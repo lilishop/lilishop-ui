@@ -67,7 +67,6 @@ const UserMain = resolve => require(['@/pages/home/Main'], resolve);
  * 店铺入驻 首页
  * 店铺入驻  申请页
  */
-const ShopEntryIndex = resolve => require(['@/pages/shopEntry/index'], resolve);
 const ShopEntry = resolve => require(['@/pages/shopEntry/shop-entry'], resolve);
 
 Vue.use(Router);
@@ -167,11 +166,6 @@ export default new Router({
     meta: {
       title: '帮助中心'
     }
-  },
-  {
-    path: '/shopEntryList',
-    name: 'shopEntryList',
-    component: ShopEntryIndex
   },
   {
     path: '/shopEntry',

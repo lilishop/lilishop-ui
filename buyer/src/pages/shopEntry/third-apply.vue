@@ -99,7 +99,6 @@
 <script>
 import { applyThird } from '@/api/shopentry';
 import { getCategory } from '@/api/goods';
-import * as RegExp from '@/plugins/RegExp.js';
 import Map from '@/components/map/index';
 import storage from '@/plugins/storage';
 import { commonUrl } from '@/plugins/request.js';
@@ -113,16 +112,16 @@ export default {
   components: { liliMap: Map },
   data () {
     return {
-      loading: false,
-      uploadLoading: false,
-      action: commonUrl + '/common/upload/file',
-      accessToken: {},
-      previewPicture: '',
-      visible: false,
-      form: {
+      loading: false, // 加载状态
+      uploadLoading: false, // 上传加载状态
+      action: commonUrl + '/common/upload/file', // 上传地址
+      accessToken: {}, // 验证token
+      previewPicture: '', // 预览图片
+      visible: false, // 图片预览
+      form: { // 表单数据
         storeLogo: []
       },
-      rules: {
+      rules: { // 验证规则
         goodsManagementCategory: [
           { required: true, message: '请选择店铺经营类目' }
         ],
@@ -131,7 +130,7 @@ export default {
         storeDesc: [{ required: true, message: '请填写店铺简介' }],
         storeCenter: [{ required: true, message: '请选择店铺位置' }]
       },
-      categoryList: []
+      categoryList: [] // 分类数据
     };
   },
   methods: {

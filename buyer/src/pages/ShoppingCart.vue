@@ -74,7 +74,7 @@ export default {
   },
   data () {
     return {
-      detail: {}
+      detail: {} // 商品详情
     };
   },
   mounted () {

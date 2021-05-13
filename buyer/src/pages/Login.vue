@@ -163,11 +163,11 @@ export default {
         username: '',
         password: ''
       },
-      formSms: {
+      formSms: { // 手机号登录
         code: '',
         mobile: ''
       },
-      verifyStatus: false,
+      verifyStatus: false, // 是否图片验证通过
       ruleInline: {
         // 验证规则
         username: [{ required: true, message: '请输入用户名' }],
@@ -184,10 +184,10 @@ export default {
         ],
         code: [{ required: true, message: '请输入手机验证码' }]
       },
-      codeMsg: '发送验证码',
-      interval: '',
-      time: 60,
-      logoImg: ''
+      codeMsg: '发送验证码', // 验证码文字
+      interval: '', // 定时器
+      time: 60, // 倒计时
+      logoImg: '' // logo图片
     };
   },
   methods: {

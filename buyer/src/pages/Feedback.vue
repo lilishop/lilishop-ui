@@ -39,15 +39,15 @@
 
 <script>
 export default {
-    name: "Feedback",
-    data() {
-        return {
-            formItem: {
-                title: "",
-                content: "",
-            },
-        };
-    },
+name: 'Feedback',
+data () {
+    return {
+        formItem: { // 表单数据
+            title: '',
+            content: ''
+        }
+    };
+}
 };
 </script>
 

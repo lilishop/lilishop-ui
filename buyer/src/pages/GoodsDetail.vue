@@ -56,16 +56,12 @@ export default {
       })
     }
   },
-  mounted () {
-    
-  },
   data () {
     return {
-      tagsColor: ['blue', 'green', 'red', 'yellow'],
-      goodsMsg: {},
-      isLoading: false,
-      categoryBar: [],
-      storeCollected: false
+      goodsMsg: {}, // 商品信息
+      isLoading: false, // 加载状态
+      categoryBar: [], // 分类
+      storeCollected: false // 商品收藏
     };
   },
   methods: {

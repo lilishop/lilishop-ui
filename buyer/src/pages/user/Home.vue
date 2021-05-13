@@ -60,7 +60,7 @@ export default {
   name: 'Home',
   data () {
     return {
-      menuList
+      menuList // 会员中心左侧列表
     };
   },
   computed: {
