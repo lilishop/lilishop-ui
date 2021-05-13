@@ -72,16 +72,16 @@ export default {
   },
   data () {
     return {
-      currentIndex: 0,
-      showAgreement: false,
-      agreementCon: '',
-      checked: false,
-      applyData: {},
-      firstData: {},
-      secondData: {},
-      thirdData: {},
+      currentIndex: 0, // 当前步骤
+      showAgreement: false, // 协议显示
+      agreementCon: '', // 协议内容
+      checked: false, // 选中协议
+      applyData: {}, // 申请数据
+      firstData: {}, // 第一步数据
+      secondData: {}, // 第二步数据
+      thirdData: {}, // 第三步数据
       storeDisable: '', // APPLY OPEN 开店中 CLOSED 关闭 REFUSED 拒绝 APPLYING 申请中，审核
-      dataReview: true
+      dataReview: true // 根据接口返回判断是否可展示数据
     };
   },
   methods: {

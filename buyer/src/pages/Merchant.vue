@@ -73,19 +73,19 @@ export default {
   name: 'Merchant',
   data () {
     return {
-      storeMsg: {},
-      cateList: [],
-      goodsList: [],
-      total: 0,
-      params: {
+      storeMsg: {}, // 店铺信息
+      cateList: [], // 店铺分裂
+      goodsList: [], // 商品列表
+      total: 0, // 商品数量
+      params: { // 请求参数
         pageNumber: 1,
         pageSize: 20,
         keyword: '',
         storeId: this.$route.query.id,
         storeCatId: ''
       },
-      cateName: '店铺推荐',
-      storeCollected: false
+      cateName: '店铺推荐', // 分类名称
+      storeCollected: false // 是否收藏
     }
   },
   created () {

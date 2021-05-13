@@ -39,10 +39,10 @@ export default {
   components: { vueQr },
   data () {
     return {
-      qrcode: '',
-      params: this.$route.query,
-      interval: null,
-      num: 0
+      qrcode: '', // 二维码
+      params: this.$route.query, // 参数
+      interval: null, // 定时器
+      num: 0 // 商品数
     };
   },
   methods: {

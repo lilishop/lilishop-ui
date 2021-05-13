@@ -101,18 +101,18 @@ export default {
   },
   data () {
     return {
-      sortIndex: 0,
+      sortIndex: 0, // 排序状态
       sortPriceIndex: false, // 判断价格升序还是降序
-      goodsTool: [
+      goodsTool: [ // 排序类型
         { title: '综合', en: '' },
         { title: '销量', en: 'buyCount' },
         { title: '评论数', en: 'commentNum' },
         { title: '新品', en: 'releaseTime' }
       ],
-      goodsList: [],
-      loading: false,
-      total: 0,
-      params: {
+      goodsList: [], // 商品列表
+      loading: false, // 加载状态
+      total: 0, // 列表总数
+      params: { // 请求参数
         pageNumber: 0,
         pageSize: 20,
         categoryId: ''

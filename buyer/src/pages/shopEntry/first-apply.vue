@@ -201,17 +201,17 @@ export default {
   },
   data () {
     return {
-      action: commonUrl + '/common/upload/file',
-      accessToken: {},
-      visible: false,
-      loading: false,
-      address: '',
-      previewPicture: '',
-      form: {
+      action: commonUrl + '/common/upload/file', // 上传地址
+      accessToken: {}, // 验证token
+      visible: false, // 预览图片
+      loading: false, // 加载状态
+      address: '', // 地址
+      previewPicture: '', // 预览图片url
+      form: { // 表单数据
         legalPhoto: [],
         licencePhoto: []
       },
-      rules: {
+      rules: { // 验证规则
         companyName: [{ required: true, message: '请填写公司信息' }],
         addressIdPath: [{ required: true, message: '请选择公司所在地' }],
         companyAddress: [{ required: true, message: '请填写公司详细地址' }],
@@ -245,8 +245,8 @@ export default {
           { pattern: RegExp.IDCard, message: '请输入正确的证件号' }
         ]
       },
-      uploadLoading1: false,
-      uploadLoading: false
+      uploadLoading1: false, // 上传loading
+      uploadLoading: false // 上传loading
     };
   },
   methods: {

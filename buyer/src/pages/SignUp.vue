@@ -10,7 +10,6 @@
       <div>注册</div>
     </div>
     <div class="login-container">
-      
         <!-- 注册 -->
         <Form
           ref="formRegist"
@@ -132,12 +131,12 @@ export default {
         ],
         code: [{ required: true, message: '请输入手机验证码' }]
       },
-      verifyStatus: false,
-      verifyType: 'REGISTER',
-      codeMsg: '发送验证码',
-      interval: '',
-      time: 60,
-      logoImg: ''
+      verifyStatus: false, // 是否验证通过
+      verifyType: 'REGISTER', // 验证状态
+      codeMsg: '发送验证码', // 提示文字
+      interval: '', // 定时器
+      time: 60, // 倒计时
+      logoImg: '' // logo图
     };
   },
   methods: {

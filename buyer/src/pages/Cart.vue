@@ -156,54 +156,21 @@ export default {
   },
   data () {
     return {
-      logoImg: '',
-      couponAvailable: false,
+      logoImg: '', // logo图
+      couponAvailable: false, // 展示优惠券
       stepIndex: 0, // 当前处于哪一步，购物车==0，填写订单信息==1，成功提交订单==2
-      goodsTotal: 1,
-      checkedNum: 0,
-      allChecked: false,
-      loading: false,
-      city: '珠海',
-      cityArr: [
-        ['北京', '上海', '天津', '重庆', '广州'],
-        ['深圳', '河南', '辽宁', '吉林', '江苏'],
-        ['江西', '四川', '海南', '贵州', '云南'],
-        ['西藏', '陕西', '甘肃', '青海', '珠海']
-      ],
-      cartList: [],
-      couponList: [
-        {
-          name: '优惠券',
-          price: '10',
-          activity: '满99减10',
-          useRange: '全品类使用',
-          disabled: true
-        },
-        {
-          name: '优惠券',
-          price: '10',
-          activity: '满99减10',
-          useRange: '全品类使用',
-          disabled: false
-        },
-        {
-          name: '优惠券',
-          price: '10',
-          activity: '满99减10',
-          useRange: '全品类使用',
-          disabled: false
-        }
-      ],
-      priceDetailDTO: {},
-      skuList: []
+      goodsTotal: 1, // 商品数量
+      checkedNum: 0, // 选中数量
+      allChecked: false, // 全选
+      loading: false, // 加载状态
+      cartList: [], // 购物车列表
+      couponList: [], // 优惠券列表
+      priceDetailDTO: {}, // 价格明细
+      skuList: [] // sku列表
     };
   },
   computed: {},
   methods: {
-    // 选择配送区域
-    changeCity (city) {
-      this.city = city;
-    },
     // 跳转商品详情
     goGoodsDetail (skuId, goodsId) {
       let routeUrl = this.$router.resolve({
@@ -450,17 +417,6 @@ export default {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 15px;
-}
-.city {
-  padding: 10px 15px;
-}
-.city-item {
-  font-weight: bold;
-  cursor: pointer;
-  padding: 5px;
-}
-.city-item:hover {
-  color: $theme_color;
 }
 /** 商品列表 */
 .cart-goods {

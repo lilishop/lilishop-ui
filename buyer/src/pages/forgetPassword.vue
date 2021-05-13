@@ -119,18 +119,18 @@ export default {
   components: { Verify },
   data () {
     return {
-      loading: false,
-      loading1: false,
-      formFirst: {
+      loading: false, // 加载状态
+      loading1: false, // 第二步加载状态
+      formFirst: { // 手机验证码表单
         // 注册表单
         mobile: '',
         code: ''
       },
-      form: {
+      form: { // 密码
         password: '',
         oncePasd: ''
       },
-      step: 0,
+      step: 0, // 步骤
       ruleInline: {
         // 验证规则
         mobile: [
@@ -144,11 +144,11 @@ export default {
         code: [{ required: true, message: '请输入手机验证码' }],
         password: [{required: true, message: '密码不能为空'}, {pattern: RegExp.password, message: '密码不能少于6位'}]
       },
-      verifyStatus: false,
-      verifyType: 'FIND_USER',
-      codeMsg: '发送验证码',
-      interval: '',
-      time: 60
+      verifyStatus: false, // 图片验证状态
+      verifyType: 'FIND_USER', // 图片验证类型
+      codeMsg: '发送验证码', // 验证码文字
+      interval: '', // 定时器
+      time: 60 // 倒计时时间
     };
   },
   methods: {

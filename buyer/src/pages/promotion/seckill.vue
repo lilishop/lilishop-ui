@@ -59,13 +59,13 @@ import {seckillByDay} from '@/api/promotion'
 export default {
   data () {
     return {
-      list: [],
-      goodsList: [],
-      interval: null,
+      list: [], // 秒杀时段列表
+      goodsList: [], // 商品列表
+      interval: null, // 定时器
       currIndex: 0, // 当前时间段的下标
       currTime: 0, // 当前显示的倒计时
       diffSeconds: 0, // 倒计时时间戳
-      nowHour: new Date().getHours()
+      nowHour: new Date().getHours() // 当前小时数
     }
   },
   watch: {

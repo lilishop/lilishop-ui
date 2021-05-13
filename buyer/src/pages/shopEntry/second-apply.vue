@@ -42,7 +42,6 @@
 </template>
 <script>
 import { applySecond } from '@/api/shopentry';
-import * as RegExp from '@/plugins/RegExp.js';
 export default {
   props: {
     content: {
@@ -52,9 +51,9 @@ export default {
   },
   data () {
     return {
-      loading: false,
-      form: {},
-      rules: {
+      loading: false, // 加载状态
+      form: {}, // 表单数据
+      rules: { // 验证规则
         settlementBankAccountName: [
           { required: true, message: '请填写银行开户名称' }
         ],

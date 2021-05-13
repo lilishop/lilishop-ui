@@ -48,7 +48,7 @@ export default {
   data () {
     return {
       goodsList: [], // 积分商品列表
-      cateList: [{
+      cateList: [{ // 商品分类
         name: '全部分类',
         id: ''
       }], // 积分分类列表

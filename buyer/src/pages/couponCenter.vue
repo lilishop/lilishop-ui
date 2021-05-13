@@ -48,9 +48,9 @@ import {couponList, receiveCoupon} from '@/api/member.js'
 export default {
   data () {
     return {
-      list: [],
-      total: 0,
-      params: {
+      list: [], // 优惠券列表
+      total: 0, // 优惠券总数
+      params: { // 请求参数
         pageNumber: 1,
         pageSize: 20
       }
