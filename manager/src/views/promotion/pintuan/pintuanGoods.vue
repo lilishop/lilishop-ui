@@ -71,8 +71,8 @@ const buyerUrl =
 export default {
   data() {
     return {
-      visible: false,
-      showImg: "",
+      visible: false,// 预览图片
+      showImg: "", // 预览图片url
       openSearch: true, // 显示搜索
       openTip: true, // 显示提示
       loading: false, // 表单加载状态

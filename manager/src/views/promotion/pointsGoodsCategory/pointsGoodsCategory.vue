@@ -76,11 +76,7 @@ export default {
   },
   data() {
     return {
-      currView: "index",
-      loading: false,
-      selectCount: 0,
-      categoryId: "",
-      expandLevel: 1,
+      loading: false, // 加载状态
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题

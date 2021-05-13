@@ -158,7 +158,7 @@ export default {
             promotionTags: [ "买2免1", "领200神券", "199减100", "母婴5折抢", "充100送20"], // 热词数据
             topAdvert:{ // 头部广告图数据
                 type:'topAdvert',
-                img:'https://x.dscmall.cn/storage/data/gallery_album/108/original_img/108_P_1539564967582.jpg',
+                img:'',
                 url:'',
                 bgColor:'#de000d',
                 size:'1200*80'

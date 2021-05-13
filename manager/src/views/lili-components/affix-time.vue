@@ -26,28 +26,21 @@ export default {
   props: ["closeShop"],
   data() {
     return {
-      month: "",
-      year: "",
-
-      defuaultWay: {
+      month: "", // 月份
+ 
+      selectedWay: { // 可选时间项
         title: "最近7天",
         selected: true,
         searchType: "LAST_SEVEN",
       },
-
-      selectedWay: {
-        title: "最近7天",
-        selected: true,
-        searchType: "LAST_SEVEN",
-      },
-      storeId: "",
-      dates: [],
-      params: {
+      storeId: "", // 店铺id
+      dates: [], // 日期列表
+      params: { // 请求参数
         pageNumber: 1,
         pageSize: 10,
         storeName: "",
       },
-      dateList: [
+      dateList: [ // 筛选条件
         {
           title: "今天",
           selected: false,
@@ -70,8 +63,8 @@ export default {
         },
       ],
 
-      shopTotal: "",
-      shopsData: [],
+      shopTotal: "", // 店铺总数
+      shopsData: [], // 店铺数据
     };
   },
   mounted() {

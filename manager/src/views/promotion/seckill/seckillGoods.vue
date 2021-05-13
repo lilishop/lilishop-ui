@@ -168,21 +168,21 @@
   export default {
     data() {
       return {
-        promotionStatus: "",
-        showModal: false,
-        openTip: true,
+        promotionStatus: "", // 活动状态
+        showModal: false, // modal显隐
+        openTip: true, // 显示提示
         loading: false, // 表单加载状态
-        submitLoading: false,
+        submitLoading: false, // 加载状态
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 0, // 当前页数
           pageSize: 100, // 页面大小
         },
-        total: 0,
+        total: 0, // 总数
         selectList: [], // 多选数据
         selectCount: 0, // 多选计数
         data: [], // 表单数据
-        columns: [
+        columns: [ // 表头
           {
             title: "活动名称",
             key: "promotionName",
@@ -246,7 +246,7 @@
             },
           },
         ],
-        goodsColumns: [
+        goodsColumns: [ // 商品表单
           {type: "selection", width: 60, align: "center"},
           {
             title: "商品名称",

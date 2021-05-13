@@ -40,8 +40,8 @@ export default {
   name: "messageTip",
   data() {
     return {
-      value: 0,
-      empty: false,
+      value: 0, // 消息数量
+      empty: false, // 是否为空
     };
   },
   props: {

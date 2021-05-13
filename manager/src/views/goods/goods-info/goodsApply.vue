@@ -99,10 +99,10 @@
           sort: "create_time", // 默认排序字段
           order: "desc", // 默认排序方式
         },
-        underForm: {
+        underForm: { // 下架原因
           reason: "",
         },
-        goodsAuditForm: {
+        goodsAuditForm: { // 商品编辑表单
           is_auth: 1,
         },
         form: {

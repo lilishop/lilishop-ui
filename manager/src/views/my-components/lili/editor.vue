@@ -74,7 +74,7 @@ export default {
   },
   data() {
     return {
-      editor: null,
+      editor: null, // 富文本编辑器初始化
       data: this.value, // 富文本数据
       dataEdit: "", // 编辑数据
       showHTMLModal: false, // 显示html

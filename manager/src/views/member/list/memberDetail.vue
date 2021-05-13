@@ -394,7 +394,7 @@
           isDefault: false
 
         },//会员地址操作form
-        selectDate: null,
+        selectDate: null, // 选择时间段
         submitLoading: false, // 添加或编辑提交状态
         addressFormValidate: {
           name: [{required: true, message: "收货人姓名不能为空"}],

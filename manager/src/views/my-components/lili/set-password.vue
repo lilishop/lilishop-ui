@@ -53,12 +53,12 @@ export default {
   },
   data() {
     return {
-      currentValue: this.value,
-      tipStyle: "password-tip-none",
-      strengthValue: 0,
-      progressStatus: "normal",
-      strength: "无",
-      grade: 0
+      currentValue: this.value, // 当前值
+      tipStyle: "password-tip-none", // 强度样式
+      strengthValue: 0, // 强度等级
+      progressStatus: "normal", // 进度条状态
+      strength: "无", // 密码强度描述
+      grade: 0 // 强度等级
     };
   },
   methods: {

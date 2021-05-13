@@ -67,7 +67,7 @@
             return {
                 openTip: true, // 显示提示
                 loading: true, // 表单加载状态
-                type: "MOBILE",
+                type: "MOBILE", // 手机还是pc
                 modalType: 0, // 添加或编辑标识
                 modalVisible: false, // 添加或编辑显示
                 modalTitle: "", // 添加或编辑标题

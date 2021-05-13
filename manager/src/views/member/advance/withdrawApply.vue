@@ -176,10 +176,9 @@
         openSearch: true, // 显示搜索
         openTip: true, // 显示提示
         loading: true, // 表单加载状态
-        drop: false,
         audit: '', // 审核备注
-        roleModalVisible: false,
-        queryModalVisible: false,
+        roleModalVisible: false, // 审核模态框
+        queryModalVisible: false, // 审核模态框
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
@@ -191,13 +190,11 @@
           memberName: "",
           applyStatus: ""
         },
-        selectDate: null,
-        // 表单验证规则
-        formValidate: {},
+        selectDate: null, // 选择时间段
         submitLoading: false, // 添加或编辑提交状态
         selectList: [], // 多选数据
         selectCount: 0, // 多选计数
-        showList: {},
+        showList: {}, // 可操作选项
         columns: [
           {
             title: "申请编号",

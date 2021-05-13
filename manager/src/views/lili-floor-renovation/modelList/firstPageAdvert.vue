@@ -66,18 +66,18 @@
 import ossManage from "@/views/sys/oss-manage/ossManage";
 export default {
     props:{
-        data:{
+        data: {
             type: Object,
             default: null
         }
     },
-    components:{ossManage},
+    components: {ossManage},
     data() {
         return {
-            options: this.data.options,
-            showModal: false,
-            selected: {},
-            picModelFlag: false
+            options: this.data.options, // 当前类型数据
+            showModal: false, // modal显隐
+            selected: {}, // 已选数据
+            picModelFlag: false // 图片选择器
         }
     },
     methods:{

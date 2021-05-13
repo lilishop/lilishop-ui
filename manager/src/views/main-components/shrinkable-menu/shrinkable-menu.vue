@@ -31,10 +31,6 @@
 import util from "@/libs/util.js";
 export default {
   name: "shrinkableMenu",
-  data () {
-    return {
-    }
-  },
   computed: {
     menuList() {
       return this.$store.state.app.menuList;

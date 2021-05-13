@@ -125,24 +125,18 @@ export default {
   data() {
     return {
 
-      wechatModal: false,//微信消息
-      wechatFormData: {},
+      wechatModal: false,// modal展示
+      wechatFormData: {}, // 微信数据
       wechatMPModal: false,//微信消息
-      wechatMPFormData: {},
-      tab: "WECHAT",
-      searchForm: {
+      wechatMPFormData: {}, // 微信订阅消息
+      tab: "WECHAT", // tab栏分类
+      searchForm: { // 请求参数
         type: "WECHAT"
       },
-      openTip: true,
       loading: true, // 表单加载状态
-      name: '',
-      id: '',
-      userLoading: true,
+      id: '', // 模板id
       selectCount: 0, // 多选计数
       selectList: [], // 多选数据
-      drop: false,
-      dropDownContent: "展开",
-      dropDownIcon: "ios-arrow-down",
       //微信消息查询
       weChatSearchForm: {
         // 搜索框对应data对象

@@ -286,45 +286,44 @@
     title: "message-manage",
     data() {
       return {
-        messageTemplate:'',//当前消息模板
-        messageTemplateId:'',
-        templateName:'',
+        messageTemplate:'',// 当前消息模板
+        messageTemplateId:'', // 当前消息模板id
+        templateName:'', // 模板名称
         smsModal: false,//短信
-        smsFormData:{
+        smsFormData:{ // 模板表单数据
           smsState:'',
           smsContent:'',
           smsCode: ''
         },
-        smsFormValidate:{
+        smsFormValidate:{ // 验证规则
           smsCode: [{ required: true, message: '请输入短信编码'}],
           smsContent: [{ required: true, message: '请输入短信内容'}],
         },
-        noticeModal: false,//站内信
-        noticeFormData:{
+        noticeModal: false, // 站内信
+        noticeFormData:{ // 站内信表单
           noticeContent:''
         },
-        noticeFormValidate:{
+        noticeFormValidate:{ // 验证规则
           noticeContent: [{ required: true, message: '请输入站内信内容'}],
         },
         wechatModal:false,//微信消息
-        wechatFormData:{
+        wechatFormData:{ // 微信表单
           remark:'',
           first:'',
           enable:'',
         },
-        wechatFormValidate:{
+        wechatFormValidate:{ // 验证规则
           remark: [{ required: true, message: '请输入站内信内容'}],
           first: [{ required: true, message: '请输入头部文字信息'}],
         },
-        tab: "MEMBER",
-        openTip: true,
+        tab: "MEMBER", // tabName
+        openTip: true,  // 提示展示
         loading: true, // 表单加载状态
-        userLoading: true,
         selectCount: 0, // 多选计数
         selectList: [], // 多选数据
-        drop: false,
-        dropDownContent: "展开",
-        dropDownIcon: "ios-arrow-down",
+        drop: false, // 更多搜索项
+        dropDownContent: "展开", // drop显示内容
+        dropDownIcon: "ios-arrow-down", // drop图标
         searchForm: {
           // 搜索框对应data对象
           type: "MEMBER",

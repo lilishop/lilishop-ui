@@ -11,43 +11,11 @@ import { getAllCity } from "@/api/index";
 export default {
   data() {
     return {
-      switched: false,
-      asyncLoading: false,
-      num: 10,
-      modalFlag: false,
-      spinShow: false,
-      timerNum: 10,
-      data: [],
-      id: 0,
-      selectedWay: [],
-      addValidate: {
-        parentName: "无父级",
-      },
-      ruleValidate: {
-        adCode: [
-          {
-            required: true,
-            message: "区域编码不能为空",
-            trigger: "blur",
-          },
-        ],
-
-        center: [
-          {
-            required: true,
-            message: "经纬度不能为空",
-            trigger: "blur",
-          },
-        ],
-        name: [
-          {
-            required: true,
-            message: "名称不能为空",
-            trigger: "blur",
-          },
-        ],
-      },
-      callBackData: "",
+      switched: false, // 控制模态框显隐
+      spinShow: false, // 加载状态
+      data: [], // 地区数据
+      selectedWay: [], // 选择的地区
+      callBackData: "", // 打开组件的回显数据
     };
   },
   mounted() {

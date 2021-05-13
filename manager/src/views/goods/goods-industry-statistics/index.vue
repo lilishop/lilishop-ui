@@ -97,18 +97,18 @@ export default {
   },
   data() {
     return {
-      storeName: "",
-      memberName: "",
-      shopFlag: false,
-      selectName: "选择",
-      modalFlag: false,
-      priceData: "",
-      orderStatus: "NUM",
+      storeName: "", // 店铺名称
+      memberName: "", // 会员名称
+      shopFlag: false, // 是否展示
+      selectName: "选择", // modal名称
+      modalFlag: false, // modal显隐
+      priceData: "", // 价格
+      orderStatus: "NUM", // tab展示
+ 
+      shopList: {}, // 店铺列表
+      memberList: {}, // 会员列表
 
-      shopList: {},
-      memberList: {},
-
-      typeList: [
+      typeList: [ // 类型
         {
           value: "YEAR",
           label: "年",
@@ -118,9 +118,9 @@ export default {
           label: "月",
         },
       ],
-      total: 0,
-      year:"",
-      params: {
+      total: 0, // 总数
+      year:"", // 当前年份
+      params: { // 请求参数
 
         type: "PRICE",
         timeType: "YEAR",
@@ -130,7 +130,7 @@ export default {
         shopId: "",
         memberId: "",
       },
-      columns: [
+      columns: [ // 店铺名称
         {
           title: "商品一级分类",
           key: "categoryName",
@@ -144,7 +144,7 @@ export default {
           key: "price",
         },
       ],
-      data: [],
+      data: [], // 店铺名称
     };
   },
   watch: {

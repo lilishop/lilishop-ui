@@ -68,7 +68,7 @@
                 <div style="margin-left: 40px">
                   <img style="width: 100px;height: 110px;margin-left: 2px"
                        v-for="(img,index) in infoData.image.split(',')" v-if="infoData.image.length !=0" :src="img"
-                       alt=""/>
+                       alt="" />
                 </div>
               </div>
             </List>
@@ -101,15 +101,10 @@ export default {
   components: {},
   data() {
     return {
-      pageShow: true,
-      infoData: "",
-      infoFlag: false,
-      infoTitle: "",
-      openSearch: true, // 显示搜索
+      infoData: "", // 商品信息
+      infoFlag: false, // 评价展示
+      infoTitle: "", // modal名称
       loading: true, // 表单加载状态
-      drop: false,
-
-      dropDownIcon: "ios-arrow-down",
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -119,7 +114,6 @@ export default {
         startDate: "", // 起始时间
         endDate: "", // 终止时间
       },
-      selectDate: null,
       form: {
         // 添加或编辑表单对象初始化数据
         memberName: "",

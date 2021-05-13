@@ -20,6 +20,7 @@ export default {
       data: [], // 地区数据
       selected: [], // 已选地区
       changeOnSelect: false, // 选择时的变化
+      id: 0 // 0层id
     };
   },
   mounted() {

@@ -80,8 +80,8 @@ import { btnWay } from "./btn.js";
 export default {
   data() {
     return {
-      btnWay,
-      type: "full",
+      btnWay, // 按钮类型
+      type: "full", // 展示方式
       //全屏广告
       advertising: [
         {
@@ -90,7 +90,7 @@ export default {
           size: "612*836",
         },
       ],
-      linkType: "",
+      linkType: "", // 选择类型
     };
   },
   methods: {},

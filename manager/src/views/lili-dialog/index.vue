@@ -22,10 +22,10 @@ export default {
   },
   data() {
     return {
-      goodsFlag: false,
+      goodsFlag: false, // 是否商品选择器
       goodsData: "", //选择的商品
       linkData: "", //选择的链接
-      flag: false,
+      flag: false, // modal显隐
     };
   },
   props: ["types"],

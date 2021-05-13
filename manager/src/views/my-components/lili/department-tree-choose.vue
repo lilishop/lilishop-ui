@@ -54,12 +54,12 @@ export default {
   },
   data() {
     return {
-      depLoading: false,
-      departmentTitle: "",
-      searchKey: "",
-      dataDep: [],
-      selectDep: [],
-      departmentId: []
+      depLoading: false, // 加载状态
+      departmentTitle: "", // modal标题
+      searchKey: "", // 搜索关键词
+      dataDep: [], // 部门列表
+      selectDep: [], // 已选部门
+      departmentId: [] // 部门id
     };
   },
   methods: {

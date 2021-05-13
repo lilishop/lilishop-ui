@@ -42,7 +42,7 @@
         </Row>
 
           <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="1100">
-            <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
+            <Form ref="form" :model="form" :label-width="100">
               <FormItem label="文章标题" prop="title">
                 <Input v-model="form.title" clearable style="width: 40%" />
               </FormItem>
@@ -106,7 +106,7 @@ export default {
   },
   data() {
     return {
-      selectedIndex: 99999,
+      selectedIndex: 99999, // 已选下标
       loading: true, // 表单加载状态
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
@@ -120,7 +120,7 @@ export default {
         order: "desc", // 默认排序方式
         categoryId: "",
       },
-      searchTreeValue: "",
+      searchTreeValue: "", // 切换
       form: {
         // 添加或编辑表单对象初始化数据
         title: "",
@@ -129,13 +129,10 @@ export default {
         content: "",
         id: "",
       },
-      // 表单验证规则
-      formValidate: {},
-      list: [],
-      treeValue: "",
+      list: [], // 列表
+      treeValue: "", // 选择的分类
       //树结构
       treeData: [],
-      model2: "",
       submitLoading: false, // 添加或编辑提交状态
       selectList: [], // 多选数据
       selectCount: 0, // 多选计数
@@ -296,7 +293,6 @@ export default {
       let value = "";
       let title = "";
       this.list = [];
-      this.model2 = "";
       data.forEach((item, index) => {
         value += `${item.value},`;
         title += `${item.title},`;

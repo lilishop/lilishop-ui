@@ -44,12 +44,11 @@ export default {
     return {
       type: "multiple", //单选或者多选 single  multiple
 
-      skuList: [],
-      model1: "",
+      skuList: [], // 商品sku列表
 
       selectedWay: [], //选中商品集合
-      total: "",
-      goodsParams: {
+      total: "",  // 商品总数
+      goodsParams: { // 商品请求参数
         pageNumber: 1,
         pageSize: 18,
         order: "desc",
@@ -59,10 +58,10 @@ export default {
         marketEnable: "UPPER",
         isAuth: "PASS",
       },
-      category: [],
-      goodsData: [],
-      empty: false,
-      loading: false,
+      category: [], // 分类
+      goodsData: [], // 商品数据
+      empty: false, // 空数据
+      loading: false, // 加载状态
     };
   },
   props: ["clearFlag"],

@@ -84,17 +84,15 @@ export default {
   },
   data() {
     return {
-      storeName: "",
-      memberName: "",
-      shopFlag: false,
-      selectName: "选择",
-      modalFlag: false,
-      priceData: "",
-      orderStatus: "PRICE",
-
-      shopList: {},
-      memberList: {},
-
+      storeName: "", // 店铺名称
+      memberName: "", // 会员名称
+      shopFlag: false, // 是否展示
+      selectName: "选择", // modal名称
+      modalFlag: false, // modal显隐
+      priceData: "", // 价格
+      orderStatus: "PRICE", // tab展示
+      shopList: {}, // 店铺列表
+      memberList: {}, // 会员列表
       typeList: [
         {
           value: "YEAR",
@@ -105,9 +103,9 @@ export default {
           label: "月",
         },
       ],
-      total: 0,
-      year: "",
-      params: {
+      total: 0, // 列表总数
+      year: "", // 当前年份
+      params: { // 请求参数
         type: "PRICE",
         timeType: "YEAR",
         pageNumber: 1,
@@ -116,7 +114,7 @@ export default {
         shopId: "",
         memberId: "",
       },
-      columns: [
+      columns: [ // 表格表头
         {
           title: "售后号",
           key: "refundSn",
@@ -150,7 +148,7 @@ export default {
           },
         },
       ],
-      data: [],
+      data: [] // 列表数据
     };
   },
   watch: {

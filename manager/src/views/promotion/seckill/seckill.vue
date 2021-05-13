@@ -145,9 +145,7 @@ export default {
         sort: "startTime",
         order: "desc", // 默认排序方式
       },
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
-      columns: [
+      columns: [ // 表单
         {
           title: "活动名称",
           key: "promotionName",

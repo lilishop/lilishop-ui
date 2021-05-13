@@ -58,10 +58,10 @@ import QRCode from "qrcodejs2";
 export default {
   data() {
     return {
-      progress: true,
-      num: 20,
-      saveDialog: false,
-      way: [
+      progress: true, // 展示进度
+      num: 20, // 提交进度
+      saveDialog: false, // 加载状态
+      way: [ // 装修tab栏切换
         {
           title: "首页",
           name: "index",
@@ -83,8 +83,8 @@ export default {
           selected: false,
         },
       ],
-      qrcode: "",
-      submitWay: {
+      qrcode: "", // 二维码
+      submitWay: { // 表单信息
         pageShow: this.$route.query.type || false,
         name: this.$route.query.name || "模板名称",
         pageClientType: "H5",

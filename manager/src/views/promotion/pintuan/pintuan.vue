@@ -100,7 +100,7 @@ export default {
   data() {
     return {
       loading: true, // 表单加载状态
-      openSearch: true,
+      openSearch: true, // 显示搜索项
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 0, // 当前页数
@@ -108,7 +108,7 @@ export default {
         sort: "startTime",
         order: "desc", // 默认排序方式
       },
-      columns: [
+      columns: [ // 表头
         {
           title: "活动名称",
           key: "promotionName",

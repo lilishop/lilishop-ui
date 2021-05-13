@@ -49,7 +49,7 @@
         },
         data() {
             return {
-                distributionStatusList,
+                distributionStatusList, // 分销状态
                 openSearch: true, // 显示搜索
                 loading: true, // 表单加载状态
                 searchForm: { // 搜索框初始化对象

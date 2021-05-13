@@ -136,18 +136,18 @@ export default {
   data() {
     return {
       selectedMember: false, //是否是其他组件调用
-      descTitle: "",
+      descTitle: "", // modal标题
       descFlag: false, //编辑查看框
       openSearch: true, // 显示搜索
       loading: true, // 表单加载状态
-      addFlag: false,
-      updateRegion: false,
-      addMemberForm: {
+      addFlag: false, // modal显隐控制
+      updateRegion: false, // 地区
+      addMemberForm: { // 添加用户表单
         mobile: "",
         username: "",
         password: "",
       },
-      searchForm: {
+      searchForm: { // 请求参数
         pageNumber: 1,
         pageSize: 10,
         order: "desc",
@@ -155,10 +155,9 @@ export default {
         mobile: "",
         disabled: "OPEN",
       },
-      picModelFlag: false,
-      // 表单验证规则
-      formValidate: {},
-      addRule: {
+      picModelFlag: false, // 选择图片
+      formValidate: {}, // 表单数据
+      addRule: { // 验证规则
         mobile: [
           { required: true, message: "请输入手机号码" },
           {

@@ -72,37 +72,10 @@
       return {
         descFlag: false, //编辑查看框
         loading: true, // 表单加载状态
-        addFlag: false,
-        updateRegion: false,
-        addMemberForm:{
-          mobile: "",
-          username: "",
-          password: "",
-        },
-        searchForm: {
+        searchForm: { // 请求参数
           pageNumber: 1,
           pageSize: 10,
         },
-        picModelFlag: false,
-        // 表单验证规则
-        formValidate: {},
-        addRule:{
-          mobile: [
-            { required: true, message: '请输入手机号码' },
-            {
-              pattern: RegExp.mobile,
-              message: '请输入正确的手机号'
-            }
-          ],
-          username: [
-            { required: true, message: '请输入会员名称' },
-          ],
-          password: [
-            { required: true, message: '请输入密码' },
-          ],
-        },
-        ruleValidate: {}, //修改验证
-        submitLoading: false, // 添加或编辑提交状态
         selectList: [], // 多选数据
         selectCount: 0, // 多选计数
         columns: [

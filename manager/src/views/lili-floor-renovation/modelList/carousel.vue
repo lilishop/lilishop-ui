@@ -128,9 +128,9 @@ export default {
   },
   data() {
     return {
-      showModal: false,
-      selected: null,
-      picModelFlag: false,
+      showModal: false, // modal显隐
+      selected: null, // 已选数据
+      picModelFlag: false, // 选择图片modal
     };
   },
 

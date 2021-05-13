@@ -48,13 +48,11 @@ export default {
       flag: false, // 控制商品模块显隐
       selected: 0, // 已选模块
       selectedLink: "", //选中的链接
-      wap,
+      wap, // tab标签栏数据
     };
   },
   watch: {
     selectedLink(val) {
-      
-
       this.$emit("selectedLink", val);
     },
   },

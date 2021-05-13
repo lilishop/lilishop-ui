@@ -52,7 +52,6 @@
                     startDate: "", // 起始时间
                     endDate: "" // 终止时间
                 },
-                selectDate: null,
                 form: { // 添加或编辑表单对象初始化数据
                     memberName: "",
                 },
@@ -142,16 +141,6 @@
             handleSearch() {
                 this.searchForm.pageNumber = 1;
                 this.searchForm.pageSize = 10;
-                this.getDataList();
-            },
-            handleReset() {
-                this.$refs.searchForm.resetFields();
-                this.searchForm.pageNumber = 1;
-                this.searchForm.pageSize = 10;
-                this.selectDate = null;
-                this.searchForm.startDate = "";
-                this.searchForm.endDate = "";
-                // 重新加载数据
                 this.getDataList();
             },
             changeSort(e) {

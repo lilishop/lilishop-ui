@@ -97,11 +97,7 @@ export default {
   name: "addSeckill",
   data() {
     return {
-      maxHeight: "240px",
-      modalType: 0,
-      /** 当前状态/模式 默认发布商品0 编辑商品1 编辑草稿箱商品2 */
-      currentStatus: 0,
-      categoryId: 0,
+      modalType: 0, // 添加、编辑标识
       form: {
         /** 活动名称 */
         promotionName: "",
@@ -115,9 +111,9 @@ export default {
         seckillRule: "",
         promotionStatus: "NEW",
       },
-      id: this.$route.query.id,
-      periodTime: null,
-      showAddPeriod: false,
+      id: this.$route.query.id, // 活动id
+      periodTime: null,  // 抢购时间段
+      showAddPeriod: false, // input显隐
       submitLoading: false, // 添加或编辑提交状态
 
       formRule: {

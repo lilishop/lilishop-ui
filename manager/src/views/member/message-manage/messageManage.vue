@@ -116,13 +116,13 @@ export default {
   title: "message-manage",
   data() {
     return {
-      openSearch: true,
-      openTip: true,
+      openSearch: true, // 显示搜索
+      openTip: true, // 显示提示
       loading: true, // 表单加载状态
       userLoading: true,
       selectCount: 0, // 多选计数
       selectList: [], // 多选数据
-      drop: false,
+      drop: false, // 展开搜索
       dropDownContent: "展开",
       dropDownIcon: "ios-arrow-down",
       searchForm: {

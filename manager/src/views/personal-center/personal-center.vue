@@ -96,16 +96,12 @@ export default {
   name: "personal-enter",
   data() {
     return {
-      activeName: "基本信息",
-      userForm: {
+      activeName: "基本信息", // 激活的tab
+      userForm: { // 用户信息
         avatar: "",
         nickname: ""
       },
-      codeError: "",
-      sending: false,
-      jumping: false,
-      currMenu: "基本信息",
-      dictSex: this.$store.state.dict.sex
+      currMenu: "基本信息" // 当前菜单
     };
   },
   methods: {

@@ -24,7 +24,6 @@
     data() {
       return {
         loading: true, // 表单加载状态
-        selectDate: null,
         form: { // 添加或编辑表单对象初始化数据
           isOpen: ""
         },

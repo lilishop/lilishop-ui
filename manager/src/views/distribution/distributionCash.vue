@@ -70,11 +70,10 @@ export default {
   data() {
     return {
       cashStatusList, // 状态列表
-      openSearch: true, // 显示搜索
       loading: true, // 表单加载状态
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
-      result: -1,
+      result: -1, // 是否通过
       searchForm: { // 搜索框初始化对象
         pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
@@ -87,7 +86,7 @@ export default {
         memberName: "",
         price: "",
       },
-      auditForm: {
+      auditForm: { // 编辑表单
         result: -1
       },
       submitLoading: false, // 添加或编辑提交状态

@@ -41,15 +41,12 @@
 </template>
 <script>
 import * as API_Other from "@/api/other.js";
-// import region from '@/views/lili-components/multiple-region'
-// import marketing from '@/views/lili-dialog/template/marketing'
-// import Region from '@/views/lili-components/multiple-region'
 export default {
   // components: {region},
   data() {
     return {
-      selectedIndex: 0,
-      columns: [
+      selectedIndex: 0, // 装修那个页面的下标
+      columns: [ // 表头
         {
           title: "页面名称",
           key: "name",
@@ -63,8 +60,8 @@ export default {
         },
       ],
 
-      loading: false,
-      pageTypes: [
+      loading: false, // 加载状态
+      pageTypes: [ // 装修类型
         {
           type: "INDEX",
           title: "首页",
@@ -74,7 +71,7 @@ export default {
           title: "专题",
         },
       ],
-      params: {
+      params: { // 请求参数
         pageNumber: 1,
         pageSize: 10,
         sort: "",
@@ -82,8 +79,8 @@ export default {
         pageType: "INDEX",
         pageClientType: "H5",
       },
-      total: "",
-      list: [],
+      total: "", // 页面数量
+      list: [], // 总数据
     };
   },
   watch: {

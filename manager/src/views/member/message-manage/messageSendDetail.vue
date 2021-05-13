@@ -77,10 +77,10 @@ export default {
   name: "message_send_detail",
   data() {
     return {
-      openSearch: true,
-      openTip: true,
+      openSearch: true, // 显示搜索项
+      openTip: true, // 显示提示
       loading: true, // 表单加载状态
-      messageId: "",
+      messageId: "", // 信息id
       sortColumn: "createTime", // 排序字段
       sortType: "desc", // 排序方式
       status: "", // 发送状态

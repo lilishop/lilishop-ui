@@ -31,7 +31,7 @@ export default {
 name:'map',
 data() {
     return {
-        showMap:false,
+        showMap:false, // modal显隐
         mapSearch:'', // 地图搜索
         map:null, // 初始化地图
         autoComplete:null, // 初始化搜索方法
@@ -39,7 +39,7 @@ data() {
         positionPicker:null, // 地图拖拽选点
         tips:[], //搜索关键字列表
         addrContent:{}, // 回显地址信息
-        loading:false,
+        loading:false, // 加载状态
     };
 },
 watch:{

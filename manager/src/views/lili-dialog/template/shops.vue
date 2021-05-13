@@ -36,14 +36,14 @@ import { getShopListData } from "@/api/shops.js";
 export default {
   data() {
     return {
-      loading: false,
-      total: "",
-      params: {
+      loading: false, // 加载状态
+      total: "", // 总数
+      params: { // 请求参数
         pageNumber: 1,
         pageSize: 10,
         storeName: "",
       },
-      shopsData: [],
+      shopsData: [], // 店铺数据
       selected: 9999999999, //设置一个不可能选中的index
     };
   },

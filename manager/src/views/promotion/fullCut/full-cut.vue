@@ -96,13 +96,13 @@ export default {
   data() {
     return {
       loading: false, // 表单加载状态
-      searchForm: {
+      searchForm: { // 请求参数
         pageNumber: 0,
         pageSize: 10,
         sort: "startTime",
         order: "desc",
       },
-      columns: [
+      columns: [ // 表头
         {
           title: "活动名称",
           key: "promotionName",

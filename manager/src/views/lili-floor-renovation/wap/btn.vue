@@ -79,7 +79,7 @@ import { btnWay } from "./btn.js";
 export default {
   data() {
     return {
-      btnWay,
+      btnWay, // 按钮类型
     };
   },
   methods: {},

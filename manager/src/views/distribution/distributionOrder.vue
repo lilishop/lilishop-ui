@@ -64,10 +64,10 @@
     components: {},
     data() {
       return {
-        timeRange: [],
-        orderStatusList,
+        timeRange: [], // 范围时间
+        orderStatusList, // 订单状态列表
         shopList: [], // 店铺列表
-        distributionId: this.$route.query.id,
+        distributionId: this.$route.query.id, // 分销id
         openSearch: true, // 显示搜索
         openTip: true, // 显示提示
         loading: true, // 表单加载状态

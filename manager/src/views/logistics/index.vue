@@ -88,7 +88,6 @@
   import {
     getLogisticsPage,
     updateLogistics,
-    getLogisticsDetail,
     addLogistics,
     delLogistics,
   } from "@/api/logistics";
@@ -104,9 +103,6 @@
         modalType: 0, // 添加或编辑标识
         modalVisible: false, // 添加或编辑显示
         modalTitle: "", // 添加或编辑标题
-        drop: false,
-        dropDownContent: "展开",
-        dropDownIcon: "ios-arrow-down",
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
@@ -115,7 +111,6 @@
           order: "desc", // 默认排序方式
           name: "",
         },
-        selectDate: null,
         form: {
           // 添加或编辑表单对象初始化数据
           name: "",

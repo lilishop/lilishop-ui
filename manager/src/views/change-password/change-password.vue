@@ -47,14 +47,14 @@ export default {
       }
     };
     return {
-      savePassLoading: false,
-      editPasswordForm: {
+      savePassLoading: false, // 保存加载状态
+      editPasswordForm: { // 编辑密码表单
         oldPassword: "",
         newPassword: "",
         rePassword: "",
       },
-      strength: "",
-      passwordValidate: {
+      strength: "", // 密码强度
+      passwordValidate: { // 验证规则
         oldPassword: [
           {
             required: true,

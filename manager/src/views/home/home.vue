@@ -214,7 +214,7 @@ export default {
   },
   data() {
     return {
-      tophotShopsColumns: [
+      tophotShopsColumns: [ // 表格表头
         {
           type: "index",
           width: 100,
@@ -276,11 +276,10 @@ export default {
       topHotGoodsData: [], //热卖商品集合
       topHotShopsData: [], //热卖店铺集合
       awaitTodoData: "", //今日待办集合
-      homeData: "",
-      username: "",
-      pvChart: "",
-      orderChart: "",
-      params: {
+      homeData: "", // 首页数据
+      pvChart: "", // 流量统计
+      orderChart: "", // 订单统计
+      params: { // 请求参数
         searchType: "LAST_SEVEN",
       },
       // 订单传参
@@ -470,10 +469,6 @@ export default {
 
     // 初始化信息
     init() {
-      if (Cookies.get("userInfo")) {
-        let userInfo = JSON.parse(Cookies.get("userInfo"));
-        this.username = userInfo.username;
-      }
       this.toHotGoods();
       this.topHotShops();
       this.awaitTodo();

@@ -168,12 +168,12 @@
     data() {
       return {
         selectedMember: false, //是否是其他组件调用
-        descTitle: "",
+        descTitle: "", // modal标题
         descFlag: false, //编辑查看框
         openSearch: true, // 显示搜索
         loading: true, // 表单加载状态
-        updateRegion: false,
-        searchForm: {
+        updateRegion: false, // 显示所在地
+        searchForm: { // 请求参数
           pageNumber: 1,
           pageSize: 10,
           order: "desc",
@@ -181,9 +181,8 @@
           mobile: "",
           disabled: "CLOSE"
         },
-        picModelFlag: false,
-        // 表单验证规则
-        formValidate: {},
+        picModelFlag: false, // 选择图片
+        formValidate: {}, // 表单数据
         ruleValidate: {}, //修改验证
         submitLoading: false, // 添加或编辑提交状态
         selectList: [], // 多选数据

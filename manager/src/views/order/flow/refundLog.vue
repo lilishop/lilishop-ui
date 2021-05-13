@@ -45,8 +45,6 @@ export default {
   data() {
     return {
       loading: true, // 表单加载状态
-      drop: false,
-      dropDownIcon: "ios-arrow-down",
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -128,16 +126,6 @@ export default {
     };
   },
   methods: {
-    dropDown() {
-      if (this.drop) {
-        this.dropDownContent = "展开";
-        this.dropDownIcon = "ios-arrow-down";
-      } else {
-        this.dropDownContent = "收起";
-        this.dropDownIcon = "ios-arrow-up";
-      }
-      this.drop = !this.drop;
-    },
     init() {
       this.getDataList();
     },

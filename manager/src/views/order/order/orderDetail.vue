@@ -378,7 +378,7 @@ export default {
       submitLoading: false, // 添加或编辑提交状态
       region: [], //地区
       regionId: [], //地区id
-      showRegion: false,
+      showRegion: false, // 显示地区
       orderLogInfo: [], //订单日志数据
       orderLogModal: false, //弹出调整价格框
       checkedLogistics: [], //选中的物流公司集合

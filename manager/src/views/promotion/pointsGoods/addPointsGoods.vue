@@ -150,11 +150,6 @@ export default {
       }
     };
     return {
-      maxHeight: "240px",
-      modalType: 0,
-      /** 当前状态/模式 默认发布商品0 编辑商品1 编辑草稿箱商品2 */
-      currentStatus: 0,
-      categoryId: 0,
       form: {
         /** 店铺承担比例 */
         sellerCommission: 0,
@@ -171,8 +166,8 @@ export default {
         getType: "FREE",
         promotionGoodsList: [],
       },
-      pointsGoodsList: [],
-      categoryList: [],
+      pointsGoodsList: [], // 积分商品列表
+      categoryList: [], // 分类列表
       submitLoading: false, // 添加或编辑提交状态
       selectedGoods: [], // 已选商品列表，便于删除
       formRule: {

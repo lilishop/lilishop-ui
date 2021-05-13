@@ -235,8 +235,8 @@ export default {
   },
   data() {
     return {
-      id: 0,
-      complaintInfo: "",
+      id: 0, // 投诉id
+      complaintInfo: "", // 投诉信息
       images: [], //会员申诉图片
       appealImages: [], //商家申诉的图片
       submitLoading: false, // 添加或编辑提交状态

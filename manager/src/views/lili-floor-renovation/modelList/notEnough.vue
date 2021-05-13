@@ -77,11 +77,11 @@ export default {
     },
     data() {
         return {
-            currentIndex:0,
-            conData:this.data,
-            selected:{},
-            showModal:false,
-            showContent:true,
+            currentIndex:0, // 当前商品index
+            conData:this.data, // 当前数据
+            selected:{}, // 已选数据
+            showModal:false, // modal显隐
+            showContent:true, // 选择后刷新数据用
         }
     },
     watch:{

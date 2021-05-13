@@ -28,7 +28,7 @@
 export default {
   data() {
     return {
-      linkList: [
+      linkList: [ // 链接列表
         {
           title: "首页",
           icon: "md-home",
@@ -82,8 +82,8 @@ export default {
         ___type: "link",
         url: ''
       },
-      linkVisible: false,
-      selectedIndex: 9999999,
+      linkVisible: false, // 是否显示外部链接
+      selectedIndex: 9999999, // 已选index
     };
   },
   methods: {

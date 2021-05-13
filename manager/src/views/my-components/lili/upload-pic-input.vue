@@ -83,11 +83,11 @@ export default {
   },
   data() {
     return {
-      accessToken: {},
-      currentValue: this.value,
-      loading: false,
-      viewImage: false,
-      uploadFileUrl: uploadFile
+      accessToken: {}, // 验证token
+      currentValue: this.value, // 当前值
+      loading: false, // 加载状态
+      viewImage: false, // 预览图片modal
+      uploadFileUrl: uploadFile // 上传地址
     };
   },
   methods: {

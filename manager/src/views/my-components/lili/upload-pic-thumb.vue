@@ -82,11 +82,11 @@ export default {
   },
   data() {
     return {
-      accessToken: {},
-      uploadFileUrl: uploadFile,
-      uploadList: [],
-      viewImage: false,
-      imgUrl: ""
+      accessToken: {}, // 验证token
+      uploadFileUrl: uploadFile, // 上传地址
+      uploadList: [], // 上传列表
+      viewImage: false, // 预览modal
+      imgUrl: "" // 图片地址
     };
   },
   methods: {

@@ -231,8 +231,8 @@ export default {
           }
         }
       ],
-      userData: [],
-      totalUser: 0
+      userData: [], // 表格数据
+      totalUser: 0 // 总数
     };
   },
   methods: {

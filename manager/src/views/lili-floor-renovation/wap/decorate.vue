@@ -150,15 +150,15 @@ export default {
   },
   data() {
     return {
-      ways,
+      ways, // 选择链接的类型
       picModelFlag: false, //图片选择器
       linkType: "goods", // dialog弹窗口类型
       styleFlag: false, //广告魔方开关
       selectedLinkIndex: "", //选择链接的索引
-      modelData,
-      selectedGoods: "",
-      selectedLinks: "",
-      modelList: "",
+      modelData, // 装修数据
+      selectedGoods: "", // 已选商品
+      selectedLinks: "", // 已选链接
+      modelList: "", // 装修列表
     };
   },
   watch: {

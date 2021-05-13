@@ -36,7 +36,6 @@ export default {
   data() {
     return {
       loading: true, // 表单加载状态
-      drop: false,
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -47,7 +46,7 @@ export default {
         endDate: "", // 终止时间
         memberName: "",
       },
-      selectDate: null,
+      selectDate: null, // 选择时间段
       // 表单验证规则
       formValidate: {},
       selectList: [], // 多选数据

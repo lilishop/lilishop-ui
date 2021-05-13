@@ -97,17 +97,17 @@ import {
 export default {
   data() {
     return {
-      asyncLoading:false,
-      num: 10,
-      modalFlag: false,
-      spinShow: false,
-      timerNum: 10,
-      data: [],
-      id: 0,
-      addValidate: {
+      asyncLoading:false, // 加载状态
+      num: 10, // 更新倒计时
+      modalFlag: false,  // 新增编辑标识
+      spinShow: false, // 全局加载状态
+      timerNum: 10, // 定时器
+      data: [], // 加载数据
+      id: 0, // id
+      addValidate: { // 添加级别
         parentName: "无父级",
       },
-      formValidate: {
+      formValidate: { // 表单数据
         adCode: "",
         cityCode: "",
         center: "",
@@ -115,7 +115,7 @@ export default {
         orderNum: "",
         level: "",
       },
-      ruleValidate: {
+      ruleValidate: { // 验证规则
         adCode: [
           {
             required: true,

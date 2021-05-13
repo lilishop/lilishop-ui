@@ -102,7 +102,7 @@
         </Modal>
         <!-- 装修标题 -->
         <Modal
-            v-model="showModalTitle"
+            v-model="showModal1"
             title="装修"
             draggable
             width="800"
@@ -152,11 +152,11 @@ export default {
     },
     data() {
         return {
-            options:this.data.options,
-            showModal:false,
-            showModalTitle:false,
-            selected: {},
-            picModelFlag: false
+            options:this.data.options, // 当前数据
+            showModal:false, // modal显隐
+            showModal1:false, // modal显隐
+            selected: {}, // 已选数据
+            picModelFlag: false // 选择图片modal
         }
     },
     methods:{
@@ -164,7 +164,7 @@ export default {
             this.selected = item;
             console.warn(item);
             if(type){
-                this.showModalTitle = true
+                this.showModal1 = true
             } else {
                 this.showModal = true
             }

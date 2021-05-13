@@ -23,11 +23,11 @@ export default {
   },
   data() {
     return {
-      templateWay,
-      changed: "",
-      selected: 0,
+      templateWay, // 模板数据
+      changed: "", // 变更模板
+      selected: 0, // 已选数据
       selectedLink: "", //选中的链接
-      wap
+      wap  // tab标签
     };
   },
   watch: {

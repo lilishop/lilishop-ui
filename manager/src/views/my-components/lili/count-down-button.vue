@@ -58,9 +58,9 @@ export default {
   },
   data() {
     return {
-      buttonText: this.text,
-      count: Number(this.countTime),
-      clicked: false
+      buttonText: this.text, // 按钮文字
+      count: Number(this.countTime), // 计时时间
+      clicked: false // 是否可点击
     };
   },
   methods: {

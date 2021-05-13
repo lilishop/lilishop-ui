@@ -61,7 +61,6 @@ export default {
   data() {
     return {
       loading: true, // 表单加载状态
-      modalType: 0, // 添加或编辑标识
 
       searchForm: {
         // 搜索框初始化对象
@@ -70,7 +69,7 @@ export default {
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
       },
-      id: this.$route.query.id,
+      id: this.$route.query.id, // 优惠券id
 
       submitLoading: false, // 添加或编辑提交状态
       selectList: [], // 多选数据

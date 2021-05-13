@@ -105,8 +105,6 @@
     data() {
       return {
         loading: true, // 表单加载状态
-        drop: false,
-        dropDownIcon: "ios-arrow-down",
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
@@ -115,8 +113,7 @@
           order: "desc", // 默认排序方式
           receiptStatus: "", // 起始时间
         },
-        shopsData: [],
-        selectDate: null,
+        shopsData: [], // 店铺数据
         form: {
           // 添加或编辑表单对象初始化数据
           sn: "",

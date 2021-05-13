@@ -254,8 +254,8 @@ export default {
       );
     };
     return {
-      loading: true,
-      params: {
+      loading: true, // 加载状态
+      params: { // 请求参数
         userId: JSON.parse(Cookies.get("userInfo")).id,
         status: 0,
         pageNumber: 1, // 当前页数
@@ -263,26 +263,25 @@ export default {
         sort: "createTime", // 默认排序字段
         order: "desc" // 默认排序方式
       },
-      total: 0,
-      totalUnread: 0,
-      totalRead: 0,
-      totalRemove: 0,
-      currentMesList: [],
-      unreadMesList: [],
-      hasreadMesList: [],
-      recyclebinList: [],
-      currentMessageType: "unread",
-      showMesTitleList: true,
-      unreadCount: 0,
-      hasreadCount: 0,
-      recyclebinCount: 0,
-      noDataText: "暂无未读消息",
-      mes: {
+      total: 0, // 消息总数
+      totalUnread: 0, // 所有未读消息数
+      totalRead: 0, // 所有已读消息数
+      totalRemove: 0, // 所有回收站消息数
+      currentMesList: [], // 当前消息列表
+      unreadMesList: [], // 未读消息列表
+      hasreadMesList: [], // 已读消息列表
+      recyclebinList: [], // 回收站消息
+      currentMessageType: "unread", // 展示消息类型
+      showMesTitleList: true, // 展示消息列表
+      unreadCount: 0, // 未读数
+      hasreadCount: 0, // 已读数
+      recyclebinCount: 0, // 回收站消息数量
+      noDataText: "暂无未读消息", // 无消息提示
+      mes: { // 信息表单
         title: "",
         time: "",
         content: ""
       },
-      dictMessageType: this.$store.state.dict.messageType,
       mesTitleColumns: [
         {
           type: "index",

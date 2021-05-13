@@ -42,17 +42,16 @@ export default {
     },
     data() {
         return {
-            options:this.data.options,
+            options:this.data.options, // 当前数据
             actStatus:0,  // 0 未开始  1 进行中   2 已结束
             actName:'限时秒杀',
             currHour:'00', // 当前秒杀场
-            diffSeconds:0,
-            days:'00',
-            hours: '00',
-            minutes: '00',
-            seconds: '00',
-            interval:undefined,
-            swiperOptions:{
+            diffSeconds:0, // 倒地时
+            hours: '00', // 小时
+            minutes: '00', // 分钟
+            seconds: '00', // 秒
+            interval:undefined, // 定时器
+            swiperOptions:{ // 轮播图参数 
                 slidesPerView: 5,
                 autoplay:true,
                 loop:true

@@ -92,8 +92,6 @@
     data() {
       return {
         loading: true, // 表单加载状态
-        drop: false,
-        dropDownIcon: "ios-arrow-down",
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
@@ -107,7 +105,7 @@
           buyerName: "",
           orderStatus: ""
         },
-        selectDate: null,
+        selectDate: null, // 下单时间
         form: {
           // 添加或编辑表单对象初始化数据
           sn: "",
@@ -237,16 +235,6 @@
       };
     },
     methods: {
-      dropDown() {
-        if (this.drop) {
-          this.dropDownContent = "展开";
-          this.dropDownIcon = "ios-arrow-down";
-        } else {
-          this.dropDownContent = "收起";
-          this.dropDownIcon = "ios-arrow-up";
-        }
-        this.drop = !this.drop;
-      },
       init() {
         this.getDataList();
       },

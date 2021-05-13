@@ -138,10 +138,10 @@ export default {
   },
   data() {
     return {
-      accessToken: {},
-      uploadFileUrl: uploadFile,
-      editor: null,
-      options: {
+      accessToken: {}, // 验证token
+      uploadFileUrl: uploadFile, // 上传地址
+      editor: null, // 富文本初始化
+      options: { // 富文本配置
         theme: "snow",
         modules: {
           toolbar: "#toolbar"

@@ -105,15 +105,15 @@
         showLoading: true,
         //展示抽屉
         showDrawer: false,
-        selectObj: [],
-        searchForm: {
+        selectObj: [], // 选择数据
+        searchForm: { // 请求参数
           goodsName: "",
           pageNumber: 1, // 当前页数
           pageSize: 10, // 页面大小
           sort: "createTime", // 默认排序字段
           order: "desc" // 默认排序方式
         },
-        tableColumns: [
+        tableColumns: [ // 表头
           {
             type: "index",
             width: 60,
@@ -230,8 +230,8 @@
             }
           }
         ],
-        tableData: [],
-        tableTotal: 0
+        tableData: [], // 表格数据
+        tableTotal: 0 // 总数
       };
     },
     methods: {

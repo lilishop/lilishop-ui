@@ -15,8 +15,8 @@ export default {
   },
   data() {
     return {
-      layout,
-      name: "index",
+      layout, // 装修模块
+      name: "index", // 装修的页面
     };
   },
   mounted() {

@@ -17,9 +17,6 @@
             <FormItem label="商品卖点" prop="sellingPoint">
               {{ goods.sellingPoint }}
             </FormItem>
-<!--            <FormItem label="商品品牌" prop="brandId">-->
-<!--              {{ goods.brandId }}-->
-<!--            </FormItem>-->
           </div>
           <h4>商品交易信息</h4>
           <div class="form-item-view">
@@ -139,10 +136,10 @@ export default {
   name: "goodsDetail",
   data() {
     return {
-      goods: '',
-      previewGoodsPicture: '',
-      goodsPictureVisible: false,
-      skuColumn: [
+      goods: '', // 商品信息
+      previewGoodsPicture: '', // 预览图片
+      goodsPictureVisible: false, // 预览图片模态框
+      skuColumn: [ // 规格表头
         {
           title: '规格',
           key: 'specs'
@@ -168,7 +165,7 @@ export default {
           slot: "showImage",
         }
       ],
-      skuData: []
+      skuData: [] // sku数据
     }
   },
   mounted() {

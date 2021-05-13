@@ -84,18 +84,18 @@
     },
     data() {
       return {
-        height: 500,
-        userLoading: true,
-        userModalVisible: false,
-        selectUsers: [],
-        searchUserForm: {
+        height: 500, // 表格高度
+        userLoading: true, // 加载状态
+        userModalVisible: false, // modal显隐
+        selectUsers: [], // 已选用户
+        searchUserForm: { // 请求参数
           username: "",
           pageNumber: 1, // 当前页数
           pageSize: 10, // 页面大小
           sort: "createTime", // 默认排序字段
           order: "desc" // 默认排序方式
         },
-        userColumns: [
+        userColumns: [ // 表头
           {
             type: "index",
             width: 60,
@@ -214,8 +214,8 @@
             }
           }
         ],
-        userData: [],
-        totalUser: 0
+        userData: [], // 用户数据
+        totalUser: 0 // 数量
       };
     },
     methods: {

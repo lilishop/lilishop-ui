@@ -47,17 +47,17 @@ export default {
   name: "tagsPageOpened",
   data() {
     return {
-      currentPageName: this.$route.name,
-      tagBodyLeft: 0,
-      visible: false,
-      contextMenuLeft: 0,
-      contextMenuTop: 0,
-      menuList: {
+      currentPageName: this.$route.name, // 当前路由名称
+      tagBodyLeft: 0, // 标签左偏移量
+      visible: false, // 显示操作按钮
+      contextMenuLeft: 0, // 内容左偏移量
+      contextMenuTop: 0, // 内容上偏移量
+      actionList: {
         others: '关闭其他',
         clearAll: '关闭所有'
       },
-      refsTag: [],
-      tagsCount: 1
+      refsTag: [], // 所有已打开标签
+      tagsCount: 1 // 标签数量
     };
   },
   props: {

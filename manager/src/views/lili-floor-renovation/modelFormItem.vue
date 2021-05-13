@@ -184,9 +184,9 @@ export default {
     },
     data () {
         return {
-            showModal:false,
-            selected:{},
-            picModelFlag: false
+            showModal:false, // modal显隐
+            selected:{}, // 已选数据
+            picModelFlag: false // 图片选择器
         }
     },
     mounted () {

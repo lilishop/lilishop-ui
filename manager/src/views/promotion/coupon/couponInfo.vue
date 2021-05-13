@@ -104,11 +104,7 @@ export default {
   },
   data() {
     return {
-      maxHeight: "240px",
-      modalType: 0,
-      /** 当前状态/模式 默认发布商品0 编辑商品1 编辑草稿箱商品2 */
-      currentStatus: 0,
-      categoryId: 0,
+      modalType: 0, // 当前类型
       loading: false, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象

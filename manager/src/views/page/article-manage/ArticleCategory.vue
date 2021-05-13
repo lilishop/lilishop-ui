@@ -85,30 +85,22 @@
         },
         data() {
             return {
-                currView: "index",
-                loading: false,
+                currView: "index", // 展示哪一类
+                loading: false, // 加载状态
                 brands: [], //品牌集合
                 Specifications: [], //规格集合
-                categoryId: "",
-                expandLevel: 1,
+                expandLevel: 1, // 展开的层级
                 modalType: 0, // 添加或编辑标识
                 modalVisible: false, // 添加或编辑显示
                 modalTitle: "", // 添加或编辑标题
                 showParent: false, // 是否展示上级菜单
                 parentTitle: "", // 父级菜单名称
-                modalBrandTitle: "",
-                modalSpecTitle: "",
                 formAdd: { // 添加或编辑表单对象初始化数据
                     parentId: "",
                     name: "",
                     sort: 1,
                     level: 0,
                 },
-                enabledParam: {
-                    type: 0
-                },
-                brandForm: {},
-                specForm: {},
                 // 表单验证规则
                 formValidate: {},
                 columns: [

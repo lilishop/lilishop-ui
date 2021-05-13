@@ -45,7 +45,7 @@
 export default {
   data() {
     return {
-      selected: {
+      selected: { // 已选数据
         index: 0,
         val: "精选",
       },

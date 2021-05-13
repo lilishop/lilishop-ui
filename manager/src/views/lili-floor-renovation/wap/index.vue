@@ -85,14 +85,14 @@ export default {
   },
   data() {
     return {
-      templates,
-      modelData,
-      qrcode: "",
-      selected: 0,
-      contentData: {
+      templates, // 模板类型
+      modelData, // 装修模型
+      qrcode: "", // 二维码
+      selected: 0, // 已选下标
+      contentData: { // 总数据
         list: [],
       },
-      decorateData: "",
+      decorateData: "", // 装修数据
     };
   },
   watch: {

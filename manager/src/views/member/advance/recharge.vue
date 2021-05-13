@@ -85,7 +85,6 @@
     data() {
       return {
         loading: true, // 表单加载状态
-        drop: false,
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
@@ -96,9 +95,7 @@
           endDate: "", // 终止时间
           memberName:""
         },
-        selectDate: null,
-        // 表单验证规则
-        formValidate: {},
+        selectDate: null, // 选择区间时间
         submitLoading: false, // 添加或编辑提交状态
         selectList: [], // 多选数据
         selectCount: 0, // 多选计数

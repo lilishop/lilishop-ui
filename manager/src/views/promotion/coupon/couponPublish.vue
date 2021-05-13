@@ -150,12 +150,7 @@ export default {
       }
     };
     return {
-      arrScopeId: [],
-      maxHeight: "240px",
-      modalType: 0,
-      /** 当前状态/模式 默认发布商品0 编辑商品1 编辑草稿箱商品2 */
-      currentStatus: 0,
-      categoryId: 0,
+      modalType: 0, // 是否编辑
       form: {
         /** 店铺承担比例 */
         storeCommission: 0,
@@ -173,7 +168,7 @@ export default {
         promotionGoodsList: [],
         scopeIdGoods: [],
       },
-      id: this.$route.query.id,
+      id: this.$route.query.id, // 优惠券id
       submitLoading: false, // 添加或编辑提交状态
       selectedGoods: [], // 已选商品列表，便于删除
       goodsCategoryList: [], // 商品分类列表

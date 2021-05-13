@@ -82,21 +82,17 @@
     name: "role-manage",
     data() {
       return {
-        loading: true,
+        loading: true, // 加载状态
         modalType: 0, // 0 添加 1 编辑
-        form: {},
-        searchForm: {
+        form: {}, // 表单数据
+        searchForm: { // 请求参数
           pageNumber: 1,
           pageSize: 10,
         },
-        modalTitle: "详细",
-        formValidate: false,
-        roleForm: {
-          name: "",
-          description: "",
-        },
-        images: [],
-        columns: [
+        modalTitle: "详细", // modal标题
+        formValidate: false, // modal显隐
+        images: [], // 图片列表
+        columns: [ // 表头
           {
             type: "selection",
             width: 60,

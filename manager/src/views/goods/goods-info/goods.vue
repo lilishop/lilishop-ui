@@ -127,9 +127,9 @@ export default {
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
-      drop: false,
-      dropDownContent: "展开",
-      dropDownIcon: "ios-arrow-down",
+      drop: false, // 展开搜索框
+      dropDownContent: "展开", // 展开标签文字
+      dropDownIcon: "ios-arrow-down", // 展开图标
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -137,7 +137,7 @@ export default {
         sort: "create_time", // 默认排序字段
         order: "desc", // 默认排序方式
       },
-      underForm: {
+      underForm: { // 下架原因
         reason: "",
       },
       form: {

@@ -80,10 +80,10 @@ export default {
   },
   data() {
     return {
-      iconModalVisible: false,
-      currentValue: this.value,
-      iconData: [],
-      key: "",
+      iconModalVisible: false, // modal显隐
+      currentValue: this.value, // 当前值
+      iconData: [], // icon列表
+      key: "", // 关键词
       tip: "输入英文关键词搜索，比如 success"
     };
   },

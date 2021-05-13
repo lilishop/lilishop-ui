@@ -15,10 +15,10 @@ import * as API_Setup from "@/api/index.js";
 export default {
   data() {
     return {
-      data: [],
-      selected: [],
-      id: 0,
-      changeOnSelect: false,
+      data: [], // 地区数据
+      selected: [], // 已选地区
+      id: 0, // 默认id
+      changeOnSelect: false, // 选择时变动
     };
   },
   mounted() {

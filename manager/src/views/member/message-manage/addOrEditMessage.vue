@@ -78,12 +78,11 @@ export default {
   },
   data() {
     return {
-      type: 0,
+      type: 0, // 消息类型
       loading: false, // 表单加载状态
-      selectUsers: [],
-      userModalVisible: false,
+      selectUsers: [], // 已选用户
       modalTitle: "", // 添加或编辑标题
-      form: {
+      form: { // 表单
         // 添加或编辑表单对象初始化数据
         title: "",
         content: "",
@@ -99,8 +98,8 @@ export default {
         content: [{ required: true, message: "内容不能为空", trigger: "blur" }]
       },
       submitLoading: false, // 添加或编辑提交状态
-      dictMessageType: this.$store.state.dict.messageType,
-      backRoute: ""
+      dictMessageType: this.$store.state.dict.messageType, // 消息类型
+      backRoute: "" // 上一个页面路由
     };
   },
   methods: {

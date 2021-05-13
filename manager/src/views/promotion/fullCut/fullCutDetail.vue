@@ -184,16 +184,15 @@ export default {
   name: "addFullCut",
   data() {
     return {
-      form: {
+      form: { // 表单
         discountType: "isFullMinus",
         scopeType: "ALL",
         promotionGoodsList: [],
       },
-      id: this.$route.query.id,
-      couponList: [],
-      giftList: [],
-      giftLoading: false,
-      couponList: false,
+      id: this.$route.query.id, // 活动id
+      couponList: [], // 优惠券列表
+      giftList: [], // 赠品列表
+      giftLoading: false, // 赠品加载状态
       columns: [
         {
           type: "selection",

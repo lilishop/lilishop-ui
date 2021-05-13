@@ -22,8 +22,8 @@ export default {
   },
   data() {
     return {
-      selectDep: [],
-      department: []
+      selectDep: [], // 已选数据
+      department: [] // 列表
     };
   },
   methods: {

@@ -137,8 +137,8 @@
         modalTitle: "", // 添加或编辑标题
         loading: true, // 表单加载状态
         content: "",//评价内容
-        drop: false,
-        dropDownIcon: "ios-arrow-down",
+        drop: false, // 更多搜索项
+        dropDownIcon: "ios-arrow-down", // drop 图标
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
@@ -146,8 +146,7 @@
           sort: "createTime", // 默认排序字段
           order: "desc", // 默认排序方式
         },
-        selectDate: null,
-        form: {},
+        form: {}, // 表单
         submitLoading: false, // 添加或编辑提交状态
         selectList: [], // 多选数据
         selectCount: 0, // 多选计数

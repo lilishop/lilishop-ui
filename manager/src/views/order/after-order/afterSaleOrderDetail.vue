@@ -394,7 +394,7 @@ export default {
   },
   data() {
     return {
-      sn: "",
+      sn: "", // 订单号
       logisticsModal: false, //查询物流模态框
       logisticsInfo: {}, //物流信息
       form: {
@@ -410,7 +410,7 @@ export default {
         ],
       },
       modalVisible: false, // 添加或编辑显示
-      afterSaleInfo: {},
+      afterSaleInfo: {}, // 售后信息
       afterSaleImage: [], //会员申诉图片
       appealImages: [], //商家申诉的图片
       submitLoading: false, // 添加或编辑提交状态

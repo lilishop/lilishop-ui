@@ -144,18 +144,17 @@ export default {
   },
   data() {
     return {
-      categoryList: [],
+      categoryList: [], // 分类列表
       sortCateList: [], //筛选出分类第一级
       sortCate: "", //筛选的数据
-      currView: "index",
-      loading: false,
-      selectCount: 0,
+      loading: false, // 加载状态
+      selectCount: 0, // 选择数量
       brands: [], //品牌集合
       specifications: [], //规格集合
-      categoryId: "",
+      categoryId: "", // 分类id
       category_brands: [], //已经选择的品牌
       category_specs: [], //已经选择的规格
-      expandLevel: 1,
+      expandLevel: 1, // 展开层级
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
       modalBrandVisible: false, //品牌关联编辑显示

@@ -150,13 +150,13 @@ export default {
         pageSize: 10, // 页面大小
         order: "desc", // 默认排序方式
       },
-      statusList: [
+      statusList: [ // 活动状态
         { label: "未开始", value: "NEW" },
         { label: "已开始", value: "START" },
         { label: "已结束", value: "END" },
         { label: "已关闭", value: "CLOSE" },
       ],
-      columns: [
+      columns: [ // 表头
         {
           title: "商品名称",
           slot: "goodsName",

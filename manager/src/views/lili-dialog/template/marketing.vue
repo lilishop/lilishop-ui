@@ -38,22 +38,20 @@ import {
   getPromotionGoods,
 } from "@/api/promotion";
 
-// 引用店铺
-// import shopListDialog from "@/views/seller/shop/";
 export default {
   data() {
     return {
-      totals: "",
+      totals: "", // 总数
       loading: true, //表格请求数据为true
-      promotionList: "",
+      promotionList: "", // 活动列表
       selectedIndex: 0, //左侧菜单选择
       promotions: "", //选中的活动key
-      index: 999,
-      params: {
+      index: 999, // 已选下标
+      params: { // 请求参数
         pageNumber: 1,
         pageSize: 10,
       },
-      pintuanColumns: [
+      pintuanColumns: [ // 表头
         {
           title: "活动标题",
           key: "title",
@@ -199,7 +197,7 @@ export default {
         },
       ],
 
-      activeColumns: [],
+      activeColumns: [], // 活动表头
 
       columns: [
         {
@@ -253,7 +251,7 @@ export default {
       promotionData: "", //商品集合
 
       showPromotionList: [], //显示当前促销的商品
-      typeOption: {
+      typeOption: { // 活动选项
         FULL_DISCOUNT: {
           title: "满减",
           methodsed: () => {
