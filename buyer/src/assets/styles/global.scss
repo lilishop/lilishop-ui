@@ -1,0 +1,125 @@
+/*
+ * @Author: LMR
+ * @Date: 2020-08-11 10:12:34
+ * @Last Modified by: LMR
+ * @Last Modified time: 2020-08-18 16:00:10
+ */
+
+//引入主题色
+@import "./theme.scss";
+
+.global_color{
+  color: $theme_color;
+}
+.global_background_color{
+  background-color: $theme_color;
+}
+.global_text_left {
+    text-align: left;
+}
+.global_text_right {
+    text-align: right;
+}
+.global_float_left {
+    float: left;
+}
+.global_float_right {
+    float: right;
+}
+.clearfix::after{
+    content: '';
+    display: block;
+    clear: both;
+}
+.width_1200{width: 1200px;}
+.width_800{width: 800px;}
+.width_400{width: 400px;}
+.width_300{width: 300px;}
+.width_200{width: 200px;}
+.width_100{width: 100px;}
+
+.fontsize_12{font-size: 12px;}
+.fontsize_14{font-size: 14px;}
+.fontsize_16{font-size: 16px;}
+.fontsize_18{font-size: 18px;}
+
+.mb_20{margin-bottom: 20px;}
+.mt_20{margin-top: 20px;}
+.ml_20{margin-left: 20px;}
+.mr_20{margin-right: 20px;}
+
+.mb_10{margin-bottom: 10px;}
+.mt_10{margin-top: 10px;}
+.ml_10{margin-left: 10px;}
+.mr_10{margin-right: 10px;}
+
+.pb_20{padding-bottom: 20px;}
+.pt_20{padding-top: 20px;}
+.pl_20{padding-left: 20px;}
+.pr_20{padding-right: 20px;}
+
+.pb_10{padding-bottom: 10px;}
+.pt_10{padding-top: 10px;}
+.pl_10{padding-left: 10px;}
+.pr_10{padding-right: 10px;}
+
+.color999{
+    color: #999;
+}
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+    font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+    // overflow: hidden;
+    margin: 0;
+    padding: 0;
+
+}
+li{
+    list-style: none;
+}
+.hover-color:hover{
+    color: $theme_color!important;
+    cursor: pointer;
+}
+.hover-pointer{
+    cursor: pointer;
+}
+.center{
+    margin: 0 auto;
+}
+.relative{
+    position: relative;
+}
+.ellipsis{
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+}
+.promotion-decorate{
+    width: 200px;
+    text-align: center;
+    font-size: 25px;
+    position: relative;
+    font-weight: bold;
+    margin: 30px auto 30px;
+    &::before,&::after{
+      content: '';
+      display: inline-block;
+      width: 25px;
+      height: 20px;
+      background-size: 50px 20px;
+      background-repeat: no-repeat;
+      background-position: 0 0;
+      position: absolute;
+      top: 10px;
+      left: -3px;
+    }
+    &::after{
+      background-position: -24px 0;
+      right: -3px;
+      left: auto;
+    }
+  }

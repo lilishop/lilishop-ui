@@ -1,0 +1,114 @@
+/*
+ * @Author: LMR
+ * @Date: 2020-08-14 11:04:12
+ * @Last Modified by: LMR
+ * @Last Modified time: 2020-08-18 14:21:41
+ */
+
+
+// 主题颜色
+
+// 明亮主题颜色
+$primary_color: #2d8cf0;
+$primary_light_color: #0f1011;
+$primary_dark_color: #2b85e4;
+$success_color: #19be6b;
+$warning_color: #ff9900;
+$error_color: #ed3f14;
+$handle-btn-color: #438cde;
+
+$theme_color: #ed3f14;
+
+$border_color: #dddee1;
+$title_color: #8c8c8c;
+$light_title_color: #1c2438;
+$light_content_color: #495060;
+$light_sub_color: #80848f;
+$light_background_color: #f8f8f9;
+$light_white_background_color :#fff;
+// 暗黑主题颜色
+$dark_background_color: #141414;
+$dark_sub_background_color: #1d1d1d; //稍微浅一点的
+$dark_content_color: #d5d5d5;
+
+
+
+/***** 封装一些方法可用于 黑暗主题 ，明亮主题 *****/
+
+
+// 背景颜色
+@mixin background_color($color) {
+  /*通过该函数设置字体颜色，后期方便统一管理；*/
+  background-color: $color;
+  transition: 0.35s;
+  [data-theme="dark"] & {
+    background-color: $dark_background_color;
+  }
+  [data-theme="light"] & {
+    background-color: $light_background_color;
+  }
+}
+// 辅助背景颜色
+@mixin sub_background_color($color) {
+  /*通过该函数设置字体颜色，后期方便统一管理；*/
+  background-color: $color;
+  transition: 0.35s;
+  [data-theme="dark"] & {
+    background-color: $dark_sub_background_color;
+  }
+  [data-theme="light"] & {
+    background-color: $light_background_color;
+  }
+}
+
+
+@mixin white_background_color() {
+  /*通过该函数设置字体颜色，后期方便统一管理；*/
+  background-color: $light_white_background_color;
+  transition: 0.35s;
+  [data-theme="dark"] & {
+    background-color: $dark_sub_background_color;
+  }
+  [data-theme="light"] & {
+    background-color: $light_white_background_color;
+  }
+}
+
+
+// 正文颜色
+@mixin content_color($color) {
+  /*通过该函数设置字体颜色，后期方便统一管理；*/
+  color: $color;
+  [data-theme="dark"] & {
+    color: $dark_content_color;
+  }
+  [data-theme="light"] & {
+    color: $light_content_color;
+  }
+}
+
+// 辅助颜色
+@mixin sub_color($color) {
+  /*通过该函数设置字体颜色，后期方便统一管理；*/
+  color: $color;
+  [data-theme="dark"] & {
+    color: $dark_content_color;
+  }
+  [data-theme="light"] & {
+    color: $light_sub_color;
+  }
+}
+
+// 标题颜色
+@mixin title_color($color) {
+  /*通过该函数设置字体颜色，后期方便统一管理；*/
+  color: $color;
+  [data-theme="dark"] & {
+    color: $dark_content_color;
+  }
+  [data-theme="light"] & {
+    color: $light_title_color;
+  }
+}
+
+

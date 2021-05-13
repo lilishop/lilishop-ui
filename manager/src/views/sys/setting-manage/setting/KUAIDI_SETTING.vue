@@ -1,0 +1,92 @@
+<template>
+  <div class="layout">
+    <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
+      <FormItem label="企业id" prop="ebusinessID">
+        <Input v-model="formValidate.ebusinessID" />
+      </FormItem>
+      <FormItem label="密钥" prop="appKey">
+        <Input class="label-appkey" v-model="formValidate.appKey" />
+      </FormItem>
+      <FormItem label="api地址" prop="reqURL">
+        <Input v-model="formValidate.reqURL" />
+      </FormItem>
+      <div class="label-btns">
+        <Button type="primary" @click="submit('formValidate')">保存</Button>
+
+      </div>
+    </Form>
+  </div>
+</template>
+<script>
+import { setSetting } from "@/api/index";
+import { handleSubmit } from "./validate";
+export default {
+  data() {
+    return {
+      ruleValidate: {},
+      formValidate: { ebusinessID: "", reqURL: "", appKey: "" },
+    };
+  },
+  props: ["res",'type'],
+  watch: {
+    res: {
+      handler() {},
+      immediate: true,
+    },
+  },
+  created() {
+    this.init();
+  },
+  methods: {
+    submit(name) {
+      let that = this;
+       if( handleSubmit(that, name )){
+        this.setupSetting()
+      }
+    },
+
+    setupSetting() {
+      setSetting(this.type, this.formValidate).then((res) => {
+        if (res.code == 200) {
+          this.$Message.success("保存成功!");
+        } else {
+          this.$Message.error("保存失败!");
+        }
+      });
+    },
+    // 实例化数据
+    init() {
+ this.res = JSON.parse(this.res);
+
+      this.$set(this, "formValidate", { ...this.res });
+      Object.keys(this.formValidate).forEach((item) => {
+        this.ruleValidate[item] = [
+          {
+            required: true,
+            message: "请填写必填项",
+            trigger: "blur",
+          },
+        ];
+      });
+
+    },
+  },
+};
+</script>
+
+<style lang="scss" scoped>
+@import "./style.scss";
+.label-item {
+  display: flex;
+  > .ivu-input {
+    width: 200px;
+    margin: 0 10px;
+  }
+}
+.label-appkey {
+  width: 300px !important;
+  /deep/ input {
+    width: 300px !important;
+  }
+}
+</style>

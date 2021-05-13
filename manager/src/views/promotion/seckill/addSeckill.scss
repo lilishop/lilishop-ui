@@ -1,0 +1,264 @@
+/*选择商品品类*/
+.content-goods-publish {
+  padding: 15px;
+  margin: 0 auto;
+  text-align: center;
+  border: 1px solid #ddd;
+  background: none repeat 0 0 #fff;
+  height: 100%;
+  margin-bottom: 20px;
+
+  /*商品品类*/
+  .goods-category {
+    text-align: left;
+    padding: 10px;
+    background: #fafafa;
+    border: 1px solid #e6e6e6;
+
+    ul {
+      padding: 8px 4px 8px 8px;
+      list-style: none;
+      width: 300px;
+      background: none repeat 0 0 #fff;
+      border: 1px solid #e6e6e6;
+      display: inline-block;
+      letter-spacing: normal;
+      margin-right: 15px;
+      vertical-align: top;
+      word-spacing: normal;
+
+      li {
+        line-height: 20px;
+        padding: 5px;
+        cursor: pointer;
+        color: #333;
+        font-size: 12px;
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+  }
+
+  /** 当前品类被选中的样式 */
+  .activeClass {
+    background-color: #d9edf7;
+    border: 1px solid #bce8f1;
+    color: #3a87ad;
+  }
+
+  /*!*当前选择的商品品类文字*!*/
+  .current-goods-category {
+    text-align: left;
+    padding: 10px;
+    width: 100%;
+    border: 1px solid #fbeed5;
+    color: #c09853;
+    background-color: #fcf8e3;
+    margin: 10px auto;
+    padding: 8px 35px 8px 14px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    font-weight: bold;
+  }
+}
+
+/*编辑基本信息*/
+.el-form {
+  padding-bottom: 80px;
+
+  .el-form-item {
+    width: 100%;
+    color: gray;
+    text-align: left;
+  }
+}
+
+getGoodsCategoryLevelList
+
+/*平铺*/
+div.base-info-item>div {
+  margin-left: 5%;
+}
+
+div.base-info-item {
+
+  h4 {
+    margin-bottom: 10px;
+    padding: 0 10px;
+    border: 1px solid #ddd;
+    background-color: #f8f8f8;
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+    line-height: 40px;
+    text-align: left;
+  }
+
+  .form-item-view {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding-left: 80px;
+
+    .shop-category-text {
+      font-size: 12px;
+    }
+  }
+
+  .item-goods-properts-row {
+    display: flex;
+    flex-direction: row;
+    word-break: break-all;
+    white-space: normal;
+    width: 300px;
+    height: 100px;
+  }
+
+  .item-goods-properts {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 10px;
+  }
+
+  .form-item {
+    display: flex;
+    align-items: center;
+  }
+
+
+  /** 审核信息-拒绝原因 */
+  .auth-info {
+    color: red;
+  }
+
+  .el-form-item {
+    width: 30%;
+    min-width: 300px;
+  }
+
+  .goods-name-width {
+    width: 50%;
+    min-width: 300px;
+  }
+
+  .el-form-item__content {
+    margin-left: 120px;
+    text-align: left;
+  }
+
+  p.goods-group-manager {
+    padding-left: 7.5%;
+    text-align: left;
+    color: #999;
+    font-size: 13px;
+  }
+
+  /*teatarea*/
+  /deep/ .el-textarea {
+    width: 150%;
+  }
+
+  .seo-text {
+    width: 150%;
+  }
+}
+
+/*折叠面板*/
+.el-collapse-item {
+  /deep/ .el-collapse-item__header {
+    text-align: left;
+    background-color: #f8f8f8;
+    padding: 0 10px;
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+  }
+
+  .el-form-item {
+    margin-left: 5%;
+    width: 25%;
+  }
+
+  /deep/ .el-form-item__content {
+    margin-left: 120px;
+    text-align: left;
+  }
+
+  p.goods-group-manager {
+    padding-left: 12%;
+    text-align: left;
+    color: #999;
+  }
+
+  /deep/ .el-collapse-item__content {
+    padding: 10px 0;
+    text-align: left;
+  }
+}
+
+/*商品描述*/
+.goods-intro {
+  line-height: 40;
+}
+
+/** 底部步骤 */
+.footer {
+  width: 88.7%;
+  padding: 10px;
+  background-color: #ffc;
+  position: fixed;
+  bottom: 0px;
+  left: 10%;
+  text-align: center;
+  z-index: 9999;
+}
+
+/*图片上传组件第一张图设置封面*/
+.goods-images {
+  /deep/ li.el-upload-list__item:first-child {
+    position: relative;
+  }
+
+  /deep/ li.el-upload-list__item:first-child:after {
+    content: "封";
+    color: #fff;
+    font-weight: bold;
+    font-size: 12px;
+    position: absolute;
+    left: -15px;
+    top: -6px;
+    width: 40px;
+    height: 24px;
+    padding-top: 6px;
+    background: #13ce66;
+    text-align: center;
+    -webkit-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+    -webkit-box-shadow: 0 0 1pc 1px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 1pc 1px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.el-form-item__label {
+  word-break: break-all;
+}
+
+.step-view {
+  width: 33%;
+  height: 40px;
+  font-size: 19px;
+  text-align: center;
+  display: flex;
+  background-color: #fff;
+  justify-content: center;
+  align-items: center;
+}
+
+.page {
+  margin-top: 2vh;
+  margin-bottom: 5vh;
+}

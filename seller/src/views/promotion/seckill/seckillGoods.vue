@@ -1,0 +1,444 @@
+<template>
+  <div class="seckill-goods">
+    <Card>
+      <Table border :columns="columns" :data="data">
+        <template slot-scope="{ row }" slot="applyEndTime">
+          {{ unixDate(row.applyEndTime) }}
+        </template>
+        <template slot-scope="{ row }" slot="hours">
+          <Tag v-for="item in unixHours(row.hours)" :key="item">{{ item }}</Tag>
+        </template>
+      </Table>
+
+      <Row class="operation">
+        <template v-if="promotionStatus == 'NEW'">
+          <Button type="primary" @click="openSkuList">选择商品</Button>
+          <Button @click="delAll">批量删除</Button>
+        </template>
+      </Row>
+      <Row v-show="openTip">
+        <Alert show-icon>
+          已选择 <span class="select-count">{{ selectCount }}</span> 项
+        </Alert>
+      </Row>
+      <Row class="operation">
+        <Tabs type="card" v-model="tabIndex">
+          <TabPane
+            v-for="(tab, tabIndex) in goodsList"
+            :key="tabIndex"
+            :label="tab.hour"
+            :name="tabIndex"
+          >
+            <Table
+              :loading="loading"
+              border
+              :columns="goodsColumns"
+              :data="tab.list"
+              :ref="'table' + tabIndex"
+              sortable="custom"
+              @on-selection-change="changeSelect"
+            >
+              <template slot-scope="{ row }" slot="originalPrice">
+                <div>{{ row.originalPrice | unitPrice("￥") }}</div>
+              </template>
+
+              <template slot-scope="{ row, index }" slot="quantity">
+                <Input
+                  v-model="row.quantity"
+                  :disabled="row.promotionApplyStatus == 'PASS'"
+                  @input="
+                    goodsList[tabIndex].list[index].quantity = row.quantity
+                  "
+                />
+              </template>
+
+              <template slot-scope="{ row, index }" slot="price">
+                <Input
+                  v-model="row.price"
+                  :disabled="row.promotionApplyStatus == 'PASS'"
+                  @input="goodsList[tabIndex].list[index].price = row.price"
+                />
+              </template>
+
+              <template slot-scope="{ row }" slot="promotionApplyStatus">
+                <Badge
+                  status="success"
+                  v-if="row.promotionApplyStatus == 'PASS'"
+                  :text="promotionApplyStatus(row.promotionApplyStatus)"
+                />
+                <Badge
+                  status="blue"
+                  v-if="row.promotionApplyStatus == 'APPLY'"
+                  :text="promotionApplyStatus(row.promotionApplyStatus)"
+                />
+                <Badge
+                  status="error"
+                  v-if="row.promotionApplyStatus == 'REFUSE'"
+                  :text="promotionApplyStatus(row.promotionApplyStatus)"
+                />
+                <span
+                  v-if="row.promotionApplyStatus == 'REFUSE'"
+                  @click="showReason(row.failReason)"
+                  class="reason"
+                  >（拒绝原因）</span
+                >
+                <Badge
+                  status="error"
+                  v-if="row.promotionApplyStatus == ''"
+                  :text="promotionApplyStatus(row.promotionApplyStatus)"
+                />
+              </template>
+
+              <template slot-scope="{ row }" slot="QRCode">
+                <img
+                  v-if="row.QRCode"
+                  :src="row.QRCode || '../../../assets/lili.png'"
+                  width="50px"
+                  height="50px"
+                  alt=""
+                />
+              </template>
+              <template slot-scope="{ row, index }" slot="action">
+                <Button
+                  type="error"
+                  v-if="row.promotionApplyStatus !== 'PASS'"
+                  :disabled="promotionStatus != 'NEW'"
+                  size="small"
+                  ghost
+                  @click="delGoods(index, row.id)"
+                  >删除</Button
+                >
+              </template>
+            </Table>
+          </TabPane>
+        </Tabs>
+      </Row>
+
+      <Row class="operation">
+        <Button @click="closeCurrentPage">返回</Button>
+        <Button
+          type="primary"
+          :loading="submitLoading"
+          :disabled="promotionStatus != 'NEW'"
+          @click="save"
+          >提交</Button
+        >
+      </Row>
+    </Card>
+
+    <sku-select
+      ref="skuSelect"
+      @selectedGoodsData="selectedGoodsData"
+    ></sku-select>
+  </div>
+</template>
+<script>
+import {
+  seckillGoodsList,
+  seckillDetail,
+  setSeckillGoods,
+  removeSeckillGoods,
+} from "@/api/promotion.js";
+import skuSelect from "@/views/lili-dialog";
+export default {
+  components: {
+    skuSelect,
+  },
+  data() {
+    return {
+      promotionStatus: "", // 活动状态
+      openTip: true,
+      loading: false, // 表单加载状态
+      searchForm: {
+        // 搜索框初始化对象
+        pageNumber: 0, // 当前页数
+        pageSize: 1000, // 页面大小
+      },
+      tabIndex: 0, // 选择商品的下标
+      submitLoading: false, // 添加或编辑提交状态
+      selectList: [], // 多选数据
+      selectCount: 0, // 多选计数
+      data: [{}], // 表单数据
+      columns: [
+        {
+          title: "活动名称",
+          key: "promotionName",
+          minWidth: 120,
+        },
+        {
+          title: "活动开始时间",
+          key: "startTime",
+        },
+        {
+          title: "报名截止时间",
+          slot: "applyEndTime",
+        },
+        {
+          title: "时间场次",
+          slot: "hours",
+        },
+      ],
+      goodsColumns: [
+        { type: "selection", width: 60, align: "center" },
+        {
+          title: "商品名称",
+          key: "goodsName",
+          minWidth: 120,
+        },
+        {
+          title: "商品价格",
+          slot: "originalPrice",
+          minWidth: 50,
+        },
+        {
+          title: "库存",
+          slot: "quantity",
+          minWidth: 40,
+        },
+        {
+          title: "活动价格",
+          slot: "price",
+          minWidth: 50,
+        },
+        {
+          title: "状态",
+          slot: "promotionApplyStatus",
+          minWidth: 30,
+        },
+        // {
+        //   title: "商品二维码",
+        //   slot: "QRCode",
+        // },
+        {
+          title: "操作",
+          slot: "action",
+          minWidth: 50,
+        },
+      ],
+      goodsList: [] // 商品列表
+    };
+  },
+  computed: {},
+  methods: {
+    // 关闭当前页面
+    closeCurrentPage() {
+      this.$store.commit("removeTag", "seckill-goods");
+      localStorage.storeOpenedList = JSON.stringify(
+        this.$store.state.app.storeOpenedList
+      );
+      this.$router.go(-1);
+    },
+    save() {
+      // 提交
+      // for(let i=0;i<this.goodsData.length;i++){
+      //     let data = this.goodsData[i]
+      //     if(!data.price){
+      //         this.$Modal.warning({
+      //             title:'提示',
+      //             content:`请填写【${data.goodsName}】的价格`
+      //         })
+      //         return
+      //     }
+      // }
+
+      let list = JSON.parse(JSON.stringify(this.goodsList));
+      let params = {
+        seckillId: this.$route.query.id,
+        applyVos: [],
+      };
+      list.forEach((e, index) => {
+        e.list.forEach((i) => {
+          // if(e.id) delete e.id
+          params.applyVos.push(i);
+        });
+      });
+      this.submitLoading = true;
+      setSeckillGoods(params).then((res) => {
+        this.submitLoading = false;
+        if (res && res.success) {
+          this.$Message.success("提交活动商品成功");
+          this.closeCurrentPage();
+        }
+      });
+    },
+    init() {
+      this.getSeckillMsg();
+    },
+
+    clearSelectAll() {
+      this.$refs.table.selectAll(false);
+    },
+    changeSelect(e) {
+      // 获取选择数据
+      this.selectList = e;
+      this.selectCount = e.length;
+    },
+
+    getDataList() {
+      // 获取商品详情
+      this.loading = true;
+      this.searchForm.seckillId = this.$route.query.id;
+
+      // 处理过的时间 为‘1:00’
+      let hours = this.unixHours(this.data[0].hours);
+      hours.forEach((e) => {
+        this.goodsList.push({
+          hour: e,
+          list: [],
+        });
+      });
+      seckillGoodsList(this.searchForm).then((res) => {
+        this.loading = false;
+        if (res.success && res.result) {
+          let data = res.result.records;
+          // 未处理时间 为'1'
+          let noFilterhours = this.data[0].hours.split(",");
+          if (data.length) {
+            noFilterhours.forEach((e, index) => {
+              data.forEach((i) => {
+                if (i.timeLine == e) {
+                  this.goodsList[index].list.push(i);
+                }
+              });
+            });
+          }
+        }
+      });
+    },
+
+    getSeckillMsg() {
+      // 获取活动详情
+      seckillDetail(this.$route.query.id).then((res) => {
+        if (res.success && res.result) {
+          this.data = [];
+          this.data.push(res.result);
+          this.promotionStatus = res.result.promotionStatus;
+          this.getDataList();
+        }
+      });
+    },
+    delGoods(index, id) {
+      // 删除商品
+      if (id) {
+        removeSeckillGoods(this.$route.query.id, id).then((res) => {
+          if (res.success) {
+            this.goodsList[this.tabIndex].list.splice(index, 1);
+            this.$Message.success("删除成功！");
+          }
+        });
+      } else {
+        this.goodsList[this.tabIndex].list.splice(index, 1);
+        this.$Message.success("删除成功！");
+      }
+    },
+    delAll() {
+      if (this.selectCount <= 0) {
+        this.$Message.warning("您还未选择要删除的数据");
+        return;
+      }
+      this.$Modal.confirm({
+        title: "确认删除",
+        content: "您确认要删除所选的 " + this.selectCount + " 条数据?",
+        onOk: () => {
+          let ids = [];
+          this.selectList.forEach(function (e) {
+            if (e.promotionApplyStatus !== 'PASS') {
+              ids.push(e.id);
+            }
+          });
+          this.goodsList[this.tabIndex].list = this.goodsList[
+            this.tabIndex
+          ].list.filter((item) => {
+            return !ids.includes(item.id);
+          });
+          removeSeckillGoods(this.$route.query.id, ids).then((res) => {
+            if (res.success) {
+              this.$Message.success("删除成功！");
+            }
+          });
+        },
+      });
+    },
+    selectedGoodsData(item) {
+      // 选择器添加商品
+      let ids = [];
+      let list = [];
+
+      this.goodsList[this.tabIndex].list.forEach((e) => {
+        ids.push(e.id);
+      });
+      item.forEach((e) => {
+        if (!ids.includes(e.id)) {
+          list.push({
+            goodsName: e.goodsName,
+            price: e.price,
+            originalPrice: e.price,
+            promotionApplyStatus: "",
+            quantity: e.quantity,
+            seckillId: this.$route.query.id,
+            storeId: e.storeId,
+            storeName: e.storeName,
+            skuId: e.id,
+            timeLine: this.data[0].hours.split(",")[this.tabIndex],
+          });
+        }
+      });
+
+      this.goodsList[this.tabIndex].list.push(...list);
+    },
+    openSkuList() {
+      this.$refs.skuSelect.open("goods");
+    },
+    unixDate(time) {
+      // 处理报名截止时间
+      return this.$options.filters.unixToDate(new Date(time) / 1000);
+    },
+    unixHours(item) {
+      if (item) {
+        // 处理小时场次
+        let hourArr = item.split(",");
+        for (let i = 0; i < hourArr.length; i++) {
+          hourArr[i] += ":00";
+        }
+        return hourArr;
+      }
+      return [];
+    },
+    promotionApplyStatus(key) {
+      switch (key) {
+        case "APPLY":
+          return "申请";
+          break;
+        case "PASS":
+          return "通过";
+          break;
+        case "REFUSE":
+          return "拒绝";
+          break;
+        default:
+          return "未申请";
+          break;
+      }
+    },
+    showReason(reason) {
+      this.$Modal.info({
+        title: "拒绝原因",
+        content: reason,
+      });
+    },
+  },
+  mounted() {
+    this.init();
+  },
+};
+</script>
+<style lang="scss" scoped>
+.operation {
+  margin: 10px 0;
+}
+.reason {
+  cursor: pointer;
+  color: #2d8cf0;
+  font-size: 12px;
+}
+</style>

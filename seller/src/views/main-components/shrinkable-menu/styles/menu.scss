@@ -1,0 +1,23 @@
+.ivu-shrinkable-menu{
+  height: calc(100% - 60px);
+  width: 240px;
+  display: flex;
+}
+.ivu-menu-vertical .ivu-menu-item-group-title {
+  padding-left: 5px;
+}
+.ivu-btn-text:hover {
+  background-color: rgba(255,255,255,.2) !important;
+}
+.ivu-menu-dark.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu), .ivu-menu-dark.ivu-menu-vertical .ivu-menu-submenu-title-active:not(.ivu-menu-submenu){
+  background-color: #fff;
+  &:hover{
+    background-color: #fff;
+  }
+}
+.ivu-menu-vertical{
+  overflow-y: auto;
+}
+.ivu-menu-dark.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu), .ivu-menu-dark.ivu-menu-vertical .ivu-menu-submenu-title-active:not(.ivu-menu-submenu){
+  color: #ed3f14;
+}

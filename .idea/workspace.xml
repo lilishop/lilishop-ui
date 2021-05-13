@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="7e964aa0-753b-43f7-854a-2942a3e76fe4" name="默认更改列表" comment="店铺设置">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+<<<<<<< HEAD
+      <change beforePath="$PROJECT_DIR$/buyer/src/pages/home/orderCenter/AddAddress.vue" beforeDir="false" afterPath="$PROJECT_DIR$/buyer/src/pages/home/orderCenter/AddAddress.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/manager/src/config/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/manager/src/config/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/seller/src/config/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/seller/src/config/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/seller/src/views/statistics/goods/goodsStatistics.vue" beforeDir="false" afterPath="$PROJECT_DIR$/seller/src/views/statistics/goods/goodsStatistics.vue" afterDir="false" />
+=======
+      <change beforePath="$PROJECT_DIR$/manager/src/views/goods-unit/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/manager/src/views/goods-unit/index.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/manager/src/views/sensitiveWords/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/manager/src/views/sensitiveWords/index.vue" afterDir="false" />
+>>>>>>> new-lmr
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Vue File" />
+        <option value="Vue Single File Component" />
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1gGPnr0TWcTGoYhLT7QHFe5MrX4" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+<<<<<<< HEAD
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/manager/src/api" />
+=======
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/manager/src/views/sys/setting-manage" />
+>>>>>>> new-lmr
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.XML" />
+    <property name="ts.external.directory.path" value="$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+<<<<<<< HEAD
+      <recent name="$PROJECT_DIR$/manager/src/api" />
+      <recent name="$PROJECT_DIR$/manager/src/views/my-components" />
+=======
+      <recent name="$PROJECT_DIR$/manager/src/views/sys/setting-manage" />
+>>>>>>> new-lmr
+      <recent name="$PROJECT_DIR$/buyer/src/components/verify" />
+      <recent name="$PROJECT_DIR$/buyer/src/components/change" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/buyer/src/components/change" />
+      <recent name="$PROJECT_DIR$/buyer/src/pages/home/memberCenter" />
+      <recent name="$PROJECT_DIR$/buyer/src/pages/home/orderCenter" />
+      <recent name="$PROJECT_DIR$/buyer/src/pages/home" />
+      <recent name="$PROJECT_DIR$/buyer/src/components/home/order" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="Home.vue" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/lili-shop-ui/buyer/src/page/user/Home.vue" useBuiltInWebServerPort="true">
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JavaScript Debug.Home.vue" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="7e964aa0-753b-43f7-854a-2942a3e76fe4" name="默认更改列表" comment="" />
+      <created>1597738125477</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1597738125477</updated>
+      <workItem from="1597738127938" duration="6268000" />
+      <workItem from="1597825716012" duration="3768000" />
+      <workItem from="1597830090678" duration="7632000" />
+      <workItem from="1597972262326" duration="865000" />
+      <workItem from="1597974893526" duration="112000" />
+      <workItem from="1597975021121" duration="17000" />
+      <workItem from="1597975216701" duration="17254000" />
+      <workItem from="1598184961388" duration="14000" />
+      <workItem from="1598233017859" duration="10307000" />
+      <workItem from="1598259954059" duration="2720000" />
+      <workItem from="1598318520176" duration="726000" />
+      <workItem from="1598319433942" duration="106000" />
+      <workItem from="1598319554477" duration="13265000" />
+      <workItem from="1598406300597" duration="6030000" />
+      <workItem from="1598422866858" duration="7787000" />
+      <workItem from="1598491104901" duration="37245000" />
+      <workItem from="1606876680167" duration="61000" />
+      <workItem from="1611131536390" duration="5616000" />
+      <workItem from="1611537245379" duration="828000" />
+      <workItem from="1611538362285" duration="350000" />
+      <workItem from="1611560515629" duration="834000" />
+      <workItem from="1611650051294" duration="3000" />
+      <workItem from="1611818003333" duration="239000" />
+      <workItem from="1613989205923" duration="7005000" />
+      <workItem from="1614076082765" duration="8973000" />
+      <workItem from="1614142479169" duration="2129000" />
+      <workItem from="1614162982178" duration="8343000" />
+      <workItem from="1614228135182" duration="3456000" />
+      <workItem from="1614248866969" duration="8023000" />
+      <workItem from="1614313313338" duration="83000" />
+      <workItem from="1614313447954" duration="211000" />
+    </task>
+    <task id="LOCAL-00001" summary="管理端页面优化">
+      <created>1613996019944</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1613996019944</updated>
+    </task>
+    <task id="LOCAL-00002" summary="修复修改商家地址报错问题">
+      <created>1613996389449</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1613996389449</updated>
+    </task>
+    <task id="LOCAL-00003" summary="去掉id">
+      <created>1614076370139</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1614076370139</updated>
+    </task>
+    <task id="LOCAL-00004" summary="选择物流规则不能选择物流模板">
+      <created>1614080544415</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1614080544415</updated>
+    </task>
+    <task id="LOCAL-00005" summary="修改查询条件样式">
+      <created>1614143298555</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1614143298555</updated>
+    </task>
+    <task id="LOCAL-00006" summary="修改样式">
+      <created>1614143902874</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1614143902874</updated>
+    </task>
+    <task id="LOCAL-00007" summary="修改更新时间为NAN">
+      <created>1614144541858</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1614144541858</updated>
+    </task>
+    <task id="LOCAL-00008" summary="修复app版本无法添加和修改">
+      <created>1614230386509</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1614230386509</updated>
+    </task>
+    <task id="LOCAL-00009" summary="去掉打印">
+      <created>1614230407722</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1614230407722</updated>
+    </task>
+    <task id="LOCAL-00010" summary="去掉多选">
+      <created>1614230544808</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1614230544808</updated>
+    </task>
+    <task id="LOCAL-00011" summary="修改消息标题宽度">
+      <created>1614230627881</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1614230627881</updated>
+    </task>
+    <task id="LOCAL-00012" summary="店铺相关js提交">
+      <created>1614231645143</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1614231645143</updated>
+    </task>
+    <task id="LOCAL-00013" summary="店铺修改">
+      <created>1614231785359</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1614231785359</updated>
+    </task>
+    <task id="LOCAL-00014" summary="优化页面">
+      <created>1614249105672</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1614249105672</updated>
+    </task>
+    <task id="LOCAL-00015" summary="页面优化">
+      <created>1614258980903</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1614258980903</updated>
+    </task>
+    <task id="LOCAL-00016" summary="页面优化">
+      <created>1614259068248</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1614259068248</updated>
+    </task>
+    <task id="LOCAL-00017" summary="页面优化">
+      <created>1614313690732</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1614313690732</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ID_ORDER">
+      <list>
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="1">
+          <value>
+            <State>
+              <option name="SHOW_ONLY_AFFECTED_CHANGES" value="true" />
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                  <entry key="structure">
+                    <value>
+                      <list>
+                        <option value="dir:/Users/liushuai/Documents/workspace/lili-shop-ui/seller/src/router" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="店铺设置" />
+    <MESSAGE value="文件排序问题处理" />
+    <MESSAGE value="管理端页面优化" />
+    <MESSAGE value="修复修改商家地址报错问题" />
+    <MESSAGE value="去掉id" />
+    <MESSAGE value="选择物流规则不能选择物流模板" />
+    <MESSAGE value="修改查询条件样式" />
+    <MESSAGE value="修改样式" />
+    <MESSAGE value="修改更新时间为NAN" />
+    <MESSAGE value="修复app版本无法添加和修改" />
+    <MESSAGE value="去掉打印" />
+    <MESSAGE value="去掉多选" />
+    <MESSAGE value="修改消息标题宽度" />
+    <MESSAGE value="店铺相关js提交" />
+    <MESSAGE value="店铺修改" />
+    <MESSAGE value="优化页面" />
+    <MESSAGE value="页面优化" />
+    <option name="LAST_COMMIT_MESSAGE" value="页面优化" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="2074" y="292" key="CommitChangelistDialog2" timestamp="1614313690605">
+      <screen x="0" y="23" width="3440" height="1333" />
+    </state>
+    <state x="2074" y="292" key="CommitChangelistDialog2/0.23.3440.1333@0.23.3440.1333" timestamp="1614313690605" />
+    <state x="1660" y="123" width="1572" height="1133" key="DiffContextDialog" timestamp="1614231764977">
+      <screen x="0" y="23" width="3440" height="1333" />
+    </state>
+    <state x="1660" y="123" width="1572" height="1133" key="DiffContextDialog/0.23.3440.1333@0.23.3440.1333" timestamp="1614231764977" />
+    <state x="2046" y="418" key="Vcs.Push.Dialog.v2" timestamp="1614313692405">
+      <screen x="0" y="23" width="3440" height="1333" />
+    </state>
+    <state x="2046" y="418" key="Vcs.Push.Dialog.v2/0.23.3440.1333@0.23.3440.1333" timestamp="1614313692405" />
+    <state x="2055" y="414" width="782" height="550" key="find.popup" timestamp="1614256597933">
+      <screen x="0" y="23" width="3440" height="1333" />
+    </state>
+    <state x="2055" y="414" width="782" height="550" key="find.popup/0.23.3440.1333@0.23.3440.1333" timestamp="1614256597933" />
+    <state x="2111" y="325" key="run.anything.popup" timestamp="1613991372498">
+      <screen x="0" y="23" width="3440" height="1333" />
+    </state>
+    <state x="2111" y="325" key="run.anything.popup/0.23.3440.1333@0.23.3440.1333" timestamp="1613991372498" />
+    <state x="2111" y="327" width="670" height="676" key="search.everywhere.popup" timestamp="1614254687317">
+      <screen x="0" y="23" width="3440" height="1333" />
+    </state>
+    <state x="2111" y="327" width="670" height="676" key="search.everywhere.popup/0.23.3440.1333@0.23.3440.1333" timestamp="1614254687317" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/manager/src/views/sys/monitor/monitor.vue</url>
+          <line>5</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

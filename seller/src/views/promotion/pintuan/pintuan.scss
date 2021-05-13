@@ -1,0 +1,41 @@
+
+.search {
+  .operation {
+    margin-bottom: 2vh;
+  }
+
+  .select-count {
+    font-weight: 600;
+    color: #40a9ff;
+  }
+
+  .select-clear {
+    margin-left: 10px;
+  }
+
+  .page {
+    margin-top: 2vh;
+  }
+
+  .drop-down {
+    margin-left: 5px;
+  }
+}
+
+.newPromotionView {
+  width: 80%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+
+  Input {
+    flex-direction: row;
+  }
+
+  .slotSpan {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+}

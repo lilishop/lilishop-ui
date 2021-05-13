@@ -1,0 +1,264 @@
+<template>
+  <div class="search">
+    <Row>
+      <Col>
+        <Card>
+          <Row @keydown.enter.native="handleSearch">
+            <Form
+              ref="searchForm"
+              :model="searchForm"
+              inline
+              :label-width="70"
+              class="search-form"
+            >
+              <Form-item label="开始时间" prop="startDay">
+                <DatePicker
+                  type="date"
+                  v-model="searchForm.startDate"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  placeholder="请选择"
+                  clearable
+                  style="width: 200px"
+                ></DatePicker>
+              </Form-item>
+              <Form-item label="结束时间" prop="endDate">
+                <DatePicker
+                  type="date"
+                  v-model="searchForm.endDate"
+                  format="yyyy-MM-dd HH:mm:ss"
+                  di
+                  placeholder="请选择"
+                  clearable
+                  style="width: 200px"
+                ></DatePicker>
+              </Form-item>
+              <Form-item label="状态" prop="orderStatus">
+                <Select v-model="searchForm.billStatus" placeholder="请选择" clearable style="width: 200px">
+                  <Option value="OUT">已出账</Option>
+                  <Option value="CHECK">已对账</Option>
+                  <Option value="COMPLETE">已完成</Option>
+                </Select>
+              </Form-item>
+              <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+
+            </Form>
+          </Row>
+          <Row class="padding-row">
+            <Table
+              :loading="loading"
+              border
+              :columns="columns"
+              :data="data"
+              ref="table"
+              sortable="custom"
+              @on-sort-change="changeSort"
+              @on-selection-change="changeSelect"
+            ></Table>
+          </Row>
+          <Row type="flex" justify="end" class="page">
+            <Page
+              :current="searchForm.pageNumber"
+              :total="total"
+              :page-size="searchForm.pageSize"
+              @on-change="changePage"
+              @on-page-size-change="changePageSize"
+              :page-size-opts="[10, 20, 50]"
+              size="small"
+              show-total
+              show-elevator
+              show-sizer
+            ></Page>
+          </Row>
+        </Card>
+      </Col>
+    </Row>
+  </div>
+</template>
+
+<script>
+  import * as API_Shop from "@/api/shops";
+
+  export default {
+    name: "storeBill",
+    components: {},
+    data() {
+      return {
+        loading: true, // 表单加载状态
+        searchForm: {
+          // 搜索框初始化对象
+          pageNumber: 1, // 当前页数
+          pageSize: 10, // 页面大小
+          sort: "createTime", // 默认排序字段
+          order: "desc", // 默认排序方式
+          startDate: "", // 起始时间
+          endDate: "", // 终止时间
+        },
+        form: {
+          // 添加或编辑表单对象初始化数据
+          sn: "",
+          sellerName: "",
+          startTime: "",
+          endTime: "",
+          billPrice: "",
+        },
+        // 表单验证规则
+        formValidate: {},
+        submitLoading: false, // 添加或编辑提交状态
+        selectList: [], // 多选数据
+        selectCount: 0, // 多选计数
+        columns: [
+          {
+            title: "账单号",
+            key: "sn",
+            minWidth: 250,
+            tooltip: true          },
+          {
+            title: "生成时间",
+            key: "createTime",
+            minWidth: 120,
+          },
+          {
+            title: "结算时间段",
+            key: "startTime",
+            width: 200,
+            tooltip: true,
+            render: (h, params) => {
+              return h('div', params.row.startTime +"~"+params.row.endTime)
+            }
+          },
+          {
+            title: "结算金额",
+            key: "billPrice",
+            minWidth: 100,
+            render: (h, params) => {
+              return h(
+                "div",
+                this.$options.filters.unitPrice(params.row.billPrice, "￥")
+              );
+            },
+          },
+
+
+          {
+            title: "状态",
+            key: "billStatus",
+            width: 100,
+            render: (h, params) => {
+              if (params.row.billStatus == "OUT") {
+                return h( "Badge", {props: { status: "success",text: "已出账" } })
+              } else if (params.row.billStatus == "EXAMINE") {
+                return h( "Badge", {props: { status: "success",text: "已审核" } })
+              } else if (params.row.billStatus == "CHECK") {
+                return h( "Badge", {props: { status: "success",text: "已对账" } })
+              } else if (params.row.billStatus == "PAY") {
+                return h( "Badge", {props: { status: "success",text: "已付款" } })
+              }else if (params.row.billStatus == "COMPLETE") {
+                return h( "Badge", {props: { status: "success",text: "已完成" } })
+              }
+            }
+          },
+
+          {
+            title: "操作",
+            key: "action",
+            align: "center",
+            width: 120,
+            render: (h, params) => {
+              return h("div", [
+                h(
+                  "Button",
+                  {
+                    props: {
+                      type: "info",
+                      size: "small",
+                    },
+                    style: {
+                      marginRight: "5px",
+                    },
+                    on: {
+                      click: () => {
+                        this.detail(params.row);
+                      },
+                    },
+                  },
+                  "查看"
+                ),
+              ]);
+            },
+          },
+        ],
+        data: [], // 表单数据
+        total: 0, // 表单数据总数
+      };
+    },
+    methods: {
+      init() {
+        this.getDataList();
+      },
+      changePage(v) {
+        this.searchForm.pageNumber = v;
+        this.getDataList();
+        this.clearSelectAll();
+      },
+      changePageSize(v) {
+        this.searchForm.pageSize = v;
+        this.getDataList();
+      },
+      handleSearch() {
+        this.searchForm.pageNumber = 1;
+        this.searchForm.pageSize = 10;
+        this.getDataList();
+      },
+      changeSort(e) {
+        this.searchForm.sort = e.key;
+        this.searchForm.order = e.order;
+        if (e.order === "normal") {
+          this.searchForm.order = "";
+        }
+        this.getDataList();
+      },
+      clearSelectAll() {
+        this.$refs.table.selectAll(false);
+      },
+      changeSelect(e) {
+        this.selectList = e;
+        this.selectCount = e.length;
+      },
+      selectDateRange(v) {
+        if (v) {
+          this.searchForm.startDate = v[0];
+          this.searchForm.endDate = v[1];
+        }
+      },
+      getDataList() {
+        this.loading = true;
+        API_Shop.getBillPage(this.searchForm).then((res) => {
+          this.loading = false;
+          if (res.success) {
+            this.data = res.result.records;
+            this.total = res.result.total;
+          }
+        });
+        this.total = this.data.length;
+        this.loading = false;
+      },
+
+      detail(v) {
+        let id = v.id;
+        this.$router.push({
+          name: "bill-detail",
+          query: { id: id },
+        });
+
+      },
+    },
+    mounted() {
+      this.init();
+    },
+  };
+</script>
+<style lang="scss" scoped>
+  // 建议引入通用样式 可删除下面样式代码
+   @import "@/styles/table-common.scss";
+
+</style>
