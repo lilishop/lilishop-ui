@@ -42,6 +42,7 @@
                 ></DatePicker>
               </Form-item>
               <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+              <Button @click="handleReset" class="search-btn">重置</Button>
             </Form>
           </Row>
           <Row class="padding-row">
@@ -305,6 +306,12 @@ export default {
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    handleReset() {
+      this.searchForm = {}
+      this.searchForm.pageNumber = 1;
+      this.searchForm.pageSize = 10;
+      this.getDataList();
+    },
     changeSort(e) {
       this.searchForm.sort = e.key;
       this.searchForm.order = e.order;
@@ -332,11 +339,9 @@ export default {
         this.loading = false;
         if (res.success) {
           this.data = res.result.records;
-          this.total = res.result.total;
+          this.total = res.result.total; 
         }
       });
-      this.total = this.data.length;
-      this.loading = false;
     },
     //回复
     handleSubmit() {
@@ -379,7 +384,7 @@ export default {
       });
     },
   },
-  mounted() {
+  activated() {
     this.init();
   },
 };

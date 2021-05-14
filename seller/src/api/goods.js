@@ -255,7 +255,7 @@ export const getGoodsListDataByStockSeller = params => {
 export const getGoods = id => {
   return getRequest(`/goods/get/${id}`);
 };
-//  上架商品
+// 上架商品
 export const upGoods = params => {
   return putRequest(`/goods/up`, params);
 };

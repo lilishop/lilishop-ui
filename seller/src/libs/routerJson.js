@@ -133,7 +133,7 @@ export const result = [
         permTypes: [],
         children: [
           {
-            name: "order",
+            name: "orderList",
             showAlways: true,
             level: 2,
             type: 0,
@@ -266,12 +266,12 @@ export const result = [
         permTypes: [],
         children: [
           {
-            name: "bill",
+            name: "accountStatementBill",
             showAlways: true,
             level: 2,
             type: 0,
             title: "财务对账",
-            path: "bill",
+            path: "accountStatementBill",
             component: "shop/bill/accountStatementBill",
             icon: "md-person",
             isMenu: true,
@@ -297,7 +297,7 @@ export const result = [
       },
 
       {
-        name: "receipt",
+        name: "receiptManager",
         showAlways: true,
         level: 1,
         type: 0,
@@ -386,12 +386,12 @@ export const result = [
         ]
       },
       {
-        name: "promotion",
+        name: "storePromotion",
         showAlways: true,
         level: 1,
         type: 0,
         title: "商家活动",
-        path: "/promotion",
+        path: "/storePromotion",
         component: "Main",
         icon: "md-person",
         isMenu: true,
@@ -429,12 +429,12 @@ export const result = [
         ]
       },
       {
-        name: "promotion",
+        name: "distribution",
         showAlways: true,
         level: 1,
         type: 0,
         title: "分销管理",
-        path: "/promotion",
+        path: "/distribution",
         component: "Main",
         icon: "md-person",
         isMenu: true,

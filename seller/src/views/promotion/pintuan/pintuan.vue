@@ -39,6 +39,7 @@
             ></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" class="search-btn " icon="ios-search">搜索</Button>
+          <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
       <Row class="operation padding-row">
@@ -206,6 +207,13 @@ export default {
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    handleReset() {
+      this.searchForm = {}
+      this.selectDate = ''
+      this.searchForm.pageNumber = 0;
+      this.searchForm.pageSize = 10;
+      this.getDataList();
+    },
 
     clearSelectAll() {
       this.$refs.table.selectAll(false);
@@ -323,14 +331,7 @@ export default {
       });
     },
   },
-  watch: {
-    $route(to, from) {
-      if (to.fullPath == "/promotion/pintuan") {
-        this.init();
-      }
-    },
-  },
-  mounted() {
+  activated() {
     this.init();
   },
 };

@@ -47,6 +47,7 @@
             icon="ios-search"
             >搜索</Button
           >
+          <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
       <Row class="operator padding-row">
@@ -264,6 +265,12 @@ export default {
       this.searchForm.pageNumber = 0;
       this.getDataList();
     },
+    handleReset() {
+      this.searchForm = {}
+      this.selectDate = ''
+      this.searchForm.pageNumber = 0;
+      this.getDataList();
+    },
 
     changeSort(e) {
       this.searchForm.sort = e.key;
@@ -390,15 +397,8 @@ export default {
       });
     },
   },
-  mounted() {
+  activated () {
     this.init();
-  },
-  watch: {
-    $route(to, from) {
-      if (to.fullPath == "/promotion/coupon") {
-        this.init();
-      }
-    },
   },
 };
 </script>

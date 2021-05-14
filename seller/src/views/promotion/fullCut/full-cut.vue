@@ -41,6 +41,7 @@
             ></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" class="search-btn" icon="ios-search">搜索</Button>
+          <Button @click="handleReset" class="ml_10">重置</Button>
         </Form>
       </Row>
       <Row class="operation">
@@ -207,6 +208,13 @@ export default {
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    handleReset() {
+      this.selectDate = ''
+      this.searchForm = {}
+      this.searchForm.pageNumber = 0;
+      this.searchForm.pageSize = 10;
+      this.getDataList();
+    },
 
     edit(row) {
       //  编辑
@@ -248,16 +256,9 @@ export default {
       });
     },
   },
-  mounted() {
+  activated() {
     this.init();
-  },
-  watch: {
-    $route(to, from) {
-      if (to.fullPath == "/promotion/full-cut") {
-        this.init();
-      }
-    },
-  },
+  }
 };
 </script>
 <style lang="scss" scoped>

@@ -192,27 +192,21 @@ export const otherRouter = {
       component: () => import("@/views/goods/goods-info/goodsDetail.vue")
     },
     {
-      path: "promotion/manager-poonts-goods",
-      title: "积分商品",
-      name: "manager-points-goods",
-      component: () => import("@/views/promotion/pointsGoods/pointsGoods.vue")
-    },
-    {
-      path: "promotion/add-poonts-goods",
+      path: "promotion/add-points-goods",
       title: "添加积分商品",
       name: "add-points-goods",
       component: () =>
         import("@/views/promotion/pointsGoods/addPointsGoods.vue")
     },
     {
-      path: "promotion/edit-poonts-goods",
+      path: "promotion/edit-points-goods",
       title: "修改积分商品",
       name: "edit-points-goods",
       component: () =>
         import("@/views/promotion/pointsGoods/editPointsGoods.vue")
     },
     {
-      path: "promotion/manager-poonts-goods-category",
+      path: "promotion/manager-points-goods-category",
       title: "积分商品分类",
       name: "manager-points-goods-category",
       component: () =>

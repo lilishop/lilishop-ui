@@ -17,6 +17,7 @@
             <Input type="text" v-model="searchForm.sn" placeholder="商品编号" clearable style="width: 200px" />
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+          <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
       <Row class="operation padding-row">
@@ -114,12 +115,6 @@ import * as API_Store from "@/api/shops";
 
 export default {
   name: "goods",
-  components: {},
-  watch: {
-    $route() {
-      this.getDataList();
-    },
-  },
   data() {
     return {
       id: "", //要操作的id
@@ -482,28 +477,28 @@ export default {
         }
       });
     },
-    changePage(v) {
+    changePage (v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
-    changePageSize(v) {
+    changePageSize (v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    handleSearch() {
+    handleSearch () {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    handleReset() {
-      this.$refs.searchForm.resetFields();
+    handleReset () {
+      this.searchForm = {};
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       // 重新加载数据
       this.getDataList();
     },
-    changeSort(e) {
+    changeSort (e) {
       this.searchForm.sort = e.key;
       this.searchForm.order = e.order;
       if (e.order === "normal") {
@@ -511,15 +506,15 @@ export default {
       }
       this.getDataList();
     },
-    clearSelectAll() {
+    clearSelectAll () {
       this.$refs.table.selectAll(false);
     },
-    changeSelect(e) {
+    changeSelect (e) {
       this.selectList = e;
       this.selectCount = e.length;
     },
     //保存运费模板信息
-    saveShipTemplate() {
+    saveShipTemplate () {
       if (this.shipTemplateForm.freightPayer == "BUYER") {
         {
           this.shipTemplateForm.templateId = 0;
@@ -717,7 +712,7 @@ export default {
       });
     },
   },
-  mounted() {
+  activated () {
     this.init();
   },
 };

@@ -41,6 +41,7 @@
             ></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+          <Button @click="handleReset" class="ml_10">重置</Button>
         </Form>
       </Row>
 
@@ -95,7 +96,7 @@
 <script>
 import { seckillList } from "@/api/promotion";
 export default {
-  name: "goods",
+  name: "seckill",
   components: {},
   data() {
     return {
@@ -185,6 +186,13 @@ export default {
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    handleReset() {
+      this.searchForm = {}
+      this.selectDate = ''
+      this.searchForm.pageNumber = 0;
+      this.searchForm.pageSize = 10;
+      this.getDataList();
+    },
 
     manage(row) {
       this.$router.push({ name: "seckill-goods", query: { id: row.id } });
@@ -220,16 +228,9 @@ export default {
       return hourArr;
     },
   },
-  mounted() {
+  activated () {
     this.init();
-  },
-  watch: {
-    $route(to, from) {
-      if (to.fullPath == "/promotion/seckill") {
-        this.init();
-      }
-    },
-  },
+  }
 };
 </script>
 <style lang="scss"  scoped>

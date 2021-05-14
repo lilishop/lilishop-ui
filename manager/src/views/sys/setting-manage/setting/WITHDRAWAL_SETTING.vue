@@ -62,6 +62,6 @@ export default {
 @import "./style.scss";
 /deep/ .ivu-form-item-content{
   align-items: center;
-  paddinig-bottom: 5px;
+  padding-bottom: 5px;
 }
 </style>

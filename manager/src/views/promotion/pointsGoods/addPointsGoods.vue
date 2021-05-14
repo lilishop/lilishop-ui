@@ -234,7 +234,7 @@ export default {
         },
         {
           title: "店铺名称",
-          key: "sellerName",
+          key: "storeName",
           minWidth: 60,
         },
         {
@@ -348,7 +348,7 @@ export default {
     },
     // 关闭当前页面
     closeCurrentPage() {
-      this.$store.commit("removeTag", "add-poonts-goods");
+      this.$store.commit("removeTag", "add-points-goods");
       localStorage.pageOpenedList = JSON.stringify(
         this.$store.state.app.pageOpenedList
       );
@@ -406,7 +406,7 @@ export default {
             originalPrice: e.price,
             quantity: e.quantity,
             storeId: e.storeId,
-            sellerName: e.sellerName,
+            storeName: e.storeName,
             skuId: e.id,
             ...e,
           });

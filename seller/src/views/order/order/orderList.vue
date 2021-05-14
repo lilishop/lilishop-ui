@@ -38,7 +38,7 @@
                 <DatePicker
                   v-model="selectDate"
                   type="datetimerange"
-                  format="yyyy-MM-dd HH:mm:ss"
+                  format="yyyy-MM-dd"
                   clearable
                   @on-change="selectDateRange"
                   placeholder="选择起始时间"
@@ -46,6 +46,7 @@
                 ></DatePicker>
               </Form-item>
               <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+              <Button @click="handleReset" class="search-btn">重置</Button>
 
             </Form>
           </Row>
@@ -83,12 +84,8 @@
 
 <script>
   import * as API_Order from "@/api/order";
-
-
   export default {
     name: "orderList",
-    components: {
-    },
     data() {
       return {
         loading: true, // 表单加载状态
@@ -245,7 +242,7 @@
         this.getDataList();
       },
       handleReset() {
-        this.$refs.searchForm.resetFields();
+        this.searchForm = {};
         this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = 10;
         this.selectDate = null;
@@ -284,8 +281,6 @@
             this.total = res.result.total;
           }
         });
-        this.total = this.data.length;
-        this.loading = false;
       },
 
       detail(v) {
@@ -297,7 +292,7 @@
 
       },
     },
-    mounted() {
+    activated () {
       this.init();
     },
   };

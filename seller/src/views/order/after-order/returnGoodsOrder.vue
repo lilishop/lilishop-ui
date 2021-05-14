@@ -45,6 +45,7 @@
                 ></DatePicker>
               </Form-item>
               <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+              <Button @click="handleReset" class="search-btn">重置</Button>
             </Form>
           </Row>
           <Row class="padding-row">
@@ -263,6 +264,13 @@
         this.searchForm.pageSize = 10;
         this.getDataList();
       },
+      handleReset() {
+        this.searchForm = {};
+        this.selectDate = ''
+        this.searchForm.pageNumber = 1;
+        this.searchForm.pageSize = 10;
+        this.getDataList();
+      },
 
       changeSort(e) {
         this.searchForm.sort = e.key;
@@ -307,7 +315,7 @@
 
       },
     },
-    mounted() {
+    activated () {
       this.init();
     },
   };
