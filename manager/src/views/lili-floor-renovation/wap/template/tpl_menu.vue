@@ -21,10 +21,10 @@ export default {
        display: flex;
        align-items: center;
        flex-wrap: wrap;
-      
+
        >.menu-item{
            text-align: center;
-           width: 63px;
+           width: 20%;
            margin:10px 0;
        }
    }
