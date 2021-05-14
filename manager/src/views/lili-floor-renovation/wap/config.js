@@ -1,18 +1,13 @@
-
-import * as API_Other from '@/api/other'
+import * as API_Other from "@/api/other";
 
 // 获取楼层装修信息
-export function initData(id){
-  API_Other.getHomeData(id).then(res=>{
-
-    homeData = res
-
-  })
+export function initData(id) {
+  API_Other.getHomeData(id).then(res => {
+    homeData = res;
+  });
 }
 
-
-export let homeData ={}
-
+export let homeData = {};
 
 /**
  * drawer:true   广告右侧打开抽屉中显示
@@ -31,7 +26,6 @@ export const modelData = [
     close: true,
     options: {
       list: [
-
         {
           img: "https://i.loli.net/2020/12/05/fKH4CwImpbuD5Xj.png",
           url: "",
@@ -45,12 +39,11 @@ export const modelData = [
           size: "750*350"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/343e226d0d2e2d2efcf21f31a678ba46.png",
+          img: "https://i.loli.net/2021/05/14/ZlzcCdnpejtN9gL.png",
           url: "",
           link: "",
           size: "750*350"
-        },
+        }
       ]
     }
   },
@@ -64,22 +57,19 @@ export const modelData = [
     options: {
       list: [
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
           size: "335*335"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/cddb5d90a4241f6235d16368534bc730.png",
+          img: "https://i.loli.net/2021/05/14/kdB3AE9ay4c1SnN.png",
           url: "",
           link: "",
           size: "335*177"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/e047d312fb5930de972ae288b9b3bae7.png",
+          img: "https://i.loli.net/2021/05/14/FmDr9ksiXeEqYLU.png",
           url: "",
           link: "",
           size: "335*177"
@@ -113,22 +103,19 @@ export const modelData = [
     options: {
       list: [
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/cddb5d90a4241f6235d16368534bc730.png",
+          img: "https://i.loli.net/2021/05/14/kdB3AE9ay4c1SnN.png",
           url: "",
           link: "",
           size: "335*177"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/e047d312fb5930de972ae288b9b3bae7.png",
+          img: "https://i.loli.net/2021/05/14/FmDr9ksiXeEqYLU.png",
           url: "",
           link: "",
           size: "335*177"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
           size: "335*335"
@@ -146,25 +133,22 @@ export const modelData = [
     options: {
       list: [
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size:"226*226 (1:1)"
+          size: "226*226 (1:1)"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size:"226*226 (1:1)"
+          size: "226*226 (1:1)"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size:"226*226 (1:1)"
+          size: "226*226 (1:1)"
         }
       ]
     }
@@ -179,11 +163,10 @@ export const modelData = [
     options: {
       list: [
         {
-          img:
-            "https://i.loli.net/2020/12/05/8wSNWbnqujDh6HL.png",
+          img: "https://i.loli.net/2020/12/05/8wSNWbnqujDh6HL.png",
           url: "",
           link: "",
-          size:"750*280"
+          size: "750*280"
         }
       ]
     }
@@ -198,15 +181,13 @@ export const modelData = [
     options: {
       list: [
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
           size: "335*220"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
           size: "335*220"
@@ -224,22 +205,19 @@ export const modelData = [
     options: {
       list: [
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
           size: "710*170"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
           size: "335*170"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
           size: "335*170"
@@ -257,23 +235,20 @@ export const modelData = [
     options: {
       list: [
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
 
           size: "335*170"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
           size: "335*170"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
           size: "710*170"
@@ -294,35 +269,31 @@ export const modelData = [
           img: "https://picsum.photos/id/127/200/200",
           url: "",
           link: "",
-          size:"75*75（1:1）"
+          size: "75*75（1:1）"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size:"75*75（1:1）"
+          size: "75*75（1:1）"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size:"75*75（1:1）"
+          size: "75*75（1:1）"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size:"75*75（1:1）"
+          size: "75*75（1:1）"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size:"75*75（1:1）"
+          size: "75*75（1:1）"
         }
       ]
     }
@@ -337,32 +308,28 @@ export const modelData = [
     options: {
       list: [
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size:"88*88（1:1）"
+          size: "88*88（1:1）"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size:"88*88（1:1）"
+          size: "88*88（1:1）"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size:"88*88（1:1）"
+          size: "88*88（1:1）"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size:"88*88（1:1）"
+          size: "88*88（1:1）"
         }
       ]
     }
@@ -377,32 +344,32 @@ export const modelData = [
     options: {
       list: [
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          title: "88*88（1:1）"
+          title: "文字",
+          size: "88*88（1:1）"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          title: "88*88（1:1）"
+          title: "文字",
+          size: "88*88（1:1）"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          title: "88*88（1:1）"
+          title: "文字",
+          size: "88*88（1:1）"
         },
         {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/0669a6adec3f35d45ec66a082e03774f.png",
+          img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          title: "88*88（1:1）"
+          title: "文字",
+          size: "88*88（1:1）"
         }
       ]
     }
@@ -430,40 +397,35 @@ export const modelData = [
     options: {
       list: [
         {
-          img:
-            "https://i.loli.net/2020/12/05/SoGAv7gYybuWzED.png",
+          img: "https://i.loli.net/2020/12/05/SoGAv7gYybuWzED.png",
           url: "",
           link: "",
           title: "标题",
           size: "88*88 (1:1)"
         },
         {
-          img:
-            "https://i.loli.net/2020/12/05/JXR5K3sbIeENjqH.png",
+          img: "https://i.loli.net/2020/12/05/JXR5K3sbIeENjqH.png",
           url: "",
           link: "",
           title: "标题",
           size: "88*88 (1:1)"
         },
         {
-          img:
-            "https://i.loli.net/2020/12/05/KlZfnCFIdEV231Y.png",
+          img: "https://i.loli.net/2020/12/05/KlZfnCFIdEV231Y.png",
           url: "",
           link: "",
           title: "标题",
           size: "88*88 (1:1)"
         },
         {
-          img:
-            "https://i.loli.net/2020/12/05/GfmMyN2wrUVIlci.png",
+          img: "https://i.loli.net/2020/12/05/GfmMyN2wrUVIlci.png",
           url: "",
           link: "",
           title: "标题",
           size: "88*88 (1:1)"
         },
         {
-          img:
-            "https://i.loli.net/2020/12/05/eznDa3iNby5FkYL.png",
+          img: "https://i.loli.net/2020/12/05/eznDa3iNby5FkYL.png",
           url: "",
           link: "",
           title: "标题",
@@ -517,120 +479,114 @@ export const modelData = [
           ],
           listWay: [
             {
-              img:
-                "https://api.7wpp.com/uploads/20200930/78d480fa1025394b9be24ef5eef17489.png",
+              img: "https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
               price: "120",
               title:
                 " 微软 (Microsoft) Xbox 无线控制器/手柄 湛蓝色 | 3.5mm耳机接口蓝牙连接 Xbox主机电脑平板通用",
               type: "精选"
             },
             {
-              img:
-                "https://i.loli.net/2020/12/05/c9mptI5Pg8qJ6ny.png",
+              img: "https://i.loli.net/2020/12/05/c9mptI5Pg8qJ6ny.png",
               title:
                 "宏碁(acer) DP高清线1.2版 2K*4KDisplayPort公对公接线笔记本电脑显卡连接显示器视频线1.5米",
               price: "190",
               type: "精选"
             },
             {
-              img:
-                "https://i.loli.net/2020/12/05/QsSYIPF743Hgf8q.png",
+              img: "https://i.loli.net/2020/12/05/QsSYIPF743Hgf8q.png",
               title:
                 "宏碁(acer) DP高清线1.2版 2K*4KDisplayPort公对公接线笔记本电脑显卡连接显示器视频线1.5米",
               price: "10",
               type: "精选"
             },
             {
-              img:
-                "https://i.loli.net/2020/12/05/VTwDYcLWnukGxat.png",
+              img: "https://i.loli.net/2020/12/05/VTwDYcLWnukGxat.png",
               title:
                 "宏碁(acer) DP高清线1.2版 2K*4KDisplayPort公对公接线笔记本电脑显卡连接显示器视频线1.5米",
               price: "190",
               type: "精选"
             },
             {
-              img:
-                "https://i.loli.net/2020/12/05/SIFwaVpE4YJAuQf.png",
+              img: "https://i.loli.net/2020/12/05/SIFwaVpE4YJAuQf.png",
               title:
                 "宏碁(acer) DP高清线1.2版 2K*4KDisplayPort公对公接线笔记本电脑显卡连接显示器视频线1.5米",
               price: "10",
               type: "精选"
             },
             {
-              img:
-                "https://api.7wpp.com/uploads/20201110/86d4dedc0d88ce4b1329b02a4b87fe7d.jpg",
+              img: "https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
               title:
                 "宏碁(acer) DP高清线1.2版 2K*4KDisplayPort公对公接线笔记本电脑显卡连接显示器视频线1.5米",
               price: "190",
               type: "精选"
             },
             {
-              img:
-                "https://api.7wpp.com/uploads/20200930/0d9102613d7b7e738c83504f80194cd4.jpg",
+              img: "https://i.loli.net/2021/05/14/xA5FW2ubiShBdPE.jpg",
               title:
                 "宏碁(acer) DP高清线1.2版 2K*4KDisplayPort公对公接线笔记本电脑显卡连接显示器视频线1.5米",
               price: "10",
               type: "精选"
-            },
+            }
           ]
         }
       ]
     }
-  },
-  {
-    notAdd: true,
-    notImg: true,
-    type: "joinGroup",
-    name: "拼团活动",
-    img: "md-image",
-    options: {
-      list: [
-        {
-          title: "测试拼团"
-        }
-      ]
-    }
-  },
-  {
-    notAdd: true,
-    notImg: true,
-    type: "integral",
-    name: "积分活动",
-    img: "md-image",
-    options: {
-      list: [
-        {
-          title: "测试积分"
-        }
-      ]
-    }
-  },
-  {
-    notAdd: true,
-    notImg: true,
-    type: "spike",
-    name: "秒杀活动",
-    img: "md-image",
-    options: {
-      list: [
-        {
-          title: "测试秒杀"
-        }
-      ]
-    }
-  },
-  {
-    notAdd: true,
-    notImg: true,
-    type: "group",
-    name: "团购活动",
-    img: "md-image",
-    options: {
-      list: [
-        {
-          title: "测试团购"
-        }
-      ]
-    }
   }
+  // TODO 第一版本隐藏暂无此功能
+  // {
+  //   notAdd: true,
+  //   notImg: true,
+  //   type: "joinGroup",
+  //   name: "拼团活动",
+  //   img: "md-image",
+  //   options: {
+  //     list: [
+  //       {
+  //         title: "测试拼团"
+  //       }
+  //     ]
+  //   }
+  // },
+  // {
+  //   notAdd: true,
+  //   notImg: true,
+  //   type: "integral",
+  //   name: "积分活动",
+  //   img: "md-image",
+  //   options: {
+  //     list: [
+  //       {
+  //         title: "测试积分"
+  //       }
+  //     ]
+  //   }
+  // },
+  // {
+  //   notAdd: true,
+  //   notImg: true,
+  //   type: "spike",
+  //   name: "秒杀活动",
+  //   img: "md-image",
+  //   options: {
+  //     list: [
+  //       {
+  //         title: "测试秒杀"
+  //       }
+  //     ]
+  //   }
+  // },
+  // {
+  //   notAdd: true,
+  //   notImg: true,
+  //   type: "group",
+  //   name: "团购活动",
+  //   img: "md-image",
+  //   options: {
+  //     list: [
+  //       {
+  //         title: "测试团购"
+  //       }
+  //     ]
+  //   }
+  // }
 ];
