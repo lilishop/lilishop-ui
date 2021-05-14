@@ -16,10 +16,10 @@ import templateSetting from "./template";
 export default {
   data() {
     return {
-      templateSetting,
-      selected: "",
-      settingData: "",
-      show: true,
+      templateSetting, // 设置模板
+      selected: "", // 已选
+      settingData: "", // 模板数据
+      show: true, // 是否显示
       setting: [
         //基础配置
         {
@@ -76,7 +76,7 @@ export default {
         //微信支付设置
         {type: "WECHAT_PAYMENT", name: "微信支付设置"},
       ],
-      tabWay: [],
+      tabWay: [], // tab数据
     };
   },
 

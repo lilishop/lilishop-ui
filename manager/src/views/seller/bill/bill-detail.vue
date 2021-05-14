@@ -107,7 +107,7 @@ export default {
   name: "bill-detail",
   data() {
     return {
-      columns: [
+      columns: [ // 表头
         {
           title: "项目",
           key: "name",
@@ -118,7 +118,7 @@ export default {
           key: "value",
         },
       ],
-      data: [
+      data: [ // 数据
         {
           name: "计算中",
           value: 0,
@@ -153,10 +153,10 @@ export default {
           value: 0,
         },
       ],
-      id: "",
-      bill: {},
-      order: [],
-      orderParam: {
+      id: "", // 账单id 
+      bill: {}, // 账单详情
+      order: [], // 订单列表
+      orderParam: { // 请求参数
         pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
         sort: "id", // 默认排序字段
@@ -165,7 +165,7 @@ export default {
         startDate: null,
         endDate: null,
       },
-      orderColumns: [
+      orderColumns: [ // 订单表头
         {
           title: "入账时间",
           key: "createTime",
@@ -251,8 +251,8 @@ export default {
         },
 
       ],
-      refund: [],
-      refundParam: {
+      refund: [], // 退款单
+      refundParam: { // 请求参数
         flowTypeEnum: "PAY",
         pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
@@ -262,22 +262,25 @@ export default {
         startDate: null,
         endDate: null,
       },
-      refundColumns: [
+      refundColumns: [ // 退款单表头
         {
           title: "退款时间",
           key: "createTime",
           minWidth: 120,
-          tooltip: true        },
+          tooltip: true
+        },
         {
           title: "退款流水编号",
           key: "sn",
           minWidth: 120,
-          tooltip: true        },
+          tooltip: true        
+        },
         {
           title: "订单编号",
           key: "sn",
           minWidth: 120,
-          tooltip: true        },
+          tooltip: true        
+        },
         {
           title: "退款金额",
           key: "finalPrice",
@@ -348,8 +351,8 @@ export default {
 
 
       ],
-      orderTotal: 0,
-      refundTotal: 0,
+      orderTotal: 0, // 订单总数
+      refundTotal: 0, // 退款单总数
     };
   },
   methods: {

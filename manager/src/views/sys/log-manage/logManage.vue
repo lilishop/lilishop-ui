@@ -106,16 +106,16 @@
     name: "log-manage",
     data() {
       return {
-        openSearch: true,
-        openTip: false,
-        loading: true,
-        selectList: [],
-        selectCount: 0,
-        selectDate: null,
-        searchKey: "",
-        operatorName: "",
+        openSearch: true, // 开启搜索
+        openTip: false, // 开启提示
+        loading: true, // 加载状态
+        selectList: [], // 已选列表
+        selectCount: 0, // 已选数量
+        selectDate: null, // 选择时间段
+        searchKey: "", // 搜索关键字
+        operatorName: "", // 操作人名称
         showDev: false,//展示进阶日志
-        searchForm: {
+        searchForm: { // 请求参数
           type: 1,
           pageNumber: 1,
           pageSize: 10,
@@ -124,7 +124,7 @@
           sort: "createTime",
           order: "desc"
         },
-        columns: [
+        columns: [ // 表头
           {
             title: "操作名称",
             key: "name",
@@ -277,8 +277,8 @@
             sortType: "desc"
           }
         ],
-        data: [],
-        total: 0
+        data: [], // 日志数据
+        total: 0 // 数据总数
       };
     },
     methods: {

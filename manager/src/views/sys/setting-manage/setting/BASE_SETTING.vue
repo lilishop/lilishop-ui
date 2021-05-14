@@ -62,10 +62,10 @@ export default {
   },
   data() {
     return {
-      handleSubmit,
-
-      picModelFlag: false,
-      formValidate: {
+      handleSubmit, // 验证规则
+ 
+      picModelFlag: false, // 预览图片显隐
+      formValidate: { // 表单数据
         buyerSideLogo: "",
         domainLogo: "",
         icp: "",
@@ -74,8 +74,8 @@ export default {
         staticPageAddress: "",
         staticPageWapAddress: "",
       },
-      selected: "",
-      ruleValidate: {},
+      selected: "", // 已选数据
+      ruleValidate: {} // 验证规则
     };
   },
   created() {

@@ -306,20 +306,19 @@ export default {
   },
   data() {
     return {
-      loading: true,
-      strict: true,
-      maxHeight: "500px",
-      expandLevel: 1,
-      menuModalVisible: false,
-      iconModalVisible: false,
-      selectList: [],
-      selectCount: 0,
-      showParent: false,
-      searchKey: "",
-      parentTitle: "",
-      editTitle: "",
-      modalTitle: "",
-      form: {
+      loading: true, // 加载状态
+      strict: true, // 级联 单选
+      maxHeight: "500px", // 最大高度
+      expandLevel: 1, // 展开层级
+      menuModalVisible: false, // 添加菜单modal
+      selectList: [], // 已选列表
+      selectCount: 0, // 所选数量
+      showParent: false, // 展示父级
+      searchKey: "", // 搜索关键词
+      parentTitle: "", // 父级标题
+      editTitle: "", // 编辑标题
+      modalTitle: "", // modal标题
+      form: { // 表单数据
         id: "",
         title: "",
         name: "",
@@ -333,10 +332,10 @@ export default {
         url: "",
         showAlways: true,
       },
-      formAdd: {
+      formAdd: { // 添加表单
         buttonType: "",
       },
-      formValidate: {
+      formValidate: { // 验证规则
         title: [{required: true, message: "名称不能为空", trigger: "blur"}],
         name: [
           {required: true, message: "路由英文名不能为空", trigger: "blur"},
@@ -355,8 +354,8 @@ export default {
           },
         ],
       },
-      submitLoading: false,
-      data: [],
+      submitLoading: false, // 提交状态
+      data: [], // 数据
     };
   },
   methods: {

@@ -161,12 +161,12 @@
     },
     data() {
       return {
-        queryModalVisible: false,
-        queryModalTitle: "查看更新信息",
+        queryModalVisible: false, // 版本信息modal
+        queryModalTitle: "查看更新信息", // modal标题
         loading: true, // 表单加载状态
         modalVisible: false, // 添加app版本模态框
         modalTitle: "", // 添加app版本标题
-        modalType: 0,
+        modalType: 0, // 新增、编辑标识
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
@@ -175,7 +175,6 @@
           order: "desc", // 默认排序方式
           type: ""
         },
-        selectDate: null,
         form: {
           // 添加或编辑表单对象初始化数据
           versionName: "",
@@ -186,7 +185,7 @@
           content: "",
           versionUpdateDate: ""
         },
-        versionUpdateDate: "",
+        versionUpdateDate: "", // 更新时间
         // 表单验证规则
         formValidate: {
           version: [

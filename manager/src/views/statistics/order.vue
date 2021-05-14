@@ -173,8 +173,8 @@ export default {
 
   data() {
     return {
-      total: "0",
-      orderType: [
+      total: "0", // 总数
+      orderType: [ // 订单类型
         {
           title: "订单",
           selected: true,
@@ -195,13 +195,13 @@ export default {
         TAKE: "已完成",
       },
 
-      serviceTypeList: {
+      serviceTypeList: { // 服务类型
         CANCEL: "取消",
         RETURN_GOODS: "退货",
         EXCHANGE_GOODS: "换货",
         RETURN_MONEY: "退款",
       },
-      serviceStatusList: {
+      serviceStatusList: { // 服务状态
         APPLY: "申请售后",
         PASS: "通过售后",
         REFUSE: "拒绝售后",
@@ -220,7 +220,7 @@ export default {
 
       columns: [], // 定退单title
 
-      orderColumns: [
+      orderColumns: [ // 表头
         {
           type: "expand",
           width: 50,
@@ -271,7 +271,7 @@ export default {
           },
         },
       ],
-      refundColumns: [
+      refundColumns: [ // 表头
         {
           type: "expand",
           width: 50,
@@ -400,8 +400,6 @@ export default {
           value: "LAST_THIRTY",
         },
       ],
-      year: "",
-
       // 订单传参
       orderParams: {
         searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY

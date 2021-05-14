@@ -57,10 +57,9 @@
     },
     data() {
       return {
-        shopId: "",
-        modalFlag: false,
+        shopId: "", // 店铺id
+        modalFlag: false, // 新增、编辑标识
         loading: true, // 表单加载状态
-        drop: false,
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
@@ -70,7 +69,7 @@
           startDate: "", // 起始时间
           endDate: "", // 终止时间
         },
-        selectDate: null,
+        selectDate: null, // 创建时间
         form: {
           // 添加或编辑表单对象初始化数据
           memberName: "",
@@ -79,9 +78,6 @@
           id: "",
           createTime: "",
         },
-        // 表单验证规则
-        formValidate: {},
-        submitLoading: false, // 添加或编辑提交状态
         selectList: [], // 多选数据
         selectCount: 0, // 多选计数
         columns: [

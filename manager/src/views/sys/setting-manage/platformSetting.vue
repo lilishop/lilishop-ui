@@ -336,26 +336,26 @@
     },
     data() {
       return {
-        tabName: "base",
+        tabName: "base", // tab栏名字
         loading: false, // 表单加载状态
-        saveLoading: false,
-        base: {
+        saveLoading: false, // 保存加载状态
+        base: { // 基本设置
           siteName: "",
           icp: "",
           logo: "",
           sellerLogo: "",
         },
-        point: {
+        point: { // 积分设置
           register: "",
           login: "",
           money: ""
         },
-        order: {
+        order: { // 订单设置
           autoCancel: "",
           autoReceive: "",
           autoComplete: ""
         },
-        goods: {
+        goods: { // 商品设置
           goodsCheck: "OPEN",
           smallPictureWidth: "",
           smallPictureHeight: "",
@@ -364,28 +364,28 @@
           originalPictureWidth: "",
           originalPictureHeight: ""
         },
-        wechat: {
+        wechat: { // 微信设置
           appId: "",
           appSecret: "",
           callbackUrl: "",
           callbackLoginUrl: "",
           callbackBindUrl: ""
         },
-        qq: {
+        qq: { // qq设置
           appId: "",
           appKey: "",
           callbackUrl: "",
           callbackLoginUrl: "",
           callbackBindUrl: ""
         },
-        weibo: {
+        weibo: { // 微博
           appKey: "",
           appSecret: "",
           callbackUrl: "",
           callbackLoginUrl: "",
           callbackBindUrl: ""
         },
-        alipay: {
+        alipay: { // 阿里
           appId: "",
           appSecret: "",
           callbackUrl: "",

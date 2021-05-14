@@ -21,11 +21,11 @@ import { handleSubmit } from "./validate";
 export default {
   data() {
     return {
-      formValidate: {
+      formValidate: { // 表单数据
         apply: true,
       },
 
-      switchTitle: "提现审核是否开启",
+      switchTitle: "提现审核是否开启", // 切换title
     };
   },
   created() {

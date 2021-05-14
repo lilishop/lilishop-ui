@@ -43,11 +43,10 @@ export default {
   name: "monitor",
   data() {
     return {
-      loading: false,
-      go: "",
-      url: "",
-      html: "",
-      height: "525px"
+      loading: false, // 加载状态
+      go: "", // iframe 地址
+      url: "", // 链接
+      height: "525px" // iframe高度
     };
   },
   computed: {},
@@ -76,7 +75,6 @@ export default {
       }
     },
     handleGo() {
-      let url = this.url;
       this.go = this.url;
     },
     handleOpen() {

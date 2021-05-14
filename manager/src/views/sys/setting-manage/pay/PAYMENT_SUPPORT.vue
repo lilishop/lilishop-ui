@@ -58,22 +58,21 @@ import { getPaymentSupportForm } from "@/api/setting";
 export default {
   data() {
     return {
-      ruleValidate: {},
-      way: {
+      ruleValidate: {}, // 验证规则
+      way: { // 类型
         APP: "移动应用端",
         H5: "移动端",
         WECHAT_MP: "小程序端",
         PC: "PC端",
       },
-      formValidate: {},
-      pay: "",
+      formValidate: {}, // 表单数据
       // key obj
-      payWay: {
+      payWay: { // 支付方式
         ALIPAY: "支付宝支付",
         WECHAT: "微信支付",
         WALLET: "余额支付",
       },
-      supportForm: "",
+      supportForm: "", // 支持的支付方式
     };
   },
   props: ["res", "type"],

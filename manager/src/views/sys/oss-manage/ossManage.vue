@@ -278,21 +278,21 @@ export default {
   name: "oss-manage",
   data() {
     return {
-      config,
-      baseUrl: "",
+      config, // api地址
+      baseUrl: "", // 基础路径
       selectImage: false, //是否是选择
       accessToken: {}, // 上传token鉴权
       loading: false, // 表单加载状态
-      fileType: "all",
-      showType: "list",
+      fileType: "all", // 文件类型
+      showType: "list", // 展示类型
       modalVisible: false, // 添加或编辑显示
-      uploadVisible: false,
-      videoVisible: false,
-      picVisible: false,
-      picTitle: "",
-      videoTitle: "",
+      uploadVisible: false, // 上传展示
+      videoVisible: false, // 文件modal
+      picVisible: false, // 图片modal
+      picTitle: "", // 图片title
+      videoTitle: "", // 视频title
       modalTitle: "", // 添加或编辑标题
-      searchForm: {
+      searchForm: { 
         // 搜索框对应data对象
         name: "",
         fileKey: "",
@@ -305,12 +305,12 @@ export default {
         endDate: "", // 终止时间
       },
       selectDate: null, // 选择日期绑定modal
-      oldKey: "",
-      form: {
+      oldKey: "", // 请求参数
+      form: { // 表单
         name: "",
         fileKey: "",
       },
-      file: {},
+      file: {}, // 文件数据
       // 表单验证规则
       formValidate: {
         name: [{required: true, message: "不能为空", trigger: "blur"}],
@@ -551,7 +551,7 @@ export default {
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
-      pageSizeOpts: [5, 10, 20],
+      pageSizeOpts: [5, 10, 20], // 页码展示项
     };
   },
   methods: {

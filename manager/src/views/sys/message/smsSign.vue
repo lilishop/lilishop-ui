@@ -80,19 +80,19 @@
 
     data() {
       return {
-        id: 0,
-        form: {
+        id: 0, // 签名id
+        form: { // 表单
           signName: "",
           businessLicense: "",
           license: "",
         },
-        loading: false,
-        formValidate: {
+        loading: false, // 加载状态
+        formValidate: { // 验证规则
           signName: [{required: true, message: "签名名称不能为空", trigger: "blur"}],
           remark: [{required: true, message: "申请说明不能为空", trigger: "blur"}],
           businessLicense: [{required: true, message: " ", trigger: "blur"}],
         },
-        submitLoading: false
+        submitLoading: false //提交加载状态
       }
 
     },

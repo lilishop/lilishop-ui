@@ -8,7 +8,6 @@
 import {getCategoryTree} from '@/api/goods.js'
 export default {
   updated() {
-    
     if (!localStorage.getItem('category') && this.$route.path !== '/login') {
       getCategoryTree(0).then(res => {
         if (res.success) {

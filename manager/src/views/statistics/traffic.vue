@@ -50,7 +50,6 @@
     </Card>
 
   </div>
-  </div>
 </template>
 <script>
 import affixTime from "@/views/lili-components/affix-time";
@@ -64,10 +63,10 @@ export default {
     return {
       // 时间
 
-      uvs: 0,
-      pvs: 0,
+      uvs: 0, // 访客数
+      pvs: 0, // 浏览量
 
-      dateList: [
+      dateList: [ // 选择项
         {
           title: "今天",
           selected: false,
@@ -90,8 +89,8 @@ export default {
         },
       ],
 
-      orderChart: "",
-      params: {
+      orderChart: "", // 初始化图表
+      params: { // 请求参数
         searchType: "LAST_SEVEN",
         year: "",
         month: "",
@@ -112,7 +111,7 @@ export default {
         },
       ],
 
-      data: [],
+      data: [], // 图标数据
     };
   },
   watch: {

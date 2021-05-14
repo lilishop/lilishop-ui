@@ -174,10 +174,9 @@ export default {
   data() {
     return {
       customSms: false, //当选择自动发送对象 展示
-      isActive: false,
       alreadyCheck: [], //已经选中的数据
       alreadyCheckShow: [], //已经选择的值负责显示
-      memberPage: 0,
+      memberPage: 0, // 会员信息
       members: [], //所有会员
       smsTemplateContent: "", //短信模板内容
       memberNum: 0, //会员总数
@@ -191,11 +190,11 @@ export default {
       templateModalVisible: false, //添加短信模板弹出框
       templateModalTitle: "", //添加短信模板弹出框标题
       templateForm: {}, //短信模板添加form
-      submitLoading: false,
-      selected: "",
-      settingData: "",
-      modalTitle: "设置",
-      modalVisible: false,
+      submitLoading: false, // 提交加载状态
+      selected: "", // 已选数据
+      settingData: "", // 设置数据
+      modalTitle: "设置", // modal标题
+      modalVisible: false, // modal显隐
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -228,7 +227,7 @@ export default {
         pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
       },
-      smsForm: {
+      smsForm: { // 短信模板数据
         smsName: "",
         signName: "",
         context: "",

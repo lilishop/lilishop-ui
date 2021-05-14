@@ -296,14 +296,14 @@
             align: "center",
           },
         ],
-        goodsList: [],
-        params: {
+        goodsList: [], // 商品列表
+        params: { // 请求参数
           seckillId: this.$route.query.id,
           applyStatus: "PASS",
           failReason: "",
           ids: "",
         },
-        rules: {
+        rules: { // 验证规则
           failReason: [{required: true, message: "请输入拒绝原因"}],
         },
       };

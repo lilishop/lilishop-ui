@@ -232,9 +232,8 @@ export default {
 
   data() {
     return {
-      shopId: this.$route.query.shopId,
+      shopId: this.$route.query.shopId, // 店铺id
       isRead: false, //是否只读，只有在店铺通过审核才可修改
-      regionAddressFlag: true,
       selectedFormBtnName: "", //点击图片绑定form
       picModalFlag: false, //图片选择器
       memberModalFlag: false, //商家账号
@@ -333,15 +332,13 @@ export default {
           },
         ],
       },
-      selectMemberList: [],
-      memberList: [],
-      indeterminate: true,
-      checkAll: false,
-      checkAllGroup: [],
-      showRegion: false,
+      indeterminate: true, // 复选框全选样式
+      checkAll: false, // 全选
+      checkAllGroup: [], // 全选数组
+      showRegion: false, // 显示地区
       submitLoading: false, // 添加或编辑提交状态
-      settlementCycle: [],
-      shopForm: {
+      settlementCycle: [], // 结算周期
+      shopForm: { // 店铺数据
         settlementCycle: "",
         selfOperated: 0,
         memberName: "",
@@ -371,9 +368,9 @@ export default {
         storeDesc: "",
         ddCode: "",
       },
-      categories: [],
+      categories: [], // 分类
 
-      infoResult: "",
+      infoResult: "", // 店铺详情
     };
   },
   methods: {

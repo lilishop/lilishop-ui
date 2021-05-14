@@ -141,13 +141,11 @@ export default {
   },
   data() {
     return {
-      height: 510,
-      openTip: false,
-      loading: true,
-      dropDownIcon: "ios-arrow-down",
-      selectCount: 0,
-      selectList: [],
-      searchForm: {
+      height: 510, // 高度
+      loading: true, // 加载状态
+      selectCount: 0, // 已选数量
+      selectList: [], // 已选数据列表
+      searchForm: { // 请求参数
         username: "",
         departmentId: "",
         mobile: "",
@@ -158,11 +156,10 @@ export default {
         sort: "createTime",
         order: "desc"
       },
-      selectDate: null,
-      modalType: 0,
-      userModalVisible: false,
-      modalTitle: "",
-      form: {
+      modalType: 0, // 新增编辑标识
+      userModalVisible: false, // 用户modal显隐
+      modalTitle: "", // modal标题
+      form: { // 表单
         username: "",
         mobile: "",
         email: "",
@@ -172,10 +169,9 @@ export default {
         departmentId: "",
         departmentTitle: ""
       },
-      userRoles: [],
-      roleList: [],
-      errorPass: "",
-      formValidate: {
+      roleList: [], // 角色列表
+      errorPass: "", // 错误提示
+      formValidate: { // 验证规则
         username: [
           {required: true, message: "用户名不能为空", trigger: "blur"}
         ],
@@ -188,8 +184,8 @@ export default {
           {type: "email", message: "邮箱格式不正确"}
         ]
       },
-      submitLoading: false,
-      columns: [
+      submitLoading: false, // 提交状态
+      columns: [ // 表头
         {
           type: "selection",
           width: 60,
@@ -360,9 +356,9 @@ export default {
           }
         }
       ],
-      data: [],
-      total: 0,
-      departments: []
+      data: [], // 用户数据
+      total: 0, // 总数
+      departments: [] // 部门
     };
   },
   methods: {

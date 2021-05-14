@@ -32,16 +32,14 @@ export default {
   },
   data() {
     return {
-      total: 0,
-      year: "",
-      params: {
+      params: { // 请求参数
         searchType: "LAST_SEVEN",
         year: "",
         month: "",
         shopId: "",
         type: "NUM"
       },
-      columns: [
+      columns: [ // 表头
         {
           title: "商品名称",
           key: "goodsName",
@@ -61,7 +59,7 @@ export default {
           },
         },
       ],
-      data: [],
+      data: [], // 数据
     };
   },
   methods: {

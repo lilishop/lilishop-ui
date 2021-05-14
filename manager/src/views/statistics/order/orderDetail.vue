@@ -76,7 +76,7 @@
 export default {
   data() {
     return {
-      orderStatusList: {
+      orderStatusList: { // 订单状态
         UNDELIVERED: "待发货",
         UNPAID: "未付款",
         PAID: "已付款",

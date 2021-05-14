@@ -262,7 +262,6 @@
         messageDetailModalVisible: false, // 添加或编辑显示
         shopShow: false, //指定商家是否出现
         shopList: [],//店铺列表
-        drop: false,
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
@@ -290,7 +289,6 @@
           pageNumber: 1, // 当前页数
           pageSize: 10, // 页面大小
         },
-        selectDate: null,
         form: {
           noticeNode: "",
           noticeTitle: ""

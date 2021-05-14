@@ -27,8 +27,8 @@ import { handleSubmit } from "./validate";
 export default {
   data() {
     return {
-      ruleValidate: {},
-      formValidate: {
+      ruleValidate: {}, // 验证规则
+      formValidate: { // 表单数据
         accessKeyId: "",
         regionId: "",
         picLocation: "",

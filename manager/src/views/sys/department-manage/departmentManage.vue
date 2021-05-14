@@ -191,20 +191,20 @@ export default {
   name: "department-manage",
   data() {
     return {
-      loading: true,
-      maxHeight: "500px",
-      strict: true,
-      userLoading: false,
-      loadingEdit: true,
-      modalVisible: false,
-      selectList: [],
-      selectCount: 0,
-      showParent: false,
-      modalTitle: "",
-      editTitle: "",
+      loading: true, // 加载状态
+      maxHeight: "500px", // 最大高度
+      strict: true, // 级联还是单选
+      userLoading: false, // 选择角色加载状态
+      loadingEdit: true, // 编辑加载状态
+      modalVisible: false, // modal显隐
+      selectList: [], // 已选列表
+      selectCount: 0, // 已选总数
+      showParent: false, // 展示父级
+      modalTitle: "", // modal标题
+      editTitle: "", // 编辑标题
       selectedRole: [], //选择的角色
-      searchKey: "",
-      form: {
+      searchKey: "", // 搜索关键字
+      form: { // 提交表单
         id: "",
         title: "",
         parentId: "",
@@ -213,8 +213,8 @@ export default {
         status: 0,
       },
 
-      formAdd: {},
-      formValidate: {
+      formAdd: {}, // 新增表单
+      formValidate: { // 验证规则
         title: [{ required: true, message: "名称不能为空", trigger: "blur" }],
         sortOrder: [
           {
@@ -225,10 +225,10 @@ export default {
           },
         ],
       },
-      submitLoading: false,
-      data: [],
-      dataEdit: [],
-      users: [],
+      submitLoading: false, // 提交loading
+      data: [], // 部门数据
+      dataEdit: [], // 编辑时部门数据
+      users: [], // 用户
     };
   },
   methods: {

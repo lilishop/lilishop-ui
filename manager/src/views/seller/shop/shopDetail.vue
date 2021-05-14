@@ -176,8 +176,7 @@
                  :name="item"
                  style="marrgin-left: 10px"
                >{{ item }}
-              </Tag
-              >
+              </Tag>
             </span>
           </p>
         </div>
@@ -558,7 +557,7 @@
         loading: true, // 表单加载状态
         storeInfo: {},//店铺信息
         checkAllGroup: [], //选中的经营分类
-        selectDate: null,
+        selectDate: null, // 申请时间
         submitLoading: false, // 添加或编辑提交状态
 
         orderColumns: [

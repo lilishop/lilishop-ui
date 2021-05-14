@@ -68,7 +68,7 @@ export default {
   props: ["res", "type"],
   data() {
     return {
-      formValidate: {
+      formValidate: { // 表单数据
         goodsCheck: 1,
         smallPictureHeight: "0",
         smallPictureWidth: "0",
@@ -77,7 +77,7 @@ export default {
         originalPictureWidth: "0",
         originalPictureHeight: "0",
       },
-      ruleValidate: {},
+      ruleValidate: {} // 验证规则
     };
   },
   watch: {

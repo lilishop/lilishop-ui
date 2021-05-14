@@ -23,8 +23,8 @@ import { handleSubmit } from "./validate";
 export default {
   data() {
     return {
-      ruleValidate: {},
-      formValidate: { ebusinessID: "", reqURL: "", appKey: "" },
+      ruleValidate: {}, // 验证规则
+      formValidate: { ebusinessID: "", reqURL: "", appKey: "" }, // 表单数据
     };
   },
   props: ["res",'type'],

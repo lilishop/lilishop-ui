@@ -89,7 +89,7 @@ export default {
         startDate: "", // 起始时间
         endDate: "", // 终止时间
       },
-      selectDate: null,
+      selectDate: null, // 选择一个时间段
       form: {
         // 添加或编辑表单对象初始化数据
         sn: "",

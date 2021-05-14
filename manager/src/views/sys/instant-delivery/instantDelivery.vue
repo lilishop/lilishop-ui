@@ -74,12 +74,12 @@
     },
     data() {
       return {
-        deliveryBean: "",
-        action: commonUrl + '/common/upload/file',
+        deliveryBean: "", // 封面
+        action: commonUrl + '/common/upload/file', // 上传地址
         loading: true, // 表单加载状态
         modalVisible: false, // 修改同城配送模态框
         modalTitle: "", // 修改同城配送标题
-        instantDelivery: [{
+        instantDelivery: [{ // 列表
           configItems: []
         }
 
@@ -155,8 +155,6 @@
           this.loading = false;
           if (res.success) {
             this.instantDelivery = res.result.records;
-
-
           }
         });
         this.loading = false;

@@ -77,14 +77,10 @@ export default {
   },
   data() {
     return {
-      sliceNum: 5,
-      userInfo: "",
-      userId: "",
-      openedSubmenuArr: this.$store.state.app.openedSubmenuArr,
-      firstThreeNav: [],
-      lastNav: [],
-      navType: 1,
-      tipsMessage: "",
+      sliceNum: 5, // 展示nav数量
+      userInfo: "", // 用户信息
+      navType: 1, // nav类型
+      tipsMessage: "", // 通知消息
     };
   },
   computed: {
@@ -118,7 +114,6 @@ export default {
       let userInfo = JSON.parse(Cookies.get("userInfo"));
 
       this.userInfo = userInfo;
-      this.userId = userInfo.id;
       this.checkTag(this.$route.name);
       let currWidth = document.body.clientWidth;
       if (currWidth <= 1200) {

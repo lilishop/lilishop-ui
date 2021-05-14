@@ -52,16 +52,14 @@ export default {
   },
   data() {
     return {
-      error: false,
-      loading: false,
-      sending: false,
-      form: {
+      loading: false, // 加载状态
+      form: { // 表单数据
         username: "",
         password: "",
         mobile: "",
         code: "",
       },
-      rules: {
+      rules: { // 验证规则
         username: [
           {
             required: true,

@@ -196,33 +196,33 @@ export default {
       superModelLoading: false, //保存权限弹出选择权限保存
       selectIsSuperModel: false, //保存权限弹出选择权限
       rolePermsWay: [], //查询角色权限集合
-      openLevel: "0",
-      loading: true,
-      treeLoading: true,
-      depTreeLoading: true,
-      submitPermLoading: false,
-      submitDepLoading: false,
-      searchKey: "",
-      sortColumn: "",
-      sortType: "desc",
+      openLevel: "0", // 展开的级别
+      loading: true, // 加载状态
+      treeLoading: true, // 树加载
+      depTreeLoading: true, // 部门树加载
+      submitPermLoading: false, // 权限提交加载
+      submitDepLoading: false, // 部门提交加载
+      searchKey: "", // 搜索关键字
+      sortColumn: "", // 排序
+      sortType: "desc", // 排序类型
       modalType: 0, // 0 添加 1 编辑
-      roleModalVisible: false,
-      permModalVisible: false,
-      depModalVisible: false,
-      modalTitle: "",
-      roleForm: {
+      roleModalVisible: false, // 角色modal
+      permModalVisible: false, // 菜单权限modal
+      depModalVisible: false, // 部门modal
+      modalTitle: "", // modal标题
+      roleForm: { // 角色表单
         name: "",
         description: "",
       },
-      roleFormValidate: {
+      roleFormValidate: { // 验证规则
         name: [
           {required: true, message: "角色名称不能为空", trigger: "blur"},
         ],
       },
-      submitLoading: false,
-      selectList: [],
-      selectCount: 0,
-      columns: [
+      submitLoading: false, // 提交loading
+      selectList: [], // 已选列表
+      selectCount: 0, // 已选总数
+      columns: [ // 表头
         {
           type: "selection",
           width: 60,
@@ -320,16 +320,16 @@ export default {
           },
         },
       ],
-      data: [],
-      pageNumber: 1,
-      pageSize: 10,
-      total: 0,
-      permData: [],
-      editRolePermId: "",
-      selectAllFlag: false,
-      depData: [],
-      dataType: 0,
-      editDepartments: [],
+      data: [], // 角色数据
+      pageNumber: 1, // 页数
+      pageSize: 10, // 每页数量
+      total: 0, // 总数
+      permData: [], // 菜单权限数据
+      editRolePermId: "", // 编辑权限id
+      selectAllFlag: false, // 全选标识
+      depData: [], // 部门数据
+      dataType: 0, // 数据类型
+      editDepartments: [], // 编辑部门
 
       saveRoleWay: [], //用户保存用户点击的菜单
     };

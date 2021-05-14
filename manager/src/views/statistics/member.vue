@@ -33,7 +33,7 @@ export default {
 
   data() {
     return {
-      columns: [
+      columns: [ // 表头
         {
           key: "createDate",
           title: "日期",
@@ -75,23 +75,16 @@ export default {
           value: "LAST_THIRTY",
         },
       ],
-      year: "",
-      orderChart: "",
-      defaultParams: {
-        month: "",
-        searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
-        storeId: "",
-        year: "",
-      },
-
-      params: {
+      year: "", // 当前年限
+      orderChart: "", // 订单表格
+      params: { // 请求参数
         searchType: "LAST_SEVEN",
         year: "",
         month: "",
         shopId: "",
       },
 
-      data: [],
+      data: [], // 数据
     };
   },
   watch: {

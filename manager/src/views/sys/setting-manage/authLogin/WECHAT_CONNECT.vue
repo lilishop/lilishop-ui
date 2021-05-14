@@ -53,15 +53,14 @@ import { getPaymentSupportForm } from "@/api/setting";
 export default {
   data() {
     return {
-      ruleValidate: {},
-      way: {
+      ruleValidate: {}, // 验证规则
+      way: { // 类型
         APP: "移动应用端",
         H5: "移动端",
         WECHAT_MP: "小程序端",
         PC: "PC端",
       },
-      formValidate: {},
-      pay: "",
+      formValidate: {} // 表单数据
     };
   },
   props: ["res", "type"],

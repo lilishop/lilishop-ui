@@ -46,8 +46,6 @@
 <script>
   import {getSetting, setSetting} from "@/api/index.js";
   import template from "./template";
-
-
   export default {
     name: "smsSettingManage",
     components: {
@@ -56,16 +54,15 @@
 
     data() {
       return {
-        submitLoading: false,
-        template,
-        selected: "",
-        settingData: "",
-        modalTitle: '设置',
-        modalVisible: false,
-        form: {},
+        submitLoading: false, // 提交状态
+        template, // 模板
+        selected: "", // 已选数据
+        settingData: "", // 设置数据
+        modalTitle: '设置', // modal标题
+        modalVisible: false, // modal显隐
+        form: {}, // 表单数据
       }
     },
-    filters: {},
     methods: {
       init() {
         settingInfo("SMS_SETTING")
