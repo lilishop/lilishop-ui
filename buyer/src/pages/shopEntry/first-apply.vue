@@ -193,9 +193,7 @@ export default {
   components: { region },
   props: {
     content: {
-      default () {
-        return {};
-      },
+      default: {},
       type: Object
     }
   },
@@ -325,11 +323,13 @@ export default {
   },
   mounted () {
     this.accessToken.accessToken = storage.getItem('accessToken');
-    this.form = JSON.parse(JSON.stringify(this.content));
-    if (this.form.licencePhoto) {
-      this.form.legalPhoto = this.content.legalPhoto.split(',');
-      this.form.licencePhoto = this.content.licencePhoto.split(',');
-      this.address = this.form.addressIdPath;
+    if (Object.keys(this.content).length) {
+      this.form = JSON.parse(JSON.stringify(this.content));
+      if (this.form.licencePhoto) {
+        this.form.legalPhoto = this.content.legalPhoto.split(',');
+        this.form.licencePhoto = this.content.licencePhoto.split(',');
+        this.address = this.form.addressIdPath;
+      }
     }
   }
 };

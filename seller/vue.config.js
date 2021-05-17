@@ -16,14 +16,7 @@ module.exports = {
         }
       },
     devServer: {
-
         port: 9998,
-        // proxy: {
-        //     '/lili': {
-        //         target: 'http://127.0.0.1:8888',  // 请求本地 需要lili后台项目
-        //         ws: true
-        //     }
-        // }
     },
 
     chainWebpack: config => {
@@ -76,12 +69,9 @@ module.exports = {
               vendor: {
                 test: /[\\/]node_modules[\\/]/,
                 name(module) {
-                  // get the name. E.g. node_modules/packageName/not/this/part.js
-                  // or node_modules/packageName
                   const packageName = module.context.match(
                     /[\\/]node_modules[\\/](.*?)([\\/]|$)/
                   )[1];
-                  // npm package names are URL-safe, but some servers don't like @ symbols
                   return `npm.${packageName.replace("@", "")}`;
                 }
               }
@@ -89,7 +79,6 @@ module.exports = {
           }
         }
     },
-
     pluginOptions: {
       'style-resources-loader': {
         preProcessor: 'scss',

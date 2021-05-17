@@ -68,8 +68,15 @@
               type="info"
               v-if="row.promotionStatus == 'NEW'"
               size="small"
-              @click="manage(row)"
+              @click="manage(row, 'manager')"
               >管理</Button
+            >&nbsp;
+            <Button
+              type="info"
+              v-if="row.promotionStatus !== 'NEW'"
+              size="small"
+              @click="manage(row, 'view')"
+              >查看</Button
             >&nbsp;
             <Button
               type="error"
@@ -252,8 +259,8 @@ export default {
     edit(v) {
       this.$router.push({ name: "new-pintuan", query: { id: v.id } });
     },
-    manage(v) {
-      this.$router.push({ name: "pintuan-goods", query: { id: v.id } });
+    manage(v, status) {
+      this.$router.push({ name: "pintuan-goods", query: { id: v.id, status: status } });
     },
     open(v) {
       this.$Modal.confirm({
