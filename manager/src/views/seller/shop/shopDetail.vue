@@ -18,7 +18,7 @@
             </div>
             <div class="bottom-info">
               <p v-if="storeInfo.createTime">{{storeInfo.createTime}}&nbsp;开店</p>
-              <p v-if="storeInfo.selfOperated == 0">
+              <p v-if="storeInfo.selfOperated == 1">
                 <Tag color="success">自营</Tag>
               </p>
               <p v-else>
