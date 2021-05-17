@@ -17,7 +17,7 @@ module.exports = {
       },
     devServer: {
 
-        port: 9998,
+        port: 10002,
         // proxy: {
         //     '/lili': {
         //         target: 'http://127.0.0.1:8888',  // 请求本地 需要lili后台项目
