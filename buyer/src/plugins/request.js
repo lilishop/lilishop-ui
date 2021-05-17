@@ -9,6 +9,7 @@ import {
 import Storage from './storage';
 import config from '@/config';
 import router from '../router/index.js';
+import store from '../vuex/store';
 import {
   handleRefreshToken
 } from '@/api/index';
@@ -80,7 +81,6 @@ service.interceptors.response.use(
     const errorData = errorResponse.data || {};
 
     if (errorResponse.status === 403) {
-
       isRefreshToken++;
 
       if (isRefreshToken === 1) {
@@ -96,6 +96,9 @@ service.interceptors.response.use(
           Storage.removeItem('accessToken');
           Storage.removeItem('refreshToken');
           Storage.removeItem('userInfo');
+          Storage.setItem('cartNum', 0)
+          store.commit('SET_CARTNUM', 0)
+          console.log('1111');
           Modal.confirm({
             title: '请登录',
             content: '<p>请登录后执行此操作</p>',

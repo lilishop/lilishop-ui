@@ -496,6 +496,7 @@ export default {
       this.form.promotionGoodsList.splice(index, 1);
     },
     selectedGoodsData(item) {
+      console.log(item);
       // 回显已选商品
       let ids = [];
       let list = [];
@@ -509,11 +510,13 @@ export default {
             price: e.price,
             quantity: e.quantity,
             storeId: e.storeId,
-            sellerName: e.sellerName,
+            storeName: e.storeName,
+            thumbnail: e.thumbnail,
             skuId: e.id,
           });
         }
       });
+      console.log(list);
       this.form.promotionGoodsList.push(...list);
     },
     getCouponList(query) {

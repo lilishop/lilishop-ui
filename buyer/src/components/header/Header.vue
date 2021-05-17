@@ -45,14 +45,14 @@
                 </div>
                 <div class="sign-out" @click="signOutFun">
                   <Icon type="md-exit"></Icon>
-                  <p>退出登陆</p>
+                  <p>退出登录</p>
                 </div>
               </div>
             </DropdownMenu>
           </Dropdown>
         </li>
-        <li class="hover-color" @click="goUserCenter('home/MyOrder')"><span class="nav-item">我的订单</span></li>
-        <li class="hover-color" @click="goUserCenter('home/MyTracks')"><span class="nav-item">我的足迹</span></li>
+        <li class="hover-color" @click="goUserCenter('/home/MyOrder')"><span class="nav-item">我的订单</span></li>
+        <li class="hover-color" @click="goUserCenter('/home/MyTracks')"><span class="nav-item">我的足迹</span></li>
         <li v-if="$route.name !== 'Cart'" style="position:relative;" @mouseenter="getCartList">
           <i class="cart-badge" v-show="cartNum">{{cartNum < 100 ? cartNum : '99'}}</i>
           <Dropdown placement="bottom-start">
@@ -83,7 +83,7 @@
                   </div>
                   <div class="shopping-cart-info">
                     <div class="shopping-cart-title ">
-                      <p class="hover-pointer goods-title">{{ item.goodsSku.goodsName }}</p>
+                      <p class="hover-pointer goods-title ellipsis">{{ item.goodsSku.goodsName }}</p>
                     </div>
                     <div class="shopping-cart-detail">
                       <p>
@@ -173,6 +173,8 @@ export default {
       storage.removeItem('accessToken');
       storage.removeItem('refreshToken');
       storage.removeItem('userInfo');
+      storage.removeItem('cartNum');
+      this.$store.commit('SET_CARTNUM', 0)
       this.$router.push('/login');
     },
     goUserCenter (path) { // 跳转我的订单，我的足迹
@@ -301,7 +303,7 @@ export default {
 .shopping-cart-list {
   padding: 10px 15px;
   box-sizing: border-box;
-  height: 300px;
+  max-height: 300px;
   overflow: scroll;
 }
 .shopping-cart-box {

@@ -245,6 +245,7 @@ export default {
             this.$Message.success('验证码发送成功');
             let that = this;
             this.interval = setInterval(() => {
+              console.log(that.time);
               that.time--;
               if (that.time === 0) {
                 that.time = 60;

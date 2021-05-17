@@ -3,22 +3,19 @@
     <Card>
       <Table style="margin: 10px 0" border :columns="columns" :data="data"></Table>
 
-      <Row class="operation">
+      <Row class="operation" v-if="status == 'manager'">
         <Button type="primary" @click="openSkuList">选择商品</Button>
         <Button @click="delAll">批量删除</Button>
         <Button @click="getDataList" icon="md-refresh">刷新</Button>
-        <Button type="dashed" @click="
-            () => {
-              openTip = !openTip;
-            }
-          ">{{ openTip ? "关闭提示" : "开启提示" }}</Button>
+        <Button type="dashed" @click="openTip = !openTip">{{ openTip ? "关闭提示" : "开启提示" }}</Button>
       </Row>
-      <Row v-show="openTip">
+      <Row v-show="openTip"  v-if="status == 'manager'">
         <Alert show-icon>
           已选择 <span class="select-count">{{ selectCount }}</span> 项
           <a class="select-clear" @click="clearSelectAll">清空</a>
         </Alert>
       </Row>
+      <h3 class="act-goods">活动商品</h3>
       <Row class="operation">
         <Table :loading="loading" border :columns="goodsColumns" :data="goodsData" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
           <template slot-scope="{ row, index }" slot="price">
@@ -35,7 +32,7 @@
       </Row>
       <Row class="operation">
         <Button @click="closeCurrentPage">返回</Button>
-        <Button type="primary" :loading="submitLoading" @click="save">保存</Button>
+        <Button  v-if="status == 'manager'" type="primary" :loading="submitLoading" @click="save">保存</Button>
       </Row>
     </Card>
 
@@ -57,8 +54,7 @@ export default {
     return {
       openTip: true, // 显示提示
       loading: false, // 表单加载状态
-      searchForm: {
-        // 搜索框初始化对象
+      searchForm: { // 搜索框初始化对象
         pageNumber: 0, // 当前页数
         pageSize: 10, // 页面大小
       },
@@ -68,6 +64,7 @@ export default {
       selectCount: 0, // 多选计数
       data: [], // 表单数据
       total: 0, // 表单数据总数
+      status: this.$route.query.status, // 查看还是修改
       columns: [
         {
           title: "活动名称",
@@ -325,5 +322,17 @@ export default {
 <style lang="scss" scoped>
 .operation {
   margin-bottom: 10px;
+}
+.act-goods {
+  margin: 20px 0;
+  font-size: 15px;
+  &::before{
+    content: '';
+    border: 1px solid $theme_color;
+    height: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    margin-right: 5px;
+  }
 }
 </style>

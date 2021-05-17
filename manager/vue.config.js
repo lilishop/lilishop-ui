@@ -18,12 +18,6 @@ module.exports = {
   },
   devServer: {
     port: 10003
-    // proxy: {
-    //     '/lili': {
-    //         target: 'http://127.0.0.1:8888',  // 请求本地 需要lili后台项目
-    //         ws: true
-    //     }
-    // }
   },
 
   chainWebpack: config => {

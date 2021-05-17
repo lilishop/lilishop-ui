@@ -111,6 +111,7 @@
 <script>
 import { getFullDiscountList, delFullDiscount } from "@/api/promotion.js";
 export default {
+  name: 'full-cut',
   data() {
     return {
       loading: false, // 表单加载状态
@@ -256,7 +257,7 @@ export default {
       });
     },
   },
-  activated() {
+  activated () {
     this.init();
   }
 };
