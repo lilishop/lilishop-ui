@@ -19,7 +19,7 @@
           :label-width="110"
         >
           <FormItem label="发票类型">
-            <RadioGroup v-model="invoiceForm.type">
+            <RadioGroup v-model="invoiceForm.type" type="button" button-style="solid">
               <Radio :label="1">个人</Radio>
               <Radio :label="2">单位</Radio>
             </RadioGroup>
@@ -39,7 +39,7 @@
             <i-input v-model="invoiceForm.taxpayerId"></i-input>
           </FormItem>
           <FormItem label="发票内容">
-            <RadioGroup v-model="invoiceForm.receiptContent">
+            <RadioGroup v-model="invoiceForm.receiptContent" type="button" button-style="solid">
               <Radio label="不开发票">不开发票</Radio>
               <Radio label="商品明细">商品明细</Radio>
             </RadioGroup>

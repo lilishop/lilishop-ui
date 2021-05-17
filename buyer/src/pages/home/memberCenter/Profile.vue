@@ -24,7 +24,7 @@
         <DatePicker type="date" placeholder="选择您的生日" v-model="formItem.birthday"></DatePicker>
       </FormItem>
       <FormItem label="性别">
-        <RadioGroup v-model="formItem.sex">
+        <RadioGroup v-model="formItem.sex" type="button" button-style="solid">
           <Radio :label="1">男</Radio>
           <Radio :label="0">女</Radio>
         </RadioGroup>

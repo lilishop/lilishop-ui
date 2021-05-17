@@ -16,7 +16,7 @@ module.exports = {
         }
       },
     devServer: {
-        port: 9998,
+        port: 10002,
     },
 
     chainWebpack: config => {

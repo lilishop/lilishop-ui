@@ -156,7 +156,7 @@
           />
         </FormItem>
         <FormItem label="发送范围">
-          <RadioGroup v-model="messageSendForm.messageRange" @on-change="selectShop">
+          <RadioGroup type="button" button-style="solid" v-model="messageSendForm.messageRange" @on-change="selectShop">
             <Radio label="ALL">全站</Radio>
             <Radio label="APPOINT">指定商家</Radio>
           </RadioGroup>
@@ -200,7 +200,7 @@
           />
         </FormItem>
         <FormItem label="发送范围">
-          <RadioGroup v-model="messageSendForm.messageRange">
+          <RadioGroup type="button" button-style="solid" v-model="messageSendForm.messageRange">
             <Radio disabled label="ALL">全站</Radio>
             <Radio  disabled label="APPOINT">指定商家</Radio>
           </RadioGroup>

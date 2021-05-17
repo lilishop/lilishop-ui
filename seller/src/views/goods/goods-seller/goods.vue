@@ -75,7 +75,7 @@
     <Modal title="批量设置运费模板" v-model="shipTemplateModal" :mask-closable="false" :width="500">
       <Form ref="shipTemplateForm" :model="shipTemplateForm" :label-width="120">
         <FormItem class="form-item-view-el" label="运费" prop="freightPayer">
-          <RadioGroup @on-change="logisticsTemplateUndertakerChange" v-model="shipTemplateForm.freightPayer">
+          <RadioGroup type="button" button-style="solid" @on-change="logisticsTemplateUndertakerChange" v-model="shipTemplateForm.freightPayer">
             <Radio label="BUYER">
               <span>买家承担运费</span>
             </Radio>

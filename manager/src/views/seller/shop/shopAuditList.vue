@@ -113,7 +113,7 @@
                     color: params.row.selfOperated ? "default" : "primary",
                   },
                 },
-                params.row.selfOperated == 0 ? "自营" : "非自营"
+                params.row.selfOperated ? "自营" : "非自营"
               );
             },
           },

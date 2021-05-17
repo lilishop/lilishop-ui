@@ -20,9 +20,10 @@
               </FormItem>
 
               <FormItem label="是否自营" prop="selfOperated">
-                <RadioGroup v-model="shopForm.selfOperated">
-                  <Radio :key=0 :label=0>自营</Radio>
-                  <Radio :key=1 :label=1>非自营</Radio>
+
+                <RadioGroup type="button" button-style="solid" v-model="shopForm.selfOperated" >
+                  <Radio :label=true>自营</Radio>
+                  <Radio :label=false>非自营</Radio>
                 </RadioGroup>
               </FormItem>
 
@@ -340,7 +341,7 @@ export default {
       settlementCycle: [], // 结算周期
       shopForm: { // 店铺数据
         settlementCycle: "",
-        selfOperated: 0,
+        selfOperated: "",
         memberName: "",
         companyName: "",
         addressPath: "",

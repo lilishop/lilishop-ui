@@ -65,7 +65,7 @@
                   <Input v-model="form.name" maxlength="10" clearable style="width: 20%"/>
                 </FormItem>
                 <FormItem label="计价方式" prop="pricingMethod">
-                  <RadioGroup v-model="form.pricingMethod">
+                  <RadioGroup type="button" button-style="solid" v-model="form.pricingMethod">
                     <Radio label="WEIGHT">按重量</Radio>
                     <Radio label="NUM">按件数</Radio>
                   </RadioGroup>

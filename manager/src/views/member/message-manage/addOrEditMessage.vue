@@ -39,7 +39,7 @@
           </FormItem>
           <div v-if="type==0">
             <FormItem label="发送范围">
-              <RadioGroup v-model="form.range">
+              <RadioGroup type="button" button-style="solid" v-model="form.range">
                 <Radio :label="0">全体用户</Radio>
                 <Radio :label="1">指定用户成员</Radio>
               </RadioGroup>

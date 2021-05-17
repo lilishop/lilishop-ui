@@ -69,7 +69,7 @@
             <RadioGroup
               v-model="fileType"
               @on-change="changeFileType"
-              type="button"
+              type="button" button-style="solid"
               style="margin-right: 25px"
             >
               <Radio label="all">所有类型</Radio>
@@ -78,7 +78,7 @@
             </RadioGroup>
             <RadioGroup
               v-model="showType"
-              type="button"
+              type="button" button-style="solid"
               @on-change="changeShowType"
             >
               <Radio title="列表" label="list">
@@ -292,7 +292,7 @@ export default {
       picTitle: "", // 图片title
       videoTitle: "", // 视频title
       modalTitle: "", // 添加或编辑标题
-      searchForm: { 
+      searchForm: {
         // 搜索框对应data对象
         name: "",
         fileKey: "",

@@ -101,7 +101,7 @@
         <div slot="footer"></div>
     </Modal>
     <Modal v-model="cancelAvail" title="请选择取消订单原因" @on-ok="sureCancel" @on-cancel="cancelAvail = false">
-      <RadioGroup v-model="cancelParams.reason" vertical>
+      <RadioGroup v-model="cancelParams.reason" vertical type="button" button-style="solid">
         <Radio :label="item.reason" v-for="item in cancelReason" :key="item.id">
            {{item.reason}}
         </Radio>

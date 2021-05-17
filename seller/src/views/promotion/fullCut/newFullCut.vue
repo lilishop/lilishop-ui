@@ -53,7 +53,7 @@
               <span class="describe">消费达到当前金额可以参与优惠</span>
             </FormItem>
             <FormItem label="优惠方式">
-              <RadioGroup v-model="form.discountType">
+              <RadioGroup type="button" button-style="solid" v-model="form.discountType">
                 <Radio
                   :disabled="form.promotionStatus != 'NEW'"
                   label="isFullMinus"
@@ -163,7 +163,7 @@
               />
             </FormItem>
             <FormItem label="使用范围" prop="scopeType">
-              <RadioGroup v-model="form.scopeType">
+              <RadioGroup type="button" button-style="solid" v-model="form.scopeType">
                 <Radio :disabled="form.promotionStatus != 'NEW'" label="ALL"
                   >全品类</Radio
                 >

@@ -77,13 +77,13 @@
           ></DatePicker>
         </FormItem>
         <FormItem label="强制更新">
-          <RadioGroup v-model="form.forceUpdate">
+          <RadioGroup type="button" button-style="solid" v-model="form.forceUpdate">
             <Radio label="1">强制更新</Radio>
             <Radio label="0">非强制更新</Radio>
           </RadioGroup>
         </FormItem>
         <FormItem label="类型">
-          <RadioGroup v-model="form.type">
+          <RadioGroup type="button" button-style="solid" v-model="form.type">
             <Radio label="IOS">苹果</Radio>
             <Radio label="ANDROID">安卓</Radio>
           </RadioGroup>

@@ -24,7 +24,7 @@
           </FormItem>
           <div v-if="type==0">
             <FormItem label="发送范围">
-              <RadioGroup v-model="form.sendType" >
+              <RadioGroup type="button" button-style="solid" v-model="form.sendType" >
                 <Radio label="ALL">全部会员</Radio>
                 <Radio label="SELECT">指定会员</Radio>
               </RadioGroup>

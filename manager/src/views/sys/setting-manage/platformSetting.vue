@@ -103,7 +103,7 @@
                     :rules="goodsValidate"
             >
               <FormItem label="是否开启商品审核" prop="goodsCheck">
-                <RadioGroup v-model="goods.goodsCheck">
+                <RadioGroup type="button" button-style="solid" v-model="goods.goodsCheck">
                   <Radio label="OPEN">开启</Radio>
                   <Radio label="CLOSE">关闭</Radio>
                 </RadioGroup>

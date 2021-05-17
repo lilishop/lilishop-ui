@@ -28,7 +28,7 @@
             <Input v-model="formValidate.cityCode" />
           </FormItem>
           <FormItem label="行政区划级别" prop="cityCode">
-            <RadioGroup v-model="formValidate.level">
+            <RadioGroup type="button" button-style="solid" v-model="formValidate.level">
               <Radio disabled label="country">国家</Radio>
               <Radio disabled label="province">省份</Radio>
               <Radio disabled label="city">市</Radio>
