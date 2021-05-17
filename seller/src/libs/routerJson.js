@@ -405,7 +405,7 @@ export const result = [
             type: 0,
             title: "满额活动",
             path: "full-cut",
-            component: "promotion/fullCut/full-cut",
+            component: "promotion/fullCut/fullCut",
             icon: "md-person",
             isMenu: true,
             url: "",

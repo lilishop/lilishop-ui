@@ -115,12 +115,12 @@ export const otherRouter = {
       component: () =>
         import("@/views/order/after-order/reurnGoodsOrderDetail.vue")
     },
-    {
-      path: "full-cut-detail",
-      title: "添加满额活动",
-      name: "full-cut-detail",
-      component: () => import("@/views/promotion/fullCut/newFullCut.vue")
-    },
+    // {
+    //   path: "full-cut-detail",
+    //   title: "添加满额活动",
+    //   name: "full-cut-detail",
+    //   component: () => import("@/views/promotion/fullCut/newFullCut.vue")
+    // },
     {
       path: "order-detail",
       title: "订单详情",

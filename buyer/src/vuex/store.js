@@ -11,7 +11,7 @@ export default new Vuex.Store({
   state: {
     category: [], // 全部分类
     navList: [],
-    cartNum: storage.getItem('cartNum') || 0
+    cartNum: storage.getItem('userInfo') ? storage.getItem('cartNum') : 0
   },
   getters,
   actions,
