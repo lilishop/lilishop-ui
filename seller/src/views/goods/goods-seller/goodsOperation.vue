@@ -8,13 +8,13 @@
         process-status="process"
       >
         <div class="step-view">
-          <step title="选择商品品类"/>
+          <step title="选择商品品类" />
         </div>
         <div class="step-view">
-          <step title="填写商品详情"/>
+          <step title="填写商品详情" />
         </div>
         <div class="step-view">
-          <step title="商品发布成功"/>
+          <step title="商品发布成功" />
         </div>
       </steps>
     </div>
@@ -528,7 +528,7 @@
                 v-model="baseInfoForm.freightPayer"
               >
                 <Radio label="BUYER">
-                  <span>买家承担运费</span>
+                  <span>卖家承担运费</span>
                 </Radio>
                 <Radio label="STORE">
                   <span>使用物流规则</span>
@@ -1189,7 +1189,7 @@ export default {
       }
     },
     gotoGoodsList() {
-      this.$router.push({name: "seller-goods"});
+      this.$router.push({name: "goods"});
     },
     gotoBack() {
       this.$router.go();
@@ -1220,14 +1220,12 @@ export default {
             i.title = i.labelName;
             i.expand = false;
             i.checked = shopCategories.some((o) => o === i.id);
-            if (i.list) {
-              i.children = i.list.map((j) => {
-                j.title = j.labelName;
-                j.expand = false;
-                j.checked = shopCategories.some((o) => o === j.id);
-                return j;
-              });
-            }
+            i.children = i.children.map((j) => {
+              j.title = j.labelName;
+              j.expand = false;
+              j.checked = shopCategories.some((o) => o === j.id);
+              return j;
+            });
             return i;
           });
         }
@@ -1730,6 +1728,7 @@ export default {
     },
     /** 上一步*/
     pre() {
+      window.scrollTo(0,0)
       this.loading = true;
       if (this.activestep === 1) {
         this.toPreCount > 0
@@ -1745,6 +1744,8 @@ export default {
     },
     /** 下一步*/
     next() {
+      console.log(111);
+      window.scrollTo(0,0)
       if (this.activestep === 0 && this.draftId) {
         this.activestep = 1;
         this.GET_GoodData();
@@ -1880,6 +1881,7 @@ export default {
               if (res.success) {
                 this.submitLoading = false;
                 this.activestep = 2;
+                window.scrollTo(0,0)
               }else{
                  this.submitLoading = false;
               }
