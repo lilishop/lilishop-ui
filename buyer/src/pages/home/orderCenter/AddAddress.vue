@@ -88,14 +88,14 @@ export default {
           this.loading = true;
           if (this.$route.query.id) {
             editMemberAddress(params).then((res) => {
-              if (res.code === 200) {
+              if (res.success) {
                 this.loading = false;
                 this.$router.push('/home/MyAddress');
               }
             }).catch(() => { this.loading = false; });
           } else {
             newMemberAddress(params).then((res) => {
-              if (res.code === 200) {
+              if (res.success) {
                 this.loading = false;
                 this.$router.push('/home/MyAddress');
               }
@@ -107,7 +107,7 @@ export default {
     getAddrById (id) {
       // 获取地址详情
       getAddrDetail(id).then((res) => {
-        if (res.code === 200) {
+        if (res.success) {
           console.log(res);
           const data = res.result;
           data.address = res.result.consigneeAddressPath.replace(/,/g, ' ');

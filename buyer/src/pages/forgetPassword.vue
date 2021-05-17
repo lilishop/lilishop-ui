@@ -160,7 +160,7 @@ export default {
           let data = JSON.parse(JSON.stringify(this.formFirst));
           apiLogin.validateCode(data).then((res) => {
             this.loading = false;
-            if (res.code === 200) {
+            if (res.success) {
             //   this.$Message.success('');
               this.step = 1;
             } else {
@@ -186,7 +186,7 @@ export default {
           apiLogin.resetPassword(params).then(res => {
             this.loading1 = false;
             console.log(res);
-            if (res.code === 200) {
+            if (res.success) {
               this.$Message.success('修改密码成功');
               this.$router.push('login');
             }
@@ -209,7 +209,7 @@ export default {
           verificationEnums: 'FIND_USER'
         };
         sendSms(params).then(res => {
-          if (res.code === 200) {
+          if (res.success) {
             this.$Message.success('验证码发送成功');
             let that = this;
             this.interval = setInterval(() => {

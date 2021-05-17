@@ -133,7 +133,7 @@ export default {
         pageClientType: "PC",
       };
       API_floor.getHomeList(params).then((res) => {
-        if (res.code == 200) {
+        if (res.success) {
           this.templateList = res.result.records;
         }
       });
@@ -142,7 +142,7 @@ export default {
     releaseTemplate(id) {
       //发布模板
       API_floor.releasePageHome(id).then((res) => {
-        if (res.code === 200) {
+        if (res.success) {
           this.$Message.success("发布模板成功");
           this.getTemplateList();
         }
@@ -155,7 +155,7 @@ export default {
         content: "<p>确定删除该模板吗？</p>",
         onOk: () => {
           API_floor.removePageHome(id).then((res) => {
-            if (res.code === 200) {
+            if (res.success) {
               this.$Message.success("删除模板成功");
               this.getTemplateList();
             }

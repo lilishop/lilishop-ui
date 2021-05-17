@@ -99,7 +99,7 @@ export default {
           if (this.id) {
             editMemberAddress(params).then((res) => {
               this.loading = false;
-              if (res.code === 200) {
+              if (res.success) {
                 this.$Message.success('编辑地址成功');
                 this.$emit('change', true);
                 this.hide();
@@ -108,7 +108,7 @@ export default {
           } else {
             newMemberAddress(params).then((res) => {
               this.loading = false;
-              if (res.code === 200) {
+              if (res.success) {
                 this.$Message.success('新增地址成功');
                 this.$emit('change', true);
                 this.hide();
@@ -121,7 +121,7 @@ export default {
     getAddrById (id) {
       // 获取地址详情
       getAddrDetail(id).then((res) => {
-        if (res.code === 200) {
+        if (res.success) {
           console.log(res);
           const data = res.result;
           data.address = res.result.consigneeAddressPath.replace(/,/g, ' ');
@@ -131,7 +131,6 @@ export default {
     },
     getAddress (item) {
       // 获取地图选择信息
-      console.log(item);
       this.mapMsg = item;
       this.$set(this.formData, 'address', item.addr);
       this.$set(this.formData, 'consigneeAddressIdPath', item.addrId);

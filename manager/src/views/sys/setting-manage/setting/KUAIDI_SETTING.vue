@@ -47,7 +47,7 @@ export default {
 
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
-        if (res.code == 200) {
+        if (res.success) {
           this.$Message.success("保存成功!");
         } else {
           this.$Message.error("保存失败!");

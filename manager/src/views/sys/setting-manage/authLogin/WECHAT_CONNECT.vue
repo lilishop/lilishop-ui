@@ -82,7 +82,7 @@ export default {
         setSetting(this.type, {
           wechatConnectSettingItems: this.formValidate,
         }).then((res) => {
-          if (res.code == 200) {
+          if (res.success) {
             this.$Message.success("保存成功!");
             this.$Modal.remove();
           } else {

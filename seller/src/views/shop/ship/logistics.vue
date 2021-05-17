@@ -165,7 +165,7 @@
           onOk: () => {
             API_Shop.logisticsChecked(v.id).then((res) => {
               this.$Modal.remove();
-              if (res.code == 200) {
+              if (res.success) {
                 this.$Message.success("物流公司开启成功");
                 this.init();
               }
@@ -183,7 +183,7 @@
           onOk: () => {
             API_Shop.logisticsUnChecked(v.selected).then((res) => {
               this.$Modal.remove();
-              if (res.code == 200) {
+              if (res.success) {
                 this.$Message.success("物流公司关闭成功");
                 this.init();
               }

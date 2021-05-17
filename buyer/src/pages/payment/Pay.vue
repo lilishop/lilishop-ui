@@ -311,7 +311,7 @@ export default {
         content: '你确定删除这个收货地址',
         onOk: () => {
           delMemberAddress(item.id).then((res) => {
-            if (res.code === 200) {
+            if (res.success) {
               this.$Message.success('删除成功');
               this.getAddress();
             }

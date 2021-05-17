@@ -51,7 +51,7 @@ export default {
                 pageData:modelForm,
             }
             API_floor.updateHome(this.$route.query.id, data).then(res=> {
-                if(res.code === 200) {
+                if(res.success) {
                     this.$Message.success('保存模板成功');
                 } else {
                     this.$Message.error(res.message)
@@ -63,7 +63,7 @@ export default {
         },
         getTemplateItem(id){ // 获取模板数据
             API_floor.getHomeData(id).then(res => {
-                if (res.code === 200) {
+                if (res.success) {
                     let pageData = res.result.pageData;
                     if(pageData) {
                         pageData = JSON.parse(pageData);

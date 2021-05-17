@@ -358,7 +358,7 @@ export default {
     getFilterList (params) {
       // 筛选、分类  列表
       APIGoods.filterList(params).then((res) => {
-        if (res.code === 200) {
+        if (res.success) {
           const data = res.result;
           this.tagsContent = [{
             key: '品牌',

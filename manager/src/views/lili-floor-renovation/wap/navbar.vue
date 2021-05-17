@@ -136,7 +136,7 @@ export default {
       })
         .then((res) => {
           this.num = 50;
-          if (res.code == 200) {
+          if (res.success) {
             this.num = 80;
             /**制作保存成功动画¸ */
             setTimeout(() => {
@@ -166,7 +166,7 @@ export default {
       API_Other.setHomeSetup(submitWay)
         .then((res) => {
           this.num = 50;
-          if (res.code == 200) {
+          if (res.success) {
             this.num = 80;
             /**制作保存成功动画¸ */
             setTimeout(() => {

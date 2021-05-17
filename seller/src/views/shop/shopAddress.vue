@@ -320,7 +320,7 @@
           onOk: () => {
             API_Shop.deleteShopAddress(v.id).then((res) => {
               this.$Modal.remove();
-              if (res.code == 200) {
+              if (res.success) {
                 this.$Message.success("此自自提地址已删除");
                 this.init();
               }

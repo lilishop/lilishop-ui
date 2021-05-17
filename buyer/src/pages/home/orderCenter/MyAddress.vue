@@ -58,7 +58,7 @@ export default {
         content: '你确定删除这个收货地址',
         onOk: () => {
           delMemberAddress(id).then((res) => {
-            if (res.code === 200) {
+            if (res.success) {
               this.$Message.success('删除成功');
               this.getAddrList();
             }
@@ -73,7 +73,7 @@ export default {
       // 获取地址列表
       memberAddress().then((res) => {
         console.log(res);
-        if (res.code === 200) {
+        if (res.success) {
           this.list = res.result.records;
         }
       });

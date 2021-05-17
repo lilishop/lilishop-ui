@@ -421,7 +421,7 @@
           content: '<p>确认禁用此会员？</p>',
           onOk: () => {
             API_Member.updateMemberStatus(params).then(res => {
-              if (res.code === 200) {
+              if (res.success) {
                 this.$Message.success('禁用成功');
                 this.getData()
               } else {
@@ -446,7 +446,7 @@
           content: '<p>启用用此会员？</p>',
           onOk: () => {
             API_Member.updateMemberStatus(params).then(res => {
-              if (res.code === 200) {
+              if (res.success) {
                 this.$Message.success('禁用成功');
                 this.getData()
               } else {

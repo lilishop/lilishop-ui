@@ -124,7 +124,7 @@
             if (this.id == undefined) {
               API_Setting.addSmsSign(this.form).then(res => {
                 this.loading = false;
-                if (res.code === 200) {
+                if (res.success) {
                   this.$Message.success('添加成功');
                   this.$router.back()
                 }
@@ -134,7 +134,7 @@
             } else {
               API_Setting.editSmsSign(this.form).then(res => {
                 this.loading = false;
-                if (res.code === 200) {
+                if (res.success) {
                   this.$Message.success('修改成功');
                   this.$router.back()
                 }
@@ -150,7 +150,7 @@
       getSmsSignDetail() {
         API_Setting.smsSignDetail(this.id).then(res => {
           this.loading = false;
-          if (res.code === 200) {
+          if (res.success) {
             this.form = res.result
           }
         })
