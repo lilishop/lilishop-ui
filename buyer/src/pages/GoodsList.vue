@@ -170,7 +170,7 @@ export default {
       apiGoods.goodsList(this.params)
         .then((res) => {
           this.loading = false;
-          if (res.code === 200) {
+          if (res.success) {
             this.goodsList = res.result.content;
             this.total = res.result.totalElements;
           }

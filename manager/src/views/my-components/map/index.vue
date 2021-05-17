@@ -58,7 +58,7 @@ methods: {
              townName: this.addrContent.regeocode.addressComponent.township
          }
       getRegion(params).then(res=>{
-             if(res.code == 200) {
+             if(res.success) {
                   this.addrContent.addr = res.result.name.replace(/,/g," ")
                   this.addrContent.addrId = res.result.id
                   this.loading = false

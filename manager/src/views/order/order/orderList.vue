@@ -254,7 +254,7 @@ export default {
         content: "<p>您确定要收款吗？线下收款涉及库存变更，需异步进行，等待约一分钟刷新列表查看</p>",
         onOk: () => {
           API_Order.orderPay(v.sn).then((res) => {
-            if (res.code === 200) {
+            if (res.success) {
               this.$Message.success("收款成功");
               this.getDataList();
             } else {

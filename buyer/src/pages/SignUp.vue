@@ -147,7 +147,7 @@ export default {
           let data = JSON.parse(JSON.stringify(this.formRegist));
           data.password = md5(data.password);
           apiLogin.regist(data).then((res) => {
-            if (res.code === 200) {
+            if (res.success) {
               this.$Message.success('注册成功!');
               this.$router.push('login');
             } else {
@@ -172,7 +172,7 @@ export default {
           verificationEnums: 'REGISTER'
         };
         sendSms(params).then(res => {
-          if (res.code === 200) {
+          if (res.success) {
             this.$Message.success('验证码发送成功');
             let that = this;
             this.interval = setInterval(() => {

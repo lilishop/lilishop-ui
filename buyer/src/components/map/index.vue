@@ -72,7 +72,7 @@ export default {
       if (this.useApi) {
         handleRegion(params).then((res) => {
           this.loading = false;
-          if (res.code === 200) {
+          if (res.success) {
             this.showMap = false;
             this.addrContent.addr = res.result.name.replace(/,/g, ' ');
             this.addrContent.addrId = res.result.id;

@@ -761,7 +761,7 @@ export default {
             API_Setting.addSmsTemplatePage(this.templateForm)
               .then((res) => {
                 this.loading = false;
-                if (res.code === 200) {
+                if (res.success) {
                   this.$Message.success("添加成功");
                   this.loading = false;
                   this.templateModalVisible = false;
@@ -775,7 +775,7 @@ export default {
             API_Setting.editSmsTemplatePage(this.templateForm)
               .then((res) => {
                 this.loading = false;
-                if (res.code === 200) {
+                if (res.success) {
                   this.$Message.success("修改成功");
                   this.loading = false;
                   this.templateModalVisible = false;

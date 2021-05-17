@@ -389,7 +389,7 @@ export default {
 
     pass() {
       API_Shop.pay(this.id).then((res) => {
-        if (res.code == 200) {
+        if (res.success) {
           this.$Message.success(res.message);
           this.init();
         }

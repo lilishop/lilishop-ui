@@ -168,7 +168,7 @@ function getTokenDebounce () {
       lock = true
       let oldRefreshToken = Storage.getItem('refreshToken');
       handleRefreshToken(oldRefreshToken).then(res => {
-        if (res.code === 200) {
+        if (res.success) {
           let {
             accessToken,
             refreshToken

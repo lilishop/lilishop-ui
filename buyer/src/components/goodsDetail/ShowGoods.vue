@@ -224,7 +224,7 @@ export default {
       this.loading = true;
       addCartGoods(params).then(res => {
         this.loading = false;
-        if (res.code === 200) {
+        if (res.success) {
           this.$router.push({path: '/shoppingCart', query: {detail: this.skuDetail, count: this.count}});
         } else {
           this.$Message.warning(res.message);
@@ -240,7 +240,7 @@ export default {
       this.loading1 = true;
       addCartGoods(params).then(res => {
         this.loading1 = false;
-        if (res.code === 200) {
+        if (res.success) {
           this.$router.push({path: '/pay', query: {way: 'BUY_NOW'}});
         } else {
           this.$Message.warning(res.message);

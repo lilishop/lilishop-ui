@@ -153,7 +153,7 @@ export default {
         pageClientType: "PC",
       };
       API_floor.getHomeList(params).then((res) => {
-        if (res.code == 200) {
+        if (res.success) {
           this.list = res.result.records;
           this.list.forEach(e => {
             if (e.pageShow === 'OPEN') {
@@ -169,7 +169,7 @@ export default {
     releaseTemplate(id) {
       //发布模板
       API_floor.releasePageHome(id).then((res) => {
-        if (res.code === 200) {
+        if (res.success) {
           this.$Message.success("发布模板成功");
           this.getTemplateList();
         }
@@ -178,7 +178,7 @@ export default {
 
     delTemplate(id) {
       API_floor.removePageHome(id).then((res) => {
-        if (res.code === 200) {
+        if (res.success) {
           this.$Message.success("删除模板成功");
           this.getTemplateList();
         }

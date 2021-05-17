@@ -120,7 +120,7 @@ export default {
     },
     getGoodsList () { // 商品信息
       goodsList(this.params).then((res) => {
-        if (res.code === 200) {
+        if (res.success) {
           this.goodsList = res.result.content;
           this.total = res.result.totalElements;
         }

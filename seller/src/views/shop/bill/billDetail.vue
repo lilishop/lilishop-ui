@@ -478,7 +478,7 @@ export default {
         onOk: () => {
           API_Shop.reconciliation(this.id).then((res) => {
             this.$Modal.remove();
-            if (res.code == 200) {
+            if (res.success) {
               this.$Message.success("账单核对成功");
               this.init();
             }

@@ -164,7 +164,7 @@ export default {
     // 删除商品
     delGoods (id) {
       delCartGoods({ skuIds: id }).then((res) => {
-        if (res.code === 200) {
+        if (res.success) {
           this.$Message.success('删除成功');
           this.getCartList();
           cartCount().then(res => {
@@ -231,7 +231,7 @@ export default {
       this.loading = true;
       addCartGoods(params).then(res => {
         this.loading = false;
-        if (res.code === 200) {
+        if (res.success) {
           this.$Message.success('商品已成功添加到购物车')
         } else {
           this.$Message.warning(res.message);

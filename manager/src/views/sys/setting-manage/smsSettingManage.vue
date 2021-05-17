@@ -72,7 +72,7 @@
       },
       saveSetting() {
         setSetting("SMS_SETTING", this.form).then((res) => {
-          if (res.code == 200) {
+          if (res.success) {
             this.$Message.success("保存成功!");
           } else {
             this.$Message.error("保存失败!");

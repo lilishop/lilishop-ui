@@ -185,7 +185,7 @@ export default {
         code: [{ required: true, message: '请输入手机验证码' }]
       },
       codeMsg: '发送验证码', // 验证码文字
-      interval: '', // 定时器
+      interval: null, // 定时器
       time: 60, // 倒计时
       logoImg: '' // logo图片
     };
@@ -201,12 +201,12 @@ export default {
             let data = JSON.parse(JSON.stringify(this.formSms));
             apiLogin.smsLogin(data).then((res) => {
               this.$refs.verify.show = false;
-              if (res.code === 200) {
+              if (res.success) {
                 this.$Message.success('登录成功');
                 storage.setItem('accessToken', res.result.accessToken);
                 storage.setItem('refreshToken', res.result.refreshToken);
                 apiLogin.getMemberMsg().then((res) => {
-                  if (res.code === 200) {
+                  if (res.success) {
                     storage.setItem('userInfo', res.result);
                     let query = this.$route.query;
                     if (query.rePath) {
@@ -241,11 +241,10 @@ export default {
           verificationEnums: 'LOGIN'
         };
         sendSms(params).then(res => {
-          if (res.code === 200) {
+          if (res.success) {
             this.$Message.success('验证码发送成功');
             let that = this;
             this.interval = setInterval(() => {
-              console.log(that.time);
               that.time--;
               if (that.time === 0) {
                 that.time = 60;
@@ -271,13 +270,13 @@ export default {
         this.$refs.verify.show = false;
         this.$Spin.show();
         apiLogin.login(data).then((res) => {
-          if (res.code === 200) {
+          if (res.success) {
             this.$Message.success('登录成功');
             storage.setItem('accessToken', res.result.accessToken);
             storage.setItem('refreshToken', res.result.refreshToken);
             apiLogin.getMemberMsg().then((res) => {
               this.$Spin.hide();
-              if (res.code === 200) {
+              if (res.success) {
                 storage.setItem('userInfo', res.result);
                 let query = this.$route.query;
                 if (query.rePath) {
@@ -313,12 +312,12 @@ export default {
     if (uuid) {
       storage.setItem('uuid', uuid);
       loginCallback(uuid).then(res => {
-        if (res.code === 200) {
+        if (res.success) {
           const result = res.result;
           storage.setItem('accessToken', result.accessToken);
           storage.setItem('refreshToken', result.refreshToken);
           apiLogin.getMemberMsg().then((res) => {
-            if (res.code === 200) {
+            if (res.success) {
               storage.setItem('userInfo', res.result);
               let query = this.$route.query;
               if (query.rePath) {

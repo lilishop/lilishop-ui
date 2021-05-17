@@ -34,7 +34,7 @@
         <span v-if="storeDisable == 'OPEN'">申请已通过，请联系管理员</span>
         <span v-if="storeDisable == 'CLOSED'">店铺已关闭，重申请联系管理员</span>
       </div>
-      <Button v-if="currentIndex == 3" @click="currentIndex = 2">返回</Button>
+      <Button v-if="currentIndex == 3" @click="$router.push('/')">返回</Button>
     </div>
 
     <Modal

@@ -144,13 +144,13 @@ export default {
     getList () { // 获取评论列表
       this.commentParams.goodsId = this.skuDetail.goodsId;
       goodsComment(this.commentParams).then(res => {
-        if (res.code === 200) {
+        if (res.success) {
           this.commentList = res.result.records;
           this.commentTotal = res.result.total;
         }
       });
       goodsCommentNum(this.skuDetail.goodsId).then(res => {
-        if (res.code === 200) {
+        if (res.success) {
           this.commentTypeNum = res.result;
         }
       });

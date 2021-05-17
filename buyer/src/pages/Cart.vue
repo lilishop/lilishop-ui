@@ -221,7 +221,7 @@ export default {
         content: '<p>确定要删除该商品吗？</p>',
         onOk: () => {
           APICart.delCartGoods({ skuIds: idArr.toString() }).then((res) => {
-            if (res.code === 200) {
+            if (res.success) {
               this.$Message.success('删除成功');
               this.getCartList();
             } else {
@@ -237,7 +237,7 @@ export default {
         content: '<p>确定要清空购物车吗？清空后不可恢复</p>',
         onOk: () => {
           APICart.clearCart().then((res) => {
-            if (res.code === 200) {
+            if (res.success) {
               this.$Message.success('清空购物车成功');
               this.getCartList();
             } else {
@@ -264,7 +264,7 @@ export default {
       console.log(val, id);
       APICart.setCartGoodsNum({ skuId: id, num: val }).then((res) => {
         console.log(res);
-        if (res.code === 200) {
+        if (res.success) {
           this.getCartList();
         }
       });
@@ -288,7 +288,7 @@ export default {
 
     async receiveShopCoupon (item) { // 领取优惠券
       let res = await APIMember.receiveCoupon(item.id)
-      if (res.code === 200) {
+      if (res.success) {
         this.$set(item, 'disabled', true)
         this.$Message.success('领取成功')
       } else {
@@ -301,7 +301,7 @@ export default {
       try {
         let res = await APICart.cartGoodsAll();
         this.loading = false;
-        if (res.code === 200) {
+        if (res.success) {
           this.cartList = res.result.cartList;
           this.priceDetailDTO = res.result.priceDetailDTO;
           this.skuList = res.result.skuList;

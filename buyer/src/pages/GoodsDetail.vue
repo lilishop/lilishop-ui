@@ -70,7 +70,7 @@ export default {
       const params = this.$route.query
       goodsSkuDetail(params).then((res) => {
         this.isLoading = false;
-        if (res.code === 200) {
+        if (res.success) {
           const result = res.result;
           const cateName = res.result.categoryName;
           const cateId = result.data.categoryPath.split(',');
