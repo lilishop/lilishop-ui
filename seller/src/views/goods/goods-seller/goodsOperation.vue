@@ -28,7 +28,7 @@
             :key="index"
           >
             <span>{{ item.name }}</span>
-            <span>》</span>
+            <span>&gt;</span>
           </li>
         </ul>
         <ul v-if="categoryListLevel2 && categoryListLevel2.length > 0">
@@ -39,7 +39,7 @@
             :key="index"
           >
             <span>{{ item.name }}</span>
-            <span>》</span>
+            <span>&gt;</span>
           </li>
         </ul>
         <ul v-if="categoryListLevel3 && categoryListLevel3.length > 0">
@@ -701,6 +701,34 @@ export default {
         this.activestep = 1;
         this.isOperationGoods = false;
         this.GET_GoodData();
+      } else if (to.query.id) {
+        this.activestep = 1;
+        this.goodsId = this.$route.query.id;
+        this.GET_GoodData();
+      } else {
+        this.baseInfoForm = {
+          salesModel: "RETAIL",
+          goodsParamsList: [],
+          freightPayer: "BUYER",
+          weight: "",
+          goodsGalleryFiles: [],
+          release: "true",
+          recommend: "true",
+          storeCategoryPath: "",
+          brandId: 0,
+          goodsUnit: "",
+          categoryPath: "",
+          sellingPoint: "",
+          intro: "",
+          mobileIntro: "",
+          updateSku: true,
+          regeneratorSkuFlag: false,
+          templateId: 0,
+        };
+        this.activestep = 0;
+        this.isPublish = true;
+        this.GET_GoodsTemplate();
+        this.GET_NextLevelCategory();
       }
     }
   },
@@ -985,7 +1013,25 @@ export default {
     }
     //新增商品
     else {
-      this.baseInfoForm = {};
+      this.baseInfoForm = {
+        salesModel: "RETAIL",
+        goodsParamsList: [],
+        freightPayer: "BUYER",
+        weight: "",
+        goodsGalleryFiles: [],
+        release: "true",
+        recommend: "true",
+        storeCategoryPath: "",
+        brandId: 0,
+        goodsUnit: "",
+        categoryPath: "",
+        sellingPoint: "",
+        intro: "",
+        mobileIntro: "",
+        updateSku: true,
+        regeneratorSkuFlag: false,
+        templateId: 0,
+      };
       this.activestep = 0;
       this.isPublish = true;
       this.GET_GoodsTemplate();
@@ -1088,6 +1134,7 @@ export default {
       });
     },
     handleBeforeUploadGoodsPicture() {
+      console.log(this.baseInfoForm);
       const check = this.baseInfoForm.goodsGalleryFiles.length < 5;
       if (!check) {
         this.$Notice.warning({
@@ -1198,6 +1245,7 @@ export default {
         ...this.baseInfoForm,
         ...response.result,
       };
+      console.warn(this.baseInfoForm);
       if (this.baseInfoForm.freightPayer != "BUYER") {
         API_Shop.getShipTemplate().then((res) => {
           if (res.success) {
@@ -1702,6 +1750,7 @@ export default {
         this.GET_GoodData();
         return;
       }
+      console.log(this.baseInfoForm);
       this.GET_GoodsParams();
       /** 1级校验 */
       this.loading = true;

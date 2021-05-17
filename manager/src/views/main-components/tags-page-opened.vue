@@ -8,20 +8,8 @@
     @mousewheel="handlescroll"
     class="tags-outer-scroll-con"
   >
-    <!-- <div class="close-all-tag-con">
-      <Dropdown transfer @on-click="handleTagsOption">
-        <Button size="small" type="primary">
-          <Icon type="md-arrow-dropdown"></Icon>
-        </Button>
-        <DropdownMenu slot="list">
-          <DropdownItem name="clearAll">{{ $t('closeAll') }}</DropdownItem>
-          <DropdownItem name="clearOthers">{{ $t('closeOthers') }}</DropdownItem>
-        </DropdownMenu>
-      </Dropdown>
-    </div> -->
-
     <ul v-show="visible" :style="{left: contextMenuLeft + 'px', top: contextMenuTop + 'px'}" class="contextmenu">
-      <li v-for="(item, key) of menuList" @click="handleTagsOption(key)" :key="key">{{item}}</li>
+      <li v-for="(item, key) of actionList" @click="handleTagsOption(key)" :key="key">{{item}}</li>
     </ul>
     <div ref="scrollBody" class="tags-inner-scroll-body" :style="{left: tagBodyLeft + 'px'}">
       <transition-group name="taglist-moving-animation">

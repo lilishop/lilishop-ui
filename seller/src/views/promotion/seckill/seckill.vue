@@ -64,13 +64,18 @@
           </template>
           <template slot-scope="{ row }" slot="action">
             <Button
-              v-if="
-                row.promotionStatus === 'NEW'
-              "
+              v-if="row.promotionStatus === 'NEW'"
               type="primary"
               size="small"
               @click="manage(row)"
               >管理</Button
+            >
+            <Button
+              v-else
+              type="info"
+              size="small"
+              @click="manage(row)"
+              >查看</Button
             >
           </template>
         </Table>

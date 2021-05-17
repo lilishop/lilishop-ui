@@ -19,10 +19,13 @@
       <Row class="operation">
         <Table :loading="loading" border :columns="goodsColumns" :data="goodsData" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
           <template slot-scope="{ row, index }" slot="price">
-            <Input v-model="row.price" @input="goodsData[index].price = row.price" />
+            <Input v-model="row.price" :disabled="status==='view'" @input="goodsData[index].price = row.price" />
           </template>
           <template slot-scope="{ row }" slot="QRCode">
             <img :src="row.QRCode || '../../../assets/lili.png'" width="50px" height="50px" alt="" />
+          </template>
+          <template slot-scope="{ index }" slot="action">
+            <Button type="error" size="small" ghost v-if="status === 'manager'" @click="delGoods(index)">删除</Button>
           </template>
         </Table>
       </Row>
@@ -138,27 +141,9 @@ export default {
 
         {
           title: "操作",
-          key: "action",
+          slot: "action",
           minWidth: 50,
           align: "center",
-          render: (h, params) => {
-            return h(
-              "Button",
-              {
-                props: {
-                  size: "small",
-                  type: "error",
-                  ghost: true,
-                },
-                on: {
-                  click: () => {
-                    this.delGoods(params.index);
-                  },
-                },
-              },
-              "删除"
-            );
-          },
         },
       ],
       goodsData: [], // 商品列表
@@ -327,9 +312,9 @@ export default {
   margin: 20px 0;
   font-size: 15px;
   &::before{
-    content: '';
-    border: 1px solid $theme_color;
-    height: 10px;
+    content: '|';
+    color: $theme_color;
+    display: inline-block;
     font-weight: bold;
     font-size: 16px;
     margin-right: 5px;

@@ -16,7 +16,7 @@
           <Button @click="delAll">批量删除</Button>
         </template>
       </Row>
-      <Row v-show="openTip">
+      <Row v-show="openTip"  v-if="promotionStatus == 'NEW'">
         <Alert show-icon>
           已选择 <span class="select-count">{{ selectCount }}</span> 项
         </Alert>
@@ -101,8 +101,7 @@
               <template slot-scope="{ row, index }" slot="action">
                 <Button
                   type="error"
-                  v-if="row.promotionApplyStatus !== 'PASS'"
-                  :disabled="promotionStatus != 'NEW'"
+                  v-if="promotionStatus === 'NEW'"
                   size="small"
                   ghost
                   @click="delGoods(index, row.id)"
@@ -119,7 +118,7 @@
         <Button
           type="primary"
           :loading="submitLoading"
-          :disabled="promotionStatus != 'NEW'"
+          v-if="promotionStatus === 'NEW'"
           @click="save"
           >提交</Button
         >
