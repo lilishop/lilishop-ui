@@ -47,7 +47,7 @@
           <span style="color: #cccccc">如果设置为0则视为不限制购买数量</span>
         </FormItem>
         <FormItem label="虚拟成团" prop="fictitious">
-          <RadioGroup v-model="form.fictitious">
+          <RadioGroup type="button" button-style="solid" v-model="form.fictitious">
             <Radio title="开启" :label="true">
               <span>开启</span>
             </Radio>

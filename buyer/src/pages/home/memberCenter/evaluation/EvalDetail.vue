@@ -27,7 +27,7 @@
         <div class="eval-con">
           <div>
             <span class="color999">商品评价：</span>
-            <RadioGroup style="margin-bottom:5px;color:#999" v-model="orderGoods.grade">
+            <RadioGroup style="margin-bottom:5px;color:#999" v-model="orderGoods.grade" type="button" button-style="solid">
               <Radio label="GOOD" disabled>好评</Radio>
               <Radio label="MODERATE" disabled>中评</Radio>
               <Radio label="WORSE" disabled>差评</Radio>

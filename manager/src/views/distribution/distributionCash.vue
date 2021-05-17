@@ -42,7 +42,7 @@
           <Input disabled v-model="form.price" clearable style="width:100%"/>
         </FormItem>
         <FormItem label="是否通过" prop="result" v-if="handleStatus =='edit'">
-             <RadioGroup v-model="result">
+             <RadioGroup v-model="result" type="button" button-style="solid">
                  <Radio :key=0 :label=0>通过</Radio>
                  <Radio :key=-1 :label=-1>拒绝</Radio>
              </RadioGroup>

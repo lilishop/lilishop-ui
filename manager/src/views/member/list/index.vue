@@ -84,7 +84,7 @@
           <Input v-model="formValidate.nickName" style="width: 200px" />
         </FormItem>
         <FormItem label="性别" prop="sex">
-          <RadioGroup v-model="formValidate.sex">
+          <RadioGroup type="button" button-style="solid" v-model="formValidate.sex">
             <Radio :label="1">
               <span>男</span>
             </Radio>

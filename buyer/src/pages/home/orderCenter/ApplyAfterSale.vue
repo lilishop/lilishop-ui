@@ -18,7 +18,7 @@
     <div>
       <Form :model="form" ref="form" :rules="rules" :label-width="80">
         <FormItem label="售后类别">
-          <RadioGroup v-model="form.serviceType" @on-change="changeReason">
+          <RadioGroup v-model="form.serviceType" @on-change="changeReason" type="button" button-style="solid">
             <Radio label="RETURN_GOODS">退货</Radio>
             <Radio label="RETURN_MONEY">退款</Radio>
           </RadioGroup>

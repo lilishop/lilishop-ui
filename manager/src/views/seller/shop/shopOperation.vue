@@ -21,7 +21,7 @@
 
               <FormItem label="是否自营" prop="selfOperated">
 
-                <RadioGroup v-model="shopForm.selfOperated" type="button">
+                <RadioGroup type="button" button-style="solid" v-model="shopForm.selfOperated" type="button">
                   <Radio :label=true>自营</Radio>
                   <Radio :label=false>非自营</Radio>
                 </RadioGroup>

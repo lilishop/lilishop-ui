@@ -162,7 +162,7 @@
     >
       <div v-for="(item, index) in saveRoleWay" :key="index">
         <span class="title">{{ item.title }}</span>
-        <RadioGroup v-model="item.isSuper">
+        <RadioGroup type="button" button-style="solid" v-model="item.isSuper">
           <Radio :label="true">
             <span>操作数据权限</span>
           </Radio>

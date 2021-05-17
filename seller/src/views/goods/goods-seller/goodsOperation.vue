@@ -139,7 +139,7 @@
               label="销售模式"
               prop="salesModel"
             >
-              <RadioGroup v-model="baseInfoForm.salesModel">
+              <RadioGroup type="button" button-style="solid" v-model="baseInfoForm.salesModel">
                 <Radio title="零售型" label="RETAIL">
                   <span>零售型</span>
                 </Radio>
@@ -523,7 +523,7 @@
               </Input>
             </FormItem>
             <FormItem class="form-item-view-el" label="运费" prop="skuList">
-              <RadioGroup
+              <RadioGroup type="button" button-style="solid"
                 @on-change="logisticsTemplateChange"
                 v-model="baseInfoForm.freightPayer"
               >
@@ -554,7 +554,7 @@
           <h4>其他信息</h4>
           <div class="form-item-view">
             <FormItem class="form-item-view-el" label="商品发布" prop="release">
-              <RadioGroup v-model="baseInfoForm.release">
+              <RadioGroup type="button" button-style="solid" v-model="baseInfoForm.release">
                 <Radio title="立即发布" label="true">
                   <span>立即发布</span>
                 </Radio>
@@ -564,7 +564,7 @@
               </RadioGroup>
             </FormItem>
             <FormItem class="form-item-view-el" label="商品推荐" prop="skuList">
-              <RadioGroup v-model="baseInfoForm.recommend">
+              <RadioGroup type="button" button-style="solid" v-model="baseInfoForm.recommend">
                 <Radio title="推荐" label="true">
                   <span>推荐</span>
                 </Radio>

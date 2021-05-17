@@ -115,7 +115,7 @@
               <p>
                 已选<span style="color: #f56c1d"> {{memberNum}}</span>人，预计耗费条数<span style="color: #f56c1d">{{this.smsForm.num}}条</span>
               </p>
-              <RadioGroup @on-change="smsRangeChange" v-model="smsForm.smsRange">
+              <RadioGroup type="button" button-style="solid" @on-change="smsRangeChange" v-model="smsForm.smsRange">
                 <Radio label="1">全部会员</Radio>
                 <Radio label="2">自定义选择</Radio>
               </RadioGroup>

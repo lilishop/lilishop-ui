@@ -57,7 +57,7 @@
               </DatePicker>
             </FormItem>
             <FormItem label="使用范围" prop="scopeType">
-              <RadioGroup v-model="form.scopeType">
+              <RadioGroup type="button" button-style="solid" v-model="form.scopeType">
                 <Radio label="ALL">全品类</Radio>
                 <Radio label="PORTION_GOODS">指定商品</Radio>
                 <Radio label="PORTION_GOODS_CATEGORY">部分商品分类</Radio>

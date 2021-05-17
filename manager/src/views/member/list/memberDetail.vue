@@ -351,7 +351,7 @@
           <Input v-model="addressForm.alias" clearable style="width: 80%" maxlength="8"/>
         </FormItem>
         <FormItem label="默认" prop="isDefault">
-          <RadioGroup v-model="addressForm.isDefault">
+          <RadioGroup type="button" button-style="solid" v-model="addressForm.isDefault">
             <Radio :label=true>是</Radio>
             <Radio :label=false>否</Radio>
           </RadioGroup>

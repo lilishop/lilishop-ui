@@ -77,7 +77,7 @@
                 <dt>是否同意</dt>
                 <dd>
                   <div class="div-content">
-                    <RadioGroup v-model="params.serviceStatus">
+                    <RadioGroup type="button" button-style="solid" v-model="params.serviceStatus">
                       <Radio label="PASS">
                         <span>同意</span>
                       </Radio>

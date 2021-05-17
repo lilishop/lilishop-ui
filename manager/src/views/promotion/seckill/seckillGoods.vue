@@ -125,7 +125,7 @@
     <Modal v-model="showModal" title="审核商品">
       <Form ref="form" :model="params" :rules="rules">
         <FormItem label="审核状态">
-          <RadioGroup v-model="params.applyStatus">
+          <RadioGroup v-model="params.applyStatus" type="button" button-style="solid">
             <Radio label="PASS">通过</Radio>
             <Radio label="REFUSE">拒绝</Radio>
           </RadioGroup>

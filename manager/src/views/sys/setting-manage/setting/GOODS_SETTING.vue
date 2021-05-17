@@ -2,7 +2,7 @@
   <div class="layout">
     <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
       <FormItem label="商品审核" prop="goodsCheck">
-        <RadioGroup v-model="formValidate.goodsCheck">
+        <RadioGroup type="button" button-style="solid" v-model="formValidate.goodsCheck">
           <Radio label="true">开启</Radio>
           <Radio label="false">关闭</Radio>
 
