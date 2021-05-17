@@ -45,7 +45,7 @@
                 </div>
                 <div class="sign-out" @click="signOutFun">
                   <Icon type="md-exit"></Icon>
-                  <p>退出登陆</p>
+                  <p>退出登录</p>
                 </div>
               </div>
             </DropdownMenu>
@@ -173,6 +173,8 @@ export default {
       storage.removeItem('accessToken');
       storage.removeItem('refreshToken');
       storage.removeItem('userInfo');
+      storage.removeItem('cartNum');
+      this.$store.commit('SET_CARTNUM', 0)
       this.$router.push('/login');
     },
     goUserCenter (path) { // 跳转我的订单，我的足迹
