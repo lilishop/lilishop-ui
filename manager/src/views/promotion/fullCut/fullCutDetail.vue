@@ -1,7 +1,7 @@
 <template>
   <div>
     <Card>
-      <Form ref="form" :model="form" :label-width="120" :rules="formRule">
+      <Form ref="form" :model="form" :label-width="120">
         <div class="base-info-item">
           <h4>基本信息</h4>
           <div class="form-item-view">
@@ -216,14 +216,19 @@ export default {
           },
         },
         {
-          title: "库存",
+          title: "图片",
           key: "quantity",
           minWidth: 40,
         },
         {
-          title: "商品二维码",
-          slot: "QRCode",
+          title: "库存",
+          key: "quantity",
+          minWidth: 40,
         },
+        // {
+        //   title: "商品二维码",
+        //   slot: "QRCode",
+        // },
       ],
       options: {
         disabledDate(date) {

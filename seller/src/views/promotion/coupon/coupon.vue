@@ -141,48 +141,94 @@ export default {
           type: "selection",
           width: 60,
           align: "center",
+          fixed: "left",
         },
         {
           title: "活动名称",
           key: "promotionName",
           minWidth: 120,
+          fixed: "left",
         },
         {
           title: "优惠券名称",
           key: "couponName",
           minWidth: 120,
+          tooltip: true
+        }, {
+          title: "面额/折扣",
+          key: "price",
+          width: 120,
+          render: (h, params) => {
+            if (params.row.price) {
+              return h(
+                "div",
+                this.$options.filters.unitPrice(params.row.price, "￥")
+              );
+            } else {
+              return h("div", params.row.couponDiscount + "折");
+            }
+          },
+        },
+
+        {
+          title: "领取数量/总数量",
+          key: "publishNum",
+          width: 100,
+          render: (h, params) => {
+            return h(
+              "div", params.row.receivedNum + "/" + params.row.publishNum)
+          }
         },
         {
           title: "优惠券类型",
           key: "couponType",
-          minWidth: 50,
+          width: 120,
           render: (h, params) => {
             let text = "未知";
-            if (params.row.couponType == "DISCOUNT") {
+            if (params.row.couponType === "DISCOUNT") {
               text = "打折";
-            } else if (params.row.couponType == "PRICE") {
+            } else if (params.row.couponType === "PRICE") {
               text = "减免现金";
             }
             return h("div", [text]);
           },
         },
         {
-          title: "面额",
-          key: "price",
-          minWidth: 40,
+          title: "品类描述",
+          key: "scopeType",
+          width: 100,
+          render: (h, params) => {
+            let text = "未知";
+            if (params.row.scopeType == "ALL") {
+              text = "全品类";
+            } else if (params.row.scopeType == "PORTION_GOODS_CATEGORY") {
+              text = "商品分类";
+            } else if (params.row.scopeType == "PORTION_SHOP_CATEGORY") {
+              text = "店铺分类";
+            } else if (params.row.scopeType == "PORTION_GOODS") {
+              text = "指定商品";
+            }
+            return h("div", [text]);
+          },
         },
         {
-          title: "折扣",
-          key: "couponDiscount",
-          minWidth: 40,
+          title: "活动时间",
+          minWidth: 120,
+          render: (h, params) => {
+            return h("div", {
+              domProps:
+                {innerHTML: params.row.startTime + "<br/>" + params.row.endTime}
+            });
+          },
         },
         {
           title: "状态",
-          key: "status",
-          minWidth: 30,
+          key: "promotionStatus",
+          minWidth: 100,
+          fixed: "right",
           render: (h, params) => {
             let text = "未知",
-              color = "default";
+              color = "";
             if (params.row.promotionStatus == "NEW") {
               text = "未开始";
               color = "default";
@@ -210,28 +256,11 @@ export default {
           },
         },
         {
-          title: "品类描述",
-          key: "scopeType",
-          minWidth: 120,
-          render: (h, params) => {
-            let text = "未知";
-            if (params.row.scopeType == "ALL") {
-              text = "全品类";
-            } else if (params.row.scopeType == "PORTION_GOODS_CATEGORY") {
-              text = "部分商品分类";
-            } else if (params.row.scopeType == "PORTION_GOODS") {
-              text = "指定商品";
-            } else if (params.row.scopeType == "PORTION_SHOP_CATEGORY") {
-              text = "部分店铺分类";
-            }
-            return h("div", [text]);
-          },
-        },
-        {
           title: "操作",
           slot: "action",
           align: "center",
-          width: 200,
+          fixed: "right",
+          width: 80,
         },
       ],
       data: [], // 表单数据

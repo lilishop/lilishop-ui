@@ -348,10 +348,6 @@ export default {
           minWidth: 40,
         },
         {
-          title: "商品二维码",
-          slot: "QRCode",
-        },
-        {
           title: "操作",
           slot: "action",
           minWidth: 50,
