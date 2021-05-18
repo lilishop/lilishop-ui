@@ -396,7 +396,7 @@ export default {
       let ids = [];
       let list = [];
       this.form.promotionGoodsList.forEach((e) => {
-        ids.push(e.id);
+        ids.push(e.skuId);
       });
       item.forEach((e) => {
         if (!ids.includes(e.id)) {

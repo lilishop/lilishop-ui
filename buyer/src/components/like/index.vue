@@ -11,7 +11,7 @@
       >
         <img :src="item.img" alt="" />
         <div class="likeTitle">{{ item.title }}</div>
-        <div class="likePrice">{{ item.price }}</div>
+        <div class="likePrice">{{ item.price | unitPrice }}</div>
       </Col>
     </Row>
   </div>

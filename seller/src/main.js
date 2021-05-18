@@ -54,6 +54,12 @@ Vue.prototype.setStore = setStore;
 Vue.prototype.getStore = getStore;
 Vue.prototype.removeStore = removeStore;
 Vue.prototype.md5 = md5;
+Vue.prototype.linkTo = function (goodsId, skuId, link='https://pc-b2b2c.pickmall.cn') {  // 跳转买家端商品
+  window.open(`${link}/goodsDetail?goodsId=${goodsId}&skuId=${skuId}`, '_blank')
+};
+Vue.prototype.wapLinkTo = function (goodsId, skuId) { // app端二维码
+  return `https://m-b2b2c.pickmall.cn/pages/product/goods?id=${skuId}&goodsId=${goodsId}`
+};
 
 Array.prototype.remove = function(from, to) {
   var rest = this.slice((to || from) + 1 || this.length);

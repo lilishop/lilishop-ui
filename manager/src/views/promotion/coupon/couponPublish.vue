@@ -459,7 +459,7 @@ export default {
       let ids = [];
       let list = [];
       this.form.promotionGoodsList.forEach((e) => {
-        ids.push(e.id);
+        ids.push(e.skuId);
       });
       item.forEach((e) => {
         if (!ids.includes(e.id)) {
@@ -478,7 +478,7 @@ export default {
     },
     getGoodsCategory(e) {
       // 获取级联选择器商品分类id
-      console.log(e);
+      // console.log(e);
     },
 
     async getCagetoryList() {

@@ -31,7 +31,7 @@
 
                   <div style="margin-left: 13px;">
                     <div class="div-zoom" >
-                      <a>{{scope.row.goodsName}}</a>
+                      <a @click="linkTo(scope.row.id,scope.row.skuId)">{{scope.row.goodsName}}</a>
                     </div>
                   </div>
                 </div>

@@ -9,18 +9,18 @@
           placeholder="请填写公司信息"
         />
       </FormItem>
-      <FormItem prop="addressIdPath" label="公司所在地">
-        <!-- <Input type="text" v-model="form.addressIdPath" placeholder="请选择公司所在地" /> -->
+      <FormItem prop="storeAddressIdPath" label="公司所在地">
+        <!-- <Input type="text" v-model="form.storeAddressIdPath" placeholder="请选择公司所在地" /> -->
         <region
           style="width: 250px"
           @selected="selectedRegion"
           :addressId="address"
         />
       </FormItem>
-      <FormItem prop="companyAddress" label="公司详细地址">
+      <FormItem prop="storeAddressDetail" label="公司详细地址">
         <Input
           type="text"
-          v-model="form.companyAddress"
+          v-model="form.storeAddressDetail"
           placeholder="请填写公司详细信息"
         />
       </FormItem>
@@ -211,8 +211,8 @@ export default {
       },
       rules: { // 验证规则
         companyName: [{ required: true, message: '请填写公司信息' }],
-        addressIdPath: [{ required: true, message: '请选择公司所在地' }],
-        companyAddress: [{ required: true, message: '请填写公司详细地址' }],
+        storeAddressIdPath: [{ required: true, message: '请选择公司所在地' }],
+        storeAddressDetail: [{ required: true, message: '请填写公司详细地址' }],
         employeeNum: [
           { required: true, message: '请填写公司员工总数' },
           { pattern: RegExp.integer, message: '只能填写正整数' }
@@ -270,18 +270,26 @@ export default {
     },
     selectedRegion (item) {
       // 地址选择回显
-      this.$set(this.form, 'addressIdPath', item[0].toString());
+      this.$set(this.form, 'storeAddressIdPath', item[0].toString());
       this.$set(
         this.form,
-        'addressPath',
+        'companyAddressPath',
         item[1].toString().replace(/\s/g, '')
       );
     },
     beforeUpload () {
       this.uploadLoading = true;
+      if (this.form.licencePhoto.length >= 3) {
+        this.$Message.warning('最多上传三张图片')
+        return false;
+      }
     },
     beforeUpload1 () {
       this.uploadLoading1 = true;
+      if (this.form.legalPhoto.length >= 3) {
+        this.$Message.warning('最多上传三张图片')
+        return false;
+      }
     },
     handleSuccess (res, file) {
       this.uploadLoading = false;
@@ -328,7 +336,7 @@ export default {
       if (this.form.licencePhoto) {
         this.form.legalPhoto = this.content.legalPhoto.split(',');
         this.form.licencePhoto = this.content.licencePhoto.split(',');
-        this.address = this.form.addressIdPath;
+        this.address = this.form.storeAddressIdPath;
       }
     }
   }

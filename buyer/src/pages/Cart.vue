@@ -17,9 +17,9 @@
       <div class="available-area">
         <div class="cart-steps">
           <span :class="stepIndex == 0 ? 'active' : ''">1.我的购物车</span>
-          <Icon :class="stepIndex == 0 ? 'active-arrow' : ''" custom="iconfont icon-xiayibu"></Icon>
+          <Icon :class="stepIndex == 0 ? 'active-arrow' : ''" custom="icomoon icon-next"></Icon>
           <span :class="stepIndex == 1 ? 'active' : ''">2.填写订单信息</span>
-          <Icon :class="stepIndex == 1 ? 'active-arrow' : ''" custom="iconfont icon-xiayibu"></Icon>
+          <Icon :class="stepIndex == 1 ? 'active-arrow' : ''" custom="icomoon icon-next"></Icon>
           <span :class="stepIndex == 2 ? 'active' : ''">3.成功提交订单</span>
         </div>
       </div>
@@ -44,7 +44,7 @@
             <div>
               <Checkbox v-model="shop.checked" @on-change="changeChecked(shop.checked, 'shop', shop.storeId)"></Checkbox>
               <span class="go-shop-page" @click="goShopPage(shop.storeId)">{{shop.storeName}}</span>
-              <Icon class="customer-service" custom="iconfont icon-kefu" />
+              <Icon class="customer-service" custom="icomoon icon-customer-service" />
             </div>
             <span class="shop-coupon" v-if="shop.couponList.length" :class="couponAvailable === index ? 'shop-coupon-show' : ''" @click.stop="showCoupon(shop.id, index)">
               <!-- 优惠券模态框 -->

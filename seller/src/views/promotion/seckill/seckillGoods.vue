@@ -364,7 +364,7 @@ export default {
       let list = [];
 
       this.goodsList[this.tabIndex].list.forEach((e) => {
-        ids.push(e.id);
+        ids.push(e.skuId);
       });
       item.forEach((e) => {
         if (!ids.includes(e.id)) {

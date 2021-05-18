@@ -29,6 +29,7 @@
     "sockjs-client": "^1.4.0",
     "stompjs": "^2.3.3",
     "swiper": "^6.3.5",
+    "vue-qr": "^2.3.0",
     "view-design": "^4.2.0",
     "vue": "^2.6.10",
     "vue-awesome": "^4.0.2",

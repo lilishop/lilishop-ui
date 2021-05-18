@@ -112,10 +112,8 @@
           <span @click="$router.push('forgetPassword')">忘记密码</span>
         </div>
         <div class="other-login">
-          <Icon custom="iconfont icon-qq" color="" class="icon-hover" @click="handleWebLogin('QQ')"/>
-          <Icon custom="iconfont icon-weixin" color="" class="icon-hover"  @click="handleWebLogin('WECHAT_PC')"/>
-          <!-- <Icon custom="iconfont icon-zhifubao" color="" class="icon-hover" @click="handleWebLogin('ALIPAY')"/> -->
-          <!-- <Icon custom="iconfont icon-weibo" color="" class="icon-hover" @click="handleWebLogin('WEIBO')"/> -->
+          <Icon custom="icomoon icon-qq" color="" class="icon-hover" @click="handleWebLogin('QQ')"/>
+          <Icon custom="icomoon icon-wechat" color="" class="icon-hover"  @click="handleWebLogin('WECHAT_PC')"/>
         </div>
       </div>
       <!-- 拼图验证码 -->

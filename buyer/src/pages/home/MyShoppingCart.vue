@@ -1,6 +1,10 @@
 <template>
   <div>
-    <Table border ref="selection" :columns="columns" :data="shoppingCart" size="large" no-data-text="您的购物车没有商品，请先添加商品到购物车再点击购买"></Table>
+    <Table border ref="selection" :columns="columns" :data="shoppingCart" size="large" no-data-text="您的购物车没有商品，请先添加商品到购物车再点击购买">
+      <template slot-scope="{row}" slot="price">
+        <span>{{row.price | unitPrice('￥')}}</span>
+      </template>
+    </Table>
     <div class="go-to">
       <Button @click="goTo" type="primary">去付款</Button>
     </div>
@@ -55,7 +59,7 @@ export default {
         {
           title: '价格',
           width: 68,
-          key: 'price',
+          slot: 'price',
           align: 'center'
         }
       ]
