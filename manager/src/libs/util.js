@@ -9,7 +9,7 @@ let util = {
 };
 
 util.title = function (title) {
-    title = title || 'lili ';
+    title = title || 'lili 运营后台';
     window.document.title = title;
 };
 
