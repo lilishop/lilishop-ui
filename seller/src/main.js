@@ -6,6 +6,7 @@ import "./styles/theme.less";
 
 import "core-js/stable";
 import "regenerator-runtime/runtime";
+import vueQr from 'vue-qr'
 
 import App from "./App";
 import { router } from "./router/index";
@@ -42,6 +43,7 @@ Vue.use(ViewUI, {
 });
 
 Vue.use(VueClipboard);
+Vue.component(vueQr)
 
 // 挂载全局使用的方法
 Vue.prototype.getRequest = getRequest;

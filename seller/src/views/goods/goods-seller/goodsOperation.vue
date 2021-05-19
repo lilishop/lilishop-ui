@@ -527,10 +527,10 @@
                 @on-change="logisticsTemplateChange"
                 v-model="baseInfoForm.freightPayer"
               >
-                <Radio label="BUYER">
+                <Radio label="STORE">
                   <span>卖家承担运费</span>
                 </Radio>
-                <Radio label="STORE">
+                <Radio label="BUYER">
                   <span>使用物流规则</span>
                 </Radio>
               </RadioGroup>
@@ -709,7 +709,7 @@ export default {
         this.baseInfoForm = {
           salesModel: "RETAIL",
           goodsParamsList: [],
-          freightPayer: "BUYER",
+          freightPayer: "STORE",
           weight: "",
           goodsGalleryFiles: [],
           release: "true",
@@ -853,7 +853,7 @@ export default {
         /** 商品参数列表 */
         goodsParamsList: [],
         /** 运费承担者 */
-        freightPayer: "BUYER",
+        freightPayer: "STORE",
         /** 商品重量 */
         weight: "",
         /** 商品相册列表 */
@@ -1016,7 +1016,7 @@ export default {
       this.baseInfoForm = {
         salesModel: "RETAIL",
         goodsParamsList: [],
-        freightPayer: "BUYER",
+        freightPayer: "STORE",
         weight: "",
         goodsGalleryFiles: [],
         release: "true",

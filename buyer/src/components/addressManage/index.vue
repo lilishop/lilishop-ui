@@ -153,7 +153,7 @@ export default {
         if (v) {
           this.getAddrById(v);
         } else {
-          this.formData = {}
+          this.formData = {isDefault: false}
           this.$refs.form.resetFields();
         }
       }
