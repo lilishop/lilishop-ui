@@ -168,7 +168,7 @@
           </p>
           <p class="item">
             <span class="label">结算周期：</span>
-            <span class="info">
+            <span class="info" v-if="storeInfo.settlementCycle">
                <Tag
                  v-for="item in storeInfo.settlementCycle.split(',')"
                  :key="item"
