@@ -54,7 +54,7 @@
         <li class="hover-color" @click="goUserCenter('/home/MyOrder')"><span class="nav-item">我的订单</span></li>
         <li class="hover-color" @click="goUserCenter('/home/MyTracks')"><span class="nav-item">我的足迹</span></li>
         <li v-if="$route.name !== 'Cart'" style="position:relative;" @mouseenter="getCartList">
-          <i class="cart-badge" v-show="cartNum">{{cartNum < 100 ? cartNum : '99'}}</i>
+          <i class="cart-badge" v-show="Number(cartNum)">{{cartNum < 100 ? cartNum : '99'}}</i>
           <Dropdown placement="bottom-start">
             <router-link to="cart" target="_blank">
               <Icon

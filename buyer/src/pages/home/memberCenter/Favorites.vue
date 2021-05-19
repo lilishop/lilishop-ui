@@ -15,7 +15,7 @@
             {{params.type === 'GOODS'? item.goodsName : item.storeName}}
           </div>
           <div class="goodsPrice">
-            <span v-if="params.type === 'GOODS'">{{item.price | unitPrice}}</span>
+            <span v-if="params.type === 'GOODS'">{{item.price | unitPrice('￥')}}</span>
             <Tag color="error" v-if="item.selfOperated">商家自营</Tag>
           </div>
           <div class="goodsBuy">

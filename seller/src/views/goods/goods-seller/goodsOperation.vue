@@ -1839,18 +1839,19 @@ export default {
             this.$Message.error("请上传商品图片");
             return;
           }
-          if (
-            !this.baseInfoForm.storeCategoryPath ||
-            !this.baseInfoForm.storeCategoryPath.length
-          ) {
-            this.submitLoading = false;
-            this.$Message.error("请选择店内分类");
-            return;
-          }
+          // if (
+          //   !this.baseInfoForm.storeCategoryPath ||
+          //   !this.baseInfoForm.storeCategoryPath.length
+          // ) {
+          //   this.submitLoading = false;
+          //   this.$Message.error("请选择店内分类");
+          //   return;
+          // }
           //如果选择的是买家承担运费 则运费模板重置为0
           if (this.baseInfoForm.freightPayer == "BUYER") {
             this.baseInfoForm.templateId = 0;
           }
+          
           this.baseInfoForm.skuList = this.skuTableData.map((sku) => {
             delete sku._index;
             delete sku._rowKey;

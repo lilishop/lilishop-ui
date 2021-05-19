@@ -9,9 +9,9 @@
             </div>
             <div class="cart-steps">
                 <span :class="stepIndex==1?'active':''">1.我的购物车</span>
-                <Icon :class="stepIndex==1?'active-arrow':''" custom="iconfont icon-xiayibu"></Icon>
+                <Icon :class="stepIndex==1?'active-arrow':''" custom="icomoon icon-next"></Icon>
                 <span :class="stepIndex==1?'active':''">2.填写订单信息</span>
-                <Icon :class="stepIndex==1?'active-arrow':''" custom="iconfont icon-xiayibu"></Icon>
+                <Icon :class="stepIndex==1?'active-arrow':''" custom="icomoon icon-next"></Icon>
                 <span :class="stepIndex==2?'active':''">3.成功提交订单</span>
             </div>
         </div>
@@ -62,8 +62,8 @@
                 <div class="goods-msg" v-for="(shop,shopIndex) in goodsList" :key="shopIndex">
                     <div class="shop-name">
                         <span>
-                            <span class="hover-color"  @click="goShopPage(shop.storeId)">{{shop.storeName}}</span>&nbsp;&nbsp;
-                            <Icon class="hover-color" custom="iconfont icon-kefu" />
+                          <span class="hover-color"  @click="goShopPage(shop.storeId)">{{shop.storeName}}</span>&nbsp;&nbsp;
+                          <Icon class="hover-color" custom="icomoon icon-customer-service" />
                         </span>
                         <span>
                             <p style="width:120px">配送方式：</p>
@@ -386,13 +386,17 @@ export default {
           })
         }
       })
+
       if (!params.remark.length) delete params.remark;
+
       this.$Spin.show();
       createTrade(params).then(res => {
         this.$Spin.hide();
         if (res.success) {
           this.$router.push({path: '/payment', query: {orderType: 'TRADE', sn: res.result.sn}});
         }
+      }).catch(() => {
+        this.$Spin.hide()
       });
     },
     useScope (type) {

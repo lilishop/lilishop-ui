@@ -28,13 +28,13 @@
       ></third-apply>
 
       <div class="success-page" v-if="currentIndex == 3">
-        <span v-if="storeDisable == '' || storeDisable == 'APPLYING'"
-          >入驻申请提交成功，等待平台审核</span
-        >
+        <span v-if="storeDisable == '' || storeDisable == 'APPLYING'">入驻申请提交成功，等待平台审核</span>
         <span v-if="storeDisable == 'OPEN'">申请已通过，请联系管理员</span>
         <span v-if="storeDisable == 'CLOSED'">店铺已关闭，重申请联系管理员</span>
+        <span v-if="storeDisable == 'REFUSED'">审核未通过,请修改资质信息，如有疑问请联系管理员</span>
       </div>
-      <Button v-if="currentIndex == 3" @click="$router.push('/')">返回</Button>
+      <Button v-if="currentIndex === 3" @click="$router.push('/')">返回</Button>
+      <Button type="primary" @click='currentIndex = 0' v-if="storeDisable === 'REFUSED' && currentIndex === 3">重新申请</Button>
     </div>
 
     <Modal

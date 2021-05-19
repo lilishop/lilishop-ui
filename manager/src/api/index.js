@@ -412,3 +412,8 @@ export const getChildRegion = (id) => {
 export const resetPassword = (params) => {
   return postRequest(`/user/resetPassword/${params}"`);
 };
+
+// 初始化商品索引
+export const createIndex = () => {
+  return getRequest(`/elasticsearch`);
+};

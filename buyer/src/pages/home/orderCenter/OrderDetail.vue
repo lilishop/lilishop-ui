@@ -39,7 +39,7 @@
     <!-- 订单商品 -->
     <div class="goods">
       <div class="shop-name">
-        <span @click="shopPage(order.order.storeId)">{{ order.order.storeName }}</span> &nbsp; <Icon custom="iconfont icon-kefu" />
+        <span @click="shopPage(order.order.storeId)">{{ order.order.storeName }}</span> &nbsp; <Icon custom="icomoon icon-customer-service" />
       </div>
       <table>
         <thead>
@@ -64,9 +64,9 @@
               </div>
             </td>
             <td>{{ goods.id }}</td>
-            <td>{{ goods.goodsPrice | unitPrice }}</td>
+            <td>{{ goods.goodsPrice | unitPrice('￥') }}</td>
             <td>{{ goods.num }}</td>
-            <td>{{ (goods.goodsPrice * goods.num) | unitPrice }}</td>
+            <td>{{ (goods.goodsPrice * goods.num) | unitPrice('￥') }}</td>
           </tr>
         </tbody>
       </table>

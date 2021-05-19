@@ -545,11 +545,12 @@ export default {
       this.form.promotionGoodsList.splice(index, 1);
     },
     selectedGoodsData(item) {
+      console.log(item);
       // 回显已选商品
       let ids = [];
       let list = [];
       this.form.promotionGoodsList.forEach((e) => {
-        ids.push(e.id);
+        ids.push(e.skuId);
       });
       item.forEach((e) => {
         if (!ids.includes(e.id)) {

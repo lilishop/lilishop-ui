@@ -145,6 +145,7 @@ export default {
             .then((res) => {
               this.loading = false;
               if (res.success) this.$emit('change', 3);
+              this.$parent.getData()
             })
             .catch(() => {
               this.loading = false;
@@ -156,6 +157,10 @@ export default {
     },
     beforeUpload () {
       this.uploadLoading = true;
+      if (this.form.storeLogo.length >= 3) {
+        this.$Message.warning('最多上传三张图片')
+        return false;
+      }
     },
 
     handleSuccess (res, file) {

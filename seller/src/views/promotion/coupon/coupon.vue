@@ -51,8 +51,8 @@
         </Form>
       </Row>
       <Row class="operator padding-row">
-        <Button @click="add" type="primary">添加</Button>&nbsp;
-        <Button @click="delAll">批量下架</Button>&nbsp;
+        <Button @click="add" type="primary">添加</Button>
+        <Button @click="delAll" class="ml_10">批量下架</Button>
         <!-- <Button @click="upAll">批量上架</Button> -->
       </Row>
       <Row class="padding-row">
@@ -106,7 +106,6 @@
 <script>
 import {
   getShopCouponList,
-  deleteShopCoupon,
   updateCouponStatus,
 } from "@/api/promotion";
 

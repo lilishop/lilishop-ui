@@ -60,7 +60,7 @@
                   :key="index"
                   @click="receiveCoupon(item.id)"
                   >
-                  <span v-if="item.couponType == 'PRICE'">满{{ item.consumeThreshold }}减{{item.price}}</span>
+                  <span v-if="item.couponType == 'PRICE'">满{{ item.consumeThreshold }}减{{item.price | unitPrice}}</span>
                   <span v-if="item.couponType == 'DISCOUNT'">满{{ item.consumeThreshold }}打{{item.couponDiscount}}折</span>
                   </span>
               </p>

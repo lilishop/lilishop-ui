@@ -55,14 +55,14 @@
       </div>
       <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
-
+        <Button type="primary" style="margin-left: 100px" @click="createIndex()">重新生成所有商品索引</Button>
       </div>
 
     </Form>
   </div>
 </template>
 <script>
-import { setSetting } from "@/api/index";
+import { setSetting,createIndex } from "@/api/index";
 import { handleSubmit } from "./validate";
 export default {
   props: ["res", "type"],
@@ -90,13 +90,23 @@ export default {
     this.init();
   },
   methods: {
+    //保存
     submit(name) {
       let that = this;
        if( handleSubmit(that, name )){
         this.setupSetting()
       }
     },
-
+    //重新生成所有商品索引
+    createIndex(){
+      createIndex().then((res) => {
+        if (res.success) {
+          this.$Message.success("开始生成!");
+        } else {
+          this.$Message.error("服务器异常!");
+        }
+      });
+    },
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {

@@ -64,7 +64,7 @@
 
           <div>
             <span @click="shopPage(order.storeId)">{{ order.storeName }}</span
-            >&nbsp;<Icon custom="iconfont icon-kefu" />
+            >&nbsp;<Icon custom="icomoon icon-customer-service" />
           </div>
           <div>
             <!-- 订单基础操作 -->

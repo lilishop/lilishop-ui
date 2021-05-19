@@ -111,33 +111,8 @@
                 <Input v-model="form.name"/>
               </Tooltip>
             </FormItem>
-            <FormItem
-              label="图标"
-              prop="icon"
-            >
-              <icon-choose v-model="form.icon"></icon-choose>
-            </FormItem>
             <FormItem label="前端组件" prop="frontRoute" v-if="form.level != 0">
               <Input v-model="form.frontRoute"/>
-            </FormItem>
-
-            <FormItem
-              label="第三方链接"
-              v-if="form.level == 2"
-              class="block-tool"
-            >
-              <Tooltip
-                placement="right"
-                content="前端组件需为 sys/monitor/monitor 时生效"
-                max-width="300"
-                transfer
-              >
-                <Input
-                  v-model="form.url"
-                  placeholder="http://"
-                  @on-change="changeEditUrl"
-                />
-              </Tooltip>
             </FormItem>
             <FormItem label="排序值" prop="sortOrder">
               <Tooltip
@@ -235,33 +210,8 @@
             <Input v-model="formAdd.name"/>
           </Tooltip>
         </FormItem>
-        <FormItem
-          label="图标"
-          prop="icon"
-        >
-          <icon-choose v-model="formAdd.icon"></icon-choose>
-        </FormItem>
         <FormItem label="前端组件" prop="frontRoute" v-if="formAdd.level != 0">
           <Input v-model="formAdd.frontRoute"/>
-        </FormItem>
-        <FormItem
-          label="第三方链接"
-          prop="url"
-          v-if="formAdd.level == 2"
-          class="block-tool"
-        >
-          <Tooltip
-            placement="right"
-            content="前端组件需为 sys/monitor/monitor 时生效"
-            max-width="300"
-            transfer
-          >
-            <Input
-              v-model="formAdd.url"
-              placeholder="http://"
-              @on-change="changeAddUrl"
-            />
-          </Tooltip>
         </FormItem>
         <FormItem label="排序值" prop="sortOrder">
           <Tooltip
@@ -296,14 +246,10 @@ import {
   deletePermission,
   searchPermission,
 } from "@/api/index";
-import IconChoose from "@/views/my-components/lili/icon-choose";
 import util from "@/libs/util.js";
 
 export default {
   name: "menu-manage",
-  components: {
-    IconChoose,
-  },
   data() {
     return {
       loading: true, // 加载状态
@@ -322,14 +268,12 @@ export default {
         id: "",
         title: "",
         name: "",
-        icon: "",
         path: "",
         frontRoute: "",
         parentId: "",
         buttonType: "",
         sortOrder: 0,
         level: 0,
-        url: "",
         showAlways: true,
       },
       formAdd: { // 添加表单
@@ -340,7 +284,6 @@ export default {
         name: [
           {required: true, message: "路由英文名不能为空", trigger: "blur"},
         ],
-        icon: [{required: true, message: "图标不能为空", trigger: "click"}],
         path: [{required: true, message: "路径不能为空", trigger: "blur"}],
         frontRoute: [
           {required: true, message: "前端组件不能为空", trigger: "blur"},
@@ -363,7 +306,7 @@ export default {
       this.getAllList();
     },
 
-    renderContent(h, {root, node, data}) {
+    renderContent(h, {root, node, data}) { // 渲染树形结构前面图标
       let icon = "";
       if (data.level == 0) {
         icon = "ios-navigate";
