@@ -1176,8 +1176,8 @@ export default {
     },
     //选择运费模板则展示运费规则
     logisticsTemplateChange(v) {
-      if (v == "STORE") {
-        //如果卖家承担运费 则需要查询运费规则
+      if (v == "BUYER") {
+        // 如果买家承担运费 则需要查询运费规则
         API_Shop.getShipTemplate().then((res) => {
           if (res.success) {
             this.logisticsTemplate = res.result;
@@ -1244,7 +1244,7 @@ export default {
         ...response.result,
       };
       console.warn(this.baseInfoForm);
-      if (this.baseInfoForm.freightPayer != "BUYER") {
+      if (this.baseInfoForm.freightPayer === "BUYER") {
         API_Shop.getShipTemplate().then((res) => {
           if (res.success) {
             this.logisticsTemplate = res.result;
@@ -1847,8 +1847,8 @@ export default {
           //   this.$Message.error("请选择店内分类");
           //   return;
           // }
-          //如果选择的是买家承担运费 则运费模板重置为0
-          if (this.baseInfoForm.freightPayer == "BUYER") {
+          //如果选择的是卖家承担运费 则运费模板重置为0
+          if (this.baseInfoForm.freightPayer !== "BUYER") {
             this.baseInfoForm.templateId = 0;
           }
           
