@@ -147,9 +147,7 @@ export default {
   },
   watch: {
     id: {
-      immediate: true,
       handler: function (v) {
-        console.log(v);
         if (v) {
           this.getAddrById(v);
         } else {

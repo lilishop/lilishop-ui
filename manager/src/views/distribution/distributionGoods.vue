@@ -21,7 +21,21 @@
             <Button @click="delAll">批量删除</Button>
           </Row>
           <Row>
-            <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+            <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
+              <template slot="goodsName" slot-scope="{row}">
+                <div>
+                    <div class="div-zoom">
+                      <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
+                    </div>
+                    <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+                      <div slot="content">
+                        <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                      </div>
+                      <img src="../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
+                    </Poptip>
+                  </div>
+              </template>
+            </Table>
           </Row>
           <Row type="flex" justify="end" class="page">
             <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator show-sizer></Page>
@@ -84,7 +98,7 @@ export default {
         },
         {
           title: "商品名称",
-          key: "goodsName",
+          slot: "goodsName",
           minWidth: 200,
           tooltip: true
         },
@@ -99,7 +113,6 @@ export default {
         {
           title: "库存",
           key: "quantity",
-          minWidth: 80
         },
         {
           title: "添加时间",
@@ -109,13 +122,11 @@ export default {
         {
           title: "店铺名称",
           key: "storeName",
-          minWidth: 120,
           tooltip: true
         },
         {
             title: "佣金金额",
             key: "commission",
-            minWidth: 120,
             sortable: false,
             render: (h, params) => {
                 return h("div", this.$options.filters.unitPrice(params.row.commission,'￥'));

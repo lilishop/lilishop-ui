@@ -48,7 +48,17 @@
               sortable="custom"
               @on-sort-change="changeSort"
               @on-selection-change="changeSelect"
-            ></Table>
+            >
+              <template slot-scope="{row}" slot="goodsName">
+                <a class="mr_10" @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
+                <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+                  <div slot="content">
+                    <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                  </div>
+                  <img src="../../../assets/qrcode.svg" style="vertical-align:bottom;" class="hover-pointer" width="20" height="20" alt="">
+                </Poptip>
+              </template>
+            </Table>
           </Row>
           <Row type="flex" justify="end" class="page">
             <Page
@@ -156,35 +166,29 @@
           {
             title: "会员名称",
             key: "memberName",
-            minWidth: 120,
             sortable: false,
           },
           {
             title: "订单编号",
             key: "orderSn",
-            minWidth: 120,
             sortType: "desc",
           },
           {
             title: "商品名称",
-            key: "goodsName",
-            minWidth: 120,
+            slot: "goodsName",
             sortType: "desc",
           },
           {
             title: "投诉主题",
             key: "complainTopic",
-            minWidth: 120,
           },
           {
             title: "投诉时间",
             key: "createTime",
-            minWidth: 120,
           },
           {
             title: "投诉状态",
             key: "complainStatus",
-            minWidth: 120,
             render: (h, params) => {
               if (params.row.complainStatus == "NEW") {
                 return h('div', [h('span', { }, '新投诉'),]);
@@ -206,7 +210,7 @@
             title: "操作",
             key: "action",
             align: "center",
-            width: 200,
+            width: 120,
             render: (h, params) => {
               if(params.row.complainStatus === "COMPLETE"){
                 return h("div", [
