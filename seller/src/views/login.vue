@@ -56,7 +56,7 @@
         </Row>
         <Footer />
       </Col>
-      <LangSwitch />
+      <!-- <LangSwitch /> -->
     </Row>
   </div>
 </template>
@@ -65,8 +65,6 @@
 import {
   login,
   userMsg,
-  initCaptcha,
-  drawCodeImage,
 } from "@/api/index";
 import { validateMobile } from "@/libs/validate";
 import Cookies from "js-cookie";
@@ -135,13 +133,6 @@ export default {
       // 获取用户信息
       userMsg().then((res) => {
         if (res.success) {
-          // 避免超过大小限制
-         /*  delete res.result.permissions;
-          let roles = [];
-          res.result.roles.forEach((e) => {
-            roles.push(e.name);
-          });
-          this.setStore("roles", roles); */
           this.setStore("saveLogin", this.saveLogin);
           if (this.saveLogin) {
             // 保存7天
@@ -180,11 +171,7 @@ export default {
         }
       })
     },
-
-  },
-  mounted() {
-    // this.getCaptchaImg();
-  },
+  }
 };
 </script>
 <style lang="scss" scoped>

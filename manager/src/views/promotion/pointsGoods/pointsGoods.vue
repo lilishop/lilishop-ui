@@ -70,8 +70,14 @@
           ref="table"
         >
           <template slot-scope="{ row }" slot="goodsName">
-            <div class="div-zoom" >
-              <a>{{ row.goodsSku.goodsName }}</a>
+            <div>
+              <a class="mr_10" @click="linkTo(row.goodsSku.goodsId,row.goodsSku.skuId)">{{row.goodsSku.goodsName}}</a>
+              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+                <div slot="content">
+                  <vue-qr :text="wapLinkTo(row.goodsSku.goodsId,row.goodsSku.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                </div>
+                <img src="../../../assets/qrcode.svg" style="vertical-align:middle;" class="hover-pointer" width="20" height="20" alt="">
+              </Poptip>
             </div>
           </template>
           <template slot-scope="{ row }" slot="price">
@@ -83,6 +89,11 @@
           <template slot-scope="{ row }" slot="quantity">
             <div>{{ row.goodsSku.quantity }}</div>
           </template>
+          <template slot-scope="{ row }" slot="startTime">
+            <div>{{ row.startTime }}</div>
+            <div>{{ row.endTime }}</div>
+          </template>
+          
           <template slot-scope="{ row }" slot="action">
             <Button
               v-if="row.promotionStatus == 'NEW'"
@@ -166,52 +177,39 @@ export default {
         {
           title: "市场价",
           slot: "price",
-          minWidth: 60,
         },
         {
           title: "结算价",
           slot: "settlementPrice",
-          minWidth: 60,
         },
         {
           title: "分类",
           key: "pointsGoodsCategoryName",
-          minWidth: 60,
         },
         {
           title: "库存数量",
           slot: "quantity",
-          minWidth: 60,
         },
         {
           title: "活动剩余库存",
           key: "activeStock",
-          minWidth:90,
         },
         {
           title: "兑换积分",
           key: "points",
-          minWidth: 60,
         },
         {
           title: "所属店铺",
           key: "storeName",
-          minWidth: 60,
         },
         {
           title: "活动开始时间",
-          key: "startTime",
-          minWidth: 140,
-        },
-        {
-          title: "活动结束时间",
-          key: "endTime",
-          minWidth: 140,
+          slot: "startTime",
+          minWidth:100
         },
         {
           title: "状态",
           key: "promotionStatus",
-          minWidth: 60,
           render: (h, params) => {
             let text = "未知",
               color = "";

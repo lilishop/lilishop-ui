@@ -269,11 +269,12 @@ export default {
       });
     },
     selectedRegion (item) {
+      console.log(item);
       // 地址选择回显
       this.$set(this.form, 'storeAddressIdPath', item[0].toString());
       this.$set(
         this.form,
-        'companyAddressPath',
+        'storeAddressPath',
         item[1].toString().replace(/\s/g, '')
       );
     },

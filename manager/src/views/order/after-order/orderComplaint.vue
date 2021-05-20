@@ -47,7 +47,17 @@
               sortable="custom"
               @on-sort-change="changeSort"
               @on-selection-change="changeSelect"
-            ></Table>
+            >
+              <template slot-scope="{row}" slot="goodsName">
+                <a class="mr_10" @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
+                <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+                  <div slot="content">
+                    <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                  </div>
+                  <img src="../../../assets/qrcode.svg" style="vertical-align:bottom;" class="hover-pointer" width="20" height="20" alt="">
+                </Poptip>
+              </template>
+            </Table>
           </Row>
           <Row type="flex" justify="end" class="page">
             <Page
@@ -167,7 +177,7 @@
           },
           {
             title: "商品名称",
-            key: "goodsName",
+            slot: "goodsName",
             minWidth: 170,
             tooltip: true
 
@@ -175,7 +185,6 @@
           {
             title: "投诉主题",
             key: "complainTopic",
-            minWidth: 120,
             tooltip: true
           },
           {

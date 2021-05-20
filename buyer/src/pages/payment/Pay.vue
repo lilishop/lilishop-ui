@@ -63,14 +63,13 @@
                     <div class="shop-name">
                         <span>
                           <span class="hover-color"  @click="goShopPage(shop.storeId)">{{shop.storeName}}</span>&nbsp;&nbsp;
-                          <Icon class="hover-color" custom="icomoon icon-customer-service" />
                         </span>
-                        <span>
+                        <!-- <span>
                             <p style="width:120px">配送方式：</p>
                             <Select v-model="shop.deliveryMethod" size="small">
                                 <Option v-for="item in deliveryList" :value="item.value" :key="item.value">{{ item.label }}</Option>
                             </Select>
-                        </span>
+                        </span> -->
                     </div>
                     <div class="goods-list">
                         <div class="goods-item" v-for="(goods,goodsIndex) in shop.skuList" :key="goodsIndex">
@@ -200,7 +199,7 @@ export default {
         // {value: 'LOCAL_TOWN_DELIVERY', label: '同城配送'}
       ],
       addressList: [], // 地址列表
-      selectedAddress: {}, // 所选地址的id
+      selectedAddress: {}, // 所选地址
       goodsList: [], // 商品列表
       priceDetailDTO: {}, // 商品价格
       totalNum: 0, // 购买数量
@@ -227,7 +226,6 @@ export default {
   methods: {
     init () {
       this.getGoodsDetail();
-      this.getAddress();
     },
     goAddressManage () { // 跳转地址管理页面
       this.$router.push('/home/MyAddress');
@@ -236,8 +234,10 @@ export default {
       memberAddress().then(res => {
         if (res.success) {
           this.addressList = res.result.records;
-          this.addressList.forEach((e) => {
-            if (e.isDefault) this.selectedAddress = e;
+          this.addressList.forEach((e, index) => {
+            if (e.id === this.selectedAddress.id && index > 2) {
+              this.moreAddr = true
+            }
           });
         }
       });
@@ -250,13 +250,30 @@ export default {
           this.goodsList = res.result.cartList;
           this.priceDetailDTO = res.result.priceDetailDTO;
           this.skuList = res.result.skuList;
+          let notSupArea = res.result.notSupportFreight
+          if (notSupArea) {
+            let content = [];
+            let title = ''
+            notSupArea.forEach(e => {
+              title = e.errorMessage
+              content.push(e.goodsSku.goodsName)
+            })
+            this.$Modal.warning({
+              title: '以下商品超出配送区域' || title,
+              content: content.toString()
+            })
+          }
+          if (res.result.memberAddress) {
+            this.selectedAddress = res.result.memberAddress
+          }
+          this.getAddress()
           this.totalNum = 0;
           for (let i = 0; i < this.skuList.length; i++) {
             this.totalNum += this.skuList[i].num;
           }
           this.getCouponNum()
         }
-      }).catch(() => { this.$Spin.hide(); });
+      }).catch(() => { this.$Spin.hide() });
     },
     getCouponNum  () { // 获取可用优惠券数量
       couponNum({way: this.$route.query.way}).then(res => {

@@ -44,7 +44,6 @@
             <div>
               <Checkbox v-model="shop.checked" @on-change="changeChecked(shop.checked, 'shop', shop.storeId)"></Checkbox>
               <span class="go-shop-page" @click="goShopPage(shop.storeId)">{{shop.storeName}}</span>
-              <Icon class="customer-service" custom="icomoon icon-customer-service" />
             </div>
             <span class="shop-coupon" v-if="shop.couponList.length" :class="couponAvailable === index ? 'shop-coupon-show' : ''" @click.stop="showCoupon(shop.id, index)">
               <!-- 优惠券模态框 -->

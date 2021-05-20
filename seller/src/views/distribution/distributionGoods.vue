@@ -23,16 +23,22 @@
           <Row>
             <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
               <!-- 商品栏目格式化 -->
-              <template slot="goodsSlot" slot-scope="scope">
+              <template slot="goodsSlot" slot-scope="{row}">
                 <div style="margin-top: 5px;height: 70px; display: flex;">
                   <div style="">
-                    <img :src="scope.row.thumbnail" style="height: 60px;margin-top: 3px;width: 60px">
+                    <img :src="row.thumbnail" style="height: 60px;margin-top: 3px;width: 60px">
                   </div>
 
                   <div style="margin-left: 13px;">
-                    <div class="div-zoom" >
-                      <a @click="linkTo(scope.row.id,scope.row.skuId)">{{scope.row.goodsName}}</a>
+                    <div class="div-zoom">
+                      <a @click="linkTo(row.id,row.skuId)">{{row.goodsName}}</a>
                     </div>
+                    <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+                      <div slot="content">
+                        <vue-qr :text="wapLinkTo(row.id,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                      </div>
+                      <img src="../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
+                    </Poptip>
                   </div>
                 </div>
 

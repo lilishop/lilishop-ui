@@ -225,7 +225,6 @@ export default {
         {
           title: "状态",
           key: "promotionStatus",
-          minWidth: 100,
           fixed: "right",
           render: (h, params) => {
             let text = "未知",

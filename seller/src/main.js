@@ -6,6 +6,7 @@ import "./styles/theme.less";
 
 import "core-js/stable";
 import "regenerator-runtime/runtime";
+import vueQr from 'vue-qr'
 
 import App from "./App";
 import { router } from "./router/index";
@@ -42,6 +43,7 @@ Vue.use(ViewUI, {
 });
 
 Vue.use(VueClipboard);
+Vue.component(vueQr)
 
 // 挂载全局使用的方法
 Vue.prototype.getRequest = getRequest;
@@ -55,7 +57,7 @@ Vue.prototype.getStore = getStore;
 Vue.prototype.removeStore = removeStore;
 Vue.prototype.md5 = md5;
 Vue.prototype.linkTo = function (goodsId, skuId, link='https://pc-b2b2c.pickmall.cn') {  // 跳转买家端商品
-  window.open(`${link}/goodsDetail?goodsId=${goodsId}&skuId=${skuId}`, '_blank')
+  window.open(`${link}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`, '_blank')
 };
 Vue.prototype.wapLinkTo = function (goodsId, skuId) { // app端二维码
   return `https://m-b2b2c.pickmall.cn/pages/product/goods?id=${skuId}&goodsId=${goodsId}`

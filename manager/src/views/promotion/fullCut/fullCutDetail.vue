@@ -156,13 +156,16 @@
                 :data="form.promotionGoodsList"
                 @on-selection-change="changeSelect"
               >
-                <template slot-scope="{ row }" slot="QRCode">
-                  <img
-                    :src="row.QRCode || '../../../assets/lili.png'"
-                    width="50px"
-                    height="50px"
-                    alt=""
-                  />
+                <template slot-scope="{ row }" slot="goodsName">
+                  <div>
+                    <a class="mr_10" @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
+                    <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+                      <div slot="content">
+                        <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                      </div>
+                      <img src="../../../assets/qrcode.svg" style="vertical-align:middle;" class="hover-pointer" width="20" height="20" alt="">
+                    </Poptip>
+                  </div>
                 </template>
               </Table>
             </FormItem>
@@ -201,7 +204,7 @@ export default {
         },
         {
           title: "商品名称",
-          key: "goodsName",
+          slot: "goodsName",
           minWidth: 120,
         },
         {
@@ -216,19 +219,10 @@ export default {
           },
         },
         {
-          title: "图片",
-          key: "quantity",
-          minWidth: 40,
-        },
-        {
           title: "库存",
           key: "quantity",
           minWidth: 40,
-        },
-        // {
-        //   title: "商品二维码",
-        //   slot: "QRCode",
-        // },
+        }
       ],
       options: {
         disabledDate(date) {

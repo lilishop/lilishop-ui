@@ -147,13 +147,11 @@ export default {
   },
   watch: {
     id: {
-      immediate: true,
       handler: function (v) {
-        console.log(v);
         if (v) {
           this.getAddrById(v);
         } else {
-          this.formData = {}
+          this.formData = {isDefault: false}
           this.$refs.form.resetFields();
         }
       }

@@ -27,7 +27,7 @@
       </div>
       <Footer />
       </Col>
-      <LangSwitch />
+      <!-- <LangSwitch /> -->
     </Row>
   </div>
 </template>
