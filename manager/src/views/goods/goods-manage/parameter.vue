@@ -76,8 +76,8 @@
             </Select>
           </FormItem>
           <FormItem label="选项" prop="specName3">
-            <Checkbox :value="Number" v-model="paramForm.required == 1">必填</Checkbox>
-            <Checkbox v-model="paramForm.isIndex == 1">可索引</Checkbox>
+            <Checkbox label=1 v-model="paramForm.required">必填</Checkbox>
+            <Checkbox label=1 v-model="paramForm.isIndex">可索引</Checkbox>
           </FormItem>
         </Form>
 
@@ -184,8 +184,8 @@ export default {
       this.paramForm = {
         paramName: param.paramName,
         options:  param.options.split(","),
-        required: param.required,
-        isIndex: param.isIndex,
+        required: param.required==1?true:false,
+        isIndex: param.isIndex==1?true:false,
         groupId: group.groupId,
         categoryId: this.categoryId,
         id: param.id,
@@ -233,6 +233,7 @@ export default {
               }
             });
           } else {
+            console.warn(this.paramGroupForm)
             updateParamsGroup(this.paramGroupForm).then((res) => {
               this.submitLoading = false;
               if (res.success) {
@@ -263,6 +264,7 @@ export default {
               }
             });
           } else {
+            console.warn(this.paramForm.isIndex)
             this.paramForm.isIndex = Number(this.paramForm.isIndex);
             this.paramForm.required = Number(this.paramForm.required);
             updateGoodsParams(this.paramForm).then((res) => {
