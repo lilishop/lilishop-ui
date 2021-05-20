@@ -592,25 +592,15 @@
                     :key="index"
                     :label="`${goodsParamsList.paramName}：`"
                   >
-                    <Input
-                      v-if="goodsParamsList.paramType === 1"
-                      type="text"
-                      v-model="goodsParamsList.paramValue"
-                      placeholder="长度为最多50个字符"
-                      maxlength="50"
-                      clearable
-                      style="width: 260px"
-                    />
                     <Select
                       v-model="goodsParamsList.paramValue"
-                      v-if="goodsParamsList.paramType === 2"
                       placeholder="请选择"
                       style="width: 200px"
                       clearable
                     >
                       <Option
                         v-for="option in goodsParamsList.optionList"
-                        :key="option"
+                        :key="option.paramValue"
                         :label="option"
                         :value="option"
                       ></Option>
@@ -1370,18 +1360,14 @@ export default {
                     (ij) => ij.paramName === elem.paramName
                   )
                 ) {
-                  if (elem.paramType === 2) {
-                    elem.optionList = elem.options.split(",");
-                  }
+                  elem.optionList = elem.options.split(",");
                   this.baseInfoForm.goodsParamsList.push(elem);
                 }
                 if (this.$route.query.id || this.draftId) {
                   this.baseInfoForm.goodsParamsList = this.baseInfoForm.goodsParamsList.map(
                     (i) => {
                       if (i.paramId === elem.id || i.id === elem.id) {
-                        if (elem.paramType === 2) {
-                          elem.optionList = elem.options.split(",");
-                        }
+                        elem.optionList = elem.options.split(",");
                         i = {
                           ...i,
                           ...elem,
@@ -1851,7 +1837,7 @@ export default {
           if (this.baseInfoForm.freightPayer !== "BUYER") {
             this.baseInfoForm.templateId = 0;
           }
-          
+
           this.baseInfoForm.skuList = this.skuTableData.map((sku) => {
             delete sku._index;
             delete sku._rowKey;
