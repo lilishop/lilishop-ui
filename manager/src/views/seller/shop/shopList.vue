@@ -111,7 +111,16 @@ export default {
           title: "店铺地址",
           key: "storeAddressPath",
           width: 300,
-          tooltip: true
+          tooltip: true,
+          render: (h, params) => {
+            return h(
+              "Tag",
+              {
+
+              },
+              params.row.storeAddressPath ||  "暂未填写"
+            );
+          },
         },
         {
           title: "是否自营",

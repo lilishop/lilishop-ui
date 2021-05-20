@@ -99,6 +99,15 @@
             key: "storeAddressPath",
             width: 300,
             sortable: false,
+            render: (h, params) => {
+            return h(
+              "Tag",
+              {
+
+              },
+              params.row.storeAddressPath ||  "暂未填写"
+            );
+          },
           },
           {
             title: "是否自营",
