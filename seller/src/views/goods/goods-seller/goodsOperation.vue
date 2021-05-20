@@ -1826,14 +1826,17 @@ export default {
             this.$Message.error("请上传商品图片");
             return;
           }
-          // if (
-          //   !this.baseInfoForm.storeCategoryPath ||
-          //   !this.baseInfoForm.storeCategoryPath.length
-          // ) {
-          //   this.submitLoading = false;
-          //   this.$Message.error("请选择店内分类");
-          //   return;
-          // }
+          let flag = false;
+          this.baseInfoForm.goodsParamsList.forEach((e)=> {
+            if(e.required === 1 && e.paramValue === null){
+              flag = true
+            }
+          });
+          if(flag){
+            this.$Message.error("请填写参数信息 参数不能为空");
+            this.submitLoading = false;
+            return;
+          }
           //如果选择的是卖家承担运费 则运费模板重置为0
           if (this.baseInfoForm.freightPayer !== "BUYER") {
             this.baseInfoForm.templateId = 0;
@@ -1852,6 +1855,12 @@ export default {
               (i) => i.url
             );
           }
+          /** 参数校验 **/
+         /* Object.keys(this.baseInfoForm.goodsParamsList).forEach((item) => {
+            console.warn(item.paramName)
+          });*/
+
+
 
           if (this.goodsId) {
             API_GOODS.editGoods(this.goodsId, this.baseInfoForm).then((res) => {
