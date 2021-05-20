@@ -22,17 +22,17 @@
           @on-selection-change="changeSelect"
         >
           <template slot-scope="{ row }" slot="goodsName">
-            <span>{{ row.goodsName }}</span>
+            <div>
+              <a class="mr_10" @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
+              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+                <div slot="content">
+                  <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                </div>
+                <img src="../../../assets/qrcode.svg" style="vertical-align:middle;" class="hover-pointer" width="20" height="20" alt="">
+              </Poptip>
+            </div>
           </template>
-          <template slot-scope="{ row }" slot="QRCode">
-            <Button @click="toBuyerGoods(row)" type="info">商品链接地址</Button>
-            <Button
-              v-if="row.QRCode != null"
-              type="success"
-              @click="viewImg(row.QRCode)"
-              >查看二维码</Button
-            >
-          </template>
+        
         </Table>
       </Row>
       <Row type="flex" justify="end" class="page operation">

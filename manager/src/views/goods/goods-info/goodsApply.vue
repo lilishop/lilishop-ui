@@ -262,24 +262,24 @@
       };
     },
     methods: {
-      init() {
+      init() { // 初始化数据
         this.getDataList();
       },
-      changePage(v) {
+      changePage(v) { // 改变页码
         this.searchForm.pageNumber = v;
         this.getDataList();
         this.clearSelectAll();
       },
-      changePageSize(v) {
+      changePageSize(v) { // 改变每页数量
         this.searchForm.pageSize = v;
         this.getDataList();
       },
-      handleSearch() {
+      handleSearch() { // 搜索
         this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = 10;
         this.getDataList();
       },
-      changeSort(e) {
+      changeSort(e) { // 排序
         this.searchForm.sort = e.key;
         this.searchForm.order = e.order;
         if (e.order === "normal") {
@@ -287,14 +287,14 @@
         }
         this.getDataList();
       },
-      clearSelectAll() {
+      clearSelectAll() { // 取消全部选中
         this.$refs.table.selectAll(false);
       },
-      changeSelect(e) {
+      changeSelect(e) { // 选中一项
         this.selectList = e;
         this.selectCount = e.length;
       },
-      getDataList() {
+      getDataList() { // 获取列表数据
         this.loading = true;
         // 带多条件搜索参数获取表单数据
         this.searchForm.isAuth = 0;
@@ -306,7 +306,7 @@
           }
         });
       },
-      examine(v, isAuth) {
+      examine(v, isAuth) { // 审核商品
         let examine = "通过";
         this.goodsAuditForm.isAuth = "PASS";
         if (isAuth != 1) {

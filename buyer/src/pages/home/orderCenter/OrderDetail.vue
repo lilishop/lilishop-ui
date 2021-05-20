@@ -39,7 +39,7 @@
     <!-- 订单商品 -->
     <div class="goods">
       <div class="shop-name">
-        <span @click="shopPage(order.order.storeId)">{{ order.order.storeName }}</span> &nbsp; <Icon custom="icomoon icon-customer-service" />
+        <span @click="shopPage(order.order.storeId)">{{ order.order.storeName }}</span>
       </div>
       <table>
         <thead>
