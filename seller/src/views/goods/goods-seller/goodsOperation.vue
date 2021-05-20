@@ -1827,13 +1827,15 @@ export default {
             return;
           }
           let flag = false;
+          let paramValue = "";
           this.baseInfoForm.goodsParamsList.forEach((e)=> {
-            if(e.required === 1 && e.paramValue === null){
+            if(e.required === 1 && e.paramValue === null || e.paramValue === undefined){
               flag = true
+              paramValue = e.paramName
             }
           });
           if(flag){
-            this.$Message.error("请填写参数信息 参数不能为空");
+            this.$Message.error(paramValue +" 参数值不能为空");
             this.submitLoading = false;
             return;
           }
