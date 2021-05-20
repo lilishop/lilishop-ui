@@ -31,9 +31,7 @@
           </p>
           <template v-if="group.params && group.params.length > 0">
             <div v-for="param in group.params" :key="param.param_id" class="params">
-              <span>{{ param.paramName }} 【{{
-                  param.paramType | paramTypeFilter
-                }}】</span>
+              <span>{{ param.paramName }}</span>
 
               <span>
                 <i-button type="text" @click="handleEditParams(group, param)">编辑</i-button>
@@ -56,19 +54,30 @@
           <FormItem label="参数名称" prop="paramName">
             <Input v-model="paramForm.paramName" style="width: 100%" />
           </FormItem>
-          <FormItem label="参数类型" prop="paramType">
-            <Select :loading="userLoading" v-model="paramForm.paramType">
-              <Option :value="1" :key="1">输入项</Option>
-              <Option :value="2" :key="2">选择项</Option>
+          <FormItem label="可选值" prop="options">
+            <Select
+              v-model="paramForm.options"
+              placeholder="输入后回车添加"
+              multiple
+              filterable
+              allow-create
+              :popper-append-to-body="false"
+              popper-class="spec-values-popper"
+              style="width: 100%; text-align: left; margin-right: 10px"
+            >
+              <Option
+                v-for="item in ops"
+                :value="item"
+                :key="item"
+                :label="item"
+              >
+                {{item}}
+              </Option>
             </Select>
           </FormItem>
-          <FormItem label="可选值" prop="options">
-            <i-input v-model="paramForm.options" type="textarea" :rows="3" placeholder="请输入可选值,选择项实用逗号分隔"></i-input>
-          </FormItem>
-
           <FormItem label="选项" prop="specName3">
-            <Checkbox :value="Number" v-model="paramForm.required">必填</Checkbox>
-            <Checkbox v-model="paramForm.isIndex">可索引</Checkbox>
+            <Checkbox label=1 v-model="paramForm.required">必填</Checkbox>
+            <Checkbox label=1 v-model="paramForm.isIndex">可索引</Checkbox>
           </FormItem>
         </Form>
 
@@ -127,6 +136,10 @@ export default {
       paramId: "",
       //参数表单
       paramForm: {},
+      /** 参数值 **/
+      ops:{
+        options: []
+      },
       paramGroupForm: {},
       /** 添加、编辑参数 规格 */
       formValidate: {
@@ -170,14 +183,15 @@ export default {
     handleEditParams(group, param) {
       this.paramForm = {
         paramName: param.paramName,
-        paramType: param.paramType,
-        options: param.options,
-        required: param.required,
-        isIndex: param.isIndex,
+        options:  param.options.split(","),
+        required: param.required==1?true:false,
+        isIndex: param.isIndex==1?true:false,
         groupId: group.groupId,
         categoryId: this.categoryId,
         id: param.id,
       };
+      console.warn(this.paramForm.options)
+      this.ops = this.paramForm.options
       this.modalType = 1;
       this.modalTitle = "修改参数";
       this.dialogParamsVisible = true;
@@ -194,7 +208,14 @@ export default {
       this.dialogParamsGroupVisible = true;
     },
     handleAddParamsGroup() {
+      this.paramGroupForm = {
+
+      };
+      this.ops = {
+
+      };
       (this.paramGroupForm.categoryId = this.categoryId), (this.modalType = 0);
+
       this.modalTitle = "添加参数组";
       this.dialogParamsGroupVisible = true;
     },
@@ -212,6 +233,7 @@ export default {
               }
             });
           } else {
+            console.warn(this.paramGroupForm)
             updateParamsGroup(this.paramGroupForm).then((res) => {
               this.submitLoading = false;
               if (res.success) {
@@ -242,6 +264,7 @@ export default {
               }
             });
           } else {
+            console.warn(this.paramForm.isIndex)
             this.paramForm.isIndex = Number(this.paramForm.isIndex);
             this.paramForm.required = Number(this.paramForm.required);
             updateGoodsParams(this.paramForm).then((res) => {
