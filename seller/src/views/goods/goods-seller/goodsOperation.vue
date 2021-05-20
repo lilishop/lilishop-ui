@@ -576,13 +576,13 @@
           </div>
           <div class="form-item-view-bottom">
             <Collapse
-              active-key="1"
+              v-model="show"
               v-for="paramsgroup in goodsParams"
               :title="paramsgroup.groupName"
               style="text-align: left"
               :key="paramsgroup.groupName"
             >
-              <Panel key="1">
+              <Panel key="1" name="1">
                 {{ paramsgroup.groupName }}
                 <p slot="content">
                   <FormItem
@@ -762,6 +762,7 @@ export default {
     };
 
     return {
+      show: '1',
       //提交状态
       submitLoading: false,
       //上传图片路径
