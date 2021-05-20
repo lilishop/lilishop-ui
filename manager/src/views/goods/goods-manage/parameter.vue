@@ -183,16 +183,15 @@ export default {
     handleEditParams(group, param) {
       this.paramForm = {
         paramName: param.paramName,
-        options:  param.options,
+        options:  param.options.split(","),
         required: param.required,
         isIndex: param.isIndex,
         groupId: group.groupId,
         categoryId: this.categoryId,
         id: param.id,
       };
-      console.warn(this.paramForm.isIndex)
-      this.options = this.paramForm.options.split(",")
-      this.ops = this.paramForm.options.split(",")
+      console.warn(this.paramForm.options)
+      this.ops = this.paramForm.options
       this.modalType = 1;
       this.modalTitle = "修改参数";
       this.dialogParamsVisible = true;
