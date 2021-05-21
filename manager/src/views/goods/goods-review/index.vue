@@ -53,7 +53,7 @@
         <div class="right-container">
           <div class="border-b">{{ infoData.goodsName }}</div>
           <div class="border-b">
-            <div class="div-height"> 店铺名称：{{ infoData.sellerName }}</div>
+            <div class="div-height"> 店铺名称：{{ infoData.storeName }}</div>
             <div class="div-height"> 订单号：{{ infoData.orderNo }}</div>
           </div>
 

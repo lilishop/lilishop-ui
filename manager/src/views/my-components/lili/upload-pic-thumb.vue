@@ -9,7 +9,7 @@
       @end="onEnd"
     >
       <div class="upload-list" v-for="(item, index) in uploadList" :key="index">
-        <div v-if="item.status == 'finished'">
+        <div v-if="item.status == 'finished'" style="height:60px;">
           <img :src="item.url" />
           <div class="upload-list-cover">
             <Icon type="ios-eye-outline" @click="handleView(item.url)"></Icon>
