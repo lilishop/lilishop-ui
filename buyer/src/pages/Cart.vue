@@ -119,7 +119,7 @@
             <div class="ml_20 total-price">
               总价（不含运费）:<span>{{ priceDetailDTO.billPrice | unitPrice("￥") }}</span>
             </div>
-            <div class="pay ml_20" @click="pay">去支付</div>
+            <div class="pay ml_20" @click="pay">去结算</div>
           </div>
         </div>
       </div>
