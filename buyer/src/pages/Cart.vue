@@ -50,7 +50,7 @@
               <div v-if="couponAvailable === index">
                 <div class="coupon-item" v-for="(item, index) in shop.couponList" :key="index">
                   <span v-if="item.couponType === 'PRICE'">￥{{ item.price }}</span>
-                  <span v-if="item.couponType === 'DISCOUNT'">{{ item.discount }}折</span>
+                  <span v-if="item.couponType === 'DISCOUNT'">{{ item.couponDiscount }}折</span>
                   <span>满{{item.consumeThreshold}}元可用</span>
                   <Button class="coupon-btn" size="small" type="primary" @click="receiveShopCoupon(item)" :disabled="item.disabled">{{ item.disabled ? "已领取" : "领取" }}</Button>
                 </div>

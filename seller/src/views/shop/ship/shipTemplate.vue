@@ -46,13 +46,13 @@
                     {{children.firstCompany}}
                   </td>
                   <td>
-                    <span class="yuan">￥</span><span class="integer">{{children.firstPrice}}</span>
+                    <span class="yuan">￥</span><span class="integer">{{children.firstPrice | unitPrice}}</span>
                   </td>
                   <td>
                     {{children.continuedCompany}}
                   </td>
                   <td class="bdr">
-                    <span class="yuan">￥</span><span class="integer">{{children.continuedPrice}}</span>
+                    <span class="yuan">￥</span><span class="integer">{{children.continuedPrice | unitPrice}}</span>
                   </td>
                 </tr>
               </tbody>

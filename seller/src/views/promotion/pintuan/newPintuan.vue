@@ -8,26 +8,14 @@
             活动名称将显示在对人拼团活动列表中，方便商家管理使用，最多输入25个字符
           </div>
         </FormItem>
-        <FormItem label="活动时间" prop="startTime">
+        <FormItem label="活动时间" prop="rangeTime">
           <DatePicker
-            type="datetime"
-            v-model="form.startTime"
+            type="datetimerange"
+            v-model="form.rangeTime"
             format="yyyy-MM-dd HH:mm:ss"
-            :options="options"
             placeholder="请选择"
-            clearable
-            style="width: 200px"
-          >
-          </DatePicker>
-          -
-          <DatePicker
-            type="datetime"
-            v-model="form.endTime"
-            format="yyyy-MM-dd HH:mm:ss"
             :options="options"
-            placeholder="请选择"
-            clearable
-            style="width: 200px"
+            style="width: 260px"
           >
           </DatePicker>
         </FormItem>
@@ -87,20 +75,6 @@
 import { savePintuan, editPintuan, getPintuanDetail } from "@/api/promotion";
 export default {
   data() {
-    const isLtEndDate = (rule, value, callback) => {
-      if (new Date(value).getTime() > new Date(this.form.endTime).getTime()) {
-        callback(new Error());
-      } else {
-        callback();
-      }
-    };
-    const isGtStartDate = (rule, value, callback) => {
-      if (new Date(value).getTime() < new Date(this.form.startTime).getTime()) {
-        callback(new Error());
-      } else {
-        callback();
-      }
-    };
     return {
       id: this.$route.query.id, // 拼团id
       form: {
@@ -131,33 +105,10 @@ export default {
             message: "限购数不合法",
           },
         ],
-        startTime: [
-          {
-            required: true,
-            type: "date",
-            message: "请选择开始时间",
-          },
-          {
-            trigger: "change",
-            message: "开始时间要小于结束时间",
-            validator: isLtEndDate,
-          },
-        ],
-        endTime: [
-          {
-            required: true,
-            type: "date",
-            message: "请选择结束时间",
-          },
-          {
-            trigger: "change",
-            message: "结束时间要大于开始时间",
-            validator: isGtStartDate,
-          },
-        ],
+        rangeTime: [{ required: true, message: "请选择活动时间" }],
       },
       submitLoading: false, // 添加或编辑提交状态
-      options: { // 不可选取的时间段
+      options: { // 不可选取时间
         disabledDate(date) {
           return date && date.valueOf() < Date.now() - 86400000;
         },
@@ -185,11 +136,12 @@ export default {
           this.submitLoading = true;
           let params = JSON.parse(JSON.stringify(this.form));
           params.startTime = this.$options.filters.unixToDate(
-            this.form.startTime / 1000
+            this.form.rangeTime[0] / 1000
           );
           params.endTime = this.$options.filters.unixToDate(
-            this.form.endTime / 1000
+            this.form.rangeTime[1] / 1000
           );
+          delete params.rangeTime
           if (!this.id) {
             // 添加 避免编辑后传入id等数据 记得删除
             delete params.id;
@@ -218,7 +170,10 @@ export default {
     getDetail() {
       getPintuanDetail(this.id).then((res) => {
         if (res.success) {
-          this.form = res.result;
+          const data = res.result;
+          data.rangeTime = [];
+          data.rangeTime.push(new Date(data.startTime), new Date(data.endTime));
+          this.form = data;
         }
       });
     },

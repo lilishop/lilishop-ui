@@ -54,7 +54,7 @@ export default {
           render: (h, params) => {
             return h(
               "div",
-              this.$options.filters.unitPrice(params.row.price)
+              this.$options.filters.unitPrice(params.row.price, '￥')
             );
           },
         },

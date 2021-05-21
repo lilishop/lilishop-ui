@@ -53,16 +53,19 @@
         </li>
         <li class="hover-color" @click="goUserCenter('/home/MyOrder')"><span class="nav-item">我的订单</span></li>
         <li class="hover-color" @click="goUserCenter('/home/MyTracks')"><span class="nav-item">我的足迹</span></li>
-        <li v-if="$route.name !== 'Cart'" style="position:relative;" @mouseenter="getCartList">
+        <li v-if="$route.name !== 'Cart'" style="position:relative;" >
           <i class="cart-badge" v-show="Number(cartNum)">{{cartNum < 100 ? cartNum : '99'}}</i>
           <Dropdown placement="bottom-start">
-            <router-link to="cart" target="_blank">
-              <Icon
-                size="18"
-                class="cart-icon"
-                type="ios-cart-outline"
-              ></Icon>
-              购物车
+            <router-link to="cart" target="_blank" >
+              <span @mouseenter="getCartList">
+                <Icon
+                  size="18"
+                  class="cart-icon"
+                  type="ios-cart-outline"
+                ></Icon>
+                购物车
+              </span>
+              
             </router-link>
 
             <DropdownMenu slot="list">
@@ -115,7 +118,7 @@
 
 <script>
 import storage from '@/plugins/storage.js';
-import {cartGoodsAll, cartCount} from '@/api/cart.js'
+import {cartGoodsAll} from '@/api/cart.js'
 export default {
   name: 'M-Header',
   created () {
@@ -211,12 +214,11 @@ export default {
     },
     getCartList () { // 获取购物车列表
       if (this.userInfo.username) {
-        cartCount().then(res => {
-          this.$store.commit('SET_CARTNUM', res.result)
-          this.Cookies.setItem('cartNum', res.result)
-        })
+          
         cartGoodsAll().then(res => {
           this.shoppingCart = res.result.skuList
+          this.$store.commit('SET_CARTNUM', this.shoppingCart.length)
+          this.Cookies.setItem('cartNum', this.shoppingCart.length)
         })
       }
     }
