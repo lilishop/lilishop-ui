@@ -13,7 +13,7 @@
     <table cellspacing="0" cellpadding='0' border="1">
       <tr>
         <td>投诉商品</td>
-        <td><img :src="detail.goodsImage" width="60" alt=""> &nbsp;{{ detail.goodsName }}</td>
+        <td class="hover-color" @click="linkTo(`/goodsDetail?goodsId=${detail.goodsId}&skuId=${detail.skuId}`)"><img :src="detail.goodsImage" width="60" alt=""> &nbsp;{{ detail.goodsName }}</td>
       </tr>
       <tr>
         <td>投诉主题</td>

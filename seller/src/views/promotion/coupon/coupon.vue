@@ -69,7 +69,7 @@
           <template slot-scope="{ row }" slot="action">
             <Button
               v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'"
-              type="primary"
+              type="info"
               size="small"
               style="margin-right: 10px"
               @click="edit(row)"
@@ -259,7 +259,7 @@ export default {
           slot: "action",
           align: "center",
           fixed: "right",
-          width: 80,
+          minWidth: 80,
         },
       ],
       data: [], // 表单数据

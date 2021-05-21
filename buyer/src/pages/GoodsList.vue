@@ -157,11 +157,11 @@ export default {
       window.open(routeUrl.href, '_blank');
     },
     changePageNum (val) {
-      this.params.pageNumber = val - 1;
+      this.params.pageNumber = val;
       this.getGoodsList();
     },
     changePageSize (val) {
-      this.params.pageNumber = 0;
+      this.params.pageNumber = 1;
       this.params.pageSize = val;
       this.getGoodsList();
     },

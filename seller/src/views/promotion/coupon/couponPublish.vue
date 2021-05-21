@@ -511,7 +511,7 @@ export default {
         this.$store.state.app.storeOpenedList
       );
       this.$router.push({
-        path: "promotion/coupon",
+        name: "coupon",
       });
     },
     changeSelect(e) {

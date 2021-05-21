@@ -37,6 +37,7 @@
       :action="uploadFileUrl"
       :headers="accessToken"
       style="display: inline-block;width:58px;"
+      v-if="!isView"
     >
       <div style="width: 58px;height:58px;line-height: 58px;">
         <Icon type="md-camera" size="20"></Icon>
@@ -87,6 +88,10 @@ export default {
     limit: {
       type: Number,
       default: 10
+    },
+    isView: {
+      type: Boolean,
+      default: false
     }
   },
   data() {

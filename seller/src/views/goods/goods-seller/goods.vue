@@ -39,16 +39,22 @@
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
 
         <!-- 商品栏目格式化 -->
-        <template slot="goodsSlot" slot-scope="scope">
+        <template slot="goodsSlot" slot-scope="{row}">
           <div style="margin-top: 5px;height: 90px; display: flex;">
             <div style="">
-              <img :src="scope.row.original" style="height: 80px;margin-top: 3px;width: 70px">
+              <img :src="row.original" style="height: 80px;margin-top: 3px;width: 70px">
             </div>
 
             <div style="margin-left: 13px;">
               <div class="div-zoom">
-                <a>{{scope.row.goodsName}}</a>
+                <a @click="linkTo(row.id,row.skuId)">{{row.goodsName}}</a>
               </div>
+              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+                <div slot="content">
+                  <vue-qr :text="wapLinkTo(row.id,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                </div>
+                <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
+              </Poptip>
             </div>
           </div>
 
@@ -76,10 +82,10 @@
       <Form ref="shipTemplateForm" :model="shipTemplateForm" :label-width="120">
         <FormItem class="form-item-view-el" label="运费" prop="freightPayer">
           <RadioGroup type="button" button-style="solid" @on-change="logisticsTemplateUndertakerChange" v-model="shipTemplateForm.freightPayer">
-            <Radio label="BUYER">
-              <span>买家承担运费</span>
-            </Radio>
             <Radio label="STORE">
+              <span>卖家承担运费</span>
+            </Radio>
+            <Radio label="BUYER">
               <span>使用物流规则</span>
             </Radio>
           </RadioGroup>
@@ -120,7 +126,7 @@ export default {
       id: "", //要操作的id
       loading: true, // 表单加载状态
       shipTemplateForm: {
-        freightPayer: "BUYER",
+        freightPayer: "STORE",
       },
       shipTemplateShow: false, //物流模板是否显示
       shipTemplateModal: false, // 物流模板是否显示
@@ -515,7 +521,7 @@ export default {
     },
     //保存运费模板信息
     saveShipTemplate () {
-      if (this.shipTemplateForm.freightPayer == "BUYER") {
+      if (this.shipTemplateForm.freightPayer == "STORE") {
         {
           this.shipTemplateForm.templateId = 0;
         }
@@ -559,7 +565,7 @@ export default {
     //运费承担者变化
     logisticsTemplateUndertakerChange(v) {
       //如果是卖家承担运费 需要显示运费模板
-      if (v == "STORE") {
+      if (v == "BUYER") {
         API_Store.getShipTemplate().then((res) => {
           if (res.success) {
             this.logisticsTemplate = res.result;
@@ -567,7 +573,7 @@ export default {
         });
         this.shipTemplateShow = true;
       }
-      if (v == "BUYER") {
+      if (v == "STORE") {
         this.shipTemplateShow = false;
       }
     },

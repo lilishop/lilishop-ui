@@ -11,7 +11,7 @@
           <BreadcrumbItem v-for="(item, index) in categoryBar" :to="goGoodsList(index)" target="_blank" :key="index">{{item.name}}</BreadcrumbItem>
         </Breadcrumb>
         <div class="store-collect">
-          <span class="mr_10"><router-link :to="'Merchant?id='+goodsMsg.data.storeId">{{goodsMsg.data.storeName}}</router-link></span>
+          <span class="mr_10"><router-link :to="'Merchant?id=' + goodsMsg.data.storeId">{{goodsMsg.data.storeName}}</router-link></span>
           <span @click="collect" ><Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#666'" />{{storeCollected?'已收藏店铺':'收藏店铺'}}</span>
         </div>
       </div>
