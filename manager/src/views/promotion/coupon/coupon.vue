@@ -174,7 +174,6 @@ export default {
         {
           title: "领取数量/总数量",
           key: "publishNum",
-          width: 100,
           render: (h, params) => {
             return h(
               "div", params.row.receivedNum + "/" + params.row.publishNum)
@@ -214,7 +213,6 @@ export default {
         },
         {
           title: "活动时间",
-          minWidth: 120,
           render: (h, params) => {
             return h("div", {
               domProps:

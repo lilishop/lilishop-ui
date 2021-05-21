@@ -15,7 +15,7 @@
               <div>{{ form.goodsSku.sellerName }}</div>
             </FormItem>
             <FormItem label="商品价格" prop="goodsPrice">
-              <div>{{ form.goodsSku.price }}</div>
+              <div>{{ form.goodsSku.price | unitPrice('￥') }}</div>
             </FormItem>
             <FormItem label="库存" prop="quantity">
               <div>{{ form.goodsSku.quantity }}</div>

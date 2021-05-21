@@ -31,7 +31,7 @@
       <template v-else>
         <div style="font-size:14px">全部结果</div>
         <Icon type="ios-arrow-forward" />
-        <div>{{params.keyword}}</div>
+        <div style="font-weight:bold;" class="mr_10">“{{params.keyword}}”</div>
       </template>
       <!-- 所选分类 -->
       <a
@@ -41,8 +41,7 @@
         :key="index"
         :title="item.name"
       >
-        <span>{{ item.type }}：</span><span>{{ item.name }}</span
-        ><Icon type="md-close" />
+        <span>{{ item.type }}：</span><span>{{ item.name }}</span><Icon type="md-close" />
       </a>
     </div>
 
@@ -190,23 +189,21 @@ export default {
     selectedItem: {
       // 监听已选条件，来调用列表接口
       handler (val) {
+        console.log(val);
         let classification = [];
-        if (val.length) {
-          val.forEach((item) => {
-            if (item.type === '品牌') {
-              this.params.brandId = this.brandIds.join('@');
-            } else {
-              const nameArr = item.name.split('、');
-              nameArr.forEach((name) => {
-                classification.push(item.type + '_' + name);
-              });
-            }
-          });
-          this.params.prop = classification.join('@');
-        } else {
-          this.params.prop = ''
-          this.params.brandId = ''
-        }
+        this.params.brandId = ''
+        this.params.prop = ''
+        val.forEach((item) => {
+          if (item.type === '品牌') {
+            this.params.brandId = this.brandIds.join('@');
+          } else {
+            const nameArr = item.name.split('、');
+            nameArr.forEach((name) => {
+              classification.push(item.type + '_' + name);
+            });
+          }
+        });
+        this.params.prop = classification.join('@');
         this.getFilterList(this.params);
         this.$emit('getParams', this.params);
       },
@@ -251,7 +248,7 @@ export default {
         this.$set(this.tabBar, 'second', second)
       }
     },
-    cateClick (item, index) {
+    cateClick (item, index) {  // 点选分类
       switch (index) {
         case 1:
           this.$router.push({
@@ -299,7 +296,6 @@ export default {
 
           brands.forEach((val) => {
             if (val.name === item) this.brandIds.push(val.value);
-            console.log(this.brandIds);
           });
         }
       }

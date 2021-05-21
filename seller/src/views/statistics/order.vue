@@ -68,7 +68,7 @@
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">退单金额</div>
-                  <div class="card-item-value">{{overViewList.refundOrderPrice || 0}}</div>
+                  <div class="card-item-value">{{overViewList.refundOrderPrice || 0 | unitPrice('￥')}}</div>
                 </div>
 
               </div>
@@ -333,9 +333,7 @@ export default {
           key: "applyRefundPrice",
           render: (h, params) => {
             return h(
-              "div",
-              "￥" +
-                (params.row.applyRefundPrice ? params.row.applyRefundPrice : 0)
+              "div", this.$options.filters.unitPrice(params.row.applyRefundPrice, '￥')
             );
           },
         },

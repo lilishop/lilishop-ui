@@ -2,7 +2,6 @@
   <div>
     <Row class="header">
       <img src="../../assets/lili.png" class="logo" width="220px">
-
     </Row>
   </div>
 </template>

@@ -166,7 +166,7 @@
             <Icon class="icon" size="31" type="ios-card" />
           </div>
           <div>
-            <div class="counts">{{homeData.orderPrice ||0}}</div>
+            <div class="counts">{{homeData.orderPrice || 0 | unitPrice('￥')}}</div>
             <div>订单总额</div>
           </div>
 

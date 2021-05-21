@@ -21,9 +21,6 @@
           <template slot-scope="{ row, index }" slot="price">
             <Input v-model="row.price" :disabled="status==='view'" @input="goodsData[index].price = row.price" />
           </template>
-          <template slot-scope="{ row }" slot="QRCode">
-            <img :src="row.QRCode || '../../../assets/lili.png'" width="50px" height="50px" alt="" />
-          </template>
           <template slot-scope="{ index }" slot="action">
             <Button type="error" size="small" ghost v-if="status === 'manager'" @click="delGoods(index)">删除</Button>
           </template>
@@ -107,11 +104,7 @@ export default {
             return h("div", [
               h(
                 "Tag",
-                {
-                  props: {
-                    color: color,
-                  },
-                },
+                {props: {color: color}},
                 text
               ),
             ]);
@@ -125,20 +118,17 @@ export default {
           key: "goodsName",
           minWidth: 120,
         },
-
         {
           title: "库存",
           key: "quantity",
           minWidth: 40,
         },
-
         {
           title: "拼团价格",
           key: "price",
           slot: "price",
           minWidth: 50,
         },
-
         {
           title: "操作",
           slot: "action",
@@ -188,23 +178,23 @@ export default {
         }
       });
     },
-    init() {
+    init() { // 初始化数据
       this.getDataList();
       this.getPintuanMsg();
     },
 
-    changePage(v) {
+    changePage(v) { // 分页 改变页数
       this.searchForm.pageNumber = v - 1;
       this.getDataList();
       this.clearSelectAll();
     },
 
-    changePageSize(v) {
+    changePageSize(v) { // 分页 改变每页数
       this.searchForm.pageSize = v;
       this.getDataList();
     },
 
-    handleSearch() {
+    handleSearch() { // 搜索
       this.searchForm.pageNumber = 0;
       this.searchForm.pageSize = 10;
       this.getDataList();
@@ -253,7 +243,7 @@ export default {
       // 删除商品
       this.goodsData.splice(index, 1);
     },
-    delAll() {
+    delAll() { // 批量删除商品
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未选择要删除的数据");
         return;
@@ -272,7 +262,7 @@ export default {
         },
       });
     },
-    selectedGoodsData(item) {
+    selectedGoodsData(item) { // 选择商品
       let ids = [];
       let list = [];
       this.goodsData.forEach((e) => {
@@ -295,7 +285,7 @@ export default {
       });
       this.goodsData.push(...list);
     },
-    openSkuList() {
+    openSkuList() { // 显示商品选择器
       this.$refs.skuSelect.open("goods");
     },
   },

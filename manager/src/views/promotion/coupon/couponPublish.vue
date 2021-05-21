@@ -49,11 +49,15 @@
             <FormItem label="领取限制" prop="couponLimitNum">
               <Input v-model="form.couponLimitNum" placeholder="领取限制" clearable style="width: 260px" />
             </FormItem>
-            <FormItem label="有效期" prop="startTime">
-              <DatePicker type="datetime" v-model="form.startTime" format="yyyy-MM-dd HH:mm:ss" placeholder="请选择" :options="options" clearable style="width: 200px">
-              </DatePicker>
-              -
-              <DatePicker type="datetime" v-model="form.endTime" format="yyyy-MM-dd HH:mm:ss" :options="options" placeholder="请选择" clearable style="width: 200px">
+            <FormItem label="有效期" prop="rangeTime">
+              <DatePicker
+                type="datetimerange"
+                v-model="form.rangeTime"
+                format="yyyy-MM-dd HH:mm:ss"
+                placeholder="请选择"
+                :options="options"
+                style="width: 260px"
+              >
               </DatePicker>
             </FormItem>
             <FormItem label="使用范围" prop="scopeType">
@@ -135,20 +139,6 @@ export default {
         callback();
       }
     };
-    const isLtEndDate = (rule, value, callback) => {
-      if (new Date(value).getTime() > new Date(this.form.endTime).getTime()) {
-        callback(new Error());
-      } else {
-        callback();
-      }
-    };
-    const isGtStartDate = (rule, value, callback) => {
-      if (new Date(value).getTime() < new Date(this.form.startTime).getTime()) {
-        callback(new Error());
-      } else {
-        callback();
-      }
-    };
     return {
       modalType: 0, // 是否编辑
       form: {
@@ -186,33 +176,10 @@ export default {
           { required: true, message: "请输入面额" },
           { validator: checkPrice },
         ],
+        rangeTime: [{ required: true, message: "请选择优惠券有效期" }],
         consumeThreshold: [
           { required: true, message: "请输入消费门槛" },
           { validator: checkWeight },
-        ],
-        startTime: [
-          {
-            required: true,
-            type: "date",
-            message: "请选择开始时间",
-          },
-          {
-            trigger: "change",
-            message: "开始时间要小于结束时间",
-            validator: isLtEndDate,
-          },
-        ],
-        endTime: [
-          {
-            required: true,
-            type: "date",
-            message: "请选择结束时间",
-          },
-          {
-            trigger: "change",
-            message: "结束时间要大于开始时间",
-            validator: isGtStartDate,
-          },
         ],
         couponDiscount: [
           { required: true, message: "请输入折扣" },
@@ -337,6 +304,8 @@ export default {
           next(this.goodsCategoryList, []);
           data.scopeIdGoods = prevCascader;
         }
+        data.rangeTime = [];
+        data.rangeTime.push(new Date(data.startTime), new Date(data.endTime));
         this.form = data;
       });
     },
@@ -345,15 +314,14 @@ export default {
       this.$refs.form.validate((valid) => {
         if (valid) {
           const params = JSON.parse(JSON.stringify(this.form));
-          const strat = this.$options.filters.unixToDate(
-            this.form.startTime / 1000
+          params.startTime = this.$options.filters.unixToDate(
+            this.form.rangeTime[0] / 1000
           );
-          const end = this.$options.filters.unixToDate(
-            this.form.endTime / 1000
+          params.endTime = this.$options.filters.unixToDate(
+            this.form.rangeTime[1] / 1000
           );
+          delete params.rangeTime
           let scopeId = [];
-          params.startTime = strat;
-          params.endTime = end;
 
           if (
             params.scopeType == "PORTION_GOODS" &&

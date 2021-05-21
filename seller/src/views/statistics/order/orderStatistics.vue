@@ -51,7 +51,7 @@
                 <span style="font-size: 14px;">总金额</span>
               </p>
               <p class="static-num">
-                {{ priceData.price | unitPrice }}
+                {{ priceData.price | unitPrice('￥') }}
               </p>
             </div>
           </div>
