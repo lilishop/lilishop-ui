@@ -17,16 +17,9 @@
       primary-key="id"
     >
       <template slot="action" slot-scope="scope">
-        <Dropdown transfer="true" trigger="click">
-          <Button type="primary" size="small">
-            操作
-            <Icon type="ios-arrow-down"></Icon>
-          </Button>
-          <DropdownMenu slot="list">
-            <DropdownItem @click.native="edit(scope.row)">编辑</DropdownItem>
-            <DropdownItem @click.native="remove(scope.row)">删除</DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
+        <Button @click.native="edit(scope.row)" style="margin-right:10px;" size="small">编辑</Button>
+        <Button @click.native="remove(scope.row)" type="primary" size="small">删除</Button>
+
       </template>
     </tree-table>
 

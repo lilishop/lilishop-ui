@@ -202,6 +202,7 @@
           this.loading = false;
           if (res.success) {
             this.data = res.result.records;
+
             this.total = res.result.total;
           }
         });
@@ -239,7 +240,7 @@
     }
   };
 </script>
-<style lang="scss">
+<style lang="scss" >
   @import "@/styles/table-common.scss";
 </style>
 

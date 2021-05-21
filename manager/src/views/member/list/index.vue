@@ -40,11 +40,11 @@
         <FormItem label="手机号码" prop="mobile" style="width: 90%;">
           <Input v-model="addMemberForm.mobile" maxlength="11" placeholder="请输入手机号码" />
         </FormItem>
-        <FormItem label="会员名称" prop="username" style="width: 90%">
+        <FormItem label="会员名称" prop="uname" style="width: 90%">
           <Input v-model="addMemberForm.username" maxlength="15" placeholder="请输入会员名称" />
         </FormItem>
 
-        <FormItem label="会员密码" prop="password" style="width: 90%">
+        <FormItem label="会员密码" prop="pwd" style="width: 90%">
           <Input type="password" password v-model="addMemberForm.password" maxlength="20" placeholder="请输入会员密码" />
         </FormItem>
       </Form>
@@ -165,8 +165,8 @@ export default {
             message: "请输入正确的手机号",
           },
         ],
-        username: [{ required: true, message: "请输入会员名称" }],
-        password: [{ required: true, message: "请输入密码" }],
+        uname: [{ required: true, message: "请输入会员名称" }],
+        pwd: [{ required: true, message: "请输入密码" }],
       },
       ruleValidate: {}, //修改验证
       submitLoading: false, // 添加或编辑提交状态

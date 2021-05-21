@@ -231,21 +231,21 @@
         </TabPane>
         <TabPane label="TA的余额" name="wallet">
           <div class="pointsTitle" style="justify-content: flex-start; text-align: left;">
-            <div style="width: 120px;">
+            <div style="min-width: 120px; margin-right:20px">
               <div class="points-top-title">
                 余额
               </div>
 
               <div class="points-top-text">
-                {{memberWalletInfo.memberDeposit?memberWalletInfo.memberDeposit:0 | unitPrice('￥')}}
+                {{memberWalletInfo.memberWallet?memberWalletInfo.memberWallet:0 | unitPrice('￥')}}
               </div>
             </div>
-            <div style="width: 120px;">
+            <div style="min-width: 120px;">
               <div class="points-top-title">
                 冻结余额
               </div>
               <div class="points-top-text">
-                {{memberWalletInfo.frozenDeposit?memberWalletInfo.frozenDeposit:0 | unitPrice('￥')}}
+                {{memberWalletInfo.memberFrozenWallet?memberWalletInfo.memberFrozenWallet:0 | unitPrice('￥')}}
               </div>
             </div>
           </div>
@@ -750,23 +750,23 @@
             minWidth: 120,
           },
           {
-            title: "业务类型",
-            key: "serviceType",
-            width: 150,
-            render: (h, params) => {
-              if (params.row.serviceType == "BALANCE_WITHDRAWAL") {
-                return h('div', [h('span', {}, '余额提现'),]);
-              } else if (params.row.serviceType == "BALANCE_PAY") {
-                return h('div', [h('span', {}, '余额支付'),]);
-              } else if (params.row.serviceType == "BALANCE_REFUND") {
-                return h('div', [h('span', {}, '余额退款'),]);
-              } else if (params.row.serviceType == "BALANCE_RECHARGE") {
-                return h('div', [h('span', {}, '余额充值'),]);
-              } else if (params.row.serviceType == "BALANCE_COMMISSION") {
-                return h('div', [h('span', {}, '佣金提成'),]);
-              }
+          title: "业务类型",
+          key: "serviceType",
+          width: 200,
+          render: (h, params) => {
+            if (params.row.serviceType == "WALLET_WITHDRAWAL") {
+              return h("div", [h("span", {}, "余额提现")]);
+            } else if (params.row.serviceType == "WALLET_PAY") {
+              return h("div", [h("span", {}, "余额支付")]);
+            } else if (params.row.serviceType == "WALLET_REFUND") {
+              return h("div", [h("span", {}, "余额退款")]);
+            } else if (params.row.serviceType == "WALLET_RECHARGE") {
+              return h("div", [h("span", {}, "余额充值")]);
+            } else {
+              return h("div", [h("span", {}, "佣金提成")]);
             }
           },
+        },
           {
             title: "变动金额",
             key: "money",

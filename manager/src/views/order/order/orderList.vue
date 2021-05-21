@@ -93,6 +93,20 @@ export default {
           title: "订单来源",
           key: "clientType",
           width: 95,
+          render: (h, params) => {
+            if (params.row.clientType == "H5") {
+              return h("div",{},"移动端");
+            }else if(params.row.clientType == "PC") {
+              return h("div",{},"PC端");
+            }else if(params.row.clientType == "WECHAT_MP") {
+              return h("div",{},"小程序端");
+            }else if(params.row.clientType == "APP") {
+              return h("div",{},"移动应用端");
+            }
+            else{
+               return h("div",{},params.row.clientType);
+            }
+          },
         },
         {
           title: "买家名称",
@@ -251,7 +265,8 @@ export default {
     confirmPrice(v) {
       this.$Modal.confirm({
         title: "提示",
-        content: "<p>您确定要收款吗？线下收款涉及库存变更，需异步进行，等待约一分钟刷新列表查看</p>",
+        content:
+          "<p>您确定要收款吗？线下收款涉及库存变更，需异步进行，等待约一分钟刷新列表查看</p>",
         onOk: () => {
           API_Order.orderPay(v.sn).then((res) => {
             if (res.success) {

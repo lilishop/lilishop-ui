@@ -145,7 +145,7 @@ export const result = [
             url: "",
             children: null,
             permTypes: []
-          } 
+          }
         ]
       },
       {
@@ -449,6 +449,20 @@ export const result = [
             title: "分销商品",
             path: "distributionGoods",
             component: "distribution/distributionGoods",
+            icon: "md-person",
+            isMenu: true,
+            url: "",
+            permTypes: [],
+            children: null
+          },
+          {
+            name: "distributionOrder",
+            showAlways: true,
+            level: 2,
+            type: 0,
+            title: "分销订单",
+            path: "distributionOrder",
+            component: "distribution/distributionOrder",
             icon: "md-person",
             isMenu: true,
             url: "",
