@@ -31,15 +31,21 @@ export default {
           type: "GOODS_SETTING",
           name: "商品设置",
         },
-        //  快递鸟设置
-        {
-          type: "KUAIDI_SETTING",
-          name: "快递鸟设置",
-        },
         //订单配置
         {
           type: "ORDER_SETTING",
           name: "订单配置",
+        },
+        //积分设置
+        {type: "POINT_SETTING", name: "积分设置"},
+        {
+          type: "WITHDRAWAL_SETTING",
+          name: "提现设置",
+        },
+        //  快递鸟设置
+        {
+          type: "KUAIDI_SETTING",
+          name: "快递鸟设置",
         },
         //阿里OSS配置
         {
@@ -50,12 +56,6 @@ export default {
         {
           type: "SMS_SETTING",
           name: "阿里短信配置",
-        },
-        //积分设置
-        {type: "POINT_SETTING", name: "积分设置"},
-        {
-          type: "WITHDRAWAL_SETTING",
-          name: "提现设置",
         },
       ],
       authLogin: [
