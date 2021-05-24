@@ -63,14 +63,13 @@
             </div>
 
             <div class="div-form-default" v-if="afterSaleInfo.serviceStatus=='APPLY'">
-              <h3>商家处理意见</h3>
+              <h3>处理意见</h3>
               <dl>
                 <dt>商家</dt>
                 <dd>
                   <div class="div-content">
                     {{afterSaleInfo.storeName}}
                   </div>
-
                 </dd>
               </dl>
               <dl>
@@ -86,9 +85,18 @@
                       </Radio>
                     </RadioGroup>
                   </div>
-
                 </dd>
               </dl>
+              <dl>
+                  <dt>申请退款金额</dt>
+                  <dd>{{ afterSaleInfo.applyRefundPrice | unitPrice('￥') }}</dd>
+                </dl>
+                <dl>
+                  <dt>实际退款金额</dt>
+                  <dd>
+                    <Input v-model="params.actualRefundPrice" style="width:260px"/>
+                  </dd>
+                </dl>
               <dl>
                 <dt>备注信息</dt>
                 <dd>
@@ -169,7 +177,7 @@
 
             </div>
             <!--"-->
-            <div class="div-form-default" v-if="afterSaleInfo.afterSaleAllowOperationVO.refund">
+            <div class="div-form-default" v-if="afterSaleInfo.afterSaleAllowOperationVO && afterSaleInfo.afterSaleAllowOperationVO.refund">
               <h3>平台退款</h3>
 
               <dl>
@@ -438,10 +446,10 @@ export default {
           this.afterSaleInfo = res.result;
           this.afterSaleImage = (res.result.afterSaleImage || "").split(",");
           //退货地址去掉逗号
-          this.afterSaleInfo.mconsigneeAddressPath = this.afterSaleInfo.mconsigneeAddressPath.replaceAll(
-            ",",
-            " "
-          );
+          if (this.afterSaleInfo.mconsigneeAddressPath)
+          this.afterSaleInfo.mconsigneeAddressPath = this.afterSaleInfo.mconsigneeAddressPath.replaceAll(","," ");
+
+          this.$set(this.params,'actualRefundPrice', this.afterSaleInfo.applyRefundPrice)
         }
       });
     },
@@ -536,6 +544,10 @@ export default {
     handleSubmit() {
       if (this.params.remark == "") {
         this.$Message.error("请输入备注信息");
+        return;
+      }
+      if (this.params.actualRefundPrice == "") {
+        this.$Message.error("请输入退款金额");
         return;
       }
       API_Order.afterSaleSellerReview(this.sn, this.params).then((res) => {

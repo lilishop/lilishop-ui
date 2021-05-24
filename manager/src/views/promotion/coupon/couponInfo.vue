@@ -14,7 +14,7 @@
               }}</span>
             </FormItem>
             <FormItem label="面额">
-              <span class="goods-category-name"> ￥{{ form.price }}</span>
+              <span class="goods-category-name"> ￥{{ form.price | unitPrice }}</span>
             </FormItem>
             <FormItem label="活动说明">
               <span class="goods-category-name">{{ form.description }}</span>

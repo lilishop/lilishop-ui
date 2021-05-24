@@ -50,7 +50,7 @@
               <div v-if="couponAvailable === index">
                 <div class="coupon-item" v-for="(item, index) in shop.couponList" :key="index">
                   <span v-if="item.couponType === 'PRICE'">￥{{ item.price }}</span>
-                  <span v-if="item.couponType === 'DISCOUNT'">{{ item.discount }}折</span>
+                  <span v-if="item.couponType === 'DISCOUNT'">{{ item.couponDiscount }}折</span>
                   <span>满{{item.consumeThreshold}}元可用</span>
                   <Button class="coupon-btn" size="small" type="primary" @click="receiveShopCoupon(item)" :disabled="item.disabled">{{ item.disabled ? "已领取" : "领取" }}</Button>
                 </div>
@@ -119,7 +119,7 @@
             <div class="ml_20 total-price">
               总价（不含运费）:<span>{{ priceDetailDTO.billPrice | unitPrice("￥") }}</span>
             </div>
-            <div class="pay ml_20" @click="pay">去支付</div>
+            <div class="pay ml_20" @click="pay">去结算</div>
           </div>
         </div>
       </div>

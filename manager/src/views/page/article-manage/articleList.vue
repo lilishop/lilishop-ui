@@ -41,38 +41,38 @@
           </Page>
         </Row>
 
-          <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="1100">
-            <Form ref="form" :model="form" :label-width="100">
-              <FormItem label="文章标题" prop="title">
-                <Input v-model="form.title" clearable style="width: 40%" />
-              </FormItem>
-              <FormItem label="文章分类" prop="categoryId">
-                <Select v-model="treeValue" placeholder="请选择" clearable style="width: 180px">
-                  <Option :value="treeValue" style="display: none">{{
+        <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="1100">
+          <Form ref="form" :model="form" :label-width="100">
+            <FormItem label="文章标题" prop="title">
+              <Input v-model="form.title" clearable style="width: 40%" />
+            </FormItem>
+            <FormItem label="文章分类" prop="categoryId">
+              <Select v-model="treeValue" placeholder="请选择" clearable style="width: 180px">
+                <Option :value="treeValue" style="display: none">{{
                         treeValue
                       }}
-                  </Option>
-                  <Tree :data="treeData" @on-select-change="handleCheckChange"></Tree>
-                </Select>
-              </FormItem>
-              <FormItem label="文章排序" prop="sort">
-                <Input type="number" v-model="form.sort" clearable style="width: 10%" />
-              </FormItem>
-              <FormItem class="form-item-view-el" label="文章内容" prop="content">
-                <editor v-model="form.content"></editor>
-              </FormItem>
-              <FormItem label="是否展示" prop="openStatus">
-                <i-switch size="large" v-model="form.openStatus" :true-value="open" :false-value="close">
-                  <span slot="open">展示</span>
-                  <span slot="close">隐藏</span>
-                </i-switch>
-              </FormItem>
-            </Form>
-            <div slot="footer">
-              <Button type="text" @click="modalVisible = false">取消</Button>
-              <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
-            </div>
-          </Modal>
+                </Option>
+                <Tree :data="treeData" @on-select-change="handleCheckChange"></Tree>
+              </Select>
+            </FormItem>
+            <FormItem label="文章排序" prop="sort">
+              <Input type="number" v-model="form.sort" clearable style="width: 10%" />
+            </FormItem>
+            <FormItem class="form-item-view-el" label="文章内容" prop="content">
+              <editor v-model="form.content"></editor>
+            </FormItem>
+            <FormItem label="是否展示" prop="openStatus">
+              <i-switch size="large" v-model="form.openStatus" :true-value="open" :false-value="close">
+                <span slot="open">展示</span>
+                <span slot="close">隐藏</span>
+              </i-switch>
+            </FormItem>
+          </Form>
+          <div slot="footer">
+            <Button type="text" @click="modalVisible = false">取消</Button>
+            <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
+          </div>
+        </Modal>
       </Card>
       </Col>
 
@@ -123,6 +123,7 @@ export default {
       searchTreeValue: "", // 切换
       form: {
         // 添加或编辑表单对象初始化数据
+        openStatus:false,
         title: "",
         categoryId: "",
         sort: 1,
@@ -347,7 +348,7 @@ export default {
             level: 0,
             children: [],
             id: "0",
-            categoryId: 0
+            categoryId: 0,
           });
         }
       });
@@ -379,13 +380,7 @@ export default {
           //为了在是否展示一列展示开关 需要改一下数据类型，最终提交再次更改
           this.data = [];
           if (res.result.records.length > 0) {
-            res.result.records.forEach((item) => {
-              if (item.openStatus == "OPEN") {
-                item.openStatus = true;
-              } else {
-                item.openStatus = false;
-              }
-            })
+
             this.data = res.result.records;
           }
         }
@@ -395,11 +390,7 @@ export default {
     },
 
     handleSubmit() {
-      if (this.form.openStatus) {
-        this.form.openStatus = "OPEN";
-      } else {
-        this.form.openStatus = "CLOSE";
-      }
+
       this.$refs.form.validate((valid) => {
         if (valid) {
           this.submitLoading = true;
@@ -412,6 +403,7 @@ export default {
                 this.$Message.success("操作成功");
                 this.getDataList();
                 this.modalVisible = false;
+
               }
             });
           } else {
@@ -422,6 +414,8 @@ export default {
                 this.$Message.success("操作成功");
                 this.getDataList();
                 this.modalVisible = false;
+
+
               }
             });
           }
@@ -449,11 +443,7 @@ export default {
           this.form.content = res.result.content;
           this.form.title = res.result.title;
           this.form.sort = res.result.sort;
-          if (res.result.openStatus == "OPEN") {
-            this.form.openStatus = true;
-          } else {
-            this.form.openStatus = false;
-          }
+            this.form.openStatus = res.result.openStatus
         }
       });
     },

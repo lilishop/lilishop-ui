@@ -576,13 +576,13 @@
           </div>
           <div class="form-item-view-bottom">
             <Collapse
-              active-key="1"
+              v-model="show"
               v-for="paramsgroup in goodsParams"
               :title="paramsgroup.groupName"
               style="text-align: left"
               :key="paramsgroup.groupName"
             >
-              <Panel key="1">
+              <Panel key="1" name="1">
                 {{ paramsgroup.groupName }}
                 <p slot="content">
                   <FormItem
@@ -592,25 +592,15 @@
                     :key="index"
                     :label="`${goodsParamsList.paramName}：`"
                   >
-                    <Input
-                      v-if="goodsParamsList.paramType === 1"
-                      type="text"
-                      v-model="goodsParamsList.paramValue"
-                      placeholder="长度为最多50个字符"
-                      maxlength="50"
-                      clearable
-                      style="width: 260px"
-                    />
                     <Select
                       v-model="goodsParamsList.paramValue"
-                      v-if="goodsParamsList.paramType === 2"
                       placeholder="请选择"
                       style="width: 200px"
                       clearable
                     >
                       <Option
                         v-for="option in goodsParamsList.optionList"
-                        :key="option"
+                        :key="option.paramValue"
                         :label="option"
                         :value="option"
                       ></Option>
@@ -772,6 +762,7 @@ export default {
     };
 
     return {
+      show: '1',
       //提交状态
       submitLoading: false,
       //上传图片路径
@@ -1370,18 +1361,14 @@ export default {
                     (ij) => ij.paramName === elem.paramName
                   )
                 ) {
-                  if (elem.paramType === 2) {
-                    elem.optionList = elem.options.split(",");
-                  }
+                  elem.optionList = elem.options.split(",");
                   this.baseInfoForm.goodsParamsList.push(elem);
                 }
                 if (this.$route.query.id || this.draftId) {
                   this.baseInfoForm.goodsParamsList = this.baseInfoForm.goodsParamsList.map(
                     (i) => {
                       if (i.paramId === elem.id || i.id === elem.id) {
-                        if (elem.paramType === 2) {
-                          elem.optionList = elem.options.split(",");
-                        }
+                        elem.optionList = elem.options.split(",");
                         i = {
                           ...i,
                           ...elem,
@@ -1839,19 +1826,24 @@ export default {
             this.$Message.error("请上传商品图片");
             return;
           }
-          // if (
-          //   !this.baseInfoForm.storeCategoryPath ||
-          //   !this.baseInfoForm.storeCategoryPath.length
-          // ) {
-          //   this.submitLoading = false;
-          //   this.$Message.error("请选择店内分类");
-          //   return;
-          // }
+          let flag = false;
+          let paramValue = "";
+          this.baseInfoForm.goodsParamsList.forEach((e)=> {
+            if(e.required === 1 && e.paramValue === null || e.paramValue === undefined){
+              flag = true
+              paramValue = e.paramName
+            }
+          });
+          if(flag){
+            this.$Message.error(paramValue +" 参数值不能为空");
+            this.submitLoading = false;
+            return;
+          }
           //如果选择的是卖家承担运费 则运费模板重置为0
           if (this.baseInfoForm.freightPayer !== "BUYER") {
             this.baseInfoForm.templateId = 0;
           }
-          
+
           this.baseInfoForm.skuList = this.skuTableData.map((sku) => {
             delete sku._index;
             delete sku._rowKey;
@@ -1865,6 +1857,12 @@ export default {
               (i) => i.url
             );
           }
+          /** 参数校验 **/
+         /* Object.keys(this.baseInfoForm.goodsParamsList).forEach((item) => {
+            console.warn(item.paramName)
+          });*/
+
+
 
           if (this.goodsId) {
             API_GOODS.editGoods(this.goodsId, this.baseInfoForm).then((res) => {

@@ -56,8 +56,8 @@
                       <Rate disabled :value="Number(item.descriptionScore)" allow-half class="remarks-star"></Rate>
                     </p>
                     <p class="remarks-content">{{item.content}}</p>
-                    <div class="comment-img" v-if="item.haveImage">
-                      <div v-for="(img, imgIndex) in item.image.split(',')"
+                    <div class="comment-img" v-if="item.images">
+                      <div v-for="(img, imgIndex) in item.images.split(',')"
                        @click="previewImg(img, item)"
                        :class="{borderColor:img === item.previewImg}"
                        :key="imgIndex">

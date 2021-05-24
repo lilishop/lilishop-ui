@@ -162,8 +162,12 @@
 
   };
 </script>
-<style lang="scss">
-  .sign-name {
+
+<style lang="scss" scoped>
+  // 建议引入通用样式 可删除下面样式代码
+  @import "@/styles/table-common.scss";
+
+   .sign-name {
     margin-top: 5px;
     margin-left: 20px;
     font-size: 16px;
@@ -188,8 +192,4 @@
   .footer {
     margin-left: 100px;
   }
-</style>
-<style lang="scss">
-  // 建议引入通用样式 可删除下面样式代码
-  @import "@/styles/table-common.scss";
 </style>

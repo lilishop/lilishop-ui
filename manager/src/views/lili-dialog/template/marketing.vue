@@ -147,7 +147,7 @@ export default {
               {
                 style: {},
               },
-              this.$options.filters.unitPrice(params.row.price)
+              this.$options.filters.unitPrice(params.row.price, '￥')
             );
           },
         },

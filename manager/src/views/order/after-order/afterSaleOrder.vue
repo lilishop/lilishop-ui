@@ -29,10 +29,8 @@
                   <Option value="PASS">通过售后</Option>
                   <Option value="REFUSE">拒绝售后</Option>
                   <Option value="BUYER_RETURN">买家退货，待卖家收货</Option>
-                  <Option value="SELLER_RE_DELIVERY">商家换货/补发</Option>
                   <Option value="SELLER_CONFIRM">卖家确认收货</Option>
                   <Option value="SELLER_TERMINATION">卖家终止售后</Option>
-                  <Option value="BUYER_CONFIRM">买家确认收货</Option>
                   <Option value="BUYER_CANCEL">买家取消售后</Option>
                   <Option value="COMPLETE">完成售后</Option>
                 </Select>
@@ -48,10 +46,10 @@
                   style="width: 200px"
                 ></DatePicker>
               </Form-item>
-              <Form-item label="商家名称" prop="sellerName">
+              <Form-item label="商家名称" prop="storeName">
                 <Input
                   type="text"
-                  v-model="searchForm.sellerName"
+                  v-model="searchForm.storeName"
                   placeholder="请输入商家名称"
                   clearable
                   style="width: 200px"
@@ -149,7 +147,7 @@
           orderSn: "",
           memberName: "",
           serviceStatus: "",
-          sellerName:"",
+          storeName:"",
           sn: "",
 
         },
@@ -157,7 +155,7 @@
         form: {
           // 添加或编辑表单对象初始化数据
           sn: "",
-          sellerName: "",
+          storeName: "",
           startTime: "",
           endTime: "",
           billPrice: "",

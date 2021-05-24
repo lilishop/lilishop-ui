@@ -183,13 +183,14 @@ export default {
         {
           title: "商品价格",
           key: "price",
-          minWidth: 120
+          render: (h, params) => {
+            return h('div', this.$options.filters.unitPrice(params.row.price, '￥'))
+          }
         },
 
         {
           title: "商品库存",
           key: "quantity",
-          minWidth: 120
         },
         {
           title: "创建时间",
@@ -200,7 +201,7 @@ export default {
           title: "操作",
           key: "action",
           align: "center",
-          width: 200,
+          width: 150,
           render: (h, params) => {
             return h("div", [
               h(

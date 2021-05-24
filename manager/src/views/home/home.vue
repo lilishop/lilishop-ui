@@ -72,11 +72,11 @@
           <div class="counts">{{$store.state.notices.refund|| 0}}</div>
           <div>待审核售后</div>
         </div>
-        <div class="todo-item" @click="navigateTo('distribution')">
+        <div class="todo-item" >
           <div class="counts">{{$store.state.notices.distributionCash|| 0}}</div>
           <div>待审核分销提现</div>
         </div>
-        <div class="todo-item" @click="navigateTo('billList')">
+        <div class="todo-item" @click="navigateTo('accountStatementBill')">
           <div class="counts">{{$store.state.notices.waitPayBill|| 0}}</div>
           <div>待审核分账</div>
         </div>

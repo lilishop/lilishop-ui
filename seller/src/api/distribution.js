@@ -51,7 +51,7 @@ export const getDistributionSetting = (id, params) => {
 
 //获取分销订单列表
 export const getDistributionOrder = (params) => {
-    return getRequest('/distribution/order/getByPage', params)
+    return getRequest('/distributionOrder', params)
 }
 
 

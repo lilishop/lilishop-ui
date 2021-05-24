@@ -35,8 +35,8 @@
             <Input type="textarea" maxlength="500" readonly show-word-limit :rows="4" v-model="orderGoods.content" />
           </div>
           <div style="display:flex;align-items:center;">
-            <template v-if="orderGoods.image">
-              <div class="demo-upload-list"  v-for="(img, index) in orderGoods.image.split(',')" :key="index">
+            <template v-if="orderGoods.images">
+              <div class="demo-upload-list"  v-for="(img, index) in orderGoods.images.split(',')" :key="index">
                 <img :src="img">
                 <div class="demo-upload-list-cover">
                   <Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon>

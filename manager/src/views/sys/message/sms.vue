@@ -710,7 +710,7 @@ export default {
     //发送短信
     sendSms() {
       this.$refs.smsForm.validate((valid) => {
-        const mobile = JSON.stringify(this.alreadyCheck);
+        const mobile = this.alreadyCheck;
         this.smsForm.mobile = mobile;
         if (valid) {
           API_Setting.sendSms(this.smsForm).then((res) => {

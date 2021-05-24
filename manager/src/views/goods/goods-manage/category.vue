@@ -244,6 +244,7 @@ export default {
     //弹出品牌关联框
     brandOperation(v) {
       getCategoryBrandListData(v.id).then((res) => {
+        console.warn(res)
         this.categoryId = v.id;
         this.modalBrandTitle = "品牌关联";
         this.brandForm.categoryBrands = res.result.map((item) => item.id);

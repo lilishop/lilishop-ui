@@ -38,7 +38,7 @@
             <div class="c-left">
               <div>
                 <span v-if="coupon.couponType === 'PRICE'" class="fontsize_12 global_color">￥<span class="price">{{coupon.price | unitPrice}}</span></span>
-                <span v-if="coupon.couponType === 'DISCOUNT'" class="fontsize_12 global_color"><span class="price">{{coupon.discount}}</span>折</span>
+                <span v-if="coupon.couponType === 'DISCOUNT'" class="fontsize_12 global_color"><span class="price">{{coupon.couponDiscount}}</span>折</span>
                 <span class="describe">满{{coupon.consumeThreshold}}元可用</span>
               </div>
               <p>使用范围：{{useScope(coupon.scopeType, coupon.storeName)}}</p>

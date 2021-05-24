@@ -173,7 +173,7 @@
                 </dt>
                 <dd>
                   <a>{{ complaintInfo.goodsName }}</a><br>
-                  <span>{{ complaintInfo.goodsPrice | unitPrice }} * {{ complaintInfo.num }}(数量)</span>
+                  <span>￥{{ complaintInfo.goodsPrice | unitPrice }} * {{ complaintInfo.num }}(数量)</span>
                 </dd>
               </dl>
 
@@ -201,7 +201,7 @@
                   订单金额
                 </dt>
                 <dd>
-                  {{ complaintInfo.orderPrice }}
+                  {{ complaintInfo.orderPrice | unitPrice('￥')}}
                 </dd>
               </dl>
 

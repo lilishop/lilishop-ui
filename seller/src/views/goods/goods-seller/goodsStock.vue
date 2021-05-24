@@ -1,7 +1,5 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
         <Card>
           <Row v-show="openSearch" @keydown.enter.native="handleSearch">
             <Form
@@ -97,8 +95,6 @@
             ></Page>
           </Row>
         </Card>
-      </Col>
-    </Row>
     <Modal
       title="更新库存"
       v-model="updateStockModalVisible"

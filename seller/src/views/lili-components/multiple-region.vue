@@ -7,7 +7,7 @@
   </Modal>
 </template>
 <script>
-import { getChildRegion, getAllCity } from "@/api/index";
+import { getAllCity } from "@/api/index";
 export default {
   data() {
     return {
@@ -22,46 +22,84 @@ export default {
     this.init();
   },
   methods: {
+    /**
+     * 关闭
+     */
     cancel() {
       this.switched = false;
-      // this.$emit("close",true)
-    },
-    open(val) {
-      if (val) {
-        this.callBackData = val;
-        this.data = JSON.parse(JSON.stringify(this.data));
-        val.areaId.split(",").forEach((ids) => {
-          this.data.forEach((item) => {
-            if (item.id == ids) {
-              item.selected = true;
 
-            }
-            item.children &&
-              item.children.forEach((child) => {
+      // 关闭的时候所有数据设置成disabled为true
+      this.data.forEach((item) => {
+        this.$set(item, "disabled", false);
+        item.children.forEach((child) => {
+          this.$set(child, "disabled", false);
+        });
+      });
+    },
+
+    /**
+     * 打开地图选择器
+     * @param {val} 回调的数据
+     * @param {index} 当前操作的运费模板的索引
+     */
+    open(val, index) {
+      if (val) {
+        //已选中的地址
+        let checkedData = this.$store.state.shipTemplate;
+
+        // 禁止选中的地址
+        let disabledData = checkedData.filter((item, i) => {
+          return i != index;
+        });
+
+        disabledData.forEach((dis) => {
+          // 循环出已经选中的地址id
+          dis.areaId.split(",").forEach((ids) => {
+            // 循环出省份
+            this.data.forEach((item) => {
+              // 如果当前省份下市区全部选中则选中该省份
+              if (dis.selectedAll) {
+                dis.area.split(",").forEach((area) => {
+                  if (area == item.name) {
+                    this.$set(item, "disabled", true);
+                  }
+                });
+              }
+              // 将市区继续循环
+              item.children.forEach((child, childIndex) => {
+                // 判断当前市区是否是已选中状态
                 if (child.id == ids) {
-                  child.checked = true;
+                  this.$set(child, "disabled", true);
                 }
               });
+            });
           });
         });
       }
-
-      this.switched = true;
+      this.switched ? (this.switched = true) : (this.switched = true);
     },
 
+    /**
+     * 提交并筛选出省市
+     */
     submit() {
       // 筛选出省市
       let list = this.$refs.tree.getCheckedAndIndeterminateNodes();
+
       let sort = [];
-      list.forEach((item) => {
+      list.forEach((item, i) => {
         item.selectedList = [];
-        if (item.level == "province") {
+        item.selectedAll = false;
+        // 筛选出当前的省份
+        if (item.level == "province" && !item.disabled) {
           sort.push({
             ...item,
           });
         }
+
+        // 筛选出当前选中的市
         sort.forEach((sortItem, sortIndex) => {
-          if (item.level != "province" && sortItem.id == item.parentId) {
+          if (item.level != "province" && sortItem.id == item.parentId && !item.disabled) {
             sortItem.selectedList.push({
               ...item,
             });
@@ -69,12 +107,24 @@ export default {
         });
       });
 
-      this.$emit(
-        "selected",
-        list.filter((item) => {
-          return item.level == "province";
-        })
-      );
+      // 判断如果当前省是否全选
+      this.data.forEach((whether) => {
+        sort.forEach((item) => {
+          // 如果当前省匹配
+          if (
+            item.id == whether.id &&
+            item.selectedList.length == whether.children.length
+          ) {
+            // 给一个全选子级的标识符
+            item.selectedList.forEach((child) => {
+              this.$set(child, "selectedAll", true);
+            });
+            this.$set(item, "selectedAll", true);
+          }
+        });
+      });
+
+      this.$emit("selected", sort);
 
       this.cancel();
     },
@@ -93,8 +143,10 @@ export default {
               ...item,
             };
             this.data.push(data);
+
             this.selectedWay.push({ name: data.title, id: data.id });
           });
+          console.log(this.data);
         }
       });
     },

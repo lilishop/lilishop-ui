@@ -8,13 +8,14 @@ import {
   getRequestWithNoToken,
   putRequestWithNoForm,
   postRequestWithNoForm,
-  commonUrl,
   managerUrl
 } from "@/libs/axios";
 import config from "@/config";
 
+let commonUrl = (process.env.NODE_ENV === 'development' ? config.api_dev.common : config.api_prod.common)
+
 // 文件上传接口
-export const uploadFile = commonUrl + "/common/upload/file";
+export const uploadFile = commonUrl+ "/common/upload/file";
 // 验证码渲染图片接口
 export const drawCodeImage = commonUrl + "/common/captcha/draw/";
 // 获取菜单

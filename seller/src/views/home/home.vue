@@ -56,7 +56,7 @@
           <h4>待办事项</h4>
 
           <div class="detail-list">
-            <div class="detail-item" @click="navigateTo('order')">
+            <div class="detail-item" @click="navigateTo('orderList')">
               <div>
                 <span>{{homeData.unPaidOrder || 0}}</span>
                 <div>待付款</div>
@@ -66,7 +66,7 @@
               </div>
             </div>
 
-            <div class="detail-item" @click="navigateTo('order')">
+            <div class="detail-item" @click="navigateTo('orderList')">
               <div>
                 <span>{{homeData.unDeliveredOrder || 0}}</span>
                 <div>待发货</div>
@@ -125,7 +125,7 @@
                 <span>{{homeData.seckillNum || 0}}</span>
                 <div>待参加活动</div>
               </div>
-              <div>
+              <div @click="navigateTo('accountStatementBill')">
                 <span>{{homeData.waitPayBill || 0}}</span>
                 <div>待对账</div>
               </div>
@@ -161,17 +161,17 @@
           </div>
 
         </div>
-        <div class="count-item">
+        <div class="count-item" @click="navigateTo('orderStatistics')">
           <div>
             <Icon class="icon" size="31" type="ios-card" />
           </div>
           <div>
-            <div class="counts">{{homeData.orderPrice ||0}}</div>
+            <div class="counts">{{homeData.orderPrice || 0 | unitPrice('￥')}}</div>
             <div>订单总额</div>
           </div>
 
         </div>
-        <div class="count-item" @click="navigateTo('order')">
+        <div class="count-item" @click="navigateTo('orderList')">
           <div>
 
             <Icon class="icon" size="31" type="md-list" />
@@ -182,7 +182,7 @@
           </div>
 
         </div>
-        <div class="count-item">
+        <div class="count-item" @click="navigateTo('trafficStatistics')">
           <div>
             <Icon class="icon" size="31" type="md-person" />
           </div>

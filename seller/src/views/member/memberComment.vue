@@ -102,6 +102,7 @@
             v-model="image"
             :disable="true"
             :remove="false"
+            :isView="true"
           ></upload-pic-thumb>
         </FormItem>
         <FormItem label="回复内容" prop="reply">
@@ -370,8 +371,8 @@ export default {
           this.content = res.result.content
           this.form.reply = res.result.reply
           this.replyStatus = res.result.replyStatus
-          if (res.result.image) {
-            this.image = (res.result.image || "").split(",");
+          if (res.result.images) {
+            this.image = (res.result.images || "").split(",");
           }
           if (res.result.replyImage) {
             this.form.replyImage = (res.result.replyImage || "").split(",");

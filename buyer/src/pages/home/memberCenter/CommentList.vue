@@ -22,10 +22,10 @@
           </div>
           <Row class="order-item-view">
             <i-col span="12" class="item-view-name">
-              <div class="order-img">
+              <div class="order-img hover-color" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
                 <img :src="item.goodsImage" alt="" />
               </div>
-              <div class="order-name">
+              <div class="order-name hover-color" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
                 {{item.goodsName}}
               </div>
               <div>
