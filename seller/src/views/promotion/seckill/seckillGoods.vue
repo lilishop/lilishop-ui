@@ -318,17 +318,17 @@ export default {
     },
     delGoods(index, id) {
       // 删除商品
-      if (id) {
-        removeSeckillGoods(this.$route.query.id, id).then((res) => {
-          if (res.success) {
-            this.goodsList[this.tabIndex].list.splice(index, 1);
-            this.$Message.success("删除成功！");
-          }
-        });
-      } else {
+      // if (id) {
+      //   removeSeckillGoods(this.$route.query.id, id).then((res) => {
+      //     if (res.success) {
+      //       this.goodsList[this.tabIndex].list.splice(index, 1);
+      //       this.$Message.success("删除成功！");
+      //     }
+      //   });
+      // } else {
         this.goodsList[this.tabIndex].list.splice(index, 1);
         this.$Message.success("删除成功！");
-      }
+      // }
     },
     delAll() {
       if (this.selectCount <= 0) {
@@ -350,43 +350,46 @@ export default {
           ].list.filter((item) => {
             return !ids.includes(item.id);
           });
-          removeSeckillGoods(this.$route.query.id, ids).then((res) => {
-            if (res.success) {
-              this.$Message.success("删除成功！");
-            }
-          });
+          // removeSeckillGoods(this.$route.query.id, ids).then((res) => {
+          //   if (res.success) {
+          //     this.$Message.success("删除成功！");
+          //   }
+          // });
         },
       });
     },
     selectedGoodsData(item) {
       // 选择器添加商品
-      let ids = [];
       let list = [];
-
-      this.goodsList[this.tabIndex].list.forEach((e) => {
-        ids.push(e.skuId);
-      });
+      console.log(item);
       item.forEach((e) => {
-        if (!ids.includes(e.id)) {
-          list.push({
-            goodsName: e.goodsName,
-            price: e.price,
-            originalPrice: e.price,
-            promotionApplyStatus: "",
-            quantity: e.quantity,
-            seckillId: this.$route.query.id,
-            storeId: e.storeId,
-            storeName: e.storeName,
-            skuId: e.id,
-            timeLine: this.data[0].hours.split(",")[this.tabIndex],
-          });
-        }
+        list.push({
+          goodsName: e.goodsName,
+          price: e.price,
+          originalPrice: e.price,
+          promotionApplyStatus: e.promotionApplyStatus || '',
+          quantity: e.quantity,
+          seckillId: this.$route.query.id,
+          storeId: e.storeId,
+          storeName: e.storeName,
+          skuId: e.id,
+          timeLine: this.data[0].hours.split(",")[this.tabIndex],
+
+        });
       });
 
-      this.goodsList[this.tabIndex].list.push(...list);
+      this.goodsList[this.tabIndex].list = list;
+      this.$nextTick(()=> {
+        this.$forceUpdate()
+      })
     },
-    openSkuList() {
+    openSkuList() { // 显示商品选择器
       this.$refs.skuSelect.open("goods");
+      let data = JSON.parse(JSON.stringify(this.goodsList[this.tabIndex].list))
+      data.forEach(e => {
+        e.id = e.skuId
+      })
+      this.$refs.skuSelect.goodsData = data;
     },
     unixDate(time) {
       // 处理报名截止时间

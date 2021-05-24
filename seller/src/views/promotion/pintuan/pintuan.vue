@@ -155,17 +155,15 @@ export default {
         {
           title: "活动开始时间",
           key: "startTime",
-          minWidth: 120
         },
         {
           title: "活动结束时间",
           key: "endTime",
-          minWidth: 120
         },
         {
           title: "状态",
           key: "promotionStatus",
-          minWidth: 100,
+          width: 100,
           render: (h, params) => {
             let text = "未知",
               color = "default";

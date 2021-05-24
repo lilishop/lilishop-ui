@@ -10,20 +10,13 @@
     scrollable
   >
     <goodsDialog
-      @selected="
-        (val) => {
-          goodsData = val;
-        }
-      "
+      @selected="(val) => {goodsData = val;}"
+      :selectedWay='goodsData'
       ref="goodsDialog"
       v-if="goodsFlag"
     />
     <linkDialog
-      @selectedLink="
-        (val) => {
-          linkData = val;
-        }
-      "
+      @selectedLink="(val) => {linkData = val;}"
       v-else
       class="linkDialog"
     />
@@ -41,14 +34,11 @@ export default {
     return {
       title: "选择", // 模态框标题
       goodsFlag: false, // 是否商品选择器
-      goodsData: "", //选择的商品
+      goodsData: [], //选择的商品
       linkData: "", //选择的链接
       flag: false, // 控制模态框显隐
     };
   },
-  props: ["types"],
-  watch: {},
-  mounted() {},
   methods: {
     // 关闭弹窗
     clickClose() {
@@ -58,7 +48,6 @@ export default {
 
     // 单选商品
     singleGoods(){
-
       var timer = setInterval(() => {
         if (this.$refs.goodsDialog) {
 
@@ -66,19 +55,16 @@ export default {
          clearInterval(timer);
         }
       }, 100);
-
-
     },
-    clickOK() {
+    clickOK() { // 确定按钮回调，
       if (this.goodsFlag) {
         this.$emit("selectedGoodsData", this.goodsData);
       } else {
         this.$emit("selectedLink", this.linkData);
       }
       this.clickClose();
-      // this.clearFlag = false
     },
-    open(type){
+    open (type) { // 父组件通过ref调用，打开商品选择器
       this.flag = true;
       if(type == 'goods'){
         this.goodsFlag = true;
@@ -87,7 +73,7 @@ export default {
       }
 
     },
-    close(){
+    close(){ // 关闭组件
       this.flag = false;
     }
   },

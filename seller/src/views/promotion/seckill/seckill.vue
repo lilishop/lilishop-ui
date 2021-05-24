@@ -134,6 +134,7 @@ export default {
         {
           title: "状态",
           key: "promotionStatus",
+          width: 100,
           render: (h, params) => {
             let text = "未知",
               color = "default";

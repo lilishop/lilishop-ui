@@ -223,7 +223,7 @@ export default {
         {
           title: "状态",
           key: "promotionStatus",
-          minWidth: 100,
+          width: 100,
           fixed: "right",
           render: (h, params) => {
             let text = "未知",
@@ -250,9 +250,9 @@ export default {
                   },
                 },
                 text
-              ),
+              )
             ]);
-          },
+          }
         },
         {
           title: "操作",

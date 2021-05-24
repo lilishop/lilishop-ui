@@ -183,7 +183,7 @@
                 style="display: flex; margin-bottom: 10px"
                 v-if="form.promotionStatus == 'NEW'"
               >
-                <Button type="primary" @click="$refs.skuSelect.open('goods')"
+                <Button type="primary" @click="openSkuList"
                   >选择商品</Button
                 >
                 <Button
@@ -376,6 +376,14 @@ export default {
       );
       this.$router.go(-1);
     },
+    openSkuList() { // 显示商品选择器
+      this.$refs.skuSelect.open("goods");
+      let data = JSON.parse(JSON.stringify(this.form.promotionGoodsList))
+      data.forEach(e => {
+        e.id = e.skuId
+      })
+      this.$refs.skuSelect.goodsData = data;
+    },
     getDetail() {
       // 获取活动详情
       getFullDiscountById(this.id).then((res) => {
@@ -496,28 +504,20 @@ export default {
       this.form.promotionGoodsList.splice(index, 1);
     },
     selectedGoodsData(item) {
-      console.log(item);
       // 回显已选商品
-      let ids = [];
       let list = [];
-      this.form.promotionGoodsList.forEach((e) => {
-        ids.push(e.skuId);
-      });
       item.forEach((e) => {
-        if (!ids.includes(e.id)) {
-          list.push({
-            goodsName: e.goodsName,
-            price: e.price,
-            quantity: e.quantity,
-            storeId: e.storeId,
-            storeName: e.storeName,
-            thumbnail: e.thumbnail,
-            skuId: e.id,
-          });
-        }
+        list.push({
+          goodsName: e.goodsName,
+          price: e.price,
+          quantity: e.quantity,
+          storeId: e.storeId,
+          storeName: e.storeName,
+          thumbnail: e.thumbnail,
+          skuId: e.id,
+        });
       });
-      console.log(list);
-      this.form.promotionGoodsList.push(...list);
+      this.form.promotionGoodsList = list;
     },
     getCouponList(query) {
       // 优惠券列表
