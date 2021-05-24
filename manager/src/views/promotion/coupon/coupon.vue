@@ -174,7 +174,7 @@ export default {
         {
           title: "领取数量/总数量",
           key: "publishNum",
-          width: 100,
+          width: 150,
           render: (h, params) => {
             return h(
               "div", params.row.receivedNum + "/" + params.row.publishNum)

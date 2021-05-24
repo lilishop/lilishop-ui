@@ -259,7 +259,7 @@ export default {
           slot: "action",
           align: "center",
           fixed: "right",
-          width: 80,
+          width: 150,
         },
       ],
       data: [], // 表单数据
