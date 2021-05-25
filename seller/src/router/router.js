@@ -72,6 +72,12 @@ export const otherRouter = {
       component: () => import("@/views/promotion/coupon/couponPublish.vue")
     },
     {
+      path: "add-live",
+      title: "创建直播",
+      name: "add-live",
+      component: () => import("@/views/promotion/live/addLive.vue")
+    },
+    {
       path: "bill-detail",
       title: "结算单详情",
       name: "bill-detail",

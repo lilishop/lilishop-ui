@@ -216,19 +216,20 @@ export const postRequestWithNoForm = (url, params) => {
   });
 };
 
-// export const postRequestWithHeaders = (url, params) => {
-//   let accessToken = getStore("accessToken");
-//   return axios({
-//     method: "post",
-//     url: `${url}`,
-//     data: params,
+export const postRequestWithHeaders = (url, params) => {
+  let accessToken = getStore("accessToken");
+  return axios({
+    method: "post",
+    url: `${url}`,
+    data: params,
 
-//     headers: {
-//       accessToken: accessToken,
-//       "Content-Type": "application/x-www-form-urlencoded"
-//     }
-//   });
-// };
+    headers: {
+      accessToken: accessToken,
+      "Content-Type": "application/x-www-form-urlencoded"
+    }
+  });
+};
+
 
 export const putRequest = (url, params,headers) => {
   let accessToken = getStore("accessToken");
