@@ -64,16 +64,6 @@ export default {
         orderStatus: "",
       },
       selectDate: null,
-      form: {
-        // 添加或编辑表单对象初始化数据
-        sn: "",
-        sellerName: "",
-        startTime: "",
-        endTime: "",
-        billPrice: "",
-      },
-      // 表单验证规则
-      formValidate: {},
       submitLoading: false, // 添加或编辑提交状态
       selectList: [], // 多选数据
       selectCount: 0, // 多选计数

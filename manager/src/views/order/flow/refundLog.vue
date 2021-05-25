@@ -57,14 +57,6 @@ export default {
         isRefund: "",
       },
       selectDate: null,
-      form: {
-        // 添加或编辑表单对象初始化数据
-        sn: "",
-        sellerName: "",
-        startTime: "",
-        endTime: "",
-        billPrice: "",
-      },
       columns: [
         {
           title: "售后单号",

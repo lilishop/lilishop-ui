@@ -105,7 +105,6 @@
         ref="underForm"
         :model="underForm"
         :label-width="100"
-        :rules="formValidate"
       >
         <FormItem label="下架原因" prop="reason">
           <Input v-model="underForm.reason" clearable style="width: 100%" />
@@ -133,9 +132,6 @@ export default {
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
-      drop: false, // 展开搜索框
-      dropDownContent: "展开", // 展开标签文字
-      dropDownIcon: "ios-arrow-down", // 展开图标
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -146,17 +142,6 @@ export default {
       underForm: { // 下架原因
         reason: "",
       },
-      form: {
-        // 添加或编辑表单对象初始化数据
-        goodsName: "",
-        sn: "",
-        marketEnable: "",
-        price: "",
-        sellerName: "",
-      },
-      // 表单验证规则
-
-      formValidate: {},
       submitLoading: false, // 添加或编辑提交状态
       selectList: [], // 多选数据
       selectCount: 0, // 多选计数
@@ -378,16 +363,6 @@ export default {
     changeSelect(e) {
       this.selectList = e;
       this.selectCount = e.length;
-    },
-    dropDown() {
-      if (this.drop) {
-        this.dropDownContent = "展开";
-        this.dropDownIcon = "ios-arrow-down";
-      } else {
-        this.dropDownContent = "收起";
-        this.dropDownIcon = "ios-arrow-up";
-      }
-      this.drop = !this.drop;
     },
     getDataList() {
       this.loading = true;

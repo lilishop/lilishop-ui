@@ -70,7 +70,7 @@
 
             <FormItem style="width: 100%" v-if="form.scopeType == 'PORTION_GOODS'">
               <div style="display: flex; margin-bottom: 10px">
-                <Button type="primary" @click="$refs.skuSelect.open('goods')">选择商品</Button>
+                <Button type="primary" @click="openSkuList">选择商品</Button>
                 <Button type="error" ghost style="margin-left: 10px" @click="delSelectGoods">批量删除</Button>
               </div>
               <Table border :columns="columns" :data="form.promotionGoodsList" @on-selection-change="changeSelect">
@@ -392,6 +392,14 @@ export default {
       );
       this.$router.go(-1);
     },
+    openSkuList() { // 显示商品选择器
+      this.$refs.skuSelect.open("goods");
+      let data = JSON.parse(JSON.stringify(this.form.promotionGoodsList))
+      data.forEach(e => {
+        e.id = e.skuId
+      })
+      this.$refs.skuSelect.goodsData = data;
+    },
     changeSelect(e) {
       // 已选商品批量选择
       this.selectedGoods = e;
@@ -424,25 +432,19 @@ export default {
     },
     selectedGoodsData(item) {
       // 回显已选商品
-      let ids = [];
       let list = [];
-      this.form.promotionGoodsList.forEach((e) => {
-        ids.push(e.skuId);
-      });
       item.forEach((e) => {
-        if (!ids.includes(e.id)) {
           list.push({
             goodsName: e.goodsName,
             price: e.price,
             originalPrice: e.price,
             quantity: e.quantity,
             storeId: e.storeId,
-            sellerName: e.sellerName,
+            storeName: e.storeName,
             skuId: e.id,
           });
-        }
       });
-      this.form.promotionGoodsList.push(...list);
+      this.form.promotionGoodsList = list;
     },
     getGoodsCategory(e) {
       // 获取级联选择器商品分类id

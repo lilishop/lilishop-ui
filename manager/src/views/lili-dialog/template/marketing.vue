@@ -65,7 +65,7 @@ export default {
         },
         {
           title: "店铺名称",
-          key: "sellerName",
+          key: "storeName",
           tooltip: true,
         },
         {
@@ -113,7 +113,7 @@ export default {
         },
         {
           title: "店铺名称",
-          key: "sellerName",
+          key: "storeName",
           tooltip: true,
         },
         {

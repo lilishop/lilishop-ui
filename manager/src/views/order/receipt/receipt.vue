@@ -114,20 +114,10 @@
           receiptStatus: "", // 起始时间
         },
         shopsData: [], // 店铺数据
-        form: {
-          // 添加或编辑表单对象初始化数据
-          sn: "",
-          sellerName: "",
-          startTime: "",
-          endTime: "",
-          billPrice: "",
-        },
         params: {
           pageNumber: 1,
-          pageSize: 1,
+          pageSize: 10,
         },
-        // 表单验证规则
-        formValidate: {},
         submitLoading: false, // 添加或编辑提交状态
         selectList: [], // 多选数据
         selectCount: 0, // 多选计数

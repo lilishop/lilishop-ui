@@ -25,9 +25,6 @@ export default {
       flag: false, // modal显隐
     };
   },
-  props: ["types"],
-  watch: {},
-  mounted() {},
   methods: {
     // 关闭弹窗
     clickClose() {
@@ -51,13 +48,17 @@ export default {
       }
       this.clickClose();
     },
-    open(type) {
+    open(type, mutiple) {
       this.flag = true;
       if (type == "goods") {
         this.goodsFlag = true;
+        if (mutiple) {
+          this.singleGoods()
+        }
       } else {
         this.goodsFlag = false;
       }
+      
     },
     close() {
       this.flag = false;

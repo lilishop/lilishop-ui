@@ -305,7 +305,7 @@ export default {
         },
         {
           title: "商家名称",
-          key: "sellerName",
+          key: "storeName",
         },
         {
           title: "售后单类型",

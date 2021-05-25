@@ -38,7 +38,7 @@
         </div>
         <div class="label-item">
           <span>店铺名称</span>
-          <span>{{res.sellerName}}</span>
+          <span>{{res.storeName}}</span>
         </div>
         <div class="label-item">
           <span>创建时间</span>

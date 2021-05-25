@@ -212,7 +212,7 @@
             <li>
               <span class="label">应付金额：</span>
               <span class="txt flowPrice"
-                >¥{{ orderInfo.order.priceDetailDTO.flowPrice }}</span
+                >¥{{ orderInfo.order.priceDetailDTO.flowPrice | unitPrice }}</span
               >
             </li>
           </ul>
