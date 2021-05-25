@@ -140,12 +140,12 @@ export default {
         {
           title: "活动类型",
           slot: "promotionType",
-          minWidth: 60,
+          width: 100,
         },
         {
           title: "活动状态",
           key: "promotionStatus",
-          minWidth: 60,
+          width: 100,
           render: (h, params) => {
             let text = "未知",
               color = "default";

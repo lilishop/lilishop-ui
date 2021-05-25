@@ -127,7 +127,7 @@
       </Row>
       <Row type="flex" justify="end" class="page">
         <Page
-          :current="searchForm.pageNumber + 1"
+          :current="searchForm.pageNumber"
           :total="total"
           :page-size="searchForm.pageSize"
           @on-change="changePage"
@@ -157,7 +157,7 @@ export default {
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
-        pageNumber: 0, // 当前页数
+        pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
         order: "desc", // 默认排序方式
       },
@@ -248,18 +248,17 @@ export default {
       this.$router.push({ name: "add-points-goods" });
     },
     changePage(v) {
-      this.searchForm.pageNumber = v - 1;
+      this.searchForm.pageNumber = v;
       this.getDataList();
-      this.clearSelectAll();
     },
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
     handleSearch() {
-      this.searchForm.pageNumber = 0;
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
-      if (this.searchForm.pointsS !== "") {
+      if (this.searchForm.pointsS) {
         this.searchForm.points =
           this.searchForm.pointsS +
           "_" +

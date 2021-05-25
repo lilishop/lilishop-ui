@@ -7,9 +7,7 @@
           <div class="form-item-view">
             <FormItem astyle="width: 100%">
               <div style="display: flex; margin-bottom: 10px">
-                <Button type="primary" @click="$refs.skuSelect.open('goods')"
-                  >选择商品</Button
-                >
+                <Button type="primary" @click="openSkuList">选择商品</Button>
                 <Button
                   type="error"
                   ghost
@@ -20,22 +18,19 @@
               </div>
               <Table
                 border
+                v-if="showTable"
                 :columns="columns"
-                :data="form.promotionGoodsList"
+                :data="promotionGoodsList"
                 @on-selection-change="changeSelect"
               >
                 <template slot-scope="{ row }" slot="skuId">
                   <div>{{ row.skuId }}</div>
                 </template>
 
-                <template slot-scope="{ row, index }" slot="settlementPrice">
+                <template slot-scope="{ index }" slot="settlementPrice">
                   <Input
                     type="number"
-                    v-model="row.settlementPrice"
-                    @input="
-                      pointsGoodsList[index].settlementPrice =
-                        row.settlementPrice
-                    "
+                    v-model="promotionGoodsList[index].settlementPrice"
                   />
                 </template>
 
@@ -44,7 +39,7 @@
                   slot="pointsGoodsCategory"
                 >
                   <Select
-                    v-model="pointsGoodsList[index].pointsGoodsCategoryId"
+                    v-model="promotionGoodsList[index].pointsGoodsCategoryId"
                     transfer="true"
                     label-in-value="true"
                     @on-change="
@@ -62,21 +57,17 @@
                   </Select>
                 </template>
 
-                <template slot-scope="{ row, index }" slot="activeStock">
+                <template slot-scope="{ index }" slot="activeStock">
                   <Input
                     type="number"
-                    v-model="row.activeStock"
-                    @input="
-                      pointsGoodsList[index].activeStock = row.activeStock
-                    "
+                    v-model="promotionGoodsList[index].activeStock"
                   />
                 </template>
 
-                <template slot-scope="{ row, index }" slot="points">
+                <template slot-scope="{ index }" slot="points">
                   <Input
                     type="number"
-                    v-model="row.points"
-                    @input="pointsGoodsList[index].points = row.points"
+                    v-model="promotionGoodsList[index].points"
                   />
                 </template>
               </Table>
@@ -151,22 +142,10 @@ export default {
     };
     return {
       form: {
-        /** 店铺承担比例 */
-        sellerCommission: 0,
-        /** 发行数量 */
-        publishNum: 1,
-        /** 运费承担者 */
-        scopeType: "ALL",
-        /** 限领数量 */
-        couponLimitNum: 1,
-        /** 活动类型 */
-        couponType: "PRICE",
-        /** 优惠券名称 */
-        couponName: "",
-        getType: "FREE",
-        promotionGoodsList: [],
+        promotionGoodsList: [], // 活动商品列表
       },
-      pointsGoodsList: [], // 积分商品列表
+      showTable: true,
+      promotionGoodsList: [], // 活动商品列表
       categoryList: [], // 分类列表
       submitLoading: false, // 添加或编辑提交状态
       selectedGoods: [], // 已选商品列表，便于删除
@@ -226,6 +205,12 @@ export default {
           title: "商品名称",
           key: "goodsName",
           minWidth: 120,
+          render: (h, params) => {
+            return h(
+              "div",
+              params.row.goodsSku.goodsName
+            );
+          },
         },
         {
           title: "SKU编码",
@@ -236,6 +221,12 @@ export default {
           title: "店铺名称",
           key: "storeName",
           minWidth: 60,
+          render: (h, params) => {
+            return h(
+              "div",
+              params.row.goodsSku.storeName
+            );
+          },
         },
         {
           title: "商品价格",
@@ -244,7 +235,7 @@ export default {
           render: (h, params) => {
             return h(
               "div",
-              this.$options.filters.unitPrice(params.row.price, "￥")
+              this.$options.filters.unitPrice(params.row.goodsSku.price, "￥")
             );
           },
         },
@@ -252,6 +243,12 @@ export default {
           title: "库存",
           key: "quantity",
           minWidth: 20,
+          render: (h, params) => {
+            return h(
+              "div",
+              params.row.goodsSku.quantity
+            );
+          },
         },
         {
           title: "结算价格",
@@ -313,11 +310,11 @@ export default {
       let res = await getPointsGoodsCategoryList();
       this.categoryList = res.result.records;
     },
-    /** 保存平台优惠券 */
+    /** 保存积分商品 */
     handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
-          let params = this.pointsGoodsList;
+          let params = this.promotionGoodsList;
           const start = this.$options.filters.unixToDate(
             this.form.startTime / 1000
           );
@@ -355,7 +352,8 @@ export default {
       this.$router.go(-1);
     },
     changeCategory(val, index) {
-      this.pointsGoodsList[index].pointsGoodsCategoryName = val.label;
+      this.promotionGoodsList[index].pointsGoodsCategoryName = val.label;
+      console.log(this.promotionGoodsList);
     },
     changeSelect(e) {
       // 已选商品批量选择
@@ -363,7 +361,7 @@ export default {
     },
     delSelectGoods() {
       // 多选删除商品
-      if (this.pointsGoodsList.length <= 0) {
+      if (this.selectedGoods.length <= 0) {
         this.$Message.warning("您还未选择要删除的数据");
         return;
       }
@@ -375,55 +373,42 @@ export default {
           this.selectedGoods.forEach(function (e) {
             ids.push(e.id);
           });
-          this.form.promotionGoodsList = this.form.promotionGoodsList.filter(
+          this.promotionGoodsList = this.promotionGoodsList.filter(
             (item) => {
               return !ids.includes(item.id);
             }
           );
-          this.pointsGoodsList = this.pointsGoodsList.filter((item) => {
-            return !ids.includes(item.id);
-          });
         },
       });
     },
     delGoods(index) {
       // 删除商品
-      this.form.promotionGoodsList.splice(index, 1);
-      this.pointsGoodsList.splice(index, 1);
+      this.promotionGoodsList.splice(index, 1);
+    },
+    openSkuList() { // 显示商品选择器
+      this.$refs.skuSelect.open("goods");
+      let data = JSON.parse(JSON.stringify(this.promotionGoodsList))
+      data.forEach(e => {
+        e.id = e.skuId
+      })
+      this.$refs.skuSelect.goodsData = data;
     },
     selectedGoodsData(item) {
       // 回显已选商品
-      let ids = [];
       let list = [];
-      this.form.promotionGoodsList.forEach((e) => {
-        ids.push(e.skuId);
-      });
       item.forEach((e) => {
-        if (!ids.includes(e.id)) {
-          list.push({
-            goodsName: e.goodsName,
-            price: e.price,
-            originalPrice: e.price,
-            quantity: e.quantity,
-            storeId: e.storeId,
-            storeName: e.storeName,
-            skuId: e.id,
-            ...e,
-          });
-          this.pointsGoodsList.push({
-            settlementPrice: 0,
-            pointsGoodsCategoryId: 0,
-            pointsGoodsCategoryName: "",
-            activeStock: 0,
-            points: 0,
-            goodsSku: {
-              ...e,
-            },
-            skuId: e.id,
-          });
+        const obj = {
+          settlementPrice: e.settlementPrice || 0,
+          pointsGoodsCategoryId: e.pointsGoodsCategoryId || 0,
+          pointsGoodsCategoryName:e.pointsGoodsCategoryName || "",
+          activeStock:e.activeStock || 0,
+          points:e.points || 0,
+          skuId: e.id,
+          goodsSku: e.goodsSku || e
         }
+        list.push(obj);
       });
-      this.form.promotionGoodsList.push(...list);
+      this.promotionGoodsList = list;
     },
   },
 };

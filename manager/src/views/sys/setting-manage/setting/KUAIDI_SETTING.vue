@@ -1,13 +1,13 @@
 <template>
   <div class="layout">
     <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
-      <FormItem label="企业id" prop="ebusinessID">
+      <FormItem label="ebusinessID" prop="ebusinessID">
         <Input v-model="formValidate.ebusinessID" />
       </FormItem>
-      <FormItem label="密钥" prop="appKey">
+      <FormItem label="appKey" prop="appKey">
         <Input class="label-appkey" v-model="formValidate.appKey" />
       </FormItem>
-      <FormItem label="api地址" prop="reqURL">
+      <FormItem label="reqURL" prop="reqURL">
         <Input v-model="formValidate.reqURL" />
       </FormItem>
       <div class="label-btns">
@@ -78,15 +78,13 @@ export default {
 @import "./style.scss";
 .label-item {
   display: flex;
-  > .ivu-input {
-    width: 200px;
-    margin: 0 10px;
-  }
 }
-.label-appkey {
+/deep/ .ivu-input {
   width: 300px !important;
-  /deep/ input {
-    width: 300px !important;
-  }
+  margin: 0 10px;
+}
+.ivu-input-wrapper {
+  width: 300px;
+  margin-right: 10px;
 }
 </style>
