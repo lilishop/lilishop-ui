@@ -330,7 +330,7 @@ export default {
         this.$Message.success("删除成功！");
       // }
     },
-    delAll() {
+    delAll() { // 删除当前时段全部数据
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未选择要删除的数据");
         return;

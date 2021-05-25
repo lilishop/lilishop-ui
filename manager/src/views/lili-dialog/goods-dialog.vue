@@ -45,8 +45,6 @@ export default {
       type: "multiple", //单选或者多选 single  multiple
 
       skuList: [], // 商品sku列表
-
-      selectedWay: [], //选中商品集合
       total: "",  // 商品总数
       goodsParams: { // 商品请求参数
         pageNumber: 1,
@@ -64,7 +62,12 @@ export default {
       loading: false, // 加载状态
     };
   },
-  props: ["clearFlag"],
+  props: {
+    selectedWay: {
+      type: Array,
+      default: new Array()
+    }
+  },
   watch: {
     category(val) {
       this.goodsParams.categoryPath = val[0];
@@ -74,6 +77,7 @@ export default {
         this.$emit("selected", this.selectedWay);
       },
       deep: true,
+      immediate: true
     },
 
     "goodsParams.categoryPath": {
@@ -110,6 +114,11 @@ export default {
         res.result.records.forEach((item) => {
           item.selected = false;
           item.___type = "goods"; //设置为goods让pc wap知道标识
+          this.selectedWay.forEach(e => {
+            if (e.id === item.id) {
+              item.selected = true 
+            }
+          })
         });
         /**
          * 解决数据请求中，滚动栏会一直上下跳动
@@ -117,7 +126,6 @@ export default {
         this.total = res.result.total;
         this.goodsData.push(...res.result.records);
 
-        // console.log(this.goodsData);
       } else {
         this.empty = true;
       }
@@ -193,9 +201,13 @@ export default {
         this.selectedWay.push(val);
       } else {
         val.selected = false;
-        this.selectedWay.splice(index, 1);
+        for (let i = 0; i<this.selectedWay.length; i++ ) {
+          if (this.selectedWay[i].id===val.id) {
+            this.selectedWay.splice(i,1)
+            break;
+          }
+        }
       }
-      // console.log(this.selectedWay);
     },
   },
 };
