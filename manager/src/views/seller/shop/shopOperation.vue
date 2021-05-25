@@ -65,9 +65,17 @@
               <FormItem label="详细地址" prop="salesConsigneeDetail">
                 <Input v-model="shopForm.salesConsigneeDetail" clearable style="width: 350px" />
               </FormItem>
+              <Divider orientation="left">腾讯云智服</Divider>
+              <FormItem label="唯一标识" prop="salesConsigneeDetail">
+                <Input v-model="shopForm.yzfSign" clearable style="width: 350px" />
+              </FormItem>
+              <FormItem label="小程序唯一标识" prop="salesConsigneeDetail">
+                <Input v-model="shopForm.yzfMpSign" clearable style="width: 350px" />
+              </FormItem>
               <Spin fix v-if="loading"></Spin>
             </div>
           </TabPane>
+          <!-- 入驻信息 -->
           <TabPane label="入驻信息" class="tab" name="sms">
             <!-- 遮罩层  -->
             <div v-if="isRead" class="mask">只读不可修改</div>

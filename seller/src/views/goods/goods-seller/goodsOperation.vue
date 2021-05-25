@@ -522,7 +522,7 @@
                 <span slot="append">kg</span>
               </Input>
             </FormItem>
-            <FormItem class="form-item-view-el" label="运费" prop="skuList">
+            <!-- <FormItem class="form-item-view-el" label="运费" prop="skuList">
               <RadioGroup type="button" button-style="solid"
                 @on-change="logisticsTemplateChange"
                 v-model="baseInfoForm.freightPayer"
@@ -534,7 +534,7 @@
                   <span>使用物流规则</span>
                 </Radio>
               </RadioGroup>
-            </FormItem>
+            </FormItem> -->
             <FormItem
               class="form-item-view-el"
               label="物流模板"
@@ -699,7 +699,7 @@ export default {
         this.baseInfoForm = {
           salesModel: "RETAIL",
           goodsParamsList: [],
-          freightPayer: "STORE",
+          // freightPayer: "STORE",
           weight: "",
           goodsGalleryFiles: [],
           release: "true",
@@ -844,7 +844,7 @@ export default {
         /** 商品参数列表 */
         goodsParamsList: [],
         /** 运费承担者 */
-        freightPayer: "STORE",
+        // freightPayer: "STORE",
         /** 商品重量 */
         weight: "",
         /** 商品相册列表 */
@@ -1007,7 +1007,7 @@ export default {
       this.baseInfoForm = {
         salesModel: "RETAIL",
         goodsParamsList: [],
-        freightPayer: "STORE",
+        // freightPayer: "STORE",
         weight: "",
         goodsGalleryFiles: [],
         release: "true",
@@ -1235,14 +1235,14 @@ export default {
         ...response.result,
       };
       console.warn(this.baseInfoForm);
-      if (this.baseInfoForm.freightPayer === "BUYER") {
-        API_Shop.getShipTemplate().then((res) => {
-          if (res.success) {
-            this.logisticsTemplate = res.result;
-          }
-        });
-        this.logisticsTemplateShow = true;
-      }
+      // if (this.baseInfoForm.freightPayer === "BUYER") {
+      //   API_Shop.getShipTemplate().then((res) => {
+      //     if (res.success) {
+      //       this.logisticsTemplate = res.result;
+      //     }
+      //   });
+      //   this.logisticsTemplateShow = true;
+      // }
       this.baseInfoForm.release = "true";
       this.baseInfoForm.recommend = this.baseInfoForm.recommend
         ? "true"
@@ -1840,9 +1840,9 @@ export default {
             return;
           }
           //如果选择的是卖家承担运费 则运费模板重置为0
-          if (this.baseInfoForm.freightPayer !== "BUYER") {
-            this.baseInfoForm.templateId = 0;
-          }
+          // if (this.baseInfoForm.freightPayer !== "BUYER") {
+          //   this.baseInfoForm.templateId = 0;
+          // }
 
           this.baseInfoForm.skuList = this.skuTableData.map((sku) => {
             delete sku._index;

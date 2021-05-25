@@ -69,9 +69,10 @@
                 <RadioGroup type="button" button-style="solid" v-model="form.pricingMethod">
                   <Radio label="WEIGHT">按重量</Radio>
                   <Radio label="NUM">按件数</Radio>
+                  <Radio label="FREE">包邮</Radio>
                 </RadioGroup>
               </FormItem>
-              <FormItem label="详细设置">
+              <FormItem label="详细设置" v-if="form.pricingMethod !== 'FREE'">
                 <div class="ncsu-trans-type" data-delivery="TRANSTYPE">
                   <div class="entity">
                     <div class="tbl-except">
@@ -101,17 +102,17 @@
                               <Input class="text w40" type="text" v-model="item.firstCompany" maxlength="3" clearable />
                             </td>
                             <td>
-                              <Input class="text w60" type="text" v-model="item.firstPrice" maxlength="6" clearable /><em class="add-on">
-                                元
-                              </em>
+                              <Input class="text w60" type="text" v-model="item.firstPrice" maxlength="6" clearable >
+                                <span slot="append">元</span>
+                              </Input>
                             </td>
                             <td>
                               <Input class="text w40" type="text" v-model="item.continuedCompany" maxlength="6" clearable />
                             </td>
                             <td>
-                              <Input class="text w60" type="text" v-model="item.continuedPrice" maxlength="6" clearable /><em class="add-on">
-                                元
-                              </em>
+                              <Input class="text w60" type="text" v-model="item.continuedPrice" maxlength="6" clearable>
+                                <span slot="append">元</span>
+                              </Input>
                             </td>
                             <td class="nscs-table-handle">
                               <Button @click="editRegion(item,index)" type="info" size="small" style="margin-bottom: 5px">修改
@@ -141,7 +142,7 @@
                 </div>
               </FormItem>
               <Form-item>
-                <Button @click="addShipTemplateChildren(index)" :loading="submitLoading" icon="ios-create-outline" >为指定城市设置运费模板
+                <Button @click="addShipTemplateChildren(index)" v-if="form.pricingMethod !== 'FREE'" icon="ios-create-outline" >为指定城市设置运费模板
                 </Button>
                 <Button @click="handleSubmit" :loading="submitLoading" type="primary" style="margin-right:5px">保存
                 </Button>
@@ -312,6 +313,7 @@ export default {
         const regNumber = /^\+?[1-9][0-9]*$/;
         const regMoney = /(^[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^(0){1}$)|(^[0-9]\.[0-9]([0-9])?$)/;
         if (valid) {
+          debugger;
           //校验运费模板详细信息
           for (let i = 0; i < this.form.freightTemplateChildList.length; i++) {
             if (
@@ -341,6 +343,8 @@ export default {
               return;
             }
           }
+          console.log(1111);
+
           if (this.operation == "ADD") {
             API_Shop.addShipTemplate(this.form, headers).then((res) => {
               if (res.success) {
@@ -541,7 +545,8 @@ textarea {
 }
 
 .w60 {
-  width: 80px !important;
+  width: 100px !important;
+  margin: 0 auto;
 }
 
 Input[type="text"],
@@ -553,18 +558,6 @@ Input.password {
   padding: 10px;
   border: solid 1px #e6e9ee;
   outline: 0 none;
-}
-
-.add-on {
-  line-height: 28px;
-  background-color: #f6f7fb;
-  vertical-align: top;
-  display: inline-block;
-  text-align: center;
-  width: 30px;
-  height: 30px;
-  border: solid #e6e9ee;
-  border-width: 1px 1px 1px 0;
 }
 
 ncsc-default-table {
