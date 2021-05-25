@@ -425,6 +425,34 @@ export const result = [
             url: "",
             permTypes: [],
             children: null
+          },
+          {
+            name: "live",
+            showAlways: true,
+            level: 2,
+            type: 0,
+            title: "小程序直播",
+            path: "live",
+            component: "promotion/live/live",
+            icon: "md-person",
+            isMenu: true,
+            url: "",
+            permTypes: [],
+            children: null
+          },
+          {
+            name: "liveGoods",
+            showAlways: true,
+            level: 2,
+            type: 0,
+            title: "直播商品",
+            path: "liveGoods",
+            component: "promotion/live/liveGoods",
+            icon: "md-person",
+            isMenu: true,
+            url: "",
+            permTypes: [],
+            children: null
           }
         ]
       },

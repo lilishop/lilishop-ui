@@ -1,5 +1,23 @@
 // 统一请求路径前缀在libs/axios.js中修改
-import { getRequest, postRequest, putRequest, deleteRequest, importRequest, uploadFileRequest } from '@/libs/axios';
+import { getRequest, postRequest, postRequestWithNoForm, putRequest, deleteRequest, importRequest, uploadFileRequest } from '@/libs/axios';
+
+
+// 获取店铺直播间列表
+export const getLivesList = (params) => {
+  return getRequest('/broadcast/studio', params)
+}
+
+// 获取店铺直播商品
+export const getLiveGoods = (params) => {
+  return getRequest('/broadcast/commodity', params)
+}
+
+// 添加店铺直播商品
+export const addLiveGoods = (params) => {
+  return postRequestWithNoForm('/broadcast/commodity', params)
+}
+
+
 
 // 获取拼团列表
 export const getPintuanList = (params) => {

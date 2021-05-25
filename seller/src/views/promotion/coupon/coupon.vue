@@ -430,7 +430,7 @@ export default {
   },
 };
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 @import "@/styles/table-common.scss";
 .search-form {
   width: 100% !important;
