@@ -14,7 +14,7 @@
               </tr>
               <tr>
                 <th colspan="20">
-                  <h3>{{item.name}}</h3>
+                  <span class="temp-name">{{item.name}}</span>
                   <span class="fr m-r-5">
                     <time style="margin-right: 20px" title="最后编辑时间">
                       <i class="icon-time"></i>{{item.updateTime}}
@@ -26,20 +26,16 @@
               </tr>
               <tr v-if="item.pricingMethod!=='FREE'">
                 <td class="w10 bdl"></td>
-                <td class="cell-area tl">运送到</td>
-                <td class="w150">首件(重)
-
-                </td>
+                <td class="cell-area tl w150">运送到</td>
+                <td class="w150">首件(重)</td>
                 <td class="w150">运费</td>
-                <td class="w150">续件(重)
-
-                </td>
+                <td class="w150">续件(重)</td>
                 <td class="w150 bdr">运费</td>
               </tr>
               <template v-if="item.pricingMethod!=='FREE'">
                 <tr v-for="(children,index) in item.freightTemplateChildList" :key="index">
                   <td class="bdl"></td>
-                  <td class="cell-area tl" style="width: 60%">{{children.area}}</td>
+                  <td class="cell-area tl w150" style="width: 60%;white-space:normal;">{{children.area}}</td>
                   <td>
                     {{children.firstCompany}}
                   </td>
@@ -54,13 +50,10 @@
                   </td>
                 </tr>
               </template>
-              
             </tbody>
-
           </table>
-
         </TabPane>
-        <TabPane v-if="csTab" :label=title :name=operation>
+        <TabPane v-if="csTab" :label="title" :name="operation">
           <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
             <FormItem label="模板名称" prop="name">
               <Input v-model="form.name" maxlength="10" clearable style="width: 20%" />
@@ -90,11 +83,11 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <tr class="bd-line" data-group="n1" v-for="(item,index) in form.freightTemplateChildList">
+                        <tr class="bd-line" data-group="n1" v-for="(item,index) in form.freightTemplateChildList" :key="index">
                           <td></td>
                           <td class="tl cell-area">
                             <span class="area-group">
-                              <p style="display:inline-block;white-space:pre;">{{item.area}}</p>
+                              <p style="display:inline-block">{{item.area}}</p>
                             </span>
                           </td>
                           <td></td>
@@ -476,13 +469,12 @@ export default {
   border-left: 1px solid #e6e6e6;
 }
 
-.order tbody tr th h3 {
+.order tbody tr th .temp-name {
+  float: left;
   font-size: 14px;
-  line-height: 20px;
   color: #555;
-  vertical-align: middle;
-  display: inline-block;
-  margin: 0 10px;
+  // line-height: 44px;
+  margin: 7px 0 0 10px;
 }
 
 .m-r-5 {
