@@ -1,12 +1,14 @@
 <template>
   <Modal :styles="{ top: '120px' }" width="1160" @on-cancel="clickClose" @on-ok="clickOK" v-model="flag" :mask-closable="false" scrollable>
-    <goodsDialog @selected="(val) => {goodsData = val;}" 
-      v-if="goodsFlag" ref="goodsDialog" :selectedWay='goodsData'/>
-    <linkDialog @selectedLink="
-        (val) => {
-          linkData = val;
-        }
-      " v-else class="linkDialog" />
+    <template v-if="flag">
+      <goodsDialog @selected="(val) => {goodsData = val;}" 
+        v-if="goodsFlag" ref="goodsDialog" :selectedWay='goodsData'/>
+      <linkDialog @selectedLink="
+          (val) => {
+            linkData = val;
+          }
+        " v-else class="linkDialog" />
+    </template>
   </Modal>
 </template>
 <script>

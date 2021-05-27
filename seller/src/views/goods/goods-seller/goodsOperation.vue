@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="goods-operation">
     <div style="height: 45px">
       <steps
         :current="activestep"

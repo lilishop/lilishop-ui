@@ -111,7 +111,6 @@ export default {
 
     initGoods(res) {
       if (res.result.records.length !=0) {
-        console.log(this.selectedWay);
         res.result.records.forEach((item) => {
           item.selected = false;
           item.___type = "goods"; //设置为goods让pc wap知道标识

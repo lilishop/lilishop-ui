@@ -40,39 +40,41 @@
 
           </Page>
         </Row>
-
-        <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="1100">
-          <Form ref="form" :model="form" :label-width="100">
-            <FormItem label="文章标题" prop="title">
-              <Input v-model="form.title" clearable style="width: 40%" />
-            </FormItem>
-            <FormItem label="文章分类" prop="categoryId">
-              <Select v-model="treeValue" placeholder="请选择" clearable style="width: 180px">
-                <Option :value="treeValue" style="display: none">{{
-                        treeValue
-                      }}
-                </Option>
-                <Tree :data="treeData" @on-select-change="handleCheckChange"></Tree>
-              </Select>
-            </FormItem>
-            <FormItem label="文章排序" prop="sort">
-              <Input type="number" v-model="form.sort" clearable style="width: 10%" />
-            </FormItem>
-            <FormItem class="form-item-view-el" label="文章内容" prop="content">
-              <editor v-model="form.content"></editor>
-            </FormItem>
-            <FormItem label="是否展示" prop="openStatus">
-              <i-switch size="large" v-model="form.openStatus" :true-value="open" :false-value="close">
-                <span slot="open">展示</span>
-                <span slot="close">隐藏</span>
-              </i-switch>
-            </FormItem>
-          </Form>
-          <div slot="footer">
-            <Button type="text" @click="modalVisible = false">取消</Button>
-            <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
-          </div>
-        </Modal>
+        <template v-if="!selected">
+          <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="1100">
+            <Form ref="form" :model="form" :label-width="100">
+              <FormItem label="文章标题" prop="title">
+                <Input v-model="form.title" clearable style="width: 40%" />
+              </FormItem>
+              <FormItem label="文章分类" prop="categoryId">
+                <Select v-model="treeValue" placeholder="请选择" clearable style="width: 180px">
+                  <Option :value="treeValue" style="display: none">{{
+                          treeValue
+                        }}
+                  </Option>
+                  <Tree :data="treeData" @on-select-change="handleCheckChange"></Tree>
+                </Select>
+              </FormItem>
+              <FormItem label="文章排序" prop="sort">
+                <Input type="number" v-model="form.sort" clearable style="width: 10%" />
+              </FormItem>
+              <FormItem class="form-item-view-el" label="文章内容" prop="content">
+                <editor v-model="form.content"></editor>
+              </FormItem>
+              <FormItem label="是否展示" prop="openStatus">
+                <i-switch size="large" v-model="form.openStatus" :true-value="open" :false-value="close">
+                  <span slot="open">展示</span>
+                  <span slot="close">隐藏</span>
+                </i-switch>
+              </FormItem>
+            </Form>
+            <div slot="footer">
+              <Button type="text" @click="modalVisible = false">取消</Button>
+              <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
+            </div>
+          </Modal>
+        </template>
+        
       </Card>
       </Col>
 
