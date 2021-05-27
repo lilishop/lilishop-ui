@@ -1,30 +1,24 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-      <Card>
-        <Row v-show="openSearch" @keydown.enter.native="handleSearch">
-          <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-            <Form-item label="订单编号" prop="orderSn">
-              <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单编号" clearable style="width: 200px" />
-            </Form-item>
-            <Form-item label="订单时间">
-              <DatePicker type="daterange" v-model="timeRange" format="yyyy-MM-dd" placeholder="选择时间" style="width: 210px"></DatePicker>
-            </Form-item>
-            <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-          </Form>
-        </Row>
+    <Card>
+      <Row v-show="openSearch" @keydown.enter.native="handleSearch">
+        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+          <Form-item label="订单编号" prop="orderSn">
+            <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单编号" clearable style="width: 200px" />
+          </Form-item>
+          <Form-item label="订单时间">
+            <DatePicker type="daterange" v-model="timeRange" format="yyyy-MM-dd" placeholder="选择时间" style="width: 210px"></DatePicker>
+          </Form-item>
+          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+        </Form>
+      </Row>
 
-        <Row class="padding-row">
-          <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"></Table>
-        </Row>
-        <Row type="flex" justify="end" class="page">
-          <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small"
-            show-total show-elevator show-sizer></Page>
-        </Row>
-      </Card>
-      </Col>
-    </Row>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"></Table>
+      <Row type="flex" justify="end" class="page">
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small"
+          show-total show-elevator show-sizer></Page>
+      </Row>
+    </Card>
 
   </div>
 </template>

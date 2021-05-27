@@ -35,18 +35,16 @@
               <Row class="operation" style="margin-top: 20px">
                 <Button @click="sendMessage" type="primary">发送消息</Button>
               </Row>
-              <Row>
-                <Table
-                  :loading="loading"
-                  border
-                  :columns="messageColumns"
-                  :data="messageData"
-                  ref="table"
-                  sortable="custom"
-                  @on-sort-change="messageChangeSort"
-                  @on-selection-change="messageChangeSelect"
-                ></Table>
-              </Row>
+              <Table
+                :loading="loading"
+                border
+                :columns="messageColumns"
+                :data="messageData"
+                ref="table"
+                sortable="custom"
+                @on-sort-change="messageChangeSort"
+                @on-selection-change="messageChangeSelect"
+              ></Table>
               <Row type="flex" justify="end" class="page">
                 <Page
                   :current="searchMessageForm.pageNumber"
@@ -64,18 +62,16 @@
             </TabPane>
 
             <TabPane label="通知类站内信" name="SETTING">
-              <Row>
-                <Table
-                  :loading="loading"
-                  border
-                  :columns="noticeColumns"
-                  :data="noticeData"
-                  ref="table"
-                  sortable="custom"
-                  @on-sort-change="changeSort"
-                  @on-selection-change="changeSelect"
-                ></Table>
-              </Row>
+              <Table
+                :loading="loading"
+                border
+                :columns="noticeColumns"
+                :data="noticeData"
+                ref="table"
+                sortable="custom"
+                @on-sort-change="changeSort"
+                @on-selection-change="changeSelect"
+              ></Table>
               <Row type="flex" justify="end" class="page">
                 <Page
                   :current="searchForm.pageNumber"
@@ -206,18 +202,16 @@
           </RadioGroup>
         </FormItem>
         <FormItem label="指定商家">
-          <Row>
-            <Table
-              :loading="loading"
-              border
-              :columns="messageDetailColumns"
-              :data="shopMessageData"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="messageChangeSort"
-              @on-selection-change="messageChangeSelect"
-            ></Table>
-          </Row>
+          <Table
+            :loading="loading"
+            border
+            :columns="messageDetailColumns"
+            :data="shopMessageData"
+            ref="table"
+            sortable="custom"
+            @on-sort-change="messageChangeSort"
+            @on-selection-change="messageChangeSelect"
+          ></Table>
           <Row type="flex" justify="end" class="page">
             <Page
               :current="searchShopMessageForm.pageNumber"

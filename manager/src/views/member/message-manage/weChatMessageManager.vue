@@ -46,15 +46,13 @@
             <Row class="operation">
               <Button @click="weChatSync" type="primary">同步微信消息</Button>
             </Row>
-            <Row>
-              <Table
-                :loading="loading"
-                border
-                :columns="weChatColumns"
-                :data="weChatData"
-                ref="weChatTable"
-              ></Table>
-            </Row>
+            <Table
+              :loading="loading"
+              border
+              :columns="weChatColumns"
+              :data="weChatData"
+              ref="weChatTable"
+            ></Table>
             <Row type="flex" justify="end" class="page">
               <Page
                 :current="weChatSearchForm.pageNumber"
@@ -77,16 +75,14 @@
             <Row class="operation">
               <Button @click="weChatSync('mp')" type="primary">同步微信小程序订阅消息</Button>
             </Row>
-            <Row>
-              <Table
-                :loading="loading"
-                border
-                :columns="weChatColumns"
-                :data="weChatMPData"
-                sortable="custom"
-                ref="weChatMPTable"
-              ></Table>
-            </Row>
+            <Table
+              :loading="loading"
+              border
+              :columns="weChatColumns"
+              :data="weChatMPData"
+              sortable="custom"
+              ref="weChatMPTable"
+            ></Table>
             <Row type="flex" justify="end" class="page">
               <Page
                 :current="weChatMPSearchForm.pageNumber"

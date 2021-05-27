@@ -48,15 +48,13 @@
       <Tabs active-key="key1" @on-click="clickTabs">
         <Tab-pane label="入账流水" key="key1">
           <Card>
-            <Row>
-              <Table
-                :loading="loading"
-                border
-                :columns="orderColumns"
-                :data="order"
-                ref="table"
-              ></Table>
-            </Row>
+            <Table
+              :loading="loading"
+              border
+              :columns="orderColumns"
+              :data="order"
+              ref="table"
+            ></Table>
             <Row type="flex" justify="end" class="page">
               <Page
                 :current="orderParam.pageNumber"
@@ -73,15 +71,13 @@
         </Tab-pane>
         <Tab-pane label="退款流水" key="key2">
           <Card>
-            <Row>
-              <Table
-                :loading="loading"
-                border
-                :columns="refundColumns"
-                :data="refund"
-                ref="table"
-              ></Table>
-            </Row>
+            <Table
+              :loading="loading"
+              border
+              :columns="refundColumns"
+              :data="refund"
+              ref="table"
+            ></Table>
             <Row type="flex" justify="end" class="page">
               <Page
                 :current="refundParam.pageNumber"

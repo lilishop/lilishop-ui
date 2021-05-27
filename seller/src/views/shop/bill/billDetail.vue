@@ -47,15 +47,13 @@
       <Tabs active-key="tab" @on-click="clickTabs">
         <Tab-pane label="订单列表" name="order">
           <Card>
-            <Row>
-              <Table
-                :loading="loading"
-                border
-                :columns="orderColumns"
-                :data="orderData"
-                ref="table"
-              ></Table>
-            </Row>
+            <Table
+              :loading="loading"
+              border
+              :columns="orderColumns"
+              :data="orderData"
+              ref="table"
+            ></Table>
             <Row type="flex" justify="end" class="page">
               <Page
                 :current="orderParam.pageNumber"
@@ -72,15 +70,13 @@
         </Tab-pane>
         <Tab-pane label="退单列表" name="refund">
           <Card>
-            <Row>
-              <Table
-                :loading="loading"
-                border
-                :columns="refundColumns"
-                :data="refundData"
-                ref="table"
-              ></Table>
-            </Row>
+            <Table
+              :loading="loading"
+              border
+              :columns="refundColumns"
+              :data="refundData"
+              ref="table"
+            ></Table>
             <Row type="flex" justify="end" class="page">
               <Page
                 :current="refundParam.pageNumber"
@@ -97,15 +93,13 @@
         </Tab-pane>
         <Tab-pane label="分销费用列表" name="distribution">
           <Card>
-            <Row>
-              <Table
-                :loading="loading"
-                border
-                :columns="distributionColumns"
-                :data="distributionData"
-                ref="table"
-              ></Table>
-            </Row>
+            <Table
+              :loading="loading"
+              border
+              :columns="distributionColumns"
+              :data="distributionData"
+              ref="table"
+            ></Table>
             <Row type="flex" justify="end" class="page">
               <Page
                 :current="distributionParam.pageNumber"

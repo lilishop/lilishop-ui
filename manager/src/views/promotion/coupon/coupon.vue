@@ -42,46 +42,37 @@
         <Button @click="delAll">批量下架</Button>
         <!-- <Button @click="upAll" >批量上架</Button> -->
       </Row>
-      <Row>
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          ref="table"
-          sortable="custom"
-          @on-sort-change="changeSort"
-          @on-selection-change="changeSelect"
-        >
-          <template slot-scope="{ row }" slot="action">
-            <!-- <Button
-              type="info"
-              size="small"
-              style="margin-right: 10px"
-              @click="receiveInfo(row)"
-              >查看</Button
-            > -->
-            <Button
-              v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'"
-              type="primary"
-              size="small"
-              style="margin-right: 10px"
-              @click="edit(row)"
-            >编辑
-            </Button
-            >
-            <Button
-              v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
-              type="error"
-              size="small"
-              style="margin-right: 10px"
-              @click="remove(row)"
-            >下架
-            </Button
-            >
-          </template>
-        </Table>
-      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        sortable="custom"
+        @on-sort-change="changeSort"
+        @on-selection-change="changeSelect"
+      >
+        <template slot-scope="{ row }" slot="action">
+          <Button
+            v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'"
+            type="primary"
+            size="small"
+            style="margin-right: 10px"
+            @click="edit(row)"
+          >编辑
+          </Button
+          >
+          <Button
+            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+            type="error"
+            size="small"
+            style="margin-right: 10px"
+            @click="remove(row)"
+          >下架
+          </Button
+          >
+        </template>
+      </Table>
       <Row type="flex" justify="end" class="page">
         <Page
           :current="searchForm.pageNumber + 1"

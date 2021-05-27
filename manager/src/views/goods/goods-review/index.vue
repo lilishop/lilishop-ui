@@ -1,38 +1,33 @@
 <template>
   <div class="search">
-    <Row>
-      <Card>
-        <Row @keydown.enter.native="handleSearch">
-          <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-            <Form-item label="会员名称" prop="memberName">
-              <Input type="text" v-model="searchForm.memberName" placeholder="请输入会员名称" clearable style="width: 200px"/>
-            </Form-item>
-            <Button @click="handleSearch" type="primary" class="search-btn" icon="ios-search">搜索</Button>
-          </Form>
-        </Row>
-        <Row class="padding-row">
-          <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"
-                 @on-sort-change="changeSort" @on-selection-change="changeSelect">
-            <!-- 页面展示 -->
-            <template slot="shopDisableSlot" slot-scope="scope">
-              <div>
-              </div>
-              <i-switch size="large" true-value="OPEN" false-value="CLOSE" v-model="scope.row.status"
-                        @on-change="changeSwitch(scope.row)">
-                <span slot="open">展示</span>
-                <span slot="close">隐藏</span>
-              </i-switch>
-            </template>
-          </Table>
-
-        </Row>
-        <Row type="flex" justify="end" class="page">
-          <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
-                @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
-                size="small" show-total show-elevator show-sizer></Page>
-        </Row>
-      </Card>
-    </Row>
+    <Card>
+      <Row @keydown.enter.native="handleSearch">
+        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+          <Form-item label="会员名称" prop="memberName">
+            <Input type="text" v-model="searchForm.memberName" placeholder="请输入会员名称" clearable style="width: 200px"/>
+          </Form-item>
+          <Button @click="handleSearch" type="primary" class="search-btn" icon="ios-search">搜索</Button>
+        </Form>
+      </Row>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"
+              @on-sort-change="changeSort" @on-selection-change="changeSelect">
+        <!-- 页面展示 -->
+        <template slot="shopDisableSlot" slot-scope="scope">
+          <div>
+          </div>
+          <i-switch size="large" true-value="OPEN" false-value="CLOSE" v-model="scope.row.status"
+                    @on-change="changeSwitch(scope.row)">
+            <span slot="open">展示</span>
+            <span slot="close">隐藏</span>
+          </i-switch>
+        </template>
+      </Table>
+      <Row type="flex" justify="end" class="page">
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
+              @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
+              size="small" show-total show-elevator show-sizer></Page>
+      </Row>
+    </Card>
 
     <Modal v-model="infoFlag" width="800" :title="infoTitle">
 
@@ -68,7 +63,7 @@
                 <div style="margin-left: 40px">
                   <img style="width: 100px;height: 110px;margin-left: 2px"
                        v-for="(img,index) in infoData.image.split(',')" v-if="infoData.image.length !=0" :src="img"
-                       alt="" />
+                       alt="" :key="index"/>
                 </div>
               </div>
             </List>
@@ -81,7 +76,7 @@
               </div>
               <div v-if="infoData.haveReplyImage == 1">
                 <div style="margin-left: 60px">
-                  <img style="width: 100px;height: 110px" v-for="(img,index) in infoData.replyImage.split(',')"
+                  <img style="width: 100px;height: 110px" v-for="(img,index) in infoData.replyImage.split(',')" :key="index"
                        v-if="infoData.replyImage.length !=0" :src="img" alt=""/>
                 </div>
               </div>

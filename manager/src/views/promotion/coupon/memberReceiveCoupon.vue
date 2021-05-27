@@ -1,51 +1,45 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-        <Card>
-          <Row>
-            <Table
-              :loading="loading"
-              border
-              :columns="columns"
-              :data="data"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="changeSort"
-              @on-selection-change="changeSelect"
-            >
-              <template slot-scope="{ row }" slot="rangeTime">
-                <div>{{ row.startTime }} ~ {{ row.endTime }}</div>
-              </template>
-              <template slot-scope="{ row }" slot="action">
-                <Button
-                  type="error"
-                  ghost
-                  size="small"
-                  :disabled="row.memberCouponStatus != 'NEW'"
-                  @click="remove(row)"
-                  >作废</Button
-                >
-              </template>
-            </Table>
-          </Row>
-          <Row type="flex" justify="end" class="page">
-            <Page
-              :current="searchForm.pageNumber"
-              :total="total"
-              :page-size="searchForm.pageSize"
-              @on-change="changePage"
-              @on-page-size-change="changePageSize"
-              :page-size-opts="[10, 20, 50]"
+    <Card>
+        <Table
+          :loading="loading"
+          border
+          :columns="columns"
+          :data="data"
+          ref="table"
+          sortable="custom"
+          @on-sort-change="changeSort"
+          @on-selection-change="changeSelect"
+        >
+          <template slot-scope="{ row }" slot="rangeTime">
+            <div>{{ row.startTime }} ~ {{ row.endTime }}</div>
+          </template>
+          <template slot-scope="{ row }" slot="action">
+            <Button
+              type="error"
+              ghost
               size="small"
-              show-total
-              show-elevator
-              show-sizer
-            ></Page>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
+              :disabled="row.memberCouponStatus != 'NEW'"
+              @click="remove(row)"
+              >作废</Button
+            >
+          </template>
+        </Table>
+      <Row type="flex" justify="end" class="page">
+        <Page
+          :current="searchForm.pageNumber"
+          :total="total"
+          :page-size="searchForm.pageSize"
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+          :page-size-opts="[10, 20, 50]"
+          size="small"
+          show-total
+          show-elevator
+          show-sizer
+        ></Page>
+      </Row>
+    </Card>
   </div>
 </template>
 

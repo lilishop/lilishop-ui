@@ -1,43 +1,37 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-      <Card>
-        <Row @keydown.enter.native="handleSearch">
-          <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-            <Form-item label="订单号" prop="orderSn">
-              <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单号" clearable style="width: 200px" />
-            </Form-item>
-            <Form-item label="会员名称" prop="buyerName">
-              <Input type="text" v-model="searchForm.buyerName" placeholder="请输入会员名称" clearable style="width: 200px" />
-            </Form-item>
-            <Form-item label="订单状态" prop="orderStatus">
-              <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 200px">
-                <Option value="UNPAID">未付款</Option>
-                <Option value="PAID">已付款</Option>
-                <Option value="UNDELIVERED">待发货</Option>
-                <Option value="DELIVERED">已发货</Option>
-                <Option value="COMPLETED">已完成</Option>
-                <Option value="TAKE">待核验</Option>
-                <Option value="CANCELLED">已取消</Option>
-              </Select>
-            </Form-item>
-            <Form-item label="下单时间">
-              <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px"></DatePicker>
-            </Form-item>
-            <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-          </Form>
-        </Row>
-        <Row class="padding-row">
-          <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
-        </Row>
-        <Row type="flex" justify="end" class="page">
-          <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
-            size="small" show-total show-elevator show-sizer></Page>
-        </Row>
-      </Card>
-      </Col>
-    </Row>
+    <Card>
+      <Row @keydown.enter.native="handleSearch">
+        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+          <Form-item label="订单号" prop="orderSn">
+            <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单号" clearable style="width: 200px" />
+          </Form-item>
+          <Form-item label="会员名称" prop="buyerName">
+            <Input type="text" v-model="searchForm.buyerName" placeholder="请输入会员名称" clearable style="width: 200px" />
+          </Form-item>
+          <Form-item label="订单状态" prop="orderStatus">
+            <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 200px">
+              <Option value="UNPAID">未付款</Option>
+              <Option value="PAID">已付款</Option>
+              <Option value="UNDELIVERED">待发货</Option>
+              <Option value="DELIVERED">已发货</Option>
+              <Option value="COMPLETED">已完成</Option>
+              <Option value="TAKE">待核验</Option>
+              <Option value="CANCELLED">已取消</Option>
+            </Select>
+          </Form-item>
+          <Form-item label="下单时间">
+            <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px"></DatePicker>
+          </Form-item>
+          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+        </Form>
+      </Row>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+      <Row type="flex" justify="end" class="page">
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
+          size="small" show-total show-elevator show-sizer></Page>
+      </Row>
+    </Card>
   </div>
 </template>
 

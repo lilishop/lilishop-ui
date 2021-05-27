@@ -1,25 +1,17 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-        <Card>
-          <Row>
-            <Table
-              :loading="loading"
-              border
-              :columns="columns"
-              :data="data"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="changeSort"
-              @on-selection-change="changeSelect"
-            ></Table>
-          </Row>
-
-        </Card>
-      </Col>
-    </Row>
-
+    <Card>
+        <Table
+          :loading="loading"
+          border
+          :columns="columns"
+          :data="data"
+          ref="table"
+          sortable="custom"
+          @on-sort-change="changeSort"
+          @on-selection-change="changeSelect"
+        ></Table>
+    </Card>
   </div>
 </template>
 

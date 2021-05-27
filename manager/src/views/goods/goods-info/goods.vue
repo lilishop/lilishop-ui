@@ -1,100 +1,94 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-        <Card>
-          <Row @keydown.enter.native="handleSearch">
-            <Form
-              ref="searchForm"
-              :model="searchForm"
-              inline
-              :label-width="70"
-              class="search-form"
+    <Card>
+      <Row @keydown.enter.native="handleSearch">
+        <Form
+          ref="searchForm"
+          :model="searchForm"
+          inline
+          :label-width="70"
+          class="search-form"
+        >
+          <Form-item label="商品名称" prop="goodsName">
+            <Input
+              type="text"
+              v-model="searchForm.goodsName"
+              placeholder="请输入商品名称"
+              clearable
+              style="width: 200px"
+            />
+          </Form-item>
+          <Form-item label="商品编号" prop="sn">
+            <Input
+              type="text"
+              v-model="searchForm.sn"
+              placeholder="请输入商品编号"
+              clearable
+              style="width: 200px"
+            />
+          </Form-item>
+          <Form-item label="状态" prop="status">
+            <Select
+              v-model="searchForm.marketEnable"
+              placeholder="请选择"
+              clearable
+              style="width: 200px"
             >
-              <Form-item label="商品名称" prop="goodsName">
-                <Input
-                  type="text"
-                  v-model="searchForm.goodsName"
-                  placeholder="请输入商品名称"
-                  clearable
-                  style="width: 200px"
-                />
-              </Form-item>
-              <Form-item label="商品编号" prop="sn">
-                <Input
-                  type="text"
-                  v-model="searchForm.sn"
-                  placeholder="请输入商品编号"
-                  clearable
-                  style="width: 200px"
-                />
-              </Form-item>
-              <Form-item label="状态" prop="status">
-                <Select
-                  v-model="searchForm.marketEnable"
-                  placeholder="请选择"
-                  clearable
-                  style="width: 200px"
-                >
-                  <Option value="UPPER">上架</Option>
-                  <Option value="DOWN">下架</Option>
-                </Select>
-              </Form-item>
-              <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search" >搜索</Button>
-            </Form>
-          </Row>
-          <Row class="padding-row">
-            <Table
-              :loading="loading"
-              border
-              :columns="columns"
-              :data="data"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="changeSort"
-              @on-selection-change="changeSelect"
-            >
+              <Option value="UPPER">上架</Option>
+              <Option value="DOWN">下架</Option>
+            </Select>
+          </Form-item>
+          <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search" >搜索</Button>
+        </Form>
+      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        sortable="custom"
+        @on-sort-change="changeSort"
+        @on-selection-change="changeSelect"
+      >
 
-              <!-- 商品栏目格式化 -->
-              <template slot="goodsSlot" slot-scope="{row}">
-                <div style="margin: 5px 0px;height: 80px; display: flex;">
-                  <div style="">
-                    <img :src="row.original" style="height: 60px;margin-top: 1px;width: 60px">
-                  </div>
+        <!-- 商品栏目格式化 -->
+        <template slot="goodsSlot" slot-scope="{row}">
+          <div style="margin: 5px 0px;height: 80px; display: flex;">
+            <div style="">
+              <img :src="row.original" style="height: 60px;margin-top: 1px;width: 60px">
+            </div>
 
-                  <div style="margin-left: 13px;">
-                    <div class="div-zoom">
-                      <a @click="linkTo(row.id,row.skuId)">{{row.goodsName}}</a>
-                    </div>
-                    <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-                      <div slot="content">
-                        <vue-qr :text="wapLinkTo(row.id,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
-                      </div>
-                      <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
-                    </Poptip>
-                  </div>
+            <div style="margin-left: 13px;">
+              <div class="div-zoom">
+                <a @click="linkTo(row.id,row.skuId)">{{row.goodsName}}</a>
+              </div>
+              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+                <div slot="content">
+                  <vue-qr :text="wapLinkTo(row.id,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
                 </div>
+                <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
+              </Poptip>
+            </div>
+          </div>
 
-              </template>
-            </Table>
-          </Row>
-          <Row type="flex" justify="end" class="page">
-            <Page
-              :current="searchForm.pageNumber"
-              :total="total"
-              :page-size="searchForm.pageSize"
-              @on-change="changePage"
-              @on-page-size-change="changePageSize"
-              :page-size-opts="[10, 20, 50]"
-              size="small"
-              show-total
-              show-elevator
-              show-sizer
-            ></Page>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
+        </template>
+      </Table>
+      <Row type="flex" justify="end" class="page">
+        <Page
+          :current="searchForm.pageNumber"
+          :total="total"
+          :page-size="searchForm.pageSize"
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+          :page-size-opts="[10, 20, 50]"
+          size="small"
+          show-total
+          show-elevator
+          show-sizer
+        ></Page>
+      </Row>
+    </Card>
     <Modal
       :title="modalTitle"
       v-model="modalVisible"

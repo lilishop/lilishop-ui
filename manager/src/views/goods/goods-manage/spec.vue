@@ -1,64 +1,57 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-        <Card>
-          <Row @keydown.enter.native="handleSearch">
-            <Form
-              ref="searchForm"
-              :model="searchForm"
-              inline
-              :label-width="70"
-              class="search-form"
-            >
-              <Form-item label="规格名称" prop="specName">
-                <Input
-                  type="text"
-                  v-model="searchForm.specName"
-                  placeholder="请输入规格名称"
-                  clearable
-                  style="width: 200px"
-                />
-              </Form-item>
+    <Card>
+      <Row @keydown.enter.native="handleSearch">
+        <Form
+          ref="searchForm"
+          :model="searchForm"
+          inline
+          :label-width="70"
+          class="search-form"
+        >
+          <Form-item label="规格名称" prop="specName">
+            <Input
+              type="text"
+              v-model="searchForm.specName"
+              placeholder="请输入规格名称"
+              clearable
+              style="width: 200px"
+            />
+          </Form-item>
 
-              <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-            </Form>
-          </Row>
-          <Row class="operation padding-row">
-            <Button @click="add" type="primary" >添加</Button>
-            <Button @click="delAll" >批量删除</Button>
-          </Row>
-          <Row class="padding-row">
-            <Table
-              :loading="loading"
-              border
-              :columns="columns"
-              :data="data"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="changeSort"
-              @on-selection-change="changeSelect"
-            >
-
-            </Table>
-          </Row>
-          <Row type="flex" justify="end" class="page">
-            <Page
-              :current="searchForm.pageNumber"
-              :total="total"
-              :page-size="searchForm.pageSize"
-              @on-change="changePage"
-              @on-page-size-change="changePageSize"
-              :page-size-opts="[10, 20, 50]"
-              size="small"
-              show-total
-              show-elevator
-              show-sizer
-            ></Page>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
+          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+        </Form>
+      </Row>
+      <Row class="operation padding-row">
+        <Button @click="add" type="primary" >添加</Button>
+        <Button @click="delAll" >批量删除</Button>
+      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        sortable="custom"
+        @on-sort-change="changeSort"
+        @on-selection-change="changeSelect"
+      >
+      </Table>
+      <Row type="flex" justify="end" class="page">
+        <Page
+          :current="searchForm.pageNumber"
+          :total="total"
+          :page-size="searchForm.pageSize"
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+          :page-size-opts="[10, 20, 50]"
+          size="small"
+          show-total
+          show-elevator
+          show-sizer
+        ></Page>
+      </Row>
+    </Card>
     <Modal
       :title="modalTitle"
       v-model="modalVisible"

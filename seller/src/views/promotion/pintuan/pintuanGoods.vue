@@ -16,16 +16,14 @@
         </Alert>
       </Row>
       <h3 class="act-goods">活动商品</h3>
-      <Row class="operation">
-        <Table :loading="loading" border :columns="goodsColumns" :data="goodsData" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
-          <template slot-scope="{ row, index }" slot="price">
-            <Input v-model="row.price" :disabled="status==='view'" @input="goodsData[index].price = row.price" />
-          </template>
-          <template slot-scope="{ index }" slot="action">
-            <Button type="error" size="small" ghost v-if="status === 'manager'" @click="delGoods(index)">删除</Button>
-          </template>
-        </Table>
-      </Row>
+      <Table :loading="loading" border :columns="goodsColumns" :data="goodsData" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
+        <template slot-scope="{ row, index }" slot="price">
+          <Input v-model="row.price" :disabled="status==='view'" @input="goodsData[index].price = row.price" />
+        </template>
+        <template slot-scope="{ index }" slot="action">
+          <Button type="error" size="small" ghost v-if="status === 'manager'" @click="delGoods(index)">删除</Button>
+        </template>
+      </Table>
       <Row type="flex" justify="end" class="page operation">
         <Page :current="searchForm.pageNumber + 1" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
           size="small" show-total show-elevator show-sizer></Page>

@@ -1,100 +1,88 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-        <Card>
-          <Tabs value="RESOURCE" @on-click="handleClickType">
-            <TabPane label="图片源" name="RESOURCE">
-              <Row>
-                <Col>
-                  <Row class="operation" style="margin-bottom: 10px">
-                    <Button @click="add" type="primary">添加</Button>
-                  </Row>
-                  <Row>
-                    <Table
-                      :loading="loading"
-                      border
-                      :columns="columns"
-                      :data="data"
-                      ref="table"
-                      sortable="custom"
-                      @on-sort-change="changeSort"
-                      @on-selection-change="changeSelect"
-                    >
-
-                      <!-- 商品栏目格式化 -->
-                      <template slot="imageSlot" slot-scope="scope">
-                        <div style="">
-                          <img :src="scope.row.resource" style="height: 60px;margin-top: 1px;width: 90px">
-                        </div>
-                      </template>
-
-                    </Table>
-                  </Row>
-                  <Row type="flex" justify="end" class="page">
-                    <Page
-                      :current="searchForm.pageNumber"
-                      :total="total"
-                      :page-size="searchForm.pageSize"
-                      @on-change="changePage"
-                      @on-page-size-change="changePageSize"
-                      :page-size-opts="[10, 20, 50]"
-                      size="small"
-                      show-total
-                      show-elevator
-                      show-sizer
-                    >
-                    </Page>
-                  </Row>
-                </Col>
-              </Row>
-            </TabPane>
-            <TabPane label="滑块源" name="SLIDER">
-              <Row>
-                <Col>
-                  <Row class="operation" style="margin-bottom: 10px">
-                    <Button @click="add" type="primary" icon="md-add">添加</Button>
-                  </Row>
-                  <Row>
-                    <Table
-                      :loading="loading"
-                      border
-                      :columns="columns"
-                      :data="data"
-                      ref="table"
-                      sortable="custom"
-                      @on-sort-change="changeSort"
-                      @on-selection-change="changeSelect"
-                    >
-                      <!-- 商品栏目格式化 -->
-                      <template slot="imageSlot" slot-scope="scope">
-                        <div style="">
-                          <img :src="scope.row.resource" style="height: 60px;margin-top: 1px;width: 60px">
-                        </div>
-                      </template>
-                    </Table>
-                  </Row>
-                  <Row type="flex" justify="end" class="page">
-                    <Page
-                      :current="searchForm.pageNumber"
-                      :total="total"
-                      :page-size="searchForm.pageSize"
-                      @on-change="changePage"
-                      @on-page-size-change="changePageSize"
-                      :page-size-opts="[10, 20, 50]"
-                      size="small"
-                      show-total
-                      show-elevator
-                      show-sizer
-                    ></Page>
-                  </Row>
-                </Col>
-              </Row>
-            </TabPane>
-          </Tabs>
-        </Card>
-      </Col>
-    </Row>
+    <Card>
+      <Tabs value="RESOURCE" @on-click="handleClickType">
+        <TabPane label="图片源" name="RESOURCE">
+          <Row class="operation" style="margin-bottom: 10px">
+            <Button @click="add" type="primary">添加</Button>
+          </Row>
+          <Table
+            :loading="loading"
+            border
+            :columns="columns"
+            :data="data"
+            ref="table"
+            sortable="custom"
+            @on-sort-change="changeSort"
+            @on-selection-change="changeSelect"
+          >
+            <!-- 商品栏目格式化 -->
+            <template slot="imageSlot" slot-scope="scope">
+              <div style="">
+                <img
+                  :src="scope.row.resource"
+                  style="height: 60px; margin-top: 1px; width: 90px"
+                />
+              </div>
+            </template>
+          </Table>
+          <Row type="flex" justify="end" class="page">
+            <Page
+              :current="searchForm.pageNumber"
+              :total="total"
+              :page-size="searchForm.pageSize"
+              @on-change="changePage"
+              @on-page-size-change="changePageSize"
+              :page-size-opts="[10, 20, 50]"
+              size="small"
+              show-total
+              show-elevator
+              show-sizer
+            >
+            </Page>
+          </Row>
+        </TabPane>
+        <TabPane label="滑块源" name="SLIDER">
+          <Row class="operation" style="margin-bottom: 10px">
+            <Button @click="add" type="primary" icon="md-add">添加</Button>
+          </Row>
+          <Table
+            :loading="loading"
+            border
+            :columns="columns"
+            :data="data"
+            ref="table"
+            sortable="custom"
+            @on-sort-change="changeSort"
+            @on-selection-change="changeSelect"
+          >
+            <!-- 商品栏目格式化 -->
+            <template slot="imageSlot" slot-scope="scope">
+              <div style="">
+                <img
+                  :src="scope.row.resource"
+                  style="height: 60px; margin-top: 1px; width: 60px"
+                />
+              </div>
+            </template>
+          </Table>
+          <Row type="flex" justify="end" class="page">
+            <Page
+              :current="searchForm.pageNumber"
+              :total="total"
+              :page-size="searchForm.pageSize"
+              @on-change="changePage"
+              @on-page-size-change="changePageSize"
+              :page-size-opts="[10, 20, 50]"
+              size="small"
+              show-total
+              show-elevator
+              show-sizer
+            ></Page>
+          </Row>
+        </TabPane>
+      </Tabs>
+    </Card>
     <Modal
       :title="modalTitle"
       v-model="modalVisible"
@@ -103,10 +91,15 @@
     >
       <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
         <FormItem label="名称" prop="name">
-          <Input v-model="form.name" maxlength="20" clearable style="width: 100%"/>
+          <Input
+            v-model="form.name"
+            maxlength="20"
+            clearable
+            style="width: 100%"
+          />
         </FormItem>
         <FormItem label="图片" prop="resource">
-          <Input v-model="form.resource" clearable style="width: 100%"/>
+          <Input v-model="form.resource" clearable style="width: 100%" />
         </FormItem>
         <FormItem label="类型" prop="type">
           <radio-group v-model="form.type" type="button">
@@ -118,9 +111,8 @@
       <div slot="footer">
         <Button type="text" @click="modalVisible = false">取消</Button>
         <Button type="primary" :loading="submitLoading" @click="handleSubmit"
-        >提交
-        </Button
-        >
+          >提交
+        </Button>
       </div>
     </Modal>
   </div>
@@ -131,7 +123,7 @@ import * as API_Setting from "@/api/setting";
 export default {
   data() {
     return {
-      modalVisible: false,//添加验证码源弹出框
+      modalVisible: false, //添加验证码源弹出框
       modalTitle: "", //添加验证码源弹出框标题
       loading: true, // 表单加载状态
       selectList: [], // 多选数据
@@ -142,7 +134,7 @@ export default {
         name: "",
         resource: "",
         type: "RESOURCE",
-      },//添加编辑表单
+      }, //添加编辑表单
       formValidate: {
         name: [
           {
@@ -165,18 +157,19 @@ export default {
         pageSize: 10, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
-        type: "RESOURCE"
+        type: "RESOURCE",
       },
       columns: [
         {
           title: "名称",
           key: "name",
           minWidth: 80,
-        },{
+        },
+        {
           title: "图片",
           key: "resource",
           width: 150,
-          slot: "imageSlot"
+          slot: "imageSlot",
         },
         {
           title: "创建人",
@@ -213,13 +206,13 @@ export default {
                     size: "small",
                   },
                   style: {
-                    marginRight: "5px"
+                    marginRight: "5px",
                   },
                   on: {
                     click: () => {
                       this.edit(params.row);
-                    }
-                  }
+                    },
+                  },
                 },
                 "编辑"
               ),
@@ -233,17 +226,17 @@ export default {
                   on: {
                     click: () => {
                       this.remove(params.row);
-                    }
-                  }
+                    },
+                  },
                 },
                 "删除"
-              )
+              ),
             ]);
           },
         },
       ],
       data: [], // 表单数据
-      total: 0,//条数
+      total: 0, //条数
     };
   },
 
@@ -264,15 +257,15 @@ export default {
     },
     //切换tab
     handleClickType(v) {
-      this.searchForm.pageNumber = 1 // 当前页数
-      this.searchForm.pageSize = 10 // 页面大小
+      this.searchForm.pageNumber = 1; // 当前页数
+      this.searchForm.pageSize = 10; // 页面大小
       //图片源
       if (v == "RESOURCE") {
-        this.searchForm.type = "RESOURCE"
+        this.searchForm.type = "RESOURCE";
       }
       //滑块源
       if (v == "SLIDER") {
-        this.searchForm.type = "SLIDER"
+        this.searchForm.type = "SLIDER";
       }
       this.getDataList();
     },
@@ -283,7 +276,7 @@ export default {
         this.loading = false;
         if (res.success) {
           this.data = res.result.records;
-          this.total = res.result.total
+          this.total = res.result.total;
         }
       });
       this.loading = false;
@@ -294,25 +287,25 @@ export default {
     },
     //添加验证码源
     add() {
-      this.form.type = this.searchForm.type
-      this.modalVisible = true
-      this.modalType = 0
-      this.modalTitle = "添加验证码源"
+      this.form.type = this.searchForm.type;
+      this.modalVisible = true;
+      this.modalType = 0;
+      this.modalTitle = "添加验证码源";
     },
     //修改验证码源
     edit(v) {
-      this.form.name = v.name
-      this.form.id = v.id
-      this.form.resource = v.resource
-      this.form.type = v.type
+      this.form.name = v.name;
+      this.form.id = v.id;
+      this.form.resource = v.resource;
+      this.form.type = v.type;
 
-      this.modalType = 1
-      this.modalVisible = true
-      this.modalTitle = "修改验证码源"
+      this.modalType = 1;
+      this.modalVisible = true;
+      this.modalTitle = "修改验证码源";
     },
     //提交表单
     handleSubmit() {
-      this.form.type = this.searchForm.type
+      this.form.type = this.searchForm.type;
       this.$refs.form.validate((valid) => {
         if (valid) {
           this.submitLoading = true;
@@ -329,14 +322,16 @@ export default {
             });
           } else {
             // 编辑
-            API_Setting.editVerification(this.form.id, this.form).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("修改成功");
-                this.getDataList();
-                this.modalVisible = false;
+            API_Setting.editVerification(this.form.id, this.form).then(
+              (res) => {
+                this.submitLoading = false;
+                if (res.success) {
+                  this.$Message.success("修改成功");
+                  this.getDataList();
+                  this.modalVisible = false;
+                }
               }
-            });
+            );
           }
         }
       });
@@ -359,8 +354,7 @@ export default {
           });
         },
       });
-    }
-
+    },
   },
   mounted() {
     this.getDataList();

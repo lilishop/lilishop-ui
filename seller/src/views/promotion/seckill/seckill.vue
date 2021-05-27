@@ -45,41 +45,39 @@
         </Form>
       </Row>
 
-      <Row class="padding-row">
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          ref="table"
-          sortable="custom"
-        >
-          <template slot-scope="{ row }" slot="applyEndTime">
-            {{ unixDate(row.applyEndTime) }}
-          </template>
-          <template slot-scope="{ row }" slot="hours">
-            <Tag v-for="item in unixHours(row.hours)" :key="item">{{
-              item
-            }}</Tag>
-          </template>
-          <template slot-scope="{ row }" slot="action">
-            <Button
-              v-if="row.promotionStatus === 'NEW'"
-              type="primary"
-              size="small"
-              @click="manage(row)"
-              >管理</Button
-            >
-            <Button
-              v-else
-              type="info"
-              size="small"
-              @click="manage(row)"
-              >查看</Button
-            >
-          </template>
-        </Table>
-      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        sortable="custom"
+      >
+        <template slot-scope="{ row }" slot="applyEndTime">
+          {{ unixDate(row.applyEndTime) }}
+        </template>
+        <template slot-scope="{ row }" slot="hours">
+          <Tag v-for="item in unixHours(row.hours)" :key="item">{{
+            item
+          }}</Tag>
+        </template>
+        <template slot-scope="{ row }" slot="action">
+          <Button
+            v-if="row.promotionStatus === 'NEW'"
+            type="primary"
+            size="small"
+            @click="manage(row)"
+            >管理</Button
+          >
+          <Button
+            v-else
+            type="info"
+            size="small"
+            @click="manage(row)"
+            >查看</Button
+          >
+        </template>
+      </Table>
       <Row type="flex" justify="end" class="page">
         <Page
           :current="searchForm.pageNumber + 1"

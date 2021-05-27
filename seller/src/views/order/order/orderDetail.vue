@@ -1,179 +1,173 @@
 <template>
   <div class="search">
-    <Row>
-      <Col style="width:100%;">
-      <Row style="flex-direction: column;width: 100%;">
-        <Card style="height: 60px">
-          <div style="">
-            <Button v-if="allowOperation.editPrice" @click="modifyPrice" type="primary">调整价格</Button>
-            <Button v-if="allowOperation.editConsignee" @click="editAddress" type="primary">修改收货地址
-            </Button>
-            <Button v-if="allowOperation.showLogistics" @click="logistics" type="primary">查看物流</Button>
-            <Button @click="orderLog" type="primary">订单日志</Button>
-            <Button v-if="allowOperation.take" @click="orderTake" type="primary">订单核销</Button>
-            <Button v-if="allowOperation.ship" @click="orderDeliver" type="primary">发货</Button>
-          </div>
-        </Card>
+    <Card style="height: 60px">
+      <div style="">
+        <Button v-if="allowOperation.editPrice" @click="modifyPrice" type="primary">调整价格</Button>
+        <Button v-if="allowOperation.editConsignee" @click="editAddress" type="primary">修改收货地址
+        </Button>
+        <Button v-if="allowOperation.showLogistics" @click="logistics" type="primary">查看物流</Button>
+        <Button @click="orderLog" type="primary">订单日志</Button>
+        <Button v-if="allowOperation.take" @click="orderTake" type="primary">订单核销</Button>
+        <Button v-if="allowOperation.ship" @click="orderDeliver" type="primary">发货</Button>
+      </div>
+    </Card>
 
-          <Card style="height: 400px">
-            <div style="width: 30%; float: left; margin-left: 20px">
-              <div class="div-item">
-                <div class="div-item-left">订单号：</div>
-                <div class="div-item-right">{{ orderInfo.order.sn }}</div>
-              </div>
-              <div class="div-item">
-                <div class="div-item-left">订单来源：</div>
-                <div class="div-item-right">
-                  {{ orderInfo.order.clientType }}
-                </div>
-              </div>
-            </div>
-
-            <div class="div-item">
-              <div class="div-item-left">订单状态：</div>
-              <div class="div-item-right">
-                {{ orderInfo.orderStatusValue }}
-              </div>
-            </div>
-
-            <div class="div-item">
-              <div class="div-item-left">下单时间：</div>
-              <div class="div-item-right">
-                {{ orderInfo.order.createTime }}
-              </div>
-            </div>
-
-
-            <div style="width: 30%; float: left; margin-left: 20px">
-              <div class="div-item" v-if="orderInfo.order.needReceipt == false">
-                <div class="div-item-left">发票信息：</div>
-                <div class="div-item-right">暂无发票信息</div>
-              </div>
-
-            <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-              <div class="div-item-left">发票抬头：</div>
-              <div class="div-item-right">{{ orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : '暂无' }}</div>
-            </div>
-
-            <div class="div-item" v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId">
-              <div class="div-item-left">发票税号：</div>
-              <div class="div-item-right">{{ orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : '暂无' }}</div>
-            </div>
-
-            <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-              <div class="div-item-left">发票内容：</div>
-              <div class="div-item-right">{{ orderInfo.receipt.receiptContent ? orderInfo.receipt.receiptContent : '暂无' }}</div>
-            </div>
-
-            <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-              <div class="div-item-left">发票金额：</div>
-              <div class="div-item-right">{{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice('￥')}}</div>
-            </div>
-
-              <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-                <div class="div-item-left">是否开票：</div>
-                <div class="div-item-right">{{ orderInfo.receipt.receiptStatus == 0 ? '未开' : '已开' }}</div>
-              </div>
-            </div>
-            <div style="width: 36%; float: left">
-              <div class="div-item">
-                <div class="div-item-left">收货信息：</div>
-                <div class="div-item-right">
-                  {{ orderInfo.order.consigneeName }}
-                  {{ orderInfo.order.consigneeMobile }}
-                  {{ orderInfo.order.consigneeAddressPath }}
-                  {{ orderInfo.order.consigneeDetail }}
-                </div>
-              </div>
-              <div class="div-item">
-                <div class="div-item-left">支付方式：</div>
-                <div class="div-item-right">
-                  {{ orderInfo.paymentMethodValue }}
-                </div>
-              </div>
-
-              <div class="div-item">
-                <div class="div-item-left">买家留言：</div>
-                <div class="div-item-right">{{ orderInfo.order.remark }}</div>
-              </div>
-
-            <div class="div-item">
-              <div class="div-item-left">配送方式：</div>
-              <div class="div-item-right">
-                {{
-                    orderInfo.deliveryMethodValue
-                      ? orderInfo.deliveryMethodValue
-                      : "暂无配送方式"
-                  }}
-              </div>
-            </div>
-          </div>
-        </Card>
-      </Row>
-      </Col>
-
-      <Card>
-        <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom">
-          <!-- 商品栏目格式化 -->
-          <template slot="goodsSlot" slot-scope="{row}">
-            <div style="margin-top: 5px; height: 80px; display: flex">
-              <div style="">
-                <img :src="row.image" style="height: 60px; margin-top: 1px; width: 60px" />
-              </div>
-
-              <div style="margin-left: 13px">
-                <div class="div-zoom">
-                  <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
-                </div>
-                <span v-for="(item, key) in JSON.parse(row.specs)">
-                  <span v-show="key!='images'" style="font-size: 12px;color: #999999;">
-                    {{key}} : {{item}}
-                  </span>
-                </span>
-                <Poptip trigger="hover" style="display: block;" title="扫码在手机中查看" transfer>
-                  <div slot="content">
-                    <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
-                  </div>
-                  <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
-                </Poptip>
-              </div>
-            </div>
-          </template>
-        </Table>
-        <div class="goods-total">
-          <ul>
-            <li>
-              <span class="label">商品总额：</span>
-              <span class="txt">{{ orderInfo.order.priceDetailDTO.goodsPrice | unitPrice('￥')}}</span>
-            </li>
-            <li>
-              <span class="label">优惠金额：</span>
-              <span class="txt">
-                {{
-                  orderInfo.order.priceDetailDTO.couponPrice +
-                  orderInfo.order.priceDetailDTO.discountPrice
-                | unitPrice('￥')}}
-              </span>
-            </li>
-            <li>
-              <span class="label">运费：</span>
-              <span class="txt">{{ orderInfo.order.freightPrice | unitPrice('￥')}}</span>
-            </li>
-            <li v-if="orderInfo.order.priceDetailDTO.payPoint != 0">
-              <span class="label">使用积分：</span>
-              <span class="txt">{{
-                orderInfo.order.priceDetailDTO.payPoint
-              }}</span>
-            </li>
-
-            <li>
-              <span class="label">应付金额：</span>
-              <span class="txt flowPrice">¥{{ orderInfo.order.flowPrice | unitPrice }}</span>
-            </li>
-          </ul>
+    <Card style="height: 400px">
+      <div style="width: 30%; float: left; margin-left: 20px">
+        <div class="div-item">
+          <div class="div-item-left">订单号：</div>
+          <div class="div-item-right">{{ orderInfo.order.sn }}</div>
         </div>
-      </Card>
-    </Row>
+        <div class="div-item">
+          <div class="div-item-left">订单来源：</div>
+          <div class="div-item-right">
+            {{ orderInfo.order.clientType }}
+          </div>
+        </div>
+      </div>
+
+      <div class="div-item">
+        <div class="div-item-left">订单状态：</div>
+        <div class="div-item-right">
+          {{ orderInfo.orderStatusValue }}
+        </div>
+      </div>
+
+      <div class="div-item">
+        <div class="div-item-left">下单时间：</div>
+        <div class="div-item-right">
+          {{ orderInfo.order.createTime }}
+        </div>
+      </div>
+
+
+      <div style="width: 30%; float: left; margin-left: 20px">
+        <div class="div-item" v-if="orderInfo.order.needReceipt == false">
+          <div class="div-item-left">发票信息：</div>
+          <div class="div-item-right">暂无发票信息</div>
+        </div>
+
+      <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+        <div class="div-item-left">发票抬头：</div>
+        <div class="div-item-right">{{ orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : '暂无' }}</div>
+      </div>
+
+      <div class="div-item" v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId">
+        <div class="div-item-left">发票税号：</div>
+        <div class="div-item-right">{{ orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : '暂无' }}</div>
+      </div>
+
+      <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+        <div class="div-item-left">发票内容：</div>
+        <div class="div-item-right">{{ orderInfo.receipt.receiptContent ? orderInfo.receipt.receiptContent : '暂无' }}</div>
+      </div>
+
+      <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+        <div class="div-item-left">发票金额：</div>
+        <div class="div-item-right">{{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice('￥')}}</div>
+      </div>
+
+        <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+          <div class="div-item-left">是否开票：</div>
+          <div class="div-item-right">{{ orderInfo.receipt.receiptStatus == 0 ? '未开' : '已开' }}</div>
+        </div>
+      </div>
+      <div style="width: 36%; float: left">
+        <div class="div-item">
+          <div class="div-item-left">收货信息：</div>
+          <div class="div-item-right">
+            {{ orderInfo.order.consigneeName }}
+            {{ orderInfo.order.consigneeMobile }}
+            {{ orderInfo.order.consigneeAddressPath }}
+            {{ orderInfo.order.consigneeDetail }}
+          </div>
+        </div>
+        <div class="div-item">
+          <div class="div-item-left">支付方式：</div>
+          <div class="div-item-right">
+            {{ orderInfo.paymentMethodValue }}
+          </div>
+        </div>
+
+        <div class="div-item">
+          <div class="div-item-left">买家留言：</div>
+          <div class="div-item-right">{{ orderInfo.order.remark }}</div>
+        </div>
+
+      <div class="div-item">
+        <div class="div-item-left">配送方式：</div>
+        <div class="div-item-right">
+          {{
+              orderInfo.deliveryMethodValue
+                ? orderInfo.deliveryMethodValue
+                : "暂无配送方式"
+            }}
+        </div>
+      </div>
+    </div>
+  </Card>
+
+    <Card>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom">
+        <!-- 商品栏目格式化 -->
+        <template slot="goodsSlot" slot-scope="{row}">
+          <div style="margin-top: 5px; height: 80px; display: flex">
+            <div style="">
+              <img :src="row.image" style="height: 60px; margin-top: 1px; width: 60px" />
+            </div>
+
+            <div style="margin-left: 13px">
+              <div class="div-zoom">
+                <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
+              </div>
+              <span v-for="(item, key) in JSON.parse(row.specs)" :key="key">
+                <span v-show="key!='images'" style="font-size: 12px;color: #999999;">
+                  {{key}} : {{item}}
+                </span>
+              </span>
+              <Poptip trigger="hover" style="display: block;" title="扫码在手机中查看" transfer>
+                <div slot="content">
+                  <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                </div>
+                <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
+              </Poptip>
+            </div>
+          </div>
+        </template>
+      </Table>
+      <div class="goods-total">
+        <ul>
+          <li>
+            <span class="label">商品总额：</span>
+            <span class="txt">{{ orderInfo.order.priceDetailDTO.goodsPrice | unitPrice('￥')}}</span>
+          </li>
+          <li>
+            <span class="label">优惠金额：</span>
+            <span class="txt">
+              {{
+                orderInfo.order.priceDetailDTO.couponPrice +
+                orderInfo.order.priceDetailDTO.discountPrice
+              | unitPrice('￥')}}
+            </span>
+          </li>
+          <li>
+            <span class="label">运费：</span>
+            <span class="txt">{{ orderInfo.order.freightPrice | unitPrice('￥')}}</span>
+          </li>
+          <li v-if="orderInfo.order.priceDetailDTO.payPoint != 0">
+            <span class="label">使用积分：</span>
+            <span class="txt">{{
+              orderInfo.order.priceDetailDTO.payPoint
+            }}</span>
+          </li>
+
+          <li>
+            <span class="label">应付金额：</span>
+            <span class="txt flowPrice">¥{{ orderInfo.order.flowPrice | unitPrice }}</span>
+          </li>
+        </ul>
+      </div>
+    </Card>
     <Modal v-model="modal" width="530">
       <p slot="header">
         <Icon type="edit"></Icon>

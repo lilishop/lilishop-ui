@@ -20,20 +20,18 @@
         <Row class="operation padding-row">
           <Button @click="add" type="primary" style="">添加</Button>
         </Row>
-        <Row>
-          <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
-            <!-- 页面展示 -->
-            <template slot="openStatusSlot" slot-scope="scope">
-              <div>
+        <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
+          <!-- 页面展示 -->
+          <template slot="openStatusSlot" slot-scope="scope">
+            <div>
 
-              </div>
-              <i-switch size="large" v-model="scope.row.openStatus" @on-change="changeSwitch(scope.row)">
-                <span slot="open">展示</span>
-                <span slot="close">隐藏</span>
-              </i-switch>
-            </template>
-          </Table>
-        </Row>
+            </div>
+            <i-switch size="large" v-model="scope.row.openStatus" @on-change="changeSwitch(scope.row)">
+              <span slot="open">展示</span>
+              <span slot="close">隐藏</span>
+            </i-switch>
+          </template>
+        </Table>
         <Row type="flex" justify="end" class="page">
           <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
             size="small" show-total show-elevator>

@@ -58,24 +58,22 @@
 
             </Form>
           </Row>
-          <Row class="padding-row">
-            <Table
-              :loading="loading"
-              border
-              :columns="columns"
-              :data="data"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="changeSort"
-              @on-selection-change="changeSelect"
-            >
-              <!-- 订单详情格式化 -->
-              <template slot="orderSlot" slot-scope="scope">
-                <a
-                  @click="$router.push({name: 'order-detail',query: {sn: scope.row.orderSn}})">{{scope.row.orderSn}}</a>
-              </template>
-            </Table>
-          </Row>
+          <Table
+            :loading="loading"
+            border
+            :columns="columns"
+            :data="data"
+            ref="table"
+            sortable="custom"
+            @on-sort-change="changeSort"
+            @on-selection-change="changeSelect"
+          >
+            <!-- 订单详情格式化 -->
+            <template slot="orderSlot" slot-scope="scope">
+              <a
+                @click="$router.push({name: 'order-detail',query: {sn: scope.row.orderSn}})">{{scope.row.orderSn}}</a>
+            </template>
+          </Table>
           <Row type="flex" justify="end" class="page">
             <Page
               :current="searchForm.pageNumber"

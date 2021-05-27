@@ -1,9 +1,5 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-      </Col>
-    </Row>
     <Card>
       <Row>
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
@@ -45,66 +41,64 @@
       <Row class="operation padding-row">
         <Button @click="newAct" type="primary">添加</Button>
       </Row>
-      <Row>
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          ref="table"
-          sortable="custom"
-          @on-sort-change="changeSort"
-          @on-selection-change="changeSelect"
-        >
-          <template slot-scope="{ row }" slot="action">
-            <Button
-              type="primary"
-              size="small"
-              v-if="row.promotionStatus == 'NEW'"
-              @click="edit(row)"
-              >编辑</Button
-            >&nbsp;
-            <Button
-              type="info"
-              v-if="row.promotionStatus == 'NEW'"
-              size="small"
-              @click="manage(row, 'manager')"
-              >管理</Button
-            >&nbsp;
-            <Button
-              type="info"
-              v-if="row.promotionStatus !== 'NEW'"
-              size="small"
-              @click="manage(row, 'view')"
-              >查看</Button
-            >&nbsp;
-            <Button
-              type="error"
-              size="small"
-              v-if="row.promotionStatus != 'START'"
-              ghost
-              @click="remove(row)"
-              >删除</Button
-            >&nbsp;
-            <Button
-              type="success"
-              v-if="
-                row.promotionStatus == 'NEW' || row.promotionStatus == 'CLOSE'
-              "
-              size="small"
-              @click="open(row)"
-              >开启</Button
-            >
-            <Button
-              type="warning"
-              v-if="row.promotionStatus == 'START'"
-              size="small"
-              @click="close(row)"
-              >关闭</Button
-            >
-          </template>
-        </Table>
-      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        sortable="custom"
+        @on-sort-change="changeSort"
+        @on-selection-change="changeSelect"
+      >
+        <template slot-scope="{ row }" slot="action">
+          <Button
+            type="primary"
+            size="small"
+            v-if="row.promotionStatus == 'NEW'"
+            @click="edit(row)"
+            >编辑</Button
+          >&nbsp;
+          <Button
+            type="info"
+            v-if="row.promotionStatus == 'NEW'"
+            size="small"
+            @click="manage(row, 'manager')"
+            >管理</Button
+          >&nbsp;
+          <Button
+            type="info"
+            v-if="row.promotionStatus !== 'NEW'"
+            size="small"
+            @click="manage(row, 'view')"
+            >查看</Button
+          >&nbsp;
+          <Button
+            type="error"
+            size="small"
+            v-if="row.promotionStatus != 'START'"
+            ghost
+            @click="remove(row)"
+            >删除</Button
+          >&nbsp;
+          <Button
+            type="success"
+            v-if="
+              row.promotionStatus == 'NEW' || row.promotionStatus == 'CLOSE'
+            "
+            size="small"
+            @click="open(row)"
+            >开启</Button
+          >
+          <Button
+            type="warning"
+            v-if="row.promotionStatus == 'START'"
+            size="small"
+            @click="close(row)"
+            >关闭</Button
+          >
+        </template>
+      </Table>
       <Row type="flex" justify="end" class="page">
         <Page
           :current="searchForm.pageNumber + 1"

@@ -1,7 +1,5 @@
 <template>
     <div class="search">
-        <Row>
-            <Col>
                 <Card>
                     <Row class="operation">
                         <Button @click="add" type="primary" icon="md-add">添加</Button>
@@ -15,18 +13,14 @@
                             <a class="select-clear" @click="clearSelectAll">清空</a>
                         </Alert>
                     </Row>
-                    <Row>
-                        <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"
-                               @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
-                    </Row>
+                    <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"
+                            @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
                     <Row type="flex" justify="end" class="page">
                         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize"
                               @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]"
                               size="small" show-total show-elevator show-sizer></Page>
                     </Row>
                 </Card>
-            </Col>
-        </Row>
         <Modal :title="modalTitle" v-model="modalVisible" :mask-closable='false' :width="500">
             <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
                 <FormItem label="导航栏名称" prop="navigationName">

@@ -1,88 +1,82 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-        <Card>
-          <Row v-show="openSearch" @keydown.enter.native="handleSearch">
-            <Form
-              ref="searchForm"
-              :model="searchForm"
-              inline
-              :label-width="70"
-              class="search-form"
+    <Card>
+      <Row v-show="openSearch" @keydown.enter.native="handleSearch">
+        <Form
+          ref="searchForm"
+          :model="searchForm"
+          inline
+          :label-width="70"
+          class="search-form"
+        >
+          <Form-item label="商品名称" prop="goodsName">
+            <Input
+              type="text"
+              v-model="searchForm.goodsName"
+              placeholder="请输入商品名称"
+              clearable
+              style="width: 200px"
+            />
+          </Form-item>
+          <span v-if="drop">
+            <Form-item label="状态" prop="status">
+              <Select
+                v-model="searchForm.marketEnable"
+                placeholder="请选择"
+                clearable
+                style="width: 200px"
+              >
+                <Option value="DOWN">下架</Option>
+                <Option value="UPPER">上架</Option>
+              </Select>
+            </Form-item>
+            <Form-item label="商品编号" prop="sn">
+              <Input
+                type="text"
+                v-model="searchForm.sn"
+                placeholder="商品编号"
+                clearable
+                style="width: 200px"
+              />
+            </Form-item>
+          </span>
+          <Form-item style="margin-left: -35px" class="br">
+            <Button @click="handleSearch" type="primary" icon="ios-search"
+              >搜索</Button
             >
-              <Form-item label="商品名称" prop="goodsName">
-                <Input
-                  type="text"
-                  v-model="searchForm.goodsName"
-                  placeholder="请输入商品名称"
-                  clearable
-                  style="width: 200px"
-                />
-              </Form-item>
-              <span v-if="drop">
-                <Form-item label="状态" prop="status">
-                  <Select
-                    v-model="searchForm.marketEnable"
-                    placeholder="请选择"
-                    clearable
-                    style="width: 200px"
-                  >
-                    <Option value="DOWN">下架</Option>
-                    <Option value="UPPER">上架</Option>
-                  </Select>
-                </Form-item>
-                <Form-item label="商品编号" prop="sn">
-                  <Input
-                    type="text"
-                    v-model="searchForm.sn"
-                    placeholder="商品编号"
-                    clearable
-                    style="width: 200px"
-                  />
-                </Form-item>
-              </span>
-              <Form-item style="margin-left: -35px" class="br">
-                <Button @click="handleSearch" type="primary" icon="ios-search"
-                  >搜索</Button
-                >
-                <Button @click="handleReset">重置</Button>
-                <a class="drop-down" @click="dropDown">
-                  {{ dropDownContent }}
-                  <Icon :type="dropDownIcon"></Icon>
-                </a>
-              </Form-item>
-            </Form>
-          </Row>
-          <Row>
-            <Table
-              :loading="loading"
-              border
-              :columns="columns"
-              :data="data"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="changeSort"
-              @on-selection-change="changeSelect"
-            ></Table>
-          </Row>
-          <Row type="flex" justify="end" class="page">
-            <Page
-              :current="searchForm.pageNumber"
-              :total="total"
-              :page-size="searchForm.pageSize"
-              @on-change="changePage"
-              @on-page-size-change="changePageSize"
-              :page-size-opts="[10, 20, 50]"
-              size="small"
-              show-total
-              show-elevator
-              show-sizer
-            ></Page>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
+            <Button @click="handleReset">重置</Button>
+            <a class="drop-down" @click="dropDown">
+              {{ dropDownContent }}
+              <Icon :type="dropDownIcon"></Icon>
+            </a>
+          </Form-item>
+        </Form>
+      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        sortable="custom"
+        @on-sort-change="changeSort"
+        @on-selection-change="changeSelect"
+      ></Table>
+      <Row type="flex" justify="end" class="page">
+        <Page
+          :current="searchForm.pageNumber"
+          :total="total"
+          :page-size="searchForm.pageSize"
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+          :page-size-opts="[10, 20, 50]"
+          size="small"
+          show-total
+          show-elevator
+          show-sizer
+        ></Page>
+      </Row>
+    </Card>
     <Modal
       :title="modalTitle"
       v-model="modalVisible"

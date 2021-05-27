@@ -73,40 +73,38 @@
               <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
             </Form>
           </Row>
-          <Row class="padding-row">
-            <Table
-              :loading="loading"
-              border
-              :columns="columns"
-              :data="data"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="changeSort"
-              @on-selection-change="changeSelect"
-            >
-              <!-- 商品栏目格式化 -->
-              <template slot="goodsSlot" slot-scope="{row}">
-                <div style="margin-top: 5px;height: 80px; display: flex;">
-                  <div style="">
-                    <img :src="row.goodsImage" style="height: 60px;margin-top: 3px">
-                  </div>
-
-                  <div style="margin-left: 13px;">
-                    <div class="div-zoom">
-                      <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
-                    </div>
-                    <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-                      <div slot="content">
-                        <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
-                      </div>
-                      <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
-                    </Poptip>
-                  </div>
+          <Table
+            :loading="loading"
+            border
+            :columns="columns"
+            :data="data"
+            ref="table"
+            sortable="custom"
+            @on-sort-change="changeSort"
+            @on-selection-change="changeSelect"
+          >
+            <!-- 商品栏目格式化 -->
+            <template slot="goodsSlot" slot-scope="{row}">
+              <div style="margin-top: 5px;height: 80px; display: flex;">
+                <div style="">
+                  <img :src="row.goodsImage" style="height: 60px;margin-top: 3px">
                 </div>
 
-              </template>
-            </Table>
-          </Row>
+                <div style="margin-left: 13px;">
+                  <div class="div-zoom">
+                    <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
+                  </div>
+                  <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+                    <div slot="content">
+                      <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                    </div>
+                    <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
+                  </Poptip>
+                </div>
+              </div>
+
+            </template>
+          </Table>
           <Row type="flex" justify="end" class="page">
             <Page
               :current="searchForm.pageNumber"

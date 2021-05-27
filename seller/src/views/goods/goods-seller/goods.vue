@@ -1,6 +1,5 @@
 <template>
   <div class="search">
-
     <Card>
       <Row @keydown.enter.native="handleSearch">
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
