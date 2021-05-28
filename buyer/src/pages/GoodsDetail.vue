@@ -13,7 +13,7 @@
         <div class="store-collect">
           <span class="mr_10" v-if="goodsMsg.data"><router-link :to="'Merchant?id=' + goodsMsg.data.storeId">{{goodsMsg.data.storeName}}</router-link></span>
           <span @click="collect" ><Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#666'" />{{storeCollected?'已收藏店铺':'收藏店铺'}}</span>
-          <span @click="connectCs(storeMsg.yzgSign)" class="ml_10"><Icon custom="icomoon icon-customer-service" />联系客服</span>
+          <span @click="connectCs(storeMsg.yzfSign)" class="ml_10"><Icon custom="icomoon icon-customer-service" />联系客服</span>
         </div>
       </div>
     </div>
