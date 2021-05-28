@@ -35,8 +35,7 @@
         </Dropdown>
       </Row>
 
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
-
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" @on-selection-change="changeSelect">
         <!-- 商品栏目格式化 -->
         <template slot="goodsSlot" slot-scope="{row}">
           <div style="margin-top: 5px;height: 90px; display: flex;">
@@ -56,7 +55,6 @@
               </Poptip>
             </div>
           </div>
-
         </template>
 
       </Table>
@@ -724,7 +722,4 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "@/styles/table-common.scss";
-/deep/ .ivu-table-wrapper {
-  width: 100% i !important;
-}
 </style>

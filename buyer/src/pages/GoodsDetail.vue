@@ -3,7 +3,7 @@
     <BaseHeader></BaseHeader>
     <Search></Search>
     <drawer></drawer>
-    <ShopHeader v-if="goodsMsg.data" :detail="goodsMsg.data"></ShopHeader>
+    <ShopHeader :detail="storeMsg"></ShopHeader>
     <div class="shop-item-path">
       <div class="shop-nav-container">
         <Breadcrumb>
@@ -11,8 +11,9 @@
           <BreadcrumbItem v-for="(item, index) in categoryBar" :to="goGoodsList(index)" target="_blank" :key="index">{{item.name}}</BreadcrumbItem>
         </Breadcrumb>
         <div class="store-collect">
-          <span class="mr_10"><router-link :to="'Merchant?id=' + goodsMsg.data.storeId">{{goodsMsg.data.storeName}}</router-link></span>
+          <span class="mr_10" v-if="goodsMsg.data"><router-link :to="'Merchant?id=' + goodsMsg.data.storeId">{{goodsMsg.data.storeName}}</router-link></span>
           <span @click="collect" ><Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#666'" />{{storeCollected?'已收藏店铺':'收藏店铺'}}</span>
+          <span @click="connectCs(storeMsg.yzgSign)" class="ml_10"><Icon custom="icomoon icon-customer-service" />联系客服</span>
         </div>
       </div>
     </div>
@@ -40,6 +41,7 @@ import ShowGoodsDetail from '@/components/goodsDetail/ShowGoodsDetail';
 import ShowLikeGoods from '@/components/like';
 import { goodsSkuDetail } from '@/api/goods';
 import { cancelCollect, collectGoods, isCollection } from '@/api/member';
+import {getDetailById} from '@/api/shopentry'
 export default {
   name: 'GoodsDetail',
   beforeRouteEnter (to, from, next) {
@@ -48,20 +50,15 @@ export default {
   },
   created () {
     this.getGoodsDetail();
-    if (this.Cookies.getItem('userInfo')) {
-      isCollection('STORE', this.goodsMsg.data.storeId).then(res => {
-        if (res.success && res.result) {
-          this.storeCollected = true;
-        }
-      })
-    }
+    
   },
   data () {
     return {
       goodsMsg: {}, // 商品信息
       isLoading: false, // 加载状态
       categoryBar: [], // 分类
-      storeCollected: false // 商品收藏
+      storeCollected: false, // 商品收藏
+      storeMsg: {} // 店铺信息
     };
   },
   methods: {
@@ -83,6 +80,20 @@ export default {
           });
           this.categoryBar = cateArr;
           this.goodsMsg = res.result;
+          // 判断是否收藏
+          if (this.Cookies.getItem('userInfo')) {
+            isCollection('STORE', this.goodsMsg.data.storeId).then(res => {
+              if (res.success && res.result) {
+                this.storeCollected = true;
+              }
+            })
+          }
+          // 获取店铺信息
+          getDetailById(this.goodsMsg.data.storeId).then(res => {
+            if (res.success) {
+              this.storeMsg = res.result
+            }
+          })
         } else {
           this.$Message.error(res.message)
           this.$router.push('/')
@@ -91,7 +102,7 @@ export default {
         this.$router.push('/')
       });
     },
-    goGoodsList (currIndex) {
+    goGoodsList (currIndex) { // 跳转商品列表
       const arr = []
       this.categoryBar.forEach((e, index) => {
         if (index <= currIndex) {
@@ -132,7 +143,6 @@ export default {
   }
 };
 </script>
-
 <style scoped lang="scss">
 .shop-item-path {
   height: 38px;
@@ -146,6 +156,7 @@ export default {
   padding: 20px 0;
   @include white_background_color();
 }
+
 .shop-nav-container {
   width: 1200px;
   margin: 0 auto;

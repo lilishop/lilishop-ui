@@ -104,7 +104,7 @@ export default {
 
 <style scoped lang="scss">
 @import '../../assets/styles/coupon.scss';
-.pageration{
-    text-align: right;
+.pageration {
+  text-align: right;
 }
 </style>

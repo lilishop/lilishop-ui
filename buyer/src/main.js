@@ -37,6 +37,10 @@ Vue.prototype.linkTo = function (url) {
     window.open(url, '_blank')
   }
 }
+Vue.prototype.connectCs = function (sign = '37ef9b97807d03c6741298ed4eb5b536d2d238e08a3c00fb01fe48f03a569974c99ad767e72c04b3165ef29aca2c488b505fe4ca') { // 联系客服
+  const url = 'https://yzf.qq.com/xv/web/static/chat/index.html?sign=' + sign
+  window.open(url, '_blank')
+}
 Vue.prototype.Cookies = storage
 /* eslint-disable no-new */
 new Vue({
