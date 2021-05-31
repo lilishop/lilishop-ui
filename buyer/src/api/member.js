@@ -441,3 +441,39 @@ export function memberPointHistory (params) {
     params
   });
 }
+/**
+ * 分页获取会员站内信
+ * @param {Object} params 请求参数，包括pageNumber、pageSize、status
+ */
+export function memberMsgList (params) {
+  return request({
+    url: `/buyer/member/message`,
+    method: Method.GET,
+    needToken: true,
+    params
+  });
+}
+/**
+ * 设置消息为已读
+ * @param {String} messageId 消息id
+ */
+ export function readMemberMsg (params) {
+  return request({
+    url: `/buyer/member/message`,
+    method: Method.PUT,
+    needToken: true,
+    params
+  });
+}
+/**
+ * 删除会员消息
+ * @param {String} messageId 消息id
+ */
+ export function delMemberMsg (params) {
+  return request({
+    url: `/buyer/member/message`,
+    method: Method.DELETE,
+    needToken: true,
+    params
+  });
+}

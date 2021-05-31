@@ -20,7 +20,6 @@
 
         <div class="goodsConfig mt_10">
           <span @click="collect" ><Icon type="ios-heart" :color="isCollected ? '#ed3f14' : '#666'" />{{isCollected?'已收藏':'收藏'}}</span>
-          
         </div>
       </div>
       <!-- 右侧商品信息、活动信息、操作展示 -->

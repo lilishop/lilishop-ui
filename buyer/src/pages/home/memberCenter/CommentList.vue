@@ -112,6 +112,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.page-size {
+  display: flex;
+  justify-content: flex-end;
+}
 .order-img {
   > img {
     width: 60px;

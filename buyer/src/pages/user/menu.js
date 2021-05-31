@@ -43,6 +43,11 @@ const member = [{
   },
   {
     icon: '',
+    title: '我的消息',
+    path: 'MsgList'
+  },
+  {
+    icon: '',
     title: '我的足迹',
     path: 'MyTracks'
   },
