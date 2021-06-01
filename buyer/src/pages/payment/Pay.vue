@@ -116,11 +116,13 @@
                             <span v-if="item.couponType === 'DISCOUNT'" class="fontsize_12 global_color"><span class="price">{{item.couponDiscount}}</span>折</span>
                             <span class="describe">满{{item.consumeThreshold}}元可用</span>
                         </div>
-                        <p>使用范围：{{useScope(item.scopeType)}}</p>
-                        <p>有效期：{{item.endTime}}</p>
+                          <p>使用范围：{{useScope(item.scopeType)}}</p>
+                          <p>有效期：{{item.endTime}}</p>
                         </div>
+                        <img class="used" v-if="usedCouponId.includes(item.id)" src="../../assets/images/geted.png" alt="">
                         <b></b>
-                        <a class="c-right" @click="useCoupon(item.id)">立即使用</a>
+                        <a class="c-right" @click="useCoupon(item.id, true)">立即使用</a>
+                        <a class="c-right" v-if="usedCouponId.includes(item.id)" @click="useCoupon(item.id, false)">放弃优惠</a>
                         <i class="circle-top"></i>
                         <i class="circle-bottom"></i>
                     </li>
@@ -207,7 +209,9 @@ export default {
       moreAddr: false, // 更多地址
       canUseCouponNum: 0, // 可用优惠券数量
       couponList: [], // 可用优惠券列表
-      logoImg: '' // 平台logo
+      logoImg: '', // 平台logo
+      usedCouponId: [], // 已使用优惠券id
+      selectedCoupon: {} // 已选优惠券对象
     };
   },
   mounted () {
@@ -250,7 +254,10 @@ export default {
           this.goodsList = res.result.cartList;
           this.priceDetailDTO = res.result.priceDetailDTO;
           this.skuList = res.result.skuList;
-          let notSupArea = res.result.notSupportFreight
+          let notSupArea = res.result.notSupportFreight;
+          this.selectedCoupon = {}
+          if (res.result.platformCoupon) this.selectedCoupon.platformCoupon = res.result.platformCoupon
+          Object.assign(this.selectedCoupon, res.result.storeCoupons)
           if (notSupArea) {
             let content = [];
             let title = ''
@@ -295,8 +302,22 @@ export default {
             storeId: storeArr.toString(),
             totalPrice: this.priceDetailDTO.goodsPrice
           }
-          canUseCouponList(params).then(res => {
+          canUseCouponList(params).then(res => { // 可用优惠券列表
             if (res.success) this.couponList = res.result.records
+            const couponKeys = Object.keys(this.selectedCoupon)
+            this.usedCouponId = []
+            if (couponKeys.length) {
+              this.couponList.forEach(e => {
+                if (e.id === this.selectedCoupon[couponKeys].memberCoupon.id) {
+                  this.usedCouponId.push(e.id)
+                } 
+              })
+              this.$nextTick(() => {
+                this.$forceUpdate()
+              })
+            }
+            
+            
           })
         }
       })
@@ -361,16 +382,14 @@ export default {
 
       });
     },
-    useCoupon (id) { // 使用优惠券
+    useCoupon (id, used) { // 使用优惠券
       let params = {
         way: this.$route.query.way,
         memberCouponId: id,
-        used: true
+        used: used  // true 为使用， false为弃用
       }
       selectCoupon(params).then(res => {
-        if (res.success) {
-          this.init()
-        }
+        if (res.success) this.init()
       })
     },
     editInvoice () { // 编辑发票信息
@@ -774,5 +793,16 @@ export default {
     .circle-top,.circle-bottom{
         right: 22px;
     }
+    .used {
+      position: absolute;
+      top: 60px;
+      right: 40px;
+      width: 50px;
+      height: 50px;
+    }
+}
+.coupon-list {
+  max-height: 260px;
+  overflow: scroll;
 }
 </style>

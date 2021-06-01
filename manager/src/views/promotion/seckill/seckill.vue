@@ -53,66 +53,64 @@
       <Row class="operation padding-row">
         <Button type="primary" @click="add">添加活动</Button>
       </Row>
-      <Row>
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          ref="table"
-          class="page"
-        >
-          <template slot-scope="{ row }" slot="action">
-            <Button
-              type="info"
-              size="small"
-              class="mr_5"
-              v-if="row.promotionStatus == 'NEW'"
-              @click="edit(row)"
-              >编辑</Button
-            >
-            &nbsp;
-            <Button
-              type="info"
-              size="small"
-              class="mr_5"
-              v-else
-              @click="manage(row)"
-              >查看</Button
-            >
-            &nbsp;
-            <Button
-              type="primary"
-              size="small"
-              class="mr_5"
-              v-if="row.promotionStatus == 'NEW'"
-              @click="manage(row)"
-              >管理</Button
-            >
-            &nbsp;
-            <!-- <Button type="success" size="small" class="mr_5" v-if="row.promotionStatus == 'NEW' || row.promotionStatus == 'END'" @click="upper(row)">上架</Button>   -->
-            <Button
-              type="error"
-              size="small"
-              v-if="
-                row.promotionStatus == 'START' || row.promotionStatus == 'NEW'
-              "
-              class="mr_5"
-              @click="off(row)"
-              >下架</Button
-            >
-            &nbsp;
-            <Button
-              type="error"
-              size="small"
-              v-if="row.promotionStatus == 'CLOSE'"
-              ghost
-              @click="expire(row)"
-              >删除</Button
-            >
-          </template>
-        </Table>
-      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        class="page"
+      >
+        <template slot-scope="{ row }" slot="action">
+          <Button
+            type="info"
+            size="small"
+            class="mr_5"
+            v-if="row.promotionStatus == 'NEW'"
+            @click="edit(row)"
+            >编辑</Button
+          >
+          &nbsp;
+          <Button
+            type="info"
+            size="small"
+            class="mr_5"
+            v-else
+            @click="manage(row)"
+            >查看</Button
+          >
+          &nbsp;
+          <Button
+            type="primary"
+            size="small"
+            class="mr_5"
+            v-if="row.promotionStatus == 'NEW'"
+            @click="manage(row)"
+            >管理</Button
+          >
+          &nbsp;
+          <!-- <Button type="success" size="small" class="mr_5" v-if="row.promotionStatus == 'NEW' || row.promotionStatus == 'END'" @click="upper(row)">上架</Button>   -->
+          <Button
+            type="error"
+            size="small"
+            v-if="
+              row.promotionStatus == 'START' || row.promotionStatus == 'NEW'
+            "
+            class="mr_5"
+            @click="off(row)"
+            >下架</Button
+          >
+          &nbsp;
+          <Button
+            type="error"
+            size="small"
+            v-if="row.promotionStatus == 'CLOSE'"
+            ghost
+            @click="expire(row)"
+            >删除</Button
+          >
+        </template>
+      </Table>
       <Row type="flex" justify="end" class="page">
         <Page
           :current="searchForm.pageNumber + 1"

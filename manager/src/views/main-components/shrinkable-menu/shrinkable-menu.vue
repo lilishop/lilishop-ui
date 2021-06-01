@@ -3,7 +3,7 @@
 <template>
   <div class="ivu-shrinkable-menu">
     <!-- 一级菜单 -->
-    <Menu ref="sideMenu" width="110px" theme="dark"  :active-name="currNav" @on-select="selectNav">
+    <Menu ref="sideMenu" width="80px" theme="dark"  :active-name="currNav" @on-select="selectNav">
       <MenuItem v-for="(item, i) in navList" :key="i" :name="item.name">
         {{item.title}}
       </MenuItem>
@@ -12,7 +12,7 @@
     <Menu
       ref="childrenMenu"
       :active-name="$route.name"
-      width="130px"
+      width="100px"
       @on-select="changeMenu"
     >
       <template v-for="item in menuList">

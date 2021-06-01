@@ -43,18 +43,16 @@
         <Button @click="delAll">批量删除</Button>
         <Button @click="resetPass">重置密码</Button>
       </Row>
-      <Row>
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          sortable="custom"
-          @on-sort-change="changeSort"
-          @on-selection-change="showSelect"
-          ref="table"
-        ></Table>
-      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        sortable="custom"
+        @on-sort-change="changeSort"
+        @on-selection-change="showSelect"
+        ref="table"
+      ></Table>
       <Row type="flex" justify="end" class="page">
         <Page
           :current="searchForm.pageNumber"

@@ -176,12 +176,16 @@ export default {
         handleSelectGoods(item) { // 调起选择商品
             console.warn(item);
             if (item) this.selected = item;
-            this.$refs.liliDialog.open('goods')
+            this.$refs.liliDialog.open('goods', 'single')
+            setTimeout(() => {
+                this.$refs.liliDialog.goodsData = [this.selected]
+            }, 500);
         },
         selectedLink (val) {
             this.selected.url = this.$options.filters.formatLinkType(val);
         },
         selectedGoodsData (val) {
+            console.log(val);
             let goods = val[0]
             console.log(this.selected);
             this.selected.img = goods.thumbnail

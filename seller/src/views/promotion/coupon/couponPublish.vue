@@ -114,9 +114,8 @@
               v-if="form.scopeType == 'PORTION_GOODS'"
             >
               <div style="display: flex; margin-bottom: 10px">
-                <Button type="primary" @click="$refs.skuSelect.open('goods')"
-                  >选择商品</Button
-                >
+                <Button type="primary" @click="openSkuList"
+                  >选择商品</Button>
                 <Button
                   type="error"
                   ghost
@@ -466,6 +465,14 @@ export default {
         name: "coupon",
       });
     },
+    openSkuList() { // 显示商品选择器
+      this.$refs.skuSelect.open("goods");
+      let data = JSON.parse(JSON.stringify(this.form.promotionGoodsList))
+      data.forEach(e => {
+        e.id = e.skuId
+      })
+      this.$refs.skuSelect.goodsData = data;
+    },
     changeSelect(e) {
       // 已选商品批量选择
       this.selectedGoods = e;
@@ -497,15 +504,9 @@ export default {
       this.form.promotionGoodsList.splice(index, 1);
     },
     selectedGoodsData(item) {
-      console.log(item);
       // 回显已选商品
-      let ids = [];
       let list = [];
-      this.form.promotionGoodsList.forEach((e) => {
-        ids.push(e.skuId);
-      });
       item.forEach((e) => {
-        if (!ids.includes(e.id)) {
           list.push({
             goodsName: e.goodsName,
             price: e.price,
@@ -515,9 +516,8 @@ export default {
             sellerName: e.sellerName,
             skuId: e.id,
           });
-        }
       });
-      this.form.promotionGoodsList.push(...list);
+      this.form.promotionGoodsList = list;
     },
     getGoodsCategory(e) {
       // 获取级联选择器商品分类id

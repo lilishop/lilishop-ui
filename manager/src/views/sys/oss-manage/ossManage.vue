@@ -103,18 +103,16 @@
             >
           </Alert>
         </Row>
-        <Row>
-          <Table
-            :loading="loading"
-            border
-            :columns="columns"
-            :data="data"
-            ref="table"
-            sortable="custom"
-            @on-sort-change="changeSort"
-            @on-selection-change="changeSelect"
-          ></Table>
-        </Row>
+        <Table
+          :loading="loading"
+          border
+          :columns="columns"
+          :data="data"
+          ref="table"
+          sortable="custom"
+          @on-sort-change="changeSort"
+          @on-selection-change="changeSelect"
+        ></Table>
       </div>
       <div v-show="showType == 'thumb'">
         <div class="oss-wrapper">

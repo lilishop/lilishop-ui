@@ -43,18 +43,16 @@
               <Button @click="handleReset" class="search-btn">重置</Button>
             </Form>
           </Row>
-          <Row class="padding-row">
-            <Table
-              :loading="loading"
-              border
-              :columns="columns"
-              :data="data"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="changeSort"
-              @on-selection-change="changeSelect"
-            ></Table>
-          </Row>
+          <Table
+            :loading="loading"
+            border
+            :columns="columns"
+            :data="data"
+            ref="table"
+            sortable="custom"
+            @on-sort-change="changeSort"
+            @on-selection-change="changeSelect"
+          ></Table>
           <Row type="flex" justify="end" class="page">
             <Page
               :current="searchForm.pageNumber"

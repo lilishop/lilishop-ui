@@ -2,7 +2,7 @@ export default {
   /**
    * @description 配置显示在浏览器标签的title
    */
-  title: 'Lili电商',
+  title: "Lili电商",
   /**
    * @description token在Cookie中存储的天数，默认1天
    */
@@ -17,29 +17,28 @@ export default {
    * @description api请求基础路径
    */
   api_dev: {
-    common: 'https://common-api.pickmall.cn',
-    buyer: 'https://buyer-api.pickmall.cn',
-    seller: 'https://store-api.pickmall.cn',
-    manager: 'https://admin-api.pickmall.cn'
+    common: "https://common-api.pickmall.cn",
+    buyer: "https://buyer-api.pickmall.cn",
+    seller: "https://store-api.pickmall.cn",
+    manager: "https://admin-api.pickmall.cn"
   },
   api_prod: {
-    common: 'https://common-api.pickmall.cn',
-    buyer: 'https://buyer-api.pickmall.cn',
-    seller: 'https://store-api.pickmall.cn',
-    manager: 'https://admin-api.pickmall.cn'
+    common: "https://common-api.pickmall.cn",
+    buyer: "https://buyer-api.pickmall.cn",
+    seller: "https://store-api.pickmall.cn",
+    manager: "https://admin-api.pickmall.cn"
   },
   /**
    *  @description api请求基础路径前缀
    */
-  baseUrlPrefix: '/manager',
+  baseUrlPrefix: "/manager",
   /**
    * @description 需要加载的插件
    */
   plugin: {
-    'error-store': {
+    "error-store": {
       showInHeader: true, // 设为false后不会在顶部显示错误日志徽标
       developmentOff: true // 设为true后在开发环境不会收集错误信息，方便开发中排查错误
     }
   }
-}
-
+};

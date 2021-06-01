@@ -1,15 +1,14 @@
 <template>
   <Modal :styles="{ top: '120px' }" width="1160" @on-cancel="clickClose" @on-ok="clickOK" v-model="flag" :mask-closable="false" scrollable>
-    <goodsDialog @selected="
-        (val) => {
-          goodsData = val;
-        }
-      " v-if="goodsFlag" ref="goodsDialog" />
-    <linkDialog @selectedLink="
-        (val) => {
-          linkData = val;
-        }
-      " v-else class="linkDialog" />
+    <template v-if="flag">
+      <goodsDialog @selected="(val) => {goodsData = val;}" 
+        v-if="goodsFlag" ref="goodsDialog" :selectedWay='goodsData'/>
+      <linkDialog @selectedLink="
+          (val) => {
+            linkData = val;
+          }
+        " v-else class="linkDialog" />
+    </template>
   </Modal>
 </template>
 <script>
@@ -23,14 +22,11 @@ export default {
   data() {
     return {
       goodsFlag: false, // 是否商品选择器
-      goodsData: "", //选择的商品
+      goodsData: [], //选择的商品
       linkData: "", //选择的链接
       flag: false, // modal显隐
     };
   },
-  props: ["types"],
-  watch: {},
-  mounted() {},
   methods: {
     // 关闭弹窗
     clickClose() {
@@ -54,13 +50,17 @@ export default {
       }
       this.clickClose();
     },
-    open(type) {
+    open(type, mutiple) {
       this.flag = true;
       if (type == "goods") {
         this.goodsFlag = true;
+        if (mutiple) {
+          this.singleGoods()
+        }
       } else {
         this.goodsFlag = false;
       }
+      
     },
     close() {
       this.flag = false;

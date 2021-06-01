@@ -150,7 +150,6 @@
         </div>
         <div>
           <Table stripe :columns="columns" :data="data"></Table>
-
         </div>
         <Page @on-change="(index)=>{refundParams.pageNumber = index}" @on-page-size-change="(size)=>{refundParams.pageSize= size}" class="page" show-total show-elevator :total="total" />
 

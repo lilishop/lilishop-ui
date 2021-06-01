@@ -16,16 +16,14 @@
         </Alert>
       </Row>
       <h3 class="act-goods">活动商品</h3>
-      <Row class="operation">
-        <Table :loading="loading" border :columns="goodsColumns" :data="goodsData" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
-          <template slot-scope="{ row, index }" slot="price">
-            <Input v-model="row.price" :disabled="status==='view'" @input="goodsData[index].price = row.price" />
-          </template>
-          <template slot-scope="{ index }" slot="action">
-            <Button type="error" size="small" ghost v-if="status === 'manager'" @click="delGoods(index)">删除</Button>
-          </template>
-        </Table>
-      </Row>
+      <Table :loading="loading" border :columns="goodsColumns" :data="goodsData" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
+        <template slot-scope="{ row, index }" slot="price">
+          <Input v-model="row.price" :disabled="status==='view'" @input="goodsData[index].price = row.price" />
+        </template>
+        <template slot-scope="{ index }" slot="action">
+          <Button type="error" size="small" ghost v-if="status === 'manager'" @click="delGoods(index)">删除</Button>
+        </template>
+      </Table>
       <Row type="flex" justify="end" class="page operation">
         <Page :current="searchForm.pageNumber + 1" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
           size="small" show-total show-elevator show-sizer></Page>
@@ -36,7 +34,7 @@
       </Row>
     </Card>
 
-    <sku-select ref="skuSelect" @selectedGoodsData="selectedGoodsData"></sku-select>
+    <sku-select ref="skuSelect" :goodsData="goodsData" @selectedGoodsData="selectedGoodsData"></sku-select>
   </div>
 </template>
 <script>
@@ -65,7 +63,7 @@ export default {
       data: [], // 表单数据
       total: 0, // 表单数据总数
       status: this.$route.query.status, // 查看还是修改
-      columns: [
+      columns: [ // 活动详情表头
         {
           title: "活动名称",
           key: "promotionName",
@@ -111,7 +109,7 @@ export default {
           },
         },
       ],
-      goodsColumns: [
+      goodsColumns: [ // 活动商品表头
         { type: "selection", width: 60, align: "center" },
         {
           title: "商品名称",
@@ -202,7 +200,6 @@ export default {
 
     handleReset() {
       // 重置
-      // this.$refs.searchForm.resetFields();
       this.searchForm.pageNumber = 0;
       this.searchForm.promotionName = "";
       this.selectDate = null;
@@ -211,7 +208,7 @@ export default {
       this.getDataList();
     },
 
-    clearSelectAll() {
+    clearSelectAll() { // 清空所有已选项
       this.$refs.table.selectAll(false);
     },
     changeSelect(e) {
@@ -220,7 +217,7 @@ export default {
       this.selectCount = e.length;
     },
 
-    getDataList() {
+    getDataList() { // 获取商品列表
       this.loading = true;
       this.searchForm.pintuanId = this.$route.query.id;
 
@@ -233,14 +230,12 @@ export default {
       });
     },
 
-    getPintuanMsg() {
-      // 获取拼团详情
+    getPintuanMsg() { // 获取拼团详情
       getPintuanDetail(this.$route.query.id).then((res) => {
         if (res.success) this.data.push(res.result);
       });
     },
-    delGoods(index) {
-      // 删除商品
+    delGoods(index) { // 删除商品
       this.goodsData.splice(index, 1);
     },
     delAll() { // 批量删除商品
@@ -263,13 +258,9 @@ export default {
       });
     },
     selectedGoodsData(item) { // 选择商品
-      let ids = [];
+      console.log(item);
       let list = [];
-      this.goodsData.forEach((e) => {
-        ids.push(e.skuId);
-      });
       item.forEach((e) => {
-        if (!ids.includes(e.id)) {
           list.push({
             goodsName: e.goodsName,
             price: e.price,
@@ -281,15 +272,19 @@ export default {
             skuId: e.id,
             categoryPath: e.categoryPath,
           });
-        }
       });
-      this.goodsData.push(...list);
+      this.goodsData = list;
     },
     openSkuList() { // 显示商品选择器
       this.$refs.skuSelect.open("goods");
+      let data = JSON.parse(JSON.stringify(this.goodsData))
+      data.forEach(e => {
+        e.id = e.skuId
+      })
+      this.$refs.skuSelect.goodsData = data;
     },
   },
-  mounted() {
+  mounted () {
     this.init();
   },
 };

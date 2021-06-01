@@ -45,7 +45,6 @@
           >
         </Form>
       </Row>
-      <Row class="padding-row">
         <Table
           :loading="loading"
           border
@@ -72,7 +71,6 @@
             </Button>
           </template>
         </Table>
-      </Row>
       <Row type="flex" justify="end" class="page">
         <Page
           :current="searchForm.pageNumber + 1"

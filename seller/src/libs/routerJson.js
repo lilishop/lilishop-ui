@@ -425,6 +425,34 @@ export const result = [
             url: "",
             permTypes: [],
             children: null
+          },
+          {
+            name: "live",
+            showAlways: true,
+            level: 2,
+            type: 0,
+            title: "直播管理",
+            path: "live",
+            component: "promotion/live/live",
+            icon: "md-person",
+            isMenu: true,
+            url: "",
+            permTypes: [],
+            children: null
+          },
+          {
+            name: "liveGoods",
+            showAlways: true,
+            level: 2,
+            type: 0,
+            title: "直播商品",
+            path: "liveGoods",
+            component: "promotion/live/liveGoods",
+            icon: "md-person",
+            isMenu: true,
+            url: "",
+            permTypes: [],
+            children: null
           }
         ]
       },
@@ -656,7 +684,7 @@ export const result = [
             showAlways: true,
             level: 2,
             type: 0,
-            title: "自提点管理",
+            title: "自提管理",
             path: "shopAddress",
             component: "shop/shopAddress",
             icon: "md-log-in",

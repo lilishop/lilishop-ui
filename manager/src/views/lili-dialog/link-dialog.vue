@@ -40,7 +40,7 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      this.$refs["lili-component"][0].type = "single"; //如果商品页面设置成为单选
+      this.$refs["lili-component"][0].type = "single"; //商品页面设置成为单选
     });
 
     this.wap.forEach((item) => {

@@ -1,82 +1,76 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-        <Card>
-          <Row @keydown.enter.native="handleSearch">
-            <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-              <Form-item label="会员名称" prop="memberName">
-                <Input
-                  type="text"
-                  v-model="searchForm.memberName"
-                  clearable
-                  placeholder="请输入会员名称"
-                  style="width: 200px"
-                />
-              </Form-item>
-              <Form-item label="订单号" prop="orderSn">
-                <Input
-                  type="text"
-                  v-model="searchForm.orderSn"
-                  clearable
-                  placeholder="请输入商品名"
-                  style="width: 200px"
-                />
-              </Form-item>
-              <Form-item label="状态" prop="status">
-                <Select v-model="searchForm.status" placeholder="请选择" clearable style="width: 200px">
-                  <Option value="NEW">新投诉</Option>
-                  <Option value="CANCEL">已撤销</Option>
-                  <Option value="WAIT_APPEAL">待申诉</Option>
-                  <Option value="COMMUNICATION">对话中</Option>
-                  <Option value="WAIT_ARBITRATION">等待仲裁</Option>
-                  <Option value="COMPLETE">已完成</Option>
+    <Card>
+      <Row @keydown.enter.native="handleSearch">
+        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+          <Form-item label="会员名称" prop="memberName">
+            <Input
+              type="text"
+              v-model="searchForm.memberName"
+              clearable
+              placeholder="请输入会员名称"
+              style="width: 200px"
+            />
+          </Form-item>
+          <Form-item label="订单号" prop="orderSn">
+            <Input
+              type="text"
+              v-model="searchForm.orderSn"
+              clearable
+              placeholder="请输入商品名"
+              style="width: 200px"
+            />
+          </Form-item>
+          <Form-item label="状态" prop="status">
+            <Select v-model="searchForm.status" placeholder="请选择" clearable style="width: 200px">
+              <Option value="NEW">新投诉</Option>
+              <Option value="CANCEL">已撤销</Option>
+              <Option value="WAIT_APPEAL">待申诉</Option>
+              <Option value="COMMUNICATION">对话中</Option>
+              <Option value="WAIT_ARBITRATION">等待仲裁</Option>
+              <Option value="COMPLETE">已完成</Option>
 
-                </Select>
-              </Form-item>
-              <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-              <Button @click="handleReset" class="search-btn">重置</Button>
-            </Form>
-          </Row>
-          <Row class="padding-row">
-            <Table
-              :loading="loading"
-              border
-              :columns="columns"
-              :data="data"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="changeSort"
-              @on-selection-change="changeSelect"
-            >
-              <template slot-scope="{row}" slot="goodsName">
-                <a class="mr_10" @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
-                <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-                  <div slot="content">
-                    <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
-                  </div>
-                  <img src="../../../assets/qrcode.svg" style="vertical-align:bottom;" class="hover-pointer" width="20" height="20" alt="">
-                </Poptip>
-              </template>
-            </Table>
-          </Row>
-          <Row type="flex" justify="end" class="page">
-            <Page
-              :current="searchForm.pageNumber"
-              :total="total"
-              :page-size="searchForm.pageSize"
-              @on-change="changePage"
-              @on-page-size-change="changePageSize"
-              :page-size-opts="[10, 20, 50]"
-              size="small"
-              show-total
-              show-elevator
-              show-sizer
-            ></Page>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
+            </Select>
+          </Form-item>
+          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+          <Button @click="handleReset" class="search-btn">重置</Button>
+        </Form>
+      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        sortable="custom"
+        @on-sort-change="changeSort"
+        @on-selection-change="changeSelect"
+      >
+        <template slot-scope="{row}" slot="goodsName">
+          <a class="mr_10" @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
+          <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+            <div slot="content">
+              <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+            </div>
+            <img src="../../../assets/qrcode.svg" style="vertical-align:bottom;" class="hover-pointer" width="20" height="20" alt="">
+          </Poptip>
+        </template>
+      </Table>
+      <Row type="flex" justify="end" class="page">
+        <Page
+          :current="searchForm.pageNumber"
+          :total="total"
+          :page-size="searchForm.pageSize"
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+          :page-size-opts="[10, 20, 50]"
+          size="small"
+          show-total
+          show-elevator
+          show-sizer
+        ></Page>
+      </Row>
+    </Card>
     <Modal
       :title="modalTitle"
       v-model="modalVisible"

@@ -1,51 +1,45 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-        <Card>
-          <Row @keydown.enter.native="handleSearch"> </Row>
-          <Row class="operation">
-            <Button @click="add" type="primary" icon="md-add">添加</Button>
-            <Button @click="getDataList" icon="md-refresh">刷新</Button>
-            <Button type="dashed" @click="openTip = !openTip">{{
-              openTip ? "关闭提示" : "开启提示"
-            }}</Button>
-          </Row>
-          <Row v-show="openTip">
-            <Alert show-icon>
-              已选择 <span class="select-count">{{ selectCount }}</span> 项
-              <a class="select-clear" @click="clearSelectAll">清空</a>
-            </Alert>
-          </Row>
-          <Row>
-            <Table
-              :loading="loading"
-              border
-              :columns="columns"
-              :data="data"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="changeSort"
-              @on-selection-change="changeSelect"
-            ></Table>
-          </Row>
-          <Row type="flex" justify="end" class="page">
-            <Page
-              :current="searchForm.pageNumber"
-              :total="total"
-              :page-size="searchForm.pageSize"
-              @on-change="changePage"
-              @on-page-size-change="changePageSize"
-              :page-size-opts="[10, 20, 50]"
-              size="small"
-              show-total
-              show-elevator
-              show-sizer
-            ></Page>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
+    <Card>
+      <Row @keydown.enter.native="handleSearch"> </Row>
+      <Row class="operation">
+        <Button @click="add" type="primary" icon="md-add">添加</Button>
+        <Button @click="getDataList" icon="md-refresh">刷新</Button>
+        <Button type="dashed" @click="openTip = !openTip">{{
+          openTip ? "关闭提示" : "开启提示"
+        }}</Button>
+      </Row>
+      <Row v-show="openTip">
+        <Alert show-icon>
+          已选择 <span class="select-count">{{ selectCount }}</span> 项
+          <a class="select-clear" @click="clearSelectAll">清空</a>
+        </Alert>
+      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        sortable="custom"
+        @on-sort-change="changeSort"
+        @on-selection-change="changeSelect"
+      ></Table>
+      <Row type="flex" justify="end" class="page">
+        <Page
+          :current="searchForm.pageNumber"
+          :total="total"
+          :page-size="searchForm.pageSize"
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+          :page-size-opts="[10, 20, 50]"
+          size="small"
+          show-total
+          show-elevator
+          show-sizer
+        ></Page>
+      </Row>
+    </Card>
     <Modal
       :title="modalTitle"
       v-model="modalVisible"

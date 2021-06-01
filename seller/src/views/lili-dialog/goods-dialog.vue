@@ -41,12 +41,17 @@
 <script>
 import * as API_Goods from "@/api/goods";
 export default {
-  data() {
+  props: {
+    selectedWay: {
+      type: Array,
+      default: new Array()
+    }
+  },
+  data () {
     return {
       type: "multiple", //单选或者多选 single  multiple
 
       cateList: [], // 商品分类列表
-      selectedWay: [], //选中商品集合
       total: "", // 商品总数
       goodsParams: { // 请求商品列表参数
         pageNumber: 1,
@@ -64,18 +69,17 @@ export default {
       loading: false, // 商品加载loading
     };
   },
-  props: ["clearFlag"],
   watch: {
     category(val) {
       this.goodsParams.categoryPath = val[2];
     },
     selectedWay: {
-      handler() {
+      handler(val) {
         this.$emit("selected", this.selectedWay);
       },
       deep: true,
+      immediate: true
     },
-
     "goodsParams.categoryPath": {
       handler: function () {
         this.goodsData = [];
@@ -88,7 +92,7 @@ export default {
     this.init();
   },
   methods: {
-    handleReachBottom() {
+    handleReachBottom() { // 页面触底触发加载
       setTimeout(() => {
         if (
           this.goodsParams.pageNumber * this.goodsParams.pageSize <=
@@ -99,17 +103,24 @@ export default {
         }
       }, 1500);
     },
-    getQueryGoodsList() {
+    getQueryGoodsList() { // 根据商品分类筛选商品
       API_Goods.getGoodsSkuData(this.goodsParams).then((res) => {
         this.initGoods(res);
       });
     },
 
-    initGoods(res) {
+    initGoods(res) { // 获取商品列表
       if (res.result.records.length !=0) {
-        res.result.records.forEach((item) => {
+        let data = res.result.records;
+        data.forEach((item) => {
           item.selected = false;
           item.___type = "goods"; //设置为goods让pc wap知道标识
+
+          this.selectedWay.forEach(e => {
+            if (e.id === item.id) {
+              item.selected = true 
+            }
+          })
         });
         /**
          * 解决数据请求中，滚动栏会一直上下跳动
@@ -141,7 +152,6 @@ export default {
     deepGroup(val) {
       val.forEach((item) => {
         let childWay = []; //第二级
-        let grandWay = []; //第三级
         // 第二层
         if (item.children) {
           item.children.forEach((child) => {
@@ -196,7 +206,12 @@ export default {
         this.selectedWay.push(val);
       } else {
         val.selected = false;
-        this.selectedWay.splice(index, 1);
+        for (let i = 0; i<this.selectedWay.length; i++ ) {
+          if (this.selectedWay[i].id===val.id) {
+            this.selectedWay.splice(i,1)
+            break;
+          }
+        }
       }
     },
   },

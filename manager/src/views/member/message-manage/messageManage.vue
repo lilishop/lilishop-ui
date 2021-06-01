@@ -75,18 +75,16 @@
           <a class="select-clear" @click="clearSelectAll">清空</a>
         </Alert>
       </Row>
-      <Row>
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          sortable="custom"
-          @on-sort-change="changeSort"
-          @on-selection-change="showSelect"
-          ref="table"
-        ></Table>
-      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        sortable="custom"
+        @on-sort-change="changeSort"
+        @on-selection-change="showSelect"
+        ref="table"
+      ></Table>
       <Row type="flex" justify="end" class="page">
         <Page
           :current="searchForm.pageNumber"

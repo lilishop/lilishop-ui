@@ -78,7 +78,6 @@
             </div>
           </div>
           <div class="point-data" style="margin-top: -5px">
-            <Row>
               <Table
                 :loading="loading"
                 border
@@ -89,7 +88,6 @@
                 @on-sort-change="pointChangeSort"
               >
               </Table>
-            </Row>
 
             <Row type="flex" justify="end" class="page" style="margin-top: 10px">
               <Page
@@ -168,18 +166,16 @@
             </Form>
           </Row>
           <div style="min-height: 180px">
-            <Row class="padding-row">
-              <Table
-                :loading="loading"
-                border
-                :columns="orderColumns"
-                :data="orderData"
-                ref="table"
-                sortable="custom"
-                @on-sort-change="orderChangeSort"
-              >
-              </Table>
-            </Row>
+            <Table
+              :loading="loading"
+              border
+              :columns="orderColumns"
+              :data="orderData"
+              ref="table"
+              sortable="custom"
+              @on-sort-change="orderChangeSort"
+            >
+            </Table>
 
             <Row type="flex" justify="end" class="page" style="margin-top: 10px">
               <Page
@@ -201,18 +197,16 @@
           <Row class="operation padding-row">
             <Button @click="addMemberAddress" type="primary">新增</Button>
           </Row>
-          <Row>
-            <Table
-              :loading="loading"
-              border
-              :columns="addressColumns"
-              :data="addressData"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="addressChangeSort"
-            >
-            </Table>
-          </Row>
+          <Table
+            :loading="loading"
+            border
+            :columns="addressColumns"
+            :data="addressData"
+            ref="table"
+            sortable="custom"
+            @on-sort-change="addressChangeSort"
+          >
+          </Table>
 
           <Row type="flex" justify="end" class="page" style="margin-top: 10px">
             <Page
@@ -249,18 +243,16 @@
               </div>
             </div>
           </div>
-          <Row>
-            <Table
-              :loading="loading"
-              border
-              :columns="walletColumns"
-              :data="walletData"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="walletChangeSort"
-            >
-            </Table>
-          </Row>
+          <Table
+            :loading="loading"
+            border
+            :columns="walletColumns"
+            :data="walletData"
+            ref="table"
+            sortable="custom"
+            @on-sort-change="walletChangeSort"
+          >
+          </Table>
 
           <Row type="flex" justify="end" class="page" style="margin-top: 10px">
             <Page
@@ -292,23 +284,21 @@
               <Button @click="getReceiptRecordData" type="primary" icon="ios-search" class="search-btn">搜索</Button>
             </Form>
           </Row>
-          <Row class="padding-row">
-            <Table
-              :loading="loading"
-              border
-              :columns="receiptRecordColumns"
-              :data="receiptRecordData"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="walletChangeSort"
-            >
-              <template slot="orderSnSlot" slot-scope="scope">
+          <Table
+            :loading="loading"
+            border
+            :columns="receiptRecordColumns"
+            :data="receiptRecordData"
+            ref="table"
+            sortable="custom"
+            @on-sort-change="walletChangeSort"
+          >
+            <template slot="orderSnSlot" slot-scope="scope">
 
-                <a @click="orderDetail(scope.row.orderSn)">{{scope.row.orderSn}}</a>
+              <a @click="orderDetail(scope.row.orderSn)">{{scope.row.orderSn}}</a>
 
-              </template>
-            </Table>
-          </Row>
+            </template>
+          </Table>
 
           <Row type="flex" justify="end" class="page" style="margin-top: 10px">
             <Page

@@ -1,47 +1,41 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-      <Card>
-        <Row>
-          <Button @click="refresh">刷新</Button>
-          <Button @click="add" type="primary">添加</Button>
-        </Row>
-        <Tabs @on-click="handleClickType" v-model="currentTab" style="margin-top: 10px">
-          <TabPane label="运费模板" name="INFO">
-            <table class="ncsc-default-table order m-b-30" :key="index" v-for="(item,index) in shipInfo">
-              <tbody>
-                <tr>
-                  <td class="sep-row" colspan="20"></td>
-                </tr>
-                <tr>
-                  <th colspan="20">
-                    <h3>{{item.name}}</h3>
-                    <span class="fr m-r-5">
-                      <time style="margin-right: 20px" title="最后编辑时间">
-                        <i class="icon-time"></i>{{item.updateTime}}
-                      </time>
-                      <Button @click="edit(item)" type="info">修改</Button>
-                      <Button @click="remove(item.id)" type="error">删除</Button>
-                    </span>
-                  </th>
-                </tr>
-                <tr>
-                  <td class="w10 bdl"></td>
-                  <td class="cell-area tl">运送到</td>
-                  <td class="w150">首件(重)
-
-                  </td>
-                  <td class="w150">运费</td>
-                  <td class="w150">续件(重)
-
-                  </td>
-                  <td class="w150 bdr">运费</td>
-                </tr>
-
-                <tr v-for="(children,index) in item.freightTemplateChildList">
+    <Card>
+      <Row>
+        <Button @click="refresh">刷新</Button>
+        <Button @click="add" type="primary">添加</Button>
+      </Row>
+      <Tabs @on-click="handleClickType" v-model="currentTab" style="margin-top: 10px">
+        <TabPane label="运费模板" name="INFO">
+          <table class="ncsc-default-table order m-b-30" :key="index" v-for="(item,index) in shipInfo">
+            <tbody>
+              <tr>
+                <td class="sep-row" colspan="20"></td>
+              </tr>
+              <tr>
+                <th colspan="20">
+                  <span class="temp-name">{{item.name}}</span>
+                  <span class="fr m-r-5">
+                    <time style="margin-right: 20px" title="最后编辑时间">
+                      <i class="icon-time"></i>{{item.updateTime}}
+                    </time>
+                    <Button @click="edit(item)" type="info">修改</Button>
+                    <Button @click="remove(item.id)" type="error">删除</Button>
+                  </span>
+                </th>
+              </tr>
+              <tr v-if="item.pricingMethod!=='FREE'">
+                <td class="w10 bdl"></td>
+                <td class="cell-area tl w150">运送到</td>
+                <td class="w150">首件(重)</td>
+                <td class="w150">运费</td>
+                <td class="w150">续件(重)</td>
+                <td class="w150 bdr">运费</td>
+              </tr>
+              <template v-if="item.pricingMethod!=='FREE'">
+                <tr v-for="(children,index) in item.freightTemplateChildList" :key="index">
                   <td class="bdl"></td>
-                  <td class="cell-area tl" style="width: 60%">{{children.area}}</td>
+                  <td class="cell-area tl w150" style="width: 60%;white-space:normal;">{{children.area}}</td>
                   <td>
                     {{children.firstCompany}}
                   </td>
@@ -55,103 +49,101 @@
                     <span class="yuan">￥</span><span class="integer">{{children.continuedPrice | unitPrice}}</span>
                   </td>
                 </tr>
-              </tbody>
-
-            </table>
-
-          </TabPane>
-          <TabPane v-if="csTab" :label=title :name=operation>
-            <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
-              <FormItem label="模板名称" prop="name">
-                <Input v-model="form.name" maxlength="10" clearable style="width: 20%" />
-              </FormItem>
-              <FormItem label="计价方式" prop="pricingMethod">
-                <RadioGroup type="button" button-style="solid" v-model="form.pricingMethod">
-                  <Radio label="WEIGHT">按重量</Radio>
-                  <Radio label="NUM">按件数</Radio>
-                </RadioGroup>
-              </FormItem>
-              <FormItem label="详细设置">
-                <div class="ncsu-trans-type" data-delivery="TRANSTYPE">
-                  <div class="entity">
-                    <div class="tbl-except">
-                      <table cellspacing="0" class="ncsc-default-table">
-                        <thead>
-                          <tr style="border-bottom: 1px solid #ddd;">
-                            <th class="w10"></th>
-                            <th class="tl">运送到</th>
-                            <th class="w10"></th>
-                            <th class="w50">首件(重)</th>
-                            <th class="w110">首费</th>
-                            <th class="w50">续件(重)</th>
-                            <th class="w110">续费</th>
-                            <th class="w150">操作</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr class="bd-line" data-group="n1" v-for="(item,index) in form.freightTemplateChildList">
-                            <td></td>
-                            <td class="tl cell-area">
-                              <span class="area-group">
-                                <p style="display:inline-block;white-space:pre;">{{item.area}}</p>
-                              </span>
-                            </td>
-                            <td></td>
-                            <td>
-                              <Input class="text w40" type="text" v-model="item.firstCompany" maxlength="3" clearable />
-                            </td>
-                            <td>
-                              <Input class="text w60" type="text" v-model="item.firstPrice" maxlength="6" clearable /><em class="add-on">
-                                元
-                              </em>
-                            </td>
-                            <td>
-                              <Input class="text w40" type="text" v-model="item.continuedCompany" maxlength="6" clearable />
-                            </td>
-                            <td>
-                              <Input class="text w60" type="text" v-model="item.continuedPrice" maxlength="6" clearable /><em class="add-on">
-                                元
-                              </em>
-                            </td>
-                            <td class="nscs-table-handle">
-                              <Button @click="editRegion(item,index)" type="info" size="small" style="margin-bottom: 5px">修改
-                              </Button>
-                              <Button @click="removeTemplateChildren(index)" :loading="submitLoading" type="error" size="small" style="margin-bottom: 5px">删除
-                              </Button>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
+              </template>
+            </tbody>
+          </table>
+        </TabPane>
+        <TabPane v-if="csTab" :label="title" :name="operation">
+          <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
+            <FormItem label="模板名称" prop="name">
+              <Input v-model="form.name" maxlength="10" clearable style="width: 20%" />
+            </FormItem>
+            <FormItem label="计价方式" prop="pricingMethod">
+              <RadioGroup type="button" button-style="solid" v-model="form.pricingMethod">
+                <Radio label="WEIGHT">按重量</Radio>
+                <Radio label="NUM">按件数</Radio>
+                <Radio label="FREE">包邮</Radio>
+              </RadioGroup>
+            </FormItem>
+            <FormItem label="详细设置" v-if="form.pricingMethod !== 'FREE'">
+              <div class="ncsu-trans-type" data-delivery="TRANSTYPE">
+                <div class="entity">
+                  <div class="tbl-except">
+                    <table cellspacing="0" class="ncsc-default-table">
+                      <thead>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                          <th class="w10"></th>
+                          <th class="tl">运送到</th>
+                          <th class="w10"></th>
+                          <th class="w50">首件(重)</th>
+                          <th class="w110">首费</th>
+                          <th class="w50">续件(重)</th>
+                          <th class="w110">续费</th>
+                          <th class="w150">操作</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr class="bd-line" data-group="n1" v-for="(item,index) in form.freightTemplateChildList" :key="index">
+                          <td></td>
+                          <td class="tl cell-area">
+                            <span class="area-group">
+                              <p style="display:inline-block">{{item.area}}</p>
+                            </span>
+                          </td>
+                          <td></td>
+                          <td>
+                            <Input class="text w40" type="text" v-model="item.firstCompany" maxlength="3" clearable />
+                          </td>
+                          <td>
+                            <Input class="text w60" type="text" v-model="item.firstPrice" maxlength="6" clearable >
+                              <span slot="append">元</span>
+                            </Input>
+                          </td>
+                          <td>
+                            <Input class="text w40" type="text" v-model="item.continuedCompany" maxlength="6" clearable />
+                          </td>
+                          <td>
+                            <Input class="text w60" type="text" v-model="item.continuedPrice" maxlength="6" clearable>
+                              <span slot="append">元</span>
+                            </Input>
+                          </td>
+                          <td class="nscs-table-handle">
+                            <Button @click="editRegion(item,index)" type="info" size="small" style="margin-bottom: 5px">修改
+                            </Button>
+                            <Button @click="removeTemplateChildren(index)" :loading="submitLoading" type="error" size="small" style="margin-bottom: 5px">删除
+                            </Button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="tbl-attach p-5">
+                    <div class="div-error" v-if="saveError">
+                      <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+                      <Icon type="ios-information-circle-outline" />
+                      指定地区城市为空或指定错误
+                      <Icon type="ios-information-circle-outline" />
+                      首费应输入正确的金额
+                      <Icon type="ios-information-circle-outline" />
+                      续费应输入正确的金额
+                      <Icon type="ios-information-circle-outline" />
+                      首(续)件(重)费应输入大于0的整数
                     </div>
-                    <div class="tbl-attach p-5">
-                      <div class="div-error" v-if="saveError">
-                        <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-                        <Icon type="ios-information-circle-outline" />
-                        指定地区城市为空或指定错误
-                        <Icon type="ios-information-circle-outline" />
-                        首费应输入正确的金额
-                        <Icon type="ios-information-circle-outline" />
-                        续费应输入正确的金额
-                        <Icon type="ios-information-circle-outline" />
-                        首(续)件(重)费应输入大于0的整数
-                      </div>
 
-                    </div>
                   </div>
                 </div>
-              </FormItem>
-              <Form-item>
-                <Button @click="addShipTemplateChildren(index)" :loading="submitLoading" icon="ios-create-outline" >为指定城市设置运费模板
-                </Button>
-                <Button @click="handleSubmit" :loading="submitLoading" type="primary" style="margin-right:5px">保存
-                </Button>
-              </Form-item>
-            </Form>
-          </TabPane>
-        </Tabs>
-      </Card>
-      </Col>
-    </Row>
+              </div>
+            </FormItem>
+            <Form-item>
+              <Button @click="addShipTemplateChildren(index)" v-if="form.pricingMethod !== 'FREE'" icon="ios-create-outline" >为指定城市设置运费模板
+              </Button>
+              <Button @click="handleSubmit" :loading="submitLoading" type="primary" style="margin-right:5px">保存
+              </Button>
+            </Form-item>
+          </Form>
+        </TabPane>
+      </Tabs>
+    </Card>
     <multiple-region ref="region" @selected="handleSelect" @closed="handleClose">
 
     </multiple-region>
@@ -312,35 +304,39 @@ export default {
         const regNumber = /^\+?[1-9][0-9]*$/;
         const regMoney = /(^[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^(0){1}$)|(^[0-9]\.[0-9]([0-9])?$)/;
         if (valid) {
-          //校验运费模板详细信息
-          for (let i = 0; i < this.form.freightTemplateChildList.length; i++) {
-            if (
-              this.form.freightTemplateChildList[i].area == "" ||
-              this.form.freightTemplateChildList[i].firstCompany == "" ||
-              this.form.freightTemplateChildList[i].firstPrice == "" ||
-              this.form.freightTemplateChildList[i].continuedCompany == "" ||
-              this.form.freightTemplateChildList[i].continuedPrice == ""
-            ) {
-              this.saveError = true;
-              return;
-            }
-            if (
-              regNumber.test(
-                this.form.freightTemplateChildList[i].firstCompany
-              ) == false ||
-              regNumber.test(
-                this.form.freightTemplateChildList[i].continuedCompany
-              ) == false ||
-              regMoney.test(this.form.freightTemplateChildList[i].firstPrice) ==
-                false ||
-              regMoney.test(
-                this.form.freightTemplateChildList[i].continuedPrice
-              ) == false
-            ) {
-              this.saveError = true;
-              return;
+          if (this.form.pricingMethod != 'FREE') {
+            //校验运费模板详细信息
+            for (let i = 0; i < this.form.freightTemplateChildList.length; i++) {
+              if (
+                this.form.freightTemplateChildList[i].area == "" ||
+                this.form.freightTemplateChildList[i].firstCompany == "" ||
+                this.form.freightTemplateChildList[i].firstPrice == "" ||
+                this.form.freightTemplateChildList[i].continuedCompany == "" ||
+                this.form.freightTemplateChildList[i].continuedPrice == ""
+              ) {
+                this.saveError = true;
+                return;
+              }
+              if (
+                regNumber.test(
+                  this.form.freightTemplateChildList[i].firstCompany
+                ) == false ||
+                regNumber.test(
+                  this.form.freightTemplateChildList[i].continuedCompany
+                ) == false ||
+                regMoney.test(this.form.freightTemplateChildList[i].firstPrice) ==
+                  false ||
+                regMoney.test(
+                  this.form.freightTemplateChildList[i].continuedPrice
+                ) == false
+              ) {
+                this.saveError = true;
+                return;
+              }
             }
           }
+          
+
           if (this.operation == "ADD") {
             API_Shop.addShipTemplate(this.form, headers).then((res) => {
               if (res.success) {
@@ -473,13 +469,12 @@ export default {
   border-left: 1px solid #e6e6e6;
 }
 
-.order tbody tr th h3 {
+.order tbody tr th .temp-name {
+  float: left;
   font-size: 14px;
-  line-height: 20px;
   color: #555;
-  vertical-align: middle;
-  display: inline-block;
-  margin: 0 10px;
+  // line-height: 44px;
+  margin: 7px 0 0 10px;
 }
 
 .m-r-5 {
@@ -541,7 +536,8 @@ textarea {
 }
 
 .w60 {
-  width: 80px !important;
+  width: 100px !important;
+  margin: 0 auto;
 }
 
 Input[type="text"],
@@ -553,18 +549,6 @@ Input.password {
   padding: 10px;
   border: solid 1px #e6e9ee;
   outline: 0 none;
-}
-
-.add-on {
-  line-height: 28px;
-  background-color: #f6f7fb;
-  vertical-align: top;
-  display: inline-block;
-  text-align: center;
-  width: 30px;
-  height: 30px;
-  border: solid #e6e9ee;
-  border-width: 1px 1px 1px 0;
 }
 
 ncsc-default-table {

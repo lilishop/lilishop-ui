@@ -1,44 +1,38 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-      <Card>
-        <Row @keydown.enter.native="handleSearch">
-          <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-            <Form-item label="订单号" prop="sn">
-              <Input type="text" v-model="searchForm.sn" placeholder="订单/交易号" clearable style="width: 200px" />
-            </Form-item>
-            <Form-item label="付款状态" prop="orderStatus">
-              <Select v-model="searchForm.payStatus" placeholder="请选择" clearable style="width: 200px">
-                <Option value="UNPAID">未付款</Option>
-                <Option value="PAID">已付款</Option>
-              </Select>
-            </Form-item>
-            <Form-item label="支付方式" prop="orderStatus">
-              <Select v-model="searchForm.paymentMethod" placeholder="请选择" clearable style="width: 200px">
-                <Option value="WECHAT">微信</Option>
-                <Option value="ALIPAY">支付宝</Option>
-                <Option value="WALLET">余额</Option>
-                <Option value="BANK_TRANSFER">银行转账</Option>
-                <Option value="">暂未付款</Option>
-              </Select>
-            </Form-item>
-            <Form-item label="支付时间">
-              <DatePicker v-model="searchForm" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px"></DatePicker>
-            </Form-item>
-            <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-          </Form>
-        </Row>
-        <Row class="padding-row">
-          <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
-        </Row>
-        <Row type="flex" justify="end" class="page">
-          <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
-            size="small" show-total show-elevator show-sizer></Page>
-        </Row>
-      </Card>
-      </Col>
-    </Row>
+    <Card>
+      <Row @keydown.enter.native="handleSearch">
+        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+          <Form-item label="订单号" prop="sn">
+            <Input type="text" v-model="searchForm.sn" placeholder="订单/交易号" clearable style="width: 200px" />
+          </Form-item>
+          <Form-item label="付款状态" prop="orderStatus">
+            <Select v-model="searchForm.payStatus" placeholder="请选择" clearable style="width: 200px">
+              <Option value="UNPAID">未付款</Option>
+              <Option value="PAID">已付款</Option>
+            </Select>
+          </Form-item>
+          <Form-item label="支付方式" prop="orderStatus">
+            <Select v-model="searchForm.paymentMethod" placeholder="请选择" clearable style="width: 200px">
+              <Option value="WECHAT">微信</Option>
+              <Option value="ALIPAY">支付宝</Option>
+              <Option value="WALLET">余额</Option>
+              <Option value="BANK_TRANSFER">银行转账</Option>
+              <Option value="">暂未付款</Option>
+            </Select>
+          </Form-item>
+          <Form-item label="支付时间">
+            <DatePicker v-model="searchForm" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px"></DatePicker>
+          </Form-item>
+          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+        </Form>
+      </Row>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+      <Row type="flex" justify="end" class="page">
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
+          size="small" show-total show-elevator show-sizer></Page>
+      </Row>
+    </Card>
   </div>
 </template>
 

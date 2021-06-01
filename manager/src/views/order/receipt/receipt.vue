@@ -58,24 +58,22 @@
 
             </Form>
           </Row>
-          <Row class="padding-row">
-            <Table
-              :loading="loading"
-              border
-              :columns="columns"
-              :data="data"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="changeSort"
-              @on-selection-change="changeSelect"
-            >
-              <!-- 订单详情格式化 -->
-              <template slot="orderSlot" slot-scope="scope">
-                <a
-                  @click="$router.push({name: 'order-detail',query: {sn: scope.row.orderSn}})">{{scope.row.orderSn}}</a>
-              </template>
-            </Table>
-          </Row>
+          <Table
+            :loading="loading"
+            border
+            :columns="columns"
+            :data="data"
+            ref="table"
+            sortable="custom"
+            @on-sort-change="changeSort"
+            @on-selection-change="changeSelect"
+          >
+            <!-- 订单详情格式化 -->
+            <template slot="orderSlot" slot-scope="scope">
+              <a
+                @click="$router.push({name: 'order-detail',query: {sn: scope.row.orderSn}})">{{scope.row.orderSn}}</a>
+            </template>
+          </Table>
           <Row type="flex" justify="end" class="page">
             <Page
               :current="searchForm.pageNumber"
@@ -114,20 +112,10 @@
           receiptStatus: "", // 起始时间
         },
         shopsData: [], // 店铺数据
-        form: {
-          // 添加或编辑表单对象初始化数据
-          sn: "",
-          sellerName: "",
-          startTime: "",
-          endTime: "",
-          billPrice: "",
-        },
         params: {
           pageNumber: 1,
-          pageSize: 1,
+          pageSize: 10,
         },
-        // 表单验证规则
-        formValidate: {},
         submitLoading: false, // 添加或编辑提交状态
         selectList: [], // 多选数据
         selectCount: 0, // 多选计数

@@ -61,73 +61,71 @@
         <Button @click="addPointsGoods" type="primary" >添加积分商品</Button>
 
       </Row>
-      <Row>
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          ref="table"
-        >
-          <template slot-scope="{ row }" slot="goodsName">
-            <div>
-              <a class="mr_10" @click="linkTo(row.goodsSku.goodsId,row.goodsSku.skuId)">{{row.goodsSku.goodsName}}</a>
-              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-                <div slot="content">
-                  <vue-qr :text="wapLinkTo(row.goodsSku.goodsId,row.goodsSku.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
-                </div>
-                <img src="../../../assets/qrcode.svg" style="vertical-align:middle;" class="hover-pointer" width="20" height="20" alt="">
-              </Poptip>
-            </div>
-          </template>
-          <template slot-scope="{ row }" slot="price">
-            <div>{{ row.goodsSku.price | unitPrice("￥") }}</div>
-          </template>
-          <template slot-scope="{ row }" slot="settlementPrice">
-            <div>{{ row.settlementPrice | unitPrice("￥") }}</div>
-          </template>
-          <template slot-scope="{ row }" slot="quantity">
-            <div>{{ row.goodsSku.quantity }}</div>
-          </template>
-          <template slot-scope="{ row }" slot="startTime">
-            <div>{{ row.startTime }}</div>
-            <div>{{ row.endTime }}</div>
-          </template>
-          
-          <template slot-scope="{ row }" slot="action">
-            <Button
-              v-if="row.promotionStatus == 'NEW'"
-              type="info"
-              size="small"
-              @click="edit(row.id)"
-              style="margin-right: 5px"
-              >编辑</Button
-            >
-            <Button
-              v-if="row.promotionStatus == 'START'"
-              type="warning"
-              size="small"
-              @click="statusChanged(row.id, 'CLOSE')"
-              style="margin-right: 5px"
-              >停用</Button
-            >
-            <Button
-              v-if="row.promotionStatus == 'CLOSE'"
-              type="warning"
-              size="small"
-              @click="statusChanged(row.id, 'START')"
-              style="margin-right: 5px"
-              >启用</Button
-            >
-            <Button type="error" size="small" @click="close(row.id)"
-              >删除</Button
-            >
-          </template>
-        </Table>
-      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+      >
+        <template slot-scope="{ row }" slot="goodsName">
+          <div>
+            <a class="mr_10" @click="linkTo(row.goodsSku.goodsId,row.goodsSku.skuId)">{{row.goodsSku.goodsName}}</a>
+            <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+              <div slot="content">
+                <vue-qr :text="wapLinkTo(row.goodsSku.goodsId,row.goodsSku.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+              </div>
+              <img src="../../../assets/qrcode.svg" style="vertical-align:middle;" class="hover-pointer" width="20" height="20" alt="">
+            </Poptip>
+          </div>
+        </template>
+        <template slot-scope="{ row }" slot="price">
+          <div>{{ row.goodsSku.price | unitPrice("￥") }}</div>
+        </template>
+        <template slot-scope="{ row }" slot="settlementPrice">
+          <div>{{ row.settlementPrice | unitPrice("￥") }}</div>
+        </template>
+        <template slot-scope="{ row }" slot="quantity">
+          <div>{{ row.goodsSku.quantity }}</div>
+        </template>
+        <template slot-scope="{ row }" slot="startTime">
+          <div>{{ row.startTime }}</div>
+          <div>{{ row.endTime }}</div>
+        </template>
+        
+        <template slot-scope="{ row }" slot="action">
+          <Button
+            v-if="row.promotionStatus == 'NEW'"
+            type="info"
+            size="small"
+            @click="edit(row.id)"
+            style="margin-right: 5px"
+            >编辑</Button
+          >
+          <Button
+            v-if="row.promotionStatus == 'START'"
+            type="warning"
+            size="small"
+            @click="statusChanged(row.id, 'CLOSE')"
+            style="margin-right: 5px"
+            >停用</Button
+          >
+          <Button
+            v-if="row.promotionStatus == 'CLOSE'"
+            type="warning"
+            size="small"
+            @click="statusChanged(row.id, 'START')"
+            style="margin-right: 5px"
+            >启用</Button
+          >
+          <Button type="error" size="small" @click="close(row.id)"
+            >删除</Button
+          >
+        </template>
+      </Table>
       <Row type="flex" justify="end" class="page">
         <Page
-          :current="searchForm.pageNumber + 1"
+          :current="searchForm.pageNumber"
           :total="total"
           :page-size="searchForm.pageSize"
           @on-change="changePage"
@@ -157,7 +155,7 @@ export default {
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
-        pageNumber: 0, // 当前页数
+        pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
         order: "desc", // 默认排序方式
       },
@@ -248,18 +246,17 @@ export default {
       this.$router.push({ name: "add-points-goods" });
     },
     changePage(v) {
-      this.searchForm.pageNumber = v - 1;
+      this.searchForm.pageNumber = v;
       this.getDataList();
-      this.clearSelectAll();
     },
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
     handleSearch() {
-      this.searchForm.pageNumber = 0;
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
-      if (this.searchForm.pointsS !== "") {
+      if (this.searchForm.pointsS) {
         this.searchForm.points =
           this.searchForm.pointsS +
           "_" +
