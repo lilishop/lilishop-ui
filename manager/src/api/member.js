@@ -98,11 +98,16 @@ export const getMemberStatistics = params => {
 };
 
 
-
 // 获取会员注册统计列表
 export const getStatisticsList = params => {
   return getRequest("/statistics/view/list", params);
 };
+
+// 获取会员历史流量
+export const historyMemberChartList = () => {
+  return getRequest("/statistics/view/online/history");
+}
+
 //查询会员数量
 export const getMemberNum = params => {
   return getRequest("/member/num", params);
@@ -121,15 +126,15 @@ export const removeMemberAddress = (id) => {
 }
 //添加会员收货地址
 export const addMemberAddress = (params) => {
-  return postRequest(`/member/address`,params)
+  return postRequest(`/member/address`, params)
 }
 //修改会员收货地址
 export const editMemberAddress = (params) => {
-  return putRequest(`/member/address`,params)
+  return putRequest(`/member/address`, params)
 }
 //查询会员预存款
 export const getMemberWallet = (params) => {
-  return getRequest(`/members/wallet`,params)
+  return getRequest(`/members/wallet`, params)
 }
 
 
