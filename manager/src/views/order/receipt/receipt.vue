@@ -281,25 +281,6 @@
         this.total = this.data.length;
         this.loading = false;
       },
-      //开发票
-      invoicing(params){
-        this.$Modal.confirm({
-          title: "确认开票",
-          content: "您确认已经开具发票 ?",
-          loading: true,
-          onOk: () => {
-            API_Order.invoicing(params.id).then((res) => {
-              if (res.success) {
-                this.$Message.success("开票成功");
-              }
-              this.$Modal.remove();
-              this.getData();
-            });
-
-
-          }
-        });
-      },
     },
     mounted() {
       this.init();
