@@ -151,8 +151,6 @@ export default {
       ]
     };
   },
-  components: {},
-  mounted () {},
   methods: {
     getCartList () { // 获取购物车列表
       this.loading = true

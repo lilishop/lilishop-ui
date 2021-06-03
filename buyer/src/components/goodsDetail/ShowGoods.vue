@@ -119,10 +119,14 @@
               <span class="inventory"> {{skuDetail.weight}}kg</span>
             </div>
           </div>
-          <div class="add-buy-car">
+          <div class="add-buy-car" v-if="$route.query.way === 'POINT'">
+            <Button type="error" :loading="loading" :disabled="skuDetail.quantity === 0" @click="pointPay">积分购买</Button>
+          </div>
+          <div class="add-buy-car" v-else>
             <Button type="error" :loading="loading" :disabled="skuDetail.quantity === 0" @click="addShoppingCartBtn">加入购物车</Button>
             <Button type="warning" :loading="loading1" :disabled="skuDetail.quantity === 0" @click="buyNow">立即购买</Button>
           </div>
+          
         </div>
       </div>
     </div>
@@ -220,6 +224,22 @@ export default {
         }
       });
     },
+    pointPay () { // 积分购买
+      const params = {
+        num: this.count,
+        skuId: this.skuDetail.id,
+        cartType: 'BUY_NOW'
+      };
+      this.loading1 = true;
+      addCartGoods(params).then(res => {
+        this.loading1 = false;
+        if (res.success) {
+          this.$router.push({path: '/pay', query: {way: 'POINT'}});
+        } else {
+          this.$Message.warning(res.message);
+        }
+      });
+    },
     async collect () { // 收藏商品
       if (this.isCollected) {
         let cancel = await cancelCollect('GOODS', this.skuDetail.id)
@@ -311,6 +331,7 @@ export default {
     }
   },
   mounted () {
+    // 用户登录才会判断是否收藏
     if (this.Cookies.getItem('userInfo')) {
       isCollection('GOODS', this.skuDetail.id).then(res => {
         if (res.success && res.result) {

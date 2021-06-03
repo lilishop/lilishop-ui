@@ -50,9 +50,8 @@ export default {
       this.$emit('content', val);
     }
   },
-  mounted () {},
   methods: {
-    changeCurr (index) {
+    changeCurr (index) { // 选择分类
       this.currentIndex = index;
     }
   }

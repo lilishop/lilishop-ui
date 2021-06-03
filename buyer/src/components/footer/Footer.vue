@@ -62,7 +62,7 @@ export default {
     };
   },
   methods: {
-    goArticle () { // 跳转
+    goArticle () { // 跳转文章页
       let routeUrl = this.$router.resolve({
         path: '/article'
       })

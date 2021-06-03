@@ -20,7 +20,7 @@ export default {
     }
   },
   computed: {
-    storeDetail () {
+    storeDetail () { // 店铺详情
       return this.detail;
     }
   }

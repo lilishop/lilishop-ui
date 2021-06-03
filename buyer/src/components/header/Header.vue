@@ -25,7 +25,6 @@
         </li>
       </ul>
       <ul class="detail">
-        <!-- <li class="first hover-pointer" @click="handleClickTheme()">切换主题</li> -->
         <li class="first" v-show="!userInfo.username">
           <router-link :to="`/login?rePath=${$route.path}&query=${JSON.stringify($route.query)}`">
             <span style="border:none" class="tipsLogin">请登录</span>
@@ -148,31 +147,22 @@ export default {
     }
   },
   methods: {
-    handleClickTheme () {
-      this.themeType === 'light'
-        ? (this.themeType = 'dark')
-        : (this.themeType = 'light');
-      window.document.documentElement.setAttribute(
-        'data-theme',
-        this.themeType
-      );
-    },
-    changeCity (city) {
+    changeCity (city) { // 选择所在城市
       this.city = city;
     },
-    goToPay () {
+    goToPay () { // 跳转购物车
       let url = this.$router.resolve({
         path: '/cart'
       })
       window.open(url.href, '_blank')
     },
-    myInfo () {
+    myInfo () { // 跳转会员中心
       let url = this.$router.resolve({
         path: '/home'
       })
       window.open(url.href, '_blank')
     },
-    signOutFun () {
+    signOutFun () { // 退出登录
       storage.removeItem('accessToken');
       storage.removeItem('refreshToken');
       storage.removeItem('userInfo');
