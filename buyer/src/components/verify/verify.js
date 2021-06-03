@@ -26,7 +26,3 @@ export function postVerifyImg (params) {
     headers: {uuid: storage.getItem('uuid')}
   });
 }
-
-export function mouseup () {
-  console.log(111);
-}

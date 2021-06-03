@@ -22,6 +22,13 @@
         </Row>
 
       </Row>
+      <!-- 拼图验证码 -->
+      <verify
+        ref="verify"
+        class="verify-con"
+        verifyType="LOGIN"
+        @change="verifyChange"
+      ></verify>
       <div v-if="socialLogining">
         <RectLoading />
       </div>
@@ -41,6 +48,7 @@ import LangSwitch from "@/views/main-components/lang-switch";
 import RectLoading from "@/views/my-components/lili/rect-loading";
 import CountDownButton from "@/views/my-components/lili/count-down-button";
 import util from "@/libs/util.js";
+import verify from '@/views/my-components/verify';
 
 export default {
   components: {
@@ -49,6 +57,7 @@ export default {
     LangSwitch,
     Header,
     Footer,
+    verify
   },
   data() {
     return {
@@ -79,7 +88,7 @@ export default {
   },
   methods: {
     mounted() {},
-    afterLogin(res) {
+    afterLogin(res) { // 登录成功后处理
       let accessToken = res.result.accessToken;
       let refreshToken = res.result.refreshToken;
       this.setStore("accessToken", accessToken);
@@ -100,23 +109,28 @@ export default {
         }
       });
     },
-    submitLogin() {
+    submitLogin() { // 登录操作
       this.$refs.usernameLoginForm.validate((valid) => {
         if (valid) {
-          this.loading = true;
-          login({
-            username: this.form.username,
-            password: this.md5(this.form.password),
-          }).then((res) => {
-            if (res && res.success) {
-              this.afterLogin(res);
-            } else {
-              this.loading = false;
-            }
-          });
+          this.$refs.verify.show = true;
         }
       });
     },
+    verifyChange (con) { // 拼图验证码回显
+      if (!con.status) return;
+      
+      this.loading = true;
+      login({
+        username: this.form.username,
+        password: this.md5(this.form.password),
+      }).then((res) => {
+        if (res && res.success) {
+          this.afterLogin(res);
+        } else {
+          this.loading = false;
+        }
+      }).catch(()=>{this.loading = false});
+    }
   },
 };
 </script>
@@ -140,7 +154,12 @@ export default {
     position: relative;
     zoom: 1;
   }
-
+  .verify-con{
+    position: absolute;
+    top: 90px;
+    z-index: 10;
+    left: 20px;
+  }
   .form {
     padding-top: 1vh;
 

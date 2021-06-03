@@ -47,7 +47,8 @@
     "vuex": "^3.4.0",
     "wangeditor": "^4.5.3",
     "xlsx": "^0.16.2",
-    "xss": "^1.0.7"
+    "xss": "^1.0.7",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.4.4",
