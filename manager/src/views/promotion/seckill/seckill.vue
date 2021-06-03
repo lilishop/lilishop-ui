@@ -71,7 +71,7 @@
               @click="edit(row)"
               >编辑</Button
             >
-            &nbsp;
+
             <Button
               type="info"
               size="small"
@@ -80,7 +80,7 @@
               @click="manage(row)"
               >查看</Button
             >
-            &nbsp;
+
             <Button
               type="primary"
               size="small"
@@ -89,7 +89,7 @@
               @click="manage(row)"
               >管理</Button
             >
-            &nbsp;
+
             <!-- <Button type="success" size="small" class="mr_5" v-if="row.promotionStatus == 'NEW' || row.promotionStatus == 'END'" @click="upper(row)">上架</Button>   -->
             <Button
               type="error"
@@ -313,4 +313,7 @@ export default {
 </script>
 <style lang="scss">
 @import "@/styles/table-common.scss";
+.mr_5{
+  margin: 0 5px;
+}
 </style>

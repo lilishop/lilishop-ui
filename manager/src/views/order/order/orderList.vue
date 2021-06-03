@@ -22,10 +22,17 @@
                 <Option value="CANCELLED">已取消</Option>
               </Select>
             </Form-item>
+
             <Form-item label="下单时间">
               <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px"></DatePicker>
             </Form-item>
             <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+
+            <download-excel class="export-excel-wrapper" :data="data" :fields="fields"  name="商品订单.xls">
+               <Button type="primary" ghost class="search-btn">导出Excel</Button>
+            </download-excel>
+
+
           </Form>
         </Row>
         <Row class="padding-row">
@@ -43,12 +50,60 @@
 
 <script>
 import * as API_Order from "@/api/order";
-
+import JsonExcel from "vue-json-excel";
 export default {
   name: "orderList",
-  components: {},
+  components: {
+    "download-excel": JsonExcel,
+  },
   data() {
     return {
+
+      // 表格的表头以及内容
+      fields:{
+        "订单编号":"sn",
+        "下单时间":"createTime",
+        "客户名称":"memberName",
+        "客户账号":"",
+        "收货人":"",
+        "收货人手机号":"",
+        "收货人地址":"",
+        "支付方式":{
+          field: "clientType",
+          callback:value=>{
+            if (value == "H5") {
+              return "移动端"
+            } else if (value == "PC") {
+              return "PC端"
+            } else if (value== "WECHAT_MP") {
+              return "小程序端"
+            } else if (value == "APP") {
+              return "移动应用端"
+            } else {
+              return value;
+            }
+          }
+        },
+        "配送方式":"",
+        "配送费用":"",
+        "订单商品金额":"",
+        "订单优惠金额":"",
+        "订单应付金额":"",
+        "商品SKU编号":"",
+        "商品数量":"groupNum",
+        "买家备注":"",
+        "订单状态":"",
+        "付款状态":{
+          field:"payStatus",
+          callback:value=>{
+            return  value == "UNPAID" ? "未付款" : value == "PAID" ? "已付款" : ""
+          }
+        },
+        "发货状态":"",
+        "发票类型":"",
+        "发票抬头":"",
+        "店铺":"storeName",
+      },
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
@@ -95,16 +150,15 @@ export default {
           width: 95,
           render: (h, params) => {
             if (params.row.clientType == "H5") {
-              return h("div",{},"移动端");
-            }else if(params.row.clientType == "PC") {
-              return h("div",{},"PC端");
-            }else if(params.row.clientType == "WECHAT_MP") {
-              return h("div",{},"小程序端");
-            }else if(params.row.clientType == "APP") {
-              return h("div",{},"移动应用端");
-            }
-            else{
-               return h("div",{},params.row.clientType);
+              return h("div", {}, "移动端");
+            } else if (params.row.clientType == "PC") {
+              return h("div", {}, "PC端");
+            } else if (params.row.clientType == "WECHAT_MP") {
+              return h("div", {}, "小程序端");
+            } else if (params.row.clientType == "APP") {
+              return h("div", {}, "移动应用端");
+            } else {
+              return h("div", {}, params.row.clientType);
             }
           },
         },

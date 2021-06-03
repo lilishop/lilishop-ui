@@ -1,22 +1,7 @@
 <template>
   <div>
     <Card>
-      <Form ref="searchForm" :model="searchForm" inline :label-width="100" class="search-form">
 
-        <Form-item label="直播状态" prop="promotionStatus">
-          <Select v-model="searchForm.status" placeholder="请选择" clearable style="width: 200px">
-            <Option value="NEW">未开始</Option>
-            <Option value="START">直播中</Option>
-            <Option value="END">已结束</Option>
-
-          </Select>
-        </Form-item>
-
-        <Button @click="handleSearch" type="primary" class="search-btn" icon="ios-search">搜索</Button>
-      </Form>
-      <div class="btns">
-        <Button @click="createLive()" type="primary">创建直播</Button>
-      </div>
       <Tabs v-model="searchForm.status">
         <!-- 标签栏 -->
         <TabPane v-for="(item,index) in tabs" :key="index" :name="item.status" :label="item.title">
@@ -25,7 +10,7 @@
 
       </Tabs>
       <Table :columns="liveColumns" :data="liveData"></Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" style="margin:20px;" justify="end" class="page">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePageNumber" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
           size="small" show-total show-elevator show-sizer></Page>
       </Row>
@@ -35,7 +20,7 @@
 </template>
 
 <script>
-import { getLiveList } from "@/api/promotion.js";
+import { getLiveList, whetherStar } from "@/api/promotion.js";
 export default {
   data() {
     return {
@@ -77,7 +62,6 @@ export default {
           render: (h, params) => {
             return h(
               "span",
-
               this.$options.filters.unixToDate(params.row.startTime)
             );
           },
@@ -91,6 +75,44 @@ export default {
 
               this.$options.filters.unixToDate(params.row.endTime)
             );
+          },
+        },
+        {
+          title: "是否推荐",
+          align: "center",
+          render: (h, params) => {
+            return h("div", [
+              h(
+                "i-switch",
+                {
+                  // 数据库0 enabled,1 disabled
+                  props: {
+                    type: "primary",
+                    size: "large",
+                    value: params.row.recommend == true,
+                  },
+                  on: {
+                    "on-change": () => {
+                      this.star(params.row,params.index);
+                    },
+                  },
+                },
+                [
+                  h("span", {
+                    slot: "open",
+                    domProps: {
+                      innerHTML: "是",
+                    },
+                  }),
+                  h("span", {
+                    slot: "close",
+                    domProps: {
+                      innerHTML: "否",
+                    },
+                  }),
+                ]
+              ),
+            ]);
           },
         },
 
@@ -135,7 +157,7 @@ export default {
                       },
                     },
                   },
-                  "查看/添加商品"
+                  "查看"
                 ),
               ]
             );
@@ -159,17 +181,27 @@ export default {
   },
   methods: {
     /**
-     * 搜索直播间状态
+     * 是否推荐
      */
-    handleSearch() {
-      this.getStoreLives();
+    async star(val,index) {
+      let switched
+      if(this.liveData[index].recommend){
+        this.$set(this.liveData[index],'recommend',false)
+        switched = false
+      }
+      else{
+
+        this.$set(this.liveData[index],'recommend',true)
+        switched = true
+      }
+
+       await whetherStar({id:val.id,recommend:switched});
     },
 
     /**
      * 页面数据大小分页回调
      */
     changePageSize(val) {
-      console.log(val)
       this.searchForm.pageSize = val;
       this.getStoreLives();
     },
@@ -177,7 +209,6 @@ export default {
      * 分页回调
      */
     changePageNumber(val) {
-      console.log(val)
       this.searchForm.pageNumber = val;
       this.getStoreLives();
     },
@@ -198,17 +229,10 @@ export default {
      */
     getLiveDetail(val) {
       this.$router.push({
-        path: "/add-live",
+        path: "/liveDetail",
         query: { ...val, liveStatus: this.searchForm.status },
       });
     },
-    /**
-     * 创建直播
-     */
-    createLive() {
-      this.$router.push({ path: "/add-live" });
-    },
-
   },
 };
 </script>

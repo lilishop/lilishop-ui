@@ -718,6 +718,9 @@ export default {
       });
     },
   },
+  mounted () {
+     this.init();
+  },
   activated () {
     this.init();
   },
