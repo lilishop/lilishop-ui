@@ -9,9 +9,10 @@
         <img :src="storeMsg.storeLogo" height="50" alt="">
         <div>
           <p>{{storeMsg.storeName || 'xx店铺'}}</p>
-          <p>{{storeMsg.storeDesc || 'xx店铺描述'}}</p>
+          <p v-html="storeMsg.storeDesc"></p>
         </div>
         <div class="store-collect" @click="collect"><Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#fff'" />{{storeCollected?'已收藏店铺':'收藏店铺'}}</div>
+        <span class="hover-pointer ml_10" @click="connectCs(storeMsg.yzfSign)"><Icon custom="icomoon icon-customer-service"  />联系客服</span>
       </div>
     </div>
     <div  class="store-category">
@@ -204,7 +205,7 @@ export default {
   }
 }
 .store-collect{
-  margin-left: 20px!important;
+  margin-left: 750px!important;
   &:hover{
     cursor: pointer;
   }

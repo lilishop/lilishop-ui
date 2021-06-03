@@ -20,7 +20,6 @@
 
         <div class="goodsConfig mt_10">
           <span @click="collect" ><Icon type="ios-heart" :color="isCollected ? '#ed3f14' : '#666'" />{{isCollected?'已收藏':'收藏'}}</span>
-          <!-- <span>举报</span> -->
         </div>
       </div>
       <!-- 右侧商品信息、活动信息、操作展示 -->
@@ -60,7 +59,7 @@
                   :key="index"
                   @click="receiveCoupon(item.id)"
                   >
-                  <span v-if="item.couponType == 'PRICE'">满{{ item.consumeThreshold }}减{{item.price | unitPrice}}</span>
+                  <span v-if="item.couponType == 'PRICE'">满{{ item.consumeThreshold }}减{{item.price}}</span>
                   <span v-if="item.couponType == 'DISCOUNT'">满{{ item.consumeThreshold }}打{{item.couponDiscount}}折</span>
                   </span>
               </p>
@@ -126,32 +125,6 @@
           </div>
         </div>
       </div>
-
-      <!-- <div class="item-detail-see">
-        <Divider>更多推荐</Divider>
-        <Row>
-          <Col :span="24" class="see-Item">
-            <img class="see-Img" src="https://demo.dscmall.cn/storage/images/201703/thumb_img/0_thumb_G_1489099128797.jpg" alt="" />
-            <p>
-              名龙堂i7 6700升7700 GTX1060 6G台式电脑主机DIY游戏组装整机
-              升6GB独显 送正版WIN10 一年上门
-            </p>
-            <p class="global_color">￥2500.00</p>
-          </Col>
-          <Col :span="24" class="see-Item">
-            <img
-              class="see-Img"
-              src="https://demo.dscmall.cn/storage/images/201703/thumb_img/0_thumb_G_1489099128797.jpg"
-              alt=""
-            />
-            <p>
-              名龙堂i7 6700升7700 GTX1060 6G台式电脑主机DIY游戏组装整机
-              升6GB独显 送正版WIN10 一年上门
-            </p>
-            <p class="global_color">￥2500.00</p>
-          </Col>
-        </Row>
-      </div> -->
     </div>
   </div>
 </template>

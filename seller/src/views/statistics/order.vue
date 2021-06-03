@@ -52,7 +52,7 @@
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">付款笔数</div>
-                  <div class="card-item-value">{{overViewList.paymentsNum || 0}}</div>
+                  <div class="card-item-value">{{overViewList.paymentOrderNum || 0}}</div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">付款金额</div>
@@ -150,7 +150,6 @@
         </div>
         <div>
           <Table stripe :columns="columns" :data="data"></Table>
-
         </div>
         <Page @on-change="(index)=>{refundParams.pageNumber = index}" @on-page-size-change="(size)=>{refundParams.pageSize= size}" class="page" show-total show-elevator :total="total" />
 

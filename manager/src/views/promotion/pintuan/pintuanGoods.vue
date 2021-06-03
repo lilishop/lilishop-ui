@@ -10,10 +10,10 @@
       ></Table>
 
       <h4>商品信息</h4>
-      <Row class="operation">
         <Table
           :loading="loading"
           border
+          class="operation"
           :columns="goodsColumns"
           :data="goodsData"
           ref="table"
@@ -34,7 +34,6 @@
           </template>
         
         </Table>
-      </Row>
       <Row type="flex" justify="end" class="page operation">
         <Page
           :current="searchForm.pageNumber + 1"

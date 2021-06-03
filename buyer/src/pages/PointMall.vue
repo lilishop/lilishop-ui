@@ -4,7 +4,7 @@
     <Search></Search>
     <cateNav></cateNav>
     <ul class="category">
-      <li @click="selectCate(cate.id)" v-for="(cate, index) in cateList" :key="index">{{cate.name}}</li>
+      <li @click="selectCate(cate.id)" :class="{'selected-cate': cate.id === params.pointsGoodsCategoryId}" v-for="(cate, index) in cateList" :key="index">{{cate.name}}</li>
     </ul>
     <h3 class="promotion-decorate">积分商品</h3>
     <!-- 列表 -->
@@ -38,6 +38,13 @@
           <span>{{ item.storeName }}</span>
         </div>
       </div>
+    </div>
+    <div class="page-size">
+      <Page :total="total" @on-change="changePageNum"
+        @on-page-size-change="changePageSize"
+        :page-size="params.pageSize"
+        show-sizer>
+      </Page>
     </div>
     <BaseFooter></BaseFooter>
   </div>
@@ -79,11 +86,27 @@ export default {
         }
       })
     },
-    selectCate (id) {
+    selectCate (id) { // 选择商品分类
       this.params.pointsGoodsCategoryId = id
       this.getList()
       this.$router.push({query: {categoryId: id}})
-    }
+    },
+    goGoodsDetail (skuId, goodsId) { // 跳转商品详情
+      let routerUrl = this.$router.resolve({
+        path: '/goodsDetail',
+        query: {skuId, goodsId}
+      })
+      window.open(routerUrl.href, '_blank')
+    },
+    changePageNum (val) { // 修改页码
+      this.params.pageNumber = val;
+      this.getList()
+    },
+    changePageSize (val) { // 修改页数
+      this.pageNumber = 1;
+      this.params.pageSize = val;
+      this.getList()
+    },
   }
 }
 </script>
@@ -104,8 +127,19 @@ export default {
     margin: 0 10px;
     &:hover{
       cursor: pointer;
+      color: $theme_color;
     }
   }
+  .selected-cate{
+    color: $theme_color;
+  }
+  
+}
+.page-size {
+  width: 1200px;
+  margin: 10px auto;
+  display: flex;
+  justify-content: flex-end;
 }
 .promotion-decorate::before,.promotion-decorate::after{
   background-image: url('../../static/sprite@2x.png');

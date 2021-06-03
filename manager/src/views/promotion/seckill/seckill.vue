@@ -53,7 +53,7 @@
       <Row class="operation padding-row">
         <Button type="primary" @click="add">添加活动</Button>
       </Row>
-      <Row>
+
         <Table
           :loading="loading"
           border
@@ -112,7 +112,7 @@
             >
           </template>
         </Table>
-      </Row>
+
       <Row type="flex" justify="end" class="page">
         <Page
           :current="searchForm.pageNumber + 1"

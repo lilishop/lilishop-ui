@@ -246,22 +246,20 @@
             </Form>
           </Row>
           <div style="min-height: 180px">
-            <Row class="padding-row">
-              <Table
-                :loading="loading"
-                border
-                :columns="orderColumns"
-                :data="orderData"
-                ref="table"
-                sortable="custom"
-                @on-sort-change="orderChangeSort"
-              >
-                <!-- 订单详情格式化 -->
-                <template slot="orderSlot" slot-scope="scope">
-                  <a @click="$router.push({name: 'order-detail',query: {sn: scope.row.sn}})">{{scope.row.sn}}</a>
-                </template>
-              </Table>
-            </Row>
+            <Table
+              :loading="loading"
+              border
+              :columns="orderColumns"
+              :data="orderData"
+              ref="table"
+              sortable="custom"
+              @on-sort-change="orderChangeSort"
+            >
+              <!-- 订单详情格式化 -->
+              <template slot="orderSlot" slot-scope="scope">
+                <a @click="$router.push({name: 'order-detail',query: {sn: scope.row.sn}})">{{scope.row.sn}}</a>
+              </template>
+            </Table>
 
             <Row type="flex" justify="end" class="page" style="margin-top: 10px">
               <Page
@@ -349,44 +347,42 @@
             </Form>
           </Row>
           <div style="min-height: 180px">
-            <Row class="padding-row">
-              <Table
-                :loading="loading"
-                border
-                :columns="refundGoodsOrderColumns"
-                :data="refundGoodsOrderData"
-                ref="table"
-                sortable="custom"
-                @on-sort-change="refundGoodsOrderChangeSort"
-              >
-                <!-- 商品栏目格式化 -->
-                <template slot="goodsSlot" slot-scope="scope">
-                  <div style="margin-top: 5px;height: 80px; display: flex;">
-                    <div style="">
-                      <img :src="scope.row.goodsImage" style="height: 60px;margin-top: 3px">
-                    </div>
-
-                    <div style="margin-left: 13px;margin-top: 3px;">
-                      <div class="div-zoom">
-                        <a>{{scope.row.goodsName}}</a>
-                      </div>
-                    </div>
+            <Table
+              :loading="loading"
+              border
+              :columns="refundGoodsOrderColumns"
+              :data="refundGoodsOrderData"
+              ref="table"
+              sortable="custom"
+              @on-sort-change="refundGoodsOrderChangeSort"
+            >
+              <!-- 商品栏目格式化 -->
+              <template slot="goodsSlot" slot-scope="scope">
+                <div style="margin-top: 5px;height: 80px; display: flex;">
+                  <div style="">
+                    <img :src="scope.row.goodsImage" style="height: 60px;margin-top: 3px">
                   </div>
 
-                </template>
+                  <div style="margin-left: 13px;margin-top: 3px;">
+                    <div class="div-zoom">
+                      <a>{{scope.row.goodsName}}</a>
+                    </div>
+                  </div>
+                </div>
 
-                <!-- 订单详情格式化 -->
-                <template slot="orderSlot" slot-scope="scope">
-                  <a
-                    @click="$router.push({name: 'order-detail',query: {sn: scope.row.orderSn}})">{{scope.row.orderSn}}</a>
-                </template>
+              </template>
 
-                <!-- 售后单详情格式化 -->
-                <template slot="refundGoodsOrderSlot" slot-scope="scope">
-                  <a @click="$router.push({name: 'after-order-detail',query: {sn: scope.row.sn}})">{{scope.row.sn}}</a>
-                </template>
-              </Table>
-            </Row>
+              <!-- 订单详情格式化 -->
+              <template slot="orderSlot" slot-scope="scope">
+                <a
+                  @click="$router.push({name: 'order-detail',query: {sn: scope.row.orderSn}})">{{scope.row.orderSn}}</a>
+              </template>
+
+              <!-- 售后单详情格式化 -->
+              <template slot="refundGoodsOrderSlot" slot-scope="scope">
+                <a @click="$router.push({name: 'after-order-detail',query: {sn: scope.row.sn}})">{{scope.row.sn}}</a>
+              </template>
+            </Table>
 
             <Row type="flex" justify="end" class="page" style="margin-top: 10px">
               <Page
@@ -474,44 +470,42 @@
             </Form>
           </Row>
           <div style="min-height: 180px">
-            <Row class="padding-row">
-              <Table
-                :loading="loading"
-                border
-                :columns="refundGoodsOrderColumns"
-                :data="refundOrderData"
-                ref="table"
-                sortable="custom"
-                @on-sort-change="refundOrderChangeSort"
-              >
-                <!-- 商品栏目格式化 -->
-                <template slot="goodsSlot" slot-scope="scope">
-                  <div style="margin-top: 5px;height: 80px; display: flex;">
-                    <div style="">
-                      <img :src="scope.row.goodsImage" style="height: 60px;margin-top: 3px">
-                    </div>
-
-                    <div style="margin-left: 13px;margin-top: 3px;">
-                      <div class="div-zoom">
-                        <a>{{scope.row.goodsName}}</a>
-                      </div>
-                    </div>
+            <Table
+              :loading="loading"
+              border
+              :columns="refundGoodsOrderColumns"
+              :data="refundOrderData"
+              ref="table"
+              sortable="custom"
+              @on-sort-change="refundOrderChangeSort"
+            >
+              <!-- 商品栏目格式化 -->
+              <template slot="goodsSlot" slot-scope="scope">
+                <div style="margin-top: 5px;height: 80px; display: flex;">
+                  <div style="">
+                    <img :src="scope.row.goodsImage" style="height: 60px;margin-top: 3px">
                   </div>
 
-                </template>
+                  <div style="margin-left: 13px;margin-top: 3px;">
+                    <div class="div-zoom">
+                      <a>{{scope.row.goodsName}}</a>
+                    </div>
+                  </div>
+                </div>
 
-                <!-- 订单详情格式化 -->
-                <template slot="orderSlot" slot-scope="scope">
-                  <a
-                    @click="$router.push({name: 'order-detail',query: {sn: scope.row.orderSn}})">{{scope.row.orderSn}}</a>
-                </template>
+              </template>
 
-                <!-- 售后单详情格式化 -->
-                <template slot="refundGoodsOrderSlot" slot-scope="scope">
-                  <a @click="$router.push({name: 'after-order-detail',query: {sn: scope.row.sn}})">{{scope.row.sn}}</a>
-                </template>
-              </Table>
-            </Row>
+              <!-- 订单详情格式化 -->
+              <template slot="orderSlot" slot-scope="scope">
+                <a
+                  @click="$router.push({name: 'order-detail',query: {sn: scope.row.orderSn}})">{{scope.row.orderSn}}</a>
+              </template>
+
+              <!-- 售后单详情格式化 -->
+              <template slot="refundGoodsOrderSlot" slot-scope="scope">
+                <a @click="$router.push({name: 'after-order-detail',query: {sn: scope.row.sn}})">{{scope.row.sn}}</a>
+              </template>
+            </Table>
 
             <Row type="flex" justify="end" class="page" style="margin-top: 10px">
               <Page
@@ -597,6 +591,20 @@
             title: "来源",
             key: "clientType",
             width: 80,
+            render: (h, params) => {
+              if (params.row.clientType == "H5") {
+                return h("div",{},"移动端");
+              }else if(params.row.clientType == "PC") {
+                return h("div",{},"PC端");
+              }else if(params.row.clientType == "WECHAT_MP") {
+                return h("div",{},"小程序端");
+              }else if(params.row.clientType == "APP") {
+                return h("div",{},"移动应用端");
+              }
+              else{
+                return h("div",{},params.row.clientType);
+              }
+            },
           },
           {
             title: "订单状态",

@@ -51,16 +51,16 @@
             </DropdownMenu>
           </Dropdown>
         </li>
-        <li class="hover-color" @click="goUserCenter('/home/MyOrder')"><span class="nav-item">我的订单</span></li>
-        <li class="hover-color" @click="goUserCenter('/home/MyTracks')"><span class="nav-item">我的足迹</span></li>
-        <li v-if="$route.name !== 'Cart'" style="position:relative;" >
+        <li @click="goUserCenter('/home/MyOrder')"><span class="nav-item hover-color">我的订单</span></li>
+        <li @click="goUserCenter('/home/MyTracks')"><span class="nav-item hover-color">我的足迹</span></li>
+        <li @click="goUserCenter('/home/MsgList')"><span class="nav-item hover-color">我的消息</span></li>
+        <li v-if="$route.name !== 'Cart'" style="position:relative;">
           <i class="cart-badge" v-show="Number(cartNum)">{{cartNum < 100 ? cartNum : '99'}}</i>
           <Dropdown placement="bottom-start">
             <router-link to="cart" target="_blank" >
               <span @mouseenter="getCartList">
                 <Icon
                   size="18"
-                  class="cart-icon"
                   type="ios-cart-outline"
                 ></Icon>
                 购物车
@@ -260,12 +260,12 @@ export default {
   float: left;
   font-size: 14px;
   line-height: 35px;
-  margin-right: 15px;
+  margin-right: 10px;
   font-weight: bold;
 }
 .nav a,.nav-item {
   text-decoration: none;
-  padding-left: 15px;
+  padding-left: 10px;
   border-left: 1px solid #ccc;
   color: #999;
   cursor: pointer;
@@ -406,9 +406,7 @@ export default {
 .sign-out p {
   font-size: 12px;
 }
-.cart-icon{
-  padding: 0 6px;
-}
+
 .goods-title:hover {
   color: $theme_color;
 }

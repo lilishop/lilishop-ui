@@ -1,84 +1,78 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-        <Card>
-          <Row @keydown.enter.native="handleSearch">
-            <Form
-              ref="searchForm"
-              :model="searchForm"
-              inline
-              :label-width="70"
-              class="search-form"
+    <Card>
+      <Row @keydown.enter.native="handleSearch">
+        <Form
+          ref="searchForm"
+          :model="searchForm"
+          inline
+          :label-width="70"
+          class="search-form"
+        >
+          <Form-item label="会员名称" prop="memberName">
+            <Input
+              type="text"
+              v-model="searchForm.memberName"
+              placeholder="请输入会员名称"
+              clearable
+              style="width: 200px"
+            />
+          </Form-item>
+          <Form-item label="审核状态" prop="applyStatus">
+            <Select
+              v-model="searchForm.memberName"
+              clearable
+              style="width: 200px"
             >
-              <Form-item label="会员名称" prop="memberName">
-                <Input
-                  type="text"
-                  v-model="searchForm.memberName"
-                  placeholder="请输入会员名称"
-                  clearable
-                  style="width: 200px"
-                />
-              </Form-item>
-              <Form-item label="审核状态" prop="applyStatus">
-                <Select
-                  v-model="searchForm.memberName"
-                  clearable
-                  style="width: 200px"
-                >
-                  <Option value="APPLY">申请中</Option>
-                  <Option value="VIA_AUDITING">审核通过(提现成功)</Option>
-                  <Option value="FAIL_AUDITING">审核拒绝</Option>
-                </Select>
-              </Form-item>
-              <Form-item label="申请时间">
-                <DatePicker
-                  v-model="selectDate"
-                  type="datetimerange"
-                  format="yyyy-MM-dd HH:mm:ss"
-                  clearable
-                  @on-change="selectDateRange"
-                  placeholder="选择起始时间"
-                  style="width: 200px"
-                ></DatePicker>
-              </Form-item>
-              <Form-item style="margin-left: -35px" class="br">
-                <Button @click="handleSearch" type="primary" icon="ios-search"
-                >搜索
-                </Button
-                >
-              </Form-item>
-            </Form>
-          </Row>
-          <Row class="padding-row">
-            <Table
-              :loading="loading"
-              border
-              :columns="columns"
-              :data="data"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="changeSort"
-              @on-selection-change="changeSelect"
-            ></Table>
-          </Row>
-          <Row type="flex" justify="end" class="page">
-            <Page
-              :current="searchForm.pageNumber"
-              :total="total"
-              :page-size="searchForm.pageSize"
-              @on-change="changePage"
-              @on-page-size-change="changePageSize"
-              :page-size-opts="[10, 20, 50]"
-              size="small"
-              show-total
-              show-elevator
-              show-sizer
-            ></Page>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
+              <Option value="APPLY">申请中</Option>
+              <Option value="VIA_AUDITING">审核通过(提现成功)</Option>
+              <Option value="FAIL_AUDITING">审核拒绝</Option>
+            </Select>
+          </Form-item>
+          <Form-item label="申请时间">
+            <DatePicker
+              v-model="selectDate"
+              type="datetimerange"
+              format="yyyy-MM-dd HH:mm:ss"
+              clearable
+              @on-change="selectDateRange"
+              placeholder="选择起始时间"
+              style="width: 200px"
+            ></DatePicker>
+          </Form-item>
+          <Form-item style="margin-left: -35px" class="br">
+            <Button @click="handleSearch" type="primary" icon="ios-search"
+            >搜索
+            </Button
+            >
+          </Form-item>
+        </Form>
+      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        sortable="custom"
+        @on-sort-change="changeSort"
+        @on-selection-change="changeSelect"
+      ></Table>
+      <Row type="flex" justify="end" class="page">
+        <Page
+          :current="searchForm.pageNumber"
+          :total="total"
+          :page-size="searchForm.pageSize"
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+          :page-size-opts="[10, 20, 50]"
+          size="small"
+          show-total
+          show-elevator
+          show-sizer
+        ></Page>
+      </Row>
+    </Card>
     <Modal
       :title="modalTitle"
       v-model="roleModalVisible"

@@ -29,10 +29,10 @@
           <a class="select-clear" @click="clearSelectAll">清空</a>
         </Alert>
       </Row>
-      <Row class="operation">
         <Table
           :loading="loading"
           border
+          class="operation"
           :columns="goodsColumns"
           :data="goodsList"
           ref="table"
@@ -106,7 +106,6 @@
             >
           </template>
         </Table>
-      </Row>
       <Row type="flex" justify="end" class="page">
         <Page
           :current="searchForm.pageNumber + 1"

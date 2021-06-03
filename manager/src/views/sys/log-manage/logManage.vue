@@ -55,7 +55,6 @@
           </i-switch>
         </Alert>
       </Row>
-      <Row>
 
         <Table
           v-if="showDev"
@@ -78,8 +77,6 @@
         >
         </Table>
 
-
-      </Row>
       <Row type="flex" justify="end" class="page">
         <Page
           :current="searchForm.pageNumber"

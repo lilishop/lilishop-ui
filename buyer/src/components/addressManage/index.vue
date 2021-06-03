@@ -57,7 +57,7 @@ import {
 export default {
   name: 'addressManage',
   props: {
-    id: {
+    id: { // 传入的地址id
       defalut: '',
       type: String
     }
@@ -89,7 +89,7 @@ export default {
     };
   },
   methods: {
-    save () {
+    save () { // 保存地址
       this.$refs.form.validate((valid) => {
         if (valid) {
           const params = JSON.parse(JSON.stringify(this.formData));
@@ -138,15 +138,15 @@ export default {
       this.formData.lat = item.position.lat;
       this.formData.lon = item.position.lng;
     },
-    show () {
+    show () { // 地址模态框显示
       this.showAddr = true;
     },
-    hide () {
+    hide () { // 地址模态框隐藏
       this.showAddr = false;
     }
   },
   watch: {
-    id: {
+    id: { // 传入的地址id
       handler: function (v) {
         if (v) {
           this.getAddrById(v);

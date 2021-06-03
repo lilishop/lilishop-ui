@@ -5,19 +5,19 @@
         <div class="base-info-item">
           <h4>积分商品信息</h4>
           <div class="form-item-view">
-            <FormItem label="商品名称" prop="goodsName">
+            <FormItem label="商品名称">
               <div>{{ form.goodsSku.goodsName }}</div>
             </FormItem>
-            <FormItem label="SKU编码" prop="skuId">
+            <FormItem label="SKU编码">
               <div>{{ form.goodsSku.id }}</div>
             </FormItem>
-            <FormItem label="店铺名称" prop="sellerName">
-              <div>{{ form.goodsSku.sellerName }}</div>
+            <FormItem label="店铺名称">
+              <div>{{ form.goodsSku.storeName }}</div>
             </FormItem>
-            <FormItem label="商品价格" prop="goodsPrice">
+            <FormItem label="商品价格">
               <div>{{ form.goodsSku.price | unitPrice('￥') }}</div>
             </FormItem>
-            <FormItem label="库存" prop="quantity">
+            <FormItem label="库存">
               <div>{{ form.goodsSku.quantity }}</div>
             </FormItem>
             <FormItem label="结算价格" prop="settlementPrice">
@@ -90,9 +90,7 @@
             </FormItem>
           </div>
           <div class="footer">
-            <Button @click="closeCurrentPage" style="margin-right: 5px"
-              >返回</Button
-            >
+            <Button @click="closeCurrentPage" style="margin-right: 5px">返回</Button>
             <Button
               type="primary"
               :loading="submitLoading"

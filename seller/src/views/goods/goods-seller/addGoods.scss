@@ -222,14 +222,13 @@ div.base-info-item {
 
 /** 底部步骤 */
 .footer {
-  width: 88.7%;
+  width: 100%;
   padding: 10px;
   background-color: #ffc;
-  position: fixed;
+  position: sticky;
   bottom: 0px;
-  left: 10%;
   text-align: center;
-  z-index: 9999;
+  z-index: 9;
 }
 
 /*图片上传组件第一张图设置封面*/

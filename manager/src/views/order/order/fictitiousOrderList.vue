@@ -51,18 +51,16 @@
               <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
             </Form>
           </Row>
-          <Row class="padding-row">
-            <Table
-              :loading="loading"
-              border
-              :columns="columns"
-              :data="data"
-              ref="table"
-              sortable="custom"
-              @on-sort-change="changeSort"
-              @on-selection-change="changeSelect"
-            ></Table>
-          </Row>
+          <Table
+            :loading="loading"
+            border
+            :columns="columns"
+            :data="data"
+            ref="table"
+            sortable="custom"
+            @on-sort-change="changeSort"
+            @on-selection-change="changeSelect"
+          ></Table>
           <Row type="flex" justify="end" class="page">
             <Page
               :current="searchForm.pageNumber"
@@ -106,16 +104,6 @@
           orderStatus: ""
         },
         selectDate: null, // 下单时间
-        form: {
-          // 添加或编辑表单对象初始化数据
-          sn: "",
-          sellerName: "",
-          startTime: "",
-          endTime: "",
-          billPrice: "",
-        },
-        // 表单验证规则
-        formValidate: {},
         submitLoading: false, // 添加或编辑提交状态
         selectList: [], // 多选数据
         selectCount: 0, // 多选计数

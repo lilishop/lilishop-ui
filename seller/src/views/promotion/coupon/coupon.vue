@@ -55,36 +55,34 @@
         <Button @click="delAll" class="ml_10">批量下架</Button>
         <!-- <Button @click="upAll">批量上架</Button> -->
       </Row>
-      <Row class="padding-row">
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          ref="table"
-          sortable="custom"
-          @on-sort-change="changeSort"
-          @on-selection-change="changeSelect"
-        >
-          <template slot-scope="{ row }" slot="action">
-            <Button
-              v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'"
-              type="info"
-              size="small"
-              style="margin-right: 10px"
-              @click="edit(row)"
-              >编辑</Button
-            >
-            <Button
-              v-if="row.promotionStatus !== 'CLOSE'"
-              type="error"
-              size="small"
-              @click="remove(row)"
-              >下架</Button
-            >
-          </template>
-        </Table>
-      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        sortable="custom"
+        @on-sort-change="changeSort"
+        @on-selection-change="changeSelect"
+      >
+        <template slot-scope="{ row }" slot="action">
+          <Button
+            v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'"
+            type="info"
+            size="small"
+            style="margin-right: 10px"
+            @click="edit(row)"
+            >编辑</Button
+          >
+          <Button
+            v-if="row.promotionStatus !== 'CLOSE'"
+            type="error"
+            size="small"
+            @click="remove(row)"
+            >下架</Button
+          >
+        </template>
+      </Table>
       <Row type="flex" justify="end" class="page">
         <Page
           :current="searchForm.pageNumber + 1"

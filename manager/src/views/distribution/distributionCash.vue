@@ -1,35 +1,29 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-        <Card>
-          <Row @keydown.enter.native="handleSearch" >
-            <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-              <Input class="search-input" v-model="searchForm.memberName">
-                <span slot="prepend">会员名称</span>
-              </Input>
-              <Input class="search-input" v-model="searchForm.sn">
-                <span slot="prepend">编号</span>
-              </Input>
-              <Form-item label="状态" style="margin-left: -20px">
-                <Select v-model="searchForm.distributionCashStatus" style="width:150px;">
-                    <Option v-for="item in cashStatusList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                </Select>
-              </Form-item>
-              <Form-item style="margin-left:-35px;" class="br">
-                <Button @click="handleSearch" type="primary" icon="ios-search">搜索</Button>
-              </Form-item>
-            </Form>
-          </Row>
-          <Row class="padding-row">
-            <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
-          </Row>
-          <Row type="flex" justify="end" class="page padding-row">
-            <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator show-sizer></Page>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
+    <Card>
+      <Row @keydown.enter.native="handleSearch" >
+        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+          <Input class="search-input" v-model="searchForm.memberName">
+            <span slot="prepend">会员名称</span>
+          </Input>
+          <Input class="search-input" v-model="searchForm.sn">
+            <span slot="prepend">编号</span>
+          </Input>
+          <Form-item label="状态" style="margin-left: -20px">
+            <Select v-model="searchForm.distributionCashStatus" style="width:150px;">
+                <Option v-for="item in cashStatusList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+            </Select>
+          </Form-item>
+          <Form-item style="margin-left:-35px;" class="br">
+            <Button @click="handleSearch" type="primary" icon="ios-search">搜索</Button>
+          </Form-item>
+        </Form>
+      </Row>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+      <Row type="flex" justify="end" class="page padding-row">
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator show-sizer></Page>
+      </Row>
+    </Card>
     <Modal :title="modalTitle" v-model="modalVisible" :mask-closable='false' :width="500">
       <Form ref="form" :model="form" :label-width="100" :rules="formValidate" >
       <FormItem label="编号">

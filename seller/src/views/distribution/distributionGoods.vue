@@ -1,56 +1,50 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-        <Card>
-          <Row @keydown.enter.native="handleSearch">
-            <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-              <Form-item label="商品名称" prop="goodsName">
-                <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px"/>
-              </Form-item>
-              <!-- <Form-item label="店铺名称">
-                  <Select v-model="searchForm.shopId" placeholder="请选择" @on-query-change="searchChange" filterable clearable style="width: 200px">
-                      <Option v-for="item in shopList" :value="item.id" :key="item.id">{{ item.storeName }}</Option>
-                  </Select>
-              </Form-item> -->
-              <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-            </Form>
-          </Row>
-          <Row class="operation padding-row">
-            <Button @click="add" type="primary">添加</Button>
-          <!--  <Button @click="add" type="default">批量删除</Button>-->
-          </Row>
-          <Row>
-            <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
-              <!-- 商品栏目格式化 -->
-              <template slot="goodsSlot" slot-scope="{row}">
-                <div style="margin-top: 5px;height: 70px; display: flex;">
-                  <div style="">
-                    <img :src="row.thumbnail" style="height: 60px;margin-top: 3px;width: 60px">
-                  </div>
+    <Card>
+      <Row @keydown.enter.native="handleSearch">
+        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+          <Form-item label="商品名称" prop="goodsName">
+            <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px"/>
+          </Form-item>
+          <!-- <Form-item label="店铺名称">
+              <Select v-model="searchForm.shopId" placeholder="请选择" @on-query-change="searchChange" filterable clearable style="width: 200px">
+                  <Option v-for="item in shopList" :value="item.id" :key="item.id">{{ item.storeName }}</Option>
+              </Select>
+          </Form-item> -->
+          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+        </Form>
+      </Row>
+      <Row class="operation padding-row">
+        <Button @click="add" type="primary">添加</Button>
+      <!--  <Button @click="add" type="default">批量删除</Button>-->
+      </Row>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
+        <!-- 商品栏目格式化 -->
+        <template slot="goodsSlot" slot-scope="{row}">
+          <div style="margin-top: 5px;height: 70px; display: flex;">
+            <div style="">
+              <img :src="row.thumbnail" style="height: 60px;margin-top: 3px;width: 60px">
+            </div>
 
-                  <div style="margin-left: 13px;">
-                    <div class="div-zoom">
-                      <a @click="linkTo(row.id,row.skuId)">{{row.goodsName}}</a>
-                    </div>
-                    <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-                      <div slot="content">
-                        <vue-qr :text="wapLinkTo(row.id,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
-                      </div>
-                      <img src="../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
-                    </Poptip>
-                  </div>
+            <div style="margin-left: 13px;">
+              <div class="div-zoom">
+                <a @click="linkTo(row.id,row.skuId)">{{row.goodsName}}</a>
+              </div>
+              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+                <div slot="content">
+                  <vue-qr :text="wapLinkTo(row.id,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
                 </div>
+                <img src="../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
+              </Poptip>
+            </div>
+          </div>
 
-              </template>
-            </Table>
-          </Row>
-          <Row type="flex" justify="end" class="page">
-            <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator show-sizer></Page>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
+        </template>
+      </Table>
+      <Row type="flex" justify="end" class="page">
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator show-sizer></Page>
+      </Row>
+    </Card>
     <liliDialog
       ref="liliDialog"
       @selectedGoodsData="selectedGoodsData"

@@ -101,18 +101,16 @@
                 <a class="select-clear" @click="clearSelectAll">清空</a>
               </Alert>
             </Row>
-            <Row>
-              <Table
-                :loading="loading"
-                border
-                :columns="columns"
-                :data="data"
-                sortable="custom"
-                @on-sort-change="changeSort"
-                @on-selection-change="showSelect"
-                ref="memberTable"
-              ></Table>
-            </Row>
+            <Table
+              :loading="loading"
+              border
+              :columns="columns"
+              :data="data"
+              sortable="custom"
+              @on-sort-change="changeSort"
+              @on-selection-change="showSelect"
+              ref="memberTable"
+            ></Table>
             <Row type="flex" justify="end" class="page">
               <Page
                 :current="searchForm.pageNumber"
@@ -145,18 +143,16 @@
                 <a class="select-clear" @click="clearSelectAll">清空</a>
               </Alert>
             </Row>
-            <Row>
-              <Table
-                :loading="loading"
-                border
-                :columns="columns"
-                :data="data"
-                sortable="custom"
-                @on-sort-change="changeSort"
-                @on-selection-change="showSelect"
-                ref="shopTable"
-              ></Table>
-            </Row>
+            <Table
+              :loading="loading"
+              border
+              :columns="columns"
+              :data="data"
+              sortable="custom"
+              @on-sort-change="changeSort"
+              @on-selection-change="showSelect"
+              ref="shopTable"
+            ></Table>
             <Row type="flex" justify="end" class="page">
               <Page
                 :current="searchForm.pageNumber"
@@ -191,18 +187,16 @@
                 <a class="select-clear" @click="clearSelectAll">清空</a>
               </Alert>
             </Row>
-            <Row>
-              <Table
-                :loading="loading"
-                border
-                :columns="weChatColumns"
-                :data="weChatData"
-                sortable="custom"
-                @on-sort-change="changeSort"
-                @on-selection-change="showSelect"
-                ref="weChatTable"
-              ></Table>
-            </Row>
+            <Table
+              :loading="loading"
+              border
+              :columns="weChatColumns"
+              :data="weChatData"
+              sortable="custom"
+              @on-sort-change="changeSort"
+              @on-selection-change="showSelect"
+              ref="weChatTable"
+            ></Table>
             <Row type="flex" justify="end" class="page">
               <Page
                 :current="weChatSearchForm.pageNumber"
@@ -236,18 +230,16 @@
                 <a class="select-clear" @click="clearSelectAll">清空</a>
               </Alert>
             </Row>
-            <Row>
-              <Table
-                :loading="loading"
-                border
-                :columns="columns"
-                :data="data"
-                sortable="custom"
-                @on-sort-change="changeSort"
-                @on-selection-change="showSelect"
-                ref="otherTable"
-              ></Table>
-            </Row>
+            <Table
+              :loading="loading"
+              border
+              :columns="columns"
+              :data="data"
+              sortable="custom"
+              @on-sort-change="changeSort"
+              @on-selection-change="showSelect"
+              ref="otherTable"
+            ></Table>
             <Row type="flex" justify="end" class="page">
               <Page
                 :current="searchForm.pageNumber"
@@ -275,7 +267,7 @@
   import {
     getMessageData,
     editSmsMessageTemplate,
-    editNoticeMessageTemplate,
+    editNoticeMessage,
     wechatMessageSync,
     getWechatMessagePage,
     editWechatMessageTemplate,
@@ -600,7 +592,7 @@
       noticeFormDataEdit(){
         this.$refs['noticeFormData'].validate((valid) => {
           if (valid) {
-            editNoticeMessageTemplate(this.messageTemplateId,this.noticeFormData).then(res => {
+            editNoticeMessage(this.messageTemplateId,this.noticeFormData).then(res => {
               if(res.message === 'success') {
                 this.$Message.success('站内信修改成功');
                 this.noticeModal = false;

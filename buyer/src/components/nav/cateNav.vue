@@ -13,11 +13,12 @@
         </li>
       </ul>
     </div>
-    <!-- 侧边导航 -->
+    <!-- 全部商品分类 -->
     <div class="cate-list" v-show="showAlways || showFirstList" @mouseenter="showFirstList = true" @mouseleave="showFirstList = false">
-      <div class="nav-side">
+      <!-- 第一级分类 -->
+      <div class="nav-side" @mouseleave="panel = false">
         <ul>
-          <li v-for="(item, index) in cateList" :key="index" @mouseenter="showDetail(index)" @mouseleave="panel = false">
+          <li v-for="(item, index) in cateList" :key="index" @mouseenter="showDetail(index)" >
             <span class="nav-side-item" @click="goGoodsList(item.id)">{{item.name}}</span>
             <span v-for="(second, secIndex) in item.children" :key="secIndex">
               <span v-if="secIndex < 2" > / </span>
@@ -26,38 +27,35 @@
           </li>
         </ul>
       </div>
-      <transition name="fade">
-        <div
-          class="detail-item-panel"
-          :duration="{ enter: 100, leave: 100 }"
-          v-show="panel"
-          @mouseenter="panel = true"
-          ref="itemPanel1"
-          @mouseleave="panel = false"
-        >
-          <div class="nav-detail-item">
-            <template v-for="(item, index) in panelData">
-              <span @click="goGoodsList(item.id, item.parentId)" v-if="index < 8" :key="index">{{ item.name }}<Icon type="ios-arrow-forward" /></span>
-            </template>
-          </div>
-          <ul>
-            <li
-              v-for="(items, index) in panelData"
-              :key="index"
-              class="detail-item-row"
-            >
-              <span class="detail-item-title" @click="goGoodsList(items.id,items.parentId)">
-                {{ items.name }} <Icon type="ios-arrow-forward" />
-                <span class="glyphicon glyphicon-menu-right"></span>
-              </span>
-              <div>
-                <span v-for="(item, subIndex) in items.children" @click="goGoodsList(item.id,items.id,items.parentId)"
-                :key="subIndex" class="detail-item">{{ item.name }}</span>
-              </div>
-            </li>
-          </ul>
+      <!-- 展开分类 -->
+      <div
+        class="detail-item-panel"
+        v-show="panel"
+        @mouseenter="panel = true"
+        @mouseleave="panel = false"
+      >
+        <div class="nav-detail-item">
+          <template v-for="(item, index) in panelData">
+            <span @click="goGoodsList(item.id, item.parentId)" v-if="index < 8" :key="index">{{ item.name }}<Icon type="ios-arrow-forward" /></span>
+          </template>
         </div>
-      </transition>
+        <ul>
+          <li
+            v-for="(items, index) in panelData"
+            :key="index"
+            class="detail-item-row"
+          >
+            <span class="detail-item-title" @click="goGoodsList(items.id,items.parentId)">
+              {{ items.name }} <Icon type="ios-arrow-forward" />
+              <span class="glyphicon glyphicon-menu-right"></span>
+            </span>
+            <div>
+              <span v-for="(item, subIndex) in items.children" @click="goGoodsList(item.id,items.id,items.parentId)"
+              :key="subIndex" class="detail-item">{{ item.name }}</span>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -86,12 +84,12 @@ export default {
     }
   },
   computed: {
-    navList () {
+    navList () { // 导航列表
       return JSON.parse(storage.getItem('navList')) || []
     }
   },
   methods: {
-    getCate () {
+    getCate () { // 获取分类数据
       getCategory(0).then(res => {
         if (res.success) {
           this.cateList = res.result;
@@ -99,7 +97,7 @@ export default {
         }
       });
     },
-    showDetail (index) {
+    showDetail (index) { // 展示全部分类
       this.panel = true
       this.panelData = this.cateList[index].children
     },
@@ -244,9 +242,6 @@ export default {
 }
 .nav-detail-item span:hover {
   background-color: $theme_color;
-}
-.detail-item-panel ul {
-  list-style: none;
 }
 .detail-item-panel li {
   line-height: 30px;

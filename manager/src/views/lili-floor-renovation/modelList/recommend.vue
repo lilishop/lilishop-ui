@@ -241,7 +241,7 @@ export default {
     },
     handleSelectGoods(item) {
       // 调起选择商品
-      this.$refs.liliDialog.open("goods");
+      this.$refs.liliDialog.open('goods', 'single')
     },
     selectedLink(val) {
       this.selected.url = this.$options.filters.formatLinkType(val);

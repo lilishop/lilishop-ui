@@ -108,7 +108,10 @@ export default {
         },
         handleSelectGoods(item) { // 调起选择链接弹窗
             if(item) this.selected = item;
-            this.$refs.liliDialog.open('goods')
+            this.$refs.liliDialog.open('goods', 'single')
+            setTimeout(() => {
+                this.$refs.liliDialog.goodsData = [this.selected]
+            }, 500);
         },
         selectedLink(val) {
            this.selected.url = this.$options.filters.formatLinkType(val);

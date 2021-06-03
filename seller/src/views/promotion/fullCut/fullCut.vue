@@ -47,50 +47,48 @@
       <Row class="operation">
         <Button type="primary" @click="newAct">新增</Button>
       </Row>
-      <Row>
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          ref="table"
-          sortable="custom"
-        >
-          <template slot-scope="{ row }" slot="applyEndTime">
-            {{ unixDate(row.applyEndTime) }}
-          </template>
-          <template slot-scope="{ row }" slot="promotionType">
-            {{ row.isFullMinus ? "满减" : "满折" }}
-          </template>
-          <template slot-scope="{ row }" slot="hours">
-            <Tag v-for="item in unixHours(row.hours)" :key="item">{{
-              item
-            }}</Tag>
-          </template>
-          <template slot-scope="{ row }" slot="action">
-            <div>
-              <Button
-                type="primary"
-                v-if="row.promotionStatus == 'NEW'"
-                size="small"
-                @click="edit(row)"
-                >编辑</Button
-              >&nbsp;
-              <Button type="success" v-else size="small" @click="edit(row)"
-                >查看</Button
-              >&nbsp;
-              <Button
-                type="error"
-                :disabled="row.promotionStatus == 'START'"
-                ghost
-                size="small"
-                @click="del(row)"
-                >删除</Button
-              >
-            </div>
-          </template>
-        </Table>
-      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        sortable="custom"
+      >
+        <template slot-scope="{ row }" slot="applyEndTime">
+          {{ unixDate(row.applyEndTime) }}
+        </template>
+        <template slot-scope="{ row }" slot="promotionType">
+          {{ row.isFullMinus ? "满减" : "满折" }}
+        </template>
+        <template slot-scope="{ row }" slot="hours">
+          <Tag v-for="item in unixHours(row.hours)" :key="item">{{
+            item
+          }}</Tag>
+        </template>
+        <template slot-scope="{ row }" slot="action">
+          <div>
+            <Button
+              type="primary"
+              v-if="row.promotionStatus == 'NEW'"
+              size="small"
+              @click="edit(row)"
+              >编辑</Button
+            >&nbsp;
+            <Button type="success" v-else size="small" @click="edit(row)"
+              >查看</Button
+            >&nbsp;
+            <Button
+              type="error"
+              :disabled="row.promotionStatus == 'START'"
+              ghost
+              size="small"
+              @click="del(row)"
+              >删除</Button
+            >
+          </div>
+        </template>
+      </Table>
       <Row type="flex" justify="end" class="page operation">
         <Page
           :current="searchForm.pageNumber + 1"

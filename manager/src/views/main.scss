@@ -52,7 +52,7 @@
     box-sizing: border-box;
     position: fixed;
     display: block;
-    padding-left: 200px;
+    padding-left: 180px;
     width: 100%;
     height: 100px;
     z-index: 20;
@@ -256,12 +256,12 @@
   .single-page-con {
     min-width: 740px;
     position: relative;
-    left: 240px;
+    left: 180px;
     top: 100px;
     right: 0;
     bottom: 0;
     height: calc(100% - 110px);
-    width: calc(100% - 240px);
+    width: calc(100% - 180px);
     overflow: auto;
     background-color: #f0f0f0;
     z-index: 1;

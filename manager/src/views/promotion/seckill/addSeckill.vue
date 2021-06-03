@@ -148,11 +148,11 @@ export default {
         }
       });
     },
-    addPeriod() {
+    addPeriod() { // 添加时间段显示input
       this.addPeriodTime();
       this.showAddPeriod = true;
     },
-    addPeriodTime() {
+    addPeriodTime() { // 添加秒杀时间段
       this.showAddPeriod = false;
       if (
         this.periodTime !== null &&
@@ -161,20 +161,10 @@ export default {
         this.form.seckillPeriod.push(this.periodTime);
       }
     },
-    removePeriodTime(event, name) {
+    removePeriodTime(event, name) { // 移除秒杀时间段
       this.form.seckillPeriod = this.form.seckillPeriod.filter((i) => i !== name);
     },
-    handleSelectLink(item, index) {
-      // 调起选择链接弹窗
-      if (item) this.selectedNav = item;
-      this.$refs.liliDialog.open('link')
-    },
-    changeScope(val) {
-      if (val === "PORTION_GOODS") {
-        this.handleSelectLink();
-      }
-    },
-    /** 保存平台优惠券 */
+    /** 添加秒杀活动 */
     handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {

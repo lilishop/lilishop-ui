@@ -11,7 +11,7 @@
       <shrinkable-menu></shrinkable-menu>
     </div>
     <!-- 顶部标题栏主体 -->
-    <div class="main-header-con" style="padding-left:240px">
+    <div class="main-header-con">
       <div class="main-header">
         <div :class="{'header-avator-con':navType!=4, 'header-avator-con nav4':navType == 4}">
           <!-- 用户头像 -->

@@ -1,17 +1,13 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
       <Card>
         <Tabs value="LIST" @on-click="paneChange">
           <TabPane label="发送任务列表" name="LIST">
             <Row class="operation" style="margin-bottom: 10px">
               <Button @click="sendBatchSmsModal" type="primary">发送短信</Button>
             </Row>
-            <Row>
-              <Table :loading="loading" border :columns="smsColumns" :data="smsData" ref="table" sortable="custom" @on-sort-change="templateChangeSort">
-              </Table>
-            </Row>
+            <Table :loading="loading" border :columns="smsColumns" :data="smsData" ref="table" sortable="custom" @on-sort-change="templateChangeSort">
+            </Table>
 
             <Row type="flex" justify="end" class="page">
               <Page :current="smsSearchForm.pageNumber" :total="smsTotal" :page-size="smsSearchForm.pageSize" @on-change="smsChangePage" @on-page-size-change="smsChangePageSize"
@@ -23,10 +19,8 @@
               <Button @click="addTemplate" type="primary">添加短信模板</Button>
               <Button @click="syncTemplate" type="info">同步</Button>
             </Row>
-            <Row>
-              <Table :loading="loading" border :columns="templateColumns" :data="templateData" ref="table" sortable="custom" @on-sort-change="smsChangeSort">
-              </Table>
-            </Row>
+            <Table :loading="loading" border :columns="templateColumns" :data="templateData" ref="table" sortable="custom" @on-sort-change="smsChangeSort">
+            </Table>
             <Row type="flex" justify="end" class="page">
               <Page :current="templateSearchForm.pageNumber" :total="templateTotal" :page-size="templateSearchForm.pageSize" @on-change="templateChangePage"
                 @on-page-size-change="templateChangePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator show-sizer></Page>
@@ -37,36 +31,30 @@
               <Button @click="addSign" type="primary">添加短信签名</Button>
               <Button @click="syncSign" type="info">同步</Button>
             </Row>
-            <Row>
-              <Table :loading="loading" border :columns="signColumns" :data="signData" ref="table" sortable="custom" @on-sort-change="signChangeSort">
-                <template slot="signStatus" slot-scope="scope">
-                  <div v-if="scope.row.signStatus ==2 ">
-                    审核拒绝
-                    <Poptip trigger="hover" :content=scope.row.reason placement="top-start" transfer>
-                      <span style="color: #ed3f14">【原因】</span>
-                    </Poptip>
-                  </div>
-                  <div v-if="scope.row.signStatus ==0 ">
-                    审核中
-                  </div>
-                  <div v-if="scope.row.signStatus ==1 ">
-                    审核通过
-                  </div>
+            <Table :loading="loading" border :columns="signColumns" :data="signData" ref="table" sortable="custom" @on-sort-change="signChangeSort">
+              <template slot="signStatus" slot-scope="scope">
+                <div v-if="scope.row.signStatus ==2 ">
+                  审核拒绝
+                  <Poptip trigger="hover" :content=scope.row.reason placement="top-start" transfer>
+                    <span style="color: #ed3f14">【原因】</span>
+                  </Poptip>
+                </div>
+                <div v-if="scope.row.signStatus ==0 ">
+                  审核中
+                </div>
+                <div v-if="scope.row.signStatus ==1 ">
+                  审核通过
+                </div>
 
-                </template>
-              </Table>
-            </Row>
+              </template>
+            </Table>
             <Row type="flex" justify="end" class="page">
               <Page :current="signSearchForm.pageNumber" :total="signTotal" :page-size="signSearchForm.pageSize" @on-change="signChangePage" @on-page-size-change="signChangePageSize"
                 :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator show-sizer></Page>
             </Row>
-
           </TabPane>
         </Tabs>
-
       </Card>
-      </Col>
-    </Row>
     <Modal :title="templateModalTitle" v-model="templateModalVisible" :mask-closable="false" :width="500">
       <Form ref="templateForm" :model="templateForm" :label-width="100" :rules="templateFormValidate">
         <FormItem label="模板名称" prop="templateName">

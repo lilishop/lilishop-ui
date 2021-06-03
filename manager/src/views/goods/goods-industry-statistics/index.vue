@@ -70,7 +70,6 @@
     <Tabs v-model="orderStatus" @on-click="handleClickType">
       <TabPane label="行业订单数量" name="NUM">
         <Table :columns="columns" :data="data"></Table>
-
       </TabPane>
       <TabPane label="行业订单金额" name="PRICE">
         <Table :columns="columns" :data="data"></Table>
