@@ -225,7 +225,7 @@
       },
       getDataList() {
         this.loading = true;
-        this.searchForm.billStatus = "OUT"
+        this.searchForm.billStatus = "CHECK"
         API_Shop.getBillPage(this.searchForm).then((res) => {
           this.loading = false;
           if (res.success) {

@@ -172,14 +172,22 @@
         </div>
       </div>
     </div>
+
+    <!-- chart -->
+    <div class="card transform">
+      <div>
+        <h4>最近48小时在线人数（整点为准）</h4>
+        <div id="historyMemberChart"></div>
+      </div>
+    </div>
     <!-- chart -->
     <div class="charts  flex">
       <div class="chart-item">
-        <h4>流量统计</h4>
+        <h4>流量走势</h4>
         <div id="pvChart"></div>
       </div>
       <div class="chart-item">
-        <h4>交易统计</h4>
+        <h4>交易趋势</h4>
         <div id="orderChart"></div>
       </div>
     </div>
@@ -279,6 +287,7 @@ export default {
       homeData: "", // 首页数据
       pvChart: "", // 流量统计
       orderChart: "", // 订单统计
+      historyMemberChart: "", // 最近会员流量统计
       params: { // 请求参数
         searchType: "LAST_SEVEN",
       },
@@ -308,13 +317,13 @@ export default {
     },
     // top10热卖商品
     async toHotGoods() {
-      let res = await hotGoods();
+      let res = await hotGoods(this.params);
       res.success ? (this.topHotGoodsData = res.result) : "";
     },
 
     // top10热卖店铺
     async topHotShops() {
-      let res = await hotShops();
+      let res = await hotShops(this.params);
       res.success ? (this.topHotShopsData = res.result) : "";
     },
     // 今日待办
@@ -323,6 +332,7 @@ export default {
       res.success ? (this.awaitTodoData = res.result) : "";
     },
 
+    //首页统计数据
     async getHomeData() {
       let res = await homeStatistics();
       if (res.success) {
@@ -358,6 +368,7 @@ export default {
       }
     },
 
+
     initOrderChart() {
       // 默认已经加载 legend-filter 交互
       let data = this.chartList;
@@ -392,6 +403,9 @@ export default {
         });
       this.orderChart.render();
     },
+
+
+
 
     // 浏览量统计图
     initPvChart() {
@@ -465,8 +479,54 @@ export default {
           this.initPvChart();
         }
       });
-    },
+    }, // 实例化会员流量图表
+    async initHistoryMemberChartList() {
+      const res = await API_Member.historyMemberChartList();
+      if (res.success) {
+        this.chartList = res.result;
 
+        if (!this.historyMemberChart) {
+          this.historyMemberChart = new Chart({
+            container: "historyMemberChart",
+            autoFit: true,
+            height: 500,
+            padding: [70, 35, 70, 35],
+          });
+        }
+
+        this.initHistoryMemberChart();
+      }
+    },
+    initHistoryMemberChart(){
+      // 默认已经加载 legend-filter 交互
+      let data = this.chartList;
+
+      data.forEach((item) => {
+        item.title = "历史在线人数";
+      });
+      this.historyMemberChart.data(data);
+
+      console.error(data)
+      this.historyMemberChart.tooltip({
+        showCrosshairs: true,
+        shared: true,
+      });
+
+      this.historyMemberChart
+        .line()
+        .position("date*num")
+        .color("title",['#ffaa71'])
+        .shape("smooth")
+      ;
+
+      this.historyMemberChart
+        .point()
+        .position("date*num")
+        .color("title",['#ffaa71'])
+        .shape("circle")
+      ;
+      this.historyMemberChart.render();
+    },
     // 初始化信息
     init() {
       this.toHotGoods();
@@ -475,6 +535,7 @@ export default {
       this.getHomeData();
       this.getPvChart();
       this.initOrderChartList();
+      this.initHistoryMemberChartList();
     },
   },
   mounted() {

@@ -492,7 +492,20 @@
           {
             title: "来源",
             key: "clientType",
-            width: 80,
+            width: 80,render: (h, params) => {
+              if (params.row.clientType == "H5") {
+                return h("div",{},"移动端");
+              }else if(params.row.clientType == "PC") {
+                return h("div",{},"PC端");
+              }else if(params.row.clientType == "WECHAT_MP") {
+                return h("div",{},"小程序端");
+              }else if(params.row.clientType == "APP") {
+                return h("div",{},"移动应用端");
+              }
+              else{
+                return h("div",{},params.row.clientType);
+              }
+            },
           },
           {
             title: "订单状态",

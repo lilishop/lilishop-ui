@@ -267,7 +267,7 @@
   import {
     getMessageData,
     editSmsMessageTemplate,
-    editNoticeMessageTemplate,
+    editNoticeMessage,
     wechatMessageSync,
     getWechatMessagePage,
     editWechatMessageTemplate,
@@ -592,7 +592,7 @@
       noticeFormDataEdit(){
         this.$refs['noticeFormData'].validate((valid) => {
           if (valid) {
-            editNoticeMessageTemplate(this.messageTemplateId,this.noticeFormData).then(res => {
+            editNoticeMessage(this.messageTemplateId,this.noticeFormData).then(res => {
               if(res.message === 'success') {
                 this.$Message.success('站内信修改成功');
                 this.noticeModal = false;
