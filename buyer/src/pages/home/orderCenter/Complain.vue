@@ -78,7 +78,7 @@ export default {
     }
   },
   methods: {
-    getOrderDetail () {
+    getOrderDetail () { // 获取订单详情
       orderDetail(this.$route.query.sn).then(res => {
         this.order = res.result
         this.orderGoods = res.result.orderItems[this.$route.query.index]
@@ -92,7 +92,7 @@ export default {
         }
       })
     },
-    save () {
+    save () { // 提交投诉信息
       let params = {
         goodsId: this.orderGoods.goodsId,
         complainTopic: this.form.complainTopic,
@@ -108,26 +108,26 @@ export default {
         }
       })
     },
-    goGoodsDetail (skuId, goodsId) {
+    goGoodsDetail (skuId, goodsId) { // 跳转商品详情
       let routerUrl = this.$router.resolve({
         path: '/goodsDetail',
         query: {skuId, goodsId}
       })
       window.open(routerUrl.href, '_blank')
     },
-    handleView (name) {
+    handleView (name) { // 预览图片
       this.previewImage = name;
       this.visible = true;
     },
-    handleRemove (index) {
+    handleRemove (index) { // 移除图片
       this.orderGoods.uploadList.splice(index, 1)
       this.$forceUpdate()
     },
-    handleSuccess (res, file) {
+    handleSuccess (res, file) { // 上传成功回调
       this.orderGoods.uploadList.push(res.result)
       this.$forceUpdate()
     },
-    handleBeforeUpload () {
+    handleBeforeUpload () { // 上传之前钩子函数
       const check = this.orderGoods.uploadList.length < 6;
       if (!check) {
         this.$Notice.warning({

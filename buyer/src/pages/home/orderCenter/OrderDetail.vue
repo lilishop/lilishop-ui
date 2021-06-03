@@ -128,7 +128,7 @@ export default {
         }
       })
     },
-    traces () {
+    traces () { // 物流信息
       getTraces(this.$route.query.sn).then(res => {
         if (res.success) {
           this.logistics = res.result

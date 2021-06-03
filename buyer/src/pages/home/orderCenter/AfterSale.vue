@@ -133,7 +133,7 @@ export default {
       });
       window.open(routeUrl.href, '_blank');
     },
-    getList () {
+    getList () { // 获取售后列表
       this.spinShow = true;
       let params = JSON.parse(JSON.stringify(this.params))
       afterSaleList(params).then(res => {
@@ -144,11 +144,11 @@ export default {
         }
       });
     },
-    changePageNum (val) {
+    changePageNum (val) { // 修改页码
       this.params.pageNumber = val;
       this.getList()
     },
-    changePageSize (val) {
+    changePageSize (val) { // 修改页数
       this.pageNumber = 1;
       this.params.pageSize = val;
       this.getList()

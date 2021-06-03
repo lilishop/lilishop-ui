@@ -75,7 +75,7 @@ export default {
         }
       })
     },
-    getLog () {
+    getLog () { // 获取售后日志
       afterSaleLog(this.$route.query.sn).then(res => {
         this.logList = res.result;
       })
