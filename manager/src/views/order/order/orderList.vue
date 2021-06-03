@@ -60,6 +60,8 @@ export default {
     return {
 
       // 表格的表头以及内容
+
+
       fields:{
         "订单编号":"sn",
         "下单时间":"createTime",
