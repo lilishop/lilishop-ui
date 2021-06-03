@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "vue-json-excel": "^0.3.0"
+  }
+}

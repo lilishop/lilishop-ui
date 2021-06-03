@@ -296,6 +296,12 @@ export const otherRouter = {
       title: "短信签名",
       name: "add-sms-sign",
       component: () => import("@/views/sys/message/smsSign.vue")
+    },
+    {
+      path: "liveDetail",
+      title: "查看直播",
+      name: "liveDetail",
+      component: () => import("@/views/live/liveDetail.vue")
     }
   ]
 };
