@@ -25,13 +25,6 @@
 <script>
 export default {
   name: 'AccountBind',
-  data () {
-    return {}
-  },
-  mounted () {
-
-  },
-  methods: {}
 }
 </script>
 

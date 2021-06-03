@@ -61,7 +61,7 @@
       </p>
       <template v-if="!$route.query.id">
         <Divider>或选择商品模版</Divider>
-        <Select v-model="draftId" style="width: 200px">
+        <Select v-model="draftId" clearable style="width: 200px">
           <Option v-for="item in goodsTemplates" :value="item.id" :key="item.id"
           >{{ item.goodsName || item.id }}
           </Option>

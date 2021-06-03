@@ -139,7 +139,7 @@ export default {
         }, 1000);
       }
     },
-    goPromotion () {
+    goPromotion () { // 跳转秒杀页面
       let routeUrl = this.$router.resolve({
         path: '/seckill'
       });

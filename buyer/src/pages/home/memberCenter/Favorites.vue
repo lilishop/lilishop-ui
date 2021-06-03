@@ -68,19 +68,19 @@ export default {
     };
   },
   methods: {
-    getList () {
+    getList () { // 获取收藏列表
       this.spinShow = true
       collectList(this.params).then(res => {
         this.spinShow = false
         if (res.success) this.list = res.result.records;
       })
     },
-    change (index) {
+    change (index) { // tab栏切换
       if (index === 0) { this.params.type = 'GOODS' }
       if (index === 1) { this.params.type = 'SHOP' }
       this.getList()
     },
-    cancel (id) {
+    cancel (id) { // 取消收藏
       let typeName = this.params.type === 'GOODS' ? '商品' : '店铺'
       this.$Modal.confirm({
         title: 'Title',
@@ -94,23 +94,23 @@ export default {
         }
       });
     },
-    changePageNum (val) {
+    changePageNum (val) { // 修改页码
       this.params.pageNumber = val;
       this.getList()
     },
-    changePageSize (val) {
+    changePageSize (val) { // 修改页数
       this.pageNumber = 1;
       this.params.pageSize = val;
       this.getList()
     },
-    buynow (skuId, goodsId) {
+    buynow (skuId, goodsId) { // 跳转详情
       let url = this.$router.resolve({
         path: '/goodsDetail',
         query: {skuId, goodsId}
       })
       window.open(url.href, '_blank')
     },
-    goShop (id) {
+    goShop (id) { // 跳转店铺页面
       let url = this.$router.resolve({
         path: '/merchant',
         query: {id}
