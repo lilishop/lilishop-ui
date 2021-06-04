@@ -50,16 +50,27 @@
               <Input v-model="form.couponLimitNum" placeholder="领取限制" clearable style="width: 260px" />
             </FormItem>
             <FormItem label="有效期" prop="rangeTime">
-              <DatePicker
-                type="datetimerange"
-                v-model="form.rangeTime"
-                format="yyyy-MM-dd HH:mm:ss"
-                placeholder="请选择"
-                :options="options"
-                style="width: 260px"
-              >
-              </DatePicker>
+              <div v-if="form.getType == 'ACTIVITY'">
+                <RadioGroup v-model="rangeTimeType">
+
+                  <Radio :label="1">
+                    起止时间
+                  </Radio>
+                  <Radio :label="0">固定时间</Radio>
+
+                </RadioGroup>
+              </div>
+              <div v-if="rangeTimeType == 1">
+                <DatePicker type="datetimerange" v-model="form.rangeTime" format="yyyy-MM-dd HH:mm:ss" placeholder="请选择" :options="options" style="width: 260px">
+                </DatePicker>
+              </div>
+              <div class="effectiveDays" v-if="rangeTimeType == 0">
+                领取当天开始
+                <InputNumber v-model="form.effectiveDays" :min="1" style="width:100px;" :max="365" />
+                天内有效(1-365间的整数)
+              </div>
             </FormItem>
+
             <FormItem label="使用范围" prop="scopeType">
               <RadioGroup type="button" button-style="solid" v-model="form.scopeType">
                 <Radio label="ALL">全品类</Radio>
@@ -116,6 +127,16 @@ export default {
   components: {
     skuSelect,
   },
+  watch: {
+    "form.getType": {
+      handler(val) {
+        if (val == "FREE") {
+          this.rangeTimeType = 1;
+        }
+      },
+      deep: true,
+    },
+  },
   data() {
     const checkPrice = (rule, value, callback) => {
       if (!value && value !== 0) {
@@ -140,6 +161,7 @@ export default {
       }
     };
     return {
+      rangeTimeType: 1,
       modalType: 0, // 是否编辑
       form: {
         /** 店铺承担比例 */
@@ -154,9 +176,11 @@ export default {
         couponType: "PRICE",
         /** 优惠券名称 */
         couponName: "",
+        promotionName: "",
         getType: "FREE",
         promotionGoodsList: [],
         scopeIdGoods: [],
+        rangeDayType: "",
       },
       id: this.$route.query.id, // 优惠券id
       submitLoading: false, // 添加或编辑提交状态
@@ -314,13 +338,24 @@ export default {
       this.$refs.form.validate((valid) => {
         if (valid) {
           const params = JSON.parse(JSON.stringify(this.form));
-          params.startTime = this.$options.filters.unixToDate(
-            this.form.rangeTime[0] / 1000
-          );
-          params.endTime = this.$options.filters.unixToDate(
-            this.form.rangeTime[1] / 1000
-          );
-          delete params.rangeTime
+           // 判断当前活动类型
+          params.getType != "ACTIVITY" ? delete params.effectiveDays : "";
+
+          //判断当前时间类型
+          if (this.rangeTimeType == 1) {
+            params.rangeDayType = "FIXEDTIME";
+            params.startTime = this.$options.filters.unixToDate(
+              this.form.rangeTime[0] / 1000
+            );
+            params.endTime = this.$options.filters.unixToDate(
+              this.form.rangeTime[1] / 1000
+            );
+            delete params.effectiveDays;
+          } else {
+            params.rangeDayType = "DYNAMICTIME";
+            delete params.rangeTime;
+          }
+
           let scopeId = [];
 
           if (
@@ -392,12 +427,13 @@ export default {
       );
       this.$router.go(-1);
     },
-    openSkuList() { // 显示商品选择器
+    openSkuList() {
+      // 显示商品选择器
       this.$refs.skuSelect.open("goods");
-      let data = JSON.parse(JSON.stringify(this.form.promotionGoodsList))
-      data.forEach(e => {
-        e.id = e.skuId
-      })
+      let data = JSON.parse(JSON.stringify(this.form.promotionGoodsList));
+      data.forEach((e) => {
+        e.id = e.skuId;
+      });
       this.$refs.skuSelect.goodsData = data;
     },
     changeSelect(e) {
@@ -434,15 +470,15 @@ export default {
       // 回显已选商品
       let list = [];
       item.forEach((e) => {
-          list.push({
-            goodsName: e.goodsName,
-            price: e.price,
-            originalPrice: e.price,
-            quantity: e.quantity,
-            storeId: e.storeId,
-            storeName: e.storeName,
-            skuId: e.id,
-          });
+        list.push({
+          goodsName: e.goodsName,
+          price: e.price,
+          originalPrice: e.price,
+          quantity: e.quantity,
+          storeId: e.storeId,
+          storeName: e.storeName,
+          skuId: e.id,
+        });
       });
       this.form.promotionGoodsList = list;
     },
@@ -526,6 +562,13 @@ h4 {
   font-size: 12px;
   margin-left: 10px;
   color: #999;
+}
+.effectiveDays {
+  font-size: 12px;
+  color: #999;
+  > * {
+    margin: 0 4px;
+  }
 }
 </style>
 

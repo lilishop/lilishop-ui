@@ -4,21 +4,10 @@
       <Row>
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
           <Form-item label="活动名称" prop="couponName">
-            <Input
-              type="text"
-              v-model="searchForm.couponName"
-              placeholder="请输入活动名称"
-              clearable
-              style="width: 200px"
-            />
+            <Input type="text" v-model="searchForm.couponName" placeholder="请输入活动名称" clearable style="width: 200px" />
           </Form-item>
           <Form-item label="活动状态" prop="promotionStatus">
-            <Select
-              v-model="searchForm.promotionStatus"
-              placeholder="请选择"
-              clearable
-              style="width: 200px"
-            >
+            <Select v-model="searchForm.promotionStatus" placeholder="请选择" clearable style="width: 200px">
               <Option value="NEW">未开始</Option>
               <Option value="START">已开始/上架</Option>
               <Option value="END">已结束/下架</Option>
@@ -26,66 +15,30 @@
             </Select>
           </Form-item>
           <Form-item label="活动时间">
-            <DatePicker
-              v-model="selectDate"
-              type="daterange"
-              clearable
-              placeholder="选择起始时间"
-              style="width: 200px"
-            ></DatePicker>
+            <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 200px"></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
       </Row>
       <Row class="operation padding-row">
-        <Button @click="add" type="primary">添加</Button>
+        <Button @click="add" type="primary">添加优惠券</Button>
+        <Button @click="()=>{$router.push({path:'/promotion/add-coupon-specify'})}">精准发劵</Button>
         <Button @click="delAll">批量下架</Button>
         <!-- <Button @click="upAll" >批量上架</Button> -->
       </Row>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
-      >
-        <template slot-scope="{ row }" slot="action">
-          <Button
-            v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'"
-            type="primary"
-            size="small"
-            style="margin-right: 10px"
-            @click="edit(row)"
-          >编辑
-          </Button
-          >
-          <Button
-            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
-            type="error"
-            size="small"
-            style="margin-right: 10px"
-            @click="remove(row)"
-          >下架
-          </Button
-          >
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
+        <template slot-scope="{ row,index }" slot="action">
+          <Button v-if="!checked && row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="primary" size="small" style="margin-right: 10px" @click="edit(row)">编辑
+          </Button>
+          <Button v-if="!checked && row.promotionStatus === 'START' || row.promotionStatus === 'NEW'" type="error" size="small" style="margin-right: 10px" @click="remove(row)">下架
+          </Button>
+          <Button v-if="checked" :type="row.___selected ?'primary': '' "   @click="check(row,index)">{{row.___selected ?'已':''}}选中
+          </Button>
         </template>
       </Table>
       <Row type="flex" justify="end" class="page">
-        <Page
-          :current="searchForm.pageNumber + 1"
-          :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
-          size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
+        <Page :current="searchForm.pageNumber + 1" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
+          size="small" show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
   </div>
@@ -94,7 +47,6 @@
 <script>
 import {
   getPlatformCouponList,
-  deletePlatformCoupon,
   updatePlatformCouponStatus,
 } from "@/api/promotion";
 
@@ -121,7 +73,7 @@ export default {
       // 表单验证规则
       formValidate: {
         promotionName: [
-          {required: true, message: "不能为空", trigger: "blur"},
+          { required: true, message: "不能为空", trigger: "blur" },
         ],
       },
       submitLoading: false, // 添加或编辑提交状态
@@ -138,15 +90,16 @@ export default {
         {
           title: "活动名称",
           key: "promotionName",
-          minWidth: 120,
+
           fixed: "left",
         },
         {
           title: "优惠券名称",
           key: "couponName",
-          minWidth: 120,
-          tooltip: true
-        }, {
+
+          tooltip: true,
+        },
+        {
           title: "面额/折扣",
           key: "price",
           width: 120,
@@ -165,10 +118,13 @@ export default {
         {
           title: "领取数量/总数量",
           key: "publishNum",
+          width: 150,
           render: (h, params) => {
             return h(
-              "div", params.row.receivedNum + "/" + params.row.publishNum)
-          }
+              "div",
+              params.row.receivedNum + "/" + params.row.publishNum
+            );
+          },
         },
         {
           title: "优惠券类型",
@@ -204,20 +160,23 @@ export default {
         },
         {
           title: "活动时间",
+          width: 120,
           render: (h, params) => {
             return h("div", {
-              domProps:
-                {innerHTML: params.row.startTime + "<br/>" + params.row.endTime}
+              domProps: {
+                innerHTML: params.row.startTime + "<br/>" + params.row.endTime,
+              },
             });
           },
         },
         {
           title: "状态",
+          width: 100,
           key: "promotionStatus",
           fixed: "right",
           render: (h, params) => {
             let text = "未知",
-              color = "";
+              color = "red";
             if (params.row.promotionStatus == "NEW") {
               text = "未开始";
               color = "default";
@@ -249,12 +208,19 @@ export default {
           slot: "action",
           align: "center",
           fixed: "right",
-          width: 80
+          width: 100,
         },
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
     };
+  },
+  props: {
+    // 是否为选中模式
+    checked: {
+      type: Boolean,
+      default: false,
+    },
   },
   watch: {
     $route(to, from) {
@@ -264,18 +230,25 @@ export default {
     },
   },
   methods: {
+    // 选中优惠券 父级传值
+    check(val,index) {
+
+      this.data[index].___selected = !this.data[index].___selected
+
+      this.$emit("selected", val);
+    },
     init() {
       this.getDataList();
     },
     add() {
-      this.$router.push({name: "add-platform-coupon"});
+      this.$router.push({ name: "add-platform-coupon" });
     },
     /** 跳转至领取详情页面 */
     receiveInfo(v) {
-      this.$router.push({name: "member-receive-coupon", query: {id: v.id}});
+      this.$router.push({ name: "member-receive-coupon", query: { id: v.id } });
     },
     info(v) {
-      this.$router.push({name: "platform-coupon-info", query: {id: v.id}});
+      this.$router.push({ name: "platform-coupon-info", query: { id: v.id } });
     },
     changePage(v) {
       this.searchForm.pageNumber = v - 1;
@@ -319,6 +292,9 @@ export default {
       getPlatformCouponList(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
+          res.result.records.forEach(item=>{
+            item.___selected = false
+          })
           this.data = res.result.records;
           this.total = res.result.total;
         }
@@ -360,7 +336,7 @@ export default {
       });
     },
     edit(v) {
-      this.$router.push({name: "edit-platform-coupon", query: {id: v.id}});
+      this.$router.push({ name: "edit-platform-coupon", query: { id: v.id } });
     },
     remove(v) {
       this.$Modal.confirm({
@@ -370,7 +346,10 @@ export default {
         loading: true,
         onOk: () => {
           // 删除
-          updatePlatformCouponStatus({couponIds: v.id, promotionStatus: "CLOSE"})
+          updatePlatformCouponStatus({
+            couponIds: v.id,
+            promotionStatus: "CLOSE",
+          })
             .then((res) => {
               this.$Modal.remove();
               if (res.success) {

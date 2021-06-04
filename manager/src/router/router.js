@@ -225,6 +225,12 @@ export const otherRouter = {
       component: () => import("@/views/promotion/coupon/couponPublish.vue")
     },
     {
+      path: "promotion/add-coupon-specify",
+      title: "精准发劵",
+      name: "add-coupon-specify",
+      component: () => import("@/views/promotion/coupon/couponSpecify.vue")
+    },
+    {
       path: "promotion/edit-platform-coupon",
       title: "编辑平台优惠券",
       name: "edit-platform-coupon",

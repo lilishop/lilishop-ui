@@ -8,7 +8,7 @@
           <div class="full-shadow" v-if="type == 'full'">
             <img :src="advertising[0].img" alt="" />
           </div>
-         
+
         </div>
       </div>
     </div>
@@ -16,7 +16,7 @@
       <div class="decorate">
         <div class="decorate-title">全屏广告</div>
 
-       
+
 
         <div class="decorate-list">
           <div
@@ -79,11 +79,11 @@
   </div>
 </template>
 <script>
-import { btnWay } from "./btn.js";
+
 export default {
   data() {
     return {
-      btnWay, // 按钮类型
+
       type: "full", // 是否全屏
 
       //全屏广告
@@ -100,21 +100,16 @@ export default {
   },
   methods: {},
   mounted() {
-    console.log(this.btnWay);
+
   },
   methods: {
-  
+
     // 点击链接
     clickLink(item) {
       this.$refs.liliDialog.open('link')
     },
 
-    // 关闭
-    closeDecorate(index) {
-      this.$nextTick(() => {
-        this.btnWay.splice(index, 1);
-      });
-    },
+
     //点击图片解析成base64
     changeFile(item, index) {
       const file = document.getElementById("files" + index).files[0];

@@ -17,6 +17,12 @@ export const whetherStar = params => {
   return getRequest(`/broadcast/studio/id/${params.id}&recommend=${params.recommend}`);
 };
 
+// 添加优惠券活动
+export const addCouponActivity = params => {
+  return postRequest(`/promotion/couponActivity/addCouponActivity`,params);
+};
+
+
 // 获取店铺直播间列表
 export const getLiveList = params => {
   return getRequest("/broadcast/studio", params);

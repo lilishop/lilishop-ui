@@ -63,7 +63,7 @@
           <template slot-scope="{ row,index }" slot="action">
             <Button v-if="params.auditStatus == 99" type="primary" @click="()=>{liveGoodsData.splice(index,1)}">删除</Button>
             <Button v-if="params.auditStatus != 99 && !reviewed" ghost type="primary" @click="()=>{$router.push({path:'/goods-operation-edit',query:{id:row.goodsId}})}">查看</Button>
-            <Button v-if="reviewed" :type="row.__selected ? 'primary' : ''" @click="selectedLiveGoods(row,index)">{{row.__selected ? '已':''}}选择</Button>
+            <Button v-if="reviewed" :type="row.___selected ? 'primary' : ''" @click="selectedLiveGoods(row,index)">{{row.___selected ? '已':''}}选择</Button>
           </template>
         </Table>
         <div class="flex">
@@ -181,7 +181,7 @@ export default {
             this.liveGoodsData.forEach((item, index) => {
               val.forEach((callback) => {
                 if (item.id == callback.id) {
-                  this.$set(this.liveGoodsData[index], "__selected", true);
+                  this.$set(this.liveGoodsData[index], "___selected", true);
                   // this.selectedGoods.push(item);
                 }
               });
@@ -208,15 +208,15 @@ export default {
      * 回调参数补充
      */
     selectedLiveGoods(val, index) {
-      if (!val.__selected) {
-        val.__selected = true;
-        this.$set(this.liveGoodsData[index], "__selected", true);
+      if (!val.___selected) {
+        val.___selected = true;
+        this.$set(this.liveGoodsData[index], "___selected", true);
         this.selectedGoods.push(this.liveGoodsData[index]);
       } else {
         this.$nextTick(() => {
-          val.__selected = false;
+          val.___selected = false;
 
-          this.$set(this.liveGoodsData[index], "__selected", true);
+          this.$set(this.liveGoodsData[index], "___selected", true);
           this.selectedGoods.splice(index, 1);
         });
       }

@@ -67,11 +67,7 @@ export default {
           name: "index",
           selected: true,
         },
-        {
-          title: "悬浮按钮",
-          name: "btn",
-          selected: false,
-        },
+
         {
           title: "全屏广告",
           name: "advertising",
