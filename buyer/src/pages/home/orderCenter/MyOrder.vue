@@ -240,7 +240,7 @@ export default {
     complainResult (sn) { // 投诉结果
 
     },
-    delOrder (sn) {
+    delOrder (sn) { // 删除订单
       this.$Modal.confirm({
         title: '删除订单',
         content: '<p>确认删除当前订单吗？</p>',
@@ -255,7 +255,7 @@ export default {
         onCancel: () => {}
       });
     },
-    getList () {
+    getList () { // 获取订单列表
       this.spinShow = true;
       let params = JSON.parse(JSON.stringify(this.params))
       if (params.orderStatus === 'ALL') {
@@ -269,11 +269,11 @@ export default {
         }
       });
     },
-    changePageNum (val) {
+    changePageNum (val) { // 修改页码
       this.params.pageNumber = val;
       this.getList()
     },
-    changePageSize (val) {
+    changePageSize (val) { // 修改页数
       this.pageNumber = 1;
       this.params.pageSize = val;
       this.getList()
@@ -289,7 +289,7 @@ export default {
         }
       })
     },
-    sureCancel () {
+    sureCancel () { // 确定取消
       cancelOrder(this.cancelParams).then(res => {
         if (res.success) {
           this.$Message.success('取消订单成功')

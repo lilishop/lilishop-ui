@@ -209,7 +209,7 @@ export default {
       },
       deep: true
     },
-    '$route': {
+    '$route': { // 监听路由
       handler (val, oVal) {
         if (this.$route.query.categoryId) {
           let cateId = this.$route.query.categoryId.split(',')
@@ -373,6 +373,7 @@ export default {
     }
   },
   mounted () {
+    // 有分类id就根据id搜索
     if (this.$route.query.categoryId) {
       let cateId = this.$route.query.categoryId.split(',')
       Object.assign(this.params, this.$route.query)

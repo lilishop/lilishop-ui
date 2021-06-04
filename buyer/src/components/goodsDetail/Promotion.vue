@@ -19,7 +19,7 @@ export default {
     time: { // 传入的初始时间
       default: 1718977559428
     },
-    type: {
+    type: { // 区分是在详情还是购物车调用
       default: 'goodsDetail', // 设置两个值，goodsDetail和cart，样式不同
       type: String
     }
@@ -37,7 +37,7 @@ export default {
     this.init()
   },
   methods: {
-    countDown (val) {
+    countDown (val) { // 倒计时方法
       function addZero (i) {
         return i < 10 ? '0' + i : i + '';
       }
@@ -58,8 +58,8 @@ export default {
         clearInterval(this.interval)
       }
     },
-    init () {
-      this.interval = setInterval((item) => {
+    init () { // 初始化
+      this.interval = setInterval(() => {
         this.countDown(this.time);
       }, 1000);
     }

@@ -63,7 +63,8 @@ export default {
         pageNumber: 1,
         pageSize: 20,
         pointsGoodsCategoryId: ''
-      }
+      },
+      total: 0 // 商品总数
     }
   },
   mounted () {
@@ -76,6 +77,7 @@ export default {
       pointGoods(this.params).then(res => {
         if (res.success) {
           this.goodsList = res.result.records
+          this.total = res.result.total
         }
       })
     },
@@ -94,7 +96,7 @@ export default {
     goGoodsDetail (skuId, goodsId) { // 跳转商品详情
       let routerUrl = this.$router.resolve({
         path: '/goodsDetail',
-        query: {skuId, goodsId}
+        query: {skuId, goodsId, way: 'POINT'}
       })
       window.open(routerUrl.href, '_blank')
     },

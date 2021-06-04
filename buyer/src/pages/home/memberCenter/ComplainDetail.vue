@@ -141,23 +141,23 @@ export default {
     }
   },
   methods: {
-    getDetail () {
+    getDetail () { // 获取投诉详情
       getComplainDetail(this.$route.query.id).then(res => {
         if (res.success) this.detail = res.result
       })
     },
-    goGoodsDetail (skuId, goodsId) {
+    goGoodsDetail (skuId, goodsId) { // 跳转商品详情
       let routerUrl = this.$router.resolve({
         path: '/goodsDetail',
         query: {skuId, goodsId}
       })
       window.open(routerUrl.href, '_blank')
     },
-    handleView (name) {
+    handleView (name) { // 预览图片
       this.previewImage = name;
       this.visible = true;
     },
-    // 回复
+    // 回复消息
     handleSubmit () {
       if (this.params.content === '') {
         this.$Message.error('请填写对话内容');

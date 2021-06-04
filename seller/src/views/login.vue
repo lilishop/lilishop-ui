@@ -55,6 +55,13 @@
 
         </Row>
         <Footer />
+        <!-- 拼图验证码 -->
+        <verify
+          ref="verify"
+          class="verify-con"
+          verifyType="LOGIN"
+          @change="verifyChange"
+        ></verify>
       </Col>
       <!-- <LangSwitch /> -->
     </Row>
@@ -72,11 +79,13 @@ import Header from "@/views/main-components/header";
 import Footer from "@/views/main-components/footer";
 import LangSwitch from "@/views/main-components/lang-switch";
 import util from "@/libs/util.js";
+import verify from '@/views/my-components/verify';
 export default {
   components: {
     LangSwitch,
     Header,
     Footer,
+    verify
   },
   data() {
     return {
@@ -154,23 +163,27 @@ export default {
         }
       });
     },
-    submitLogin() {
-      // 正常逻辑
+    submitLogin() { // 登录提交
       this.$refs.usernameLoginForm.validate((valid) => {
         if (valid) {
-          this.loading = true;
-          login({
-            username: this.form.username,
-            password: this.md5(this.form.password),
-          }).then((res) => {
-            this.loading = false;
-            if (res && res.success) {
-              this.afterLogin(res);
-            }
-          }).catch(()=>{this.loading = false})
+          this.$refs.verify.show = true;
         }
       })
     },
+    verifyChange (con) { // 拼图验证码回显
+      if (!con.status) return;
+      
+      this.loading = true;
+      login({
+        username: this.form.username,
+        password: this.md5(this.form.password),
+      }).then((res) => {
+        this.loading = false;
+        if (res && res.success) {
+          this.afterLogin(res);
+        }
+      }).catch(()=>{this.loading = false})
+    }
   }
 };
 </script>
@@ -202,6 +215,12 @@ export default {
   /deep/ .ivu-row{
     display: flex;
     flex-direction: column !important;
+  }
+  .verify-con{
+    position: absolute;
+    top: 126px;
+    z-index: 10;
+    left: 20px;
   }
   .form {
     padding-top: 1vh;

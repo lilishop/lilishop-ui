@@ -24,6 +24,8 @@ service.interceptors.request.use(
         ...config.params
       }
     }
+    const uuid = getStore('uuid');
+    config.headers['uuid'] = uuid;
     return config;
   },
   err => {

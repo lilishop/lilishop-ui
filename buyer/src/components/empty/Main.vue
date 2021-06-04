@@ -13,11 +13,6 @@
 <script>
 export default {
   name: 'Main',
-  data () {
-    return {
-
-    };
-  },
   props: {
     _Title: { // 描述内容
       type: null,

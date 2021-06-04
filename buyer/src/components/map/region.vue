@@ -21,7 +21,7 @@ export default {
   props: ['addressId'],
   mounted () {},
   methods: {
-    change (val, selectedData) {
+    change (val, selectedData) { // 选择地区
       /**
        * @returns [regionId,region]
        */
@@ -30,7 +30,7 @@ export default {
         selectedData[selectedData.length - 1].__label.split('/')
       ]);
     },
-    loadData (item, callback) {
+    loadData (item, callback) { // 加载数据
       item.loading = true;
       getRegion(item.value).then((res) => {
         if (res.result.length <= 0) {
@@ -59,7 +59,7 @@ export default {
         }
       });
     },
-    async init () {
+    async init () { // 初始化地图数据
       let data = await getRegion(0);
       let arr = [];
       data.result.forEach((item) => {
