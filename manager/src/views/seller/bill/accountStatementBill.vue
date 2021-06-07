@@ -189,7 +189,7 @@ export default {
         (this.searchForm.endTime = this.$options.filters.unixToDate(
           this.searchForm.endTime / 1000
         ));
-      this.searchForm.billStatus = "OUT";
+      this.searchForm.billStatus = "CHECK";
       API_Shop.getBuyBillPage(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
