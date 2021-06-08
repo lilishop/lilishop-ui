@@ -522,7 +522,7 @@
                 <span slot="append">kg</span>
               </Input>
             </FormItem>
-            <!-- <FormItem class="form-item-view-el" label="运费" prop="skuList">
+            <FormItem class="form-item-view-el" label="运费" prop="skuList">
               <RadioGroup type="button" button-style="solid"
                 @on-change="logisticsTemplateChange"
                 v-model="baseInfoForm.freightPayer"
@@ -534,7 +534,7 @@
                   <span>使用物流规则</span>
                 </Radio>
               </RadioGroup>
-            </FormItem> -->
+            </FormItem>
             <FormItem
               class="form-item-view-el"
               label="物流模板"
