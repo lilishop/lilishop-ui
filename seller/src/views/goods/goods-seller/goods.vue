@@ -226,7 +226,7 @@ export default {
         {
           title: "商品编号",
           key: "sn",
-          width: 200,
+          width: 100,
           tooltip: true,
         },
         {
@@ -338,6 +338,7 @@ export default {
           title: "操作",
           key: "action",
           align: "center",
+          fixed: "right",
           width: 200,
           render: (h, params) => {
             let enableOrDisable = "";
