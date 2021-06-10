@@ -527,7 +527,7 @@ export default {
     orderTakeSubmit() {
       this.$refs.orderTakeForm.validate((valid) => {
         if (valid) {
-          API_Order.orderTake(this.sn, this.orderTakeForm).then((res) => {
+          API_Order.orderTake(this.sn, this.orderTakeForm.qrCode).then((res) => {
             if (res.success) {
               this.$Message.success("订单核销成功");
               this.orderTakeModal = false;

@@ -1,67 +1,29 @@
 <template>
   <div class="login">
-    <Row
-      type="flex"
-      class="row"
-      justify="center"
-      align="middle"
-      @keydown.enter.native="submitLogin"
-    >
+    <Row type="flex" @keydown.enter.native="submitLogin">
       <Col style="width: 368px">
-        <Header />
+      <Header />
+      <Row style="flex-direction: column;">
+        <Form ref="usernameLoginForm" :model="form" :rules="rules" class="form">
+          <FormItem prop="username">
+            <Input v-model="form.username" prefix="ios-contact" size="large" clearable placeholder="请输入用户名" autocomplete="off" />
+          </FormItem>
+          <FormItem prop="password">
+            <Input type="password" v-model="form.password" prefix="ios-lock" size="large" password placeholder="请输入密码" autocomplete="off" />
+          </FormItem>
+        </Form>
+
         <Row>
-            <Form
-              ref="usernameLoginForm"
-              :model="form"
-              :rules="rules"
-              class="form"
-            >
-              <FormItem prop="username">
-                <Input
-                  v-model="form.username"
-                  prefix="ios-contact"
-                  size="large"
-                  clearable
-                  placeholder="请输入用户名"
-                  autocomplete="off"
-                />
-              </FormItem>
-              <FormItem prop="password">
-                <Input
-                  type="password"
-                  v-model="form.password"
-                  prefix="ios-lock"
-                  size="large"
-                  password
-                  placeholder="请输入密码"
-                  autocomplete="off"
-                />
-              </FormItem>
-            </Form>
-
-          <Row>
-            <Button
-              class="login-btn"
-              type="primary"
-              size="large"
-              :loading="loading"
-              @click="submitLogin"
-              long
-            >
-              <span v-if="!loading">{{ $t("login") }}</span>
-              <span v-else>{{ $t("logining") }}</span>
-            </Button>
-          </Row>
-
+          <Button class="login-btn" type="primary" size="large" :loading="loading" @click="submitLogin" long>
+            <span v-if="!loading">{{ $t("login") }}</span>
+            <span v-else>{{ $t("logining") }}</span>
+          </Button>
         </Row>
-        <Footer />
-        <!-- 拼图验证码 -->
-        <verify
-          ref="verify"
-          class="verify-con"
-          verifyType="LOGIN"
-          @change="verifyChange"
-        ></verify>
+
+      </Row>
+      <Footer />
+      <!-- 拼图验证码 -->
+      <verify ref="verify" class="verify-con" verifyType="LOGIN" @change="verifyChange"></verify>
       </Col>
       <!-- <LangSwitch /> -->
     </Row>
@@ -69,35 +31,34 @@
 </template>
 
 <script>
-import {
-  login,
-  userMsg,
-} from "@/api/index";
+import { login, userMsg } from "@/api/index";
 import { validateMobile } from "@/libs/validate";
 import Cookies from "js-cookie";
 import Header from "@/views/main-components/header";
 import Footer from "@/views/main-components/footer";
 import LangSwitch from "@/views/main-components/lang-switch";
 import util from "@/libs/util.js";
-import verify from '@/views/my-components/verify';
+import verify from "@/views/my-components/verify";
 export default {
   components: {
     LangSwitch,
     Header,
     Footer,
-    verify
+    verify,
   },
   data() {
     return {
       saveLogin: true, // 保存登录状态
       loading: false, // 加载状态
-      form: { // 表单数据
+      form: {
+        // 表单数据
         username: "",
         password: "",
         mobile: "",
         code: "",
       },
-      rules: { // 验证规则
+      rules: {
+        // 验证规则
         username: [
           {
             required: true,
@@ -163,35 +124,41 @@ export default {
         }
       });
     },
-    submitLogin() { // 登录提交
+    submitLogin() {
+      // 登录提交
       this.$refs.usernameLoginForm.validate((valid) => {
         if (valid) {
           this.$refs.verify.show = true;
         }
-      })
+      });
     },
-    verifyChange (con) { // 拼图验证码回显
+    verifyChange(con) {
+      // 拼图验证码回显
       if (!con.status) return;
-      
+
       this.loading = true;
       login({
         username: this.form.username,
         password: this.md5(this.form.password),
-      }).then((res) => {
-        this.loading = false;
-        if (res && res.success) {
-          this.afterLogin(res);
-        }
-      }).catch(()=>{this.loading = false})
-    }
-  }
+      })
+        .then((res) => {
+          this.loading = false;
+          if (res && res.success) {
+            this.afterLogin(res);
+          }
+        })
+        .catch(() => {
+          this.loading = false;
+        });
+      this.$refs.verify.show = false;
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
- .row {
+.row {
   padding: 70px 50px;
-  border-radius: .8em;
-
+  border-radius: 0.8em;
 }
 .login {
   height: 100%;
@@ -212,11 +179,11 @@ export default {
     position: relative;
     zoom: 1;
   }
-  /deep/ .ivu-row{
+  /deep/ .ivu-row {
     display: flex;
-    flex-direction: column !important;
+
   }
-  .verify-con{
+  .verify-con {
     position: absolute;
     top: 126px;
     z-index: 10;
@@ -260,5 +227,4 @@ export default {
 .flex {
   justify-content: center;
 }
-
 </style>

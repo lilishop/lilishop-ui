@@ -20,7 +20,7 @@ export default {
   title: "左一右二",
   props: ["res"],
   mounted() {
-    console.log(this.res);
+
   }
 };
 </script>

@@ -2,6 +2,19 @@
 import {getRequest, postRequest, putRequest} from '@/libs/axios';
 
 
+
+// 下载待发货的订单列表
+export const verificationCode = (verificationCode) => {
+  return getRequest(`/orders/getOrderByVerificationCode/${verificationCode}`)
+}
+
+
+
+// 下载待发货的订单列表
+export const downLoadDeliverExcel = (params) => {
+  return getRequest(`/orders/downLoadDeliverExcel`, params)
+}
+
 // 获取普通订单列表
 export const getOrderList = (params) => {
   return getRequest(`/orders`, params)
@@ -62,8 +75,8 @@ export const getLogisticsChecked = () => {
 }
 
 // 订单核验
-export const orderTake = (sn, params) => {
-  return postRequest(`/orders/${sn}/take`, params)
+export const orderTake = (sn, verificationCode) => {
+  return putRequest(`/orders/take/${sn}/${verificationCode}`)
 }
 
 // 售后服务单
