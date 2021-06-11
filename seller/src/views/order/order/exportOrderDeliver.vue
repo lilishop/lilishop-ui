@@ -17,8 +17,8 @@
       </div>
       <!-- 上传 -->
       <div v-if="item.checked && index ==1" class="tpl">
-        <Upload style="width:50%; height:400px;" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" multiple type="drag"
-          action="//jsonplaceholder.typicode.com/posts/">
+        <Upload name="file" style="width:50%; height:400px;" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" multiple type="drag" :action="action"
+          :headers="accessToken">
           <div style="padding: 50px 0">
             <Icon type="ios-cloud-upload" size="102" style="color: #3399ff"></Icon>
             <h2>选择或拖拽文件上传</h2>
@@ -42,12 +42,15 @@
 <script>
 import JsonExcel from "vue-json-excel";
 import { getLogisticsChecked } from "@/api/order.js";
+import { baseUrl } from "@/libs/axios.js";
 export default {
   components: {
     "download-excel": JsonExcel,
   },
   data() {
     return {
+      action: baseUrl + "/orders/batchDeliver", // 上传接口
+      accessToken: {}, // 验证token
       // 步骤集合
       stepList: [
         {
@@ -68,7 +71,9 @@ export default {
       ],
     };
   },
-  mounted() {},
+  mounted() {
+       this.accessToken.accessToken =this.getStore("accessToken");
+  },
   methods: {
     // 点击选择步骤
     handleCheckStep(val) {
@@ -78,9 +83,8 @@ export default {
       val.checked = true;
     },
 
-   async downLoad() {
-     let res = await  getLogisticsChecked()
-
+    async downLoad() {
+      let res = await getLogisticsChecked();
     },
   },
 };

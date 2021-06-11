@@ -232,9 +232,7 @@ export default {
   methods: {
     // 选中优惠券 父级传值
     check(val,index) {
-
       this.data[index].___selected = !this.data[index].___selected
-
       this.$emit("selected", val);
     },
     init() {

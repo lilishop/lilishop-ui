@@ -71,7 +71,7 @@ service.interceptors.request.use(
       let jwtData = JSON.parse(
         decodeURIComponent(escape(window.atob(accessToken.split(".")[1])))
       );
-      if (jwtData.exp < new Date().getTime() / 1000) {
+      if (jwtData.exp < Math.round(new Date() / 1000)) {
         refresh()
       }
     }

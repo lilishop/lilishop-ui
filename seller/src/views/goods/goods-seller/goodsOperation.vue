@@ -381,6 +381,7 @@
             </Collapse>
           </div>
         </div>
+        </div>
       </Form>
     </div>
     <div class="content-goods-publish" v-show="activestep === 2">

@@ -4,13 +4,21 @@
       <Row @keydown.enter.native="handleSearch">
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
           <Form-item label="订单编号" prop="orderSn">
-            <Input type="text" v-model="searchForm.orderSn" clearable placeholder="请输入订单编号" style="width: 200px" />
+            <Input type="text" v-model="searchForm.orderSn" clearable placeholder="请输入订单编号" style="width: 160px" />
           </Form-item>
           <Form-item label="会员名称" prop="buyerName">
-            <Input type="text" v-model="searchForm.buyerName" clearable placeholder="请输入会员名称" style="width: 200px" />
+            <Input type="text" v-model="searchForm.buyerName" clearable placeholder="请输入会员名称" style="width: 160px" />
+          </Form-item>
+              <Form-item label="订单类型" prop="orderType">
+            <Select v-model="searchForm.orderType" placeholder="请选择" clearable style="width: 160px">
+              <Option value="NORMAL">普通订单</Option>
+              <Option value="PINTUAN">拼团订单</Option>
+              <Option value="GIFT">赠品订单</Option>
+              <Option value="VIRTUAL">核验订单</Option>
+            </Select>
           </Form-item>
           <Form-item label="订单状态" prop="orderStatus">
-            <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 200px">
+            <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 160px">
               <Option value="UNPAID">未付款</Option>
               <Option value="PAID">已付款</Option>
               <Option value="UNDELIVERED">待发货</Option>
@@ -21,7 +29,7 @@
             </Select>
           </Form-item>
           <Form-item label="下单时间">
-            <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px"></DatePicker>
+            <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 160px"></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
           <Button @click="handleReset" class="search-btn">重置</Button>
