@@ -40,8 +40,12 @@
 </template>
 
 <script>
-import { downLoadDeliverExcel } from "@/api/order.js";
+import JsonExcel from "vue-json-excel";
+import { getLogisticsChecked } from "@/api/order.js";
 export default {
+  components: {
+    "download-excel": JsonExcel,
+  },
   data() {
     return {
       // 步骤集合
@@ -74,9 +78,9 @@ export default {
       val.checked = true;
     },
 
-    async downLoad() {
-      let res = await downLoadDeliverExcel({ orderIds: "1402886442132217857" });
-      console.log(res);
+   async downLoad() {
+     let res = await  getLogisticsChecked()
+
     },
   },
 };

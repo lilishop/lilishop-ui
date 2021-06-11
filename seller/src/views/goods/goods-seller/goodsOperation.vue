@@ -310,25 +310,36 @@
               <FormItem class="form-item-view-el" label="商品重量" prop="weight">
                 <Input v-model="baseInfoForm.weight">
                 <span slot="append">kg</span>
-                </Input>
-              </FormItem>
-              <FormItem class="form-item-view-el" label="运费" prop="skuList">
-                <RadioGroup type="button" button-style="solid" @on-change="logisticsTemplateChange" v-model="baseInfoForm.freightPayer">
-                  <Radio label="STORE">
-                    <span>卖家承担运费</span>
-                  </Radio>
-                  <Radio label="BUYER">
-                    <span>使用物流规则</span>
-                  </Radio>
-                </RadioGroup>
-              </FormItem>
-              <FormItem class="form-item-view-el" label="物流模板" prop="templateId" v-if="logisticsTemplateShow">
-                <Select v-model="baseInfoForm.templateId" style="width: 200px">
-                  <Option v-for="item in logisticsTemplate" :value="item.id" :key="item.id">{{ item.name }}
-                  </Option>
-                </Select>
-              </FormItem>
-            </div>
+              </Input>
+            </FormItem>
+            <FormItem class="form-item-view-el" label="运费" prop="skuList">
+              <RadioGroup type="button" button-style="solid"
+                @on-change="logisticsTemplateChange"
+                v-model="baseInfoForm.freightPayer"
+              >
+                <Radio label="STORE">
+                  <span>卖家承担运费</span>
+                </Radio>
+                <Radio label="BUYER">
+                  <span>使用物流规则</span>
+                </Radio>
+              </RadioGroup>
+            </FormItem>
+            <FormItem
+              class="form-item-view-el"
+              label="物流模板"
+              prop="templateId"
+              v-if="logisticsTemplateShow"
+            >
+              <Select v-model="baseInfoForm.templateId" style="width: 200px">
+                <Option
+                  v-for="item in logisticsTemplate"
+                  :value="item.id"
+                  :key="item.id"
+                >{{ item.name }}
+                </Option>
+              </Select>
+            </FormItem>
           </div>
           <h4>其他信息</h4>
           <div class="form-item-view">

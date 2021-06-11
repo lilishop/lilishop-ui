@@ -90,16 +90,15 @@ export default {
         {
           title: "活动名称",
           key: "promotionName",
-
+          width: 120,
           fixed: "left",
         },
         {
           title: "优惠券名称",
           key: "couponName",
-
-          tooltip: true,
-        },
-        {
+          width: 120,
+          tooltip: true
+        }, {
           title: "面额/折扣",
           key: "price",
           width: 120,
@@ -121,10 +120,9 @@ export default {
           width: 150,
           render: (h, params) => {
             return h(
-              "div",
-              params.row.receivedNum + "/" + params.row.publishNum
-            );
+              "div", params.row.receivedNum + "/" + params.row.publishNum)
           },
+          minWidth:130,
         },
         {
           title: "优惠券类型",
@@ -168,6 +166,7 @@ export default {
               },
             });
           },
+          minWidth:150,
         },
         {
           title: "状态",
@@ -202,13 +201,14 @@ export default {
               ),
             ]);
           },
+          minWidth:70,
         },
         {
           title: "操作",
           slot: "action",
           align: "center",
           fixed: "right",
-          width: 100,
+          minWidth: 140
         },
       ],
       data: [], // 表单数据
