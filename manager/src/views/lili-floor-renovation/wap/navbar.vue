@@ -8,13 +8,14 @@
       </Button>
     </div>
     <div class="model-title-view-btn">
-      <Poptip placement="bottom" width="100">
+      <!-- TODO 后期会补全 目前版本暂无 -->
+      <!-- <Poptip placement="bottom" width="100">
         <Button size="default" @click="creatQrCode">预览模板</Button>
         <div slot="content" class="default-view-content">
           <div>临时预览</div>
           <div ref="qrCodeUrl"></div>
         </div>
-      </Poptip>
+      </Poptip> -->
       <Button size="default" type="primary" @click="handleSpinShow">保存模板</Button>
 
       <Modal title="保存中" v-model="saveDialog" :closable="true" :mask-closable="false" :footer-hide="true">

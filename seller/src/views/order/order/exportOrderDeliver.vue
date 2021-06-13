@@ -17,8 +17,8 @@
       </div>
       <!-- 上传 -->
       <div v-if="item.checked && index ==1" class="tpl">
-        <Upload name="file" style="width:50%; height:400px;" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" multiple type="drag" :action="action"
-          :headers="accessToken">
+        <Upload :before-upload="handleUpload" name="files"  style="width:50%; height:400px;"
+          accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" multiple type="drag" :action="action" :headers="accessToken">
           <div style="padding: 50px 0">
             <Icon type="ios-cloud-upload" size="102" style="color: #3399ff"></Icon>
             <h2>选择或拖拽文件上传</h2>
@@ -41,7 +41,7 @@
 
 <script>
 import JsonExcel from "vue-json-excel";
-import { getLogisticsChecked } from "@/api/order.js";
+import { downLoadDeliverExcel, uploadDeliverExcel } from "@/api/order.js";
 import { baseUrl } from "@/libs/axios.js";
 export default {
   components: {
@@ -49,6 +49,7 @@ export default {
   },
   data() {
     return {
+      file: "",
       action: baseUrl + "/orders/batchDeliver", // 上传接口
       accessToken: {}, // 验证token
       // 步骤集合
@@ -72,7 +73,8 @@ export default {
     };
   },
   mounted() {
-       this.accessToken.accessToken =this.getStore("accessToken");
+    this.accessToken.accessToken = this.getStore("accessToken");
+    console.log(this.accessToken.accessToken);
   },
   methods: {
     // 点击选择步骤
@@ -83,8 +85,51 @@ export default {
       val.checked = true;
     },
 
-    async downLoad() {
-      let res = await getLogisticsChecked();
+
+    handleUpload(file) {
+      this.file = file;
+      this.upload();
+      return false;
+    },
+
+    /**
+     * 上传文件
+     */
+    async upload() {
+      let fd = new FormData();
+      fd.append("files", this.file);
+      await uploadDeliverExcel(fd);
+    },
+
+
+    /**
+     * 下载excel
+     */
+    downLoad() {
+      downLoadDeliverExcel()
+        .then((res) => {
+          const blob = new Blob([res], {
+            type: "application/vnd.ms-excel;charset=utf-8",
+          });
+          //对于<a>标签，只有 Firefox 和 Chrome（内核） 支持 download 属性
+          //IE10以上支持blob但是依然不支持download
+          if ("download" in document.createElement("a")) {
+            //支持a标签download的浏览器
+            const link = document.createElement("a"); //创建a标签
+            link.download = "批量发货导入模板.xls"; //a标签添加属性
+            link.style.display = "none";
+            link.href = URL.createObjectURL(blob);
+            document.body.appendChild(link);
+            link.click(); //执行下载
+            URL.revokeObjectURL(link.href); //释放url
+            document.body.removeChild(link); //释放标签
+          } else {
+            navigator.msSaveBlob(blob, fileName);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
   },
 };
