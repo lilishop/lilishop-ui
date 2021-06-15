@@ -6,10 +6,10 @@
           <h4>基本信息</h4>
           <div class="form-item-view">
             <FormItem label="活动名称" prop="promotionName">
-              <Input type="text" v-model="form.promotionName" placeholder="活动名称" clearable style="width: 260px" />
+              <Input type="text" v-model="form.promotionName" placeholder="活动名称" clearable style="width: 260px"/>
             </FormItem>
             <FormItem label="优惠券名称" prop="couponName">
-              <Input type="text" v-model="form.couponName" placeholder="优惠券名称" clearable style="width: 260px" />
+              <Input type="text" v-model="form.couponName" placeholder="优惠券名称" clearable style="width: 260px"/>
             </FormItem>
             <FormItem label="优惠券类型" prop="couponType">
               <Select v-model="form.couponType" style="width: 260px">
@@ -18,11 +18,11 @@
               </Select>
             </FormItem>
             <FormItem label="折扣" prop="couponDiscount" v-if="form.couponType == 'DISCOUNT'">
-              <Input type="number" v-model="form.couponDiscount" placeholder="折扣" clearable style="width: 260px" />
+              <Input type="number" v-model="form.couponDiscount" placeholder="折扣" clearable style="width: 260px"/>
               <span class="describe">请输入0-10之间数字，可以输入一位小数</span>
             </FormItem>
             <FormItem label="面额" prop="price" v-if="form.couponType == 'PRICE'">
-              <Input type="text" v-model="form.price" placeholder="面额" clearable style="width: 260px" />
+              <Input type="text" v-model="form.price" placeholder="面额" clearable style="width: 260px"/>
             </FormItem>
             <FormItem label="活动类型" prop="getType">
               <Select v-model="form.getType" style="width: 260px">
@@ -33,21 +33,25 @@
 
             <FormItem label="店铺承担比例" prop="storeCommission">
               <Input v-model="form.storeCommission" placeholder="店铺承担比例" style="width: 260px">
-              <span slot="append">%</span>
+                <span slot="append">%</span>
               </Input>
               <span class="describe">店铺承担比例，输入0-100之间数值</span>
             </FormItem>
-            <FormItem label="发放数量" prop="publishNum">
-              <Input v-model="form.publishNum" placeholder="发放数量" style="width: 260px" />
+            <FormItem label="发放数量" prop="publishNum" v-if="form.getType==='FREE'">
+              <Input v-model="form.publishNum" placeholder="发放数量" style="width: 260px"/>
+            </FormItem>
+            <FormItem label="领取数量限制" prop="couponLimitNum" v-if="form.getType==='FREE'">
+              <Input v-model="form.couponLimitNum" placeholder="领取限制" clearable style="width: 260px"/>
+            </FormItem>
+            <FormItem label="范围描述" prop="description">
+              <Input v-model="form.description" type="textarea" :rows="4" maxlength="50" show-word-limit clearable
+                     style="width: 260px"/>
             </FormItem>
           </div>
           <h4>使用限制</h4>
           <div class="form-item-view">
             <FormItem label="消费门槛" prop="consumeThreshold">
-              <Input type="text" v-model="form.consumeThreshold" placeholder="消费门槛" clearable style="width: 260px" />
-            </FormItem>
-            <FormItem label="领取限制" prop="couponLimitNum">
-              <Input v-model="form.couponLimitNum" placeholder="领取限制" clearable style="width: 260px" />
+              <Input type="text" v-model="form.consumeThreshold" placeholder="消费门槛" clearable style="width: 260px"/>
             </FormItem>
             <FormItem label="有效期" prop="rangeTime">
               <div v-if="form.getType == 'ACTIVITY'">
@@ -61,12 +65,13 @@
                 </RadioGroup>
               </div>
               <div v-if="rangeTimeType == 1">
-                <DatePicker type="datetimerange" v-model="form.rangeTime" format="yyyy-MM-dd HH:mm:ss" placeholder="请选择" :options="options" style="width: 260px">
+                <DatePicker type="datetimerange" v-model="form.rangeTime" format="yyyy-MM-dd HH:mm:ss" placeholder="请选择"
+                            :options="options" style="width: 260px">
                 </DatePicker>
               </div>
               <div class="effectiveDays" v-if="rangeTimeType == 0">
                 领取当天开始
-                <InputNumber v-model="form.effectiveDays" :min="1" style="width:100px;" :max="365" />
+                <InputNumber v-model="form.effectiveDays" :min="1" style="width:100px;" :max="365"/>
                 天内有效(1-365间的整数)
               </div>
             </FormItem>
@@ -86,19 +91,16 @@
               </div>
               <Table border :columns="columns" :data="form.promotionGoodsList" @on-selection-change="changeSelect">
                 <template slot-scope="{ row }" slot="QRCode">
-                  <img :src="row.QRCode || '../../../assets/lili.png'" width="50px" height="50px" alt="" />
+                  <img :src="row.QRCode || '../../../assets/lili.png'" width="50px" height="50px" alt=""/>
                 </template>
               </Table>
             </FormItem>
 
             <FormItem v-if="form.scopeType == 'PORTION_GOODS_CATEGORY'">
 
-              <Cascader @on-change="getGoodsCategory" :data="goodsCategoryList" style="width:300px;" v-model="form.scopeIdGoods"></Cascader>
+              <Cascader @on-change="getGoodsCategory" :data="goodsCategoryList" style="width:300px;"
+                        v-model="form.scopeIdGoods"></Cascader>
 
-            </FormItem>
-
-            <FormItem label="范围描述" prop="description">
-              <Input v-model="form.description" type="textarea" :rows="4" maxlength="50" show-word-limit clearable style="width: 260px" />
             </FormItem>
             <div>
               <Button type="text" @click="closeCurrentPage">返回</Button>
@@ -118,8 +120,8 @@ import {
   getPlatformCoupon,
   editPlatformCoupon,
 } from "@/api/promotion";
-import { getCategoryTree } from "@/api/goods";
-import { regular } from "@/utils";
+import {getCategoryTree} from "@/api/goods";
+import {regular} from "@/utils";
 import skuSelect from "@/views/lili-dialog";
 
 export default {
@@ -167,7 +169,7 @@ export default {
         /** 店铺承担比例 */
         storeCommission: 0,
         /** 发行数量 */
-        publishNum: 1,
+        publishNum: 0,
         /** 运费承担者 */
         scopeType: "ALL",
         /** 限领数量 */
@@ -193,38 +195,37 @@ export default {
         value: "id",
       }, // 级联选择器配置项
       formRule: {
-        promotionName: [{ required: true, message: "活动名称不能为空" }],
-        couponName: [{ required: true, message: "优惠券名称不能为空" }],
-        couponLimitNum: [{ required: true, message: "领取限制不能为空" }],
+        promotionName: [{required: true, message: "活动名称不能为空"}],
+        couponName: [{required: true, message: "优惠券名称不能为空"}],
         price: [
-          { required: true, message: "请输入面额" },
-          { validator: checkPrice },
+          {required: true, message: "请输入面额"},
+          {validator: checkPrice},
         ],
-        rangeTime: [{ required: true, message: "请选择优惠券有效期" }],
+        rangeTime: [{required: true, message: "请选择优惠券有效期"}],
         consumeThreshold: [
-          { required: true, message: "请输入消费门槛" },
-          { validator: checkWeight },
+          {required: true, message: "请输入消费门槛"},
+          {validator: checkWeight},
         ],
         couponDiscount: [
-          { required: true, message: "请输入折扣" },
+          {required: true, message: "请输入折扣"},
           {
             pattern: regular.discount,
             message: "请输入0-10的数字,可有一位小数",
           },
         ],
         storeCommission: [
-          { required: true, message: "请输入店铺承担比例" },
-          { pattern: regular.rate, message: "请输入0-100的正整数" },
+          {required: true, message: "请输入店铺承担比例"},
+          {pattern: regular.rate, message: "请输入0-100的正整数"},
         ],
         publishNum: [
-          { required: true, message: "请输入发放数量" },
-          { pattern: regular.integer, message: "请输入正整数" },
+          {required: true, message: "请输入发放数量"},
+          {pattern: regular.integer, message: "请输入正整数"},
         ],
         couponLimitNum: [
-          { required: true, message: "请输入领取限制" },
-          { pattern: regular.integer, message: "请输入正整数" },
+          {required: true, message: "领取限制不能为空"},
+          {pattern: regular.integer, message: "请输入正整数"},
         ],
-        description: [{ required: true, message: "请输入范围描述" }],
+        description: [{required: true, message: "请输入范围描述"}],
       },
       columns: [
         {
@@ -301,6 +302,7 @@ export default {
         if (!data.promotionGoodsList) data.promotionGoodsList = [];
         if (data.scopeType == "PORTION_GOODS_CATEGORY") {
           let prevCascader = data.scopeId.split(",");
+
           // console.log(prevCascader);
           function next(params, prev) {
             for (let i = 0; i < params.length; i++) {
@@ -325,6 +327,7 @@ export default {
               }
             }
           }
+
           next(this.goodsCategoryList, []);
           data.scopeIdGoods = prevCascader;
         }
@@ -338,7 +341,7 @@ export default {
       this.$refs.form.validate((valid) => {
         if (valid) {
           const params = JSON.parse(JSON.stringify(this.form));
-           // 判断当前活动类型
+          // 判断当前活动类型
           params.getType != "ACTIVITY" ? delete params.effectiveDays : "";
 
           //判断当前时间类型
@@ -363,7 +366,7 @@ export default {
             (!params.promotionGoodsList ||
               params.promotionGoodsList.length == 0)
           ) {
-            this.$Modal.warning({ title: "提示", content: "请选择指定商品" });
+            this.$Modal.warning({title: "提示", content: "请选择指定商品"});
             return;
           }
 
@@ -371,7 +374,7 @@ export default {
             params.scopeType == "PORTION_GOODS_CATEGORY" &&
             (!params.scopeIdGoods || params.scopeIdGoods.length == 0)
           ) {
-            this.$Modal.warning({ title: "提示", content: "请选择商品分类" });
+            this.$Modal.warning({title: "提示", content: "请选择商品分类"});
             return;
           }
 
@@ -516,7 +519,7 @@ export default {
             }
           });
         }
-        return { value: item.id, label: item.name, children: item.children };
+        return {value: item.id, label: item.name, children: item.children};
       });
     },
     filterCategory(list) {
@@ -558,14 +561,17 @@ h4 {
   line-height: 40px;
   text-align: left;
 }
+
 .describe {
   font-size: 12px;
   margin-left: 10px;
   color: #999;
 }
+
 .effectiveDays {
   font-size: 12px;
   color: #999;
+
   > * {
     margin: 0 4px;
   }

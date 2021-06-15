@@ -19,7 +19,7 @@ export const whetherStar = params => {
 
 // 添加优惠券活动
 export const addCouponActivity = params => {
-  return postRequest(`/promotion/couponActivity/addCouponActivity`,params);
+  return postRequest(`/promotion/couponActivity/addCouponActivity`, params);
 };
 
 
@@ -101,6 +101,34 @@ export const getMemberReceiveCouponList = id => {
 //  作废会员优惠券
 export const deleteMemberReceiveCoupon = id => {
   return putRequest(`/promotion/coupon/member/cancellation/${id}`);
+};
+
+
+// 保存平台优惠券
+export const saveActivityCoupon = params => {
+  return postRequest("/promotion/couponActivity", params, {
+    "Content-type": "application/json"
+  });
+};
+// 获取活动优惠券列表
+export const getActivityCouponList = params => {
+  return getRequest("/promotion/couponActivity/activityCoupons", params);
+};
+// 获取平台优惠券活动
+export const getCouponActivityList = params => {
+  return getRequest("/promotion/couponActivity", params);
+};
+//  作废优惠券
+export const deleteCouponActivity = ids => {
+  return deleteRequest(`/promotion/couponActivity/${ids}`);
+};
+//  更新优惠券活动
+export const updateCouponActivity = params => {
+  return putRequest(`/promotion/couponActivity/status`, params);
+};
+//  获取单个优惠券活动
+export const getCouponActivity = id => {
+  return getRequest(`/promotion/couponActivity/${id}`);
 };
 
 // 获取限时抢购数据
