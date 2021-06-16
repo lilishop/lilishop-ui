@@ -4,7 +4,7 @@
       <Row>
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
           <Form-item label="活动名称" prop="couponName">
-            <Input type="text" v-model="searchForm.couponName" placeholder="请输入活动名称" clearable style="width: 200px"/>
+            <Input type="text" v-model="searchForm.couponName" placeholder="请输入活动名称" clearable style="width: 200px" />
           </Form-item>
           <Form-item label="活动状态" prop="promotionStatus">
             <Select v-model="searchForm.promotionStatus" placeholder="请选择" clearable style="width: 200px">
@@ -15,8 +15,7 @@
             </Select>
           </Form-item>
           <Form-item label="活动时间">
-            <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间"
-                        style="width: 200px"></DatePicker>
+            <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 200px"></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
@@ -26,21 +25,17 @@
         <Button @click="delAll">批量下架</Button>
         <!-- <Button @click="upAll" >批量上架</Button> -->
       </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"
-             @on-sort-change="changeSort" @on-selection-change="changeSelect">
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
         <template slot-scope="{ row,index }" slot="action">
-          <Button v-if="!checked && row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="primary"
-                  size="small" style="margin-right: 10px" @click="edit(row)">编辑
+          <Button v-if="!checked && row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="primary" size="small" style="margin-right: 10px" @click="edit(row)">编辑
           </Button>
-          <Button v-if="!checked && row.promotionStatus === 'START' || row.promotionStatus === 'NEW'" type="error"
-                  size="small" style="margin-right: 10px" @click="remove(row)">下架
+          <Button v-if="!checked && row.promotionStatus === 'START' || row.promotionStatus === 'NEW'" type="error" size="small" style="margin-right: 10px" @click="remove(row)">下架
           </Button>
         </template>
       </Table>
       <Row type="flex" justify="end" class="page">
-        <Page :current="searchForm.pageNumber + 1" :total="total" :page-size="searchForm.pageSize"
-              @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
-              size="small" show-total show-elevator show-sizer></Page>
+        <Page :current="searchForm.pageNumber + 1" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
+          size="small" show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
   </div>
@@ -68,7 +63,7 @@ export default {
         pageSize: 10, // 页面大小
         sort: "startTime", // 默认排序字段
         order: "desc", // 默认排序方式
-        getType: '', // 默认排序方式
+        getType: "", // 默认排序方式
       },
       form: {
         // 添加或编辑表单对象初始化数据
@@ -77,7 +72,7 @@ export default {
       // 表单验证规则
       formValidate: {
         promotionName: [
-          {required: true, message: "不能为空", trigger: "blur"},
+          { required: true, message: "不能为空", trigger: "blur" },
         ],
       },
       submitLoading: false, // 添加或编辑提交状态
@@ -94,15 +89,16 @@ export default {
         {
           title: "活动名称",
           key: "promotionName",
-          width: 120,
+          minWidth: 100,
           fixed: "left",
         },
         {
           title: "优惠券名称",
           key: "couponName",
-          width: 120,
-          tooltip: true
-        }, {
+          minWidth: 100,
+          tooltip: true,
+        },
+        {
           title: "面额/折扣",
           key: "price",
           width: 120,
@@ -124,9 +120,11 @@ export default {
           width: 150,
           render: (h, params) => {
             return h(
-              "div", params.row.receivedNum + "/" + params.row.publishNum)
+              "div",
+              params.row.receivedNum + "/" + params.row.publishNum
+            );
           },
-          minWidth:130,
+          minWidth: 130,
         },
         {
           title: "优惠券类型",
@@ -162,20 +160,19 @@ export default {
         },
         {
           title: "活动时间",
-          width: 120,
-          render: (h, params) => {
 
+          render: (h, params) => {
             if (params.row.getType === "ACTIVITY") {
               return h("div", "长期有效");
             } else {
               return h("div", {
                 domProps: {
-                  innerHTML: params.row.startTime + "<br/>" + params.row.endTime,
+                  innerHTML:
+                    params.row.startTime + "<br/>" + params.row.endTime,
                 },
               });
             }
           },
-          minWidth:150,
         },
         {
           title: "状态",
@@ -210,14 +207,14 @@ export default {
               ),
             ]);
           },
-          minWidth:70,
+          minWidth: 70,
         },
         {
           title: "操作",
           slot: "action",
           align: "center",
           fixed: "right",
-          minWidth: 140
+          maxWidth: 140,
         },
       ],
       data: [], // 表单数据
@@ -233,13 +230,13 @@ export default {
     //优惠券类型 查询参数
     getType: {
       type: String,
-      default: ''
+      default: "",
     },
     //已选择优惠券
-    selectList: {
+    selectedList: {
       type: Array,
-      default: []
-    }
+      default: [],
+    },
   },
   watch: {
     $route(to, from) {
@@ -255,16 +252,27 @@ export default {
     },
     init() {
       this.getDataList();
+
+      // 判断是否是父级回调给自己已选择优惠券
+      if (this.selectedList.length != 0) {
+        // console.log(this.selectedList);
+        this.selectedList.forEach((item) => {
+          item._checked = true;
+          item.___selected = true;
+        });
+        this.$set(this, "data", this.selectedList);
+        console.log(this.data);
+      }
     },
     add() {
-      this.$router.push({name: "add-platform-coupon"});
+      this.$router.push({ name: "add-platform-coupon" });
     },
     /** 跳转至领取详情页面 */
     receiveInfo(v) {
-      this.$router.push({name: "member-receive-coupon", query: {id: v.id}});
+      this.$router.push({ name: "member-receive-coupon", query: { id: v.id } });
     },
     info(v) {
-      this.$router.push({name: "platform-coupon-info", query: {id: v.id}});
+      this.$router.push({ name: "platform-coupon-info", query: { id: v.id } });
     },
     changePage(v) {
       this.searchForm.pageNumber = v - 1;
@@ -294,7 +302,7 @@ export default {
     changeSelect(e) {
       this.selectList = e;
       this.selectCount = e.length;
-      this.checked ? this.check() : '';
+      this.checked ? this.check() : "";
     },
     getDataList() {
       this.loading = true;
@@ -309,9 +317,9 @@ export default {
       getPlatformCouponList(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
-          res.result.records.forEach(item => {
-            item.___selected = false
-          })
+          res.result.records.forEach((item) => {
+            item.___selected = false;
+          });
           this.data = res.result.records;
           this.total = res.result.total;
         }
@@ -353,7 +361,7 @@ export default {
       });
     },
     edit(v) {
-      this.$router.push({name: "edit-platform-coupon", query: {id: v.id}});
+      this.$router.push({ name: "edit-platform-coupon", query: { id: v.id } });
     },
     remove(v) {
       this.$Modal.confirm({

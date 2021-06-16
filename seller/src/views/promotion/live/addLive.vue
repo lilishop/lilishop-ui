@@ -153,7 +153,6 @@ import {
   addLiveGoods,
   editLive,
   getLiveInfo,
-  delLiveGoods,
   delRoomLiveGoods,
 } from "@/api/promotion";
 import liveGoods from "./liveGoods";

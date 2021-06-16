@@ -14,7 +14,7 @@ export const getPromotionSeckill = params => {
 
 // 是否推荐直播间
 export const whetherStar = params => {
-  return getRequest(`/broadcast/studio/id/${params.id}&recommend=${params.recommend}`);
+  return putRequest(`/broadcast/studio/recommend/${params.id}`,params);
 };
 
 // 添加优惠券活动
