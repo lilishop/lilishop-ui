@@ -17,7 +17,7 @@
               <div class="user-img">
                 <img :src="userInfo.face" />
               </div>
-              <p>{{userInfo.username | secrecyMobile}}</p>
+              <p>{{userInfo.nickName}}</p>
             </div>
 
             <!--   循环导航栏       -->
