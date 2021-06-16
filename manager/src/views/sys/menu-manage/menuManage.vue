@@ -70,7 +70,7 @@
                   size="16"
                   style="margin-right: 5px"
                 ></Icon>
-                <span>顶部菜单</span>
+                <span>顶级菜单</span>
               </div>
               <div v-show="form.level == 1 || form.level == 2">
                 <Icon
@@ -168,7 +168,7 @@
               size="16"
               style="margin-right: 5px"
             ></Icon>
-            <span>顶部菜单</span>
+            <span>顶级菜单</span>
           </div>
           <div v-show="formAdd.level != 0">
             <Icon
@@ -271,13 +271,11 @@ export default {
         path: "",
         frontRoute: "",
         parentId: "",
-        buttonType: "",
         sortOrder: 0,
         level: 0,
         showAlways: true,
       },
       formAdd: { // 添加表单
-        buttonType: "",
       },
       formValidate: { // 验证规则
         title: [{required: true, message: "名称不能为空", trigger: "blur"}],
@@ -542,7 +540,7 @@ export default {
         return;
       }
       this.parentTitle = this.form.title;
-      this.modalTitle = "添加子节点(可拖动)";
+      this.modalTitle = "添加子节点";
       this.showParent = true;
       if (this.form.level == 2) {
         this.$Modal.warning({
@@ -557,7 +555,6 @@ export default {
         parentId: this.form.id,
         level: Number(this.form.level) + 1,
         sortOrder: 0,
-        buttonType: "",
         status: 0,
         showAlways: true,
       };
@@ -568,7 +565,7 @@ export default {
       this.menuModalVisible = true;
     },
     addRootMenu() {
-      this.modalTitle = "添加顶部菜单(可拖动)";
+      this.modalTitle = "添加顶级菜单";
       this.showParent = false;
       this.formAdd = {
         level: 0,

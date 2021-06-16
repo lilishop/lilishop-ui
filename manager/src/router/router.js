@@ -225,12 +225,6 @@ export const otherRouter = {
       component: () => import("@/views/promotion/coupon/couponPublish.vue")
     },
     {
-      path: "promotion/add-coupon-specify",
-      title: "精准发劵",
-      name: "add-coupon-specify",
-      component: () => import("@/views/promotion/coupon/couponSpecify.vue")
-    },
-    {
       path: "promotion/edit-platform-coupon",
       title: "编辑平台优惠券",
       name: "edit-platform-coupon",
@@ -248,6 +242,37 @@ export const otherRouter = {
       title: "详情",
       name: "platform-coupon-info",
       component: () => import("@/views/promotion/coupon/couponInfo.vue")
+    },
+    {
+      path: "coupon-activity/add",
+      title: "添加优惠券活动",
+      name: "add-coupon-activity",
+      component: () => import("@/views/promotion/couponActivity/couponPublish.vue")
+    },
+    {
+      path: "coupon-activity/edit",
+      title: "编辑平台优惠券",
+      name: "edit-coupon-activity",
+      component: () => import("@/views/promotion/couponActivity/couponPublish.vue")
+    },
+    {
+      path: "promotion/member-receive-coupon",
+      title: "领取详情",
+      name: "member-coupon-activity",
+      component: () =>
+        import("@/views/promotion/coupon/memberReceiveCoupon.vue")
+    },
+    {
+      path: "promotion/platform-coupon-info",
+      title: "详情",
+      name: "platform-coupon-activity",
+      component: () => import("@/views/promotion/coupon/couponInfo.vue")
+    },
+    {
+      path: "promotion/add-coupon-specify",
+      title: "精准发劵",
+      name: "add-coupon-specify",
+      component: () => import("@/views/promotion/coupon/couponSpecify.vue")
     },
     {
       path: "promotion/manager-pintuan",

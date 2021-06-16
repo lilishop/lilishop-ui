@@ -11,7 +11,6 @@ export const result = [
     isMenu: true,
     url: "",
     description: "",
-    buttonType: "",
     permTypes: [],
     children: [
       {
@@ -116,7 +115,6 @@ export const result = [
     isMenu: true,
     url: "",
     description: "",
-    buttonType: "",
     permTypes: [],
     children: [
       {
@@ -249,7 +247,6 @@ export const result = [
     isMenu: true,
     url: "",
     description: "",
-    buttonType: "",
     permTypes: [],
     children: [
       {
@@ -339,7 +336,6 @@ export const result = [
     isMenu: true,
     url: "",
     description: "",
-    buttonType: "",
     permTypes: [],
     children: [
       {
@@ -514,7 +510,6 @@ export const result = [
     isMenu: true,
     url: "",
     description: "",
-    buttonType: "",
     permTypes: [],
     children: [
       {
@@ -590,7 +585,6 @@ export const result = [
     isMenu: true,
     url: "",
     description: "",
-    buttonType: "",
     children: [
       {
         name: "user-manage",
@@ -661,7 +655,6 @@ export const result = [
         isMenu: true,
         url: "",
         description: "",
-        buttonType: "",
         children: [
           {
             name: "shopSetting",
@@ -675,7 +668,6 @@ export const result = [
             isMenu: true,
             url: null,
             description: null,
-            buttonType: "",
             children: null,
             permTypes: []
           },
@@ -691,7 +683,6 @@ export const result = [
             isMenu: true,
             url: null,
             description: null,
-            buttonType: "",
             children: null,
             permTypes: []
           }
@@ -712,7 +703,6 @@ export const result = [
     isMenu: true,
     url: "",
     description: "",
-    buttonType: "",
     children: [
       {
         name: "user-manage",
