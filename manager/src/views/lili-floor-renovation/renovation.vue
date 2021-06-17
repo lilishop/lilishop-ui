@@ -40,15 +40,7 @@ export default {
   methods: {
     saveTemplate() {
       // 保存模板
-      this.$Modal.confirm({
-        title: "是否立即发布？",
-        onOk: () => {
-          this.submitTemplate("OPEN");
-        },
-        onCancel: () => {
-          this.submitTemplate("CLOSE");
-        },
-      });
+      this.submitTemplate(this.$route.query.pageShow ? 'OPEN' : 'CLOSE')
     },
     // 提交模板
     submitTemplate(pageShow) {
