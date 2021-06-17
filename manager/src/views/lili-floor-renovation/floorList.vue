@@ -25,7 +25,7 @@
               <span slot="close">关</span>
             </i-switch>
             <Button type="info" placement="right" @click="Template(item)" size="small">编辑</Button>
-            <Button type="success" placement="right" @click="decorate(item.id)" size="small">装修</Button>
+            <Button type="success" placement="right" @click="decorate(item)" size="small">装修</Button>
             <Poptip confirm title="删除此模板？" @on-ok="delTemplate(item.id)" @on-cancel="cancel">
               <Button type="error" size="small">删除</Button>
             </Poptip>
@@ -139,9 +139,9 @@ export default {
       this.showModal = true;
     },
 
-    decorate(id) {
+    decorate(val) {
       // 装修
-      this.$router.push({ name: "renovation", query: { id: id } });
+      this.$router.push({ name: "renovation", query: { id: val.id,pageShow:val.pageShow } });
     },
 
     getTemplateList() {
