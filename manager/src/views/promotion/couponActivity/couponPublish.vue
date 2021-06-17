@@ -10,7 +10,7 @@
             </FormItem>
 
             <FormItem label="活动时间">
-              <DatePicker type="datetimerange" v-model="rangeTime" format="yyyy-MM-dd HH:mm:ss" placeholder="请选择" :options="options" style="width: 260px">
+              <DatePicker type="datetimerange" :options="options" v-model="rangeTime" format="yyyy-MM-dd HH:mm:ss" placeholder="请选择"  style="width: 260px">
               </DatePicker>
             </FormItem>
 
@@ -86,6 +86,11 @@ export default {
   },
   data() {
     return {
+      options: {
+        disabledDate(date) {
+          return date && date.valueOf() < Date.now() - 86400000;
+        },
+      },
       showCouponSelect: false, //显示优惠券选择框
       modalType: 0, // 是否编辑
       rangeTime: "", //时间区间
