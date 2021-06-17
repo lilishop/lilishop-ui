@@ -25,7 +25,7 @@
         <Button @click="delAll">批量下架</Button>
         <!-- <Button @click="upAll" >批量上架</Button> -->
       </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-select-cancel="cancelSelect" @on-selection-change="changeSelect">
         <template slot-scope="{ row,index }" slot="action">
           <Button v-if="!checked && row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="primary" size="small" style="margin-right: 10px" @click="edit(row)">编辑
           </Button>
@@ -34,8 +34,8 @@
         </template>
       </Table>
       <Row type="flex" justify="end" class="page">
-        <Page :current="searchForm.pageNumber + 1" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
-          size="small" show-total show-elevator show-sizer></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
+          show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
   </div>
@@ -59,7 +59,7 @@ export default {
       modalTitle: "", // 添加或编辑标题
       searchForm: {
         // 搜索框初始化对象
-        pageNumber: 0, // 当前页数
+        pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
         sort: "startTime", // 默认排序字段
         order: "desc", // 默认排序方式
@@ -219,6 +219,7 @@ export default {
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
+      selectCoupon: [], //本级选中的优惠券
     };
   },
   props: {
@@ -247,22 +248,22 @@ export default {
   },
   methods: {
     // 选中优惠券 父级传值
+    selectedList: {
+      handler(val) {
+        // 判断是否是父级回调给自己已选择优惠券
+        if (val.length != 0) {
+          this.selectCoupon = val;
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
     check() {
-      this.$emit("selected", this.selectList);
+      // this.selectCoupon.push(this.selectList)
+      this.$emit("selected", this.selectCoupon);
     },
     init() {
       this.getDataList();
-
-      // 判断是否是父级回调给自己已选择优惠券
-      if (this.selectedList.length != 0) {
-        // console.log(this.selectedList);
-        this.selectedList.forEach((item) => {
-          item._checked = true;
-          item.___selected = true;
-        });
-        this.$set(this, "data", this.selectedList);
-        console.log(this.data);
-      }
     },
     add() {
       this.$router.push({ name: "add-platform-coupon" });
@@ -275,9 +276,9 @@ export default {
       this.$router.push({ name: "platform-coupon-info", query: { id: v.id } });
     },
     changePage(v) {
-      this.searchForm.pageNumber = v - 1;
+      this.searchForm.pageNumber = v;
       this.getDataList();
-      this.clearSelectAll();
+      // this.clearSelectAll();
     },
     changePageSize(v) {
       this.searchForm.pageSize = v;
@@ -299,10 +300,37 @@ export default {
     clearSelectAll() {
       this.$refs.table.selectAll(false);
     },
+
+    /**
+     * 取消已选择的数据
+     */
+    cancelSelect(selection, row) {
+      console.log(row)
+      let findCoupon = this.selectCoupon.find((item) => {
+        return item.id == row.id;
+      });
+      // 如果没有则添加
+      if (!findCoupon) {
+        this.selectCoupon.push(row);
+      } else {
+        // 有重复数据就删除
+        this.selectCoupon.map((item, index) => {
+          if (item.id == findCoupon.id) {
+            this.selectCoupon.splice(index, 1);
+          }
+        });
+      }
+    },
+    /**
+     * 选择优惠券
+     */
     changeSelect(e) {
+      if (this.checked && e.length != 0) {
+        this.selectCoupon.push(...e);
+        this.check();
+      }
       this.selectList = e;
       this.selectCount = e.length;
-      this.checked ? this.check() : "";
     },
     getDataList() {
       this.loading = true;
@@ -318,8 +346,17 @@ export default {
         this.loading = false;
         if (res.success) {
           res.result.records.forEach((item) => {
+            if (this.selectCoupon.length != 0) {
+              this.selectCoupon.forEach((child) => {
+                if (item.id == child.id) {
+                  item.___selected = true;
+                  item._checked = true;
+                }
+              });
+            }
             item.___selected = false;
           });
+
           this.data = res.result.records;
           this.total = res.result.total;
         }

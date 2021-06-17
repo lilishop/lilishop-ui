@@ -62,7 +62,7 @@
       </Form>
     </Card>
     <Modal @on-ok="()=>{this.showCouponSelect = false}" @on-cancel="()=>{this.showCouponSelect = false}" v-model="showCouponSelect" width="80%">
-      <couponTemplate :checked="true" v-if="showCouponSelect" :selectedList="selectCouponList" getType="ACTIVITY" @selected="selectedCoupon" />
+      <couponTemplate :checked="true" :selectedList="selectCouponList" getType="ACTIVITY" @selected="selectedCoupon" />
     </Modal>
 
     <Modal width="1200" v-model="checkUserList">
