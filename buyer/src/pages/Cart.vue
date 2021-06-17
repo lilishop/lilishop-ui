@@ -59,7 +59,7 @@
             <div class="promotion-notice">{{shop.promotionNotice}}</div>
           </div>
           <template v-for="(goods, goodsIndex) in shop.skuList">
-            <div class="goods-item"  :key="goodsIndex">
+            <div class="goods-item" :key="goodsIndex">
               <div class="width_60">
                 <Checkbox v-model="goods.checked" @on-change="changeChecked(goods.checked, 'goods', goods.goodsSku.id)"></Checkbox>
               </div>
@@ -93,7 +93,7 @@
               </div>
               <div class="error-goods" v-if="goods.errorMessage">
                 <div>{{goods.errorMessage}}</div>
-                <Button type="primary"  @click="delGoods(goods.goodsSku.id)">删除</Button>
+                <Button type="primary" @click="delGoods(goods.goodsSku.id)">删除</Button>
               </div>
             </div>
 
@@ -117,7 +117,7 @@
               已节省<span>{{ priceDetailDTO.discountPrice | unitPrice("￥") }}</span>
             </div>
             <div class="ml_20 total-price">
-              总价（不含运费）:<span>{{ priceDetailDTO.billPrice | unitPrice("￥") }}</span>
+              总价（不含运费）:<div>{{ priceDetailDTO.billPrice | unitPrice("￥") }}</div>
             </div>
             <div class="pay ml_20" @click="pay">去结算</div>
           </div>
@@ -136,26 +136,26 @@
 </template>
 
 <script>
-import Promotion from '@/components/goodsDetail/Promotion'
-import Search from '@/components/Search';
-import ShowLikeGoods from '@/components/like';
-import * as APICart from '@/api/cart';
-import * as APIMember from '@/api/member';
-import {getLogo} from '@/api/common.js'
+import Promotion from "@/components/goodsDetail/Promotion";
+import Search from "@/components/Search";
+import ShowLikeGoods from "@/components/like";
+import * as APICart from "@/api/cart";
+import * as APIMember from "@/api/member";
+import { getLogo } from "@/api/common.js";
 export default {
-  name: 'Cart',
-  beforeRouteEnter (to, from, next) {
+  name: "Cart",
+  beforeRouteEnter(to, from, next) {
     window.scrollTo(0, 0);
     next();
   },
   components: {
     Search,
     ShowLikeGoods,
-    Promotion
+    Promotion,
   },
-  data () {
+  data() {
     return {
-      logoImg: '', // logo图
+      logoImg: "", // logo图
       couponAvailable: false, // 展示优惠券
       stepIndex: 0, // 当前处于哪一步，购物车==0，填写订单信息==1，成功提交订单==2
       goodsTotal: 1, // 商品数量
@@ -165,45 +165,45 @@ export default {
       cartList: [], // 购物车列表
       couponList: [], // 优惠券列表
       priceDetailDTO: {}, // 价格明细
-      skuList: [] // sku列表
+      skuList: [], // sku列表
     };
   },
   computed: {},
   methods: {
     // 跳转商品详情
-    goGoodsDetail (skuId, goodsId) {
+    goGoodsDetail(skuId, goodsId) {
       let routeUrl = this.$router.resolve({
-        path: '/goodsDetail',
-        query: { skuId, goodsId }
+        path: "/goodsDetail",
+        query: { skuId, goodsId },
       });
-      window.open(routeUrl.href, '_blank');
+      window.open(routeUrl.href, "_blank");
     },
     // 跳转店铺首页
-    goShopPage (id) {
+    goShopPage(id) {
       let routeUrl = this.$router.resolve({
-        path: '/Merchant',
-        query: { id }
+        path: "/Merchant",
+        query: { id },
       });
-      window.open(routeUrl.href, '_blank');
+      window.open(routeUrl.href, "_blank");
     },
     // 收藏商品
-    collectGoods (id) {
+    collectGoods(id) {
       this.$Modal.confirm({
-        title: '收藏',
-        content: '<p>商品收藏后可在个人中心我的收藏查看</p>',
+        title: "收藏",
+        content: "<p>商品收藏后可在个人中心我的收藏查看</p>",
         onOk: () => {
-          APIMember.collectGoods('GOODS', id).then((res) => {
+          APIMember.collectGoods("GOODS", id).then((res) => {
             if (res.success) {
-              this.$Message.success('收藏商品成功');
+              this.$Message.success("收藏商品成功");
               this.getCartList();
             }
           });
         },
-        onCancel: () => { }
+        onCancel: () => {},
       });
     },
     // 删除商品
-    delGoods (id) {
+    delGoods(id) {
       const idArr = [];
       if (!id) {
         const list = this.cartList;
@@ -216,49 +216,50 @@ export default {
         idArr.push(id);
       }
       this.$Modal.confirm({
-        title: '删除',
-        content: '<p>确定要删除该商品吗？</p>',
+        title: "删除",
+        content: "<p>确定要删除该商品吗？</p>",
         onOk: () => {
           APICart.delCartGoods({ skuIds: idArr.toString() }).then((res) => {
             if (res.success) {
-              this.$Message.success('删除成功');
+              this.$Message.success("删除成功");
               this.getCartList();
             } else {
               this.$Message.error(res.message);
             }
           });
-        }
+        },
       });
     },
-    clearCart () { // 清空购物车
+    clearCart() {
+      // 清空购物车
       this.$Modal.confirm({
-        title: '提示',
-        content: '<p>确定要清空购物车吗？清空后不可恢复</p>',
+        title: "提示",
+        content: "<p>确定要清空购物车吗？清空后不可恢复</p>",
         onOk: () => {
           APICart.clearCart().then((res) => {
             if (res.success) {
-              this.$Message.success('清空购物车成功');
+              this.$Message.success("清空购物车成功");
               this.getCartList();
             } else {
               this.$Message.error(res.message);
             }
           });
-        }
+        },
       });
     },
     // 跳转支付页面
-    pay () {
+    pay() {
       if (this.checkedNum) {
-        this.$router.push({ path: '/pay', query: { way: 'CART' } });
+        this.$router.push({ path: "/pay", query: { way: "CART" } });
       } else {
-        this.$Message.warning('请至少选择一件商品');
+        this.$Message.warning("请至少选择一件商品");
       }
     },
     // 展示优惠券
-    showCoupon (storeId, index) {
+    showCoupon(storeId, index) {
       this.couponAvailable = index;
     },
-    changeNum (val, id) {
+    changeNum(val, id) {
       // 设置购买数量
       console.log(val, id);
       APICart.setCartGoodsNum({ skuId: id, num: val }).then((res) => {
@@ -268,13 +269,13 @@ export default {
         }
       });
     },
-    async changeChecked (status, type, id) {
+    async changeChecked(status, type, id) {
       // 设置商品选中状态
       const check = status ? 1 : 0;
-      if (type === 'all') {
+      if (type === "all") {
         // 全选
         await APICart.setCheckedAll({ checked: check });
-      } else if (type === 'shop') {
+      } else if (type === "shop") {
         // 选中店铺所有商品
         await APICart.setCheckedSeller({ checked: check, storeId: id });
       } else {
@@ -285,16 +286,17 @@ export default {
       this.getCartList();
     },
 
-    async receiveShopCoupon (item) { // 领取优惠券
-      let res = await APIMember.receiveCoupon(item.id)
+    async receiveShopCoupon(item) {
+      // 领取优惠券
+      let res = await APIMember.receiveCoupon(item.id);
       if (res.success) {
-        this.$set(item, 'disabled', true)
-        this.$Message.success('领取成功')
+        this.$set(item, "disabled", true);
+        this.$Message.success("领取成功");
       } else {
-        this.$Message.error(res.message)
+        this.$Message.error(res.message);
       }
     },
-    async getCartList () {
+    async getCartList() {
       // 购物车列表
       this.loading = true;
       try {
@@ -307,9 +309,9 @@ export default {
           this.checkedNum = 0;
           let allChecked = true;
           for (let k = 0; k < this.cartList.length; k++) {
-            let shop = this.cartList[k]
-            let list = await APIMember.couponList({storeId: shop.storeId})
-            shop.couponList.push(...list.result.records)
+            let shop = this.cartList[k];
+            let list = await APIMember.couponList({ storeId: shop.storeId });
+            shop.couponList.push(...list.result.records);
           }
           for (let i = 0; i < this.skuList.length; i++) {
             if (this.skuList[i].checked) {
@@ -318,30 +320,31 @@ export default {
               allChecked = false;
             }
           }
-          this.$forceUpdate()
+          this.$forceUpdate();
           this.allChecked = allChecked;
         }
       } catch (error) {
         this.loading = false;
       }
-    }
+    },
   },
-  mounted () {
+  mounted() {
     this.getCartList();
-    APICart.cartCount().then(res => { // 购物车商品数量
+    APICart.cartCount().then((res) => {
+      // 购物车商品数量
       if (res.success) this.goodsTotal = res.result;
     });
-    if (!this.Cookies.getItem('logo')) {
-      getLogo().then(res => {
+    if (!this.Cookies.getItem("logo")) {
+      getLogo().then((res) => {
         if (res.success) {
-          let logoObj = JSON.parse(res.result.settingValue)
-          this.Cookies.setItem('logo', logoObj.buyerSideLogo)
+          let logoObj = JSON.parse(res.result.settingValue);
+          this.Cookies.setItem("logo", logoObj.buyerSideLogo);
         }
-      })
+      });
     } else {
-      this.logoImg = this.Cookies.getItem('logo')
+      this.logoImg = this.Cookies.getItem("logo");
     }
-  }
+  },
 };
 </script>
 
@@ -544,7 +547,7 @@ export default {
           width: 70px;
           height: 70px;
         }
-        >div>p {
+        > div > p {
           @include content_color($light_content_color);
           font-size: 13px;
           text-align: left;
@@ -567,12 +570,12 @@ export default {
         }
       }
     }
-    .error-goods{
+    .error-goods {
       position: absolute;
       width: 100%;
       height: 100%;
       margin-left: -20px;
-      background-color: rgba($color: #999, $alpha: .5);
+      background-color: rgba($color: #999, $alpha: 0.5);
       z-index: 10;
       display: flex;
       align-items: center;
@@ -603,7 +606,7 @@ export default {
     .save-price span {
       color: #000;
     }
-    .total-price span {
+    .total-price div {
       color: $theme_color;
       font-size: 20px;
     }
@@ -651,23 +654,31 @@ export default {
   display: flex;
   margin-top: 5px;
   margin-left: 5px;
-  >span{
+  > span {
     border: 1px solid $theme_color;
     color: $theme_color;
     font-size: 12px;
     border-radius: 2px;
     padding: 0 2px;
   }
-  >p{
+  > p {
     font-size: 12px;
     margin-left: 10px;
     color: #999;
   }
 }
-
+.cart-goods-footer > div{
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.total-price{
+  display: flex;
+  align-items: center;
+}
 </style>
 <style>
-  .ivu-input-number-input {
-    text-align: center;
-  }
+.ivu-input-number-input {
+  text-align: center;
+}
 </style>

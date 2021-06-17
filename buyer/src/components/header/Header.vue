@@ -2,26 +2,10 @@
   <div class="box">
     <div class="nav">
       <ul class="location">
-        <li><router-link to="/" v-if="$route.path !== '/'" class="home-page" ><Icon type="md-home" />首页</router-link></li>
         <li>
-          <Dropdown placement="bottom-start">
-            <a href="javascript:void(0)">
-              <Icon type="ios-pin" class="icon"></Icon>
-              {{ city }}
-            </a>
-            <DropdownMenu slot="list">
-              <div class="city">
-                <p v-for="(items, index) in cityArr" :key="index">
-                  <span
-                    v-for="(item, index) in items"
-                    class="city-item"
-                    :key="index"
-                    @click="changeCity(item)"
-                    >{{ item }}</span>
-                </p>
-              </div>
-            </DropdownMenu>
-          </Dropdown>
+          <router-link to="/" v-if="$route.path !== '/'" class="home-page">
+            <Icon type="md-home" />首页
+          </router-link>
         </li>
       </ul>
       <ul class="detail">
@@ -53,19 +37,15 @@
         </li>
         <li class="hover-color" @click="goUserCenter('/home/MyOrder')"><span class="nav-item">我的订单</span></li>
         <li class="hover-color" @click="goUserCenter('/home/MyTracks')"><span class="nav-item">我的足迹</span></li>
-        <li v-if="$route.name !== 'Cart'" style="position:relative;" >
+        <li v-if="$route.name !== 'Cart'" style="position:relative;">
           <i class="cart-badge" v-show="Number(cartNum)">{{cartNum < 100 ? cartNum : '99'}}</i>
           <Dropdown placement="bottom-start">
-            <router-link to="cart" target="_blank" >
+            <router-link to="/cart" target="_blank">
               <span @mouseenter="getCartList">
-                <Icon
-                  size="18"
-                  class="cart-icon"
-                  type="ios-cart-outline"
-                ></Icon>
+                <Icon size="18" class="cart-icon" type="ios-cart-outline"></Icon>
                 购物车
               </span>
-              
+
             </router-link>
 
             <DropdownMenu slot="list">
@@ -75,12 +55,7 @@
                 <span>赶快去添加商品吧~</span>
               </div>
               <div class="shopping-cart-list" v-show="shoppingCart.length > 0">
-                <div
-                  class="shopping-cart-box"
-                  v-for="(item, index) in shoppingCart"
-                  @click="goToPay"
-                  :key="index"
-                >
+                <div class="shopping-cart-box" v-for="(item, index) in shoppingCart" @click="goToPay" :key="index">
                   <div class="shopping-cart-img">
                     <img :src="item.goodsSku.thumbnail" class="hover-pointer" />
                   </div>
@@ -117,112 +92,107 @@
 </template>
 
 <script>
-import storage from '@/plugins/storage.js';
-import {cartGoodsAll} from '@/api/cart.js'
+import storage from "@/plugins/storage.js";
+import { cartGoodsAll } from "@/api/cart.js";
 export default {
-  name: 'M-Header',
-  created () {
-    if (storage.getItem('userInfo')) {
-      this.userInfo = JSON.parse(storage.getItem('userInfo'));
+  name: "M-Header",
+  created() {
+    if (storage.getItem("userInfo")) {
+      this.userInfo = JSON.parse(storage.getItem("userInfo"));
     }
   },
 
-  data () {
+  data() {
     return {
       // 主题颜色切换
-      themeType: 'light',
-      city: '珠海', // 展示城市
-      cityArr: [
-        ['北京', '上海', '天津', '重庆', '广州'],
-        ['深圳', '河南', '辽宁', '吉林', '江苏'],
-        ['江西', '四川', '海南', '贵州', '云南'],
-        ['西藏', '陕西', '甘肃', '青海', '珠海']
-      ],
+      themeType: "light",
       userInfo: {}, // 用户信息
-      shoppingCart: [] // 购物车
+      shoppingCart: [], // 购物车
     };
   },
   computed: {
-    cartNum () {
-      return this.$store.state.cartNum
-    }
+    cartNum() {
+      return this.$store.state.cartNum;
+    },
   },
   methods: {
-    handleClickTheme () {
-      this.themeType === 'light'
-        ? (this.themeType = 'dark')
-        : (this.themeType = 'light');
+    handleClickTheme() {
+      this.themeType === "light"
+        ? (this.themeType = "dark")
+        : (this.themeType = "light");
       window.document.documentElement.setAttribute(
-        'data-theme',
+        "data-theme",
         this.themeType
       );
     },
-    changeCity (city) {
+    changeCity(city) {
       this.city = city;
     },
-    goToPay () {
+    goToPay() {
       let url = this.$router.resolve({
-        path: '/cart'
-      })
-      window.open(url.href, '_blank')
+        path: "/cart",
+      });
+      window.open(url.href, "_blank");
     },
-    myInfo () {
+    myInfo() {
       let url = this.$router.resolve({
-        path: '/home'
-      })
-      window.open(url.href, '_blank')
+        path: "/home",
+      });
+      window.open(url.href, "_blank");
     },
-    signOutFun () {
-      storage.removeItem('accessToken');
-      storage.removeItem('refreshToken');
-      storage.removeItem('userInfo');
-      storage.removeItem('cartNum');
-      this.$store.commit('SET_CARTNUM', 0)
-      this.$router.push('/login');
+    signOutFun() {
+      storage.removeItem("accessToken");
+      storage.removeItem("refreshToken");
+      storage.removeItem("userInfo");
+      storage.removeItem("cartNum");
+      this.$store.commit("SET_CARTNUM", 0);
+      this.$router.push("/login");
     },
-    goUserCenter (path) { // 跳转我的订单，我的足迹
+    goUserCenter(path) {
+      // 跳转我的订单，我的足迹
       if (this.userInfo.username) {
-        this.$router.push({path: path})
+        this.$router.push({ path: path });
       } else {
         this.$Modal.confirm({
-          title: '请登录',
-          content: '<p>请登录后执行此操作</p>',
-          okText: '立即登录',
-          cancelText: '继续浏览',
+          title: "请登录",
+          content: "<p>请登录后执行此操作</p>",
+          okText: "立即登录",
+          cancelText: "继续浏览",
           onOk: () => {
             this.$router.push({
-              path: '/login',
+              path: "/login",
               query: {
                 rePath: this.$router.history.current.path,
-                query: JSON.stringify(this.$router.history.current.query)
-              }
+                query: JSON.stringify(this.$router.history.current.query),
+              },
             });
-          }
+          },
         });
       }
     },
-    shopEntry () { // 店铺入驻
-      if (storage.getItem('accessToken')) {
+    shopEntry() {
+      // 店铺入驻
+      if (storage.getItem("accessToken")) {
         let routeUrl = this.$router.resolve({
-          path: '/shopEntry',
-          query: {id: 1}
+          path: "/shopEntry",
+          query: { id: 1 },
         });
-        window.open(routeUrl.href, '_blank');
+        window.open(routeUrl.href, "_blank");
       } else {
-        this.$router.push('login');
+        this.$router.push("login");
       }
     },
-    getCartList () { // 获取购物车列表
+    getCartList() {
+      // 获取购物车列表
       if (this.userInfo.username) {
-          
-        cartGoodsAll().then(res => {
-          this.shoppingCart = res.result.skuList
-          this.$store.commit('SET_CARTNUM', this.shoppingCart.length)
-          this.Cookies.setItem('cartNum', this.shoppingCart.length)
-        })
+        cartGoodsAll().then((res) => {
+          this.shoppingCart = res.result.skuList;
+          this.$store.commit("SET_CARTNUM", this.shoppingCart.length);
+          this.Cookies.setItem("cartNum", this.shoppingCart.length);
+        });
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -263,7 +233,8 @@ export default {
   margin-right: 15px;
   font-weight: bold;
 }
-.nav a,.nav-item {
+.nav a,
+.nav-item {
   text-decoration: none;
   padding-left: 15px;
   border-left: 1px solid #ccc;
@@ -406,7 +377,7 @@ export default {
 .sign-out p {
   font-size: 12px;
 }
-.cart-icon{
+.cart-icon {
   padding: 0 6px;
 }
 .goods-title:hover {
