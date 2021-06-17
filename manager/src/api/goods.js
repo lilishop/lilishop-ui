@@ -5,9 +5,13 @@ import { getRequest, postRequest, putRequest, deleteRequest} from '@/libs/axios'
 export const getManagerBrandPage = (params) => {
     return getRequest('/goods/brand/getByPage', params)
 }
-//  添加或修改品牌设置
+//  添加
 export const addBrand = (params) => {
     return postRequest('/goods/brand', params)
+}
+// 修改品牌设置
+export const updateBrand = (params) => {
+    return putRequest(`/goods/brand/${params.id}`, params)
 }
 // 禁用品牌
 export const disableBrand = (id, params) => {

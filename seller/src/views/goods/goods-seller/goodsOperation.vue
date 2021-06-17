@@ -294,9 +294,20 @@
           </div>
           <h4>商品详情描述</h4>
           <div class="form-item-view">
-            <div class="tree-bar" :style="{ maxHeight: maxHeight }">
-              <FormItem class="form-item-view-el" label="店内分类" prop="shopCategory">
-                <Tree ref="tree" :data="shopCategory" show-checkbox @on-select-change="selectTree" @on-check-change="changeSelect" :check-strictly="!strict"></Tree>
+            <div class="tree-bar" >
+              <FormItem
+                class="form-item-view-el"
+                label="店内分类"
+                prop="shopCategory"
+              >
+                <Tree
+                  ref="tree"
+                  :data="shopCategory"
+                  show-checkbox
+                  @on-select-change="selectTree"
+                  @on-check-change="changeSelect"
+                  :check-strictly="!strict"
+                ></Tree>
               </FormItem>
             </div>
             <FormItem class="form-item-view-el" label="商品描述" prop="intro">
@@ -594,7 +605,6 @@ export default {
       /** 3级分类列表*/
       categoryListLevel3: [],
 
-      maxHeight: "240px",
       /** 请求的商品参数组列表 */
       goodsParams: [
         {

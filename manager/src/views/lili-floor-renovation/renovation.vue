@@ -41,22 +41,24 @@ export default {
     saveTemplate() {
       // 保存模板
       this.$Modal.confirm({
-        title: "Title",
-        content: "<p>Content of dialog</p><p>Content of dialog</p>",
+        title: "是否立即发布？",
         onOk: () => {
-          this.$Message.info("Clicked ok");
+          this.submitTemplate("OPEN");
         },
         onCancel: () => {
-          this.$Message.info("Clicked cancel");
+          this.submitTemplate("CLOSE");
         },
       });
-
+    },
+    // 提交模板
+    submitTemplate(pageShow) {
       this.modelForm.list.unshift(this.$refs.modelForm.navList);
       this.modelForm.list.unshift(this.$refs.modelForm.topAdvert);
       const modelForm = JSON.stringify(this.modelForm);
       const data = {
         id: this.$route.query.id,
         pageData: modelForm,
+        pageShow,
       };
       API_floor.updateHome(this.$route.query.id, data).then((res) => {
         if (res.success) {

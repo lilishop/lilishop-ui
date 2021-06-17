@@ -376,6 +376,7 @@ export default {
       });
     },
     getAllList(parent_id) {
+      this.sortCateList = []
       this.loading = true;
       getCategoryTree(parent_id).then((res) => {
         this.loading = false;
