@@ -485,7 +485,7 @@
           </div>
           <h4>商品详情描述</h4>
           <div class="form-item-view">
-            <div class="tree-bar" :style="{ maxHeight: maxHeight }">
+            <div class="tree-bar" >
               <FormItem
                 class="form-item-view-el"
                 label="店内分类"
@@ -815,7 +815,6 @@ export default {
       /** 3级分类列表*/
       categoryListLevel3: [],
 
-      maxHeight: "240px",
       /** 请求的商品参数组列表 */
       goodsParams: [
         {

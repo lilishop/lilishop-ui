@@ -82,7 +82,7 @@
 </template>
 
 <script>
-  import {getManagerBrandPage, addBrand, disableBrand} from "@/api/goods";
+  import {getManagerBrandPage, addBrand,updateBrand, disableBrand} from "@/api/goods";
   import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
 
   export default {
@@ -323,7 +323,7 @@
               });
             } else {
               // 编辑
-              addBrand(this.form).then((res) => {
+              updateBrand(this.form).then((res) => {
                 this.submitLoading = false;
                 if (res.success) {
                   this.$Message.success("操作成功");
