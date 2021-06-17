@@ -332,7 +332,7 @@ export const otherRouter = {
       path: "liveDetail",
       title: "查看直播",
       name: "liveDetail",
-      component: () => import("@/views/live/liveDetail.vue")
+      component: () => import("@/views/promotion/live/liveDetail.vue")
     }
   ]
 };
