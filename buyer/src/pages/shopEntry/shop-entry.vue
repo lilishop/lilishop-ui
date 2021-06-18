@@ -9,23 +9,11 @@
         <Step title="其他信息"></Step>
         <Step title="提交审核"></Step>
       </Steps>
-      <first-apply
-        v-if="currentIndex == 0 && dataReview"
-        :content="firstData"
-        @change="nextPage"
-      ></first-apply>
+      <first-apply v-if="currentIndex == 0 && dataReview" :content="firstData" @change="nextPage"></first-apply>
 
-      <second-apply
-        v-if="currentIndex == 1 && dataReview"
-        :content="secondData"
-        @change="nextPage"
-      ></second-apply>
+      <second-apply v-if="currentIndex == 1 && dataReview" :content="secondData" @change="nextPage"></second-apply>
 
-      <third-apply
-        v-if="currentIndex == 2 && dataReview"
-        :content="thirdData"
-        @change="nextPage"
-      ></third-apply>
+      <third-apply v-if="currentIndex == 2 && dataReview" :content="thirdData" @change="nextPage"></third-apply>
 
       <div class="success-page" v-if="currentIndex == 3">
         <span v-if="storeDisable == '' || storeDisable == 'APPLYING'">入驻申请提交成功，等待平台审核</span>
@@ -37,62 +25,51 @@
       <Button type="primary" @click='currentIndex = 0' v-if="storeDisable === 'REFUSED' && currentIndex === 3">重新申请</Button>
     </div>
 
-    <Modal
-      title="店铺入驻协议"
-      v-model="showAgreement"
-      width="1200"
-      :closable="false"
-      :mask-closable="false"
-    >
+    <Modal title="店铺入驻协议" v-model="showAgreement" width="1200" :closable="false" :mask-closable="false">
       <div class="agreeent-con" v-html="agreementCon"></div>
 
       <div slot="footer" style="text-align: center">
-        <p><Checkbox v-model="checked">我已同意以上协议</Checkbox></p>
-        <Button
-          type="primary"
-          :disabled="!checked"
-          class="margin"
-          @click="showAgreement = false"
-          >同意协议填写资质信息</Button
-        >
+        <p>
+          <Checkbox v-model="checked">我已同意以上协议</Checkbox>
+        </p>
+        <Button type="primary" :disabled="!checked" class="margin" @click="showAgreement = false">同意协议填写资质信息</Button>
       </div>
     </Modal>
   </div>
 </template>
 <script>
-import { agreement, applyStatus } from '@/api/shopentry';
-import firstApply from './first-apply';
-import secondApply from './second-apply';
-import thirdApply from './third-apply';
+import { agreement, applyStatus } from "@/api/shopentry";
+import firstApply from "./first-apply";
+import secondApply from "./second-apply";
+import thirdApply from "./third-apply";
 export default {
   components: {
     firstApply,
     secondApply,
-    thirdApply
+    thirdApply,
   },
-  data () {
+  data() {
     return {
       currentIndex: 0, // 当前步骤
       showAgreement: false, // 协议显示
-      agreementCon: '', // 协议内容
+      agreementCon: "", // 协议内容
       checked: false, // 选中协议
       applyData: {}, // 申请数据
       firstData: {}, // 第一步数据
       secondData: {}, // 第二步数据
       thirdData: {}, // 第三步数据
-      storeDisable: '', // APPLY OPEN 开店中 CLOSED 关闭 REFUSED 拒绝 APPLYING 申请中，审核
-      dataReview: true // 根据接口返回判断是否可展示数据
+      storeDisable: "", // APPLY OPEN 开店中 CLOSED 关闭 REFUSED 拒绝 APPLYING 申请中，审核
+      dataReview: true, // 根据接口返回判断是否可展示数据
     };
   },
   methods: {
-    getArticle () {
+    getArticle() {
       // 入驻协议
       agreement().then((res) => {
-        console.log(res);
-        this.agreementCon = res.result;
+        this.agreementCon = res.result.content;
       });
     },
-    getData () {
+    getData() {
       applyStatus().then((res) => {
         if (res.success) {
           if (!res.result) {
@@ -101,34 +78,34 @@ export default {
             this.dataReview = false;
             let data = res.result;
             let first = [
-              'addressIdPath',
-              'addressPath',
-              'companyAddress',
-              'companyEmail',
-              'companyName',
-              'employeeNum',
-              'legalId',
-              'legalName',
-              'licencePhoto',
-              'legalPhoto',
-              'licenseNum',
-              'linkName',
-              'linkPhone',
-              'registeredCapital',
-              'scope'
+              "addressIdPath",
+              "addressPath",
+              "companyAddress",
+              "companyEmail",
+              "companyName",
+              "employeeNum",
+              "legalId",
+              "legalName",
+              "licencePhoto",
+              "legalPhoto",
+              "licenseNum",
+              "linkName",
+              "linkPhone",
+              "registeredCapital",
+              "scope",
             ];
             let second = [
-              'settlementBankAccountName',
-              'settlementBankAccountNum',
-              'settlementBankBranchName',
-              'settlementBankJointName'
+              "settlementBankAccountName",
+              "settlementBankAccountNum",
+              "settlementBankBranchName",
+              "settlementBankJointName",
             ];
             let third = [
-              'goodsManagementCategory',
-              'storeCenter',
-              'storeDesc',
-              'storeLogo',
-              'storeName'
+              "goodsManagementCategory",
+              "storeCenter",
+              "storeDesc",
+              "storeLogo",
+              "storeName",
             ];
 
             this.storeDisable = data.storeDisable;
@@ -143,7 +120,7 @@ export default {
               this.thirdData[e] = data[e];
             });
 
-            if (this.storeDisable === 'APPLY') {
+            if (this.storeDisable === "APPLY") {
               this.currentIndex = 0;
             } else {
               this.currentIndex = 3;
@@ -154,13 +131,14 @@ export default {
         }
       });
     },
-    nextPage (step) {
+    nextPage(step) {
       this.currentIndex = step;
-    }
+    },
   },
-  mounted () {
+  mounted() {
     this.getData();
-  }
+    this.getArticle();
+  },
 };
 </script>
 <style lang="scss" scoped>

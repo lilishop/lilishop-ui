@@ -106,7 +106,7 @@
 
     <Modal :title="modalSpecTitle" v-model="modalSpecVisible" :mask-closable="false" :width="500">
       <Form ref="specForm" :model="specForm" :label-width="100">
-        <Select v-model="specForm.category_specs" multiple>
+        <Select v-model="specForm.categorySpecs" multiple>
           <Option v-for="item in specifications" :value="item.id" :key="item.id" :label="item.specName">
           </Option>
         </Select>
@@ -134,7 +134,6 @@ import {
 } from "@/api/goods";
 import TreeTable from "@/views/my-components/tree-table/Table/Table";
 import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
-import * as filters from "@/utils/filters";
 
 export default {
   name: "lili-components",
@@ -153,7 +152,7 @@ export default {
       specifications: [], //规格集合
       categoryId: "", // 分类id
       category_brands: [], //已经选择的品牌
-      category_specs: [], //已经选择的规格
+      categorySpecs: [], //已经选择的规格
       expandLevel: 1, // 展开层级
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
@@ -240,7 +239,8 @@ export default {
     //获取所有规格
     getSpecList() {
       getSpecificationList().then((res) => {
-        if (res.success) {
+        if (res.length != 0) {
+
           this.specifications = res;
         }
       });
@@ -261,7 +261,8 @@ export default {
       getCategorySpecListData(v.id).then((res) => {
         this.categoryId = v.id;
         this.modalSpecTitle = "规格关联";
-        this.specForm.category_specs = res.map((item) => item.id);
+        console.log(res);
+        this.specForm.categorySpecs = res.map((item) => item.id);
         this.modalSpecVisible = true;
       });
     },
@@ -396,7 +397,6 @@ export default {
 
           this.categoryList = res.result;
 
-
           this.$nextTick(() => {
             this.$set(this, "tableData", [res.result[this.categoryIndex]]);
           });
@@ -459,22 +459,8 @@ export default {
   background: #fff;
   padding: 20px;
 }
-.article {
-  font-size: 16px;
-  font-weight: 400;
-  margin: 12px 0;
-}
-
-.href-text {
-  font-size: 12px;
-}
 
 .operation {
   margin-bottom: 2vh;
-}
-
-.select-count {
-  font-weight: 600;
-  color: #40a9ff;
 }
 </style>
