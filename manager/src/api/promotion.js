@@ -119,8 +119,8 @@ export const getCouponActivityList = params => {
   return getRequest("/promotion/couponActivity", params);
 };
 //  作废优惠券
-export const deleteCouponActivity = ids => {
-  return deleteRequest(`/promotion/couponActivity/${ids}`);
+export const closeActivity = id => {
+  return deleteRequest(`/promotion/couponActivity/${id}`);
 };
 //  更新优惠券活动
 export const updateCouponActivity = params => {
