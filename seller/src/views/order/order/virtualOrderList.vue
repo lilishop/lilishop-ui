@@ -27,7 +27,26 @@
           <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
-      <Table class="padding-row" :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+      <div>
+        <Button type="primary" class="export" @click="expressOrderDeliver">
+          批量发货
+          <Icon type="ios-arrow-down"></Icon>
+        </Button>
+        <Poptip @keydown.enter.native="orderVerification" placement="bottom-start" width="400">
+          <Button class="export">
+            核验订单
+          </Button>
+          <div class="api" slot="content">
+            <h2>核验订单号</h2>
+            <div style="margin:10px 0;">
+              <Input v-model="orderCode" style="width:300px; margin-right:10px;" />
+              <Button style="primary" @click="orderVerification">核验</Button>
+            </div>
+          </div>
+        </Poptip>
+
+      </div>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
       <Row type="flex" justify="end" class="page">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
           show-total show-elevator show-sizer></Page>
@@ -40,7 +59,7 @@
 import * as API_Order from "@/api/order";
 import { verificationCode } from "@/api/order";
 export default {
-  name: "orderList",
+  name: "virtualOrderList",
   data() {
     return {
       orderCode: "",
@@ -56,7 +75,7 @@ export default {
         orderSn: "",
         buyerName: "",
         orderStatus: "",
-        orderType:"NORMAL"
+        orderType:"VIRTUAL"
       },
       selectDate: null,
       form: {

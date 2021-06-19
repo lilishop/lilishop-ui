@@ -143,6 +143,20 @@ export const result = [
             url: "",
             children: null,
             permTypes: []
+          },
+          {
+            name: "virtualOrderList",
+            showAlways: true,
+            level: 2,
+            type: 0,
+            title: "虚拟订单",
+            path: "virtualOrderList",
+            component: "order/order/virtualOrderList",
+            icon: "md-person",
+            isMenu: true,
+            url: "",
+            children: null,
+            permTypes: []
           }
         ]
       },
