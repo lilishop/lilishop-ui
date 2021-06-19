@@ -34,33 +34,6 @@
         </div>
       </div>
     </div>
-    <!-- <div class="other-user-buy-box">
-      <div class="other-user-buy-title">
-        <p>可以顺便看下其他商品哦 ~</p>
-      </div>
-      <div class="other-user-buy-row" v-for="(items,index1) in recommend" :key="index1">
-        <div class="other-user-buy-item-box" v-for="(item,index2) in items" :key="index2">
-          <div class="other-user-buy-item-img">
-            <a href="item_detail.html"><img :src="item.img" alt=""></a>
-          </div>
-          <div class="other-buy-detail-box">
-            <div class="other-buy-title">
-              <a href="item_detail.html">
-                <p>{{item.intro}}</p>
-              </a>
-            </div>
-            <div class="other-buy-price">
-              <p>￥{{item.price}}</p>
-            </div>
-            <div class="other-buy-btn-box">
-              <router-link to="/goodsDetail">
-                <button class="other-buy-btn"><Icon type="ios-cart"></Icon> 加入购物车</button>
-              </router-link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> -->
     <BaseFooter></BaseFooter>
   </div>
 </template>

@@ -11,14 +11,12 @@
 export default {
   title: "三列单行图片模块",
   props: ["res"],
-  mounted() {
-    console.log(this.res);
-  }
 };
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";
 .layout {
+   background: #e8e8e8;
   height: 110px;
   display: flex;
   align-items: center;

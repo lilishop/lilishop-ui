@@ -20,7 +20,6 @@
 
         <div class="goodsConfig mt_10">
           <span @click="collect" ><Icon type="ios-heart" :color="isCollected ? '#ed3f14' : '#666'" />{{isCollected?'已收藏':'收藏'}}</span>
-          <!-- <span>举报</span> -->
         </div>
       </div>
       <!-- 右侧商品信息、活动信息、操作展示 -->
@@ -60,7 +59,7 @@
                   :key="index"
                   @click="receiveCoupon(item.id)"
                   >
-                  <span v-if="item.couponType == 'PRICE'">满{{ item.consumeThreshold }}减{{item.price | unitPrice}}</span>
+                  <span v-if="item.couponType == 'PRICE'">满{{ item.consumeThreshold }}减{{item.price}}</span>
                   <span v-if="item.couponType == 'DISCOUNT'">满{{ item.consumeThreshold }}打{{item.couponDiscount}}折</span>
                   </span>
               </p>
@@ -120,38 +119,16 @@
               <span class="inventory"> {{skuDetail.weight}}kg</span>
             </div>
           </div>
-          <div class="add-buy-car">
+          <div class="add-buy-car" v-if="$route.query.way === 'POINT'">
+            <Button type="error" :loading="loading" :disabled="skuDetail.quantity === 0" @click="pointPay">积分购买</Button>
+          </div>
+          <div class="add-buy-car" v-else>
             <Button type="error" :loading="loading" :disabled="skuDetail.quantity === 0" @click="addShoppingCartBtn">加入购物车</Button>
             <Button type="warning" :loading="loading1" :disabled="skuDetail.quantity === 0" @click="buyNow">立即购买</Button>
           </div>
+          
         </div>
       </div>
-
-      <!-- <div class="item-detail-see">
-        <Divider>更多推荐</Divider>
-        <Row>
-          <Col :span="24" class="see-Item">
-            <img class="see-Img" src="https://demo.dscmall.cn/storage/images/201703/thumb_img/0_thumb_G_1489099128797.jpg" alt="" />
-            <p>
-              名龙堂i7 6700升7700 GTX1060 6G台式电脑主机DIY游戏组装整机
-              升6GB独显 送正版WIN10 一年上门
-            </p>
-            <p class="global_color">￥2500.00</p>
-          </Col>
-          <Col :span="24" class="see-Item">
-            <img
-              class="see-Img"
-              src="https://demo.dscmall.cn/storage/images/201703/thumb_img/0_thumb_G_1489099128797.jpg"
-              alt=""
-            />
-            <p>
-              名龙堂i7 6700升7700 GTX1060 6G台式电脑主机DIY游戏组装整机
-              升6GB独显 送正版WIN10 一年上门
-            </p>
-            <p class="global_color">￥2500.00</p>
-          </Col>
-        </Row>
-      </div> -->
     </div>
   </div>
 </template>
@@ -242,6 +219,22 @@ export default {
         this.loading1 = false;
         if (res.success) {
           this.$router.push({path: '/pay', query: {way: 'BUY_NOW'}});
+        } else {
+          this.$Message.warning(res.message);
+        }
+      });
+    },
+    pointPay () { // 积分购买
+      const params = {
+        num: this.count,
+        skuId: this.skuDetail.id,
+        cartType: 'BUY_NOW'
+      };
+      this.loading1 = true;
+      addCartGoods(params).then(res => {
+        this.loading1 = false;
+        if (res.success) {
+          this.$router.push({path: '/pay', query: {way: 'POINT'}});
         } else {
           this.$Message.warning(res.message);
         }
@@ -338,6 +331,7 @@ export default {
     }
   },
   mounted () {
+    // 用户登录才会判断是否收藏
     if (this.Cookies.getItem('userInfo')) {
       isCollection('GOODS', this.skuDetail.id).then(res => {
         if (res.success && res.result) {

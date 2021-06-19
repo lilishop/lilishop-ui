@@ -1,8 +1,9 @@
 <template>
   <div>
-    <Card>
+    <Card style="position:relative;">
+      <Spin size="large" fix v-if="spinShow"></Spin>
       <Alert type="warning">
-        创建直播
+
         <template slot="desc">
           为了方便在创建直播间时从选择商品，请尽量提前提审直播商品
         </template>
@@ -10,21 +11,23 @@
 
       <Form :model="liveForm" ref="liveForm" :rules="liveRulesForm" :label-width="120">
         <FormItem label="直播标题" prop="name">
-          <Input v-model="liveForm.name" style="width:460px"></Input>
+          <Input :disabled="liveStatus!='NEW'" v-model="liveForm.name" style="width:460px"></Input>
           <div class="tips">直播间名字，最短3个汉字，最长17个汉字，1个汉字相当于2个字符</div>
         </FormItem>
         <FormItem label="主播昵称" prop="anchorName">
-          <Input v-model="liveForm.anchorName" style="width:360px"></Input>
+          <Input :disabled="liveStatus!='NEW'" v-model="liveForm.anchorName" style="width:360px"></Input>
           <div class="tips">主播昵称，最短2个汉字，最长15个汉字，1个汉字相当于2个字符</div>
         </FormItem>
         <FormItem label="直播时间" prop="startTime">
 
-          <DatePicker format="yyyy-MM-dd HH:mm" type="datetimerange" @on-change="handleChangeTime" :options="optionsTime" placeholder="直播计划开始时间-直播计划结束时间" style="width: 300px"></DatePicker>
-          <div class="tips">直播开播时间需要在当前时间的10分钟后 并且 开始时间不能在 6 个月后</div>
+          <DatePicker :disabled="liveStatus!='NEW'" format="yyyy-MM-dd HH:mm" type="datetimerange" v-model="times" @on-change="handleChangeTime" :options="optionsTime" placeholder="直播计划开始时间-直播计划结束时间"
+            style="width: 300px">
+          </DatePicker>
+          <div class="tips">直播开播时间需要在当前时间的10分钟后并且,开始时间不能在6个月后,直播计划结束时间（开播时间和结束时间间隔不得短于30分钟，不得超过24小时）</div>
         </FormItem>
 
         <FormItem label="主播微信号" prop="anchorWechat">
-          <Input v-model="liveForm.anchorWechat" style="width:360px" placeholder="主播微信号"></Input>
+          <Input :disabled="liveStatus!='NEW'" v-model="liveForm.anchorWechat" style="width:360px" placeholder="主播微信号"></Input>
           <div class="tips">主播微信号，如果未实名认证，需要先前往“小程序直播”小程序进行<a target="_black" href="https://res.wx.qq.com/op_res/9rSix1dhHfK4rR049JL0PHJ7TpOvkuZ3mE0z7Ou_Etvjf-w1J_jVX0rZqeStLfwh">实名验证</a></div>
         </FormItem>
 
@@ -34,15 +37,14 @@
             <template>
               <img :src="liveForm.feedsImg">
               <div class="upload-list-cover">
-                <Icon type="ios-eye-outline" @click.native="handleView(item.name)"></Icon>
-                <Icon type="ios-trash-outline" @click.native="handleRemove(item)"></Icon>
+                <Icon type="ios-eye-outline" @click.native="handleView(liveForm.feedsImg)"></Icon>
+                <Icon type="ios-trash-outline" @click.native="handleRemove('feedsImg')"></Icon>
               </div>
             </template>
 
           </div>
           <Upload v-if="liveForm.feedsImg.length ==0" ref="upload" :show-upload-list="false" :on-success="handleFeedsImgSuccess" :default-file-list="defaultImgList" :format="['jpg','jpeg','png']"
-            :on-format-error="handleFormatError" :max-size="1024" :on-exceeded-size="handleMaxSize" :before-upload="handleBeforeUpload" multiple type="drag" :action="action" :headers="accessToken"
-            style="display: inline-block;width:58px;">
+            :on-format-error="handleFormatError" :max-size="1024" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
             <div style="width: 58px;height:58px;line-height: 58px;">
               <Icon type="ios-camera" size="20"></Icon>
             </div>
@@ -59,28 +61,77 @@
             <template>
               <img :src="liveForm.coverImg">
               <div class="upload-list-cover">
-                <Icon type="ios-eye-outline" @click.native="handleView(item)"></Icon>
-                <Icon type="ios-trash-outline" @click.native="handleRemove(item,'coverImg')"></Icon>
+                <Icon type="ios-eye-outline" @click.native="handleView(liveForm.coverImg)"></Icon>
+                <Icon type="ios-trash-outline" @click.native="handleRemove('coverImg')"></Icon>
               </div>
             </template>
           </div>
           <Upload v-if="liveForm.coverImg.length ==0" ref="upload" :show-upload-list="false" :on-success="handleCoverImgSuccess" :default-file-list="defaultImgList" :format="['jpg','jpeg','png']"
-            :on-format-error="handleFormatError" :max-size="2048" :on-exceeded-size="handleMaxSize" :before-upload="handleBeforeUpload" multiple type="drag" :action="action" :headers="accessToken"
-            style="display: inline-block;width:58px;">
+            :on-format-error="handleFormatError" :max-size="2048" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
             <div style="width: 58px;height:58px;line-height: 58px;">
               <Icon type="ios-camera" size="20"></Icon>
             </div>
           </Upload>
           <div class="tips"> 直播间背景图，图片规则：建议像素1080*1920，大小不超过2M</div>
         </FormItem>
-        <FormItem label="商品" >
-          <Button type="primary" ghost icon="md-add">添加商品</Button>
-          <Table class="goods-table" :columns="liveColumns" :data="liveData"></Table>
+
+        <!-- 直播间背景墙 -->
+        <FormItem label="直播间分享图" prop="shareImg">
+
+          <div class="upload-list" v-if="liveForm.shareImg">
+            <template>
+              <img :src="liveForm.shareImg">
+              <div class="upload-list-cover">
+                <Icon type="ios-eye-outline" @click.native="handleView(liveForm.shareImg)"></Icon>
+                <Icon type="ios-trash-outline" @click.native="handleRemove('shareImg')"></Icon>
+              </div>
+            </template>
+          </div>
+          <Upload v-if="liveForm.shareImg.length ==0" ref="upload" :show-upload-list="false" :on-success="handleShareImgSuccess" :default-file-list="defaultImgList" :format="['jpg','jpeg','png']"
+            :on-format-error="handleFormatError" :max-size="2048" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
+            <div style="width: 58px;height:58px;line-height: 58px;">
+              <Icon type="ios-camera" size="20"></Icon>
+            </div>
+          </Upload>
+          <div class="tips"> 直播间分享图，图片规则：建议像素800*640，大小不超过1M</div>
+        </FormItem>
+
+        <FormItem label="商品" v-if="$route.query.id">
+          <Button type="primary" :disabled="liveStatus!='NEW'" ghost @click="liveGoodsVisible=true" icon="md-add">添加商品</Button>
+          <Table class="goods-table" :columns="liveColumns" :data="liveData">
+            <template slot-scope="{ row,index }" slot="goodsName">
+              <div class="flex-goods">
+                <Badge v-if="index == 0 || index ==1" color="volcano"></Badge>
+                <img class="thumbnail" :src="row.thumbnail || row.goodsImage">
+                {{ row.goodsName || row.name }}
+              </div>
+            </template>
+            <template slot-scope="{ row }" class="price" slot="price">
+              <div>
+                <div v-if="row.priceType == 1">{{row.price | unitPrice('￥')}}</div>
+                <div v-if="row.priceType == 2">{{row.price | unitPrice('￥')}}至{{row.price2 | unitPrice('￥')}}</div>
+                <div v-if="row.priceType == 3">{{row.price | unitPrice('￥')}}<span class="original-price">{{row.price2 | unitPrice('￥')}}</span></div>
+              </div>
+            </template>
+            <template slot-scope="{ row }" slot="quantity">
+              <div>{{row.quantity}}</div>
+            </template>
+            <template slot-scope="{ row,index }" slot="action">
+              <div class="action">
+                <Button size="small" type="primary" :disabled="liveStatus!='NEW'" @click="deleteGoods(row,index)">删除</Button>
+                <Button size="small" ghost type="primary" :disabled="liveStatus!='NEW'" @click="onMove(row.id,1)">上移</Button>
+                <Button size="small" ghost type="primary" :disabled="liveStatus!='NEW'" @click="onMove(row.id,0)">下移</Button>
+              </div>
+            </template>
+          </Table>
+          <div class="tips">
+            直播间商品中前两个商品将自动被选为封面，伴随直播间在直播列表中显示
+          </div>
         </FormItem>
 
         <FormItem>
           <Button type="primary" @click="createLives()">保存</Button>
-          <Button style="margin-left: 8px">取消</Button>
+
         </FormItem>
       </Form>
     </Card>
@@ -88,19 +139,36 @@
     <Modal title="查看图片" v-model="imageVisible">
       <img :src="imageSrc" v-if="imageVisible" style="width: 100%">
     </Modal>
+
+    <Modal width="800" v-model="liveGoodsVisible" @on-ok="addGoods">
+      <liveGoods :init="liveData" @selectedGoods="callBackData" reviewed />
+    </Modal>
   </div>
 </template>
 
 <script>
 import { uploadFile } from "@/api/index";
-import { getLiveGoods } from "@/api/promotion";
+import {
+  addLive,
+  addLiveGoods,
+  editLive,
+  getLiveInfo,
+  delRoomLiveGoods,
+} from "@/api/promotion";
+import liveGoods from "./liveGoods";
 export default {
+  components: {
+    liveGoods,
+  },
   data() {
     return {
+      spinShow: false,
+      liveGoodsVisible: false, //选择商品
       imageVisible: false, //查看图片的dailog
       imageSrc: "", //查看图片的路径
       action: uploadFile, // 上传地址
       accessToken: {}, // 验证token
+      liveStatus: "NEW", //当前直播状态
       // 不能选择今天以前的时间
       optionsTime: {
         disabledDate(date) {
@@ -124,7 +192,6 @@ export default {
           {
             required: true,
             message: "请输入开始时间以及结束时间",
-            trigger: "blur",
           },
         ],
         feedsImg: [
@@ -133,38 +200,149 @@ export default {
         coverImg: [
           { required: true, message: "直播间背景墙不能为空", trigger: "blur" },
         ],
+        shareImg: [
+          { required: true, message: "直播间分享图不能为空", trigger: "blur" },
+        ],
       },
       liveForm: {
+        name: "", //直播标题
+        anchorName: "", //主播昵称
+        anchorWechat: "", //主播微信号
         feedsImg: "", //分享卡片封面
         coverImg: "", //直播间背景墙
+        shareImg: "", //分享图
+        startTime: "",
       },
+
+      times: [], //接收直播时间数据
       // 直播商品表格表头
       liveColumns: [
         {
           title: "商品",
+          slot: "goodsName",
         },
         {
           title: "价格",
+          slot: "price",
         },
         {
           title: "库存",
-        },
-        {
-          title: "链接",
+          slot: "quantity",
+          width: 100,
         },
         {
           title: "操作",
+          slot: "action",
+          width: 250,
         },
       ],
       liveData: [], //直播商品集合
+      commodityList: "", //商品集合
     };
   },
   mounted() {
+    /**
+     * 如果query.id有值说明是查看详情
+     * liveStatus 可以判断当前直播状态 从而区分数据 是否是未开始、已开启、已关闭、
+     */
+    if (this.$route.query.id) {
+      // 获取直播间详情
+      this.getLiveDetail();
+    }
     this.accessToken = {
       accessToken: this.getStore("accessToken"),
     };
   },
   methods: {
+    /**
+     * 删除直播间商品
+     */
+    async deleteGoods(val, index) {
+      let res = await delRoomLiveGoods(this.liveForm.roomId, val.liveGoodsId);
+      if (res.success) {
+        this.$Message.success("删除成功!");
+        this.liveData.splice(index, 1);
+      }
+    },
+    /**
+     * 获取直播间详情
+     */
+    async getLiveDetail() {
+      let result = await getLiveInfo(this.$route.query.id);
+
+      // 将数据回调到liveform里面
+      if (result.success) {
+        let data = result.result;
+        for (let key in data) {
+          this.liveForm[key] = data[key];
+        }
+        // 将选择的商品回调给表格
+
+        this.liveData = data.commodityList;
+        this.commodityList = data.commodityList;
+
+        // 将时间格式化
+        this.$set(
+          this.times,
+          [0],
+          this.$options.filters.unixToDate(data.startTime, "yyyy-MM-dd hh:mm")
+        );
+        this.$set(
+          this.times,
+          [1],
+          this.$options.filters.unixToDate(data.endTime, "yyyy-MM-dd hh:mm")
+        );
+        this.liveStatus = data.status;
+      }
+    },
+    /**
+     * 上下移动功能
+     * dir 1为上 0为下
+     */
+    onMove(code, dir) {
+      let moveComm = (curIndex, nextIndex) => {
+        let arr = this.liveData;
+        arr[curIndex] = arr.splice(nextIndex, 1, arr[curIndex])[0];
+        return arr;
+      };
+      this.liveData.some((val, index) => {
+        if (val.id === code) {
+          if (dir === 1 && index === 0) {
+            this.$message.Warning("已在顶部！");
+          } else if (dir === 0 && index === this.liveData.length - 1) {
+            this.$message.Warning("已在底部！");
+          } else {
+            let nextIndex = dir === 1 ? index - 1 : index + 1;
+            this.liveData = moveComm(index, nextIndex);
+          }
+          return true;
+        }
+        return false;
+      });
+    },
+    /**
+     * 回调的商品选择数据
+     */
+    callBackData(way) {
+      this.$set(this, "liveData", way);
+    },
+
+    /**
+     * dialog点击确定时判断
+     */
+    addGoods() {
+      this.liveData.forEach((item) => {
+        this.commodityList.forEach((oldVal) => {
+          if (oldVal.liveGoodsId != item.liveGoodsId) {
+            addLiveGoods({
+              roomId: this.$route.query.roomId,
+              liveGoodsId: item.liveGoodsId,
+            });
+          }
+        });
+      });
+    },
+
     /**
      * 上传图片查看图片
      */
@@ -176,11 +354,11 @@ export default {
     /**
      * 删除上传的图片
      */
-    handleRemove(val, type) {
-      if (type == "coverImg") {
-        this.liveForm.coverImg = "";
+    handleRemove(type) {
+      if (this.liveStatus == "NEW") {
+        this.liveForm[type] = "";
       } else {
-        this.liveForm.feedsImg = "";
+        this.$Message.error("当前状态禁止修改删除!");
       }
     },
     /**
@@ -188,6 +366,13 @@ export default {
      */
     handleCoverImgSuccess(res) {
       this.liveForm.coverImg = res.result;
+    },
+    /**
+     * 直播间分享图上传成功回调
+     */
+    handleShareImgSuccess(res) {
+      console.log(res);
+      this.liveForm.shareImg = res.result;
     },
 
     /**
@@ -201,15 +386,24 @@ export default {
      * 直播间背景图
      */
     handleCoverImgSuccess(res) {
-      this.liveForm.coverImg.push(res.result);
+      this.liveForm.coverImg = res.result;
     },
 
     /**
      * 选择时间后的回调
      */
     handleChangeTime(daterange) {
-      this.liveForm.startTime = new Date(daterange[0]).getTime() / 1000;
-      this.liveForm.endTime = new Date(daterange[1]).getTime() / 1000;
+      this.times = daterange;
+      this.$set(
+        this.liveForm,
+        "startTime",
+        new Date(daterange[0]).getTime() / 1000
+      );
+      this.$set(
+        this.liveForm,
+        "endTime",
+        new Date(daterange[1]).getTime() / 1000
+      );
     },
 
     /**
@@ -235,8 +429,8 @@ export default {
     /**
      * 限制只能上传一张图片
      */
-    handleBeforeUpload() {
-      const check = this.liveForm.feedsImg.length < 1;
+    handleBeforeUpload(type) {
+      const check = this.liveForm[type].length < 1;
       if (!check) {
         this.$Notice.warning({
           title: "最多上传一张图片",
@@ -244,18 +438,77 @@ export default {
       }
       return check;
     },
-    createLives() {},
+
+    /**
+     * 添加直播间 /broadcast/studio/edit
+     */
+    createLives() {
+      this.$refs["liveForm"].validate((valid) => {
+        if (valid) {
+          // 需判断当前是否是添加商品
+          if (this.$route.query.id && this.liveData.length != 0) {
+            this.spinShow = true;
+             this.liveForm.commodityList = JSON.stringify(this.liveForm.commodityList);
+            // 将当前直播间修改
+            editLive(this.liveForm).then((res) => {
+              if (res.success) {
+                this.$Message.success("修改成功!");
+
+                this.$router.push({ path: "/storePromotion/live" });
+              }
+              this.spinShow = false;
+            });
+          } else {
+            // 此处为创建直播
+            this.spinShow = true;
+            addLive(this.liveForm).then((res) => {
+              if (res.success) {
+                this.$Message.success("添加成功!");
+
+                this.$router.push({ path: "/storePromotion/live" });
+              }
+              this.spinShow = false;
+            });
+          }
+        }
+      });
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
+.action {
+  display: flex;
+  /deep/ .ivu-btn {
+    margin: 0 5px !important;
+  }
+}
+.original-price {
+  margin-left: 10px;
+  color: #999;
+  text-decoration: line-through;
+}
+.thumbnail {
+  width: 50px;
+  height: 50px;
+  border-radius: 0.4em;
+}
+.flex-goods {
+  margin: 10px;
+  display: flex;
+
+  align-items: center;
+  > img {
+    margin-right: 10px;
+  }
+}
 .tips {
   color: #999;
   font-size: 12px;
 }
 .goods-table {
-  width: 800px;
+  width: 1000px;
   margin: 10px 0;
 }
 .upload-list {

@@ -38,10 +38,10 @@
                   </div>
                 </div>
                 <div class="remarks-bar">
-                  <span @click="searchByGrade('')" :class="{selectedBar: commentParams.grade === ''}">全部({{commentTypeNum.all}})</span>
-                  <span @click="searchByGrade('GOOD')" :class="{selectedBar: commentParams.grade === 'GOOD'}">好评({{commentTypeNum.good}})</span>
-                  <span @click="searchByGrade('MODERATE')" :class="{selectedBar: commentParams.grade === 'MODERATE'}">中评({{commentTypeNum.moderate}})</span>
-                  <span @click="searchByGrade('WORSE')" :class="{selectedBar: commentParams.grade === 'WORSE'}">差评({{commentTypeNum.worse}})</span>
+                  <span @click="viewByGrade('')" :class="{selectedBar: commentParams.grade === ''}">全部({{commentTypeNum.all}})</span>
+                  <span @click="viewByGrade('GOOD')" :class="{selectedBar: commentParams.grade === 'GOOD'}">好评({{commentTypeNum.good}})</span>
+                  <span @click="viewByGrade('MODERATE')" :class="{selectedBar: commentParams.grade === 'MODERATE'}">中评({{commentTypeNum.moderate}})</span>
+                  <span @click="viewByGrade('WORSE')" :class="{selectedBar: commentParams.grade === 'WORSE'}">差评({{commentTypeNum.worse}})</span>
                 </div>
                 <div style="text-align: center;margin-top: 20px;" v-if="commentList.length === 0">
                   暂无评价数据
@@ -86,9 +86,6 @@
                 </div>
               </div>
             </TabPane>
-            <!-- <TabPane label="商品问答">
-              <ShowGoodsQuestion/>
-            </TabPane> -->
           </Tabs>
         </div>
       </div>
@@ -97,7 +94,6 @@
 </template>
 
 <script>
-import ShowGoodsQuestion from '@/components/goodsDetail/ShowGoodsQuestion';
 import { goodsComment, goodsCommentNum } from '@/api/member.js';
 export default {
   name: 'ShowGoodsDetail',
@@ -122,21 +118,21 @@ export default {
     };
   },
   computed: {
-    skuDetail () {
+    skuDetail () { // skuId
       return this.detail.data;
     }
   },
   methods: {
-    changeHeight (name) {
+    changeHeight (name) {  // 设置商品详情高度
       let heightCss = window.getComputedStyle(this.$refs[name]).height;
       heightCss = parseInt(heightCss.substr(0, heightCss.length - 2)) + 89;
       this.$refs.itemIntroDetail.style.height = heightCss + 'px';
     },
-    changePageNum (val) {
+    changePageNum (val) { // 修改评论页码
       this.commentParams.pageNumber = val;
       this.getList();
     },
-    changePageSize (val) {
+    changePageSize (val) { // 修改评论页数
       this.commentParams.pageNumber = 1;
       this.commentParams.pageSize = val;
       this.getList();
@@ -155,12 +151,12 @@ export default {
         }
       });
     },
-    searchByGrade (grade) {
+    viewByGrade (grade) { // 好中差评切换
       this.$set(this.commentParams, 'grade', grade);
       this.commentParams.pageNumber = 1;
       this.getList();
     },
-    tabClick (name) {
+    tabClick (name) { // 商品详情和评价之间的tab切换
       if (name === 0) {
         this.$nextTick(() => {
           this.changeHeight('itemIntroGoods')
@@ -198,7 +194,7 @@ export default {
         }
       }
     },
-    handleScroll () {
+    handleScroll () { // 监听页面滚动
       if (this.onceFlag) {
         this.$nextTick(() => {
           this.changeHeight('itemIntroGoods')
@@ -208,15 +204,12 @@ export default {
     }
   },
   mounted () {
-    this.$nextTick(() => {
+    this.$nextTick(() => { // 手动设置详情高度，解决无法撑开问题
       setTimeout(this.changeHeight('itemIntroGoods'), 2000);
     });
     window.addEventListener('scroll', this.handleScroll)
     this.getList();
   },
-  components: {
-    ShowGoodsQuestion
-  }
 };
 </script>
 
@@ -283,14 +276,12 @@ export default {
 }
 .item-intro-detail{
   margin: 0  30px;
-  // min-height: 1500px;
   width: 100%;
 }
 .item-intro-nav{
   width: 100%;
   height: 38px;
   background-color: #F7F7F7;
-  // border-bottom: 1px solid $theme_color;
 }
 .item-intro-nav ul{
   margin: 0px;
@@ -329,8 +320,6 @@ export default {
   width: 240px;
   height: 36px;
   font-size: 14px;
-  /* text-align: center; */
-  /* background-color: #ccc; */
 }
 .item-param-title {
   color: #232323;

@@ -213,7 +213,7 @@ export default {
     this.distribution()
   },
   methods: {
-    apply () {
+    apply () { // 申请成为分销商
       this.$refs.form.validate(valid => {
         if (valid) {
           this.applyLoading = true
@@ -239,10 +239,10 @@ export default {
         }
       })
     },
-    qrcodeData (data64) {
+    qrcodeData (data64) { // 二维码base64地址
       this.base64Img = data64
     },
-    downloadQrcode () {
+    downloadQrcode () { // 下载二维码
       let a = document.createElement('a'); // 生成一个a元素
       let event = new MouseEvent('click'); // 创建一个单击事件
       a.download = this.goodsNameCurr || 'photo'
@@ -265,11 +265,11 @@ export default {
         this.getLog()
       }
     },
-    changePage (val) {
+    changePage (val) { // 修改页码
       this.params.pageNumber = val;
       this.getGoodsData()
     },
-    changePageLog (val) {
+    changePageLog (val) { // 修改页码 日志
       this.logParams.pageNumber = val;
       this.getLog()
     },

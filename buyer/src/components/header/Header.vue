@@ -9,7 +9,6 @@
         </li>
       </ul>
       <ul class="detail">
-        <!-- <li class="first hover-pointer" @click="handleClickTheme()">切换主题</li> -->
         <li class="first" v-show="!userInfo.username">
           <router-link :to="`/login?rePath=${$route.path}&query=${JSON.stringify($route.query)}`">
             <span style="border:none" class="tipsLogin">请登录</span>
@@ -35,14 +34,27 @@
             </DropdownMenu>
           </Dropdown>
         </li>
+<<<<<<< HEAD
         <li class="hover-color" @click="goUserCenter('/home/MyOrder')"><span class="nav-item">我的订单</span></li>
         <li class="hover-color" @click="goUserCenter('/home/MyTracks')"><span class="nav-item">我的足迹</span></li>
+=======
+        <li @click="goUserCenter('/home/MyOrder')"><span class="nav-item hover-color">我的订单</span></li>
+        <li @click="goUserCenter('/home/MyTracks')"><span class="nav-item hover-color">我的足迹</span></li>
+        <li @click="goUserCenter('/home/MsgList')"><span class="nav-item hover-color">我的消息</span></li>
+>>>>>>> dev-ryan
         <li v-if="$route.name !== 'Cart'" style="position:relative;">
           <i class="cart-badge" v-show="Number(cartNum)">{{cartNum < 100 ? cartNum : '99'}}</i>
           <Dropdown placement="bottom-start">
             <router-link to="/cart" target="_blank">
               <span @mouseenter="getCartList">
+<<<<<<< HEAD
                 <Icon size="18" class="cart-icon" type="ios-cart-outline"></Icon>
+=======
+                <Icon
+                  size="18"
+                  type="ios-cart-outline"
+                ></Icon>
+>>>>>>> dev-ryan
                 购物车
               </span>
 
@@ -116,6 +128,7 @@ export default {
     },
   },
   methods: {
+<<<<<<< HEAD
     handleClickTheme() {
       this.themeType === "light"
         ? (this.themeType = "dark")
@@ -129,17 +142,28 @@ export default {
       this.city = city;
     },
     goToPay() {
+=======
+    changeCity (city) { // 选择所在城市
+      this.city = city;
+    },
+    goToPay () { // 跳转购物车
+>>>>>>> dev-ryan
       let url = this.$router.resolve({
         path: "/cart",
       });
       window.open(url.href, "_blank");
     },
+<<<<<<< HEAD
     myInfo() {
+=======
+    myInfo () { // 跳转会员中心
+>>>>>>> dev-ryan
       let url = this.$router.resolve({
         path: "/home",
       });
       window.open(url.href, "_blank");
     },
+<<<<<<< HEAD
     signOutFun() {
       storage.removeItem("accessToken");
       storage.removeItem("refreshToken");
@@ -147,6 +171,15 @@ export default {
       storage.removeItem("cartNum");
       this.$store.commit("SET_CARTNUM", 0);
       this.$router.push("/login");
+=======
+    signOutFun () { // 退出登录
+      storage.removeItem('accessToken');
+      storage.removeItem('refreshToken');
+      storage.removeItem('userInfo');
+      storage.removeItem('cartNum');
+      this.$store.commit('SET_CARTNUM', 0)
+      this.$router.push('/login');
+>>>>>>> dev-ryan
     },
     goUserCenter(path) {
       // 跳转我的订单，我的足迹
@@ -230,13 +263,13 @@ export default {
   float: left;
   font-size: 14px;
   line-height: 35px;
-  margin-right: 15px;
+  margin-right: 10px;
   font-weight: bold;
 }
 .nav a,
 .nav-item {
   text-decoration: none;
-  padding-left: 15px;
+  padding-left: 10px;
   border-left: 1px solid #ccc;
   color: #999;
   cursor: pointer;
@@ -377,9 +410,13 @@ export default {
 .sign-out p {
   font-size: 12px;
 }
+<<<<<<< HEAD
 .cart-icon {
   padding: 0 6px;
 }
+=======
+
+>>>>>>> dev-ryan
 .goods-title:hover {
   color: $theme_color;
 }

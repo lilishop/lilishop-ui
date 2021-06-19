@@ -347,6 +347,7 @@ export default {
             this.form.versionUpdateDate / 1000
           );
           this.form.versionUpdateDate = versionUpdateDate;
+
           this.form.updateTime = versionUpdateDate;
           if (this.modalType == 0) {
             // 添加 避免编辑后传入id等数据 记得删除

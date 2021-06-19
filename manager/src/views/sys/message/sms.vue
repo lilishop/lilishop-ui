@@ -116,7 +116,7 @@
                     <Scroll :on-reach-bottom="memberSearchEdge">
 
                       <div dis-hover v-for="(item, index) in members" :key="index" class="scroll-card">
-                        <Button class="btns" :class="{'active':item.___selected}" @click="moveMember(index,item)" style="width: 100%;text-align: left">
+                        <Button class="btns" :class="{'active':item.____selected}" @click="moveMember(index,item)" style="width: 100%;text-align: left">
                           <span v-if="item.mobile" class="mobile">
                             {{item.mobile}}
                           </span>
@@ -501,8 +501,8 @@ export default {
 
 
       this.members.forEach((item,index)=>{
-        if(item.___selected && item.mobile == val.mobile){
-          item.___selected = false
+        if(item.____selected && item.mobile == val.mobile){
+          item.____selected = false
         }
       })
 
@@ -543,7 +543,7 @@ export default {
         this.$Message.error("当前用户暂无手机号绑定");
         return false;
       }
-      item.___selected = true;
+      item.____selected = true;
       if (this.alreadyCheck.length == 0) {
         this.alreadyCheck.push(item.mobile);
         this.alreadyCheckShow.push(item);
@@ -581,7 +581,7 @@ export default {
         this.loading = false;
         if (res.success) {
           res.result.records.forEach((item) => {
-            item.___selected = false;
+            item.____selected = false;
             this.members.push(item);
           });
 

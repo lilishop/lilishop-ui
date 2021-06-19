@@ -66,7 +66,8 @@ export default {
       uvs: 0, // 访客数
       pvs: 0, // 浏览量
 
-      dateList: [ // 选择项
+      dateList: [
+        // 选择项
         {
           title: "今天",
           selected: false,
@@ -90,7 +91,8 @@ export default {
       ],
 
       orderChart: "", // 初始化图表
-      params: { // 请求参数
+      params: {
+        // 请求参数
         searchType: "LAST_SEVEN",
         year: "",
         month: "",
@@ -117,6 +119,8 @@ export default {
   watch: {
     params: {
       handler(val) {
+        this.uvs = 0;
+        this.pvs = 0;
         this.init();
       },
       deep: true,

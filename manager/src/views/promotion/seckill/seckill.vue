@@ -2,29 +2,12 @@
   <div class="seckill">
     <Card>
       <Row>
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
+        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
           <Form-item label="活动名称" prop="promotionName">
-            <Input
-              type="text"
-              v-model="searchForm.promotionName"
-              placeholder="请输入活动名称"
-              clearable
-              style="width: 200px"
-            />
+            <Input type="text" v-model="searchForm.promotionName" placeholder="请输入活动名称" clearable style="width: 200px" />
           </Form-item>
           <Form-item label="活动状态" prop="promotionStatus">
-            <Select
-              v-model="searchForm.promotionStatus"
-              placeholder="请选择"
-              clearable
-              style="width: 200px"
-            >
+            <Select v-model="searchForm.promotionStatus" placeholder="请选择" clearable style="width: 200px">
               <Option value="NEW">未开始</Option>
               <Option value="START">已开始/上架</Option>
               <Option value="END">已结束/下架</Option>
@@ -32,22 +15,10 @@
             </Select>
           </Form-item>
           <Form-item label="活动时间">
-            <DatePicker
-              v-model="selectDate"
-              type="daterange"
-              clearable
-              placeholder="选择起始时间"
-              style="width: 200px"
-            ></DatePicker>
+            <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 200px"></DatePicker>
           </Form-item>
 
-          <Button
-            @click="handleSearch"
-            type="primary"
-            icon="ios-search"
-            class="search-btn"
-            >搜索</Button
-          >
+          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
       </Row>
       <Row class="operation padding-row">
@@ -131,19 +102,25 @@
 
 <script>
 import { getSeckillList, delSeckill, closeSeckill } from "@/api/promotion";
+import setupSeckill from "@/views/promotion/seckill/setupSeckill";
 export default {
   name: "seckill",
+  components: {
+    setupSeckill,
+  },
   data() {
     return {
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
-        pageNumber: 0, // 当前页数
+        pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
         sort: "startTime",
         order: "desc", // 默认排序方式
       },
-      columns: [ // 表单
+      setupFlag: false, //默认不请求设置
+      columns: [
+        // 表单
         {
           title: "活动名称",
           key: "promotionName",
@@ -225,14 +202,27 @@ export default {
     };
   },
   methods: {
+    clickTabPane(name) {
+
+      if (name == "setup") {
+
+        this.setupFlag = true;
+      } else {
+        this.setupFlag = false;
+      }
+    },
+
+    // 初始化信息
     init() {
       this.getDataList();
     },
+    // 点击分页
     changePage(v) {
-      this.searchForm.pageNumber = v - 1;
+      this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
+    // 设置每页大小
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
@@ -285,6 +275,7 @@ export default {
         },
       });
     },
+    // 获取数据集合
     getDataList() {
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {

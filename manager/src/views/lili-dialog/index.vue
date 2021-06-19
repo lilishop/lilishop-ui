@@ -1,7 +1,7 @@
 <template>
   <Modal :styles="{ top: '120px' }" width="1160" @on-cancel="clickClose" @on-ok="clickOK" v-model="flag" :mask-closable="false" scrollable>
     <template v-if="flag">
-      <goodsDialog @selected="(val) => {goodsData = val;}" 
+      <goodsDialog @selected="(val) => {goodsData = val;}"
         v-if="goodsFlag" ref="goodsDialog" :selectedWay='goodsData'/>
       <linkDialog @selectedLink="
           (val) => {
@@ -14,10 +14,12 @@
 <script>
 import goodsDialog from "./goods-dialog";
 import linkDialog from "./link-dialog";
+import couponDialog from "./coupon-dialog";
 export default {
   components: {
     goodsDialog,
     linkDialog,
+    couponDialog,
   },
   data() {
     return {
@@ -60,7 +62,7 @@ export default {
       } else {
         this.goodsFlag = false;
       }
-      
+
     },
     close() {
       this.flag = false;

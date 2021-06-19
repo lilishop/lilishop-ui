@@ -93,6 +93,11 @@ export default {
       getCategory(0).then(res => {
         if (res.success) {
           this.cateList = res.result;
+          // 过期时间
+          var expirationTime = new Date().setHours(new Date().getHours() + 1);
+          // 存放过期时间
+          localStorage.setItem('category_expiration_time', expirationTime);
+          // 存放分类信息
           localStorage.setItem('category', JSON.stringify(res.result))
         }
       });
@@ -117,7 +122,12 @@ export default {
     }
   },
   mounted () {
-    if (localStorage.getItem('category')) {
+    if (localStorage.getItem('category') && localStorage.getItem('category_expiration_time')) {
+      // 如果缓存过期，则获取最新的信息
+      if (new Date() > localStorage.getItem('category_expiration_time')) {
+        this.getCate();
+        return;
+      }
       this.cateList = JSON.parse(localStorage.getItem('category'))
     } else {
       this.getCate()

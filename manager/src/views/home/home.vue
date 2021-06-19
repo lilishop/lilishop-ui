@@ -211,10 +211,8 @@
 import { homeStatistics, hotGoods, hotShops, getNoticePage } from "@/api/index";
 import show from "./show.vue";
 import * as API_Goods from "@/api/goods";
-
 import { Chart } from "@antv/g2";
 import * as API_Member from "@/api/member";
-import Cookies from "js-cookie";
 export default {
   name: "home",
   components: {
@@ -502,11 +500,13 @@ export default {
       let data = this.chartList;
 
       data.forEach((item) => {
+
         item.title = "历史在线人数";
+        item.date = item.date.substring(5)
+
       });
       this.historyMemberChart.data(data);
 
-      console.error(data)
       this.historyMemberChart.tooltip({
         showCrosshairs: true,
         shared: true,

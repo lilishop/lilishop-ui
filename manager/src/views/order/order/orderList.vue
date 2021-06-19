@@ -1,16 +1,27 @@
 <template>
   <div class="search">
+
     <Card>
+
       <Row @keydown.enter.native="handleSearch">
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
           <Form-item label="订单号" prop="orderSn">
-            <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单号" clearable style="width: 200px" />
+            <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单号" clearable style="width: 160px" />
           </Form-item>
           <Form-item label="会员名称" prop="buyerName">
-            <Input type="text" v-model="searchForm.buyerName" placeholder="请输入会员名称" clearable style="width: 200px" />
+            <Input type="text" v-model="searchForm.buyerName" placeholder="请输入会员名称" clearable style="width: 160px" />
+          </Form-item>
+
+          <Form-item label="订单类型" prop="orderType">
+            <Select v-model="searchForm.orderType" placeholder="请选择" clearable style="width: 160px">
+              <Option value="NORMAL">普通订单</Option>
+              <Option value="PINTUAN">拼团订单</Option>
+              <Option value="GIFT">赠品订单</Option>
+              <Option value="VIRTUAL">核验订单</Option>
+            </Select>
           </Form-item>
           <Form-item label="订单状态" prop="orderStatus">
-            <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 200px">
+            <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 160px">
               <Option value="UNPAID">未付款</Option>
               <Option value="PAID">已付款</Option>
               <Option value="UNDELIVERED">待发货</Option>
@@ -20,29 +31,91 @@
               <Option value="CANCELLED">已取消</Option>
             </Select>
           </Form-item>
+
           <Form-item label="下单时间">
-            <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px"></DatePicker>
+            <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 160px"></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
       </Row>
+      <div>
+        <download-excel class="export-excel-wrapper" :data="data" :fields="fields" name="商品订单.xls">
+          <Button type="primary" class="export">
+            导出Excel
+          </Button>
+        </download-excel>
+      </div>
+
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+
       <Row type="flex" justify="end" class="page">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
-          size="small" show-total show-elevator show-sizer></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
+          show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
+
   </div>
 </template>
 
 <script>
 import * as API_Order from "@/api/order";
-
+import JsonExcel from "vue-json-excel";
 export default {
   name: "orderList",
-  components: {},
+  components: {
+    "download-excel": JsonExcel,
+  },
   data() {
     return {
+      // 表格的表头以及内容
+      fields: {
+        订单编号: "sn",
+        下单时间: "createTime",
+        客户名称: "memberName",
+        客户账号: "",
+        收货人: "",
+        收货人手机号: "",
+        收货人地址: "",
+        支付方式: {
+          field: "clientType",
+          callback: (value) => {
+            if (value == "H5") {
+              return "移动端";
+            } else if (value == "PC") {
+              return "PC端";
+            } else if (value == "WECHAT_MP") {
+              return "小程序端";
+            } else if (value == "APP") {
+              return "移动应用端";
+            } else {
+              return value;
+            }
+          },
+        },
+        配送方式: "",
+        配送费用: "",
+        订单商品金额: "",
+        订单优惠金额: "",
+        订单应付金额: "",
+        商品SKU编号: "",
+        商品数量: "groupNum",
+        买家备注: "",
+        订单状态: "",
+        付款状态: {
+          field: "payStatus",
+          callback: (value) => {
+            return value == "UNPAID"
+              ? "未付款"
+              : value == "PAID"
+              ? "已付款"
+              : "";
+          },
+        },
+        发货状态: "",
+        发票类型: "",
+        发票抬头: "",
+        店铺: "storeName",
+      },
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
@@ -65,42 +138,56 @@ export default {
         {
           title: "订单号",
           key: "sn",
-          minWidth: 230,
+          minWidth: 240,
           tooltip: true,
         },
-        {
-          title: "下单时间",
-          key: "createTime",
-          width: 200,
-        },
+
         {
           title: "订单来源",
           key: "clientType",
-          width: 95,
+          width: 120,
           render: (h, params) => {
             if (params.row.clientType == "H5") {
-              return h("div",{},"移动端");
-            }else if(params.row.clientType == "PC") {
-              return h("div",{},"PC端");
-            }else if(params.row.clientType == "WECHAT_MP") {
-              return h("div",{},"小程序端");
-            }else if(params.row.clientType == "APP") {
-              return h("div",{},"移动应用端");
+              return h("div", {}, "移动端");
+            } else if (params.row.clientType == "PC") {
+              return h("div", {}, "PC端");
+            } else if (params.row.clientType == "WECHAT_MP") {
+              return h("div", {}, "小程序端");
+            } else if (params.row.clientType == "APP") {
+              return h("div", {}, "移动应用端");
+            } else {
+              return h("div", {}, params.row.clientType);
             }
-            else{
-               return h("div",{},params.row.clientType);
+          },
+        },
+        {
+          title: "订单类型",
+          key: "orderType",
+          width: 120,
+          render: (h, params) => {
+            if (params.row.orderType == "NORMAL") {
+              return h("div", [h("span", {}, "普通订单")]);
+            } else if (params.row.orderType == "PINTUAN") {
+              return h("div", [h("span", {}, "拼团订单")]);
+            } else if (params.row.orderType == "GIFT") {
+              return h("div", [h("span", {}, "赠品订单")]);
+            } else if (params.row.orderType == "VIRTUAL") {
+              return h("div", [h("tag", {}, "核验订单")]);
             }
           },
         },
         {
           title: "买家名称",
           key: "memberName",
-          width: 130,
+          minWidth: 130,
+          tooltip: true,
         },
+
         {
           title: "订单金额",
           key: "flowPrice",
-          minWidth: 120,
+          minWidth: 100,
+          tooltip: true,
           render: (h, params) => {
             return h(
               "div",
@@ -112,7 +199,7 @@ export default {
         {
           title: "订单状态",
           key: "orderStatus",
-          width: 95,
+          minWidth: 100,
           render: (h, params) => {
             if (params.row.orderStatus == "UNPAID") {
               return h("div", [h("span", {}, "未付款")]);
@@ -131,12 +218,19 @@ export default {
             }
           },
         },
+        {
+          title: "下单时间",
+          key: "createTime",
+          width: 170,
+          sortable: true,
+          sortType: "desc",
+        },
 
         {
           title: "操作",
           key: "action",
           align: "center",
-          width: 180,
+          width: 100,
           render: (h, params) => {
             return h("div", [
               h(
@@ -280,4 +374,11 @@ export default {
 <style lang="scss" scoped>
 // 建议引入通用样式 可删除下面样式代码
 @import "@/styles/table-common.scss";
+.export {
+  margin: 10px 20px 10px 0;
+}
+.export-excel-wrapper {
+  display: inline;
+}
+
 </style>

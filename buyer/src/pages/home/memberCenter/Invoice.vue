@@ -78,12 +78,12 @@ export default {
     this.getList()
   },
   methods: {
-    getList () {
+    getList () { // 获取发票列表
       receiptList().then(res => {
         this.list = res.result.records;
       })
     },
-    save () {
+    save () { // 保存发票
       this.$refs.form.validate((valid) => {
         if (valid) {
           this.loading = true;
@@ -105,7 +105,7 @@ export default {
         }
       });
     },
-    resetData () {
+    resetData () { // 重置表单数据
       this.$refs.form.resetFields();
     }
   }

@@ -67,14 +67,14 @@ export default {
     };
   },
   methods: {
-    getArticleList () {
+    getArticleList () { // 获取常见问题列表
       articleList(this.params).then(res => {
         if (res.success) {
           this.articleList = res.result.records
         }
       })
     },
-    goArticle (id) {
+    goArticle (id) { // 跳转文章详情
       let routeUrl = this.$router.resolve({
         path: '/article',
         query: {id}

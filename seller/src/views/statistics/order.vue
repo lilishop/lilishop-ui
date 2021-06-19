@@ -173,7 +173,8 @@ export default {
   data() {
     return {
       total: "0", // 订单总数
-      orderType: [ // tab切换状态
+      orderType: [
+        // tab切换状态
         {
           title: "订单",
           selected: true,
@@ -194,13 +195,15 @@ export default {
         TAKE: "已完成",
       },
 
-      serviceTypeList: { // 服务类型
+      serviceTypeList: {
+        // 服务类型
         CANCEL: "取消",
         RETURN_GOODS: "退货",
         EXCHANGE_GOODS: "换货",
         RETURN_MONEY: "退款",
       },
-      serviceStatusList: { // 服务类型
+      serviceStatusList: {
+        // 服务类型
         APPLY: "申请售后",
         PASS: "通过售后",
         REFUSE: "拒绝售后",
@@ -219,7 +222,8 @@ export default {
 
       columns: [], // 定退单title
 
-      orderColumns: [ // 订单表头
+      orderColumns: [
+        // 订单表头
         {
           type: "expand",
           width: 50,
@@ -270,7 +274,8 @@ export default {
           },
         },
       ],
-      refundColumns: [ // 退货单表头
+      refundColumns: [
+        // 退货单表头
         {
           type: "expand",
           width: 50,
@@ -332,7 +337,8 @@ export default {
           key: "applyRefundPrice",
           render: (h, params) => {
             return h(
-              "div", this.$options.filters.unitPrice(params.row.applyRefundPrice, '￥')
+              "div",
+              this.$options.filters.unitPrice(params.row.applyRefundPrice, "￥")
             );
           },
         },
@@ -402,20 +408,20 @@ export default {
       orderParams: {
         searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
         year: "",
-        storeId: JSON.parse(Cookies.get("userInfo")).id || '',
+        storeId: JSON.parse(Cookies.get("userInfo")).id || "",
         memberId: "",
       },
       // 订单概念
       overViewParams: {
         month: "",
         searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
-        storeId: JSON.parse(Cookies.get("userInfo")).id || '',
+        storeId: JSON.parse(Cookies.get("userInfo")).id || "",
         year: "",
       },
       defaultParams: {
         month: "",
         searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
-        storeId: JSON.parse(Cookies.get("userInfo")).id || '',
+        storeId: JSON.parse(Cookies.get("userInfo")).id || "",
         year: "",
       },
 
@@ -425,7 +431,7 @@ export default {
         pageNumber: 1,
         pageSize: 10,
         searchType: "LAST_SEVEN",
-        storeId:JSON.parse(Cookies.get("userInfo")).id || '',
+        storeId: JSON.parse(Cookies.get("userInfo")).id || "",
         year: "",
       },
 
@@ -477,34 +483,29 @@ export default {
       // 默认已经加载 legend-filter 交互
       let data = this.chartList;
 
-      this.orderChart.data(data);
-      this.orderChart.scale({
-        finalPrice: {
-          range: [0, 1],
-          nice: true,
-        },
+      data.forEach((item) => {
+        item.createTime = item.createTime.split(" ")[0];
+        item.title = "交易额";
       });
+      this.orderChart.data(data);
+
       this.orderChart.tooltip({
         showCrosshairs: true,
         shared: true,
       });
-      this.orderChart.axis("finalPrice", {
-        label: {
-          formatter: (val) => {
-            return val + "元";
-          },
-        },
-      });
+
       this.orderChart
         .line()
         .position("createTime*price")
-
+        .label("price")
+        .color("title")
         .shape("smooth");
 
       this.orderChart
         .point()
         .position("createTime*price")
-
+        .label("price")
+        .color("title")
         .shape("circle")
         .style({
           stroke: "#fff",
@@ -527,7 +528,6 @@ export default {
       const res = await API_Goods.getOrderOverView(this.overViewParams);
       if (res.success) {
         this.overViewList = res.result;
-        console.log(res.result);
       }
     },
     // 实例化订单图表
@@ -597,9 +597,9 @@ export default {
     background: $theme_color;
   }
 }
-.breadcrumb{
-  span{
-      cursor: pointer;
+.breadcrumb {
+  span {
+    cursor: pointer;
   }
 }
 

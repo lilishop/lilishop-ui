@@ -63,7 +63,7 @@ export default {
     this.getPoint()
   },
   methods: {
-    getHistory () {
+    getHistory () { // 获取积分历史
       memberPointHistory(this.params).then(res => {
         this.logData = res.result;
       })
@@ -73,11 +73,11 @@ export default {
         if (res.success) this.pointObj = res.result
       })
     },
-    changePage (val) {
+    changePage (val) { // 修改页码
       this.pageNumber = val
       this.getHistory()
     },
-    changePageSize (val) {
+    changePageSize (val) { // 修改页数
       this.param.pageSize = val
       this.params.pageNumber = 1
       this.getHistory()

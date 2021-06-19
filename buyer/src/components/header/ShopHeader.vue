@@ -1,10 +1,10 @@
 <template>
   <div class="shop-box">
     <div class="shop-container">
-      <div class="shop-title">
-        <div class="shop-title-content">
-          <p><router-link :to="`/merchant?id=${skuDetail.storeId}`">{{ skuDetail.storeName }}</router-link></p>
-        </div>
+      <div class="shop-title-content">
+        <img class="hover-pointer" @click="linkTo(`/merchant?id=${storeDetail.storeId}`)" :src="storeDetail.storeLogo" height="40" alt="">
+        <p><router-link :to="`/merchant?id=${storeDetail.storeId}`">{{ storeDetail.storeName }}</router-link></p>
+        <div class="ml_20" v-html="storeDetail.storeDesc"></div>
       </div>
     </div>
   </div>
@@ -20,7 +20,7 @@ export default {
     }
   },
   computed: {
-    skuDetail () {
+    storeDetail () { // 店铺详情
       return this.detail;
     }
   }
@@ -46,57 +46,17 @@ export default {
   color: #fff;
 }
 
-.shop-title {
-  display: flex;
-  flex-direction: row;
-}
-
-.shop-title-icon {
-  font-size: 46px;
-}
-
 .shop-title-content {
-  padding-top: 8px;
-  margin-left: 15px;
   display: flex;
+  align-items: center;
 }
 
 .shop-title-content p {
-  line-height: 26px;
   font-size: 20px;
-
-}
-.shop-title-content p:nth-child(2) {
-  font-size: 16px;
   margin-left: 20px;
 }
 .shop-title-content a {
   color: #fff;
 }
 
-.shop-another-item {
-  display: flex;
-  flex-direction: row;
-}
-
-.shop-another-item-detail {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-left: 15px;
-}
-
-.shop-another-item-img {
-  height: 80px;
-  border-radius: 40px;
-  overflow: hidden;
-}
-
-.shop-another-item-img img {
-  width: 80px;
-}
-
-.shop-anoter-item-intro {
-  margin-left: 15px;
-}
 </style>

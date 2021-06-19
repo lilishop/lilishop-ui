@@ -47,6 +47,8 @@ const ComplainList = resolve => require(['@/pages/home/memberCenter/ComplainList
 const ComplainDetail = resolve => require(['@/pages/home/memberCenter/ComplainDetail'], resolve);
 const Invoice = resolve => require(['@/pages/home/memberCenter/Invoice'], resolve);
 const Point = resolve => require(['@/pages/home/memberCenter/Point'], resolve);
+const MsgList = resolve => require(['@/pages/home/memberCenter/memberMsg/MsgList'], resolve);
+const MsgDetail = resolve => require(['@/pages/home/memberCenter/memberMsg/MsgDetail'], resolve);
 
 /*
  * 会员中心
@@ -315,6 +317,18 @@ export default new Router({
       path: 'AddAddress',
       name: 'AddAddress',
       component: AddAddress
+    },
+    {
+      path: 'MsgList',
+      name: 'MsgList',
+      component: MsgList,
+      meta: {title: '我的消息'}
+    },
+    {
+      path: 'MsgDetail',
+      name: 'MsgDetail',
+      component: MsgDetail,
+      meta: {title: '我的消息'}
     },
     {
       path: 'MyOrder',

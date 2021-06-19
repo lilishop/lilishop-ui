@@ -65,19 +65,19 @@ export default {
     }
   },
   methods: {
-    getDetail () {
+    getDetail () { // 获取评价详情
       evaluationDetail(this.$route.query.id).then(res => {
         if (res.success) this.orderGoods = res.result
       })
     },
-    goGoodsDetail (skuId, goodsId) {
+    goGoodsDetail (skuId, goodsId) { // 跳转商品详情
       let routerUrl = this.$router.resolve({
         path: '/goodsDetail',
         query: {skuId, goodsId}
       })
       window.open(routerUrl.href, '_blank')
     },
-    handleView (name) {
+    handleView (name) { // 预览图片
       this.previewImage = name;
       this.visible = true;
     }

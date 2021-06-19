@@ -99,7 +99,7 @@ export default {
         againPassword: '',
         newPassword: ''
       },
-      ruleInLines: {
+      ruleInLines: { // 验证规则
         picture: [
           {required: true, message: '请输入图片验证码', trigger: 'blur'}
         ],
@@ -107,7 +107,7 @@ export default {
           {required: true, message: '请输入短信验证码', trigger: 'blur'}
         ]
       },
-      ruleIn: {
+      ruleIn: { // 验证规则
         newPassword: [
           {required: true, message: '请输入新密码', trigger: 'blur'},
           {type: 'string', min: 6, message: '密码不能少于6位'}
@@ -117,7 +117,7 @@ export default {
           {type: 'string', min: 6, message: '密码不能少于6位'}
         ]
       },
-      ruleInline: {
+      ruleInline: { // 验证规则
         password: [
           {required: true, message: '请输入旧密码', trigger: 'blur'}
         ],

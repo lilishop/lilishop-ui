@@ -64,10 +64,11 @@ export default {
     return {
       // 时间
 
-      uvs: "", // 访客数
-      pvs: "", // 浏览量
+      uvs: 0, // 访客数
+      pvs: 0, // 浏览量
 
-      dateList: [ // 日期选择列表
+      dateList: [
+        // 日期选择列表
         {
           title: "今天",
           selected: false,
@@ -118,6 +119,8 @@ export default {
   watch: {
     params: {
       handler(val) {
+        this.uvs = 0;
+        this.pvs = 0;
         this.init();
       },
       deep: true,
@@ -195,8 +198,8 @@ export default {
         if (res.result) {
           this.data = res.result;
           res.result.forEach((item) => {
-            this.uvs += item.uvNum;
-            this.pvs += item.pvNum;
+            this.uvs += parseInt(item.uvNum);
+            this.pvs += parseInt(item.pvNum);
           });
 
           if (!this.orderChart) {

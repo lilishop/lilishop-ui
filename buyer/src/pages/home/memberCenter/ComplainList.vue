@@ -18,7 +18,7 @@
           <div class="title order-item-title">
             <span>投诉单号:{{item.id}}</span>
             <span class="color999 ml_10">{{item.createTime}}</span>
-            <span class="hover-pointer fontsize_12 eval-detail" @click="detail(item.id)">投诉详情</span>
+            <span class="hover-pointer fontsize_12 eval-detail" @click="goDetail(item.id)">投诉详情</span>
             <span class="hover-pointer fontsize_12 eval-detail" style="right: 90px" v-if="item.complainStatus != 'EXPIRED' && item.complainStatus != 'CANCEL'" @click="cancel(item.id)">取消投诉</span>
           </div>
           <Row class="order-item-view">
@@ -93,7 +93,7 @@ export default {
     this.getList()
   },
   methods: {
-    getList () {
+    getList () { // 获取投诉列表
       complainList(this.params).then(res => {
         if (res.success) {
           const list = res.result.records;
@@ -102,16 +102,16 @@ export default {
         }
       })
     },
-    changePageNum (val) {
+    changePageNum (val) { // 改变页码
       this.params.pageNumber = val;
       this.getList()
     },
-    changePageSize (val) {
+    changePageSize (val) { // 改变页数
       this.pageNumber = 1;
       this.params.pageSize = val;
       this.getList()
     },
-    cancel (id) {
+    cancel (id) { // 取消投诉
       this.$Modal.confirm({
         title: '取消投诉',
         content: '<p>确定取消投诉吗？</p>',
@@ -126,7 +126,7 @@ export default {
         onCancel: () => { }
       });
     },
-    detail (id) {
+    goDetail (id) { // 跳转投诉详情
       this.$router.push({path: '/home/complainDetail', query: { id }})
     }
   }
