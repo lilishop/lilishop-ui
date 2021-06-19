@@ -16,7 +16,6 @@
               <Option value="UNDELIVERED">待发货</Option>
               <Option value="DELIVERED">已发货</Option>
               <Option value="COMPLETED">已完成</Option>
-              <Option value="TAKE">待核验</Option>
               <Option value="CANCELLED">已取消</Option>
             </Select>
           </Form-item>
@@ -27,7 +26,12 @@
           <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
-      <Table class="padding-row" :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+      <div>
+        <Button type="primary" class="export" @click="expressOrderDeliver">
+          批量发货
+        </Button>
+      </div>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
       <Row type="flex" justify="end" class="page">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
           show-total show-elevator show-sizer></Page>

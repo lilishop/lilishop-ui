@@ -13,8 +13,6 @@
             <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 160px">
               <Option value="UNPAID">未付款</Option>
               <Option value="PAID">已付款</Option>
-              <Option value="UNDELIVERED">待发货</Option>
-              <Option value="DELIVERED">已发货</Option>
               <Option value="COMPLETED">已完成</Option>
               <Option value="TAKE">待核验</Option>
               <Option value="CANCELLED">已取消</Option>
@@ -28,16 +26,12 @@
         </Form>
       </Row>
       <div>
-        <Button type="primary" class="export" @click="expressOrderDeliver">
-          批量发货
-          <Icon type="ios-arrow-down"></Icon>
-        </Button>
         <Poptip @keydown.enter.native="orderVerification" placement="bottom-start" width="400">
           <Button class="export">
             核验订单
           </Button>
           <div class="api" slot="content">
-            <h2>核验订单号</h2>
+            <h2>核验码</h2>
             <div style="margin:10px 0;">
               <Input v-model="orderCode" style="width:300px; margin-right:10px;" />
               <Button style="primary" @click="orderVerification">核验</Button>
@@ -213,14 +207,6 @@ export default {
           query: { sn: result.result.sn || this.orderCode },
         });
       }
-    },
-    /**
-     * 批量发货
-     */
-    expressOrderDeliver() {
-      this.$router.push({
-        path: "/export-order-deliver",
-      });
     },
     init() {
       this.getDataList();
