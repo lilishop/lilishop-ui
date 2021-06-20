@@ -230,7 +230,8 @@
         <FormItem label="发送范围">
           <RadioGroup type="button" button-style="solid" v-model="messageSendForm.messageRange">
             <Radio disabled label="ALL">全站</Radio>
-            <Radio disabled label="APPOINT">指定商家</Radio>
+            <Radio v-if="messageSendForm.messageClient == 'store'" disabled label="APPOINT">指定商家</Radio>
+            <Radio v-if="messageSendForm.messageClient == 'member'" disabled label="MEMBER">指定会员</Radio>
           </RadioGroup>
         </FormItem>
         <FormItem label="指定商家" v-if="messageSendForm.messageClient == 'store'">
@@ -565,7 +566,11 @@
                 ]);
               } else if (params.row.messageRange == "APPOINT") {
                 return h('div', [
-                  h('span', {}, '指定用户'),
+                  h('span', {}, '指定商家'),
+                ]);
+              } else if (params.row.messageRange == "MEMBER") {
+                return h('div', [
+                  h('span', {}, '指定会员'),
                 ]);
               }
             }
@@ -894,11 +899,18 @@
       },
       //管理员发送站内信提交
       sendMessageSubmit() {
-
+        let userIds = [];
+        let userNames = [];
         console.warn(this.selectedMember)
-        if(this.messageSendForm.messageClient == 'member' && this.messageSendForm.messageRange == 'MEMBER'){
-
+        if (this.messageSendForm.messageClient == 'member' && this.messageSendForm.messageRange == 'MEMBER'){
+          this.selectedMember.forEach(function(item, index) {
+            userIds.push(item.id)
+            userNames.push(item.username)
+          })
+          this.messageSendForm.userIds = userIds
+          this.messageSendForm.userNames = userNames
         }
+
         if (this.messageSendForm.userIds.length <= 0 && this.messageSendForm.messageRange == "APPOINT") {
           this.$Message.error("请选择发送对象");
           return
@@ -938,6 +950,7 @@
         if (v == "MEMBER") {
           this.shopShow = false
           this.memberShow = true
+          this.selectedMember = []
         }
       },
       //获取管理员发送列表
