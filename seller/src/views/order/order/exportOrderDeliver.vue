@@ -44,7 +44,7 @@ import JsonExcel from "vue-json-excel";
 import { downLoadDeliverExcel, uploadDeliverExcel } from "@/api/order.js";
 import { baseUrl } from "@/libs/axios.js";
 export default {
-  components: {
+   components: {
     "download-excel": JsonExcel,
   },
   data() {
@@ -79,10 +79,14 @@ export default {
   methods: {
     // 点击选择步骤
     handleCheckStep(val) {
-      this.stepList.map((item) => {
-        item.checked = false;
-      });
-      val.checked = true;
+      if(val.title.search('3') == -1){
+        console.warn(val)
+        this.stepList.map((item) => {
+          item.checked = false;
+        });
+        val.checked = true;
+      }
+
     },
 
 
