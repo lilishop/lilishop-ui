@@ -60,7 +60,7 @@ export default {
         orderSn: "",
         buyerName: "",
         orderStatus: "",
-        orderType:"NORMAL"
+        orderType: "NORMAL",
       },
       selectDate: null,
       form: {
@@ -191,8 +191,6 @@ export default {
       let result = await verificationCode(this.orderCode);
 
       if (result.success) {
-
-
         this.$router.push({
           name: "order-detail",
           query: { sn: result.result.sn || this.orderCode },
@@ -270,6 +268,9 @@ export default {
         query: { sn: sn },
       });
     },
+  },
+  mounted() {
+    this.init();
   },
   activated() {
     this.init();

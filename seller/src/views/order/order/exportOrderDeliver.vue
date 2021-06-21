@@ -17,8 +17,8 @@
       </div>
       <!-- 上传 -->
       <div v-if="item.checked && index ==1" class="tpl">
-        <Upload :before-upload="handleUpload" name="files"  style="width:50%; height:400px;"
-          accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" multiple type="drag" :action="action" :headers="accessToken">
+        <Upload :before-upload="handleUpload" name="files" style="width:50%; height:400px;" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+          multiple type="drag" :action="action" :headers="accessToken">
           <div style="padding: 50px 0">
             <Icon type="ios-cloud-upload" size="102" style="color: #3399ff"></Icon>
             <h2>选择或拖拽文件上传</h2>
@@ -26,11 +26,13 @@
         </Upload>
       </div>
       <!-- 上传 -->
-      <div v-if="item.checked && index ==2" class="tpl">
+      <div v-if="item.checked && index ==2" class="tpl success">
+
         <h1>发货完成</h1>
 
         <div>
-          <Button>关闭页面</Button>
+          <Button class="btn" @click="close">关闭页面</Button>
+          <Button class="btn" type="primary" @click="navigationToGoodsOrder">商品订单</Button>
         </div>
       </div>
 
@@ -44,7 +46,7 @@ import JsonExcel from "vue-json-excel";
 import { downLoadDeliverExcel, uploadDeliverExcel } from "@/api/order.js";
 import { baseUrl } from "@/libs/axios.js";
 export default {
-   components: {
+  components: {
     "download-excel": JsonExcel,
   },
   data() {
@@ -79,21 +81,33 @@ export default {
   methods: {
     // 点击选择步骤
     handleCheckStep(val) {
-      if(val.title.search('3') == -1){
-        console.warn(val)
+      if (val.title.search("3") == -1) {
+        console.warn(val);
         this.stepList.map((item) => {
           item.checked = false;
         });
         val.checked = true;
       }
-
     },
-
 
     handleUpload(file) {
       this.file = file;
       this.upload();
       return false;
+    },
+
+    navigationToGoodsOrder() {
+      this.$router.push({
+        path: "/order/orderList",
+      });
+    },
+
+    close() {
+      this.$store.commit("removeTag", "export-order-deliver");
+      localStorage.storeOpenedList = JSON.stringify(
+        this.$store.state.app.storeOpenedList
+      );
+      this.$router.go(-1);
     },
 
     /**
@@ -102,9 +116,15 @@ export default {
     async upload() {
       let fd = new FormData();
       fd.append("files", this.file);
-      await uploadDeliverExcel(fd);
-    },
+      let res = await uploadDeliverExcel(fd);
+      if (res.success) {
+        this.stepList.map((item) => {
+          item.checked = false;
+        });
 
+        this.stepList[2].checked = true;
+      }
+    },
 
     /**
      * 下载excel
@@ -175,5 +195,16 @@ h2 {
 img {
   width: 100px;
   height: 100px;
+}
+.success {
+  align-items: center;
+  flex-direction: column;
+  > h1 {
+    font-size: 28px;
+    margin: 10px;
+  }
+  /deep/ .btn {
+    margin: 10px;
+  }
 }
 </style>
