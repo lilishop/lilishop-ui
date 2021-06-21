@@ -1203,6 +1203,9 @@ export default {
       );
     },
     async GET_SkuSpec() {
+      if(!this.specSelected){
+        return;
+      }
       let specResult = await API_GOODS.getSpecListSellerData({
         pageNumber: 1,
         pageSize: 10,
