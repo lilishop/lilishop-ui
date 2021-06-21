@@ -18,7 +18,7 @@
           <div class="title order-item-title">
             <span>订单号:{{item.orderNo}}</span>
             <span class="color999 ml_10">{{item.createTime}}</span>
-            <span class="hover-pointer fontsize_12 eval-detail" @click="evaluate(item.id)">评价详情</span>
+            <span class="hover-pointer fontsize_12 eval-detail" @click="evaluateDetail(item.id)">评价详情</span>
           </div>
           <Row class="order-item-view">
             <i-col span="12" class="item-view-name">
@@ -80,7 +80,7 @@ export default {
     this.getList()
   },
   methods: {
-    getList () {
+    getList () { // 获取评价列表
       evolutionList(this.params).then(res => {
         if (res.success) {
           const list = res.result.records;
@@ -92,19 +92,16 @@ export default {
         }
       })
     },
-    changePageNum (val) {
+    changePageNum (val) { // 修改页码
       this.params.pageNumber = val;
       this.getList()
     },
-    changePageSize (val) {
+    changePageSize (val) { // 修改页数
       this.pageNumber = 1;
       this.params.pageSize = val;
       this.getList()
     },
-    changeIndex (index) {
-      console.log(index);
-    },
-    evaluate (id) {
+    evaluateDetail (id) { // 跳转评价详情
       this.$router.push({path: '/home/evalDetail', query: { id }})
     }
   }
@@ -112,6 +109,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.page-size {
+  display: flex;
+  justify-content: flex-end;
+}
 .order-img {
   > img {
     width: 60px;

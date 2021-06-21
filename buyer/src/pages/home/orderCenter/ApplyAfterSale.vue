@@ -139,7 +139,7 @@ export default {
     }
   },
   methods: {
-    getInfo () {
+    getInfo () { // 获取售后信息
       afterSaleInfo(this.$route.query.sn).then(res => {
         if (res.success) {
           this.info = res.result
@@ -147,15 +147,15 @@ export default {
         }
       })
     },
-    getReason (type) {
+    getReason (type) { // 获取售后原因
       afterSaleReason(type).then(res => {
         if (res.success) this.reasonList = res.result
       })
     },
-    changeReason (type) {
+    changeReason (type) { // 改变售后原因列表
       this.getReason(type)
     },
-    apply () {
+    apply () { // 售后申请提交
       this.$refs.form.validate(valid => {
         if (valid) {
           let params = Object.assign(this.info, this.form)
@@ -170,19 +170,19 @@ export default {
         }
       })
     },
-    handleView (name) {
+    handleView (name) { // 预览图片
       this.previewImage = name;
       this.visible = true;
     },
-    handleRemove (index) {
+    handleRemove (index) { // 移除图片
       this.uploadList.splice(index, 1)
       this.$forceUpdate()
     },
-    handleSuccess (res, file) {
+    handleSuccess (res, file) { // 上传成功回调
       this.uploadList.push(res.result)
       this.$forceUpdate()
     },
-    handleBeforeUpload () {
+    handleBeforeUpload () { // 上传之前钩子函数
       const check = this.uploadList.length < 6;
       if (!check) {
         this.$Notice.warning({

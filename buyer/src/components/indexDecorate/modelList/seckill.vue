@@ -71,7 +71,7 @@ export default {
     };
   },
   watch: {
-    diffSeconds (val) {
+    diffSeconds (val) {  // 秒杀倒计时
       const hours = Math.floor(val / 3600);
       // 当前秒数 / 60，向下取整
       // 获取到所有分钟数 3600 / 60 = 60分钟
@@ -139,7 +139,7 @@ export default {
         }, 1000);
       }
     },
-    goPromotion () {
+    goPromotion () { // 跳转秒杀页面
       let routeUrl = this.$router.resolve({
         path: '/seckill'
       });

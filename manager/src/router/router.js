@@ -5,7 +5,7 @@ export const loginRouter = {
   path: "/login",
   name: "login",
   meta: {
-    title: "登录 - lili "
+    title: "登录 - lili运营后台"
   },
   component: () => import("@/views/login.vue")
 };
@@ -244,6 +244,43 @@ export const otherRouter = {
       component: () => import("@/views/promotion/coupon/couponInfo.vue")
     },
     {
+      path: "coupon-activity/add",
+      title: "添加优惠券活动",
+      name: "add-coupon-activity",
+      component: () => import("@/views/promotion/couponActivity/couponPublish.vue")
+    },
+    {
+      path: "coupon-activity/edit",
+      title: "编辑平台优惠券活动",
+      name: "edit-coupon-activity",
+      component: () => import("@/views/promotion/couponActivity/couponPublish.vue")
+    },
+    {
+      path: "promotion/coupon-activity-info",
+      title: "券活动详情",
+      name: "coupon-activity-info",
+      component: () => import("@/views/promotion/couponActivity/couponInfo.vue")
+    },
+    {
+      path: "promotion/member-receive-coupon",
+      title: "领取详情",
+      name: "member-coupon-activity",
+      component: () =>
+        import("@/views/promotion/coupon/memberReceiveCoupon.vue")
+    },
+    {
+      path: "promotion/platform-coupon-info",
+      title: "详情",
+      name: "platform-coupon-activity",
+      component: () => import("@/views/promotion/coupon/couponInfo.vue")
+    },
+    {
+      path: "promotion/add-coupon-specify",
+      title: "精准发劵",
+      name: "add-coupon-specify",
+      component: () => import("@/views/promotion/coupon/couponSpecify.vue")
+    },
+    {
       path: "promotion/manager-pintuan",
       title: "平台拼团",
       name: "manager-pintuan",
@@ -296,6 +333,12 @@ export const otherRouter = {
       title: "短信签名",
       name: "add-sms-sign",
       component: () => import("@/views/sys/message/smsSign.vue")
+    },
+    {
+      path: "liveDetail",
+      title: "查看直播",
+      name: "liveDetail",
+      component: () => import("@/views/promotion/live/liveDetail.vue")
     }
   ]
 };

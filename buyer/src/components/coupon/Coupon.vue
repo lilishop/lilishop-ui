@@ -44,7 +44,7 @@ export default {
     };
   },
   methods: {
-    getList () {
+    getList () { // 获取优惠券列表
       this.loading = true
       memberCouponList(this.params).then(res => {
         this.loading = false
@@ -67,18 +67,18 @@ export default {
       }
     },
 
-    changePageNum (val) {
+    changePageNum (val) { // 分页改变页码
       this.params.pageNumber = val;
       this.getList()
     },
 
-    changePageSize (val) {
+    changePageSize (val) { // 分页改变页数
       this.pageNumber = 1;
       this.params.pageSize = val;
       this.getList()
     },
 
-    useScope (type, storeName) {
+    useScope (type, storeName) { // 根据字段返回 优惠券适用范围
       let shop = '平台';
       let goods = '全部商品'
       if (storeName !== 'platform') shop = storeName
@@ -104,7 +104,7 @@ export default {
 
 <style scoped lang="scss">
 @import '../../assets/styles/coupon.scss';
-.pageration{
-    text-align: right;
+.pageration {
+  text-align: right;
 }
 </style>

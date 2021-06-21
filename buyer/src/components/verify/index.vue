@@ -43,11 +43,11 @@ export default {
     };
   },
   methods: {
-    mouseDown (e) {
+    mouseDown (e) { // 鼠标按下操作，
       this.downX = e.clientX;
       this.flag = true;
     },
-    mouseMove (e) {
+    mouseMove (e) { // 鼠标移动
       if (this.flag) {
         let offset = e.clientX - this.downX;
 
@@ -60,7 +60,7 @@ export default {
         }
       }
     },
-    mouseUp () {
+    mouseUp () { // 鼠标抬起
       if (!this.flag) return false;
       this.flag = false;
       let params = {
@@ -83,7 +83,7 @@ export default {
         }
       });
     },
-    refresh () {
+    refresh () { // 刷新验证图片
       this.flag = false;
       this.downX = 0;
       this.distance = 0;
@@ -91,7 +91,7 @@ export default {
       this.verifyText = '拖动滑块解锁';
       this.getImg();
     },
-    getImg () {
+    getImg () { // 获取验证图片
       getVerifyImg(this.type).then(res => {
         this.data = res.result;
       });

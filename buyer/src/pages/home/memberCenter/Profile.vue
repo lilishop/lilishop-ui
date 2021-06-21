@@ -8,7 +8,6 @@
         <Upload
           :show-upload-list="false"
           :on-success="handleSuccess"
-          :before-upload="handleBeforeUpload"
           :format="['jpg','jpeg','png']"
           :action="action"
           :headers="accessToken"
@@ -58,7 +57,7 @@ export default {
     this.accessToken.accessToken = storage.getItem('accessToken');
   },
   methods: {
-    save () {
+    save () { // 保存
       this.$refs.form.validate(valid => {
         if (valid) {
           let params = {
@@ -76,10 +75,9 @@ export default {
         }
       })
     },
-    handleSuccess (res, file) {
+    handleSuccess (res, file) { // 上传成功
       this.$set(this.formItem, 'face', res.result)
     },
-    handleBeforeUpload () {}
   }
 
 }

@@ -1,30 +1,30 @@
 <template>
   <div class="search">
     <Card>
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          ref="table"
-          sortable="custom"
-          @on-sort-change="changeSort"
-          @on-selection-change="changeSelect"
-        >
-          <template slot-scope="{ row }" slot="rangeTime">
-            <div>{{ row.startTime }} ~ {{ row.endTime }}</div>
-          </template>
-          <template slot-scope="{ row }" slot="action">
-            <Button
-              type="error"
-              ghost
-              size="small"
-              :disabled="row.memberCouponStatus != 'NEW'"
-              @click="remove(row)"
-              >作废</Button
-            >
-          </template>
-        </Table>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        sortable="custom"
+        @on-sort-change="changeSort"
+        @on-selection-change="changeSelect"
+      >
+        <template slot-scope="{ row }" slot="rangeTime">
+          <div>{{ row.startTime }} ~ {{ row.endTime }}</div>
+        </template>
+        <template slot-scope="{ row }" slot="action">
+          <Button
+            type="error"
+            ghost
+            size="small"
+            :disabled="row.memberCouponStatus != 'NEW'"
+            @click="remove(row)"
+            >作废</Button
+          >
+        </template>
+      </Table>
       <Row type="flex" justify="end" class="page">
         <Page
           :current="searchForm.pageNumber"

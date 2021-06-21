@@ -5,7 +5,7 @@ export const loginRouter = {
   path: "/login",
   name: "login",
   meta: {
-    title: "登录 - lili "
+    title: "登录 - lili商家后台 "
   },
   component: () => import("@/views/login.vue")
 };
@@ -128,11 +128,18 @@ export const otherRouter = {
       component: () => import("@/views/promotion/fullCut/newFullCut.vue")
     },
     {
+      path: "export-order-deliver",
+      title: "发货",
+      name: "export-order-deliver",
+      component: () => import("@/views/order/order/exportOrderDeliver.vue")
+    },
+    {
       path: "order-detail",
       title: "订单详情",
       name: "order-detail",
       component: () => import("@/views/order/order/orderDetail.vue")
     },
+
     // {
     //   path: "/*",
     //   name: "error-404",

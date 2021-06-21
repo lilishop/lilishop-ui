@@ -59,7 +59,6 @@ export default {
       isActive: 0 // 已激活tab栏下标
     };
   },
-  mounted () {},
   methods: {
     // 点击右侧的回调
     callBack () {

@@ -63,17 +63,17 @@ export default {
     };
   },
   methods: {
-    selectTags (item) {
+    selectTags (item) { // 选择热门标签
       this.searchData = item;
       this.search();
     },
-    search () {
+    search () { // 全平台搜索商品
       this.$router.push({
         path: '/goodsList',
         query: { keyword: this.searchData }
       });
     },
-    searchStore () {
+    searchStore () { // 店铺搜索商品
       this.$emit('search', this.searchData)
     }
   },

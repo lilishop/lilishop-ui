@@ -224,7 +224,6 @@ import memberLayout from "@/views/member/list/index";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import { getCategoryTree } from "@/api/goods";
 import { shopDetail, shopAdd, shopEdit, getShopByMemberId } from "@/api/shops";
-import * as filters from "@/utils/filters";
 import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
 import region from "@/views/lili-components/region";
 import liliMap from "@/views/my-components/map/index";

@@ -11,7 +11,6 @@ export const result = [
     isMenu: true,
     url: "",
     description: "",
-    buttonType: "",
     permTypes: [],
     children: [
       {
@@ -116,7 +115,6 @@ export const result = [
     isMenu: true,
     url: "",
     description: "",
-    buttonType: "",
     permTypes: [],
     children: [
       {
@@ -140,6 +138,20 @@ export const result = [
             title: "商品订单",
             path: "orderList",
             component: "order/order/orderList",
+            icon: "md-person",
+            isMenu: true,
+            url: "",
+            children: null,
+            permTypes: []
+          },
+          {
+            name: "virtualOrderList",
+            showAlways: true,
+            level: 2,
+            type: 0,
+            title: "虚拟订单",
+            path: "virtualOrderList",
+            component: "order/order/virtualOrderList",
             icon: "md-person",
             isMenu: true,
             url: "",
@@ -249,7 +261,6 @@ export const result = [
     isMenu: true,
     url: "",
     description: "",
-    buttonType: "",
     permTypes: [],
     children: [
       {
@@ -339,7 +350,6 @@ export const result = [
     isMenu: true,
     url: "",
     description: "",
-    buttonType: "",
     permTypes: [],
     children: [
       {
@@ -377,6 +387,49 @@ export const result = [
             title: "秒杀活动",
             path: "seckill",
             component: "promotion/seckill/seckill",
+            icon: "md-person",
+            isMenu: true,
+            url: "",
+            permTypes: [],
+            children: null
+          }
+        ]
+      },
+      {
+        name: "lives",
+        showAlways: true,
+        level: 1,
+        type: 0,
+        title: "直播活动",
+        path: "/promotion",
+        component: "Main",
+        icon: "md-person",
+        isMenu: true,
+        url: "",
+        permTypes: [],
+        children: [
+          {
+            name: "live",
+            showAlways: true,
+            level: 2,
+            type: 0,
+            title: "直播管理",
+            path: "live",
+            component: "promotion/live/live",
+            icon: "md-person",
+            isMenu: true,
+            url: "",
+            permTypes: [],
+            children: null
+          },
+          {
+            name: "liveGoods",
+            showAlways: true,
+            level: 2,
+            type: 0,
+            title: "直播商品",
+            path: "liveGoods",
+            component: "promotion/live/liveGoods",
             icon: "md-person",
             isMenu: true,
             url: "",
@@ -426,34 +479,7 @@ export const result = [
             permTypes: [],
             children: null
           },
-          {
-            name: "live",
-            showAlways: true,
-            level: 2,
-            type: 0,
-            title: "直播管理",
-            path: "live",
-            component: "promotion/live/live",
-            icon: "md-person",
-            isMenu: true,
-            url: "",
-            permTypes: [],
-            children: null
-          },
-          {
-            name: "liveGoods",
-            showAlways: true,
-            level: 2,
-            type: 0,
-            title: "直播商品",
-            path: "liveGoods",
-            component: "promotion/live/liveGoods",
-            icon: "md-person",
-            isMenu: true,
-            url: "",
-            permTypes: [],
-            children: null
-          }
+
         ]
       },
       {
@@ -514,7 +540,6 @@ export const result = [
     isMenu: true,
     url: "",
     description: "",
-    buttonType: "",
     permTypes: [],
     children: [
       {
@@ -590,7 +615,6 @@ export const result = [
     isMenu: true,
     url: "",
     description: "",
-    buttonType: "",
     children: [
       {
         name: "user-manage",
@@ -661,7 +685,6 @@ export const result = [
         isMenu: true,
         url: "",
         description: "",
-        buttonType: "",
         children: [
           {
             name: "shopSetting",
@@ -675,7 +698,6 @@ export const result = [
             isMenu: true,
             url: null,
             description: null,
-            buttonType: "",
             children: null,
             permTypes: []
           },
@@ -691,7 +713,6 @@ export const result = [
             isMenu: true,
             url: null,
             description: null,
-            buttonType: "",
             children: null,
             permTypes: []
           }
@@ -712,7 +733,6 @@ export const result = [
     isMenu: true,
     url: "",
     description: "",
-    buttonType: "",
     children: [
       {
         name: "user-manage",

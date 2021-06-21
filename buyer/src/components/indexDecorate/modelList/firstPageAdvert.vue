@@ -32,7 +32,6 @@ export default {
       options: this.data.options // 装修数据
     };
   },
-  methods: {}
 };
 </script>
 <style lang="scss" scoped>

@@ -3,8 +3,22 @@ import { getRequest, postRequest, postRequestWithNoForm, putRequest, deleteReque
 
 
 // 获取店铺直播间列表
-export const getLivesList = (params) => {
+export const getLiveList = (params) => {
   return getRequest('/broadcast/studio', params)
+}
+// 添加直播间
+export const addLive = (params) => {
+  return postRequest('/broadcast/studio', params)
+}
+
+// 获取直播间详情
+export const getLiveInfo = (studioId) => {
+  return getRequest(`/broadcast/studio/studioInfo/${studioId}`)
+}
+
+// 修改直播间
+export const editLive = (params) => {
+  return putRequest('/broadcast/studio/edit', params)
 }
 
 // 获取店铺直播商品
@@ -12,12 +26,26 @@ export const getLiveGoods = (params) => {
   return getRequest('/broadcast/commodity', params)
 }
 
+// 店铺直播间删除商品
+export const delLiveGoods = (goodsId) => {
+  return deleteRequest(`/broadcast/commodity/${goodsId}`)
+}
+
+// 直播间删除商品
+export const delRoomLiveGoods = (roomId,liveGoodsId) => {
+  return deleteRequest(`/broadcast/studio/deleteInRoom/${roomId}/${liveGoodsId}`)
+}
+
 // 添加店铺直播商品
-export const addLiveGoods = (params) => {
+export const addLiveStoreGoods = (params) => {
   return postRequestWithNoForm('/broadcast/commodity', params)
 }
 
+// 店铺直播间添加
+export const addLiveGoods = (params) => {
 
+  return putRequest(`/broadcast/studio/push/${params.roomId}/${params.liveGoodsId}`)
+}
 
 // 获取拼团列表
 export const getPintuanList = (params) => {

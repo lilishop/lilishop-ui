@@ -21,11 +21,11 @@
         <Button @click="addMember" type="primary">添加会员</Button>
       </Row>
 
-        <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
-        </Table>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
+      </Table>
       <Row type="flex" justify="end" class="page">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
-          size="small" show-total show-elevator show-sizer></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
+          show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
 
@@ -137,12 +137,14 @@ export default {
       loading: true, // 表单加载状态
       addFlag: false, // modal显隐控制
       updateRegion: false, // 地区
-      addMemberForm: { // 添加用户表单
+      addMemberForm: {
+        // 添加用户表单
         mobile: "",
         username: "",
         password: "",
       },
-      searchForm: { // 请求参数
+      searchForm: {
+        // 请求参数
         pageNumber: 1,
         pageSize: 10,
         order: "desc",
@@ -152,7 +154,8 @@ export default {
       },
       picModelFlag: false, // 选择图片
       formValidate: {}, // 表单数据
-      addRule: { // 验证规则
+      addRule: {
+        // 验证规则
         mobile: [
           { required: true, message: "请输入手机号码" },
           {
@@ -229,6 +232,7 @@ export default {
                   {
                     props: {
                       size: "small",
+                      type: params.row.___selected ? "primary" : "",
                     },
                     style: {
                       marginRight: "5px",
@@ -236,11 +240,11 @@ export default {
                     },
                     on: {
                       click: () => {
-                        this.callback(params.row);
+                        this.callback(params.row, params.index);
                       },
                     },
                   },
-                  "选择"
+                  params.row.___selected ? "已选择" : "选择"
                 ),
 
                 h(
@@ -251,7 +255,8 @@ export default {
                       size: "small",
                     },
                     style: {
-                      marginRight: "5px", display: this.selectedMember ? "none" : "block",
+                      marginRight: "5px",
+                      display: this.selectedMember ? "none" : "block",
                     },
                     on: {
                       click: () => {
@@ -270,7 +275,8 @@ export default {
                       ghost: true,
                     },
                     style: {
-                      marginRight: "5px", display: this.selectedMember ? "none" : "block",
+                      marginRight: "5px",
+                      display: this.selectedMember ? "none" : "block",
                     },
                     on: {
                       click: () => {
@@ -306,18 +312,75 @@ export default {
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
+      selectMember: [], //保存选中的用户
     };
+  },
+  props: {
+    // 是否为选中模式
+    selectedMember: {
+      type: Boolean,
+      default: false,
+    },
+    // 已选择用户数据
+    selectedList: {
+      type: null,
+      default: "",
+    },
+  },
+  watch: {
+    selectedList: {
+      handler(val) {
+        this.$set(this, "selectMember", JSON.parse(JSON.stringify(val)));
+        this.init(this.data);
+        // 将父级数据与当前组件数据进行匹配
+
+      },
+      deep: true,
+      immediate: true,
+    },
   },
   methods: {
     // 回调给父级
-    callback(val) {
+    callback(val, index) {
+      this.$set(val, "___selected", !val.___selected);
+      console.log(val.___selected);
+      let findUser = this.selectMember.find((item) => {
+        return item.id == val.id;
+      });
+      // 如果没有则添加
+      if (!findUser) {
+        this.selectMember.push(val);
+      } else {
+        // 有重复数据就删除
+        this.selectMember.map((item, index) => {
+          if (item.id == findUser.id) {
+            this.selectMember.splice(index, 1);
+          }
+        });
+      }
+
       this.$emit("callback", val);
     },
-    init() {
-      this.getData();
+    // 初始化信息
+    init(data) {
+      data.forEach((item) => {
+        if (this.selectMember.length != 0) {
+          this.selectMember.forEach((member) => {
+            if (member.id == item.id) {
+              this.$set(item, "___selected", true);
+            }
+          });
+        } else {
+          this.$set(item, "___selected", false);
+        }
+      });
+      this.data = data;
     },
     changePage(v) {
       this.searchForm.pageNumber = v;
+      // 此处如果是父子级传值的时候需要做一下处理
+      //selectedMember
+
       this.getData();
     },
     changePageSize(v) {
@@ -373,12 +436,13 @@ export default {
         }
       });
     },
+
     //查询会员列表
     getData() {
       API_Member.getMemberListData(this.searchForm).then((res) => {
         if (res.result.records) {
           this.loading = false;
-          this.data = res.result.records;
+          this.init(res.result.records);
           this.total = res.result.total;
         }
       });
@@ -467,7 +531,7 @@ export default {
     },
   },
   mounted() {
-    this.init();
+    this.getData();
   },
 };
 </script>
@@ -476,7 +540,7 @@ export default {
 /deep/ .ivu-table-wrapper {
   width: 100%;
 }
-/deep/ .ivu-card{
+/deep/ .ivu-card {
   width: 100%;
 }
 .face {

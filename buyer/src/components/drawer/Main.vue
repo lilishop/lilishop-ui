@@ -44,12 +44,12 @@ export default {
     }
   },
   methods: {
-    showCartNum (item) {
+    showCartNum (item) { // 获取购物车数量
       if (this.userInfo && item.title === '购物车') {
         this.getCartList()
       }
     },
-    clickBar (val) {
+    clickBar (val) { // tabbar点击操作
       if (!this.userInfo) {
         this.$Modal.confirm({
           title: '请登录',
@@ -83,7 +83,7 @@ export default {
         }
       }
     },
-    openBlank (path) {
+    openBlank (path) { // 新页面打开地址
       let routerUrl = this.$router.resolve({
         path: path
       })

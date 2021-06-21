@@ -76,7 +76,7 @@
   </div>
 </template>
 <script>
-import { btnWay } from "./btn.js";
+
 export default {
   data() {
     return {
@@ -95,7 +95,7 @@ export default {
   },
   methods: {},
   mounted() {
-    console.log(this.btnWay);
+
   },
   methods: {
     // 点击链接
@@ -103,12 +103,7 @@ export default {
       this.$refs.liliDialog.open('link')
     },
 
-    // 关闭
-    closeDecorate(index) {
-      this.$nextTick(() => {
-        this.btnWay.splice(index, 1);
-      });
-    },
+
     //点击图片解析成base64
     changeFile(item, index) {
       const file = document.getElementById("files" + index).files[0];

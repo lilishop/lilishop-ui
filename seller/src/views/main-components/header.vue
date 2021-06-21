@@ -1,7 +1,7 @@
 <template>
   <div>
     <Row class="header">
-      <img src="../../assets/lili.png" class="logo" width="220px">
+      <img class="logo" src="../../assets/logo.png" >
     </Row>
   </div>
 </template>
@@ -14,13 +14,13 @@ export default {
 
 <style lang="scss" scoped>
 .header {
-
   margin-bottom: 6vh;
   align-items: center;
   display: flex;
   justify-content: center !important;
 }
 .logo {
-  transform: scale(3);
+  width: 440px;
+  height: 158px;
 }
 </style>

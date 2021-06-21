@@ -2,29 +2,12 @@
   <div class="seckill">
     <Card>
       <Row>
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
+        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
           <Form-item label="活动名称" prop="goodsName">
-            <Input
-              type="text"
-              v-model="searchForm.promotionName"
-              placeholder="请输入活动名称"
-              clearable
-              style="width: 200px"
-            />
+            <Input type="text" v-model="searchForm.promotionName" placeholder="请输入活动名称" clearable style="width: 200px" />
           </Form-item>
           <Form-item label="活动状态" prop="promotionStatus">
-            <Select
-              v-model="searchForm.promotionStatus"
-              placeholder="请选择"
-              clearable
-              style="width: 200px"
-            >
+            <Select v-model="searchForm.promotionStatus" placeholder="请选择" clearable style="width: 200px">
               <Option value="NEW">未开始</Option>
               <Option value="START">已开始/上架</Option>
               <Option value="END">已结束/下架</Option>
@@ -32,13 +15,7 @@
             </Select>
           </Form-item>
           <Form-item label="活动时间">
-            <DatePicker
-              v-model="selectDate"
-              type="daterange"
-              clearable
-              placeholder="选择起始时间"
-              style="width: 200px"
-            ></DatePicker>
+            <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 200px"></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
           <Button @click="handleReset" class="ml_10">重置</Button>
@@ -79,18 +56,8 @@
         </template>
       </Table>
       <Row type="flex" justify="end" class="page">
-        <Page
-          :current="searchForm.pageNumber + 1"
-          :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
-          size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
+        <Page :current="searchForm.pageNumber + 1" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
+          size="small" show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
   </div>
@@ -191,8 +158,8 @@ export default {
       this.getDataList();
     },
     handleReset() {
-      this.searchForm = {}
-      this.selectDate = ''
+      this.searchForm = {};
+      this.selectDate = "";
       this.searchForm.pageNumber = 0;
       this.searchForm.pageSize = 10;
       this.getDataList();
@@ -232,9 +199,12 @@ export default {
       return hourArr;
     },
   },
-  activated () {
+  activated() {
     this.init();
-  }
+  },
+  mounted() {
+    this.init();
+  },
 };
 </script>
 <style lang="scss"  scoped>
