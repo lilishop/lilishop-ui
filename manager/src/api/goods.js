@@ -5,6 +5,13 @@ import { getRequest, postRequest, putRequest, deleteRequest} from '@/libs/axios'
 export const getManagerBrandPage = (params) => {
     return getRequest('/goods/brand/getByPage', params)
 }
+
+// 批量删除
+export const delBrand = (ids) =>{
+  return deleteRequest(`/goods/brand/delByIds/${ids}`)
+}
+
+
 //  添加
 export const addBrand = (params) => {
     return postRequest('/goods/brand', params)

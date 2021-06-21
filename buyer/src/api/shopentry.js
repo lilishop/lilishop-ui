@@ -61,7 +61,7 @@ export function getCateById (id) {
 //  店铺入驻协议
 export function agreement () {
   return request({
-    url: `/buyer/article/get/1349291301250293760`,
+    url: `/buyer/article/type/STORE_REGISTER`,
     needToken: true,
     method: Method.GET
   })
