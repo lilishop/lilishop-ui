@@ -18,7 +18,7 @@
                   <Input type="text" @keyup="handleLink(linkItem,linkList.length)" v-model="linkItem.url" placeholder="https://"></Input>
               </div>
           </Poptip>
-          
+
         </div>
       </Col>
     </Row>
@@ -74,7 +74,12 @@ export default {
           icon: "md-happy",
           ___type: "sign",
         },
-        
+        {
+          title: "小程序直播",
+          icon: "ios-videocam",
+          ___type: "live",
+        },
+
       ],
       linkItem: {
         title: "外部链接",

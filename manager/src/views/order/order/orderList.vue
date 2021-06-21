@@ -230,7 +230,7 @@ export default {
           title: "操作",
           key: "action",
           align: "center",
-          width: 100,
+          width: 150,
           render: (h, params) => {
             return h("div", [
               h(
