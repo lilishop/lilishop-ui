@@ -34,14 +34,18 @@
             </DropdownMenu>
           </Dropdown>
         </li>
-        <li class="hover-color" @click="goUserCenter('/home/MyOrder')"><span class="nav-item">我的订单</span></li>
-        <li class="hover-color" @click="goUserCenter('/home/MyTracks')"><span class="nav-item">我的足迹</span></li>
+        <li @click="goUserCenter('/home/MyOrder')"><span class="nav-item hover-color">我的订单</span></li>
+        <li @click="goUserCenter('/home/MyTracks')"><span class="nav-item hover-color">我的足迹</span></li>
+        <li @click="goUserCenter('/home/MsgList')"><span class="nav-item hover-color">我的消息</span></li>
         <li v-if="$route.name !== 'Cart'" style="position:relative;">
           <i class="cart-badge" v-show="Number(cartNum)">{{cartNum < 100 ? cartNum : '99'}}</i>
           <Dropdown placement="bottom-start">
             <router-link to="/cart" target="_blank">
               <span @mouseenter="getCartList">
-                <Icon size="18" class="cart-icon" type="ios-cart-outline"></Icon>
+                <Icon
+                  size="18"
+                  type="ios-cart-outline"
+                ></Icon>
                 购物车
               </span>
 
@@ -124,19 +128,19 @@ export default {
       });
       window.open(url.href, "_blank");
     },
-    myInfo() {
+    myInfo () { // 跳转会员中心
       let url = this.$router.resolve({
         path: "/home",
       });
       window.open(url.href, "_blank");
     },
-    signOutFun() {
-      storage.removeItem("accessToken");
-      storage.removeItem("refreshToken");
-      storage.removeItem("userInfo");
-      storage.removeItem("cartNum");
-      this.$store.commit("SET_CARTNUM", 0);
-      this.$router.push("/login");
+    signOutFun () { // 退出登录
+      storage.removeItem('accessToken');
+      storage.removeItem('refreshToken');
+      storage.removeItem('userInfo');
+      storage.removeItem('cartNum');
+      this.$store.commit('SET_CARTNUM', 0)
+      this.$router.push('/login');
     },
     goUserCenter(path) {
       // 跳转我的订单，我的足迹
