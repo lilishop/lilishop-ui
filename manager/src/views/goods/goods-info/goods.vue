@@ -138,7 +138,6 @@ export default {
         pageSize: 10, // 页面大小
         sort: "create_time", // 默认排序字段
         order: "desc", // 默认排序方式
-        goodsType: "", // 商品类型
       },
       underForm: { // 下架原因
         reason: "",
