@@ -94,8 +94,8 @@
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
           pageSize: 10, // 页面大小
-          sort: "createTime", // 默认排序字段
-          order: "desc", // 默认排序方式
+          sort: "", // 默认排序字段
+          order: "", // 默认排序方式
           startDate: "", // 起始时间
           endDate: "", // 终止时间
           orderType: "FICTITIOUS",
@@ -118,8 +118,6 @@
             title: "下单时间",
             key: "createTime",
             width: 200,
-            sortable: true,
-            sortType: "desc",
           },
           {
             title: "订单来源",

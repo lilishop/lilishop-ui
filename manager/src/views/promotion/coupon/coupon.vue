@@ -101,7 +101,7 @@ export default {
         {
           title: "面额/折扣",
           key: "price",
-          width: 120,
+          width: 100,
           render: (h, params) => {
             if (params.row.price) {
               return h(
@@ -117,14 +117,14 @@ export default {
         {
           title: "领取数量/总数量",
           key: "publishNum",
-          width: 150,
+          width: 130,
           render: (h, params) => {
             return h(
               "div",
               params.row.receivedNum + "/" + params.row.publishNum
             );
           },
-          minWidth: 130,
+
         },
         {
           title: "优惠券类型",

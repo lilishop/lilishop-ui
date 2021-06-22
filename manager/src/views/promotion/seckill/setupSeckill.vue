@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="templateShow">
     <Form :model="form" :label-width="120">
       <FormItem label="每日场次设置">
         <Row :gutter="16" class="row">
@@ -27,6 +27,7 @@ import { getSetting, setSetting } from "@/api/index";
 export default {
   data() {
     return {
+      templateShow:false,
       submitLoading: false,
       selectedTime: [],
       times: [], //时间集合 1-24点
@@ -81,6 +82,7 @@ export default {
     async init() {
       let result = await getSetting("SECKILL_SETTING");
       if (result.success) {
+        this.templateShow = true
         this.form.seckillRule = result.result.seckillRule;
         this.times=[]
         for (let i = 0; i < 24; i++) {

@@ -21,7 +21,7 @@
         <div class="div-item">
           <div class="div-item-left">订单来源：</div>
           <div class="div-item-right">
-            {{ orderInfo.order.clientType }}
+            {{  orderInfo.order.clientType | clientTypeWay }}
           </div>
         </div>
       </div>
