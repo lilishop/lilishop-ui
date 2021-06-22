@@ -329,19 +329,33 @@ export default {
     },
 
     /**
+     * 提交直播间商品
+     */
+    addGoods() {
+      addLiveGoods({
+        roomId: this.$route.query.roomId,
+        liveGoodsId: item.liveGoodsId,
+      });
+    },
+
+    /**
      * dialog点击确定时判断
      */
     addGoods() {
+      console.log(this.commodityList);
       this.liveData.forEach((item, index) => {
-        this.commodityList.forEach((oldVal, i) => {
-          // 如果商品里面没有商品，以及添加商品为第一次的话
-          if (oldVal.liveGoodsId != item.liveGoodsId) {
-            addLiveGoods({
-              roomId: this.$route.query.roomId,
-              liveGoodsId: item.liveGoodsId,
-            });
-          }
-        });
+        if (this.commodityList.length == 1 && this.liveData.length == 1) {
+          addLiveGoods({
+            roomId: this.$route.query.roomId,
+            liveGoodsId: item.liveGoodsId,
+          });
+        } else {
+          this.commodityList.forEach((oldVal, i) => {
+            // 如果商品里面没有商品，以及添加商品为第一次的话
+            if (oldVal.liveGoodsId != item.liveGoodsId) {
+            }
+          });
+        }
       });
     },
 

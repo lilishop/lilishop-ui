@@ -6,7 +6,7 @@
       <div class="shop-item">
         <div class="label-item">
           <span>订单来源</span>
-          <span>{{res.clientType}}</span>
+          <span>{{res.clientType | clientTypeWay}}</span>
         </div>
         <div class="label-item">
           <span>订单状态</span>
