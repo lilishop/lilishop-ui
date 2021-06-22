@@ -147,21 +147,13 @@ export default {
           sortable: false,
           render: (h, params) => {
             if (params.row.distributionStatus == "PASS") {
-              return h("Badge", {
-                props: { status: "success", text: "审核通过" },
-              });
+              return h("Tag", {props: {color: "green",},},"通过");
             } else if (params.row.distributionStatus == "APPLY") {
-              return h("Badge", {
-                props: { status: "processing", text: "申请中" },
-              });
+              return h("Tag", {props: {color: "geekblue",},},"待审核");
             } else if (params.row.distributionStatus == "RETREAT") {
-              return h("Badge", {
-                props: { status: "warning", text: "已清退" },
-              });
+              return h("Tag", {props: {color: "volcano",},},"清退");
             } else if (params.row.distributionStatus == "REFUSE") {
-              return h("Badge", {
-                props: { status: "error", text: "审核拒绝" },
-              });
+              return h("Tag", {props: {color: "red",},},"拒绝");
             }
           },
         },

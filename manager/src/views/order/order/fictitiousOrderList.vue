@@ -150,19 +150,15 @@
             width:95,
             render: (h, params) => {
               if (params.row.orderStatus == "UNPAID") {
-                return h('div', [h('span', { }, '未付款'),]);
+                return h("div", [h("tag", {props: {color: "magenta"}}, "未付款")]);
               } else if (params.row.orderStatus == "PAID") {
-                return h('div', [h('span', { }, '已付款'),]);
-              } else if (params.row.orderStatus == "UNDELIVERED") {
-                return h('div', [h('span', { }, '待发货'),]);
-              } else if (params.row.orderStatus == "DELIVERED") {
-                return h('div', [h('span', { }, '已发货'),]);
-              }else if (params.row.orderStatus == "COMPLETED") {
-                return h('div', [h('span', { }, '已完成'),]);
-              }else if (params.row.orderStatus == "TAKE") {
-                return h('div', [h('span', { }, '待核验'),]);
-              }else if (params.row.orderStatus == "CANCELLED") {
-                return h('div', [h('span', { }, '已取消'),]);
+                return h("div", [h("tag", {props: {color: "blue"}}, "已付款")]);
+              } else if (params.row.orderStatus == "COMPLETED") {
+                return h("div", [h("tag", {props: {color: "green"}}, "已完成")]);
+              } else if (params.row.orderStatus == "TAKE") {
+                return h("div", [h("tag", {props: {color: "volcano"}}, "待核验")]);
+              } else if (params.row.orderStatus == "CANCELLED") {
+                return h("div", [h("tag", {props: {color: "red"}}, "已取消")]);
               }
             }
           },

@@ -131,13 +131,14 @@ export default {
           key: "couponType",
           width: 120,
           render: (h, params) => {
-            let text = "未知";
+            let text = "";
             if (params.row.couponType === "DISCOUNT") {
-              text = "打折";
+              return h("Tag", {props: {color: "blue",},}, "打折");
             } else if (params.row.couponType === "PRICE") {
-              text = "减免现金";
+              return h("Tag", {props: {color: "geekblue",},}, "减免现金");
+            }else {
+              return h("Tag", {props: {color: "purple",},}, "未知");
             }
-            return h("div", [text]);
           },
         },
         {
@@ -184,7 +185,7 @@ export default {
               color = "red";
             if (params.row.promotionStatus == "NEW") {
               text = "未开始";
-              color = "default";
+              color = "geekblue";
             } else if (params.row.promotionStatus == "START") {
               text = "已开始";
               color = "green";
