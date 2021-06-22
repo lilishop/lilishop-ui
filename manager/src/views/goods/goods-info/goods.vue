@@ -38,6 +38,12 @@
               <Option value="DOWN">下架</Option>
             </Select>
           </Form-item>
+          <Form-item label="商品类型" prop="status">
+            <Select v-model="searchForm.goodsType" placeholder="请选择" clearable style="width: 200px">
+              <Option value="PHYSICAL_GOODS">实物商品</Option>
+              <Option value="VIRTUAL_GOODS">虚拟商品</Option>
+            </Select>
+          </Form-item>
           <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search" >搜索</Button>
         </Form>
       </Row>
@@ -172,6 +178,20 @@ export default {
               "div",
               this.$options.filters.unitPrice(params.row.price, "￥")
             );
+          },
+        },
+        {
+          title: "商品类型",
+          key: "goodsType",
+          width: 130,
+          render: (h, params) => {
+            if (params.row.goodsType === 'PHYSICAL_GOODS') {
+              return h("div", "实物商品");
+            } else if (params.row.goodsType === 'VIRTUAL_GOODS') {
+              return h("div", "虚拟商品");
+            } else {
+              return h("div", "电子卡券");
+            }
           },
         },
         {
