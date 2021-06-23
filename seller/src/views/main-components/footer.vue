@@ -1,14 +1,14 @@
 <template>
   <div class="foot">
     <Row type="flex" justify="space-around" class="help">
-      <a class="item" href="https://lilishop.com" target="_blank">{{ $t('help') }}</a>
-      <a class="item" href="https://lilishop.com" target="_blank">{{ $t('privacy') }}</a>
-      <a class="item" href="https://lilishop.com" target="_blank">{{ $t('terms') }}</a>
+      <a class="item" href="https://pickmall.cn/" target="_blank">{{ $t('help') }}</a>
+      <a class="item" href="https://pickmall.cn/" target="_blank">{{ $t('privacy') }}</a>
+      <a class="item" href="https://pickmall.cn/" target="_blank">{{ $t('terms') }}</a>
     </Row>
     <Row type="flex" justify="center" class="copyright">
       Copyright © 2020 - Present
       <a
-        href="http://lili.cn"
+        href="https://pickmall.cn/"
         target="_blank"
         style="margin:0 5px;"
       >lili-shop</a> {{ $t('rights') }}

@@ -517,7 +517,7 @@ export default {
               if (res.success) {
                 this.$Message.success("修改成功!");
 
-                this.$router.push({ path: "/storePromotion/live" });
+                this.$router.push({ path: "/promotion/live" });
               }
               this.spinShow = false;
             });
@@ -528,7 +528,7 @@ export default {
               if (res.success) {
                 this.$Message.success("添加成功!");
 
-                this.$router.push({ path: "/storePromotion/live" });
+                this.$router.push({ path: "/promotion/live" });
               }
               this.spinShow = false;
             });

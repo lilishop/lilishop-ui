@@ -53,8 +53,8 @@ export default {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
-        sort: "createTime", // 默认排序字段
-        order: "desc", // 默认排序方式
+        sort: "", // 默认排序字段
+        order: "", // 默认排序方式
         startDate: "", // 起始时间
         endDate: "", // 终止时间
         orderSn: "",
@@ -80,7 +80,7 @@ export default {
         {
           title: "订单号",
           key: "sn",
-          minWidth: 240,
+          minWidth: 200,
           tooltip: true,
         },
         {
@@ -95,7 +95,7 @@ export default {
             } else if (params.row.clientType == "WECHAT_MP") {
               return h("div", {}, "小程序端");
             } else if (params.row.clientType == "APP") {
-              return h("div", {}, "移动应用端");
+              return h("div", {}, "APP端");
             } else {
               return h("div", {}, params.row.clientType);
             }
@@ -145,11 +145,8 @@ export default {
         {
           title: "下单时间",
           key: "createTime",
-          width: 170,
-          sortable: true,
-          sortType: "desc",
+          width: 170
         },
-
         {
           title: "操作",
           key: "action",
