@@ -4,7 +4,7 @@
       <Row @keydown.enter.native="handleSearch">
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
           <Form-item label="商品名称" prop="goodsName">
-            <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px"/>
+            <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px" />
           </Form-item>
           <Form-item label="状态" prop="status">
             <Select v-model="searchForm.marketEnable" placeholder="请选择" clearable style="width: 200px">
@@ -19,7 +19,7 @@
             </Select>
           </Form-item>
           <Form-item label="商品编号" prop="sn">
-            <Input type="text" v-model="searchForm.sn" placeholder="商品编号" clearable style="width: 200px"/>
+            <Input type="text" v-model="searchForm.sn" placeholder="商品编号" clearable style="width: 200px" />
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
           <Button @click="handleReset" class="search-btn">重置</Button>
@@ -55,8 +55,7 @@
               </div>
               <Poptip trigger="hover" title="扫码在手机中查看" transfer>
                 <div slot="content">
-                  <vue-qr :text="wapLinkTo(row.id,row.skuId)" :margin="0" colorDark="#000" colorLight="#fff"
-                          :size="150"></vue-qr>
+                  <vue-qr :text="wapLinkTo(row.id,row.skuId)" :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
                 </div>
                 <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
               </Poptip>
@@ -67,15 +66,21 @@
       </Table>
 
       <Row type="flex" justify="end" class="page">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
-              @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
-              show-total show-elevator show-sizer></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
+          show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
 
     <Modal title="更新库存" v-model="updateStockModalVisible" :mask-closable="false" :width="500">
-      <Input type="number" v-model="stockAllUpdate" placeholder="全部修改，如不需全部修改，则不需输入"/>
-      <Table :columns="updateStockColumns" :data="stockList" border :span-method="handleSpan"></Table>
+      <Tabs value="updateStock">
+        <TabPane label="手动规格更新" name="updateStock">
+          <Table :columns="updateStockColumns" :data="stockList" border :span-method="handleSpan"></Table>
+        </TabPane>
+        <TabPane label="批量规格更新" name="stockAll">
+          <Input type="number" v-model="stockAllUpdate" placeholder="统一规格修改" />
+        </TabPane>
+      </Tabs>
+
       <div slot="footer">
         <Button type="text" @click="updateStockModalVisible = false">取消</Button>
         <Button type="primary" @click="updateStock">更新</Button>
@@ -86,8 +91,7 @@
     <Modal title="批量设置运费模板" v-model="shipTemplateModal" :mask-closable="false" :width="500">
       <Form ref="shipTemplateForm" :model="shipTemplateForm" :label-width="120">
         <FormItem class="form-item-view-el" label="运费" prop="freightPayer">
-          <RadioGroup type="button" button-style="solid" @on-change="logisticsTemplateUndertakerChange"
-                      v-model="shipTemplateForm.freightPayer">
+          <RadioGroup type="button" button-style="solid" @on-change="logisticsTemplateUndertakerChange" v-model="shipTemplateForm.freightPayer">
             <Radio label="STORE">
               <span>卖家承担运费</span>
             </Radio>
@@ -259,9 +263,9 @@ export default {
           key: "goodsType",
           width: 130,
           render: (h, params) => {
-            if (params.row.goodsType === 'PHYSICAL_GOODS') {
+            if (params.row.goodsType === "PHYSICAL_GOODS") {
               return h("div", "实物商品");
-            } else if (params.row.goodsType === 'VIRTUAL_GOODS') {
+            } else if (params.row.goodsType === "VIRTUAL_GOODS") {
               return h("div", "虚拟商品");
             } else {
               return h("div", "电子卡券");
@@ -455,10 +459,10 @@ export default {
       this.getDataList();
     },
     addGoods() {
-      this.$router.push({name: "goods-operation"});
+      this.$router.push({ name: "goods-operation" });
     },
     editGoods(v) {
-      this.$router.push({name: "goods-operation-edit", query: {id: v.id}});
+      this.$router.push({ name: "goods-operation-edit", query: { id: v.id } });
     },
 
     //批量操作
@@ -481,7 +485,7 @@ export default {
       }
     },
     getStockDetail(id) {
-      getGoodsSkuListDataSeller({goodsId: id, pageSize: 1000}).then((res) => {
+      getGoodsSkuListDataSeller({ goodsId: id, pageSize: 1000 }).then((res) => {
         if (res.success) {
           this.updateStockModalVisible = true;
           this.stockAllUpdate = undefined;
@@ -491,7 +495,7 @@ export default {
     },
     updateStock() {
       let updateStockList = this.stockList.map((i) => {
-        let j = {skuId: i.id, quantity: i.quantity};
+        let j = { skuId: i.id, quantity: i.quantity };
         if (this.stockAllUpdate) {
           j.quantity = this.stockAllUpdate;
         }

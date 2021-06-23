@@ -69,7 +69,7 @@ export default {
         orderSn: "",
         buyerName: "",
         orderStatus: "",
-        orderType:"VIRTUAL"
+        orderType: "VIRTUAL",
       },
       selectDate: null,
       form: {
@@ -200,8 +200,6 @@ export default {
       let result = await verificationCode(this.orderCode);
 
       if (result.success) {
-
-
         this.$router.push({
           name: "order-detail",
           query: { sn: result.result.sn || this.orderCode },
@@ -228,6 +226,7 @@ export default {
       this.searchForm = {};
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
+      this.searchForm.orderType = "VIRTUAL";
       this.selectDate = null;
       this.searchForm.startDate = "";
       this.searchForm.endDate = "";
