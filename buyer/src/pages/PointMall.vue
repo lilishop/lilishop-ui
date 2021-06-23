@@ -108,7 +108,7 @@ export default {
       this.pageNumber = 1;
       this.params.pageSize = val;
       this.getList()
-    },
+    }
   }
 }
 </script>
@@ -132,10 +132,10 @@ export default {
       color: $theme_color;
     }
   }
+
   .selected-cate{
     color: $theme_color;
   }
-  
 }
 .page-size {
   width: 1200px;
