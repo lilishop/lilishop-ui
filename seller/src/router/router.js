@@ -5,7 +5,7 @@ export const loginRouter = {
   path: "/login",
   name: "login",
   meta: {
-    title: "登录 - lili商家后台 "
+    title: "登录 - lili商家后台"
   },
   component: () => import("@/views/login.vue")
 };

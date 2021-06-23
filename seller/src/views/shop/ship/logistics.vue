@@ -58,10 +58,10 @@
             minWidth: 120,
             sortable: true,
             render: (h, params) => {
-              if (params.row.selected === null || params.row.selected === "") {
-                return h( "Badge", {props: { status: "error",text: "关闭" } })
-              } else if (params.row.selected !== "") {
-                return h( "Badge", {props: { status: "success",text: "开启" } })
+              if(params.row.selected === null || params.row.selected === ""){
+                return h("div", [h("tag", {props: {color: "volcano"}}, "关闭")]);
+              }else{
+                return h("div", [h("tag", {props: {color: "green"}}, "开启")]);
               }
             }
           },

@@ -119,14 +119,13 @@ export default {
         {
           title: "直播状态",
           render: (h, params) => {
-            return h(
-              "span",
-              params.row.status == "NEW"
-                ? "未开始"
-                : params.row.status == "START"
-                ? "直播中"
-                : "已结束"
-            );
+            if(params.row.status == "NEW"){
+              return h("div", [h("tag", {props: {color: "blue"}}, "未开始")]);
+            }else if(params.row.status == "START"){
+              return h("div", [h("tag", {props: {color: "green"}}, "直播中")]);
+            }else{
+              return h("div", [h("tag", {props: {color: "volcano"}}, "已结束")]);
+            }
           },
         },
         {

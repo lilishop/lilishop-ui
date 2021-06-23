@@ -69,10 +69,10 @@ service.interceptors.request.use(
       config.headers['accessToken'] = accessToken;
       // 解析当前token时间
       let jwtData = JSON.parse(
-        decodeURIComponent(escape(window.atob(accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))))
+        decodeURIComponent(escape(window.atob(accessToken.split('.')[1])))
       );
       if (jwtData.exp < Math.round(new Date() / 1000)) {
-        refresh()
+        refresh(config)
       }
     }
 
@@ -83,7 +83,7 @@ service.interceptors.request.use(
   }
 );
 
-async function refresh () {
+async function refresh (error) {
   const getTokenRes = await refreshToken();
   if (getTokenRes === 'success') {
     // 刷新token
@@ -101,7 +101,6 @@ async function refresh () {
     Storage.removeItem('userInfo');
     Storage.setItem('cartNum', 0);
     store.commit('SET_CARTNUM', 0);
-    console.log('1111');
     Modal.confirm({
       title: '请登录',
       content: '<p>请登录后执行此操作</p>',
@@ -140,9 +139,11 @@ service.interceptors.response.use(
       isRefreshToken++;
 
       if (isRefreshToken === 1) {
-        refresh()
+        refresh(error)
         isRefreshToken = 0;
       }
+    } else if (errorResponse.status === 404) {
+      // 避免刷新token时也提示报错信息
     } else {
       if (error.message) {
         let _message =

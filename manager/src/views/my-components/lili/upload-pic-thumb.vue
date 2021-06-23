@@ -1,47 +1,48 @@
 <template>
   <div>
-    <vuedraggable
-      :list="uploadList"
-      :disabled="!draggable||!multiple"
-      :animation="200"
-      class="list-group"
-      ghost-class="thumb-ghost"
-      @end="onEnd"
-    >
-      <div class="upload-list" v-for="(item, index) in uploadList" :key="index">
-        <div v-if="item.status == 'finished'" style="height:60px;">
-          <img :src="item.url" />
-          <div class="upload-list-cover">
-            <Icon type="ios-eye-outline" @click="handleView(item.url)"></Icon>
-            <Icon type="ios-trash-outline" @click="handleRemove(item)"></Icon>
+    <div class="upload-pic-thumb">
+      <vuedraggable
+        :list="uploadList"
+        :disabled="!draggable||!multiple"
+        :animation="200"
+        class="list-group"
+        ghost-class="thumb-ghost"
+        @end="onEnd"
+      >
+        <div class="upload-list" v-for="(item, index) in uploadList" :key="index">
+          <div v-if="item.status == 'finished'" style="height:60px;">
+            <img :src="item.url" />
+            <div class="upload-list-cover">
+              <Icon type="ios-eye-outline" @click="handleView(item.url)"></Icon>
+              <Icon type="ios-trash-outline" @click="handleRemove(item)"></Icon>
+            </div>
+          </div>
+          <div v-else>
+            <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
           </div>
         </div>
-        <div v-else>
-          <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
+      </vuedraggable>
+      <Upload
+        ref="upload"
+        :multiple="multiple"
+        :show-upload-list="false"
+        :on-success="handleSuccess"
+        :on-error="handleError"
+        :format="['jpg','jpeg','png','gif']"
+        :max-size="maxSize*1024"
+        :on-format-error="handleFormatError"
+        :on-exceeded-size="handleMaxSize"
+        :before-upload="handleBeforeUpload"
+        type="drag"
+        :action="uploadFileUrl"
+        :headers="accessToken"
+        style="display: inline-block;width:58px;"
+      >
+        <div style="width: 58px;height:58px;line-height: 58px;">
+          <Icon type="md-camera" size="20"></Icon>
         </div>
-      </div>
-    </vuedraggable>
-    <Upload
-      ref="upload"
-      :multiple="multiple"
-      :show-upload-list="false"
-      :on-success="handleSuccess"
-      :on-error="handleError"
-      :format="['jpg','jpeg','png','gif']"
-      :max-size="maxSize*1024"
-      :on-format-error="handleFormatError"
-      :on-exceeded-size="handleMaxSize"
-      :before-upload="handleBeforeUpload"
-      type="drag"
-      :action="uploadFileUrl"
-      :headers="accessToken"
-      style="display: inline-block;width:58px;"
-    >
-      <div style="width: 58px;height:58px;line-height: 58px;">
-        <Icon type="md-camera" size="20"></Icon>
-      </div>
-    </Upload>
-
+      </Upload>
+    </div>
     <Modal title="图片预览" v-model="viewImage" :styles="{top: '30px'}" draggable>
       <img :src="imgUrl" alt="无效的图片链接" style="width: 100%;margin: 0 auto;display: block;" />
       <div slot="footer">
@@ -242,6 +243,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.upload-pic-thumb{
+  display: flex;
+}
 .upload-list {
   display: inline-block;
   width: 60px;
@@ -255,6 +259,7 @@ export default {
   position: relative;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
   margin-right: 5px;
+  vertical-align: middle;
 }
 .upload-list img {
   width: 100%;

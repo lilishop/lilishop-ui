@@ -126,7 +126,7 @@
             <Button type="error" :loading="loading" :disabled="skuDetail.quantity === 0" @click="addShoppingCartBtn">加入购物车</Button>
             <Button type="warning" :loading="loading1" :disabled="skuDetail.quantity === 0" @click="buyNow">立即购买</Button>
           </div>
-          
+
         </div>
       </div>
     </div>
@@ -199,13 +199,18 @@ export default {
         skuId: this.skuDetail.id
       };
       this.loading = true;
+      console.log(11111111);
       addCartGoods(params).then(res => {
+        debugger;
         this.loading = false;
         if (res.success) {
           this.$router.push({path: '/shoppingCart', query: {detail: this.skuDetail, count: this.count}});
         } else {
           this.$Message.warning(res.message);
         }
+      }).catch(() => {
+        console.log('catch');
+        this.loading = false;
       });
     },
     buyNow () { // 立即购买
@@ -222,6 +227,8 @@ export default {
         } else {
           this.$Message.warning(res.message);
         }
+      }).catch(() => {
+        this.loading1 = false;
       });
     },
     pointPay () { // 积分购买
@@ -339,7 +346,7 @@ export default {
         }
       })
     }
-    
+
     this.formatSku(this.goodsSpecList);
     this.promotion()
     document.title = this.skuDetail.goodsName

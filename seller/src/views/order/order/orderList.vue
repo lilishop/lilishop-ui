@@ -80,7 +80,7 @@ export default {
         {
           title: "订单号",
           key: "sn",
-          minWidth: 240,
+          minWidth: 200,
           tooltip: true,
         },
         {
@@ -95,7 +95,7 @@ export default {
             } else if (params.row.clientType == "WECHAT_MP") {
               return h("div", {}, "小程序端");
             } else if (params.row.clientType == "APP") {
-              return h("div", {}, "移动应用端");
+              return h("div", {}, "APP端");
             } else {
               return h("div", {}, params.row.clientType);
             }
@@ -126,29 +126,27 @@ export default {
           minWidth: 100,
           render: (h, params) => {
             if (params.row.orderStatus == "UNPAID") {
-              return h("div", [h("span", {}, "未付款")]);
+              return h("div", [h("tag", {props: {color: "magenta"}}, "未付款")]);
             } else if (params.row.orderStatus == "PAID") {
-              return h("div", [h("span", {}, "已付款")]);
+              return h("div", [h("tag", {props: {color: "blue"}}, "已付款")]);
             } else if (params.row.orderStatus == "UNDELIVERED") {
-              return h("div", [h("span", {}, "待发货")]);
+              return h("div", [h("tag", {props: {color: "geekblue"}}, "待发货")]);
             } else if (params.row.orderStatus == "DELIVERED") {
-              return h("div", [h("span", {}, "已发货")]);
+              return h("div", [h("tag", {props: {color: "cyan"}}, "已发货")]);
             } else if (params.row.orderStatus == "COMPLETED") {
-              return h("div", [h("span", {}, "已完成")]);
+              return h("div", [h("tag", {props: {color: "green"}}, "已完成")]);
             } else if (params.row.orderStatus == "TAKE") {
-              return h("div", [h("span", {}, "待核验")]);
+              return h("div", [h("tag", {props: {color: "volcano"}}, "待核验")]);
             } else if (params.row.orderStatus == "CANCELLED") {
-              return h("div", [h("span", {}, "已取消")]);
+              return h("div", [h("tag", {props: {color: "red"}}, "已取消")]);
             }
           },
         },
         {
           title: "下单时间",
           key: "createTime",
-          width: 170,
-
+          width: 170
         },
-
         {
           title: "操作",
           key: "action",
