@@ -170,32 +170,11 @@ export default {
           width: 130,
           render: (h, params) => {
             if (params.row.isAuth == "TOBEAUDITED") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "待审核",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "blue",},},"待审核");
             } else if (params.row.isAuth == "PASS") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "success",
-                    text: "审核通过",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "green",},},"通过");
             } else if (params.row.isAuth == "REFUSE") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "审核拒绝",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "red",},},"审核拒绝");
             }
           },
         },
