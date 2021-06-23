@@ -134,21 +134,18 @@ export default {
           key: "name",
           minWidth: 120
         },
-
         {
           title: "状态",
           key: "disabled",
           minWidth: 50,
           render(h, params) {
-            return h("Badge", {
-              props: {
-                status: params.row.disabled ? "success" : "error",
-                text: params.row.disabled ? "开启" : "关闭",
-              },
-            });
+            if(params.row.disabled){
+              return h("div", [h("tag", {props: {color: "green"}}, "开启")]);
+            }else{
+              return h("div", [h("tag", {props: {color: "volcano"}}, "关闭")]);
+            }
           },
         },
-
         {
           title: "操作",
           key: "action",

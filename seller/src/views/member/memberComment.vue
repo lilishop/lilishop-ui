@@ -210,11 +210,11 @@ export default {
           width: 100,
           render: (h, params) => {
             if (params.row.grade == "GOOD") {
-              return h("Badge", {props: {status: "success", text: "好评"}})
+              return h("Tag", {props: {color: "green",},}, "好评");
             } else if (params.row.grade == "MODERATE") {
-              return h("Badge", {props: {status: "success", text: "中评"}})
-            } else if (params.row.grade == "WORSE") {
-              return h("Badge", {props: {status: "error", text: "差评"}})
+              return h("Tag", {props: {color: "orange",},}, "中评");
+            } else {
+              return h("Tag", {props: {color: "red",},}, "差评");
             }
           }
         },
@@ -224,9 +224,9 @@ export default {
           width: 100,
           render: (h, params) => {
             if (params.row.status === "OPEN") {
-              return h("Badge", {props: {status: "success", text: "展示"}})
+              return h("Tag", {props: {color: "green"}},"展示")
             } else {
-              return h("Badge", {props: {status: "error", text: "隐藏"}})
+              return h("Tag", {props: {color: "red"}},"隐藏")
             }
           },
         },
@@ -236,9 +236,9 @@ export default {
           width: 110,
           render: (h, params) => {
             if (params.row.replyStatus) {
-              return h("Badge", {props: {status: "success", text: "已回复"}})
+              return h("Tag", {props: {color: "green"}},"已回复")
             } else {
-              return h("Badge", {props: {status: "error", text: "未回复"}})
+              return h("Tag", {props: {color: "blue"}},"未回复")
             }
           },
         },
@@ -334,7 +334,7 @@ export default {
         this.loading = false;
         if (res.success) {
           this.data = res.result.records;
-          this.total = res.result.total; 
+          this.total = res.result.total;
         }
       });
     },
