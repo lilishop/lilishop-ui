@@ -142,6 +142,8 @@ service.interceptors.response.use(
         refresh(error)
         isRefreshToken = 0;
       }
+    } else if (errorResponse.status === 404) {
+      // 避免刷新token时也提示报错信息
     } else {
       if (error.message) {
         let _message =

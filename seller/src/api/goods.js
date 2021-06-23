@@ -209,11 +209,6 @@ export const deleteParamsGroup = (id, params) => {
   return deleteRequest(`/goods/category/parameters/${id}`, params);
 };
 
-//保存获取关联规格
-export const getGoodsSpecInfo = (category_id, params) => {
-  return getRequest(`/goods/category/spec/goods/${category_id}`, params);
-};
-
 //获取sku列表
 export const getSkuPage = params => {
   return getRequest(`/goodsSku/getByPage`, params);
@@ -318,7 +313,7 @@ export const getCategoryParamsListDataSeller = (id, params) => {
 
 //保存获取关联规格
 export const getGoodsSpecInfoSeller = (category_id, params) => {
-  return getRequest(`/goods/category/spec/goods/${category_id}`, params);
+  return getRequest(`/goods/spec/${category_id}`, params);
 };
 
 //批量设置运费模板
