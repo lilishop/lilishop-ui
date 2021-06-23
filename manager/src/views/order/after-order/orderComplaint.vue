@@ -191,17 +191,17 @@
             width: 100,
             render: (h, params) => {
               if (params.row.complainStatus == "NEW") {
-                return h('div', [h('span', { }, '新投诉'),]);
+                return h('div', [h('tag',{props: {color: "purple"}}, '新投诉'),]);
               } else if (params.row.complainStatus == "CANCEL") {
-                return h('div', [h('span', { }, '已撤销'),]);
+                return h('div', [h('tag', {props: {color: "cyan"}}, '已撤销'),]);
               } else if (params.row.complainStatus == "WAIT_APPEAL") {
-                return h('div', [h('span', { }, '待申诉'),]);
+                return h('div', [h('tag', {props: {color: "volcano"}}, '待申诉'),]);
               } else if (params.row.complainStatus == "COMMUNICATION") {
-                return h('div', [h('span', { }, '对话中'),]);
+                return h('div', [h('tag', {props: {color: "orange"}}, '对话中'),]);
               }else if (params.row.complainStatus == "WAIT_ARBITRATION") {
-                return h('div', [h('span', { }, '等待仲裁'),]);
+                return h('div', [h('tag', {props: {color: "blue"}}, '等待仲裁'),]);
               }else if (params.row.complainStatus == "COMPLETE") {
-                return h('div', [h('span', { }, '已完成'),]);
+                return h('div', [h('tag', {props: {color: "green"}}, '已完成'),]);
               }
             }
           },

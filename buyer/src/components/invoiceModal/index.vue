@@ -69,8 +69,8 @@ export default {
         receiptContent: '不开发票', // 发票内容
         type: 1 // 1 个人 2 单位
       },
-      ruleInline: { // 验证规则
-        receiptTitle: [{ required: true, message: '请填写公司名称' }],
+      type: 1, // 1 个人 2 单位
+      ruleInline: {
         taxpayerId: [
           { required: true, message: '请填写纳税人识别号' },
           { pattern: TINumber, message: '请填写正确的纳税人识别号' }
@@ -78,21 +78,11 @@ export default {
       }
     };
   },
-  methods: {
-    save () { // 保存发票
-      if (this.invoiceForm.type === 1) {
-        // 个人
-        let flag = true;
-        this.receiptItems.forEach((e) => {
-          if (
-            e.receiptTitle === '个人' &&
-            e.receiptContent === this.invoiceForm.receiptContent
-          ) {
-            this.$emit('change', e);
-            flag = false;
-            this.invoiceAvailable = false;
-          }
-        });
+  props: ["invoiceData"],
+  watch: {
+    invoiceData: {
+      handler(val) {
+        this.invoiceForm = { ...val };
 
         if (flag) {
           let params = {

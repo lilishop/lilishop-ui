@@ -135,35 +135,11 @@ export default {
           width: 90,
           render: (h, params) => {
             if (params.row.grade == "GOOD") {
-              return h(
-                "Tag",
-                {
-                  props: {
-                    color: "success",
-                  },
-                },
-                "好评"
-              );
+              return h("Tag", {props: {color: "green",},}, "好评");
             } else if (params.row.grade == "MODERATE") {
-              return h(
-                "Tag",
-                {
-                  props: {
-                    color: "warning",
-                  },
-                },
-                "中评"
-              );
+              return h("Tag", {props: {color: "orange",},}, "中评");
             } else {
-              return h(
-                "Tag",
-                {
-                  props: {
-                    color: "error",
-                  },
-                },
-                "差评"
-              );
+              return h("Tag", {props: {color: "red",},}, "差评");
             }
           },
         },

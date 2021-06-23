@@ -153,7 +153,6 @@ import {
   addLiveGoods,
   editLive,
   getLiveInfo,
-  delLiveGoods,
   delRoomLiveGoods,
 } from "@/api/promotion";
 import liveGoods from "./liveGoods";
@@ -173,6 +172,7 @@ export default {
       // 不能选择今天以前的时间
       optionsTime: {
         disabledDate(date) {
+          // console.log(data)
           return date && date.valueOf() < Date.now() - 86400000;
         },
       },
@@ -192,7 +192,7 @@ export default {
         startTime: [
           {
             required: true,
-            message: "请输入开始时间以及结束时间",
+            message: "请正确输入开始时间以及结束时间",
           },
         ],
         feedsImg: [
@@ -329,18 +329,33 @@ export default {
     },
 
     /**
+     * 提交直播间商品
+     */
+    addGoods() {
+      addLiveGoods({
+        roomId: this.$route.query.roomId,
+        liveGoodsId: item.liveGoodsId,
+      });
+    },
+
+    /**
      * dialog点击确定时判断
      */
     addGoods() {
-      this.liveData.forEach((item) => {
-        this.commodityList.forEach((oldVal) => {
-          if (oldVal.liveGoodsId != item.liveGoodsId) {
-            addLiveGoods({
-              roomId: this.$route.query.roomId,
-              liveGoodsId: item.liveGoodsId,
-            });
-          }
-        });
+      console.log(this.commodityList);
+      this.liveData.forEach((item, index) => {
+        if (this.commodityList.length == 1 && this.liveData.length == 1) {
+          addLiveGoods({
+            roomId: this.$route.query.roomId,
+            liveGoodsId: item.liveGoodsId,
+          });
+        } else {
+          this.commodityList.forEach((oldVal, i) => {
+            // 如果商品里面没有商品，以及添加商品为第一次的话
+            if (oldVal.liveGoodsId != item.liveGoodsId) {
+            }
+          });
+        }
       });
     },
 
@@ -390,21 +405,66 @@ export default {
       this.liveForm.coverImg = res.result;
     },
 
+    tipsDateError() {
+      this.$Message.error({
+        content:
+          "直播开播时间需要在当前时间的10分钟后并且,开始时间不能在6个月后,直播计划结束时间（开播时间和结束时间间隔不得短于30分钟，不得超过24小时）",
+        duration: 5,
+      });
+    },
+
     /**
      * 选择时间后的回调
      */
     handleChangeTime(daterange) {
-      this.times = daterange;
-      this.$set(
-        this.liveForm,
-        "startTime",
-        new Date(daterange[0]).getTime() / 1000
-      );
-      this.$set(
-        this.liveForm,
-        "endTime",
-        new Date(daterange[1]).getTime() / 1000
-      );
+      /**
+       * 直播开播时间需要在当前时间的10分钟后
+       * 此处设置默认为15分钟方便调整
+       */
+      let siteTime = new Date().getTime() / 1000;
+      let selectTime = new Date(daterange[0]).getTime() / 1000;
+      let currentTime = this.$options.filters.unixToDate(siteTime);
+      /**
+       * 开播时间和结束时间间隔不得短于30分钟，不得超过24小时
+       * 判断用户设置的结束时间
+       */
+      let endTime = new Date(daterange[1]).getTime() / 1000;
+      if (selectTime <= siteTime + 15 * 60) {
+        this.tipsDateError();
+        return false;
+      } else if (selectTime + 30 * 60 >= endTime) {
+        // 不能小于30分钟
+
+        this.tipsDateError();
+        return false;
+      } else if (selectTime + 24 * 60 * 60 <= endTime) {
+        // 不能超过24小时
+
+        this.tipsDateError();
+        return false;
+      } else if (
+        // 不能超过6个月
+        siteTime >=
+        new Date().getTime() + 6 * 31 * 24 * 3600 * 1000 + 86400000
+      ) {
+        this.tipsDateError();
+        return false;
+      } else {
+        this.$set(this.times, [0], currentTime);
+        this.times[1] = daterange[1];
+
+        // this.times = daterange;
+        this.$set(
+          this.liveForm,
+          "startTime",
+          new Date(daterange[0]).getTime() / 1000
+        );
+        this.$set(
+          this.liveForm,
+          "endTime",
+          new Date(daterange[1]).getTime() / 1000
+        );
+      }
     },
 
     /**
@@ -449,7 +509,9 @@ export default {
           // 需判断当前是否是添加商品
           if (this.$route.query.id && this.liveData.length != 0) {
             this.spinShow = true;
-             this.liveForm.commodityList = JSON.stringify(this.liveForm.commodityList);
+            this.liveForm.commodityList = JSON.stringify(
+              this.liveForm.commodityList
+            );
             // 将当前直播间修改
             editLive(this.liveForm).then((res) => {
               if (res.success) {

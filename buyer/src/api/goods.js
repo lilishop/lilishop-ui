@@ -36,7 +36,7 @@ export function goodsSkuDetail (params) {
   return request({
     url: `/buyer/goods/sku/${params.goodsId}/${params.skuId}`,
     method: Method.GET,
-    needToken: false,
+    needToken: true,
     params
   });
 }

@@ -251,9 +251,15 @@ export const otherRouter = {
     },
     {
       path: "coupon-activity/edit",
-      title: "编辑平台优惠券",
+      title: "编辑平台优惠券活动",
       name: "edit-coupon-activity",
       component: () => import("@/views/promotion/couponActivity/couponPublish.vue")
+    },
+    {
+      path: "promotion/coupon-activity-info",
+      title: "券活动详情",
+      name: "coupon-activity-info",
+      component: () => import("@/views/promotion/couponActivity/couponInfo.vue")
     },
     {
       path: "promotion/member-receive-coupon",
@@ -332,7 +338,7 @@ export const otherRouter = {
       path: "liveDetail",
       title: "查看直播",
       name: "liveDetail",
-      component: () => import("@/views/live/liveDetail.vue")
+      component: () => import("@/views/promotion/live/liveDetail.vue")
     }
   ]
 };

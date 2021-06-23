@@ -4,8 +4,17 @@
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加活动</Button>
       </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"
-             @on-sort-change="changeSort" @on-selection-change="changeSelect">
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom">
+
+        <template slot-scope="{ row,index }" slot="action">
+          <Button type="primary"
+                  size="small" style="margin-right: 10px" @click="info(row)">查看
+          </Button>
+          <Button v-if="!checked && row.promotionStatus === 'START' || row.promotionStatus === 'NEW'" type="error"
+                  size="small" style="margin-right: 10px" @click="remove(row)">停止
+          </Button>
+        </template>
+
       </Table>
       <Row type="flex" justify="end" class="page">
         <Page :current="searchForm.pageNumber + 1" :total="total" :page-size="searchForm.pageSize"
@@ -19,11 +28,11 @@
 <script>
 import {
   getCouponActivityList,
-  updatePlatformCouponStatus,
+  closeActivity,
 } from "@/api/promotion";
 
 export default {
-  name: "coupon",
+  name: "couponActivity",
   components: {},
   data() {
     return {
@@ -148,63 +157,36 @@ export default {
       default: false,
     },
   },
-  watch: {
-    $route(to, from) {
-      if (to.fullPath == "/promotion/manager-coupon") {
-        this.init();
-      }
-    },
-  },
   methods: {
-    // 选中优惠券 父级传值
-    check(val, index) {
-
-      this.data[index].___selected = !this.data[index].___selected
-
-      this.$emit("selected", val);
-    },
+    //获取数据 初始化
     init() {
       this.getDataList();
     },
+    //增加券活动
     add() {
       this.$router.push({name: "add-coupon-activity"});
     },
-    /** 跳转至领取详情页面 */
-    receiveInfo(v) {
-      this.$router.push({name: "member-receive-coupon", query: {id: v.id}});
-    },
+    //查看详情
     info(v) {
-      this.$router.push({name: "platform-coupon-info", query: {id: v.id}});
+      this.$router.push({name: "coupon-activity-info", query: {id: v.id}});
     },
+    //跳转页面
     changePage(v) {
       this.searchForm.pageNumber = v - 1;
       this.getDataList();
-      this.clearSelectAll();
     },
+    //修改分页
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    //搜索活动
     handleSearch() {
       this.searchForm.pageNumber = 0;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
+    //数据获取
     getDataList() {
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
@@ -218,133 +200,32 @@ export default {
       getCouponActivityList(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
-          res.result.records.forEach(item => {
-            item.___selected = false
-          })
           this.data = res.result.records;
           this.total = res.result.total;
         }
       });
-      this.total = this.data.length;
       this.loading = false;
     },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          if (this.modalType === 0) {
-            // 添加 避免编辑后传入id等数据 记得删除
-            delete this.form.id;
-            this.postRequest("/coupon/insertOrUpdate", this.form).then(
-              (res) => {
-                this.submitLoading = false;
-                if (res.success) {
-                  this.$Message.success("操作成功");
-                  this.getDataList();
-                  this.modalVisible = false;
-                }
-              }
-            );
-          } else {
-            // 编辑
-            this.postRequest("/coupon/insertOrUpdate", this.form).then(
-              (res) => {
-                this.submitLoading = false;
-                if (res.success) {
-                  this.$Message.success("操作成功");
-                  this.getDataList();
-                  this.modalVisible = false;
-                }
-              }
-            );
-          }
-        }
-      });
-    },
+    //跳转编辑
     edit(v) {
       this.$router.push({name: "edit-platform-coupon", query: {id: v.id}});
     },
+    //下架活动
     remove(v) {
       this.$Modal.confirm({
         title: "确认下架",
         // 记得确认修改此处
-        content: "确认要下架此优惠券么?",
+        content: "确认要下架此优惠券活动么?下架活动只能重新创建",
         loading: true,
         onOk: () => {
           // 删除
-          updatePlatformCouponStatus({
-            couponIds: v.id,
-            promotionStatus: "CLOSE",
-          })
-            .then((res) => {
-              this.$Modal.remove();
-              if (res.success) {
-                this.$Message.success("优惠券已作废");
-                this.getDataList();
-              }
-            })
-            .catch(() => {
-              this.$Modal;
-            });
-        },
-      });
-    },
-    delAll() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要下架的优惠券");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认下架",
-        content: "您确认要下架所选的 " + this.selectCount + " 条数据?",
-        loading: true,
-        onOk: () => {
-          let ids = [];
-          this.selectList.forEach(function (e) {
-            ids.push(e.id);
-          });
-          let params = {
-            couponIds: ids.toString(),
-            promotionStatus: "CLOSE",
-          };
-          // 批量删除
-          updatePlatformCouponStatus(params).then((res) => {
-            this.$Modal.remove();
+          closeActivity(v.id).then((res) => {
             if (res.success) {
-              this.$Message.success("下架成功");
-              this.clearSelectAll();
+              this.$Message.success("优惠券活动已作废");
               this.getDataList();
             }
-          });
-        },
-      });
-    },
-    upAll() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("请选择要上架的优惠券");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认上架",
-        content: "您确认要上架所选的 " + this.selectCount + " 条数据?",
-        loading: true,
-        onOk: () => {
-          let ids = [];
-          this.selectList.forEach(function (e) {
-            ids.push(e.id);
-          });
-          let params = {
-            couponIds: ids.toString(),
-            promotionStatus: "START",
-          };
-          // 批量上架
-          updatePlatformCouponStatus(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("上架成功");
-              this.clearSelectAll();
-              this.getDataList();
-            }
+          }).catch(() => {
+            this.$Modal;
           });
         },
       });

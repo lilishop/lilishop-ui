@@ -11,7 +11,7 @@
     <tree-table ref="treeTable" size="default" :loading="loading" :data="tableData" :columns="columns" :border="true" :show-index="false" :is-fold="true" :expand-type="false" primary-key="id">
 
       <template slot="action" slot-scope="scope">
-        <Dropdown v-show="scope.row.level == 2"  transfer="true" trigger="click">
+        <Dropdown v-show="scope.row.level == 2" transfer="true" trigger="click">
           <Button size="small">
             绑定
             <Icon type="ios-arrow-down"></Icon>
@@ -106,7 +106,7 @@
 
     <Modal :title="modalSpecTitle" v-model="modalSpecVisible" :mask-closable="false" :width="500">
       <Form ref="specForm" :model="specForm" :label-width="100">
-        <Select v-model="specForm.category_specs" multiple>
+        <Select v-model="specForm.categorySpecs" multiple>
           <Option v-for="item in specifications" :value="item.id" :key="item.id" :label="item.specName">
           </Option>
         </Select>
@@ -134,7 +134,6 @@ import {
 } from "@/api/goods";
 import TreeTable from "@/views/my-components/tree-table/Table/Table";
 import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
-import * as filters from "@/utils/filters";
 
 export default {
   name: "lili-components",
@@ -153,7 +152,7 @@ export default {
       specifications: [], //规格集合
       categoryId: "", // 分类id
       category_brands: [], //已经选择的品牌
-      category_specs: [], //已经选择的规格
+      categorySpecs: [], //已经选择的规格
       expandLevel: 1, // 展开层级
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
@@ -212,13 +211,17 @@ export default {
         },
       ],
       tableData: [],
+      categoryIndex: 0,
     };
   },
   methods: {
-
     changeSortCate(val) {
-      let way = this.categoryList.find((item) => {
-        return item.name == val;
+      let way = this.categoryList.find((item, index) => {
+        if (item.name == val) {
+          this.categoryIndex = index;
+          console.log((this.categoryIndex = index));
+          return item.name == val;
+        }
       });
       this.tableData = [way];
     },
@@ -236,7 +239,8 @@ export default {
     //获取所有规格
     getSpecList() {
       getSpecificationList().then((res) => {
-        if (res.success) {
+        if (res.length != 0) {
+
           this.specifications = res;
         }
       });
@@ -244,7 +248,7 @@ export default {
     //弹出品牌关联框
     brandOperation(v) {
       getCategoryBrandListData(v.id).then((res) => {
-        console.warn(res)
+        console.warn(res);
         this.categoryId = v.id;
         this.modalBrandTitle = "品牌关联";
         this.brandForm.categoryBrands = res.result.map((item) => item.id);
@@ -257,7 +261,8 @@ export default {
       getCategorySpecListData(v.id).then((res) => {
         this.categoryId = v.id;
         this.modalSpecTitle = "规格关联";
-        this.specForm.category_specs = res.map((item) => item.id);
+        console.log(res);
+        this.specForm.categorySpecs = res.map((item) => item.id);
         this.modalSpecVisible = true;
       });
     },
@@ -337,7 +342,7 @@ export default {
               this.submitLoading = false;
               if (res.success) {
                 this.$Message.success("添加成功");
-                this.getAllList(0);
+                this.getAllList(this.categoryIndex);
                 this.modalVisible = false;
                 this.$refs.form.resetFields();
               }
@@ -348,7 +353,7 @@ export default {
               this.submitLoading = false;
               if (res.success) {
                 this.$Message.success("修改成功");
-                this.getAllList(0);
+                this.getAllList(this.categoryIndex);
                 this.modalVisible = false;
                 this.$refs.form.resetFields();
               }
@@ -376,12 +381,11 @@ export default {
       });
     },
     getAllList(parent_id) {
+      this.sortCateList = [];
       this.loading = true;
       getCategoryTree(parent_id).then((res) => {
         this.loading = false;
         if (res.success) {
-          // 仅展开指定级数 默认后台已展开所有
-          let expandLevel = this.expandLevel;
           localStorage.setItem("category", JSON.stringify(res.result));
           res.result.forEach((e, index, arr) => {
             this.sortCateList.push({
@@ -389,65 +393,13 @@ export default {
               value: e.name,
             });
             this.sortCate = arr[0].name;
-            if (expandLevel == 1) {
-              if (e.level == 0) {
-                e.expand = false;
-              }
-              if (e.children && e.children.length > 0) {
-                e.children.forEach(function (c) {
-                  if (c.level == 1) {
-                    c.expand = false;
-                  }
-                  if (c.children && c.children.length > 0) {
-                    c.children.forEach(function (b) {
-                      if (b.level == 2) {
-                        b.expand = false;
-                      }
-                    });
-                  }
-                });
-              }
-            } else if (expandLevel == 2) {
-              if (e.level == 0) {
-                e.expand = true;
-              }
-              if (e.children && e.children.length > 0) {
-                e.children.forEach(function (c) {
-                  if (c.level == 1) {
-                    c.expand = false;
-                  }
-                  if (c.children && c.children.length > 0) {
-                    c.children.forEach(function (b) {
-                      if (b.level == 2) {
-                        b.expand = false;
-                      }
-                    });
-                  }
-                });
-              }
-            } else if (expandLevel == 3) {
-              if (e.level == 0) {
-                e.expand = true;
-              }
-              if (e.children && e.children.length > 0) {
-                e.children.forEach(function (c) {
-                  if (c.level == 1) {
-                    c.expand = true;
-                  }
-                  if (c.children && c.children.length > 0) {
-                    c.children.forEach(function (b) {
-                      if (b.level == 2) {
-                        b.expand = false;
-                      }
-                    });
-                  }
-                });
-              }
-            }
           });
 
           this.categoryList = res.result;
-          this.tableData = [res.result[0]];
+
+          this.$nextTick(() => {
+            this.$set(this, "tableData", [res.result[this.categoryIndex]]);
+          });
         }
       });
     },
@@ -507,22 +459,8 @@ export default {
   background: #fff;
   padding: 20px;
 }
-.article {
-  font-size: 16px;
-  font-weight: 400;
-  margin: 12px 0;
-}
-
-.href-text {
-  font-size: 12px;
-}
 
 .operation {
   margin-bottom: 2vh;
-}
-
-.select-count {
-  font-weight: 600;
-  color: #40a9ff;
 }
 </style>

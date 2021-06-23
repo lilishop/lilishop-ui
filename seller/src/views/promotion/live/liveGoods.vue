@@ -276,10 +276,10 @@ export default {
     async saveLiveGoods() {
       this.saveGoodsLoading = true;
       let submit = this.liveGoodsData.map((element) => {
-        console.log(element.priceType);
+        console.log(element);
         return {
           goodsId: element.goodsId, //商品id
-          goodsImage: element.small, //商品图片
+          goodsImage: element.small, //商品图片  必须为 300 * 300
           name: element.goodsName, //商品昵称
           price: parseInt(element.price), //商品价格
           quantity: element.quantity, //库存

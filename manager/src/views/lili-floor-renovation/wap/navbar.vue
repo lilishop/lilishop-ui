@@ -3,35 +3,22 @@
   <div class="model-title">
     <div>店铺装修</div>
     <div class="btns">
-      <Button
-        @click="clickBtn(item)"
-        size="small"
-        v-for="(item, index) in way"
-        :key="index"
-        :type="item.selected ? 'primary' : ''"
-      >
+      <Button @click="clickBtn(item)" size="small" v-for="(item, index) in way" :key="index" :type="item.selected ? 'primary' : ''">
         {{ item.title }}
       </Button>
     </div>
     <div class="model-title-view-btn">
-      <Poptip placement="bottom" width="100">
+      <!-- TODO 后期会补全 目前版本暂无 -->
+      <!-- <Poptip placement="bottom" width="100">
         <Button size="default" @click="creatQrCode">预览模板</Button>
         <div slot="content" class="default-view-content">
           <div>临时预览</div>
           <div ref="qrCodeUrl"></div>
         </div>
-      </Poptip>
-      <Button size="default" type="primary" @click="handleSpinShow"
-        >保存模板</Button
-      >
+      </Poptip> -->
+      <Button size="default" type="primary" @click="handleSpinShow">保存模板</Button>
 
-      <Modal
-        title="保存中"
-        v-model="saveDialog"
-        :closable="true"
-        :mask-closable="false"
-        :footer-hide="true"
-      >
+      <Modal title="保存中" v-model="saveDialog" :closable="true" :mask-closable="false" :footer-hide="true">
         <div v-if="progress">
           <div class="model-item">
             模板名称 <Input style="width: 200px" v-model="submitWay.name" />
@@ -61,7 +48,8 @@ export default {
       progress: true, // 展示进度
       num: 20, // 提交进度
       saveDialog: false, // 加载状态
-      way: [ // 装修tab栏切换
+      way: [
+        // 装修tab栏切换
         {
           title: "首页",
           name: "index",
@@ -80,7 +68,8 @@ export default {
         },
       ],
       qrcode: "", // 二维码
-      submitWay: { // 表单信息
+      submitWay: {
+        // 表单信息
         pageShow: this.$route.query.type || false,
         name: this.$route.query.name || "模板名称",
         pageClientType: "H5",
@@ -124,11 +113,13 @@ export default {
 
     // 更新
     update() {
-         this.progress = false;
+      this.progress = false;
       API_Other.updateHome(this.$route.query.id, {
         pageData: JSON.stringify(this.$store.state.styleStore),
         name: this.submitWay.name,
         pageShow: this.submitWay.pageShow,
+        pageType: "INDEX",
+        pageClientType: "H5",
       })
         .then((res) => {
           this.num = 50;
@@ -171,7 +162,7 @@ export default {
               this.goback();
             }, 1000);
           } else {
-             this.progress = true;
+            this.progress = true;
             this.saveDialog = false;
             this.$Message.error("保存失败，请稍后重试");
           }

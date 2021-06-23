@@ -303,7 +303,7 @@ export default {
         content: "更新后店铺以及用户地区绑定数据将全部错乱",
         onOk: () => {
           let timer;
-          let numer;
+          let number;
 
           this.asyncLoading = true
 
@@ -319,7 +319,8 @@ export default {
                       click: () => {
                         this.$Message.destroy();
                         this.asyncLoading = false
-                        clearInterval(timer, numer);
+                        clearInterval(number);
+                        clearTimeout(timer)
                       },
                     },
                   },
@@ -329,11 +330,12 @@ export default {
             },
           });
 
-          numer = setInterval(() => {
+          number = setInterval(() => {
             this.num--;
           }, 1000);
 
           timer = setTimeout(() => {
+            clearInterval(number)
             asyncRegion().then((res) => {
               this.asyncLoading = false
               this.$Message.loading("地区数据正在更新中！");

@@ -2,29 +2,12 @@
   <div class="search">
     <Card>
       <Row>
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="100"
-          class="search-form"
-        >
+        <Form ref="searchForm" :model="searchForm" inline :label-width="100" class="search-form">
           <Form-item label="优惠券名称">
-            <Input
-              type="text"
-              v-model="searchForm.couponName"
-              placeholder="请输入优惠券名称"
-              clearable
-              style="width: 200px"
-            />
+            <Input type="text" v-model="searchForm.couponName" placeholder="请输入优惠券名称" clearable style="width: 200px" />
           </Form-item>
           <Form-item label="活动状态" prop="promotionStatus">
-            <Select
-              v-model="searchForm.promotionStatus"
-              placeholder="请选择"
-              clearable
-              style="width: 200px"
-            >
+            <Select v-model="searchForm.promotionStatus" placeholder="请选择" clearable style="width: 200px">
               <Option value="NEW">未开始</Option>
               <Option value="START">已开始/上架</Option>
               <Option value="END">已结束/下架</Option>
@@ -32,21 +15,9 @@
             </Select>
           </Form-item>
           <Form-item label="活动时间">
-            <DatePicker
-              v-model="selectDate"
-              type="daterange"
-              clearable
-              placeholder="选择起始时间"
-              style="width: 200px"
-            ></DatePicker>
+            <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 200px"></DatePicker>
           </Form-item>
-          <Button
-            @click="handleSearch"
-            type="primary"
-            class="search-btn"
-            icon="ios-search"
-            >搜索</Button
-          >
+          <Button @click="handleSearch" type="primary" class="search-btn" icon="ios-search">搜索</Button>
           <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
@@ -55,57 +26,22 @@
         <Button @click="delAll" class="ml_10">批量下架</Button>
         <!-- <Button @click="upAll">批量上架</Button> -->
       </Row>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
-      >
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
         <template slot-scope="{ row }" slot="action">
-          <Button
-            v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'"
-            type="info"
-            size="small"
-            style="margin-right: 10px"
-            @click="edit(row)"
-            >编辑</Button
-          >
-          <Button
-            v-if="row.promotionStatus !== 'CLOSE'"
-            type="error"
-            size="small"
-            @click="remove(row)"
-            >下架</Button
-          >
+          <Button v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="info" size="small" style="margin-right: 10px" @click="edit(row)">编辑</Button>
+          <Button v-if="row.promotionStatus !== 'CLOSE'" type="error" size="small" @click="remove(row)">下架</Button>
         </template>
       </Table>
       <Row type="flex" justify="end" class="page">
-        <Page
-          :current="searchForm.pageNumber + 1"
-          :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
-          size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
+        <Page :current="searchForm.pageNumber + 1" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
+          size="small" show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
   </div>
 </template>
 
 <script>
-import {
-  getShopCouponList,
-  updateCouponStatus,
-} from "@/api/promotion";
+import { getShopCouponList, updateCouponStatus } from "@/api/promotion";
 
 export default {
   name: "coupon",
@@ -143,18 +79,19 @@ export default {
         {
           title: "活动名称",
           key: "promotionName",
-          minWidth: 120,
+          minWidth: 100,
           fixed: "left",
         },
         {
           title: "优惠券名称",
           key: "couponName",
-          minWidth: 120,
-          tooltip: true
-        }, {
+          minWidth: 100,
+          tooltip: true,
+        },
+        {
           title: "面额/折扣",
           key: "price",
-          width: 120,
+          width: 100,
           render: (h, params) => {
             if (params.row.price) {
               return h(
@@ -170,11 +107,13 @@ export default {
         {
           title: "领取数量/总数量",
           key: "publishNum",
-          width: 100,
+          width: 130,
           render: (h, params) => {
             return h(
-              "div", params.row.receivedNum + "/" + params.row.publishNum)
-          }
+              "div",
+              params.row.receivedNum + "/" + params.row.publishNum
+            );
+          },
         },
         {
           title: "优惠券类型",
@@ -210,22 +149,28 @@ export default {
         },
         {
           title: "活动时间",
-          minWidth: 120,
+
           render: (h, params) => {
-            return h("div", {
-              domProps:
-                {innerHTML: params.row.startTime + "<br/>" + params.row.endTime}
-            });
+            if (params.row.getType === "ACTIVITY") {
+              return h("div", "长期有效");
+            } else {
+              return h("div", {
+                domProps: {
+                  innerHTML:
+                    params.row.startTime + "<br/>" + params.row.endTime,
+                },
+              });
+            }
           },
         },
         {
           title: "状态",
-          key: "promotionStatus",
           width: 100,
+          key: "promotionStatus",
           fixed: "right",
           render: (h, params) => {
             let text = "未知",
-              color = "";
+              color = "red";
             if (params.row.promotionStatus == "NEW") {
               text = "未开始";
               color = "default";
@@ -248,16 +193,17 @@ export default {
                   },
                 },
                 text
-              )
+              ),
             ]);
-          }
+          },
+          minWidth: 70,
         },
         {
           title: "操作",
           slot: "action",
           align: "center",
           fixed: "right",
-          minWidth: 80,
+          maxWidth: 140,
         },
       ],
       data: [], // 表单数据
@@ -292,8 +238,8 @@ export default {
       this.getDataList();
     },
     handleReset() {
-      this.searchForm = {}
-      this.selectDate = ''
+      this.searchForm = {};
+      this.selectDate = "";
       this.searchForm.pageNumber = 0;
       this.getDataList();
     },
@@ -423,7 +369,7 @@ export default {
       });
     },
   },
-  activated () {
+  activated() {
     this.init();
   },
 };

@@ -102,41 +102,13 @@ export default {
           width: 100,
           render: (h, params) => {
             if (params.row.promotionStatus == "NEW") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "新建",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "volcano",},},"新建");
             } else if (params.row.promotionStatus == "START") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "success",
-                    text: "开始",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "blue",},},"开始");
             } else if (params.row.promotionStatus == "END") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "结束",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "green",},},"结束");
             } else if (params.row.promotionStatus == "CLOSE") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "废弃",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "volcano",},},"结束");
             }
           },
         },

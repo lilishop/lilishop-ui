@@ -12,20 +12,21 @@
 export default {
   title: "四列单行图片模块",
   props: ["res"],
-  mounted() {
-    console.log(this.res);
-  }
+
 };
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";
 .layout {
-  height: 84px;
+  // background: #e8e8e8;
+  // height: 84px;
   display: flex;
+  padding: 0 8px;
   align-items: center;
   justify-content: center;
   background-size: cover;
 }
+
 img{
   width: 84px;
 }

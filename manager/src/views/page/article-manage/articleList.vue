@@ -57,7 +57,7 @@
                 <Input type="number" v-model="form.sort" clearable style="width: 10%" />
               </FormItem>
               <FormItem class="form-item-view-el" label="文章内容" prop="content">
-                <editor v-model="form.content"></editor>
+                <editor openXss v-model="form.content"></editor>
               </FormItem>
               <FormItem label="是否展示" prop="openStatus">
                 <i-switch size="large" v-model="form.openStatus" :true-value="open" :false-value="close">
@@ -72,7 +72,7 @@
             </div>
           </Modal>
         </template>
-        
+
       </Card>
       </Col>
 
@@ -123,7 +123,7 @@ export default {
       searchTreeValue: "", // 切换
       form: {
         // 添加或编辑表单对象初始化数据
-        openStatus:false,
+        openStatus: false,
         title: "",
         categoryId: "",
         sort: 1,
@@ -380,7 +380,6 @@ export default {
           //为了在是否展示一列展示开关 需要改一下数据类型，最终提交再次更改
           this.data = [];
           if (res.result.records.length > 0) {
-
             this.data = res.result.records;
           }
         }
@@ -390,7 +389,6 @@ export default {
     },
 
     handleSubmit() {
-
       this.$refs.form.validate((valid) => {
         if (valid) {
           this.submitLoading = true;
@@ -403,7 +401,6 @@ export default {
                 this.$Message.success("操作成功");
                 this.getDataList();
                 this.modalVisible = false;
-
               }
             });
           } else {
@@ -414,8 +411,6 @@ export default {
                 this.$Message.success("操作成功");
                 this.getDataList();
                 this.modalVisible = false;
-
-
               }
             });
           }
@@ -440,10 +435,25 @@ export default {
           this.form.categoryId = res.result.categoryId;
           this.treeValue = data.articleCategoryName;
           this.form.id = data.id;
-          this.form.content = res.result.content;
+          this.form.content = htmlEscape(res.result.content);
           this.form.title = res.result.title;
           this.form.sort = res.result.sort;
-            this.form.openStatus = res.result.openStatus
+          this.form.openStatus = res.result.openStatus;
+        }
+      });
+    },
+
+    htmlEscape(text) {
+      return text.replace(/[<>"&]/g, function (match, pos, originalText) {
+        switch (match) {
+          case "<":
+            return "&lt;";
+          case ">":
+            return "&gt;";
+          case "&":
+            return "&amp;";
+          case '"':
+            return "&quot;";
         }
       });
     },

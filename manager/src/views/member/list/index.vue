@@ -312,6 +312,7 @@ export default {
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
+      selectMember: [], //保存选中的用户
     };
   },
   props: {
@@ -320,18 +321,66 @@ export default {
       type: Boolean,
       default: false,
     },
+    // 已选择用户数据
+    selectedList: {
+      type: null,
+      default: "",
+    },
+  },
+  watch: {
+    selectedList: {
+      handler(val) {
+        this.$set(this, "selectMember", JSON.parse(JSON.stringify(val)));
+        this.init(this.data);
+        // 将父级数据与当前组件数据进行匹配
+
+      },
+      deep: true,
+      immediate: true,
+    },
   },
   methods: {
     // 回调给父级
     callback(val, index) {
-      val.___selected = !val.___selected;
+      this.$set(val, "___selected", !val.___selected);
+      console.log(val.___selected);
+      let findUser = this.selectMember.find((item) => {
+        return item.id == val.id;
+      });
+      // 如果没有则添加
+      if (!findUser) {
+        this.selectMember.push(val);
+      } else {
+        // 有重复数据就删除
+        this.selectMember.map((item, index) => {
+          if (item.id == findUser.id) {
+            this.selectMember.splice(index, 1);
+          }
+        });
+      }
+
       this.$emit("callback", val);
     },
-    init() {
-      this.getData();
+    // 初始化信息
+    init(data) {
+      data.forEach((item) => {
+        if (this.selectMember.length != 0) {
+          this.selectMember.forEach((member) => {
+            if (member.id == item.id) {
+              this.$set(item, "___selected", true);
+            }
+          });
+        } else {
+          this.$set(item, "___selected", false);
+        }
+      });
+      this.data = data;
     },
     changePage(v) {
       this.searchForm.pageNumber = v;
+      // 此处如果是父子级传值的时候需要做一下处理
+      //selectedMember
+
       this.getData();
     },
     changePageSize(v) {
@@ -387,15 +436,13 @@ export default {
         }
       });
     },
+
     //查询会员列表
     getData() {
       API_Member.getMemberListData(this.searchForm).then((res) => {
         if (res.result.records) {
           this.loading = false;
-          res.result.records.forEach((item) => {
-            item.___selected = false;
-          });
-          this.data = res.result.records;
+          this.init(res.result.records);
           this.total = res.result.total;
         }
       });
@@ -484,7 +531,7 @@ export default {
     },
   },
   mounted() {
-    this.init();
+    this.getData();
   },
 };
 </script>

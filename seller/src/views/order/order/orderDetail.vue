@@ -21,7 +21,7 @@
         <div class="div-item">
           <div class="div-item-left">订单来源：</div>
           <div class="div-item-right">
-            {{ orderInfo.order.clientType }}
+            {{  orderInfo.order.clientType | clientTypeWay }}
           </div>
         </div>
       </div>
@@ -94,7 +94,7 @@
           <div class="div-item-right">{{ orderInfo.order.remark }}</div>
         </div>
 
-      <div class="div-item">
+      <div class="div-item" v-if="orderInfo.order.orderType != 'VIRTUAL'">
         <div class="div-item-left">配送方式：</div>
         <div class="div-item-right">
           {{
@@ -521,13 +521,14 @@ export default {
     },
     //弹出订单核销框
     orderTake() {
+      this.orderTakeForm.qrCode = this.orderInfo.order.verificationCode
       this.orderTakeModal = true;
     },
     //订单核销提交
     orderTakeSubmit() {
       this.$refs.orderTakeForm.validate((valid) => {
         if (valid) {
-          API_Order.orderTake(this.sn, this.orderTakeForm).then((res) => {
+          API_Order.orderTake(this.sn, this.orderTakeForm.qrCode).then((res) => {
             if (res.success) {
               this.$Message.success("订单核销成功");
               this.orderTakeModal = false;

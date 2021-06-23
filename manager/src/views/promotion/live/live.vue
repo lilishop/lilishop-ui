@@ -93,7 +93,7 @@ export default {
                   },
                   on: {
                     "on-change": () => {
-                      this.star(params.row,params.index);
+                      this.star(params.row, params.index);
                     },
                   },
                 },
@@ -183,19 +183,19 @@ export default {
     /**
      * 是否推荐
      */
-    async star(val,index) {
-      let switched
-      if(this.liveData[index].recommend){
-        this.$set(this.liveData[index],'recommend',false)
-        switched = false
-      }
-      else{
-
-        this.$set(this.liveData[index],'recommend',true)
-        switched = true
+    async star(val, index) {
+      let switched;
+      if (this.liveData[index].recommend) {
+        this.$set(this.liveData[index], "recommend", false);
+        switched = false;
+      } else {
+        this.$set(this.liveData[index], "recommend", true);
+        switched = true;
       }
 
-       await whetherStar({id:val.id,recommend:switched});
+      await whetherStar({ id: val.id, recommend: switched });
+
+      this.getStoreLives();
     },
 
     /**
