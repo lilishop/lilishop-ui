@@ -40,7 +40,7 @@
       </Row>
       <div>
         <download-excel class="export-excel-wrapper" :data="data" :fields="fields" name="商品订单.xls">
-          <Button type="primary" class="export">
+          <Button type="info" class="export">
             导出Excel
           </Button>
         </download-excel>
@@ -72,10 +72,6 @@ export default {
         订单编号: "sn",
         下单时间: "createTime",
         客户名称: "memberName",
-        客户账号: "",
-        收货人: "",
-        收货人手机号: "",
-        收货人地址: "",
         支付方式: {
           field: "clientType",
           callback: (value) => {
@@ -92,15 +88,7 @@ export default {
             }
           },
         },
-        配送方式: "",
-        配送费用: "",
-        订单商品金额: "",
-        订单优惠金额: "",
-        订单应付金额: "",
-        商品SKU编号: "",
         商品数量: "groupNum",
-        买家备注: "",
-        订单状态: "",
         付款状态: {
           field: "payStatus",
           callback: (value) => {
@@ -111,9 +99,6 @@ export default {
               : "";
           },
         },
-        发货状态: "",
-        发票类型: "",
-        发票抬头: "",
         店铺: "storeName",
       },
       loading: true, // 表单加载状态
@@ -222,56 +207,23 @@ export default {
           title: "下单时间",
           key: "createTime",
           width: 170,
-          sortable: true,
-          sortType: "desc",
         },
-
         {
           title: "操作",
           key: "action",
           align: "center",
           width: 150,
           render: (h, params) => {
-            return h("div", [
-              h(
-                "Button",
-
-                {
-                  props: {
-                    type: "primary",
-                    size: "small",
-                  },
-                  attrs: {
-                    disabled: params.row.orderStatus == "UNPAID" ? false : true,
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.confirmPrice(params.row);
-                    },
-                  },
-                },
-                "收款"
+            return h("div", [h("Button", {props: {type: "primary", size: "small",},
+                attrs: {disabled: params.row.orderStatus == "UNPAID" ? false : true,},
+                style: {marginRight: "5px",},
+                on: {click: () => {this.confirmPrice(params.row);},},
+                }, "收款"
               ),
-              h(
-                "Button",
-                {
-                  props: {
-                    type: "info",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.detail(params.row);
-                    },
-                  },
-                },
-                "查看"
+              h("Button", {props: {type: "info", size: "small",},
+                  style: {marginRight: "5px",},
+                  on: {click: () => {this.detail(params.row);},},
+                }, "查看"
               ),
             ]);
           },
