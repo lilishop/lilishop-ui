@@ -54,20 +54,20 @@ export const result = [
             children: null,
             permTypes: []
           },
-          {
-            name: "daft-goods",
-            showAlways: true,
-            level: 2,
-            type: 0,
-            title: "草稿商品",
-            path: "daft-goods",
-            component: "goods/goods-seller/draftGoods",
-            icon: "md-person",
-            isMenu: true,
-            url: "",
-            children: null,
-            permTypes: []
-          },
+          // {
+          //   name: "daft-goods",
+          //   showAlways: true,
+          //   level: 2,
+          //   type: 0,
+          //   title: "草稿商品",
+          //   path: "daft-goods",
+          //   component: "goods/goods-seller/draftGoods",
+          //   icon: "md-person",
+          //   isMenu: true,
+          //   url: "",
+          //   children: null,
+          //   permTypes: []
+          // },
 
           {
             path: "template-goods",
