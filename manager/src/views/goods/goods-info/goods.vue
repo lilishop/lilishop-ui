@@ -186,11 +186,11 @@ export default {
           width: 130,
           render: (h, params) => {
             if (params.row.goodsType === 'PHYSICAL_GOODS') {
-              return h("div", "实物商品");
+              return h("Tag", {props: {color: "green",},}, "实物商品");
             } else if (params.row.goodsType === 'VIRTUAL_GOODS') {
-              return h("div", "虚拟商品");
+              return h("Tag", {props: {color: "volcano",},}, "虚拟商品");
             } else {
-              return h("div", "电子卡券");
+              return h("Tag", {props: {color: "geekblue",},}, "电子卡券");
             }
           },
         },
@@ -200,23 +200,9 @@ export default {
           width: 100,
           render: (h, params) => {
             if (params.row.marketEnable == "DOWN") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "下架",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "green"},},"上架");
             } else if (params.row.marketEnable == "UPPER") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "success",
-                    text: "上架",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "volcano",},},"下架");
             }
           },
         },
@@ -226,36 +212,14 @@ export default {
           width: 130,
           render: (h, params) => {
             if (params.row.isAuth == "TOBEAUDITED") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "待审核",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "volcano",},},"待审核");
             } else if (params.row.isAuth == "PASS") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "success",
-                    text: "审核通过",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "green"},},"通过");
             } else if (params.row.isAuth == "REFUSE") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "审核拒绝",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "red",},},"拒绝");
             }
           },
         },
-
         {
           title: "店铺名称",
           key: "storeName",

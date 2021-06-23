@@ -317,7 +317,7 @@
               <editor id="mobileIntr" v-model="baseInfoForm.mobileIntro"></editor>
             </FormItem>
           </div>
-          <div v-if="this.baseInfoForm.goodsType!='VIRTUAL_GOODS'">
+          <div v-if="baseInfoForm.goodsType!='VIRTUAL_GOODS'">
             <h4>商品物流信息</h4>
             <div class="form-item-view">
               <FormItem class="form-item-view-el" label="商品重量" prop="weight">
@@ -325,24 +325,11 @@
                 <span slot="append">kg</span>
               </Input>
             </FormItem>
-            <FormItem class="form-item-view-el" label="运费" prop="skuList">
-              <RadioGroup type="button" button-style="solid"
-                @on-change="logisticsTemplateChange"
-                v-model="baseInfoForm.freightPayer"
-              >
-                <Radio label="STORE">
-                  <span>卖家承担运费</span>
-                </Radio>
-                <Radio label="BUYER">
-                  <span>使用物流规则</span>
-                </Radio>
-              </RadioGroup>
-            </FormItem>
+            
             <FormItem
               class="form-item-view-el"
               label="物流模板"
               prop="templateId"
-              v-if="logisticsTemplateShow"
             >
               <Select v-model="baseInfoForm.templateId" style="width: 200px">
                 <Option
@@ -352,7 +339,7 @@
                 >{{ item.name }}
                 </Option>
               </Select>
-            </FormItem>
+            </FormItem> 
           </div>
           <h4>其他信息</h4>
           <div class="form-item-view">
@@ -431,10 +418,11 @@
         <Button type="primary" @click="save" :loading="submitLoading" v-if="activestep === 1">
           {{ this.goodsId ? "保存" : "保存商品" }}
         </Button>
-        <Button type="primary" @click="saveToDraft('TEMPLATE')" v-if="activestep === 1">保存为模版
+        <Button type="primary" @click="saveToDraft('TEMPLATE')" v-if="activestep === 1">
+          保存为模版
         </Button>
-        <Button type="primary" @click="saveToDraft('DRAFT')" v-if="activestep === 1 && !isOperationGoods">保存至草稿箱
-        </Button>
+        <!-- <Button type="primary" @click="saveToDraft('DRAFT')" v-if="activestep === 1 && !isOperationGoods">保存至草稿箱
+        </Button> -->
       </ButtonGroup>
 
     </div>
@@ -632,8 +620,6 @@ export default {
         salesModel: "RETAIL",
         /** 商品参数列表 */
         goodsParamsList: [],
-        /** 运费承担者 */
-        // freightPayer: "STORE",
         /** 商品重量 */
         weight: "",
         /** 商品相册列表 */
@@ -710,9 +696,6 @@ export default {
       /** 当前百分比 */
       currentPercent: 0,
 
-      /** 物流模板是否展示 **/
-      logisticsTemplateShow: false,
-
       /** 运费模板 **/
       logisticsTemplate: [],
 
@@ -779,6 +762,12 @@ export default {
     this.accessToken = {
       accessToken: this.getStore("accessToken"),
     };
+    // 获取运费模板
+    API_Shop.getShipTemplate().then((res) => {
+      if (res.success) {
+        this.logisticsTemplate = res.result;
+      }
+    })
     //编辑商品
     if (this.$route.query.id) {
       this.activestep = 1;
@@ -786,7 +775,7 @@ export default {
       this.GET_GoodData();
       this.selectGoodsType = false;
     }
-    //编辑模版/草稿
+    //编辑模版
     else if (this.$route.query.draftId) {
       this.draftId = this.$route.query.draftId;
       this.activestep = 1;
@@ -806,7 +795,6 @@ export default {
       this.baseInfoForm = {
         salesModel: "RETAIL",
         goodsParamsList: [],
-        // freightPayer: "STORE",
         weight: "",
         goodsGalleryFiles: [],
         release: "true",
@@ -984,20 +972,7 @@ export default {
         });
       }
     },
-    //选择运费模板则展示运费规则
-    logisticsTemplateChange(v) {
-      if (v == "BUYER") {
-        // 如果买家承担运费 则需要查询运费规则
-        API_Shop.getShipTemplate().then((res) => {
-          if (res.success) {
-            this.logisticsTemplate = res.result;
-          }
-        });
-        this.logisticsTemplateShow = true;
-      } else {
-        this.logisticsTemplateShow = false;
-      }
-    },
+        
     gotoGoodsList() {
       this.$router.push({ name: "goods" });
     },
@@ -1053,15 +1028,8 @@ export default {
         ...this.baseInfoForm,
         ...response.result,
       };
-      console.warn(this.baseInfoForm);
-      // if (this.baseInfoForm.freightPayer === "BUYER") {
-      //   API_Shop.getShipTemplate().then((res) => {
-      //     if (res.success) {
-      //       this.logisticsTemplate = res.result;
-      //     }
-      //   });
-      //   this.logisticsTemplateShow = true;
-      // }
+      // console.warn(this.baseInfoForm);
+     
       this.baseInfoForm.release = "true";
       this.baseInfoForm.recommend = this.baseInfoForm.recommend
         ? "true"
@@ -1555,7 +1523,6 @@ export default {
     },
     /** 下一步*/
     next() {
-      console.log(111);
       window.scrollTo(0, 0);
       if (this.activestep === 0 && this.draftId) {
         this.activestep = 1;
@@ -1666,10 +1633,6 @@ export default {
             this.submitLoading = false;
             return;
           }
-          //如果选择的是卖家承担运费 则运费模板重置为0
-          // if (this.baseInfoForm.freightPayer !== "BUYER") {
-          //   this.baseInfoForm.templateId = 0;
-          // }
 
           this.baseInfoForm.skuList = this.skuTableData.map((sku) => {
             delete sku._index;
@@ -1762,7 +1725,7 @@ export default {
         },
       });
     },
-    SAVE_DRAFT_GOODS() {
+    SAVE_DRAFT_GOODS() { // 保存草稿商品
       API_GOODS.saveDraftGoods(this.baseInfoForm).then((res) => {
         if (res.success) {
           this.$Message.info("保存成功！");

@@ -50,7 +50,6 @@ export default {
   },
   created () {
     this.getGoodsDetail();
-    
   },
   data () {
     return {

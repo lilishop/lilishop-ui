@@ -5,7 +5,7 @@ import ViewUI from "view-design";
 import "./styles/theme.less";
 
 import "core-js/stable";
-import "regenerator-runtime/runtime";
+// import "regenerator-runtime/runtime";
 import vueQr from 'vue-qr'
 
 import App from "./App";

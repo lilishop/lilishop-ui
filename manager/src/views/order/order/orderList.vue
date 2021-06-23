@@ -166,13 +166,13 @@ export default {
           width: 120,
           render: (h, params) => {
             if (params.row.orderType == "NORMAL") {
-              return h("div", [h("span", {}, "普通订单")]);
+              return h("div", [h("tag", {props: {color: "blue"}}, "普通订单")]);
             } else if (params.row.orderType == "PINTUAN") {
-              return h("div", [h("span", {}, "拼团订单")]);
+              return h("div", [h("tag", {props: {color: "volcano"}}, "拼团订单")]);
             } else if (params.row.orderType == "GIFT") {
-              return h("div", [h("span", {}, "赠品订单")]);
+              return h("div", [h("tag", {props: {color: "green"}}, "赠品订单")]);
             } else if (params.row.orderType == "VIRTUAL") {
-              return h("div", [h("tag", {}, "核验订单")]);
+              return h("div", [h("tag", {props: {color: "geekblue"}}, "核验订单")]);
             }
           },
         },
@@ -202,19 +202,19 @@ export default {
           minWidth: 100,
           render: (h, params) => {
             if (params.row.orderStatus == "UNPAID") {
-              return h("div", [h("span", {}, "未付款")]);
+              return h("div", [h("tag", {props: {color: "magenta"}}, "未付款")]);
             } else if (params.row.orderStatus == "PAID") {
-              return h("div", [h("span", {}, "已付款")]);
+              return h("div", [h("tag", {props: {color: "blue"}}, "已付款")]);
             } else if (params.row.orderStatus == "UNDELIVERED") {
-              return h("div", [h("span", {}, "待发货")]);
+              return h("div", [h("tag", {props: {color: "geekblue"}}, "待发货")]);
             } else if (params.row.orderStatus == "DELIVERED") {
-              return h("div", [h("span", {}, "已发货")]);
+              return h("div", [h("tag", {props: {color: "cyan"}}, "已发货")]);
             } else if (params.row.orderStatus == "COMPLETED") {
-              return h("div", [h("span", {}, "已完成")]);
+              return h("div", [h("tag", {props: {color: "green"}}, "已完成")]);
             } else if (params.row.orderStatus == "TAKE") {
-              return h("div", [h("span", {}, "待核验")]);
+              return h("div", [h("tag", {props: {color: "volcano"}}, "待核验")]);
             } else if (params.row.orderStatus == "CANCELLED") {
-              return h("div", [h("span", {}, "已取消")]);
+              return h("div", [h("tag", {props: {color: "red"}}, "已取消")]);
             }
           },
         },
@@ -230,7 +230,7 @@ export default {
           title: "操作",
           key: "action",
           align: "center",
-          width: 100,
+          width: 150,
           render: (h, params) => {
             return h("div", [
               h(

@@ -92,7 +92,7 @@
           <div>{{ row.startTime }}</div>
           <div>{{ row.endTime }}</div>
         </template>
-        
+
         <template slot-scope="{ row }" slot="action">
           <Button
             v-if="row.promotionStatus == 'NEW'"
@@ -213,16 +213,16 @@ export default {
               color = "";
             if (params.row.promotionStatus == "NEW") {
               text = "未开始";
-              color = "default";
+              color = "geekblue";
             } else if (params.row.promotionStatus == "START") {
               text = "已开始";
-              color = "green";
+              color = "blue";
             } else if (params.row.promotionStatus == "END") {
               text = "已结束";
-              color = "blue";
+              color = "green";
             } else if (params.row.promotionStatus == "CLOSE") {
               text = "已关闭";
-              color = "red";
+              color = "volcano";
             }
             return h("div", [h("Tag", { props: { color: color } }, text)]);
           },
