@@ -6,7 +6,7 @@ import ViewUI from 'view-design'
 import './styles/theme.less';
 
 import "core-js/stable"
-import "regenerator-runtime/runtime"
+// import "regenerator-runtime/runtime"
 import App from './App'
 import { router } from './router/index'
 import store from './store'
