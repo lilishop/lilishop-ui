@@ -113,9 +113,11 @@
               >&nbsp;
               <Checkbox
                 :disabled="form.promotionStatus != 'NEW'"
+                v-if="JSON.parse(getStore('userInfo')).selfOperated"
                 v-model="form.isPoint"
                 >送积分</Checkbox
               >
+
             </FormItem>
             <FormItem v-if="form.isCoupon" label="赠送优惠券" prop="couponId">
               <Select
