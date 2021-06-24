@@ -23,8 +23,8 @@
         </Form>
       </Row>
       <Row class="operation padding-row">
-        <Button @click="add" type="primary" >添加</Button>
-        <Button @click="delAll" >批量删除</Button>
+        <Button @click="add" type="primary">添加</Button>
+        <Button @click="delAll">批量删除</Button>
       </Row>
       <Table
         :loading="loading"
@@ -60,53 +60,33 @@
     >
       <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
         <FormItem label="规格名称" prop="specName">
-          <Input v-model="form.specName" maxlength="30" clearable style="width: 100%" />
+          <Input v-model="form.specName" maxlength="30" clearable style="width: 100%"/>
+        </FormItem>
+        <FormItem label="规格值" prop="specValue">
+          <Select
+            v-model="form.specValue"
+            placeholder="输入后回车添加"
+            multiple
+            filterable
+            allow-create
+            :popper-append-to-body="false"
+            popper-class="spec-values-popper"
+            style="width: 100%; text-align: left; margin-right: 10px"
+          >
+            <Option
+              v-for="item in specValue"
+              :value="item"
+              :label="item"
+            >
+            </Option>
+          </Select>
         </FormItem>
       </Form>
       <div slot="footer">
         <Button type="text" @click="modalVisible = false">取消</Button>
         <Button type="primary" :loading="submitLoading" @click="saveSpec"
-          >提交</Button
-        >
-      </div>
-    </Modal>
-    <Modal
-      :title="modalTitle"
-      v-model="dialogSpecValuesVisible"
-      :mask-closable="false"
-      :width="500"
-      :styles="{ top: '30px' }"
-      class="permModal"
-    >
-      <Form ref="specForm" :model="specForm" :label-width="100">
-        <Select
-          v-model="specForm.specValue"
-          placeholder="输入后回车添加"
-          multiple
-          filterable
-          allow-create
-          :popper-append-to-body="false"
-          popper-class="spec-values-popper"
-          style="width: 100%; text-align: left; margin-right: 10px"
-        >
-          <Option
-            v-for="item in specValues"
-            :value="item.specValue"
-            :key="item.id"
-            :label="item.specValue"
-          >
-          </Option>
-        </Select>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="dialogSpecValuesVisible = false"
-          >取消</Button
-        >
-        <Button
-          type="primary"
-          :loading="submitLoading"
-          @click="submitSpecValuesForm"
-          >提交</Button
+        >提交
+        </Button
         >
       </div>
     </Modal>
@@ -118,10 +98,9 @@ import {
   getSpecListData,
   insertSpec,
   updateSpec,
-  delSpec,
-  getSpecValuesListData,
-  saveSpecValues,
+  delSpec
 } from "@/api/goods";
+
 export default {
   name: "spec",
   components: {},
@@ -131,7 +110,6 @@ export default {
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
-      dialogSpecValuesVisible: false, // 添加或编辑规格值
       specTitle: "", // 添加或编辑规格值
       searchForm: {
         // 搜索框初始化对象
@@ -145,9 +123,8 @@ export default {
         specName: "",
         specValue: "",
       },
-      specForm: {},
       /** 编辑规格值 */
-      specValues: [],
+      specValue: [],
       // 表单验证规则
       formValidate: {},
       submitLoading: false, // 添加或编辑提交状态
@@ -179,24 +156,7 @@ export default {
           width: 250,
           render: (h, params) => {
             return h("div", [
-              h(
-                "Button",
-                {
-                  props: {
-                    type: "primary",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.editSpec(params.row);
-                    },
-                  },
-                },
-                "编辑规格值"
-              ),
+
               h(
                 "Button",
                 {
@@ -239,23 +199,28 @@ export default {
     };
   },
   methods: {
+    //初始化，获取数据
     init() {
       this.getDataList();
     },
+    //修改分页
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
+    //修改页面大小
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    //搜索参数
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    //重置搜索参数
     handleReset() {
       this.$refs.searchForm.resetFields();
       this.searchForm.pageNumber = 1;
@@ -263,6 +228,7 @@ export default {
       // 重新加载数据
       this.getDataList();
     },
+    //更改排序
     changeSort(e) {
       this.searchForm.sort = e.key;
       this.searchForm.order = e.order;
@@ -271,36 +237,27 @@ export default {
       }
       this.getDataList();
     },
+    //清除已选择
     clearSelectAll() {
       this.$refs.table.selectAll(false);
     },
+    //修改已选择
     changeSelect(e) {
       this.selectList = e;
       this.selectCount = e.length;
     },
+    //获取数据
     getDataList() {
       this.loading = true;
       // 带多条件搜索参数获取表单数据 请自行修改接口
       getSpecListData(this.searchForm).then((res) => {
         this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
+        this.data = res.records;
+        this.total = res.total;
       });
       this.loading = false;
     },
-    submitSpecValuesForm() {
-      saveSpecValues(this.specForm.specId, this.specForm).then((res) => {
-        this.submitLoading = false;
-        if (res.success) {
-          this.$Message.success("规格值保存成功");
-          this.getDataList();
-          this.modalVisible = false;
-          this.dialogSpecValuesVisible = false;
-        }
-      });
-    },
+    //新增规格
     saveSpec() {
       this.$refs.form.validate((valid) => {
         if (valid) {
@@ -318,7 +275,7 @@ export default {
             });
           } else {
             // 编辑
-            updateSpec(this.form).then((res) => {
+            updateSpec(this.form.id, this.form).then((res) => {
               this.submitLoading = false;
               if (res.success) {
                 this.$Message.success("操作成功");
@@ -330,6 +287,7 @@ export default {
         }
       });
     },
+    //弹出添加框
     add() {
       this.modalType = 0;
       this.modalTitle = "添加";
@@ -337,30 +295,30 @@ export default {
       delete this.form.id;
       this.modalVisible = true;
     },
+    //弹出编辑框
     edit(v) {
       this.modalType = 1;
       this.modalTitle = "编辑";
-      this.$refs.form.resetFields();
       // 转换null为""
       for (let attr in v) {
         if (v[attr] === null) {
           v[attr] = "";
         }
       }
-      let str = JSON.stringify(v);
-      let data = JSON.parse(str);
-      this.form = data;
+      let localVal = v.specValue;
+
+      this.form.specName = v.specName;
+      this.form.id = v.id;
+      this.form.specValue = v.specValue;
+
+      if (localVal && localVal.indexOf("," > 0)) {
+        this.form.specValue = localVal.split(",")
+        this.specValue = this.form.specValue
+        this.$set(this, 'specValue', this.form.specValue)
+      } else {
+        this.specValue = [];
+      }
       this.modalVisible = true;
-    },
-    editSpec(v) {
-      getSpecValuesListData(v.id).then((res) => {
-        this.modalType = 1;
-        this.modalTitle = "编辑";
-        this.specValues = res.result;
-        this.specForm.specValue = res.result.map(item => item.specValue)
-        this.specForm.specId = v.id;
-        this.dialogSpecValuesVisible = true;
-      });
     },
     remove(v) {
       this.$Modal.confirm({
@@ -415,5 +373,5 @@ export default {
 };
 </script>
 <style lang="scss">
-  @import "@/styles/table-common.scss";
+@import "@/styles/table-common.scss";
 </style>

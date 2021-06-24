@@ -30,7 +30,7 @@ export const getLiveList = params => {
 
 // 获取直播间详情
 export const getLiveInfo = studioId => {
-  return getRequest(`/broadcast/studio/studioInfo/${studioId}`);
+  return getRequest(`/broadcast/studio/${studioId}`);
 };
 
 // 获取当前进行中的促销活动商品

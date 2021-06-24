@@ -130,7 +130,7 @@
         </FormItem>
 
         <FormItem>
-          <Button type="primary" @click="createLives()">保存</Button>
+          <Button type="primary" v-if="liveStatus=='NEW'" @click="createLives()">保存</Button>
 
         </FormItem>
       </Form>
@@ -342,8 +342,7 @@ export default {
      * dialog点击确定时判断
      */
     addGoods() {
-      console.log(this.commodityList);
-      this.liveData.forEach((item, index) => {
+      this.liveData.forEach((item) => {
         if (this.commodityList.length == 1 && this.liveData.length == 1) {
           addLiveGoods({
             roomId: this.$route.query.roomId,

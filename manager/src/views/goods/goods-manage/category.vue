@@ -261,7 +261,6 @@ export default {
       getCategorySpecListData(v.id).then((res) => {
         this.categoryId = v.id;
         this.modalSpecTitle = "规格关联";
-        console.log(res);
         this.specForm.categorySpecs = res.map((item) => item.id);
         this.modalSpecVisible = true;
       });
