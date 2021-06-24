@@ -67,8 +67,7 @@
         <span v-show="activeCategoryName3">> {{ activeCategoryName3 }}</span>
       </p>
       <template v-if="!$route.query.id && draftId">
-        <Divider>已选商品模版:{{goodsTemplates.find(item=>{return item.id == draftId}).goodsName}}</Divider>
-
+        <Divider>已选商品模版:{{checkedTemplate()}}</Divider>
       </template>
     </div>
 
@@ -727,7 +726,8 @@ export default {
         this.logisticsTemplate = res.result;
       }
     })
-    //编辑商品
+   
+    // 编辑商品
     if (this.$route.query.id) {
       this.activestep = 1;
       this.goodsId = this.$route.query.id;
@@ -735,7 +735,7 @@ export default {
       this.selectGoodsType = false;
       
     }
-    //编辑模版
+    // 编辑模板
     else if (this.$route.query.draftId) {
       this.draftId = this.$route.query.draftId;
       this.activestep = 1;
@@ -776,7 +776,14 @@ export default {
       this.GET_GoodsTemplate();
       this.GET_NextLevelCategory();
     },
-
+     // 获取已选模板
+    checkedTemplate () {
+      if(this.goodsTemplates.length) {
+        return this.goodsTemplates.find(item=>{return item.id == this.draftId}).goodsName
+      } else {
+        return ""
+      }
+    },
     // 选择商品模板
     handleClickGoodsTemplate(val) {
       this.draftId = val.id;
