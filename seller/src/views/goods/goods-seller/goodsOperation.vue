@@ -185,10 +185,7 @@
                       <div class="sku-item" v-for="(item, $index) in skuInfo" :key="$index">
                         <Card :bordered="true">
                           <FormItem label="规格名：" class="sku-item-content-name">
-                            <AutoComplete style="width: 150px" v-model="item.name" :maxlength="30" :data="specListSelected" placeholder="请输入规格项名称" :filter-method="filterMethod"
-                              @on-change="skuItemChange(item.name, $index)" @keyup.enter.native="editSkuItem(item, $index)" @on-focus="
-                                getActiveSkuItem(index, $index, item, val)
-                              " @on-blur="editSkuItem(item, $index)" />
+                            <AutoComplete style="width: 150px" v-model="item.name" :maxlength="30" :data="specListSelected" placeholder="请输入规格项名称" />
                             <Button type="error" style="margin-left: 10px" @click="handleCloseSkuItem($index)">删除
                             </Button>
                           </FormItem>
@@ -197,22 +194,8 @@
                             <!--规格值文本列表-->
                             <div v-for="(val, index) in item.spec_values" :key="index" style="padding: 0px 20px 10px 0px; float: left">
                               <div>
-                                <AutoComplete style="width: 150px; float: left" v-model="val.value" :maxlength="30" :data="skuValue" placeholder="请输入规格值名称" :filter-method="filterMethod" @on-change="
-                                    skuValueChange(val.value, index, item)
-                                  " @on-focus="
-                                    getActiveSkuValueItem(
-                                      index,
-                                      $index,
-                                      item,
-                                      val
-                                    )
-                                  " @keyup.enter.native="
-                                    editSkuIValue(item, val, $index, index)
-                                  " @on-blur="
-                                    editSkuIValue(item, val, $index, $index)
-                                  "></AutoComplete>
-                                <Button type="error" style="float: left; margin-left: 10px" @click="handleCloseSkuValue($index, index)">删除
-                                </Button>
+                                <AutoComplete style="width: 150px; float: left" v-model="val.value" :maxlength="30" :data="skuValue" placeholder="请输入规格值名称"></AutoComplete>
+                                <Button type="error" style="float: left; margin-left: 10px" @click="handleCloseSkuValue($index, index)">删除</Button>
                               </div>
                             </div>
                             <div style="float: left">
@@ -853,6 +836,7 @@ export default {
         fieldData.unshift(fieldData.splice(index, 1)[0]);
       }
     },
+    // 获取商品模板
     GET_GoodsTemplate() {
       let searchParams = {
         saveType: "TEMPLATE",
@@ -865,6 +849,7 @@ export default {
         }
       });
     },
+    // 编辑sku图片
     editSkuPicture(row) {
       console.log(row);
       if (row.images && row.images.length > 0) {
@@ -951,26 +936,6 @@ export default {
         });
       }
       return !check;
-    },
-    async getActiveSkuItem(index, $index, item, val) {
-      this.specSelected = "";
-      await this.GET_SkuSpec();
-    },
-    async getActiveSkuValueItem(index, $index, item, val) {
-      this.specValSelected = "";
-      await this.GET_SkuSpecVal(item.spec_id);
-    },
-    async editSkuItem(item, $index) {
-      if (item.name) {
-        API_GOODS.insertSpecSeller({
-          specName: item.name,
-          categoryPath: this.baseInfoForm.categoryPath,
-        }).then((res) => {
-          if (res.message !== "60001") {
-            this.skuItemChange(item.name, $index);
-          }
-        });
-      }
     },
         
     gotoGoodsList() {
@@ -1170,25 +1135,7 @@ export default {
         }
       );
     },
-    async GET_SkuSpec() {
-      if(!this.specSelected){
-        return;
-      }
-      let specResult = await API_GOODS.getSpecListSellerData({
-        pageNumber: 1,
-        pageSize: 10,
-        specName: this.specSelected,
-        categoryPath: this.baseInfoForm.categoryPath,
-      });
-      if (specResult.success && specResult.result.records.length > 0) {
-        this.specListSelected = specResult.result.records.map(
-          (i) => i.specName
-        );
-        this.specList = specResult.result.records;
-      } else {
-        this.specListSelected = [];
-      }
-    },
+
     /** 添加规格项 */
     addSkuItem() {
       if (this.skuInfo.length >= 5) {
@@ -1291,49 +1238,6 @@ export default {
       let _arr = cloneObj(this.skuInfo[this.activeSkuItemIndex]);
       this.$set(this.skuInfo[this.activeSkuItemIndex], "name", _arr.name);
       this.$set(this.skuInfo, this.activeSkuItemIndex, _arr);
-      /**
-       * 渲染规格详细表格
-       */
-      this.renderTableData();
-    },
-    /** 编辑规格值时触发 */
-    async editSkuIValue(item, val, $index, index) {
-      await API_GOODS.saveSpecValuesSeller(item.spec_id, {
-        spec_value: [val.value],
-      });
-
-      /**
-       * 渲染规格详细表格
-       */
-      this.renderTableData();
-    },
-    /** 获取编辑时的skuInfo信息 */
-    getSkuInfo() {
-      /** 下拉列表数据(skuData)存在时 检测productSkuInfo中对应的规格(spec_id)项 并且赋值于skuInfo中对应的规格项信息（描述 + 名称） */
-      if (this.categoryId) {
-        API_GOODS.getSpecValuesListData(this.categoryId, {}).then(
-          (response) => {
-            this.skuData = response;
-            if (
-              this.skuData.length > 0 &&
-              Array.isArray(this.productSkuInfo) &&
-              this.productSkuInfo.length > 0
-            ) {
-              this.skuInfo = cloneObj(this.productSkuInfo);
-              if (this.skuInfo.length > 0) {
-                this.skuInfo.forEach((key) => {
-                  this.skuData.forEach((item) => {
-                    if (key.spec_id === item.spec_id) {
-                      key.name = item.name;
-                      key.spec_memo = item.spec_memo;
-                    }
-                  });
-                });
-              }
-            }
-          }
-        );
-      }
       /**
        * 渲染规格详细表格
        */
