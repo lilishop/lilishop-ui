@@ -373,11 +373,12 @@
                         :title="paramsGroup.groupName"
                         style="text-align: left" :key="paramsGroup.groupName">
                 <Panel :name="paramsGroup.groupName">
+                  {{paramsGroup.groupName}}
                   <p slot="content">
                     <FormItem v-for="( params, paramsIndex) in paramsGroup.params" :key="paramsIndex"
                               :label="`${params.paramName}：`">
-                      <Select v-model="params.paramName" placeholder="请选择" style="width: 200px" clearable
-                              @on-change="selectParams(paramsGroup,groupIndex,params,paramsIndex,params.val)">
+                      <Select v-model="params.paramValue" placeholder="请选择" style="width: 200px" clearable
+                              @on-change="selectParams(paramsGroup,groupIndex,params,paramsIndex,params.paramValue)">
                         <Option v-for="option in params.options.split(',')" :label="option"
                                 :value="option"></Option>
                       </Select>
@@ -864,14 +865,13 @@ export default {
           required:'',
         }
       }
-      //赋予参数明
-      this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[paramsIndex].paramName = params.paramName
-      //赋予参数值
-      this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[paramsIndex].paramValue = value
-      //参数是否索引
-      this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[paramsIndex].isIndex = params.isIndex
-      //参数是否必填
-      this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[paramsIndex].required = params.required
+      this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[paramsIndex]={
+        paramName: params.paramName,
+        paramValue: value,
+        isIndex: params.isIndex,
+        required: params.required,
+      }
+      console.log(this.baseInfoForm.goodsParamsDTOList);
     },
 
     // 编辑sku图片
@@ -1137,14 +1137,31 @@ export default {
               this.params_panel.push(item.groupName)
             }
           )
-          // 循环参数分组
-          this.goodsParams.forEach((parmsGroup) => {
-                  this.baseInfoForm.goodsParamsDTOList.forEach(paramsGroup=>{
-                    paramsGroup.goodsParamsItemDTOList.forEach(params=>{
-                      params.paramName=params.paramValue
-                    })
-                  })
-          });
+          if (this.baseInfoForm.goodsParamsDTOList) {
+            // 已选值集合
+            const paramsArr = []
+            this.baseInfoForm.goodsParamsDTOList.forEach(group =>{
+              group.goodsParamsItemDTOList.forEach(param => {
+                param.groupId = group.groupId
+                paramsArr.push(param)
+                console.log(param);
+              })
+            })
+            // 循环参数分组
+            this.goodsParams.forEach((parmsGroup) => {
+              parmsGroup.params.forEach(param => {
+              
+                paramsArr.forEach(arr=>{
+                  if(param.paramName == arr.paramName){
+                    param.paramValue = arr.paramValue
+                  }
+                })
+              })
+            });
+            console.log(this.goodsParams);
+          } else {
+            this.baseInfoForm.goodsParamsDTOList = []
+          }
         }
       );
     },
