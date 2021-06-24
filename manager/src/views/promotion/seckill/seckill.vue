@@ -102,13 +102,13 @@ export default {
           width: 100,
           render: (h, params) => {
             if (params.row.promotionStatus == "NEW") {
-              return h("Tag", {props: {color: "volcano",},},"新建");
+              return h("Tag", {props: {color: "geekblue",},},"新建");
             } else if (params.row.promotionStatus == "START") {
-              return h("Tag", {props: {color: "blue",},},"开始");
+              return h("Tag", {props: {color: "green",},},"开始");
             } else if (params.row.promotionStatus == "END") {
-              return h("Tag", {props: {color: "green",},},"结束");
-            } else if (params.row.promotionStatus == "CLOSE") {
               return h("Tag", {props: {color: "volcano",},},"结束");
+            } else if (params.row.promotionStatus == "CLOSE") {
+              return h("Tag", {props: {color: "red",},},"结束");
             }
           },
         },

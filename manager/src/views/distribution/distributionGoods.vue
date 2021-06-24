@@ -67,10 +67,12 @@ export default {
         {
           type: "selection",
           width: 60,
-          align: "center"
+          align: "center",
+          fixed: "left",
         },
         {
           title: "商品图片",
+          fixed: "left",
           key: "thumbnail",
           width: 120,
           align: "center",

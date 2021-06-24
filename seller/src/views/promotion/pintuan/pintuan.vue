@@ -52,6 +52,7 @@
         @on-selection-change="changeSelect"
       >
         <template slot-scope="{ row }" slot="action">
+          <div  class="row">
           <Button
             type="primary"
             size="small"
@@ -97,6 +98,7 @@
             @click="close(row)"
             >关闭</Button
           >
+          </div>
         </template>
       </Table>
       <Row type="flex" justify="end" class="page">

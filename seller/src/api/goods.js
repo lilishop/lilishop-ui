@@ -132,13 +132,13 @@ export const delSpec = (id, params) => {
   return deleteRequest(`/goods/spec/del/${id}`, params);
 };
 //  获取商品规格值列表
-export const getSpecValuesListData = (id, params) => {
-  return getRequest(`/goods/spec-values/values/${id}`, params);
-};
+// export const getSpecValuesListData = (id, params) => {
+//   return getRequest(`/goods/spec-values/values/${id}`, params);
+// };
 //  添加商品规格值
-export const saveSpecValues = (id, params) => {
-  return postRequest(`/goods/spec-values/save/${id}`, params);
-};
+// export const saveSpecValues = (id, params) => {
+//   return postRequest(`/goods/spec-values/save/${id}`, params);
+// };
 
 // 查询某分类下的全部子分类列表
 export const getGoodsCategory = parent_id => {
