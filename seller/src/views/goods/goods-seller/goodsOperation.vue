@@ -71,13 +71,7 @@
         <span v-show="activeCategoryName3">> {{ activeCategoryName3 }}</span>
       </p>
       <template v-if="!$route.query.id && draftId">
-        <Divider>已选商品模版:{{
-            goodsTemplates.find(item => {
-              return item.id == draftId
-            }).goodsName
-          }}
-        </Divider>
-
+        <Divider>已选商品模版:{{checkedTemplate()}}</Divider>
       </template>
     </div>
 
@@ -431,11 +425,9 @@
         <Button type="primary" @click="save" :loading="submitLoading" v-if="activestep === 1">
           {{ this.goodsId ? "保存" : "保存商品" }}
         </Button>
-        <Button type="primary" @click="saveToDraft('TEMPLATE')" v-if="activestep === 1">
+        <Button type="primary" @click="saveToDraft" v-if="activestep === 1">
           保存为模版
         </Button>
-        <!-- <Button type="primary" @click="saveToDraft('DRAFT')" v-if="activestep === 1 && !isOperationGoods">保存至草稿箱
-        </Button> -->
       </ButtonGroup>
 
     </div>
@@ -737,7 +729,8 @@ export default {
         this.logisticsTemplate = res.result;
       }
     })
-    //编辑商品
+
+    // 编辑商品
     if (this.$route.query.id) {
       this.activestep = 1;
       this.goodsId = this.$route.query.id;
@@ -745,7 +738,7 @@ export default {
       this.selectGoodsType = false;
 
     }
-    //编辑模版
+    // 编辑模板
     else if (this.$route.query.draftId) {
       this.draftId = this.$route.query.draftId;
       this.activestep = 1;
@@ -786,7 +779,14 @@ export default {
       this.GET_GoodsTemplate();
       this.GET_NextLevelCategory();
     },
-
+     // 获取已选模板
+    checkedTemplate () {
+      if(this.goodsTemplates.length) {
+        return this.goodsTemplates.find(item=>{return item.id == this.draftId}).goodsName
+      } else {
+        return ""
+      }
+    },
     // 选择商品模板
     handleClickGoodsTemplate(val) {
       this.draftId = val.id;
@@ -1316,7 +1316,6 @@ export default {
         });
         cloneTemp.splice(0, 1);
         result = this.specIterator(result, cloneTemp);
-        // result = this.defaultParams(result);
         this.skuTableData = result;
       }
     },
@@ -1327,7 +1326,8 @@ export default {
             if (res.length) {
               res.forEach(e => {
                 this.skuData.push(e.specName)
-                this.skuVals.push(e.specValue ? e.specValue.split(',') : [])
+                const vals = e.specValue ? e.specValue.split(',') : []
+                this.skuVals.push(Array.from(new Set(vals)))
               })
             }
           }
@@ -1338,12 +1338,7 @@ export default {
     filterMethod(value, option) {
       return option.toUpperCase().indexOf(value.toUpperCase()) !== -1;
     },
-    /**
-     * 添加固有属性
-     */
-    // defaultParams(tableData) {
-    //   return tableData;
-    // },
+
     /**
      * 迭代属性，形成表格
      * result 渲染的数据
@@ -1354,7 +1349,6 @@ export default {
       if (cloneTemp.length > 0) {
         let table = [];
         result.forEach((resItem) => {
-          let tableItem = [];
           cloneTemp[0].spec_values.forEach((valItem) => {
             let obj = cloneObj(resItem);
             obj[valItem.name] = valItem.value;
@@ -1592,29 +1586,22 @@ export default {
       });
     },
     /** 保存为模板 */
-    saveToDraft(saveType) {
-      let showType = saveType === "TEMPLATE" ? "模版" : "草稿";
+    saveToDraft() {
       this.baseInfoForm.skuList = this.skuTableData;
       if (this.baseInfoForm.goodsGalleryFiles.length > 0) {
         this.baseInfoForm.goodsGalleryList =
           this.baseInfoForm.goodsGalleryFiles.map((i) => i.url);
       }
       this.baseInfoForm.categoryName = [];
-      this.baseInfoForm.saveType = saveType;
+      this.baseInfoForm.saveType = 'TEMPLATE';
 
       if (this.draftId) {
         this.baseInfoForm.id = this.draftId;
         this.$Modal.confirm({
-          title: "当前" + showType + "已存在",
-          content:
-            "当前" +
-            showType +
-            "已存在，是否保存为新" +
-            showType +
-            "或替换原" +
-            showType,
-          okText: "保存新" + showType,
-          cancelText: "替换旧" + showType,
+          title: "当前模板已存在",
+          content: "当前模板已存在，保存为新模板或替换原模板",
+          okText: "保存新模板",
+          cancelText: "替换旧模板",
           closable: true,
           onOk: () => {
             delete this.baseInfoForm.id;
@@ -1630,7 +1617,7 @@ export default {
       }
 
       this.$Modal.confirm({
-        title: "保存" + showType,
+        title: "保存模板",
         content: "是否确定保存",
         okText: "保存",
         closable: true,
