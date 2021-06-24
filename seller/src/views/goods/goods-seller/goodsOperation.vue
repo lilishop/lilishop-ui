@@ -373,6 +373,7 @@
                         :title="paramsGroup.groupName"
                         style="text-align: left" :key="paramsGroup.groupName">
                 <Panel :name="paramsGroup.groupName">
+                  {{paramsGroup.groupName}}
                   <p slot="content">
                     <FormItem v-for="( params, paramsIndex) in paramsGroup.params" :key="paramsIndex"
                               :label="`${params.paramName}：`">
