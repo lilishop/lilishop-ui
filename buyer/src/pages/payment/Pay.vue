@@ -4,15 +4,23 @@
     <!-- LOGO 步骤条 -->
     <div class="width_1200 logo">
       <div>
-        <router-link to="/"><img :src="logoImg" alt="lili shop" title="lilishop"></router-link>
+        <router-link to="/"
+          ><img :src="logoImg" alt="lili shop" title="lilishop"
+        /></router-link>
         <div>结算页</div>
       </div>
       <div class="cart-steps">
-        <span :class="stepIndex==1?'active':''">1.我的购物车</span>
-        <Icon :class="stepIndex==1?'active-arrow':''" custom="icomoon icon-next"></Icon>
-        <span :class="stepIndex==1?'active':''">2.填写订单信息</span>
-        <Icon :class="stepIndex==1?'active-arrow':''" custom="icomoon icon-next"></Icon>
-        <span :class="stepIndex==2?'active':''">3.成功提交订单</span>
+        <span :class="stepIndex == 1 ? 'active' : ''">1.我的购物车</span>
+        <Icon
+          :class="stepIndex == 1 ? 'active-arrow' : ''"
+          custom="icomoon icon-next"
+        ></Icon>
+        <span :class="stepIndex == 1 ? 'active' : ''">2.填写订单信息</span>
+        <Icon
+          :class="stepIndex == 1 ? 'active-arrow' : ''"
+          custom="icomoon icon-next"
+        ></Icon>
+        <span :class="stepIndex == 2 ? 'active' : ''">3.成功提交订单</span>
       </div>
     </div>
     <Divider />
@@ -24,18 +32,35 @@
           <span @click="goAddressManage">管理收货人地址</span>
         </div>
         <div class="address-manage">
-          <div class="address-item" v-show="moreAddr ? true : index < 3" :class="selectedAddress.id === item.id?'border-red':''" @mouseenter="showEditBtn = index" @mouseleave="showEditBtn = ''"
-            @click="selectAddress(item)" v-for="(item,index) in addressList" :key="index">
+          <div
+            class="address-item"
+            v-show="moreAddr ? true : index < 3"
+            :class="selectedAddress.id === item.id ? 'border-red' : ''"
+            @mouseenter="showEditBtn = index"
+            @mouseleave="showEditBtn = ''"
+            @click="selectAddress(item)"
+            v-for="(item, index) in addressList"
+            :key="index"
+          >
             <div>
-              <span>{{item.name}}</span>
+              <span>{{ item.name }}</span>
               <Tag class="ml_10" v-if="item.isDefault" color="red">默认</Tag>
-              <Tag class="ml_10" v-if="item.alias" color="warning">{{item.alias}}</Tag>
+              <Tag class="ml_10" v-if="item.alias" color="warning">{{
+                item.alias
+              }}</Tag>
             </div>
-            <div>{{item.mobile}}</div>
-            <div>{{ item.consigneeAddressPath | unitAddress }} {{item.detail}}</div>
+            <div>{{ item.mobile }}</div>
+            <div>
+              {{ item.consigneeAddressPath | unitAddress }} {{ item.detail }}
+            </div>
             <div class="edit-btn" v-show="showEditBtn === index">
               <span @click.stop="editAddress(item.id)">修改</span>
-              <span class="ml_10" v-if="!item.isDefault" @click.stop="delAddress(item)">删除</span>
+              <span
+                class="ml_10"
+                v-if="!item.isDefault"
+                @click.stop="delAddress(item)"
+                >删除</span
+              >
             </div>
             <div class="corner-icon" v-show="selectedAddress.id === item.id">
               <div></div>
@@ -48,8 +73,12 @@
           </div>
         </div>
 
-        <div class="more-addr" @click="moreAddr = !moreAddr" v-if="addressList.length>3">
-          {{moreAddr ? '收起地址' : '更多地址'}}
+        <div
+          class="more-addr"
+          @click="moreAddr = !moreAddr"
+          v-if="addressList.length > 3"
+        >
+          {{ moreAddr ? "收起地址" : "更多地址" }}
           <Icon v-show="!moreAddr" type="md-arrow-dropdown" />
           <Icon v-show="moreAddr" type="md-arrow-dropup" />
         </div>
@@ -60,10 +89,17 @@
           <span>商品信息</span>
           <span @click="$router.push('/cart')">返回购物车</span>
         </div>
-        <div class="goods-msg" v-for="(shop,shopIndex) in goodsList" :key="shopIndex">
+        <div
+          class="goods-msg"
+          v-for="(shop, shopIndex) in goodsList"
+          :key="shopIndex"
+        >
           <div class="shop-name">
             <span>
-              <span class="hover-color" @click="goShopPage(shop.storeId)">{{shop.storeName}}</span>&nbsp;&nbsp;
+              <span class="hover-color" @click="goShopPage(shop.storeId)">{{
+                shop.storeName
+              }}</span
+              >&nbsp;&nbsp;
             </span>
             <!-- <span>
                             <p style="width:120px">配送方式：</p>
@@ -73,33 +109,60 @@
                         </span> -->
           </div>
           <div class="goods-list">
-            <div class="goods-item" v-for="(goods,goodsIndex) in shop.skuList" :key="goodsIndex">
-              <span class="hover-color" @click="goGoodsDetail(goods.goodsSku.id, goods.goodsSku.goodsId)">
-                <img :src="goods.goodsSku.thumbnail" alt="">
-                <span style="vertical-align:top;">{{goods.goodsSku.goodsName}}</span>
+            <div
+              class="goods-item"
+              v-for="(goods, goodsIndex) in shop.skuList"
+              :key="goodsIndex"
+            >
+              <span
+                class="hover-color"
+                @click="
+                  goGoodsDetail(goods.goodsSku.id, goods.goodsSku.goodsId)
+                "
+              >
+                <img :src="goods.goodsSku.thumbnail" alt="" />
+                <span style="vertical-align: top">{{
+                  goods.goodsSku.goodsName
+                }}</span>
               </span>
-              <span class="goods-price">{{goods.goodsSku.price | unitPrice('￥')}}</span>
-              <span>x{{goods.num}}</span>
-              <span>{{goods.goodsSku.quantity > 0 ? '有货' : '无货'}}</span>
-              <span class="goods-price">{{goods.goodsSku.price * goods.num | unitPrice('￥')}}</span>
+              <span class="goods-price">{{
+                goods.goodsSku.price | unitPrice("￥")
+              }}</span>
+              <span>x{{ goods.num }}</span>
+              <span>{{ goods.goodsSku.quantity > 0 ? "有货" : "无货" }}</span>
+              <span class="goods-price">{{
+                (goods.goodsSku.price * goods.num) | unitPrice("￥")
+              }}</span>
             </div>
           </div>
           <div class="order-mark">
-            <Input type="textarea" maxlength="60" v-model="shop.remark" show-word-limit placeholder="订单备注" />
-            <span style="font-size:12px;color:#999;">提示：请勿填写有关支付、收货、发票方面的信息</span>
+            <Input
+              type="textarea"
+              maxlength="60"
+              v-model="shop.remark"
+              show-word-limit
+              placeholder="订单备注"
+            />
+            <span style="font-size: 12px; color: #999"
+              >提示：请勿填写有关支付、收货、发票方面的信息</span
+            >
           </div>
         </div>
       </div>
       <!-- 发票信息 -->
       <div class="invoice">
         <div class="card-head mt_20 mb_20">
-          <span class="relative">发票信息<span class="inv-tips">
-              <Icon type="ios-alert-outline" />开企业抬头发票须填写纳税人识别号，以免影响报销
-            </span></span>
+          <span class="relative"
+            >发票信息<span class="inv-tips">
+              <Icon
+                type="ios-alert-outline"
+              />开企业抬头发票须填写纳税人识别号，以免影响报销
+            </span></span
+          >
         </div>
         <div class="inovice-content">
-          <span>{{invoiceData.receiptTitle}}</span>
-          <span>{{invoiceData.receiptContent}}</span>
+          <span>{{ invoiceData.receiptTitle }}</span>
+          <span>{{ invoiceData.receiptContent }}</span>
           <span @click="editInvoice">编辑</span>
         </div>
       </div>
@@ -108,24 +171,49 @@
         <div class="card-head mt_20 mb_20">
           <span class="relative">优惠券</span>
         </div>
-        <div v-if="couponList.length === 0">
-          无可用优惠券
-        </div>
+        <div v-if="couponList.length === 0">无可用优惠券</div>
         <ul v-else class="coupon-list">
-          <li v-for="(item, index) in couponList" class="coupon-item" :key="index">
+          <li
+            v-for="(item, index) in couponList"
+            class="coupon-item"
+            :key="index"
+          >
             <div class="c-left">
               <div>
-                <span v-if="item.couponType === 'PRICE'" class="fontsize_12 global_color">￥<span class="price">{{item.price | unitPrice}}</span></span>
-                <span v-if="item.couponType === 'DISCOUNT'" class="fontsize_12 global_color"><span class="price">{{item.couponDiscount}}</span>折</span>
-                <span class="describe">满{{item.consumeThreshold}}元可用</span>
+                <span
+                  v-if="item.couponType === 'PRICE'"
+                  class="fontsize_12 global_color"
+                  >￥<span class="price">{{
+                    item.price | unitPrice
+                  }}</span></span
+                >
+                <span
+                  v-if="item.couponType === 'DISCOUNT'"
+                  class="fontsize_12 global_color"
+                  ><span class="price">{{ item.couponDiscount }}</span
+                  >折</span
+                >
+                <span class="describe"
+                  >满{{ item.consumeThreshold }}元可用</span
+                >
               </div>
-              <p>使用范围：{{useScope(item.scopeType)}}</p>
-              <p>有效期：{{item.endTime}}</p>
+              <p>使用范围：{{ useScope(item.scopeType) }}</p>
+              <p>有效期：{{ item.endTime }}</p>
             </div>
-            <img class="used" v-if="usedCouponId.includes(item.id)" src="../../assets/images/geted.png" alt="">
+            <img
+              class="used"
+              v-if="usedCouponId.includes(item.id)"
+              src="../../assets/images/geted.png"
+              alt=""
+            />
             <b></b>
             <a class="c-right" @click="useCoupon(item.id, true)">立即使用</a>
-            <a class="c-right" v-if="usedCouponId.includes(item.id)" @click="useCoupon(item.id, false)">放弃优惠</a>
+            <a
+              class="c-right"
+              v-if="usedCouponId.includes(item.id)"
+              @click="useCoupon(item.id, false)"
+              >放弃优惠</a
+            >
             <i class="circle-top"></i>
             <i class="circle-bottom"></i>
           </li>
@@ -138,81 +226,116 @@
         </div>
         <div>
           <div>
-            <span>使用积分：</span><Input type="text" style="width:100px;" v-model.number="otherMsgForm.point" placeholder="请输入使用积分" /> <span style="color:#999;">您当前的可用积分为 {{otherMsgForm.totalPoint}}
-              ，本订单最多可以使用{{otherMsgForm.availablePoint}}</span>
+            <span>使用积分：</span
+            ><Input
+              type="text"
+              style="width: 100px"
+              v-model.number="otherMsgForm.point"
+              placeholder="请输入使用积分"
+            />
+            <span style="color: #999"
+              >您当前的可用积分为
+              {{ otherMsgForm.totalPoint }} ，本订单最多可以使用{{
+                otherMsgForm.availablePoint
+              }}</span
+            >
           </div>
         </div>
       </div>
       <!-- 订单价格 -->
       <div class="order-price">
         <div>
-          <span>{{totalNum}}件商品，总商品金额：</span><span>{{priceDetailDTO.goodsPrice | unitPrice('￥')}}</span>
+          <span>{{ totalNum }}件商品，总商品金额：</span
+          ><span>{{ priceDetailDTO.goodsPrice | unitPrice("￥") }}</span>
         </div>
         <div>
-          <span>运费：</span><span>{{ priceDetailDTO.freightPrice | unitPrice('￥')}}</span>
+          <span>运费：</span
+          ><span>{{ priceDetailDTO.freightPrice | unitPrice("￥") }}</span>
         </div>
         <div>
-          <span>优惠金额：</span><span>-{{ priceDetailDTO.discountPrice + priceDetailDTO.couponPrice + priceDetailDTO.updatePrice | unitPrice('￥')}}</span>
+          <span>优惠金额：</span
+          ><span
+            >-{{
+              (priceDetailDTO.discountPrice +
+                priceDetailDTO.couponPrice +
+                priceDetailDTO.updatePrice)
+                | unitPrice("￥")
+            }}</span
+          >
         </div>
         <div>
-          <span>应付金额：</span><span class='actrual-price'>{{priceDetailDTO.billPrice | unitPrice('￥')}}</span>
+          <span>应付金额：</span
+          ><span class="actrual-price">{{
+            priceDetailDTO.billPrice | unitPrice("￥")
+          }}</span>
         </div>
       </div>
-
     </div>
     <!-- 底部支付栏 -->
     <div class="order-footer width_1200">
       <div class="pay ml_20" @click="pay">提交订单</div>
-      <div class="pay-address" v-if="addressList.length">配送至：{{ selectedAddress.consigneeAddressPath | unitAddress }}
-        {{selectedAddress.detail}}&nbsp;&nbsp;收货人：{{selectedAddress.name}}&nbsp;&nbsp;{{selectedAddress.mobile}}</div>
+      <div class="pay-address" v-if="addressList.length">
+        配送至：{{ selectedAddress.consigneeAddressPath | unitAddress }}
+        {{ selectedAddress.detail }}&nbsp;&nbsp;收货人：{{
+          selectedAddress.name
+        }}&nbsp;&nbsp;{{ selectedAddress.mobile }}
+      </div>
     </div>
     <BaseFooter></BaseFooter>
     <!-- 添加发票模态框 -->
-    <invoice-modal ref="invModal" :invoiceData="invoiceData" @change="getInvMsg" />
+    <invoice-modal
+      ref="invModal"
+      :invoiceData="invoiceData"
+      @change="getInvMsg"
+    />
     <!-- 选择地址模态框 -->
-    <address-manage ref="address" :id="addrId" @change="addrChange"></address-manage>
+    <address-manage
+      ref="address"
+      :id="addrId"
+      @change="addrChange"
+    ></address-manage>
   </div>
 </template>
 
 <script>
-import invoiceModal from "@/components/invoiceModal";
-import addressManage from "@/components/addressManage";
-import { memberAddress, delMemberAddress } from "@/api/address";
+import invoiceModal from '@/components/invoiceModal';
+import addressManage from '@/components/addressManage';
+import { memberAddress, delMemberAddress } from '@/api/address';
 import {
   cartGoodsPay,
   createTrade,
   selectAddr,
   shippingMethod,
   selectCoupon,
-  couponNum,
-} from "@/api/cart";
-import { canUseCouponList } from "@/api/member.js";
-import { getLogo } from "@/api/common.js";
+  couponNum
+} from '@/api/cart';
+import { canUseCouponList } from '@/api/member.js';
+import { getLogo } from '@/api/common.js';
 export default {
-  name: "Pay",
+  name: 'Pay',
   components: { invoiceModal, addressManage },
-  data() {
+  data () {
     return {
       stepIndex: 1, // 顶部步骤条状态
       invoiceAvailable: false, // 发票编辑按钮
-      showEditBtn: "", // 鼠标移入显示编辑按钮
-      orderMark: "", // 订单备注
+      showEditBtn: '', // 鼠标移入显示编辑按钮
+      orderMark: '', // 订单备注
       invoiceData: {
         // 发票数据
-        receiptTitle: "个人",
-        receiptContent: "不开发票",
+        receiptTitle: '个人',
+        receiptContent: '不开发票'
       },
       otherMsgForm: {
         // 其他信息模块数据
         point: 0,
         availablePoint: 10,
         totalPoint: 100,
-        noGoods: 0,
+        noGoods: 0
       },
       deliveryList: [
         // 物流
         // {value: 'SELF_PICK_UP', label: '自提'},
-        { value: "LOGISTICS", label: "物流" },
+        { value: 'LOGISTICS', label: '物流' }
         // {value: 'LOCAL_TOWN_DELIVERY', label: '同城配送'}
       ],
       addressList: [], // 地址列表
@@ -220,37 +343,37 @@ export default {
       goodsList: [], // 商品列表
       priceDetailDTO: {}, // 商品价格
       totalNum: 0, // 购买数量
-      addrId: "", // 编辑地址传入的id
+      addrId: '', // 编辑地址传入的id
       moreAddr: false, // 更多地址
       canUseCouponNum: 0, // 可用优惠券数量
       couponList: [], // 可用优惠券列表
-      logoImg: "", // 平台logo
+      logoImg: '', // 平台logo
       usedCouponId: [], // 已使用优惠券id
-      selectedCoupon: {}, // 已选优惠券对象
+      selectedCoupon: {} // 已选优惠券对象
     };
   },
-  mounted() {
+  mounted () {
     this.init();
-    if (!this.Cookies.getItem("logo")) {
+    if (!this.Cookies.getItem('logo')) {
       getLogo().then((res) => {
         if (res.success) {
           let logoObj = JSON.parse(res.result.settingValue);
-          this.Cookies.setItem("logo", logoObj.buyerSideLogo);
+          this.Cookies.setItem('logo', logoObj.buyerSideLogo);
         }
       });
     } else {
-      this.logoImg = this.Cookies.getItem("logo");
+      this.logoImg = this.Cookies.getItem('logo');
     }
   },
   methods: {
-    init() {
+    init () {
       this.getGoodsDetail();
     },
-    goAddressManage() {
+    goAddressManage () {
       // 跳转地址管理页面
-      this.$router.push("/home/MyAddress");
+      this.$router.push('/home/MyAddress');
     },
-    getAddress() {
+    getAddress () {
       // 获取收货地址列表
       memberAddress().then((res) => {
         if (res.success) {
@@ -263,7 +386,7 @@ export default {
         }
       });
     },
-    getGoodsDetail() {
+    getGoodsDetail () {
       // 订单商品详情
       this.$Spin.show();
       cartGoodsPay({ way: this.$route.query.way })
@@ -274,24 +397,21 @@ export default {
             this.priceDetailDTO = res.result.priceDetailDTO;
             this.skuList = res.result.skuList;
 
-            res.result.receiptVO
-              ? (this.invoiceData = res.result.receiptVO)
-              : "";
+            res.result.receiptVO ? (this.invoiceData = res.result.receiptVO) : '';
 
             let notSupArea = res.result.notSupportFreight;
             this.selectedCoupon = {};
-            if (res.result.platformCoupon)
-              this.selectedCoupon.platformCoupon = res.result.platformCoupon;
+            if (res.result.platformCoupon) this.selectedCoupon.platformCoupon = res.result.platformCoupon;
             Object.assign(this.selectedCoupon, res.result.storeCoupons);
             if (notSupArea) {
               let content = [];
-              let title = "";
+              let title = '';
               notSupArea.forEach((e) => {
                 title = e.errorMessage;
                 content.push(e.goodsSku.goodsName);
               });
               this.$Modal.warning({
-                title: "以下商品超出配送区域" || title,
+                title: '以下商品超出配送区域' || title,
                 content: content.toString(),
               });
             }
@@ -310,7 +430,7 @@ export default {
           this.$Spin.hide();
         });
     },
-    getCouponNum() {
+    getCouponNum () {
       // 获取可用优惠券数量
       couponNum({ way: this.$route.query.way }).then((res) => {
         this.canUseCouponNum = res.result;
@@ -326,10 +446,10 @@ export default {
           let params = {
             pageNumber: 1,
             pageSize: 100,
-            memberCouponStatus: "NEW",
+            memberCouponStatus: 'NEW',
             scopeId: skuArr.toString(),
             storeId: storeArr.toString(),
-            totalPrice: this.priceDetailDTO.goodsPrice,
+            totalPrice: this.priceDetailDTO.goodsPrice
           };
           canUseCouponList(params).then((res) => {
             // 可用优惠券列表
@@ -350,86 +470,85 @@ export default {
         }
       });
     },
-    selectAddress(item) {
+    selectAddress (item) {
       // 选择地址
       let params = {
         way: this.$route.query.way,
-        shippingAddressId: item.id,
+        shippingAddressId: item.id
       };
       selectAddr(params).then((res) => {
         if (res.success) {
-          this.$Message.success("选择收货地址成功");
+          this.$Message.success('选择收货地址成功');
           this.selectedAddress = item;
           this.getGoodsDetail();
         }
       });
     },
-    editAddress(id) {
+    editAddress (id) {
       // 编辑地址
       this.addrId = id;
       this.$refs.address.show();
     },
-    addrChange(item) {
+    addrChange () {
       // 添加，编辑地址回显
       this.getAddress();
     },
-    delAddress(item) {
+    delAddress (item) {
       // 删除地址
       this.$Modal.confirm({
-        title: "提示",
-        content: "你确定删除这个收货地址",
+        title: '提示',
+        content: '你确定删除这个收货地址',
         onOk: () => {
           delMemberAddress(item.id).then((res) => {
             if (res.success) {
-              this.$Message.success("删除成功");
+              this.$Message.success('删除成功');
               this.getAddress();
             }
           });
         },
-        onCancel: () => {},
+        onCancel: () => {}
       });
     },
-    goGoodsDetail(skuId, goodsId) {
+    goGoodsDetail (skuId, goodsId) {
       // 跳转商品详情
       let routeUrl = this.$router.resolve({
-        path: "/goodsDetail",
-        query: { skuId, goodsId },
+        path: '/goodsDetail',
+        query: { skuId, goodsId }
       });
-      window.open(routeUrl.href, "_blank");
+      window.open(routeUrl.href, '_blank');
     },
     // 跳转店铺首页
-    goShopPage(id) {
+    goShopPage (id) {
       let routeUrl = this.$router.resolve({
-        path: "/Merchant",
-        query: { id: id },
+        path: '/Merchant',
+        query: { id: id }
       });
-      window.open(routeUrl.href, "_blank");
+      window.open(routeUrl.href, '_blank');
     },
-    selectDelivery(delivery) {
+    selectDelivery (delivery) {
       // 选择配送方式
       let params = {
         way: this.$route.query.way,
-        shippingMethod: delivery.value,
+        shippingMethod: delivery.value
       };
       shippingMethod(params).then((res) => {});
     },
-    useCoupon(id, used) {
+    useCoupon (id, used) {
       // 使用优惠券
       let params = {
         way: this.$route.query.way,
         memberCouponId: id,
-        used: used, // true 为使用， false为弃用
+        used: used // true 为使用， false为弃用
       };
       selectCoupon(params).then((res) => {
         if (res.success) this.init();
       });
     },
-    editInvoice() {
-
+    editInvoice () {
       // 编辑发票信息
       this.$refs.invModal.invoiceAvailable = true;
     },
-    getInvMsg(item) {
+    getInvMsg (item) {
       // 获取发票信息
       if (item) {
         this.init();
@@ -437,18 +556,18 @@ export default {
       }
     },
 
-    pay() {
+    pay () {
       // 结算
       const params = {
-        client: "PC",
+        client: 'PC',
         remark: [],
-        way: this.$route.query.way,
+        way: this.$route.query.way
       };
       this.goodsList.forEach((e) => {
         if (e.remark) {
           params.remark.push({
             remark: e.remark,
-            storeId: e.storeId,
+            storeId: e.storeId
           });
         }
       });
@@ -461,8 +580,8 @@ export default {
           this.$Spin.hide();
           if (res.success) {
             this.$router.push({
-              path: "/payment",
-              query: { orderType: "TRADE", sn: res.result.sn },
+              path: '/payment',
+              query: { orderType: 'TRADE', sn: res.result.sn }
             });
           }
         })
@@ -470,22 +589,22 @@ export default {
           this.$Spin.hide();
         });
     },
-    useScope(type) {
-      let goods = "全部商品";
+    useScope (type) {
+      let goods = '全部商品';
       switch (type) {
-        case "ALL":
-          goods = "全部商品";
+        case 'ALL':
+          goods = '全部商品';
           break;
-        case "PORTION_GOODS":
-          goods = "部分商品";
+        case 'PORTION_GOODS':
+          goods = '部分商品';
           break;
-        case "PORTION_GOODS_CATEGORY":
-          goods = "部分分类商品";
+        case 'PORTION_GOODS_CATEGORY':
+          goods = '部分分类商品';
           break;
       }
       return `${goods}可用`;
-    },
-  },
+    }
+  }
 };
 </script>
 

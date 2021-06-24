@@ -130,7 +130,7 @@
         </FormItem>
 
         <FormItem>
-          <Button type="primary" @click="createLives()">保存</Button>
+          <Button type="primary" v-if="liveStatus=='NEW'" @click="createLives()">保存</Button>
 
         </FormItem>
       </Form>
@@ -342,8 +342,7 @@ export default {
      * dialog点击确定时判断
      */
     addGoods() {
-      console.log(this.commodityList);
-      this.liveData.forEach((item, index) => {
+      this.liveData.forEach((item) => {
         if (this.commodityList.length == 1 && this.liveData.length == 1) {
           addLiveGoods({
             roomId: this.$route.query.roomId,
@@ -517,7 +516,7 @@ export default {
               if (res.success) {
                 this.$Message.success("修改成功!");
 
-                this.$router.push({ path: "/storePromotion/live" });
+                this.$router.push({ path: "/promotion/live" });
               }
               this.spinShow = false;
             });
@@ -528,7 +527,7 @@ export default {
               if (res.success) {
                 this.$Message.success("添加成功!");
 
-                this.$router.push({ path: "/storePromotion/live" });
+                this.$router.push({ path: "/promotion/live" });
               }
               this.spinShow = false;
             });

@@ -29,7 +29,6 @@
             <div>{{ filterOrderStatus(order.orderStatus) }}</div>
             <div>
               订单号：{{ order.sn }} &nbsp; &nbsp; &nbsp;{{order.createTime}}
-              &nbsp; &nbsp;{{ order.memberName | secrecyMobile }}
             </div>
           </div>
           <div>
