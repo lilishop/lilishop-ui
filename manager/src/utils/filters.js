@@ -16,6 +16,22 @@ export function unitPrice(val, unit, location) {
   return (unit || '') + price
 }
 
+/**
+ * 订单来源
+ */
+export function clientTypeWay(val) {
+  if (val == "H5") {
+    return "移动端";
+  } else if (val == "PC") {
+    return "PC端";
+  } else if (val == "WECHAT_MP") {
+    return "小程序端";
+  } else if (val == "APP") {
+    return "移动应用端";
+  } else {
+    return val;
+  }
+}
 
 
 
