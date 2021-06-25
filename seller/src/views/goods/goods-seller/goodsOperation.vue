@@ -159,10 +159,10 @@
                 </template>
               </div>
               <Upload ref="upload" :show-upload-list="false" :default-file-list="baseInfoForm.goodsGalleryFiles"
-                :on-success="handleSuccessGoodsPicture" :format="['jpg', 'jpeg', 'png']"
-                :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize"
-                :before-upload="handleBeforeUploadGoodsPicture" multiple type="drag" :action="uploadFileUrl"
-                :headers="accessToken" style="display: inline-block;margin-left:10px;">
+                      :on-success="handleSuccessGoodsPicture" :format="['jpg', 'jpeg', 'png']"
+                      :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize"
+                      :before-upload="handleBeforeUploadGoodsPicture" multiple type="drag" :action="uploadFileUrl"
+                      :headers="accessToken" style="display: inline-block;margin-left:10px;">
                 <div style="width: 80px; height: 80px; line-height: 80px">
                   <Icon type="ios-camera" size="20"></Icon>
                 </div>
@@ -183,9 +183,9 @@
                         <Card :bordered="true">
                           <FormItem label="规格名：" class="sku-item-content-name">
                             <AutoComplete style="width: 150px" v-model="item.name" :maxlength="30"
-                              placeholder="请输入规格项名称"
-                              :filter-method="filterMethod" :data="skuData"
-                              @on-change="editSkuItem">
+                                          placeholder="请输入规格项名称"
+                                          :filter-method="filterMethod" :data="skuData"
+                                          @on-change="editSkuItem">
                             </AutoComplete>
                             <Button type="error" style="margin-left: 10px" @click="handleCloseSkuItem($index)">删除
                             </Button>
@@ -441,7 +441,7 @@ export default {
     editor,
   },
   watch: {
-    selectGoodsType: { // 选择商品类型
+    selectGoodsType: {
       handler(val) {
         if (val && this.baseInfoForm.goodsType) {
           this.goodsTypeWay.forEach((item) => {
@@ -836,6 +836,7 @@ export default {
      * @value 参数选项值
      */
     selectParams(paramsGroup, groupIndex, params, paramsIndex, value) {
+      console.log(params.id);
       if (!this.baseInfoForm.goodsParamsDTOList[groupIndex]) {
         this.baseInfoForm.goodsParamsDTOList[groupIndex] = {
           groupId:'',
@@ -850,10 +851,11 @@ export default {
       //参数详细为空，则赋予
       if (!this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[paramsIndex]) {
         this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[paramsIndex]={
-          paramName:'',
-          paramValue:'',
-          isIndex:'',
-          required:'',
+          paramName: '',
+          paramValue: '',
+          isIndex: '',
+          required: '',
+          paramId: ''
         }
       }
       this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[paramsIndex]={
@@ -861,7 +863,9 @@ export default {
         paramValue: value,
         isIndex: params.isIndex,
         required: params.required,
+        paramId: params.id
       }
+
     },
 
     // 编辑sku图片
