@@ -6,14 +6,14 @@
         <div class="left-tips">订单提交成功，请尽快付款！</div>
         <div class="left-tips-time">请您尽快完成支付，否则订单会被自动取消</div>
         <div class="left-tips-count-down">
-          <mv-count-down :startTime="startTime"
-                         :endTime="endTime"
-                         :endText="endText"
-                         :dayTxt="'天'"
-                         :hourTxt="'小时'"
-                         :minutesTxt="'分钟'"
-                         :secondsTxt="'秒'"
-                         :isStart="isStart"></mv-count-down>
+          <mv-count-down :startTime="startTime" class="count-down"
+            :endTime="endTime"
+            :endText="endText"
+            :dayTxt="'天'"
+            :hourTxt="'小时'"
+            :minutesTxt="'分钟'"
+            :secondsTxt="'秒'"
+            :isStart="isStart"></mv-count-down>
 
         </div>
       </div>
@@ -22,26 +22,22 @@
       </div>
     </div>
     <div class="wrapper-box">
-      <div v-for="item in support">
-        <div v-if="item === 'ALIPAY'" class="-box-item" @click="handlePay('ALIPAY')">
-          <img
-            src="https://ss3.bdstatic.com/yrwDcj7w0QhBkMak8IuT_XF5ehU5bvGh7c50/logopic/a9936a369e82e0c6c42112674a5220e8_fullsize.jpg"
-            alt="">
-          <span>支付宝</span>
-        </div>
-        <div v-if="item === 'WECHAT'" class="-box-item" @click="handlePay('WECHAT')">
-          <img
-            src="https://dss1.bdstatic.com/6OF1bjeh1BF3odCf/it/u=3774939867,2826752539&fm=74&app=80&f=JPEG&size=f121,121?sec=1880279984&t=796e842a5ef2d16d9edc872d6f1147ef"
-            alt="">
-          <span>微信</span>
-        </div>
-        <div v-if="item === 'WALLET'" class="-box-item" @click="handlePay('WALLET')">
-          <img
-            src="https://dss1.bdstatic.com/6OF1bjeh1BF3odCf/it/u=3774939867,2826752539&fm=74&app=80&f=JPEG&size=f121,121?sec=1880279984&t=796e842a5ef2d16d9edc872d6f1147ef"
-            alt="">
-          <span>余额支付</span>
-          <span>当前剩余({{ walletValue|unitPrice('￥') }})</span>
-        </div>
+      <div v-if="support.includes('ALIPAY')" class="-box-item" @click="handlePay('ALIPAY')">
+        <img
+          src="https://ss3.bdstatic.com/yrwDcj7w0QhBkMak8IuT_XF5ehU5bvGh7c50/logopic/a9936a369e82e0c6c42112674a5220e8_fullsize.jpg"
+          alt="">
+        <span>支付宝</span>
+      </div>
+      <div v-if="support.includes('WECHAT')" class="-box-item" @click="handlePay('WECHAT')">
+        <img
+          src="https://dss1.bdstatic.com/6OF1bjeh1BF3odCf/it/u=3774939867,2826752539&fm=74&app=80&f=JPEG&size=f121,121?sec=1880279984&t=796e842a5ef2d16d9edc872d6f1147ef"
+          alt="">
+        <span>微信</span>
+      </div>
+      <div v-if="support.includes('WALLET')" class="-box-item" @click="handlePay('WALLET')">
+        <Icon custom="icomoon icon-wallet" size="60"/>
+        <span>余额支付</span>
+        <span>当前剩余({{ walletValue | unitPrice('￥') }})</span>
       </div>
     </div>
     <BaseFooter></BaseFooter>
@@ -49,7 +45,7 @@
 </template>
 <script>
 
-import {tradeDetail} from '@/api/pay.js';
+import {tradeDetail, pay} from '@/api/pay.js';
 import MvCountDown from 'mv-count-down'
 import {Message} from 'view-design';
 
@@ -97,7 +93,24 @@ export default {
       params.paymentMethod = way;
       params.paymentClient = 'NATIVE';
       params.price = this.payDetail.price;
-      this.$router.push({path: '/qrpay', query: params});
+      if (way === 'WALLET') {
+        this.$Modal.confirm({
+          title: '支付确认',
+          content: '<p>确认使用余额支付吗？</p>',
+          onOk: () => {
+            pay(params).then(res => {
+              if (res.success) {
+                this.$Message.warning(res.message)
+                this.$router.push('/payDone');
+              } else {
+                this.$Message.warning(res.message)
+              }
+            })
+          }
+        });
+      } else {
+        this.$router.push({path: '/qrpay', query: params});
+      }
     }
   },
   mounted () {
@@ -116,9 +129,8 @@ export default {
 }
 
 .-box-item {
-  margin-right: 30px;
   display: flex;
-  font-size: 21px;
+  font-size: 18px;
   font-weight: bold;
   align-items: center;
   margin: 20px 20px;
@@ -130,7 +142,7 @@ export default {
   }
 
   > span {
-    margin-left: 10px;
+    margin-left: 15px;
   }
 
   > img {
@@ -166,7 +178,6 @@ export default {
 .wrapper-box {
   @include white_background_color();
   height: auto;
-  display: flex;
 }
 
 .wrapper {
@@ -182,5 +193,9 @@ export default {
 
 .head-right {
   font-weight: bold;
+  font-size: 18px;
+}
+.count-down{
+  font-size: 16px!important;
 }
 </style>
