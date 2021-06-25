@@ -327,6 +327,7 @@ export default {
       })
     },
     promotion () { // 格式化促销活动，返回当前促销的对象
+      if (!this.detail.promotionMap) return false;
       let keysArr = Object.keys(this.detail.promotionMap);
       if (keysArr.length === 0) return false;
 
