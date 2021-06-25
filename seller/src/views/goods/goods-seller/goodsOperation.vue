@@ -27,7 +27,6 @@
 
     </Modal>
 
-
     <div class="step-list">
       <steps :current="activestep" simple style="height:60px;margin-top: 10px" process-status="process">
         <div class="step-view">
@@ -194,7 +193,7 @@
                             <AutoComplete style="width: 150px" v-model="item.name" :maxlength="30"
                                           placeholder="请输入规格项名称"
                                           :filter-method="filterMethod" :data="skuData"
-                                          @on-change="editSkuItem">
+                                          @on-change="throttle(editSkuItem($index, item.name), 1000)">
                             </AutoComplete>
                             <Button type="error" style="margin-left: 10px" @click="handleCloseSkuItem($index)">删除
                             </Button>
@@ -209,7 +208,7 @@
                                               :maxlength="30" placeholder="请输入规格值名称"
                                               :filter-method="filterMethod" :data="skuVal"
                                               @on-focus="changeSkuVals(item.name)"
-                                              @on-change="skuValueChange(val.value, $index, item)">
+                                              @on-change="throttle(skuValueChange(val.value, $index, item), 1000)">
 
                                 </AutoComplete>
                                 <Button type="error" style="margin-left: 10px"
@@ -842,6 +841,7 @@ export default {
      * @paramsGroup 参数分组
      * @groupIndex 参数分组下标
      * @params 参数选项
+     * @paramIndex 参数下标值
      * @value 参数选项值
      */
     selectParams(paramsGroup, groupIndex, params, paramsIndex, value) {
@@ -871,7 +871,6 @@ export default {
         isIndex: params.isIndex,
         required: params.required,
       }
-      console.log(this.baseInfoForm.goodsParamsDTOList);
     },
 
     // 编辑sku图片
@@ -977,6 +976,7 @@ export default {
         }
       );
     },
+    // 获取商品单位
     GET_GoodsUnit() {
       API_GOODS.getGoodsUnitList().then((res) => {
         if (res.success) {
@@ -984,6 +984,7 @@ export default {
         }
       });
     },
+    // 获取当前店铺分类
     GET_ShopGoodsLabel() {
       API_GOODS.getShopGoodsLabelListSeller().then((res) => {
         if (res.success) {
@@ -1122,7 +1123,6 @@ export default {
       this.skuTableData = skus;
     },
 
-
     /** 根据当前分类id查询商品应包含的参数 */
     GET_GoodsParams() {
       API_GOODS.getCategoryParamsListDataSeller(this.categoryId).then(
@@ -1166,7 +1166,6 @@ export default {
       );
     },
 
-
     /** 添加规格项 */
     addSkuItem() {
       if (this.skuInfo.length >= 5) {
@@ -1183,15 +1182,17 @@ export default {
       this.renderTableData();
     },
     // 编辑规格名
-    editSkuItem() {
+    editSkuItem(index,name) {
+      // this.skuTableColumn[index].title = name
+      // this.skuTableColumn[index].key = 'sku' + index
       this.renderTableData();
     },
     // 编辑规格值
     async skuValueChange(val, index, item) {
       /** 更新skuInfo数据 */
-      let _arr = cloneObj(item);
-      this.$set(item, "name", _arr.name);
-      this.$set(this.skuInfo, index, _arr);
+      // let _arr = cloneObj(item);
+      // this.$set(item, "name", _arr.name);
+      // this.$set(this.skuInfo, index, _arr);
       /**
        * 渲染规格详细表格
        */
@@ -1272,18 +1273,17 @@ export default {
     renderTableData() {
       this.skuTableColumn = [];
       this.skuTableData = [];
-
+      let pushData = [];
       //渲染头部
-      this.skuInfo.forEach((sku) => {
+      this.skuInfo.forEach((sku,index) => {
         //列名称
         let columnName = sku.name;
-        this.skuTableColumn.push({
+        pushData.push({
           title: columnName,
           key: columnName,
         });
       });
-      let pushData = [];
-      pushData.push(...this.skuTableColumn);
+      
       this.baseInfoForm.goodsType != "VIRTUAL_GOODS"
         ? pushData.push({
           title: "重量",
@@ -1314,27 +1314,55 @@ export default {
       );
 
       this.skuTableColumn = pushData;
-
       //克隆所有渲染的数据
       let cloneTemp = cloneObj(this.skuInfo);
+
       //数据清空一次
       this.skuTableData = [];
       //判定 是否存在规格分组
       if (cloneTemp[0]) {
         //存放最终结果
         let result = [];
-
         //循环选中的 sku 数据
         cloneTemp[0].spec_values.forEach((specItem) => {
           result.push({
-            [specItem.name]: specItem.value,
+            [cloneTemp[0].name]: specItem.value,
             images: this.baseInfoForm.goodsGalleryFiles || [],
           });
         });
         cloneTemp.splice(0, 1);
         result = this.specIterator(result, cloneTemp);
         this.skuTableData = result;
+        console.log(this.skuTableData);
       }
+    },
+     /**
+     * 迭代属性，形成表格
+     * result 渲染的数据
+     * array spec数据
+     */
+    specIterator(result, cloneTemp) {
+      //是否还可以循环
+      if (cloneTemp.length > 0) {
+        let table = [];
+        result.forEach((resItem) => {
+          cloneTemp[0].spec_values.forEach((valItem) => {
+            let obj = cloneObj(resItem);
+            obj[cloneTemp[0].name] = valItem.value;
+            table.push(obj);
+          });
+        });
+        result = [];
+        table.forEach((t) => {
+          result.push(t);
+        });
+        //清除当前循环的分组
+        cloneTemp.splice(0, 1);
+        
+      } else {
+        return result;
+      }
+      return this.specIterator(result, cloneTemp);
     },
     /** 根据分类id获取系统设置规格信息*/
     Get_SkuInfoByCategory(categoryId) {
@@ -1355,34 +1383,18 @@ export default {
     filterMethod(value, option) {
       return option.toUpperCase().indexOf(value.toUpperCase()) !== -1;
     },
-
-    /**
-     * 迭代属性，形成表格
-     * result 渲染的数据
-     * array spec数据
-     */
-    specIterator(result, cloneTemp) {
-      //是否还可以循环
-      if (cloneTemp.length > 0) {
-        let table = [];
-        result.forEach((resItem) => {
-          cloneTemp[0].spec_values.forEach((valItem) => {
-            let obj = cloneObj(resItem);
-            obj[valItem.name] = valItem.value;
-            table.push(obj);
-          });
-        });
-        result = [];
-        table.forEach((t) => {
-          result.push(t);
-        });
-        //清除当前循环的分组
-        cloneTemp.splice(0, 1);
-      } else {
-        return result;
+    // 节流函数
+    throttle (fn,time) {
+      let startTime = new Date();//初始时间
+      return function(){
+        let time_ = (new Date() - startTime) >= time;//判断时间间隔是否大于传入的time值，返回布尔值
+        if(time_){
+          fn.apply(this);
+          startTime = new Date();//函数执行完后更新初始时间的值
+        }
       }
-      return this.specIterator(result, cloneTemp);
     },
+   
     // 规格表格操作
     handleSpan({row, column, rowIndex, columnIndex}) {
     },
