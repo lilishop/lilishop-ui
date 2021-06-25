@@ -123,7 +123,7 @@
             <Button type="error" :loading="loading" :disabled="skuDetail.quantity === 0" @click="pointPay">积分购买</Button>
           </div>
           <div class="add-buy-car" v-if="$route.query.way !== 'POINT' && skuDetail.isAuth === 'PASS'">
-            <Button type="error" :loading="loading" :disabled="skuDetail.quantity === 0" @click="addShoppingCartBtn">加入购物车</Button>
+            <Button type="error" v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'" :loading="loading" :disabled="skuDetail.quantity === 0" @click="addShoppingCartBtn">加入购物车</Button>
             <Button type="warning" :loading="loading1" :disabled="skuDetail.quantity === 0" @click="buyNow">立即购买</Button>
           </div>
 
@@ -199,7 +199,6 @@ export default {
         skuId: this.skuDetail.id
       };
       this.loading = true;
-      console.log(11111111);
       addCartGoods(params).then(res => {
         debugger;
         this.loading = false;
@@ -219,11 +218,15 @@ export default {
         skuId: this.skuDetail.id,
         cartType: 'BUY_NOW'
       };
+      // 虚拟商品购买
+      if (this.skuDetail.goodsType === 'VIRTUAL_GOODS') {
+        params.cartType = 'VIRTUAL'
+      }
       this.loading1 = true;
       addCartGoods(params).then(res => {
         this.loading1 = false;
         if (res.success) {
-          this.$router.push({path: '/pay', query: {way: 'BUY_NOW'}});
+          this.$router.push({path: '/pay', query: {way: params.cartType}});
         } else {
           this.$Message.warning(res.message);
         }
