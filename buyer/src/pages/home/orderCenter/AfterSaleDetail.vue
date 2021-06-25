@@ -44,6 +44,12 @@
         </tr>
       </table>
     </div>
+    <div class="order-card" v-if="afterSale.afterSaleImage">
+      <h3 class="mb_10">图片信息</h3>
+      <div v-for="img in afterSale.afterSaleImage.split(',')" :key="img">
+        <img :src="img" width="200" height="200" @click="perviewImg(img)" class="hover-pointer" alt="">
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -83,6 +89,9 @@ export default {
     filterOrderStatus (status) { // 获取订单状态中文
       const ob = this.afterSaleStatusList.filter(e => { return e.status === status });
       return ob[0].name
+    },
+    perviewImg (img) {
+      window.open(img, '_blank')
     }
   },
   mounted () {

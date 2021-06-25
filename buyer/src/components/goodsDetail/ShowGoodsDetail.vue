@@ -86,6 +86,14 @@
                 </div>
               </div>
             </TabPane>
+            <TabPane label="商品参数">
+              <table class="mt_10" border="1" cellpadding='0' cellspacing="0" v-if="skuDetail.goodsParamsList && skuDetail.length">
+                <tr v-for="param in skuDetail.goodsParamsList" :key="param">
+                  <td>{{param.paramName}}</td><td>{{param.paramValue}}</td>
+                </tr>
+              </table>
+              <!-- <div v-else>暂无商品参数</div> -->
+            </TabPane>
           </Tabs>
         </div>
       </div>
@@ -474,5 +482,19 @@ export default {
 }
 .ivu-rate-star-full:before, .ivu-rate-star-half .ivu-rate-star-content:before {
   color: $theme_color;
+}
+table{
+  border-color: #eee;
+  color: #999;
+  width: 70%;
+  margin-left: 10px;
+  tr{
+    td:nth-child(1){
+      width: 200px;
+    }
+  }
+  td{
+    padding: 5px;
+  }
 }
 </style>

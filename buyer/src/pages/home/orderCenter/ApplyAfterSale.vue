@@ -16,11 +16,11 @@
     </template>
     </Table>
     <div>
-      <Form :model="form" ref="form" :rules="rules" :label-width="80">
+      <Form :model="form" ref="form" class="mt_10" :rules="rules" :label-width="80">
         <FormItem label="售后类别">
           <RadioGroup v-model="form.serviceType" @on-change="changeReason" type="button" button-style="solid">
-            <Radio label="RETURN_GOODS">退货</Radio>
-            <Radio label="RETURN_MONEY">退款</Radio>
+            <Radio v-if="info.returnGoods" label="RETURN_GOODS">退货</Radio>
+            <Radio v-if="info.returnMoney" label="RETURN_MONEY">退款</Radio>
           </RadioGroup>
         </FormItem>
         <FormItem label="提交数量" prop="num">
@@ -144,6 +144,10 @@ export default {
         if (res.success) {
           this.info = res.result
           this.goodsData.push(res.result)
+          if (!this.info.returnGoods && this.info.returnMoney) {
+            this.form.serviceType = 'RETURN_MONEY'
+          }
+          this.getReason(this.form.serviceType)
         }
       })
     },
@@ -195,7 +199,6 @@ export default {
   mounted () {
     this.accessToken.accessToken = storage.getItem('accessToken');
     this.getInfo()
-    this.getReason('RETURN_GOODS')
   }
 }
 </script>

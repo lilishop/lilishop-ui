@@ -64,7 +64,7 @@
                   </span>
               </p>
             </div>
-             <!-- 满减展示 -->
+            <!-- 满减展示 -->
             <div class="item-price-row" v-if="promotionMap['FULL_DISCOUNT']">
               <p>
                 <span class="item-price-title">促&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;销</span>
@@ -111,7 +111,7 @@
               <span class="inventory"> 库存{{skuDetail.quantity}}</span>
             </div>
           </div>
-          <div class="item-select">
+          <div class="item-select" v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'">
             <div class="item-select-title">
               <p>重量</p>
             </div>
@@ -119,11 +119,11 @@
               <span class="inventory"> {{skuDetail.weight}}kg</span>
             </div>
           </div>
-          <div class="add-buy-car" v-if="$route.query.way === 'POINT'">
+          <div class="add-buy-car" v-if="$route.query.way === 'POINT' && skuDetail.isAuth === 'PASS'">
             <Button type="error" :loading="loading" :disabled="skuDetail.quantity === 0" @click="pointPay">积分购买</Button>
           </div>
-          <div class="add-buy-car" v-else>
-            <Button type="error" :loading="loading" :disabled="skuDetail.quantity === 0" @click="addShoppingCartBtn">加入购物车</Button>
+          <div class="add-buy-car" v-if="$route.query.way !== 'POINT' && skuDetail.isAuth === 'PASS'">
+            <Button type="error" v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'" :loading="loading" :disabled="skuDetail.quantity === 0" @click="addShoppingCartBtn">加入购物车</Button>
             <Button type="warning" :loading="loading1" :disabled="skuDetail.quantity === 0" @click="buyNow">立即购买</Button>
           </div>
 
@@ -151,7 +151,7 @@ export default {
       count: 1, // 商品数量
       imgIndex: 0, // 展示图片下标
       currentSelceted: [], // 当前商品sku
-      imgList: this.detail.data.specList[0].specImage, // 商品图片列表
+      imgList: this.detail.data.specList[0].specImage || [], // 商品图片列表
       skuDetail: this.detail.data, // sku详情
       goodsSpecList: this.detail.specs, // 商品spec
       promotionMap: { // 活动状态
@@ -199,7 +199,6 @@ export default {
         skuId: this.skuDetail.id
       };
       this.loading = true;
-      console.log(11111111);
       addCartGoods(params).then(res => {
         debugger;
         this.loading = false;
@@ -219,11 +218,15 @@ export default {
         skuId: this.skuDetail.id,
         cartType: 'BUY_NOW'
       };
+      // 虚拟商品购买
+      if (this.skuDetail.goodsType === 'VIRTUAL_GOODS') {
+        params.cartType = 'VIRTUAL'
+      }
       this.loading1 = true;
       addCartGoods(params).then(res => {
         this.loading1 = false;
         if (res.success) {
-          this.$router.push({path: '/pay', query: {way: 'BUY_NOW'}});
+          this.$router.push({path: '/pay', query: {way: params.cartType}});
         } else {
           this.$Message.warning(res.message);
         }
@@ -324,6 +327,7 @@ export default {
       })
     },
     promotion () { // 格式化促销活动，返回当前促销的对象
+      if (!this.detail.promotionMap) return false;
       let keysArr = Object.keys(this.detail.promotionMap);
       if (keysArr.length === 0) return false;
 

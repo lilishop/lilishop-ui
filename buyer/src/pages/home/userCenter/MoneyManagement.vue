@@ -215,7 +215,7 @@ export default {
                       color: 'green'
                     }
                   },
-                  params.row.money
+                  this.$options.filters.unitPrice(params.row.money, '+ ¥')
                 )
               ]);
             } else if (params.row.money < 0) {
@@ -227,7 +227,7 @@ export default {
                       color: 'red'
                     }
                   },
-                  params.row.money
+                  this.$options.filters.unitPrice(0 - params.row.money, '- ¥')
                 )
               ]);
             }
@@ -252,7 +252,10 @@ export default {
         },
         {
           title: '充值金额',
-          key: 'rechargeMoney'
+          key: 'rechargeMoney',
+          render: (h, params) => {
+            return h('div', [h('span', this.$options.filters.unitPrice(params.row.rechargeMoney, '¥'))]);
+          }
         },
         {
           title: '支付状态',
@@ -281,7 +284,9 @@ export default {
         {
           title: '提现金额',
           key: 'applyMoney',
-          width: 120
+          render: (h, params) => {
+            return h('div', [h('span', this.$options.filters.unitPrice(params.row.applyMoney, '¥'))]);
+          }
         },
         {
           title: '提现状态',
@@ -392,9 +397,10 @@ export default {
         if (valid) {
           recharge(this.formData).then((res) => {
             if (res.message === 'success') {
-              // TODO 根据返回的值跳转到收银台进行支付,一下是输出sn
-              console.warn(res.result.rechargeSn);
-              this.modal = false;
+              this.$router.push({
+                path: '/payment',
+                query: { orderType: 'RECHARGE', sn: res.result.rechargeSn }
+              });
             }
           });
         }
