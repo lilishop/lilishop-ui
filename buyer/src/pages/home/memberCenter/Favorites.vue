@@ -30,13 +30,13 @@
     </div>
     <empty v-else />
     <!-- 分页 -->
-    <div class="page-size mt_10" v-if="paging">
+    <!-- <div class="page-size mt_10" v-if="paging">
       <Page :total="total" @on-change="changePageNum"
         @on-page-size-change="changePageSize"
         :page-size="params.pageSize"
         show-sizer>
       </Page>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -61,7 +61,7 @@ export default {
       total: 0, // 收藏总数
       params: { // 请求参数
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 100,
         type: 'GOODS'
       },
       spinShow: false // 加载状态

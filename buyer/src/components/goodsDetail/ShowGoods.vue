@@ -64,7 +64,7 @@
                   </span>
               </p>
             </div>
-             <!-- 满减展示 -->
+            <!-- 满减展示 -->
             <div class="item-price-row" v-if="promotionMap['FULL_DISCOUNT']">
               <p>
                 <span class="item-price-title">促&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;销</span>
@@ -111,7 +111,7 @@
               <span class="inventory"> 库存{{skuDetail.quantity}}</span>
             </div>
           </div>
-          <div class="item-select" v-if="skuDetail.weight">
+          <div class="item-select" v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'">
             <div class="item-select-title">
               <p>重量</p>
             </div>
@@ -119,10 +119,10 @@
               <span class="inventory"> {{skuDetail.weight}}kg</span>
             </div>
           </div>
-          <div class="add-buy-car" v-if="$route.query.way === 'POINT'">
+          <div class="add-buy-car" v-if="$route.query.way === 'POINT' && skuDetail.isAuth === 'PASS'">
             <Button type="error" :loading="loading" :disabled="skuDetail.quantity === 0" @click="pointPay">积分购买</Button>
           </div>
-          <div class="add-buy-car" v-else>
+          <div class="add-buy-car" v-if="$route.query.way !== 'POINT' && skuDetail.isAuth === 'PASS'">
             <Button type="error" :loading="loading" :disabled="skuDetail.quantity === 0" @click="addShoppingCartBtn">加入购物车</Button>
             <Button type="warning" :loading="loading1" :disabled="skuDetail.quantity === 0" @click="buyNow">立即购买</Button>
           </div>

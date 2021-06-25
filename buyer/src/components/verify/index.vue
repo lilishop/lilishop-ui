@@ -98,14 +98,14 @@ export default {
     }
   },
   created () {
-    this.getImg();
+    // this.getImg();
   },
   watch: {
     verifyType: {
       immediate: true,
       handler: function (v) {
         this.type = v;
-        this.refresh();
+        // this.refresh();
       }
     },
     show (v) {
