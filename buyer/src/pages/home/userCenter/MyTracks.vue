@@ -15,6 +15,14 @@
         </span>
       </li>
     </ul>
+    <!-- 分页 -->
+    <div class="page-size">
+      <Page :total="total" @on-change="changePageNum"
+        @on-page-size-change="changePageSize"
+        :page-size="params.pageSize"
+        show-sizer>
+      </Page>
+    </div>
   </div>
 </template>
 
@@ -25,7 +33,14 @@ export default {
   data () {
     return {
       list: [], // 我的足迹，商品列表
-      spinShow: false // 控制loading是否加载
+      spinShow: false, // 控制loading是否加载
+      params: {
+        pageNumber: 1,
+        pageSize: 30,
+        order: 'desc',
+        sort: 'createTime'
+      },
+      total: 0
     };
   },
   mounted () {
@@ -71,7 +86,16 @@ export default {
         }
       })
     },
-    getList () {
+    changePageNum (val) { // 修改页码
+      this.params.pageNumber = val;
+      this.getList()
+    },
+    changePageSize (val) { // 修改页数
+      this.pageNumber = 1;
+      this.params.pageSize = val;
+      this.getList()
+    },
+    getList () { // 获取足迹列表
       this.spinShow = true;
       tracksList(this.params).then(res => {
         this.spinShow = false

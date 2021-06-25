@@ -148,17 +148,9 @@
                     </div>
                     <div>
                       <Icon type="ios-arrow-dropleft" @click.native="
-                        handleGoodsPicRemoteUp(
-                          baseInfoForm.goodsGalleryFiles,
-                          __index
-                        )
-                      "/>
+                        handleGoodsPicRemoteUp(baseInfoForm.goodsGalleryFiles,__index)"/>
                       <Icon type="ios-arrow-dropright" @click.native="
-                        handleGoodsPicRemoteDown(
-                          baseInfoForm.goodsGalleryFiles,
-                          __index
-                        )
-                      "/>
+                        handleGoodsPicRemoteDown(baseInfoForm.goodsGalleryFiles,__index)"/>
                     </div>
                   </div>
                 </template>
@@ -193,7 +185,7 @@
                             <AutoComplete style="width: 150px" v-model="item.name" :maxlength="30"
                                           placeholder="请输入规格项名称"
                                           :filter-method="filterMethod" :data="skuData"
-                                          @on-change="throttle(editSkuItem(), 1000)">
+                                          @on-change="editSkuItem">
                             </AutoComplete>
                             <Button type="error" style="margin-left: 10px" @click="handleCloseSkuItem($index)">删除
                             </Button>
@@ -204,15 +196,14 @@
                             <div v-for="(val, index) in item.spec_values" :key="index"
                                  style="padding: 0px 20px 10px 0px; float: left">
                               <div>
-                                <AutoComplete style="width: 150px; float: left" v-if="skuValVisible" v-model="val.value"
-                                              :maxlength="30" placeholder="请输入规格值名称"
-                                              :filter-method="filterMethod" :data="skuVal"
-                                              @on-focus="changeSkuVals(item.name)"
-                                              @on-change="throttle(skuValueChange(val.value, $index, item), 1000)">
-
+                                <AutoComplete style="width: 150px; float: left" v-model="val.value"
+                                  :maxlength="30" placeholder="请输入规格值名称"
+                                  :filter-method="filterMethod" :data="skuVal"
+                                  @on-focus="changeSkuVals(item.name)"
+                                  @on-change="skuValueChange(val.value, $index, item)">
                                 </AutoComplete>
-                                <Button type="error" style="margin-left: 10px"
-                                        @click="handleCloseSkuValue(item, index)">删除
+                                <Button type="error" style="margin-left: 10px" @click="handleCloseSkuValue(item, index)">
+                                  删除
                                 </Button>
                               </div>
                             </div>
