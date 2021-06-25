@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'icomoon';
-  src:  url('icomoon.eot?4ejtdc');
-  src:  url('icomoon.eot?4ejtdc#iefix') format('embedded-opentype'),
-    url('icomoon.ttf?4ejtdc') format('truetype'),
-    url('icomoon.woff?4ejtdc') format('woff'),
-    url('icomoon.svg?4ejtdc#icomoon') format('svg');
+  src:  url('icomoon.eot?jvagvf');
+  src:  url('icomoon.eot?jvagvf#iefix') format('embedded-opentype'),
+    url('icomoon.ttf?jvagvf') format('truetype'),
+    url('icomoon.woff?jvagvf') format('woff'),
+    url('icomoon.svg?jvagvf#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,6 +25,14 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-wallet:before {
+  content: "\e905";
+  color: #3c56c6;
+}
+.icon-qrcode:before {
+  content: "\e904";
+  color: #999;
+}
 .icon-customer-service:before {
   content: "\e900";
 }
