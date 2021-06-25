@@ -34,7 +34,7 @@
           alt="">
         <span>微信</span>
       </div>
-      <div v-if="support.includes('WALLET')" class="-box-item" @click="handlePay('WALLET')">
+      <div v-if="support.includes('WALLET') && $route.query.orderType !== 'RECHARGE'" class="-box-item" @click="handlePay('WALLET')">
         <Icon custom="icomoon icon-wallet" size="60"/>
         <span>余额支付</span>
         <span>当前剩余({{ walletValue | unitPrice('￥') }})</span>
