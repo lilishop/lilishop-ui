@@ -361,6 +361,7 @@
             <div class="form-item-view-bottom">
               <Collapse v-model="params_panel" v-for="(paramsGroup,groupIndex) in goodsParams"
                         :title="paramsGroup.groupName"
+                        class="mb_10"
                         style="text-align: left" :key="paramsGroup.groupName">
                 <Panel :name="paramsGroup.groupName">
                   {{paramsGroup.groupName}}
