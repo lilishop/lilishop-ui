@@ -208,20 +208,20 @@ export default {
      * 回调参数补充
      */
     selectedLiveGoods(val, index) {
-      if (!val.___selected) {
-        val.___selected = true;
-        this.$set(this.liveGoodsData[index], "___selected", true);
-        this.selectedGoods.push(this.liveGoodsData[index]);
-      } else {
-        this.$nextTick(() => {
-          val.___selected = false;
+      // if (!val.___selected) {
+      //   val.___selected = true;
+      //   this.$set(this.liveGoodsData[index], "___selected", true);
+      //   this.selectedGoods.push(this.liveGoodsData[index]);
+      // } else {
+      //   this.$nextTick(() => {
+      //     val.___selected = false;
 
-          this.$set(this.liveGoodsData[index], "___selected", true);
-          this.selectedGoods.splice(index, 1);
-        });
-      }
+      //     this.$set(this.liveGoodsData[index], "___selected", true);
+      //     this.selectedGoods.splice(index, 1);
+      //   });
+      // }
 
-      this.$emit("selectedGoods", this.selectedGoods);
+      this.$emit("selectedGoods", val);
     },
     /**
      * 解决radio数据不回显问题
@@ -279,7 +279,7 @@ export default {
         console.log(element);
         return {
           goodsId: element.goodsId, //商品id
-          goodsImage: element.small, //商品图片  必须为 300 * 300
+          goodsImage: element.small, //商品图片  最大为 300 * 300
           name: element.goodsName, //商品昵称
           price: parseInt(element.price), //商品价格
           quantity: element.quantity, //库存

@@ -39,9 +39,11 @@
             </FormItem>
             <FormItem label="发放数量" prop="publishNum" v-if="form.getType==='FREE'">
               <Input v-model="form.publishNum" placeholder="发放数量" style="width: 260px"/>
+              <div class="tips">如果发放数量为0时,则代表不限制发放数量</div>
             </FormItem>
             <FormItem label="领取数量限制" prop="couponLimitNum" v-if="form.getType==='FREE'">
               <Input v-model="form.couponLimitNum" placeholder="领取限制" clearable style="width: 260px"/>
+              <div class="tips">如果领取数量为0时,则代表不限制领取数量</div>
             </FormItem>
             <FormItem label="范围描述" prop="description">
               <Input v-model="form.description" type="textarea" :rows="4" maxlength="50" show-word-limit clearable
@@ -575,6 +577,10 @@ h4 {
   > * {
     margin: 0 4px;
   }
+}
+.tips {
+  font-size: 12px;
+  color: #999;
 }
 </style>
 

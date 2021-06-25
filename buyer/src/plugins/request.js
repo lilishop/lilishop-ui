@@ -69,7 +69,7 @@ service.interceptors.request.use(
       config.headers['accessToken'] = accessToken;
       // 解析当前token时间
       let jwtData = JSON.parse(
-        decodeURIComponent(escape(window.atob(accessToken.split('.')[1])))
+        decodeURIComponent(escape(window.atob(accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))))
       );
       if (jwtData.exp < Math.round(new Date() / 1000)) {
         refresh(config)
