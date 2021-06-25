@@ -193,7 +193,7 @@
                             <AutoComplete style="width: 150px" v-model="item.name" :maxlength="30"
                                           placeholder="请输入规格项名称"
                                           :filter-method="filterMethod" :data="skuData"
-                                          @on-change="throttle(editSkuItem($index, item.name), 1000)">
+                                          @on-change="throttle(editSkuItem(), 1000)">
                             </AutoComplete>
                             <Button type="error" style="margin-left: 10px" @click="handleCloseSkuItem($index)">删除
                             </Button>
@@ -1182,9 +1182,7 @@ export default {
       this.renderTableData();
     },
     // 编辑规格名
-    editSkuItem(index,name) {
-      // this.skuTableColumn[index].title = name
-      // this.skuTableColumn[index].key = 'sku' + index
+    editSkuItem() {
       this.renderTableData();
     },
     // 编辑规格值
@@ -1275,7 +1273,7 @@ export default {
       this.skuTableData = [];
       let pushData = [];
       //渲染头部
-      this.skuInfo.forEach((sku,index) => {
+      this.skuInfo.forEach((sku) => {
         //列名称
         let columnName = sku.name;
         pushData.push({
@@ -1314,6 +1312,7 @@ export default {
       );
 
       this.skuTableColumn = pushData;
+      console.log(this.skuTableColumn);
       //克隆所有渲染的数据
       let cloneTemp = cloneObj(this.skuInfo);
 
