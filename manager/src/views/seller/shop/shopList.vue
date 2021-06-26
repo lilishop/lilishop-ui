@@ -126,7 +126,7 @@ export default {
               "Tag",
               {
                 props: {
-                  color: params.row.selfOperated ? "error" : "success",
+                  color: params.row.selfOperated ? "volcano" : "green",
                 },
               },
               params.row.selfOperated  ? "自营" : "非自营"
@@ -141,50 +141,15 @@ export default {
           width: 130,
           render: (h, params) => {
             if (params.row.storeDisable == "OPEN") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "success",
-                    text: "开启中",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "green",},},"开启中");
             } else if (params.row.storeDisable == "CLOSED") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "已关闭",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "volcano",},},"已关闭");
             } else if (params.row.storeDisable == "APPLY") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "申请中",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "geekblue",},},"申请中");
             } else if (params.row.storeDisable == "APPLYING") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "审核中",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "purple",},},"审核中");
             } else if (params.row.storeDisable == "REFUSED") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "审核拒绝",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "red",},},"审核拒绝");
             }
           },
         },

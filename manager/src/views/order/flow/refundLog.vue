@@ -100,9 +100,9 @@ export default {
           width: 95,
           render: (h, params) => {
             if (params.row.isRefund == "1") {
-              return h("div", [h("span", {}, "已退款")]);
+              return h("div", [h("Tag", {props: {color: "green",},}, "已退款")]);
             } else {
-              return h("div", [h("span", {}, "未退款")]);
+              return h("div", [h("Tag", {props: {color: "orange",},}, "未退款")]);
             }
           },
         },

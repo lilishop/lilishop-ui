@@ -95,13 +95,13 @@ export default {
           width: 100,
           render: (h, params) => {
             if (params.row.billStatus == "OUT") {
-              return h("div", "已出账");
+              return h("Tag", {props: {color: "blue",},},"已出账");
             } else if (params.row.billStatus == "CHECK") {
-              return h("div", "已对账");
+              return h("Tag", {props: {color: "geekblue",},},"已对账");
             } else if (params.row.billStatus == "EXAMINE") {
-              return h("div", "已审核");
+              return h("Tag", {props: {color: "purple",},},"已审核");
             } else {
-              return h("div", "已付款");
+              return h("Tag", {props: {color: "green",},},"已付款");
             }
           },
         },

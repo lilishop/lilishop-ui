@@ -132,15 +132,13 @@
             width: 100,
             render: (h, params) => {
               if (params.row.billStatus == "OUT") {
-                return h( "Badge", {props: { status: "success",text: "已出账" } })
-              } else if (params.row.billStatus == "EXAMINE") {
-                return h( "Badge", {props: { status: "success",text: "已审核" } })
+                return h("Tag", {props: {color: "blue",},},"已出账");
               } else if (params.row.billStatus == "CHECK") {
-                return h( "Badge", {props: { status: "success",text: "已对账" } })
-              } else if (params.row.billStatus == "PAY") {
-                return h( "Badge", {props: { status: "success",text: "已付款" } })
-              }else if (params.row.billStatus == "COMPLETE") {
-                return h( "Badge", {props: { status: "success",text: "已完成" } })
+                return h("Tag", {props: {color: "geekblue",},},"已对账");
+              } else if (params.row.billStatus == "EXAMINE") {
+                return h("Tag", {props: {color: "purple",},},"已审核");
+              } else {
+                return h("Tag", {props: {color: "green",},},"已付款");
               }
             }
           },

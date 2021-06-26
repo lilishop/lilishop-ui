@@ -113,23 +113,9 @@ export default {
           align: "left",
           render: (h, params) => {
             if (params.row.deleteFlag == 0) {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "success",
-                    text: "启用",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "green",},},"启用");
             } else if (params.row.deleteFlag == 1) {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "禁用",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "volcano",},},"禁用");
             }
           },
           filters: [

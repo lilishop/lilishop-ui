@@ -69,7 +69,7 @@ export default {
         orderSn: "",
         buyerName: "",
         orderStatus: "",
-        orderType:"VIRTUAL"
+        orderType: "VIRTUAL",
       },
       selectDate: null,
       form: {
@@ -135,19 +135,19 @@ export default {
           minWidth: 100,
           render: (h, params) => {
             if (params.row.orderStatus == "UNPAID") {
-              return h("div", [h("span", {}, "未付款")]);
+              return h("div", [h("tag", {props: {color: "magenta"}}, "未付款")]);
             } else if (params.row.orderStatus == "PAID") {
-              return h("div", [h("span", {}, "已付款")]);
+              return h("div", [h("tag", {props: {color: "blue"}}, "已付款")]);
             } else if (params.row.orderStatus == "UNDELIVERED") {
-              return h("div", [h("span", {}, "待发货")]);
+              return h("div", [h("tag", {props: {color: "geekblue"}}, "待发货")]);
             } else if (params.row.orderStatus == "DELIVERED") {
-              return h("div", [h("span", {}, "已发货")]);
+              return h("div", [h("tag", {props: {color: "cyan"}}, "已发货")]);
             } else if (params.row.orderStatus == "COMPLETED") {
-              return h("div", [h("span", {}, "已完成")]);
+              return h("div", [h("tag", {props: {color: "green"}}, "已完成")]);
             } else if (params.row.orderStatus == "TAKE") {
-              return h("div", [h("span", {}, "待核验")]);
+              return h("div", [h("tag", {props: {color: "volcano"}}, "待核验")]);
             } else if (params.row.orderStatus == "CANCELLED") {
-              return h("div", [h("span", {}, "已取消")]);
+              return h("div", [h("tag", {props: {color: "red"}}, "已取消")]);
             }
           },
         },
@@ -200,8 +200,6 @@ export default {
       let result = await verificationCode(this.orderCode);
 
       if (result.success) {
-
-
         this.$router.push({
           name: "order-detail",
           query: { sn: result.result.sn || this.orderCode },
@@ -228,6 +226,7 @@ export default {
       this.searchForm = {};
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
+      this.searchForm.orderType = "VIRTUAL";
       this.selectDate = null;
       this.searchForm.startDate = "";
       this.searchForm.endDate = "";

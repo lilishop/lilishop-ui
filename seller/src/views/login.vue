@@ -162,7 +162,7 @@ export default {
 }
 .login {
   height: 100%;
-  background: url("../assets/background.svg") no-repeat;
+  background: url("../assets/background.png") no-repeat;
   background-size: 100%;
   background-position-y: bottom;
   background-color: #edf0f3;

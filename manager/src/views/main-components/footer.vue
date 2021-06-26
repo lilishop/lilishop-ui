@@ -8,7 +8,7 @@
     <Row type="flex" justify="center" class="copyright">
       Copyright © 2020 - Present
       <a
-        href="http://lili.cn"
+        href="https://pickmall.cn/"
         target="_blank"
         style="margin:0 5px;"
       >lili-shop</a> {{ $t('rights') }}

@@ -24,78 +24,35 @@
       <Row class="operation padding-row">
         <Button type="primary" @click="add">添加活动</Button>
       </Row>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        class="page"
-      >
-        <template slot-scope="{ row }" slot="action">
-          <Button
-            type="info"
-            size="small"
-            class="mr_5"
-            v-if="row.promotionStatus == 'NEW'"
-            @click="edit(row)"
-            >编辑</Button
-          >
+      <Tabs value="list"  @on-click="clickTabPane">
+        <TabPane label="秒杀活动列表" name="list">
+          <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="page">
+            <template slot-scope="{ row }" slot="action">
+              <Button type="info" size="small" class="mr_5" v-if="row.promotionStatus == 'NEW'" @click="edit(row)">编辑</Button>
 
-          <Button
-            type="info"
-            size="small"
-            class="mr_5"
-            v-else
-            @click="manage(row)"
-            >查看</Button
-          >
+              <Button type="info" size="small" class="mr_5" v-else @click="manage(row)">查看</Button>
 
-          <Button
-            type="primary"
-            size="small"
-            class="mr_5"
-            v-if="row.promotionStatus == 'NEW'"
-            @click="manage(row)"
-            >管理</Button
-          >
+              <Button type="primary" size="small" class="mr_5" v-if="row.promotionStatus == 'NEW'" @click="manage(row)">管理</Button>
 
-          <!-- <Button type="success" size="small" class="mr_5" v-if="row.promotionStatus == 'NEW' || row.promotionStatus == 'END'" @click="upper(row)">上架</Button>   -->
-          <Button
-            type="error"
-            size="small"
-            v-if="
-              row.promotionStatus == 'START' || row.promotionStatus == 'NEW'
-            "
-            class="mr_5"
-            @click="off(row)"
-            >下架</Button
-          >
+              <Button type="error" size="small" v-if="
+                row.promotionStatus == 'START' || row.promotionStatus == 'NEW'
+              " class="mr_5" @click="off(row)">下架</Button>
+              &nbsp;
+              <Button type="error" size="small" v-if="row.promotionStatus == 'CLOSE'" ghost @click="expire(row)">删除</Button>
+            </template>
+          </Table>
 
-          <Button
-            type="error"
-            size="small"
-            v-if="row.promotionStatus == 'CLOSE'"
-            ghost
-            @click="expire(row)"
-            >删除</Button
-          >
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="page">
-        <Page
-          :current="searchForm.pageNumber + 1"
-          :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
-          size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
+          <Row type="flex" justify="end" class="page">
+            <Page style="margin: 20px 0;" :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize"
+              :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator show-sizer></Page>
+          </Row>
+        </TabPane>
+        <TabPane label="秒杀活动设置" name="setup">
+
+          <setupSeckill v-if="setupFlag"></setupSeckill>
+        </TabPane>
+      </Tabs>
+
     </Card>
   </div>
 </template>
@@ -145,41 +102,13 @@ export default {
           width: 100,
           render: (h, params) => {
             if (params.row.promotionStatus == "NEW") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "新建",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "geekblue",},},"新建");
             } else if (params.row.promotionStatus == "START") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "success",
-                    text: "开始",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "green",},},"开始");
             } else if (params.row.promotionStatus == "END") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "结束",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "volcano",},},"结束");
             } else if (params.row.promotionStatus == "CLOSE") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "废弃",
-                  },
-                }),
-              ]);
+              return h("Tag", {props: {color: "red",},},"结束");
             }
           },
         },
@@ -302,7 +231,7 @@ export default {
 </script>
 <style lang="scss">
 @import "@/styles/table-common.scss";
-.mr_5{
-  margin: 0 4px;
+.mr_5 {
+  margin: 0 5px;
 }
 </style>

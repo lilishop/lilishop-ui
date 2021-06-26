@@ -70,7 +70,7 @@ export default {
       payCallback(params).then(res => {
         if (res.result) {
           clearInterval(this.interval);
-          this.$router.push('/payDone');
+          this.$router.push({path: '/payDone', query: {orderType: this.$route.query.orderType}});
         }
       });
     }

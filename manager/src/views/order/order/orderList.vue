@@ -40,7 +40,7 @@
       </Row>
       <div>
         <download-excel class="export-excel-wrapper" :data="data" :fields="fields" name="商品订单.xls">
-          <Button type="primary" class="export">
+          <Button type="info" class="export">
             导出Excel
           </Button>
         </download-excel>
@@ -72,10 +72,6 @@ export default {
         订单编号: "sn",
         下单时间: "createTime",
         客户名称: "memberName",
-        客户账号: "",
-        收货人: "",
-        收货人手机号: "",
-        收货人地址: "",
         支付方式: {
           field: "clientType",
           callback: (value) => {
@@ -92,15 +88,7 @@ export default {
             }
           },
         },
-        配送方式: "",
-        配送费用: "",
-        订单商品金额: "",
-        订单优惠金额: "",
-        订单应付金额: "",
-        商品SKU编号: "",
         商品数量: "groupNum",
-        买家备注: "",
-        订单状态: "",
         付款状态: {
           field: "payStatus",
           callback: (value) => {
@@ -111,9 +99,6 @@ export default {
               : "";
           },
         },
-        发货状态: "",
-        发票类型: "",
-        发票抬头: "",
         店铺: "storeName",
       },
       loading: true, // 表单加载状态
@@ -166,13 +151,13 @@ export default {
           width: 120,
           render: (h, params) => {
             if (params.row.orderType == "NORMAL") {
-              return h("div", [h("span", {}, "普通订单")]);
+              return h("div", [h("tag", {props: {color: "blue"}}, "普通订单")]);
             } else if (params.row.orderType == "PINTUAN") {
-              return h("div", [h("span", {}, "拼团订单")]);
+              return h("div", [h("tag", {props: {color: "volcano"}}, "拼团订单")]);
             } else if (params.row.orderType == "GIFT") {
-              return h("div", [h("span", {}, "赠品订单")]);
+              return h("div", [h("tag", {props: {color: "green"}}, "赠品订单")]);
             } else if (params.row.orderType == "VIRTUAL") {
-              return h("div", [h("tag", {}, "核验订单")]);
+              return h("div", [h("tag", {props: {color: "geekblue"}}, "核验订单")]);
             }
           },
         },
@@ -202,19 +187,19 @@ export default {
           minWidth: 100,
           render: (h, params) => {
             if (params.row.orderStatus == "UNPAID") {
-              return h("div", [h("span", {}, "未付款")]);
+              return h("div", [h("tag", {props: {color: "magenta"}}, "未付款")]);
             } else if (params.row.orderStatus == "PAID") {
-              return h("div", [h("span", {}, "已付款")]);
+              return h("div", [h("tag", {props: {color: "blue"}}, "已付款")]);
             } else if (params.row.orderStatus == "UNDELIVERED") {
-              return h("div", [h("span", {}, "待发货")]);
+              return h("div", [h("tag", {props: {color: "geekblue"}}, "待发货")]);
             } else if (params.row.orderStatus == "DELIVERED") {
-              return h("div", [h("span", {}, "已发货")]);
+              return h("div", [h("tag", {props: {color: "cyan"}}, "已发货")]);
             } else if (params.row.orderStatus == "COMPLETED") {
-              return h("div", [h("span", {}, "已完成")]);
+              return h("div", [h("tag", {props: {color: "green"}}, "已完成")]);
             } else if (params.row.orderStatus == "TAKE") {
-              return h("div", [h("span", {}, "待核验")]);
+              return h("div", [h("tag", {props: {color: "volcano"}}, "待核验")]);
             } else if (params.row.orderStatus == "CANCELLED") {
-              return h("div", [h("span", {}, "已取消")]);
+              return h("div", [h("tag", {props: {color: "red"}}, "已取消")]);
             }
           },
         },
@@ -222,56 +207,23 @@ export default {
           title: "下单时间",
           key: "createTime",
           width: 170,
-          sortable: true,
-          sortType: "desc",
         },
-
         {
           title: "操作",
           key: "action",
           align: "center",
           width: 150,
           render: (h, params) => {
-            return h("div", [
-              h(
-                "Button",
-
-                {
-                  props: {
-                    type: "primary",
-                    size: "small",
-                  },
-                  attrs: {
-                    disabled: params.row.orderStatus == "UNPAID" ? false : true,
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.confirmPrice(params.row);
-                    },
-                  },
-                },
-                "收款"
+            return h("div", [h("Button", {props: {type: "primary", size: "small",},
+                attrs: {disabled: params.row.orderStatus == "UNPAID" ? false : true,},
+                style: {marginRight: "5px",},
+                on: {click: () => {this.confirmPrice(params.row);},},
+                }, "收款"
               ),
-              h(
-                "Button",
-                {
-                  props: {
-                    type: "info",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.detail(params.row);
-                    },
-                  },
-                },
-                "查看"
+              h("Button", {props: {type: "info", size: "small",},
+                  style: {marginRight: "5px",},
+                  on: {click: () => {this.detail(params.row);},},
+                }, "查看"
               ),
             ]);
           },

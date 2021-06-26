@@ -69,10 +69,10 @@ service.interceptors.request.use(
       config.headers['accessToken'] = accessToken;
       // 解析当前token时间
       let jwtData = JSON.parse(
-        decodeURIComponent(escape(window.atob(accessToken.split('.')[1])))
+        decodeURIComponent(escape(window.atob(accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))))
       );
       if (jwtData.exp < Math.round(new Date() / 1000)) {
-        refresh()
+        refresh(config)
       }
     }
 
@@ -142,6 +142,8 @@ service.interceptors.response.use(
         refresh(error)
         isRefreshToken = 0;
       }
+    } else if (errorResponse.status === 404) {
+      // 避免刷新token时也提示报错信息
     } else {
       if (error.message) {
         let _message =

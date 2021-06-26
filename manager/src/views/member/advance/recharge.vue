@@ -131,23 +131,9 @@
             sortable: false,
             render: (h, params) => {
               if (params.row.payStatus == "PAID") {
-                return h("div", [
-                  h("Badge", {
-                    props: {
-                      status: "success",
-                      text: "已付款",
-                    },
-                  }),
-                ]);
-              } else if (params.row.payStatus == "UNPAID") {
-                return h("div", [
-                  h("Badge", {
-                    props: {
-                      status: "error",
-                      text: "未付款",
-                    },
-                  }),
-                ]);
+                return h("Tag", {props: {color: "green",},}, "已付款");
+              } else {
+                return h("Tag", {props: {color: "red",},}, "未付款");
               }
             },
           },

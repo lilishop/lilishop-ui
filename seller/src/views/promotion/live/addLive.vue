@@ -97,7 +97,7 @@
         </FormItem>
 
         <FormItem label="商品" v-if="$route.query.id">
-          <Button type="primary" :disabled="liveStatus!='NEW'" ghost @click="liveGoodsVisible=true" icon="md-add">添加商品</Button>
+          <Button type="primary" ghost @click="liveGoodsVisible=true" :disabled="liveStatus!='NEW'" icon="md-add">添加商品</Button>
           <Table class="goods-table" :columns="liveColumns" :data="liveData">
             <template slot-scope="{ row,index }" slot="goodsName">
               <div class="flex-goods">
@@ -130,7 +130,7 @@
         </FormItem>
 
         <FormItem>
-          <Button type="primary" @click="createLives()">保存</Button>
+          <Button type="primary" v-if="liveStatus=='NEW'" @click="createLives()">保存</Button>
 
         </FormItem>
       </Form>
@@ -140,8 +140,8 @@
       <img :src="imageSrc" v-if="imageVisible" style="width: 100%">
     </Modal>
 
-    <Modal width="800" v-model="liveGoodsVisible" @on-ok="addGoods">
-      <liveGoods :init="liveData" @selectedGoods="callBackData" reviewed />
+    <Modal width="800" v-model="liveGoodsVisible" footer-hide>
+      <liveGoods @selectedGoods="callBackData" reviewed />
     </Modal>
   </div>
 </template>
@@ -259,10 +259,14 @@ export default {
      * 删除直播间商品
      */
     async deleteGoods(val, index) {
+      this.$Spin.show();
       let res = await delRoomLiveGoods(this.liveForm.roomId, val.liveGoodsId);
       if (res.success) {
         this.$Message.success("删除成功!");
         this.liveData.splice(index, 1);
+        this.$Spin.hide();
+      } else {
+        this.$Spin.hide();
       }
     },
     /**
@@ -325,36 +329,19 @@ export default {
      * 回调的商品选择数据
      */
     callBackData(way) {
-      this.$set(this, "liveData", way);
-    },
-
-    /**
-     * 提交直播间商品
-     */
-    addGoods() {
+      console.log(way);
+      this.liveGoodsVisible = false;
+      this.$Spin.show();
       addLiveGoods({
         roomId: this.$route.query.roomId,
-        liveGoodsId: item.liveGoodsId,
-      });
-    },
-
-    /**
-     * dialog点击确定时判断
-     */
-    addGoods() {
-      console.log(this.commodityList);
-      this.liveData.forEach((item, index) => {
-        if (this.commodityList.length == 1 && this.liveData.length == 1) {
-          addLiveGoods({
-            roomId: this.$route.query.roomId,
-            liveGoodsId: item.liveGoodsId,
-          });
+        liveGoodsId: way.liveGoodsId,
+      }).then((res) => {
+        if (res.success) {
+          this.liveData.push(way);
+          this.$Spin.hide();
+          console.log(this.liveData);
         } else {
-          this.commodityList.forEach((oldVal, i) => {
-            // 如果商品里面没有商品，以及添加商品为第一次的话
-            if (oldVal.liveGoodsId != item.liveGoodsId) {
-            }
-          });
+          this.$Spin.hide();
         }
       });
     },
@@ -517,7 +504,7 @@ export default {
               if (res.success) {
                 this.$Message.success("修改成功!");
 
-                this.$router.push({ path: "/storePromotion/live" });
+                this.$router.push({ path: "/promotion/live" });
               }
               this.spinShow = false;
             });
@@ -528,7 +515,7 @@ export default {
               if (res.success) {
                 this.$Message.success("添加成功!");
 
-                this.$router.push({ path: "/storePromotion/live" });
+                this.$router.push({ path: "/promotion/live" });
               }
               this.spinShow = false;
             });

@@ -101,7 +101,7 @@ export default {
         {
           title: "面额/折扣",
           key: "price",
-          width: 120,
+          width: 100,
           render: (h, params) => {
             if (params.row.price) {
               return h(
@@ -117,27 +117,28 @@ export default {
         {
           title: "领取数量/总数量",
           key: "publishNum",
-          width: 150,
+          width: 130,
           render: (h, params) => {
             return h(
               "div",
               params.row.receivedNum + "/" + params.row.publishNum
             );
           },
-          minWidth: 130,
+
         },
         {
           title: "优惠券类型",
           key: "couponType",
           width: 120,
           render: (h, params) => {
-            let text = "未知";
+            let text = "";
             if (params.row.couponType === "DISCOUNT") {
-              text = "打折";
+              return h("Tag", {props: {color: "blue",},}, "打折");
             } else if (params.row.couponType === "PRICE") {
-              text = "减免现金";
+              return h("Tag", {props: {color: "geekblue",},}, "减免现金");
+            }else {
+              return h("Tag", {props: {color: "purple",},}, "未知");
             }
-            return h("div", [text]);
           },
         },
         {
@@ -160,7 +161,7 @@ export default {
         },
         {
           title: "活动时间",
-
+          width: 150,
           render: (h, params) => {
             if (params.row.getType === "ACTIVITY") {
               return h("div", "长期有效");
@@ -184,7 +185,7 @@ export default {
               color = "red";
             if (params.row.promotionStatus == "NEW") {
               text = "未开始";
-              color = "default";
+              color = "geekblue";
             } else if (params.row.promotionStatus == "START") {
               text = "已开始";
               color = "green";

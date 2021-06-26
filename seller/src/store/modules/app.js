@@ -7,6 +7,7 @@ import Vue from 'vue';
 const app = {
     state: {
         shipTemplates:"",
+        regions:[], //此处是在地区选择器时赋值一次
         styleStore:"", //移动端楼层装修中选择风格存储
         loading: false, // 全局加载动画
         added: false, // 加载路由标识
