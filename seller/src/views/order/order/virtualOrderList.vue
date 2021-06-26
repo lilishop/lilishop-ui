@@ -1,106 +1,62 @@
 <template>
   <div class="search">
-
     <Card>
-
       <Row @keydown.enter.native="handleSearch">
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="订单号" prop="orderSn">
-            <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单号" clearable style="width: 160px" />
+          <Form-item label="订单编号" prop="orderSn">
+            <Input type="text" v-model="searchForm.orderSn" clearable placeholder="请输入订单编号" style="width: 160px" />
           </Form-item>
           <Form-item label="会员名称" prop="buyerName">
-            <Input type="text" v-model="searchForm.buyerName" placeholder="请输入会员名称" clearable style="width: 160px" />
-          </Form-item>
-
-          <Form-item label="订单类型" prop="orderType">
-            <Select v-model="searchForm.orderType" placeholder="请选择" clearable style="width: 160px">
-              <Option value="NORMAL">普通订单</Option>
-              <Option value="PINTUAN">拼团订单</Option>
-              <Option value="GIFT">赠品订单</Option>
-              <Option value="VIRTUAL">核验订单</Option>
-            </Select>
+            <Input type="text" v-model="searchForm.buyerName" clearable placeholder="请输入会员名称" style="width: 160px" />
           </Form-item>
           <Form-item label="订单状态" prop="orderStatus">
             <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 160px">
               <Option value="UNPAID">未付款</Option>
               <Option value="PAID">已付款</Option>
-              <Option value="UNDELIVERED">待发货</Option>
-              <Option value="DELIVERED">已发货</Option>
               <Option value="COMPLETED">已完成</Option>
               <Option value="TAKE">待核验</Option>
               <Option value="CANCELLED">已取消</Option>
             </Select>
           </Form-item>
-
           <Form-item label="下单时间">
             <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 160px"></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+          <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
       <div>
-        <download-excel class="export-excel-wrapper" :data="data" :fields="fields" name="商品订单.xls">
-          <Button type="info" class="export">
-            导出Excel
+        <Poptip @keydown.enter.native="orderVerification" placement="bottom-start" width="400">
+          <Button class="export">
+            核验订单
           </Button>
-        </download-excel>
+          <div class="api" slot="content">
+            <h2>核验码</h2>
+            <div style="margin:10px 0;">
+              <Input v-model="orderCode" style="width:300px; margin-right:10px;" />
+              <Button style="primary" @click="orderVerification">核验</Button>
+            </div>
+          </div>
+        </Poptip>
+
       </div>
-
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
-
       <Row type="flex" justify="end" class="page">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
           show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
-
   </div>
 </template>
 
 <script>
 import * as API_Order from "@/api/order";
-import JsonExcel from "vue-json-excel";
+import { verificationCode } from "@/api/order";
 export default {
-  name: "orderList",
-  components: {
-    "download-excel": JsonExcel,
-  },
+  name: "virtualOrderList",
   data() {
     return {
-      // 表格的表头以及内容
-      fields: {
-        订单编号: "sn",
-        下单时间: "createTime",
-        客户名称: "memberName",
-        支付方式: {
-          field: "clientType",
-          callback: (value) => {
-            if (value == "H5") {
-              return "移动端";
-            } else if (value == "PC") {
-              return "PC端";
-            } else if (value == "WECHAT_MP") {
-              return "小程序端";
-            } else if (value == "APP") {
-              return "移动应用端";
-            } else {
-              return value;
-            }
-          },
-        },
-        商品数量: "groupNum",
-        付款状态: {
-          field: "payStatus",
-          callback: (value) => {
-            return value == "UNPAID"
-              ? "未付款"
-              : value == "PAID"
-              ? "已付款"
-              : "";
-          },
-        },
-        店铺: "storeName",
-      },
+      orderCode: "",
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
@@ -110,12 +66,22 @@ export default {
         order: "desc", // 默认排序方式
         startDate: "", // 起始时间
         endDate: "", // 终止时间
-        orderType: "",
         orderSn: "",
         buyerName: "",
         orderStatus: "",
+        orderType: "VIRTUAL",
       },
       selectDate: null,
+      form: {
+        // 添加或编辑表单对象初始化数据
+        sn: "",
+        sellerName: "",
+        startTime: "",
+        endTime: "",
+        billPrice: "",
+      },
+      // 表单验证规则
+      formValidate: {},
       submitLoading: false, // 添加或编辑提交状态
       selectList: [], // 多选数据
       selectCount: 0, // 多选计数
@@ -126,7 +92,6 @@ export default {
           minWidth: 240,
           tooltip: true,
         },
-
         {
           title: "订单来源",
           key: "clientType",
@@ -146,28 +111,11 @@ export default {
           },
         },
         {
-          title: "订单类型",
-          key: "orderType",
-          width: 120,
-          render: (h, params) => {
-            if (params.row.orderType == "NORMAL") {
-              return h("div", [h("tag", {props: {color: "blue"}}, "普通订单")]);
-            } else if (params.row.orderType == "PINTUAN") {
-              return h("div", [h("tag", {props: {color: "volcano"}}, "拼团订单")]);
-            } else if (params.row.orderType == "GIFT") {
-              return h("div", [h("tag", {props: {color: "green"}}, "赠品订单")]);
-            } else if (params.row.orderType == "VIRTUAL") {
-              return h("div", [h("tag", {props: {color: "geekblue"}}, "核验订单")]);
-            }
-          },
-        },
-        {
           title: "买家名称",
           key: "memberName",
           minWidth: 130,
           tooltip: true,
         },
-
         {
           title: "订单金额",
           key: "flowPrice",
@@ -207,23 +155,34 @@ export default {
           title: "下单时间",
           key: "createTime",
           width: 170,
+          sortable: true,
+          sortType: "desc",
         },
+
         {
           title: "操作",
           key: "action",
           align: "center",
-          width: 150,
+          width: 100,
           render: (h, params) => {
-            return h("div", [h("Button", {props: {type: "primary", size: "small",},
-                attrs: {disabled: params.row.orderStatus == "UNPAID" ? false : true,},
-                style: {marginRight: "5px",},
-                on: {click: () => {this.confirmPrice(params.row);},},
-                }, "收款"
-              ),
-              h("Button", {props: {type: "info", size: "small",},
-                  style: {marginRight: "5px",},
-                  on: {click: () => {this.detail(params.row);},},
-                }, "查看"
+            return h("div", [
+              h(
+                "Button",
+                {
+                  props: {
+                    type: "info",
+                    size: "small",
+                  },
+                  style: {
+                    marginRight: "5px",
+                  },
+                  on: {
+                    click: () => {
+                      this.detail(params.row);
+                    },
+                  },
+                },
+                "查看"
               ),
             ]);
           },
@@ -234,6 +193,19 @@ export default {
     };
   },
   methods: {
+    /**
+     * 核验订单
+     */
+    async orderVerification() {
+      let result = await verificationCode(this.orderCode);
+
+      if (result.success) {
+        this.$router.push({
+          name: "order-detail",
+          query: { sn: result.result.sn || this.orderCode },
+        });
+      }
+    },
     init() {
       this.getDataList();
     },
@@ -251,9 +223,10 @@ export default {
       this.getDataList();
     },
     handleReset() {
-      this.$refs.searchForm.resetFields();
+      this.searchForm = {};
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
+      this.searchForm.orderType = "VIRTUAL";
       this.selectDate = null;
       this.searchForm.startDate = "";
       this.searchForm.endDate = "";
@@ -288,26 +261,6 @@ export default {
           this.total = res.result.total;
         }
       });
-      this.total = this.data.length;
-      this.loading = false;
-    },
-    //确认收款
-    confirmPrice(v) {
-      this.$Modal.confirm({
-        title: "提示",
-        content:
-          "<p>您确定要收款吗？线下收款涉及库存变更，需异步进行，等待约一分钟刷新列表查看</p>",
-        onOk: () => {
-          API_Order.orderPay(v.sn).then((res) => {
-            if (res.success) {
-              this.$Message.success("收款成功");
-              this.getDataList();
-            } else {
-              this.$Message.error(res.message);
-            }
-          });
-        },
-      });
     },
 
     detail(v) {
@@ -318,19 +271,15 @@ export default {
       });
     },
   },
-  mounted() {
+  activated() {
     this.init();
   },
 };
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 // 建议引入通用样式 可删除下面样式代码
 @import "@/styles/table-common.scss";
 .export {
   margin: 10px 20px 10px 0;
 }
-.export-excel-wrapper {
-  display: inline;
-}
-
 </style>

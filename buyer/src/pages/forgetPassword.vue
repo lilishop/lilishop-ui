@@ -93,13 +93,13 @@
     </div>
     <div class="foot">
       <Row type="flex" justify="space-around" class="help">
-        <a class="item" href="https://lilishop.com" target="_blank">帮助</a>
-        <a class="item" href="https://lilishop.com" target="_blank">隐私</a>
-        <a class="item" href="https://lilishop.com" target="_blank">条款</a>
+        <a class="item" href="https://pickmall.cn/" target="_blank">帮助</a>
+        <a class="item" href="https://pickmall.cn/" target="_blank">隐私</a>
+        <a class="item" href="https://pickmall.cn/" target="_blank">条款</a>
       </Row>
       <Row type="flex" justify="center" class="copyright">
         Copyright © 2020 - Present
-        <a href="http://lili.cn" target="_blank" style="margin: 0 5px"
+        <a href="https://pickmall.cn/" target="_blank" style="margin: 0 5px"
           >lili-shop</a
         >
         版权所有

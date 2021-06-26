@@ -72,51 +72,13 @@ export default {
           align: "center",
           render: (h, params) => {
             if (params.row.paymentMethod === "WECHAT") {
-              return h("div", [
-                h(
-                  "Tag",
-                  {
-                    props: {
-                      color: "green",
-                    },
-                  },
-                  "微信"
-                ),
-              ]);
+              return h("div", [h("Tag", {props: {color: "green",},}, "微信"),]);
             } else if (params.row.paymentMethod === "ALIPAY") {
-              return h("div", [
-                h(
-                  "Tag",
-                  {
-                    props: {
-                      color: "blue",
-                    },
-                  },
-                  "支付宝"
-                ),
-              ]);
+              return h("div", [h("Tag", {props: {color: "blue",},}, "支付宝"),]);
             } else if (params.row.paymentMethod === "WALLET") {
-              return h("div", [
-                h(
-                  "Tag",
-                  {
-                    props: {},
-                  },
-                  "余额支付"
-                ),
-              ]);
+              return h("div", [h("Tag", {props: {color: "geekblue",},}, "余额支付"),]);
             } else if (params.row.paymentMethod === "BANK_TRANSFER") {
-              return h("div", [
-                h(
-                  "Tag",
-                  {
-                    props: {
-                      color: "orange",
-                    },
-                  },
-                  "银行转帐"
-                ),
-              ]);
+              return h("div", [h("Tag", {props: {color: "orange",},}, "银行转帐"),]);
             } else {
               return h("div", [h("Tag", {}, "暂未付款")]);
             }

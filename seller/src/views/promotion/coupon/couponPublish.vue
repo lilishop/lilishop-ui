@@ -6,22 +6,10 @@
           <h4>基本信息</h4>
           <div class="form-item-view">
             <FormItem label="活动名称" prop="promotionName">
-              <Input
-                type="text"
-                v-model="form.promotionName"
-                placeholder="活动名称"
-                clearable
-                style="width: 260px"
-              />
+              <Input type="text" v-model="form.promotionName" placeholder="活动名称" clearable style="width: 260px" />
             </FormItem>
             <FormItem label="优惠券名称" prop="couponName">
-              <Input
-                type="text"
-                v-model="form.couponName"
-                placeholder="优惠券名称"
-                clearable
-                style="width: 260px"
-              />
+              <Input type="text" v-model="form.couponName" placeholder="优惠券名称" clearable style="width: 260px" />
             </FormItem>
             <FormItem label="优惠券类型" prop="couponType">
               <Select v-model="form.couponType" style="width: 260px">
@@ -29,32 +17,12 @@
                 <Option value="PRICE">减免现金</Option>
               </Select>
             </FormItem>
-            <FormItem
-              label="折扣"
-              prop="discount"
-              v-if="form.couponType == 'DISCOUNT'"
-            >
-              <Input
-                type="number"
-                v-model="form.couponDiscount"
-                placeholder="折扣"
-                clearable
-                style="width: 260px"
-              />
+            <FormItem label="折扣" prop="discount" v-if="form.couponType == 'DISCOUNT'">
+              <Input type="number" v-model="form.couponDiscount" placeholder="折扣" clearable style="width: 260px" />
               <span class="describe">请输入0-10之间数字，可以输入一位小数</span>
             </FormItem>
-            <FormItem
-              label="面额"
-              prop="price"
-              v-if="form.couponType == 'PRICE'"
-            >
-              <Input
-                type="text"
-                v-model="form.price"
-                placeholder="面额"
-                clearable
-                style="width: 260px"
-              />
+            <FormItem label="面额" prop="price" v-if="form.couponType == 'PRICE'">
+              <Input type="text" v-model="form.price" placeholder="面额" clearable style="width: 260px" />
             </FormItem>
             <FormItem label="活动类型" prop="getType">
               <Select v-model="form.getType" style="width: 260px">
@@ -63,42 +31,22 @@
               </Select>
             </FormItem>
 
-            <FormItem label="发放数量" prop="publishNum">
-              <Input
-                v-model="form.publishNum"
-                placeholder="发放数量"
-                style="width: 260px"
-              />
+            <FormItem label="发放数量" v-if="form.getType == 'FREE'" prop="publishNum">
+              <Input v-model="form.publishNum" placeholder="发放数量" style="width: 260px" />
+              <div class="tips">如果发放数量为0时,则代表不限制发放数量</div>
             </FormItem>
           </div>
           <h4>使用限制</h4>
           <div class="form-item-view">
             <FormItem label="消费门槛" prop="consumeThreshold">
-              <Input
-                type="text"
-                v-model="form.consumeThreshold"
-                placeholder="消费门槛"
-                clearable
-                style="width: 260px"
-              />
+              <Input type="text" v-model="form.consumeThreshold" placeholder="消费门槛" clearable style="width: 260px" />
             </FormItem>
-            <FormItem label="领取限制" prop="couponLimitNum">
-              <Input
-                v-model="form.couponLimitNum"
-                placeholder="领取限制"
-                clearable
-                style="width: 260px"
-              />
+            <FormItem label="领取限制" v-if="form.getType == 'FREE'" prop="couponLimitNum">
+              <Input v-model="form.couponLimitNum" placeholder="领取限制" clearable style="width: 260px" />
+              <div class="tips">如果领取限制为0时,则代表不限制领取数量</div>
             </FormItem>
             <FormItem label="有效期" prop="rangeTime">
-              <DatePicker
-                type="datetimerange"
-                v-model="form.rangeTime"
-                format="yyyy-MM-dd HH:mm:ss"
-                placeholder="请选择"
-                :options="options"
-                style="width: 260px"
-              >
+              <DatePicker type="datetimerange" v-model="form.rangeTime" format="yyyy-MM-dd HH:mm:ss" placeholder="请选择" :options="options" style="width: 260px">
               </DatePicker>
             </FormItem>
             <FormItem label="使用范围" prop="scopeType">
@@ -109,34 +57,14 @@
               </RadioGroup>
             </FormItem>
 
-            <FormItem
-              style="width: 100%"
-              v-if="form.scopeType == 'PORTION_GOODS'"
-            >
+            <FormItem style="width: 100%" v-if="form.scopeType == 'PORTION_GOODS'">
               <div style="display: flex; margin-bottom: 10px">
-                <Button type="primary" @click="openSkuList"
-                  >选择商品</Button>
-                <Button
-                  type="error"
-                  ghost
-                  style="margin-left: 10px"
-                  @click="delSelectGoods"
-                  >批量删除</Button
-                >
+                <Button type="primary" @click="openSkuList">选择商品</Button>
+                <Button type="error" ghost style="margin-left: 10px" @click="delSelectGoods">批量删除</Button>
               </div>
-              <Table
-                border
-                :columns="columns"
-                :data="form.promotionGoodsList"
-                @on-selection-change="changeSelect"
-              >
+              <Table border :columns="columns" :data="form.promotionGoodsList" @on-selection-change="changeSelect">
                 <template slot-scope="{ row }" slot="QRCode">
-                  <img
-                    :src="row.QRCode || '../../../assets/lili.png'"
-                    width="50px"
-                    height="50px"
-                    alt=""
-                  />
+                  <img :src="row.QRCode || '../../../assets/lili.png'" width="50px" height="50px" alt="" />
                 </template>
               </Table>
             </FormItem>
@@ -147,35 +75,17 @@
             </FormItem>
 
             <FormItem label="范围描述" prop="description">
-              <Input
-                v-model="form.description"
-                type="textarea"
-                :rows="4"
-                maxlength="50"
-                show-word-limit
-                clearable
-                style="width: 260px"
-              />
+              <Input v-model="form.description" type="textarea" :rows="4" maxlength="50" show-word-limit clearable style="width: 260px" />
             </FormItem>
             <div>
-              <Button type="text" @click="$router.push({ name: 'coupon' })"
-                >返回</Button
-              >
-              <Button
-                type="primary"
-                :loading="submitLoading"
-                @click="handleSubmit"
-                >提交</Button
-              >
+              <Button type="text" @click="$router.push({ name: 'coupon' })">返回</Button>
+              <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
             </div>
           </div>
         </div>
       </Form>
     </Card>
-    <sku-select
-      ref="skuSelect"
-      @selectedGoodsData="selectedGoodsData"
-    ></sku-select>
+    <sku-select ref="skuSelect" @selectedGoodsData="selectedGoodsData"></sku-select>
   </div>
 </template>
 
@@ -212,7 +122,7 @@ export default {
         callback();
       }
     };
-   
+
     return {
       modalType: 0, // 判断是新增还是编辑优惠券 0 新增  1 编辑
       categoryId: 0, // 分类id
@@ -232,6 +142,7 @@ export default {
         getType: "FREE",
         promotionGoodsList: [],
         scopeIdGoods: [],
+        rangeDayType: "FIXEDTIME",
       },
       id: this.$route.query.id,
       submitLoading: false, // 添加或编辑提交状态
@@ -392,7 +303,11 @@ export default {
           params.endTime = this.$options.filters.unixToDate(
             this.form.rangeTime[1] / 1000
           );
-          delete params.rangeTime
+          if (params.getType == "ACTIVITY") {
+            params.couponLimitNum = 0;
+            params.publishNum = 0;
+          }
+          delete params.rangeTime;
           let scopeId = [];
           if (
             params.scopeType == "PORTION_GOODS" &&
@@ -465,12 +380,13 @@ export default {
         name: "coupon",
       });
     },
-    openSkuList() { // 显示商品选择器
+    openSkuList() {
+      // 显示商品选择器
       this.$refs.skuSelect.open("goods");
-      let data = JSON.parse(JSON.stringify(this.form.promotionGoodsList))
-      data.forEach(e => {
-        e.id = e.skuId
-      })
+      let data = JSON.parse(JSON.stringify(this.form.promotionGoodsList));
+      data.forEach((e) => {
+        e.id = e.skuId;
+      });
       this.$refs.skuSelect.goodsData = data;
     },
     changeSelect(e) {
@@ -507,15 +423,15 @@ export default {
       // 回显已选商品
       let list = [];
       item.forEach((e) => {
-          list.push({
-            goodsName: e.goodsName,
-            price: e.price,
-            originalPrice: e.price,
-            quantity: e.quantity,
-            storeId: e.storeId,
-            sellerName: e.sellerName,
-            skuId: e.id,
-          });
+        list.push({
+          goodsName: e.goodsName,
+          price: e.price,
+          originalPrice: e.price,
+          quantity: e.quantity,
+          storeId: e.storeId,
+          sellerName: e.sellerName,
+          skuId: e.id,
+        });
       });
       this.form.promotionGoodsList = list;
     },
@@ -598,11 +514,15 @@ h4 {
   margin-left: 10px;
   color: #999;
 }
-.ivu-form-item{
+.ivu-form-item {
   margin-bottom: 24px !important;
 }
-.wrapper{
+.wrapper {
   min-height: 1000px;
+}
+.tips {
+  font-size: 12px;
+  color: #999;
 }
 </style>
 

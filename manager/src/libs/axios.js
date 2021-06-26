@@ -64,14 +64,6 @@ service.interceptors.response.use(
         }
         return data;
         break;
-      case 403:
-        // 权限不足
-        if (data.message !== null) {
-          Message.error(data.message);
-        } else {
-          Message.error("权限不足");
-        }
-        break;
       case 500:
         // 系统异常
         if (data.message !== null) {
@@ -89,6 +81,8 @@ service.interceptors.response.use(
     if (error.response) {
       if (error.response.status === 401) {
         // 这种情况一般调到登录页
+      } else if (error.response.status === 404) {
+        // 避免刷新token报错
       } else if (error.response.status === 403) {
         isRefreshToken++;
         if(isRefreshToken === 1) {

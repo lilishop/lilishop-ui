@@ -132,13 +132,13 @@ export const delSpec = (id, params) => {
   return deleteRequest(`/goods/spec/del/${id}`, params);
 };
 //  获取商品规格值列表
-export const getSpecValuesListData = (id, params) => {
-  return getRequest(`/goods/spec-values/values/${id}`, params);
-};
+// export const getSpecValuesListData = (id, params) => {
+//   return getRequest(`/goods/spec-values/values/${id}`, params);
+// };
 //  添加商品规格值
-export const saveSpecValues = (id, params) => {
-  return postRequest(`/goods/spec-values/save/${id}`, params);
-};
+// export const saveSpecValues = (id, params) => {
+//   return postRequest(`/goods/spec-values/save/${id}`, params);
+// };
 
 // 查询某分类下的全部子分类列表
 export const getGoodsCategory = parent_id => {
@@ -209,24 +209,19 @@ export const deleteParamsGroup = (id, params) => {
   return deleteRequest(`/goods/category/parameters/${id}`, params);
 };
 
-//保存获取关联规格
-export const getGoodsSpecInfo = (category_id, params) => {
-  return getRequest(`/goods/category/spec/goods/${category_id}`, params);
-};
-
 //获取sku列表
 export const getSkuPage = params => {
   return getRequest(`/goodsSku/getByPage`, params);
 };
 
 //  获取商品规格值列表
-export const getSpecValuesListSellerData = (id, params) => {
-  return getRequest(`/goods/spec-values/values/${id}`, params);
-};
+// export const getSpecValuesListSellerData = (id, params) => {
+//   return getRequest(`/goods/spec-values/values/${id}`, params);
+// };
 //  添加商品规格值
-export const saveSpecValuesSeller = (id, params) => {
-  return postRequest(`/goods/spec-values/save/${id}`, params);
-};
+// export const saveSpecValuesSeller = (id, params) => {
+//   return postRequest(`/goods/spec-values/save/${id}`, params);
+// };
 
 //  获取商品规格分页列表
 export const getSpecListSellerData = params => {
@@ -317,8 +312,8 @@ export const getCategoryParamsListDataSeller = (id, params) => {
 };
 
 //保存获取关联规格
-export const getGoodsSpecInfoSeller = (category_id, params) => {
-  return getRequest(`/goods/category/spec/goods/${category_id}`, params);
+export const getGoodsSpecInfoSeller = (category_id) => {
+  return getRequest(`/goods/spec/${category_id}`);
 };
 
 //批量设置运费模板

@@ -105,13 +105,13 @@ export default {
               color = "default";
             if (params.row.promotionStatus == "NEW") {
               text = "未开始";
-              color = "default";
+              color = "geekblue";
             } else if (params.row.promotionStatus == "START") {
               text = "已开始";
               color = "green";
             } else if (params.row.promotionStatus == "END") {
               text = "已结束";
-              color = "red";
+              color = "volcano";
             } else if (params.row.promotionStatus == "CLOSE") {
               text = "已关闭";
               color = "red";

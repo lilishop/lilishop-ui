@@ -216,11 +216,11 @@
             width: 100,
             render: (h, params) => {
               if (params.row.serviceType == "RETURN_MONEY") {
-                return h('div', [h('span', {}, '退款'),]);
+                return h('div', [h('tag', {props: {color: "blue"}}, '退款'),]);
               } else if (params.row.serviceType == "RETURN_GOODS") {
-                return h('div', [h('span', {}, '退货'),]);
+                return h('div', [h('tag', {props: {color: "volcano"}}, '退货'),]);
               } else if (params.row.serviceType == "EXCHANGE_GOODS") {
-                return h('div', [h('span', {}, '换货'),]);
+                return h('div', [h('tag', {props: {color: "green"}}, '换货'),]);
               }
             }
           },
@@ -231,27 +231,23 @@
             width: 110,
             render: (h, params) => {
               if (params.row.serviceStatus == "APPLY") {
-                return h('div', [h('span', {}, '申请中'),]);
+                return h('div', [h('tag', {props: {color: "blue"}}, '申请中'),]);
               } else if (params.row.serviceStatus == "PASS") {
-                return h('div', [h('span', {}, '通过售后'),]);
+                return h('div', [h('tag', {props: {color: "cyan"}}, '通过售后'),]);
               } else if (params.row.serviceStatus == "REFUSE") {
-                return h('div', [h('span', {}, '拒绝售后'),]);
+                return h('div', [h('tag', {props: {color: "volcano"}}, '拒绝售后'),]);
               } else if (params.row.serviceStatus == "BUYER_RETURN") {
-                return h('div', [h('span', {}, '买家退货，待卖家收货'),]);
-              } else if (params.row.serviceStatus == "SELLER_RE_DELIVERY") {
-                return h('div', [h('span', {}, '商家换货/补发'),]);
+                return h('div', [h('tag', {props: {color: "orange"}}, '买家退货，待卖家收货'),]);
               } else if (params.row.serviceStatus == "SELLER_CONFIRM") {
-                return h('div', [h('span', {}, '卖家确认收货'),]);
+                return h('div', [h('tag', {props: {color: "gold"}}, '卖家确认收货'),]);
               } else if (params.row.serviceStatus == "SELLER_TERMINATION") {
-                return h('div', [h('span', {}, '卖家终止售后'),]);
-              } else if (params.row.serviceStatus == "BUYER_CONFIRM") {
-                return h('div', [h('span', {}, '买家确认收货'),]);
+                return h('div', [h('tag', {props: {color: "lime"}}, '卖家终止售后'),]);
               } else if (params.row.serviceStatus == "BUYER_CANCEL") {
-                return h('div', [h('span', {}, '买家取消售后'),]);
+                return h('div', [h('tag', {props: {color: "purple"}}, '买家取消售后'),]);
               } else if (params.row.serviceStatus == "COMPLETE") {
-                return h('div', [h('span', {}, '完成售后'),]);
+                return h('div', [h('tag', {props: {color: "green"}}, '完成售后'),]);
               }else if (params.row.serviceStatus == "WAIT_REFUND") {
-                return h('div', [h('span', {}, '待平台退款'),]);
+                return h('div', [h('tag', {props: {color: "geekblue"}}, '待平台退款'),]);
               }
             }
           },

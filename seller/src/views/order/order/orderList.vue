@@ -9,14 +9,6 @@
           <Form-item label="会员名称" prop="buyerName">
             <Input type="text" v-model="searchForm.buyerName" clearable placeholder="请输入会员名称" style="width: 160px" />
           </Form-item>
-              <Form-item label="订单类型" prop="orderType">
-            <Select v-model="searchForm.orderType" placeholder="请选择" clearable style="width: 160px">
-              <Option value="NORMAL">普通订单</Option>
-              <Option value="PINTUAN">拼团订单</Option>
-              <Option value="GIFT">赠品订单</Option>
-              <Option value="VIRTUAL">核验订单</Option>
-            </Select>
-          </Form-item>
           <Form-item label="订单状态" prop="orderStatus">
             <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 160px">
               <Option value="UNPAID">未付款</Option>
@@ -24,7 +16,6 @@
               <Option value="UNDELIVERED">待发货</Option>
               <Option value="DELIVERED">已发货</Option>
               <Option value="COMPLETED">已完成</Option>
-              <Option value="TAKE">待核验</Option>
               <Option value="CANCELLED">已取消</Option>
             </Select>
           </Form-item>
@@ -38,21 +29,7 @@
       <div>
         <Button type="primary" class="export" @click="expressOrderDeliver">
           批量发货
-          <Icon type="ios-arrow-down"></Icon>
         </Button>
-        <Poptip @keydown.enter.native="orderVerification" placement="bottom-start" width="400">
-          <Button class="export">
-            核验订单
-          </Button>
-          <div class="api" slot="content">
-            <h2>核验订单号</h2>
-            <div style="margin:10px 0;">
-              <Input v-model="orderCode" style="width:300px; margin-right:10px;" />
-              <Button style="primary" @click="orderVerification">核验</Button>
-            </div>
-          </div>
-        </Poptip>
-
       </div>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
       <Row type="flex" justify="end" class="page">
@@ -76,13 +53,14 @@ export default {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
-        sort: "createTime", // 默认排序字段
-        order: "desc", // 默认排序方式
+        sort: "", // 默认排序字段
+        order: "", // 默认排序方式
         startDate: "", // 起始时间
         endDate: "", // 终止时间
         orderSn: "",
         buyerName: "",
         orderStatus: "",
+        orderType: "NORMAL",
       },
       selectDate: null,
       form: {
@@ -102,7 +80,7 @@ export default {
         {
           title: "订单号",
           key: "sn",
-          minWidth: 240,
+          minWidth: 200,
           tooltip: true,
         },
         {
@@ -117,25 +95,9 @@ export default {
             } else if (params.row.clientType == "WECHAT_MP") {
               return h("div", {}, "小程序端");
             } else if (params.row.clientType == "APP") {
-              return h("div", {}, "移动应用端");
+              return h("div", {}, "APP端");
             } else {
               return h("div", {}, params.row.clientType);
-            }
-          },
-        },
-        {
-          title: "订单类型",
-          key: "orderType",
-          width: 120,
-          render: (h, params) => {
-            if (params.row.orderType == "NORMAL") {
-              return h("div", [h("span", {}, "普通订单")]);
-            } else if (params.row.orderType == "PINTUAN") {
-              return h("div", [h("span", {}, "拼团订单")]);
-            } else if (params.row.orderType == "GIFT") {
-              return h("div", [h("span", {}, "赠品订单")]);
-            } else if (params.row.orderType == "VIRTUAL") {
-              return h("div", [h("tag", {}, "核验订单")]);
             }
           },
         },
@@ -164,30 +126,27 @@ export default {
           minWidth: 100,
           render: (h, params) => {
             if (params.row.orderStatus == "UNPAID") {
-              return h("div", [h("span", {}, "未付款")]);
+              return h("div", [h("tag", {props: {color: "magenta"}}, "未付款")]);
             } else if (params.row.orderStatus == "PAID") {
-              return h("div", [h("span", {}, "已付款")]);
+              return h("div", [h("tag", {props: {color: "blue"}}, "已付款")]);
             } else if (params.row.orderStatus == "UNDELIVERED") {
-              return h("div", [h("span", {}, "待发货")]);
+              return h("div", [h("tag", {props: {color: "geekblue"}}, "待发货")]);
             } else if (params.row.orderStatus == "DELIVERED") {
-              return h("div", [h("span", {}, "已发货")]);
+              return h("div", [h("tag", {props: {color: "cyan"}}, "已发货")]);
             } else if (params.row.orderStatus == "COMPLETED") {
-              return h("div", [h("span", {}, "已完成")]);
+              return h("div", [h("tag", {props: {color: "green"}}, "已完成")]);
             } else if (params.row.orderStatus == "TAKE") {
-              return h("div", [h("span", {}, "待核验")]);
+              return h("div", [h("tag", {props: {color: "volcano"}}, "待核验")]);
             } else if (params.row.orderStatus == "CANCELLED") {
-              return h("div", [h("span", {}, "已取消")]);
+              return h("div", [h("tag", {props: {color: "red"}}, "已取消")]);
             }
           },
         },
         {
           title: "下单时间",
           key: "createTime",
-          width: 170,
-          sortable: true,
-          sortType: "desc",
+          width: 170
         },
-
         {
           title: "操作",
           key: "action",
@@ -229,8 +188,6 @@ export default {
       let result = await verificationCode(this.orderCode);
 
       if (result.success) {
-
-
         this.$router.push({
           name: "order-detail",
           query: { sn: result.result.sn || this.orderCode },
@@ -308,6 +265,9 @@ export default {
         query: { sn: sn },
       });
     },
+  },
+  mounted() {
+    this.init();
   },
   activated() {
     this.init();

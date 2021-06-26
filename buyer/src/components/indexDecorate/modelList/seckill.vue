@@ -36,7 +36,7 @@
 </template>
 <script>
 import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper';
-import 'swiper/swiper-bundle.css';
+// import 'swiper/swiper-bundle.css';
 export default {
   components: {
     Swiper,

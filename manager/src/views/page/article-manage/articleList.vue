@@ -57,7 +57,7 @@
                 <Input type="number" v-model="form.sort" clearable style="width: 10%" />
               </FormItem>
               <FormItem class="form-item-view-el" label="文章内容" prop="content">
-                <editor openXss v-model="form.content"></editor>
+                <editor  openXss v-model="form.content"></editor>
               </FormItem>
               <FormItem label="是否展示" prop="openStatus">
                 <i-switch size="large" v-model="form.openStatus" :true-value="open" :false-value="close">
@@ -435,25 +435,10 @@ export default {
           this.form.categoryId = res.result.categoryId;
           this.treeValue = data.articleCategoryName;
           this.form.id = data.id;
-          this.form.content = htmlEscape(res.result.content);
+          this.form.content =res.result.content;
           this.form.title = res.result.title;
           this.form.sort = res.result.sort;
           this.form.openStatus = res.result.openStatus;
-        }
-      });
-    },
-
-    htmlEscape(text) {
-      return text.replace(/[<>"&]/g, function (match, pos, originalText) {
-        switch (match) {
-          case "<":
-            return "&lt;";
-          case ">":
-            return "&gt;";
-          case "&":
-            return "&amp;";
-          case '"':
-            return "&quot;";
         }
       });
     },
