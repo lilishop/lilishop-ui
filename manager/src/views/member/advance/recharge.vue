@@ -138,6 +138,13 @@
             },
           },
           {
+            title: "充值时间",
+            key: "createTime",
+            align: "left",
+            width: 190,
+            sortable: false,
+          },
+          {
             title: "支付时间",
             key: "payTime",
             align: "left",

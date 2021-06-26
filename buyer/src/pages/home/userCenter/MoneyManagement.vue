@@ -188,10 +188,10 @@ export default {
       },
       formValidate: {
         price: [
-          { required: true, message: '请输入大于0小于9999的合法充值金额' },
+          { required: true, message: '请输入大于等于1小于9999的合法充值金额' },
           {
             pattern: /^[1-9]\d{0,3}(\.\d{1,2})?$/,
-            message: '请输入大于0小于9999的合法充值金额',
+            message: '请输入大于等于1小于9999的合法充值金额',
             trigger: 'change'
           }
         ]
@@ -200,11 +200,13 @@ export default {
       logColumns: [
         {
           title: '时间',
+          width: 190,
           key: 'createTime'
         },
         {
           title: '金额',
           key: 'money',
+          width: 180,
           render: (h, params) => {
             if (params.row.money > 0) {
               return h('div', [
@@ -242,19 +244,28 @@ export default {
       // 充值记录
       rechargeListColumns: [
         {
+          title: '充值时间',
+          key: 'createTime',
+          width: 168
+        },
+        {
           title: '支付单号',
           key: 'rechargeSn',
           width: 200
         },
         {
-          title: '支付方式',
-          key: 'rechargeWay'
-        },
-        {
           title: '充值金额',
           key: 'rechargeMoney',
           render: (h, params) => {
-            return h('div', [h('span', this.$options.filters.unitPrice(params.row.rechargeMoney, '¥'))]);
+            if (params.row.payStatus === 'PAID') {
+              return h('div', [h('span',{
+                style: {
+                  color: 'green'
+                }
+              }, this.$options.filters.unitPrice(params.row.rechargeMoney, '+ ¥'))]);
+            } else {
+              return h('div', [h('span',this.$options.filters.unitPrice(params.row.rechargeMoney, '¥'))]);
+            }
           }
         },
         {
@@ -269,28 +280,48 @@ export default {
           }
         },
         {
+          title: '支付方式',
+          key: 'rechargeWay'
+        },
+        {
           title: '支付时间',
-          key: 'payTime'
+          key: 'payTime',
+          width: 180
         }
       ],
       rechargeListData: {}, // 充值记录数据
       // 提现记录
       withdrawApplyColumns: [
         {
+          title: '申请时间',
+          key: 'createTime',
+          width: 168
+        },
+        {
           title: '提现单号',
           key: 'sn',
-          width: 215
+          width: 200
         },
         {
           title: '提现金额',
           key: 'applyMoney',
+          width: 110,
           render: (h, params) => {
-            return h('div', [h('span', this.$options.filters.unitPrice(params.row.applyMoney, '¥'))]);
+            if (params.row.applyStatus === 'VIA_AUDITING') {
+              return h('div', [h('span',{
+                style: {
+                  color: 'green'
+                }
+              }, this.$options.filters.unitPrice(params.row.applyMoney, '+ ¥'))]);
+            } else {
+              return h('div', [h('span', this.$options.filters.unitPrice(params.row.applyMoney, '¥'))]);
+            }
           }
         },
         {
           title: '提现状态',
           key: 'applyStatus',
+          width: 95,
           render: (h, params) => {
             if (params.row.applyStatus === 'APPLY') {
               return h('div', [h('span', {}, '申请中')]);
@@ -302,12 +333,14 @@ export default {
           }
         },
         {
-          title: '提现时间',
-          key: 'inspectTime'
+          title: '审核时间',
+          key: 'inspectTime',
+          width: 168
         },
         {
           title: '审核备注',
           key: 'inspectRemark'
+
         }
       ],
       withdrawApplyColumnsListData: {} // 提现记录
