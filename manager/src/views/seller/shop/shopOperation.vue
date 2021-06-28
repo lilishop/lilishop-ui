@@ -27,8 +27,18 @@
                 </RadioGroup>
               </FormItem>
 
-              <FormItem label="店铺经纬度" prop="shopCenter">
-                <Input v-model="shopForm.storeCenter" @on-focus="$refs.liliMap.showMap = true" clearable style="width: 350px" />
+              <FormItem label="店铺定位" prop="shopCenter">
+                <!-- <Input v-model="shopForm.storeCenter" @on-focus="$refs.liliMap.showMap = true" clearable style="width: 350px" /> -->
+                <Button
+                  type="info"
+                  v-if="!shopForm.storeCenter"
+                  @click="$refs.liliMap.showMap = true"
+                >点击获取店铺定位</Button>
+                <Button
+                  type="success"
+                  v-else
+                  @click="$refs.liliMap.showMap = true"
+                >已定位</Button>
               </FormItem>
 
               <FormItem label="店铺所在地" prop="storeAddressPath">
@@ -267,7 +277,7 @@ export default {
           { required: true, message: "店铺简介不能为空", trigger: "blur" },
         ],
         storeCenter: [
-          { required: true, message: "店铺经纬度不能为空", trigger: "change" },
+          { required: true, message: "店铺未定位", trigger: "change" },
         ],
         companyName: [
           { required: true, message: "公司名称不能为空", trigger: "blur" },

@@ -621,7 +621,7 @@ export default {
         /** 是否重新生成sku */
         regeneratorSkuFlag: false,
         /** 运费模板id **/
-        templateId: 0,
+        templateId: '',
         /** 参数组*/
         goodsParamsDTOList: [],
       },
@@ -685,6 +685,7 @@ export default {
           {required: true, message: "请输入物流参数"},
           {validator: checkWeight},
         ],
+        templateId: [{required: true, message: '请选择物流模板'}],
         sellingPoint: [{required: true, message: "请输入商品卖点"}],
         goodsUnit: [{required: true, message: "请选择计量单位"}],
       },
@@ -763,7 +764,7 @@ export default {
         mobileIntro: "",
         updateSku: true,
         regeneratorSkuFlag: false,
-        templateId: 0,
+        templateId: '',
         goodsParamsDTOList: [],
       };
       this.activestep = 0;
@@ -1548,6 +1549,7 @@ export default {
             this.$Message.error("请上传商品图片");
             return;
           }
+          if (this.baseInfoForm.templateId === '') this.baseInfoForm.templateId = 0;
           let flag = false;
           let paramValue = "";
           // //参数校验

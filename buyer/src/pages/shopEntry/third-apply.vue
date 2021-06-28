@@ -90,7 +90,6 @@
       </FormItem>
 
       <FormItem>
-        
         <Button @click="$emit('change', 1)">返回</Button>
         <Button type="primary" :loading="loading" @click="next"
           >提交平台审核</Button
