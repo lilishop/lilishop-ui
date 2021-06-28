@@ -137,7 +137,7 @@
               <Input type="text" v-model="baseInfoForm.cost" placeholder="市场价格" clearable style="width: 260px"/>
             </FormItem>
             <FormItem class="form-item-view-el required" label="商品图片" prop="goodsGalleryFiles">
-              <div class="demo-upload-list" v-for="(item, __index) in baseInfoForm.goodsGalleryFiles" :key="__index">
+              <!-- <div class="demo-upload-list" v-for="(item, __index) in baseInfoForm.goodsGalleryFiles" :key="__index">
                 <template v-if="item.status === 'finished'">
                   <img :src="item.url"/>
 
@@ -157,8 +157,8 @@
                 <template v-else>
                   <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
                 </template>
-              </div>
-              <Upload ref="upload" :show-upload-list="false" :default-file-list="baseInfoForm.goodsGalleryFiles"
+              </div> -->
+              <!-- <Upload ref="upload" :show-upload-list="false" :default-file-list="baseInfoForm.goodsGalleryFiles"
                       :on-success="handleSuccessGoodsPicture" :format="['jpg', 'jpeg', 'png']"
                       :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize"
                       :before-upload="handleBeforeUploadGoodsPicture" multiple type="drag" :action="uploadFileUrl"
@@ -166,7 +166,8 @@
                 <div style="width: 80px; height: 80px; line-height: 80px">
                   <Icon type="ios-camera" size="20"></Icon>
                 </div>
-              </Upload>
+              </Upload> -->
+              <upload-pic-thumb v-model="baseInfoForm.goodsGalleryFiles" :multiple="true"></upload-pic-thumb>
 
               <Modal title="View Image" v-model="goodsPictureVisible">
                 <img :src="previewGoodsPicture" v-if="goodsPictureVisible" style="width: 100%"/>
@@ -371,7 +372,7 @@
                       <Select v-model="params.paramValue" placeholder="请选择" style="width: 200px" clearable
                               @on-change="selectParams(paramsGroup,groupIndex,params,paramsIndex,params.paramValue)">
                         <Option v-for="option in params.options.split(',')" :label="option"
-                                :value="option"></Option>
+                                :value="option" :key="option"></Option>
                       </Select>
                     </FormItem>
                   </p>
@@ -874,12 +875,12 @@ export default {
     editSkuPicture(row) {
       console.log(row);
       if (row.images && row.images.length > 0) {
-        this.previewPicture = row.images[0].url;
+        this.previewPicture = row.images[0];
       }
       this.selectedSku = row;
       this.showSkuPicture = true;
     },
-    handleView(url) {
+    handleView (url) {
       this.previewPicture = url;
       this.visible = true;
     },
@@ -1017,7 +1018,6 @@ export default {
         ...this.baseInfoForm,
         ...response.result,
       };
-      // console.warn(this.baseInfoForm);
 
       this.baseInfoForm.release = "true";
       this.baseInfoForm.recommend = this.baseInfoForm.recommend
@@ -1184,10 +1184,7 @@ export default {
     },
     // 编辑规格值
     async skuValueChange(val, index, item) {
-      /** 更新skuInfo数据 */
-      // let _arr = cloneObj(item);
-      // this.$set(item, "name", _arr.name);
-      // this.$set(this.skuInfo, index, _arr);
+ 
       /**
        * 渲染规格详细表格
        */
