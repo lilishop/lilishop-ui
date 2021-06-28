@@ -1,14 +1,13 @@
 <template>
   <div class="login">
+    <div style="height:50px;"></div>
     <!-- 顶部logo -->
-    <div class="top-content">
-      <div class="logo-box">
-        <img
-          src="../assets/images/logo1.png"
-          @click="$router.push('/')"
-        />
-        <div>修改密码</div>
-      </div>
+    <div class="logo-box">
+      <img
+        :src="logoImg" width='150'
+        @click="$router.push('/')"
+      />
+      <div>修改密码</div>
     </div>
     <div class="login-container">
         <!-- 验证手机号 -->
@@ -119,6 +118,7 @@ export default {
   components: { Verify },
   data () {
     return {
+      logoImg: '', // logo图
       loading: false, // 加载状态
       loading1: false, // 第二步加载状态
       formFirst: { // 手机验证码表单
@@ -242,34 +242,22 @@ export default {
   },
   mounted () {
     this.$refs.formFirst.resetFields();
+    this.logoImg = this.Cookies.getItem('logo')
   },
   watch: {
   }
 };
 </script>
 <style scoped lang="scss">
-.login {
-  height: 100%;
-}
-.top-content {
-  width: 100%;
+.logo-box {
+  width: 600px;
   height: 80px;
-  position: relative;
-  z-index: 1;
-  box-shadow: 0 1px 1px #ddd;
-  background-color: #fff;
-
-  .logo-box {
-    width: 80%;
-    max-width: 1200px;
-    height: 80px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    img {
-      width: 200px;
-      cursor: pointer;
-    }
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  img {
+    width: 150px;
+    cursor: pointer;
   }
   div {
     font-size: 20px;
@@ -278,22 +266,23 @@ export default {
 }
 
 .login-container {
+  border-top: 2px solid $theme_color;
   position: relative;
-  margin: 10px auto;
-  width: 1200px;
+  margin: 0 auto;
+  width: 600px;
   background-color: #fff;
-  padding: 20px;
+  padding: 20px 150px;
   .login-btn{
     position: absolute;
     right: 20px;
-    top: 20px;
+    top: -45px;
   }
 }
 
 .verify-con{
   position: absolute;
-  left: 400px;
-  top: 50px;
+  left: 140px;
+  top: -30px;
   z-index: 10;
 }
 

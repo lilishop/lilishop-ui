@@ -116,6 +116,7 @@ async function refresh (error) {
         });
       },
       onCancel: () => {
+        router.go(0)
         Modal.remove();
       }
     });

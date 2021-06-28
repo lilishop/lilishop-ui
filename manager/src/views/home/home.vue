@@ -150,7 +150,7 @@
             <div class="today-item">
               <div>今日交易额</div>
 
-              <span>￥{{homeData.todayOrderPrice | unitPrice }}</span>
+              <span>￥{{homeData.todayOrderPrice ? (homeData.todayOrderPrice  | unitPrice) : 0}}</span>
             </div>
             <div class="today-item">
               <div>今日新增店铺</div>

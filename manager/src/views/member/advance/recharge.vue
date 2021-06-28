@@ -122,6 +122,17 @@
             title: "充值方式",
             key: "rechargeWay",
             width: 120,
+            render: (h, params) => {
+              if (params.row.rechargeWay === 'ALIPAY') {
+                return h('div', [h('span', {}, '支付宝')]);
+              } else if (params.row.rechargeWay === 'WECHAT') {
+                return h('div', [h('span', {}, '微信')]);
+              } else if (params.row.rechargeWay === 'BANK_TRANSFER') {
+                return h('div', [h('span', {}, '线下转账')]);
+              } else {
+                return h('div', [h('span', {}, '')]);
+              }
+            }
           },
           {
             title: "支付状态",
