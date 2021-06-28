@@ -48,7 +48,7 @@
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">下单金额</div>
-                  <div class="card-item-value">{{overViewList.orderAmount| unitPrice('￥') }}</div>
+                  <div class="card-item-value">{{overViewList.orderAmount  ? ($options.filters.unitPrice(overViewList.orderAmount )) : 0 }}</div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">付款笔数</div>
@@ -56,7 +56,7 @@
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">付款金额</div>
-                  <div class="card-item-value">{{overViewList.paymentAmount | unitPrice('￥')}}</div>
+                  <div class="card-item-value">{{ overViewList.paymentAmount ?  ($options.filters.unitPrice(overViewList.paymentAmount)) : 0 }}</div>
                 </div>
 
               </div>
