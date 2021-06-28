@@ -18,7 +18,7 @@
 import { getVerifyImg, postVerifyImg } from './verify.js';
 export default {
   props: {
-    verifyType: {
+    verifyType: { // 验证方式，登录，注册等
       defalut: 'LOGIN',
       type: String
     }
@@ -96,9 +96,6 @@ export default {
         this.data = res.result;
       });
     }
-  },
-  created () {
-    // this.getImg();
   },
   watch: {
     verifyType: {

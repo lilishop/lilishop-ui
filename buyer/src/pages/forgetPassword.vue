@@ -280,7 +280,7 @@ export default {
 .login-container {
   position: relative;
   margin: 10px auto;
-  width: 1200px;
+  width: 600px;
   background-color: #fff;
   padding: 20px;
   .login-btn{

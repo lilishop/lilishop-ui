@@ -10,7 +10,6 @@
         />
       </FormItem>
       <FormItem prop="storeAddressIdPath" label="公司所在地">
-        <!-- <Input type="text" v-model="form.storeAddressIdPath" placeholder="请选择公司所在地" /> -->
         <region
           style="width: 250px"
           @selected="selectedRegion"
@@ -31,6 +30,13 @@
           placeholder="请填写公司员工总数"
           ><span slot="append">人</span>
           </Input>
+      </FormItem>
+      <FormItem prop="linkPhone" label="公司电话">
+        <Input
+          type="text"
+          v-model="form.companyPhone"
+          placeholder="请填写公司电话"
+          ></Input>
       </FormItem>
       <FormItem prop="registeredCapital" label="注册资金">
         <Input
