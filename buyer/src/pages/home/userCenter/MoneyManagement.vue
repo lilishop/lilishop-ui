@@ -258,13 +258,13 @@ export default {
           key: 'rechargeMoney',
           render: (h, params) => {
             if (params.row.payStatus === 'PAID') {
-              return h('div', [h('span',{
+              return h('div', [h('span', {
                 style: {
                   color: 'green'
                 }
               }, this.$options.filters.unitPrice(params.row.rechargeMoney, '+ ¥'))]);
             } else {
-              return h('div', [h('span',this.$options.filters.unitPrice(params.row.rechargeMoney, '¥'))]);
+              return h('div', [h('span', this.$options.filters.unitPrice(params.row.rechargeMoney, '¥'))]);
             }
           }
         },
@@ -281,7 +281,18 @@ export default {
         },
         {
           title: '支付方式',
-          key: 'rechargeWay'
+          key: 'rechargeWay',
+          render: (h, params) => {
+            if (params.row.rechargeWay === 'ALIPAY') {
+              return h('div', [h('span', {}, '支付宝')]);
+            } else if (params.row.rechargeWay === 'WECHAT') {
+              return h('div', [h('span', {}, '微信')]);
+            } else if (params.row.rechargeWay === 'BANK_TRANSFER') {
+              return h('div', [h('span', {}, '线下转账')]);
+            } else {
+              return h('div', [h('span', {}, '未知方式')]);
+            }
+          }
         },
         {
           title: '支付时间',
@@ -308,7 +319,7 @@ export default {
           width: 110,
           render: (h, params) => {
             if (params.row.applyStatus === 'VIA_AUDITING') {
-              return h('div', [h('span',{
+              return h('div', [h('span', {
                 style: {
                   color: 'green'
                 }
