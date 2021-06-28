@@ -324,7 +324,7 @@ export default {
     // 已选择用户数据
     selectedList: {
       type: null,
-      default: "",
+      default: [],
     },
   },
   watch: {

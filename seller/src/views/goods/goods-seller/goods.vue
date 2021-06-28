@@ -36,7 +36,7 @@
             <DropdownItem name="uppers">批量上架</DropdownItem>
             <DropdownItem name="lowers">批量下架</DropdownItem>
             <DropdownItem name="deleteAll">批量删除</DropdownItem>
-            <!-- <DropdownItem name="batchShipTemplate">批量设置运费模板</DropdownItem> -->
+            <DropdownItem name="batchShipTemplate">批量设置运费模板</DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </Row>

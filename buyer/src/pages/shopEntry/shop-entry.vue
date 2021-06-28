@@ -21,9 +21,6 @@
         <span v-if="storeDisable == 'CLOSED'">店铺已关闭，重申请联系管理员</span>
         <span v-if="storeDisable == 'REFUSED'">审核未通过,请修改资质信息，如有疑问请联系管理员</span>
       </div>
-      <Button @click="currentIndex = 0">上一步</Button>
-      <Button @click="currentIndex = 1">下一步</Button>
-      <Button @click="currentIndex = 2">第三步</Button>
       <Button v-if="currentIndex === 3" @click="$router.push('/')">返回</Button>
       <Button type="primary" @click='currentIndex = 0' v-if="storeDisable === 'REFUSED' && currentIndex === 3">重新申请</Button>
     </div>
