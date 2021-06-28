@@ -86,4 +86,9 @@ export const getMemberFeedbackDetail = (id) => {
   return getRequest(`/feedback/${id}`);
 };
 
+//管理员获取发送详情列表
+export const getMemberMessage = (params) => {
+  return getRequest(`/message/member`, params);
+};
+
 

@@ -35,16 +35,18 @@
               <Row class="operation" style="margin-top: 20px">
                 <Button @click="sendMessage" type="primary">发送消息</Button>
               </Row>
-              <Table
-                :loading="loading"
-                border
-                :columns="messageColumns"
-                :data="messageData"
-                ref="table"
-                sortable="custom"
-                @on-sort-change="messageChangeSort"
-                @on-selection-change="messageChangeSelect"
-              ></Table>
+              <Row>
+                <Table
+                  :loading="loading"
+                  border
+                  :columns="messageColumns"
+                  :data="messageData"
+                  ref="table"
+                  sortable="custom"
+                  @on-sort-change="messageChangeSort"
+                  @on-selection-change="messageChangeSelect"
+                ></Table>
+              </Row>
               <Row type="flex" justify="end" class="page">
                 <Page
                   :current="searchMessageForm.pageNumber"
@@ -62,16 +64,18 @@
             </TabPane>
 
             <TabPane label="通知类站内信" name="SETTING">
-              <Table
-                :loading="loading"
-                border
-                :columns="noticeColumns"
-                :data="noticeData"
-                ref="table"
-                sortable="custom"
-                @on-sort-change="changeSort"
-                @on-selection-change="changeSelect"
-              ></Table>
+              <Row>
+                <Table
+                  :loading="loading"
+                  border
+                  :columns="noticeColumns"
+                  :data="noticeData"
+                  ref="table"
+                  sortable="custom"
+                  @on-sort-change="changeSort"
+                  @on-selection-change="changeSelect"
+                ></Table>
+              </Row>
               <Row type="flex" justify="end" class="page">
                 <Page
                   :current="searchForm.pageNumber"
@@ -106,21 +110,22 @@
       </div>
       <div class="send-setting">
         <div class="left-show">
-            <div v-for="(item, index) in form.variables" >
-              #{<span>{{item}}</span>}
-            </div>
+          <div v-for="(item, index) in form.variables">
+            #{<span>{{item}}</span>}
+          </div>
         </div>
         <div class="send-form">
           <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
 
             <FormItem label="通知节点" prop="noticeNode">
-              <Input v-model="form.noticeNode" clearable type="text" style="width: 90%" maxlength="20"  disabled />
+              <Input v-model="form.noticeNode" clearable type="text" style="width: 90%" maxlength="20" disabled/>
             </FormItem>
             <FormItem label="消息标题" prop="noticeTitle">
               <Input v-model="form.noticeTitle" clearable type="text" style="width: 90%" maxlength="20"/>
             </FormItem>
             <FormItem label="消息内容" prop="noticeContent">
-              <Input v-model="form.noticeContent" clearable type="textarea" style="width: 90%" maxlength="50" :autosize="{maxRows:4,minRows: 4}" show-word-limit />
+              <Input v-model="form.noticeContent" clearable type="textarea" style="width: 90%" maxlength="50"
+                     :autosize="{maxRows:4,minRows: 4}" show-word-limit/>
             </FormItem>
           </Form>
         </div>
@@ -137,24 +142,34 @@
       :title="messageModalTitle"
       v-model="messageModalVisible"
       :mask-closable="false"
-      :width="500"
+      :width="800"
     >
       <Form ref="messageSendForm" :model="messageSendForm" :label-width="100" :rules="messageFormValidate">
         <FormItem label="消息标题" prop="title">
-          <Input v-model="messageSendForm.title" maxlength="15" clearable style="width: 90%"/>
+          <Input v-model="messageSendForm.title" maxlength="15" clearable style="width: 70%"/>
         </FormItem>
         <FormItem label="消息内容" prop="content">
           <Input
             v-model="messageSendForm.content"
             :rows="4"
             type="textarea"
-            style="max-height:60vh;overflow:auto;width: 90%"
+            style="max-height:60vh;overflow:auto;width: 70%"
           />
         </FormItem>
+
+        <FormItem label="发送对象">
+          <RadioGroup type="button" button-style="solid" v-model="messageSendForm.messageClient"
+                      @on-change="selectObject">
+            <Radio label="member">会员</Radio>
+            <Radio label="store">商家</Radio>
+          </RadioGroup>
+        </FormItem>
+
         <FormItem label="发送范围">
           <RadioGroup type="button" button-style="solid" v-model="messageSendForm.messageRange" @on-change="selectShop">
             <Radio label="ALL">全站</Radio>
-            <Radio label="APPOINT">指定商家</Radio>
+            <Radio v-if="messageSendForm.messageClient == 'store'" label="APPOINT">指定商家</Radio>
+            <Radio v-if="messageSendForm.messageClient == 'member'" label="MEMBER">指定会员</Radio>
           </RadioGroup>
         </FormItem>
         <FormItem label="指定商家" v-if="shopShow">
@@ -165,6 +180,17 @@
             </Option>
           </Select>
         </FormItem>
+        <FormItem label="选择会员" prop="scopeType"
+                  v-if="memberShow">
+          <Button type="primary" icon="ios-add" @click="addVip" ghost>选择会员</Button>
+          <div style="margin-top:24px;" v-if="messageSendForm.messageClient == 'member'">
+            <Table border :columns="userColumns" :data="this.selectedMember">
+            </Table>
+          </div>
+        </FormItem>
+        <Modal width="1200" v-model="checkUserList">
+          <userList v-if="checkUserList" @callback="callbackSelectUser" :selectedList="selectedMember" ref="memberLayout"/>
+        </Modal>
       </Form>
       <div slot="footer">
         <Button type="text" @click="messageModalVisible = false">取消</Button>
@@ -180,7 +206,7 @@
       :title="modalTitle"
       v-model="messageDetailModalVisible"
       :mask-closable="false"
-      :width="700"
+      :width="800"
     >
       <Form ref="messageSendForm" :model="messageSendForm" :label-width="100" :rules="messageFormValidate">
         <FormItem label="消息标题" prop="title">
@@ -195,30 +221,65 @@
             style="max-height:60vh;overflow:auto;width: 50%"
           />
         </FormItem>
+        <FormItem label="发送对象">
+          <RadioGroup type="button" button-style="solid" v-model="messageSendForm.messageClient">
+            <Radio disabled label="member">会员</Radio>
+            <Radio disabled label="store">商家</Radio>
+          </RadioGroup>
+        </FormItem>
         <FormItem label="发送范围">
           <RadioGroup type="button" button-style="solid" v-model="messageSendForm.messageRange">
             <Radio disabled label="ALL">全站</Radio>
-            <Radio  disabled label="APPOINT">指定商家</Radio>
+            <Radio v-if="messageSendForm.messageClient == 'store'" disabled label="APPOINT">指定商家</Radio>
+            <Radio v-if="messageSendForm.messageClient == 'member'" disabled label="MEMBER">指定会员</Radio>
           </RadioGroup>
         </FormItem>
-        <FormItem label="指定商家">
-          <Table
-            :loading="loading"
-            border
-            :columns="messageDetailColumns"
-            :data="shopMessageData"
-            ref="table"
-            sortable="custom"
-            @on-sort-change="messageChangeSort"
-            @on-selection-change="messageChangeSelect"
-          ></Table>
+        <FormItem label="指定商家" v-if="messageSendForm.messageClient == 'store'">
+          <Row>
+            <Table
+              :loading="loading"
+              border
+              :columns="messageDetailColumns"
+              :data="shopMessageData"
+              ref="table"
+              sortable="custom"
+              @on-sort-change="shopMessageChangeSort"
+            ></Table>
+          </Row>
           <Row type="flex" justify="end" class="page">
             <Page
               :current="searchShopMessageForm.pageNumber"
               :total="shopMessageDataTotal"
               :page-size="searchShopMessageForm.pageSize"
-              @on-change="messageChangePage"
-              @on-page-size-change="messageChangePageSize"
+              @on-change="shopMessageChangePage"
+              @on-page-size-change="shopMessageChangePageSize"
+              :page-size-opts="[10, 20, 50]"
+              size="small"
+              show-total
+              show-elevator
+              show-sizer
+            ></Page>
+          </Row>
+        </FormItem>
+        <FormItem label="指定会员" v-if="messageSendForm.messageClient == 'member'">
+          <Row>
+            <Table
+              :loading="loading"
+              border
+              :columns="memberMessageDetailColumns"
+              :data="memberMessageData"
+              ref="table"
+              sortable="custom"
+              @on-sort-change="memberMessageChangeSort"
+            ></Table>
+          </Row>
+          <Row type="flex" justify="end" class="page">
+            <Page
+              :current="searchMemberMessageForm.pageNumber"
+              :total="memberMessageDataTotal"
+              :page-size="searchMemberMessageForm.pageSize"
+              @on-change="memberMessageChangePage"
+              @on-page-size-change="memberMessageChangePageSize"
               :page-size-opts="[10, 20, 50]"
               size="small"
               show-total
@@ -239,14 +300,18 @@
   import * as API_Setting from "@/api/setting.js";
   import * as API_Other from "@/api/other.js";
   import * as API_Shop from "@/api/shops.js";
-
+  import userList from "@/views/member/list/index";
 
   export default {
     name: "bill",
-    components: {},
+    components: {
+      userList
+    },
     data() {
       return {
         openSearch: true, // 显示搜索
+        checkUserList: false, //会员选择器
+        selectedMember: [], //选择的会员
         openTip: true, // 显示提示
         loading: true, // 表单加载状态
         modalVisible: false, // 添加或编辑显示
@@ -255,6 +320,7 @@
         messageModalTitle: "", // 发送站内信标题
         messageDetailModalVisible: false, // 添加或编辑显示
         shopShow: false, //指定商家是否出现
+        memberShow: false, //指定会员是否出现
         shopList: [],//店铺列表
         searchForm: {
           // 搜索框初始化对象
@@ -283,6 +349,12 @@
           pageNumber: 1, // 当前页数
           pageSize: 10, // 页面大小
         },
+        //发送给会员的消息
+        searchMemberMessageForm: {
+          // 搜索框初始化对象
+          pageNumber: 1, // 当前页数
+          pageSize: 10, // 页面大小
+        },
         form: {
           noticeNode: "",
           noticeTitle: ""
@@ -290,6 +362,7 @@
         //消息发送表单
         messageSendForm: {
           messageRange: "ALL",
+          messageClient: "member",
           userIds: [],
           userNames: [],
         },
@@ -413,6 +486,45 @@
             }
           },
         ],
+        // 用户表格
+        userColumns: [
+          {
+            title: "用户名称",
+            key: "nickName",
+            minWidth: 120,
+          },
+          {
+            title: "手机号",
+            key: "mobile",
+            render: (h, params) => {
+              return h("div", params.row.mobile || "暂未填写");
+            },
+          },
+          {
+            title: "操作",
+            key: "action",
+            minWidth: 50,
+            align: "center",
+            render: (h, params) => {
+              return h(
+                "Button",
+                {
+                  props: {
+                    size: "small",
+                    type: "error",
+                    ghost: true,
+                  },
+                  on: {
+                    click: () => {
+                      this.delUser(params.index);
+                    },
+                  },
+                },
+                "删除"
+              );
+            },
+          },
+        ],
         noticeData: [], // 表单数据
         noticeDataTotal: 0, // 表单数据总数
         messageColumns: [
@@ -427,7 +539,22 @@
             minWidth: 350,
             tooltip: true
           },
-
+          {
+            title: "发送对象",
+            key: "messageClient",
+            width: 100,
+            render: (h, params) => {
+              if (params.row.messageClient == "member") {
+                return h('div', [
+                  h('span', {}, '会员'),
+                ]);
+              } else if (params.row.messageClient == "store") {
+                return h('div', [
+                  h('span', {}, '商家'),
+                ]);
+              }
+            }
+          },
           {
             title: "发送类型",
             key: "messageRange",
@@ -439,7 +566,11 @@
                 ]);
               } else if (params.row.messageRange == "APPOINT") {
                 return h('div', [
-                  h('span', {}, '指定用户'),
+                  h('span', {}, '指定商家'),
+                ]);
+              } else if (params.row.messageRange == "MEMBER") {
+                return h('div', [
+                  h('span', {}, '指定会员'),
                 ]);
               }
             }
@@ -499,7 +630,7 @@
             }
           },
         ],
-      messageData: [], // 表单数据
+        messageData: [], // 表单数据
         messageDataTotal: 0, // 表单数据总数
         messageDetailColumns: [
           {
@@ -518,22 +649,87 @@
             key: "status",
             render: (h, params) => {
               if (params.row.status == "ALREADY_READY") {
-                return h( "Badge", {props: { status: "success",text: "已读" } })
+                return h("Badge", {props: {status: "success", text: "已读"}})
               } else if (params.row.status == "UN_READY") {
-                return h( "Badge", {props: { status: "processing",text: "未读" } })
-              }else{
-                return h( "Badge", {props: { status: "processing",text: "回收站" } })
+                return h("Badge", {props: {status: "processing", text: "未读"}})
+              } else {
+                return h("Badge", {props: {status: "processing", text: "回收站"}})
               }
             }
           },
         ],
         shopMessageData: [], // 发送给店铺的消息数据
         shopMessageDataTotal: 0, // 发送给店铺的消息数据总数
+
+        memberMessageDetailColumns: [
+          {
+            title: "会员ID",
+            key: "memberId",
+            maxWidth: 300,
+            sortable: false,
+          },
+          {
+            title: "会员名称",
+            key: "memberName",
+            sortable: false,
+          },
+          {
+            title: "是否已读",
+            key: "status",
+            maxWidth: 120,
+            render: (h, params) => {
+              if (params.row.status == "ALREADY_READY") {
+                return h("Badge", {props: {status: "success", text: "已读"}})
+              } else if (params.row.status == "UN_READY") {
+                return h("Badge", {props: {status: "processing", text: "未读"}})
+              } else {
+                return h("Badge", {props: {status: "processing", text: "回收站"}})
+              }
+            }
+          },
+        ],
+        memberMessageData: [], // 发送给店铺的消息数据
+        memberMessageDataTotal: 0, // 发送给店铺的消息数据总数
       };
     },
     methods: {
       init() {
         this.getMessage();
+      },
+
+      // 返回已选择的用户
+      callbackSelectUser(val) {
+        // 每次将返回的数据回调判断
+        let findUser = this.selectedMember.find((item) => {
+          return item.id === val.id;
+        });
+        // 如果没有则添加
+        if (!findUser) {
+          this.selectedMember.push(val);
+        } else {
+          // 有重复数据就删除
+          this.selectedMember.map((item, index) => {
+            if (item.id === findUser.id) {
+              this.selectedMember.splice(index, 1);
+            }
+          });
+        }
+        this.reSelectMember();
+      },
+
+      // 删除选择的会员
+      delUser(index) {
+        this.selectedMember.splice(index, 1);
+        this.reSelectMember();
+      },
+      //更新选择的会员
+      reSelectMember() {
+        this.form.memberDTOS = this.selectedMember.map((item) => {
+          return {
+            nickName: item.nickName,
+            id: item.id
+          }
+        });
       },
 
       //获取全部商家
@@ -547,6 +743,13 @@
         });
         this.loading = false;
 
+      },
+      // 添加指定用户
+      addVip() {
+        this.checkUserList = true;
+        this.$nextTick(() => {
+          this.$refs.memberLayout.selectedMember = true;
+        });
       },
       paneChange(v) {
         if (v == "SETTING") {
@@ -581,6 +784,42 @@
         this.searchMessageForm.pageNumber = v;
         this.getMessage();
         this.clearSelectAll();
+      },
+
+      //会员消息每页条数发生变化
+      memberMessageChangePageSize(v) {
+        this.searchMemberMessageForm.pageSize = v;
+        this.messageDetail();
+      },
+      //会员消息页数变化
+      memberMessageChangePage(v) {
+        this.searchMemberMessageForm.pageNumber = v;
+        this.messageDetail();
+        this.clearSelectAll();
+      },
+      //会员消息
+      memberMessageChangeSort(e) {
+        this.searchMemberMessageForm.sort = e.key;
+        this.searchMemberMessageForm.order = e.order;
+        this.messageDetail()
+      },
+
+      //店铺消息每页条数发生变化
+      shopMessageChangePageSize(v) {
+        this.searchShopMessageForm.pageSize = v;
+        this.messageDetail();
+      },
+      //店铺消息页数变化
+      shopMessageChangePage(v) {
+        this.searchShopMessageForm.pageNumber = v;
+        this.messageDetail();
+        this.clearSelectAll();
+      },
+      //店铺消息
+      shopMessageChangeSort(e) {
+        this.searchShopMessageForm.sort = e.key;
+        this.searchShopMessageForm.order = e.order;
+        this.messageDetail()
       },
       //消息
       messageChangeSort(e) {
@@ -622,7 +861,7 @@
         })
       },
       //删除站内信
-      delete(id){
+      delete(id) {
         console.warn(id)
         this.$Modal.confirm({
           title: "确认删除",
@@ -647,9 +886,11 @@
         this.messageModalVisible = true
         this.messageModalTitle = "发送站内信"
         this.shopShow = false
+        this.memberShow = false
         this.messageSendForm =
           {
             messageRange: "ALL",
+            messageClient: "member",
             content: "",
             title: "",
             userIds: [],
@@ -658,6 +899,18 @@
       },
       //管理员发送站内信提交
       sendMessageSubmit() {
+        let userIds = [];
+        let userNames = [];
+        console.warn(this.selectedMember)
+        if (this.messageSendForm.messageClient == 'member' && this.messageSendForm.messageRange == 'MEMBER'){
+          this.selectedMember.forEach(function(item, index) {
+            userIds.push(item.id)
+            userNames.push(item.username)
+          })
+          this.messageSendForm.userIds = userIds
+          this.messageSendForm.userNames = userNames
+        }
+
         if (this.messageSendForm.userIds.length <= 0 && this.messageSendForm.messageRange == "APPOINT") {
           this.$Message.error("请选择发送对象");
           return
@@ -677,14 +930,27 @@
         })
 
       },
+      //发送对象选择
+      selectObject(v) {
+        this.messageSendForm.messageRange = "ALL"
+        this.shopShow = false
+        this.memberShow =false
+      },
       //弹出选择商家的框
       selectShop(v) {
         if (v == "APPOINT") {
           this.getShopList()
           this.shopShow = true
+          this.memberShow = false
         }
         if (v == "ALL") {
           this.shopShow = false
+          this.memberShow = false
+        }
+        if (v == "MEMBER") {
+          this.shopShow = false
+          this.memberShow = true
+          this.selectedMember = []
         }
       },
       //获取管理员发送列表
@@ -715,9 +981,9 @@
       handleSubmit() {
         this.$refs.form.validate((valid) => {
           if (valid) {
-            let params ={
-              noticeContent:this.form.noticeContent,
-              noticeTitle:this.form.noticeTitle
+            let params = {
+              noticeContent: this.form.noticeContent,
+              noticeTitle: this.form.noticeTitle
             }
             API_Setting.editNoticeMessage(this.form.id, params).then((res) => {
               this.submitLoading = false;
@@ -731,18 +997,37 @@
         });
       },
       //消息详情
-      detail(v) {
-        this.searchShopMessageForm.messageId = v.id
-        API_Other.getShopMessage(this.searchShopMessageForm).then((res) => {
-          if (res.success) {
-            this.messageDetailModalVisible = true;
-            this.modalTitle = "消息详情"
-            this.messageSendForm = v
-            this.shopMessageData = res.result.records;
-            this.shopMessageDataTotal = res.result.total;
-          }
-        });
+      messageDetail() {
+        if (this.messageSendForm.messageClient == 'member') {
+          API_Other.getMemberMessage(this.searchMemberMessageForm).then((res) => {
+            if (res.success) {
+              this.memberMessageData = res.result.records;
+              this.memberMessageDataTotal = res.result.total;
+            }
+          });
+        } else {
+          console.warn(this.searchShopMessageForm)
+          API_Other.getShopMessage(this.searchShopMessageForm).then((res) => {
+            if (res.success) {
+              this.shopMessageData = res.result.records;
+              this.shopMessageDataTotal = res.result.total;
+            }
+          });
+        }
 
+      },
+      //消息详情弹出框
+      detail(v) {
+        console.warn(this.searchShopMessageForm)
+        this.messageSendForm = v
+        if (this.messageSendForm.messageClient == 'member') {
+          this.searchMemberMessageForm.messageId = v.id
+        } else {
+          this.searchShopMessageForm.messageId = v.id
+        }
+        this.messageDetail();
+        this.messageDetailModalVisible = true;
+        this.modalTitle = "消息详情"
       },
       edit(v) {
         API_Setting.getNoticeMessageDetail(v.id).then((res) => {
@@ -755,7 +1040,7 @@
       },
       //禁用站内信模板
       disable(v) {
-        API_Setting.updateMessageStatus(v.id,"CLOSE").then((res) => {
+        API_Setting.updateMessageStatus(v.id, "CLOSE").then((res) => {
           if (res.success) {
             this.$Message.success("禁用成功");
             this.getNoticeMessage();
@@ -764,7 +1049,7 @@
       },
       //启用站内信模板
       enable(v) {
-        API_Setting.updateMessageStatus(v.id,"OPEN").then((res) => {
+        API_Setting.updateMessageStatus(v.id, "OPEN").then((res) => {
           if (res.success) {
             this.$Message.success("启用成功");
             this.getNoticeMessage();
