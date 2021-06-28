@@ -95,8 +95,8 @@
                             <Input class="text w40" type="text" v-model="item.firstCompany" maxlength="3" clearable />
                           </td>
                           <td>
-                            <Input class="text w60" type="text" v-model="item.firstPrice" maxlength="6" clearable >
-                              <span slot="append">元</span>
+                            <Input class="text w60" type="text" v-model="item.firstPrice" maxlength="6" clearable>
+                            <span slot="append">元</span>
                             </Input>
                           </td>
                           <td>
@@ -104,7 +104,7 @@
                           </td>
                           <td>
                             <Input class="text w60" type="text" v-model="item.continuedPrice" maxlength="6" clearable>
-                              <span slot="append">元</span>
+                            <span slot="append">元</span>
                             </Input>
                           </td>
                           <td class="nscs-table-handle">
@@ -135,7 +135,7 @@
               </div>
             </FormItem>
             <Form-item>
-              <Button @click="addShipTemplateChildren(index)" v-if="form.pricingMethod !== 'FREE'" icon="ios-create-outline" >为指定城市设置运费模板
+              <Button @click="addShipTemplateChildren(index)" v-if="form.pricingMethod !== 'FREE'" icon="ios-create-outline">为指定城市设置运费模板
               </Button>
               <Button @click="handleSubmit" :loading="submitLoading" type="primary" style="margin-right:5px">保存
               </Button>
@@ -163,7 +163,7 @@ export default {
 
   data() {
     return {
-      selectedIndex:0, //选中的地址模板下标
+      selectedIndex: 0, //选中的地址模板下标
       item: "", //运费模板子模板
       shipInfo: {}, // 运费模板数据
       title: "添加运费模板", // 模态框标题
@@ -195,6 +195,11 @@ export default {
       },
     };
   },
+  computed: {
+    regions() {
+      return this.$store.state.regions;
+    },
+  },
   methods: {
     init() {
       this.getData();
@@ -224,7 +229,7 @@ export default {
             firstPrice: "",
             continuedCompany: "1",
             continuedPrice: "",
-            selectedAll:false
+            selectedAll: false,
           },
         ],
       };
@@ -240,12 +245,24 @@ export default {
       this.form = item;
     },
     //选择地区
-    editRegion(item,index) {
-      this.selectedIndex = index
+    editRegion(item, index) {
+      this.selectedIndex = index;
       this.item = item;
 
-      this.$store.state.shipTemplate =  this.form.freightTemplateChildList
-      this.$refs.region.open(item,index);
+      this.regions.forEach((addr) => {
+        this.form.freightTemplateChildList.forEach((child) => {
+          child.area.split(",").forEach((area) => {
+            if (addr.name == area) {
+              addr.selectedAll = true;
+              this.$set(child, "selectedAll", true);
+            }
+          });
+        });
+      });
+
+      this.$store.state.shipTemplate = this.form.freightTemplateChildList;
+
+      this.$refs.region.open(item, index);
     },
     //刷细数据
     refresh() {
@@ -273,9 +290,11 @@ export default {
           if (child.selectedList != "") {
             // 只显示省份
 
-            if(child.selectedAll ){
-                area += child.name + ","
-                this.form.freightTemplateChildList[this.selectedIndex].selectedAll = true
+            if (child.selectedAll) {
+              area += child.name + ",";
+              this.form.freightTemplateChildList[
+                this.selectedIndex
+              ].selectedAll = true;
             }
 
             child.selectedList.forEach((son) => {
@@ -302,11 +321,16 @@ export default {
 
       this.$refs.form.validate((valid) => {
         const regNumber = /^\+?[1-9][0-9]*$/;
-        const regMoney = /(^[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^(0){1}$)|(^[0-9]\.[0-9]([0-9])?$)/;
+        const regMoney =
+          /(^[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^(0){1}$)|(^[0-9]\.[0-9]([0-9])?$)/;
         if (valid) {
-          if (this.form.pricingMethod != 'FREE') {
+          if (this.form.pricingMethod != "FREE") {
             //校验运费模板详细信息
-            for (let i = 0; i < this.form.freightTemplateChildList.length; i++) {
+            for (
+              let i = 0;
+              i < this.form.freightTemplateChildList.length;
+              i++
+            ) {
               if (
                 this.form.freightTemplateChildList[i].area == "" ||
                 this.form.freightTemplateChildList[i].firstCompany == "" ||
@@ -324,8 +348,9 @@ export default {
                 regNumber.test(
                   this.form.freightTemplateChildList[i].continuedCompany
                 ) == false ||
-                regMoney.test(this.form.freightTemplateChildList[i].firstPrice) ==
-                  false ||
+                regMoney.test(
+                  this.form.freightTemplateChildList[i].firstPrice
+                ) == false ||
                 regMoney.test(
                   this.form.freightTemplateChildList[i].continuedPrice
                 ) == false
@@ -335,7 +360,6 @@ export default {
               }
             }
           }
-          
 
           if (this.operation == "ADD") {
             API_Shop.addShipTemplate(this.form, headers).then((res) => {
@@ -372,7 +396,7 @@ export default {
         firstPrice: "",
         continuedCompany: "1",
         continuedPrice: "",
-        selectedAll:false
+        selectedAll: false,
       };
       this.form.freightTemplateChildList.push(params);
     },

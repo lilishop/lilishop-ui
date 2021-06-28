@@ -44,23 +44,27 @@ export default {
      */
     open(val, index) {
       if (val) {
+        // console.warn(val);
         //已选中的地址
         let checkedData = this.$store.state.shipTemplate;
 
+        // console.warn(this.$store.state.shipTemplate);
         // 禁止选中的地址
         let disabledData = checkedData.filter((item, i) => {
           return i != index;
         });
-
         disabledData.forEach((dis) => {
+          console.log(dis)
           // 循环出已经选中的地址id
           dis.areaId.split(",").forEach((ids) => {
             // 循环出省份
             this.data.forEach((item) => {
               // 如果当前省份下市区全部选中则选中该省份
+
               if (dis.selectedAll) {
                 dis.area.split(",").forEach((area) => {
                   if (area == item.name) {
+                    console.log(item.name +"选中")
                     this.$set(item, "disabled", true);
                   }
                 });
@@ -99,7 +103,11 @@ export default {
 
         // 筛选出当前选中的市
         sort.forEach((sortItem, sortIndex) => {
-          if (item.level != "province" && sortItem.id == item.parentId && !item.disabled) {
+          if (
+            item.level != "province" &&
+            sortItem.id == item.parentId &&
+            !item.disabled
+          ) {
             sortItem.selectedList.push({
               ...item,
             });
@@ -147,6 +155,7 @@ export default {
             this.selectedWay.push({ name: data.title, id: data.id });
           });
           console.log(this.data);
+          this.$store.state.regions = this.data;
         }
       });
     },

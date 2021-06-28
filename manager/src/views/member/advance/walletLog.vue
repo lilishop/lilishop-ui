@@ -78,7 +78,7 @@ export default {
                       color: "red",
                     },
                   },
-                  this.$options.filters.unitPrice(params.row.money, "￥")
+                  this.$options.filters.unitPrice(-params.row.money, "- ￥")
                 ),
               ]);
             }
