@@ -130,7 +130,7 @@
               } else if (params.row.rechargeWay === 'BANK_TRANSFER') {
                 return h('div', [h('span', {}, '线下转账')]);
               } else {
-                return h('div', [h('span', {}, '未知方式')]);
+                return h('div', [h('span', {}, '')]);
               }
             }
           },
