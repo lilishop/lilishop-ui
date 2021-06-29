@@ -344,6 +344,7 @@ export default {
     callback(val, index) {
       this.$set(val, "___selected", !val.___selected);
       console.log(val.___selected);
+      console.log(this.selectMember);
       let findUser = this.selectMember.find((item) => {
         return item.id == val.id;
       });

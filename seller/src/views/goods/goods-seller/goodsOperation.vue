@@ -137,27 +137,33 @@
               <Input type="text" v-model="baseInfoForm.cost" placeholder="市场价格" clearable style="width: 260px"/>
             </FormItem>
             <FormItem class="form-item-view-el required" label="商品图片" prop="goodsGalleryFiles">
-              <div class="demo-upload-list" v-for="(item, __index) in baseInfoForm.goodsGalleryFiles" :key="__index">
-                <template v-if="item.status === 'finished'">
-                  <img :src="item.url"/>
-
-                  <div class="demo-upload-list-cover">
-                    <div>
-                      <Icon type="ios-eye-outline" @click.native="handleViewGoodsPicture(item.url)"></Icon>
-                      <Icon type="ios-trash-outline" @click.native="handleRemoveGoodsPicture(item)"></Icon>
+              <vuedraggable
+                :list="baseInfoForm.goodsGalleryFiles"
+                :animation="200"
+                style="display:inline-block;"
+                ghost-class="thumb-ghost"
+              >
+                <div class="demo-upload-list" v-for="(item, __index) in baseInfoForm.goodsGalleryFiles" :key="__index">
+                  <template v-if="item.status === 'finished'">
+                    <img :src="item.url"/>
+                    <div class="demo-upload-list-cover">
+                      <div>
+                        <Icon type="ios-eye-outline" size="30" @click.native="handleViewGoodsPicture(item.url)"></Icon>
+                        <Icon type="ios-trash-outline" size="30" @click.native="handleRemoveGoodsPicture(item)"></Icon>
+                      </div>
+                      <!-- <div>
+                        <Icon type="ios-arrow-dropleft" @click.native="
+                          handleGoodsPicRemoteUp(baseInfoForm.goodsGalleryFiles,__index)"/>
+                        <Icon type="ios-arrow-dropright" @click.native="
+                          handleGoodsPicRemoteDown(baseInfoForm.goodsGalleryFiles,__index)"/>
+                      </div> -->
                     </div>
-                    <div>
-                      <Icon type="ios-arrow-dropleft" @click.native="
-                        handleGoodsPicRemoteUp(baseInfoForm.goodsGalleryFiles,__index)"/>
-                      <Icon type="ios-arrow-dropright" @click.native="
-                        handleGoodsPicRemoteDown(baseInfoForm.goodsGalleryFiles,__index)"/>
-                    </div>
-                  </div>
-                </template>
-                <template v-else>
-                  <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
-                </template>
-              </div>
+                  </template>
+                  <template v-else>
+                    <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
+                  </template>
+                </div>
+              </vuedraggable>
               <Upload ref="upload" :show-upload-list="false" :default-file-list="baseInfoForm.goodsGalleryFiles"
                       :on-success="handleSuccessGoodsPicture" :format="['jpg', 'jpeg', 'png']"
                       :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize"
@@ -167,6 +173,7 @@
                   <Icon type="ios-camera" size="20"></Icon>
                 </div>
               </Upload>
+              <!-- <upload-pic-thumb v-model="baseInfoForm.goodsGalleryFiles" :multiple="true"></upload-pic-thumb> -->
 
               <Modal title="View Image" v-model="goodsPictureVisible">
                 <img :src="previewGoodsPicture" v-if="goodsPictureVisible" style="width: 100%"/>
@@ -371,7 +378,7 @@
                       <Select v-model="params.paramValue" placeholder="请选择" style="width: 200px" clearable
                               @on-change="selectParams(paramsGroup,groupIndex,params,paramsIndex,params.paramValue)">
                         <Option v-for="option in params.options.split(',')" :label="option"
-                                :value="option"></Option>
+                                :value="option" :key="option"></Option>
                       </Select>
                     </FormItem>
                   </p>
@@ -428,18 +435,17 @@
 
 <script>
 import {regular} from "@/utils";
-import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
 import editor from "@/views/my-components/lili/editor";
 import * as API_GOODS from "@/api/goods";
 import * as API_Shop from "@/api/shops";
 
 import cloneObj from "@/utils/index";
-
+import vuedraggable from "vuedraggable";
 export default {
   name: "addGoods",
   components: {
-    uploadPicThumb,
     editor,
+    vuedraggable
   },
   watch: {
     selectGoodsType: {
@@ -620,7 +626,7 @@ export default {
         updateSku: true,
         /** 是否重新生成sku */
         regeneratorSkuFlag: false,
-        /** 运费模板id **/
+        /** 物流模板id **/
         templateId: '',
         /** 参数组*/
         goodsParamsDTOList: [],
@@ -647,7 +653,7 @@ export default {
       /** 规格图片 */
       images: [],
 
-      /** 运费模板 **/
+      /** 物流模板 **/
       logisticsTemplate: [],
 
       /** 固定列校验提示内容 */
@@ -716,7 +722,7 @@ export default {
     this.accessToken = {
       accessToken: this.getStore("accessToken"),
     };
-    // 获取运费模板
+    // 获取物流模板
     API_Shop.getShipTemplate().then((res) => {
       if (res.success) {
         this.logisticsTemplate = res.result;
@@ -838,7 +844,6 @@ export default {
      * @value 参数选项值
      */
     selectParams(paramsGroup, groupIndex, params, paramsIndex, value) {
-      console.log(params.id);
       if (!this.baseInfoForm.goodsParamsDTOList[groupIndex]) {
         this.baseInfoForm.goodsParamsDTOList[groupIndex] = {
           groupId:'',
@@ -872,14 +877,13 @@ export default {
 
     // 编辑sku图片
     editSkuPicture(row) {
-      console.log(row);
       if (row.images && row.images.length > 0) {
         this.previewPicture = row.images[0].url;
       }
       this.selectedSku = row;
       this.showSkuPicture = true;
     },
-    handleView(url) {
+    handleView (url) {
       this.previewPicture = url;
       this.visible = true;
     },
@@ -938,7 +942,6 @@ export default {
       });
     },
     handleBeforeUploadGoodsPicture() {
-      console.log(this.baseInfoForm);
       const check = this.baseInfoForm.goodsGalleryFiles.length < 5;
       if (!check) {
         this.$Notice.warning({
@@ -1017,7 +1020,6 @@ export default {
         ...this.baseInfoForm,
         ...response.result,
       };
-      // console.warn(this.baseInfoForm);
 
       this.baseInfoForm.release = "true";
       this.baseInfoForm.recommend = this.baseInfoForm.recommend
@@ -1141,7 +1143,6 @@ export default {
               group.goodsParamsItemDTOList.forEach(param => {
                 param.groupId = group.groupId
                 paramsArr.push(param)
-                console.log(param);
               })
             })
             // 循环参数分组
@@ -1155,7 +1156,6 @@ export default {
                 })
               })
             });
-            console.log(this.goodsParams);
           } else {
             this.baseInfoForm.goodsParamsDTOList = []
           }
@@ -1184,10 +1184,7 @@ export default {
     },
     // 编辑规格值
     async skuValueChange(val, index, item) {
-      /** 更新skuInfo数据 */
-      // let _arr = cloneObj(item);
-      // this.$set(item, "name", _arr.name);
-      // this.$set(this.skuInfo, index, _arr);
+ 
       /**
        * 渲染规格详细表格
        */
@@ -1309,7 +1306,6 @@ export default {
       );
 
       this.skuTableColumn = pushData;
-      console.log(this.skuTableColumn);
       //克隆所有渲染的数据
       let cloneTemp = cloneObj(this.skuInfo);
 
@@ -1329,7 +1325,6 @@ export default {
         cloneTemp.splice(0, 1);
         result = this.specIterator(result, cloneTemp);
         this.skuTableData = result;
-        console.log(this.skuTableData);
       }
     },
      /**
@@ -1459,7 +1454,6 @@ export default {
         this.GET_GoodData();
         return;
       }
-      console.log(this.baseInfoForm);
       this.GET_GoodsParams();
       /** 1级校验 */
       this.loading = true;
@@ -1582,7 +1576,6 @@ export default {
           }
           /** 参数校验 **/
           /* Object.keys(this.baseInfoForm.goodsParamsList).forEach((item) => {
-            console.warn(item.paramName)
           });*/
 
           if (this.goodsId) {

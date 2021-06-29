@@ -36,7 +36,7 @@
             <DropdownItem name="uppers">批量上架</DropdownItem>
             <DropdownItem name="lowers">批量下架</DropdownItem>
             <DropdownItem name="deleteAll">批量删除</DropdownItem>
-            <DropdownItem name="batchShipTemplate">批量设置运费模板</DropdownItem>
+            <DropdownItem name="batchShipTemplate">批量设置物流模板</DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </Row>
@@ -87,21 +87,10 @@
       </div>
     </Modal>
 
-    <!-- 批量设置运费模板 -->
-    <Modal title="批量设置运费模板" v-model="shipTemplateModal" :mask-closable="false" :width="500">
+    <!-- 批量设置物流模板 -->
+    <Modal title="批量设置物流模板" v-model="shipTemplateModal" :mask-closable="false" :width="500">
       <Form ref="shipTemplateForm" :model="shipTemplateForm" :label-width="120">
-        <FormItem class="form-item-view-el" label="运费" prop="freightPayer">
-          <RadioGroup type="button" button-style="solid" @on-change="logisticsTemplateUndertakerChange" v-model="shipTemplateForm.freightPayer">
-            <Radio label="STORE">
-              <span>卖家承担运费</span>
-            </Radio>
-            <Radio label="BUYER">
-              <span>使用物流规则</span>
-            </Radio>
-          </RadioGroup>
-        </FormItem>
-
-        <FormItem class="form-item-view-el" label="物流模板" prop="templateId" v-if="shipTemplateShow">
+        <FormItem class="form-item-view-el" label="物流模板" prop="templateId">
           <Select v-model="shipTemplateForm.templateId" style="width: 200px">
             <Option v-for="item in logisticsTemplate" :value="item.id" :key="item.id">{{ item.name }}
             </Option>
@@ -124,10 +113,9 @@ import {
   upGoods,
   lowGoods,
   deleteGoods,
-  batchShipTemplate,
+  batchShipTemplate
 } from "@/api/goods";
-
-import * as API_Store from "@/api/shops";
+import * as API_Shop from "@/api/shops";
 
 export default {
   name: "goods",
@@ -135,10 +123,7 @@ export default {
     return {
       id: "", //要操作的id
       loading: true, // 表单加载状态
-      shipTemplateForm: {
-        freightPayer: "STORE",
-      },
-      shipTemplateShow: false, //物流模板是否显示
+      shipTemplateForm: {},
       shipTemplateModal: false, // 物流模板是否显示
       logisticsTemplate: [], // 物流列表
       updateStockModalVisible: false, // 更新库存模态框显隐
@@ -421,11 +406,12 @@ export default {
       if (v == "deleteAll") {
         this.deleteAll();
       }
-      //批量设置运费模板
+      //批量设置物流模板
       if (v == "batchShipTemplate") {
         this.batchShipTemplate();
       }
     },
+    // 获取库存详情
     getStockDetail(id) {
       getGoodsSkuListDataSeller({ goodsId: id, pageSize: 1000 }).then((res) => {
         if (res.success) {
@@ -435,6 +421,7 @@ export default {
         }
       });
     },
+    // 更新库存
     updateStock() {
       let updateStockList = this.stockList.map((i) => {
         let j = { skuId: i.id, quantity: i.quantity };
@@ -486,28 +473,24 @@ export default {
       this.selectList = e;
       this.selectCount = e.length;
     },
-    //保存运费模板信息
+    //保存物流模板信息
     saveShipTemplate() {
-      if (this.shipTemplateForm.freightPayer == "STORE") {
-        {
-          this.shipTemplateForm.templateId = 0;
-        }
-      }
+     
       this.$Modal.confirm({
-        title: "确认设置运费模板",
+        title: "确认设置物流模板",
         content:
-          "您确认要设置所选的 " + this.selectCount + " 个商品的运费模板?",
+          "您确认要设置所选的 " + this.selectCount + " 个商品的物流模板?",
         loading: true,
         onOk: () => {
           let ids = [];
           this.selectList.forEach(function (e) {
             ids.push(e.id);
           });
-          // 批量设置运费模板
+          // 批量设置物流模板
           batchShipTemplate(this.shipTemplateForm).then((res) => {
             this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("运费模板设置成功");
+              this.$Message.success("物流模板设置成功");
               this.clearSelectAll();
               this.getDataList();
             }
@@ -516,12 +499,13 @@ export default {
         },
       });
     },
-    //批量设置运费模板
+    //批量设置物流模板
     batchShipTemplate() {
       if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要设置运费模板的商品");
+        this.$Message.warning("您还未选择要设置物流模板的商品");
         return;
       }
+      this.getShipTempList()
       let data = [];
       this.selectList.forEach(function (e) {
         data.push(e.id);
@@ -529,21 +513,7 @@ export default {
       this.shipTemplateForm.goodsId = data;
       this.shipTemplateModal = true;
     },
-    //运费承担者变化
-    logisticsTemplateUndertakerChange(v) {
-      //如果是卖家承担运费 需要显示运费模板
-      if (v == "BUYER") {
-        API_Store.getShipTemplate().then((res) => {
-          if (res.success) {
-            this.logisticsTemplate = res.result;
-          }
-        });
-        this.shipTemplateShow = true;
-      }
-      if (v == "STORE") {
-        this.shipTemplateShow = false;
-      }
-    },
+    // 获取商品列表数据
     getDataList() {
       this.loading = true;
       // 带多条件搜索参数获取表单数据
@@ -554,6 +524,14 @@ export default {
           this.total = res.result.total;
         }
       });
+    },
+    // 获取物流模板
+    getShipTempList () {
+      API_Shop.getShipTemplate().then((res) => {
+        if (res.success) {
+          this.logisticsTemplate = res.result;
+        }
+      })
     },
     //下架商品
     lower(v) {

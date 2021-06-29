@@ -80,7 +80,6 @@
 export default {
   data() {
     return {
-      btnWay, // 按钮类型
       type: "full", // 展示方式
       //全屏广告
       advertising: [

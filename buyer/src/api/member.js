@@ -457,23 +457,21 @@ export function memberMsgList (params) {
  * 设置消息为已读
  * @param {String} messageId 消息id
  */
- export function readMemberMsg (params) {
+ export function readMemberMsg (id) {
   return request({
-    url: `/buyer/member/message`,
+    url: `/buyer/member/message/${id}`,
     method: Method.PUT,
-    needToken: true,
-    params
+    needToken: true
   });
 }
 /**
  * 删除会员消息
  * @param {String} messageId 消息id
  */
- export function delMemberMsg (params) {
+ export function delMemberMsg (id) {
   return request({
-    url: `/buyer/member/message`,
+    url: `/buyer/member/message/${id}`,
     method: Method.DELETE,
-    needToken: true,
-    params
+    needToken: true
   });
 }
