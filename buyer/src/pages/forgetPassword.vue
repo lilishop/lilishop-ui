@@ -1,5 +1,5 @@
 <template>
-  <div class="login">
+  <div class="forget-password" @click='$refs.verify.show = false'>
     <div style="height:50px;"></div>
     <!-- 顶部logo -->
     <div class="logo-box">
@@ -236,7 +236,7 @@ export default {
     },
     verifyBtnClick () {
       if (!this.verifyStatus) {
-        this.$refs.verify.show = true;
+        this.$refs.verify.init();
       }
     }
   },
@@ -248,7 +248,11 @@ export default {
   }
 };
 </script>
+
 <style scoped lang="scss">
+.forget-password{
+  height: 100%;
+}
 .logo-box {
   width: 600px;
   height: 80px;
