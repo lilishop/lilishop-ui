@@ -169,14 +169,16 @@
           <p class="item">
             <span class="label">结算周期：</span>
             <span class="info" v-if="storeInfo.settlementCycle">
+              <template v-for="item in storeInfo.settlementCycle.split(',')">
                <Tag
-                 v-for="item in storeInfo.settlementCycle.split(',')"
-                 :key="item"
-                 v-if="item!==''"
-                 :name="item"
-                 style="marrgin-left: 10px"
-               >{{ item }}
-              </Tag>
+                  :key="item"
+                  v-if="item!==''"
+                  :name="item"
+                  style="marrgin-left: 10px"
+                >{{ item }}
+                </Tag>
+              </template>
+               
             </span>
           </p>
         </div>

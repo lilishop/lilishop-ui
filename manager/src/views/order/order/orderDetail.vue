@@ -171,7 +171,7 @@
                 <div class="div-zoom">
                   <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
                 </div>
-                <span v-for="(item, key) in JSON.parse(row.specs)">
+                <span v-for="(item, key) in JSON.parse(row.specs)" :key="key">
                   <span v-show="key!='images'" style="font-size: 12px;color: #999999;">
                     {{key}} : {{item}}
                   </span>
@@ -245,9 +245,8 @@
         </Form>
       </div>
       <div slot="footer" style="text-align: right">
-        <Button type="success" size="large" @click="modifyPriceSubmit"
-          >调整</Button
-        >
+        <Button @click="modal = false">关闭</Button>
+        <Button type="primary" @click="modifyPriceSubmit">调整</Button>
       </div>
     </Modal>
     <!-- 订单取消模态框 -->
@@ -275,9 +274,8 @@
         </Form>
       </div>
       <div slot="footer" style="text-align: right">
-        <Button type="success" size="large" @click="orderCancelSubmit"
-          >取消</Button
-        >
+        <Button @click="orderCancelModal = false">关闭</Button>
+        <Button type="primary" @click="orderCancelSubmit">确认</Button>
       </div>
     </Modal>
     <!--收件地址弹出框-->
@@ -340,8 +338,8 @@
         </Form>
       </div>
       <div slot="footer" style="text-align: right">
-        <Button type="success" size="large" @click="editAddressSubmit">修改</Button
-        >
+        <Button @click="addressModal = false">关闭</Button>
+        <Button type="primary" @click="editAddressSubmit">修改</Button>
       </div>
     </Modal>
     <!-- 订单日志 -->
