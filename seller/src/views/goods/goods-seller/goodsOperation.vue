@@ -1,32 +1,5 @@
 <template>
   <div class="goods-operation">
-    <!-- 选择商品类型 -->
-    <Modal v-model="selectGoodsType" width="550" :closable="false">
-      <div class="goods-type-list" v-if="!showGoodsTemplates">
-        <div class="goods-type-item" :class="{'active-goods-type':item.check}" @click="handleClickGoodsType(item)"
-             v-for="(item,index) in goodsTypeWay" :key="index">
-          <img :src="item.img"/>
-          <div>
-            <h2>{{ item.title }}</h2>
-            <p>{{ item.desc }}</p>
-          </div>
-        </div>
-      </div>
-      <div v-else class="goods-type-list">
-        <h2 @click="showGoodsTemplates = !showGoodsTemplates">返回</h2>
-        <div class="goods-type-item template-item" @click="handleClickGoodsTemplate(item)"
-             v-for="(item,index) in goodsTemplates" :key="index">
-          <img :src="item.thumbnail"/>
-          <div>
-            <h2>{{ item.goodsName }}</h2>
-            <p>{{ item.sellingPoint || '' }}</p>
-          </div>
-        </div>
-
-      </div>
-
-    </Modal>
-
     <div class="step-list">
       <steps :current="activestep" simple style="height:60px;margin-top: 10px" process-status="process">
         <div class="step-view">
@@ -40,39 +13,12 @@
         </div>
       </steps>
     </div>
-    <div class="content-goods-publish" v-show="activestep === 0">
-      <div class="goods-category">
-        <ul v-if="categoryListLevel1 && categoryListLevel1.length > 0">
-          <li v-for="(item, index) in categoryListLevel1" :class="{ activeClass: index == activeCategoryIndex1 }"
-              @click="handleSelectCategory(item, index, 1)" :key="index">
-            <span>{{ item.name }}</span>
-            <span>&gt;</span>
-          </li>
-        </ul>
-        <ul v-if="categoryListLevel2 && categoryListLevel2.length > 0">
-          <li v-for="(item, index) in categoryListLevel2" :class="{ activeClass: index == activeCategoryIndex2 }"
-              @click="handleSelectCategory(item, index, 2)" :key="index">
-            <span>{{ item.name }}</span>
-            <span>&gt;</span>
-          </li>
-        </ul>
-        <ul v-if="categoryListLevel3 && categoryListLevel3.length > 0">
-          <li v-for="(item, index) in categoryListLevel3" :class="{ activeClass: index == activeCategoryIndex3 }"
-              @click="handleSelectCategory(item, index, 3)" :key="index">
-            <span>{{ item.name }}</span>
-          </li>
-        </ul>
-      </div>
-      <p class="current-goods-category">
-        您当前选择的商品类别是：
-        <span>{{ activeCategoryName1 }}</span>
-        <span v-show="activeCategoryName2">> {{ activeCategoryName2 }}</span>
-        <span v-show="activeCategoryName3">> {{ activeCategoryName3 }}</span>
-      </p>
-      <template v-if="!$route.query.id && draftId">
-        <Divider>已选商品模版:{{checkedTemplate()}}</Divider>
-      </template>
-    </div>
+    <!-- 第一步 选择分类 -->
+    <first-step ref='first' v-show="activestep === 0"></first-step>
+    <!-- 第二步 商品详细信息 -->
+    <second-step v-show="activestep === 1"></second-step>
+    <!-- 第三步 发布完成 -->
+    <third-step v-show="activestep === 2"></third-step>
 
     <div class="content-goods-publish" v-show="activestep === 1">
       <Form ref="baseInfoForm" :model="baseInfoForm" :label-width="120" :rules="baseInfoFormRule">
@@ -151,12 +97,6 @@
                         <Icon type="ios-eye-outline" size="30" @click.native="handleViewGoodsPicture(item.url)"></Icon>
                         <Icon type="ios-trash-outline" size="30" @click.native="handleRemoveGoodsPicture(item)"></Icon>
                       </div>
-                      <!-- <div>
-                        <Icon type="ios-arrow-dropleft" @click.native="
-                          handleGoodsPicRemoteUp(baseInfoForm.goodsGalleryFiles,__index)"/>
-                        <Icon type="ios-arrow-dropright" @click.native="
-                          handleGoodsPicRemoteDown(baseInfoForm.goodsGalleryFiles,__index)"/>
-                      </div> -->
                     </div>
                   </template>
                   <template v-else>
@@ -307,7 +247,7 @@
                   show-checkbox
                   @on-select-change="selectTree"
                   @on-check-change="changeSelect"
-                  :check-strictly="!strict"
+                  :check-strictly="false"
                 ></Tree>
               </FormItem>
             </div>
@@ -417,7 +357,7 @@
       <ButtonGroup>
         <Button type="primary" @click="pre" v-if="activestep === 1 && isPublish">上一步
         </Button>
-        <Button type="primary" @click="selectGoodsType=!selectGoodsType" v-if="activestep === 0">商品类型
+        <Button type="primary" @click="$refs.first.selectGoodsType = true" v-if="activestep === 0">商品类型
         </Button>
         <Button type="primary" @click="next" v-if="activestep === 0">下一步
         </Button>
@@ -428,8 +368,8 @@
           保存为模版
         </Button>
       </ButtonGroup>
-
     </div>
+    
   </div>
 </template>
 
@@ -441,43 +381,49 @@ import * as API_Shop from "@/api/shops";
 
 import cloneObj from "@/utils/index";
 import vuedraggable from "vuedraggable";
+import firstStep from  './goodsOperationFirst'
+import secondStep from  './goodsOperationSec'
+import thirdStep from  './goodsOperationThird'
 export default {
   name: "addGoods",
   components: {
     editor,
-    vuedraggable
+    vuedraggable,
+    firstStep,
+    secondStep,
+    thirdStep
   },
   watch: {
-    selectGoodsType: {
-      handler(val) {
-        if (val && this.baseInfoForm.goodsType) {
-          this.goodsTypeWay.forEach((item) => {
-            item.check = false;
-            if (item.type == this.baseInfoForm.goodsType) {
-              item.check = true;
-            }
-            if (!item.type) {
-              this.defaultBaseInfo();
-            }
-          });
-        }
-      },
-    },
-    $route(to, from) {
-      if (to.query.draftId) {
-        this.draftId = to.query.draftId;
-        this.activestep = 1;
-        this.isOperationGoods = false;
-        this.GET_GoodData();
-      } else if (to.query.id) {
-        this.activestep = 1;
-        this.goodsId = this.$route.query.id;
-        this.GET_GoodData();
-      } else {
-        this.selectGoodsType = true;
-        this.defaultBaseInfo();
-      }
-    },
+    // selectGoodsType: {
+    //   handler(val) {
+    //     if (val && this.baseInfoForm.goodsType) {
+    //       this.goodsTypeWay.forEach((item) => {
+    //         item.check = false;
+    //         if (item.type == this.baseInfoForm.goodsType) {
+    //           item.check = true;
+    //         }
+    //         if (!item.type) {
+    //           this.defaultBaseInfo();
+    //         }
+    //       });
+    //     }
+    //   },
+    // },
+    // $route(to, from) {
+    //   if (to.query.draftId) {
+    //     this.draftId = to.query.draftId;
+    //     this.activestep = 1;
+    //     this.isOperationGoods = false;
+    //     this.GET_GoodData();
+    //   } else if (to.query.id) {
+    //     this.activestep = 1;
+    //     this.goodsId = this.$route.query.id;
+    //     this.GET_GoodData();
+    //   } else {
+    //     this.selectGoodsType = true;
+    //     this.defaultBaseInfo();
+    //   }
+    // },
   },
   data() {
     // 表单验证项，商品价格
@@ -519,35 +465,12 @@ export default {
     };
 
     return {
-      selectGoodsType: false, //是否选择商品类型
-      showGoodsTemplates: false, //是否显示选择商品模板
-      goodsTypeWay: [
-        {
-          title: "实物商品",
-          img: require("@/assets/goodsType1.png"),
-          desc: "零售批发，物流配送",
-          type: "PHYSICAL_GOODS",
-          check: false,
-        },
-        {
-          title: "虚拟商品",
-          img: require("@/assets/goodsType2.png"),
-          desc: "虚拟核验，无需物流",
-          type: "VIRTUAL_GOODS",
-          check: false,
-        },
-        {
-          title: "商品模板导入",
-          img: require("@/assets/goodsTypeTpl.png"),
-          desc: "商品模板，一键导入",
-          check: false,
-        },
-      ],
+      
       //提交状态
       submitLoading: false,
       //上传图片路径
       uploadFileUrl: API_GOODS.uploadFile,
-      // 预览图片
+      // 预览图片路径
       previewPicture: "",
       //商品图片
       previewGoodsPicture: "",
@@ -559,9 +482,7 @@ export default {
       showSkuPicture: false,
       //选择的sku
       selectedSku: {},
-      //选择店铺分类
-      strict: true,
-      //模版 / 草稿 id
+      //模版 id
       draftId: undefined,
       /** 当前激活步骤*/
       activestep: 0,
@@ -569,30 +490,7 @@ export default {
       isOperationGoods: true,
       //是否在发布商品
       isPublish: false,
-      /** 当前点击的1级分类索引*/
-      activeCategoryIndex1: -1,
-
-      /** 当前点击的2级分类索引*/
-      activeCategoryIndex2: -1,
-
-      /** 当前点击的3级分类索引*/
-      activeCategoryIndex3: -1,
-      /** 当前商品分类名称1*/
-      activeCategoryName1: "",
-
-      /** 当前商品分类名称2*/
-      activeCategoryName2: "",
-
-      /** 当前商品分类名称3*/
-      activeCategoryName3: "",
-      /** 1级分类列表*/
-      categoryListLevel1: [],
-
-      /** 2级分类列表*/
-      categoryListLevel2: [],
-
-      /** 3级分类列表*/
-      categoryListLevel3: [],
+      
 
       /** 请求的商品参数组列表 */
       goodsParams: [],
@@ -688,7 +586,7 @@ export default {
           {validator: checkPrice},
         ],
         weight: [
-          {required: true, message: "请输入物流参数"},
+          {required: true, message: "请输入商品重量"},
           {validator: checkWeight},
         ],
         templateId: [{required: true, message: '请选择物流模板'}],
@@ -702,7 +600,6 @@ export default {
       shopCategory: [],
       /** 商品单位列表 */
       goodsUnitList: {},
-      goodsTemplates: [],
       ignoreColumn: [
         "_index",
         "_rowKey",
@@ -734,8 +631,6 @@ export default {
       this.activestep = 1;
       this.goodsId = this.$route.query.id;
       this.GET_GoodData();
-      this.selectGoodsType = false;
-
     }
     // 编辑模板
     else if (this.$route.query.draftId) {
@@ -743,11 +638,10 @@ export default {
       this.activestep = 1;
       this.isOperationGoods = false;
       this.GET_GoodData();
-      this.selectGoodsType = false;
     }
     //新增商品
     else {
-      this.selectGoodsType = true;
+      this.$refs.first.selectGoodsType = true;
       this.defaultBaseInfo();
     }
   },
@@ -775,66 +669,10 @@ export default {
       };
       this.activestep = 0;
       this.isPublish = true;
-      this.GET_GoodsTemplate();
-      this.GET_NextLevelCategory();
-    },
-     // 获取已选模板
-    checkedTemplate () {
-      if(this.goodsTemplates.length) {
-        return this.goodsTemplates.find(item=>{return item.id == this.draftId}).goodsName
-      } else {
-        return ""
-      }
-    },
-    // 选择商品模板
-    handleClickGoodsTemplate(val) {
-      this.draftId = val.id;
-      this.selectGoodsType = false;
-    },
-    // 点击商品类型
-    handleClickGoodsType(val) {
-      this.goodsTypeWay.map((item) => {
-        return (item.check = false);
-      });
-
-      val.check = !val.check;
-      if (!val.type) {
-        this.showGoodsTemplates = true;
-      } else {
-        this.baseInfoForm.goodsType = val.type;
-        this.draftId = "";
-      }
+      this.$refs.first.GET_NextLevelCategory();
     },
 
-    // 移动商品图片位置
-    handleGoodsPicRemoteUp(fieldData, index) {
-      if (index != 0) {
-        fieldData[index] = fieldData.splice(index - 1, 1, fieldData[index])[0];
-      } else {
-        fieldData.push(fieldData.shift());
-      }
-    },
-    // 移动商品图片位置
-    handleGoodsPicRemoteDown(fieldData, index) {
-      if (index != fieldData.length - 1) {
-        fieldData[index] = fieldData.splice(index + 1, 1, fieldData[index])[0];
-      } else {
-        fieldData.unshift(fieldData.splice(index, 1)[0]);
-      }
-    },
-    // 获取商品模板
-    GET_GoodsTemplate() {
-      let searchParams = {
-        saveType: "TEMPLATE",
-        sort: "create_time",
-        order: "desc",
-      };
-      API_GOODS.getDraftGoodsListData(searchParams).then((res) => {
-        if (res.success) {
-          this.goodsTemplates = res.result.records;
-        }
-      });
-    },
+  
     /**
      * 选择参数
      * @paramsGroup 参数分组
@@ -1433,17 +1271,10 @@ export default {
     /** 上一步*/
     pre() {
       window.scrollTo(0, 0);
-      this.loading = true;
       if (this.activestep === 1) {
-        this.toPreCount > 0
-          ? this.GET_NextLevelCategory()
-          : this.GET_NextLevelCategory(null, 0, true);
         if (this.activestep-- < 0) this.activestep = 0;
-        this.toPreCount++;
-        this.loading = false;
       } else {
         this.activestep--;
-        this.loading = false;
       }
     },
     /** 下一步*/
@@ -1454,16 +1285,13 @@ export default {
         this.GET_GoodData();
         return;
       }
-      this.GET_GoodsParams();
+      
       /** 1级校验 */
-      this.loading = true;
-      if (this.activestep === 0 && !this.activeCategoryName1) {
+      if (this.activestep === 0 && !this.activeCategoryName1) { 
         this.$Message.error("请选择商品分类");
-        this.loading = false;
         return;
       } else if (this.activestep === 0 && this.activeCategoryIndex3 === -1) {
         this.$Message.error("必须选择到三级分类");
-        this.loading = false;
         return;
       } else if (
         this.activestep === 0 &&
@@ -1471,6 +1299,7 @@ export default {
         this.currentStatus === 0
       ) {
         /** 获取该商城分类下 商品参数信息 */
+        this.GET_GoodsParams();
         /** 查询品牌列表 */
         this.getGoodsBrandList();
         /** 查询分类绑定的规格信息 */
@@ -1487,13 +1316,10 @@ export default {
           if (valid) {
             /** 规格校验 */
             if (!this.skuFormVali()) {
-              this.loading = false;
               return;
             }
-            this.loading = false;
             if (this.activestep++ > 2) return;
           } else {
-            this.loading = false;
             this.$message.error(
               "表单中存在未填写或者填写有误的地方,已有错误标示，请检查并正确填写"
             );
@@ -1502,7 +1328,6 @@ export default {
         return;
       }
       /** 下一步 */
-      this.loading = false;
       if (this.activestep++ > 2) return;
     },
     // 店内分类选择
@@ -1653,46 +1478,8 @@ export default {
         }
       });
     },
-    /** 选择商城商品分类 */
-    handleSelectCategory(row, index, level) {
-      if (level === 1) {
-        this.baseInfoForm.categoryPath = row.id;
-        this.activeCategoryName1 = row.name;
-        this.activeCategoryName2 = this.activeCategoryName3 = "";
-        this.activeCategoryIndex1 = index;
-        this.activeCategoryIndex2 = -1;
-        this.activeCategoryIndex3 = -1;
-        this.categoryListLevel2 = this.categoryListLevel1[index].children;
-        this.categoryListLevel3 = [];
-      } else if (level === 2) {
-        this.baseInfoForm.categoryPath =
-          this.baseInfoForm.categoryPath + "," + row.id;
-        this.activeCategoryName2 = row.name;
-        this.activeCategoryName3 = "";
-        this.activeCategoryIndex2 = index;
-        this.activeCategoryIndex3 = -1;
-        this.categoryListLevel3 = this.categoryListLevel2[index].children;
-      } else {
-        this.baseInfoForm.categoryPath =
-          this.baseInfoForm.categoryPath + "," + row.id;
-        this.activeCategoryName3 = row.name;
-        this.activeCategoryIndex3 = index;
-      }
-      // 设置当前商城分类ID
-      this.baseInfoForm.categoryId = row.id;
-      this.categoryId = row.id;
-      this.baseInfoForm.categoryName = row.name;
-    },
-    /** 查询下一级 商城商品分类*/
-    GET_NextLevelCategory(row, level, not_click = false) {
-      this.loading = true;
-      const _id = row && row.id !== 0 ? row.id : 0;
-      API_GOODS.getGoodsCategoryAll().then((res) => {
-        if (res.success && res.result) {
-          this.categoryListLevel1 = res.result;
-        }
-      });
-    },
+    
+    
   },
 };
 </script>
