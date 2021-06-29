@@ -3,8 +3,7 @@
     <Card style="height: 60px">
       <div style="">
         <Button v-if="allowOperation.editPrice" @click="modifyPrice" type="primary">调整价格</Button>
-        <Button v-if="allowOperation.editConsignee" @click="editAddress" type="primary">修改收货地址
-        </Button>
+        <Button v-if="allowOperation.editConsignee" @click="editAddress" type="primary">修改收货地址</Button>
         <Button v-if="allowOperation.showLogistics" @click="logistics" type="primary">查看物流</Button>
         <Button @click="orderLog" type="primary">订单日志</Button>
         <Button v-if="allowOperation.take" @click="orderTake" type="primary">订单核销</Button>
@@ -181,7 +180,8 @@
         </Form>
       </div>
       <div slot="footer" style="text-align: right">
-        <Button type="success" size="large" @click="modifyPriceSubmit">调整</Button>
+        <Button @click="modal = false">关闭</Button>
+        <Button type="primary" @click="modifyPriceSubmit">调整</Button>
       </div>
     </Modal>
     <!--收件地址弹出框-->
@@ -210,7 +210,8 @@
         </Form>
       </div>
       <div slot="footer" style="text-align: right">
-        <Button type="success" size="large" @click="editAddressSubmit">修改</Button>
+        <Button @click="addressModal = false">关闭</Button>
+        <Button type="primary" @click="editAddressSubmit">修改</Button>
       </div>
     </Modal>
     <!-- 订单核销 -->
@@ -227,7 +228,8 @@
         </Form>
       </div>
       <div slot="footer" style="text-align: right">
-        <Button type="success" size="large" @click="orderTakeSubmit">核销</Button>
+        <Button @click="orderTakeModal = false">关闭</Button>
+        <Button type="primary" @click="orderTakeSubmit">核销</Button>
       </div>
     </Modal>
     <!-- 订单日志 -->
@@ -303,8 +305,8 @@
       </div>
 
       <div slot="footer" style="text-align: right">
-        <Button size="large" @click="orderDeliverHandelCancel">取消</Button>
-        <Button type="success" size="large" @click="orderDeliverySubmit">发货</Button>
+        <Button  @click="orderDeliverModal = false">关闭</Button>
+        <Button type="primary" @click="orderDeliverySubmit">发货</Button>
       </div>
     </Modal>
   </div>
@@ -599,10 +601,6 @@ export default {
           this.orderDeliverModal = true;
         }
       });
-    },
-    //订单日志取消
-    orderDeliverHandelCancel() {
-      this.orderDeliverModal = false;
     },
     //订单发货提交
     orderDeliverySubmit() {
