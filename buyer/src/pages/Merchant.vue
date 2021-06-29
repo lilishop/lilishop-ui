@@ -9,10 +9,12 @@
         <img :src="storeMsg.storeLogo" height="50" alt="">
         <div>
           <p>{{storeMsg.storeName || 'xx店铺'}}</p>
-          <p v-html="storeMsg.storeDesc"></p>
+          <p class="ellipsis" :alt="storeMsg.storeDesc" v-html="storeMsg.storeDesc"></p>
         </div>
-        <div class="store-collect" @click="collect"><Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#fff'" />{{storeCollected?'已收藏店铺':'收藏店铺'}}</div>
-        <span class="hover-pointer ml_10" @click="connectCs(storeMsg.yzfSign)"><Icon custom="icomoon icon-customer-service"  />联系客服</span>
+        <div>
+          <span class="hover-pointer" @click="collect"><Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#fff'" />{{storeCollected?'已收藏店铺':'收藏店铺'}}</span>
+          <span style="width:80px" class="hover-pointer ml_10" @click="connectCs(storeMsg.yzfSign)"><Icon custom="icomoon icon-customer-service"  />联系客服</span>
+        </div>
       </div>
     </div>
     <div  class="store-category">
@@ -183,15 +185,25 @@ export default {
   position: relative;
   width: 100%;
   background-color: #666;
-  padding: 10px;
+  padding: 4px;
   color: #fff;
   >div{
     display: flex;
     width: 1200px;
     margin: 0 auto;
     align-items: center;
-    >div{
+
+    img {
+      width: 80px;
+    }
+
+    >div:nth-child(2){
       margin-left: 10px;
+      flex: 1;
+    }
+
+    >div:nth-child(3){
+      width: 200px;
     }
   }
   img {
@@ -202,14 +214,11 @@ export default {
   }
   p:nth-child(2){
     font-size: 14px;
+    max-height: 40px;
+    max-width: 400px;
   }
 }
-.store-collect{
-  margin-left: 750px!important;
-  &:hover{
-    cursor: pointer;
-  }
-}
+
 .store-category {
   background-color: #005aa0;
   color: #fff;

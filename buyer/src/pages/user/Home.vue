@@ -15,7 +15,8 @@
           >
             <div class="user-icon">
               <div class="user-img">
-                <img :src="userInfo.face" />
+                <img :src="userInfo.face" v-if="userInfo.face" alt />
+                <Avatar icon="ios-person" class="mb_10" v-else size="96" />
               </div>
               <p>{{userInfo.nickName}}</p>
             </div>
@@ -125,20 +126,12 @@ export default {
   align-items: center;
 }
 
-.user-icon span {
-  font-size: 96px;
-}
-
 .user-img {
   margin-bottom: 15px;
   width: 96px;
   height: 96px;
   border-radius: 48px;
   overflow: hidden;
-}
-
-.user-img img {
-  width: 100%;
 }
 
 .layout-footer-center {

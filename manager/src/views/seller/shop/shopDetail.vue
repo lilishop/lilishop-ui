@@ -98,8 +98,8 @@
 
           </p>
           <p class="item">
-            <span class="label">店铺经纬度：</span>
-            <span class="info">{{storeInfo.storeCenter?storeInfo.storeCenter:'暂未完善'}}</span>
+            <span class="label">店铺定位：</span>
+            <span class="info">{{storeInfo.storeCenter?'已定位':'未定位'}}</span>
           </p>
           <p class="item">
             <span class="label">经营范围：</span>

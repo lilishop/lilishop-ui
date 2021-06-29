@@ -121,7 +121,7 @@
             </div>
 
             <div class="detail-item">
-              <div>
+              <div @click="navigateTo('seckill')">
                 <span>{{homeData.seckillNum || 0}}</span>
                 <div>待参加活动</div>
               </div>

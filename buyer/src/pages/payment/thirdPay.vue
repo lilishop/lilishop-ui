@@ -63,6 +63,7 @@ export default {
       this.num++;
       if (this.num >= 7) {
         clearInterval(this.interval);
+        this.interval = null;
       }
       let params = JSON.parse(JSON.stringify(this.$route.query));
       delete params.paymentMethod;
@@ -70,6 +71,7 @@ export default {
       payCallback(params).then(res => {
         if (res.result) {
           clearInterval(this.interval);
+          this.interval = null;
           this.$router.push({path: '/payDone', query: {orderType: this.$route.query.orderType}});
         }
       });

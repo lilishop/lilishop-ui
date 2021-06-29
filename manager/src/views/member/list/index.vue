@@ -324,7 +324,7 @@ export default {
     // 已选择用户数据
     selectedList: {
       type: null,
-      default: "",
+      default: [],
     },
   },
   watch: {
@@ -344,6 +344,7 @@ export default {
     callback(val, index) {
       this.$set(val, "___selected", !val.___selected);
       console.log(val.___selected);
+      console.log(this.selectMember);
       let findUser = this.selectMember.find((item) => {
         return item.id == val.id;
       });

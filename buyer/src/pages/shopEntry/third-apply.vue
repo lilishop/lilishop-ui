@@ -60,17 +60,23 @@
           >
         </Select>
       </FormItem>
-      <FormItem prop="storeCenter" label="经纬度">
-        <Input
+      <FormItem prop="storeCenter" label="店铺定位">
+        <!-- <Input
           type="text"
           v-model="form.storeCenter"
           readonly
           placeholder="点击右侧按钮选择店铺位置"
-        />
+        /> -->
         <Button
-          icon="ios-locate-outline"
+          type="info"
+          v-if="!form.storeCenter"
           @click="$refs.liliMap.showMap = true"
-        ></Button>
+        >点击获取店铺定位</Button>
+        <Button
+          type="success"
+          v-else
+          @click="$refs.liliMap.showMap = true"
+        >已定位</Button>
       </FormItem>
       <FormItem prop="storeDesc" label="店铺简介">
         <Input
