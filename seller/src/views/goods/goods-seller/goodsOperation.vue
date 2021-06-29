@@ -626,7 +626,7 @@ export default {
         updateSku: true,
         /** 是否重新生成sku */
         regeneratorSkuFlag: false,
-        /** 运费模板id **/
+        /** 物流模板id **/
         templateId: '',
         /** 参数组*/
         goodsParamsDTOList: [],
@@ -653,7 +653,7 @@ export default {
       /** 规格图片 */
       images: [],
 
-      /** 运费模板 **/
+      /** 物流模板 **/
       logisticsTemplate: [],
 
       /** 固定列校验提示内容 */
@@ -722,7 +722,7 @@ export default {
     this.accessToken = {
       accessToken: this.getStore("accessToken"),
     };
-    // 获取运费模板
+    // 获取物流模板
     API_Shop.getShipTemplate().then((res) => {
       if (res.success) {
         this.logisticsTemplate = res.result;
