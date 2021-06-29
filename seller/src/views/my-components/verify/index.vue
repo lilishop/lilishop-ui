@@ -18,6 +18,7 @@
 import { getVerifyImg, postVerifyImg } from './verify.js';
 export default {
   props: {
+    // 传入数据，判断是登录、注册、修改密码
     verifyType: {
       defalut: 'LOGIN',
       type: String
@@ -43,10 +44,12 @@ export default {
     };
   },
   methods: {
+    // 鼠标按下事件，开始拖动滑块
     mouseDown (e) {
       this.downX = e.clientX;
       this.flag = true;
     },
+    // 鼠标移动事件，计算距离
     mouseMove (e) {
       if (this.flag) {
         let offset = e.clientX - this.downX;
@@ -60,6 +63,7 @@ export default {
         }
       }
     },
+    // 鼠标抬起事件，验证是否正确
     mouseUp () {
       if (!this.flag) return false;
       this.flag = false;
@@ -108,7 +112,7 @@ export default {
       handler: function (v) {
         this.type = v;
       }
-    },
+    }
   }
 };
 </script>
