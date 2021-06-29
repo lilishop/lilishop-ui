@@ -27,13 +27,9 @@
                 <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 200px">
                   <Option value="NEW">新订单</Option>
                   <Option value="CONFIRM">已确认</Option>
-                  <Option value="STOCK_LOCK">库存锁定</Option>
-                  <Option value="ERROR">出库失败</Option>
-                  <Option value="WAIT_PINTUAN">待成团</Option>
-                  <Option value="PAID">待发货</Option>
-                  <Option value="DELIVERED">已发货</Option>
-                  <Option value="COMPLETE">已完成</Option>
                   <Option value="TAKE">待核验</Option>
+                  <Option value="COMPLETE">已完成</Option>
+                  <Option value="WAIT_PINTUAN">待成团</Option>
                   <Option value="CANCELLED">已取消</Option>
                 </Select>
               </Form-item>
