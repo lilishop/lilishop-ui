@@ -22,10 +22,7 @@ export default {
     buyer: 'https://buyer-api.pickmall.cn',
     seller: 'https://store-api.pickmall.cn',
     manager: 'https://admin-api.pickmall.cn',
-    // common: 'http://192.168.0.100:8890',
-    // buyer: 'http://192.168.0.100:8888',
-    // seller: 'http://192.168.0.100:8889',
-    // manager: 'http://192.168.0.100:8887'
+
   },
   api_prod: {
     common: 'https://common-api.pickmall.cn',
