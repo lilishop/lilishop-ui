@@ -98,7 +98,7 @@
           order: "", // 默认排序方式
           startDate: "", // 起始时间
           endDate: "", // 终止时间
-          orderType: "FICTITIOUS",
+          orderType: "VIRTUAL",
           orderSn: "",
           buyerName: "",
           orderStatus: ""
@@ -123,6 +123,19 @@
             title: "订单来源",
             key: "clientType",
             width: 95,
+            render: (h, params) => {
+              if (params.row.clientType == "H5") {
+                return h("div", {}, "移动端");
+              } else if (params.row.clientType == "PC") {
+                return h("div", {}, "PC端");
+              } else if (params.row.clientType == "WECHAT_MP") {
+                return h("div", {}, "小程序端");
+              } else if (params.row.clientType == "APP") {
+                return h("div", {}, "移动应用端");
+              } else {
+                return h("div", {}, params.row.clientType);
+              }
+            },
           },
           {
             title: "买家名称",
