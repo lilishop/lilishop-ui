@@ -112,7 +112,7 @@
       </Form>
       <div slot="footer">
         <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="lower(form.id)"
+        <Button type="primary" :loading="submitLoading" @click="lower"
           >提交</Button
         >
       </div>
@@ -363,7 +363,7 @@ export default {
       this.modalTitle = "下架操作";
       this.modalVisible = true;
     },
-    lower(id) {
+    lower() {
       lowGoods(this.id, this.underForm).then((res) => {
         this.$Modal.remove();
         if (res.success) {
