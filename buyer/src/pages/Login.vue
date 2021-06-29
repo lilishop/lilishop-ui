@@ -1,7 +1,7 @@
 <template>
   <div class="login" @keyup.enter="handleSubmit('formInline')">
     <!-- 顶部logo -->
-    <div class="top-content">
+    <div class="top-content" @click='$refs.verify.show = false'>
       <div class="logo-box">
         <img
           :src="logoImg"
@@ -15,7 +15,7 @@
       <!-- 轮播 -->
       <Carousel loop :autoplay-speed="5000" class="login-carousel" arrow="never">
         <CarouselItem>
-          <div class="demo-carousel">
+          <div class="demo-carousel" @click='$refs.verify.show = false'>
             <img
               src="https://wanmi-b2b.oss-cn-shanghai.aliyuncs.com/201811141632252680"
             />
@@ -23,7 +23,7 @@
         </CarouselItem>
       </Carousel>
       <!-- 登录模块 -->
-      <div class="form-box">
+      <div class="form-box" @click='$refs.verify.show = false'>
         <div class="account-number">
           <div class="tab-switch">
             <span>{{type?'账号登录':'验证码登录'}}</span>
@@ -37,6 +37,7 @@
           :model="formData"
           :rules="ruleInline"
           v-show="type === true"
+          @click.self='$refs.verify.show = false'
         >
           <FormItem prop="username">
             <i-input
@@ -72,6 +73,7 @@
           :model="formSms"
           :rules="ruleInline"
           v-show="type === false"
+          @click.self='$refs.verify.show = false'
         >
           <FormItem prop="mobile">
             <i-input
@@ -194,7 +196,7 @@ export default {
       this.$refs[name].validate((valid) => {
         if (valid) {
           if (this.type) {
-            this.$refs.verify.show = true;
+            this.$refs.verify.init();
           } else {
             let data = JSON.parse(JSON.stringify(this.formSms));
             apiLogin.smsLogin(data).then((res) => {
@@ -224,6 +226,7 @@ export default {
         }
       });
     },
+    // 发送手机验证码
     sendCode () {
       if (this.time === 60) {
         if (this.formSms.mobile === '') {
@@ -296,9 +299,10 @@ export default {
         this.$refs.verify.show = false;
       }
     },
+    // 开启滑块验证
     verifyBtnClick () {
       if (!this.verifyStatus) {
-        this.$refs.verify.show = true;
+        this.$refs.verify.init();
       }
     },
     handleWebLogin (type) { // 第三方登录

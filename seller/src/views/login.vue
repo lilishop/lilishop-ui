@@ -1,5 +1,5 @@
 <template>
-  <div class="login">
+  <div class="login" @click="$refs.verify.show = false">
     <Row type="flex" @keydown.enter.native="submitLogin">
       <Col style="width: 368px">
       <Header />
@@ -128,7 +128,7 @@ export default {
       // 登录提交
       this.$refs.usernameLoginForm.validate((valid) => {
         if (valid) {
-          this.$refs.verify.show = true;
+          this.$refs.verify.init();
         }
       });
     },

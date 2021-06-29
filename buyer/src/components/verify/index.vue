@@ -1,5 +1,5 @@
 <template>
-  <div class="verify-content" v-if="show" @mousemove="mouseMove" @mouseup="mouseUp">
+  <div class="verify-content" v-if="show" @mousemove="mouseMove" @mouseup="mouseUp" @click.stop>
     <div class="imgBox" :style="{width:data.originalWidth+'px',height:data.originalHeight + 'px'}">
       <img :src="data.backImage" style="width:100%;height:100%" alt="">
       <img class="slider" :src="data.slidingImage" :style="{left:distance+'px',top:data.randomY+'px'}" :width="data.sliderWidth" :height="data.sliderHeight" alt="">
@@ -18,6 +18,7 @@
 import { getVerifyImg, postVerifyImg } from './verify.js';
 export default {
   props: {
+    // 传入数据，判断是登录、注册、修改密码
     verifyType: {
       defalut: 'LOGIN',
       type: String
@@ -38,16 +39,18 @@ export default {
       distance: 0, // 拼图移动距离
       flag: false, // 判断滑块是否按下
       downX: 0, // 鼠标按下位置
-      bgColor: 'aqua', // 滑动背景颜色
+      bgColor: '#04ad11', // 滑动背景颜色
       verifyText: '拖动滑块解锁' // 文字提示
     };
   },
   methods: {
-    mouseDown (e) { // 鼠标按下操作，
+    // 鼠标按下事件，开始拖动滑块
+    mouseDown (e) {
       this.downX = e.clientX;
       this.flag = true;
     },
-    mouseMove (e) { // 鼠标移动
+    // 鼠标移动事件，计算距离
+    mouseMove (e) {
       if (this.flag) {
         let offset = e.clientX - this.downX;
 
@@ -60,7 +63,8 @@ export default {
         }
       }
     },
-    mouseUp () { // 鼠标抬起
+    // 鼠标抬起事件，验证是否正确
+    mouseUp () {
       if (!this.flag) return false;
       this.flag = false;
       let params = {
@@ -83,34 +87,32 @@ export default {
         }
       });
     },
-    refresh () { // 刷新验证图片
+    refresh () { // 刷新滑块
       this.flag = false;
       this.downX = 0;
       this.distance = 0;
-      this.bgColor = 'aqua';
+      this.bgColor = '#04ad11';
       this.verifyText = '拖动滑块解锁';
-      this.getImg();
+      this.init();
     },
-    getImg () { // 获取验证图片
+    init () { // 初始化数据
       getVerifyImg(this.type).then(res => {
-        this.data = res.result;
+        if (res.result) {
+          this.data = res.result;
+          this.show = true;
+        } else {
+          this.$Message.warning('请求失败请重试！')
+        }
       });
     }
-  },
-  created () {
-    // this.getImg();
   },
   watch: {
     verifyType: {
       immediate: true,
       handler: function (v) {
         this.type = v;
-        // this.refresh();
       }
     },
-    show (v) {
-      if (v) this.refresh();
-    }
   }
 };
 </script>
@@ -143,7 +145,7 @@ export default {
   }
 }
 .handle {
-  border: 1px solid rgb(134, 134, 134);
+  border: 1px solid #e4dede;
   margin-top: 5px;
   height: 42px;
   background: #ddd;
@@ -156,7 +158,7 @@ export default {
     width: 40px;
     height: 40px;
     opacity: 0.5;
-    background: aqua;
+    background: #04ad11;
   }
 
   .swiper {
