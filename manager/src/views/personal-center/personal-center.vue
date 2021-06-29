@@ -25,7 +25,7 @@
                 </FormItem>
 
                 <FormItem label="用户名：">
-                  {{ userForm.memberName }}
+                  {{ userForm.username }}
                 </FormItem>
                 <FormItem label="昵称：" prop="nickName">
                   <Input v-model="userForm.nickName" style="width: 250px"/>
@@ -50,25 +50,6 @@
                   <a @click="changePassword">修改</a>
                 </div>
               </div>
-              <!-- #TODO 这块目前好像没有这个功能 -->
-              <!-- <div class="item">
-                <div>
-                  <div class="title">绑定手机</div>
-                  <div class="desc">
-                    <span v-if="userForm.mobile">已绑定手机：{{ userForm.mobile }}</span>
-                    <span v-else>未绑定手机号</span>
-                  </div>
-                </div>
-              </div>
-              <div class="item">
-                <div>
-                  <div class="title">绑定邮箱</div>
-                  <div class="desc">
-                    <span v-if="userForm.email">已绑定邮箱：{{ userForm.email }}</span>
-                    <span v-else>未绑定邮箱</span>
-                  </div>
-                </div>
-              </div> -->
             </div>
           </div>
         </div>
@@ -101,6 +82,7 @@ export default {
         avatar: "",
         nickname: ""
       },
+      saveLoading:false,//loading 状态
       currMenu: "基本信息" // 当前菜单
     };
   },
