@@ -217,7 +217,7 @@
               <Form-item label="订单类型" prop="orderType">
                 <Select v-model="orderSearchForm.orderType" placeholder="请选择" clearable style="width: 200px">
                   <Option value="NORMAL">普通订单</Option>
-                  <Option value="FICTITIOUS">虚拟订单</Option>
+                  <Option value="VIRTUAL">虚拟订单</Option>
                   <Option value="GIFT">赠品订单</Option>
                   <Option value="PINTUAN">拼团订单</Option>
                 </Select>
@@ -577,7 +577,7 @@
             render: (h, params) => {
               if (params.row.orderType == "NORMAL") {
                 return h('div', [h('span', {}, '普通订单'),]);
-              } else if (params.row.orderType == "FICTITIOUS") {
+              } else if (params.row.orderType == "VIRTUAL") {
                 return h('div', [h('span', {}, '虚拟订单'),]);
               } else if (params.row.orderType == "GIFT") {
                 return h('div', [h('span', {}, '赠品订单'),]);

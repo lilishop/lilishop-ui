@@ -98,7 +98,7 @@
           order: "", // 默认排序方式
           startDate: "", // 起始时间
           endDate: "", // 终止时间
-          orderType: "FICTITIOUS",
+          orderType: "VIRTUAL",
           orderSn: "",
           buyerName: "",
           orderStatus: ""
