@@ -2,7 +2,8 @@
   <div class="msg-list">
     <card _Title="我的消息" :_Tabs="status" :_Size="16"  @_Change="statusChange"/>
 
-    <Table :columns="messageColumns" :data="messageData.records"></Table>
+    <Table v-if="params.status != 'ALREADY_REMOVE' " :columns="messageColumns" :data="messageData.records"></Table>
+    <Table v-if="params.status == 'ALREADY_REMOVE' " :columns="messageDelColumns" :data="messageData.records"></Table>
     <!-- 分页 -->
     <Page
       style="float:right;margin-top:10px"
@@ -30,6 +31,26 @@ export default {
         pageSize: 10,
         status: 'UN_READY'
       },
+      messageDelColumns: [ // table展示数据
+        {
+          title: '消息标题',
+          key: 'title',
+          align: 'left',
+          tooltip: true,
+        },
+        {
+          title: '消息内容',
+          key: 'content',
+          align: 'left',
+          tooltip: true
+        },
+        {
+          title: '发送时间',
+          key: 'createTime',
+          align: 'left',
+          width: 240
+        },
+      ],
       messageColumns: [ // table展示数据
         {
           title: '消息标题',
