@@ -84,14 +84,14 @@
           </div>
         </div>
         <!-- 选择颜色 -->
-        <div class="item-select" v-for="(sku, index) in formatList" :key="sku.id">
+        <div class="item-select" v-for="(sku, index) in formatList" :key="sku.name">
           <div class="item-select-title">
             <p>{{ sku.name }}</p>
           </div>
           <div class="item-select-column">
-            <div class="item-select-row" v-for="(item) in sku.values" :key="item.id">
-              <div class="item-select-box" @click="select(index, sku.id, item.id)"
-                :class="{ 'item-select-box-active': item.id === currentSelceted[index] }"
+            <div class="item-select-row" v-for="(item) in sku.values" :key="item.value">
+              <div class="item-select-box" @click="select(index, item.value)"
+                :class="{ 'item-select-box-active': item.value === currentSelceted[index] }"
               >
                 <div class="item-select-intro">
                   <p>{{ item.value }}</p>
@@ -170,14 +170,14 @@ export default {
     Promotion
   },
   methods: {
-    select (index, id, valueId) { // 选择规格
-      this.$set(this.currentSelceted, index, valueId);
+    select (index, value) { // 选择规格
+      this.$set(this.currentSelceted, index, value);
 
       let selectedSkuId = this.goodsSpecList.find((i) => {
         let matched = true;
         let specValues = i.specValues.filter((j) => j.specName !== 'images');
         for (let n = 0; n < specValues.length; n++) {
-          if (specValues[n].specValueId !== this.currentSelceted[n]) {
+          if (specValues[n].specValue !== this.currentSelceted[n]) {
             matched = false;
             return;
           }
@@ -267,15 +267,13 @@ export default {
     },
     formatSku (list) {
       // 格式化数据
-
+      console.log(list);
       let arr = [{}];
 
       list.forEach((item, index) => {
         item.specValues.forEach((spec, specIndex) => {
-          let id = spec.specNameId;
           let name = spec.specName;
           let values = {
-            id: spec.specValueId,
             value: spec.specValue,
             quantity: item.quantity
           };
@@ -287,7 +285,7 @@ export default {
             if (
               arrItem.name === name &&
               arrItem.values &&
-              !arrItem.values.find((i) => i.id === values.id)
+              !arrItem.values.find((i) => i.value === values.value)
             ) {
               arrItem.values.push(values);
             }
@@ -297,7 +295,6 @@ export default {
             });
             if (!keys.includes(name)) {
               arr.push({
-                id: id,
                 name: name,
                 values: [values]
               });
@@ -307,12 +304,12 @@ export default {
       });
       arr.shift();
       this.formatList = arr;
-
+      console.log(this.formatList);
       let cur = list.filter((i) => i.skuId === this.$route.query.skuId)[0];
       if (cur) {
         cur.specValues.filter((i) => i.specName !== 'images')
           .forEach((value, _index) => {
-            this.currentSelceted[_index] = value.specValueId;
+            this.currentSelceted[_index] = value.specValue;
           });
       }
       this.skuList = list;
