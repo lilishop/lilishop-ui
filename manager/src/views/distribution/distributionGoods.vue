@@ -21,16 +21,16 @@
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
         <template slot="goodsName" slot-scope="{row}">
           <div>
-              <div class="div-zoom">
-                <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
-              </div>
-              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-                <div slot="content">
-                  <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
-                </div>
-                <img src="../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
-              </Poptip>
+            <div class="div-zoom">
+              <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
             </div>
+            <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+              <div slot="content">
+                <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+              </div>
+              <img src="../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
+            </Poptip>
+          </div>
         </template>
       </Table>
       <Row type="flex" justify="end" class="page">

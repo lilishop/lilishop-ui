@@ -34,7 +34,25 @@
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
       </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"></Table>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom">
+        <template slot-scope="{row}" slot="goodsMsg">
+          <div class="goods-msg">
+            <img :src="row.image" width="60" height="60" alt="">
+            <div>
+              <div class="div-zoom">
+                <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
+              </div>
+              <div style="color:#999;font-size:10px">数量：x{{row.num}}</div>
+              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+                <div slot="content">
+                  <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                </div>
+                <img src="../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
+              </Poptip>
+            </div>
+          </div>
+        </template>
+      </Table>
       <Row type="flex" justify="end" class="page">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize"
           @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]"
@@ -71,53 +89,35 @@
           {
             title: "订单编号",
             key: "orderSn",
-            minWidth: 120,
+            minWidth: 100,
             tooltip: true
           },
-
           {
-            title: "实付金额",
-            key: "orderPrice",
-            width: 130,
-            sortable: false,
-            render: (h, params) => {
-              if(params.row.orderPrice == null){
-                return h("div", this.$options.filters.unitPrice(0, '￥'));
-              }else{
-                return h("div", this.$options.filters.unitPrice(params.row.orderPrice, '￥'));
-              }
-
-            }
+            title: '商品信息',
+            slot: 'goodsMsg',
+            minWidth: 120
           },
           {
             title: "退款金额",
             key: "returnMoney",
-            width: 130,
             sortable: false,
             render: (h, params) => {
-              if(params.row.orderPrice == null){
+              if(params.row.sellBackRebate == null){
                 return h("div", this.$options.filters.unitPrice(0, '￥'));
               }else{
-                return h("div", this.$options.filters.unitPrice(params.row.returnMoney, '￥'));
+                return h("div", this.$options.filters.unitPrice(params.row.sellBackRebate, '￥'));
               }
             }
           },
           {
-            title: "商品名称",
-            key: "goodsName",
-            minWidth: 120,
-            tooltip: true
-          },
-          {
             title: "分销商",
             key: "distributionName",
-            minWidth: 120,
             tooltip: true
           },
           {
             title: "店铺名称",
             key: "storeName",
-            minWidth: 120,
+            tooltip: true
           },
           {
             title: "状态",
@@ -141,10 +141,10 @@
             width: 120,
             sortable: false,
             render: (h, params) => {
-              if(params.row.rebateGrade == null){
+              if(params.row.rebate == null){
                 return h("div", this.$options.filters.unitPrice(0, '￥'));
               }else{
-                return h("div", this.$options.filters.unitPrice(params.row.rebateGrade, '￥'));
+                return h("div", this.$options.filters.unitPrice(params.row.rebate, '￥'));
               }
 
             }
@@ -225,7 +225,7 @@
       this.init();
     },
     watch: {
-      $route(e) {
+      $route(e) { // 监听路由，参数变化调取接口
         this.distributionId = e.query.id ? e.query.id : undefined;
         this.getDataList();
       }
@@ -234,5 +234,12 @@
 </script>
 <style lang="scss" >
   @import "@/styles/table-common.scss";
+  .goods-msg {
+    display: flex;
+    align-items: center;
+    >div{
+      margin-left: 10px;
+    }
+  }
 </style>
 

@@ -111,7 +111,7 @@
               <span class="inventory"> 库存{{skuDetail.quantity}}</span>
             </div>
           </div>
-          <div class="item-select" v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'">
+          <div class="item-select" v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS' || skuDetail.weight === 0">
             <div class="item-select-title">
               <p>重量</p>
             </div>

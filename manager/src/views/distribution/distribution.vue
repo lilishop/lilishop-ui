@@ -100,7 +100,7 @@ export default {
         },
         {
           title: "推广单数",
-          key: "orderNum",
+          key: "distributionOrderCount",
           minWidth: 120,
           width: 150,
         },
@@ -124,7 +124,7 @@ export default {
           render: (h, params) => {
             return h(
               "div",
-              this.$options.filters.unitPrice(params.row.rebateTotal, "￥")
+              this.$options.filters.unitPrice(params.row.canRebate, "￥")
             );
           },
         },
@@ -136,7 +136,7 @@ export default {
           render: (h, params) => {
             return h(
               "div",
-              this.$options.filters.unitPrice(params.row.rebateTotal, "￥")
+              this.$options.filters.unitPrice(params.row.commissionFrozen, "￥")
             );
           },
         },
