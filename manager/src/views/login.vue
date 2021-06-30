@@ -1,5 +1,5 @@
 <template>
-  <div class="login">
+  <div class="login" @click='$refs.verify.show = false'>
     <Row @keydown.enter.native="submitLogin" class="flex">
       <Col style="width: 368px">
       <Header />
@@ -111,7 +111,7 @@ export default {
       // 登录操作
       this.$refs.usernameLoginForm.validate((valid) => {
         if (valid) {
-          this.$refs.verify.show = true;
+          this.$refs.verify.init();
         }
       });
     },
@@ -161,7 +161,7 @@ export default {
   }
   .verify-con {
     position: absolute;
-    top: 90px;
+    top: 150px;
     z-index: 10;
     left: 20px;
   }

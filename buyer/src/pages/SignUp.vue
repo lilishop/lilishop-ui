@@ -1,5 +1,5 @@
 <template>
-  <div class="login">
+  <div class="login" @click='$refs.verify.show = false'>
     <div style="height:50px;"></div>
     <div class="logo-box">
       <img
@@ -202,7 +202,7 @@ export default {
     },
     verifyBtnClick () {
       if (!this.verifyStatus) {
-        this.$refs.verify.show = true;
+        this.$refs.verify.init();
       }
     }
   },

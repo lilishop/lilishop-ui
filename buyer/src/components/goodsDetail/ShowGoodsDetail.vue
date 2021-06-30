@@ -92,7 +92,7 @@
                   <td>{{param.paramName}}</td><td>{{param.paramValue}}</td>
                 </tr>
               </table>
-              <!-- <div v-else>暂无商品参数</div> -->
+              <div v-else>暂无商品参数</div>
             </TabPane>
           </Tabs>
         </div>
