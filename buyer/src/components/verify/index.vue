@@ -112,7 +112,7 @@ export default {
       handler: function (v) {
         this.type = v;
       }
-    },
+    }
   }
 };
 </script>
