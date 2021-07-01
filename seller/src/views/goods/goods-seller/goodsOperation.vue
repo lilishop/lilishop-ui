@@ -776,6 +776,7 @@ export default {
       this.activestep = 0;
       this.isPublish = true;
       this.GET_GoodsTemplate();
+
       this.GET_NextLevelCategory();
     },
      // 获取已选模板
@@ -790,6 +791,8 @@ export default {
     handleClickGoodsTemplate(val) {
       this.draftId = val.id;
       this.selectGoodsType = false;
+      this.GET_GoodData();
+      this.activestep = 1;
     },
     // 点击商品类型
     handleClickGoodsType(val) {
