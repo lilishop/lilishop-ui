@@ -111,7 +111,7 @@
               <span class="inventory"> 库存{{skuDetail.quantity}}</span>
             </div>
           </div>
-          <div class="item-select" v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS' || skuDetail.weight === 0">
+          <div class="item-select" v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS' && skuDetail.weight !== 0">
             <div class="item-select-title">
               <p>重量</p>
             </div>
@@ -267,7 +267,6 @@ export default {
     },
     formatSku (list) {
       // 格式化数据
-      console.log(list);
       let arr = [{}];
 
       list.forEach((item, index) => {
@@ -304,7 +303,7 @@ export default {
       });
       arr.shift();
       this.formatList = arr;
-      console.log(this.formatList);
+
       let cur = list.filter((i) => i.skuId === this.$route.query.skuId)[0];
       if (cur) {
         cur.specValues.filter((i) => i.specName !== 'images')

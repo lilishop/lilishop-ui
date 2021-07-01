@@ -31,7 +31,6 @@ export default {
 </script>
 <style lang="scss">
 #app{
-  height: 100%;
   @include background_color($light_background_color);
 }
 </style>

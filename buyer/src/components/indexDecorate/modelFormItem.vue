@@ -123,22 +123,7 @@ export default {
 .model-item {
   position: relative;
   margin-bottom: 20px;
-  &:hover {
-    .del-btn {
-      display: block;
-    }
-  }
-}
-.del-btn {
-  width: 100px;
-  height: 100px;
-  display: none;
-  position: absolute;
-  right: -100px;
-  top: 0;
-  &:hover {
-    display: block;
-  }
+  background-color: #fff;
 }
 
 /** 热门广告 */

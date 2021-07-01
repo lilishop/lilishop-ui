@@ -30,8 +30,20 @@
         <Button type="primary" class="export" @click="expressOrderDeliver">
           批量发货
         </Button>
+        
+        <!-- <download-excel
+          style="display:inline-block;"
+          :data="data"
+          :fields="excelColumns"
+          :fetch="exportOrder"
+          name="待发货订单.xls"
+        >
+          <Button type="success">
+            导出待发货订单
+          </Button>
+        </download-excel> -->
       </div>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"></Table>
       <Row type="flex" justify="end" class="page">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
           show-total show-elevator show-sizer></Page>
@@ -43,8 +55,12 @@
 <script>
 import * as API_Order from "@/api/order";
 import { verificationCode } from "@/api/order";
+import JsonExcel from "vue-json-excel";
 export default {
   name: "orderList",
+  components: {
+    "download-excel": JsonExcel,
+  },
   data() {
     return {
       orderCode: "",
@@ -74,8 +90,6 @@ export default {
       // 表单验证规则
       formValidate: {},
       submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [
         {
           title: "订单号",
@@ -178,6 +192,13 @@ export default {
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
+      excelColumns: { // 导出excel的参数
+        '编号': 'index',
+        '订单号': 'sn',
+        '收货人': 'memberName',
+        '收货人联系电话': 'memberName',
+        '收货地址': 'memberName',
+      }
     };
   },
   methods: {
@@ -202,22 +223,27 @@ export default {
         path: "/export-order-deliver",
       });
     },
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
+    // 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索订单
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    // 重置
     handleReset() {
       this.searchForm = {};
       this.searchForm.pageNumber = 1;
@@ -228,25 +254,14 @@ export default {
       // 重新加载数据
       this.getDataList();
     },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
-
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
+    // 起始时间处理
     selectDateRange(v) {
       if (v) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
       }
     },
+    // 获取表格数据
     getDataList() {
       this.loading = true;
       API_Order.getOrderList(this.searchForm).then((res) => {
@@ -257,7 +272,25 @@ export default {
         }
       });
     },
-
+    // 导出的待发货订单数据
+    async exportOrder () {
+      const params = {
+        // 搜索框初始化对象
+        pageNumber: 1, // 当前页数
+        pageSize: 10, // 页面大小
+        sort: "", // 默认排序字段
+        order: "", // 默认排序方式
+        startDate: "", // 起始时间
+        endDate: "", // 终止时间
+        orderSn: "",
+        buyerName: "",
+        orderStatus: "UNDELIVERED",
+        orderType: "NORMAL",
+      }
+      const res = await API_Order.getOrderList(params)
+      return res.result.records
+    },
+    // 查看订单详情
     detail(v) {
       let sn = v.sn;
       this.$router.push({

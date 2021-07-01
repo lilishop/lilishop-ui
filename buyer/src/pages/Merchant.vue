@@ -18,10 +18,16 @@
       </div>
     </div>
     <div  class="store-category">
-      <ul>
-        <li @click="searchByCate({id:'', labelName: '店铺推荐'})">首页</li>
-        <li v-for="(cate, index) in cateList" :key="index" @click="searchByCate(cate)">
-          {{cate.labelName}}
+      <ul class="cate-list">
+        <li class="cate-item" @click="searchByCate({id:'', labelName: '店铺推荐'})">首页</li>
+        <li class="cate-item" v-for="(cate, index) in cateList" :key="index" >
+          <Dropdown v-if="cate.children.length">
+            <div @click.self="searchByCate(cate)">{{cate.labelName}} <Icon type="ios-arrow-down"></Icon></div>
+            <DropdownMenu slot="list">
+                <DropdownItem @click.native="searchByCate(sec)" :name="sec.id" v-for="sec in cate.children" :key="sec.id">{{sec.labelName}}</DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+          <span v-else @click.self="searchByCate(cate)">{{cate.labelName}}</span>
         </li>
       </ul>
     </div>
@@ -97,13 +103,6 @@ export default {
     this.getGoodsList()
   },
   mounted () {
-    if (this.Cookies.getItem('userInfo')) {
-      isCollection('STORE', this.soterMsg.storeId).then(res => {
-        if (res.success && res.result) {
-          this.storeCollected = true;
-        }
-      })
-    }
   },
   methods: {
     getStoreMsg () { // 店铺信息
@@ -111,6 +110,13 @@ export default {
         if (res.success) {
           this.storeMsg = res.result
           document.title = this.storeMsg.storeName
+          if (this.Cookies.getItem('userInfo')) {
+            isCollection('STORE', this.storeMsg.storeId).then(res => {
+              if (res.success && res.result) {
+                this.storeCollected = true;
+              }
+            })
+          }
         }
       })
     },
@@ -222,15 +228,17 @@ export default {
 .store-category {
   background-color: #005aa0;
   color: #fff;
-  ul{
+  .cate-list{
     width: 1200px;
-    margin: 0 auto 10px;
-    padding: 3px 0;
-    display: flex;
-    li {
+    margin: 0 auto ;
+    clear: left;
+    height: 30px;
+    line-height: 30px;
+    .cate-item {
       margin-right: 25px;
+      float: left;
     }
-    li:hover{
+    .cate-item:hover{
       cursor: pointer;
     }
   }
