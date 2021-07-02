@@ -284,7 +284,7 @@ export default {
         endDate: "", // 终止时间
         orderSn: "",
         buyerName: "",
-        tag: "WAIT_ROG",
+        tag: "WAIT_SHIP",
         orderType: "NORMAL",
         storeId: userInfo.id
       }
