@@ -151,12 +151,6 @@
                         <Icon type="ios-eye-outline" size="30" @click.native="handleViewGoodsPicture(item.url)"></Icon>
                         <Icon type="ios-trash-outline" size="30" @click.native="handleRemoveGoodsPicture(item)"></Icon>
                       </div>
-                      <!-- <div>
-                        <Icon type="ios-arrow-dropleft" @click.native="
-                          handleGoodsPicRemoteUp(baseInfoForm.goodsGalleryFiles,__index)"/>
-                        <Icon type="ios-arrow-dropright" @click.native="
-                          handleGoodsPicRemoteDown(baseInfoForm.goodsGalleryFiles,__index)"/>
-                      </div> -->
                     </div>
                   </template>
                   <template v-else>
@@ -808,23 +802,6 @@ export default {
         this.draftId = "";
       }
     },
-
-    // 移动商品图片位置
-    handleGoodsPicRemoteUp(fieldData, index) {
-      if (index != 0) {
-        fieldData[index] = fieldData.splice(index - 1, 1, fieldData[index])[0];
-      } else {
-        fieldData.push(fieldData.shift());
-      }
-    },
-    // 移动商品图片位置
-    handleGoodsPicRemoteDown(fieldData, index) {
-      if (index != fieldData.length - 1) {
-        fieldData[index] = fieldData.splice(index + 1, 1, fieldData[index])[0];
-      } else {
-        fieldData.unshift(fieldData.splice(index, 1)[0]);
-      }
-    },
     // 获取商品模板
     GET_GoodsTemplate() {
       let searchParams = {
@@ -1460,6 +1437,11 @@ export default {
       this.GET_GoodsParams();
       /** 1级校验 */
       this.loading = true;
+      if (this.activestep === 0 && !this.baseInfoForm.goodsType) {
+        this.$Message.error('请选择商品类型')
+        this.loading = false;
+        return
+      }
       if (this.activestep === 0 && !this.activeCategoryName1) {
         this.$Message.error("请选择商品分类");
         this.loading = false;

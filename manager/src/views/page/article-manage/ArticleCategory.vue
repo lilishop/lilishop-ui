@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="operation">
+        <div class="operation mb_10">
             <Button @click="addParent" icon="md-add">添加一级分类</Button>
         </div>
         <tree-table
@@ -16,10 +16,9 @@
                 primary-key="id">
             <template slot="action" slot-scope="scope">
                 <Button
-                        type="primary"
+                        type="info"
                         @click="edit(scope.row)"
                         size="small"
-                        icon="md-add"
                         style="margin-right:5px"
                 >编辑
                 </Button>
@@ -28,17 +27,14 @@
                         type="error"
                         @click="remove(scope.row)"
                         size="small"
-                        icon="md-add"
                         style="margin-right:5px"
                 >删除
                 </Button>
-                &nbsp;
                 <Button
                         v-show="scope.row.level != 2 "
-                        type="primary"
+                        type="success"
                         @click="addChildren(scope.row)"
                         size="small"
-                        icon="md-add"
                         style="margin-right:5px"
                 >添加子分类
                 </Button>

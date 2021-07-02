@@ -122,6 +122,7 @@ export default {
           // 如果服务器端返回的不是 {errno:0, data: [...]} 这种格式，可使用该配置
           customInsert: function (insertImg, result, editor) {
             if (result.success == true) {
+              console.log(insertImg,result,editor);
               let url = result.result;
               insertImg(url);
               that.$Message.success("上传图片成功");
