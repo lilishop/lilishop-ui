@@ -27,7 +27,7 @@ export default {
 .model-content {
   width: 1200px;
   margin: 0 auto;
-  background: #fff;
+  // background: #fff;
   min-height: 1200px;
 }
 </style>

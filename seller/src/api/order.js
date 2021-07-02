@@ -12,6 +12,10 @@ export const verificationCode = verificationCode => {
 export const downLoadDeliverExcel = params => {
   return getRequest(`/orders/downLoadDeliverExcel`, params, 'blob');
 };
+// 导出待发货订单
+export const queryExportOrder = params => {
+  return getRequest(`/orders/queryExportOrder`, params);
+};
 
 
 // 上传待发货的订单列表

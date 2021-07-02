@@ -94,6 +94,7 @@ export default {
   width: 1200px;
   height: 340px;
   overflow: hidden;
+  margin-top: -20px;
 }
 
 /* 导航主体 */

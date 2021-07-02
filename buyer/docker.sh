@@ -1,1 +1,1 @@
-docker build -t registry.cn-beijing.aliyuncs.com/lili-images/buyer-ui-1.0.1:0.0.4 .
+docker build -t registry.cn-beijing.aliyuncs.com/lili-images/buyer-ui-4.2.0:0.0.2 .

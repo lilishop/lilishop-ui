@@ -63,7 +63,7 @@
 
       <div class="div-item" v-if="orderInfo.order.needReceipt == true">
         <div class="div-item-left">发票金额：</div>
-        <div class="div-item-right">{{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice('￥')}}</div>
+        <div class="div-item-right"><span v-if="orderInfo.receipt.receiptPrice">￥</span>{{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice}}</div>
       </div>
 
         <div class="div-item" v-if="orderInfo.order.needReceipt == true">

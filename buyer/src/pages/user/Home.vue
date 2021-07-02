@@ -15,7 +15,7 @@
           >
             <div class="user-icon">
               <div class="user-img">
-                <img :src="userInfo.face" v-if="userInfo.face" alt />
+                <img :src="userInfo.face" style="width:100%;height:100%;" v-if="userInfo.face" alt />
                 <Avatar icon="ios-person" class="mb_10" v-else size="96" />
               </div>
               <p>{{userInfo.nickName}}</p>
