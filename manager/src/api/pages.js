@@ -80,11 +80,11 @@ export const updateArticleCategory = (params, id) => {
 }
 //文章添加
 export const saveArticle = (params) => {
-    return postRequest('/article', params)
+    return postRequest('/article', params, {"Content-Type": "application/json"})
 }
 //文章修改
 export const updateArticle = (params) => {
-    return putRequest(`/article/update/${params.id}`, params)
+    return putRequest(`/article/update/${params.id}`, params, {"Content-Type": "application/json"})
 }
 //文章是否展示修改
 export const updateArticleStatus = (id,params) => {

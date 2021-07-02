@@ -37,8 +37,8 @@
         </FormItem>
         <FormItem label="是否通过" prop="result" v-if="handleStatus =='edit'">
              <RadioGroup v-model="result" type="button" button-style="solid">
-                 <Radio :key=0 :label=0>通过</Radio>
-                 <Radio :key=-1 :label=-1>拒绝</Radio>
+                 <Radio label="PASS">通过</Radio>
+                 <Radio label="REFUSE">拒绝</Radio>
              </RadioGroup>
         </FormItem>
       </Form>
@@ -67,7 +67,7 @@ export default {
       loading: true, // 表单加载状态
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
-      result: -1, // 是否通过
+      result: 'REFUSE', // 是否通过
       searchForm: { // 搜索框初始化对象
         pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
@@ -79,9 +79,6 @@ export default {
         sn: "",
         memberName: "",
         price: "",
-      },
-      auditForm: { // 编辑表单
-        result: -1
       },
       submitLoading: false, // 添加或编辑提交状态
       selectList: [], // 多选数据
@@ -101,11 +98,9 @@ export default {
           title: "申请金额",
           key: "price",
           minWidth: 90,
-           render: (h, params) => {
-              if (params.row.price) {
-                  return h("div", this.$options.filters.unitPrice(params.row.price,'￥'));
-                }
-              }
+          render: (h, params) => {
+            return h("div", this.$options.filters.unitPrice(params.row.price,'￥'));
+          }
         },
         {
           title: "申请时间",
@@ -193,23 +188,27 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
-      this.clearSelectAll();
     },
+    // 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索表格
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    // 排序
     changeSort(e) {
       this.searchForm.sort = e.key;
       this.searchForm.order = e.order;
@@ -218,14 +217,7 @@ export default {
       }
       this.getDataList();
     },
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
-
+    // 获取列表数据
     getDataList() {
       this.loading = true;
       // 带多条件搜索参数获取表单数据 请自行修改接口
@@ -241,7 +233,7 @@ export default {
     },
     handleSubmit() {
       let result = "拒绝"
-      if(this.result == 0){
+      if(this.result == 'PASS'){
         result = "通过"
       }
       this.$refs.form.validate(valid => {
@@ -251,12 +243,13 @@ export default {
             content: "您确认要审核"+result+"么?",
             loading: true,
             onOk: () => {
-                this.auditForm.result = this.result;
-                auditDistributionCash(this.form.id,this.auditForm).then(res => {
+                auditDistributionCash(this.form.id,{result:this.result}).then(res => {
                     if (res.success) {
                       this.$Modal.remove();
                       this.$Message.success("审核成功");
                       this.getDataList();
+                      this.modalVisible = false;
+                    } else {
                       this.modalVisible = false;
                     }
                 });
@@ -275,9 +268,7 @@ export default {
           v[attr] = "";
         }
       }
-      let str = JSON.stringify(v);
-      let data = JSON.parse(str);
-      this.form = data;
+      this.form = JSON.parse(JSON.stringify(v));
       this.modalVisible = true;
     },
     view(v){

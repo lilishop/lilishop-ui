@@ -54,7 +54,7 @@
         <span v-show="activeCategoryName2">> {{ activeCategoryName2 }}</span>
         <span v-show="activeCategoryName3">> {{ activeCategoryName3 }}</span>
       </p>
-      <template v-if="!$route.query.id && draftId">
+      <template v-if="!$route.query.id">
         <Divider>已选商品模版:{{checkedTemplate()}}</Divider>
       </template>
     </div>
@@ -120,7 +120,7 @@ export default {
       // 获取已选模板
     checkedTemplate () {
       if(this.goodsTemplates.length) {
-        return this.goodsTemplates.find(item=>{return item.id == this.draftId}).goodsName
+        return this.goodsTemplates.find(item=>{return item.id == this.$parent.draftId}).goodsName
       } else {
         return ""
       }
@@ -134,6 +134,7 @@ export default {
       val.check = !val.check;
       if (!val.type) {
         this.showGoodsTemplates = true;
+        this.GET_GoodsTemplate()
       } else {
         // this.baseInfoForm.goodsType = val.type;
         // this.draftId = "";
@@ -198,6 +199,7 @@ export default {
     },
   },
   mounted () {
+    this.GET_NextLevelCategory()
   }
 }
 </script>

@@ -393,38 +393,7 @@ export default {
     secondStep,
     thirdStep
   },
-  watch: {
-    // selectGoodsType: {
-    //   handler(val) {
-    //     if (val && this.baseInfoForm.goodsType) {
-    //       this.goodsTypeWay.forEach((item) => {
-    //         item.check = false;
-    //         if (item.type == this.baseInfoForm.goodsType) {
-    //           item.check = true;
-    //         }
-    //         if (!item.type) {
-    //           this.defaultBaseInfo();
-    //         }
-    //       });
-    //     }
-    //   },
-    // },
-    // $route(to, from) {
-    //   if (to.query.draftId) {
-    //     this.draftId = to.query.draftId;
-    //     this.activestep = 1;
-    //     this.isOperationGoods = false;
-    //     this.GET_GoodData();
-    //   } else if (to.query.id) {
-    //     this.activestep = 1;
-    //     this.goodsId = this.$route.query.id;
-    //     this.GET_GoodData();
-    //   } else {
-    //     this.selectGoodsType = true;
-    //     this.defaultBaseInfo();
-    //   }
-    // },
-  },
+
   data() {
     // 表单验证项，商品价格
     const checkPrice = (rule, value, callback) => {
@@ -482,8 +451,6 @@ export default {
       showSkuPicture: false,
       //选择的sku
       selectedSku: {},
-      //模版 id
-      draftId: undefined,
       /** 当前激活步骤*/
       activestep: 0,
       //是否在编辑商品
@@ -634,7 +601,6 @@ export default {
     }
     // 编辑模板
     else if (this.$route.query.draftId) {
-      this.draftId = this.$route.query.draftId;
       this.activestep = 1;
       this.isOperationGoods = false;
       this.GET_GoodData();
@@ -671,8 +637,6 @@ export default {
       this.isPublish = true;
       this.$refs.first.GET_NextLevelCategory();
     },
-
-  
     /**
      * 选择参数
      * @paramsGroup 参数分组
@@ -848,8 +812,8 @@ export default {
     // 编辑时获取商品信息
     async GET_GoodData() {
       let response = {};
-      if (this.draftId) {
-        response = await API_GOODS.getDraftGoodsDetail(this.draftId);
+      if (this.$route.query.draftId) {
+        response = await API_GOODS.getDraftGoodsDetail(this.$route.query.draftId);
       } else {
         response = await API_GOODS.getGoods(this.$route.query.id);
         this.goodsId = response.result.id;
@@ -1280,14 +1244,19 @@ export default {
     /** 下一步*/
     next() {
       window.scrollTo(0, 0);
-      if (this.activestep === 0 && this.draftId) {
+      if (this.activestep === 0 && this.$route.query.draftId) {
         this.activestep = 1;
         this.GET_GoodData();
         return;
       }
-      
       /** 1级校验 */
-      if (this.activestep === 0 && !this.activeCategoryName1) { 
+      this.loading = true;
+      if (this.activestep === 0 && !this.baseInfoForm.goodsType) {
+        this.$Message.error('请选择商品类型')
+        this.loading = false;
+        return
+      }
+      if (this.activestep === 0 && !this.activeCategoryName1) {
         this.$Message.error("请选择商品分类");
         return;
       } else if (this.activestep === 0 && this.activeCategoryIndex3 === -1) {
@@ -1327,8 +1296,7 @@ export default {
         });
         return;
       }
-      /** 下一步 */
-      if (this.activestep++ > 2) return;
+      
     },
     // 店内分类选择
     selectTree(v) {
@@ -1439,8 +1407,8 @@ export default {
       this.baseInfoForm.categoryName = [];
       this.baseInfoForm.saveType = 'TEMPLATE';
 
-      if (this.draftId) {
-        this.baseInfoForm.id = this.draftId;
+      if (this.$route.query.draftId) {
+        this.baseInfoForm.id = this.$route.query.draftId;
         this.$Modal.confirm({
           title: "当前模板已存在",
           content: "当前模板已存在，保存为新模板或替换原模板",

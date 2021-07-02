@@ -72,19 +72,25 @@ export default {
         xPos: this.distance
       };
       postVerifyImg(params).then(res => {
-        if (res.result) {
-          this.bgColor = 'green';
-          this.verifyText = '解锁成功';
-          this.$emit('change', { status: true, distance: this.distance });
+        if (res.success) {
+          if (res.result) {
+            this.bgColor = 'green';
+            this.verifyText = '解锁成功';
+            this.$emit('change', { status: true, distance: this.distance });
+          } else {
+            this.bgColor = 'red';
+            this.verifyText = '解锁失败';
+            let that = this;
+            setTimeout(() => {
+              that.refresh();
+            }, 1000);
+            this.$emit('change', { status: false, distance: this.distance });
+          }
         } else {
-          this.bgColor = 'red';
-          this.verifyText = '解锁失败';
-          let that = this;
-          setTimeout(() => {
-            that.refresh();
-          }, 1000);
-          this.$emit('change', { status: false, distance: this.distance });
+          this.refresh()
         }
+      }).catch(() => {
+        this.refresh()
       });
     },
     refresh () { // 刷新滑块

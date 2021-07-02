@@ -121,7 +121,7 @@ export default {
         {
           title: "发票状态",
           key: "receiptStatus",
-          width: 90,
+          width: 100,
           tooltip: true,
           render: (h, params) => {
             if (params.row.receiptStatus == 0) {
@@ -138,7 +138,7 @@ export default {
         {
           title: "订单状态",
           key: "orderStatus",
-          width: 90,
+          width: 100,
           render: (h, params) => {
             if (params.row.orderStatus == "UNPAID") {
               return h("div", [
