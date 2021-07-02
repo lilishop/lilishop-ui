@@ -2,11 +2,11 @@
   <div class="model-item" v-if="element && element.key">
     <!-- 轮播图模块，包括个人信息，快捷导航模块 -->
     <template v-if="element.type == 'carousel'">
-      <model-carousel :data="element"></model-carousel>
+      <model-carousel :data="element" class="mb_20"></model-carousel>
     </template>
     <!-- 热门广告 -->
     <template v-if="element.type == 'hotAdvert'">
-      <div>
+      <div class="mb_20">
         <img
           style="display: block"
           class="hover-pointer"
@@ -36,7 +36,7 @@
     <!-- 折扣广告 -->
     <template v-if="element.type == 'discountAdvert'">
       <div
-        class="discountAdvert"
+        class="discountAdvert mb_20"
         :style="{
           'background-image': 'url(' + element.options.bgImg.img + ')',
         }"
@@ -66,28 +66,28 @@
 
     <!-- 好货推荐 -->
     <template v-if="element.type == 'recommend'">
-      <recommend :data="element"></recommend>
+      <recommend :data="element" class="mb_20"></recommend>
     </template>
     <!-- 新品排行 -->
     <template v-if="element.type == 'newGoodsSort'">
-      <new-goods-sort :data="element"></new-goods-sort>
+      <new-goods-sort :data="element" class="mb_20"></new-goods-sort>
     </template>
     <!-- 首页广告 -->
     <template v-if="element.type == 'firstAdvert'">
-      <first-page-advert :data="element"></first-page-advert>
+      <first-page-advert :data="element" class="mb_20"></first-page-advert>
     </template>
     <!-- 横幅广告 -->
     <template v-if="element.type == 'bannerAdvert'">
       <img
         width="1200"
-        class="hover-pointer"
+        class="hover-pointer mb_20"
         @click="linkTo(element.options.url)"
         :src="element.options.img"
         alt=""
       />
     </template>
     <template v-if="element.type == 'notEnough'">
-      <not-enough :data="element"></not-enough>
+      <not-enough :data="element" class="mb_20"></not-enough>
     </template>
   </div>
 </template>
@@ -122,7 +122,6 @@ export default {
 <style lang="scss" scoped>
 .model-item {
   position: relative;
-  margin-bottom: 20px;
   background-color: #fff;
 }
 

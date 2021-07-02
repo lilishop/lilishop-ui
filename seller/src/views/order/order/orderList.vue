@@ -63,7 +63,7 @@ export default {
   },
   data() {
     return {
-      orderCode: "",
+      orderCode: "", // 虚拟订单核验码
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
@@ -289,12 +289,19 @@ export default {
         storeId: userInfo.id
       }
       const res = await API_Order.queryExportOrder(params)
-      for (let i=0; i<res.result.length; i++) {
-        res.result[i].index = i+1;
-        res.result[i].consigneeAddress = 
-          res.result[i].consigneeAddressPath.replace(/,/g, "") + res.result[i].consigneeDetail
+      if (res.success) {
+        if (res.result.length === 0) {
+          this.$Message.warning('暂无待发货订单')
+          return []
+        }
+        for (let i=0; i<res.result.length; i++) {
+          res.result[i].index = i+1;
+          res.result[i].consigneeAddress = 
+            res.result[i].consigneeAddressPath.replace(/,/g, "") + res.result[i].consigneeDetail
+        }
+        return res.result
       }
-      return res.result
+      
     },
     // 查看订单详情
     detail(v) {
