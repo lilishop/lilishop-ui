@@ -90,7 +90,7 @@
               <template v-if="detail.goodsParamsDTOList && detail.goodsParamsDTOList.length">
                 <div class="goods-params" v-for="item in detail.goodsParamsDTOList" :key="item.groupId">
                   <span class="ml_10">{{item.groupName}}</span>
-                  <table class="mt_10" cellpadding='0' cellspacing="0" >
+                  <table class="mb_10" cellpadding='0' border="1" cellspacing="0" >
                     <tr v-for="param in item.goodsParamsItemDTOList" :key="param.paramId">
                       <td style="text-align:right">{{param.paramName}}</td><td>{{param.paramValue}}</td>
                     </tr>
@@ -489,16 +489,17 @@ export default {
   color: $theme_color;
 }
 table{
-  border-color: #eee;
+  border-color:#efefef;
   color: #999;
-  width: 50%;
+  min-width: 30%;
   margin-left: 10px;
+  font-size: 12px;
   tr{
     td:nth-child(1){
-      width: 100px;
+      min-width: 70px;
     }
     td:nth-child(2){
-      padding-left: 20px;
+      padding-left: 10px;
     }
   }
   td{

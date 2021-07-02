@@ -30,8 +30,7 @@
         <Button type="primary" class="export" @click="expressOrderDeliver">
           批量发货
         </Button>
-        
-        <!-- <download-excel
+        <download-excel
           style="display:inline-block;"
           :data="data"
           :fields="excelColumns"
@@ -41,7 +40,7 @@
           <Button type="success">
             导出待发货订单
           </Button>
-        </download-excel> -->
+        </download-excel>
       </div>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"></Table>
       <Row type="flex" justify="end" class="page">
@@ -56,6 +55,7 @@
 import * as API_Order from "@/api/order";
 import { verificationCode } from "@/api/order";
 import JsonExcel from "vue-json-excel";
+import Cookies from "js-cookie";
 export default {
   name: "orderList",
   components: {
@@ -87,8 +87,6 @@ export default {
         endTime: "",
         billPrice: "",
       },
-      // 表单验证规则
-      formValidate: {},
       submitLoading: false, // 添加或编辑提交状态
       columns: [
         {
@@ -195,9 +193,9 @@ export default {
       excelColumns: { // 导出excel的参数
         '编号': 'index',
         '订单号': 'sn',
-        '收货人': 'memberName',
-        '收货人联系电话': 'memberName',
-        '收货地址': 'memberName',
+        '收货人': 'consigneeName',
+        '收货人联系电话': 'consigneeMobile',
+        '收货地址': 'consigneeAddress',
       }
     };
   },
@@ -274,21 +272,29 @@ export default {
     },
     // 导出的待发货订单数据
     async exportOrder () {
+      let userInfo = JSON.parse(Cookies.get("userInfo"));
+      console.log(userInfo);
       const params = {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-        sort: "", // 默认排序字段
-        order: "", // 默认排序方式
+        pageSize: 100, // 页面大小
+        sort: "startDate", // 默认排序字段
+        order: "desc", // 默认排序方式
         startDate: "", // 起始时间
         endDate: "", // 终止时间
         orderSn: "",
         buyerName: "",
-        orderStatus: "UNDELIVERED",
+        tag: "WAIT_ROG",
         orderType: "NORMAL",
+        storeId: userInfo.id
       }
-      const res = await API_Order.getOrderList(params)
-      return res.result.records
+      const res = await API_Order.queryExportOrder(params)
+      for (let i=0; i<res.result.length; i++) {
+        res.result[i].index = i+1;
+        res.result[i].consigneeAddress = 
+          res.result[i].consigneeAddressPath.replace(/,/g, "") + res.result[i].consigneeDetail
+      }
+      return res.result
     },
     // 查看订单详情
     detail(v) {
