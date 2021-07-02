@@ -2,13 +2,8 @@
   <div class="wrapper">
     <div class="operation">
       <Button @click="addParent" icon="md-add">添加一级分类</Button>
-      选择分类:
-      <Select @on-change="changeSortCate" v-model="sortCate" style="width:200px">
-        <Option v-for="item in sortCateList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-      </Select>
-
     </div>
-    <tree-table ref="treeTable" size="default" :loading="loading" :data="tableData" :columns="columns" :border="true" :show-index="false" :is-fold="true" :expand-type="false" primary-key="id">
+    <Table size="default" :load-data="handleLoadData" row-key="id" :loading="loading" :data="tableData" :columns="columns">
 
       <template slot="action" slot-scope="scope">
         <Dropdown v-show="scope.row.level == 2" transfer="true" trigger="click">
@@ -53,7 +48,7 @@
           <Badge text="禁用" status="error"></Badge>
         </div>
       </template>
-    </tree-table>
+    </Table>
 
     <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="500">
       <Form ref="form" :model="formAdd" :label-width="100" :rules="formValidate">
@@ -132,19 +127,17 @@ import {
   saveCategorySpec,
   getCategoryTree,
 } from "@/api/goods";
-import TreeTable from "@/views/my-components/tree-table/Table/Table";
+
 import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
 
 export default {
   name: "lili-components",
   components: {
-    TreeTable,
     uploadPicInput,
   },
   data() {
     return {
       categoryList: [], // 分类列表
-      sortCateList: [], //筛选出分类第一级
       sortCate: "", //筛选的数据
       loading: false, // 加载状态
       selectCount: 0, // 选择数量
@@ -184,47 +177,44 @@ export default {
         {
           title: "分类名称",
           key: "name",
-          minWidth: "120px",
+          tree: true,
         },
         {
           title: "状态",
           key: "deleteFlag",
-          headerAlign: "center",
-          type: "template",
-          template: "deleteFlag",
+
+          slot: "deleteFlag",
         },
         {
-          title: "佣金(%)",
+          title: "佣金",
           key: "commissionRate",
-          headerAlign: "center",
-          type: "template",
-          template: "commissionRate",
+
+          slot: "commissionRate",
         },
         {
           fixed: "right",
           title: "操作",
           key: "action",
-          align: "left",
-          headerAlign: "center",
-          type: "template",
-          template: "action",
+
+          slot: "action",
         },
       ],
       tableData: [],
       categoryIndex: 0,
+      checkedCategoryChildren: "", //选中的分类子级
     };
   },
   methods: {
-    changeSortCate(val) {
-      let way = this.categoryList.find((item, index) => {
-        if (item.name == val) {
-          this.categoryIndex = index;
-          console.log((this.categoryIndex = index));
-          return item.name == val;
-        }
-      });
-      this.tableData = [way];
-    },
+    // changeSortCate(val) {
+    //   let way = this.categoryList.find((item, index) => {
+    //     if (item.name == val) {
+    //       this.categoryIndex = index;
+    //       console.log((this.categoryIndex = index));
+    //       return item.name == val;
+    //     }
+    //   });
+    //   this.tableData = [way];
+    // },
     init() {
       this.getAllList(0);
       this.getBrandList();
@@ -240,7 +230,6 @@ export default {
     getSpecList() {
       getSpecificationList().then((res) => {
         if (res.length != 0) {
-
           this.specifications = res;
         }
       });
@@ -379,26 +368,64 @@ export default {
         },
       });
     },
+
+    // 异步手动加载分类名称
+    handleLoadData(item, callback) {
+      console.warn(item);
+      if (item.level == 0) {
+        let categoryList = JSON.parse(JSON.stringify(this.categoryList));
+        categoryList.forEach((val) => {
+          if (val.id == item.id) {
+            val.children.map((child) => {
+              child._loading = false;
+              child.children = [];
+            });
+            // 模拟加载
+            setTimeout(() => {
+              callback(val.children);
+            }, 1000);
+          }
+        });
+      } else {
+        this.deepCategoryChildren(item.id, this.categoryList);
+        console.log(this.checkedCategoryChildren);
+        setTimeout(() => {
+          callback(this.checkedCategoryChildren);
+        }, 1000);
+      }
+    },
+
+    // 通过递归children来实现手动加载数据
+    deepCategoryChildren(id, list) {
+      if (id != "0" && list.length != 0) {
+        for (let i = 0; i < list.length; i++) {
+          let item = list[i];
+          if (item.id == id) {
+            this.checkedCategoryChildren = item.children;
+            return;
+          } else {
+            this.deepCategoryChildren(id, item.children);
+          }
+        }
+      }
+    },
+
     getAllList(parent_id) {
-      this.sortCateList = [];
       this.loading = true;
       getCategoryTree(parent_id).then((res) => {
         this.loading = false;
         if (res.success) {
           localStorage.setItem("category", JSON.stringify(res.result));
-          res.result.forEach((e, index, arr) => {
-            this.sortCateList.push({
-              label: e.name,
-              value: e.name,
-            });
-            this.sortCate = arr[0].name;
+          this.categoryList = JSON.parse(JSON.stringify(res.result));
+          this.tableData = res.result.map((item) => {
+            if (item.children.length != 0) {
+              item.children = [];
+              item._loading = false;
+            }
+            return item;
           });
 
-          this.categoryList = res.result;
-
-          this.$nextTick(() => {
-            this.$set(this, "tableData", [res.result[this.categoryIndex]]);
-          });
+          console.log(this.tableData);
         }
       });
     },

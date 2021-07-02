@@ -1,9 +1,10 @@
 <template>
   <div class="order-detail" v-if="order.order">
     <card _Title="订单详情" :_Size="16"></card>
+    <p class="verificationCode" v-if="order.order.verificationCode">核验码：<span>{{order.order.verificationCode}}</span></p>
     <div class="order-card">
-      <p class="global_color fontsize_18">{{ order.orderStatusValue }} <span class="verificationCode" v-if="order.order.verificationCode">核验码：{{order.order.verificationCode}}</span></p>
-      <p class="global_color">订单号：{{ order.order.sn }}</p>
+      <p class="global_color fontsize_18">{{ order.orderStatusValue }}</p>
+      <p>订单号：{{ order.order.sn }}</p>
       <div style="color:#999;" class="operation-time">操作时间：{{order.order.updateTime}}</div>
       <Steps class="progress" :current="progressList.length" direction="vertical">
         <Step
@@ -25,7 +26,7 @@
       <p>支付方式：{{order.paymentMethodValue}}</p>
       <p>付款状态：{{order.payStatusValue}}</p>
     </div>
-    <div class="order-card">
+    <div class="order-card" v-if="!order.order.verificationCode">
       <h3>配送信息</h3>
       <p>配送方式：{{order.deliveryMethodValue}}</p>
       <p>配送状态：{{order.deliverStatusValue}}</p>
@@ -235,10 +236,14 @@ table {
   }
 }
 .verificationCode {
-  font-size: 16px;
-  margin-left: 240px;
+  font-size: 20px;
+  margin-bottom: 20px;
   color: rgb(65, 63, 63);
   font-weight: bold;
+  text-align: center;
+  span{
+    color: $theme_color;
+  }
 }
 /** 订单进度条 */
 .progress {

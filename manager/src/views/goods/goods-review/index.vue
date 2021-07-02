@@ -28,7 +28,7 @@
               size="small" show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
-
+    <!-- 评价详情 -->
     <Modal v-model="infoFlag" width="800" :title="infoTitle">
 
       <div class="info-list" style="overflow: hidden">
@@ -58,12 +58,15 @@
                 <ListItemMeta :avatar="infoData.memberProfile" :title="infoData.memberName"
                               :description="infoData.content"/>
               </ListItem>
-              <div class="" v-if="infoData.haveImage == 1">
+              <div class="" v-if="infoData.haveImage">
                 评价图
                 <div style="margin-left: 40px">
-                  <img style="width: 100px;height: 110px;margin-left: 2px"
-                       v-for="(img,index) in infoData.image.split(',')" v-if="infoData.image.length !=0" :src="img"
+                  <template v-if="infoData.images && infoData.images.length">
+                    <img style="width: 100px;height: 110px;margin-left: 2px"
+                       v-for="(img,index) in infoData.images.split(',')"  :src="img"
                        alt="" :key="index"/>
+                  </template>
+                  
                 </div>
               </div>
             </List>
@@ -74,10 +77,13 @@
                 <div style="float: left"> 商家回复：</div>
                 <div style="margin-left: 60px">{{ infoData.reply }}</div>
               </div>
-              <div v-if="infoData.haveReplyImage == 1">
+              <div v-if="infoData.haveReplyImage">
                 <div style="margin-left: 60px">
-                  <img style="width: 100px;height: 110px" v-for="(img,index) in infoData.replyImage.split(',')" :key="index"
-                       v-if="infoData.replyImage.length !=0" :src="img" alt=""/>
+                  <template  v-if="infoData.replyImage && infoData.replyImage.length">
+                    <img style="width: 100px;height: 110px" v-for="(img,index) in infoData.replyImage.split(',')" :key="index"
+                       :src="img" alt=""/>
+                  </template>
+                  
                 </div>
               </div>
             </div>

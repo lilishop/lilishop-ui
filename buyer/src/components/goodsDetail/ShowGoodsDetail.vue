@@ -87,12 +87,17 @@
               </div>
             </TabPane>
             <TabPane label="商品参数">
-              <table class="mt_10" border="1" cellpadding='0' cellspacing="0" v-if="skuDetail.goodsParamsList && skuDetail.length">
-                <tr v-for="param in skuDetail.goodsParamsList" :key="param">
-                  <td>{{param.paramName}}</td><td>{{param.paramValue}}</td>
-                </tr>
-              </table>
-              <!-- <div v-else>暂无商品参数</div> -->
+              <template v-if="detail.goodsParamsDTOList && detail.goodsParamsDTOList.length">
+                <div class="goods-params" v-for="item in detail.goodsParamsDTOList" :key="item.groupId">
+                  <span class="ml_10">{{item.groupName}}</span>
+                  <table class="mb_10" cellpadding='0' border="1" cellspacing="0" >
+                    <tr v-for="param in item.goodsParamsItemDTOList" :key="param.paramId">
+                      <td style="text-align:right">{{param.paramName}}</td><td>{{param.paramValue}}</td>
+                    </tr>
+                  </table>
+                </div>
+              </template>
+              <div v-else>暂无商品参数</div>
             </TabPane>
           </Tabs>
         </div>
@@ -131,7 +136,7 @@ export default {
     }
   },
   methods: {
-    changeHeight (name) {  // 设置商品详情高度
+    changeHeight (name) { // 设置商品详情高度
       let heightCss = window.getComputedStyle(this.$refs[name]).height;
       heightCss = parseInt(heightCss.substr(0, heightCss.length - 2)) + 89;
       this.$refs.itemIntroDetail.style.height = heightCss + 'px';
@@ -484,17 +489,28 @@ export default {
   color: $theme_color;
 }
 table{
-  border-color: #eee;
+  border-color:#efefef;
   color: #999;
-  width: 70%;
+  min-width: 30%;
   margin-left: 10px;
+  font-size: 12px;
   tr{
     td:nth-child(1){
-      width: 200px;
+      min-width: 70px;
+    }
+    td:nth-child(2){
+      padding-left: 10px;
     }
   }
   td{
-    padding: 5px;
+    padding: 6px;
   }
+}
+.goods-params {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  margin-left: 30px;
+  span{color:#999}
 }
 </style>

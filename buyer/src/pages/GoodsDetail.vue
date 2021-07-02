@@ -77,7 +77,6 @@ export default {
               name: cateName[index]
             });
           });
-          console.log(cateArr);
           this.categoryBar = cateArr;
           this.goodsMsg = res.result;
           // 判断是否收藏

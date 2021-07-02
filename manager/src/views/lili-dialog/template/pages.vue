@@ -1,10 +1,11 @@
 <template>
   <div class="wrapper">
-    <div class="list">
+    <!-- TODO 目前数据少暂且不用 -->
+    <!-- <div class="list">
       <div class="list-item active">
         文章页
       </div>
-    </div>
+    </div> -->
     <div class="content">
       <Article @callbacked="callbackArticle" :selected="true" />
     </div>
@@ -36,8 +37,8 @@ export default {
   height: 414px;
   overflow: auto;
 }
-.ivu-table-wrapper ivu-table-wrapper-with-border{
-  height: 300px  !important;
+.ivu-table-wrapper ivu-table-wrapper-with-border {
+  height: 300px !important;
 }
 .list {
   margin: 0 1.5%;

@@ -3,12 +3,12 @@
     <Card>
       <Row @keydown.enter.native="handleSearch" >
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Input class="search-input" v-model="searchForm.memberName">
-            <span slot="prepend">会员名称</span>
-          </Input>
-          <Input class="search-input" v-model="searchForm.sn">
-            <span slot="prepend">编号</span>
-          </Input>
+          <Form-item label="会员名称">
+            <Input class="search-input" v-model="searchForm.memberName"></Input>
+          </Form-item>
+          <Form-item label="编号">
+            <Input class="search-input" v-model="searchForm.sn"></Input>
+          </Form-item>
           <Form-item label="状态" style="margin-left: -20px">
             <Select v-model="searchForm.distributionCashStatus" style="width:150px;">
                 <Option v-for="item in cashStatusList" :value="item.value" :key="item.value">{{ item.label }}</Option>
@@ -114,7 +114,7 @@ export default {
         },
         {
           title: "处理时间",
-          key: "payTime",
+          key: "updateTime",
           minWidth: 130
         },
         {

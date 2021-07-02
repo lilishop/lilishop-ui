@@ -200,9 +200,9 @@ export default {
           width: 100,
           render: (h, params) => {
             if (params.row.marketEnable == "DOWN") {
-              return h("Tag", {props: {color: "green"},},"上架");
+              return h("Tag", {props: {color: "volcano"},},"下架");
             } else if (params.row.marketEnable == "UPPER") {
-              return h("Tag", {props: {color: "volcano",},},"下架");
+              return h("Tag", {props: {color: "green",},},"上架");
             }
           },
         },
