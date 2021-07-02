@@ -213,6 +213,7 @@ export default {
     },
     //添加运费模板
     add() {
+      this.$refs.region.clear()
       this.title = "添加运费模板";
       this.csTab = true;
       this.operation = "ADD";
