@@ -167,7 +167,6 @@
                   <Icon type="ios-camera" size="20"></Icon>
                 </div>
               </Upload>
-              <!-- <upload-pic-thumb v-model="baseInfoForm.goodsGalleryFiles" :multiple="true"></upload-pic-thumb> -->
 
               <Modal title="View Image" v-model="goodsPictureVisible">
                 <img :src="previewGoodsPicture" v-if="goodsPictureVisible" style="width: 100%"/>
@@ -227,7 +226,7 @@
                           .ivu-table-overflowX {
                             overflow-x: hidden;
                           }
-                        " :span-method="handleSpan">
+                        ">
                         <template slot-scope="{ row }" slot="sn">
                           <Input v-model="row.sn" placeholder="请输入货号" @on-change="updateSkuTable(row, 'sn')"/>
                         </template>
@@ -886,6 +885,7 @@ export default {
         this.baseInfoForm.goodsGalleryFiles.filter((i) => i.url !== file.url);
     },
     updateSkuPicture() {
+      this.baseInfoForm.regeneratorSkuFlag = true;
       let _index = this.selectedSku._index;
       this.skuTableData[_index] = this.selectedSku;
     },
@@ -900,11 +900,10 @@ export default {
         this.previewPicture = file.url;
       }
     },
-    handleSuccessGoodsPicture(res, file) {
-      if (file.response) {
-        file.url = file.response.result;
-        this.baseInfoForm.goodsGalleryFiles.push(file);
-      }
+    handleSuccessGoodsPicture(res, file, fileList) {
+      console.log(res, file, fileList);
+      file.url = res.result;
+      this.baseInfoForm.goodsGalleryFiles = fileList;
     },
     handleFormatError(file) {
       this.$Notice.warning({
@@ -1365,13 +1364,10 @@ export default {
         }
       }
     },
-   
-    // 规格表格操作
-    handleSpan({row, column, rowIndex, columnIndex}) {
-    },
     /** 数据改变之后 抛出数据 */
     updateSkuTable(row, item) {
       let index = row._index;
+      this.baseInfoForm.regeneratorSkuFlag = true;
       // this.skuTableData[index][item] = row[item];
       /** 进行自定义校验 判断是否是数字（小数也能通过）重量 */
       if (item === "weight") {
