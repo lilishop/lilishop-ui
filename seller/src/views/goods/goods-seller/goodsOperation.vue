@@ -74,7 +74,7 @@
       </template>
     </div>
 
-    <div class="content-goods-publish" v-show="activestep === 1">
+    <div class="content-goods-publish" style="min-width:1350px;" v-show="activestep === 1">
       <Form ref="baseInfoForm" :model="baseInfoForm" :label-width="120" :rules="baseInfoFormRule">
         <div class="base-info-item">
           <h4>基本信息</h4>
@@ -255,18 +255,24 @@
                               <img v-if="previewPicture !== ''" :src="previewPicture"/>
                             </div>
                             <Divider/>
-                            <div class="sku-upload-list" v-for="(img, __index) in selectedSku.images" :key="__index">
-                              <template v-if="img.status === 'finished'">
-                                <img :src="img.url"/>
-                                <div class="sku-upload-list-cover">
-                                  <Icon type="ios-eye-outline" @click="handleView(img.url)"></Icon>
-                                  <Icon type="ios-trash-outline" @click="handleRemove(img, __index)"></Icon>
-                                </div>
-                              </template>
-                              <template v-else>
-                                <Progress v-if="img.showProgress" :percent="img.percentage" hide-info></Progress>
-                              </template>
-                            </div>
+                            <vuedraggable
+                              :list="selectedSku.images"
+                              :animation="200"
+                              style="display:inline-block;"
+                            >
+                              <div class="sku-upload-list" v-for="(img, __index) in selectedSku.images" :key="__index">
+                                <template v-if="img.status === 'finished'">
+                                  <img :src="img.url"/>
+                                  <div class="sku-upload-list-cover">
+                                    <Icon type="ios-eye-outline" @click="handleView(img.url)"></Icon>
+                                    <Icon type="ios-trash-outline" @click="handleRemove(img, __index)"></Icon>
+                                  </div>
+                                </template>
+                                <template v-else>
+                                  <Progress v-if="img.showProgress" :percent="img.percentage" hide-info></Progress>
+                                </template>
+                              </div>
+                            </vuedraggable>
                             <Upload ref="uploadSku" :show-upload-list="false" :default-file-list="row.images"
                                     :on-success="handleSuccess" :format="['jpg', 'jpeg', 'png']"
                                     :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize"
@@ -297,6 +303,7 @@
                 <Tree
                   ref="tree"
                   :data="shopCategory"
+                  style="text-align:left;"
                   show-checkbox
                   @on-select-change="selectTree"
                   @on-check-change="changeSelect"
@@ -305,7 +312,7 @@
               </FormItem>
             </div>
             <FormItem class="form-item-view-el" label="商品描述" prop="intro">
-              <editor id="intro" v-model="baseInfoForm.intro"></editor>
+              <editor id="intro" showExpand v-model="baseInfoForm.intro"></editor>
             </FormItem>
             <FormItem class="form-item-view-el" label="移动端描述" prop="skuList">
               <editor id="mobileIntr" v-model="baseInfoForm.mobileIntro"></editor>

@@ -17,10 +17,10 @@ export default {
    * @description api请求基础路径
    */
   api_dev: {
-    // common: 'http://192.168.0.100:8890',
-    // buyer: 'http://192.168.0.100:8888',
-    // seller: 'http://192.168.0.100:8889',
-    // manager: 'http://192.168.0.100:8887'
+    // common: 'http://192.168.0.106:8890',
+    // buyer: 'http://192.168.0.106:8888',
+    // seller: 'http://192.168.0.106:8889',
+    // manager: 'http://192.168.0.106:8887'
 
     common: 'https://common-api.pickmall.cn',
     buyer: 'https://buyer-api.pickmall.cn',

@@ -8,7 +8,7 @@
             <!-- 遮罩层  -->
             <div v-if="isRead" class="mask">只读不可修改</div>
             <div>
-              <FormItem label="会员名称" required prop="memberName">
+              <FormItem label="会员名称" prop="memberName">
                 <div class="item">
                   <Input disabled v-model="shopForm.memberName" />
                   <Button @click="selectMember()" v-if="!$route.query.shopId">选择会员</Button>
@@ -44,7 +44,7 @@
               <FormItem label="店铺所在地" prop="storeAddressPath">
                 <Input disabled v-model="shopForm.storeAddressPath" style="width: 350px" />
               </FormItem>
-              <FormItem label="店铺详细地址" required prop="storeAddressDetail">
+              <FormItem label="店铺详细地址"  prop="storeAddressDetail">
                 <Input v-model="shopForm.storeAddressDetail" clearable style="width: 350px" />
               </FormItem>
 
@@ -91,60 +91,60 @@
             <div v-if="isRead" class="mask">只读不可修改</div>
             <Divider orientation="left">公司信息</Divider>
             <div>
-              <FormItem label="公司名称" required prop="companyName">
+              <FormItem label="公司名称"  prop="companyName">
                 <Input v-model="shopForm.companyName" clearable style="width: 350px" />
               </FormItem>
 
-              <FormItem label="公司电话" required prop="companyPhone">
+              <FormItem label="公司电话"  prop="companyPhone">
                 <Input v-model="shopForm.companyPhone" clearable style="width: 350px" />
               </FormItem>
-              <FormItem label="公司所在地" required>
+              <FormItem label="公司所在地" >
                 <Input v-model="shopForm.companyAddressPath" disabled style="width: 260px" v-if="showRegion == false" />
                 <Button v-if="showRegion == false" @click="regionClick" :loading="submitLoading" type="primary" icon="ios-create-outline" style="margin-left: 8px">修改
                 </Button>
                 <region style="width: 350px" @selected="selectedRegion" v-if="showRegion == true" />
               </FormItem>
-              <FormItem label="公司详细地址" required prop="companyAddress">
+              <FormItem label="公司详细地址"  prop="companyAddress">
                 <Input v-model="shopForm.companyAddress" clearable style="width: 350px" />
               </FormItem>
-              <FormItem label="员工总数" required prop="employeeNum">
+              <FormItem label="员工总数"  prop="employeeNum">
                 <InputNumber style="width: 150px" :min="1" :max="9999999" v-model="shopForm.employeeNum">
                 </InputNumber>
               </FormItem>
-              <FormItem label="注册资金" required prop="registeredCapital">
+              <FormItem label="注册资金"  prop="registeredCapital">
                 <InputNumber style="width: 150px" :min="1" :max="9999999" v-model="shopForm.registeredCapital">
                 </InputNumber>
                 <span style="margin-left: 10px">万</span>
               </FormItem>
-              <FormItem label="联系人姓名" required prop="linkName">
+              <FormItem label="联系人姓名"  prop="linkName">
                 <Input v-model="shopForm.linkName" clearable style="width: 200px" />
               </FormItem>
-              <FormItem label="联系人手机" required prop="linkPhone">
+              <FormItem label="联系人手机"  prop="linkPhone">
                 <Input v-model="shopForm.linkPhone" maxlength="11" clearable style="width: 200px" />
               </FormItem>
-              <FormItem label="电子邮箱" required prop="companyEmail">
+              <FormItem label="电子邮箱"  prop="companyEmail">
                 <Input v-model="shopForm.companyEmail" clearable style="width: 200px" />
               </FormItem>
 
               <Divider orientation="left">营业执照信息</Divider>
 
-              <FormItem label="营业执照号" required prop="licenseNum">
+              <FormItem label="营业执照号"  prop="licenseNum">
                 <Input v-model="shopForm.licenseNum" clearable style="width: 200px" />
               </FormItem>
 
-              <FormItem label="法定经营范围" required prop="scope">
+              <FormItem label="法定经营范围"  prop="scope">
                 <Input v-model="shopForm.scope" clearable style="width: 200px" />
               </FormItem>
 
               <Divider orientation="left">法人信息</Divider>
 
-              <FormItem label="法人姓名" required prop="legalName">
+              <FormItem label="法人姓名"  prop="legalName">
                 <Input v-model="shopForm.legalName" clearable style="width: 200px" />
               </FormItem>
-              <FormItem label="法人证件号" required prop="legalId">
+              <FormItem label="法人证件号"  prop="legalId">
                 <Input v-model="shopForm.legalId" clearable style="width: 200px" />
               </FormItem>
-              <FormItem label="法人身份证照片" required ref="legalPhoto">
+              <FormItem label="法人身份证照片"  ref="legalPhoto">
                 <Avatar style="height: 100px;width: 100px" v-if="shopForm.legalPhoto" shape="square" icon="ios-person" size="default" :src="shopForm.legalPhoto" />
                 <div>
                   <Button @click="handleCLickImg('legalPhoto')" type="primary">选择图片</Button>
@@ -152,20 +152,20 @@
               </FormItem>
 
               <Divider orientation="left">结算银行信息</Divider>
-              <FormItem label="银行开户名" required prop="settlementBankAccountName">
+              <FormItem label="银行开户名"  prop="settlementBankAccountName">
                 <Input v-model="shopForm.settlementBankAccountName" clearable style="width: 200px" />
               </FormItem>
-              <FormItem label="银行账号" required prop="settlementBankAccountNum">
+              <FormItem label="银行账号"  prop="settlementBankAccountNum">
                 <Input v-model="shopForm.settlementBankAccountNum" clearable style="width: 200px" />
               </FormItem>
-              <FormItem label="银行支行名称" required prop="settlementBankBranchName">
+              <FormItem label="银行支行名称"  prop="settlementBankBranchName">
                 <Input v-model="shopForm.settlementBankBranchName" clearable style="width: 200px" />
               </FormItem>
-              <FormItem label="支行联行号" required prop="settlementBankJointName">
+              <FormItem label="支行联行号"  prop="settlementBankJointName">
                 <Input v-model="shopForm.settlementBankJointName" clearable style="width: 200px" />
               </FormItem>
 
-              <FormItem label="许可证电子版" required>
+              <FormItem label="许可证电子版" >
                 <Avatar style="height: 100px;width: 100px" v-if="shopForm.licencePhoto" shape="square" icon="ios-person" size="default" :src="shopForm.licencePhoto" />
                 <div>
                   <Button @click="handleCLickImg('licencePhoto')" type="primary">选择图片</Button>
@@ -262,28 +262,28 @@ export default {
       shopValidate: {
         // 表单验证规则
         memberName: [
-          { required: true, message: "会员不能为空", trigger: "blur" },
+          { required: true, message: "会员不能为空" },
         ],
         storeName: [
-          { required: true, message: "店铺名称不能为空", trigger: "blur" },
+          { required: true, message: "店铺名称不能为空" },
         ],
         companyAddress: [
-          { required: true, message: "公司地址不能为空", trigger: "blur" },
+          { required: true, message: "公司地址不能为空" },
         ],
         storeAddressDetail: [
-          { required: true, message: "店铺详细地址不能为空", trigger: "blur" },
+          { required: true, message: "店铺详细地址不能为空" },
         ],
         storeDesc: [
-          { required: true, message: "店铺简介不能为空", trigger: "blur" },
+          { required: true, message: "店铺简介不能为空" },
         ],
         storeCenter: [
-          { required: true, message: "店铺未定位", trigger: "change" },
+          { required: true, message: "店铺未定位" },
         ],
         companyName: [
-          { required: true, message: "公司名称不能为空", trigger: "blur" },
+          { required: true, message: "公司名称不能为空", },
         ],
         companyPhone: [
-          { required: true, message: "公司电话不能为空", trigger: "blur" },
+          { required: true, message: "公司电话不能为空", },
         ],
         employeeNum: [
           {
@@ -302,10 +302,10 @@ export default {
           },
         ],
         linkName: [
-          { required: true, message: "联系人姓名不能为空", trigger: "blur" },
+          { required: true, message: "联系人姓名不能为空", },
         ],
         linkPhone: [
-          { required: true, message: "联系人手机号不能为空", trigger: "blur" },
+          { required: true, message: "联系人手机号不能为空", },
           {
             type: "string",
             pattern: /^1[3|4|5|6|7|8][0-9]{9}$/,
@@ -314,32 +314,32 @@ export default {
           },
         ],
         companyEmail: [
-          { required: true, message: "邮箱不能为空", trigger: "blur" },
-          { type: "email", message: "邮箱格式错误", trigger: "blur" },
+          { required: true, message: "邮箱不能为空", },
+          { type: "email", message: "邮箱格式错误", },
         ],
         licenseNum: [
-          { required: true, message: "营业执照号不能为空", trigger: "blur" },
+          { required: true, message: "营业执照号不能为空", },
         ],
         scope: [
-          { required: true, message: "法定经营范围不能为空", trigger: "blur" },
+          { required: true, message: "法定经营范围不能为空", },
         ],
         legalName: [
-          { required: true, message: "法人姓名不能为空", trigger: "blur" },
+          { required: true, message: "法人姓名不能为空", },
         ],
         legalId: [
-          { required: true, message: "法人证件号不能为空", trigger: "blur" },
+          { required: true, message: "法人证件号不能为空", },
         ],
         settlementBankAccountName: [
-          { required: true, message: "银行开户名不能为空", trigger: "blur" },
+          { required: true, message: "银行开户名不能为空", },
         ],
         settlementBankAccountNum: [
-          { required: true, message: "银行账号不能为空", trigger: "blur" },
+          { required: true, message: "银行账号不能为空", },
         ],
         settlementBankBranchName: [
-          { required: true, message: "银行支行名称不能为空", trigger: "blur" },
+          { required: true, message: "银行支行名称不能为空", },
         ],
         settlementBankJointName: [
-          { required: true, message: "支行联行号不能为空", trigger: "blur" },
+          { required: true, message: "支行联行号不能为空", },
         ],
         salesConsigneeMobile: [
           {

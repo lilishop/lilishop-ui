@@ -7,7 +7,7 @@
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom">
 
         <template slot-scope="{ row,index }" slot="action">
-          <Button type="primary"
+          <Button type="info"
                   size="small" style="margin-right: 10px" @click="info(row)">查看
           </Button>
           <Button v-if="!checked && row.promotionStatus === 'START' || row.promotionStatus === 'NEW'" type="error"

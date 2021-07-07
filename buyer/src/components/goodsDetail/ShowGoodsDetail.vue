@@ -222,7 +222,7 @@ export default {
     });
     window.addEventListener('scroll', this.handleScroll)
     this.getList();
-  },
+  }
 };
 </script>
 

@@ -90,7 +90,6 @@ export default {
     initEditor() {
       let that = this;
       this.editor = new E(`#${this.id}`);
-
       // 编辑内容绑定数据
       this.editor.config.onchange = (html) => {
         if (this.openXss) {
@@ -195,6 +194,7 @@ export default {
       });
     },
     setData(value) {
+      // 设置数据
       if (!this.editor) {
         this.initEditor();
       }
@@ -204,15 +204,14 @@ export default {
         this.$emit("input", this.data);
         this.$emit("on-change", this.data);
       }
-    },
+    }
   },
   watch: {
     value: {
       immediate: true,
       handler: function (val) {
-
         this.setData(val);
-      }
+      },
     },
   },
   mounted() {
@@ -230,6 +229,10 @@ export default {
   :hover {
     color: #333;
   }
+}
+.w-e-toolbar {
+  // 给工具栏换行
+  flex-wrap: wrap;
 }
 .e-code {
   top: 6px;

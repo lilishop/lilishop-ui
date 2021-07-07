@@ -26,10 +26,10 @@
         <!-- <Button @click="upAll" >批量上架</Button> -->
       </Row>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-select-cancel="cancelSelect" @on-selection-change="changeSelect">
-        <template slot-scope="{ row,index }" slot="action">
-          <Button v-if="!checked && row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="primary" size="small" style="margin-right: 10px" @click="edit(row)">编辑
+        <template slot-scope="{ row }" slot="action">
+          <Button v-if="!checked && row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="success" :class="{'mr_10' : !checked && row.promotionStatus === 'START' || row.promotionStatus === 'NEW'}" size="small" @click="edit(row)">编辑
           </Button>
-          <Button v-if="!checked && row.promotionStatus === 'START' || row.promotionStatus === 'NEW'" type="error" size="small" style="margin-right: 10px" @click="remove(row)">下架
+          <Button v-if="!checked && row.promotionStatus === 'START' || row.promotionStatus === 'NEW'" type="error" size="small" @click="remove(row)">下架
           </Button>
         </template>
       </Table>
@@ -215,7 +215,7 @@ export default {
           slot: "action",
           align: "center",
           fixed: "right",
-          maxWidth: 140,
+          width: 130,
         },
       ],
       data: [], // 表单数据

@@ -51,8 +51,6 @@ export default {
       }
     }
   },
-  mounted() {
-  },
   methods: {
     changeMenu(name) { //二级路由点击
     console.log(name)
@@ -60,14 +58,9 @@ export default {
         name: name
       });
     },
-    selectNav(name) {
+    selectNav(name) { // 一级路由点击事件
       this.$store.commit("setCurrNav", name);
       this.setStore("currNav", name);
-      // if (this.$route.name != "home_index") {
-      //   this.$router.push({
-      //     name: "home_index"
-      //   });
-      // }
       util.initRouter(this);
     },
   }
