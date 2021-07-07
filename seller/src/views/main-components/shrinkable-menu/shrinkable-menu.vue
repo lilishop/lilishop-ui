@@ -40,6 +40,9 @@ export default {
     navList() {
       return this.$store.state.app.navList;
     },
+    currNav() {
+      return this.$store.state.app.currNav;
+    }
   },
   methods: {
     changeMenu(name) { //二级路由点击
