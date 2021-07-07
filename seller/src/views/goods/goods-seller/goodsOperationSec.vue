@@ -210,6 +210,7 @@
               >
                 <Tree
                   ref="tree"
+                  style="text-align:left;"
                   :data="shopCategory"
                   show-checkbox
                   @on-select-change="selectTree"
@@ -310,6 +311,7 @@
   </div>
 </template>
 <script>
+import * as API_GOODS from "@/api/goods";
 import * as API_Shop from "@/api/shops";
 import cloneObj from "@/utils/index";
 import bus from '@/libs/eventBus'
@@ -768,9 +770,6 @@ export default {
         skus.push(sku);
       });
       this.skuInfo = skusInfo;
-      /**
-       * 渲染规格详细表格
-       */
       this.renderTableData();
       this.skuTableData = skus;
     },
@@ -815,7 +814,6 @@ export default {
         }
       );
     },
-
     /** 添加规格项 */
     addSkuItem() {
       if (this.skuInfo.length >= 5) {
@@ -826,9 +824,6 @@ export default {
       this.$set(this.skuInfo, this.skuInfo.length, {
         spec_values: [],
       });
-      /**
-       * 渲染规格详细表格
-       */
       this.renderTableData();
     },
     // 编辑规格名
@@ -837,10 +832,6 @@ export default {
     },
     // 编辑规格值
     async skuValueChange(val, index, item) {
- 
-      /**
-       * 渲染规格详细表格
-       */
       this.renderTableData();
     },
     // 获取焦点时，取得规格名对应的规格值
@@ -1026,10 +1017,6 @@ export default {
     /** 自动完成表单所需方法*/
     filterMethod(value, option) {
       return option.toUpperCase().indexOf(value.toUpperCase()) !== -1;
-    },
-   
-    // 规格表格操作
-    handleSpan({row, column, rowIndex, columnIndex}) {
     },
     /** 数据改变之后 抛出数据 */
     updateSkuTable(row, item) {
@@ -1222,7 +1209,17 @@ export default {
         this.logisticsTemplate = res.result;
       }
     })
-  }
+    /** 获取该商城分类下 商品参数信息 */
+    this.GET_GoodsParams();
+    /** 查询品牌列表 */
+    this.getGoodsBrandList();
+    /** 查询分类绑定的规格信息 */
+    this.Get_SkuInfoByCategory(this.baseInfoForm.categoryId);
+    // 获取商品单位
+    this.GET_GoodsUnit();
+    // 获取当前店铺分类
+    this.GET_ShopGoodsLabel();
+}
 }
 </script>
 <style lang="scss" scoped>

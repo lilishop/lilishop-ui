@@ -28,21 +28,21 @@
     <div class="content-goods-publish">
       <div class="goods-category">
         <ul v-if="categoryListLevel1.length > 0">
-          <li v-for="(item, index) in categoryListLevel1" :class="{ activeClass: category[0].name }"
+          <li v-for="(item, index) in categoryListLevel1" :class="{ activeClass: category[0].name === item.name }"
               @click="handleSelectCategory(item, index, 1)" :key="index">
             <span>{{ item.name }}</span>
             <span>&gt;</span>
           </li>
         </ul>
         <ul v-if="categoryListLevel2.length > 0">
-          <li v-for="(item, index) in categoryListLevel2" :class="{ activeClass: category[1].name }"
+          <li v-for="(item, index) in categoryListLevel2" :class="{ activeClass: category[1].name === item.name }"
               @click="handleSelectCategory(item, index, 2)" :key="index">
             <span>{{ item.name }}</span>
             <span>&gt;</span>
           </li>
         </ul>
         <ul v-if="categoryListLevel3.length > 0">
-          <li v-for="(item, index) in categoryListLevel3" :class="{ activeClass: category[2].name }"
+          <li v-for="(item, index) in categoryListLevel3" :class="{ activeClass: category[2].name === item.name }"
               @click="handleSelectCategory(item, index, 3)" :key="index">
             <span>{{ item.name }}</span>
           </li>
@@ -105,9 +105,8 @@ export default {
         {name: '', id: ''},
         {name: '', id: ''}
       ],
-
-      /** 当前商品分类名称3*/
-      activeCategoryName3: "",
+      // 商品类型
+      goodsType: '',
       /** 1级分类列表*/
       categoryListLevel1: [],
 
@@ -138,7 +137,7 @@ export default {
         this.showGoodsTemplates = true;
         this.GET_GoodsTemplate()
       } else {
-        // this.baseInfoForm.goodsType = val.type;
+        this.goodsType = val.type;
       }
     },
     // 获取商品模板
@@ -196,35 +195,21 @@ export default {
     // 下一步
     next() {
       window.scrollTo(0, 0);
-      if (this.$route.query.draftId) {
-        this.activestep = 1;
-        this.GET_GoodData();
-        return;
-      }
       /** 1级校验 */
       this.loading = true;
-      if (!this.baseInfoForm.goodsType) {
+      if (!this.goodsType) {
         this.$Message.error('请选择商品类型')
         this.loading = false;
         return
       }
-      if (!this.activeCategoryName1) {
+      if (!this.category[0].name) {
         this.$Message.error("请选择商品分类");
         return;
-      } else if (this.activeCategoryIndex3 === -1) {
+      } else if (!this.category[2].name) {
         this.$Message.error("必须选择到三级分类");
         return;
-      } else if (this.activeCategoryName3) {
-        /** 获取该商城分类下 商品参数信息 */
-        this.GET_GoodsParams();
-        /** 查询品牌列表 */
-        this.getGoodsBrandList();
-        /** 查询分类绑定的规格信息 */
-        this.Get_SkuInfoByCategory(this.baseInfoForm.categoryId);
-        // 获取商品单位
-        this.GET_GoodsUnit();
-        // 获取当前店铺分类
-        this.GET_ShopGoodsLabel();
+      } else if (this.category[2].name) {
+        this.$parent.activestep = 1;
       }
     },
   },

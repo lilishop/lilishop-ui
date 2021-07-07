@@ -26,7 +26,7 @@
 
 <script>
 
-import * as API_GOODS from "@/api/goods";
+
 
 import firstStep from  './goodsOperationFirst'
 import secondStep from  './goodsOperationSec'
