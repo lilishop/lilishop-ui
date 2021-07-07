@@ -1,7 +1,6 @@
 <style lang="scss" scoped>
 @import "./styles/menu.scss";
 </style>
-
 <template>
   <div class="ivu-shrinkable-menu">
     <!-- 一级菜单 -->
@@ -40,6 +39,9 @@ export default {
     navList() {
       return this.$store.state.app.navList;
     },
+    currNav() {
+      return this.$store.state.app.currNav;
+    }
   },
   methods: {
     changeMenu(name) { //二级路由点击
@@ -47,7 +49,7 @@ export default {
         name: name
       });
     },
-    selectNav(name) {
+    selectNav(name) { // 一级路由点击
       this.$store.commit("setCurrNav", name);
       this.setStore("currNav", name);
       util.initRouter(this);

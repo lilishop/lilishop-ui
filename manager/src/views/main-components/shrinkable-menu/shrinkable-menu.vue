@@ -1,5 +1,3 @@
-
-
 <template>
   <div class="ivu-shrinkable-menu">
     <!-- 一级菜单 -->
@@ -38,6 +36,9 @@ export default {
     navList() {
       return this.$store.state.app.navList;
     },
+    currNav() {
+      return this.$store.state.app.currNav;
+    }
   },
   watch: {
     // 监听路由变化
@@ -45,29 +46,17 @@ export default {
       handler: function (val, oldVal) {
         console.log(val);
       }
-    },
-    menuList: {
-      handler: function (val, oldVal) {
-      }
-    }
-  },
-  mounted() {
+    } 
   },
   methods: {
     changeMenu(name) { //二级路由点击
-    console.log(name)
       this.$router.push({
         name: name
       });
     },
-    selectNav(name) {
+    selectNav(name) { // 一级路由点击事件
       this.$store.commit("setCurrNav", name);
       this.setStore("currNav", name);
-      // if (this.$route.name != "home_index") {
-      //   this.$router.push({
-      //     name: "home_index"
-      //   });
-      // }
       util.initRouter(this);
     },
   }

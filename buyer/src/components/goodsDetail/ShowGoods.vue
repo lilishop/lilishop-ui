@@ -29,6 +29,9 @@
             {{ skuDetail.goodsName }}
           </p>
         </div>
+        <div class="sell-point">
+          {{skuDetail.sellingPoint}}
+        </div>
         <!-- 限时秒杀 -->
         <Promotion v-if="promotionMap['SECKILL']" :time="promotionMap['SECKILL'].endTime"></Promotion>
         <!-- 商品详细 价格、优惠券、促销 -->
@@ -654,6 +657,11 @@ export default {
       color: $theme_color;
     }
   }
+}
+.sell-point {
+  font-size: 12px;
+  color: red;
+  margin-bottom: 5px;
 }
 /******************商品图片及购买详情结束******************/
 </style>

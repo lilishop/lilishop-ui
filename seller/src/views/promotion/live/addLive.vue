@@ -277,6 +277,7 @@ export default {
 
       // 将数据回调到liveform里面
       if (result.success) {
+        console.log(result);
         let data = result.result;
         for (let key in data) {
           this.liveForm[key] = data[key];
@@ -494,11 +495,12 @@ export default {
       this.$refs["liveForm"].validate((valid) => {
         if (valid) {
           // 需判断当前是否是添加商品
-          if (this.$route.query.id && this.liveData.length != 0) {
+          if (this.$route.query.id) {
             this.spinShow = true;
             this.liveForm.commodityList = JSON.stringify(
               this.liveForm.commodityList
             );
+            delete this.liveForm.updateTime
             // 将当前直播间修改
             editLive(this.liveForm).then((res) => {
               if (res.success) {

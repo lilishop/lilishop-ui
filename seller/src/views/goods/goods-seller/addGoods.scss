@@ -77,10 +77,6 @@
   }
 }
 
-/*平铺*/
-div.base-info-item > div {
-  margin-left: 5%;
-}
 
 div.base-info-item {
   h4 {
@@ -94,13 +90,15 @@ div.base-info-item {
     line-height: 40px;
     text-align: left;
   }
-
+  >div{
+    padding-left: 5%;
+  }
   .form-item-view {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: space-between;
-    padding-left: 80px;
+    // padding-left: 80px;
 
     .layout {
       margin-bottom: 20px;
