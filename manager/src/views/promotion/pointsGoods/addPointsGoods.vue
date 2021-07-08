@@ -187,11 +187,11 @@ export default {
         ],
         publishNum: [
           { required: true, message: "请输入发放数量" },
-          { pattern: regular.integer, message: "请输入正整数" },
+          { pattern: regular.Integer, message: "请输入正整数" },
         ],
         couponLimitNum: [
           { required: true, message: "请输入领取限制" },
-          { pattern: regular.integer, message: "请输入正整数" },
+          { pattern: regular.Integer, message: "请输入正整数" },
         ],
         description: [{ required: true, message: "请输入范围描述" }],
       },

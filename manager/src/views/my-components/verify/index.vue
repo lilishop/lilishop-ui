@@ -3,7 +3,7 @@
     <div class="imgBox" :style="{width:data.originalWidth+'px',height:data.originalHeight + 'px'}">
       <img :src="data.backImage" style="width:100%;height:100%" alt="">
       <img class="slider" :src="data.slidingImage" :style="{left:distance+'px',top:data.randomY+'px'}" :width="data.sliderWidth" :height="data.sliderHeight" alt="">
-      <Icon type="md-refresh" class="refresh" @click="refresh" />
+      <Icon type="md-refresh" class="refresh" @click="init" />
     </div>
     <div class="handle" :style="{width:data.originalWidth+'px'}">
       <span class="bgcolor" :style="{width:distance + 'px',background:bgColor}"></span>
@@ -82,27 +82,24 @@ export default {
             this.verifyText = '解锁失败';
             let that = this;
             setTimeout(() => {
-              that.refresh();
+              that.init();
             }, 1000);
             this.$emit('change', { status: false, distance: this.distance });
           }
         } else {
-          this.refresh()
+          this.init()
         }
         
       }).catch(()=>{
-        this.refresh()
+        this.init()
       });
     },
-    refresh () { // 刷新滑块
+    init () { // 初始化数据
       this.flag = false;
       this.downX = 0;
       this.distance = 0;
       this.bgColor = '#04ad11';
       this.verifyText = '拖动滑块解锁';
-      this.init();
-    },
-    init () { // 初始化数据
       getVerifyImg(this.type).then(res => {
         if (res.result) {
           this.data = res.result;
