@@ -121,7 +121,7 @@ export default {
           render: (h, params) => {
             return h(
               "div",
-              params.row.receivedNum + "/" + params.row.publishNum
+              params.row.receivedNum + "/" + (params.row.publishNum === 0 ? '不限制' : params.row.publishNum)
             );
           },
 

@@ -1,20 +1,14 @@
 <template>
   <div class="goods-operation">
     <div class="step-list">
-      <steps :current="activestep" simple style="height:60px;margin-top: 10px" process-status="process">
-        <div class="step-view">
-          <step title="选择商品品类"/>
-        </div>
-        <div class="step-view">
-          <step title="填写商品详情"/>
-        </div>
-        <div class="step-view">
-          <step title="商品发布成功"/>
-        </div>
+      <steps :current="activestep" style="height:60px;margin-top: 10px">
+        <step title="选择商品品类"/>
+        <step title="填写商品详情"/>
+        <step title="商品发布成功"/>
       </steps>
     </div>
     <!-- 第一步 选择分类 -->
-    <first-step ref='first' v-if="activestep === 0"></first-step>
+    <first-step ref='first' v-show="activestep === 0"></first-step>
     <!-- 第二步 商品详细信息 -->
     <second-step ref='second' v-if="activestep === 1"></second-step>
     <!-- 第三步 发布完成 -->
@@ -23,11 +17,7 @@
     
   </div>
 </template>
-
 <script>
-
-
-
 import firstStep from  './goodsOperationFirst'
 import secondStep from  './goodsOperationSec'
 import thirdStep from  './goodsOperationThird'
@@ -42,7 +32,7 @@ export default {
   data() {
     return {
       /** 当前激活步骤*/
-      activestep: '',
+      activestep: 0,
     };
   },
 

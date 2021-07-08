@@ -545,6 +545,9 @@ export default {
       this.selectedSku = row;
       this.showSkuPicture = true;
     },
+    pre () { // 上一步
+      this.$parent.activestep--;
+    },
     // 预览图片
     handleView (url) {
       this.previewPicture = url;
