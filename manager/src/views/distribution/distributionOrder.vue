@@ -52,6 +52,9 @@
             </div>
           </div>
         </template>
+        <template slot-scope="{row}" slot="distributionOrderStatus">
+          <Tag :color="filterStatusColor(row.distributionOrderStatus)">{{filterStatus(row.distributionOrderStatus)}}</Tag>
+        </template>
       </Table>
       <Row type="flex" justify="end" class="page">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize"
@@ -121,20 +124,10 @@
           },
           {
             title: "状态",
-            key: "distributionOrderStatus",
-            width: 100,
-            sortable: false,
-            render: (h, params) => {
-              if (params.row.distributionOrderStatus == 'COMPLETE_CASH') {
-                return h('div', '提现完成')
-              } else if (params.row.distributionOrderStatus == 'WAIT_BILL') {
-                return h('div', '待结算')
-              } else if (params.row.distributionOrderStatus == 'WAIT_CASH') {
-                return h('div', '待提现')
-              }
-            }
+            slot: "distributionOrderStatus",
+            width: 120,
+            
           },
-
           {
             title: "佣金金额",
             key: "rebateGrade",
@@ -219,6 +212,34 @@
       },
       searchChange(val) { // 店铺搜索，键盘点击回调
         this.getShopList(val)
+      },
+      filterStatus (status) { // 过滤订单状态
+        const arr = [
+          {status: 'WAIT_BILL', title: '待结算'},
+          {status: 'WAIT_CASH', title: '待提现'},
+          {status: 'COMPLETE_CASH', title: '提现完成'},
+          {status: 'CANCEL', title: '订单取消'},
+          {status: 'REFUND', title: '退款'},
+        ]
+        for (let i=0;i<arr.length;i++) {
+          if (arr[i].status === status) {
+            return arr[i].title;
+          }
+        }
+      },
+      filterStatusColor (status) { // 状态tag标签颜色
+        const arr = [
+          {status: 'WAIT_BILL', color: 'magenta'},
+          {status: 'WAIT_CASH', color: 'warning'},
+          {status: 'COMPLETE_CASH', color: 'success'},
+          {status: 'CANCEL', color: 'default'},
+          {status: 'REFUND', color: 'error'},
+        ]
+        for (let i=0;i<arr.length;i++) {
+          if (arr[i].status === status) {
+            return arr[i].color;
+          }
+        }
       }
     },
     mounted() {

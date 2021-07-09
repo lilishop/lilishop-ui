@@ -23,6 +23,11 @@
                 type="primary"
                 >订单取消</Button
               >
+              <Button
+                v-if="orderInfo.order.orderStatus === 'UNPAID'"
+                @click="confirmPrice"
+                type="success"
+                >收款</Button>
               <Button @click="orderLog" type="primary"
                 >订单日志</Button
               >
@@ -571,6 +576,25 @@ export default {
       this.showRegion = true;
       this.regionId = "";
     },
+    //确认收款
+    confirmPrice() {
+      this.$Modal.confirm({
+        title: "提示",
+        content:
+          "<p>您确定要收款吗？线下收款涉及库存变更，需异步进行，等待约一分钟刷新列表查看</p>",
+        onOk: () => {
+          API_Order.orderPay(this.sn).then((res) => {
+            if (res.success) {
+              this.$Message.success("收款成功");
+              this.getDataList();
+            } else {
+              this.$Message.error(res.message);
+            }
+          });
+        },
+      });
+    },
+    // 获取订单详情
     getDataList() {
       this.loading = true;
       API_Order.orderDetail(this.sn).then((res) => {

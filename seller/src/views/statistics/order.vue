@@ -37,7 +37,6 @@
 
               </div>
               <div class="transaction-card" v-if="item.label=='订单'">
-
                 <div class="card-item">
                   <div class="card-item-label">下单笔数</div>
                   <div class="card-item-value">{{overViewList.orderNum || 0}}</div>
@@ -48,7 +47,7 @@
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">下单金额</div>
-                  <div class="card-item-value">{{overViewList.orderAmount  ? ($options.filters.unitPrice(overViewList.orderAmount )) : 0 }}</div>
+                  <div class="card-item-value">{{overViewList.orderAmount || 0 | unitPrice('￥')}}</div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">付款笔数</div>
@@ -56,7 +55,7 @@
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">付款金额</div>
-                  <div class="card-item-value">{{ overViewList.paymentAmount ?  ($options.filters.unitPrice(overViewList.paymentAmount)) : 0 }}</div>
+                  <div class="card-item-value">{{ overViewList.paymentAmount || 0 | unitPrice('￥')}}</div>
                 </div>
 
               </div>
@@ -141,7 +140,6 @@
 
       </div>
     </Card>
-
     <Card class="card">
       <div>
         <h4>订退单统计</h4>
@@ -152,9 +150,7 @@
           <Table stripe :columns="columns" :data="data"></Table>
         </div>
         <Page @on-change="(index)=>{refundParams.pageNumber = index}" @on-page-size-change="(size)=>{refundParams.pageSize= size}" class="page" show-total show-elevator :total="total" />
-
       </div>
-
     </Card>
 
   </div>

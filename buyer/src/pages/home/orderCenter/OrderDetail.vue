@@ -80,8 +80,8 @@
         <div>
           <span>运费：</span><span>+{{ order.order.freightPrice | unitPrice("￥") }}</span><br>
         </div>
-        <div><span>优惠券：</span><span>-{{ order.order.priceDetailDTO.couponPrice || 0 | unitPrice("￥") }}</span></div>
-        <div><span>活动优惠：</span><span>-{{ order.order.discountPrice | unitPrice("￥") }}</span></div>
+        <div v-if="order.order.priceDetailDTO.couponPrice"><span>优惠券：</span><span>-{{ order.order.priceDetailDTO.couponPrice || 0 | unitPrice("￥") }}</span></div>
+        <div v-if="order.order.discountPrice"><span>活动优惠：</span><span>-{{ order.order.discountPrice | unitPrice("￥") }}</span></div>
         <div>
           <span>应付金额：</span>
           <span class="actrual-price">{{ order.order.flowPrice | unitPrice("￥") }}</span>

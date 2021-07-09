@@ -207,20 +207,13 @@ export default {
           title: "操作",
           key: "action",
           align: "center",
-          width: 150,
+          width: 100,
           render: (h, params) => {
-            return h("div", [h("Button", {props: {type: "primary", size: "small",},
-                attrs: {disabled: params.row.orderStatus == "UNPAID" ? false : true,},
+            return  h("Button", {props: {type: "info", size: "small",},
                 style: {marginRight: "5px",},
-                on: {click: () => {this.confirmPrice(params.row);},},
-                }, "收款"
-              ),
-              h("Button", {props: {type: "info", size: "small",},
-                  style: {marginRight: "5px",},
-                  on: {click: () => {this.detail(params.row);},},
-                }, "查看"
-              ),
-            ]);
+                on: {click: () => {this.detail(params.row);},},
+              }, "查看"
+            )
           },
         },
       ],
@@ -286,25 +279,7 @@ export default {
       this.total = this.data.length;
       this.loading = false;
     },
-    //确认收款
-    confirmPrice(v) {
-      this.$Modal.confirm({
-        title: "提示",
-        content:
-          "<p>您确定要收款吗？线下收款涉及库存变更，需异步进行，等待约一分钟刷新列表查看</p>",
-        onOk: () => {
-          API_Order.orderPay(v.sn).then((res) => {
-            if (res.success) {
-              this.$Message.success("收款成功");
-              this.getDataList();
-            } else {
-              this.$Message.error(res.message);
-            }
-          });
-        },
-      });
-    },
-
+    // 跳转详情页面
     detail(v) {
       let sn = v.sn;
       this.$router.push({
