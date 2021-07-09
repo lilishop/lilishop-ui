@@ -280,34 +280,13 @@ div.base-info-item {
   word-break: break-all;
 }
 
-/deep/ .ivu-steps {
-  width: 100% !important;
-  display: flex;
-}
 .step-list {
   height: 60px;
+  padding: 10px 30px;
+  background-color: #fff;
   margin-bottom: 20px;
   border-radius: 0.8em;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  // box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)
-}
-.step-view {
-  flex: 1;
-  height: 60px;
-  font-size: 19px;
-  text-align: center;
-  display: flex;
-  background-color: #fff;
-  justify-content: center;
-  align-items: center;
-}
-.step-view:nth-of-type(1) {
-  border-top-left-radius: 0.4em;
-  border-bottom-left-radius: 0.4em;
-}
-.step-view:nth-last-child(1) {
-  border-top-right-radius: 0.4em;
-  border-bottom-right-radius: 0.4em;
 }
 
 .add-sku-btn {

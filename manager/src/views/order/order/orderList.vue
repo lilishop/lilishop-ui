@@ -1,43 +1,38 @@
 <template>
   <div class="search">
-
     <Card>
+      <Form ref="searchForm" @keydown.enter.native="handleSearch" :model="searchForm" inline :label-width="70" class="search-form">
+        <Form-item label="订单号" prop="orderSn">
+          <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单号" clearable style="width: 160px" />
+        </Form-item>
+        <Form-item label="会员名称" prop="buyerName">
+          <Input type="text" v-model="searchForm.buyerName" placeholder="请输入会员名称" clearable style="width: 160px" />
+        </Form-item>
 
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="订单号" prop="orderSn">
-            <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单号" clearable style="width: 160px" />
-          </Form-item>
-          <Form-item label="会员名称" prop="buyerName">
-            <Input type="text" v-model="searchForm.buyerName" placeholder="请输入会员名称" clearable style="width: 160px" />
-          </Form-item>
-
-          <Form-item label="订单类型" prop="orderType">
-            <Select v-model="searchForm.orderType" placeholder="请选择" clearable style="width: 160px">
-              <Option value="NORMAL">普通订单</Option>
-              <Option value="PINTUAN">拼团订单</Option>
-              <Option value="GIFT">赠品订单</Option>
-              <Option value="VIRTUAL">核验订单</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="订单状态" prop="orderStatus">
-            <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 160px">
-              <Option value="UNPAID">未付款</Option>
-              <Option value="PAID">已付款</Option>
-              <Option value="UNDELIVERED">待发货</Option>
-              <Option value="DELIVERED">已发货</Option>
-              <Option value="COMPLETED">已完成</Option>
-              <Option value="TAKE">待核验</Option>
-              <Option value="CANCELLED">已取消</Option>
-            </Select>
-          </Form-item>
-
-          <Form-item label="下单时间">
-            <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 160px"></DatePicker>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-        </Form>
-      </Row>
+        <Form-item label="订单类型" prop="orderType">
+          <Select v-model="searchForm.orderType" placeholder="请选择" clearable style="width: 160px">
+            <Option value="NORMAL">普通订单</Option>
+            <Option value="PINTUAN">拼团订单</Option>
+            <Option value="GIFT">赠品订单</Option>
+            <Option value="VIRTUAL">核验订单</Option>
+          </Select>
+        </Form-item>
+        <Form-item label="订单状态" prop="orderStatus">
+          <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 160px">
+            <Option value="UNPAID">未付款</Option>
+            <Option value="PAID">已付款</Option>
+            <Option value="UNDELIVERED">待发货</Option>
+            <Option value="DELIVERED">已发货</Option>
+            <Option value="COMPLETED">已完成</Option>
+            <Option value="TAKE">待核验</Option>
+            <Option value="CANCELLED">已取消</Option>
+          </Select>
+        </Form-item>
+        <Form-item label="下单时间">
+          <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 160px"></DatePicker>
+        </Form-item>
+        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+      </Form>
       <div>
         <download-excel class="export-excel-wrapper" :data="data" :fields="fields" name="商品订单.xls">
           <Button type="info" class="export">
