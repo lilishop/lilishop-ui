@@ -6,10 +6,10 @@
           <h4>基本信息</h4>
           <div class="form-item-view">
             <FormItem label="商品分类">
-              <span class="goods-category-name">{{ activeCategoryName1 }}</span>
-              <span v-show="activeCategoryName2">> {{ activeCategoryName2 }}</span>
-              <span v-show="activeCategoryName3">> {{ activeCategoryName3 }}</span>
-              <span v-if="!activeCategoryName1" v-html="baseInfoForm.category_name"></span>
+              <span class="goods-category-name">{{ this.baseInfoForm.categoryName[0] }}</span>
+              <span> &gt; {{ this.baseInfoForm.categoryName[1] }}</span>
+              <span> &gt; {{ this.baseInfoForm.categoryName[2] }}</span>
+              
             </FormItem>
             <FormItem label="商品名称" prop="goodsName">
               <Input type="text" v-model="baseInfoForm.goodsName" placeholder="商品名称" clearable style="width: 260px"/>
@@ -169,18 +169,24 @@
                               <img v-if="previewPicture !== ''" :src="previewPicture"/>
                             </div>
                             <Divider/>
-                            <div class="sku-upload-list" v-for="(img, __index) in selectedSku.images" :key="__index">
-                              <template v-if="img.status === 'finished'">
-                                <img :src="img.url"/>
-                                <div class="sku-upload-list-cover">
-                                  <Icon type="ios-eye-outline" @click="handleView(img.url)"></Icon>
-                                  <Icon type="ios-trash-outline" @click="handleRemove(img, __index)"></Icon>
-                                </div>
-                              </template>
-                              <template v-else>
-                                <Progress v-if="img.showProgress" :percent="img.percentage" hide-info></Progress>
-                              </template>
-                            </div>
+                            <vuedraggable
+                              :list="baseInfoForm.goodsGalleryFiles"
+                              :animation="200"
+                              style="display:inline-block;"
+                            >
+                              <div class="sku-upload-list" v-for="(img, __index) in selectedSku.images" :key="__index">
+                                <template v-if="img.status === 'finished'">
+                                  <img :src="img.url"/>
+                                  <div class="sku-upload-list-cover">
+                                    <Icon type="ios-eye-outline" @click="handleView(img.url)"></Icon>
+                                    <Icon type="ios-trash-outline" @click="handleRemove(img, __index)"></Icon>
+                                  </div>
+                                </template>
+                                <template v-else>
+                                  <Progress v-if="img.showProgress" :percent="img.percentage" hide-info></Progress>
+                                </template>
+                              </div>
+                            </vuedraggable>
                             <Upload ref="uploadSku" :show-upload-list="false" :default-file-list="row.images"
                                 :on-success="handleSuccess" :format="['jpg', 'jpeg', 'png']"
                                 :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize"
@@ -193,7 +199,6 @@
                           </Modal>
                         </template>
                       </Table>
-
                     </div>
                   </div>
                 </Panel>
@@ -254,20 +259,20 @@
             <div class="form-item-view">
               <FormItem class="form-item-view-el" label="商品发布" prop="release">
                 <RadioGroup type="button" button-style="solid" v-model="baseInfoForm.release">
-                  <Radio title="立即发布" label="true">
+                  <Radio title="立即发布" :label="true">
                     <span>立即发布</span>
                   </Radio>
-                  <Radio title="放入仓库" label="false">
+                  <Radio title="放入仓库" :label="false">
                     <span>放入仓库</span>
                   </Radio>
                 </RadioGroup>
               </FormItem>
               <FormItem class="form-item-view-el" label="商品推荐" prop="skuList">
                 <RadioGroup type="button" button-style="solid" v-model="baseInfoForm.recommend">
-                  <Radio title="推荐" label="true">
+                  <Radio title="推荐" :label="true">
                     <span>推荐</span>
                   </Radio>
-                  <Radio title="不推荐" label="false">
+                  <Radio title="不推荐" :label="false">
                     <span>不推荐</span>
                   </Radio>
                 </RadioGroup>
@@ -275,9 +280,9 @@
             </div>
             <div class="form-item-view-bottom">
               <Collapse v-model="params_panel" v-for="(paramsGroup,groupIndex) in goodsParams"
-                        :title="paramsGroup.groupName"
-                        class="mb_10"
-                        style="text-align: left" :key="paramsGroup.groupName">
+                  :title="paramsGroup.groupName"
+                  class="mb_10"
+                  style="text-align: left" :key="paramsGroup.groupName">
                 <Panel :name="paramsGroup.groupName">
                   {{paramsGroup.groupName}}
                   <p slot="content">
@@ -314,7 +319,6 @@
 import * as API_GOODS from "@/api/goods";
 import * as API_Shop from "@/api/shops";
 import cloneObj from "@/utils/index";
-import bus from '@/libs/eventBus'
 import vuedraggable from "vuedraggable";
 import editor from "@/views/my-components/lili/editor";
 import {regular} from "@/utils";
@@ -322,7 +326,13 @@ import {regular} from "@/utils";
 export default {
   components:{
     editor,
-    vuedraggable,
+    vuedraggable
+  },
+  props: {
+    firstData: {
+      default: {},
+      type: Object
+    }
   },
   data () {
     // 表单验证项，商品价格
@@ -363,6 +373,7 @@ export default {
       }
     };
     return {
+      categoryId: '', // 商品分类第三级id
       //提交状态
       submitLoading: false,
       //上传图片路径
@@ -387,9 +398,9 @@ export default {
         /** 商品相册列表 */
         goodsGalleryFiles: [],
         /** 是否立即发布 true 立即发布 false 放入仓库 */
-        release: "true",
+        release: true,
         /** 是否为推荐商品 */
-        recommend: "true",
+        recommend: true,
         /** 店铺分类 */
         storeCategoryPath: "",
         brandId: 0,
@@ -411,6 +422,8 @@ export default {
         templateId: '',
         /** 参数组*/
         goodsParamsDTOList: [],
+        /** 商品分类中文名 */
+        categoryName: []
       },
       /** 表单数据*/
       skuForm: {},
@@ -482,7 +495,7 @@ export default {
       /** 店铺分类列表 */
       shopCategory: [],
       /** 商品单位列表 */
-      goodsUnitList: {},
+      goodsUnitList: [],
       ignoreColumn: [
         "_index",
         "_rowKey",
@@ -507,6 +520,7 @@ export default {
      * @value 参数选项值
      */
     selectParams(paramsGroup, groupIndex, params, paramsIndex, value) {
+      debugger
       if (!this.baseInfoForm.goodsParamsDTOList[groupIndex]) {
         this.baseInfoForm.goodsParamsDTOList[groupIndex] = {
           groupId:'',
@@ -515,10 +529,9 @@ export default {
         }
       }
       //赋予分组id、分组名称
-      this.baseInfoForm.goodsParamsDTOList[groupIndex] = {
-        groupId : paramsGroup.groupId,
-        groupName : paramsGroup.groupName
-      }
+      this.baseInfoForm.goodsParamsDTOList[groupIndex].groupId = paramsGroup.groupId
+      this.baseInfoForm.goodsParamsDTOList[groupIndex].groupName = paramsGroup.groupName
+        
       //参数详细为空，则赋予
       if (!this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[paramsIndex]) {
         this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[paramsIndex]={
@@ -573,6 +586,7 @@ export default {
         this.baseInfoForm.goodsGalleryFiles.filter((i) => i.url !== file.url);
     },
     updateSkuPicture() {
+      this.baseInfoForm.regeneratorSkuFlag = true;
       let _index = this.selectedSku._index;
       this.skuTableData[_index] = this.selectedSku;
     },
@@ -596,16 +610,13 @@ export default {
     handleFormatError(file) {
       this.$Notice.warning({
         title: "文件格式不正确",
-        desc:
-          "File format of " +
-          file.name +
-          " is incorrect, please select jpg or png.",
+        desc: "文件 " + file.name + " 的格式不正确"
       });
     },
     handleMaxSize(file) {
       this.$Notice.warning({
         title: "超过文件大小限制",
-        desc: "图片  " + file.name + " 不能超过2mb",
+        desc: "图片 " + file.name + " 不能超过2mb"
       });
     },
     handleBeforeUploadGoodsPicture() {
@@ -669,27 +680,19 @@ export default {
       });
     },
     // 编辑时获取商品信息
-    async GET_GoodData() {
+    async GET_GoodData(id,draftId) {
       let response = {};
-      if (this.$route.query.draftId) {
-        response = await API_GOODS.getDraftGoodsDetail(this.$route.query.draftId);
+      if (draftId) {
+        response = await API_GOODS.getDraftGoodsDetail(draftId);
       } else {
-        response = await API_GOODS.getGoods(this.$route.query.id);
+        response = await API_GOODS.getGoods(id);
         this.goodsId = response.result.id;
       }
       this.baseInfoForm = {...this.baseInfoForm,...response.result};
 
-      this.baseInfoForm.release = "true";
-      this.baseInfoForm.recommend = this.baseInfoForm.recommend
-        ? "true"
-        : "false";
+      this.baseInfoForm.release = true;
 
-      //分类名称展示
-      this.activeCategoryName1 = response.result.categoryName[0];
-      this.activeCategoryName2 = response.result.categoryName[1];
-      this.activeCategoryName3 = response.result.categoryName[2];
-
-      this.baseInfoForm.categoryId = response.result.categoryPath.split(",");
+      this.categoryId = response.result.categoryPath.split(",")[2];
 
 
       if (
@@ -702,8 +705,6 @@ export default {
             return files;
           });
       }
-
-      this.categoryId = this.baseInfoForm.categoryId[2];
 
       this.Get_SkuInfoByCategory(this.categoryId)
 
@@ -1024,7 +1025,7 @@ export default {
     /** 数据改变之后 抛出数据 */
     updateSkuTable(row, item) {
       let index = row._index;
-      // this.skuTableData[index][item] = row[item];
+      this.baseInfoForm.regeneratorSkuFlag = true;
       /** 进行自定义校验 判断是否是数字（小数也能通过）重量 */
       if (item === "weight") {
         if (
@@ -1136,11 +1137,10 @@ export default {
               }
             });
           } else {
-            // this.baseInfoForm.goodsType = "NORMAL";
             API_GOODS.createGoods(this.baseInfoForm).then((res) => {
               if (res.success) {
                 this.submitLoading = false;
-                this.activestep = 2;
+                this.$parent.activestep = 2;
                 window.scrollTo(0, 0);
               } else {
                 this.submitLoading = false;
@@ -1197,7 +1197,7 @@ export default {
       API_GOODS.saveDraftGoods(this.baseInfoForm).then((res) => {
         if (res.success) {
           this.$Message.info("保存成功！");
-          this.$router.back();
+          this.$router.push({name: 'template-goods'});
         }
       });
     }
@@ -1212,16 +1212,34 @@ export default {
         this.logisticsTemplate = res.result;
       }
     })
-    /** 获取该商城分类下 商品参数信息 */
-    this.GET_GoodsParams();
-    /** 查询品牌列表 */
-    this.getGoodsBrandList();
-    /** 查询分类绑定的规格信息 */
-    this.Get_SkuInfoByCategory(this.baseInfoForm.categoryId);
-    // 获取商品单位
-    this.GET_GoodsUnit();
-    // 获取当前店铺分类
-    this.GET_ShopGoodsLabel();
+    if (this.$route.query.id || this.$route.query.draftId) {  // 编辑商品、模板
+      this.GET_GoodData(this.$route.query.id, this.$route.query.draftId)
+    } else { // 新增商品、模板
+      if (this.firstData.tempId) { // 选择模板
+        this.GET_GoodData('', this.firstData.tempId)
+      } else {
+        const cateId = []
+        this.firstData.category.forEach(cate => {
+          this.baseInfoForm.categoryName.push(cate.name)
+          cateId.push(cate.id)
+        })
+        this.categoryId = cateId[2]
+        this.baseInfoForm.categoryPath = cateId.toString()
+        this.baseInfoForm.goodsType = this.firstData.goodsType;
+        /** 获取该商城分类下 商品参数信息 */
+        this.GET_GoodsParams();
+        /** 查询品牌列表 */
+        this.getGoodsBrandList();
+        /** 查询分类绑定的规格信息 */
+        this.Get_SkuInfoByCategory(this.categoryId);
+        // 获取商品单位
+        this.GET_GoodsUnit();
+        // 获取当前店铺分类
+        this.GET_ShopGoodsLabel();
+      }
+      
+    }
+    
 }
 }
 </script>

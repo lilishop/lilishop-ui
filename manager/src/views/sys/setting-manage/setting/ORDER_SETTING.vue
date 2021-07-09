@@ -12,13 +12,7 @@
         <Input type='number' v-model="formValidate.autoReceive">
         <span slot="append">天</span>
         </Input>
-
-      </FormItem>
-      <FormItem label="订单自动完成" prop="autoComplete">
-        <Input type='number' v-model="formValidate.autoComplete">
-        <span slot="append">天</span>
-        </Input>
-
+        <span class="desc">收货后，订单完成</span>
       </FormItem>
 
       <FormItem label="自动评价" prop="autoEvaluation">
@@ -27,11 +21,17 @@
         </Input>
 
       </FormItem>
-      <FormItem label="售后自动取消" prop="autoCancelAfterSale">
-        <Input type='number' v-model="formValidate.autoCancelAfterSale">
+      <FormItem label="已完成订单允许退单" prop="closeAfterSale">
+        <Input type='number' v-model="formValidate.closeAfterSale">
         <span slot="append">天</span>
         </Input>
-
+        <span class="desc">如果天数为0,则不允许退单</span>
+      </FormItem>
+      <FormItem label="已完成订单允许投诉" prop="closeComplaint">
+        <Input type='number' v-model="formValidate.closeComplaint">
+        <span slot="append">天</span>
+        </Input>
+        <span class="desc">如果天数为0,则不允许投诉</span>
       </FormItem>
 
       <div class="label-btns">
@@ -50,10 +50,10 @@ export default {
       ruleValidate: {}, // 验证规则
       formValidate: { // 表单数据
         autoCancel: "",
-        autoComplete: "",
         autoEvaluation: "",
         autoReceive: "",
-        autoCancelAfterSale: "",
+        closeAfterSale: "",
+        closeComplaint:""
       },
     };
   },
@@ -120,5 +120,9 @@ export default {
 }
 /deep/ .ivu-input {
   width: 100px !important;
+}
+.desc {
+  font-size: 12px;
+  color: #999;
 }
 </style>
