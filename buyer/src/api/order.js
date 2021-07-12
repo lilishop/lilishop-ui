@@ -69,7 +69,7 @@ export function sureReceived (orderSn) {
 export function getTraces (orderSn) {
   return request({
     url: `/buyer/orders/getTraces/${orderSn}`,
-    method: Method.GET,
+    method: Method.POST,
     needToken: true
   });
 }
