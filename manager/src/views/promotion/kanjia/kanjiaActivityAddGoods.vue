@@ -90,15 +90,14 @@
 
 <script>
   import {
-    saveKanjiaActivityGoods,
-    getPlatformCoupon,
-    editPlatformCoupon,
+    saveKanJiaActivityGoods,
+    editKanJiaActivityGoods
   } from "@/api/promotion";
   import {regular} from "@/utils";
   import skuSelect from "@/views/lili-dialog";
 
   export default {
-    name: "addCoupon",
+    name: "addKanJiaActivityGoods",
     components: {
       skuSelect,
     },
@@ -210,11 +209,6 @@
       }
     },
     methods: {
-      getCoupon() {
-        getPlatformCoupon(this.id).then((res) => {
-          let data = res.result;
-        });
-      },
 
       openSkuList() { // 显示商品选择器
         this.$refs.skuSelect.open("goods");
@@ -302,35 +296,19 @@
               return;
             }
             this.submitLoading = true;
-            if (this.modalType === 0) {
-              // 添加 避免编辑后传入id等数据 记得删除
-              delete params.id;
-              saveKanjiaActivityGoods(params).then((res) => {
-                this.submitLoading = false;
-                if (res.success) {
-                  this.$Message.success("砍价活动添加成功");
-                  this.closeCurrentPage();
-                }
-              });
-            } else {
-              // 编辑
-              delete params.consumeLimit;
-              delete params.updateTime;
-
-              editPlatformCoupon(params).then((res) => {
-                this.submitLoading = false;
-                if (res.success) {
-                  this.$Message.success("优惠券修改成功");
-                  this.closeCurrentPage();
-                }
-              });
-            }
+            saveKanJiaActivityGoods(params).then((res) => {
+              this.submitLoading = false;
+              if (res.success) {
+                this.$Message.success("砍价活动修改成功");
+                this.closeCurrentPage();
+              }
+            });
           }
         });
       },
       // 关闭当前页面
       closeCurrentPage() {
-        this.$store.commit("removeTag", "add-platform-coupon");
+        this.$store.commit("removeTag", "add-kan-jia-goods");
         localStorage.pageOpenedList = JSON.stringify(
           this.$store.state.app.pageOpenedList
         );

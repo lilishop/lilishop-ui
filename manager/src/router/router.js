@@ -213,6 +213,18 @@ export const otherRouter = {
         import("@/views/promotion/pointsGoodsCategory/pointsGoodsCategory.vue")
     },
     {
+      path: "promotion/add-kanJia-activity-goods",
+      title: "添加砍价活动",
+      name: "add-kanJia-activity-goods",
+      component: () => import("@/views/promotion/kanjia/kanjiaActivityAddGoods.vue")
+    },
+    {
+      path: "promotion/edit-kanJia-activity-goods",
+      title: "修改砍价活动",
+      name: "edit-kanJia-activity-goods",
+      component: () => import("@/views/promotion/kanjia/kanjiaActivityEditGoods.vue")
+    },
+    {
       path: "promotion/manager-coupon",
       title: "平台优惠券",
       name: "manager-coupon",

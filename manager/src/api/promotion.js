@@ -14,7 +14,7 @@ export const getPromotionSeckill = params => {
 
 // 是否推荐直播间
 export const whetherStar = params => {
-  return putRequest(`/broadcast/studio/recommend/${params.id}`,params);
+  return putRequest(`/broadcast/studio/recommend/${params.id}`, params);
 };
 
 // 添加优惠券活动
@@ -62,6 +62,33 @@ export const getPintuanGoodsList = params => {
 // 关闭拼团活动
 export const closePintuan = pintuanId => {
   return putRequest(`/promotion/pintuan/close/${pintuanId}`);
+};
+
+// 修改砍价活动商品
+export const saveKanJiaActivityGoods = params => {
+  return postRequest("/promotion/kan-jia-goods", params, {
+    "Content-type": "application/json"
+  });
+};
+// 修改砍价活动商品
+export const editKanJiaActivityGoods = params => {
+  return putRequest("/promotion/kan-jia-goods", params, {
+    "Content-type": "application/json"
+  });
+};
+// 获取砍价活动商品
+export const getKanJiaGoodsList = params => {
+  return getRequest(`/promotion/kan-jia-goods`, params);
+};
+
+//删除砍价活动商品
+export const delKanJiaGoods = ids => {
+  return deleteRequest(`/promotion/kan-jia-goods/${ids}`);
+};
+
+// 砍价活动商品详情
+export const getKanJiaActivityGoodsById = id => {
+  return getRequest(`/promotion/kan-jia-goods/${id}`);
 };
 
 // 保存平台优惠券

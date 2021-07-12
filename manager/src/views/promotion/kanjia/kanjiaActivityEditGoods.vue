@@ -5,63 +5,68 @@
         <div class="base-info-item">
           <div class="form-item-view">
             <h4>商品信息</h4>
-
-            <FormItem label="选择商品" prop="scopeType">
-              <Button type="primary" @click="openSkuList">选择商品</Button>
-              <Button
-                type="error"
-                ghost
-                style="margin-left: 10px"
-                @click="delSelectGoods"
-              >批量删除
-              </Button
-              >
+            <FormItem label="商品名称">
+              <div>{{ form.goodsName }}</div>
+            </FormItem>
+            <FormItem label="SKU编码">
+              <div>{{ form.skuId }}</div>
+            </FormItem>
+            <FormItem label="店铺名称">
+              <div>{{ form.goodsSku.storeName }}</div>
+            </FormItem>
+            <FormItem label="商品价格">
+              <div>{{ form.goodsSku.price | unitPrice('￥') }}</div>
+            </FormItem>
+            <FormItem label="商品库存">
+              <div>{{ form.goodsSku.quantity }}</div>
+            </FormItem>
+            <FormItem label="结算价格" prop="settlementPrice">
+              <Input
+                type="number"
+                v-model="form.settlementPrice"
+                placeholder="请填写结算价格"
+                clearable
+                style="width: 260px"
+              />
+            </FormItem>
+            <FormItem label="最低购买金额" prop="purchasePrice">
+              <Input
+                type="number"
+                v-model="form.purchasePrice"
+                placeholder="请填写最低购买金额"
+                clearable
+                style="width: 260px"
+              />
+            </FormItem>
+            <FormItem label="最低可砍" prop="lowestPrice">
+              <Input
+                type="number"
+                v-model="form.lowestPrice"
+                placeholder="请填写最低可砍金额"
+                clearable
+                style="width: 260px"
+              />
+            </FormItem>
+            <FormItem label="最高可砍" prop="highestPrice">
+              <Input
+                type="number"
+                v-model="form.highestPrice"
+                placeholder="请填写最高可砍金额"
+                clearable
+                style="width: 260px"
+              />
             </FormItem>
 
-            <FormItem astyle="width: 100%">
-              <Table
-                border
-                :columns="columns"
-                :data="form.promotionGoodsList"
-                @on-selection-change="changeSelect"
-              >
-                <template slot-scope="{ row }" slot="skuId">
-                  <div>{{ row.skuId }}</div>
-                </template>
-
-                <template slot-scope="{ index }" slot="settlementPrice">
-                  <Input
-                    type="number"
-                    v-model="form.promotionGoodsList[index].settlementPrice"
-                  />
-                </template>
-                <template slot-scope="{ index }" slot="lowestPrice">
-                  <Input
-                    type="number"
-                    v-model="form.promotionGoodsList[index].lowestPrice"
-                  />
-                </template>
-                <template slot-scope="{ index }" slot="highestPrice">
-                  <Input
-                    type="number"
-                    v-model="form.promotionGoodsList[index].highestPrice"
-                  />
-                </template>
-                <template slot-scope="{ index }" slot="purchasePrice">
-                  <Input
-                    type="number"
-                    v-model="form.promotionGoodsList[index].purchasePrice"
-                  />
-                </template>
-
-                <template slot-scope="{ index }" slot="stock">
-                  <Input
-                    type="number"
-                    v-model="form.promotionGoodsList[index].stock"
-                  />
-                </template>
-              </Table>
+            <FormItem label="活动库存" prop="stock">
+              <Input
+                type="number"
+                v-model="form.stock"
+                placeholder="请填写活动库存"
+                clearable
+                style="width: 260px"
+              />
             </FormItem>
+
             <FormItem label="活动时间" prop="rangeTime">
               <DatePicker
                 type="datetimerange"
@@ -90,111 +95,90 @@
 
 <script>
   import {
-    saveKanjiaActivityGoods,
-    getPlatformCoupon,
-    editPlatformCoupon,
+    getKanJiaActivityGoodsById,
+    editKanJiaActivityGoods,
   } from "@/api/promotion";
   import {regular} from "@/utils";
   import skuSelect from "@/views/lili-dialog";
 
   export default {
-    name: "addCoupon",
+    name: "editKanjiaActivityGoods",
     components: {
       skuSelect,
     },
     watch: {},
     data() {
+      const checkSettlementPrice = (rule, value, callback) => {
+        if (!value && value !== 0) {
+          return callback(new Error("结算金额不能为空"));
+        } else if (!regular.money.test(value)) {
+          callback(new Error("请输入正整数或者两位小数"));
+        } else if (parseFloat(value) > 99999999) {
+          callback(new Error("结算金额设置超过上限值"));
+        } else {
+          callback();
+        }
+      };
+      const checkPurchasePrice = (rule, value, callback) => {
+        if (!value && value !== 0) {
+          return callback(new Error("最低购买金额不能为空"));
+        } else if (!regular.money.test(value)) {
+          callback(new Error("请输入正整数或者两位小数"));
+        } else if (parseFloat(value) > 99999999) {
+          callback(new Error("最低购买金额设置超过上限值"));
+        } else {
+          callback();
+        }
+      };
+      const checkLowestPrice = (rule, value, callback) => {
+        if (!value && value !== 0) {
+          return callback(new Error("最低可砍金额不能为空"));
+        } else if (!regular.money.test(value)) {
+          callback(new Error("请输入正整数或者两位小数"));
+        } else if (parseFloat(value) > 99999999) {
+          callback(new Error("最低可砍金额设置超过上限值"));
+        } else {
+          callback();
+        }
+      };
+      const checkHighestPrice = (rule, value, callback) => {
+        if (!value && value !== 0) {
+          return callback(new Error("最高可砍金额不能为空"));
+        } else if (!regular.money.test(value)) {
+          callback(new Error("请输入正整数或者两位小数"));
+        } else if (parseFloat(value) > 99999999) {
+          callback(new Error("最高可砍金额设置超过上限值"));
+        } else {
+          callback();
+        }
+      };
       return {
         modalType: 0, // 是否编辑
         form: {
-          promotionGoodsList: [], // 活动商品列表
+          goodsSku: {},
         },
         id: this.$route.query.id, // 砍价活动id
         submitLoading: false, // 添加或编辑提交状态
-        selectedGoods: [], // 已选商品列表，便于删除
-        promotionGoodsList: [], // 活动商品列表
         formRule: {
+          settlementPrice: [
+            {required: true, message: "请输入结算金额"},
+            {validator: checkSettlementPrice},
+          ],
+          purchasePrice: [
+            {required: true, message: "请输入最低购买金额"},
+            {validator: checkPurchasePrice},
+          ],
+          lowestPrice: [
+            {required: true, message: "请输入最低可砍金额"},
+            {validator: checkLowestPrice},
+          ],
+          highestPrice: [
+            {required: true, message: "请输入最高可砍金额"},
+            {validator: checkHighestPrice},
+          ],
           rangeTime: [{required: true, message: "请选择活动时间"}],
+          stock: [{required: true, message: "请输入活动库存"}],
         },
-        columns: [
-          {
-            type: "selection",
-            width: 60,
-            align: "center",
-          },
-          {
-            title: "商品名称",
-            key: "goodsName",
-            tooltip: true,
-            minWidth: 100,
-          },
-          {
-            title: "商品价格",
-            key: "price",
-            width: 120,
-            render: (h, params) => {
-              return h(
-                "div",
-                this.$options.filters.unitPrice(params.row.price, "￥")
-              );
-            },
-          },
-          {
-            title: "库存",
-            key: "quantity",
-            width: 100,
-          },
-          {
-            title: "结算价格",
-            slot: "settlementPrice",
-            width: 110,
-          },
-          {
-            title: "最低砍",
-            slot: "lowestPrice",
-            width: 110,
-          },
-          {
-            title: "最高砍",
-            slot: "highestPrice",
-            width: 110,
-          },
-
-          {
-            title: "最低购买金额",
-            slot: "purchasePrice",
-            width: 110,
-          },
-          {
-            title: "活动库存",
-            slot: "stock",
-            width: 110,
-          },
-          {
-            title: "操作",
-            key: "action",
-            align: "center",
-            width: 100,
-            render: (h, params) => {
-              return h(
-                "Button",
-                {
-                  props: {
-                    size: "small",
-                    type: "error",
-                    ghost: true,
-                  },
-                  on: {
-                    click: () => {
-                      this.delGoods(params.index);
-                    },
-                  },
-                },
-                "删除"
-              );
-            },
-          },
-        ],
         options: {
           disabledDate(date) {
             return date && date.valueOf() < Date.now() - 86400000;
@@ -205,28 +189,22 @@
     async mounted() {
       // 如果id不为空则查询信息
       if (this.id) {
-        this.getCoupon();
+        this.getKanJiaActivityGoods();
         this.modalType = 1;
       }
     },
     methods: {
-      getCoupon() {
-        getPlatformCoupon(this.id).then((res) => {
-          let data = res.result;
+      getKanJiaActivityGoods() {
+        getKanJiaActivityGoodsById(this.id).then((res) => {
+          this.form = res.result;
+          this.form.rangeTime = [];
+          this.form.rangeTime.push(new Date(this.form.startTime), new Date(this.form.endTime));
         });
-      },
-
-      openSkuList() { // 显示商品选择器
-        this.$refs.skuSelect.open("goods");
-        let data = JSON.parse(JSON.stringify(this.promotionGoodsList))
-        data.forEach(e => {
-          e.id = e.skuId
-        })
-        this.$refs.skuSelect.goodsData = data;
       },
 
       /** 保存砍价活动 */
       handleSubmit() {
+
         this.$refs.form.validate((valid) => {
           if (valid) {
             const params = JSON.parse(JSON.stringify(this.form));
@@ -241,162 +219,72 @@
               this.form.rangeTime[1] / 1000
             );
             delete params.rangeTime
-            let checkResult = true
-            //如果添加活动的时候选择了商品 则对选择的商品参数做一些校验
-            if (this.form.promotionGoodsList.length > 0) {
-              this.form.promotionGoodsList.forEach((res) => {
-                //校验库存参数
-                if (res.stock <= 0 || res.stock > res.quantity) {
-                  checkResult = false
-                  this.$Message.error("活动库存不能为0且不能超过商品库存");
-                  return
-                }
-                // 最低购买金额格式校验
-                if (!regular.money.test(res.purchasePrice)) {
-                  checkResult = false
-                  this.$Message.error("最低购买金额格式不正确");
-                }
-                // 结算价格金额格式校验
-                if (!regular.money.test(res.settlementPrice)) {
-                  checkResult = false
-                  this.$Message.error("结算价格金额格式不正确");
-                  return
-                }
-                // 结算价格金额格式校验
-                if (res.settlementPrice < 0 || res.settlementPrice > res.price) {
-                  checkResult = false
-                  this.$Message.error("结算价格金额不能为0且不能超过商品价格");
-                  return
-                }
-                //最高砍价校验
-                if (!regular.money.test(res.highestPrice)) {
-                  checkResult = false
-                  this.$Message.error("最高可砍金额格式错误");
-                  return
-                }
-                if (res.highestPrice <= 0 || res.highestPrice > res.price) {
-                  checkResult = false
-                  this.$Message.error("最高可砍金额不能为0且不能超过商品价格");
-                  return
-                }
-                //最低砍价校验
-                if (!regular.money.test(res.lowestPrice)) {
-                  checkResult = false
-                  this.$Message.error("最低可砍金额格式错误");
-                  return
-                }
-                if (res.lowestPrice <= 0 || res.lowestPrice > res.price) {
-                  checkResult = false
-                  this.$Message.error("最低可砍金额不能为0");
-                  return
-                }
-                //校验最高最低砍价金额
-                if (res.lowestPrice > res.highestPrice) {
-                  checkResult = false
-                  this.$Message.error("最低砍价金额不能大于最高砍价金额");
-                  return
-                }
-              });
+            console.warn(params)
+            //校验库存参数
+            if (params.stock <= 0 || params.stock > params.goodsSku.quantity) {
+              this.$Message.error("活动库存不能为0且不能超过商品库存");
+              return
             }
-            if (!checkResult) {
-              return;
+            // 最低购买金额格式校验
+            if (!regular.money.test(params.purchasePrice)) {
+              this.$Message.error("最低购买金额格式不正确");
             }
-            this.submitLoading = true;
-            if (this.modalType === 0) {
-              // 添加 避免编辑后传入id等数据 记得删除
-              delete params.id;
-              saveKanjiaActivityGoods(params).then((res) => {
-                this.submitLoading = false;
-                if (res.success) {
-                  this.$Message.success("砍价活动添加成功");
-                  this.closeCurrentPage();
-                }
-              });
-            } else {
-              // 编辑
-              delete params.consumeLimit;
-              delete params.updateTime;
+            // 结算价格金额格式校验
+            if (!regular.money.test(params.settlementPrice)) {
+              this.$Message.error("结算价格金额格式不正确");
+              return
+            }
+            // 结算价格金额格式校验
+            if (params.settlementPrice < 0 || params.settlementPrice > params.price) {
+              this.$Message.error("结算价格金额不能为0且不能超过商品价格");
+              return
+            }
+            //最高砍价校验
+            if (!regular.money.test(params.highestPrice)) {
+              this.$Message.error("最高可砍金额格式错误");
+              return
+            }
+            if (params.highestPrice <= 0 || params.highestPrice > params.price) {
+              this.$Message.error("最高可砍金额不能为0且不能超过商品价格");
+              return
+            }
 
-              editPlatformCoupon(params).then((res) => {
-                this.submitLoading = false;
-                if (res.success) {
-                  this.$Message.success("优惠券修改成功");
-                  this.closeCurrentPage();
-                }
-              });
+            //最低砍价校验
+            if (!regular.money.test(params.lowestPrice)) {
+              this.$Message.error("最低可砍金额格式错误");
+              return
             }
+            if (params.lowestPrice <= 0 || params.lowestPrice > params.price) {
+              this.$Message.error("最低可砍金额不能为0");
+              return
+            }
+            //校验最高最低砍价金额
+            if (params.lowestPrice > params.highestPrice) {
+              this.$Message.error("最低砍价金额不能大于最高砍价金额");
+              return
+            }
+
+            this.submitLoading = true;
+            // 添加 避免编辑后传入id等数据 记得删除
+            editKanJiaActivityGoods(params).then((res) => {
+              this.submitLoading = false;
+              if (res.success) {
+                this.$Message.success("砍价活动修改成功");
+                this.closeCurrentPage();
+              }
+            });
           }
         });
       },
       // 关闭当前页面
       closeCurrentPage() {
-        this.$store.commit("removeTag", "add-platform-coupon");
+        this.$store.commit("removeTag", "add-kan-jia-goods");
         localStorage.pageOpenedList = JSON.stringify(
           this.$store.state.app.pageOpenedList
         );
         this.$router.go(-1);
       },
-      openSkuList() {
-        // 显示商品选择器
-        this.$refs.skuSelect.open("goods");
-        let data = JSON.parse(JSON.stringify(this.form.promotionGoodsList));
-        data.forEach((e) => {
-          e.id = e.skuId;
-        });
-        this.$refs.skuSelect.goodsData = data;
-      },
-      changeSelect(e) {
-        // 已选商品批量选择
-        this.selectedGoods = e;
-      },
-      delSelectGoods() {
-        // 多选删除商品
-        if (this.selectedGoods.length <= 0) {
-          this.$Message.warning("您还未选择要删除的数据");
-          return;
-        }
-        this.$Modal.confirm({
-          title: "确认删除",
-          content: "您确认要删除所选商品吗?",
-          onOk: () => {
-            let ids = [];
-            this.selectedGoods.forEach(function (e) {
-              ids.push(e.id);
-            });
-            this.form.promotionGoodsList = this.form.promotionGoodsList.filter(
-              (item) => {
-                return !ids.includes(item.id);
-              }
-            );
-          },
-        });
-      },
-      delGoods(index) {
-        // 删除商品
-        this.form.promotionGoodsList.splice(index, 1);
-      },
-      selectedGoodsData(item) {
-        // 回显已选商品
-        let list = [];
-        item.forEach((e) => {
-          list.push({
-            settlementPrice: e.settlementPrice || 0,
-            purchasePrice: e.purchasePrice || 0,
-            lowestPrice: e.lowestPrice || 0,
-            highestPrice: e.highestPrice || 0,
-            stock: e.stock || 0,
-            goodsName: e.goodsName,
-            price: e.price,
-            originalPrice: e.price,
-            quantity: e.quantity,
-            storeId: e.storeId,
-            storeName: e.storeName,
-            skuId: e.id,
-          });
-        });
-        console.warn(list)
-        this.form.promotionGoodsList = list;
-      },
+
     },
   };
 </script>

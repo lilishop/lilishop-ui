@@ -3,8 +3,8 @@
     <Card>
       <Row>
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="活动名称" prop="promotionName">
-            <Input type="text" v-model="searchForm.promotionName" placeholder="请输入活动名称" clearable style="width: 200px" />
+          <Form-item label="商品名称" prop="goodsName">
+            <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px"/>
           </Form-item>
           <Form-item label="活动状态" prop="promotionStatus">
             <Select v-model="searchForm.promotionStatus" placeholder="请选择" clearable style="width: 200px">
@@ -15,26 +15,50 @@
             </Select>
           </Form-item>
           <Form-item label="活动时间">
-            <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 200px"></DatePicker>
+            <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间"
+                        style="width: 200px"></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
       </Row>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加砍价</Button>
-        <Button @click="delAll">批量下架</Button>
-        <!-- <Button @click="upAll" >批量上架</Button> -->
       </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-select-cancel="cancelSelect" @on-selection-change="changeSelect">
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"
+             @on-sort-change="changeSort">
+        <template slot-scope="{ row }" slot="goodsName">
+          <div>
+            <a class="mr_10" @click="linkTo(row.goodsSku.goodsId,row.skuId)">{{row.goodsName}}</a>
+            <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+              <div slot="content">
+
+                <vue-qr :text="wapLinkTo(row.goodsSku.goodsId,row.skuId)" :margin="0" colorDark="#000" colorLight="#fff"
+                        :size="150"></vue-qr>
+              </div>
+              <img src="../../../assets/qrcode.svg" style="vertical-align:middle;" class="hover-pointer" width="20"
+                   height="20" alt="">
+            </Poptip>
+          </div>
+        </template>
+        <template slot-scope="{ row }" slot="startTime">
+          <div>{{ row.startTime }}</div>
+          <div>{{ row.endTime }}</div>
+        </template>
+        <template slot-scope="{ row }" slot="quantity">
+          <div>{{ row.goodsSku.quantity }}</div>
+        </template>
         <template slot-scope="{ row,index }" slot="action">
-          <Button v-if="!checked && row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="primary" size="small" style="margin-right: 10px" @click="edit(row)">编辑
+          <Button v-if="row.promotionStatus === 'NEW'" type="info"
+                  size="small" style="margin-right: 10px" @click="edit(row)">编辑
           </Button>
-          <Button v-if="!checked && row.promotionStatus === 'START' || row.promotionStatus === 'NEW'" type="error" size="small" style="margin-right: 10px" @click="remove(row)">下架
+          <Button v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'END'" type="error"
+                  size="small" style="margin-right: 10px" @click="delAll(row)">删除
           </Button>
         </template>
       </Table>
       <Row type="flex" justify="end" class="page">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
+              @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
               show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
@@ -43,8 +67,8 @@
 
 <script>
   import {
-    getKanjiaList,
-    updatePlatformCouponStatus,
+    getKanJiaGoodsList,
+    delKanJiaGoods,
   } from "@/api/promotion";
 
   export default {
@@ -63,41 +87,57 @@
           pageSize: 10, // 页面大小
           sort: "startTime", // 默认排序字段
           order: "desc", // 默认排序方式
-          promotionName: ""
+          goodsName: ""
         },
         form: {
           // 添加或编辑表单对象初始化数据
-          promotionName: "",
         },
         // 表单验证规则
-        formValidate: {
-          promotionName: [
-            { required: true, message: "不能为空", trigger: "blur" },
-          ],
-        },
+        formValidate: {},
         submitLoading: false, // 添加或编辑提交状态
         selectList: [], // 多选数据
         selectCount: 0, // 多选计数
         columns: [
           {
-            title: "活动名称",
-            key: "promotionName",
-            minWidth: 100,
-            tooltip: true
+            title: "商品名称",
+            slot: "goodsName",
+            minWidth: 150,
+            tooltip: true,
           },
           {
-            title: "每人最低砍价",
+            title: "库存数量",
+            slot: "quantity",
+            width: 100,
+          },
+          {
+            title: "剩余活动库存",
+            key: "stock",
+            width: 110,
+          },
+          {
+            title: "最低购买金额",
             key: "lowestPrice",
-            minWidth: 100,
+            minWidth: 110,
             render: (h, params) => {
-                return h(
-                  "div",
-                  this.$options.filters.unitPrice(params.row.lowestPrice, "￥")
-                );
+              return h(
+                "div",
+                this.$options.filters.unitPrice(params.row.lowestPrice, "￥")
+              );
             },
           },
           {
-            title: "每人最高砍价",
+            title: "每人最低砍",
+            key: "lowestPrice",
+            minWidth: 100,
+            render: (h, params) => {
+              return h(
+                "div",
+                this.$options.filters.unitPrice(params.row.lowestPrice, "￥")
+              );
+            },
+          },
+          {
+            title: "每人最高砍",
             key: "highestPrice",
             minWidth: 100,
             tooltip: true,
@@ -109,20 +149,20 @@
             },
           },
           {
-            title: "活动时间",
-            width: 300,
+            title: "结算价格",
+            key: "settlementPrice",
+            minWidth: 100,
             render: (h, params) => {
-              if (params.row.getType === "ACTIVITY") {
-                return h("div", "长期有效");
-              } else {
-                return h("div", {
-                  domProps: {
-                    innerHTML:
-                      params.row.startTime + "～" + params.row.endTime,
-                  },
-                });
-              }
+              return h(
+                "div",
+                this.$options.filters.unitPrice(params.row.settlementPrice, "￥")
+              );
             },
+          },
+          {
+            title: "活动开始时间",
+            slot: "startTime",
+            minWidth: 150,
           },
           {
             title: "状态",
@@ -155,14 +195,14 @@
                 ),
               ]);
             },
-            width: 130,
+            width: 100,
           },
           {
             title: "操作",
             slot: "action",
             align: "center",
             fixed: "right",
-            width: 180,
+            width: 150,
           },
         ],
         data: [], // 表单数据
@@ -170,23 +210,7 @@
         selectCoupon: [], //本级选中的优惠券
       };
     },
-    props: {
-      // 是否为选中模式
-      checked: {
-        type: Boolean,
-        default: false,
-      },
-      //优惠券类型 查询参数
-      getType: {
-        type: String,
-        default: "",
-      },
-      //已选择优惠券
-      selectedList: {
-        type: Array,
-        default: [],
-      },
-    },
+    props: {},
     watch: {
       $route(to, from) {
         if (to.fullPath == "/promotion/manager-coupon") {
@@ -215,14 +239,11 @@
       },
       // 添加砍价活动跳转
       add() {
-        this.$router.push({ name: "add-kanJia-activity" });
+        this.$router.push({name: "add-kanJia-activity-goods"});
       },
-      /** 跳转至领取详情页面 */
-      receiveInfo(v) {
-        this.$router.push({ name: "member-receive-coupon", query: { id: v.id } });
-      },
+
       info(v) {
-        this.$router.push({ name: "platform-coupon-info", query: { id: v.id } });
+        this.$router.push({name: "platform-coupon-info", query: {id: v.id}});
       },
       changePage(v) {
         this.searchForm.pageNumber = v;
@@ -250,37 +271,6 @@
         this.$refs.table.selectAll(false);
       },
 
-      /**
-       * 取消已选择的数据
-       */
-      cancelSelect(selection, row) {
-        console.log(row)
-        let findCoupon = this.selectCoupon.find((item) => {
-          return item.id == row.id;
-        });
-        // 如果没有则添加
-        if (!findCoupon) {
-          this.selectCoupon.push(row);
-        } else {
-          // 有重复数据就删除
-          this.selectCoupon.map((item, index) => {
-            if (item.id == findCoupon.id) {
-              this.selectCoupon.splice(index, 1);
-            }
-          });
-        }
-      },
-      /**
-       * 选择优惠券
-       */
-      changeSelect(e) {
-        if (this.checked && e.length != 0) {
-          this.selectCoupon.push(...e);
-          this.check();
-        }
-        this.selectList = e;
-        this.selectCount = e.length;
-      },
       getDataList() {
         this.loading = true;
         if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
@@ -291,21 +281,9 @@
           this.searchForm.endTime = null;
         }
         // 带多条件搜索参数获取表单数据 请自行修改接口
-        getKanjiaList(this.searchForm).then((res) => {
+        getKanJiaGoodsList(this.searchForm).then((res) => {
           this.loading = false;
           if (res.success) {
-            res.result.records.forEach((item) => {
-              if (this.selectCoupon.length != 0) {
-                this.selectCoupon.forEach((child) => {
-                  if (item.id == child.id) {
-                    item.___selected = true;
-                    item._checked = true;
-                  }
-                });
-              }
-              item.___selected = false;
-            });
-
             this.data = res.result.records;
             this.total = res.result.total;
           }
@@ -313,121 +291,24 @@
         this.total = this.data.length;
         this.loading = false;
       },
-      handleSubmit() {
-        this.$refs.form.validate((valid) => {
-          if (valid) {
-            this.submitLoading = true;
-            if (this.modalType === 0) {
-              // 添加 避免编辑后传入id等数据 记得删除
-              delete this.form.id;
-              this.postRequest("/coupon/insertOrUpdate", this.form).then(
-                (res) => {
-                  this.submitLoading = false;
-                  if (res.success) {
-                    this.$Message.success("操作成功");
-                    this.getDataList();
-                    this.modalVisible = false;
-                  }
-                }
-              );
-            } else {
-              // 编辑
-              this.postRequest("/coupon/insertOrUpdate", this.form).then(
-                (res) => {
-                  this.submitLoading = false;
-                  if (res.success) {
-                    this.$Message.success("操作成功");
-                    this.getDataList();
-                    this.modalVisible = false;
-                  }
-                }
-              );
-            }
-          }
-        });
-      },
       edit(v) {
-        this.$router.push({ name: "edit-kanJia-activity", query: { id: v.id } });
+        this.$router.push({name: "edit-kanJia-activity-goods", query: {id: v.id}});
       },
-      remove(v) {
+      delAll(row) {
         this.$Modal.confirm({
-          title: "确认下架",
-          // 记得确认修改此处
-          content: "确认要下架此优惠券么?",
-          loading: true,
-          onOk: () => {
-            // 删除
-            updatePlatformCouponStatus({
-              couponIds: v.id,
-              promotionStatus: "CLOSE",
-            })
-              .then((res) => {
-                this.$Modal.remove();
-                if (res.success) {
-                  this.$Message.success("优惠券已作废");
-                  this.getDataList();
-                }
-              })
-              .catch(() => {
-                this.$Modal;
-              });
-          },
-        });
-      },
-      delAll() {
-        if (this.selectCount <= 0) {
-          this.$Message.warning("您还未选择要下架的优惠券");
-          return;
-        }
-        this.$Modal.confirm({
-          title: "确认下架",
-          content: "您确认要下架所选的 " + this.selectCount + " 条数据?",
+          title: "确认删除",
+          content: "确认需要删除此砍价商品",
           loading: true,
           onOk: () => {
             let ids = [];
             this.selectList.forEach(function (e) {
               ids.push(e.id);
             });
-            let params = {
-              couponIds: ids.toString(),
-              promotionStatus: "CLOSE",
-            };
             // 批量删除
-            updatePlatformCouponStatus(params).then((res) => {
+            delKanJiaGoods(row.id).then((res) => {
               this.$Modal.remove();
               if (res.success) {
-                this.$Message.success("下架成功");
-                this.clearSelectAll();
-                this.getDataList();
-              }
-            });
-          },
-        });
-      },
-      upAll() {
-        if (this.selectCount <= 0) {
-          this.$Message.warning("请选择要上架的优惠券");
-          return;
-        }
-        this.$Modal.confirm({
-          title: "确认上架",
-          content: "您确认要上架所选的 " + this.selectCount + " 条数据?",
-          loading: true,
-          onOk: () => {
-            let ids = [];
-            this.selectList.forEach(function (e) {
-              ids.push(e.id);
-            });
-            let params = {
-              couponIds: ids.toString(),
-              promotionStatus: "START",
-            };
-            // 批量上架
-            updatePlatformCouponStatus(params).then((res) => {
-              this.$Modal.remove();
-              if (res.success) {
-                this.$Message.success("上架成功");
-                this.clearSelectAll();
+                this.$Message.success("删除成功");
                 this.getDataList();
               }
             });
@@ -436,10 +317,6 @@
       },
     },
     mounted() {
-      //如果作为组件方式，传入了类型值，则搜索参数附加类型
-      if (this.getType) {
-        this.searchForm.getType = this.getType;
-      }
       this.init();
     },
   };
