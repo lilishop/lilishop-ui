@@ -98,7 +98,7 @@ export const getMemberStatistics = params => {
 };
 
 
-// 获取会员注册统计列表
+// 获取流量统计
 export const getStatisticsList = params => {
   return getRequest("/statistics/view/list", params);
 };
