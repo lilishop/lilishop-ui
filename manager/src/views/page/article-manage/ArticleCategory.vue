@@ -141,12 +141,14 @@
                 this.modalVisible = true;
             },
             edit(v) {
+                console.log(v);
                 this.modalType = 1;
                 this.modalTitle = "编辑";
                 this.formAdd.id = v.id;
                 this.formAdd.articleCategoryName = v.articleCategoryName;
                 this.formAdd.level = v.level;
                 this.formAdd.parentId = v.parentId;
+                this.formAdd.sort = v.sort;
                 this.showParent = false;
                 this.modalVisible = true;
             },

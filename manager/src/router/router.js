@@ -243,13 +243,6 @@ export const otherRouter = {
       component: () => import("@/views/promotion/coupon/couponPublish.vue")
     },
     {
-      path: "promotion/member-receive-coupon",
-      title: "领取详情",
-      name: "member-receive-coupon",
-      component: () =>
-        import("@/views/promotion/coupon/memberReceiveCoupon.vue")
-    },
-    {
       path: "promotion/platform-coupon-info",
       title: "详情",
       name: "platform-coupon-info",
@@ -274,23 +267,10 @@ export const otherRouter = {
       component: () => import("@/views/promotion/couponActivity/couponInfo.vue")
     },
     {
-      path: "promotion/member-receive-coupon",
-      title: "领取详情",
-      name: "member-coupon-activity",
-      component: () =>
-        import("@/views/promotion/coupon/memberReceiveCoupon.vue")
-    },
-    {
       path: "promotion/platform-coupon-info",
       title: "详情",
       name: "platform-coupon-activity",
       component: () => import("@/views/promotion/coupon/couponInfo.vue")
-    },
-    {
-      path: "promotion/add-coupon-specify",
-      title: "精准发劵",
-      name: "add-coupon-specify",
-      component: () => import("@/views/promotion/coupon/couponSpecify.vue")
     },
     {
       path: "promotion/manager-pintuan",

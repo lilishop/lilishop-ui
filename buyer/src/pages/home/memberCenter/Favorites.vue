@@ -5,11 +5,8 @@
     <div v-if="list.length">
       <template v-for="(item) in list">
         <div class="goodsItem" :key="item.skuId">
-          <div class="goodsImg hover-pointer">
-            <img
-              :src="params.type === 'GOODS'? item.image : item.logo"
-              alt=""
-            />
+          <div class="goodsImg hover-pointer" v-if="params.type === 'GOODS'">
+            <img :src="item.image" />
           </div>
           <div class="goodsTitle hover-pointer">
             {{params.type === 'GOODS'? item.goodsName : item.storeName}}

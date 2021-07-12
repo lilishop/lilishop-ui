@@ -275,14 +275,13 @@ export default {
       this.reSelectCoupon();
     },
     reSelectCoupon() {
-      //清空原有数据
+      // 清空原有数据
       this.form.couponActivityItems = this.selectCouponList.map((item) => {
         return {
           num: 0,
           couponId: item.id,
         }
       });
-      console.log(this.form.couponActivityItems)
     },
 
     // 添加指定用户
@@ -308,7 +307,6 @@ export default {
       this.$refs.form.validate((valid) => {
         if (valid) {
           const params = JSON.parse(JSON.stringify(this.form));
-          console.log(params);
           this.submitLoading = true;
           // 添加 避免编辑后传入id等数据 记得删除
           delete params.id;

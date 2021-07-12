@@ -6,7 +6,7 @@
       <a class="item" href="https://pickmall.cn/" target="_blank">{{ $t('terms') }}</a>
     </Row>
     <Row type="flex" justify="center" class="copyright">
-      Copyright © 2020 - Present
+      Copyright © {{year}} - Present
       <a
         href="https://pickmall.cn/"
         target="_blank"
@@ -18,7 +18,12 @@
 
 <script>
 export default {
-  name: "footer"
+  name: "footer",
+  data() {
+    return {
+      year: new Date().getFullYear()
+    }
+  },
 };
 </script>
 
