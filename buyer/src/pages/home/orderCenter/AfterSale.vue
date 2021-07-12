@@ -84,7 +84,9 @@ export default {
       params: { // 请求参数
         pageNumber: 1,
         pageSize: 10,
-        keywords: ''
+        keywords: '',
+        sort: 'createTime',
+        order: 'desc'
       },
       // 状态数组
       afterSaleStatusList,

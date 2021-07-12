@@ -46,9 +46,7 @@
         <thead>
           <tr>
             <th width="50%">商品</th>
-            <!-- <th width="20%">属性</th> -->
             <th width="20%">货号</th>
-            <!-- <th width="10%">发货仓库</th> -->
             <th width="10%">单价</th>
             <th width="10%">数量</th>
             <th width="10%">小计</th>
@@ -82,10 +80,11 @@
         <div>
           <span>运费：</span><span>+{{ order.order.freightPrice | unitPrice("￥") }}</span><br>
         </div>
-        <div><span>优惠金额：</span><span>-{{ order.order.discountPrice | unitPrice("￥") }}</span></div>
+        <div v-if="order.order.priceDetailDTO.couponPrice"><span>优惠券：</span><span>-{{ order.order.priceDetailDTO.couponPrice || 0 | unitPrice("￥") }}</span></div>
+        <div v-if="order.order.discountPrice"><span>活动优惠：</span><span>-{{ order.order.discountPrice | unitPrice("￥") }}</span></div>
         <div>
-          <span>应付金额：</span
-          ><span class="actrual-price">{{ order.order.flowPrice | unitPrice("￥") }}</span>
+          <span>应付金额：</span>
+          <span class="actrual-price">{{ order.order.flowPrice | unitPrice("￥") }}</span>
         </div>
       </div>
     </div>
@@ -121,7 +120,7 @@ export default {
       });
       window.open(routeUrl.href, '_blank');
     },
-    getDetail () { // 订单详情
+    getDetail () { // 获取订单详情
       orderDetail(this.$route.query.sn).then(res => {
         if (res.success) {
           this.order = res.result;

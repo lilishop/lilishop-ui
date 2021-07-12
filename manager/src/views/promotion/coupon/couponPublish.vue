@@ -68,7 +68,7 @@
               </div>
               <div v-if="rangeTimeType == 1">
                 <DatePicker type="datetimerange" v-model="form.rangeTime" format="yyyy-MM-dd HH:mm:ss" placeholder="请选择"
-                            :options="options" style="width: 260px">
+                  :options="options" style="width: 260px">
                 </DatePicker>
               </div>
               <div class="effectiveDays" v-if="rangeTimeType == 0">
@@ -100,8 +100,8 @@
 
             <FormItem v-if="form.scopeType == 'PORTION_GOODS_CATEGORY'">
 
-              <Cascader @on-change="getGoodsCategory" :data="goodsCategoryList" style="width:300px;"
-                        v-model="form.scopeIdGoods"></Cascader>
+              <Cascader :data="goodsCategoryList" style="width:260px;"
+                v-model="form.scopeIdGoods"></Cascader>
 
             </FormItem>
             <div>
@@ -127,7 +127,7 @@ import {regular} from "@/utils";
 import skuSelect from "@/views/lili-dialog";
 
 export default {
-  name: "addCoupon",
+  name: "edit-platform-coupon",
   components: {
     skuSelect,
   },
@@ -140,6 +140,14 @@ export default {
       },
       deep: true,
     },
+    $route(e) { // 监听路由，参数变化调取接口
+      this.id = e.query.id;
+      if (this.id) {
+        this.getCoupon()
+      } else {
+        this.$refs.form.resetFiles()
+      }
+    }
   },
   data() {
     const checkPrice = (rule, value, callback) => {
@@ -165,7 +173,7 @@ export default {
       }
     };
     return {
-      rangeTimeType: 1,
+      rangeTimeType: 1, // 当前时间类型
       modalType: 0, // 是否编辑
       form: {
         /** 店铺承担比例 */
@@ -221,11 +229,11 @@ export default {
         ],
         publishNum: [
           {required: true, message: "请输入发放数量"},
-          {pattern: regular.integer, message: "请输入正整数"},
+          {pattern: regular.Integer, message: "请输入正整数"},
         ],
         couponLimitNum: [
           {required: true, message: "领取限制不能为空"},
-          {pattern: regular.integer, message: "请输入正整数"},
+          {pattern: regular.Integer, message: "请输入正整数"},
         ],
         description: [{required: true, message: "请输入范围描述"}],
       },
@@ -289,7 +297,7 @@ export default {
       },
     };
   },
-  async mounted() {
+  async mounted () {
     await this.getCagetoryList();
     // 如果id不为空则查询信息
     if (this.id) {
@@ -495,7 +503,7 @@ export default {
     async getCagetoryList() {
       // 获取全部商品分类
       let data = await getCategoryTree();
-      this.goodsCategoryList = this.filterCategory(data.result);
+      this.goodsCategoryList = data.result;
       // 过滤出可显示的值
 
       this.goodsCategoryList = this.goodsCategoryList.map((item) => {
@@ -523,18 +531,7 @@ export default {
         }
         return {value: item.id, label: item.name, children: item.children};
       });
-    },
-    filterCategory(list) {
-      // 递归删除空children
-      list.forEach((item) => {
-        if (item.children.length == 0) {
-          delete item.children;
-        } else {
-          this.filterCategory(item.children);
-        }
-      });
-
-      return list;
+      console.log(this.goodsCategoryList);
     },
     filterCategoryId(list, idArr) {
       // 递归获取分类id

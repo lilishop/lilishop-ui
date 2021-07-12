@@ -40,13 +40,8 @@
         {{ scope.row.commissionRate }}%
       </template>
 
-      <template slot="deleteFlag" slot-scope="scope">
-        <div v-if="scope.row.deleteFlag == 0">
-          <Badge text="正常启用" status="success"></Badge>
-        </div>
-        <div v-if="scope.row.deleteFlag == 1">
-          <Badge text="禁用" status="error"></Badge>
-        </div>
+      <template slot="deleteFlag" slot-scope="{row}">
+        <Tag :class="{'ml_10': row.deleteFlag}" :color="row.deleteFlag == false ? 'success' : 'error'">{{row.deleteFlag == false ? '正常启用' : '禁用'}}</Tag>
       </template>
     </Table>
 
@@ -129,7 +124,7 @@ import {
 } from "@/api/goods";
 
 import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
-
+import {regular} from "@/utils";
 export default {
   name: "lili-components",
   components: {
@@ -172,7 +167,12 @@ export default {
       brandWay: "", //请求绑定品牌的信息
       specForm: {},
       // 表单验证规则
-      formValidate: {},
+      formValidate: {
+        commissionRate: [
+          {required: true, message: '请填写佣金比例'},
+          {pattern: regular.Integer, message: "佣金比例不能为负"},
+        ]
+      },
       columns: [
         {
           title: "分类名称",
@@ -181,8 +181,6 @@ export default {
         },
         {
           title: "状态",
-          key: "deleteFlag",
-
           slot: "deleteFlag",
         },
         {

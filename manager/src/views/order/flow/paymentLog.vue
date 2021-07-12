@@ -22,7 +22,7 @@
             </Select>
           </Form-item>
           <Form-item label="支付时间">
-            <DatePicker v-model="searchForm" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px"></DatePicker>
+            <DatePicker v-model="searchForm.paymentTime" type="datetime" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="changeDate" placeholder="选择支付时间" style="width: 200px"></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
@@ -53,10 +53,9 @@ export default {
         pageSize: 10, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
-        startDate: "", // 起始时间
-        endDate: "", // 终止时间
         sn: "",
         payStatus: "",
+        paymentTime: "",
       },
       columns: [
         {
@@ -151,61 +150,30 @@ export default {
     };
   },
   methods: {
-    dropDown() {
-      if (this.drop) {
-        this.dropDownContent = "展开";
-        this.dropDownIcon = "ios-arrow-down";
-      } else {
-        this.dropDownContent = "收起";
-        this.dropDownIcon = "ios-arrow-up";
-      }
-      this.drop = !this.drop;
-    },
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
+    // 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    handleReset() {
-      this.$refs.searchForm.resetFields();
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      this.selectDate = null;
-      this.searchForm.startDate = "";
-      this.searchForm.endDate = "";
-      // 重新加载数据
-      this.getDataList();
+    changeDate (val) { // 改变日期格式
+      this.searchForm.paymentTime = val
     },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
-
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
-    selectDateRange(v) {
-      if (v) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      }
-    },
+    // 获取列表
     getDataList() {
       this.loading = true;
       API_Order.paymentLog(this.searchForm).then((res) => {

@@ -97,7 +97,7 @@
         <a class="item" href="https://pickmall.cn/" target="_blank">条款</a>
       </Row>
       <Row type="flex" justify="center" class="copyright">
-        Copyright © 2020 - Present
+        Copyright © {{year}} - Present
         <a href="https://pickmall.cn/" target="_blank" style="margin: 0 5px"
           >lili-shop</a
         >
@@ -130,6 +130,7 @@ export default {
         password: '',
         oncePasd: ''
       },
+      year: new Date().getFullYear(), // 当前年份
       step: 0, // 步骤
       ruleInline: {
         // 验证规则

@@ -79,13 +79,11 @@ export default {
         {
           title: "活动名称",
           key: "promotionName",
-          minWidth: 100,
           fixed: "left",
         },
         {
           title: "优惠券名称",
           key: "couponName",
-          minWidth: 100,
           tooltip: true,
         },
         {
@@ -107,18 +105,16 @@ export default {
         {
           title: "领取数量/总数量",
           key: "publishNum",
-          width: 130,
           render: (h, params) => {
             return h(
               "div",
-              params.row.receivedNum + "/" + params.row.publishNum
+              params.row.receivedNum + "/" + (params.row.publishNum === 0 ? '不限制' : params.row.publishNum)
             );
           },
         },
         {
           title: "优惠券类型",
           key: "couponType",
-          width: 120,
           render: (h, params) => {
             let text = "未知";
             if (params.row.couponType === "DISCOUNT") {
@@ -195,8 +191,7 @@ export default {
                 text
               ),
             ]);
-          },
-          minWidth: 70,
+          }
         },
         {
           title: "操作",

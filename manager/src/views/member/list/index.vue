@@ -30,26 +30,22 @@
     </Card>
 
     <!-- 添加用户模态框 -->
-    <Modal v-model="addFlag" title="添加用户">
+    <Modal v-model="addFlag" title="添加会员">
       <Form ref="addMemberForm" :model="addMemberForm" :rules="addRule" :label-width="100">
         <FormItem label="手机号码" prop="mobile" style="width: 90%;">
           <Input v-model="addMemberForm.mobile" maxlength="11" placeholder="请输入手机号码" />
         </FormItem>
-        <FormItem label="会员名称" prop="uname" style="width: 90%">
+        <FormItem label="会员名称" prop="username" style="width: 90%">
           <Input v-model="addMemberForm.username" maxlength="15" placeholder="请输入会员名称" />
         </FormItem>
 
-        <FormItem label="会员密码" prop="pwd" style="width: 90%">
+        <FormItem label="会员密码" prop="password" style="width: 90%">
           <Input type="password" password v-model="addMemberForm.password" maxlength="20" placeholder="请输入会员密码" />
         </FormItem>
       </Form>
 
       <div slot="footer">
-        <Button @click="
-            () => {
-              addFlag = false;
-            }
-          ">
+        <Button @click="addFlag = false">
           取消
         </Button>
         <Button type="primary" :loading="handleAddLoading" @click="addMemberSubmit">
@@ -163,8 +159,8 @@ export default {
             message: "请输入正确的手机号",
           },
         ],
-        uname: [{ required: true, message: "请输入会员名称" }],
-        pwd: [{ required: true, message: "请输入密码" }],
+        username: [{ required: true, message: "请输入会员名称" }],
+        password: [{ required: true, message: "请输入密码" }],
       },
       ruleValidate: {}, //修改验证
       submitLoading: false, // 添加或编辑提交状态
@@ -421,11 +417,7 @@ export default {
     },
     addMember() {
       this.addFlag = true;
-      this.addMemberForm = {
-        mobile: "",
-        username: "",
-        password: "",
-      };
+      this.$refs.addMemberForm.resetFields()
     },
     /**
      * 查询查看会员详情
@@ -460,6 +452,7 @@ export default {
         if (valid) {
           API_Member.addMember(this.addMemberForm).then((res) => {
             if (res.result) {
+              this.$refs.addMemberForm.resetFields()
               this.getData();
               this.$Message.success("添加成功！");
               this.addFlag = false;

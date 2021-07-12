@@ -90,7 +90,7 @@
               <template v-if="detail.goodsParamsDTOList && detail.goodsParamsDTOList.length">
                 <div class="goods-params" v-for="item in detail.goodsParamsDTOList" :key="item.groupId">
                   <span class="ml_10">{{item.groupName}}</span>
-                  <table class="mb_10" cellpadding='0' border="1" cellspacing="0" >
+                  <table class="mb_10" cellpadding='0' cellspacing="0" >
                     <tr v-for="param in item.goodsParamsItemDTOList" :key="param.paramId">
                       <td style="text-align: center">{{param.paramName}}</td><td>{{param.paramValue}}</td>
                     </tr>
@@ -222,7 +222,7 @@ export default {
     });
     window.addEventListener('scroll', this.handleScroll)
     this.getList();
-  },
+  }
 };
 </script>
 

@@ -59,8 +59,6 @@
         :data="data"
         ref="table"
         sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
       ></Table>
       <Row type="flex" justify="end" class="page">
         <Page
@@ -77,29 +75,6 @@
         ></Page>
       </Row>
     </Card>
-    <Modal
-      :title="modalTitle"
-      v-model="modalVisible"
-      :mask-closable="false"
-      :width="500"
-    >
-      <Form
-        ref="underForm"
-        :model="underForm"
-        :label-width="100"
-        :rules="formValidate"
-      >
-        <FormItem label="下架原因" prop="reason">
-          <Input v-model="underForm.reason" clearable style="width: 100%" />
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="lower(form.id)"
-          >提交</Button
-        >
-      </div>
-    </Modal>
   </div>
 </template>
 
@@ -110,11 +85,7 @@ export default {
   components: {},
   data() {
     return {
-      id: "", //要操作的id
-      openSearch: true, // 显示搜索
       loading: true, // 表单加载状态
-      modalVisible: false, // 添加或编辑显示
-      modalTitle: "", // 添加或编辑标题
       drop: false,
       dropDownContent: "展开",
       dropDownIcon: "ios-arrow-down",
@@ -124,24 +95,8 @@ export default {
         pageSize: 10, // 页面大小
         sort: "create_time", // 默认排序字段
         order: "desc", // 默认排序方式
+        saveType: "TEMPLATE"
       },
-      underForm: { // 下架表单
-        reason: "",
-      },
-      form: {
-        // 添加或编辑表单对象初始化数据
-        goodsName: "",
-        sn: "",
-        marketEnable: "",
-        price: "",
-        sellerName: "",
-      },
-      // 表单验证规则
-
-      formValidate: {},
-      submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [ // 表头
         {
           title: "ID",
@@ -202,7 +157,7 @@ export default {
                 "Button",
                 {
                   props: {
-                    type: "primary",
+                    type: "success",
                     size: "small",
                   },
                   style: {
@@ -244,22 +199,14 @@ export default {
   },
   methods: {
     init() {
-      let here = this.$route.matched.find((v) => v.name === this.$route.name);
-      this.pageType = here.props.default ? here.props.default.type : "";
-      if (this.pageType === "TEMPLATE") {
-        this.searchForm.saveType = "TEMPLATE";
-      } else {
-        this.searchForm.saveType = "DRAFT";
-      }
       this.getDataList();
     },
+    // 编辑模板
     editGoods(v) {
-      this.searchForm.saveType === "TEMPLATE" ?
-        this.$router.push({ name: "goods-template-operation-edit", query: { draftId: v.id } }):
-        this.$router.push({ name: "goods-draft-operation-edit", query: { draftId: v.id } });
+        this.$router.push({ name: "goods-template-operation-edit", query: { draftId: v.id } })
     },
     removeDraft (id) {
-      let showType = this.searchForm.saveType === "TEMPLATE" ? "模版" : "草稿";
+      let showType = "模版";
       this.$Modal.confirm({
         title: "确认审核",
         content: "您确认要删除id为 " + id + " 的" + showType + "吗?",
@@ -278,7 +225,6 @@ export default {
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
-      this.clearSelectAll();
     },
     changePageSize(v) {
       this.searchForm.pageSize = v;
@@ -295,21 +241,6 @@ export default {
       this.searchForm.pageSize = 10;
       // 重新加载数据
       this.getDataList();
-    },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
     },
     dropDown() {
       if (this.drop) {

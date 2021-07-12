@@ -40,7 +40,7 @@
         </div>
         <div class="clearfix"></div>
         <div class="copyright">
-          <p>Copyright © LILI</p>
+          <p>Copyright © {{year}} LILI</p>
         </div>
       </div>
     </footer>
@@ -58,7 +58,8 @@ export default {
         [ '支付方式', '货到付款', '在线支付', '分期付款', '邮局汇款', '公司转账' ],
         [ '售后服务', '售后政策', '价格保护', '退款说明', '返修/退换货', '取消订单' ]
       ],
-      moreLink: ['关于我们', '联系我们', '联系客服', '商家帮助', '隐私政策'] // 更多链接
+      moreLink: ['关于我们', '联系我们', '联系客服', '商家帮助', '隐私政策'], // 更多链接
+      year: new Date().getFullYear() // 当前年份
     };
   },
   methods: {
