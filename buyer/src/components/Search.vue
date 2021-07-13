@@ -53,6 +53,10 @@ export default {
     store: { // 是否为店铺页面
       type: Boolean,
       default: false
+    },
+    hover: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -89,10 +93,14 @@ export default {
     } else {
       this.logoImg = this.Cookies.getItem('logo')
     }
+
     this.searchData = this.$route.query.keyword
-    hotWords({start: 1, end: 5}).then(res => {
-      if (res.success) this.promotionTags = res.result
-    })
+
+    if (!this.hover) { // 首页顶部固定搜索栏不调用热词接口
+      hotWords({start: 1, end: 5}).then(res => {
+        if (res.success) this.promotionTags = res.result
+      })
+    }
   }
 };
 </script>

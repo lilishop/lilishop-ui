@@ -619,25 +619,28 @@ export default {
         desc: "图片 " + file.name + " 不能超过2mb"
       });
     },
+    // 商品图片上传
     handleBeforeUploadGoodsPicture() {
       const check = this.baseInfoForm.goodsGalleryFiles.length < 5;
       if (!check) {
         this.$Notice.warning({
-          title: "Up to five pictures can be uploaded.",
+          title: "图片数量不能大于五张",
         });
+        return false
       }
-      return check;
     },
-    handleBeforeUpload() {
+    handleBeforeUpload(file) {
       const check =
         this.selectedSku.images !== undefined &&
         this.selectedSku.images.length > 5;
       if (check) {
         this.$Notice.warning({
-          title: "Up to five pictures can be uploaded.",
+          title: "图片数量不能大于五张",
         });
       }
+      console.log(file);
       return !check;
+      
     },
    
     /** 查询商品品牌列表 */

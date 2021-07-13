@@ -1,8 +1,8 @@
 <template>
   <div class="scroll-show">
     <div class="content clearfix">
-      <cateNav class="cate" :showNavBar="false"></cateNav>
-      <Search class="search-con" :showLogo="false" :showTag="false"></Search>
+      <cateNav class="cate" :hover="true" :showNavBar="false"></cateNav>
+      <Search class="search-con" :hover="true" :showLogo="false" :showTag="false"></Search>
       <Icon type="ios-cart-outline" @click="goCartList" class="cart-icon"  @mouseenter.native="getCartList" />
       <i class="cart-badge">{{cartNum < 100 ? cartNum : '99'}}</i>
     </div>

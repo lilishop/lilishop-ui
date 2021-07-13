@@ -73,6 +73,10 @@ export default {
     showNavBar: { // 显示全部商品分类右侧导航条
       default: true,
       type: Boolean
+    },
+    hover: {
+      default: false,
+      type: Boolean
     }
   },
   data () {
@@ -90,6 +94,7 @@ export default {
   },
   methods: {
     getCate () { // 获取分类数据
+      if (this.hover) return false;
       getCategory(0).then(res => {
         if (res.success) {
           this.cateList = res.result;

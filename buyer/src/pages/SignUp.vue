@@ -1,5 +1,5 @@
 <template>
-  <div class="login" @click='$refs.verify.show = false'>
+  <div class="sign-up" @click='$refs.verify.show = false'>
     <div style="height:50px;"></div>
     <div class="logo-box">
       <img
@@ -209,13 +209,12 @@ export default {
   mounted () {
     this.$refs.formRegist.resetFields();
     this.logoImg = this.Cookies.getItem('logo')
-  },
-  watch: {
+    console.log(window.innerHeight);
+    document.querySelector('.sign-up').style.height = window.innerHeight + 'px'
   }
 };
 </script>
 <style scoped lang="scss">
-
 .logo-box {
   width: 600px;
   height: 80px;
