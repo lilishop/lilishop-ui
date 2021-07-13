@@ -100,7 +100,7 @@
             key: "point",
             width: 110,
             render: (h, params) => {
-              if (params.row.pointType == 1) {
+              if (params.row.pointType == 'INCREASE') {
                 return h('div', [
                   h('span', {
                     style: {
