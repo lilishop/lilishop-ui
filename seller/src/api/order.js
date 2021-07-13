@@ -113,7 +113,7 @@ export const afterSaleSellerDelivery = (sn, params) => {
 };
 //查询物流
 export const getTraces = (sn, params) => {
-  return postRequest(`/orders/getTraces/${sn}`, params);
+  return getRequest(`/orders/getTraces/${sn}`, params);
 };
 //售后单查询物流
 export const getSellerDeliveryTraces = (sn, params) => {
