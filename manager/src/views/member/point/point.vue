@@ -97,16 +97,16 @@
 
           {
             title: "变动积分",
-            key: "point",
+            key: "variablePoint",
             width: 110,
             render: (h, params) => {
-              if (params.row.pointType == 1) {
+              if (params.row.pointType == 'INCREASE') {
                 return h('div', [
                   h('span', {
                     style: {
                       color: 'green'
                     }
-                  }, "+" + params.row.point),
+                  }, "+" + params.row.variablePoint),
                 ]);
               } else {
                 return h('div', [
@@ -114,7 +114,7 @@
                     style: {
                       color: 'red'
                     }
-                  }, "-" + params.row.point),
+                  }, "-" + params.row.variablePoint),
                 ]);
               }
 
