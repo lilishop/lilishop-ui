@@ -27,7 +27,7 @@
               type="primary"
               style="width: 100px;margin-right:5px"
               :loading="savePassLoading"
-              @click="saveEditPass"
+              @click="editPassword"
             >保存</Button>
             <Button @click="cancelEditPass">取消</Button>
           </FormItem>
@@ -61,6 +61,7 @@ export default {
         rePass: "" // 从新输入新密码
       },
       strength: "", // 密码强度
+      // 验证规则
       passwordValidate: {
         oldPass: [
           {
@@ -101,10 +102,12 @@ export default {
     };
   },
   methods: {
+    // 新密码回调
     changeInputPass(v, grade, strength) {
       this.strength = strength;
     },
-    saveEditPass() {
+    // 修改密码
+    editPassword() {
       let params = {
         password: this.md5(this.editPasswordForm.oldPass),
         newPassword: this.md5(this.editPasswordForm.newPassword)
@@ -131,6 +134,7 @@ export default {
         }
       });
     },
+    // 取消修改密码
     cancelEditPass() {
       this.$store.commit("removeTag", "change_pass");
       localStorage.storeOpenedList = JSON.stringify(
@@ -147,11 +151,9 @@ export default {
         name: lastPageName
       });
     }
-  },
-  mounted() {}
+  }
 };
 </script>
-
 <style lang="scss" scoped>
 .change-pass {
   &-btn-box {

@@ -59,36 +59,33 @@
               <Input type="text" v-model="baseInfoForm.cost" placeholder="市场价格" clearable style="width: 260px"/>
             </FormItem>
             <FormItem class="form-item-view-el required" label="商品图片" prop="goodsGalleryFiles">
-              <vuedraggable
-                :list="baseInfoForm.goodsGalleryFiles"
-                :animation="200"
-                style="display:inline-block;"
-                ghost-class="thumb-ghost"
-              >
-                <div class="demo-upload-list" v-for="(item, __index) in baseInfoForm.goodsGalleryFiles" :key="__index">
-                  <template v-if="item.status === 'finished'">
-                    <img :src="item.url"/>
-                    <div class="demo-upload-list-cover">
-                      <div>
-                        <Icon type="ios-eye-outline" size="30" @click.native="handleViewGoodsPicture(item.url)"></Icon>
-                        <Icon type="ios-trash-outline" size="30" @click.native="handleRemoveGoodsPicture(item)"></Icon>
+              <div style="display:flex;flex-wrap:flex-start;">
+                <vuedraggable
+                  :list="baseInfoForm.goodsGalleryFiles"
+                  :animation="200"
+                >
+                  <div class="demo-upload-list" v-for="(item, __index) in baseInfoForm.goodsGalleryFiles" :key="__index">
+                    <template>
+                      <img :src="item.url"/>
+                      <div class="demo-upload-list-cover">
+                        <div>
+                          <Icon type="md-search" size="30" @click.native="handleViewGoodsPicture(item.url)"></Icon>
+                          <Icon type="md-trash" size="30" @click.native="handleRemoveGoodsPicture(item)"></Icon>
+                        </div>
                       </div>
-                    </div>
-                  </template>
-                  <template v-else>
-                    <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
-                  </template>
-                </div>
-              </vuedraggable>
-              <Upload ref="upload" :show-upload-list="false" :default-file-list="baseInfoForm.goodsGalleryFiles"
-                :on-success="handleSuccessGoodsPicture" :format="['jpg', 'jpeg', 'png']"
-                :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize"
-                :before-upload="handleBeforeUploadGoodsPicture" multiple type="drag" :action="uploadFileUrl"
-                :headers="accessToken" style="display: inline-block;margin-left:10px;">
-                <div style="width: 80px; height: 80px; line-height: 80px">
-                  <Icon type="ios-camera" size="20"></Icon>
-                </div>
-              </Upload>
+                    </template>
+                  </div>
+                </vuedraggable>
+                <Upload ref="upload" :show-upload-list="false" 
+                  :on-success="handleSuccessGoodsPicture" :format="['jpg', 'jpeg', 'png']"
+                  :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize"
+                  :before-upload="handleBeforeUploadGoodsPicture" multiple type="drag" :action="uploadFileUrl"
+                  :headers="accessToken" style="margin-left:10px">
+                  <div style="width: 148px; height: 148px; line-height: 148px">
+                    <Icon type="md-add" size="20"></Icon>
+                  </div>
+                </Upload>
+              </div>
               <Modal title="View Image" v-model="goodsPictureVisible">
                 <img :src="previewGoodsPicture" v-if="goodsPictureVisible" style="width: 100%"/>
               </Modal>
@@ -98,7 +95,7 @@
                 <Panel name="1">
                   规格名称
                   <div slot="content" class="sku-item-content">
-                    <Form :model="skuForm" @submit.native.prevent>
+                    <Form>
                       <div class="sku-item" v-for="(item, $index) in skuInfo" :key="$index">
                         <Card :bordered="true">
                           <FormItem label="规格名：" class="sku-item-content-name">
@@ -113,7 +110,7 @@
                           <FormItem label="规格值：" prop="sku">
                             <!--规格值文本列表-->
                             <div v-for="(val, index) in item.spec_values" :key="index"
-                                 style="padding: 0px 20px 10px 0px; float: left">
+                                  style="padding: 0px 20px 10px 0px; float: left">
                               <div>
                                 <AutoComplete style="width: 150px; float: left" v-model="val.value"
                                   :maxlength="30" placeholder="请输入规格值名称"
@@ -170,24 +167,21 @@
                             </div>
                             <Divider/>
                             <vuedraggable
-                              :list="baseInfoForm.goodsGalleryFiles"
+                              :list="selectedSku.images"
                               :animation="200"
                               style="display:inline-block;"
                             >
                               <div class="sku-upload-list" v-for="(img, __index) in selectedSku.images" :key="__index">
-                                <template v-if="img.status === 'finished'">
+                                <template>
                                   <img :src="img.url"/>
                                   <div class="sku-upload-list-cover">
-                                    <Icon type="ios-eye-outline" @click="handleView(img.url)"></Icon>
-                                    <Icon type="ios-trash-outline" @click="handleRemove(img, __index)"></Icon>
+                                    <Icon type="md-search" @click="handleView(img.url)"></Icon>
+                                    <Icon type="md-trash" @click="handleRemove(img, __index)"></Icon>
                                   </div>
-                                </template>
-                                <template v-else>
-                                  <Progress v-if="img.showProgress" :percent="img.percentage" hide-info></Progress>
                                 </template>
                               </div>
                             </vuedraggable>
-                            <Upload ref="uploadSku" :show-upload-list="false" :default-file-list="row.images"
+                            <Upload ref="uploadSku" :show-upload-list="false"
                                 :on-success="handleSuccess" :format="['jpg', 'jpeg', 'png']"
                                 :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize"
                                 :before-upload="handleBeforeUpload" multiple type="drag" :action="uploadFileUrl"
@@ -425,28 +419,20 @@ export default {
         /** 商品分类中文名 */
         categoryName: []
       },
-      /** 表单数据*/
-      skuForm: {},
       /** 表格头 */
       skuTableColumn: [],
       /** 表格数据 */
       skuTableData: [],
-
       /** 默认的规格参数 */
       skuData: [],
-
       /** 默认的规格值 */
       skuVals: [],
       // 某一规格名下的规格值
       skuVal: [],
+      // 规格展开的项
       open_panel: [1, 2],
-
       /** 要提交的规格数据*/
       skuInfo: [],
-
-      /** 规格图片 */
-      images: [],
-
       /** 物流模板 **/
       logisticsTemplate: [],
 
@@ -491,12 +477,11 @@ export default {
       },
       /** 品牌列表 */
       brandList: [],
-      collapseVal: [],
       /** 店铺分类列表 */
       shopCategory: [],
       /** 商品单位列表 */
       goodsUnitList: [],
-      ignoreColumn: [
+      ignoreColumn: [ // 添加规格时需要忽略的参数
         "_index",
         "_rowKey",
         "sn",
@@ -506,8 +491,7 @@ export default {
         "quantity",
         "specId",
         "specValueId",
-      ],
-      skuValVisible: true,
+      ]
     }
   },
   methods: {
@@ -577,19 +561,23 @@ export default {
         this.previewPicture = "";
       }
     },
+    // 查看商品大图
     handleViewGoodsPicture(url) {
       this.previewGoodsPicture = url;
       this.goodsPictureVisible = true;
     },
+    // 移除商品图片
     handleRemoveGoodsPicture(file) {
       this.baseInfoForm.goodsGalleryFiles =
         this.baseInfoForm.goodsGalleryFiles.filter((i) => i.url !== file.url);
     },
+    // 更新sku图片
     updateSkuPicture() {
       this.baseInfoForm.regeneratorSkuFlag = true;
       let _index = this.selectedSku._index;
       this.skuTableData[_index] = this.selectedSku;
     },
+    // sku图片上传成功
     handleSuccess(res, file) {
       if (file.response) {
         file.url = file.response.result;
@@ -601,26 +589,31 @@ export default {
         this.previewPicture = file.url;
       }
     },
+    // 商品图片上传成功
     handleSuccessGoodsPicture(res, file) {
+      console.log(res);
       if (file.response) {
         file.url = file.response.result;
         this.baseInfoForm.goodsGalleryFiles.push(file);
       }
     },
+    // 图片格式不正确
     handleFormatError(file) {
       this.$Notice.warning({
         title: "文件格式不正确",
         desc: "文件 " + file.name + " 的格式不正确"
       });
     },
+    // 图片大小不正确
     handleMaxSize(file) {
       this.$Notice.warning({
         title: "超过文件大小限制",
         desc: "图片 " + file.name + " 不能超过2mb"
       });
     },
-    // 商品图片上传
-    handleBeforeUploadGoodsPicture() {
+    // 图片上传前钩子
+    handleBeforeUploadGoodsPicture(file) {
+      
       const check = this.baseInfoForm.goodsGalleryFiles.length < 5;
       if (!check) {
         this.$Notice.warning({
@@ -629,18 +622,15 @@ export default {
         return false
       }
     },
+    // sku图片上传前钩子
     handleBeforeUpload(file) {
       const check =
         this.selectedSku.images !== undefined &&
         this.selectedSku.images.length > 5;
       if (check) {
-        this.$Notice.warning({
-          title: "图片数量不能大于五张",
-        });
+        this.$Notice.warning({ title: "图片数量不能大于五张" });
+        return false
       }
-      console.log(file);
-      return !check;
-      
     },
    
     /** 查询商品品牌列表 */

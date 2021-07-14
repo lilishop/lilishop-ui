@@ -24,7 +24,6 @@
                   <Avatar :src="userInfo.storeLogo" style="background: #fff;margin-left: 10px;"></Avatar>
                 </div>
                 <DropdownMenu slot="list">
-                  <!-- <DropdownItem name="ownSpace">{{ $t('userCenter') }}</DropdownItem> -->
                   <DropdownItem name="changePass">{{ $t('changePass') }}</DropdownItem>
                   <DropdownItem name="loginOut" divided>{{ $t('logout') }}</DropdownItem>
                 </DropdownMenu>
@@ -53,9 +52,6 @@
 <script>
 import shrinkableMenu from "./main-components/shrinkable-menu/shrinkable-menu.vue";
 import tagsPageOpened from "./main-components/tags-page-opened.vue";
-import breadcrumbNav from "./main-components/breadcrumb-nav.vue";
-import fullScreen from "./main-components/fullscreen.vue";
-import messageTip from "./main-components/message-tip.vue";
 import circleLoading from "@/views/my-components/lili/circle-loading.vue";
 import Cookies from "js-cookie";
 import util from "@/libs/util.js";
@@ -64,10 +60,7 @@ export default {
   components: {
     shrinkableMenu,
     tagsPageOpened,
-    breadcrumbNav,
-    fullScreen,
-    messageTip,
-    circleLoading,
+    circleLoading
   },
   data() {
     return {

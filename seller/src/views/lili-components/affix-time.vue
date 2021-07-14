@@ -32,7 +32,7 @@ export default {
       },
       storeId: "", // 店铺id
       dates: [], // 日期列表
-      params: {
+      params: { // 请求参数
         pageNumber: 1,
         pageSize: 10,
         storeName: "",
@@ -65,8 +65,6 @@ export default {
   },
   mounted() {
    this.storeId = JSON.parse(Cookies.get("userInfo")).id;
-
-
     this.getFiveYears();
   },
   methods: {
@@ -91,7 +89,7 @@ export default {
       }
       this.dates = dates.reverse();
     },
-
+    // 选择回调
     changeSelect() {
       if (this.month) {
         this.dateList.forEach((res) => {
@@ -105,7 +103,7 @@ export default {
       } else {
       }
     },
-
+    // 点击时间筛选
     clickBreadcrumb(item) {
       this.dateList.forEach((res) => {
         res.selected = false;
@@ -119,7 +117,6 @@ export default {
       }
 
       this.selectedWay = item;
-      // this.month = "";
       this.selectedWay.year = new Date().getFullYear();
       this.selectedWay.month = "";
 

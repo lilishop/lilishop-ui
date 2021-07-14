@@ -29,6 +29,7 @@ export default {
 
   props: ['addressId'],
   methods: {
+    // 选择地区回显
     change(val, selectedData) {
       /**
        * @returns [regionId,region]
@@ -46,8 +47,7 @@ export default {
     handleChangeOnSelect(value) {
       this.changeOnSelect = value;
     },
-    getArea(val) {
-    },
+    // 动态加载数据
     loadData(item, callback) {
       item.loading = true;
       API_Setup.getChildRegion(item.value).then((res) => {
@@ -87,6 +87,7 @@ export default {
         }
       });
     },
+    // 初始化数据
     init() {
       API_Setup.getChildRegion(this.id).then((res) => {
         let way = [];
@@ -116,5 +117,3 @@ export default {
   },
 };
 </script>
-<style scoped lang="scss">
-</style>

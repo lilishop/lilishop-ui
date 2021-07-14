@@ -1,57 +1,56 @@
 <template>
   <div class="search">
     <Card>
-      <Row v-show="openSearch" @keydown.enter.native="handleSearch">
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
-          <Form-item label="商品名称" prop="goodsName">
+      <Form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        :label-width="70"
+        class="search-form mb_10"
+        @keydown.enter.native="handleSearch"
+      >
+        <Form-item label="商品名称" prop="goodsName">
+          <Input
+            type="text"
+            v-model="searchForm.goodsName"
+            placeholder="请输入商品名称"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <span v-if="drop">
+          <Form-item label="状态" prop="status">
+            <Select
+              v-model="searchForm.marketEnable"
+              placeholder="请选择"
+              clearable
+              style="width: 200px"
+            >
+              <Option value="DOWN">下架</Option>
+              <Option value="UPPER">上架</Option>
+            </Select>
+          </Form-item>
+          <Form-item label="商品编号" prop="sn">
             <Input
               type="text"
-              v-model="searchForm.goodsName"
-              placeholder="请输入商品名称"
+              v-model="searchForm.sn"
+              placeholder="商品编号"
               clearable
               style="width: 200px"
             />
           </Form-item>
-          <span v-if="drop">
-            <Form-item label="状态" prop="status">
-              <Select
-                v-model="searchForm.marketEnable"
-                placeholder="请选择"
-                clearable
-                style="width: 200px"
-              >
-                <Option value="DOWN">下架</Option>
-                <Option value="UPPER">上架</Option>
-              </Select>
-            </Form-item>
-            <Form-item label="商品编号" prop="sn">
-              <Input
-                type="text"
-                v-model="searchForm.sn"
-                placeholder="商品编号"
-                clearable
-                style="width: 200px"
-              />
-            </Form-item>
-          </span>
-          <Form-item style="margin-left: -35px" class="br">
-            <Button @click="handleSearch" type="primary" icon="ios-search"
-              >搜索</Button
-            >
-            <Button @click="handleReset">重置</Button>
-            <a class="drop-down" @click="dropDown">
-              {{ dropDownContent }}
-              <Icon :type="dropDownIcon"></Icon>
-            </a>
-          </Form-item>
-        </Form>
-      </Row>
+        </span>
+        <Form-item style="margin-left: -35px" class="br">
+          <Button @click="handleSearch" type="primary" icon="ios-search"
+            >搜索</Button
+          >
+          <Button @click="handleReset">重置</Button>
+          <a class="drop-down" @click="dropDown">
+            {{ dropDownContent }}
+            <Icon :type="dropDownIcon"></Icon>
+          </a>
+        </Form-item>
+      </Form>
       <Table
         :loading="loading"
         border
@@ -198,13 +197,14 @@ export default {
     };
   },
   methods: {
-    init() {
+    init() { // 初始化数据
       this.getDataList();
     },
     // 编辑模板
     editGoods(v) {
-        this.$router.push({ name: "goods-template-operation-edit", query: { draftId: v.id } })
+      this.$router.push({ name: "goods-template-operation-edit", query: { draftId: v.id } })
     },
+    // 删除模板
     removeDraft (id) {
       let showType = "模版";
       this.$Modal.confirm({
@@ -222,19 +222,23 @@ export default {
         },
       });
     },
+    // 改变页数
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
+    // 改变页码
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    // 重置
     handleReset() {
       this.$refs.searchForm.resetFields();
       this.searchForm.pageNumber = 1;
@@ -242,6 +246,7 @@ export default {
       // 重新加载数据
       this.getDataList();
     },
+    // 展开、收起搜索项
     dropDown() {
       if (this.drop) {
         this.dropDownContent = "展开";
@@ -252,6 +257,7 @@ export default {
       }
       this.drop = !this.drop;
     },
+    // 获取列表数据
     getDataList() {
       this.loading = true;
       // 带多条件搜索参数获取表单数据

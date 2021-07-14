@@ -4,7 +4,7 @@
     <Row>
       <Col style=" height: 100%;" span="4">
       <Card class="article-category">
-        <Tree :data="treeData" @on-select-change="handleSearchChange"></Tree>
+        <Tree :data="treeData" @on-select-change="handleCateChange"></Tree>
       </Card>
       </Col>
       <Col span="20">
@@ -18,9 +18,9 @@
           </Form>
         </Row>
         <Row class="operation padding-row">
-          <Button @click="add" type="primary" style="">添加</Button>
+          <Button @click="add" type="primary">添加</Button>
         </Row>
-        <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
+        <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-selection-change="changeSelect">
           <!-- 页面展示 -->
           <template slot="openStatusSlot" slot-scope="scope">
             <div>
@@ -57,7 +57,7 @@
                 <Input type="number" v-model="form.sort" clearable style="width: 10%" />
               </FormItem>
               <FormItem class="form-item-view-el" label="文章内容" prop="content">
-                <editor  openXss v-model="form.content"></editor>
+                <editor openXss v-model="form.content"></editor>
               </FormItem>
               <FormItem label="是否展示" prop="openStatus">
                 <i-switch size="large" v-model="form.openStatus" :true-value="open" :false-value="close">
@@ -154,28 +154,7 @@ export default {
           title: "是否显示",
           key: "openStatus",
           width: 100,
-          slot: "openStatusSlot",
-          /*render: (h, params) => {
-            if (params.row.openStatus == "CLOSE") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "隐藏",
-                  },
-                }),
-              ]);
-            } else if (params.row.openStatus == "OPEN") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "success",
-                    text: "展示",
-                  },
-                }),
-              ]);
-            }
-          },*/
+          slot: "openStatusSlot"
         },
         {
           title: "排序",
@@ -266,11 +245,13 @@ export default {
     },
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
       this.getAllList(0);
     },
-    handleSearchChange(data) {
+    // 选择分类回调
+    handleCateChange(data) {
       let { value, title } = data[0];
       this.list.push({
         value,
@@ -279,7 +260,7 @@ export default {
       this.searchForm.categoryId = value;
       this.searchTreeValue = title;
     },
-    //是否展示事件
+    //是否展示文章
     changeSwitch(v) {
       let params = {
         status: v.openStatus,
@@ -290,6 +271,7 @@ export default {
         }
       });
     },
+    // 文章分类的选择事件
     handleCheckChange(data) {
       let value = "";
       let title = "";
@@ -307,36 +289,33 @@ export default {
       this.form.categoryId = value;
       this.treeValue = title;
     },
+    // 改变页数
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
+    // 改变页码
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索列表
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
+    // 取消全选
     clearSelectAll() {
       this.$refs.table.selectAll(false);
     },
+    // 列表选择回调
     changeSelect(e) {
       this.selectList = e;
       this.selectCount = e.length;
     },
-
+    // 获取全部文章分类
     getAllList(parent_id) {
       this.loading = true;
       getArticleCategory(parent_id).then((res) => {
@@ -353,6 +332,7 @@ export default {
         }
       });
     },
+    // 文章分类格式化方法
     getTree(tree = []) {
       let arr = [];
       if (!!tree && tree.length !== 0) {
@@ -369,6 +349,7 @@ export default {
       }
       return arr;
     },
+    // 获取文章列表
     getDataList(val) {
       if (val) this.form = {};
       this.loading = true;
@@ -387,7 +368,7 @@ export default {
       this.total = this.data.length;
       this.loading = false;
     },
-
+    // 添加文章
     handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
@@ -417,16 +398,26 @@ export default {
         }
       });
     },
+    // 添加文章modal
     add() {
       this.modalType = 0;
       this.modalTitle = "添加文章";
+      this.treeValue = '';
+      this.form = {
+        content:''
+      };
       this.$refs.form.resetFields();
       delete this.form.id;
       this.modalVisible = true;
     },
+    // 编辑文章modal
     edit(data) {
       this.modalType = 1;
       this.modalTitle = "编辑文章";
+      this.treeValue = '';
+      this.form = {
+        content:''
+      };
       this.$refs.form.resetFields();
 
       seeArticle(data.id).then((res) => {

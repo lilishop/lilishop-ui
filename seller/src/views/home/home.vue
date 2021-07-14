@@ -217,11 +217,13 @@ export default {
     };
   },
   methods: {
+    // 跳转页面
     navigateTo(name) {
       this.$router.push({
         name,
       });
     },
+    // 初始化数据
     async init() {
       let userInfo = JSON.parse(Cookies.get("userInfo"));
 
@@ -232,7 +234,7 @@ export default {
         this.notices = res.result.records;
       }
     },
-
+    // 跳转文章页
     async clickLinkNotices(val) {
       let res = await seeArticle(val.id);
       if (res.success) {
@@ -240,7 +242,7 @@ export default {
         this.noticeFlage = true;
       }
     },
-
+    // 获取首页数据
     async getHomeData() {
       let res = await getSellerHomeData();
       if (res.success) {

@@ -145,7 +145,7 @@ export default {
       if (this.id) {
         this.getCoupon()
       } else {
-        this.$refs.form.resetFiles()
+        this.$refs.form.resetFields()
       }
     }
   },

@@ -36,12 +36,6 @@ export const otherRouter = {
       component: () => import("@/views/message/message.vue")
     },
     {
-      path: "stock-goods",
-      title: "店铺端商品库存告警列表",
-      name: "stock-goods",
-      component: () => import("@/views/goods/goods-seller/goodsStock.vue")
-    },
-    {
       path: "goods-operation",
       title: "添加商品",
       name: "goods-operation",

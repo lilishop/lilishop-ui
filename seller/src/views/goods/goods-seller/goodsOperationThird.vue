@@ -26,6 +26,7 @@ export default {
     gotoGoodsList() {
       this.$router.push({name: "goods"});
     },
+    // 刷新页面
     gotoBack() {
       this.$router.go();
     },

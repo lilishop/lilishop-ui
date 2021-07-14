@@ -126,13 +126,16 @@ export default {
           template: "action",
         }
       ],
+      // 表格数据
       tableData: []
     };
   },
   methods: {
-    init() {
+    // 初始化数据
+    init() { 
       this.getAllList();
     },
+    // 刷新列表
     refresh() {
       this.loading = true;
       let that = this;
@@ -152,6 +155,7 @@ export default {
       this.formAdd.parentId = v.id;
       this.modalVisible = true;
     },
+    // 编辑分类
     edit(v) {
       this.modalType = 1;
       this.modalTitle = "编辑";
@@ -209,6 +213,7 @@ export default {
         }
       });
     },
+    // 确认删除分类
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
@@ -227,6 +232,7 @@ export default {
         }
       });
     },
+    // 获取分类
     getAllList() {
       this.loading = true;
       API_Goods.getShopGoodsLabelList(this.searchForm).then((res) => {

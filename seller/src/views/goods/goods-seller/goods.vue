@@ -64,7 +64,6 @@
         </template>
 
       </Table>
-
       <Row type="flex" justify="end" class="page">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
           show-total show-elevator show-sizer></Page>
@@ -123,7 +122,7 @@ export default {
     return {
       id: "", //要操作的id
       loading: true, // 表单加载状态
-      shipTemplateForm: {},
+      shipTemplateForm: {}, // 物流模板
       shipTemplateModal: false, // 物流模板是否显示
       logisticsTemplate: [], // 物流列表
       updateStockModalVisible: false, // 更新库存模态框显隐
@@ -382,12 +381,14 @@ export default {
     };
   },
   methods: {
-    init() {
+    init() { // 初始化数据
       this.getDataList();
     },
+    // 添加商品
     addGoods() {
       this.$router.push({ name: "goods-operation" });
     },
+    // 编辑商品
     editGoods(v) {
       this.$router.push({ name: "goods-operation-edit", query: { id: v.id } });
     },
@@ -437,20 +438,24 @@ export default {
         }
       });
     },
+    // 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
+    // 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    // 重置搜索条件
     handleReset() {
       this.searchForm = {};
       this.searchForm.pageNumber = 1;
@@ -458,24 +463,17 @@ export default {
       // 重新加载数据
       this.getDataList();
     },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
+    // 清除多选
     clearSelectAll() {
       this.$refs.table.selectAll(false);
     },
+    // 添加选中项
     changeSelect(e) {
       this.selectList = e;
       this.selectCount = e.length;
     },
     //保存物流模板信息
     saveShipTemplate() {
-     
       this.$Modal.confirm({
         title: "确认设置物流模板",
         content:

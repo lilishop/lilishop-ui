@@ -33,12 +33,15 @@ import util from "@/libs/util.js";
 export default {
   name: "shrinkableMenu",
   computed: {
+    // 二级菜单列表
     menuList() {
       return this.$store.state.app.menuList;
     },
+    // 一级菜单
     navList() {
       return this.$store.state.app.navList;
     },
+    // 当前一级菜单
     currNav() {
       return this.$store.state.app.currNav;
     }

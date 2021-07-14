@@ -37,6 +37,7 @@ export default {
     };
   },
   methods: {
+    // 选择商品分类回调
     getFirstData (item) {
       this.firstData = item;
       this.activestep = 1;
@@ -54,7 +55,6 @@ export default {
   }
 };
 </script>
-
 <style lang="scss" scoped>
 @import "./addGoods.scss";
 </style>

@@ -108,10 +108,8 @@ export default {
       goodsType: '',
       /** 1级分类列表*/
       categoryListLevel1: [],
-
       /** 2级分类列表*/
       categoryListLevel2: [],
-
       /** 3级分类列表*/
       categoryListLevel3: [],
     }

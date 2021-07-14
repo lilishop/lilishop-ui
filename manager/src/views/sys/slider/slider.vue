@@ -13,8 +13,6 @@
             :data="data"
             ref="table"
             sortable="custom"
-            @on-sort-change="changeSort"
-            @on-selection-change="changeSelect"
           >
             <!-- 商品栏目格式化 -->
             <template slot="imageSlot" slot-scope="scope">
@@ -53,8 +51,6 @@
             :data="data"
             ref="table"
             sortable="custom"
-            @on-sort-change="changeSort"
-            @on-selection-change="changeSelect"
           >
             <!-- 商品栏目格式化 -->
             <template slot="imageSlot" slot-scope="scope">
@@ -99,7 +95,7 @@
           />
         </FormItem>
         <FormItem label="图片" prop="resource">
-          <Input v-model="form.resource" clearable style="width: 100%" />
+          <upload-pic-input v-model="form.resource" style="width: 100%"></upload-pic-input>
         </FormItem>
         <FormItem label="类型" prop="type">
           <radio-group v-model="form.type" type="button">
@@ -119,15 +115,16 @@
 </template>
 <script>
 import * as API_Setting from "@/api/setting";
-
+import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
 export default {
+  components: {
+    uploadPicInput,
+  },
   data() {
     return {
       modalVisible: false, //添加验证码源弹出框
       modalTitle: "", //添加验证码源弹出框标题
       loading: true, // 表单加载状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       modalType: 0, // 添加或编辑标识
       submitLoading: false, // 添加或编辑提交状态
       form: {
@@ -250,11 +247,6 @@ export default {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      this.getDataList();
-    },
     //切换tab
     handleClickType(v) {
       this.searchForm.pageNumber = 1; // 当前页数
@@ -281,15 +273,12 @@ export default {
       });
       this.loading = false;
     },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
     //添加验证码源
     add() {
       this.form.type = this.searchForm.type;
       this.modalVisible = true;
       this.modalType = 0;
+      this.$refs.form.resetFields()
       this.modalTitle = "添加验证码源";
     },
     //修改验证码源

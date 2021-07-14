@@ -6,19 +6,13 @@
           <Form-item label="商品名称" prop="goodsName">
             <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px"/>
           </Form-item>
-          <!-- <Form-item label="店铺名称">
-              <Select v-model="searchForm.shopId" placeholder="请选择" @on-query-change="searchChange" filterable clearable style="width: 200px">
-                  <Option v-for="item in shopList" :value="item.id" :key="item.id">{{ item.storeName }}</Option>
-              </Select>
-          </Form-item> -->
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
       </Row>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加</Button>
-      <!--  <Button @click="add" type="default">批量删除</Button>-->
       </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" @on-selection-change="changeSelect">
         <!-- 商品栏目格式化 -->
         <template slot="goodsSlot" slot-scope="{row}">
           <div style="margin-top: 5px;height: 70px; display: flex;">
@@ -92,9 +86,6 @@ export default {
       submitLoading: false, // 添加或编辑提交状态
       shopList:[], // 店铺列表
       loading: true, // 表单加载状态
-      drop: false,
-      dropDownContent: "展开",
-      dropDownIcon: "ios-arrow-down",
       searchForm: { // 搜索框初始化对象
         pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
@@ -115,7 +106,7 @@ export default {
             trigger: "change"
           }],
       },
-      columns: [ // 表哥表头
+      columns: [ // 表格表头
         {
           type: "selection",
           width: 60,
@@ -188,30 +179,29 @@ export default {
     };
   },
   methods: {
-    init() {
+    init() { // 初始化数据
       this.getDataList();
-      // this.getShopList()
     },
+    // 选择商品回调
     selectedGoodsData(v){
       this.modalVisible = true
       this.form.commission = 1
       this.modalTitle = "保存分销商品"
       this.skuId = v[0].id
-      //this.data.unshift(v[0])
     },
+    // 添加商品modal
     add(){
-
-         this.$refs.liliDialog.flag = true;
+      this.$refs.liliDialog.flag = true;
       this.$refs.liliDialog.goodsFlag = true;
-
       this.$refs.liliDialog.singleGoods();
-
     },
+    // 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
-      this.clearSelectAll();
+      this.$refs.table.selectAll(false);
     },
+    // 添加商品
     handleSubmit(){
       this.$refs['form'].validate((valid) => {
         if (valid) {
@@ -225,28 +215,18 @@ export default {
         }
       })
     },
+    // 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-
+    // 获取商品列表
     getDataList() {
       this.loading = true;
       // 带多条件搜索参数获取表单数据 请自行修改接口
@@ -260,6 +240,7 @@ export default {
       this.total = this.data.length;
       this.loading = false;
     },
+    // 删除商品
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
@@ -278,6 +259,7 @@ export default {
         }
       });
     },
+    // 获取店铺列表 搜索项用
     getShopList (val) {
       const params = {
         pageNumber:1,

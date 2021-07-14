@@ -21,7 +21,7 @@ export default {
   name: "footer",
   data() {
     return {
-      year: new Date().getFullYear()
+      year: new Date().getFullYear() // 年
     }
   },
 };

@@ -1,19 +1,17 @@
 <template>
   <div class="search">
     <Card>
-      <Row v-show="openSearch" @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="订单编号" prop="orderSn">
-            <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单编号" clearable style="width: 200px" />
-          </Form-item>
-          <Form-item label="订单时间">
-            <DatePicker type="daterange" v-model="timeRange" format="yyyy-MM-dd" placeholder="选择时间" style="width: 210px"></DatePicker>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-        </Form>
-      </Row>
+      <Form ref="searchForm" :model="searchForm" inline :label-width="70"  @keydown.enter.native="handleSearch" class="search-form">
+        <Form-item label="订单编号" prop="orderSn">
+          <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单编号" clearable style="width: 200px" />
+        </Form-item>
+        <Form-item label="订单时间">
+          <DatePicker type="daterange" v-model="timeRange" format="yyyy-MM-dd" placeholder="选择时间" style="width: 210px"></DatePicker>
+        </Form-item>
+        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+      </Form>
 
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"></Table>
+      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table"></Table>
       <Row type="flex" justify="end" class="page">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small"
           show-total show-elevator show-sizer></Page>
@@ -35,8 +33,6 @@ export default {
       timeRange: [], // 范围时间
       orderStatusList, // 订单状态列表
       distributionId: this.$route.query.id, // 分销id
-      openSearch: true, // 显示搜索
-      openTip: true, // 显示提示
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
@@ -133,23 +129,26 @@ export default {
     };
   },
   methods: {
-    init() {
+    init() { // 初始化数据
       this.getDataList();
     },
+    // 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
+    // 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-
+    // 获取订单数据
     getDataList() {
       this.searchForm.distributionId = this.distributionId;
       this.loading = true;

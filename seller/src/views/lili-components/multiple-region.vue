@@ -22,7 +22,7 @@ export default {
     this.init();
   },
   methods: {
-    clear() {
+    clear() {  // 引用该组件的父组件会调用
       this.data = [];
       this.selectedWay = [];
       this.init();
@@ -49,12 +49,8 @@ export default {
      */
     open(val, index) {
       if (val) {
-        // console.warn(val);
         //已选中的地址
         let checkedData = this.$store.state.shipTemplate;
-
-        // console.warn(this.$store.state.shipTemplate);
-        // 禁止选中的地址
 
         let checkData = [];
         let disabledData = checkedData.filter((item, i) => {
@@ -177,7 +173,7 @@ export default {
 
       this.cancel();
     },
-
+    // 初始化地区数据
     init() {
       getAllCity().then((res) => {
         if (res.result) {
