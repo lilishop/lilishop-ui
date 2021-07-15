@@ -25,7 +25,6 @@
       <!-- 拼图验证码 -->
       <verify ref="verify" class="verify-con" verifyType="LOGIN" @change="verifyChange"></verify>
       </Col>
-      <!-- <LangSwitch /> -->
     </Row>
   </div>
 </template>
@@ -36,12 +35,10 @@ import { validateMobile } from "@/libs/validate";
 import Cookies from "js-cookie";
 import Header from "@/views/main-components/header";
 import Footer from "@/views/main-components/footer";
-import LangSwitch from "@/views/main-components/lang-switch";
 import util from "@/libs/util.js";
 import verify from "@/views/my-components/verify";
 export default {
   components: {
-    LangSwitch,
     Header,
     Footer,
     verify,

@@ -1,57 +1,53 @@
 <template>
   <div class="search">
     <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="会员名称" prop="memberName">
-            <Input
-              type="text"
-              v-model="searchForm.memberName"
-              clearable
-              placeholder="请输入会员名称"
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="商品名称" prop="goodsName">
-            <Input
-              type="text"
-              v-model="searchForm.goodsName"
-              clearable
-              placeholder="请输入商品名"
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="评价" prop="orderStatus">
-            <Select v-model="searchForm.grade" placeholder="请选择" clearable style="width: 200px">
-              <Option value="GOOD">好评</Option>
-              <Option value="MODERATE">中评</Option>
-              <Option value="WORSE">差评</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="评论日期">
-            <DatePicker
-              v-model="selectDate"
-              type="datetimerange"
-              format="yyyy-MM-dd HH:mm:ss"
-              clearable
-              @on-change="selectDateRange"
-              placeholder="选择起始时间"
-              style="width: 200px"
-            ></DatePicker>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-          <Button @click="handleReset" class="search-btn">重置</Button>
-        </Form>
-      </Row>
+      <Form ref="searchForm" :model="searchForm" @keydown.enter.native="handleSearch" inline :label-width="70" class="search-form">
+        <Form-item label="会员名称" prop="memberName">
+          <Input
+            type="text"
+            v-model="searchForm.memberName"
+            clearable
+            placeholder="请输入会员名称"
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="商品名称" prop="goodsName">
+          <Input
+            type="text"
+            v-model="searchForm.goodsName"
+            clearable
+            placeholder="请输入商品名"
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="评价" prop="orderStatus">
+          <Select v-model="searchForm.grade" placeholder="请选择" clearable style="width: 200px">
+            <Option value="GOOD">好评</Option>
+            <Option value="MODERATE">中评</Option>
+            <Option value="WORSE">差评</Option>
+          </Select>
+        </Form-item>
+        <Form-item label="评论日期">
+          <DatePicker
+            v-model="selectDate"
+            type="datetimerange"
+            format="yyyy-MM-dd HH:mm:ss"
+            clearable
+            @on-change="selectDateRange"
+            placeholder="选择起始时间"
+            style="width: 200px"
+          ></DatePicker>
+        </Form-item>
+        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+        <Button @click="handleReset" class="search-btn">重置</Button>
+      </Form>
       <Table
         :loading="loading"
         border
         :columns="columns"
         :data="data"
         ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
+        class="mt_10"
       ></Table>
       <Row type="flex" justify="end" class="page">
         <Page
@@ -154,10 +150,9 @@ export default {
   },
   data() {
     return {
-      detailInfo: [],
+      detailInfo: {}, // 详情信息
       image: [],//评价图片
       replyStatus: false,//回复状态
-      modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
       loading: true, // 表单加载状态
@@ -179,7 +174,7 @@ export default {
       // 表单验证规则
       formValidate: {
         reply: [
-          {required: true, message: '请输入回复内容', trigger: 'blur'},
+          {required: true, message: '请输入回复内容', trigger: 'blur'}
         ],
       },
       submitLoading: false, // 添加或编辑提交状态
@@ -284,50 +279,45 @@ export default {
     };
   },
   methods: {
-    init() {
+    init() { // 初始化数据
       this.getDataList();
     },
+    // 改变页数
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
+    // 改变页码
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    // 重置
     handleReset() {
       this.searchForm = {}
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
+    // 清除选中状态
     clearSelectAll() {
       this.$refs.table.selectAll(false);
     },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
+    // 选择日期回调
     selectDateRange(v) {
       if (v) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
       }
     },
+    // 获取列表数据
     getDataList() {
       this.loading = true;
       API_Member.getMemberReview(this.searchForm).then((res) => {
@@ -353,7 +343,7 @@ export default {
         }
       });
     },
-
+    // 获取详情
     detail(v) {
       this.form.replyImage = []
       this.loading = true;

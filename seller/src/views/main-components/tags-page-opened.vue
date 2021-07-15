@@ -42,7 +42,7 @@ export default {
       visible: false, // 显示操作按钮
       contextMenuLeft: 0, // 内容左偏移量
       contextMenuTop: 0, // 内容上偏移量
-      actionList: {
+      actionList: { // 右键菜单
         others: '关闭其他',
         clearAll: '关闭所有'
       },
@@ -68,6 +68,7 @@ export default {
     }
   },
   methods: {
+    // 格式化标签名
     itemTitle(item) {
       if (typeof item.title == "object") {
         return this.$t(item.title.i18n);
@@ -75,6 +76,7 @@ export default {
         return item.title;
       }
     },
+    // 关闭页面
     closePage(event, name) {
       let storeOpenedList = this.$store.state.app.storeOpenedList;
       let lastPageObj = storeOpenedList[0];
@@ -102,6 +104,7 @@ export default {
         this.linkTo(lastPageObj);
       }
     },
+    // 跳转
     linkTo(item) {
       if (this.$route.name == item.name) {
         return;
@@ -118,6 +121,7 @@ export default {
         this.$router.push(routerObj);
       }
     },
+    // 页签栏滚动
     handlescroll(e) {
       var type = e.type;
       let delta = 0;
@@ -155,6 +159,7 @@ export default {
       }
       this.tagBodyLeft = left;
     },
+    // 标签右键操作
     handleTagsOption(type) {
       if (type == "clearAll") {
         this.$store.commit("clearAllTags");
@@ -166,6 +171,7 @@ export default {
       }
       this.tagBodyLeft = 0;
     },
+    // 标签栏滚动
     moveToView(tag) {
       if (tag.offsetLeft < -this.tagBodyLeft) {
         // 标签在可视区域左侧
@@ -193,12 +199,14 @@ export default {
         );
       }
     },
+    // 显示操作按钮
     contextMenu (item, e) {
       this.visible = true
       const offsetLeft = this.$el.getBoundingClientRect().left
       this.contextMenuLeft = e.clientX - offsetLeft + 10
       this.contextMenuTop = e.clientY - 64
     },
+    // 关闭右侧菜单
     closeMenu () {
       this.visible = false
     }
