@@ -57,6 +57,7 @@
         :columns="columns"
         :data="data"
         ref="table"
+        class="mt_10"
         sortable="custom"
       ></Table>
       <Row type="flex" justify="end" class="page">

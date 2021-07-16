@@ -69,7 +69,7 @@
                 >人评价
               </div>
               <div class="goods-show-seller">
-                <Tag v-if="item.selfOperated" style="padding:0 4px;" size="small" color="error">自营</Tag><span>{{ item.storeName }}</span>
+                <Tag v-if="item.selfOperated" style="padding:0 4px;" size="default" color="error">自营</Tag><span>{{ item.storeName }}</span>
               </div>
             </div>
           </div>

@@ -189,7 +189,6 @@ export default {
     selectedItem: {
       // 监听已选条件，来调用列表接口
       handler (val) {
-        console.log(val);
         let classification = [];
         this.params.brandId = ''
         this.params.prop = ''
@@ -248,7 +247,7 @@ export default {
         this.$set(this.tabBar, 'second', second)
       }
     },
-    cateClick (item, index) {  // 点选分类
+    cateClick (item, index) { // 点选分类
       switch (index) {
         case 1:
           this.$router.push({
@@ -636,7 +635,8 @@ export default {
   > div:first-child {
     width: 100px;
     background: #eee;
-    padding: 10px 0 0 10px;
+    padding-left: 10px;
+    line-height: 30px;
   }
   > div:last-child {
     width: 1100px;

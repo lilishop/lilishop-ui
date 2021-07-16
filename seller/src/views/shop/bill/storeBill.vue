@@ -1,75 +1,72 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-        <Card>
-          <Row @keydown.enter.native="handleSearch">
-            <Form
-              ref="searchForm"
-              :model="searchForm"
-              inline
-              :label-width="70"
-              class="search-form"
-            >
-              <Form-item label="开始时间" prop="startDay">
-                <DatePicker
-                  type="date"
-                  v-model="searchForm.startDate"
-                  format="yyyy-MM-dd HH:mm:ss"
-                  placeholder="请选择"
-                  clearable
-                  style="width: 200px"
-                ></DatePicker>
-              </Form-item>
-              <Form-item label="结束时间" prop="endDate">
-                <DatePicker
-                  type="date"
-                  v-model="searchForm.endDate"
-                  format="yyyy-MM-dd HH:mm:ss"
-                  di
-                  placeholder="请选择"
-                  clearable
-                  style="width: 200px"
-                ></DatePicker>
-              </Form-item>
-              <Form-item label="状态" prop="orderStatus">
-                <Select v-model="searchForm.billStatus" placeholder="请选择" clearable style="width: 200px">
-                  <Option value="OUT">已出账</Option>
-                  <Option value="CHECK">已对账</Option>
-                  <Option value="COMPLETE">已完成</Option>
-                </Select>
-              </Form-item>
-              <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-              <Button @click="handleReset" class="search-btn">重置</Button>
-            </Form>
-          </Row>
-          <Table
-            :loading="loading"
-            border
-            :columns="columns"
-            :data="data"
-            ref="table"
-            sortable="custom"
-            @on-sort-change="changeSort"
-            @on-selection-change="changeSelect"
-          ></Table>
-          <Row type="flex" justify="end" class="page">
-            <Page
-              :current="searchForm.pageNumber"
-              :total="total"
-              :page-size="searchForm.pageSize"
-              @on-change="changePage"
-              @on-page-size-change="changePageSize"
-              :page-size-opts="[10, 20, 50]"
-              size="small"
-              show-total
-              show-elevator
-              show-sizer
-            ></Page>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
+    <Card>
+      <Row @keydown.enter.native="handleSearch">
+        <Form
+          ref="searchForm"
+          :model="searchForm"
+          inline
+          :label-width="70"
+          class="search-form"
+        >
+          <Form-item label="开始时间" prop="startDay">
+            <DatePicker
+              type="date"
+              v-model="searchForm.startDate"
+              format="yyyy-MM-dd HH:mm:ss"
+              placeholder="请选择"
+              clearable
+              style="width: 200px"
+            ></DatePicker>
+          </Form-item>
+          <Form-item label="结束时间" prop="endDate">
+            <DatePicker
+              type="date"
+              v-model="searchForm.endDate"
+              format="yyyy-MM-dd HH:mm:ss"
+              di
+              placeholder="请选择"
+              clearable
+              style="width: 200px"
+            ></DatePicker>
+          </Form-item>
+          <Form-item label="状态" prop="orderStatus">
+            <Select v-model="searchForm.billStatus" placeholder="请选择" clearable style="width: 200px">
+              <Option value="OUT">已出账</Option>
+              <Option value="CHECK">已对账</Option>
+              <Option value="COMPLETE">已完成</Option>
+            </Select>
+          </Form-item>
+          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+          <Button @click="handleReset" class="search-btn">重置</Button>
+        </Form>
+      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        class="mt_10"
+        sortable="custom"
+        @on-sort-change="changeSort"
+        @on-selection-change="changeSelect"
+      ></Table>
+      <Row type="flex" justify="end" class="page">
+        <Page
+          :current="searchForm.pageNumber"
+          :total="total"
+          :page-size="searchForm.pageSize"
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+          :page-size-opts="[10, 20, 50]"
+          size="small"
+          show-total
+          show-elevator
+          show-sizer
+        ></Page>
+      </Row>
+    </Card>
   </div>
 </template>
 

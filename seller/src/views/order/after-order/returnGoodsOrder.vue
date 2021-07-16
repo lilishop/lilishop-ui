@@ -49,6 +49,7 @@
       <Table
         :loading="loading"
         border
+        class="mt_10"
         :columns="columns"
         :data="data"
         ref="table"

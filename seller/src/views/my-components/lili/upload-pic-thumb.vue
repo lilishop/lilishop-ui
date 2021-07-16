@@ -63,34 +63,34 @@ export default {
     vuedraggable
   },
   props: {
-    value: {
+    value: { // 默认值
       type: Object
     },
-    draggable: {
+    draggable: { // 是否可拖拽改变位置
       type: Boolean,
       default: true
     },
-    multiple: {
+    multiple: { // 多选
       type: Boolean,
       default: true
     },
-    maxSize: {
+    maxSize: { // 大小限制 MB
       type: Number,
       default: 5
     },
-    disable:{
+    disable:{ // 禁止上传
       type: Boolean,
       default: false
     },
-    remove:{
+    remove:{ // 移除图片
       type: Boolean,
       default: true
     },
-    limit: {
+    limit: { // 上传总数限制
       type: Number,
       default: 10
     },
-    isView: {
+    isView: { // 显示上传按钮
       type: Boolean,
       default: false
     }

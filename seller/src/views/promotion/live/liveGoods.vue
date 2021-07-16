@@ -24,7 +24,7 @@
       <div style="position:relative">
         <Spin size="large" fix v-if="tableLoading">
         </Spin>
-        <Table disabled-hover :columns="liveGoodsColumns" :data="liveGoodsData">
+        <Table class="mt_10" disabled-hover :columns="liveGoodsColumns" :data="liveGoodsData">
 
           <template slot-scope="{ row }" slot="goodsName">
             <div class="flex-goods">

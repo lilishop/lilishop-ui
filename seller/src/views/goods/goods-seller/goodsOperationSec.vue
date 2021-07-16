@@ -137,7 +137,7 @@
                   规格详细
                   <div slot="content">
                     <div slot="content">
-                      <Table :columns="skuTableColumn" :data="skuTableData" style="
+                      <Table class="mt_10" :columns="skuTableColumn" :data="skuTableData" style="
                           width: 100%;
                           .ivu-table-overflowX {
                             overflow-x: hidden;

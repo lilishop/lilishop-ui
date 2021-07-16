@@ -41,7 +41,7 @@
         </Dropdown>
       </Row>
 
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" @on-selection-change="changeSelect">
+      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" @on-selection-change="changeSelect">
         <!-- 商品栏目格式化 -->
         <template slot="goodsSlot" slot-scope="{row}">
           <div style="margin-top: 5px;height: 90px; display: flex;">
@@ -73,7 +73,7 @@
     <Modal title="更新库存" v-model="updateStockModalVisible" :mask-closable="false" :width="500">
       <Tabs value="updateStock">
         <TabPane label="手动规格更新" name="updateStock">
-          <Table :columns="updateStockColumns" :data="stockList" border :span-method="handleSpan"></Table>
+          <Table class="mt_10" :columns="updateStockColumns" :data="stockList" border :span-method="handleSpan"></Table>
         </TabPane>
         <TabPane label="批量规格更新" name="stockAll">
           <Input type="number" v-model="stockAllUpdate" placeholder="统一规格修改" />

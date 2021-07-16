@@ -83,6 +83,7 @@ export default {
       this.grade = grade;
       return grade;
     },
+    // 强度验证方法
     strengthChange() {
       if (!this.currentValue) {
         this.tipStyle = "password-tip-none";
@@ -108,11 +109,13 @@ export default {
         this.strengthValue = 100;
       }
     },
+    // 输入框change事件
     handleChange(v) {
       this.strengthChange();
       this.$emit("input", this.currentValue);
       this.$emit("on-change", this.currentValue, this.grade, this.strength);
     },
+    // 回显当前密码
     setCurrentValue(value) {
       if (value === this.currentValue) {
         return;

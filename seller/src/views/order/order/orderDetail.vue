@@ -107,7 +107,7 @@
   </Card>
 
     <Card>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom">
+      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom">
         <!-- 商品栏目格式化 -->
         <template slot="goodsSlot" slot-scope="{row}">
           <div style="margin-top: 5px; height: 80px; display: flex">

@@ -62,7 +62,7 @@
                 <Button type="primary" @click="openSkuList">选择商品</Button>
                 <Button type="error" ghost style="margin-left: 10px" @click="delSelectGoods">批量删除</Button>
               </div>
-              <Table border :columns="columns" :data="form.promotionGoodsList" @on-selection-change="changeSelect">
+              <Table class="mt_10" border :columns="columns" :data="form.promotionGoodsList" @on-selection-change="changeSelect">
                 <template slot-scope="{ row }" slot="QRCode">
                   <img :src="row.QRCode || '../../../assets/lili.png'" width="50px" height="50px" alt="" />
                 </template>

@@ -41,6 +41,7 @@
         border
         :columns="columns"
         :data="data"
+        class="mt_10"
         ref="table"
         sortable="custom"
         @on-sort-change="changeSort"

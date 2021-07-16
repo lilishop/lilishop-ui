@@ -404,6 +404,7 @@ export default {
       this.modalTitle = "添加文章";
       this.treeValue = '';
       this.form = {
+        sort: 1,
         content:''
       };
       this.$refs.form.resetFields();

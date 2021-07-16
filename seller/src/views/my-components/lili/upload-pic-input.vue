@@ -55,28 +55,28 @@ export default {
   props: {
     value: String,
     size: String,
-    placeholder: {
+    placeholder: { // input提示信息
       type: String,
       default: "图片链接"
     },
-    showInput: {
+    showInput: { // 显示图片链接
       type: Boolean,
       default: true
     },
-    disabled: {
+    disabled: { // 是否不可选中
       type: Boolean,
       default: false
     },
-    readonly: {
+    readonly: { // 是否只读
       type: Boolean,
       default: false
     },
-    maxSize: {
+    maxSize: { // 图片最大尺寸
       type: Number,
       default: 5
     },
-    maxlength: Number,
-    icon: {
+    maxlength: Number, // 最大长度
+    icon: { // 上传按钮图标
       type: String,
       default: "ios-cloud-upload-outline"
     }
@@ -91,11 +91,13 @@ export default {
     };
   },
   methods: {
+    // 初始化
     init() {
       this.accessToken = {
         accessToken: this.getStore("accessToken")
       };
     },
+    // 格式校验
     handleFormatError(file) {
       this.loading = false;
       this.$Notice.warning({
@@ -106,6 +108,7 @@ export default {
           " ’格式不正确, 请选择 .jpg .jpeg .png .gif .bmp格式文件"
       });
     },
+    // 大小校验
     handleMaxSize(file) {
       this.loading = false;
       this.$Notice.warning({
@@ -113,10 +116,12 @@ export default {
         desc: "所选文件‘ " + file.name + " ’大小过大, 不得超过 " + this.maxSize + "M."
       });
     },
+    // 上传前
     beforeUpload() {
       this.loading = true;
       return true;
     },
+    // 上传成功
     handleSuccess(res, file) {
       this.loading = false;
       if (res.success) {
@@ -127,15 +132,18 @@ export default {
         this.$Message.error(res.message);
       }
     },
+    // 上传失败
     handleError(error, file, fileList) {
       this.loading = false;
       this.$Message.error(error.toString());
     },
+    // 上传成功回显
     handleChange(v) {
       this.$emit("input", this.currentValue);
       this.$emit("on-change", this.currentValue);
       this.$attrs.rollback && this.$attrs.rollback()
     },
+    // 初始值
     setCurrentValue(value) {
       if (value === this.currentValue) {
         return;

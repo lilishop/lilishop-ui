@@ -87,6 +87,7 @@ export default {
     };
   },
   methods: {
+    // 初始化编辑器
     initEditor() {
       let that = this;
       this.editor = new E(`#${this.id}`);
@@ -171,16 +172,19 @@ export default {
       }
       this.editor.create();
     },
+    // html预览
     editHTML() {
       this.dataEdit = this.data;
       this.showHTMLModal = true;
     },
+    // 保存
     editHTMLOk() {
       this.editor.txt.html(this.dataEdit);
       this.$emit("input", this.data);
       this.$emit("on-change", this.data);
       this.showHTMLModal = false;
     },
+    // 清空编辑器
     clear() {
       this.$Modal.confirm({
         title: "确认清空",

@@ -144,7 +144,10 @@
       <div>
         <h4>订退单统计</h4>
         <div class="breadcrumb" style="margin-bottom:20px;">
-          <span @click="clickTab(item,index)" :class="{'active':item.selected}" v-for="(item,index) in orderType" :key="index"> {{item.title}}</span>
+          <RadioGroup v-model="orderOrRefund" type="button" size="small" button-style="solid">
+            <Radio :label="true">订单</Radio>
+            <Radio :label="false">退单</Radio>
+          </RadioGroup>
         </div>
         <div>
           <Table stripe :columns="columns" :data="data"></Table>
@@ -168,18 +171,8 @@ export default {
 
   data() {
     return {
+      orderOrRefund: true, // 订单还是退单
       total: "0", // 订单总数
-      orderType: [
-        // tab切换状态
-        {
-          title: "订单",
-          selected: true,
-        },
-        {
-          title: "退单",
-          selected: false,
-        },
-      ],
       // 订单状态
       orderStatusList: {
         UNDELIVERED: "待发货",
@@ -460,20 +453,17 @@ export default {
       },
       deep: true,
     },
+    orderOrRefund:{ // 订单还是退单
+      handler (val) {
+        if (val) {
+          this.getOrderList();
+        } else {
+          this.getOrderRefundList();
+        }
+      }
+    }
   },
   methods: {
-    clickTab(item, index) {
-      this.refundIndex = index;
-      this.orderType.forEach((res) => {
-        res.selected = false;
-      });
-      if (item.title == "退单") {
-        this.getOrderRefundList();
-      } else {
-        this.getOrderList();
-      }
-      item.selected = true;
-    },
     // 订单图
     initOrderChart() {
       // 默认已经加载 legend-filter 交互

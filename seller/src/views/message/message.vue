@@ -52,6 +52,7 @@
       <transition name="view-message">
         <div v-if="showMesTitleList" class="message-title-list-con">
           <Table
+            class="mt_10"
             ref="messageList"
             :loading="loading"
             :columns="mesTitleColumns"
@@ -314,14 +315,17 @@
       };
     },
     methods: {
+      // 改变页数
       changePage(v) {
         this.params.pageNumber = v;
         this.refreshMessage();
       },
+      // 改变页码
       changePageSize(v) {
         this.params.pageSize = v;
         this.refreshMessage();
       },
+      // 刷新消息
       refreshMessage() {
         let status = "UN_READY";
         let type = this.currentMessageType;
@@ -342,8 +346,6 @@
           }
         });
       },
-
-
       //获取全部数据
       getAll() {
         API_Index.getAllMessage(this.params).then(res => {
@@ -359,6 +361,7 @@
           }
         });
       },
+      // 删除消息
       deleteMessage(id) {
         API_Index.deleteMessage(id).then(res => {
           if (res.success) {
@@ -369,6 +372,7 @@
       backMesTitleList() {
         this.showMesTitleList = true;
       },
+      // 设置当前消息分类
       setCurrentMesType(type) {
         if (this.currentMessageType !== type) {
           this.showMesTitleList = true;

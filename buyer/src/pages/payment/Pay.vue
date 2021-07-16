@@ -412,7 +412,7 @@ export default {
               });
               this.$Modal.warning({
                 title: '以下商品超出配送区域' || title,
-                content: content.toString(),
+                content: content.toString()
               });
             }
             if (res.result.memberAddress) {
