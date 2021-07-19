@@ -131,7 +131,6 @@
 
         <FormItem>
           <Button type="primary" v-if="liveStatus=='NEW'" @click="createLives()">保存</Button>
-
         </FormItem>
       </Form>
     </Card>
@@ -162,7 +161,7 @@ export default {
   },
   data() {
     return {
-      spinShow: false,
+      spinShow: false, // loading加载
       liveGoodsVisible: false, //选择商品
       imageVisible: false, //查看图片的dailog
       imageSrc: "", //查看图片的路径
@@ -172,7 +171,6 @@ export default {
       // 不能选择今天以前的时间
       optionsTime: {
         disabledDate(date) {
-          // console.log(data)
           return date && date.valueOf() < Date.now() - 86400000;
         },
       },
@@ -237,8 +235,7 @@ export default {
           width: 250,
         },
       ],
-      liveData: [], //直播商品集合
-      commodityList: "", //商品集合
+      liveData: [] //直播商品集合
     };
   },
   mounted() {
@@ -285,7 +282,6 @@ export default {
         // 将选择的商品回调给表格
 
         this.liveData = data.commodityList;
-        this.commodityList = data.commodityList;
 
         // 将时间格式化
         this.$set(

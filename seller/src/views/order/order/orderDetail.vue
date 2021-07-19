@@ -5,7 +5,7 @@
         <Button v-if="allowOperation.editPrice" @click="modifyPrice" type="primary">调整价格</Button>
         <Button v-if="allowOperation.editConsignee" @click="editAddress" type="primary">修改收货地址</Button>
         <Button v-if="allowOperation.showLogistics" @click="logistics" type="primary">查看物流</Button>
-        <Button @click="orderLog" type="primary">订单日志</Button>
+        <Button @click="orderLogModal = true" type="primary">订单日志</Button>
         <Button v-if="allowOperation.take" @click="orderTake" type="primary">订单核销</Button>
         <Button v-if="allowOperation.ship" @click="orderDeliver" type="primary">发货</Button>
       </div>
@@ -46,65 +46,65 @@
           <div class="div-item-right">暂无发票信息</div>
         </div>
 
-      <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-        <div class="div-item-left">发票抬头：</div>
-        <div class="div-item-right">{{ orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : '暂无' }}</div>
-      </div>
+        <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+          <div class="div-item-left">发票抬头：</div>
+          <div class="div-item-right">{{ orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : '暂无' }}</div>
+        </div>
 
-      <div class="div-item" v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId">
-        <div class="div-item-left">发票税号：</div>
-        <div class="div-item-right">{{ orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : '暂无' }}</div>
-      </div>
-
-      <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-        <div class="div-item-left">发票内容：</div>
-        <div class="div-item-right">{{ orderInfo.receipt.receiptContent ? orderInfo.receipt.receiptContent : '暂无' }}</div>
-      </div>
-
-      <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-        <div class="div-item-left">发票金额：</div>
-        <div class="div-item-right"><span v-if="orderInfo.receipt.receiptPrice">￥</span>{{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice}}</div>
-      </div>
+        <div class="div-item" v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId">
+          <div class="div-item-left">发票税号：</div>
+          <div class="div-item-right">{{ orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : '暂无' }}</div>
+        </div>
 
         <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-          <div class="div-item-left">是否开票：</div>
-          <div class="div-item-right">{{ orderInfo.receipt.receiptStatus == 0 ? '未开' : '已开' }}</div>
-        </div>
-      </div>
-      <div style="width: 36%; float: left">
-        <div class="div-item">
-          <div class="div-item-left">收货信息：</div>
-          <div class="div-item-right">
-            {{ orderInfo.order.consigneeName }}
-            {{ orderInfo.order.consigneeMobile }}
-            {{ orderInfo.order.consigneeAddressPath }}
-            {{ orderInfo.order.consigneeDetail }}
-          </div>
-        </div>
-        <div class="div-item">
-          <div class="div-item-left">支付方式：</div>
-          <div class="div-item-right">
-            {{ orderInfo.paymentMethodValue }}
-          </div>
+          <div class="div-item-left">发票内容：</div>
+          <div class="div-item-right">{{ orderInfo.receipt.receiptContent ? orderInfo.receipt.receiptContent : '暂无' }}</div>
         </div>
 
-        <div class="div-item">
-          <div class="div-item-left">买家留言：</div>
-          <div class="div-item-right">{{ orderInfo.order.remark }}</div>
+        <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+          <div class="div-item-left">发票金额：</div>
+          <div class="div-item-right"><span v-if="orderInfo.receipt.receiptPrice">￥</span>{{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice}}</div>
         </div>
 
-      <div class="div-item" v-if="orderInfo.order.orderType != 'VIRTUAL'">
-        <div class="div-item-left">配送方式：</div>
-        <div class="div-item-right">
-          {{
-              orderInfo.deliveryMethodValue
-                ? orderInfo.deliveryMethodValue
-                : "暂无配送方式"
-            }}
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+            <div class="div-item-left">是否开票：</div>
+            <div class="div-item-right">{{ orderInfo.receipt.receiptStatus == 0 ? '未开' : '已开' }}</div>
+          </div>
+        </div>
+        <div style="width: 36%; float: left">
+          <div class="div-item">
+            <div class="div-item-left">收货信息：</div>
+            <div class="div-item-right">
+              {{ orderInfo.order.consigneeName }}
+              {{ orderInfo.order.consigneeMobile }}
+              {{ orderInfo.order.consigneeAddressPath }}
+              {{ orderInfo.order.consigneeDetail }}
+            </div>
+          </div>
+          <div class="div-item">
+            <div class="div-item-left">支付方式：</div>
+            <div class="div-item-right">
+              {{ orderInfo.paymentMethodValue }}
+            </div>
+          </div>
+
+          <div class="div-item">
+            <div class="div-item-left">买家留言：</div>
+            <div class="div-item-right">{{ orderInfo.order.remark }}</div>
+          </div>
+
+        <div class="div-item" v-if="orderInfo.order.orderType != 'VIRTUAL'">
+          <div class="div-item-left">配送方式：</div>
+          <div class="div-item-right">
+            {{
+                orderInfo.deliveryMethodValue
+                  ? orderInfo.deliveryMethodValue
+                  : "暂无配送方式"
+              }}
+          </div>
         </div>
       </div>
-    </div>
-  </Card>
+    </Card>
 
     <Card>
       <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom">
@@ -242,7 +242,7 @@
       </div>
 
       <div slot="footer" style="text-align: right">
-        <Button @click="handelCancel">取消</Button>
+        <Button @click="orderLogModal = false">取消</Button>
       </div>
     </Modal>
     <!-- 查询物流 -->
@@ -282,7 +282,7 @@
       </div>
 
       <div slot="footer" style="text-align: right">
-        <Button @click="logisticsClose">取消</Button>
+        <Button @click="logisticsModal = false">取消</Button>
       </div>
     </Modal>
     <!-- 订单发货 -->
@@ -330,10 +330,8 @@ export default {
       region: [], //地区
       regionId: [], //地区id
       showRegion: false,
-      orderLogInfo: [], //订单日志数据
       orderLogModal: false, //弹出调整价格框
       logisticsModal: false, //弹出查询物流框
-      receiptModal: false, //开发票弹出框
       orderDeliverModal: false, //订单发货弹出框
       orderTakeModal: false, //订单核销弹出框
       checkedLogistics: [], //选中的物流公司集合
@@ -348,10 +346,6 @@ export default {
         },
       },
       modal: false, //弹出调整价格框
-      searchForm: {
-        pageNumber: 1, // 当前页数
-        pageSize: 100, // 页面大小
-      },
       //调整价格表单
       modifyPriceForm: {
         orderPrice: 0,
@@ -488,7 +482,7 @@ export default {
           },
         },
       ],
-      data: [], // 表单数据
+      data: [], // 商品表单数据
       orderLogColumns: [
         // 表头
         {
@@ -512,6 +506,7 @@ export default {
           minWidth: 200,
         },
       ],
+      // 订单日志数据
       orderLogData: [],
     };
   },
@@ -553,7 +548,7 @@ export default {
         }
       });
     },
-
+    // 修改订单金额
     modifyPrice() {
       //默认要修改的金额为订单总金额
       this.modifyPriceForm.orderPrice = this.orderInfo.order.flowPrice;
@@ -589,10 +584,6 @@ export default {
         }
       });
     },
-    //关闭物流弹出框
-    logisticsClose() {
-      this.logisticsModal = false;
-    },
     //订单发货
     orderDeliver() {
       API_Order.getLogisticsChecked().then((res) => {
@@ -606,26 +597,15 @@ export default {
     orderDeliverySubmit() {
       this.$refs.orderDeliveryForm.validate((valid) => {
         if (valid) {
-          API_Order.orderDelivery(this.sn, this.orderDeliveryForm).then(
-            (res) => {
-              if (res.success) {
-                this.$Message.success("订单发货成功");
-                this.orderDeliverModal = false;
-                this.getDataDetail();
-              }
+          API_Order.orderDelivery(this.sn, this.orderDeliveryForm).then((res) => {
+            if (res.success) {
+              this.$Message.success("订单发货成功");
+              this.orderDeliverModal = false;
+              this.getDataDetail();
             }
-          );
+          });
         }
       });
-    },
-
-    //订单日志
-    orderLog() {
-      this.orderLogModal = true;
-    },
-    //订单日志取消
-    handelCancel() {
-      this.orderLogModal = false;
     },
     //弹出修改收货地址框
     editAddress() {

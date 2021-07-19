@@ -1,5 +1,5 @@
 <template>
-  <div class="search">
+  <div class="pintuan">
     <Card>
       <Row>
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
@@ -47,9 +47,6 @@
         :columns="columns"
         :data="data"
         ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
       >
         <template slot-scope="{ row }" slot="action">
           <div  class="row">
@@ -128,7 +125,6 @@ import {
 } from "@/api/promotion";
 export default {
   name: "pintuan",
-  components: {},
   data() {
     return {
       loading: true, // 表单加载状态
@@ -140,8 +136,6 @@ export default {
         order: "desc", // 默认排序方式
       },
       selectDate: null, // 选择的时间
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [
         {
           title: "活动名称",
@@ -191,23 +185,27 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v - 1;
       this.getDataList();
-      this.clearSelectAll();
     },
+    // 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 0;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    // 重置
     handleReset() {
       this.searchForm = {}
       this.selectDate = ''
@@ -215,20 +213,14 @@ export default {
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
+    // 时间段分别赋值
     selectDateRange(v) {
       if (v) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
       }
     },
+    // 获取列表数据
     getDataList() {
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
@@ -238,7 +230,6 @@ export default {
         this.searchForm.startTime = null;
         this.searchForm.endTime = null;
       }
-      // 带多条件搜索参数获取表单数据 请自行修改接口
       getPintuanList(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
@@ -247,15 +238,19 @@ export default {
         }
       });
     },
+    // 新建拼团
     newAct() {
       this.$router.push({ name: "new-pintuan" });
     },
+    // 编辑拼团
     edit(v) {
       this.$router.push({ name: "new-pintuan", query: { id: v.id } });
     },
+    // 管理拼团商品
     manage(v, status) {
       this.$router.push({ name: "pintuan-goods", query: { id: v.id, status: status } });
     },
+    // 手动开启拼团活动
     open(v) {
       this.$Modal.confirm({
         title: "确认开启",
@@ -298,6 +293,7 @@ export default {
         },
       });
     },
+    // 关闭拼团活动
     close(v) {
       this.$Modal.confirm({
         title: "确认关闭",
@@ -314,6 +310,7 @@ export default {
         },
       });
     },
+    // 删除拼团活动
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
@@ -338,6 +335,5 @@ export default {
 };
 </script>
 <style lang="scss">
-@import "pintuan.scss";
 @import "@/styles/table-common.scss";
 </style>

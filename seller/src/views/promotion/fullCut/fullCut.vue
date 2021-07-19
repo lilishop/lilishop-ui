@@ -1,49 +1,49 @@
 <template>
   <div class="full-cut">
     <Card>
-      <Row>
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
-          <Form-item label="活动名称">
-            <Input
-              type="text"
-              v-model="searchForm.promotionName"
-              placeholder="请输入活动名称"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="活动状态" prop="promotionStatus">
-            <Select
-              v-model="searchForm.promotionStatus"
-              placeholder="请选择"
-              clearable
-              style="width: 200px"
-            >
-              <Option value="NEW">未开始</Option>
-              <Option value="START">已开始/上架</Option>
-              <Option value="END">已结束/下架</Option>
-              <Option value="CLOSE">紧急关闭/作废</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="活动时间">
-            <DatePicker
-              v-model="selectDate"
-              type="daterange"
-              clearable
-              placeholder="选择起始时间"
-              style="width: 200px"
-            ></DatePicker>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" class="search-btn" icon="ios-search">搜索</Button>
+      <Form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        :label-width="70"
+        class="search-form"
+      >
+        <Form-item label="活动名称">
+          <Input
+            type="text"
+            v-model="searchForm.promotionName"
+            placeholder="请输入活动名称"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="活动状态" prop="promotionStatus">
+          <Select
+            v-model="searchForm.promotionStatus"
+            placeholder="请选择"
+            clearable
+            style="width: 200px"
+          >
+            <Option value="NEW">未开始</Option>
+            <Option value="START">已开始/上架</Option>
+            <Option value="END">已结束/下架</Option>
+            <Option value="CLOSE">紧急关闭/作废</Option>
+          </Select>
+        </Form-item>
+        <Form-item label="活动时间">
+          <DatePicker
+            v-model="selectDate"
+            type="daterange"
+            clearable
+            placeholder="选择起始时间"
+            style="width: 200px"
+          ></DatePicker>
+        </Form-item>
+        <Form-item>
+          <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
           <Button @click="handleReset" class="ml_10">重置</Button>
-        </Form>
-      </Row>
+        </Form-item>
+      </Form>
       <Row class="operation">
         <Button type="primary" @click="newAct">新增</Button>
       </Row>
@@ -184,29 +184,31 @@ export default {
     };
   },
   methods: {
+    // 改变页码
     newAct() {
-      // 新增活动
       this.$router.push({ name: "full-cut-detail" });
     },
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 改变页数
     changePage(v) {
-      // 改变页数
       this.searchForm.pageNumber = v - 1;
       this.getDataList();
     },
+    // 改变页码
     changePageSize(v) {
-      // 改变页码
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
-      // 搜索
       this.searchForm.pageNumber = 0;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    // 重置
     handleReset() {
       this.selectDate = ''
       this.searchForm = {}
@@ -214,11 +216,11 @@ export default {
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-
+    //  编辑
     edit(row) {
-      //  编辑
       this.$router.push({ name: "full-cut-detail", query: { id: row.id } });
     },
+    // 删除
     del(row) {
       this.$Modal.confirm({
         title: "提示",
@@ -237,6 +239,7 @@ export default {
         },
       });
     },
+    // 获取列表数据
     getDataList() {
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {

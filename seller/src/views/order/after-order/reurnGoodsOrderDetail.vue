@@ -9,18 +9,9 @@
                 <h3>售后申请</h3>
                 <dl>
                   <dt>售后状态</dt>
-                  <dd v-if="afterSaleInfo.serviceStatus =='APPLY'">申请售后</dd>
-                  <dd v-if="afterSaleInfo.serviceStatus =='PASS'">申请通过</dd>
-                  <dd v-if="afterSaleInfo.serviceStatus =='REFUSE'">申请拒绝</dd>
-                  <dd v-if="afterSaleInfo.serviceStatus =='BUYER_RETURN'">买家退货，待卖家收货</dd>
-                  <dd v-if="afterSaleInfo.serviceStatus =='SELLER_RE_DELIVERY'">商家换货</dd>
-                  <dd v-if="afterSaleInfo.serviceStatus =='SELLER_CONFIRM'">卖家确认收货</dd>
-                  <dd v-if="afterSaleInfo.serviceStatus =='SELLER_TERMINATION'">卖家终止售后</dd>
-                  <dd v-if="afterSaleInfo.serviceStatus =='BUYER_CONFIRM'">买家确认收货</dd>
-                  <dd v-if="afterSaleInfo.serviceStatus =='BUYER_CANCEL'">买家取消售后</dd>
-                  <dd v-if="afterSaleInfo.serviceStatus =='WAIT_REFUND'">等待平台退款</dd>
-                  <dd v-if="afterSaleInfo.serviceStatus =='COMPLETE'">已完成</dd>
+                  <dd>{{filterStatus(afterSaleInfo.serviceStatus)}}</dd>
                 </dl>
+                
                 <dl>
                   <dt>退货退款编号</dt>
                   <dd>{{ afterSaleInfo.sn }}</dd>
@@ -296,7 +287,7 @@
       </div>
 
       <div slot="footer" style="text-align: right">
-        <Button size="large" @click="orderDeliverCancel">取消</Button>
+        <Button size="large" @click="modalVisible = false">取消</Button>
         <Button type="success" size="large" @click="orderDeliverySubmit">发货</Button>
 
       </div>
@@ -337,7 +328,7 @@
       </div>
 
       <div slot="footer" style="text-align: right">
-        <Button @click="logisticsClose">取消</Button>
+        <Button @click="logisticsModal = false">取消</Button>
       </div>
     </Modal>
   </div>
@@ -387,13 +378,24 @@ export default {
         remark: "",
         actualRefundPrice: 0,
       },
+      // 售后状态
+      afterSaleStatus: [
+        {status: 'APPLY', label: '申请售后'},
+        {status: 'PASS', label: '申请通过'},
+        {status: 'REFUSE', label: '申请拒绝'},
+        {status: 'BUYER_RETURN', label: '买家退货，待卖家收货'},
+        {status: 'SELLER_RE_DELIVERY', label: '商家换货'},
+        {status: 'SELLER_CONFIRM', label: '卖家确认收货'},
+        {status: 'SELLER_TERMINATION', label: '卖家终止售后'},
+        {status: 'BUYER_CONFIRM', label: '买家确认收货'},
+        {status: 'BUYER_CANCEL', label: '买家取消售后'},
+        {status: 'WAIT_REFUND', label: '等待平台退款'},
+        {status: 'COMPLETE', label: '已完成'},
+      ]
     };
   },
-  watch: {
-    $route(to, from) {
-    },
-  },
   methods: {
+    // 获取售后详情
     getDetail() {
       this.loading = true;
       API_Order.afterSaleOrderDetail(this.sn).then((res) => {
@@ -414,9 +416,6 @@ export default {
           this.getDetail();
         }
       });
-    },
-    orderDeliverCancel() {
-      this.modalVisible = false;
     },
     //商家确认收货
     sellerConfirmSubmit(type) {
@@ -463,10 +462,6 @@ export default {
         }
       });
     },
-    //关闭物流弹出框
-    logisticsClose() {
-      this.logisticsModal = false;
-    },
 
     //换货发货
     orderDeliverySubmit() {
@@ -497,12 +492,23 @@ export default {
         }
       });
     },
+    // 返回售后状态中文描述
+    filterStatus (status) {
+      let label = ''
+      for (let i = 0; i< this.afterSaleStatus.length; i++) {
+        const obj = this.afterSaleStatus[i]
+        if (obj.status === status) {
+          label = obj.label
+          break;
+        }
+      }
+      return label
+    }
   },
-
-  mounted() {
+  activated () {
     this.sn = this.$route.query.sn;
     this.getDetail();
-  },
+  }
 };
 </script>
 <style lang="scss" scoped>

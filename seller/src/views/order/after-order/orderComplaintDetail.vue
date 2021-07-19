@@ -1,257 +1,245 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-      <Card>
-        <div class="main-content">
-          <div class="div-flow-left">
-            <div class="div-form-default">
-              <h3>投诉信息</h3>
-              <dl>
-                <dt>投诉商品</dt>
-                <dd>{{ complaintInfo.goodsName }}</dd>
-              </dl>
-              <dl>
-                <dt>投诉状态</dt>
-                <dd v-if="complaintInfo.complainStatus =='NEW'">新投诉</dd>
-                <dd v-if="complaintInfo.complainStatus =='CANCEL'">已撤销</dd>
-                <dd v-if="complaintInfo.complainStatus =='WAIT_APPEAL'">待申诉</dd>
-                <dd v-if="complaintInfo.complainStatus =='COMMUNICATION'">对话中</dd>
-                <dd v-if="complaintInfo.complainStatus =='WAIT_ARBITRATION'">等待仲裁</dd>
-                <dd v-if="complaintInfo.complainStatus =='COMPLETE'">已完成</dd>
-              </dl>
-              <dl>
-                <dt>投诉时间</dt>
-                <dd>{{ complaintInfo.createTime }}</dd>
-              </dl>
-              <dl>
-                <dt>投诉主题</dt>
-                <dd>{{ complaintInfo.complainTopic }}</dd>
-              </dl>
-              <dl>
-                <dt>投诉内容</dt>
-                <dd>{{ complaintInfo.content }}</dd>
-              </dl>
-              <dl>
-                <dt>投诉凭证</dt>
-                <dd v-if="images === ''">
-                  暂无投诉凭证
-                </dd>
-                <dd v-else>
-                  <div class="div-img" v-for="(item, index) in images">
-                    <img class="complain-img" :src=item>
-                  </div>
-                </dd>
-              </dl>
-            </div>
-            <div class="div-form-default" v-if="complaintInfo.complainStatus !== 'WAIT_APPEAL'">
-              <h3>商家申诉信息</h3>
-              <dl>
-                <dt>申诉时间</dt>
-                <dd>{{ complaintInfo.appealTime }}</dd>
-              </dl>
-              <dl>
-                <dt>申诉内容</dt>
-                <dd>{{ complaintInfo.appealContent }}</dd>
-              </dl>
-              <dl>
-                <dt>申诉凭证</dt>
-                <dd v-if="appealImages == ''">
-                  暂无申诉凭证
-                </dd>
-                <dd v-else>
-                  <div class="div-img" v-for="(item, index) in appealImages">
-                    <img class="complain-img" :src=item>
-                  </div>
-                </dd>
-              </dl>
-            </div>
+    <Card>
+      <div class="main-content">
+        <div class="div-flow-left">
+          <div class="div-form-default">
+            <h3>投诉信息</h3>
+            <dl>
+              <dt>投诉商品</dt>
+              <dd>{{ complaintInfo.goodsName }}</dd>
+            </dl>
+            <dl>
+              <dt>投诉状态</dt>
+              <dd v-if="complaintInfo.complainStatus =='NEW'">新投诉</dd>
+              <dd v-if="complaintInfo.complainStatus =='CANCEL'">已撤销</dd>
+              <dd v-if="complaintInfo.complainStatus =='WAIT_APPEAL'">待申诉</dd>
+              <dd v-if="complaintInfo.complainStatus =='COMMUNICATION'">对话中</dd>
+              <dd v-if="complaintInfo.complainStatus =='WAIT_ARBITRATION'">等待仲裁</dd>
+              <dd v-if="complaintInfo.complainStatus =='COMPLETE'">已完成</dd>
+            </dl>
+            <dl>
+              <dt>投诉时间</dt>
+              <dd>{{ complaintInfo.createTime }}</dd>
+            </dl>
+            <dl>
+              <dt>投诉主题</dt>
+              <dd>{{ complaintInfo.complainTopic }}</dd>
+            </dl>
+            <dl>
+              <dt>投诉内容</dt>
+              <dd>{{ complaintInfo.content }}</dd>
+            </dl>
+            <dl>
+              <dt>投诉凭证</dt>
+              <dd v-if="images === ''">
+                暂无投诉凭证
+              </dd>
+              <dd v-else>
+                <div class="div-img" v-for="(item, index) in images" :key="index">
+                  <img class="complain-img" :src=item>
+                </div>
+              </dd>
+            </dl>
+          </div>
+          <div class="div-form-default" v-if="complaintInfo.complainStatus !== 'WAIT_APPEAL'">
+            <h3>商家申诉信息</h3>
+            <dl>
+              <dt>申诉时间</dt>
+              <dd>{{ complaintInfo.appealTime }}</dd>
+            </dl>
+            <dl>
+              <dt>申诉内容</dt>
+              <dd>{{ complaintInfo.appealContent }}</dd>
+            </dl>
+            <dl>
+              <dt>申诉凭证</dt>
+              <dd v-if="appealImages == ''">
+                暂无申诉凭证
+              </dd>
+              <dd v-else>
+                <div class="div-img" v-for="(item, index) in appealImages" :key="index">
+                  <img class="complain-img" :src=item>
+                </div>
+              </dd>
+            </dl>
+          </div>
 
-            <div class="div-form-default" v-if="complaintInfo.complainStatus === 'WAIT_APPEAL'">
-              <h3>商家申诉</h3>
-              <dl>
-                <dt>申诉内容</dt>
-                <dd>
-                  <Input v-model="appeal.appealContent" type="textarea" maxlength="200" :rows="4" clearable style="width:260px" />
-                </dd>
-              </dl>
-              <dl>
-                <dt>申诉凭证</dt>
-                <dd>
-                  <div class="complain-upload-list" :key="index" v-for="(item,index) in appeal.appealImages">
-                    <template v-if="item.status === 'finished'">
-                      <img class="complain-img" :src="item.url">
-                      <div class="complain-upload-list-cover">
-                        <Icon type="ios-eye-outline" @click.native="handleView(item.url)"></Icon>
-                        <Icon type="ios-trash-outline" @click.native="handleRemove(item)"></Icon>
-                      </div>
-                    </template>
-                    <template v-else>
-                      <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
-                    </template>
-                  </div>
-                  <Upload ref="upload" :show-upload-list="false" :on-format-error="handleFormatError" :action="uploadFileUrl" :headers="accessToken" :on-success="handleSuccessGoodsPicture"
-                    :format="['jpg','jpeg','png']" :max-size="2048" :on-exceeded-size="handleMaxSize" :before-upload="handleBeforeUpload" multiple type="drag"
-                    style="display: inline-block;width:58px;">
-                    <div style="width: 58px;height:58px;line-height: 58px;">
-                      <Icon type="ios-camera" size="20"></Icon>
+          <div class="div-form-default" v-if="complaintInfo.complainStatus === 'WAIT_APPEAL'">
+            <h3>商家申诉</h3>
+            <dl>
+              <dt>申诉内容</dt>
+              <dd>
+                <Input v-model="appeal.appealContent" type="textarea" maxlength="200" :rows="4" clearable style="width:260px" />
+              </dd>
+            </dl>
+            <dl>
+              <dt>申诉凭证</dt>
+              <dd>
+                <div class="complain-upload-list" :key="index" v-for="(item,index) in appeal.appealImages">
+                  <template v-if="item.status === 'finished'">
+                    <img class="complain-img" :src="item.url">
+                    <div class="complain-upload-list-cover">
+                      <Icon type="ios-eye-outline" @click.native="handleView(item.url)"></Icon>
+                      <Icon type="ios-trash-outline" @click.native="handleRemove(item)"></Icon>
                     </div>
-                  </Upload>
-                  <Modal title="View Image" v-model="visible">
-                    <img :src="imgName" v-if="visible" style="width: 100%">
-                  </Modal>
+                  </template>
+                  <template v-else>
+                    <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
+                  </template>
+                </div>
+                <Upload ref="upload" :show-upload-list="false" :on-format-error="handleFormatError" :action="uploadFileUrl" :headers="accessToken" :on-success="handleSuccessGoodsPicture"
+                  :format="['jpg','jpeg','png']" :max-size="2048" :on-exceeded-size="handleMaxSize" :before-upload="handleBeforeUpload" multiple type="drag"
+                  style="display: inline-block;width:58px;">
+                  <div style="width: 58px;height:58px;line-height: 58px;">
+                    <Icon type="ios-camera" size="20"></Icon>
+                  </div>
+                </Upload>
+                <Modal title="View Image" v-model="visible">
+                  <img :src="imgName" v-if="visible" style="width: 100%">
+                </Modal>
+              </dd>
+            </dl>
+            <dl>
+              <dt></dt>
+              <dd>
+                <Button type="primary" :loading="submitLoading" @click="appealSubmit()" style="margin-left: 5px">
+                  提交申诉
+                </Button>
+              </dd>
+            </dl>
+          </div>
 
-                  <!-- <Input v-model="appeal.appealImages" type="textarea" maxlength="200" :rows="4" clearable
-                           style="width:260px"/> -->
-                </dd>
-              </dl>
-              <dl>
-                <dt></dt>
-                <dd>
-                  <Button type="primary" :loading="submitLoading" @click="appealSubmit()" style="margin-left: 5px">
-                    提交申诉
+          <div class="div-form-default">
+            <h3>对话详情</h3>
+            <dl>
+              <dt>对话记录</dt>
+              <dd>
+                <div class="div-content">
+                  <p v-for="(item, index) in complaintInfo.orderComplaintCommunications" :key="index">
+                    <span v-if="item.owner === 'STORE'">商家[{{ item.createTime }}]</span>
+                    <span v-if="item.owner === 'BUYER'">买家[{{ item.createTime }}]</span>
+                    <span v-if="item.owner === 'PLATFORM'">平台[{{ item.createTime }}]</span>
+                    {{ item.content }}
+                  </p>
+                </div>
+
+              </dd>
+            </dl>
+            <dl v-if="complaintInfo.complainStatus!='COMPLETE'">
+              <dt>发送对话</dt>
+              <dd>
+                <Input v-model="params.content" type="textarea" maxlength="200" :rows="4" clearable style="width:260px" />
+              </dd>
+            </dl>
+            <dl>
+              <dt></dt>
+              <dd v-if="complaintInfo.complainStatus != 'COMPLETE'">
+                <div style="text-align: right;width: 45%;margin-top: 10px">
+                  <Button type="primary" :loading="submitLoading" @click="handleSubmit" style="margin-left: 5px">
+                    回复
                   </Button>
-                </dd>
-              </dl>
-            </div>
-
-            <div class="div-form-default">
-              <h3>对话详情</h3>
-              <dl>
-                <dt>对话记录</dt>
-                <dd>
-                  <div class="div-content">
-                    <p v-for="(item, index) in complaintInfo.orderComplaintCommunications">
-                      <span v-if="item.owner === 'STORE'">商家[{{ item.createTime }}]</span>
-                      <span v-if="item.owner === 'BUYER'">买家[{{ item.createTime }}]</span>
-                      <span v-if="item.owner === 'PLATFORM'">平台[{{ item.createTime }}]</span>
-                      {{ item.content }}
-                    </p>
-                  </div>
-
-                </dd>
-              </dl>
-              <dl v-if="complaintInfo.complainStatus!='COMPLETE'">
-                <dt>发送对话</dt>
-                <dd>
-                  <Input v-model="params.content" type="textarea" maxlength="200" :rows="4" clearable style="width:260px" />
-                </dd>
-              </dl>
-              <dl>
-                <dt></dt>
-                <dd v-if="complaintInfo.complainStatus != 'COMPLETE'">
-                  <div style="text-align: right;width: 45%;margin-top: 10px">
-                    <Button type="primary" :loading="submitLoading" @click="handleSubmit" style="margin-left: 5px">
-                      回复
-                    </Button>
-                    <Button type="primary" :loading="submitLoading" @click="returnDataList" style="margin-left: 5px">
-                      返回列表
-                    </Button>
-                  </div>
-                </dd>
-              </dl>
-            </div>
-            <div class="div-form-default" v-if="complaintInfo.complainStatus === 'COMPLETE'">
-              <h3>仲裁结果</h3>
-              <dl>
-                <dt>仲裁意见</dt>
-                <dd>
-                  {{ complaintInfo.arbitrationResult }}
-                </dd>
-              </dl>
-            </div>
+                  <Button type="default" :loading="submitLoading" @click="returnDataList" style="margin-left: 5px">
+                    返回列表
+                  </Button>
+                </div>
+              </dd>
+            </dl>
           </div>
-          <div class="div-flow-center">
-
-          </div>
-          <div class="div-flow-right">
-            <div class="div-form-default">
-              <h3>相关商品交易信息</h3>
-              <dl>
-                <dt>
-                  <img :src="complaintInfo.goodsImage" height="60px">
-                </dt>
-                <dd>
-                  <a>{{ complaintInfo.goodsName }}</a><br>
-                  <span>￥{{ complaintInfo.goodsPrice | unitPrice }} * {{ complaintInfo.num }}(数量)</span>
-                </dd>
-              </dl>
-
-            </div>
-            <div class="div-form-default">
-              <h3>订单相关信息</h3>
-              <dl>
-                <dt>
-                  订单编号
-                </dt>
-                <dd>
-                  {{ complaintInfo.orderSn }}
-                </dd>
-              </dl>
-              <dl>
-                <dt>
-                  下单时间
-                </dt>
-                <dd>
-                  {{ complaintInfo.orderTime }}
-                </dd>
-              </dl>
-              <dl>
-                <dt>
-                  订单金额
-                </dt>
-                <dd>
-                  {{ complaintInfo.orderPrice | unitPrice('￥')}}
-                </dd>
-              </dl>
-
-            </div>
-            <div class="div-form-default">
-              <h3>收件人信息</h3>
-              <dl>
-                <dt>
-                  收货人
-                </dt>
-                <dd>
-                  {{ complaintInfo.consigneeName }}
-                </dd>
-              </dl>
-              <dl>
-                <dt>
-                  收货地址
-                </dt>
-                <dd>
-                  {{ complaintInfo.consigneeAddressPath }}
-                </dd>
-              </dl>
-              <dl>
-                <dt>
-                  收货人手机
-                </dt>
-                <dd>
-                  {{ complaintInfo.consigneeMobile }}
-                </dd>
-              </dl>
-            </div>
-
+          <div class="div-form-default" v-if="complaintInfo.complainStatus === 'COMPLETE'">
+            <h3>仲裁结果</h3>
+            <dl>
+              <dt>仲裁意见</dt>
+              <dd>
+                {{ complaintInfo.arbitrationResult }}
+              </dd>
+            </dl>
           </div>
         </div>
+        <div class="div-flow-center">
 
-      </Card>
-      </Col>
-    </Row>
+        </div>
+        <div class="div-flow-right">
+          <div class="div-form-default">
+            <h3>相关商品交易信息</h3>
+            <dl>
+              <dt>
+                <img :src="complaintInfo.goodsImage" height="60px">
+              </dt>
+              <dd>
+                <a>{{ complaintInfo.goodsName }}</a><br>
+                <span>￥{{ complaintInfo.goodsPrice | unitPrice }} * {{ complaintInfo.num }}(数量)</span>
+              </dd>
+            </dl>
+
+          </div>
+          <div class="div-form-default">
+            <h3>订单相关信息</h3>
+            <dl>
+              <dt>
+                订单编号
+              </dt>
+              <dd>
+                {{ complaintInfo.orderSn }}
+              </dd>
+            </dl>
+            <dl>
+              <dt>
+                下单时间
+              </dt>
+              <dd>
+                {{ complaintInfo.orderTime }}
+              </dd>
+            </dl>
+            <dl>
+              <dt>
+                订单金额
+              </dt>
+              <dd>
+                {{ complaintInfo.orderPrice | unitPrice('￥')}}
+              </dd>
+            </dl>
+
+          </div>
+          <div class="div-form-default">
+            <h3>收件人信息</h3>
+            <dl>
+              <dt>
+                收货人
+              </dt>
+              <dd>
+                {{ complaintInfo.consigneeName }}
+              </dd>
+            </dl>
+            <dl>
+              <dt>
+                收货地址
+              </dt>
+              <dd>
+                {{ complaintInfo.consigneeAddressPath }}
+              </dd>
+            </dl>
+            <dl>
+              <dt>
+                收货人手机
+              </dt>
+              <dd>
+                {{ complaintInfo.consigneeMobile }}
+              </dd>
+            </dl>
+          </div>
+
+        </div>
+      </div>
+    </Card>
   </div>
 </template>
 
 <script>
 import * as API_Order from "@/api/order";
-import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
 import * as API_GOODS from "@/api/goods";
 export default {
   name: "orderComplaint",
-  components: {
-    uploadPicThumb,
-  },
   data() {
     return {
       //展示图片层
@@ -284,15 +272,18 @@ export default {
     },
   },
   methods: {
+    // 预览图片
     handleView(name) {
       this.imgName = name;
       this.visible = true;
     },
+    // 移除回复图片
     handleRemove(file) {
       this.appeal.appealImages = this.appeal.appealImages.filter(
         (i) =>  i.url !== file.url
       );
     },
+    // 上传成功回调
     handleSuccessGoodsPicture(res, file) {
       if (file.response) {
         file.url = file.response.result;
@@ -300,6 +291,7 @@ export default {
         this.appeal.appealImages.push(file);
       }
     },
+    // 上传之前钩子
     handleBeforeUpload() {
       const check =
         this.images.images !== undefined && this.images.images.length > 5;
@@ -310,6 +302,7 @@ export default {
       }
       return !check;
     },
+    // 上传格式错误
     handleFormatError(file) {
       this.$Notice.warning({
         title: "图片格式不正确",
@@ -319,12 +312,14 @@ export default {
           " is incorrect, please select jpg or png.",
       });
     },
+    // 上传大小限制
     handleMaxSize(file) {
       this.$Notice.warning({
         title: "超过文件大小限制",
         desc: "图片  " + file.name + " 不能超过2mb",
       });
     },
+    // 获取详情
     getDetail() {
       this.loading = true;
       API_Order.getComplainDetail(this.id).then((res) => {
@@ -358,7 +353,7 @@ export default {
         }
       });
     },
-    //回复
+    //申诉
     appealSubmit() {
 
       if (this.appeal.appealContent === "") {
@@ -376,7 +371,7 @@ export default {
       });
     },
   },
-  mounted() {
+  activated () {
     this.id = this.$route.query.id;
     this.getDetail();
     this.accessToken = {

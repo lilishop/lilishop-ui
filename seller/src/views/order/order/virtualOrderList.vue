@@ -56,7 +56,7 @@ export default {
   name: "virtualOrderList",
   data() {
     return {
-      orderCode: "",
+      orderCode: "", // 核验码
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
@@ -72,19 +72,6 @@ export default {
         orderType: "VIRTUAL",
       },
       selectDate: null,
-      form: {
-        // 添加或编辑表单对象初始化数据
-        sn: "",
-        sellerName: "",
-        startTime: "",
-        endTime: "",
-        billPrice: "",
-      },
-      // 表单验证规则
-      formValidate: {},
-      submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [
         {
           title: "订单号",
@@ -206,22 +193,27 @@ export default {
         });
       }
     },
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
+    // 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    // 重置
     handleReset() {
       this.searchForm = {};
       this.searchForm.pageNumber = 1;
@@ -233,6 +225,7 @@ export default {
       // 重新加载数据
       this.getDataList();
     },
+    // 表格排序
     changeSort(e) {
       this.searchForm.sort = e.key;
       this.searchForm.order = e.order;
@@ -241,17 +234,14 @@ export default {
       }
       this.getDataList();
     },
-
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
+    // 时间段重新赋值
     selectDateRange(v) {
       if (v) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
       }
     },
+    // 获取商品列表
     getDataList() {
       this.loading = true;
       API_Order.getOrderList(this.searchForm).then((res) => {
@@ -262,7 +252,7 @@ export default {
         }
       });
     },
-
+    // 跳转详情
     detail(v) {
       let sn = v.sn;
       this.$router.push({

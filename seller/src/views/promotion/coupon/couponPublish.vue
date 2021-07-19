@@ -33,7 +33,7 @@
 
             <FormItem label="发放数量" v-if="form.getType == 'FREE'" prop="publishNum">
               <Input v-model="form.publishNum" placeholder="发放数量" style="width: 260px" />
-              <div class="tips">如果发放数量为0时,则代表不限制发放数量</div>
+              <span class="tips ml_10">如果发放数量为0时,则代表不限制发放数量</span>
             </FormItem>
           </div>
           <h4>使用限制</h4>
@@ -43,7 +43,7 @@
             </FormItem>
             <FormItem label="领取限制" v-if="form.getType == 'FREE'" prop="couponLimitNum">
               <Input v-model="form.couponLimitNum" placeholder="领取限制" clearable style="width: 260px" />
-              <div class="tips">如果领取限制为0时,则代表不限制领取数量</div>
+              <span class="tips ml_10">如果领取限制为0时,则代表不限制领取数量</span>
             </FormItem>
             <FormItem label="有效期" prop="rangeTime">
               <DatePicker type="datetimerange" v-model="form.rangeTime" format="yyyy-MM-dd HH:mm:ss" placeholder="请选择" :options="options" style="width: 260px">
@@ -125,7 +125,6 @@ export default {
 
     return {
       modalType: 0, // 判断是新增还是编辑优惠券 0 新增  1 编辑
-      categoryId: 0, // 分类id
       form: {
         /** 店铺承担比例 */
         sellerCommission: 0,
@@ -148,12 +147,6 @@ export default {
       submitLoading: false, // 添加或编辑提交状态
       selectedGoods: [], // 已选商品列表，便于删除
       goodsCategoryList: [], // 商品分类列表
-      shopCategoryList: [], // 店铺分类列表
-      cascaderProps: {
-        multiple: true,
-        label: "name",
-        value: "id",
-      }, // 级联选择器配置项
       formRule: {
         promotionName: [{ required: true, message: "活动名称不能为空" }],
         couponName: [{ required: true, message: "优惠券名称不能为空" }],
@@ -241,6 +234,7 @@ export default {
           },
         },
       ],
+      // 时间选择器可选范围
       options: {
         disabledDate(date) {
           return date && date.valueOf() < Date.now() - 86400000;
@@ -257,6 +251,7 @@ export default {
     }
   },
   methods: {
+    // 获取回显数据
     getCoupon() {
       getShopCoupon(this.id).then((res) => {
         let data = res.result;
@@ -292,7 +287,7 @@ export default {
         this.form = data;
       });
     },
-    /** 保存平台优惠券 */
+    /** 保存优惠券 */
     handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {

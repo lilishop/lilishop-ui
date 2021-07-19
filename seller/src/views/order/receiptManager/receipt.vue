@@ -40,8 +40,7 @@
 import * as API_Order from "@/api/order";
 
 export default {
-  name: "storeBill",
-  components: {},
+  name: "receipt",
   data() {
     return {
       loading: true, // 表单加载状态
@@ -53,19 +52,6 @@ export default {
         order: "desc", // 默认排序方式
         receiptStatus: "", // 起始时间
       },
-      form: {
-        // 添加或编辑表单对象初始化数据
-        sn: "",
-        sellerName: "",
-        startTime: "",
-        endTime: "",
-        billPrice: "",
-      },
-      // 表单验证规则
-      formValidate: {},
-      submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [
         {
           title: "订单号",
@@ -213,50 +199,41 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getData();
     },
+    // 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getData();
-      this.clearSelectAll();
     },
+    // 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getData();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getData();
     },
+    // 重置搜索条件
     handleReset() {
       this.searchForm = {};
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getData();
     },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getData();
-    },
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
+    // 时间段从新赋值
     selectDateRange(v) {
       if (v) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
       }
     },
+    // 获取数据
     getData() {
       this.loading = true;
       API_Order.getReceiptPage(this.searchForm).then((res) => {
@@ -286,9 +263,6 @@ export default {
         },
       });
     },
-  },
-  mounted() {
-    this.init();
   },
   activated() {
     this.init();

@@ -28,6 +28,7 @@
         :columns="columns"
         :data="data"
         ref="table"
+        class="mt_10"
         sortable="custom"
       >
         <template slot-scope="{ row }" slot="applyEndTime">
@@ -141,22 +142,27 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v - 1;
       this.getDataList();
     },
+    // 分页 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 0;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    // 重置
     handleReset() {
       this.searchForm = {};
       this.selectDate = "";
@@ -164,10 +170,11 @@ export default {
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-
+    // 管理
     manage(row) {
       this.$router.push({ name: "seckill-goods", query: { id: row.id } });
     },
+    // 获取列表数据
     getDataList() {
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
@@ -201,10 +208,7 @@ export default {
   },
   activated() {
     this.init();
-  },
-  mounted() {
-    this.init();
-  },
+  }
 };
 </script>
 <style lang="scss"  scoped>

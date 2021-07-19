@@ -17,12 +17,12 @@
               type="text"
               v-model="searchForm.orderSn"
               clearable
-              placeholder="请输入商品名"
+              placeholder="请输入订单号"
               style="width: 200px"
             />
           </Form-item>
           <Form-item label="状态" prop="status">
-            <Select v-model="searchForm.status" placeholder="请选择" clearable style="width: 200px">
+            <Select v-model="searchForm.status" placeholder="请选择订单状态" clearable style="width: 200px">
               <Option value="NEW">新投诉</Option>
               <Option value="CANCEL">已撤销</Option>
               <Option value="WAIT_APPEAL">待申诉</Option>
@@ -43,9 +43,6 @@
         :data="data"
         class="mt_10"
         ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
       >
         <template slot-scope="{row}" slot="goodsName">
           <a class="mr_10" @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
@@ -72,56 +69,6 @@
         ></Page>
       </Row>
     </Card>
-    <Modal
-      :title="modalTitle"
-      v-model="modalVisible"
-      :mask-closable="false"
-      :width="500"
-    >
-      <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
-        <FormItem label="评价内容">
-          <span v-if="content == ''">暂无评价</span>
-          <span v-else>{{content}}</span>
-        </FormItem>
-        <FormItem label="评价图片">
-          <upload-pic-thumb
-                            v-model="image"
-                            :disable="true"
-                            :remove="false"
-          ></upload-pic-thumb>
-        </FormItem>
-        <FormItem label="回复内容" prop="reply">
-          <Input v-if="replyStatus == false"
-            v-model="form.reply"
-            type="textarea"
-            maxlength="200"
-            :rows="4"
-            clearable
-            style="width:260px"
-          />
-          <span v-else>
-            {{form.reply}}
-          </span>
-        </FormItem>
-        <FormItem label="回复图片" prop="replyImage">
-          <upload-pic-thumb v-if="replyStatus == false"
-            v-model="form.replyImage"
-            :limit="5"
-          ></upload-pic-thumb>
-          <upload-pic-thumb v-else
-            v-model="form.replyImage"
-            :disable="true"
-             :remove="false"
-          ></upload-pic-thumb>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button v-if="replyStatus == false" type="primary" :loading="submitLoading" @click="handleSubmit" >回复
-        </Button
-        >
-      </div>
-    </Modal>
   </div>
 </template>
 
@@ -137,14 +84,7 @@
     },
     data() {
       return {
-        image:[],//评价图片
-        replyStatus:false,//回复状态
-        modalType: 0, // 添加或编辑标识
-        modalVisible: false, // 添加或编辑显示
-        modalTitle: "", // 添加或编辑标题
-        openTip: true, // 显示提示
         loading: true, // 表单加载状态
-        content: "",//评价内容
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
@@ -152,10 +92,6 @@
           sort: "createTime", // 默认排序字段
           order: "desc", // 默认排序方式
         },
-        form: {}, // 表单数据
-        submitLoading: false, // 添加或编辑提交状态
-        selectList: [], // 多选数据
-        selectCount: 0, // 多选计数
         columns: [
           // 表头
           {
@@ -213,9 +149,8 @@
                     "Button",
                     {
                       props: {
-                        type: "primary",
-                        size: "small",
-                        icon: "ios-create-outline",
+                        type: "info",
+                        size: "small"
                       },
                       style: {
                         marginRight: "5px",
@@ -236,8 +171,7 @@
                     {
                       props: {
                         type: "primary",
-                        size: "small",
-                        icon: "ios-create-outline",
+                        size: "small"
                       },
                       style: {
                         marginRight: "5px",
@@ -262,60 +196,34 @@
       };
     },
     methods: {
-      init() {
+      // 初始化数据
+      init() { 
         this.getDataList();
       },
+      // 改变页码
       changePage(v) {
         this.searchForm.pageNumber = v;
         this.getDataList();
-        this.clearSelectAll();
       },
+      // 改变页数
       changePageSize(v) {
         this.searchForm.pageSize = v;
         this.getDataList();
       },
+      // 搜索
       handleSearch() {
         this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = 10;
         this.getDataList();
       },
+      // 重置
       handleReset() {
         this.searchForm = {}
         this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = 10;
         this.getDataList();
       },
-      changeSort(e) {
-        this.searchForm.sort = e.key;
-        this.searchForm.order = e.order;
-        if (e.order === "normal") {
-          this.searchForm.order = "";
-        }
-        this.getDataList();
-      },
-      clearSelectAll() {
-        this.$refs.table.selectAll(false);
-      },
-      changeSelect(e) {
-        this.selectList = e;
-        this.selectCount = e.length;
-      },
-      selectDateRange(v) {
-        if (v) {
-          this.searchForm.startDate = v[0];
-          this.searchForm.endDate = v[1];
-        }
-      },
-      dropDown() {
-        if (this.drop) {
-          this.dropDownContent = "展开";
-          this.dropDownIcon = "ios-arrow-down";
-        } else {
-          this.dropDownContent = "收起";
-          this.dropDownIcon = "ios-arrow-up";
-        }
-        this.drop = !this.drop;
-      },
+      // 获取数据
       getDataList() {
         this.loading = true;
         API_Order.getComplainPage(this.searchForm).then((res) => {
@@ -327,21 +235,6 @@
         });
         this.total = this.data.length;
         this.loading = false;
-      },
-      //回复
-      handleSubmit() {
-        this.$refs.form.validate((valid) => {
-          if (valid) {
-            API_Member.replyMemberReview(this.form.id, this.form).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("回复成功");
-                this.getDataList();
-                this.modalVisible = false;
-              }
-            });
-          }
-        });
       },
       //投诉详情
       detail(v) {

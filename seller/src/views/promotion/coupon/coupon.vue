@@ -24,9 +24,8 @@
       <Row class="operator padding-row">
         <Button @click="add" type="primary">添加</Button>
         <Button @click="delAll" class="ml_10">批量下架</Button>
-        <!-- <Button @click="upAll">批量上架</Button> -->
       </Row>
-      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
+      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" @on-selection-change="changeSelect">
         <template slot-scope="{ row }" slot="action">
           <Button v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="info" size="small" style="margin-right: 10px" @click="edit(row)">编辑</Button>
           <Button v-if="row.promotionStatus !== 'CLOSE'" type="error" size="small" @click="remove(row)">下架</Button>
@@ -55,17 +54,6 @@ export default {
         sort: "startTime", // 默认排序字段
         order: "desc", // 默认排序方式
       },
-      form: {
-        // 添加或编辑表单对象初始化数据
-        promotionName: "",
-      },
-      // 表单验证规则
-      formValidate: {
-        promotionName: [
-          { required: true, message: "不能为空", trigger: "blur" },
-        ],
-      },
-      submitLoading: false, // 添加或编辑提交状态
       selectList: [], // 多选数据
       selectCount: 0, // 多选计数
       columns: [
@@ -238,15 +226,6 @@ export default {
       this.searchForm.pageNumber = 0;
       this.getDataList();
     },
-
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
     clearSelectAll() {
       this.$refs.table.selectAll(false);
     },
@@ -254,6 +233,7 @@ export default {
       this.selectList = e;
       this.selectCount = e.length;
     },
+    // 获取列表数据
     getDataList() {
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
@@ -263,7 +243,6 @@ export default {
         this.searchForm.startTime = null;
         this.searchForm.endTime = null;
       }
-      // 带多条件搜索参数获取表单数据 请自行修改接口
       getShopCouponList(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
@@ -274,14 +253,14 @@ export default {
       this.total = this.data.length;
       this.loading = false;
     },
-
+    // 跳转编辑优惠券页面
     edit(v) {
       this.$router.push({ name: "add-coupon", query: { id: v.id } });
     },
+    // 下架优惠券
     remove(v) {
       this.$Modal.confirm({
         title: "确认下架",
-        // 记得确认修改此处
         content: "确认要下架此优惠券么?",
         loading: true,
         onOk: () => {
@@ -290,7 +269,6 @@ export default {
             couponIds: v.id,
             promotionStatus: "CLOSE",
           };
-          // 批量删除
           updateCouponStatus(params).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -302,44 +280,15 @@ export default {
         },
       });
     },
-    upAll() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("请选择要上架的优惠券");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认上架",
-        content: "您确认要上架所选的 " + this.selectCount + " 条数据?",
-        loading: true,
-        onOk: () => {
-          let ids = [];
-          this.selectList.forEach(function (e) {
-            ids.push(e.id);
-          });
-          let params = {
-            couponIds: ids.toString(),
-            promotionStatus: "START",
-          };
-          // 批量上架
-          updateCouponStatus(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("上架成功");
-              this.clearSelectAll();
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
+    // 批量下架
     delAll() {
       if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要作废的优惠券");
+        this.$Message.warning("您还未选择要下架的优惠券");
         return;
       }
       this.$Modal.confirm({
-        title: "确认作废",
-        content: "您确认要作废所选的 " + this.selectCount + " 条数据?",
+        title: "确认下架",
+        content: "您确认要下架所选的 " + this.selectCount + " 条数据?",
         loading: true,
         onOk: () => {
           let ids = [];
@@ -351,7 +300,6 @@ export default {
             couponIds: ids.toString(),
             promotionStatus: "CLOSE",
           };
-          // 批量删除
           updateCouponStatus(params).then((res) => {
             this.$Modal.remove();
             if (res.success) {

@@ -146,6 +146,7 @@ export default {
       );
       this.$router.go(-1);
     },
+    // 保存商品
     save() {
       if (this.goodsData.length == 0) {
         this.$Modal.warning({ title: "提示", content: "请选择活动商品" });
@@ -203,8 +204,6 @@ export default {
       this.searchForm.pageNumber = 0;
       this.searchForm.promotionName = "";
       this.selectDate = null;
-
-      // 重新加载数据
       this.getDataList();
     },
 
@@ -229,7 +228,6 @@ export default {
         }
       });
     },
-
     getPintuanMsg() { // 获取拼团详情
       getPintuanDetail(this.$route.query.id).then((res) => {
         if (res.success) this.data.push(res.result);

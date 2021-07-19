@@ -130,6 +130,7 @@ export default {
       );
       this.$router.go(-1);
     },
+    // 提交活动
     handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
@@ -167,6 +168,7 @@ export default {
         }
       });
     },
+    // 获取详情
     getDetail() {
       getPintuanDetail(this.id).then((res) => {
         if (res.success) {

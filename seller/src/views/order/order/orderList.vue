@@ -63,7 +63,6 @@ export default {
   },
   data() {
     return {
-      orderCode: "", // 虚拟订单核验码
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
@@ -79,15 +78,6 @@ export default {
         orderType: "NORMAL",
       },
       selectDate: null,
-      form: {
-        // 添加或编辑表单对象初始化数据
-        sn: "",
-        sellerName: "",
-        startTime: "",
-        endTime: "",
-        billPrice: "",
-      },
-      submitLoading: false, // 添加或编辑提交状态
       columns: [
         {
           title: "订单号",
@@ -201,19 +191,6 @@ export default {
   },
   methods: {
     /**
-     * 核验订单
-     */
-    async orderVerification() {
-      let result = await verificationCode(this.orderCode);
-
-      if (result.success) {
-        this.$router.push({
-          name: "order-detail",
-          query: { sn: result.result.sn || this.orderCode },
-        });
-      }
-    },
-    /**
      * 批量发货
      */
     expressOrderDeliver() {
@@ -311,9 +288,6 @@ export default {
         query: { sn: sn },
       });
     },
-  },
-  mounted() {
-    this.init();
   },
   activated() {
     this.init();

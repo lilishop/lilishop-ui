@@ -75,13 +75,11 @@
 import * as API_Goods from "@/api/goods";
 
 import TreeTable from "@/views/my-components/tree-table/Table/Table";
-import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
 
 export default {
   name: "lili-components",
   components: {
-    TreeTable,
-    uploadPicInput
+    TreeTable
   },
   data() {
     return {

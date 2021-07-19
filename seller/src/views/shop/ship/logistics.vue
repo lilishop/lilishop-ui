@@ -1,5 +1,5 @@
 <template>
-  <div class="search">
+  <div class="logistics">
     <Card>
         <Table
           :loading="loading"
@@ -9,7 +9,6 @@
           ref="table"
           sortable="custom"
           @on-sort-change="changeSort"
-          @on-selection-change="changeSelect"
         ></Table>
     </Card>
   </div>
@@ -20,7 +19,6 @@
 
   export default {
     name: "logistics",
-    components: {},
     data() {
       return {
         loading: true, // 表单加载状态
@@ -31,21 +29,7 @@
           sort: "createTime", // 默认排序字段
           order: "desc", // 默认排序方式
         },
-        form: {
-          // 添加或编辑表单对象初始化数据
-          sn: "",
-          sellerName: "",
-          startTime: "",
-          endTime: "",
-          billPrice: "",
-        },
-        // 表单验证规则
-        formValidate: {},
-        submitLoading: false, // 添加或编辑提交状态
-        selectList: [], // 多选数据
-        selectCount: 0, // 多选计数
         columns: [
-
           {
             title: "物流公司",
             key: "name",
@@ -85,7 +69,7 @@
                       },
                       on: {
                         click: () => {
-                          this.checked(params.row);
+                          this.open(params.row);
                         },
                       },
                     },
@@ -106,7 +90,7 @@
                       },
                       on: {
                         click: () => {
-                          this.unChecked(params.row);
+                          this.close(params.row);
                         },
                       },
                     },
@@ -122,9 +106,11 @@
       };
     },
     methods: {
+      // 初始化数据
       init() {
         this.getDataList();
       },
+      // 变更排序
       changeSort(e) {
         this.searchForm.sort = e.key;
         this.searchForm.order = e.order;
@@ -133,10 +119,7 @@
         }
         this.getDataList();
       },
-      changeSelect(e) {
-        this.selectList = e;
-        this.selectCount = e.length;
-      },
+      // 获取数据
       getDataList() {
         this.loading = true;
         API_Shop.getLogistics().then((res) => {
@@ -147,8 +130,8 @@
         });
         this.loading = false;
       },
-      //物流公司选中
-      checked(v) {
+      // 开启
+      open(v) {
         this.$Modal.confirm({
           title: "确认开启",
           // 记得确认修改此处
@@ -165,11 +148,10 @@
           }
         });
       },
-      //物流公司取消选中
-      unChecked(v){
+      // 关闭
+      close(v){
         this.$Modal.confirm({
           title: "确认关闭",
-          // 记得确认修改此处
           content: "您确认关闭此物流公司?",
           loading: true,
           onOk: () => {
@@ -189,29 +171,3 @@
     },
   };
 </script>
-<style lang="scss">
-  // 建议引入通用样式 可删除下面样式代码
-  // @import "@/styles/table-common.scss";
-  .search {
-    .operation {
-      margin-bottom: 2vh;
-    }
-
-    .select-count {
-      font-weight: 600;
-      color: #40a9ff;
-    }
-
-    .select-clear {
-      margin-left: 10px;
-    }
-
-    .page {
-      margin-top: 2vh;
-    }
-
-    .drop-down {
-      margin-left: 5px;
-    }
-  }
-</style>

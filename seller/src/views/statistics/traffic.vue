@@ -1,9 +1,8 @@
 <template>
-  <div class="wrapper">
+  <div>
     <Affix :offset-top="100">
       <Card class="card fixed-bottom">
         <affixTime @selected="clickBreadcrumb" />
-
       </Card>
     </Affix>
     <Card class="card">
@@ -45,11 +44,8 @@
       <div>
         <h4>客户增长报表</h4>
         <Table class="table" stripe :columns="columns" :data="data"></Table>
-
       </div>
     </Card>
-
-  </div>
   </div>
 </template>
 <script>
@@ -186,13 +182,13 @@ export default {
 
       this.orderChart.render();
     },
-
+    // 时间筛选
     clickBreadcrumb(item, index) {
       let callback = JSON.parse(JSON.stringify(item));
 
       this.params = callback;
     },
-
+    // 初始化
     init() {
       API_Member.getStatisticsList(this.params).then((res) => {
         if (res.result) {

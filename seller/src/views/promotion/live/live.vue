@@ -40,7 +40,7 @@ export default {
   data() {
     return {
       // 查询数据的总数
-      total: "",
+      total: 0,
       // 查询的form
       searchForm: {
         pageSize: 10,

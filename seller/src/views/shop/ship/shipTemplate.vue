@@ -15,6 +15,7 @@
               <tr>
                 <th colspan="20">
                   <span class="temp-name">{{item.name}}</span>
+                  <Tag v-if="item.pricingMethod==='FREE'" class="baoyou" color="warning">包邮</Tag>
                   <span class="fr m-r-5">
                     <time style="margin-right: 20px" title="最后编辑时间">
                       <i class="icon-time"></i>{{item.updateTime}}
@@ -160,7 +161,6 @@ export default {
   components: {
     multipleRegion,
   },
-
   data() {
     return {
       selectedIndex: 0, //选中的地址模板下标
@@ -201,6 +201,7 @@ export default {
     },
   },
   methods: {
+    // 初始化数据
     init() {
       this.getData();
     },
@@ -278,7 +279,6 @@ export default {
         this.shipInfo = res.result;
       });
     },
-
     /**
      * 选择地址回调
      */
@@ -603,5 +603,8 @@ em {
   margin-bottom: -8px;
   font-size: 15px;
   color: #f00;
+}
+.baoyou {
+  margin: 6px 10px 0;
 }
 </style>

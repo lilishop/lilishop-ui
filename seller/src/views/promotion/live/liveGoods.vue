@@ -144,6 +144,7 @@ export default {
       ],
       // 表格商品详情
       liveGoodsData: [],
+      // 已选商品
       selectedGoods: [],
     };
   },
@@ -208,18 +209,6 @@ export default {
      * 回调参数补充
      */
     selectedLiveGoods(val, index) {
-      // if (!val.___selected) {
-      //   val.___selected = true;
-      //   this.$set(this.liveGoodsData[index], "___selected", true);
-      //   this.selectedGoods.push(this.liveGoodsData[index]);
-      // } else {
-      //   this.$nextTick(() => {
-      //     val.___selected = false;
-
-      //     this.$set(this.liveGoodsData[index], "___selected", true);
-      //     this.selectedGoods.splice(index, 1);
-      //   });
-      // }
 
       this.$emit("selectedGoods", val);
     },

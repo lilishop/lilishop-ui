@@ -76,7 +76,6 @@ export default {
   },
   mounted() {
     this.accessToken.accessToken = this.getStore("accessToken");
-    console.log(this.accessToken.accessToken);
   },
   methods: {
     // 点击选择步骤
@@ -89,19 +88,19 @@ export default {
         val.checked = true;
       }
     },
-
+    // 上传数据
     handleUpload(file) {
       this.file = file;
       this.upload();
       return false;
     },
-
+    // 跳转订单列表
     navigationToGoodsOrder() {
       this.$router.push({
         path: "/order/orderList",
       });
     },
-
+    // 关闭页面
     close() {
       this.$store.commit("removeTag", "export-order-deliver");
       localStorage.storeOpenedList = JSON.stringify(

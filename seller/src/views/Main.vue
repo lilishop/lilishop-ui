@@ -87,6 +87,7 @@ export default {
     },
   },
   methods: {
+    // 初始化方法
     init() {
       // 菜单
       let pathArr = util.setCurrentPath(this, this.$route.name);
@@ -103,25 +104,7 @@ export default {
         this.sliceNum = 2;
       }
     },
-    selectNav(name) {
-      this.$store.commit("setCurrNav", name);
-      this.setStore("currNav", name);
-      // 清空所有已打开标签
-      // this.$store.commit("clearAllTags");
-      if (this.$route.name != "home_index") {
-        this.$router.push({
-          name: "home_index",
-        });
-      }
-      util.initRouter(this);
-    },
-    toggleClick() {
-      this.shrink = !this.shrink;
-    },
-    handleLanDropdown(name) {
-      this.$i18n.locale = name;
-      this.$store.commit("switchLang", name);
-    },
+    // 用户头像下拉
     handleClickUserDropdown(name) {
       if (name == "ownSpace") {
         util.openNewPage(this, "personal-enter");
@@ -142,6 +125,7 @@ export default {
         this.$router.push({ path: "/login" });
       }
     },
+    // 快捷页签选中状态
     checkTag(name) {
       let openpageHasTag = this.pageTagsList.some((item) => {
         if (item.name == name) {
@@ -158,7 +142,7 @@ export default {
         );
       }
     },
-
+    // 宽度变化
     resize() {
       let currWidth = document.body.clientWidth;
       let count = currWidth / 300;

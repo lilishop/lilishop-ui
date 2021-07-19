@@ -259,7 +259,7 @@ import skuSelect from "@/views/lili-dialog";
 export default {
   name: "addFullCut",
   components: {
-    skuSelect,
+    skuSelect
   },
   data() {
     const checkPrice = (rule, value, callback) => {

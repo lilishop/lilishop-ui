@@ -191,7 +191,6 @@ export default {
 
             this.selectedWay.push({ name: data.title, id: data.id });
           });
-          console.log(this.data);
           this.$store.state.regions = this.data;
         }
       });

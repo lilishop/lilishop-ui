@@ -1,38 +1,30 @@
 <template>
-  <div class="search">
-    <Row>
-      <Col>
-        <Card>
-
-          <Row class="operation">
-            <Button @click="add" type="primary">添加</Button>
-          </Row>
-          <Table
-            :loading="loading"
-            border
-            :columns="columns"
-            :data="data"
-            ref="table"
-            sortable="custom"
-            @on-selection-change="changeSelect"
-          ></Table>
-          <Row type="flex" justify="end" class="page">
-            <Page
-              :current="searchForm.pageNumber"
-              :total="total"
-              :page-size="searchForm.pageSize"
-              @on-change="changePage"
-              @on-page-size-change="changePageSize"
-              :page-size-opts="[10, 20, 50]"
-              size="small"
-              show-total
-              show-elevator
-              show-sizer
-            ></Page>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
+  <div class="self-address">
+    <Card>
+      <Button @click="add" type="primary">添加</Button>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        style="margin-top:10px"
+      ></Table>
+      <Row type="flex" justify="end" style="margin-top:10px;">
+        <Page
+          :current="searchForm.pageNumber"
+          :total="total"
+          :page-size="searchForm.pageSize"
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+          :page-size-opts="[10, 20, 50]"
+          size="small"
+          show-total
+          show-elevator
+          show-sizer
+        ></Page>
+      </Row>
+    </Card>
     <Modal
       :title="modalTitle"
       v-model="modalVisible"
@@ -84,7 +76,6 @@
           pageNumber: 1, // 当前页数
           pageSize: 10, // 页面大小
         },
-        selectDate: null,
         form: {
           // 添加或编辑表单对象初始化数据
           addressName: "",
@@ -135,8 +126,6 @@
           ],
         },
         submitLoading: false, // 添加或编辑提交状态
-        selectList: [], // 多选数据
-        selectCount: 0, // 多选计数
         columns: [
           // 表头
           {
@@ -208,44 +197,39 @@
       };
     },
     methods: {
-      init() {
+      init() { // 初始化数据
         this.getDataList();
       },
+      // 分页 改变页码
       changePage(v) {
         this.searchForm.pageNumber = v;
         this.getDataList();
-        this.clearSelectAll();
       },
+      // 分页 改变页数
       changePageSize(v) {
         this.searchForm.pageSize = v;
         this.getDataList();
       },
+      // 搜索
       handleSearch() {
         this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = 10;
         this.getDataList();
       },
+      // 重置
       handleReset() {
         this.$refs.searchForm.resetFields();
         this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = 10;
-        // 重新加载数据
         this.getDataList();
-      },
-      clearSelectAll() {
-        this.$refs.table.selectAll(false);
-      },
-      changeSelect(e) {
-        this.selectList = e;
-        this.selectCount = e.length;
       },
       //获取地址
       getAddress(item){
-
         this.$set(this.form, 'address', item.addr)
         this.form.address = item.address
         this.form.center = item.position.lat + "," + item.position.lng
       },
+      // 获取数据
       getDataList() {
         this.loading = true;
         API_Shop.getShopAddress(this.searchForm).then((res) => {
@@ -308,7 +292,7 @@
           }
         });
       },
-      //删除提交
+      //删除
       deleteSubmit(v){
         this.$Modal.confirm({
           title: "确认删除",
@@ -332,29 +316,4 @@
     },
   };
 </script>
-<style lang="scss">
-  // 建议引入通用样式 可删除下面样式代码
-  // @import "@/styles/table-common.scss";
-  .search {
-    .operation {
-      margin-bottom: 2vh;
-    }
 
-    .select-count {
-      font-weight: 600;
-      color: #40a9ff;
-    }
-
-    .select-clear {
-      margin-left: 10px;
-    }
-
-    .page {
-      margin-top: 2vh;
-    }
-
-    .drop-down {
-      margin-left: 5px;
-    }
-  }
-</style>

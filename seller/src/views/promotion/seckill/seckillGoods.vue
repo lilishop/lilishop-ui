@@ -16,11 +16,6 @@
           <Button @click="delAll">批量删除</Button>
         </template>
       </Row>
-      <Row v-show="openTip"  v-if="promotionStatus == 'NEW'">
-        <Alert show-icon>
-          已选择 <span class="select-count">{{ selectCount }}</span> 项
-        </Alert>
-      </Row>
       <Row class="operation">
         <Tabs type="card" v-model="tabIndex">
           <TabPane
@@ -136,7 +131,6 @@ import {
   seckillGoodsList,
   seckillDetail,
   setSeckillGoods,
-  removeSeckillGoods,
 } from "@/api/promotion.js";
 import skuSelect from "@/views/lili-dialog";
 export default {
@@ -146,7 +140,6 @@ export default {
   data() {
     return {
       promotionStatus: "", // 活动状态
-      openTip: true,
       loading: false, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
@@ -204,10 +197,6 @@ export default {
           slot: "promotionApplyStatus",
           minWidth: 30,
         },
-        // {
-        //   title: "商品二维码",
-        //   slot: "QRCode",
-        // },
         {
           title: "操作",
           slot: "action",
@@ -217,7 +206,6 @@ export default {
       goodsList: [] // 商品列表
     };
   },
-  computed: {},
   methods: {
     // 关闭当前页面
     closeCurrentPage() {
@@ -227,18 +215,8 @@ export default {
       );
       this.$router.go(-1);
     },
+    // 提交秒杀商品
     save() {
-      // 提交
-      // for(let i=0;i<this.goodsData.length;i++){
-      //     let data = this.goodsData[i]
-      //     if(!data.price){
-      //         this.$Modal.warning({
-      //             title:'提示',
-      //             content:`请填写【${data.goodsName}】的价格`
-      //         })
-      //         return
-      //     }
-      // }
 
       let list = JSON.parse(JSON.stringify(this.goodsList));
       let params = {
@@ -260,10 +238,11 @@ export default {
         }
       });
     },
+    // 初始化数据
     init() {
       this.getSeckillMsg();
     },
-
+    // 清除选中状态 
     clearSelectAll() {
       this.$refs.table.selectAll(false);
     },
@@ -316,19 +295,10 @@ export default {
         }
       });
     },
-    delGoods(index, id) {
+    delGoods(index) {
       // 删除商品
-      // if (id) {
-      //   removeSeckillGoods(this.$route.query.id, id).then((res) => {
-      //     if (res.success) {
-      //       this.goodsList[this.tabIndex].list.splice(index, 1);
-      //       this.$Message.success("删除成功！");
-      //     }
-      //   });
-      // } else {
-        this.goodsList[this.tabIndex].list.splice(index, 1);
-        this.$Message.success("删除成功！");
-      // }
+      this.goodsList[this.tabIndex].list.splice(index, 1);
+      this.$Message.success("删除成功！");
     },
     delAll() { // 删除当前时段全部数据
       if (this.selectCount <= 0) {
@@ -350,11 +320,6 @@ export default {
           ].list.filter((item) => {
             return !ids.includes(item.id);
           });
-          // removeSeckillGoods(this.$route.query.id, ids).then((res) => {
-          //   if (res.success) {
-          //     this.$Message.success("删除成功！");
-          //   }
-          // });
         },
       });
     },
@@ -406,22 +371,20 @@ export default {
       }
       return [];
     },
+    // 格式化申请状态
     promotionApplyStatus(key) {
       switch (key) {
         case "APPLY":
           return "申请";
-          break;
         case "PASS":
           return "通过";
-          break;
         case "REFUSE":
           return "拒绝";
-          break;
         default:
           return "未申请";
-          break;
       }
     },
+    // 展示审核拒绝原因
     showReason(reason) {
       this.$Modal.info({
         title: "拒绝原因",

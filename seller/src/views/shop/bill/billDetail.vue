@@ -1,52 +1,38 @@
 <template>
-  <div>
-    <template>
-      <Row>
-        <i-col span="24">
-          <Card>
-            <p slot="title">商家信息</p>
-            <div class="flex flex_align_item">
-              <p>店铺名称：{{ bill.storeName }}</p>
-              <p>银行开户名：{{ bill.bankAccountName }}</p>
-              <p>银行账号：{{ bill.bankAccountNumber }}</p>
-              <p>开户行支行名称：{{ bill.bankName }}</p>
-              <p>支行联行号：{{ bill.bankCode }}</p>
-            </div>
-          </Card>
-        </i-col>
-      </Row>
-    </template>
-    <template>
-      <Row>
-        <i-col span="24">
-          <Card>
-            <p slot="title">账单详细</p>
+  <div class="bill-detail">
+    <Card>
+      <p slot="title">商家信息</p>
+      <div class="flex flex_align_item">
+        <p>店铺名称：{{ bill.storeName }}</p>
+        <p>银行开户名：{{ bill.bankAccountName }}</p>
+        <p>银行账号：{{ bill.bankAccountNumber }}</p>
+        <p>开户行支行名称：{{ bill.bankName }}</p>
+        <p>支行联行号：{{ bill.bankCode }}</p>
+      </div>
+    </Card>
+    <Card class="mt_10">
+      <p slot="title">账单详细</p>
 
-            <div class="tips-status">
-              <span>商品状态</span>
+      <div class="tips-status">
+        <span>商品状态</span>
 
-              <span class="theme_color">{{
-                bill.billStatus | unixSellerBillStatus
-              }}</span>
+        <span class="theme_color">{{
+          bill.billStatus | unixSellerBillStatus
+        }}</span>
 
-              <Button
-                v-if="bill.billStatus == 'OUT'"
-                size="mini"
-                @click="reconciliation()"
-                type="primary"
-                >对账</Button
-              >
-            </div>
-
-            <i-table :columns="columns" :data="data" stripe></i-table>
-          </Card>
-        </i-col>
-      </Row>
-    </template>
-    <template>
-      <Tabs active-key="tab" @on-click="clickTabs">
+        <Button
+          v-if="bill.billStatus == 'OUT'"
+          size="mini"
+          @click="reconciliation()"
+          type="primary"
+          >对账</Button
+        >
+      </div>
+      <i-table :columns="columns" :data="data" stripe></i-table>
+    </Card>
+    <Card class="mt_10">
+      <Tabs active-key="tab" type="card" @on-click="clickTabs">
         <Tab-pane label="订单列表" name="order">
-          <Card>
             <Table
               :loading="loading"
               border
@@ -66,10 +52,8 @@
                 show-elevator
               ></Page>
             </Row>
-          </Card>
         </Tab-pane>
         <Tab-pane label="退单列表" name="refund">
-          <Card>
             <Table
               :loading="loading"
               border
@@ -89,10 +73,8 @@
                 show-elevator
               ></Page>
             </Row>
-          </Card>
         </Tab-pane>
         <Tab-pane label="分销费用列表" name="distribution">
-          <Card>
             <Table
               :loading="loading"
               border
@@ -112,10 +94,9 @@
                 show-elevator
               ></Page>
             </Row>
-          </Card>
         </Tab-pane>
       </Tabs>
-    </template>
+    </Card>
   </div>
 </template>
 <script>
@@ -550,6 +531,7 @@ export default {
         }
       });
     },
+    // 账单详细
     initTable() {
       let bill = this.bill;
       this.data[0].name = "结算单号";
@@ -612,6 +594,9 @@ export default {
     width: 50%;
     margin: 15px 0;
   }
+}
+.page{
+  margin-top: 10px;
 }
 .tips-status {
   padding: 18px;

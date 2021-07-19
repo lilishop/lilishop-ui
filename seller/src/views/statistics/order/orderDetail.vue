@@ -1,6 +1,5 @@
 <template>
-  <div class="wrapper">
-
+  <div>
     <div class="shop">
       <h3>订单详情</h3>
       <div class="shop-item">
@@ -69,7 +68,6 @@
         </div>
       </div>
     </div>
-
   </div>
 </template>
 <script>
@@ -91,8 +89,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.wrapper {
-}
 .shop {
   padding: 10px 0;
   background: #fff;

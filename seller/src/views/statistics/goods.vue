@@ -20,9 +20,11 @@
   </div>
 </template>
 <script>
+import affixTime from "@/views/lili-components/affix-time";
 import * as API_Goods from "@/api/goods";
 import Cookies from "js-cookie";
 export default {
+  components: { affixTime },
   data() {
     return {
       params: { // 请求参数
@@ -56,11 +58,12 @@ export default {
     };
   },
   methods: {
+    // tab切换
     handleClickType(name) {
       this.params.type = name;
       this.getData();
     },
-
+    // 时间筛选
     clickBreadcrumb(item, index) {
       let callback = item;
       let type = this.params.type;
@@ -68,6 +71,7 @@ export default {
       this.params.type = type;
       this.getData();
     },
+    // 获取数据
     getData() {
       Promise.all([API_Goods.goodsStatistics(this.params)]).then((res) => {
         if (res[0].result) {
