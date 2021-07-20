@@ -74,11 +74,11 @@ export default {
       })
     },
     changePage (val) { // 修改页码
-      this.pageNumber = val
+      this.params.pageNumber = val
       this.getHistory()
     },
     changePageSize (val) { // 修改页数
-      this.param.pageSize = val
+      this.params.pageSize = val
       this.params.pageNumber = 1
       this.getHistory()
     }

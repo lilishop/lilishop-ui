@@ -397,8 +397,9 @@ export default {
             this.priceDetailDTO = res.result.priceDetailDTO;
             this.skuList = res.result.skuList;
 
-            res.result.receiptVO ? (this.invoiceData = res.result.receiptVO) : '';
-
+            if (res.result.receiptVO) {
+              this.invoiceData = res.result.receiptVO
+            }
             let notSupArea = res.result.notSupportFreight;
             this.selectedCoupon = {};
             if (res.result.platformCoupon) this.selectedCoupon.platformCoupon = res.result.platformCoupon;
@@ -589,6 +590,7 @@ export default {
           this.$Spin.hide();
         });
     },
+    // 优惠券可用范围
     useScope (type) {
       let goods = '全部商品';
       switch (type) {

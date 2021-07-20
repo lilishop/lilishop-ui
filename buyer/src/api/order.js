@@ -96,3 +96,22 @@ export function communication (params) {
     params
   });
 }
+
+// 退换货服务 提交物流
+export function afterSaleDelivery (params) {
+  return request({
+    url: `/buyer/afterSale/delivery/${params.afterSaleSn}`,
+    method: Method.POST,
+    needToken: true,
+    params
+  });
+}
+// 获取退货可选物流公司
+export function getLogisticsCompany () {
+  return request({
+    url: `/buyer/logistics`,
+    method: Method.GET,
+    needToken: true,
+    params: { pageNumber: 1, pageSize: 200, disabled: 'OPEN' }
+  });
+}
