@@ -1,5 +1,4 @@
 <style lang="scss">
-@import "@/styles/table-common.scss";
 @import "./ossManage.scss";
 </style>
 <template>
@@ -166,7 +165,7 @@
           </Card>
         </div>
       </div>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page
           :current="searchForm.pageNumber"
           :total="total"

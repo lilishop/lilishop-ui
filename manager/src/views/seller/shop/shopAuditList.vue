@@ -28,7 +28,7 @@
         </Form>
       </Row>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
               size="small" show-total show-elevator show-sizer></Page>
       </Row>
@@ -395,7 +395,3 @@
     },
   };
 </script>
-<style lang="scss">
-  // 建议引入通用样式 可删除下面样式代码
-  @import "@/styles/table-common.scss";
-</style>

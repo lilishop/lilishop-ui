@@ -164,8 +164,6 @@
 </script>
 
 <style lang="scss" scoped>
-  // 建议引入通用样式 可删除下面样式代码
-  @import "@/styles/table-common.scss";
 
    .sign-name {
     margin-top: 5px;

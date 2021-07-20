@@ -1,6 +1,3 @@
-<style lang="scss">
-@import "@/styles/table-common.scss";
-</style>
 <template>
   <div class="search">
     <Card>
@@ -51,7 +48,7 @@
         @on-sort-change="changeSort"
         @on-selection-change="changeSelect"
       ></Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page
           :current="pageNumber"
           :total="total"

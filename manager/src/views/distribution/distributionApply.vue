@@ -1,5 +1,5 @@
 <template>
-  <div class="search">
+  <div>
     <Card>
       <Row @keydown.enter.native="handleSearch">
         <Form
@@ -21,7 +21,6 @@
           <Button
             @click="handleSearch"
             type="primary"
-            icon="ios-search"
             class="search-btn"
             >搜索</Button
           >
@@ -34,11 +33,8 @@
         :columns="columns"
         :data="data"
         ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
       ></Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page
           :current="searchForm.pageNumber"
           :total="total"
@@ -61,7 +57,6 @@ import { getDistributionListData, auditDistribution } from "@/api/distribution";
 
 export default {
   name: "distributionApply",
-  components: {},
   data() {
     return {
       loading: true, // 表单加载状态
@@ -74,14 +69,6 @@ export default {
         startDate: "", // 起始时间
         endDate: "", // 终止时间
       },
-      form: {
-        // 添加或编辑表单对象初始化数据
-        memberName: "",
-      },
-      // 表单验证规则
-      submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [
         {
           title: "会员名称",
@@ -149,48 +136,31 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
+    // 分页 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
-    selectDateRange(v) {
-      if (v) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      }
-    },
+    // 获取列表数据
     getDataList() {
       this.loading = true;
       this.searchForm.distributionStatus = "APPLY";
-      // 带多条件搜索参数获取表单数据 请自行修改接口
       getDistributionListData(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
@@ -198,9 +168,6 @@ export default {
           this.total = res.result.total;
         }
       });
-      // 以下为模拟数据
-      //this.data = [
-      //];
       this.total = this.data.length;
       this.loading = false;
     },
@@ -235,6 +202,3 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-@import "@/styles/table-common.scss";
-</style>

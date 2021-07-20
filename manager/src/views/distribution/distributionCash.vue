@@ -1,5 +1,5 @@
 <template>
-  <div class="search">
+  <div>
     <Card>
       <Row @keydown.enter.native="handleSearch" >
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
@@ -15,11 +15,11 @@
             </Select>
           </Form-item>
           <Form-item style="margin-left:-35px;" class="br">
-            <Button @click="handleSearch" type="primary" icon="ios-search">搜索</Button>
+            <Button @click="handleSearch" type="primary">搜索</Button>
           </Form-item>
         </Form>
       </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
       <Row type="flex" justify="end" class="page padding-row">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator show-sizer></Page>
       </Row>
@@ -55,12 +55,9 @@ import {
         getDistributionCash,
         auditDistributionCash
     } from "@/api/distribution";
-// import { parse } from 'date-fns';
 import {cashStatusList} from './dataJson'
 export default {
   name: "distributionCash",
-  components: {
-  },
   data() {
     return {
       cashStatusList, // 状态列表
@@ -81,8 +78,6 @@ export default {
         price: "",
       },
       submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [
         {
           title: "编号",
@@ -202,19 +197,10 @@ export default {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    // 搜索表格
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
-      this.getDataList();
-    },
-    // 排序
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
       this.getDataList();
     },
     // 获取列表数据
@@ -231,6 +217,7 @@ export default {
       this.total = this.data.length;
       this.loading = false;
     },
+    // 通过还是拒绝申请
     handleSubmit() {
       let result = "拒绝"
       if(this.result == 'PASS'){
@@ -258,6 +245,7 @@ export default {
         }
       });
     },
+    // 弹出modal 审核
     edit(v) {
       this.modalTitle = "审核";
       this.handleStatus = 'edit';
@@ -271,6 +259,7 @@ export default {
       this.form = JSON.parse(JSON.stringify(v));
       this.modalVisible = true;
     },
+    // 弹出modal 查看
     view(v){
       this.modalTitle = "查看";
       this.handleStatus = 'view';
@@ -293,6 +282,3 @@ export default {
   }
 };
 </script>
-<style lang="scss">
-  @import "@/styles/table-common.scss";
-</style>

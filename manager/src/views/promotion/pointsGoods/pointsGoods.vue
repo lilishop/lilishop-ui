@@ -59,7 +59,7 @@
           <Button type="error" size="small" @click="close(row.id)">删除</Button>
         </template>
       </Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
           show-total show-elevator show-sizer></Page>
       </Row>
@@ -265,6 +265,3 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-@import "@/styles/table-common.scss";
-</style>

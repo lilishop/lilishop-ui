@@ -89,7 +89,7 @@
               >
               </Table>
 
-            <Row type="flex" justify="end" class="page" style="margin-top: 10px">
+            <Row type="flex" justify="end" class="mt_10" style="margin-top: 10px">
               <Page
                 :current="pointSearchForm.pageNumber"
                 :total="pointTotal"
@@ -177,7 +177,7 @@
             >
             </Table>
 
-            <Row type="flex" justify="end" class="page" style="margin-top: 10px">
+            <Row type="flex" justify="end" class="mt_10" style="margin-top: 10px">
               <Page
                 :current="orderSearchForm.pageNumber"
                 :total="orderTotal"
@@ -208,7 +208,7 @@
           >
           </Table>
 
-          <Row type="flex" justify="end" class="page" style="margin-top: 10px">
+          <Row type="flex" justify="end" class="mt_10" style="margin-top: 10px">
             <Page
               :current="addressSearchForm.pageNumber"
               :total="addressTotal"
@@ -254,7 +254,7 @@
           >
           </Table>
 
-          <Row type="flex" justify="end" class="page" style="margin-top: 10px">
+          <Row type="flex" justify="end" class="mt_10" style="margin-top: 10px">
             <Page
               :current="walletSearchForm.pageNumber"
               :total="walletTotal"
@@ -300,7 +300,7 @@
             </template>
           </Table>
 
-          <Row type="flex" justify="end" class="page" style="margin-top: 10px">
+          <Row type="flex" justify="end" class="mt_10" style="margin-top: 10px">
             <Page
               :current="receiptRecordSearchForm.pageNumber"
               :total="receiptRecordTotal"
@@ -1151,7 +1151,5 @@
   };
 </script>
 <style lang="scss" scoped>
-  @import "@/styles/table-common.scss";
   @import "memberDetail.scss";
-
 </style>

@@ -106,7 +106,7 @@
             >
           </template>
         </Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page
           :current="searchForm.pageNumber + 1"
           :total="total"

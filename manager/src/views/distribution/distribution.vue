@@ -1,5 +1,5 @@
 <template>
-  <div class="search">
+  <div>
     <Card>
       <Row @keydown.enter.native="handleSearch">
         <Form
@@ -46,11 +46,9 @@
         :columns="columns"
         :data="data"
         ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
+        class="mt_10"
       ></Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page
           :current="searchForm.pageNumber"
           :total="total"
@@ -82,15 +80,12 @@ export default {
   data() {
     return {
       distributionStatusList, // 分销状态
-      openSearch: true, // 显示搜索
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
       },
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [
         {
           title: "会员名称",
@@ -227,43 +222,30 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },
-    see(v) {
-      this.$router.push({
-        name: "distributionOrder",
-        query: { id: v.memberId },
-      });
-    },
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
-      this.clearSelectAll();
     },
+    // 分页 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-
-    clearSelectAll() {
-      // 清空
-      this.$refs.table.selectAll(false);
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
-
+    // 获取列表数据
     getDataList() {
       this.loading = true;
       this.searchForm.status = "PASS";
-      // 带多条件搜索参数获取表单数据 请自行修改接口
       getDistributionListData(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
@@ -316,6 +298,3 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-@import "@/styles/table-common.scss";
-</style>

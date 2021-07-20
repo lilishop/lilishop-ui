@@ -9,7 +9,7 @@
             <Table :loading="loading" border :columns="smsColumns" :data="smsData" ref="table" sortable="custom" @on-sort-change="templateChangeSort">
             </Table>
 
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page :current="smsSearchForm.pageNumber" :total="smsTotal" :page-size="smsSearchForm.pageSize" @on-change="smsChangePage" @on-page-size-change="smsChangePageSize"
                 :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator show-sizer></Page>
             </Row>
@@ -21,7 +21,7 @@
             </Row>
             <Table :loading="loading" border :columns="templateColumns" :data="templateData" ref="table" sortable="custom" @on-sort-change="smsChangeSort">
             </Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page :current="templateSearchForm.pageNumber" :total="templateTotal" :page-size="templateSearchForm.pageSize" @on-change="templateChangePage"
                 @on-page-size-change="templateChangePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator show-sizer></Page>
             </Row>
@@ -48,7 +48,7 @@
 
               </template>
             </Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page :current="signSearchForm.pageNumber" :total="signTotal" :page-size="signSearchForm.pageSize" @on-change="signChangePage" @on-page-size-change="signChangePageSize"
                 :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator show-sizer></Page>
             </Row>
@@ -900,8 +900,6 @@ export default {
 </script>
 
 <style lang="scss">
-// 建议引入通用样式 可删除下面样式代码
-@import "@/styles/table-common.scss";
 @import "sms.scss";
 
 .split {

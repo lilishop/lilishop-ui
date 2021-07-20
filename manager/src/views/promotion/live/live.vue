@@ -10,7 +10,7 @@
 
       </Tabs>
       <Table :columns="liveColumns" :data="liveData"></Table>
-      <Row type="flex" style="margin:20px;" justify="end" class="page">
+      <Row type="flex" style="margin:20px;" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePageNumber" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
           size="small" show-total show-elevator show-sizer></Page>
       </Row>
@@ -237,7 +237,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "@/styles/table-common.scss";
 .btns {
   margin-bottom: 10px;
   margin-top: 10px;

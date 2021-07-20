@@ -36,7 +36,7 @@ import { changePass } from "@/api/index";
 export default {
   name: "change-password",
   components: {
-    SetPassword,
+    SetPassword
   },
   data() {
     const valideRePassword = (rule, value, callback) => {
@@ -94,9 +94,11 @@ export default {
     };
   },
   methods: {
+    // 密码强度
     changeInputPass(v, grade, strength) {
       this.strength = strength;
     },
+    // 确认修改密码
     saveEditPass() {
       let params = {
         password: this.md5(this.editPasswordForm.oldPassword),
@@ -125,6 +127,7 @@ export default {
         }
       });
     },
+    // 取消修改密码
     cancelEditPass() {
       this.$store.commit("removeTag", "change_password");
       localStorage.pageOpenedList = JSON.stringify(
@@ -141,8 +144,7 @@ export default {
         name: lastPageName,
       });
     },
-  },
-  mounted() {},
+  }
 };
 </script>
 <style lang="scss" scoped>

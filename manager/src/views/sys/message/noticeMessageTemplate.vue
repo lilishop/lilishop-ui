@@ -47,7 +47,7 @@
                   @on-selection-change="messageChangeSelect"
                 ></Table>
               </Row>
-              <Row type="flex" justify="end" class="page">
+              <Row type="flex" justify="end" class="mt_10">
                 <Page
                   :current="searchMessageForm.pageNumber"
                   :total="messageDataTotal"
@@ -76,7 +76,7 @@
                   @on-selection-change="changeSelect"
                 ></Table>
               </Row>
-              <Row type="flex" justify="end" class="page">
+              <Row type="flex" justify="end" class="mt_10">
                 <Page
                   :current="searchForm.pageNumber"
                   :total="noticeDataTotal"
@@ -246,7 +246,7 @@
               @on-sort-change="shopMessageChangeSort"
             ></Table>
           </Row>
-          <Row type="flex" justify="end" class="page">
+          <Row type="flex" justify="end" class="mt_10">
             <Page
               :current="searchShopMessageForm.pageNumber"
               :total="shopMessageDataTotal"
@@ -273,7 +273,7 @@
               @on-sort-change="memberMessageChangeSort"
             ></Table>
           </Row>
-          <Row type="flex" justify="end" class="page">
+          <Row type="flex" justify="end" class="mt_10">
             <Page
               :current="searchMemberMessageForm.pageNumber"
               :total="memberMessageDataTotal"
@@ -1064,6 +1064,5 @@
   };
 </script>
 <style lang="scss">
-  @import "@/styles/table-common.scss";
   @import "sms.scss";
 </style>

@@ -1,6 +1,4 @@
-<style lang="scss">
-  @import "@/styles/table-common.scss";
-</style>
+
 <template>
   <div>
     <!--短信-->
@@ -111,7 +109,7 @@
               @on-selection-change="showSelect"
               ref="memberTable"
             ></Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page
                 :current="searchForm.pageNumber"
                 :total="total"
@@ -153,7 +151,7 @@
               @on-selection-change="showSelect"
               ref="shopTable"
             ></Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page
                 :current="searchForm.pageNumber"
                 :total="total"
@@ -197,7 +195,7 @@
               @on-selection-change="showSelect"
               ref="weChatTable"
             ></Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page
                 :current="weChatSearchForm.pageNumber"
                 :total="weChatTotal"
@@ -240,7 +238,7 @@
               @on-selection-change="showSelect"
               ref="otherTable"
             ></Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page
                 :current="searchForm.pageNumber"
                 :total="total"

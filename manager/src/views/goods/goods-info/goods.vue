@@ -1,63 +1,59 @@
 <template>
   <div class="search">
     <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
-          <Form-item label="商品名称" prop="goodsName">
-            <Input
-              type="text"
-              v-model="searchForm.goodsName"
-              placeholder="请输入商品名称"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="商品编号" prop="sn">
-            <Input
-              type="text"
-              v-model="searchForm.sn"
-              placeholder="请输入商品编号"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="状态" prop="status">
-            <Select
-              v-model="searchForm.marketEnable"
-              placeholder="请选择"
-              clearable
-              style="width: 200px"
-            >
-              <Option value="UPPER">上架</Option>
-              <Option value="DOWN">下架</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="商品类型" prop="status">
-            <Select v-model="searchForm.goodsType" placeholder="请选择" clearable style="width: 200px">
-              <Option value="PHYSICAL_GOODS">实物商品</Option>
-              <Option value="VIRTUAL_GOODS">虚拟商品</Option>
-            </Select>
-          </Form-item>
-          <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search" >搜索</Button>
-        </Form>
-      </Row>
+      <Form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        :label-width="70"
+        class="search-form"
+          @keydown.enter.native="handleSearch"
+      >
+        <Form-item label="商品名称" prop="goodsName">
+          <Input
+            type="text"
+            v-model="searchForm.goodsName"
+            placeholder="请输入商品名称"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="商品编号" prop="sn">
+          <Input
+            type="text"
+            v-model="searchForm.sn"
+            placeholder="请输入商品编号"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="状态" prop="status">
+          <Select
+            v-model="searchForm.marketEnable"
+            placeholder="请选择"
+            clearable
+            style="width: 200px"
+          >
+            <Option value="UPPER">上架</Option>
+            <Option value="DOWN">下架</Option>
+          </Select>
+        </Form-item>
+        <Form-item label="商品类型" prop="status">
+          <Select v-model="searchForm.goodsType" placeholder="请选择" clearable style="width: 200px">
+            <Option value="PHYSICAL_GOODS">实物商品</Option>
+            <Option value="VIRTUAL_GOODS">虚拟商品</Option>
+          </Select>
+        </Form-item>
+        <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search" >搜索</Button>
+      </Form>
       <Table
         :loading="loading"
         border
         :columns="columns"
         :data="data"
         ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
+        class="mt_10"
       >
-
         <!-- 商品栏目格式化 -->
         <template slot="goodsSlot" slot-scope="{row}">
           <div style="margin: 5px 0px;height: 80px; display: flex;">
@@ -80,7 +76,7 @@
 
         </template>
       </Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page
           :current="searchForm.pageNumber"
           :total="total"
@@ -96,7 +92,7 @@
       </Row>
     </Card>
     <Modal
-      :title="modalTitle"
+      title="下架操作"
       v-model="modalVisible"
       :mask-closable="false"
       :width="500"
@@ -124,14 +120,11 @@
 import { getGoodsListData, upGoods, lowGoods } from "@/api/goods";
 export default {
   name: "goods",
-  components: {},
   data() {
     return {
       id: "", //要操作的id
       loading: true, // 表单加载状态
-      modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
-      modalTitle: "", // 添加或编辑标题
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -143,8 +136,6 @@ export default {
         reason: "",
       },
       submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [
         {
           title: "商品名称",
@@ -310,41 +301,29 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
-      this.clearSelectAll();
     },
+    // 分页 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
+    // 获取数据
     getDataList() {
       this.loading = true;
-      // 带多条件搜索参数获取表单数据
       getGoodsListData(this.searchForm).then((res) => {
         this.loading = false;
         if (res.records) {
@@ -353,16 +332,15 @@ export default {
         }
       });
     },
+    // 编辑
     edit(v) {
       this.id = v.id;
       if (v.underMessage != "{}") {
         this.underForm.reason = v.underMessage;
       }
-
-      this.modalType = 1;
-      this.modalTitle = "下架操作";
       this.modalVisible = true;
     },
+    // 下架
     lower() {
       lowGoods(this.id, this.underForm).then((res) => {
         this.$Modal.remove();
@@ -373,6 +351,7 @@ export default {
         }
       });
     },
+    // 商家
     upper(v) {
       this.$Modal.confirm({
         title: "确认上架",
@@ -397,14 +376,10 @@ export default {
         name: "goods-detail",
         query: { id: id },
       });
-    },
+    }
   },
   mounted() {
     this.init();
   },
 };
 </script>
-<style lang="scss" scoped>
-  // 建议引入通用样式 可删除下面样式代码
-  @import "@/styles/table-common.scss";
-</style>

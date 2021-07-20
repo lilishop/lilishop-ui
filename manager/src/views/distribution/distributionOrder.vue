@@ -1,40 +1,38 @@
 <template>
-  <div class="search">
+  <div>
     <Card>
-      <Row v-show="openSearch" @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="订单编号" prop="orderSn">
-            <Input
-              type="text"
-              v-model="searchForm.orderSn"
-              placeholder="请输入订单编号"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="分销商" prop="distributionName">
-            <Input
-              type="text"
-              v-model="searchForm.distributionName"
-              placeholder="请输入分销商名称"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="店铺名称">
-            <Select v-model="searchForm.shopId" placeholder="请选择" @on-query-change="searchChange" filterable
-                    clearable style="width: 150px">
-              <Option v-for="item in shopList" :value="item.id" :key="item.id">{{ item.storeName }}</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="订单时间">
-            <DatePicker type="daterange" v-model="timeRange" format="yyyy-MM-dd" placeholder="选择时间"
-                        style="width: 210px"></DatePicker>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-        </Form>
-      </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom">
+      <Form ref="searchForm" @keydown.enter.native="handleSearch" :model="searchForm" inline :label-width="70" class="search-form">
+        <Form-item label="订单编号" prop="orderSn">
+          <Input
+            type="text"
+            v-model="searchForm.orderSn"
+            placeholder="请输入订单编号"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="分销商" prop="distributionName">
+          <Input
+            type="text"
+            v-model="searchForm.distributionName"
+            placeholder="请输入分销商名称"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="店铺名称">
+          <Select v-model="searchForm.shopId" placeholder="请选择" @on-query-change="searchChange" filterable
+                  clearable style="width: 150px">
+            <Option v-for="item in shopList" :value="item.id" :key="item.id">{{ item.storeName }}</Option>
+          </Select>
+        </Form-item>
+        <Form-item label="订单时间">
+          <DatePicker type="daterange" v-model="timeRange" format="yyyy-MM-dd" placeholder="选择时间"
+                      style="width: 210px"></DatePicker>
+        </Form-item>
+        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+      </Form>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10">
         <template slot-scope="{row}" slot="goodsMsg">
           <div class="goods-msg">
             <img :src="row.image" width="60" height="60" alt="">
@@ -56,7 +54,7 @@
           <Tag :color="filterStatusColor(row.distributionOrderStatus)">{{filterStatus(row.distributionOrderStatus)}}</Tag>
         </template>
       </Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize"
           @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]"
           size="small" show-total show-elevator show-sizer></Page>
@@ -81,8 +79,6 @@
         orderStatusList, // 订单状态列表
         shopList: [], // 店铺列表
         distributionId: this.$route.query.id, // 分销id
-        openSearch: true, // 显示搜索
-        openTip: true, // 显示提示
         loading: true, // 表单加载状态
         searchForm: { // 搜索框初始化对象
           pageNumber: 1, // 当前页数
@@ -154,24 +150,28 @@
       };
     },
     methods: {
+      // 初始化数据
       init() {
         this.getDataList();
         this.getShopList()
       },
+      //分页 改变页码
       changePage(v) {
         this.searchForm.pageNumber = v;
         this.getDataList();
       },
+      // 分页 改变页数
       changePageSize(v) {
         this.searchForm.pageSize = v;
         this.getDataList();
       },
+      // 搜索
       handleSearch() {
         this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = 10;
         this.getDataList();
       },
-
+      // 获取列表数据
       getDataList() {
         this.searchForm.distributionId = this.distributionId;
         this.loading = true;
@@ -181,7 +181,6 @@
           this.searchForm.startTime = this.$options.filters.unixToDate(startTime / 1000)
           this.searchForm.endTime = this.$options.filters.unixToDate(endTime / 1000)
         }
-        console.log(this.searchForm)
         // 带多条件搜索参数获取表单数据 请自行修改接口
         getDistributionOrder(this.searchForm).then(res => {
           this.loading = false;
@@ -194,7 +193,7 @@
         this.total = this.data.length;
         this.loading = false;
       },
-      getShopList(val) { // 获取店铺列表
+      getShopList(val) { // 获取店铺列表 搜索用
         const params = {
           pageNumber: 1,
           pageSize: 10,
@@ -253,8 +252,7 @@
     }
   };
 </script>
-<style lang="scss" >
-  @import "@/styles/table-common.scss";
+<style lang="scss">
   .goods-msg {
     display: flex;
     align-items: center;
