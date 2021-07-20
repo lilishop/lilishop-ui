@@ -15,9 +15,6 @@
     <div class="model-config">
       <div class="decorate">
         <div class="decorate-title">全屏广告</div>
-
-
-
         <div class="decorate-list">
           <div
             class="decorate-item"

@@ -79,6 +79,11 @@ export default {
           icon: "ios-videocam",
           ___type: "live",
         },
+        {
+          title: "砍价",
+          icon: "md-share-alt",
+          ___type: "kanjia",
+        },
 
       ],
       linkItem: {

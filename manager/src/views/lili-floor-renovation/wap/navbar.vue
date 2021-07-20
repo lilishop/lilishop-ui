@@ -55,17 +55,16 @@ export default {
           name: "index",
           selected: true,
         },
-
-        {
-          title: "全屏广告",
-          name: "advertising",
-          selected: false,
-        },
-        {
-          title: "弹窗广告",
-          name: "alertAdvertising",
-          selected: false,
-        },
+        // {
+        //   title: "全屏广告",
+        //   name: "advertising",
+        //   selected: false,
+        // },
+        // {
+        //   title: "弹窗广告",
+        //   name: "alertAdvertising",
+        //   selected: false,
+        // },
       ],
       qrcode: "", // 二维码
       submitWay: {
