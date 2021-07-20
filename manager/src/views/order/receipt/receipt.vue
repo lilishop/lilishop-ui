@@ -74,7 +74,7 @@
                 @click="$router.push({name: 'order-detail',query: {sn: scope.row.orderSn}})">{{scope.row.orderSn}}</a>
             </template>
           </Table>
-          <Row type="flex" justify="end" class="page">
+          <Row type="flex" justify="end" class="mt_10">
             <Page
               :current="searchForm.pageNumber"
               :total="total"

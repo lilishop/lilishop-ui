@@ -216,7 +216,3 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-// 建议引入通用样式 可删除下面样式代码
-@import "@/styles/table-common.scss";
-</style>

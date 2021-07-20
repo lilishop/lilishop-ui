@@ -55,7 +55,7 @@
               :data="order"
               ref="table"
             ></Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page
                 :current="orderParam.pageNumber"
                 :total="orderTotal"
@@ -78,7 +78,7 @@
               :data="refund"
               ref="table"
             ></Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page
                 :current="refundParam.pageNumber"
                 :total="refundTotal"

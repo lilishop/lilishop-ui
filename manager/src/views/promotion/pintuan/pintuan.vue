@@ -71,7 +71,7 @@
             </Button>
           </template>
         </Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page
           :current="searchForm.pageNumber + 1"
           :total="total"
@@ -237,7 +237,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-@import "@/styles/table-common.scss";
 .ivu-form-item{
   margin-bottom: 0  !important;
 }

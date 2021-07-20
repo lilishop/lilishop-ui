@@ -196,4 +196,5 @@ $dark_content_color: #d5d5d5;
   [data-theme="light"] & {
     color: $light_title_color;
   }
-}
+} 
+@import "./table-common.scss";

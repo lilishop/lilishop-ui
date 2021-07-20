@@ -1,6 +1,3 @@
-<style lang="less">
-@import "@/styles/table-common.scss";
-</style>
 <template>
   <div>
     <!--微信模板-->
@@ -53,7 +50,7 @@
               :data="weChatData"
               ref="weChatTable"
             ></Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page
                 :current="weChatSearchForm.pageNumber"
                 :total="weChatTotal"
@@ -83,7 +80,7 @@
               sortable="custom"
               ref="weChatMPTable"
             ></Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page
                 :current="weChatMPSearchForm.pageNumber"
                 :total="weChatMPTotal"

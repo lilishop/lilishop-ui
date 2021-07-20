@@ -37,7 +37,7 @@
         @on-selection-change="changeSelect"
       >
       </Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page
           :current="searchForm.pageNumber"
           :total="total"
@@ -372,6 +372,3 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-@import "@/styles/table-common.scss";
-</style>

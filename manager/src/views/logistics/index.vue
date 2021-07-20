@@ -1,7 +1,6 @@
 <template>
   <div class="search">
     <Card>
-      <Row @keydown.enter.native="handleSearch"></Row>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加</Button>
       </Row>
@@ -16,14 +15,14 @@
         @on-selection-change="changeSelect"
       >
         <!-- 页面展示 -->
-        <template slot="disableSlot" slot-scope="scope">
-          <i-switch size="large" v-model="scope.row.disabled == 'OPEN'?true:false" @on-change="changeSwitch(scope.row)">
-            <span slot="open">展示</span>
-            <span slot="close">隐藏</span>
+        <template slot="disableSlot" slot-scope="{row}">
+          <i-switch size="large" :value="row.switch" @on-change="changeSwitch(row)">
+            <span slot="open">开启</span>
+            <span slot="close">禁用</span>
           </i-switch>
         </template>
       </Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page
           :current="searchForm.pageNumber"
           :total="total"
@@ -87,12 +86,9 @@
   } from "@/api/logistics";
 
   export default {
-    name: "bill",
-    components: {},
+    name: "logistics",
     data() {
       return {
-        openSearch: true, // 显示搜索
-        openTip: true, // 显示提示
         loading: true, // 表单加载状态
         modalType: 0, // 添加或编辑标识
         modalVisible: false, // 添加或编辑显示
@@ -120,15 +116,7 @@
           ],
         },
         submitLoading: false, // 添加或编辑提交状态
-        selectList: [], // 多选数据
-        selectCount: 0, // 多选计数
         columns: [
-          // 表头
-          {
-            type: "selection",
-            width: 60,
-            align: "center",
-          },
           {
             title: "物流公司名称",
             key: "name",
@@ -146,14 +134,6 @@
             key: "disabled",
             width: 150,
             slot: "disableSlot",
-            /*render(h, params) {
-              return h("Badge", {
-                props: {
-                  status: params.row.disabled == 'OPEN' ? "success" : "error",
-                  text: params.row.disabled == 'OPEN' ? "开启" : "禁用",
-                },
-              });
-            },*/
           },
           {
             title: "创建时间",
@@ -213,59 +193,53 @@
       };
     },
     methods: {
+      // 初始化
       init() {
         this.getDataList();
       },
+      // 分页 改变页码
       changePage(v) {
         this.searchForm.pageNumber = v;
         this.getDataList();
-        this.clearSelectAll();
       },
+      // 分页 改变页数
       changePageSize(v) {
         this.searchForm.pageSize = v;
         this.getDataList();
       },
-      handleSearch() {
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 10;
-        this.getDataList();
-      },
-      handleReset() {
-        this.$refs.searchForm.resetFields();
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 10;
-        // 重新加载数据
-        this.getDataList();
-      },
-      changeSort(e) {
-        this.searchForm.sort = e.key;
-        this.searchForm.order = e.order;
-        if (e.order === "normal") {
-          this.searchForm.order = "";
-        }
-        this.getDataList();
-      },
-      clearSelectAll() {
-        this.$refs.table.selectAll(false);
-      },
-      changeSelect(e) {
-        this.selectList = e;
-        this.selectCount = e.length;
-      },
-
+      // 获取列表
       getDataList() {
         this.loading = true;
 
         getLogisticsPage(this.searchForm).then((res) => {
           this.loading = false;
           if (res.success) {
-            this.data = res.result.records;
+            const data = res.result.records;
+            data.forEach(e => {
+              e.switch = e.disabled === 'OPEN' ? true : false
+            });
+            this.data = data;
             this.total = res.result.total;
           }
         });
         this.total = this.data.length;
         this.loading = false;
       },
+      // switch 切换状态
+      changeSwitch (v) {
+        this.form.name = v.name;
+        this.form.code = v.code;
+        this.form.standBy = v.standBy;
+        this.form.formItems = v.formItems;
+        this.form.disabled = v.disabled === 'CLOSE' ? 'OPEN' : 'CLOSE';
+        updateLogistics(v.id, this.form).then((res) => {
+          if (res.success) {
+            this.$Message.success("操作成功");
+            this.getDataList();
+          }
+        });
+      },
+      // 确认提交
       handleSubmit() {
         this.$refs.form.validate((valid) => {
           if (valid) {
@@ -300,6 +274,7 @@
           }
         });
       },
+      // 添加信息
       add() {
         this.modalType = 0;
         this.modalTitle = "添加";
@@ -308,6 +283,7 @@
 
         this.modalVisible = true;
       },
+      // 编辑
       detail(v) {
         this.modalType = 1;
         this.id = v.id;
@@ -323,6 +299,7 @@
           ? (this.form.disabled = true)
           : (this.form.disabled = false);
       },
+      // 删除物流公司
       remove(v) {
         this.$Modal.confirm({
           title: "确认删除",
@@ -347,7 +324,3 @@
     },
   };
 </script>
-<style lang="scss" scoped>
-  // 建议引入通用样式 可删除下面样式代码
-  @import "@/styles/table-common.scss";
-</style>

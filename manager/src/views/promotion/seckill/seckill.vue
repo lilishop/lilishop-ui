@@ -26,7 +26,7 @@
       </Row>
       <Tabs value="list"  @on-click="clickTabPane">
         <TabPane label="秒杀活动列表" name="list">
-          <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="page">
+          <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10">
             <template slot-scope="{ row }" slot="action">
               <Button type="info" size="small" class="mr_5" v-if="row.promotionStatus == 'NEW'" @click="edit(row)">编辑</Button>
 
@@ -42,7 +42,7 @@
             </template>
           </Table>
 
-          <Row type="flex" justify="end" class="page">
+          <Row type="flex" justify="end" class="mt_10">
             <Page style="margin: 20px 0;" :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize"
               :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator show-sizer></Page>
           </Row>
@@ -230,7 +230,6 @@ export default {
 };
 </script>
 <style lang="scss">
-@import "@/styles/table-common.scss";
 .mr_5 {
   margin: 0 5px;
 }

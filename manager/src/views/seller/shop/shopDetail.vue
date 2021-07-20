@@ -263,7 +263,7 @@
               </template>
             </Table>
 
-            <Row type="flex" justify="end" class="page" style="margin-top: 10px">
+            <Row type="flex" justify="end" class="mt_10" style="margin-top: 10px">
               <Page
                 :current="orderSearchForm.pageNumber"
                 :total="orderTotal"
@@ -386,7 +386,7 @@
               </template>
             </Table>
 
-            <Row type="flex" justify="end" class="page" style="margin-top: 10px">
+            <Row type="flex" justify="end" class="mt_10" style="margin-top: 10px">
               <Page
                 :current="refundGoodsOrderSearchForm.pageNumber"
                 :total="refundGoodsOrderTotal"
@@ -509,7 +509,7 @@
               </template>
             </Table>
 
-            <Row type="flex" justify="end" class="page" style="margin-top: 10px">
+            <Row type="flex" justify="end" class="mt_10" style="margin-top: 10px">
               <Page
                 :current="refundOrderSearchForm.pageNumber"
                 :total="refundOrderTotal"
@@ -1006,7 +1006,5 @@
   };
 </script>
 <style lang="scss" scoped>
-  @import "@/styles/table-common.scss";
   @import "shopDetail.scss";
-
 </style>

@@ -4,11 +4,6 @@
       <p slot="header">
         <span>发票信息</span>
       </p>
-      <!-- <div>
-                <div>为响应环保，自营全面启用电子普通发票，非自营发票由第三方商家实际开具。</div>
-                <div>电子普通发票是税务机关认可的有效收付款凭证，与纸质普通发票具有同等法律效力，可用于报销入账、售后维权等。</div>
-                <div>如商品由第三方卖家销售，发票类型及内容将由该卖家决定。</div>
-            </div> -->
       <!-- 普通发票 -->
       <div class="nav-content">
         <Form :model="invoiceForm" ref="form" label-position="left" :rules="ruleInline" :label-width="110">
@@ -55,15 +50,14 @@ export default {
   name: 'invoiceModal',
   data () {
     return {
-      invoice: 1,
+      invoice: 1, // 发票类型
       invoiceAvailable: false, // 模态框显隐
       loading: false, // 提交状态
       invoiceForm: {
-        // 发票表单
         // 普票表单
         receiptTitle: '', // 发票抬头
         taxpayerId: '', // 纳税人识别号
-        receiptContent: '商品明细', // 发票内容
+        receiptContent: '商品明细' // 发票内容
       },
       type: 1, // 1 个人 2 单位
       ruleInline: {
@@ -107,10 +101,9 @@ export default {
       let flage = true;
 
       // 保存分为两种类型，个人以及企业
-      const { type, receiptTitle, receiptContent } = JSON.parse(
+      const { receiptTitle } = JSON.parse(
         JSON.stringify(this.invoiceForm)
       );
-
       // 判断是否填写发票抬头
       if (!receiptTitle) {
         this.$Message.error('请填写发票抬头!');
@@ -118,7 +111,7 @@ export default {
         return false;
       }
 
-      if (type === 2) {
+      if (this.type === 2) {
         this.$refs.form.validate((valid) => {
           if (!valid) {
             flage = false;

@@ -1,22 +1,20 @@
 <template>
-  <div class="search">
+  <div>
     <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="商品名称" prop="goodsName">
-            <Input
-              type="text"
-              v-model="searchForm.goodsName"
-              placeholder="请输入商品名称"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-        </Form>
-      </Row>
-      <Row class="operation" style="margin-top: 10px">
-        <Button @click="delAll">批量删除</Button>
+      <Form @keydown.enter.native="handleSearch" ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+        <Form-item label="商品名称" prop="goodsName">
+          <Input
+            type="text"
+            v-model="searchForm.goodsName"
+            placeholder="请输入商品名称"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+      </Form>
+      <Row class="operation" style="margin:10px 0;">
+        <Button @click="delAll" type="primary">批量下架</Button>
       </Row>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
         <template slot="goodsName" slot-scope="{row}">
@@ -33,7 +31,7 @@
           </div>
         </template>
       </Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
@@ -45,14 +43,10 @@ import {
         getDistributionGoods,
         delDistributionGoods
     } from "@/api/distribution";
-import {getShopListData} from '@/api/shops'
 export default {
   name: "distributionGoods",
-  components: {
-  },
   data() {
     return {
-      shopList:[], // 店铺列表
       loading: true, // 表单加载状态
       searchForm: { // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -161,50 +155,39 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
-      // this.getShopList()
     },
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
+    // 分页 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    handleReset() {
-      this.$refs.searchForm.resetFields();
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      // 重新加载数据
-      this.init();
-    },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
+    // 清除选中状态
     clearSelectAll() {
       this.$refs.table.selectAll(false);
     },
+    // 选中后赋值
     changeSelect(e) {
       this.selectList = e;
       this.selectCount = e.length;
     },
-
+    // 获取列表数据
     getDataList() {
       this.loading = true;
-      // 带多条件搜索参数获取表单数据 请自行修改接口
       getDistributionGoods(this.searchForm).then(res => {
         this.loading = false;
         if (res.success) {
@@ -215,68 +198,50 @@ export default {
       this.total = this.data.length;
       this.loading = false;
     },
+    // 下架商品
     remove(v) {
       this.$Modal.confirm({
-        title: "确认删除",
-        // 记得确认修改此处
-        content: "您确认要删除么?",
+        title: "确认下架",
+        content: "您确认要下架么?",
         loading: true,
         onOk: () => {
-          // 删除
+          // 下架
           delDistributionGoods(v.id).then(res => {
             this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("删除成功");
+              this.$Message.success("下架成功");
               this.getDataList();
             }
           });
         }
       });
     },
+    // 批量下架
     delAll() {
       if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要删除的数据");
+        this.$Message.warning("您还未选择要下架的数据");
         return;
       }
       this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选的 " + this.selectCount + " 条数据?",
+        title: "确认下架",
+        content: "您确认要下架所选的 " + this.selectCount + " 条数据?",
         loading: true,
         onOk: () => {
           let ids = []
           this.selectList.forEach(item => {
               ids.push(item.id)
           });
-          // 批量删除
+          // 批量下架
           delDistributionGoods(ids.toString()).then(res => {
             this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("删除成功");
+              this.$Message.success("下架成功");
               this.clearSelectAll();
               this.getDataList();
             }
           });
         }
       });
-    },
-    getShopList(val){
-      const params = {
-        pageNumber:1,
-        pageSize:10,
-        storeName:''
-      }
-      if(val){
-        params.storeName = val;
-      }else {
-        params.storeName = ''
-      }
-
-      getShopListData(params).then(res => {
-        this.shopList = res.result.records
-      })
-    },
-    searchChange(val){
-      this.getShopList(val)
     }
   },
   mounted() {
@@ -284,7 +249,5 @@ export default {
   }
 };
 </script>
-<style lang="scss">
-  @import "@/styles/table-common.scss";
-</style>
+
 

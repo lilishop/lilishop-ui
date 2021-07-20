@@ -277,6 +277,8 @@ export default {
             res.result[i].consigneeAddressPath.replace(/,/g, "") + res.result[i].consigneeDetail
         }
         return res.result
+      } else {
+        this.$Message.warning('暂无待发货订单')
       }
       
     },
