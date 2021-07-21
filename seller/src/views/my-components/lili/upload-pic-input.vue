@@ -11,15 +11,15 @@
         :readonly="readonly"
         :maxlength="maxlength"
       >
-        <Button slot="append" icon="md-eye"></Button>
+          <Poptip slot="append" transfer trigger="hover" title="图片预览" placement="right">
+            <Icon type="md-eye" class="see-icon" />
+            <div slot="content">
+              <img :src="currentValue" alt="该资源不存在" style="width: 100%;margin: 0 auto;display: block;" />
+              <a @click="viewImage=true" style="margin-top:5px;text-align:right;display:block">查看大图</a>
+            </div>
+          </Poptip>
       </Input>
-      <Poptip transfer trigger="hover" title="图片预览" placement="right" width="350">
-        <Icon type="md-eye" class="see-icon" />
-        <div slot="content">
-          <img :src="currentValue" alt="该资源不存在" style="width: 100%;margin: 0 auto;display: block;" />
-          <a @click="viewImage=true" style="margin-top:5px;text-align:right;display:block">查看大图</a>
-        </div>
-      </Poptip>
+      
       <Upload
         :action="uploadFileUrl"
         :headers="accessToken"
@@ -35,7 +35,7 @@
         ref="up"
         class="upload"
       >
-        <Button :loading="loading" :size="size" :disabled="disabled" :icon="icon">上传图片</Button>
+        <Button :loading="loading" :size="size" :disabled="disabled">上传图片</Button>
       </Upload>
     </div>
 
@@ -166,9 +166,6 @@ export default {
 <style lang="scss" scoped>
 .see-icon {
   font-size: 16px;
-  margin-left: -32px;
-  margin-top: 3px;
-  padding: 7px;
   cursor: pointer;
 }
 

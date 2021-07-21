@@ -1,5 +1,5 @@
 <template>
-  <div class="full-cut">
+  <div class="search">
     <Card>
       <Form
         ref="searchForm"
@@ -73,25 +73,38 @@
               v-if="row.promotionStatus == 'NEW'"
               size="small"
               @click="edit(row)"
-              >编辑</Button
-            >&nbsp;
-            <Button type="success" v-else size="small" @click="edit(row)"
-              >查看</Button
-            >&nbsp;
+              >编辑</Button>
+            <Button type="info" v-else size="small" @click="edit(row)">查看</Button>
+            <Button
+              type="success"
+              v-if="row.promotionStatus === 'START'"
+              ghost
+              style="margin-left:5px"
+              size="small"
+              @click="openOrClose(row)"
+              >关闭</Button>
+            <Button
+              type="success"
+              v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
+              ghost
+              style="margin-left:5px"
+              size="small"
+              @click="openOrClose(row)"
+              >开启</Button>
             <Button
               type="error"
               :disabled="row.promotionStatus == 'START'"
               ghost
+              style="margin-left:5px"
               size="small"
               @click="del(row)"
-              >删除</Button
-            >
+              >删除</Button>
           </div>
         </template>
       </Table>
       <Row type="flex" justify="end" class="page operation">
         <Page
-          :current="searchForm.pageNumber + 1"
+          :current="searchForm.pageNumber"
           :total="total"
           :page-size="searchForm.pageSize"
           @on-change="changePage"
@@ -107,14 +120,14 @@
   </div>
 </template>
 <script>
-import { getFullDiscountList, delFullDiscount } from "@/api/promotion.js";
+import { getFullDiscountList, delFullDiscount, updateFullDiscount } from "@/api/promotion.js";
 export default {
   name: 'full-cut',
   data() {
     return {
       loading: false, // 表单加载状态
       searchForm: { // 列表请求参数
-        pageNumber: 0,
+        pageNumber: 1,
         pageSize: 10,
         sort: "startTime",
         order: "desc",
@@ -194,7 +207,7 @@ export default {
     },
     // 改变页数
     changePage(v) {
-      this.searchForm.pageNumber = v - 1;
+      this.searchForm.pageNumber = v;
       this.getDataList();
     },
     // 改变页码
@@ -204,7 +217,7 @@ export default {
     },
     // 搜索
     handleSearch() {
-      this.searchForm.pageNumber = 0;
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
@@ -212,7 +225,7 @@ export default {
     handleReset() {
       this.selectDate = ''
       this.searchForm = {}
-      this.searchForm.pageNumber = 0;
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
@@ -233,6 +246,31 @@ export default {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("删除成功");
+              this.getDataList();
+            }
+          });
+        },
+      });
+    },
+    // 开启或关闭活动
+    openOrClose (row) {
+      let name = '开启'
+      let status = 'START'
+      if (row.promotionStatus === 'START') {
+        name = '关闭'
+        status = 'CLOSE'
+      }
+      this.$Modal.confirm({
+        title: "提示",
+        // 记得确认修改此处
+        content: `确认${name}此活动吗?需要一定时间才能生效，请耐心等待`,
+        loading: true,
+        onOk: () => {
+          // 删除
+          updateFullDiscount(row.id, status).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success(`${name}成功`);
               this.getDataList();
             }
           });

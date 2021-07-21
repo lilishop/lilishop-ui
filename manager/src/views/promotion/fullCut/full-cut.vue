@@ -49,6 +49,7 @@
         :columns="columns"
         :data="data"
         ref="table"
+        class="mt_10"
         sortable="custom"
       >
         <template slot-scope="{ row }" slot="applyEndTime">
@@ -64,15 +65,27 @@
         </template>
         <template slot-scope="{ row }" slot="action">
           <div>
-            <Button type="success" size="small" @click="view(row)"
-              >查看</Button
-            >&nbsp;
+            <Button type="info" size="small" @click="view(row)">查看</Button>
+            <Button
+              type="error"
+              v-if="row.promotionStatus === 'START'"
+              style="margin-left:5px"
+              size="small"
+              @click="openOrClose(row)"
+              >关闭</Button>
+            <Button
+              type="success"
+              v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
+              style="margin-left:5px"
+              size="small"
+              @click="openOrClose(row)"
+              >开启</Button>
           </div>
         </template>
       </Table>
       <Row type="flex" justify="end" class="page operation">
         <Page
-          :current="searchForm.pageNumber + 1"
+          :current="searchForm.pageNumber"
           :total="total"
           :page-size="searchForm.pageSize"
           @on-change="changePage"
@@ -88,14 +101,14 @@
   </div>
 </template>
 <script>
-import { getFullDiscountList } from "@/api/promotion.js";
+import { getFullDiscountList, updateFullDiscount } from "@/api/promotion.js";
 
 export default {
   data() {
     return {
       loading: false, // 表单加载状态
       searchForm: { // 请求参数
-        pageNumber: 0,
+        pageNumber: 1,
         pageSize: 10,
         sort: "startTime",
         order: "desc",
@@ -163,7 +176,7 @@ export default {
           title: "操作",
           slot: "action",
           align: "center",
-          width: 100,
+          width: 140,
         },
       ],
       data: [], // 列表数据
@@ -173,9 +186,34 @@ export default {
     init() {
       this.getDataList();
     },
+    // 开启或关闭活动
+    openOrClose (row) {
+      let name = '开启'
+      let status = 'START'
+      if (row.promotionStatus === 'START') {
+        name = '关闭'
+        status = 'CLOSE'
+      }
+      this.$Modal.confirm({
+        title: "提示",
+        // 记得确认修改此处
+        content: `确认${name}此活动吗?需要一定时间才能生效，请耐心等待`,
+        loading: true,
+        onOk: () => {
+          // 删除
+          updateFullDiscount(row.id, status).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success(`${name}成功`);
+              this.getDataList();
+            }
+          });
+        },
+      });
+    },
     changePage(v) {
       // 改变页数
-      this.searchForm.pageNumber = v - 1;
+      this.searchForm.pageNumber = v;
       this.getDataList();
     },
     changePageSize(v) {
@@ -185,7 +223,7 @@ export default {
     },
     handleSearch() {
       // 搜索
-      this.searchForm.pageNumber = 0;
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
@@ -210,6 +248,7 @@ export default {
       // 查看
       this.$router.push({ name: "full-cut-detail", query: { id: row.id } });
     },
+
   },
   mounted() {
     this.init();

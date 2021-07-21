@@ -351,7 +351,6 @@ export default {
           } else {
             // 编辑
             delete params.consumeLimit;
-            delete params.couponDiscount;
             delete params.updateTime;
 
             editShopCoupon(params).then((res) => {

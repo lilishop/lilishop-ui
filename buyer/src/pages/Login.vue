@@ -4,7 +4,7 @@
     <div class="top-content" @click='$refs.verify.show = false'>
       <div class="logo-box">
         <img
-          :src="logoImg"
+          :src="$store.state.logoImg"
           @click="$router.push('/')"
         />
         <div>欢迎登录</div>
@@ -186,8 +186,7 @@ export default {
       },
       codeMsg: '发送验证码', // 验证码文字
       interval: null, // 定时器
-      time: 60, // 倒计时
-      logoImg: '' // logo图片
+      time: 60 // 倒计时
     };
   },
   methods: {
@@ -332,7 +331,6 @@ export default {
         }
       });
     }
-    this.logoImg = this.Cookies.getItem('logo')
   },
   watch: {
     type (v) {

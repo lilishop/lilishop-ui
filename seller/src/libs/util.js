@@ -233,6 +233,7 @@ util.openNewPage = function (vm, name, argu, query) {
             if (query) {
                 tag.query = query;
             }
+            console.log(tag);
             vm.$store.commit('increateTag', tag);
         }
     }

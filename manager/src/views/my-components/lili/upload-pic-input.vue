@@ -11,13 +11,13 @@
         :readonly="readonly"
         :maxlength="maxlength"
       >
-        <Poptip slot="append" transfer trigger="hover" title="图片预览" placement="right" width="350">
-          <Icon type="md-eye" class="see-icon" />
-          <div slot="content">
-            <img :src="currentValue" alt="该资源不存在" style="width: 100%;margin: 0 auto;display: block;" />
-            <a @click="viewImage=true" style="margin-top:5px;text-align:right;display:block">查看大图</a>
-          </div>
-        </Poptip>
+          <Poptip slot="append" transfer trigger="hover" title="图片预览" placement="right">
+            <Icon type="md-eye" class="see-icon" />
+            <div slot="content">
+              <img :src="currentValue" alt="该资源不存在" style="width: 100%;margin: 0 auto;display: block;" />
+              <a @click="viewImage=true" style="margin-top:5px;text-align:right;display:block">查看大图</a>
+            </div>
+          </Poptip>
       </Input>
       
       <Upload
@@ -54,7 +54,10 @@ export default {
   name: "uploadPicInput",
   props: {
     value: String,
-    size: String,
+    size: {
+      default: 'default',
+      type: String
+    },
     placeholder: {
       type: String,
       default: "图片链接"
@@ -91,11 +94,13 @@ export default {
     };
   },
   methods: {
+    // 初始化
     init() {
       this.accessToken = {
         accessToken: this.getStore("accessToken")
       };
     },
+    // 格式校验
     handleFormatError(file) {
       this.loading = false;
       this.$Notice.warning({
@@ -106,6 +111,7 @@ export default {
           " ’格式不正确, 请选择 .jpg .jpeg .png .gif .bmp格式文件"
       });
     },
+    // 大小校验
     handleMaxSize(file) {
       this.loading = false;
       this.$Notice.warning({
@@ -113,10 +119,12 @@ export default {
         desc: "所选文件‘ " + file.name + " ’大小过大, 不得超过 " + this.maxSize + "M."
       });
     },
+    // 上传前
     beforeUpload() {
       this.loading = true;
       return true;
     },
+    // 上传成功
     handleSuccess(res, file) {
       this.loading = false;
       if (res.success) {
@@ -127,15 +135,18 @@ export default {
         this.$Message.error(res.message);
       }
     },
+    // 上传失败
     handleError(error, file, fileList) {
       this.loading = false;
       this.$Message.error(error.toString());
     },
+    // 上传成功回显
     handleChange(v) {
       this.$emit("input", this.currentValue);
       this.$emit("on-change", this.currentValue);
       this.$attrs.rollback && this.$attrs.rollback()
     },
+    // 初始值
     setCurrentValue(value) {
       if (value === this.currentValue) {
         return;
@@ -158,9 +169,6 @@ export default {
 <style lang="scss" scoped>
 .see-icon {
   font-size: 16px;
-  margin-left: -32px;
-  margin-top: 3px;
-  padding: 7px;
   cursor: pointer;
 }
 

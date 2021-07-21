@@ -4,7 +4,7 @@
     <!-- 顶部logo -->
     <div class="logo-box">
       <img
-        :src="logoImg" width='150'
+        :src="$store.state.logoImg" width='150'
         @click="$router.push('/')"
       />
       <div>修改密码</div>
@@ -118,7 +118,6 @@ export default {
   components: { Verify },
   data () {
     return {
-      logoImg: '', // logo图
       loading: false, // 加载状态
       loading1: false, // 第二步加载状态
       formFirst: { // 手机验证码表单
@@ -243,7 +242,6 @@ export default {
   },
   mounted () {
     this.$refs.formFirst.resetFields();
-    this.logoImg = this.Cookies.getItem('logo')
   },
   watch: {
   }

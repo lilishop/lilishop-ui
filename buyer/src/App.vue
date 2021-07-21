@@ -7,7 +7,6 @@
 <script>
 import {v4 as uuidv4} from 'uuid';
 import storage from '@/plugins/storage';
-import {getLogo} from '@/api/common.js';
 export default {
   name: 'App',
   mounted () {
@@ -15,16 +14,6 @@ export default {
     if (!uuid) {
       uuid = uuidv4();
       storage.setItem('uuid', uuid);
-    }
-    if (!this.Cookies.getItem('logo')) {
-      setTimeout(() => {
-        getLogo().then(res => {
-          if (res.success) {
-            let logoObj = JSON.parse(res.result.settingValue)
-            this.Cookies.setItem('logo', logoObj.buyerSideLogo)
-          }
-        })
-      }, 1000)
     }
   }
 };

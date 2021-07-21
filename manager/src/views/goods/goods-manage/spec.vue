@@ -1,27 +1,25 @@
 <template>
   <div class="search">
     <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
-          <Form-item label="规格名称" prop="specName">
-            <Input
-              type="text"
-              v-model="searchForm.specName"
-              placeholder="请输入规格名称"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-        </Form>
-      </Row>
+      <Form
+        @keydown.enter.native="handleSearch"
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        :label-width="70"
+        class="search-form"
+      >
+        <Form-item label="规格名称" prop="specName">
+          <Input
+            type="text"
+            v-model="searchForm.specName"
+            placeholder="请输入规格名称"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
+      </Form>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加</Button>
         <Button @click="delAll">批量删除</Button>
@@ -58,7 +56,7 @@
       :mask-closable="false"
       :width="500"
     >
-      <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
+      <Form ref="form" :model="form" :label-width="100">
         <FormItem label="规格名称" prop="specName">
           <Input v-model="form.specName" maxlength="30" clearable style="width: 100%"/>
         </FormItem>
@@ -73,11 +71,7 @@
             popper-class="spec-values-popper"
             style="width: 100%; text-align: left; margin-right: 10px"
           >
-            <Option
-              v-for="item in specValue"
-              :value="item"
-              :label="item"
-            >
+            <Option v-for="item in specValue" :value="item" :label="item" :key="item">
             </Option>
           </Select>
         </FormItem>
@@ -110,7 +104,6 @@ export default {
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
-      specTitle: "", // 添加或编辑规格值
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -125,8 +118,6 @@ export default {
       },
       /** 编辑规格值 */
       specValue: [],
-      // 表单验证规则
-      formValidate: {},
       submitLoading: false, // 添加或编辑提交状态
       selectList: [], // 多选数据
       selectCount: 0, // 多选计数
@@ -320,10 +311,10 @@ export default {
       }
       this.modalVisible = true;
     },
+    // 删除规格
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
-        // 记得确认修改此处
         content: "您确认要删除 " + v.specName + " ?",
         loading: true,
         onOk: () => {
@@ -338,6 +329,7 @@ export default {
         },
       });
     },
+    // 批量删除
     delAll() {
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未选择要删除的数据");

@@ -1,19 +1,16 @@
 <template>
   <div class="search">
     <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="品牌名称" prop="name">
-            <Input type="text" v-model="searchForm.name" placeholder="请输入品牌名称" clearable style="width: 200px" />
-          </Form-item>
-
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-        </Form>
-      </Row>
+      <Form ref="searchForm" @keydown.enter.native="handleSearch" :model="searchForm" inline :label-width="70" class="search-form">
+        <Form-item label="品牌名称">
+          <Input type="text" v-model="searchForm.name" placeholder="请输入品牌名称" clearable style="width: 200px" />
+        </Form-item>
+        <Button @click="handleSearch" type="primary">搜索</Button>
+      </Form>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加</Button>
       </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table"></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
           show-total show-elevator show-sizer></Page>
@@ -30,8 +27,7 @@
       </Form>
       <div slot="footer">
         <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交
-        </Button>
+        <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
       </div>
     </Modal>
   </div>
@@ -50,7 +46,7 @@ import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
 export default {
   name: "brand",
   components: {
-    uploadPicInput,
+    uploadPicInput
   },
   data() {
     return {
@@ -74,8 +70,6 @@ export default {
       // 表单验证规则
       formValidate: {},
       submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [
         {
           title: "品牌名称",
@@ -237,51 +231,38 @@ export default {
         this.getDataList();
       }
     },
-
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
-      this.clearSelectAll();
     },
+    // 分页 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
+    // 获取数据
     getDataList() {
       this.loading = true;
-      // 带多条件搜索参数获取表单数据 请自行修改接口
       getManagerBrandPage(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
-          console.warn(12);
           this.data = res.result.records;
           this.total = res.result.total;
         }
       });
     },
+    // 提交表单
     handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
@@ -311,6 +292,7 @@ export default {
         }
       });
     },
+    // 添加
     add() {
       this.modalType = 0;
       this.modalTitle = "添加";
@@ -318,6 +300,7 @@ export default {
       delete this.form.id;
       this.modalVisible = true;
     },
+    // 编辑
     edit(v) {
       this.modalType = 1;
       this.modalTitle = "编辑";
@@ -333,6 +316,7 @@ export default {
       this.form = data;
       this.modalVisible = true;
     },
+    // 启用品牌
     enable(v) {
       this.$Modal.confirm({
         title: "确认启用",
@@ -349,6 +333,7 @@ export default {
         },
       });
     },
+    // 禁用
     disable(v) {
       this.$Modal.confirm({
         title: "确认禁用",

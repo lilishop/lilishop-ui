@@ -1,7 +1,7 @@
 <template>
   <div>
     <Card>
-      <Form ref="form" :model="form" :label-width="120" :rules="formRule">
+      <Form ref="form" :model="form" :label-width="120" :rules="formRule" class="search-form">
         <div class="base-info-item">
           <h4>基本信息</h4>
           <div class="form-item-view">
@@ -100,17 +100,17 @@
                 :disabled="form.promotionStatus != 'NEW'"
                 v-model="form.isFreeFreight"
                 >免邮费</Checkbox
-              >&nbsp;
+              > 
               <Checkbox
                 :disabled="form.promotionStatus != 'NEW'"
                 v-model="form.isCoupon"
                 >送优惠券</Checkbox
-              >&nbsp;
+              > 
               <Checkbox
                 :disabled="form.promotionStatus != 'NEW'"
                 v-model="form.isGift"
                 >送赠品</Checkbox
-              >&nbsp;
+              > 
               <Checkbox
                 :disabled="form.promotionStatus != 'NEW'"
                 v-if="JSON.parse(getStore('userInfo')).selfOperated"

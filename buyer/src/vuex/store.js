@@ -11,7 +11,8 @@ export default new Vuex.Store({
   state: {
     category: [], // 全部分类
     navList: [],
-    cartNum: storage.getItem('cartNum') || 0
+    cartNum: storage.getItem('cartNum') || 0,
+    logoImg: 'https://lili-system.oss-cn-beijing.aliyuncs.com/logo.png'
   },
   getters,
   actions,
