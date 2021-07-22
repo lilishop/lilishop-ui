@@ -27,8 +27,9 @@
       </Row>
       <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" @on-selection-change="changeSelect">
         <template slot-scope="{ row }" slot="action">
-          <Button v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="info" size="small" style="margin-right: 5px" @click="edit(row)">编辑</Button>
+          <Button v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="info" size="small" :style="{'marginRight': row.promotionStatus !== 'CLOSE'?'5px':'0'}" @click="edit(row)">编辑</Button>
           <Button v-if="row.promotionStatus !== 'CLOSE'" type="error" size="small" @click="remove(row)">下架</Button>
+          <!-- <Button v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'" type="success" size="small" @click="open(row)">上架</Button> -->
         </template>
       </Table>
       <Row type="flex" justify="end" class="page">
@@ -257,6 +258,29 @@ export default {
     edit(v) {
       this.$router.push({ name: "add-coupon", query: { id: v.id } });
     },
+    // 开启优惠券
+    open(v) {
+      this.$Modal.confirm({
+        title: "确认",
+        content: "确认要上架此优惠券么?",
+        loading: true,
+        onOk: () => {
+          this.loading = false;
+          let params = {
+            couponIds: v.id,
+            promotionStatus: "START",
+          };
+          updateCouponStatus(params).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success("上架成功");
+              this.clearSelectAll();
+              this.getDataList();
+            }
+          });
+        },
+      });
+    },
     // 下架优惠券
     remove(v) {
       this.$Modal.confirm({
@@ -280,6 +304,7 @@ export default {
         },
       });
     },
+
     // 批量下架
     delAll() {
       if (this.selectCount <= 0) {

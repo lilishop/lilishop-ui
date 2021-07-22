@@ -95,7 +95,7 @@
 
       <!-- 其他筛选项 -->
       <template v-for="(tag, tagIndex) in tagsContent">
-        <div class="other" v-if="tag.show && tagIndex !== 0" :key="tagIndex">
+        <div class="other" v-if="tag.show && tagIndex !== 0" v-show="tagIndex < showTagCount" :key="tagIndex">
           <div>
             <strong>{{ tag.key }}：</strong>
           </div>
@@ -153,6 +153,7 @@
           </div>
         </div>
       </template>
+      <div @click="moreOptions" v-if="tagsContent.length>4" class="more-options">{{showTagCount===5?'更多筛选项':'收起筛选项'}}<Icon :type="showTagCount===5?'ios-arrow-down':'ios-arrow-up'" /></div>
     </div>
   </div>
 </template>
@@ -168,6 +169,7 @@ export default {
         first: {},
         second: {}
       },
+      showTagCount: 5, // 展示的搜索项数量
       multiple: false, // 多选
       tagsContent: [
         // 标签
@@ -369,6 +371,10 @@ export default {
           });
         }
       });
+    },
+    // 展示更多搜索项
+    moreOptions () {
+      this.showTagCount = this.showTagCount === 5 ? 100 : 5
     }
   },
   mounted () {
@@ -502,8 +508,8 @@ export default {
 /** 筛选主体 */
 .content {
   background: #fff;
-  border-top: 1px solid #999;
-  border-bottom: 1px solid #999;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
   margin: 10px 0;
 }
 /** 品牌 start */
@@ -699,6 +705,13 @@ export default {
       }
     }
   }
+}
+.more-options{
+  margin: 5px;
+  color: #2d8cf0;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: right;
 }
 
 /** 其他筛选项  end */

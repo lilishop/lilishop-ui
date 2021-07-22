@@ -2,7 +2,7 @@
   <div class="order-detail">
     <card _Title="售后详情" :_Size="16"></card>
     <div class="order-card">
-      <h3>{{filterOrderStatus(afterSale.serviceStatus)}}</h3>
+      <h3>{{afterSale.serviceName}}</h3>
       <p class="global_color fontsize_18">{{ afterSale.orderStatusValue }}</p>
       <p>售后单号：{{ afterSale.sn }} &nbsp;&nbsp;&nbsp;订单号：{{afterSale.orderSn}}</p>
       <div style="color:#999;" class="operation-time">创建时间：{{afterSale.createTime}}</div>
@@ -31,8 +31,22 @@
       <h3 class="mb_10">服务单信息</h3>
       <table border="1" cellpadding='0' cellspacing="0">
         <tr>
-          <td>退款方式</td><td>{{afterSale.refundWay == 'ORIGINAL' ? '原路退回' : '账号退款'}}{{afterSale.applyRefundPrice | unitPrice('￥')}}</td>
+          <td>退款方式</td><td>{{afterSale.refundWay == 'ORIGINAL' ? '原路退回' : '账号退款'}}</td>
         </tr>
+        <tr>
+          <td>退款金额</td><td>{{afterSale.actualRefundPrice | unitPrice('￥')}}</td>
+        </tr>
+        <template v-if="afterSale.refundWay === 'OFFLINE'">
+          <tr>
+            <td>退款开户行</td><td>{{afterSale.bankDepositName}}</td>
+          </tr>
+          <tr>
+            <td>退款开户名</td><td>{{afterSale.bankAccountName}}</td>
+          </tr>
+          <tr>
+            <td>退款卡号</td><td>{{afterSale.bankAccountNumber}}</td>
+          </tr>
+        </template>
         <tr>
           <td>商品处理方式</td><td>{{afterSale.serviceType == 'RETURN_MONEY' ? '退款' : '退货'}}</td>
         </tr>
@@ -53,7 +67,7 @@
   </div>
 </template>
 <script>
-import { afterSaleDetail, afterSaleReason, afterSaleLog } from '@/api/member.js';
+import { afterSaleDetail, afterSaleLog } from '@/api/member.js';
 import { afterSaleStatusList } from '../enumeration.js'
 export default {
   name: 'aftersale-detail',
@@ -62,7 +76,6 @@ export default {
       afterSale: {}, // 售后详情数据
       logList: [], // 日志
       afterSaleStatusList // 售后状态列表
-
     };
   },
   methods: {
@@ -70,14 +83,7 @@ export default {
       afterSaleDetail(this.$route.query.sn).then(res => {
         if (res.success) {
           this.afterSale = res.result;
-
-          afterSaleReason(this.afterSale.serviceType).then(res => {
-            res.result.forEach(element => {
-              if (element.id === this.afterSale.reason) {
-                this.$set(this.afterSale, 'reason', element.reason)
-              }
-            });
-          })
+          this.afterSale.serviceName = this.filterOrderStatus(this.afterSale.serviceStatus)
         }
       })
     },
@@ -88,7 +94,7 @@ export default {
     },
     filterOrderStatus (status) { // 获取订单状态中文
       const ob = this.afterSaleStatusList.filter(e => { return e.status === status });
-      return ob[0].name
+      if (ob.length) return ob[0].name
     },
     perviewImg (img) {
       window.open(img, '_blank')

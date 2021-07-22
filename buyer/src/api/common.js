@@ -33,7 +33,7 @@ export function sendSms (params) {
   });
 }
 /**
- * 发送短信验证码
+ * 获取logo图标
  */
 export function getLogo () {
   return request({

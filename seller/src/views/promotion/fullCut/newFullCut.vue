@@ -12,7 +12,7 @@
                 :disabled="form.promotionStatus != 'NEW'"
                 placeholder="活动名称"
                 clearable
-                style="width: 260px"
+                style="width: 280px"
               />
             </FormItem>
             <FormItem label="活动时间" prop="rangeTime">
@@ -23,7 +23,7 @@
                 format="yyyy-MM-dd HH:mm:ss"
                 placeholder="请选择"
                 :options="options"
-                style="width: 320px"
+                style="width: 280px"
               >
               </DatePicker>
             </FormItem>
@@ -34,7 +34,7 @@
                 type="textarea"
                 :rows="4"
                 clearable
-                style="width: 260px"
+                style="width: 280px"
               />
             </FormItem>
           </div>
@@ -48,7 +48,7 @@
                 :disabled="form.promotionStatus != 'NEW'"
                 placeholder="优惠门槛"
                 clearable
-                style="width: 260px"
+                style="width: 280px"
               />
               <span class="describe">消费达到当前金额可以参与优惠</span>
             </FormItem>
@@ -77,7 +77,7 @@
                 v-model="form.fullMinus"
                 placeholder="优惠金额"
                 clearable
-                style="width: 260px"
+                style="width: 280px"
               />
             </FormItem>
             <FormItem
@@ -91,7 +91,7 @@
                 v-model="form.fullRate"
                 placeholder="优惠折扣"
                 clearable
-                style="width: 260px"
+                style="width: 280px"
               />
               <span class="describe">优惠折扣为0-10之间数字，可有一位小数</span>
             </FormItem>
@@ -127,7 +127,7 @@
                 :remote-method="getCouponList"
                 placeholder="输入优惠券名称搜索"
                 :loading="couponLoading"
-                style="width: 260px"
+                style="width: 280px"
               >
                 <Option
                   v-for="item in couponList"
@@ -145,7 +145,7 @@
                 :remote-method="getGiftList"
                 placeholder="输入赠品名称搜索"
                 :loading="giftLoading"
-                style="width: 260px"
+                style="width: 280px"
               >
                 <Option
                   v-for="item in giftList"
@@ -161,7 +161,7 @@
                 v-model="form.point"
                 type="number"
                 :min="0"
-                style="width: 260px"
+                style="width: 280px"
               />
             </FormItem>
             <FormItem label="使用范围" prop="scopeType">
