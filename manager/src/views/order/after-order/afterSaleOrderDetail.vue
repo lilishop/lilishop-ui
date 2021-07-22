@@ -88,15 +88,15 @@
                 </dd>
               </dl>
               <dl>
-                  <dt>申请退款金额</dt>
-                  <dd>{{ afterSaleInfo.applyRefundPrice | unitPrice('￥') }}</dd>
-                </dl>
-                <dl>
-                  <dt>实际退款金额</dt>
-                  <dd>
-                    <Input v-model="params.actualRefundPrice" style="width:260px"/>
-                  </dd>
-                </dl>
+                <dt>申请退款金额</dt>
+                <dd>{{ afterSaleInfo.applyRefundPrice | unitPrice('￥') }}</dd>
+              </dl>
+              <dl>
+                <dt>实际退款金额</dt>
+                <dd>
+                  <Input v-model="params.actualRefundPrice" style="width:260px" />
+                </dd>
+              </dl>
               <dl>
                 <dt>备注信息</dt>
                 <dd>
@@ -174,12 +174,47 @@
                   {{afterSaleInfo.orderSn}}
                 </dd>
               </dl>
+              <dl v-if="afterSaleInfo.bankDepositName">
+                <dt>银行开户行</dt>
+                <dd>
+                  {{afterSaleInfo.bankDepositName}}
+                </dd>
+              </dl>
+              <dl v-if="afterSaleInfo.bankAccountName">
+                <dt>银行开户名</dt>
+                <dd>
+                  {{afterSaleInfo.bankAccountName}}
+                </dd>
+              </dl>
+              <dl v-if="afterSaleInfo.bankAccountNumber">
+                <dt>银行卡号</dt>
+                <dd>
+                  {{afterSaleInfo.bankAccountNumber}}
+                </dd>
+              </dl>
 
             </div>
             <!--"-->
             <div class="div-form-default" v-if="afterSaleInfo.afterSaleAllowOperationVO && afterSaleInfo.afterSaleAllowOperationVO.refund">
               <h3>平台退款</h3>
-
+              <dl>
+                <dt>银行开户行</dt>
+                <dd>
+                  {{afterSaleInfo.bankDepositName}}
+                </dd>
+              </dl>
+              <dl>
+                <dt>银行开户名</dt>
+                <dd>
+                  {{afterSaleInfo.bankAccountName}}
+                </dd>
+              </dl>
+              <dl>
+                <dt>银行卡号</dt>
+                <dd>
+                  {{afterSaleInfo.bankAccountNumber}}
+                </dd>
+              </dl>
               <dl>
                 <dt>备注信息</dt>
                 <dd>
@@ -200,15 +235,15 @@
               <h3>物流信息</h3>
               <dl>
                 <dt>
-                  收货人
+                  收货商家
                 </dt>
                 <dd>
-                  {{afterSaleInfo.sconsigneeName}}
+                  {{afterSaleInfo.storeName}}
                 </dd>
               </dl>
               <dl>
                 <dt>
-                  收货人手机
+                  收货商家手机
                 </dt>
                 <dd>
                   {{afterSaleInfo.sconsigneeMobile}}
@@ -227,7 +262,7 @@
                   物流公司
                 </dt>
                 <dd>
-                  {{afterSaleInfo.slogisticsNo}}
+                  {{afterSaleInfo.mlogisticsName}}
                 </dd>
               </dl>
               <dl>
@@ -235,7 +270,7 @@
                   物流单号
                 </dt>
                 <dd>
-                  {{afterSaleInfo.slogisticsCode}}
+                  {{afterSaleInfo.mlogisticsNo}}
                 </dd>
               </dl>
               <dl>
@@ -447,9 +482,14 @@ export default {
           this.afterSaleImage = (res.result.afterSaleImage || "").split(",");
           //退货地址去掉逗号
           if (this.afterSaleInfo.mconsigneeAddressPath)
-          this.afterSaleInfo.mconsigneeAddressPath = this.afterSaleInfo.mconsigneeAddressPath.replaceAll(","," ");
+            this.afterSaleInfo.mconsigneeAddressPath =
+              this.afterSaleInfo.mconsigneeAddressPath.replaceAll(",", " ");
 
-          this.$set(this.params,'actualRefundPrice', this.afterSaleInfo.applyRefundPrice)
+          this.$set(
+            this.params,
+            "actualRefundPrice",
+            this.afterSaleInfo.applyRefundPrice
+          );
         }
       });
     },
@@ -601,10 +641,10 @@ export default {
       margin: 0;
       border-bottom: dotted 1px #e6e6e6;
       overflow: hidden;
+      display: flex;
 
       dt {
-        display: inline-block;
-        width: 13%;
+        flex: 2;
         vertical-align: top;
         text-align: right;
         padding: 15px 1% 15px 0;
@@ -613,8 +653,7 @@ export default {
       }
 
       dd {
-        display: inline-block;
-        width: 84%;
+        flex: 10;
         padding: 15px 0 15px 1%;
         margin: 0;
         border-left: 1px solid #f0f0f0;
@@ -727,10 +766,10 @@ dl dt {
       margin: 0;
       border-bottom: dotted 1px #e6e6e6;
       overflow: hidden;
-
+      display: flex;
       dt {
         display: inline-block;
-        width: 13%;
+        flex: 2;
         vertical-align: top;
         text-align: right;
         padding: 15px 1% 15px 0;
@@ -740,7 +779,7 @@ dl dt {
 
       dd {
         display: inline-block;
-        width: 84%;
+        flex: 10;
         padding: 15px 0 15px 1%;
         margin: 0;
         border-left: 1px solid #f0f0f0;

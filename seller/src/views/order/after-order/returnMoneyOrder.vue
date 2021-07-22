@@ -46,12 +46,14 @@
           <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
+
       <Table
         :loading="loading"
         border
         class="mt_10"
         :columns="columns"
         :data="data"
+
         ref="table"
       >
 
@@ -142,7 +144,7 @@
             title: "申请退款金额",
             key: "applyRefundPrice",
             width: 130,
-            sortType: "desc",
+
             render: (h, params) => {
               return h(
                 "div",
@@ -258,6 +260,7 @@
           this.loading = false;
           if (res.success) {
             this.data = res.result.records;
+            console.log(this.data)
             this.total = res.result.total;
           }
         });
