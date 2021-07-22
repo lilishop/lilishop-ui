@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <Card style="height: 60px">
-      <div style="">
+      <div>
         <Button
           v-if="allowOperation.editPrice"
           @click="modifyPrice"
@@ -30,127 +30,124 @@
       </div>
     </Card>
 
-    <Card style="height: 400px" class="mt_10">
-      <div style="width: 30%; float: left; margin-left: 20px">
-        <div class="div-item">
-          <div class="div-item-left">订单号：</div>
-          <div class="div-item-right">{{ orderInfo.order.sn }}</div>
-        </div>
-        <div class="div-item">
-          <div class="div-item-left">订单来源：</div>
-          <div class="div-item-right">
-            {{ orderInfo.order.clientType | clientTypeWay }}
-          </div>
-        </div>
-      </div>
-
-      <div class="div-item">
-        <div class="div-item-left">订单状态：</div>
-        <div class="div-item-right">
-          {{ orderInfo.orderStatusValue }}
-        </div>
-      </div>
-
-      <div class="div-item">
-        <div class="div-item-left">下单时间：</div>
-        <div class="div-item-right">
-          {{ orderInfo.order.createTime }}
-        </div>
-      </div>
-
-      <div style="width: 30%; float: left; margin-left: 20px">
-        <div class="div-item" v-if="orderInfo.order.needReceipt == false">
-          <div class="div-item-left">发票信息：</div>
-          <div class="div-item-right">暂无发票信息</div>
-        </div>
-        <template v-if="orderInfo.order.needReceipt == true && orderInfo.receipt">
+    <Card class="mt_10">
+      <Row>
+        <Col span="12">
           <div class="div-item">
-            <div class="div-item-left">发票抬头：</div>
+            <div class="div-item-left">订单号：</div>
+            <div class="div-item-right">{{ orderInfo.order.sn }}</div>
+          </div>
+          <div class="div-item">
+            <div class="div-item-left">订单来源：</div>
+            <div class="div-item-right">
+              {{ orderInfo.order.clientType | clientTypeWay }}
+            </div>
+          </div>
+          <div class="div-item">
+            <div class="div-item-left">订单状态：</div>
+            <div class="div-item-right">
+              {{ orderInfo.orderStatusValue }}
+            </div>
+          </div>
+
+          <div class="div-item">
+            <div class="div-item-left">下单时间：</div>
+            <div class="div-item-right">
+              {{ orderInfo.order.createTime }}
+            </div>
+          </div>
+          <div class="div-item" v-if="orderInfo.order.needReceipt == false">
+            <div class="div-item-left">发票信息：</div>
+            <div class="div-item-right">暂无发票信息</div>
+          </div>
+          <template v-if="orderInfo.order.needReceipt == true && orderInfo.receipt">
+            <div class="div-item">
+              <div class="div-item-left">发票抬头：</div>
+              <div class="div-item-right">
+                {{
+                  orderInfo.receipt.receiptTitle
+                    ? orderInfo.receipt.receiptTitle
+                    : "暂无"
+                }}
+              </div>
+            </div>
+
+            <div class="div-item" v-if="orderInfo.receipt.taxpayerId">
+              <div class="div-item-left">发票税号：</div>
+              <div class="div-item-right">
+                {{
+                  orderInfo.receipt.taxpayerId
+                    ? orderInfo.receipt.taxpayerId
+                    : "暂无"
+                }}
+              </div>
+            </div>
+
+            <div class="div-item">
+              <div class="div-item-left">发票内容：</div>
+              <div class="div-item-right">
+                {{
+                  orderInfo.receipt.receiptContent
+                    ? orderInfo.receipt.receiptContent
+                    : "暂无"
+                }}
+              </div>
+            </div>
+
+            <div class="div-item">
+              <div class="div-item-left">发票金额：</div>
+              <div class="div-item-right">
+                <span v-if="orderInfo.receipt.receiptPrice">￥</span
+                >{{
+                  orderInfo.receipt.receiptPrice
+                    ? orderInfo.receipt.receiptPrice
+                    : "暂无" | unitPrice
+                }}
+              </div>
+            </div>
+
+            <div class="div-item">
+              <div class="div-item-left">是否开票：</div>
+              <div class="div-item-right">
+                {{ orderInfo.receipt.receiptStatus == 0 ? "未开" : "已开" }}
+              </div>
+            </div>  
+          </template>
+        </Col>
+        <Col span="12">
+          <div class="div-item">
+            <div class="div-item-left">收货信息：</div>
+            <div class="div-item-right">
+              {{ orderInfo.order.consigneeName }}
+              {{ orderInfo.order.consigneeMobile }}
+              {{ orderInfo.order.consigneeAddressPath }}
+              {{ orderInfo.order.consigneeDetail }}
+            </div>
+          </div>
+          <div class="div-item">
+            <div class="div-item-left">支付方式：</div>
+            <div class="div-item-right">
+              {{ orderInfo.paymentMethodValue }}
+            </div>
+          </div>
+
+          <div class="div-item">
+            <div class="div-item-left">买家留言：</div>
+            <div class="div-item-right">{{ orderInfo.order.remark }}</div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.orderType != 'VIRTUAL'">
+            <div class="div-item-left">配送方式：</div>
             <div class="div-item-right">
               {{
-                orderInfo.receipt.receiptTitle
-                  ? orderInfo.receipt.receiptTitle
-                  : "暂无"
+                orderInfo.deliveryMethodValue
+                  ? orderInfo.deliveryMethodValue
+                  : "暂无配送方式"
               }}
             </div>
           </div>
-
-          <div class="div-item" v-if="orderInfo.receipt.taxpayerId">
-            <div class="div-item-left">发票税号：</div>
-            <div class="div-item-right">
-              {{
-                orderInfo.receipt.taxpayerId
-                  ? orderInfo.receipt.taxpayerId
-                  : "暂无"
-              }}
-            </div>
-          </div>
-
-          <div class="div-item">
-            <div class="div-item-left">发票内容：</div>
-            <div class="div-item-right">
-              {{
-                orderInfo.receipt.receiptContent
-                  ? orderInfo.receipt.receiptContent
-                  : "暂无"
-              }}
-            </div>
-          </div>
-
-          <div class="div-item">
-            <div class="div-item-left">发票金额：</div>
-            <div class="div-item-right">
-              <span v-if="orderInfo.receipt.receiptPrice">￥</span
-              >{{
-                orderInfo.receipt.receiptPrice
-                  ? orderInfo.receipt.receiptPrice
-                  : "暂无" | unitPrice
-              }}
-            </div>
-          </div>
-
-          <div class="div-item">
-            <div class="div-item-left">是否开票：</div>
-            <div class="div-item-right">
-              {{ orderInfo.receipt.receiptStatus == 0 ? "未开" : "已开" }}
-            </div>
-          </div>  
-        </template>
-        
-      </div>
-      <div style="width: 36%; float: left">
-        <div class="div-item">
-          <div class="div-item-left">收货信息：</div>
-          <div class="div-item-right">
-            {{ orderInfo.order.consigneeName }}
-            {{ orderInfo.order.consigneeMobile }}
-            {{ orderInfo.order.consigneeAddressPath }}
-            {{ orderInfo.order.consigneeDetail }}
-          </div>
-        </div>
-        <div class="div-item">
-          <div class="div-item-left">支付方式：</div>
-          <div class="div-item-right">
-            {{ orderInfo.paymentMethodValue }}
-          </div>
-        </div>
-
-        <div class="div-item">
-          <div class="div-item-left">买家留言：</div>
-          <div class="div-item-right">{{ orderInfo.order.remark }}</div>
-        </div>
-
-        <div class="div-item" v-if="orderInfo.order.orderType != 'VIRTUAL'">
-          <div class="div-item-left">配送方式：</div>
-          <div class="div-item-right">
-            {{
-              orderInfo.deliveryMethodValue
-                ? orderInfo.deliveryMethodValue
-                : "暂无配送方式"
-            }}
-          </div>
-        </div>
-      </div>
+        </Col>
+      </Row>
     </Card>
 
     <Card class="mt_10">

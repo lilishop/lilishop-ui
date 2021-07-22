@@ -53,7 +53,6 @@
 
 <script>
 import * as API_Order from "@/api/order";
-import { verificationCode } from "@/api/order";
 import JsonExcel from "vue-json-excel";
 import Cookies from "js-cookie";
 export default {
@@ -186,6 +185,12 @@ export default {
         '收货人': 'consigneeName',
         '收货人联系电话': 'consigneeMobile',
         '收货地址': 'consigneeAddress',
+        '商品名称': 'goodsName',
+        '商品价格': 'goodsPrice',
+        '订单金额': 'flowPrice',
+        '商品数量': 'num',
+        '店铺名称': 'storeName',
+        '创建时间': 'createTime'
       }
     };
   },
@@ -275,6 +280,8 @@ export default {
           res.result[i].index = i+1;
           res.result[i].consigneeAddress = 
             res.result[i].consigneeAddressPath.replace(/,/g, "") + res.result[i].consigneeDetail
+          res.result[i].goodsPrice = this.$options.filters.unitPrice(res.result[i].goodsPrice,'￥')
+          res.result[i].flowPrice = this.$options.filters.unitPrice(res.result[i].flowPrice,'￥')
         }
         return res.result
       } else {

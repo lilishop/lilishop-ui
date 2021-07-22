@@ -417,3 +417,24 @@ export const resetPassword = (params) => {
 export const createIndex = () => {
   return getRequest(`/elasticsearch`);
 };
+
+// 分页查询自定义分词
+export const getCustomWordsPage = (params) => {
+  return getRequest(`/manager/custom-words`, params);
+};
+
+// 添加自定义分词
+export const insertCustomWords = (params) => {
+  return postRequest(`/manager/custom-words`, params);
+};
+
+// 修改自定义分词
+export const updateCustomWords = (params) => {
+  return putRequest(`/manager/custom-words`, params);
+};
+
+// 删除自定义分词
+export const delCustom = (id) => {
+  return deleteRequest(`/manager/custom-words/${id}`);
+};
+

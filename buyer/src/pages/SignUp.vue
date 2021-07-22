@@ -4,7 +4,7 @@
     <div class="logo-box">
       <img
         width="150"
-        :src="logoImg"
+        :src="$store.state.logoImg"
         @click="$router.push('/')"
       />
       <div>注册</div>
@@ -135,8 +135,7 @@ export default {
       verifyType: 'REGISTER', // 验证状态
       codeMsg: '发送验证码', // 提示文字
       interval: '', // 定时器
-      time: 60, // 倒计时
-      logoImg: '' // logo图
+      time: 60 // 倒计时
     };
   },
   methods: {
@@ -208,8 +207,6 @@ export default {
   },
   mounted () {
     this.$refs.formRegist.resetFields();
-    this.logoImg = this.Cookies.getItem('logo')
-    console.log(window.innerHeight);
     document.querySelector('.sign-up').style.height = window.innerHeight + 'px'
   }
 };

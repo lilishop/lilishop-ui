@@ -1,46 +1,42 @@
 <template>
   <div class="search">
     <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
-          <Form-item label="商品名称" prop="goodsName">
-            <Input
-              type="text"
-              v-model="searchForm.goodsName"
-              placeholder="请输入商品名称"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="商品编号" prop="sn">
-            <Input
-              type="text"
-              v-model="searchForm.sn"
-              placeholder="请输入商品编号"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-          <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search" >搜索</Button>
-        </Form>
-      </Row>
+      <Form
+        ref="searchForm"
+        @keydown.enter.native="handleSearch"
+        :model="searchForm"
+        inline
+        :label-width="70"
+        class="search-form"
+      >
+        <Form-item label="商品名称" prop="goodsName">
+          <Input
+            type="text"
+            v-model="searchForm.goodsName"
+            placeholder="请输入商品名称"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="商品编号" prop="sn">
+          <Input
+            type="text"
+            v-model="searchForm.sn"
+            placeholder="请输入商品编号"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search" >搜索</Button>
+      </Form>
       <Table
         :loading="loading"
         border
         :columns="columns"
         :data="data"
         ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
+        class="mt_10"
       >
-
         <!-- 商品栏目格式化 -->
         <template slot="goodsSlot" slot-scope="scope">
           <div style="margin-top: 5px;height: 80px; display: flex;">
@@ -85,7 +81,6 @@
       return {
         id: "", //要操作的id
         loading: true, // 表单加载状态
-        modalType: 0, // 添加或编辑标识
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
@@ -93,15 +88,9 @@
           sort: "create_time", // 默认排序字段
           order: "desc", // 默认排序方式
         },
-        underForm: { // 下架原因
-          reason: "",
-        },
         goodsAuditForm: { // 商品编辑表单
           is_auth: 1,
         },
-        submitLoading: false, // 添加或编辑提交状态
-        selectList: [], // 多选数据
-        selectCount: 0, // 多选计数
         columns: [
           {
             title: "商品名称",
@@ -252,7 +241,6 @@
       changePage(v) { // 改变页码
         this.searchForm.pageNumber = v;
         this.getDataList();
-        this.clearSelectAll();
       },
       changePageSize(v) { // 改变每页数量
         this.searchForm.pageSize = v;
@@ -262,21 +250,6 @@
         this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = 10;
         this.getDataList();
-      },
-      changeSort(e) { // 排序
-        this.searchForm.sort = e.key;
-        this.searchForm.order = e.order;
-        if (e.order === "normal") {
-          this.searchForm.order = "";
-        }
-        this.getDataList();
-      },
-      clearSelectAll() { // 取消全部选中
-        this.$refs.table.selectAll(false);
-      },
-      changeSelect(e) { // 选中一项
-        this.selectList = e;
-        this.selectCount = e.length;
       },
       getDataList() { // 获取列表数据
         this.loading = true;
@@ -312,8 +285,6 @@
           },
         });
       },
-
-
       //查看商品详情
       showDetail(v) {
         let id = v.id;

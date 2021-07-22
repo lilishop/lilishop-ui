@@ -175,3 +175,7 @@ export const getFullDiscountById = (id) => {
 export const delFullDiscount = (id) => {
     return deleteRequest(`/promotion/fullDiscount/${id}`)
 }
+// 开启、关闭满减活动
+export const updateFullDiscount = (id, promotionStatus) => {
+    return putRequest(`/promotion/fullDiscount/status/${id}/${promotionStatus}`)
+}

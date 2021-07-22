@@ -100,17 +100,17 @@
                 :disabled="form.promotionStatus != 'NEW'"
                 v-model="form.isFreeFreight"
                 >免邮费</Checkbox
-              >&nbsp;
+              > 
               <Checkbox
                 :disabled="form.promotionStatus != 'NEW'"
                 v-model="form.isCoupon"
                 >送优惠券</Checkbox
-              >&nbsp;
+              > 
               <Checkbox
                 :disabled="form.promotionStatus != 'NEW'"
                 v-model="form.isGift"
                 >送赠品</Checkbox
-              >&nbsp;
+              > 
               <Checkbox
                 :disabled="form.promotionStatus != 'NEW'"
                 v-if="JSON.parse(getStore('userInfo')).selfOperated"
@@ -389,6 +389,7 @@ export default {
     getDetail() {
       // 获取活动详情
       getFullDiscountById(this.id).then((res) => {
+        console.log(res);
         let data = res.result;
         if (data.number == -1) {
           data.promotionGoodsList = [];
@@ -400,7 +401,7 @@ export default {
           data.discountType = "isFullMinus";
           delete data.isFullMinus;
         } else {
-          data.discountType = "isFullMinus";
+          data.discountType = "isFullRate";
           delete data.isFullRate;
         }
         data.rangeTime = [];

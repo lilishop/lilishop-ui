@@ -4,7 +4,7 @@
     <!-- LOGO 搜索 -->
     <div class="width_1200 logo">
       <div>
-        <router-link to="/"><img :src="logoImg" alt="lili shop" title="lilishop" /></router-link>
+        <router-link to="/"><img :src="$store.state.logoImg" alt="lili shop" title="lilishop" /></router-link>
         <div>
           购物车(<span>{{ goodsTotal }}</span>)
         </div>
@@ -136,26 +136,25 @@
 </template>
 
 <script>
-import Promotion from "@/components/goodsDetail/Promotion";
-import Search from "@/components/Search";
-import ShowLikeGoods from "@/components/like";
-import * as APICart from "@/api/cart";
-import * as APIMember from "@/api/member";
-import { getLogo } from "@/api/common.js";
+import Promotion from '@/components/goodsDetail/Promotion';
+import Search from '@/components/Search';
+import ShowLikeGoods from '@/components/like';
+import * as APICart from '@/api/cart';
+import * as APIMember from '@/api/member';
+import { getLogo } from '@/api/common.js';
 export default {
-  name: "Cart",
-  beforeRouteEnter(to, from, next) {
+  name: 'Cart',
+  beforeRouteEnter (to, from, next) {
     window.scrollTo(0, 0);
     next();
   },
   components: {
     Search,
     ShowLikeGoods,
-    Promotion,
+    Promotion
   },
-  data() {
+  data () {
     return {
-      logoImg: "", // logo图
       couponAvailable: false, // 展示优惠券
       stepIndex: 0, // 当前处于哪一步，购物车==0，填写订单信息==1，成功提交订单==2
       goodsTotal: 1, // 商品数量
@@ -165,45 +164,45 @@ export default {
       cartList: [], // 购物车列表
       couponList: [], // 优惠券列表
       priceDetailDTO: {}, // 价格明细
-      skuList: [], // sku列表
+      skuList: [] // sku列表
     };
   },
   computed: {},
   methods: {
     // 跳转商品详情
-    goGoodsDetail(skuId, goodsId) {
+    goGoodsDetail (skuId, goodsId) {
       let routeUrl = this.$router.resolve({
-        path: "/goodsDetail",
-        query: { skuId, goodsId },
+        path: '/goodsDetail',
+        query: { skuId, goodsId }
       });
-      window.open(routeUrl.href, "_blank");
+      window.open(routeUrl.href, '_blank');
     },
     // 跳转店铺首页
-    goShopPage(id) {
+    goShopPage (id) {
       let routeUrl = this.$router.resolve({
-        path: "/Merchant",
-        query: { id },
+        path: '/Merchant',
+        query: { id }
       });
-      window.open(routeUrl.href, "_blank");
+      window.open(routeUrl.href, '_blank');
     },
     // 收藏商品
-    collectGoods(id) {
+    collectGoods (id) {
       this.$Modal.confirm({
-        title: "收藏",
-        content: "<p>商品收藏后可在个人中心我的收藏查看</p>",
+        title: '收藏',
+        content: '<p>商品收藏后可在个人中心我的收藏查看</p>',
         onOk: () => {
-          APIMember.collectGoods("GOODS", id).then((res) => {
+          APIMember.collectGoods('GOODS', id).then((res) => {
             if (res.success) {
-              this.$Message.success("收藏商品成功");
+              this.$Message.success('收藏商品成功');
               this.getCartList();
             }
           });
         },
-        onCancel: () => {},
+        onCancel: () => {}
       });
     },
     // 删除商品
-    delGoods(id) {
+    delGoods (id) {
       const idArr = [];
       if (!id) {
         const list = this.cartList;
@@ -216,50 +215,50 @@ export default {
         idArr.push(id);
       }
       this.$Modal.confirm({
-        title: "删除",
-        content: "<p>确定要删除该商品吗？</p>",
+        title: '删除',
+        content: '<p>确定要删除该商品吗？</p>',
         onOk: () => {
           APICart.delCartGoods({ skuIds: idArr.toString() }).then((res) => {
             if (res.success) {
-              this.$Message.success("删除成功");
+              this.$Message.success('删除成功');
               this.getCartList();
             } else {
               this.$Message.error(res.message);
             }
           });
-        },
+        }
       });
     },
-    clearCart() {
+    clearCart () {
       // 清空购物车
       this.$Modal.confirm({
-        title: "提示",
-        content: "<p>确定要清空购物车吗？清空后不可恢复</p>",
+        title: '提示',
+        content: '<p>确定要清空购物车吗？清空后不可恢复</p>',
         onOk: () => {
           APICart.clearCart().then((res) => {
             if (res.success) {
-              this.$Message.success("清空购物车成功");
+              this.$Message.success('清空购物车成功');
               this.getCartList();
             } else {
               this.$Message.error(res.message);
             }
           });
-        },
+        }
       });
     },
     // 跳转支付页面
-    pay() {
+    pay () {
       if (this.checkedNum) {
-        this.$router.push({ path: "/pay", query: { way: "CART" } });
+        this.$router.push({ path: '/pay', query: { way: 'CART' } });
       } else {
-        this.$Message.warning("请至少选择一件商品");
+        this.$Message.warning('请至少选择一件商品');
       }
     },
     // 展示优惠券
-    showCoupon(storeId, index) {
+    showCoupon (storeId, index) {
       this.couponAvailable = index;
     },
-    changeNum(val, id) {
+    changeNum (val, id) {
       // 设置购买数量
       console.log(val, id);
       APICart.setCartGoodsNum({ skuId: id, num: val }).then((res) => {
@@ -269,13 +268,13 @@ export default {
         }
       });
     },
-    async changeChecked(status, type, id) {
+    async changeChecked (status, type, id) {
       // 设置商品选中状态
       const check = status ? 1 : 0;
-      if (type === "all") {
+      if (type === 'all') {
         // 全选
         await APICart.setCheckedAll({ checked: check });
-      } else if (type === "shop") {
+      } else if (type === 'shop') {
         // 选中店铺所有商品
         await APICart.setCheckedSeller({ checked: check, storeId: id });
       } else {
@@ -286,17 +285,17 @@ export default {
       this.getCartList();
     },
 
-    async receiveShopCoupon(item) {
+    async receiveShopCoupon (item) {
       // 领取优惠券
       let res = await APIMember.receiveCoupon(item.id);
       if (res.success) {
-        this.$set(item, "disabled", true);
-        this.$Message.success("领取成功");
+        this.$set(item, 'disabled', true);
+        this.$Message.success('领取成功');
       } else {
         this.$Message.error(res.message);
       }
     },
-    async getCartList() {
+    async getCartList () {
       // 购物车列表
       this.loading = true;
       try {
@@ -326,25 +325,15 @@ export default {
       } catch (error) {
         this.loading = false;
       }
-    },
+    }
   },
-  mounted() {
+  mounted () {
     this.getCartList();
     APICart.cartCount().then((res) => {
       // 购物车商品数量
       if (res.success) this.goodsTotal = res.result;
     });
-    if (!this.Cookies.getItem("logo")) {
-      getLogo().then((res) => {
-        if (res.success) {
-          let logoObj = JSON.parse(res.result.settingValue);
-          this.Cookies.setItem("logo", logoObj.buyerSideLogo);
-        }
-      });
-    } else {
-      this.logoImg = this.Cookies.getItem("logo");
-    }
-  },
+  }
 };
 </script>
 

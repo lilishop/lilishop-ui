@@ -49,18 +49,6 @@ export const otherRouter = {
       component: () => import("@/views/goods/goods-manage/category.vue")
     },
     {
-      path: "message",
-      title: "消息中心",
-      name: "message_index",
-      component: () => import("@/views/message/message.vue")
-    },
-    {
-      path: "category",
-      title: "类型列表",
-      name: "category",
-      component: () => import("@/views/goods/goods-manage/category.vue")
-    },
-    {
       path: "parameter",
       title: "参数绑定",
       name: "parameter",

@@ -1,40 +1,19 @@
 <template>
   <div class="search">
     <Card>
-      <Form
-        @keydown.enter.native="handleSearch"
-        ref="searchForm"
-        :model="searchForm"
-        inline
-        :label-width="70"
-        class="search-form"
-      >
-        <Form-item label="规格名称" prop="specName">
-          <Input
-            type="text"
-            v-model="searchForm.specName"
-            placeholder="请输入规格名称"
-            clearable
-            style="width: 200px"
-          />
-        </Form-item>
-        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
-      </Form>
-      <Row class="operation padding-row">
+      <Row class="operation">
         <Button @click="add" type="primary">添加</Button>
-        <Button @click="delAll">批量删除</Button>
       </Row>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
-      >
-      </Table>
+        <Table
+          :loading="loading"
+          border
+          :columns="columns"
+          :data="data"
+          ref="table"
+          sortable="custom"
+          @on-sort-change="changeSort"
+          @on-selection-change="changeSelect"
+        ></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page
           :current="searchForm.pageNumber"
@@ -56,31 +35,15 @@
       :mask-closable="false"
       :width="500"
     >
-      <Form ref="form" :model="form" :label-width="100">
-        <FormItem label="规格名称" prop="specName">
-          <Input v-model="form.specName" maxlength="30" clearable style="width: 100%"/>
-        </FormItem>
-        <FormItem label="规格值" prop="specValue">
-          <Select
-            v-model="form.specValue"
-            placeholder="输入后回车添加"
-            multiple
-            filterable
-            allow-create
-            :popper-append-to-body="false"
-            popper-class="spec-values-popper"
-            style="width: 100%; text-align: left; margin-right: 10px"
-          >
-            <Option v-for="item in specValue" :value="item" :label="item" :key="item">
-            </Option>
-          </Select>
+      <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
+        <FormItem label="自定义分词" prop="sn">
+          <Input v-model="form.name" clearable style="width: 100%" />
         </FormItem>
       </Form>
       <div slot="footer">
         <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="saveSpec"
-        >提交
-        </Button
+        <Button type="primary" :loading="submitLoading" @click="handleSubmit"
+          >提交</Button
         >
       </div>
     </Modal>
@@ -89,14 +52,13 @@
 
 <script>
 import {
-  getSpecListData,
-  insertSpec,
-  updateSpec,
-  delSpec
-} from "@/api/goods";
-
+  getCustomWordsPage,
+  delCustom,
+  insertCustomWords,
+  updateCustomWords
+} from "@/api/index";
 export default {
-  name: "spec",
+  name: "customWords",
   components: {},
   data() {
     return {
@@ -109,15 +71,23 @@ export default {
         pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
         sort: "createTime", // 默认排序字段
-        order: "asc", // 默认排序方式
+        order: "desc", // 默认排序方式
+        words: "",
       },
       form: {
         // 添加或编辑表单对象初始化数据
-        specName: "",
-        specValue: "",
+        name: "",
       },
-      /** 编辑规格值 */
-      specValue: [],
+      // 表单验证规则
+      formValidate: {
+        name: [
+          {
+            required: true,
+            message: "请输入敏感词",
+            trigger: "blur",
+          },
+        ],
+      },
       submitLoading: false, // 添加或编辑提交状态
       selectList: [], // 多选数据
       selectCount: 0, // 多选计数
@@ -129,25 +99,33 @@ export default {
           align: "center",
         },
         {
-          title: "规格名称",
-          key: "specName",
-          width: 200,
+          title: "自定义分词",
+          key: "name",
+          minWidth: 120
         },
         {
-          title: "规格值",
-          key: "specValue",
-          minWidth: 250,
-          tooltip: true
+          title: "创建时间",
+          key: "createTime",
+          width: 200
+        },
+        {
+          title: "更新时间",
+          key: "updateTime",
+          width: 200
+        },
+        {
+          title: "操作人",
+          key: "createBy",
+          minWidth: 150
         },
         {
           title: "操作",
           key: "action",
           align: "center",
           fixed: "right",
-          width: 250,
+          width: 200,
           render: (h, params) => {
             return h("div", [
-
               h(
                 "Button",
                 {
@@ -160,11 +138,11 @@ export default {
                   },
                   on: {
                     click: () => {
-                      this.edit(params.row);
+                      this.detail(params.row);
                     },
                   },
                 },
-                "编辑"
+                "修改"
               ),
               h(
                 "Button",
@@ -172,6 +150,9 @@ export default {
                   props: {
                     type: "error",
                     size: "small",
+                  },
+                  style: {
+                    marginRight: "5px",
                   },
                   on: {
                     click: () => {
@@ -190,28 +171,23 @@ export default {
     };
   },
   methods: {
-    //初始化，获取数据
     init() {
       this.getDataList();
     },
-    //修改分页
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
-    //修改页面大小
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    //搜索参数
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    //重置搜索参数
     handleReset() {
       this.$refs.searchForm.resetFields();
       this.searchForm.pageNumber = 1;
@@ -219,7 +195,6 @@ export default {
       // 重新加载数据
       this.getDataList();
     },
-    //更改排序
     changeSort(e) {
       this.searchForm.sort = e.key;
       this.searchForm.order = e.order;
@@ -228,35 +203,36 @@ export default {
       }
       this.getDataList();
     },
-    //清除已选择
     clearSelectAll() {
       this.$refs.table.selectAll(false);
     },
-    //修改已选择
     changeSelect(e) {
       this.selectList = e;
       this.selectCount = e.length;
     },
-    //获取数据
+
     getDataList() {
       this.loading = true;
-      // 带多条件搜索参数获取表单数据 请自行修改接口
-      getSpecListData(this.searchForm).then((res) => {
+
+      getCustomWordsPage(this.searchForm).then((res) => {
         this.loading = false;
-        this.data = res.records;
-        this.total = res.total;
+        if (res.success) {
+          this.data = res.result.records;
+          this.total = res.result.total;
+        }
       });
+      this.total = this.data.length;
       this.loading = false;
     },
-    //新增规格
-    saveSpec() {
+    handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
           this.submitLoading = true;
-          if (this.modalType === 0) {
-            // 添加 避免编辑后传入id等数据
+
+          if (this.modalType == 0) {
+            // 添加 避免编辑后传入id等数据 记得删除
             delete this.form.id;
-            insertSpec(this.form).then((res) => {
+            insertCustomWords(this.form).then((res) => {
               this.submitLoading = false;
               if (res.success) {
                 this.$Message.success("操作成功");
@@ -265,8 +241,9 @@ export default {
               }
             });
           } else {
+            this.form.id = this.id;
             // 编辑
-            updateSpec(this.form.id, this.form).then((res) => {
+            updateCustomWords(this.form).then((res) => {
               this.submitLoading = false;
               if (res.success) {
                 this.$Message.success("操作成功");
@@ -278,48 +255,30 @@ export default {
         }
       });
     },
-    //弹出添加框
     add() {
       this.modalType = 0;
       this.modalTitle = "添加";
+      this.form = {}
       this.$refs.form.resetFields();
-      delete this.form.id;
+
       this.modalVisible = true;
     },
-    //弹出编辑框
-    edit(v) {
+    detail(v) {
       this.modalType = 1;
-      this.modalTitle = "编辑";
-      // 转换null为""
-      for (let attr in v) {
-        if (v[attr] === null) {
-          v[attr] = "";
-        }
-      }
-      let localVal = v.specValue;
-
-      this.form.specName = v.specName;
-      this.form.id = v.id;
-      this.form.specValue = v.specValue;
-
-      if (localVal && localVal.indexOf("," > 0)) {
-        this.form.specValue = localVal.split(",")
-        this.specValue = this.form.specValue
-        this.$set(this, 'specValue', this.form.specValue)
-      } else {
-        this.specValue = [];
-      }
+      this.id = v.id;
+      this.modalTitle = "修改";
       this.modalVisible = true;
+      this.form.name = v.name;
     },
-    // 删除规格
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
-        content: "您确认要删除 " + v.specName + " ?",
+        // 记得确认修改此处
+        content: "您确认要删除 " + v.name + " ?",
         loading: true,
         onOk: () => {
           // 删除
-          delSpec(v.id).then((res) => {
+          delCustom(v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("操作成功");
@@ -329,7 +288,6 @@ export default {
         },
       });
     },
-    // 批量删除
     delAll() {
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未选择要删除的数据");
@@ -346,12 +304,11 @@ export default {
           });
           ids = ids.substring(0, ids.length - 1);
           // 批量删除
-          delSpec(ids).then((res) => {
+          delSensitive(ids).then((res) => {
             this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("删除成功");
+              this.$Message.success("操作成功");
               this.clearSelectAll();
-              this.searchForm.pageNumber = 1
               this.getDataList();
             }
           });

@@ -71,7 +71,7 @@
             <Input v-model="form.bankAccountNumber" type="text" placeholder="请输入银行账号" style="width:260px" />
           </FormItem>
         </template>
-        <FormItem label="返回方式">
+        <FormItem label="返回方式" v-if="form.serviceType === 'RETURN_GOODS'">
           <div>快递至第三方卖家</div>
         </FormItem>
         <FormItem>

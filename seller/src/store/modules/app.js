@@ -14,7 +14,7 @@ const app = {
         navList: [], // 顶部菜单
         currNav: "", // 当前顶部菜单name
         currNavTitle: "", // 当前顶部菜单标题
-        cachePage: [],
+        cachePage: [], // 缓存的页面
         lang: '',
         isFullScreen: false,
         openedSubmenuArr: [], // 要展开的菜单数组
@@ -93,6 +93,7 @@ const app = {
                     state.cachePage.splice(index, 1);
                 }
             });
+            localStorage.cachePage = JSON.stringify(state.cachePage);
         },
         initCachepage(state) {
             if (localStorage.cachePage) {
@@ -120,6 +121,7 @@ const app = {
         clearAllTags(state) {
             state.storeOpenedList.splice(1);
             state.cachePage.length = 0;
+            localStorage.cachePage = '';
             localStorage.storeOpenedList = JSON.stringify(state.storeOpenedList);
         },
         clearOtherTags(state, vm) {
@@ -140,6 +142,7 @@ const app = {
                 return item == currentName;
             });
             state.cachePage = newCachepage;
+            localStorage.cachePage = JSON.stringify(state.cachePage);
             localStorage.storeOpenedList = JSON.stringify(state.storeOpenedList);
         },
         setOpenedList(state) {
@@ -165,6 +168,7 @@ const app = {
         setMessageCount(state, count) {
             state.messageCount = count;
         },
+        // 新增页签
         increateTag(state, tagObj) {
             if (!Util.oneOf(tagObj.name, state.dontCache)) {
                 state.cachePage.push(tagObj.name);

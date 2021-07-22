@@ -116,7 +116,6 @@ import {
 } from "@/api/goods";
 export default {
   name: "categoryParams",
-  components: {},
   data() {
     return {
       /** 分类ID */
@@ -127,19 +126,17 @@ export default {
       modalType: 0,
       /** 添加或编辑标题 */
       modalTitle: "",
-      modalTitle1: "",
       /** 参数添加或编辑弹出框 */
       dialogParamsVisible: false,
       /** 参数组添加或编辑弹出框 */
       dialogParamsGroupVisible: false,
-      /** 参数ID **/
-      paramId: "",
       //参数表单
       paramForm: {},
       /** 参数值 **/
       ops:{
         options: []
       },
+      // 参数表单
       paramGroupForm: {},
       /** 添加、编辑参数 规格 */
       formValidate: {
@@ -161,6 +158,7 @@ export default {
     },
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },
@@ -207,6 +205,7 @@ export default {
       this.modalTitle = "修改参数组";
       this.dialogParamsGroupVisible = true;
     },
+    // 添加参数
     handleAddParamsGroup() {
       this.paramGroupForm = {
 
@@ -279,6 +278,7 @@ export default {
         }
       });
     },
+    // 获取分类列表
     getDataList() {
       getCategoryParamsListData(this.categoryId).then((res) => {
         if (res.success) {

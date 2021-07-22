@@ -5,7 +5,7 @@
     <div class="width_1200 logo">
       <div>
         <router-link to="/"
-          ><img :src="logoImg" alt="lili shop" title="lilishop"
+          ><img :src="$store.state.logoImg" alt="lili shop" title="lilishop"
         /></router-link>
         <div>结算页</div>
       </div>
@@ -190,7 +190,7 @@
                 <span
                   v-if="item.couponType === 'DISCOUNT'"
                   class="fontsize_12 global_color"
-                  ><span class="price">{{ item.couponDiscount }}</span
+                  ><span class="price">{{ item.discount }}</span
                   >折</span
                 >
                 <span class="describe"
@@ -347,23 +347,12 @@ export default {
       moreAddr: false, // 更多地址
       canUseCouponNum: 0, // 可用优惠券数量
       couponList: [], // 可用优惠券列表
-      logoImg: '', // 平台logo
       usedCouponId: [], // 已使用优惠券id
       selectedCoupon: {} // 已选优惠券对象
     };
   },
   mounted () {
     this.init();
-    if (!this.Cookies.getItem('logo')) {
-      getLogo().then((res) => {
-        if (res.success) {
-          let logoObj = JSON.parse(res.result.settingValue);
-          this.Cookies.setItem('logo', logoObj.buyerSideLogo);
-        }
-      });
-    } else {
-      this.logoImg = this.Cookies.getItem('logo');
-    }
   },
   methods: {
     init () {

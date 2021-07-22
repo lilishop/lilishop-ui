@@ -27,12 +27,12 @@
       </Row>
       <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" @on-selection-change="changeSelect">
         <template slot-scope="{ row }" slot="action">
-          <Button v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="info" size="small" style="margin-right: 10px" @click="edit(row)">编辑</Button>
+          <Button v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="info" size="small" style="margin-right: 5px" @click="edit(row)">编辑</Button>
           <Button v-if="row.promotionStatus !== 'CLOSE'" type="error" size="small" @click="remove(row)">下架</Button>
         </template>
       </Table>
       <Row type="flex" justify="end" class="page">
-        <Page :current="searchForm.pageNumber + 1" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
           size="small" show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
@@ -49,7 +49,7 @@ export default {
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
-        pageNumber: 0, // 当前页数
+        pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
         sort: "startTime", // 默认排序字段
         order: "desc", // 默认排序方式
@@ -135,7 +135,7 @@ export default {
           title: "活动时间",
 
           render: (h, params) => {
-            if (params.row.getType === "ACTIVITY") {
+            if (params.row.rangeDayType !== "FIXEDTIME") {
               return h("div", "长期有效");
             } else {
               return h("div", {
@@ -208,7 +208,7 @@ export default {
       this.$router.push({ name: "platform-coupon-info", query: { id: v.id } });
     },
     changePage(v) {
-      this.searchForm.pageNumber = v - 1;
+      this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
@@ -217,13 +217,13 @@ export default {
       this.getDataList();
     },
     handleSearch() {
-      this.searchForm.pageNumber = 0;
+      this.searchForm.pageNumber = 1;
       this.getDataList();
     },
     handleReset() {
       this.searchForm = {};
       this.selectDate = "";
-      this.searchForm.pageNumber = 0;
+      this.searchForm.pageNumber = 1;
       this.getDataList();
     },
     clearSelectAll() {

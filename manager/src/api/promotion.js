@@ -179,7 +179,10 @@ export const getFullDiscountList = params => {
 export const getFullDiscountById = id => {
   return getRequest(`/promotion/fullDiscount/${id}`);
 };
-
+// 开启、关闭满额活动
+export const updateFullDiscount = (id, promotionStatus) => {
+  return putRequest(`/promotion/fullDiscount/status/${id}/${promotionStatus}`)
+}
 // 积分商品列表
 export const getPointsGoodsList = params => {
   return getRequest(`/promotion/pointsGoods`, params);

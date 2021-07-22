@@ -1,8 +1,8 @@
 <template>
-  <div class="search">
+  <div>
     <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+      <Row>
+        <Form ref="searchForm" :model="searchForm" @keydown.enter.native="handleSearch" inline :label-width="70" class="search-form">
           <Form-item label="会员名称" prop="memberName">
             <Input type="text" v-model="searchForm.memberName" placeholder="请输入会员名称" clearable style="width: 200px"/>
           </Form-item>
@@ -350,5 +350,52 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-@import "./index.scss";
+.left-container {
+  float: left;
+}
+
+.right-container {
+  float: left;
+  margin-left: 50px;
+}
+
+.img {
+  width: 100%;
+  height: 100%;
+}
+img {
+  vertical-align: middle;
+  border-style: none;
+}
+.product {
+  width: 140px;
+  height: 160px;
+  border: 1px solid #d9d9d9;
+  border-radius: 3px;
+}
+.show{
+  label{
+    font-size: 14px;
+  }
+  margin-top: 15px;
+}
+
+label {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  display: block;
+  float: left;
+  margin-right: 2px;
+}
+.border-b {
+  border-bottom: 1px solid #e9e9e9;
+  width: 500px;
+  overflow: hidden;
+  position: relative;
+  margin-top: 12px;
+}
+.div-height{
+  line-height: 25px;
+}
 </style>

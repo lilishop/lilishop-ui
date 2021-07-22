@@ -2,7 +2,7 @@
   <div>
     <div class="container">
       <img
-        :src="logoImg"
+        :src="$store.state.logoImg"
         v-if="showLogo"
         class="logo-img"
         alt=""
@@ -37,7 +37,6 @@
 </template>
 
 <script>
-import {getLogo} from '@/api/common.js'
 import {hotWords} from '@/api/goods.js'
 export default {
   name: 'search',
@@ -62,7 +61,6 @@ export default {
   data () {
     return {
       searchData: '', // 搜索内容
-      logoImg: '', // pc端展示logo
       promotionTags: [] // 热门搜索列表
     };
   },
@@ -82,18 +80,6 @@ export default {
     }
   },
   mounted () {
-    if (!this.Cookies.getItem('logo')) {
-      getLogo().then(res => {
-        if (res.success) {
-          let logoObj = JSON.parse(res.result.settingValue)
-          this.Cookies.setItem('logo', logoObj.buyerSideLogo)
-          this.logoImg = logoObj.buyerSideLogo
-        }
-      })
-    } else {
-      this.logoImg = this.Cookies.getItem('logo')
-    }
-
     this.searchData = this.$route.query.keyword
 
     if (!this.hover) { // 首页顶部固定搜索栏不调用热词接口

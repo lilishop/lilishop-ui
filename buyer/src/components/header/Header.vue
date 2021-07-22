@@ -2,6 +2,7 @@
   <div class="box">
     <div class="nav">
       <ul class="location">
+        <li v-if="$route.path.includes('home')" style="margin-left:10px"><router-link to="/">首页</router-link></li>
       </ul>
       <ul class="detail">
         <li class="first" v-show="!userInfo.username">
