@@ -158,7 +158,7 @@
           {
             title: "状态",
             key: "serviceStatus",
-            width: 120,
+            width: 200,
             render: (h, params) => {
               if (params.row.serviceStatus == "APPLY") {
                 return h('div', [h('tag', {props: {color: "blue"}}, '申请中'),]);
