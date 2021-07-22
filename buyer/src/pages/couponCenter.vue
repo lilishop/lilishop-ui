@@ -5,7 +5,7 @@
       <div>
         <div class="coupon-title">
           <router-link to="/">
-            <img src="../assets/images/logo.png" width="120" alt="">
+            <img src="../assets/images/logo1.png" width="120" alt="">
           </router-link>
           <p>领券中心</p>
           <Input search style="width:400px" @on-search='search' enter-button="搜索" placeholder="搜索优惠券" />

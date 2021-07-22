@@ -12,7 +12,7 @@ export default new Vuex.Store({
     category: [], // 全部分类
     navList: [],
     cartNum: storage.getItem('cartNum') || 0,
-    logoImg: 'https://lili-system.oss-cn-beijing.aliyuncs.com/logo.png'
+    logoImg: require('@/assets/images/logo2.png')
   },
   getters,
   actions,

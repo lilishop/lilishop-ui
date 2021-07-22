@@ -75,5 +75,9 @@ export const afterSaleStatusList = [
   {
     name: '完成售后',
     status: 'COMPLETE'
+  },
+  {
+    name: '等待平台退款',
+    status: 'WAIT_REFUND'
   }
 ]

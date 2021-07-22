@@ -235,6 +235,7 @@ export default {
         this.submitLoading = false
       })
     },
+    // 提交物流modal
     openModal (row) {
       console.log(row);
       this.singleOrder = row;
