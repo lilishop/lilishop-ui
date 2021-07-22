@@ -8,113 +8,52 @@
         <Button @click="addRole" type="primary">添加角色</Button>
         <Button @click="delAll">批量删除</Button>
       </Row>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
-      ></Table>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="pageNumber"
-          :total="total"
-          :page-size="pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
-          size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
+        <Page :current="pageNumber" :total="total" :page-size="pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total
+          show-elevator show-sizer></Page>
       </Row>
     </Card>
 
     <!-- 编辑 -->
-    <Modal
-      :title="modalTitle"
-      v-model="roleModalVisible"
-      :mask-closable="false"
-      :width="500"
-    >
-      <Form
-        ref="roleForm"
-        :model="roleForm"
-        :label-width="80"
-        :rules="roleFormValidate"
-      >
+    <Modal :title="modalTitle" v-model="roleModalVisible" :mask-closable="false" :width="500">
+      <Form ref="roleForm" :model="roleForm" :label-width="80" :rules="roleFormValidate">
         <FormItem label="角色名称" prop="name">
-          <Input v-model="roleForm.name"/>
+          <Input v-model="roleForm.name" />
         </FormItem>
         <FormItem label="备注" prop="description">
-          <Input v-model="roleForm.description"/>
+          <Input v-model="roleForm.description" />
         </FormItem>
       </Form>
       <div slot="footer">
         <Button type="text" @click="cancelRole">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="submitRole"
-        >提交
-        </Button
-        >
+        <Button type="primary" :loading="submitLoading" @click="submitRole">提交
+        </Button>
       </div>
     </Modal>
     <!-- 菜单权限 -->
-    <Modal
-      :title="modalTitle"
-      v-model="permModalVisible"
-      :mask-closable="false"
-      :width="500"
-      :styles="{ top: '30px' }"
-      class="permModal"
-    >
+    <Modal :title="modalTitle" v-model="permModalVisible" :mask-closable="false" :width="500" :styles="{ top: '30px' }" class="permModal">
       <div style="position: relative">
-        <Tree
-          ref="tree"
-          :data="permData"
-          show-checkbox
-          :render="renderContent"
-          :check-strictly="true"
-        >
+        <Tree ref="tree" :data="permData" show-checkbox :render="renderContent" :check-strictly="true">
         </Tree>
         <Spin size="large" fix v-if="treeLoading"></Spin>
       </div>
       <div slot="footer">
         <Button type="text" @click="cancelPermEdit">取消</Button>
-        <Select
-          v-model="openLevel"
-          @on-change="changeOpen"
-          style="width: 110px; text-align: left; margin-right: 10px"
-        >
+        <Select v-model="openLevel" @on-change="changeOpen" style="width: 110px; text-align: left; margin-right: 10px">
           <Option value="0">展开所有</Option>
           <Option value="1">收合所有</Option>
           <Option value="2">仅展开一级</Option>
           <Option value="3">仅展开两级</Option>
         </Select>
-        <Button
-          type="primary"
-          :loading="submitPermLoading"
-          @click="submitPermEdit(true)"
-        >编辑
-        </Button
-        >
+        <Button type="primary" :loading="submitPermLoading" @click="submitPermEdit(true)">编辑
+        </Button>
       </div>
     </Modal>
     <!-- 数据权限 -->
-    <Modal
-      :title="modalTitle"
-      v-model="depModalVisible"
-      :mask-closable="false"
-      :width="500"
-      class="depModal"
-    >
-      <Alert show-icon
-      >默认可查看全部数据，自定义数据范围时请勾选下方数据
-      </Alert
-      >
+    <Modal :title="modalTitle" v-model="depModalVisible" :mask-closable="false" :width="500" class="depModal">
+      <Alert show-icon>默认可查看全部数据，自定义数据范围时请勾选下方数据
+      </Alert>
       <Form :label-width="85">
         <FormItem label="数据范围">
           <Select v-model="dataType" transfer>
@@ -127,46 +66,37 @@
       </Form>
       <div v-show="dataType == 1" style="margin-top: 15px">
         <div style="position: relative">
-          <Tree
-            ref="depTree"
-            :data="depData"
-            :load-data="loadData"
-            @on-toggle-expand="expandCheckDep"
-            multiple
-            style="margin-top: 15px"
-          ></Tree>
+          <Tree ref="depTree" :data="depData" :load-data="loadData" @on-toggle-expand="expandCheckDep" multiple style="margin-top: 15px"></Tree>
           <Spin size="large" fix v-if="depTreeLoading"></Spin>
         </div>
       </div>
       <div slot="footer">
         <Button type="text" @click="depModalVisible = false">取消</Button>
-        <Button
-          type="primary"
-          :loading="submitDepLoading"
-          @click="submitDepEdit"
-        >提交
-        </Button
-        >
+        <Button type="primary" :loading="submitDepLoading" @click="submitDepEdit">提交
+        </Button>
       </div>
     </Modal>
 
     <!-- 保存权限弹出选择权限 -->
-    <Modal
-      v-model="selectIsSuperModel"
-      title="选择菜单权限"
-      :loading="superModelLoading"
-      @on-ok="saveRole"
-    >
-      <div v-for="(item, index) in saveRoleWay" :key="index">
-        <span class="title">{{ item.title }}</span>
-        <RadioGroup type="button" button-style="solid" v-model="item.isSuper">
-          <Radio :label="true">
-            <span>操作数据权限</span>
-          </Radio>
-          <Radio :label="false">
-            <span>查看权限</span>
-          </Radio>
-        </RadioGroup>
+    <Modal width="800" v-model="selectIsSuperModel" title="选择菜单权限" :loading="superModelLoading" @on-ok="saveRole">
+      <!-- <div class="btns">
+        <Button type="primary"  class="btn-item">一键选中·数据权限</Button>
+        <Button  class="btn-item">一键选中·查看权限</Button>
+      </div> -->
+      <div class="role-list">
+        <div class="role-item" v-for="(item, index) in saveRoleWay" :key="index">
+          <div class="title">{{ item.title }}</div>
+          <div class="content">
+          <RadioGroup type="button" button-style="solid" v-model="item.isSuper">
+            <Radio :label="true">
+              <span>操作数据权限</span>
+            </Radio>
+            <Radio :label="false">
+              <span>查看权限</span>
+            </Radio>
+          </RadioGroup>
+          </div>
+        </div>
       </div>
     </Modal>
   </div>
@@ -207,19 +137,22 @@ export default {
       permModalVisible: false, // 菜单权限modal
       depModalVisible: false, // 部门modal
       modalTitle: "", // modal标题
-      roleForm: { // 角色表单
+      roleForm: {
+        // 角色表单
         name: "",
         description: "",
       },
-      roleFormValidate: { // 验证规则
+      roleFormValidate: {
+        // 验证规则
         name: [
-          {required: true, message: "角色名称不能为空", trigger: "blur"},
+          { required: true, message: "角色名称不能为空", trigger: "blur" },
         ],
       },
       submitLoading: false, // 提交loading
       selectList: [], // 已选列表
       selectCount: 0, // 已选总数
-      columns: [ // 表头
+      columns: [
+        // 表头
         {
           type: "selection",
           width: 60,
@@ -234,7 +167,7 @@ export default {
           title: "备注",
           key: "description",
           minWidth: 150,
-          tooltip: true
+          tooltip: true,
         },
         {
           title: "创建时间",
@@ -285,7 +218,7 @@ export default {
                 {
                   props: {
                     size: "small",
-                    type: "info"
+                    type: "info",
                   },
                   style: {
                     marginRight: "5px",
@@ -342,7 +275,7 @@ export default {
       console.log(val);
     },
 
-    renderContent(h, {root, node, data}) {
+    renderContent(h, { root, node, data }) {
       let icon = "";
 
       if (data.level == 0) {
@@ -384,7 +317,7 @@ export default {
             h("span", data.title),
             h(
               "span",
-              {class: {tips: true}},
+              { class: { tips: true } },
               data.isSuper ? "操作权限" : "查看权限"
             ),
           ]),
@@ -655,7 +588,6 @@ export default {
         way.push(perm);
         this.saveRoleWay = way;
       });
-
     },
 
     /**保存权限 */
@@ -678,7 +610,7 @@ export default {
       this.permModalVisible = false;
     },
     loadData(item, callback) {
-      loadDepartment(item.id, {openDataFilter: false}).then((res) => {
+      loadDepartment(item.id, { openDataFilter: false }).then((res) => {
         if (res.success) {
           res.result.forEach(function (e) {
             e.selected = false;
@@ -777,3 +709,33 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.role-list {
+  height: 500px;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+}
+.role-item {
+  width: 50%;
+  display: flex;
+  padding: 20px 0;
+  align-items: center;
+  >.title{
+    flex: 2;
+    text-align: right;
+  }
+  >.content{
+    flex: 10;
+  }
+}
+.btns{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.btn-item{
+  margin-right: 20px;
+}
+
+</style>
