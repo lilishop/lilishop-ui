@@ -8,8 +8,11 @@
           <div class="goodsImg hover-pointer" v-if="params.type === 'GOODS'">
             <img :src="item.image" />
           </div>
-          <div class="goodsTitle hover-pointer">
-            {{params.type === 'GOODS'? item.goodsName : item.storeName}}
+          <div class="goodsTitle hover-color" v-if="params.type === 'GOODS'" @click="buynow(item.skuId, item.goodsId)">
+            {{item.goodsName}}
+          </div>
+          <div v-else class="goodsTitle hover-pointer">
+            {{item.storeName}}
           </div>
           <div class="goodsPrice">
             <span v-if="params.type === 'GOODS'">{{item.price | unitPrice('￥')}}</span>

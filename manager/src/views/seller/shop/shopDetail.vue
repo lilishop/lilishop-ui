@@ -117,9 +117,6 @@
             </span>
           </p>
         </div>
-
-
-
         <div class="ant-col-md-6">
           <p class="item">
             <span class="label">法人姓名：</span>
@@ -185,7 +182,7 @@
       </div>
     </Card>
 
-    <Card>
+    <Card class="mt_10">
       <Tabs type="order" @on-click="storeInfoChange">
         <TabPane label="TA的订单" name="order" style="min-height: 200px">
           <Row>
@@ -254,6 +251,7 @@
               :columns="orderColumns"
               :data="orderData"
               ref="table"
+              class="mt_10"
               sortable="custom"
               @on-sort-change="orderChangeSort"
             >
@@ -355,6 +353,7 @@
               :columns="refundGoodsOrderColumns"
               :data="refundGoodsOrderData"
               ref="table"
+              class="mt_10"
               sortable="custom"
               @on-sort-change="refundGoodsOrderChangeSort"
             >
@@ -478,6 +477,7 @@
               :columns="refundGoodsOrderColumns"
               :data="refundOrderData"
               ref="table"
+              class="mt_10"
               sortable="custom"
               @on-sort-change="refundOrderChangeSort"
             >

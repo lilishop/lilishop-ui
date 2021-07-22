@@ -149,12 +149,8 @@ export default {
       this.previewGoodsPicture = url;
       this.goodsPictureVisible = true;
     }
-    ,
   }
-  ,
-
 }
-;
 </script>
 
 <style lang="scss" soped>
