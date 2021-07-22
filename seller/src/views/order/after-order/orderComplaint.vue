@@ -102,12 +102,10 @@
           {
             title: "订单编号",
             key: "orderSn",
-            sortType: "desc",
           },
           {
             title: "商品名称",
             slot: "goodsName",
-            sortType: "desc",
           },
           {
             title: "投诉主题",
@@ -197,7 +195,7 @@
     },
     methods: {
       // 初始化数据
-      init() { 
+      init() {
         this.getDataList();
       },
       // 改变页码
