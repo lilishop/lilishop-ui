@@ -190,7 +190,7 @@
                 <span
                   v-if="item.couponType === 'DISCOUNT'"
                   class="fontsize_12 global_color"
-                  ><span class="price">{{ item.couponDiscount }}</span
+                  ><span class="price">{{ item.discount }}</span
                   >折</span
                 >
                 <span class="describe"

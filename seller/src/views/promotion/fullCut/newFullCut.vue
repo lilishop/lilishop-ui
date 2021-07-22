@@ -1,7 +1,7 @@
 <template>
   <div>
     <Card>
-      <Form ref="form" :model="form" :label-width="120" :rules="formRule" class="search-form">
+      <Form ref="form" :model="form" :label-width="120" :rules="formRule">
         <div class="base-info-item">
           <h4>基本信息</h4>
           <div class="form-item-view">
@@ -389,6 +389,7 @@ export default {
     getDetail() {
       // 获取活动详情
       getFullDiscountById(this.id).then((res) => {
+        console.log(res);
         let data = res.result;
         if (data.number == -1) {
           data.promotionGoodsList = [];
@@ -400,7 +401,7 @@ export default {
           data.discountType = "isFullMinus";
           delete data.isFullMinus;
         } else {
-          data.discountType = "isFullMinus";
+          data.discountType = "isFullRate";
           delete data.isFullRate;
         }
         data.rangeTime = [];
