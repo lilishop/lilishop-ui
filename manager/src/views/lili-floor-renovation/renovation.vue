@@ -86,9 +86,6 @@ export default {
             this.modelForm = { list: [] };
           }
         }
-
-        // this.$refs.modelForm.topAdvert = {};
-        // this.$refs.modelForm.navList = {}
       });
     },
   },

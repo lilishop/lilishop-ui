@@ -78,10 +78,7 @@
       </Form>
       <div slot="footer">
         <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="saveSpec"
-        >提交
-        </Button
-        >
+        <Button type="primary" :loading="submitLoading" @click="saveSpec">提交</Button>
       </div>
     </Modal>
   </div>
@@ -318,7 +315,6 @@ export default {
         content: "您确认要删除 " + v.specName + " ?",
         loading: true,
         onOk: () => {
-          // 删除
           delSpec(v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -345,7 +341,6 @@ export default {
             ids += e.id + ",";
           });
           ids = ids.substring(0, ids.length - 1);
-          // 批量删除
           delSpec(ids).then((res) => {
             this.$Modal.remove();
             if (res.success) {

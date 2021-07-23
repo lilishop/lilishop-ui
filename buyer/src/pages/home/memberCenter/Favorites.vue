@@ -29,14 +29,6 @@
       <Spin size="large" fix v-if="spinShow"></Spin>
     </div>
     <empty v-else />
-    <!-- 分页 -->
-    <!-- <div class="page-size mt_10" v-if="paging">
-      <Page :total="total" @on-change="changePageNum"
-        @on-page-size-change="changePageSize"
-        :page-size="params.pageSize"
-        show-sizer>
-      </Page>
-    </div> -->
   </div>
 </template>
 
@@ -93,15 +85,6 @@ export default {
           })
         }
       });
-    },
-    changePageNum (val) { // 修改页码
-      this.params.pageNumber = val;
-      this.getList()
-    },
-    changePageSize (val) { // 修改页数
-      this.pageNumber = 1;
-      this.params.pageSize = val;
-      this.getList()
     },
     buynow (skuId, goodsId) { // 跳转详情
       let url = this.$router.resolve({

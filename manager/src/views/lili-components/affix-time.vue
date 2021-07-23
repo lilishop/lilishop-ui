@@ -3,11 +3,8 @@
     <div class="breadcrumb">
       <span @click="clickBreadcrumb(item,index)" :class="{'active':item.selected}" v-for="(item,index) in dateList" :key="index"> {{item.title}}</span>
       <div class="date-picker">
-
         <Select @on-change="changeSelect(selectedWay)" v-model="month" placeholder="年月查询" style="width:200px;margin-left:10px;">
-
           <Option v-for="(item,index) in dates" :value="item.year+'-'+item.month" :key="index">{{ item.year+'年'+item.month+'月' }}</Option>
-
         </Select>
       </div>
       <div class="shop-list" v-if="!closeShop">
@@ -72,6 +69,7 @@ export default {
     this.getShopList();
   },
   methods: {
+    // 页面触底
     handleReachBottom() {
       setTimeout(() => {
         if (this.params.pageNumber * this.params.pageSize <= this.total) {
@@ -80,6 +78,7 @@ export default {
         }
       }, 1500);
     },
+    // 查询店铺列表
     getShopList() {
       getShopListData(this.params).then((res) => {
         if (res.success) {
@@ -92,6 +91,7 @@ export default {
         }
       });
     },
+    // 变更店铺
     changeshop(val) {
       this.selectedWay.storeId = this.storeId;
       this.$emit("selected", this.selectedWay);
@@ -118,7 +118,7 @@ export default {
       }
       this.dates = dates.reverse();
     },
-
+    // 改变已选店铺
     changeSelect() {
       console.log(this.month);
       if (this.month) {
@@ -130,11 +130,10 @@ export default {
         this.selectedWay.searchType = "";
 
         this.$emit("selected", this.selectedWay);
-        // console.log(this.$emit("selected", this.selectedWay));
       } else {
       }
     },
-
+    // 变更时间
     clickBreadcrumb(item) {
       this.dateList.forEach((res) => {
         res.selected = false;
@@ -148,7 +147,6 @@ export default {
       }
 
       this.selectedWay = item;
-      // this.month = "";
       this.selectedWay.year = new Date().getFullYear();
       this.selectedWay.month = "";
 

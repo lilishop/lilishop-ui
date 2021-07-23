@@ -1,10 +1,8 @@
 <template>
   <div>
     <!-- 统计 -->
-
     <div class="card">
       <h4>
-
         基本信息
       </h4>
       <div class="count-list flex">
@@ -16,7 +14,6 @@
             <div class="counts">{{homeData.goodsNum ||0}}</div>
             <div>商品数量</div>
           </div>
-
         </div>
         <div class="count-item" @click="navigateTo('memberList')">
           <div>
@@ -52,7 +49,6 @@
     </div>
 
     <!-- 今日待办 -->
-
     <div class="card">
       <h4>今日待办</h4>
       <div class="todo-list flex">
@@ -88,10 +84,7 @@
       <div class="flow-list flex">
         <div class="flow-item ">
           <div class="flow-member">
-            <div>
-
-              当前在线人数
-            </div>
+            <div>当前在线人数</div>
             <span>
               {{homeData.currentNumberPeopleOnline || 0}}
             </span>
@@ -149,7 +142,6 @@
             </div>
             <div class="today-item">
               <div>今日交易额</div>
-
               <span>￥{{homeData.todayOrderPrice ? (homeData.todayOrderPrice  | unitPrice) : 0}}</span>
             </div>
             <div class="today-item">
@@ -209,15 +201,11 @@
 
 <script>
 import { homeStatistics, hotGoods, hotShops, getNoticePage } from "@/api/index";
-import show from "./show.vue";
 import * as API_Goods from "@/api/goods";
 import { Chart } from "@antv/g2";
 import * as API_Member from "@/api/member";
 export default {
   name: "home",
-  components: {
-    show,
-  },
   data() {
     return {
       tophotShopsColumns: [ // 表格表头
@@ -298,16 +286,8 @@ export default {
       },
     };
   },
-
-  computed: {
-    currNav() {
-      return this.$store.state.app.currNav;
-    },
-    avatarPath() {
-      return localStorage.avatorImgPath;
-    },
-  },
   methods: {
+    // 路由跳转
     navigateTo(name) {
       this.$router.push({
         name,
@@ -366,7 +346,7 @@ export default {
       }
     },
 
-
+    // 订单表
     initOrderChart() {
       // 默认已经加载 legend-filter 交互
       let data = this.chartList;
@@ -401,9 +381,6 @@ export default {
         });
       this.orderChart.render();
     },
-
-
-
 
     // 浏览量统计图
     initPvChart() {
@@ -477,7 +454,8 @@ export default {
           this.initPvChart();
         }
       });
-    }, // 实例化会员流量图表
+    },
+    // 实例化会员流量图表
     async initHistoryMemberChartList() {
       const res = await API_Member.historyMemberChartList();
       if (res.success) {
@@ -495,6 +473,7 @@ export default {
         this.initHistoryMemberChart();
       }
     },
+    // 历史在线人数
     initHistoryMemberChart(){
       // 默认已经加载 legend-filter 交互
       let data = this.chartList;

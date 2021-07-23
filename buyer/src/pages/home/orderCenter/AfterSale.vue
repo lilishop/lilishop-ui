@@ -19,10 +19,7 @@
     <empty v-if="orderList.length === 0" />
     <div class="order-content" v-else>
       <template v-for="(order, onderIndex) in orderList">
-        <div
-          class="order-list"
-          :key="onderIndex"
-        >
+        <div class="order-list" :key="onderIndex">
           <div class="order-header">
             <div>
               <div v-if="order.serviceStatus">{{filterOrderStatus(order.serviceStatus)}}</div>
@@ -32,7 +29,7 @@
               </div>
             </div>
             <div>
-              <span>{{ order.applyRefundPrice | unitPrice("￥") }}</span>
+              <span>申请退款金额：<span class="global_color">{{ order.applyRefundPrice | unitPrice("￥") }}</span></span>
             </div>
           </div>
           <div class="order-body">
@@ -57,12 +54,11 @@
               <Button @click="goDetail(order.sn)" size="small">售后详情</Button>
               <Button @click="openModal(order)" v-if="order.serviceStatus == 'PASS' &&
                   order.serviceType != 'RETURN_MONEY'" size="small">提交物流</Button>
-
               <Button @click="cancel(order.sn)" v-if="order.afterSaleAllowOperationVO.cancel" size="small">取消售后</Button>
             </div>
           </div>
         </div>
-      </template>+
+      </template>
       <Spin size="large" fix v-if="spinShow"></Spin>
     </div>
     <!-- 分页 -->

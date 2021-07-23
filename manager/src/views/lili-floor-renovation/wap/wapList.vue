@@ -96,11 +96,13 @@ export default {
     this.init();
   },
   methods: {
+    // 切换tab
     clickType(val,index) {
       this.params.pageNumber = 1
       this.selectedIndex = index
       this.params.pageType = val;
     },
+    // 是否发布
     changeSwitch(item) {
       this.loading = true;
       API_Other.releasePageHome(item.id).then((res) => {
@@ -115,6 +117,7 @@ export default {
         this.loading = false;
       });
     },
+    // 初始化数据
     init() {
       this.loading = true;
       API_Other.getHomeList(this.params).then((res) => {
@@ -132,20 +135,20 @@ export default {
         this.total = res.result.total;
       });
     },
-
+    // 装修楼层
     handleEdit(val) {
       this.$router.push({
         path: "/floorList/main",
         query: { id: val.id, name: val.name, type: val.pageShow },
       });
     },
-
+    // 添加模板
     handleAdd() {
       this.$router.push({
         path: "/floorList/main",
       });
     },
-
+    // 删除模板
     handleDel(val) {
       this.loading = true;
       API_Other.removePageHome(val.id).then((res) => {

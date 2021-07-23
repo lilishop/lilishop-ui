@@ -175,7 +175,7 @@ export default {
         }
       });
     },
-
+    // 删除模板
     delTemplate(id) {
       API_floor.removePageHome(id).then((res) => {
         if (res.success) {
@@ -184,8 +184,7 @@ export default {
         }
       });
     },
-  },
-  computed: {},
+  }
 };
 </script>
 

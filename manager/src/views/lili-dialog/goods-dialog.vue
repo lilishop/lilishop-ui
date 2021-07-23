@@ -45,7 +45,7 @@ export default {
       type: "multiple", //单选或者多选 single  multiple
 
       skuList: [], // 商品sku列表
-      total: "",  // 商品总数
+      total: 0,  // 商品总数
       goodsParams: { // 商品请求参数
         pageNumber: 1,
         pageSize: 18,
@@ -79,7 +79,6 @@ export default {
       deep: true,
       immediate: true
     },
-
     "goodsParams.categoryPath": {
       handler: function () {
         this.goodsData = [];
@@ -92,6 +91,7 @@ export default {
     this.init();
   },
   methods: {
+    // 触底加载更多方法
     handleReachBottom() {
       setTimeout(() => {
         if (
@@ -103,12 +103,13 @@ export default {
         }
       }, 1500);
     },
+    // 获取商品列表
     getQueryGoodsList() {
       API_Goods.getGoodsSkuData(this.goodsParams).then((res) => {
         this.initGoods(res);
       });
     },
-
+    // 获取列表方法
     initGoods(res) {
       if (res.result.records.length !=0) {
         res.result.records.forEach((item) => {

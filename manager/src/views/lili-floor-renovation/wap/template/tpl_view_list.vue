@@ -3,9 +3,6 @@
 </template>
 <script>
 export default {
-    destroyed(){
-       
-    }
 }
 </script>
 <style scoped lang="scss">

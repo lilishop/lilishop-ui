@@ -52,11 +52,12 @@ export default {
     };
   },
   props: ["res"],
-  mounted() {},
   methods: {
+    // 删除商品
     closeGoods(val, index) {
       this.res.list[0].listWay.splice(index,1)
     },
+    // 切换商品列表
     handleClickTitle(val, index) {
       this.selected.index = index;
       this.selected.val = val.title;

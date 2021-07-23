@@ -108,6 +108,7 @@ export default {
   },
 
   methods: {
+    // 初始化数据
     init() {
       if (!this.$route.query.id) return false;
       API_Other.getHomeData(this.$route.query.id).then(res=>{
@@ -116,12 +117,6 @@ export default {
 
          this.handleComponent( this.contentData.list[0], 0)
       })
-    },
-    handleSpinShow() {
-      this.$Spin.show();
-      setTimeout(() => {
-        this.$Spin.hide();
-      }, 3000);
     },
 
     // 中间组件拖动，右侧数据绑定不变
@@ -159,7 +154,7 @@ export default {
       this.selected = index;
       this.$set(this, "decorateData", val);
     },
-
+    // 右侧栏回调
     handleDrawer(val) {
       let newIndex = this.selected;
 

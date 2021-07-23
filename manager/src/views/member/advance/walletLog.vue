@@ -13,7 +13,7 @@
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
       </Row>
-        <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+        <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table"></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
           size="small" show-total show-elevator show-sizer></Page>
@@ -26,7 +26,6 @@
 import { getUserWallet } from "@/api/member";
 export default {
   name: "walletLog",
-  components: {},
   data() {
     return {
       loading: true, // 表单加载状态
@@ -41,10 +40,6 @@ export default {
         memberName: "",
       },
       selectDate: null, // 选择时间段
-      // 表单验证规则
-      formValidate: {},
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [
         // 表头
         {
@@ -120,57 +115,36 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
-      this.clearSelectAll();
     },
+    // 分页 改变页数
     changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    handleReset() {
-      this.$refs.searchForm.resetFields();
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      this.selectDate = null;
-      this.searchForm.startDate = "";
-      this.searchForm.endDate = "";
-      this.searchForm.memberName = "";
-      // 重新加载数据
-      this.getDataList();
-    },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
+    // 时间段赋值
     selectDateRange(v) {
       if (v) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
       }
     },
+    // 获取列表数据
     getDataList() {
-      this.loading = true;
       // 带多条件搜索参数获取表单数据 请自行修改接口
       getUserWallet(this.searchForm).then((res) => {
         this.loading = false;

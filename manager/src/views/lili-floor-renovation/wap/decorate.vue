@@ -168,20 +168,15 @@ export default {
     },
   },
   props: ["res"],
-  mounted() {},
   methods: {
     // 选择风格
     selectStyle() {
       this.styleFlag = !this.styleFlag;
     },
-
     // 回调选择的链接
     selectedLink(val) {
       this.selectedLinks.url = val;
-
-      console.log(this.selectedLinks);
     },
-
     // 回调的商品信息
     selectedGoodsData(val) {
       if (!val) return false;
@@ -194,10 +189,8 @@ export default {
       this.res.options.list[0].listWay = this.res.options.list[0].listWay.concat(
         val
       );
-
       this.linkType = "";
     },
-
     // 绑定商品
     bindGoodsId(val) {
       this.selectedGoods = val;
@@ -208,7 +201,7 @@ export default {
       this.$emit("handleDrawer", item);
       this.styleFlag = false;
     },
-
+    // 打开图片选择器
     liliDialogFlag(flag) {
       this.$refs.liliDialog.goodsFlag = flag;
       this.$refs.liliDialog.flag = true;
@@ -216,14 +209,9 @@ export default {
 
     // 点击链接赋值一个唯一值，并将当前选择的模块赋值
     clickLink(val, index) {
-      // this.selectedLinkIndex = index
-      // val.___only = new Date().getTime(), //赋值当前时间戳 唯一
       this.selectedLinks = val;
-
-      console.log(this.selectedLinks);
       this.liliDialogFlag(false);
     },
-
     //点击图片解析成base64
     changeFile(item, index) {
       const file = document.getElementById("files" + index).files[0];
@@ -247,21 +235,17 @@ export default {
       };
       this.res.options.list.push(way);
     },
-
+    // 图片选择器回显
     callbackSelected(val) {
       this.picModelFlag = false;
       this.selectedGoods.img = val.url;
     },
-
-    // 点击选择照片
+    // 点击选择图片
     handleClickFile(item, index) {
       this.$refs.ossManage.selectImage = true;
       this.selectedGoods = item;
       this.picModelFlag = true;
-
-      // console.log(let files = files)
     },
-
     // 关闭
     closeDecorate(index) {
       this.$nextTick(() => {

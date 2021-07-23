@@ -50,7 +50,6 @@
                         <tr v-for="(item, index) in conData.options.navList" :key="index">
                             <td><Input v-model="item.title" /></td>
                             <td><Input v-model="item.desc" /></td>
-                            <!-- <td><Input v-model="item.sort"/></td> -->
                             <td v-if="index!=0">
                                 <Button type="error" size="small" @click="handleDelNav(index)">删除</Button>
                             </td>
@@ -62,7 +61,6 @@
         <!-- 选择商品。链接 -->
         <liliDialog
             ref="liliDialog"
-            @selectedLink="selectedLink"
             @selectedGoodsData="selectedGoodsData"
         ></liliDialog>
     </div>
@@ -92,30 +90,24 @@ export default {
             this.$emit('content',val)
         }
     },
-    mounted() {
-
-    },
     methods:{
+        // tab点击切换
         changeCurr(index){
             this.currentIndex = index;
         },
+        // 编辑
         handleSelectModel (item,type) {
             this.selected = item;
             this.showModal = true
         },
-        handleSelectLink(item,index) { // 调起选择链接弹窗
-            this.$refs.liliDialog.open('link')
-        },
-        handleSelectGoods(item) { // 调起选择链接弹窗
+        handleSelectGoods(item) { // 调起选择商品弹窗
             if(item) this.selected = item;
             this.$refs.liliDialog.open('goods', 'single')
             setTimeout(() => {
                 this.$refs.liliDialog.goodsData = [this.selected]
             }, 500);
         },
-        selectedLink(val) {
-           this.selected.url = this.$options.filters.formatLinkType(val);
-        },
+        // 选择商品回调
         selectedGoodsData(val){
             console.log(val)
             let goods = val[0]

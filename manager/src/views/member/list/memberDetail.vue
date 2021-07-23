@@ -83,6 +83,7 @@
                 border
                 :columns="pointsColumns"
                 :data="pointData"
+                class="mt_10"
                 ref="table"
                 sortable="custom"
                 @on-sort-change="pointChangeSort"
@@ -172,6 +173,7 @@
               :columns="orderColumns"
               :data="orderData"
               ref="table"
+              class="mt_10"
               sortable="custom"
               @on-sort-change="orderChangeSort"
             >
@@ -203,6 +205,7 @@
             :columns="addressColumns"
             :data="addressData"
             ref="table"
+            class="mt_10"
             sortable="custom"
             @on-sort-change="addressChangeSort"
           >
@@ -249,6 +252,7 @@
             :columns="walletColumns"
             :data="walletData"
             ref="table"
+            class="mt_10"
             sortable="custom"
             @on-sort-change="walletChangeSort"
           >
@@ -289,6 +293,7 @@
             border
             :columns="receiptRecordColumns"
             :data="receiptRecordData"
+            class="mt_10"
             ref="table"
             sortable="custom"
             @on-sort-change="walletChangeSort"
@@ -365,7 +370,7 @@
   import * as API_Order from "@/api/order.js";
 
   export default {
-    name: "member",
+    name: "memberDetail",
     components: {
       region,
       ossManage,

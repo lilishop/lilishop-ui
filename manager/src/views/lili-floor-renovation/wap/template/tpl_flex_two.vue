@@ -14,9 +14,6 @@
 export default {
   title: "两张横图",
   props: ["res"],
-  mounted () {
-
-  }
 };
 </script>
 <style lang="scss" scoped>

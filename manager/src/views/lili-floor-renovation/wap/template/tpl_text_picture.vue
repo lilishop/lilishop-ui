@@ -35,10 +35,7 @@
 <script>
 export default {
   title: "文字图片模板",
-  props: ["res"],
-  mounted() {
-    console.log(this.res);
-  }
+  props: ["res"]
 };
 </script>
 <style lang="scss" scoped>

@@ -10,9 +10,6 @@
         :columns="columns"
         :data="data"
         ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
       >
         <!-- 页面展示 -->
         <template slot="disableSlot" slot-scope="{row}">
@@ -90,13 +87,12 @@
     data() {
       return {
         loading: true, // 表单加载状态
-        modalType: 0, // 添加或编辑标识
         modalVisible: false, // 添加或编辑显示
         modalTitle: "", // 添加或编辑标题
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
           sort: "createTime", // 默认排序字段
           order: "desc", // 默认排序方式
           name: "",
@@ -245,7 +241,7 @@
           if (valid) {
             this.submitLoading = true;
             this.form.disabled = this.form.disabled == true ? "OPEN" : "CLOSE"
-            if (this.modalType == 0) {
+            if (this.modalTitle == "添加") {
               // 添加 避免编辑后传入id等数据 记得删除
               delete this.form.id;
 
@@ -276,7 +272,6 @@
       },
       // 添加信息
       add() {
-        this.modalType = 0;
         this.modalTitle = "添加";
         this.form = {};
         this.$refs.form.resetFields();
@@ -285,7 +280,6 @@
       },
       // 编辑
       detail(v) {
-        this.modalType = 1;
         this.id = v.id;
         this.modalTitle = "修改";
         this.modalVisible = true;

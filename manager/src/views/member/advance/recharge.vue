@@ -47,9 +47,7 @@
         :columns="columns"
         :data="data"
         ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
+        class="mt_10"
       ></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page
@@ -75,7 +73,6 @@
   } from "@/api/member";
   export default {
     name: "recharge",
-    components: {},
     data() {
       return {
         loading: true, // 表单加载状态
@@ -90,9 +87,6 @@
           memberName:""
         },
         selectDate: null, // 选择区间时间
-        submitLoading: false, // 添加或编辑提交状态
-        selectList: [], // 多选数据
-        selectCount: 0, // 多选计数
         columns: [
           {
             title: "会员名称",
@@ -168,58 +162,37 @@
       };
     },
     methods: {
+      // 初始化数据
       init() {
         this.getDataList();
       },
+      // 分页 改变页码
       changePage(v) {
         this.searchForm.pageNumber = v;
         this.getDataList();
-        this.clearSelectAll();
       },
+      // 分页 改变页数
       changePageSize(v) {
+        this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = v;
         this.getDataList();
       },
+      // 搜索
       handleSearch() {
         this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = 10;
         this.getDataList();
       },
-      handleReset() {
-        this.$refs.searchForm.resetFields();
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 10;
-        this.selectDate = null;
-        this.searchForm.startDate = "";
-        this.searchForm.endDate = "";
-        this.searchForm.memberName = "";
-        // 重新加载数据
-        this.getDataList();
-      },
-      changeSort(e) {
-        this.searchForm.sort = e.key;
-        this.searchForm.order = e.order;
-        if (e.order === "normal") {
-          this.searchForm.order = "";
-        }
-        this.getDataList();
-      },
-      clearSelectAll() {
-        this.$refs.table.selectAll(false);
-      },
-      changeSelect(e) {
-        this.selectList = e;
-        this.selectCount = e.length;
-      },
+      // 时间段赋值
       selectDateRange(v) {
         if (v) {
           this.searchForm.startDate = v[0];
           this.searchForm.endDate = v[1];
         }
       },
+      // 获取列表数据
       getDataList() {
         this.loading = true;
-        // 带多条件搜索参数获取表单数据 请自行修改接口
         getUserRecharge(this.searchForm).then((res) => {
           this.loading = false;
           if (res.success) {

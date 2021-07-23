@@ -81,6 +81,7 @@ export default {
         }
     },
     methods:{
+        // 打开装修modal
         handleSelectModel (item,type) {
             this.selected = item;
             this.showModal = true
@@ -88,7 +89,7 @@ export default {
         handleSelectLink(item,index) { // 调起选择链接弹窗
             this.$refs.liliDialog.open('link')
         },
-       
+        // 选择链接回调
         selectedLink(val) {
             this.selected.url = this.$options.filters.formatLinkType(val);;
         },
@@ -96,6 +97,7 @@ export default {
             this.$refs.ossManage.selectImage = true;
             this.picModelFlag = true;
         },
+        // 选择图片回调
         callbackSelected (val) {
             this.picModelFlag = false;
             this.selected.img = val.url;

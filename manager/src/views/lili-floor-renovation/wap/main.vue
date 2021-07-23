@@ -19,16 +19,11 @@ export default {
       name: "index", // 装修的页面
     };
   },
-  mounted() {
-
-  },
   methods: {
-    selected(val) {
+    selected(val) { // 顶部栏点击切换
       this.name = val;
-    },
-
-
-  },
+    }
+  }
 };
 </script>
 <style scoped lang="scss">

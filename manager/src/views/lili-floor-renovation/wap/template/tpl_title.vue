@@ -11,10 +11,7 @@
 <script>
 export default {
   title: "标题栏",
-  props: ["res"],
-  mounted() {
-    console.log(this.res);
-  },
+  props: ["res"]
 };
 </script>
 <style lang="scss" scoped>

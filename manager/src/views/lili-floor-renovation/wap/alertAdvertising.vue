@@ -69,14 +69,12 @@
             </div>
           </div>
         </div>
-        <!-- <Button type="primary" @click="addDecorate()" ghost>添加</Button> -->
         <liliDialog ref="liliDialog" :types="linkType"></liliDialog>
       </div>
     </div>
   </div>
 </template>
 <script>
-
 export default {
   data() {
     return {
@@ -92,17 +90,11 @@ export default {
       linkType: "", // 选择类型
     };
   },
-  methods: {},
-  mounted() {
-
-  },
   methods: {
     // 点击链接
     clickLink(item) {
       this.$refs.liliDialog.open('link')
     },
-
-
     //点击图片解析成base64
     changeFile(item, index) {
       const file = document.getElementById("files" + index).files[0];
@@ -118,7 +110,6 @@ export default {
     // 点击选择照片
     handleClickFile(item, index) {
       document.getElementById("files" + index).click();
-      // console.log(let files = files)
     },
   },
 };
