@@ -304,11 +304,6 @@ export const deleteMessageSend = (ids, params) => {
   return deleteRequest(`/manager/messageSend/delByIds/${ids}`, params);
 };
 
-// 通过id获取子地区
-export const getRegion = (id) => {
-  return getRequest(`/region/item/${id}`);
-};
-
 // 分页获取文件数据
 export const getFileListData = (params) => {
   return getRequest("/file", params);
@@ -387,11 +382,6 @@ export const asyncRegion = () => {
 // 批量id删除
 export const delRegion = (ids) => {
   return deleteRequest(`/region/${ids}`);
-};
-
-// 通过id获取地区详情
-export const getRegionDetail = (id) => {
-  return getRequest(`/region/${id}`);
 };
 
 // 更新地区

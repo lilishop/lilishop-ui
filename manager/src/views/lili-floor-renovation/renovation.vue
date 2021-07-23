@@ -58,7 +58,7 @@ export default {
         if (res.success) {
           this.$Message.success("保存模板成功");
         } else {
-          this.$Message.error(res.message);
+          // this.$Message.error(res.message);
         }
       });
     },

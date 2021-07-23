@@ -89,7 +89,6 @@
 import {
   getChildRegion,
   updateRegion,
-  getRegionDetail,
   delRegion,
   asyncRegion,
   addRegion,

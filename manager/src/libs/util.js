@@ -331,7 +331,6 @@ util.initRouter = function (vm) { // 初始化路由
       getCurrentPermissionList().then(res => {
             if (!res.success) return false;
             let menuData = res.result;
-            // let menuData = result
 
             // 格式化数据，设置 空children 为 null
             for(let i =0;i<menuData.length;i++){
@@ -340,6 +339,8 @@ util.initRouter = function (vm) { // 初始化路由
                     let tt = t[k].children;
                     for(let z = 0;z<tt.length;z++){
                         tt[z].children = null
+                        // 给所有三级路由添加字段，显示一级菜单name，方便点击页签时的选中筛选
+                        tt[z].firstRouterName = menuData[i].name
                     }
                 }
             }
@@ -395,8 +396,7 @@ util.initMenuData = function (vm, data) {
     menuData.forEach(e => {
         let nav = {
             name: e.name,
-            title: e.title,
-            icon: e.icon
+            title: e.title
         }
         navList.push(nav);
     })
@@ -460,6 +460,7 @@ util.initRouterNode = function (routers, data) {  // data为所有子菜单数�
         meta.permTypes = menu.permTypes ? menu.permTypes : null;
         meta.title = menu.title ? menu.title + " - lilishop 运营后台" : null;
         meta.url = menu.url ? menu.url : null;
+        meta.firstRouterName = item.firstRouterName
         menu.meta = meta;
 
         routers.push(menu);

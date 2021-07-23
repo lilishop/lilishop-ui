@@ -487,7 +487,7 @@ export default {
               this.$Message.success("禁用成功");
               this.getData();
             } else {
-              this.$Message.error(res.message);
+              // this.$Message.error(res.message);
             }
           });
         },

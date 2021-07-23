@@ -492,7 +492,7 @@ export default {
               this.$Message.success("收款成功");
               this.getDataList();
             } else {
-              this.$Message.error(res.message);
+              // this.$Message.error(res.message);
             }
           });
         },

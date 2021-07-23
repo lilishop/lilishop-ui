@@ -122,7 +122,7 @@ export default {
         // 返回组件值
         this.returnValue();
       } else {
-        this.$Message.error(res.message);
+        // this.$Message.error(res.message);
       }
     },
     handleError(error, file, fileList) {

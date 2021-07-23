@@ -181,7 +181,7 @@
 
                                     this.formAdd={}
                                 } else {
-                                    this.$Message.error(res.message);
+                                    // this.$Message.error(res.message);
                                 }
                                 this.getAllList();
                                 this.modalVisible = false;
@@ -193,7 +193,7 @@
                                 if (res.success) {
                                     this.$Message.success("修改成功");
                                 } else {
-                                    this.$Message.error(res.message);
+                                    // this.$Message.error(res.message);
                                 }
                                 this.getAllList();
                                 this.modalVisible = false;

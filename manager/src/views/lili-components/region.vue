@@ -11,7 +11,7 @@
 </template>
 <script>
 
-import * as API_Setup from "@/api/index.js";
+import * as API_Setup from "@/api/common.js";
 export default {
   data() {
     return {
@@ -46,7 +46,7 @@ export default {
     },
     loadData(item, callback) {
       item.loading = true;
-      API_Setup.getRegion(item.value).then((res) => {
+      API_Setup.getChildRegion(item.value).then((res) => {
         if (res.result.length <= 0) {
           item.loading = false;
           this.selected = item;
@@ -84,7 +84,7 @@ export default {
       });
     },
     init() {
-      API_Setup.getRegion(this.id).then((res) => {
+      API_Setup.getChildRegion(this.id).then((res) => {
         let way = [];
 
         res.result.forEach((item) => {

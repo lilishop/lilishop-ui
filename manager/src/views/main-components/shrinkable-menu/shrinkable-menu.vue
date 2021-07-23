@@ -27,6 +27,7 @@
 
 <script>
 import util from "@/libs/util.js";
+
 export default {
   name: "shrinkableMenu",
   computed: {
@@ -45,6 +46,9 @@ export default {
     $route: {
       handler: function (val, oldVal) {
         console.log(val);
+        if (val.meta.firstRouterName && val.meta.firstRouterName !== this.currNav) {
+          this.selectNav(val.meta.firstRouterName)
+        }
       }
     } 
   },
@@ -58,6 +62,9 @@ export default {
       this.$store.commit("setCurrNav", name);
       this.setStore("currNav", name);
       util.initRouter(this);
+      this.$nextTick(()=>{
+        this.$refs.childrenMenu.updateActiveName()
+      })
     },
   }
 };
