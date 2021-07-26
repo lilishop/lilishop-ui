@@ -8,15 +8,12 @@
         :columns="columns"
         :data="data"
         ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
       ></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page
-          :current="pageNumber"
+          :current="searchForm.pageNumber"
           :total="total"
-          :page-size="pageSize"
+          :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
           :page-size-opts="[10, 20, 50]"
@@ -28,7 +25,7 @@
       </Row>
     </Card>
     <!-- 修改模态框 -->
-    <Modal v-model="formValidate" :title="modalTitle" @on-ok="" width="500">
+    <Modal v-model="formValidate" title="详细信息" width="500">
       <Form
         ref="formValidate"
         :model="form"
@@ -54,7 +51,7 @@
             暂无
           </div>
           <div v-else>
-            <span v-for="(item, index) in this.form.images.split(',')">
+            <span v-for="(item, index) in this.form.images.split(',')" :key="index">
               <Avatar shape="square" icon="ios-person" size="large" style="width: 80px;height: 90px;margin-right: 5px" :src="item"
               />
             </span>
@@ -75,25 +72,17 @@
   } from "@/api/other";
 
   export default {
-    name: "role-manage",
+    name: "feedback",
     data() {
       return {
         loading: true, // 加载状态
-        modalType: 0, // 0 添加 1 编辑
         form: {}, // 表单数据
         searchForm: { // 请求参数
           pageNumber: 1,
           pageSize: 10,
         },
-        modalTitle: "详细", // modal标题
         formValidate: false, // modal显隐
-        images: [], // 图片列表
         columns: [ // 表头
-          {
-            type: "selection",
-            width: 60,
-            align: "center",
-          },
           {
             title: "会员名称",
             key: "userName",
@@ -140,7 +129,6 @@
             title: "操作",
             key: "action",
             align: "center",
-            fixed: "right",
             width: 130,
             render: (h, params) => {
               return h("div", [
@@ -166,42 +154,27 @@
             },
           },
         ],
-        data: [],
-        pageNumber: 1,
-        pageSize: 10,
-        total: 0,
-        permData: [],
-        editRolePermId: "",
-        selectAllFlag: false,
-        depData: [],
-        dataType: 0,
-        editDepartments: [],
+        data: [], // 表格数据
+        total: 0 // 数据总数
 
-        saveRoleWay: [], //用户保存用户点击的菜单
       };
     },
     methods: {
+      // 初始化数据
       init() {
         this.getFeedback();
       },
-
+      // 分页 修改页码
       changePage(v) {
         this.searchForm.pageNumber = v;
         this.getFeedback();
       },
+      // 分页 修改页数
       changePageSize(v) {
+        this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = v;
         this.getFeedback();
       },
-      changeSort(e) {
-        this.sortColumn = e.key;
-        this.sortType = e.order;
-        if (e.order == "normal") {
-          this.sortType = "";
-        }
-        this.getFeedback();
-      },
-
       /**
        * 查询意见反馈
        */
@@ -226,7 +199,6 @@
             this.formValidate = true
           }
         });
-
       }
     },
     mounted() {

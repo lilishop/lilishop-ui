@@ -145,7 +145,6 @@ export default {
     },
     // 获取列表数据
     getDataList() {
-      // 带多条件搜索参数获取表单数据 请自行修改接口
       getUserWallet(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {

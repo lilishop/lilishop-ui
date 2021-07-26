@@ -1,238 +1,228 @@
 <template>
   <div class="search">
-    <Row>
-      <Col style="width:100%;">
-      <Card>
-        <div class="main-content">
-          <div class="div-flow-left">
+    <Card>
+      <div class="main-content">
+        <div class="div-flow-left">
+          <div class="div-form-default">
+            <h3>投诉信息</h3>
+            <dl>
+              <dt>投诉商品</dt>
+              <dd>{{complaintInfo.goodsName}}</dd>
+            </dl>
+            <dl>
+              <dt>投诉状态</dt>
+              <dd v-if="complaintInfo.complainStatus =='NEW'">新投诉</dd>
+              <dd v-if="complaintInfo.complainStatus =='CANCEL'">已撤销</dd>
+              <dd v-if="complaintInfo.complainStatus =='WAIT_APPEAL'">待申诉</dd>
+              <dd v-if="complaintInfo.complainStatus =='COMMUNICATION'">对话中</dd>
+              <dd v-if="complaintInfo.complainStatus =='WAIT_ARBITRATION'">等待仲裁</dd>
+              <dd v-if="complaintInfo.complainStatus =='COMPLETE'">已完成</dd>
+            </dl>
+            <dl>
+              <dt>投诉时间</dt>
+              <dd>{{complaintInfo.createTime}}</dd>
+            </dl>
+            <dl>
+              <dt>投诉主题</dt>
+              <dd>{{complaintInfo.complainTopic}}</dd>
+            </dl>
+            <dl>
+              <dt>投诉内容</dt>
+              <dd>{{complaintInfo.content}}</dd>
+            </dl>
+            <dl>
+              <dt>投诉凭证</dt>
+              <dd v-if="images == ''">
+                暂无投诉凭证
+              </dd>
+              <dd v-else>
+                <div class="div-img" v-for="(item, index) in images" :key="index">
+                  <img class="complain-img" :src=item>
+                </div>
+              </dd>
+            </dl>
+          </div>
+          <div class="div-form-default" v-if="complaintInfo.appealContent">
+            <h3>商家申诉信息</h3>
+            <dl>
+              <dt>申诉时间</dt>
+              <dd>{{complaintInfo.appealTime}}</dd>
+            </dl>
+            <dl>
+              <dt>申诉内容</dt>
+              <dd>{{complaintInfo.appealContent}}</dd>
+            </dl>
+            <dl>
+              <dt>申诉凭证</dt>
+              <dd v-if="complaintInfo.appealImagesList.length == 0">
+                暂无申诉凭证
+              </dd>
+              <dd v-else>
+                <div class="div-img" v-for="(item, index) in complaintInfo.appealImagesList" :key="index">
+                  <img class="complain-img" :src="item">
+                </div>
+              </dd>
+            </dl>
+          </div>
             <div class="div-form-default">
-              <h3>投诉信息</h3>
+              <h3>对话详情</h3>
               <dl>
-                <dt>投诉商品</dt>
-                <dd>{{complaintInfo.goodsName}}</dd>
-              </dl>
-              <dl>
-                <dt>投诉状态</dt>
-                <dd v-if="complaintInfo.complainStatus =='NEW'">新投诉</dd>
-                <dd v-if="complaintInfo.complainStatus =='CANCEL'">已撤销</dd>
-                <dd v-if="complaintInfo.complainStatus =='WAIT_APPEAL'">待申诉</dd>
-                <dd v-if="complaintInfo.complainStatus =='COMMUNICATION'">对话中</dd>
-                <dd v-if="complaintInfo.complainStatus =='WAIT_ARBITRATION'">等待仲裁</dd>
-                <dd v-if="complaintInfo.complainStatus =='COMPLETE'">已完成</dd>
-              </dl>
-              <dl>
-                <dt>投诉时间</dt>
-                <dd>{{complaintInfo.createTime}}</dd>
-              </dl>
-              <dl>
-                <dt>投诉主题</dt>
-                <dd>{{complaintInfo.complainTopic}}</dd>
-              </dl>
-              <dl>
-                <dt>投诉内容</dt>
-                <dd>{{complaintInfo.content}}</dd>
-              </dl>
-              <dl>
-                <dt>投诉凭证</dt>
-                <dd v-if="images == ''">
-                  暂无投诉凭证
-                </dd>
-                <dd v-else>
-                  <div class="div-img" v-for="(item, index) in images">
-                    <img class="complain-img" :src=item>
+                <dt>对话记录</dt>
+                <dd>
+                  <div class="div-content">
+                    <p v-for="(item, index) in complaintInfo.orderComplaintCommunications" :key="index">
+                      <span v-if="item.owner == 'STORE'">商家[{{ item.createTime }}]</span>
+                      <span v-if="item.owner == 'BUYER'">买家[{{ item.createTime }}]</span>
+                      <span v-if="item.owner == 'PLATFORM'">平台[{{ item.createTime }}]</span>
+                      {{ item.content }}
+                    </p>
                   </div>
-                </dd>
-              </dl>
-            </div>
-            <div class="div-form-default" v-if="complaintInfo.appealContent">
-              <h3>商家申诉信息</h3>
-              <dl>
-                <dt>申诉时间</dt>
-                <dd>{{complaintInfo.appealTime}}</dd>
-              </dl>
-              <dl>
-                <dt>申诉内容</dt>
-                <dd>{{complaintInfo.appealContent}}</dd>
-              </dl>
-              <dl>
-                <dt>申诉凭证</dt>
-                <dd v-if="complaintInfo.appealImagesList.length == 0">
-                  暂无申诉凭证
-                </dd>
-                <dd v-else>
-                  <div class="div-img" v-for="(item, index) in complaintInfo.appealImagesList">
-                    <img class="complain-img" :src="item">
-                  </div>
-                </dd>
-              </dl>
-            </div>
-              <div class="div-form-default">
-                <h3>对话详情</h3>
-                <dl>
-                  <dt>对话记录</dt>
-                  <dd>
-                    <div class="div-content">
-                      <p v-for="(item, index) in complaintInfo.orderComplaintCommunications">
-                        <span v-if="item.owner == 'STORE'">商家[{{ item.createTime }}]</span>
-                        <span v-if="item.owner == 'BUYER'">买家[{{ item.createTime }}]</span>
-                        <span v-if="item.owner == 'PLATFORM'">平台[{{ item.createTime }}]</span>
-                        {{ item.content }}
-                      </p>
-                    </div>
 
-                  </dd>
-                </dl>
-                <dl v-if="complaintInfo.complainStatus!='COMPLETE'">
-                  <dt>发送对话</dt>
-                  <dd>
-                    <Input
-                      v-model="params.content"
-                      type="textarea"
-                      maxlength="200"
-                      :rows="4"
-                      clearable
-                      style="width:260px"
-                    />
-                  </dd>
-                </dl>
-                <dl v-if="complaintInfo.complainStatus != 'COMPLETE'">
-                  <dt></dt>
-                  <dd>
-                    <div style="text-align: right;width: 45%;margin-top: 10px">
-                      <Button type="primary" :loading="submitLoading" @click="handleSubmit" style="margin-left: 5px">
-                        回复
-                      </Button>
-                      <Button type="primary" :loading="submitLoading" @click="returnDataList" style="margin-left: 5px">
-                        返回列表
-                      </Button>
-                    </div>
-                  </dd>
-                </dl>
-              </div>
-            <div class="div-form-default" v-if="complaintInfo.complainStatus == 'COMPLETE'">
-              <h3>仲裁结果</h3>
-              <dl>
-                <dt>仲裁意见</dt>
-                <dd>
-                  {{complaintInfo.arbitrationResult}}
                 </dd>
               </dl>
-            </div>
-            <div class="div-form-default" v-if="complaintInfo.complainStatus != 'COMPLETE'">
-              <h3>平台仲裁</h3>
-              <dl v-if="arbitrationResultShow == true">
-                <dt>仲裁</dt>
+              <dl v-if="complaintInfo.complainStatus!='COMPLETE'">
+                <dt>发送对话</dt>
                 <dd>
-                  <Input v-model="arbitrationParams.arbitrationResult" type="textarea" maxlength="200" :rows="4" clearable style="width:260px" />
+                  <Input
+                    v-model="params.content"
+                    type="textarea"
+                    maxlength="200"
+                    :rows="4"
+                    clearable
+                    style="width:260px"
+                  />
                 </dd>
               </dl>
-              <dl>
+              <dl v-if="complaintInfo.complainStatus != 'COMPLETE'">
                 <dt></dt>
-                <dd style="text-align:right;display:flex; justify-content: space-between;">
-                  <Button type="primary" ghost :loading="submitLoading" v-if="arbitrationResultShow == false" @click="arbitrationHandle">
-                    直接仲裁结束投诉流程
-                  </Button>
-                  <Button :loading="submitLoading" v-if="complaintInfo.complainStatus == 'NEW'" @click="handleStoreComplaint">
-                    交由商家申诉
-                  </Button>
-                  <Button type="primary" :loading="submitLoading" v-if="arbitrationResultShow == true" @click="arbitrationHandleSubmit">
-                    提交仲裁
-                  </Button>
+                <dd>
+                  <div style="text-align: right;width: 45%;margin-top: 10px">
+                    <Button type="primary" :loading="submitLoading" @click="handleSubmit" style="margin-left: 5px">
+                      回复
+                    </Button>
+                    <Button type="primary" :loading="submitLoading" @click="returnDataList" style="margin-left: 5px">
+                      返回列表
+                    </Button>
+                  </div>
                 </dd>
               </dl>
             </div>
+          <div class="div-form-default" v-if="complaintInfo.complainStatus == 'COMPLETE'">
+            <h3>仲裁结果</h3>
+            <dl>
+              <dt>仲裁意见</dt>
+              <dd>
+                {{complaintInfo.arbitrationResult}}
+              </dd>
+            </dl>
           </div>
-          <div class="div-flow-center">
-
-          </div>
-          <div class="div-flow-right">
-            <div class="div-form-default">
-              <h3>相关商品交易信息</h3>
-              <dl>
-                <dt>
-                  <img :src="complaintInfo.goodsImage" height="60px">
-                </dt>
-                <dd>
-                  <a>{{complaintInfo.goodsName}}</a><br>
-                  <span>￥{{complaintInfo.goodsPrice}} * {{complaintInfo.num}}(数量)</span>
-                </dd>
-              </dl>
-
-            </div>
-            <div class="div-form-default">
-              <h3>订单相关信息</h3>
-              <dl>
-                <dt>
-                  订单编号
-                </dt>
-                <dd>
-                  {{complaintInfo.orderSn}}
-                </dd>
-              </dl>
-              <dl>
-                <dt>
-                  下单时间
-                </dt>
-                <dd>
-                  {{complaintInfo.createTime}}
-                </dd>
-              </dl>
-              <dl>
-                <dt>
-                  订单金额
-                </dt>
-                <dd>
-                  {{complaintInfo.orderPrice}}
-                </dd>
-              </dl>
-
-            </div>
-            <div class="div-form-default">
-              <h3>收件人信息</h3>
-              <dl>
-                <dt>
-                  收货人
-                </dt>
-                <dd>
-                  {{complaintInfo.consigneeName}}
-                </dd>
-              </dl>
-              <dl>
-                <dt>
-                  收货地址
-                </dt>
-                <dd>
-                  {{complaintInfo.consigneeAddressPath}}
-                </dd>
-              </dl>
-              <dl>
-                <dt>
-                  收货人手机
-                </dt>
-                <dd>
-                  {{complaintInfo.consigneeMobile}}
-                </dd>
-              </dl>
-            </div>
-
+          <div class="div-form-default" v-if="complaintInfo.complainStatus != 'COMPLETE'">
+            <h3>平台仲裁</h3>
+            <dl v-if="arbitrationResultShow == true">
+              <dt>仲裁</dt>
+              <dd>
+                <Input v-model="arbitrationParams.arbitrationResult" type="textarea" maxlength="200" :rows="4" clearable style="width:260px" />
+              </dd>
+            </dl>
+            <dl>
+              <dt></dt>
+              <dd style="text-align:right;display:flex; justify-content: space-between;">
+                <Button type="primary" ghost :loading="submitLoading" v-if="arbitrationResultShow == false" @click="arbitrationHandle">
+                  直接仲裁结束投诉流程
+                </Button>
+                <Button :loading="submitLoading" v-if="complaintInfo.complainStatus == 'NEW'" @click="handleStoreComplaint">
+                  交由商家申诉
+                </Button>
+                <Button type="primary" :loading="submitLoading" v-if="arbitrationResultShow == true" @click="arbitrationHandleSubmit">
+                  提交仲裁
+                </Button>
+              </dd>
+            </dl>
           </div>
         </div>
+        <div class="div-flow-center">
 
-      </Card>
-      </Col>
-    </Row>
+        </div>
+        <div class="div-flow-right">
+          <div class="div-form-default">
+            <h3>相关商品交易信息</h3>
+            <dl>
+              <dt>
+                <img :src="complaintInfo.goodsImage" height="60px">
+              </dt>
+              <dd>
+                <a>{{complaintInfo.goodsName}}</a><br>
+                <span>￥{{complaintInfo.goodsPrice}} * {{complaintInfo.num}}(数量)</span>
+              </dd>
+            </dl>
+
+          </div>
+          <div class="div-form-default">
+            <h3>订单相关信息</h3>
+            <dl>
+              <dt>
+                订单编号
+              </dt>
+              <dd>
+                {{complaintInfo.orderSn}}
+              </dd>
+            </dl>
+            <dl>
+              <dt>
+                下单时间
+              </dt>
+              <dd>
+                {{complaintInfo.createTime}}
+              </dd>
+            </dl>
+            <dl>
+              <dt>
+                订单金额
+              </dt>
+              <dd>
+                {{complaintInfo.orderPrice}}
+              </dd>
+            </dl>
+
+          </div>
+          <div class="div-form-default">
+            <h3>收件人信息</h3>
+            <dl>
+              <dt>
+                收货人
+              </dt>
+              <dd>
+                {{complaintInfo.consigneeName}}
+              </dd>
+            </dl>
+            <dl>
+              <dt>
+                收货地址
+              </dt>
+              <dd>
+                {{complaintInfo.consigneeAddressPath}}
+              </dd>
+            </dl>
+            <dl>
+              <dt>
+                收货人手机
+              </dt>
+              <dd>
+                {{complaintInfo.consigneeMobile}}
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </Card>
   </div>
 </template>
 
 <script>
 import * as API_Order from "@/api/order";
-import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
 
 export default {
-  name: "orderComplaint",
-  components: {
-    uploadPicThumb,
-  },
+  name: "orderComplaintDetail",
   data() {
     return {
       id: 0, // 投诉id
@@ -267,9 +257,11 @@ export default {
         }
       });
     },
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 获取投诉详情
     getDetail() {
       this.loading = true;
       API_Order.getOrderComplainDetail(this.id).then((res) => {

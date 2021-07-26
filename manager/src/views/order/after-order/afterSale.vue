@@ -1,146 +1,114 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-        <Card>
-          <Tabs value="RETURN_MONEY" @on-click="handleClickType">
-            <TabPane label="退款" name="RETURN_MONEY">
-              <Row>
-                <Col>
-                  <Row class="operation" style="margin-bottom: 10px">
-                    <Button @click="add"  type="primary" >添加</Button>
-                  </Row>
-                  <Table
-                    :loading="loading"
-                    border
-                    :columns="columns"
-                    :data="data"
-                    ref="table"
-                    sortable="custom"
-                    @on-sort-change="changeSort"
-                    @on-selection-change="changeSelect"
-                  ></Table>
-                  <Row type="flex" justify="end" class="mt_10">
-                    <Page
-                      :current="searchForm.pageNumber"
-                      :total="total"
-                      :page-size="searchForm.pageSize"
-                      @on-change="changePage"
-                      @on-page-size-change="changePageSize"
-                      :page-size-opts="[10, 20, 50]"
-                      size="small"
-                      show-total
-                      show-elevator
-                      show-sizer
-                    ></Page>
-                  </Row>
-                </Col>
-              </Row>
-            </TabPane>
-            <TabPane label="取消" name="CANCEL">
-              <Row>
-                <Col>
-                  <Row class="operation" style="margin-bottom: 10px">
-                    <Button @click="add" type="primary" icon="md-add">添加</Button>
-                  </Row>
-                  <Table
-                    :loading="loading"
-                    border
-                    :columns="columns"
-                    :data="data"
-                    ref="table"
-                    sortable="custom"
-                    @on-sort-change="changeSort"
-                    @on-selection-change="changeSelect"
-                  ></Table>
-                  <Row type="flex" justify="end" class="mt_10">
-                    <Page
-                      :current="searchForm.pageNumber"
-                      :total="total"
-                      :page-size="searchForm.pageSize"
-                      @on-change="changePage"
-                      @on-page-size-change="changePageSize"
-                      :page-size-opts="[10, 20, 50]"
-                      size="small"
-                      show-total
-                      show-elevator
-                      show-sizer
-                    ></Page>
-                  </Row>
-                </Col>
-              </Row>
-            </TabPane>
-            <TabPane label="退货" name="RETURN_GOODS">
-              <Row>
-                <Col>
-                  <Row class="operation" style="margin-bottom: 10px">
-                    <Button @click="add" type="primary" icon="md-add">添加</Button>
-                  </Row>
-                  <Table
-                    :loading="loading"
-                    border
-                    :columns="columns"
-                    :data="data"
-                    ref="table"
-                    sortable="custom"
-                    @on-sort-change="changeSort"
-                    @on-selection-change="changeSelect"
-                  ></Table>
-                  <Row type="flex" justify="end" class="mt_10">
-                    <Page
-                      :current="searchForm.pageNumber"
-                      :total="total"
-                      :page-size="searchForm.pageSize"
-                      @on-change="changePage"
-                      @on-page-size-change="changePageSize"
-                      :page-size-opts="[10, 20, 50]"
-                      size="small"
-                      show-total
-                      show-elevator
-                      show-sizer
-                    ></Page>
-                  </Row>
-                </Col>
-              </Row>
-            </TabPane>
-            <TabPane label="投诉" name="COMPLAIN">
-              <Row>
-                <Col>
-                  <Row class="operation" style="margin-bottom: 10px">
-                    <Button @click="add" type="primary" icon="md-add">添加</Button>
-                    <Button @click="getDataList" icon="md-refresh">刷新</Button>
-                  </Row>
-                  <Table
-                    :loading="loading"
-                    border
-                    :columns="columns"
-                    :data="data"
-                    ref="table"
-                    sortable="custom"
-                    @on-sort-change="changeSort"
-                    @on-selection-change="changeSelect"
-                  ></Table>
-                  <Row type="flex" justify="end" class="mt_10">
-                    <Page
-                      :current="searchForm.pageNumber"
-                      :total="total"
-                      :page-size="searchForm.pageSize"
-                      @on-change="changePage"
-                      @on-page-size-change="changePageSize"
-                      :page-size-opts="[10, 20, 50]"
-                      size="small"
-                      show-total
-                      show-elevator
-                      show-sizer
-                    ></Page>
-                  </Row>
-                </Col>
-              </Row>
-            </TabPane>
-          </Tabs>
-        </Card>
-      </Col>
-    </Row>
+    <Card>
+      <Tabs value="RETURN_MONEY" @on-click="handleClickType">
+        <TabPane label="退款" name="RETURN_MONEY">
+          <Row class="operation" style="margin-bottom: 10px">
+            <Button @click="add"  type="primary" >添加</Button>
+          </Row>
+          <Table
+            :loading="loading"
+            border
+            :columns="columns"
+            :data="data"
+            ref="table"
+          ></Table>
+          <Row type="flex" justify="end" class="mt_10">
+            <Page
+              :current="searchForm.pageNumber"
+              :total="total"
+              :page-size="searchForm.pageSize"
+              @on-change="changePage"
+              @on-page-size-change="changePageSize"
+              :page-size-opts="[10, 20, 50]"
+              size="small"
+              show-total
+              show-elevator
+              show-sizer
+            ></Page>
+          </Row>
+        </TabPane>
+        <TabPane label="取消" name="CANCEL">
+          <Row class="operation" style="margin-bottom: 10px">
+            <Button @click="add" type="primary" icon="md-add">添加</Button>
+          </Row>
+          <Table
+            :loading="loading"
+            border
+            :columns="columns"
+            :data="data"
+            ref="table"
+          ></Table>
+          <Row type="flex" justify="end" class="mt_10">
+            <Page
+              :current="searchForm.pageNumber"
+              :total="total"
+              :page-size="searchForm.pageSize"
+              @on-change="changePage"
+              @on-page-size-change="changePageSize"
+              :page-size-opts="[10, 20, 50]"
+              size="small"
+              show-total
+              show-elevator
+              show-sizer
+            ></Page>
+          </Row>
+        </TabPane>
+        <TabPane label="退货" name="RETURN_GOODS">
+          <Row class="operation" style="margin-bottom: 10px">
+            <Button @click="add" type="primary" icon="md-add">添加</Button>
+          </Row>
+          <Table
+            :loading="loading"
+            border
+            :columns="columns"
+            :data="data"
+            ref="table"
+          ></Table>
+          <Row type="flex" justify="end" class="mt_10">
+            <Page
+              :current="searchForm.pageNumber"
+              :total="total"
+              :page-size="searchForm.pageSize"
+              @on-change="changePage"
+              @on-page-size-change="changePageSize"
+              :page-size-opts="[10, 20, 50]"
+              size="small"
+              show-total
+              show-elevator
+              show-sizer
+            ></Page>
+          </Row>
+        </TabPane>
+        <TabPane label="投诉" name="COMPLAIN">
+          <Row class="operation" style="margin-bottom: 10px">
+            <Button @click="add" type="primary" icon="md-add">添加</Button>
+            <Button @click="getDataList" icon="md-refresh">刷新</Button>
+          </Row>
+          <Table
+            :loading="loading"
+            border
+            :columns="columns"
+            :data="data"
+            ref="table"
+          ></Table>
+          <Row type="flex" justify="end" class="mt_10">
+            <Page
+              :current="searchForm.pageNumber"
+              :total="total"
+              :page-size="searchForm.pageSize"
+              @on-change="changePage"
+              @on-page-size-change="changePageSize"
+              :page-size-opts="[10, 20, 50]"
+              size="small"
+              show-total
+              show-elevator
+              show-sizer
+            ></Page>
+          </Row>
+        </TabPane>
+      </Tabs>
+    </Card>
     <Modal
       :title="modalTitle"
       v-model="modalVisible"
@@ -171,9 +139,6 @@
         modalVisible: false,//添加售后原因弹出框
         modalTitle: "", //添加售后原因弹出框标题
         loading: true, // 表单加载状态
-        selectList: [], // 多选数据
-        selectCount: 0, // 多选计数
-        modalType: 0, // 添加或编辑标识
         submitLoading: false, // 添加或编辑提交状态
         form: {
           reason: ""
@@ -261,18 +226,16 @@
     },
 
     methods: {
+      // 分页 修改页码
       changePage(v) {
         this.searchForm.pageNumber = v;
         this.getDataList();
         this.clearSelectAll();
       },
+      // 分页 修改页数
       changePageSize(v) {
+        this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = v;
-        this.getDataList();
-      },
-      changeSort(e) {
-        this.searchForm.sort = e.key;
-        this.searchForm.order = e.order;
         this.getDataList();
       },
       //切换tab
@@ -309,10 +272,6 @@
         });
         this.loading = false;
       },
-      changeSelect(e) {
-        this.selectList = e;
-        this.selectCount = e.length;
-      },
       //添加售后原因
       add() {
         this.form.reason = ""
@@ -331,7 +290,7 @@
         this.$refs.form.validate((valid) => {
           if (valid) {
             this.submitLoading = true;
-            if (this.modalType == 0) {
+            if (this.modalTitle == '添加售后原因') {
               // 添加
               delete this.form.id;
               API_Order.addAfterSaleReason(this.form).then((res) => {

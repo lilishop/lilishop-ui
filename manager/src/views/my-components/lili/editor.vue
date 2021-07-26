@@ -159,16 +159,19 @@ export default {
         }
       }
     },
+    // 编辑html
     editHTML() {
       this.dataEdit = this.data;
       this.showHTMLModal = true;
     },
+    // 保存
     editHTMLOk() {
       editor.txt.html(this.dataEdit);
       this.$emit("input", this.data);
       this.$emit("on-change", this.data);
       this.showHTMLModal = false;
     },
+    // 清空编辑器
     clear() {
       this.$Modal.confirm({
         title: "确认清空",
@@ -181,6 +184,7 @@ export default {
         },
       });
     },
+    // 回显数据
     setData(value) {
       if (!editor) {
         this.initEditor();

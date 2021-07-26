@@ -40,9 +40,7 @@
         :columns="columns"
         :data="data"
         ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
+        class="mt_10"
       >
         <template slot-scope="{row}" slot="goodsName">
           <a class="mr_10" @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
@@ -69,56 +67,6 @@
         ></Page>
       </Row>
     </Card>
-    <Modal
-      :title="modalTitle"
-      v-model="modalVisible"
-      :mask-closable="false"
-      :width="500"
-    >
-      <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
-        <FormItem label="评价内容">
-          <span v-if="content == ''">暂无评价</span>
-          <span v-else>{{content}}</span>
-        </FormItem>
-        <FormItem label="评价图片">
-          <upload-pic-thumb
-                            v-model="image"
-                            :disable="true"
-                            :remove="false"
-          ></upload-pic-thumb>
-        </FormItem>
-        <FormItem label="回复内容" prop="reply">
-          <Input v-if="replyStatus == false"
-            v-model="form.reply"
-            type="textarea"
-            maxlength="200"
-            :rows="4"
-            clearable
-            style="width:260px"
-          />
-          <span v-else>
-            {{form.reply}}
-          </span>
-        </FormItem>
-        <FormItem label="回复图片" prop="replyImage">
-          <upload-pic-thumb v-if="replyStatus == false"
-            v-model="form.replyImage"
-            :limit="5"
-          ></upload-pic-thumb>
-          <upload-pic-thumb v-else
-            v-model="form.replyImage"
-            :disable="true"
-             :remove="false"
-          ></upload-pic-thumb>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button v-if="replyStatus == false" type="primary" :loading="submitLoading" @click="handleSubmit" >回复
-        </Button
-        >
-      </div>
-    </Modal>
   </div>
 </template>
 
@@ -133,15 +81,7 @@
     },
     data() {
       return {
-        image:[],//评价图片
-        replyStatus:false,//回复状态
-        modalType: 0, // 添加或编辑标识
-        modalVisible: false, // 添加或编辑显示
-        modalTitle: "", // 添加或编辑标题
         loading: true, // 表单加载状态
-        content: "",//评价内容
-        drop: false, // 更多搜索项
-        dropDownIcon: "ios-arrow-down", // drop 图标
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
@@ -149,10 +89,6 @@
           sort: "createTime", // 默认排序字段
           order: "desc", // 默认排序方式
         },
-        form: {}, // 表单
-        submitLoading: false, // 添加或编辑提交状态
-        selectList: [], // 多选数据
-        selectCount: 0, // 多选计数
         columns: [
           // 表头
           {
@@ -271,54 +207,28 @@
       }
     },
     methods: {
+      // 初始化数据
       init() {
         this.getDataList();
       },
+      // 分页 改变页码
       changePage(v) {
         this.searchForm.pageNumber = v;
         this.getDataList();
-        this.clearSelectAll();
       },
+      // 分页 改变页数
       changePageSize(v) {
+        this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = v;
         this.getDataList();
       },
+      // 搜索
       handleSearch() {
         this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = 10;
         this.getDataList();
       },
-      changeSort(e) {
-        this.searchForm.sort = e.key;
-        this.searchForm.order = e.order;
-        if (e.order === "normal") {
-          this.searchForm.order = "";
-        }
-        this.getDataList();
-      },
-      clearSelectAll() {
-        this.$refs.table.selectAll(false);
-      },
-      changeSelect(e) {
-        this.selectList = e;
-        this.selectCount = e.length;
-      },
-      selectDateRange(v) {
-        if (v) {
-          this.searchForm.startDate = v[0];
-          this.searchForm.endDate = v[1];
-        }
-      },
-      dropDown() {
-        if (this.drop) {
-          this.dropDownContent = "展开";
-          this.dropDownIcon = "ios-arrow-down";
-        } else {
-          this.dropDownContent = "收起";
-          this.dropDownIcon = "ios-arrow-up";
-        }
-        this.drop = !this.drop;
-      },
+      // 获取列表数据
       getDataList() {
         this.loading = true;
         API_Order.getOrderComplain(this.searchForm).then((res) => {

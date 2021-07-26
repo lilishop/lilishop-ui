@@ -1,127 +1,121 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-        <Card>
-          <Row @keydown.enter.native="handleSearch">
-            <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-              <Form-item label="订单编号" prop="orderSn">
-                <Input
-                  type="text"
-                  v-model="searchForm.orderSn"
-                  placeholder="请输入订单编号"
-                  clearable
-                  style="width: 200px"
-                />
-              </Form-item>
-              <Form-item label="售后单号" prop="sn">
-                <Input
-                  type="text"
-                  v-model="searchForm.sn"
-                  placeholder="请输入售后单号"
-                  clearable
-                  style="width: 200px"
-                />
-              </Form-item>
-              <Form-item label="售后状态">
-                <Select v-model="searchForm.serviceStatus" placeholder="全部" clearable style="width: 200px">
-                  <Option value="APPLY">申请售后</Option>
-                  <Option value="PASS">通过售后</Option>
-                  <Option value="REFUSE">拒绝售后</Option>
-                  <Option value="BUYER_RETURN">买家退货，待卖家收货</Option>
-                  <Option value="SELLER_CONFIRM">卖家确认收货</Option>
-                  <Option value="SELLER_TERMINATION">卖家终止售后</Option>
-                  <Option value="BUYER_CANCEL">买家取消售后</Option>
-                  <Option value="COMPLETE">完成售后</Option>
-                </Select>
-              </Form-item>
-              <Form-item label="申请时间">
-                <DatePicker
-                  v-model="selectDate"
-                  type="datetimerange"
-                  format="yyyy-MM-dd HH:mm:ss"
-                  clearable
-                  @on-change="selectDateRange"
-                  placeholder="选择起始时间"
-                  style="width: 200px"
-                ></DatePicker>
-              </Form-item>
-              <Form-item label="商家名称" prop="storeName">
-                <Input
-                  type="text"
-                  v-model="searchForm.storeName"
-                  placeholder="请输入商家名称"
-                  clearable
-                  style="width: 200px"
-                />
-              </Form-item>
-              <Form-item label="会员名称" prop="memberName">
-                <Input
-                  type="text"
-                  v-model="searchForm.memberName"
-                  placeholder="请输入会员名称"
-                  clearable
-                  style="width: 200px"
-                />
-              </Form-item>
-              <Form-item label="售后类型">
-                <Select v-model="searchForm.serviceType" placeholder="全部" clearable style="width: 200px">
-                  <Option value="RETURN_MONEY">退款</Option>
-                  <Option value="RETURN_GOODS">退货</Option>
-                </Select>
-              </Form-item>
-              <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-            </Form>
-          </Row>
-          <Table
-            :loading="loading"
-            border
-            :columns="columns"
-            :data="data"
-            ref="table"
-            sortable="custom"
-            @on-sort-change="changeSort"
-            @on-selection-change="changeSelect"
-          >
-            <!-- 商品栏目格式化 -->
-            <template slot="goodsSlot" slot-scope="{row}">
-              <div style="margin-top: 5px;height: 80px; display: flex;">
-                <div style="">
-                  <img :src="row.goodsImage" style="height: 60px;margin-top: 3px">
-                </div>
+    <Card>
+      <Row @keydown.enter.native="handleSearch">
+        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+          <Form-item label="订单编号" prop="orderSn">
+            <Input
+              type="text"
+              v-model="searchForm.orderSn"
+              placeholder="请输入订单编号"
+              clearable
+              style="width: 200px"
+            />
+          </Form-item>
+          <Form-item label="售后单号" prop="sn">
+            <Input
+              type="text"
+              v-model="searchForm.sn"
+              placeholder="请输入售后单号"
+              clearable
+              style="width: 200px"
+            />
+          </Form-item>
+          <Form-item label="售后状态">
+            <Select v-model="searchForm.serviceStatus" placeholder="全部" clearable style="width: 200px">
+              <Option value="APPLY">申请售后</Option>
+              <Option value="PASS">通过售后</Option>
+              <Option value="REFUSE">拒绝售后</Option>
+              <Option value="BUYER_RETURN">买家退货，待卖家收货</Option>
+              <Option value="SELLER_CONFIRM">卖家确认收货</Option>
+              <Option value="SELLER_TERMINATION">卖家终止售后</Option>
+              <Option value="BUYER_CANCEL">买家取消售后</Option>
+              <Option value="COMPLETE">完成售后</Option>
+            </Select>
+          </Form-item>
+          <Form-item label="申请时间">
+            <DatePicker
+              v-model="selectDate"
+              type="datetimerange"
+              format="yyyy-MM-dd HH:mm:ss"
+              clearable
+              @on-change="selectDateRange"
+              placeholder="选择起始时间"
+              style="width: 200px"
+            ></DatePicker>
+          </Form-item>
+          <Form-item label="商家名称" prop="storeName">
+            <Input
+              type="text"
+              v-model="searchForm.storeName"
+              placeholder="请输入商家名称"
+              clearable
+              style="width: 200px"
+            />
+          </Form-item>
+          <Form-item label="会员名称" prop="memberName">
+            <Input
+              type="text"
+              v-model="searchForm.memberName"
+              placeholder="请输入会员名称"
+              clearable
+              style="width: 200px"
+            />
+          </Form-item>
+          <Form-item label="售后类型">
+            <Select v-model="searchForm.serviceType" placeholder="全部" clearable style="width: 200px">
+              <Option value="RETURN_MONEY">退款</Option>
+              <Option value="RETURN_GOODS">退货</Option>
+            </Select>
+          </Form-item>
+          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+        </Form>
+      </Row>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        class="mt_10"
+      >
+        <!-- 商品栏目格式化 -->
+        <template slot="goodsSlot" slot-scope="{row}">
+          <div style="margin-top: 5px;height: 80px; display: flex;">
+            <div style="">
+              <img :src="row.goodsImage" style="height: 60px;margin-top: 3px">
+            </div>
 
-                <div style="margin-left: 13px;">
-                  <div class="div-zoom">
-                    <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
-                  </div>
-                  <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-                    <div slot="content">
-                      <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
-                    </div>
-                    <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
-                  </Poptip>
-                </div>
+            <div style="margin-left: 13px;">
+              <div class="div-zoom">
+                <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
               </div>
+              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
+                <div slot="content">
+                  <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                </div>
+                <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
+              </Poptip>
+            </div>
+          </div>
 
-            </template>
-          </Table>
-          <Row type="flex" justify="end" class="mt_10">
-            <Page
-              :current="searchForm.pageNumber"
-              :total="total"
-              :page-size="searchForm.pageSize"
-              @on-change="changePage"
-              @on-page-size-change="changePageSize"
-              :page-size-opts="[10, 20, 50]"
-              size="small"
-              show-total
-              show-elevator
-              show-sizer
-            ></Page>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
+        </template>
+      </Table>
+      <Row type="flex" justify="end" class="mt_10">
+        <Page
+          :current="searchForm.pageNumber"
+          :total="total"
+          :page-size="searchForm.pageSize"
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+          :page-size-opts="[10, 20, 50]"
+          size="small"
+          show-total
+          show-elevator
+          show-sizer
+        ></Page>
+      </Row>
+    </Card>
   </div>
 </template>
 
@@ -130,7 +124,6 @@
 
   export default {
     name: "orderList",
-    components: {},
     data() {
       return {
         loading: true, // 表单加载状态
@@ -158,8 +151,6 @@
           endTime: "",
           billPrice: "",
         },
-        selectList: [], // 多选数据
-        selectCount: 0, // 多选计数
         columns: [
           {
             title: "售后服务单号",
@@ -287,44 +278,35 @@
       };
     },
     methods: {
+      // 初始化数据
       init() {
         this.getDataList();
       },
+      // 分页 改变页码
       changePage(v) {
         this.searchForm.pageNumber = v;
         this.getDataList();
-        this.clearSelectAll();
       },
+      // 分页 改变页数
       changePageSize(v) {
+        this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = v;
         this.getDataList();
       },
+      // 搜索
       handleSearch() {
         this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = 10;
         this.getDataList();
       },
-      changeSort(e) {
-        this.searchForm.sort = e.key;
-        this.searchForm.order = e.order;
-        if (e.order === "normal") {
-          this.searchForm.order = "";
-        }
-        this.getDataList();
-      },
-      clearSelectAll() {
-        this.$refs.table.selectAll(false);
-      },
-      changeSelect(e) {
-        this.selectList = e;
-        this.selectCount = e.length;
-      },
+      // 开始结束时间分别赋值
       selectDateRange(v) {
         if (v) {
           this.searchForm.startDate = v[0];
           this.searchForm.endDate = v[1];
         }
       },
+      // 获取列表数据
       getDataList() {
         this.loading = true;
         API_Order.getAfterSaleOrderPage(this.searchForm).then((res) => {
@@ -337,25 +319,7 @@
         this.total = this.data.length;
         this.loading = false;
       },
-      //确认收款
-      confirmPrice(v) {
-        this.$Modal.confirm({
-          title: "确认收款",
-          content: "您确定要收款吗？",
-          loading: true,
-          onOk: () => {
-            API_Order.orderPay(v.sn).then(res => {
-              if (res.success) {
-                this.$Message.success("收款成功")
-                this.getDataList()
-              }
-              this.$Modal.remove();
-            })
-          },
-        });
-
-      },
-
+      // 跳转订单详情
       detail(v) {
         let sn = v.sn;
         this.$router.push({

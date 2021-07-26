@@ -321,24 +321,9 @@ export default {
       logisticsModal: false, //查询物流模态框
       
       logisticsInfo: {}, //物流信息
-      form: {
-        logisticsNo: "",
-        logisticsId: "",
-      }, //换货发货form
-      formValidate: {
-        logisticsNo: [
-          { required: true, message: "发货单号不能为空", trigger: "change" },
-        ],
-        logisticsId: [
-          { required: true, message: "请选择物流公司", trigger: "blur" },
-        ],
-      },
-      modalVisible: false, // 添加或编辑显示
       afterSaleInfo: {}, // 售后信息
       afterSaleImage: [], //会员申诉图片
-      appealImages: [], //商家申诉的图片
       submitLoading: false, // 添加或编辑提交状态
-      checkedLogistics: [], //选中的物流公司集合
       storeMsg: {}, // 商家地址信息
       //商家处理意见
       params: {
@@ -389,9 +374,6 @@ export default {
       ]
     };
   },
-  watch: {
-    $route(to, from) {},
-  },
   methods: {
     // 获取售后详情
     getDetail() {
@@ -426,9 +408,6 @@ export default {
           
         }
       });
-    },
-    orderDeliverCancel() {
-      this.modalVisible = false;
     },
     //平台退款
     refundPriceSubmit() {
@@ -499,7 +478,6 @@ export default {
       return flag
     }
   },
-
   mounted() {
     this.sn = this.$route.query.sn;
     this.getDetail();

@@ -27,7 +27,7 @@
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
       </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
           size="small" show-total show-elevator show-sizer></Page>
@@ -41,12 +41,9 @@ import * as API_Order from "@/api/order";
 
 export default {
   name: "paymentLog",
-  components: {},
   data() {
     return {
       loading: true, // 表单加载状态
-      drop: false, // 更多搜索项
-      dropDownIcon: "ios-arrow-down", // drop图标
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -161,6 +158,7 @@ export default {
     },
     // 改变页数
     changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },

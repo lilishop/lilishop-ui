@@ -37,12 +37,6 @@ export const otherRouter = {
       component: () => import("@/views/change-password/change-password.vue")
     },
     {
-      path: "message",
-      title: "消息中心",
-      name: "message_index",
-      component: () => import("@/views/message/message.vue")
-    },
-    {
       path: "category",
       title: "类型列表",
       name: "category",
@@ -71,12 +65,6 @@ export const otherRouter = {
       title: "店铺详细",
       name: "shop-detail",
       component: () => import("@/views/seller/shop/shopDetail.vue")
-    },
-    {
-      path: "add_message",
-      title: "会员站内信",
-      name: "add_message",
-      component: () => import("@/views/member/notice/addMessage.vue")
     },
     {
       path: "bill-detail",

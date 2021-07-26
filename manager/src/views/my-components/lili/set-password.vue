@@ -108,11 +108,13 @@ export default {
         this.strengthValue = 100;
       }
     },
+    // 密码变动后回调
     handleChange(v) {
       this.strengthChange();
       this.$emit("input", this.currentValue);
       this.$emit("on-change", this.currentValue, this.grade, this.strength);
     },
+    // 监听密码变动，实时回显密码强度
     setCurrentValue(value) {
       if (value === this.currentValue) {
         return;

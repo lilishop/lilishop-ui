@@ -64,13 +64,13 @@
       </div>
     </Card>
 
-    <Card>
+    <Card class="mt_10">
       <Tabs type="point" @on-click="memberInfoChange">
         <TabPane label="TA的积分" name="point">
           <div class="pointsTitle" style="justify-content: flex-start; text-align: left;">
             <div style="width: 120px;">
               <div class="points-top-title">
-                积分余额
+                剩余积分
               </div>
               <div class="points-top-text">
                 {{memberInfo.point?memberInfo.point:0}}
@@ -85,8 +85,6 @@
                 :data="pointData"
                 class="mt_10"
                 ref="table"
-                sortable="custom"
-                @on-sort-change="pointChangeSort"
               >
               </Table>
 
@@ -174,8 +172,6 @@
               :data="orderData"
               ref="table"
               class="mt_10"
-              sortable="custom"
-              @on-sort-change="orderChangeSort"
             >
             </Table>
 
@@ -253,8 +249,6 @@
             :data="walletData"
             ref="table"
             class="mt_10"
-            sortable="custom"
-            @on-sort-change="walletChangeSort"
           >
           </Table>
 
@@ -295,8 +289,6 @@
             :data="receiptRecordData"
             class="mt_10"
             ref="table"
-            sortable="custom"
-            @on-sort-change="walletChangeSort"
           >
             <template slot="orderSnSlot" slot-scope="scope">
 
@@ -428,7 +420,7 @@
             key: "point",
             width: 150,
             render: (h, params) => {
-              if (params.row.pointType == 1) {
+              if (params.row.pointType == 'INCREASE') {
                 return h('div', [
                   h('span', {
                     style: {
@@ -1079,6 +1071,7 @@
       ,
       //积分记录页数变化
       pointChangePageSize(v) {
+        this.pointSearchForm.pageNumber = 1;
         this.pointSearchForm.pageSize = v;
         this.getPointData();
       }
@@ -1091,6 +1084,7 @@
       ,
       //会员地址记录页数变化
       addressChangePageSize(v) {
+        this.addressSearchForm.pageNumber = 1;
         this.addressSearchForm.pageSize = v;
         this.getPointData();
       },
@@ -1103,6 +1097,7 @@
       ,
       //余额记录页数变化
       walletChangePageSize(v) {
+        this.walletSearchForm.pageNumber = 1;
         this.walletSearchForm.pageSize = v;
         this.getDepositLogData();
       },
@@ -1115,31 +1110,11 @@
       ,
       //订单记录页数变化
       orderChangePageSize(v) {
+        this.orderSearchForm.pageNumber = 1;
         this.orderSearchForm.pageSize = v;
         this.getOrderData();
       },
-      orderChangeSort(e) {
-        this.orderSearchForm.sort = e.key;
-        this.orderSearchForm.order = e.order;
-        this.getOrderData();
-      },
-      addressChangeSort(e) {
-        this.addressSearchForm.sort = e.key;
-        this.addressSearchForm.order = e.order;
-        this.getPointData();
-      }
-
-      ,
-      walletChangeSort(e) {
-        this.walletSearchForm.sort = e.key;
-        this.walletSearchForm.order = e.order;
-        this.getDepositLogData();
-      },
-      pointChangeSort(e) {
-        this.pointSearchForm.sort = e.key;
-        this.pointSearchForm.order = e.order;
-        this.getPointData();
-      },
+      // 起止时间从新赋值
       selectDateRange(v) {
         if (v) {
           this.orderSearchForm.startDate = v[0];

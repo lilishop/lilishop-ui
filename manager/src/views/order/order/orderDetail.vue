@@ -1,142 +1,134 @@
 <template>
   <div class="search">
     <div>
-      <Col>
-      <div>
-        <Card style="height: 60px">
-          <div style="">
-
-            <Button v-if="allowOperation.editPrice" @click="modifyPrice">调整价格</Button>
-
-            <Button v-if="allowOperation.editConsignee" @click="editAddress" type="primary" ghost>修改收货地址</Button>
-
-            <Button v-if="allowOperation.cancel" @click="orderCancel" type="warning" ghost>订单取消</Button>
-
-            <Button v-if="orderInfo.order.orderStatus === 'UNPAID'" @click="confirmPrice" type="primary">收款</Button>
-            <Button @click="orderLog" type="info" ghost>订单日志</Button>
+      <Card style="height: 60px">
+        <div style="">
+          <Button v-if="allowOperation.editPrice" @click="modifyPrice">调整价格</Button>
+          <Button v-if="allowOperation.editConsignee" @click="editAddress" type="primary" ghost>修改收货地址</Button>
+          <Button v-if="allowOperation.cancel" @click="orderCancel" type="warning" ghost>订单取消</Button>
+          <Button v-if="orderInfo.order.orderStatus === 'UNPAID'" @click="confirmPrice" type="primary">收款</Button>
+          <Button @click="orderLog" type="info" ghost>订单日志</Button>
+        </div>
+      </Card>
+      <Card class="mt_10 clearfix">
+        <div style="width: 30%; float: left; margin-left: 20px">
+          <div class="div-item">
+            <div class="div-item-left">订单号：</div>
+            <div class="div-item-right">{{ orderInfo.order.sn }}</div>
           </div>
-        </Card>
-        <Card style="height: 400px">
-          <div style="width: 30%; float: left; margin-left: 20px">
-            <div class="div-item">
-              <div class="div-item-left">订单号：</div>
-              <div class="div-item-right">{{ orderInfo.order.sn }}</div>
-            </div>
-            <div class="div-item">
-              <div class="div-item-left">订单来源：</div>
-              <div class="div-item-right">
-                {{ orderInfo.order.clientType  | clientTypeWay}}
-              </div>
-            </div>
-
-            <div class="div-item">
-              <div class="div-item-left">订单状态：</div>
-              <div class="div-item-right">
-                {{ orderInfo.orderStatusValue }}
-              </div>
-            </div>
-
-            <div class="div-item">
-              <div class="div-item-left">下单时间：</div>
-              <div class="div-item-right">
-                {{ orderInfo.order.createTime }}
-              </div>
+          <div class="div-item">
+            <div class="div-item-left">订单来源：</div>
+            <div class="div-item-right">
+              {{ orderInfo.order.clientType | clientTypeWay}}
             </div>
           </div>
-          <div style="width: 30%; float: left; margin-left: 20px">
-            <div class="div-item" v-if="orderInfo.order.needReceipt == false">
-              <div class="div-item-left">发票信息：</div>
-              <div class="div-item-right">暂无发票信息</div>
-            </div>
 
-            <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-              <div class="div-item-left">发票抬头：</div>
-              <div class="div-item-right">{{ orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : '暂无' }}</div>
-            </div>
-
-            <div class="div-item" v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId">
-              <div class="div-item-left">发票税号：</div>
-              <div class="div-item-right">{{ orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : '暂无' }}</div>
-            </div>
-
-            <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-              <div class="div-item-left">发票内容：</div>
-              <div class="div-item-right">{{ orderInfo.receipt.receiptContent ? orderInfo.receipt.receiptContent : '暂无' }}</div>
-            </div>
-
-            <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-              <div class="div-item-left">发票金额：</div>
-              <div class="div-item-right">{{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice('￥')}}</div>
-            </div>
-
-            <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-              <div class="div-item-left">是否开票：</div>
-              <div class="div-item-right">{{ orderInfo.receipt.receiptStatus == 0 ? '未开' : '已开' }}</div>
+          <div class="div-item">
+            <div class="div-item-left">订单状态：</div>
+            <div class="div-item-right">
+              {{ orderInfo.orderStatusValue }}
             </div>
           </div>
-          <div style="width: 36%; float: left">
-            <div class="div-item">
-              <div class="div-item-left">收货信息：</div>
-              <div class="div-item-right">
-                {{ orderInfo.order.consigneeName }}
-                {{ orderInfo.order.consigneeMobile }}
-                {{ orderInfo.order.consigneeAddressPath }}
-                {{ orderInfo.order.consigneeDetail }}
-              </div>
-            </div>
-            <div class="div-item">
-              <div class="div-item-left">支付方式：</div>
-              <div class="div-item-right">
-                {{ orderInfo.paymentMethodValue }}
-              </div>
-            </div>
 
-            <div class="div-item">
-              <div class="div-item-left">买家留言：</div>
-              <div class="div-item-right">{{ orderInfo.order.remark }}</div>
-            </div>
-
-            <div class="div-item" v-if="orderInfo.order.needReceipt == false">
-              <div class="div-item-left">发票信息：</div>
-              <div class="div-item-right">暂无发票信息</div>
-            </div>
-
-            <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-              <div class="div-item-left">发票抬头：</div>
-              <div class="div-item-right">{{ orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : '暂无' }}</div>
-            </div>
-
-            <div class="div-item" v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId">
-              <div class="div-item-left">发票税号：</div>
-              <div class="div-item-right">{{ orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : '暂无' }}</div>
-            </div>
-
-            <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-              <div class="div-item-left">发票内容：</div>
-              <div class="div-item-right">{{ orderInfo.receipt.receiptContent ? orderInfo.receipt.receiptContent : '暂无' }}</div>
-            </div>
-
-            <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-              <div class="div-item-left">发票金额：</div>
-              <div class="div-item-right">{{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice('￥')}}</div>
-            </div>
-
-            <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-              <div class="div-item-left">是否开票：</div>
-              <div class="div-item-right">{{ orderInfo.receipt.receiptStatus == 0 ? '未开' : '已开' }}</div>
-            </div>
-
-            <div class="div-item">
-              <div class="div-item-left">配送方式：</div>
-              <div class="div-item-right">
-                {{ orderInfo.deliveryMethodValue }}
-              </div>
+          <div class="div-item">
+            <div class="div-item-left">下单时间：</div>
+            <div class="div-item-right">
+              {{ orderInfo.order.createTime }}
             </div>
           </div>
-        </Card>
-      </div>
-      </Col>
-      <Card>
+        </div>
+        <div style="width: 30%; float: left; margin-left: 20px">
+          <div class="div-item" v-if="orderInfo.order.needReceipt == false">
+            <div class="div-item-left">发票信息：</div>
+            <div class="div-item-right">暂无发票信息</div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+            <div class="div-item-left">发票抬头：</div>
+            <div class="div-item-right">{{ orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : '暂无' }}</div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId">
+            <div class="div-item-left">发票税号：</div>
+            <div class="div-item-right">{{ orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : '暂无' }}</div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+            <div class="div-item-left">发票内容：</div>
+            <div class="div-item-right">{{ orderInfo.receipt.receiptContent ? orderInfo.receipt.receiptContent : '暂无' }}</div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+            <div class="div-item-left">发票金额：</div>
+            <div class="div-item-right">{{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice('￥')}}</div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+            <div class="div-item-left">是否开票：</div>
+            <div class="div-item-right">{{ orderInfo.receipt.receiptStatus == 0 ? '未开' : '已开' }}</div>
+          </div>
+        </div>
+        <div style="width: 36%; float: left">
+          <div class="div-item">
+            <div class="div-item-left">收货信息：</div>
+            <div class="div-item-right">
+              {{ orderInfo.order.consigneeName }}
+              {{ orderInfo.order.consigneeMobile }}
+              {{ orderInfo.order.consigneeAddressPath }}
+              {{ orderInfo.order.consigneeDetail }}
+            </div>
+          </div>
+          <div class="div-item">
+            <div class="div-item-left">支付方式：</div>
+            <div class="div-item-right">
+              {{ orderInfo.paymentMethodValue }}
+            </div>
+          </div>
+
+          <div class="div-item">
+            <div class="div-item-left">买家留言：</div>
+            <div class="div-item-right">{{ orderInfo.order.remark }}</div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == false">
+            <div class="div-item-left">发票信息：</div>
+            <div class="div-item-right">暂无发票信息</div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+            <div class="div-item-left">发票抬头：</div>
+            <div class="div-item-right">{{ orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : '暂无' }}</div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId">
+            <div class="div-item-left">发票税号：</div>
+            <div class="div-item-right">{{ orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : '暂无' }}</div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+            <div class="div-item-left">发票内容：</div>
+            <div class="div-item-right">{{ orderInfo.receipt.receiptContent ? orderInfo.receipt.receiptContent : '暂无' }}</div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+            <div class="div-item-left">发票金额：</div>
+            <div class="div-item-right">{{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice('￥')}}</div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+            <div class="div-item-left">是否开票：</div>
+            <div class="div-item-right">{{ orderInfo.receipt.receiptStatus == 0 ? '未开' : '已开' }}</div>
+          </div>
+
+          <div class="div-item">
+            <div class="div-item-left">配送方式：</div>
+            <div class="div-item-right">
+              {{ orderInfo.deliveryMethodValue }}
+            </div>
+          </div>
+        </div>
+      </Card>
+      <Card class="mt_10">
         <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom">
           <!-- 商品栏目格式化 -->
           <template slot="goodsSlot" slot-scope="{row}">
@@ -608,7 +600,6 @@ export default {
 <style lang="scss">
 .order-log-div {
   line-height: 30px;
-  height: 500px;
   overflow-y: scroll;
 }
 
