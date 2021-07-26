@@ -57,8 +57,6 @@
 <script>
 import shrinkableMenu from "./main-components/shrinkable-menu/shrinkable-menu.vue";
 import tagsPageOpened from "./main-components/tags-page-opened.vue";
-import breadcrumbNav from "./main-components/breadcrumb-nav.vue";
-import fullScreen from "./main-components/fullscreen.vue";
 import messageTip from "./main-components/message-tip.vue";
 import circleLoading from "@/views/my-components/lili/circle-loading.vue";
 import Cookies from "js-cookie";
@@ -70,8 +68,6 @@ export default {
   components: {
     shrinkableMenu,
     tagsPageOpened,
-    breadcrumbNav,
-    fullScreen,
     messageTip,
     circleLoading,
   },

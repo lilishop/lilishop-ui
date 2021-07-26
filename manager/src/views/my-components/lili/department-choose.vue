@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { initDepartment, loadDepartment } from "@/api/index";
+import { initDepartment } from "@/api/index";
 export default {
   name: "departmentChoose",
   props: {
@@ -27,50 +27,13 @@ export default {
     };
   },
   methods: {
+    // 获取部门数据
     initDepartmentData() {
       initDepartment().then(res => {
         if (res.success) {
-          res.result.forEach(function(e) {
-            if (e.isParent) {
-              e.value = e.id;
-              e.label = e.title;
-              e.loading = false;
-              e.children = [];
-            } else {
-              e.value = e.id;
-              e.label = e.title;
-            }
-            if (e.status == -1) {
-              e.label = "[已禁用] " + e.label;
-              e.disabled = true;
-            }
-          });
-          this.department = res.result;
-        }
-      });
-    },
-    loadData(item, callback) {
-      item.loading = true;
-      loadDepartment(item.value).then(res => {
-        item.loading = false;
-        if (res.success) {
-          res.result.forEach(function(e) {
-            if (e.isParent) {
-              e.value = e.id;
-              e.label = e.title;
-              e.loading = false;
-              e.children = [];
-            } else {
-              e.value = e.id;
-              e.label = e.title;
-            }
-            if (e.status == -1) {
-              e.label = "[已禁用] " + e.label;
-              e.disabled = true;
-            }
-          });
-          item.children = res.result;
-          callback();
+          const arr = res.result;
+          this.filterData(arr)
+          this.department = arr
         }
       });
     },
@@ -82,8 +45,21 @@ export default {
       }
       this.$emit("on-change", departmentId);
     },
+    // 清空已选列表
     clearSelect() {
       this.selectDep = [];
+    },
+    // 处理部门数据
+    filterData (data) {
+      data.forEach(e => {
+        e.value = e.id;
+        e.label = e.title;
+        if (e.children) {
+          this.filterData(e.children)
+        } else {
+          return
+        }
+      })
     }
   },
   created() {

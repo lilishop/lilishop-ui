@@ -132,7 +132,7 @@ export default {
         this.$emit("input", this.currentValue);
         this.$emit("on-change", this.currentValue);
       } else {
-        this.$Message.error(res.message);
+        // this.$Message.error(res.message);
       }
     },
     // 上传失败

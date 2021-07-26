@@ -91,27 +91,30 @@ export default {
     };
   },
   methods: {
+    // 拖拽结束事件
     onEnd() {
       this.returnValue();
     },
+    // 初始化方法
     init() {
       this.setData(this.value, true);
       this.accessToken = {
         accessToken: this.getStore("accessToken")
       };
     },
+    // 预览图片
     handleView(imgUrl) {
       this.imgUrl = imgUrl;
       this.viewImage = true;
     },
+    // 移除图片
     handleRemove(file) {
       this.uploadList = this.uploadList.filter(i => i.url !== file.url);
       this.returnValue();
     },
+    // 上传成功
     handleSuccess(res, file) {
       if (res.success) {
-
-
         file.url = res.result;
         // 单张图片处理
         if (!this.multiple && this.uploadList.length > 0) {
@@ -125,9 +128,11 @@ export default {
         this.$Message.error(res.message);
       }
     },
+    // 上传失败
     handleError(error, file, fileList) {
       this.$Message.error(error.toString());
     },
+    // 格式校验
     handleFormatError(file) {
       this.$Notice.warning({
         title: "不支持的文件格式",
@@ -137,6 +142,7 @@ export default {
           " ’格式不正确, 请选择 .jpg .jpeg .png .gif图片格式文件"
       });
     },
+    // 上传文件大小校验
     handleMaxSize(file) {
       this.$Notice.warning({
         title: "文件大小过大",
@@ -148,6 +154,7 @@ export default {
           "M."
       });
     },
+    // 上传之前钩子
     handleBeforeUpload() {
       if (this.multiple && this.uploadList.length >= this.limit) {
         this.$Message.warning("最多只能上传" + this.limit + "张图片");
@@ -155,6 +162,7 @@ export default {
       }
       return true;
     },
+    // 返回组件值
     returnValue() {
       if (!this.uploadList || this.uploadList.length < 1) {
         if (!this.multiple) {
@@ -180,6 +188,7 @@ export default {
         this.$emit("on-change", v);
       }
     },
+    // 传入值变化时改变值
     setData(v, init) {
       if (typeof v == "string") {
         // 单张

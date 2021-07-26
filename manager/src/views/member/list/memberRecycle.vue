@@ -38,6 +38,7 @@
           :columns="columns"
           :data="data"
           ref="table"
+          class="mt_10"
           sortable="custom"
           @on-sort-change="changeSort"
           @on-selection-change="changeSelect"
@@ -181,9 +182,6 @@
         picModelFlag: false, // 选择图片
         formValidate: {}, // 表单数据
         ruleValidate: {}, //修改验证
-        submitLoading: false, // 添加或编辑提交状态
-        selectList: [], // 多选数据
-        selectCount: 0, // 多选计数
         columns: [
           {
             title: "会员名称",
@@ -332,40 +330,26 @@
       callback(val) {
         this.$emit("callback", val);
       },
+      // 初始化数据
       init() {
         this.getData();
       },
+      // 分页 修改页码
       changePage(v) {
         this.searchForm.pageNumber = v;
         this.getData();
       },
+      // 分页 修改页数
       changePageSize(v) {
+        this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = v;
         this.getData();
       },
+      // 搜索
       handleSearch() {
         this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = 10;
         this.getData();
-      },
-
-      changeSort(e) {
-        this.searchForm.sort = e.key;
-        this.searchForm.order = e.order;
-        if (e.order === "normal") {
-          this.searchForm.order = "";
-        }
-        this.getData();
-      },
-      changeSelect(e) {
-        this.selectList = e;
-        this.selectCount = e.length;
-      },
-      selectDateRange(v) {
-        if (v) {
-          this.searchForm.startDate = v[0];
-          this.searchForm.endDate = v[1];
-        }
       },
       //查看详情修改
       editPerm(val) {
@@ -406,28 +390,6 @@
         this.regionId = val[0];
       },
 
-
-      //禁用会员
-      disabled(v) {
-        let params = {
-          memberIds: [v.id],
-          disabled: "CLOSE"
-        }
-        this.$Modal.confirm({
-          title: '提示',
-          content: '<p>确认禁用此会员？</p>',
-          onOk: () => {
-            API_Member.updateMemberStatus(params).then(res => {
-              if (res.success) {
-                this.$Message.success('禁用成功');
-                this.getData()
-              } else {
-                this.$Message.error(res.message);
-              }
-            });
-          }
-        });
-      },
       //详细
       detail(row){
         this.$router.push({ name: "member-detail", query: { id: row.id } });
@@ -447,7 +409,7 @@
                 this.$Message.success('禁用成功');
                 this.getData()
               } else {
-                this.$Message.error(res.message);
+                // this.$Message.error(res.message);
               }
             });
           }

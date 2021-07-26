@@ -227,6 +227,7 @@ export default {
     };
   },
   methods: {
+    // 编辑
     handleSelectModel(item, type) {
       this.selected = item;
       if (type) {
@@ -243,9 +244,11 @@ export default {
       // 调起选择商品
       this.$refs.liliDialog.open('goods', 'single')
     },
+    // 选择链接回调
     selectedLink(val) {
       this.selected.url = this.$options.filters.formatLinkType(val);
     },
+    // 选择商品回调
     selectedGoodsData(val) {
       console.log(val);
       let goods = val[0];
@@ -259,6 +262,7 @@ export default {
       this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
     },
+    // 选择图片回调
     callbackSelected(val) {
       this.picModelFlag = false;
       this.selected.img = val.url;

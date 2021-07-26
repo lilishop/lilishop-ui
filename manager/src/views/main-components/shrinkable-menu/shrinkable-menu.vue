@@ -27,6 +27,7 @@
 
 <script>
 import util from "@/libs/util.js";
+
 export default {
   name: "shrinkableMenu",
   computed: {
@@ -45,6 +46,9 @@ export default {
     $route: {
       handler: function (val, oldVal) {
         console.log(val);
+        if (val.meta.firstRouterName && val.meta.firstRouterName !== this.currNav) {
+          this.selectNav(val.meta.firstRouterName)
+        }
       }
     } 
   },
@@ -58,10 +62,38 @@ export default {
       this.$store.commit("setCurrNav", name);
       this.setStore("currNav", name);
       util.initRouter(this);
+      this.$nextTick(()=>{
+        this.$refs.childrenMenu.updateActiveName()
+      })
     },
   }
 };
 </script>
 <style lang="scss" scoped>
-@import "./styles/menu.scss";
+.ivu-shrinkable-menu{
+    height: calc(100% - 60px);
+    width: 180px;
+    display: flex;
+}
+
+.ivu-btn-text:hover {
+    background-color: rgba(255,255,255,.2) !important;
+}
+.ivu-menu-dark.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu), .ivu-menu-dark.ivu-menu-vertical .ivu-menu-submenu-title-active:not(.ivu-menu-submenu){
+    background-color: #fff;
+    &:hover{
+        background-color: #fff;
+    }
+}
+.ivu-menu-vertical{
+  overflow-y: auto;
+}
+.ivu-menu-dark.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu), .ivu-menu-dark.ivu-menu-vertical .ivu-menu-submenu-title-active:not(.ivu-menu-submenu){
+    color: #ed3f14;
+}
+/deep/.ivu-menu-vertical .ivu-menu-item-group-title {
+    height: 40px;
+    line-height: 40px;
+    padding-left: 20px;
+}
 </style>

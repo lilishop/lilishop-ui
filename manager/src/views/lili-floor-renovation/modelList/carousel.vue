@@ -139,6 +139,7 @@ export default {
       // 编辑模块
       this.showModal = true;
     },
+    // 添加轮播图
     handleAdd () {
       this.data.options.list.push({ img: "", url: "" });
       this.$forceUpdate();
@@ -161,6 +162,7 @@ export default {
       this.selected.url = this.$options.filters.formatLinkType(val);
       console.log(this.selected.url);
     },
+    // 选择图片
     handleSelectImg(item) {
       this.selected = item;
       this.$refs.ossManage.selectImage = true;

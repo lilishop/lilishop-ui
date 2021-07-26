@@ -166,13 +166,12 @@
 <script>
 import * as API_Goods from "@/api/goods";
 import { Chart } from "@antv/g2";
-import empty from "@/views/lili-empty";
 import orderRow from "./order/orderDetail";
 import refundRow from "./order/refundOrder";
 import affixTime from "@/views/lili-components/affix-time";
 
 export default {
-  components: { empty, orderRow, refundRow, affixTime },
+  components: { orderRow, refundRow, affixTime },
 
   data() {
     return {

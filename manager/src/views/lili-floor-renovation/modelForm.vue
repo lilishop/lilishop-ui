@@ -25,13 +25,6 @@
                     <i-input v-model="searchData" size="large" placeholder="输入你想查找的商品">
                         <Button slot="append">搜索</Button>
                     </i-input>
-                    <!-- <Tag
-                        v-for="(item, index) in promotionTags"
-                        :key="index"
-                        class="mt_10"
-                    >
-                        {{item}}
-                    </Tag> -->
                 </div>
             </div>
             <div class="nav-con">
@@ -185,6 +178,7 @@ export default {
             if(item) this.selectedNav = item;
             this.$refs.liliDialog.open('link')
         },
+        // 已选链接
         selectedLink(val) {
             console.log(val);
             if(this.showModalNav){
@@ -202,9 +196,11 @@ export default {
             )
             console.log(this.navList.list)
         },
+        // 拖动结束回调
         handleMoveEnd ({newIndex, oldIndex}) {
             console.log('index', newIndex, oldIndex)
         },
+        // 修改顶部广告
         handleModel (type) {
             if(type == 'topAdvert'){
                 this.showModal = true;
@@ -212,6 +208,7 @@ export default {
                 this.showModalNav = true;
             }
         },
+        // 选择图片
         handleSelectImg() {
             this.$refs.ossManage.selectImage = true;
             this.picModelFlag = true;
@@ -236,9 +233,6 @@ export default {
                 model: this.data.list[newIndex].type + '_' + key
             })
         },
-    },
-    watch: {
-
     }
 }
 </script>

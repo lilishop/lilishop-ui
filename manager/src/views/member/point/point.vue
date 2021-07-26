@@ -1,55 +1,50 @@
 <template>
   <div class="search">
-    <Row>
-      <Card>
-        <Row @keydown.enter.native="handleSearch">
-          <Form
-            ref="searchForm"
-            :model="searchForm"
-            inline
-            :label-width="70"
-            class="search-form"
-          >
-            <Form-item label="会员名称" prop="username">
-              <Input
-                type="text"
-                v-model="searchForm.memberName"
-                placeholder="请输入会员名称"
-                clearable
-                style="width: 200px"
-              />
-              </Form-item>
-            <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search">搜索</Button >
-          </Form>
-        </Row>
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          ref="table"
-          sortable="custom"
-          @on-sort-change="changeSort"
-          @on-selection-change="changeSelect"
-        >
-        </Table>
-        <Row type="flex" justify="end" class="mt_10">
-          <Page
-            :current="searchForm.pageNumber"
-            :total="total"
-            :page-size="searchForm.pageSize"
-            @on-change="changePage"
-            @on-page-size-change="changePageSize"
-            :page-size-opts="[10, 20, 50]"
-            size="small"
-            show-total
-            show-elevator
-            show-sizer
-          ></Page>
-        </Row>
-      </Card>
-    </Row>
-
+    <Card style="padding:0 10px 10px 0">
+      <Form
+        @keydown.enter.native="handleSearch"
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        style="margin-top:10px"
+        :label-width="70"
+        class="search-form"
+      >
+        <Form-item label="会员名称" prop="username">
+          <Input
+            type="text"
+            v-model="searchForm.memberName"
+            placeholder="请输入会员名称"
+            clearable
+            style="width: 200px"
+          />
+          </Form-item>
+        <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search">搜索</Button >
+      </Form>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        class="mt_10"
+      >
+      </Table>
+      <Row type="flex" justify="end" class="mt_10">
+        <Page
+          :current="searchForm.pageNumber"
+          :total="total"
+          :page-size="searchForm.pageSize"
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+          :page-size-opts="[10, 20, 50]"
+          size="small"
+          show-total
+          show-elevator
+          show-sizer
+        ></Page>
+      </Row>
+    </Card>
   </div>
 </template>
 
@@ -57,9 +52,9 @@
   import region from "@/views/lili-components/region";
   import * as API_Member from "@/api/member.js";
   import ossManage from "@/views/sys/oss-manage/ossManage";
-  import * as RegExp from '@/libs/RegExp.js';
 
   export default {
+    // 积分历史页面
     name: "point",
     components: {
       region,
@@ -67,14 +62,11 @@
     },
     data() {
       return {
-        descFlag: false, //编辑查看框
         loading: true, // 表单加载状态
         searchForm: { // 请求参数
           pageNumber: 1,
           pageSize: 10,
         },
-        selectList: [], // 多选数据
-        selectCount: 0, // 多选计数
         columns: [
           {
             title: "会员名称",
@@ -141,40 +133,26 @@
       callback(val) {
         this.$emit("callback", val);
       },
+      // 初始化数据
       init() {
         this.getData();
       },
+      // 分页 改变页码
       changePage(v) {
         this.searchForm.pageNumber = v;
         this.getData();
       },
+      // 分页 改变页数
       changePageSize(v) {
+        this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = v;
         this.getData();
       },
+      // 搜索
       handleSearch() {
         this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = 10;
         this.getData();
-      },
-
-      changeSort(e) {
-        this.searchForm.sort = e.key;
-        this.searchForm.order = e.order;
-        if (e.order === "normal") {
-          this.searchForm.order = "";
-        }
-        this.getData();
-      },
-      changeSelect(e) {
-        this.selectList = e;
-        this.selectCount = e.length;
-      },
-      selectDateRange(v) {
-        if (v) {
-          this.searchForm.startDate = v[0];
-          this.searchForm.endDate = v[1];
-        }
       },
       //查新积分列表
       getData() {

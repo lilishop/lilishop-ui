@@ -40,7 +40,7 @@
         <div class="search">
           <Card>
 
-            <Row class="operation">
+            <Row class="operation mt_10">
               <Button @click="weChatSync" type="primary">同步微信消息</Button>
             </Row>
             <Table
@@ -69,7 +69,7 @@
         <div class="search">
           <Card>
 
-            <Row class="operation">
+            <Row class="operation mt_10">
               <Button @click="weChatSync('mp')" type="primary">同步微信小程序订阅消息</Button>
             </Row>
             <Table
@@ -120,7 +120,6 @@ export default {
 
       wechatModal: false,// modal展示
       wechatFormData: {}, // 微信数据
-      wechatMPModal: false,//微信消息
       wechatMPFormData: {}, // 微信订阅消息
       tab: "WECHAT", // tab栏分类
       searchForm: { // 请求参数
@@ -128,8 +127,6 @@ export default {
       },
       loading: true, // 表单加载状态
       id: '', // 模板id
-      selectCount: 0, // 多选计数
-      selectList: [], // 多选数据
       //微信消息查询
       weChatSearchForm: {
         // 搜索框对应data对象
@@ -232,6 +229,7 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },

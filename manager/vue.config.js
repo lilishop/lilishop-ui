@@ -47,7 +47,6 @@ module.exports = {
       gitalk: "Gitalk",
       "js-cookie": "Cookies",
       wangEditor: "wangEditor",
-      quill: "Quill",
       stompjs: "Stomp",
       "sockjs-client": "SockJS",
       vuedraggable: "vuedraggable"

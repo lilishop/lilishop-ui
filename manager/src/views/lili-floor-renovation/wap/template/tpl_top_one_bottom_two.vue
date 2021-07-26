@@ -18,10 +18,7 @@
 <script>
 export default {
   title: "上一下二",
-  props: ["res"],
-  mounted() {
-    console.log(this.res);
-  }
+  props: ["res"]
 };
 </script>
 <style lang="scss" scoped>

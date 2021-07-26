@@ -14,12 +14,10 @@
 <script>
 import goodsDialog from "./goods-dialog";
 import linkDialog from "./link-dialog";
-import couponDialog from "./coupon-dialog";
 export default {
   components: {
     goodsDialog,
-    linkDialog,
-    couponDialog,
+    linkDialog
   },
   data() {
     return {
@@ -44,6 +42,7 @@ export default {
         }
       }, 100);
     },
+    // 点击确认
     clickOK() {
       if (this.goodsFlag) {
         this.$emit("selectedGoodsData", this.goodsData);
@@ -52,6 +51,7 @@ export default {
       }
       this.clickClose();
     },
+    // 打开组件方法
     open(type, mutiple) {
       this.flag = true;
       if (type == "goods") {
@@ -64,6 +64,7 @@ export default {
       }
 
     },
+    // 关闭组件
     close() {
       this.flag = false;
     },

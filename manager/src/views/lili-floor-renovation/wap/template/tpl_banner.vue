@@ -20,9 +20,6 @@ export default {
       },
       deep: true
     }
-  },
-  mounted() {
-    console.log(this.res);
   }
 };
 </script>

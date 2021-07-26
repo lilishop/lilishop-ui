@@ -53,10 +53,6 @@ export const afterSaleStatusList = [
     status: 'BUYER_RETURN'
   },
   {
-    name: '商家换货/补发',
-    status: 'SELLER_RE_DELIVERY'
-  },
-  {
     name: '卖家确认收货',
     status: 'SELLER_CONFIRM'
   },

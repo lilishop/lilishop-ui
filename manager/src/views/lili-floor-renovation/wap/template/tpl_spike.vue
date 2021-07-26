@@ -29,7 +29,7 @@
 </template>
 <script>
 export default {
-  props: ["res"],
+  props: ["res"]
 };
 </script>
 <style lang="scss" scoped>

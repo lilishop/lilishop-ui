@@ -1,9 +1,8 @@
 <template>
-
   <div class="wrapper">
     <Row>
       <Col style=" height: 100%;" span="4">
-      <Card class="article-category">
+      <Card class="article-category mr_10">
         <Tree :data="treeData" @on-select-change="handleCateChange"></Tree>
       </Card>
       </Col>
@@ -20,7 +19,7 @@
         <Row class="operation padding-row">
           <Button @click="add" type="primary">添加</Button>
         </Row>
-        <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-selection-change="changeSelect">
+        <Table :loading="loading" border :columns="columns" :data="data" ref="table">
           <!-- 页面展示 -->
           <template slot="openStatusSlot" slot-scope="scope">
             <div>
@@ -38,46 +37,44 @@
 
           </Page>
         </Row>
-        <template v-if="!selected">
-          <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="1100">
-            <Form ref="form" :model="form" :label-width="100">
-              <FormItem label="文章标题" prop="title">
-                <Input v-model="form.title" clearable style="width: 40%" />
-              </FormItem>
-              <FormItem label="文章分类" prop="categoryId">
-                <Select v-model="treeValue" placeholder="请选择" clearable style="width: 180px">
-                  <Option :value="treeValue" style="display: none">{{
-                          treeValue
-                        }}
-                  </Option>
-                  <Tree :data="treeData" @on-select-change="handleCheckChange"></Tree>
-                </Select>
-              </FormItem>
-              <FormItem label="文章排序" prop="sort">
-                <Input type="number" v-model="form.sort" clearable style="width: 10%" />
-              </FormItem>
-              <FormItem class="form-item-view-el" label="文章内容" prop="content">
-                <editor openXss v-model="form.content"></editor>
-              </FormItem>
-              <FormItem label="是否展示" prop="openStatus">
-                <i-switch size="large" v-model="form.openStatus" :true-value="open" :false-value="close">
-                  <span slot="open">展示</span>
-                  <span slot="close">隐藏</span>
-                </i-switch>
-              </FormItem>
-            </Form>
-            <div slot="footer">
-              <Button type="text" @click="modalVisible = false">取消</Button>
-              <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
-            </div>
-          </Modal>
-        </template>
-
+        
       </Card>
       </Col>
-
     </Row>
-
+    <template v-if="!selected">
+      <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="1100">
+        <Form ref="form" :model="form" :label-width="100">
+          <FormItem label="文章标题" prop="title">
+            <Input v-model="form.title" clearable style="width: 40%" />
+          </FormItem>
+          <FormItem label="文章分类" prop="categoryId">
+            <Select v-model="treeValue" placeholder="请选择" clearable style="width: 180px">
+              <Option :value="treeValue" style="display: none">{{
+                      treeValue
+                    }}
+              </Option>
+              <Tree :data="treeData" @on-select-change="handleCheckChange"></Tree>
+            </Select>
+          </FormItem>
+          <FormItem label="文章排序" prop="sort">
+            <Input type="number" v-model="form.sort" clearable style="width: 10%" />
+          </FormItem>
+          <FormItem class="form-item-view-el" label="文章内容" prop="content">
+            <editor openXss v-model="form.content"></editor>
+          </FormItem>
+          <FormItem label="是否展示" prop="openStatus">
+            <i-switch size="large" v-model="form.openStatus" :true-value="open" :false-value="close">
+              <span slot="open">展示</span>
+              <span slot="close">隐藏</span>
+            </i-switch>
+          </FormItem>
+        </Form>
+        <div slot="footer">
+          <Button type="text" @click="modalVisible = false">取消</Button>
+          <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
+        </div>
+      </Modal>
+    </template>
   </div>
 </template>
 
@@ -135,8 +132,6 @@ export default {
       //树结构
       treeData: [],
       submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [
         // 表头
         {
@@ -293,10 +288,10 @@ export default {
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
-      this.clearSelectAll();
     },
     // 改变页码
     changePageSize(v) {
+      this.selected.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
@@ -305,15 +300,6 @@ export default {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
-    },
-    // 取消全选
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-    // 列表选择回调
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
     },
     // 获取全部文章分类
     getAllList(parent_id) {
@@ -353,7 +339,6 @@ export default {
     getDataList(val) {
       if (val) this.form = {};
       this.loading = true;
-      // 带多条件搜索参数获取表单数据 请自行修改接口
       getArticle(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
@@ -434,10 +419,10 @@ export default {
         }
       });
     },
+    // 删除文章
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
-        // 记得确认修改此处
         content: "您确认要删除么?",
         loading: true,
         onOk: () => {

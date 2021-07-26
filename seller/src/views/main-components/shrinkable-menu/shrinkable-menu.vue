@@ -46,6 +46,17 @@ export default {
       return this.$store.state.app.currNav;
     }
   },
+  watch: {
+    // 监听路由变化
+    $route: {
+      handler: function (val, oldVal) {
+        console.log(val);
+        if (val.meta.firstRouterName && val.meta.firstRouterName !== this.currNav) {
+          this.selectNav(val.meta.firstRouterName)
+        }
+      }
+    } 
+  },
   methods: {
     changeMenu(name) { //二级路由点击
       this.$router.push({
@@ -56,6 +67,9 @@ export default {
       this.$store.commit("setCurrNav", name);
       this.setStore("currNav", name);
       util.initRouter(this);
+      this.$nextTick(()=>{
+        this.$refs.childrenMenu.updateActiveName()
+      })
     },
   }
 };

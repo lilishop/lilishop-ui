@@ -24,9 +24,6 @@
       </Row>
       <!-- 拼图验证码 -->
       <verify ref="verify" class="verify-con" verifyType="LOGIN" @change="verifyChange"></verify>
-      <div v-if="socialLogining">
-        <RectLoading />
-      </div>
       <Footer />
       </Col>
       <!-- <LangSwitch /> -->
@@ -40,15 +37,11 @@ import Cookies from "js-cookie";
 import Header from "@/views/main-components/header";
 import Footer from "@/views/main-components/footer";
 import LangSwitch from "@/views/main-components/lang-switch";
-import RectLoading from "@/views/my-components/lili/rect-loading";
-import CountDownButton from "@/views/my-components/lili/count-down-button";
 import util from "@/libs/util.js";
 import verify from "@/views/my-components/verify";
 
 export default {
   components: {
-    CountDownButton,
-    RectLoading,
     LangSwitch,
     Header,
     Footer,

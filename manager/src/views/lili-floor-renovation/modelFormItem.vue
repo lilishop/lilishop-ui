@@ -58,38 +58,6 @@
                 </div>
             </div>
         </template>
-        <!-- 首页品牌 -->
-        <!-- <template v-if="element.type == 'brand'">
-            <div class="brand">
-                <div class="brand-view">
-                    <div class="brand-view-content" v-for="(brand,index) in element.options.brandViewList" :key="index">
-                        <div class="brand-view-title">
-                            <span><span class="fontsize_18 fw_bold">{{brand.nameCn}}</span> <span class="fw_bold">{{brand.nameEn}}</span></span>
-                            <span>更多&gt;</span>
-                        </div>
-                        <div class="brand-view-img">
-                            <img :src="brand.img" alt="">
-                        </div>
-                    </div>
-                </div>
-                <ul class="brand-list">
-                    <li v-for="(sign,index) in element.options.signList" :key="index">
-                        <div class="brand-img">
-                            <img :src="sign.img" alt="">
-                        </div>
-                        <div class="brand-mash">
-                            <Icon type="ios-heart-outline" />
-                            <div>关注人数：{{ sign.follow }}</div>
-                            <div>点击进入</div>
-                        </div>
-                    </li>
-                    <li class="refresh">
-                        <Icon type="md-refresh" />
-                        <div>换一批</div>
-                    </li>
-                </ul>
-            </div>
-        </template> -->
         <!-- 好货推荐 -->
         <template v-if="element.type == 'recommend'">
             <recommend :data="element"></recommend>
@@ -189,14 +157,13 @@ export default {
             picModelFlag: false // 图片选择器
         }
     },
-    mounted () {
-        
-    },
     methods: {
+        // 编辑模块
         handleSelectModel (item) {
             this.selected = item;
             this.showModal = true
         },
+        // 删除模块
         handleModelDelete () {
             this.$Modal.confirm({
                 title: '提示',
@@ -212,28 +179,25 @@ export default {
         handleSelectLink(item,index) { // 调起选择链接弹窗
             this.$refs.liliDialog.open('link')
         },
+        // 确定选择链接
         selectedLink(val) {
             this.selected.url = this.$options.filters.formatLinkType(val);;
         },
+        // 拖动结束回调
         handleMoveEnd ({newIndex, oldIndex}) {
             console.log('index', newIndex, oldIndex)
-        },
-        handleEditModel (type) {
-            this.showModal = true;
         },
         handleSelectImg(){ // 选择图片
             this.$refs.ossManage.selectImage = true;
             this.picModelFlag = true;
         },
+        // 回显图片
         callbackSelected (val) {
             this.picModelFlag = false;
             this.selected.img = val.url;
         }
         
     },
-    watch: {
-        
-    }
 }
 </script>
 <style lang="scss" scoped>

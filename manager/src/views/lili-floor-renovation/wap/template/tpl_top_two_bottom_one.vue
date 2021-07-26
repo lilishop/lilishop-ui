@@ -18,9 +18,6 @@
 export default {
   title: "上二下一",
   props: ["res"],
-  mounted() {
-    console.log(this.res);
-  }
 };
 </script>
 <style lang="scss" scoped>

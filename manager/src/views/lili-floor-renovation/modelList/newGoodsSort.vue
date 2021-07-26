@@ -160,6 +160,7 @@ export default {
         }
     },
     methods:{
+        // 装修modal
         handleSelectModel (item, type) {
             this.selected = item;
             console.warn(item);
@@ -181,9 +182,11 @@ export default {
                 this.$refs.liliDialog.goodsData = [this.selected]
             }, 500);
         },
+        // 选择链接回调
         selectedLink (val) {
             this.selected.url = this.$options.filters.formatLinkType(val);
         },
+        // 选择商品回调
         selectedGoodsData (val) {
             console.log(val);
             let goods = val[0]
@@ -193,17 +196,11 @@ export default {
             this.selected.name = goods.goodsName
             this.selected.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`
         },
-       
-        handleMoveEnd ({newIndex, oldIndex}) {
-            console.log('index', newIndex, oldIndex)
-        },
-        handleEditModel (type) {
-            this.showModal = true;
-        },
         handleSelectImg(){ // 选择图片
             this.$refs.ossManage.selectImage = true;
             this.picModelFlag = true;
         },
+        // 选择图片回显
         callbackSelected (val) {
             this.picModelFlag = false;
             this.selected.img = val.url;

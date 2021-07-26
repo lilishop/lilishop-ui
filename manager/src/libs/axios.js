@@ -103,6 +103,7 @@ service.interceptors.response.use(
 
       } else {
         // 其他错误处理
+        console.log(error.response.data);
         Message.error(error.response.data.message)
       }
     }

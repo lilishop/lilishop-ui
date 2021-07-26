@@ -22,7 +22,7 @@
           </Form-item>
         </Form>
       </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
           show-total show-elevator show-sizer></Page>
@@ -59,23 +59,26 @@
 
     <Modal :title="modalTitle" v-model="queryModalVisible" :mask-closable="false" :width="500">
       <Form :label-width="80">
-        <FormItem label="申请编号">
+        <FormItem label="申请编号：">
           <span>{{showList.sn}}</span>
         </FormItem>
-        <FormItem label="用户名称">
+        <FormItem label="用户名称：">
           <span>{{showList.memberName}}</span>
         </FormItem>
-        <FormItem label="申请金额">
+        <FormItem label="申请金额：">
           <span>{{showList.applyMoney}}</span>
         </FormItem>
-        <FormItem label="提现状态">
+        <FormItem label="提现状态：">
           <span>{{showList.applyStatus | paramTypeFilter}}</span>
         </FormItem>
-        <FormItem label="申请时间">
+        <FormItem label="申请时间：">
           <span>{{showList.createTime}}</span>
         </FormItem>
-        <FormItem label="审核时间">
+        <FormItem label="审核时间：">
           <span>{{showList.inspectTime}}</span>
+        </FormItem>
+        <FormItem label="审核备注：">
+          <span>{{showList.inspectRemark}}</span>
         </FormItem>
 
       </Form>
@@ -202,6 +205,7 @@ export default {
                       this.showList = {};
                       this.roleModalVisible = true;
                       this.showList = params.row;
+                      this.audit =""
                     },
                   },
                 },

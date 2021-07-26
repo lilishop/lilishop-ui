@@ -17,6 +17,10 @@
             <Option value="VIRTUAL">核验订单</Option>
           </Select>
         </Form-item>
+        <Form-item label="下单时间">
+          <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 160px"></DatePicker>
+        </Form-item>
+        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         <Form-item label="订单状态" prop="orderStatus">
           <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 160px">
             <Option value="UNPAID">未付款</Option>
@@ -28,10 +32,7 @@
             <Option value="CANCELLED">已取消</Option>
           </Select>
         </Form-item>
-        <Form-item label="下单时间">
-          <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 160px"></DatePicker>
-        </Form-item>
-        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+        
       </Form>
       <div>
         <download-excel class="export-excel-wrapper" :data="data" :fields="fields" name="商品订单.xls">
@@ -111,9 +112,6 @@ export default {
         orderStatus: "",
       },
       selectDate: null,
-      submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [
         {
           title: "订单号",
@@ -222,51 +220,35 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
+    // 分页 改变页数
     changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    handleReset() {
-      this.$refs.searchForm.resetFields();
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      this.selectDate = null;
-      this.searchForm.startDate = "";
-      this.searchForm.endDate = "";
-      // 重新加载数据
-      this.getDataList();
-    },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
-
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
+    // 起止时间从新赋值
     selectDateRange(v) {
       if (v) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
       }
     },
+    // 获取列表数据
     getDataList() {
       this.loading = true;
       API_Order.getOrderList(this.searchForm).then((res) => {

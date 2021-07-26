@@ -64,15 +64,13 @@ import {
   userInfo,
   userInfoEdit,
 } from "@/api/index";
-import CountDownButton from "@/views/my-components/lili/count-down-button";
 import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
 import Cookies from "js-cookie";
 import util from "@/libs/util";
 
 export default {
   components: {
-    uploadPicThumb,
-    CountDownButton
+    uploadPicThumb
   },
   name: "personal-enter",
   data() {

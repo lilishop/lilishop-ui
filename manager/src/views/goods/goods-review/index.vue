@@ -9,8 +9,7 @@
           <Button @click="handleSearch" type="primary" class="search-btn" icon="ios-search">搜索</Button>
         </Form>
       </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"
-              @on-sort-change="changeSort" @on-selection-change="changeSelect">
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10">
         <!-- 页面展示 -->
         <template slot="shopDisableSlot" slot-scope="scope">
           <div>
@@ -39,7 +38,7 @@
           <div class="show">
             <label>页面展示：</label>
             <i-switch size="large" true-value="OPEN" false-value="CLOSE" v-model="infoData.status"
-                      @on-change="changeRadio" style="margin-top: 3px">
+                      @on-change="changeSwitchView" style="margin-top: 3px">
               <span slot="open">展示</span>
               <span slot="close">隐藏</span>
             </i-switch>
@@ -56,7 +55,7 @@
             <List>
               <ListItem>
                 <ListItemMeta :avatar="infoData.memberProfile" :title="infoData.memberName"
-                              :description="infoData.content"/>
+                  :description="infoData.content"/>
               </ListItem>
               <div class="" v-if="infoData.haveImage">
                 评价图
@@ -98,11 +97,10 @@
 import * as API_Member from "@/api/member";
 
 export default {
-  name: "shop",
-  components: {},
+  name: "goods-review", // 会员评价
   data() {
     return {
-      infoData: "", // 商品信息
+      infoData: {}, // 商品信息
       infoFlag: false, // 评价展示
       infoTitle: "", // modal名称
       loading: true, // 表单加载状态
@@ -115,9 +113,6 @@ export default {
         startDate: "", // 起始时间
         endDate: "", // 终止时间
       },
-      submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [
         // 表头
         {
@@ -223,7 +218,8 @@ export default {
     };
   },
   methods: {
-    changeRadio(val) {
+    // 切换查看switch
+    changeSwitchView(val) {
       let status = val;
       API_Member.updateMemberReview(this.infoData.id, {status}).then(
         (res) => {
@@ -232,44 +228,26 @@ export default {
         }
       );
     },
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
+    // 分页 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
-    },
-
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
-    selectDateRange(v) {
-      if (v) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      }
     },
     //列表直接选择页面是否展示
     changeSwitch(v) {
@@ -278,9 +256,9 @@ export default {
         this.init();
       });
     },
+    // 获取列表
     getDataList() {
       this.loading = true;
-      // 带多条件搜索参数获取表单数据 请自行修改接口
       API_Member.getMemberReview(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
@@ -301,44 +279,16 @@ export default {
         }
       });
     },
-
+    // 删除评论
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
-        // 记得确认修改此处
         content: "您确认要删除会员" + v.memberName + "的评论?",
         loading: true,
         onOk: () => {
           API_Member.delMemberReview(v.id).then((res) => {
             this.$Message.success("修改成功");
             this.init();
-          });
-        },
-      });
-    },
-    delAll() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要删除的数据");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选的 " + this.selectCount + " 条数据?",
-        loading: true,
-        onOk: () => {
-          let ids = "";
-          this.selectList.forEach(function (e) {
-            ids += e.id + ",";
-          });
-          ids = ids.substring(0, ids.length - 1);
-          // 批量删除
-          this.deleteRequest("/shop/delByIds/" + ids).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.clearSelectAll();
-              this.getDataList();
-            }
           });
         },
       });

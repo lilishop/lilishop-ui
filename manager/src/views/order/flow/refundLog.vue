@@ -19,8 +19,7 @@
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
       </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"
-              @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize"
               @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
@@ -34,8 +33,7 @@
 import * as API_Order from "@/api/order";
 
 export default {
-  name: "paymentLog",
-  components: {},
+  name: "refundLog",
   data() {
     return {
       loading: true, // 表单加载状态
@@ -50,6 +48,7 @@ export default {
         orderSn: "",
         isRefund: "",
       },
+      // 退款起止时间
       selectDate: null,
       columns: [
         {
@@ -112,51 +111,35 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
+    // 分页 改变页数
     changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    handleReset() {
-      this.$refs.searchForm.resetFields();
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      this.selectDate = null;
-      this.searchForm.startDate = "";
-      this.searchForm.endDate = "";
-      // 重新加载数据
-      this.getDataList();
-    },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
-
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
+    // 起止时间从新赋值
     selectDateRange(v) {
       if (v) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
       }
     },
+    // 获取列表数据
     getDataList() {
       this.loading = true;
       API_Order.refundLog(this.searchForm).then((res) => {
@@ -166,7 +149,6 @@ export default {
           this.total = res.result.total;
         }
       });
-      this.total = this.data.length;
       this.loading = false;
     }
   },

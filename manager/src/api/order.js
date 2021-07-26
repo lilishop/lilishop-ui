@@ -117,16 +117,10 @@ export const getAfterSaleOrderPage = (params) => {
 export const getAfterSaleOrderDetail = (sn) => {
   return getRequest(`/afterSale/get/${sn}`)
 }
-
 //售后单查询物流
-export const getSellerDeliveryTraces = (sn, params) => {
-  return getRequest(`/afterSale/getSellerDeliveryTraces/${sn}`, params)
+export const getAfterSaleTraces = (sn) => {
+  return getRequest(`/afterSale/getDeliveryTraces/${sn}`)
 }
-//售后单查询物流
-export const getAfterSaleTraces = (sn, params) => {
-  return getRequest(`/afterSale/getDeliveryTraces/${sn}`, params)
-}
-
 // 获取商家选中的物流公司
 export const getLogisticsChecked = () => {
   return getRequest(`/logistics/getChecked`)
@@ -155,6 +149,11 @@ export const paymentLog = (params) => {
 //平台退款记录
 export const refundLog = (params) => {
   return getRequest(`/refundLog`, params)
+}
+
+//售后单商家收货信息
+export const storeAddress = (sn) => {
+  return getRequest(`/afterSale/getStoreAfterSaleAddress/${sn}`)
 }
 
 

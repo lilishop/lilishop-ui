@@ -34,7 +34,10 @@
           <td>退款方式</td><td>{{afterSale.refundWay == 'ORIGINAL' ? '原路退回' : '账号退款'}}</td>
         </tr>
         <tr>
-          <td>退款金额</td><td>{{afterSale.actualRefundPrice | unitPrice('￥')}}</td>
+          <td>申请退款金额</td><td>{{afterSale.applyRefundPrice | unitPrice('￥')}}</td>
+        </tr>
+        <tr v-if="afterSale.actualRefundPrice">
+          <td>实际退款金额</td><td>{{afterSale.actualRefundPrice | unitPrice('￥')}}</td>
         </tr>
         <template v-if="afterSale.refundWay === 'OFFLINE'">
           <tr>

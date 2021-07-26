@@ -8,8 +8,11 @@
           <div class="goodsImg hover-pointer" v-if="params.type === 'GOODS'">
             <img :src="item.image" />
           </div>
-          <div class="goodsTitle hover-pointer">
-            {{params.type === 'GOODS'? item.goodsName : item.storeName}}
+          <div class="goodsTitle hover-color" v-if="params.type === 'GOODS'" @click="buynow(item.skuId, item.goodsId)">
+            {{item.goodsName}}
+          </div>
+          <div v-else class="goodsTitle hover-pointer">
+            {{item.storeName}}
           </div>
           <div class="goodsPrice">
             <span v-if="params.type === 'GOODS'">{{item.price | unitPrice('￥')}}</span>
@@ -26,14 +29,6 @@
       <Spin size="large" fix v-if="spinShow"></Spin>
     </div>
     <empty v-else />
-    <!-- 分页 -->
-    <!-- <div class="page-size mt_10" v-if="paging">
-      <Page :total="total" @on-change="changePageNum"
-        @on-page-size-change="changePageSize"
-        :page-size="params.pageSize"
-        show-sizer>
-      </Page>
-    </div> -->
   </div>
 </template>
 
@@ -90,15 +85,6 @@ export default {
           })
         }
       });
-    },
-    changePageNum (val) { // 修改页码
-      this.params.pageNumber = val;
-      this.getList()
-    },
-    changePageSize (val) { // 修改页数
-      this.pageNumber = 1;
-      this.params.pageSize = val;
-      this.getList()
     },
     buynow (skuId, goodsId) { // 跳转详情
       let url = this.$router.resolve({

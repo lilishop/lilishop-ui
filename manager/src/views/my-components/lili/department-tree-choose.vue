@@ -22,7 +22,6 @@
           <div class="dep-tree-bar">
             <Tree
               :data="dataDep"
-              :load-data="loadData"
               @on-select-change="selectTree"
             ></Tree>
             <Spin size="large" fix v-if="depLoading"></Spin>
@@ -34,7 +33,7 @@
 </template>
 
 <script>
-import {initDepartment, loadDepartment, searchDepartment} from "@/api/index";
+import {initDepartment, searchDepartment} from "@/api/index";
 
 export default {
   name: "departmentTreeChoose",
@@ -63,37 +62,11 @@ export default {
     };
   },
   methods: {
+    // 获取部门数据
     initDepartmentData() {
       initDepartment().then(res => {
         if (res.success) {
-          res.result.forEach(function (e) {
-            if (e.isParent) {
-              e.loading = false;
-              e.children = [];
-            }
-            if (e.status == -1) {
-              e.title = "[已禁用] " + e.title;
-              e.disabled = true;
-            }
-          });
           this.dataDep = res.result;
-        }
-      });
-    },
-    loadData(item, callback) {
-      loadDepartment(item.id).then(res => {
-        if (res.success) {
-          res.result.forEach(function (e) {
-            if (e.isParent) {
-              e.loading = false;
-              e.children = [];
-            }
-            if (e.status == -1) {
-              e.title = "[已禁用] " + e.title;
-              e.disabled = true;
-            }
-          });
-          callback(res.result);
         }
       });
     },
@@ -117,6 +90,7 @@ export default {
         this.initDepartmentData();
       }
     },
+    // 选择回调
     selectTree(v) {
       if (v.length === 0) {
         this.$emit("on-change", null);
@@ -132,6 +106,7 @@ export default {
       }
       this.$emit("on-change", department);
     },
+    // 清除选中方法
     clearSelect() {
       this.departmentId = [];
       this.departmentTitle = "";
@@ -143,6 +118,7 @@ export default {
       }
       this.$emit("on-clear");
     },
+    // 设置数据 回显用
     setData(ids, title) {
       this.departmentTitle = title;
       if (this.multiple) {
@@ -151,7 +127,6 @@ export default {
         this.departmentId = [];
         this.departmentId.push(ids);
       }
-      // this.$emit("on-change", this.departmentId);
     }
   },
   created() {

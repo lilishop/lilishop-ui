@@ -1,10 +1,8 @@
 <template>
   <div class="search">
     <Card>
-      <Row @keydown.enter.native="handleSearch"> </Row>
       <Row class="operation">
-        <Button @click="add" type="primary" >添加</Button>
-
+        <Button @click="add" type="primary">添加</Button>
         <Button @click="delAll">批量删除</Button>
       </Row>
       <Table
@@ -58,15 +56,13 @@ import {
   addGoodsUnit,
   getGoodsUnitPage,
   updateGoodsUnit,
-  delGoodsUnit, delSensitive,
+  delGoodsUnit
 } from "@/api/index";
 export default {
-  name: "bill",
-  components: {},
+  name: "goods-unit",
   data() {
     return {
       loading: true, // 表单加载状态
-      modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
       searchForm: {
@@ -141,7 +137,7 @@ export default {
                   },
                   on: {
                     click: () => {
-                      this.detail(params.row);
+                      this.edit(params.row);
                     },
                   },
                 },
@@ -174,46 +170,37 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
+    // 分页 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    handleReset() {
-      this.$refs.searchForm.resetFields();
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      // 重新加载数据
-      this.getDataList();
-    },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
+    // 清除选中
     clearSelectAll() {
       this.$refs.table.selectAll(false);
     },
+    // 选中回调
     changeSelect(e) {
       this.selectList = e;
       this.selectCount = e.length;
     },
-
+    // 获取列表数据
     getDataList() {
       this.loading = true;
 
@@ -227,12 +214,13 @@ export default {
       this.total = this.data.length;
       this.loading = false;
     },
+    // 修改后提交
     handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
           this.submitLoading = true;
 
-          if (this.modalType == 0) {
+          if (this.modalTitle == "添加") {
             // 添加 避免编辑后传入id等数据 记得删除
             delete this.form.id;
             addGoodsUnit(this.form).then((res) => {
@@ -257,21 +245,22 @@ export default {
         }
       });
     },
+    // 添加
     add() {
-      this.modalType = 0;
       this.modalTitle = "添加";
       this.form = {};
       this.$refs.form.resetFields();
 
       this.modalVisible = true;
     },
-    detail(v) {
-      this.modalType = 1;
+    // 编辑
+    edit(v) {
       this.id = v.id;
       this.modalTitle = "修改";
       this.modalVisible = true;
       this.form.name = v.name;
     },
+    // 删除
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
@@ -290,6 +279,7 @@ export default {
         },
       });
     },
+    // 全部删除
     delAll() {
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未选择要删除的数据");
@@ -314,9 +304,9 @@ export default {
               this.getDataList();
             }
           });
-        },
+        }
       });
-    },
+    }
   },
   mounted() {
     this.init();

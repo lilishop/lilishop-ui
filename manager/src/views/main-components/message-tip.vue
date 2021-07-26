@@ -28,7 +28,6 @@
         <DropdownItem v-if="res.waitPayBill" @click.native="navigateTo('accountStatementBill')">
           <Badge :count="res.waitPayBill">待与商家对账</Badge>
         </DropdownItem>
-
         <div></div>
       </DropdownMenu>
     </Dropdown>

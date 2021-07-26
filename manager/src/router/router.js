@@ -37,12 +37,6 @@ export const otherRouter = {
       component: () => import("@/views/change-password/change-password.vue")
     },
     {
-      path: "message",
-      title: "消息中心",
-      name: "message_index",
-      component: () => import("@/views/message/message.vue")
-    },
-    {
       path: "category",
       title: "类型列表",
       name: "category",
@@ -71,26 +65,6 @@ export const otherRouter = {
       title: "店铺详细",
       name: "shop-detail",
       component: () => import("@/views/seller/shop/shopDetail.vue")
-    },
-    {
-      path: "add-edit-message",
-      title: "消息详情",
-      name: "add_edit_message",
-      component: () =>
-        import("@/views/member/message-manage/addOrEditMessage.vue")
-    },
-    {
-      path: "add_message",
-      title: "会员站内信",
-      name: "add_message",
-      component: () => import("@/views/member/notice/addMessage.vue")
-    },
-    {
-      path: "message-send-detail",
-      title: "消息发送详情",
-      name: "message_send_detail",
-      component: () =>
-        import("@/views/member/message-manage/messageSendDetail.vue")
     },
     {
       path: "bill-detail",

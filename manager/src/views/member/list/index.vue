@@ -21,7 +21,7 @@
         <Button @click="addMember" type="primary">添加会员</Button>
       </Row>
 
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table">
       </Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
@@ -56,9 +56,9 @@
 
     <!-- 修改模态框 -->
     <Modal v-model="descFlag" :title="descTitle" @on-ok="handleSubmitModal" width="500">
-      <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="80">
+      <Form ref="form" :model="form" :rules="ruleValidate" :label-width="80">
         <FormItem label="头像">
-          <img :src="formValidate.face" class="face" />
+          <img :src="form.face" class="face" />
           <Button type="text" class="upload" @click="
               () => {
                 this.picModelFlag = true;
@@ -69,13 +69,13 @@
           <input type="file" style="display: none" id="file" />
         </FormItem>
         <FormItem label="用户名" prop="name">
-          <Input v-model="formValidate.username" style="width: 200px" disabled />
+          <Input v-model="form.username" style="width: 200px" disabled />
         </FormItem>
         <FormItem label="用户昵称" prop="name">
-          <Input v-model="formValidate.nickName" style="width: 200px" />
+          <Input v-model="form.nickName" style="width: 200px" />
         </FormItem>
         <FormItem label="性别" prop="sex">
-          <RadioGroup type="button" button-style="solid" v-model="formValidate.sex">
+          <RadioGroup type="button" button-style="solid" v-model="form.sex">
             <Radio :label="1">
               <span>男</span>
             </Radio>
@@ -85,14 +85,14 @@
           </RadioGroup>
         </FormItem>
         <FormItem label="修改密码" prop="password">
-          <Input type="password" style="width: 220px" password v-model="formValidate.newPassword" />
+          <Input type="password" style="width: 220px" password v-model="form.newPassword" />
         </FormItem>
         <FormItem label="生日" prop="birthday">
-          <DatePicker type="date" format="yyyy-MM-dd" v-model="formValidate.birthday" style="width: 220px"></DatePicker>
+          <DatePicker type="date" format="yyyy-MM-dd" v-model="form.birthday" style="width: 220px"></DatePicker>
         </FormItem>
         <FormItem label="所在地" prop="mail">
           <div class="form-item" v-if="!updateRegion">
-            <Input disabled style="width: 250px" :value="formValidate.region" />
+            <Input disabled style="width: 250px" :value="form.region" />
             <Button type="text" @click="
                 () => {
                   this.updateRegion = !this.updateRegion;
@@ -122,14 +122,13 @@ export default {
   name: "member",
   components: {
     region,
-    ossManage,
+    ossManage
   },
   data() {
     return {
       selectedMember: false, //是否是其他组件调用
       descTitle: "", // modal标题
       descFlag: false, //编辑查看框
-      openSearch: true, // 显示搜索
       loading: true, // 表单加载状态
       addFlag: false, // modal显隐控制
       updateRegion: false, // 地区
@@ -149,7 +148,7 @@ export default {
         disabled: "OPEN",
       },
       picModelFlag: false, // 选择图片
-      formValidate: {}, // 表单数据
+      form: {}, // 表单数据
       addRule: {
         // 验证规则
         mobile: [
@@ -163,9 +162,6 @@ export default {
         password: [{ required: true, message: "请输入密码" }],
       },
       ruleValidate: {}, //修改验证
-      submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [
         {
           title: "会员名称",
@@ -373,6 +369,7 @@ export default {
       });
       this.data = data;
     },
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       // 此处如果是父子级传值的时候需要做一下处理
@@ -380,33 +377,17 @@ export default {
 
       this.getData();
     },
+    // 分页 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
+      this.searchForm.pageNumber = 1;
       this.getData();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getData();
-    },
-
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getData();
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
-    selectDateRange(v) {
-      if (v) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      }
     },
     //查看详情修改
     editPerm(val) {
@@ -425,7 +406,7 @@ export default {
     getMemberInfo(id) {
       API_Member.getMemberInfoData(id).then((res) => {
         if (res.result) {
-          this.$set(this, "formValidate", res.result);
+          this.$set(this, "form", res.result);
         }
       });
     },
@@ -443,7 +424,7 @@ export default {
     // 选中的图片
     callbackSelected(val) {
       this.picModelFlag = false;
-      this.formValidate.face = val.url;
+      this.form.face = val.url;
     },
     //添加会员提交
     addMemberSubmit() {
@@ -487,7 +468,7 @@ export default {
               this.$Message.success("禁用成功");
               this.getData();
             } else {
-              this.$Message.error(res.message);
+              // this.$Message.error(res.message);
             }
           });
         },
@@ -496,13 +477,13 @@ export default {
 
     // 提交修改数据
     handleSubmitModal() {
-      const { nickName, sex, username, face, newPassword } = this.formValidate;
-      let time = new Date(this.formValidate.birthday);
+      const { nickName, sex, username, face, newPassword } = this.form;
+      let time = new Date(this.form.birthday);
       let birthday =
         time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
       let submit = {
-        regionId: this.formValidate.regionId,
-        region: this.formValidate.region,
+        regionId: this.form.regionId,
+        region: this.form.region,
         nickName,
         username,
         sex,
