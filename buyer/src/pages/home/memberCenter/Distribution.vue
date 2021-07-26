@@ -91,11 +91,15 @@
           </TabPane>
           <TabPane label="提现记录" name="log">
             <Table stripe :columns="logColumns" :data="logData.records">
+              <template slot-scope="{ row }" slot="sn">
+                <span>{{row.sn}}</span>
+              </template>
               <template slot-scope="{ row }" slot="time">
                 <span>{{row.createTime}}</span>
               </template>
               <template slot-scope="{ row }" slot="price">
-                <span> +￥{{ row.price | unitPrice }}</span>
+                <span v-if="row.distributionCashStatus == 'REFUSE'" style="color: green"> +￥{{ row.price | unitPrice }}</span>
+                <span v-else style="color: red"> -￥{{ row.price | unitPrice }}</span>
               </template>
               <template slot-scope="{ row }" slot="status">
                 <span> {{row.distributionCashStatus == "APPLY" ? "待处理" : row.distributionCashStatus == "PASS" ? "通过" : "拒绝"}}</span>
@@ -186,6 +190,7 @@ export default {
         {title: '操作', slot: 'action', width: 120}
       ],
       logColumns: [ // 日志表头
+        {title: '编号', slot: 'sn'},
         {title: '申请时间', slot: 'time'},
         {title: '提现金额', slot: 'price'},
         {title: '提现状态', slot: 'status'}
@@ -298,7 +303,7 @@ export default {
     },
     getLog () { // 提现历史
       distCashHistory(this.logParams).then(res => {
-        if (res.success) this.goodsData = res.result
+        if (res.success) this.logData = res.result
       })
     },
     distribution () { // 获取分销商信息

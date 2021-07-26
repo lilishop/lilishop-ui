@@ -339,7 +339,7 @@ export default {
             } else if (params.row.applyStatus === 'VIA_AUDITING') {
               return h('div', [h('span', {}, '提现成功')]);
             } else {
-              return h('div', [h('span', {}, '审核未通过')]);
+              return h('div', [h('span', {}, '审核拒绝')]);
             }
           }
         },
@@ -350,7 +350,8 @@ export default {
         },
         {
           title: '审核备注',
-          key: 'inspectRemark'
+          key: 'inspectRemark',
+          tooltip: true
 
         }
       ],
