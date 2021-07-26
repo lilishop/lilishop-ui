@@ -428,3 +428,14 @@ export const delCustom = (id) => {
   return deleteRequest(`/manager/custom-words/${id}`);
 };
 
+// 设置热搜词
+export const setHotWords = (params) => {
+  return postRequest(`/hotwords`, params);
+};
+
+
+// 获取热搜词
+export const getHotWords = () => {
+  return getRequest(`/hotwords`);
+};
+
