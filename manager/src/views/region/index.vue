@@ -1,12 +1,11 @@
 <template>
   <Card>
     <Row class="operation">
-      <Button @click="asyncRegion"  :loading="asyncLoading" type="primary" icon="md-add"
+      <Button @click="handleAsyncRegion"  :loading="asyncLoading" type="primary" icon="md-add"
         >同步数据</Button
       >
     </Row>
     <div class="flex">
-      <Spin size="large" fix v-if="spinShow"></Spin>
       <Tree
         class="tree"
         :data="data"
@@ -99,7 +98,6 @@ export default {
       asyncLoading:false, // 加载状态
       num: 10, // 更新倒计时
       modalFlag: false,  // 新增编辑标识
-      spinShow: false, // 全局加载状态
       timerNum: 10, // 定时器
       data: [], // 加载数据
       id: 0, // id
@@ -122,7 +120,6 @@ export default {
             trigger: "blur",
           },
         ],
-
         center: [
           {
             required: true,
@@ -144,6 +141,7 @@ export default {
     this.init();
   },
   methods: {
+    // 提交数据
     submit() {
       delete this.addValidate.children;
       addRegion(this.addValidate).then((res) => {
@@ -190,7 +188,7 @@ export default {
       this.addValidate.center = "";
       this.modalFlag = true;
     },
-
+    // 删除
     handleDel() {
       this.$Modal.confirm({
         title: "确定删除？",
@@ -227,11 +225,11 @@ export default {
         }
       });
     },
-
+    // 树结构点击事件
     changeTree(array, val) {
       this.formValidate = val;
     },
-
+    // 异步加载数据
     loadData(item, callback) {
       item.loading = true;
       console.log(item);
@@ -267,7 +265,7 @@ export default {
         }
       });
     },
-
+    // 初始化数据
     init() {
       getChildRegion(this.id).then((res) => {
         if (res.result) {
@@ -294,8 +292,8 @@ export default {
         }
       });
     },
-
-    asyncRegion() {
+    // 同步数据
+    handleAsyncRegion() {
       this.num = 10;
       this.$Modal.confirm({
         title: "确定更新？",

@@ -1,28 +1,28 @@
 <template>
   <div>
-    <div class="operation">
-      <Button @click="addParent" icon="md-add">添加积分商品分类</Button>
-      <Button icon="md-refresh" @click="refresh">刷新</Button>
-    </div>
-    <tree-table
-      ref="treeTable"
-      size="default"
-      :loading="loading"
-      :data="tableData"
-      :columns="columns"
-      :border="true"
-      :show-index="false"
-      :is-fold="true"
-      :expand-type="false"
-      primary-key="id"
-    >
-      <template slot="action" slot-scope="scope">
-        <Button @click.native="edit(scope.row)" style="margin-right:10px;" size="small">编辑</Button>
-        <Button @click.native="remove(scope.row)" type="primary" size="small">删除</Button>
-
-      </template>
-    </tree-table>
-
+    <Card>
+      <div class="operation mb_10">
+        <Button @click="addParent" type="primary" icon="md-add">添加积分商品分类</Button>
+        <Button icon="md-refresh" @click="init">刷新</Button>
+      </div>
+      <tree-table
+        ref="treeTable"
+        size="default"
+        :loading="loading"
+        :data="tableData"
+        :columns="columns"
+        :border="true"
+        :show-index="false"
+        :is-fold="true"
+        :expand-type="false"
+        primary-key="id"
+      >
+        <template slot="action" slot-scope="scope">
+          <Button @click.native="edit(scope.row)" style="margin-right:10px;" size="small">编辑</Button>
+          <Button @click.native="remove(scope.row)" type="primary" size="small">删除</Button>
+        </template>
+      </tree-table>
+    </Card>
     <Modal
       :title="modalTitle"
       v-model="modalVisible"
@@ -59,13 +59,11 @@ import {
   deletePointsGoodsCategoryById,
 } from "@/api/promotion";
 import TreeTable from "@/views/my-components/tree-table/Table/Table";
-import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
 
 export default {
   name: "pointsGoodsCategory",
   components: {
-    TreeTable,
-    uploadPicInput,
+    TreeTable
   },
   data() {
     return {
@@ -102,20 +100,15 @@ export default {
           template: "action",
         },
       ],
-      tableData: [],
+      tableData: [], // 表格数据
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getAllList();
     },
-    refresh() {
-      this.loading = true;
-      let that = this;
-      setTimeout(function () {
-        that.loading = false;
-      }, 1000);
-    },
+    // 编辑分类
     edit(v) {
       this.modalType = 1;
       this.modalTitle = "编辑";
@@ -125,6 +118,7 @@ export default {
       this.showParent = false;
       this.modalVisible = true;
     },
+    // 添加顶级分类
     addParent() {
       this.modalType = 0;
       this.modalTitle = "添加积分商品分类";
@@ -135,6 +129,7 @@ export default {
       this.formAdd.parentId = 0;
       this.modalVisible = true;
     },
+    // 提交
     Submit() {
       this.$refs.form.validate((valid) => {
         console.log(valid);
@@ -167,10 +162,10 @@ export default {
         }
       });
     },
+    // 删除
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
-        // 记得确认修改此处
         content: "您确认要删除 " + v.name + " ?",
         loading: true,
         onOk: () => {
@@ -185,6 +180,7 @@ export default {
         },
       });
     },
+    // 获取所有分类
     getAllList() {
       this.loading = true;
       getPointsGoodsCategoryList().then((res) => {

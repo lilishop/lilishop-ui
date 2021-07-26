@@ -2,9 +2,7 @@
   <div class="pintuan-goods">
     <Card>
       <h4>活动详情</h4>
-      <Table
-        style="margin: 10px 0"
-        border
+      <Table style="margin: 10px 0" border
         :columns="columns"
         :data="data"
       ></Table>
@@ -36,7 +34,7 @@
         </Table>
       <Row type="flex" justify="end" class="page operation">
         <Page
-          :current="searchForm.pageNumber + 1"
+          :current="searchForm.pageNumber"
           :total="total"
           :page-size="searchForm.pageSize"
           @on-change="changePage"
@@ -49,41 +47,21 @@
         ></Page>
       </Row>
     </Card>
-    <Modal title="查看图片" v-model="visible">
-      <img
-        :src="showImg"
-        v-if="visible"
-        style="width: 200px; height: 200px; margin-left: 130px"
-      />
-    </Modal>
   </div>
 </template>
 <script>
 import { getPintuanGoodsList, getPintuanDetail } from "@/api/promotion.js";
-import config from "@/config";
-
-const buyerUrl =
-  process.env.NODE_ENV === "development"
-    ? config.api_dev.buyer
-    : config.api_prod.buyer;
 
 export default {
   data() {
     return {
-      visible: false,// 预览图片
-      showImg: "", // 预览图片url
-      openSearch: true, // 显示搜索
-      openTip: true, // 显示提示
       loading: false, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
-        pageNumber: 0, // 当前页数
+        pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
       },
 
-      submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       data: [], // 表单数据
       total: 0, // 表单数据总数
       columns: [
@@ -170,35 +148,27 @@ export default {
         },
 
       ],
-      goodsData: [],
+      goodsData: [] // 商品数据
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
       this.getPintuanMsg();
     },
-
+    // 分页 改变页码
     changePage(v) {
-      this.searchForm.pageNumber = v - 1;
+      this.searchForm.pageNumber = v;
       this.getDataList();
-      this.clearSelectAll();
     },
-
+    // 分页 改变页数
     changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-
-    handleReset() {
-      // 重置
-      this.searchForm.pageNumber = 0;
-      this.searchForm.promotionName = "";
-      this.selectDate = null;
-      // 重新加载数据
-      this.getDataList();
-    },
-
+    // 获取拼团商品列表
     getDataList() {
       this.loading = true;
       this.searchForm.pintuanId = this.$route.query.id;
@@ -211,26 +181,11 @@ export default {
         }
       });
     },
-
+    // 获取拼团详情
     getPintuanMsg() {
-      // 获取拼团详情
       getPintuanDetail(this.$route.query.id).then((res) => {
         if (res.success) this.data.push(res.result);
       });
-    },
-
-    toBuyerGoods(row) {
-      window.open(
-        buyerUrl +
-          "/pages/product/product?id=" +
-          row.skuId +
-          "&goodsId=" +
-          row.goodsId
-      );
-    },
-    viewImg(img) {
-      this.showImg = img;
-      this.visible = true;
     },
   },
   mounted() {
@@ -239,9 +194,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.operation {
-  margin-bottom: 10px;
-}
 h4 {
   margin: 20px 0;
   padding: 0 10px;

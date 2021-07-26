@@ -252,8 +252,6 @@
               :data="orderData"
               ref="table"
               class="mt_10"
-              sortable="custom"
-              @on-sort-change="orderChangeSort"
             >
               <!-- 订单详情格式化 -->
               <template slot="orderSlot" slot-scope="scope">
@@ -354,8 +352,6 @@
               :data="refundGoodsOrderData"
               ref="table"
               class="mt_10"
-              sortable="custom"
-              @on-sort-change="refundGoodsOrderChangeSort"
             >
               <!-- 商品栏目格式化 -->
               <template slot="goodsSlot" slot-scope="scope">
@@ -478,8 +474,6 @@
               :data="refundOrderData"
               ref="table"
               class="mt_10"
-              sortable="custom"
-              @on-sort-change="refundOrderChangeSort"
             >
               <!-- 商品栏目格式化 -->
               <template slot="goodsSlot" slot-scope="scope">
@@ -554,7 +548,6 @@
         storeInfo: {},//店铺信息
         checkAllGroup: [], //选中的经营分类
         selectDate: null, // 申请时间
-        submitLoading: false, // 添加或编辑提交状态
 
         orderColumns: [
           {
@@ -902,21 +895,6 @@
         });
         this.loading = false;
       },
-      detail(v) {
-        let sn = v.sn;
-        this.$router.push({
-          name: "after-order-detail",
-          query: {sn: sn},
-        });
-
-      },
-      //跳转到订单详情页面
-      orderDetail(v) {
-        this.$router.push({
-          name: "order-detail",
-          query: {sn: v},
-        });
-      },
       //查询分类
       getCategories() {
         getCategoryTree().then((res) => {
@@ -925,8 +903,6 @@
           }
         });
       },
-
-
       //售后单页数变化
       refundGoodsOrderChangePage(v) {
         this.refundGoodsOrderSearchForm.pageNumber = v;
@@ -936,15 +912,9 @@
       //售后单页数变化
       refundGoodsOrderChangePageSize(v) {
         this.refundGoodsOrderSearchForm.pageSize = v;
+        this.refundGoodsOrderSearchForm.pageNumber = 1;
         this.getRefundGoodsOrderData();
       },
-      //售后单
-      refundGoodsOrderChangeSort(e) {
-        this.refundGoodsOrderSearchForm.sort = e.key;
-        this.refundGoodsOrderSearchForm.order = e.order;
-        this.getRefundGoodsOrderData();
-      },
-
       //退款单页数变化
       refundOrderChangePage(v) {
         this.refundOrderSearchForm.pageNumber = v;
@@ -954,12 +924,7 @@
       //售后单页数变化
       refundOrderChangePageSize(v) {
         this.refundOrderSearchForm.pageSize = v;
-        this.getRefundOrder();
-      },
-      //售后单
-      refundOrderChangeSort(e) {
-        this.refundOrderSearchForm.sort = e.key;
-        this.refundOrderSearchForm.order = e.order;
+        this.refundOrderSearchForm.pageNumber = 1;
         this.getRefundOrder();
       },
       //订单记录页数变化
@@ -971,25 +936,24 @@
       //订单记录页数变化
       orderChangePageSize(v) {
         this.orderSearchForm.pageSize = v;
+        this.orderSearchForm.pageNumber = 1;
         this.getOrderData();
       },
-      orderChangeSort(e) {
-        this.orderSearchForm.sort = e.key;
-        this.orderSearchForm.order = e.order;
-        this.getOrderData();
-      },
+      // 起止时间格式化
       selectDateRange(v) {
         if (v) {
           this.orderSearchForm.startDate = v[0];
           this.orderSearchForm.endDate = v[1];
         }
       },
+      // 起止时间格式化
       selectRefundGoodsDateRange(v) {
         if (v) {
           this.refundGoodsOrderSearchForm.startDate = v[0];
           this.refundGoodsOrderSearchForm.endDate = v[1];
         }
       },
+      // 起止时间格式化
       selectRefundDateRange(v) {
         if (v) {
           this.refundOrderSearchForm.startDate = v[0];
@@ -997,12 +961,10 @@
         }
       },
     },
-
     mounted() {
       this.id = this.$route.query.id;
       this.init();
     }
-    ,
   };
 </script>
 <style lang="scss" scoped>

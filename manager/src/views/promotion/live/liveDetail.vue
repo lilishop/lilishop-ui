@@ -1,7 +1,6 @@
 <template>
   <div>
     <Card>
-
       <Form :model="liveForm" ref="liveForm" :rules="liveRulesForm" :label-width="120">
         <FormItem label="直播标题" prop="name">
           <Input disabled v-model="liveForm.name" style="width:460px"></Input>

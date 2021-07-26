@@ -16,15 +16,14 @@
               <Option v-for="item in statusList" :value="item.value" :key="item.value">{{ item.label }}</Option>
             </Select>
           </Form-item>
+          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
           <Form-item label="SKU编码">
             <Input type="text" v-model="searchForm.skuId" placeholder="请输入SKU编码" clearable style="width: 200px" />
           </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
       </Row>
       <Row class="operation padding-row">
         <Button @click="addPointsGoods" type="primary">添加积分商品</Button>
-
       </Row>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table">
         <template slot-scope="{ row }" slot="goodsName">
@@ -51,7 +50,6 @@
           <div>{{ row.startTime }}</div>
           <div>{{ row.endTime }}</div>
         </template>
-
         <template slot-scope="{ row }" slot="action">
           <Button v-if="row.promotionStatus == 'NEW'" type="info" size="small" @click="edit(row.id)" style="margin-right: 5px">编辑</Button>
           <Button v-if="row.promotionStatus == 'START'" type="warning" size="small" @click="statusChanged(row.id, 'CLOSE')" style="margin-right: 5px">停用</Button>
@@ -75,7 +73,6 @@ import {
 } from "@/api/promotion";
 export default {
   name: "pointsGoods",
-  components: {},
   data() {
     return {
       loading: true, // 表单加载状态
@@ -92,8 +89,7 @@ export default {
         { label: "已结束", value: "END" },
         { label: "已关闭", value: "CLOSE" },
       ],
-      columns: [
-        // 表头
+      columns: [ // 表头
         {
           title: "商品名称",
           slot: "goodsName",
@@ -111,7 +107,6 @@ export default {
           slot: "settlementPrice",
           width: 100,
         },
-
         {
           title: "库存数量",
           slot: "quantity",
@@ -178,20 +173,26 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 跳转添加商品页面
     addPointsGoods() {
       this.$router.push({ name: "add-points-goods" });
     },
+    // 分页 修改页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
+    // 分页 修改页数
     changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
@@ -201,10 +202,9 @@ export default {
           "_" +
           (this.searchForm.pointsE ? this.searchForm.pointsE : "");
       }
-
       this.getDataList();
     },
-
+    // 获取列表数据
     getDataList() {
       this.loading = true;
       getPointsGoodsList(this.searchForm).then((res) => {
@@ -215,9 +215,11 @@ export default {
         }
       });
     },
+    // 编辑
     edit(id) {
       this.$router.push({ name: "edit-points-goods", query: { id: id } });
     },
+    // 启用 停用积分商品
     statusChanged(id, status) {
       let text = "";
       if (status == "START") {
@@ -242,6 +244,7 @@ export default {
         },
       });
     },
+    // 删除积分商品
     close(id) {
       this.$Modal.confirm({
         title: "确认删除",
@@ -258,7 +261,7 @@ export default {
           });
         },
       });
-    },
+    }
   },
   mounted() {
     this.init();

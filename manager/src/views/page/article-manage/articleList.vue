@@ -2,9 +2,9 @@
   <div class="wrapper">
     <Row>
       <Col style=" height: 100%;" span="4">
-      <Card class="article-category mr_10">
-        <Tree :data="treeData" @on-select-change="handleCateChange"></Tree>
-      </Card>
+        <Card class="article-category mr_10">
+          <Tree :data="treeData" @on-select-change="handleCateChange"></Tree>
+        </Card>
       </Col>
       <Col span="20">
       <Card class="article-detail">

@@ -17,12 +17,11 @@
           <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search">搜索</Button>
         </Form>
       </Row>
-      <Row class="operation padding-row">
+      <Row class="operation padding-row" v-if="!selectedMember">
         <Button @click="addMember" type="primary">添加会员</Button>
       </Row>
 
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table">
-      </Table>
+      <Table :loading="loading" border :columns="columns" class="mt_10" :data="data" ref="table"></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
           show-total show-elevator show-sizer></Page>
@@ -43,29 +42,20 @@
           <Input type="password" password v-model="addMemberForm.password" maxlength="20" placeholder="请输入会员密码" />
         </FormItem>
       </Form>
-
       <div slot="footer">
-        <Button @click="addFlag = false">
-          取消
-        </Button>
-        <Button type="primary" :loading="handleAddLoading" @click="addMemberSubmit">
-          确定
-        </Button>
+        <Button @click="addFlag = false">取消</Button>
+        <Button type="primary" :loading="handleAddLoading" @click="addMemberSubmit">确定</Button>
       </div>
     </Modal>
-
     <!-- 修改模态框 -->
     <Modal v-model="descFlag" :title="descTitle" @on-ok="handleSubmitModal" width="500">
       <Form ref="form" :model="form" :rules="ruleValidate" :label-width="80">
         <FormItem label="头像">
           <img :src="form.face" class="face" />
-          <Button type="text" class="upload" @click="
-              () => {
+          <Button type="text" class="upload" @click="() => {
                 this.picModelFlag = true;
                 this.$refs.ossManage.selectImage = true;
-              }
-            ">修改
-          </Button>
+              }">修改</Button>
           <input type="file" style="display: none" id="file" />
         </FormItem>
         <FormItem label="用户名" prop="name">
@@ -93,12 +83,9 @@
         <FormItem label="所在地" prop="mail">
           <div class="form-item" v-if="!updateRegion">
             <Input disabled style="width: 250px" :value="form.region" />
-            <Button type="text" @click="
-                () => {
+            <Button type="text" @click="() => {
                   this.updateRegion = !this.updateRegion;
-                }
-              ">修改
-            </Button>
+                }">修改</Button>
           </div>
           <div class="form-item" v-else>
             <region style="width: 250px" @selected="selectedRegion" />
@@ -121,8 +108,7 @@ import * as RegExp from "@/libs/RegExp.js";
 export default {
   name: "member",
   components: {
-    region,
-    ossManage
+    region, ossManage
   },
   data() {
     return {
@@ -372,9 +358,6 @@ export default {
     // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
-      // 此处如果是父子级传值的时候需要做一下处理
-      //selectedMember
-
       this.getData();
     },
     // 分页 改变页数

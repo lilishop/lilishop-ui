@@ -5,19 +5,17 @@
         <Button @click="add" type="primary">添加活动</Button>
       </Row>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom">
-
-        <template slot-scope="{ row,index }" slot="action">
-          <Button type="info"
-                  size="small" style="margin-right: 10px" @click="info(row)">查看
+        <template slot-scope="{ row }" slot="action">
+          <Button type="info" size="small" style="margin-right: 10px" @click="info(row)">
+            查看
           </Button>
           <Button v-if="!checked && row.promotionStatus === 'START' || row.promotionStatus === 'NEW'" type="error"
-                  size="small" style="margin-right: 10px" @click="remove(row)">停止
+            size="small" style="margin-right: 10px" @click="remove(row)">停止
           </Button>
         </template>
-
       </Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber + 1" :total="total" :page-size="searchForm.pageSize"
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize"
               @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
               size="small" show-total show-elevator show-sizer></Page>
       </Row>
@@ -42,7 +40,7 @@ export default {
       modalTitle: "", // 添加或编辑标题
       searchForm: {
         // 搜索框初始化对象
-        pageNumber: 0, // 当前页数
+        pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
@@ -170,19 +168,20 @@ export default {
     info(v) {
       this.$router.push({name: "coupon-activity-info", query: {id: v.id}});
     },
-    //跳转页面
+    // 分页 修改页码
     changePage(v) {
-      this.searchForm.pageNumber = v - 1;
+      this.searchForm.pageNumber = v;
       this.getDataList();
     },
-    //修改分页
+    // 分页 修改页数
     changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
     //搜索活动
     handleSearch() {
-      this.searchForm.pageNumber = 0;
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
@@ -196,7 +195,6 @@ export default {
         this.searchForm.startTime = null;
         this.searchForm.endTime = null;
       }
-      // 带多条件搜索参数获取表单数据 请自行修改接口
       getCouponActivityList(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
@@ -210,23 +208,21 @@ export default {
     edit(v) {
       this.$router.push({name: "edit-platform-coupon", query: {id: v.id}});
     },
-    //下架活动
+    //停止活动
     remove(v) {
       this.$Modal.confirm({
-        title: "确认下架",
+        title: "确认停止",
         // 记得确认修改此处
-        content: "确认要下架此优惠券活动么?下架活动只能重新创建",
+        content: "确认要停止此优惠券活动么?停止活动只能重新创建",
         loading: true,
         onOk: () => {
           // 删除
           closeActivity(v.id).then((res) => {
             if (res.success) {
-              this.$Message.success("优惠券活动已作废");
+              this.$Message.success("优惠券活动已停止");
               this.getDataList();
             }
-          }).catch(() => {
-            this.$Modal;
-          });
+          }).catch(() => {});
         },
       });
     },

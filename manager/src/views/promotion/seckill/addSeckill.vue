@@ -118,9 +118,9 @@ export default {
 
       formRule: {
         promotionName: [{ required: true, message: "请填写活动名称" }],
-        applyEndTime: [{ required: true, message: "请填写报名截止时间" }],
+        applyEndTime: [{ required: true, message: "请选择报名截止时间" }],
         seckillPeriod: [{ required: true, message: "请填写抢购时间段" }],
-        startTime: [{ required: true, message: "请填写活动开始时间" }],
+        startTime: [{ required: true, message: "请选择活动开始时间" }],
         seckillRule: [{ required: true, message: "请输入申请规则" }],
       },
     };
@@ -139,6 +139,7 @@ export default {
       localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList);
       this.$router.go(-1);
     },
+    // 获取活动详情
     getData() {
       seckillDetail(this.id).then((res) => {
         if (res.success) {
@@ -201,8 +202,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "addSeckill.scss";
-.ivu-form-item{
-  margin-bottom: 30px;
+h4 {
+  margin-bottom: 10px;
+  padding: 0 10px;
+  border: 1px solid #ddd;
+  background-color: #f8f8f8;
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+  line-height: 40px;
+  text-align: left;
 }
+// .ivu-form-item{
+//   margin-bottom: 30px;
+// }
 </style>

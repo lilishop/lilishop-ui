@@ -22,7 +22,7 @@
         <Button @click="add" type="primary">添加优惠券</Button>
         <Button @click="delAll">批量下架</Button>
       </Row>
-      <Table v-if="refreshTable" :loading="loading" border :columns="columns" :data="data" ref="table" @on-selection-change="changeSelect">
+      <Table v-if="refreshTable" :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10" @on-selection-change="changeSelect">
         <template slot-scope="{ row }" slot="action">
           <Button v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="success" :class="{'mr_10' : row.promotionStatus === 'START' || row.promotionStatus === 'NEW'}" size="small" @click="edit(row)">编辑
           </Button>
@@ -37,7 +37,6 @@
     </Card>
   </div>
 </template>
-
 <script>
 import {
   getPlatformCouponList,
@@ -46,14 +45,9 @@ import {
 
 export default {
   name: "coupon",
-  components: {},
-
   data() {
     return {
       loading: true, // 表单加载状态
-      modalType: 0, // 添加或编辑标识
-      modalVisible: false, // 添加或编辑显示
-      modalTitle: "", // 添加或编辑标题
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -62,17 +56,6 @@ export default {
         order: "desc", // 默认排序方式
         getType: "", // 默认排序方式
       },
-      form: {
-        // 添加或编辑表单对象初始化数据
-        promotionName: "",
-      },
-      // 表单验证规则
-      formValidate: {
-        promotionName: [
-          { required: true, message: "不能为空", trigger: "blur" },
-        ],
-      },
-      submitLoading: false, // 添加或编辑提交状态
       selectList: [], // 多选数据
       selectCount: 0, // 多选计数
       columns: [
@@ -271,6 +254,7 @@ export default {
     check() { // 选中的优惠券
       this.$emit("selected", this.selectList);
     },
+    // 初始化数据
     init() {
       this.getDataList();
     },
@@ -285,11 +269,12 @@ export default {
       this.getDataList();
     },
     changePageSize(v) { // 改变页数
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
     handleSearch() { // 搜索
-      this.searchForm.pageNumber = 0;
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
@@ -313,7 +298,6 @@ export default {
         this.searchForm.startTime = null;
         this.searchForm.endTime = null;
       }
-      // 带多条件搜索参数获取表单数据 请自行修改接口
       getPlatformCouponList(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {

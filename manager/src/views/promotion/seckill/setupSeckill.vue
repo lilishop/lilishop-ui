@@ -18,7 +18,6 @@
         </div>
       </FormItem>
     </Form>
-    <!-- 选择时间 -->
   </div>
 </template>
 
@@ -27,9 +26,8 @@ import { getSetting, setSetting } from "@/api/index";
 export default {
   data() {
     return {
-      templateShow:false,
+      templateShow:false, // 设置是否显示
       submitLoading: false,
-      selectedTime: [],
       times: [], //时间集合 1-24点
       form: {
         seckillRule: "",
@@ -107,7 +105,6 @@ export default {
         }
       }
     },
-
     /**
      * 选中时间
      */

@@ -11,8 +11,6 @@
           :columns="columns"
           :data="data"
           ref="table"
-          sortable="custom"
-          @on-sort-change="changeSort"
           @on-selection-change="changeSelect"
         ></Table>
       <Row type="flex" justify="end" class="mt_10">
@@ -59,8 +57,7 @@ import {
   updateSensitiveWords
 } from "@/api/index";
 export default {
-  name: "bill",
-  components: {},
+  name: "sensitiveWords",
   data() {
     return {
       loading: true, // 表单加载状态
@@ -172,36 +169,25 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
+    // 分页 改变页数
     changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      this.getDataList();
-    },
-    handleReset() {
-      this.$refs.searchForm.resetFields();
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      // 重新加载数据
-      this.getDataList();
-    },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
       this.getDataList();
     },
     clearSelectAll() {
@@ -211,7 +197,7 @@ export default {
       this.selectList = e;
       this.selectCount = e.length;
     },
-
+    // 获取数据
     getDataList() {
       this.loading = true;
 
@@ -225,6 +211,7 @@ export default {
       this.total = this.data.length;
       this.loading = false;
     },
+    // 提交
     handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
@@ -255,6 +242,7 @@ export default {
         }
       });
     },
+    // 添加敏感词
     add() {
       this.modalType = 0;
       this.modalTitle = "添加";
@@ -263,6 +251,7 @@ export default {
 
       this.modalVisible = true;
     },
+    // 修改
     detail(v) {
       this.modalType = 1;
       this.id = v.id;
@@ -270,6 +259,7 @@ export default {
       this.modalVisible = true;
       this.form.sensitiveWord = v.sensitiveWord;
     },
+    // 删除
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
@@ -288,6 +278,7 @@ export default {
         },
       });
     },
+    // 批量删除
     delAll() {
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未选择要删除的数据");

@@ -27,7 +27,7 @@
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
       </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
               size="small" show-total show-elevator show-sizer></Page>
@@ -51,8 +51,6 @@
     },
     data() {
       return {
-        shopId: "", // 店铺id
-        modalFlag: false, // 新增、编辑标识
         loading: true, // 表单加载状态
         searchForm: {
           // 搜索框初始化对象
@@ -64,16 +62,6 @@
           endDate: "", // 终止时间
         },
         selectDate: null, // 创建时间
-        form: {
-          // 添加或编辑表单对象初始化数据
-          memberName: "",
-          storeName: "",
-          shopDisable: "",
-          id: "",
-          createTime: "",
-        },
-        selectList: [], // 多选数据
-        selectCount: 0, // 多选计数
         columns: [
           // 表头
           {
@@ -264,52 +252,38 @@
     },
 
     methods: {
-      callbackShop() {
-        this.init();
-      },
       // 回调给父级
       callback(val) {
         this.$emit("callback", val);
       },
+      // 初始化数据
       init() {
         this.getDataList();
       },
+      // 分页 改变页码
       changePage(v) {
         this.searchForm.pageNumber = v;
         this.getDataList();
-        this.clearSelectAll();
       },
+      // 分页 改变页数
       changePageSize(v) {
+        this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = v;
         this.getDataList();
       },
+      // 搜索
       handleSearch() {
         this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 10;
         this.getDataList();
       },
-      changeSort(e) {
-        this.searchForm.sort = e.key;
-        this.searchForm.order = e.order;
-        if (e.order === "normal") {
-          this.searchForm.order = "";
-        }
-        this.getDataList();
-      },
-      clearSelectAll() {
-        this.$refs.table.selectAll(false);
-      },
-      changeSelect(e) {
-        this.selectList = e;
-        this.selectCount = e.length;
-      },
+      // 起止时间从新赋值
       selectDateRange(v) {
         if (v) {
           this.searchForm.startDate = v[0];
           this.searchForm.endDate = v[1];
         }
       },
-
+      // 获取列表数据
       getDataList() {
         this.loading = true;
         // 带多条件搜索参数获取表单数据 请自行修改接口
@@ -324,16 +298,19 @@
         this.total = this.data.length;
         this.loading = false;
       },
+      // 添加店铺
       add() {
         this.$router.push({ path: '/shop-operation'});
       },
+      // 修改店铺
       edit(v) {
         this.$router.push({ path: '/shop-operation', query: { shopId: v.id } });
       },
+      // 关闭店铺
       disable(v) {
         this.$Modal.confirm({
-          title: "确认禁用",
-          content: "您确认要禁用店铺 " + v.storeName + " ?",
+          title: "确认关闭",
+          content: "您确认要关闭店铺 " + v.storeName + " ?",
           loading: true,
           onOk: () => {
             disableShop(v.id).then((res) => {
@@ -346,6 +323,7 @@
           },
         });
       },
+      // 审核店铺
       audit(v) {
         this.$Modal.confirm({
           title: "审核店铺",
@@ -373,10 +351,11 @@
           },
         });
       },
+      // 开启店铺
       enable(v) {
         this.$Modal.confirm({
-          title: "确认启用",
-          content: "您确认要启用店铺 " + v.storeName + " ?",
+          title: "确认开启",
+          content: "您确认要开启店铺 " + v.storeName + " ?",
           loading: true,
           onOk: () => {
             enableBrand(v.id).then((res) => {

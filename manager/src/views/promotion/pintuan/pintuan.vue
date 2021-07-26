@@ -1,79 +1,78 @@
 <template>
   <div class="search">
     <Card>
-      <Row v-show="openSearch">
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
-          <Form-item label="活动名称" prop="promotionName">
-            <Input
-              type="text"
-              v-model="searchForm.promotionName"
-              placeholder="请输入活动名称"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="活动状态" prop="promotionStatus">
-            <Select
-              v-model="searchForm.promotionStatus"
-              placeholder="请选择"
-              clearable
-              style="width: 200px"
-            >
-              <Option value="NEW">未开始</Option>
-              <Option value="START">已开始/上架</Option>
-              <Option value="END">已结束/下架</Option>
-              <Option value="CLOSE">紧急关闭/作废</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="活动时间">
-            <DatePicker
-              v-model="selectDate"
-              type="daterange"
-              clearable
-              placeholder="选择起始时间"
-              style="width: 200px"
-            ></DatePicker>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" class="search-btn"
-            >搜索</Button
+      <Form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        :label-width="70"
+        class="search-form"
+      >
+        <Form-item label="活动名称" prop="promotionName">
+          <Input
+            type="text"
+            v-model="searchForm.promotionName"
+            placeholder="请输入活动名称"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="活动状态" prop="promotionStatus">
+          <Select
+            v-model="searchForm.promotionStatus"
+            placeholder="请选择"
+            clearable
+            style="width: 200px"
           >
-        </Form>
-      </Row>
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          ref="table"
+            <Option value="NEW">未开始</Option>
+            <Option value="START">已开始/上架</Option>
+            <Option value="END">已结束/下架</Option>
+            <Option value="CLOSE">紧急关闭/作废</Option>
+          </Select>
+        </Form-item>
+        <Form-item label="活动时间">
+          <DatePicker
+            v-model="selectDate"
+            type="daterange"
+            clearable
+            placeholder="选择起始时间"
+            style="width: 200px"
+          ></DatePicker>
+        </Form-item>
+        <Button @click="handleSearch" type="primary" class="search-btn"
+          >搜索</Button
         >
-          <template slot-scope="{ row }" slot="action">
-            <Button
-              type="info"
-              size="small"
-              @click="view(row)"
-              style="margin-right: 5px"
-              >查看</Button
-            >
-            <Button
-              type="error"
-              size="small"
-              :disabled="
-                row.promotionStatus == 'END' || row.promotionStatus == 'CLOSE'
-              "
-              @click="close(row)"
-              >关闭
-            </Button>
-          </template>
-        </Table>
+      </Form>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        class="mt_10"
+      >
+        <template slot-scope="{ row }" slot="action">
+          <Button
+            type="info"
+            size="small"
+            @click="view(row)"
+            style="margin-right: 5px"
+            >查看</Button
+          >
+          <Button
+            type="error"
+            size="small"
+            :disabled="
+              row.promotionStatus == 'END' || row.promotionStatus == 'CLOSE'
+            "
+            @click="close(row)"
+            >关闭
+          </Button>
+        </template>
+      </Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page
-          :current="searchForm.pageNumber + 1"
+          :current="searchForm.pageNumber"
           :total="total"
           :page-size="searchForm.pageSize"
           @on-change="changePage"
@@ -94,14 +93,12 @@ import { getPintuanList, closePintuan } from "@/api/promotion";
 
 export default {
   name: "pintuan",
-  components: {},
   data() {
     return {
       loading: true, // 表单加载状态
-      openSearch: true, // 显示搜索项
       searchForm: {
         // 搜索框初始化对象
-        pageNumber: 0, // 当前页数
+        pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
         sort: "startTime",
         order: "desc", // 默认排序方式
@@ -175,23 +172,29 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },
+    // 分页 修改页码
     changePage(v) {
-      this.searchForm.pageNumber = v - 1;
+      this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
+    // 分页 修改页数
     changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
-      this.searchForm.pageNumber = 0;
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    // 获取拼团列表
     getDataList() {
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
@@ -209,9 +212,11 @@ export default {
         }
       });
     },
+    // 查看拼团商品
     view(v) {
       this.$router.push({ name: "pintuan-goods", query: { id: v.id } });
     },
+    // 关闭当前活动
     close(v) {
       this.$Modal.confirm({
         title: "确认关闭",

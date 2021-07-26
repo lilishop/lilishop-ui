@@ -198,12 +198,6 @@ export default {
       submitLoading: false, // 添加或编辑提交状态
       selectedGoods: [], // 已选商品列表，便于删除
       goodsCategoryList: [], // 商品分类列表
-      shopCategoryList: [], // 店铺分类列表
-      cascaderProps: {
-        multiple: true,
-        label: "name",
-        value: "id",
-      }, // 级联选择器配置项
       formRule: {
         promotionName: [{required: true, message: "活动名称不能为空"}],
         couponName: [{required: true, message: "优惠券名称不能为空"}],
@@ -306,6 +300,7 @@ export default {
     }
   },
   methods: {
+    // 获取优惠券数据
     getCoupon() {
       getPlatformCoupon(this.id).then((res) => {
         let data = res.result;
@@ -495,17 +490,11 @@ export default {
       });
       this.form.promotionGoodsList = list;
     },
-    getGoodsCategory(e) {
-      // 获取级联选择器商品分类id
-      // console.log(e);
-    },
-
     async getCagetoryList() {
       // 获取全部商品分类
       let data = await getCategoryTree();
       this.goodsCategoryList = data.result;
       // 过滤出可显示的值
-
       this.goodsCategoryList = this.goodsCategoryList.map((item) => {
         if (item.children) {
           item.children = item.children.map((child) => {
@@ -531,7 +520,6 @@ export default {
         }
         return {value: item.id, label: item.name, children: item.children};
       });
-      console.log(this.goodsCategoryList);
     },
     filterCategoryId(list, idArr) {
       // 递归获取分类id

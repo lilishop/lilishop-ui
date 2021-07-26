@@ -110,13 +110,11 @@ import {
   getPointsGoodsById,
   getPointsGoodsCategoryList,
 } from "@/api/promotion";
-import { format } from "date-fns";
 
 export default {
-  name: "addCoupon",
+  name: "editPointsGoods",
   data() {
     return {
-      modalType: 0, // 添加、编辑标识
       form: {
         /** 活动名称 */
         promotionName: "",
@@ -134,7 +132,6 @@ export default {
       categoryList: [], // 分类列表
       id: this.$route.query.id, // 活动id
       submitLoading: false, // 添加或编辑提交状态
-
       formRule: {
         settlementPrice: [{ required: true, message: "请填写结算价格" }],
         pointsGoodsCategoryId: [
@@ -150,7 +147,6 @@ export default {
     // 如果id不为空则查询信息
     if (this.id) {
       this.getData();
-      this.modalType = 1;
     }
   },
   methods: {
@@ -162,6 +158,7 @@ export default {
       );
       this.$router.go(-1);
     },
+    // 获取商品数据
     getData() {
       getPointsGoodsById(this.id).then((res) => {
         if (res.success) {
@@ -170,11 +167,12 @@ export default {
         }
       });
     },
+    // 获取分类
     async getCategory() {
       let res = await getPointsGoodsCategoryList();
       this.categoryList = res.result.records;
     },
-    /** 保存平台优惠券 */
+    /** 保存 */
     handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {

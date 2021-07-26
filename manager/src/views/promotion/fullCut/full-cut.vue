@@ -2,13 +2,7 @@
   <div class="full-cut">
     <Card>
       <Row>
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
+        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
           <Form-item label="活动名称" prop="promotionName">
             <Input
               type="text"
@@ -59,9 +53,7 @@
           {{ row.isFullMinus ? "满减" : "满折" }}
         </template>
         <template slot-scope="{ row }" slot="hours">
-          <Tag v-for="item in unixHours(row.hours)" :key="item">{{
-            item
-          }}</Tag>
+          <Tag v-for="item in unixHours(row.hours)" :key="item">{{item}}</Tag>
         </template>
         <template slot-scope="{ row }" slot="action">
           <div>
@@ -83,7 +75,7 @@
           </div>
         </template>
       </Table>
-      <Row type="flex" justify="end" class="page operation">
+      <Row type="flex" justify="end" class="mt_10">
         <Page
           :current="searchForm.pageNumber"
           :total="total"
@@ -183,6 +175,7 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getDataList();
     },
@@ -218,6 +211,7 @@ export default {
     },
     changePageSize(v) {
       // 改变页码
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
@@ -227,6 +221,7 @@ export default {
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
+    // 获取列表数据
     getDataList() {
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {

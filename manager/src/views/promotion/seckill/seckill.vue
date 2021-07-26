@@ -63,7 +63,7 @@ import setupSeckill from "@/views/promotion/seckill/setupSeckill";
 export default {
   name: "seckill",
   components: {
-    setupSeckill,
+    setupSeckill
   },
   data() {
     return {
@@ -131,33 +131,32 @@ export default {
     };
   },
   methods: {
+    // tab栏点击切换列表和设置
     clickTabPane(name) {
-
       if (name == "setup") {
-
         this.setupFlag = true;
       } else {
         this.setupFlag = false;
       }
     },
-
     // 初始化信息
     init() {
       this.getDataList();
     },
-    // 点击分页
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
-      this.clearSelectAll();
     },
-    // 设置每页大小
+    // 分页 改变页数
     changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 搜索
     handleSearch() {
-      this.searchForm.pageNumber = 0;
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },

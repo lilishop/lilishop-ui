@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="content-goods-publish">
-      <Form ref="form" :model="form" :label-width="130">
+      <Form ref="form" :model="form" :label-width="70">
         <div class="base-info-item">
           <h4>优惠券活动详情</h4>
           <div class="form-item-view">
@@ -30,10 +30,10 @@
           <h4>优惠券列表</h4>
           <Table :columns="couponColumn" :data="couponData" ref="table">
           </Table>
-          <h4 v-if="couponActivity.activityScopeInfo && memberData.length>0">会员列表列表</h4>
-          <Table :columns="memberColumn" :data="memberData">
-
-          </Table>
+          <template v-if="couponActivity.activityScopeInfo && memberData.length>0">
+            <h4 class="mt_10">会员列表列表</h4>
+            <Table :columns="memberColumn" :data="memberData"></Table>
+          </template>
         </div>
       </Form>
     </div>
@@ -52,7 +52,9 @@ export default {
   data() {
     return {
       id: this.$route.query.id,//表单id
-      couponActivity: "",//券活动
+      couponActivity: {
+
+      },//券活动
       couponColumn: [
         {
           title: "优惠券名称",
@@ -124,6 +126,52 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "couponPublish.scss";
+/*选择商品品类*/
+.content-goods-publish {
+  padding: 15px;
+  margin: 0 auto;
+  text-align: center;
+  border: 1px solid #ddd;
+  background: none repeat 0 0 #fff;
+  height: 100%;
+  margin-bottom: 20px;
+}
+
+div.base-info-item {
+  h4 {
+    margin-bottom: 10px;
+    padding: 0 10px;
+    border: 1px solid #ddd;
+    background-color: #f8f8f8;
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+    line-height: 40px;
+    text-align: left;
+  }
+
+  .form-item-view {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding-left: 40px;
+
+    .shop-category-text {
+      font-size: 12px;
+    }
+  }
+}
+/** 底部步骤 */
+.footer {
+  width: 88.7%;
+  padding: 10px;
+  background-color: #ffc;
+  position: fixed;
+  bottom: 0px;
+  left: 10%;
+  text-align: center;
+  z-index: 9999;
+}
 </style>
 

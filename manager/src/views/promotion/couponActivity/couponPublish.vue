@@ -6,12 +6,11 @@
           <h4>活动信息</h4>
           <div class="form-item-view">
             <FormItem label="活动名称" prop="promotionName">
-              <Input type="text" v-model="form.promotionName" placeholder="活动名称" clearable style="width: 260px"/>
+              <Input type="text" v-model="form.promotionName" placeholder="请填写活动名称" clearable style="width: 260px"/>
             </FormItem>
-
             <FormItem label="活动时间">
               <DatePicker type="datetimerange" :options="options" v-model="rangeTime" format="yyyy-MM-dd HH:mm:ss"
-                          placeholder="请选择" style="width: 260px">
+                placeholder="请选择活动时间" style="width: 260px">
               </DatePicker>
             </FormItem>
 
@@ -72,18 +71,16 @@
 
 <script>
 import couponTemplate from "@/views/promotion/coupon/coupon";
-
 import userList from "@/views/member/list/index";
-
-import {saveActivityCoupon, updateCouponActivity} from "@/api/promotion";
+import {saveActivityCoupon} from "@/api/promotion";
 
 export default {
   name: "addCouponActivity",
   components: {
     couponTemplate,
-    userList,
+    userList
   },
-  data() {
+  data () {
     return {
       options: {
         disabledDate(date) {
@@ -228,7 +225,6 @@ export default {
     };
   },
   methods: {
-
     // 返回已选择的用户
     callbackSelectUser(val) {
       // 每次将返回的数据回调判断
@@ -283,7 +279,6 @@ export default {
         }
       });
     },
-
     // 添加指定用户
     addVip() {
       this.checkUserList = true;

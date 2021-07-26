@@ -5,9 +5,7 @@
       <Tabs v-model="searchForm.status">
         <!-- 标签栏 -->
         <TabPane v-for="(item,index) in tabs" :key="index" :name="item.status" :label="item.title">
-
         </TabPane>
-
       </Tabs>
       <Table :columns="liveColumns" :data="liveData"></Table>
       <Row type="flex" style="margin:20px;" justify="end" class="mt_10">
@@ -167,6 +165,7 @@ export default {
     };
   },
   watch: {
+    // 直播状态
     "searchForm.status": {
       handler() {
         this.liveData = [];

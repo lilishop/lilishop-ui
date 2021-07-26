@@ -193,12 +193,6 @@ export const otherRouter = {
       component: () => import("@/views/promotion/coupon/couponPublish.vue")
     },
     {
-      path: "promotion/platform-coupon-info",
-      title: "详情",
-      name: "platform-coupon-info",
-      component: () => import("@/views/promotion/coupon/couponInfo.vue")
-    },
-    {
       path: "coupon-activity/add",
       title: "添加优惠券活动",
       name: "add-coupon-activity",
@@ -215,12 +209,6 @@ export const otherRouter = {
       title: "券活动详情",
       name: "coupon-activity-info",
       component: () => import("@/views/promotion/couponActivity/couponInfo.vue")
-    },
-    {
-      path: "promotion/platform-coupon-info",
-      title: "详情",
-      name: "platform-coupon-activity",
-      component: () => import("@/views/promotion/coupon/couponInfo.vue")
     },
     {
       path: "promotion/manager-pintuan",

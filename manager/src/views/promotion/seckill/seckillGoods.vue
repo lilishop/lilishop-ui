@@ -308,25 +308,26 @@
       };
     },
     methods: {
+      // 初始化数据
       init() {
         this.getSeckillMsg();
       },
-
+      // 分页 改变页码
       changePage(v) {
-        this.searchForm.pageNumber = v - 1;
+        this.searchForm.pageNumber = v;
         this.getDataList();
         this.clearSelectAll();
       },
-
+      // 分页 改变页数
       changePageSize(v) {
+        this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = v;
         this.getDataList();
       },
-
+      // 清除选中状态
       clearSelectAll() {
         this.$refs.table.selectAll(false);
       },
-
       changeSelect(e) {
         // 获取选择数据
         this.selectList = e;
@@ -379,17 +380,15 @@
         }
         return hourArr;
       },
+      // 格式化申请状态
       promotionApplyStatus(key) {
         switch (key) {
           case "APPLY":
             return "申请";
-            break;
           case "PASS":
             return "通过";
-            break;
           case "REFUSE":
             return "拒绝";
-            break;
         }
       },
       pass(row) {
@@ -421,6 +420,7 @@
         }
         this.showModal = true;
       },
+      // 确认审批
       sureAudit() {
         this.selectCount = this.selectList.length;
         // 批量审核
@@ -453,6 +453,7 @@
           }
         });
       },
+      // 展示拒绝原因
       showReason(reason) {
         this.$Modal.info({
           title: "拒绝原因",

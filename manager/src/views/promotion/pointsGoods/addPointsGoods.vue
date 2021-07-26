@@ -56,19 +56,11 @@
                     >
                   </Select>
                 </template>
-
                 <template slot-scope="{ index }" slot="activeStock">
-                  <Input
-                    type="number"
-                    v-model="promotionGoodsList[index].activeStock"
-                  />
+                  <Input type="number" v-model="promotionGoodsList[index].activeStock" />
                 </template>
-
                 <template slot-scope="{ index }" slot="points">
-                  <Input
-                    type="number"
-                    v-model="promotionGoodsList[index].points"
-                  />
+                  <Input type="number" v-model="promotionGoodsList[index].points" />
                 </template>
               </Table>
             </FormItem>
@@ -306,6 +298,7 @@ export default {
     await this.getCategory();
   },
   methods: {
+    // 获取商品分类
     async getCategory() {
       let res = await getPointsGoodsCategoryList();
       this.categoryList = res.result.records;
@@ -351,10 +344,12 @@ export default {
       );
       this.$router.go(-1);
     },
+    // 选择分类
     changeCategory(val, index) {
       this.promotionGoodsList[index].pointsGoodsCategoryName = val.label;
       console.log(this.promotionGoodsList);
     },
+    // 变更选中状态
     changeSelect(e) {
       // 已选商品批量选择
       this.selectedGoods = e;

@@ -1,7 +1,3 @@
-<style lang="scss" scoped>
-@import "./personal-center.scss";
-</style>
-
 <template>
   <div class="own-space">
     <Card class="own-space-new">
@@ -85,6 +81,7 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       let v = JSON.parse(Cookies.get("userInfo"));
       // 转换null为""
@@ -97,15 +94,18 @@ export default {
       this.userForm = userInfo;
       console.log(userInfo)
     },
+    // 跳转修改密码页面
     changePassword() {
       util.openNewPage(this, "change-password");
       this.$router.push({
         name: "change_password"
       });
     },
+    // 左侧菜单点击
     changeMenu(v) {
       this.currMenu = v;
     },
+    // 保存
     saveEdit() {
       this.saveLoading = true;
       let params = this.userForm;
@@ -117,7 +117,6 @@ export default {
           Cookies.set("userInfo", this.userForm);
           // 更新头像
           this.$store.commit("setAvatarPath", this.userForm.avatar);
-
           setTimeout(()=>{
             this.$router.go(0)
           },500)
@@ -125,31 +124,77 @@ export default {
         }
       });
     },
-    updateUserInfo() {
-      // 更新用户信息
-      userInfo().then(res => {
-        if (res.success) {
-          // 避免超过大小限制
-          delete res.result.permissions;
-          if (this.getStore("saveLogin")) {
-            // 保存7天
-            Cookies.set("userInfo", JSON.stringify(res.result), {
-              expires: 7
-            });
-          } else {
-            Cookies.set("userInfo", JSON.stringify(res.result));
-          }
-          this.setStore("userInfo", res.result);
-        }
-      });
-    },
-    changeMessage(v) {
-      this.setStore("messageOpen", v);
-    }
   },
   mounted() {
-    let type = this.$route.query.type;
     this.init();
   }
 };
 </script>
+<style lang="scss" scoped>
+  .own-space {
+  .own-space-new {
+    .ivu-card-body {
+      padding: 16px 16px 16px 0px;
+    }
+  }
+
+  .own-wrap {
+    display: flex;
+
+    .title {
+      font-size: 20px;
+      color: rgba(0, 0, 0, .85);
+      line-height: 28px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .safe {
+      width: 100%;
+
+      .item {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 14px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #e8e8e8;
+
+        .title {
+          color: rgba(0, 0, 0, .65);
+          margin-bottom: 4px;
+          font-size: 14px;
+          line-height: 22px;
+        }
+
+        .desc {
+          color: rgba(0, 0, 0, .45);
+          font-size: 14px;
+          line-height: 22px;
+
+          .red {
+            color: #ed3f14;
+          }
+
+          .middle {
+            color: #faad14;
+          }
+
+          .green {
+            color: #52c41a;
+          }
+        }
+      }
+    }
+  }
+}
+
+/deep/ .upload-list {
+  img {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+</style>

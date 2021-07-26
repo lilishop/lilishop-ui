@@ -388,7 +388,7 @@ export default {
       },
       categories: [], // 分类
 
-      infoResult: "", // 店铺详情
+      infoResult: {}, // 店铺详情
     };
   },
   methods: {
@@ -452,30 +452,25 @@ export default {
       this.shopForm.salesConsigneeAddressPath = val[1];
       this.shopForm.salesConsigneeAddressId = val[0];
     },
-
+    // 选择图片modal
     handleCLickImg(val) {
       this.$refs.ossManage.selectImage = true;
       this.picModalFlag = true;
       this.selectedFormBtnName = val;
     },
-
+    // 图片回显
     callbackSelected(val) {
       this.picModalFlag = false;
       this.shopForm[this.selectedFormBtnName] = val.url;
     },
-
+    // 初始化数据
     init() {
       this.getCategories();
       if (this.shopId) {
         this.getShopDetail();
       }
     },
-    filterMethod(value, option) {
-      if (value && option) {
-        return option.toUpperCase().indexOf(value.toUpperCase()) !== -1;
-      }
-    },
-
+    // 获取店铺详情
     getShopDetail() {
       shopDetail(this.shopId).then((res) => {
         if (res.result) {
@@ -490,6 +485,7 @@ export default {
         }
       });
     },
+    // 保存
     save() {
       this.$refs.shopForm.validate((valid) => {
         //校验结算日是否已经确认完成
@@ -542,6 +538,7 @@ export default {
       this.$set(this.shopForm, "storeAddressPath", item.addr);
       this.$set(this.shopForm, "storeAddressIdPath", item.addrId);
     },
+    // 全部选中
     handleCheckAll() {
       if (this.indeterminate) {
         this.checkAll = false;
@@ -558,6 +555,7 @@ export default {
         this.checkAllGroup = [];
       }
     },
+    // 经营类目的选择
     checkAllGroupChange(data) {
       if (data.length === this.categories.length) {
         this.indeterminate = false;
@@ -570,6 +568,7 @@ export default {
         this.checkAll = false;
       }
     },
+    // 获取所有分类
     getCategories() {
       getCategoryTree().then((res) => {
         if (res.success) {
