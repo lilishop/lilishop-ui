@@ -37,8 +37,8 @@
         </FormItem>
         <FormItem label="是否通过" prop="result" v-if="handleStatus =='edit'">
              <RadioGroup v-model="result" type="button" button-style="solid">
-                 <Radio label="PASS">通过</Radio>
-                 <Radio label="REFUSE">拒绝</Radio>
+                 <Radio label="VIA_AUDITING">通过</Radio>
+                 <Radio label="FAIL_AUDITING">拒绝</Radio>
              </RadioGroup>
         </FormItem>
       </Form>
@@ -64,7 +64,7 @@ export default {
       loading: true, // 表单加载状态
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
-      result: 'REFUSE', // 是否通过
+      result: 'FAIL_AUDITING', // 是否通过
       searchForm: { // 搜索框初始化对象
         pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
@@ -115,10 +115,10 @@ export default {
               if (params.row.distributionCashStatus == 'APPLY') {
                    return h("div", "待处理");
               }
-              if (params.row.distributionCashStatus == 'PASS') {
+              if (params.row.distributionCashStatus == 'VIA_AUDITING') {
                    return h("div", "通过");
               }
-              if (params.row.distributionCashStatus == 'REFUSE') {
+              if (params.row.distributionCashStatus == 'FAIL_AUDITING') {
                    return h("div", "审核拒绝");
               }
             },
@@ -220,7 +220,7 @@ export default {
     // 通过还是拒绝申请
     handleSubmit() {
       let result = "拒绝"
-      if(this.result == 'PASS'){
+      if(this.result == 'VIA_AUDITING'){
         result = "通过"
       }
       this.$refs.form.validate(valid => {
