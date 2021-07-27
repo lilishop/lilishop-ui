@@ -507,7 +507,7 @@ export default {
     },
     // 返回售后状态中文描述
     filterStatus(status) {
-      let label = "";
+      let label = '';
       for (let i = 0; i < this.afterSaleStatus.length; i++) {
         const obj = this.afterSaleStatus[i];
         if (obj.status === status) {
@@ -518,7 +518,7 @@ export default {
       return label;
     },
   },
-  activated() {
+  mounted() {
     this.sn = this.$route.query.sn;
     this.getDetail();
   },

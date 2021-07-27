@@ -14,8 +14,8 @@
           </Form-item>
           <Form-item label="状态" prop="receiptStatus">
             <Select v-model="searchForm.receiptStatus" placeholder="请选择" clearable style="width: 200px">
-              <Option value="0">未开票</Option>
-              <Option value="1">已开票</Option>
+              <Option :value="0">未开票</Option>
+              <Option :value="1">已开票</Option>
             </Select>
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
@@ -50,7 +50,7 @@ export default {
         pageSize: 10, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
-        receiptStatus: "", // 起始时间
+        receiptStatus: "", // 发票状态
       },
       columns: [
         {
@@ -110,13 +110,13 @@ export default {
           width: 100,
           tooltip: true,
           render: (h, params) => {
-            if (params.row.receiptStatus == 0) {
+            if (params.row.receiptStatus === 0) {
               return h("div", [
                 h("tag", { props: { color: "volcano" } }, "未开票"),
               ]);
             } else {
               return h("div", [
-                h("tag", { props: { color: "green" } }, "未开票"),
+                h("tag", { props: { color: "green" } }, "已开票"),
               ]);
             }
           },

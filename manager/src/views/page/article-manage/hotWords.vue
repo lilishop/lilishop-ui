@@ -13,7 +13,7 @@
       </Row>
 
       <div class="card-list">
-        <Card v-for="words in data" class="card-item" onclick="">
+        <Card v-for="words in data" class="card-item" :key="words" onclick="">
           <p><a href="#" slot="extra" @click.prevent="add(words)">{{ words }}</a></p>
         </Card>
       </div>
