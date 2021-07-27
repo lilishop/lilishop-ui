@@ -448,11 +448,11 @@ export default {
     // 选择菜单
     selectTree(v) {
       if (v.length > 0) {
-        // 转换null为""
 
         let str = JSON.stringify(v);
         let menu = JSON.parse(str);
         this.form = menu[0];
+        console.log(this.form);
         this.editTitle = menu[0].title;
       } else {
         this.cancelEdit();
@@ -492,6 +492,8 @@ export default {
           delete this.form.updateTime;
           delete this.form.selected;
           delete this.form.description;
+          delete this.form.children;
+          delete this.form.children;
 
           editPermission(this.form).then((res) => {
             this.submitLoading = false;
