@@ -86,7 +86,7 @@ export default {
         this.setupSetting();
       }
     },
-
+    // 修改支付设置
     handleChangePayType(val) {
       this.$Modal.confirm({
         title: "修改支付设置",
@@ -100,7 +100,7 @@ export default {
         },
       });
     },
-
+    // 保存设置
     setupSetting() {
       setSetting(this.type, { paymentSupportItems: this.formValidate }).then(
         (res) => {

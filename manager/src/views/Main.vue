@@ -1,7 +1,6 @@
 <style lang="scss">
 @import "./main.scss";
 </style>
-
 <template>
   <div class="main">
     <!-- 左侧菜单 -->
@@ -94,10 +93,7 @@ export default {
     },
     lang() {
       return this.$store.state.app.lang;
-    },
-    mesCount() {
-      return 0;
-    },
+    }
   },
 
   methods: {

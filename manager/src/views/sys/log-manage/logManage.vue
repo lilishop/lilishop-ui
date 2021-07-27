@@ -2,7 +2,7 @@
 <template>
   <div class="search">
     <Card>
-      <Row v-show="openSearch" @keydown.enter.native="handleSearch">
+      <Row @keydown.enter.native="handleSearch">
         <Form ref="searchForm" :model="searchForm" inline :label-width="70"   class="search-form">
           <Form-item label="搜索日志" prop="searchKey">
             <Input
@@ -101,17 +101,14 @@
     name: "log-manage",
     data() {
       return {
-        openSearch: true, // 开启搜索
         openTip: false, // 开启提示
         loading: true, // 加载状态
-        selectList: [], // 已选列表
-        selectCount: 0, // 已选数量
         selectDate: null, // 选择时间段
-        searchKey: "", // 搜索关键字
-        operatorName: "", // 操作人名称
         showDev: false,//展示进阶日志
         searchForm: { // 请求参数
           type: 1,
+          key: '',
+          operatorName: '',
           pageNumber: 1,
           pageSize: 10,
           startDate: "",
@@ -277,38 +274,36 @@
       };
     },
     methods: {
+      // 初始化数据
       init() {
         this.getLogList();
       },
-      changeTab(v) {
-        this.searchForm.type = v;
-        this.getLogList();
-      },
+      // 分页 修改页码
       changePage(v) {
         this.searchForm.pageNumber = v;
         this.getLogList();
-        this.clearSelectAll();
       },
+      // 分页 修改页数
       changePageSize(v) {
+        this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = v;
         this.getLogList();
       },
+      // 起止时间从新赋值
       selectDateRange(v) {
         if (v) {
           this.searchForm.startDate = v[0];
           this.searchForm.endDate = v[1];
         }
       },
+      // 搜索
       handleSearch() {
         this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 10;
         this.getLogList();
       },
+      // 获取日志数据
       getLogList() {
         this.loading = true;
-        this.searchForm.key = this.searchKey;
-        this.searchForm.operatorName = this.operatorName;
-
         getLogListData(this.searchForm).then(res => {
           this.loading = false;
           if (res.success) {

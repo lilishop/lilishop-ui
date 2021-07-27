@@ -80,12 +80,6 @@ export default {
       ruleValidate: {} // 验证规则
     };
   },
-  watch: {
-    res: {
-      handler() {},
-      immediate: true,
-    },
-  },
   created() {
     this.init();
   },
@@ -107,6 +101,7 @@ export default {
         }
       });
     },
+    // 保存设置
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {

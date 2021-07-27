@@ -6,7 +6,7 @@
           <Tabs value="MESSAGE" @on-click="paneChange">
 
             <TabPane label="站内信列表" name="MESSAGE">
-              <Row v-show="openSearch" @keydown.enter.native="handleSearch">
+              <Row @keydown.enter.native="handleSearch">
                 <Form ref="searchForm" :model="searchMessageForm" inline :label-width="70" class="search-form">
                   <Form-item label="消息标题" prop="title">
                     <Input
@@ -47,7 +47,7 @@
                   @on-selection-change="messageChangeSelect"
                 ></Table>
               </Row>
-              <Row type="flex" justify="end" class="mt_10">
+              <Row type="flex" justify="end" class="mt_10 mb_10">
                 <Page
                   :current="searchMessageForm.pageNumber"
                   :total="messageDataTotal"
@@ -71,9 +71,6 @@
                   :columns="noticeColumns"
                   :data="noticeData"
                   ref="table"
-                  sortable="custom"
-                  @on-sort-change="changeSort"
-                  @on-selection-change="changeSelect"
                 ></Table>
               </Row>
               <Row type="flex" justify="end" class="mt_10">
@@ -110,7 +107,7 @@
       </div>
       <div class="send-setting">
         <div class="left-show">
-          <div v-for="(item, index) in form.variables">
+          <div v-for="(item, index) in form.variables" :key="index">
             #{<span>{{item}}</span>}
           </div>
         </div>
@@ -184,7 +181,7 @@
                   v-if="memberShow">
           <Button type="primary" icon="ios-add" @click="addVip" ghost>选择会员</Button>
           <div style="margin-top:24px;" v-if="messageSendForm.messageClient == 'member'">
-            <Table border :columns="userColumns" :data="this.selectedMember">
+            <Table border :columns="userColumns" :data="selectedMember">
             </Table>
           </div>
         </FormItem>
@@ -303,16 +300,14 @@
   import userList from "@/views/member/list/index";
 
   export default {
-    name: "bill",
+    name: "noticeMessageTemplate",
     components: {
       userList
     },
     data() {
       return {
-        openSearch: true, // 显示搜索
         checkUserList: false, //会员选择器
         selectedMember: [], //选择的会员
-        openTip: true, // 显示提示
         loading: true, // 表单加载状态
         modalVisible: false, // 添加或编辑显示
         modalTitle: "", // 添加或编辑标题
@@ -380,9 +375,6 @@
 
         },
         submitLoading: false, // 添加或编辑提交状态
-        selectList: [], // 多选数据
-        messageSelectList: [], // 消息多选数据
-        messageSelectCount: 0, // 多选计数
         selectCount: 0, // 多选计数
         noticeColumns: [
           {
@@ -688,15 +680,15 @@
             }
           },
         ],
-        memberMessageData: [], // 发送给店铺的消息数据
-        memberMessageDataTotal: 0, // 发送给店铺的消息数据总数
+        memberMessageData: [], // 发送给会员的消息数据
+        memberMessageDataTotal: 0, // 发送给会员的消息数据总数
       };
     },
     methods: {
+      // 初始化数据
       init() {
         this.getMessage();
       },
-
       // 返回已选择的用户
       callbackSelectUser(val) {
         // 每次将返回的数据回调判断
@@ -751,6 +743,7 @@
           this.$refs.memberLayout.selectedMember = true;
         });
       },
+      // tab切换
       paneChange(v) {
         if (v == "SETTING") {
           this.getNoticeMessage()
@@ -759,24 +752,27 @@
           this.getMessage()
         }
       },
+      // 分页 修改页码
       changePage(v) {
         this.searchForm.pageNumber = v;
         this.getNoticeMessage();
-        this.clearSelectAll();
       },
+      // 分页 修改页数
       changePageSize(v) {
+        this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = v;
         this.getNoticeMessage();
       },
+      // 搜索
       handleSearch() {
         this.searchMessageForm.pageNumber = 1;
-        this.searchMessageForm.pageSize = 10;
         this.getMessage();
       },
 
       //消息每页条数发生变化
       messageChangePageSize(v) {
         this.searchMessageForm.pageSize = v;
+        this.searchMessageForm.pageNumber = 1;
         this.getMessage();
       },
       //消息页数变化
@@ -789,6 +785,7 @@
       //会员消息每页条数发生变化
       memberMessageChangePageSize(v) {
         this.searchMemberMessageForm.pageSize = v;
+        this.searchMemberMessageForm.pageNumber = 1;
         this.messageDetail();
       },
       //会员消息页数变化
@@ -820,38 +817,6 @@
         this.searchShopMessageForm.sort = e.key;
         this.searchShopMessageForm.order = e.order;
         this.messageDetail()
-      },
-      //消息
-      messageChangeSort(e) {
-        this.searchMessageForm.sort = e.key;
-        this.searchMessageForm.order = e.order;
-        this.getMessage();
-      },
-      changeSort(e) {
-        this.searchForm.sort = e.key;
-        this.searchForm.order = e.order;
-        if (e.order === "normal") {
-          this.searchForm.order = "";
-        }
-        this.getNoticeMessage();
-      },
-      clearSelectAll() {
-        this.$refs.table.selectAll(false);
-      },
-      //消息
-      messageChangeSelect(e) {
-        this.messageSelectList = e;
-        this.messageSelectCount = e.length;
-      },
-      changeSelect(e) {
-        this.selectList = e;
-        this.selectCount = e.length;
-      },
-      selectDateRange(v) {
-        if (v) {
-          this.searchForm.startDate = v[0];
-          this.searchForm.endDate = v[1];
-        }
       },
       //获取发送段铺的名称
       getName(value) {
@@ -965,7 +930,7 @@
         });
         this.loading = false;
       },
-
+      // 获取通知数据
       getNoticeMessage() {
         this.loading = true;
         API_Setting.getNoticeMessageData(this.searchForm).then((res) => {
@@ -1029,6 +994,7 @@
         this.messageDetailModalVisible = true;
         this.modalTitle = "消息详情"
       },
+      // 编辑通知
       edit(v) {
         API_Setting.getNoticeMessageDetail(v.id).then((res) => {
           if (res.success) {

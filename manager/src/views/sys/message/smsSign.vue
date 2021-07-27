@@ -1,11 +1,8 @@
 <template>
   <Card>
     <div style="margin-top: 0px">
-      <div class="sign-name" v-if="id == undefined">
-        新增签名
-      </div>
-      <div class="sign-name" v-else>
-        修改签名
+      <div class="sign-name">
+        {{id ? '修改签名' : '新增签名'}}
       </div>
       <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
         <FormItem label="签名" prop="signName">
@@ -53,18 +50,14 @@
         </div>
         <FormItem label="申请说明" prop="remark">
           <Input v-model="form.remark" clearable type="textarea" style="width: 50%" maxlength="100"
-                 :autosize="{maxRows:4,minRows: 4}" show-word-limit
-                 placeholder="请描述您的业务使用场景，不超过100字符；如：验证码、双十一大促营销"/>
+            :autosize="{maxRows:4,minRows: 4}" show-word-limit
+            placeholder="请描述您的业务使用场景，不超过100字符；如：验证码、双十一大促营销"/>
         </FormItem>
       </Form>
       <div class="footer">
-        <Button type="primary" :loading="submitLoading" @click="addSignSubmit">提交
-        </Button
-        >
+        <Button type="primary" :loading="submitLoading" @click="addSignSubmit">提交</Button>
       </div>
     </div>
-
-
   </Card>
 </template>
 
@@ -77,7 +70,6 @@
     components: {
       uploadPicThumb
     },
-
     data() {
       return {
         id: 0, // 签名id
@@ -96,14 +88,13 @@
       }
 
     },
-    filters: {},
     methods: {
+      // 初始化数据
       init() {
         this.id = this.$route.query.id;
         if (this.id != undefined) {
           this.getSmsSignDetail();
         }
-
       },
       //添加短信模板
       addSignSubmit() {
@@ -159,12 +150,9 @@
     mounted() {
       this.init();
     },
-
   };
 </script>
-
 <style lang="scss" scoped>
-
    .sign-name {
     margin-top: 5px;
     margin-left: 20px;

@@ -57,7 +57,7 @@ export default {
         this.setupSetting();
       }
     },
-
+    // 保存设置
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {

@@ -553,6 +553,7 @@
         this.initWeibo();
         this.initAlipay();
       },
+      // 基础配置
       initBase() {
         this.loading = true;
         getParams('base').then(res => {
@@ -564,6 +565,7 @@
           }
         });
       },
+      // 积分设置
       initPoint() {
         this.loading = true;
         getParams('point').then(res => {
@@ -575,6 +577,7 @@
           }
         });
       },
+      // 订单设置
       initOrder() {
         this.loading = true;
         getParams('order').then(res => {
@@ -586,6 +589,7 @@
           }
         });
       },
+      // 商品设置
       initGoods() {
         this.loading = true;
         getParams('goods').then(res => {
@@ -597,6 +601,7 @@
           }
         });
       },
+      // 
       initWeibo() {
         this.loading = true;
         getParams('weibo').then(res => {
@@ -608,6 +613,7 @@
           }
         });
       },
+      // 微信设置
       initWechat() {
         this.loading = true;
         getParams('wechat').then(res => {
@@ -630,6 +636,7 @@
           }
         });
       },
+      // 阿里配置
       initAlipay() {
         this.loading = true;
         getParams('alipay').then(res => {
@@ -641,6 +648,7 @@
           }
         });
       },
+      // 保存基础配置
       saveBase() {
         this.$refs.baseForm.validate(valid => {
           if (valid) {
@@ -655,6 +663,7 @@
           }
         });
       },
+      // 保存积分配置
       savePoint() {
         this.$refs.pointForm.validate(valid => {
           if (valid) {
@@ -669,6 +678,7 @@
           }
         });
       },
+      // 保存订单配置
       saveOrder() {
         this.$refs.orderForm.validate(valid => {
           if (valid) {
@@ -683,6 +693,7 @@
           }
         });
       },
+      // 保存商品设置
       saveGoods() {
         this.$refs.goodsForm.validate(valid => {
           if (valid) {
@@ -697,6 +708,7 @@
           }
         });
       },
+      // 保存微信设置
       saveWechat() {
         this.$refs.wechatForm.validate(valid => {
           if (valid) {
@@ -711,6 +723,7 @@
           }
         });
       },
+      // 保存qq设置
       saveQQ() {
         this.$refs.qqForm.validate(valid => {
           if (valid) {
@@ -725,6 +738,7 @@
           }
         });
       },
+      // 保存微博设置
       saveWeibo() {
         this.$refs.wechatForm.validate(valid => {
           if (valid) {
@@ -739,6 +753,7 @@
           }
         });
       },
+      // 保存支付宝设置
       saveAlipay() {
         this.$refs.alipayForm.validate(valid => {
           if (valid) {

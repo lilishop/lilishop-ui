@@ -28,23 +28,18 @@ export default {
     };
   },
   props: ["res",'type'],
-  watch: {
-    res: {
-      handler() {},
-      immediate: true,
-    },
-  },
   created() {
     this.init();
   },
   methods: {
+    // 验证
     submit(name) {
       let that = this;
        if( handleSubmit(that, name )){
         this.setupSetting()
       }
     },
-
+    // 保存设置
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {
@@ -56,8 +51,7 @@ export default {
     },
     // 实例化数据
     init() {
- this.res = JSON.parse(this.res);
-
+      this.res = JSON.parse(this.res);
       this.$set(this, "formValidate", { ...this.res });
       Object.keys(this.formValidate).forEach((item) => {
         this.ruleValidate[item] = [
@@ -68,7 +62,6 @@ export default {
           },
         ];
       });
-
     },
   },
 };

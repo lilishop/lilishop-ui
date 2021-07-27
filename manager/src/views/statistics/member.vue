@@ -16,7 +16,7 @@
     <Card class="card">
       <div>
         <h4>客户增长报表</h4>
-        <Table style="margin-top:10px;" stripe :columns="columns" :data="data"></Table>
+        <Table class="mt_10" stripe :columns="columns" :data="data"></Table>
 
       </div>
     </Card>
@@ -30,7 +30,6 @@ import affixTime from "@/views/lili-components/affix-time";
 
 export default {
   components: { affixTime },
-
   data() {
     return {
       columns: [ // 表头
@@ -169,14 +168,14 @@ export default {
 
       this.orderChart.render();
     },
-
+    // 条件查询
     clickBreadcrumb(item, index) {
       let callback = item;
 
       console.warn(callback);
       this.params = {...callback};
     },
-
+    // 初始化数据
     init() {
       API_Member.getMemberStatistics(this.params).then((res) => {
         if (res.result) {

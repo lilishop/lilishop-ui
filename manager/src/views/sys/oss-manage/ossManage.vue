@@ -26,6 +26,9 @@
                 style="width: 200px"
               />
             </Form-item>
+            <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn"
+            >搜索
+            </Button>
             <Form-item label="上传时间">
               <DatePicker
                 v-model="selectDate"
@@ -37,10 +40,7 @@
                 style="width: 200px"
               ></DatePicker>
             </Form-item>
-            <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn"
-            >搜索
-            </Button
-            >
+            
           </Form>
         </Row>
         <div class="oss-operation padding-row">
@@ -558,7 +558,7 @@ export default {
     selectedParams(val) {
       this.$emit("callback", val);
     },
-
+    // 更多操作
     handleDropdown(name) {
       if (name == "refresh") {
         this.getDataList();
@@ -566,12 +566,14 @@ export default {
         this.removeAll();
       }
     },
+    // 初始化数据
     init() {
       this.accessToken = {
         accessToken: this.getStore("accessToken"),
       };
       this.getDataList();
     },
+    // 查看大图
     showPic(v) {
       this.file = v;
       this.file.msize = ((v.fileSize * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
@@ -579,6 +581,7 @@ export default {
       this.picTitle = v.name + "(" + v.fileKey + ")";
       this.picVisible = true;
     },
+    // 查看视频
     showVideo(v) {
       dp = new DPlayer({
         container: document.getElementById("dplayer"),
@@ -596,18 +599,23 @@ export default {
       this.videoTitle = v.name + "(" + v.fileKey + ")";
       this.videoVisible = true;
     },
+    // 关闭视频
     closeVideo() {
       dp.destroy();
     },
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
+    // 分页 改变页数
     changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
+    // 排序
     changeSort(e) {
       this.searchForm.sort = e.key;
       this.searchForm.order = e.order;
@@ -616,12 +624,14 @@ export default {
       }
       this.getDataList();
     },
+    // 起止时间从新赋值
     selectDateRange(v) {
       if (v) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
       }
     },
+    // 改变查看方式
     changeShowType() {
       this.searchForm.pageNumber = 1;
       if (this.showType == "list") {
@@ -631,7 +641,7 @@ export default {
       }
       this.getDataList();
     },
-
+    // 获取列表数据
     getDataList() {
       if (this.showType == "list") {
         this.pageSizeOpts = [10, 20, 50];
@@ -646,6 +656,7 @@ export default {
         this.total = res.result.total;
       });
     },
+    // 搜索
     handleSearch() {
       this.searchForm.title = this.searchForm.name;
       this.searchForm.pageNumber = 1;
@@ -656,6 +667,7 @@ export default {
       }
       this.getDataList();
     },
+    // 文件类型筛选
     changeFileType() {
       let name = this.fileType;
       if (name == "all") {
@@ -667,27 +679,14 @@ export default {
       }
       this.handleSearch();
     },
-    handleReset() {
-      this.$refs.searchForm.resetFields();
-      this.searchForm.pageNumber = 1;
-      if (this.showType == "list") {
-        this.searchForm.pageSize = 5;
-      } else {
-        this.searchForm.pageSize = 12;
-      }
-      this.selectDate = null;
-      this.searchForm.startDate = "";
-      this.searchForm.endDate = "";
-      this.searchForm.fileKey = "";
-      // 重新加载数据
-      this.getDataList();
-    },
+    // 上传文件超过大小限制
     handleMaxSize(file) {
       this.$Notice.warning({
         title: "文件大小过大",
         desc: "所选文件‘ " + file.name + " ’大小过大, 不得超过 5M.",
       });
     },
+    // 上传成功回调
     handleSuccess(res, file) {
       if (res.success) {
         this.$Message.success("上传文件 " + file.name + " 成功");
@@ -696,20 +695,25 @@ export default {
         this.$Message.error(res.message);
       }
     },
+    // 上传失败回调
     handleError(error, file, fileList) {
       this.$Message.error(error.toString());
     },
+    // 清空上传文件
     clearFiles() {
       this.$refs.up.clearFiles();
     },
+    // 取消修改文件名
     handleCancel() {
       this.modalVisible = false;
     },
+    // 下载文件
     download(v) {
       window.open(
         v.url + "?attname=&response-content-type=application/octet-stream"
       );
     },
+    // 批量删除文件
     removeAll() {
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未选择要删除的数据");
@@ -736,6 +740,7 @@ export default {
         },
       });
     },
+    // 单个删除文件
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
@@ -752,6 +757,7 @@ export default {
         },
       });
     },
+    // 提交修改文件名
     handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
@@ -773,6 +779,7 @@ export default {
         }
       });
     },
+    // 修改文件名modal
     rename(v) {
       this.modalTitle = "编辑文件名";
       // 转换null为""
@@ -787,10 +794,12 @@ export default {
       this.oldKey = data.fileKey;
       this.modalVisible = true;
     },
+    // 清除选中状态
     clearSelectAll() {
       this.$refs.table.selectAll(false);
       this.totalSize = "";
     },
+    // 选中回调
     changeSelect(e) {
       this.selectList = e;
       this.selectCount = e.length;
@@ -803,7 +812,6 @@ export default {
   },
   mounted() {
     this.init();
-
     this.baseUrl =
       process.env.NODE_ENV === "development"
         ? this.config.api_dev.common

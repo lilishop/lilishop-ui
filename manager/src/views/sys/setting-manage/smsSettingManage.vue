@@ -64,12 +64,11 @@
       }
     },
     methods: {
+      // 初始化数据
       init() {
         settingInfo("SMS_SETTING")
       },
-      setting() {
-        this.modalVisible = true
-      },
+      // 保存设置
       saveSetting() {
         setSetting("SMS_SETTING", this.form).then((res) => {
           if (res.success) {
@@ -80,6 +79,7 @@
           this.modalVisible = false
         });
       },
+      // 查看
       settingInfo(v) {
         alert()
         this.selected = v

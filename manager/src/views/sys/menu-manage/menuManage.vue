@@ -1,11 +1,15 @@
 <style lang="scss" scoped>
 @import "@/styles/tree-common.scss";
+.desc{
+  font-size: 12px;
+  color: #999;
+}
 </style>
 <template>
   <div class="search">
     <Card>
+      <!-- 筛选项和操作按钮 -->
       <Row class="operation">
-
         <i-switch v-model="strict" class="selectModel" size="large" style="margin-right: 5px">
           <span slot="open">级联</span>
           <span slot="close">单选</span>
@@ -27,6 +31,7 @@
           </DropdownMenu>
         </Dropdown>
       </Row>
+      <!-- 页面主体，左侧树结构，右侧表单项 -->
       <Row type="flex" justify="start">
         <Col :md="8" :lg="8" :xl="6">
           <Alert show-icon>
@@ -81,38 +86,41 @@
                 <span>页面菜单</span>
               </div>
             </FormItem>
-            <FormItem
-              label="名称"
-              prop="title"
-            >
-              <Input v-model="form.title"/>
+            <FormItem label="菜单名称" prop="title">
+              <Input v-model="form.title" />
             </FormItem>
-
-            <FormItem label="路径" prop="path" v-if="form.level != 0">
-              <Input v-model="form.path"/>
+            <FormItem label="路由地址" prop="path" v-if="form.level != 0" class="block-tool">
+              <Tooltip placement="right" content="路由地址，英文唯一，跳转页面，路径展示用 ">
+                <Input v-model="form.path"/>
+              </Tooltip>
             </FormItem>
             <FormItem
-              label="英文名"
+              label="路由名称"
               prop="name"
               v-if="form.level == 0"
               class="block-tool"
             >
-              <Tooltip placement="right" content="需唯一">
+              <Tooltip placement="right" content="路由name，需英文唯一，跳转页面用">
                 <Input v-model="form.name"/>
               </Tooltip>
             </FormItem>
             <FormItem
-              label="路由英文名"
+              label="路由名称"
               prop="name"
               v-if="form.level != 0"
               class="block-tool"
             >
-              <Tooltip placement="right" content="需唯一" transfer>
+              <Tooltip placement="right" content="路由name，需英文唯一，跳转页面用" transfer>
                 <Input v-model="form.name"/>
               </Tooltip>
             </FormItem>
-            <FormItem label="前端组件" prop="frontRoute" v-if="form.level != 0">
+            <FormItem label="文件路径" prop="frontRoute" v-if="form.level != 0">
               <Input v-model="form.frontRoute"/>
+            </FormItem>
+            <FormItem label="权限url" v-if="form.level != 0" class="block-tool">
+              <Tooltip placement="right" content="*号模糊匹配，逗号分割" transfer>
+                <Input v-model="form.permission"/>
+              </Tooltip>
             </FormItem>
             <FormItem label="排序值" prop="sortOrder">
               <Tooltip
@@ -178,40 +186,44 @@
             ></Icon>
             <span>页面菜单</span>
           </div>
-
         </FormItem>
         <FormItem
-          label="名称"
+          label="菜单名称"
           prop="title"
         >
           <Input v-model="formAdd.title"/>
         </FormItem>
 
-        <FormItem label="路径" prop="path" v-if="formAdd.level != 0">
+        <FormItem label="路由地址" prop="path" v-if="formAdd.level != 0">
           <Input v-model="formAdd.path"/>
+          
         </FormItem>
         <FormItem
-          label="英文名"
+          label="路由名称"
           prop="name"
           v-if="formAdd.level == 0"
           class="block-tool"
         >
-          <Tooltip placement="right" content="需唯一">
+          <Tooltip placement="right" content="路由name，需英文唯一，跳转页面用">
             <Input v-model="formAdd.name"/>
           </Tooltip>
         </FormItem>
         <FormItem
-          label="路由英文名"
+          label="路由名称"
           prop="name"
           v-if="formAdd.level != 0"
           class="block-tool"
         >
-          <Tooltip placement="right" content="需唯一">
+          <Tooltip placement="right" content="路由name，需英文唯一，跳转页面用">
             <Input v-model="formAdd.name"/>
           </Tooltip>
         </FormItem>
-        <FormItem label="前端组件" prop="frontRoute" v-if="formAdd.level != 0">
+        <FormItem label="文件路径" prop="frontRoute" v-if="formAdd.level != 0">
           <Input v-model="formAdd.frontRoute"/>
+        </FormItem>
+        <FormItem label="权限url" v-if="formAdd.level != 0">
+          <Input v-model="formAdd.permission"/>
+          <div class="desc">*号模糊匹配，逗号分割</div>
         </FormItem>
         <FormItem label="排序值" prop="sortOrder">
           <Tooltip
@@ -230,9 +242,7 @@
       <div slot="footer">
         <Button type="text" @click="menuModalVisible = false">取消</Button>
         <Button type="primary" :loading="submitLoading" @click="submitAdd"
-        >提交
-        </Button
-        >
+        >提交</Button>
       </div>
     </Modal>
   </div>
@@ -244,7 +254,6 @@ import {
   addPermission,
   editPermission,
   deletePermission,
-  searchPermission,
 } from "@/api/index";
 import util from "@/libs/util.js";
 
@@ -273,18 +282,18 @@ export default {
         parentId: "",
         sortOrder: 0,
         level: 0,
-        showAlways: true,
+        permission: ''
       },
       formAdd: { // 添加表单
       },
       formValidate: { // 验证规则
-        title: [{required: true, message: "名称不能为空", trigger: "blur"}],
+        title: [{required: true, message: "菜单名称名称不能为空", trigger: "blur"}],
         name: [
-          {required: true, message: "路由英文名不能为空", trigger: "blur"},
+          {required: true, message: "路由名称不能为空", trigger: "blur"},
         ],
-        path: [{required: true, message: "路径不能为空", trigger: "blur"}],
+        path: [{required: true, message: "路由地址不能为空", trigger: "blur"}],
         frontRoute: [
-          {required: true, message: "前端组件不能为空", trigger: "blur"},
+          {required: true, message: "文件地址不能为空", trigger: "blur"},
         ],
         sortOrder: [
           {
@@ -300,6 +309,7 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getAllList();
     },
@@ -329,8 +339,8 @@ export default {
         ]),
       ]);
     },
+    // 更多操作
     handleDropdown(name) {
-      console.log(name)
       if (name == "expandOne") {
         this.expandLevel = 1;
         this.getAllList();
@@ -348,6 +358,7 @@ export default {
         this.getAllList();
       }
     },
+    // 获取所有菜单
     getAllList() {
       this.loading = true;
       getAllPermissionList().then((res) => {
@@ -434,19 +445,7 @@ export default {
         }
       });
     },
-    search() {
-      if (this.searchKey) {
-        this.loading = true;
-        searchPermission({title: this.searchKey}).then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.data = res.result;
-          }
-        });
-      } else {
-        this.getAllList();
-      }
-    },
+    // 选择菜单
     selectTree(v) {
       if (v.length > 0) {
         // 转换null为""
@@ -459,6 +458,7 @@ export default {
         this.cancelEdit();
       }
     },
+    // 取消选择
     cancelEdit() {
       let data = this.$refs.tree.getSelectedNodes()[0];
       if (data) {
@@ -468,11 +468,12 @@ export default {
       this.form.id = "";
       this.editTitle = "";
     },
+    // 重置表单
     handleReset() {
       this.$refs.form.resetFields();
-      this.form.icon = "";
       this.form.frontRoute = "";
     },
+    // 保存
     submitEdit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
@@ -482,13 +483,16 @@ export default {
           }
           this.submitLoading = true;
           if (this.form.sortOrder == null) {
-            this.form.sortOrder = "";
+            this.form.sortOrder = 0;
           }
-          if (this.form.buttonType == null) {
-            this.form.buttonType = "";
-          }
-
+          // 删除一些之前添加的无用字段
+          delete this.form.icon;
+          delete this.form.frontComponent;
+          delete this.form.buttonType;
           delete this.form.updateTime;
+          delete this.form.selected;
+          delete this.form.description;
+
           editPermission(this.form).then((res) => {
             this.submitLoading = false;
             if (res.success) {
@@ -503,6 +507,7 @@ export default {
         }
       });
     },
+    // 添加
     submitAdd() {
       this.$refs.formAdd.validate((valid) => {
         if (valid) {
@@ -522,18 +527,7 @@ export default {
         }
       });
     },
-    changeEditUrl(e) {
-      let v = e.target.value;
-      if (v.indexOf("http") > -1) {
-        this.form.frontRoute = "sys/monitor/monitor";
-      }
-    },
-    changeAddUrl(e) {
-      let v = e.target.value;
-      if (v.indexOf("http") > -1) {
-        this.formAdd.frontRoute = "sys/monitor/monitor";
-      }
-    },
+    // 添加子菜单
     addMenu() {
       if (!this.form.id) {
         this.$Message.warning("请先点击选择一个菜单权限节点");
@@ -549,14 +543,11 @@ export default {
         });
         return;
       }
-      let frontRoute = "";
       this.formAdd = {
-        icon: "",
         parentId: this.form.id,
         level: Number(this.form.level) + 1,
         sortOrder: 0,
-        status: 0,
-        showAlways: true,
+        permission:'' // 权限url
       };
       if (this.form.level == 0) {
         this.formAdd.path = "/";
@@ -564,20 +555,22 @@ export default {
       }
       this.menuModalVisible = true;
     },
+    // 添加顶级菜单
     addRootMenu() {
       this.modalTitle = "添加顶级菜单";
       this.showParent = false;
       this.formAdd = {
         level: 0,
-        sortOrder: 0,
-        status: 0,
+        sortOrder: 0
       };
       this.menuModalVisible = true;
     },
+    // 选中菜单赋值
     changeSelect(v) {
       this.selectCount = v.length;
       this.selectList = v;
     },
+    // 批量删除菜单
     delAll() {
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未勾选要删除的数据");

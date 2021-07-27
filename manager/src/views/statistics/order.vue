@@ -3,9 +3,7 @@
   <div class="wrapper">
     <Affix :offset-top="100">
       <Card class="card fixed-bottom">
-
         <affixTime @selected="clickBreadcrumb" />
-
       </Card>
     </Affix>
 
@@ -68,7 +66,7 @@
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">退单金额</div>
-                  <div class="card-item-value">{{overViewList.refundOrderPrice || 0}}</div>
+                  <div class="card-item-value">{{overViewList.refundOrderPrice || 0 | unitPrice('￥')}}</div>
                 </div>
 
               </div>
@@ -155,7 +153,7 @@
           <Table stripe :columns="columns" :data="data"></Table>
 
         </div>
-        <Page @on-change="(index)=>{refundParams.pageNumber = index}" @on-page-size-change="(size)=>{refundParams.pageSize= size}" class="mt_10" show-total show-elevator :total="total" />
+        <Page size="small" @on-change="(index)=>{refundParams.pageNumber = index}" @on-page-size-change="(size)=>{refundParams.pageSize= size,refundParams.pageNumber = 1}" class="mt_10" show-total show-sizer show-elevator :total="total" />
 
       </div>
 

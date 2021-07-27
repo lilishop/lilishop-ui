@@ -79,7 +79,6 @@ export default {
     };
   },
   created() {
-    console.log(this.type);
     this.init();
   },
   methods: {
@@ -95,12 +94,12 @@ export default {
         this.setupSetting();
       }
     },
+    // 选择回显
     callbackSelected(val) {
       this.picModelFlag = false;
       this.formValidate[this.selected] = val.url;
-      console.log(val);
     },
-
+    // 保存设置
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {
@@ -110,8 +109,6 @@ export default {
         }
       });
     },
-
-
     /**添加必填项 */
     init() {
       this.res = JSON.parse(this.res);

@@ -6,7 +6,6 @@
       </Card>
     </Affix>
     <Card class="card">
-
       <Tabs @on-click="handleClickType">
         <TabPane label="热门商品订单数量" name="NUM">
           <Table :columns="columns" :data="data"></Table>
@@ -26,9 +25,8 @@ import affixTime from "@/views/lili-components/affix-time";
 
 export default {
   components: {
-
     affixTime,
-    memberLayout,
+    memberLayout
   },
   data() {
     return {
@@ -63,11 +61,12 @@ export default {
     };
   },
   methods: {
+    // tab切换
     handleClickType(name) {
       this.params.type = name;
       this.getData();
     },
-
+    // 条件删选
     clickBreadcrumb(item, index) {
       let callback = item;
       let type = this.params.type;
@@ -75,6 +74,7 @@ export default {
       this.params.type = type;
       this.getData();
     },
+    // 获取数据
     getData() {
       Promise.all([API_Goods.goodsStatistics(this.params)]).then((res) => {
         if (res[0].result) {

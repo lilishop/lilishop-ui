@@ -118,7 +118,7 @@ import * as API_Setting from "@/api/setting";
 import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
 export default {
   components: {
-    uploadPicInput,
+    uploadPicInput
   },
   data() {
     return {
@@ -238,12 +238,15 @@ export default {
   },
 
   methods: {
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
+    // 分页 改变页数
     changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },

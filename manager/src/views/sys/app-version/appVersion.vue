@@ -1,32 +1,22 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
-      <Card>
-        <Row @keydown.enter.native="handleSearch">
-          <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-            <Form-item label="系统类型" prop="orderSn">
-              <Select v-model="searchForm.type" placeholder="请选择系统类型" clearable style="width: 200px">
-                <Option value="IOS">苹果</Option>
-                <Option value="ANDROID">安卓</Option>
-              </Select>
-            </Form-item>
-            <Button @click="handleSearch" type="primary" icon="ios-search">搜索</Button>
-          </Form>
-        </Row>
-        <Row class="operation" style="margin-top: 20px">
-          <Button @click="addAppVersion" type="primary">添加</Button>
-        </Row>
-        <Row class="padding-row">
-          <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
-        </Row>
-        <Row type="flex" justify="end" class="mt_10">
-          <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
-            size="small" show-total show-elevator show-sizer></Page>
-        </Row>
-      </Card>
-      </Col>
-    </Row>
+    <Card>
+        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form" @keydown.enter.native="handleSearch">
+          <Form-item label="系统类型" prop="orderSn">
+            <Select v-model="searchForm.type" placeholder="请选择系统类型" clearable style="width: 200px">
+              <Option value="IOS">苹果</Option>
+              <Option value="ANDROID">安卓</Option>
+            </Select>
+          </Form-item>
+          <Button @click="handleSearch" type="primary" icon="ios-search">搜索</Button>
+        </Form>
+      <Button class="mt_10 mb_10" @click="addAppVersion" type="primary">添加</Button>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+      <Row type="flex" justify="end" class="mt_10">
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
+          size="small" show-total show-elevator show-sizer></Page>
+      </Row>
+    </Card>
     <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="1000">
       <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
         <FormItem label="版本名称" prop="versionName">
@@ -111,10 +101,7 @@
 import * as API_Setting from "@/api/setting";
 
 export default {
-  name: "orderList",
-  components: {
-
-  },
+  name: "appVersion",
   data() {
     return {
       queryModalVisible: false, // 版本信息modal
@@ -156,8 +143,6 @@ export default {
         versionUpdateDate: [{ required: true, message: "更新时间不能为空" }],
       },
       submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
       columns: [
         {
           title: "版本名称",
@@ -277,34 +262,27 @@ export default {
     };
   },
   methods: {
+    // 获取表格数据
     init() {
       this.getData();
     },
+    // 分页 修改页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getData();
     },
+    // 分页 修改页数
     changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getData();
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
       this.getData();
     },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
-      this.getData();
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
+    // 获取数据
     getData() {
       this.loading = true;
       API_Setting.appVersionPage(this.searchForm).then((res) => {
@@ -331,7 +309,7 @@ export default {
         content: " ",
       };
     },
-    //添加app版本信息
+    //编辑app版本信息
     editAppVersion(v) {
       this.modalVisible = true;
       this.modalTitle = "修改APP版本信息";
@@ -373,6 +351,7 @@ export default {
         }
       });
     },
+    // 删除app版本信息
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
@@ -390,6 +369,7 @@ export default {
         },
       });
     },
+    // 查看
     detail(v) {
       this.queryModalVisible = true;
       this.form = JSON.parse(JSON.stringify(v));

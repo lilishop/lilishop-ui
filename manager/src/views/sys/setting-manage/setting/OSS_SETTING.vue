@@ -44,13 +44,14 @@ export default {
     this.init();
   },
   methods: {
+    // 保存
     submit(name) {
       let that = this;
        if( handleSubmit(that, name )){
         this.setupSetting()
       }
     },
-
+    // 保存设置
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {

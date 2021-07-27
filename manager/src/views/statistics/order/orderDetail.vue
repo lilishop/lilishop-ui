@@ -44,7 +44,7 @@
           <span>创建时间</span>
           <span>{{res.createTime}}</span>
         </div>
-
+        
       </div>
       <h3>商品详情</h3>
       <div class="shop-item">
@@ -91,8 +91,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.wrapper {
-}
+
 .shop {
   padding: 10px 0;
   background: #fff;
@@ -139,13 +138,14 @@ h3 {
 }
 .label-item {
   margin: 10px 0;
-  width: 20%;
+  width: 33%;
   padding: 8px;
   align-items: center;
   font-weight: bold;
   display: flex;
-  > span {
-    padding: 8px;
+  > span:nth-child(1) {
+    width: 70px;
+    color: #999;
   }
 }
 </style>

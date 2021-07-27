@@ -45,7 +45,7 @@ export default {
     LangSwitch,
     Header,
     Footer,
-    verify,
+    verify
   },
   data() {
     return {
@@ -77,7 +77,6 @@ export default {
     };
   },
   methods: {
-    mounted() {},
     afterLogin(res) {
       // 登录成功后处理
       let accessToken = res.result.accessToken;

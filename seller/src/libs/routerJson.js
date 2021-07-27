@@ -1,7 +1,7 @@
 export const result = [
   {
     name: "lili",
-    showAlways: true,
+    
     level: 0,
     type: -1,
     title: "商品",
@@ -15,7 +15,7 @@ export const result = [
     children: [
       {
         name: "goods-list",
-        showAlways: true,
+        
         level: 1,
         type: 0,
         title: "商品管理",
@@ -28,7 +28,7 @@ export const result = [
         children: [
           {
             name: "goods-operation",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "商品发布",
@@ -42,7 +42,7 @@ export const result = [
           },
           {
             name: "goods",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "商品列表",
@@ -56,7 +56,7 @@ export const result = [
           },
           // {
           //   name: "daft-goods",
-          //   showAlways: true,
+          //   
           //   level: 2,
           //   type: 0,
           //   title: "草稿商品",
@@ -72,7 +72,7 @@ export const result = [
           {
             path: "template-goods",
             props: {type: "TEMPLATE"},
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "商品模版",
@@ -86,7 +86,7 @@ export const result = [
           },
           {
             name: "category",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "店铺分类",
@@ -105,7 +105,7 @@ export const result = [
 
   {
     name: "order",
-    showAlways: true,
+    
     level: 0,
     type: -1,
     title: "订单",
@@ -119,7 +119,7 @@ export const result = [
     children: [
       {
         name: "order",
-        showAlways: true,
+        
         level: 1,
         type: 0,
         title: "订单管理",
@@ -132,7 +132,7 @@ export const result = [
         children: [
           {
             name: "orderList",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "商品订单",
@@ -146,7 +146,7 @@ export const result = [
           },
           {
             name: "virtualOrderList",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "虚拟订单",
@@ -162,7 +162,7 @@ export const result = [
       },
       {
         name: "memberComment",
-        showAlways: true,
+        
         level: 1,
         type: 0,
         title: "评价管理",
@@ -175,7 +175,7 @@ export const result = [
         children: [
           {
             name: "memberComment",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "评价管理",
@@ -191,7 +191,7 @@ export const result = [
       },
       {
         name: "order",
-        showAlways: true,
+        
         level: 1,
         type: 0,
         title: "售后管理",
@@ -204,7 +204,7 @@ export const result = [
         children: [
           {
             name: "returnGoodsOrder",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "退货管理",
@@ -218,7 +218,7 @@ export const result = [
           },
           {
             name: "returnMoneyOrder",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "退款管理",
@@ -232,7 +232,7 @@ export const result = [
           },
           {
             name: "orderComplaint",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "投诉管理",
@@ -251,7 +251,7 @@ export const result = [
 
   {
     name: "bill",
-    showAlways: true,
+    
     level: 0,
     type: -1,
     title: "财务",
@@ -265,7 +265,7 @@ export const result = [
     children: [
       {
         name: "bill",
-        showAlways: true,
+        
         level: 1,
         type: 0,
         title: "财务管理",
@@ -278,7 +278,7 @@ export const result = [
         children: [
           {
             name: "accountStatementBill",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "财务对账",
@@ -292,7 +292,7 @@ export const result = [
           },
           {
             name: "storeBill",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "店铺结算",
@@ -309,7 +309,7 @@ export const result = [
 
       {
         name: "receiptManager",
-        showAlways: true,
+        
         level: 1,
         type: 0,
         title: "发票管理",
@@ -322,7 +322,7 @@ export const result = [
         children: [
           {
             name: "receipt",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "发票管理",
@@ -340,7 +340,7 @@ export const result = [
   },
   {
     name: "promotion",
-    showAlways: true,
+    
     level: 0,
     type: -1,
     title: "营销",
@@ -354,7 +354,7 @@ export const result = [
     children: [
       {
         name: "promotion",
-        showAlways: true,
+        
         level: 1,
         type: 0,
         title: "平台活动",
@@ -367,7 +367,7 @@ export const result = [
         children: [
           {
             name: "pintuan",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "拼团活动",
@@ -381,7 +381,7 @@ export const result = [
           },
           {
             name: "seckill",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "秒杀活动",
@@ -397,7 +397,7 @@ export const result = [
       },
       {
         name: "lives",
-        showAlways: true,
+        
         level: 1,
         type: 0,
         title: "直播活动",
@@ -410,7 +410,7 @@ export const result = [
         children: [
           {
             name: "live",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "直播管理",
@@ -424,7 +424,7 @@ export const result = [
           },
           {
             name: "liveGoods",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "直播商品",
@@ -440,7 +440,7 @@ export const result = [
       },
       {
         name: "storePromotion",
-        showAlways: true,
+        
         level: 1,
         type: 0,
         title: "商家活动",
@@ -453,7 +453,7 @@ export const result = [
         children: [
           {
             name: "full-cut",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "满额活动",
@@ -467,7 +467,7 @@ export const result = [
           },
           {
             name: "coupon",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "优惠券",
@@ -484,7 +484,7 @@ export const result = [
       },
       {
         name: "distribution",
-        showAlways: true,
+        
         level: 1,
         type: 0,
         title: "分销管理",
@@ -497,7 +497,6 @@ export const result = [
         children: [
           {
             name: "distributionGoods",
-            showAlways: true,
             level: 2,
             type: 0,
             title: "分销商品",
@@ -511,7 +510,6 @@ export const result = [
           },
           {
             name: "distributionOrder",
-            showAlways: true,
             level: 2,
             type: 0,
             title: "分销订单",
@@ -530,7 +528,6 @@ export const result = [
 
   {
     name: "statistics",
-    showAlways: true,
     level: 0,
     type: -1,
     title: "统计",
@@ -544,7 +541,6 @@ export const result = [
     children: [
       {
         name: "statistics",
-        showAlways: true,
         level: 1,
         type: 0,
         title: "统计管理",
@@ -557,7 +553,6 @@ export const result = [
         children: [
           {
             name: "goodsStatistics",
-            showAlways: true,
             level: 2,
             type: 0,
             title: "商品统计",
@@ -571,7 +566,6 @@ export const result = [
           },
           {
             name: "orderStatistics",
-            showAlways: true,
             level: 2,
             type: 0,
             title: "订单统计",
@@ -585,7 +579,6 @@ export const result = [
           },
           {
             name: "trafficStatistics",
-            showAlways: true,
             level: 2,
             type: 0,
             title: "流量统计",
@@ -597,7 +590,6 @@ export const result = [
             permTypes: [],
             children: null
           },
-
         ]
       }
     ]
@@ -605,7 +597,6 @@ export const result = [
 
   {
     name: "settings",
-    showAlways: true,
     level: 0,
     type: -1,
     title: "设置",
@@ -618,7 +609,6 @@ export const result = [
     children: [
       {
         name: "user-manage",
-        showAlways: true,
         level: 1,
         type: 0,
         title: "页面设置",
@@ -632,7 +622,6 @@ export const result = [
       },
       {
         name: "ship",
-        showAlways: true,
         level: 1,
         type: 0,
         title: "配送设置",
@@ -645,7 +634,6 @@ export const result = [
         children: [
           {
             name: "shipTemplate",
-            showAlways: true,
             level: 2,
             type: 0,
             title: "配送模板",
@@ -659,7 +647,6 @@ export const result = [
           },
           {
             name: "logistics",
-            showAlways: true,
             level: 2,
             type: 0,
             title: "物流公司",
@@ -675,7 +662,6 @@ export const result = [
       },
       {
         name: "shop",
-        showAlways: false,
         level: 1,
         type: 0,
         title: "店铺管理",
@@ -688,7 +674,7 @@ export const result = [
         children: [
           {
             name: "shopSetting",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "店铺设置",
@@ -703,7 +689,7 @@ export const result = [
           },
           {
             name: "shopAddress",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "自提管理",
@@ -723,7 +709,7 @@ export const result = [
   },
   {
     name: "messages",
-    showAlways: true,
+    
     level: 0,
     type: -1,
     title: "消息",
@@ -736,7 +722,7 @@ export const result = [
     children: [
       {
         name: "user-manage",
-        showAlways: true,
+        
         level: 1,
         type: 0,
         title: "系统消息",
@@ -749,7 +735,7 @@ export const result = [
         children: [
           {
             name: "message_index",
-            showAlways: true,
+            
             level: 2,
             type: 0,
             title: "系统消息",

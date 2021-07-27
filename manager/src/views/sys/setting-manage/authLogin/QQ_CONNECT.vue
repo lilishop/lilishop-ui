@@ -2,7 +2,7 @@
 
   <div class="layout">
 
-    <div class="row" v-if="client ==item.client" v-for="(item,index) in  formValidate" :key="index">
+    <div class="row" v-if="client == item.client" v-for="(item,index) in  formValidate" :key="index">
       <div class="col">
         <Card :padding="0">
           <!-- app -->
@@ -51,7 +51,6 @@
 <script>
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
-import { getPaymentSupportForm } from "@/api/setting";
 export default {
   data() {
     return {
@@ -76,7 +75,7 @@ export default {
         this.setupSetting();
       }
     },
-
+    // 保存
     setupSetting() {
       this.$Spin.show();
       setTimeout(() => {

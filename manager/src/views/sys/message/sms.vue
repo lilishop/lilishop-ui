@@ -6,7 +6,7 @@
             <Row class="operation" style="margin-bottom: 10px">
               <Button @click="sendBatchSmsModal" type="primary">发送短信</Button>
             </Row>
-            <Table :loading="loading" border :columns="smsColumns" :data="smsData" ref="table" sortable="custom" @on-sort-change="templateChangeSort">
+            <Table :loading="loading" border :columns="smsColumns" :data="smsData" ref="table">
             </Table>
 
             <Row type="flex" justify="end" class="mt_10">
@@ -19,7 +19,7 @@
               <Button @click="addTemplate" type="primary">添加短信模板</Button>
               <Button @click="syncTemplate" type="info">同步</Button>
             </Row>
-            <Table :loading="loading" border :columns="templateColumns" :data="templateData" ref="table" sortable="custom" @on-sort-change="smsChangeSort">
+            <Table :loading="loading" border :columns="templateColumns" :data="templateData" ref="table">
             </Table>
             <Row type="flex" justify="end" class="mt_10">
               <Page :current="templateSearchForm.pageNumber" :total="templateTotal" :page-size="templateSearchForm.pageSize" @on-change="templateChangePage"
@@ -31,7 +31,7 @@
               <Button @click="addSign" type="primary">添加短信签名</Button>
               <Button @click="syncSign" type="info">同步</Button>
             </Row>
-            <Table :loading="loading" border :columns="signColumns" :data="signData" ref="table" sortable="custom" @on-sort-change="signChangeSort">
+            <Table :loading="loading" border :columns="signColumns" :data="signData" ref="table">
               <template slot="signStatus" slot-scope="scope">
                 <div v-if="scope.row.signStatus ==2 ">
                   审核拒绝
@@ -45,7 +45,6 @@
                 <div v-if="scope.row.signStatus ==1 ">
                   审核通过
                 </div>
-
               </template>
             </Table>
             <Row type="flex" justify="end" class="mt_10">
@@ -168,7 +167,6 @@ export default {
       members: [], //所有会员
       smsTemplateContent: "", //短信模板内容
       memberNum: 0, //会员总数
-      smsNum: 0, //预计发送短信条数
       smsContent: "<div class='sms'>效果预览</div>", //短信内容
       smsTemplates: [], //短信模板
       smsSigns: [], //短信签名
@@ -179,15 +177,6 @@ export default {
       templateModalTitle: "", //添加短信模板弹出框标题
       templateForm: {}, //短信模板添加form
       submitLoading: false, // 提交加载状态
-      selected: "", // 已选数据
-      settingData: "", // 设置数据
-      modalTitle: "设置", // modal标题
-      modalVisible: false, // modal显隐
-      searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-      },
       signSearchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -357,8 +346,7 @@ export default {
                 {
                   props: {
                     type: "info",
-                    size: "small",
-                    icon: "ios-create-outline",
+                    size: "small"
                   },
                   style: {
                     marginRight: "5px",
@@ -477,8 +465,8 @@ export default {
       signTotal: 0, // 表单数据总数
     };
   },
-  filters: {},
   methods: {
+    // 初始化数据
     init() {
       this.getSms();
       //查询会员总数
@@ -498,16 +486,11 @@ export default {
     alreadyCheckClose(val,index) {
       this.alreadyCheck.splice(index, 1);
       this.alreadyCheckShow.splice(index, 1);
-
-
       this.members.forEach((item,index)=>{
         if(item.____selected && item.mobile == val.mobile){
           item.____selected = false
         }
       })
-
-
-
       this.smsForm.num--;
       this.memberNum--;
     },
@@ -515,7 +498,6 @@ export default {
     detail(){
 
     },
-
     //选择接收人事件
     smsRangeChange(v) {
       this.memberNum = 0;
@@ -589,7 +571,6 @@ export default {
         }
       });
     },
-
     //弹出发送短信模态框
     sendBatchSmsModal() {
       this.templateSearchForm.templateStatus = 1;
@@ -604,7 +585,6 @@ export default {
           this.smsSigns = res.result.records;
         }
       });
-
       this.smsContent = "<div class='sms'>效果预览</div>";
       //添加的时候将已经选过的手机号码置为空
       this.alreadyCheck = [];
@@ -622,9 +602,6 @@ export default {
       this.getMemberNum();
       this.loading = false;
       this.sendSmsModal = true;
-    },
-    setting() {
-      this.modalVisible = true;
     },
     //pane切换事件
     paneChange(v) {
@@ -673,8 +650,6 @@ export default {
       }
       this.smsForm.context = this.smsTemplateContent;
     },
-    //查询方法
-    handleSearch() {},
     //删除短信模板
     deleteSmsTemplate(v) {
       let params = {
@@ -721,7 +696,7 @@ export default {
       this.templateModalTitle = "添加短信模板";
       this.templateForm = {};
     },
-    //新增短信模板
+    //修改短信模板
     editTemplate(v) {
       this.templateModalVisible = true;
       this.templateModalTitle = "修改短信模板";
@@ -813,6 +788,7 @@ export default {
     },
     //短信记录页数变化
     smsChangePageSize(v) {
+      this.smsSearchForm.pageNumber = 1;
       this.smsSearchForm.pageSize = v;
       this.getSms();
     },
@@ -823,18 +799,9 @@ export default {
     },
     //短信模板页数变化
     templateChangePageSize(v) {
+      this.templateSearchForm.pageNumber =1;
       this.templateSearchForm.pageSize = v;
       this.getSmsTemplate();
-    },
-    templateChangeSort(e) {
-      this.templateSearchForm.sort = e.key;
-      this.templateSearchForm.order = e.order;
-      this.getSmsTemplate();
-    },
-    smsChangeSort(e) {
-      this.smsSearchForm.sort = e.key;
-      this.smsSearchForm.order = e.order;
-      this.getSms();
     },
     //分页获取短信模板数据
     getSmsTemplate() {
@@ -867,12 +834,8 @@ export default {
     },
     //短信模板页数变化
     signChangePageSize(v) {
+      this.signSearchForm.pageNumber = 1;
       this.signSearchForm.pageSize = v;
-      this.getSmsSign();
-    },
-    signChangeSort(e) {
-      this.signSearchForm.sort = e.key;
-      this.signSearchForm.order = e.order;
       this.getSmsSign();
     },
     //修改短信签名
@@ -894,8 +857,7 @@ export default {
   },
   mounted() {
     this.init();
-  },
-  watch: {},
+  }
 };
 </script>
 

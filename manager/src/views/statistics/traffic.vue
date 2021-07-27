@@ -61,11 +61,8 @@ export default {
 
   data() {
     return {
-      // 时间
-
       uvs: 0, // 访客数
       pvs: 0, // 浏览量
-
       dateList: [
         // 选择项
         {
@@ -89,14 +86,12 @@ export default {
           value: "LAST_THIRTY",
         },
       ],
-
       orderChart: "", // 初始化图表
       params: {
         // 请求参数
         searchType: "LAST_SEVEN",
         year: "",
         month: "",
-        // storeId: "",
       },
       columns: [
         {
@@ -113,7 +108,7 @@ export default {
         },
       ],
 
-      data: [], // 图标数据
+      data: [], // 图表数据
     };
   },
   watch: {
@@ -129,11 +124,6 @@ export default {
   methods: {
     // 订单图
     initChart() {
-      // 默认已经加载 legend-filter 交互
-      /**
-       * 将数据分成三组来进行展示
-       */
-
       let uv = [];
       let pv = [];
 
@@ -186,13 +176,13 @@ export default {
 
       this.orderChart.render();
     },
-
+    // 通过时间来筛选
     clickBreadcrumb(item, index) {
       let callback = JSON.parse(JSON.stringify(item));
 
       this.params = callback;
     },
-
+    // 初始化数据
     init() {
       API_Member.getStatisticsList(this.params).then((res) => {
         if (res.result) {
@@ -224,16 +214,11 @@ export default {
 .table {
   margin-top: 10px;
 }
-.wrapper {
-  padding-bottom: 200px;
-}
 .box-item {
   display: flex;
-
   flex-direction: column;
   width: 25%;
   font-weight: bold;
-  // align-items: center;
   justify-content: center;
   > div {
     margin: 4px;

@@ -34,7 +34,6 @@ body {
   height: 100%;
   background: #f0f0f0;
   font-size: 12px;
-  /* overflow: hidden; */
 }
 
 .app-main {

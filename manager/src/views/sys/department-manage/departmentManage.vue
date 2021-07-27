@@ -17,17 +17,10 @@
           <Alert show-icon>
             当前选择编辑：
             <span class="select-title">{{ editTitle }}</span>
-            <a class="select-clear" v-if="form.id" @click="cancelEdit"
+            <a class="select-clear" v-if="form.id" @click="cancelSelect"
               >取消选择</a
             >
           </Alert>
-          <!--  <Input
-            v-model="searchKey"
-            suffix="ios-search"
-            @on-change="search"
-            placeholder="输入部门名搜索"
-            clearable
-          /> -->
           <div class="tree-bar" :style="{ maxHeight: maxHeight }">
             <Tree
               ref="tree"
@@ -48,7 +41,7 @@
             :label-width="100"
             :rules="formValidate"
           >
-            <FormItem label="上级部门" prop="parentTitle">
+            <!-- <FormItem label="上级部门" prop="parentTitle">
               <div style="display: flex">
                 <Input
                   v-model="form.parentTitle"
@@ -76,7 +69,7 @@
                   </div>
                 </Poptip>
               </div>
-            </FormItem>
+            </FormItem> -->
             <FormItem label="部门名称" prop="title">
               <Input v-model="form.title" />
             </FormItem>
@@ -195,7 +188,7 @@ export default {
       maxHeight: "500px", // 最大高度
       strict: true, // 级联还是单选
       userLoading: false, // 选择角色加载状态
-      loadingEdit: true, // 编辑加载状态
+      loadingEdit: false, // 编辑加载状态
       modalVisible: false, // modal显隐
       selectList: [], // 已选列表
       selectCount: 0, // 已选总数
@@ -235,6 +228,7 @@ export default {
     init() {
       this.getParentList();
     },
+    // 获取部门数据
     getParentList() {
       this.loading = true;
       initDepartment().then((res) => {
@@ -244,32 +238,15 @@ export default {
         }
       });
     },
-
+    // 动态加载二级数据
     loadData(item, callback) {
       loadDepartment(item.id).then((res) => {
+        this.loadingEdit = false;
         if (res.success) {
-          /*  res.result.forEach(function(e) {
-            if (e.isParent) {
-              e.loading = false;
-              e.children = [];
-            }
-          }); */
+          console.log(res.result);
           callback(res.result);
         }
       });
-    },
-    search() {
-      if (this.searchKey) {
-        this.loading = true;
-        searchDepartment({ title: this.searchKey }).then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.data = res.result;
-          }
-        });
-      } else {
-        this.getParentList();
-      }
     },
 
     // 点击树
@@ -311,10 +288,11 @@ export default {
           }
         });
       } else {
-        this.cancelEdit();
+        this.cancelSelect();
       }
     },
-    cancelEdit() {
+    // 取消选择
+    cancelSelect() {
       let data = this.$refs.tree.getSelectedNodes()[0];
       if (data) {
         data.selected = false;
@@ -323,6 +301,7 @@ export default {
       delete this.form.id;
       this.editTitle = "";
     },
+    // 选择上级部门
     selectTreeEdit(v) {
 
       if (v.length > 0) {
@@ -338,13 +317,16 @@ export default {
         this.form.parentTitle = data.title;
       }
     },
+    // 取消添加部门
     cancelAdd() {
       this.modalVisible = false;
     },
+    // 重置表单
     handleReset() {
       this.$refs.form.resetFields();
       this.form.status = 0;
     },
+    // 提交表单
     submitEdit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
@@ -352,8 +334,6 @@ export default {
             this.$Message.warning("请先点击选择要修改的部门");
             return;
           }
-
-          console.log(this.selectedRole);
           let roleWay = [];
           this.selectedRole.forEach((item) => {
             let role = {
@@ -365,11 +345,7 @@ export default {
 
           Promise.all([
             editDepartment(this.form.id, this.form),
-            updateDepartmentRole(
-                this.form.id,
-           roleWay
-
-            ),
+            updateDepartmentRole(this.form.id, roleWay)
           ]).then((res) => {
             this.submitLoading = false;
             if (res[0].success) {
@@ -377,14 +353,11 @@ export default {
               this.init();
               this.modalVisible = false;
             }
-
-            console.log(res[1]);
           });
-
-
         }
       });
     },
+    // 确认添加部门
     submitAdd() {
       this.$refs.formAdd.validate((valid) => {
         if (valid) {
@@ -400,6 +373,7 @@ export default {
         }
       });
     },
+    // 添加子部门
     add() {
       if (this.form.id == "" || this.form.id == null) {
         this.$Message.warning("请先点击选择一个部门");
@@ -415,6 +389,7 @@ export default {
       };
       this.modalVisible = true;
     },
+    // 添加一级部门
     addRoot() {
       this.modalTitle = "添加一级部门";
       this.showParent = false;
@@ -425,11 +400,13 @@ export default {
       };
       this.modalVisible = true;
     },
+    // 选中回调
     changeSelect(v) {
       console.log(v);
       this.selectCount = v.length;
       this.selectList = v;
     },
+    // 批量删除部门
     delAll() {
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未勾选要删除的数据");
@@ -452,7 +429,7 @@ export default {
               this.$Message.success("删除成功");
               this.selectList = [];
               this.selectCount = 0;
-              this.cancelEdit();
+              this.cancelSelect();
               this.init();
             }
           });

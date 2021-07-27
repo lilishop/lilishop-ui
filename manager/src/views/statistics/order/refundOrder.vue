@@ -1,6 +1,5 @@
 <template>
   <div class="wrapper">
-
     <div class="shop">
       <h3>售后详情</h3>
       <div class="shop-item">
@@ -15,11 +14,11 @@
 
         <div class="label-item">
           <span>退款时间</span>
-          <span>{{res.refundTime || '暂无'}}</span>
+          <span>{{res.refundTime ? (new Date(res.refundTime).getTime()/1000 | unixToDate) : '暂无'}}</span>
         </div>
         <div class="label-item">
           <span>申请退款金额</span>
-          <span>{{res.applyRefundPrice || '0'}}</span>
+          <span>{{res.applyRefundPrice || 0 | unitPrice('￥')}}</span>
         </div>
         <div class="label-item">
           <span>商家备注</span>
@@ -44,7 +43,6 @@
           <span>创建时间</span>
           <span>{{res.createTime}}</span>
         </div>
-
       </div>
       <h3>商品详情</h3>
       <div class="shop-item">
@@ -111,15 +109,12 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.wrapper {
-}
 .shop {
-  padding: 10px 0;
+  padding: 5px 0;
   background: #fff;
 }
 .shop-item {
   display: flex;
-
   flex-wrap: wrap;
 }
 h3 {
@@ -158,13 +153,18 @@ h3 {
 }
 .label-item {
   margin: 10px 0;
-  width: 20%;
+  width: 33%;
   padding: 8px;
   align-items: center;
   font-weight: bold;
   display: flex;
-  > span {
-    padding: 8px;
+  > span:nth-child(1) {
+    width: 90px;
+    color: #999;
+  }
+  > span:nth-child(2){
+    text-align: left;
+    white-space: wrap;
   }
 }
 </style>

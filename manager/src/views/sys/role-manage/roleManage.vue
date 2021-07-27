@@ -1,6 +1,3 @@
-<style lang="scss">
-@import "./roleManage.scss";
-</style>
 <template>
   <div class="search">
     <Card>
@@ -26,7 +23,7 @@
         </FormItem>
       </Form>
       <div slot="footer">
-        <Button type="text" @click="cancelRole">取消</Button>
+        <Button type="text" @click="roleModalVisible = false">取消</Button>
         <Button type="primary" :loading="submitLoading" @click="submitRole">提交
         </Button>
       </div>
@@ -39,7 +36,7 @@
         <Spin size="large" fix v-if="treeLoading"></Spin>
       </div>
       <div slot="footer">
-        <Button type="text" @click="cancelPermEdit">取消</Button>
+        <Button type="text" @click="permModalVisible = false">取消</Button>
         <Select v-model="openLevel" @on-change="changeOpen" style="width: 110px; text-align: left; margin-right: 10px">
           <Option value="0">展开所有</Option>
           <Option value="1">收合所有</Option>
@@ -110,7 +107,6 @@ import {
   editRole,
   deleteRole,
   loadDepartment,
-  editRoleDep,
   selectRoleMenu,
   saveRoleMenu,
 } from "@/api/index";
@@ -129,7 +125,6 @@ export default {
       depTreeLoading: true, // 部门树加载
       submitPermLoading: false, // 权限提交加载
       submitDepLoading: false, // 部门提交加载
-      searchKey: "", // 搜索关键字
       sortColumn: "", // 排序
       sortType: "desc", // 排序类型
       modalType: 0, // 0 添加 1 编辑
@@ -265,19 +260,15 @@ export default {
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getRoleList();
       // 获取所有菜单权限树
       this.getPermList();
     },
-
-    handleContextMenu(val) {
-      console.log(val);
-    },
-
+    // 渲染部门前icon
     renderContent(h, { root, node, data }) {
       let icon = "";
-
       if (data.level == 0) {
         icon = "ios-navigate";
       } else if (data.level == 1) {
@@ -324,15 +315,19 @@ export default {
         ]
       );
     },
+    // 分页 修改页码
     changePage(v) {
       this.pageNumber = v;
       this.getRoleList();
       this.clearSelectAll();
     },
+    // 分页 修改页数
     changePageSize(v) {
+      this.pageNumber = 1;
       this.pageSize = v;
       this.getRoleList();
     },
+    // 变更排序方式
     changeSort(e) {
       this.sortColumn = e.key;
       this.sortType = e.order;
@@ -389,9 +384,7 @@ export default {
         }
       });
     },
-    cancelRole() {
-      this.roleModalVisible = false;
-    },
+    // 提交
     submitRole() {
       this.$refs.roleForm.validate((valid) => {
         if (valid) {
@@ -434,6 +427,7 @@ export default {
       delete this.roleForm.id;
       this.roleModalVisible = true;
     },
+    // 编辑
     edit(v) {
       this.modalType = 1;
       this.modalTitle = "编辑角色";
@@ -449,6 +443,7 @@ export default {
       this.roleForm = roleInfo;
       this.roleModalVisible = true;
     },
+    // 删除
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
@@ -465,13 +460,16 @@ export default {
         },
       });
     },
+    // 清除选中
     clearSelectAll() {
       this.$refs.table.selectAll(false);
     },
+    // 选中回调
     changeSelect(e) {
       this.selectList = e;
       this.selectCount = e.length;
     },
+    // 批量删除
     delAll() {
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未选择要删除的数据");
@@ -509,15 +507,12 @@ export default {
       this.modalTitle = "分配 " + v.name + " 的菜单权限";
       // 匹配勾选
       let rolePerms;
-
       // 当前角色的菜单权限
-
       let res = await selectRoleMenu(v.id);
       if (res.result) {
         rolePerms = res.result;
         this.rolePermsWay = res.result;
       }
-
       // 递归判断子节点
       this.checkPermTree(this.permData, rolePerms);
       console.warn(this.permData);
@@ -555,7 +550,6 @@ export default {
       }
       return false;
     },
-
     // 递归全选节点
     selectedTreeAll(permData, select) {
       let that = this;
@@ -566,15 +560,11 @@ export default {
         }
       });
     },
-
     /**分配菜单权限 */
     submitPermEdit() {
       this.saveRoleWay = [];
-
       this.selectIsSuperModel = true; //打开选择权限
-
       let selectedNodes = this.$refs.tree.getCheckedNodes();
-
       let way = [];
 
       selectedNodes.forEach((e) => {
@@ -605,10 +595,7 @@ export default {
         }
       });
     },
-
-    cancelPermEdit() {
-      this.permModalVisible = false;
-    },
+    // 加载数据
     loadData(item, callback) {
       loadDepartment(item.id, { openDataFilter: false }).then((res) => {
         if (res.success) {
@@ -627,9 +614,8 @@ export default {
         }
       });
     },
-
+    // 判断展开子节点
     expandCheckDep(v) {
-      // 判断展开子节点
       this.checkDepTree(v.children, this.editDepartments);
     },
     // 判断子节点
@@ -643,7 +629,7 @@ export default {
         }
       });
     },
-
+    // 树结构展开层级
     changeOpen(v) {
       if (v == "0") {
         this.permData.forEach((e) => {
@@ -735,6 +721,29 @@ export default {
   justify-content: space-between;
 }
 .btn-item{
+  margin-right: 20px;
+}
+.permModal {
+    .ivu-modal-body {
+        max-height: 560px;
+        overflow: auto;
+    }
+}
+
+.depModal {
+    .ivu-modal-body {
+        max-height: 500px;
+        overflow: auto;
+    }
+}
+.tips{
+  font-size: 12px;
+  color: #999;
+  margin-left: 8px;
+}
+.title{
+
+  font-weight: bold;
   margin-right: 20px;
 }
 

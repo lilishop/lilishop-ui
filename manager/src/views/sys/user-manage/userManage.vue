@@ -104,7 +104,7 @@
         </FormItem>
       </Form>
       <div slot="footer">
-        <Button type="text" @click="cancelUser">取消</Button>
+        <Button type="text" @click="userModalVisible = false">取消</Button>
         <Button type="primary" :loading="submitLoading" @click="submitUser">提交</Button>
       </div>
     </Modal>
@@ -136,7 +136,6 @@ export default {
   },
   data() {
     return {
-      height: 510, // 高度
       loading: true, // 加载状态
       selectCount: 0, // 已选数量
       selectList: [], // 已选数据列表
@@ -353,13 +352,14 @@ export default {
       ],
       data: [], // 用户数据
       total: 0, // 总数
-      departments: [] // 部门
     };
   },
   methods: {
+    // 初始化数据
     init() {
       this.getUserList();
     },
+    // 选择部门回调
     handleSelectDepTree(v) {
       if (v) {
         this.form.departmentId = v.departmentId;
@@ -369,23 +369,21 @@ export default {
         this.form.departmentTitle = "";
       }
     },
+    // 搜索项部门选择
     handleSelectDep(v) {
       this.searchForm.departmentId = v;
     },
+    // 分页 修改页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getUserList();
       this.clearSelectAll();
     },
+    // 分页 修改页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
+      this.searchForm.pageNumber = 1;
       this.getUserList();
-    },
-    selectDateRange(v) {
-      if (v) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      }
     },
     getUserList() {
       // 多条件搜索用户列表
@@ -405,11 +403,13 @@ export default {
         }
       });
     },
+    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getUserList();
     },
+    // 排序
     changeSort(e) {
       this.searchForm.sort = e.key;
       this.searchForm.order = e.order;
@@ -418,6 +418,7 @@ export default {
       }
       this.getUserList();
     },
+    // 获取角色列表
     getRoleList() {
       let params = {
         pageSize: 100
@@ -428,6 +429,7 @@ export default {
         }
       });
     },
+    // 重置密码
     resetPass() {
       this.$Modal.confirm({
         title: "确认重置",
@@ -453,9 +455,7 @@ export default {
         }
       });
     },
-    cancelUser() {
-      this.userModalVisible = false;
-    },
+    // 确认提交
     submitUser() {
       this.$refs.form.validate(valid => {
         if (valid) {
@@ -498,6 +498,7 @@ export default {
         }
       });
     },
+    // 添加用户
     add() {
       this.modalType = 0;
       this.modalTitle = "添加用户";
@@ -505,20 +506,18 @@ export default {
       this.$refs.depTree.setData("", "");
       this.userModalVisible = true;
     },
+    // 编辑用户
     edit(v) {
       this.form = JSON.parse(JSON.stringify(v));
       this.modalType = 1;
       this.modalTitle = "编辑用户";
       this.$refs.form.resetFields();
       // 转换null为""
-
       for (let attr in this.form) {
         if (this.form[attr] == null) {
           this.form[attr] = "";
         }
       }
-
-
       this.$refs.depTree.setData(this.form.departmentId, this.form.departmentTitle);
       let selectRolesId = [];
       if (this.form.roles) {
@@ -529,6 +528,7 @@ export default {
       this.form.roles = selectRolesId;
       this.userModalVisible = true;
     },
+    // 启用
     enable(v) {
       let params = {
         status: true
@@ -548,6 +548,7 @@ export default {
         }
       });
     },
+    // 禁用
     disable(v) {
       let params = {
         status: false
@@ -567,6 +568,7 @@ export default {
         }
       });
     },
+    // 删除用户
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
@@ -583,14 +585,17 @@ export default {
         }
       });
     },
+    // 选中状态
     showSelect(e) {
       this.exportData = e;
       this.selectList = e;
       this.selectCount = e.length;
     },
+    // 清除选中状态
     clearSelectAll() {
       this.$refs.table.selectAll(false);
     },
+    // 批量删除
     delAll() {
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未选择要删除的数据");
@@ -619,8 +624,6 @@ export default {
     }
   },
   mounted() {
-    // 计算高度
-    this.height = Number(document.documentElement.clientHeight - 230);
     this.init();
     this.getRoleList();
   }

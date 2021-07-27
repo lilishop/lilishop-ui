@@ -74,7 +74,7 @@ export default {
         this.setupSetting();
       }
     },
-
+    // 保存设置
     setupSetting() {
       this.$Spin.show();
       setTimeout(() => {

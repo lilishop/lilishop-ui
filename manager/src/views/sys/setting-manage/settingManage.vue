@@ -88,13 +88,13 @@ export default {
       this.$nextTick(() => {
         this.show = true;
       });
-      // this.$router.go(0)
     },
   },
   mounted() {
     this.clickTab(this.selected);
   },
   methods: {
+    // tab切换
     clickTab(name) {
       this.selected = name;
       this.getSettingData(name);
