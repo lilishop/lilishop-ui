@@ -84,6 +84,11 @@ export default {
           icon: "md-share-alt",
           ___type: "kanjia",
         },
+        {
+          title: "积分商城",
+          icon: "ios-basket",
+          ___type: "point",
+        },
 
       ],
       linkItem: {
