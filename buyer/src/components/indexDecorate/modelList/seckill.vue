@@ -14,29 +14,10 @@
         {{ actStatus == 0 ? "未开始" : "已结束" }}
       </div>
     </div>
-    <div class="section">
-      <swiper ref="mySwiper" :options="swiperOptions">
-        <swiper-slide
-          v-for="(item, index) in options.list[0].goodsList"
-          :key="index"
-          class="swiper-slide"
-        >
-          <div class="content hover-pointer" @click="goPromotion">
-            <img :src="item.img" width="140" height="140" :alt="item.name" />
-            <div class="ellipsis">{{ item.name }}</div>
-            <div>
-              <span>{{ item.price | unitPrice("￥") }}</span>
-              <span>{{ item.originalPrice | unitPrice("￥") }}</span>
-            </div>
-          </div>
-        </swiper-slide>
-      </swiper>
-    </div>
   </div>
 </template>
 <script>
 import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper';
-// import 'swiper/swiper-bundle.css';
 export default {
   components: {
     Swiper,
@@ -53,7 +34,7 @@ export default {
   },
   data () {
     return {
-      options: this.data.options, // 装修数据
+      list: [], // 秒杀商品
       actStatus: 0, // 0 未开始  1 进行中   2 已结束
       actName: '限时秒杀', // 活动名称
       currHour: '00', // 当前秒杀场
@@ -70,75 +51,13 @@ export default {
       }
     };
   },
-  watch: {
-    diffSeconds (val) {  // 秒杀倒计时
-      const hours = Math.floor(val / 3600);
-      // 当前秒数 / 60，向下取整
-      // 获取到所有分钟数 3600 / 60 = 60分钟
-      // 对60取模，超过小时数的分钟数
-      const minutes = Math.floor(val / 60) % 60;
-      // 当前的秒数 % 60，获取到 超过小时数、分钟数的秒数（秒数）
-      const seconds = val % 60;
-      this.hours = hours < 10 ? '0' + hours : hours;
-      this.minutes = minutes < 10 ? '0' + minutes : minutes;
-      this.seconds = seconds < 10 ? '0' + seconds : seconds;
-
-      if (val === 0) {
-        clearInterval(this.interval);
-        this.hours = 0;
-        this.minutes = 0;
-        this.seconds = 0;
-        this.countDown(this.options.list);
-      }
-    }
-  },
   mounted () {
-    this.countDown(this.options.list);
+    
   },
   beforeDestroy () {
     clearInterval(this.interval);
   },
   methods: {
-    // 倒计时
-    countDown (list) {
-      /**
-       * 默认倒计时两小时
-       * 如果没有开始，则显示未开始
-       * 进行中显示倒计时 + 时间
-       * 今天的秒杀结束则显示已结束
-       */
-      let nowHour = new Date().getHours();
-      if (nowHour < Number(list[0].time)) {
-        // 活动未开始
-        this.currHour = list[0].time;
-        this.actStatus = 0;
-      } else if (nowHour >= Number(list[list.length - 1].time + 2)) {
-        // 活动已结束
-        this.actStatus = 2;
-        this.currHour = list[list.length - 1].time;
-      } else {
-        // 活动进行中
-        this.actStatus = 1;
-        for (let i = 0; i < list.length; i++) {
-          if (nowHour === Number(list[i].time)) {
-            this.currHour = list[i].time;
-          }
-          if (
-            nowHour > Number(list[i].time) &&
-            nowHour < Number(list[i].time + 2)
-          ) {
-            this.currHour = list[i].time;
-          }
-        }
-        // 当前0点时间戳
-        let zeroTime = new Date(new Date().toLocaleDateString()).getTime();
-        // 活动倒计时
-        this.diffSeconds = Math.floor((zeroTime + 3600 * 1000 * (this.currHour + 2) - new Date().getTime()) / 1000);
-        this.interval = setInterval(() => {
-          this.diffSeconds--;
-        }, 1000);
-      }
-    },
     goPromotion () { // 跳转秒杀页面
       let routeUrl = this.$router.resolve({
         path: '/seckill'
