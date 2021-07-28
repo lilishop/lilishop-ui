@@ -50,10 +50,8 @@ export default {
       const data = {
         id: this.$route.query.id,
         pageData: modelForm,
-        pageShow,
+        pageShow
       };
-      console.log(this.modelForm);
-      
       API_floor.updateHome(this.$route.query.id, data).then((res) => {
         if (res.success) {
           this.$Message.success("保存模板成功");
