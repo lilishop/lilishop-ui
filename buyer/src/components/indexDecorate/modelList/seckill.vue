@@ -17,21 +17,8 @@
   </div>
 </template>
 <script>
-import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper';
+
 export default {
-  components: {
-    Swiper,
-    SwiperSlide
-  },
-  directives: {
-    swiper: directive
-  },
-  props: {
-    data: {
-      type: Object,
-      default: null
-    }
-  },
   data () {
     return {
       list: [], // 秒杀商品
@@ -43,19 +30,20 @@ export default {
       hours: 0, // 小时
       minutes: 0, // 分钟
       seconds: 0, // 秒
-      interval: undefined, // 定时器
+      interval: null, // 定时器
       swiperOptions: { // 轮播图参数
-        slidesPerView: 5,
-        autoplay: true,
-        loop: true
+        // slidesPerView: 5,
+        // autoplay: true,
+        // loop: true
       }
     };
   },
-  mounted () {
-    
+  computed: {
   },
   beforeDestroy () {
     clearInterval(this.interval);
+  },
+  mounted () {
   },
   methods: {
     goPromotion () { // 跳转秒杀页面

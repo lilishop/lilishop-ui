@@ -46,3 +46,14 @@ export function pointGoods (params) {
     params
   });
 }
+/**
+ * 获取积分商品详情
+ */
+export function pointGoodsDetail (id) {
+  return request({
+    url: `/buyer/promotion/pointsGoods/${id}`,
+    method: Method.GET,
+    needToken: true,
+    id
+  });
+}
