@@ -172,11 +172,8 @@
             </li>
             <li v-if="orderInfo.order.priceDetailDTO.payPoint != 0">
               <span class="label">使用积分：</span>
-              <span class="txt">{{
-                orderInfo.order.priceDetailDTO.payPoint
-              }}</span>
+              <span class="txt flowPrice">{{orderInfo.order.priceDetailDTO.payPoint}}</span>
             </li>
-
             <li>
               <span class="label">应付金额：</span>
               <span class="txt flowPrice">¥{{ orderInfo.order.priceDetailDTO.flowPrice | unitPrice }}</span>

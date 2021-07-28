@@ -37,9 +37,7 @@
     <template v-if="element.type == 'discountAdvert'">
       <div
         class="discountAdvert mb_20"
-        :style="{
-          'background-image': 'url(' + element.options.bgImg.img + ')',
-        }"
+        :style="{'backgroundImage' :'url(' + require('@/assets/images/decorate.png')+')'}"
       >
         <img
           @click="linkTo(item.url)"
