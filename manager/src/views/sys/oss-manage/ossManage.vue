@@ -26,9 +26,7 @@
                 style="width: 200px"
               />
             </Form-item>
-            <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn"
-            >搜索
-            </Button>
+           
             <Form-item label="上传时间">
               <DatePicker
                 v-model="selectDate"
@@ -40,7 +38,9 @@
                 style="width: 200px"
               ></DatePicker>
             </Form-item>
-            
+             <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn"
+              >搜索
+              </Button>
           </Form>
         </Row>
         <div class="oss-operation padding-row">
@@ -273,6 +273,12 @@ import config from "@/config";
 var dp;
 export default {
   name: "oss-manage",
+  props:{
+    isComponent:{
+      default: false,
+      type:Boolean
+    }
+  },
   data() {
     return {
       config, // api地址
@@ -551,6 +557,11 @@ export default {
       pageSizeOpts: [5, 10, 20], // 页码展示项
     };
   },
+  watch:{
+    selectImage(val) {
+      if (val && !this.data.length) this.init()
+    }
+  },
   methods: {
     /**
      * 选择
@@ -811,11 +822,14 @@ export default {
     },
   },
   mounted() {
-    this.init();
+    if(!this.isComponent) { // 是组件的话，初始化不调用接口
+      this.init();
+    }
     this.baseUrl =
       process.env.NODE_ENV === "development"
         ? this.config.api_dev.common
         : this.config.api_prod.common;
   },
+ 
 };
 </script>

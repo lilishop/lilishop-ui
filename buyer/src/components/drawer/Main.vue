@@ -36,9 +36,11 @@ export default {
   },
   components: {drawerPage},
   computed: {
+    // 用户信息
     userInfo () {
       return Storage.getItem('userInfo');
     },
+    // 购物车商品数量
     cartNum () {
       return this.$store.state.cartNum
     }

@@ -144,6 +144,7 @@ import { addCartGoods } from '@/api/cart.js';
 export default {
   name: 'ShowGoods',
   props: {
+    // 商品数据
     detail: {
       type: Object,
       default: null
@@ -168,10 +169,7 @@ export default {
       isCollected: false // 是否收藏
     };
   },
-  components: {
-    PicZoom,
-    Promotion
-  },
+  components: { PicZoom, Promotion },
   methods: {
     select (index, value) { // 选择规格
       this.$set(this.currentSelceted, index, value);

@@ -31,11 +31,16 @@
       <p>配送方式：{{order.deliveryMethodValue}}</p>
       <p>配送状态：{{order.deliverStatusValue}}</p>
     </div>
-    <div class="order-card" v-if="order.order.receipt">
+    <div class="order-card">
       <h3>发票信息</h3>
-      <p>发票抬头：{{order.order.receiptVO.receiptTitle}}</p>
-      <p>发票内容：{{order.order.receiptVO.receiptContent}}</p>
-      <p v-if="order.order.receiptVO.taxpayerId">纳税人识别号：{{order.order.receiptVO.taxpayerId}}</p>
+      <template v-if="order.order.receipt">
+        <p>发票抬头：{{order.order.receiptVO.receiptTitle}}</p>
+        <p>发票内容：{{order.order.receiptVO.receiptContent}}</p>
+        <p v-if="order.order.receiptVO.taxpayerId">纳税人识别号：{{order.order.receiptVO.taxpayerId}}</p>
+      </template>
+      <div v-else style="color:#999;margin-left:5px">
+        未开发票
+      </div>
     </div>
     <!-- 订单商品 -->
     <div class="goods">
@@ -155,6 +160,7 @@ export default {
   p {
     color: #999;
     margin: 3px;
+    margin-left: 5px;
   }
   h3 {
     font-weight: normal;

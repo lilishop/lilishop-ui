@@ -97,17 +97,6 @@
             <FormItem
               label="路由名称"
               prop="name"
-              v-if="form.level == 0"
-              class="block-tool"
-            >
-              <Tooltip placement="right" content="路由name，需英文唯一，跳转页面用">
-                <Input v-model="form.name"/>
-              </Tooltip>
-            </FormItem>
-            <FormItem
-              label="路由名称"
-              prop="name"
-              v-if="form.level != 0"
               class="block-tool"
             >
               <Tooltip placement="right" content="路由name，需英文唯一，跳转页面用" transfer>
@@ -201,17 +190,6 @@
         <FormItem
           label="路由名称"
           prop="name"
-          v-if="formAdd.level == 0"
-          class="block-tool"
-        >
-          <Tooltip placement="right" content="路由name，需英文唯一，跳转页面用">
-            <Input v-model="formAdd.name"/>
-          </Tooltip>
-        </FormItem>
-        <FormItem
-          label="路由名称"
-          prop="name"
-          v-if="formAdd.level != 0"
           class="block-tool"
         >
           <Tooltip placement="right" content="路由name，需英文唯一，跳转页面用">

@@ -165,17 +165,14 @@ export default {
         {
           title: "入账时间",
           key: "createTime",
-          minWidth: 120
         },
         {
           title: "订单编号",
           key: "sn",
-          minWidth: 120
         },
         {
           title: "订单金额",
           key: "finalPrice",
-          minWidth: 120,
           render: (h, params) => {
             return h(
               "div",
@@ -184,9 +181,28 @@ export default {
           },
         },
         {
+          title: "砍价商品结算价格",
+          key: "kanjiaSettlementPrice",
+          render: (h, params) => {
+            return h(
+              "div",
+              this.$options.filters.unitPrice(params.row.kanjiaSettlementPrice, "￥")
+            );
+          },
+        },
+        {
+          title: "积分商品结算价格",
+          key: "pointSettlementPrice",
+          render: (h, params) => {
+            return h(
+              "div",
+              this.$options.filters.unitPrice(params.row.pointSettlementPrice, "￥")
+            );
+          },
+        },
+        {
           title: "平台分佣",
           key: "commissionPrice",
-          minWidth: 120,
           render: (h, params) => {
             return h(
               "div",
@@ -197,7 +213,6 @@ export default {
         {
           title: "平台优惠券",
           key: "siteCouponPrice",
-          minWidth: 120,
           render: (h, params) => {
             if(params.row.siteCouponPrice == null){
               return h(
@@ -216,7 +231,6 @@ export default {
         {
           title: "分销金额",
           key: "distributionRebate",
-          minWidth: 100,
           render: (h, params) => {
             if(params.row.distributionRebate == null){
               return h(
@@ -235,7 +249,6 @@ export default {
         {
           title: "应结金额",
           key: "billPrice",
-          minWidth: 120,
           render: (h, params) => {
             return h(
               "div",

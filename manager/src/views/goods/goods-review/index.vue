@@ -12,8 +12,6 @@
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10">
         <!-- 页面展示 -->
         <template slot="shopDisableSlot" slot-scope="scope">
-          <div>
-          </div>
           <i-switch size="large" true-value="OPEN" false-value="CLOSE" v-model="scope.row.status"
                     @on-change="changeSwitch(scope.row)">
             <span slot="open">展示</span>
@@ -50,13 +48,19 @@
             <div class="div-height"> 店铺名称：{{ infoData.storeName }}</div>
             <div class="div-height"> 订单号：{{ infoData.orderNo }}</div>
           </div>
-
+          
           <div class="border-b">
             <List>
+              
               <ListItem>
                 <ListItemMeta :avatar="infoData.memberProfile" :title="infoData.memberName"
                   :description="infoData.content"/>
               </ListItem>
+              <div class="score-content">
+                <span>物流评分：{{infoData.deliveryScore}}</span>
+                <span>服务评分：{{infoData.serviceScore}}</span>
+                <span>描述评分：{{infoData.descriptionScore}}</span>
+              </div>
               <div class="" v-if="infoData.haveImage">
                 评价图
                 <div style="margin-left: 40px">
@@ -82,7 +86,6 @@
                     <img style="width: 100px;height: 110px" v-for="(img,index) in infoData.replyImage.split(',')" :key="index"
                        :src="img" alt=""/>
                   </template>
-                  
                 </div>
               </div>
             </div>
@@ -142,14 +145,28 @@ export default {
             } else {
               return h("Tag", {props: {color: "red",},}, "差评");
             }
+          }
+        },
+        {
+          title: "物流评分",
+          key: "deliveryScore",
+          render: (h, params) => {
+            return h('div',params.row.deliveryScore || 5 + '星')
           },
         },
         {
-          title: "评价内容",
-          key: "content",
-          align: "left",
-          minWidth: 200,
-          tooltip: true,
+          title: "服务评分",
+          key: "deliveryScore",
+          render: (h, params) => {
+            return h('div',params.row.serviceScore || 5 + '星')
+          },
+        },
+        {
+          title: "描述评分",
+          key: "deliveryScore",
+          render: (h, params) => {
+            return h('div',params.row.descriptionScore || 5 + '星')
+          },
         },
         {
           title: "评价时间",
@@ -347,5 +364,9 @@ label {
 }
 .div-height{
   line-height: 25px;
+}
+.score-content {
+  margin: 5px 0;
+  span{margin-right: 20px;}
 }
 </style>
