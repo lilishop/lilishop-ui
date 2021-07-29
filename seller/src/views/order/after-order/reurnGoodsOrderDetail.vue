@@ -518,7 +518,9 @@ export default {
       return label;
     },
   },
-  activated() {
+
+
+  mounted() {
     this.sn = this.$route.query.sn;
     this.getDetail();
   },
