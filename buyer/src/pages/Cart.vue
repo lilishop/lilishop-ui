@@ -125,12 +125,6 @@
       </div>
       <Spin size="large" fix v-if="loading"></Spin>
     </div>
-    <!-- 猜你喜欢 -->
-    <!-- <div class="like">
-      <div class="likeGoods">
-        <ShowLikeGoods />
-      </div>
-    </div> -->
     <BaseFooter></BaseFooter>
   </div>
 </template>
@@ -138,10 +132,8 @@
 <script>
 import Promotion from '@/components/goodsDetail/Promotion';
 import Search from '@/components/Search';
-import ShowLikeGoods from '@/components/like';
 import * as APICart from '@/api/cart';
 import * as APIMember from '@/api/member';
-import { getLogo } from '@/api/common.js';
 export default {
   name: 'Cart',
   beforeRouteEnter (to, from, next) {
@@ -150,7 +142,6 @@ export default {
   },
   components: {
     Search,
-    ShowLikeGoods,
     Promotion
   },
   data () {

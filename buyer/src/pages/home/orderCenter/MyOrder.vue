@@ -162,6 +162,7 @@ export default {
       });
       window.open(routeUrl.href, '_blank');
     },
+    // 切换订单状态
     change (index) {
       switch (index) {
         case 0:
@@ -216,23 +217,15 @@ export default {
         this.afterSaleModal = true
       }
     },
+    // 申请售后
     afterSaleSelect (item) {
       this.$router.push({name: 'ApplyAfterSale', query: {sn: item.sn}})
-    },
-    viewComment (sn) { // 查看评价
-
     },
     comment (sn, goodsIndex) { // 评价
       this.$router.push({path: '/home/addEval', query: {sn, index: goodsIndex}})
     },
-    addComment (sn) { // 追加评价
-
-    },
     complain (sn, goodsIndex) { // 投诉
       this.$router.push({name: 'Complain', query: {sn, index: goodsIndex}})
-    },
-    complainResult (sn) { // 投诉结果
-
     },
     delOrder (sn) { // 删除订单
       this.$Modal.confirm({
@@ -268,7 +261,7 @@ export default {
       this.getList()
     },
     changePageSize (val) { // 修改页数
-      this.pageNumber = 1;
+      this.params.pageNumber = 1;
       this.params.pageSize = val;
       this.getList()
     },
@@ -309,9 +302,7 @@ export default {
 }
 .page-size {
   margin: 15px 0px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
+  text-align: right;
 }
 /** 订单列表 */
 .order-list {

@@ -37,8 +37,6 @@
           <myFavorites :homePage="true" />
         </div>
         <div class="box">
-          <!-- 猜你喜欢 -->
-          <!-- <myLike /> -->
         </div>
       </div>
     </div>
@@ -48,7 +46,6 @@
 <script>
 import myOrderPage from '@/pages/home/orderCenter/MyOrder'
 import myFavorites from '@/pages/home/memberCenter/Favorites'
-// import myLike from '@/components/like'
 
 export default {
   name: 'main',
