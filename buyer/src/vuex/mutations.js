@@ -9,3 +9,6 @@ export const SET_NAVLIST = (state, data) => {
 export const SET_CARTNUM = (state, data) => {
   state.cartNum = data
 }
+export const SET_HOTWORDS = (state, data) => {
+  state.hotWordsList = data
+}
