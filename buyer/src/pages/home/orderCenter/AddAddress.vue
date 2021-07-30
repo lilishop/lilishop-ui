@@ -10,21 +10,22 @@
         :rules="ruleInline"
       >
         <FormItem label="收件人" prop="name">
-          <i-input v-model="formData.name" style="width: 600px"></i-input>
+          <i-input v-model="formData.name" placeholder="请输入收件人姓名" style="width: 600px"></i-input>
         </FormItem>
         <FormItem label="收件地区" prop="address">
           <i-input
             v-model="formData.address"
             disabled
+            placeholder="请选择收货地址" 
             style="width: 600px"
           ></i-input>
           <Button type="primary" size="small" @click="$refs.map.showMap = true">选择</Button>
         </FormItem>
         <FormItem label="详细地址" prop="detail">
-          <i-input v-model="formData.detail" style="width: 600px"></i-input>
+          <i-input v-model="formData.detail" placeholder="请输入详细地址"  style="width: 600px"></i-input>
         </FormItem>
         <FormItem label="手机号码" prop="mobile">
-          <i-input v-model="formData.mobile" style="width: 600px"></i-input>
+          <i-input v-model="formData.mobile" placeholder="请输入收件人手机号"  style="width: 600px"></i-input>
         </FormItem>
         <FormItem label="地址别名">
           <i-input

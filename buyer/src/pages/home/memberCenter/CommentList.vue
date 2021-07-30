@@ -28,9 +28,6 @@
               <div class="order-name hover-color" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
                 {{item.goodsName}}
               </div>
-              <div>
-                x1
-              </div>
             </i-col>
             <i-col span="4">{{item.createBy | secrecyMobile}}</i-col>
             <i-col span="4">
@@ -54,6 +51,7 @@
       <Page :total="total" @on-change="changePageNum"
         @on-page-size-change="changePageSize"
         :page-size="params.pageSize"
+        show-total
         show-sizer>
       </Page>
     </div>

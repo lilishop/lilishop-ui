@@ -29,18 +29,10 @@
               <div class="order-name hover-color" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
                 {{item.goodsName}}
               </div>
-              <div>
-                x1
-              </div>
             </i-col>
             <i-col span="4">{{statusLabel[item.complainStatus]}}</i-col>
             <i-col span="4">
-              <Tooltip >
-                <div class="content">{{item.content}}</div>
-                <div style="white-space: normal;" slot="content">
-                  {{item.content}}
-                </div>
-              </Tooltip>
+              <div class="content">{{item.complainTopic}}</div>
             </i-col>
             <i-col span="4">
               <Tooltip >
@@ -60,6 +52,7 @@
       <Page :total="total" @on-change="changePageNum"
         @on-page-size-change="changePageSize"
         :page-size="params.pageSize"
+        show-total
         show-sizer>
       </Page>
     </div>
@@ -192,5 +185,8 @@ export default {
   &:hover{
     color: $theme_color;
   }
+}
+.page-size{
+  text-align: right;
 }
 </style>

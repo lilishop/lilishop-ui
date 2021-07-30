@@ -70,6 +70,7 @@ export default {
   },
   props: ['invoiceData'],
   watch: {
+    // 回显的发票信息
     invoiceData: {
       handler (val) {
         this.invoiceForm = { ...val };
@@ -123,7 +124,7 @@ export default {
 
       return flage;
     },
-
+    // 保存发票信息
     async submit () {
       if (this.save()) {
         this.loading = true;

@@ -187,7 +187,6 @@ export default {
           return i;
         }
       });
-      console.log(selectedSkuId);
       this.$router.push({
         path: '/goodsDetail',
         query: { skuId: selectedSkuId.skuId, goodsId: this.skuDetail.goodsId }
@@ -235,22 +234,6 @@ export default {
         this.loading1 = false;
       });
     },
-    pointPay () { // 积分购买
-      const params = {
-        num: this.count,
-        skuId: this.skuDetail.id,
-        cartType: 'BUY_NOW'
-      };
-      this.loading1 = true;
-      addCartGoods(params).then(res => {
-        this.loading1 = false;
-        if (res.success) {
-          this.$router.push({path: '/pay', query: {way: 'POINT'}});
-        } else {
-          this.$Message.warning(res.message);
-        }
-      });
-    },
     async collect () { // 收藏商品
       if (this.isCollected) {
         let cancel = await cancelCollect('GOODS', this.skuDetail.id)
@@ -266,10 +249,9 @@ export default {
         }
       }
     },
+    // 格式化数据
     formatSku (list) {
-      // 格式化数据
       let arr = [{}];
-
       list.forEach((item, index) => {
         item.specValues.forEach((spec, specIndex) => {
           let name = spec.specName;
@@ -347,7 +329,6 @@ export default {
         }
       })
     }
-
     this.formatSku(this.goodsSpecList);
     this.promotion()
     document.title = this.skuDetail.goodsName
@@ -490,10 +471,8 @@ export default {
 .item-detail-price-row {
   padding: 10px;
   display: flex;
-  // width: 555px;
   flex-direction: row;
   justify-content: space-between;
-  // @include background_color($light_background_color);
   background: url("../../assets/images/goodsDetail/price-bg.png");
 }
 

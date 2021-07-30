@@ -8,47 +8,45 @@
         <span class="color999 ml_20" v-if="order.order">{{order.order.paymentTime}}</span>
       </p>
     </div>
-    <ul class="goods-eval">
-      <li >
-        <div class="goods-con">
-          <img :src="orderGoods.image" class="hover-pointer" alt="" width="100" @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)">
-          <p class="hover-pointer color999" @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)">{{orderGoods.goodsName}}</p>
-          <p>{{orderGoods.goodsPrice | unitPrice('￥')}}</p>
-        </div>
+    <div class="goods-eval">
+      <div class="goods-con">
+        <img :src="orderGoods.image" class="hover-pointer" alt="" width="100" @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)">
+        <p class="hover-pointer color999" @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)">{{orderGoods.goodsName}}</p>
+        <p>{{orderGoods.goodsPrice | unitPrice('￥')}}</p>
+      </div>
 
-        <div class="eval-con">
-          <div>
-            <span class="color999">投诉主题：</span>
-            <Select v-model="form.complainTopic" style="width:260px;margin-bottom:10px">
-              <Option v-for="item in reasonList" :value="item.reason" :key="item.id">{{ item.reason }}</Option>
-            </Select>
-            <Input type="textarea" maxlength="500" show-word-limit :rows="4" placeholder="请输入投诉内容" v-model="form.content" />
-          </div>
-          <div style="display:flex;align-items:center;">
-            <div class="demo-upload-list" v-for="(img, index) in orderGoods.uploadList" :key="index">
-              <img :src="img">
-              <div class="demo-upload-list-cover">
-                  <Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon>
-                  <Icon type="ios-trash-outline" @click.native="handleRemove(index)"></Icon>
-              </div>
-            </div>
-            <Upload
-                :show-upload-list="false"
-                :on-success="handleSuccess"
-                :before-upload="handleBeforeUpload"
-                :format="['jpg','jpeg','png']"
-                :action="action"
-                :headers="accessToken"
-                style="display: inline-block;width:58px;">
-                <div class="hover-pointer icon-upload" style="">
-                  <Icon type="ios-camera" size="20"></Icon>
-                </div>
-            </Upload>
-            <div class="describe">上传投诉凭证，最多5张</div>
-          </div>
+      <div class="eval-con">
+        <div>
+          <span class="color999">投诉主题：</span>
+          <Select v-model="form.complainTopic" style="width:260px;margin-bottom:10px">
+            <Option v-for="item in reasonList" :value="item.reason" :key="item.id">{{ item.reason }}</Option>
+          </Select>
+          <Input type="textarea" maxlength="500" show-word-limit :rows="4" placeholder="请输入投诉内容" v-model="form.content" />
         </div>
-      </li>
-    </ul>
+        <div style="display:flex;align-items:center;">
+          <div class="demo-upload-list" v-for="(img, index) in orderGoods.uploadList" :key="index">
+            <img :src="img">
+            <div class="demo-upload-list-cover">
+                <Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon>
+                <Icon type="ios-trash-outline" @click.native="handleRemove(index)"></Icon>
+            </div>
+          </div>
+          <Upload
+              :show-upload-list="false"
+              :on-success="handleSuccess"
+              :before-upload="handleBeforeUpload"
+              :format="['jpg','jpeg','png']"
+              :action="action"
+              :headers="accessToken"
+              style="display: inline-block;width:58px;">
+              <div class="hover-pointer icon-upload" style="">
+                <Icon type="ios-camera" size="20"></Icon>
+              </div>
+          </Upload>
+          <div class="describe">上传投诉凭证，最多5张</div>
+        </div>
+      </div>
+    </div>
     <Button type="primary" class="mt_10" :loading="loading" @click="save">提交</Button>
     <Modal title="View Image" v-model="visible">
         <img :src="previewImage" v-if="visible" style="width: 100%">
@@ -155,10 +153,8 @@ export default {
     font-weight: bold;
   }
 }
-.goods-eval li{
+.goods-eval{
   display: flex;
-  border-bottom: 1px solid #eee;
-
   .goods-con {
     width: 30%;
     padding: 20px;

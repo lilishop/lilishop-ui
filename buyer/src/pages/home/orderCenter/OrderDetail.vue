@@ -96,10 +96,8 @@
   </div>
 </template>
 <script>
-import card from '@/components/card';
 import { orderDetail, getTraces } from '@/api/order.js';
 export default {
-  components: { card },
   name: 'order-detail',
   data () {
     return {

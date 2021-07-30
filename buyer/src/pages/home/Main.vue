@@ -30,11 +30,11 @@
       <div class="userBox">
         <div class="box">
           <!-- 我的订单组件 -->
-          <myOrderPage :paging="false" :homePage="true" />
+          <myOrderPage :homePage="true" />
         </div>
         <div class="box">
           <!-- 近期收藏 -->
-          <myFavorites :paging="false" :homePage="true" />
+          <myFavorites :homePage="true" />
         </div>
         <div class="box">
           <!-- 猜你喜欢 -->

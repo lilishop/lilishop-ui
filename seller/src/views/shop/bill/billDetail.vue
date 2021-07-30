@@ -168,7 +168,7 @@ export default {
         },
         {
           title: "订单编号",
-          key: "sn",
+          key: "orderSn",
         },
         {
           title: "订单金额",
@@ -184,20 +184,28 @@ export default {
           title: "砍价商品结算价格",
           key: "kanjiaSettlementPrice",
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.kanjiaSettlementPrice, "￥")
-            );
+            if (params.row.kanjiaSettlementPrice) {
+              return h(
+                "div",
+                this.$options.filters.unitPrice(params.row.kanjiaSettlementPrice, "￥")
+              );
+            } else {
+              return h('div','￥0.00')
+            }
           },
         },
         {
           title: "积分商品结算价格",
           key: "pointSettlementPrice",
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.pointSettlementPrice, "￥")
-            );
+            if (params.row.pointSettlementPrice){
+              return h(
+                "div",
+                this.$options.filters.unitPrice(params.row.pointSettlementPrice, "￥")
+              );
+            } else {
+              return h('div','￥0.00')
+            }
           },
         },
         {

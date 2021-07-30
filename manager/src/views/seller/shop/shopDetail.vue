@@ -133,6 +133,7 @@
             </span>
           </p>
           <p class="item">
+            
             <span class="label">营业执照号：</span>
             <span class="info">{{storeInfo.licenseNum}}</span>
           </p>
@@ -239,6 +240,7 @@
                   @on-change="selectDateRange"
                   placeholder="选择起始时间"
                   style="width: 200px"
+                  transfer
                 ></DatePicker>
               </Form-item>
               <Button @click="getOrderData" type="primary" icon="ios-search" class="search-btn">搜索</Button>
@@ -321,6 +323,7 @@
                   @on-change="selectRefundGoodsDateRange"
                   placeholder="选择起始时间"
                   style="width: 200px"
+                  transfer
                 ></DatePicker>
               </Form-item>
               <Form-item label="商家名称" prop="storeName">
@@ -443,6 +446,7 @@
                   @on-change="selectRefundDateRange"
                   placeholder="选择起始时间"
                   style="width: 200px"
+                  transfer
                 ></DatePicker>
               </Form-item>
               <Form-item label="商家名称" prop="storeName">

@@ -27,12 +27,15 @@
         <td>补充内容</td>
         <td>
           <div style="display:flex;align-items:center;">
-            <div class="demo-upload-list" v-for="(img, index) in detail.images.split(',')" :key="index">
-              <img :src="img">
-              <div class="demo-upload-list-cover">
-                <Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon>
+            <template v-if="detail.images">
+              <div class="demo-upload-list" v-for="(img, index) in detail.images.split(',')" :key="index">
+                <img :src="img">
+                <div class="demo-upload-list-cover">
+                  <Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon>
+                </div>
               </div>
-            </div>
+            </template>
+            <div v-else>暂无</div>
           </div>
         </td>
       </tr>
@@ -53,12 +56,15 @@
         <td>
 
           <div style="display:flex;align-items:center;">
-            <div class="demo-upload-list" v-for="(img, index) in detail.appealImages.split(',')" :key="index">
-              <img :src="img">
-              <div class="demo-upload-list-cover">
-                <Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon>
+            <template v-if="detail.appealImages">
+              <div class="demo-upload-list" v-for="(img, index) in detail.appealImages.split(',')" :key="index">
+                <img :src="img">
+                <div class="demo-upload-list-cover">
+                  <Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon>
+                </div>
               </div>
-            </div>
+            </template>
+            <div v-else>暂无</div>
           </div>
         </td>
       </tr>
@@ -73,7 +79,7 @@
     </table>
 
     <Alert class="l_title" show-icon type="warning">对话详情</Alert>
-    <div class="speak-way" v-if="detail.orderComplaintCommunications.length">
+    <div class="speak-way" v-if="detail.orderComplaintCommunications && detail.orderComplaintCommunications.length">
       <div
         class="speak-msg seller"
         :class="{'speak-buyer': item.owner == 'BUYER', 'speak-platform': item.owner == 'PLATFORM', 'speak-seller': item.owner == 'STORE',}"
@@ -96,7 +102,7 @@
         <td>回复：</td>
         <td><label>
           <input type="textarea" maxlength="200" :rows="4" clearable
-                 style="width:260px" v-model="params.content"></input>
+                 style="width:260px" v-model="params.content" />
         </label></td>
       </tr>
       <tr>
@@ -124,6 +130,7 @@ export default {
       visible: false, // 图片预览
       previewImage: '', // 预览图片地址
       loading: false, // 加载状态
+      submitLoading: false, // 回复消息loading
       // 状态
       statusLabel: {
         NO_APPLY: '未申请',
@@ -163,6 +170,7 @@ export default {
         this.$Message.error('请填写对话内容');
         return;
       }
+      this.submitLoading = true;
       this.params.complainId = this.$route.query.id;
       communication(this.params).then((res) => {
         this.submitLoading = false;

@@ -54,7 +54,7 @@
           <td>商品处理方式</td><td>{{afterSale.serviceType == 'RETURN_MONEY' ? '退款' : '退货'}}</td>
         </tr>
         <tr>
-          <td>退款原因</td><td>{{afterSale.reason}}</td>
+          <td>退款原因</td><td>{{afterSale.reasonName}}</td>
         </tr>
         <tr>
           <td>问题描述</td><td>{{afterSale.problemDesc}}</td>
@@ -70,7 +70,7 @@
   </div>
 </template>
 <script>
-import { afterSaleDetail, afterSaleLog } from '@/api/member.js';
+import { afterSaleDetail, afterSaleLog, afterSaleReason } from '@/api/member.js';
 import { afterSaleStatusList } from '../enumeration.js'
 export default {
   name: 'aftersale-detail',
@@ -78,6 +78,7 @@ export default {
     return {
       afterSale: {}, // 售后详情数据
       logList: [], // 日志
+      reasonList: [], // 售后原因列表
       afterSaleStatusList // 售后状态列表
     };
   },
@@ -87,6 +88,25 @@ export default {
         if (res.success) {
           this.afterSale = res.result;
           this.afterSale.serviceName = this.filterOrderStatus(this.afterSale.serviceStatus)
+          // 如果是原因id，则调接口查询原因中文释义
+          const pattern3 = new RegExp("[0-9]+");
+          if (pattern3.test(this.afterSale.reason)) {
+            this.getReason(this.afterSale.serviceType)
+          } else {
+            this.$set(this.afterSale, 'reasonName', this.afterSale.reason)
+          }
+        }
+      })
+    },
+    getReason (type) { // 获取售后原因
+      afterSaleReason(type).then(res => {
+        if (res.success) {
+          this.reasonList = res.result
+          this.reasonList.forEach(e=> {
+            if (e.id === this.afterSale.reason) {
+              this.$set(this.afterSale, 'reasonName', e.reason)
+            }
+          })
         }
       })
     },
@@ -99,7 +119,7 @@ export default {
       const ob = this.afterSaleStatusList.filter(e => { return e.status === status });
       if (ob.length) return ob[0].name
     },
-    perviewImg (img) {
+    perviewImg (img) { // 查看图片
       window.open(img, '_blank')
     }
   },

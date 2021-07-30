@@ -81,16 +81,26 @@ export default {
   },
   mounted () {
     this.searchData = this.$route.query.keyword
-
     if (!this.hover) { // 首页顶部固定搜索栏不调用热词接口
-      hotWords({start: 1, end: 5}).then(res => {
-        if (res.success) this.promotionTags = res.result
-      })
+      // 搜索热词每一小时请求一次
+      const reloadTime = this.Cookies.getItem('hotWordsReloadTime')
+      const time = new Date().getTime() - 60*60*1000
+      if (!reloadTime) {
+        hotWords({count: 5}).then(res => {
+          if (res.success) this.promotionTags = res.result
+        })
+        this.Cookies.setItem('hotWordsReloadTime',new Date().getTime())
+      } else if (reloadTime && time > reloadTime) {
+        hotWords({count: 5}).then(res => {
+          if (res.success) this.promotionTags = res.result
+        })
+        this.Cookies.setItem('hotWordsReloadTime',new Date().getTime())
+      }
+      
     }
   }
 };
 </script>
-
 <style scoped lang="scss">
 .container {
   margin: 30px auto;

@@ -37,7 +37,6 @@ const ApplyAfterSale = resolve => require(['@/pages/home/orderCenter/ApplyAfterS
 const Profile = resolve => require(['@/pages/home/memberCenter/Profile'], resolve);
 const AccountSafe = resolve => require(['@/pages/home/memberCenter/AccountSafe'], resolve);
 const ModifyPwd = resolve => require(['@/pages/home/memberCenter/ModifyPwd'], resolve);
-const AccountBind = resolve => require(['@/pages/home/memberCenter/AccountBind'], resolve);
 const Favorites = resolve => require(['@/pages/home/memberCenter/Favorites'], resolve);
 const Distribution = resolve => require(['@/pages/home/memberCenter/Distribution'], resolve);
 const CommentList = resolve => require(['@/pages/home/memberCenter/CommentList'], resolve); // 评价列表
@@ -45,7 +44,6 @@ const AddEval = resolve => require(['@/pages/home/memberCenter/evaluation/AddEva
 const EvalDetail = resolve => require(['@/pages/home/memberCenter/evaluation/EvalDetail'], resolve);
 const ComplainList = resolve => require(['@/pages/home/memberCenter/ComplainList'], resolve);
 const ComplainDetail = resolve => require(['@/pages/home/memberCenter/ComplainDetail'], resolve);
-const Invoice = resolve => require(['@/pages/home/memberCenter/Invoice'], resolve);
 const Point = resolve => require(['@/pages/home/memberCenter/Point'], resolve);
 const MsgList = resolve => require(['@/pages/home/memberCenter/memberMsg/MsgList'], resolve);
 const MsgDetail = resolve => require(['@/pages/home/memberCenter/memberMsg/MsgDetail'], resolve);
@@ -62,12 +60,10 @@ const Home = resolve => require(['@/pages/user/Home'], resolve);
 
 const MyShoppingCart = resolve => require(['@/pages/home/MyShoppingCart'], resolve);
 const Merchant = resolve => require(['@/pages/Merchant'], resolve);
-// const AllCategories = resolve => require(['@/pages/AllCategories'], resolve);
 const UserMain = resolve => require(['@/pages/home/Main'], resolve);
 
 /**
- * 店铺入驻 首页
- * 店铺入驻  申请页
+ * 店铺入驻 
  */
 const ShopEntry = resolve => require(['@/pages/shopEntry/shop-entry'], resolve);
 
@@ -254,11 +250,6 @@ export default new Router({
       component: ComplainDetail
     },
     {
-      path: 'Invoice',
-      name: 'Invoice',
-      component: Invoice
-    },
-    {
       path: 'AccountSafe',
       name: 'AccountSafe',
       component: AccountSafe
@@ -289,11 +280,6 @@ export default new Router({
       path: 'Profile',
       name: 'Profile',
       component: Profile
-    },
-    {
-      path: 'AccountBind',
-      name: 'AccountBind',
-      component: AccountBind
     },
     {
       path: 'AfterSale',

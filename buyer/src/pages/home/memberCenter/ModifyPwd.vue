@@ -126,7 +126,7 @@ export default {
           {type: 'string', min: 6, message: '密码不能少于6位'}
         ],
         againPassword: [
-          {required: true, message: '请输入新密码', trigger: 'blur'},
+          {required: true, message: '请确认新密码', trigger: 'blur'},
           {type: 'string', min: 6, message: '密码不能少于6位'}
         ]
       }
@@ -200,13 +200,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
-
   .wrapper {
     text-align: center;
   }
-
   .phone {
     text-align: left;
   }
-
 </style>
