@@ -61,12 +61,6 @@
         </Select>
       </FormItem>
       <FormItem prop="storeCenter" label="店铺定位">
-        <!-- <Input
-          type="text"
-          v-model="form.storeCenter"
-          readonly
-          placeholder="点击右侧按钮选择店铺位置"
-        /> -->
         <Button
           type="info"
           v-if="!form.storeCenter"
@@ -140,6 +134,7 @@ export default {
     };
   },
   methods: {
+    // 下一步
     next () {
       this.$refs.thirdForm.validate((valid) => {
         if (valid) {
@@ -161,6 +156,7 @@ export default {
         }
       });
     },
+    // 上传之前
     beforeUpload () {
       this.uploadLoading = true;
       if (this.form.storeLogo.length >= 3) {
@@ -168,12 +164,12 @@ export default {
         return false;
       }
     },
-
+    // 上传成功回调
     handleSuccess (res, file) {
       this.uploadLoading = false;
       this.form.storeLogo.push(res.result);
     },
-
+    // 上传格式错误
     handleFormatError (file) {
       this.uploadLoading = false;
       this.$Notice.warning({
@@ -181,6 +177,7 @@ export default {
         desc: '上传文件格式不正确'
       });
     },
+    // 上传大小限制
     handleMaxSize (file) {
       this.uploadLoading = false;
       this.$Notice.warning({
@@ -188,24 +185,28 @@ export default {
         desc: '文件大小不能超过2M'
       })
     },
+    // 上传失败
     uploadErr () {
       this.uploadLoading = false;
     },
+    // 查看图片
     handleView (item) {
       this.previewPicture = item;
       this.visible = true;
     },
+    // 删除图片
     handleRemove (index, listName) {
       this.form[listName].splice(index, 1);
     },
+    // 选择坐标回调
     getAddress (item) {
-      console.log(item);
       this.$set(
         this.form,
         'storeCenter',
         item.position.lng + ',' + item.position.lat
       );
     },
+    // 获取商品分类
     getCategoryList () {
       getCategory(0).then((res) => {
         if (res.success) this.categoryList = res.result;

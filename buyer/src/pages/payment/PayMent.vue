@@ -127,7 +127,6 @@ export default {
   font-size: 21px;
 
 }
-
 .-box-item {
   display: flex;
   font-size: 18px;

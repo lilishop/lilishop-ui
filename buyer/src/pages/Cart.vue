@@ -158,7 +158,6 @@ export default {
       skuList: [] // sku列表
     };
   },
-  computed: {},
   methods: {
     // 跳转商品详情
     goGoodsDetail (skuId, goodsId) {

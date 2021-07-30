@@ -93,7 +93,6 @@ export default {
       const time = new Date().getTime() - 60*60*1000
       if (!reloadTime) {
         hotWords({count: 5}).then(res => {
-          console.log(res);
           if (res.success) storage.setItem('hotWordsList', res.result)
         })
         storage.setItem('hotWordsReloadTime',new Date().getTime())

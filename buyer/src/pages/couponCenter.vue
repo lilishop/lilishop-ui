@@ -32,10 +32,10 @@
           </li>
         </ul>
         <Page :total="total" @on-change="changePageNum"
-          v-if="list.length && total > params.pageNumber"
           class="pageration"
           @on-page-size-change="changePageSize"
           :page-size="params.pageSize"
+          show-total
           show-sizer>
         </Page>
       </div>
@@ -57,11 +57,13 @@ export default {
     }
   },
   methods: {
+    // 搜索优惠券
     search (item) {
       this.params.couponName = item
       this.params.pageNumber = 1
       this.getList()
     },
+    // 获取优惠券列表
     getList () {
       this.$Spin.show()
       couponList(this.params).then(res => {
@@ -73,18 +75,18 @@ export default {
         }
       }).catch(() => { this.$Spin.hide() })
     },
-
+    // 分页 改变页码
     changePageNum (val) {
       this.params.pageNumber = val;
       this.getList()
     },
-
+    // 分页 改变每页数
     changePageSize (val) {
-      this.pageNumber = 1;
+      this.params.pageNumber = 1;
       this.params.pageSize = val;
       this.getList()
     },
-
+    // 领取优惠券
     receive (item) {
       receiveCoupon(item.id).then(res => {
         if (res.success) {
@@ -111,7 +113,7 @@ export default {
         }
       })
     },
-
+    // 优惠券可用范围
     useScope (type, storeName) {
       let shop = '平台';
       let goods = '全部商品'

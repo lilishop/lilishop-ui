@@ -70,6 +70,7 @@ export default {
     };
   },
   methods: {
+    // 下一步
     next () {
       this.$refs.secondForm.validate((valid) => {
         if (valid) {

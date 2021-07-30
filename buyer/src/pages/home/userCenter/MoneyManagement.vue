@@ -72,15 +72,16 @@
         <!-- 分页 -->
         <div class="page-size">
           <Page
-            :current="searchForm.pageNumber"
+            :current="walletForm.pageNumber"
             :total="logColumnsData.total"
-            :page-size="searchForm.pageSize"
+            :page-size="walletForm.pageSize"
             @on-change="changePage"
             @on-page-size-change="changePageSize"
             :page-size-opts="[10, 20, 50]"
             size="small"
             show-total
-            show-elevator
+            show-sizer
+            transfer
           ></Page>
         </div>
       </TabPane>
@@ -93,15 +94,16 @@
         <!-- 分页 -->
         <div class="page-size">
           <Page
-            :current="rechargeSearchForm.pageNumber"
+            :current="rechargeForm.pageNumber"
             :total="rechargeListData.total"
-            :page-size="rechargeSearchForm.pageSize"
+            :page-size="rechargeForm.pageSize"
             @on-change="rechargeChangePage"
             @on-page-size-change="rechargeChangePageSize"
             :page-size-opts="[10, 20, 50]"
             size="small"
             show-total
-            show-elevator
+            show-sizer
+            transfer
           ></Page>
         </div>
       </TabPane>
@@ -114,15 +116,16 @@
         <!-- 分页 -->
         <div class="page-size">
           <Page
-            :current="withdrawApplySearchForm.pageNumber"
+            :current="withdrawApplyForm.pageNumber"
             :total="withdrawApplyColumnsListData.total"
-            :page-size="withdrawApplySearchForm.pageSize"
+            :page-size="withdrawApplyForm.pageSize"
             @on-change="withdrawChangePage"
             @on-page-size-change="withdrawChangePageSize"
             :page-size-opts="[10, 20, 50]"
             size="small"
             show-total
-            show-elevator
+            show-sizer
+            transfer
           ></Page>
         </div>
       </TabPane>
@@ -131,7 +134,6 @@
 </template>
 
 <script>
-import card from '@/components/card';
 import {
   getMembersWallet,
   getDepositLog,
@@ -158,19 +160,19 @@ export default {
         price: 1
       },
       // 余额日志
-      searchForm: {
+      walletForm: {
         // 搜索框初始化对象
         pageNumber: 1,
         pageSize: 10
       },
       // 充值记录
-      rechargeSearchForm: {
+      rechargeForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
         pageSize: 10 // 页面大小
       },
       // 提现记录
-      withdrawApplySearchForm: {
+      withdrawApplyForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
         pageSize: 10 // 页面大小
@@ -358,17 +360,17 @@ export default {
       withdrawApplyColumnsListData: {} // 提现记录
     };
   },
-  components: { card },
   mounted () {
     this.init();
   },
   methods: {
+    // 初始化数据
     init () {
       getMembersWallet().then((res) => {
         this.frozenDeposit = res.result.memberFrozenWallet;
         this.memberDeposit = res.result.memberWallet;
       });
-      getDepositLog(this.searchForm).then((res) => {
+      getDepositLog(this.walletForm).then((res) => {
         if (res.message === 'success') {
           this.logColumnsData = res.result;
         }
@@ -390,7 +392,7 @@ export default {
     },
     // 充值记录
     getRechargeData () {
-      getRecharge(this.rechargeSearchForm).then((res) => {
+      getRecharge(this.rechargeForm).then((res) => {
         if (res.message === 'success') {
           this.rechargeListData = res.result;
         }
@@ -398,7 +400,7 @@ export default {
     },
     // 提现记录
     getWithdrawApplyData () {
-      getWithdrawApply(this.withdrawApplySearchForm).then((res) => {
+      getWithdrawApply(this.withdrawApplyForm).then((res) => {
         if (res.message === 'success') {
           this.withdrawApplyColumnsListData = res.result;
         }
@@ -406,29 +408,32 @@ export default {
     },
     // 余额日志
     changePage (v) {
-      this.searchForm.pageNumber = v;
+      this.walletForm.pageNumber = v;
       this.init();
     },
     changePageSize (v) {
-      this.searchForm.pageSize = v;
+      this.walletForm.pageNumber = 1;
+      this.walletForm.pageSize = v;
       this.init();
     },
     // 充值记录
     rechargeChangePage (v) {
-      this.rechargeSearchForm.pageNumber = v;
+      this.rechargeForm.pageNumber = v;
       this.getRechargeData();
     },
     rechargeChangePageSize (v) {
-      this.rechargeSearchForm.pageSize = v;
+      this.rechargeForm.pageNumber = 1;
+      this.rechargeForm.pageSize = v;
       this.getRechargeData();
     },
     // 提现记录
     withdrawChangePage (v) {
-      this.withdrawApplySearchForm.pageNumber = v;
+      this.withdrawApplyForm.pageNumber = v;
       this.getWithdrawApplyData();
     },
     withdrawChangePageSize (v) {
-      this.withdrawApplySearchForm.pageSize = v;
+      this.withdrawApplyForm.pageNumber = 1;
+      this.withdrawApplyForm.pageSize = v;
       this.getWithdrawApplyData();
     },
     // 弹出在线充值框
@@ -456,6 +461,7 @@ export default {
       this.withdrawApplyFormData.price = 1;
       this.withdrawApplyModal = true;
     },
+    // 提现
     withdrawal () {
       this.$refs['withdrawApplyFormData'].validate((valid) => {
         if (valid) {
@@ -496,7 +502,5 @@ export default {
 .ivu-btn {
   margin: 0 4px;
 }
-.fontsize_48 {
-  font-size: 48px;
-}
+
 </style>

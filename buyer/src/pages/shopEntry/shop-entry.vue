@@ -129,10 +129,10 @@ export default {
               this.$forceUpdate();
             })
           }
-          console.log(33333333333333);
         }
       });
     },
+    // 下一步
     nextPage (step) {
       this.currentIndex = step;
     }

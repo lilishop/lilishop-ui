@@ -100,7 +100,7 @@ export default {
       this.getList()
     },
     changePageSize (val) { // 改变页数
-      this.pageNumber = 1;
+      this.params.pageNumber = 1;
       this.params.pageSize = val;
       this.getList()
     },

@@ -254,6 +254,7 @@ export default {
     };
   },
   methods: {
+    // 下一步
     next () {
       this.$refs.firstForm.validate((valid) => {
         if (valid) {
@@ -274,9 +275,8 @@ export default {
         }
       });
     },
+    // 地址选择回显
     selectedRegion (item) {
-      console.log(item);
-      // 地址选择回显
       this.$set(this.form, 'storeAddressIdPath', item[0].toString());
       this.$set(
         this.form,
@@ -284,6 +284,7 @@ export default {
         item[1].toString().replace(/\s/g, '')
       );
     },
+    // 上传之前
     beforeUpload () {
       this.uploadLoading = true;
       if (this.form.licencePhoto.length >= 3) {
@@ -291,6 +292,7 @@ export default {
         return false;
       }
     },
+    // 上传之前
     beforeUpload1 () {
       this.uploadLoading1 = true;
       if (this.form.legalPhoto.length >= 3) {
@@ -298,16 +300,24 @@ export default {
         return false;
       }
     },
+    // 上传成功回调
     handleSuccess (res, file) {
       this.uploadLoading = false;
       this.form.licencePhoto.push(res.result);
     },
+    // 上传成功回调
     handleSuccess1 (res, file) {
       this.uploadLoading1 = false;
       this.form.legalPhoto.push(res.result);
       console.log(res);
       console.log(file);
     },
+    // 上传失败
+    uploadErr () {
+      this.uploadLoading = false;
+      this.uploadLoading1 = false;
+    },
+    // 上传失败回调
     handleFormatError (file) {
       this.uploadLoading = false;
       this.uploadLoading1 = false;
@@ -316,6 +326,7 @@ export default {
         desc: '上传文件格式不正确'
       });
     },
+    // 上传大小限制
     handleMaxSize (file) {
       this.uploadLoading = false;
       this.uploadLoading1 = false;
@@ -324,21 +335,19 @@ export default {
         desc: '文件大小不能超过2M'
       });
     },
-    uploadErr () {
-      this.uploadLoading = false;
-      this.uploadLoading1 = false;
-    },
+    // 图片查看
     handleView (item) {
       this.previewPicture = item;
       this.visible = true;
     },
+    // 删除图片
     handleRemove (index, listName) {
       this.form[listName].splice(index, 1);
     }
   },
   mounted () {
     this.accessToken.accessToken = storage.getItem('accessToken');
-    if (Object.keys(this.content).length) {
+    if (Object.keys(this.content).length) { // 处理回显数据
       this.form = JSON.parse(JSON.stringify(this.content));
       if (this.form.licencePhoto) {
         this.form.legalPhoto = this.content.legalPhoto.split(',');

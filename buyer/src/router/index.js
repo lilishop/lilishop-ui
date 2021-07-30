@@ -12,7 +12,6 @@ const Pay = resolve => require(['@/pages/payment/Pay'], resolve);
 const PayDone = resolve => require(['@/pages/payment/PayDone'], resolve);
 const PayMent = resolve => require(['@/pages/payment/PayMent'], resolve);
 const ThirdPay = resolve => require(['@/pages/payment/thirdPay'], resolve);
-const Feedback = resolve => require(['@/pages/Feedback'], resolve);
 const Coupon = resolve => require(['@/pages/couponCenter'], resolve);
 const seckill = resolve => require(['@/pages/promotion/seckill'], resolve);
 const article = resolve => require(['@/pages/article/index'], resolve);
@@ -58,7 +57,6 @@ const MoneyManagement = resolve => require(['@/pages/home/userCenter/MoneyManage
 
 const Home = resolve => require(['@/pages/user/Home'], resolve);
 
-const MyShoppingCart = resolve => require(['@/pages/home/MyShoppingCart'], resolve);
 const Merchant = resolve => require(['@/pages/Merchant'], resolve);
 const UserMain = resolve => require(['@/pages/home/Main'], resolve);
 
@@ -148,14 +146,6 @@ export default new Router({
     path: '/payDone', // 支付成功页面
     name: 'PayDone',
     component: PayDone
-  },
-  {
-    path: '/feedback', // 反馈页面
-    name: 'Feedback',
-    component: Feedback,
-    meta: {
-      title: 'LiLi 登录'
-    }
   },
   {
     path: '/article', // 文章页面
@@ -333,11 +323,6 @@ export default new Router({
       name: 'AfterSaleDetail',
       component: AfterSaleDetail,
       meta: {title: '售后详情'}
-    },
-    {
-      path: 'MyShoppingCart',
-      name: 'MyShoppingCart',
-      component: MyShoppingCart
     }
     ]
   },
