@@ -43,6 +43,7 @@
       <Page :total="total" @on-change="changePageNum"
         @on-page-size-change="changePageSize"
         :page-size="params.pageSize"
+        show-total
         show-sizer>
       </Page>
     </div>

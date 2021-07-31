@@ -65,7 +65,7 @@ export default {
     };
   },
   computed: {
-    userInfo () {
+    userInfo () { // 用户信息
       return JSON.parse(Storage.getItem('userInfo'));
     }
   },

@@ -8,9 +8,9 @@ const psl = require('psl');
 export default {
   setItem: (key, value, options = {}) => {
     if (process.client) {
-      const p_psl = psl.parse(document.domain);
-      let domain = p_psl.domain;
-      if (/\d+\.\d+\.\d+\.\d+/.test(p_psl.input)) domain = p_psl.input;
+      const pPsl = psl.parse(document.domain);
+      let domain = pPsl.domain;
+      if (/\d+\.\d+\.\d+\.\d+/.test(pPsl.input)) domain = pPsl.input;
       options = { domain, ...options };
     }
     Cookies.set(key, value, options);
@@ -20,9 +20,9 @@ export default {
   },
   removeItem: (key, options = {}) => {
     if (process.client) {
-      const p_psl = psl.parse(document.domain);
-      let domain = p_psl.domain;
-      if (/\d+\.\d+\.\d+\.\d+/.test(p_psl.input)) domain = p_psl.input;
+      const pPsl = psl.parse(document.domain);
+      let domain = pPsl.domain;
+      if (/\d+\.\d+\.\d+\.\d+/.test(pPsl.input)) domain = pPsl.input;
       options = { domain, ...options };
     }
     Cookies.remove(key, options);

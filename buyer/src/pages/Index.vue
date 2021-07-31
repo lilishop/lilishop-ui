@@ -73,42 +73,6 @@ export default {
 .container {
   @include sub_background_color($light_background_color);
 }
-/** 商品分类 */
-.nav-con {
-  width: 1200px;
-  height: 40px;
-  background: #eee;
-  margin: 0 auto;
-  display: flex;
-  .all-categories {
-    width: 200px;
-    line-height: 40px;
-    color: #fff;
-    background-color: $theme_color;
-    text-align: center;
-    font-size: 16px;
-  }
-  .nav-item {
-    width: 1000px;
-    height: 40px;
-    line-height: 40px;
-    overflow: hidden;
-    list-style: none;
-    background-color: #eee;
-    display: flex;
-    li {
-      width: 50px;
-      font-size: 16px;
-      font-weight: bold;
-      margin-left: 15px;
-      color: rgb(89, 88, 88);
-      font-size: 15px;
-      &:hover {
-        color: $theme_color;
-      }
-    }
-  }
-}
 </style>
 <style>
 .hover-search {

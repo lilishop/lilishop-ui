@@ -219,8 +219,8 @@ export default {
         }
       });
     },
+    // 清空购物车
     clearCart () {
-      // 清空购物车
       this.$Modal.confirm({
         title: '提示',
         content: '<p>确定要清空购物车吗？清空后不可恢复</p>',
@@ -248,8 +248,8 @@ export default {
     showCoupon (storeId, index) {
       this.couponAvailable = index;
     },
+    // 设置购买数量
     changeNum (val, id) {
-      // 设置购买数量
       console.log(val, id);
       APICart.setCartGoodsNum({ skuId: id, num: val }).then((res) => {
         console.log(res);
@@ -258,8 +258,8 @@ export default {
         }
       });
     },
+    // 设置商品选中状态
     async changeChecked (status, type, id) {
-      // 设置商品选中状态
       const check = status ? 1 : 0;
       if (type === 'all') {
         // 全选
@@ -274,9 +274,8 @@ export default {
 
       this.getCartList();
     },
-
+    // 领取优惠券
     async receiveShopCoupon (item) {
-      // 领取优惠券
       let res = await APIMember.receiveCoupon(item.id);
       if (res.success) {
         this.$set(item, 'disabled', true);
@@ -285,8 +284,8 @@ export default {
         this.$Message.error(res.message);
       }
     },
+    // 购物车列表
     async getCartList () {
-      // 购物车列表
       this.loading = true;
       try {
         let res = await APICart.cartGoodsAll();

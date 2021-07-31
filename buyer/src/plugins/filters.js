@@ -53,51 +53,6 @@ export function unitAddress (val) {
   return val.replace(/,/g, ' ');
 }
 
-export function pointStatus (status) {
-  switch (status) {
-    case 'COMPLETE':
-      return '已成交';
-    case 'WITHDRAW':
-      return '已撤回';
-    case 'DEALING':
-      return '交易中';
-    case 'AUDITING':
-      return '待审核';
-    case 'NODEAL':
-      return '未成交';
-    case 'CANCEL':
-      return '已取消';
-  }
-};
-
-/**
- * 根据订单状态码返回订单状态
- * @param status_code
- * @returns {string}
- */
-export function unixOrderStatus (statusCode) {
-  switch (statusCode) {
-    case 'NEW':
-      return '新订单';
-    case 'INTODB_ERROR':
-      return '入库失败';
-    case 'CONFIRM':
-      return '已确认';
-    case 'PAID_OFF':
-      return '已付款';
-    case 'SHIPPED':
-      return '已发货';
-    case 'ROG':
-      return '已收货';
-    case 'COMPLETE':
-      return '已完成';
-    case 'CANCELLED':
-      return '已取消';
-    case 'AFTER_SERVICE':
-      return '售后中';
-  }
-}
-
 /**
  * 13888888888 -> 138****8888
  * @param mobile
@@ -109,14 +64,4 @@ export function secrecyMobile (mobile) {
     return mobile;
   }
   return mobile.replace(/(\d{3})(\d{4})(\d{4})/, '$1****$3');
-}
-
-/**
- * 格式化货品的规格
- * @param sku
- * @returns {*}
- */
-export function formatterSkuSpec (sku) {
-  if (!sku.spec_list || !sku.spec_list.length) return '';
-  return sku.spec_list.map(spec => spec.spec_value).join(' - ');
 }

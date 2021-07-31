@@ -61,7 +61,7 @@ const Merchant = resolve => require(['@/pages/Merchant'], resolve);
 const UserMain = resolve => require(['@/pages/home/Main'], resolve);
 
 /**
- * 店铺入驻 
+ * 店铺入驻
  */
 const ShopEntry = resolve => require(['@/pages/shopEntry/shop-entry'], resolve);
 

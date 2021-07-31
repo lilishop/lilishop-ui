@@ -46,9 +46,9 @@ export default {
     };
   },
   methods: {
+    // 获取支付二维码
     handlePay () {
       const params = this.$route.query;
-
       pay(params).then(res => {
         if (res.success) {
           this.qrcode = res.result;

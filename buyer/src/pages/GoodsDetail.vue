@@ -54,6 +54,7 @@ export default {
     };
   },
   methods: {
+    // 获取商品详情
     getGoodsDetail () {
       this.isLoading = true;
       const params = this.$route.query
@@ -140,12 +141,6 @@ export default {
   @include background_color($light_background_color);
   line-height: 38px;
   color: #2c2c2c;
-}
-
-.like {
-  width: 100%;
-  padding: 20px 0;
-  @include white_background_color();
 }
 
 .shop-nav-container {

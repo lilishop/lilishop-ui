@@ -241,6 +241,7 @@ export default {
     }
   },
   mounted () {
+    document.querySelector('.forget-password').style.height = window.innerHeight + 'px'
     this.$refs.formFirst.resetFields();
   },
   watch: {
@@ -250,7 +251,7 @@ export default {
 
 <style scoped lang="scss">
 .forget-password{
-  height: 100%;
+  min-height: 700px;
 }
 .logo-box {
   width: 600px;

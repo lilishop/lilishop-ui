@@ -133,7 +133,7 @@
         <router-link to="/article?id=1371992704333905920" class="item" target="_blank">条款</router-link>
       </Row>
       <Row type="flex" justify="center" class="copyright">
-        Copyright © 2021 - Present
+        Copyright © {{year}} - Present
         <a href="https://pickmall.cn" target="_blank" style="margin: 0 5px">lili-shop</a>
         版权所有
       </Row>
@@ -186,7 +186,8 @@ export default {
       },
       codeMsg: '发送验证码', // 验证码文字
       interval: null, // 定时器
-      time: 60 // 倒计时
+      time: 60, // 倒计时
+      year: new Date().getFullYear()
     };
   },
   methods: {
@@ -220,8 +221,6 @@ export default {
               }
             });
           }
-        } else {
-          // this.$Message.error('请填写正确的用户名或密码');
         }
       });
     },
