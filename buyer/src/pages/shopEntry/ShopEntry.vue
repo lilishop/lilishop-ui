@@ -39,9 +39,9 @@
 </template>
 <script>
 import { agreement, applyStatus } from '@/api/shopentry';
-import firstApply from './first-apply';
-import secondApply from './second-apply';
-import thirdApply from './third-apply';
+import firstApply from './FirstApply';
+import secondApply from './SecondApply';
+import thirdApply from './ThirdApply';
 export default {
   components: {
     firstApply,

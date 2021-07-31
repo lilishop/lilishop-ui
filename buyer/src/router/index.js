@@ -3,7 +3,7 @@ import Router from 'vue-router';
 import Index from '@/pages/Index';
 const Login = resolve => require(['@/pages/Login'], resolve);
 const SignUp = resolve => require(['@/pages/SignUp'], resolve);
-const ForgetPassword = resolve => require(['@/pages/forgetPassword'], resolve);
+const ForgetPassword = resolve => require(['@/pages/ForgetPassword'], resolve);
 const GoodsList = resolve => require(['@/pages/GoodsList'], resolve);
 const GoodsDetail = resolve => require(['@/pages/GoodsDetail'], resolve);
 const ShoppingCart = resolve => require(['@/pages/ShoppingCart'], resolve);
@@ -11,8 +11,8 @@ const Cart = resolve => require(['@/pages/Cart'], resolve);
 const Pay = resolve => require(['@/pages/payment/Pay'], resolve);
 const PayDone = resolve => require(['@/pages/payment/PayDone'], resolve);
 const PayMent = resolve => require(['@/pages/payment/PayMent'], resolve);
-const ThirdPay = resolve => require(['@/pages/payment/thirdPay'], resolve);
-const Coupon = resolve => require(['@/pages/couponCenter'], resolve);
+const ThirdPay = resolve => require(['@/pages/payment/ThirdPay'], resolve);
+const Coupon = resolve => require(['@/pages/CouponCenter'], resolve);
 const seckill = resolve => require(['@/pages/promotion/seckill'], resolve);
 const article = resolve => require(['@/pages/article/index'], resolve);
 const PointMall = resolve => require(['@/pages/PointMall'], resolve);
@@ -63,7 +63,7 @@ const UserMain = resolve => require(['@/pages/home/Main'], resolve);
 /**
  * 店铺入驻
  */
-const ShopEntry = resolve => require(['@/pages/shopEntry/shop-entry'], resolve);
+const ShopEntry = resolve => require(['@/pages/shopEntry/ShopEntry'], resolve);
 
 Vue.use(Router);
 
@@ -76,7 +76,7 @@ export default new Router({
   },
   {
     path: '/login', // 登陆
-    name: 'Login',
+    name: 'login',
     component: Login,
     meta: {
       title: 'LiLi 登录'

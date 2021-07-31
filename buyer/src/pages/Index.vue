@@ -21,7 +21,7 @@
 
 <script>
 import Search from '@/components/Search';
-import ModelForm from '@/components/indexDecorate/modelForm';
+import ModelForm from '@/components/indexDecorate/ModelForm';
 import HoverSearch from '@/components/header/hoverSearch';
 import storage from '@/plugins/storage';
 import { indexData } from '@/api/index.js';

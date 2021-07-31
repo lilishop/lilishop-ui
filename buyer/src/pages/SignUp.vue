@@ -103,7 +103,7 @@ import * as apiLogin from '@/api/login.js';
 import { sendSms } from '@/api/common.js';
 import Verify from '@/components/verify';
 export default {
-  name: 'Login',
+  name: 'SignUp',
   components: { Verify },
   data () {
     return {
