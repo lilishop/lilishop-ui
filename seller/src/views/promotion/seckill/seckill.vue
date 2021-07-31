@@ -56,7 +56,7 @@
           >
         </template>
       </Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber + 1" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
           size="small" show-total show-elevator show-sizer></Page>
       </Row>
@@ -206,8 +206,13 @@ export default {
       return hourArr;
     },
   },
-  activated() {
+  mounted() {
     this.init();
+  },
+  // 页面缓存处理，从该页面离开时，修改KeepAlive为false，保证进入该页面是刷新
+  beforeRouteLeave(to, from, next) {
+    from.meta.keepAlive = false
+    next()
   }
 };
 </script>
@@ -222,12 +227,6 @@ export default {
   }
   .select-clear {
     margin-left: 10px;
-  }
-  .page {
-    margin-top: 2vh;
-  }
-  .drop-down {
-    margin-left: 5px;
   }
 }
 </style>

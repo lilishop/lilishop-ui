@@ -60,7 +60,7 @@
         class="mt_10"
         sortable="custom"
       ></Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page
           :current="searchForm.pageNumber"
           :total="total"
@@ -106,7 +106,7 @@ export default {
         {
           title: "商品原图",
           key: "original",
-          width: 150,
+          width: 120,
           align: "center",
           render: (h, params) => {
             return h("img", {

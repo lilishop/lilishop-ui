@@ -54,7 +54,7 @@
           </Poptip>
         </template>
       </Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page
           :current="searchForm.pageNumber"
           :total="total"
@@ -243,9 +243,14 @@
         });
       },
     },
-    activated() {
+    mounted() {
       this.init();
     },
+    // 页面缓存处理，从该页面离开时，修改KeepAlive为false，保证进入该页面是刷新
+    beforeRouteLeave(to, from, next) {
+      from.meta.keepAlive = false
+      next()
+    }
   };
 </script>
 <style lang="scss">

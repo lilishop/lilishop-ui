@@ -1,7 +1,4 @@
-import axios from 'axios';
-import { getMenuList } from '@/api/index';
 import lazyLoading from './lazyLoading.js';
-import router from '@/router/index';
 import Cookies from "js-cookie";
 import { result } from './routerJson.js';
 
@@ -233,7 +230,6 @@ util.openNewPage = function (vm, name, argu, query) {
             if (query) {
                 tag.query = query;
             }
-            console.log(tag);
             vm.$store.commit('increateTag', tag);
         }
     }
@@ -399,7 +395,6 @@ util.initMenuData = function (vm, data) {
         let nav = {
             name: e.name,
             title: e.title,
-            icon: e.icon
         }
         navList.push(nav);
     })
@@ -450,20 +445,17 @@ util.initRouterNode = function (routers, data) {  // data为所有子菜单数�
 
     for (var item of data) {
         let menu = Object.assign({}, item);
-        // menu.component = import(`@/views/${menu.component}.vue`);
         menu.component = lazyLoading(menu.component);
 
         if (item.children && item.children.length > 0) {
             menu.children = [];
             util.initRouterNode(menu.children, item.children);
         }
-
         let meta = {};
-        // 给页面添加权限、标题、第三方网页链接
-        meta.permTypes = menu.permTypes ? menu.permTypes : null;
+        // 给页面添加标题
         meta.title = menu.title ? menu.title + " - lilishop商家后台" : null;
-        meta.url = menu.url ? menu.url : null;
-        meta.firstRouterName = item.firstRouterName
+        meta.firstRouterName = menu.firstRouterName
+        meta.keepAlive = menu.keepAlive ? true : false
         menu.meta = meta;
 
         routers.push(menu);

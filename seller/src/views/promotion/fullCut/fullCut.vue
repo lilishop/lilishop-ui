@@ -296,8 +296,13 @@ export default {
       });
     },
   },
-  activated () {
+  mounted () {
     this.init();
+  },
+  // 页面缓存处理，从该页面离开时，修改KeepAlive为false，保证进入该页面是刷新
+  beforeRouteLeave(to, from, next) {
+    from.meta.keepAlive = false
+    next()
   }
 };
 </script>

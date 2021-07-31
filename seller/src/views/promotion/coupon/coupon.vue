@@ -29,10 +29,9 @@
         <template slot-scope="{ row }" slot="action">
           <Button v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="info" size="small" :style="{'marginRight': row.promotionStatus !== 'CLOSE'?'5px':'0'}" @click="edit(row)">编辑</Button>
           <Button v-if="row.promotionStatus !== 'CLOSE'" type="error" size="small" @click="remove(row)">下架</Button>
-          <!-- <Button v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'" type="success" size="small" @click="open(row)">上架</Button> -->
         </template>
       </Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
           size="small" show-total show-elevator show-sizer></Page>
       </Row>
@@ -337,7 +336,7 @@ export default {
       });
     },
   },
-  activated() {
+  mounted() {
     this.init();
   },
 };

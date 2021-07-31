@@ -40,7 +40,7 @@
               :data="orderData"
               ref="table"
             ></Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page
                 :current="orderParam.pageNumber"
                 :total="orderTotal"
@@ -61,7 +61,7 @@
               :data="refundData"
               ref="table"
             ></Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page
                 :current="refundParam.pageNumber"
                 :total="refundTotal"
@@ -82,7 +82,7 @@
               :data="distributionData"
               ref="table"
             ></Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page
                 :current="distributionParam.pageNumber"
                 :total="distributionTotal"
@@ -604,6 +604,13 @@ export default {
   mounted() {
     this.init();
   },
+  // 如果是从详情页返回列表页，修改列表页keepAlive为true，确保不刷新页面
+  beforeRouteLeave(to, from, next){
+    if(to.name === 'accountStatementBill' || to.name === 'storeBill') {
+      to.meta.keepAlive = true
+    }
+    next()
+  }
 };
 </script>
 

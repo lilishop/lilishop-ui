@@ -50,7 +50,6 @@ export default {
     // 监听路由变化
     $route: {
       handler: function (val, oldVal) {
-        console.log(val);
         if (val.meta.firstRouterName && val.meta.firstRouterName !== this.currNav) {
           this.selectNav(val.meta.firstRouterName)
         }
