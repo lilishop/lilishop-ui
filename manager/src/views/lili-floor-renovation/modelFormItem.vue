@@ -35,7 +35,7 @@
         </template>
         <!-- 折扣广告 -->
         <template v-if="element.type == 'discountAdvert'">
-            <div class="discountAdvert" :style="{'background-image' : 'url(' + element.options.bgImg.img + ')'}">
+            <div class="discountAdvert" :style="{'background-image' : 'url(' + require('@/assets/nav/decorate.png') + ')'}">
                 <div>
                     <div v-for="(item,index) in element.options.classification" :key="index" class="setup-content">
                         <img :src="item.img" width="190" height="210" alt="">

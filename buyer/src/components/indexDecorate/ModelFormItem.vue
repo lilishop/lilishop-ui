@@ -30,14 +30,14 @@
       </ul>
     </template>
     <!-- 限时秒杀 待完善 -->
-    <!-- <template v-if="element.type == 'seckill'">
-      <seckill class="mb_20"></seckill>
-    </template> -->
+    <template v-if="element.type == 'seckill' && element.options.list.length">
+      <seckill :data="element" class="mb_20"></seckill>
+    </template>
     <!-- 折扣广告 -->
     <template v-if="element.type == 'discountAdvert'">
       <div
         class="discountAdvert mb_20"
-        :style="{'backgroundImage' :'url(' + require('@/assets/images/decorate.png')+')'}"
+        :style="{'backgroundImage' :'url(' + require('@/assets/images/decorate.png') + ')'}"
       >
         <img
           @click="linkTo(item.url)"

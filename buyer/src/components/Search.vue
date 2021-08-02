@@ -62,7 +62,7 @@ export default {
   },
   data () {
     return {
-      searchData: '', // 搜索内容
+      searchData: '' // 搜索内容
     };
   },
   methods: {
@@ -80,7 +80,7 @@ export default {
       this.$emit('search', this.searchData)
     }
   },
-  computed:{
+  computed: {
     promotionTags () {
       return JSON.parse(this.$store.state.hotWordsList)
     }
@@ -90,19 +90,18 @@ export default {
     if (!this.hover) { // 首页顶部固定搜索栏不调用热词接口
       // 搜索热词每一小时请求一次
       const reloadTime = storage.getItem('hotWordsReloadTime')
-      const time = new Date().getTime() - 60*60*1000
+      const time = new Date().getTime() - 5 * 60 * 1000
       if (!reloadTime) {
         hotWords({count: 5}).then(res => {
           if (res.success) storage.setItem('hotWordsList', res.result)
         })
-        storage.setItem('hotWordsReloadTime',new Date().getTime())
+        storage.setItem('hotWordsReloadTime', new Date().getTime())
       } else if (reloadTime && time > reloadTime) {
         hotWords({count: 5}).then(res => {
           if (res.success) storage.setItem('hotWordsList', res.result)
         })
-        storage.setItem('hotWordsReloadTime',new Date().getTime())
+        storage.setItem('hotWordsReloadTime', new Date().getTime())
       }
-      
     }
   }
 };
