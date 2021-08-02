@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="pay-done">
     <BaseHeader></BaseHeader>
     <div class="pay-done-box">
       <img src="../../assets/images/pay-success.png">
@@ -14,7 +14,10 @@
 
 <script>
 export default {
-  name: 'PayDone'
+  name: 'PayDone',
+  mounted () {
+    document.querySelector('.pay-done').style.height = window.innerHeight + 'px'
+  }
 };
 </script>
 
@@ -23,7 +26,6 @@ export default {
   margin: 100px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
 }
 .pay-btn{

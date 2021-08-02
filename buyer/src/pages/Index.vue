@@ -25,6 +25,7 @@ import ModelForm from '@/components/indexDecorate/ModelForm';
 import HoverSearch from '@/components/header/hoverSearch';
 import storage from '@/plugins/storage';
 import { indexData } from '@/api/index.js';
+import {seckillByDay} from '@/api/promotion'
 export default {
   name: 'Index',
   mounted () {
@@ -54,11 +55,28 @@ export default {
         if (res.success) {
           let dataJson = JSON.parse(res.result.pageData);
           this.modelForm = dataJson;
+          // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
+          for (let i = 0; i < dataJson.list.length; i++) {
+            if (dataJson.list[i].type === 'discountAdvert') {
+              let seckill = this.getListByDay()
+              dataJson.list[i].options.list = seckill
+              break;
+            }
+          }
           storage.setItem('navList', dataJson.list[1])
           this.showNav = true
           this.topAdvert = dataJson.list[0];
         }
       });
+    },
+    async getListByDay () { // 当天秒杀活动
+      const res = await seckillByDay()
+      console.log(res);
+      if (res.success && res.result.length) {
+        return res.result
+      } else {
+        return []
+      }
     }
   },
   components: {
