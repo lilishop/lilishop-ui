@@ -22,7 +22,7 @@
               <div class="wap-content-desc-title">{{ item.storeName }}</div>
 
               <div class="self-operated" :class="{'theme_color':item.selfOperated }">{{ item.selfOperated ? '自营' : '非自营' }}</div>
-              <div class="wap-sku" :class="{'theme_color':!item.shopDisable }">{{ item.shopDisable ? '开启中' : '关闭' }}</div>
+              <div class="wap-sku" :class="{'theme_color':!item.storeDisable }">{{ item.storeDisable ? '开启中' : '关闭' }}</div>
             </div>
           </div>
           <Spin size="large" fix v-if="loading"></Spin>
