@@ -36,7 +36,6 @@
 // 引入插件
 import { swiper, swiperSlide } from 'vue-awesome-swiper';
 import 'swiper/dist/css/swiper.css';
-import {seckillByDay} from '@/api/promotion'
 export default {
   components: {
     swiper,
@@ -143,13 +142,6 @@ export default {
       }, 1000)
     },
     getListByDay () { // 当天秒杀活动
-      // seckillByDay().then(res => {
-      //   if (res.success) {
-      //     this.list = res.result
-      //     this.goodsList = this.list[0].seckillGoodsList
-      //     this.countDown(this.currIndex)
-      //   }
-      // })
       // const list = [
       //   {
       //     timeLine: 18,
@@ -313,7 +305,7 @@ export default {
   align-items: center;
   justify-content: center;
 }
-.swiper-button-prev:hover, .swiper-button-next:hover{
+.swiper-button-prev:hover, .swiper-button-next:hover {
   background: #aaa;
 }
 .swiper-button-prev {
