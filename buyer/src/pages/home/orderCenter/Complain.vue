@@ -138,6 +138,7 @@ export default {
   mounted () {
     this.accessToken.accessToken = storage.getItem('accessToken');
     this.getOrderDetail()
+    window.scrollTo(0, 0)
   }
 }
 </script>

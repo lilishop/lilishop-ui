@@ -197,7 +197,7 @@ export default {
   background: #ededed;
 }
 .item-title {
-  background: #f5f7fa;
+  background: #d7e7f5!important;
   height: 54px;
 }
 .no-more {
@@ -244,7 +244,7 @@ export default {
     }
   }
 }
-.item:nth-of-type(3n) {
+.item:nth-of-type(2n+1) {
   background: #f5f7fa;
 }
 </style>

@@ -1,5 +1,6 @@
 <template>
   <div class="seckill">
+    <div class="desc">秒杀商品需要在促销活动中添加商品，有商品时才会在首页展示</div>
     <div class="aside">
       <div class="title">{{ actName }}</div>
       <div class="hour">
@@ -152,6 +153,13 @@ export default {
   width: 100%;
   height: 260px;
   display: flex;
+  position: relative;
+  .desc{
+    position: absolute;
+    color: $theme_color;
+    left: 200px;
+    top: 5px;
+  }
   .aside {
     overflow: hidden;
     width: 190px;

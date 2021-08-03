@@ -1,6 +1,13 @@
 <template>
   <div class="order-detail">
     <card _Title="售后详情" :_Size="16"></card>
+    <!-- 操作按钮 -->
+    <Card class="mb_10" v-if="(afterSale.serviceStatus == 'PASS' &&
+          afterSale.serviceType != 'RETURN_MONEY') || (afterSale.afterSaleAllowOperationVO && afterSale.afterSaleAllowOperationVO.cancel)">
+      <Button type="success" @click="openModal" v-if="afterSale.serviceStatus == 'PASS' &&
+          afterSale.serviceType != 'RETURN_MONEY'" size="small">提交物流</Button>
+      <Button type="error" @click="cancel(afterSale.sn)" v-if="afterSale.afterSaleAllowOperationVO && afterSale.afterSaleAllowOperationVO.cancel" size="small">取消售后</Button>
+    </Card>
     <div class="order-card">
       <h3>{{afterSale.serviceName}}</h3>
       <p class="global_color fontsize_18">{{ afterSale.orderStatusValue }}</p>
@@ -67,10 +74,35 @@
         <img :src="img" width="200" height="200" @click="perviewImg(img)" class="hover-pointer" alt="">
       </div>
     </div>
+    <Modal v-model="logisticsShow" width="530">
+      <p slot="header">
+        <span>提交物流信息</span>
+      </p>
+      <div>
+        <Form ref="form" :model="form" label-position="left" :label-width="100" :rules="rules">
+          <FormItem label="物流公司" prop="logisticsId">
+            <Select v-model="form.logisticsId" placeholder="请选择物流公司">
+              <Option v-for="item in companyList" :value="item.id" :key="item.id">{{ item.name }}</Option>
+            </Select>
+          </FormItem>
+          <FormItem label="快递单号" prop="logisticsNo">
+            <Input v-model="form.logisticsNo" placeholder="请填写快递单号"></Input>
+          </FormItem>
+          <FormItem label="发货时间" prop="mDeliverTime">
+            <DatePicker type="date" style="width:100%" v-model="form.mDeliverTime" @on-change="changeTime" format="yyyy-MM-dd" placeholder="选择发货时间"></DatePicker>
+          </FormItem>
+        </Form>
+      </div>
+      <div slot="footer" style="text-align: right">
+        <Button @click="logisticsShow = false">关闭</Button>
+        <Button type="primary" :loading="submitLoading" @click="submitDelivery">提交</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 <script>
-import { afterSaleDetail, afterSaleLog, afterSaleReason } from '@/api/member.js';
+import { afterSaleDetail, afterSaleLog, afterSaleReason, cancelAfterSale } from '@/api/member.js';
+import { afterSaleDelivery, getLogisticsCompany } from '@/api/order.js';
 import { afterSaleStatusList } from '../enumeration.js'
 export default {
   name: 'aftersale-detail',
@@ -79,7 +111,21 @@ export default {
       afterSale: {}, // 售后详情数据
       logList: [], // 日志
       reasonList: [], // 售后原因列表
-      afterSaleStatusList // 售后状态列表
+      afterSaleStatusList, // 售后状态列表
+      companyList: [], // 物流公司列表
+      logisticsShow: false, // 物流信息modal
+      form: { // 物流信息数据
+        afterSaleSn: '',
+        logisticsId: '',
+        logisticsNo: '',
+        mDeliverTime: ''
+      },
+      rules: { // 必填校验
+        logisticsId: [{ required: true, message: '请选择物流公司' }],
+        logisticsNo: [{ required: true, message: '请填写物流编号' }],
+        mDeliverTime: [{ required: true, message: '请选择发货时间' }]
+      },
+      submitLoading: false // 提交加载状态
     };
   },
   methods: {
@@ -89,7 +135,7 @@ export default {
           this.afterSale = res.result;
           this.afterSale.serviceName = this.filterOrderStatus(this.afterSale.serviceStatus)
           // 如果是原因id，则调接口查询原因中文释义
-          const pattern3 = new RegExp("[0-9]+");
+          const pattern3 = new RegExp('[0-9]+');
           if (pattern3.test(this.afterSale.reason)) {
             this.getReason(this.afterSale.serviceType)
           } else {
@@ -102,7 +148,7 @@ export default {
       afterSaleReason(type).then(res => {
         if (res.success) {
           this.reasonList = res.result
-          this.reasonList.forEach(e=> {
+          this.reasonList.forEach(e => {
             if (e.id === this.afterSale.reason) {
               this.$set(this.afterSale, 'reasonName', e.reason)
             }
@@ -121,6 +167,56 @@ export default {
     },
     perviewImg (img) { // 查看图片
       window.open(img, '_blank')
+    },
+    cancel (sn) { // 取消售后申请
+      this.$Modal.confirm({
+        title: '取消',
+        content: '<p>确定取消此次售后申请吗？</p>',
+        onOk: () => {
+          cancelAfterSale(sn).then(res => {
+            if (res.success) {
+              this.$Message.success('取消售后申请成功')
+              this.getDetail()
+            }
+          })
+        },
+        onCancel: () => {}
+      });
+    },
+    // 获取物流公司列表
+    getCompany () {
+      getLogisticsCompany().then(res => {
+        if (res.success) {
+          this.companyList = res.result
+        }
+      })
+    },
+    // 提交物流信息
+    submitDelivery () {
+      this.submitLoading = true
+      afterSaleDelivery(this.form).then(res => {
+        if (res.success) {
+          this.logisticsShow = false;
+          this.$Message.success('提交成功')
+          this.getDetail()
+        }
+        this.submitLoading = false
+      }).catch(() => {
+        this.submitLoading = false
+      })
+    },
+    // 提交物流modal
+    openModal () {
+      this.form.afterSaleSn = this.afterSale.sn
+      this.logisticsShow = true;
+      this.$refs.form.resetFields()
+      if (!this.companyList.length) {
+        this.getCompany()
+      }
+    },
+    // 格式化时间
+    changeTime (time) {
+      this.form.mDeliverTime = time;
     }
   },
   mounted () {
