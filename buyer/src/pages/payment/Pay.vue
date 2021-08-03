@@ -260,7 +260,7 @@
         <div>
           <span>应付金额：</span
           ><span class="actrual-price">{{
-            priceDetailDTO.billPrice | unitPrice("￥")
+            priceDetailDTO.flowPrice | unitPrice("￥")
           }}</span>
         </div>
       </div>
