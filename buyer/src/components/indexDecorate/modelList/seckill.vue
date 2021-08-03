@@ -142,20 +142,21 @@ export default {
       }, 1000)
     },
     getListByDay () { // 当天秒杀活动
-      // const list = [
-      //   {
-      //     timeLine: 18,
-      //     seckillGoodsList: [
-      //       {goodsImage: 'https://lilishop-oss.oss-cn-beijing.aliyuncs.com/a9593607de404546953055f279fd5d54.png', goodsName: 'dfsdgsdf', originalPrice: 39, price: 12},
-      //       {goodsImage: 'https://lilishop-oss.oss-cn-beijing.aliyuncs.com/a9593607de404546953055f279fd5d54.png', goodsName: 'dfsdgsdf', originalPrice: 39, price: 12},
-      //       {goodsImage: 'https://lilishop-oss.oss-cn-beijing.aliyuncs.com/a9593607de404546953055f279fd5d54.png', goodsName: 'dfsdgsdf', originalPrice: 39, price: 12},
-      //       {goodsImage: 'https://lilishop-oss.oss-cn-beijing.aliyuncs.com/a9593607de404546953055f279fd5d54.png', goodsName: 'dfsdgsdf', originalPrice: 39, price: 12},
-      //       {goodsImage: 'https://lilishop-oss.oss-cn-beijing.aliyuncs.com/a9593607de404546953055f279fd5d54.png', goodsName: 'dfsdgsdf', originalPrice: 39, price: 12},
-      //       {goodsImage: 'https://lilishop-oss.oss-cn-beijing.aliyuncs.com/a9593607de404546953055f279fd5d54.png', goodsName: 'dfsdgsdf', originalPrice: 39, price: 12}
-      //     ]
-      //   }
-      // ]
-      this.list = this.data.options.list
+      const list = [
+        {
+          timeLine: 18,
+          seckillGoodsList: [
+            {goodsImage: 'https://lilishop-oss.oss-cn-beijing.aliyuncs.com/a9593607de404546953055f279fd5d54.png', goodsName: 'dfsdgsdf', originalPrice: 39, price: 12},
+            {goodsImage: 'https://lilishop-oss.oss-cn-beijing.aliyuncs.com/a9593607de404546953055f279fd5d54.png', goodsName: 'dfsdgsdf', originalPrice: 39, price: 12},
+            {goodsImage: 'https://lilishop-oss.oss-cn-beijing.aliyuncs.com/a9593607de404546953055f279fd5d54.png', goodsName: 'dfsdgsdf', originalPrice: 39, price: 12},
+            {goodsImage: 'https://lilishop-oss.oss-cn-beijing.aliyuncs.com/a9593607de404546953055f279fd5d54.png', goodsName: 'dfsdgsdf', originalPrice: 39, price: 12},
+            {goodsImage: 'https://lilishop-oss.oss-cn-beijing.aliyuncs.com/a9593607de404546953055f279fd5d54.png', goodsName: 'dfsdgsdf', originalPrice: 39, price: 12},
+            {goodsImage: 'https://lilishop-oss.oss-cn-beijing.aliyuncs.com/a9593607de404546953055f279fd5d54.png', goodsName: 'dfsdgsdf', originalPrice: 39, price: 12}
+          ]
+        }
+      ]
+      this.list = list
+      // this.list = this.data.options.list
       this.goodsList = this.list[0].seckillGoodsList
       this.countDown(this.currIndex)
     }
