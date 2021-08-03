@@ -30,10 +30,7 @@
       </ul>
     </template>
     <!-- 限时秒杀 待完善 -->
-    <!-- <template v-if="element.type == 'seckill' && element.options.list.length">
-      <seckill :data="element" class="mb_20"></seckill>
-    </template> -->
-    <template v-if="element.type == 'discountAdvert'">
+    <template v-if="element.type == 'seckill' && element.options.list.length">
       <seckill :data="element" class="mb_20"></seckill>
     </template>
     <!-- 折扣广告 -->

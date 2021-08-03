@@ -57,7 +57,7 @@ export default {
           this.modelForm = dataJson;
           // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
           for (let i = 0; i < dataJson.list.length; i++) {
-            if (dataJson.list[i].type === 'discountAdvert') {
+            if (dataJson.list[i].type === 'seckill') {
               let seckill = this.getListByDay()
               dataJson.list[i].options.list = seckill
               break;
