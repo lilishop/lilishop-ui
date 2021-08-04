@@ -87,8 +87,7 @@ export default {
       userInfo().then((res) => {
         if (res.success) {
           // 加载菜单
-          this.setStore("userInfo", res.result);
-          Cookies.set("userInfo", JSON.stringify(res.result));
+          Cookies.set("userInfoManager", JSON.stringify(res.result));
           this.$store.commit("setAvatarPath", res.result.avatar);
           util.initRouter(this);
           this.$router.push({

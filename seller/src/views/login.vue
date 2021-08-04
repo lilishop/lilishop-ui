@@ -103,13 +103,12 @@ export default {
           this.setStore("saveLogin", this.saveLogin);
           if (this.saveLogin) {
             // 保存7天
-            Cookies.set("userInfo", JSON.stringify(res.result), {
+            Cookies.set("userInfoSeller", JSON.stringify(res.result), {
               expires: 7,
             });
           } else {
-            Cookies.set("userInfo", JSON.stringify(res.result));
+            Cookies.set("userInfoSeller", JSON.stringify(res.result));
           }
-          this.setStore("userInfo", res.result);
           this.$store.commit("setAvatarPath", res.result.storeLogo);
           // 加载菜单
           util.initRouter(this);

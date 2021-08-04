@@ -37,10 +37,6 @@ import { collectList, cancelCollect } from '@/api/member.js'
 export default {
   name: 'Favorites',
   props: {
-    paging: {
-      type: Boolean,
-      default: true
-    },
     homePage: {
       type: Boolean,
       default: false

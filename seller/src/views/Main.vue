@@ -39,9 +39,12 @@
     </div>
     <div class="single-page-con">
       <div class="single-page">
-        <keep-alive :include="cachePage">
-          <router-view></router-view>
+        <!-- <keep-alive :include="cachePage"> -->
+        <!-- </keep-alive> -->
+        <keep-alive>
+          <router-view v-if="$route.meta.keepAlive"></router-view>
         </keep-alive>
+        <router-view v-if="!$route.meta.keepAlive"></router-view>
       </div>
     </div>
     <!-- 全局加载动画 -->
@@ -65,7 +68,7 @@ export default {
   data() {
     return {
       sliceNum: 5, // 展示nav数量
-      userInfo: "", // 用户信息
+      userInfo: {}, // 用户信息
       navType: 1, // nav类型
     };
   },
@@ -95,7 +98,7 @@ export default {
         this.$store.commit("addOpenSubmenu", pathArr[1].name);
       }
 
-      let userInfo = JSON.parse(Cookies.get("userInfo"));
+      let userInfo = JSON.parse(Cookies.get("userInfoSeller"));
       this.userInfo = userInfo;
       this.checkTag(this.$route.name);
 

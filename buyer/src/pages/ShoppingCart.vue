@@ -53,9 +53,6 @@ export default {
   mounted () {
     let detail = this.$route.query.detail;
     if (detail) this.detail = detail;
-  },
-  methods: {
-
   }
 };
 </script>

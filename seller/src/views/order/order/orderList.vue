@@ -43,7 +43,7 @@
         </download-excel>
       </div>
       <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"></Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
           show-total show-elevator show-sizer></Page>
       </Row>
@@ -254,8 +254,7 @@ export default {
     },
     // 导出的待发货订单数据
     async exportOrder () {
-      let userInfo = JSON.parse(Cookies.get("userInfo"));
-      console.log(userInfo);
+      let userInfo = JSON.parse(Cookies.get("userInfoSeller"));
       const params = {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -298,9 +297,14 @@ export default {
       });
     },
   },
-  activated() {
+  mounted() {
     this.init();
   },
+  // 页面缓存处理，从该页面离开时，修改KeepAlive为false，保证进入该页面是刷新
+  beforeRouteLeave(to, from, next) {
+    from.meta.keepAlive = false
+    next()
+  }
 };
 </script>
 <style lang="scss">

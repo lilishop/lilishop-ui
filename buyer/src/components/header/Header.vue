@@ -39,15 +39,10 @@
           <Dropdown placement="bottom-start">
             <router-link to="/cart" target="_blank">
               <span @mouseenter="getCartList">
-                <Icon
-                  size="18"
-                  type="ios-cart-outline"
-                ></Icon>
+                <Icon size="18" type="ios-cart-outline"></Icon>
                 购物车
               </span>
-
             </router-link>
-
             <DropdownMenu slot="list">
               <div class="shopping-cart-null" style="width:200px" v-show="shoppingCart.length <= 0">
                 <Icon type="ios-cart-outline" class="cart-null-icon"></Icon>
@@ -83,9 +78,6 @@
         <li>
           <span class="nav-item" @click="shopEntry">店铺入驻</span>
         </li>
-        <!-- <li>
-          <router-link to="/feedback">意见反馈</router-link>
-        </li>-->
       </ul>
     </div>
   </div>
@@ -104,21 +96,17 @@ export default {
 
   data () {
     return {
-      // 主题颜色切换
-      themeType: 'light',
       userInfo: {}, // 用户信息
       shoppingCart: [] // 购物车
     };
   },
   computed: {
+    // 购物车商品数量
     cartNum () {
       return this.$store.state.cartNum;
     }
   },
   methods: {
-    changeCity (city) { // 选择所在城市
-      this.city = city;
-    },
     goToPay () { // 跳转购物车
       let url = this.$router.resolve({
         path: '/cart'
@@ -140,7 +128,7 @@ export default {
       this.$router.push('/login');
     },
     goUserCenter (path) {
-      // 跳转我的订单，我的足迹
+      // 跳转我的订单，我的足迹、收藏等
       if (this.userInfo.username) {
         this.$router.push({ path: path });
       } else {

@@ -116,7 +116,6 @@ export default {
                 content: "修改密码成功，需重新登录",
                 onOk: () => {
                   this.$store.commit("logout", this);
-                  this.$store.commit("clearOpenedSubmenu");
                   this.$router.push({
                     name: "login",
                   });

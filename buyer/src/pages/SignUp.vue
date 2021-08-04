@@ -88,7 +88,7 @@
         <router-link to="/article?id=1371992704333905920" class="item" target="_blank">条款</router-link>
       </Row>
       <Row type="flex" justify="center" class="copyright">
-        Copyright © 2021 - Present
+        Copyright © {{year}} - Present
         <a href="https://pickmall.cn" target="_blank" style="margin: 0 5px">lili-shop</a>
         版权所有
       </Row>
@@ -103,10 +103,11 @@ import * as apiLogin from '@/api/login.js';
 import { sendSms } from '@/api/common.js';
 import Verify from '@/components/verify';
 export default {
-  name: 'Login',
+  name: 'SignUp',
   components: { Verify },
   data () {
     return {
+      year: new Date().getFullYear(),
       formRegist: {
         // 注册表单
         mobilePhone: '',
@@ -156,6 +157,7 @@ export default {
         } else {}
       });
     },
+    // 发送短信验证码
     sendCode () {
       if (this.time === 60) {
         if (this.formRegist.mobilePhone === '') {
@@ -191,14 +193,13 @@ export default {
         });
       }
     },
-    handleCancel () {
-      this.$refs.formRegist.resetFields();
-    },
+    // 图片验证码成功回调
     verifyChange (con) {
       if (!con.status) return;
       this.$refs.verify.show = false;
       this.verifyStatus = true;
     },
+    // 打开图片验证码
     verifyBtnClick () {
       if (!this.verifyStatus) {
         this.$refs.verify.init();

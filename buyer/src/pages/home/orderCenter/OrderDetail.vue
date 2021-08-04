@@ -1,6 +1,11 @@
 <template>
   <div class="order-detail" v-if="order.order">
     <card _Title="订单详情" :_Size="16"></card>
+    <Card class="mb_10" v-if="order.allowOperationVO.pay || order.allowOperationVO.rog || order.allowOperationVO.cancel">
+      <Button type="success" @click="goPay(order.order.sn)" size="small" v-if="order.allowOperationVO.pay">去支付</Button>
+      <Button type="info" @click="received(order.order.sn)" size="small" v-if="order.allowOperationVO.rog">确认收货</Button>
+      <Button type="error" @click="handleCancelOrder(order.order.sn)" v-if="order.allowOperationVO.cancel" size="small">取消订单</Button>
+    </Card>
     <p class="verificationCode" v-if="order.order.verificationCode">核验码：<span>{{order.order.verificationCode}}</span></p>
     <div class="order-card">
       <p class="global_color fontsize_18">{{ order.orderStatusValue }}</p>
@@ -50,11 +55,12 @@
       <table>
         <thead>
           <tr>
-            <th width="50%">商品</th>
+            <th width="40%">商品</th>
             <th width="20%">货号</th>
             <th width="10%">单价</th>
             <th width="10%">数量</th>
             <th width="10%">小计</th>
+            <th width="10%">操作</th>
           </tr>
         </thead>
         <tbody>
@@ -71,6 +77,11 @@
             <td>{{ goods.goodsPrice | unitPrice('￥') }}</td>
             <td>{{ goods.num }}</td>
             <td>{{ (goods.goodsPrice * goods.num) | unitPrice('￥') }}</td>
+            <td>
+              <Button v-if="goods.afterSaleStatus.includes('NOT_APPLIED')" @click="applyAfterSale(goods.sn)" type="info" size="small" class="mb_5">申请售后</Button>
+              <Button v-if="goods.commentStatus == 'UNFINISHED'" @click="comment(order.order.sn, goodsIndex)" size="small" type="success" class="fontsize_12 mb_5" >评价</Button>
+              <Button v-if="goods.complainStatus == 'NO_APPLY'" @click="complain(order.order.sn, goodsIndex)" type="warning" class="fontsize_12" size="small">投诉</Button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -93,19 +104,31 @@
         </div>
       </div>
     </div>
+    <Modal v-model="cancelAvail" title="请选择取消订单原因" @on-ok="sureCancel" @on-cancel="cancelAvail = false">
+      <RadioGroup v-model="cancelParams.reason" vertical type="button" button-style="solid">
+        <Radio :label="item.reason" v-for="item in cancelReason" :key="item.id">
+           {{item.reason}}
+        </Radio>
+      </RadioGroup>
+    </Modal>
   </div>
 </template>
 <script>
-import card from '@/components/card';
-import { orderDetail, getTraces } from '@/api/order.js';
+import { orderDetail, getTraces, sureReceived, cancelOrder } from '@/api/order.js';
+import { afterSaleReason } from '@/api/member';
 export default {
-  components: { card },
   name: 'order-detail',
   data () {
     return {
       order: {}, // 订单详情数据
       progressList: [], // 订单流程
-      logistics: [] // 物流数据
+      logistics: [], // 物流数据
+      cancelParams: { // 取消售后参数
+        orderSn: '',
+        reason: ''
+      },
+      cancelAvail: false, // 取消订单modal控制
+      cancelReason: [] // 取消订单原因
     };
   },
   methods: {
@@ -139,6 +162,46 @@ export default {
           this.logistics = res.result
         }
       })
+    },
+    received (sn) { // 确认收货
+      sureReceived(sn).then(res => {
+        if (res.success) {
+          this.$Message.success('确认收货成功')
+          this.getDetail()
+        }
+      })
+    },
+    goPay (sn) { // 去支付
+      this.$router.push({path: '/payment', query: {orderType: 'ORDER', sn}});
+    },
+    applyAfterSale (sn) { // 申请售后
+      this.$router.push({name: 'ApplyAfterSale', query: {sn: sn}})
+    },
+    comment (sn, goodsIndex) { // 评价
+      this.$router.push({path: '/home/addEval', query: {sn, index: goodsIndex}})
+    },
+    complain (sn, goodsIndex) { // 投诉
+      this.$router.push({name: 'Complain', query: {sn, index: goodsIndex}})
+    },
+    handleCancelOrder (sn) {
+      // 取消订单
+      this.cancelParams.orderSn = sn;
+      afterSaleReason('CANCEL').then(res => {
+        if (res.success) {
+          this.cancelReason = res.result;
+          this.cancelAvail = true
+          this.cancelParams.reason = this.cancelReason[0].reason
+        }
+      })
+    },
+    sureCancel () { // 确定取消
+      cancelOrder(this.cancelParams).then(res => {
+        if (res.success) {
+          this.$Message.success('取消订单成功')
+          this.getDetail()
+          this.cancelAvail = false
+        }
+      })
     }
   },
   mounted () {
@@ -148,6 +211,9 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.mb_5{
+  margin-bottom: 5px;
+}
 .order-card {
   padding: 10px;
   padding-bottom: 10px;
@@ -169,7 +235,7 @@ export default {
   .operation-time {
     position: absolute;
     right: 20px;
-    top: 10px;
+    top: 20px;
   }
 }
 /** 店铺名称 */

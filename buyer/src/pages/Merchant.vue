@@ -102,8 +102,6 @@ export default {
     this.getCateList()
     this.getGoodsList()
   },
-  mounted () {
-  },
   methods: {
     getStoreMsg () { // 店铺信息
       getDetailById(this.$route.query.id).then(res => {
@@ -154,10 +152,12 @@ export default {
       this.cateName = cate.labelName
       this.getGoodsList()
     },
+    // 分页 修改页码
     changePageNum (val) {
       this.params.pageNumber = val;
       this.getGoodsList();
     },
+    // 分页 修改页数
     changePageSize (val) {
       this.params.pageNumber = 1;
       this.params.pageSize = val;

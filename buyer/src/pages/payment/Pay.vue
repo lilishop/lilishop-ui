@@ -101,12 +101,6 @@
               }}</span
               >&nbsp;&nbsp;
             </span>
-            <!-- <span>
-                            <p style="width:120px">配送方式：</p>
-                            <Select v-model="shop.deliveryMethod" size="small">
-                                <Option v-for="item in deliveryList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                            </Select>
-                        </span> -->
           </div>
           <div class="goods-list">
             <div
@@ -266,7 +260,7 @@
         <div>
           <span>应付金额：</span
           ><span class="actrual-price">{{
-            priceDetailDTO.billPrice | unitPrice("￥")
+            priceDetailDTO.flowPrice | unitPrice("￥")
           }}</span>
         </div>
       </div>
@@ -310,7 +304,6 @@ import {
   couponNum
 } from '@/api/cart';
 import { canUseCouponList } from '@/api/member.js';
-import { getLogo } from '@/api/common.js';
 export default {
   name: 'Pay',
   components: { invoiceModal, addressManage },
@@ -332,12 +325,6 @@ export default {
         totalPoint: 100,
         noGoods: 0
       },
-      deliveryList: [
-        // 物流
-        // {value: 'SELF_PICK_UP', label: '自提'},
-        { value: 'LOGISTICS', label: '物流' }
-        // {value: 'LOCAL_TOWN_DELIVERY', label: '同城配送'}
-      ],
       addressList: [], // 地址列表
       selectedAddress: {}, // 所选地址
       goodsList: [], // 商品列表
@@ -355,6 +342,7 @@ export default {
     this.init();
   },
   methods: {
+    // 初始化数据
     init () {
       this.getGoodsDetail();
     },
@@ -514,14 +502,6 @@ export default {
         query: { id: id }
       });
       window.open(routeUrl.href, '_blank');
-    },
-    selectDelivery (delivery) {
-      // 选择配送方式
-      let params = {
-        way: this.$route.query.way,
-        shippingMethod: delivery.value
-      };
-      shippingMethod(params).then((res) => {});
     },
     useCoupon (id, used) {
       // 使用优惠券

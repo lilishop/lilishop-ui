@@ -152,7 +152,7 @@
         <div>
           <Table stripe :columns="columns" :data="data"></Table>
         </div>
-        <Page @on-change="(index)=>{refundParams.pageNumber = index}" @on-page-size-change="(size)=>{refundParams.pageSize= size}" class="page" show-total show-elevator :total="total" />
+        <Page @on-change="(index)=>{refundParams.pageNumber = index}" @on-page-size-change="(size)=>{refundParams.pageSize= size}" class="mt_10" show-total show-elevator :total="total" />
       </div>
     </Card>
 
@@ -397,20 +397,20 @@ export default {
       orderParams: {
         searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
         year: "",
-        storeId: JSON.parse(Cookies.get("userInfo")).id || "",
+        storeId: JSON.parse(Cookies.get("userInfoSeller")).id || "",
         memberId: "",
       },
       // 订单概念
       overViewParams: {
         month: "",
         searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
-        storeId: JSON.parse(Cookies.get("userInfo")).id || "",
+        storeId: JSON.parse(Cookies.get("userInfoSeller")).id || "",
         year: "",
       },
       defaultParams: {
         month: "",
         searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
-        storeId: JSON.parse(Cookies.get("userInfo")).id || "",
+        storeId: JSON.parse(Cookies.get("userInfoSeller")).id || "",
         year: "",
       },
 
@@ -420,7 +420,7 @@ export default {
         pageNumber: 1,
         pageSize: 10,
         searchType: "LAST_SEVEN",
-        storeId: JSON.parse(Cookies.get("userInfo")).id || "",
+        storeId: JSON.parse(Cookies.get("userInfoSeller")).id || "",
         year: "",
       },
 

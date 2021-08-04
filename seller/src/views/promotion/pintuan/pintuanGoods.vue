@@ -285,6 +285,13 @@ export default {
   mounted () {
     this.init();
   },
+  // 如果是从详情页返回列表页，修改列表页keepAlive为true，确保不刷新页面
+  beforeRouteLeave(to, from, next){
+    if(to.name === 'pintuan') {
+      to.meta.keepAlive = true
+    }
+    next()
+  }
 };
 </script>
 <style lang="scss" scoped>

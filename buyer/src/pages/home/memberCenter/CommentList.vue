@@ -28,16 +28,13 @@
               <div class="order-name hover-color" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
                 {{item.goodsName}}
               </div>
-              <div>
-                x1
-              </div>
             </i-col>
             <i-col span="4">{{item.createBy | secrecyMobile}}</i-col>
             <i-col span="4">
               {{item.grade==='GOOD'?'好评' : item.grade === 'WORSE'?'差评' : '中评'}}
             </i-col>
             <i-col span="4">
-              <Tooltip >
+              <Tooltip transfer>
                   <div class="content">{{item.content}}</div>
                   <div style="white-space: normal;" slot="content">
                     {{item.content}}
@@ -54,6 +51,7 @@
       <Page :total="total" @on-change="changePageNum"
         @on-page-size-change="changePageSize"
         :page-size="params.pageSize"
+        show-total
         show-sizer>
       </Page>
     </div>
@@ -97,7 +95,7 @@ export default {
       this.getList()
     },
     changePageSize (val) { // 修改页数
-      this.pageNumber = 1;
+      this.params.pageNumber = 1;
       this.params.pageSize = val;
       this.getList()
     },

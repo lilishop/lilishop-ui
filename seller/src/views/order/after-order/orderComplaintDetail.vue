@@ -371,13 +371,20 @@ export default {
       });
     },
   },
-  activated () {
+  mounted () {
     this.id = this.$route.query.id;
     this.getDetail();
     this.accessToken = {
       accessToken: this.getStore("accessToken"),
     };
   },
+  // 如果是从详情页返回列表页，修改列表页keepAlive为true，确保不刷新页面
+  beforeRouteLeave(to, from, next){
+    if(to.name === 'orderComplaint') {
+      to.meta.keepAlive = true
+    }
+    next()
+  }
 };
 </script>
 <style lang="scss" scoped>

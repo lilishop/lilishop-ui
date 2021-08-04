@@ -7,7 +7,7 @@ import FixedTopPage from '@/components/advertising/FixedTop'; // 顶部广告
 import Footer from '@/components/footer/Footer'; // 底部栏
 import Search from '@/components/Search' // 搜索框
 import card from '@/components/card' // 个人中心 卡片
-import cateNav from '@/components/nav/cateNav' // 个人中心 卡片
+import cateNav from '@/components/nav/CateNav' // 个人中心 卡片
 
 empty.install = function (Vue) {
   Vue.component('empty', empty);

@@ -45,7 +45,6 @@
                 </div>
               </div>
             </div>
-
             <div>
               <span @click="shopPage(order.shopId)">{{ order.storeName }}</span>
             </div>
@@ -201,7 +200,7 @@ export default {
       this.getList()
     },
     changePageSize (val) { // 修改页数
-      this.pageNumber = 1;
+      this.params.pageNumber = 1;
       this.params.pageSize = val;
       this.getList()
     },

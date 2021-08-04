@@ -1,4 +1,3 @@
-// import Vue from 'vue';
 import axios from 'axios';
 import https from 'https';
 import { Message, Spin, Modal } from 'view-design';
@@ -8,6 +7,7 @@ import router from '../router/index.js';
 import store from '../vuex/store';
 import { handleRefreshToken } from '@/api/index';
 const qs = require('qs');
+// api地址
 export const buyerUrl =
   process.env.NODE_ENV === 'development'
     ? config.api_dev.buyer
@@ -180,13 +180,8 @@ export const Method = {
 };
 
 export default function request (options) {
-  // 如果是服务端或者是请求的刷新token，不需要检查token直接请求。
-  //   if (process.server || options.url.indexOf('passport/token') !== -1) {
   return service(options);
-  //   }
-  // service(options).then(resolve).catch(reject)
 }
-
 // 防抖闭包来一波
 function getTokenDebounce () {
   let lock = false;

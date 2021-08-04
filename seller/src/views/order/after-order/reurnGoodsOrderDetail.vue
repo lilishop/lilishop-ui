@@ -416,7 +416,7 @@ export default {
         if (res.success) {
           this.afterSaleInfo = res.result;
           this.afterSaleImage = (res.result.afterSaleImage || "").split(",");
-          this.params.actualRefundPrice = res.result.flowPrice;
+          this.params.actualRefundPrice = res.result.applyRefundPrice;
         }
       });
     },
@@ -522,6 +522,13 @@ export default {
     this.sn = this.$route.query.sn;
     this.getDetail();
   },
+  // 如果是从详情页返回列表页，修改列表页keepAlive为true，确保不刷新页面
+  beforeRouteLeave(to, from, next){
+    if(to.name === 'returnGoodsOrder' || to.name === 'returnMoneyOrder') {
+      to.meta.keepAlive = true
+    }
+    next()
+  }
 };
 </script>
 <style lang="scss" scoped>

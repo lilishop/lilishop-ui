@@ -3,10 +3,10 @@
     <BaseHeader></BaseHeader>
     <Search></Search>
     <cateNav></cateNav>
-    <ul class="category">
-      <li @click="selectCate(cate.id)" :class="{'selected-cate': cate.id === params.pointsGoodsCategoryId}" v-for="(cate, index) in cateList" :key="index">{{cate.name}}</li>
-    </ul>
     <h3 class="promotion-decorate">积分商品</h3>
+    <Select @on-select="selectCate" size="small" class="cate-select-con" v-model="cateId">
+      <Option v-for="(cate, index) in cateList" :value="cate.id" :key="index">{{cate.name}}</Option>
+    </Select>
     <!-- 列表 -->
     <div class="goods-list">
       <empty v-if="goodsList.length === 0" />
@@ -43,6 +43,7 @@
       <Page :total="total" @on-change="changePageNum"
         @on-page-size-change="changePageSize"
         :page-size="params.pageSize"
+        show-total
         show-sizer>
       </Page>
     </div>
@@ -57,18 +58,20 @@ export default {
       goodsList: [], // 积分商品列表
       cateList: [{ // 商品分类
         name: '全部分类',
-        id: ''
+        id: 0
       }], // 积分分类列表
       params: { // 商品列表请求参数
         pageNumber: 1,
         pageSize: 20,
         pointsGoodsCategoryId: ''
       },
-      total: 0 // 商品总数
+      total: 0, // 商品总数
+      cateId: '' // 店铺分类id
     }
   },
   mounted () {
     this.params.pointsGoodsCategoryId = this.$route.query.categoryId || ''
+    this.cateId = this.$route.query.categoryId || 0
     this.getList()
     this.getCate()
   },
@@ -88,10 +91,11 @@ export default {
         }
       })
     },
-    selectCate (id) { // 选择商品分类
-      this.params.pointsGoodsCategoryId = id
+    selectCate (item) { // 选择商品分类
+      let cateId = item.value === 0 ? '' : item.value
+      this.params.pointsGoodsCategoryId = cateId
       this.getList()
-      this.$router.push({query: {categoryId: id}})
+      this.$router.push({query: {categoryId: cateId}})
     },
     goGoodsDetail (skuId, goodsId) { // 跳转商品详情
       let routerUrl = this.$router.resolve({
@@ -105,7 +109,7 @@ export default {
       this.getList()
     },
     changePageSize (val) { // 修改页数
-      this.pageNumber = 1;
+      this.params.pageNumber = 1;
       this.params.pageSize = val;
       this.getList()
     }
@@ -116,6 +120,9 @@ export default {
 @import '../assets/styles/goodsList.scss';
 .seckill-price {
   font-size: 18px;
+}
+.point-mall{
+  position: relative;
 }
 .category {
   width: 1200px;
@@ -145,5 +152,13 @@ export default {
 }
 .promotion-decorate::before,.promotion-decorate::after{
   background-image: url('../../static/sprite@2x.png');
+}
+.cate-select-con{
+  display: block;
+  margin: 0 auto;
+  position: relative;
+  top: -60px;
+  left: 200px;
+  width: 100px;
 }
 </style>

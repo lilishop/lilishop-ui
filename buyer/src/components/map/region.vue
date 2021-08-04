@@ -167,7 +167,6 @@ export default {
   watch: {
     addressId: {
       handler: function (v) {
-        console.log(v);
         if (v) {
           this.reviewData();
         } else {
@@ -175,9 +174,6 @@ export default {
         }
       },
       immediate: true
-    },
-    addr (v) {
-      console.log(v);
     }
   }
 };

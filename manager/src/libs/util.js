@@ -320,7 +320,7 @@ util.initRouter = function (vm) { // 初始化路由
         frontRoute: 'error-page/404'
     }];
     // 判断用户是否登录
-    let userInfo = Cookies.get('userInfo')
+    let userInfo = Cookies.get('userInfoManager')
     if (!userInfo) {
         // 未登录
         return;

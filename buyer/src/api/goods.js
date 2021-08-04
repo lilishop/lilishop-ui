@@ -60,8 +60,8 @@ export function pintuanMembers (pintuanId) {
 }
 
 /**
- * @param {Number} start 搜索起始下标
- * @param {Number} end 搜索结束下标
+ * 获取搜索热词
+ * @param {Number} count 获取搜索热词数量
  */
 export function hotWords (params) {
   return request({

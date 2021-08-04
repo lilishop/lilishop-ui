@@ -417,7 +417,7 @@
 
           {
             title: "变动积分",
-            key: "point",
+            key: "variablePoint",
             width: 150,
             render: (h, params) => {
               if (params.row.pointType == 'INCREASE') {
@@ -426,7 +426,7 @@
                     style: {
                       color: 'green'
                     }
-                  }, "+" + params.row.point),
+                  }, "+" + params.row.variablePoint),
                 ]);
               } else {
                 return h('div', [
@@ -434,7 +434,7 @@
                     style: {
                       color: 'red'
                     }
-                  }, "-" + params.row.point),
+                  }, "-" + params.row.variablePoint),
                 ]);
               }
 

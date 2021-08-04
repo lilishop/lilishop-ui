@@ -53,6 +53,7 @@ export default {
     };
   },
   watch: {
+    // 监听搜索框搜索地图
     mapSearch: function (val) {
       this.searchOfMap(val);
     }

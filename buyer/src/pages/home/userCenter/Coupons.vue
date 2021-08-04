@@ -20,10 +20,10 @@
       </li>
     </ul>
     <Page :total="total" @on-change="changePageNum"
-      v-if="list.length && total > params.pageNumber"
       class="pageration"
       @on-page-size-change="changePageSize"
       :page-size="params.pageSize"
+      show-total
       show-sizer>
     </Page>
     <Spin v-if="loading" fix></Spin>
@@ -41,7 +41,7 @@ export default {
         '已使用',
         '已过期'
       ],
-      statusList: ['NEW', 'USED', 'EXPIRE'],
+      statusList: ['NEW', 'USED', 'EXPIRE'], // 优惠券状态
       loading: false, // 列表加载状态
       params: { // 请求参数
         pageNumber: 1,
@@ -86,7 +86,7 @@ export default {
     },
 
     changePageSize (val) { // 分页改变页数
-      this.pageNumber = 1;
+      this.params.pageNumber = 1;
       this.params.pageSize = val;
       this.getList()
     },

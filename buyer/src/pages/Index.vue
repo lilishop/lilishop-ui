@@ -3,7 +3,6 @@
     <drawer></drawer>
     <!-- 固定头部 -->
     <hover-search class="hover-search" :class="{show: topSearchShow}"></hover-search>
-
     <!-- 顶部广告 -->
     <FixedTopPage :data="topAdvert"></FixedTopPage>
     <!-- 头部 包括登录，我的订单等 -->
@@ -21,10 +20,11 @@
 
 <script>
 import Search from '@/components/Search';
-import ModelForm from '@/components/indexDecorate/modelForm';
+import ModelForm from '@/components/indexDecorate/ModelForm';
 import HoverSearch from '@/components/header/hoverSearch';
 import storage from '@/plugins/storage';
 import { indexData } from '@/api/index.js';
+import {seckillByDay} from '@/api/promotion'
 export default {
   name: 'Index',
   mounted () {
@@ -54,11 +54,28 @@ export default {
         if (res.success) {
           let dataJson = JSON.parse(res.result.pageData);
           this.modelForm = dataJson;
+          // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
+          for (let i = 0; i < dataJson.list.length; i++) {
+            if (dataJson.list[i].type === 'seckill') {
+              let seckill = this.getListByDay()
+              dataJson.list[i].options.list = seckill
+              break;
+            }
+          }
           storage.setItem('navList', dataJson.list[1])
           this.showNav = true
           this.topAdvert = dataJson.list[0];
         }
       });
+    },
+    async getListByDay () { // 当天秒杀活动
+      const res = await seckillByDay()
+      console.log(res);
+      if (res.success && res.result.length) {
+        return res.result
+      } else {
+        return []
+      }
     }
   },
   components: {
@@ -72,42 +89,6 @@ export default {
 <style scoped lang="scss">
 .container {
   @include sub_background_color($light_background_color);
-}
-/** 商品分类 */
-.nav-con {
-  width: 1200px;
-  height: 40px;
-  background: #eee;
-  margin: 0 auto;
-  display: flex;
-  .all-categories {
-    width: 200px;
-    line-height: 40px;
-    color: #fff;
-    background-color: $theme_color;
-    text-align: center;
-    font-size: 16px;
-  }
-  .nav-item {
-    width: 1000px;
-    height: 40px;
-    line-height: 40px;
-    overflow: hidden;
-    list-style: none;
-    background-color: #eee;
-    display: flex;
-    li {
-      width: 50px;
-      font-size: 16px;
-      font-weight: bold;
-      margin-left: 15px;
-      color: rgb(89, 88, 88);
-      font-size: 15px;
-      &:hover {
-        color: $theme_color;
-      }
-    }
-  }
 }
 </style>
 <style>

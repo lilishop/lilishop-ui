@@ -60,10 +60,8 @@
               </div>
             </div>
           </div>
-
           <div>
-            <span @click="shopPage(order.storeId)">{{ order.storeName }}</span
-            >
+            <span @click="shopPage(order.storeId)">{{ order.storeName }}</span>
           </div>
           <div>
             <!-- 订单基础操作 -->
@@ -79,25 +77,26 @@
       <Spin size="large" fix v-if="spinShow"></Spin>
     </div>
     <!-- 分页 -->
-    <div class="page-size" v-if="paging">
+    <div class="page-size" v-if="!homePage">
       <Page :total="total" @on-change="changePageNum"
         @on-page-size-change="changePageSize"
         :page-size="params.pageSize"
+        show-total
         show-sizer>
       </Page>
     </div>
     <!-- 选择售后商品 -->
     <Modal v-model="afterSaleModal" title="请选择申请售后的商品">
-        <div>
-            <Table
-              border
-              :columns="afterSaleColumns"
-              :data="afterSaleArr"
-              @on-row-click="afterSaleSelect"
-            >
-            </Table>
-        </div>
-        <div slot="footer"></div>
+      <div>
+        <Table
+          border
+          :columns="afterSaleColumns"
+          :data="afterSaleArr"
+          @on-row-click="afterSaleSelect"
+        >
+        </Table>
+      </div>
+      <div slot="footer"></div>
     </Modal>
     <Modal v-model="cancelAvail" title="请选择取消订单原因" @on-ok="sureCancel" @on-cancel="cancelAvail = false">
       <RadioGroup v-model="cancelParams.reason" vertical type="button" button-style="solid">
@@ -116,11 +115,7 @@ import { orderStatusList } from '../enumeration.js'
 export default {
   name: 'MyOrder',
   props: {
-    paging: {
-      type: Boolean,
-      default: true
-    },
-    homePage: {
+    homePage: { // 判断是否个人中心首页展示内容
       type: Boolean,
       default: false
     }
@@ -167,6 +162,7 @@ export default {
       });
       window.open(routeUrl.href, '_blank');
     },
+    // 切换订单状态
     change (index) {
       switch (index) {
         case 0:
@@ -221,23 +217,15 @@ export default {
         this.afterSaleModal = true
       }
     },
+    // 申请售后
     afterSaleSelect (item) {
       this.$router.push({name: 'ApplyAfterSale', query: {sn: item.sn}})
-    },
-    viewComment (sn) { // 查看评价
-
     },
     comment (sn, goodsIndex) { // 评价
       this.$router.push({path: '/home/addEval', query: {sn, index: goodsIndex}})
     },
-    addComment (sn) { // 追加评价
-
-    },
     complain (sn, goodsIndex) { // 投诉
       this.$router.push({name: 'Complain', query: {sn, index: goodsIndex}})
-    },
-    complainResult (sn) { // 投诉结果
-
     },
     delOrder (sn) { // 删除订单
       this.$Modal.confirm({
@@ -273,7 +261,7 @@ export default {
       this.getList()
     },
     changePageSize (val) { // 修改页数
-      this.pageNumber = 1;
+      this.params.pageNumber = 1;
       this.params.pageSize = val;
       this.getList()
     },
@@ -314,9 +302,7 @@ export default {
 }
 .page-size {
   margin: 15px 0px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
+  text-align: right;
 }
 /** 订单列表 */
 .order-list {

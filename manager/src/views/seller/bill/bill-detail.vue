@@ -1,99 +1,85 @@
 <template>
   <div>
-    <template>
-      <Row>
-        <i-col span="24">
-          <Card>
-            <p slot="title">商家信息</p>
-            <div class="flex flex_align_item">
-              <p>店铺名称：{{ bill.storeName }}</p>
-              <p>银行开户名：{{ bill.bankAccountName }}</p>
-              <p>银行账号：{{ bill.bankAccountNumber }}</p>
-              <p>开户行支行名称：{{ bill.bankName }}</p>
-              <p>支行联行号：{{ bill.bankCode }}</p>
-            </div>
-          </Card>
-        </i-col>
-      </Row>
-    </template>
-    <template>
-      <Row>
-        <i-col span="24">
-          <Card>
-            <p slot="title">账单详细</p>
+    <Card>
+      <p slot="title">商家信息</p>
+      <div class="flex flex_align_item">
+        <p>店铺名称：{{ bill.storeName }}</p>
+        <p>银行开户名：{{ bill.bankAccountName }}</p>
+        <p>银行账号：{{ bill.bankAccountNumber }}</p>
+        <p>开户行支行名称：{{ bill.bankName }}</p>
+        <p>支行联行号：{{ bill.bankCode }}</p>
+      </div>
+    </Card>
+    <Card class="mt_10 mb_10">
+      <p slot="title">账单详细</p>
 
-            <div class="tips-status">
-              <span>商品状态</span>
+      <div class="tips-status">
+        <span>商品状态</span>
 
-              <span class="theme_color">{{
-                bill.billStatus | unixSellerBillStatus
-              }}</span>
+        <span class="theme_color">{{
+          bill.billStatus | unixSellerBillStatus
+        }}</span>
 
 
-              <Button
-                v-if="bill.billStatus == 'CHECK'"
-                size="mini"
-                type="primary"
-                @click="pass()"
-                >付款</Button
-              >
-            </div>
+        <Button
+          v-if="bill.billStatus == 'CHECK'"
+          size="mini"
+          type="primary"
+          @click="pass()"
+          >付款</Button
+        >
+      </div>
 
-            <i-table :columns="columns" :data="data" stripe></i-table>
-          </Card>
-        </i-col>
-      </Row>
-    </template>
-    <template>
-      <Tabs active-key="key1" @on-click="clickTabs">
-        <Tab-pane label="入账流水" key="key1">
-          <Card>
-            <Table
-              :loading="loading"
-              border
-              :columns="orderColumns"
-              :data="order"
-              ref="table"
-            ></Table>
-            <Row type="flex" justify="end" class="mt_10">
-              <Page
-                :current="orderParam.pageNumber"
-                :total="orderTotal"
-                :page-size="orderParam.pageSize"
-                @on-change="orderChangePage"
-                @on-page-size-change="orderChangePageSize"
-                size="small"
-                show-total
-                show-elevator
-              ></Page>
-            </Row>
-          </Card>
-        </Tab-pane>
-        <Tab-pane label="退款流水" key="key2">
-          <Card>
-            <Table
-              :loading="loading"
-              border
-              :columns="refundColumns"
-              :data="refund"
-              ref="table"
-            ></Table>
-            <Row type="flex" justify="end" class="mt_10">
-              <Page
-                :current="refundParam.pageNumber"
-                :total="refundTotal"
-                :page-size="refundParam.pageSize"
-                @on-change="getRefund()"
-                @on-page-size-change="getRefund()"
-                size="small"
-                show-total
-                show-elevator
-              ></Page>
-            </Row>
-          </Card>
-        </Tab-pane>
-      </Tabs>
-    </template>
+      <i-table :columns="columns" :data="data" stripe></i-table>
+    </Card>
+    <Tabs active-key="key1" @on-click="clickTabs">
+      <Tab-pane label="入账流水" key="key1">
+        <Card>
+          <Table
+            :loading="loading"
+            border
+            :columns="orderColumns"
+            :data="order"
+            ref="table"
+          ></Table>
+          <Row type="flex" justify="end" class="mt_10">
+            <Page
+              :current="orderParam.pageNumber"
+              :total="orderTotal"
+              :page-size="orderParam.pageSize"
+              @on-change="orderChangePage"
+              @on-page-size-change="orderChangePageSize"
+              size="small"
+              show-total
+              show-elevator
+            ></Page>
+          </Row>
+        </Card>
+      </Tab-pane>
+      <Tab-pane label="退款流水" key="key2">
+        <Card>
+          <Table
+            :loading="loading"
+            border
+            :columns="refundColumns"
+            :data="refund"
+            ref="table"
+          ></Table>
+          <Row type="flex" justify="end" class="mt_10">
+            <Page
+              :current="refundParam.pageNumber"
+              :total="refundTotal"
+              :page-size="refundParam.pageSize"
+              @on-change="getRefund()"
+              @on-page-size-change="getRefund()"
+              size="small"
+              show-total
+              show-elevator
+            ></Page>
+          </Row>
+        </Card>
+      </Tab-pane>
+    </Tabs>
   </div>
 </template>
 <script>
@@ -170,7 +156,7 @@ export default {
         },
         {
           title: "订单编号",
-          key: "sn",
+          key: "orderSn",
           minWidth: 120,
           tooltip: true
         },
@@ -183,6 +169,35 @@ export default {
               "div",
               this.$options.filters.unitPrice(params.row.finalPrice, "￥")
             );
+          },
+        },
+        {
+          title: "砍价商品结算价格",
+          slot: "kanjiaSettlementPrice",
+          render: (h, params) => {
+            if (params.row.kanjiaSettlementPrice) {
+              return h(
+                "div",
+                this.$options.filters.unitPrice(params.row.kanjiaSettlementPrice, "￥")
+              );
+            } else {
+              return h('div','￥0.00')
+            }
+            
+          },
+        },
+        {
+          title: "积分商品结算价格",
+          key: "pointSettlementPrice",
+          render: (h, params) => {
+            if (params.row.pointSettlementPrice){
+              return h(
+                "div",
+                this.$options.filters.unitPrice(params.row.pointSettlementPrice, "￥")
+              );
+            } else {
+              return h('div','￥0.00')
+            }
           },
         },
         {
@@ -199,7 +214,6 @@ export default {
         {
           title: "平台优惠券",
           key: "siteCouponPrice",
-          minWidth: 120,
           render: (h, params) => {
             if(params.row.siteCouponPrice == null){
               return h(

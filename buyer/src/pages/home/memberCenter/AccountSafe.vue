@@ -20,9 +20,7 @@
 </template>
 
 <script>
-import {
-  getPwdStatus
-} from '@/api/account';
+import { getPwdStatus } from '@/api/account';
 export default {
   name: 'AccountSafe',
   data () {

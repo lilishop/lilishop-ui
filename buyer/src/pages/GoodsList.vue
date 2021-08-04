@@ -77,6 +77,7 @@
       </div>
       <div class="goods-page">
         <Page
+          show-total
           show-sizer
           @on-change="changePageNum"
           @on-page-size-change="changePageSize"
@@ -126,6 +127,7 @@ export default {
     }
   },
   methods: {
+    // 搜索
     handleSearch (key) {
       this.params.keyword = key
       this.params.pageNumber = 0
@@ -156,15 +158,18 @@ export default {
       });
       window.open(routeUrl.href, '_blank');
     },
+    // 分页 修改页码
     changePageNum (val) {
       this.params.pageNumber = val;
       this.getGoodsList();
     },
+    // 分页 修改页数
     changePageSize (val) {
       this.params.pageNumber = 1;
       this.params.pageSize = val;
       this.getGoodsList();
     },
+    // 获取商品列表
     getGoodsList () {
       this.loading = true;
       apiGoods.goodsList(this.params)
@@ -194,7 +199,6 @@ export default {
     }
     this.getGoodsList()
   },
-  mounted () {},
   components: {
     GoodsClassNav
   }

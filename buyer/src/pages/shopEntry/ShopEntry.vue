@@ -39,9 +39,9 @@
 </template>
 <script>
 import { agreement, applyStatus } from '@/api/shopentry';
-import firstApply from './first-apply';
-import secondApply from './second-apply';
-import thirdApply from './third-apply';
+import firstApply from './FirstApply';
+import secondApply from './SecondApply';
+import thirdApply from './ThirdApply';
 export default {
   components: {
     firstApply,
@@ -129,10 +129,10 @@ export default {
               this.$forceUpdate();
             })
           }
-          console.log(33333333333333);
         }
       });
     },
+    // 下一步
     nextPage (step) {
       this.currentIndex = step;
     }

@@ -18,7 +18,7 @@ export default {
     }
   },
   computed: {
-    cartNum () { // 购物车数量
+    cartNum () { // 购物车商品数量
       return this.$store.state.cartNum
     }
   },

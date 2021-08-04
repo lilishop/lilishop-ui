@@ -88,9 +88,6 @@ export default {
     avatarPath() {
       return localStorage.avatorImgPath;
     },
-    cachePage() {
-      return this.$store.state.app.cachePage;
-    },
     lang() {
       return this.$store.state.app.lang;
     }
@@ -99,11 +96,7 @@ export default {
   methods: {
     init() {
       // 菜单初始化
-      let pathArr = util.setCurrentPath(this, this.$route.name);
-      if (pathArr.length >= 2) {
-        this.$store.commit("addOpenSubmenu", pathArr[1].name);
-      }
-      let userInfo = JSON.parse(Cookies.get("userInfo"));
+      let userInfo = JSON.parse(Cookies.get("userInfoManager"));
 
       this.userInfo = userInfo;
       this.checkTag(this.$route.name);
@@ -138,9 +131,7 @@ export default {
       }
       // 退出登录
       else if (name === "loginOut") {
-        Cookies.set("accessToken", "");
         this.$store.commit("logout", this);
-        this.$store.commit("clearOpenedSubmenu");
         this.setStore("accessToken", "");
         this.setStore("refreshToken", "");
         this.$router.push({ path: "/login" });
@@ -177,16 +168,9 @@ export default {
   watch: {
     $route(to, from) {
       this.$store.commit("setCurrentPageName", to.name);
-      let pathArr = util.setCurrentPath(this, to.name);
-      if (pathArr.length > 2) {
-        this.$store.commit("addOpenSubmenu", pathArr[1].name);
-      }
       this.checkTag(to.name);
       localStorage.currentPageName = to.name;
-    },
-    lang() {
-      util.setCurrentPath(this, this.$route.name); // 在切换语言时用于刷新面包屑
-    },
+    }
   },
   mounted() {
     this.init();

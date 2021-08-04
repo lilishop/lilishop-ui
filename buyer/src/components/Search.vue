@@ -27,6 +27,7 @@
           <Tag
             v-for="(item, index) in promotionTags"
             :key="index"
+            class="mr_10"
           >
             <span class="hover-color" @click="selectTags(item)">{{ item }}</span>
           </Tag>
@@ -37,6 +38,7 @@
 </template>
 
 <script>
+import storage from '@/plugins/storage.js'
 import {hotWords} from '@/api/goods.js'
 export default {
   name: 'search',
@@ -60,8 +62,7 @@ export default {
   },
   data () {
     return {
-      searchData: '', // 搜索内容
-      promotionTags: [] // 热门搜索列表
+      searchData: '' // 搜索内容
     };
   },
   methods: {
@@ -79,18 +80,36 @@ export default {
       this.$emit('search', this.searchData)
     }
   },
-  mounted () {
+  computed: {
+    promotionTags () {
+      if (this.$store.state.hotWordsList) {
+        return JSON.parse(this.$store.state.hotWordsList)
+      } else {
+        return []
+      }
+    }
+  },
+  created () {
     this.searchData = this.$route.query.keyword
-
     if (!this.hover) { // 首页顶部固定搜索栏不调用热词接口
-      hotWords({start: 1, end: 5}).then(res => {
-        if (res.success) this.promotionTags = res.result
-      })
+      // 搜索热词每5分钟请求一次
+      const reloadTime = storage.getItem('hotWordsReloadTime')
+      const time = new Date().getTime() - 5 * 60 * 1000
+      if (!reloadTime) {
+        hotWords({count: 5}).then(res => {
+          if (res.success) storage.setItem('hotWordsList', res.result)
+        })
+        storage.setItem('hotWordsReloadTime', new Date().getTime())
+      } else if (reloadTime && time > reloadTime) {
+        hotWords({count: 5}).then(res => {
+          if (res.success) storage.setItem('hotWordsList', res.result)
+        })
+        storage.setItem('hotWordsReloadTime', new Date().getTime())
+      }
     }
   }
 };
 </script>
-
 <style scoped lang="scss">
 .container {
   margin: 30px auto;

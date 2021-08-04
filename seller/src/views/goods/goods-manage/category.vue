@@ -77,7 +77,7 @@ import * as API_Goods from "@/api/goods";
 import TreeTable from "@/views/my-components/tree-table/Table/Table";
 
 export default {
-  name: "lili-components",
+  name: "store-category",
   components: {
     TreeTable
   },
@@ -85,7 +85,6 @@ export default {
     return {
       submitLoading: false, // 提交loading
       loading: false, //表格加载的loading
-      expandLevel: 1, // 展开的层级
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
@@ -162,7 +161,6 @@ export default {
       this.formAdd.level = v.level;
       this.formAdd.parentId = v.parentId;
       this.formAdd.sortOrder = v.sortOrder;
-      this.formAdd.image = v.image;
       this.showParent = false;
       this.modalVisible = true;
     },
@@ -184,6 +182,7 @@ export default {
       this.$refs.formAdd.validate(valid => {
         if (valid) {
           this.submitLoading = true;
+          console.log(this.formAdd);
           if (this.modalType === 0) {
             // 添加 避免编辑后传入id等数据 记得删除
             delete this.formAdd.id;
@@ -193,7 +192,6 @@ export default {
                 this.$Message.success("添加成功");
                 this.getAllList(0);
                 this.modalVisible = false;
-                this.$refs.form.resetFields();
               }
             });
           } else {
@@ -204,7 +202,6 @@ export default {
                 this.$Message.success("修改成功");
                 this.getAllList(0);
                 this.modalVisible = false;
-                this.$refs.form.resetFields();
               }
             });
           }
@@ -236,63 +233,11 @@ export default {
       API_Goods.getShopGoodsLabelList(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
-          // 仅展开指定级数 默认后台已展开所有
-          let expandLevel = this.expandLevel;
-          res.result.forEach(function (e) {
-            if (expandLevel == 1) {
-              if (e.level == 0) {
-                e.expand = false;
-              }
-              if (e.children && e.children.length > 0) {
-                e.children.forEach(function (c) {
-                  if (c.level == 1) {
-                    c.expand = false;
-                  }
-                  if (c.children && c.children.length > 0) {
-                    c.children.forEach(function (b) {
-                      if (b.level == 2) {
-                        b.expand = false;
-                      }
-                    });
-                  }
-                });
-              }
-            } else if (expandLevel == 2) {
-              if (e.level == 0) {
-                e.expand = true;
-              }
-              if (e.children && e.children.length > 0) {
-                e.children.forEach(function (c) {
-                  if (c.level == 1) {
-                    c.expand = false;
-                  }
-                  if (c.children && c.children.length > 0) {
-                    c.children.forEach(function (b) {
-                      if (b.level == 2) {
-                        b.expand = false;
-                      }
-                    });
-                  }
-                });
-              }
-            } else if (expandLevel == 3) {
-              if (e.level == 0) {
-                e.expand = true;
-              }
-              if (e.children && e.children.length > 0) {
-                e.children.forEach(function (c) {
-                  if (c.level == 1) {
-                    c.expand = true;
-                  }
-                  if (c.children && c.children.length > 0) {
-                    c.children.forEach(function (b) {
-                      if (b.level == 2) {
-                        b.expand = false;
-                      }
-                    });
-                  }
-                });
-              }
+          res.result.forEach(firstCate => {
+            if (firstCate.children && firstCate.children.length) {
+              firstCate.children.forEach(secondCate => {
+                secondCate.parentId = firstCate.id
+              })
             }
           });
           this.tableData = res.result;

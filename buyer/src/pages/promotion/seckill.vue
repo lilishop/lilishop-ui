@@ -68,6 +68,10 @@ export default {
       nowHour: new Date().getHours() // 当前小时数
     }
   },
+  beforeDestroy () {
+    // 销毁前清除定时器
+    clearInterval(this.interval);
+  },
   watch: {
     currIndex (val) {
       clearInterval(this.interval)

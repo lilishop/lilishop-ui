@@ -40,7 +40,7 @@
               :data="orderData"
               ref="table"
             ></Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page
                 :current="orderParam.pageNumber"
                 :total="orderTotal"
@@ -61,7 +61,7 @@
               :data="refundData"
               ref="table"
             ></Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page
                 :current="refundParam.pageNumber"
                 :total="refundTotal"
@@ -82,7 +82,7 @@
               :data="distributionData"
               ref="table"
             ></Table>
-            <Row type="flex" justify="end" class="page">
+            <Row type="flex" justify="end" class="mt_10">
               <Page
                 :current="distributionParam.pageNumber"
                 :total="distributionTotal"
@@ -165,17 +165,14 @@ export default {
         {
           title: "入账时间",
           key: "createTime",
-          minWidth: 120
         },
         {
           title: "订单编号",
-          key: "sn",
-          minWidth: 120
+          key: "orderSn",
         },
         {
           title: "订单金额",
           key: "finalPrice",
-          minWidth: 120,
           render: (h, params) => {
             return h(
               "div",
@@ -184,9 +181,36 @@ export default {
           },
         },
         {
+          title: "砍价商品结算价格",
+          key: "kanjiaSettlementPrice",
+          render: (h, params) => {
+            if (params.row.kanjiaSettlementPrice) {
+              return h(
+                "div",
+                this.$options.filters.unitPrice(params.row.kanjiaSettlementPrice, "￥")
+              );
+            } else {
+              return h('div','￥0.00')
+            }
+          },
+        },
+        {
+          title: "积分商品结算价格",
+          key: "pointSettlementPrice",
+          render: (h, params) => {
+            if (params.row.pointSettlementPrice){
+              return h(
+                "div",
+                this.$options.filters.unitPrice(params.row.pointSettlementPrice, "￥")
+              );
+            } else {
+              return h('div','￥0.00')
+            }
+          },
+        },
+        {
           title: "平台分佣",
           key: "commissionPrice",
-          minWidth: 120,
           render: (h, params) => {
             return h(
               "div",
@@ -197,7 +221,6 @@ export default {
         {
           title: "平台优惠券",
           key: "siteCouponPrice",
-          minWidth: 120,
           render: (h, params) => {
             if(params.row.siteCouponPrice == null){
               return h(
@@ -216,7 +239,6 @@ export default {
         {
           title: "分销金额",
           key: "distributionRebate",
-          minWidth: 100,
           render: (h, params) => {
             if(params.row.distributionRebate == null){
               return h(
@@ -235,7 +257,6 @@ export default {
         {
           title: "应结金额",
           key: "billPrice",
-          minWidth: 120,
           render: (h, params) => {
             return h(
               "div",
@@ -583,6 +604,13 @@ export default {
   mounted() {
     this.init();
   },
+  // 如果是从详情页返回列表页，修改列表页keepAlive为true，确保不刷新页面
+  beforeRouteLeave(to, from, next){
+    if(to.name === 'accountStatementBill' || to.name === 'storeBill') {
+      to.meta.keepAlive = true
+    }
+    next()
+  }
 };
 </script>
 

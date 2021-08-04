@@ -237,7 +237,7 @@ export default {
         this.withdrawApplyModal = false
         this.price = 0;
         if (res.success) {
-          this.$Message.success('提现成功')
+          this.$Message.success('申请已提交，请等待审核')
           this.distribution()
         } else {
           this.$Message.error(res.message)
@@ -333,39 +333,18 @@ export default {
 </script>
 
 <style scoped lang='scss'>
-  .afList{
-    display: flex;
-
-  }
-.codeImg{
-
-  display: flex;
-  >img{
-    width: 150px;
-    height: 150px;
-  }
-}
-.mb_40{margin-bottom: 40px;}
 .box {
   margin: 20px 0;
 }
 .page-size {
   margin: 15px 0px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
+  text-align: right;
 }
 .account-price {
   font-weight: bold;
 }
 .subTips {
   @include sub_color($light_sub_color);
-}
-.account-btns {
-  margin: 10px 0;
-}
-.ivu-btn {
-  margin: 0 4px;
 }
 .fontsize_48 {
   font-size: 48px;

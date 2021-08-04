@@ -66,6 +66,7 @@ export default {
     };
   },
   methods: {
+    // 获取订单详情
     getTradeDetail () {
       const params = this.$route.query;
       params.clientType = 'PC'
@@ -127,7 +128,6 @@ export default {
   font-size: 21px;
 
 }
-
 .-box-item {
   display: flex;
   font-size: 18px;

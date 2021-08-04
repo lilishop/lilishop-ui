@@ -3,12 +3,10 @@
     <card _Title="收货地址" _More="添加新地址" _Src="/home/addAddress"></card>
     <div class="address-box" v-for="(item, index) in list" :key="index">
       <div class="address-header">
-        <span
-          >{{ item.name }}
+        <span>
+          {{ item.name }}
           <Tag class="ml_10" v-if="item.isDefault" color="red">默认地址</Tag>
-          <Tag class="ml_10" v-if="item.alias" color="warning">{{
-            item.alias
-          }}</Tag>
+          <Tag class="ml_10" v-if="item.alias" color="warning">{{item.alias}}</Tag>
         </span>
         <div class="address-action">
           <span @click="edit(item.id)"><Icon type="edit"></Icon>修改</span>
@@ -81,9 +79,6 @@ export default {
   },
   mounted () {
     this.getAddrList();
-  },
-  components: {
-    card
   }
 };
 </script>

@@ -17,7 +17,7 @@
             :open-names="openName"
             @on-select="onSelect"
           >
-            <!--   循环导航栏       -->
+            <!-- 循环导航栏  -->
             <Submenu
               v-show="menu.children"
               v-for="(menu, index) in list"
@@ -34,7 +34,6 @@
                 >{{ chlidren.articleCategoryName }}</MenuItem
               >
             </Submenu>
-
           </Menu>
         </Sider>
         <Layout class="layout ml_10">

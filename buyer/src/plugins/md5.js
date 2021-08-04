@@ -10,7 +10,7 @@
  * Add integers, wrapping at 2^32. This uses 16-bit operations internally
  * to work around bugs in some JS interpreters.
  */
-function safe_add(x, y) {
+function safe_add (x, y) {
   var lsw = (x & 0xFFFF) + (y & 0xFFFF)
   var msw = (x >> 16) + (y >> 16) + (lsw >> 16)
   return (msw << 16) | (lsw & 0xFFFF)
@@ -19,7 +19,7 @@ function safe_add(x, y) {
 /*
  * Bitwise rotate a 32-bit number to the left.
  */
-function rol(num, cnt) {
+function rol (num, cnt) {
   return (num << cnt) | (num >>> (32 - cnt))
 }
 
@@ -42,7 +42,7 @@ function hh(a, b, c, d, x, s, t) {
   return cmn(b ^ c ^ d, a, b, x, s, t)
 }
 
-function ii(a, b, c, d, x, s, t) {
+function ii (a, b, c, d, x, s, t) {
   return cmn(c ^ (b | (~d)), a, b, x, s, t)
 }
 
@@ -50,7 +50,7 @@ function ii(a, b, c, d, x, s, t) {
  * Calculate the MD5 of an array of little-endian words, producing an array
  * of little-endian words.
  */
-function coreMD5(x) {
+function coreMD5 (x) {
   var a = 1732584193
   var b = -271733879
   var c = -1732584194

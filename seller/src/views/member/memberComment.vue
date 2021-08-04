@@ -49,7 +49,7 @@
         ref="table"
         class="mt_10"
       ></Table>
-      <Row type="flex" justify="end" class="page">
+      <Row type="flex" justify="end" class="mt_10">
         <Page
           :current="searchForm.pageNumber"
           :total="total"
@@ -369,7 +369,7 @@ export default {
       });
     },
   },
-  activated() {
+  mounted() {
     this.init();
   },
 };

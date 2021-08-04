@@ -3,7 +3,7 @@ import Router from 'vue-router';
 import Index from '@/pages/Index';
 const Login = resolve => require(['@/pages/Login'], resolve);
 const SignUp = resolve => require(['@/pages/SignUp'], resolve);
-const ForgetPassword = resolve => require(['@/pages/forgetPassword'], resolve);
+const ForgetPassword = resolve => require(['@/pages/ForgetPassword'], resolve);
 const GoodsList = resolve => require(['@/pages/GoodsList'], resolve);
 const GoodsDetail = resolve => require(['@/pages/GoodsDetail'], resolve);
 const ShoppingCart = resolve => require(['@/pages/ShoppingCart'], resolve);
@@ -11,9 +11,8 @@ const Cart = resolve => require(['@/pages/Cart'], resolve);
 const Pay = resolve => require(['@/pages/payment/Pay'], resolve);
 const PayDone = resolve => require(['@/pages/payment/PayDone'], resolve);
 const PayMent = resolve => require(['@/pages/payment/PayMent'], resolve);
-const ThirdPay = resolve => require(['@/pages/payment/thirdPay'], resolve);
-const Feedback = resolve => require(['@/pages/Feedback'], resolve);
-const Coupon = resolve => require(['@/pages/couponCenter'], resolve);
+const ThirdPay = resolve => require(['@/pages/payment/ThirdPay'], resolve);
+const Coupon = resolve => require(['@/pages/CouponCenter'], resolve);
 const seckill = resolve => require(['@/pages/promotion/seckill'], resolve);
 const article = resolve => require(['@/pages/article/index'], resolve);
 const PointMall = resolve => require(['@/pages/PointMall'], resolve);
@@ -37,7 +36,6 @@ const ApplyAfterSale = resolve => require(['@/pages/home/orderCenter/ApplyAfterS
 const Profile = resolve => require(['@/pages/home/memberCenter/Profile'], resolve);
 const AccountSafe = resolve => require(['@/pages/home/memberCenter/AccountSafe'], resolve);
 const ModifyPwd = resolve => require(['@/pages/home/memberCenter/ModifyPwd'], resolve);
-const AccountBind = resolve => require(['@/pages/home/memberCenter/AccountBind'], resolve);
 const Favorites = resolve => require(['@/pages/home/memberCenter/Favorites'], resolve);
 const Distribution = resolve => require(['@/pages/home/memberCenter/Distribution'], resolve);
 const CommentList = resolve => require(['@/pages/home/memberCenter/CommentList'], resolve); // 评价列表
@@ -45,7 +43,6 @@ const AddEval = resolve => require(['@/pages/home/memberCenter/evaluation/AddEva
 const EvalDetail = resolve => require(['@/pages/home/memberCenter/evaluation/EvalDetail'], resolve);
 const ComplainList = resolve => require(['@/pages/home/memberCenter/ComplainList'], resolve);
 const ComplainDetail = resolve => require(['@/pages/home/memberCenter/ComplainDetail'], resolve);
-const Invoice = resolve => require(['@/pages/home/memberCenter/Invoice'], resolve);
 const Point = resolve => require(['@/pages/home/memberCenter/Point'], resolve);
 const MsgList = resolve => require(['@/pages/home/memberCenter/memberMsg/MsgList'], resolve);
 const MsgDetail = resolve => require(['@/pages/home/memberCenter/memberMsg/MsgDetail'], resolve);
@@ -60,16 +57,13 @@ const MoneyManagement = resolve => require(['@/pages/home/userCenter/MoneyManage
 
 const Home = resolve => require(['@/pages/user/Home'], resolve);
 
-const MyShoppingCart = resolve => require(['@/pages/home/MyShoppingCart'], resolve);
 const Merchant = resolve => require(['@/pages/Merchant'], resolve);
-// const AllCategories = resolve => require(['@/pages/AllCategories'], resolve);
 const UserMain = resolve => require(['@/pages/home/Main'], resolve);
 
 /**
- * 店铺入驻 首页
- * 店铺入驻  申请页
+ * 店铺入驻
  */
-const ShopEntry = resolve => require(['@/pages/shopEntry/shop-entry'], resolve);
+const ShopEntry = resolve => require(['@/pages/shopEntry/ShopEntry'], resolve);
 
 Vue.use(Router);
 
@@ -82,7 +76,7 @@ export default new Router({
   },
   {
     path: '/login', // 登陆
-    name: 'Login',
+    name: 'login',
     component: Login,
     meta: {
       title: 'LiLi 登录'
@@ -152,14 +146,6 @@ export default new Router({
     path: '/payDone', // 支付成功页面
     name: 'PayDone',
     component: PayDone
-  },
-  {
-    path: '/feedback', // 反馈页面
-    name: 'Feedback',
-    component: Feedback,
-    meta: {
-      title: 'LiLi 登录'
-    }
   },
   {
     path: '/article', // 文章页面
@@ -254,11 +240,6 @@ export default new Router({
       component: ComplainDetail
     },
     {
-      path: 'Invoice',
-      name: 'Invoice',
-      component: Invoice
-    },
-    {
       path: 'AccountSafe',
       name: 'AccountSafe',
       component: AccountSafe
@@ -289,11 +270,6 @@ export default new Router({
       path: 'Profile',
       name: 'Profile',
       component: Profile
-    },
-    {
-      path: 'AccountBind',
-      name: 'AccountBind',
-      component: AccountBind
     },
     {
       path: 'AfterSale',
@@ -347,11 +323,6 @@ export default new Router({
       name: 'AfterSaleDetail',
       component: AfterSaleDetail,
       meta: {title: '售后详情'}
-    },
-    {
-      path: 'MyShoppingCart',
-      name: 'MyShoppingCart',
-      component: MyShoppingCart
     }
     ]
   },

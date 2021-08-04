@@ -22,12 +22,6 @@
     <!-- 商品详细展示 -->
     <ShowGoodsDetail v-if="goodsMsg.data" :detail="goodsMsg"></ShowGoodsDetail>
 
-    <!--    猜你喜欢-->
-    <!-- <div class="like">
-      <div class="likeGoods">
-        <ShowLikeGoods/>
-      </div>
-    </div> -->
     <Spin size="large" fix v-if="isLoading"></Spin>
     <BaseFooter></BaseFooter>
   </div>
@@ -38,7 +32,6 @@ import Search from '@/components/Search';
 import ShopHeader from '@/components/header/ShopHeader';
 import ShowGoods from '@/components/goodsDetail/ShowGoods';
 import ShowGoodsDetail from '@/components/goodsDetail/ShowGoodsDetail';
-import ShowLikeGoods from '@/components/like';
 import { goodsSkuDetail } from '@/api/goods';
 import { cancelCollect, collectGoods, isCollection } from '@/api/member';
 import {getDetailById} from '@/api/shopentry'
@@ -61,6 +54,7 @@ export default {
     };
   },
   methods: {
+    // 获取商品详情
     getGoodsDetail () {
       this.isLoading = true;
       const params = this.$route.query
@@ -137,8 +131,7 @@ export default {
     Search,
     ShopHeader,
     ShowGoods,
-    ShowGoodsDetail,
-    ShowLikeGoods
+    ShowGoodsDetail
   }
 };
 </script>
@@ -148,12 +141,6 @@ export default {
   @include background_color($light_background_color);
   line-height: 38px;
   color: #2c2c2c;
-}
-
-.like {
-  width: 100%;
-  padding: 20px 0;
-  @include white_background_color();
 }
 
 .shop-nav-container {

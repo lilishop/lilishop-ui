@@ -559,7 +559,7 @@ export default {
   },
   watch:{
     selectImage(val) {
-      if (val) this.init()
+      if (val && !this.data.length) this.init()
     }
   },
   methods: {

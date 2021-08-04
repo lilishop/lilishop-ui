@@ -1,23 +1,6 @@
 <template>
   <div>
     <div class="item-intro-show">
-      <!-- <div class="item-intro-recommend">
-        <div class="item-recommend-title">
-          <p>店铺热销</p>
-        </div>
-        <div class="item-intro-recommend-column">
-          <div class="item-recommend-column" v-for="(item, index) in hotList" :key="index">
-            <div class="item-recommend-img">
-              <img :src="item.img" alt="">
-            </div>
-            <div class="item-recommend-intro">
-              <span>
-                <span class="item-recommend-top-num">{{index + 1}}</span> 热销{{item.sale}}件</span>
-              <span class="item-recommend-price">￥{{item.price | unitPrice}}</span>
-            </div>
-          </div>
-        </div>
-      </div> -->
       <div class="item-intro-detail" ref="itemIntroDetail">
         <div class="item-intro-nav item-tabs">
           <Tabs :animated="false" @on-click="tabClick">
@@ -131,7 +114,8 @@ export default {
     };
   },
   computed: {
-    skuDetail () { // skuId
+    // 商品详情
+    skuDetail () {
       return this.detail.data;
     }
   },

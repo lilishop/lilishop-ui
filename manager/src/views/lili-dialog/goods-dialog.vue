@@ -70,7 +70,7 @@ export default {
   },
   watch: {
     category(val) {
-      this.goodsParams.categoryPath = val[0];
+      this.goodsParams.categoryPath = val[2];
     },
     selectedWay: {
       handler() {
