@@ -82,13 +82,17 @@ export default {
   },
   computed: {
     promotionTags () {
-      return JSON.parse(this.$store.state.hotWordsList)
+      if (this.$store.state.hotWordsList) {
+        return JSON.parse(this.$store.state.hotWordsList)
+      } else {
+        return []
+      }
     }
   },
   created () {
     this.searchData = this.$route.query.keyword
     if (!this.hover) { // 首页顶部固定搜索栏不调用热词接口
-      // 搜索热词每一小时请求一次
+      // 搜索热词每5分钟请求一次
       const reloadTime = storage.getItem('hotWordsReloadTime')
       const time = new Date().getTime() - 5 * 60 * 1000
       if (!reloadTime) {

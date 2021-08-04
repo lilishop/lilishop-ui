@@ -9,11 +9,11 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    category: [], // 全部分类
     navList: [], // 首页快捷导航
     cartNum: storage.getItem('cartNum') || 0,
     logoImg: require('@/assets/images/logo2.png'),
-    hotWordsList: storage.getItem('hotWordsList') || []
+    hotWordsList: storage.getItem('hotWordsList'),
+    category: localStorage.getItem('category')
   },
   getters,
   actions,

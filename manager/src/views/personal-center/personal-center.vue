@@ -57,7 +57,6 @@
 
 <script>
 import {
-  userInfo,
   userInfoEdit,
 } from "@/api/index";
 import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
@@ -92,7 +91,6 @@ export default {
       }
       let userInfo = JSON.parse(JSON.stringify(v));
       this.userForm = userInfo;
-      console.log(userInfo)
     },
     // 跳转修改密码页面
     changePassword() {

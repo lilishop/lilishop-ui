@@ -81,10 +81,10 @@ export default {
   },
   data () {
     return {
-      cateList: [], // 分类数据
       panel: false, // 二级分类展示
       panelData: [], // 二级分类数据
-      showFirstList: false // 始终展示一级列表
+      showFirstList: false, // 始终展示一级列表
+      cateList: [] // 商品分类
     }
   },
   computed: {
@@ -98,6 +98,7 @@ export default {
       getCategory(0).then(res => {
         if (res.success) {
           this.cateList = res.result;
+          this.$store.commit('SET_CATEGORY', res.result)
           // 过期时间
           var expirationTime = new Date().setHours(new Date().getHours() + 1);
           // 存放过期时间

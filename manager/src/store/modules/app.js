@@ -1,7 +1,6 @@
 import { otherRouter } from '@/router/router';
 import { router } from '@/router/index';
 import Util from '@/libs/util';
-import Cookies from 'js-cookie';
 import Vue from 'vue';
 
 const app = {
@@ -14,11 +13,7 @@ const app = {
         currNavTitle: "", // 当前顶部菜单标题
         cachePage: [],
         lang: '',
-        isFullScreen: false,
-        openedSubmenuArr: [], // 要展开的菜单数组
-        menuTheme: 'dark', // 主题
-        themeColor: '',
-        pageOpenedList: [{
+        pageOpenedList: [{ // 打开过的页面，顶部历史菜单项
             title: '首页',
             path: '',
             name: 'home_index'
@@ -34,9 +29,7 @@ const app = {
         // 面包屑数组 左侧菜单
         menuList: [],
         tagsList: [...otherRouter.children], //这块是面包屑的内容不能删除
-        routers: [
-            otherRouter
-        ],
+        routers: [otherRouter],
         messageCount: 0,
         // 在这里定义你不想要缓存的页面的name属性值(参见路由配置router.js)
         dontCache: ['test', 'test']
@@ -67,24 +60,10 @@ const app = {
             state.currNavTitle = v;
         },
         setTagsList(state, list) {
-
             state.tagsList.push(...list);
         },
         updateMenulist(state, routes) {
             state.menuList = routes;
-        },
-        addOpenSubmenu(state, name) {
-            let hasThisName = false;
-            let isEmpty = false;
-            if (name.length == 0) {
-                isEmpty = true;
-            }
-            if (state.openedSubmenuArr.indexOf(name) > -1) {
-                hasThisName = true;
-            }
-            if (!hasThisName && !isEmpty) {
-                state.openedSubmenuArr.push(name);
-            }
         },
         closePage(state, name) {
             state.cachePage.forEach((item, index) => {
@@ -157,9 +136,6 @@ const app = {
             state.lang = lang;
             localStorage.lang = lang;
             Vue.config.lang = lang;
-        },
-        clearOpenedSubmenu(state) {
-            state.openedSubmenuArr.length = 0;
         },
         setMessageCount(state, count) {
             state.messageCount = count;

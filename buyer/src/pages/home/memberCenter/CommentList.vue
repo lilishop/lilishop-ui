@@ -34,7 +34,7 @@
               {{item.grade==='GOOD'?'好评' : item.grade === 'WORSE'?'差评' : '中评'}}
             </i-col>
             <i-col span="4">
-              <Tooltip >
+              <Tooltip transfer>
                   <div class="content">{{item.content}}</div>
                   <div style="white-space: normal;" slot="content">
                     {{item.content}}

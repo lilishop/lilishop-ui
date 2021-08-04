@@ -183,9 +183,13 @@ export default {
       multSelected: [], // 多选分类
       selectedItem: [], // 已选分类集合 顶部展示
       brandIds: [], // 品牌id合集
-      params: {}, // 请求参数
-      cateList: [] // 全部商品分类
+      params: {} // 请求参数
     };
+  },
+  computed: {
+    cateList () { // 商品分类
+      return this.$store.state.category
+    }
   },
   watch: {
     selectedItem: {
@@ -228,8 +232,12 @@ export default {
   methods: {
     getNav () { // 获取商品分类，分类下展示
       if (!this.$route.query.categoryId) return
-
-      this.cateList = JSON.parse(localStorage.getItem('category'))
+      if (!this.cateList.length) { // 商品分类存储在localstorage，接口未调用成功前再次刷新数据
+        setTimeout(() => {
+          this.getNav()
+        }, 500)
+        return
+      }
       const arr = this.$route.query.categoryId.split(',')
       if (arr.length > 0) {
         this.tabBar = this.cateList.filter(e => {
@@ -416,7 +424,7 @@ export default {
     background: #fff;
     border: 1px solid #999;
     padding: 0 8px;
-    width: 85px;
+    min-width: 85px;
     text-align: center;
     margin: 0 3px;
     &:hover {
