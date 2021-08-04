@@ -58,7 +58,7 @@ service.interceptors.response.use(
         break;
       case 401:
         // 未登录 清除已登录状态
-        Cookies.set("userInfo", "");
+        Cookies.set("userInfoSeller", "");
         setStore("accessToken", "");
         if (router.history.current.name != "login") {
           if (data.message !== null) {
@@ -103,7 +103,7 @@ service.interceptors.response.use(
               router.go(0);
             }
           } else {
-            Cookies.set("userInfo", "");
+            Cookies.set("userInfoSeller", "");
             router.push("/login");
           }
           isRefreshToken = 0;

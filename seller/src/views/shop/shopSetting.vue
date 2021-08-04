@@ -201,7 +201,7 @@ export default {
           this.$set(this.form, "address", res.result.storeAddressPath);
           this.storeName = res.result.storeName;
           this.form.center = res.result.storeCenter;
-          Cookies.set("userInfo", JSON.stringify(res.result));
+          Cookies.set("userInfoSeller", JSON.stringify(res.result));
           //库存预警数赋值
 
           this.$nextTick(() => {

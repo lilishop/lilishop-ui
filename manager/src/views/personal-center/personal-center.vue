@@ -82,7 +82,7 @@ export default {
   methods: {
     // 初始化数据
     init() {
-      let v = JSON.parse(Cookies.get("userInfo"));
+      let v = JSON.parse(Cookies.get("userInfoManager"));
       // 转换null为""
       for (let attr in v) {
         if (v[attr] == null) {
@@ -112,7 +112,7 @@ export default {
         if (res.success) {
           this.$Message.success("保存成功");
           // 更新用户信息
-          Cookies.set("userInfo", this.userForm);
+          Cookies.set("userInfoManager", this.userForm);
           // 更新头像
           this.$store.commit("setAvatarPath", this.userForm.avatar);
           setTimeout(()=>{

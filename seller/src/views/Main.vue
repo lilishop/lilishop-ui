@@ -98,7 +98,7 @@ export default {
         this.$store.commit("addOpenSubmenu", pathArr[1].name);
       }
 
-      let userInfo = JSON.parse(Cookies.get("userInfo"));
+      let userInfo = JSON.parse(Cookies.get("userInfoSeller"));
       this.userInfo = userInfo;
       this.checkTag(this.$route.name);
 

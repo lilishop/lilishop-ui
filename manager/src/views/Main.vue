@@ -96,7 +96,7 @@ export default {
   methods: {
     init() {
       // 菜单初始化
-      let userInfo = JSON.parse(Cookies.get("userInfo"));
+      let userInfo = JSON.parse(Cookies.get("userInfoManager"));
 
       this.userInfo = userInfo;
       this.checkTag(this.$route.name);

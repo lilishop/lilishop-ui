@@ -225,7 +225,7 @@ export default {
     },
     // 初始化数据
     async init() {
-      let userInfo = JSON.parse(Cookies.get("userInfo"));
+      let userInfo = JSON.parse(Cookies.get("userInfoSeller"));
 
       this.userData = userInfo;
 

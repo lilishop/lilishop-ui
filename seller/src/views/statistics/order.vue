@@ -397,20 +397,20 @@ export default {
       orderParams: {
         searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
         year: "",
-        storeId: JSON.parse(Cookies.get("userInfo")).id || "",
+        storeId: JSON.parse(Cookies.get("userInfoSeller")).id || "",
         memberId: "",
       },
       // 订单概念
       overViewParams: {
         month: "",
         searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
-        storeId: JSON.parse(Cookies.get("userInfo")).id || "",
+        storeId: JSON.parse(Cookies.get("userInfoSeller")).id || "",
         year: "",
       },
       defaultParams: {
         month: "",
         searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
-        storeId: JSON.parse(Cookies.get("userInfo")).id || "",
+        storeId: JSON.parse(Cookies.get("userInfoSeller")).id || "",
         year: "",
       },
 
@@ -420,7 +420,7 @@ export default {
         pageNumber: 1,
         pageSize: 10,
         searchType: "LAST_SEVEN",
-        storeId: JSON.parse(Cookies.get("userInfo")).id || "",
+        storeId: JSON.parse(Cookies.get("userInfoSeller")).id || "",
         year: "",
       },
 

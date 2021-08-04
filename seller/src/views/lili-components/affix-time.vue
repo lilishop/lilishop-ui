@@ -64,7 +64,7 @@ export default {
     };
   },
   mounted() {
-   this.storeId = JSON.parse(Cookies.get("userInfo")).id;
+   this.storeId = JSON.parse(Cookies.get("userInfoSeller")).id;
     this.getFiveYears();
   },
   methods: {

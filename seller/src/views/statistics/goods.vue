@@ -31,7 +31,7 @@ export default {
         searchType: "LAST_SEVEN",
         year: "",
         month: "",
-        storeId: JSON.parse(Cookies.get("userInfo")).id || '',
+        storeId: JSON.parse(Cookies.get("userInfoSeller")).id || '',
         type: "NUM"
       },
       columns: [ // 表格表头

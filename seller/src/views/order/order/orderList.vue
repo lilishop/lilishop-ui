@@ -254,8 +254,7 @@ export default {
     },
     // 导出的待发货订单数据
     async exportOrder () {
-      let userInfo = JSON.parse(Cookies.get("userInfo"));
-      console.log(userInfo);
+      let userInfo = JSON.parse(Cookies.get("userInfoSeller"));
       const params = {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数

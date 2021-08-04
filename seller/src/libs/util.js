@@ -318,11 +318,11 @@ util.initRouter = function (vm) { // 初始化路由
         component: 'error-page/404'
     }];
     // 判断用户是否登录
-    let userInfo = Cookies.get('userInfo')
-    // if (!userInfo) {
-    //     // 未登录
-    //     return;
-    // }
+    let userInfo = Cookies.get('userInfoSeller')
+    if (!userInfo) {
+        // 未登录
+        return;
+    }
 
     if (!vm.$store.state.app.added) {
         // 第一次加载 读取数据
