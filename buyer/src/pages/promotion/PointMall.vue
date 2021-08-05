@@ -15,7 +15,7 @@
         class="goods-show-info"
         v-for="(item, index) in goodsList"
         :key="index"
-        @click="goGoodsDetail(item.skuId, item.goodsSku.goodsId)"
+        @click="goGoodsDetail(item.id)"
       >
         <div class="goods-show-img">
           <img width="220" height="220" :src="item.goodsSku.thumbnail" />
@@ -97,12 +97,13 @@ export default {
       this.getList()
       this.$router.push({query: {categoryId: cateId}})
     },
-    goGoodsDetail (skuId, goodsId) { // 跳转商品详情
-      let routerUrl = this.$router.resolve({
-        path: '/goodsDetail',
-        query: {skuId, goodsId, way: 'POINT'}
-      })
-      window.open(routerUrl.href, '_blank')
+    goGoodsDetail (id) { // 跳转商品详情
+      this.$router.push({path: '/pointGoodsDetail', query: {id}})
+      // let routerUrl = this.$router.resolve({
+      //   path: '/pointGoodsDetail',
+      //   query: {id}
+      // })
+      // window.open(routerUrl.href, '_blank')
     },
     changePageNum (val) { // 修改页码
       this.params.pageNumber = val;
@@ -117,7 +118,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-@import '../assets/styles/goodsList.scss';
+@import '../../assets/styles/goodsList.scss';
 .seckill-price {
   font-size: 18px;
 }
@@ -151,7 +152,7 @@ export default {
   justify-content: flex-end;
 }
 .promotion-decorate::before,.promotion-decorate::after{
-  background-image: url('../../static/sprite@2x.png');
+  background-image: url('../../../static/sprite@2x.png');
 }
 .cate-select-con{
   display: block;

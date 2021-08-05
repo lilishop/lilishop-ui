@@ -70,7 +70,6 @@ export default {
     },
     async getListByDay () { // 当天秒杀活动
       const res = await seckillByDay()
-      console.log(res);
       if (res.success && res.result.length) {
         return res.result
       } else {
