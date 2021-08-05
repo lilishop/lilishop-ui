@@ -21,8 +21,8 @@
               style="width: 200px"
             />
           </Form-item>
-          <Form-item label="店铺状态" prop="shopDisable">
-            <Select v-model="searchForm.shopDisable" clearable style="width: 200px">
+          <Form-item label="店铺状态">
+            <Select v-model="searchForm.storeDisable" clearable style="width: 200px">
               <Option value="OPEN">开启中</Option>
               <Option value="CLOSED">已关闭</Option>
               <Option value="APPLY">申请中</Option>
