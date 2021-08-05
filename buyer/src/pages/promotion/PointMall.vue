@@ -22,9 +22,7 @@
         </div>
         <div class="goods-show-price">
           <span>
-            <span class="seckill-price text-danger">{{
-              item.settlementPrice | unitPrice("￥")
-            }} + {{item.points}}积分</span>
+            <span class="seckill-price text-danger">{{item.points}}积分</span>
           </span>
         </div>
         <div class="goods-show-detail">

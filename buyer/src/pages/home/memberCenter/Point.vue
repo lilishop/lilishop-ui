@@ -8,7 +8,7 @@
     <h3>积分日志</h3>
     <Table :columns="logColumns" :data="logData.records">
       <template slot-scope="{ row }" slot="point">
-        <div><span>{{row.pointType == "INCREASE" ? '+' : '-'}}</span>{{ row.variablePoint }}</div>
+        <div :style="{color:row.pointType === 'INCREASE' ? 'green' : 'red'}"><span>{{row.pointType === "INCREASE" ? '+' : ''}}</span>{{ row.variablePoint }}</div>
       </template>
     </Table>
     <!-- 分页 -->

@@ -229,8 +229,8 @@ export default {
         ],
         linkName: [{ required: true, message: '请填写联系人姓名' }],
         linkPhone: [
-          { required: true, message: '请填写联系人姓名' },
-          { pattern: RegExp.mobile, message: '请填写正确手机号' }
+          { required: true, message: '请填写公司电话' },
+          { pattern: RegExp.mobile, message: '请填写正确的号码' }
         ],
         companyEmail: [
           { required: true, message: '请填写电子邮箱' },

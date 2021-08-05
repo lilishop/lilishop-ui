@@ -42,7 +42,7 @@
           </p>
           <p class="item">
             <span class="label">性别：</span>
-            <span v-if="memberInfo.sex==1" class="info">男</span>
+            <span v-if="memberInfo.sex===1" class="info">男</span>
             <span v-else class="info">女</span>
           </p>
           <p class="item">
@@ -414,7 +414,6 @@
             key: "beforePoint",
             width: 150,
           },
-
           {
             title: "变动积分",
             key: "variablePoint",
@@ -434,10 +433,9 @@
                     style: {
                       color: 'red'
                     }
-                  }, "-" + params.row.variablePoint),
+                  }, params.row.variablePoint),
                 ]);
               }
-
             }
           },
           {
@@ -483,7 +481,6 @@
               } else if (params.row.orderType == "PINTUAN") {
                 return h('div', [h('span', {}, '拼团订单'),]);
               }
-
             }
           },
           {
@@ -538,7 +535,6 @@
               }
             }
           },
-
           {
             title: "售后状态",
             key: "groupAfterSaleStatus",

@@ -50,10 +50,12 @@
             </div>
             <div>
               <!-- 订单基础操作 -->
-              <Button @click="goDetail(order.sn)" size="small">售后详情</Button>
-              <Button @click="openModal(order)" v-if="order.serviceStatus == 'PASS' &&
-                  order.serviceType != 'RETURN_MONEY'" size="small">提交物流</Button>
-              <Button @click="cancel(order.sn)" v-if="order.afterSaleAllowOperationVO.cancel" size="small">取消售后</Button>
+              <Button @click="goDetail(order.sn)" type="info" size="small">售后详情</Button>
+              <Button @click="openModal(order)"
+                v-if="order.serviceStatus == 'PASS' &&
+                order.serviceType != 'RETURN_MONEY'"
+                type="warning" size="small">提交物流</Button>
+              <Button @click="cancel(order.sn)" type="error" v-if="order.afterSaleAllowOperationVO.cancel" size="small">取消售后</Button>
             </div>
           </div>
         </div>

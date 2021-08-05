@@ -556,9 +556,6 @@ export default {
 }
 
 .item-select-row {
-  // display: flex;
-  // flex-direction: row;
-  // flex-wrap: wrap;
   margin-bottom: 8px;
 }
 
@@ -566,10 +563,6 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: center;
-}
-
-.item-select-img {
-  width: 36px;
 }
 
 .item-select-box {
@@ -589,29 +582,9 @@ export default {
   border: 0.5px solid $theme_color;
 }
 
-.item-select-box-disabled {
-  background-color: gray;
-}
-
-.item-select-img img {
-  width: 100%;
-}
-
 .item-select-intro p {
   margin: 0px;
   padding: 5px;
-}
-
-.item-select-class {
-  padding: 5px;
-  margin-right: 8px;
-  @include sub_background_color($light_background_color);
-  border: 0.5px solid #ccc;
-  cursor: pointer;
-}
-
-.item-select-class:hover {
-  border: 0.5px solid $theme_color;
 }
 
 .add-buy-car-box {
