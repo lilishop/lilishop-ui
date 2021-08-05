@@ -241,12 +241,6 @@ export const otherRouter = {
       component: () => import("@/views/promotion/seckill/seckillGoods.vue")
     },
     {
-      path: "promotion/seckill/manager-seckill-add",
-      title: "添加限时抢购",
-      name: "manager-seckill-add",
-      component: () => import("@/views/promotion/seckill/addSeckill.vue")
-    },
-    {
       path: "/floorList/renovation",
       title: "编辑模板",
       name: "renovation",

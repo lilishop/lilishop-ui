@@ -14,7 +14,7 @@
           <p>有效期：{{item.endTime}}</p>
         </div>
         <b></b>
-        <a class="c-right" @click="go(item)">立即使用</a>
+        <a class="c-right" :class="{'canot-use':params.memberCouponStatus !== 'NEW'}" @click="go(item)">立即使用</a>
         <i class="circle-top"></i>
         <i class="circle-bottom"></i>
       </li>
@@ -66,9 +66,12 @@ export default {
     // 切换优惠券状态
     change (index) {
       this.params.memberCouponStatus = this.statusList[index]
+      this.params.pageNumber = 1;
       this.getList()
     },
     go (item) { // 根据使用条件跳转商品列表页面
+      if (this.params.memberCouponStatus !== 'NEW') return;
+
       if (item.storeId !== 'platform') {
         this.$router.push({path: '/merchant', query: {id: item.storeId}})
       } else {
@@ -127,10 +130,15 @@ export default {
     width: 43px;
     font-size: 14px;
   }
+  .canot-use{
+    color: #999;
+    background-color: #eee;
+  }
   i {
     right: 34px;
   }
 }
+
 .pageration {
   text-align: right;
 }
