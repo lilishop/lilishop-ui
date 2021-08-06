@@ -284,7 +284,7 @@ export default {
         }
         return res.result
       } else {
-        this.$Message.warning('暂无待发货订单')
+        this.$Message.warning('导出订单失败，请重试')
       }
       
     },
