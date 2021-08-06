@@ -67,12 +67,12 @@
             </template>
           </div>
           <Upload v-if="liveForm.coverImg.length ==0" ref="upload" :show-upload-list="false" :on-success="handleCoverImgSuccess" :default-file-list="defaultImgList" :format="['jpg','jpeg','png']"
-            :on-format-error="handleFormatError" :max-size="2048" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
+            :on-format-error="handleFormatError" :max-size="1024" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
             <div style="width: 58px;height:58px;line-height: 58px;">
               <Icon type="ios-camera" size="20"></Icon>
             </div>
           </Upload>
-          <div class="tips"> 直播间背景图，图片规则：建议像素1080*1920，大小不超过2M</div>
+          <div class="tips"> 直播间背景图，图片规则：建议像素1080*1920，大小不超过1M</div>
         </FormItem>
 
         <!-- 直播间背景墙 -->
@@ -88,7 +88,7 @@
             </template>
           </div>
           <Upload v-if="liveForm.shareImg.length ==0" ref="upload" :show-upload-list="false" :on-success="handleShareImgSuccess" :default-file-list="defaultImgList" :format="['jpg','jpeg','png']"
-            :on-format-error="handleFormatError" :max-size="2048" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
+            :on-format-error="handleFormatError" :max-size="1024" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
             <div style="width: 58px;height:58px;line-height: 58px;">
               <Icon type="ios-camera" size="20"></Icon>
             </div>
@@ -467,7 +467,7 @@ export default {
     handleMaxSize(file) {
       this.$Notice.warning({
         title: "图片超过限制大小！",
-        desc: file.name + "图片超过规定限制大小，请重新上传",
+        desc: "图片超过规定限制大小，请重新上传",
       });
     },
 

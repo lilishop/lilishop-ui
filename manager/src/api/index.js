@@ -16,15 +16,8 @@ let commonUrl = (process.env.NODE_ENV === 'development' ? config.api_dev.common 
 
 // 文件上传接口
 export const uploadFile = commonUrl+ "/common/upload/file";
-// 验证码渲染图片接口
-export const drawCodeImage = commonUrl + "/common/captcha/draw/";
-// 获取菜单
-export const getMenuList = managerUrl + "/permission/getMenuList";
 // Websocket
 export const ws = managerUrl + "/ws";
-
-export const getMessageSendData = "";
-
 
 //获取所有city
 export const getAllCity = (params) => {

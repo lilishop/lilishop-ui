@@ -20,7 +20,7 @@
     <div  class="store-category">
       <ul class="cate-list">
         <li class="cate-item" @click="searchByCate({id:'', labelName: '店铺推荐'})">首页</li>
-        <li class="cate-item" v-for="(cate, index) in cateList" :key="index" >
+        <li class="cate-item" v-for="(cate, index) in cateList" :key="index">
           <Dropdown v-if="cate.children.length">
             <div @click.self="searchByCate(cate)">{{cate.labelName}} <Icon type="ios-arrow-down"></Icon></div>
             <DropdownMenu slot="list">
