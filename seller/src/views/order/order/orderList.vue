@@ -258,7 +258,7 @@ export default {
       const params = {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 100, // 页面大小
+        pageSize: 10000, // 页面大小
         sort: "startDate", // 默认排序字段
         order: "desc", // 默认排序方式
         startDate: "", // 起始时间
