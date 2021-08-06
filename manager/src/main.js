@@ -22,11 +22,13 @@ import liliDialog from '@/views/lili-dialog'
 import {md5} from '@/utils/md5.js';
 Vue.config.devtools = true;
 Vue.config.productionTip = false
-Vue.prototype.linkTo = function (goodsId, skuId, link='https://pc-b2b2c.pickmall.cn') {  // 跳转买家端商品
-  window.open(`${link}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`, '_blank')
+const buyerUrlPC = 'https://pc-b2b2c.pickmall.cn' // 跳转买家端地址 pc端
+const buyerUrlWap = 'https://m-b2b2c.pickmall.cn' // 跳转买家端地址 wap端
+Vue.prototype.linkTo = function (goodsId, skuId) {  // 跳转买家端商品
+  window.open(`${buyerUrlPC}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`, '_blank')
 };
 Vue.prototype.wapLinkTo = function (goodsId, skuId) { // app端二维码
-  return `https://m-b2b2c.pickmall.cn/pages/product/goods?id=${skuId}&goodsId=${goodsId}`
+  return `${buyerUrlWap}/pages/product/goods?id=${skuId}&goodsId=${goodsId}`
 };
 Vue.use(VueLazyload, {
     error: require('./assets/img-error.png'),

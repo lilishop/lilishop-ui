@@ -35,9 +35,9 @@
         
       </Form>
       <div>
-        <download-excel class="export-excel-wrapper" :data="data" :fields="fields" name="商品订单.xls">
+        <download-excel class="export-excel-wrapper" :data="data" :fields="fields" :fetch="exportOrder" name="商品订单.xls">
           <Button type="info" class="export">
-            导出Excel
+            导出订单
           </Button>
         </download-excel>
       </div>
@@ -269,6 +269,24 @@ export default {
         query: { sn: sn },
       });
     },
+    // 导出订单
+    async exportOrder () {
+      const params = JSON.parse(JSON.stringify(this.searchForm))
+      params.pageNumber = 1;
+      params.pageSize = 10000
+      const result = await API_Order.getOrderList(params)
+      if (result.success) {
+        if (result.result.records.length === 0) {
+          this.$Message.warning('暂无待发货订单')
+          return []
+        } else {
+          return result.result.records
+        }
+      } else {
+        this.$Message.warning('导出订单失败，请重试')
+      }
+      
+    }
   },
   mounted() {
     this.init();

@@ -27,7 +27,7 @@
         :on-error="handleError"
         :format="['jpg','jpeg','png','gif','bmp']"
         accept=".jpg, .jpeg, .png, .gif, .bmp"
-        :max-size="maxSize*1024"
+        :max-size="1024"
         :on-format-error="handleFormatError"
         :on-exceeded-size="handleMaxSize"
         :before-upload="beforeUpload"
@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { uploadFile } from "@/api/index";
+import { uploadFile } from "@/libs/axios";
 export default {
   name: "uploadPicInput",
   props: {
@@ -71,10 +71,6 @@ export default {
       type: Boolean,
       default: false
     },
-    maxSize: { // 图片最大尺寸
-      type: Number,
-      default: 5
-    },
     maxlength: Number, // 最大长度
     icon: { // 上传按钮图标
       type: String,
@@ -87,7 +83,7 @@ export default {
       currentValue: this.value, // 当前值
       loading: false, // 加载状态
       viewImage: false, // 是否预览图片
-      uploadFileUrl: uploadFile // 上传列表
+      uploadFileUrl: uploadFile // 上传路径
     };
   },
   methods: {
@@ -113,7 +109,7 @@ export default {
       this.loading = false;
       this.$Notice.warning({
         title: "文件大小过大",
-        desc: "所选文件‘ " + file.name + " ’大小过大, 不得超过 " + this.maxSize + "M."
+        desc: "所选文件大小过大, 不得超过1M."
       });
     },
     // 上传前

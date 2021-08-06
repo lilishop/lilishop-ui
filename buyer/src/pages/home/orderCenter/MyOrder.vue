@@ -65,10 +65,10 @@
           </div>
           <div>
             <!-- 订单基础操作 -->
-            <Button @click="orderDetail(order.sn)" size="small">订单详情</Button>
-            <Button @click="handleCancelOrder(order.sn)" v-if="order.allowOperationVO.cancel" size="small">取消订单</Button>
-            <Button @click="goPay(order.sn)" size="small" v-if="order.allowOperationVO.pay">去支付</Button>
-            <Button @click="received(order.sn)" size="small" v-if="order.allowOperationVO.rog">确认收货</Button>
+            <Button @click="orderDetail(order.sn)" type="info" size="small">订单详情</Button>
+            <Button @click="handleCancelOrder(order.sn)" type="error" v-if="order.allowOperationVO.cancel" size="small">取消订单</Button>
+            <Button @click="goPay(order.sn)" size="small" type="success" v-if="order.allowOperationVO.pay">去支付</Button>
+            <Button @click="received(order.sn)" size="small" type="warning" v-if="order.allowOperationVO.rog">确认收货</Button>
             <!-- 售后 -->
             <Button v-if="order.groupAfterSaleStatus.includes('NOT_APPLIED')" @click="applyAfterSale(order.orderItems)" size="small">申请售后</Button>
           </div>

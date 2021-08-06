@@ -13,7 +13,7 @@ export default new Vuex.Store({
     cartNum: storage.getItem('cartNum') || 0,
     logoImg: require('@/assets/images/logo2.png'),
     hotWordsList: storage.getItem('hotWordsList'),
-    category: localStorage.getItem('category')
+    category: JSON.parse(localStorage.getItem('category'))
   },
   getters,
   actions,

@@ -187,7 +187,7 @@
         :headers="accessToken"
         :on-success="handleSuccess"
         :on-error="handleError"
-        :max-size="5120"
+        :max-size="1024"
         :on-exceeded-size="handleMaxSize"
         multiple
         type="drag"
@@ -694,7 +694,7 @@ export default {
     handleMaxSize(file) {
       this.$Notice.warning({
         title: "文件大小过大",
-        desc: "所选文件‘ " + file.name + " ’大小过大, 不得超过 5M.",
+        desc: "所选文件大小过大, 不得超过 1M.",
       });
     },
     // 上传成功回调

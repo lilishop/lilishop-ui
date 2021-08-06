@@ -117,7 +117,7 @@
               已节省<span>{{ priceDetailDTO.discountPrice | unitPrice("￥") }}</span>
             </div>
             <div class="ml_20 total-price">
-              总价（不含运费）:<div>{{ priceDetailDTO.billPrice | unitPrice("￥") }}</div>
+              总价（不含运费）:<div>{{ priceDetailDTO.flowPrice | unitPrice("￥") }}</div>
             </div>
             <div class="pay ml_20" @click="pay">去结算</div>
           </div>

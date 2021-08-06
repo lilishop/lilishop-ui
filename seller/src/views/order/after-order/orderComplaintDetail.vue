@@ -89,7 +89,7 @@
                   </template>
                 </div>
                 <Upload ref="upload" :show-upload-list="false" :on-format-error="handleFormatError" :action="uploadFileUrl" :headers="accessToken" :on-success="handleSuccessGoodsPicture"
-                  :format="['jpg','jpeg','png']" :max-size="2048" :on-exceeded-size="handleMaxSize" :before-upload="handleBeforeUpload" multiple type="drag"
+                  :format="['jpg','jpeg','png']" :max-size="1024" :on-exceeded-size="handleMaxSize" :before-upload="handleBeforeUpload" multiple type="drag"
                   style="display: inline-block;width:58px;">
                   <div style="width: 58px;height:58px;line-height: 58px;">
                     <Icon type="ios-camera" size="20"></Icon>
@@ -237,7 +237,7 @@
 
 <script>
 import * as API_Order from "@/api/order";
-import * as API_GOODS from "@/api/goods";
+import { uploadFile } from "@/libs/axios";
 export default {
   name: "orderComplaint",
   data() {
@@ -245,7 +245,7 @@ export default {
       //展示图片层
       visible: false,
       //上传图片路径
-      uploadFileUrl: API_GOODS.uploadFile,
+      uploadFileUrl: uploadFile,
       accessToken: "", // 验证token
       id: 0, // 投诉单id
       complaintInfo: "", // 投诉信息
@@ -316,7 +316,7 @@ export default {
     handleMaxSize(file) {
       this.$Notice.warning({
         title: "超过文件大小限制",
-        desc: "图片  " + file.name + " 不能超过2mb",
+        desc: "图片不能超过1mb",
       });
     },
     // 获取详情

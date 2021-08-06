@@ -47,7 +47,8 @@
                 <span> ￥{{ row.commission | unitPrice }}</span>
               </template>
               <template slot-scope="{ row }" slot="action">
-                <Button type="primary" size="small" style="margin-right: 5px" @click="fenxiao(row)">分销商品</Button>
+                <Button type="success" size="small" style="margin-right: 5px" @click="fenxiao(row)">分销商品</Button>
+                <Button type="error" size="small" @click="selectGoods(row.id, false)">取消选择</Button>
               </template>
             </Table>
             <div class="page-size">
@@ -74,7 +75,7 @@
                 <span> ￥{{ row.commission | unitPrice }}</span>
               </template>
               <template slot-scope="{ row }" slot="action">
-                <Button type="primary" size="small" style="margin-right: 5px" @click="selectGoods(row.id)">选择商品</Button>
+                <Button type="primary" size="small" style="margin-right: 5px" @click="selectGoods(row.id, true)">选择商品</Button>
               </template>
             </Table>
             <div class="page-size">
@@ -158,7 +159,7 @@
 </template>
 
 <script>
-import {distribution, applyDistribution, distCash, distCashHistory, getDistOrderList, getDistGoodsList, selectDistGoods} from '@/api/member.js'
+import {distribution, applyDistribution, distCash, distCashHistory, getDistGoodsList, selectDistGoods} from '@/api/member.js'
 import { IDCard } from '@/plugins/RegExp.js';
 import vueQr from 'vue-qr';
 export default {
@@ -187,7 +188,7 @@ export default {
         {title: '商品名称', slot: 'name', width: 400},
         {title: '商品价格', slot: 'price'},
         {title: '佣金', slot: 'commission'},
-        {title: '操作', slot: 'action', width: 120}
+        {title: '操作', slot: 'action', minWidth: 120}
       ],
       logColumns: [ // 日志表头
         {title: '编号', slot: 'sn'},
@@ -262,9 +263,6 @@ export default {
       } else if (tab === 'goodsUncheck') {
         this.params.checked = false
         this.getGoodsData()
-      } else if (tab === 'order') {
-        this.orderParams.pageNumber = 1
-        this.getOrderData()
       } else if (tab === 'log') {
         this.logParams.pageNumber = 1
         this.getLog()
@@ -278,10 +276,14 @@ export default {
       this.logParams.pageNumber = val;
       this.getLog()
     },
-    selectGoods (id) { // 选择商品
-      selectDistGoods(id).then(res => {
+    selectGoods (id, checked) { // 选择商品
+      let params = {
+        distributionGoodsId: id,
+        checked: checked
+      }
+      selectDistGoods(params).then(res => {
         if (res.success) {
-          this.$Message.success('分销商品选择成功，请在已选商品中查看')
+          this.$Message.success('操作成功！')
           this.getGoodsData()
         }
       })
@@ -293,11 +295,6 @@ export default {
     },
     getGoodsData () { // 商品数据
       getDistGoodsList(this.params).then(res => {
-        if (res.success) this.goodsData = res.result
-      })
-    },
-    getOrderData () { // 订单数据
-      getDistOrderList(this.orderParams).then(res => {
         if (res.success) this.goodsData = res.result
       })
     },

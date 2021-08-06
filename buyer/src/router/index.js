@@ -6,6 +6,7 @@ const SignUp = resolve => require(['@/pages/SignUp'], resolve);
 const ForgetPassword = resolve => require(['@/pages/ForgetPassword'], resolve);
 const GoodsList = resolve => require(['@/pages/GoodsList'], resolve);
 const GoodsDetail = resolve => require(['@/pages/GoodsDetail'], resolve);
+const PointGoodsDetail = resolve => require(['@/pages/promotion/PointGoodsDetail'], resolve);
 const ShoppingCart = resolve => require(['@/pages/ShoppingCart'], resolve);
 const Cart = resolve => require(['@/pages/Cart'], resolve);
 const Pay = resolve => require(['@/pages/payment/Pay'], resolve);
@@ -15,7 +16,7 @@ const ThirdPay = resolve => require(['@/pages/payment/ThirdPay'], resolve);
 const Coupon = resolve => require(['@/pages/CouponCenter'], resolve);
 const seckill = resolve => require(['@/pages/promotion/seckill'], resolve);
 const article = resolve => require(['@/pages/article/index'], resolve);
-const PointMall = resolve => require(['@/pages/PointMall'], resolve);
+const PointMall = resolve => require(['@/pages/promotion/PointMall'], resolve);
 
 /*
  * 会员中心
@@ -108,6 +109,12 @@ export default new Router({
     name: 'GoodsDetail',
     component: GoodsDetail,
     meta: {title: '商品详情'}
+  },
+  {
+    path: '/pointGoodsDetail', // 商品详情
+    name: 'PointGoodsDetail',
+    component: PointGoodsDetail,
+    meta: {title: '积分商品'}
   },
   {
     path: '/shoppingCart', // 头部购物车
@@ -252,13 +259,14 @@ export default new Router({
     {
       path: 'Favorites',
       name: 'Favorites',
-      component: Favorites
+      component: Favorites,
+      meta: {title: '我的收藏'}
     },
     {
       path: 'Distribution',
       name: 'Distribution',
       component: Distribution,
-      meta: {title: '我的投诉'}
+      meta: {title: '分销推荐'}
     },
     {
       path: 'Point',

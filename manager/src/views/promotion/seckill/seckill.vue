@@ -21,10 +21,10 @@
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
       </Row>
-      <Row class="operation padding-row">
+      <!-- <Row class="operation padding-row">
         <Button type="primary" @click="add">添加活动</Button>
-      </Row>
-      <Tabs value="list"  @on-click="clickTabPane">
+      </Row> -->
+      <Tabs value="list" class="mt_10" @on-click="clickTabPane">
         <TabPane label="秒杀活动列表" name="list">
           <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10">
             <template slot-scope="{ row }" slot="action">
@@ -32,7 +32,7 @@
 
               <Button type="info" size="small" class="mr_5" v-else @click="manage(row)">查看</Button>
 
-              <Button type="primary" size="small" class="mr_5" v-if="row.promotionStatus == 'NEW'" @click="manage(row)">管理</Button>
+              <Button type="success" size="small" class="mr_5" v-if="row.promotionStatus == 'NEW'" @click="manage(row)">管理</Button>
 
               <Button type="error" size="small" v-if="
                 row.promotionStatus == 'START' || row.promotionStatus == 'NEW'

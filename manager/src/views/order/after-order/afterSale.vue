@@ -280,7 +280,10 @@
       },
       //修改售后原因
       edit(v) {
+   
         this.form.reason = v.reason
+        this.form.id = v.id
+  
         this.modalVisible = true
         this.modalTitle = "修改售后原因"
       },

@@ -31,18 +31,19 @@
               <Option value="CANCELLED">已取消</Option>
             </Select>
           </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
           <Form-item label="下单时间">
             <DatePicker
               v-model="selectDate"
               type="datetimerange"
-              format="yyyy-MM-dd HH:mm:ss"
+              format="yyyy-MM-dd"
               clearable
               @on-change="selectDateRange"
-              placeholder="选择起始时间"
+              placeholder="选择起始时间" 
               style="width: 200px"
             ></DatePicker>
           </Form-item>
+          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+          
         </Form>
       </Row>
       <Table
@@ -94,6 +95,7 @@
           buyerName: "",
           orderStatus: ""
         },
+     
         selectDate: null, // 下单时间
         columns: [
           {

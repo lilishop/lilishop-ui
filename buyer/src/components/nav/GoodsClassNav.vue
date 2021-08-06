@@ -188,7 +188,7 @@ export default {
   },
   computed: {
     cateList () { // 商品分类
-      return this.$store.state.category
+      return this.$store.state.category || []
     }
   },
   watch: {

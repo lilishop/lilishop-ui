@@ -8,14 +8,6 @@ import {
   getRequestWithNoToken,
   commonUrl
 } from "@/libs/axios";
-import config from "@/config";
-
-// 文件上传接口
-export const uploadFile = commonUrl + "/common/upload/file";
-// 验证码渲染图片接口
-export const drawCodeImage = "/common/captcha/draw/";
-// 获取菜单
-export const getMenuList = "/permission/getMenuList";
 // 获取数据字典
 export const getDictData = "/dictData/getByType/";
 // Websocket

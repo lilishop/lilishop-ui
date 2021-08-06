@@ -1,10 +1,6 @@
 // 统一请求路径前缀在libs/axios.js中修改
 import { getRequest, postRequest, putRequest, deleteRequest, importRequest, getRequestWithNoToken } from '@/libs/axios';
 
-// 验证码渲染图片接口
-export const drawCodeImage = "/lili/common/captcha/draw/"
-
-
 // 获取kuaidi配置
 export const getParams = (params) => {
     return getRequest('/platformSetting/get/'+params)

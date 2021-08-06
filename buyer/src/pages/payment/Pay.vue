@@ -213,29 +213,6 @@
           </li>
         </ul>
       </div>
-      <!-- 其他信息 -->
-      <div class="other" v-if="$route.query.way === 'POINT'">
-        <div class="card-head mt_20 mb_20">
-          <span>其他信息</span>
-        </div>
-        <div>
-          <div>
-            <span>使用积分：</span
-            ><Input
-              type="text"
-              style="width: 100px"
-              v-model.number="otherMsgForm.point"
-              placeholder="请输入使用积分"
-            />
-            <span style="color: #999"
-              >您当前的可用积分为
-              {{ otherMsgForm.totalPoint }} ，本订单最多可以使用{{
-                otherMsgForm.availablePoint
-              }}</span
-            >
-          </div>
-        </div>
-      </div>
       <!-- 订单价格 -->
       <div class="order-price">
         <div>
@@ -257,7 +234,13 @@
             }}</span
           >
         </div>
-        <div>
+        <div v-if="$route.query.way === 'POINTS'">
+          <span>应付积分：</span
+          ><span class="actrual-price">{{
+            priceDetailDTO.payPoint
+          }}</span>
+        </div>
+        <div v-else>
           <span>应付金额：</span
           ><span class="actrual-price">{{
             priceDetailDTO.flowPrice | unitPrice("￥")
@@ -299,7 +282,6 @@ import {
   cartGoodsPay,
   createTrade,
   selectAddr,
-  shippingMethod,
   selectCoupon,
   couponNum
 } from '@/api/cart';
@@ -317,13 +299,6 @@ export default {
         // 发票数据
         receiptTitle: '个人',
         receiptContent: '不开发票'
-      },
-      otherMsgForm: {
-        // 其他信息模块数据
-        point: 0,
-        availablePoint: 10,
-        totalPoint: 100,
-        noGoods: 0
       },
       addressList: [], // 地址列表
       selectedAddress: {}, // 所选地址
@@ -549,10 +524,14 @@ export default {
         .then((res) => {
           this.$Spin.hide();
           if (res.success) {
-            this.$router.push({
-              path: '/payment',
-              query: { orderType: 'TRADE', sn: res.result.sn }
-            });
+            if (params.way === 'POINTS') { // 积分支付不需要跳转支付页面
+              this.$router.push('/payDone')
+            } else {
+              this.$router.push({
+                path: '/payment',
+                query: { orderType: 'TRADE', sn: res.result.sn }
+              });
+            }
           }
         })
         .catch(() => {

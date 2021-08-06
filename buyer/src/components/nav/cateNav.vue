@@ -89,7 +89,11 @@ export default {
   },
   computed: {
     navList () { // 导航列表
-      return JSON.parse(storage.getItem('navList')) || []
+      if (storage.getItem('navList')) {
+        return JSON.parse(storage.getItem('navList'))
+      } else {
+        return []
+      }
     }
   },
   methods: {
