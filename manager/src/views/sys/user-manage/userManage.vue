@@ -3,7 +3,7 @@
     <Card>
       <Row @keydown.enter.native="handleSearch">
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="用户名" prop="username">
+          <Form-item label="用户名">
             <Input
               type="text"
               v-model="searchForm.username"
@@ -12,7 +12,7 @@
               style="width: 200px"
             />
           </Form-item>
-          <Form-item label="联系方式" prop="mobile">
+          <Form-item label="联系方式">
             <Input
               type="text"
               v-model="searchForm.mobile"
@@ -22,15 +22,8 @@
             />
           </Form-item>
 
-          <Form-item label="部门" prop="department" >
+          <Form-item label="部门">
             <department-choose @on-change="handleSelectDep" style="width: 150px;" ref="dep"></department-choose>
-          </Form-item>
-
-          <Form-item label="用户状态" prop="status">
-            <Select v-model="searchForm.status" placeholder="请选择" clearable style="width: 150px">
-              <Option value="true">启用</Option>
-              <Option value="false">禁用</Option>
-            </Select>
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
@@ -143,8 +136,6 @@ export default {
         username: "",
         departmentId: "",
         mobile: "",
-        type: "",
-        status: "",
         pageNumber: 1,
         pageSize: 10,
         sort: "createTime",
@@ -158,7 +149,6 @@ export default {
         mobile: "",
         email: "",
         sex: "",
-        type: 0,
         roles: [],
         departmentId: "",
         departmentTitle: ""
@@ -388,13 +378,6 @@ export default {
     getUserList() {
       // 多条件搜索用户列表
       this.loading = true;
-      // 避免后台默认值
-      if (!this.searchForm.type) {
-        this.searchForm.type = "";
-      }
-      if (!this.searchForm.status) {
-        this.searchForm.status = "";
-      }
       getUserListData(this.searchForm).then(res => {
         this.loading = false;
         if (res.success) {
@@ -461,21 +444,21 @@ export default {
         if (valid) {
           if (this.modalType == 0) {
             // 添加用户 避免编辑后传入id
-            delete this.form.id;
-            delete this.form.status;
-            if (this.form.password == "" || this.form.password == undefined) {
+            const params = JSON.parse(JSON.stringify(this.form))
+            delete params.id;
+            delete params.status;
+            if (params.password == "" || params.password == undefined) {
               this.errorPass = "密码不能为空";
               return;
             }
-            if (this.form.password.length < 6) {
+            if (params.password.length < 6) {
               this.errorPass = "密码长度不得少于6位";
               return;
             }
             //todo
-            this.form.password = this.md5(this.form.password)
-
+            params.password = this.md5(params.password)
             this.submitLoading = true;
-            addUser(this.form).then(res => {
+            addUser(params).then(res => {
               this.submitLoading = false;
               if (res.success) {
                 this.$Message.success("操作成功");
@@ -503,6 +486,15 @@ export default {
       this.modalType = 0;
       this.modalTitle = "添加用户";
       this.$refs.form.resetFields();
+      this.form = { // 表单
+        username: "",
+        mobile: "",
+        email: "",
+        sex: "",
+        roles: [],
+        departmentId: "",
+        departmentTitle: ""
+      },
       this.$refs.depTree.setData("", "");
       this.userModalVisible = true;
     },
