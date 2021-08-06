@@ -78,7 +78,7 @@
                 </vuedraggable>
                 <Upload ref="upload" :show-upload-list="false" 
                   :on-success="handleSuccessGoodsPicture" :format="['jpg', 'jpeg', 'png']"
-                  :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize"
+                  :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" :max-size="1024"
                   :before-upload="handleBeforeUploadGoodsPicture" multiple type="drag" :action="uploadFileUrl"
                   :headers="accessToken" style="margin-left:10px">
                   <div style="width: 148px; height: 148px; line-height: 148px">
@@ -183,7 +183,7 @@
                             </vuedraggable>
                             <Upload ref="uploadSku" :show-upload-list="false"
                                 :on-success="handleSuccess" :format="['jpg', 'jpeg', 'png']"
-                                :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize"
+                                :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" :max-size="1024"
                                 :before-upload="handleBeforeUpload" multiple type="drag" :action="uploadFileUrl"
                                 :headers="accessToken" style="display: inline-block; width: 58px">
                               <div>
@@ -609,7 +609,7 @@ export default {
     handleMaxSize(file) {
       this.$Notice.warning({
         title: "超过文件大小限制",
-        desc: "图片 " + file.name + " 不能超过2mb"
+        desc: "图片大小不能超过1MB"
       });
     },
     // 图片上传前钩子

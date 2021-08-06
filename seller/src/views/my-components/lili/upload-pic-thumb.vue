@@ -30,7 +30,7 @@
         :on-success="handleSuccess"
         :on-error="handleError"
         :format="['jpg','jpeg','png','gif']"
-        :max-size="maxSize*1024"
+        :max-size="1024"
         :on-format-error="handleFormatError"
         :on-exceeded-size="handleMaxSize"
         :before-upload="handleBeforeUpload"
@@ -73,10 +73,6 @@ export default {
     multiple: { // 多选
       type: Boolean,
       default: true
-    },
-    maxSize: { // 大小限制 MB
-      type: Number,
-      default: 5
     },
     disable:{ // 禁止上传
       type: Boolean,
@@ -154,11 +150,7 @@ export default {
       this.$Notice.warning({
         title: "文件大小过大",
         desc:
-          "所选文件‘ " +
-          file.name +
-          " ’大小过大, 不得超过 " +
-          this.maxSize +
-          "M."
+          "所选文件大小过大, 不得超过1M."
       });
     },
     handleBeforeUpload() {
