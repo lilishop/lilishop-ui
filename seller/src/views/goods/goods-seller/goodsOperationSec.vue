@@ -315,6 +315,7 @@ import * as API_Shop from "@/api/shops";
 import cloneObj from "@/utils/index";
 import vuedraggable from "vuedraggable";
 import editor from "@/views/my-components/lili/editor";
+import { uploadFile } from "@/libs/axios";
 import {regular} from "@/utils";
 
 export default {
@@ -371,7 +372,7 @@ export default {
       //提交状态
       submitLoading: false,
       //上传图片路径
-      uploadFileUrl: API_GOODS.uploadFile,
+      uploadFileUrl: uploadFile,
       // 预览图片路径
       previewPicture: "",
       //商品图片

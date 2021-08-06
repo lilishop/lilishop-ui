@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { uploadFile } from "@/api/index";
+import { uploadFile } from "@/libs/axios";
 export default {
   name: "uploadPicInput",
   props: {
@@ -87,7 +87,7 @@ export default {
       currentValue: this.value, // 当前值
       loading: false, // 加载状态
       viewImage: false, // 是否预览图片
-      uploadFileUrl: uploadFile // 上传列表
+      uploadFileUrl: uploadFile // 上传路径
     };
   },
   methods: {

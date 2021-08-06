@@ -237,7 +237,7 @@
 
 <script>
 import * as API_Order from "@/api/order";
-import * as API_GOODS from "@/api/goods";
+import { uploadFile } from "@/libs/axios";
 export default {
   name: "orderComplaint",
   data() {
@@ -245,7 +245,7 @@ export default {
       //展示图片层
       visible: false,
       //上传图片路径
-      uploadFileUrl: API_GOODS.uploadFile,
+      uploadFileUrl: uploadFile,
       accessToken: "", // 验证token
       id: 0, // 投诉单id
       complaintInfo: "", // 投诉信息

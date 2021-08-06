@@ -50,7 +50,7 @@
 </template>
 
 <script>
-import { uploadFile } from "@/api/index";
+import { uploadFile } from "@/libs/axios";
 import E from "wangeditor";
 import xss from "xss";
 // 表情包配置 自定义表情可在该js文件中统一修改

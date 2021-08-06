@@ -6,16 +6,7 @@ import {
   deleteRequest,
   getRequestWithNoToken,
   postRequestWithNoToken,
-  commonUrl,
-  baseUrl
 } from "@/libs/axios";
-
-// 文件上传接口
-export const uploadFile = commonUrl + "/common/upload/file";
-// 验证码渲染图片接口
-export const drawCodeImage = commonUrl + "/common/captcha/draw/";
-// 获取菜单
-export const getMenuList = baseUrl + "/permission/getMenuList";
 
 //获取所有city
 export const getAllCity = (params) => {

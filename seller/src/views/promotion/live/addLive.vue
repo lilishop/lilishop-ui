@@ -146,7 +146,7 @@
 </template>
 
 <script>
-import { uploadFile } from "@/api/index";
+import { uploadFile } from "@/libs/axios";
 import {
   addLive,
   addLiveGoods,
