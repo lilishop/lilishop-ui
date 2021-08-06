@@ -76,22 +76,22 @@
 
     <!-- 保存权限弹出选择权限 -->
     <Modal width="800" v-model="selectIsSuperModel" title="选择菜单权限" :loading="superModelLoading" @on-ok="saveRole">
-      <!-- <div class="btns">
-        <Button type="primary"  class="btn-item">一键选中·数据权限</Button>
-        <Button  class="btn-item">一键选中·查看权限</Button>
-      </div> -->
+      <div class="btns">
+        <Button type="primary" @click="setRole()" class="btn-item">一键选中·数据权限</Button>
+        <Button class="btn-item" @click="setRole('onlyView')">一键选中·查看权限</Button>
+      </div>
       <div class="role-list">
         <div class="role-item" v-for="(item, index) in saveRoleWay" :key="index">
           <div class="title">{{ item.title }}</div>
           <div class="content">
-          <RadioGroup type="button" button-style="solid" v-model="item.isSuper">
-            <Radio :label="true">
-              <span>操作数据权限</span>
-            </Radio>
-            <Radio :label="false">
-              <span>查看权限</span>
-            </Radio>
-          </RadioGroup>
+            <RadioGroup type="button" button-style="solid" v-model="item.isSuper">
+              <Radio :label="true">
+                <span>操作数据权限</span>
+              </Radio>
+              <Radio :label="false">
+                <span>查看权限</span>
+              </Radio>
+            </RadioGroup>
           </div>
         </div>
       </div>
@@ -338,6 +338,17 @@ export default {
     },
 
     /**
+     * 设置权限
+     */
+    setRole(val) {
+      let enable;
+      val == "onlyView" ? (enable = false) : (enable = true);
+      this.saveRoleWay.map((item) => {
+        item.isSuper = enable;
+      });
+    },
+
+    /**
      * 查询所有角色
      */
     getRoleList() {
@@ -515,7 +526,7 @@ export default {
       }
       // 递归判断子节点
       this.checkPermTree(this.permData, rolePerms);
-      console.warn(this.permData);
+
       this.permModalVisible = true;
     },
     // 递归判断子节点
@@ -535,7 +546,6 @@ export default {
     },
     // 判断角色拥有的权限节点勾选
     hasPerm(p, rolePerms) {
-      console.log(p, rolePerms);
       if (!rolePerms) return false;
       let flag = false;
       for (let i = 0; i < rolePerms.length; i++) {
@@ -568,7 +578,6 @@ export default {
       let way = [];
 
       selectedNodes.forEach((e) => {
-        console.log(e);
         let perm = {
           title: e.title,
           isSuper: e.isSuper,
@@ -707,44 +716,42 @@ export default {
   display: flex;
   padding: 20px 0;
   align-items: center;
-  >.title{
+  > .title {
     flex: 2;
     text-align: right;
   }
-  >.content{
+  > .content {
     flex: 10;
   }
 }
-.btns{
+.btns {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 }
-.btn-item{
+.btn-item {
   margin-right: 20px;
 }
 .permModal {
-    .ivu-modal-body {
-        max-height: 560px;
-        overflow: auto;
-    }
+  .ivu-modal-body {
+    max-height: 560px;
+    overflow: auto;
+  }
 }
 
 .depModal {
-    .ivu-modal-body {
-        max-height: 500px;
-        overflow: auto;
-    }
+  .ivu-modal-body {
+    max-height: 500px;
+    overflow: auto;
+  }
 }
-.tips{
+.tips {
   font-size: 12px;
   color: #999;
   margin-left: 8px;
 }
-.title{
-
+.title {
   font-weight: bold;
   margin-right: 20px;
 }
-
 </style>
