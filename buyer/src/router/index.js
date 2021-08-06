@@ -259,13 +259,14 @@ export default new Router({
     {
       path: 'Favorites',
       name: 'Favorites',
-      component: Favorites
+      component: Favorites,
+      meta: {title: '我的收藏'}
     },
     {
       path: 'Distribution',
       name: 'Distribution',
       component: Distribution,
-      meta: {title: '我的投诉'}
+      meta: {title: '分销推荐'}
     },
     {
       path: 'Point',

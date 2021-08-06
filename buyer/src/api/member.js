@@ -346,14 +346,16 @@ export function getDistGoodsList (params) {
 }
 
 /**
- * 选择分销商品
+ * 绑定、解绑分销商品
  * @param distributionGoodsId 分销商品id
+ * @param checked 分销商品id,true为绑定，false为解绑
  */
-export function selectDistGoods (distributionGoodsId) {
+export function selectDistGoods (params) {
   return request({
-    url: `/buyer/distributionGoods/checked/${distributionGoodsId}`,
+    url: `/buyer/distributionGoods/checked/${params.distributionGoodsId}`,
     method: Method.GET,
-    needToken: true
+    needToken: true,
+    params
   });
 }
 
@@ -457,7 +459,8 @@ export function memberMsgList (params) {
  * 设置消息为已读
  * @param {String} messageId 消息id
  */
- export function readMemberMsg (id) {
+
+export function readMemberMsg (id) {
   return request({
     url: `/buyer/member/message/${id}`,
     method: Method.PUT,
@@ -468,7 +471,7 @@ export function memberMsgList (params) {
  * 删除会员消息
  * @param {String} messageId 消息id
  */
- export function delMemberMsg (id) {
+export function delMemberMsg (id) {
   return request({
     url: `/buyer/member/message/${id}`,
     method: Method.DELETE,
