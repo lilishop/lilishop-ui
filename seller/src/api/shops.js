@@ -3,12 +3,6 @@ import {getRequest, postRequest, putRequest, deleteRequest, importRequest, getRe
 
 // Vaptcha ID
 export const vaptchaID = "5dce36188713b71e70a41eb7"
-// 文件上传接口
-export const uploadFile = "/upload/file"
-// 验证码渲染图片接口
-export const drawCodeImage = "/common/captcha/draw/"
-// 获取菜单
-export const getMenuList = "/permission/getMenuList"
 // 获取数据字典
 export const getDictData = "/dictData/getByType/"
 // Websocket

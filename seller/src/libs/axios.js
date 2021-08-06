@@ -15,7 +15,8 @@ export const commonUrl =
   process.env.NODE_ENV === "development"
     ? config.api_dev.common
     : config.api_prod.common;
-
+// 文件上传接口
+export const uploadFile = commonUrl + "/common/upload/file";
 var isRefreshToken = 0;
 const refreshToken = getTokenDebounce();
 const service = axios.create({

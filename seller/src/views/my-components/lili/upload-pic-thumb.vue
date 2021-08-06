@@ -55,7 +55,7 @@
 </template>
 
 <script>
-import { uploadFile } from "@/api/index";
+import { uploadFile } from "@/libs/axios";
 import vuedraggable from "vuedraggable";
 export default {
   name: "uploadPicThumb",
