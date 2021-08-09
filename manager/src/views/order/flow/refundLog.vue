@@ -4,26 +4,24 @@
       <Row @keydown.enter.native="handleSearch">
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
           <Form-item label="订单号" prop="orderSn">
-            <Input type="text" v-model="searchForm.orderSn" placeholder="订单/交易号" clearable style="width: 200px"/>
+            <Input type="text" v-model="searchForm.orderSn" placeholder="订单/交易号" clearable style="width: 200px" />
           </Form-item>
-          <Form-item label="退款状态" prop="orderStatus">
+          <Form-item label="退款状态">
             <Select v-model="searchForm.isRefund" placeholder="请选择" clearable style="width: 200px">
               <Option value="false">未退款</Option>
               <Option value="true">已退款</Option>
             </Select>
           </Form-item>
           <Form-item label="退款时间">
-            <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable
-                        @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px"></DatePicker>
+            <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px"></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
       </Row>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize"
-              @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
-              size="small" show-total show-elevator show-sizer></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
+          show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
   </div>
@@ -67,13 +65,13 @@ export default {
           title: "第三方付款流水",
           key: "paymentReceivableNo",
           minWidth: 150,
-          tooltip: true
+          tooltip: true,
         },
         {
           title: "第三方退款流水",
           key: "receivableNo",
           minWidth: 130,
-          tooltip: true
+          tooltip: true,
         },
         {
           title: "退款金额",
@@ -90,7 +88,7 @@ export default {
           title: "申请时间",
           key: "createTime",
           minWidth: 200,
-          tooltip: true
+          tooltip: true,
         },
         {
           title: "退款状态",
@@ -99,9 +97,13 @@ export default {
           width: 95,
           render: (h, params) => {
             if (params.row.isRefund == "1") {
-              return h("div", [h("Tag", {props: {color: "green",},}, "已退款")]);
+              return h("div", [
+                h("Tag", { props: { color: "green" } }, "已退款"),
+              ]);
             } else {
-              return h("div", [h("Tag", {props: {color: "orange",},}, "未退款")]);
+              return h("div", [
+                h("Tag", { props: { color: "orange" } }, "未退款"),
+              ]);
             }
           },
         },
@@ -113,7 +115,7 @@ export default {
   methods: {
     // 初始化数据
     init() {
-      this.getDataList();
+      this.getDataList();  
     },
     // 分页 改变页码
     changePage(v) {
@@ -150,7 +152,7 @@ export default {
         }
       });
       this.loading = false;
-    }
+    },
   },
   mounted() {
     this.init();

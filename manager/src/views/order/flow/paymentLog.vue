@@ -14,11 +14,12 @@
           </Form-item>
           <Form-item label="支付方式" prop="orderStatus">
             <Select v-model="searchForm.paymentMethod" placeholder="请选择" clearable style="width: 200px">
+              <Option value="">全部</Option>
               <Option value="WECHAT">微信</Option>
               <Option value="ALIPAY">支付宝</Option>
               <Option value="WALLET">余额</Option>
               <Option value="BANK_TRANSFER">银行转账</Option>
-              <Option value="">暂未付款</Option>
+
             </Select>
           </Form-item>
           <Form-item label="支付时间">
@@ -29,8 +30,8 @@
       </Row>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
-          size="small" show-total show-elevator show-sizer></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
+          show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
   </div>
@@ -68,13 +69,21 @@ export default {
           align: "center",
           render: (h, params) => {
             if (params.row.paymentMethod === "WECHAT") {
-              return h("div", [h("Tag", {props: {color: "green",},}, "微信"),]);
+              return h("div", [
+                h("Tag", { props: { color: "green" } }, "微信"),
+              ]);
             } else if (params.row.paymentMethod === "ALIPAY") {
-              return h("div", [h("Tag", {props: {color: "blue",},}, "支付宝"),]);
+              return h("div", [
+                h("Tag", { props: { color: "blue" } }, "支付宝"),
+              ]);
             } else if (params.row.paymentMethod === "WALLET") {
-              return h("div", [h("Tag", {props: {color: "geekblue",},}, "余额支付"),]);
+              return h("div", [
+                h("Tag", { props: { color: "geekblue" } }, "余额支付"),
+              ]);
             } else if (params.row.paymentMethod === "BANK_TRANSFER") {
-              return h("div", [h("Tag", {props: {color: "orange",},}, "银行转帐"),]);
+              return h("div", [
+                h("Tag", { props: { color: "orange" } }, "银行转帐"),
+              ]);
             } else {
               return h("div", [h("Tag", {}, "暂未付款")]);
             }
@@ -95,13 +104,19 @@ export default {
           key: "clientType",
           width: 130,
           render: (h, params) => {
-            if (params.row.clientType === "WECHAT_MP" || params.row.clientType === '小程序') {
+            if (
+              params.row.clientType === "WECHAT_MP" ||
+              params.row.clientType === "小程序"
+            ) {
               return h("div", [h("span", {}, "小程序")]);
             } else if (params.row.clientType === "APP") {
               return h("div", [h("span", {}, "APP")]);
             } else if (params.row.clientType === "PC") {
               return h("div", [h("span", {}, "PC网页")]);
-            } else if (params.row.clientType === "H5" || params.row.clientType === 'wap') {
+            } else if (
+              params.row.clientType === "H5" ||
+              params.row.clientType === "wap"
+            ) {
               return h("div", [h("span", {}, "移动端")]);
             }
           },
@@ -168,8 +183,9 @@ export default {
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    changeDate (val) { // 改变日期格式
-      this.searchForm.paymentTime = val
+    changeDate(val) {
+      // 改变日期格式
+      this.searchForm.paymentTime = val;
     },
     // 获取列表
     getDataList() {

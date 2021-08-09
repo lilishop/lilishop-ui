@@ -6,6 +6,7 @@ import {
   deleteRequest,
   getRequestWithNoToken,
   postRequestWithNoToken,
+  commonUrl,
 } from "@/libs/axios";
 
 //获取所有city
