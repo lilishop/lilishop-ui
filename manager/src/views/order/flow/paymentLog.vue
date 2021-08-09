@@ -1,8 +1,8 @@
 <template>
-  <div class="search">
+  <div class="search">   
     <Card>
       <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+        <Form ref="searchForm" :model="searchForm" inline :label-width="100" class="search-form">
           <Form-item label="订单号" prop="sn">
             <Input type="text" v-model="searchForm.sn" placeholder="订单/交易号" clearable style="width: 200px" />
           </Form-item>
@@ -22,8 +22,8 @@
 
             </Select>
           </Form-item>
-          <Form-item label="支付时间">
-            <DatePicker v-model="searchForm.paymentTime" type="datetime" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="changeDate" placeholder="选择支付时间" style="width: 200px"></DatePicker>
+          <Form-item label="订单创建时间">
+            <DatePicker v-model="times" type="datetimerange" format="yyyy-MM-dd HH:mm" clearable @on-change="changeDate" placeholder="选择支付时间" style="width: 200px"></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
@@ -53,8 +53,10 @@ export default {
         order: "desc", // 默认排序方式
         sn: "",
         payStatus: "",
-        paymentTime: "",
+        startDate: "", //订单创建时间
+        endDate: "", //订单结束时间
       },
+      times: [], //订单创建时间
       columns: [
         {
           title: "订单/交易编号",
@@ -185,7 +187,8 @@ export default {
     },
     changeDate(val) {
       // 改变日期格式
-      this.searchForm.paymentTime = val;
+      this.searchForm.startDate = val[0];
+      this.searchForm.endDate = val[1];
     },
     // 获取列表
     getDataList() {
