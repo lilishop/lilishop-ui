@@ -338,7 +338,7 @@ export default {
             container: "orderChart",
             autoFit: true,
             height: 500,
-            padding: [70, 35, 70, 35],
+            padding: [70, 70, 70, 70],
           });
         }
 
@@ -448,7 +448,7 @@ export default {
               container: "pvChart",
               autoFit: true,
               height: 500,
-              padding: [70, 35, 70, 35],
+              padding: [70, 70, 70, 70],
             });
           }
           this.initPvChart();
@@ -466,7 +466,7 @@ export default {
             container: "historyMemberChart",
             autoFit: true,
             height: 500,
-            padding: [70, 35, 70, 35],
+            padding: [70, 70, 70, 70],
           });
         }
 

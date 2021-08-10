@@ -197,7 +197,7 @@ export default {
               container: "orderChart",
               autoFit: true,
               height: 500,
-              padding: [70, 35, 70, 35],
+              padding: [70, 70, 70, 70],
             });
           }
           this.initChart();
