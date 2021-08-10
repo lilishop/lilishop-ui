@@ -4,6 +4,14 @@
     <template v-if="element.type == 'carousel'">
       <model-carousel :data="element"></model-carousel>
     </template>
+    <!-- 轮播图模块，100%宽度，无个人信息栏 -->
+    <template v-if="element.type == 'carousel1'">
+      <model-carousel1 class="mb_20" :data="element"></model-carousel1>
+    </template>
+    <!-- 轮播图模块，包括个人信息，两个轮播模块 -->
+    <template v-if="element.type == 'carousel2'">
+      <model-carousel2 class="mb_20" :data="element"></model-carousel2>
+    </template>
     <!-- 热门广告 -->
     <template v-if="element.type == 'hotAdvert'">
       <div class="setup-content">
@@ -223,6 +231,8 @@
 
 <script>
 import ModelCarousel from "./modelList/carousel.vue";
+import ModelCarousel1 from './modelList/carousel1.vue';
+import ModelCarousel2 from './modelList/carousel2.vue';
 import FirstPageAdvert from "./modelList/firstPageAdvert.vue";
 import NewGoodsSort from "./modelList/newGoodsSort.vue";
 import Recommend from "./modelList/recommend.vue";
@@ -235,6 +245,8 @@ export default {
   props: ["element", "select", "index", "data"],
   components: {
     ModelCarousel,
+    ModelCarousel1,
+    ModelCarousel2,
     Recommend,
     NewGoodsSort,
     FirstPageAdvert,
