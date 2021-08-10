@@ -3,9 +3,7 @@
 <template>
   <div>
     <Card class="change-pass">
-      <p slot="title">
-        修改密码
-      </p>
+      <p slot="title">修改密码</p>
       <div class="mt_10">
         <Form ref="editPasswordForm" :model="editPasswordForm" :label-width="100" label-position="right" :rules="passwordValidate" style="width:450px">
           <FormItem label="原密码" prop="oldPass">

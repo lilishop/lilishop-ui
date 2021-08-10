@@ -229,6 +229,12 @@ export const otherRouter = {
       component: () => import("@/views/promotion/fullCut/fullCutDetail.vue")
     },
     {
+      path: "promotion/seckill/manager-seckill-add",
+      title: "编辑秒杀活动",
+      name: "manager-seckill-add",
+      component: () => import("@/views/promotion/seckill/addSeckill.vue")
+    },
+    {
       path: "promotion/seckill/seckill-goods",
       title: "秒杀商品",
       name: "seckill-goods",

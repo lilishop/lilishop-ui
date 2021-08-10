@@ -8,6 +8,9 @@
           <div class="goodsImg hover-pointer" v-if="params.type === 'GOODS'">
             <img :src="item.image" />
           </div>
+          <div class="goodsImg hover-pointer" v-else>
+            <img :src="item.storeLogo" />
+          </div>
           <div class="goodsTitle hover-color" v-if="params.type === 'GOODS'" @click="buynow(item.skuId, item.goodsId)">
             {{item.goodsName}}
           </div>
@@ -20,9 +23,9 @@
           </div>
           <div class="goodsBuy">
             <Button size="small" type="primary" @click="buynow(item.skuId, item.goodsId)" v-if="params.type === 'GOODS'">立即购买</Button>
-            <Button size="small" type="primary" @click="goShop(item.storeId)" v-else>店铺购买</Button>
+            <Button size="small" type="primary" @click="goShop(item.id)" v-else>店铺购买</Button>
             <Button size="small" type="error" ghost v-if="params.type === 'GOODS'" @click="cancel(item.skuId)">取消收藏</Button>
-            <Button size="small" type="error" ghost v-if="params.type === 'SHOP'" @click="cancel(item.storeId)">取消收藏</Button>
+            <Button size="small" type="error" ghost v-if="params.type === 'SHOP'" @click="cancel(item.id)">取消收藏</Button>
           </div>
         </div>
       </template>
