@@ -71,8 +71,9 @@ export default {
   methods: {
     // 页面触底
     handleReachBottom() {
+     
       setTimeout(() => {
-        if (this.params.pageNumber * this.params.pageSize <= this.total) {
+        if (this.params.pageNumber * this.params.pageSize <= this.shopTotal) {
           this.params.pageNumber++;
           this.getShopList();
         }
