@@ -157,10 +157,6 @@ export default {
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    add() {
-      // 添加
-      this.$router.push({ name: "manager-seckill-add" });
-    },
     edit(v) {
       // 编辑
       this.$router.push({ name: "manager-seckill-add", query: { id: v.id } });
