@@ -16,7 +16,7 @@
         </Alert>
       </Row>
       <h3 class="act-goods">活动商品</h3>
-      <Table class="mt_10" :loading="loading" border :columns="goodsColumns" :data="goodsData" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
+      <Table class="mt_10" :loading="loading" border :columns="goodsColumns" :data="goodsData" ref="table" @on-selection-change="changeSelect">
         <template slot-scope="{ row, index }" slot="price">
           <Input v-model="row.price" :disabled="status==='view'" @input="goodsData[index].price = row.price" />
         </template>

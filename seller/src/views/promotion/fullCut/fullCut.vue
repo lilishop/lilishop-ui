@@ -1,13 +1,7 @@
 <template>
   <div class="search">
     <Card>
-      <Form
-        ref="searchForm"
-        :model="searchForm"
-        inline
-        :label-width="70"
-        class="search-form"
-      >
+      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
         <Form-item label="活动名称">
           <Input
             type="text"
@@ -53,7 +47,6 @@
         :columns="columns"
         :data="data"
         ref="table"
-        sortable="custom"
       >
         <template slot-scope="{ row }" slot="applyEndTime">
           {{ unixDate(row.applyEndTime) }}

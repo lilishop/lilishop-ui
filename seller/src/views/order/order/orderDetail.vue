@@ -157,7 +157,6 @@
         :columns="columns"
         :data="data"
         ref="table"
-        sortable="custom"
       >
         <!-- 商品栏目格式化 -->
         <template slot="goodsSlot" slot-scope="{ row }">
@@ -384,7 +383,6 @@
           :columns="orderLogColumns"
           :data="orderLogData"
           ref="table"
-          sortable="custom"
         ></Table>
       </div>
 

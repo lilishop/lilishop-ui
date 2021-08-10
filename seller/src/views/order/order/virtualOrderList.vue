@@ -1,30 +1,28 @@
 <template>
   <div class="search">
     <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="订单编号" prop="orderSn">
-            <Input type="text" v-model="searchForm.orderSn" clearable placeholder="请输入订单编号" style="width: 160px" />
-          </Form-item>
-          <Form-item label="会员名称" prop="buyerName">
-            <Input type="text" v-model="searchForm.buyerName" clearable placeholder="请输入会员名称" style="width: 160px" />
-          </Form-item>
-          <Form-item label="订单状态" prop="orderStatus">
-            <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 160px">
-              <Option value="UNPAID">未付款</Option>
-              <Option value="PAID">已付款</Option>
-              <Option value="COMPLETED">已完成</Option>
-              <Option value="TAKE">待核验</Option>
-              <Option value="CANCELLED">已取消</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="下单时间">
-            <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 160px"></DatePicker>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-          <Button @click="handleReset" class="search-btn">重置</Button>
-        </Form>
-      </Row>
+      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+        <Form-item label="订单编号" prop="orderSn">
+          <Input type="text" v-model="searchForm.orderSn" clearable placeholder="请输入订单编号" style="width: 160px" />
+        </Form-item>
+        <Form-item label="会员名称" prop="buyerName">
+          <Input type="text" v-model="searchForm.buyerName" clearable placeholder="请输入会员名称" style="width: 160px" />
+        </Form-item>
+        <Form-item label="订单状态" prop="orderStatus">
+          <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 160px">
+            <Option value="UNPAID">未付款</Option>
+            <Option value="PAID">已付款</Option>
+            <Option value="COMPLETED">已完成</Option>
+            <Option value="TAKE">待核验</Option>
+            <Option value="CANCELLED">已取消</Option>
+          </Select>
+        </Form-item>
+        <Form-item label="下单时间">
+          <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 160px"></DatePicker>
+        </Form-item>
+        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
+        <Button @click="handleReset" class="search-btn">重置</Button>
+      </Form>
       <div>
         <Poptip @keydown.enter.native="orderVerification" placement="bottom-start" width="400">
           <Button class="export">
@@ -40,7 +38,7 @@
         </Poptip>
 
       </div>
-      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort"></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
           show-total show-elevator show-sizer></Page>

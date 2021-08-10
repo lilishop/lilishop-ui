@@ -1,13 +1,10 @@
 <template>
   <div class="store-bill">
     <Card>
-      <Form
-        ref="searchForm"
+      <Form ref="searchForm"
         :model="searchForm"
         inline
-        :label-width="70"
-        class="search-form"
-        @keydown.enter.native="handleSearch"
+        :label-width="70" class="search-form" @keydown.enter.native="handleSearch"
       >
         <Form-item label="开始时间" prop="startDay">
           <DatePicker
@@ -37,7 +34,7 @@
             <Option value="COMPLETE">已完成</Option>
           </Select>
         </Form-item>
-        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
         <Button @click="handleReset" class="search-btn">重置</Button>
       </Form>
       <Table

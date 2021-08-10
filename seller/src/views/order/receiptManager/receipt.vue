@@ -1,28 +1,26 @@
 <template>
   <div class="search">
     <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="订单编号" prop="orderSn">
-            <Input type="text" v-model="searchForm.orderSn" clearable placeholder="请输入订单编号" style="width: 200px" />
-          </Form-item>
-          <Form-item label="会员名称" prop="memberName">
-            <Input type="text" v-model="searchForm.memberName" clearable placeholder="请输入会员名称" style="width: 200px" />
-          </Form-item>
-          <Form-item label="发票抬头" prop="receiptTitle">
-            <Input type="text" v-model="searchForm.receiptTitle" clearable placeholder="请输入发票抬头" style="width: 200px" />
-          </Form-item>
-          <Form-item label="状态" prop="receiptStatus">
-            <Select v-model="searchForm.receiptStatus" placeholder="请选择" clearable style="width: 200px">
-              <Option :value="0">未开票</Option>
-              <Option :value="1">已开票</Option>
-            </Select>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-          <Button @click="handleReset" class="search-btn">重置</Button>
-        </Form>
-      </Row>
-      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
+      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+        <Form-item label="订单编号" prop="orderSn">
+          <Input type="text" v-model="searchForm.orderSn" clearable placeholder="请输入订单编号" style="width: 200px" />
+        </Form-item>
+        <Form-item label="会员名称" prop="memberName">
+          <Input type="text" v-model="searchForm.memberName" clearable placeholder="请输入会员名称" style="width: 200px" />
+        </Form-item>
+        <Form-item label="发票抬头" prop="receiptTitle">
+          <Input type="text" v-model="searchForm.receiptTitle" clearable placeholder="请输入发票抬头" style="width: 200px" />
+        </Form-item>
+        <Form-item label="状态" prop="receiptStatus">
+          <Select v-model="searchForm.receiptStatus" placeholder="请选择" clearable style="width: 200px">
+            <Option :value="0">未开票</Option>
+            <Option :value="1">已开票</Option>
+          </Select>
+        </Form-item>
+        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
+        <Button @click="handleReset" class="search-btn">重置</Button>
+      </Form>
+      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table">
         <!-- 订单详情格式化 -->
         <template slot="orderSlot" slot-scope="scope">
           <a @click="$router.push({name: 'order-detail',query: {sn: scope.row.orderSn}})">{{scope.row.orderSn}}</a>

@@ -8,7 +8,7 @@
         <Form-item label="订单时间">
           <DatePicker type="daterange" v-model="timeRange" format="yyyy-MM-dd" placeholder="选择时间" style="width: 210px"></DatePicker>
         </Form-item>
-        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
       </Form>
 
       <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table"></Table>

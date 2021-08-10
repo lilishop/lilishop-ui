@@ -4,7 +4,7 @@
       <div class="query-wrapper">
         <div class="query-item">
           <div>搜索范围</div>
-          <Input placeholder="商品名称" @on-clear="goodsData=[]; goodsParams.goodsName='';  getQueryGoodsList()" @on-enter="()=>{goodsData=[]; getQueryGoodsList();}" icon="ios-search" clearable
+          <Input placeholder="商品名称" @on-clear="goodsData=[]; goodsParams.goodsName='';  getQueryGoodsList()" @on-enter="()=>{goodsData=[]; getQueryGoodsList();}" clearable
             style="width: 150px" v-model="goodsParams.goodsName" />
         </div>
         <div class="query-item">

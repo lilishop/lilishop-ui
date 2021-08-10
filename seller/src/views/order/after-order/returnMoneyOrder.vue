@@ -1,51 +1,49 @@
 <template>
   <div class="search">
     <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="商品" prop="goodsName">
-            <Input
-              type="text"
-              v-model="searchForm.goodsName"
-              clearable
-              placeholder="请输入商品名称"
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="会员名称" prop="memberName">
-            <Input
-              type="text"
-              v-model="searchForm.memberName"
-              clearable
-              placeholder="请输入会员名称"
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="订单编号" prop="orderSn">
-            <Input
-              type="text"
-              v-model="searchForm.orderSn"
-              clearable
-              placeholder="请输入订单编号"
-              style="width: 200px"
-            />
-          </Form-item>
+      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+        <Form-item label="商品" prop="goodsName">
+          <Input
+            type="text"
+            v-model="searchForm.goodsName"
+            clearable
+            placeholder="请输入商品名称"
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="会员名称" prop="memberName">
+          <Input
+            type="text"
+            v-model="searchForm.memberName"
+            clearable
+            placeholder="请输入会员名称"
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="订单编号" prop="orderSn">
+          <Input
+            type="text"
+            v-model="searchForm.orderSn"
+            clearable
+            placeholder="请输入订单编号"
+            style="width: 200px"
+          />
+        </Form-item>
 
-          <Form-item label="申请时间">
-            <DatePicker
-              v-model="selectDate"
-              type="datetimerange"
-              format="yyyy-MM-dd HH:mm:ss"
-              clearable
-              @on-change="selectDateRange"
-              placeholder="选择起始时间"
-              style="width: 200px"
-            ></DatePicker>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-          <Button @click="handleReset" class="search-btn">重置</Button>
-        </Form>
-      </Row>
+        <Form-item label="申请时间">
+          <DatePicker
+            v-model="selectDate"
+            type="datetimerange"
+            format="yyyy-MM-dd HH:mm:ss"
+            clearable
+            @on-change="selectDateRange"
+            placeholder="选择起始时间"
+            style="width: 200px"
+          ></DatePicker>
+        </Form-item>
+        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
+        <Button @click="handleReset" class="search-btn">重置</Button>
+      </Form>
 
       <Table
         :loading="loading"

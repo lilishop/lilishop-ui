@@ -30,7 +30,6 @@
               :columns="goodsColumns"
               :data="tab.list"
               :ref="'table' + tabIndex"
-              sortable="custom"
               @on-selection-change="changeSelect"
             >
               <template slot-scope="{ row }" slot="originalPrice">

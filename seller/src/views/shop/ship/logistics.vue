@@ -1,15 +1,13 @@
 <template>
   <div class="logistics">
     <Card>
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          ref="table"
-          sortable="custom"
-          @on-sort-change="changeSort"
-        ></Table>
+      <Table
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+      ></Table>
     </Card>
   </div>
 </template>
@@ -108,15 +106,6 @@
     methods: {
       // 初始化数据
       init() {
-        this.getDataList();
-      },
-      // 变更排序
-      changeSort(e) {
-        this.searchForm.sort = e.key;
-        this.searchForm.order = e.order;
-        if (e.order === "normal") {
-          this.searchForm.order = "";
-        }
         this.getDataList();
       },
       // 获取数据
