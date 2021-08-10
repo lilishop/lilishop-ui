@@ -1,11 +1,9 @@
 <template>
   <div class="search">
-    <Row>
-      <Col>
+ 
       <Card style="margin-left: 10px">
         <Tabs @on-click="handleClickType">
           <TabPane label="基本信息" name="INFO">
-
             <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
               <FormItem label="店铺名称">
                 <Input v-model="storeName" disabled clearable style="width: 20%" />
@@ -20,7 +18,7 @@
                 <upload-pic-thumb v-model="form.storeLogo" :multiple="false"></upload-pic-thumb>
               </FormItem>
               <FormItem label="店铺简介" prop="content" class="wangEditor">
-                <editor v-model="form.storeDesc" style="width: 30%"></editor>
+                <Input type="textarea" :rows="8" v-model="form.storeDesc" style="width: 30%"></Input>
               </FormItem>
               <Form-item>
                 <Button @click="handleSubmit" :loading="submitLoading" type="primary"  style="margin-right:5px">修改
@@ -65,10 +63,8 @@
             </Form>
           </TabPane>
         </Tabs>
-
       </Card>
-      </Col>
-    </Row>
+   
 
     <liliMap ref="liliMap" @getAddress="getAddress"></liliMap>
   </div>
