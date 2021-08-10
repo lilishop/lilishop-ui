@@ -16,10 +16,11 @@
               <Option v-for="item in statusList" :value="item.value" :key="item.value">{{ item.label }}</Option>
             </Select>
           </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
           <Form-item label="SKU编码">
             <Input type="text" v-model="searchForm.skuId" placeholder="请输入SKU编码" clearable style="width: 200px" />
           </Form-item>
+          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+          
         </Form>
       </Row>
       <Row class="operation padding-row">

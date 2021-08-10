@@ -1,5 +1,5 @@
 <template>
-  <div class="search">
+  <div>
     <Card>
       <Form ref="searchForm" @keydown.enter.native="handleSearch" :model="searchForm" inline :label-width="70" class="search-form">
         <Form-item label="订单号" prop="orderSn">
@@ -20,7 +20,6 @@
         <Form-item label="下单时间">
           <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 160px"></DatePicker>
         </Form-item>
-        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         <Form-item label="订单状态" prop="orderStatus">
           <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 160px">
             <Option value="UNPAID">未付款</Option>
@@ -32,7 +31,7 @@
             <Option value="CANCELLED">已取消</Option>
           </Select>
         </Form-item>
-        
+        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
       </Form>
       <div>
         <download-excel class="export-excel-wrapper" :data="data" :fields="fields" :fetch="exportOrder" name="商品订单.xls">

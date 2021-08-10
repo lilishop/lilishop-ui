@@ -6,48 +6,41 @@
           <Tabs value="MESSAGE" @on-click="paneChange">
 
             <TabPane label="站内信列表" name="MESSAGE">
-              <Row @keydown.enter.native="handleSearch">
-                <Form ref="searchForm" :model="searchMessageForm" inline :label-width="70" class="search-form">
-                  <Form-item label="消息标题" prop="title">
-                    <Input
-                      type="text"
-                      v-model="searchMessageForm.title"
-                      placeholder="请输入消息标题"
-                      clearable
-                      style="width: 200px"
-                    />
-                  </Form-item>
+              <Form ref="searchForm" :model="searchMessageForm" inline :label-width="70" class="search-form">
+                <Form-item label="消息标题" prop="title">
+                  <Input
+                    type="text"
+                    v-model="searchMessageForm.title"
+                    placeholder="请输入消息标题"
+                    clearable
+                    style="width: 200px"
+                  />
+                </Form-item>
 
-                  <Form-item label="消息内容" prop="content">
-                    <Input
-                      type="text"
-                      v-model="searchMessageForm.content"
-                      placeholder="请输入消息内容"
-                      clearable
-                      style="width: 200px"
-                    />
-                  </Form-item>
+                <Form-item label="消息内容" prop="content">
+                  <Input
+                    type="text"
+                    v-model="searchMessageForm.content"
+                    placeholder="请输入消息内容"
+                    clearable
+                    style="width: 200px"
+                  />
+                </Form-item>
 
-                  <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+                <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
 
-                </Form>
-              </Row>
+              </Form>
               <Row class="operation" style="margin-top: 20px">
                 <Button @click="sendMessage" type="primary">发送消息</Button>
               </Row>
-              <Row>
-                <Table
-                  :loading="loading"
-                  border
-                  :columns="messageColumns"
-                  :data="messageData"
-                  ref="table"
-                  sortable="custom"
-                  @on-sort-change="messageChangeSort"
-                  @on-selection-change="messageChangeSelect"
-                ></Table>
-              </Row>
-              <Row type="flex" justify="end" class="mt_10 mb_10">
+              <Table
+                class="mr_10"
+                :loading="loading"
+                border
+                :columns="messageColumns"
+                :data="messageData"
+              ></Table>
+              <Row type="flex" justify="end" class="mt_10 mb_10 mr_10">
                 <Page
                   :current="searchMessageForm.pageNumber"
                   :total="messageDataTotal"
@@ -64,16 +57,14 @@
             </TabPane>
 
             <TabPane label="通知类站内信" name="SETTING">
-              <Row>
-                <Table
-                  :loading="loading"
-                  border
-                  :columns="noticeColumns"
-                  :data="noticeData"
-                  ref="table"
-                ></Table>
-              </Row>
-              <Row type="flex" justify="end" class="mt_10">
+              <Table
+                :loading="loading"
+                border
+                class="mr_10"
+                :columns="noticeColumns"
+                :data="noticeData"
+              ></Table>
+              <Row type="flex" justify="end" class="mt_10 mr_10">
                 <Page
                   :current="searchForm.pageNumber"
                   :total="noticeDataTotal"
@@ -193,8 +184,7 @@
         <Button type="text" @click="messageModalVisible = false">取消</Button>
         <Button type="primary" :loading="submitLoading" @click="sendMessageSubmit"
         >发送
-        </Button
-        >
+        </Button>
       </div>
     </Modal>
 

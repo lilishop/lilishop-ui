@@ -1,22 +1,26 @@
 <template>
   <div class="search">
     <Card>
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form" @keydown.enter.native="handleSearch">
-          <Form-item label="系统类型" prop="orderSn">
-            <Select v-model="searchForm.type" placeholder="请选择系统类型" clearable style="width: 200px">
-              <Option value="IOS">苹果</Option>
-              <Option value="ANDROID">安卓</Option>
-            </Select>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search">搜索</Button>
-        </Form>
+      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form" @keydown.enter.native="handleSearch">
+        <Form-item label="系统类型" prop="orderSn">
+          <Select v-model="searchForm.type" placeholder="请选择系统类型" clearable style="width: 200px">
+            <Option value="IOS">苹果</Option>
+            <Option value="ANDROID">安卓</Option>
+          </Select>
+        </Form-item>
+        <Button @click="handleSearch" type="primary" icon="ios-search">搜索</Button>
+      </Form>
+
       <Button class="mt_10 mb_10" @click="addAppVersion" type="primary">添加</Button>
+
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
           size="small" show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
+    
     <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="1000">
       <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
         <FormItem label="版本名称" prop="versionName">

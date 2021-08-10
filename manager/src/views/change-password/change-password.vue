@@ -4,10 +4,9 @@
   <div>
     <Card class="change-pass">
       <p slot="title">
-        <Icon type="key"></Icon>
         修改密码
       </p>
-      <div>
+      <div class="mt_10">
         <Form ref="editPasswordForm" :model="editPasswordForm" :label-width="100" label-position="right" :rules="passwordValidate" style="width:450px">
           <FormItem label="原密码" prop="oldPass">
             <Input type="password" v-model="editPasswordForm.oldPassword" placeholder="请输入现在使用的密码"></Input>
@@ -19,7 +18,7 @@
             <Input type="password" v-model="editPasswordForm.rePassword" placeholder="请再次输入新密码"></Input>
           </FormItem>
           <FormItem>
-            <Button type="primary" style="width: 100px;margin-right:5px" :loading="savePassLoading" @click="saveEditPass">保存
+            <Button type="primary" class="mr_10" :loading="savePassLoading" @click="saveEditPass">保存
             </Button>
             <Button @click="cancelEditPass">取消</Button>
           </FormItem>

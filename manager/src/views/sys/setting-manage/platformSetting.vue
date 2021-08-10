@@ -5,11 +5,11 @@
         <TabPane label="基础设置" name="base">
           <div style="display:flex;position:relative">
             <Form
-                    ref="baseForm"
-                    :model="base"
-                    :label-width="140"
-                    label-position="right"
-                    :rules="baseValidate"
+              ref="baseForm"
+              :model="base"
+              :label-width="140"
+              label-position="right"
+              :rules="baseValidate"
             >
               <FormItem label="网站名称" prop="siteName">
                 <Input type="text" v-model="base.siteName" placeholder="请输入网站名称" style="width: 350px"/>

@@ -1,33 +1,30 @@
 <template>
   <div class="search">
     <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="用户名">
-            <Input
-              type="text"
-              v-model="searchForm.username"
-              placeholder="请输入用户名"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="联系方式">
-            <Input
-              type="text"
-              v-model="searchForm.mobile"
-              placeholder="请输入联系方式"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-
-          <Form-item label="部门">
-            <department-choose @on-change="handleSelectDep" style="width: 150px;" ref="dep"></department-choose>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-        </Form>
-      </Row>
+      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+        <Form-item label="用户名">
+          <Input
+            type="text"
+            v-model="searchForm.username"
+            placeholder="请输入用户名"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="联系方式">
+          <Input
+            type="text"
+            v-model="searchForm.mobile"
+            placeholder="请输入联系方式"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="部门">
+          <department-choose @on-change="handleSelectDep" style="width: 150px;" ref="dep"></department-choose>
+        </Form-item>
+        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+      </Form>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加</Button>
         <Button @click="delAll">批量删除</Button>

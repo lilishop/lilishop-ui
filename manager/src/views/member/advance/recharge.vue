@@ -1,33 +1,32 @@
 <template>
   <div class="search">
     <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
-          <Form-item label="会员名称" prop="memberName">
-            <Input
-              type="text"
-              v-model="searchForm.memberName"
-              placeholder="请输入会员名称"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="充值单号" prop="rechargeSn">
-            <Input
-              type="text"
-              v-model="searchForm.rechargeSn"
-              placeholder="请输入充值单号"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="支付时间">
+      <Form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        :label-width="70"
+        class="search-form"
+      >
+        <Form-item label="会员名称" prop="memberName">
+          <Input
+            type="text"
+            v-model="searchForm.memberName"
+            placeholder="请输入会员名称"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="充值单号" prop="rechargeSn">
+          <Input
+            type="text"
+            v-model="searchForm.rechargeSn"
+            placeholder="请输入充值单号"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="支付时间">
           <DatePicker
             v-model="selectDate"
             type="datetimerange"
@@ -38,9 +37,8 @@
             style="width: 200px"
           ></DatePicker>
         </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-        </Form>
-      </Row>
+        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+      </Form>
       <Table
         :loading="loading"
         border

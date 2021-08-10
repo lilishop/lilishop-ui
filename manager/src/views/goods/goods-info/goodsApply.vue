@@ -27,7 +27,7 @@
             style="width: 200px"
           />
         </Form-item>
-        <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search" >搜索</Button>
+        <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search">搜索</Button>
       </Form>
       <Table
         :loading="loading"

@@ -2,40 +2,38 @@
 <template>
   <div class="search">
     <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70"   class="search-form">
-          <Form-item label="搜索日志" prop="searchKey">
-            <Input
-              type="text"
-              v-model="searchForm.searchKey"
-              placeholder="请输入搜索日志内容"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="操作人" prop="operatorName">
-            <Input
-              type="text"
-              v-model="searchForm.operatorName"
-              placeholder="请输入操作人"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-          <Form-item label="创建时间">
-            <DatePicker
-              type="daterange"
-              v-model="selectDate"
-              format="yyyy-MM-dd"
-              clearable
-              @on-change="selectDateRange"
-              placeholder="选择起始时间"
-              style="width: 200px"
-            ></DatePicker>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-        </Form>
-      </Row>
+      <Form ref="searchForm" :model="searchForm" inline :label-width="70"   class="search-form">
+        <Form-item label="搜索日志" prop="searchKey">
+          <Input
+            type="text"
+            v-model="searchForm.searchKey"
+            placeholder="请输入搜索日志内容"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="操作人" prop="operatorName">
+          <Input
+            type="text"
+            v-model="searchForm.operatorName"
+            placeholder="请输入操作人"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
+        <Form-item label="创建时间">
+          <DatePicker
+            type="daterange"
+            v-model="selectDate"
+            format="yyyy-MM-dd"
+            clearable
+            @on-change="selectDateRange"
+            placeholder="选择起始时间"
+            style="width: 200px"
+          ></DatePicker>
+        </Form-item>
+        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+      </Form>
       <Row class="operation padding-row">
         <Button @click="getLogList" icon="md-refresh">刷新</Button>
         <Button type="dashed" @click="openTip=!openTip">{{openTip ? "关闭提示" : "开启提示"}}</Button>
