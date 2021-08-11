@@ -9,9 +9,9 @@
                 </div>
             </div>
             <div class="header-con">
-                <div><Icon type="md-pin" />北京</div>
+                <div></div>
                 <ul class="detail">
-                    <!-- <li>切换主题</li> -->
+                    <li>立即注册</li>
                     <li>请登录</li>
                     <li>我的订单</li>
                     <li>我的足迹</li>

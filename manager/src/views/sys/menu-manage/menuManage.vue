@@ -1,10 +1,4 @@
-<style lang="scss" scoped>
-@import "@/styles/tree-common.scss";
-.desc{
-  font-size: 12px;
-  color: #999;
-}
-</style>
+
 <template>
   <div class="search">
     <Card>
@@ -130,7 +124,6 @@
                 @click="submitEdit"
                 :loading="submitLoading"
                 type="primary"
-                icon="ios-create-outline"
               >保存
               </Button
               >
@@ -232,6 +225,7 @@ import {
   addPermission,
   editPermission,
   deletePermission,
+  searchPermission,
 } from "@/api/index";
 import util from "@/libs/util.js";
 
@@ -436,6 +430,20 @@ export default {
         this.cancelEdit();
       }
     },
+    // 搜索菜单
+    search() {
+      if (this.searchKey) {
+        this.loading = true;
+        searchPermission({title: this.searchKey}).then((res) => {
+          this.loading = false;
+          if (res.success) {
+            this.data = res.result;
+          }
+        });
+      } else {
+        this.getAllList();
+      }
+    },
     // 取消选择
     cancelEdit() {
       let data = this.$refs.tree.getSelectedNodes()[0];
@@ -591,3 +599,10 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+@import "@/styles/tree-common.scss";
+.desc{
+  font-size: 12px;
+  color: #999;
+}
+</style>

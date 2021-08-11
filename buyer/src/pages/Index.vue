@@ -10,7 +10,7 @@
     <!-- 搜索框、logo -->
     <Search></Search>
     <!-- 商品分类 -->
-    <cateNav :showAlways="true" v-if="showNav"></cateNav>
+    <cateNav :showAlways="true" v-if="showNav" :large="carouselLarge" :opacity="carouselOpacity"></cateNav>
     <!-- 楼层装修部分 -->
     <model-form ref="modelForm" :data="modelForm"></model-form>
     <!-- 底部栏 -->
@@ -44,7 +44,9 @@ export default {
       modelForm: { list: [] }, // 楼层装修数据
       topAdvert: {}, // 顶部广告
       showNav: false, // 是否展示分类栏
-      topSearchShow: false // 滚动后顶部搜索栏展示
+      topSearchShow: false, // 滚动后顶部搜索栏展示
+      carouselLarge: false, // 不同轮播分类尺寸
+      carouselOpacity: false // 不同轮播分类样式
     };
   },
   methods: {
@@ -53,15 +55,21 @@ export default {
       indexData({ clientType: 'PC' }).then((res) => {
         if (res.success) {
           let dataJson = JSON.parse(res.result.pageData);
-          this.modelForm = dataJson;
           // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
+          // 轮播图根据不同轮播，样式不同
           for (let i = 0; i < dataJson.list.length; i++) {
-            if (dataJson.list[i].type === 'seckill') {
+            let type = dataJson.list[i].type
+            if (type === 'carousel2') {
+              this.carouselLarge = true;
+            } else if (type === 'carousel1') {
+              this.carouselLarge = true
+              this.carouselOpacity = true
+            } else if (type === 'seckill') {
               let seckill = this.getListByDay()
               dataJson.list[i].options.list = seckill
-              break;
             }
           }
+          this.modelForm = dataJson;
           storage.setItem('navList', dataJson.list[1])
           this.showNav = true
           this.topAdvert = dataJson.list[0];
