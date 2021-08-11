@@ -77,12 +77,13 @@ export default {
             this.dataReview = false;
             let data = res.result;
             let first = [
-              'storeAddressIdPath',
-              'storeAddressPath',
-              'storeAddressDetail',
+              'companyAddressPath',
+              'companyAddress',
+              'companyAddressIdPath',
               'companyEmail',
               'companyName',
               'employeeNum',
+              'companyPhone',
               'legalId',
               'legalName',
               'licencePhoto',
@@ -104,7 +105,10 @@ export default {
               'storeCenter',
               'storeDesc',
               'storeLogo',
-              'storeName'
+              'storeName',
+              'storeAddressIdPath',
+              'storeAddressPath',
+              'storeAddressDetail'
             ];
 
             this.storeDisable = data.storeDisable;

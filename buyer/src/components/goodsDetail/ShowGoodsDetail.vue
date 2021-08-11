@@ -390,7 +390,8 @@ export default {
       margin-right: 5px;
       width: 50px;
       height: 50px;
-      img{width: 100%;}
+      overflow: hidden;
+      img{width: 100%;height: 100%;}
     }
   }
   .preview-img{

@@ -9,17 +9,17 @@
           placeholder="请填写公司信息"
         />
       </FormItem>
-      <FormItem prop="storeAddressIdPath" label="公司所在地">
+      <FormItem prop="companyAddressIdPath" label="公司所在地">
         <region
           style="width: 250px"
           @selected="selectedRegion"
           :addressId="address"
         />
       </FormItem>
-      <FormItem prop="storeAddressDetail" label="公司详细地址">
+      <FormItem prop="companyAddress" label="公司详细地址">
         <Input
           type="text"
-          v-model="form.storeAddressDetail"
+          v-model="form.companyAddress"
           placeholder="请填写公司详细信息"
         />
       </FormItem>
@@ -31,7 +31,7 @@
           ><span slot="append">人</span>
           </Input>
       </FormItem>
-      <FormItem prop="linkPhone" label="公司电话">
+      <FormItem prop="companyPhone" label="公司电话">
         <Input
           type="text"
           v-model="form.companyPhone"
@@ -217,8 +217,8 @@ export default {
       },
       rules: { // 验证规则
         companyName: [{ required: true, message: '请填写公司信息' }],
-        storeAddressIdPath: [{ required: true, message: '请选择公司所在地' }],
-        storeAddressDetail: [{ required: true, message: '请填写公司详细地址' }],
+        companyAddressIdPath: [{ required: true, message: '请选择公司所在地' }],
+        companyAddress: [{ required: true, message: '请填写公司详细地址' }],
         employeeNum: [
           { required: true, message: '请填写公司员工总数' },
           { pattern: RegExp.integer, message: '只能填写正整数' }
@@ -229,8 +229,12 @@ export default {
         ],
         linkName: [{ required: true, message: '请填写联系人姓名' }],
         linkPhone: [
-          { required: true, message: '请填写公司电话' },
+          { required: true, message: '请填写联系人电话' },
           { pattern: RegExp.mobile, message: '请填写正确的号码' }
+        ],
+        companyPhone: [
+          { required: true, message: '请填写公司电话' },
+          { pattern: RegExp.TEL, message: '请填写正确的号码' }
         ],
         companyEmail: [
           { required: true, message: '请填写电子邮箱' },
@@ -277,10 +281,10 @@ export default {
     },
     // 地址选择回显
     selectedRegion (item) {
-      this.$set(this.form, 'storeAddressIdPath', item[0].toString());
+      this.$set(this.form, 'companyAddressIdPath', item[0].toString());
       this.$set(
         this.form,
-        'storeAddressPath',
+        'companyAddressPath',
         item[1].toString().replace(/\s/g, '')
       );
     },
@@ -352,7 +356,7 @@ export default {
       if (this.form.licencePhoto) {
         this.form.legalPhoto = this.content.legalPhoto.split(',');
         this.form.licencePhoto = this.content.licencePhoto.split(',');
-        this.address = this.form.storeAddressIdPath;
+        this.address = this.form.companyAddressIdPath;
       }
     }
   }

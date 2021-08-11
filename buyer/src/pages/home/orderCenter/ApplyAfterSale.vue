@@ -129,7 +129,7 @@ export default {
           { required: true, message: '请输入银行卡号' },
           {
             type: 'string',
-            pattern: /^([1-9]{1})(\d{14}|\d{18})$/,
+            pattern: /^[0-9]\d*$/,
             message: '请输入正确的银行卡号'
           }
         ],
