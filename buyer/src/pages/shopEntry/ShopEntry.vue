@@ -123,9 +123,7 @@ export default {
               this.thirdData[e] = data[e];
             });
 
-            if (this.storeDisable === 'APPLY') {
-              this.currentIndex = 0;
-            } else {
+            if (this.storeDisable !== 'APPLY') {
               this.currentIndex = 3;
             }
             this.$nextTick(() => {
@@ -139,6 +137,7 @@ export default {
     // 下一步
     nextPage (step) {
       this.currentIndex = step;
+      this.getData()
     }
   },
   mounted () {

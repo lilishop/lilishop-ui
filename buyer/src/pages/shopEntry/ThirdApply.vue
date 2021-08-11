@@ -256,6 +256,7 @@ export default {
       this.address = this.form.storeAddressIdPath;
       this.$forceUpdate();
     }
+    this.$refs.thirdForm.resetFields()
   }
 };
 </script>

@@ -94,6 +94,7 @@ export default {
       this.form = JSON.parse(JSON.stringify(this.content));
       this.$forceUpdate();
     }
+    this.$refs.secondForm.resetFields()
   }
 };
 </script>
