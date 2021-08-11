@@ -146,7 +146,7 @@ import { modelData } from "./config";
 import ways from "@/views/lili-dialog/wap.js"; // 选择链接的类型
 export default {
   components: {
-    ossManage
+    ossManage,
   },
   data() {
     return {
@@ -179,16 +179,18 @@ export default {
     },
     // 回调的商品信息
     selectedGoodsData(val) {
+     
       if (!val) return false;
-      val.forEach((item) => {
+      let data = val.map((item) => {
         delete item.selected;
-        item.img = item.thumbnail;
-        item.title = item.goodsName;
-        item.type = this.selectedGoods.title;
+        return {
+          img: item.thumbnail,
+          title: item.goodsName,
+          type: this.selectedGoods.title,
+          ...item
+        };
       });
-      this.res.options.list[0].listWay = this.res.options.list[0].listWay.concat(
-        val
-      );
+      this.res.options.list[0].listWay.push(...data);
       this.linkType = "";
     },
     // 绑定商品

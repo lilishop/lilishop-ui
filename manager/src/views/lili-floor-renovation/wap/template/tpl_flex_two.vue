@@ -23,13 +23,12 @@ export default {
   display: flex;
   height: 110px;
   overflow: hidden;
-
 }
 .flex-item {
-    width: 50%;
+  width: 50%;
   > img {
     display: block;
-     max-width: 100%;
+    max-width: 100%;
     height: 100%;
   }
 }
