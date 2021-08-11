@@ -59,7 +59,7 @@
           <FormItem label="分类名称" prop="name">
             <Input v-model="formAdd.name" clearable style="width: 100%" />
           </FormItem>
-          <FormItem label="分类图标" prop="image">
+          <FormItem label="分类图标" prop="image" v-if="formAdd.level === 2">
             <upload-pic-input v-model="formAdd.image" style="width: 100%"></upload-pic-input>
           </FormItem>
           <FormItem label="排序值" prop="sortOrder" style="width: 345px">
@@ -266,10 +266,12 @@ export default {
     },
     // 添加子分类
     addChildren(v) {
+      console.log(v);
       this.modalType = 0;
       this.modalTitle = "添加子分类";
       this.parentTitle = v.name;
       this.formAdd.level = eval(v.level + "+1");
+      this.formAdd.commissionRate = v.commissionRate;
       this.showParent = true;
       delete this.formAdd.id;
       this.formAdd.parentId = v.id;

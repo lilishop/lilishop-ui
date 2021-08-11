@@ -1,6 +1,7 @@
 <template>
   <div>
     <Card>
+      <Button class="mb_10" v-if="shopForm.storeDisable === 'APPLYING'" type="primary" @click="audit">审核</Button>
       <Tabs v-model="tabName" :animated="false" style="overflow: visible">
         <Form ref="shopForm" :model="shopForm" :label-width="130" label-position="right" :rules="shopValidate">
           <TabPane label="基本信息" class="tab" name="base">
@@ -86,7 +87,7 @@
             </div>
           </TabPane>
           <!-- 入驻信息 -->
-          <TabPane label="入驻信息" class="tab" name="sms">
+          <TabPane label="入驻信息" class="tab" name="entry">
             <!-- 遮罩层  -->
             <div v-if="isRead" class="mask">只读不可修改</div>
             <Divider orientation="left">公司信息</Divider>
@@ -190,7 +191,7 @@
             </FormItem>
           </TabPane>
 
-          <TabPane label="配送信息" class="tab" name="distribution">
+          <TabPane label="配送信息" class="tab" name="send">
 
             <!-- 遮罩层  -->
             <FormItem label="达达编码" prop="ddCode">
@@ -199,11 +200,12 @@
           </TabPane>
 
           <TabPane label="结算信息" class="tab" name="settlement">
+            <Alert type="error">已添加<span class="theme_color">{{settlementCycle.length}}</span>个结算日，最多可添加5个结算日，当月不包含所设日期时，将会顺延到下一个结算日</Alert>
             <FormItem label="结算周期">
               <Tag v-for="item in settlementCycle" :key="item" :name="item" closable style="marrgin-left: 10px" @on-close="removesettlementCycle">{{ item }}
               </Tag>
-              <InputNumber :max="28" :min="1" v-model="day" v-show="settlementShow"></InputNumber>
-              <Button type="default" @click="addsettlementCycle" size="small" v-if="addSettlementBtn" style="margin-left: 8px">添加结算周期
+              <InputNumber size="small" :max="31" :min="1" v-model="day" v-show="settlementShow"></InputNumber>
+              <Button type="default" @click="addsettlementCycle" size="small" v-if="addSettlementBtn && settlementCycle.length < 5" style="margin-left: 8px">添加结算周期
               </Button>
               <Button v-if="addSettlementConfirmBtn" type="default" @click="addsettlementCycleConfirm" size="small" style="margin-left: 8px">确认
               </Button>
@@ -212,8 +214,11 @@
         </Form>
       </Tabs>
       <div align="center">
-        <Button type="primary" @click="save" v-if="!isRead" style="width: 100px; margin-right: 5px">{{ shopId ? "修改" :
-          "保存" }}
+        
+        <Button type="info" v-show="tabNameList.indexOf(tabName)>0" class="mr_10" @click="prev">上一步</Button>
+        <Button type="primary" v-show="tabNameList.indexOf(tabName)<4" @click="next">下一步</Button>
+        <Button type="primary" v-show="tabNameList.indexOf(tabName) === 4" @click="save" v-if="!isRead">
+          {{ shopId ? "修改" : "保存" }}
         </Button>
       </div>
     </Card>
@@ -233,7 +238,7 @@
 import memberLayout from "@/views/member/list/index";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import { getCategoryTree } from "@/api/goods";
-import { shopDetail, shopAdd, shopEdit, getShopByMemberId } from "@/api/shops";
+import { shopDetail, shopAdd, shopEdit, getShopByMemberId,shopAudit } from "@/api/shops";
 import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
 import region from "@/views/lili-components/region";
 import liliMap from "@/views/my-components/map/index";
@@ -251,14 +256,16 @@ export default {
   data() {
     return {
       shopId: this.$route.query.shopId, // 店铺id
-      isRead: false, //是否只读，只有在店铺通过审核才可修改
-      selectedFormBtnName: "", //点击图片绑定form
-      picModalFlag: false, //图片选择器
-      memberModalFlag: false, //商家账号
-      settlementShow: false, //是否展示结算日输入框
-      addSettlementConfirmBtn: false, //添加结算日确认按钮
-      addSettlementBtn: true, //添加结算日按钮
-      day: 0, //结算日
+      isRead: false, // 是否只读，只有在店铺通过审核才可修改
+      selectedFormBtnName: "", // 点击图片绑定form
+      picModalFlag: false, // 图片选择器
+      memberModalFlag: false, // 商家账号
+      settlementShow: false, // 是否展示结算日输入框
+      addSettlementConfirmBtn: false, // 添加结算日确认按钮
+      addSettlementBtn: true, // 添加结算日按钮
+      day: 1, //结算日
+      tabName: 'base', // tab栏name值
+      tabNameList: ['base', 'entry', 'category', 'send' ,'settlement'], // tab栏name值数组
       shopValidate: {
         // 表单验证规则
         memberName: [
@@ -433,14 +440,20 @@ export default {
     },
     //添加结算日
     addsettlementCycleConfirm() {
-      console.warn(this.settlementCycle.includes(this.day + ""));
-      if (this.day !== null && !this.settlementCycle.includes(this.day + "")) {
-        this.settlementCycle.push(this.day);
+      if (!this.day) {
+        this.$Message.warning('请输入正确的结算周期，1-31的整数')
+        return
       }
+      if (this.settlementCycle.includes(this.day)) {
+        this.$Message.warning('已有该结算周期，不能重复输入')
+        return
+      }
+      this.settlementCycle.push(this.day);
       this.addSettlementConfirmBtn = false;
       this.addSettlementBtn = true;
       this.settlementShow = false;
       this.day = 1;
+      
     },
     // 选择地址
     selectedRegion(val) {
@@ -469,6 +482,14 @@ export default {
       if (this.shopId) {
         this.getShopDetail();
       }
+    },
+    next () { // 下一步
+      let index = this.tabNameList.indexOf(this.tabName) + 1
+      this.tabName = this.tabNameList[index]
+    },
+    prev () { // 上一步
+      let index = this.tabNameList.indexOf(this.tabName) - 1
+      this.tabName = this.tabNameList[index]
     },
     // 获取店铺详情
     getShopDetail() {
@@ -574,6 +595,35 @@ export default {
         if (res.success) {
           this.categories = res.result;
         }
+      });
+    },
+    // 审核店铺
+    audit() {
+      let id = this.$route.query.shopId
+      this.$Modal.confirm({
+        title: "审核店铺",
+        content: "您确认要审核通过该店铺?",
+        okText: "通过",
+        cancelText: "驳回",
+        loading: true,
+        onOk: () => {
+          shopAudit(id, 0).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success("操作成功");
+              this.$router.push({name: 'shopAuth'})
+            }
+          });
+        },
+        onCancel: () => {
+          shopAudit(id, 1).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success("操作成功");
+              this.$router.push({name: 'shopAuth'})
+            }
+          });
+        },
       });
     },
   },
