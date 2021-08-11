@@ -72,6 +72,20 @@
           @click="$refs.liliMap.showMap = true"
         >已定位</Button>
       </FormItem>
+      <FormItem prop="storeAddressIdPath" label="店铺所在地">
+        <region
+          style="width: 250px"
+          @selected="selectedRegion"
+          :addressId="address"
+        />
+      </FormItem>
+      <FormItem prop="storeAddressDetail" label="店铺详细地址">
+        <Input
+          type="text"
+          v-model="form.storeAddressDetail"
+          placeholder="请填写店铺详细地址"
+        />
+      </FormItem>
       <FormItem prop="storeDesc" label="店铺简介">
         <Input
           type="textarea"
@@ -102,6 +116,7 @@ import { getCategory } from '@/api/goods';
 import Map from '@/components/map/index';
 import storage from '@/plugins/storage';
 import { commonUrl } from '@/plugins/request.js';
+import region from '@/components/map/region.vue';
 export default {
   props: {
     content: {
@@ -109,7 +124,7 @@ export default {
       type: Object
     }
   },
-  components: { liliMap: Map },
+  components: { liliMap: Map, region },
   data () {
     return {
       loading: false, // 加载状态
@@ -117,6 +132,7 @@ export default {
       action: commonUrl + '/common/upload/file', // 上传地址
       accessToken: {}, // 验证token
       previewPicture: '', // 预览图片
+      address: '', // 回显地址
       visible: false, // 图片预览
       form: { // 表单数据
         storeLogo: []
@@ -128,7 +144,9 @@ export default {
         storeName: [{ required: true, message: '请填写店铺名称' }],
         storeLogo: [{ required: true, message: '请上传店铺logo' }],
         storeDesc: [{ required: true, message: '请填写店铺简介' }],
-        storeCenter: [{ required: true, message: '请选择店铺位置' }]
+        storeCenter: [{ required: true, message: '请选择店铺位置' }],
+        storeAddressIdPath: [{ required: true, message: '请选择店铺位置' }],
+        storeAddressDetail: [{ required: true, message: '请输入店铺详细地址' }]
       },
       categoryList: [] // 分类数据
     };
@@ -211,6 +229,15 @@ export default {
       getCategory(0).then((res) => {
         if (res.success) this.categoryList = res.result;
       });
+    },
+    // 地址选择回显
+    selectedRegion (item) {
+      this.$set(this.form, 'storeAddressIdPath', item[0].toString());
+      this.$set(
+        this.form,
+        'storeAddressPath',
+        item[1].toString().replace(/\s/g, '')
+      );
     }
   },
   mounted () {
@@ -226,6 +253,7 @@ export default {
       } else {
         this.form.storeLogo = [];
       }
+      this.address = this.form.storeAddressIdPath;
       this.$forceUpdate();
     }
   }

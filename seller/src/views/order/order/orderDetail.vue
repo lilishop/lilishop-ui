@@ -233,6 +233,10 @@
               orderInfo.order.freightPrice | unitPrice("￥")
             }}</span>
           </li>
+          <li v-if="orderInfo.order.priceDetailDTO.updatePrice">
+              <span class="label">修改金额：</span>
+              <span class="txt theme_color">¥{{ orderInfo.order.priceDetailDTO.updatePrice | unitPrice }}</span>
+            </li>
           <li v-if="orderInfo.order.priceDetailDTO.payPoint != 0">
             <span class="label">使用积分：</span>
             <span class="txt">{{
@@ -986,5 +990,8 @@ dl dt {
       font-size: 22px;
     }
   }
+}
+.theme_color{
+  color: $theme_color;
 }
 </style>
