@@ -6,32 +6,33 @@
         <Input type='number' v-model="formValidate.autoCancel">
         <span slot="append">分</span>
         </Input>
+        <span class="desc">发起订单后，多少分钟未操作取消订单</span>
       </FormItem>
 
       <FormItem label="订单自动收货" class="label-item" prop="autoReceive">
         <Input type='number' v-model="formValidate.autoReceive">
         <span slot="append">天</span>
         </Input>
-        <span class="desc">收货后，订单完成</span>
+        <span class="desc">发货后多少天自动完成收货</span>
       </FormItem>
 
-      <FormItem label="自动评价" prop="autoEvaluation">
+      <FormItem label="自动好评" prop="autoEvaluation">
         <Input type='number' v-model="formValidate.autoEvaluation">
         <span slot="append">天</span>
         </Input>
-
+        <span class="desc">订单发货后，多少天后自动好评</span>
       </FormItem>
       <FormItem label="已完成订单允许退单" prop="closeAfterSale">
         <Input type='number' v-model="formValidate.closeAfterSale">
         <span slot="append">天</span>
         </Input>
-        <span class="desc">如果天数为0,则不允许退单</span>
+        <span class="desc">订单完成后，多少天内允许退单，如果天数为0,则不允许退单</span>
       </FormItem>
       <FormItem label="已完成订单允许投诉" prop="closeComplaint">
         <Input type='number' v-model="formValidate.closeComplaint">
         <span slot="append">天</span>
         </Input>
-        <span class="desc">如果天数为0,则不允许投诉</span>
+        <span class="desc">订单完成后，多少天内允许投诉，如果天数为0,则不允许投诉</span>
       </FormItem>
 
       <div class="label-btns">

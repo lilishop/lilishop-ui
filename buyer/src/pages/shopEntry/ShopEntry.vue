@@ -68,7 +68,7 @@ export default {
         this.agreementCon = res.result.content;
       });
     },
-    getData () { // 获取已填写店铺信息
+    getData (status) { // 获取已填写店铺信息
       applyStatus().then((res) => {
         if (res.success) {
           if (!res.result) {
@@ -122,9 +122,12 @@ export default {
             third.forEach((e) => {
               this.thirdData[e] = data[e];
             });
-
-            if (this.storeDisable !== 'APPLY') {
-              this.currentIndex = 3;
+            if (status === 'init') {
+              if (this.storeDisable === 'APPLY') {
+                this.currentIndex = 0;
+              } else {
+                this.currentIndex = 3;
+              }
             }
             this.$nextTick(() => {
               this.dataReview = true;
@@ -137,11 +140,11 @@ export default {
     // 下一步
     nextPage (step) {
       this.currentIndex = step;
-      this.getData()
+      this.getData('next')
     }
   },
   mounted () {
-    this.getData();
+    this.getData('init');
     this.getArticle();
   }
 };

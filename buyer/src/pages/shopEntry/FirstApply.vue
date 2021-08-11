@@ -79,7 +79,7 @@
         <Input
           type="textarea"
           v-model="form.scope"
-          maxlength="300"
+          maxlength="200"
           show-word-limit
           :rows="4"
           placeholder="请输入营业执照所示经营范围"

@@ -1,12 +1,12 @@
 <template>
   <div class="layout">
     <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
-      <FormItem label="积分比例" prop="money">
+      <FormItem label="积分比率" prop="money">
         <Input type="number" v-model="formValidate.money">
-        <span slot="prepend">1积分=</span>
-        <span slot="append">人民币</span>
+          <span slot="prepend">1积分=</span>
+          <span slot="append">人民币</span>
         </Input>
-
+        
       </FormItem>
 
       <FormItem label="注册账号" prop="register">
@@ -14,13 +14,13 @@
         <span slot="append">积分</span>
         </Input>
       </FormItem>
-      <FormItem label="登录" class="label-item" prop="login">
+      <!-- <FormItem label="登录" class="label-item" prop="login">
         <Input type="number" v-model="formValidate.login">
 
         <span slot="append">积分</span>
         </Input>
 
-      </FormItem>
+      </FormItem> -->
 
       <FormItem label="每日签到积分" prop="signIn">
         <Input type="number" v-model="formValidate.signIn">
@@ -38,11 +38,12 @@
       <FormItem class="label-item" v-for="(point,index) in  formValidate.pointSettingItems" :key="index" :label="'签到设置'+(index+1)">
         <div class="label-item">
 
-          <InputNumber :min="1" v-model="point.day" :formatter="value => `签到${value}天`" :parser="value => value.replace('天', '') && value.replace('签到', '')"></InputNumber>
+          <InputNumber :min="1" v-model="point.day"></InputNumber>
 
-          <InputNumber :min="0" :formatter="value => `赠送${value}积分`" :parser="value => value.replace('积分', '') && value.replace('赠送', '')" v-model="point.point"></InputNumber>
+          <InputNumber :min="0"  v-model="point.point"></InputNumber>
 
           <Button ghost type="error" @click="delSign(point,index)">删除</Button>
+          <span class="ml_10">签到<span class="theme_color">{{point.day}}</span>天，赠送<span class="theme_color">{{point.point}}</span>积分</span>
         </div>
 
       </FormItem>

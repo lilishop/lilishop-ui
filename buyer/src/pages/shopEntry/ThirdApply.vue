@@ -90,7 +90,7 @@
         <Input
           type="textarea"
           v-model="form.storeDesc"
-          maxlength="300"
+          maxlength="200"
           show-word-limit
           :rows="4"
           placeholder="请输入店铺简介"
