@@ -43,7 +43,6 @@ export default {
   data() {
     return {
       type: "multiple", //单选或者多选 single  multiple
-
       skuList: [], // 商品sku列表
       total: 0,  // 商品总数
       goodsParams: { // 商品请求参数
@@ -115,10 +114,9 @@ export default {
         res.result.records.forEach((item) => {
           item.selected = false;
           item.___type = "goods"; //设置为goods让pc wap知道标识
-          
           this.selectedWay.forEach(e => {
             if (e.id === item.id) {
-              item.selected = true 
+              item.selected = true
             }
           })
         });

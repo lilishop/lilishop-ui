@@ -2,11 +2,17 @@
   <div class="model-item" v-if="element && element.key">
     <!-- 轮播图模块，包括个人信息，快捷导航模块 -->
     <template v-if="element.type == 'carousel'">
-      <model-carousel :data="element" class="mb_20"></model-carousel>
+      <model-carousel :data="element" class="mb_20 width_1200_auto"></model-carousel>
+    </template>
+    <template v-if="element.type == 'carousel1'">
+      <model-carousel1 :data="element" class="mb_20"></model-carousel1>
+    </template>
+    <template v-if="element.type == 'carousel2'">
+      <model-carousel2 :data="element" class="mb_20 width_1200_auto"></model-carousel2>
     </template>
     <!-- 热门广告 -->
     <template v-if="element.type == 'hotAdvert'">
-      <div class="mb_20">
+      <div class="mb_20 width_1200_auto">
         <img
           style="display: block"
           class="hover-pointer"
@@ -16,7 +22,7 @@
           alt=""
         />
       </div>
-      <ul class="advert-list">
+      <ul class="advert-list width_1200_auto">
         <template v-for="(item, index) in element.options.list">
           <li
             v-if="index !== 0"
@@ -31,12 +37,12 @@
     </template>
     <!-- 限时秒杀 待完善 -->
     <template v-if="element.type == 'seckill' && element.options.list.length">
-      <seckill :data="element" class="mb_20"></seckill>
+      <seckill :data="element"  class="mb_20 width_1200_auto"></seckill>
     </template>
     <!-- 折扣广告 -->
     <template v-if="element.type == 'discountAdvert'">
       <div
-        class="discountAdvert mb_20"
+        class="discountAdvert"
         :style="{'backgroundImage' :'url(' + require('@/assets/images/decorate.png') + ')'}"
       >
         <img
@@ -64,15 +70,15 @@
 
     <!-- 好货推荐 -->
     <template v-if="element.type == 'recommend'">
-      <recommend :data="element" class="mb_20"></recommend>
+      <recommend :data="element" class="mb_20 width_1200_auto"></recommend>
     </template>
     <!-- 新品排行 -->
     <template v-if="element.type == 'newGoodsSort'">
-      <new-goods-sort :data="element" class="mb_20"></new-goods-sort>
+      <new-goods-sort :data="element" class="mb_20 width_1200_auto"></new-goods-sort>
     </template>
     <!-- 首页广告 -->
     <template v-if="element.type == 'firstAdvert'">
-      <first-page-advert :data="element" class="mb_20"></first-page-advert>
+      <first-page-advert :data="element" class="mb_20 width_1200_auto"></first-page-advert>
     </template>
     <!-- 横幅广告 -->
     <template v-if="element.type == 'bannerAdvert'">
@@ -85,13 +91,15 @@
       />
     </template>
     <template v-if="element.type == 'notEnough'">
-      <not-enough :data="element" class="mb_20"></not-enough>
+      <not-enough :data="element" class="mb_20 width_1200_auto"></not-enough>
     </template>
   </div>
 </template>
 
 <script>
 import ModelCarousel from './modelList/Carousel.vue';
+import ModelCarousel1 from './modelList/Carousel1.vue';
+import ModelCarousel2 from './modelList/Carousel2.vue';
 import FirstPageAdvert from './modelList/FirstPageAdvert.vue';
 import NewGoodsSort from './modelList/NewGoodsSort.vue';
 import Recommend from './modelList/Recommend.vue';
@@ -103,6 +111,8 @@ export default {
   props: ['element', 'select', 'index', 'data'],
   components: {
     ModelCarousel,
+    ModelCarousel1,
+    ModelCarousel2,
     Recommend,
     NewGoodsSort,
     FirstPageAdvert,
@@ -118,9 +128,9 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+
 .model-item {
   position: relative;
-  background-color: #fff;
 }
 
 /** 热门广告 */
@@ -153,10 +163,13 @@ export default {
 }
 /** 折扣广告 */
 .discountAdvert {
+  width: 1300px;
   height: 566px;
+  margin: 0 auto;
+  margin-bottom: 20px;
   background-repeat: no-repeat;
-  margin-left: -97px;
   position: relative;
+  left: -47px;
   padding-left: 295px;
   display: flex;
   flex-wrap: wrap;
@@ -171,104 +184,6 @@ export default {
     }
   }
 }
-/** 首页品牌 */
-.brand {
-  .brand-view {
-    display: flex;
-    margin-top: 10px;
-    .brand-view-content {
-      width: 470px;
-      margin-left: 10px;
-      img {
-        width: 100%;
-        height: 316px;
-      }
-      .brand-view-title {
-        height: 50px;
-        padding: 0 5px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-    }
-    .brand-view-content:first-child {
-      width: 240px;
-      margin-left: 0;
-    }
-  }
-  .brand-list {
-    margin-top: 10px;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    li {
-      width: 121px;
-      height: 112px;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid #f5f5f5;
-      margin: -1px -1px 0 0;
-      &:hover {
-        .brand-mash {
-          display: flex;
-        }
-      }
-      .brand-img {
-        text-align: center;
-        margin-top: 30px;
-        img {
-          width: 100px;
-          height: auto;
-        }
-      }
-      .brand-mash {
-        display: none;
-        position: absolute;
-        top: 0;
-        left: 0;
-        background: rgba(0, 0, 0, 0.5);
-        width: inherit;
-        height: inherit;
-        font-size: 12px;
-        font-weight: bold;
-        .ivu-icon {
-          position: absolute;
-          right: 10px;
-          top: 10px;
-          font-size: 15px;
-        }
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        color: #fff;
-        cursor: pointer;
-        div:last-child {
-          background-color: $theme_color;
-          border-radius: 9px;
-          padding: 0 10px;
-          margin-top: 5px;
-        }
-      }
-    }
-    .refresh {
-      display: flex;
-      align-items: center;
-      flex-direction: column;
-      justify-content: center;
-      .ivu-icon {
-        font-size: 18px;
-        transition: all 0.3s ease-out;
-      }
-      &:hover {
-        background-color: $theme_color;
-        color: #fff;
-        .ivu-icon {
-          transform: rotateZ(360deg);
-        }
-      }
-    }
-  }
-}
 
 /** 装修模态框 内部样式start */
 .modal-top-advert {
@@ -279,5 +194,10 @@ export default {
   > * {
     margin-bottom: 10px;
   }
+}
+.width_1200_auto{
+  width: 1200px;
+  margin: 0 auto;
+  background-color: #fff;
 }
 </style>

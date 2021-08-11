@@ -24,8 +24,8 @@
           <div class="goodsBuy">
             <Button size="small" type="primary" @click="buynow(item.skuId, item.goodsId)" v-if="params.type === 'GOODS'">立即购买</Button>
             <Button size="small" type="primary" @click="goShop(item.id)" v-else>店铺购买</Button>
-            <Button size="small" type="error" ghost v-if="params.type === 'GOODS'" @click="cancel(item.skuId)">取消收藏</Button>
-            <Button size="small" type="error" ghost v-if="params.type === 'SHOP'" @click="cancel(item.id)">取消收藏</Button>
+            <Button size="small" v-if="params.type === 'GOODS'" @click="cancel(item.skuId)">取消收藏</Button>
+            <Button size="small" v-if="params.type === 'SHOP'" @click="cancel(item.id)">取消收藏</Button>
           </div>
         </div>
       </template>

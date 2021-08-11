@@ -45,12 +45,20 @@
         </Row>
         <div class="oss-operation padding-row">
           <div>
-            <Button
-              @click="uploadVisible = true"
-              type="primary"
-            >上传文件
-            </Button
+            <Upload
+              style="display:inline-block;"
+              :action="baseUrl + '/common/upload/file'"
+              :headers="accessToken"
+              :on-success="handleSuccess"
+              :on-error="handleError"
+              :show-upload-list="false"
+              :max-size="1024"
+              :on-exceeded-size="handleMaxSize"
+              multiple
+              ref="up"
             >
+              <Button type="primary">上传文件</Button>
+            </Upload>
             <Dropdown @on-click="handleDropdown">
               <Button>
                 更多操作
@@ -181,28 +189,7 @@
       </Row>
     </Card>
 
-    <Drawer title="文件上传" class="drawer" styles="z-index:2000;" closable v-model="uploadVisible" width="500">
-      <Upload
-        :action="baseUrl + '/common/upload/file'"
-        :headers="accessToken"
-        :on-success="handleSuccess"
-        :on-error="handleError"
-        :max-size="1024"
-        :on-exceeded-size="handleMaxSize"
-        multiple
-        type="drag"
-        ref="up"
-
-      >
-        <div style="padding: 20px 0">
-          <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
-          <p>点击这里或将文件拖拽到这里上传</p>
-        </div>
-      </Upload>
-      <div class="drawer-footer">
-        <Button @click="clearFiles">清空上传列表</Button>
-      </div>
-    </Drawer>
+      
 
     <Modal
       :title="modalTitle"
@@ -497,7 +484,7 @@ export default {
                 "Button",
                 {
                   props: {
-                    type: "primary",
+                    type: "info",
                     size: "small",
                   },
                   style: {
@@ -517,6 +504,7 @@ export default {
                 {
                   props: {
                     size: "small",
+                    type: 'success'
                   },
                   style: {
                     marginRight: "5px",

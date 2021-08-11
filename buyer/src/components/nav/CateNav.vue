@@ -4,7 +4,6 @@
       <div class="all-categories hover-pointer" @mouseenter="showFirstList = true" @mouseleave="showFirstList = false">全部商品分类</div>
       <ul class="nav-item" v-if="showNavBar">
         <li
-          class="hover-color"
           v-for="(item, index) in navList.list"
           :key="index"
           @click="linkTo(item.url)"
@@ -16,7 +15,7 @@
     <!-- 全部商品分类 -->
     <div class="cate-list" v-show="showAlways || showFirstList" @mouseenter="showFirstList = true" @mouseleave="showFirstList = false">
       <!-- 第一级分类 -->
-      <div class="nav-side" @mouseleave="panel = false">
+      <div class="nav-side" :class="{'large-nav': large, 'opacity-nav': opacity}" @mouseleave="panel = false">
         <ul>
           <li v-for="(item, index) in cateList" :key="index" @mouseenter="showDetail(index)" >
             <span class="nav-side-item" @click="goGoodsList(item.id)">{{item.name}}</span>
@@ -30,6 +29,7 @@
       <!-- 展开分类 -->
       <div
         class="detail-item-panel"
+        :style="{'minHeight': large?'470px':'340px'}"
         v-show="panel"
         @mouseenter="panel = true"
         @mouseleave="panel = false"
@@ -75,6 +75,14 @@ export default {
       type: Boolean
     },
     hover: {
+      default: false,
+      type: Boolean
+    },
+    large: { // 是否更高的高度
+      default: false,
+      type: Boolean
+    },
+    opacity: { // 是否背景透明
       default: false,
       type: Boolean
     }
@@ -156,7 +164,6 @@ export default {
 .nav-con {
   width: 1200px;
   height: 40px;
-  // background: #eee;
   margin: 0 auto;
   display: flex;
   .all-categories {
@@ -176,7 +183,7 @@ export default {
     background-color: #eee;
     display: flex;
     li {
-      font-size: 16px;
+      float: left;
       font-weight: bold;
       margin-left: 20px;
       color: rgb(89, 88, 88);
@@ -187,23 +194,11 @@ export default {
     }
   }
 }
+// 分类列表
 .cate-list{
   margin: 0 auto;
   position: absolute;
   z-index: 1000;
-}
-.nav-item li {
-  float: left;
-  font-size: 16px;
-  font-weight: bold;
-  margin-left: 30px;
-}
-.nav-item a {
-  text-decoration: none;
-  color: #555555;
-}
-.nav-item a:hover {
-  color: $theme_color;
 }
 
 .nav-side {
@@ -214,6 +209,15 @@ export default {
   background-color: #6e6568;
   height: 335px;
   overflow: hidden;
+}
+.large-nav{
+  height: 470px;
+  ul>li{
+    line-height: 20px;
+  }
+}
+.opacity-nav{
+  background-color:rgba(0,0,0,.5);
 }
 .nav-side ul {
   width: 100%;
@@ -226,9 +230,9 @@ export default {
   padding-left: 12px;
   font-size: 13px;
   line-height: 18px;
-}
-.nav-side li:hover {
-  background: #999395;
+  &:hover{
+    background: #999395;
+  }
 }
 .nav-side-item:hover {
   cursor: pointer;
@@ -237,7 +241,7 @@ export default {
 
 /*显示商品详细信息*/
 .detail-item-panel {
-  width: 815px;
+  width: 1000px;
   min-height: 340px;
   background-color: #fff;
   box-shadow: 0px 0px 15px #ccc;
@@ -265,7 +269,6 @@ export default {
 }
 .detail-item-panel li {
   line-height: 30px;
-  // margin-left: 40px;
 }
 .detail-item-title {
   font-weight: bold;

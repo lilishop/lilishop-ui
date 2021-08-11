@@ -16,7 +16,7 @@
     </div>
     <!-- 操作按钮 -->
     <div class="btn-bar">
-      <Button type="primary" @click="saveTemplate">保存模板</Button>
+      <Button type="primary" :loading="submitLoading" @click="saveTemplate">保存模板</Button>
       <Button class="ml_10" @click="resetTemplate">还原模板</Button>
     </div>
   </div>
@@ -38,6 +38,7 @@ export default {
     return {
       modelData, // 可选模块数据
       modelForm: { list: [] }, // 模板数据
+      submitLoading: false, // 提交加载状态
     };
   },
   methods: {
@@ -47,15 +48,17 @@ export default {
     },
     // 提交模板
     submitTemplate(pageShow) {
-      this.modelForm.list.unshift(this.$refs.modelForm.navList);
-      this.modelForm.list.unshift(this.$refs.modelForm.topAdvert);
-      const modelForm = JSON.stringify(this.modelForm);
+      this.submitLoading = true
+      const modelForm = JSON.parse(JSON.stringify(this.modelForm)) 
+      modelForm.list.unshift(this.$refs.modelForm.navList);
+      modelForm.list.unshift(this.$refs.modelForm.topAdvert);
       const data = {
         id: this.$route.query.id,
-        pageData: modelForm,
+        pageData: JSON.stringify(modelForm),
         pageShow
       };
       API_floor.updateHome(this.$route.query.id, data).then((res) => {
+        this.submitLoading = false
         if (res.success) {
           this.$Message.success("保存模板成功");
         }
