@@ -25,6 +25,6 @@ export default {
   background-size: cover;
 }
 img {
-  width: 67px;
+  width: 67px !important;
 }
 </style>

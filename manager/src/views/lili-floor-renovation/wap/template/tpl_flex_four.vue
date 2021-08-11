@@ -28,6 +28,6 @@ export default {
 }
 
 img{
-  width: 84px;
+  width: 84px !important;
 }
 </style>

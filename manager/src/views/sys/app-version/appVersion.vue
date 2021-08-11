@@ -387,11 +387,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.ivu-form-item {
-  margin-bottom: 14px;
-  vertical-align: top;
-  zoom: 1;
-}
+
 .search-form {
   width: 100%;
 }
