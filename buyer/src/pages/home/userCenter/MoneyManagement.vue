@@ -278,6 +278,8 @@ export default {
               return h('div', [h('span', {}, '已付款')]);
             } else if (params.row.payStatus === 'UNPAID') {
               return h('div', [h('span', {}, '未付款')]);
+            } else if (params.row.payStatus === 'CANCEL') {
+              return h('div', [h('span', {}, '已取消')]);
             }
           }
         },
