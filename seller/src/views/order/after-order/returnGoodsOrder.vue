@@ -142,7 +142,6 @@
             title: "申请退款金额",
             key: "applyRefundPrice",
             width: 130,
-            sortType: "desc",
             render: (h, params) => {
               return h(
                 "div",

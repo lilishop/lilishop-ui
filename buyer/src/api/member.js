@@ -478,3 +478,15 @@ export function delMemberMsg (id) {
     needToken: true
   });
 }
+
+/**
+ * 绑定分销
+ * @param distributionId 商品分销ID
+ */
+export function getGoodsDistribution (distributionId) {
+  return request({
+    url: `/buyer/distribution/bindingDistribution/${distributionId}`,
+    method: Method.GET,
+    needToken: true
+  });
+}

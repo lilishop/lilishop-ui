@@ -8,12 +8,19 @@
       <div class="shop-nav-container">
         <Breadcrumb>
           <BreadcrumbItem to="/">首页</BreadcrumbItem>
-          <BreadcrumbItem v-for="(item, index) in categoryBar" :to="goGoodsList(index)" target="_blank" :key="index">{{item.name}}</BreadcrumbItem>
+          <BreadcrumbItem v-for="(item, index) in categoryBar" :to="goGoodsList(index)" target="_blank" :key="index">
+            {{ item.name }}
+          </BreadcrumbItem>
         </Breadcrumb>
         <div class="store-collect">
-          <span class="mr_10" v-if="goodsMsg.data"><router-link :to="'Merchant?id=' + goodsMsg.data.storeId">{{goodsMsg.data.storeName}}</router-link></span>
-          <span @click="collect" ><Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#666'" />{{storeCollected?'已收藏店铺':'收藏店铺'}}</span>
-          <span @click="connectCs(storeMsg.yzfSign)" class="ml_10"><Icon custom="icomoon icon-customer-service" />联系客服</span>
+          <span class="mr_10" v-if="goodsMsg.data"><router-link
+            :to="'Merchant?id=' + goodsMsg.data.storeId">{{ goodsMsg.data.storeName }}</router-link></span>
+          <span @click="collect"><Icon type="ios-heart"
+                                       :color="storeCollected ? '#ed3f14' : '#666'"/>{{
+              storeCollected ? '已收藏店铺' : '收藏店铺'
+            }}</span>
+          <span @click="connectCs(storeMsg.yzfSign)" class="ml_10"><Icon
+            custom="icomoon icon-customer-service"/>联系客服</span>
         </div>
       </div>
     </div>
@@ -32,9 +39,10 @@ import Search from '@/components/Search';
 import ShopHeader from '@/components/header/ShopHeader';
 import ShowGoods from '@/components/goodsDetail/ShowGoods';
 import ShowGoodsDetail from '@/components/goodsDetail/ShowGoodsDetail';
-import { goodsSkuDetail } from '@/api/goods';
-import { cancelCollect, collectGoods, isCollection } from '@/api/member';
+import {goodsSkuDetail} from '@/api/goods';
+import {cancelCollect, collectGoods, isCollection, getGoodsDistribution} from '@/api/member';
 import {getDetailById} from '@/api/shopentry'
+
 export default {
   name: 'GoodsDetail',
   beforeRouteEnter (to, from, next) {
@@ -57,7 +65,24 @@ export default {
     // 获取商品详情
     getGoodsDetail () {
       this.isLoading = true;
-      const params = this.$route.query
+      const params = this.$route.query;
+      // 分销员id
+      let distributionId = (params && params.distributionId) ? params.distributionId : this.Cookies.getItem('distributionId');
+      // 如果有分销信息
+      if (distributionId) {
+        console.log(distributionId)
+        // 先存储
+        this.Cookies.setItem('distributionId', params.distributionId)
+        let _this = this;
+        // 绑定关系
+        getGoodsDistribution(params.distributionId).then(res => {
+          // 绑定成功，则清除关系
+          if (res.success) {
+            _this.Cookies.removeItem('distributionId');
+          }
+        })
+      }
+
       goodsSkuDetail(params).then((res) => {
         this.isLoading = false;
         if (res.success) {
@@ -125,8 +150,7 @@ export default {
       location.reload();
     }
   },
-  computed: {
-  },
+  computed: {},
   components: {
     Search,
     ShopHeader,
@@ -147,13 +171,15 @@ export default {
   width: 1200px;
   margin: 0 auto;
   position: relative;
+
   .store-collect {
     position: absolute;
     right: 20px;
     top: 0;
     color: #999;
-    span{
-      &:hover{
+
+    span {
+      &:hover {
         cursor: pointer;
         color: $theme_color;
       }
