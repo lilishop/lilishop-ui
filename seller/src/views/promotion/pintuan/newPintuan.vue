@@ -3,7 +3,7 @@
     <Card>
       <Form ref="form" :model="form" :label-width="130" :rules="formValidate">
         <FormItem label="活动名称" prop="promotionName" :label-width="130">
-          <Input v-model="form.promotionName" clearable style="width: 260px" />
+          <Input v-model="form.promotionName" clearable style="width: 260px" maxlength="25" />
           <div style="color: #cccccc">
             活动名称将显示在对人拼团活动列表中，方便商家管理使用，最多输入25个字符
           </div>
@@ -21,11 +21,11 @@
         </FormItem>
 
         <FormItem label="参团人数" prop="requiredNum" :label-width="130">
-          <Input v-model="form.requiredNum" style="width: 260px">
+          <Input v-model="form.requiredNum" style="width: 260px" max="8">
             <span slot="append">人</span>
           </Input>
           <span style="color: #cccccc"
-            >建议参团人数不少于2人，不超过20人。</span
+            >参团人数不少于2人，不得超过10人。</span
           >
         </FormItem>
         <FormItem label="限购数量" prop="limitNum" :label-width="130">
@@ -54,6 +54,7 @@
             type="textarea"
             :rows="4"
             clearable
+            maxlength="255"
             style="width: 260px"
           />
           <br />
@@ -94,7 +95,7 @@ export default {
         requiredNum: [
           { required: true, message: "参团人数不能为空" },
           {
-            pattern: /^(1|[1-9]\d?|100)$/,
+            pattern: /^([2-9]|10)?$/,
             message: "参团人数不合法",
           },
         ],
@@ -135,13 +136,25 @@ export default {
       this.$refs.form.validate((valid) => {
         if (valid) {
           this.submitLoading = true;
-          let params = JSON.parse(JSON.stringify(this.form));
+          let params = JSON.parse(JSON.stringify(this.form))
           params.startTime = this.$options.filters.unixToDate(
             this.form.rangeTime[0] / 1000
           );
+
           params.endTime = this.$options.filters.unixToDate(
             this.form.rangeTime[1] / 1000
           );
+          if(params.startTime === '' || params.endTime ===''){
+            this.$Message.error("活动时间不能为空");
+            this.submitLoading = false;
+            return
+          }
+          if(params.startTime < new Date()){
+            this.$Message.error("拼团活动开始时间不能小于当前时间");
+            this.submitLoading = false;
+            return
+          }
+
           delete params.rangeTime
           if (!this.id) {
             // 添加 避免编辑后传入id等数据 记得删除
