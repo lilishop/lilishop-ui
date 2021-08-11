@@ -150,7 +150,10 @@ export const removeSeckillGoods = (seckillId, ids) => {
 export const seckillDetail = (seckillId) => {
     return getRequest(`/promotion/seckill/${seckillId}`)
 }
-
+// 删除秒杀商品
+export const delSeckillGoods = params => {
+    return deleteRequest(`/promotion/seckill/apply/${params.seckillId}/${params.id}`);
+  };
 // 满减满赠活动列表
 export const getFullDiscountList = (params) => {
     return getRequest(`/promotion/fullDiscount`,params)

@@ -38,7 +38,7 @@
           <TabPane label="已选商品" name="goodsChecked">
             <Table stripe :columns="goodsColumns" :data="goodsData.records">
               <template slot-scope="{ row }" slot="name">
-                <div class="goods-msg" @click="linkTo(`/goodsDetail?skuId=${row.skuId}&goodsId=${row.id}`)"><img style="vertical-align:top;" :src="row.thumbnail" width="60" height="60" alt="">&nbsp; {{row.goodsName}}</div>
+                <div class="goods-msg" @click="linkTo(`/goodsDetail?skuId=${row.skuId}&goodsId=${row.goodsId}`)"><img style="vertical-align:top;" :src="row.thumbnail" width="60" height="60" alt="">&nbsp; {{row.goodsName}}</div>
               </template>
               <template slot-scope="{ row }" slot="price">
                 <span> ￥{{ row.price | unitPrice }}</span>
@@ -66,7 +66,7 @@
           <TabPane label="未选商品" name="goodsUncheck">
             <Table stripe :columns="goodsColumns" :data="goodsData.records">
               <template slot-scope="{ row }" slot="name">
-                <div class="goods-msg" @click="linkTo(`/goodsDetail?skuId=${row.skuId}&goodsId=${row.id}`)"><img style="vertical-align:top;" :src="row.thumbnail" width="60" height="60" alt="">&nbsp; {{row.goodsName}}</div>
+                <div class="goods-msg" @click="linkTo(`/goodsDetail?skuId=${row.skuId}&goodsId=${row.goodsId}`)"><img style="vertical-align:top;" :src="row.thumbnail" width="60" height="60" alt="">&nbsp; {{row.goodsName}}</div>
               </template>
               <template slot-scope="{ row }" slot="price">
                 <span> ￥{{ row.price | unitPrice }}</span>
@@ -289,7 +289,7 @@ export default {
       })
     },
     fenxiao (row) { // 分销商品
-      this.qrcode = `${location.origin}/goodsDetail?skuId=${row.skuId}&goodsId=${row.id}&distributionId=${this.result.id}`
+      this.qrcode = `${location.origin}/goodsDetail?skuId=${row.skuId}&goodsId=${row.goodsId}&distributionId=${this.result.id}`
       this.goodsNameCurr = row.goodsName
       this.qrcodeShow = true;
     },

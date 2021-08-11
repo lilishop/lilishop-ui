@@ -3,11 +3,7 @@
     <template v-if="flag">
       <goodsDialog @selected="(val) => {goodsData = val;}"
         v-if="goodsFlag" ref="goodsDialog" :selectedWay='goodsData'/>
-      <linkDialog @selectedLink="
-          (val) => {
-            linkData = val;
-          }
-        " v-else class="linkDialog" />
+      <linkDialog @selectedLink="(val) => { linkData = val; }" v-else class="linkDialog" />
     </template>
   </Modal>
 </template>

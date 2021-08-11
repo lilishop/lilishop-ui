@@ -9,103 +9,47 @@
           <Tag v-for="item in unixHours(row.hours)" :key="item">{{ item }}</Tag>
         </template>
       </Table>
+      <Table
+        :loading="loading"
+        border
+        class="operation"
+        :columns="goodsColumns"
+        :data="goodsList"
+        ref="table"
+      >
+        <template slot-scope="{ row }" slot="originalPrice">
+          <div>{{ row.originalPrice | unitPrice("￥") }}</div>
+        </template>
 
-      <Row class="operation">
-        <Button @click="auditAll">批量审核</Button>
-        <Button
-          type="dashed"
-          @click="
-            () => {
-              openTip = !openTip;
-            }
-          "
-        >{{ openTip ? "关闭提示" : "开启提示" }}
-        </Button
-        >
-      </Row>
-      <Row v-show="openTip">
-        <Alert show-icon>
-          已选择 <span class="select-count">{{ selectCount }}</span> 项
-          <a class="select-clear" @click="clearSelectAll">清空</a>
-        </Alert>
-      </Row>
-        <Table
-          :loading="loading"
-          border
-          class="operation"
-          :columns="goodsColumns"
-          :data="goodsList"
-          ref="table"
-          sortable="custom"
-          @on-selection-change="changeSelect"
-        >
-          <template slot-scope="{ row }" slot="originalPrice">
-            <div>{{ row.originalPrice | unitPrice("￥") }}</div>
-          </template>
+        <template slot-scope="{ row }" slot="quantity">
+          <div>{{ row.quantity }}</div>
+        </template>
 
-          <template slot-scope="{ row }" slot="quantity">
-            <div>{{ row.quantity }}</div>
-          </template>
+        <template slot-scope="{ row }" slot="price">
+          <div>{{ row.price | unitPrice("￥") }}</div>
+        </template>
 
-          <template slot-scope="{ row }" slot="price">
-            <div>{{ row.price | unitPrice("￥") }}</div>
-          </template>
-
-          <template slot-scope="{ row }" slot="promotionApplyStatus">
-            <Badge
-              status="success"
-              v-if="row.promotionApplyStatus == 'PASS'"
-              :text="promotionApplyStatus(row.promotionApplyStatus)"
-            />
-            <Badge
-              status="blue"
-              v-if="row.promotionApplyStatus == 'APPLY'"
-              :text="promotionApplyStatus(row.promotionApplyStatus)"
-            />
-            <Badge
-              status="error"
-              v-if="row.promotionApplyStatus == 'REFUSE'"
-              :text="promotionApplyStatus(row.promotionApplyStatus)"
-            />
-            <span
-              v-if="row.promotionApplyStatus == 'REFUSE'"
-              @click="showReason(row.failReason)"
-              class="reason"
-            >（拒绝原因）</span
-            >
-          </template>
-          <template slot-scope="{ row }" slot="time">
-            <Tag>{{ row.timeLine + ":00" }}</Tag>
-          </template>
-          <template slot-scope="{ row }" slot="QRCode">
-            <img
-              v-if="row.QRCode"
-              :src="row.QRCode || '../../../assets/lili.png'"
-              width="50px"
-              height="50px"
-              alt=""
-            />
-          </template>
-          <template slot-scope="{ row }" slot="action">
-            <Button
-              type="success"
-              size="small"
-              style="margin-right: 10px"
-              :disabled="row.promotionApplyStatus != 'APPLY'"
-              @click="pass(row)"
-            >通过
-            </Button
-            >
-            <Button
-              type="error"
-              size="small"
-              :disabled="row.promotionApplyStatus != 'APPLY'"
-              @click="refuse(row)"
-            >拒绝
-            </Button
-            >
-          </template>
-        </Table>
+        <template slot-scope="{ row }" slot="time">
+          <Tag>{{ row.timeLine + ":00" }}</Tag>
+        </template>
+        <template slot-scope="{ row }" slot="QRCode">
+          <img
+            v-if="row.QRCode"
+            :src="row.QRCode || '../../../assets/lili.png'"
+            width="50px"
+            height="50px"
+            alt=""
+          />
+        </template>
+        <template slot-scope="{ row, index }" slot="action">
+          <Button
+            type="error"
+            size="small"
+            @click="delGoods(index,row)"
+          >删除
+          </Button>
+        </template>
+      </Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page
           :current="searchForm.pageNumber + 1"
@@ -121,40 +65,6 @@
         ></Page>
       </Row>
     </Card>
-    <Modal v-model="showModal" title="审核商品">
-      <Form ref="form" :model="params" :rules="rules">
-        <FormItem label="审核状态">
-          <RadioGroup v-model="params.applyStatus" type="button" button-style="solid">
-            <Radio label="PASS">通过</Radio>
-            <Radio label="REFUSE">拒绝</Radio>
-          </RadioGroup>
-        </FormItem>
-        <FormItem
-          label="拒绝原因"
-          prop="failReason"
-          v-if="params.applyStatus == 'REFUSE'"
-        >
-          <Input
-            type="textarea"
-            v-model="params.failReason"
-            maxlength="50"
-            style="width: 260px"
-            show-word-limit
-          />
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button size="small" @click="showModal = false">取消</Button>
-        <Button
-          size="small"
-          type="primary"
-          :loading="submitLoading"
-          @click="sureAudit"
-        >确定
-        </Button
-        >
-      </div>
-    </Modal>
   </div>
 </template>
 <script>
@@ -162,6 +72,7 @@
     seckillGoodsList,
     seckillDetail,
     auditApplySeckill,
+    delSeckillGoods
   } from "@/api/promotion.js";
 
   export default {
@@ -246,7 +157,6 @@
           },
         ],
         goodsColumns: [ // 商品表单
-          {type: "selection", width: 60, align: "center"},
           {
             title: "商品名称",
             key: "goodsName",
@@ -281,13 +191,11 @@
             width: 100,
             slot: "time",
           },
-          {
-            title: "状态",
-            slot: "promotionApplyStatus",
-            minWidth: 30,
-            width: 90,
-          },
-
+          // {
+          //   title: "状态",
+          //   slot: "promotionApplyStatus",
+          //   width: 90,
+          // },
           {
             title: "操作",
             slot: "action",
@@ -328,16 +236,6 @@
       clearSelectAll() {
         this.$refs.table.selectAll(false);
       },
-      changeSelect(e) {
-        // 获取选择数据
-        this.selectList = e;
-        this.selectCount = e.length;
-        let ids = [];
-        this.selectList.forEach((item) => {
-          ids.push(e.id);
-        });
-        this.params.ids = ids.toString();
-      },
 
       getDataList() {
         // 获取商品详情
@@ -363,11 +261,25 @@
           }
         });
       },
-      delGoods(index) {
+      delGoods(index, row) {
         // 删除商品
-        this.goodsList.list.splice(index, 1);
+        this.$Modal.confirm({
+          title: "确认删除",
+          content: "您确认要删除该商品吗?删除后不可恢复",
+          onOk: () => {
+            const params = {
+              seckillId: row.seckillId,
+              id: row.id
+            }
+            delSeckillGoods(params).then(res => {
+              if (res.success) {
+                this.goodsList.splice(index, 1);
+                this.$Message.success("删除成功！");
+              }
+            })
+          },
+        });
       },
-
       unixDate(time) {
         // 处理报名截止时间
         return this.$options.filters.unixToDate(new Date(time) / 1000);
@@ -379,87 +291,7 @@
           hourArr[i] += ":00";
         }
         return hourArr;
-      },
-      // 格式化申请状态
-      promotionApplyStatus(key) {
-        switch (key) {
-          case "APPLY":
-            return "申请";
-          case "PASS":
-            return "通过";
-          case "REFUSE":
-            return "拒绝";
-        }
-      },
-      pass(row) {
-        // 通过
-        let params = {
-          seckillId: this.$route.query.id,
-          applyStatus: "PASS",
-          failReason: "",
-          ids: row.id,
-        };
-        auditApplySeckill(params).then((res) => {
-          if (res && res.success) {
-            this.$Message.success("已通过该商品审核");
-            this.getDataList();
-          }
-        });
-      },
-      refuse(row) {
-        // 拒绝
-        this.params.applyStatus = "REFUSE";
-        this.selectList.push(row);
-        this.showModal = true;
-      },
-      auditAll() {
-        // 批量审核
-        if (this.selectCount <= 0) {
-          this.$Message.warning("您还未选择要审核的商品");
-          return;
-        }
-        this.showModal = true;
-      },
-      // 确认审批
-      sureAudit() {
-        this.selectCount = this.selectList.length;
-        // 批量审核
-        if (this.selectCount <= 0) {
-          this.$Message.warning("您还未选择要审核的商品");
-          return;
-        }
-        this.params.ids = this.selectList
-          .filter((i) => i.promotionApplyStatus === "APPLY")
-          .map((i) => i.id);
-        if (this.params.ids.length <= 0) {
-          this.$Message.warning("当前没有可审核的商品");
-          return;
-        }
-        if (
-          this.params.applyStatus == "REFUSE" &&
-          this.params.failReason === ""
-        ) {
-          this.$Message.warning("审核拒绝理由不能为空");
-          return;
-        }
-        this.submitLoading = true;
-        auditApplySeckill(this.params).then((res) => {
-          this.submitLoading = false;
-          if (res.success) {
-            this.showModal = false;
-            this.$Message.success("审核成功");
-            this.selectList = [];
-            this.getDataList();
-          }
-        });
-      },
-      // 展示拒绝原因
-      showReason(reason) {
-        this.$Modal.info({
-          title: "拒绝原因",
-          content: reason,
-        });
-      },
+      }
     },
     mounted() {
       this.init();

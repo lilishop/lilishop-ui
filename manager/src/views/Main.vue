@@ -132,6 +132,7 @@ export default {
       // 退出登录
       else if (name === "loginOut") {
         this.$store.commit("logout", this);
+        this.$store.commit('setAdded', false);
         this.setStore("accessToken", "");
         this.setStore("refreshToken", "");
         this.$router.push({ path: "/login" });
@@ -167,7 +168,6 @@ export default {
   },
   watch: {
     $route(to, from) {
-      this.$store.commit("setCurrentPageName", to.name);
       this.checkTag(to.name);
       localStorage.currentPageName = to.name;
     }

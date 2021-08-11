@@ -6,7 +6,7 @@ import {
   deleteRequest
 } from "@/libs/axios";
 
-// 获取限时抢购申请列表
+// 获取秒杀活动申请列表
 
 export const getPromotionSeckill = params => {
   return getRequest(`/promotion/seckill/apply`, params);
@@ -118,10 +118,12 @@ export const getActivityCouponList = params => {
 export const getCouponActivityList = params => {
   return getRequest("/promotion/couponActivity", params);
 };
-//  作废优惠券
+// 关闭优惠券活动
 export const closeActivity = id => {
   return deleteRequest(`/promotion/couponActivity/${id}`);
 };
+
+
 //  更新优惠券活动
 export const updateCouponActivity = params => {
   return putRequest(`/promotion/couponActivity/status`, params);
@@ -131,42 +133,45 @@ export const getCouponActivity = id => {
   return getRequest(`/promotion/couponActivity/${id}`);
 };
 
-// 获取限时抢购数据
+// 获取秒杀活动数据
 export const getSeckillList = params => {
   return getRequest("/promotion/seckill", params);
 };
 
-// 获取限时抢购审核列表
+// 获取秒杀活动审核列表
 export const seckillGoodsList = params => {
   return getRequest("/promotion/seckill/apply", params);
 };
 
-// 获取限时抢购详情数据
+// 获取秒杀活动详情数据
 export const seckillDetail = (id, params) => {
   return getRequest(`/promotion/seckill/${id}`, params);
 };
 
-// 删除限时抢购
+// 删除秒杀活动
 export const delSeckill = id => {
   return deleteRequest(`/promotion/seckill/${id}`);
 };
 
-// 保存限时抢购
+// 保存秒杀活动
 export const saveSeckill = params => {
   return postRequest("/promotion/seckill", params);
 };
 
-// 修改限时抢购
+// 修改秒杀活动
 export const updateSeckill = params => {
   return putRequest("/promotion/seckill", params);
 };
 
-// 关闭限时抢购
+// 关闭秒杀活动
 export const closeSeckill = id => {
   return putRequest(`/promotion/seckill/close/${id}`);
 };
-
-// 审核限时抢购
+// 删除秒杀商品
+export const delSeckillGoods = params => {
+  return deleteRequest(`/promotion/seckill/apply/${params.seckillId}/${params.id}`);
+};
+// 审核秒杀活动
 export const auditApplySeckill = params => {
   return putRequest(`/promotion/seckill/apply/audit/${params.ids}`, params);
 };

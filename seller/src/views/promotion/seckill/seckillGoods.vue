@@ -13,7 +13,7 @@
       <Row class="operation">
         <template v-if="promotionStatus == 'NEW'">
           <Button type="primary" @click="openSkuList">选择商品</Button>
-          <Button @click="delAll">批量删除</Button>
+          <!-- <Button @click="delAll">批量删除</Button> -->
         </template>
       </Row>
       <Row class="operation">
@@ -98,7 +98,7 @@
                   v-if="promotionStatus === 'NEW'"
                   size="small"
                   ghost
-                  @click="delGoods(index, row.id)"
+                  @click="delGoods(index, row)"
                   >删除</Button
                 >
               </template>
@@ -130,6 +130,7 @@ import {
   seckillGoodsList,
   seckillDetail,
   setSeckillGoods,
+  delSeckillGoods
 } from "@/api/promotion.js";
 import skuSelect from "@/views/lili-dialog";
 export default {
@@ -170,7 +171,6 @@ export default {
         },
       ],
       goodsColumns: [
-        { type: "selection", width: 60, align: "center" },
         {
           title: "商品名称",
           key: "goodsName",
@@ -245,8 +245,8 @@ export default {
     clearSelectAll() {
       this.$refs.table.selectAll(false);
     },
+    // 获取选择数据
     changeSelect(e) {
-      // 获取选择数据
       this.selectList = e;
       this.selectCount = e.length;
     },
@@ -255,7 +255,6 @@ export default {
       // 获取商品详情
       this.loading = true;
       this.searchForm.seckillId = this.$route.query.id;
-
       // 处理过的时间 为‘1:00’
       let hours = this.unixHours(this.data[0].hours);
       hours.forEach((e) => {
@@ -294,33 +293,23 @@ export default {
         }
       });
     },
-    delGoods(index) {
+    delGoods(index, row) {
       // 删除商品
-      this.goodsList[this.tabIndex].list.splice(index, 1);
-      this.$Message.success("删除成功！");
-    },
-    delAll() { // 删除当前时段全部数据
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要删除的数据");
-        return;
+      if (row.promotionApplyStatus === 'PASS') {
+        const params = {
+          seckillId: row.seckillId,
+          id: row.id
+        }
+        delSeckillGoods(params).then(res => {
+          if (res.success) {
+            this.goodsList[this.tabIndex].list.splice(index, 1);
+            this.$Message.success("删除成功！");
+          }
+        })
+      } else {
+        this.goodsList[this.tabIndex].list.splice(index, 1);
+        this.$Message.success("删除成功！");
       }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选的 " + this.selectCount + " 条数据?",
-        onOk: () => {
-          let ids = [];
-          this.selectList.forEach(function (e) {
-            if (e.promotionApplyStatus !== 'PASS') {
-              ids.push(e.id);
-            }
-          });
-          this.goodsList[this.tabIndex].list = this.goodsList[
-            this.tabIndex
-          ].list.filter((item) => {
-            return !ids.includes(item.id);
-          });
-        },
-      });
     },
     selectedGoodsData(item) {
       // 选择器添加商品

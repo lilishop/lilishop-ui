@@ -68,8 +68,8 @@
               <p class="item">
                 <span class="label">公司地址：</span>
                 <span class="info">
-              {{storeInfo.companyAddressPath || storeInfo.companyAddress?storeInfo.companyAddressPath + ' '+storeInfo.companyAddress:"暂未完善"}}
-            </span>
+                  {{storeInfo.companyAddressPath || storeInfo.companyAddress?storeInfo.companyAddressPath + ' '+storeInfo.companyAddress:"暂未完善"}}
+                </span>
               </p>
             </div>
 

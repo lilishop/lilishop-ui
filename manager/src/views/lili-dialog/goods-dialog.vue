@@ -115,7 +115,7 @@ export default {
           item.selected = false;
           item.___type = "goods"; //设置为goods让pc wap知道标识
           this.selectedWay.forEach(e => {
-            if (e.id === item.id) {
+            if (e.id && e.id === item.id) {
               item.selected = true
             }
           })

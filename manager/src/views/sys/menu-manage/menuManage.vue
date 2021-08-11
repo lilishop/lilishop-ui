@@ -228,7 +228,7 @@ import {
   searchPermission,
 } from "@/api/index";
 import util from "@/libs/util.js";
-
+import Cookies from "js-cookie";
 export default {
   name: "menu-manage",
   data() {
@@ -486,7 +486,7 @@ export default {
             if (res.success) {
               this.$Message.success("编辑成功");
               // 标记重新获取菜单数据
-              this.$store.commit("setAdded", false);
+              this.$store.commit('setAdded', false);
               util.initRouter(this);
               this.init();
               this.menuModalVisible = false;
@@ -506,7 +506,7 @@ export default {
             if (res.success) {
               this.$Message.success("添加成功");
               // 标记重新获取菜单数据
-              this.$store.commit("setAdded", false);
+              this.$store.commit('setAdded', false);
               util.initRouter(this);
               this.init();
               this.menuModalVisible = false;
@@ -579,7 +579,7 @@ export default {
             if (res.success) {
               this.$Message.success("删除成功");
               // 标记重新获取菜单数据
-              this.$store.commit("setAdded", false);
+              this.$store.commit('setAdded', false);
               util.initRouter(this);
               this.selectList = [];
               this.selectCount = 0;

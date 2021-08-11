@@ -111,7 +111,7 @@ import {
   saveRoleMenu,
 } from "@/api/index";
 import util from "@/libs/util.js";
-
+import Cookies from "js-cookie";
 export default {
   name: "role-manage",
   data() {
@@ -597,7 +597,7 @@ export default {
         if (res.success) {
           this.$Message.success("操作成功");
           // 标记重新获取菜单数据
-          this.$store.commit("setAdded", false);
+          this.$store.commit('setAdded', false);
           util.initRouter(this);
           this.getRoleList();
           this.permModalVisible = false;
