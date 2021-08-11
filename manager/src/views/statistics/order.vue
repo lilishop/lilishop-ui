@@ -50,6 +50,10 @@
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">付款笔数</div>
+                  <div class="card-item-value">{{overViewList.paymentsNum || 0}}</div>
+                </div>
+                <div class="card-item">
+                  <div class="card-item-label">付款人数</div>
                   <div class="card-item-value">{{overViewList.paymentOrderNum || 0}}</div>
                 </div>
                 <div class="card-item">
