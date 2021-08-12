@@ -401,6 +401,11 @@ export const createIndex = () => {
   return getRequest(`/elasticsearch`);
 };
 
+// 初始化商品索引
+export const getProgress = () => {
+  return getRequest(`/elasticsearch/progress`);
+};
+
 // 分页查询自定义分词
 export const getCustomWordsPage = (params) => {
   return getRequest(`/manager/custom-words`, params);

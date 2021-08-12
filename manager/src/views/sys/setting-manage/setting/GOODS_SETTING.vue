@@ -56,13 +56,15 @@
       <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
         <Button type="primary" style="margin-left: 100px" @click="createIndex()">重新生成所有商品索引</Button>
+        <div class="progress-item" v-if="showProgress">
+          <i-progress :percent="progressVal"></i-progress>
+        </div>
       </div>
-
     </Form>
   </div>
 </template>
 <script>
-import { setSetting,createIndex } from "@/api/index";
+import { setSetting,createIndex,getProgress } from "@/api/index";
 import { handleSubmit } from "./validate";
 export default {
   props: ["res", "type"],
@@ -77,6 +79,9 @@ export default {
         originalPictureWidth: "0",
         originalPictureHeight: "0",
       },
+      progressVal: 0,
+      showProgress: false,
+      intervalProgress: null,
       ruleValidate: {} // 验证规则
     };
   },
@@ -96,10 +101,39 @@ export default {
       createIndex().then((res) => {
         if (res.success) {
           this.$Message.success("开始生成!");
-        } else {
-          this.$Message.error("服务器异常!");
+          this.showProgress = true;
+          setTimeout(() => {
+            this.intervalProgress = setInterval(()=> {
+              getProgress().then(resp => {
+                let progressResult = resp.result
+                if (progressResult !=null && progressResult.flag === 0) {
+                  clearInterval(this.intervalProgress);
+                  this.showProgress = false;
+                  this.$Message.success("生成成功!");
+                } else {
+                  this.progressVal = Math.floor((progressResult.processed / progressResult.total) * 100);
+                }
+              });
+            }, 1000);
+          }, 10000);
+        } else if (res.code === 100000) {
+          this.showProgress = true;
+          this.intervalProgress = setInterval(()=> {
+            getProgress().then(resp => {
+              let progressResult = resp.result
+              if (progressResult !=null && progressResult.flag === 0) {
+                clearInterval(this.intervalProgress);
+                this.showProgress = false;
+                this.$Message.success("生成成功!");
+              } else {
+                this.progressVal = Math.floor((progressResult.processed / progressResult.total) * 100);
+              }
+            });
+          }, 1000);
         }
       });
+
+
     },
     // 保存设置
     setupSetting() {
