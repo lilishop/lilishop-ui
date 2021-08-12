@@ -83,7 +83,7 @@
 
       <Modal :title="modalBrandTitle" v-model="modalBrandVisible" :mask-closable="false" :width="500">
         <Form ref="brandForm" :model="brandForm" :label-width="100">
-          <Select v-model="brandForm.categoryBrands" multiple>
+          <Select v-model="brandForm.categoryBrands" filterable multiple>
             <Option v-for="item in brandWay" :value="item.id" :key="item.id">{{ item.name }}</Option>
 
           </Select>
