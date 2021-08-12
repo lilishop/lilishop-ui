@@ -14,8 +14,8 @@
               <div class="remarks-container" ref="itemGoodsComment">
                 <div class="remarks-analyse-box">
                   <div class="remarks-analyse-goods">
-                    <i-circle :percent="skuDetail.grade || 100" stroke-color="#5cb85c">
-                      <span class="remarks-analyse-num">{{skuDetail.grade || 100}}%</span>
+                    <i-circle :percent="skuDetail.grade" stroke-color="#5cb85c">
+                      <span class="remarks-analyse-num">{{skuDetail.grade}}%</span>
                       <p class="remarks-analyse-title">好评率</p>
                     </i-circle>
                   </div>
@@ -206,6 +206,9 @@ export default {
     });
     window.addEventListener('scroll', this.handleScroll)
     this.getList();
+    if (this.skuDetail.grade === null || this.skuDetail.grade === undefined) {
+      this.skuDetail.grade = 100
+    }
   }
 };
 </script>

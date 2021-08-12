@@ -325,39 +325,31 @@ util.initRouter = function (vm) { // 初始化路由
     }
 
     if (!vm.$store.state.app.added) {
-        // 第一次加载 读取数据
-        let accessToken = window.localStorage.getItem('accessToken');
         // 加载菜单
-        // axios.get(getMenuList, { headers: { 'accessToken': accessToken } }).then(res => {
-            // let menuData = res.result;
-            let menuData = result;
-            if (!menuData) {
-                return;
-            }
-            // 格式化数据，设置 空children 为 null
-            for(let i =0;i<menuData.length;i++){
-                let t = menuData[i].children
-                for(let k = 0;k<t.length;k++){
-                    let tt = t[k].children;
-                    for(let z = 0;z<tt.length;z++){
-                        tt[z].children = null
-                        // 给所有三级路由添加字段，显示一级菜单name，方便点击页签时的选中筛选
-                        tt[z].firstRouterName = menuData[i].name
-                    }
+        let menuData = result;
+        // 格式化数据，设置 空children 为 null
+        for(let i =0;i<menuData.length;i++){
+            let t = menuData[i].children
+            for(let k = 0;k<t.length;k++){
+                let tt = t[k].children;
+                for(let z = 0;z<tt.length;z++){
+                    tt[z].children = null
+                    // 给所有三级路由添加字段，显示一级菜单name，方便点击页签时的选中筛选
+                    tt[z].firstRouterName = menuData[i].name
                 }
             }
-            util.initAllMenuData(constRoutes, menuData);
-            util.initRouterNode(otherRoutes, otherRouter);
-            // 添加所有主界面路由
-            vm.$store.commit('updateAppRouter', constRoutes.filter(item => item.children.length > 0));
-            // 添加全局路由
-            vm.$store.commit('updateDefaultRouter', otherRoutes);
-            // 添加菜单路由
-            util.initMenuData(vm, menuData);
-            // 缓存数据 修改加载标识
-            window.localStorage.setItem('menuData', JSON.stringify(menuData));
-            vm.$store.commit('setAdded', true);
-        // });
+        }
+        util.initAllMenuData(constRoutes, menuData);
+        util.initRouterNode(otherRoutes, otherRouter);
+        // 添加所有主界面路由
+        vm.$store.commit('updateAppRouter', constRoutes.filter(item => item.children.length > 0));
+        // 添加全局路由
+        vm.$store.commit('updateDefaultRouter', otherRoutes);
+        // 添加菜单路由
+        util.initMenuData(vm, menuData);
+        // 缓存数据 修改加载标识
+        window.localStorage.setItem('menuData', JSON.stringify(menuData));
+        vm.$store.commit('setAdded', true);
     } else {
         // 读取缓存数据
         let data = window.localStorage.getItem('menuData');

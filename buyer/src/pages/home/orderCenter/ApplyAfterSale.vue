@@ -8,7 +8,7 @@
     >
     <template slot-scope="{ row }" slot="goodsName">
       <div style="padding:5px;display:flex;">
-        <img :src="row.image" style="vertical-align: top;" width="60" alt=""> <span class="ml_10">{{row.goodsName}}</span>
+        <img :src="row.image" style="vertical-align: top;" width="60" height="60" alt=""> <span class="ml_10">{{row.goodsName}}</span>
       </div>
     </template>
     <template slot-scope="{ row }" slot="goodsPrice">

@@ -37,9 +37,7 @@
 <script>
   import {
     getShopListData,
-    disableShop,
-    enableBrand,
-    shopAudit,
+    shopAudit
   } from "@/api/shops";
   import shopOperation from "./shopOperation";
   export default {
@@ -99,7 +97,7 @@
                 "Tag",
                 {
                   props: {
-                    color: params.row.selfOperated ? "default" : "primary",
+                    color: params.row.selfOperated ? "default" : "success",
                   },
                 },
                 params.row.selfOperated ? "自营" : "非自营"
@@ -121,48 +119,8 @@
             align: "center",
             fixed: "right",
             render: (h, params) => {
-              let enableOrDisable = "";
-              if (params.row.storeDisable == "OPEN") {
-                enableOrDisable = h(
-                  "Button",
-                  {
-                    props: {
-                      size: "small",
-                      type: "error"
-                    },
-                    style: {
-                      marginRight: "5px",
-                    },
-                    on: {
-                      click: () => {
-                        this.disable(params.row);
-                      },
-                    },
-                  },
-                  "关闭"
-                );
-              } else if (params.row.storeDisable == "CLOSED") {
-                enableOrDisable = h(
-                  "Button",
-                  {
-                    props: {
-                      type: "success",
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                    },
-                    on: {
-                      click: () => {
-                        this.enable(params.row);
-                      },
-                    },
-                  },
-                  "开启"
-                );
-              } else if (params.row.storeDisable == "APPLYING") {
-                return h("div", [
-                  h(
+              if (params.row.storeDisable == "APPLYING") {
+                return h(
                     "Button",
                     {
                       props: {
@@ -174,78 +132,18 @@
                       },
                       on: {
                         click: () => {
-                          this.audit(params.row);
-                        },
-                      },
-                    },
-                    "审核"
-                  ),
-                  h(
-                    "Button",
-                    {
-                      props: {
-                        type: "primary",
-                        size: "small",
-                      },
-                      style: {
-                        marginRight: "5px",
-                      },
-                      on: {
-                        click: () => {
                           this.edit(params.row);
                         },
                       },
                     },
-                    "修改"
-                  ),
-                ]);
+                    "查看"
+                  )
               }
-
-              return h("div", [
-                h(
-                  "Button",
-                  {
-                    props: {
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                      display: this.selectedShop ? "inline-block" : "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.callback(params.row);
-                      },
-                    },
-                  },
-                  "选择"
-                ),
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                    },
-                    on: {
-                      click: () => {
-                        this.edit(params.row);
-                      },
-                    },
-                  },
-                  "修改"
-                ),
-                enableOrDisable,
-              ]);
             },
           },
         ],
         data: [], // 表单数据
-        total: 0, // 表单数据总数
-        selectedShop: false, //用于是否选择店铺
+        total: 0 // 表单数据总数
       };
     },
 
@@ -296,76 +194,11 @@
         this.total = this.data.length;
         this.loading = false;
       },
-      // 添加店铺
-      add() {
-        this.$router.push({ path: '/shop-operation'});
-      },
-      // 修改店铺
+      // 查看店铺
       edit(v) {
         this.$router.push({ path: '/shop-operation', query: { shopId: v.id } });
       },
-      // 关闭店铺
-      disable(v) {
-        this.$Modal.confirm({
-          title: "确认关闭",
-          content: "您确认要关闭店铺 " + v.storeName + " ?",
-          loading: true,
-          onOk: () => {
-            disableShop(v.id).then((res) => {
-              this.$Modal.remove();
-              if (res.success) {
-                this.$Message.success("操作成功");
-                this.getDataList();
-              }
-            });
-          },
-        });
-      },
-      // 审核店铺
-      audit(v) {
-        this.$Modal.confirm({
-          title: "审核店铺",
-          content: "您确认要审核通过店铺 " + v.storeName + " ?",
-          okText: "通过",
-          cancelText: "驳回",
-          loading: true,
-          onOk: () => {
-            shopAudit(v.id, 0).then((res) => {
-              this.$Modal.remove();
-              if (res.success) {
-                this.$Message.success("操作成功");
-                this.getDataList();
-              }
-            });
-          },
-          onCancel: () => {
-            shopAudit(v.id, 1).then((res) => {
-              this.$Modal.remove();
-              if (res.success) {
-                this.$Message.success("操作成功");
-                this.getDataList();
-              }
-            });
-          },
-        });
-      },
-      // 开启店铺
-      enable(v) {
-        this.$Modal.confirm({
-          title: "确认开启",
-          content: "您确认要开启店铺 " + v.storeName + " ?",
-          loading: true,
-          onOk: () => {
-            enableBrand(v.id).then((res) => {
-              this.$Modal.remove();
-              if (res.success) {
-                this.$Message.success("操作成功");
-                this.getDataList();
-              }
-            });
-          },
-        });
-      },
+      
     },
     mounted() {
       this.init();

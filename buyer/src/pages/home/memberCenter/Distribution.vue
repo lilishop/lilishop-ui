@@ -240,6 +240,7 @@ export default {
         if (res.success) {
           this.$Message.success('申请已提交，请等待审核')
           this.distribution()
+          this.getLog()
         } else {
           this.$Message.error(res.message)
         }

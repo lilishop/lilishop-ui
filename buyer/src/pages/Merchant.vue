@@ -6,7 +6,7 @@
     <!-- 店铺logo -->
     <div class="shop-logo">
       <div>
-        <img :src="storeMsg.storeLogo" height="50" alt="">
+        <img :src="storeMsg.storeLogo" height="80" alt="">
         <div>
           <p>{{storeMsg.storeName || 'xx店铺'}}</p>
           <p class="ellipsis" :alt="storeMsg.storeDesc" v-html="storeMsg.storeDesc"></p>
@@ -199,10 +199,6 @@ export default {
     margin: 0 auto;
     align-items: center;
 
-    img {
-      width: 80px;
-    }
-
     >div:nth-child(2){
       margin-left: 10px;
       flex: 1;
@@ -211,9 +207,6 @@ export default {
     >div:nth-child(3){
       width: 200px;
     }
-  }
-  img {
-    height: 80px;
   }
   p:nth-child(1) {
     font-size: 20px;

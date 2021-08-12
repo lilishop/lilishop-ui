@@ -101,6 +101,8 @@ export default {
         this.spinShow = false
         if (res.success && res.result) {
           this.list = res.result;
+        } else {
+          this.list = []
         }
       });
     }

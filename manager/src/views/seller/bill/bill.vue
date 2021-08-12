@@ -10,11 +10,11 @@
           </DatePicker>
         </Form-item>
         <Form-item label="筛选状态">
-          <Select v-model="searchForm.billStatus" style="width:160px">
-            <Option value="">全部</Option>
+          <Select v-model="searchForm.billStatus" clearable style="width:160px">
             <Option value="OUT">已出账</Option>
-            <Option value="CHECK">已核对</Option>
-            <Option value="COMPLETE">已完成</Option>
+            <Option value="CHECK">已对账</Option>
+            <Option value="EXAMINE">已审核</Option>
+            <Option value="COMPLETE">已付款</Option>
           </Select>
         </Form-item>
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
