@@ -19,7 +19,7 @@
             <span>投诉单号:{{item.id}}</span>
             <span class="color999 ml_10">{{item.createTime}}</span>
             <span class="hover-pointer fontsize_12 eval-detail" @click="goDetail(item.id)">投诉详情</span>
-            <span class="hover-pointer fontsize_12 eval-detail" style="right: 90px" v-if="item.complainStatus != 'EXPIRED' && item.complainStatus != 'CANCEL'" @click="cancel(item.id)">取消投诉</span>
+            <span class="hover-pointer fontsize_12 eval-detail" style="right: 90px" v-if="item.complainStatus === 'APPLYING' || item.complainStatus === 'NEW'" @click="cancel(item.id)">取消投诉</span>
           </div>
           <Row class="order-item-view">
             <i-col span="12" class="item-view-name">
@@ -70,10 +70,10 @@ export default {
       statusLabel: { // 投诉状态
         NO_APPLY: '未申请',
         APPLYING: '申请中',
-        COMPLETE: '已完成，此时可申请',
-        EXPIRED: '已失效，不可申请',
+        COMPLETE: '已完成',
+        EXPIRED: '已失效',
         CANCEL: '已取消',
-        NEW: '申请中'
+        NEW: '新订单'
       },
       total: 0, // 投诉总数
       params: { // 请求参数

@@ -19,7 +19,7 @@
               <Input v-model="baseInfoForm.sellingPoint" type="textarea" :rows="4" style="width: 260px"/>
             </FormItem>
             <FormItem label="商品品牌" prop="brandId">
-              <Select v-model="baseInfoForm.brandId" style="width: 200px">
+              <Select v-model="baseInfoForm.brandId" filterable style="width: 200px">
                 <Option v-for="item in brandList" :value="item.id" :key="item.id" :label="item.name"></Option>
               </Select>
             </FormItem>
