@@ -65,6 +65,12 @@ export default {
           tooltip: true,
         },
         {
+          title: "店铺名称",
+          key: "storeName",
+          minWidth: 100,
+          tooltip: true,
+        },
+        {
           title: "支付方式",
           key: "paymentMethod",
           width: 120,
