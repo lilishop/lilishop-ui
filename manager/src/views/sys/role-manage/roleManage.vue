@@ -31,7 +31,7 @@
     <!-- 菜单权限 -->
     <Modal :title="modalTitle" v-model="permModalVisible" :mask-closable="false" :width="500" :styles="{ top: '30px' }" class="permModal">
       <div style="position: relative">
-        <Tree ref="tree" :data="permData" show-checkbox :render="renderContent" :check-strictly="true">
+        <Tree ref="tree" :data="permData" show-checkbox :render="renderContent">
         </Tree>
         <Spin size="large" fix v-if="treeLoading"></Spin>
       </div>
@@ -43,7 +43,7 @@
           <Option value="2">仅展开一级</Option>
           <Option value="3">仅展开两级</Option>
         </Select>
-        <Button type="primary" :loading="submitPermLoading" @click="submitPermEdit(true)">编辑
+        <Button type="primary" :loading="submitPermLoading" @click="submitPermEdit()">编辑
         </Button>
       </div>
     </Modal>
@@ -287,11 +287,6 @@ export default {
             display: "inline-block",
             cursor: "pointer",
           },
-          on: {
-            click: () => {
-              data.checked = !data.checked;
-            },
-          },
         },
         [
           h("span", [
@@ -307,9 +302,29 @@ export default {
             }),
             h("span", data.title),
             h(
-              "span",
-              { class: { tips: true } },
-              data.isSuper ? "操作权限" : "查看权限"
+              "Tag",
+              {
+                props: {
+                  type:
+                    data.isSuper == true
+                      ? "red"
+                      : data.isSuper == false
+                      ? "default"
+                      : "",
+                },
+                style: {
+                  "margin-left": "10px",
+                  display:
+                    data.isSuper == true || data.isSuper == false
+                      ? "inline-block"
+                      : "none",
+                },
+              },
+              data.isSuper == true
+                ? "操作权限"
+                : data.isSuper == false
+                ? "查看权限"
+                : ""
             ),
           ]),
         ]
@@ -510,6 +525,24 @@ export default {
 
     // 菜单权限
     async editPerm(v) {
+
+      /**
+       * 点击菜单权限每次将赋值的isSuper数据给清空掉
+       */
+      this.permData.map((item) => {
+        item.children.length != 0
+          ? item.children.map((child) => {
+              child.children.length != 0
+                ? child.children.map((kid) => {
+                    delete kid.isSuper;
+                  })
+                : "";
+              delete child.isSuper;
+            })
+          : "";
+        delete item.isSuper;
+      });
+
       if (this.treeLoading) {
         this.$Message.warning("菜单权限数据加载中，请稍后点击查看");
         return;
@@ -524,9 +557,8 @@ export default {
         rolePerms = res.result;
         this.rolePermsWay = res.result;
       }
-      // 递归判断子节点
+      // 递归判断子节点是否可以选中
       this.checkPermTree(this.permData, rolePerms);
-
       this.permModalVisible = true;
     },
     // 递归判断子节点
@@ -576,8 +608,8 @@ export default {
       this.selectIsSuperModel = true; //打开选择权限
       let selectedNodes = this.$refs.tree.getCheckedNodes();
       let way = [];
-
       selectedNodes.forEach((e) => {
+       
         let perm = {
           title: e.title,
           isSuper: e.isSuper,
@@ -597,7 +629,7 @@ export default {
         if (res.success) {
           this.$Message.success("操作成功");
           // 标记重新获取菜单数据
-          this.$store.commit('setAdded', false);
+          this.$store.commit("setAdded", false);
           util.initRouter(this);
           this.getRoleList();
           this.permModalVisible = false;
@@ -609,7 +641,7 @@ export default {
       loadDepartment(item.id, { openDataFilter: false }).then((res) => {
         if (res.success) {
           res.result.forEach(function (e) {
-            e.selected = false;
+            e.checked = false;
             if (e.isParent) {
               e.loading = false;
               e.children = [];
@@ -632,9 +664,9 @@ export default {
       let that = this;
       depData.forEach(function (p) {
         if (that.hasDepPerm(p, roleDepIds)) {
-          p.selected = true;
+          p.checked = true;
         } else {
-          p.selected = false;
+          p.checked = false;
         }
       });
     },

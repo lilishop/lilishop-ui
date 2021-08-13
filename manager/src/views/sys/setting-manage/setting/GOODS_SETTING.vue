@@ -9,21 +9,6 @@
         </RadioGroup>
       </FormItem>
       <div class="label-item">
-        <FormItem label="小图宽" prop="smallPictureWidth">
-          <Input type="number" v-model="formValidate.smallPictureWidth">
-          <span slot="prepend">宽</span>
-          <span slot="append">px</span>
-          </Input>
-
-        </FormItem>
-        <FormItem label="小图高" class="label-item" prop="smallPictureHeight">
-          <Input type="number" v-model="formValidate.smallPictureHeight">
-          <span slot="prepend">高</span>
-          <span slot="append">px</span>
-          </Input>
-        </FormItem>
-      </div>
-      <div class="label-item">
         <FormItem class="label-item" label="缩略图宽" prop="abbreviationPictureWidth">
           <Input type="number" v-model="formValidate.abbreviationPictureWidth">
           <span slot="prepend">宽</span>
@@ -33,6 +18,21 @@
         </FormItem>
         <FormItem class="label-item" label="缩略图高" prop="abbreviationPictureHeight">
           <Input type="number" v-model="formValidate.abbreviationPictureHeight">
+          <span slot="prepend">高</span>
+          <span slot="append">px</span>
+          </Input>
+        </FormItem>
+      </div>
+      <div class="label-item">
+        <FormItem label="小图宽" prop="smallPictureWidth">
+          <Input type="number" v-model="formValidate.smallPictureWidth">
+          <span slot="prepend">宽</span>
+          <span slot="append">px</span>
+          </Input>
+
+        </FormItem>
+        <FormItem label="小图高" class="label-item" prop="smallPictureHeight">
+          <Input type="number" v-model="formValidate.smallPictureHeight">
           <span slot="prepend">高</span>
           <span slot="append">px</span>
           </Input>
@@ -64,13 +64,14 @@
   </div>
 </template>
 <script>
-import { setSetting,createIndex,getProgress } from "@/api/index";
+import { setSetting, createIndex, getProgress } from "@/api/index";
 import { handleSubmit } from "./validate";
 export default {
   props: ["res", "type"],
   data() {
     return {
-      formValidate: { // 表单数据
+      formValidate: {
+        // 表单数据
         goodsCheck: 1,
         smallPictureHeight: "0",
         smallPictureWidth: "0",
@@ -82,7 +83,7 @@ export default {
       progressVal: 0,
       showProgress: false,
       intervalProgress: null,
-      ruleValidate: {} // 验证规则
+      ruleValidate: {}, // 验证规则
     };
   },
   created() {
@@ -92,48 +93,50 @@ export default {
     //保存
     submit(name) {
       let that = this;
-       if( handleSubmit(that, name )){
-        this.setupSetting()
+      if (handleSubmit(that, name)) {
+        this.setupSetting();
       }
     },
     //重新生成所有商品索引
-    createIndex(){
+    createIndex() {
       createIndex().then((res) => {
         if (res.success) {
           this.$Message.success("开始生成!");
           this.showProgress = true;
           setTimeout(() => {
-            this.intervalProgress = setInterval(()=> {
-              getProgress().then(resp => {
-                let progressResult = resp.result
-                if (progressResult !=null && progressResult.flag === 0) {
+            this.intervalProgress = setInterval(() => {
+              getProgress().then((resp) => {
+                let progressResult = resp.result;
+                if (progressResult != null && progressResult.flag === 0) {
                   clearInterval(this.intervalProgress);
                   this.showProgress = false;
                   this.$Message.success("生成成功!");
                 } else {
-                  this.progressVal = Math.floor((progressResult.processed / progressResult.total) * 100);
+                  this.progressVal = Math.floor(
+                    (progressResult.processed / progressResult.total) * 100
+                  );
                 }
               });
             }, 1000);
           }, 10000);
         } else if (res.code === 100000) {
           this.showProgress = true;
-          this.intervalProgress = setInterval(()=> {
-            getProgress().then(resp => {
-              let progressResult = resp.result
-              if (progressResult !=null && progressResult.flag === 0) {
+          this.intervalProgress = setInterval(() => {
+            getProgress().then((resp) => {
+              let progressResult = resp.result;
+              if (progressResult != null && progressResult.flag === 0) {
                 clearInterval(this.intervalProgress);
                 this.showProgress = false;
                 this.$Message.success("生成成功!");
               } else {
-                this.progressVal = Math.floor((progressResult.processed / progressResult.total) * 100);
+                this.progressVal = Math.floor(
+                  (progressResult.processed / progressResult.total) * 100
+                );
               }
             });
           }, 1000);
         }
       });
-
-
     },
     // 保存设置
     setupSetting() {
@@ -161,7 +164,7 @@ export default {
             message: "请填写必填项",
             trigger: "blur",
           },
-           {
+          {
             validator: (rule, value, callback) => {
               if (value < 0) {
                 callback(new Error("不能输入负数！"));
@@ -173,7 +176,6 @@ export default {
           },
         ];
       });
-
     },
   },
 };
