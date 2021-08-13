@@ -59,7 +59,7 @@
           <FormItem label="分类名称" prop="name">
             <Input v-model="formAdd.name" clearable style="width: 100%" />
           </FormItem>
-          <FormItem label="分类图标" prop="image" v-if="formAdd.level === 2">
+          <FormItem label="分类图标" prop="image" v-if="formAdd.level !== 1">
             <upload-pic-input v-model="formAdd.image" style="width: 100%"></upload-pic-input>
           </FormItem>
           <FormItem label="排序值" prop="sortOrder" style="width: 345px">
