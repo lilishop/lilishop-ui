@@ -1,5 +1,3 @@
-
-
 <template>
   <div>
     <Card class="change-pass">
@@ -143,24 +141,3 @@ export default {
   }
 };
 </script>
-<style lang="scss" scoped>
-.change-pass {
-  &-btn-box {
-    margin-bottom: 10px;
-
-    button {
-      padding-left: 0;
-
-      span {
-        color: #2d8cf0;
-        transition: all 0.2s;
-      }
-
-      span:hover {
-        color: #0c25f1;
-        transition: all 0.2s;
-      }
-    }
-  }
-}
-</style>

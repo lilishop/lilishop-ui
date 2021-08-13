@@ -433,7 +433,7 @@
                     style: {
                       color: 'red'
                     }
-                  }, params.row.variablePoint),
+                  }, '-' + params.row.variablePoint),
                 ]);
               }
             }

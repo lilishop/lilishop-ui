@@ -2,7 +2,7 @@
   <div class="model-carousel2">
     <div class="nav-body clearfix">
       <!-- 侧边导航 -->
-      <div class="nav-side">导航栏占位区</div>
+      <div class="nav-side">分类占位区</div>
       <div class="nav-content setup-content">
         <!-- 轮播图 -->
         <Carousel autoplay>

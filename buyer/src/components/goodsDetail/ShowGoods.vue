@@ -155,7 +155,7 @@ export default {
       count: 1, // 商品数量
       imgIndex: 0, // 展示图片下标
       currentSelceted: [], // 当前商品sku
-      imgList: this.detail.data.specList[0].specImage || [{}], // 商品图片列表
+      imgList: [{}], // 商品图片列表
       skuDetail: this.detail.data, // sku详情
       goodsSpecList: this.detail.specs, // 商品spec
       promotionMap: { // 活动状态
@@ -329,6 +329,11 @@ export default {
         }
       })
     }
+    this.detail.data.specList.forEach(e => {
+      if (e.specName === 'images') {
+        this.imgList = e.specImage
+      }
+    })
     this.formatSku(this.goodsSpecList);
     this.promotion()
     document.title = this.skuDetail.goodsName
