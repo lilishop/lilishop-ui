@@ -16,26 +16,28 @@
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
 
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
-          size="small" show-total show-elevator show-sizer></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
+          show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
-    
+
     <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="1000">
       <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
         <FormItem label="版本名称" prop="versionName">
           <Input v-model="form.versionName" maxlength="15" clearable style="width: 40%" />
+
         </FormItem>
         <FormItem label="版本号" prop="version">
           <Input v-model="form.version" maxlength="15" clearable style="width: 40%" />
+          <span class="tips">在移动端项目->manifest.json->基础配置->应用版本名称中查看</span>
         </FormItem>
         <FormItem label="更新时间" prop="versionUpdateDate">
           <DatePicker v-model="form.versionUpdateDate" type="datetime" format="yyyy-MM-dd HH:mm:ss" clearable placeholder="请选择" style="width: 200px"></DatePicker>
         </FormItem>
         <FormItem label="强制更新">
           <RadioGroup type="button" button-style="solid" v-model="form.forceUpdate">
-            <Radio :label="true">强制更新</Radio>
-            <Radio :label="false">非强制更新</Radio>
+            <Radio :label="1">强制更新</Radio>
+            <Radio :label="0">非强制更新</Radio>
           </RadioGroup>
         </FormItem>
         <FormItem label="类型">
@@ -46,9 +48,15 @@
         </FormItem>
         <FormItem label="下载地址" prop="downloadUrl">
           <Input v-model="form.downloadUrl" maxlength="100" clearable style="width: 40%" />
+          <span class="tips" v-if="form.type == 'IOS'">
+            AppStore中App项目下载目录。可从下载App页面点击分享，拷贝链接
+          </span>
+          <span class="tips" v-else>
+            安卓该链接为应用的下载地址
+          </span>
         </FormItem>
         <FormItem class="form-item-view-el" label="更新内容" prop="content">
-             <Input v-model="form.content" :rows="6" maxlength="100" show-word-limit type="textarea" placeholder="Enter something..."  />
+          <Input v-model="form.content" :rows="6" maxlength="100" show-word-limit type="textarea" placeholder="Enter something..." />
         </FormItem>
       </Form>
       <div slot="footer">
@@ -318,7 +326,10 @@ export default {
       this.modalVisible = true;
       this.modalTitle = "修改APP版本信息";
       this.modalType = 1;
+      v.forceUpdate ? (v.forceUpdate = 1) : (v.forceUpdate = 0);
       this.form = v;
+
+      console.log(this.form);
     },
     //保存app版本信息
     saveAppVersion() {
@@ -329,7 +340,6 @@ export default {
             this.form.versionUpdateDate / 1000
           );
           this.form.versionUpdateDate = versionUpdateDate;
-
           this.form.updateTime = versionUpdateDate;
           if (this.modalType == 0) {
             // 添加 避免编辑后传入id等数据 记得删除
@@ -387,8 +397,11 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-
 .search-form {
   width: 100%;
+}
+.tips {
+  margin-left: 10px;
+  color: #999;
 }
 </style>
