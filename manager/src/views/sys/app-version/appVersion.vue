@@ -39,6 +39,12 @@
             <Radio :label="1">强制更新</Radio>
             <Radio :label="0">非强制更新</Radio>
           </RadioGroup>
+          <span class="tips" v-if="form.forceUpdate == 1">
+           强制更新即为应用中必须更新此版本。不更新则无法继续使用App
+          </span>
+          <span class="tips" v-if="form.forceUpdate == 0">
+           非强制更新为应用中推荐更新此版本。不更新还可以继续使用
+          </span>
         </FormItem>
         <FormItem label="类型">
           <RadioGroup type="button" button-style="solid" v-model="form.type">
