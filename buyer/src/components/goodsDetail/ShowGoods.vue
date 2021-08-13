@@ -138,7 +138,7 @@
 
 <script>
 import Promotion from './Promotion.vue';
-import PicZoom from 'vue-piczoom'; // 图片放大 https://github.com/826327700/vue-piczoom
+import PicZoom from 'vue-piczoom'; // 图片放大
 import { collectGoods, isCollection, receiveCoupon, cancelCollect } from '@/api/member.js';
 import { addCartGoods } from '@/api/cart.js';
 export default {
@@ -173,7 +173,6 @@ export default {
   methods: {
     select (index, value) { // 选择规格
       this.$set(this.currentSelceted, index, value);
-
       let selectedSkuId = this.goodsSpecList.find((i) => {
         let matched = true;
         let specValues = i.specValues.filter((j) => j.specName !== 'images');
@@ -200,7 +199,6 @@ export default {
       };
       this.loading = true;
       addCartGoods(params).then(res => {
-        debugger;
         this.loading = false;
         if (res.success) {
           this.$router.push({path: '/shoppingCart', query: {detail: this.skuDetail, count: this.count}});
@@ -208,7 +206,6 @@ export default {
           this.$Message.warning(res.message);
         }
       }).catch(() => {
-        console.log('catch');
         this.loading = false;
       });
     },

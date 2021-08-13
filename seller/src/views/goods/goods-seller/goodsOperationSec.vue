@@ -505,12 +505,11 @@ export default {
      * @value 参数选项值
      */
     selectParams(paramsGroup, groupIndex, params, paramsIndex, value) {
-      debugger
       if (!this.baseInfoForm.goodsParamsDTOList[groupIndex]) {
         this.baseInfoForm.goodsParamsDTOList[groupIndex] = {
-          groupId:'',
-          groupName:'',
-          goodsParamsItemDTOList:[]
+          groupId: '',
+          groupName: '',
+          goodsParamsItemDTOList: []
         }
       }
       //赋予分组id、分组名称
