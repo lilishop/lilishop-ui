@@ -158,7 +158,7 @@
           <Button type="info" :loading="uploadLoading1">证照上传</Button>
         </Upload>
         <div class="describe">
-          请压缩图片在2M以内，格式为gif，jpg，png，并确保文字清晰，以免上传或审核失败
+          请压缩图片在2M以内，身份证正反面两张照片，确保图片清晰无缺角
         </div>
         <div
           class="img-list"
@@ -299,8 +299,8 @@ export default {
     // 上传之前
     beforeUpload1 () {
       this.uploadLoading1 = true;
-      if (this.form.legalPhoto.length >= 3) {
-        this.$Message.warning('最多上传三张图片')
+      if (this.form.legalPhoto.length >= 2) {
+        this.$Message.warning('最多上传两张图片')
         return false;
       }
     },
@@ -313,8 +313,6 @@ export default {
     handleSuccess1 (res, file) {
       this.uploadLoading1 = false;
       this.form.legalPhoto.push(res.result);
-      console.log(res);
-      console.log(file);
     },
     // 上传失败
     uploadErr () {

@@ -3,59 +3,39 @@
     <Cascader
       :data="data"
       :load-data="loadData"
-      change-on-select
-      @on-visible-change="handleChangeOnSelect"
+      v-model="addr"
+      placeholder="请选择地址"
       @on-change="change"
+      style="width: 350px"
     ></Cascader>
   </div>
 </template>
 <script>
-
-import * as API_Setup from "@/api/common.js";
+import {getChildRegion} from '@/api/common.js';
 export default {
-  data() {
+  data () {
     return {
       data: [], // 地区数据
-      selected: [], // 已选地区
-      id: 0, // 默认id
-      changeOnSelect: false, // 选择时变动
+      addr: [] // 已选数据
     };
   },
-  mounted() {
-    this.init();
-  },
-
   props: ['addressId'],
+  mounted () {},
   methods: {
-    // 选择地区回调
-    change(val, selectedData) {
+    change (val, selectedData) { // 选择地区
       /**
        * @returns [regionId,region]
        */
-      this.$emit("selected", [
+      this.$emit('selected', [
         val,
-        selectedData[selectedData.length - 1].__label.split("/"),
+        selectedData[selectedData.length - 1].__label.split('/')
       ]);
     },
-    /**
-     * 动态设置change-on-select的值
-     * 当级联选择器弹窗展开时，设置change-on-select为true，即可以点选菜单选项值发生变化
-     * 当级联选择器弹窗关闭时，设置change-on-select为false，即能够设置初始值
-     */
-    handleChangeOnSelect(value) {
-      this.changeOnSelect = value;
-    },
-    // 加载地区数据
-    loadData(item, callback) {
+    loadData (item, callback) { // 加载数据
       item.loading = true;
-      API_Setup.getChildRegion(item.value).then((res) => {
+      getChildRegion(item.value).then((res) => {
         if (res.result.length <= 0) {
           item.loading = false;
-          this.selected = item;
-
-          /**
-           * 处理数据并返回
-           */
         } else {
           res.result.forEach((child) => {
             item.loading = false;
@@ -64,54 +44,138 @@ export default {
               value: child.id,
               label: child.name,
               loading: false,
-              children: [],
+              children: []
             };
 
-            if (
-              child.level == "street" ||
-              item.label == "香港特别行政区" ||
-              item.label == "澳门特别行政区"
-            ) {
+            if (child.level === 'street' || item.label === '香港特别行政区') {
               item.children.push({
                 value: child.id,
-                label: child.name,
+                label: child.name
               });
             } else {
               item.children.push(data);
             }
           });
-          this.selected = item;
           callback();
         }
       });
     },
-    // 初始化
-    init() {
-      API_Setup.getChildRegion(this.id).then((res) => {
-        let way = [];
-
-        res.result.forEach((item) => {
-          let data;
-          // 台湾省做处理
-          if (item.name == "台湾省") {
-            data = {
-              value: item.id,
-              label: item.name,
-            };
-          } else {
-            data = {
-              value: item.id,
-              label: item.name,
-              loading: false,
-              children: [],
-            };
-          }
-          way.push(data);
-        });
-        this.data = way;
+    async init () { // 初始化地图数据
+      let data = await getChildRegion(0);
+      let arr = [];
+      data.result.forEach((item) => {
+        let obj;
+        // 台湾省做处理
+        if (item.name === '台湾省') {
+          obj = {
+            value: item.id,
+            label: item.name
+          };
+        } else {
+          obj = {
+            value: item.id,
+            label: item.name,
+            loading: false,
+            children: []
+          };
+        }
+        arr.push(obj);
       });
+      this.data = arr;
     },
+    async reviewData () {
+      // 数据回显
+      let addr = JSON.parse(JSON.stringify(this.addressId.split(',')));
+      let length = addr.length;
+      let data = await getChildRegion(0);
+      let arr0 = [];
+      let arr1 = [];
+      let arr2 = [];
+      // 第一级数据
+      data.result.forEach((item) => {
+        let obj;
+        // 台湾省做处理
+        if (item.name === '台湾省') {
+          obj = {
+            value: item.id,
+            label: item.name
+          };
+        } else {
+          obj = {
+            value: item.id,
+            label: item.name,
+            loading: false,
+            children: []
+          };
+        }
+        arr0.push(obj);
+      });
+      // 根据选择的数据来加载数据列表
+      if (length > 0) {
+        let children = await getChildRegion(addr[0]);
+        children = this.handleData(children.result);
+        arr0.forEach((e) => {
+          if (e.value === addr[0]) {
+            e.children = arr1 = children;
+          }
+        });
+      }
+      if (length > 1) {
+        let children = await getChildRegion(addr[1]);
+        children = this.handleData(children.result);
+        arr1.forEach((e) => {
+          if (e.value === addr[1]) {
+            e.children = arr2 = children;
+          }
+        });
+      }
+      if (length > 2) {
+        let children = await getChildRegion(addr[2]);
+        children = this.handleData(children.result);
+        arr2.forEach((e) => {
+          if (e.value === addr[2]) {
+            e.children = children;
+          }
+        });
+      }
+      this.data = arr0;
+      this.addr = addr;
+    },
+    handleData (data) {
+      // 处理接口数据
+      let item = [];
+      data.forEach((child) => {
+        let obj = {
+          value: child.id,
+          label: child.name,
+          loading: false,
+          children: []
+        };
+
+        if (child.level === 'street' || item.label === '香港特别行政区') {
+          item.push({
+            value: child.id,
+            label: child.name
+          });
+        } else {
+          item.push(obj);
+        }
+      });
+      return item;
+    }
   },
+  watch: {
+    addressId: {
+      handler: function (v) {
+        if (v) {
+          this.reviewData();
+        } else {
+          this.init();
+        }
+      },
+      immediate: true
+    }
+  }
 };
 </script>
 <style scoped lang="scss">

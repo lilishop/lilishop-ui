@@ -129,7 +129,7 @@
           <p class="item">
             <span class="label">身份证照片：</span>
             <span class="info">
-              <img style="height: 100px;width: 90px" :src="storeInfo.legalPhoto">
+              <img style="height: 100px;width: 100px" class="mr_10" v-for="item in storeInfo.legalPhoto" :src="item" :key="item">
             </span>
           </p>
           <p class="item">
@@ -144,7 +144,7 @@
           <p class="item">
             <span class="label">营业执照电子版：</span>
             <span class="info">
-              <img style="height: 100px;width: 90px" :src="storeInfo.licencePhoto">
+              <img style="height: 100px;width: 100px" :src="storeInfo.licencePhoto">
             </span>
           </p>
 
@@ -846,6 +846,7 @@
           //因switch开关需要用到true或者false 所以进行一次格式化
           this.storeInfo.storeDisable = this.storeInfo.storeDisable === "OPEN" ? true : false
           this.checkAllGroup = this.storeInfo.goodsManagementCategory.split(",");
+          this.storeInfo.legalPhoto = this.storeInfo.legalPhoto.split(",");
         });
       },
       //店铺状态改变事件
