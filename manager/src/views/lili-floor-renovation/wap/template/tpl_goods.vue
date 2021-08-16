@@ -1,32 +1,15 @@
 <template>
   <div class="layout">
     <div class="goods-cell-title">
-      <div
-        class="goods-item-title"
-        :class="{ selected: selected.index == index }"
-        @click="handleClickTitle(title, index)"
-        v-for="(title, index) in res.list[0].titleWay"
-        :key="index"
-      >
+      <div class="goods-item-title" :class="{ selected: selected.index == index }" @click="handleClickTitle(title, index)" v-for="(title, index) in res.list[0].titleWay" :key="index">
         <h4>{{ title.title }}</h4>
         <div>{{ title.desc }}</div>
       </div>
     </div>
     <div class="goods-list">
-      <div
-        v-if="selected.val == item.type"
-        class="goods-item"
-        v-for="(item, item_index) in res.list[0].listWay"
-        :key="item_index"
-      >
+      <div v-if="selected.val == item.type" class="goods-item" v-for="(item, item_index) in res.list[0].listWay" :key="item_index">
         <div class="goods-img">
-          <Icon
-            size="20"
-            color="#e1251b"
-            @click="closeGoods(item, item_index)"
-            class="goods-icon"
-            type="ios-close-circle"
-          />
+          <Icon size="20" color="#e1251b" @click="closeGoods(item, item_index)" class="goods-icon" type="ios-close-circle" />
           <img :src="item.img" alt />
         </div>
         <div class="goods-desc">
@@ -45,17 +28,29 @@
 export default {
   data() {
     return {
-      selected: { // 已选数据
+      selected: {
+        // 已选数据
         index: 0,
-        val: "精选",
+        val: "",
       },
     };
   },
   props: ["res"],
+  watch: {
+    res: {
+      handler(val) {
+        // 监听父级的值 如果有值将值赋给selected
+        if (val) {
+          this.selected.val = this.res.list[0].listWay[0].type;
+        }
+      },
+      immediate: true,
+    },
+  },
   methods: {
     // 删除商品
     closeGoods(val, index) {
-      this.res.list[0].listWay.splice(index,1)
+      this.res.list[0].listWay.splice(index, 1);
     },
     // 切换商品列表
     handleClickTitle(val, index) {
