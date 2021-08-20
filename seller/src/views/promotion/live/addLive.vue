@@ -43,8 +43,8 @@
             </template>
 
           </div>
-          <Upload v-if="liveForm.feedsImg.length ==0" ref="upload" :show-upload-list="false" :on-success="handleFeedsImgSuccess" :default-file-list="defaultImgList" :format="['jpg','jpeg','png']"
-            :on-format-error="handleFormatError" :max-size="1024" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
+          <Upload v-if="liveForm.feedsImg.length ==0" ref="upload" :show-upload-list="false" :on-success="handleFeedsImgSuccess" :format="['jpg','jpeg','png']" :on-format-error="handleFormatError"
+            :max-size="1024" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
             <div style="width: 58px;height:58px;line-height: 58px;">
               <Icon type="ios-camera" size="20"></Icon>
             </div>
@@ -66,8 +66,8 @@
               </div>
             </template>
           </div>
-          <Upload v-if="liveForm.coverImg.length ==0" ref="upload" :show-upload-list="false" :on-success="handleCoverImgSuccess" :default-file-list="defaultImgList" :format="['jpg','jpeg','png']"
-            :on-format-error="handleFormatError" :max-size="1024" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
+          <Upload v-if="liveForm.coverImg.length ==0" ref="upload" :show-upload-list="false" :on-success="handleCoverImgSuccess" :format="['jpg','jpeg','png']" :on-format-error="handleFormatError"
+            :max-size="1024" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
             <div style="width: 58px;height:58px;line-height: 58px;">
               <Icon type="ios-camera" size="20"></Icon>
             </div>
@@ -87,8 +87,8 @@
               </div>
             </template>
           </div>
-          <Upload v-if="liveForm.shareImg.length ==0" ref="upload" :show-upload-list="false" :on-success="handleShareImgSuccess" :default-file-list="defaultImgList" :format="['jpg','jpeg','png']"
-            :on-format-error="handleFormatError" :max-size="1024" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
+          <Upload v-if="liveForm.shareImg.length ==0" ref="upload" :show-upload-list="false" :on-success="handleShareImgSuccess" :format="['jpg','jpeg','png']" :on-format-error="handleFormatError"
+            :max-size="1024" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
             <div style="width: 58px;height:58px;line-height: 58px;">
               <Icon type="ios-camera" size="20"></Icon>
             </div>
@@ -235,7 +235,7 @@ export default {
           width: 250,
         },
       ],
-      liveData: [] //直播商品集合
+      liveData: [], //直播商品集合
     };
   },
   mounted() {
@@ -496,7 +496,7 @@ export default {
             this.liveForm.commodityList = JSON.stringify(
               this.liveForm.commodityList
             );
-            delete this.liveForm.updateTime
+            delete this.liveForm.updateTime;
             // 将当前直播间修改
             editLive(this.liveForm).then((res) => {
               if (res.success) {

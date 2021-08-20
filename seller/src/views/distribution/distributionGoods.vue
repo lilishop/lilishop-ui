@@ -12,7 +12,7 @@
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加</Button>
       </Row>
-      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" @on-selection-change="changeSelect">
+      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" >
         <!-- 商品栏目格式化 -->
         <template slot="goodsSlot" slot-scope="{row}">
           <div style="margin-top: 5px;height: 70px; display: flex;">
@@ -107,11 +107,6 @@ export default {
           }],
       },
       columns: [ // 表格表头
-        {
-          type: "selection",
-          width: 60,
-          align: "center"
-        },
         {
           title: "商品名称",
           key: "goodsName",

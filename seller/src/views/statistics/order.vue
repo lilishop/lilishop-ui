@@ -149,8 +149,8 @@
         <h4>订退单统计</h4>
         <div class="breadcrumb" style="margin-bottom:20px;">
           <RadioGroup v-model="orderOrRefund" type="button" size="small" button-style="solid">
-            <Radio :label="true">订单</Radio>
-            <Radio :label="false">退单</Radio>
+            <Radio :label="1">订单</Radio>
+            <Radio :label="0">退单</Radio>
           </RadioGroup>
         </div>
         <div>
@@ -175,8 +175,8 @@ export default {
 
   data() {
     return {
-      orderOrRefund: true, // 订单还是退单
-      total: "0", // 订单总数
+      orderOrRefund: 1, // 订单还是退单
+      total:0, // 订单总数
       // 订单状态
       orderStatusList: {
         UNDELIVERED: "待发货",
@@ -457,15 +457,16 @@ export default {
       },
       deep: true,
     },
-    orderOrRefund:{ // 订单还是退单
-      handler (val) {
-        if (val) {
+    orderOrRefund: {
+      // 订单还是退单
+      handler(val) {
+        if (val == 1) {
           this.getOrderList();
         } else {
           this.getOrderRefundList();
         }
-      }
-    }
+      },
+    },
   },
   methods: {
     // 订单图

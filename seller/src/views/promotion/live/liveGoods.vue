@@ -14,7 +14,7 @@
 
       <div>
         <Tabs v-model="params.auditStatus">
-          <TabPane v-for="(item,index) in liveTabWay" :key="index" :label="item.label" :name="item.type">
+          <TabPane v-for="(item,index) in liveTabWay" :key="index" :label="item.label" :name="item.type+''">
           </TabPane>
         </Tabs>
       </div>
@@ -63,7 +63,7 @@
           <template slot-scope="{ row,index }" slot="action">
             <Button v-if="params.auditStatus == 99" type="primary" @click="()=>{liveGoodsData.splice(index,1)}">删除</Button>
             <Button v-if="params.auditStatus != 99 && !reviewed" ghost type="primary" @click="()=>{$router.push({path:'/goods-operation-edit',query:{id:row.goodsId}})}">查看</Button>
-            <Button v-if="reviewed" :type="row.___selected ? 'primary' : ''" @click="selectedLiveGoods(row,index)">{{row.___selected ? '已':''}}选择</Button>
+            <Button v-if="reviewed" :type="row.___selected ? 'primary' : 'default'" @click="selectedLiveGoods(row,index)">{{row.___selected ? '已':''}}选择</Button>
           </template>
         </Table>
         <div class="flex">
@@ -90,7 +90,7 @@ export default {
   },
   data() {
     return {
-      goodsTotal: "", //商品总数
+      goodsTotal: 0, //商品总数
       saveGoodsLoading: false, //保存商品加载
       tableLoading: false, //表格是否加载
       params: {
@@ -209,7 +209,6 @@ export default {
      * 回调参数补充
      */
     selectedLiveGoods(val, index) {
-
       this.$emit("selectedGoods", val);
     },
     /**

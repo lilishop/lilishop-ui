@@ -64,7 +64,7 @@ export default {
   },
   props: {
     value: { // 默认值
-      type: Object
+      type:null
     },
     draggable: { // 是否可拖拽改变位置
       type: Boolean,

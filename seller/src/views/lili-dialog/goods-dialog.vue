@@ -4,8 +4,8 @@
       <div class="query-wrapper">
         <div class="query-item">
           <div>搜索范围</div>
-          <Input placeholder="商品名称" @on-clear="goodsData=[]; goodsParams.goodsName='';  getQueryGoodsList()" @on-enter="()=>{goodsData=[]; getQueryGoodsList();}" clearable
-            style="width: 150px" v-model="goodsParams.goodsName" />
+          <Input placeholder="商品名称" @on-clear="goodsData=[]; goodsParams.goodsName='';  getQueryGoodsList()" @on-enter="()=>{goodsData=[]; getQueryGoodsList();}" clearable style="width: 150px"
+            v-model="goodsParams.goodsName" />
         </div>
         <div class="query-item">
           <Cascader v-model="category" placeholder="请选择商品分类" style="width: 150px" :data="cateList"></Cascader>
@@ -44,16 +44,19 @@ export default {
   props: {
     selectedWay: {
       type: Array,
-      default: new Array()
-    }
+      default: () => {
+        return [];
+      },
+    },
   },
-  data () {
+  data() {
     return {
       type: "multiple", //单选或者多选 single  multiple
 
       cateList: [], // 商品分类列表
       total: "", // 商品总数
-      goodsParams: { // 请求商品列表参数
+      goodsParams: {
+        // 请求商品列表参数
         pageNumber: 1,
         pageSize: 18,
         order: "desc",
@@ -78,7 +81,7 @@ export default {
         this.$emit("selected", this.selectedWay);
       },
       deep: true,
-      immediate: true
+      immediate: true,
     },
     "goodsParams.categoryPath": {
       handler: function () {
@@ -92,7 +95,8 @@ export default {
     this.init();
   },
   methods: {
-    handleReachBottom() { // 页面触底触发加载
+    handleReachBottom() {
+      // 页面触底触发加载
       setTimeout(() => {
         if (
           this.goodsParams.pageNumber * this.goodsParams.pageSize <=
@@ -103,31 +107,32 @@ export default {
         }
       }, 1500);
     },
-    getQueryGoodsList() { // 根据商品分类筛选商品
+    getQueryGoodsList() {
+      // 根据商品分类筛选商品
       API_Goods.getGoodsSkuData(this.goodsParams).then((res) => {
         this.initGoods(res);
       });
     },
 
-    initGoods(res) { // 获取商品列表
-      if (res.result.records.length !=0) {
+    initGoods(res) {
+      // 获取商品列表
+      if (res.result.records.length != 0) {
         let data = res.result.records;
         data.forEach((item) => {
           item.selected = false;
           item.___type = "goods"; //设置为goods让pc wap知道标识
 
-          this.selectedWay.forEach(e => {
+          this.selectedWay.forEach((e) => {
             if (e.id === item.id) {
-              item.selected = true 
+              item.selected = true;
             }
-          })
+          });
         });
         /**
          * 解决数据请求中，滚动栏会一直上下跳动
          */
         this.total = res.result.total;
         this.goodsData.push(...res.result.records);
-
       } else {
         this.empty = true;
       }
@@ -206,9 +211,9 @@ export default {
         this.selectedWay.push(val);
       } else {
         val.selected = false;
-        for (let i = 0; i<this.selectedWay.length; i++ ) {
-          if (this.selectedWay[i].id===val.id) {
-            this.selectedWay.splice(i,1)
+        for (let i = 0; i < this.selectedWay.length; i++) {
+          if (this.selectedWay[i].id === val.id) {
+            this.selectedWay.splice(i, 1);
             break;
           }
         }

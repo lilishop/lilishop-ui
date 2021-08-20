@@ -40,7 +40,6 @@
           ref="table"
           class="mt_10"
           sortable="custom"
-          @on-sort-change="changeSort"
           @on-selection-change="changeSelect"
         >
         </Table>

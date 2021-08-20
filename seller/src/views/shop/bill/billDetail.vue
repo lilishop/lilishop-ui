@@ -20,18 +20,13 @@
           bill.billStatus | unixSellerBillStatus
         }}</span>
 
-        <Button
-          v-if="bill.billStatus == 'OUT'"
-          size="mini"
-          @click="reconciliation()"
-          type="primary"
-          >对账</Button
-        >
+        <Button v-if="bill.billStatus == 'OUT'" size="mini" @click="reconciliation()" type="primary">对账</Button>
       </div>
       <table>
         <tbody>
           <tr v-for="(item,index) in data" :key="index">
-            <td>{{item.name}}</td><td>{{item.value}}</td>
+            <td>{{item.name}}</td>
+            <td>{{item.value}}</td>
           </tr>
         </tbody>
       </table>
@@ -58,12 +53,12 @@
             <p>退单产生退还佣金金额</p>
             <p class="increase-color">+{{bill.refundCommissionPrice || 0  | unitPrice('￥')}}</p>
           </span>
-          
+
           <span>
             <p>退单分销返现返还</p>
             <p class="increase-color">+{{bill.distributionRefundCommission || 0  | unitPrice('￥')}}</p>
           </span>
-          
+
           <span>
             <p>退单平台优惠券返还</p>
             <p class="increase-color">+{{bill.siteCouponRefundCommission || 0  | unitPrice('￥')}}</p>
@@ -82,67 +77,25 @@
     <Card class="mt_10">
       <Tabs active-key="tab" type="card" @on-click="clickTabs">
         <Tab-pane label="订单列表" name="order">
-            <Table
-              :loading="loading"
-              border
-              :columns="orderColumns"
-              :data="orderData"
-              ref="table"
-            ></Table>
-            <Row type="flex" justify="end" class="mt_10">
-              <Page
-                :current="orderParam.pageNumber"
-                :total="orderTotal"
-                :page-size="orderParam.pageSize"
-                @on-change="orderChangePage"
-                @on-page-size-change="orderChangePageSize"
-                size="small"
-                show-total
-                show-elevator
-              ></Page>
-            </Row>
+          <Table :loading="loading" border :columns="orderColumns" :data="orderData" ref="table"></Table>
+          <Row type="flex" justify="end" class="mt_10">
+            <Page :current="orderParam.pageNumber" :total="orderTotal" :page-size="orderParam.pageSize" @on-change="orderChangePage" @on-page-size-change="orderChangePageSize" size="small" show-total
+              show-elevator></Page>
+          </Row>
         </Tab-pane>
         <Tab-pane label="退单列表" name="refund">
-            <Table
-              :loading="loading"
-              border
-              :columns="refundColumns"
-              :data="refundData"
-              ref="table"
-            ></Table>
-            <Row type="flex" justify="end" class="mt_10">
-              <Page
-                :current="refundParam.pageNumber"
-                :total="refundTotal"
-                :page-size="refundParam.pageSize"
-                @on-change="refundChangePage"
-                @on-page-size-change="refundChangePageSize"
-                size="small"
-                show-total
-                show-elevator
-              ></Page>
-            </Row>
+          <Table :loading="loading" border :columns="refundColumns" :data="refundData" ref="table"></Table>
+          <Row type="flex" justify="end" class="mt_10">
+            <Page :current="refundParam.pageNumber" :total="refundTotal" :page-size="refundParam.pageSize" @on-change="refundChangePage" @on-page-size-change="refundChangePageSize" size="small"
+              show-total show-elevator></Page>
+          </Row>
         </Tab-pane>
         <Tab-pane label="分销费用列表" name="distribution">
-            <Table
-              :loading="loading"
-              border
-              :columns="distributionColumns"
-              :data="distributionData"
-              ref="table"
-            ></Table>
-            <Row type="flex" justify="end" class="mt_10">
-              <Page
-                :current="distributionParam.pageNumber"
-                :total="distributionTotal"
-                :page-size="distributionParam.pageSize"
-                @on-change="distributionChangePage"
-                @on-page-size-change="distributionChangePageSize"
-                size="small"
-                show-total
-                show-elevator
-              ></Page>
-            </Row>
+          <Table :loading="loading" border :columns="distributionColumns" :data="distributionData" ref="table"></Table>
+          <Row type="flex" justify="end" class="mt_10">
+            <Page :current="distributionParam.pageNumber" :total="distributionTotal" :page-size="distributionParam.pageSize" @on-change="distributionChangePage"
+              @on-page-size-change="distributionChangePageSize" size="small" show-total show-elevator></Page>
+          </Row>
         </Tab-pane>
       </Tabs>
     </Card>
@@ -155,6 +108,7 @@ export default {
   name: "bill-detail",
   data() {
     return {
+      loading: true,
       columns: [
         {
           title: "项目",
@@ -166,7 +120,8 @@ export default {
           key: "value",
         },
       ],
-      data: [ // 账单数据
+      data: [
+        // 账单数据
         {
           name: "计算中",
           value: 0,
@@ -199,7 +154,7 @@ export default {
         {
           name: "计算公式",
           value: 0,
-        }
+        },
       ],
       id: "", // 账单id
       bill: {}, // 商家信息
@@ -236,10 +191,13 @@ export default {
             if (params.row.kanjiaSettlementPrice) {
               return h(
                 "div",
-                this.$options.filters.unitPrice(params.row.kanjiaSettlementPrice, "￥")
+                this.$options.filters.unitPrice(
+                  params.row.kanjiaSettlementPrice,
+                  "￥"
+                )
               );
             } else {
-              return h('div','￥0.00')
+              return h("div", "￥0.00");
             }
           },
         },
@@ -247,13 +205,16 @@ export default {
           title: "积分商品结算价格",
           key: "pointSettlementPrice",
           render: (h, params) => {
-            if (params.row.pointSettlementPrice){
+            if (params.row.pointSettlementPrice) {
               return h(
                 "div",
-                this.$options.filters.unitPrice(params.row.pointSettlementPrice, "￥")
+                this.$options.filters.unitPrice(
+                  params.row.pointSettlementPrice,
+                  "￥"
+                )
               );
             } else {
-              return h('div','￥0.00')
+              return h("div", "￥0.00");
             }
           },
         },
@@ -271,36 +232,34 @@ export default {
           title: "平台优惠券",
           key: "siteCouponPrice",
           render: (h, params) => {
-            if(params.row.siteCouponPrice == null){
+            if (params.row.siteCouponPrice == null) {
+              return h("div", "-");
+            } else {
               return h(
                 "div",
-                "-"
-              );
-            }else{
-              return h(
-                "div",
-                this.$options.filters.unitPrice(params.row.siteCouponPrice, "￥")
+                this.$options.filters.unitPrice(
+                  params.row.siteCouponPrice,
+                  "￥"
+                )
               );
             }
-
           },
         },
         {
           title: "分销金额",
           key: "distributionRebate",
           render: (h, params) => {
-            if(params.row.distributionRebate == null){
+            if (params.row.distributionRebate == null) {
+              return h("div", "-");
+            } else {
               return h(
                 "div",
-                "-"
-              );
-            }else{
-              return h(
-                "div",
-                this.$options.filters.unitPrice(params.row.distributionRebate, "￥")
+                this.$options.filters.unitPrice(
+                  params.row.distributionRebate,
+                  "￥"
+                )
               );
             }
-
           },
         },
         {
@@ -313,7 +272,6 @@ export default {
             );
           },
         },
-
       ],
       orderData: [], // 订单列表
       orderTotal: 0, // 订单数量
@@ -329,17 +287,17 @@ export default {
         {
           title: "退款时间",
           key: "createTime",
-          minWidth: 120
+          minWidth: 120,
         },
         {
           title: "退款流水编号",
           key: "sn",
-          minWidth: 130
+          minWidth: 130,
         },
         {
           title: "订单编号",
           key: "sn",
-          minWidth: 120
+          minWidth: 120,
         },
         {
           title: "退款金额",
@@ -357,16 +315,16 @@ export default {
           key: "commissionPrice",
           minWidth: 120,
           render: (h, params) => {
-            if(params.row.commissionPrice){
+            if (params.row.commissionPrice) {
               return h(
                 "div",
-                this.$options.filters.unitPrice(params.row.commissionPrice, "￥")
+                this.$options.filters.unitPrice(
+                  params.row.commissionPrice,
+                  "￥"
+                )
               );
-            }else{
-              return h(
-                "div",
-                this.$options.filters.unitPrice(0, "￥")
-              );
+            } else {
+              return h("div", this.$options.filters.unitPrice(0, "￥"));
             }
           },
         },
@@ -374,25 +332,24 @@ export default {
         {
           title: "退还平台优惠券",
           key: "siteCouponCommission",
-          minWidth: 140
+          minWidth: 140,
         },
         {
           title: "退还分销",
           key: "distributionRebate",
           minWidth: 120,
           render: (h, params) => {
-            if(params.row.distributionRebate == null){
+            if (params.row.distributionRebate == null) {
+              return h("div", "-");
+            } else {
               return h(
                 "div",
-                "-"
-              );
-            }else{
-              return h(
-                "div",
-                this.$options.filters.unitPrice(params.row.distributionRebate, "￥")
+                this.$options.filters.unitPrice(
+                  params.row.distributionRebate,
+                  "￥"
+                )
               );
             }
-
           },
         },
 
@@ -401,18 +358,14 @@ export default {
           key: "billPrice",
           minWidth: 120,
           render: (h, params) => {
-            if(params.row.billPrice == null){
-              return h(
-                "div",
-                "-"
-              );
-            }else{
+            if (params.row.billPrice == null) {
+              return h("div", "-");
+            } else {
               return h(
                 "div",
                 this.$options.filters.unitPrice(params.row.billPrice, "￥")
               );
             }
-
           },
         },
       ],
@@ -429,18 +382,18 @@ export default {
         {
           title: "订单编号",
           key: "sn",
-          minWidth: 120
+          minWidth: 120,
         },
         {
           title: "交易金额",
           key: "finalPrice",
-          minWidth: 120
+          minWidth: 120,
         },
         {
           title: "商品名称",
           key: "goodsName",
           minWidth: 120,
-          tooltip: true
+          tooltip: true,
         },
         {
           title: "规格",
@@ -456,7 +409,7 @@ export default {
         {
           title: "店铺名称",
           key: "storeName",
-          minWidth: 120
+          minWidth: 120,
         },
 
         {
@@ -464,53 +417,55 @@ export default {
           key: "distributionRebate",
           minWidth: 120,
           render: (h, params) => {
-           if(params.row.flowType === "退款" ){
-             return h(
-               "div",
-               this.$options.filters.unitPrice("-"+params.row.distributionRebate, "￥")
-             );
-           }else{
-             if(params.row.distributionRebate){
-               return h(
-                 "div",
-                 this.$options.filters.unitPrice(params.row.distributionRebate, "￥")
-               );
-             }else{
-               return h(
-                 "div",
-                 this.$options.filters.unitPrice(0, "￥")
-               );
-             }
-           }
+            if (params.row.flowType === "退款") {
+              return h(
+                "div",
+                this.$options.filters.unitPrice(
+                  "-" + params.row.distributionRebate,
+                  "￥"
+                )
+              );
+            } else {
+              if (params.row.distributionRebate) {
+                return h(
+                  "div",
+                  this.$options.filters.unitPrice(
+                    params.row.distributionRebate,
+                    "￥"
+                  )
+                );
+              } else {
+                return h("div", this.$options.filters.unitPrice(0, "￥"));
+              }
+            }
           },
         },
         {
           title: "时间",
           key: "createTime",
-          minWidth: 120
+          minWidth: 120,
         },
       ],
       distributionData: [], // 分销数据
       distributionTotal: 0, // 分销总数
-
     };
   },
   watch: {
-    '$route.query.id': function (val) {
+    "$route.query.id": function (val) {
       this.id = val;
       this.getBill();
-    }
+    },
   },
   methods: {
     clickTabs(v) {
       if (v == "order") {
         this.orderParam.flowType = "PAY";
-        this.getOrderList()
-      } else if(v === "refund"){
+        this.getOrderList();
+      } else if (v === "refund") {
         this.orderParam.flowType = "REFUND";
-        this.getRefundList()
-      }else{
-        this.getDistributionList()
+        this.getRefundList();
+      } else {
+        this.getDistributionList();
       }
     },
     //核对结算单
@@ -528,7 +483,7 @@ export default {
               this.init();
             }
           });
-        }
+        },
       });
     },
 
@@ -539,15 +494,16 @@ export default {
     //订单列表部分
     orderChangePage(v) {
       this.orderParam.pageNumber = v;
-      this.getOrderList()
+      this.getOrderList();
     },
     orderChangePageSize(v) {
       this.orderParam.pageSize = v;
-      this.getOrderList()
+      this.getOrderList();
     },
-    getOrderList(){
-      API_Shop.getSellerFlow(this.id,this.orderParam).then((res) => {
+    getOrderList() {
+      API_Shop.getSellerFlow(this.id, this.orderParam).then((res) => {
         if (res.success) {
+          this.loading = false;
           this.orderData = res.result.records;
           this.orderTotal = res.result.total;
         }
@@ -556,11 +512,11 @@ export default {
     //退单部分
     refundChangePage(v) {
       this.refundParam.pageNumber = v;
-      this.getRefundList()
+      this.getRefundList();
     },
     refundChangePageSize(v) {
       this.refundParam.pageSize = v;
-      this.getRefundList()
+      this.getRefundList();
     },
     getRefundList() {
       API_Shop.getSellerFlow(this.id, this.refundParam).then((res) => {
@@ -574,23 +530,25 @@ export default {
     //分销费用列表
     distributionChangePage(v) {
       this.distributionParam.pageNumber = v;
-      this.getDistributionList()
+      this.getDistributionList();
     },
     distributionChangePageSize(v) {
       this.distributionParam.pageSize = v;
-      this.getDistributionList()
+      this.getDistributionList();
     },
     getDistributionList() {
-      API_Shop.getDistributionFlow(this.id, this.distributionParam).then((res) => {
-        this.loading = false;
-        if (res.result) {
-          this.distributionData = res.result.records;
-          this.distributionTotal = res.result.total;
+      API_Shop.getDistributionFlow(this.id, this.distributionParam).then(
+        (res) => {
+          this.loading = false;
+          if (res.result) {
+            this.distributionData = res.result.records;
+            this.distributionTotal = res.result.total;
+          }
         }
-      });
+      );
     },
     //获取结算单详细
-    getBill(){
+    getBill() {
       API_Shop.getBillDetail(this.id).then((res) => {
         if (res.success) {
           this.bill = res.result;
@@ -623,22 +581,27 @@ export default {
       this.data[5].value = bill.payTime === null ? "未付款" : bill.payTime;
 
       this.data[6].name = "订单付款总金额";
-      this.data[6].value = filters.unitPrice(bill.orderPrice?bill.orderPrice:0, "¥");
+      this.data[6].value = filters.unitPrice(
+        bill.orderPrice ? bill.orderPrice : 0,
+        "¥"
+      );
       this.data[7].name = "结算金额";
-      this.data[7].value = filters.unitPrice(bill.billPrice?bill.billPrice:0, "¥");
+      this.data[7].value = filters.unitPrice(
+        bill.billPrice ? bill.billPrice : 0,
+        "¥"
+      );
     },
-
   },
   mounted() {
     this.init();
   },
   // 如果是从详情页返回列表页，修改列表页keepAlive为true，确保不刷新页面
-  beforeRouteLeave(to, from, next){
-    if(to.name === 'accountStatementBill' || to.name === 'storeBill') {
-      to.meta.keepAlive = true
+  beforeRouteLeave(to, from, next) {
+    if (to.name === "accountStatementBill" || to.name === "storeBill") {
+      to.meta.keepAlive = true;
     }
-    next()
-  }
+    next();
+  },
 };
 </script>
 
@@ -651,7 +614,7 @@ export default {
     margin: 15px 0;
   }
 }
-.page{
+.page {
   margin-top: 10px;
 }
 .tips-status {
@@ -665,33 +628,32 @@ export default {
     color: $theme_color;
   }
 }
-table{
+table {
   font-size: 14px;
   margin-left: 20px;
-  tr{
+  tr {
     height: 40px;
     padding: 10px;
-    td:nth-child(1){
+    td:nth-child(1) {
       width: 120px;
     }
   }
 }
-.bill-detail-price{
+.bill-detail-price {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   padding: 10px;
-  >span{
-    
+  > span {
     font-size: 14px;
     text-align: center;
     width: 200px;
     margin-bottom: 10px;
   }
-  .theme_color{
+  .theme_color {
     color: $theme_color;
   }
-  .increase-color{
+  .increase-color {
     color: green;
   }
 }

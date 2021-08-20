@@ -145,7 +145,7 @@
         </TabPane>
       </Tabs>
     </Card>
-    <multiple-region ref="region" @selected="handleSelect" @closed="handleClose">
+    <multiple-region ref="region" @selected="handleSelect" >
 
     </multiple-region>
 

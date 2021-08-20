@@ -118,6 +118,8 @@ export default {
   name: 'full-cut',
   data() {
     return {
+      total:0,
+      selectDate:[],
       loading: false, // 表单加载状态
       searchForm: { // 列表请求参数
         pageNumber: 1,

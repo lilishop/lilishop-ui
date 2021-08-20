@@ -6,7 +6,7 @@ import "./styles/theme.less";
 
 import "core-js/stable";
 // import "regenerator-runtime/runtime";
-import vueQr from 'vue-qr'
+import vueQr from "vue-qr";
 
 import App from "./App";
 import { router } from "./router/index";
@@ -43,7 +43,7 @@ Vue.use(ViewUI, {
 });
 
 Vue.use(VueClipboard);
-Vue.component(vueQr)
+Vue.component("vue-qr", vueQr); //此处将vue-qr添加为全局组件
 
 // 挂载全局使用的方法
 Vue.prototype.getRequest = getRequest;
@@ -56,13 +56,18 @@ Vue.prototype.setStore = setStore;
 Vue.prototype.getStore = getStore;
 Vue.prototype.removeStore = removeStore;
 Vue.prototype.md5 = md5;
-const buyerUrlPC = 'https://pc-b2b2c.pickmall.cn' // 跳转买家端地址 pc端
-const buyerUrlWap = 'https://m-b2b2c.pickmall.cn' // 跳转买家端地址 wap端
-Vue.prototype.linkTo = function (goodsId, skuId) {  // 跳转买家端商品
-  window.open(`${buyerUrlPC}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`, '_blank')
+const buyerUrlPC = "https://pc-b2b2c.pickmall.cn"; // 跳转买家端地址 pc端
+const buyerUrlWap = "https://m-b2b2c.pickmall.cn"; // 跳转买家端地址 wap端
+Vue.prototype.linkTo = function(goodsId, skuId) {
+  // 跳转买家端商品
+  window.open(
+    `${buyerUrlPC}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`,
+    "_blank"
+  );
 };
-Vue.prototype.wapLinkTo = function (goodsId, skuId) { // app端二维码
-  return `${buyerUrlWap}/pages/product/goods?id=${skuId}&goodsId=${goodsId}`
+Vue.prototype.wapLinkTo = function(goodsId, skuId) {
+  // app端二维码
+  return `${buyerUrlWap}/pages/product/goods?id=${skuId}&goodsId=${goodsId}`;
 };
 
 Array.prototype.remove = function(from, to) {
