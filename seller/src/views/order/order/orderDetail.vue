@@ -111,7 +111,7 @@
               <div class="div-item-right">
                 {{ orderInfo.receipt.receiptStatus == 0 ? "未开" : "已开" }}
               </div>
-            </div>  
+            </div>
           </template>
         </Col>
         <Col span="12">
@@ -619,13 +619,13 @@ export default {
           key: "unitPrice",
           minWidth: 100,
           render: (h, params) => {
-            if (!params.row.priceDetailDTO.unitPrice) {
+            if (!params.row.unitPrice) {
               return h("div", this.$options.filters.unitPrice(0, "￥"));
             }
             return h(
               "div",
               this.$options.filters.unitPrice(
-                params.row.priceDetailDTO.unitPrice,
+                params.row.unitPrice,
                 "￥"
               )
             );
