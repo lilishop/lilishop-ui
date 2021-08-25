@@ -22,7 +22,7 @@
             v-for="(tab, tabIndex) in goodsList"
             :key="tabIndex"
             :label="tab.hour"
-            :name="tabIndex"
+            :name="tabIndex + ''"
           >
             <Table
               :loading="loading"

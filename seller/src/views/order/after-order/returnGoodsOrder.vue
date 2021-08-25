@@ -156,6 +156,7 @@
           },
           {
             title: "状态",
+            align: "center",
             key: "serviceStatus",
             width: 200,
             render: (h, params) => {
@@ -189,6 +190,7 @@
             title: "操作",
             key: "action",
             align: "center",
+            fixed: 'right',
             width: 120,
             render: (h, params) => {
               return h("div", [

@@ -4,11 +4,10 @@
       :data="data"
       :load-data="loadData"
       change-on-select
-      v-model="dd"
       @on-visible-change="handleChangeOnSelect"
       @on-change="change"
     ></Cascader>
-    {{ dd }}
+  
   </div>
 </template>
 <script>
@@ -17,6 +16,7 @@ import * as API_Setup from "@/api/common.js";
 export default {
   data() {
     return {
+      dd:"",
       data: [], // 地区数据
       selected: [], // 已选地区
       changeOnSelect: false, // 选择时的变化

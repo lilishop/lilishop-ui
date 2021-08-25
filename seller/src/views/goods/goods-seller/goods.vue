@@ -55,6 +55,7 @@
               </div>
               <Poptip trigger="hover" title="扫码在手机中查看" transfer>
                 <div slot="content">
+                  <!-- <vueQr>123</vueQr> -->
                   <vue-qr :text="wapLinkTo(row.id,row.skuId)" :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
                 </div>
                 <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
@@ -73,7 +74,7 @@
     <Modal title="更新库存" v-model="updateStockModalVisible" :mask-closable="false" :width="500">
       <Tabs value="updateStock">
         <TabPane label="手动规格更新" name="updateStock">
-          <Table class="mt_10" :columns="updateStockColumns" :data="stockList" border :span-method="handleSpan"></Table>
+          <Table class="mt_10" :columns="updateStockColumns" :data="stockList" border ></Table>
         </TabPane>
         <TabPane label="批量规格更新" name="stockAll">
           <Input type="number" v-model="stockAllUpdate" placeholder="统一规格修改" />
@@ -117,6 +118,7 @@ import {
 import * as API_Shop from "@/api/shops";
 
 export default {
+ 
   name: "goods",
   data() {
     return {

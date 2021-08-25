@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <Card>
       <div class="operation">
         <Button @click="addParent">添加一级分类</Button>
@@ -60,7 +59,7 @@
             <Input v-model="formAdd.labelName" maxlength="12" clearable style="width:100%"/>
           </FormItem>
           <FormItem label="排序值" prop="sortOrder" style="width:345px">
-            <InputNumber v-model="formAdd.sortOrder" min="1"></InputNumber>
+            <InputNumber v-model="formAdd.sortOrder" :min="1"></InputNumber>
           </FormItem>
         </Form>
         <div slot="footer">

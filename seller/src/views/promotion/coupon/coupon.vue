@@ -46,6 +46,7 @@ export default {
   name: "coupon",
   data() {
     return {
+      selectDate:[],
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
