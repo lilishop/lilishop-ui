@@ -92,7 +92,7 @@ export default {
         },
 
         {
-          title: "领取数量/总数量",
+          title: "已领取数量/总数量",
           key: "publishNum",
           render: (h, params) => {
             return h(

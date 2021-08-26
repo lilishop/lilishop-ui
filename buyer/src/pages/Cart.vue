@@ -75,6 +75,18 @@
                       <promotion :time="promotion.endTime" type="cart"></promotion>
                     </div>
                   </template>
+                  <template v-for="(promotion, promotionIndex) in goods.promotions">
+                    <div class="promotion" :key="promotionIndex" v-if="promotion.promotionType === 'FULL_DISCOUNT'">
+                      <span>满优惠活动</span>
+                      <promotion :time="promotion.endTime" type="cart"></promotion>
+                    </div>
+                  </template>
+                  <template v-for="(promotion, promotionIndex) in goods.promotions">
+                    <div class="promotion" :key="promotionIndex" v-if="promotion.promotionType === 'COUPON'">
+                      <span>优惠券</span>
+                      <promotion :time="promotion.endTime" type="cart"></promotion>
+                    </div>
+                  </template>
                 </div>
               </div>
               <div class="width_150">
