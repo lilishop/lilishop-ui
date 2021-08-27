@@ -95,7 +95,7 @@ export default {
         },
 
         {
-          title: "领取数量/总数量",
+          title: "已领取数量/总数量",
           key: "publishNum",
           width: 130,
           render: (h, params) => {
@@ -308,7 +308,7 @@ export default {
       this.total = this.data.length;
       this.loading = false;
     },
-    
+
     edit(v) {  // 跳转编辑页面
       this.$router.push({ name: "edit-platform-coupon", query: { id: v.id } });
     },

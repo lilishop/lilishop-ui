@@ -111,7 +111,7 @@
               <div class="div-item-right">
                 {{ orderInfo.receipt.receiptStatus == 0 ? "未开" : "已开" }}
               </div>
-            </div>  
+            </div>
           </template>
         </Col>
         <Col span="12">
@@ -217,15 +217,14 @@
               orderInfo.order.priceDetailDTO.goodsPrice | unitPrice("￥")
             }}</span>
           </li>
-          <li>
+          <li v-if="orderInfo.order.priceDetailDTO.discountPrice && orderInfo.order.priceDetailDTO.discountPrice > 0">
             <span class="label">优惠金额：</span>
-            <span class="txt">
-              {{
-                (orderInfo.order.priceDetailDTO.couponPrice +
-                  orderInfo.order.priceDetailDTO.discountPrice)
-                  | unitPrice("￥")
-              }}
-            </span>
+            <span class="txt"> {{ orderInfo.order.priceDetailDTO.discountPrice | unitPrice('￥') }} </span>
+          </li>
+
+          <li v-if="orderInfo.order.priceDetailDTO.couponPrice && orderInfo.order.priceDetailDTO.couponPrice > 0">
+            <span class="label">优惠券金额：</span>
+            <span class="txt"> {{ orderInfo.order.priceDetailDTO.couponPrice | unitPrice('￥') }} </span>
           </li>
           <li>
             <span class="label">运费：</span>
@@ -619,13 +618,13 @@ export default {
           key: "unitPrice",
           minWidth: 100,
           render: (h, params) => {
-            if (!params.row.priceDetailDTO.unitPrice) {
+            if (!params.row.unitPrice) {
               return h("div", this.$options.filters.unitPrice(0, "￥"));
             }
             return h(
               "div",
               this.$options.filters.unitPrice(
-                params.row.priceDetailDTO.unitPrice,
+                params.row.unitPrice,
                 "￥"
               )
             );

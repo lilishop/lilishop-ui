@@ -19,7 +19,7 @@
           <div class="div-item">
             <div class="div-item-left">订单来源：</div>
             <div class="div-item-right">
-              {{ orderInfo.order.clientType | clientTypeWay}}
+              {{ orderInfo.order.clientType | clientTypeWay }}
             </div>
           </div>
 
@@ -45,7 +45,10 @@
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票抬头：</div>
-            <div class="div-item-right">{{ orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : '暂无' }}</div>
+            <div class="div-item-right">{{
+                orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : '暂无'
+              }}
+            </div>
           </div>
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId">
@@ -55,12 +58,17 @@
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票内容：</div>
-            <div class="div-item-right">{{ orderInfo.receipt.receiptContent ? orderInfo.receipt.receiptContent : '暂无' }}</div>
+            <div class="div-item-right">{{
+                orderInfo.receipt.receiptContent ? orderInfo.receipt.receiptContent : '暂无'
+              }}
+            </div>
           </div>
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票金额：</div>
-            <div class="div-item-right">{{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice('￥')}}</div>
+            <div class="div-item-right">
+              {{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice('￥') }}
+            </div>
           </div>
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
@@ -97,7 +105,10 @@
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票抬头：</div>
-            <div class="div-item-right">{{ orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : '暂无' }}</div>
+            <div class="div-item-right">{{
+                orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : '暂无'
+              }}
+            </div>
           </div>
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId">
@@ -107,12 +118,17 @@
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票内容：</div>
-            <div class="div-item-right">{{ orderInfo.receipt.receiptContent ? orderInfo.receipt.receiptContent : '暂无' }}</div>
+            <div class="div-item-right">{{
+                orderInfo.receipt.receiptContent ? orderInfo.receipt.receiptContent : '暂无'
+              }}
+            </div>
           </div>
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票金额：</div>
-            <div class="div-item-right">{{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice('￥')}}</div>
+            <div class="div-item-right">
+              {{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice('￥') }}
+            </div>
           </div>
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
@@ -134,21 +150,22 @@
           <template slot="goodsSlot" slot-scope="{row}">
             <div style="margin-top: 5px; height: 80px; display: flex">
               <div style="">
-                <img :src="row.image" style="height: 60px; margin-top: 1px; width: 60px" />
+                <img :src="row.image" style="height: 60px; margin-top: 1px; width: 60px"/>
               </div>
 
               <div style="margin-left: 13px">
                 <div class="div-zoom">
-                  <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
+                  <a @click="linkTo(row.goodsId,row.skuId)">{{ row.goodsName }}</a>
                 </div>
                 <span v-for="(item, key) in JSON.parse(row.specs)" :key="key">
                   <span v-show="key!='images'" style="font-size: 12px;color: #999999;">
-                    {{key}} : {{item}}
+                    {{ key }} : {{ item }}
                   </span>
                 </span>
                 <Poptip trigger="hover" style="display: block;" title="扫码在手机中查看" transfer>
                   <div slot="content">
-                    <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)" :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                    <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)" :margin="0" colorDark="#000" colorLight="#fff"
+                            :size="150"></vue-qr>
                   </div>
                   <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
                 </Poptip>
@@ -160,15 +177,20 @@
           <ul>
             <li>
               <span class="label">商品总额：</span>
-              <span class="txt">{{ orderInfo.order.priceDetailDTO.goodsPrice | unitPrice('￥')  }}</span>
+              <span class="txt">{{ orderInfo.order.priceDetailDTO.goodsPrice | unitPrice('￥') }}</span>
             </li>
-            <li>
+            <li v-if="orderInfo.order.priceDetailDTO.discountPrice && orderInfo.order.priceDetailDTO.discountPrice > 0">
               <span class="label">优惠金额：</span>
-              <span class="txt"> {{ orderInfo.order.discountPrice | unitPrice('￥')}} </span>
+              <span class="txt"> {{ orderInfo.order.priceDetailDTO.discountPrice | unitPrice('￥') }} </span>
+            </li>
+
+            <li v-if="orderInfo.order.priceDetailDTO.couponPrice && orderInfo.order.priceDetailDTO.couponPrice > 0">
+              <span class="label">优惠券金额：</span>
+              <span class="txt"> {{ orderInfo.order.priceDetailDTO.couponPrice | unitPrice('￥') }} </span>
             </li>
             <li>
               <span class="label">运费：</span>
-              <span class="txt">{{ orderInfo.order.freightPrice | unitPrice('￥')}}</span>
+              <span class="txt">{{ orderInfo.order.freightPrice | unitPrice('￥') }}</span>
             </li>
             <li v-if="orderInfo.order.priceDetailDTO.updatePrice">
               <span class="label">修改金额：</span>
@@ -176,7 +198,7 @@
             </li>
             <li v-if="orderInfo.order.priceDetailDTO.payPoint != 0">
               <span class="label">使用积分：</span>
-              <span class="txt flowPrice">{{orderInfo.order.priceDetailDTO.payPoint}}</span>
+              <span class="txt flowPrice">{{ orderInfo.order.priceDetailDTO.payPoint }}</span>
             </li>
             <li>
               <span class="label">应付金额：</span>
@@ -193,9 +215,11 @@
         <span>修改金额</span>
       </p>
       <div>
-        <Form ref="modifyPriceForm" :model="modifyPriceForm" label-position="left" :label-width="100" :rules="modifyPriceValidate">
+        <Form ref="modifyPriceForm" :model="modifyPriceForm" label-position="left" :label-width="100"
+              :rules="modifyPriceValidate">
           <FormItem label="订单金额" prop="price">
-            <Input v-model="modifyPriceForm.price" size="large" number maxlength="9"><span slot="append">元</span></Input>
+            <Input v-model="modifyPriceForm.price" size="large" number maxlength="9"><span
+              slot="append">元</span></Input>
           </FormItem>
         </Form>
       </div>
@@ -211,9 +235,11 @@
         <span>订单取消</span>
       </p>
       <div>
-        <Form ref="orderCancelForm" :model="orderCancelForm" label-position="left" :label-width="100" :rules="orderCancelValidate">
+        <Form ref="orderCancelForm" :model="orderCancelForm" label-position="left" :label-width="100"
+              :rules="orderCancelValidate">
           <FormItem label="取消原因" prop="reason">
-            <Input v-model="orderCancelForm.reason" type="textarea" :autosize="{ minRows: 2, maxRows: 5 }" placeholder="请输入取消原因"></Input>
+            <Input v-model="orderCancelForm.reason" type="textarea" :autosize="{ minRows: 2, maxRows: 5 }"
+                   placeholder="请输入取消原因"></Input>
           </FormItem>
         </Form>
       </div>
@@ -237,10 +263,11 @@
             <Input v-model="addressForm.consigneeMobile" size="large" maxlength="11"></Input>
           </FormItem>
           <FormItem label="地址信息" prop="consigneeAddressPath">
-            <Input v-model="region" disabled style="width: 305px" v-if="showRegion == false" />
-            <Button v-if="showRegion == false" @click="regionClick" :loading="submitLoading" type="primary" icon="ios-create-outline" style="margin-left: 8px">修改
+            <Input v-model="region" disabled style="width: 305px" v-if="showRegion == false"/>
+            <Button v-if="showRegion == false" @click="regionClick" :loading="submitLoading" type="primary"
+                    icon="ios-create-outline" style="margin-left: 8px">修改
             </Button>
-            <region style="width: 400px" @selected="selectedRegion" v-if="showRegion == true" />
+            <region style="width: 400px" @selected="selectedRegion" v-if="showRegion == true"/>
           </FormItem>
           <FormItem label="详细地址" prop="consigneeDetail">
             <Input v-model="addressForm.consigneeDetail" size="large" maxlength="50"></Input>
@@ -258,7 +285,8 @@
         <span>订单日志</span>
       </p>
       <div class="order-log-div">
-        <Table :loading="loading" border :columns="orderLogColumns" :data="orderInfo.orderLogs" ref="table" sortable="custom"></Table>
+        <Table :loading="loading" border :columns="orderLogColumns" :data="orderInfo.orderLogs" ref="table"
+               sortable="custom"></Table>
       </div>
 
       <div slot="footer" style="text-align: right">
@@ -318,7 +346,7 @@ export default {
       //验证要调整的订单金额
       modifyPriceValidate: {
         reason: [
-          { required: true, message: "请输入大于0小于99999的合法金额" },
+          {required: true, message: "请输入大于0小于99999的合法金额"},
           {
             pattern: /^[1-9]\d{0,3}(\.\d{1,2})?$/,
             message: "请输入大于0小于9999的合法金额",
@@ -330,7 +358,7 @@ export default {
       //验证取消订单原因
       orderCancelValidate: {
         reason: [
-          { required: true, message: "取消原因不能为空", trigger: "blur" },
+          {required: true, message: "取消原因不能为空", trigger: "blur"},
         ],
       },
       addressModal: false, //弹出修改收件信息框
@@ -344,18 +372,18 @@ export default {
       },
       orderDeliverFormValidate: {
         logisticsNo: [
-          { required: true, message: "发货单号不能为空", trigger: "change" },
+          {required: true, message: "发货单号不能为空", trigger: "change"},
         ],
         logisticsId: [
-          { required: true, message: "请选择物流公司", trigger: "blur" },
+          {required: true, message: "请选择物流公司", trigger: "blur"},
         ],
       },
       addressRule: {
         consigneeName: [
-          { required: true, message: "收货人姓名不能为空", trigger: "blur" },
+          {required: true, message: "收货人姓名不能为空", trigger: "blur"},
         ],
         consigneeMobile: [
-          { required: true, message: "联系方式不能为空", trigger: "blur" },
+          {required: true, message: "联系方式不能为空", trigger: "blur"},
           {
             pattern: RegExp.mobile,
             trigger: "blur",
@@ -363,7 +391,7 @@ export default {
           },
         ],
         consigneeDetail: [
-          { required: true, message: "详细地址不能为空", trigger: "blur" },
+          {required: true, message: "详细地址不能为空", trigger: "blur"},
         ],
       },
 
@@ -668,26 +696,31 @@ export default {
     padding: 20px;
     height: 150px;
     width: 100%;
+
     ul {
       margin-right: 10px;
       display: block;
       float: right;
       list-style-type: none;
+
       li {
         text-align: -webkit-match-parent;
       }
     }
+
     .label {
       float: left;
       width: 500px;
       text-align: right;
     }
+
     .txt {
       float: left;
       width: 130px;
       text-align: right;
       font-family: verdana;
     }
+
     .flowPrice {
       color: #cc0000;
       font-size: 22px;
