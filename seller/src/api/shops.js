@@ -1,8 +1,7 @@
 // 统一请求路径前缀在libs/axios.js中修改
 import {getRequest, postRequest, putRequest, deleteRequest, importRequest, getRequestWithNoToken} from '@/libs/axios';
 
-// Vaptcha ID
-export const vaptchaID = "5dce36188713b71e70a41eb7"
+
 // 获取数据字典
 export const getDictData = "/dictData/getByType/"
 // Websocket

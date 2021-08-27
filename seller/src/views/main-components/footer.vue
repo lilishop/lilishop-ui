@@ -1,17 +1,13 @@
 <template>
   <div class="foot">
     <Row type="flex" justify="space-around" class="help">
-      <a class="item" href="https://pickmall.cn/" target="_blank">{{ $t('help') }}</a>
-      <a class="item" href="https://pickmall.cn/" target="_blank">{{ $t('privacy') }}</a>
-      <a class="item" href="https://pickmall.cn/" target="_blank">{{ $t('terms') }}</a>
+      <a class="item" href="https://pickmall.cn/" target="_blank">帮助</a>
+      <a class="item" href="https://pickmall.cn/" target="_blank">隐私</a>
+      <a class="item" href="https://pickmall.cn/" target="_blank">条款</a>
     </Row>
     <Row type="flex" justify="center" class="copyright">
       Copyright © {{year}} - Present
-      <a
-        href="https://pickmall.cn/"
-        target="_blank"
-        style="margin:0 5px;"
-      >lili-shop</a> {{ $t('rights') }}
+      <a href="https://pickmall.cn/" target="_blank" style="margin:0 5px;">lili-shop</a>
     </Row>
   </div>
 </template>
@@ -21,8 +17,8 @@ export default {
   name: "footer",
   data() {
     return {
-      year: new Date().getFullYear() // 年
-    }
+      year: new Date().getFullYear(), // 年
+    };
   },
 };
 </script>

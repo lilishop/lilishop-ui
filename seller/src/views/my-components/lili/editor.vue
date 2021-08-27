@@ -1,7 +1,7 @@
 <template>
   <div>
     <div style="position: relative">
-      <div :id="id" style="text-align: left; min-width: 1080px"></div>
+      <div :id="eid" style="text-align: left; min-width: 1080px"></div>
       <div v-if="showExpand">
         <div class="e-menu e-code" @click="editHTML">
           <Icon type="md-code-working" size="22" />
@@ -15,29 +15,12 @@
       </div>
     </div>
 
-    <Modal
-      title="编辑html代码"
-      v-model="showHTMLModal"
-      :mask-closable="false"
-      :width="900"
-      :fullscreen="full"
-    >
-      <Input
-        v-if="!full"
-        v-model="dataEdit"
-        :rows="15"
-        type="textarea"
-        style="max-height: 60vh; overflow: auto"
-      />
+    <Modal title="编辑html代码" v-model="showHTMLModal" :mask-closable="false" :width="900" :fullscreen="full">
+      <Input v-if="!full" v-model="dataEdit" :rows="15" type="textarea" style="max-height: 60vh; overflow: auto" />
       <Input v-if="full" v-model="dataEdit" :rows="32" type="textarea" />
       <div slot="footer">
         <Button @click="full = !full" icon="md-expand">全屏开/关</Button>
-        <Button
-          @click="editHTMLOk"
-          type="primary"
-          icon="md-checkmark-circle-outline"
-          >确定保存</Button
-        >
+        <Button @click="editHTMLOk" type="primary" icon="md-checkmark-circle-outline">确定保存</Button>
       </div>
     </Modal>
     <Modal title="预览" v-model="fullscreenModal" fullscreen>
@@ -58,7 +41,7 @@ import { sina } from "@/libs/emoji";
 export default {
   name: "editor",
   props: {
-    id: {
+    eid: {
       type: String,
       default: "editor",
     },
@@ -78,7 +61,7 @@ export default {
   },
   data() {
     return {
-      editor: null, // 初始化富文本编辑器
+      editor: "", // 初始化富文本编辑器
       data: this.value, // 富文本数据
       dataEdit: "", // 编辑数据
       showHTMLModal: false, // 显示html
@@ -90,7 +73,7 @@ export default {
     // 初始化编辑器
     initEditor() {
       let that = this;
-      this.editor = new E(`#${this.id}`);
+      this.editor = new E(`#${this.eid}`);
       // 编辑内容绑定数据
       this.editor.config.onchange = (html) => {
         if (this.openXss) {
@@ -208,16 +191,17 @@ export default {
         this.$emit("input", this.data);
         this.$emit("on-change", this.data);
       }
-    }
+    },
   },
   watch: {
     value: {
-      immediate: true,
       handler: function (val) {
+        // 赋值给富文本
         this.setData(val);
       },
     },
   },
+
   mounted() {
     this.initEditor();
   },

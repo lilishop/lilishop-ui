@@ -71,7 +71,7 @@ export default {
     // 格式化标签名
     itemTitle(item) {
       if (typeof item.title == "object") {
-        return this.$t(item.title.i18n);
+        return item.title;
       } else {
         return item.title;
       }

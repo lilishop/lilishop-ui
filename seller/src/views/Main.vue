@@ -24,8 +24,8 @@
                   <Avatar :src="userInfo.storeLogo" style="background: #fff;margin-left: 10px;"></Avatar>
                 </div>
                 <DropdownMenu slot="list">
-                  <DropdownItem name="changePass">{{ $t('changePass') }}</DropdownItem>
-                  <DropdownItem name="loginOut" divided>{{ $t('logout') }}</DropdownItem>
+                  <DropdownItem name="changePass">切换</DropdownItem>
+                  <DropdownItem name="loginOut" divided>退出</DropdownItem>
                 </DropdownMenu>
               </Dropdown>
             </Row>

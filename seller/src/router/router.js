@@ -19,7 +19,7 @@ export const otherRouter = {
   children: [
     {
       path: "home",
-      title: { i18n: "home" },
+      title: "首页",
       name: "home_index",
       component: () => import("@/views/home/home.vue")
     },
@@ -132,7 +132,7 @@ export const otherRouter = {
       title: "订单详情",
       name: "order-detail",
       component: () => import("@/views/order/order/orderDetail.vue")
-    },
+    }
 
     // {
     //   path: "/*",
