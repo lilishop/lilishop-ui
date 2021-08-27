@@ -217,15 +217,14 @@
               orderInfo.order.priceDetailDTO.goodsPrice | unitPrice("￥")
             }}</span>
           </li>
-          <li>
+          <li v-if="orderInfo.order.priceDetailDTO.discountPrice && orderInfo.order.priceDetailDTO.discountPrice > 0">
             <span class="label">优惠金额：</span>
-            <span class="txt">
-              {{
-                (orderInfo.order.priceDetailDTO.couponPrice +
-                  orderInfo.order.priceDetailDTO.discountPrice)
-                  | unitPrice("￥")
-              }}
-            </span>
+            <span class="txt"> {{ orderInfo.order.priceDetailDTO.discountPrice | unitPrice('￥') }} </span>
+          </li>
+
+          <li v-if="orderInfo.order.priceDetailDTO.couponPrice && orderInfo.order.priceDetailDTO.couponPrice > 0">
+            <span class="label">优惠券金额：</span>
+            <span class="txt"> {{ orderInfo.order.priceDetailDTO.couponPrice | unitPrice('￥') }} </span>
           </li>
           <li>
             <span class="label">运费：</span>
