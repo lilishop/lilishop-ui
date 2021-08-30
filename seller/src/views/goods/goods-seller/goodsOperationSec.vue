@@ -1114,7 +1114,6 @@ export default {
             ? (submit.recommend = true)
             : (submit.recommend = false);
 
-          return;
           if (this.goodsId) {
             API_GOODS.editGoods(this.goodsId, submit).then((res) => {
               if (res.success) {
