@@ -1,14 +1,16 @@
 <template>
   <div class="point">
-    <card _Title="我的积分" />
+    <card _Title="我的积分"/>
     <div class="point-content">
-      <span>剩余积分：<span>{{pointObj.point || 0}}</span></span>
-      <span>累计获得：<span>{{pointObj.totalPoint || 0}}</span></span>
+      <span>剩余积分：<span>{{ pointObj.point || 0 }}</span></span>
+      <span>累计获得：<span>{{ pointObj.totalPoint || 0 }}</span></span>
     </div>
     <h3>积分日志</h3>
     <Table :columns="logColumns" :data="logData.records">
       <template slot-scope="{ row }" slot="point">
-        <div :style="{color:row.pointType === 'INCREASE' ? 'green' : 'red'}"><span>{{row.pointType === "INCREASE" ? '+' : '-'}}</span>{{ row.variablePoint }}</div>
+        <div :style="{color:row.pointType === 'INCREASE' ? 'green' : 'red'}">
+          <span v-if="row.pointType === 'INCREASE'">+</span>{{ row.variablePoint }}
+        </div>
       </template>
     </Table>
     <!-- 分页 -->
@@ -28,6 +30,7 @@
 </template>
 <script>
 import {memberPoint, memberPointHistory} from '@/api/member.js'
+
 export default {
   name: 'Point',
   data () {
@@ -90,12 +93,15 @@ h3 {
   font-size: 16px;
   margin: 20px 10px;
 }
+
 .point-content {
   text-align: center;
   margin-bottom: 30px;
-  >span{
+
+  > span {
     color: #999;
     margin-right: 100px;
+
     span {
       color: $theme_color;
       font-size: 24px;
