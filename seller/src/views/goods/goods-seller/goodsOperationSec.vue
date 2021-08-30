@@ -1089,16 +1089,13 @@ export default {
             this.submitLoading = false;
             return;
           }
-          let tips = ""
           submit.skuList = this.skuTableData.map((sku) => {
             // 非空判断
-            console.warn(sku);
-           
-            // delete sku._index;
-            // delete sku._rowKey;
-            // delete sku.specNameId;
-            // delete sku.specValueId;
-            // return sku;
+            delete sku._index;
+            delete sku._rowKey;
+            delete sku.specNameId;
+            delete sku.specValueId;
+            return sku;
           });
 
           if (submit.goodsGalleryFiles.length > 0) {

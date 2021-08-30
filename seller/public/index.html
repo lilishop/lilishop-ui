@@ -8,11 +8,9 @@
     <title>lili store</title>
     <meta name="keywords" content="keywords" />
     <meta name="description" content="description" />
+    <!-- built files will be auto injected -->
     <% for(var css of htmlWebpackPlugin.options.cdn.css) { %>
-      <link rel="stylesheet" href="<%=css%>" />
-    <% } %>
-    <% for(var js of htmlWebpackPlugin.options.cdn.js) { %>
-      <script src="<%=js%>"></script>
+    <link rel="stylesheet" href="<%=css%>" />
     <% } %>
     <style>
       .page-loading-wrap {
@@ -65,8 +63,10 @@
       }
     </style>
   </head>
-
   <body>
+    <% for(var js of htmlWebpackPlugin.options.cdn.js) { %>
+    <script src="<%=js%>"></script>
+    <% } %>
     <noscript>
       <strong
         >We're sorry but lili-admin doesn't work properly without JavaScript
@@ -82,6 +82,5 @@
         <h4 style="margin-top:20px;">正在加载资源...</h4>
       </div>
     </div>
-    <!-- built files will be auto injected -->
   </body>
 </html>
