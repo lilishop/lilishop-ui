@@ -15,8 +15,8 @@
 
         <Row>
           <Button class="login-btn" type="primary" size="large" :loading="loading" @click="submitLogin" long>
-            <span v-if="!loading">{{ $t("login") }}</span>
-            <span v-else>{{ $t("logining") }}</span>
+            <span v-if="!loading">登录</span>
+            <span v-else>登录中</span>
           </Button>
         </Row>
 

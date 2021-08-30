@@ -11,7 +11,6 @@ import vueQr from "vue-qr";
 import App from "./App";
 import { router } from "./router/index";
 import store from "./store";
-import i18n from "@/locale";
 
 import {
   getRequest,
@@ -27,7 +26,6 @@ import util from "@/libs/util";
 import dictUtil from "@/libs/dictUtil";
 
 import VueLazyload from "vue-lazyload";
-import VueClipboard from "vue-clipboard2";
 
 import * as filters from "@/utils/filters"; // global filter
 
@@ -38,11 +36,9 @@ Vue.use(VueLazyload, {
   error: require("./assets/img-error.png"),
   loading: require("./assets/loading2.gif")
 });
-Vue.use(ViewUI, {
-  i18n: (key, value) => i18n.t(key, value)
-});
 
-Vue.use(VueClipboard);
+Vue.use(ViewUI);
+
 Vue.component("vue-qr", vueQr); //此处将vue-qr添加为全局组件
 
 // 挂载全局使用的方法
@@ -84,7 +80,6 @@ new Vue({
   el: "#app",
   router,
   store,
-  i18n,
   render: h => h(App),
   data: {
     currentPageName: ""

@@ -9,14 +9,14 @@
               <span class="goods-category-name">{{ this.baseInfoForm.categoryName[0] }}</span>
               <span> &gt; {{ this.baseInfoForm.categoryName[1] }}</span>
               <span> &gt; {{ this.baseInfoForm.categoryName[2] }}</span>
-              
+
             </FormItem>
             <FormItem label="商品名称" prop="goodsName">
-              <Input type="text" v-model="baseInfoForm.goodsName" placeholder="商品名称" clearable style="width: 260px"/>
+              <Input type="text" v-model="baseInfoForm.goodsName" placeholder="商品名称" clearable style="width: 260px" />
             </FormItem>
 
             <FormItem label="商品卖点" prop="sellingPoint">
-              <Input v-model="baseInfoForm.sellingPoint" type="textarea" :rows="4" style="width: 260px"/>
+              <Input v-model="baseInfoForm.sellingPoint" type="textarea" :rows="4" style="width: 260px" />
             </FormItem>
             <FormItem label="商品品牌" prop="brandId">
               <Select v-model="baseInfoForm.brandId" filterable style="width: 200px">
@@ -28,14 +28,12 @@
           <div class="form-item-view">
             <FormItem class="form-item-view-el" label="计量单位" prop="goodsUnit">
               <Select v-model="baseInfoForm.goodsUnit" style="width: 100px">
-                <Option v-for="unit in goodsUnitList" :key="unit" :value="unit">{{ unit }}
+                <Option v-for="(unit,i) in goodsUnitList" :key="i" :value="unit">{{ unit }}
                 </Option>
               </Select>
             </FormItem>
             <FormItem class="form-item-view-el" label="销售模式" prop="salesModel">
-              <RadioGroup type="button" 
-                v-if="baseInfoForm.goodsType!='VIRTUAL_GOODS'" 
-                button-style="solid"
+              <RadioGroup type="button" v-if="baseInfoForm.goodsType!='VIRTUAL_GOODS'" button-style="solid"
                 v-model="baseInfoForm.salesModel">
                 <Radio title="零售型" label="RETAIL">零售型</Radio>
                 <Radio title="批发型" label="WHOLESALE">批发型</Radio>
@@ -50,23 +48,21 @@
           <h4>商品规格及图片</h4>
           <div class="form-item-view">
             <FormItem label="商品编号" prop="sn">
-              <Input type="text" v-model="baseInfoForm.sn" placeholder="商品编号" clearable style="width: 260px"/>
+              <Input type="text" v-model="baseInfoForm.sn" placeholder="商品编号" clearable style="width: 260px" />
             </FormItem>
             <FormItem label="商品价格" prop="price">
-              <Input type="text" v-model="baseInfoForm.price" placeholder="商品价格" clearable style="width: 260px"/>
+              <Input type="text" v-model="baseInfoForm.price" placeholder="商品价格" clearable style="width: 260px" />
             </FormItem>
             <FormItem label="市场价格" prop="cost">
-              <Input type="text" v-model="baseInfoForm.cost" placeholder="市场价格" clearable style="width: 260px"/>
+              <Input type="text" v-model="baseInfoForm.cost" placeholder="市场价格" clearable style="width: 260px" />
             </FormItem>
             <FormItem class="form-item-view-el required" label="商品图片" prop="goodsGalleryFiles">
               <div style="display:flex;flex-wrap:flex-start;">
-                <vuedraggable
-                  :list="baseInfoForm.goodsGalleryFiles"
-                  :animation="200"
-                >
-                  <div class="demo-upload-list" v-for="(item, __index) in baseInfoForm.goodsGalleryFiles" :key="__index">
+                <vuedraggable :list="baseInfoForm.goodsGalleryFiles" :animation="200">
+                  <div class="demo-upload-list" v-for="(item, __index) in baseInfoForm.goodsGalleryFiles"
+                    :key="__index">
                     <template>
-                      <img :src="item.url"/>
+                      <img :src="item.url" />
                       <div class="demo-upload-list-cover">
                         <div>
                           <Icon type="md-search" size="30" @click.native="handleViewGoodsPicture(item.url)"></Icon>
@@ -76,18 +72,18 @@
                     </template>
                   </div>
                 </vuedraggable>
-                <Upload ref="upload" :show-upload-list="false" 
-                  :on-success="handleSuccessGoodsPicture" :format="['jpg', 'jpeg', 'png']"
-                  :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" :max-size="1024"
-                  :before-upload="handleBeforeUploadGoodsPicture" multiple type="drag" :action="uploadFileUrl"
-                  :headers="accessToken" style="margin-left:10px">
+
+                <Upload ref="upload" :show-upload-list="false" :on-success="handleSuccessGoodsPicture"
+                  :format="['jpg', 'jpeg', 'png']" :on-format-error="handleFormatError"
+                  :on-exceeded-size="handleMaxSize" :max-size="1024" :before-upload="handleBeforeUploadGoodsPicture"
+                  multiple type="drag" :action="uploadFileUrl" :headers="{...accessToken}" style="margin-left:10px">
                   <div style="width: 148px; height: 148px; line-height: 148px">
                     <Icon type="md-add" size="20"></Icon>
                   </div>
                 </Upload>
               </div>
               <Modal title="View Image" v-model="goodsPictureVisible">
-                <img :src="previewGoodsPicture" v-if="goodsPictureVisible" style="width: 100%"/>
+                <img :src="previewGoodsPicture" v-if="goodsPictureVisible" style="width: 100%" />
               </Modal>
             </FormItem>
             <div class="layout" style="width: 100%">
@@ -100,8 +96,7 @@
                         <Card :bordered="true">
                           <FormItem label="规格名：" class="sku-item-content-name">
                             <AutoComplete style="width: 150px" v-model="item.name" :maxlength="30"
-                              placeholder="请输入规格项名称"
-                              :filter-method="filterMethod" :data="skuData"
+                              placeholder="请输入规格项名称" :filter-method="filterMethod" :data="skuData"
                               @on-change="editSkuItem">
                             </AutoComplete>
                             <Button type="error" style="margin-left: 10px" @click="handleCloseSkuItem($index)">删除
@@ -110,70 +105,71 @@
                           <FormItem label="规格值：" prop="sku">
                             <!--规格值文本列表-->
                             <div v-for="(val, index) in item.spec_values" :key="index"
-                                  style="padding: 0px 20px 10px 0px; float: left">
+                              style="padding: 0px 20px 10px 0px; float: left">
                               <div>
-                                <AutoComplete style="width: 150px; float: left" v-model="val.value"
-                                  :maxlength="30" placeholder="请输入规格值名称"
-                                  :filter-method="filterMethod" :data="skuVal"
+                                <AutoComplete style="width: 150px; float: left" v-model="val.value" :maxlength="30"
+                                  placeholder="请输入规格值名称" :filter-method="filterMethod" :data="skuVal"
                                   @on-focus="changeSkuVals(item.name)"
                                   @on-change="skuValueChange(val.value, $index, item)">
                                 </AutoComplete>
-                                <Button type="error" style="margin-left: 10px" @click="handleCloseSkuValue(item, index)">
+                                <Button type="error" style="margin-left: 10px"
+                                  @click="handleCloseSkuValue(item, index)">
                                   删除
                                 </Button>
                               </div>
                             </div>
                             <div style="float: left">
-                              <Button type="primary" @click="addSpec($index, item)">添加规格值</Button>
+                              <Button @click="addSpec($index, item)">添加规格值</Button>
                             </div>
                           </FormItem>
                         </Card>
                       </div>
                     </Form>
-                    <Button class="add-sku-btn" type="primary" size="mini" @click="addSkuItem">添加规格项目</Button>
+                    <Button class="add-sku-btn" type="primary" size="small" @click="addSkuItem">添加规格项目</Button>
                   </div>
                 </Panel>
                 <Panel name="2">
                   规格详细
                   <div slot="content">
                     <div slot="content">
+                      <!-- #TODO 此处有待优化  -->
                       <Table class="mt_10" :columns="skuTableColumn" :data="skuTableData" style="
                           width: 100%;
                           .ivu-table-overflowX {
                             overflow-x: hidden;
                           }
-                        " :span-method="handleSpan">
+                        ">
                         <template slot-scope="{ row }" slot="sn">
-                          <Input v-model="row.sn" placeholder="请输入货号" @on-change="updateSkuTable(row, 'sn')"/>
+                          <Input clearable v-model="row.sn" placeholder="请输入货号"
+                            @on-change="updateSkuTable(row, 'sn')" />
                         </template>
-                        <template slot-scope="{ row }" slot="weight" v-if="baseInfoForm.goodsType!='VIRTUAL_GOODS'">
-                          <Input v-model="row.weight" placeholder="请输入重量" @on-change="updateSkuTable(row, 'weight')"/>
-                        </template>
+                        <div slot-scope="{ row }" slot="weight" v-if="baseInfoForm.goodsType!='VIRTUAL_GOODS'">
+                          <Input clearable v-model="row.weight" placeholder="请输入重量"
+                            @on-change="updateSkuTable(row, 'weight')" />
+                        </div>
                         <template slot-scope="{ row }" slot="quantity">
-                          <Input v-model="row.quantity" placeholder="请输入库存" @on-change="updateSkuTable(row, 'quantity')"/>
-                        </template>
+                          <Input clearable v-model="row.quantity" placeholder="请输入库存"
+                            @on-change="updateSkuTable(row, 'quantity')" /> </template>
                         <template slot-scope="{ row }" slot="cost">
-                          <Input v-model="row.cost" placeholder="请输入成本价" @on-change="updateSkuTable(row, 'cost')"/>
+                          <Input clearable v-model="row.cost" placeholder="请输入成本价"
+                            @on-change="updateSkuTable(row, 'cost')" />
                         </template>
                         <template slot-scope="{ row }" slot="price">
-                          <Input v-model="row.price" placeholder="请输入价格" @on-change="updateSkuTable(row, 'price')"/>
+                          <Input clearable v-model="row.price" placeholder="请输入价格"
+                            @on-change="updateSkuTable(row, 'price')" />
                         </template>
                         <template slot-scope="{ row }" slot="images">
                           <Button @click="editSkuPicture(row)">编辑图片</Button>
                           <Modal v-model="showSkuPicture" :styles="{ top: '30px' }" class-name="sku-preview-modal"
-                                 title="编辑图片" ok-text="结束编辑" @on-ok="updateSkuPicture()" cancel-text="取消">
+                            title="编辑图片" ok-text="结束编辑" @on-ok="updateSkuPicture()" cancel-text="取消">
                             <div class="preview-picture">
-                              <img v-if="previewPicture !== ''" :src="previewPicture"/>
+                              <img v-if="previewPicture !== ''" :src="previewPicture" />
                             </div>
-                            <Divider/>
-                            <vuedraggable
-                              :list="selectedSku.images"
-                              :animation="200"
-                              style="display:inline-block;"
-                            >
+                            <Divider />
+                            <vuedraggable :list="selectedSku.images" :animation="200" style="display:inline-block;">
                               <div class="sku-upload-list" v-for="(img, __index) in selectedSku.images" :key="__index">
                                 <template>
-                                  <img :src="img.url"/>
+                                  <img :src="img.url" />
                                   <div class="sku-upload-list-cover">
                                     <Icon type="md-search" @click="handleView(img.url)"></Icon>
                                     <Icon type="md-trash" @click="handleRemove(img, __index)"></Icon>
@@ -181,11 +177,11 @@
                                 </template>
                               </div>
                             </vuedraggable>
-                            <Upload ref="uploadSku" :show-upload-list="false"
-                                :on-success="handleSuccess" :format="['jpg', 'jpeg', 'png']"
-                                :on-format-error="handleFormatError" :on-exceeded-size="handleMaxSize" :max-size="1024"
-                                :before-upload="handleBeforeUpload" multiple type="drag" :action="uploadFileUrl"
-                                :headers="accessToken" style="display: inline-block; width: 58px">
+                            <Upload ref="uploadSku" :show-upload-list="false" :on-success="handleSuccess"
+                              :format="['jpg', 'jpeg', 'png']" :on-format-error="handleFormatError"
+                              :on-exceeded-size="handleMaxSize" :max-size="1024" :before-upload="handleBeforeUpload"
+                              multiple type="drag" :action="uploadFileUrl" :headers="{...accessToken}"
+                              style="display: inline-block; width: 58px">
                               <div>
                                 <Icon type="ios-camera" size="55"></Icon>
                               </div>
@@ -202,27 +198,16 @@
           <h4>商品详情描述</h4>
           <div class="form-item-view">
             <div class="tree-bar">
-              <FormItem
-                class="form-item-view-el"
-                label="店内分类"
-                prop="shopCategory"
-              >
-                <Tree
-                  ref="tree"
-                  style="text-align:left;"
-                  :data="shopCategory"
-                  show-checkbox
-                  @on-select-change="selectTree"
-                  @on-check-change="changeSelect"
-                  :check-strictly="false"
-                ></Tree>
+              <FormItem class="form-item-view-el" label="店内分类" prop="shopCategory">
+                <Tree ref="tree" style="text-align:left;" :data="shopCategory" show-checkbox
+                  @on-select-change="selectTree" @on-check-change="changeSelect" :check-strictly="false"></Tree>
               </FormItem>
             </div>
             <FormItem class="form-item-view-el" label="商品描述" prop="intro">
-              <editor id="intro" v-model="baseInfoForm.intro"></editor>
+              <editor eid="intro" v-model="baseInfoForm.intro"></editor>
             </FormItem>
             <FormItem class="form-item-view-el" label="移动端描述" prop="skuList">
-              <editor id="mobileIntr" v-model="baseInfoForm.mobileIntro"></editor>
+              <editor eid="mobileIntro" v-model="baseInfoForm.mobileIntro"></editor>
             </FormItem>
           </div>
           <div v-if="baseInfoForm.goodsType!='VIRTUAL_GOODS'">
@@ -230,21 +215,13 @@
             <div class="form-item-view">
               <FormItem class="form-item-view-el" label="商品重量" prop="weight">
                 <Input v-model="baseInfoForm.weight">
-                  <span slot="append">kg</span>
+                <span slot="append">kg</span>
                 </Input>
               </FormItem>
 
-              <FormItem
-                class="form-item-view-el"
-                label="物流模板"
-                prop="templateId"
-              >
+              <FormItem class="form-item-view-el" label="物流模板" prop="templateId">
                 <Select v-model="baseInfoForm.templateId" style="width: 200px">
-                  <Option
-                    v-for="item in logisticsTemplate"
-                    :value="item.id"
-                    :key="item.id"
-                  >{{ item.name }}
+                  <Option v-for="item in logisticsTemplate" :value="item.id" :key="item.id">{{ item.name }}
                   </Option>
                 </Select>
               </FormItem>
@@ -253,20 +230,20 @@
             <div class="form-item-view">
               <FormItem class="form-item-view-el" label="商品发布" prop="release">
                 <RadioGroup type="button" button-style="solid" v-model="baseInfoForm.release">
-                  <Radio title="立即发布" :label="true">
+                  <Radio title="立即发布" :label="1">
                     <span>立即发布</span>
                   </Radio>
-                  <Radio title="放入仓库" :label="false">
+                  <Radio title="放入仓库" :label="0">
                     <span>放入仓库</span>
                   </Radio>
                 </RadioGroup>
               </FormItem>
               <FormItem class="form-item-view-el" label="商品推荐" prop="skuList">
                 <RadioGroup type="button" button-style="solid" v-model="baseInfoForm.recommend">
-                  <Radio title="推荐" :label="true">
+                  <Radio title="推荐" :label="1">
                     <span>推荐</span>
                   </Radio>
-                  <Radio title="不推荐" :label="false">
+                  <Radio title="不推荐" :label="0">
                     <span>不推荐</span>
                   </Radio>
                 </RadioGroup>
@@ -274,18 +251,16 @@
             </div>
             <div class="form-item-view-bottom">
               <Collapse v-model="params_panel" v-for="(paramsGroup,groupIndex) in goodsParams"
-                  :title="paramsGroup.groupName"
-                  class="mb_10"
-                  style="text-align: left" :key="paramsGroup.groupName">
+                :title="paramsGroup.groupName" class="mb_10" style="text-align: left" :key="paramsGroup.groupName">
                 <Panel :name="paramsGroup.groupName">
                   {{paramsGroup.groupName}}
                   <p slot="content">
                     <FormItem v-for="( params, paramsIndex) in paramsGroup.params" :key="paramsIndex"
-                              :label="`${params.paramName}：`">
+                      :label="`${params.paramName}：`">
                       <Select v-model="params.paramValue" placeholder="请选择" style="width: 200px" clearable
-                              @on-change="selectParams(paramsGroup,groupIndex,params,paramsIndex,params.paramValue)">
-                        <Option v-for="option in params.options.split(',')" :label="option"
-                                :value="option" :key="option"></Option>
+                        @on-change="selectParams(paramsGroup,groupIndex,params,paramsIndex,params.paramValue)">
+                        <Option v-for="option in params.options.split(',')" :label="option" :value="option"
+                          :key="option"></Option>
                       </Select>
                     </FormItem>
                   </p>
@@ -316,20 +291,20 @@ import cloneObj from "@/utils/index";
 import vuedraggable from "vuedraggable";
 import editor from "@/views/my-components/lili/editor";
 import { uploadFile } from "@/libs/axios";
-import {regular} from "@/utils";
+import { regular } from "@/utils";
 
 export default {
-  components:{
+  components: {
     editor,
-    vuedraggable
+    vuedraggable,
   },
   props: {
     firstData: {
       default: {},
-      type: Object
-    }
+      type: Object,
+    },
   },
-  data () {
+  data() {
     // 表单验证项，商品价格
     const checkPrice = (rule, value, callback) => {
       if (!value && value !== 0) {
@@ -368,7 +343,9 @@ export default {
       }
     };
     return {
-      categoryId: '', // 商品分类第三级id
+      accessToken: "", //令牌token
+      goodsParams: "",
+      categoryId: "", // 商品分类第三级id
       //提交状态
       submitLoading: false,
       //上传图片路径
@@ -393,9 +370,9 @@ export default {
         /** 商品相册列表 */
         goodsGalleryFiles: [],
         /** 是否立即发布 true 立即发布 false 放入仓库 */
-        release: true,
+        release: 1,
         /** 是否为推荐商品 */
-        recommend: true,
+        recommend: 1,
         /** 店铺分类 */
         storeCategoryPath: "",
         brandId: 0,
@@ -414,11 +391,11 @@ export default {
         /** 是否重新生成sku */
         regeneratorSkuFlag: false,
         /** 物流模板id **/
-        templateId: '',
+        templateId: "",
         /** 参数组*/
         goodsParamsDTOList: [],
         /** 商品分类中文名 */
-        categoryName: []
+        categoryName: [],
       },
       /** 表格头 */
       skuTableColumn: [],
@@ -445,7 +422,7 @@ export default {
       validateError: [],
       baseInfoFormRule: {
         goodsName: [
-          {required: true, message: "请输入商品名称"},
+          { required: true, message: "请输入商品名称" },
           {
             whitespace: true,
             message: "商品名称不可为纯空格",
@@ -457,24 +434,24 @@ export default {
           },
         ],
         sn: [
-          {required: true, message: "请输入商品编号"},
-          {validator: checkSn},
+          { required: true, message: "请输入商品编号" },
+          { validator: checkSn },
         ],
         price: [
-          {required: true, message: "请输入商品价格"},
-          {validator: checkPrice},
+          { required: true, message: "请输入商品价格" },
+          { validator: checkPrice },
         ],
         cost: [
-          {required: true, message: "请输入市场价格"},
-          {validator: checkPrice},
+          { required: true, message: "请输入市场价格" },
+          { validator: checkPrice },
         ],
         weight: [
-          {required: true, message: "请输入商品重量"},
-          {validator: checkWeight},
+          { required: true, message: "请输入商品重量" },
+          { validator: checkWeight },
         ],
-        templateId: [{required: true, message: '请选择物流模板'}],
-        sellingPoint: [{required: true, message: "请输入商品卖点"}],
-        goodsUnit: [{required: true, message: "请选择计量单位"}],
+        templateId: [{ required: true, message: "请选择物流模板" }],
+        sellingPoint: [{ required: true, message: "请输入商品卖点" }],
+        goodsUnit: [{ required: true, message: "请选择计量单位" }],
       },
       /** 品牌列表 */
       brandList: [],
@@ -482,7 +459,8 @@ export default {
       shopCategory: [],
       /** 商品单位列表 */
       goodsUnitList: [],
-      ignoreColumn: [ // 添加规格时需要忽略的参数
+      ignoreColumn: [
+        // 添加规格时需要忽略的参数
         "_index",
         "_rowKey",
         "sn",
@@ -492,8 +470,8 @@ export default {
         "quantity",
         "specId",
         "specValueId",
-      ]
-    }
+      ],
+    };
   },
   methods: {
     /**
@@ -507,32 +485,41 @@ export default {
     selectParams(paramsGroup, groupIndex, params, paramsIndex, value) {
       if (!this.baseInfoForm.goodsParamsDTOList[groupIndex]) {
         this.baseInfoForm.goodsParamsDTOList[groupIndex] = {
-          groupId: '',
-          groupName: '',
-          goodsParamsItemDTOList: []
-        }
+          groupId: "",
+          groupName: "",
+          goodsParamsItemDTOList: [],
+        };
       }
       //赋予分组id、分组名称
-      this.baseInfoForm.goodsParamsDTOList[groupIndex].groupId = paramsGroup.groupId
-      this.baseInfoForm.goodsParamsDTOList[groupIndex].groupName = paramsGroup.groupName
-        
+      this.baseInfoForm.goodsParamsDTOList[groupIndex].groupId =
+        paramsGroup.groupId;
+      this.baseInfoForm.goodsParamsDTOList[groupIndex].groupName =
+        paramsGroup.groupName;
+
       //参数详细为空，则赋予
-      if (!this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[paramsIndex]) {
-        this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[paramsIndex]={
-          paramName: '',
-          paramValue: '',
-          isIndex: '',
-          required: '',
-          paramId: ''
-        }
+      if (
+        !this.baseInfoForm.goodsParamsDTOList[groupIndex]
+          .goodsParamsItemDTOList[paramsIndex]
+      ) {
+        this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[
+          paramsIndex
+        ] = {
+          paramName: "",
+          paramValue: "",
+          isIndex: "",
+          required: "",
+          paramId: "",
+        };
       }
-      this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[paramsIndex]={
+      this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[
+        paramsIndex
+      ] = {
         paramName: params.paramName,
         paramValue: value,
         isIndex: params.isIndex,
         required: params.required,
-        paramId: params.id
-      }
+        paramId: params.id,
+      };
     },
     // 编辑sku图片
     editSkuPicture(row) {
@@ -542,11 +529,12 @@ export default {
       this.selectedSku = row;
       this.showSkuPicture = true;
     },
-    pre () { // 上一步
+    pre() {
+      // 上一步
       this.$parent.activestep--;
     },
     // 预览图片
-    handleView (url) {
+    handleView(url) {
       this.previewPicture = url;
       this.visible = true;
     },
@@ -601,25 +589,24 @@ export default {
     handleFormatError(file) {
       this.$Notice.warning({
         title: "文件格式不正确",
-        desc: "文件 " + file.name + " 的格式不正确"
+        desc: "文件 " + file.name + " 的格式不正确",
       });
     },
     // 图片大小不正确
     handleMaxSize(file) {
       this.$Notice.warning({
         title: "超过文件大小限制",
-        desc: "图片大小不能超过1MB"
+        desc: "图片大小不能超过1MB",
       });
     },
     // 图片上传前钩子
     handleBeforeUploadGoodsPicture(file) {
-      
       const check = this.baseInfoForm.goodsGalleryFiles.length < 5;
       if (!check) {
         this.$Notice.warning({
           title: "图片数量不能大于五张",
         });
-        return false
+        return false;
       }
     },
     // sku图片上传前钩子
@@ -629,10 +616,10 @@ export default {
         this.selectedSku.images.length > 5;
       if (check) {
         this.$Notice.warning({ title: "图片数量不能大于五张" });
-        return false
+        return false;
       }
     },
-   
+
     /** 查询商品品牌列表 */
     getGoodsBrandList() {
       API_GOODS.getCategoryBrandListDataSeller(this.categoryId).then(
@@ -673,7 +660,7 @@ export default {
       });
     },
     // 编辑时获取商品信息
-    async GET_GoodData(id,draftId) {
+    async GET_GoodData(id, draftId) {
       let response = {};
       if (draftId) {
         response = await API_GOODS.getDraftGoodsDetail(draftId);
@@ -681,12 +668,13 @@ export default {
         response = await API_GOODS.getGoods(id);
         this.goodsId = response.result.id;
       }
-      this.baseInfoForm = {...this.baseInfoForm,...response.result};
 
-      this.baseInfoForm.release = true;
-
+      response.result.recommend
+        ? (response.result.recommend = 1)
+        : (response.result.recommend = 0);
+      this.baseInfoForm = { ...this.baseInfoForm, ...response.result };
+      this.baseInfoForm.release = 1; //即使是被放入仓库，修改的时候也会显示会立即发布
       this.categoryId = response.result.categoryPath.split(",")[2];
-
 
       if (
         response.result.goodsGalleryList &&
@@ -694,12 +682,12 @@ export default {
       ) {
         this.baseInfoForm.goodsGalleryFiles =
           response.result.goodsGalleryList.map((i) => {
-            let files = {url: i};
+            let files = { url: i };
             return files;
           });
       }
 
-      this.Get_SkuInfoByCategory(this.categoryId)
+      this.Get_SkuInfoByCategory(this.categoryId);
 
       this.renderGoodsDetailSku(response.result.skuList);
 
@@ -781,32 +769,30 @@ export default {
           this.goodsParams = response;
 
           //展开选项卡
-          this.goodsParams.forEach(item => {
-              this.params_panel.push(item.groupName)
-            }
-          )
+          this.goodsParams.forEach((item) => {
+            this.params_panel.push(item.groupName);
+          });
           if (this.baseInfoForm.goodsParamsDTOList) {
             // 已选值集合
-            const paramsArr = []
-            this.baseInfoForm.goodsParamsDTOList.forEach(group =>{
-              group.goodsParamsItemDTOList.forEach(param => {
-                param.groupId = group.groupId
-                paramsArr.push(param)
-              })
-            })
+            const paramsArr = [];
+            this.baseInfoForm.goodsParamsDTOList.forEach((group) => {
+              group.goodsParamsItemDTOList.forEach((param) => {
+                param.groupId = group.groupId;
+                paramsArr.push(param);
+              });
+            });
             // 循环参数分组
             this.goodsParams.forEach((parmsGroup) => {
-              parmsGroup.params.forEach(param => {
-              
-                paramsArr.forEach(arr=>{
-                  if(param.paramName == arr.paramName){
-                    param.paramValue = arr.paramValue
+              parmsGroup.params.forEach((param) => {
+                paramsArr.forEach((arr) => {
+                  if (param.paramName == arr.paramName) {
+                    param.paramValue = arr.paramValue;
                   }
-                })
-              })
+                });
+              });
             });
           } else {
-            this.baseInfoForm.goodsParamsDTOList = []
+            this.baseInfoForm.goodsParamsDTOList = [];
           }
         }
       );
@@ -837,10 +823,10 @@ export default {
         this.skuData.forEach((e, index) => {
           if (e === name) {
             if (this.skuVal.length != this.skuVals[index].length) {
-              this.skuVal = this.skuVals[index]
+              this.skuVal = this.skuVals[index];
             }
           }
-        })
+        });
       }
     },
     /** 移除当前规格项 进行数据变化*/
@@ -868,19 +854,14 @@ export default {
     },
     /** 添加当前规格项的规格值*/
     addSpec($index, item) {
-
       if (this.validateEmpty(item.spec_values)) {
         if (item.spec_values.length >= 10) {
           this.$Message.error("规格值不能大于10个！");
           return;
         }
-        this.$set(
-          item.spec_values,
-          item.spec_values.length,
-          {
-            name: item.name,
-          }
-        );
+        this.$set(item.spec_values, item.spec_values.length, {
+          name: item.name,
+        });
         this.baseInfoForm.regeneratorSkuFlag = true;
         /**
          * 渲染规格详细表格
@@ -916,14 +897,14 @@ export default {
           key: columnName,
         });
       });
-      
-      this.baseInfoForm.goodsType != "VIRTUAL_GOODS"
-        ? pushData.push({
+
+      this.baseInfoForm.goodsType != "VIRTUAL_GOODS";
+
+      pushData.push(
+        {
           title: "重量",
           slot: "weight",
-        })
-        : "";
-      pushData.push(
+        },
         {
           title: "货号",
           slot: "sn",
@@ -945,13 +926,14 @@ export default {
           slot: "images",
         }
       );
+      this.baseInfoForm.goodsType != "VIRTUAL_GOODS" ? pushData.shift() : "";
 
       this.skuTableColumn = pushData;
       //克隆所有渲染的数据
       let cloneTemp = cloneObj(this.skuInfo);
 
       //数据清空一次
-      this.skuTableData = [];
+      this.$set(this, "skuTableData", []);
       //判定 是否存在规格分组
       if (cloneTemp[0]) {
         //存放最终结果
@@ -966,9 +948,10 @@ export default {
         cloneTemp.splice(0, 1);
         result = this.specIterator(result, cloneTemp);
         this.skuTableData = result;
+        console.log(this.skuTableData)
       }
     },
-     /**
+    /**
      * 迭代属性，形成表格
      * result 渲染的数据
      * array spec数据
@@ -990,7 +973,6 @@ export default {
         });
         //清除当前循环的分组
         cloneTemp.splice(0, 1);
-        
       } else {
         return result;
       }
@@ -999,16 +981,15 @@ export default {
     /** 根据分类id获取系统设置规格信息*/
     Get_SkuInfoByCategory(categoryId) {
       if (categoryId) {
-        API_GOODS.getGoodsSpecInfoSeller(categoryId).then(res => {
-            if (res.length) {
-              res.forEach(e => {
-                this.skuData.push(e.specName)
-                const vals = e.specValue ? e.specValue.split(',') : []
-                this.skuVals.push(Array.from(new Set(vals)))
-              })
-            }
+        API_GOODS.getGoodsSpecInfoSeller(categoryId).then((res) => {
+          if (res.length) {
+            res.forEach((e) => {
+              this.skuData.push(e.specName);
+              const vals = e.specValue ? e.specValue.split(",") : [];
+              this.skuVals.push(Array.from(new Set(vals)));
+            });
           }
-        );
+        });
       }
     },
     /** 自动完成表单所需方法*/
@@ -1016,7 +997,8 @@ export default {
       return option.toUpperCase().indexOf(value.toUpperCase()) !== -1;
     },
     /** 数据改变之后 抛出数据 */
-    updateSkuTable(row, item) {
+    updateSkuTable(row, item, type = "deafult") {
+    
       let index = row._index;
       this.baseInfoForm.regeneratorSkuFlag = true;
       /** 进行自定义校验 判断是否是数字（小数也能通过）重量 */
@@ -1054,7 +1036,10 @@ export default {
           return;
         }
       }
-      this.skuTableData[index][item] = row[item];
+      this.$nextTick(() => {
+        this.skuTableData[index][item] = row[item];
+      });
+      // this.$set(this.skuTableData,[index][item],row[item])
     },
     // 店内分类选择
     selectTree(v) {
@@ -1086,25 +1071,26 @@ export default {
       this.submitLoading = true;
       this.$refs["baseInfoForm"].validate((valid) => {
         if (valid) {
+          let submit = JSON.parse(JSON.stringify(this.baseInfoForm));
           if (
-            this.baseInfoForm.goodsGalleryFiles &&
-            this.baseInfoForm.goodsGalleryFiles.length <= 0
+            submit.goodsGalleryFiles &&
+            submit.goodsGalleryFiles.length <= 0
           ) {
             this.submitLoading = false;
             this.$Message.error("请上传商品图片");
             return;
           }
-          if (this.baseInfoForm.templateId === '') this.baseInfoForm.templateId = 0;
+          if (submit.templateId === "") submit.templateId = 0;
           let flag = false;
           let paramValue = "";
-          
+
           if (flag) {
             this.$Message.error(paramValue + " 参数值不能为空");
             this.submitLoading = false;
             return;
           }
-
-          this.baseInfoForm.skuList = this.skuTableData.map((sku) => {
+          submit.skuList = this.skuTableData.map((sku) => {
+            // 非空判断
             delete sku._index;
             delete sku._rowKey;
             delete sku.specNameId;
@@ -1112,16 +1098,21 @@ export default {
             return sku;
           });
 
-          if (this.baseInfoForm.goodsGalleryFiles.length > 0) {
-            this.baseInfoForm.goodsGalleryList =
-              this.baseInfoForm.goodsGalleryFiles.map((i) => i.url);
+          if (submit.goodsGalleryFiles.length > 0) {
+            submit.goodsGalleryList = submit.goodsGalleryFiles.map(
+              (i) => i.url
+            );
           }
           /** 参数校验 **/
-          /* Object.keys(this.baseInfoForm.goodsParamsList).forEach((item) => {
+          /* Object.keys(submit.goodsParamsList).forEach((item) => {
           });*/
+          submit.release ? (submit.release = true) : (submit.release = false);
+          submit.recommend
+            ? (submit.recommend = true)
+            : (submit.recommend = false);
 
           if (this.goodsId) {
-            API_GOODS.editGoods(this.goodsId, this.baseInfoForm).then((res) => {
+            API_GOODS.editGoods(this.goodsId, submit).then((res) => {
               if (res.success) {
                 this.submitLoading = false;
                 this.$router.go(-1);
@@ -1130,7 +1121,7 @@ export default {
               }
             });
           } else {
-            API_GOODS.createGoods(this.baseInfoForm).then((res) => {
+            API_GOODS.createGoods(submit).then((res) => {
               if (res.success) {
                 this.submitLoading = false;
                 this.$parent.activestep = 2;
@@ -1153,7 +1144,7 @@ export default {
           this.baseInfoForm.goodsGalleryFiles.map((i) => i.url);
       }
       this.baseInfoForm.categoryName = [];
-      this.baseInfoForm.saveType = 'TEMPLATE';
+      this.baseInfoForm.saveType = "TEMPLATE";
 
       if (this.$route.query.draftId) {
         this.baseInfoForm.id = this.$route.query.draftId;
@@ -1186,16 +1177,17 @@ export default {
         },
       });
     },
-    SAVE_DRAFT_GOODS() { // 保存模板
+    SAVE_DRAFT_GOODS() {
+      // 保存模板
       API_GOODS.saveDraftGoods(this.baseInfoForm).then((res) => {
         if (res.success) {
           this.$Message.info("保存成功！");
-          this.$router.push({name: 'template-goods'});
+          this.$router.push({ name: "template-goods" });
         }
       });
-    }
+    },
   },
-  mounted () {
+  mounted() {
     this.accessToken = {
       accessToken: this.getStore("accessToken"),
     };
@@ -1204,20 +1196,23 @@ export default {
       if (res.success) {
         this.logisticsTemplate = res.result;
       }
-    })
-    if (this.$route.query.id || this.$route.query.draftId) {  // 编辑商品、模板
-      this.GET_GoodData(this.$route.query.id, this.$route.query.draftId)
-    } else { // 新增商品、模板
-      if (this.firstData.tempId) { // 选择模板
-        this.GET_GoodData('', this.firstData.tempId)
+    });
+    if (this.$route.query.id || this.$route.query.draftId) {
+      // 编辑商品、模板
+      this.GET_GoodData(this.$route.query.id, this.$route.query.draftId);
+    } else {
+      // 新增商品、模板
+      if (this.firstData.tempId) {
+        // 选择模板
+        this.GET_GoodData("", this.firstData.tempId);
       } else {
-        const cateId = []
-        this.firstData.category.forEach(cate => {
-          this.baseInfoForm.categoryName.push(cate.name)
-          cateId.push(cate.id)
-        })
-        this.categoryId = cateId[2]
-        this.baseInfoForm.categoryPath = cateId.toString()
+        const cateId = [];
+        this.firstData.category.forEach((cate) => {
+          this.baseInfoForm.categoryName.push(cate.name);
+          cateId.push(cate.id);
+        });
+        this.categoryId = cateId[2];
+        this.baseInfoForm.categoryPath = cateId.toString();
         this.baseInfoForm.goodsType = this.firstData.goodsType;
         /** 获取该商城分类下 商品参数信息 */
         this.GET_GoodsParams();
@@ -1230,12 +1225,10 @@ export default {
         // 获取当前店铺分类
         this.GET_ShopGoodsLabel();
       }
-      
     }
-    
-}
-}
+  },
+};
 </script>
 <style lang="scss" scoped>
-  @import "./addGoods.scss";
+@import "./addGoods.scss";
 </style>
