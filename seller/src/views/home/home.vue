@@ -89,7 +89,7 @@
                 <div>退货</div>
               </div>
               <div @click="navigateTo('memberComment')">
-                <span>{{homeData.commentNum || 0}}</span>
+                <span>{{homeData.memberEvaluation || 0}}</span>
                 <div>待评价</div>
               </div>
               <div class="detail-title">
@@ -98,7 +98,7 @@
             </div>
             <div class="detail-item" @click="navigateTo('orderComplaint')">
               <div>
-                <span>{{homeData.deliveredOrder || 0}}</span>
+                <span>{{homeData.complaint || 0}}</span>
                 <div>待处理</div>
               </div>
 
@@ -123,11 +123,11 @@
             <div class="detail-item">
               <div @click="navigateTo('seckill')">
                 <span>{{homeData.seckillNum || 0}}</span>
-                <div>待参加活动</div>
+                <div>秒杀活动</div>
               </div>
               <div @click="navigateTo('accountStatementBill')">
                 <span>{{homeData.waitPayBill || 0}}</span>
-                <div>待对账</div>
+                <div>等待对账</div>
               </div>
               <div class="detail-title">
                 其他
