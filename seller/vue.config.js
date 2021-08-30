@@ -24,7 +24,7 @@ let externals = {
   "sockjs-client": "SockJS",
   vuedraggable: "vuedraggable",
   "@antv/g2": "G2",
-  "vue-qr": "vue-qr"
+
 };
 
 // 使用CDN的内容
@@ -32,7 +32,7 @@ let cdn = {
   css: ["https://cdn.jsdelivr.net/npm/view-design@4.1.1/dist/styles/iview.css"],
   js: [
     // vue must at first!
-    "https://unpkg.com/vue/dist/vue.js",
+    "https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js",
     "https://cdn.jsdelivr.net/npm/vuex@3.1.2/dist/vuex.min.js",
     "https://cdn.jsdelivr.net/npm/vue-router@3.1.3/dist/vue-router.min.js",
     "https://cdn.jsdelivr.net/npm/axios@0.19.0/dist/axios.min.js",
@@ -43,7 +43,6 @@ let cdn = {
     "https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js",
     "https://cdn.jsdelivr.net/npm/vuedraggable@2.23.2/dist/vuedraggable.umd.min.js",
     "https://gw.alipayobjects.com/os/lib/antv/g2/4.1.24/dist/g2.min.js",
-    "https://cdn.jsdelivr.net/npm/vue-qr@2.5.0/dist/vue-qr.min.js"
   ]
 };
 
