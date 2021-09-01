@@ -16,8 +16,6 @@
           :data="goodsData"
           ref="table"
           sortable="custom"
-          @on-sort-change="changeSort"
-          @on-selection-change="changeSelect"
         >
           <template slot-scope="{ row }" slot="goodsName">
             <div>

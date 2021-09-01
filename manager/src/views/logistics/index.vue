@@ -49,8 +49,8 @@
         </FormItem>
         <FormItem label="支持电子面单">
           <i-switch v-model="form.standBy" size="large">
-            <span slot="open">开</span>
-            <span slot="close">关</span>
+            <span slot="OPEN">开</span>
+            <span slot="CLOSE">关</span>
           </i-switch>
         </FormItem>
         <FormItem label="电子面单表单">
@@ -58,8 +58,8 @@
         </FormItem>
         <FormItem label="禁用状态" prop="disabled">
           <i-switch v-model="form.disabled" size="large">
-            <span slot="open">开启</span>
-            <span slot="close">禁用</span>
+            <span slot="OPEN">开启</span>
+            <span slot="CLOSE">禁用</span>
           </i-switch>
         </FormItem>
       </Form>
@@ -100,6 +100,7 @@
         form: {
           // 添加或编辑表单对象初始化数据
           name: "",
+          disabled:"OPEN"
         },
         // 表单验证规则
         formValidate: {

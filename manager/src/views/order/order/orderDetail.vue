@@ -263,7 +263,7 @@
             <Input v-model="addressForm.consigneeMobile" size="large" maxlength="11"></Input>
           </FormItem>
           <FormItem label="地址信息" prop="consigneeAddressPath">
-            <Input v-model="region" disabled style="width: 305px" v-if="showRegion == false"/>
+            <Input v-model="addr" disabled style="width: 305px" v-if="showRegion == false"/>
             <Button v-if="showRegion == false" @click="regionClick" :loading="submitLoading" type="primary"
                     icon="ios-create-outline" style="margin-left: 8px">修改
             </Button>
@@ -300,16 +300,18 @@
 import * as API_Order from "@/api/order";
 import * as RegExp from "@/libs/RegExp.js";
 import region from "@/views/lili-components/region";
-
+import vueQr from 'vue-qr'
 export default {
   name: "orderList",
   components: {
     region,
+    "vue-qr":vueQr
   },
   data() {
     return {
+      loading:false, //加载表格
       submitLoading: false, // 添加或编辑提交状态
-      region: [], //地区
+      addr: "", //地区
       regionId: [], //地区id
       showRegion: false, // 显示地区
       orderLogInfo: [], //订单日志数据
@@ -554,7 +556,7 @@ export default {
     },
     // 选中的地址
     selectedRegion(val) {
-      this.region = val[1];
+      this.addr = val[1];
       this.regionId = val[0];
     },
     //订单取消
@@ -587,7 +589,7 @@ export default {
     editAddress() {
       this.addressModal = true;
       this.showRegion = false;
-      this.region = this.orderInfo.order.consigneeAddressPath;
+      this.addr = this.orderInfo.order.consigneeAddressPath;
       this.regionId = this.orderInfo.order.consigneeAddressIdPath;
       this.addressForm.consigneeName = this.orderInfo.order.consigneeName;
       this.addressForm.consigneeMobile = this.orderInfo.order.consigneeMobile;
@@ -603,7 +605,7 @@ export default {
         this.$Message.error("请选择地址");
         return;
       }
-      this.addressForm.consigneeAddressPath = this.region;
+      this.addressForm.consigneeAddressPath = this.addr;
       this.addressForm.consigneeAddressIdPath = this.regionId;
       this.$refs.addressForm.validate((valid) => {
         if (valid) {

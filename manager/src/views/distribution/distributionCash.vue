@@ -25,7 +25,7 @@
       </Row>
     </Card>
     <Modal :title="modalTitle" v-model="modalVisible" :mask-closable='false' :width="500">
-      <Form ref="form" :model="form" :label-width="100" :rules="formValidate" >
+      <Form ref="form" :model="form" :label-width="100"  >
       <FormItem label="编号">
           <Input disabled v-model="form.sn" clearable style="width:100%"/>
         </FormItem>

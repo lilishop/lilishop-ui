@@ -154,7 +154,6 @@
                 border
                 :columns="columns"
                 :data="form.promotionGoodsList"
-                @on-selection-change="changeSelect"
               >
                 <template slot-scope="{ row }" slot="goodsName">
                   <div>
@@ -183,8 +182,12 @@
 <script>
 import { getPlatformCouponList, getFullDiscountById } from "@/api/promotion";
 import { getGoodsSkuData } from "@/api/goods";
+import vueQr from 'vue-qr'
 export default {
   name: "addFullCut",
+  components: {
+       "vue-qr":vueQr
+  },
   data() {
     return {
       form: { // 表单

@@ -178,7 +178,7 @@ export default {
   data() {
     return {
       orderOrRefund: 1, // 订单还是单
-      total: "0", // 总数
+      total: 0, // 总数
       // 订单状态
       orderStatusList: {
         UNDELIVERED: "待发货",

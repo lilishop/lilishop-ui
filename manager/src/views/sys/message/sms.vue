@@ -160,6 +160,7 @@ export default {
 
   data() {
     return {
+      loading:false,
       customSms: false, //当选择自动发送对象 展示
       alreadyCheck: [], //已经选中的数据
       alreadyCheckShow: [], //已经选择的值负责显示

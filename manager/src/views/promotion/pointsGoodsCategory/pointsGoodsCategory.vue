@@ -67,6 +67,7 @@ export default {
   },
   data() {
     return {
+      submitLoading:false,
       loading: false, // 加载状态
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示

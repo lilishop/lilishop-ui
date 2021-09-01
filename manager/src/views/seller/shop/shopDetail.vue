@@ -184,7 +184,7 @@
     </Card>
 
     <Card class="mt_10">
-      <Tabs type="order" @on-click="storeInfoChange">
+      <Tabs value="order" @on-click="storeInfoChange">
         <TabPane label="TA的订单" name="order" style="min-height: 200px">
           <Row>
             <Form ref="searchForm" :model="orderSearchForm" inline :label-width="70" class="search-form">

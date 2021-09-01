@@ -98,7 +98,6 @@
         <Button type="primary" :loading="submitLoading" @click="submitUser">提交</Button>
       </div>
     </Modal>
-    <check-password ref="checkPass" @on-success="resetPass"/>
   </div>
 </template>
 

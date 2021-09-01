@@ -12,7 +12,6 @@
         :data="data"
         ref="table"
         sortable="custom"
-        @on-sort-change="changeSort"
         @on-selection-change="changeSelect"
       ></Table>
       <Row type="flex" justify="end" class="mt_10">

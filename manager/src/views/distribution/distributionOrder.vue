@@ -69,10 +69,13 @@
   } from "@/api/distribution";
   import {orderStatusList} from './dataJson'
   import {getShopListData} from '@/api/shops'
+  import vueQr from 'vue-qr'
 
   export default {
     name: "distributionOrder",
-    components: {},
+    components: {
+         "vue-qr":vueQr
+    },
     data() {
       return {
         timeRange: [], // 范围时间

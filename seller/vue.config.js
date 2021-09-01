@@ -1,6 +1,6 @@
 const path = require("path");
 const CompressionPlugin = require("compression-webpack-plugin");
-
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const resolve = dir => {
   return path.join(__dirname, dir);
 };
@@ -23,8 +23,7 @@ let externals = {
   wangeditor: "wangEditor",
   "sockjs-client": "SockJS",
   vuedraggable: "vuedraggable",
-  "@antv/g2": "G2",
-
+  "@antv/g2": "G2"
 };
 
 // 使用CDN的内容
@@ -42,7 +41,7 @@ let cdn = {
     "https://cdn.jsdelivr.net/npm/wangeditor@latest/dist/wangEditor.min.js",
     "https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js",
     "https://cdn.jsdelivr.net/npm/vuedraggable@2.23.2/dist/vuedraggable.umd.min.js",
-    "https://gw.alipayobjects.com/os/lib/antv/g2/4.1.24/dist/g2.min.js",
+    "https://gw.alipayobjects.com/os/lib/antv/g2/4.1.24/dist/g2.min.js"
   ]
 };
 
@@ -79,7 +78,23 @@ module.exports = {
         threshold: 10240 // 对超过10k文件压缩
       })
     ],
+    mode: "production",
     optimization: {
+      minimizer: [
+        new UglifyJsPlugin({
+          uglifyOptions: {
+            // 删除注释
+            output: {
+              comments: false
+            },
+            compress: {
+              drop_console: true, // 删除所有调式带有console的
+              drop_debugger: true,
+              pure_funcs: ["console.log"] // 删除console.log
+            }
+          }
+        })
+      ],
       runtimeChunk: "single",
       splitChunks: {
         chunks: "all",

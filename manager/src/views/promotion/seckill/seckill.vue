@@ -4,7 +4,8 @@
       <Row>
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
           <Form-item label="活动名称" prop="promotionName">
-            <Input type="text" v-model="searchForm.promotionName" placeholder="请输入活动名称" clearable style="width: 200px" />
+            <Input type="text" v-model="searchForm.promotionName" placeholder="请输入活动名称" clearable
+              style="width: 200px" />
           </Form-item>
           <Form-item label="活动状态" prop="promotionStatus">
             <Select v-model="searchForm.promotionStatus" placeholder="请选择" clearable style="width: 200px">
@@ -15,7 +16,8 @@
             </Select>
           </Form-item>
           <Form-item label="活动时间">
-            <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 200px"></DatePicker>
+            <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 200px">
+            </DatePicker>
           </Form-item>
 
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
@@ -25,22 +27,26 @@
         <TabPane label="秒杀活动列表" name="list">
           <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10">
             <template slot-scope="{ row }" slot="action">
-              <Button type="info" size="small" class="mr_5" v-if="row.promotionStatus == 'NEW'" @click="edit(row)">编辑</Button>
+              <Button type="info" size="small" class="mr_5" v-if="row.promotionStatus == 'NEW'"
+                @click="edit(row)">编辑</Button>
 
               <Button type="info" size="small" class="mr_5" v-else @click="manage(row)">查看</Button>
 
-              <Button type="success" size="small" class="mr_5" v-if="row.promotionStatus == 'NEW'" @click="manage(row)">管理</Button>
+              <Button type="success" size="small" class="mr_5" v-if="row.promotionStatus == 'NEW'"
+                @click="manage(row)">管理</Button>
 
               <Button type="error" size="small" v-if="
                 row.promotionStatus == 'START' || row.promotionStatus == 'NEW'
               " class="mr_5" @click="off(row)">下架</Button>
               &nbsp;
-              <Button type="error" size="small" v-if="row.promotionStatus == 'CLOSE'" ghost @click="expire(row)">删除</Button>
+              <Button type="error" size="small" v-if="row.promotionStatus == 'CLOSE'" ghost
+                @click="expire(row)">删除</Button>
             </template>
           </Table>
 
           <Row type="flex" justify="end" class="mt_10">
-            <Page style="margin: 20px 0;" :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize"
+            <Page style="margin: 20px 0;" :current="searchForm.pageNumber" :total="total"
+              :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize"
               :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator show-sizer></Page>
           </Row>
         </TabPane>
@@ -60,10 +66,11 @@ import setupSeckill from "@/views/promotion/seckill/setupSeckill";
 export default {
   name: "seckill",
   components: {
-    setupSeckill
+    setupSeckill,
   },
   data() {
     return {
+      selectDate: [],
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
@@ -99,13 +106,13 @@ export default {
           width: 100,
           render: (h, params) => {
             if (params.row.promotionStatus == "NEW") {
-              return h("Tag", {props: {color: "geekblue",},},"新建");
+              return h("Tag", { props: { color: "geekblue" } }, "新建");
             } else if (params.row.promotionStatus == "START") {
-              return h("Tag", {props: {color: "green",},},"开始");
+              return h("Tag", { props: { color: "green" } }, "开始");
             } else if (params.row.promotionStatus == "END") {
-              return h("Tag", {props: {color: "volcano",},},"结束");
+              return h("Tag", { props: { color: "volcano" } }, "结束");
             } else if (params.row.promotionStatus == "CLOSE") {
-              return h("Tag", {props: {color: "red",},},"结束");
+              return h("Tag", { props: { color: "red" } }, "结束");
             }
           },
         },

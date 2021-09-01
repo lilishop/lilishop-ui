@@ -15,7 +15,6 @@ import vueQr from 'vue-qr'
 import { getRequest, postRequest, putRequest, deleteRequest, importRequest, uploadFileRequest } from '@/libs/axios'
 import { setStore, getStore, removeStore } from '@/libs/storage'
 import util from '@/libs/util'
-import VueLazyload from 'vue-lazyload'
 
 import * as filters from '@/utils/filters' // global filter
 import liliDialog from '@/views/lili-dialog'
@@ -30,10 +29,7 @@ Vue.prototype.linkTo = function (goodsId, skuId) {  // 跳转买家端商品
 Vue.prototype.wapLinkTo = function (goodsId, skuId) { // app端二维码
   return `${buyerUrlWap}/pages/product/goods?id=${skuId}&goodsId=${goodsId}`
 };
-Vue.use(VueLazyload, {
-    error: require('./assets/img-error.png'),
-    loading: require('./assets/loading2.gif')
-})
+
 Vue.use(ViewUI, {
     i18n: (key, value) => i18n.t(key, value)
 });

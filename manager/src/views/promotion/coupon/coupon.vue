@@ -28,6 +28,7 @@
           </Button>
           <Button v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'" type="error" size="small" @click="remove(row)">下架
           </Button>
+         
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">
@@ -201,6 +202,7 @@ export default {
       data: [], // 表单数据
       total: 0, // 表单数据总数
       refreshTable: true, // 修改选中状态后刷新表格
+      selectDate:[], //选中的信息
     };
   },
   props: {
@@ -212,7 +214,9 @@ export default {
     //已选择优惠券
     selectedList: {
       type: Array,
-      default: [],
+      default: ()=>{
+        return []
+      },
     },
   },
   watch: {

@@ -100,7 +100,7 @@
       </div>
 
       <div v-show="showType == 'list'">
-        <Row v-show="openTip">
+        <Row >
           <Alert show-icon>
             已选择
             <span class="select-count">{{ selectCount }}</span> 项

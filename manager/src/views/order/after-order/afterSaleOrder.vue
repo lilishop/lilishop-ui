@@ -121,9 +121,12 @@
 
 <script>
   import * as API_Order from "@/api/order";
-
+  import vueQr from 'vue-qr'
   export default {
     name: "orderList",
+    components: {
+         "vue-qr":vueQr
+    },
     data() {
       return {
         loading: true, // 表单加载状态

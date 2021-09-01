@@ -86,10 +86,7 @@
         </div>
       </Form>
     </Card>
-    <sku-select
-      ref="skuSelect"
-      @selectedGoodsData="selectedGoodsData"
-    ></sku-select>
+    
   </div>
 </template>
 
@@ -99,13 +96,11 @@
     editKanJiaActivityGoods,
   } from "@/api/promotion";
   import {regular} from "@/utils";
-  import skuSelect from "@/views/lili-dialog";
+
 
   export default {
     name: "editKanjiaActivityGoods",
-    components: {
-      skuSelect,
-    },
+   
     watch: {},
     data() {
       const checkSettlementPrice = (rule, value, callback) => {

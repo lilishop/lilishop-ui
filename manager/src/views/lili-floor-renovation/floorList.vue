@@ -26,7 +26,7 @@
             </i-switch>
             <Button type="info" placement="right" @click="Template(item)" size="small">编辑</Button>
             <Button type="success" placement="right" @click="decorate(item)" size="small">装修</Button>
-            <Poptip confirm title="删除此模板？" @on-ok="delTemplate(item.id)" @on-cancel="cancel">
+            <Poptip confirm title="删除此模板？" @on-ok="delTemplate(item.id)">
               <Button type="error" size="small">删除</Button>
             </Poptip>
           </div>
@@ -46,7 +46,7 @@
       @on-ok="newTemplate"
       @on-cancel="showModal = false"
     >
-      <Form ref="form" :model="formData" :rules="rules" :label-width="80">
+      <Form ref="form" :model="formData" :label-width="80">
         <FormItem label="模板名称" prop="name">
           <Input v-model="formData.name" placeholder="请输入模板名称" />
         </FormItem>
