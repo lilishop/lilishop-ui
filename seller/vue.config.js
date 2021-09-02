@@ -45,9 +45,26 @@ let cdn = {
   ]
 };
 
+// 删除注释
+let jsPlugin = [
+  new UglifyJsPlugin({
+    uglifyOptions: {
+      // 删除注释
+      output: {
+        comments: false
+      },
+      compress: {
+        drop_console: true, // 删除所有调式带有console的
+        drop_debugger: true,
+        pure_funcs: ["console.log"] // 删除console.log
+      }
+    }
+  })
+];
 // 判断是否需要加载CDN
 cdn = enableCDN ? cdn : { css: [], js: [] };
 externals = enableCDN ? externals : {};
+jsPlugin = enableProduction ? jsPlugin : [];
 
 module.exports = {
   css: {
@@ -80,21 +97,7 @@ module.exports = {
     ],
     mode: "production",
     optimization: {
-      minimizer: [
-        new UglifyJsPlugin({
-          uglifyOptions: {
-            // 删除注释
-            output: {
-              comments: false
-            },
-            compress: {
-              drop_console: true, // 删除所有调式带有console的
-              drop_debugger: true,
-              pure_funcs: ["console.log"] // 删除console.log
-            }
-          }
-        })
-      ],
+      minimizer: jsPlugin,
       runtimeChunk: "single",
       splitChunks: {
         chunks: "all",
