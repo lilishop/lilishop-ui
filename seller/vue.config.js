@@ -10,7 +10,7 @@ const resolve = dir => {
  * 将开发环境中替换为本地的内容，方便处理bug以及开启vueDev
  * 我们可以根据环境变量进行相应的处理，只有在产品的时候，才让插件去自动注入相应的资源文件到html页面
  */
-const enableCDN = process.env.NODE_ENV === "production"; // 是否生产环境
+const enableProduction = process.env.NODE_ENV === "production"; // 是否生产环境
 
 let externals = {
   vue: "Vue",
@@ -62,8 +62,8 @@ let jsPlugin = [
   })
 ];
 // 判断是否需要加载CDN
-cdn = enableCDN ? cdn : { css: [], js: [] };
-externals = enableCDN ? externals : {};
+cdn = enableProduction ? cdn : { css: [], js: [] };
+externals = enableProduction ? externals : {};
 jsPlugin = enableProduction ? jsPlugin : [];
 
 module.exports = {

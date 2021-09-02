@@ -96,7 +96,7 @@
               <div class="block">
                 <div class="box">
                   <span>付款笔数</span>
-                  <span>{{overViewList.paymentsNum  || 0 }}</span>
+                  <span>{{overViewList.paymentOrderNum  || 0 }}</span>
                 </div>
               </div>
 

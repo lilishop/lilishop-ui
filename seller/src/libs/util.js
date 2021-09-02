@@ -2,12 +2,13 @@ import lazyLoading from './lazyLoading.js';
 import Cookies from "js-cookie";
 import { result } from './routerJson.js';
 
+import config from '@/config/index'
 let util = {
 
 };
 
 util.title = function (title) {
-    title = title || 'lili 商家后台';
+    title = title || `${config.title} 商家后台`;
     window.document.title = title;
 };
 
