@@ -49,27 +49,27 @@
               class="goods-show-info"
               v-for="(item, index) in goodsList"
               :key="index"
-              @click="goGoodsDetail(item.id, item.goodsId)"
+              @click="goGoodsDetail(item.id, item.content.goodsId)"
             >
               <div class="goods-show-img">
-                <img width="220" height="220" :src="item.thumbnail" />
+                <img width="220" height="220" :src="item.content.thumbnail" />
               </div>
               <div class="goods-show-price">
                 <span>
                   <span class="seckill-price text-danger">{{
-                    item.price | unitPrice("￥")
+                    item.content.price | unitPrice("￥")
                   }}</span>
                 </span>
               </div>
               <div class="goods-show-detail">
-                <span>{{ item.goodsName }}</span>
+                <span>{{ item.content.goodsName }}</span>
               </div>
               <div class="goods-show-num">
-                已有<span>{{ item.commentNum || 0 }}</span
+                已有<span>{{ item.content.commentNum || 0 }}</span
                 >人评价
               </div>
               <div class="goods-show-seller">
-                <Tag v-if="item.selfOperated" style="padding:0 4px;" size="default" color="error">自营</Tag><span>{{ item.storeName }}</span>
+                <Tag v-if="item.content.selfOperated" style="padding:0 4px;" size="default" color="error">自营</Tag><span>{{ item.content.storeName }}</span>
               </div>
             </div>
           </div>

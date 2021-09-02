@@ -79,6 +79,9 @@
             <Checkbox label=1 v-model="paramForm.required">必填</Checkbox>
             <Checkbox label=1 v-model="paramForm.isIndex">可索引</Checkbox>
           </FormItem>
+          <FormItem label="排序" prop="specName3">
+            <Input type="number" v-model="paramForm.sort" style="width: 100%" />
+          </FormItem>
         </Form>
 
         <div slot="footer">
@@ -170,6 +173,7 @@ export default {
         options: "",
         required: false,
         isIndex: false,
+        sort: 0,
         groupId: group.groupId,
         categoryId: this.categoryId,
       };
@@ -186,9 +190,9 @@ export default {
         isIndex: param.isIndex==1?true:false,
         groupId: group.groupId,
         categoryId: this.categoryId,
+        sort: param.sort,
         id: param.id,
       };
-      console.warn(this.paramForm.options)
       this.ops = this.paramForm.options
       this.modalType = 1;
       this.modalTitle = "修改参数";

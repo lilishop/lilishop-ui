@@ -509,6 +509,7 @@ export default {
           isIndex: "",
           required: "",
           paramId: "",
+          sort: ""
         };
       }
       this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[
@@ -519,6 +520,7 @@ export default {
         isIndex: params.isIndex,
         required: params.required,
         paramId: params.id,
+        sort: params.sort
       };
     },
     // 编辑sku图片
