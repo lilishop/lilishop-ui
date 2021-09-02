@@ -1,6 +1,6 @@
 const path = require("path");
 const CompressionPlugin = require("compression-webpack-plugin");
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const resolve = dir => {
   return path.join(__dirname, dir);
 };
@@ -47,9 +47,27 @@ let cdn = {
   ]
 };
 
-// 判断是否需要加载CDN
+// 删除注释
+let jsPlugin = [
+  new UglifyJsPlugin({
+    uglifyOptions: {
+      // 删除注释
+      output: {
+        comments: false
+      },
+      compress: {
+        drop_console: true, // 删除所有调式带有console的
+        drop_debugger: true,
+        pure_funcs: ["console.log"] // 删除console.log
+      }
+    }
+  })
+];
+
+// 判断是否需要加载CDN，线上删除注释
 cdn = enableProduction ? cdn : { css: [], js: [] };
 externals = enableProduction ? externals : {};
+jsPlugin = enableProduction ? jsPlugin : [];
 module.exports = {
   css: {
     loaderOptions: {
@@ -79,24 +97,9 @@ module.exports = {
         threshold: 10240 // 对超过10k文件压缩
       })
     ],
-    mode: "production",
     optimization: {
       runtimeChunk: "single",
-      minimizer: [
-        new UglifyJsPlugin({
-          uglifyOptions: {
-            // 删除注释
-            output: {
-              comments: false
-            },
-            compress: {
-              drop_console: true, // 删除所有调式带有console的
-              drop_debugger: true,
-              pure_funcs: ["console.log"] // 删除console.log
-            }
-          }
-        })
-      ],
+      minimizer: jsPlugin,
       splitChunks: {
         chunks: "all",
         maxInitialRequests: Infinity,

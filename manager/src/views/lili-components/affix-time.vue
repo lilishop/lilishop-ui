@@ -1,14 +1,18 @@
 <template>
   <div>
     <div class="breadcrumb">
-      <span @click="clickBreadcrumb(item,index)" :class="{'active':item.selected}" v-for="(item,index) in dateList" :key="index"> {{item.title}}</span>
+      <span @click="clickBreadcrumb(item,index)" :class="{'active':item.selected}" v-for="(item,index) in dateList"
+        :key="index"> {{item.title}}</span>
       <div class="date-picker">
-        <Select @on-change="changeSelect(selectedWay)" v-model="month" placeholder="年月查询" style="width:200px;margin-left:10px;">
-          <Option v-for="(item,index) in dates" :value="item.year+'-'+item.month" :key="index">{{ item.year+'年'+item.month+'月' }}</Option>
+        <Select @on-change="changeSelect(selectedWay)" v-model="month" placeholder="年月查询"
+          style="width:200px;margin-left:10px;">
+          <Option v-for="(item,index) in dates" :value="item.year+'-'+item.month" :key="index">
+            {{ item.year+'年'+item.month+'月' }}</Option>
         </Select>
       </div>
       <div class="shop-list" v-if="!closeShop">
-        <Select clearable @on-change="changeshop(selectedWay)" v-model="storeId" placeholder="店铺查询" style="width:200px;margin-left:10px;">
+        <Select clearable @on-change="changeshop(selectedWay)" v-model="storeId" placeholder="店铺查询"
+          style="width:200px;margin-left:10px;">
           <Scroll :on-reach-bottom="handleReachBottom">
             <Option v-for="(item,index) in shopsData" :value="item.id" :key="index">{{ item.storeName }}</Option>
           </Scroll>
@@ -24,20 +28,23 @@ export default {
   data() {
     return {
       month: "", // 月份
- 
-      selectedWay: { // 可选时间项
+
+      selectedWay: {
+        // 可选时间项
         title: "最近7天",
         selected: true,
         searchType: "LAST_SEVEN",
       },
       storeId: "", // 店铺id
       dates: [], // 日期列表
-      params: { // 请求参数
+      params: {
+        // 请求参数
         pageNumber: 1,
         pageSize: 10,
         storeName: "",
       },
-      dateList: [ // 筛选条件
+      dateList: [
+        // 筛选条件
         {
           title: "今天",
           selected: false,
@@ -71,7 +78,6 @@ export default {
   methods: {
     // 页面触底
     handleReachBottom() {
-     
       setTimeout(() => {
         if (this.params.pageNumber * this.params.pageSize <= this.shopTotal) {
           this.params.pageNumber++;
@@ -144,7 +150,15 @@ export default {
       this.month = "";
 
       if (item.searchType == "") {
-        item.searchType = "LAST_SEVEN";
+        if (
+          dateList.some((date) => {
+            return date.title == item.title;
+          })
+        ) {
+          item.searchType = date.searchType;
+        } else {
+          item.searchType = "LAST_SEVEN";
+        }
       }
 
       this.selectedWay = item;
