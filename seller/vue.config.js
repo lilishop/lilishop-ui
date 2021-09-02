@@ -95,7 +95,6 @@ module.exports = {
         threshold: 10240 // 对超过10k文件压缩
       })
     ],
-    mode: "production",
     optimization: {
       minimizer: jsPlugin,
       runtimeChunk: "single",
