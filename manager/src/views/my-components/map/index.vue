@@ -32,7 +32,6 @@
 import AMapLoader from "@amap/amap-jsapi-loader";
 import { getRegion } from "@/api/common.js";
 export default {
-  name: "map",
   data() {
     return {
       showMap: false, // modal显隐

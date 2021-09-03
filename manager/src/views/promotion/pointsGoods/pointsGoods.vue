@@ -72,8 +72,12 @@ import {
   editPointsGoodsStatus,
   deletePointsGoodsStatus,
 } from "@/api/promotion";
+import vueQr from 'vue-qr'
 export default {
   name: "pointsGoods",
+  components: {
+       "vue-qr":vueQr
+  },
   data() {
     return {
       loading: true, // 表单加载状态

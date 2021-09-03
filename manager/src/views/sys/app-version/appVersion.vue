@@ -13,7 +13,7 @@
 
       <Button class="mt_10 mb_10" @click="addAppVersion" type="primary">添加</Button>
 
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"  ></Table>
 
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"

@@ -47,32 +47,7 @@
         </Button>
       </div>
     </Modal>
-    <!-- 数据权限 -->
-    <Modal :title="modalTitle" v-model="depModalVisible" :mask-closable="false" :width="500" class="depModal">
-      <Alert show-icon>默认可查看全部数据，自定义数据范围时请勾选下方数据
-      </Alert>
-      <Form :label-width="85">
-        <FormItem label="数据范围">
-          <Select v-model="dataType" transfer>
-            <Option :value="0">全部数据权限</Option>
-            <Option :value="1">自定义数据权限</Option>
-            <Option :value="2">本部门及以下数据权限</Option>
-            <Option :value="3">本部门数据权限</Option>
-          </Select>
-        </FormItem>
-      </Form>
-      <div v-show="dataType == 1" style="margin-top: 15px">
-        <div style="position: relative">
-          <Tree ref="depTree" :data="depData" :load-data="loadData" @on-toggle-expand="expandCheckDep" multiple style="margin-top: 15px"></Tree>
-          <Spin size="large" fix v-if="depTreeLoading"></Spin>
-        </div>
-      </div>
-      <div slot="footer">
-        <Button type="text" @click="depModalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitDepLoading" @click="submitDepEdit">提交
-        </Button>
-      </div>
-    </Modal>
+   
 
     <!-- 保存权限弹出选择权限 -->
     <Modal width="800" v-model="selectIsSuperModel" title="选择菜单权限" :loading="superModelLoading" @on-ok="saveRole">
@@ -111,7 +86,6 @@ import {
   saveRoleMenu,
 } from "@/api/index";
 import util from "@/libs/util.js";
-import Cookies from "js-cookie";
 export default {
   name: "role-manage",
   data() {
@@ -305,12 +279,12 @@ export default {
               "Tag",
               {
                 props: {
-                  type:
+                  color:
                     data.isSuper == true
                       ? "red"
                       : data.isSuper == false
                       ? "default"
-                      : "",
+                      : "default",
                 },
                 style: {
                   "margin-left": "10px",

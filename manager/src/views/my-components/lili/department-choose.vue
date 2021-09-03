@@ -3,7 +3,6 @@
     <Cascader
       v-model="selectDep"
       :data="department"
-      :load-data="loadData"
       @on-change="handleChangeDep"
       change-on-select
       filterable

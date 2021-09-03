@@ -1,6 +1,6 @@
 <template>
   <div class="layout">
-    <Carousel class="carousel" v-if="res"  autoplay autoplay-speed="5000">
+    <Carousel class="carousel" v-if="res"  autoplay :autoplay-speed="5000">
       <CarouselItem v-for="(item, index) in res.list" :key="index">
         <div>
           <img class="image-mode" :src="item.img" />

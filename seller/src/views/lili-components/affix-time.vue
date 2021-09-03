@@ -112,8 +112,16 @@ export default {
       item.storeId = this.storeId;
       this.month = "";
 
-      if (item.searchType == "") {
-        item.searchType = "LAST_SEVEN";
+       if (item.searchType == "") {
+        if (
+          dateList.some((date) => {
+            return date.title == item.title;
+          })
+        ) {
+          item.searchType = date.searchType;
+        } else {
+          item.searchType = "LAST_SEVEN";
+        }
       }
 
       this.selectedWay = item;

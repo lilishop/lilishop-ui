@@ -78,7 +78,7 @@ export default {
           },
         },
         {
-          title: "优惠券类型",
+          title: "活动范围",
           key: "activityScope",
           minWidth: 120,
           render: (h, params) => {

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="content-goods-publish">
-      <Form ref="form" :model="form" :label-width="70">
+      <Form ref="form" :label-width="70">
         <div class="base-info-item">
           <h4>优惠券活动详情</h4>
           <div class="form-item-view">
@@ -20,7 +20,6 @@
               <span>{{ couponActivity.startTime }}～{{ couponActivity.endTime }}</span>
             </FormItem>
             <FormItem label="活动状态">
-
               <span v-if="couponActivity.promotionStatus==='NEW'">新建</span>
               <span v-if="couponActivity.promotionStatus==='START'">已开始</span>
               <span v-if="couponActivity.promotionStatus==='END'">已结束</span>

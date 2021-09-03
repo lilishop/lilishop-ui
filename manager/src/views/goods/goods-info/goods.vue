@@ -118,7 +118,11 @@
 
 <script>
 import { getGoodsListData, upGoods, lowGoods } from "@/api/goods";
+import vueQr from 'vue-qr'
 export default {
+  components: {
+      "vue-qr":vueQr
+  },
   name: "goods",
   data() {
     return {

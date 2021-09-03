@@ -72,12 +72,11 @@
 
 <script>
   import * as API_Order from "@/api/order";
-  import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
-
+  import vueQr from 'vue-qr'
   export default {
     name: "orderComplaint",
-    components: {
-      uploadPicThumb
+      components: {
+      "vue-qr":vueQr
     },
     data() {
       return {

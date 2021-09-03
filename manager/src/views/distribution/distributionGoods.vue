@@ -1,22 +1,18 @@
 <template>
   <div>
     <Card>
-      <Form @keydown.enter.native="handleSearch" ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+      <Form @keydown.enter.native="handleSearch" ref="searchForm" :model="searchForm" inline :label-width="70"
+        class="search-form">
         <Form-item label="商品名称" prop="goodsName">
-          <Input
-            type="text"
-            v-model="searchForm.goodsName"
-            placeholder="请输入商品名称"
-            clearable
-            style="width: 200px"
-          />
+          <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px" />
         </Form-item>
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
       </Form>
       <Row class="operation" style="margin:10px 0;">
         <Button @click="delAll" type="primary">批量下架</Button>
       </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect">
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"
+        @on-selection-change="changeSelect">
         <template slot="goodsName" slot-scope="{row}">
           <div>
             <div class="div-zoom">
@@ -24,7 +20,8 @@
             </div>
             <Poptip trigger="hover" title="扫码在手机中查看" transfer>
               <div slot="content">
-                <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)" :margin="0" colorDark="#000" colorLight="#fff"
+                  :size="150"></vue-qr>
               </div>
               <img src="../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
             </Poptip>
@@ -32,23 +29,27 @@
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator show-sizer></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
+          @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator
+          show-sizer></Page>
       </Row>
     </Card>
   </div>
 </template>
 
 <script>
-import {
-        getDistributionGoods,
-        delDistributionGoods
-    } from "@/api/distribution";
+import { getDistributionGoods, delDistributionGoods } from "@/api/distribution";
+import vueQr from "vue-qr";
 export default {
+  components: {
+    "vue-qr": vueQr,
+  },
   name: "distributionGoods",
   data() {
     return {
       loading: true, // 表单加载状态
-      searchForm: { // 搜索框初始化对象
+      searchForm: {
+        // 搜索框初始化对象
         pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
         sort: "createTime", // 默认排序字段
@@ -70,35 +71,38 @@ export default {
           key: "thumbnail",
           width: 120,
           align: "center",
-                    render: (h, params) => {
-                      return h("img", {
-                        attrs: {
-                          src: params.row.thumbnail,
-                          alt: "加载图片失败"
-                        },
-                        style: {
-                          cursor: "pointer",
-                          width: "80px",
-                          height: "60px",
-                          margin: "10px 0",
-                          "object-fit": "contain"
-                        }
-                      });
-                    }
+          render: (h, params) => {
+            return h("img", {
+              attrs: {
+                src: params.row.thumbnail,
+                alt: "加载图片失败",
+              },
+              style: {
+                cursor: "pointer",
+                width: "80px",
+                height: "60px",
+                margin: "10px 0",
+                "object-fit": "contain",
+              },
+            });
+          },
         },
         {
           title: "商品名称",
           slot: "goodsName",
           minWidth: 200,
-          tooltip: true
+          tooltip: true,
         },
         {
           title: "商品价格",
           key: "price",
           minWidth: 100,
           render: (h, params) => {
-            return h("div", this.$options.filters.unitPrice(params.row.price,'￥'));
-          }
+            return h(
+              "div",
+              this.$options.filters.unitPrice(params.row.price, "￥")
+            );
+          },
         },
         {
           title: "库存",
@@ -107,21 +111,23 @@ export default {
         {
           title: "添加时间",
           key: "createTime",
-          width: 170
+          width: 170,
         },
         {
           title: "店铺名称",
           key: "storeName",
-          tooltip: true
+          tooltip: true,
         },
         {
-            title: "佣金金额",
-            key: "commission",
-            sortable: false,
-            render: (h, params) => {
-                return h("div", this.$options.filters.unitPrice(params.row.commission,'￥'));
-            }
-
+          title: "佣金金额",
+          key: "commission",
+          sortable: false,
+          render: (h, params) => {
+            return h(
+              "div",
+              this.$options.filters.unitPrice(params.row.commission, "￥")
+            );
+          },
         },
         {
           title: "操作",
@@ -136,22 +142,22 @@ export default {
                 {
                   props: {
                     type: "error",
-                    size: "small"
+                    size: "small",
                   },
                   on: {
                     click: () => {
                       this.remove(params.row);
-                    }
-                  }
+                    },
+                  },
                 },
                 "下架"
-              )
+              ),
             ]);
-          }
-        }
+          },
+        },
       ],
       data: [], // 表单数据
-      total: 0 // 表单数据总数
+      total: 0, // 表单数据总数
     };
   },
   methods: {
@@ -188,7 +194,7 @@ export default {
     // 获取列表数据
     getDataList() {
       this.loading = true;
-      getDistributionGoods(this.searchForm).then(res => {
+      getDistributionGoods(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
           this.data = res.result.records;
@@ -206,14 +212,14 @@ export default {
         loading: true,
         onOk: () => {
           // 下架
-          delDistributionGoods(v.id).then(res => {
+          delDistributionGoods(v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("下架成功");
               this.getDataList();
             }
           });
-        }
+        },
       });
     },
     // 批量下架
@@ -227,12 +233,12 @@ export default {
         content: "您确认要下架所选的 " + this.selectCount + " 条数据?",
         loading: true,
         onOk: () => {
-          let ids = []
-          this.selectList.forEach(item => {
-              ids.push(item.id)
+          let ids = [];
+          this.selectList.forEach((item) => {
+            ids.push(item.id);
           });
           // 批量下架
-          delDistributionGoods(ids.toString()).then(res => {
+          delDistributionGoods(ids.toString()).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("下架成功");
@@ -240,13 +246,13 @@ export default {
               this.getDataList();
             }
           });
-        }
+        },
       });
-    }
+    },
   },
   mounted() {
     this.init();
-  }
+  },
 };
 </script>
 

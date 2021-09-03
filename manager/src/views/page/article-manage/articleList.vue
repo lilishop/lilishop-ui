@@ -63,7 +63,7 @@
             <editor openXss v-model="form.content"></editor>
           </FormItem>
           <FormItem label="是否展示" prop="openStatus">
-            <i-switch size="large" v-model="form.openStatus" :true-value="open" :false-value="close">
+            <i-switch size="large" v-model="form.openStatus"  >
               <span slot="open">展示</span>
               <span slot="close">隐藏</span>
             </i-switch>
@@ -169,7 +169,7 @@ export default {
                 {
                   props: {
                     size: "small",
-                    type: this.selectedIndex == params.index ? "primary" : "",
+                    type: this.selectedIndex == params.index ? "primary" : "default",
                   },
                   style: {
                     marginRight: "5px",

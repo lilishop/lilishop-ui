@@ -1,11 +1,11 @@
 import Main from "@/views/Main.vue";
-
+import config from '@/config/index'
 // 不作为Main组件的子页面展示的页面单独写，如下
 export const loginRouter = {
   path: "/login",
   name: "login",
   meta: {
-    title: "登录 - lili商家后台"
+    title: `登录 - ${config.title}商家后台`
   },
   component: () => import("@/views/login.vue")
 };

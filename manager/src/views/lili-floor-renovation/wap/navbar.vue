@@ -41,7 +41,6 @@
 <script>
 import * as API_Other from "@/api/other.js";
 
-import QRCode from "qrcodejs2";
 export default {
   data() {
     return {
@@ -66,7 +65,7 @@ export default {
         //   selected: false,
         // },
       ],
-      qrcode: "", // 二维码
+   
       submitWay: {
         // 表单信息
         pageShow: this.$route.query.type || false,
@@ -168,20 +167,6 @@ export default {
           console.log(res);
         })
         .catch((error) => {});
-    },
-
-    creatQrCode() {
-      if (this.qrcode) {
-        return false;
-      }
-      // this.qrcode = new QRCode(this.$refs.qrCodeUrl, {
-      //   text: "https://www.baidu.com", // 需要转换为二维码的内容
-      //   width: 100,
-      //   height: 100,
-      //   colorDark: "#000000",
-      //   colorLight: "#ffffff",
-      //   correctLevel: QRCode.CorrectLevel.H,
-      // });
     },
   },
 };

@@ -2,7 +2,8 @@ export default {
   /**
    * @description 配置显示在浏览器标签的title
    */
-  title: "Lili电商",
+  title: "lilishop",
+
   /**
    * @description token在Cookie中存储的天数，默认1天
    */
@@ -13,6 +14,8 @@ export default {
    *              用来在菜单中显示文字
    */
   useI18n: true,
+
+  
 
   /**
    * @description api请求基础路径

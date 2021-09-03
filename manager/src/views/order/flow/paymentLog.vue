@@ -158,9 +158,9 @@ export default {
           fixed: "right",
           render: (h, params) => {
             if (params.row.payStatus == "PAID") {
-              return h("div", [h("span", {}, "已付款")]);
+              return h("div", [h("Tag", {props:{color:'green'}}, "已付款")]);
             } else {
-              return h("div", [h("span", {}, "未付款")]);
+              return h("div", [h("Tag", {props:{color:'red'}}, "未付款")]);
             }
           },
         },

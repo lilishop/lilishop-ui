@@ -96,7 +96,7 @@
               <div class="block">
                 <div class="box">
                   <span>付款笔数</span>
-                  <span>{{overViewList.paymentsNum  || 0 }}</span>
+                  <span>{{overViewList.paymentOrderNum  || 0 }}</span>
                 </div>
               </div>
 
@@ -178,7 +178,7 @@ export default {
   data() {
     return {
       orderOrRefund: 1, // 订单还是单
-      total: "0", // 总数
+      total: 0, // 总数
       // 订单状态
       orderStatusList: {
         UNDELIVERED: "待发货",

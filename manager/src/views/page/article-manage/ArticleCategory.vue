@@ -103,6 +103,7 @@ export default {
   },
   data() {
     return {
+      submitLoading:false,
       loading: false, // 加载状态
       expandLevel: 1, // 展开的层级
       modalType: 0, // 添加或编辑标识

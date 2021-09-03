@@ -65,7 +65,7 @@
     </Card>
 
     <Card class="mt_10">
-      <Tabs type="point" @on-click="memberInfoChange">
+      <Tabs value="point" @on-click="memberInfoChange">
         <TabPane label="TA的积分" name="point">
           <div class="pointsTitle" style="justify-content: flex-start; text-align: left;">
             <div style="width: 120px;">
@@ -203,7 +203,6 @@
             ref="table"
             class="mt_10"
             sortable="custom"
-            @on-sort-change="addressChangeSort"
           >
           </Table>
 
@@ -339,8 +338,8 @@
         </FormItem>
         <FormItem label="默认" prop="isDefault">
           <RadioGroup type="button" button-style="solid" v-model="addressForm.isDefault">
-            <Radio :label=true>是</Radio>
-            <Radio :label=false>否</Radio>
+            <Radio label="1">是</Radio>
+            <Radio label="0">否</Radio>
           </RadioGroup>
         </FormItem>
       </Form>
@@ -378,7 +377,7 @@
         addressModalVisible: false, //会员地址操作弹出框
         addressForm: {
           id: "",
-          isDefault: false
+          isDefault: "0"
 
         },//会员地址操作form
         selectDate: null, // 选择时间段
@@ -665,7 +664,7 @@
             key: "isDefault",
             width: 80,
             render: (h, params) => {
-              if (params.row.isDefault) {
+              if (params.row.isDefault == "1") {
                 return h('div', [
                   h('span', {}, "是"),
                 ]);
@@ -981,7 +980,7 @@
         this.addressModalVisible = true
         this.addressForm = {
           id: "",
-          isDefault: false,
+          isDefault: "0",
         }
 
       },
@@ -998,9 +997,11 @@
         this.$refs.addressForm.validate((valid) => {
           if (valid) {
             this.submitLoading = true;
-            if (this.addressForm.id != "") {
+            let submit = JSON.parse(JSON.stringify(this.addressForm))
+            submit.isDefault == "1" ? submit.isDefault  = true :  submit.isDefault = false
+            if (submit.id != "") {
               //修改地址
-              API_Member.editMemberAddress(this.addressForm).then((res) => {
+              API_Member.editMemberAddress(submit).then((res) => {
                 this.submitLoading = false;
                 if (res && res.success) {
                   this.$Message.success("修改成功");
@@ -1010,7 +1011,7 @@
               });
             } else {
               //添加地址
-              API_Member.addMemberAddress(this.addressForm).then((res) => {
+              API_Member.addMemberAddress(submit).then((res) => {
                 this.submitLoading = false;
                 if (res && res.success) {
                   this.$Message.success("添加成功");

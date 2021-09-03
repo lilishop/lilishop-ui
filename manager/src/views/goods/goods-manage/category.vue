@@ -6,7 +6,7 @@
       </div>
       <Table :load-data="handleLoadData" row-key="id" :loading="loading" :data="tableData" :columns="columns">
         <template slot="action" slot-scope="scope">
-          <Dropdown v-show="scope.row.level == 2" transfer="true" trigger="click">
+          <Dropdown v-show="scope.row.level == 2"   trigger="click">
             <Button size="small">
               绑定
               <Icon type="ios-arrow-down"></Icon>
@@ -19,7 +19,7 @@
           </Dropdown>
 
           &nbsp;
-          <Dropdown transfer="true" trigger="click">
+          <Dropdown  trigger="click">
             <Button size="small">
               操作
               <Icon type="ios-arrow-down"></Icon>
@@ -134,6 +134,7 @@ export default {
   },
   data() {
     return {
+      submitLoading:false, //加载状态
       categoryList: [], // 分类列表
       loading: false, // 加载状态
       brands: [], //品牌集合
@@ -154,9 +155,9 @@ export default {
         parentId: "",
         name: "",
         image: "",
-        sortOrder: "",
+        sortOrder: 0,
         deleteFlag: 0,
-        commissionRate: "",
+        commissionRate: 0,
         level: 0,
       },
       brandForm: {

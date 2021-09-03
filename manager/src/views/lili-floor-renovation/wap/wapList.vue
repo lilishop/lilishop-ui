@@ -25,7 +25,7 @@
               <span slot="close">关</span>
             </i-switch>
             <Button type="info" placement="right" @click="handleEdit(item)" size="small">修改</Button>
-            <Poptip confirm title="删除此模板？" @on-ok="handleDel(item)" @on-cancel="cancel">
+            <Poptip confirm title="删除此模板？" @on-ok="handleDel(item)" >
               <Button type="error" size="small">删除</Button>
             </Poptip>
           </div>
@@ -79,7 +79,7 @@ export default {
         pageType: "INDEX",
         pageClientType: "H5",
       },
-      total: "", // 页面数量
+      total: 0, // 页面数量
       list: [], // 总数据
     };
   },

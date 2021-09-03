@@ -4,21 +4,11 @@
       <Row>
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
           <Form-item label="活动名称" prop="promotionName">
-            <Input
-              type="text"
-              v-model="searchForm.promotionName"
-              placeholder="请输入活动名称"
-              clearable
-              style="width: 200px"
-            />
+            <Input type="text" v-model="searchForm.promotionName" placeholder="请输入活动名称" clearable
+              style="width: 200px" />
           </Form-item>
           <Form-item label="活动状态" prop="promotionStatus">
-            <Select
-              v-model="searchForm.promotionStatus"
-              placeholder="请选择"
-              clearable
-              style="width: 200px"
-            >
+            <Select v-model="searchForm.promotionStatus" placeholder="请选择" clearable style="width: 200px">
               <Option value="NEW">未开始</Option>
               <Option value="START">已开始/上架</Option>
               <Option value="END">已结束/下架</Option>
@@ -26,26 +16,13 @@
             </Select>
           </Form-item>
           <Form-item label="活动时间">
-            <DatePicker
-              v-model="selectDate"
-              type="daterange"
-              clearable
-              placeholder="选择起始时间"
-              style="width: 200px"
-            ></DatePicker>
+            <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 200px">
+            </DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" class="search-btn" icon="ios-search">搜索</Button>
         </Form>
       </Row>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        class="mt_10"
-        sortable="custom"
-      >
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10" sortable="custom">
         <template slot-scope="{ row }" slot="applyEndTime">
           {{ unixDate(row.applyEndTime) }}
         </template>
@@ -58,36 +35,17 @@
         <template slot-scope="{ row }" slot="action">
           <div>
             <Button type="info" size="small" @click="view(row)">查看</Button>
-            <Button
-              type="error"
-              v-if="row.promotionStatus === 'START'"
-              style="margin-left:5px"
-              size="small"
-              @click="openOrClose(row)"
-              >关闭</Button>
-            <Button
-              type="success"
-              v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
-              style="margin-left:5px"
-              size="small"
-              @click="openOrClose(row)"
-              >开启</Button>
+            <Button type="error" v-if="row.promotionStatus === 'START'" style="margin-left:5px" size="small"
+              @click="openOrClose(row)">关闭</Button>
+            <Button type="success" v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
+              style="margin-left:5px" size="small" @click="openOrClose(row)">开启</Button>
           </div>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
-          :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
-          size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
+          @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator
+          show-sizer></Page>
       </Row>
     </Card>
   </div>
@@ -98,14 +56,18 @@ import { getFullDiscountList, updateFullDiscount } from "@/api/promotion.js";
 export default {
   data() {
     return {
+      selectDate: [],
+      total: 0,
       loading: false, // 表单加载状态
-      searchForm: { // 请求参数
+      searchForm: {
+        // 请求参数
         pageNumber: 1,
         pageSize: 10,
         sort: "startTime",
         order: "desc",
       },
-      columns: [ // 表头
+      columns: [
+        // 表头
         {
           title: "活动名称",
           key: "promotionName",
@@ -180,12 +142,12 @@ export default {
       this.getDataList();
     },
     // 开启或关闭活动
-    openOrClose (row) {
-      let name = '开启'
-      let status = 'START'
-      if (row.promotionStatus === 'START') {
-        name = '关闭'
-        status = 'CLOSE'
+    openOrClose(row) {
+      let name = "开启";
+      let status = "START";
+      if (row.promotionStatus === "START") {
+        name = "关闭";
+        status = "CLOSE";
       }
       this.$Modal.confirm({
         title: "提示",
@@ -243,7 +205,6 @@ export default {
       // 查看
       this.$router.push({ name: "full-cut-detail", query: { id: row.id } });
     },
-
   },
   mounted() {
     this.init();

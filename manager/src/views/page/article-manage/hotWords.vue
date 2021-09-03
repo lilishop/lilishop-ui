@@ -19,18 +19,13 @@
       </div>
 
     </Card>
-    <Modal
-      :title="modalTitle"
-      v-model="modalVisible"
-      :mask-closable="false"
-      :width="500"
-    >
-      <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
+    <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="500">
+      <Form ref="form" :model="form" :label-width="100" >
         <FormItem label="热词" prop="name">
-          <Input v-model="form.keywords" clearable style="width: 100%"/>
+          <Input v-model="form.keywords" clearable style="width: 100%" />
         </FormItem>
         <FormItem label="分数" prop="name">
-          <Input v-model="form.point" clearable style="width: 100%"/>
+          <Input v-model="form.point" clearable style="width: 100%" />
         </FormItem>
       </Form>
       <div slot="footer">
@@ -42,18 +37,17 @@
 </template>
 
 <script>
-import {
-  getHotWords,
-  setHotWords
-} from "@/api/index";
+import { getHotWords, setHotWords } from "@/api/index";
 
 export default {
   name: "hotWords",
   components: {},
   data() {
     return {
+      submitLoading:false,
+      modalTitle: "",
       loading: true, // 表单加载状态
-      modalVisible: false,//弹出框
+      modalVisible: false, //弹出框
       form: {
         keywords: "",
         point: 0,
@@ -97,7 +91,7 @@ export default {
       if (words) {
         this.form.keywords = words;
       } else {
-        this.form.keywords = '';
+        this.form.keywords = "";
       }
       this.form.point = 1;
       this.$refs.form.resetFields();

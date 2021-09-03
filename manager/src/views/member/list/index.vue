@@ -23,8 +23,9 @@
 
       <Table :loading="loading" border :columns="columns" class="mt_10" :data="data" ref="table"></Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
-          show-total show-elevator show-sizer></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
+          @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator
+          show-sizer></Page>
       </Row>
     </Card>
 
@@ -44,7 +45,7 @@
       </Form>
       <div slot="footer">
         <Button @click="addFlag = false">取消</Button>
-        <Button type="primary" :loading="handleAddLoading" @click="addMemberSubmit">确定</Button>
+        <Button type="primary" @click="addMemberSubmit">确定</Button>
       </div>
     </Modal>
     <!-- 修改模态框 -->
@@ -108,11 +109,11 @@ import * as RegExp from "@/libs/RegExp.js";
 export default {
   name: "member",
   components: {
-    region, ossManage
+    region,
+    ossManage,
   },
   data() {
     return {
-      selectedMember: false, //是否是其他组件调用
       descTitle: "", // modal标题
       descFlag: false, //编辑查看框
       loading: true, // 表单加载状态
@@ -210,7 +211,7 @@ export default {
                   {
                     props: {
                       size: "small",
-                      type: params.row.___selected ? "primary" : "",
+                      type: params.row.___selected ? "primary" : "default",
                     },
                     style: {
                       marginRight: "5px",
@@ -302,7 +303,9 @@ export default {
     // 已选择用户数据
     selectedList: {
       type: null,
-      default: [],
+      default: () => {
+        return [];
+      },
     },
   },
   watch: {
@@ -311,7 +314,6 @@ export default {
         this.$set(this, "selectMember", JSON.parse(JSON.stringify(val)));
         this.init(this.data);
         // 将父级数据与当前组件数据进行匹配
-
       },
       deep: true,
       immediate: true,
@@ -381,7 +383,7 @@ export default {
     },
     addMember() {
       this.addFlag = true;
-      this.$refs.addMemberForm.resetFields()
+      this.$refs.addMemberForm.resetFields();
     },
     /**
      * 查询查看会员详情
@@ -416,7 +418,7 @@ export default {
         if (valid) {
           API_Member.addMember(this.addMemberForm).then((res) => {
             if (res.result) {
-              this.$refs.addMemberForm.resetFields()
+              this.$refs.addMemberForm.resetFields();
               this.getData();
               this.$Message.success("添加成功！");
               this.addFlag = false;

@@ -25,7 +25,6 @@
 
 <script>
 import { setSetting, getSetting } from "@/api/index";
-
 export default {
   name: "distributionSetting",
   data() {
@@ -33,8 +32,8 @@ export default {
       form: {
         // 添加或编辑表单对象初始化数据
         isOpen: "",
-        distributionDay: "", //分销关系绑定天数
-        cashDay: "", //分销结算天数
+        distributionDay: 0, //分销关系绑定天数
+        cashDay: 0, //分销结算天数
       }
     };
   },

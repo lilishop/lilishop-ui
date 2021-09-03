@@ -132,6 +132,7 @@ export default {
   name: "bill-detail",
   data() {
     return {
+      loading:false,
       columns: [ // 表头
         {
           title: "项目",
