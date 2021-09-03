@@ -250,22 +250,4 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.article {
-  font-size: 16px;
-  font-weight: 400;
-  margin: 12px 0;
-}
-
-.href-text {
-  font-size: 12px;
-}
-
-.operation {
-  margin-bottom: 2vh;
-}
-
-.select-count {
-  font-weight: 600;
-  color: #40a9ff;
-}
 </style>

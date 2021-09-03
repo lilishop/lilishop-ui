@@ -27,8 +27,9 @@
       </Row>
       <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" @on-selection-change="changeSelect">
         <template slot-scope="{ row }" slot="action">
-          <Button v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="info" size="small" :style="{'marginRight': row.promotionStatus !== 'CLOSE'?'5px':'0'}" @click="edit(row)">编辑</Button>
-          <Button v-if="row.promotionStatus !== 'CLOSE'" type="error" size="small" @click="remove(row)">下架</Button>
+          <Button v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="info" size="small"  @click="see(row)">编辑</Button>
+          <Button v-else type="default" size="small"  @click="see(row,'only')">查看</Button>
+          <Button v-if="row.promotionStatus !== 'END'" type="error" size="small" :style="{'marginLeft':'5px'}" @click="remove(row)">下架</Button>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">
@@ -255,9 +256,12 @@ export default {
       this.loading = false;
     },
     // 跳转编辑优惠券页面
-    edit(v) {
-      this.$router.push({ name: "add-coupon", query: { id: v.id } });
+    see(v,only) {
+      let data 
+      only ? data = { onlyView : true,id: v.id } : data  = { id: v.id } 
+      this.$router.push({ name: "add-coupon", query:data});
     },
+    
     // 开启优惠券
     open(v) {
       this.$Modal.confirm({

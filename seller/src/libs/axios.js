@@ -1,5 +1,4 @@
 import axios from "axios";
-import config from "@/config";
 import { getStore, setStore } from "./storage";
 import { router } from "../router/index";
 import { Message } from "view-design";
@@ -9,12 +8,12 @@ import { handleRefreshToken } from "@/api/index";
 // 统一请求路径前缀
 export const baseUrl =
   (process.env.NODE_ENV === "development"
-    ? config.api_dev.seller
-    : config.api_prod.seller) + config.baseUrlPrefix;
+    ?  BASE.API_DEV.seller
+    : BASE.API_PROD.seller) + BASE.PREFIX;
 export const commonUrl =
   process.env.NODE_ENV === "development"
-    ? config.api_dev.common
-    : config.api_prod.common;
+    ? BASE.API_DEV.common
+    : BASE.API_PROD.common;
 // 文件上传接口
 export const uploadFile = commonUrl + "/common/upload/file";
 var isRefreshToken = 0;

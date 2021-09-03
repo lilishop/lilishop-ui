@@ -24,9 +24,11 @@
       </Row>
       <Table v-if="refreshTable" :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10" @on-selection-change="changeSelect">
         <template slot-scope="{ row }" slot="action">
-          <Button v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="success" :class="{'mr_10' : row.promotionStatus === 'START' || row.promotionStatus === 'NEW'}" size="small" @click="edit(row)">编辑
+          <Button v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="info"  size="small" @click="see(row)">编辑
           </Button>
-          <Button v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'" type="error" size="small" @click="remove(row)">下架
+          <Button v-else type="default"  size="small" @click="see(row,'onlyView')">查看
+          </Button>
+          <Button class="ml_5" v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'" type="error" size="small" @click="remove(row)">下架
           </Button>
          
         </template>
@@ -313,8 +315,10 @@ export default {
       this.loading = false;
     },
 
-    edit(v) {  // 跳转编辑页面
-      this.$router.push({ name: "edit-platform-coupon", query: { id: v.id } });
+    see(v,only) {  // 跳转编辑页面
+     let data 
+      only ? data = { onlyView : true,id: v.id } : data  = { id: v.id } 
+      this.$router.push({ name: "edit-platform-coupon", query:data });
     },
     remove(v) { // 下架优惠券
       this.$Modal.confirm({

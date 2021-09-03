@@ -8,6 +8,7 @@ import vueQr from "vue-qr";
 import App from "./App";
 import { router } from "./router/index";
 import store from "./store";
+import config from '@/config/index'
 
 import {
   getRequest,
@@ -49,18 +50,18 @@ Vue.prototype.setStore = setStore;
 Vue.prototype.getStore = getStore;
 Vue.prototype.removeStore = removeStore;
 Vue.prototype.md5 = md5;
-const buyerUrlPC = "https://pc-b2b2c.pickmall.cn"; // 跳转买家端地址 pc端
-const buyerUrlWap = "https://m-b2b2c.pickmall.cn"; // 跳转买家端地址 wap端
+const PC_URL = config.PC_URL; // 跳转买家端地址 pc端
+const WAP_URL = config.WAP_URL; // 跳转买家端地址 wap端
 Vue.prototype.linkTo = function(goodsId, skuId) {
   // 跳转买家端商品
   window.open(
-    `${buyerUrlPC}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`,
+    `${PC_URL}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`,
     "_blank"
   );
 };
 Vue.prototype.wapLinkTo = function(goodsId, skuId) {
   // app端二维码
-  return `${buyerUrlWap}/pages/product/goods?id=${skuId}&goodsId=${goodsId}`;
+  return `${WAP_URL}/pages/product/goods?id=${skuId}&goodsId=${goodsId}`;
 };
 
 Array.prototype.remove = function(from, to) {

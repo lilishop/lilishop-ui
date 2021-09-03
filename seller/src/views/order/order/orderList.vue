@@ -35,7 +35,7 @@
           :fetch="exportOrder"
           name="待发货订单.xls"
         >
-          <Button type="success">导出待发货订单</Button>
+          <Button >导出待发货订单</Button>
         </download-excel>
       </div>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table"></Table>

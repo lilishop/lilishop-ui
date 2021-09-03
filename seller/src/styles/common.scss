@@ -1,110 +1,133 @@
-
-
 //自动移滚动条样式
-::-webkit-scrollbar{
+::-webkit-scrollbar {
   width: 1px;
   height: 5px;
 }
-::-webkit-scrollbar-thumb{
+::-webkit-scrollbar-thumb {
   border-radius: 1em;
-  background-color: rgba(50,50,50,.3);
+  background-color: rgba(50, 50, 50, 0.3);
 }
-::-webkit-scrollbar-track{
+::-webkit-scrollbar-track {
   border-radius: 1em;
-  background-color: rgba(50,50,50,.1);
+  background-color: rgba(50, 50, 50, 0.1);
 }
 
-.flex{
+.flex {
   display: flex !important;
-
 }
-.flex_justify_content{
+.flex-j-c {
   justify-content: center;
 }
-.flex_align_item{
+.flex-a-c {
   align-items: center;
 }
 
-.global_text_left {
-  text-align: left;
+.width_1200 {
+  width: 1200px;
 }
-.global_text_right {
-  text-align: right;
+.width_800 {
+  width: 800px;
 }
-.global_float_left {
-  float: left;
+.width_400 {
+  width: 400px;
 }
-.global_float_right {
-    float: right;
+.width_300 {
+  width: 300px;
 }
-.clearfix::after{
-    content: '';
-    display: block;
-    clear: both;
+.width_200 {
+  width: 200px;
 }
-.width_1200{width: 1200px;}
-.width_800{width: 800px;}
-.width_400{width: 400px;}
-.width_300{width: 300px;}
-.width_200{width: 200px;}
-.width_100{width: 100px;}
-
-.fz_12{font-size: 12px;}
-.fz_14{font-size: 14px;}
-.fz_16{font-size: 16px;}
-.fz_18{font-size: 18px;}
-.fw_bold{font-weight: bold;}
-
-.mb_20{margin-bottom: 20px;}
-.mt_20{margin-top: 20px;}
-.ml_20{margin-left: 20px;}
-.mr_20{margin-right: 20px;}
-
-.mb_10{margin-bottom: 10px;}
-.mt_10{margin-top: 10px;}
-.ml_10{margin-left: 10px;}
-.mr_10{margin-right: 10px;}
-
-.pb_20{padding-bottom: 20px;}
-.pt_20{padding-top: 20px;}
-.pl_20{padding-left: 20px;}
-.pr_20{padding-right: 20px;}
-
-.pb_10{padding-bottom: 10px;}
-.pt_10{padding-top: 10px;}
-.pl_10{padding-left: 10px;}
-.pr_10{padding-right: 10px;}
-
-ul,li{
-    list-style: none;
+.width_100 {
+  width: 100px;
 }
 
-.ellipsis{
-    overflow: hidden;
-    text-overflow:ellipsis;
-    white-space: nowrap;
+.fz_12 {
+  font-size: 12px;
+}
+.fz_14 {
+  font-size: 14px;
+}
+.fz_16 {
+  font-size: 16px;
+}
+.fz_18 {
+  font-size: 18px;
+}
+.fw_bold {
+  font-weight: bold;
+}
+
+.mb_20 {
+  margin-bottom: 20px;
+}
+.mt_20 {
+  margin-top: 20px;
+}
+.ml_20 {
+  margin-left: 20px;
+}
+.mr_20 {
+  margin-right: 20px;
+}
+
+.mb_10 {
+  margin-bottom: 10px;
+}
+.mt_10 {
+  margin-top: 10px;
+}
+.ml_10 {
+  margin-left: 10px;
+}
+.mr_10 {
+  margin-right: 10px;
+}
+
+.pb_20 {
+  padding-bottom: 20px;
+}
+.pt_20 {
+  padding-top: 20px;
+}
+.pl_20 {
+  padding-left: 20px;
+}
+.pr_20 {
+  padding-right: 20px;
+}
+
+.pb_10 {
+  padding-bottom: 10px;
+}
+.pt_10 {
+  padding-top: 10px;
+}
+.pl_10 {
+  padding-left: 10px;
+}
+.pr_10 {
+  padding-right: 10px;
+}
+
+ul,
+li {
+  list-style: none;
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .hover-pointer {
   cursor: pointer;
 }
 
-/*
- * @Author: LMR
- * @Date: 2020-08-14 11:04:12
- * @Last Modified by: LMR
- * @Last Modified time: 2020-08-18 14:21:41
- */
-
 // 主题颜色
 
-// 明亮主题颜色
-$primary_color: #2d8cf0;
-$primary_light_color: #0f1011;
-$primary_dark_color: #2b85e4;
 $success_color: #19be6b;
 $warning_color: #ff9900;
 $error_color: #ed3f14;
-$handle-btn-color: #438cde;
 
 $theme_color: #ed3f14;
 
@@ -119,78 +142,3 @@ $light_white_background_color: #fff;
 $dark_background_color: #141414;
 $dark_sub_background_color: #1d1d1d; //稍微浅一点的
 $dark_content_color: #d5d5d5;
-
-/***** 封装一些方法可用于 黑暗主题 ，明亮主题 *****/
-
-// 背景颜色
-@mixin background_color($color) {
-  /*通过该函数设置字体颜色，后期方便统一管理；*/
-  background-color: $color;
-  transition: 0.35s;
-  [data-theme="dark"] & {
-    background-color: $dark_background_color;
-  }
-  [data-theme="light"] & {
-    background-color: $light_background_color;
-  }
-}
-// 辅助背景颜色
-@mixin sub_background_color($color) {
-  /*通过该函数设置字体颜色，后期方便统一管理；*/
-  background-color: $color;
-  transition: 0.35s;
-  [data-theme="dark"] & {
-    background-color: $dark_sub_background_color;
-  }
-  [data-theme="light"] & {
-    background-color: $light_background_color;
-  }
-}
-
-@mixin white_background_color() {
-  /*通过该函数设置字体颜色，后期方便统一管理；*/
-  background-color: $light_white_background_color;
-  transition: 0.35s;
-  [data-theme="dark"] & {
-    background-color: $dark_sub_background_color;
-  }
-  [data-theme="light"] & {
-    background-color: $light_white_background_color;
-  }
-}
-
-// 正文颜色
-@mixin content_color($color) {
-  /*通过该函数设置字体颜色，后期方便统一管理；*/
-  color: $color;
-  [data-theme="dark"] & {
-    color: $dark_content_color;
-  }
-  [data-theme="light"] & {
-    color: $light_content_color;
-  }
-}
-
-// 辅助颜色
-@mixin sub_color($color) {
-  /*通过该函数设置字体颜色，后期方便统一管理；*/
-  color: $color;
-  [data-theme="dark"] & {
-    color: $dark_content_color;
-  }
-  [data-theme="light"] & {
-    color: $light_sub_color;
-  }
-}
-
-// 标题颜色
-@mixin title_color($color) {
-  /*通过该函数设置字体颜色，后期方便统一管理；*/
-  color: $color;
-  [data-theme="dark"] & {
-    color: $dark_content_color;
-  }
-  [data-theme="light"] & {
-    color: $light_title_color;
-  }
-}
