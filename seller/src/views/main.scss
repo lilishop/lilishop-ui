@@ -1,13 +1,3 @@
-.lock-screen-back {
-  border-radius: 50%;
-  z-index: -1;
-  box-shadow: 0 0 0 0 #667aa6 inset;
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  transition: all 3s;
-}
 
 .main {
   position: absolute;
@@ -277,9 +267,6 @@
   }
 }
 
-.taglist-moving-animation-move {
-  transition: transform 0.3s;
-}
 
 .logo-con {
   width: 100%;
@@ -313,14 +300,6 @@
   background: #fff;
 }
 
-.nav-item {
-  font-size: 14px;
-}
-
-.main-nav-menu {
-  bottom: 10px;
-  position: relative;
-}
 
 .loading-position {
   position: absolute;

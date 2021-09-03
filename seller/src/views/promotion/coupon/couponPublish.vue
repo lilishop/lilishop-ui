@@ -6,63 +6,63 @@
           <h4>基本信息</h4>
           <div class="form-item-view">
             <FormItem label="活动名称" prop="promotionName">
-              <Input type="text" v-model="form.promotionName" placeholder="活动名称" clearable style="width: 260px" />
+              <Input :disabled="disabled" type="text" v-model="form.promotionName" placeholder="活动名称" clearable style="width: 260px" />
             </FormItem>
             <FormItem label="优惠券名称" prop="couponName">
-              <Input type="text" v-model="form.couponName" placeholder="优惠券名称" clearable style="width: 260px" />
+              <Input :disabled="disabled" type="text" v-model="form.couponName" placeholder="优惠券名称" clearable style="width: 260px" />
             </FormItem>
             <FormItem label="优惠券类型" prop="couponType">
-              <Select v-model="form.couponType" style="width: 260px">
+              <Select :disabled="disabled" v-model="form.couponType" style="width: 260px">
                 <Option value="DISCOUNT">打折</Option>
                 <Option value="PRICE">减免现金</Option>
               </Select>
             </FormItem>
             <FormItem label="折扣" prop="discount" v-if="form.couponType == 'DISCOUNT'">
-              <Input type="number" v-model="form.couponDiscount" placeholder="折扣" clearable style="width: 260px" />
+              <Input :disabled="disabled" type="number" v-model="form.couponDiscount" placeholder="折扣" clearable style="width: 260px" />
               <span class="describe">请输入0-10之间数字，可以输入一位小数</span>
             </FormItem>
             <FormItem label="面额" prop="price" v-if="form.couponType == 'PRICE'">
-              <Input type="text" v-model="form.price" placeholder="面额" clearable style="width: 260px" />
+              <Input :disabled="disabled" type="text" v-model="form.price" placeholder="面额" clearable style="width: 260px" />
             </FormItem>
             <FormItem label="活动类型" prop="getType">
-              <Select v-model="form.getType" style="width: 260px">
+              <Select :disabled="disabled" v-model="form.getType" style="width: 260px">
                 <Option value="FREE">免费领取</Option>
                 <Option value="ACTIVITY">活动赠送</Option>
               </Select>
             </FormItem>
 
             <FormItem label="发放数量" v-if="form.getType == 'FREE'" prop="publishNum">
-              <Input v-model="form.publishNum" placeholder="发放数量" style="width: 260px" />
+              <Input :disabled="disabled" v-model="form.publishNum" placeholder="发放数量" style="width: 260px" />
               <span class="tips ml_10">如果发放数量为0时,则代表不限制发放数量</span>
             </FormItem>
           </div>
           <h4>使用限制</h4>
           <div class="form-item-view">
             <FormItem label="消费门槛" prop="consumeThreshold">
-              <Input type="text" v-model="form.consumeThreshold" placeholder="消费门槛" clearable style="width: 260px" />
+              <Input :disabled="disabled" type="text" v-model="form.consumeThreshold" placeholder="消费门槛" clearable style="width: 260px" />
             </FormItem>
             <FormItem label="领取限制" v-if="form.getType == 'FREE'" prop="couponLimitNum">
-              <Input v-model="form.couponLimitNum" placeholder="领取限制" clearable style="width: 260px" />
+              <Input :disabled="disabled" v-model="form.couponLimitNum" placeholder="领取限制" clearable style="width: 260px" />
               <span class="tips ml_10">如果领取限制为0时,则代表不限制领取数量</span>
             </FormItem>
             <FormItem label="有效期" prop="rangeTime">
-              <DatePicker type="datetimerange" v-model="form.rangeTime" format="yyyy-MM-dd HH:mm:ss" placeholder="请选择" :options="options" style="width: 260px">
+              <DatePicker :disabled="disabled" type="datetimerange" v-model="form.rangeTime" format="yyyy-MM-dd HH:mm:ss" placeholder="请选择" :options="options" style="width: 260px">
               </DatePicker>
             </FormItem>
             <FormItem label="使用范围" prop="scopeType">
-              <RadioGroup type="button" button-style="solid" v-model="form.scopeType">
-                <Radio label="ALL">全品类</Radio>
-                <Radio label="PORTION_GOODS">指定商品</Radio>
-                <Radio label="PORTION_GOODS_CATEGORY">部分商品分类</Radio>
+              <RadioGroup  type="button" button-style="solid" v-model="form.scopeType">
+                <Radio :disabled="disabled" label="ALL">全品类</Radio>
+                <Radio :disabled="disabled" label="PORTION_GOODS">指定商品</Radio>
+                <Radio :disabled="disabled" label="PORTION_GOODS_CATEGORY">部分商品分类</Radio>
               </RadioGroup>
             </FormItem>
 
             <FormItem style="width: 100%" v-if="form.scopeType == 'PORTION_GOODS'">
               <div style="display: flex; margin-bottom: 10px">
-                <Button type="primary" @click="openSkuList">选择商品</Button>
-                <Button type="error" ghost style="margin-left: 10px" @click="delSelectGoods">批量删除</Button>
+                <Button :disabled="disabled" type="primary" @click="openSkuList">选择商品</Button>
+                <Button :disabled="disabled" type="error" ghost style="margin-left: 10px" @click="delSelectGoods">批量删除</Button>
               </div>
-              <Table class="mt_10" border :columns="columns" :data="form.promotionGoodsList" @on-selection-change="changeSelect">
+              <Table class="mt_10" :disabled="disabled" border :columns="columns" :data="form.promotionGoodsList" @on-selection-change="changeSelect">
                 <template slot-scope="{ row }" slot="QRCode">
                   <img :src="row.QRCode || '../../../assets/lili.png'" width="50px" height="50px" alt="" />
                 </template>
@@ -70,16 +70,16 @@
             </FormItem>
 
             <FormItem v-if="form.scopeType == 'PORTION_GOODS_CATEGORY'">
-              <Cascader @on-change="getGoodsCategory" :data="goodsCategoryList" style="width:300px;" v-model="form.scopeIdGoods"></Cascader>
+              <Cascader :disabled="disabled" @on-change="getGoodsCategory" :data="goodsCategoryList" style="width:300px;" v-model="form.scopeIdGoods"></Cascader>
 
             </FormItem>
 
             <FormItem label="范围描述" prop="description">
-              <Input v-model="form.description" type="textarea" :rows="4" maxlength="50" show-word-limit clearable style="width: 260px" />
+              <Input :disabled="disabled" v-model="form.description" type="textarea" :rows="4" maxlength="50" show-word-limit clearable style="width: 260px" />
             </FormItem>
             <div>
-              <Button type="text" @click="$router.push({ name: 'coupon' })">返回</Button>
-              <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
+              <Button :disabled="disabled" type="text" @click="$router.push({ name: 'coupon' })">返回</Button>
+              <Button :disabled="disabled" type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
             </div>
           </div>
         </div>
@@ -125,6 +125,7 @@ export default {
 
     return {
       modalType: 0, // 判断是新增还是编辑优惠券 0 新增  1 编辑
+      disabled: this.$route.query.onlyView,
       form: {
         /** 店铺承担比例 */
         sellerCommission: 0,

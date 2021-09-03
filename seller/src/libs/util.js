@@ -446,7 +446,7 @@ util.initRouterNode = function (routers, data) {  // data为所有子菜单数�
         }
         let meta = {};
         // 给页面添加标题
-        meta.title = menu.title ? menu.title + " - lilishop商家后台" : null;
+        meta.title = menu.title ? menu.title + " - "+config.title+"商家后台" : null;
         meta.firstRouterName = menu.firstRouterName
         meta.keepAlive = menu.keepAlive ? true : false
         menu.meta = meta;

@@ -67,7 +67,14 @@ externals = enableProduction ? externals : {};
 jsPlugin = enableProduction ? jsPlugin : [];
 
 module.exports = {
+  // 输出文件目录，当运行 vue-cli-service build 时生成的生产环境构建文件的目录。注意目标目录在构建之前会被清除
+  outputDir:'dist',
+  // 放置生成的静态资源 (js、css、img、fonts) 的目录。
+  assetsDir:'static',
+
   css: {
+    // 是否为 CSS 开启 source map。设置为 true 之后可能会影响构建的性能。
+    sourceMap:false,
     loaderOptions: {
       // 向 CSS 相关的 loader 传递选项
       less: {
