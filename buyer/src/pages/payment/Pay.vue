@@ -5,7 +5,7 @@
     <div class="width_1200 logo">
       <div>
         <router-link to="/"
-          ><img :src="$store.state.logoImg" alt="lili shop" title="lilishop"
+        ><img :src="$store.state.logoImg" alt="lili shop" title="lilishop"
         /></router-link>
         <div>结算页</div>
       </div>
@@ -23,7 +23,7 @@
         <span :class="stepIndex == 2 ? 'active' : ''">3.成功提交订单</span>
       </div>
     </div>
-    <Divider />
+    <Divider/>
     <div class="content width_1200">
       <!-- 收货地址 -->
       <div class="address">
@@ -46,8 +46,9 @@
               <span>{{ item.name }}</span>
               <Tag class="ml_10" v-if="item.isDefault" color="red">默认</Tag>
               <Tag class="ml_10" v-if="item.alias" color="warning">{{
-                item.alias
-              }}</Tag>
+                  item.alias
+                }}
+              </Tag>
             </div>
             <div>{{ item.mobile }}</div>
             <div>
@@ -59,16 +60,16 @@
                 class="ml_10"
                 v-if="!item.isDefault"
                 @click.stop="delAddress(item)"
-                >删除</span
+              >删除</span
               >
             </div>
             <div class="corner-icon" v-show="selectedAddress.id === item.id">
               <div></div>
-              <Icon type="md-checkmark" />
+              <Icon type="md-checkmark"/>
             </div>
           </div>
           <div class="add-address" @click="editAddress('')">
-            <Icon type="ios-add-circle-outline" />
+            <Icon type="ios-add-circle-outline"/>
             <div>添加新地址</div>
           </div>
         </div>
@@ -79,8 +80,8 @@
           v-if="addressList.length > 3"
         >
           {{ moreAddr ? "收起地址" : "更多地址" }}
-          <Icon v-show="!moreAddr" type="md-arrow-dropdown" />
-          <Icon v-show="moreAddr" type="md-arrow-dropup" />
+          <Icon v-show="!moreAddr" type="md-arrow-dropdown"/>
+          <Icon v-show="moreAddr" type="md-arrow-dropup"/>
         </div>
       </div>
       <!-- 商品信息 -->
@@ -97,8 +98,8 @@
           <div class="shop-name">
             <span>
               <span class="hover-color" @click="goShopPage(shop.storeId)">{{
-                shop.storeName
-              }}</span
+                  shop.storeName
+                }}</span
               >&nbsp;&nbsp;
             </span>
           </div>
@@ -114,19 +115,19 @@
                   goGoodsDetail(goods.goodsSku.id, goods.goodsSku.goodsId)
                 "
               >
-                <img :src="goods.goodsSku.thumbnail" alt="" />
+                <img :src="goods.goodsSku.thumbnail" alt=""/>
                 <span style="vertical-align: top">{{
-                  goods.goodsSku.goodsName
-                }}</span>
+                    goods.goodsSku.goodsName
+                  }}</span>
               </span>
               <span class="goods-price">{{
-                goods.goodsSku.price | unitPrice("￥")
-              }}</span>
+                  goods.purchasePrice | unitPrice("￥")
+                }}</span>
               <span>x{{ goods.num }}</span>
               <span>{{ goods.goodsSku.quantity > 0 ? "有货" : "无货" }}</span>
               <span class="goods-price">{{
-                (goods.goodsSku.price * goods.num) | unitPrice("￥")
-              }}</span>
+                  goods.subTotal | unitPrice("￥")
+                }}</span>
             </div>
           </div>
           <div class="order-mark">
@@ -138,7 +139,7 @@
               placeholder="订单备注"
             />
             <span style="font-size: 12px; color: #999"
-              >提示：请勿填写有关支付、收货、发票方面的信息</span
+            >提示：请勿填写有关支付、收货、发票方面的信息</span
             >
           </div>
         </div>
@@ -147,7 +148,7 @@
       <div class="invoice">
         <div class="card-head mt_20 mb_20">
           <span class="relative"
-            >发票信息<span class="inv-tips">
+          >发票信息<span class="inv-tips">
               <Icon
                 type="ios-alert-outline"
               />开企业抬头发票须填写纳税人识别号，以免影响报销
@@ -177,18 +178,18 @@
                 <span
                   v-if="item.couponType === 'PRICE'"
                   class="fontsize_12 global_color"
-                  >￥<span class="price">{{
+                >￥<span class="price">{{
                     item.price | unitPrice
                   }}</span></span
                 >
                 <span
                   v-if="item.couponType === 'DISCOUNT'"
                   class="fontsize_12 global_color"
-                  ><span class="price">{{ item.discount }}</span
-                  >折</span
+                ><span class="price">{{ item.discount }}</span
+                >折</span
                 >
                 <span class="describe"
-                  >满{{ item.consumeThreshold }}元可用</span
+                >满{{ item.consumeThreshold }}元可用</span
                 >
               </div>
               <p>使用范围：{{ useScope(item.scopeType) }}</p>
@@ -206,7 +207,7 @@
               class="c-right"
               v-if="usedCouponId.includes(item.id)"
               @click="useCoupon(item.id, false)"
-              >放弃优惠</a
+            >放弃优惠</a
             >
             <i class="circle-top"></i>
             <i class="circle-bottom"></i>
@@ -219,21 +220,27 @@
           <span>{{ totalNum }}件商品，总商品金额：</span
           ><span>{{ priceDetailDTO.goodsPrice | unitPrice("￥") }}</span>
         </div>
-        <div>
+        <div v-if="priceDetailDTO.freightPrice>0">
           <span>运费：</span
           ><span>{{ priceDetailDTO.freightPrice | unitPrice("￥") }}</span>
         </div>
-        <div>
+        <div v-if="priceDetailDTO.discountPrice>0">
           <span>优惠金额：</span
           ><span
-            >-{{
-              (priceDetailDTO.discountPrice +
-                priceDetailDTO.couponPrice +
-                priceDetailDTO.updatePrice)
-                | unitPrice("￥")
-            }}</span
-          >
+        >-{{
+            priceDetailDTO.discountPrice | unitPrice("￥")
+          }}</span
+        >
         </div>
+        <div v-if="priceDetailDTO.couponPrice>0">
+          <span>优惠券金额：</span
+          ><span
+        >-{{
+            priceDetailDTO.couponPrice | unitPrice("￥")
+          }}</span
+        >
+        </div>
+
         <div v-if="$route.query.way === 'POINTS'">
           <span>应付积分：</span
           ><span class="actrual-price">{{
@@ -277,7 +284,7 @@
 <script>
 import invoiceModal from '@/components/invoiceModal';
 import addressManage from '@/components/addressManage';
-import { memberAddress, delMemberAddress } from '@/api/address';
+import {memberAddress, delMemberAddress} from '@/api/address';
 import {
   cartGoodsPay,
   createTrade,
@@ -285,10 +292,11 @@ import {
   selectCoupon,
   couponNum
 } from '@/api/cart';
-import { canUseCouponList } from '@/api/member.js';
+import {canUseCouponList} from '@/api/member.js';
+
 export default {
   name: 'Pay',
-  components: { invoiceModal, addressManage },
+  components: {invoiceModal, addressManage},
   data () {
     return {
       stepIndex: 1, // 顶部步骤条状态
@@ -341,7 +349,7 @@ export default {
     getGoodsDetail () {
       // 订单商品详情
       this.$Spin.show();
-      cartGoodsPay({ way: this.$route.query.way })
+      cartGoodsPay({way: this.$route.query.way})
         .then((res) => {
           this.$Spin.hide();
           if (res.success) {
@@ -385,7 +393,7 @@ export default {
     },
     getCouponNum () {
       // 获取可用优惠券数量
-      couponNum({ way: this.$route.query.way }).then((res) => {
+      couponNum({way: this.$route.query.way}).then((res) => {
         this.canUseCouponNum = res.result;
         if (res.result) {
           let storeArr = [];
@@ -459,14 +467,15 @@ export default {
             }
           });
         },
-        onCancel: () => {}
+        onCancel: () => {
+        }
       });
     },
     goGoodsDetail (skuId, goodsId) {
       // 跳转商品详情
       let routeUrl = this.$router.resolve({
         path: '/goodsDetail',
-        query: { skuId, goodsId }
+        query: {skuId, goodsId}
       });
       window.open(routeUrl.href, '_blank');
     },
@@ -474,7 +483,7 @@ export default {
     goShopPage (id) {
       let routeUrl = this.$router.resolve({
         path: '/Merchant',
-        query: { id: id }
+        query: {id: id}
       });
       window.open(routeUrl.href, '_blank');
     },
@@ -529,7 +538,7 @@ export default {
             } else {
               this.$router.push({
                 path: '/payment',
-                query: { orderType: 'TRADE', sn: res.result.sn }
+                query: {orderType: 'TRADE', sn: res.result.sn}
               });
             }
           }
@@ -567,30 +576,36 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin: 20px auto 0;
+
   div:nth-child(1) {
     display: flex;
     justify-content: space-between;
     align-items: center;
+
     img {
       width: 150px;
       height: auto;
       cursor: pointer;
     }
+
     div:nth-child(2) {
       width: 200px;
       color: #999;
       font-size: 16px;
       margin: 0 20px;
+
       span {
         color: $theme_color;
       }
     }
   }
 }
+
 .cart-steps {
   height: 30px;
   display: flex;
   align-items: center;
+
   span {
     @include content_color($light_content_color);
     height: 30px;
@@ -616,6 +631,7 @@ export default {
     color: #ff8f23;
   }
 }
+
 /** logo end */
 /** content start */
 .content {
@@ -624,10 +640,12 @@ export default {
   min-height: 200px;
   padding: 15px 25px;
 }
+
 /** 地址管理 */
 .address-manage {
   display: flex;
   flex-wrap: wrap;
+
   > div {
     border: 1px dotted #949494;
     width: 265px;
@@ -637,47 +655,58 @@ export default {
     cursor: pointer;
     color: #999;
   }
+
   .add-address {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
+
     .ivu-icon {
       font-size: 24px;
     }
   }
+
   .address-item {
     position: relative;
     font-size: 12px;
+
     > div:nth-child(1) {
       margin-bottom: 10px;
+
       span {
         margin-right: 10px;
       }
+
       > span:nth-child(1) {
         color: #000000;
         font-size: 14px;
       }
     }
+
     .edit-btn {
       font-size: 12px;
       position: absolute;
       top: 15px;
       right: 20px;
       color: $theme_color;
+
       span:hover {
         border-bottom: 1px solid $theme_color;
       }
     }
+
     .corner-icon {
       position: absolute;
       right: -1px;
       bottom: -1px;
+
       div {
         width: 0;
         border-top: 20px solid transparent;
         border-right: 20px solid $theme_color;
       }
+
       .ivu-icon {
         font-size: 12px;
         position: absolute;
@@ -688,29 +717,36 @@ export default {
       }
     }
   }
+
   .border-red {
     border-color: $theme_color;
   }
 }
+
 /** 购买商品列表 start */
 .shop-name {
   display: flex;
   justify-content: space-between;
+
   > span:nth-child(1) {
     font-weight: bold;
+
     .ivu-icon {
       color: #ff8f23;
+
       &:hover {
         color: $theme_color;
       }
     }
   }
+
   > span:nth-child(2) {
     color: #999;
     position: relative;
     display: flex;
     width: 200px;
   }
+
   .delivery-list {
     position: absolute;
     right: 0;
@@ -722,19 +758,23 @@ export default {
     width: 200px;
     min-height: 100px;
     padding: 10px;
+
     li {
       width: 90px;
       height: 30px;
       text-align: center;
+
       &:hover {
         cursor: pointer;
       }
     }
   }
 }
+
 .goods-list {
   background-color: #f8f8f8;
   margin: 10px 0 20px 0;
+
   .goods-item {
     display: flex;
     align-items: center;
@@ -742,34 +782,42 @@ export default {
     padding: 20px 0;
     margin: 0 20px;
     border-bottom: 1px dotted #999;
+
     &:last-child {
       border: none;
     }
+
     img {
       width: 48px;
       height: 48px;
     }
+
     > span {
       text-align: center;
       width: 100px;
     }
+
     > span:nth-child(1) {
       font-size: 12px;
       flex: 1;
       text-align: left;
     }
+
     > span:last-child {
       color: $theme_color;
       font-weight: bold;
     }
+
     .goods-price {
       font-size: 16px;
     }
   }
 }
+
 .order-mark {
   width: 500px;
 }
+
 /** 购买商品列表 end */
 /** 发票信息 start */
 .invoice {
@@ -781,6 +829,7 @@ export default {
     margin: 0 0 0 10px;
     font-size: 12px !important;
     box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
+
     &::before {
       content: "";
       display: inline-block;
@@ -791,6 +840,7 @@ export default {
       position: absolute;
       left: -9px;
     }
+
     .ivu-icon {
       color: #ff8f23;
       margin-right: 3px;
@@ -798,19 +848,23 @@ export default {
       font-weight: bold;
     }
   }
+
   .inovice-content {
     > span {
       margin-right: 10px;
     }
+
     > span:last-child {
       color: $theme_color;
       cursor: pointer;
+
       &:hover {
         border-bottom: 1px solid $theme_color;
       }
     }
   }
 }
+
 /** 发票信息 end */
 
 /** 订单价格 */
@@ -819,18 +873,21 @@ export default {
   margin-top: 30px;
   font-size: 16px;
   color: #999;
+
   > div > span:nth-child(2) {
     width: 130px;
     text-align: right;
     display: inline-block;
     margin-top: 10px;
   }
+
   .actrual-price {
     color: $theme_color;
     font-weight: bold;
     font-size: 20px;
   }
 }
+
 /** content end */
 /** 底部支付栏 */
 .order-footer {
@@ -842,11 +899,14 @@ export default {
   flex-direction: row-reverse;
   border-top: 1px solid #ddd;
   margin: 10px auto;
+
   div {
     text-align: center;
   }
+
   position: sticky;
   bottom: 0;
+
   .pay {
     background-color: $theme_color;
     width: 150px;
@@ -857,6 +917,7 @@ export default {
     cursor: pointer;
   }
 }
+
 /** 公共表头 */
 .card-head {
   display: flex;
@@ -868,44 +929,54 @@ export default {
   span:nth-child(1) {
     font-size: 18px;
   }
+
   span:nth-child(2) {
     font-size: 12px;
     color: #438cde;
     cursor: pointer;
+
     &:hover {
       color: $theme_color;
     }
   }
 }
+
 .ivu-divider {
   background: $theme_color;
   height: 2px;
 }
+
 .pay-address {
   font-size: 12px;
 }
+
 .more-addr {
   cursor: pointer;
   margin-top: 10px;
   display: inline-block;
 }
+
 .coupon-item {
   width: 260px;
   height: 125px;
   margin-right: 10px;
   margin-bottom: 10px;
+
   .c-right {
     width: 30px;
     padding: 10px 7px;
   }
+
   b {
     background: url("../../assets/images/small-circle.png") top left repeat-y;
     right: 28px;
   }
+
   .circle-top,
   .circle-bottom {
     right: 22px;
   }
+
   .used {
     position: absolute;
     top: 60px;
@@ -914,6 +985,7 @@ export default {
     height: 50px;
   }
 }
+
 .coupon-list {
   max-height: 260px;
   overflow: scroll;

@@ -90,14 +90,14 @@
                 </div>
               </div>
               <div class="width_150">
-                {{ goods.goodsSku.price | unitPrice("￥") }}
+                {{ goods.purchasePrice | unitPrice("￥") }}
               </div>
               <div class="width_100">
                 <InputNumber :min="1" size="small" v-model="goods.num" @on-change="changeNum(goods.num, goods.goodsSku.id)"></InputNumber>
                 <div class="fontsize_12">{{goods.goodsSku.quantity > 0 ? '有货' : '无货'}}</div>
               </div>
               <div class="width_150">
-                {{ goods.num * goods.goodsSku.price | unitPrice("￥") }}
+                {{ goods.subTotal | unitPrice("￥") }}
               </div>
               <div class="width_100">
                 <span class="handle-btn" v-if="!goods.errorMessage" @click="delGoods(goods.goodsSku.id)">删除</span>
