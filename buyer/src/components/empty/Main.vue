@@ -35,6 +35,6 @@ export default {
 }
 p {
   cursor: pointer;
-  @include sub_color($light_sub_color);
+ 
 }
 </style>

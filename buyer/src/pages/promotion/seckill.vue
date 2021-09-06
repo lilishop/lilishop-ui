@@ -164,7 +164,7 @@ export default {
   background-color: #666;
 }
 .promotion-decorate::before,.promotion-decorate::after{
-  background-image: url('../../../static/sprite@2x.png');
+  background-image: url('/src/assets/images/sprite@2x.png');
 }
 .time-line{
   width: 1200px;

@@ -342,7 +342,7 @@ export default {
   font-weight: bold;
 }
 .subTips {
-  @include sub_color($light_sub_color);
+ 
 }
 .fontsize_48 {
   font-size: 48px;

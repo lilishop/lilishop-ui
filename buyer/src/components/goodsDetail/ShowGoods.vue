@@ -346,7 +346,7 @@ export default {
 }
 .inventory {
   padding-left: 4px;
-  @include sub_color($light_sub_color);
+ 
 }
 
 .global_color {
@@ -597,6 +597,9 @@ export default {
 
 .add-buy-car {
   margin-top: 15px;
+  >*{
+    margin: 0 4px;
+  }
 }
 
 .goodsConfig {

@@ -421,9 +421,6 @@ export default {
       }
     }
 
-    img:hover{
-      cursor: url(require('../../../static/small.cur')),auto;
-    }
   }
 }
 

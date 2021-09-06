@@ -496,7 +496,7 @@ export default {
   font-weight: bold;
 }
 .subTips {
-  @include sub_color($light_sub_color);
+ 
 }
 .account-btns {
   margin: 10px 0;
