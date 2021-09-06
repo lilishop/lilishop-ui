@@ -150,7 +150,7 @@
           <template slot="goodsSlot" slot-scope="{row}">
             <div style="margin-top: 5px; height: 80px; display: flex">
               <div style="">
-                <img :src="row.image" style="height: 60px; margin-top: 1px; width: 60px"/>
+                <img :src="row.image" style="height: 60px; margin-top: 1px; width: 60px" />
               </div>
 
               <div style="margin-left: 13px">
@@ -165,7 +165,7 @@
                 <Poptip trigger="hover" style="display: block;" title="扫码在手机中查看" transfer>
                   <div slot="content">
                     <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)" :margin="0" colorDark="#000" colorLight="#fff"
-                            :size="150"></vue-qr>
+                      :size="150"></vue-qr>
                   </div>
                   <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
                 </Poptip>
@@ -215,11 +215,11 @@
         <span>修改金额</span>
       </p>
       <div>
-        <Form ref="modifyPriceForm" :model="modifyPriceForm" label-position="left" :label-width="100"
-              :rules="modifyPriceValidate">
+        <Form ref="modifyPriceForm" :model="modifyPriceForm" label-position="left" :label-width="70"
+          :rules="modifyPriceValidate">
           <FormItem label="订单金额" prop="price">
-            <Input v-model="modifyPriceForm.price" size="large" number maxlength="9"><span
-              slot="append">元</span></Input>
+            <InputNumber style="width:100px;" v-model="modifyPriceForm.price" :min="0" :max="999999"></InputNumber>
+            <span class="ml_10">元</span>
           </FormItem>
         </Form>
       </div>
@@ -236,10 +236,10 @@
       </p>
       <div>
         <Form ref="orderCancelForm" :model="orderCancelForm" label-position="left" :label-width="100"
-              :rules="orderCancelValidate">
+          :rules="orderCancelValidate">
           <FormItem label="取消原因" prop="reason">
             <Input v-model="orderCancelForm.reason" type="textarea" :autosize="{ minRows: 2, maxRows: 5 }"
-                   placeholder="请输入取消原因"></Input>
+              placeholder="请输入取消原因"></Input>
           </FormItem>
         </Form>
       </div>
@@ -263,11 +263,11 @@
             <Input v-model="addressForm.consigneeMobile" size="large" maxlength="11"></Input>
           </FormItem>
           <FormItem label="地址信息" prop="consigneeAddressPath">
-            <Input v-model="addr" disabled style="width: 305px" v-if="showRegion == false"/>
+            <Input v-model="addr" disabled style="width: 305px" v-if="showRegion == false" />
             <Button v-if="showRegion == false" @click="regionClick" :loading="submitLoading" type="primary"
-                    icon="ios-create-outline" style="margin-left: 8px">修改
+              icon="ios-create-outline" style="margin-left: 8px">修改
             </Button>
-            <region style="width: 400px" @selected="selectedRegion" v-if="showRegion == true"/>
+            <region style="width: 400px" @selected="selectedRegion" v-if="showRegion == true" />
           </FormItem>
           <FormItem label="详细地址" prop="consigneeDetail">
             <Input v-model="addressForm.consigneeDetail" size="large" maxlength="50"></Input>
@@ -286,7 +286,7 @@
       </p>
       <div class="order-log-div">
         <Table :loading="loading" border :columns="orderLogColumns" :data="orderInfo.orderLogs" ref="table"
-               sortable="custom"></Table>
+          sortable="custom"></Table>
       </div>
 
       <div slot="footer" style="text-align: right">
@@ -300,16 +300,16 @@
 import * as API_Order from "@/api/order";
 import * as RegExp from "@/libs/RegExp.js";
 import region from "@/views/lili-components/region";
-import vueQr from 'vue-qr'
+import vueQr from "vue-qr";
 export default {
   name: "orderList",
   components: {
     region,
-    "vue-qr":vueQr
+    "vue-qr": vueQr,
   },
   data() {
     return {
-      loading:false, //加载表格
+      loading: false, //加载表格
       submitLoading: false, // 添加或编辑提交状态
       addr: "", //地区
       regionId: [], //地区id
@@ -348,7 +348,7 @@ export default {
       //验证要调整的订单金额
       modifyPriceValidate: {
         reason: [
-          {required: true, message: "请输入大于0小于99999的合法金额"},
+          { required: true, message: "请输入大于0小于99999的合法金额" },
           {
             pattern: /^[1-9]\d{0,3}(\.\d{1,2})?$/,
             message: "请输入大于0小于9999的合法金额",
@@ -360,7 +360,7 @@ export default {
       //验证取消订单原因
       orderCancelValidate: {
         reason: [
-          {required: true, message: "取消原因不能为空", trigger: "blur"},
+          { required: true, message: "取消原因不能为空", trigger: "blur" },
         ],
       },
       addressModal: false, //弹出修改收件信息框
@@ -374,18 +374,18 @@ export default {
       },
       orderDeliverFormValidate: {
         logisticsNo: [
-          {required: true, message: "发货单号不能为空", trigger: "change"},
+          { required: true, message: "发货单号不能为空", trigger: "change" },
         ],
         logisticsId: [
-          {required: true, message: "请选择物流公司", trigger: "blur"},
+          { required: true, message: "请选择物流公司", trigger: "blur" },
         ],
       },
       addressRule: {
         consigneeName: [
-          {required: true, message: "收货人姓名不能为空", trigger: "blur"},
+          { required: true, message: "收货人姓名不能为空", trigger: "blur" },
         ],
         consigneeMobile: [
-          {required: true, message: "联系方式不能为空", trigger: "blur"},
+          { required: true, message: "联系方式不能为空", trigger: "blur" },
           {
             pattern: RegExp.mobile,
             trigger: "blur",
@@ -393,7 +393,7 @@ export default {
           },
         ],
         consigneeDetail: [
-          {required: true, message: "详细地址不能为空", trigger: "blur"},
+          { required: true, message: "详细地址不能为空", trigger: "blur" },
         ],
       },
 
