@@ -1,13 +1,10 @@
-/**
- * Created by Andste on 2018/5/3.
- */
-
-import Cookies from 'js-cookie';
-const psl = require('psl');
+import Cookies from "js-cookie";
+const psl = require("psl");
 
 export default {
   setItem: (key, value, options = {}) => {
     if (process.client) {
+      console.log(process.client);
       const pPsl = psl.parse(document.domain);
       let domain = pPsl.domain;
       if (/\d+\.\d+\.\d+\.\d+/.test(pPsl.input)) domain = pPsl.input;
@@ -15,7 +12,7 @@ export default {
     }
     Cookies.set(key, value, options);
   },
-  getItem: (key) => {
+  getItem: key => {
     return Cookies.get(key);
   },
   removeItem: (key, options = {}) => {

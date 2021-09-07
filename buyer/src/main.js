@@ -3,7 +3,7 @@ import App from './App';
 import router from './router';
 import ViewUI from 'view-design';
 import './assets/styles/theme.less';
-import './assets/iconfont/iconfont.css';
+// import './assets/iconfont/iconfont.css';
 import * as filters from './plugins/filters';
 import store from '@/vuex/store'
 import storage from '@/plugins/storage';
@@ -47,9 +47,7 @@ Vue.prototype.connectCs = function (sign = '37ef9b97807d03c6741298ed4eb5b536d2d2
 Vue.prototype.Cookies = storage
 /* eslint-disable no-new */
 new Vue({
-  el: '#app',
   router,
   store,
-  components: { App },
-  template: '<App/>'
-});
+  render: h => h(App)
+}).$mount("#app")

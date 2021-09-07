@@ -157,6 +157,6 @@ export default {
   position: relative;
   height: 0px;
   top: -38px;
-  left: 336px;
+  left: 339px;
 }
 </style>

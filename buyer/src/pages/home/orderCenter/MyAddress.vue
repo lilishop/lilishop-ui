@@ -110,7 +110,7 @@ export default {
 }
 
 .address-content-title {
-  @include sub_color($light_sub_color);
+ 
 }
 
 .address-action span {

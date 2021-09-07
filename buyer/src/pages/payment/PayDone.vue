@@ -21,7 +21,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang='scss'>
 .pay-done-box {
   margin: 100px;
   display: flex;
@@ -31,5 +31,8 @@ export default {
 .pay-btn{
   width: 300px;
   margin: 0 auto;
+  >*{
+    margin:0 4px;
+  }
 }
 </style>

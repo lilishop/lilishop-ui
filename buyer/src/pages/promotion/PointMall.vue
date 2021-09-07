@@ -150,7 +150,7 @@ export default {
   justify-content: flex-end;
 }
 .promotion-decorate::before,.promotion-decorate::after{
-  background-image: url('../../../static/sprite@2x.png');
+  background-image: url('/src/assets/images/sprite@2x.png');
 }
 .cate-select-con{
   display: block;

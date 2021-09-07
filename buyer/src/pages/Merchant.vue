@@ -41,23 +41,23 @@
         class="goods-show-info"
         v-for="(item, index) in goodsList"
         :key="index"
-        @click="goGoodsDetail(item.id, item.goodsId)"
+        @click="goGoodsDetail(item.content.id, item.content.goodsId)"
       >
         <div class="goods-show-img">
-          <img width="220" height="220" :src="item.thumbnail" />
+          <img width="220" height="220" :src="item.content.thumbnail" />
         </div>
         <div class="goods-show-price">
           <span>
             <span class="seckill-price text-danger">{{
-              item.price | unitPrice("￥")
+              item.content.price | unitPrice("￥")
             }}</span>
           </span>
         </div>
         <div class="goods-show-detail">
-          <span>{{ item.goodsName }}</span>
+          <span>{{ item.content.goodsName }}</span>
         </div>
         <div class="goods-show-num">
-          已有<span>{{ item.commentNum || 0 }}</span>人评价
+          已有<span>{{ item.content.commentNum || 0 }}</span>人评价
         </div>
       </div>
     </div>
@@ -237,6 +237,6 @@ export default {
   }
 }
 .promotion-decorate::before,.promotion-decorate::after{
-  background-image: url('../../static/sprite@2x.png');
+  background-image: url('/src/assets/images/sprite@2x.png');
 }
 </style>

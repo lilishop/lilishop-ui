@@ -285,6 +285,9 @@ export default {
 
 .add-buy-car {
   margin-top: 15px;
+  >*{
+    margin: 0 4px;
+  }
 }
 .item-select {
   display: flex;

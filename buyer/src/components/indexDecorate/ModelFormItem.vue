@@ -152,15 +152,7 @@ export default {
     }
   }
 }
-/** 限时秒杀 */
-.limit-img {
-  display: flex;
-  flex-direction: row;
-  img {
-    width: 300px;
-    height: 100px;
-  }
-}
+
 /** 折扣广告 */
 .discountAdvert {
   width: 1300px;
@@ -173,7 +165,7 @@ export default {
   padding-left: 295px;
   display: flex;
   flex-wrap: wrap;
-  align-items: start;
+  align-items: flex-start;
   img {
     margin-top: 10px;
     margin-right: 10px;
@@ -185,16 +177,6 @@ export default {
   }
 }
 
-/** 装修模态框 内部样式start */
-.modal-top-advert {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  > * {
-    margin-bottom: 10px;
-  }
-}
 .width_1200_auto{
   width: 1200px;
   margin: 0 auto;

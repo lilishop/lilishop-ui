@@ -17,10 +17,10 @@
         </li>
         <li v-show="!!userInfo.username">
           <div class="username-p">
-            <p>
+            <div>
               <Avatar class="person-icon" :src="userInfo.face" icon="person" size="small" />
               <span class="username">{{ userInfo.nickName? userInfo.nickName : userInfo.username | secrecyMobile }}</span>
-            </p>
+            </div>
             <transition name='fade'>
               <ul class="drop-items">
                 <li @click="goUserCenter('/home')">我的主页</li>
@@ -184,7 +184,7 @@ export default {
 .first,
 .username,
 .shopping-cart-null span {
-  @include sub_color($light_sub_color);
+ 
 }
 
 .box {
@@ -308,8 +308,11 @@ export default {
 }
 .username-p {
   position: relative;
-  p{
+  div{
     cursor: pointer;
+    >span{
+      margin-left: 5px;
+    }
   }
   .drop-items {
     position: absolute;
