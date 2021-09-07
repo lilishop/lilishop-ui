@@ -29,7 +29,7 @@ let cdn = {
     "https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js",
     "https://cdn.jsdelivr.net/npm/vuex@3.1.2/dist/vuex.min.js",
     "https://cdn.jsdelivr.net/npm/vue-router@3.1.3/dist/vue-router.min.js",
-    "https://cdn.jsdelivr.net/npm/axios@0.19.0/dist/axios.min.js",
+    "https://cdn.jsdelivr.net/npm/axios@0.19.2/dist/axios.min.js",
     "https://cdn.jsdelivr.net/npm/view-design@4.1.1/dist/iview.min.js",
     "https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"
   ]
