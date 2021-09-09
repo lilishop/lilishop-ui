@@ -15,6 +15,23 @@ export function unitPrice(val, unit, location) {
   }
   return (unit || '') + price
 }
+// 转义 
+export function enCode(v1) {
+  var entry = {
+    "&#39;": "'",
+    "&lt;": "<",
+    "&gt;": ">",
+    "&#40;": "(",
+    "&#41;": ")"
+  };
+
+  v1 = v1.replace(/(&#39;)|(&lt;)|(&gt;)|(&#40;)|(&#41;)|\s/gi, function($0) {
+    return entry[$0] || $0;
+  });
+
+  return v1;
+}
+
 
 /**
  * 订单来源

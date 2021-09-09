@@ -195,9 +195,12 @@ export default {
       this.$emit("on-change", this.data);
     },
   },
-  watch: {
-    value(val) {
-      this.setData(val);
+ watch: {
+    value: {
+      handler: function (val) {
+        // 赋值给富文本
+        this.setData(this.$options.filters.enCode(val));
+      },
     },
   },
   mounted() {

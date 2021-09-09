@@ -73,3 +73,8 @@ export default {
   }
 };
 </script>
+<style lang="scss" scoped>
+.ivu-menu-dark.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu), .ivu-menu-dark.ivu-menu-vertical .ivu-menu-submenu-title-active:not(.ivu-menu-submenu){
+    color: $theme_color;
+}
+</style>

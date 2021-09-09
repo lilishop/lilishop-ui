@@ -194,10 +194,10 @@ export default {
     },
   },
   watch: {
-    value: {
+   value: {
       handler: function (val) {
         // 赋值给富文本
-        this.setData(val);
+        this.setData(this.$options.filters.enCode(val));
       },
     },
   },
