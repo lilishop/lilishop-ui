@@ -580,18 +580,19 @@ export default {
     submitPermEdit() {
       this.saveRoleWay = [];
       this.selectIsSuperModel = true; //打开选择权限
-      let selectedNodes = this.$refs.tree.getCheckedNodes();
+      let selectedNodes = this.$refs.tree.getCheckedAndIndeterminateNodes();
       let way = [];
       selectedNodes.forEach((e) => {
-       
+       console.log(e)
         let perm = {
           title: e.title,
-          isSuper: e.isSuper,
+          isSuper: e.isSuper || false,
           menuId: e.id,
           roleId: this.editRolePermId,
         };
         way.push(perm);
-        this.saveRoleWay = way;
+        this.$set(this,'saveRoleWay',way)
+     
       });
     },
 
