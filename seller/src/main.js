@@ -8,8 +8,6 @@ import vueQr from "vue-qr";
 import App from "./App";
 import { router } from "./router/index";
 import store from "./store";
-import config from '@/config/index'
-
 import {
   getRequest,
   postRequest,
@@ -50,8 +48,8 @@ Vue.prototype.setStore = setStore;
 Vue.prototype.getStore = getStore;
 Vue.prototype.removeStore = removeStore;
 Vue.prototype.md5 = md5;
-const PC_URL = config.PC_URL; // 跳转买家端地址 pc端
-const WAP_URL = config.WAP_URL; // 跳转买家端地址 wap端
+const PC_URL = BASE.PC_URL; // 跳转买家端地址 pc端
+const WAP_URL = BASE.WAP_URL; // 跳转买家端地址 wap端
 Vue.prototype.linkTo = function(goodsId, skuId) {
   // 跳转买家端商品
   window.open(
