@@ -88,7 +88,7 @@ export default {
   overflow-y: auto;
 }
 .ivu-menu-dark.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu), .ivu-menu-dark.ivu-menu-vertical .ivu-menu-submenu-title-active:not(.ivu-menu-submenu){
-    color: #ed3f14;
+    color: $theme_color;
 }
 /deep/.ivu-menu-vertical .ivu-menu-item-group-title {
     height: 40px;

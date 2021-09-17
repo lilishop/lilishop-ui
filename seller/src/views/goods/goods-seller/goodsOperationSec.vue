@@ -166,7 +166,7 @@
                               <img v-if="previewPicture !== ''" :src="previewPicture" />
                             </div>
                             <Divider />
-                            <vuedraggable :list="selectedSku.images" :animation="200" style="display:inline-block;">
+                            <vuedraggable  :list="selectedSku.images" :animation="200" style="display:inline-block;">
                               <div class="sku-upload-list" v-for="(img, __index) in selectedSku.images" :key="__index">
                                 <template>
                                   <img :src="img.url" />
@@ -900,13 +900,13 @@ export default {
         });
       });
 
-      this.baseInfoForm.goodsType != "VIRTUAL_GOODS";
-
-      pushData.push(
-        {
+     this.baseInfoForm.goodsType != "VIRTUAL_GOODS"
+        ? pushData.push({
           title: "重量",
           slot: "weight",
-        },
+        })
+        : "";
+      pushData.push(
         {
           title: "货号",
           slot: "sn",
@@ -928,7 +928,6 @@ export default {
           slot: "images",
         }
       );
-      this.baseInfoForm.goodsType != "VIRTUAL_GOODS" ? pushData.shift() : "";
 
       this.skuTableColumn = pushData;
       //克隆所有渲染的数据

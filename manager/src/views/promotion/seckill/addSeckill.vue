@@ -176,6 +176,7 @@ export default {
           delete this.form.createTime;
           delete this.form.updateTime;
           delete this.form.endTime;
+          delete this.form.seckillApplyList;
           // 编辑
           updateSeckill(this.form).then((res) => {
             this.submitLoading = false;

@@ -60,10 +60,10 @@
           <div class="title">{{ item.title }}</div>
           <div class="content">
             <RadioGroup type="button" button-style="solid" v-model="item.isSuper">
-              <Radio :label="true">
+              <Radio :label="1">
                 <span>操作数据权限</span>
               </Radio>
-              <Radio :label="false">
+              <Radio :label="0">
                 <span>查看权限</span>
               </Radio>
             </RadioGroup>
@@ -280,23 +280,23 @@ export default {
               {
                 props: {
                   color:
-                    data.isSuper == true
+                    data.isSuper == 1
                       ? "red"
-                      : data.isSuper == false
+                      : data.isSuper == 0
                       ? "default"
                       : "default",
                 },
                 style: {
                   "margin-left": "10px",
                   display:
-                    data.isSuper == true || data.isSuper == false
+                    data.isSuper == 1 || data.isSuper == 0
                       ? "inline-block"
                       : "none",
                 },
               },
-              data.isSuper == true
+              data.isSuper == 1
                 ? "操作权限"
-                : data.isSuper == false
+                : data.isSuper == 0
                 ? "查看权限"
                 : ""
             ),
@@ -331,7 +331,7 @@ export default {
      */
     setRole(val) {
       let enable;
-      val == "onlyView" ? (enable = false) : (enable = true);
+      val == "onlyView" ? (enable = 0) : (enable = 1);
       this.saveRoleWay.map((item) => {
         item.isSuper = enable;
       });
@@ -580,19 +580,21 @@ export default {
     submitPermEdit() {
       this.saveRoleWay = [];
       this.selectIsSuperModel = true; //打开选择权限
-      let selectedNodes = this.$refs.tree.getCheckedNodes();
+      let selectedNodes = this.$refs.tree.getCheckedAndIndeterminateNodes();
       let way = [];
       selectedNodes.forEach((e) => {
-       
+       console.log(e)
         let perm = {
           title: e.title,
-          isSuper: e.isSuper,
+          isSuper: e.isSuper ? e.isSuper = 1 : e.isSuper = 0 || 0,
           menuId: e.id,
           roleId: this.editRolePermId,
         };
         way.push(perm);
-        this.saveRoleWay = way;
+        this.$set(this,'saveRoleWay',way)
+     
       });
+      console.log(this.saveRoleWay)
     },
 
     /**保存权限 */

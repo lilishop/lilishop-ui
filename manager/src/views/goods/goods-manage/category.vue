@@ -4,9 +4,10 @@
       <div class="mb_10">
         <Button @click="addParent" icon="md-add">添加一级分类</Button>
       </div>
-      <Table :load-data="handleLoadData" row-key="id" :loading="loading" :data="tableData" :columns="columns">
+      <Table class="table" :load-data="handleLoadData" row-key="id" :loading="loading" :data="tableData"
+        :columns="columns">
         <template slot="action" slot-scope="scope">
-          <Dropdown v-show="scope.row.level == 2"   trigger="click">
+          <Dropdown v-show="scope.row.level == 2" trigger="click">
             <Button size="small">
               绑定
               <Icon type="ios-arrow-down"></Icon>
@@ -19,7 +20,7 @@
           </Dropdown>
 
           &nbsp;
-          <Dropdown  trigger="click">
+          <Dropdown trigger="click">
             <Button size="small">
               操作
               <Icon type="ios-arrow-down"></Icon>
@@ -32,7 +33,8 @@
             </DropdownMenu>
           </Dropdown>
           &nbsp;
-          <Button v-show="scope.row.level != 2" type="primary" @click="addChildren(scope.row)" size="small" icon="md-add" style="margin-right: 5px">添加子分类
+          <Button v-show="scope.row.level != 2" type="primary" @click="addChildren(scope.row)" size="small"
+            icon="md-add" style="margin-right: 5px">添加子分类
           </Button>
         </template>
 
@@ -41,7 +43,8 @@
         </template>
 
         <template slot="deleteFlag" slot-scope="{row}">
-          <Tag :class="{'ml_10': row.deleteFlag}" :color="row.deleteFlag == false ? 'success' : 'error'">{{row.deleteFlag == false ? '正常启用' : '禁用'}}</Tag>
+          <Tag :class="{'ml_10': row.deleteFlag}" :color="row.deleteFlag == false ? 'success' : 'error'">
+            {{row.deleteFlag == false ? '正常启用' : '禁用'}}</Tag>
         </template>
       </Table>
 
@@ -107,7 +110,7 @@
         </div>
       </Modal>
     </Card>
-    
+
   </div>
 </template>
 <script>
@@ -126,15 +129,15 @@ import {
 } from "@/api/goods";
 
 import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
-import {regular} from "@/utils";
+import { regular } from "@/utils";
 export default {
   name: "goods-category",
   components: {
-    uploadPicInput
+    uploadPicInput,
   },
   data() {
     return {
-      submitLoading:false, //加载状态
+      submitLoading: false, //加载状态
       categoryList: [], // 分类列表
       loading: false, // 加载状态
       brands: [], //品牌集合
@@ -168,9 +171,9 @@ export default {
       // 表单验证规则
       formValidate: {
         commissionRate: [
-          {required: true, message: '请填写佣金比例'},
-          {pattern: regular.Integer, message: "佣金比例不能为负"},
-        ]
+          { required: true, message: "请填写佣金比例" },
+          { pattern: regular.Integer, message: "佣金比例不能为负" },
+        ],
       },
       columns: [
         {
@@ -189,7 +192,6 @@ export default {
           slot: "commissionRate",
         },
         {
-          fixed: "right",
           title: "操作",
           key: "action",
 
@@ -466,4 +468,11 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+/deep/ .ivu-table-wrapper {
+  overflow: auto;
+}
+.table {
+  min-height: 100vh;
+  height: auto;
+}
 </style>

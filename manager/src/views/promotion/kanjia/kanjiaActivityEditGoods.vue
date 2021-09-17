@@ -22,6 +22,7 @@
             </FormItem>
             <FormItem label="结算价格" prop="settlementPrice">
               <Input
+                :disabled="onlyView"
                 type="number"
                 v-model="form.settlementPrice"
                 placeholder="请填写结算价格"
@@ -31,6 +32,7 @@
             </FormItem>
             <FormItem label="最低购买金额" prop="purchasePrice">
               <Input
+                :disabled="onlyView"
                 type="number"
                 v-model="form.purchasePrice"
                 placeholder="请填写最低购买金额"
@@ -40,6 +42,7 @@
             </FormItem>
             <FormItem label="最低可砍" prop="lowestPrice">
               <Input
+                :disabled="onlyView"
                 type="number"
                 v-model="form.lowestPrice"
                 placeholder="请填写最低可砍金额"
@@ -49,6 +52,7 @@
             </FormItem>
             <FormItem label="最高可砍" prop="highestPrice">
               <Input
+                :disabled="onlyView"
                 type="number"
                 v-model="form.highestPrice"
                 placeholder="请填写最高可砍金额"
@@ -59,6 +63,7 @@
 
             <FormItem label="活动库存" prop="stock">
               <Input
+                :disabled="onlyView"
                 type="number"
                 v-model="form.stock"
                 placeholder="请填写活动库存"
@@ -69,18 +74,19 @@
 
             <FormItem label="活动时间" prop="rangeTime">
               <DatePicker
+                :disabled="onlyView"
                 type="datetimerange"
                 v-model="form.rangeTime"
                 format="yyyy-MM-dd HH:mm:ss"
                 placeholder="请选择"
                 :options="options"
-                style="width: 260px"
+                style="width: 300px"
               >
               </DatePicker>
             </FormItem>
             <div>
               <Button type="text" @click="closeCurrentPage">返回</Button>
-              <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
+              <Button type="primary" v-if="!onlyView" :loading="submitLoading" @click="handleSubmit">提交</Button>
             </div>
           </div>
         </div>
@@ -153,6 +159,7 @@
           goodsSku: {},
         },
         id: this.$route.query.id, // 砍价活动id
+        onlyView:this.$route.query.onlyView, // 是否为只读
         submitLoading: false, // 添加或编辑提交状态
         formRule: {
           settlementPrice: [

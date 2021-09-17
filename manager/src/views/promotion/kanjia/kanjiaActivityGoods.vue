@@ -47,7 +47,10 @@
         <template slot-scope="{ row }" slot="quantity">
           <div>{{ row.goodsSku.quantity }}</div>
         </template>
-        <template slot-scope="{ row,index }" slot="action">
+        <template slot-scope="{ row }" slot="action">
+          <Button v-if="row.promotionStatus != 'NEW'"  size="small" style="margin-right: 10px"
+            @click="edit(row,'onlyView')">查看
+          </Button>
           <Button v-if="row.promotionStatus === 'NEW'" type="info" size="small" style="margin-right: 10px"
             @click="edit(row)">编辑
           </Button>
@@ -281,10 +284,14 @@ export default {
       this.total = this.data.length;
       this.loading = false;
     },
-    edit(v) {
+    edit(v,type) {
+      let data = {
+        id:v.id
+      }
+      type ? data.onlyView = true : ''
       this.$router.push({
         name: "edit-kanJia-activity-goods",
-        query: { id: v.id },
+        query: data,
       });
     },
     delAll(row) {

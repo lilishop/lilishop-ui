@@ -250,4 +250,11 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+/deep/ .ivu-table-wrapper {
+  overflow: auto;
+}
+.table {
+  min-height: 100vh;
+  height: auto;
+}
 </style>

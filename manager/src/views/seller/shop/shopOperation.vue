@@ -517,6 +517,8 @@ export default {
         if (res.success) {
           this.infoResult = res.result;
           this.shopForm = res.result;
+           this.shopForm.selfOperated ? this.shopForm.selfOperated = 1 : this.shopForm.selfOperated = 0
+         
           this.checkAllGroup = this.shopForm.goodsManagementCategory.split(",");
           if (this.shopForm.settlementCycle) {
             this.settlementCycle = this.shopForm.settlementCycle.split(',')
