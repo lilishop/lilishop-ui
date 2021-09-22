@@ -65,9 +65,19 @@ export const INTEGER = {
   message:'请输入正整数'
 }
 
+export const VARCHAR5 = {
+  pattern:/^.{1,5}$/,
+  message:'长度应该限制在1-5个字符'
+}
+
 export const VARCHAR20 = {
-  pattern:/^.{3,20}$/,
-  message:'长度应该限制在3-20个字符'
+  pattern:/^.{1,20}$/,
+  message:'长度应该限制在1-20个字符'
+}
+
+export const VARCHAR255 = {
+  pattern:/^.{1,255}$/,
+  message:'超出最大长度限制'
 }
 
 export const URL200 = {
