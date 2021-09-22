@@ -127,7 +127,7 @@ export default {
       form: {
         // 添加或编辑表单对象初始化数据
         storeAddressPath: "", // 店铺地址中文
-        center: "", // 经度 + 纬度
+        storeCenter: "", // 经度 + 纬度
         longitude: "", //经度
         latitude: "", //纬度
         storeAddressDetail: "", //详细地址
@@ -194,7 +194,7 @@ export default {
           this.form = res.result;
           this.$set(this.form, "address", res.result.storeAddressPath);
           this.storeName = res.result.storeName;
-          this.form.center = res.result.storeCenter;
+          this.form.storeCenter = res.result.storeCenter;
           Cookies.set("userInfoSeller", JSON.stringify(res.result));
           //库存预警数赋值
 
@@ -296,7 +296,7 @@ export default {
       this.$set(this.form, "address", item.addr);
       this.form.storeAddressPath = item.addr;
       this.form.storeAddressIdPath = item.addrId;
-      this.form.center = item.position.lat + "," + item.position.lng;
+      this.form.storeCenter = item.position.lng + "," +  item.position.lat 
     },
   },
   mounted() {

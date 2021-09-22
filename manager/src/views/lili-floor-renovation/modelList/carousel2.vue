@@ -43,7 +43,7 @@
         <div class="person-msg">
           <img :src="userInfo.face" v-if="userInfo.face" alt />
           <Avatar icon="ios-person" class="mb_10" v-else size="80" />
-          <div>Hi，{{ userInfo.nickName || "欢迎来到LiLi Shop" | secrecyMobile }}</div>
+          <div>Hi，{{ userInfo.nickName || "欢迎来到管理后台" | secrecyMobile }}</div>
           <div v-if="userInfo.id">
             <Button type="error" shape="circle">会员中心</Button>
           </div>
@@ -343,7 +343,7 @@ export default {
         margin-left: 5px;
       }
       span:nth-child(1) {
-        @include content_color($theme_color);
+        color: $theme_color;
         margin-left: 0;
       }
       span:nth-child(2) {

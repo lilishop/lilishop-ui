@@ -898,37 +898,9 @@ dl dt {
   }
 }
 
-.flex-card {
-  display: flex;
-  height: 600px;
-}
-
-.card-item {
-  margin: 5px 0;
-}
-
-.flex-card-left {
-  flex: 4;
-  //background: #f8f8f8;
-}
-
-.flex-card-right {
-  flex: 6;
-}
 
 .search {
-  .operation {
-    margin-bottom: 2vh;
-  }
-
-  .select-count {
-    font-weight: 600;
-    color: #40a9ff;
-  }
-
-  .select-clear {
-    margin-left: 10px;
-  }
+ 
 
   .div-item {
     line-height: 35px;
@@ -944,15 +916,6 @@ dl dt {
     }
   }
 
-  .div-status-right {
-    margin-top: 20px;
-    margin-left: 30px;
-    font-size: 20px;
-  }
-
-  .page {
-    margin-top: 2vh;
-  }
 
   button {
     margin-left: 5px;
@@ -985,7 +948,7 @@ dl dt {
     }
 
     .flowPrice {
-      color: #cc0000;
+      color: $theme_color;
       font-size: 22px;
     }
   }

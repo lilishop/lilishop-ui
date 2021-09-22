@@ -11,7 +11,7 @@ import App from './App'
 import { router } from './router/index'
 import store from './store'
 import i18n from '@/locale'
-import vueQr from 'vue-qr'
+
 import { getRequest, postRequest, putRequest, deleteRequest, importRequest, uploadFileRequest } from '@/libs/axios'
 import { setStore, getStore, removeStore } from '@/libs/storage'
 import util from '@/libs/util'
@@ -21,13 +21,13 @@ import liliDialog from '@/views/lili-dialog'
 import {md5} from '@/utils/md5.js';
 Vue.config.devtools = true;
 Vue.config.productionTip = false
-const buyerUrlPC = 'https://pc-b2b2c.pickmall.cn' // 跳转买家端地址 pc端
-const buyerUrlWap = 'https://m-b2b2c.pickmall.cn' // 跳转买家端地址 wap端
+const PC_URL = BASE.PC_URL; // 跳转买家端地址 pc端
+const WAP_URL = BASE.WAP_URL; // 跳转买家端地址 wap端
 Vue.prototype.linkTo = function (goodsId, skuId) {  // 跳转买家端商品
-  window.open(`${buyerUrlPC}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`, '_blank')
+  window.open(`${PC_URL}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`, '_blank')
 };
 Vue.prototype.wapLinkTo = function (goodsId, skuId) { // app端二维码
-  return `${buyerUrlWap}/pages/product/goods?id=${skuId}&goodsId=${goodsId}`
+  return `${WAP_URL}/pages/product/goods?id=${skuId}&goodsId=${goodsId}`
 };
 
 Vue.use(ViewUI, {
@@ -35,7 +35,7 @@ Vue.use(ViewUI, {
 });
 
 Vue.component('liliDialog',liliDialog)
-Vue.component(vueQr)
+
 
 
 

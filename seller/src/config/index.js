@@ -14,6 +14,14 @@ export default {
    */
   useI18n: true,
   /**
+   * @description 高德web端申请的api key
+   */
+  aMapKey: "b440952723253aa9fe483e698057bf7d",
+  /**
+   * @description 官网地址
+   */
+  website: "https://www.pickmall.cn",
+  /**
    * @description 需要加载的插件
    */
   plugin: {

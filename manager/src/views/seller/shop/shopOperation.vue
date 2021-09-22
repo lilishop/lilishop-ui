@@ -576,7 +576,7 @@ export default {
     },
     // 点击定位获取店铺地址
     getAddress(item) {
-      this.shopForm.storeCenter = item.position.lat + "," + item.position.lng;
+      this.shopForm.storeCenter = item.position.lng + ',' + item.position.lat;
       this.$set(this.shopForm, "storeAddressPath", item.addr);
       this.$set(this.shopForm, "storeAddressIdPath", item.addrId);
     },

@@ -215,16 +215,5 @@ export default {
 };
 </script>
 <style lang="scss"  scoped>
-.seckill {
-  .operation {
-    margin: 10px 0;
-  }
-  .select-count {
-    font-weight: 600;
-    color: #40a9ff;
-  }
-  .select-clear {
-    margin-left: 10px;
-  }
-}
+
 </style>

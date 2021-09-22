@@ -6,18 +6,20 @@
       <Row style="flex-direction: column;">
         <Form ref="usernameLoginForm" :model="form" :rules="rules" class="form">
           <FormItem prop="username">
-            <Input v-model="form.username" prefix="ios-contact" size="large" clearable placeholder="请输入用户名" autocomplete="off" />
+            <Input v-model="form.username" prefix="ios-contact" size="large" clearable placeholder="请输入用户名"
+              autocomplete="off" />
           </FormItem>
           <FormItem prop="password">
-            <Input type="password" v-model="form.password" prefix="ios-lock" size="large" password placeholder="请输入密码" autocomplete="off" />
+            <Input type="password" v-model="form.password" prefix="ios-lock" size="large" password placeholder="请输入密码"
+              autocomplete="off" />
           </FormItem>
         </Form>
 
         <Row>
-          <Button class="login-btn" type="primary" size="large" :loading="loading" @click="submitLogin" long>
+          <div class="login-btn" type="primary" size="large" :loading="loading" @click="submitLogin" long>
             <span v-if="!loading">登录</span>
             <span v-else>登录中</span>
-          </Button>
+          </div>
         </Row>
 
       </Row>
@@ -26,6 +28,8 @@
       <verify ref="verify" class="verify-con" verifyType="LOGIN" @change="verifyChange"></verify>
       </Col>
     </Row>
+
+   
   </div>
 </template>
 
@@ -152,33 +156,18 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.row {
-  padding: 70px 50px;
-  border-radius: 0.8em;
-}
+
 .login {
   height: 100%;
   background: url("../assets/background.png") no-repeat;
   background-size: 100%;
   background-position-y: bottom;
-  background-color: #edf0f3;
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+ 
 
-  .ivu-tabs-nav-container {
-    line-height: 2;
-    font-size: 17px;
-    box-sizing: border-box;
-    white-space: nowrap;
-    overflow: hidden;
-    position: relative;
-    zoom: 1;
-  }
-  /deep/ .ivu-row {
-    display: flex;
-
-  }
   .verify-con {
     position: absolute;
     top: 126px;
@@ -187,40 +176,26 @@ export default {
   }
   .form {
     padding-top: 1vh;
-
-    .input-verify {
-      width: 67%;
-    }
   }
 
-  .forget-pass,
-  .other-way {
-    font-size: 14px;
-  }
-
-  .login-btn,
-  .other-login {
-    margin-top: 3vh;
-  }
-
-  .icons {
-    display: flex;
-    align-items: center;
-  }
-
-  .other-icon {
+  .login-btn {
+    background: linear-gradient(135deg, $theme_color 0%, $warning_color 100%);
+    height: 40px;
     cursor: pointer;
-    margin-left: 10px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
-    color: rgba(0, 0, 0, 0.2);
-
-    :hover {
-      color: #2d8cf0;
-    }
+    justify-content: center;
+    font-size: 16px;
+    color: #fff;
+    width: 100%;
+    text-align: center;
+    transition: 0.35s;
+  }
+  .login-btn:hover {
+    opacity: .9;
+    border-radius: 10px;
   }
 }
-.flex {
-  justify-content: center;
-}
+
 </style>

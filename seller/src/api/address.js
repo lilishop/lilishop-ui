@@ -1,5 +1,5 @@
 // 统一请求路径前缀在libs/axios.js中修改
-import {getRequest, postRequest, putRequest, deleteRequest, importRequest, getRequestWithNoToken} from '@/libs/axios';
+import {getRequest} from '@/libs/axios';
 
 
 // 传给后台citycode 获取城市街道等id

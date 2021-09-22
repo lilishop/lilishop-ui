@@ -22,7 +22,6 @@ let externals = {
   "js-cookie": "Cookies",
   wangeditor: "wangEditor",
   "sockjs-client": "SockJS",
-  vuedraggable: "vuedraggable",
   "@antv/g2": "G2"
 };
 
@@ -40,7 +39,6 @@ let cdn = {
     "https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js",
     "https://cdn.jsdelivr.net/npm/wangeditor@latest/dist/wangEditor.min.js",
     "https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js",
-    "https://cdn.jsdelivr.net/npm/vuedraggable@2.23.2/dist/vuedraggable.umd.min.js",
     "https://gw.alipayobjects.com/os/lib/antv/g2/4.1.24/dist/g2.min.js"
   ]
 };

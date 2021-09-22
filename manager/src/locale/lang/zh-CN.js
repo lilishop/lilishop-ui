@@ -1,5 +1,6 @@
+import config from '@/config/index'
 export default {
-    lili: 'lili',
+    lili: config.title,
     usernameLogin: '账户密码登录',
     mobileLogin: '手机号登录',
     autoLogin: '自动登录',

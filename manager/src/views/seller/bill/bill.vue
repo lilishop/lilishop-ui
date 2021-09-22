@@ -20,7 +20,7 @@
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
       </Form>
       <Row class="operation padding-row">
-        <Button @click="delAll">批量删除</Button>
+       
       </Row>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-selection-change="changeSelect">
       </Table>

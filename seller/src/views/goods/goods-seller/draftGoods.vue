@@ -1,77 +1,32 @@
 <template>
   <div class="search">
     <Card>
-      <Form
-        ref="searchForm"
-        :model="searchForm"
-        inline
-        :label-width="70"
-        class="search-form mb_10"
-        @keydown.enter.native="handleSearch"
-      >
+      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form mb_10"
+        @keydown.enter.native="handleSearch">
         <Form-item label="商品名称" prop="goodsName">
-          <Input
-            type="text"
-            v-model="searchForm.goodsName"
-            placeholder="请输入商品名称"
-            clearable
-            style="width: 200px"
-          />
+          <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px" />
         </Form-item>
-        <span v-if="drop">
-          <Form-item label="状态" prop="status">
-            <Select
-              v-model="searchForm.marketEnable"
-              placeholder="请选择"
-              clearable
-              style="width: 200px"
-            >
-              <Option value="DOWN">下架</Option>
-              <Option value="UPPER">上架</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="商品编号" prop="sn">
-            <Input
-              type="text"
-              v-model="searchForm.sn"
-              placeholder="商品编号"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-        </span>
+
+        <Form-item label="状态" prop="status">
+          <Select v-model="searchForm.marketEnable" placeholder="请选择" clearable style="width: 200px">
+            <Option value="DOWN">下架</Option>
+            <Option value="UPPER">上架</Option>
+          </Select>
+        </Form-item>
+        <Form-item label="商品编号" prop="sn">
+          <Input type="text" v-model="searchForm.sn" placeholder="商品编号" clearable style="width: 200px" />
+        </Form-item>
+
         <Form-item style="margin-left: -35px" class="br">
-          <Button @click="handleSearch" type="primary" icon="ios-search"
-            >搜索</Button
-          >
-          <Button @click="handleReset">重置</Button>
-          <a class="drop-down" @click="dropDown">
-            {{ dropDownContent }}
-            <Icon :type="dropDownIcon"></Icon>
-          </a>
+          <Button @click="handleSearch" type="primary" icon="ios-search">搜索</Button>
+
         </Form-item>
       </Form>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        class="mt_10"
-      ></Table>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
-          :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
-          size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
+          @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator
+          show-sizer></Page>
       </Row>
     </Card>
   </div>
@@ -85,22 +40,20 @@ export default {
   data() {
     return {
       loading: true, // 表单加载状态
-      drop: false,
-      dropDownContent: "展开",
-      dropDownIcon: "ios-arrow-down",
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
         sort: "create_time", // 默认排序字段
         order: "desc", // 默认排序方式
-        saveType: "TEMPLATE"
+        saveType: "TEMPLATE",
       },
-      columns: [ // 表头
+      columns: [
+        // 表头
         {
           title: "ID",
           key: "id",
-          minWidth: 120
+          minWidth: 120,
         },
         {
           title: "商品原图",
@@ -126,14 +79,17 @@ export default {
         {
           title: "商品名称",
           key: "goodsName",
-          minWidth: 120
+          minWidth: 120,
         },
         {
           title: "商品价格",
           key: "price",
           render: (h, params) => {
-            return h('div', this.$options.filters.unitPrice(params.row.price, '￥'))
-          }
+            return h(
+              "div",
+              this.$options.filters.unitPrice(params.row.price, "￥")
+            );
+          },
         },
 
         {
@@ -143,7 +99,7 @@ export default {
         {
           title: "创建时间",
           key: "createTime",
-          minWidth: 120
+          minWidth: 120,
         },
         {
           title: "操作",
@@ -187,7 +143,7 @@ export default {
                   },
                 },
                 "删除"
-              )
+              ),
             ]);
           },
         },
@@ -197,15 +153,19 @@ export default {
     };
   },
   methods: {
-    init() { // 初始化数据
+    init() {
+      // 初始化数据
       this.getDataList();
     },
     // 编辑模板
     editGoods(v) {
-      this.$router.push({ name: "goods-template-operation-edit", query: { draftId: v.id } })
+      this.$router.push({
+        name: "goods-template-operation-edit",
+        query: { draftId: v.id },
+      });
     },
     // 删除模板
-    removeDraft (id) {
+    removeDraft(id) {
       let showType = "模版";
       this.$Modal.confirm({
         title: "确认审核",
@@ -246,17 +206,7 @@ export default {
       // 重新加载数据
       this.getDataList();
     },
-    // 展开、收起搜索项
-    dropDown() {
-      if (this.drop) {
-        this.dropDownContent = "展开";
-        this.dropDownIcon = "ios-arrow-down";
-      } else {
-        this.dropDownContent = "收起";
-        this.dropDownIcon = "ios-arrow-up";
-      }
-      this.drop = !this.drop;
-    },
+
     // 获取列表数据
     getDataList() {
       this.loading = true;
@@ -281,22 +231,4 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.search {
-  .operation {
-    margin-bottom: 2vh;
-  }
-  .select-count {
-    font-weight: 600;
-    color: #40a9ff;
-  }
-  .select-clear {
-    margin-left: 10px;
-  }
-  .page {
-    margin-top: 2vh;
-  }
-  .drop-down {
-    margin-left: 5px;
-  }
-}
 </style>

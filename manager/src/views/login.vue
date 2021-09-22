@@ -141,15 +141,7 @@ export default {
   align-items: center;
   justify-content: center;
 
-  .ivu-tabs-nav-container {
-    line-height: 2;
-    font-size: 17px;
-    box-sizing: border-box;
-    white-space: nowrap;
-    overflow: hidden;
-    position: relative;
-    zoom: 1;
-  }
+
   .verify-con {
     position: absolute;
     top: 150px;
@@ -159,37 +151,27 @@ export default {
   .form {
     padding-top: 1vh;
 
-    .input-verify {
-      width: 67%;
-    }
   }
 
-  .forget-pass,
-  .other-way {
-    font-size: 14px;
-  }
-
-  .login-btn,
-  .other-login {
-    margin-top: 3vh;
-  }
-
-  .icons {
-    display: flex;
-    align-items: center;
-  }
-
-  .other-icon {
+  .login-btn {
+    background: linear-gradient(135deg, $theme_color 0%, $warning_color 100%);
+    height: 40px;
     cursor: pointer;
-    margin-left: 10px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
-    color: rgba(0, 0, 0, 0.2);
-
-    :hover {
-      color: #2d8cf0;
-    }
+    justify-content: center;
+    font-size: 16px;
+    color: #fff;
+    width: 100%;
+    text-align: center;
+    transition: 0.35s;
   }
+  .login-btn:hover {
+    opacity: .9;
+    border-radius: 10px;
+  }
+
 }
 .flex {
   justify-content: center;
