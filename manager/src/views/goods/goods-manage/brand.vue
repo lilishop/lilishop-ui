@@ -1,9 +1,10 @@
 <template>
   <div class="search">
     <Card>
-      <Form ref="searchForm" @keydown.enter.native="handleSearch" :model="searchForm" inline :label-width="70" class="search-form">
+      <Form ref="searchForm" @keydown.enter.native="handleSearch" :model="searchForm" inline :label-width="70"
+            class="search-form">
         <Form-item label="品牌名称">
-          <Input type="text" v-model="searchForm.name" placeholder="请输入品牌名称" clearable style="width: 200px" />
+          <Input type="text" v-model="searchForm.name" placeholder="请输入品牌名称" clearable style="width: 200px"/>
         </Form-item>
         <Button @click="handleSearch" type="primary">搜索</Button>
       </Form>
@@ -12,14 +13,15 @@
       </Row>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table"></Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
-          show-total show-elevator show-sizer></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
+              @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
+              show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
     <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="500">
       <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
         <FormItem label="品牌名称" prop="name">
-          <Input v-model="form.name" clearable style="width: 100%" />
+          <Input v-model="form.name" clearable style="width: 100%"/>
         </FormItem>
         <FormItem label="品牌图标" prop="logo">
           <upload-pic-input v-model="form.logo" style="width: 100%"></upload-pic-input>
@@ -42,6 +44,8 @@ import {
   delBrand,
 } from "@/api/goods";
 import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
+
+import {regular} from "@/utils";
 
 export default {
   name: "brand",
@@ -68,7 +72,16 @@ export default {
         deleteFlag: "",
       },
       // 表单验证规则
-      formValidate: {},
+      formValidate: {
+        name: [
+          regular.REQUIRED,
+          regular.VARCHAR20
+        ],
+        logo: [
+          regular.REQUIRED,
+          regular.URL200
+        ],
+      },
       submitLoading: false, // 添加或编辑提交状态
       columns: [
         {
@@ -104,9 +117,9 @@ export default {
           align: "left",
           render: (h, params) => {
             if (params.row.deleteFlag == 0) {
-              return h("Tag", {props: {color: "green",},},"启用");
+              return h("Tag", {props: {color: "green",},}, "启用");
             } else if (params.row.deleteFlag == 1) {
-              return h("Tag", {props: {color: "volcano",},},"禁用");
+              return h("Tag", {props: {color: "volcano",},}, "禁用");
             }
           },
           filters: [
@@ -323,7 +336,7 @@ export default {
         content: "您确认要启用品牌 " + v.name + " ?",
         loading: true,
         onOk: () => {
-          disableBrand(v.id, { disable: false }).then((res) => {
+          disableBrand(v.id, {disable: false}).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("操作成功");
@@ -340,7 +353,7 @@ export default {
         content: "您确认要禁用品牌 " + v.name + " ?",
         loading: true,
         onOk: () => {
-          disableBrand(v.id, { disable: true }).then((res) => {
+          disableBrand(v.id, {disable: true}).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("操作成功");

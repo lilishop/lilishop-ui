@@ -57,3 +57,24 @@ export const URL =
 
 // 固话
 export const TEL = /0\d{2,3}-\d{7,8}/
+
+
+// 正整数
+export const INTEGER = {
+  pattern: /^[0-9]\d*$/,
+  message:'请输入正整数'
+}
+
+export const VARCHAR20 = {
+  pattern:/^.{3,20}$/,
+  message:'长度应该限制在3-20个字符'
+}
+
+export const URL200 = {
+  pattern:/[a-zA-z]+\:\/\/[^\s]{1,190}/,
+  message:'请输入长度不超过200的URL地址'
+}
+export const REQUIRED = {
+  required: true,
+  message:'请填写参数'
+}
