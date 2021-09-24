@@ -74,7 +74,7 @@ export default {
           render: (h, params) => {
             return h("img", {
               attrs: {
-                src: params.row.thumbnail,
+                src: params.row.thumbnail || '',
                 alt: "加载图片失败",
               },
               style: {

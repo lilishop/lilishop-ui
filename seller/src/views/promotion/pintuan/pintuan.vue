@@ -51,7 +51,7 @@
         <template slot-scope="{ row }" slot="action">
           <div  class="row">
           <Button
-            type="primary"
+            type="default"
             size="small"
             v-if="row.promotionStatus == 'NEW'"
             @click="edit(row)"
@@ -75,7 +75,6 @@
             type="error"
             size="small"
             v-if="row.promotionStatus != 'START'"
-            ghost
             @click="remove(row)"
             >删除</Button
           >&nbsp;

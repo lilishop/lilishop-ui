@@ -6,6 +6,6 @@ export const getChildRegion = (id) => {
 };
 
 // 点地图获取地址信息
-export const getRegion = (parpams) => {
-  return getRequest(`${commonUrl}/common/region/region`, parpams);
+export const getRegion = (params) => {
+  return getRequest(`${commonUrl}/common/region/region`, params);
 };

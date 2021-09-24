@@ -1,5 +1,7 @@
+
+import config from '@/config/index'
 export default {
-    lili: 'lili',
+    lili: config.title,
     usernameLogin: 'UsernameLogin',
     mobileLogin: 'MobileLogin',
     autoLogin: 'Auto Login',

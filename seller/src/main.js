@@ -19,7 +19,7 @@ import {
 import { setStore, getStore, removeStore } from "@/libs/storage";
 
 import util from "@/libs/util";
-import dictUtil from "@/libs/dictUtil";
+
 
 import VueLazyload from "vue-lazyload";
 
@@ -83,8 +83,7 @@ new Vue({
   mounted() {
     // 初始化菜单
     util.initRouter(this);
-    // 初始化全局数据字典
-    dictUtil.initDictData(this);
+   
     this.currentPageName = this.$route.name;
     // 显示打开的页面的列表
     this.$store.commit("setOpenedList");

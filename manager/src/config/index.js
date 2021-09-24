@@ -2,7 +2,7 @@ export default {
   /**
    * @description 配置显示在浏览器标签的title
    */
-  title: "Lili电商",
+  title: "lilishop",
   /**
    * @description token在Cookie中存储的天数，默认1天
    */
@@ -16,26 +16,14 @@ export default {
   /**
    * @description api请求基础路径
    */
-  api_dev: {
-    common: "https://common-api.pickmall.cn",
-    buyer: "https://buyer-api.pickmall.cn",
-    seller: "https://store-api.pickmall.cn",
-    manager: "https://admin-api.pickmall.cn"
-    // common: 'http://192.168.0.100:8890',
-    // buyer: 'http://192.168.0.100:8888',
-    // seller: 'http://192.168.0.100:8889',
-    // manager: 'http://192.168.0.100:8887'
-  },
-  api_prod: {
-    common: "https://common-api.pickmall.cn",
-    buyer: "https://buyer-api.pickmall.cn",
-    seller: "https://store-api.pickmall.cn",
-    manager: "https://admin-api.pickmall.cn"
-  },
-  /**
-   *  @description api请求基础路径前缀
+   /**
+   * @description 高德web端申请的api key
    */
-  baseUrlPrefix: "/manager",
+    aMapKey: "b440952723253aa9fe483e698057bf7d",
+    /**
+     * @description 官网地址
+     */
+    website: "https://www.pickmall.cn",
   /**
    * @description 需要加载的插件
    */

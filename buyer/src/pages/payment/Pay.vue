@@ -777,6 +777,7 @@ export default {
 
   .goods-item {
     display: flex;
+    width:100%;
     align-items: center;
     justify-content: space-between;
     padding: 20px 0;
@@ -799,9 +800,14 @@ export default {
 
     > span:nth-child(1) {
       font-size: 12px;
+     
       flex: 1;
       text-align: left;
+      >span{
+        margin-left: 10px;
+      }
     }
+   
 
     > span:last-child {
       color: $theme_color;

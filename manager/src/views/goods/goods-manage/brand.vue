@@ -85,7 +85,7 @@ export default {
           render: (h, params) => {
             return h("img", {
               attrs: {
-                src: params.row.logo,
+                src: params.row.logo || '',
                 alt: "加载图片失败",
               },
               style: {

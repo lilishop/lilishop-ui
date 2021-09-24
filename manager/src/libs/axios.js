@@ -1,31 +1,36 @@
 import axios from "axios";
-import config from "@/config";
-import {getStore, setStore} from "./storage.js";
-import {router} from "../router/index";
-import {Message} from "view-design";
+import { getStore, setStore } from "./storage.js";
+import { router } from "../router/index";
+import { Message } from "view-design";
 import Cookies from "js-cookie";
-import {handleRefreshToken} from "../api/index"
+import { handleRefreshToken } from "../api/index";
 
 // 统一请求路径前缀
-export const commonUrl = (process.env.NODE_ENV === 'development' ? config.api_dev.common : config.api_prod.common);
-export const managerUrl = (process.env.NODE_ENV === 'development' ? config.api_dev.manager : config.api_prod.manager) + config.baseUrlPrefix;
+export const commonUrl =
+  process.env.NODE_ENV === "development"
+    ? BASE.API_DEV.common
+    : BASE.API_PROD.common;
+export const managerUrl =
+  (process.env.NODE_ENV === "development"
+    ? BASE.API_DEV.manager
+    : BASE.API_PROD.manager) + BASE.PREFIX;
 
 const service = axios.create({
   timeout: 8000,
   baseURL: managerUrl
-})
+});
 var isRefreshToken = 0;
-const refreshToken = getTokenDebounce()
+const refreshToken = getTokenDebounce();
 service.interceptors.request.use(
   config => {
-    if (config.method == 'get') {
+    if (config.method == "get") {
       config.params = {
         _t: Date.parse(new Date()) / 1000,
         ...config.params
-      }
+      };
     }
-    const uuid = getStore('uuid');
-    config.headers['uuid'] = uuid;
+    const uuid = getStore("uuid");
+    config.headers["uuid"] = uuid;
     return config;
   },
   err => {
@@ -36,7 +41,7 @@ service.interceptors.request.use(
 
 // http response 拦截器
 service.interceptors.response.use(
-  (response) => {
+  response => {
     const data = response.data;
     // 根据返回的code值来做不同的处理(和后端约定)
     if (!data.success && data.message) {
@@ -76,7 +81,7 @@ service.interceptors.response.use(
         return data;
     }
   },
-  async (error) => {
+  async error => {
     // 返回状态码不为200时候的错误处理
     if (error.response) {
       if (error.response.status === 401) {
@@ -85,79 +90,78 @@ service.interceptors.response.use(
         // 避免刷新token报错
       } else if (error.response.status === 403) {
         isRefreshToken++;
-        if(isRefreshToken === 1) {
+        if (isRefreshToken === 1) {
           const getTokenRes = await refreshToken();
-          if (getTokenRes === 'success') { // 刷新token
+          if (getTokenRes === "success") {
+            // 刷新token
             if (isRefreshToken === 1) {
-              error.response.config.headers.accessToken = getStore('accessToken')
-              return service(error.response.config)
+              error.response.config.headers.accessToken = getStore(
+                "accessToken"
+              );
+              return service(error.response.config);
             } else {
-              router.go(0)
+              router.go(0);
             }
           } else {
             Cookies.set("userInfoManager", "");
-            router.push('/login')
+            router.push("/login");
           }
-          isRefreshToken = 0
+          isRefreshToken = 0;
         }
-
       } else {
         // 其他错误处理
         console.log(error.response.data);
-        Message.error(error.response.data.message)
+        Message.error(error.response.data.message);
       }
     }
     /* router.push("/login") */
     return Promise.resolve(error);
   }
-)
-
+);
 
 // 防抖闭包来一波
 function getTokenDebounce() {
-  let lock = false
-  let success = false
-  return function () {
+  let lock = false;
+  let success = false;
+  return function() {
     if (!lock) {
-      lock = true
+      lock = true;
       let oldRefreshToken = getStore("refreshToken");
-      handleRefreshToken(oldRefreshToken).then(res => {
-        if (res.success) {
-          let {
-            accessToken,
-            refreshToken
-          } = res.result;
-          setStore("accessToken", accessToken);
-          setStore("refreshToken", refreshToken);
+      handleRefreshToken(oldRefreshToken)
+        .then(res => {
+          if (res.success) {
+            let { accessToken, refreshToken } = res.result;
+            setStore("accessToken", accessToken);
+            setStore("refreshToken", refreshToken);
 
-          success = true
-          lock = false
-        } else {
-          success = false
-          lock = false
-          router.push('/login')
-        }
-      }).catch((err) => {
-        success = false
-        lock = false
-      })
+            success = true;
+            lock = false;
+          } else {
+            success = false;
+            lock = false;
+            router.push("/login");
+          }
+        })
+        .catch(err => {
+          success = false;
+          lock = false;
+        });
     }
     return new Promise(resolve => {
       // 一直看lock,直到请求失败或者成功
       const timer = setInterval(() => {
         if (!lock) {
-          clearInterval(timer)
+          clearInterval(timer);
           if (success) {
-            resolve('success')
+            resolve("success");
           } else {
-            resolve('fail')
+            resolve("fail");
           }
         }
-      }, 500) // 轮询时间间隔
-    })
-  }
+      }, 500); // 轮询时间间隔
+    });
+  };
 }
-
 
 export const getRequest = (url, params) => {
   let accessToken = getStore("accessToken");
@@ -180,19 +184,19 @@ export const postRequest = (url, params, headers) => {
     transformRequest: headers
       ? undefined
       : [
-        function (data) {
-          let ret = "";
-          for (let it in data) {
-            ret +=
-              encodeURIComponent(it) +
-              "=" +
-              encodeURIComponent(data[it]) +
-              "&";
+          function(data) {
+            let ret = "";
+            for (let it in data) {
+              ret +=
+                encodeURIComponent(it) +
+                "=" +
+                encodeURIComponent(data[it]) +
+                "&";
+            }
+            ret = ret.substring(0, ret.length - 1);
+            return ret;
           }
-          ret = ret.substring(0, ret.length - 1);
-          return ret;
-        }
-      ],
+        ],
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       accessToken: accessToken,
@@ -238,19 +242,19 @@ export const putRequest = (url, params, headers) => {
     transformRequest: headers
       ? undefined
       : [
-        function (data) {
-          let ret = "";
-          for (let it in data) {
-            ret +=
-              encodeURIComponent(it) +
-              "=" +
-              encodeURIComponent(data[it]) +
-              "&";
+          function(data) {
+            let ret = "";
+            for (let it in data) {
+              ret +=
+                encodeURIComponent(it) +
+                "=" +
+                encodeURIComponent(data[it]) +
+                "&";
+            }
+            ret = ret.substring(0, ret.length - 1);
+            return ret;
           }
-          ret = ret.substring(0, ret.length - 1);
-          return ret;
-        }
-      ],
+        ],
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       accessToken: accessToken,
@@ -321,7 +325,6 @@ export const getRequestWithNoToken = (url, params) => {
   });
 };
 
-
 /**
  * 无需token验证的请求 避免旧token过期导致请求失败
  * @param {*} url
@@ -334,4 +337,3 @@ export const postRequestWithNoToken = (url, params) => {
     params: params
   });
 };
-

@@ -7,7 +7,7 @@
     </Row>
     <Row type="flex" justify="center" class="copyright">
       Copyright © {{year}} - Present
-      <a :href="config.website" target="_blank" style="margin:0 5px;">{{config.title}}</a>
+      <a :href="config.website" class="href" target="_blank" style="margin:0 5px;">{{config.title}}</a>
     </Row>
   </div>
 </template>
@@ -44,4 +44,5 @@ export default {
     }
   }
 }
+
 </style>

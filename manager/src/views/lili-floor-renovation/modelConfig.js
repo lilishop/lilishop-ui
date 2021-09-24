@@ -615,7 +615,7 @@ export const modelData = [{
     icon: 'md-image',
     options: {
       list: [{
-          name: 'LILI生鲜',
+          name: '生鲜',
           describe: "年货带回家 满199减60",
           img: require('@/assets/nav/decorate8.png'),
           url: '',
@@ -624,8 +624,8 @@ export const modelData = [{
           size: '170*170'
         },
         {
-          name: 'LILI众筹',
-          describe: "备孕有孕检测仪",
+          name: '众筹',
+          describe: "年货带回家",
           img: require('@/assets/nav/decorate9.png'),
           url: '',
           fromColor: "#325bb4",
@@ -633,7 +633,7 @@ export const modelData = [{
           size: '170*170'
         },
         {
-          name: 'LILI生鲜',
+          name: '生鲜',
           describe: "年货带回家 满199减60",
           img: require('@/assets/nav/decorate8.png'),
           url: '',
@@ -642,7 +642,7 @@ export const modelData = [{
           size: '170*170'
         },
         {
-          name: 'LILI众筹',
+          name: '众筹',
           describe: "备孕有孕检测仪",
           img: require('@/assets/nav/decorate9.png'),
           url: '',
@@ -651,7 +651,7 @@ export const modelData = [{
           size: '170*170'
         },
         {
-          name: 'LILI生鲜',
+          name: '生鲜',
           describe: "年货带回家 满199减60",
           img: require('@/assets/nav/decorate8.png'),
           url: '',
@@ -660,7 +660,7 @@ export const modelData = [{
           size: '170*170'
         },
         {
-          name: 'LILI众筹',
+          name: '众筹',
           describe: "备孕有孕检测仪",
           img: require('@/assets/nav/decorate9.png'),
           url: '',

@@ -31,6 +31,7 @@
 <script>
 import AMapLoader from '@amap/amap-jsapi-loader';
 import { handleRegion } from '@/api/address.js';
+import config from '@/config'
 export default {
   name: 'map',
   props: {
@@ -41,6 +42,7 @@ export default {
   },
   data () {
     return {
+      config,
       showMap: false, // 展示地图
       mapSearch: '', // 地图搜索
       map: null, // 初始化地图
@@ -88,7 +90,7 @@ export default {
     },
     init () { // 初始化地图
       AMapLoader.load({
-        key: 'b440952723253aa9fe483e698057bf7d', // 申请好的Web端开发者Key，首次调用 load 时必填
+        key: this.config.aMapKey, // 申请好的Web端开发者Key，首次调用 load 时必填
         version: '', // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
         plugins: [
           'AMap.ToolBar',

@@ -248,6 +248,6 @@ export default {
   }
 }
 .ivu-tag-primary, .ivu-tag-primary.ivu-tag-dot .ivu-tag-dot-inner{
-  background: red;
+  background: $theme_color;
 }
 </style>

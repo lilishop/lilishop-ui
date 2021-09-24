@@ -10,9 +10,9 @@ import {
   postRequestWithNoForm,
   managerUrl
 } from "@/libs/axios";
-import config from "@/config";
 
-let commonUrl = (process.env.NODE_ENV === 'development' ? config.api_dev.common : config.api_prod.common)
+
+let commonUrl = (process.env.NODE_ENV === 'development' ? BASE.API_DEV.common : BASE.API_PROD.common)
 
 // 文件上传接口
 export const uploadFile = commonUrl+ "/common/upload/file";

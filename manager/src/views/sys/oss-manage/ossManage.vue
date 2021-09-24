@@ -47,7 +47,7 @@
           <div>
             <Upload
               style="display:inline-block;"
-              :action="baseUrl + '/common/upload/file'"
+              :action="commonUrl + '/common/upload/file'"
               :headers="accessToken"
               :on-success="handleSuccess"
               :on-error="handleError"
@@ -257,6 +257,7 @@ import {
 import DPlayer from "dplayer";
 import config from "@/config";
 
+import { commonUrl } from "@/libs/axios";
 var dp;
 export default {
   name: "oss-manage",
@@ -268,8 +269,8 @@ export default {
   },
   data() {
     return {
+      commonUrl, // 上传文件路径
       config, // api地址
-      baseUrl: "", // 基础路径
       selectImage: false, //是否是选择
       accessToken: {}, // 上传token鉴权
       loading: false, // 表单加载状态
@@ -342,7 +343,7 @@ export default {
             if (params.row.fileType.includes("image") > 0) {
               return h("img", {
                 attrs: {
-                  src: params.row.url,
+                  src: params.row.url || '',
                   alt: "加载图片失败",
                 },
                 style: {
@@ -813,10 +814,6 @@ export default {
     if(!this.isComponent) { // 是组件的话，初始化不调用接口
       this.init();
     }
-    this.baseUrl =
-      process.env.NODE_ENV === "development"
-        ? this.config.api_dev.common
-        : this.config.api_prod.common;
   },
  
 };
