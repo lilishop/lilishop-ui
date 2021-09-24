@@ -22,7 +22,7 @@
               <div class="wap-content-desc-title">{{ item.storeName }}</div>
 
               <div class="self-operated" :class="{'theme_color':item.selfOperated }">{{ item.selfOperated ? '自营' : '非自营' }}</div>
-              <div class="wap-sku" :class="{'theme_color':!item.storeDisable }">{{ item.storeDisable ? '开启中' : '关闭' }}</div>
+              <div class="wap-sku" :class="{'theme_color':(item.storeDisable === 'OPEN' ? true : false) }">{{ item.storeDisable === 'OPEN' ? '开启中' : '未开启' }}</div>
             </div>
           </div>
           <Spin size="large" fix v-if="loading"></Spin>
@@ -41,6 +41,7 @@ export default {
       params: { // 请求参数
         pageNumber: 1,
         pageSize: 10,
+        storeDisable: "OPEN",
         storeName: "",
       },
       shopsData: [], // 店铺数据
