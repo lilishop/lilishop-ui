@@ -13,32 +13,6 @@ export default {
    *              用来在菜单中显示文字
    */
   useI18n: true,
-
-  
-
-  /**
-   * @description api请求基础路径
-   */
-  api_dev: {
-    // common: "https://common-api.pickmall.cn",
-    // buyer: "https://buyer-api.pickmall.cn",
-    // seller: "https://store-api.pickmall.cn",
-    // manager: "https://admin-api.pickmall.cn"
-    common: 'http://192.168.0.111:8890',
-    buyer: 'http://192.168.0.111:8888',
-    seller: 'http://192.168.0.111:8889',
-    manager: 'http://192.168.0.111:8887'
-  },
-  api_prod: {
-    common: "https://common-api.pickmall.cn",
-    buyer: "https://buyer-api.pickmall.cn",
-    seller: "https://store-api.pickmall.cn",
-    manager: "https://admin-api.pickmall.cn"
-  },
-  /**
-   *  @description api请求基础路径前缀
-   */
-  baseUrlPrefix: "/store",
   /**
    * @description 高德web端申请的api key
    */
