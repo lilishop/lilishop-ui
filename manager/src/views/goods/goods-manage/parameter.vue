@@ -35,7 +35,8 @@
 
               <span>
                 <i-button type="text" @click="handleEditParams(group, param)">编辑</i-button>
-                <i-button type="text" size="small" style="color: #f56c6c" @click="handleDeleteParam(group, param)">删除</i-button>
+                <i-button type="text" size="small" style="color: #f56c6c"
+                          @click="handleDeleteParam(group, param)">删除</i-button>
               </span>
             </div>
           </template>
@@ -52,7 +53,7 @@
       <Modal :title="modalTitle" v-model="dialogParamsVisible" :mask-closable="false" :width="500">
         <Form ref="paramForm" :model="paramForm" :label-width="100" :rules="formValidate">
           <FormItem label="参数名称" prop="paramName">
-            <Input v-model="paramForm.paramName" style="width: 100%" />
+            <Input v-model="paramForm.paramName" style="width: 100%"/>
           </FormItem>
           <FormItem label="可选值" prop="options">
             <Select
@@ -71,7 +72,7 @@
                 :key="item"
                 :label="item"
               >
-                {{item}}
+                {{ item }}
               </Option>
             </Select>
           </FormItem>
@@ -79,8 +80,8 @@
             <Checkbox label=1 v-model="paramForm.required">必填</Checkbox>
             <Checkbox label=1 v-model="paramForm.isIndex">可索引</Checkbox>
           </FormItem>
-          <FormItem label="排序" prop="specName3">
-            <Input type="number" v-model="paramForm.sort" style="width: 100%" />
+          <FormItem label="排序" prop="sort">
+            <Input type="number" v-model="paramForm.sort" style="width: 100%"/>
           </FormItem>
         </Form>
 
@@ -95,7 +96,7 @@
       <Modal :title="modalTitle" v-model="dialogParamsGroupVisible" :mask-closable="false" :width="500">
         <Form ref="paramGroupForm" :model="paramGroupForm" :label-width="100" :rules="paramGroupValidate">
           <FormItem label="参数名称" prop="groupName">
-            <Input v-model="paramGroupForm.groupName" style="width: 100%" />
+            <Input v-model="paramGroupForm.groupName" style="width: 100%"/>
           </FormItem>
         </Form>
 
@@ -117,6 +118,9 @@ import {
   updateParamsGroup,
   deleteParamsGroup,
 } from "@/api/goods";
+
+import {regular} from "@/utils";
+
 export default {
   name: "categoryParams",
   data() {
@@ -136,7 +140,7 @@ export default {
       //参数表单
       paramForm: {},
       /** 参数值 **/
-      ops:{
+      ops: {
         options: []
       },
       // 参数表单
@@ -144,13 +148,23 @@ export default {
       /** 添加、编辑参数 规格 */
       formValidate: {
         paramName: [
-          { required: true, message: "参数名称不能为空", trigger: "blur" },
+          regular.REQUIRED,
+          regular.VARCHAR5
+        ],
+        options: [
+          regular.REQUIRED,
+          regular.VARCHAR255
+        ],
+        sort: [
+          regular.REQUIRED,
+          regular.INTEGER
         ],
       },
       /** 参数组*/
       paramGroupValidate: {
         groupName: [
-          { required: true, message: "参数组名称不能为空", trigger: "blur" },
+          regular.REQUIRED,
+          regular.VARCHAR5
         ],
       },
     };
@@ -185,9 +199,9 @@ export default {
     handleEditParams(group, param) {
       this.paramForm = {
         paramName: param.paramName,
-        options:  param.options.split(","),
-        required: param.required==1?true:false,
-        isIndex: param.isIndex==1?true:false,
+        options: param.options.split(","),
+        required: param.required == 1 ? true : false,
+        isIndex: param.isIndex == 1 ? true : false,
         groupId: group.groupId,
         categoryId: this.categoryId,
         sort: param.sort,
@@ -211,12 +225,8 @@ export default {
     },
     // 添加参数
     handleAddParamsGroup() {
-      this.paramGroupForm = {
-
-      };
-      this.ops = {
-
-      };
+      this.paramGroupForm = {};
+      this.ops = {};
       (this.paramGroupForm.categoryId = this.categoryId), (this.modalType = 0);
 
       this.modalTitle = "添加参数组";
@@ -334,11 +344,12 @@ export default {
   },
 };
 </script>
-<style lang="scss" >
+<style lang="scss">
 .row {
   overflow: hidden;
   margin: 20px 0;
 }
+
 .params {
   align-items: center;
   display: flex;
@@ -347,6 +358,7 @@ export default {
   font-size: 14px;
   justify-content: space-between;
 }
+
 .ivu-card-head {
   background-color: #f5f7fa;
 }
@@ -354,6 +366,7 @@ export default {
 .ivu-btn {
   font-size: 13px;
 }
+
 .paramsGroup {
   flex-wrap: wrap;
   display: flex;

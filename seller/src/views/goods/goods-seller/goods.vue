@@ -19,7 +19,7 @@
             </Select>
           </Form-item>
           <Form-item label="商品编号" prop="sn">
-            <Input type="text" v-model="searchForm.sn" placeholder="商品编号" clearable style="width: 200px" />
+            <Input type="text" v-model="searchForm.id" placeholder="商品编号" clearable style="width: 200px" />
           </Form-item>
           <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
           <Button @click="handleReset" class="search-btn">重置</Button>
@@ -118,7 +118,7 @@ import {
 import * as API_Shop from "@/api/shops";
 
 export default {
- 
+
   name: "goods",
   data() {
     return {
@@ -201,8 +201,8 @@ export default {
         },
         {
           title: "商品编号",
-          key: "sn",
-          width: 100,
+          key: "id",
+          width: 180,
           tooltip: true,
         },
         {
@@ -210,18 +210,6 @@ export default {
           key: "goodsName",
           minWidth: 200,
           slot: "goodsSlot",
-        },
-
-        {
-          title: "市场价格",
-          key: "cost",
-          width: 130,
-          render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.cost, "￥")
-            );
-          },
         },
         {
           title: "商品类型",

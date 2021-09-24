@@ -114,7 +114,7 @@ export default {
       formValidate: {
         specName: [
           regular.REQUIRED,
-          regular.VARCHAR20
+          // regular.VARCHAR20
         ],
         specValue: [
           regular.REQUIRED,

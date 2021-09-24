@@ -61,7 +61,8 @@ export const TEL = /0\d{2,3}-\d{7,8}/
 
 // 正整数
 export const INTEGER = {
-  pattern: /^[0-9]\d*$/,
+
+  pattern: /^[0-9]\d{0,10}|0$/,
   message:'请输入正整数'
 }
 

@@ -18,37 +18,21 @@
             style="width: 200px"
           />
         </Form-item>
-        <span v-if="drop">
-          <Form-item label="状态" prop="status">
-            <Select
-              v-model="searchForm.marketEnable"
-              placeholder="请选择"
-              clearable
-              style="width: 200px"
-            >
-              <Option value="DOWN">下架</Option>
-              <Option value="UPPER">上架</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="商品编号" prop="sn">
-            <Input
-              type="text"
-              v-model="searchForm.sn"
-              placeholder="商品编号"
-              clearable
-              style="width: 200px"
-            />
-          </Form-item>
-        </span>
+
+        <Form-item label="商品编号" prop="id">
+          <Input
+            type="text"
+            v-model="searchForm.id"
+            placeholder="商品编号"
+            clearable
+            style="width: 200px"
+          />
+        </Form-item>
         <Form-item style="margin-left: -35px" class="br">
           <Button @click="handleSearch" type="primary" icon="ios-search"
             >搜索</Button
           >
           <Button @click="handleReset">重置</Button>
-          <a class="drop-down" @click="dropDown">
-            {{ dropDownContent }}
-            <Icon :type="dropDownIcon"></Icon>
-          </a>
         </Form-item>
       </Form>
       <Table
@@ -98,7 +82,7 @@ export default {
       },
       columns: [ // 表头
         {
-          title: "ID",
+          title: "编号",
           key: "id",
           minWidth: 120
         },
@@ -134,11 +118,6 @@ export default {
           render: (h, params) => {
             return h('div', this.$options.filters.unitPrice(params.row.price, '￥'))
           }
-        },
-
-        {
-          title: "商品库存",
-          key: "quantity",
         },
         {
           title: "创建时间",
@@ -245,17 +224,6 @@ export default {
       this.searchForm.pageSize = 10;
       // 重新加载数据
       this.getDataList();
-    },
-    // 展开、收起搜索项
-    dropDown() {
-      if (this.drop) {
-        this.dropDownContent = "展开";
-        this.dropDownIcon = "ios-arrow-down";
-      } else {
-        this.dropDownContent = "收起";
-        this.dropDownIcon = "ios-arrow-up";
-      }
-      this.drop = !this.drop;
     },
     // 获取列表数据
     getDataList() {

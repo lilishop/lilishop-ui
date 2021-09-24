@@ -75,6 +75,9 @@ import * as API_Goods from "@/api/goods";
 
 import TreeTable from "@/views/my-components/tree-table/Table/Table";
 
+import { regular } from "@/utils";
+import {VARCHAR20} from "../../../utils/regular";
+
 export default {
   name: "store-category",
   components: {
@@ -98,11 +101,12 @@ export default {
       // 表单验证规则
       formValidate: {
         labelName: [
-          {
-            required: true,
-            message: "请输入分类名称",
-            trigger: "blur",
-          },
+          regular.REQUIRED,
+          regular.VARCHAR20
+        ],
+        sortOrder: [
+          regular.REQUIRED,
+          regular.INTEGER
         ],
       },
       columns: [
@@ -128,7 +132,7 @@ export default {
   },
   methods: {
     // 初始化数据
-    init() { 
+    init() {
       this.getAllList();
     },
     // 刷新列表

@@ -21,7 +21,7 @@
           />
         </Form-item>
         <Form-item label="店铺名称">
-          <Select v-model="searchForm.shopId" placeholder="请选择" @on-query-change="searchChange" filterable
+          <Select v-model="searchForm.storeId" placeholder="请选择" @on-query-change="searchChange" filterable
                   clearable style="width: 150px">
             <Option v-for="item in shopList" :value="item.id" :key="item.id">{{ item.storeName }}</Option>
           </Select>
@@ -91,17 +91,19 @@
           {
             title: "订单编号",
             key: "orderSn",
-            minWidth: 100,
+            minWidth: 180,
+            fixed: "left",
             tooltip: true
           },
           {
             title: '商品信息',
             slot: 'goodsMsg',
-            minWidth: 120
+            minWidth: 150
           },
           {
             title: "退款金额",
             key: "returnMoney",
+            minWidth:80,
             sortable: false,
             render: (h, params) => {
               if(params.row.sellBackRebate == null){
@@ -114,23 +116,24 @@
           {
             title: "分销商",
             key: "distributionName",
-            tooltip: true
+            tooltip: true,
+            minWidth:80,
           },
           {
             title: "店铺名称",
             key: "storeName",
+            minWidth:80,
             tooltip: true
           },
           {
             title: "状态",
             slot: "distributionOrderStatus",
-            width: 120,
-            
+            minWidth:80,
           },
           {
             title: "佣金金额",
             key: "rebateGrade",
-            width: 120,
+            minWidth:80,
             sortable: false,
             render: (h, params) => {
               if(params.row.rebate == null){
@@ -142,9 +145,10 @@
             }
           },
           {
+            fixed: "right",
             title: "创建时间",
             key: "createTime",
-            width: 180,
+            minWidth:100,
             sortable: false,
           }
         ],

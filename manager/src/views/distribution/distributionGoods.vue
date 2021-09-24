@@ -107,20 +107,23 @@ export default {
         {
           title: "库存",
           key: "quantity",
+          minWidth: 80,
         },
         {
           title: "添加时间",
           key: "createTime",
-          width: 170,
+          minWidth: 100,
         },
         {
           title: "店铺名称",
           key: "storeName",
+          minWidth: 100,
           tooltip: true,
         },
         {
           title: "佣金金额",
           key: "commission",
+          minWidth: 100,
           sortable: false,
           render: (h, params) => {
             return h(
@@ -134,7 +137,7 @@ export default {
           key: "action",
           align: "center",
           fixed: "right",
-          width: 150,
+          minWidth: 100,
           render: (h, params) => {
             return h("div", [
               h(
