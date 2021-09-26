@@ -25,9 +25,8 @@
           </div>
           <h4>商品规格及图片</h4>
           <div class="form-item-view">
-            <FormItem label="商品编号"> {{ goods.sn }}</FormItem>
+            <FormItem label="商品编号"> {{ goods.id }}</FormItem>
             <FormItem label="商品价格"> ¥{{ goods.price | unitPrice }} </FormItem>
-            <FormItem label="市场价格"> ¥{{ goods.cost | unitPrice }} </FormItem>
             <FormItem label="商品图片">
               <div class="demo-upload-list" v-for="(item, __index) in goods.goodsGalleryList" :key="__index">
                 <img :src="item"/>
@@ -67,14 +66,6 @@
               label="移动端描述"
             >
               <div v-html="goods.mobileIntro"></div>
-            </FormItem>
-          </div>
-          <h4>商品物流信息</h4>
-          <div class="form-item-view">
-            <FormItem label="商品重量">
-              <Input v-model="goods.weight">
-                <span slot="append">kg</span>
-              </Input>
             </FormItem>
           </div>
         </div>
