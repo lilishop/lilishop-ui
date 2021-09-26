@@ -18,10 +18,10 @@
             style="width: 200px"
           />
         </Form-item>
-        <Form-item label="商品编号" prop="sn">
+        <Form-item label="商品编号" prop="id">
           <Input
             type="text"
-            v-model="searchForm.sn"
+            v-model="searchForm.id"
             placeholder="请输入商品编号"
             clearable
             style="width: 200px"
@@ -101,20 +101,9 @@
           },
           {
             title: "商品编号",
-            key: "sn",
+            key: "id",
             minWidth: 100,
             tooltip: true
-          },
-          {
-            title: "成本价",
-            key: "price",
-            minWidth: 130,
-            render: (h, params) => {
-              return h(
-                "div",
-                this.$options.filters.unitPrice(params.row.cost, "￥")
-              );
-            },
           },
           {
             title: "价格",

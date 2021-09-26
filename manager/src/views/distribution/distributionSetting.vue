@@ -1,20 +1,20 @@
 <template>
   <div style="background-color: #fff;">
 
-    <Form ref="form" :model="form" :label-width="120" style="padding: 10px;">
+    <Form ref="form" :model="form" :rules="formRule" :label-width="120" style="padding: 10px;">
 
       <Divider orientation="left">分销设置</Divider>
-      <FormItem label="是否开启分销" prop="distribution">
+      <FormItem label="是否开启分销" prop="isOpen">
         <i-switch size="large" v-model="form.isOpen" :true-value="true" :false-value="false">
           <span slot="open">开启</span>
           <span slot="close">关闭</span>
         </i-switch>
       </FormItem>
       <FormItem label="分销关系绑定天数" prop="distributionDay">
-        <InputNumber :min="1" style="width:100px;" v-model="form.distributionDay"></InputNumber>
+        <InputNumber :min="1" :max="365" style="width:100px;" v-model="form.distributionDay"></InputNumber>
       </FormItem>
       <FormItem label="分销结算天数" prop="cashDay">
-        <InputNumber :min="1" style="width:100px;" v-model="form.cashDay"></InputNumber>
+        <InputNumber :min="1"  :max="365"  style="width:100px;" v-model="form.cashDay"></InputNumber>
       </FormItem>
       <FormItem>
         <Button type="primary" @click="submit">保存</Button>
@@ -25,15 +25,27 @@
 
 <script>
 import { setSetting, getSetting } from "@/api/index";
+import { regular } from "@/utils";
 export default {
   name: "distributionSetting",
   data() {
     return {
       form: {
         // 添加或编辑表单对象初始化数据
-        isOpen: "",
+        isOpen: true,
         distributionDay: 0, //分销关系绑定天数
         cashDay: 0, //分销结算天数
+      },
+      formRule: {
+        isOpen: [
+          regular.REQUIRED
+        ],
+        distributionDay: [
+          regular.REQUIRED
+        ],
+        cashDay: [
+          regular.REQUIRED
+        ],
       }
     };
   },
