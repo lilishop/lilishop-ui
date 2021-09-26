@@ -63,7 +63,7 @@ export default {
   data() {
     return {
       handleSubmit, // 验证规则
- 
+
       picModelFlag: false, // 预览图片显隐
       formValidate: { // 表单数据
         buyerSideLogo: "",

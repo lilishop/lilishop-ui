@@ -76,7 +76,15 @@
     text-align: left;
   }
 }
-
+.sku-val{
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  >.sku-item-content-val{
+  
+    
+    margin-right: 20px;
+  }
+}
 
 div.base-info-item {
   h4 {
@@ -104,15 +112,23 @@ div.base-info-item {
       margin-bottom: 20px;
 
       .sku-item-content {
+        margin: 20px 0;
         display: flex;
+        width: 100% !important;
+        flex: 1;
+      
         flex-direction: column;
         align-items: flex-start;
-        justify-content: center;
+        justify-content: flex-start;
         width: 100%;
+        >.ivu-card-body{
+          width: 100%;
+        }
 
         .sku-item-content-name {
           display: flex;
           align-items: flex-start;
+          justify-content: flex-start;
           width: 100%;
         }
       }

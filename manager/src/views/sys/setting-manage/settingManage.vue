@@ -57,6 +57,11 @@ export default {
           type: "SMS_SETTING",
           name: "阿里短信配置",
         },
+        //阿里短信配置
+        {
+          type: "IM_SETTING",
+          name: "客服设置",
+        },
       ],
       authLogin: [
         // 微信设置

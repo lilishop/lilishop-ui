@@ -57,6 +57,9 @@ import {
   updateGoodsUnit,
   delGoodsUnit
 } from "@/api/index";
+
+import {regular} from "@/utils";
+
 export default {
   name: "goods-unit",
   data() {
@@ -79,12 +82,9 @@ export default {
       // 表单验证规则
       formValidate: {
         name: [
-          {
-            required: true,
-            message: "请输入计量单位",
-            trigger: "blur",
-          },
-        ],
+          regular.REQUIRED,
+          regular.VARCHAR5
+        ]
       },
       submitLoading: false, // 添加或编辑提交状态
       selectList: [], // 多选数据

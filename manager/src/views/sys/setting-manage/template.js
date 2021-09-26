@@ -5,6 +5,7 @@ import POINT_SETTING from "./setting/POINT_SETTING";
 import KUAIDI_SETTING from "./setting/KUAIDI_SETTING";
 import OSS_SETTING from "./setting/OSS_SETTING";
 import SMS_SETTING from "./setting/SMS_SETTING";
+import IM_SETTING from "./setting/IM_SETTING";
 import WITHDRAWAL_SETTING from "./setting/WITHDRAWAL_SETTING";
 import ALIPAY_PAYMENT from "./pay/ALIPAY_PAYMENT";
 import WECHAT_PAYMENT from "./pay/WECHAT_PAYMENT";
@@ -20,6 +21,7 @@ export default {
   KUAIDI_SETTING,
   OSS_SETTING,
   SMS_SETTING,
+  IM_SETTING,
   WITHDRAWAL_SETTING,
   PAYMENT_SUPPORT,
   WECHAT_PAYMENT,
