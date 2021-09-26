@@ -91,29 +91,32 @@
                           <Button type="primary" slot="extra" @click="handleCloseSkuItem($index)">
                             删除规格
                           </Button>
-                          <FormItem label="规格名" :prop="'item.'+$index+'.name'" :rules="baseInfoFormRule.name"
-                            class="sku-item-content-val flex">
-                            <AutoComplete style="width: 150px" v-model="item.name" :maxlength="30"
-                              placeholder="请输入规格项名称" :filter-method="filterMethod" :data="skuData"
-                              @on-change="editSkuItem">
-                            </AutoComplete>
-                           
-                          </FormItem>
-                          <div class="flex sku-val">
-                            <!--规格值文本列表-->
-                            <FormItem v-for="(val, index) in item.spec_values" :key="index"
-                              class="sku-item-content-val flex" label="规格项" :prop="'spec_values.'+index"
-                              :rules="[regular.REQUIRED, regular.VARCHAR60]">
-                              <AutoComplete v-model="val.value" style="width: 150px" :maxlength="30"
-                                placeholder="请输入规格项" :filter-method="filterMethod" :data="skuVal"
-                                @on-focus="changeSkuVals(item.name)"
-                                @on-change="skuValueChange(val.value, $index, item)">
+                          <div>
+                            <FormItem label="规格名" class="sku-item-content-val flex">
+                              <AutoComplete style="width: 150px"   v-model="item.name" :maxlength="30"
+                                placeholder="请输入规格项名称" :filter-method="filterMethod" :data="skuData"
+                                @on-change="editSkuItem">
                               </AutoComplete>
-                              <Button type="primary" size="small" style="margin-left: 10px"
-                                @click="handleCloseSkuValue(item, index)">
-                                删除
-                              </Button>
+
                             </FormItem>
+                          </div>
+                          <div class="flex sku-val">
+                            <Form :model="item" class="flex">
+                              <!--规格值文本列表-->
+                              <FormItem v-for="(val, index) in item.spec_values" :key="index"
+                                class="sku-item-content-val flex" label="规格项" :prop="'spec_values.'+index+'.value'"
+                                :rules="[regular.REQUIRED, regular.VARCHAR60]">
+                                <AutoComplete v-model="val.value" style="width: 150px" :maxlength="30"
+                                  placeholder="请输入规格项" :filter-method="filterMethod" :data="skuVal"
+                                  @on-focus="changeSkuVals(item.name)"
+                                  @on-change="skuValueChange(val.value, $index, item)">
+                                </AutoComplete>
+                                <Button type="primary" size="small" style="margin-left: 10px"
+                                  @click="handleCloseSkuValue(item, index)">
+                                  删除
+                                </Button>
+                              </FormItem>
+                            </Form>
 
                           </div>
                           <div>
@@ -296,7 +299,6 @@ export default {
     },
   },
   data() {
-    
     // 表单验证项，商品价格
     const checkPrice = (rule, value, callback) => {
       if (!value && value !== 0) {
@@ -422,6 +424,7 @@ export default {
         value: [regular.REQUIRED, regular.VARCHAR60],
         templateId: [regular.REQUIRED],
       },
+      skuInfoRules: {},
       /** 品牌列表 */
       brandList: [],
       /** 店铺分类列表 */
@@ -443,6 +446,9 @@ export default {
     };
   },
   methods: {
+    changeSku(val){
+      console.warn(val)
+    },
     /**
      * 选择参数
      * @paramsGroup 参数分组
@@ -699,7 +705,7 @@ export default {
                   {
                     id: u.specValueId,
                     name: u.specName,
-                    value: u.specValue,
+                    value: u.specValue || "",
                   },
                 ],
               });
@@ -712,7 +718,7 @@ export default {
                   sk.spec_values.push({
                     id: u.specValueId,
                     name: u.specName,
-                    value: u.specValue,
+                    value: u.specValue || "",
                   });
                 }
                 if (!sk.spec_id && u.specName === "specId") {
@@ -777,6 +783,7 @@ export default {
       // 写入对象，下标，具体对象
       this.$set(this.skuInfo, this.skuInfo.length, {
         spec_values: [],
+        name: "规格名",
       });
       this.renderTableData();
     },
@@ -832,6 +839,7 @@ export default {
         }
         this.$set(item.spec_values, item.spec_values.length, {
           name: item.name,
+          value: "",
         });
         this.baseInfoForm.regeneratorSkuFlag = true;
         /**
@@ -861,6 +869,7 @@ export default {
       let pushData = [];
       //渲染头部
       this.skuInfo.forEach((sku) => {
+        !sku.name  ? sku.name = "规格名" : ''
         //列名称
         let columnName = sku.name;
         pushData.push({
@@ -934,6 +943,7 @@ export default {
           cloneTemp[0].spec_values.forEach((valItem) => {
             let obj = cloneObj(resItem);
             obj[cloneTemp[0].name] = valItem.value;
+
             table.push(obj);
           });
         });

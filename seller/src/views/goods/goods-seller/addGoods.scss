@@ -79,7 +79,7 @@
 .sku-val{
   justify-content: flex-start;
   flex-wrap: wrap;
-  >.sku-item-content-val{
+  /deep/ .sku-item-content-val{
   
     
     margin-right: 20px;
