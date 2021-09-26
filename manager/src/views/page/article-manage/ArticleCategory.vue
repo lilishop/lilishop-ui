@@ -33,7 +33,7 @@
             >删除
           </Button>
           <Button
-            v-show="scope.row.level != 2"
+            v-show="scope.row.level != 1"
             type="success"
             @click="addChildren(scope.row)"
             size="small"
@@ -114,14 +114,15 @@ export default {
       formAdd: {
         // 添加或编辑表单对象初始化数据
         parentId: "",
-        name: "",
         sort: 1,
         level: 0,
+        articleCategoryName:""
       },
       // 表单验证规则
       formValidate: {
         articleCategoryName:[
           regular.REQUIRED,
+          regular.VARCHAR20,
         ],
         sort:[
           regular.REQUIRED,

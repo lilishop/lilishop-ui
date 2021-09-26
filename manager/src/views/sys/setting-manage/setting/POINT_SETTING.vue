@@ -6,7 +6,7 @@
           <span slot="prepend">1积分=</span>
           <span slot="append">人民币</span>
         </Input>
-        
+
       </FormItem>
 
       <FormItem label="注册账号" prop="register">
@@ -101,10 +101,7 @@ export default {
       }
       this.formValidate.pointSettingItems.push({
         point: "0",
-        day:
-          this.formValidate.pointSettingItems[
-            this.formValidate.pointSettingItems.length - 1
-          ].day + 1,
+        day: this.formValidate.pointSettingItems.length ,
       });
     },
     // 实例化数据
