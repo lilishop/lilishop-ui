@@ -2,7 +2,7 @@
   <div>
     <Card>
       <Form ref="searchForm" @keydown.enter.native="handleSearch" :model="searchForm" inline :label-width="70" class="search-form">
-        <Form-item label="订单编号" prop="orderSn">
+        <Form-item label="订单编号"  prop="orderSn">
           <Input
             type="text"
             v-model="searchForm.orderSn"
@@ -86,6 +86,8 @@
         searchForm: { // 搜索框初始化对象
           pageNumber: 1, // 当前页数
           pageSize: 10, // 页面大小
+          sort:"create_time",
+          order:"desc"
         },
         columns: [
           {

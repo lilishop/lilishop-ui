@@ -1,24 +1,27 @@
 <template>
   <div>
     <Card>
-      <Row @keydown.enter.native="handleSearch" >
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="会员名称">
-            <Input class="search-input" v-model="searchForm.memberName"></Input>
+        <Form ref="searchForm" :model="searchForm"  class="search-form">
+          <Form-item label="会员名称"  class="flex" prop="memberName">
+            <Input
+              type="text" v-model="searchForm.memberName"
+              style="width: 200px"></Input>
           </Form-item>
-          <Form-item label="编号">
-            <Input class="search-input" v-model="searchForm.sn"></Input>
+          <Form-item label="编号" class="flex">
+            <Input
+              type="text" v-model="searchForm.sn"
+              style="width: 200px"></Input>
           </Form-item>
-          <Form-item label="状态" style="margin-left: -20px">
-            <Select v-model="searchForm.distributionCashStatus" style="width:150px;">
+          <Form-item label="状态"
+                     style="width: 200px">
+            <Select v-model="searchForm.distributionCashStatus" clearable style="width: 150px">
                 <Option v-for="item in cashStatusList" :value="item.value" :key="item.value">{{ item.label }}</Option>
             </Select>
           </Form-item>
-          <Form-item style="margin-left:-35px;" class="br">
+          <Form-item>
             <Button @click="handleSearch" type="primary">搜索</Button>
           </Form-item>
         </Form>
-      </Row>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
       <Row type="flex" justify="end" class="page padding-row">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator show-sizer></Page>

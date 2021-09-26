@@ -15,6 +15,9 @@
               <Input type="text" v-model="baseInfoForm.goodsName" placeholder="商品名称" clearable style="width: 260px" />
             </FormItem>
 
+            <FormItem label="商品价格" prop="price">
+              <Input type="text" v-model="baseInfoForm.price" placeholder="商品价格" clearable style="width: 260px" />
+            </FormItem>
             <FormItem label="商品卖点" prop="sellingPoint">
               <Input v-model="baseInfoForm.sellingPoint" type="textarea" :rows="4" style="width: 260px" />
             </FormItem>
@@ -47,15 +50,6 @@
           </div>
           <h4>商品规格及图片</h4>
           <div class="form-item-view">
-            <FormItem label="商品编号" prop="sn">
-              <Input type="text" v-model="baseInfoForm.sn" placeholder="商品编号" clearable style="width: 260px" />
-            </FormItem>
-            <FormItem label="商品价格" prop="price">
-              <Input type="text" v-model="baseInfoForm.price" placeholder="商品价格" clearable style="width: 260px" />
-            </FormItem>
-            <FormItem label="市场价格" prop="cost">
-              <Input type="text" v-model="baseInfoForm.cost" placeholder="市场价格" clearable style="width: 260px" />
-            </FormItem>
             <FormItem class="form-item-view-el required" label="商品图片" prop="goodsGalleryFiles">
               <div style="display:flex;flex-wrap:flex-start;">
                 <vuedraggable :list="baseInfoForm.goodsGalleryFiles" :animation="200">
@@ -86,15 +80,15 @@
                 <img :src="previewGoodsPicture" v-if="goodsPictureVisible" style="width: 100%" />
               </Modal>
             </FormItem>
-            <div class="layout" style="width: 100%">
+            <div class="layout">
               <Collapse v-model="open_panel">
                 <Panel name="1">
-                  规格名称
-                  <div slot="content" class="sku-item-content">
+                  自定义规格项
+                  <div slot="content" >
                     <Form>
-                      <div class="sku-item" v-for="(item, $index) in skuInfo" :key="$index">
-                        <Card :bordered="true">
-                          <FormItem label="规格名：" class="sku-item-content-name">
+                      <div v-for="(item, $index) in skuInfo" :key="$index" class="sku-item-content">
+                        <Card :bordered="true" class="ivu-card-body">
+                          <FormItem label="规格名"  :prop="'item.'+$index+'.name'" :rules="baseInfoFormRule.name" class="sku-item-content-val">
                             <AutoComplete style="width: 150px" v-model="item.name" :maxlength="30"
                               placeholder="请输入规格项名称" :filter-method="filterMethod" :data="skuData"
                               @on-change="editSkuItem">
@@ -102,30 +96,26 @@
                             <Button type="error" style="margin-left: 10px" @click="handleCloseSkuItem($index)">删除
                             </Button>
                           </FormItem>
-                          <FormItem label="规格值：" prop="sku">
                             <!--规格值文本列表-->
-                            <div v-for="(val, index) in item.spec_values" :key="index"
-                              style="padding: 0px 20px 10px 0px; float: left">
-                              <div>
-                                <AutoComplete style="width: 150px; float: left" v-model="val.value" :maxlength="30"
-                                  placeholder="请输入规格值名称" :filter-method="filterMethod" :data="skuVal"
+                              <FormItem v-for="(val, index) in item.spec_values" :key="index" class="sku-item-content-val"
+                                        label="规格项" :prop="'val.'+index+'.val'" :rules="baseInfoFormRule.value">
+                                <AutoComplete v-model="val.value" style="width: 150px" :maxlength="30"
+                                  placeholder="请输入规格项" :filter-method="filterMethod" :data="skuVal"
                                   @on-focus="changeSkuVals(item.name)"
                                   @on-change="skuValueChange(val.value, $index, item)">
                                 </AutoComplete>
                                 <Button type="error" style="margin-left: 10px"
-                                  @click="handleCloseSkuValue(item, index)">
+                                        @click="handleCloseSkuValue(item, index)">
                                   删除
                                 </Button>
-                              </div>
-                            </div>
-                            <div style="float: left">
+                              </FormItem>
+                            <div>
                               <Button @click="addSpec($index, item)">添加规格值</Button>
                             </div>
-                          </FormItem>
                         </Card>
                       </div>
                     </Form>
-                    <Button class="add-sku-btn" type="primary" size="small" @click="addSkuItem">添加规格项目</Button>
+                    <Button class="add-sku-btn" type="primary" size="small" @click="addSkuItem">添加规格项</Button>
                   </div>
                 </Panel>
                 <Panel name="2">
@@ -213,12 +203,6 @@
           <div v-if="baseInfoForm.goodsType!='VIRTUAL_GOODS'">
             <h4>商品物流信息</h4>
             <div class="form-item-view">
-              <FormItem class="form-item-view-el" label="商品重量" prop="weight">
-                <Input v-model="baseInfoForm.weight">
-                <span slot="append">kg</span>
-                </Input>
-              </FormItem>
-
               <FormItem class="form-item-view-el" label="物流模板" prop="templateId">
                 <Select v-model="baseInfoForm.templateId" style="width: 200px">
                   <Option v-for="item in logisticsTemplate" :value="item.id" :key="item.id">{{ item.name }}
@@ -326,6 +310,8 @@ export default {
         callback(new Error("商品编号不能为空"));
       } else if (!/^[a-zA-Z0-9_\\-]+$/g.test(value)) {
         callback(new Error("请输入数字、字母、下划线或者中划线"));
+      } else if (value.length>30) {
+        callback(new Error("商品编号长度不能大于30"));
       } else {
         callback();
       }
@@ -365,8 +351,6 @@ export default {
       /** 发布商品基本参数 */
       baseInfoForm: {
         salesModel: "RETAIL",
-        /** 商品重量 */
-        weight: "",
         /** 商品相册列表 */
         goodsGalleryFiles: [],
         /** 是否立即发布 true 立即发布 false 放入仓库 */
@@ -422,36 +406,30 @@ export default {
       validateError: [],
       baseInfoFormRule: {
         goodsName: [
-          { required: true, message: "请输入商品名称" },
-          {
-            whitespace: true,
-            message: "商品名称不可为纯空格",
-          },
-          {
-            min: 3,
-            max: 60,
-            message: "长度在 3 到 60 个字符",
-          },
+          regular.REQUIRED,
+          regular.WHITE_SPACE,
+          regular.VARCHAR60
         ],
-        sn: [
-          { required: true, message: "请输入商品编号" },
-          { validator: checkSn },
-        ],
-        price: [
-          { required: true, message: "请输入商品价格" },
+        price:[
+          regular.REQUIRED,
           { validator: checkPrice },
         ],
-        cost: [
-          { required: true, message: "请输入市场价格" },
-          { validator: checkPrice },
+        sellingPoint: [
+          regular.REQUIRED,
+          regular.VARCHAR60
         ],
-        weight: [
-          { required: true, message: "请输入商品重量" },
-          { validator: checkWeight },
-        ],
-        templateId: [{ required: true, message: "请选择物流模板" }],
-        sellingPoint: [{ required: true, message: "请输入商品卖点" }],
         goodsUnit: [{ required: true, message: "请选择计量单位" }],
+        name:[
+          regular.REQUIRED,
+          regular.VARCHAR5
+        ],
+        value:[
+          regular.REQUIRED,
+          regular.VARCHAR60
+        ],
+        templateId:[
+          regular.REQUIRED,
+        ]
       },
       /** 品牌列表 */
       brandList: [],
@@ -999,7 +977,7 @@ export default {
     },
     /** 数据改变之后 抛出数据 */
     updateSkuTable(row, item, type = "deafult") {
-    
+
       let index = row._index;
       this.baseInfoForm.regeneratorSkuFlag = true;
       /** 进行自定义校验 判断是否是数字（小数也能通过）重量 */
@@ -1065,6 +1043,10 @@ export default {
         ids += e.id + ",";
       });
       ids = ids.substring(0, ids.length - 1);
+
+      if(ids.length>100){
+        this.$Message.error("选择了过多的店铺分类，请谨慎选择");
+      }
       this.baseInfoForm.storeCategoryPath = ids;
     },
     /**  添加商品 **/
@@ -1134,6 +1116,8 @@ export default {
           }
         } else {
           this.submitLoading = false;
+
+          this.$Message.error("还有必填项未做处理，请检查表单");
         }
       });
     },
