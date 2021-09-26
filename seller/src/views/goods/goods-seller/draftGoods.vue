@@ -6,20 +6,20 @@
         <Form-item label="商品名称" prop="goodsName">
           <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px" />
         </Form-item>
-
-        <Form-item label="状态" prop="status">
-          <Select v-model="searchForm.marketEnable" placeholder="请选择" clearable style="width: 200px">
-            <Option value="DOWN">下架</Option>
-            <Option value="UPPER">上架</Option>
-          </Select>
+        <Form-item label="商品编号" prop="id">
+          <Input
+            type="text"
+            v-model="searchForm.id"
+            placeholder="商品编号"
+            clearable
+            style="width: 200px"
+          />
         </Form-item>
-        <Form-item label="商品编号" prop="sn">
-          <Input type="text" v-model="searchForm.sn" placeholder="商品编号" clearable style="width: 200px" />
-        </Form-item>
-
         <Form-item style="margin-left: -35px" class="br">
-          <Button @click="handleSearch" type="primary" icon="ios-search">搜索</Button>
-
+          <Button @click="handleSearch" type="primary" icon="ios-search"
+            >搜索</Button
+          >
+          <Button @click="handleReset">重置</Button>
         </Form-item>
       </Form>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
@@ -51,7 +51,7 @@ export default {
       columns: [
         // 表头
         {
-          title: "ID",
+          title: "编号",
           key: "id",
           minWidth: 120,
         },
@@ -90,11 +90,6 @@ export default {
               this.$options.filters.unitPrice(params.row.price, "￥")
             );
           },
-        },
-
-        {
-          title: "商品库存",
-          key: "quantity",
         },
         {
           title: "创建时间",
@@ -206,7 +201,6 @@ export default {
       // 重新加载数据
       this.getDataList();
     },
-
     // 获取列表数据
     getDataList() {
       this.loading = true;

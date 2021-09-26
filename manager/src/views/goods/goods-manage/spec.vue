@@ -56,7 +56,8 @@
       :mask-closable="false"
       :width="500"
     >
-      <Form ref="form" :model="form" :label-width="100">
+      <Form ref="form" :model="form" :label-width="100"
+            :rules="formValidate">
         <FormItem label="规格名称" prop="specName">
           <Input v-model="form.specName" maxlength="30" clearable style="width: 100%"/>
         </FormItem>
@@ -92,6 +93,7 @@ import {
   delSpec
 } from "@/api/goods";
 
+import {regular} from "@/utils";
 export default {
   name: "spec",
   components: {},
@@ -107,6 +109,17 @@ export default {
         pageSize: 10, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "asc", // 默认排序方式
+      },
+      // 表单验证规则
+      formValidate: {
+        specName: [
+          regular.REQUIRED,
+          // regular.VARCHAR20
+        ],
+        specValue: [
+          regular.REQUIRED,
+          regular.VARCHAR255
+        ],
       },
       form: {
         // 添加或编辑表单对象初始化数据
@@ -280,6 +293,7 @@ export default {
       this.modalType = 0;
       this.modalTitle = "添加";
       this.$refs.form.resetFields();
+      this.specValue = '';
       delete this.form.id;
       this.modalVisible = true;
     },

@@ -171,9 +171,17 @@ export default {
       // 表单验证规则
       formValidate: {
         commissionRate: [
-          { required: true, message: "请填写佣金比例" },
-          { pattern: regular.Integer, message: "佣金比例不能为负" },
+          regular.REQUIRED,
+          regular.INTEGER
         ],
+        name:[
+          regular.REQUIRED,
+          regular.VARCHAR20,
+        ],
+        sortOrder:[
+          regular.REQUIRED,
+          regular.INTEGER
+        ]
       },
       columns: [
         {

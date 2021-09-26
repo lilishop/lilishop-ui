@@ -24,11 +24,11 @@ export const cashStatusList = [
         label:'待处理'
     },
     {
-        value:'REFUSE',
+        value:'FAIL_AUDITING',
         label:'拒绝'
     },
     {
-        value:'PASS',
+        value:'VIA_AUDITING',
         label:'通过'
     }
 ]

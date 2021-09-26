@@ -33,7 +33,7 @@
             >删除
           </Button>
           <Button
-            v-show="scope.row.level != 2"
+            v-show="scope.row.level != 1"
             type="success"
             @click="addChildren(scope.row)"
             size="small"
@@ -65,14 +65,14 @@
             />
           </FormItem>
         </div>
-        <FormItem label="分类名称" prop="name">
+        <FormItem label="分类名称" prop="articleCategoryName">
           <Input
             v-model="formAdd.articleCategoryName"
             clearable
             style="width: 100%"
           />
         </FormItem>
-        <FormItem label="排序值" prop="sort" style="width: 345px">
+        <FormItem label="排序值" prop="sort">
           <InputNumber v-model="formAdd.sort"></InputNumber>
         </FormItem>
       </Form>
@@ -94,7 +94,7 @@ import {
 } from "@/api/pages";
 import TreeTable from "@/views/my-components/tree-table/Table/Table";
 import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
-
+import { regular } from "@/utils";
 export default {
   name: "lili-components",
   components: {
@@ -114,12 +114,21 @@ export default {
       formAdd: {
         // 添加或编辑表单对象初始化数据
         parentId: "",
-        name: "",
         sort: 1,
         level: 0,
+        articleCategoryName:""
       },
       // 表单验证规则
-      formValidate: {},
+      formValidate: {
+        articleCategoryName:[
+          regular.REQUIRED,
+          regular.VARCHAR20,
+        ],
+        sort:[
+          regular.REQUIRED,
+          regular.INTEGER
+        ]
+      },
       columns: [
         {
           title: "分类名称",
