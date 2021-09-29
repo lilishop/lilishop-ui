@@ -91,7 +91,7 @@
                 <dt>申请退款金额</dt>
                 <dd>{{ afterSaleInfo.applyRefundPrice | unitPrice('￥') }}</dd>
               </dl>
-              <dl>
+              <dl v-if="params.serviceStatus == 'PASS'">
                 <dt>实际退款金额</dt>
                 <dd>
                   <Input v-model="params.actualRefundPrice" style="width:260px" />

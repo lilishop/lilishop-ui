@@ -8,8 +8,8 @@
 
             <FormItem label="选择商品" prop="scopeType">
               <Button type="primary" @click="openSkuList">选择商品</Button>
-              <Button type="error" ghost style="margin-left: 10px" @click="delSelectGoods">批量删除
-              </Button>
+              <!-- <Button type="error" ghost style="margin-left: 10px" @click="delSelectGoods">批量删除
+              </Button> -->
             </FormItem>
 
             <FormItem astyle="width: 100%">
@@ -292,28 +292,28 @@ export default {
       // 已选商品批量选择
       this.selectedGoods = e;
     },
-    delSelectGoods() {
-      // 多选删除商品
-      if (this.selectedGoods.length <= 0) {
-        this.$Message.warning("您还未选择要删除的数据");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选商品吗?",
-        onOk: () => {
-          let ids = [];
-          this.selectedGoods.forEach(function (e) {
-            ids.push(e.id);
-          });
-          this.form.promotionGoodsList = this.form.promotionGoodsList.filter(
-            (item) => {
-              return !ids.includes(item.id);
-            }
-          );
-        },
-      });
-    },
+    // delSelectGoods() {
+    //   // 多选删除商品
+    //   if (this.selectedGoods.length <= 0) {
+    //     this.$Message.warning("您还未选择要删除的数据");
+    //     return;
+    //   }
+    //   this.$Modal.confirm({
+    //     title: "确认删除",
+    //     content: "您确认要删除所选商品吗?",
+    //     onOk: () => {
+    //       let ids = [];
+    //       this.selectedGoods.forEach(function (e) {
+    //         ids.push(e.id);
+    //       });
+    //       this.form.promotionGoodsList = this.form.promotionGoodsList.filter(
+    //         (item) => {
+    //           return !ids.includes(item.id);
+    //         }
+    //       );
+    //     },
+    //   });
+    // },
     delGoods(index) {
       // 删除商品
       this.form.promotionGoodsList.splice(index, 1);

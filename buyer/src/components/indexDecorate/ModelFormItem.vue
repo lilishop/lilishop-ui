@@ -81,14 +81,17 @@
       <first-page-advert :data="element" class="mb_20 width_1200_auto"></first-page-advert>
     </template>
     <!-- 横幅广告 -->
-    <template v-if="element.type == 'bannerAdvert'">
+    <template  v-if="element.type == 'bannerAdvert'">
+      <div style="width:100%; text-align: center;">
       <img
         width="1200"
         class="hover-pointer mb_20"
+      
         @click="linkTo(element.options.url)"
         :src="element.options.img"
         alt=""
       />
+      </div>
     </template>
     <template v-if="element.type == 'notEnough'">
       <not-enough :data="element" class="mb_20 width_1200_auto"></not-enough>
