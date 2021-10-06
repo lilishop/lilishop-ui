@@ -48,12 +48,13 @@
             <Input v-model="form.title" clearable style="width: 40%" />
           </FormItem>
           <FormItem label="文章分类" prop="categoryId">
+       
             <Select v-model="treeValue" placeholder="请选择" clearable style="width: 180px">
               <Option :value="treeValue" style="display: none">{{
                       treeValue
                     }}
               </Option>
-              <Tree :data="treeData" @on-select-change="handleCheckChange"></Tree>
+              <Tree :data="treeDataDefault" @on-select-change="handleCheckChange"></Tree>
             </Select>
           </FormItem>
           <FormItem label="文章排序" prop="sort">
@@ -108,7 +109,7 @@ export default {
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
-
+      treeDataDefault:"",
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -308,6 +309,7 @@ export default {
         this.loading = false;
         if (res.success) {
           this.treeData = this.getTree(res.result);
+          this.treeDataDefault = this.getTree(res.result);
           this.treeData.unshift({
             title: "全部",
             level: 0,
@@ -388,6 +390,7 @@ export default {
       this.modalType = 0;
       this.modalTitle = "添加文章";
       this.treeValue = '';
+
       this.form = {
         sort: 1,
         content:''
