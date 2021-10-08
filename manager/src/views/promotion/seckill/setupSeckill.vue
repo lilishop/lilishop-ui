@@ -95,12 +95,12 @@ export default {
                 });
               }
             });
-            if (!this.times[i]) {
-              this.times.push({
-                time: i,
-                check: false,
-              });
-            }
+          }
+          if (!this.times[i]) {
+            this.times.push({
+              time: i,
+              check: false,
+            });
           }
         }
       }
