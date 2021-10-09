@@ -408,22 +408,22 @@ export const getProgress = () => {
 
 // 分页查询自定义分词
 export const getCustomWordsPage = (params) => {
-  return getRequest(`/manager/custom-words`, params);
+  return getRequest(`/custom-words/page`, params);
 };
 
 // 添加自定义分词
 export const insertCustomWords = (params) => {
-  return postRequest(`/manager/custom-words`, params);
+  return postRequest(`/custom-words`, params);
 };
 
 // 修改自定义分词
 export const updateCustomWords = (params) => {
-  return putRequest(`/manager/custom-words`, params);
+  return putRequest(`/custom-words`, params);
 };
 
 // 删除自定义分词
 export const delCustom = (id) => {
-  return deleteRequest(`/manager/custom-words/${id}`);
+  return deleteRequest(`/custom-words/${id}`);
 };
 
 // 设置热搜词

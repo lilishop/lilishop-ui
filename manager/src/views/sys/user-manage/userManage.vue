@@ -413,6 +413,7 @@ export default {
     },
     // 重置密码
     resetPass() {
+      if(this.selectCount==0) {this.$Message.warning('请选中数据后重试!'); return}
       this.$Modal.confirm({
         title: "确认重置",
         content:
