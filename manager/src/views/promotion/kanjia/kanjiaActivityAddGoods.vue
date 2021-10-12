@@ -19,22 +19,18 @@
                 </template>
 
                 <template slot-scope="{ index }" slot="settlementPrice">
-                  <Input type="number" v-model="form.promotionGoodsList[index].settlementPrice" />
+                  <InputNumber :min="0" v-model="form.promotionGoodsList[index].settlementPrice" />
                 </template>
                 <template slot-scope="{ index }" slot="lowestPrice">
-                  <Input type="number" v-model="form.promotionGoodsList[index].lowestPrice" />
+                  <InputNumber :min="0" v-model="form.promotionGoodsList[index].lowestPrice" />
 
                 </template>
                 <template slot-scope="{ index }" slot="highestPrice">
-                  <Input type="number" v-model="form.promotionGoodsList[index].highestPrice" />
+                  <InputNumber :min="0" v-model="form.promotionGoodsList[index].highestPrice" />
 
                 </template>
-                <template slot-scope="{ index }" slot="purchasePrice">
-                  <Input type="number" v-model="form.promotionGoodsList[index].purchasePrice" />
-                </template>
-
                 <template slot-scope="{ index }" slot="stock">
-                  <Input type="number" v-model="form.promotionGoodsList[index].stock" />
+                  <InputNumber :min="0" v-model="form.promotionGoodsList[index].stock" />
                 </template>
               </Table>
             </FormItem>
@@ -122,12 +118,6 @@ export default {
           slot: "highestPrice",
           width: 110,
         },
-
-        {
-          title: "最低购买金额",
-          slot: "purchasePrice",
-          width: 110,
-        },
         {
           title: "活动库存",
           slot: "stock",
@@ -209,11 +199,7 @@ export default {
                 this.$Message.error("活动库存不能为0且不能超过商品库存");
                 return;
               }
-              // 最低购买金额格式校验
-              if (!regular.money.test(res.purchasePrice)) {
-                checkResult = false;
-                this.$Message.error("最低购买金额格式不正确");
-              }
+              
               // 结算价格金额格式校验
               if (!regular.money.test(res.settlementPrice)) {
                 checkResult = false;
@@ -324,7 +310,7 @@ export default {
       item.forEach((e) => {
         list.push({
           settlementPrice: e.settlementPrice || 0,
-          purchasePrice: e.purchasePrice || 0,
+          purchasePrice:  0,
           lowestPrice: e.lowestPrice || 0,
           highestPrice: e.highestPrice || 0,
           stock: e.stock || 0,

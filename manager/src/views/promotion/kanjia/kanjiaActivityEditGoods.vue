@@ -30,16 +30,7 @@
                 style="width: 260px"
               />
             </FormItem>
-            <FormItem label="最低购买金额" prop="purchasePrice">
-              <Input
-                :disabled="onlyView"
-                type="number"
-                v-model="form.purchasePrice"
-                placeholder="请填写最低购买金额"
-                clearable
-                style="width: 260px"
-              />
-            </FormItem>
+           
             <FormItem label="最低可砍" prop="lowestPrice">
               <Input
                 :disabled="onlyView"
@@ -156,6 +147,7 @@
       return {
         modalType: 0, // 是否编辑
         form: {
+          purchasePrice:0,
           goodsSku: {},
         },
         id: this.$route.query.id, // 砍价活动id
@@ -166,10 +158,7 @@
             {required: true, message: "请输入结算金额"},
             {validator: checkSettlementPrice},
           ],
-          purchasePrice: [
-            {required: true, message: "请输入最低购买金额"},
-            {validator: checkPurchasePrice},
-          ],
+         
           lowestPrice: [
             {required: true, message: "请输入最低可砍金额"},
             {validator: checkLowestPrice},
@@ -227,10 +216,7 @@
               this.$Message.error("活动库存不能为0且不能超过商品库存");
               return
             }
-            // 最低购买金额格式校验
-            if (!regular.money.test(params.purchasePrice)) {
-              this.$Message.error("最低购买金额格式不正确");
-            }
+          
             // 结算价格金额格式校验
             if (!regular.money.test(params.settlementPrice)) {
               this.$Message.error("结算价格金额格式不正确");

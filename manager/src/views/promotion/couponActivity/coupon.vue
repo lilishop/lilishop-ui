@@ -221,6 +221,7 @@ export default {
             if (res.success) {
               this.$Message.success("优惠券活动已停止");
               this.getDataList();
+              this.$Modal.remove()
             }
           }).catch(() => {});
         },
