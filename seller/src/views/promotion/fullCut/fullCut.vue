@@ -3,21 +3,10 @@
     <Card>
       <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
         <Form-item label="活动名称">
-          <Input
-            type="text"
-            v-model="searchForm.promotionName"
-            placeholder="请输入活动名称"
-            clearable
-            style="width: 200px"
-          />
+          <Input type="text" v-model="searchForm.promotionName" placeholder="请输入活动名称" clearable style="width: 200px" />
         </Form-item>
         <Form-item label="活动状态" prop="promotionStatus">
-          <Select
-            v-model="searchForm.promotionStatus"
-            placeholder="请选择"
-            clearable
-            style="width: 200px"
-          >
+          <Select v-model="searchForm.promotionStatus" placeholder="请选择" clearable style="width: 200px">
             <Option value="NEW">未开始</Option>
             <Option value="START">已开始/上架</Option>
             <Option value="END">已结束/下架</Option>
@@ -25,13 +14,8 @@
           </Select>
         </Form-item>
         <Form-item label="活动时间">
-          <DatePicker
-            v-model="selectDate"
-            type="daterange"
-            clearable
-            placeholder="选择起始时间"
-            style="width: 200px"
-          ></DatePicker>
+          <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 200px">
+          </DatePicker>
         </Form-item>
         <Form-item>
           <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
@@ -41,13 +25,7 @@
       <Row class="operation">
         <Button type="primary" @click="newAct">新增</Button>
       </Row>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-      >
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table">
         <template slot-scope="{ row }" slot="applyEndTime">
           {{ unixDate(row.applyEndTime) }}
         </template>
@@ -61,67 +39,40 @@
         </template>
         <template slot-scope="{ row }" slot="action">
           <div>
-            <Button
-              type="primary"
-              v-if="row.promotionStatus == 'NEW'"
-              size="small"
-              @click="edit(row)"
-              >编辑</Button>
+            <Button type="primary" v-if="row.promotionStatus == 'NEW'" size="small" @click="edit(row)">编辑</Button>
             <Button type="info" v-else size="small" @click="edit(row)">查看</Button>
-            <Button
-              type="success"
-              v-if="row.promotionStatus === 'START'"
-              ghost
-              style="margin-left:5px"
-              size="small"
-              @click="openOrClose(row)"
-              >关闭</Button>
-            <Button
-              type="success"
-              v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
-              ghost
-              style="margin-left:5px"
-              size="small"
-              @click="openOrClose(row)"
-              >开启</Button>
-            <Button
-              type="error"
-              :disabled="row.promotionStatus == 'START'"
-              ghost
-              style="margin-left:5px"
-              size="small"
-              @click="del(row)"
-              >删除</Button>
+            <Button type="success" v-if="row.promotionStatus === 'START'" style="margin-left:5px" size="small"
+              @click="openOrClose(row)">关闭</Button>
+            <Button type="success" v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
+              style="margin-left:5px" size="small" @click="openOrClose(row)">开启</Button>
+            <Button type="error" :disabled="row.promotionStatus == 'START'" style="margin-left:5px" size="small"
+              @click="del(row)">删除</Button>
           </div>
         </template>
       </Table>
       <Row type="flex" justify="end" class="page operation">
-        <Page
-          :current="searchForm.pageNumber"
-          :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
-          size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
+          @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator
+          show-sizer></Page>
       </Row>
     </Card>
   </div>
 </template>
 <script>
-import { getFullDiscountList, delFullDiscount, updateFullDiscount } from "@/api/promotion.js";
+import {
+  getFullDiscountList,
+  delFullDiscount,
+  updateFullDiscount,
+} from "@/api/promotion.js";
 export default {
-  name: 'full-cut',
+  name: "full-cut",
   data() {
     return {
-      total:0,
-      selectDate:[],
+      total: 0,
+      selectDate: [],
       loading: false, // 表单加载状态
-      searchForm: { // 列表请求参数
+      searchForm: {
+        // 列表请求参数
         pageNumber: 1,
         pageSize: 10,
         sort: "startTime",
@@ -218,8 +169,8 @@ export default {
     },
     // 重置
     handleReset() {
-      this.selectDate = ''
-      this.searchForm = {}
+      this.selectDate = "";
+      this.searchForm = {};
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
@@ -248,12 +199,12 @@ export default {
       });
     },
     // 开启或关闭活动
-    openOrClose (row) {
-      let name = '开启'
-      let status = 'START'
-      if (row.promotionStatus === 'START') {
-        name = '关闭'
-        status = 'CLOSE'
+    openOrClose(row) {
+      let name = "开启";
+      let status = "START";
+      if (row.promotionStatus === "START") {
+        name = "关闭";
+        status = "CLOSE";
       }
       this.$Modal.confirm({
         title: "提示",
@@ -291,14 +242,14 @@ export default {
       });
     },
   },
-  mounted () {
+  mounted() {
     this.init();
   },
   // 页面缓存处理，从该页面离开时，修改KeepAlive为false，保证进入该页面是刷新
   beforeRouteLeave(to, from, next) {
-    from.meta.keepAlive = false
-    next()
-  }
+    from.meta.keepAlive = false;
+    next();
+  },
 };
 </script>
 <style lang="scss" scoped>

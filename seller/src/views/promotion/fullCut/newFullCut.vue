@@ -54,7 +54,7 @@
               </Select>
             </FormItem>
             <FormItem v-if="form.isPoint" label="赠积分" prop="point">
-              <Input :disabled="form.promotionStatus != 'NEW'" v-model="form.point" type="number" :min="0" style="width: 280px" />
+              <InputNumber :min="0" :disabled="form.promotionStatus != 'NEW'" v-model="form.point" type="number"  style="width: 280px" />
             </FormItem>
             <FormItem label="使用范围" prop="scopeType">
               <RadioGroup type="button" button-style="solid" v-model="form.scopeType">
@@ -376,6 +376,7 @@ export default {
         pageNumber: 0,
         getType: "ACTIVITY",
         couponName: query,
+        promotionStatus:"START"
       };
       this.couponLoading = true;
       getShopCouponList(params).then((res) => {

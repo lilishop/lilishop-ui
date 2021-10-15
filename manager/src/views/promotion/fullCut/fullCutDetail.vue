@@ -271,6 +271,7 @@ export default {
         pageSize: 10,
         pageNumber: 0,
         couponName: query,
+        promotionStatus:"START"
       };
       this.couponLoading = true;
       getPlatformCouponList(params).then((res) => {

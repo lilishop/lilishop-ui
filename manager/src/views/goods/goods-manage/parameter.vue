@@ -12,7 +12,7 @@
       </Card>
       <div class="paramsGroup" v-else>
 
-        <Card style="width: 350px; margin:7px;" v-for="group in paramsGroup" :key="group.groupId" :bordered="false">
+        <Card style="width: 350px; margin:7px;" v-for="(group,index) in paramsGroup" :key="index" :bordered="false">
           <p slot="title">
             <Icon type="ios-film-outline"></Icon>&nbsp;{{ group.groupName }}
           </p>
@@ -30,7 +30,7 @@
             <Icon type="arrow-down-b"></Icon>
           </p>
           <template v-if="group.params && group.params.length > 0">
-            <div v-for="param in group.params" :key="param.param_id" class="params">
+            <div v-for="(param,paramId) in group.params" :key="paramId" class="params">
               <span>{{ param.paramName }}</span>
 
               <span>
@@ -67,9 +67,9 @@
               style="width: 100%; text-align: left; margin-right: 10px"
             >
               <Option
-                v-for="item in ops"
+                v-for="(item,itemIndex) in ops.options"
                 :value="item"
-                :key="item"
+                :key="itemIndex"
                 :label="item"
               >
                 {{ item }}
@@ -94,7 +94,7 @@
 
     <div>
       <Modal :title="modalTitle" v-model="dialogParamsGroupVisible" :mask-closable="false" :width="500">
-        <Form ref="paramGroupForm" :model="paramGroupForm" :label-width="100" :rules="paramGroupValidate">
+        <Form   @submit.native.prevent   @keydown.enter.native='submitParamGroupForm'   ref="paramGroupForm" :model="paramGroupForm" :label-width="100" :rules="paramGroupValidate">
           <FormItem label="参数名称" prop="groupName">
             <Input v-model="paramGroupForm.groupName" style="width: 100%"/>
           </FormItem>
@@ -125,6 +125,7 @@ export default {
   name: "categoryParams",
   data() {
     return {
+      submitLoading:false,
       /** 分类ID */
       categoryId: this.$route.query.id,
       /** 参数组 */
