@@ -35,7 +35,7 @@
       :width="500"
     >
       <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
-        <FormItem label="自定义分词" prop="sn">
+        <FormItem label="自定义分词" prop="name">
           <Input v-model="form.name" clearable style="width: 100%" />
         </FormItem>
       </Form>
@@ -56,6 +56,8 @@ import {
   insertCustomWords,
   updateCustomWords
 } from "@/api/index";
+
+import { regular } from "@/utils";
 export default {
   name: "customWords",
   data() {
@@ -79,11 +81,8 @@ export default {
       // 表单验证规则
       formValidate: {
         name: [
-          {
-            required: true,
-            message: "请输入自定义分词",
-            trigger: "blur",
-          },
+          regular.REQUIRED,
+          regular.VARCHAR20
         ],
       },
       submitLoading: false, // 添加或编辑提交状态
