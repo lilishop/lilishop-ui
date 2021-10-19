@@ -14,7 +14,7 @@
       <p slot="title">账单详细</p>
 
       <div class="tips-status">
-        <span>商品状态</span>
+        <span>账单状态</span>
         <span class="theme_color">{{bill.billStatus | unixSellerBillStatus}}</span>
         <Button
           v-if="bill.billStatus == 'CHECK'"
@@ -54,12 +54,12 @@
             <p>退单产生退还佣金金额</p>
             <p class="increase-color">+{{bill.refundCommissionPrice || 0  | unitPrice('￥')}}</p>
           </span>
-          
+
           <span>
             <p>退单分销返现返还</p>
             <p class="increase-color">+{{bill.distributionRefundCommission || 0  | unitPrice('￥')}}</p>
           </span>
-          
+
           <span>
             <p>退单平台优惠券返还</p>
             <p class="increase-color">+{{bill.siteCouponRefundCommission || 0  | unitPrice('￥')}}</p>
@@ -178,7 +178,7 @@ export default {
           value: 0,
         }
       ],
-      id: "", // 账单id 
+      id: "", // 账单id
       bill: {}, // 账单详情
       order: [], // 订单列表
       orderParam: { // 请求参数
@@ -297,13 +297,13 @@ export default {
           title: "退款流水编号",
           key: "sn",
           minWidth: 120,
-          tooltip: true        
+          tooltip: true
         },
         {
           title: "订单编号",
           key: "sn",
           minWidth: 120,
-          tooltip: true        
+          tooltip: true
         },
         {
           title: "退款金额",

@@ -141,6 +141,7 @@
             v-model="messageSendForm.content"
             :rows="4"
             type="textarea"
+            maxlength="200"
             style="max-height:60vh;overflow:auto;width: 70%"
           />
         </FormItem>
@@ -288,7 +289,7 @@
   import * as API_Other from "@/api/other.js";
   import * as API_Shop from "@/api/shops.js";
   import userList from "@/views/member/list/index";
-
+  import { regular } from "@/utils";
   export default {
     name: "noticeMessageTemplate",
     components: {
@@ -316,10 +317,12 @@
         },
         messageFormValidate: {
           title: [
-            {required: true, message: '请输入消息标题', trigger: 'blur'},
+            regular.REQUIRED,
+            regular.VARCHAR20
           ],
           content: [
-            {required: true, message: '请输入消息内容', trigger: 'blur'},
+            regular.REQUIRED,
+            regular.VARCHAR255
           ],
         },
         //管理端消息汇总

@@ -62,10 +62,14 @@ export const TEL = /0\d{2,3}-\d{7,8}/
 // 正整数
 export const INTEGER = {
 
-  pattern: /^[0-9]\d{0,10}|0$/,
-  message:'请输入正整数'
+    pattern: /^[0-9]\d{0,10}|0$/,
+    message:'请输入正整数'
+  }
+// 正整数
+export const NUMBER = {
+    pattern: /^(\-|\+)?\d{0,10}$/,
+    message:'请输入数字'
 }
-
 export const VARCHAR5 = {
   pattern:/^.{1,5}$/,
   message:'长度应该限制在1-5个字符'

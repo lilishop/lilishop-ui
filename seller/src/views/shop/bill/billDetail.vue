@@ -14,7 +14,7 @@
       <p slot="title">账单详细</p>
 
       <div class="tips-status">
-        <span>商品状态</span>
+        <span>账单状态</span>
 
         <span class="theme_color">{{
           bill.billStatus | unixSellerBillStatus
