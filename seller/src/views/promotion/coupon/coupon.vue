@@ -84,10 +84,10 @@ export default {
             if (params.row.price) {
               return h(
                 "div",
-                this.$options.filters.unitPrice(params.row.price, "￥")
+                this.$options.filters.unitPrice((params.row.price || 0), "￥")
               );
             } else {
-              return h("div", params.row.couponDiscount + "折");
+              return h("div", (params.row.couponDiscount || 0) + "折");
             }
           },
         },

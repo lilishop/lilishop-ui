@@ -5,7 +5,7 @@
     <div class="width_1200 logo">
       <div>
         <router-link to="/"
-        ><img :src="$store.state.logoImg" alt="lili shop" title="lilishop"
+        ><img :src="$store.state.logoImg" 
         /></router-link>
         <div>结算页</div>
       </div>

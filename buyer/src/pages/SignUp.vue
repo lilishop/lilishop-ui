@@ -89,7 +89,7 @@
       </Row>
       <Row type="flex" justify="center" class="copyright">
         Copyright © {{year}} - Present
-        <a href="https://pickmall.cn" target="_blank" style="margin: 0 5px">lili-shop</a>
+        <a href="https://pickmall.cn" target="_blank" style="margin: 0 5px">{{config.title}}</a>
         版权所有
       </Row>
     </div>
@@ -97,6 +97,7 @@
 </template>
 
 <script>
+import config from '@/config'
 import * as RegExp from '@/plugins/RegExp.js';
 import { md5 } from '@/plugins/md5.js';
 import * as apiLogin from '@/api/login.js';
@@ -107,6 +108,7 @@ export default {
   components: { Verify },
   data () {
     return {
+      config,
       year: new Date().getFullYear(),
       formRegist: {
         // 注册表单

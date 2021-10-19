@@ -39,7 +39,7 @@
           <Input v-model="formAdd.name" clearable style="width: 100%" />
         </FormItem>
         <FormItem label="排序值" prop="sortOrder">
-          <Input v-model="formAdd.sortOrder" clearable style="width: 100%" />
+          <InputNumber v-model="formAdd.sortOrder" :min="0" clearable style="width: 100%" />
         </FormItem>
       </Form>
       <div slot="footer">
@@ -80,6 +80,7 @@ export default {
         name: "",
         deleteFlag: 0,
         level: 0,
+        sortOrder:1
       },
       // 表单验证规则
       formValidate: {

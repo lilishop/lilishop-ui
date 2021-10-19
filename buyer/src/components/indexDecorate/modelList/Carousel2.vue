@@ -33,7 +33,7 @@
         <div class="person-msg">
           <img :src="userInfo.face" v-if="userInfo.face" alt />
           <Avatar icon="ios-person" class="mb_10" v-else size="80" />
-          <div>Hi，{{ userInfo.nickName || "欢迎来到LiLi Shop" | secrecyMobile }}</div>
+          <div>Hi，{{ userInfo.nickName || `欢迎来到${config.title}` | secrecyMobile }}</div>
           <div v-if="userInfo.id">
             <Button type="error" shape="circle">会员中心</Button>
           </div>
@@ -57,6 +57,7 @@
 </template>
 
 <script>
+import config from '@/config'
 import {articleList} from '@/api/common.js'
 import storage from '@/plugins/storage';
 export default {
@@ -64,6 +65,7 @@ export default {
   props: ['data'],
   data () {
     return {
+      config,
       userInfo: {}, // 用户信息
       articleList: [], // 常见问题
       params: { // 请求常见问题参数

@@ -14,7 +14,9 @@
     <% for(var js of htmlWebpackPlugin.options.cdn.js) { %>
       <script src="<%=js%>"></script>
       <% } %>
+      <script src="/config.js"></script>
     <noscript>
+      
       <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
     <div id="app"></div>

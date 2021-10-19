@@ -2,7 +2,6 @@ import axios from 'axios';
 import https from 'https';
 import { Message, Spin, Modal } from 'view-design';
 import Storage from './storage';
-import config from '@/config';
 import router from '../router/index.js';
 import store from '../vuex/store';
 import { handleRefreshToken } from '@/api/index';
@@ -10,20 +9,20 @@ const qs = require('qs');
 // api地址
 export const buyerUrl =
   process.env.NODE_ENV === 'development'
-    ? config.api_dev.buyer
-    : config.api_prod.buyer;
+    ? BASE.API_DEV.buyer
+    : BASE.API_PROD.buyer;
 export const commonUrl =
   process.env.NODE_ENV === 'development'
-    ? config.api_dev.common
-    : config.api_prod.common;
+    ? BASE.API_DEV.common
+    : BASE.API_PROD.common;
 export const managerUrl =
   process.env.NODE_ENV === 'development'
-    ? config.api_dev.manager
-    : config.api_prod.manager;
+    ? BASE.API_DEV.manager
+    : BASE.API_PROD.manager;
 export const sellerUrl =
   process.env.NODE_ENV === 'development'
-    ? config.api_dev.seller
-    : config.api_prod.seller;
+    ? BASE.API_DEV.seller
+    : BASE.API_PROD.seller;
 // 创建axios实例
 var isRefreshToken = 0;
 const refreshToken = getTokenDebounce();

@@ -95,7 +95,7 @@
       </Row>
       <Row type="flex" justify="center" class="copyright">
         Copyright © {{year}} - Present
-        <a href="https://pickmall.cn" target="_blank" style="margin: 0 5px">lili-shop</a>
+        <a href="https://pickmall.cn" target="_blank" style="margin: 0 5px">{{config.title}}</a>
         版权所有
       </Row>
     </div>
@@ -103,6 +103,7 @@
 </template>
 
 <script>
+import config from '@/config'
 import * as RegExp from "@/plugins/RegExp.js";
 import { md5 } from "@/plugins/md5.js";
 import * as apiLogin from "@/api/login.js";
@@ -118,6 +119,7 @@ export default {
   },
   data() {
     return {
+      config,
       type: true, // true 账号登录  false 验证码登录
       formData: {
         // 登录表单

@@ -80,7 +80,7 @@ export default new Router({
     name: 'login',
     component: Login,
     meta: {
-      title: 'LiLi 登录'
+      title: '登录'
     }
   },
   {
@@ -88,7 +88,7 @@ export default new Router({
     name: 'SignUp',
     component: SignUp,
     meta: {
-      title: 'LiLi 注册'
+      title: '注册'
     }
   },
   {
@@ -96,7 +96,7 @@ export default new Router({
     name: 'forgetPassword',
     component: ForgetPassword,
     meta: {
-      title: 'LiLi 忘记密码'
+      title: '忘记密码'
     }
   },
   {
@@ -283,7 +283,7 @@ export default new Router({
       path: 'AfterSale',
       name: 'AfterSale',
       component: AfterSale,
-      meta: {title: 'LiLi 售后'}
+      meta: {title: '售后'}
     },
     {
       path: 'ApplyAfterSale',

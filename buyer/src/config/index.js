@@ -1,8 +1,21 @@
 export default {
   /**
-   * @description 配置显示在浏览器标签的title
+   * @description 配置显示在浏览器标签的title、底部信息、部分信息展示的值
    */
-  title: "Lili电商",
+  title: "lili-shop",
+  /**
+   * @description icp证
+   */
+  icpCard: "",
+
+  company:{
+    href:"https://pickmall.cn",
+    name:"北京宏业汇成科技有限公司"
+  },
+  /**
+   * @description icp备案号
+   */
+  icpMessage: "京ICP备20009696号-1",
   /**
    * @description token在Cookie中存储的天数，默认1天
    */
@@ -17,30 +30,6 @@ export default {
    * @description 高德web端申请的api key
    */
   aMapKey: "b440952723253aa9fe483e698057bf7d",
-  /**
-   * @description api请求基础路径
-   */
-  api_dev: {
-    // common: 'http://192.168.0.101:8890',
-    // buyer: 'http://192.168.0.101:8888',
-    // seller: 'http://192.168.0.101:8889',
-    // manager: 'http://192.168.0.101:8887'
-
-    common: "https://common-api.pickmall.cn",
-    buyer: "https://buyer-api.pickmall.cn",
-    seller: "https://store-api.pickmall.cn",
-    manager: "https://admin-api.pickmall.cn"
-  },
-  api_prod: {
-    common: "https://common-api.pickmall.cn",
-    buyer: "https://buyer-api.pickmall.cn",
-    seller: "https://store-api.pickmall.cn",
-    manager: "https://admin-api.pickmall.cn"
-  },
-  /**
-   *  @description api请求基础路径前缀
-   */
-  baseUrlPrefix: "/buyer",
   /**
    * @description 需要加载的插件
    */

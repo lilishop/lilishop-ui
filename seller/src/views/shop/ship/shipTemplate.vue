@@ -66,7 +66,9 @@
                 <Radio label="FREE">包邮</Radio>
               </RadioGroup>
             </FormItem>
+
             <FormItem label="详细设置" v-if="form.pricingMethod !== 'FREE'">
+              <Alert type="warning" >点击右侧修改按钮编辑数据</Alert>
               <div class="ncsu-trans-type" data-delivery="TRANSTYPE">
                 <div class="entity">
                   <div class="tbl-except">
@@ -84,7 +86,8 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <tr class="bd-line" data-group="n1" v-for="(item,index) in form.freightTemplateChildList" :key="index">
+                        <tr class="bd-line" data-group="n1" v-for="(item,index) in form.freightTemplateChildList"
+                          :key="index">
                           <td></td>
                           <td class="tl cell-area">
                             <span class="area-group">
@@ -101,7 +104,8 @@
                             </Input>
                           </td>
                           <td>
-                            <Input class="text w40" type="text" v-model="item.continuedCompany" maxlength="6" clearable />
+                            <Input class="text w40" type="text" v-model="item.continuedCompany" maxlength="6"
+                              clearable />
                           </td>
                           <td>
                             <Input class="text w60" type="text" v-model="item.continuedPrice" maxlength="6" clearable>
@@ -109,9 +113,11 @@
                             </Input>
                           </td>
                           <td class="nscs-table-handle">
-                            <Button @click="editRegion(item,index)" type="info" size="small" style="margin-bottom: 5px">修改
+                            <Button @click="editRegion(item,index)" type="info" size="small"
+                              style="margin-bottom: 5px">修改
                             </Button>
-                            <Button @click="removeTemplateChildren(index)" :loading="submitLoading" type="error" size="small" style="margin-bottom: 5px">删除
+                            <Button @click="removeTemplateChildren(index)" :loading="submitLoading" type="error"
+                              size="small" style="margin-bottom: 5px">删除
                             </Button>
                           </td>
                         </tr>
@@ -136,7 +142,8 @@
               </div>
             </FormItem>
             <Form-item>
-              <Button @click="addShipTemplateChildren(index)" v-if="form.pricingMethod !== 'FREE'" icon="ios-create-outline">为指定城市设置运费模板
+              <Button @click="addShipTemplateChildren(index)" v-if="form.pricingMethod !== 'FREE'"
+                icon="ios-create-outline">为指定城市设置运费模板
               </Button>
               <Button @click="handleSubmit" :loading="submitLoading" type="primary" style="margin-right:5px">保存
               </Button>
@@ -145,7 +152,7 @@
         </TabPane>
       </Tabs>
     </Card>
-    <multiple-region ref="region" @selected="handleSelect" >
+    <multiple-region ref="region" @selected="handleSelect">
 
     </multiple-region>
 
@@ -214,7 +221,7 @@ export default {
     },
     //添加运费模板
     add() {
-      this.$refs.region.clear()
+      this.$refs.region.clear();
       this.title = "添加运费模板";
       this.csTab = true;
       this.operation = "ADD";

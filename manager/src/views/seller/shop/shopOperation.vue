@@ -21,10 +21,9 @@
               </FormItem>
 
               <FormItem label="是否自营" prop="selfOperated">
-
                 <RadioGroup type="button" button-style="solid" v-model="shopForm.selfOperated" >
-                  <Radio :label=true>自营</Radio>
-                  <Radio :label=false>非自营</Radio>
+                  <Radio :label="1">自营</Radio>
+                  <Radio :label="0">非自营</Radio>
                 </RadioGroup>
               </FormItem>
 
@@ -81,7 +80,6 @@
               <FormItem label="小程序唯一标识">
                 <Input v-model="shopForm.yzfMpSign" clearable style="width: 350px" />
               </FormItem>
-              <Spin fix v-if="loading"></Spin>
             </div>
           </TabPane>
 
@@ -167,7 +165,7 @@
                   <Button @click="handleCLickImg('licencePhoto')" type="primary">选择图片</Button>
                 </div>
               </FormItem>
-              <Spin fix v-if="loading"></Spin>
+          
             </div>
           </TabPane>
           <TabPane label="经营范围" class="tab" name="category">
@@ -361,11 +359,12 @@ export default {
       indeterminate: true, // 复选框全选样式
       checkAll: false, // 全选
       checkAllGroup: [], // 全选数组
+      
       submitLoading: false, // 添加或编辑提交状态
       settlementCycle: [], // 结算周期
       shopForm: { // 店铺数据
         settlementCycle: "",
-        selfOperated: false,
+        selfOperated: 0,
         memberName: "",
         companyName: "",
         addressPath: "",
