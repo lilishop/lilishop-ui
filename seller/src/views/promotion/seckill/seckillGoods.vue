@@ -17,9 +17,9 @@
         </template>
       </Row>
       <Row class="operation">
-        <Tabs type="card" v-model="tabIndex">
+        <Tabs type="card" v-model="tabCurrent">
           <TabPane v-for="(tab, tabIndex) in goodsList" :key="tabIndex" :label="tab.hour" :name="tabIndex + ''">
-            <Table :loading="loading" border :columns="goodsColumns" :data="tab.list" :ref="'table' + tabIndex"
+            <Table :loading="loading" border :columns="goodsColumns" v-if="tabIndex == tabCurrent" :data="tab.list" :ref="'table' + tabIndex"
               @on-selection-change="changeSelect">
               <template slot-scope="{ row }" slot="originalPrice">
                 <div>{{ row.originalPrice | unitPrice("￥") }}</div>
@@ -86,8 +86,14 @@ export default {
   components: {
     skuSelect,
   },
+  watch:{
+    tabCurrent(val){
+      this.tabIndex = val
+    }
+  },
   data() {
     return {
+      tabCurrent:0,
       promotionStatus: "", // 活动状态
       loading: false, // 表单加载状态
       searchForm: {
@@ -269,6 +275,7 @@ export default {
     selectedGoodsData(callback) {
       let way = [];
       let data = JSON.parse(JSON.stringify(callback));
+
       data.forEach((e) => {
         way.push({
           goodsName: e.goodsName,
@@ -284,10 +291,14 @@ export default {
         });
       });
 
+    
       this.$set(this.goodsList[this.tabIndex], "list", [
         ...way,
         ...this.defaultGoodsList,
       ]);
+      // this.$nextTick(() => {
+      //   this.$forceUpdate();
+      // });
     },
     openSkuList() {
       // 显示商品选择器

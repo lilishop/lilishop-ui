@@ -21,7 +21,6 @@
                 format="yyyy-MM-dd HH:mm:ss"
                 placeholder="请选择"
                 clearable
-                @on-change="applyTimeChange"
                 style="width: 200px"
               >
               </DatePicker>
@@ -33,7 +32,6 @@
                 format="yyyy-MM-dd"
                 placeholder="请选择"
                 clearable
-                @on-change="startTimeChange"
                 style="width: 200px"
               >
               </DatePicker>
