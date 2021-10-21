@@ -18,6 +18,7 @@ import {
 } from "@/libs/axios";
 import { setStore, getStore, removeStore } from "@/libs/storage";
 
+import i18nBox from '@/views/lili-components/i18n-translate'
 import util from "@/libs/util";
 
 
@@ -34,7 +35,7 @@ Vue.use(VueLazyload, {
 });
 
 Vue.use(ViewUI);
-
+Vue.component('i18nBox',i18nBox)
 Vue.component("vue-qr", vueQr); //此处将vue-qr添加为全局组件
 
 // 挂载全局使用的方法
