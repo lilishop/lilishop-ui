@@ -2,47 +2,51 @@
   <div>
     <Button @click="enable = true">语言设定</Button>
     <Modal v-model="enable" draggable sticky scrollable :mask="false" :title="title">
-      <div>
-        <RadioGroup v-model="language">
-          <Radio :label="item.value || item.label" :key="index" v-for="(item,index) in data">
-            <span>{{item.title || item.name}}</span>
-          </Radio>
-        </RadioGroup>
-      </div>
 
+      <Tabs closable type="card" @on-tab-remove="handleTabRemove" :value="language[0].title">
+        <TabPane v-for="(item,index) in language" :key="index" :label="item.title" :name="item.title">
+          <Input v-model="item.___i18n" />
+        </TabPane>
+      </Tabs>
     </Modal>
   </div>
 </template>
 
 <script>
+import {language} from "./languages";
 export default {
   /**
-   * data 循环的语言内容格式 [{'title':'test','value':'val'}]
+   * tabs 循环的语言内容格式 [{'title':'test','value':'val'}]
    */
   props: {
-    data: {
-      type: Array,
-      default: () => {
-        return [];
-      },
+    value: {
+      type: null,
+      default: "",
     },
   },
   watch: {
-    /**
-     * 回调语言内容
-     */
-    language(val) {
-      if (val) {
-        this.$emit("language", val);
-      }
+    language: {
+      handler(val) {
+        this.$emit("language", { language: [...val], val: this.value });
+      },
+      deep: true,
     },
   },
   data() {
     return {
-      language: "", //语言值
+      language,
+      tabVal: "",
       enable: false, //是否开启modal
       title: "转换语言",
     };
+  },
+  methods: {
+    //   删除tab标签将没有用的语音进行删除
+    handleTabRemove(tab) {
+      this.language = this.language.filter((item) => {
+        return item.value != tab;
+      });
+    },
   },
 };
 </script>
