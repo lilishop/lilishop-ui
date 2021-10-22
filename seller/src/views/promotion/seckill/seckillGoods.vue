@@ -22,17 +22,18 @@
             <Table :loading="loading" border :columns="goodsColumns" v-if="tabIndex == tabCurrent" :data="tab.list" :ref="'table' + tabIndex"
               @on-selection-change="changeSelect">
               <template slot-scope="{ row }" slot="originalPrice">
+                
                 <div>{{ row.originalPrice | unitPrice("￥") }}</div>
               </template>
 
               <template slot-scope="{ row, index }" slot="quantity">
-                <Input v-model="row.quantity" :disabled="row.promotionApplyStatus == 'PASS'" @input="
+                <InputNumber :min="0" v-model="row.quantity" :disabled="row.promotionApplyStatus == 'PASS'" @input="
                     goodsList[tabIndex].list[index].quantity = row.quantity
                   " />
               </template>
 
               <template slot-scope="{ row, index }" slot="price">
-                <Input v-model="row.price" :disabled="row.promotionApplyStatus == 'PASS'"
+                <InputNumber :min="0" style="width:100%;" v-model="row.price" :disabled="row.promotionApplyStatus == 'PASS'"
                   @input="goodsList[tabIndex].list[index].price = row.price" />
               </template>
 
@@ -133,7 +134,7 @@ export default {
         },
         {
           title: "商品价格",
-          slot: "price",
+          slot: "originalPrice",
           minWidth: 50,
         },
         {
