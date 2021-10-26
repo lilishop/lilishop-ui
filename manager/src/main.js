@@ -18,6 +18,7 @@ import util from '@/libs/util'
 
 import * as filters from '@/utils/filters' // global filter
 import liliDialog from '@/views/lili-dialog'
+import i18nBox from '@/views/lili-components/i18n-translate'
 import {md5} from '@/utils/md5.js';
 Vue.config.devtools = true;
 Vue.config.productionTip = false
@@ -35,6 +36,7 @@ Vue.use(ViewUI, {
 });
 
 Vue.component('liliDialog',liliDialog)
+Vue.component('i18nBox',i18nBox)
 
 
 

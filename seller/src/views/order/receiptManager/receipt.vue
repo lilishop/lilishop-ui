@@ -85,7 +85,7 @@ export default {
         {
           title: "发票内容",
           key: "receiptContent",
-          minWidth: 120,
+          minWidth: 90,
           tooltip: true,
           render: (h, params) => {
             return h("div", params.row.receiptContent || "暂未填写");
@@ -172,10 +172,12 @@ export default {
                   },
                   attrs: {
                     disabled:
-                      params.row.orderStatus == "COMPLETED" &&
-                      params.row.receiptStatus == 0
-                        ? false
-                        : true,
+                      !(
+                        (params.row.orderStatus === "COMPLETED"
+                          ||params.row.orderStatus === "DELIVERED")
+
+                        &&
+                        params.row.receiptStatus === 0),
                   },
                   style: {
                     marginRight: "5px",

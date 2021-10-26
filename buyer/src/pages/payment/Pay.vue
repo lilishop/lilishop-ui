@@ -5,7 +5,7 @@
     <div class="width_1200 logo">
       <div>
         <router-link to="/"
-        ><img :src="$store.state.logoImg" 
+        ><img :src="$store.state.logoImg"
         /></router-link>
         <div>结算页</div>
       </div>
@@ -569,6 +569,9 @@ export default {
 
 <style scoped lang="scss">
 @import "../../assets/styles/coupon.scss";
+.goods-msg{
+  overflow: hidden;
+}
 /** logo start */
 .logo {
   height: 40px;
@@ -772,6 +775,7 @@ export default {
 }
 
 .goods-list {
+  width: 1150px;
   background-color: #f8f8f8;
   margin: 10px 0 20px 0;
 
@@ -800,14 +804,14 @@ export default {
 
     > span:nth-child(1) {
       font-size: 12px;
-     
+
       flex: 1;
       text-align: left;
       >span{
         margin-left: 10px;
       }
     }
-   
+
 
     > span:last-child {
       color: $theme_color;
@@ -897,6 +901,7 @@ export default {
 /** content end */
 /** 底部支付栏 */
 .order-footer {
+  z-index: 20;
   height: 50px;
   @include background_color($light_white_background_color);
   @include title_color($title_color);

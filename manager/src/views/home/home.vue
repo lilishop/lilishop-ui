@@ -68,7 +68,7 @@
           <div class="counts">{{$store.state.notices.refund|| 0}}</div>
           <div>待审核售后</div>
         </div>
-        <div class="todo-item" >
+        <div class="todo-item">
           <div class="counts">{{$store.state.notices.distributionCash|| 0}}</div>
           <div>待审核分销提现</div>
         </div>
@@ -197,6 +197,13 @@
       <Table stripe :columns="tophotShopsColumns" :data="topHotShopsData"></Table>
 
     </div>
+    <div>
+      <!-- 测试数据 -->
+      <Input v-model="test.a" />
+      {{test}}
+      <i18nBox :value="test.a" @language="(val)=>{test.languages = val}"></i18nBox>
+      <!-- 测试数据 -->
+    </div>
   </div>
 </template>
 
@@ -205,11 +212,22 @@ import { homeStatistics, hotGoods, hotShops, getNoticePage } from "@/api/index";
 import * as API_Goods from "@/api/goods";
 import { Chart } from "@antv/g2";
 import * as API_Member from "@/api/member";
+// import i18nBox from '@/views/lili-components/i18n-translate'
 export default {
   name: "home",
+  // components:{
+  //   i18nBox
+  // },
   data() {
     return {
-      tophotShopsColumns: [ // 表格表头
+      // 测试数据
+      test: {
+        a: "test",
+        languages:[]
+      },
+      // 测试数据结束
+      tophotShopsColumns: [
+        // 表格表头
         {
           type: "index",
           width: 100,
@@ -275,7 +293,8 @@ export default {
       pvChart: "", // 流量统计
       orderChart: "", // 订单统计
       historyMemberChart: "", // 最近会员流量统计
-      params: { // 请求参数
+      params: {
+        // 请求参数
         searchType: "LAST_SEVEN",
       },
       // 订单传参
@@ -475,15 +494,13 @@ export default {
       }
     },
     // 历史在线人数
-    initHistoryMemberChart(){
+    initHistoryMemberChart() {
       // 默认已经加载 legend-filter 交互
       let data = this.chartList;
 
       data.forEach((item) => {
-
         item.title = "历史在线人数";
-        item.date = item.date.substring(5)
-
+        item.date = item.date.substring(5);
       });
       this.historyMemberChart.data(data);
 
@@ -495,16 +512,14 @@ export default {
       this.historyMemberChart
         .line()
         .position("date*num")
-        .color("title",['#ffaa71'])
-        .shape("smooth")
-      ;
+        .color("title", ["#ffaa71"])
+        .shape("smooth");
 
       this.historyMemberChart
         .point()
         .position("date*num")
-        .color("title",['#ffaa71'])
-        .shape("circle")
-      ;
+        .color("title", ["#ffaa71"])
+        .shape("circle");
       this.historyMemberChart.render();
     },
     // 初始化信息
