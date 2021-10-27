@@ -13,7 +13,7 @@
         <DropdownItem v-if="res.complain" @click.native="navigateTo('orderComplaint')">
           <Badge :count="res.complain">待处理投诉审核 </Badge>
         </DropdownItem>
-        <DropdownItem v-if="res.distributionCash" @click.native="navigateTo('distribution')">
+        <DropdownItem v-if="res.distributionCash" @click.native="navigateTo('distributionCash')">
           <Badge :count="res.distributionCash">待处理分销商提现申请 </Badge>
         </DropdownItem>
         <DropdownItem v-if="res.goods" @click.native="navigateTo('applyGoods')">
