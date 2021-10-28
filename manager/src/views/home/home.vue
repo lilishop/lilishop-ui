@@ -197,13 +197,7 @@
       <Table stripe :columns="tophotShopsColumns" :data="topHotShopsData"></Table>
 
     </div>
-    <div>
-      <!-- 测试数据 -->
-      <Input v-model="test.a" />
-      {{test}}
-      <i18nBox :value="test.a" @language="(val)=>{test.languages = val}"></i18nBox>
-      <!-- 测试数据 -->
-    </div>
+    
   </div>
 </template>
 
