@@ -1,18 +1,18 @@
 <template>
-  <div style="width: 100%;">
-
+  <div style="width: 100%">
     <Card>
       <Button @click="handleAddParamsGroup" type="primary">添加</Button>
-
     </Card>
 
     <div class="row">
-      <Card v-if="paramsGroup.length==0">
-        暂无参数绑定信息
-      </Card>
+      <Card v-if="paramsGroup.length == 0"> 暂无参数绑定信息 </Card>
       <div class="paramsGroup" v-else>
-
-        <Card style="width: 350px; margin:7px;" v-for="(group,index) in paramsGroup" :key="index" :bordered="false">
+        <Card
+          style="width: 350px; margin: 7px"
+          v-for="(group, index) in paramsGroup"
+          :key="index"
+          :bordered="false"
+        >
           <p slot="title">
             <Icon type="ios-film-outline"></Icon>&nbsp;{{ group.groupName }}
           </p>
@@ -23,37 +23,62 @@
                 <Icon type="ios-arrow-down"></Icon>
               </a>
               <Dropdown-menu slot="list">
-                <Dropdown-item @click.native="handleEditParamsGroup(group)">编辑</Dropdown-item>
-                <Dropdown-item @click.native="handleDeleteParamGroup(group)">删除</Dropdown-item>
+                <Dropdown-item @click.native="handleEditParamsGroup(group)"
+                  >编辑</Dropdown-item
+                >
+                <Dropdown-item @click.native="handleDeleteParamGroup(group)"
+                  >删除</Dropdown-item
+                >
               </Dropdown-menu>
             </Dropdown>
             <Icon type="arrow-down-b"></Icon>
           </p>
           <template v-if="group.params && group.params.length > 0">
-            <div v-for="(param,paramId) in group.params" :key="paramId" class="params">
+            <div
+              v-for="(param, paramId) in group.params"
+              :key="paramId"
+              class="params"
+            >
               <span>{{ param.paramName }}</span>
 
               <span>
-                <i-button type="text" @click="handleEditParams(group, param)">编辑</i-button>
-                <i-button type="text" size="small" style="color: #f56c6c"
-                          @click="handleDeleteParam(group, param)">删除</i-button>
+                <i-button type="text" @click="handleEditParams(group, param)"
+                  >编辑</i-button
+                >
+                <i-button
+                  type="text"
+                  size="small"
+                  style="color: #f56c6c"
+                  @click="handleDeleteParam(group, param)"
+                  >删除</i-button
+                >
               </span>
             </div>
           </template>
           <div v-else style="align-content: center">暂无数据...</div>
           <div style="text-align: center">
-            <i-button type="text" @click="handleAddParams(group)">添加</i-button>
+            <i-button type="text" @click="handleAddParams(group)"
+              >添加</i-button
+            >
           </div>
         </Card>
-
       </div>
-
     </div>
     <div>
-      <Modal :title="modalTitle" v-model="dialogParamsVisible" :mask-closable="false" :width="500">
-        <Form ref="paramForm" :model="paramForm" :label-width="100" :rules="formValidate">
+      <Modal
+        :title="modalTitle"
+        v-model="dialogParamsVisible"
+        :mask-closable="false"
+        :width="500"
+      >
+        <Form
+          ref="paramForm"
+          :model="paramForm"
+          :label-width="100"
+          :rules="formValidate"
+        >
           <FormItem label="参数名称" prop="paramName">
-            <Input v-model="paramForm.paramName" style="width: 100%"/>
+            <Input v-model="paramForm.paramName" style="width: 100%" />
           </FormItem>
           <FormItem label="可选值" prop="options">
             <Select
@@ -67,7 +92,7 @@
               style="width: 100%; text-align: left; margin-right: 10px"
             >
               <Option
-                v-for="(item,itemIndex) in ops.options"
+                v-for="(item, itemIndex) in ops.options"
                 :value="item"
                 :key="itemIndex"
                 :label="item"
@@ -77,32 +102,61 @@
             </Select>
           </FormItem>
           <FormItem label="选项" prop="specName3">
-            <Checkbox label=1 v-model="paramForm.required">必填</Checkbox>
-            <Checkbox label=1 v-model="paramForm.isIndex">可索引</Checkbox>
+            <Checkbox label="1" v-model="paramForm.required">必填</Checkbox>
+            <Checkbox label="1" v-model="paramForm.isIndex">可索引</Checkbox>
           </FormItem>
           <FormItem label="排序" prop="sort">
-            <Input type="number" v-model="paramForm.sort" style="width: 100%"/>
+            <InputNumber
+              :min="0"
+              type="number"
+              v-model="paramForm.sort"
+              style="width: 100%"
+            />
           </FormItem>
         </Form>
 
         <div slot="footer">
           <Button type="text" @click="dialogParamsVisible = false">取消</Button>
-          <Button type="primary" :loading="submitLoading" @click="submitParamForm">提交</Button>
+          <Button
+            type="primary"
+            :loading="submitLoading"
+            @click="submitParamForm"
+            >提交</Button
+          >
         </div>
       </Modal>
     </div>
 
     <div>
-      <Modal :title="modalTitle" v-model="dialogParamsGroupVisible" :mask-closable="false" :width="500">
-        <Form   @submit.native.prevent   @keydown.enter.native='submitParamGroupForm'   ref="paramGroupForm" :model="paramGroupForm" :label-width="100" :rules="paramGroupValidate">
+      <Modal
+        :title="modalTitle"
+        v-model="dialogParamsGroupVisible"
+        :mask-closable="false"
+        :width="500"
+      >
+        <Form
+          @submit.native.prevent
+          @keydown.enter.native="submitParamGroupForm"
+          ref="paramGroupForm"
+          :model="paramGroupForm"
+          :label-width="100"
+          :rules="paramGroupValidate"
+        >
           <FormItem label="参数名称" prop="groupName">
-            <Input v-model="paramGroupForm.groupName" style="width: 100%"/>
+            <Input v-model="paramGroupForm.groupName" style="width: 100%" />
           </FormItem>
         </Form>
 
         <div slot="footer">
-          <Button type="text" @click="dialogParamsGroupVisible = false">取消</Button>
-          <Button type="primary" :loading="submitLoading" @click="submitParamGroupForm">提交</Button>
+          <Button type="text" @click="dialogParamsGroupVisible = false"
+            >取消</Button
+          >
+          <Button
+            type="primary"
+            :loading="submitLoading"
+            @click="submitParamGroupForm"
+            >提交</Button
+          >
         </div>
       </Modal>
     </div>
@@ -119,13 +173,13 @@ import {
   deleteParamsGroup,
 } from "@/api/goods";
 
-import {regular} from "@/utils";
+import { regular } from "@/utils";
 
 export default {
   name: "categoryParams",
   data() {
     return {
-      submitLoading:false,
+      submitLoading: false,
       /** 分类ID */
       categoryId: this.$route.query.id,
       /** 参数组 */
@@ -139,40 +193,38 @@ export default {
       /** 参数组添加或编辑弹出框 */
       dialogParamsGroupVisible: false,
       //参数表单
-      paramForm: {},
+      paramForm: {
+        sort: 1,
+      },
       /** 参数值 **/
       ops: {
-        options: []
+        options: [],
       },
       // 参数表单
       paramGroupForm: {},
       /** 添加、编辑参数 规格 */
       formValidate: {
-        paramName: [
-          regular.REQUIRED,
-          regular.VARCHAR5
-        ],
-        options: [
-          regular.REQUIRED,
-          regular.VARCHAR255
-        ],
-        sort: [
-          regular.REQUIRED,
-          regular.INTEGER
-        ],
+        paramName: [regular.REQUIRED, regular.VARCHAR5],
+        options: [regular.REQUIRED, regular.VARCHAR255],
+        sort: [regular.REQUIRED, regular.INTEGER],
       },
       /** 参数组*/
       paramGroupValidate: {
-        groupName: [
-          regular.REQUIRED,
-          regular.VARCHAR5
-        ],
+        groupName: [regular.REQUIRED, regular.VARCHAR5],
       },
     };
   },
   filters: {
     paramTypeFilter(val) {
       return val === 1 ? "输入项" : "选择项";
+    },
+  },
+  watch: {
+    "paramForm.options": {
+      handler(val) {
+        this.ops.options = this.paramForm.options;
+      },
+      deep: true,
     },
   },
   methods: {
@@ -198,17 +250,18 @@ export default {
     },
     //弹出修改参数框
     handleEditParams(group, param) {
+      console.log(group, param);
       this.paramForm = {
         paramName: param.paramName,
         options: param.options.split(","),
         required: param.required == 1 ? true : false,
         isIndex: param.isIndex == 1 ? true : false,
-        groupId: group.groupId,
-        categoryId: this.categoryId,
-        sort: param.sort,
+        groupId: param.groupId || "",
+        categoryId: param.categoryId || "",
+        sort: param.sort || 1,
         id: param.id,
       };
-      this.ops = this.paramForm.options
+      this.ops.options = this.paramForm.options;
       this.modalType = 1;
       this.modalTitle = "修改参数";
       this.dialogParamsVisible = true;
@@ -247,7 +300,7 @@ export default {
               }
             });
           } else {
-            console.warn(this.paramGroupForm)
+            console.warn(this.paramGroupForm);
             updateParamsGroup(this.paramGroupForm).then((res) => {
               this.submitLoading = false;
               if (res.success) {
@@ -266,10 +319,11 @@ export default {
       this.$refs.paramForm.validate((valid) => {
         if (valid) {
           this.submitLoading = true;
+          let data = JSON.parse(JSON.stringify(this.paramForm));
+          data.isIndex = Number(data.isIndex);
+          data.required = Number(data.required);
           if (this.modalType === 0) {
-            this.paramForm.isIndex = Number(this.paramForm.isIndex);
-            this.paramForm.required = Number(this.paramForm.required);
-            insertGoodsParams(this.paramForm).then((res) => {
+            insertGoodsParams(data).then((res) => {
               this.submitLoading = false;
               if (res.success) {
                 this.$Message.success("参数添加成功");
@@ -278,10 +332,10 @@ export default {
               }
             });
           } else {
-            console.warn(this.paramForm.isIndex)
-            this.paramForm.isIndex = Number(this.paramForm.isIndex);
-            this.paramForm.required = Number(this.paramForm.required);
-            updateGoodsParams(this.paramForm).then((res) => {
+            console.warn(data.isIndex);
+            data.isIndex = Number(data.isIndex);
+            data.required = Number(data.required);
+            updateGoodsParams(data).then((res) => {
               this.submitLoading = false;
               if (res.success) {
                 this.$Message.success("参数修改成功");
