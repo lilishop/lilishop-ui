@@ -492,6 +492,7 @@ export default {
     },
     //回复
     handleSubmit() {
+      this.submitLoading = true;
       if (this.params.remark == "") {
         this.$Message.error("请输入备注信息");
         return;
