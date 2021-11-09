@@ -219,14 +219,7 @@ export default {
       return val === 1 ? "输入项" : "选择项";
     },
   },
-  watch: {
-    "paramForm.options": {
-      handler(val) {
-        this.ops.options = this.paramForm.options;
-      },
-      deep: true,
-    },
-  },
+ 
   methods: {
     // 初始化数据
     init() {
