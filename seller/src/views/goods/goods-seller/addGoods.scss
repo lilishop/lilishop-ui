@@ -79,6 +79,9 @@
 .sku-val{
   justify-content: flex-start;
   flex-wrap: wrap;
+  >.ivu-form{
+    flex-wrap: wrap !important;
+  }
   /deep/ .sku-item-content-val{
   
     
