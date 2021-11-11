@@ -109,7 +109,7 @@ export default {
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
-      treeDataDefault:"",
+      treeDataDefault: [],
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -352,7 +352,7 @@ export default {
           }
         }
       });
-      this.total = this.data.length;
+      this.total = this.data?.length;
       this.loading = false;
     },
     // 添加文章

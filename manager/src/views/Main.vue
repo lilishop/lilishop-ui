@@ -60,7 +60,7 @@ import messageTip from "./main-components/message-tip.vue";
 import circleLoading from "@/views/my-components/lili/circle-loading.vue";
 import Cookies from "js-cookie";
 import util from "@/libs/util.js";
-import { getNoticePage } from "@/api/index";
+import { getNoticePage,logout } from "@/api/index";
 
 var client;
 export default {
@@ -131,11 +131,13 @@ export default {
       }
       // 退出登录
       else if (name === "loginOut") {
-        this.$store.commit("logout", this);
-        this.$store.commit('setAdded', false);
-        this.setStore("accessToken", "");
-        this.setStore("refreshToken", "");
-        this.$router.push({ path: "/login" });
+        logout().then(res => {
+          this.$store.commit("logout", this);
+          this.$store.commit('setAdded', false);
+          this.setStore("accessToken", "");
+          this.setStore("refreshToken", "");
+          this.$router.push({ path: "/login" });
+        })
       }
     },
     //切换标签

@@ -31,6 +31,12 @@ export const getSellerHomeData = params => {
 export const login = params => {
   return postRequestWithNoToken("/login/userLogin", params);
 };
+
+// 登出
+export const logout = () => {
+  return postRequest("/login/logout");
+};
+
 // 获取用户登录信息
 export const userInfo = params => {
   return getRequest("/user/info", params);

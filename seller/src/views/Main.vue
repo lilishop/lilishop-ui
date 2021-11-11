@@ -58,6 +58,7 @@ import tagsPageOpened from "./main-components/tags-page-opened.vue";
 import circleLoading from "@/views/my-components/lili/circle-loading.vue";
 import Cookies from "js-cookie";
 import util from "@/libs/util.js";
+import { logout } from "@/api/index";
 
 export default {
   components: {
@@ -120,12 +121,14 @@ export default {
           name: "change_pass",
         });
       } else if (name == "loginOut") {
-        Cookies.set("accessToken", "");
-        this.$store.commit("logout", this);
-        this.$store.commit("clearOpenedSubmenu");
-        this.setStore("accessToken", "");
-        this.setStore("refreshToken", "");
-        this.$router.push({ path: "/login" });
+        logout().then(res => {
+          Cookies.set("accessToken", "");
+          this.$store.commit("logout", this);
+          this.$store.commit("clearOpenedSubmenu");
+          this.setStore("accessToken", "");
+          this.setStore("refreshToken", "");
+          this.$router.push({ path: "/login" });
+        })
       }
     },
     // 快捷页签选中状态

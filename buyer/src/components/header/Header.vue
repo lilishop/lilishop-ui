@@ -86,6 +86,7 @@
 <script>
 import storage from '@/plugins/storage.js';
 import { cartGoodsAll } from '@/api/cart.js';
+import { logout } from '@/api/account.js';
 export default {
   name: 'M-Header',
   created () {
@@ -120,12 +121,14 @@ export default {
       window.open(url.href, '_blank');
     },
     signOutFun () { // 退出登录
-      storage.removeItem('accessToken');
-      storage.removeItem('refreshToken');
-      storage.removeItem('userInfo');
-      storage.removeItem('cartNum');
-      this.$store.commit('SET_CARTNUM', 0)
-      this.$router.push('/login');
+      logout().then(res => {
+        storage.removeItem('accessToken');
+        storage.removeItem('refreshToken');
+        storage.removeItem('userInfo');
+        storage.removeItem('cartNum');
+        this.$store.commit('SET_CARTNUM', 0)
+        this.$router.push('/login');
+      });
     },
     goUserCenter (path) {
       // 跳转我的订单，我的足迹、收藏等

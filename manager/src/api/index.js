@@ -49,6 +49,12 @@ export const getNoticePage = (params) => {
 export const login = (params) => {
   return getRequestWithNoToken("/user/login", params);
 };
+
+// 登出
+export const logout = () => {
+  return postRequest("/user/logout");
+};
+
 // 刷新token
 export const handleRefreshToken = (token) => {
   return getRequestWithNoToken(`/user/refresh/${token}`);

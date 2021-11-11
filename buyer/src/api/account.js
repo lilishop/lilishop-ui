@@ -57,3 +57,12 @@ export function editPwd (params) {
     data: params
   })
 }
+
+// 获取密码状态
+export function logout () {
+  return request({
+    url: '/buyer/members/logout',
+    method: Method.POST,
+    needToken: true
+  })
+}
