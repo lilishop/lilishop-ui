@@ -35,13 +35,22 @@
       <h3>配送信息</h3>
       <p>配送方式：{{order.deliveryMethodValue}}</p>
       <p>配送状态：{{order.deliverStatusValue}}</p>
+      <div class="div-express-log" v-if="logistics">
+          <p class="express-log">
+            <p>订单日志：</p>
+            <p v-for="(item, index) in logistics.traces" :key="index">
+              <span class="time">{{ item.AcceptTime }}</span>
+              <span class="detail">{{ item.AcceptStation }}</span>
+            </p>
+          </p>
+        </div>
     </div>
     <div class="order-card">
       <h3>发票信息</h3>
-      <template v-if="order.receipt">
-        <p>发票抬头：{{order.receipt.receiptTitle}}</p>
-        <p>发票内容：{{order.receipt.receiptContent}}</p>
-        <p v-if="order.receipt.taxpayerId">纳税人识别号：{{order.receipt.taxpayerId}}</p>
+      <template v-if="order.order.receipt">
+        <p>发票抬头：{{order.order.receiptVO.receiptTitle}}</p>
+        <p>发票内容：{{order.order.receiptVO.receiptContent}}</p>
+        <p v-if="order.order.receiptVO.taxpayerId">纳税人识别号：{{order.order.receiptVO.taxpayerId}}</p>
       </template>
       <div v-else style="color:#999;margin-left:5px">
         未开发票
@@ -122,7 +131,7 @@ export default {
     return {
       order: {}, // 订单详情数据
       progressList: [], // 订单流程
-      logistics: [], // 物流数据
+      logistics: "", // 物流数据
       cancelParams: { // 取消售后参数
         orderSn: '',
         reason: ''
