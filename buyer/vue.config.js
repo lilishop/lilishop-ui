@@ -4,6 +4,7 @@ const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const resolve = dir => {
   return path.join(__dirname, dir);
 };
+const configs = require('./src/config')
 /**
  * 在项目开发的时候将生产环境以及开发环境进行判断
  * 将生产环境中的路径用cdn来进行优化处理
@@ -128,6 +129,7 @@ module.exports = {
     config.resolve.alias.set("@", resolve("src"));
     config.plugin("html").tap(args => {
       args[0].cdn = cdn;
+      args[0].title = configs.title;
       return args;
     });
   }

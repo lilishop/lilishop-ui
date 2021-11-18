@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   /**
    * @description 配置显示在浏览器标签的title、底部信息、部分信息展示的值
    */
@@ -30,13 +30,5 @@ export default {
    * @description 高德web端申请的api key
    */
   aMapKey: "b440952723253aa9fe483e698057bf7d",
-  /**
-   * @description 需要加载的插件
-   */
-  plugin: {
-    "error-store": {
-      showInHeader: true, // 设为false后不会在顶部显示错误日志徽标
-      developmentOff: true // 设为true后在开发环境不会收集错误信息，方便开发中排查错误
-    }
-  }
+ 
 };

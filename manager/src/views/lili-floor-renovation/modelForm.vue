@@ -88,8 +88,6 @@
             width="800"
             :z-index="100"
             :mask-closable="false"
-            
-          
             >
             <!-- 分类tab栏 -->
             <div class="modal-tab-bar">

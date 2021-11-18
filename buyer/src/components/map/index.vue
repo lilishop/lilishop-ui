@@ -31,7 +31,7 @@
 <script>
 import AMapLoader from '@amap/amap-jsapi-loader';
 import { handleRegion } from '@/api/address.js';
-import config from '@/config'
+
 export default {
   name: 'map',
   props: {
@@ -42,7 +42,7 @@ export default {
   },
   data () {
     return {
-      config,
+      config:require('@/config'),
       showMap: false, // 展示地图
       mapSearch: '', // 地图搜索
       map: null, // 初始化地图
