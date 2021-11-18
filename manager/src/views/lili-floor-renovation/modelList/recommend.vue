@@ -107,9 +107,9 @@
       draggable
       width="800"
       :z-index="100"
-      mask-closable="false"
-      :on-ok="sureDecorate"
-      :on-cancel="cancelDecorate"
+      :mask-closable="false"
+      
+      
     >
       <div class="modal-top-advert">
         <div>
@@ -169,9 +169,9 @@
       draggable
       width="800"
       :z-index="100"
-      mask-closable="false"
-      :on-ok="sureDecorate"
-      :on-cancel="cancelDecorate"
+      :mask-closable="false"
+      
+      
     >
       <div class="modal-top-advert">
         <div><span>主标题：</span><Input v-model="selected.title" /></div>

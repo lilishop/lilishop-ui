@@ -25,9 +25,9 @@
       draggable
       width="800"
       :z-index="100"
-      mask-closable="false"
-      :on-ok="sureDecorate"
-      :on-cancel="cancelDecorate"
+      :mask-closable="false"
+      
+      
     >
       <div class="modal-tab-bar">
         <Button type="primary" size="small" @click="handleAdd">添加轮播</Button>
@@ -81,7 +81,7 @@
     <liliDialog
       ref="liliDialog"
       @selectedLink="selectedLink"
-      @selectedGoodsData="selectedGoodsData"
+    
     ></liliDialog>
     <!-- 选择图片 -->
     <Modal width="1200px" v-model="picModelFlag" footer-hide>

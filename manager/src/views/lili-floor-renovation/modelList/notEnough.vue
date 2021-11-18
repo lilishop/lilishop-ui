@@ -32,9 +32,7 @@
             draggable
             width="800"
             :z-index="100"
-            mask-closable="false"
-            :on-ok="sureDecorate"
-            :on-cancel="cancelDecorate"
+            :mask-closable="false"
             >
             <div class="modal-tab-bar">
                 <Button type="primary" size='small' @click="handleAddNav">添加分类</Button>

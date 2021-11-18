@@ -22,7 +22,7 @@
             <div class="search-con">
                 <img :src="require('@/assets/logo.png')" class="logo" alt="">
                 <div class="search">
-                    <i-input v-model="searchData" size="large" placeholder="输入你想查找的商品">
+                    <i-input  size="large" placeholder="输入你想查找的商品">
                         <Button slot="append">搜索</Button>
                     </i-input>
                 </div>
@@ -58,9 +58,9 @@
             draggable
             width="800"
             :z-index="100"
-            mask-closable="false"
-            :on-ok="sureDecorate"
-            :on-cancel="cancelDecorate"
+            :mask-closable="false"
+            
+           
             >
             <!-- 顶部广告 -->
             <div class="modal-top-advert">
@@ -87,9 +87,9 @@
             draggable
             width="800"
             :z-index="100"
-            mask-closable="false"
-            :on-ok="sureDecorate"
-            :on-cancel="cancelDecorate"
+            :mask-closable="false"
+            
+          
             >
             <!-- 分类tab栏 -->
             <div class="modal-tab-bar">
@@ -121,7 +121,7 @@
         <liliDialog
             ref="liliDialog"
             @selectedLink="selectedLink"
-            @selectedGoodsData="selectedGoodsData"
+           
         ></liliDialog>
         <!-- 选择图片 -->
         <Modal width="1200px" v-model="picModelFlag" footer-hide>

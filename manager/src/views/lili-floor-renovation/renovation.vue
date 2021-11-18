@@ -3,7 +3,7 @@
     <!-- 左侧模块列表 -->
     <div class="model-list">
       <div class="classification-title">基础模块</div>
-      <draggable tag="ul" :list="modelData" v-bind="{group:{ name:'model', pull:'clone',put:false},sort:false, ghostClass: 'ghost'}" @end="handleMoveEnd" @start="handleMoveStart" :move="handleMove">
+      <draggable tag="ul" :list="modelData" v-bind="{group:{ name:'model', pull:'clone',put:false},sort:false, ghostClass: 'ghost'}"   >
         <li v-for="(model, index) in modelData" :key="index" class="model-item">
           <Icon :type="model.icon" />
           <span>{{model.name}}</span>
