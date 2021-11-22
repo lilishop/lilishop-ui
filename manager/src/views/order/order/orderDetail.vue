@@ -657,10 +657,6 @@ export default {
     margin-bottom: 2vh;
   }
 
-  .select-count {
-    font-weight: 600;
-    color: #40a9ff;
-  }
 
   .select-clear {
     margin-left: 10px;

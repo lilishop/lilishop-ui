@@ -11,7 +11,7 @@
       </Row>
       <Row v-show="openTip"  v-if="status == 'manager'">
         <Alert show-icon>
-          已选择 <span class="select-count">{{ selectCount }}</span> 项
+          已选择 <span >{{ selectCount }}</span> 项
           <a class="select-clear" @click="clearSelectAll">清空</a>
         </Alert>
       </Row>
