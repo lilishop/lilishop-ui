@@ -42,7 +42,7 @@
       width="600"
       :z-index="100"
       :loading="loading"
-      mask-closable="false"
+      :mask-closable="false"
       @on-ok="newTemplate"
       @on-cancel="showModal = false"
     >

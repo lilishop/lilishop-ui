@@ -13,23 +13,32 @@
     <!-- 顶部标题栏主体 -->
     <div class="main-header-con">
       <div class="main-header">
-        <div :class="{'header-avator-con':navType!=4, 'header-avator-con nav4':navType == 4}">
+        <div
+          :class="{
+            'header-avator-con': navType != 4,
+            'header-avator-con nav4': navType == 4,
+          }"
+        >
           <!-- 通知消息 -->
           <message-tip v-if="tipsMessage" :res="tipsMessage"></message-tip>
           <!-- 用户头像 -->
           <div class="user-dropdown-menu-con">
-
             <Row type="flex" justify="end" align="middle" class="user-dropdown-innercon">
               <Dropdown transfer trigger="hover" @on-click="handleClickUserDropdown">
                 <div class="dropList">
                   <span class="main-user-name">{{ userInfo.nickName }}</span>
                   <Icon type="md-arrow-dropdown" />
-                  <Avatar :src="avatarPath" style="background: #fff;margin-left: 10px;"></Avatar>
+                  <Avatar
+                    :src="avatarPath"
+                    style="background: #fff; margin-left: 10px"
+                  ></Avatar>
                 </div>
                 <DropdownMenu slot="list">
-                  <DropdownItem name="personalCenter">{{ $t('userCenter') }}</DropdownItem>
-                  <DropdownItem name="changePass">{{ $t('changePass') }}</DropdownItem>
-                  <DropdownItem name="loginOut" divided>{{ $t('logout') }}</DropdownItem>
+                  <DropdownItem name="personalCenter">{{
+                    $t("userCenter")
+                  }}</DropdownItem>
+                  <DropdownItem name="changePass">{{ $t("changePass") }}</DropdownItem>
+                  <DropdownItem name="loginOut" divided>{{ $t("logout") }}</DropdownItem>
                 </DropdownMenu>
               </Dropdown>
             </Row>
@@ -60,7 +69,7 @@ import messageTip from "./main-components/message-tip.vue";
 import circleLoading from "@/views/my-components/lili/circle-loading.vue";
 import Cookies from "js-cookie";
 import util from "@/libs/util.js";
-import { getNoticePage,logout } from "@/api/index";
+import { getNoticePage, logout } from "@/api/index";
 
 var client;
 export default {
@@ -90,7 +99,7 @@ export default {
     },
     lang() {
       return this.$store.state.app.lang;
-    }
+    },
   },
 
   methods: {
@@ -131,13 +140,13 @@ export default {
       }
       // 退出登录
       else if (name === "loginOut") {
-        logout().then(res => {
+        logout().then((res) => {
           this.$store.commit("logout", this);
-          this.$store.commit('setAdded', false);
+          this.$store.commit("setAdded", false);
           this.setStore("accessToken", "");
           this.setStore("refreshToken", "");
           this.$router.push({ path: "/login" });
-        })
+        });
       }
     },
     //切换标签
@@ -149,12 +158,7 @@ export default {
       });
       if (!openpageHasTag) {
         //  解决关闭当前标签后再点击回退按钮会退到当前页时没有标签的问题
-        util.openNewPage(
-          this,
-          name,
-          this.$route.params || {},
-          this.$route.query || {}
-        );
+        util.openNewPage(this, name, this.$route.params || {}, this.$route.query || {});
       }
     },
     //宽度动态计算

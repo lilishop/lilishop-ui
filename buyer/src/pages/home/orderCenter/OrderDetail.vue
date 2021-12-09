@@ -87,7 +87,7 @@
             <td>{{ goods.num }}</td>
             <td>{{ (goods.goodsPrice * goods.num) | unitPrice('￥') }}</td>
             <td>
-              <Button v-if="goods.afterSaleStatus.includes('NOT_APPLIED')" @click="applyAfterSale(goods.sn)" type="info" size="small" class="mb_5">申请售后</Button>
+              <Button v-if="goods.afterSaleStatus.includes('NOT_APPLIED') || goods.afterSaleStatus.includes('PART_AFTER_SALE')" @click="applyAfterSale(goods.sn)" type="info" size="small" class="mb_5">申请售后</Button>
               <Button v-if="goods.commentStatus == 'UNFINISHED'" @click="comment(order.order.sn, goodsIndex)" size="small" type="success" class="fontsize_12 mb_5" >评价</Button>
               <Button v-if="goods.complainStatus == 'NO_APPLY'" @click="complain(order.order.sn, goodsIndex)" type="warning" class="fontsize_12" size="small">投诉</Button>
             </td>

@@ -147,9 +147,7 @@
       draggable
       width="800"
       :z-index="100"
-      mask-closable="false"
-      :on-ok="sureDecorate"
-      :on-cancel="cancelDecorate"
+      :mask-closable="false"
     >
       <div class="modal-top-advert">
         <div>
@@ -216,7 +214,7 @@
     <liliDialog
       ref="liliDialog"
       @selectedLink="selectedLink"
-      @selectedGoodsData="selectedGoodsData"
+  
     ></liliDialog>
     <!-- 选择图片 -->
     <Modal width="1200px" v-model="picModelFlag" footer-hide>
@@ -287,10 +285,7 @@ export default {
     selectedLink(val) {
       this.selected.url = this.$options.filters.formatLinkType(val);
     },
-    // 拖动结束回调
-    handleMoveEnd({ newIndex, oldIndex }) {
-      console.log("index", newIndex, oldIndex);
-    },
+    
     handleSelectImg() {
       // 选择图片
       this.$refs.ossManage.selectImage = true;

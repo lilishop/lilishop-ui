@@ -49,7 +49,7 @@
               <div class="decorate-view-link" v-if="res.options.list[0].listWay.length != 0">
 
                 <!-- 绑定商品选择器回调已选择的商品 -->
-                <div v-if="title_item.title == bindGoods.type" v-for="(bindGoods,bindGoodsIndex) in res.options.list[0].listWay" :key="bindGoodsIndex">
+                <div v-if="title_item.___index == bindGoods.___index ||  title_item.title == bindGoods.type" v-for="(bindGoods,bindGoodsIndex) in res.options.list[0].listWay" :key="bindGoodsIndex">
                   {{bindGoods.title}},
                 </div>
 
@@ -183,10 +183,13 @@ export default {
       if (!val) return false;
       let data = val.map((item) => {
         delete item.selected;
+        delete item.intro
+        delete item.mobileIntro
         return {
           img: item.thumbnail,
           title: item.goodsName,
           type: this.selectedGoods.title,
+          ___index:this.selectedGoods.___index,
           ...item
         };
       });

@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import config from '@/config'
+
 import {articleList} from '@/api/common.js'
 import storage from '@/plugins/storage';
 export default {
@@ -65,7 +65,7 @@ export default {
   props: ['data'],
   data () {
     return {
-      config,
+      config:require('@/config'),
       userInfo: {}, // 用户信息
       articleList: [], // 常见问题
       params: { // 请求常见问题参数

@@ -459,22 +459,32 @@ export const modelData = [
     options: {
       list: [
         {
+          /**
+           * 2021/12/9
+           * 新增索引（‘index’）判断商品归属分类
+           * 之前代码没有配置index也不会收到印象
+           * 新建的楼层将采用索引判断分类
+           */
           titleWay: [
             {
               title: "精选",
-              desc: "电子推荐"
+              desc: "电子推荐",
+              ___index:0,
             },
             {
               title: "实惠",
-              desc: "便宜好货"
+              desc: "便宜好货",
+              ___index:1,
             },
             {
               title: "进口",
-              desc: "国际自营"
+              desc: "国际自营",
+              ___index:2,
             },
             {
               title: "推荐",
-              desc: "喂奶推荐"
+              desc: "喂奶推荐",
+              ___index:3,
             }
           ],
           listWay: [
@@ -483,50 +493,18 @@ export const modelData = [
               price: "120",
               title:
                 " 微软 (Microsoft) Xbox 无线控制器/手柄 湛蓝色 | 3.5mm耳机接口蓝牙连接 Xbox主机电脑平板通用",
-              type: "精选"
+              type: "精选",
+              ___index:0
             },
             {
               img: "https://i.loli.net/2020/12/05/c9mptI5Pg8qJ6ny.png",
               title:
                 "宏碁(acer) DP高清线1.2版 2K*4KDisplayPort公对公接线笔记本电脑显卡连接显示器视频线1.5米",
               price: "190",
-              type: "精选"
+              type: "精选",
+              ___index:0
             },
-            {
-              img: "https://i.loli.net/2020/12/05/QsSYIPF743Hgf8q.png",
-              title:
-                "宏碁(acer) DP高清线1.2版 2K*4KDisplayPort公对公接线笔记本电脑显卡连接显示器视频线1.5米",
-              price: "10",
-              type: "精选"
-            },
-            {
-              img: "https://i.loli.net/2020/12/05/VTwDYcLWnukGxat.png",
-              title:
-                "宏碁(acer) DP高清线1.2版 2K*4KDisplayPort公对公接线笔记本电脑显卡连接显示器视频线1.5米",
-              price: "190",
-              type: "精选"
-            },
-            {
-              img: "https://i.loli.net/2020/12/05/SIFwaVpE4YJAuQf.png",
-              title:
-                "宏碁(acer) DP高清线1.2版 2K*4KDisplayPort公对公接线笔记本电脑显卡连接显示器视频线1.5米",
-              price: "10",
-              type: "精选"
-            },
-            {
-              img: "https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
-              title:
-                "宏碁(acer) DP高清线1.2版 2K*4KDisplayPort公对公接线笔记本电脑显卡连接显示器视频线1.5米",
-              price: "190",
-              type: "精选"
-            },
-            {
-              img: "https://i.loli.net/2021/05/14/xA5FW2ubiShBdPE.jpg",
-              title:
-                "宏碁(acer) DP高清线1.2版 2K*4KDisplayPort公对公接线笔记本电脑显卡连接显示器视频线1.5米",
-              price: "10",
-              type: "精选"
-            }
+            
           ]
         }
       ]

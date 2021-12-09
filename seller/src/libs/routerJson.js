@@ -1,3 +1,7 @@
+/**
+ * 商家端左侧菜单栏静态数据
+ */
+
 export const result = [{
     name: "lili",
     level: 0,

@@ -68,12 +68,12 @@
 </template>
 
 <script>
-import config from '@/config'
+
 export default {
   name: "Footer",
   data() {
     return {
-      config,
+      config:require('@/config'),
       guideArr: [
         // 导航链接
         ["购物指南", "购物流程", "会员介绍", "生活旅行", "常见问题"],

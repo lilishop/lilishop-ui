@@ -97,7 +97,7 @@
 </template>
 
 <script>
-import config from '@/config'
+
 import * as RegExp from '@/plugins/RegExp.js';
 import { md5 } from '@/plugins/md5.js';
 import * as apiLogin from '@/api/login.js';
@@ -108,7 +108,7 @@ export default {
   components: { Verify },
   data () {
     return {
-      config,
+      config:require('@/config'),
       year: new Date().getFullYear(),
       formRegist: {
         // 注册表单

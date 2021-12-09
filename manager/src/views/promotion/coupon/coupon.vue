@@ -146,7 +146,7 @@ export default {
           title: "活动时间",
           width: 150,
           render: (h, params) => {
-            if (params.row.getType === "ACTIVITY") {
+            if (params.row.getType === "ACTIVITY" && params.row.rangeDayType == 'DYNAMICTIME') {
               return h("div", "长期有效");
             } else {
               return h("div", {

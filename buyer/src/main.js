@@ -10,6 +10,7 @@ import storage from '@/plugins/storage';
 // 全局引入封装组件
 import {InstallAll} from '@/components/global.js';
 
+let title = require('@/config').title
 Vue.use(ViewUI);
 Vue.use(InstallAll);
 Vue.config.productionTip = false;
@@ -20,7 +21,7 @@ Object.keys(filters).forEach(key => {
 
 router.beforeEach((to, from, next) => {
   ViewUI.LoadingBar.start();
-  window.document.title = to.meta.title === undefined ? 'lili shop' : to.meta.title
+  window.document.title = to.meta.title === undefined ? title : to.meta.title
   next();
 });
 
