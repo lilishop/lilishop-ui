@@ -108,6 +108,12 @@ export default {
   },
 
   methods: {
+
+    enableBindGoodsShow(){
+
+    },
+
+
     // 初始化数据
     init() {
       if (!this.$route.query.id) return false;
@@ -156,6 +162,7 @@ export default {
     },
     // 右侧栏回调
     handleDrawer(val) {
+    
       let newIndex = this.selected;
 
       this.decorateData = "";
