@@ -7,7 +7,7 @@
       </div>
     </div>
     <div class="goods-list">
-      <div v-if="selected.val == item.type" class="goods-item" v-for="(item, item_index) in res.list[0].listWay" :key="item_index">
+      <div v-if="selected.index == item.___index || selected.val == item.type" class="goods-item" v-for="(item, item_index) in res.list[0].listWay" :key="item_index">
         <div class="goods-img">
           <Icon size="20" color="#e1251b" @click="closeGoods(item, item_index)" class="goods-icon" type="ios-close-circle" />
           <img :src="item.img" alt />
@@ -31,7 +31,6 @@ export default {
       selected: {
         // 已选数据
         index: 0,
-        val: "",
       },
     };
   },

@@ -89,6 +89,11 @@ export const getRefundGoodsAddress = () => {
 export const saveRefundGoodsAddress = (params) => {
   return putRequest(`/settings/storeAfterSaleAddress`, params)
 }
+//修改im商户id
+export const updatEmerchantId = (params) => {
+  return putRequest(`/settings/merchantEuid`, params)
+}
+
 
 //修改保存库存预警数
 export const updateStockWarning = (params) => {
@@ -111,6 +116,5 @@ export const addShipTemplate = (params, headers) => {
 export const editShipTemplate = (id, params, headers) => {
   return putRequest(`/freightTemplate/${id}`, params, headers)
 }
-
 
 
