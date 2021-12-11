@@ -1,15 +1,19 @@
-
 <template>
   <div class="search">
     <Card>
       <!-- 筛选项和操作按钮 -->
       <Row class="operation">
-        <i-switch v-model="strict" class="selectModel" size="large" style="margin-right: 5px">
+        <i-switch
+          v-model="strict"
+          class="selectModel"
+          size="large"
+          style="margin-right: 5px"
+        >
           <span slot="open">级联</span>
           <span slot="close">单选</span>
         </i-switch>
-        <Button @click="addRootMenu" >添加顶级菜单</Button>
-        <Button @click="addMenu" type="primary" >添加子菜单</Button>
+        <Button @click="addRootMenu">添加顶级菜单</Button>
+        <Button @click="addMenu" type="primary">添加子菜单</Button>
         <Button @click="delAll">批量删除</Button>
         <Dropdown @on-click="handleDropdown">
           <Button>
@@ -31,9 +35,7 @@
           <Alert show-icon>
             当前选择编辑：
             <span class="select-title">{{ editTitle }}</span>
-            <a class="select-clear" v-if="form.id" @click="cancelEdit"
-            >取消选择</a
-            >
+            <a class="select-clear" v-if="form.id" @click="cancelEdit">取消选择</a>
           </Alert>
           <Input
             v-model="searchKey"
@@ -56,12 +58,7 @@
           </div>
         </Col>
         <Col :md="15" :lg="13" :xl="9" style="margin-left: 10px">
-          <Form
-            ref="form"
-            :model="form"
-            :label-width="110"
-            :rules="formValidate"
-          >
+          <Form ref="form" :model="form" :label-width="110" :rules="formValidate">
             <FormItem label="类型" prop="type">
               <div v-show="form.level == 0">
                 <Icon
@@ -81,41 +78,41 @@
               </div>
             </FormItem>
             <FormItem label="菜单名称" prop="title">
-              <Input v-model="form.title" />
-            </FormItem>
-            <FormItem label="路由地址" prop="path" v-if="form.level != 0" class="block-tool">
-              <Tooltip placement="right" content="路由地址，英文唯一，跳转页面，路径展示用 ">
-                <Input v-model="form.path"/>
-              </Tooltip>
+              <Input class="menu-input" v-model="form.title" />
             </FormItem>
             <FormItem
-              label="路由名称"
-              prop="name"
+              label="路由地址"
+              prop="path"
+              v-if="form.level != 0"
               class="block-tool"
             >
-              <Tooltip placement="right" content="路由name，需英文唯一，跳转页面用" transfer>
-                <Input v-model="form.name"/>
+              <Tooltip
+                placement="right"
+                content="路由地址，英文唯一，跳转页面，路径展示用 "
+              >
+                <Input class="menu-input" v-model="form.path" />
+              </Tooltip>
+            </FormItem>
+            <FormItem label="路由名称" prop="name" class="block-tool">
+              <Tooltip
+                placement="right"
+                content="路由name，需英文唯一，跳转页面用"
+                transfer
+              >
+                <Input class="menu-input" v-model="form.name" />
               </Tooltip>
             </FormItem>
             <FormItem label="文件路径" prop="frontRoute" v-if="form.level != 0">
-              <Input v-model="form.frontRoute"/>
+              <Input class="menu-input" v-model="form.frontRoute" />
             </FormItem>
             <FormItem label="权限url" v-if="form.level != 0" class="block-tool">
               <Tooltip placement="right" content="*号模糊匹配，逗号分割" transfer>
-                <Input v-model="form.permission"/>
+                <Input class="menu-input" v-model="form.permission" />
               </Tooltip>
             </FormItem>
             <FormItem label="排序值" prop="sortOrder">
-              <Tooltip
-                trigger="hover"
-                placement="right"
-                content="值越小越靠前，支持小数"
-              >
-                <InputNumber
-                  :max="1000"
-                  :min="0"
-                  v-model="form.sortOrder"
-                ></InputNumber>
+              <Tooltip trigger="hover" placement="right" content="值越小越靠前，支持小数">
+                <InputNumber :max="1000" :min="0" v-model="form.sortOrder"></InputNumber>
               </Tooltip>
             </FormItem>
             <Form-item>
@@ -124,9 +121,8 @@
                 @click="submitEdit"
                 :loading="submitLoading"
                 type="primary"
-              >保存
-              </Button
-              >
+                >保存
+              </Button>
               <Button @click="handleReset">重置</Button>
             </Form-item>
           </Form>
@@ -142,78 +138,48 @@
       :width="500"
       :styles="{ top: '30px' }"
     >
-      <Form
-        ref="formAdd"
-        :model="formAdd"
-        :label-width="100"
-        :rules="formValidate"
-      >
+      <Form ref="formAdd" :model="formAdd" :label-width="100" :rules="formValidate">
         <div v-if="showParent">
           <FormItem label="上级节点：">{{ parentTitle }}</FormItem>
         </div>
         <FormItem label="类型" prop="type">
           <div v-show="formAdd.level == 0">
-            <Icon
-              type="ios-navigate-outline"
-              size="16"
-              style="margin-right: 5px"
-            ></Icon>
+            <Icon type="ios-navigate-outline" size="16" style="margin-right: 5px"></Icon>
             <span>顶级菜单</span>
           </div>
           <div v-show="formAdd.level != 0">
-            <Icon
-              type="ios-list-box-outline"
-              size="16"
-              style="margin-right: 5px"
-            ></Icon>
+            <Icon type="ios-list-box-outline" size="16" style="margin-right: 5px"></Icon>
             <span>页面菜单</span>
           </div>
         </FormItem>
-        <FormItem
-          label="菜单名称"
-          prop="title"
-        >
-          <Input v-model="formAdd.title"/>
+        <FormItem label="菜单名称" prop="title">
+          <Input class="menu-input" v-model="formAdd.title" />
         </FormItem>
 
         <FormItem label="路由地址" prop="path" v-if="formAdd.level != 0">
-          <Input v-model="formAdd.path"/>
-          
+          <Input v-model="formAdd.path" />
         </FormItem>
-        <FormItem
-          label="路由名称"
-          prop="name"
-          class="block-tool"
-        >
+        <FormItem label="路由名称" prop="name" class="block-tool">
           <Tooltip placement="right" content="路由name，需英文唯一，跳转页面用">
-            <Input v-model="formAdd.name"/>
+            <Input v-model="formAdd.name" />
           </Tooltip>
         </FormItem>
         <FormItem label="文件路径" prop="frontRoute" v-if="formAdd.level != 0">
-          <Input v-model="formAdd.frontRoute"/>
+          <Input v-model="formAdd.frontRoute" />
         </FormItem>
         <FormItem label="权限url" v-if="formAdd.level != 0">
-          <Input v-model="formAdd.permission"/>
+          <Input v-model="formAdd.permission" />
           <div class="desc">*号模糊匹配，逗号分割</div>
         </FormItem>
         <FormItem label="排序值" prop="sortOrder">
-          <Tooltip
-            trigger="hover"
-            placement="right"
-            content="值越小越靠前，支持小数"
-          >
-            <InputNumber
-              :max="1000"
-              :min="0"
-              v-model="formAdd.sortOrder"
-            ></InputNumber>
+          <Tooltip trigger="hover" placement="right" content="值越小越靠前，支持小数">
+            <InputNumber :max="1000" :min="0" v-model="formAdd.sortOrder"></InputNumber>
           </Tooltip>
         </FormItem>
       </Form>
       <div slot="footer">
         <Button type="text" @click="menuModalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="submitAdd"
-        >提交</Button>
+        <Button type="primary" :loading="submitLoading" @click="submitAdd">提交</Button>
       </div>
     </Modal>
   </div>
@@ -245,7 +211,8 @@ export default {
       parentTitle: "", // 父级标题
       editTitle: "", // 编辑标题
       modalTitle: "", // modal标题
-      form: { // 表单数据
+      form: {
+        // 表单数据
         id: "",
         title: "",
         name: "",
@@ -254,19 +221,17 @@ export default {
         parentId: "",
         sortOrder: 0,
         level: 0,
-        permission: ''
+        permission: "",
       },
-      formAdd: { // 添加表单
+      formAdd: {
+        // 添加表单
       },
-      formValidate: { // 验证规则
-        title: [{required: true, message: "菜单名称名称不能为空", trigger: "blur"}],
-        name: [
-          {required: true, message: "路由名称不能为空", trigger: "blur"},
-        ],
-        path: [{required: true, message: "路由地址不能为空", trigger: "blur"}],
-        frontRoute: [
-          {required: true, message: "文件地址不能为空", trigger: "blur"},
-        ],
+      formValidate: {
+        // 验证规则
+        title: [{ required: true, message: "菜单名称名称不能为空", trigger: "blur" }],
+        name: [{ required: true, message: "路由名称不能为空", trigger: "blur" }],
+        path: [{ required: true, message: "路由地址不能为空", trigger: "blur" }],
+        frontRoute: [{ required: true, message: "文件地址不能为空", trigger: "blur" }],
         sortOrder: [
           {
             required: true,
@@ -286,7 +251,8 @@ export default {
       this.getAllList();
     },
 
-    renderContent(h, {root, node, data}) { // 渲染树形结构前面图标
+    renderContent(h, { root, node, data }) {
+      // 渲染树形结构前面图标
       let icon = "";
       if (data.level == 0) {
         icon = "ios-navigate";
@@ -420,7 +386,6 @@ export default {
     // 选择菜单
     selectTree(v) {
       if (v.length > 0) {
-
         let str = JSON.stringify(v);
         let menu = JSON.parse(str);
         this.form = menu[0];
@@ -434,7 +399,7 @@ export default {
     search() {
       if (this.searchKey) {
         this.loading = true;
-        searchPermission({title: this.searchKey}).then((res) => {
+        searchPermission({ title: this.searchKey }).then((res) => {
           this.loading = false;
           if (res.success) {
             this.data = res.result;
@@ -486,7 +451,7 @@ export default {
             if (res.success) {
               this.$Message.success("编辑成功");
               // 标记重新获取菜单数据
-              this.$store.commit('setAdded', false);
+              this.$store.commit("setAdded", false);
               util.initRouter(this);
               this.init();
               this.menuModalVisible = false;
@@ -506,7 +471,7 @@ export default {
             if (res.success) {
               this.$Message.success("添加成功");
               // 标记重新获取菜单数据
-              this.$store.commit('setAdded', false);
+              this.$store.commit("setAdded", false);
               util.initRouter(this);
               this.init();
               this.menuModalVisible = false;
@@ -535,7 +500,7 @@ export default {
         parentId: this.form.id,
         level: Number(this.form.level) + 1,
         sortOrder: 0,
-        permission:'' // 权限url
+        permission: "", // 权限url
       };
       if (this.form.level == 0) {
         this.formAdd.path = "/";
@@ -549,7 +514,7 @@ export default {
       this.showParent = false;
       this.formAdd = {
         level: 0,
-        sortOrder: 0
+        sortOrder: 0,
       };
       this.menuModalVisible = true;
     },
@@ -579,7 +544,7 @@ export default {
             if (res.success) {
               this.$Message.success("删除成功");
               // 标记重新获取菜单数据
-              this.$store.commit('setAdded', false);
+              this.$store.commit("setAdded", false);
               util.initRouter(this);
               this.selectList = [];
               this.selectCount = 0;
@@ -601,8 +566,11 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "@/styles/tree-common.scss";
-.desc{
+.desc {
   font-size: 12px;
   color: #999;
+}
+.menu-input {
+  width: 500px;
 }
 </style>

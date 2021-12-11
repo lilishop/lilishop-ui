@@ -60,8 +60,8 @@ export const getPintuanGoodsList = params => {
 };
 
 // 关闭拼团活动
-export const closePintuan = pintuanId => {
-  return putRequest(`/promotion/pintuan/close/${pintuanId}`);
+export const updatePintuanStatus = (pintuanId, params) => {
+  return putRequest(`/promotion/pintuan/status/${pintuanId}`, params);
 };
 
 // 修改砍价活动商品
@@ -187,12 +187,14 @@ export const saveSeckill = params => {
 
 // 修改秒杀活动
 export const updateSeckill = params => {
-  return putRequest("/promotion/seckill", params);
+  return putRequest("/promotion/seckill", params, {
+    "Content-type": "application/json"
+  });
 };
 
 // 关闭秒杀活动
-export const closeSeckill = id => {
-  return putRequest(`/promotion/seckill/close/${id}`);
+export const updateSeckillStatus = (id, params) => {
+  return putRequest(`/promotion/seckill/status/${id}`, params);
 };
 // 删除秒杀商品
 export const delSeckillGoods = params => {
