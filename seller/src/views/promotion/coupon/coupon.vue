@@ -2,12 +2,29 @@
   <div class="search">
     <Card>
       <Row>
-        <Form ref="searchForm" :model="searchForm" inline :label-width="100" class="search-form">
+        <Form
+          ref="searchForm"
+          :model="searchForm"
+          inline
+          :label-width="100"
+          class="search-form"
+        >
           <Form-item label="优惠券名称">
-            <Input type="text" v-model="searchForm.couponName" placeholder="请输入优惠券名称" clearable style="width: 200px" />
+            <Input
+              type="text"
+              v-model="searchForm.couponName"
+              placeholder="请输入优惠券名称"
+              clearable
+              style="width: 200px"
+            />
           </Form-item>
           <Form-item label="活动状态" prop="promotionStatus">
-            <Select v-model="searchForm.promotionStatus" placeholder="请选择" clearable style="width: 200px">
+            <Select
+              v-model="searchForm.promotionStatus"
+              placeholder="请选择"
+              clearable
+              style="width: 200px"
+            >
               <Option value="NEW">未开始</Option>
               <Option value="START">已开始/上架</Option>
               <Option value="END">已结束/下架</Option>
@@ -15,26 +32,71 @@
             </Select>
           </Form-item>
           <Form-item label="活动时间">
-            <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 200px"></DatePicker>
+            <DatePicker
+              v-model="selectDate"
+              type="daterange"
+              clearable
+              placeholder="选择起始时间"
+              style="width: 200px"
+            ></DatePicker>
           </Form-item>
-          <Button @click="handleSearch" type="primary" class="search-btn" icon="ios-search">搜索</Button>
+          <Button
+            @click="handleSearch"
+            type="primary"
+            class="search-btn"
+            icon="ios-search"
+            >搜索</Button
+          >
           <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
       <Row class="operator padding-row">
         <Button @click="add" type="primary">添加</Button>
-        <Button @click="delAll" class="ml_10">批量下架</Button>
+        <Button @click="delAll" class="ml_10">批量关闭</Button>
       </Row>
-      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" @on-selection-change="changeSelect">
+      <Table
+        class="mt_10"
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        @on-selection-change="changeSelect"
+      >
         <template slot-scope="{ row }" slot="action">
-          <Button v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'" type="info" size="small"  @click="see(row)">编辑</Button>
-          <Button v-else type="default" size="small"  @click="see(row,'only')">查看</Button>
-          <Button v-if="row.promotionStatus !== 'END'" type="error" size="small" :style="{'marginLeft':'5px'}" @click="remove(row)">下架</Button>
+          <Button
+            v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'"
+            type="info"
+            size="small"
+            @click="see(row)"
+            >编辑</Button
+          >
+          <Button v-else type="default" size="small" @click="see(row, 'only')"
+            >查看</Button
+          >
+          <Button
+            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+            type="error"
+            size="small"
+            :style="{ marginLeft: '5px' }"
+            @click="remove(row)"
+            >关闭</Button
+          >
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
-          size="small" show-total show-elevator show-sizer></Page>
+        <Page
+          :current="searchForm.pageNumber"
+          :total="total"
+          :page-size="searchForm.pageSize"
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+          :page-size-opts="[10, 20, 50]"
+          size="small"
+          show-total
+          show-elevator
+          show-sizer
+        ></Page>
       </Row>
     </Card>
   </div>
@@ -42,12 +104,13 @@
 
 <script>
 import { getShopCouponList, updateCouponStatus } from "@/api/promotion";
+import { promotionsStatusRender, promotionsScopeTypeRender } from "@/utils/promotions";
 
 export default {
   name: "coupon",
   data() {
     return {
-      selectDate:[],
+      selectDate: [],
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
@@ -84,7 +147,7 @@ export default {
             if (params.row.price) {
               return h(
                 "div",
-                this.$options.filters.unitPrice((params.row.price || 0), "￥")
+                this.$options.filters.unitPrice(params.row.price || 0, "￥")
               );
             } else {
               return h("div", (params.row.couponDiscount || 0) + "折");
@@ -98,7 +161,9 @@ export default {
           render: (h, params) => {
             return h(
               "div",
-              params.row.receivedNum + "/" + (params.row.publishNum === 0 ? '不限制' : params.row.publishNum)
+              params.row.receivedNum +
+                "/" +
+                (params.row.publishNum === 0 ? "不限制" : params.row.publishNum)
             );
           },
         },
@@ -118,32 +183,24 @@ export default {
         {
           title: "品类描述",
           key: "scopeType",
-          width: 100,
+          width: 120,
           render: (h, params) => {
-            let text = "未知";
-            if (params.row.scopeType == "ALL") {
-              text = "全品类";
-            } else if (params.row.scopeType == "PORTION_GOODS_CATEGORY") {
-              text = "商品分类";
-            } else if (params.row.scopeType == "PORTION_SHOP_CATEGORY") {
-              text = "店铺分类";
-            } else if (params.row.scopeType == "PORTION_GOODS") {
-              text = "指定商品";
-            }
-            return h("div", [text]);
+            return promotionsScopeTypeRender(h, params);
           },
         },
         {
           title: "活动时间",
 
           render: (h, params) => {
-            if (params.row.rangeDayType !== "FIXEDTIME") {
+            if (
+              params?.row?.getType === "ACTIVITY" &&
+              params?.row?.rangeDayType === "DYNAMICTIME"
+            ) {
               return h("div", "长期有效");
-            } else {
+            } else if (params?.row?.startTime && params?.row?.endTime) {
               return h("div", {
                 domProps: {
-                  innerHTML:
-                    params.row.startTime + "<br/>" + params.row.endTime,
+                  innerHTML: params.row.startTime + "<br/>" + params.row.endTime,
                 },
               });
             }
@@ -155,33 +212,8 @@ export default {
           key: "promotionStatus",
           fixed: "right",
           render: (h, params) => {
-            let text = "未知",
-              color = "red";
-            if (params.row.promotionStatus == "NEW") {
-              text = "未开始";
-              color = "default";
-            } else if (params.row.promotionStatus == "START") {
-              text = "已开始";
-              color = "green";
-            } else if (params.row.promotionStatus == "END") {
-              text = "已结束";
-              color = "red";
-            } else if (params.row.promotionStatus == "CLOSE") {
-              text = "已关闭";
-              color = "red";
-            }
-            return h("div", [
-              h(
-                "Tag",
-                {
-                  props: {
-                    color: color,
-                  },
-                },
-                text
-              ),
-            ]);
-          }
+            return promotionsStatusRender(h, params);
+          },
         },
         {
           title: "操作",
@@ -256,34 +288,10 @@ export default {
       this.loading = false;
     },
     // 跳转编辑优惠券页面
-    see(v,only) {
-      let data 
-      only ? data = { onlyView : true,id: v.id } : data  = { id: v.id } 
-      this.$router.push({ name: "add-coupon", query:data});
-    },
-    
-    // 开启优惠券
-    open(v) {
-      this.$Modal.confirm({
-        title: "确认",
-        content: "确认要上架此优惠券么?",
-        loading: true,
-        onOk: () => {
-          this.loading = false;
-          let params = {
-            couponIds: v.id,
-            promotionStatus: "START",
-          };
-          updateCouponStatus(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("上架成功");
-              this.clearSelectAll();
-              this.getDataList();
-            }
-          });
-        },
-      });
+    see(v, only) {
+      let data;
+      only ? (data = { onlyView: true, id: v.id }) : (data = { id: v.id });
+      this.$router.push({ name: "add-coupon", query: data });
     },
     // 下架优惠券
     remove(v) {
@@ -295,7 +303,6 @@ export default {
           this.loading = false;
           let params = {
             couponIds: v.id,
-            promotionStatus: "CLOSE",
           };
           updateCouponStatus(params).then((res) => {
             this.$Modal.remove();
@@ -312,12 +319,12 @@ export default {
     // 批量下架
     delAll() {
       if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要下架的优惠券");
+        this.$Message.warning("您还未选择要关闭的优惠券");
         return;
       }
       this.$Modal.confirm({
-        title: "确认下架",
-        content: "您确认要下架所选的 " + this.selectCount + " 条数据?",
+        title: "确认关闭",
+        content: "您确认要关闭所选的 " + this.selectCount + " 条数据?",
         loading: true,
         onOk: () => {
           let ids = [];
@@ -327,7 +334,6 @@ export default {
 
           let params = {
             couponIds: ids.toString(),
-            promotionStatus: "CLOSE",
           };
           updateCouponStatus(params).then((res) => {
             this.$Modal.remove();

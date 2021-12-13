@@ -154,103 +154,103 @@ export const otherRouter = {
       component: () => import("@/views/goods/goods-info/goodsDetail.vue")
     },
     {
-      path: "promotion/add-points-goods",
+      path: "promotions/add-points-goods",
       title: "添加积分商品",
       name: "add-points-goods",
       component: () =>
-        import("@/views/promotion/pointsGoods/addPointsGoods.vue")
+        import("@/views/promotions/points-goods/points-goods-add.vue")
     },
     {
-      path: "promotion/edit-points-goods",
+      path: "promotions/edit-points-goods",
       title: "修改积分商品",
       name: "edit-points-goods",
       component: () =>
-        import("@/views/promotion/pointsGoods/editPointsGoods.vue")
+        import("@/views/promotions/points-goods/points-goods-edit.vue")
     },
     {
-      path: "promotion/manager-points-goods-category",
+      path: "promotions/manager-points-goods-category",
       title: "积分商品分类",
       name: "manager-points-goods-category",
       component: () =>
-        import("@/views/promotion/pointsGoodsCategory/pointsGoodsCategory.vue")
+        import("@/views/promotions/points-goods-category/points-goods-category.vue")
     },
     {
-      path: "promotion/add-kanJia-activity-goods",
+      path: "promotions/add-kanJia-activity-goods",
       title: "添加砍价活动",
       name: "add-kanJia-activity-goods",
-      component: () => import("@/views/promotion/kanjia/kanjiaActivityAddGoods.vue")
+      component: () => import("@/views/promotions/kanjia/kanjia-activity-add-goods.vue")
     },
     {
-      path: "promotion/edit-kanJia-activity-goods",
+      path: "promotions/edit-kanJia-activity-goods",
       title: "修改砍价活动",
       name: "edit-kanJia-activity-goods",
-      component: () => import("@/views/promotion/kanjia/kanjiaActivityEditGoods.vue")
+      component: () => import("@/views/promotions/kanjia/kanjia-activity-edit-goods.vue")
     },
     {
-      path: "promotion/manager-coupon",
+      path: "promotions/manager-coupon",
       title: "平台优惠券",
       name: "manager-coupon",
-      component: () => import("@/views/promotion/coupon/coupon.vue")
+      component: () => import("@/views/promotions/coupon/coupon.vue")
     },
     {
-      path: "promotion/add-platform-coupon",
+      path: "promotions/add-platform-coupon",
       title: "添加平台优惠券",
       name: "add-platform-coupon",
-      component: () => import("@/views/promotion/coupon/couponPublish.vue")
+      component: () => import("@/views/promotions/coupon/coupon-publish.vue")
     },
     {
-      path: "promotion/edit-platform-coupon",
+      path: "promotions/edit-platform-coupon",
       title: "编辑平台优惠券",
       name: "edit-platform-coupon",
-      component: () => import("@/views/promotion/coupon/couponPublish.vue")
+      component: () => import("@/views/promotions/coupon/coupon-publish.vue")
     },
     {
-      path: "coupon-activity/add",
+      path: "promotions/add-coupon-activity",
       title: "添加优惠券活动",
       name: "add-coupon-activity",
-      component: () => import("@/views/promotion/couponActivity/couponPublish.vue")
+      component: () => import("@/views/promotions/coupon-activity/coupon-publish.vue")
     },
     {
-      path: "coupon-activity/edit",
+      path: "promotions/edit-coupon-activity",
       title: "编辑平台优惠券活动",
       name: "edit-coupon-activity",
-      component: () => import("@/views/promotion/couponActivity/couponPublish.vue")
+      component: () => import("@/views/promotions/coupon-activity/coupon-publish.vue")
     },
     {
-      path: "promotion/coupon-activity-info",
+      path: "promotions/coupon-activity-info",
       title: "券活动详情",
       name: "coupon-activity-info",
-      component: () => import("@/views/promotion/couponActivity/couponInfo.vue")
+      component: () => import("@/views/promotions/coupon-activity/coupon-info.vue")
     },
     {
-      path: "promotion/manager-pintuan",
+      path: "promotions/manager-pintuan",
       title: "平台拼团",
       name: "manager-pintuan",
-      component: () => import("@/views/promotion/pintuan/pintuan.vue")
+      component: () => import("@/views/promotions/pintuan/pintuan.vue")
     },
     {
-      path: "promotion/pintuan/pintuan-goods",
+      path: "promotions/pintuan/pintuan-goods",
       title: "拼团商品",
       name: "pintuan-goods",
-      component: () => import("@/views/promotion/pintuan/pintuanGoods.vue")
+      component: () => import("@/views/promotions/pintuan/pintuan-goods.vue")
     },
     {
-      path: "promotion/full-cut-detail",
+      path: "promotions/full-discount-detail",
       title: "满减满折详情",
-      name: "full-cut-detail",
-      component: () => import("@/views/promotion/fullCut/fullCutDetail.vue")
+      name: "full-discount-detail",
+      component: () => import("@/views/promotions/full-discount/full-discount-detail.vue")
     },
     {
-      path: "promotion/seckill/manager-seckill-add",
+      path: "promotions/seckill/manager-seckill-add",
       title: "编辑秒杀活动",
       name: "manager-seckill-add",
-      component: () => import("@/views/promotion/seckill/addSeckill.vue")
+      component: () => import("@/views/promotions/seckill/seckill-add.vue")
     },
     {
-      path: "promotion/seckill/seckill-goods",
+      path: "promotions/seckill/seckill-goods",
       title: "秒杀商品",
       name: "seckill-goods",
-      component: () => import("@/views/promotion/seckill/seckillGoods.vue")
+      component: () => import("@/views/promotions/seckill/seckill-goods.vue")
     },
     {
       path: "/floorList/renovation",
@@ -271,10 +271,10 @@ export const otherRouter = {
       component: () => import("@/views/sys/message/smsSign.vue")
     },
     {
-      path: "liveDetail",
+      path: "live-detail",
       title: "查看直播",
-      name: "liveDetail",
-      component: () => import("@/views/promotion/live/liveDetail.vue")
+      name: "live-detail",
+      component: () => import("@/views/promotions/live/live-detail.vue")
     }
   ]
 };

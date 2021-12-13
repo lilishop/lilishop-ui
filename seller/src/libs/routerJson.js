@@ -283,8 +283,8 @@ export const result = [{
             level: 2,
             type: 0,
             title: "满额活动",
-            path: "full-cut",
-            component: "promotion/fullCut/fullCut",
+            path: "full-discount",
+            component: "promotion/full-discount/full-discount",
             children: null
           },
           {

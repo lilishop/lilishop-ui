@@ -60,13 +60,8 @@ export const editPintuan = (params) => {
     return putRequest('/promotion/pintuan', params,{'Content-type': 'application/json'})
 }
 // 手动开启拼团活动
-export const openPintuan = (pintuanId, params) => {
-    return putRequest(`/promotion/pintuan/open/${pintuanId}`, params)
-}
-
-// 手动关闭拼团活动
-export const closePintuan = (pintuanId) => {
-    return putRequest(`/promotion/pintuan/close/${pintuanId}`)
+export const editPintuanStatus = (pintuanId, params) => {
+    return putRequest(`/promotion/pintuan/status/${pintuanId}`, params)
 }
 
 // 删除拼团活动
@@ -179,6 +174,6 @@ export const delFullDiscount = (id) => {
     return deleteRequest(`/promotion/fullDiscount/${id}`)
 }
 // 开启、关闭满减活动
-export const updateFullDiscount = (id, promotionStatus) => {
-    return putRequest(`/promotion/fullDiscount/status/${id}/${promotionStatus}`)
+export const updateFullDiscount = (id, params) => {
+    return putRequest(`/promotion/fullDiscount/status/${id}`, params)
 }

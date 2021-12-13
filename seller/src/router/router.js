@@ -63,7 +63,7 @@ export const otherRouter = {
       path: "add-coupon",
       title: "店铺优惠券",
       name: "add-coupon",
-      component: () => import("@/views/promotion/coupon/couponPublish.vue")
+      component: () => import("@/views/promotion/coupon/coupon-publish.vue")
     },
     {
       path: "add-live",
@@ -81,19 +81,19 @@ export const otherRouter = {
       path: "seckill-goods",
       title: "限时抢购商品",
       name: "seckill-goods",
-      component: () => import("@/views/promotion/seckill/seckillGoods.vue")
+      component: () => import("@/views/promotion/seckill/seckill-goods.vue")
     },
     {
       path: "pintuan-goods",
       title: "拼团商品",
       name: "pintuan-goods",
-      component: () => import("@/views/promotion/pintuan/pintuanGoods.vue")
+      component: () => import("@/views/promotion/pintuan/pintuan-goods.vue")
     },
     {
-      path: "new-pintuan",
+      path: "pintuan-edit",
       title: "新增拼团",
-      name: "new-pintuan",
-      component: () => import("@/views/promotion/pintuan/newPintuan.vue")
+      name: "pintuan-edit",
+      component: () => import("@/views/promotion/pintuan/pintuan-edit.vue")
     },
     {
       path: "order-detail",
@@ -116,10 +116,10 @@ export const otherRouter = {
         import("@/views/order/after-order/reurnGoodsOrderDetail.vue")
     },
     {
-      path: "full-cut-detail",
+      path: "full-discount-detail",
       title: "添加满额活动",
-      name: "full-cut-detail",
-      component: () => import("@/views/promotion/fullCut/newFullCut.vue")
+      name: "full-discount-detail",
+      component: () => import("@/views/promotion/full-discount/full-discount-add.vue")
     },
     {
       path: "export-order-deliver",

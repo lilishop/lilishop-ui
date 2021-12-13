@@ -2,7 +2,13 @@
   <div class="pintuan">
     <Card>
       <Row>
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+        <Form
+          ref="searchForm"
+          :model="searchForm"
+          inline
+          :label-width="70"
+          class="search-form"
+        >
           <Form-item label="活动名称" prop="promotionName">
             <Input
               type="text"
@@ -34,66 +40,64 @@
               style="width: 200px"
             ></DatePicker>
           </Form-item>
-          <Button @click="handleSearch" type="primary" class="search-btn " icon="ios-search">搜索</Button>
+          <Button
+            @click="handleSearch"
+            type="primary"
+            class="search-btn"
+            icon="ios-search"
+            >搜索</Button
+          >
           <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
       <Row class="operation padding-row">
         <Button @click="newAct" type="primary">添加</Button>
       </Row>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-      >
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table">
         <template slot-scope="{ row }" slot="action">
-          <div  class="row">
-          <Button
-            type="default"
-            size="small"
-            v-if="row.promotionStatus == 'NEW'"
-            @click="edit(row)"
-            >编辑</Button
-          >&nbsp;
-          <Button
-            type="info"
-            v-if="row.promotionStatus == 'NEW'"
-            size="small"
-            @click="manage(row, 'manager')"
-            >管理</Button
-          >&nbsp;
-          <Button
-            type="info"
-            v-if="row.promotionStatus !== 'NEW'"
-            size="small"
-            @click="manage(row, 'view')"
-            >查看</Button
-          >&nbsp;
-          <Button
-            type="error"
-            size="small"
-            v-if="row.promotionStatus != 'START'"
-            @click="remove(row)"
-            >删除</Button
-          >&nbsp;
-          <Button
-            type="success"
-            v-if="
-              row.promotionStatus == 'NEW' || row.promotionStatus == 'CLOSE'
-            "
-            size="small"
-            @click="open(row)"
-            >开启</Button
-          >
-          <Button
-            type="warning"
-            v-if="row.promotionStatus == 'START'"
-            size="small"
-            @click="close(row)"
-            >关闭</Button
-          >
+          <div class="row">
+            <Button
+              type="default"
+              size="small"
+              v-if="row.promotionStatus == 'NEW'"
+              @click="edit(row)"
+              >编辑</Button
+            >&nbsp;
+            <Button
+              type="info"
+              v-if="row.promotionStatus == 'NEW'"
+              size="small"
+              @click="manage(row, 'manager')"
+              >管理</Button
+            >&nbsp;
+            <Button
+              type="info"
+              v-if="row.promotionStatus !== 'NEW'"
+              size="small"
+              @click="manage(row, 'view')"
+              >查看</Button
+            >&nbsp;
+            <Button
+              type="error"
+              size="small"
+              v-if="row.promotionStatus != 'START'"
+              @click="remove(row)"
+              >删除</Button
+            >&nbsp;
+            <Button
+              type="success"
+              v-if="row.promotionStatus == 'NEW' || row.promotionStatus == 'CLOSE'"
+              size="small"
+              @click="open(row)"
+              >开启</Button
+            >
+            <Button
+              type="warning"
+              v-if="row.promotionStatus == 'START'"
+              size="small"
+              @click="close(row)"
+              >关闭</Button
+            >
           </div>
         </template>
       </Table>
@@ -116,12 +120,7 @@
 </template>
 
 <script>
-import {
-  getPintuanList,
-  deletePintuan,
-  openPintuan,
-  closePintuan,
-} from "@/api/promotion";
+import { getPintuanList, deletePintuan, editPintuanStatus } from "@/api/promotion";
 export default {
   name: "pintuan",
   data() {
@@ -139,7 +138,7 @@ export default {
         {
           title: "活动名称",
           key: "promotionName",
-          minWidth: 120
+          minWidth: 120,
         },
         {
           title: "活动开始时间",
@@ -206,8 +205,8 @@ export default {
     },
     // 重置
     handleReset() {
-      this.searchForm = {}
-      this.selectDate = ''
+      this.searchForm = {};
+      this.selectDate = "";
       this.searchForm.pageNumber = 0;
       this.searchForm.pageSize = 10;
       this.getDataList();
@@ -239,11 +238,11 @@ export default {
     },
     // 新建拼团
     newAct() {
-      this.$router.push({ name: "new-pintuan" });
+      this.$router.push({ name: "pintuan-edit" });
     },
     // 编辑拼团
     edit(v) {
-      this.$router.push({ name: "new-pintuan", query: { id: v.id } });
+      this.$router.push({ name: "pintuan-edit", query: { id: v.id } });
     },
     // 管理拼团商品
     manage(v, status) {
@@ -251,15 +250,20 @@ export default {
     },
     // 手动开启拼团活动
     open(v) {
+      let sTime = new Date();
+      sTime.setMinutes(sTime.getMinutes() + 10);
+      let eTime = new Date(new Date().setHours(0, 0, 0, 0) + 24 * 60 * 60 * 1000 - 1);
+      this.openStartTime = sTime.getTime();
+      this.openEndTime = eTime.getTime();
       this.$Modal.confirm({
-        title: "确认开启",
+        title: "确认开启(默认为当前时间的十分钟之后)",
         content: "您确认要开启此拼团活动?",
         onOk: () => {
           let params = {
             startTime: this.openStartTime,
             endTime: this.openEndTime,
           };
-          openPintuan(v.id, params).then((res) => {
+          editPintuanStatus(v.id, params).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("开启活动成功");
@@ -273,6 +277,7 @@ export default {
               props: {
                 type: "datetimerange",
                 placeholder: "请选择开始时间和结束时间",
+                value: [sTime, eTime],
               },
               style: {
                 width: "350px",
@@ -299,7 +304,7 @@ export default {
         content: "您确认要关闭此拼团活动?",
         loading: true,
         onOk: () => {
-          closePintuan(v.id).then((res) => {
+          editPintuanStatus(v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("关闭活动成功");
@@ -333,9 +338,9 @@ export default {
   },
   // 页面缓存处理，从该页面离开时，修改KeepAlive为false，保证进入该页面是刷新
   beforeRouteLeave(to, from, next) {
-    from.meta.keepAlive = false
-    next()
-  }
+    from.meta.keepAlive = false;
+    next();
+  },
 };
 </script>
 <style lang="scss">

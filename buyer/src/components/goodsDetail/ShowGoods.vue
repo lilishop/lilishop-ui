@@ -19,7 +19,11 @@
         </div>
 
         <div class="goodsConfig mt_10">
-          <span @click="collect" ><Icon type="ios-heart" :color="isCollected ? '#ed3f14' : '#666'" />{{isCollected?'已收藏':'收藏'}}</span>
+          <span @click="collect"
+            ><Icon type="ios-heart" :color="isCollected ? '#ed3f14' : '#666'" />{{
+              isCollected ? "已收藏" : "收藏"
+            }}</span
+          >
         </div>
       </div>
       <!-- 右侧商品信息、活动信息、操作展示 -->
@@ -30,10 +34,13 @@
           </p>
         </div>
         <div class="sell-point">
-          {{skuDetail.sellingPoint}}
+          {{ skuDetail.sellingPoint }}
         </div>
         <!-- 限时秒杀 -->
-        <Promotion v-if="promotionMap['SECKILL']" :time="promotionMap['SECKILL'].endTime"></Promotion>
+        <Promotion
+          v-if="promotionMap['SECKILL']"
+          :time="promotionMap['SECKILL'].endTime"
+        ></Promotion>
         <!-- 商品详细 价格、优惠券、促销 -->
         <div class="item-detail-price-row">
           <div class="item-price-left">
@@ -41,19 +48,25 @@
             <div class="item-price-row" v-if="!skuDetail.promotionPrice">
               <p>
                 <span class="item-price-title">价 &nbsp;&nbsp;&nbsp;&nbsp;格</span>
-                <span class="item-price">{{skuDetail.price | unitPrice("￥")}}</span>
+                <span class="item-price">{{ skuDetail.price | unitPrice("￥") }}</span>
               </p>
             </div>
             <!-- 秒杀价格 -->
             <div class="item-price-row" v-if="skuDetail.promotionPrice">
               <p>
-                <span class="item-price-title" v-if="promotionMap['SECKILL']">秒 &nbsp;杀&nbsp;价</span>
-                <span class="item-price">{{skuDetail.promotionPrice | unitPrice("￥")}}</span>
-                <span class="item-price-old">{{skuDetail.price | unitPrice("￥")}}</span>
+                <span class="item-price-title" v-if="promotionMap['SECKILL']"
+                  >秒 &nbsp;杀&nbsp;价</span
+                >
+                <span class="item-price">{{
+                  skuDetail.promotionPrice | unitPrice("￥")
+                }}</span>
+                <span class="item-price-old">{{
+                  skuDetail.price | unitPrice("￥")
+                }}</span>
               </p>
             </div>
             <!-- 优惠券展示 -->
-            <div class="item-price-row"  v-if="promotionMap['COUPON'].length">
+            <div class="item-price-row" v-if="promotionMap['COUPON'].length">
               <p>
                 <span class="item-price-title">优 惠 券</span>
                 <span
@@ -61,10 +74,14 @@
                   v-for="(item, index) in promotionMap['COUPON']"
                   :key="index"
                   @click="receiveCoupon(item.id)"
+                >
+                  <span v-if="item.couponType == 'PRICE'"
+                    >满{{ item.consumeThreshold }}减{{ item.price }}</span
                   >
-                  <span v-if="item.couponType == 'PRICE'">满{{ item.consumeThreshold }}减{{item.price}}</span>
-                  <span v-if="item.couponType == 'DISCOUNT'">满{{ item.consumeThreshold }}打{{item.couponDiscount}}折</span>
-                  </span>
+                  <span v-if="item.couponType == 'DISCOUNT'"
+                    >满{{ item.consumeThreshold }}打{{ item.couponDiscount }}折</span
+                  >
+                </span>
               </p>
             </div>
             <!-- 满减展示 -->
@@ -72,8 +89,20 @@
               <p>
                 <span class="item-price-title">促&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;销</span>
                 <span class="item-promotion">满减</span>
-                <span class="item-desc-pintuan" v-if="promotionMap['FULL_DISCOUNT'].fullMinus">满{{ promotionMap['FULL_DISCOUNT'].fullMoney }}元，立减现金{{ promotionMap['FULL_DISCOUNT'].fullMinus}}元</span>
-                <span class="item-desc-pintuan" v-if="promotionMap['FULL_DISCOUNT'].fullRate">满{{ promotionMap['FULL_DISCOUNT'].fullMoney }}元，立享{{ promotionMap['FULL_DISCOUNT'].fullRate}}折</span>
+                <span
+                  class="item-desc-pintuan"
+                  v-if="promotionMap['FULL_DISCOUNT'].fullMinus"
+                  >满{{ promotionMap["FULL_DISCOUNT"].fullMoney }}元，立减现金{{
+                    promotionMap["FULL_DISCOUNT"].fullMinus
+                  }}元</span
+                >
+                <span
+                  class="item-desc-pintuan"
+                  v-if="promotionMap['FULL_DISCOUNT'].fullRate"
+                  >满{{ promotionMap["FULL_DISCOUNT"].fullMoney }}元，立享{{
+                    promotionMap["FULL_DISCOUNT"].fullRate
+                  }}折</span
+                >
               </p>
             </div>
           </div>
@@ -92,9 +121,13 @@
             <p>{{ sku.name }}</p>
           </div>
           <div class="item-select-column">
-            <div class="item-select-row" v-for="(item) in sku.values" :key="item.value">
-              <div class="item-select-box" @click="select(index, item.value)"
-                :class="{ 'item-select-box-active': item.value === currentSelceted[index] }"
+            <div class="item-select-row" v-for="item in sku.values" :key="item.value">
+              <div
+                class="item-select-box"
+                @click="select(index, item.value)"
+                :class="{
+                  'item-select-box-active': item.value === currentSelceted[index],
+                }"
               >
                 <div class="item-select-intro">
                   <p>{{ item.value }}</p>
@@ -110,26 +143,57 @@
               <p>数量</p>
             </div>
             <div class="item-select-row">
-              <InputNumber :min="1" :disabled="skuDetail.quantity === 0" v-model="count"></InputNumber>
-              <span class="inventory"> 库存{{skuDetail.quantity}}</span>
+              <InputNumber
+                :min="1"
+                :disabled="skuDetail.quantity === 0"
+                v-model="count"
+              ></InputNumber>
+              <span class="inventory"> 库存{{ skuDetail.quantity }}</span>
             </div>
           </div>
-          <div class="item-select" v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS' && skuDetail.weight !== 0">
+          <div
+            class="item-select"
+            v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS' && skuDetail.weight !== 0"
+          >
             <div class="item-select-title">
               <p>重量</p>
             </div>
             <div class="item-select-row">
-              <span class="inventory"> {{skuDetail.weight}}kg</span>
+              <span class="inventory"> {{ skuDetail.weight }}kg</span>
             </div>
           </div>
-          <div class="add-buy-car" v-if="$route.query.way === 'POINT' && skuDetail.isAuth === 'PASS'">
-            <Button type="error" :loading="loading" :disabled="skuDetail.quantity === 0" @click="pointPay">积分购买</Button>
+          <div
+            class="add-buy-car"
+            v-if="$route.query.way === 'POINT' && skuDetail.isAuth === 'PASS'"
+          >
+            <Button
+              type="error"
+              :loading="loading"
+              :disabled="skuDetail.quantity === 0"
+              @click="pointPay"
+              >积分购买</Button
+            >
           </div>
-          <div class="add-buy-car" v-if="$route.query.way !== 'POINT' && skuDetail.isAuth === 'PASS'">
-            <Button type="error" v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'" :loading="loading" :disabled="skuDetail.quantity === 0" @click="addShoppingCartBtn">加入购物车</Button>
-            <Button type="warning" :loading="loading1" :disabled="skuDetail.quantity === 0" @click="buyNow">立即购买</Button>
+          <div
+            class="add-buy-car"
+            v-if="$route.query.way !== 'POINT' && skuDetail.isAuth === 'PASS'"
+          >
+            <Button
+              type="error"
+              v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
+              :loading="loading"
+              :disabled="skuDetail.quantity === 0"
+              @click="addShoppingCartBtn"
+              >加入购物车</Button
+            >
+            <Button
+              type="warning"
+              :loading="loading1"
+              :disabled="skuDetail.quantity === 0"
+              @click="buyNow"
+              >立即购买</Button
+            >
           </div>
-
         </div>
       </div>
     </div>
@@ -137,20 +201,25 @@
 </template>
 
 <script>
-import Promotion from './Promotion.vue';
-import PicZoom from 'vue-piczoom'; // 图片放大
-import { collectGoods, isCollection, receiveCoupon, cancelCollect } from '@/api/member.js';
-import { addCartGoods } from '@/api/cart.js';
+import Promotion from "./Promotion.vue";
+import PicZoom from "vue-piczoom"; // 图片放大
+import {
+  collectGoods,
+  isCollection,
+  receiveCoupon,
+  cancelCollect,
+} from "@/api/member.js";
+import { addCartGoods } from "@/api/cart.js";
 export default {
-  name: 'ShowGoods',
+  name: "ShowGoods",
   props: {
     // 商品数据
     detail: {
       type: Object,
-      default: null
-    }
+      default: null,
+    },
   },
-  data () {
+  data() {
     return {
       count: 1, // 商品数量
       imgIndex: 0, // 展示图片下标
@@ -158,24 +227,26 @@ export default {
       imgList: [{}], // 商品图片列表
       skuDetail: this.detail.data, // sku详情
       goodsSpecList: this.detail.specs, // 商品spec
-      promotionMap: { // 活动状态
+      promotionMap: {
+        // 活动状态
         SECKILL: null,
         FULL_DISCOUNT: null,
-        COUPON: []
+        COUPON: [],
       }, // 促销活动
       formatList: [], // 选择商品品类的数组
       loading: false, // 立即购买loading
       loading1: false, // 加入购物车loading
-      isCollected: false // 是否收藏
+      isCollected: false, // 是否收藏
     };
   },
   components: { PicZoom, Promotion },
   methods: {
-    select (index, value) { // 选择规格
+    select(index, value) {
+      // 选择规格
       this.$set(this.currentSelceted, index, value);
       let selectedSkuId = this.goodsSpecList.find((i) => {
         let matched = true;
-        let specValues = i.specValues.filter((j) => j.specName !== 'images');
+        let specValues = i.specValues.filter((j) => j.specName !== "images");
         for (let n = 0; n < specValues.length; n++) {
           if (specValues[n].specValue !== this.currentSelceted[n]) {
             matched = false;
@@ -187,76 +258,86 @@ export default {
         }
       });
       this.$router.push({
-        path: '/goodsDetail',
-        query: { skuId: selectedSkuId.skuId, goodsId: this.skuDetail.goodsId }
+        path: "/goodsDetail",
+        query: { skuId: selectedSkuId.skuId, goodsId: this.skuDetail.goodsId },
       });
     },
 
-    addShoppingCartBtn () { // 添加购物车
-      const params = {
-        num: this.count,
-        skuId: this.skuDetail.id
-      };
-      this.loading = true;
-      addCartGoods(params).then(res => {
-        this.loading = false;
-        if (res.success) {
-          this.$router.push({path: '/shoppingCart', query: {detail: this.skuDetail, count: this.count}});
-        } else {
-          this.$Message.warning(res.message);
-        }
-      }).catch(() => {
-        this.loading = false;
-      });
-    },
-    buyNow () { // 立即购买
+    addShoppingCartBtn() {
+      // 添加购物车
       const params = {
         num: this.count,
         skuId: this.skuDetail.id,
-        cartType: 'BUY_NOW'
+      };
+      this.loading = true;
+      addCartGoods(params)
+        .then((res) => {
+          this.loading = false;
+          if (res.success) {
+            this.$router.push({
+              path: "/shoppingCart",
+              query: { detail: this.skuDetail, count: this.count },
+            });
+          } else {
+            this.$Message.warning(res.message);
+          }
+        })
+        .catch(() => {
+          this.loading = false;
+        });
+    },
+    buyNow() {
+      // 立即购买
+      const params = {
+        num: this.count,
+        skuId: this.skuDetail.id,
+        cartType: "BUY_NOW",
       };
       // 虚拟商品购买
-      if (this.skuDetail.goodsType === 'VIRTUAL_GOODS') {
-        params.cartType = 'VIRTUAL'
+      if (this.skuDetail.goodsType === "VIRTUAL_GOODS") {
+        params.cartType = "VIRTUAL";
       }
       this.loading1 = true;
-      addCartGoods(params).then(res => {
-        this.loading1 = false;
-        if (res.success) {
-          this.$router.push({path: '/pay', query: {way: params.cartType}});
-        } else {
-          this.$Message.warning(res.message);
-        }
-      }).catch(() => {
-        this.loading1 = false;
-      });
+      addCartGoods(params)
+        .then((res) => {
+          this.loading1 = false;
+          if (res.success) {
+            this.$router.push({ path: "/pay", query: { way: params.cartType } });
+          } else {
+            this.$Message.warning(res.message);
+          }
+        })
+        .catch(() => {
+          this.loading1 = false;
+        });
     },
-    async collect () { // 收藏商品
+    async collect() {
+      // 收藏商品
       if (this.isCollected) {
-        let cancel = await cancelCollect('GOODS', this.skuDetail.id)
+        let cancel = await cancelCollect("GOODS", this.skuDetail.id);
         if (cancel.success) {
-          this.$Message.success('取消收藏成功')
-          this.isCollected = false
+          this.$Message.success("取消收藏成功");
+          this.isCollected = false;
         }
       } else {
-        let collect = await collectGoods('GOODS', this.skuDetail.id);
+        let collect = await collectGoods("GOODS", this.skuDetail.id);
         if (collect.code === 200) {
           this.isCollected = true;
-          this.$Message.success('收藏商品成功,可以前往个人中心我的收藏查看');
+          this.$Message.success("收藏商品成功,可以前往个人中心我的收藏查看");
         }
       }
     },
     // 格式化数据
-    formatSku (list) {
+    formatSku(list) {
       let arr = [{}];
       list.forEach((item, index) => {
         item.specValues.forEach((spec, specIndex) => {
           let name = spec.specName;
           let values = {
             value: spec.specValue,
-            quantity: item.quantity
+            quantity: item.quantity,
           };
-          if (name === 'images') {
+          if (name === "images") {
             return;
           }
 
@@ -275,7 +356,7 @@ export default {
             if (!keys.includes(name)) {
               arr.push({
                 name: name,
-                values: [values]
+                values: [values],
               });
             }
           });
@@ -286,55 +367,67 @@ export default {
 
       let cur = list.filter((i) => i.skuId === this.$route.query.skuId)[0];
       if (cur) {
-        cur.specValues.filter((i) => i.specName !== 'images')
+        cur.specValues
+          .filter((i) => i.specName !== "images")
           .forEach((value, _index) => {
             this.currentSelceted[_index] = value.specValue;
           });
       }
       this.skuList = list;
     },
-    receiveCoupon (id) { // 领取优惠券
-      receiveCoupon(id).then(res => {
+    receiveCoupon(id) {
+      // 领取优惠券
+      receiveCoupon(id).then((res) => {
         if (res.success) {
-          this.$Message.success('优惠券领取成功')
+          this.$Message.success("优惠券领取成功");
         } else {
-          this.$Message.warning(res.message)
+          this.$Message.warning(res.message);
         }
-      })
+      });
     },
-    promotion () { // 格式化促销活动，返回当前促销的对象
+    promotion() {
+      // 格式化促销活动，返回当前促销的对象
       if (!this.detail.promotionMap) return false;
       let keysArr = Object.keys(this.detail.promotionMap);
       if (keysArr.length === 0) return false;
 
       for (let i = 0; i < keysArr.length; i++) {
-        let key = keysArr[i].split('-')[0]
-        if (key === 'COUPON') {
-          this.promotionMap[key].push(this.detail.promotionMap[keysArr[i]])
+        let key = keysArr[i].split("-")[0];
+        if (
+          (new Date(this.detail.promotionMap[keysArr[i]].startTime).getTime >
+            new Date().getTime() &&
+            new Date(this.detail.promotionMap[keysArr[i]].endTime).getTime <
+              new Date().getTime()) ||
+          this.detail.promotionMap[keysArr[i]].getType !== "FREE"
+        ) {
+          continue;
+        }
+        if (key === "COUPON") {
+          this.promotionMap[key].push(this.detail.promotionMap[keysArr[i]]);
         } else {
-          this.promotionMap[key] = this.detail.promotionMap[keysArr[i]]
+          this.promotionMap[key] = this.detail.promotionMap[keysArr[i]];
         }
       }
-    }
+    },
   },
-  mounted () {
+  mounted() {
     // 用户登录才会判断是否收藏
-    if (this.Cookies.getItem('userInfo')) {
-      isCollection('GOODS', this.skuDetail.id).then(res => {
+    if (this.Cookies.getItem("userInfo")) {
+      isCollection("GOODS", this.skuDetail.id).then((res) => {
         if (res.success && res.result) {
           this.isCollected = true;
         }
-      })
+      });
     }
-    this.detail.data.specList.forEach(e => {
-      if (e.specName === 'images') {
-        this.imgList = e.specImage
+    this.detail.data.specList.forEach((e) => {
+      if (e.specName === "images") {
+        this.imgList = e.specImage;
       }
-    })
+    });
     this.formatSku(this.goodsSpecList);
-    this.promotion()
-    document.title = this.skuDetail.goodsName
-  }
+    this.promotion();
+    document.title = this.skuDetail.goodsName;
+  },
 };
 </script>
 
@@ -346,7 +439,6 @@ export default {
 }
 .inventory {
   padding-left: 4px;
- 
 }
 
 .global_color {
@@ -597,7 +689,7 @@ export default {
 
 .add-buy-car {
   margin-top: 15px;
-  >*{
+  > * {
     margin: 0 4px;
   }
 }
@@ -607,7 +699,7 @@ export default {
   justify-content: space-between;
   > span {
     padding-right: 10px;
-    &:hover{
+    &:hover {
       cursor: pointer;
       color: $theme_color;
     }
