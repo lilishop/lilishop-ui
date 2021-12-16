@@ -191,17 +191,6 @@ export default {
           width: 110,
         },
         {
-          title: "最低购买金额",
-          key: "lowestPrice",
-          minWidth: 110,
-          render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.lowestPrice, "￥")
-            );
-          },
-        },
-        {
           title: "每人最低砍",
           key: "lowestPrice",
           minWidth: 100,
