@@ -66,7 +66,7 @@ export default {
   },
   created() {
     this.getGoodsDetail();
-    this.getIMDetailMethods();
+    // this.getIMDetailMethods();
   },
   data() {
     return {
