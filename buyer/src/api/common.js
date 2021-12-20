@@ -81,3 +81,14 @@ export function articleDetail (id) {
     method: Method.GET
   });
 }
+
+
+
+
+// 获取IM接口前缀
+export function getIMDetail () {
+  return request({
+    url: `${commonUrl}/common/IM`,
+    method: Method.GET
+  });
+}

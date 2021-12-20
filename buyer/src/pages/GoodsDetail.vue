@@ -13,14 +13,24 @@
           </BreadcrumbItem>
         </Breadcrumb>
         <div class="store-collect">
-          <span class="mr_10" v-if="goodsMsg.data"><router-link
-            :to="'Merchant?id=' + goodsMsg.data.storeId">{{ goodsMsg.data.storeName }}</router-link></span>
-          <span @click="collect"><Icon type="ios-heart"
-              :color="storeCollected ? '#ed3f14' : '#666'"/>
-              {{storeCollected ? '已收藏店铺' : '收藏店铺'}}
-            </span>
-          <span @click="connectCs(storeMsg.yzfSign)" class="ml_10"><Icon
-            custom="icomoon icon-customer-service"/>联系客服</span>
+          <span class="mr_10" v-if="goodsMsg.data">
+
+            <router-link :to="'Merchant?id=' + goodsMsg.data.storeId">{{ goodsMsg.data.storeName }}</router-link>
+          </span>
+          <span @click="collect">
+            <Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#666'" />
+            {{storeCollected ? '已收藏店铺' : '收藏店铺'}}
+          </span>
+          <!-- 
+               先看下udesk merchantEuid 是否有值
+               有的话 链接udesk
+               没有的话 显示云智服
+           -->
+          <span class="ml_10" v-if="storeMsg.merchantEuid" @click="IMService()">联系客服</span>
+
+          <span v-else @click="connectCs(storeMsg.yzfSign)" class="ml_10">
+            <Icon custom="icomoon icon-customer-service" />联系客服
+          </span>
         </div>
       </div>
     </div>
@@ -35,128 +45,158 @@
 </template>
 
 <script>
-import Search from '@/components/Search';
-import ShopHeader from '@/components/header/ShopHeader';
-import ShowGoods from '@/components/goodsDetail/ShowGoods';
-import ShowGoodsDetail from '@/components/goodsDetail/ShowGoodsDetail';
-import {goodsSkuDetail} from '@/api/goods';
-import {cancelCollect, collectGoods, isCollection, getGoodsDistribution} from '@/api/member';
-import {getDetailById} from '@/api/shopentry'
-
+import Search from "@/components/Search";
+import ShopHeader from "@/components/header/ShopHeader";
+import ShowGoods from "@/components/goodsDetail/ShowGoods";
+import ShowGoodsDetail from "@/components/goodsDetail/ShowGoodsDetail";
+import { goodsSkuDetail } from "@/api/goods";
+import {
+  cancelCollect,
+  collectGoods,
+  isCollection,
+  getGoodsDistribution,
+} from "@/api/member";
+import { getDetailById } from "@/api/shopentry";
+import { getIMDetail } from "@/api/common";
 export default {
-  name: 'GoodsDetail',
-  beforeRouteEnter (to, from, next) {
+  name: "GoodsDetail",
+  beforeRouteEnter(to, from, next) {
     window.scrollTo(0, 0);
     next();
   },
-  created () {
+  created() {
     this.getGoodsDetail();
+    this.getIMDetailMethods();
   },
-  data () {
+  data() {
     return {
       goodsMsg: {}, // 商品信息
       isLoading: false, // 加载状态
       categoryBar: [], // 分类
       storeCollected: false, // 商品收藏
-      storeMsg: {} // 店铺信息
+      storeMsg: {}, // 店铺信息
+      IMLink: "",
     };
   },
   methods: {
+    // 跳转im客服
+    IMService() {
+      window.open(this.IM);
+    },
+    // 获取im信息
+    async getIMDetailMethods() {
+      let res = await getIMDetail();
+      if (res.success) {
+        this.IMLink = res.result;
+      }
+    },
     // 获取商品详情
-    getGoodsDetail () {
+    getGoodsDetail() {
       this.isLoading = true;
       const params = this.$route.query;
       // 分销员id
-      let distributionId = (params && params.distributionId) ? params.distributionId : this.Cookies.getItem('distributionId');
+      let distributionId =
+        params && params.distributionId
+          ? params.distributionId
+          : this.Cookies.getItem("distributionId");
       // 如果有分销信息
       if (distributionId) {
-        console.log(distributionId)
+        console.log(distributionId);
         // 先存储
-        this.Cookies.setItem('distributionId', params.distributionId)
+        this.Cookies.setItem("distributionId", params.distributionId);
         let _this = this;
         // 绑定关系
-        getGoodsDistribution(params.distributionId).then(res => {
+        getGoodsDistribution(params.distributionId).then((res) => {
           // 绑定成功，则清除关系
           if (res.success) {
-            _this.Cookies.removeItem('distributionId');
+            _this.Cookies.removeItem("distributionId");
           }
-        })
+        });
       }
 
-      goodsSkuDetail(params).then((res) => {
-        this.isLoading = false;
-        if (res.success) {
-          const result = res.result;
-          const cateName = res.result.categoryName;
-          const cateId = result.data.categoryPath.split(',');
-          const cateArr = [];
-          cateId.forEach((e, index) => { // 插入分类id和name
-            cateArr.push({
-              id: e,
-              name: cateName[index]
+      goodsSkuDetail(params)
+        .then((res) => {
+          this.isLoading = false;
+          if (res.success) {
+            const result = res.result;
+            const cateName = res.result.categoryName;
+            const cateId = result.data.categoryPath.split(",");
+            const cateArr = [];
+            cateId.forEach((e, index) => {
+              // 插入分类id和name
+              cateArr.push({
+                id: e,
+                name: cateName[index],
+              });
             });
-          });
-          this.categoryBar = cateArr;
-          this.goodsMsg = res.result;
-          // 判断是否收藏
-          if (this.Cookies.getItem('userInfo')) {
-            isCollection('STORE', this.goodsMsg.data.storeId).then(res => {
-              if (res.success && res.result) {
-                this.storeCollected = true;
-              }
-            })
-          }
-          // 获取店铺信息
-          getDetailById(this.goodsMsg.data.storeId).then(res => {
-            if (res.success) {
-              this.storeMsg = res.result
+            this.categoryBar = cateArr;
+            this.goodsMsg = res.result;
+            // 判断是否收藏
+            if (this.Cookies.getItem("userInfo")) {
+              isCollection("STORE", this.goodsMsg.data.storeId).then((res) => {
+                if (res.success && res.result) {
+                  this.storeCollected = true;
+                }
+              });
             }
-          })
-        } else {
-          this.$Message.error(res.message)
-          this.$router.push('/')
-        }
-      }).catch(() => {
-        this.$router.push('/')
-      });
+            // 获取店铺信息
+            getDetailById(this.goodsMsg.data.storeId).then((res) => {
+              if (res.success) {
+                this.storeMsg = res.result;
+              }
+            });
+          } else {
+            this.$Message.error(res.message);
+            this.$router.push("/");
+          }
+        })
+        .catch(() => {
+          this.$router.push("/");
+        });
     },
-    goGoodsList (currIndex) { // 跳转商品列表
-      const arr = []
+    goGoodsList(currIndex) {
+      // 跳转商品列表
+      const arr = [];
       this.categoryBar.forEach((e, index) => {
         if (index <= currIndex) {
-          arr.push(e.id)
+          arr.push(e.id);
         }
-      })
-      return location.origin + '/goodsList?categoryId=' + arr.toString()
+      });
+      return location.origin + "/goodsList?categoryId=" + arr.toString();
     },
-    async collect () { // 收藏店铺
+    async collect() {
+      // 收藏店铺
       if (this.storeCollected) {
-        let cancel = await cancelCollect('STORE', this.goodsMsg.data.storeId)
+        let cancel = await cancelCollect("STORE", this.goodsMsg.data.storeId);
         if (cancel.success) {
-          this.$Message.success('已取消收藏')
+          this.$Message.success("已取消收藏");
           this.storeCollected = false;
         }
       } else {
-        let collect = await collectGoods('STORE', this.goodsMsg.data.storeId);
+        let collect = await collectGoods("STORE", this.goodsMsg.data.storeId);
         if (collect.code === 200) {
           this.storeCollected = true;
-          this.$Message.success('收藏店铺成功,可以前往个人中心我的收藏查看');
+          this.$Message.success("收藏店铺成功,可以前往个人中心我的收藏查看");
         }
       }
-    }
+    },
   },
   watch: {
-    '$route.query.skuId': function (val) {
+    "$route.query.skuId": function (val) {
       location.reload();
-    }
+    },
   },
-  computed: {},
+  computed: {
+    IM() {
+      return this.IMLink + this.storeMsg.merchantEuid;
+    },
+  },
   components: {
     Search,
     ShopHeader,
     ShowGoods,
-    ShowGoodsDetail
-  }
+    ShowGoodsDetail,
+  },
 };
 </script>
 <style scoped lang="scss">
