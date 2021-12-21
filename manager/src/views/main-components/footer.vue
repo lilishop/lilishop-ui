@@ -13,7 +13,8 @@
 </template>
 
 <script>
-import config from '@/config/index'
+
+const config = require('@/config/index')
 export default {
   name: "footer",
   data() {

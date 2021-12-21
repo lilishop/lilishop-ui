@@ -2,7 +2,8 @@ import lazyLoading from './lazyLoading.js';
 import Cookies from "js-cookie";
 import { result } from './routerJson.js';
 
-import config from '@/config/index'
+const config = require('@/config/index')
+
 let util = {
 
 };
