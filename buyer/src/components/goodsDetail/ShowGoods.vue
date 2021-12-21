@@ -164,7 +164,7 @@
           </div>
           <div
             class="add-buy-car"
-            v-if="$route.query.way === 'POINT' && skuDetail.isAuth === 'PASS'"
+            v-if="$route.query.way === 'POINT' && skuDetail.authFlag === 'PASS'"
           >
             <Button
               type="error"
@@ -176,7 +176,7 @@
           </div>
           <div
             class="add-buy-car"
-            v-if="$route.query.way !== 'POINT' && skuDetail.isAuth === 'PASS'"
+            v-if="$route.query.way !== 'POINT' && skuDetail.authFlag === 'PASS'"
           >
             <Button
               type="error"
@@ -393,15 +393,6 @@ export default {
 
       for (let i = 0; i < keysArr.length; i++) {
         let key = keysArr[i].split("-")[0];
-        if (
-          (new Date(this.detail.promotionMap[keysArr[i]].startTime).getTime >
-            new Date().getTime() &&
-            new Date(this.detail.promotionMap[keysArr[i]].endTime).getTime <
-              new Date().getTime()) ||
-          this.detail.promotionMap[keysArr[i]].getType !== "FREE"
-        ) {
-          continue;
-        }
         if (key === "COUPON") {
           this.promotionMap[key].push(this.detail.promotionMap[keysArr[i]]);
         } else {

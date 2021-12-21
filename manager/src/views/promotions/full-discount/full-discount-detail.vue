@@ -54,12 +54,12 @@
             </FormItem>
             <FormItem label="优惠方式">
               <RadioGroup type="button" button-style="solid" v-model="form.discountType">
-                <Radio label="isFullMinus" disabled>减现金</Radio>
-                <Radio label="isFullRate" disabled>打折</Radio>
+                <Radio label="fullMinusFlag" disabled>减现金</Radio>
+                <Radio label="fullRateFlag" disabled>打折</Radio>
               </RadioGroup>
             </FormItem>
             <FormItem
-              v-if="form.discountType == 'isFullMinus'"
+              v-if="form.discountType == 'fullMinusFlag'"
               label="优惠金额"
               prop="fullMinus"
             >
@@ -73,7 +73,7 @@
               />
             </FormItem>
             <FormItem
-              v-if="form.discountType == 'isFullRate'"
+              v-if="form.discountType == 'fullRateFlag'"
               label="优惠折扣"
               prop="fullRate"
             >
@@ -88,12 +88,12 @@
               <span class="describe">优惠折扣为0-10之间数字，可有一位小数</span>
             </FormItem>
             <FormItem label="额外赠送">
-              <Checkbox v-model="form.isFreeFreight" disabled>免邮费</Checkbox>&nbsp;
-              <Checkbox v-model="form.isCoupon" disabled>送优惠券</Checkbox>&nbsp;
-              <Checkbox v-model="form.isGift" disabled>送赠品</Checkbox>&nbsp;
-              <Checkbox v-model="form.isPoint" disabled>送积分</Checkbox>
+              <Checkbox v-model="form.freeFreightFlag" disabled>免邮费</Checkbox>&nbsp;
+              <Checkbox v-model="form.couponFlag" disabled>送优惠券</Checkbox>&nbsp;
+              <Checkbox v-model="form.giftFlag" disabled>送赠品</Checkbox>&nbsp;
+              <Checkbox v-model="form.pointFlag" disabled>送积分</Checkbox>
             </FormItem>
-            <FormItem v-if="form.isCoupon" label="赠送优惠券" prop="couponId">
+            <FormItem v-if="form.couponFlag" label="赠送优惠券" prop="couponId">
               <Select
                 v-model="form.couponId"
                 filterable
@@ -108,7 +108,7 @@
                 }}</Option>
               </Select>
             </FormItem>
-            <FormItem v-if="form.isGift" label="赠品" prop="giftId">
+            <FormItem v-if="form.giftFlag" label="赠品" prop="giftId">
               <Select
                 v-model="form.giftId"
                 filterable
@@ -123,7 +123,7 @@
                 }}</Option>
               </Select>
             </FormItem>
-            <FormItem v-if="form.isPoint" label="赠积分" prop="point">
+            <FormItem v-if="form.pointFlag" label="赠积分" prop="point">
               <Input v-model="form.point" type="number" disabled style="width: 260px" />
             </FormItem>
             <FormItem label="使用范围" prop="scopeType">
@@ -187,7 +187,7 @@ export default {
     return {
       form: {
         // 表单
-        discountType: "isFullMinus",
+        discountType: "fullMinusFlag",
         scopeType: "ALL",
         promotionGoodsList: [],
       },
@@ -242,12 +242,12 @@ export default {
         if (!data.scopeType === "ALL") {
           data.promotionGoodsList = [];
         }
-        if (data.isFullMinus) {
-          data.discountType = "isFullMinus";
-          delete data.isFullMinus;
+        if (data.fullMinusFlag) {
+          data.discountType = "fullMinusFlag";
+          delete data.fullMinusFlag;
         } else {
-          data.discountType = "isFullMinus";
-          delete data.isFullRate;
+          data.discountType = "fullMinusFlag";
+          delete data.fullRateFlag;
         }
         data.rangeTime = [];
         data.rangeTime.push(new Date(data.startTime), new Date(data.endTime));

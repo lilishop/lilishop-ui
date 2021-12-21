@@ -54,16 +54,16 @@
             </FormItem>
             <FormItem label="优惠方式">
               <RadioGroup type="button" button-style="solid" v-model="form.discountType">
-                <Radio :disabled="form.promotionStatus != 'NEW'" label="isFullMinus"
+                <Radio :disabled="form.promotionStatus != 'NEW'" label="fullMinusFlag"
                   >减现金</Radio
                 >
-                <Radio :disabled="form.promotionStatus != 'NEW'" label="isFullRate"
+                <Radio :disabled="form.promotionStatus != 'NEW'" label="fullRateFlag"
                   >打折</Radio
                 >
               </RadioGroup>
             </FormItem>
             <FormItem
-              v-if="form.discountType == 'isFullMinus'"
+              v-if="form.discountType == 'fullMinusFlag'"
               label="优惠金额"
               prop="fullMinus"
             >
@@ -77,7 +77,7 @@
               />
             </FormItem>
             <FormItem
-              v-if="form.discountType == 'isFullRate'"
+              v-if="form.discountType == 'fullRateFlag'"
               label="优惠折扣"
               prop="fullRate"
             >
@@ -94,13 +94,15 @@
             <FormItem label="额外赠送">
               <Checkbox
                 :disabled="form.promotionStatus != 'NEW'"
-                v-model="form.isFreeFreight"
+                v-model="form.freeFreightFlag"
                 >免邮费</Checkbox
               >
-              <Checkbox :disabled="form.promotionStatus != 'NEW'" v-model="form.isCoupon"
+              <Checkbox
+                :disabled="form.promotionStatus != 'NEW'"
+                v-model="form.couponFlag"
                 >送优惠券</Checkbox
               >
-              <Checkbox :disabled="form.promotionStatus != 'NEW'" v-model="form.isGift"
+              <Checkbox :disabled="form.promotionStatus != 'NEW'" v-model="form.giftFlag"
                 >送赠品</Checkbox
               >
               <Checkbox
@@ -109,11 +111,11 @@
                   Cookies.get('userInfoSeller') &&
                   JSON.parse(Cookies.get('userInfoSeller')).selfOperated
                 "
-                v-model="form.isPoint"
+                v-model="form.pointFlag"
                 >送积分</Checkbox
               >
             </FormItem>
-            <FormItem v-if="form.isCoupon" label="赠送优惠券" prop="couponId">
+            <FormItem v-if="form.couponFlag" label="赠送优惠券" prop="couponId">
               <Select
                 v-model="form.couponId"
                 :disabled="form.promotionStatus != 'NEW'"
@@ -128,7 +130,7 @@
                 }}</Option>
               </Select>
             </FormItem>
-            <FormItem v-if="form.isGift" label="赠品" prop="giftId">
+            <FormItem v-if="form.giftFlag" label="赠品" prop="giftId">
               <Select
                 :disabled="form.promotionStatus != 'NEW'"
                 v-model="form.giftId"
@@ -143,7 +145,7 @@
                 }}</Option>
               </Select>
             </FormItem>
-            <FormItem v-if="form.isPoint" label="赠积分" prop="point">
+            <FormItem v-if="form.pointGift" label="赠积分" prop="point">
               <InputNumber
                 :min="0"
                 :disabled="form.promotionStatus != 'NEW'"
@@ -265,7 +267,7 @@ export default {
       Cookies,
       form: {
         // 活动表单
-        discountType: "isFullMinus",
+        discountType: "fullMinusFlag",
         scopeType: "ALL",
         promotionGoodsList: [],
         promotionStatus: "NEW",
@@ -370,12 +372,12 @@ export default {
         if (data.scopeType === "ALL") {
           data.promotionGoodsList = [];
         }
-        if (data.isFullMinus) {
-          data.discountType = "isFullMinus";
-          delete data.isFullMinus;
+        if (data.fullMinusFlag) {
+          data.discountType = "fullMinusFlag";
+          delete data.fullMinusFlag;
         } else {
-          data.discountType = "isFullRate";
-          delete data.isFullRate;
+          data.discountType = "fullRateFlag";
+          delete data.fullRateFlag;
         }
         data.rangeTime = [];
         data.rangeTime.push(new Date(data.startTime), new Date(data.endTime));
@@ -410,10 +412,10 @@ export default {
               e.endTime = params.endTime;
             });
           }
-          if (params.discountType == "isFullMinus") {
-            params.isFullMinus = true;
+          if (params.discountType == "fullMinusFlag") {
+            params.fullMinusFlag = true;
           } else {
-            params.isFullRate = true;
+            params.fullRateFlag = true;
           }
           delete params.rangeTime;
           this.submitLoading = true;

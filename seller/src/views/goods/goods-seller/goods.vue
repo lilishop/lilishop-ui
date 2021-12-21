@@ -156,14 +156,14 @@ export default {
         },
         {
           title: "审核状态",
-          key: "isAuth",
+          key: "authFlag",
           width: 130,
           render: (h, params) => {
-            if (params.row.isAuth == "TOBEAUDITED") {
+            if (params.row.authFlag == "TOBEAUDITED") {
               return h("Tag", {props: {color: "blue",},},"待审核");
-            } else if (params.row.isAuth == "PASS") {
+            } else if (params.row.authFlag == "PASS") {
               return h("Tag", {props: {color: "green",},},"通过");
-            } else if (params.row.isAuth == "REFUSE") {
+            } else if (params.row.authFlag == "REFUSE") {
               return h("Tag", {props: {color: "red",},},"审核拒绝");
             }
           },
@@ -250,14 +250,14 @@ export default {
         },
         {
           title: "审核状态",
-          key: "isAuth",
+          key: "authFlag",
           width: 120,
           render: (h, params) => {
-            if (params.row.isAuth == "PASS") {
+            if (params.row.authFlag == "PASS") {
               return h("Tag", {props: {color: "green"}},"通过");
-            } else if (params.row.isAuth == "TOBEAUDITED") {
+            } else if (params.row.authFlag == "TOBEAUDITED") {
               return h("Tag", {props: {color: "volcano"}},"待审核");
-            } else if (params.row.isAuth == "REFUSE") {
+            } else if (params.row.authFlag == "REFUSE") {
               return h("Tag", {props: {color: "red"}},"审核拒绝");
             }
           },

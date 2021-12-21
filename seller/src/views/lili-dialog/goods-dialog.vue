@@ -64,7 +64,7 @@ export default {
         sn: "",
         categoryPath: "",
         marketEnable: "UPPER",
-        isAuth: "PASS",
+        authFlag: "PASS",
       },
       category: [], // 选中的商品分类
       goodsData: [], // 商品列表

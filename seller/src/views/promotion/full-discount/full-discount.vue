@@ -53,7 +53,7 @@
           {{ unixDate(row.applyEndTime) }}
         </template>
         <template slot-scope="{ row }" slot="promotionType">
-          {{ row.isFullMinus ? "满减" : "满折" }}
+          {{ row.fullMinusFlag ? "满减" : "满折" }}
         </template>
         <template slot-scope="{ row }" slot="hours">
           <Tag v-for="item in unixHours(row.hours)" :key="item">{{ item }}</Tag>

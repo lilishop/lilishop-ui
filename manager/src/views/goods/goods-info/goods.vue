@@ -7,7 +7,7 @@
         inline
         :label-width="70"
         class="search-form"
-          @keydown.enter.native="handleSearch"
+        @keydown.enter.native="handleSearch"
       >
         <Form-item label="商品名称" prop="goodsName">
           <Input
@@ -39,12 +39,19 @@
           </Select>
         </Form-item>
         <Form-item label="商品类型" prop="status">
-          <Select v-model="searchForm.goodsType" placeholder="请选择" clearable style="width: 200px">
+          <Select
+            v-model="searchForm.goodsType"
+            placeholder="请选择"
+            clearable
+            style="width: 200px"
+          >
             <Option value="PHYSICAL_GOODS">实物商品</Option>
             <Option value="VIRTUAL_GOODS">虚拟商品</Option>
           </Select>
         </Form-item>
-        <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search" >搜索</Button>
+        <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search"
+          >搜索</Button
+        >
       </Form>
       <Table
         :loading="loading"
@@ -55,25 +62,39 @@
         class="mt_10"
       >
         <!-- 商品栏目格式化 -->
-        <template slot="goodsSlot" slot-scope="{row}">
-          <div style="margin: 5px 0px;height: 80px; display: flex;">
+        <template slot="goodsSlot" slot-scope="{ row }">
+          <div style="margin: 5px 0px; height: 80px; display: flex">
             <div style="">
-              <img :src="row.original" style="height: 60px;margin-top: 1px;width: 60px">
+              <img
+                :src="row.original"
+                style="height: 60px; margin-top: 1px; width: 60px"
+              />
             </div>
 
-            <div style="margin-left: 13px;">
+            <div style="margin-left: 13px">
               <div class="div-zoom">
-                <a @click="linkTo(row.id,row.skuId)">{{row.goodsName}}</a>
+                <a @click="linkTo(row.id, row.skuId)">{{ row.goodsName }}</a>
               </div>
               <Poptip trigger="hover" title="扫码在手机中查看" transfer>
                 <div slot="content">
-                  <vue-qr :text="wapLinkTo(row.id,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                  <vue-qr
+                    :text="wapLinkTo(row.id, row.skuId)"
+                    :margin="0"
+                    colorDark="#000"
+                    colorLight="#fff"
+                    :size="150"
+                  ></vue-qr>
                 </div>
-                <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
+                <img
+                  src="../../../assets/qrcode.svg"
+                  class="hover-pointer"
+                  width="20"
+                  height="20"
+                  alt=""
+                />
               </Poptip>
             </div>
           </div>
-
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">
@@ -91,26 +112,15 @@
         ></Page>
       </Row>
     </Card>
-    <Modal
-      title="下架操作"
-      v-model="modalVisible"
-      :mask-closable="false"
-      :width="500"
-    >
-      <Form
-        ref="underForm"
-        :model="underForm"
-        :label-width="100"
-      >
+    <Modal title="下架操作" v-model="modalVisible" :mask-closable="false" :width="500">
+      <Form ref="underForm" :model="underForm" :label-width="100">
         <FormItem label="下架原因" prop="reason">
           <Input v-model="underForm.reason" clearable style="width: 100%" />
         </FormItem>
       </Form>
       <div slot="footer">
         <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="lower"
-          >提交</Button
-        >
+        <Button type="primary" :loading="submitLoading" @click="lower">提交</Button>
       </div>
     </Modal>
   </div>
@@ -118,10 +128,10 @@
 
 <script>
 import { getGoodsListData, upGoods, lowGoods } from "@/api/goods";
-import vueQr from 'vue-qr'
+import vueQr from "vue-qr";
 export default {
   components: {
-      "vue-qr":vueQr
+    "vue-qr": vueQr,
   },
   name: "goods",
   data() {
@@ -136,7 +146,8 @@ export default {
         sort: "create_time", // 默认排序字段
         order: "desc", // 默认排序方式
       },
-      underForm: { // 下架原因
+      underForm: {
+        // 下架原因
         reason: "",
       },
       submitLoading: false, // 添加或编辑提交状态
@@ -151,17 +162,14 @@ export default {
           title: "商品编号",
           key: "id",
           minWidth: 150,
-          tooltip: true
+          tooltip: true,
         },
         {
           title: "价格",
           key: "price",
           width: 130,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.price, "￥")
-            );
+            return h("div", this.$options.filters.unitPrice(params.row.price, "￥"));
           },
         },
         {
@@ -169,12 +177,12 @@ export default {
           key: "goodsType",
           width: 130,
           render: (h, params) => {
-            if (params.row.goodsType === 'PHYSICAL_GOODS') {
-              return h("Tag", {props: {color: "green",},}, "实物商品");
-            } else if (params.row.goodsType === 'VIRTUAL_GOODS') {
-              return h("Tag", {props: {color: "volcano",},}, "虚拟商品");
+            if (params.row.goodsType === "PHYSICAL_GOODS") {
+              return h("Tag", { props: { color: "green" } }, "实物商品");
+            } else if (params.row.goodsType === "VIRTUAL_GOODS") {
+              return h("Tag", { props: { color: "volcano" } }, "虚拟商品");
             } else {
-              return h("Tag", {props: {color: "geekblue",},}, "电子卡券");
+              return h("Tag", { props: { color: "geekblue" } }, "电子卡券");
             }
           },
         },
@@ -184,23 +192,23 @@ export default {
           width: 100,
           render: (h, params) => {
             if (params.row.marketEnable == "DOWN") {
-              return h("Tag", {props: {color: "volcano"},},"下架");
+              return h("Tag", { props: { color: "volcano" } }, "下架");
             } else if (params.row.marketEnable == "UPPER") {
-              return h("Tag", {props: {color: "green",},},"上架");
+              return h("Tag", { props: { color: "green" } }, "上架");
             }
           },
         },
         {
           title: "审核状态",
-          key: "isAuth",
+          key: "authFlag",
           width: 130,
           render: (h, params) => {
-            if (params.row.isAuth == "TOBEAUDITED") {
-              return h("Tag", {props: {color: "volcano",},},"待审核");
-            } else if (params.row.isAuth == "PASS") {
-              return h("Tag", {props: {color: "green"},},"通过");
-            } else if (params.row.isAuth == "REFUSE") {
-              return h("Tag", {props: {color: "red",},},"拒绝");
+            if (params.row.authFlag == "TOBEAUDITED") {
+              return h("Tag", { props: { color: "volcano" } }, "待审核");
+            } else if (params.row.authFlag == "PASS") {
+              return h("Tag", { props: { color: "green" } }, "通过");
+            } else if (params.row.authFlag == "REFUSE") {
+              return h("Tag", { props: { color: "red" } }, "拒绝");
             }
           },
         },
@@ -208,7 +216,7 @@ export default {
           title: "店铺名称",
           key: "storeName",
           minWidth: 100,
-          tooltip: true
+          tooltip: true,
         },
         {
           title: "操作",
@@ -236,7 +244,8 @@ export default {
                     },
                   },
                   "上架"
-                ), h(
+                ),
+                h(
                   "Button",
                   {
                     props: {
@@ -249,7 +258,7 @@ export default {
                     },
                   },
                   "查看"
-                )
+                ),
               ]);
             } else {
               return h("div", [
@@ -270,7 +279,8 @@ export default {
                     },
                   },
                   "下架"
-                ), h(
+                ),
+                h(
                   "Button",
                   {
                     props: {
@@ -283,7 +293,7 @@ export default {
                     },
                   },
                   "查看"
-                )
+                ),
               ]);
             }
           },
@@ -369,7 +379,7 @@ export default {
         name: "goods-detail",
         query: { id: id },
       });
-    }
+    },
   },
   mounted() {
     this.init();
