@@ -1,4 +1,5 @@
 const path = require("path");
+const configs = require('./src/config')
 const CompressionPlugin = require("compression-webpack-plugin");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const resolve = dir => {
@@ -11,6 +12,7 @@ const resolve = dir => {
  * 我们可以根据环境变量进行相应的处理，只有在产品的时候，才让插件去自动注入相应的资源文件到html页面
  */
 const enableProduction = process.env.NODE_ENV === "production"; // 是否生产环境
+
 
 let externals = {
   vue: "Vue",
@@ -63,8 +65,9 @@ let jsPlugin = [
 ];
 
 // 判断是否需要加载CDN，线上删除注释
-cdn = enableProduction ? cdn : { css: [], js: [] };
-externals = enableProduction ? externals : {};
+
+cdn =  enableProduction && configs.enableCDN  ? cdn : { css: [], js: [] };
+externals = enableProduction && configs.enableCDN  ? externals : {};
 jsPlugin = enableProduction ? jsPlugin : [];
 module.exports = {
   css: {
@@ -78,7 +81,7 @@ module.exports = {
     }
   },
   devServer: {
-    port: 10003
+    port: configs.port
   },
 
   // 打包时不生成.map文件 避免看到源码

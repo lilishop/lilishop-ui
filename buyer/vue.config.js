@@ -13,6 +13,7 @@ const configs = require('./src/config')
  */
 const enableProduction = process.env.NODE_ENV === "production"; // 是否生产环境
 
+
 let externals = {
   vue: "Vue",
   axios: "axios",
@@ -53,8 +54,8 @@ let jsPlugin = [
   })
 ];
 // 判断是否需要加载CDN
-cdn = enableProduction ? cdn : { css: [], js: [] };
-externals = enableProduction ? externals : {};
+cdn = enableProduction && configs.enableCDN ? cdn : { css: [], js: [] };
+externals = enableProduction && configs.enableCDN  ? externals : {};
 jsPlugin = enableProduction ? jsPlugin : [];
 
 module.exports = {
@@ -80,7 +81,7 @@ module.exports = {
     }
   },
   devServer: {
-    port: 10000
+    port: configs.port
   },
 
   // 打包时不生成.map文件 避免看到源码

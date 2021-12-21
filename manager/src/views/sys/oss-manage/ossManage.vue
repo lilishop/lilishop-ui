@@ -255,8 +255,8 @@ import {
   deleteFile,
 } from "@/api/index";
 import DPlayer from "dplayer";
-import config from "@/config";
 
+const config = require('@/config/index')
 import { commonUrl } from "@/libs/axios";
 var dp;
 export default {
