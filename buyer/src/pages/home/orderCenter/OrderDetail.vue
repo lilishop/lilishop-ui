@@ -75,9 +75,9 @@
         <tbody>
           <tr v-for="(goods, goodsIndex) in order.orderItems" :key="goodsIndex">
             <td>
-              <img @click="goodsDetail(goods.id, goods.goodsId)" :src="goods.image" alt="" />
+              <img @click="goodsDetail(goods.skuId, goods.goodsId)" :src="goods.image" alt="" />
               <div>
-                <p @click="goodsDetail(goods.id, goods.goodsId)" class="hover-color">
+                <p @click="goodsDetail(goods.skuId, goods.goodsId)" class="hover-color">
                   {{ goods.goodsName }}
                 </p>
               </div>
