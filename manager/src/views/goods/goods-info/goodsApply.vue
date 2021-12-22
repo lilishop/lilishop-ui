@@ -94,7 +94,7 @@ export default {
       },
       goodsAuditForm: {
         // 商品编辑表单
-        is_auth: 1,
+        auth_flag: 1,
       },
       columns: [
         {
