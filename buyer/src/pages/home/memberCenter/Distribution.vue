@@ -342,7 +342,7 @@ export default {
   font-weight: bold;
 }
 .subTips {
- 
+  margin-left: 10px;
 }
 .fontsize_48 {
   font-size: 48px;

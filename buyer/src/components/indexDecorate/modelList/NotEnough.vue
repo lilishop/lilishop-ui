@@ -63,7 +63,7 @@ export default {
   justify-content: center;
   width: 100%;
   margin-bottom: 10px;
-  background-color: rgb(218, 217, 217);
+  background-color: #f3f5f7;
   height: 60px;
   align-items: center;
   position: relative;

@@ -86,7 +86,7 @@
       <img
         width="1200"
         class="hover-pointer mb_20"
-      
+
         @click="linkTo(element.options.url)"
         :src="element.options.img"
         alt=""
@@ -134,6 +134,7 @@ export default {
 
 .model-item {
   position: relative;
+  margin-bottom: 10px;
 }
 
 /** 热门广告 */
