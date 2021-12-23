@@ -345,7 +345,7 @@ export default {
 }
 
 .goods-list {
-  width: 500px;
+  // width: 500px;
   display: flex;
   margin-bottom: 10px;
 

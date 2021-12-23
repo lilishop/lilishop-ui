@@ -150,6 +150,9 @@ export default {
 }
 .goodsBuy {
   margin-left: 80px;
+  >*{
+    margin: 0 4px;
+  }
 }
 .page-size{
   text-align: right;

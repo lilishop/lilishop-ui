@@ -496,7 +496,7 @@ export default {
   font-weight: bold;
 }
 .subTips {
- 
+  margin-left: 10px;
 }
 .account-btns {
   margin: 10px 0;
