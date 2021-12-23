@@ -52,7 +52,7 @@
               :on-success="handleSuccess"
               :on-error="handleError"
               :show-upload-list="false"
-              :max-size="1024"
+              :max-size="2048"
               :on-exceeded-size="handleMaxSize"
               multiple
               ref="up"
