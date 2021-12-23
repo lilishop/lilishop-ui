@@ -105,7 +105,7 @@
         </template>
         <template slot-scope="{ row }" slot="action">
           <Button
-            v-if="row.promotionStatus == 'NEW'"
+            v-if="row.promotionStatus !== 'START'"
             type="info"
             size="small"
             @click="edit(row.id)"
@@ -113,7 +113,7 @@
             >编辑</Button
           >
           <Button
-            v-if="row.promotionStatus == 'START'"
+            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
             type="warning"
             size="small"
             @click="statusChanged(row.id, 'CLOSE')"
@@ -121,14 +121,12 @@
             >关闭</Button
           >
           <Button
-            v-if="row.promotionStatus == 'CLOSE'"
-            type="warning"
+            v-if="row.promotionStatus === 'CLOSE'"
+            type="error"
             size="small"
-            @click="statusChanged(row.id, 'START')"
-            style="margin-right: 5px"
-            >开启</Button
+            @click="close(row.id)"
+            >删除</Button
           >
-          <Button type="error" size="small" @click="close(row.id)">删除</Button>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">

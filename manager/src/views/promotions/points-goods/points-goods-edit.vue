@@ -15,14 +15,14 @@
               <div>{{ form.goodsSku.storeName }}</div>
             </FormItem>
             <FormItem label="商品价格">
-              <div>{{ form.goodsSku.price | unitPrice('￥') }}</div>
+              <div>{{ form.goodsSku.price | unitPrice("￥") }}</div>
             </FormItem>
             <FormItem label="库存">
               <div>{{ form.goodsSku.quantity }}</div>
             </FormItem>
             <FormItem label="结算价格" prop="settlementPrice">
               <Input
-                type="num"
+                type="number"
                 v-model="form.settlementPrice"
                 placeholder="请填写结算价格"
                 clearable
@@ -32,19 +32,16 @@
             <FormItem label="分类" prop="pointsGoodsCategoryId">
               <Select
                 v-model="form.pointsGoodsCategoryId"
-                label-in-value="true"
+                :label-in-value="true"
                 @on-change="
                   (val) => {
                     changeCategory(val, index);
                   }
                 "
               >
-                <Option
-                  v-for="item in categoryList"
-                  :value="item.id"
-                  :key="item.id"
-                  >{{ item.name }}</Option
-                >
+                <Option v-for="item in categoryList" :value="item.id" :key="item.id">{{
+                  item.name
+                }}</Option>
               </Select>
             </FormItem>
             <FormItem label="活动库存" prop="activeStock">
@@ -65,36 +62,21 @@
                 style="width: 260px"
               />
             </FormItem>
-            <FormItem label="活动开始时间" prop="startTime">
+            <FormItem label="活动开始时间">
               <DatePicker
-                type="datetime"
-                v-model="form.startTime"
+                type="datetimerange"
+                v-model="form.rangeTime"
                 format="yyyy-MM-dd HH:mm:ss"
-                :options="options"
                 placeholder="请选择"
-                clearable
-                style="width: 200px"
-              >
-              </DatePicker>
-              -
-              <DatePicker
-                type="datetime"
-                v-model="form.endTime"
-                format="yyyy-MM-dd HH:mm:ss"
                 :options="options"
-                placeholder="请选择"
-                clearable
-                style="width: 200px"
+                style="width: 260px"
               >
               </DatePicker>
             </FormItem>
           </div>
           <div class="footer">
             <Button @click="closeCurrentPage" style="margin-right: 5px">返回</Button>
-            <Button
-              type="primary"
-              :loading="submitLoading"
-              @click="handleSubmit"
+            <Button type="primary" :loading="submitLoading" @click="handleSubmit"
               >保存</Button
             >
           </div>
@@ -134,11 +116,13 @@ export default {
       submitLoading: false, // 添加或编辑提交状态
       formRule: {
         settlementPrice: [{ required: true, message: "请填写结算价格" }],
-        pointsGoodsCategoryId: [
-          { required: true, message: "请选择积分商品分类" },
-        ],
+        pointsGoodsCategoryId: [{ required: true, message: "请选择积分商品分类" }],
         points: [{ required: true, message: "请填写兑换积分" }],
-        startTime: [{ required: true, message: "请填写活动开始时间" }],
+      },
+      options: {
+        disabledDate(date) {
+          return date && date.valueOf() < Date.now() - 86400000;
+        },
       },
     };
   },
@@ -153,9 +137,7 @@ export default {
     // 关闭当前页面
     closeCurrentPage() {
       this.$store.commit("removeTag", "edit-points-goods");
-      localStorage.pageOpenedList = JSON.stringify(
-        this.$store.state.app.pageOpenedList
-      );
+      localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList);
       this.$router.go(-1);
     },
     // 获取商品数据
@@ -164,6 +146,10 @@ export default {
         if (res.success) {
           let data = res.result;
           this.form = data;
+          data.rangeTime = [];
+          if (data.startTime && data.endTime) {
+            data.rangeTime.push(new Date(data.startTime), new Date(data.endTime));
+          }
         }
       });
     },
@@ -176,12 +162,8 @@ export default {
     handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
-          const start = this.$options.filters.unixToDate(
-            this.form.startTime / 1000
-          );
-          const end = this.$options.filters.unixToDate(
-            this.form.endTime / 1000
-          );
+          const start = this.$options.filters.unixToDate(this.form.rangeTime[0] / 1000);
+          const end = this.$options.filters.unixToDate(this.form.rangeTime[1] / 1000);
           this.form.startTime = start;
           this.form.endTime = end;
           this.submitLoading = true;

@@ -239,7 +239,7 @@ export const updatePointsGoods = params => {
 };
 // 修改积分商品状态
 export const editPointsGoodsStatus = (id, params) => {
-  return putRequest(`/promotion/pointsGoods/${id}`, params);
+  return putRequest(`/promotion/pointsGoods/status/${id}`, params);
 };
 // 删除积分商品
 export const deletePointsGoodsStatus = id => {
