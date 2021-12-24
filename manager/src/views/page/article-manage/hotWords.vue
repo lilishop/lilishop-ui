@@ -14,14 +14,19 @@
 
       <div class="card-list">
         <Card v-for="words in data" class="card-item" :key="words" onclick="">
-          <p><a href="#" slot="extra" @click.prevent="add(words)">{{ words }}</a></p>
+          <p>
+            <a href="#" slot="extra" @click.prevent="add(words)">{{ words }}</a>
+          </p>
+          <p slot="extra">
+            <a @click="deleteWords(words)">
+              <Icon type="md-close" />
+            </a>
+          </p>
         </Card>
       </div>
-
     </Card>
     <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="500">
-      <Form ref="form" :model="form" :label-width="100"
-            :rules="formValidate">
+      <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
         <FormItem label="热词" prop="keywords">
           <Input v-model="form.keywords" clearable style="width: 100%" />
         </FormItem>
@@ -31,14 +36,16 @@
       </Form>
       <div slot="footer">
         <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
+        <Button type="primary" :loading="submitLoading" @click="handleSubmit"
+          >提交</Button
+        >
       </div>
     </Modal>
   </div>
 </template>
 
 <script>
-import { getHotWords, setHotWords } from "@/api/index";
+import { getHotWords, setHotWords, deleteHotWords } from "@/api/index";
 
 import { regular } from "@/utils";
 export default {
@@ -46,7 +53,7 @@ export default {
   components: {},
   data() {
     return {
-      submitLoading:false,
+      submitLoading: false,
       modalTitle: "",
       loading: true, // 表单加载状态
       modalVisible: false, //弹出框
@@ -58,14 +65,8 @@ export default {
 
       // 表单验证规则
       formValidate: {
-        keywords:[
-          regular.REQUIRED,
-          regular.VARCHAR20,
-        ],
-        point:[
-          regular.REQUIRED,
-          regular.NUMBER
-        ]
+        keywords: [regular.REQUIRED, regular.VARCHAR20],
+        point: [regular.REQUIRED, regular.NUMBER],
       },
     };
   },
@@ -109,6 +110,22 @@ export default {
       }
       this.form.point = 1;
       this.modalVisible = true;
+    },
+    deleteWords(words) {
+      this.$Modal.confirm({
+        title: "是否确定删除热词",
+        content: "<p>您确定要删除此热词吗？</p>",
+        okText: "确实",
+        cancelText: "取消",
+        onOk: () => {
+          deleteHotWords(words).then((res) => {
+            if (res.success) {
+              this.$Message.success("删除成功");
+              this.getDataList();
+            }
+          });
+        },
+      });
     },
   },
   mounted() {
