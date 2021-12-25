@@ -145,8 +145,10 @@
             <div class="item-select-row">
               <InputNumber
                 :min="1"
+                :max="skuDetail.quantity"
                 :disabled="skuDetail.quantity === 0"
                 v-model="count"
+                :precision="0.1"
               ></InputNumber>
               <span class="inventory"> 库存{{ skuDetail.quantity }}</span>
             </div>
