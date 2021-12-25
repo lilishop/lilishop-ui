@@ -39,8 +39,8 @@
             </ul>
             <div class="icp">
               <li v-if="config.icpCard">
-                <a href="https://beian.miit.gov.cn/" target="_blank">
-                  
+                <a :href='"https://tsm.miit.gov.cn/dxxzsp/xkz/xkzgl/resource/qiyesearch.jsp?num="+config.icpCard+"&type=xuke"' target="_blank">
+                  {{config.icpCard}}
                 </a>
               </li>
               <li v-if="config.icpMessage">
@@ -54,7 +54,7 @@
           <div class="information">
 
             <a class="flex " :href="config.company.href">
-              <img class="zhizhao" src="@/assets/images/zhizhao.jpg" mode="" />{{config.company.title}}
+              <img class="zhizhao" src="@/assets/images/zhizhao.jpg" mode="" />{{config.company.name}}
             </a>
           </div>
         </div>

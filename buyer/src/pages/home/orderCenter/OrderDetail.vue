@@ -35,15 +35,17 @@
       <h3>配送信息</h3>
       <p>配送方式：{{order.deliveryMethodValue}}</p>
       <p>配送状态：{{order.deliverStatusValue}}</p>
+      <p v-if="logistics">物流信息：{{logistics.shipper || '暂无物流信息'}}</p>
+      <p v-if="logistics">物流单号：{{logistics.logisticCode || '暂无物流单号'}}</p>
       <div class="div-express-log" v-if="logistics">
-          <p class="express-log">
+          <div class="express-log">
             <p>订单日志：</p>
-            <p v-for="(item, index) in logistics.traces" :key="index">
+            <div v-for="(item, index) in logistics.traces" :key="index">
               <span class="time">{{ item.AcceptTime }}</span>
               <span class="detail">{{ item.AcceptStation }}</span>
-            </p>
-          </p>
-        </div>
+            </div>
+          </div>
+      </div>
     </div>
     <div class="order-card">
       <h3>发票信息</h3>
