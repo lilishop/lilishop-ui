@@ -437,6 +437,10 @@ export const setHotWords = (params) => {
   return postRequest(`/hotwords`, params);
 };
 
+// 删除热搜词
+export const deleteHotWords = (words) => {
+  return deleteRequest(`/hotwords/${words}`);
+};
 
 // 获取热搜词
 export const getHotWords = () => {

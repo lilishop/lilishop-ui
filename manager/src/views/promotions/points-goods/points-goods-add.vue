@@ -341,10 +341,10 @@ export default {
         onOk: () => {
           let ids = [];
           this.selectedGoods.forEach(function (e) {
-            ids.push(e.id);
+            ids.push(e.skuId);
           });
           this.promotionGoodsList = this.promotionGoodsList.filter((item) => {
-            return !ids.includes(item.id);
+            return !ids.includes(item.skuId);
           });
         },
       });

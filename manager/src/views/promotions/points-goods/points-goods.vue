@@ -121,7 +121,7 @@
             >关闭</Button
           >
           <Button
-            v-if="row.promotionStatus === 'CLOSE'"
+            v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'END'"
             type="error"
             size="small"
             @click="close(row.id)"

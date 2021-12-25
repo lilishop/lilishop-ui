@@ -183,7 +183,7 @@
                 >全选</Checkbox
               >
             </div>
-            <div class="width_100 handle-btn" @click="delGoods">删除选中商品</div>
+            <div class="width_100 handle-btn" @click="delGoods()">删除选中商品</div>
             <!-- <div class="width_100 handle-btn" @click="collectGoods">移到我的收藏</div> -->
             <div class="width_100 handle-btn" @click="clearCart">清空购物车</div>
           </div>
@@ -278,7 +278,9 @@ export default {
         const list = this.cartList;
         list.forEach((shop) => {
           shop.skuList.forEach((goods) => {
-            idArr.push(goods.goodsSku.id);
+            if(goods.checked) {
+              idArr.push(goods.goodsSku.id);
+            }
           });
         });
       } else {

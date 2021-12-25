@@ -290,10 +290,10 @@ export default {
         onOk: () => {
           let ids = [];
           this.selectList.forEach(function (e) {
-            ids.push(e.id);
+            ids.push(e.skuId);
           });
           this.goodsData = this.goodsData.filter((item) => {
-            return !ids.includes(item.id);
+            return !ids.includes(item.skuId);
           });
         },
       });
