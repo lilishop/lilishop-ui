@@ -215,7 +215,7 @@ export const getFullDiscountById = id => {
 };
 // 开启、关闭满额活动
 export const updateFullDiscount = (id, promotionStatus) => {
-  return putRequest(`/promotion/fullDiscount/status/${id}/${promotionStatus}`)
+  return putRequest(`/promotion/fullDiscount/status/${id}`)
 }
 // 积分商品列表
 export const getPointsGoodsList = params => {
