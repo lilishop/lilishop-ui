@@ -25,7 +25,7 @@ export default {
     callbackArticle(val) {
       val.___type = "pages";
 
-      val.___path = "/pages/public/article";
+      val.___path = "/pages/passport/article";
 
       this.$emit("selected", [val]);
     },
