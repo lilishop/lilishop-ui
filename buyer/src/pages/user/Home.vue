@@ -65,8 +65,23 @@ export default {
     };
   },
   computed: {
-    userInfo () { // 用户信息
-      return JSON.parse(Storage.getItem('userInfo'));
+    userInfo () { // 用户信息  
+      if(Storage.getItem('userInfo')){
+         return JSON.parse(Storage.getItem('userInfo'));  
+      } else{
+         this.$Modal.confirm({
+          title:'请登录',
+          content:"<p>请登录后执行此操作</p>",
+          okText: '立即登录',
+          cancelText: '继续浏览',
+          onOk:()=>{
+            if(true){
+              this.$router.push('/login');
+            }
+          }
+        }) 
+          return {}
+      }  
     }
   },
 

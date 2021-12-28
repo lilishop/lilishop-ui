@@ -30,8 +30,14 @@
   margin-top: 6px;
 }
 .goods-show-detail {
+  height: 36px;
   font-size: 12px;
   margin: 6px 0px;
+  overflow:hidden;
+  text-overflow: ellipsis;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
 }
 .goods-show-num {
   font-size: 12px;
