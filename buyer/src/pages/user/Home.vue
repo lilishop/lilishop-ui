@@ -70,8 +70,10 @@ export default {
          return JSON.parse(Storage.getItem('userInfo'));  
       } else{
          this.$Modal.confirm({
-          title:'登录失效',
-          content:"<p>登录已失效，请再次登录</p>",
+          title:'请登录',
+          content:"<p>请登录后执行此操作</p>",
+          okText: '立即登录',
+          cancelText: '继续浏览',
           onOk:()=>{
             if(true){
               this.$router.push('/login');
