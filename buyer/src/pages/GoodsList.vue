@@ -69,7 +69,7 @@
                 >人评价
               </div>
               <div class="goods-show-seller">
-                <Tag v-if="item.content.selfOperated" style="padding:0 4px;" size="default" color="error">自营</Tag><span>{{ item.content.storeName }}</span>
+                <Tag class="goods-show-buyer" v-if="item.content.selfOperated" size="default" color="error">自营</Tag>{{ item.content.storeName }}
               </div>
             </div>
           </div>
@@ -206,7 +206,14 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import '../assets/styles/goodsList.scss';
+@import '../assets/styles/goodsList.scss';  
+.goods-show-info>.goods-show-seller>.goods-show-buyer{
+    height:16px;width:30px;
+    white-space: nowrap;
+    line-height:16px;
+    padding:0 3px;
+    background-color:#E23A3A;
+  }
 .container {
   margin: 15px auto;
   width: 1200px;
@@ -284,6 +291,7 @@ export default {
     display: block;
     clear: left;
   }
+
   .price-sort {
     span {
       display: inline-block;

@@ -65,8 +65,21 @@ export default {
     };
   },
   computed: {
-    userInfo () { // 用户信息
-      return JSON.parse(Storage.getItem('userInfo'));
+    userInfo () { // 用户信息  
+      if(Storage.getItem('userInfo')){
+         return JSON.parse(Storage.getItem('userInfo'));  
+      } else{
+         this.$Modal.confirm({
+          title:'登录失效',
+          content:"<p>登录已失效，请再次登录</p>",
+          onOk:()=>{
+            if(true){
+              this.$router.push('/login');
+            }
+          }
+        }) 
+          return {}
+      }  
     }
   },
 
