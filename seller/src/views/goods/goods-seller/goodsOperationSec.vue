@@ -1071,7 +1071,7 @@ export default {
       let pushData = [];
       //渲染头部
       this.skuInfo.forEach((sku) => {
-        !sku.name ? (sku.name = "规格名") : "";
+        // !sku.name ? (sku.name = "规格名") : "";
         //列名称
         let columnName = sku.name;
         pushData.push({

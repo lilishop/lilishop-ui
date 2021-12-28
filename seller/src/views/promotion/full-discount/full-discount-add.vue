@@ -145,7 +145,7 @@
                 }}</Option>
               </Select>
             </FormItem>
-            <FormItem v-if="form.pointGift" label="赠积分" prop="point">
+            <FormItem v-if="form.pointFlag" label="赠积分" prop="point">
               <InputNumber
                 :min="0"
                 :disabled="form.promotionStatus != 'NEW'"

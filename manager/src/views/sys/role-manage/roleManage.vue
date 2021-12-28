@@ -541,7 +541,9 @@ export default {
 
       permData.forEach((p) => {
         if (that.hasPerm(p, rolePerms) && p.status != -1) {
-          this.$set(p, "checked", true);
+          if (p.children && p.children.length === 0) {
+            this.$set(p, "checked", true);
+          }
         } else {
           this.$set(p, "checked", false);
         }
