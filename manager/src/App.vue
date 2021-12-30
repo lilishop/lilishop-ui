@@ -5,7 +5,6 @@
 </template>
 
 <script>
-import {v4 as uuidv4} from 'uuid';
 import {getCategoryTree} from '@/api/goods.js'
 export default {
   updated() {
@@ -17,13 +16,7 @@ export default {
       })
     }
   },
-  mounted() {
-    let uuid = this.getStore('uuid');
-    if (!uuid) {
-      uuid = uuidv4();
-      this.setStore('uuid', uuid);
-    }
-  },
+
 };
 </script>
 
