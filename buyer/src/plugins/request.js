@@ -5,6 +5,8 @@ import Storage from './storage';
 import router from '../router/index.js';
 import store from '../vuex/store';
 import { handleRefreshToken } from '@/api/index';
+import {v4 as uuidv4} from 'uuid';
+
 const qs = require('qs');
 // api地址
 export const buyerUrl =
@@ -59,7 +61,11 @@ service.interceptors.request.use(
       config.loading = Spin.show();
     }
 
-    const uuid = Storage.getItem('uuid');
+    let uuid = Storage.getItem('uuid');
+    if (!uuid) {
+      uuid = uuidv4();
+      Storage.setItem('uuid', uuid);
+    }
     config.headers['uuid'] = uuid;
 
     // 获取访问Token
