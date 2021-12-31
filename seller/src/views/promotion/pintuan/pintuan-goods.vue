@@ -47,7 +47,7 @@
       </Table>
       <Row type="flex" justify="end" class="page operation">
         <Page
-          :current="searchForm.pageNumber + 1"
+          :current="searchForm.pageNumber"
           :total="total"
           :page-size="searchForm.pageSize"
           @on-change="changePage"
@@ -91,7 +91,7 @@ export default {
       loading: false, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
-        pageNumber: 0, // 当前页数
+        pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
       },
 
@@ -219,7 +219,7 @@ export default {
 
     changePage(v) {
       // 分页 改变页数
-      this.searchForm.pageNumber = v - 1;
+      this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
@@ -232,14 +232,14 @@ export default {
 
     handleSearch() {
       // 搜索
-      this.searchForm.pageNumber = 0;
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
 
     handleReset() {
       // 重置
-      this.searchForm.pageNumber = 0;
+      this.searchForm.pageNumber = 1;
       this.searchForm.promotionName = "";
       this.selectDate = null;
       this.getDataList();

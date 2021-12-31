@@ -62,31 +62,31 @@
               v-if="row.promotionStatus == 'NEW'"
               @click="edit(row)"
               >编辑</Button
-            >&nbsp;
+            >
             <Button
               type="info"
               v-if="row.promotionStatus == 'NEW'"
               size="small"
               @click="manage(row, 'manager')"
               >管理</Button
-            >&nbsp;
+            >
             <Button
               type="info"
-              v-if="row.promotionStatus !== 'NEW'"
+              v-if="row.promotionStatus !== 'NEW' && row.promotionStatus !== 'CLOSE'"
               size="small"
               @click="manage(row, 'view')"
               >查看</Button
-            >&nbsp;
+            >
             <Button
               type="error"
               size="small"
               v-if="row.promotionStatus != 'START'"
               @click="remove(row)"
               >删除</Button
-            >&nbsp;
+            >
             <Button
               type="success"
-              v-if="row.promotionStatus == 'NEW' || row.promotionStatus == 'CLOSE'"
+              v-if="row.promotionStatus == 'CLOSE'"
               size="small"
               @click="open(row)"
               >开启</Button
@@ -345,4 +345,8 @@ export default {
 </script>
 <style lang="scss">
 @import "@/styles/table-common.scss";
+.row Button {
+  margin-right: 4px;
+
+}
 </style>

@@ -4,6 +4,7 @@ import { router } from "../router/index";
 import { Message } from "view-design";
 import Cookies from "js-cookie";
 import { handleRefreshToken } from "@/api/index";
+import {v4 as uuidv4} from 'uuid';
 
 // 统一请求路径前缀
 export const baseUrl =
@@ -30,7 +31,12 @@ service.interceptors.request.use(
         ...config.params
       };
     }
-    const uuid = getStore("uuid");
+    let uuid = getStore("uuid");
+    if (!uuid) {
+      uuid = uuidv4();
+      setStore('uuid', uuid);
+    }
+
     config.headers["uuid"] = uuid;
     return config;
   },
