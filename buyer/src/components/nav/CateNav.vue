@@ -4,14 +4,15 @@
       <div class="all-categories hover-pointer" @mouseenter="showFirstList = true" @mouseleave="showFirstList = false">全部商品分类</div>
       <ul class="nav-item" v-if="showNavBar">
         <li
+          class ="nav-lis"
           v-for="(item, index) in navList.list"
           :key="index"
           @click="linkTo(item.url)"
         >
           {{ item.name }}
         </li>
-      </ul>
-    </div>
+      </ul>   
+    </div> <hr style="width:1200px;height:2px;background:#e4393c;margin-top:-1px;margin-bottom:5px;"/>
     <!-- 全部商品分类 -->
     <div class="cate-list" v-show="showAlways || showFirstList" @mouseenter="showFirstList = true" @mouseleave="showFirstList = false">
       <!-- 第一级分类 -->
@@ -155,6 +156,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.nav-lis:hover{
+  color:#e4393c !important;
+  cursor: pointer;
+}
 .cate-nav{
   width: 1200px;
   position: relative;
@@ -170,9 +175,10 @@ export default {
     width: 200px;
     line-height: 40px;
     color: #fff;
-    background-color: $theme_color;
+    background-color: #e4393c;
     text-align: center;
     font-size: 16px;
+    border-bottom:none;
   }
   .nav-item {
     width: 1000px;
@@ -180,13 +186,13 @@ export default {
     line-height: 40px;
     overflow: hidden;
     list-style: none;
-    background-color: #eee;
+    // background-color: #eee;
     display: flex;
     li {
       float: left;
       font-weight: bold;
       margin-left: 20px;
-      color: rgb(89, 88, 88);
+      color: rgb(129, 127, 127);
       font-size: 15px;
       &:hover {
         color: $theme_color;

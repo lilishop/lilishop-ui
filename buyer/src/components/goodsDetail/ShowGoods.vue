@@ -7,6 +7,8 @@
         <div class="item-detail-big-img">
           <pic-zoom :url="imgList[imgIndex].url" :scale="2"></pic-zoom>
         </div>
+        <div v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'" style="margin-top:10px;rgb(153, 149, 149);">实物商品</div>
+        <div v-else-if="skuDetail.goodsType == 'VIRTUAL_GOODS'" style="margin-top:10px;rgb(153, 149, 149);">虚拟商品</div>
         <div class="item-detail-img-row">
           <div
             class="item-detail-img-small"

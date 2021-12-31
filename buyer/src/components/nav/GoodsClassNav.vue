@@ -414,7 +414,7 @@ export default {
     font-size: 18px;
     font-weight: bold;
     &:hover {
-      color: $theme_color;
+      color: #e4393c;
       cursor: pointer;
     }
   }
@@ -428,8 +428,8 @@ export default {
     text-align: center;
     margin: 0 3px;
     &:hover {
-      color: $theme_color;
-      border-color: $theme_color;
+      color: #e4393c;
+      border-color: #e4393c;
       border-bottom-color: #fff;
       cursor: pointer;
       ul {
@@ -447,7 +447,7 @@ export default {
       width: 300px;
       padding: 5px 10px;
       background: #fff;
-      border: 1px solid $theme_color;
+      border: 1px solid #e4393c;
       z-index: 1;
       &::before {
         content: "";
@@ -470,7 +470,7 @@ export default {
         margin: 3px 0;
         text-align: left;
         &:hover {
-          color: $theme_color;
+          color: #e4393c;
           cursor: pointer;
         }
       }
@@ -489,23 +489,23 @@ export default {
     background-color: #f3f3f3;
     border: 1px solid #ddd;
     &:hover {
-      border-color: $theme_color;
+      border-color: #e4393c;
       background-color: #fff;
       .ivu-icon {
         color: #fff;
-        background-color: $theme_color;
+        background-color: #e4393c;
       }
     }
 
     span:nth-child(2) {
-      color: $theme_color;
+      color: #e4393c;
     }
 
     .ivu-icon {
       position: absolute;
       right: 0;
       top: 0;
-      color: $theme_color;
+      color: #e4393c;
       line-height: 22px;
       width: 21px;
       height: 22px;
@@ -545,7 +545,7 @@ export default {
         width: 100px;
         height: 50px;
         float: left;
-        line-height: 50px;
+        line-height: 45px;
         border: 1px solid #ddd;
         margin: -1px -1px 0 0;
         overflow: hidden;
@@ -557,7 +557,8 @@ export default {
         }
 
         &:hover {
-          border-color: $theme_color;
+          border-color: #e4393c;
+          border: 2px solid #e4393c;
           top: 0;
           left: 0;
           position: relative;
@@ -571,7 +572,7 @@ export default {
           display: inline-block;
           width: 100%;
           height: 100%;
-          color: $theme_color;
+          color: #e4393c;
           text-align: center;
           font-size: 12px;
           cursor: pointer;
@@ -584,7 +585,7 @@ export default {
           div {
             width: 0;
             border-top: 20px solid transparent;
-            border-right: 20px solid $theme_color;
+            border-right: 20px solid #e4393c;
           }
           .ivu-icon {
             font-size: 12px;
@@ -597,7 +598,7 @@ export default {
         }
       }
       .border-color {
-        border-color: $theme_color;
+        border-color: #e4393c;
         z-index: 1;
       }
     }
@@ -619,8 +620,8 @@ export default {
         font-size: 12px;
         &:hover {
           cursor: pointer;
-          color: $theme_color;
-          border-color: $theme_color;
+          color: #e4393c;
+          border-color: #e4393c;
         }
       }
     }
@@ -666,14 +667,14 @@ export default {
         height: 30px;
         float: left;
         line-height: 30px;
-        color: $primary_color;
+        color:#4d9cf1;
         overflow: hidden;
         position: relative;
         font-size: 12px;
         padding: 2px;
         cursor: pointer;
         &:hover {
-          color: $theme_color;
+          color: #e4393c;
         }
       }
     }
@@ -695,8 +696,8 @@ export default {
         font-size: 12px;
         &:hover {
           cursor: pointer;
-          color: $theme_color;
-          border-color: $theme_color;
+          color: #e4393c;
+          border-color: #e4393c;
         }
       }
     }
@@ -716,11 +717,13 @@ export default {
 }
 .more-options{
   margin: 5px;
-  color: #2d8cf0;
+  color: #4d9cf1;
   font-size: 12px;
   cursor: pointer;
   text-align: right;
 }
-
+.more-options:hover{
+  color:#0165d1;
+}
 /** 其他筛选项  end */
 </style>
