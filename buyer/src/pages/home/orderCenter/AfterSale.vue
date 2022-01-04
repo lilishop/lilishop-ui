@@ -362,6 +362,5 @@ export default {
 
 .modal-goods {
   padding: 5px;
-  background-color: #eee;
 }
 </style>
