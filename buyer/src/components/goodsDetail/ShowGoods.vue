@@ -44,15 +44,9 @@
         <!-- 商品详细 价格、优惠券、促销 -->
         <div class="item-detail-price-row">
           <div class="item-price-left">
-            <!-- 商品原价 -->
-            <div class="item-price-row" v-if="!skuDetail.promotionPrice">
-              <p>
-                <span class="item-price-title">价 &nbsp;&nbsp;&nbsp;&nbsp;格</span>
-                <span class="item-price">{{ skuDetail.price | unitPrice("￥") }}</span>
-              </p>
-            </div>
+            
             <!-- 秒杀价格 -->
-            <div class="item-price-row" v-if="skuDetail.promotionPrice">
+            <div class="item-price-row" v-if="skuDetail.promotionPrice && promotionMap['SECKILL']">
               <p>
                 <span class="item-price-title" v-if="promotionMap['SECKILL']"
                   >秒 &nbsp;杀&nbsp;价</span
@@ -63,6 +57,13 @@
                 <span class="item-price-old">{{
                   skuDetail.price | unitPrice("￥")
                 }}</span>
+              </p>
+            </div>
+            <!-- 商品原价 -->
+            <div class="item-price-row" v-else>
+              <p>
+                <span class="item-price-title">价 &nbsp;&nbsp;&nbsp;&nbsp;格</span>
+                <span class="item-price">{{ skuDetail.price | unitPrice("￥") }}</span>
               </p>
             </div>
             <!-- 优惠券展示 -->
