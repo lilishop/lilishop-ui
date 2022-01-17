@@ -111,10 +111,11 @@ export default {
       if (!con.status) return;
 
       this.loading = true;
-      login({
-        username: this.form.username,
-        password: this.md5(this.form.password),
-      })
+
+      let fd = new FormData();
+      fd.append('username',this.form.username)
+      fd.append('password',this.md5(this.form.password))
+      login(fd)
         .then((res) => {
           if (res && res.success) {
             this.afterLogin(res);

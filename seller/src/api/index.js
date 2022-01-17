@@ -5,7 +5,7 @@ import {
   putRequest,
   deleteRequest,
   getRequestWithNoToken,
-  postRequestWithNoToken,
+  postRequestWithNoTokenData,
   commonUrl,
 } from "@/libs/axios";
 
@@ -29,7 +29,7 @@ export const getSellerHomeData = params => {
 
 // 登陆
 export const login = params => {
-  return postRequestWithNoToken("/login/userLogin", params);
+  return postRequestWithNoTokenData("/login/userLogin", params);
 };
 
 // 登出

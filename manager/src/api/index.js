@@ -7,6 +7,7 @@ import {
   importRequest,
   getRequestWithNoToken,
   putRequestWithNoForm,
+  postRequestWithNoTokenData,
   postRequestWithNoForm,
   managerUrl
 } from "@/libs/axios";
@@ -47,7 +48,7 @@ export const getNoticePage = (params) => {
 
 // 登陆
 export const login = (params) => {
-  return getRequestWithNoToken("/user/login", params);
+  return postRequestWithNoTokenData("/user/login", params);
 };
 
 // 登出

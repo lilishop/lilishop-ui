@@ -350,3 +350,20 @@ export const postRequestWithNoToken = (url, params) => {
     params: params
   });
 };
+
+/**
+ * 无需token验证的请求 避免旧token过期导致请求失败
+ * @param {*} url
+ * @param {*} params
+ */
+ export const postRequestWithNoTokenData = (url, params) => {
+  return service({
+    method: "post",
+    url: `${url}`,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    data: params
+  });
+};
+
