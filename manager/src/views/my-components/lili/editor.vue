@@ -78,11 +78,7 @@ export default {
       editor = new E(`#${this.id}`);
       // 编辑内容绑定数据
       editor.config.onchange = (html) => {
-        if (this.openXss) {
-          this.data = xss(html);
-        } else {
-          this.data = html;
-        }
+        this.data = html;
         this.$emit("input", this.data);
         this.$emit("on-change", this.data);
       };
@@ -166,6 +162,7 @@ export default {
     },
     // 保存
     editHTMLOk() {
+      console.log(this.dataEdit);
       editor.txt.html(this.dataEdit);
       this.$emit("input", this.data);
       this.$emit("on-change", this.data);

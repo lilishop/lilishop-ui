@@ -76,11 +76,7 @@ export default {
       this.editor = new E(`#${this.eid}`);
       // 编辑内容绑定数据
       this.editor.config.onchange = (html) => {
-        if (this.openXss) {
-          this.data = xss(html);
-        } else {
-          this.data = html;
-        }
+        this.data = html;
         this.$emit("input", this.data);
         this.$emit("on-change", this.data);
       };
