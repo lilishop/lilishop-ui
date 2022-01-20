@@ -4,21 +4,21 @@ import {getRequest, postRequest, putRequest, deleteRequest} from '@/libs/axios';
 
 //查询分销商
 export const getDistributionListData = (params) => {
-    return getRequest('/distribution/getByPage', params)
+    return getRequest('/distribution/distribution/getByPage', params)
 }
 //审核分销商
 export const auditDistribution = (id, params) => {
-    return putRequest(`/distribution/audit/${id}`, params)
+    return putRequest(`/distribution/distribution/audit/${id}`, params)
 }
 // 清退分销商
 export const retreatDistribution = (id, params) => {
-    return putRequest(`/distribution/retreat/${id}`, params)
+    return putRequest(`/distribution/distribution/retreat/${id}`, params)
 }
 
 
 // 恢复分销商
 export const resumeDistribution = (id, params) => {
-    return putRequest(`/distribution/resume/${id}`, params)
+    return putRequest(`/distribution/distribution/resume/${id}`, params)
 }
 
 //保存更新分销设置

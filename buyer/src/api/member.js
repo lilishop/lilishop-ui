@@ -301,7 +301,7 @@ export function clearComplain (id) {
  */
 export function distribution () {
   return request({
-    url: `/buyer/distribution`,
+    url: `/buyer/distribution/distribution`,
     method: Method.GET,
     needToken: true
   });
@@ -314,7 +314,7 @@ export function distribution () {
  */
 export function applyDistribution (params) {
   return request({
-    url: `/buyer/distribution`,
+    url: `/buyer/distribution/distribution`,
     method: Method.POST,
     needToken: true,
     params
@@ -326,7 +326,7 @@ export function applyDistribution (params) {
  */
 export function getDistOrderList (params) {
   return request({
-    url: `/buyer/distribution/distributionOrder`,
+    url: `/buyer/distribution/order`,
     method: Method.GET,
     needToken: true,
     params
@@ -338,7 +338,7 @@ export function getDistOrderList (params) {
  */
 export function getDistGoodsList (params) {
   return request({
-    url: `/buyer/distributionGoods`,
+    url: `/buyer/distribution/goods`,
     method: Method.GET,
     needToken: true,
     params
@@ -352,7 +352,7 @@ export function getDistGoodsList (params) {
  */
 export function selectDistGoods (params) {
   return request({
-    url: `/buyer/distributionGoods/checked/${params.distributionGoodsId}`,
+    url: `/buyer/distribution/goods/checked/${params.distributionGoodsId}`,
     method: Method.GET,
     needToken: true,
     params

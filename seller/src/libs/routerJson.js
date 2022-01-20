@@ -311,7 +311,7 @@ export const result = [{
             type: 0,
             title: "分销商品",
             path: "distributionGoods",
-            component: "distribution/distributionGoods",
+            component: "distribution/distribution/goods",
             children: null
           },
           {
@@ -320,7 +320,7 @@ export const result = [{
             type: 0,
             title: "分销订单",
             path: "distributionOrder",
-            component: "distribution/distributionOrder",
+            component: "distribution/distribution/order",
             children: null
           }
         ]

@@ -48,7 +48,7 @@ export const getNoticePage = (params) => {
 
 // 登陆
 export const login = (params) => {
-  return postRequestWithNoTokenData("/user/login", params);
+  return postRequestWithNoTokenData("/passport/user/login", params);
 };
 
 // 登出
@@ -62,7 +62,7 @@ export const handleRefreshToken = (token) => {
 };
 // 获取用户登录信息
 export const userInfo = (params) => {
-  return getRequest("/user/info", params);
+  return getRequest("/passport/user/info", params);
 };
 // 注册
 export const regist = (params) => {
@@ -237,7 +237,7 @@ export const getAllPermissionList = (params) => {
 
 // 获取全部权限数据
 export const getCurrentPermissionList = (params) => {
-  return getRequest("/menu/memberMenu", params);
+  return getRequest("/permission/menu/memberMenu", params);
 };
 
 // 添加权限
@@ -306,16 +306,16 @@ export const deleteMessageSend = (ids, params) => {
 
 // 分页获取文件数据
 export const getFileListData = (params) => {
-  return getRequest("/file", params);
+  return getRequest("/common/file", params);
 };
 
 // 重命名文件
 export const renameFile = (params) => {
-  return postRequest("/file/rename", params);
+  return postRequest("/common/file/rename", params);
 };
 // 删除文件
 export const deleteFile = (ids, params) => {
-  return deleteRequest(`/file/delete/${ids}`, params);
+  return deleteRequest(`/common/file/delete/${ids}`, params);
 };
 // 下载文件
 export const aliDownloadFile = (fKey, params) => {

@@ -31,7 +31,7 @@ export const getHomeData = params => {
  */
 export const getHomeList = params => {
 
-  return getRequest("/pageData/pageDataList", params);
+  return getRequest("/other/pageData/pageDataList", params);
 };
 
 

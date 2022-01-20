@@ -26,11 +26,11 @@ export const disableBrand = (id, params) => {
 }
 //根据分类id获取关联品牌
 export const getCategoryBrandListData = (category_id, params) => {
-    return getRequest(`/category/brand/${category_id}`, params)
+    return getRequest(`/goods/category/brand/${category_id}`, params)
 }
 //保存获取关联品牌
 export const saveCategoryBrand = (category_id, params) => {
-    return postRequest(`/category/brand/${category_id}`, params)
+    return postRequest(`/goods/category/brand/${category_id}`, params)
 }
 //保存获取关联规格
 export const saveCategorySpec = (category_id, params) => {
