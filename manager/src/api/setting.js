@@ -7,7 +7,7 @@ import {
 
 // 查询短信站内信信息
 export const getMessageData = params => {
-  return getRequest("/message", params);
+  return getRequest("/other/message", params);
 };
 //修改短信模板
 export const editSmsMessageTemplate = (id, params) => {
@@ -153,12 +153,12 @@ export const editInstantDeliveryImage = (bean, params) => {
 
 //查询短信发送记录
 export const getSmsPage = (params) => {
-  return getRequest(`sms`, params);
+  return getRequest(`sms/sms`, params);
 };
 
 //发送短信
 export const sendSms = (params) => {
-  return postRequest(`sms`, params);
+  return postRequest(`sms/sms`, params);
 };
 /*
  * 获取 支付支持设置开关

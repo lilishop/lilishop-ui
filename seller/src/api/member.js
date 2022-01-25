@@ -3,17 +3,17 @@ import {getRequest, putRequest, postRequest} from "@/libs/axios";
 
 // 分页获取会员评价
 export const getMemberReview = params => {
-  return getRequest("/memberEvaluation", params);
+  return getRequest("/member/evaluation", params);
 };
 
 // 根据id获取评价详情
 export const getMemberInfoReview = id => {
-  return getRequest(`/memberEvaluation/get/${id}`);
+  return getRequest(`/member/evaluation/get/${id}`);
 };
 
 //回复评价信息
 export const replyMemberReview = (id, params) => {
-  return putRequest(`/memberEvaluation/reply/${id}`, params);
+  return putRequest(`/member/evaluation/reply/${id}`, params);
 };
 
 // 获取会员注册统计列表
@@ -72,7 +72,7 @@ export const deleteMemberListData = ids => {
 };
 // 获取充值记录列表数据
 export const getUserRecharge = params => {
-  return getRequest("/recharge", params);
+  return getRequest("/wallet/recharge", params);
 };
 
 // 获取预存款明细列表数据

@@ -7,40 +7,40 @@ export const getBillPage = (params) => {
 }
 //查询店铺列表
 export const getShopListData = (params) => {
-    return getRequest('/store', params)
+    return getRequest('/store/store', params)
 }
 //禁用店铺
 export const disableShop = (id) => {
-    return putRequest(`/store/disable/${id}`)
+    return putRequest(`/store/store/disable/${id}`)
 }
 //开启店铺
 export const enableBrand = (id) => {
-    return putRequest(`/store/enable/${id}`)
+    return putRequest(`/store/store/enable/${id}`)
 }
 
 //查询店铺详细
 export const getShopDetailData = (id, params) => {
-    return getRequest(`/store/get/detail/${id}`, params)
+    return getRequest(`/store/store/get/detail/${id}`, params)
 }
 
 //增加店铺列表
 export const shopAdd = (params) => {
-    return postRequest(`/store/add`, params)
+    return postRequest(`/store/store/add`, params)
 }
 
 //修改店铺列表
 export const shopEdit = (id,params) => {
-    return putRequest(`/store/edit/${id}`, params)
+    return putRequest(`/store/store/edit/${id}`, params)
 }
 
 //审核店铺
 export const shopAudit = (id, passed) => {
-    return putRequest(`/store/audit/${id}/${passed}`)
+    return putRequest(`/store/store/audit/${id}/${passed}`)
 }
 
 //查询店铺详情
 export const shopDetail = (id) => {
-    return getRequest(`/store/get/detail/${id}`)
+    return getRequest(`/store/store/get/detail/${id}`)
 }
 
 
@@ -74,10 +74,10 @@ export const pay = (id) => {
 
 //获取所有商家
 export const getShopList = () => {
-  return getRequest(`/store/all`)
+  return getRequest(`/store/store/all`)
 }
 
 //根据id获取店铺信息
 export const getShopByMemberId = (id) => {
-  return getRequest(`/store/${id}/member`)
+  return getRequest(`/store/store/${id}/member`)
 }

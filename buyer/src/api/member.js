@@ -22,7 +22,7 @@ export function getDepositLog (params) {
 // 查询充值记录
 export function getRecharge (params) {
   return request({
-    url: '/buyer/member/recharge',
+    url: '/buyer/wallet/recharge',
     method: Method.GET,
     needToken: true,
     params
