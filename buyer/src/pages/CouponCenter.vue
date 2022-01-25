@@ -51,6 +51,7 @@ export default {
       list: [], // 优惠券列表
       total: 0, // 优惠券总数
       params: { // 请求参数
+        getType: 'FREE',
         pageNumber: 1,
         pageSize: 20
       }
@@ -95,6 +96,7 @@ export default {
             content: '<p>优惠券领取成功，可到我的优惠券页面查看</p>',
             okText: '我的优惠券',
             cancelText: '立即使用',
+            closable: true,
             onOk: () => {
               this.$router.push('/home/Coupons')
             },
