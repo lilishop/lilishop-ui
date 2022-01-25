@@ -79,7 +79,7 @@ export const orderDelivery = (sn, params) => {
 
 // 获取商家选中的物流公司
 export const getLogisticsChecked = () => {
-  return getRequest(`/logistics/getChecked`);
+  return getRequest(`/other/logistics/getChecked`);
 };
 
 // 订单核验

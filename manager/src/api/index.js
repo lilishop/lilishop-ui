@@ -263,15 +263,15 @@ export const searchPermission = (params) => {
 
 // 分页获取日志数据
 export const getLogListData = (params) => {
-  return getRequest("/log/getAllByPage", params);
+  return getRequest("/setting/log/getAllByPage", params);
 };
 // 删除日志
 export const deleteLog = (ids, params) => {
-  return deleteRequest(`/log/${ids}`, params);
+  return deleteRequest(`/setting/log/${ids}`, params);
 };
 // 清空日志
 export const deleteAllLog = (params) => {
-  return deleteRequest("/log", params);
+  return deleteRequest("/setting/log", params);
 };
 
 
@@ -339,22 +339,22 @@ export const setSetting = (key, params) => {
 // 分页查询敏感词
 
 export const getSensitiveWordsPage = (params) => {
-  return getRequest(`/sensitiveWords`, params);
+  return getRequest(`/other/sensitiveWords`, params);
 };
 
 // 分页查询敏感词
 export const insertSensitiveWords = (params) => {
-  return postRequest(`/sensitiveWords`, params);
+  return postRequest(`/other/sensitiveWords`, params);
 };
 
 // 修改
 export const updateSensitiveWords = (id, params) => {
-  return putRequest(`/sensitiveWords/${id}`, params);
+  return putRequest(`/other/sensitiveWords/${id}`, params);
 };
 
 // 删除敏感词
 export const delSensitive = (ids) => {
-  return deleteRequest(`/sensitiveWords/delByIds/${ids}`);
+  return deleteRequest(`/other/sensitiveWords/delByIds/${ids}`);
 };
 
 // 添加商品计量单位
@@ -376,26 +376,26 @@ export const delGoodsUnit = (ids) => {
 
 // 同步高德行政地区数据
 export const asyncRegion = () => {
-  return postRequest(`/region/sync`);
+  return postRequest(`/setting/region/sync`);
 };
 
 // 批量id删除
 export const delRegion = (ids) => {
-  return deleteRequest(`/region/${ids}`);
+  return deleteRequest(`/setting/region/${ids}`);
 };
 
 // 更新地区
 export const updateRegion = (id, params) => {
-  return putRequest(`/region/${id}`, params);
+  return putRequest(`/setting/region/${id}`, params);
 };
 // 添加地区
 export const addRegion = (params) => {
-  return postRequest(`/region`, params);
+  return postRequest(`/setting/region`, params);
 };
 
 // 通过id获取子地区
 export const getChildRegion = (id) => {
-  return getRequest(`/region/item/${id}`);
+  return getRequest(`/setting/region/item/${id}`);
 };
 
 // 重置用户密码

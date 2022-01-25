@@ -39,17 +39,17 @@ export const getBillDetail = (id, params) => {
 
 // 获取所有物流公司
 export const getLogistics = (id, params) => {
-  return getRequest(`/logistics`, params)
+  return getRequest(`/other/logistics`, params)
 }
 
 // 开启物流公司
 export const logisticsChecked = (id, params) => {
-  return postRequest(`/logistics/${id}`, params)
+  return postRequest(`/other/logistics/${id}`, params)
 }
 
 // 关闭开启物流公司
 export const logisticsUnChecked = (id, params) => {
-  return deleteRequest(`/logistics/${id}`, params)
+  return deleteRequest(`/other/logistics/${id}`, params)
 }
 // 获取商家自提点
 export const getShopAddress = (id, params) => {

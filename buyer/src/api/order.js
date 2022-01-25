@@ -109,7 +109,7 @@ export function afterSaleDelivery (params) {
 // 获取退货可选物流公司
 export function getLogisticsCompany () {
   return request({
-    url: `/buyer/logistics`,
+    url: `/buyer/other/logistics`,
     method: Method.GET,
     needToken: true,
     params: { pageNumber: 1, pageSize: 200, disabled: 'OPEN' }

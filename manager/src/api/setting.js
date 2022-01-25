@@ -20,37 +20,37 @@ export const editNoticeMessage = (id, params) => {
 
 //微信消息同步
 export const wechatMessageSync = (params) => {
-  return getRequest("/message/wechat/init", params)
+  return getRequest("/wechat/wechatMessage/init", params)
 }
 //分页获取微信消息
 export const getWechatMessagePage = (params) => {
-  return getRequest("/message/wechat", params)
+  return getRequest("/wechat/wechatMessage", params)
 }
 //编辑微信消息模版
 export const editWechatMessageTemplate = (id, params) => {
-  return putRequest(`/message/wechat/${id}`, params)
+  return putRequest(`/wechat/wechatMessage/${id}`, params)
 }
 //删除微信消息模版
 export const delWechatMessageTemplate = (id, params) => {
-  return deleteRequest(`/message/wechat/${id}`, params)
+  return deleteRequest(`/wechat/wechatMessage/${id}`, params)
 }
 
 
 //微信消息订阅同步
 export const wechatMPMessageSync = (params) => {
-  return getRequest("/message/wechatMPMessage/init", params)
+  return getRequest("/wechat/wechatMPMessage/init", params)
 }
 //分页获取微信消息订阅
 export const getWechatMPMessagePage = (params) => {
-  return getRequest("/message/wechatMPMessage", params)
+  return getRequest("/wechat/wechatMPMessage", params)
 }
 //编辑微信消息订阅模版
 export const editWechatMPMessageTemplate = (id, params) => {
-  return putRequest(`/message/wechatMPMessage/${id}`, params)
+  return putRequest(`/wechat/wechatMPMessage/${id}`, params)
 }
 //删除微信消息订阅模版
 export const delWechatMPMessageTemplate = (id, params) => {
-  return deleteRequest(`/message/wechatMPMessage/${id}`, params)
+  return deleteRequest(`/wechat/wechatMPMessage/${id}`, params)
 }
 
 
@@ -118,19 +118,19 @@ export const smsSignDetail = (id) => {
 
 //分页查询app版本信息
 export const appVersionPage = (params) => {
-  return getRequest(`systems/app/version`, params);
+  return getRequest(`/other/appVersion`, params);
 };
 //添加app版本信息
 export const addVersion = (params) => {
-  return postRequest(`systems/app/version`, params);
+  return postRequest(`/other/appVersion`, params);
 };
 //修改app版本信息
 export const editVersion = (params, id) => {
-  return putRequest(`systems/app/version/${id}`, params);
+  return putRequest(`/other/appVersion/${id}`, params);
 };
 //删除app版本信息
 export const deleteVersion = (id) => {
-  return deleteRequest(`systems/app/version/${id}`);
+  return deleteRequest(`/other/appVersion/${id}`);
 };
 //查询同城配送列表
 export const getInstantDelivery = (params) => {
@@ -164,32 +164,32 @@ export const sendSms = (params) => {
  * 获取 支付支持设置开关
  */
 export const getPaymentSupportForm = () => {
-  return getRequest(`system/settingx/paymentSupport`);
+  return getRequest(`setting/settingx/paymentSupport`);
 }
 
 //  验证码源文件删除
 export const delVerification = (id) => {
-  return deleteRequest(`/verificationSource/${id}`)
+  return deleteRequest(`/other/verificationSource/${id}`)
 }
 
 //  添加验证码源文件
 export const addVerification = (params) => {
-  return postRequest(`/verificationSource`, params)
+  return postRequest(`/other/verificationSource`, params)
 }
 
 //  修改验证码源文件
 export const editVerification = (id, params) => {
-  return putRequest(`/verificationSource/${id}`, params)
+  return putRequest(`/other/verificationSource/${id}`, params)
 }
 
 // 验证码源文件详情
 export const verificationDetail = (id) => {
-  return getRequest(`/verificationSource/${id}`)
+  return getRequest(`/other/verificationSource/${id}`)
 }
 
 // 验证码源文件列表
 export const verificationPage = (params) => {
-  return getRequest(`/verificationSource`, params)
+  return getRequest(`/other/verificationSource`, params)
 }
 
 //获取通知类站内信
