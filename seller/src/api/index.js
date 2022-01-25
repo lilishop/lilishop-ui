@@ -16,7 +16,7 @@ export const getAllCity = (params) => {
 
 // 登陆
 export const getHomeNotice = params => {
-  return getRequest("/article/getByPage?type=STORE_ARTICLE&pageSize=15");
+  return getRequest("/other/article/getByPage?type=STORE_ARTICLE&pageSize=15");
 };
 
 
@@ -29,12 +29,12 @@ export const getSellerHomeData = params => {
 
 // 登陆
 export const login = params => {
-  return postRequestWithNoTokenData("/login/userLogin", params);
+  return postRequestWithNoTokenData("/passport/login/userLogin", params);
 };
 
 // 登出
 export const logout = () => {
-  return postRequest("/login/logout");
+  return postRequest("/passport/login/logout");
 };
 
 // 获取用户登录信息
@@ -43,7 +43,7 @@ export const userInfo = params => {
 };
 // 获取登录信息
 export const userMsg = params => {
-  return getRequest('/settings', params)
+  return getRequest('/settings/storeSettings', params)
 }
 // 注册
 export const regist = params => {
@@ -240,7 +240,7 @@ export const aliDownloadFile = (fKey, params) => {
 
 // base64上传
 export const base64Upload = params => {
-  return postRequest("/upload/file", params);
+  return postRequest("/common/common/upload/file", params);
 };
 
 

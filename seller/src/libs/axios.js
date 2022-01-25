@@ -16,7 +16,7 @@ export const commonUrl =
     ? BASE.API_DEV.common
     : BASE.API_PROD.common;
 // 文件上传接口
-export const uploadFile = commonUrl + "/common/upload/file";
+export const uploadFile = commonUrl + "/common/common/upload/file";
 var isRefreshToken = 0;
 const refreshToken = getTokenDebounce();
 const service = axios.create({

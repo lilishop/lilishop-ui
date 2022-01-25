@@ -92,7 +92,7 @@ export const seeArticle = (id) => {
 }
 //获取文章列表数据
 export const getArticle = (params) => {
-    return getRequest('/article/getByPage', params)
+    return getRequest('/other/article/getByPage', params)
 }
 
 

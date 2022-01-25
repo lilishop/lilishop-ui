@@ -144,7 +144,7 @@ export const getGoodsSkuData = params => {
 
 //  获取商品分页列表
 export const getGoodsListData = params => {
-  return getRequest("/goods/list", params);
+  return getRequest("/goods/goods/list", params);
 };
 //  获取待审核商品分页列表
 export const getAuthGoodsListData = params => {
@@ -178,7 +178,7 @@ export const getShopGoodsLabelListSeller = () => {
 
 //查询分类绑定参数信息
 export const getCategoryParamsListData = (id, params) => {
-  return getRequest(`/goods/category/parameters/${id}`, params);
+  return getRequest(`/goods/categoryParameters/${id}`, params);
 };
 //查询商品绑定参数信息
 export const getCategoryParamsByGoodsId = (goodsId, categoryId) => {
@@ -194,11 +194,11 @@ export const deleteParams = (id, params) => {
 };
 //更新或者保存参数组
 export const insertOrUpdateParamsGroup = params => {
-  return postRequest("/goods/category/parameters/save", params);
+  return postRequest("/goods/categoryParameters/save", params);
 };
 //删除参数组
 export const deleteParamsGroup = (id, params) => {
-  return deleteRequest(`/goods/category/parameters/${id}`, params);
+  return deleteRequest(`/goods/categoryParameters/${id}`, params);
 };
 
 //获取sku列表
@@ -226,38 +226,38 @@ export const insertSpecSeller = params => {
 
 //  更新商品库存
 export const updateGoodsSkuStocks = params => {
-  return putRequest("/goods/update/stocks", params, {
+  return putRequest("/goods/goods/update/stocks", params, {
     "Content-Type": "application/json"
   });
 };
 //  获取商品分页列表
 export const getGoodsListDataSeller = params => {
-  return getRequest("/goods/list", params);
+  return getRequest("/goods/goods/list", params);
 };
 //  获取商品告警分页列表
 export const getGoodsListDataByStockSeller = params => {
-  return getRequest("/goods/list/stock", params);
+  return getRequest("/goods/goods/list/stock", params);
 };
 //  获取商品详情
 export const getGoods = id => {
-  return getRequest(`/goods/get/${id}`);
+  return getRequest(`/goods/goods/get/${id}`);
 };
 // 上架商品
 export const upGoods = params => {
-  return putRequest(`/goods/up`, params);
+  return putRequest(`/goods/goods/up`, params);
 };
 // 删除商品
 export const deleteGoods = params => {
-  return putRequest(`/goods/delete`, params);
+  return putRequest(`/goods/goods/delete`, params);
 };
 //  下架商品
 export const lowGoods = params => {
-  return putRequest(`/goods/under`, params);
+  return putRequest(`/goods/goods/under`, params);
 };
 
 // 获取商品单位列表
 export const getGoodsUnitList = () => {
-  return getRequest(`/goods/unit`);
+  return getRequest(`/goods/goodsUnit`);
 };
 //根据分类id获取关联品牌
 export const getCategoryBrandListDataSeller = (category_id, params) => {
@@ -265,42 +265,42 @@ export const getCategoryBrandListDataSeller = (category_id, params) => {
 };
 
 export function createGoods(params) {
-  return postRequest("/goods/create", params, {
+  return postRequest("/goods/goods/create", params, {
     "Content-Type": "application/json"
   });
 }
 
 export function editGoods(goodsId, params) {
-  return putRequest(`/goods/update/${goodsId}`, params, {
+  return putRequest(`/goods/goods/update/${goodsId}`, params, {
     "Content-Type": "application/json"
   });
 }
 
 // 获取草稿商品分页列表
 export const getDraftGoodsListData = params => {
-  return getRequest("/draft/goods/page", params);
+  return getRequest("/goods/draftGoods/page", params);
 };
 
 // 获取草稿商品详情
 export const getDraftGoodsDetail = id => {
-  return getRequest(`/draft/goods/${id}`);
+  return getRequest(`/goods/draftGoods/${id}`);
 };
 
 // 保存草稿商品
 export function saveDraftGoods(params) {
-  return postRequest("/draft/goods/save", params, {
+  return postRequest("/goods/draftGoods/save", params, {
     "Content-Type": "application/json"
   });
 }
 
 // 删除草稿商品
 export const deleteDraftGoods = id => {
-  return deleteRequest(`/draft/goods/${id}`);
+  return deleteRequest(`/goods/draftGoods/${id}`);
 };
 
 //查询分类绑定参数信息
 export const getCategoryParamsListDataSeller = (id, params) => {
-  return getRequest(`/goods/category/parameters/${id}`, params);
+  return getRequest(`/goods/categoryParameters/${id}`, params);
 };
 
 //保存获取关联规格
