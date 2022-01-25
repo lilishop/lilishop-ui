@@ -16,7 +16,7 @@ import {
 let commonUrl = (process.env.NODE_ENV === 'development' ? BASE.API_DEV.common : BASE.API_PROD.common)
 
 // 文件上传接口
-export const uploadFile = commonUrl+ "/common/upload/file";
+export const uploadFile = commonUrl+ "/common/common/upload/file";
 // Websocket
 export const ws = managerUrl + "/ws";
 
@@ -99,131 +99,131 @@ export const ipInfo = (params) => {
 };
 // 个人中心编辑
 export const userInfoEdit = (params) => {
-  return putRequest("/user/edit", params);
+  return putRequest("/passport/user/edit", params);
 };
 // 个人中心修改密码
 export const changePass = (params) => {
-  return putRequest("/user/editPassword", params);
+  return putRequest("/passport/user/editPassword", params);
 };
 // 个人中心修改手机
 export const changeMobile = (params) => {
-  return postRequest("/user/changeMobile", params);
+  return postRequest("/passport/user/changeMobile", params);
 };
 // 获取用户数据 多条件
 export const getUserListData = (params) => {
-  return getRequest("/user", params);
+  return getRequest("/passport/user", params);
 };
 // 通过用户名搜索
 export const searchUserByName = (username, params) => {
-  return getRequest("/user/searchByName/" + username, params);
+  return getRequest("/passport/user/searchByName/" + username, params);
 };
 // 获取全部用户数据
 export const getAllUserData = (params) => {
-  return getRequest("/user/getAll", params);
+  return getRequest("/passport/user/getAll", params);
 };
 
 // 添加用户
 export const addUser = (params) => {
-  return postRequest("/user", params);
+  return postRequest("/passport/user", params);
 };
 // 编辑管理员自身
 export const editUser = (params) => {
-  return putRequest("/user/edit", params);
+  return putRequest("/passport/user/edit", params);
 };
 // 编辑用户
 export const editOtherUser = (params) => {
-  return putRequest("/user/admin/edit", params);
+  return putRequest("/passport/user/admin/edit", params);
 };
 // 启用用户
 export const enableUser = (id, params) => {
-  return putRequest(`/user/enable/${id}`, params);
+  return putRequest(`/passport/user/enable/${id}`, params);
 };
 // 删除用户
 export const deleteUser = (ids, params) => {
-  return deleteRequest(`/user/${ids}`, params);
+  return deleteRequest(`/passport/user/${ids}`, params);
 };
 // 导入用户
 export const importUserData = (params) => {
-  return importRequest("/user/importData", params);
+  return importRequest("/passport/user/importData", params);
 };
 /****************************** 部门 */
 // 通过部门获取全部角色数据
 export const getUserByDepartmentId = (id, params) => {
-  return getRequest(`/departmentRole/${id}`, params);
+  return getRequest(`/permission/departmentRole/${id}`, params);
 };
 
 // 通过部门修改绑定角色
 export const updateDepartmentRole = (id, params) => {
-  return putRequestWithNoForm(`/departmentRole/${id}`, params);
+  return putRequestWithNoForm(`/permission/departmentRole/${id}`, params);
 };
 
 // 获取一级部门
 export const initDepartment = (params) => {
-  return getRequest("/department", params);
+  return getRequest("/permission/department", params);
 };
 // 加载部门子级数据
 export const loadDepartment = (id) => {
-  return getRequest(`/department/${id}`);
+  return getRequest(`/permission/department/${id}`);
 };
 // 添加部门
 export const addDepartment = (params) => {
-  return postRequest("/department", params);
+  return postRequest("/permission/department", params);
 };
 // 编辑部门
 export const editDepartment = (ids, params) => {
-  return putRequest(`/department/${ids} `, params);
+  return putRequest(`/permission/department/${ids} `, params);
 };
 // 删除部门
 export const deleteDepartment = (ids, params) => {
-  return deleteRequest(`/department/${ids}`, params);
+  return deleteRequest(`/permission/department/${ids}`, params);
 };
 // 搜索部门
 export const searchDepartment = (params) => {
-  return getRequest("/department/search", params);
+  return getRequest("/permission/department/search", params);
 };
 
 /****************************** 部门结束 */
 
 // 获取全部角色数据
 export const getAllRoleList = (params) => {
-  return getRequest("/role", params);
+  return getRequest("/permission/role", params);
 };
 // 分页获取角色数据
 export const getRoleList = (params) => {
-  return getRequest("/role", params);
+  return getRequest("/permission/role", params);
 };
 
 // 添加角色
 export const addRole = (params) => {
-  return postRequest("/role", params);
+  return postRequest("/permission/role", params);
 };
 
 // 编辑角色
 export const editRole = (params) => {
-  return putRequest(`/role/${params.roleId}`, params);
+  return putRequest(`/permission/role/${params.roleId}`, params);
 };
 
 // 查看某角色拥有的菜单
 export const selectRoleMenu = (params) => {
-  return getRequest(`/roleMenu/${params}`);
+  return getRequest(`/permission/roleMenu/${params}`);
 };
 
 // 保存角色菜单
 export const saveRoleMenu = (id, params) => {
-  return postRequestWithNoForm(`/roleMenu/${id}`, params);
+  return postRequestWithNoForm(`/permission/roleMenu/${id}`, params);
 };
 
 // 分配角色权限
 export const editRolePerm = (params) => {
-  return postRequest("/role/editRolePerm", params);
+  return postRequest("/permission/role/editRolePerm", params);
 };
 // 分配角色数据权限
 export const editRoleDep = (params) => {
-  return postRequest("/role/editRoleDep", params);
+  return postRequest("/permission/role/editRoleDep", params);
 };
 // 删除角色
 export const deleteRole = (ids, params) => {
-  return deleteRequest(`/role/${ids}`, params);
+  return deleteRequest(`/permission/role/${ids}`, params);
 };
 
 /****************************** 角色结束 */
@@ -232,7 +232,7 @@ export const deleteRole = (ids, params) => {
 /****************************** 权限 */
 // 获取全部权限数据
 export const getAllPermissionList = (params) => {
-  return getRequest("/menu/tree", params);
+  return getRequest("/permission/menu/tree", params);
 };
 
 // 获取全部权限数据
@@ -242,20 +242,20 @@ export const getCurrentPermissionList = (params) => {
 
 // 添加权限
 export const addPermission = (params) => {
-  return postRequest("/menu", params);
+  return postRequest("/permission/menu", params);
 };
 
 // 编辑权限
 export const editPermission = (params) => {
-  return putRequest(`/menu/${params.id}`, params);
+  return putRequest(`/permission/menu/${params.id}`, params);
 };
 // 删除权限
 export const deletePermission = (ids, params) => {
-  return deleteRequest(`/menu/${ids}`, params);
+  return deleteRequest(`/permission/menu/${ids}`, params);
 };
 // 搜索权限
 export const searchPermission = (params) => {
-  return getRequest("/menu", params);
+  return getRequest("/permission/menu", params);
 };
 
 /****************************** 权限结束 */
@@ -311,11 +311,11 @@ export const getFileListData = (params) => {
 
 // 重命名文件
 export const renameFile = (params) => {
-  return postRequest("/common/file/rename", params);
+  return postRequest("/common/common/file/rename", params);
 };
 // 删除文件
 export const deleteFile = (ids, params) => {
-  return deleteRequest(`/common/file/delete/${ids}`, params);
+  return deleteRequest(`/common/common/file/delete/${ids}`, params);
 };
 // 下载文件
 export const aliDownloadFile = (fKey, params) => {
@@ -324,16 +324,16 @@ export const aliDownloadFile = (fKey, params) => {
 
 // base64上传
 export const base64Upload = (params) => {
-  return postRequest("/upload/file", params);
+  return postRequest("/common/common/upload/file", params);
 };
 
 // 系统设置
 export const getSetting = (key) => {
-  return getRequest(`/system/setting/get/${key}`);
+  return getRequest(`/setting/setting/get/${key}`);
 };
 // 更新系统配置
 export const setSetting = (key, params) => {
-  return putRequestWithNoForm(`/system/setting/put/${key}`, params);
+  return putRequestWithNoForm(`/setting/setting/put/${key}`, params);
 };
 
 // 分页查询敏感词
@@ -400,7 +400,7 @@ export const getChildRegion = (id) => {
 
 // 重置用户密码
 export const resetPassword = (params) => {
-  return postRequest(`/user/resetPassword/${params}"`);
+  return postRequest(`/passport/user/resetPassword/${params}"`);
 };
 
 // 初始化商品索引
@@ -415,36 +415,35 @@ export const getProgress = () => {
 
 // 分页查询自定义分词
 export const getCustomWordsPage = (params) => {
-  return getRequest(`/custom-words/page`, params);
+  return getRequest(`/other/customWords/page`, params);
 };
 
 // 添加自定义分词
 export const insertCustomWords = (params) => {
-  return postRequest(`/custom-words`, params);
+  return postRequest(`/other/customWords`, params);
 };
 
 // 修改自定义分词
 export const updateCustomWords = (params) => {
-  return putRequest(`/custom-words`, params);
+  return putRequest(`/other/customWords`, params);
 };
 
 // 删除自定义分词
 export const delCustom = (id) => {
-  return deleteRequest(`/custom-words/${id}`);
+  return deleteRequest(`/other/customWords/${id}`);
 };
 
 // 设置热搜词
 export const setHotWords = (params) => {
-  return postRequest(`/hotwords`, params);
+  return postRequest(`/hotwords/hotwords`, params);
 };
 
 // 删除热搜词
 export const deleteHotWords = (words) => {
-  return deleteRequest(`/hotwords/${words}`);
+  return deleteRequest(`/hotwords/hotwords/${words}`);
 };
 
 // 获取热搜词
 export const getHotWords = () => {
-  return getRequest(`/hotwords`);
+  return getRequest(`/hotwords/hotwords`);
 };
-

@@ -12,7 +12,7 @@ import {
  */
 export const setHomeSetup = params => {
 
-  return postRequest("/pageData/add", params);
+  return postRequest("/other/pageData/add", params);
 };
 
 /**
@@ -21,7 +21,7 @@ export const setHomeSetup = params => {
  */
 export const getHomeData = params => {
 
-  return getRequest(`/pageData/${params}`);
+  return getRequest(`/other/pageData/${params}`);
 };
 
 
@@ -41,7 +41,7 @@ export const getHomeList = params => {
  */
 export const updateHome = (id, params) => {
 
-  return putRequest(`/pageData/update/${id}`, params);
+  return putRequest(`/other/pageData/update/${id}`, params);
 };
 
 /**
@@ -50,7 +50,7 @@ export const updateHome = (id, params) => {
  */
 export const removePageHome = (id) => {
 
-  return deleteRequest(`/pageData/remove/${id}`);
+  return deleteRequest(`/other/pageData/remove/${id}`);
 };
 
 
@@ -60,35 +60,33 @@ export const removePageHome = (id) => {
  */
 export const releasePageHome = (id) => {
 
-  return putRequest(`/pageData/release/${id}`);
+  return putRequest(`/other/pageData/release/${id}`);
 };
 
 //管理员获取发送列表
 export const getMessagePage = (params) => {
-  return getRequest(`/message`, params);
+  return getRequest(`/other/message`, params);
 };
 //管理员获取发送列表
 export const sendMessage = (params) => {
-  return postRequest(`/message`, params);
+  return postRequest(`/other/message`, params);
 };
 //管理员获取发送详情列表
 export const getShopMessage = (params) => {
-  return getRequest(`/message/store`, params);
+  return getRequest(`/other/storeMessage`, params);
 };
 
 //管理员获取会员意见反馈
 export const getMemberFeedback = (params) => {
-  return getRequest(`/feedback`, params);
+  return getRequest(`/other/feedback`, params);
 };
 
 //管理员获取会员意见反馈
 export const getMemberFeedbackDetail = (id) => {
-  return getRequest(`/feedback/${id}`);
+  return getRequest(`/other/feedback/${id}`);
 };
 
 //管理员获取发送详情列表
 export const getMemberMessage = (params) => {
-  return getRequest(`/message/member`, params);
+  return getRequest(`/other/memberMessage`, params);
 };
-
-

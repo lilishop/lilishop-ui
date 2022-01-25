@@ -63,54 +63,45 @@ export const savePageData = (params) => {
 }
 //获取分类列表数据
 export const getArticleCategory = () => {
-  return getRequest(`/article-category/all-children`)
+  return getRequest(`/other/articleCategory/all-children`)
 }
 //文章分类添加
 export const saveArticleCategory = (params) => {
-    return postRequest('/article-category', params)
+    return postRequest('/other/articleCategory', params)
 }
 
 //删除文章分类
 export const delArticleCategory = (id) => {
-    return deleteRequest(`/article-category/${id}`)
+    return deleteRequest(`/other/articleCategory${id}`)
 }
 //修改文章分类
 export const updateArticleCategory = (params, id) => {
-    return putRequest(`/article-category/update/${id}`, params)
+    return putRequest(`/other/articleCategory/update/${id}`, params)
 }
 //文章添加
 export const saveArticle = (params) => {
-    return postRequest('/article', params, {"Content-Type": "application/json"})
+    return postRequest('/other/article', params, {"Content-Type": "application/json"})
 }
 //文章修改
 export const updateArticle = (params) => {
-    return putRequest(`/article/update/${params.id}`, params, {"Content-Type": "application/json"})
+    return putRequest(`/other/article/update/${params.id}`, params, {"Content-Type": "application/json"})
 }
 //文章是否展示修改
 export const updateArticleStatus = (id,params) => {
-  return putRequest(`/article/update/status/${id}`, params)
+  return putRequest(`/other/article/update/status/${id}`, params)
 }
 //查看文章
 export const seeArticle = (id) => {
-    return getRequest(`/article/${id}`)
+    return getRequest(`/other/article/${id}`)
 }
 //获取文章列表数据
 export const getArticle = (params) => {
-    return getRequest('/article/getByPage', params)
+    return getRequest('/other/article/getByPage', params)
 }
 
 
 
 //删除文章数据
 export const delArticle = (ids) => {
-    return deleteRequest(`/article/delByIds/${ids}`)
+    return deleteRequest(`/other/article/delByIds/${ids}`)
 }
-
-
-
-
-
-
-
-
-

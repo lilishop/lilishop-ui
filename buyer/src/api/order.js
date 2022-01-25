@@ -80,7 +80,7 @@ export function getTraces (orderSn) {
  */
 export function evolutionList (params) {
   return request({
-    url: `/buyer/memberEvaluation`,
+    url: `/buyer/member/evaluation`,
     method: Method.GET,
     needToken: true,
     params

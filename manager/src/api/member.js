@@ -9,22 +9,22 @@ export const getMember = params => {
 
 // 分页获取会员评价
 export const getMemberReview = params => {
-  return getRequest("/memberEvaluation/getByPage", params);
+  return getRequest("/member/evaluation/getByPage", params);
 };
 
 // 获取id
 export const getMemberInfoReview = id => {
-  return getRequest(`/memberEvaluation/get/${id}`);
+  return getRequest(`/member/evaluation/get/${id}`);
 };
 
 
 // 删除评论
 export const delMemberReview = id => {
-  return putRequest(`/memberEvaluation/delete/${id}`);
+  return putRequest(`/member/evaluation/delete/${id}`);
 };
 // 修改评价状态
 export const updateMemberReview = (id, params) => {
-  return getRequest(`/memberEvaluation/updateStatus/${id}`, params);
+  return getRequest(`/member/evaluation/updateStatus/${id}`, params);
 };
 
 
@@ -35,12 +35,12 @@ export const insertOrUpdateSpec = params => {
 
 //  获取会员列表
 export const getMemberListData = params => {
-  return getRequest("/passport/member", params);
+  return getRequest("/member/passport", params);
 };
 
 //  获取会员详情
 export const getMemberInfoData = (id) => {
-  return getRequest(`/passport/member/${id}`);
+  return getRequest(`/member/passport/${id}`);
 };
 
 //  修改会员基本信息
@@ -50,26 +50,26 @@ export const updateMember = (params) => {
 
 //  添加会员基本信息
 export const addMember = params => {
-  return postRequest(`/passport/member`, params);
+  return postRequest(`/member/passport`, params);
 };
 
 //  获取会员列表
 export const getMemberAll = () => {
-  return getRequest("/passport/member/getAll");
+  return getRequest("/member/passport/getAll");
 };
 
 //  增加或修改会员列表
 export const operationMemberListData = params => {
-  return postRequest("/passport/member/insertOrUpdate", params);
+  return postRequest("/member/passport/insertOrUpdate", params);
 };
 
 //  增加或修改会员列表
 export const deleteMemberListData = ids => {
-  return deleteRequest(`/passport/member/delByIds/${ids}`);
+  return deleteRequest(`/member/passport/delByIds/${ids}`);
 };
 // 获取充值记录列表数据
 export const getUserRecharge = params => {
-  return getRequest("/recharge", params);
+  return getRequest("/wallet/recharge", params);
 };
 
 // 获取预存款明细列表数据
@@ -79,12 +79,12 @@ export const getUserWallet = params => {
 
 // 获取提现申请列表数据
 export const getUserWithdrawApply = params => {
-  return getRequest("/members/withdraw-apply", params);
+  return getRequest("/wallet/withdrawApply", params);
 };
 
 // 审核提现申请
 export const withdrawApply = params => {
-  return postRequest("/members/withdraw-apply", params);
+  return postRequest("/wallet/withdrawApply", params);
 };
 
 //会员状态修改
@@ -110,7 +110,7 @@ export const historyMemberChartList = () => {
 
 //查询会员数量
 export const getMemberNum = params => {
-  return getRequest("/passport/member/num", params);
+  return getRequest("/member/passport/num", params);
 };
 //查询会员历史积分
 export const getHistoryPointData = (params) => {

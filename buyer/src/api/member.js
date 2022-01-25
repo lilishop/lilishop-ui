@@ -22,7 +22,7 @@ export function getDepositLog (params) {
 // 查询充值记录
 export function getRecharge (params) {
   return request({
-    url: '/buyer/member/recharge',
+    url: '/buyer/wallet/recharge',
     method: Method.GET,
     needToken: true,
     params
@@ -99,7 +99,7 @@ export function collectList (params) {
 // 单个商品评价
 export function goodsComment (params) {
   return request({
-    url: `/buyer/memberEvaluation/${params.goodsId}/goodsEvaluation`,
+    url: `/buyer/member/evaluation/${params.goodsId}/goodsEvaluation`,
     method: Method.GET,
     needToken: false,
     params
@@ -109,7 +109,7 @@ export function goodsComment (params) {
 // 商品各评价类别数量
 export function goodsCommentNum (goodsId) {
   return request({
-    url: `/buyer/memberEvaluation/${goodsId}/evaluationNumber`,
+    url: `/buyer/member/evaluation/${goodsId}/evaluationNumber`,
     method: Method.GET,
     needToken: false
   });
@@ -118,7 +118,7 @@ export function goodsCommentNum (goodsId) {
 // 添加会员评价
 export function addEvaluation (params) {
   return request({
-    url: `/buyer/memberEvaluation`,
+    url: `/buyer/member/evaluation`,
     method: Method.POST,
     needToken: true,
     params
@@ -128,7 +128,7 @@ export function addEvaluation (params) {
 // 会员评价详情
 export function evaluationDetail (id) {
   return request({
-    url: `/buyer/memberEvaluation/get/${id}`,
+    url: `/buyer/member/evaluation/get/${id}`,
     method: Method.GET,
     needToken: true
   });
