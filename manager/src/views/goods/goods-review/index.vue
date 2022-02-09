@@ -304,6 +304,7 @@ export default {
         loading: true,
         onOk: () => {
           API_Member.delMemberReview(v.id).then((res) => {
+            this.$Modal.remove();
             this.$Message.success("修改成功");
             this.init();
           });

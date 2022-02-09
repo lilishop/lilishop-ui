@@ -4,8 +4,14 @@
       <div class="mb_10">
         <Button @click="addParent" icon="md-add">添加一级分类</Button>
       </div>
-      <Table class="table" :load-data="handleLoadData" row-key="id" :loading="loading" :data="tableData"
-        :columns="columns">
+      <Table
+        class="table"
+        :load-data="handleLoadData"
+        row-key="id"
+        :loading="loading"
+        :data="tableData"
+        :columns="columns"
+      >
         <template slot="action" slot-scope="scope">
           <Dropdown v-show="scope.row.level == 2" trigger="click">
             <Button size="small">
@@ -13,9 +19,15 @@
               <Icon type="ios-arrow-down"></Icon>
             </Button>
             <DropdownMenu slot="list">
-              <DropdownItem @click.native="brandOperation(scope.row)">编辑绑定品牌</DropdownItem>
-              <DropdownItem @click.native="specOperation(scope.row)">编辑绑定规格</DropdownItem>
-              <DropdownItem @click.native="parameterOperation(scope.row)">编辑绑定参数</DropdownItem>
+              <DropdownItem @click.native="brandOperation(scope.row)"
+                >编辑绑定品牌</DropdownItem
+              >
+              <DropdownItem @click.native="specOperation(scope.row)"
+                >编辑绑定规格</DropdownItem
+              >
+              <DropdownItem @click.native="parameterOperation(scope.row)"
+                >编辑绑定参数</DropdownItem
+              >
             </DropdownMenu>
           </Dropdown>
 
@@ -27,14 +39,28 @@
             </Button>
             <DropdownMenu slot="list">
               <DropdownItem @click.native="edit(scope.row)">编辑</DropdownItem>
-              <DropdownItem v-if="scope.row.deleteFlag == 1" @click.native="enable(scope.row)">启用</DropdownItem>
-              <DropdownItem v-if="scope.row.deleteFlag == 0" @click.native="disable(scope.row)">禁用</DropdownItem>
+              <DropdownItem
+                v-if="scope.row.deleteFlag == 1"
+                @click.native="enable(scope.row)"
+                >启用</DropdownItem
+              >
+              <DropdownItem
+                v-if="scope.row.deleteFlag == 0"
+                @click.native="disable(scope.row)"
+                >禁用</DropdownItem
+              >
               <DropdownItem @click.native="remove(scope.row)">删除</DropdownItem>
             </DropdownMenu>
           </Dropdown>
           &nbsp;
-          <Button v-show="scope.row.level != 2" type="primary" @click="addChildren(scope.row)" size="small"
-            icon="md-add" style="margin-right: 5px">添加子分类
+          <Button
+            v-show="scope.row.level != 2"
+            type="primary"
+            @click="addChildren(scope.row)"
+            size="small"
+            icon="md-add"
+            style="margin-right: 5px"
+            >添加子分类
           </Button>
         </template>
 
@@ -42,18 +68,31 @@
           {{ scope.row.commissionRate }}%
         </template>
 
-        <template slot="deleteFlag" slot-scope="{row}">
-          <Tag :class="{'ml_10': row.deleteFlag}" :color="row.deleteFlag == false ? 'success' : 'error'">
-            {{row.deleteFlag == false ? '正常启用' : '禁用'}}</Tag>
+        <template slot="deleteFlag" slot-scope="{ row }">
+          <Tag
+            :class="{ ml_10: row.deleteFlag }"
+            :color="row.deleteFlag == false ? 'success' : 'error'"
+          >
+            {{ row.deleteFlag == false ? "正常启用" : "禁用" }}</Tag
+          >
         </template>
       </Table>
 
-      <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="500">
+      <Modal
+        :title="modalTitle"
+        v-model="modalVisible"
+        :mask-closable="false"
+        :width="500"
+      >
         <Form ref="form" :model="formAdd" :label-width="100" :rules="formValidate">
           <div v-if="showParent">
             <FormItem label="上级分类" prop="parentId">
               {{ parentTitle }}
-              <Input v-model="formAdd.parentId" clearable style="width: 100%; display: none" />
+              <Input
+                v-model="formAdd.parentId"
+                clearable
+                style="width: 100%; display: none"
+              />
             </FormItem>
           </div>
           <FormItem label="层级" prop="level" style="display: none">
@@ -63,7 +102,10 @@
             <Input v-model="formAdd.name" clearable style="width: 100%" />
           </FormItem>
           <FormItem label="分类图标" prop="image" v-if="formAdd.level !== 1">
-            <upload-pic-input v-model="formAdd.image" style="width: 100%"></upload-pic-input>
+            <upload-pic-input
+              v-model="formAdd.image"
+              style="width: 100%"
+            ></upload-pic-input>
           </FormItem>
           <FormItem label="排序值" prop="sortOrder" style="width: 345px">
             <InputNumber v-model="formAdd.sortOrder"></InputNumber>
@@ -72,7 +114,12 @@
             <InputNumber v-model="formAdd.commissionRate"></InputNumber>
           </FormItem>
           <FormItem label="是否启用" prop="deleteFlag">
-            <i-switch size="large" v-model="formAdd.deleteFlag" :true-value="0" :false-value="1">
+            <i-switch
+              size="large"
+              v-model="formAdd.deleteFlag"
+              :true-value="0"
+              :false-value="1"
+            >
               <span slot="open">启用</span>
               <span slot="close">禁用</span>
             </i-switch>
@@ -84,33 +131,52 @@
         </div>
       </Modal>
 
-      <Modal :title="modalBrandTitle" v-model="modalBrandVisible" :mask-closable="false" :width="500">
+      <Modal
+        :title="modalBrandTitle"
+        v-model="modalBrandVisible"
+        :mask-closable="false"
+        :width="500"
+      >
         <Form ref="brandForm" :model="brandForm" :label-width="100">
           <Select v-model="brandForm.categoryBrands" filterable multiple>
-            <Option v-for="item in brandWay" :value="item.id" :key="item.id">{{ item.name }}</Option>
-
+            <Option v-for="item in brandWay" :value="item.id" :key="item.id">{{
+              item.name
+            }}</Option>
           </Select>
         </Form>
         <div slot="footer">
           <Button type="text" @click="modalBrandVisible = false">取消</Button>
-          <Button type="primary" :loading="submitLoading" @click="saveCategoryBrand">提交</Button>
+          <Button type="primary" :loading="submitLoading" @click="saveCategoryBrand"
+            >提交</Button
+          >
         </div>
       </Modal>
 
-      <Modal :title="modalSpecTitle" v-model="modalSpecVisible" :mask-closable="false" :width="500">
+      <Modal
+        :title="modalSpecTitle"
+        v-model="modalSpecVisible"
+        :mask-closable="false"
+        :width="500"
+      >
         <Form ref="specForm" :model="specForm" :label-width="100">
           <Select v-model="specForm.categorySpecs" multiple>
-            <Option v-for="item in specifications" :value="item.id" :key="item.id" :label="item.specName">
+            <Option
+              v-for="item in specifications"
+              :value="item.id"
+              :key="item.id"
+              :label="item.specName"
+            >
             </Option>
           </Select>
         </Form>
         <div slot="footer">
           <Button type="text" @click="modalSpecVisible = false">取消</Button>
-          <Button type="primary" :loading="submitLoading" @click="saveCategorySpec">提交</Button>
+          <Button type="primary" :loading="submitLoading" @click="saveCategorySpec"
+            >提交</Button
+          >
         </div>
       </Modal>
     </Card>
-
   </div>
 </template>
 <script>
@@ -170,18 +236,9 @@ export default {
       specForm: {}, // 规格数据
       // 表单验证规则
       formValidate: {
-        commissionRate: [
-          regular.REQUIRED,
-          regular.INTEGER
-        ],
-        name:[
-          regular.REQUIRED,
-          regular.VARCHAR20,
-        ],
-        sortOrder:[
-          regular.REQUIRED,
-          regular.INTEGER
-        ]
+        commissionRate: [regular.REQUIRED, regular.INTEGER],
+        name: [regular.REQUIRED, regular.VARCHAR20],
+        sortOrder: [regular.REQUIRED, regular.INTEGER],
       },
       columns: [
         {
@@ -235,7 +292,6 @@ export default {
     //弹出品牌关联框
     brandOperation(v) {
       getCategoryBrandListData(v.id).then((res) => {
-        console.warn(res);
         this.categoryId = v.id;
         this.modalBrandTitle = "品牌关联";
         this.brandForm.categoryBrands = res.result.map((item) => item.id);
@@ -277,7 +333,6 @@ export default {
     },
     // 添加子分类
     addChildren(v) {
-      console.log(v);
       this.modalType = 0;
       this.modalTitle = "添加子分类";
       this.parentTitle = v.name;
@@ -367,7 +422,6 @@ export default {
 
     // 异步手动加载分类名称
     handleLoadData(item, callback) {
-      console.warn(item);
       if (item.level == 0) {
         let categoryList = JSON.parse(JSON.stringify(this.categoryList));
         categoryList.forEach((val) => {
@@ -384,7 +438,6 @@ export default {
         });
       } else {
         this.deepCategoryChildren(item.id, this.categoryList);
-        console.log(this.checkedCategoryChildren);
         setTimeout(() => {
           callback(this.checkedCategoryChildren);
         }, 1000);
@@ -420,8 +473,6 @@ export default {
             }
             return item;
           });
-
-          console.log(this.tableData);
         }
       });
     },
