@@ -4,7 +4,7 @@ var BASE = {
      */
     API_DEV: {
       seller:  "http://127.0.0.1:8888",
-      manager: "http://127.0.0.1:8888" 
+      manager: "http://127.0.0.1:8888",
       buyer:   "http://127.0.0.1:8888",
       common:  "http://127.0.0.1:8888",
     },

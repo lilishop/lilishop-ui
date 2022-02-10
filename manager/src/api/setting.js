@@ -15,7 +15,7 @@ export const editSmsMessageTemplate = (id, params) => {
 }
 //修改站内信模板
 export const editNoticeMessage = (id, params) => {
-  return putRequest(`/noticeMessage/${id}`, params)
+  return putRequest(`/setting/noticeMessage/${id}`, params)
 }
 
 //微信消息同步
@@ -57,7 +57,7 @@ export const delWechatMPMessageTemplate = (id, params) => {
 
 // 查询站内信模板信息
 export const getNoticeMessageData = params => {
-  return getRequest("/noticeMessage", params);
+  return getRequest("/setting/noticeMessage", params);
 };
 //删除站内信
 export const deleteMessage = (id) => {
@@ -65,11 +65,11 @@ export const deleteMessage = (id) => {
 };
 // 开启站内信模板
 export const openNoticeMessage = (id) => {
-  return putRequest(`/noticeMessage/${id}/open`);
+  return putRequest(`/setting/noticeMessage/${id}/open`);
 };
 // 修改站内信状态
 export const updateMessageStatus = (id,status) => {
-  return putRequest(`/noticeMessage/${id}/${status}`);
+  return putRequest(`/setting/noticeMessage/${id}/${status}`);
 };
 //获取短信模板
 export const getSmsTemplatePage = (params) => {
@@ -194,5 +194,5 @@ export const verificationPage = (params) => {
 
 //获取通知类站内信
 export const getNoticeMessageDetail = (id, params) => {
-  return getRequest(`/noticeMessage/${id}`, params)
+  return getRequest(`/setting/noticeMessage/${id}`, params)
 }

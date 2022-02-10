@@ -4,9 +4,22 @@
       <Card style="height: 60px">
         <div style="">
           <Button v-if="allowOperation.editPrice" @click="modifyPrice">调整价格</Button>
-          <Button v-if="allowOperation.editConsignee" @click="editAddress" type="primary" ghost>修改收货地址</Button>
-          <Button v-if="allowOperation.cancel" @click="orderCancel" type="warning" ghost>订单取消</Button>
-          <Button v-if="orderInfo.order.orderStatus === 'UNPAID'" @click="confirmPrice" type="primary">收款</Button>
+          <Button
+            v-if="allowOperation.editConsignee"
+            @click="editAddress"
+            type="primary"
+            ghost
+            >修改收货地址</Button
+          >
+          <Button v-if="allowOperation.cancel" @click="orderCancel" type="warning" ghost
+            >订单取消</Button
+          >
+          <Button
+            v-if="orderInfo.order.orderStatus === 'UNPAID'"
+            @click="confirmPrice"
+            type="primary"
+            >收款</Button
+          >
           <Button @click="orderLog" type="info" ghost>订单日志</Button>
         </div>
       </Card>
@@ -45,21 +58,30 @@
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票抬头：</div>
-            <div class="div-item-right">{{
-                orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : '暂无'
+            <div class="div-item-right">
+              {{
+                orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : "暂无"
               }}
             </div>
           </div>
 
-          <div class="div-item" v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId">
+          <div
+            class="div-item"
+            v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId"
+          >
             <div class="div-item-left">发票税号：</div>
-            <div class="div-item-right">{{ orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : '暂无' }}</div>
+            <div class="div-item-right">
+              {{ orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : "暂无" }}
+            </div>
           </div>
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票内容：</div>
-            <div class="div-item-right">{{
-                orderInfo.receipt.receiptContent ? orderInfo.receipt.receiptContent : '暂无'
+            <div class="div-item-right">
+              {{
+                orderInfo.receipt.receiptContent
+                  ? orderInfo.receipt.receiptContent
+                  : "暂无"
               }}
             </div>
           </div>
@@ -67,13 +89,19 @@
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票金额：</div>
             <div class="div-item-right">
-              {{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice('￥') }}
+              {{
+                orderInfo.receipt.receiptPrice
+                  ? orderInfo.receipt.receiptPrice
+                  : "暂无" | unitPrice("￥")
+              }}
             </div>
           </div>
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">是否开票：</div>
-            <div class="div-item-right">{{ orderInfo.receipt.receiptStatus == 0 ? '未开' : '已开' }}</div>
+            <div class="div-item-right">
+              {{ orderInfo.receipt.receiptStatus == 0 ? "未开" : "已开" }}
+            </div>
           </div>
         </div>
         <div style="width: 36%; float: left">
@@ -105,21 +133,30 @@
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票抬头：</div>
-            <div class="div-item-right">{{
-                orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : '暂无'
+            <div class="div-item-right">
+              {{
+                orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : "暂无"
               }}
             </div>
           </div>
 
-          <div class="div-item" v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId">
+          <div
+            class="div-item"
+            v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId"
+          >
             <div class="div-item-left">发票税号：</div>
-            <div class="div-item-right">{{ orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : '暂无' }}</div>
+            <div class="div-item-right">
+              {{ orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : "暂无" }}
+            </div>
           </div>
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票内容：</div>
-            <div class="div-item-right">{{
-                orderInfo.receipt.receiptContent ? orderInfo.receipt.receiptContent : '暂无'
+            <div class="div-item-right">
+              {{
+                orderInfo.receipt.receiptContent
+                  ? orderInfo.receipt.receiptContent
+                  : "暂无"
               }}
             </div>
           </div>
@@ -127,13 +164,19 @@
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票金额：</div>
             <div class="div-item-right">
-              {{ orderInfo.receipt.receiptPrice ? orderInfo.receipt.receiptPrice : '暂无' | unitPrice('￥') }}
+              {{
+                orderInfo.receipt.receiptPrice
+                  ? orderInfo.receipt.receiptPrice
+                  : "暂无" | unitPrice("￥")
+              }}
             </div>
           </div>
 
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">是否开票：</div>
-            <div class="div-item-right">{{ orderInfo.receipt.receiptStatus == 0 ? '未开' : '已开' }}</div>
+            <div class="div-item-right">
+              {{ orderInfo.receipt.receiptStatus == 0 ? "未开" : "已开" }}
+            </div>
           </div>
 
           <div class="div-item">
@@ -145,29 +188,55 @@
         </div>
       </Card>
       <Card class="mt_10">
-        <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom">
+        <Table
+          :loading="loading"
+          border
+          :columns="columns"
+          :data="data"
+          ref="table"
+          sortable="custom"
+        >
           <!-- 商品栏目格式化 -->
-          <template slot="goodsSlot" slot-scope="{row}">
+          <template slot="goodsSlot" slot-scope="{ row }">
             <div style="margin-top: 5px; height: 80px; display: flex">
               <div style="">
-                <img :src="row.image" style="height: 60px; margin-top: 1px; width: 60px" />
+                <img
+                  :src="row.image"
+                  style="height: 60px; margin-top: 1px; width: 60px"
+                />
               </div>
 
               <div style="margin-left: 13px">
                 <div class="div-zoom">
-                  <a @click="linkTo(row.goodsId,row.skuId)">{{ row.goodsName }}</a>
+                  <a @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
                 </div>
                 <span v-for="(item, key) in JSON.parse(row.specs)" :key="key">
-                  <span v-show="key!='images'" style="font-size: 12px;color: #999999;">
+                  <span v-show="key != 'images'" style="font-size: 12px; color: #999999">
                     {{ key }} : {{ item }}
                   </span>
                 </span>
-                <Poptip trigger="hover" style="display: block;" title="扫码在手机中查看" transfer>
+                <Poptip
+                  trigger="hover"
+                  style="display: block"
+                  title="扫码在手机中查看"
+                  transfer
+                >
                   <div slot="content">
-                    <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)" :margin="0" colorDark="#000" colorLight="#fff"
-                      :size="150"></vue-qr>
+                    <vue-qr
+                      :text="wapLinkTo(row.goodsId, row.skuId)"
+                      :margin="0"
+                      colorDark="#000"
+                      colorLight="#fff"
+                      :size="150"
+                    ></vue-qr>
                   </div>
-                  <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
+                  <img
+                    src="../../../assets/qrcode.svg"
+                    class="hover-pointer"
+                    width="20"
+                    height="20"
+                    alt=""
+                  />
                 </Poptip>
               </div>
             </div>
@@ -177,32 +246,56 @@
           <ul>
             <li>
               <span class="label">商品总额：</span>
-              <span class="txt">{{ orderInfo.order.priceDetailDTO.goodsPrice | unitPrice('￥') }}</span>
+              <span class="txt">{{
+                orderInfo.order.priceDetailDTO.goodsPrice | unitPrice("￥")
+              }}</span>
             </li>
-            <li v-if="orderInfo.order.priceDetailDTO.discountPrice && orderInfo.order.priceDetailDTO.discountPrice > 0">
+            <li
+              v-if="
+                orderInfo.order.priceDetailDTO.discountPrice &&
+                orderInfo.order.priceDetailDTO.discountPrice > 0
+              "
+            >
               <span class="label">优惠金额：</span>
-              <span class="txt"> {{ orderInfo.order.priceDetailDTO.discountPrice | unitPrice('￥') }} </span>
+              <span class="txt">
+                {{ orderInfo.order.priceDetailDTO.discountPrice | unitPrice("￥") }}
+              </span>
             </li>
 
-            <li v-if="orderInfo.order.priceDetailDTO.couponPrice && orderInfo.order.priceDetailDTO.couponPrice > 0">
+            <li
+              v-if="
+                orderInfo.order.priceDetailDTO.couponPrice &&
+                orderInfo.order.priceDetailDTO.couponPrice > 0
+              "
+            >
               <span class="label">优惠券金额：</span>
-              <span class="txt"> {{ orderInfo.order.priceDetailDTO.couponPrice | unitPrice('￥') }} </span>
+              <span class="txt">
+                {{ orderInfo.order.priceDetailDTO.couponPrice | unitPrice("￥") }}
+              </span>
             </li>
             <li>
               <span class="label">运费：</span>
-              <span class="txt">{{ orderInfo.order.freightPrice | unitPrice('￥') }}</span>
+              <span class="txt">{{
+                orderInfo.order.freightPrice | unitPrice("￥")
+              }}</span>
             </li>
             <li v-if="orderInfo.order.priceDetailDTO.updatePrice">
               <span class="label">修改金额：</span>
-              <span class="txt theme_color">¥{{ orderInfo.order.priceDetailDTO.updatePrice | unitPrice }}</span>
+              <span class="txt theme_color"
+                >¥{{ orderInfo.order.priceDetailDTO.updatePrice | unitPrice }}</span
+              >
             </li>
             <li v-if="orderInfo.order.priceDetailDTO.payPoint != 0">
               <span class="label">使用积分：</span>
-              <span class="txt flowPrice">{{ orderInfo.order.priceDetailDTO.payPoint }}</span>
+              <span class="txt flowPrice">{{
+                orderInfo.order.priceDetailDTO.payPoint
+              }}</span>
             </li>
             <li>
               <span class="label">应付金额：</span>
-              <span class="txt flowPrice">¥{{ orderInfo.order.priceDetailDTO.flowPrice | unitPrice }}</span>
+              <span class="txt flowPrice"
+                >¥{{ orderInfo.order.priceDetailDTO.flowPrice | unitPrice }}</span
+              >
             </li>
           </ul>
         </div>
@@ -215,10 +308,20 @@
         <span>修改金额</span>
       </p>
       <div>
-        <Form ref="modifyPriceForm" :model="modifyPriceForm" label-position="left" :label-width="70"
-          :rules="modifyPriceValidate">
+        <Form
+          ref="modifyPriceForm"
+          :model="modifyPriceForm"
+          label-position="left"
+          :label-width="70"
+          :rules="modifyPriceValidate"
+        >
           <FormItem label="订单金额" prop="price">
-            <InputNumber style="width:100px;" v-model="modifyPriceForm.price" :min="0" :max="999999"></InputNumber>
+            <InputNumber
+              style="width: 100px"
+              v-model="modifyPriceForm.price"
+              :min="0"
+              :max="999999"
+            ></InputNumber>
             <span class="ml_10">元</span>
           </FormItem>
         </Form>
@@ -235,11 +338,20 @@
         <span>订单取消</span>
       </p>
       <div>
-        <Form ref="orderCancelForm" :model="orderCancelForm" label-position="left" :label-width="100"
-          :rules="orderCancelValidate">
+        <Form
+          ref="orderCancelForm"
+          :model="orderCancelForm"
+          label-position="left"
+          :label-width="100"
+          :rules="orderCancelValidate"
+        >
           <FormItem label="取消原因" prop="reason">
-            <Input v-model="orderCancelForm.reason" type="textarea" :autosize="{ minRows: 2, maxRows: 5 }"
-              placeholder="请输入取消原因"></Input>
+            <Input
+              v-model="orderCancelForm.reason"
+              type="textarea"
+              :autosize="{ minRows: 2, maxRows: 5 }"
+              placeholder="请输入取消原因"
+            ></Input>
           </FormItem>
         </Form>
       </div>
@@ -255,22 +367,55 @@
         <span>修改收件信息</span>
       </p>
       <div>
-        <Form ref="addressForm" :model="addressForm" label-position="left" :label-width="100" :rules="addressRule">
+        <Form
+          ref="addressForm"
+          :model="addressForm"
+          label-position="left"
+          :label-width="100"
+          :rules="addressRule"
+        >
           <FormItem label="收件人" prop="consigneeName">
-            <Input v-model="addressForm.consigneeName" size="large" maxlength="20"></Input>
+            <Input
+              v-model="addressForm.consigneeName"
+              size="large"
+              maxlength="20"
+            ></Input>
           </FormItem>
           <FormItem label="联系方式" prop="consigneeMobile">
-            <Input v-model="addressForm.consigneeMobile" size="large" maxlength="11"></Input>
+            <Input
+              v-model="addressForm.consigneeMobile"
+              size="large"
+              maxlength="11"
+            ></Input>
           </FormItem>
           <FormItem label="地址信息" prop="consigneeAddressPath">
-            <Input v-model="addr" disabled style="width: 305px" v-if="showRegion == false" />
-            <Button v-if="showRegion == false" @click="regionClick" :loading="submitLoading" type="primary"
-              icon="ios-create-outline" style="margin-left: 8px">修改
+            <Input
+              v-model="addr"
+              disabled
+              style="width: 305px"
+              v-if="showRegion == false"
+            />
+            <Button
+              v-if="showRegion == false"
+              @click="regionClick"
+              :loading="submitLoading"
+              type="primary"
+              icon="ios-create-outline"
+              style="margin-left: 8px"
+              >修改
             </Button>
-            <region style="width: 400px" @selected="selectedRegion" v-if="showRegion == true" />
+            <region
+              style="width: 400px"
+              @selected="selectedRegion"
+              v-if="showRegion == true"
+            />
           </FormItem>
           <FormItem label="详细地址" prop="consigneeDetail">
-            <Input v-model="addressForm.consigneeDetail" size="large" maxlength="50"></Input>
+            <Input
+              v-model="addressForm.consigneeDetail"
+              size="large"
+              maxlength="50"
+            ></Input>
           </FormItem>
         </Form>
       </div>
@@ -285,8 +430,14 @@
         <span>订单日志</span>
       </p>
       <div class="order-log-div">
-        <Table :loading="loading" border :columns="orderLogColumns" :data="orderInfo.orderLogs" ref="table"
-          sortable="custom"></Table>
+        <Table
+          :loading="loading"
+          border
+          :columns="orderLogColumns"
+          :data="orderInfo.orderLogs"
+          ref="table"
+          sortable="custom"
+        ></Table>
       </div>
 
       <div slot="footer" style="text-align: right">
@@ -359,9 +510,7 @@ export default {
 
       //验证取消订单原因
       orderCancelValidate: {
-        reason: [
-          { required: true, message: "取消原因不能为空", trigger: "blur" },
-        ],
+        reason: [{ required: true, message: "取消原因不能为空", trigger: "blur" }],
       },
       addressModal: false, //弹出修改收件信息框
       //收件地址表单
@@ -373,12 +522,8 @@ export default {
         consigneeAddressIdPath: "",
       },
       orderDeliverFormValidate: {
-        logisticsNo: [
-          { required: true, message: "发货单号不能为空", trigger: "change" },
-        ],
-        logisticsId: [
-          { required: true, message: "请选择物流公司", trigger: "blur" },
-        ],
+        logisticsNo: [{ required: true, message: "发货单号不能为空", trigger: "change" }],
+        logisticsId: [{ required: true, message: "请选择物流公司", trigger: "blur" }],
       },
       addressRule: {
         consigneeName: [
@@ -442,10 +587,7 @@ export default {
             if (!params.row.goodsPrice) {
               return h("div", this.$options.filters.unitPrice(0, "￥"));
             }
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.goodsPrice, "￥")
-            );
+            return h("div", this.$options.filters.unitPrice(params.row.goodsPrice, "￥"));
           },
         },
 
@@ -459,10 +601,7 @@ export default {
           key: "flowPrice",
           minWidth: 100,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.flowPrice, "￥")
-            );
+            return h("div", this.$options.filters.unitPrice(params.row.flowPrice, "￥"));
           },
         },
       ],
@@ -542,15 +681,13 @@ export default {
     modifyPriceSubmit() {
       this.$refs.modifyPriceForm.validate((valid) => {
         if (valid) {
-          API_Order.updateOrderPrice(this.sn, this.modifyPriceForm).then(
-            (res) => {
-              if (res.success) {
-                this.$Message.success("修改订单金额成功");
-                this.modal = false;
-                this.getDataList();
-              }
+          API_Order.updateOrderPrice(this.sn, this.modifyPriceForm).then((res) => {
+            if (res.success) {
+              this.$Message.success("修改订单金额成功");
+              this.modal = false;
+              this.getDataList();
             }
-          );
+          });
         }
       });
     },
@@ -594,10 +731,8 @@ export default {
       this.addressForm.consigneeName = this.orderInfo.order.consigneeName;
       this.addressForm.consigneeMobile = this.orderInfo.order.consigneeMobile;
       this.addressForm.consigneeDetail = this.orderInfo.order.consigneeDetail;
-      this.addressForm.consigneeAddressPath =
-        this.orderInfo.order.consigneeAddressPath;
-      this.addressForm.consigneeAddressIdPath =
-        this.orderInfo.order.consigneeAddressIdPath;
+      this.addressForm.consigneeAddressPath = this.orderInfo.order.consigneeAddressPath;
+      this.addressForm.consigneeAddressIdPath = this.orderInfo.order.consigneeAddressIdPath;
     },
     //修改收货地址
     editAddressSubmit() {
@@ -609,15 +744,13 @@ export default {
       this.addressForm.consigneeAddressIdPath = this.regionId;
       this.$refs.addressForm.validate((valid) => {
         if (valid) {
-          API_Order.editOrderConsignee(this.sn, this.addressForm).then(
-            (res) => {
-              if (res.success) {
-                this.$Message.success("收货地址修改成功");
-                this.addressModal = false;
-                this.getDataList();
-              }
+          API_Order.editOrderConsignee(this.sn, this.addressForm).then((res) => {
+            if (res.success) {
+              this.$Message.success("收货地址修改成功");
+              this.addressModal = false;
+              this.getDataList();
             }
-          );
+          });
         }
       });
     },
@@ -656,7 +789,6 @@ export default {
   .operation {
     margin-bottom: 2vh;
   }
-
 
   .select-clear {
     margin-left: 10px;

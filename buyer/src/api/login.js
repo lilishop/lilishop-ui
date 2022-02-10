@@ -6,7 +6,7 @@ import request, {Method, buyerUrl} from '@/plugins/request.js';
  */
 export function regist (params) {
   return request({
-    url: '/buyer/passport/members/register',
+    url: '/buyer/passport/member/register',
     method: Method.POST,
     needToken: false,
     data: params
@@ -18,7 +18,7 @@ export function regist (params) {
  */
 export function login (params) {
   return request({
-    url: '/buyer/passport/members/userLogin',
+    url: '/buyer/passport/member/userLogin',
     method: Method.POST,
     needToken: false,
     data: params,
@@ -31,7 +31,7 @@ export function login (params) {
  */
 export function smsLogin (params) {
   return request({
-    url: '/buyer/passport/members/smsLogin',
+    url: '/buyer/passport/member/smsLogin',
     method: Method.POST,
     needToken: false,
     data: params,
@@ -44,7 +44,7 @@ export function smsLogin (params) {
  */
 export function getMemberMsg (params) {
   return request({
-    url: '/buyer/passport/members',
+    url: '/buyer/passport/member',
     method: Method.GET,
     needToken: true,
     params
@@ -74,7 +74,7 @@ export function loginCallback (uuid) {
  */
 export function validateCode (params) {
   return request({
-    url: `/buyer/passport/members/resetByMobile`,
+    url: `/buyer/passport/member/resetByMobile`,
     method: Method.POST,
     needToken: false,
     params
@@ -86,7 +86,7 @@ export function validateCode (params) {
  */
 export function resetPassword (params) {
   return request({
-    url: `/buyer/passport/members/resetPassword`,
+    url: `/buyer/passport/member/resetPassword`,
     method: Method.POST,
     needToken: false,
     params

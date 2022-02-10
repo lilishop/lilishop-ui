@@ -311,11 +311,11 @@ export const getFileListData = (params) => {
 
 // 重命名文件
 export const renameFile = (params) => {
-  return postRequest("/common/common/file/rename", params);
+  return postRequest("/common/file/rename", params);
 };
 // 删除文件
 export const deleteFile = (ids, params) => {
-  return deleteRequest(`/common/common/file/delete/${ids}`, params);
+  return deleteRequest(`/common/file/delete/${ids}`, params);
 };
 // 下载文件
 export const aliDownloadFile = (fKey, params) => {
@@ -405,12 +405,12 @@ export const resetPassword = (params) => {
 
 // 初始化商品索引
 export const createIndex = () => {
-  return getRequest(`/elasticsearch`);
+  return getRequest(`/other/elasticsearch`);
 };
 
 // 初始化商品索引
 export const getProgress = () => {
-  return getRequest(`/elasticsearch/progress`);
+  return getRequest(`/other/elasticsearch/progress`);
 };
 
 // 分页查询自定义分词

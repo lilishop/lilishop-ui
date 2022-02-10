@@ -134,7 +134,7 @@ export const editMemberAddress = (params) => {
 }
 //查询会员预存款
 export const getMemberWallet = (params) => {
-  return getRequest(`/members/wallet`, params)
+  return getRequest(`/wallet/wallet`, params)
 }
 
 

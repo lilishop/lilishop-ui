@@ -2,7 +2,7 @@ import {commonUrl, getRequest, getRequestWithNoToken, postRequestWithNoToken} fr
 
 // 通过id获取子地区
 export const getChildRegion = (id) => {
-  return getRequest(`${commonUrl}/common/region/item/${id}`);
+  return getRequest(`${commonUrl}/common/common/region/item/${id}`);
 };
 
 // 点地图获取地址信息

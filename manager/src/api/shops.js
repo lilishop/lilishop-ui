@@ -58,7 +58,7 @@ export const getBuyBillDetail = (id) => {
 
 // 获取商家结算单流水分页
 export const getStoreFlow = (id,params) => {
-  return getRequest(`/store/bill/${id}/getStoreFlow`,params)
+  return getRequest(`/order/bill/${id}/getStoreFlow`,params)
 }
 
 // 审核结算单

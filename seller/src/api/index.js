@@ -11,7 +11,7 @@ import {
 
 //获取所有city
 export const getAllCity = (params) => {
-  return getRequest(commonUrl+'/common/region/allCity', params)
+  return getRequest(commonUrl+'/common/common/region/allCity', params)
 }
 
 // 登陆
@@ -171,47 +171,47 @@ export const getLogListData = params => {
 };
 // 分页获取消息数据
 export const getMessageData = params => {
-  return getRequest("/message/getByCondition", params);
+  return getRequest("/message/storeMessage/getByCondition", params);
 };
 // 获取单个消息详情
 export const getMessageDataById = (id, params) => {
-  return getRequest(`/message/get/${id}`, params);
+  return getRequest(`/message/storeMessage/get/${id}`, params);
 };
 // 添加消息
 export const addMessage = params => {
-  return postRequest("/message/add", params);
+  return postRequest("/message/storeMessage/add", params);
 };
 // 编辑消息
 export const editMessage = params => {
-  return postRequest("/message/edit", params);
+  return postRequest("/message/storeMessage/edit", params);
 };
 // 回收站还原消息
 export const reductionMessage = (ids, params) => {
-  return putRequest(`/message/${ids}/reduction`, params);
+  return putRequest(`/message/storeMessage/${ids}/reduction`, params);
 };
 // 彻底删除消息
 export const clearMessage = (ids, params) => {
-  return deleteRequest(`/message/${ids}`, params);
+  return deleteRequest(`/message/storeMessage/${ids}`, params);
 };
 // 已读消息放入回收站
 export const deleteMessage = (ids, params) => {
-  return deleteRequest(`/message/${ids}/delete`, params);
+  return deleteRequest(`/message/storeMessage/${ids}/delete`, params);
 };
 // 分页获取消息推送数据
 export const getMessageSendData = params => {
-  return getRequest("/message", params);
+  return getRequest("/message/storeMessage", params);
 };
 // 进入消息中心首次加载全部数据
 export const getAllMessage = params => {
-  return getRequest("/message/all", params);
+  return getRequest("/message/storeMessage/all", params);
 };
 // 已读消息
 export const read = (id) => {
-  return putRequest(`/message/${id}/read`);
+  return putRequest(`/message/storeMessage/${id}/read`);
 };
 // 删除发送消息
 export const deleteMessageSend = (ids, params) => {
-  return deleteRequest(`/messageSend/delByIds/${ids}`, params);
+  return deleteRequest(`/message/storeMessageSend/delByIds/${ids}`, params);
 };
 
 // 分页获取文件数据

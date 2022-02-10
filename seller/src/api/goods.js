@@ -35,12 +35,12 @@ export const delCategdelShopGoodsLabel = id => {
 
 //  根据goodsId分页获取商品列表
 export const getQueryGoodsIdGoodsList = goodsId => {
-  return getRequest(`/goods/sku/${goodsId}/list`);
+  return getRequest(`/goods/goods/sku/${goodsId}/list`);
 };
 
 //  获取商品分页列表
 export const getGoodsSkuListDataSeller = params => {
-  return getRequest("/goods/sku/list", params);
+  return getRequest("/goods/goods/sku/list", params);
 };
 
 //  获取商品品牌分页列表
@@ -139,7 +139,7 @@ export const getGoodsCategory = parent_id => {
 
 //  获取商品sku分页列表
 export const getGoodsSkuData = params => {
-  return getRequest("/goods/sku/list", params);
+  return getRequest("/goods/goods/sku/list", params);
 };
 
 //  获取商品分页列表

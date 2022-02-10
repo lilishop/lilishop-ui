@@ -48,7 +48,7 @@ export default {
         nickName: [{required: true, message: '用户昵称不能为空'}, { max: 16, message: '用户昵称不能超过15个字符' }]
       },
       formItem: {}, // 表单数据
-      action: commonUrl + '/common/upload/file', // 上传接口
+      action: commonUrl + '/common/common/upload/file', // 上传接口
       accessToken: {} // 验证token
     }
   },

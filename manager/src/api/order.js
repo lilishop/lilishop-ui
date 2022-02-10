@@ -132,7 +132,7 @@ export const getTraces = (sn, params) => {
 }
 //获取发票列表
 export const getReceiptPage = (params) => {
-  return getRequest(`/receipt`, params)
+  return getRequest(`/trade/receipt`, params)
 }
 //平台退款
 export const refundPrice = (afterSaleSn, params) => {

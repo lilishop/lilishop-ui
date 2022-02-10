@@ -1,9 +1,8 @@
 <template>
   <div>
-    <Card style="position:relative;">
+    <Card style="position: relative">
       <Spin size="large" fix v-if="spinShow"></Spin>
       <Alert type="warning">
-
         <template slot="desc">
           为了方便在创建直播间时从选择商品，请尽量提前提审直播商品
         </template>
@@ -11,116 +10,229 @@
 
       <Form :model="liveForm" ref="liveForm" :rules="liveRulesForm" :label-width="120">
         <FormItem label="直播标题" prop="name">
-          <Input :disabled="liveStatus!='NEW'" v-model="liveForm.name" style="width:460px"></Input>
-          <div class="tips">直播间名字，最短3个汉字，最长17个汉字，1个汉字相当于2个字符</div>
+          <Input
+            :disabled="liveStatus != 'NEW'"
+            v-model="liveForm.name"
+            style="width: 460px"
+          ></Input>
+          <div class="tips">
+            直播间名字，最短3个汉字，最长17个汉字，1个汉字相当于2个字符
+          </div>
         </FormItem>
         <FormItem label="主播昵称" prop="anchorName">
-          <Input :disabled="liveStatus!='NEW'" v-model="liveForm.anchorName" style="width:360px"></Input>
-          <div class="tips">主播昵称，最短2个汉字，最长15个汉字，1个汉字相当于2个字符</div>
+          <Input
+            :disabled="liveStatus != 'NEW'"
+            v-model="liveForm.anchorName"
+            style="width: 360px"
+          ></Input>
+          <div class="tips">
+            主播昵称，最短2个汉字，最长15个汉字，1个汉字相当于2个字符
+          </div>
         </FormItem>
         <FormItem label="直播时间" prop="startTime">
-
-          <DatePicker :disabled="liveStatus!='NEW'" format="yyyy-MM-dd HH:mm" type="datetimerange" v-model="times" @on-change="handleChangeTime" :options="optionsTime" placeholder="直播计划开始时间-直播计划结束时间"
-            style="width: 300px">
+          <DatePicker
+            :disabled="liveStatus != 'NEW'"
+            format="yyyy-MM-dd HH:mm"
+            type="datetimerange"
+            v-model="times"
+            @on-change="handleChangeTime"
+            :options="optionsTime"
+            placeholder="直播计划开始时间-直播计划结束时间"
+            style="width: 300px"
+          >
           </DatePicker>
-          <div class="tips">直播开播时间需要在当前时间的10分钟后并且,开始时间不能在6个月后,直播计划结束时间（开播时间和结束时间间隔不得短于30分钟，不得超过24小时）</div>
+          <div class="tips">
+            直播开播时间需要在当前时间的10分钟后并且,开始时间不能在6个月后,直播计划结束时间（开播时间和结束时间间隔不得短于30分钟，不得超过24小时）
+          </div>
         </FormItem>
 
         <FormItem label="主播微信号" prop="anchorWechat">
-          <Input :disabled="liveStatus!='NEW'" v-model="liveForm.anchorWechat" style="width:360px" placeholder="主播微信号"></Input>
-          <div class="tips">主播微信号，如果未实名认证，需要先前往“小程序直播”小程序进行<a target="_black" href="https://res.wx.qq.com/op_res/9rSix1dhHfK4rR049JL0PHJ7TpOvkuZ3mE0z7Ou_Etvjf-w1J_jVX0rZqeStLfwh">实名验证</a></div>
+          <Input
+            :disabled="liveStatus != 'NEW'"
+            v-model="liveForm.anchorWechat"
+            style="width: 360px"
+            placeholder="主播微信号"
+          ></Input>
+          <div class="tips">
+            主播微信号，如果未实名认证，需要先前往“小程序直播”小程序进行<a
+              target="_black"
+              href="https://res.wx.qq.com/op_res/9rSix1dhHfK4rR049JL0PHJ7TpOvkuZ3mE0z7Ou_Etvjf-w1J_jVX0rZqeStLfwh"
+              >实名验证</a
+            >
+          </div>
         </FormItem>
 
         <!-- 分享卡片 -->
         <FormItem label="分享卡片封面" prop="feedsImg">
           <div class="upload-list" v-if="liveForm.feedsImg">
             <template>
-              <img :src="liveForm.feedsImg">
+              <img :src="liveForm.feedsImg" />
               <div class="upload-list-cover">
-                <Icon type="ios-eye-outline" @click.native="handleView(liveForm.feedsImg)"></Icon>
-                <Icon type="ios-trash-outline" @click.native="handleRemove('feedsImg')"></Icon>
+                <Icon
+                  type="ios-eye-outline"
+                  @click.native="handleView(liveForm.feedsImg)"
+                ></Icon>
+                <Icon
+                  type="ios-trash-outline"
+                  @click.native="handleRemove('feedsImg')"
+                ></Icon>
               </div>
             </template>
-
           </div>
-          <Upload v-if="liveForm.feedsImg.length ==0" ref="upload" :show-upload-list="false" :on-success="handleFeedsImgSuccess" :format="['jpg','jpeg','png']" :on-format-error="handleFormatError"
-            :max-size="1024" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
-            <div style="width: 58px;height:58px;line-height: 58px;">
+          <Upload
+            v-if="liveForm.feedsImg.length == 0"
+            ref="upload"
+            :show-upload-list="false"
+            :on-success="handleFeedsImgSuccess"
+            :format="['jpg', 'jpeg', 'png']"
+            :on-format-error="handleFormatError"
+            :max-size="1024"
+            :on-exceeded-size="handleMaxSize"
+            type="drag"
+            :action="action"
+            :headers="accessToken"
+            style="display: inline-block; width: 58px"
+          >
+            <div style="width: 58px; height: 58px; line-height: 58px">
               <Icon type="ios-camera" size="20"></Icon>
             </div>
           </Upload>
-          <div class="tips">
-            直播间分享图，图片规则：建议像素800*640，大小不超过1M；
-          </div>
+          <div class="tips">直播间分享图，图片规则：建议像素800*640，大小不超过1M；</div>
         </FormItem>
 
         <!-- 直播间背景墙 -->
         <FormItem label="直播间背景墙" prop="coverImg">
-
           <div class="upload-list" v-if="liveForm.coverImg">
             <template>
-              <img :src="liveForm.coverImg">
+              <img :src="liveForm.coverImg" />
               <div class="upload-list-cover">
-                <Icon type="ios-eye-outline" @click.native="handleView(liveForm.coverImg)"></Icon>
-                <Icon type="ios-trash-outline" @click.native="handleRemove('coverImg')"></Icon>
+                <Icon
+                  type="ios-eye-outline"
+                  @click.native="handleView(liveForm.coverImg)"
+                ></Icon>
+                <Icon
+                  type="ios-trash-outline"
+                  @click.native="handleRemove('coverImg')"
+                ></Icon>
               </div>
             </template>
           </div>
-          <Upload v-if="liveForm.coverImg.length ==0" ref="upload" :show-upload-list="false" :on-success="handleCoverImgSuccess" :format="['jpg','jpeg','png']" :on-format-error="handleFormatError"
-            :max-size="1024" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
-            <div style="width: 58px;height:58px;line-height: 58px;">
+          <Upload
+            v-if="liveForm.coverImg.length == 0"
+            ref="upload"
+            :show-upload-list="false"
+            :on-success="handleCoverImgSuccess"
+            :format="['jpg', 'jpeg', 'png']"
+            :on-format-error="handleFormatError"
+            :max-size="1024"
+            :on-exceeded-size="handleMaxSize"
+            type="drag"
+            :action="action"
+            :headers="accessToken"
+            style="display: inline-block; width: 58px"
+          >
+            <div style="width: 58px; height: 58px; line-height: 58px">
               <Icon type="ios-camera" size="20"></Icon>
             </div>
           </Upload>
-          <div class="tips"> 直播间背景图，图片规则：建议像素1080*1920，大小不超过1M</div>
+          <div class="tips">直播间背景图，图片规则：建议像素1080*1920，大小不超过1M</div>
         </FormItem>
 
         <!-- 直播间背景墙 -->
         <FormItem label="直播间分享图" prop="shareImg">
-
           <div class="upload-list" v-if="liveForm.shareImg">
             <template>
-              <img :src="liveForm.shareImg">
+              <img :src="liveForm.shareImg" />
               <div class="upload-list-cover">
-                <Icon type="ios-eye-outline" @click.native="handleView(liveForm.shareImg)"></Icon>
-                <Icon type="ios-trash-outline" @click.native="handleRemove('shareImg')"></Icon>
+                <Icon
+                  type="ios-eye-outline"
+                  @click.native="handleView(liveForm.shareImg)"
+                ></Icon>
+                <Icon
+                  type="ios-trash-outline"
+                  @click.native="handleRemove('shareImg')"
+                ></Icon>
               </div>
             </template>
           </div>
-          <Upload v-if="liveForm.shareImg.length ==0" ref="upload" :show-upload-list="false" :on-success="handleShareImgSuccess" :format="['jpg','jpeg','png']" :on-format-error="handleFormatError"
-            :max-size="1024" :on-exceeded-size="handleMaxSize" type="drag" :action="action" :headers="accessToken" style="display: inline-block;width:58px;">
-            <div style="width: 58px;height:58px;line-height: 58px;">
+          <Upload
+            v-if="liveForm.shareImg.length == 0"
+            ref="upload"
+            :show-upload-list="false"
+            :on-success="handleShareImgSuccess"
+            :format="['jpg', 'jpeg', 'png']"
+            :on-format-error="handleFormatError"
+            :max-size="1024"
+            :on-exceeded-size="handleMaxSize"
+            type="drag"
+            :action="action"
+            :headers="accessToken"
+            style="display: inline-block; width: 58px"
+          >
+            <div style="width: 58px; height: 58px; line-height: 58px">
               <Icon type="ios-camera" size="20"></Icon>
             </div>
           </Upload>
-          <div class="tips"> 直播间分享图，图片规则：建议像素800*640，大小不超过1M</div>
+          <div class="tips">直播间分享图，图片规则：建议像素800*640，大小不超过1M</div>
         </FormItem>
 
         <FormItem label="商品" v-if="$route.query.id">
-          <Button type="primary" ghost @click="liveGoodsVisible=true" :disabled="liveStatus!='NEW'" icon="md-add">添加商品</Button>
+          <Button
+            type="primary"
+            ghost
+            @click="liveGoodsVisible = true"
+            :disabled="liveStatus != 'NEW'"
+            icon="md-add"
+            >添加商品</Button
+          >
           <Table class="goods-table" :columns="liveColumns" :data="liveData">
-            <template slot-scope="{ row,index }" slot="goodsName">
+            <template slot-scope="{ row, index }" slot="goodsName">
               <div class="flex-goods">
-                <Badge v-if="index == 0 || index ==1" color="volcano"></Badge>
-                <img class="thumbnail" :src="row.thumbnail || row.goodsImage">
+                <Badge v-if="index == 0 || index == 1" color="volcano"></Badge>
+                <img class="thumbnail" :src="row.thumbnail || row.goodsImage" />
                 {{ row.goodsName || row.name }}
               </div>
             </template>
             <template slot-scope="{ row }" class="price" slot="price">
               <div>
-                <div v-if="row.priceType == 1">{{row.price | unitPrice('￥')}}</div>
-                <div v-if="row.priceType == 2">{{row.price | unitPrice('￥')}}至{{row.price2 | unitPrice('￥')}}</div>
-                <div v-if="row.priceType == 3">{{row.price | unitPrice('￥')}}<span class="original-price">{{row.price2 | unitPrice('￥')}}</span></div>
+                <div v-if="row.priceType == 1">{{ row.price | unitPrice("￥") }}</div>
+                <div v-if="row.priceType == 2">
+                  {{ row.price | unitPrice("￥") }}至{{ row.price2 | unitPrice("￥") }}
+                </div>
+                <div v-if="row.priceType == 3">
+                  {{ row.price | unitPrice("￥")
+                  }}<span class="original-price">{{ row.price2 | unitPrice("￥") }}</span>
+                </div>
               </div>
             </template>
             <template slot-scope="{ row }" slot="quantity">
-              <div>{{row.quantity}}</div>
+              <div>{{ row.quantity }}</div>
             </template>
-            <template slot-scope="{ row,index }" slot="action">
+            <template slot-scope="{ row, index }" slot="action">
               <div class="action">
-                <Button size="small" type="primary" :disabled="liveStatus!='NEW'" @click="deleteGoods(row,index)">删除</Button>
-                <Button size="small" ghost type="primary" :disabled="liveStatus!='NEW'" @click="onMove(row.id,1)">上移</Button>
-                <Button size="small" ghost type="primary" :disabled="liveStatus!='NEW'" @click="onMove(row.id,0)">下移</Button>
+                <Button
+                  size="small"
+                  type="primary"
+                  :disabled="liveStatus != 'NEW'"
+                  @click="deleteGoods(row, index)"
+                  >删除</Button
+                >
+                <Button
+                  size="small"
+                  ghost
+                  type="primary"
+                  :disabled="liveStatus != 'NEW'"
+                  @click="onMove(row.id, 1)"
+                  >上移</Button
+                >
+                <Button
+                  size="small"
+                  ghost
+                  type="primary"
+                  :disabled="liveStatus != 'NEW'"
+                  @click="onMove(row.id, 0)"
+                  >下移</Button
+                >
               </div>
             </template>
           </Table>
@@ -130,13 +242,15 @@
         </FormItem>
 
         <FormItem>
-          <Button type="primary" v-if="liveStatus=='NEW'" @click="createLives()">保存</Button>
+          <Button type="primary" v-if="liveStatus == 'NEW'" @click="createLives()"
+            >保存</Button
+          >
         </FormItem>
       </Form>
     </Card>
     <!-- 浏览图片 -->
     <Modal title="查看图片" v-model="imageVisible">
-      <img :src="imageSrc" v-if="imageVisible" style="width: 100%">
+      <img :src="imageSrc" v-if="imageVisible" style="width: 100%" />
     </Modal>
 
     <Modal width="800" v-model="liveGoodsVisible" footer-hide>
@@ -184,24 +298,16 @@ export default {
           { required: true, message: "请输入主播昵称", trigger: "blur" },
           { max: 15, min: 2, message: "主播昵称最短2个汉字，最长15个汉字" },
         ],
-        anchorWechat: [
-          { required: true, message: "请输入主播微信号", trigger: "blur" },
-        ],
+        anchorWechat: [{ required: true, message: "请输入主播微信号", trigger: "blur" }],
         startTime: [
           {
             required: true,
             message: "请正确输入开始时间以及结束时间",
           },
         ],
-        feedsImg: [
-          { required: true, message: "分享卡片封面不能为空", trigger: "blur" },
-        ],
-        coverImg: [
-          { required: true, message: "直播间背景墙不能为空", trigger: "blur" },
-        ],
-        shareImg: [
-          { required: true, message: "直播间分享图不能为空", trigger: "blur" },
-        ],
+        feedsImg: [{ required: true, message: "分享卡片封面不能为空", trigger: "blur" }],
+        coverImg: [{ required: true, message: "直播间背景墙不能为空", trigger: "blur" }],
+        shareImg: [{ required: true, message: "直播间分享图不能为空", trigger: "blur" }],
       },
       liveForm: {
         name: "", //直播标题
@@ -438,16 +544,8 @@ export default {
         this.times[1] = daterange[1];
 
         // this.times = daterange;
-        this.$set(
-          this.liveForm,
-          "startTime",
-          new Date(daterange[0]).getTime() / 1000
-        );
-        this.$set(
-          this.liveForm,
-          "endTime",
-          new Date(daterange[1]).getTime() / 1000
-        );
+        this.$set(this.liveForm, "startTime", new Date(daterange[0]).getTime() / 1000);
+        this.$set(this.liveForm, "endTime", new Date(daterange[1]).getTime() / 1000);
       }
     },
 
@@ -493,9 +591,7 @@ export default {
           // 需判断当前是否是添加商品
           if (this.$route.query.id) {
             this.spinShow = true;
-            this.liveForm.commodityList = JSON.stringify(
-              this.liveForm.commodityList
-            );
+            this.liveForm.commodityList = JSON.stringify(this.liveForm.commodityList);
             delete this.liveForm.updateTime;
             // 将当前直播间修改
             editLive(this.liveForm).then((res) => {

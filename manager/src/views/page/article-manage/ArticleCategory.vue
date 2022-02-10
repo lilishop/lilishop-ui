@@ -121,8 +121,7 @@ export default {
       // 表单验证规则
       formValidate: {
         articleCategoryName:[
-          regular.REQUIRED,
-          regular.VARCHAR20,
+          regular.REQUIRED
         ],
         sort:[
           regular.REQUIRED,

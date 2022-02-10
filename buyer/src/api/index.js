@@ -28,7 +28,7 @@ export function pageData (params) {
  */
 export function handleRefreshToken (token) {
   return request({
-    url: `/buyer/passport/members/refresh/${token}`,
+    url: `/buyer/passport/member/refresh/${token}`,
     method: Method.GET,
     needToken: false
   })

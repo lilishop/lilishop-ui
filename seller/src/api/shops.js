@@ -19,7 +19,7 @@ export const getBillPage = (params) => {
 
 // 获取商家结算单流水分页
 export const getSellerFlow = (id, params) => {
-  return getRequest(`/member/bill/${id}/getStoreFlow`, params)
+  return getRequest(`/order/bill/${id}/getStoreFlow`, params)
 }
 
 // 商家核对结算单
@@ -29,7 +29,7 @@ export const reconciliation = (id, params) => {
 
 // 获取商家分销订单流水分页
 export const getDistributionFlow = (id, params) => {
-  return getRequest(`/member/bill/${id}/getDistributionFlow`, params)
+  return getRequest(`/order/bill/${id}/getDistributionFlow`, params)
 }
 
 // 获取商家结算单详细

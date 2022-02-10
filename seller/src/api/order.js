@@ -125,10 +125,10 @@ export const getAfterSaleTraces = (sn, params) => {
 };
 //获取发票列表
 export const getReceiptPage = params => {
-  return getRequest(`/receipt`, params);
+  return getRequest(`/trade/receipt`, params);
 };
 
 //获取发票列表
 export const invoicing = id => {
-  return postRequest(`receipt/${id}/invoicing`);
+  return postRequest(`/trade/receipt/${id}/invoicing`);
 };
