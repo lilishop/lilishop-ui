@@ -7,6 +7,6 @@ module.exports = {
   }, //公司信息
   icpMessage: "京ICP备20009696号-1", //icp备案
   aMapKey: "b440952723253aa9fe483e698057bf7d", //高德web端申请的api key
-  enableCDN: false, //生产环境 是否启用cdn加载 vue等js
+  enableCDN: true, //生产环境 是否启用cdn加载 vue等js
   port: 10000, //端口
 };

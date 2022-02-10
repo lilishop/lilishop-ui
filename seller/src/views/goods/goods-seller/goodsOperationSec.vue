@@ -45,7 +45,11 @@
               />
             </FormItem>
             <FormItem label="商品品牌" prop="brandId">
-              <Select v-model="baseInfoForm.brandId" filterable style="width: 200px">
+              <Select
+                v-model="baseInfoForm.brandId"
+                filterable
+                style="width: 200px"
+              >
                 <Option
                   v-for="item in brandList"
                   :value="item.id"
@@ -57,14 +61,25 @@
           </div>
           <h4>商品交易信息</h4>
           <div class="form-item-view">
-            <FormItem class="form-item-view-el" label="计量单位" prop="goodsUnit">
+            <FormItem
+              class="form-item-view-el"
+              label="计量单位"
+              prop="goodsUnit"
+            >
               <Select v-model="baseInfoForm.goodsUnit" style="width: 100px">
-                <Option v-for="(unit, i) in goodsUnitList" :key="i" :value="unit"
+                <Option
+                  v-for="(unit, i) in goodsUnitList"
+                  :key="i"
+                  :value="unit"
                   >{{ unit }}
                 </Option>
               </Select>
             </FormItem>
-            <FormItem class="form-item-view-el" label="销售模式" prop="salesModel">
+            <FormItem
+              class="form-item-view-el"
+              label="销售模式"
+              prop="salesModel"
+            >
               <RadioGroup
                 type="button"
                 v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'"
@@ -94,7 +109,10 @@
               prop="goodsGalleryFiles"
             >
               <div style="display: flex; flex-wrap: flex-start">
-                <vuedraggable :list="baseInfoForm.goodsGalleryFiles" :animation="200">
+                <vuedraggable
+                  :list="baseInfoForm.goodsGalleryFiles"
+                  :animation="200"
+                >
                   <div
                     class="demo-upload-list"
                     v-for="(item, __index) in baseInfoForm.goodsGalleryFiles"
@@ -163,12 +181,15 @@
                           <Button
                             type="primary"
                             slot="extra"
-                            @click="handleCloseSkuItem($index)"
+                            @click="handleCloseSkuItem(item, $index)"
                           >
                             删除规格
                           </Button>
-                          <div>
-                            <FormItem label="规格名" class="sku-item-content-val flex">
+                          <Form :model="item" class="flex">
+                            <FormItem
+                              label="规格名"
+                              class="sku-item-content-val flex"
+                            >
                               <AutoComplete
                                 style="width: 150px"
                                 v-model="item.name"
@@ -176,11 +197,11 @@
                                 placeholder="请输入规格项名称"
                                 :filter-method="filterMethod"
                                 :data="skuData"
-                                @on-change="editSkuItem"
+                                @on-change="handleSkuTitle($event, $index)"
                               >
                               </AutoComplete>
                             </FormItem>
-                          </div>
+                          </Form>
                           <div class="flex sku-val">
                             <Form :model="item" class="flex">
                               <!--规格值文本列表-->
@@ -200,7 +221,14 @@
                                   :filter-method="filterMethod"
                                   :data="skuVal"
                                   @on-focus="changeSkuVals(item.name)"
-                                  @on-change="skuValueChange(val.value, $index, item)"
+                                  @on-change="
+                                    handleSkuValue(
+                                      val.value,
+                                      $index,
+                                      val,
+                                      index
+                                    )
+                                  "
                                 >
                                 </AutoComplete>
                                 <Button
@@ -215,7 +243,9 @@
                             </Form>
                           </div>
                           <div>
-                            <Button @click="addSpec($index, item)">添加规格值</Button>
+                            <Button @click="addSpec($index, item)"
+                              >添加规格值</Button
+                            >
                           </div>
                         </Card>
                       </div>
@@ -233,9 +263,97 @@
                   规格详细
                   <div slot="content">
                     <div slot="content">
+                      <ul class="flex sku-ul">
+                        <li
+                          v-for="(item, index) in skuTableColumn"
+                          :key="index"
+                        >
+                          {{ item.title }}
+                        </li>
+                      </ul>
+
+                      <div
+                        class="mt_10 flex sku-editor"
+                        v-for="(item, index) in skuTableData"
+                        :key="index"
+                      >
+                        <div
+                          v-for="(spec, specIndex) in skuTableColumn.filter(
+                            (val) => {
+                              return val.key;
+                            }
+                          )"
+                          :key="specIndex"
+                        >
+                          {{
+                            skuTableData[index][
+                              spec.title || spec.key || spec.___key
+                            ]
+                          }}
+                        </div>
+
+                        <div
+                          v-if="
+                            skuTableColumn.find((val) => {
+                              return val.slot == 'weight';
+                            })
+                          "
+                        >
+                          <Input
+                            clearable
+                            :min="0"
+                            v-model="item.weight"
+                            placeholder="请输入重量"
+                            @on-change="updateSkuTable(item, 'weight', index)"
+                          />
+                        </div>
+                        <div>
+                          <Input
+                            clearable
+                            v-model="item.sn"
+                            placeholder="请输入货号"
+                            @on-change="updateSkuTable(item, 'sn', index)"
+                          />
+                        </div>
+                        <div>
+                          <InputNumber
+                            clearable
+                            class="input-number"
+                            :min="0"
+                            v-model="item.quantity"
+                            placeholder="请输入库存"
+                            @on-change="updateSkuTable(item, 'quantity', index)"
+                          />
+                        </div>
+                        <div>
+                          <InputNumber
+                            clearable
+                            class="input-number"
+                            :min="0"
+                            v-model="item.cost"
+                            placeholder="请输入成本价"
+                            @on-change="updateSkuTable(item, 'cost', index)"
+                          />
+                        </div>
+                        <div>
+                          <InputNumber
+                            class="input-number"
+                            clearable
+                            :min="0"
+                            v-model="item.price"
+                            placeholder="请输入价格"
+                            @on-change="updateSkuTable(item, 'price', index)"
+                          />
+                        </div>
+                        <div>
+                          <Button @click="editSkuPicture(item)"
+                            >编辑图片</Button
+                          >
+                        </div>
+                      </div>
+
                       <!-- #TODO 此处有待优化  -->
-                      <Table
-                        class="mt_10"
+                      <!-- <Table
                         :columns="skuTableColumn"
                         :data="skuTableData"
                         style="
@@ -291,76 +409,82 @@
                         </template>
                         <template slot-scope="{ row }" slot="images">
                           <Button @click="editSkuPicture(row)">编辑图片</Button>
-                          <Modal
-                            v-model="showSkuPicture"
-                            :styles="{ top: '30px' }"
-                            class-name="sku-preview-modal"
-                            title="编辑图片"
-                            ok-text="结束编辑"
-                            @on-ok="updateSkuPicture()"
-                            cancel-text="取消"
-                          >
-                            <div class="preview-picture">
-                              <img v-if="previewPicture !== ''" :src="previewPicture" />
-                            </div>
-                            <Divider />
-                            <vuedraggable
-                              :list="selectedSku.images"
-                              :animation="200"
-                              style="display: inline-block"
-                            >
-                              <div
-                                class="sku-upload-list"
-                                v-for="(img, __index) in selectedSku.images"
-                                :key="__index"
-                              >
-                                <template>
-                                  <img :src="img.url" />
-                                  <div class="sku-upload-list-cover">
-                                    <Icon
-                                      type="md-search"
-                                      @click="handleView(img.url)"
-                                    ></Icon>
-                                    <Icon
-                                      type="md-trash"
-                                      @click="handleRemove(img, __index)"
-                                    ></Icon>
-                                  </div>
-                                </template>
-                              </div>
-                            </vuedraggable>
-                            <Upload
-                              ref="uploadSku"
-                              :show-upload-list="false"
-                              :on-success="handleSuccess"
-                              :format="['jpg', 'jpeg', 'png']"
-                              :on-format-error="handleFormatError"
-                              :on-exceeded-size="handleMaxSize"
-                              :max-size="1024"
-                              :before-upload="handleBeforeUpload"
-                              multiple
-                              type="drag"
-                              :action="uploadFileUrl"
-                              :headers="{ ...accessToken }"
-                              style="display: inline-block; width: 58px"
-                            >
-                              <div>
-                                <Icon type="ios-camera" size="55"></Icon>
-                              </div>
-                            </Upload>
-                          </Modal>
+
                         </template>
-                      </Table>
+                      </Table> -->
                     </div>
                   </div>
                 </Panel>
               </Collapse>
             </div>
+
+            <Modal
+              v-model="showSkuPicture"
+              :styles="{ top: '30px' }"
+              class-name="sku-preview-modal"
+              title="编辑图片"
+              ok-text="结束编辑"
+              @on-ok="updateSkuPicture()"
+              cancel-text="取消"
+            >
+              <div class="preview-picture">
+                <img v-if="previewPicture !== ''" :src="previewPicture" />
+              </div>
+              <Divider />
+              <vuedraggable
+                :list="selectedSku.images"
+                :animation="200"
+                style="display: inline-block"
+              >
+                <div
+                  class="sku-upload-list"
+                  v-for="(img, __index) in selectedSku.images"
+                  :key="__index"
+                >
+                  <template>
+                    <img :src="img.url" />
+                    <div class="sku-upload-list-cover">
+                      <Icon
+                        type="md-search"
+                        @click="handleView(img.url)"
+                      ></Icon>
+                      <Icon
+                        type="md-trash"
+                        @click="handleRemove(img, __index)"
+                      ></Icon>
+                    </div>
+                  </template>
+                </div>
+              </vuedraggable>
+              <Upload
+                ref="uploadSku"
+                :show-upload-list="false"
+                :on-success="handleSuccess"
+                :format="['jpg', 'jpeg', 'png']"
+                :on-format-error="handleFormatError"
+                :on-exceeded-size="handleMaxSize"
+                :max-size="1024"
+                :before-upload="handleBeforeUpload"
+                multiple
+                type="drag"
+                :action="uploadFileUrl"
+                :headers="{ ...accessToken }"
+                style="display: inline-block; width: 58px"
+              >
+                <div>
+                  <Icon type="ios-camera" size="55"></Icon>
+                </div>
+              </Upload>
+            </Modal>
           </div>
           <h4>商品详情描述</h4>
           <div class="form-item-view">
             <div class="tree-bar">
-              <FormItem class="form-item-view-el" label="店内分类" prop="shopCategory">
+              <FormItem
+                class="form-item-view-el"
+                label="店内分类"
+                prop="shopCategory"
+              >
                 <Tree
                   ref="tree"
                   style="text-align: left"
@@ -375,14 +499,25 @@
             <FormItem class="form-item-view-el" label="商品描述" prop="intro">
               <editor eid="intro" v-model="baseInfoForm.intro"></editor>
             </FormItem>
-            <FormItem class="form-item-view-el" label="移动端描述" prop="skuList">
-              <editor eid="mobileIntro" v-model="baseInfoForm.mobileIntro"></editor>
+            <FormItem
+              class="form-item-view-el"
+              label="移动端描述"
+              prop="skuList"
+            >
+              <editor
+                eid="mobileIntro"
+                v-model="baseInfoForm.mobileIntro"
+              ></editor>
             </FormItem>
           </div>
           <div v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'">
             <h4>商品物流信息</h4>
             <div class="form-item-view">
-              <FormItem class="form-item-view-el" label="物流模板" prop="templateId">
+              <FormItem
+                class="form-item-view-el"
+                label="物流模板"
+                prop="templateId"
+              >
                 <Select v-model="baseInfoForm.templateId" style="width: 200px">
                   <Option
                     v-for="item in logisticsTemplate"
@@ -395,7 +530,11 @@
             </div>
             <h4>其他信息</h4>
             <div class="form-item-view">
-              <FormItem class="form-item-view-el" label="商品发布" prop="release">
+              <FormItem
+                class="form-item-view-el"
+                label="商品发布"
+                prop="release"
+              >
                 <RadioGroup
                   type="button"
                   button-style="solid"
@@ -409,7 +548,11 @@
                   </Radio>
                 </RadioGroup>
               </FormItem>
-              <FormItem class="form-item-view-el" label="商品推荐" prop="skuList">
+              <FormItem
+                class="form-item-view-el"
+                label="商品推荐"
+                prop="skuList"
+              >
                 <RadioGroup
                   type="button"
                   button-style="solid"
@@ -656,6 +799,7 @@ export default {
       ],
     };
   },
+
   methods: {
     /**
      * 选择参数
@@ -674,14 +818,15 @@ export default {
         };
       }
       //赋予分组id、分组名称
-      this.baseInfoForm.goodsParamsDTOList[groupIndex].groupId = paramsGroup.groupId;
-      this.baseInfoForm.goodsParamsDTOList[groupIndex].groupName = paramsGroup.groupName;
+      this.baseInfoForm.goodsParamsDTOList[groupIndex].groupId =
+        paramsGroup.groupId;
+      this.baseInfoForm.goodsParamsDTOList[groupIndex].groupName =
+        paramsGroup.groupName;
 
       //参数详细为空，则赋予
       if (
-        !this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[
-          paramsIndex
-        ]
+        !this.baseInfoForm.goodsParamsDTOList[groupIndex]
+          .goodsParamsItemDTOList[paramsIndex]
       ) {
         this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[
           paramsIndex
@@ -707,7 +852,8 @@ export default {
     },
     // 编辑sku图片
     editSkuPicture(row) {
-      if (row.images && row.images.length > 0) {
+      console.log(row);
+      if (row.images && row.images.length) {
         this.previewPicture = row.images[0].url;
       }
       this.selectedSku = row;
@@ -724,7 +870,9 @@ export default {
     },
     // 移除已选图片
     handleRemove(item, index) {
-      this.selectedSku.images = this.selectedSku.images.filter((i) => i.url !== item.url);
+      this.selectedSku.images = this.selectedSku.images.filter(
+        (i) => i.url !== item.url
+      );
       if (this.selectedSku.images.length > 0 && index === 0) {
         this.previewPicture = this.selectedSku.images[0].url;
       } else if (this.selectedSku.images.length < 0) {
@@ -738,9 +886,8 @@ export default {
     },
     // 移除商品图片
     handleRemoveGoodsPicture(file) {
-      this.baseInfoForm.goodsGalleryFiles = this.baseInfoForm.goodsGalleryFiles.filter(
-        (i) => i.url !== file.url
-      );
+      this.baseInfoForm.goodsGalleryFiles =
+        this.baseInfoForm.goodsGalleryFiles.filter((i) => i.url !== file.url);
     },
     // 更新sku图片
     updateSkuPicture() {
@@ -762,7 +909,6 @@ export default {
     },
     // 商品图片上传成功
     handleSuccessGoodsPicture(res, file) {
-      console.log(res);
       if (file.response) {
         file.url = file.response.result;
         this.baseInfoForm.goodsGalleryFiles.push(file);
@@ -795,7 +941,8 @@ export default {
     // sku图片上传前钩子
     handleBeforeUpload(file) {
       const check =
-        this.selectedSku.images !== undefined && this.selectedSku.images.length > 5;
+        this.selectedSku.images !== undefined &&
+        this.selectedSku.images.length > 5;
       if (check) {
         this.$Notice.warning({ title: "图片数量不能大于五张" });
         return false;
@@ -804,9 +951,11 @@ export default {
 
     /** 查询商品品牌列表 */
     getGoodsBrandList() {
-      API_GOODS.getCategoryBrandListDataSeller(this.categoryId).then((response) => {
-        this.brandList = response;
-      });
+      API_GOODS.getCategoryBrandListDataSeller(this.categoryId).then(
+        (response) => {
+          this.brandList = response;
+        }
+      );
     },
     // 获取商品单位
     GET_GoodsUnit() {
@@ -860,12 +1009,11 @@ export default {
         response.result.goodsGalleryList &&
         response.result.goodsGalleryList.length > 0
       ) {
-        this.baseInfoForm.goodsGalleryFiles = response.result.goodsGalleryList.map(
-          (i) => {
+        this.baseInfoForm.goodsGalleryFiles =
+          response.result.goodsGalleryList.map((i) => {
             let files = { url: i };
             return files;
-          }
-        );
+          });
       }
 
       this.Get_SkuInfoByCategory(this.categoryId);
@@ -892,12 +1040,18 @@ export default {
           cost: e.cost,
           quantity: e.quantity,
           weight: e.weight,
+          // ___keys: [],
         };
         e.specList.forEach((u) => {
           if (u.specName === "images") {
             sku.images = u.specImage;
           } else {
             sku[u.specName] = u.specValue;
+            // 赋值keys标识符
+            // sku.___keys.push({
+            //   key: u.specName,
+            //   value: u.specValue,
+            // });
             if (
               !skusInfo.some((s) => s.name === u.specName) &&
               !this.ignoreColumn.includes(u.specName)
@@ -910,6 +1064,7 @@ export default {
                     id: u.specValueId,
                     name: u.specName,
                     value: u.specValue || "",
+                    ___key: u.specValue || "",
                   },
                 ],
               });
@@ -923,6 +1078,7 @@ export default {
                     id: u.specValueId,
                     name: u.specName,
                     value: u.specValue || "",
+                    ___key: u.specValue || "",
                   });
                 }
                 if (!sk.spec_id && u.specName === "specId") {
@@ -937,44 +1093,47 @@ export default {
       });
       this.skuInfo = skusInfo;
       this.renderTableData();
+
       this.skuTableData = skus;
     },
 
     /** 根据当前分类id查询商品应包含的参数 */
     GET_GoodsParams() {
-      API_GOODS.getCategoryParamsListDataSeller(this.categoryId).then((response) => {
-        if (!response || response.length <= 0) {
-          return;
-        }
-        this.goodsParams = response;
+      API_GOODS.getCategoryParamsListDataSeller(this.categoryId).then(
+        (response) => {
+          if (!response || response.length <= 0) {
+            return;
+          }
+          this.goodsParams = response;
 
-        //展开选项卡
-        this.goodsParams.forEach((item) => {
-          this.params_panel.push(item.groupName);
-        });
-        if (this.baseInfoForm.goodsParamsDTOList) {
-          // 已选值集合
-          const paramsArr = [];
-          this.baseInfoForm.goodsParamsDTOList.forEach((group) => {
-            group.goodsParamsItemDTOList.forEach((param) => {
-              param.groupId = group.groupId;
-              paramsArr.push(param);
-            });
+          //展开选项卡
+          this.goodsParams.forEach((item) => {
+            this.params_panel.push(item.groupName);
           });
-          // 循环参数分组
-          this.goodsParams.forEach((parmsGroup) => {
-            parmsGroup.params.forEach((param) => {
-              paramsArr.forEach((arr) => {
-                if (param.paramName == arr.paramName) {
-                  param.paramValue = arr.paramValue;
-                }
+          if (this.baseInfoForm.goodsParamsDTOList) {
+            // 已选值集合
+            const paramsArr = [];
+            this.baseInfoForm.goodsParamsDTOList.forEach((group) => {
+              group.goodsParamsItemDTOList.forEach((param) => {
+                param.groupId = group.groupId;
+                paramsArr.push(param);
               });
             });
-          });
-        } else {
-          this.baseInfoForm.goodsParamsDTOList = [];
+            // 循环参数分组
+            this.goodsParams.forEach((parmsGroup) => {
+              parmsGroup.params.forEach((param) => {
+                paramsArr.forEach((arr) => {
+                  if (param.paramName == arr.paramName) {
+                    param.paramValue = arr.paramValue;
+                  }
+                });
+              });
+            });
+          } else {
+            this.baseInfoForm.goodsParamsDTOList = [];
+          }
         }
-      });
+      );
     },
     /** 添加规格项 */
     addSkuItem() {
@@ -985,18 +1144,11 @@ export default {
       // 写入对象，下标，具体对象
       this.$set(this.skuInfo, this.skuInfo.length, {
         spec_values: [],
-        name: "规格名",
+        name: "规格名" + (this.skuInfo.length + 1),
       });
-      this.renderTableData();
+      // this.renderTableData();
     },
-    // 编辑规格名
-    editSkuItem() {
-      this.renderTableData();
-    },
-    // 编辑规格值
-    async skuValueChange(val, index, item) {
-      this.renderTableData();
-    },
+
     // 获取焦点时，取得规格名对应的规格值
     changeSkuVals(name) {
       if (name) {
@@ -1009,14 +1161,7 @@ export default {
         });
       }
     },
-    /** 移除当前规格项 进行数据变化*/
-    handleCloseSkuItem($index) {
-      this.skuInfo.splice($index, 1);
-      /**
-       * 渲染规格详细表格
-       */
-      this.renderTableData();
-    },
+
     // 添加规格值的验证
     validateEmpty(params) {
       let flag = true;
@@ -1042,6 +1187,7 @@ export default {
         this.$set(item.spec_values, item.spec_values.length, {
           name: item.name,
           value: "",
+          ___key: "",
         });
         this.baseInfoForm.regeneratorSkuFlag = true;
         /**
@@ -1051,27 +1197,99 @@ export default {
       }
     },
 
-    /** 移除当前规格值 */
-    handleCloseSkuValue(item, index) {
-      item.spec_values.splice(index, 1);
+    /** 移除当前规格项 进行数据变化*/
+    handleCloseSkuItem(item, $index) {
+      console.log(item);
+      let oldsSkuTableData = cloneObj(this.skuTableData);
+      oldsSkuTableData.forEach((sku, i) => {
+        if (sku[item.name]) {
+          delete sku[item.name];
+        }
+      });
+      this.skuTableData = oldsSkuTableData;
 
+      this.skuTableColumn.forEach((column, i) => {
+        if (column.key == item.name) {
+          this.skuTableColumn.splice(i, 1);
+        }
+      });
+      this.skuInfo.splice($index, 1);
+    },
+
+    /**
+     * 移除当前规格值
+     * 找到一样规格的值进行移出
+     */
+    handleCloseSkuValue(item, index) {
+      let oldsSkuTableData = cloneObj(this.skuTableData);
+      console.log("oldsSkuTableData", oldsSkuTableData);
+      this.skuTableData = oldsSkuTableData.filter((sku, i) => {
+        if (
+          sku[item.spec_values[index].name] != item.spec_values[index].value
+        ) {
+          return sku;
+        }
+      });
+      item.spec_values.splice(index, 1);
       this.baseInfoForm.regeneratorSkuFlag = true;
-      /**
-       * 渲染规格详细表格
-       */
-      this.renderTableData();
+    },
+
+    /**
+     * 编辑规格值
+     * 根据当前___keys的索引指定需修改的值
+     * @param {*} change  返回input更改的值
+     * @param {*} index 修改规格名的索引
+     * @param {*} item 当前规格值
+     */
+    async handleSkuValue(change, index, item) {
+      this.skuTableData.map((sku, i) => {
+        // 指定key
+        if (sku[item.name] == item.___key) {
+          sku[item.name] = change;
+          console.log(1);
+        } else if (!item.___key && !sku[item.name]) {
+          // 如果为第一次没有值则进行赋值操作
+
+          sku[item.name] = change;
+          console.log("赋值", sku);
+        }
+      });
+      item.___key = change;
+    },
+
+    /**
+     * 编辑规格名
+     * 根据修改的规格名，将skuTableData的key(规格名)进行修改
+     * @param {*} change  返回input更改的值
+     * @param {*} index 修改规格名的索引
+     */
+    handleSkuTitle(change, index) {
+      let oldSkuTableColumn = cloneObj(this.skuTableColumn);
+      this.skuTableData.forEach((sku, i) => {
+        Object.keys(sku).forEach((key) => {
+          if (oldSkuTableColumn[index].key == key) {
+            // 修改当前sku的规格名
+            sku = {
+              [change]: sku[key],
+              ...sku,
+            };
+            delete sku[key];
+
+            this.skuTableData[i] = sku;
+          }
+        });
+      });
+      this.skuTableColumn[index].key = change;
+      this.skuTableColumn[index].title = change;
     },
 
     /**
      * 渲染table所需要的column 和 data
      */
     renderTableData() {
-      this.skuTableColumn = [];
-      this.skuTableData = [];
       let pushData = [];
       //渲染头部
       this.skuInfo.forEach((sku) => {
-        // !sku.name ? (sku.name = "规格名") : "";
         //列名称
         let columnName = sku.name;
         pushData.push({
@@ -1112,14 +1330,20 @@ export default {
       this.skuTableColumn = pushData;
       //克隆所有渲染的数据
       let cloneTemp = cloneObj(this.skuInfo);
+      if (cloneTemp.length) {
+        cloneTemp.map((temp) => {
+          return {
+            [temp.name]: temp.value,
+            images: this.baseInfoForm.goodsGalleryFiles || [],
+          };
+        });
+      }
 
-      //数据清空一次
-      this.$set(this, "skuTableData", []);
       //判定 是否存在规格分组
       if (cloneTemp[0]) {
         //存放最终结果
         let result = [];
-        //循环选中的 sku 数据
+        // 循环出第一个规格名中的数据
         cloneTemp[0].spec_values.forEach((specItem) => {
           result.push({
             [cloneTemp[0].name]: specItem.value,
@@ -1128,8 +1352,14 @@ export default {
         });
         cloneTemp.splice(0, 1);
         result = this.specIterator(result, cloneTemp);
+        // 保存以前skuTable值
+        let oldData = cloneObj(this.skuTableData);
+
         this.skuTableData = result;
-        console.log(this.skuTableData);
+        // 赋值给最新的skuTable
+        this.skuTableData = Object.assign(this.skuTableData, oldData);
+
+        console.log(result, this.skuTableData);
       }
     },
     /**
@@ -1141,16 +1371,25 @@ export default {
       //是否还可以循环
       if (cloneTemp.length > 0) {
         let table = [];
-        result.forEach((resItem) => {
+        let newVal = []; // 用于存储新对象 并重置到最后一位
+        result.forEach((resItem, i) => {
           cloneTemp[0].spec_values.forEach((valItem) => {
             let obj = cloneObj(resItem);
             obj[cloneTemp[0].name] = valItem.value;
 
-            table.push(obj);
+            if (valItem.value) {
+              table.push(obj);
+            } else {
+              newVal.push(obj);
+            }
           });
         });
         result = [];
+        table.push(...newVal);
+
         table.forEach((t) => {
+          console.log("t", t);
+
           result.push(t);
         });
         //清除当前循环的分组
@@ -1160,6 +1399,7 @@ export default {
       }
       return this.specIterator(result, cloneTemp);
     },
+
     /** 根据分类id获取系统设置规格信息*/
     Get_SkuInfoByCategory(categoryId) {
       if (categoryId) {
@@ -1179,8 +1419,7 @@ export default {
       return option.toUpperCase().indexOf(value.toUpperCase()) !== -1;
     },
     /** 数据改变之后 抛出数据 */
-    updateSkuTable(row, item, type = "deafult") {
-      let index = row._index;
+    updateSkuTable(row, item, index) {
       this.baseInfoForm.regeneratorSkuFlag = true;
       /** 进行自定义校验 判断是否是数字（小数也能通过）重量 */
       if (item === "weight") {
@@ -1218,6 +1457,7 @@ export default {
         }
       }
       this.$nextTick(() => {
+        console.log(index, item);
         this.skuTableData[index][item] = row[item];
       });
       // this.$set(this.skuTableData,[index][item],row[item])
@@ -1257,7 +1497,10 @@ export default {
       this.$refs["baseInfoForm"].validate((valid) => {
         if (valid) {
           let submit = JSON.parse(JSON.stringify(this.baseInfoForm));
-          if (submit.goodsGalleryFiles && submit.goodsGalleryFiles.length <= 0) {
+          if (
+            submit.goodsGalleryFiles &&
+            submit.goodsGalleryFiles.length <= 0
+          ) {
             this.submitLoading = false;
             this.$Message.error("请上传商品图片");
             return;
@@ -1281,13 +1524,17 @@ export default {
           });
 
           if (submit.goodsGalleryFiles.length > 0) {
-            submit.goodsGalleryList = submit.goodsGalleryFiles.map((i) => i.url);
+            submit.goodsGalleryList = submit.goodsGalleryFiles.map(
+              (i) => i.url
+            );
           }
           /** 参数校验 **/
           /* Object.keys(submit.goodsParamsList).forEach((item) => {
           });*/
           submit.release ? (submit.release = true) : (submit.release = false);
-          submit.recommend ? (submit.recommend = true) : (submit.recommend = false);
+          submit.recommend
+            ? (submit.recommend = true)
+            : (submit.recommend = false);
 
           if (this.goodsId) {
             API_GOODS.editGoods(this.goodsId, submit).then((res) => {
@@ -1320,9 +1567,8 @@ export default {
     saveToDraft() {
       this.baseInfoForm.skuList = this.skuTableData;
       if (this.baseInfoForm.goodsGalleryFiles.length > 0) {
-        this.baseInfoForm.goodsGalleryList = this.baseInfoForm.goodsGalleryFiles.map(
-          (i) => i.url
-        );
+        this.baseInfoForm.goodsGalleryList =
+          this.baseInfoForm.goodsGalleryFiles.map((i) => i.url);
       }
       this.baseInfoForm.categoryName = [];
       this.baseInfoForm.saveType = "TEMPLATE";
@@ -1412,4 +1658,30 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "./addGoods.scss";
+
+.sku-ul {
+  align-items: center;
+  padding: 10px 0;
+  border-radius: 0.4em;
+  background: #f3f5f7;
+  > li {
+    flex: 1;
+    text-align: center;
+    font-weight: bold;
+    padding: 10px;
+  }
+}
+.sku-editor {
+  > div {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 10px;
+  }
+}
+.input-number {
+  width: 100%;
+}
 </style>
