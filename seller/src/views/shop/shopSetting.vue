@@ -1,78 +1,177 @@
 <template>
   <div class="search">
-
     <Card style="margin-left: 10px">
       <Tabs v-model="type" @on-click="handleClickType">
         <TabPane label="基本信息" name="INFO">
-          <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
+          <Form
+            ref="form"
+            :model="form"
+            :label-width="100"
+            :rules="formValidate"
+          >
             <FormItem label="店铺名称">
-              <Input v-model="storeName" disabled clearable style="width: 20%"/>
+              <Input
+                v-model="storeName"
+                disabled
+                clearable
+                style="width: 20%"
+              />
             </FormItem>
             <FormItem label="店铺地址" prop="address">
-              <Input v-model="form.address" @on-focus="$refs.liliMap.showMap = true" clearable style="width: 20%"/>
+              <Input
+                v-model="form.address"
+                @on-focus="$refs.liliMap.showMap = true"
+                clearable
+                style="width: 20%"
+              />
             </FormItem>
             <FormItem label="详细地址" prop="shopAddressDetail">
-              <Input v-model="form.storeAddressDetail" clearable style="width: 20%" maxlength="50"/>
+              <Input
+                v-model="form.storeAddressDetail"
+                clearable
+                style="width: 20%"
+                maxlength="50"
+              />
             </FormItem>
             <FormItem label="店铺LOGO：">
-              <upload-pic-thumb v-model="form.storeLogo" :multiple="false"></upload-pic-thumb>
+              <upload-pic-thumb
+                v-model="form.storeLogo"
+                :multiple="false"
+              ></upload-pic-thumb>
             </FormItem>
             <FormItem label="店铺简介" prop="content" class="wangEditor">
-              <Input type="textarea" :rows="8" v-model="form.storeDesc" style="width: 30%"></Input>
+              <Input
+                type="textarea"
+                :rows="8"
+                v-model="form.storeDesc"
+                style="width: 30%"
+              ></Input>
             </FormItem>
             <Form-item>
-              <Button @click="handleSubmit" :loading="submitLoading" type="primary" style="margin-right:5px">修改
+              <Button
+                @click="handleSubmit"
+                :loading="submitLoading"
+                type="primary"
+                style="margin-right: 5px"
+                >修改
               </Button>
             </Form-item>
           </Form>
         </TabPane>
         <TabPane label="退货地址" name="REFUND_GOODS_ADDRESS">
-          <Form ref="addressForm" :model="addressForm" :label-width="100" :rules="afterFormValidate">
+          <Form
+            ref="addressForm"
+            :model="addressForm"
+            :label-width="100"
+            :rules="afterFormValidate"
+          >
             <FormItem label="收货人" prop="salesConsigneeName">
-              <Input v-model="addressForm.salesConsigneeName" maxlength="11" clearable style="width: 20%"/>
+              <Input
+                v-model="addressForm.salesConsigneeName"
+                maxlength="11"
+                clearable
+                style="width: 20%"
+              />
             </FormItem>
             <FormItem label="收货人电话" prop="salesConsigneeMobile">
-              <Input v-model="addressForm.salesConsigneeMobile" maxlength="11" style="width: 20%"/>
+              <Input
+                v-model="addressForm.salesConsigneeMobile"
+                maxlength="11"
+                style="width: 20%"
+              />
             </FormItem>
             <FormItem label="售后地址">
-              <Input v-model="region" disabled style="width: 20%" v-if="showRegion == false"/>
-              <Button v-if="showRegion == false" @click="regionClick" :loading="submitLoading" type="primary"
-                      style="margin-left:8px">修改
+              <Input
+                v-model="region"
+                disabled
+                style="width: 20%"
+                v-if="showRegion == false"
+              />
+              <Button
+                v-if="showRegion == false"
+                @click="regionClick"
+                :loading="submitLoading"
+                type="primary"
+                style="margin-left: 8px"
+                >修改
               </Button>
-              <regionMap style="width: 20%" @selected="selectedRegion" v-if="showRegion == true"/>
+              <regionMap
+                style="width: 20%"
+                @selected="selectedRegion"
+                v-if="showRegion == true"
+              />
             </FormItem>
             <FormItem label="详细地址" prop="salesConsigneeDetail">
-              <Input v-model="addressForm.salesConsigneeDetail" clearable style="width: 20%" maxlength="50"/>
+              <Input
+                v-model="addressForm.salesConsigneeDetail"
+                clearable
+                style="width: 20%"
+                maxlength="50"
+              />
             </FormItem>
 
             <Form-item>
-              <Button @click="afterHandleSubmit" :loading="submitLoading" type="primary" style="margin-right:5px">修改
+              <Button
+                @click="afterHandleSubmit"
+                :loading="submitLoading"
+                type="primary"
+                style="margin-right: 5px"
+                >修改
               </Button>
             </Form-item>
           </Form>
         </TabPane>
         <TabPane label="库存预警" name="STOCK_WARNING">
-
-          <Form ref="stockWarningForm" :model="stockWarningForm" :label-width="100" :rules="stockWarningFormValidate">
+          <Form
+            ref="stockWarningForm"
+            :model="stockWarningForm"
+            :label-width="100"
+            :rules="stockWarningFormValidate"
+          >
             <FormItem label="预警数" prop="stockWarning">
-              <Input v-model="stockWarningForm.stockWarning" type="number" maxlength="6" clearable style="width: 20%"/>
+              <InputNumber
+                :min="0"
+                :max="99999"
+                v-model="stockWarningForm.stockWarning"
+                type="number"
+                maxlength="6"
+                clearable
+                style="width: 20%"
+              />
             </FormItem>
             <Form-item>
-              <Button @click="stockWarningHandleSubmit" :loading="submitLoading" type="primary"
-                      style="margin-right:5px">修改
+              <Button
+                @click="stockWarningHandleSubmit"
+                :loading="submitLoading"
+                type="primary"
+                style="margin-right: 5px"
+                >修改
               </Button>
             </Form-item>
           </Form>
         </TabPane>
         <TabPane label="客服设置" name="UDESK">
-
-          <Form ref="udeskForm" :model="udeskForm" :label-width="100" :rules="udeskFormValidate">
+          <Form
+            ref="udeskForm"
+            :model="udeskForm"
+            :label-width="100"
+            :rules="udeskFormValidate"
+          >
             <FormItem label="坐席id" prop="merchantEuid">
-              <Input v-model="udeskForm.merchantEuid" maxlength="30" clearable style="width: 20%"/>
+              <Input
+                v-model="udeskForm.merchantEuid"
+                maxlength="30"
+                clearable
+                style="width: 20%"
+              />
             </FormItem>
             <Form-item>
-              <Button @click="merchantSubmit" :loading="submitLoading" type="primary"
-                      style="margin-right:5px">修改
+              <Button
+                @click="merchantSubmit"
+                :loading="submitLoading"
+                type="primary"
+                style="margin-right: 5px"
+                >修改
               </Button>
             </Form-item>
           </Form>
@@ -86,7 +185,7 @@
 
 <script>
 import * as API_Shop from "@/api/shops";
-import {validateMobile} from "@/libs/validate";
+import { validateMobile } from "@/libs/validate";
 import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
 import liliMap from "@/views/my-components/map/index";
 import regionMap from "@/views/lili-components/region";
@@ -121,21 +220,21 @@ export default {
       },
       //im form
       udeskForm: {
-        merchantEuid: ""
+        merchantEuid: "",
       },
       stockWarningFormValidate: {
         stockWarning: [
-          {required: true, message: "请输入库存预警数", trigger: "blur"},
+          { required: true, message: "请输入库存预警数", trigger: "blur" },
         ],
       },
       udeskFormValidate: {
         merchantEuid: [
-          {required: true, message: "请输入店铺坐席ID", trigger: "blur"},
+          { required: true, message: "请输入店铺坐席ID", trigger: "blur" },
         ],
       },
       afterFormValidate: {
         salesConsigneeMobile: [
-          {required: true, message: "手机号不能为空", trigger: "blur"},
+          { required: true, message: "手机号不能为空", trigger: "blur" },
           {
             pattern: RegExp.mobile,
             trigger: "blur",
@@ -143,10 +242,10 @@ export default {
           },
         ],
         salesConsigneeName: [
-          {required: true, message: "请输入收货人", trigger: "blur"},
+          { required: true, message: "请输入收货人", trigger: "blur" },
         ],
         salesConsigneeDetail: [
-          {required: true, message: "请输入详细地址", trigger: "blur"},
+          { required: true, message: "请输入详细地址", trigger: "blur" },
         ],
       },
       form: {
@@ -272,7 +371,6 @@ export default {
       });
     },
     merchantSubmit() {
-
       this.$refs.udeskForm.validate((valid) => {
         if (valid) {
           this.submitLoading = true;
@@ -339,7 +437,7 @@ export default {
       this.$set(this.form, "address", item.addr);
       this.form.storeAddressPath = item.addr;
       this.form.storeAddressIdPath = item.addrId;
-      this.form.storeCenter = item.position.lng + "," + item.position.lat
+      this.form.storeCenter = item.position.lng + "," + item.position.lat;
     },
   },
   mounted() {
