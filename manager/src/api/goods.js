@@ -26,15 +26,15 @@ export const disableBrand = (id, params) => {
 }
 //根据分类id获取关联品牌
 export const getCategoryBrandListData = (category_id, params) => {
-    return getRequest(`/goods/category/brand/${category_id}`, params)
+    return getRequest(`/goods/categoryBrand/${category_id}`, params)
 }
 //保存获取关联品牌
 export const saveCategoryBrand = (category_id, params) => {
-    return postRequest(`/goods/category/brand/${category_id}`, params)
+    return postRequest(`/goods/categoryBrand/${category_id}`, params)
 }
 //保存获取关联规格
 export const saveCategorySpec = (category_id, params) => {
-    return postRequest(`/goods/category/spec/${category_id}`, params)
+    return postRequest(`/goods/categorySpec/${category_id}`, params)
 }
 
 //获取所有可用品牌
@@ -88,7 +88,7 @@ export const updateSpec = (id,params) => {
 }
 //根据分类id获取关联规格
 export const getCategorySpecListData = (category_id, params) => {
-    return getRequest(`/goods/category/spec/${category_id}`, params)
+    return getRequest(`/goods/categorySpec/${category_id}`, params)
 }
 //删除gUI个
 export const delSpec = (id, params) => {
@@ -130,7 +130,7 @@ export const authGoods = (id, params) => {
 
 //查询分类绑定参数信息
 export const getCategoryParamsListData = (id, params) => {
-    return getRequest(`/goods/category/parameters/${id}`, params)
+    return getRequest(`/goods/categoryParameters/${id}`, params)
 }
 
 //查询商品绑定参数信息
@@ -151,20 +151,20 @@ export const deleteParams = (id, params) => {
 }
 //保存参数组
 export const insertParamsGroup = (params) => {
-    return postRequest('/goods/category/parameters', params)
+    return postRequest('/goods/categoryParameters', params)
 }
 //更新参数组
 export const updateParamsGroup = (params) => {
-    return putRequest('/goods/category/parameters', params)
+    return putRequest('/goods/categoryParameters', params)
 }
 //删除参数组
 export const deleteParamsGroup = (id, params) => {
-    return deleteRequest(`/goods/category/parameters/${id}`, params)
+    return deleteRequest(`/goods/categoryParameters/${id}`, params)
 }
 
 //保存获取关联规格
 export const getGoodsSpecInfo = (category_id, params) => {
-    return getRequest(`/goods/category/spec/goods/${category_id}`, params)
+    return getRequest(`/goods/categorySpec/goods/${category_id}`, params)
 }
 
 

@@ -52,7 +52,7 @@ export function getAddrDetail (id) {
 // 传给后台citycode 获取城市街道等id
 export function handleRegion (params) {
   return request({
-    url: `${commonUrl}/common/common/common/region/region`,
+    url: `${commonUrl}/common/common/region/region`,
     needToken: true,
     method: Method.GET,
     params

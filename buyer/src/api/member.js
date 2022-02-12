@@ -214,7 +214,7 @@ export function afterSaleInfo (sn) {
 // 获取申请售后、投诉原因
 export function afterSaleReason (serviceType) {
   return request({
-    url: `/buyer/order/afterSale//get/afterSaleReason/${serviceType}`,
+    url: `/buyer/order/afterSale/get/afterSaleReason/${serviceType}`,
     method: Method.GET,
     needToken: true
   });
@@ -222,7 +222,7 @@ export function afterSaleReason (serviceType) {
 // 获取申请售后详情
 export function afterSaleDetail (sn) {
   return request({
-    url: `/buyer/order/afterSale//get/${sn}`,
+    url: `/buyer/order/afterSale/get/${sn}`,
     method: Method.GET,
     needToken: true
   });
@@ -230,7 +230,7 @@ export function afterSaleDetail (sn) {
 // 售后日志
 export function afterSaleLog (sn) {
   return request({
-    url: `/buyer/order/afterSale//get/getAfterSaleLog/${sn}`,
+    url: `/buyer/order/afterSale/get/getAfterSaleLog/${sn}`,
     method: Method.GET,
     needToken: true
   });

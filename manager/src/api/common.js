@@ -7,7 +7,7 @@ export const getChildRegion = (id) => {
 
 // 点地图获取地址信息
 export const getRegion = (params) => {
-  return getRequest(`${commonUrl}/common/region/region`, params);
+  return getRequest(`${commonUrl}/common/common/region/region`, params);
 };
 
 // 获取拼图验证

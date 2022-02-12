@@ -153,5 +153,5 @@ export const refundLog = (params) => {
 
 //售后单商家收货信息
 export const storeAddress = (sn) => {
-  return getRequest(`/afterSale/getStoreAfterSaleAddress/${sn}`)
+  return getRequest(`/order/afterSale/getStoreAfterSaleAddress/${sn}`)
 }

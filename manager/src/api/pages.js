@@ -72,7 +72,7 @@ export const saveArticleCategory = (params) => {
 
 //删除文章分类
 export const delArticleCategory = (id) => {
-    return deleteRequest(`/other/articleCategory${id}`)
+    return deleteRequest(`/other/articleCategory/${id}`)
 }
 //修改文章分类
 export const updateArticleCategory = (params, id) => {

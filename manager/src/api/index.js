@@ -22,7 +22,7 @@ export const ws = managerUrl + "/ws";
 
 //获取所有city
 export const getAllCity = (params) => {
-  return getRequest(commonUrl + '/common/region/allCity', params)
+  return getRequest(commonUrl + '/common/common/region/allCity', params)
 }
 
 
@@ -53,7 +53,7 @@ export const login = (params) => {
 
 // 登出
 export const logout = () => {
-  return postRequest("/user/logout");
+  return postRequest("/passport/user/logout");
 };
 
 // 刷新token
@@ -277,11 +277,11 @@ export const deleteAllLog = (params) => {
 
 // 分页获取消息数据
 export const getMessageData = (params) => {
-  return getRequest("/message/getByCondition", params);
+  return getRequest("/other/message/getByCondition", params);
 };
 // 获取单个消息详情
 export const getMessageDataById = (id, params) => {
-  return getRequest(`/message/get/${id}`, params);
+  return getRequest(`/other/message/get/${id}`, params);
 };
 // 发送消息
 export const addMessage = (params) => {
@@ -289,11 +289,11 @@ export const addMessage = (params) => {
 };
 // 编辑消息
 export const editMessage = (params) => {
-  return postRequest("/message/edit", params);
+  return postRequest("/other/message/edit", params);
 };
 // 删除消息
 export const deleteMessage = (ids, params) => {
-  return deleteRequest(`/message/delByIds/${ids}`, params);
+  return deleteRequest(`/other/message/delByIds/${ids}`, params);
 };
 // 编辑发送消息
 export const editMessageSend = (params) => {

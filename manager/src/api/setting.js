@@ -11,7 +11,7 @@ export const getMessageData = params => {
 };
 //修改短信模板
 export const editSmsMessageTemplate = (id, params) => {
-  return putRequest(`/message/sms/${id}`, params)
+  return putRequest(`/sms/sms/${id}`, params)
 }
 //修改站内信模板
 export const editNoticeMessage = (id, params) => {
@@ -61,7 +61,7 @@ export const getNoticeMessageData = params => {
 };
 //删除站内信
 export const deleteMessage = (id) => {
-  return deleteRequest(`message/${id}`);
+  return deleteRequest(`/other/message/${id}`);
 };
 // 开启站内信模板
 export const openNoticeMessage = (id) => {

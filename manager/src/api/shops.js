@@ -47,12 +47,12 @@ export const shopDetail = (id) => {
 
 // 获取结算单分页
 export const getBuyBillPage = (params) => {
-  return getRequest(`/store/bill/getByPage`,params)
+  return getRequest(`/order/bill/getByPage`,params)
 }
 
 // 获取结算单详情
 export const getBuyBillDetail = (id) => {
-  return getRequest(`/store/bill/get/${id}`)
+  return getRequest(`/order/bill/get/${id}`)
 }
 
 
@@ -64,12 +64,12 @@ export const getStoreFlow = (id,params) => {
 // 审核结算单
 
 export const examine = (id) => {
-  return putRequest(`/store/bill/examine/${id}`)
+  return putRequest(`/order/bill/examine/${id}`)
 }
 // 审核结算单
 
 export const pay = (id) => {
-  return putRequest(`/store/bill/pay/${id}`)
+  return putRequest(`/order/bill/pay/${id}`)
 }
 
 //获取所有商家

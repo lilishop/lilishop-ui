@@ -69,7 +69,7 @@ export const saveCategoryBrand = (category_id, params) => {
 };
 //保存获取关联规格
 export const saveCategorySpec = (category_id, params) => {
-  return postRequest(`/goods/category/spec/${category_id}`, params);
+  return postRequest(`/goods/categorySpec/${category_id}`, params);
 };
 
 //获取所有可用品牌
@@ -117,7 +117,7 @@ export const insertOrUpdateSpec = params => {
 };
 //根据分类id获取关联规格
 export const getCategorySpecListData = (category_id, params) => {
-  return getRequest(`/goods/category/spec/${category_id}`, params);
+  return getRequest(`/goods/categorySpec/${category_id}`, params);
 };
 //删除gUI个
 export const delSpec = (id, params) => {
