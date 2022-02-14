@@ -7,7 +7,7 @@ import storage from '@/plugins/storage.js';
  */
 export function getVerifyImg (verificationEnums) {
   return request({
-    url: `${commonUrl}/common/slider/${verificationEnums}`,
+    url: `${commonUrl}/common/common/slider/${verificationEnums}`,
     method: Method.GET,
     needToken: false,
     headers: {uuid: storage.getItem('uuid')}
@@ -19,7 +19,7 @@ export function getVerifyImg (verificationEnums) {
  */
 export function postVerifyImg (params) {
   return request({
-    url: `${commonUrl}/common/slider/${params.verificationEnums}`,
+    url: `${commonUrl}/common/common/slider/${params.verificationEnums}`,
     method: Method.POST,
     needToken: false,
     params,

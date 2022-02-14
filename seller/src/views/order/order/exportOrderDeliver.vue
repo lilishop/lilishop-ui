@@ -52,7 +52,7 @@ export default {
   data() {
     return {
       file: "",
-      action: baseUrl + "/orders/batchDeliver", // 上传接口
+      action: baseUrl + "/order/order/batchDeliver", // 上传接口
       accessToken: {}, // 验证token
       // 步骤集合
       stepList: [

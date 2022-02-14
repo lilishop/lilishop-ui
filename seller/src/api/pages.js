@@ -80,19 +80,19 @@ export const updateArticleCategory = (params, id) => {
 }
 //文章添加
 export const saveArticle = (params) => {
-    return postRequest('/article', params)
+    return postRequest('/other/article', params)
 }
 //文章修改
 export const updateArticle = (params) => {
-    return putRequest(`/article/update/${params.id}`, params)
+    return putRequest(`/other/article/update/${params.id}`, params)
 }
 //查看文章
 export const seeArticle = (id) => {
-    return getRequest(`/article/${id}`)
+    return getRequest(`/other/article/${id}`)
 }
 //获取文章列表数据
 export const getArticle = (params) => {
-    return getRequest('/article/getByPage', params)
+    return getRequest('/other/article/getByPage', params)
 }
 
 
@@ -100,7 +100,7 @@ export const getArticle = (params) => {
 
 //删除文章数据
 export const delArticle = (ids) => {
-    return deleteRequest(`/article/delByIds/${ids}`)
+    return deleteRequest(`/other/article/delByIds/${ids}`)
 }
 
 
