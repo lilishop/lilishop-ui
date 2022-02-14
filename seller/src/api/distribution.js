@@ -5,17 +5,17 @@ import {getRequest, postRequest, putRequest, deleteRequest, importRequest, getRe
 
 //获取分销商品列表
 export const getDistributionGoods = (params) => {
-  return getRequest('/distributionGoods', params)
+  return getRequest('/distribution/goods', params)
 }
 
 // 取消分销商品
 export const distributionGoodsCancel = (id) => {
-  return deleteRequest(`/distributionGoods/cancel/${id}`)
+  return deleteRequest(`/distribution/goods/cancel/${id}`)
 }
 
 // 选择分销商品
 export const distributionGoodsCheck = (id,param) => {
-  return putRequest(`/distributionGoods/checked/${id}`,param)
+  return putRequest(`/distribution/goods/checked/${id}`,param)
 }
 
 
@@ -51,7 +51,7 @@ export const getDistributionSetting = (id, params) => {
 
 //获取分销订单列表
 export const getDistributionOrder = (params) => {
-    return getRequest('/distributionOrder', params)
+    return getRequest('/distribution/order', params)
 }
 
 

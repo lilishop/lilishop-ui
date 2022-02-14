@@ -10,23 +10,23 @@ import {
 
 // 分页获取物流公司
 export const getLogisticsPage = params => {
-  return getRequest(`/logistics/getByPage`, params);
+  return getRequest(`/other/logistics/getByPage`, params);
 };
 // 删除
 export const delLogistics = id => {
-  return deleteRequest(`/logistics/delete/${id}`);
+  return deleteRequest(`/other/logistics/delete/${id}`);
 };
 // 添加
 export const addLogistics = params => {
-  return postRequest(`/logistics/save`,params);
+  return postRequest(`/other/logistics/save`,params);
 };
 // 通过id查询详情
 export const getLogisticsDetail = id => {
-  return getRequest(`/logistics/get/${id}`);
+  return getRequest(`/other/logistics/get/${id}`);
 };
 // 编辑
 export const updateLogistics = (id,params) => {
-  return putRequest(`/logistics/${id}`,params);
+  return putRequest(`/other/logistics/${id}`,params);
 };
 
 

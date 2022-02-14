@@ -4,10 +4,10 @@ import {commonUrl, getRequestWithNoToken, postRequestWithNoToken} from '@/libs/a
 
 // 获取拼图验证
 export const getVerifyImg = (verificationEnums) => {
-  return getRequestWithNoToken(`${commonUrl}/common/slider/${verificationEnums}`);
+  return getRequestWithNoToken(`${commonUrl}/common/common/slider/${verificationEnums}`);
 };
 
 // 拼图验证
 export const postVerifyImg = (params) => {
-  return postRequestWithNoToken(`${commonUrl}/common/slider/${params.verificationEnums}`, params);
+  return postRequestWithNoToken(`${commonUrl}/common/common/slider/${params.verificationEnums}`, params);
 };

@@ -68,7 +68,7 @@ export default {
         content: ''
       }, // 表单
       visible: false, // 图片预览
-      action: commonUrl + '/common/upload/file', // 上传地址
+      action: commonUrl + '/common/common/upload/file', // 上传地址
       accessToken: {}, // 验证token
       previewImage: '', // 图片地址
       loading: false, // 加载状态

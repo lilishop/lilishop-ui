@@ -1522,6 +1522,9 @@ export default {
             delete sku.specValueId;
             return sku;
           });
+          if (this.firstData.tempId) {
+            delete submit.id;
+          }
 
           if (submit.goodsGalleryFiles.length > 0) {
             submit.goodsGalleryList = submit.goodsGalleryFiles.map(

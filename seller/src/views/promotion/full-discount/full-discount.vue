@@ -78,7 +78,7 @@
             >
             <Button
               type="success"
-              v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
+              v-if="row.promotionStatus === 'CLOSE'"
               style="margin-left: 5px"
               size="small"
               @click="openOrClose(row)"

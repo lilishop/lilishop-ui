@@ -26,15 +26,15 @@ export const disableBrand = (id, params) => {
 }
 //根据分类id获取关联品牌
 export const getCategoryBrandListData = (category_id, params) => {
-    return getRequest(`/category/brand/${category_id}`, params)
+    return getRequest(`/goods/categoryBrand/${category_id}`, params)
 }
 //保存获取关联品牌
 export const saveCategoryBrand = (category_id, params) => {
-    return postRequest(`/category/brand/${category_id}`, params)
+    return postRequest(`/goods/categoryBrand/${category_id}`, params)
 }
 //保存获取关联规格
 export const saveCategorySpec = (category_id, params) => {
-    return postRequest(`/goods/category/spec/${category_id}`, params)
+    return postRequest(`/goods/categorySpec/${category_id}`, params)
 }
 
 //获取所有可用品牌
@@ -88,7 +88,7 @@ export const updateSpec = (id,params) => {
 }
 //根据分类id获取关联规格
 export const getCategorySpecListData = (category_id, params) => {
-    return getRequest(`/goods/category/spec/${category_id}`, params)
+    return getRequest(`/goods/categorySpec/${category_id}`, params)
 }
 //删除gUI个
 export const delSpec = (id, params) => {
@@ -102,35 +102,35 @@ export const getGoodsCategory = (parent_id) => {
 
 //  上架商品
 export const upGoods = (id, params) => {
-    return putRequest(`/goods/${id}/up`, params)
+    return putRequest(`/goods/goods/${id}/up`, params)
   }
   //  下架商品
   export const lowGoods = (id, params) => {
-    return putRequest(`/goods/${id}/under`, params)
+    return putRequest(`/goods/goods/${id}/under`, params)
   }
 
 //  获取商品sku分页列表
 export const getGoodsSkuData = (params) => {
-    return getRequest('/goods/sku/list', params)
+    return getRequest('/goods/goods/sku/list', params)
 }
 
 
 //  获取商品分页列表
 export const getGoodsListData = (params) => {
-    return getRequest('/goods/list', params)
+    return getRequest('/goods/goods/list', params)
 }
 //  获取待审核商品分页列表
 export const getAuthGoodsListData = (params) => {
-    return getRequest('/goods/auth/list', params)
+    return getRequest('/goods/goods/auth/list', params)
 }
 //  审核商品
 export const authGoods = (id, params) => {
-    return putRequest(`/goods/${id}/auth`, params)
+    return putRequest(`/goods/goods/${id}/auth`, params)
 }
 
 //查询分类绑定参数信息
 export const getCategoryParamsListData = (id, params) => {
-    return getRequest(`/goods/category/parameters/${id}`, params)
+    return getRequest(`/goods/categoryParameters/${id}`, params)
 }
 
 //查询商品绑定参数信息
@@ -151,20 +151,20 @@ export const deleteParams = (id, params) => {
 }
 //保存参数组
 export const insertParamsGroup = (params) => {
-    return postRequest('/goods/category/parameters', params)
+    return postRequest('/goods/categoryParameters', params)
 }
 //更新参数组
 export const updateParamsGroup = (params) => {
-    return putRequest('/goods/category/parameters', params)
+    return putRequest('/goods/categoryParameters', params)
 }
 //删除参数组
 export const deleteParamsGroup = (id, params) => {
-    return deleteRequest(`/goods/category/parameters/${id}`, params)
+    return deleteRequest(`/goods/categoryParameters/${id}`, params)
 }
 
 //保存获取关联规格
 export const getGoodsSpecInfo = (category_id, params) => {
-    return getRequest(`/goods/category/spec/goods/${category_id}`, params)
+    return getRequest(`/goods/categorySpec/goods/${category_id}`, params)
 }
 
 
@@ -176,7 +176,7 @@ export const getSkuPage = (params) => {
 
 //查看商品详情
 export const getGoodsDetail = (id) => {
-  return getRequest(`/goods/get/${id}`)
+  return getRequest(`/goods/goods/get/${id}`)
 }
 
 
@@ -225,4 +225,3 @@ export const refundStatistics = (params) => {
 export const refundPriceStatistics = (params) => {
     return getRequest(`/statistics/refund/order/getPrice`, params)
 }
-

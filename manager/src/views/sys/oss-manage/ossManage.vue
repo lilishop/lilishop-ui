@@ -47,7 +47,7 @@
           <div>
             <Upload
               style="display:inline-block;"
-              :action="commonUrl + '/common/upload/file'"
+              :action="commonUrl + '/common/common/upload/file'"
               :headers="accessToken"
               :on-success="handleSuccess"
               :on-error="handleError"

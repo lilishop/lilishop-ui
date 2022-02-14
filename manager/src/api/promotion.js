@@ -66,29 +66,29 @@ export const updatePintuanStatus = (pintuanId, params) => {
 
 // 修改砍价活动商品
 export const saveKanJiaActivityGoods = params => {
-  return postRequest("/promotion/kan-jia-goods", params, {
+  return postRequest("/promotion/kanJiaGoods", params, {
     "Content-type": "application/json"
   });
 };
 // 修改砍价活动商品
 export const editKanJiaActivityGoods = params => {
-  return putRequest("/promotion/kan-jia-goods", params, {
+  return putRequest("/promotion/kanJiaGoods", params, {
     "Content-type": "application/json"
   });
 };
 // 获取砍价活动商品
 export const getKanJiaGoodsList = params => {
-  return getRequest(`/promotion/kan-jia-goods`, params);
+  return getRequest(`/promotion/kanJiaGoods`, params);
 };
 
 //删除砍价活动商品
 export const delKanJiaGoods = ids => {
-  return deleteRequest(`/promotion/kan-jia-goods/${ids}`);
+  return deleteRequest(`/promotion/kanJiaGoods/${ids}`);
 };
 
 // 砍价活动商品详情
 export const getKanJiaActivityGoodsById = id => {
-  return getRequest(`/promotion/kan-jia-goods/${id}`);
+  return getRequest(`/promotion/kanJiaGoods/${id}`);
 };
 
 // 保存平台优惠券

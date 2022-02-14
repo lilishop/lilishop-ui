@@ -9,7 +9,7 @@
           class="width_300"
           search
           enter-button
-          v-model="params.keywords"
+          v-model="params.sn"
           @on-search="getList"
           placeholder="请输入订单号搜索"
         />
@@ -125,7 +125,7 @@ export default {
       params: { // 请求参数
         pageNumber: 1,
         pageSize: 10,
-        keywords: '',
+        sn: '',
         sort: 'createTime',
         order: 'desc'
       },

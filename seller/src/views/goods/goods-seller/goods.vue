@@ -2,24 +2,52 @@
   <div class="search">
     <Card>
       <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+        <Form
+          ref="searchForm"
+          :model="searchForm"
+          inline
+          :label-width="70"
+          class="search-form"
+        >
           <Form-item label="商品名称" prop="goodsName">
-            <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px" />
+            <Input
+              type="text"
+              v-model="searchForm.goodsName"
+              placeholder="请输入商品名称"
+              clearable
+              style="width: 200px"
+            />
           </Form-item>
           <Form-item label="状态" prop="status">
-            <Select v-model="searchForm.marketEnable" placeholder="请选择" clearable style="width: 200px">
+            <Select
+              v-model="searchForm.marketEnable"
+              placeholder="请选择"
+              clearable
+              style="width: 200px"
+            >
               <Option value="DOWN">下架</Option>
               <Option value="UPPER">上架</Option>
             </Select>
           </Form-item>
           <Form-item label="商品类型" prop="status">
-            <Select v-model="searchForm.goodsType" placeholder="请选择" clearable style="width: 200px">
+            <Select
+              v-model="searchForm.goodsType"
+              placeholder="请选择"
+              clearable
+              style="width: 200px"
+            >
               <Option value="PHYSICAL_GOODS">实物商品</Option>
               <Option value="VIRTUAL_GOODS">虚拟商品</Option>
             </Select>
           </Form-item>
           <Form-item label="商品编号" prop="sn">
-            <Input type="text" v-model="searchForm.id" placeholder="商品编号" clearable style="width: 200px" />
+            <Input
+              type="text"
+              v-model="searchForm.id"
+              placeholder="商品编号"
+              clearable
+              style="width: 200px"
+            />
           </Form-item>
           <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
           <Button @click="handleReset" class="search-btn">重置</Button>
@@ -41,40 +69,82 @@
         </Dropdown>
       </Row>
 
-      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" @on-selection-change="changeSelect">
+      <Table
+        class="mt_10"
+        :loading="loading"
+        border
+        :columns="columns"
+        :data="data"
+        ref="table"
+        @on-selection-change="changeSelect"
+      >
         <!-- 商品栏目格式化 -->
-        <template slot="goodsSlot" slot-scope="{row}">
-          <div style="margin-top: 5px;height: 90px; display: flex;">
+        <template slot="goodsSlot" slot-scope="{ row }">
+          <div style="margin-top: 5px; height: 90px; display: flex">
             <div style="">
-              <img :src="row.original" style="height: 80px;margin-top: 3px;width: 70px">
+              <img
+                :src="row.original"
+                style="height: 80px; margin-top: 3px; width: 70px"
+              />
             </div>
 
-            <div style="margin-left: 13px;">
+            <div style="margin-left: 13px">
               <div class="div-zoom">
-                <a @click="linkTo(row.id,row.skuId)">{{ row.goodsName }}</a>
+                <a @click="linkTo(row.id, row.skuId)">{{ row.goodsName }}</a>
               </div>
               <Poptip trigger="hover" title="扫码在手机中查看" transfer>
                 <div slot="content">
                   <!-- <vueQr>123</vueQr> -->
-                  <vue-qr :text="wapLinkTo(row.id,row.skuId)" :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                  <vue-qr
+                    :text="wapLinkTo(row.id, row.skuId)"
+                    :margin="0"
+                    colorDark="#000"
+                    colorLight="#fff"
+                    :size="150"
+                  ></vue-qr>
                 </div>
-                <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
+                <img
+                  src="../../../assets/qrcode.svg"
+                  class="hover-pointer"
+                  width="20"
+                  height="20"
+                  alt=""
+                />
               </Poptip>
             </div>
           </div>
         </template>
-
       </Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
-          show-total show-elevator show-sizer></Page>
+        <Page
+          :current="searchForm.pageNumber"
+          :total="total"
+          :page-size="searchForm.pageSize"
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+          :page-size-opts="[10, 20, 50]"
+          size="small"
+          show-total
+          show-elevator
+          show-sizer
+        ></Page>
       </Row>
     </Card>
 
-    <Modal title="更新库存" v-model="updateStockModalVisible" :mask-closable="false" :width="500">
+    <Modal
+      title="更新库存"
+      v-model="updateStockModalVisible"
+      :mask-closable="false"
+      :width="500"
+    >
       <Tabs value="updateStock">
         <TabPane label="手动规格更新" name="updateStock">
-          <Table class="mt_10" :columns="updateStockColumns" :data="stockList" border ></Table>
+          <Table
+            class="mt_10"
+            :columns="updateStockColumns"
+            :data="stockList"
+            border
+          ></Table>
         </TabPane>
         <TabPane label="批量规格更新" name="stockAll">
           <Input type="number" v-model="stockAllUpdate" placeholder="统一规格修改" />
@@ -88,11 +158,17 @@
     </Modal>
 
     <!-- 批量设置物流模板 -->
-    <Modal title="批量设置物流模板" v-model="shipTemplateModal" :mask-closable="false" :width="500">
+    <Modal
+      title="批量设置物流模板"
+      v-model="shipTemplateModal"
+      :mask-closable="false"
+      :width="500"
+    >
       <Form ref="shipTemplateForm" :model="shipTemplateForm" :label-width="120">
         <FormItem class="form-item-view-el" label="物流模板" prop="templateId">
           <Select v-model="shipTemplateForm.templateId" style="width: 200px">
-            <Option v-for="item in logisticsTemplate" :value="item.id" :key="item.id">{{ item.name }}
+            <Option v-for="item in logisticsTemplate" :value="item.id" :key="item.id"
+              >{{ item.name }}
             </Option>
           </Select>
         </FormItem>
@@ -113,12 +189,11 @@ import {
   upGoods,
   lowGoods,
   deleteGoods,
-  batchShipTemplate
+  batchShipTemplate,
 } from "@/api/goods";
 import * as API_Shop from "@/api/shops";
 
 export default {
-
   name: "goods",
   data() {
     return {
@@ -160,11 +235,11 @@ export default {
           width: 130,
           render: (h, params) => {
             if (params.row.authFlag == "TOBEAUDITED") {
-              return h("Tag", {props: {color: "blue",},},"待审核");
+              return h("Tag", { props: { color: "blue" } }, "待审核");
             } else if (params.row.authFlag == "PASS") {
-              return h("Tag", {props: {color: "green",},},"通过");
+              return h("Tag", { props: { color: "green" } }, "通过");
             } else if (params.row.authFlag == "REFUSE") {
-              return h("Tag", {props: {color: "red",},},"审核拒绝");
+              return h("Tag", { props: { color: "red" } }, "审核拒绝");
             }
           },
         },
@@ -216,12 +291,12 @@ export default {
           key: "goodsType",
           width: 130,
           render: (h, params) => {
-            if (params.row.goodsType === 'PHYSICAL_GOODS') {
-              return h("Tag", {props: {color: "geekblue"}},"实物商品");
-            } else if (params.row.goodsType === 'VIRTUAL_GOODS') {
-              return h("Tag", {props: {color: "purple"}},"虚拟商品");
+            if (params.row.goodsType === "PHYSICAL_GOODS") {
+              return h("Tag", { props: { color: "geekblue" } }, "实物商品");
+            } else if (params.row.goodsType === "VIRTUAL_GOODS") {
+              return h("Tag", { props: { color: "purple" } }, "虚拟商品");
             } else {
-              return h("Tag", {props: {color: "cyan"}},"电子卡券");
+              return h("Tag", { props: { color: "cyan" } }, "电子卡券");
             }
           },
         },
@@ -230,10 +305,7 @@ export default {
           key: "price",
           width: 130,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.price, "￥")
-            );
+            return h("div", this.$options.filters.unitPrice(params.row.price, "￥"));
           },
         },
         {
@@ -254,11 +326,11 @@ export default {
           width: 120,
           render: (h, params) => {
             if (params.row.authFlag == "PASS") {
-              return h("Tag", {props: {color: "green"}},"通过");
+              return h("Tag", { props: { color: "green" } }, "通过");
             } else if (params.row.authFlag == "TOBEAUDITED") {
-              return h("Tag", {props: {color: "volcano"}},"待审核");
+              return h("Tag", { props: { color: "volcano" } }, "待审核");
             } else if (params.row.authFlag == "REFUSE") {
-              return h("Tag", {props: {color: "red"}},"审核拒绝");
+              return h("Tag", { props: { color: "red" } }, "审核拒绝");
             }
           },
         },
@@ -269,9 +341,9 @@ export default {
           sortable: false,
           render: (h, params) => {
             if (params.row.marketEnable == "DOWN") {
-              return h("Tag", {props: {color: "red"}},"下架");
+              return h("Tag", { props: { color: "red" } }, "下架");
             } else if (params.row.marketEnable == "UPPER") {
-              return h("Tag", {props: {color: "green"}},"上架");
+              return h("Tag", { props: { color: "green" } }, "上架");
             }
           },
         },
@@ -371,7 +443,8 @@ export default {
     };
   },
   methods: {
-    init() { // 初始化数据
+    init() {
+      // 初始化数据
       this.getDataList();
     },
     // 添加商品
@@ -425,6 +498,7 @@ export default {
         if (res.success) {
           this.updateStockModalVisible = false;
           this.$Message.success("更新库存成功");
+          this.getDataList();
         }
       });
     },
@@ -466,8 +540,7 @@ export default {
     saveShipTemplate() {
       this.$Modal.confirm({
         title: "确认设置物流模板",
-        content:
-          "您确认要设置所选的 " + this.selectCount + " 个商品的物流模板?",
+        content: "您确认要设置所选的 " + this.selectCount + " 个商品的物流模板?",
         loading: true,
         onOk: () => {
           let ids = [];
@@ -493,7 +566,7 @@ export default {
         this.$Message.warning("您还未选择要设置物流模板的商品");
         return;
       }
-      this.getShipTempList()
+      this.getShipTempList();
       let data = [];
       this.selectList.forEach(function (e) {
         data.push(e.id);
@@ -514,12 +587,12 @@ export default {
       });
     },
     // 获取物流模板
-    getShipTempList () {
+    getShipTempList() {
       API_Shop.getShipTemplate().then((res) => {
         if (res.success) {
           this.logisticsTemplate = res.result;
         }
-      })
+      });
     },
     //下架商品
     lower(v) {
