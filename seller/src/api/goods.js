@@ -310,7 +310,7 @@ export const getGoodsSpecInfoSeller = (category_id) => {
 
 //批量设置运费模板
 export const batchShipTemplate = params => {
-  return putRequest(`/goods/freight`, params);
+  return putRequest(`/goods/goods/freight`, params);
 };
 
 
