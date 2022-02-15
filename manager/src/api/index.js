@@ -58,7 +58,7 @@ export const logout = () => {
 
 // 刷新token
 export const handleRefreshToken = (token) => {
-  return getRequestWithNoToken(`/user/refresh/${token}`);
+  return getRequestWithNoToken(`/passport/user/refresh/${token}`);
 };
 // 获取用户登录信息
 export const userInfo = (params) => {
