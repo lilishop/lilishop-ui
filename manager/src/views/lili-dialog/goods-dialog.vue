@@ -62,9 +62,11 @@ export default {
     };
   },
   props: {
-    selectedWay: {
+    selectedWay: { 
       type: Array,
-      default: new Array()
+      default: function(){
+        return new Array()
+      }
     }
   },
   watch: {

@@ -22,7 +22,7 @@
 
           <Table height="350" border tooltip :loading="loading" :columns="activeColumns" :data="showPromotionList"></Table>
 
-          <Page @on-change="(val) => {params.pageNumber = val; } " :current="params.pageNumber" :page-size="params.pageSize" class="mt_10" :total="totals" size="small" show-elevator />
+          <Page @on-change="(val) => {params.pageNumber = val; } " :current="params.pageNumber" :page-size="params.pageSize" class="mt_10" :total="Number(totals)" size="small" show-elevator />
 
         </div>
 
@@ -187,6 +187,7 @@ export default {
                   on: {
                     click: () => {
                       this.selectedPromotion(params);
+                      console.log(this.index)
                     },
                   },
                 },

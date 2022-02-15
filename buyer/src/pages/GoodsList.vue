@@ -271,7 +271,7 @@ export default {
 .item-as-title {
   width: 100%;
   height: 36px;
-  color: #e4393c;
+  color: $theme_color;
   line-height: 36px;
   font-size: 18px;
 }
@@ -372,7 +372,7 @@ export default {
   background-color: #fff;
 }
 .goods-list-tool span:hover {
-  border-color: #e4393c;
+  border-color: $theme_color;
   position: relative;
   text-decoration: none;
   z-index: 1;
@@ -384,7 +384,7 @@ export default {
 .goods-list-tool-active {
   color: #fff;
   border-left: 1px solid #ccc;
-  background-color: #e4393c !important;
+  background-color: $theme_color !important;
 }
 
 /* ---------------商品栏结束------------------- */

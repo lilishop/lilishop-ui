@@ -5,7 +5,7 @@ import Storage from './storage';
 import router from '../router/index.js';
 import store from '../vuex/store';
 import { handleRefreshToken } from '@/api/index';
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4} from 'uuid';
 
 const qs = require('qs');
 // api地址
@@ -88,7 +88,7 @@ service.interceptors.request.use(
   }
 );
 
-async function refresh (error) {
+async function refresh(error) {
   const getTokenRes = await refreshToken();
   if (getTokenRes === 'success') {
     // 刷新token
@@ -121,7 +121,8 @@ async function refresh (error) {
         });
       },
       onCancel: () => {
-        router.go(0)
+        // router.go(0)
+        router.push("/");
         Modal.remove();
       }
     });

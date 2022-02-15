@@ -15,10 +15,15 @@
           >
             <div class="user-icon">
               <div class="user-img">
-                <img :src="userInfo.face" style="width:100%;height:100%;" v-if="userInfo.face" alt />
+                <img
+                  :src="userInfo.face"
+                  style="width: 100%; height: 100%"
+                  v-if="userInfo.face"
+                  alt
+                />
                 <Avatar icon="ios-person" class="mb_10" v-else size="96" />
               </div>
-              <p>{{userInfo.nickName}}</p>
+              <p>{{ userInfo.nickName }}</p>
             </div>
 
             <!--   循环导航栏       -->
@@ -38,7 +43,6 @@
                 >{{ chlidren.title }}</MenuItem
               >
             </Submenu>
-
           </Menu>
         </Sider>
         <Layout class="layout ml_10">
@@ -54,47 +58,33 @@
 </template>
 
 <script>
-import menuList from './menu';
-import Storage from '@/plugins/storage.js';
+import menuList from "./menu";
+import Storage from "@/plugins/storage.js";
 
 export default {
-  name: 'Home',
-  data () {
+  name: "Home",
+  data() {
     return {
-      menuList // 会员中心左侧列表
+      menuList, // 会员中心左侧列表
     };
   },
   computed: {
-    userInfo () { // 用户信息  
-      if(Storage.getItem('userInfo')){
-         return JSON.parse(Storage.getItem('userInfo'));  
-      } else{
-         this.$Modal.confirm({
-          title:'请登录',
-          content:"<p>请登录后执行此操作</p>",
-          okText: '立即登录',
-          cancelText: '继续浏览',
-          onOk:()=>{
-            if(true){
-              this.$router.push('/login');
-            }
-          }
-        }) 
-          return {}
-      }  
-    }
+    userInfo() {
+      // 用户信息
+      if (Storage.getItem("userInfo")) {
+        return JSON.parse(Storage.getItem("userInfo"));
+      } else {
+        return {};
+      }
+    },
   },
 
   methods: {
     // 每次点击左侧bar的callback
-    onSelect (name) {
-      this.$router.push({name: name});
+    onSelect(name) {
+      this.$router.push({ name: name });
     },
-    // 跳转到个人中心的首页
-    toUserMain () {
-      this.$router.push(`/home`);
-    }
-  }
+  },
 };
 </script>
 

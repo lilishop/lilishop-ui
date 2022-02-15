@@ -96,27 +96,27 @@
                           </td>
                           <td></td>
                           <td>
-                            <Input class="text w40" type="text" v-model="item.firstCompany" maxlength="3" clearable />
+                            <InputNumber class="text w40" type="text" v-model="item.firstCompany" :max="999" :min="0" :step="0.1" clearable/>
                           </td>
                           <td>
-                            <Input class="text w60" type="text" v-model="item.firstPrice" maxlength="6" clearable>
-                            <span slot="append">元</span>
-                            </Input>
+                            <InputNumber class="text w60" type="text" v-model="item.firstPrice" :max="999999" :min="0" clearable  :formatter="value => `¥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+            :parser="value => value.replace(/\¥\s?|(,*)/g, '')">
+                            </InputNumber>
                           </td>
                           <td>
-                            <Input class="text w40" type="text" v-model="item.continuedCompany" maxlength="6"
-                              clearable />
+                            <InputNumber class="text w40" type="text" v-model="item.continuedCompany" :max="999" :min="0" :step="0.1"
+                              />
                           </td>
                           <td>
-                            <Input class="text w60" type="text" v-model="item.continuedPrice" maxlength="6" clearable>
-                            <span slot="append">元</span>
-                            </Input>
+                            <InputNumber class="text w60" type="text" v-model="item.continuedPrice" :max="999999" :min="0" clearable  :formatter="value => `¥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+            :parser="value => value.replace(/\¥\s?|(,*)/g, '')">
+                            </InputNumber>
                           </td>
                           <td class="nscs-table-handle">
                             <Button @click="editRegion(item,index)" type="info" size="small"
                               style="margin-bottom: 5px">修改
                             </Button>
-                            <Button @click="removeTemplateChildren(index)" :loading="submitLoading" type="error"
+                            <Button @click="removeTemplateChildren(index)"  type="error"
                               size="small" style="margin-bottom: 5px">删除
                             </Button>
                           </td>
@@ -145,7 +145,7 @@
               <Button @click="addShipTemplateChildren(index)" v-if="form.pricingMethod !== 'FREE'"
                 icon="ios-create-outline">为指定城市设置运费模板
               </Button>
-              <Button @click="handleSubmit" :loading="submitLoading" type="primary" style="margin-right:5px">保存
+              <Button @click="handleSubmit" type="primary" style="margin-right:5px">保存
               </Button>
             </Form-item>
           </Form>
@@ -170,12 +170,15 @@ export default {
   },
   data() {
     return {
+      gotop: false,
+      index:'0',
       selectedIndex: 0, //选中的地址模板下标
       item: "", //运费模板子模板
       shipInfo: {}, // 运费模板数据
       title: "添加运费模板", // 模态框标题
       operation: "add", // 操作状态
       currentTab: "", // 当前模板tab
+      // submitLoading:false,
       saveError: false, // 是否显示错误提示
       csTab: false, // 添加运费模板显示
       form: {
@@ -234,14 +237,18 @@ export default {
           {
             area: "",
             areaId: "",
-            firstCompany: "1",
-            firstPrice: "",
-            continuedCompany: "1",
-            continuedPrice: "",
+            firstCompany: 0,
+            firstPrice: 0,
+            continuedCompany: 0,
+            continuedPrice: 0,
             selectedAll: false,
           },
         ],
       };
+    },
+    handleScroll(){
+       let scrolltop = document.documentElement.scrollTop || document.body.scrollTop;
+      scrolltop > 30 ? (this.gotop = true) : (this.gotop = false);
     },
     //修改运费模板
     edit(item) {
@@ -252,6 +259,15 @@ export default {
       this.saveError = false;
       //给form赋值
       this.form = item;
+
+      let top = document.documentElement.scrollTop || document.body.scrollTop;
+      // 实现滚动效果 
+      const timeTop = setInterval(() => {
+        document.body.scrollTop = document.documentElement.scrollTop = top -= 50;
+        if (top <= 0) {
+          clearInterval(timeTop);
+        }
+      }, 0);
     },
     //选择地区
     editRegion(item, index) {
@@ -268,7 +284,6 @@ export default {
           });
         });
       });
-
       this.$store.state.shipTemplate = this.form.freightTemplateChildList;
 
       this.$refs.region.open(item, index);
@@ -328,9 +343,9 @@ export default {
       };
 
       this.$refs.form.validate((valid) => {
-        const regNumber = /^\+?[1-9][0-9]*$/;
-        const regMoney =
-          /(^[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^(0){1}$)|(^[0-9]\.[0-9]([0-9])?$)/;
+        // const regNumber = /^\+?[1-9][0-9]*$/;
+        // const regMoney =
+        //   /(^[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^(0){1}$)|(^[0-9]\.[0-9]([0-9])?$)/;
         if (valid) {
           if (this.form.pricingMethod != "FREE") {
             //校验运费模板详细信息
@@ -349,23 +364,23 @@ export default {
                 this.saveError = true;
                 return;
               }
-              if (
-                regNumber.test(
-                  this.form.freightTemplateChildList[i].firstCompany
-                ) == false ||
-                regNumber.test(
-                  this.form.freightTemplateChildList[i].continuedCompany
-                ) == false ||
-                regMoney.test(
-                  this.form.freightTemplateChildList[i].firstPrice
-                ) == false ||
-                regMoney.test(
-                  this.form.freightTemplateChildList[i].continuedPrice
-                ) == false
-              ) {
-                this.saveError = true;
-                return;
-              }
+              //  if (
+              //   regNumber.test(
+              //     this.form.freightTemplateChildList[i].firstCompany
+              //   ) == false ||
+              //   regNumber.test(
+              //     this.form.freightTemplateChildList[i].continuedCompany
+              //   ) == false ||
+              //   regMoney.test(
+              //     this.form.freightTemplateChildList[i].firstPrice
+              //   ) == false ||
+              //   regMoney.test(
+              //     this.form.freightTemplateChildList[i].continuedPrice
+              //   ) == false
+              // ) {
+              //   this.saveError = true;
+              //   return;
+              // }
             }
           }
 
@@ -400,10 +415,10 @@ export default {
       const params = {
         area: "",
         areaId: "",
-        firstCompany: "1",
-        firstPrice: "",
-        continuedCompany: "1",
-        continuedPrice: "",
+        firstCompany: 0,
+        firstPrice: 0,
+        continuedCompany: 0,
+        continuedPrice: 0,
         selectedAll: false,
       };
       this.form.freightTemplateChildList.push(params);
@@ -437,6 +452,7 @@ export default {
   },
   mounted() {
     this.init();
+    window.addEventListener("scroll", this.handleScroll, true);
   },
 };
 </script>

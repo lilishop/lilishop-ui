@@ -1,10 +1,14 @@
 <template>
   <div class="scroll-show">
     <div class="content clearfix">
-      <cateNav class="cate" :hover="true" :showNavBar="false"></cateNav>
+      <!-- <cateNav class="cate" :hover="true" :showNavBar="false"></cateNav> -->
+      <img src="../../assets/images/logo2.png" alt="" class="images" />
       <Search class="search-con" :hover="true" :showLogo="false" :showTag="false"></Search>
-      <Icon type="ios-cart-outline" @click="goCartList" class="cart-icon"  @mouseenter.native="getCartList" />
-      <i class="cart-badge">{{cartNum < 100 ? cartNum : '99'}}</i>
+      <div class="cart-content">
+        <Icon type="ios-cart-outline" @click="goCartList" class="cart-icon"  @mouseenter.native="getCartList" />
+        <i class="cart-badge">{{cartNum < 100 ? cartNum : '99'}}</i>
+      </div>
+      <div class="hr"></div>
     </div>
   </div>
 </template>
@@ -48,25 +52,46 @@ export default {
 <style lang="scss" scoped>
   .content{
     width: 1200px;
-    height: 40px;
-    margin: 10px auto;
+    height: 100%;
+    margin:  auto;
     position: relative;
+  }
+  .hr{
+    width: 100%;
+    height: 2px;
+    background-color: #e4393c;
+    margin-top:60px;
+  }
+  .content>img{
+    width:180px;
+    float: left;
+    overflow: hidden;
+    height: 100%;
   }
   .cate {
     float: left;
     width: 200px!important;
   }
+  .cart-content{
+    width: 100px;
+    height: 100%;
+    margin-left:55px;
+    float: left;
+    overflow: hidden;
+    line-height: 500%;
+  }
   .search-con{
     float: left;
     width: 800px;
-    overflow: hidden;
-    margin-top: -27px;
+    height: 100%;
+    margin-left:20px;
+    // overflow: hidden;
+    line-height: 60px;
+    margin-top: -20px;
   }
   .cart-icon {
     width: 30px;
-    float: left;
     font-size: 25px;
-    margin-top: 8px;
     color: $theme_color;
     z-index: 1;
     position: relative;
@@ -77,7 +102,8 @@ export default {
   .cart-badge {
     position: absolute;
     font-style: normal;
-    right: 165px;
+    // right: 165px;
+    right:108px;
     display: block;
     background-color: $theme_color;
     color: #fff;

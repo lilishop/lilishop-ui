@@ -414,7 +414,7 @@ export default {
     font-size: 18px;
     font-weight: bold;
     &:hover {
-      color: #e4393c;
+      color: $theme_color;
       cursor: pointer;
     }
   }
@@ -428,8 +428,8 @@ export default {
     text-align: center;
     margin: 0 3px;
     &:hover {
-      color: #e4393c;
-      border-color: #e4393c;
+      color: $theme_color;
+      border-color: $theme_color;
       border-bottom-color: #fff;
       cursor: pointer;
       ul {
@@ -447,7 +447,7 @@ export default {
       width: 300px;
       padding: 5px 10px;
       background: #fff;
-      border: 1px solid #e4393c;
+      border: 1px solid $theme_color;
       z-index: 1;
       &::before {
         content: "";
@@ -470,7 +470,7 @@ export default {
         margin: 3px 0;
         text-align: left;
         &:hover {
-          color: #e4393c;
+          color: $theme_color;
           cursor: pointer;
         }
       }
@@ -489,23 +489,23 @@ export default {
     background-color: #f3f3f3;
     border: 1px solid #ddd;
     &:hover {
-      border-color: #e4393c;
+      border-color: $theme_color;
       background-color: #fff;
       .ivu-icon {
         color: #fff;
-        background-color: #e4393c;
+        background-color: $theme_color;
       }
     }
 
     span:nth-child(2) {
-      color: #e4393c;
+      color: $theme_color;
     }
 
     .ivu-icon {
       position: absolute;
       right: 0;
       top: 0;
-      color: #e4393c;
+      color: $theme_color;
       line-height: 22px;
       width: 21px;
       height: 22px;
@@ -557,8 +557,8 @@ export default {
         }
 
         &:hover {
-          border-color: #e4393c;
-          border: 2px solid #e4393c;
+          border-color: $theme_color;
+          border: 2px solid $theme_color;
           top: 0;
           left: 0;
           position: relative;
@@ -572,7 +572,7 @@ export default {
           display: inline-block;
           width: 100%;
           height: 100%;
-          color: #e4393c;
+          color: $theme_color;
           text-align: center;
           font-size: 12px;
           cursor: pointer;
@@ -585,7 +585,7 @@ export default {
           div {
             width: 0;
             border-top: 20px solid transparent;
-            border-right: 20px solid #e4393c;
+            border-right: 20px solid $theme_color;
           }
           .ivu-icon {
             font-size: 12px;
@@ -598,7 +598,7 @@ export default {
         }
       }
       .border-color {
-        border-color: #e4393c;
+        border-color: $theme_color;
         z-index: 1;
       }
     }
@@ -620,8 +620,8 @@ export default {
         font-size: 12px;
         &:hover {
           cursor: pointer;
-          color: #e4393c;
-          border-color: #e4393c;
+          color: $theme_color;
+          border-color: $theme_color;
         }
       }
     }
@@ -674,7 +674,7 @@ export default {
         padding: 2px;
         cursor: pointer;
         &:hover {
-          color: #e4393c;
+          color: $theme_color;
         }
       }
     }
@@ -696,8 +696,8 @@ export default {
         font-size: 12px;
         &:hover {
           cursor: pointer;
-          color: #e4393c;
-          border-color: #e4393c;
+          color: $theme_color;
+          border-color: $theme_color;
         }
       }
     }

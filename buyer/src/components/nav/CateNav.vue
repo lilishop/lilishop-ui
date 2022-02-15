@@ -12,7 +12,7 @@
           {{ item.name }}
         </li>
       </ul>   
-    </div> <hr style="width:1200px;height:2px;background:#e4393c;margin-top:-1px;margin-bottom:5px;"/>
+    </div> <hr style="width:1200px;height:2.5px;background:#e4393c;margin-top:-1px;margin-bottom:5px;border:none;"/>
     <!-- 全部商品分类 -->
     <div class="cate-list" v-show="showAlways || showFirstList" @mouseenter="showFirstList = true" @mouseleave="showFirstList = false">
       <!-- 第一级分类 -->
@@ -157,7 +157,7 @@ export default {
 
 <style scoped lang="scss">
 .nav-lis:hover{
-  color:#e4393c !important;
+  color:$theme_color !important;
   cursor: pointer;
 }
 .cate-nav{
@@ -175,7 +175,7 @@ export default {
     width: 200px;
     line-height: 40px;
     color: #fff;
-    background-color: #e4393c;
+    background-color: $theme_color;
     text-align: center;
     font-size: 16px;
     border-bottom:none;
@@ -195,7 +195,7 @@ export default {
       color: rgb(129, 127, 127);
       font-size: 15px;
       &:hover {
-        color: $theme_color;
+        color: #e1251b;
       }
     }
   }
@@ -242,7 +242,7 @@ export default {
 }
 .nav-side-item:hover {
   cursor: pointer;
-  color: $theme_color;
+  color: #e1251b;
 }
 
 /*显示商品详细信息*/
@@ -271,7 +271,7 @@ export default {
   background-color: #6e6568;
 }
 .nav-detail-item span:hover {
-  background-color: $theme_color;
+  background-color: #e1251b;
 }
 .detail-item-panel li {
   line-height: 30px;
@@ -286,7 +286,7 @@ export default {
   text-align: right;
 }
 .detail-item-title:hover {
-  color: $theme_color;
+  color: #e1251b;
 }
 .detail-item-row  {
   display: flex;
@@ -304,6 +304,6 @@ export default {
   }
 }
 .detail-item:hover {
-  color: $theme_color;
+  color: #e1251b;
 }
 </style>
