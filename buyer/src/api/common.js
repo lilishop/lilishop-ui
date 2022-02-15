@@ -5,7 +5,7 @@ import request, {Method, commonUrl} from '@/plugins/request.js';
  */
 export function getVerifyImg (verificationEnums) {
   return request({
-    url: `${commonUrl}/common/slider/${verificationEnums}`,
+    url: `${commonUrl}/common/common/slider/${verificationEnums}`,
     method: Method.GET,
     needToken: false
   });
@@ -15,7 +15,7 @@ export function getVerifyImg (verificationEnums) {
  */
 export function postVerifyImg (params) {
   return request({
-    url: `${commonUrl}/common/slider/${params.verificationEnums}`,
+    url: `${commonUrl}/common/common/slider/${params.verificationEnums}`,
     method: Method.POST,
     needToken: false,
     params
@@ -26,7 +26,7 @@ export function postVerifyImg (params) {
  */
 export function sendSms (params) {
   return request({
-    url: `${commonUrl}/common/sms/${params.verificationEnums}/${params.mobile}`,
+    url: `${commonUrl}/common/common/sms/${params.verificationEnums}/${params.mobile}`,
     method: Method.GET,
     needToken: false,
     params
@@ -45,7 +45,7 @@ export function getLogo () {
 // 地区数据，用于三级联动
 export function getRegion (id) {
   return request({
-    url: `${commonUrl}/common/region/item/${id}`,
+    url: `${commonUrl}/common/common/region/item/${id}`,
     needToken: true,
     method: Method.GET
   });
@@ -57,7 +57,7 @@ export function getRegion (id) {
  */
 export function articleList (params) {
   return request({
-    url: `/buyer/article`,
+    url: `/buyer/other/article`,
     method: Method.GET,
     params
   });
@@ -69,7 +69,7 @@ export function articleList (params) {
  */
 export function articleCateList () {
   return request({
-    url: `/buyer/article/articleCategory/list`,
+    url: `/buyer/other/article/articleCategory/list`,
     method: Method.GET
   });
 }
@@ -77,7 +77,7 @@ export function articleCateList () {
 // 通过id获取文章
 export function articleDetail (id) {
   return request({
-    url: `/buyer/article/get/${id}`,
+    url: `/buyer/other/article/get/${id}`,
     method: Method.GET
   });
 }

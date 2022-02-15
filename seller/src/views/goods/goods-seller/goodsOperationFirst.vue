@@ -3,9 +3,14 @@
     <!-- 选择商品类型 -->
     <Modal v-model="selectGoodsType" width="550" :closable="false">
       <div class="goods-type-list" v-if="!showGoodsTemplates">
-        <div class="goods-type-item" :class="{'active-goods-type':item.check}" @click="handleClickGoodsType(item)"
-          v-for="(item,index) in goodsTypeWay" :key="index">
-          <img :src="item.img"/>
+        <div
+          class="goods-type-item"
+          :class="{ 'active-goods-type': item.check }"
+          @click="handleClickGoodsType(item)"
+          v-for="(item, index) in goodsTypeWay"
+          :key="index"
+        >
+          <img :src="item.img" />
           <div>
             <h2>{{ item.title }}</h2>
             <p>{{ item.desc }}</p>
@@ -14,12 +19,16 @@
       </div>
       <div v-else class="goods-type-list">
         <h2 @click="showGoodsTemplates = !showGoodsTemplates">返回</h2>
-        <div class="goods-type-item template-item" @click="handleClickGoodsTemplate(item)"
-             v-for="(item,tempIndex) in goodsTemplates" :key="tempIndex">
+        <div
+          class="goods-type-item template-item"
+          @click="handleClickGoodsTemplate(item)"
+          v-for="(item, tempIndex) in goodsTemplates"
+          :key="tempIndex"
+        >
           <img :src="item.thumbnail" />
           <div>
             <h2>{{ item.goodsName }}</h2>
-            <p>{{ item.sellingPoint || '' }}</p>
+            <p>{{ item.sellingPoint || "" }}</p>
           </div>
         </div>
       </div>
@@ -28,22 +37,34 @@
     <div class="content-goods-publish">
       <div class="goods-category">
         <ul v-if="categoryListLevel1.length > 0">
-          <li v-for="(item, index) in categoryListLevel1" :class="{ activeClass: category[0].name === item.name }"
-              @click="handleSelectCategory(item, index, 1)" :key="index">
+          <li
+            v-for="(item, index) in categoryListLevel1"
+            :class="{ activeClass: category[0].name === item.name }"
+            @click="handleSelectCategory(item, index, 1)"
+            :key="index"
+          >
             <span>{{ item.name }}</span>
             <span>&gt;</span>
           </li>
         </ul>
         <ul v-if="categoryListLevel2.length > 0">
-          <li v-for="(item, index) in categoryListLevel2" :class="{ activeClass: category[1].name === item.name }"
-              @click="handleSelectCategory(item, index, 2)" :key="index">
+          <li
+            v-for="(item, index) in categoryListLevel2"
+            :class="{ activeClass: category[1].name === item.name }"
+            @click="handleSelectCategory(item, index, 2)"
+            :key="index"
+          >
             <span>{{ item.name }}</span>
             <span>&gt;</span>
           </li>
         </ul>
         <ul v-if="categoryListLevel3.length > 0">
-          <li v-for="(item, index) in categoryListLevel3" :class="{ activeClass: category[2].name === item.name }"
-              @click="handleSelectCategory(item, index, 3)" :key="index">
+          <li
+            v-for="(item, index) in categoryListLevel3"
+            :class="{ activeClass: category[2].name === item.name }"
+            @click="handleSelectCategory(item, index, 3)"
+            :key="index"
+          >
             <span>{{ item.name }}</span>
           </li>
         </ul>
@@ -55,7 +76,7 @@
         <span v-show="category[2].name">> {{ category[2].name }}</span>
       </p>
       <template v-if="selectedTemplate.goodsName">
-        <Divider>已选商品模版:{{selectedTemplate.goodsName}}</Divider>
+        <Divider>已选商品模版:{{ selectedTemplate.goodsName }}</Divider>
       </template>
     </div>
     <!-- 底部按钮 -->
@@ -100,19 +121,19 @@ export default {
       ],
       // 商品分类选择数组
       category: [
-        {name: '', id: ''},
-        {name: '', id: ''},
-        {name: '', id: ''}
+        { name: "", id: "" },
+        { name: "", id: "" },
+        { name: "", id: "" },
       ],
       // 商品类型
-      goodsType: '',
+      goodsType: "",
       /** 1级分类列表*/
       categoryListLevel1: [],
       /** 2级分类列表*/
       categoryListLevel2: [],
       /** 3级分类列表*/
       categoryListLevel3: [],
-    }
+    };
   },
   methods: {
     // 点击商品类型
@@ -123,26 +144,25 @@ export default {
 
       val.check = !val.check;
       if (!val.type) {
-        this.GET_GoodsTemplate()
+        this.GET_GoodsTemplate();
         this.showGoodsTemplates = true;
       } else {
         this.goodsType = val.type;
-        this.selectedTemplate = {}
+        this.selectedTemplate = {};
       }
     },
     // 点击商品模板
     handleClickGoodsTemplate(val) {
-      console.log(val);
       this.selectedTemplate = val;
       this.selectGoodsType = false;
-      this.$emit('change', {tempId: val.id})
+      this.$emit("change", { tempId: val.id });
     },
     // 获取商品模板
     GET_GoodsTemplate() {
       let searchParams = {
         saveType: "TEMPLATE",
         sort: "create_time",
-        order: "desc"
+        order: "desc",
       };
       API_GOODS.getDraftGoodsListData(searchParams).then((res) => {
         if (res.success) {
@@ -153,10 +173,9 @@ export default {
     /** 选择商城商品分类 */
     handleSelectCategory(row, index, level) {
       if (level === 1) {
-        this.category.forEach(cate => {
-          cate.name = '',
-          cate.id = ''
-        })
+        this.category.forEach((cate) => {
+          (cate.name = ""), (cate.id = "");
+        });
         this.category[0].name = row.name;
         this.category[0].id = row.id;
         this.categoryListLevel2 = this.categoryListLevel1[index].children;
@@ -164,12 +183,12 @@ export default {
       } else if (level === 2) {
         this.category[1].name = row.name;
         this.category[1].id = row.id;
-        this.category[2].name = '';
-        this.category[2].id = '';
+        this.category[2].name = "";
+        this.category[2].id = "";
         this.categoryListLevel3 = this.categoryListLevel2[index].children;
       } else {
-        this.category[2].name = row.name
-        this.category[2].id = row.id
+        this.category[2].name = row.name;
+        this.category[2].id = row.id;
       }
     },
     /** 查询下一级 商城商品分类*/
@@ -185,8 +204,8 @@ export default {
     next() {
       window.scrollTo(0, 0);
       if (!this.goodsType && !this.selectedTemplate.goodsName) {
-        this.$Message.error('请选择商品类型')
-        return
+        this.$Message.error("请选择商品类型");
+        return;
       }
       if (!this.category[0].name) {
         this.$Message.error("请选择商品分类");
@@ -196,19 +215,18 @@ export default {
         return;
       } else if (this.category[2].name) {
         if (this.selectedTemplate.id) {
-          this.$emit('change',{tempId: this.selectedTemplate.id})
+          this.$emit("change", { tempId: this.selectedTemplate.id });
         } else {
-          this.$emit('change',{category: this.category,goodsType:this.goodsType})
+          this.$emit("change", { category: this.category, goodsType: this.goodsType });
         }
       }
     },
   },
-  mounted () {
-    this.GET_NextLevelCategory()
-    
-  }
-}
+  mounted() {
+    this.GET_NextLevelCategory();
+  },
+};
 </script>
 <style lang="scss" scoped>
-  @import "./addGoods.scss";
+@import "./addGoods.scss";
 </style>

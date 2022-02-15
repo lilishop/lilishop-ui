@@ -16,7 +16,7 @@ import {
  */
 export const setHomeSetup = params => {
 
-  return postRequest("/pageData/add", params);
+  return postRequest("/other/pageData/add", params);
 };
 
 /**
@@ -25,7 +25,7 @@ export const setHomeSetup = params => {
  */
 export const getHomeData = params => {
 
-  return getRequest(`/pageData/${params}`);
+  return getRequest(`/other/pageData/${params}`);
 };
 
 

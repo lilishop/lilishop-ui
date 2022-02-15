@@ -3,7 +3,13 @@
   <div class="model-title">
     <div>店铺装修</div>
     <div class="btns">
-      <Button @click="clickBtn(item)" size="small" v-for="(item, index) in way" :key="index" :type="item.selected ? 'primary' : ''">
+      <Button
+        @click="clickBtn(item)"
+        size="small"
+        v-for="(item, index) in way"
+        :key="index"
+        :type="item.selected ? 'primary' : ''"
+      >
         {{ item.title }}
       </Button>
     </div>
@@ -18,7 +24,13 @@
       </Poptip> -->
       <Button size="default" type="primary" @click="handleSpinShow">保存模板</Button>
 
-      <Modal title="保存中" v-model="saveDialog" :closable="true" :mask-closable="false" :footer-hide="true">
+      <Modal
+        title="保存中"
+        v-model="saveDialog"
+        :closable="true"
+        :mask-closable="false"
+        :footer-hide="true"
+      >
         <div v-if="progress">
           <div class="model-item">
             模板名称 <Input style="width: 200px" v-model="submitWay.name" />
@@ -65,7 +77,7 @@ export default {
         //   selected: false,
         // },
       ],
-   
+
       submitWay: {
         // 表单信息
         pageShow: this.$route.query.type || false,
@@ -99,7 +111,7 @@ export default {
         return false;
       }
 
-      this.submitWay.pageShow
+      this.submitWay?.pageShow === true
         ? (this.submitWay.pageShow = "OPEN")
         : (this.submitWay.pageShow = "CLOSE");
 

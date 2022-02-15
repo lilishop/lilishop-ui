@@ -68,14 +68,31 @@
                 已有<span>{{ item.content.commentNum || 0 }}</span
                 >人评价
               </div>
-              <div class="goods-show-seller" >
-                <Tag class="goods-show-buyer" v-if="item.content.selfOperated" size="default" color="error">自营
+              <div class="goods-show-seller">
+                <Tag
+                  class="goods-show-buyer"
+                  v-if="item.content.selfOperated"
+                  size="default"
+                  color="error"
+                  >自营
                 </Tag>
-                <div class="goods-show-right" > 
-               <div class="goods-show-middle" v-if="goodsListType.content.goodsType == 'VIRTUAL_GOODS'">虚拟</div>
-                <div class="goods-show-middle" v-else-if="goodsListType.content.goodsType == 'PHYSICAL_GOODS'">实物</div>
+                <div class="goods-show-right">
+                  <div
+                    class="goods-show-middle"
+                    v-if="goodsListType.content.goodsType == 'VIRTUAL_GOODS'"
+                  >
+                    虚拟
+                  </div>
+                  <div
+                    class="goods-show-middle"
+                    v-else-if="goodsListType.content.goodsType == 'PHYSICAL_GOODS'"
+                  >
+                    实物
+                  </div>
                 </div>
-                <span class="text-bottom" style="color:#e4393c;">{{ item.content.storeName }}</span>
+                <span class="text-bottom" style="color: #e4393c">{{
+                  item.content.storeName
+                }}</span>
               </div>
             </div>
           </div>
@@ -98,134 +115,141 @@
 </template>
 
 <script>
-import GoodsClassNav from '@/components/nav/GoodsClassNav';
-import * as apiGoods from '@/api/goods';
+import GoodsClassNav from "@/components/nav/GoodsClassNav";
+import * as apiGoods from "@/api/goods";
 export default {
-  name: 'GoodsList',
-  beforeRouteEnter (to, from, next) {
+  name: "GoodsList",
+  beforeRouteEnter(to, from, next) {
     window.scrollTo(0, 0);
     next();
   },
-  data () {
+  data() {
     return {
       sortIndex: 0, // 排序状态
       sortPriceIndex: false, // 判断价格升序还是降序
-      goodsTool: [ // 排序类型
-        { title: '综合', en: '' },
-        { title: '销量', en: 'buyCount' },
-        { title: '评论数', en: 'commentNum' },
-        { title: '新品', en: 'releaseTime' }
+      goodsTool: [
+        // 排序类型
+        { title: "综合", en: "" },
+        { title: "销量", en: "buyCount" },
+        { title: "评论数", en: "commentNum" },
+        { title: "新品", en: "releaseTime" },
       ],
       goodsList: [], // 商品列表
       loading: false, // 加载状态
-      goodsListType:"",
+      goodsListType: "",
       total: 0, // 列表总数
-      params: { // 请求参数
+      params: {
+        // 请求参数
         pageNumber: 0,
         pageSize: 20,
-        categoryId: ''
-      }
+        categoryId: "",
+      },
     };
   },
   watch: {
-    $route () {
-      const keyword = this.$route.query.keyword
-      this.handleSearch(keyword)
-    }
+    $route() {
+      const keyword = this.$route.query.keyword;
+      this.handleSearch(keyword);
+    },
   },
   methods: {
     // 搜索
-    handleSearch (key) {
-      this.params.keyword = key
-      this.params.pageNumber = 0
-      this.getGoodsList()
+    handleSearch(key) {
+      this.params.keyword = key;
+      this.params.pageNumber = 0;
+      this.getGoodsList();
     },
-    orderBy (data, index) {
+    orderBy(data, index) {
       // 排序
       this.sortIndex = index;
       this.params.sort = data;
-      this.params.order = 'desc';
-      if (data === 'price') {
+      this.params.order = "desc";
+      if (data === "price") {
         if (!this.sortPriceIndex) {
-          this.sortPriceIndex = 'asc';
+          this.sortPriceIndex = "asc";
         } else {
-          this.sortPriceIndex === 'desc' ? (this.sortPriceIndex = 'asc') : (this.sortPriceIndex = 'desc');
+          this.sortPriceIndex === "desc"
+            ? (this.sortPriceIndex = "asc")
+            : (this.sortPriceIndex = "desc");
         }
-        this.params.order = this.sortPriceIndex
+        this.params.order = this.sortPriceIndex;
       } else {
-        this.sortPriceIndex = false
+        this.sortPriceIndex = false;
       }
       this.getGoodsList();
     },
-    goGoodsDetail (skuId, goodsId) {
+    goGoodsDetail(skuId, goodsId) {
       // 跳转商品详情
       let routeUrl = this.$router.resolve({
-        path: '/goodsDetail',
-        query: { skuId, goodsId }
+        path: "/goodsDetail",
+        query: { skuId, goodsId },
       });
-      window.open(routeUrl.href, '_blank');
+      window.open(routeUrl.href, "_blank");
     },
     // 分页 修改页码
-    changePageNum (val) {
+    changePageNum(val) {
       this.params.pageNumber = val;
       this.getGoodsList();
     },
     // 分页 修改页数
-    changePageSize (val) {
+    changePageSize(val) {
       this.params.pageNumber = 1;
       this.params.pageSize = val;
       this.getGoodsList();
     },
     // 获取商品列表
-    getGoodsList () {
+    getGoodsList() {
       this.loading = true;
-      apiGoods.goodsList(this.params)
+      apiGoods
+        .goodsList(this.params)
         .then((res) => {
           this.loading = false;
           if (res.success) {
             this.goodsList = res.result.content;
             this.total = res.result.totalElements;
-            for(var i = 0;i<this.goodsList.length; i++){
+            for (var i = 0; i < this.goodsList.length; i++) {
               this.goodsListType = this.goodsList[i];
             }
           }
-        }).catch(() => {
+        })
+        .catch(() => {
           this.loading = false;
         });
     },
-    getParams (val) {
+    getParams(val) {
       // 筛选条件回显
-      Object.assign(this.params, val)
-      this.getGoodsList()
-    }
+      Object.assign(this.params, val);
+      this.getGoodsList();
+    },
   },
-  created () {
+  created() {
     if (this.$route.query.categoryId) {
-      let cateId = this.$route.query.categoryId.split(',')
-      Object.assign(this.params, this.$route.query)
-      this.params.categoryId = cateId[cateId.length - 1]
+      let cateId = this.$route.query.categoryId.split(",");
+      Object.assign(this.params, this.$route.query);
+      this.params.categoryId = cateId[cateId.length - 1];
     } else {
-      Object.assign(this.params, this.$route.query)
+      Object.assign(this.params, this.$route.query);
     }
-    this.getGoodsList()
+    this.getGoodsList();
   },
   components: {
-    GoodsClassNav
-  }
+    GoodsClassNav,
+  },
 };
 </script>
 
 <style scoped lang="scss">
-@import '../assets/styles/goodsList.scss';  
-.goods-show-info>.goods-show-seller>.goods-show-buyer{
-    height:16px;width:30px;
-    white-space: nowrap;
-    line-height:17px;
-    text-align: center;
-    padding:0 3px;
-    background-color:#E23A3A;
-  }
-.goods-show-seller{
+@import "../assets/styles/goodsList.scss";
+.goods-show-info > .goods-show-seller > .goods-show-buyer {
+  height: 16px;
+  width: 30px;
+  white-space: nowrap;
+  line-height: 17px;
+  text-align: center;
+  padding: 0 3px;
+  background-color: #e23a3a;
+}
+.goods-show-seller {
   // padding:3px 0;
   vertical-align: middle;
 }
@@ -235,8 +259,8 @@ export default {
   min-width: 1000px;
   position: relative;
 }
-.price-sort:hover{
-  color:#E23A3A;
+.price-sort:hover {
+  color: #e23a3a;
 }
 .goods-box {
   display: flex;
@@ -246,26 +270,26 @@ export default {
   width: 200px;
   border: 1px solid #ccc;
 }
-.goods-show-right{
-  width:35px;
-  height:17px;
+.goods-show-right {
+  width: 35px;
+  height: 17px;
   // vertical-align:middle;
   overflow: hidden;
-  margin-top:1.5px;
+  margin-top: 1.5px;
   margin-right: 5px;
   line-height: 16px;
-  background:white;
-  border-radius:4px;
-  margin-bottom:5px;
-  float:left;
-  text-align:center;
-  border:1px solid rgba(112, 123, 187, 0.8);
-  color:rgba(112, 123, 187, 0.8);
+  background: white;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  float: left;
+  text-align: center;
+  border: 1px solid rgba(112, 123, 187, 0.8);
+  color: rgba(112, 123, 187, 0.8);
 }
-.goods-show-middle:hover{
-  color:rgba(2, 15, 88, 0.6);
-  border:0.2px solid rgba(0, 13, 87, 0.6);
-  border-radius:4px;
+.goods-show-middle:hover {
+  color: rgba(2, 15, 88, 0.6);
+  border: 0.2px solid rgba(0, 13, 87, 0.6);
+  border-radius: 4px;
   line-height: 18px;
 }
 .item-as-title {

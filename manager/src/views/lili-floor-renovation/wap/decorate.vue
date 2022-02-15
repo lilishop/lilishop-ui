@@ -2,17 +2,27 @@
   <div class="decorate">
     <div class="decorate-title">
       {{ res.name }}
-      <Button style="margin-left: 20px" size="small" ghost v-if="
-          res.type == 'tpl_ad_list' ||
-          res.type == 'tpl_activity_list' ||
-          res.drawer
-        " type="primary" @click="selectStyle()">选择风格</Button>
+      <Button
+        style="margin-left: 20px"
+        size="small"
+        ghost
+        v-if="res.type == 'tpl_ad_list' || res.type == 'tpl_activity_list' || res.drawer"
+        type="primary"
+        @click="selectStyle()"
+        >选择风格</Button
+      >
     </div>
 
     <!-- 右侧显示抽屉 -->
     <Drawer title="选择风格" :closable="false" width="400" v-model="styleFlag">
       <div class="drawer">
-        <div class="drawer-item" @click="clickDrawer(item, index)" v-for="(item, index) in modelData" :key="index" v-if="item.drawer">
+        <div
+          class="drawer-item"
+          @click="clickDrawer(item, index)"
+          v-for="(item, index) in modelData"
+          :key="index"
+          v-if="item.drawer"
+        >
           <img src alt />
           <span>{{ item.name }}</span>
         </div>
@@ -20,18 +30,29 @@
     </Drawer>
 
     <!-- 卡片集合 -->
-    <div class="decorate-list" v-if="
-        (res.type != 'tpl_ad_list' && res.type != 'tpl_activity_list') ||
-        res.drawer
-      ">
+    <div
+      class="decorate-list"
+      v-if="(res.type != 'tpl_ad_list' && res.type != 'tpl_activity_list') || res.drawer"
+    >
       <div class="decorate-item" v-for="(item, index) in res.options.list" :key="index">
         <div class="decorate-item-title">
           <div>卡片</div>
-          <Icon @click="closeDecorate(index)" v-if="res.close" size="20" color="#e1251b" type="md-close-circle" />
+          <Icon
+            @click="closeDecorate(index)"
+            v-if="res.close"
+            size="20"
+            color="#e1251b"
+            type="md-close-circle"
+          />
         </div>
 
         <div class="decorate-item-box">
-          <div class="decorate-border" v-if="item.titleWay" v-for="(title_item, title_index) in item.titleWay" :key="title_index">
+          <div
+            class="decorate-border"
+            v-if="item.titleWay"
+            v-for="(title_item, title_index) in item.titleWay"
+            :key="title_index"
+          >
             <div class="decorate-view">
               <div class="decorate-view-title">标题{{ title_index + 1 }}</div>
               <div>
@@ -46,19 +67,28 @@
             </div>
             <div class="decorate-view">
               <div class="decorate-view-title">绑定商品</div>
-              <div class="decorate-view-link" v-if="res.options.list[0].listWay.length != 0">
-
+              <div
+                class="decorate-view-link"
+                v-if="res.options.list[0].listWay.length != 0"
+              >
                 <!-- 绑定商品选择器回调已选择的商品 -->
-                <div v-if="title_item.___index == bindGoods.___index ||  title_item.title == bindGoods.type" v-for="(bindGoods,bindGoodsIndex) in res.options.list[0].listWay" :key="bindGoodsIndex">
-                  {{bindGoods.title}},
+                <div
+                  v-if="
+                    title_item.___index == bindGoods.___index ||
+                    title_item.title == bindGoods.type
+                  "
+                  v-for="(bindGoods, bindGoodsIndex) in res.options.list[0].listWay"
+                  :key="bindGoodsIndex"
+                >
+                  {{ bindGoods.title }},
                 </div>
-
               </div>
               <div>
-                <Button @click="bindGoodsId(title_item)" size="small" ghost type="primary">选择商品</Button>
+                <Button @click="bindGoodsId(title_item)" size="small" ghost type="primary"
+                  >选择商品</Button
+                >
               </div>
             </div>
-
           </div>
           <!-- 选择照片 -->
           <div class="decorate-view" v-if="!res.notImg">
@@ -72,7 +102,13 @@
               </div>
             </div>
             <div class="selectBtn">
-              <Button size="small" @click="handleClickFile(item, index)" ghost type="primary">选择照片</Button>
+              <Button
+                size="small"
+                @click="handleClickFile(item, index)"
+                ghost
+                type="primary"
+                >选择照片</Button
+              >
             </div>
           </div>
           <!-- 填写标题 -->
@@ -90,50 +126,54 @@
               已选链接：
 
               <span>
-                {{ ways.find((e)=>{return item.url.___type == e.name}).title }}
+                {{
+                  ways.find((e) => {
+                    return item.url.___type == e.name;
+                  }).title
+                }}
                 -
                 <!-- 当选择完链接之后的商品名称 -->
-                <span v-if="item.url.___type == 'goods'"> {{item.url.goodsName}}</span>
+                <span v-if="item.url.___type == 'goods'"> {{ item.url.goodsName }}</span>
                 <!-- 当选择完链接之后的分类回调 -->
-                <span v-if="item.url.___type == 'category'"> {{item.url.name}}</span>
+                <span v-if="item.url.___type == 'category'"> {{ item.url.name }}</span>
                 <!-- 当选择完链接之后的店铺回调 -->
-                <span v-if="item.url.___type == 'shops'"> {{item.url.memberName}}</span>
+                <span v-if="item.url.___type == 'shops'"> {{ item.url.memberName }}</span>
                 <!-- 当选择完链接之后的其他回调 -->
-                <span v-if="item.url.___type == 'other'"> {{item.url.title}}</span>
+                <span v-if="item.url.___type == 'other'"> {{ item.url.title }}</span>
                 <!-- 当选择完活动之后的其他回调 -->
                 <span v-if="item.url.___type == 'marketing'">
-                  <span v-if="item.url.___promotion =='SECKILL'">
-                    秒杀
-                  </span>
-                  <span v-if="item.url.___promotion =='FULL_DISCOUNT'">
-                    满减
-                  </span>
-                  <span v-if="item.url.___promotion =='PINTUAN'">
-                    拼团
-                  </span>
-                  {{item.url.title || item.url.goodsName}}
+                  <span v-if="item.url.___promotion == 'SECKILL'"> 秒杀 </span>
+                  <span v-if="item.url.___promotion == 'FULL_DISCOUNT'"> 满减 </span>
+                  <span v-if="item.url.___promotion == 'PINTUAN'"> 拼团 </span>
+                  {{ item.url.title || item.url.goodsName }}
                 </span>
                 <!-- 当选择完活动之后的其他回调 -->
-                <span v-if="item.url.___type == 'pages'"> {{item.url.title}}</span>
-
+                <span v-if="item.url.___type == 'pages'"> {{ item.url.title }}</span>
               </span>
-
             </div>
             <div>
-              <Button ghost size="small" type="primary" @click="clickLink(item,index)">选择链接</Button>
+              <Button ghost size="small" type="primary" @click="clickLink(item, index)"
+                >选择链接</Button
+              >
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <Button v-if="
-        res.type != 'tpl_ad_list' &&
-        res.type != 'tpl_activity_list' &&
-        !res.notAdd
-      " type="primary" @click="addDecorate()" ghost>添加</Button>
+    <Button
+      v-if="res.type != 'tpl_ad_list' && res.type != 'tpl_activity_list' && !res.notAdd"
+      type="primary"
+      @click="addDecorate()"
+      ghost
+      >添加</Button
+    >
 
-    <liliDialog ref="liliDialog" @selectedLink="selectedLink" @selectedGoodsData="selectedGoodsData"></liliDialog>
+    <liliDialog
+      ref="liliDialog"
+      @selectedLink="selectedLink"
+      @selectedGoodsData="selectedGoodsData"
+    ></liliDialog>
 
     <Modal width="1200px" v-model="picModelFlag">
       <ossManage @callback="callbackSelected" ref="ossManage" />
@@ -179,18 +219,17 @@ export default {
     },
     // 回调的商品信息
     selectedGoodsData(val) {
-     
       if (!val) return false;
       let data = val.map((item) => {
         delete item.selected;
-        delete item.intro
-        delete item.mobileIntro
+        delete item.intro;
+        delete item.mobileIntro;
         return {
           img: item.thumbnail,
           title: item.goodsName,
           type: this.selectedGoods.title,
-          ___index:this.selectedGoods.___index,
-          ...item
+          ___index: this.selectedGoods.___index,
+          ...item,
         };
       });
       this.res.options.list[0].listWay.push(...data);
@@ -236,7 +275,7 @@ export default {
         title: "标题",
         link: "",
         url: "",
-        size: this.res.options.list[0].size,
+        size: this.res.options.list[0]?.size,
       };
       this.res.options.list.push(way);
     },

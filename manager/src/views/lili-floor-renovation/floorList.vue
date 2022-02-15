@@ -1,8 +1,13 @@
 <template>
   <div class="wrapper">
     <Card class="category">
-      <div :class="{active:i == selectedIndex}" class="category-item" v-for="(typeItem,i) in pageTypes" :key="typeItem.type">
-        <div @click="clickType(typeItem.type,i)">{{typeItem.title}}</div>
+      <div
+        :class="{ active: i == selectedIndex }"
+        class="category-item"
+        v-for="(typeItem, i) in pageTypes"
+        :key="typeItem.type"
+      >
+        <div @click="clickType(typeItem.type, i)">{{ typeItem.title }}</div>
       </div>
     </Card>
     <Card class="content">
@@ -24,16 +29,19 @@
               <span slot="open">开</span>
               <span slot="close">关</span>
             </i-switch>
-            <Button type="info" placement="right" @click="Template(item)" size="small">编辑</Button>
-            <Button type="success" placement="right" @click="decorate(item)" size="small">装修</Button>
+            <Button type="info" placement="right" @click="Template(item)" size="small"
+              >编辑</Button
+            >
+            <Button type="success" placement="right" @click="decorate(item)" size="small"
+              >装修</Button
+            >
             <Poptip confirm title="删除此模板？" @on-ok="delTemplate(item.id)">
               <Button type="error" size="small">删除</Button>
             </Poptip>
           </div>
         </div>
-        <div class="no-more" v-if="list.length ==0">暂无更多模板</div>
+        <div class="no-more" v-if="list.length == 0">暂无更多模板</div>
       </div>
-
     </Card>
     <Modal
       v-model="showModal"
@@ -61,13 +69,15 @@ export default {
   name: "floorList",
   data() {
     return {
-      showModal: false,  // 添加modal的显示
+      showModal: false, // 添加modal的显示
       selectedIndex: 0, // 首页还是专题选择的index
-      formData: { // 新建模态框的数据
+      formData: {
+        // 新建模态框的数据
         status: false, // 模板是否开启
         name: "", // 模板名称
       },
-      columns: [ // 列表展示的column
+      columns: [
+        // 列表展示的column
         {
           title: "页面名称",
           key: "name",
@@ -82,11 +92,12 @@ export default {
       ],
 
       loading: false, // 加载状态
-      pageTypes: [ // 那种类别的模板
+      pageTypes: [
+        // 那种类别的模板
         {
           type: "INDEX",
           title: "首页",
-        }
+        },
         // {
         //   type: "SPECIAL",
         //   title: "专题",
@@ -134,14 +145,17 @@ export default {
 
     Template(item) {
       // 编辑表单
-      item.status = item.pageShow
+      item.status = item.pageShow;
       this.formData = item;
       this.showModal = true;
     },
 
     decorate(val) {
       // 装修
-      this.$router.push({ name: "renovation", query: { id: val.id,pageShow:val.pageShow } });
+      this.$router.push({
+        name: "renovation",
+        query: { id: val.id, pageShow: val.pageShow },
+      });
     },
 
     getTemplateList() {
@@ -155,13 +169,13 @@ export default {
       API_floor.getHomeList(params).then((res) => {
         if (res.success) {
           this.list = res.result.records;
-          this.list.forEach(e => {
-            if (e.pageShow === 'OPEN') {
-              e.pageShow = true
+          this.list.forEach((e) => {
+            if (e.pageShow === "OPEN") {
+              e.pageShow = true;
             } else {
-              e.pageShow = false
+              e.pageShow = false;
             }
-          })
+          });
         }
       });
     },
@@ -184,7 +198,7 @@ export default {
         }
       });
     },
-  }
+  },
 };
 </script>
 
@@ -197,7 +211,7 @@ export default {
   background: #ededed;
 }
 .item-title {
-  background: #d7e7f5!important;
+  background: #d7e7f5 !important;
   height: 54px;
 }
 .no-more {
@@ -239,12 +253,12 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    div:nth-child(2){
+    div:nth-child(2) {
       margin-right: 80px;
     }
   }
 }
-.item:nth-of-type(2n+1) {
+.item:nth-of-type(2n + 1) {
   background: #f5f7fa;
 }
 </style>

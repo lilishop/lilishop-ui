@@ -313,8 +313,12 @@ export default {
             let notSupArea = res.result.notSupportFreight;
             this.selectedCoupon = {};
             if (res.result.platformCoupon)
-              this.selectedCoupon.platformCoupon = res.result.platformCoupon;
-            Object.assign(this.selectedCoupon, res.result.storeCoupons);
+              this.selectedCoupon[res.result.platformCoupon.memberCoupon.id] = res.result.platformCoupon;
+            if (res.result.storeCoupons && Object.keys(res.result.storeCoupons)[0]) {
+              let storeMemberCouponsId = Object.keys(res.result.storeCoupons)[0];
+              let storeCouponId = res.result.storeCoupons[storeMemberCouponsId].memberCoupon.id;
+              this.selectedCoupon[storeCouponId] = res.result.storeCoupons[storeMemberCouponsId];
+            }
             if (notSupArea) {
               let content = [];
               let title = "";
@@ -340,7 +344,7 @@ export default {
             const couponKeys = Object.keys(this.selectedCoupon);
             if (couponKeys.length) {
               this.couponList.forEach((e) => {
-                if (e.id === this.selectedCoupon[couponKeys].memberCoupon.id) {
+                if (this.selectedCoupon[e.id] && e.id === this.selectedCoupon[e.id].memberCoupon.id) {
                   this.usedCouponId.push(e.id);
                 }
               });

@@ -7,56 +7,54 @@
             <h3>退货申请</h3>
             <dl>
               <dt>退货状态</dt>
-              <dd>{{afterSaleInfo.serviceName}}</dd>
+              <dd>{{ afterSaleInfo.serviceName }}</dd>
             </dl>
             <dl>
               <dt>退货退款编号</dt>
-              <dd>{{afterSaleInfo.sn}}</dd>
+              <dd>{{ afterSaleInfo.sn }}</dd>
             </dl>
             <dl>
               <dt>退货退款原因</dt>
-              <dd>{{afterSaleInfo.reason}}</dd>
+              <dd>{{ afterSaleInfo.reason }}</dd>
             </dl>
             <dl>
               <dt>申请退款金额</dt>
-              <dd>￥{{afterSaleInfo.applyRefundPrice | unitPrice}}</dd>
+              <dd>￥{{ afterSaleInfo.applyRefundPrice | unitPrice }}</dd>
             </dl>
             <dl v-if="afterSaleInfo.actualRefundPrice">
               <dt>实际退款金额</dt>
-              <dd>￥{{afterSaleInfo.actualRefundPrice | unitPrice}}</dd>
+              <dd>￥{{ afterSaleInfo.actualRefundPrice | unitPrice }}</dd>
             </dl>
             <dl v-if="afterSaleInfo.refundPoint">
               <dt>退还积分</dt>
-              <dd>{{afterSaleInfo.refundPoint}}</dd>
+              <dd>{{ afterSaleInfo.refundPoint }}</dd>
             </dl>
             <dl>
               <dt>退货数量</dt>
-              <dd>{{afterSaleInfo.num}}</dd>
+              <dd>{{ afterSaleInfo.num }}</dd>
             </dl>
             <dl>
               <dt>问题描述</dt>
-              <dd>{{afterSaleInfo.problemDesc}}</dd>
+              <dd>{{ afterSaleInfo.problemDesc }}</dd>
             </dl>
             <dl>
               <dt>凭证</dt>
-              <dd v-if="afterSaleImage == ''">
-                暂无凭证
-              </dd>
+              <dd v-if="afterSaleImage == ''">暂无凭证</dd>
               <dd v-else>
                 <div class="div-img" v-for="(item, index) in afterSaleImage" :key="index">
-                  <img class="complain-img" :src=item>
+                  <img class="complain-img" :src="item" />
                 </div>
               </dd>
             </dl>
           </div>
 
-          <div class="div-form-default" v-if="afterSaleInfo.serviceStatus=='APPLY'">
+          <div class="div-form-default" v-if="afterSaleInfo.serviceStatus == 'APPLY'">
             <h3>处理意见</h3>
             <dl>
               <dt>商家</dt>
               <dd>
                 <div class="div-content">
-                  {{afterSaleInfo.storeName}}
+                  {{ afterSaleInfo.storeName }}
                 </div>
               </dd>
             </dl>
@@ -64,7 +62,11 @@
               <dt>是否同意</dt>
               <dd>
                 <div class="div-content">
-                  <RadioGroup type="button" button-style="solid" v-model="params.serviceStatus">
+                  <RadioGroup
+                    type="button"
+                    button-style="solid"
+                    v-model="params.serviceStatus"
+                  >
                     <Radio label="PASS">
                       <span>同意</span>
                     </Radio>
@@ -77,37 +79,49 @@
             </dl>
             <dl>
               <dt>申请退款金额</dt>
-              <dd>{{ afterSaleInfo.applyRefundPrice | unitPrice('￥') }}</dd>
+              <dd>{{ afterSaleInfo.applyRefundPrice | unitPrice("￥") }}</dd>
             </dl>
             <dl>
               <dt>实际退款金额</dt>
               <dd>
-                <Input v-model="params.actualRefundPrice" style="width:260px" />
+                <Input v-model="params.actualRefundPrice" style="width: 260px" />
               </dd>
             </dl>
             <dl>
               <dt>备注信息</dt>
               <dd>
-                <Input v-model="params.remark" type="textarea" maxlength="200" :rows="4" clearable style="width:260px" />
+                <Input
+                  v-model="params.remark"
+                  type="textarea"
+                  maxlength="200"
+                  :rows="4"
+                  clearable
+                  style="width: 260px"
+                />
               </dd>
             </dl>
             <dl>
               <dd>
-                <div style="text-align: right;width: 45%;margin-top: 10px">
-                  <Button type="primary" :loading="submitLoading" @click="handleSubmit" style="margin-left: 5px">
+                <div style="text-align: right; width: 45%; margin-top: 10px">
+                  <Button
+                    type="primary"
+                    :loading="submitLoading"
+                    @click="handleSubmit"
+                    style="margin-left: 5px"
+                  >
                     确定
                   </Button>
                 </div>
               </dd>
             </dl>
           </div>
-          <div class="div-form-default" v-if="afterSaleInfo.serviceStatus !='APPLY'">
+          <div class="div-form-default" v-if="afterSaleInfo.serviceStatus != 'APPLY'">
             <h3>商家处理</h3>
             <dl>
               <dt>商家</dt>
               <dd>
                 <div class="div-content">
-                  {{afterSaleInfo.storeName}}
+                  {{ afterSaleInfo.storeName }}
                 </div>
               </dd>
             </dl>
@@ -128,139 +142,176 @@
             <dl>
               <dt>备注信息</dt>
               <dd>
-                {{afterSaleInfo.auditRemark || '暂无备注信息'}}
+                {{ afterSaleInfo.auditRemark || "暂无备注信息" }}
               </dd>
             </dl>
           </div>
         </div>
-        <div class="div-flow-center">
-
-        </div>
+        <div class="div-flow-center"></div>
         <div class="div-flow-right">
           <div class="div-form-default">
             <h3>相关商品交易信息</h3>
             <dl>
               <dt>
-                <img :src="afterSaleInfo.goodsImage" height="60px">
+                <img :src="afterSaleInfo.goodsImage" height="60px" />
               </dt>
               <dd>
                 <div class="div-zoom">
-                  <a @click="linkTo(afterSaleInfo.goodsId,afterSaleInfo.skuId)">{{afterSaleInfo.goodsName}}</a>
+                  <a @click="linkTo(afterSaleInfo.goodsId, afterSaleInfo.skuId)">{{
+                    afterSaleInfo.goodsName
+                  }}</a>
                   <Poptip trigger="hover" title="扫码在手机中查看" transfer>
                     <div slot="content">
-                      <vue-qr :text="wapLinkTo(afterSaleInfo.goodsId,afterSaleInfo.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                      <vue-qr
+                        :text="wapLinkTo(afterSaleInfo.goodsId, afterSaleInfo.skuId)"
+                        :margin="0"
+                        colorDark="#000"
+                        colorLight="#fff"
+                        :size="150"
+                      ></vue-qr>
                     </div>
-                    <img src="../../../assets/qrcode.svg" style="vertical-align:middle" class="hover-pointer ml_10" width="20" height="20" alt="">
+                    <img
+                      src="../../../assets/qrcode.svg"
+                      style="vertical-align: middle"
+                      class="hover-pointer ml_10"
+                      width="20"
+                      height="20"
+                      alt=""
+                    />
                   </Poptip>
                 </div>
-                <div style="color:#999;font-size:10px">数量：x{{afterSaleInfo.num}}</div>
-                
+                <div style="color: #999; font-size: 10px">
+                  数量：x{{ afterSaleInfo.num }}
+                </div>
               </dd>
             </dl>
-
           </div>
           <div class="div-form-default">
             <h3>订单相关信息</h3>
             <dl>
-              <dt>
-                订单编号
-              </dt>
+              <dt>订单编号</dt>
               <dd>
-                {{afterSaleInfo.orderSn}}
+                {{ afterSaleInfo.orderSn }}
               </dd>
             </dl>
             <dl v-if="afterSaleInfo.bankDepositName">
               <dt>银行开户行</dt>
               <dd>
-                {{afterSaleInfo.bankDepositName}}
+                {{ afterSaleInfo.bankDepositName }}
               </dd>
             </dl>
             <dl v-if="afterSaleInfo.bankAccountName">
               <dt>银行开户名</dt>
               <dd>
-                {{afterSaleInfo.bankAccountName}}
+                {{ afterSaleInfo.bankAccountName }}
               </dd>
             </dl>
             <dl v-if="afterSaleInfo.bankAccountNumber">
               <dt>银行卡号</dt>
               <dd>
-                {{afterSaleInfo.bankAccountNumber}}
+                {{ afterSaleInfo.bankAccountNumber }}
               </dd>
             </dl>
-
           </div>
-          <div class="div-form-default" v-if="afterSaleInfo.afterSaleAllowOperationVO && afterSaleInfo.afterSaleAllowOperationVO.refund">
+          <div
+            class="div-form-default"
+            v-if="
+              afterSaleInfo.afterSaleAllowOperationVO &&
+              afterSaleInfo.afterSaleAllowOperationVO.refund
+            "
+          >
             <h3>平台退款</h3>
             <dl>
               <dt>银行开户行</dt>
               <dd>
-                {{afterSaleInfo.bankDepositName}}
+                {{ afterSaleInfo.bankDepositName }}
               </dd>
             </dl>
             <dl>
               <dt>银行开户名</dt>
               <dd>
-                {{afterSaleInfo.bankAccountName}}
+                {{ afterSaleInfo.bankAccountName }}
               </dd>
             </dl>
             <dl>
               <dt>银行卡号</dt>
               <dd>
-                {{afterSaleInfo.bankAccountNumber}}
+                {{ afterSaleInfo.bankAccountNumber }}
               </dd>
             </dl>
             <dl>
               <dt>备注信息</dt>
               <dd>
-                <Input v-model="refundPriceForm.remark" type="textarea" maxlength="200" :rows="4" clearable style="width:260px" />
+                <Input
+                  v-model="refundPriceForm.remark"
+                  type="textarea"
+                  maxlength="200"
+                  :rows="4"
+                  clearable
+                  style="width: 260px"
+                />
               </dd>
             </dl>
             <dl>
               <dt>操作</dt>
               <dd>
-                <Button type="primary" :loading="submitLoading" @click="refundPriceSubmit" style="margin-left: 5px">
+                <Button
+                  type="primary"
+                  :loading="submitLoading"
+                  @click="refundPriceSubmit"
+                  style="margin-left: 5px"
+                >
                   退款
                 </Button>
               </dd>
             </dl>
           </div>
-          <div class="div-form-default" v-if="afterSaleInfo.showDelivery && afterSaleInfo.serviceType ==='RETURN_GOODS'">
+          <div
+            class="div-form-default"
+            v-if="
+              afterSaleInfo.showDelivery && afterSaleInfo.serviceType === 'RETURN_GOODS'
+            "
+          >
             <h3>物流信息</h3>
             <dl>
               <dt>收货商家</dt>
-              <dd>{{afterSaleInfo.storeName}}</dd>
+              <dd>{{ afterSaleInfo.storeName }}</dd>
             </dl>
             <dl>
               <dt>收货商家手机</dt>
-              <dd>{{storeMsg.salesConsigneeMobile}}</dd>
+              <dd>{{ storeMsg.salesConsigneeMobile }}</dd>
             </dl>
             <dl>
               <dt>收货地址</dt>
-              <dd>{{storeMsg.salesConsigneeAddressPath}} {{storeMsg.salesConsigneeDetail}}</dd>
+              <dd>
+                {{ storeMsg.salesConsigneeAddressPath }}
+                {{ storeMsg.salesConsigneeDetail }}
+              </dd>
             </dl>
             <dl>
               <dt>物流公司</dt>
-              <dd>{{afterSaleInfo.mlogisticsName}}</dd>
+              <dd>{{ afterSaleInfo.mlogisticsName }}</dd>
             </dl>
             <dl>
-              <dt>
-                物流单号
-              </dt>
+              <dt>物流单号</dt>
               <dd>
-                {{afterSaleInfo.mlogisticsNo}}
+                {{ afterSaleInfo.mlogisticsNo }}
               </dd>
             </dl>
             <dl>
               <dt>操作</dt>
               <dd>
-                <Button type="info" :loading="submitLoading" @click="logisticsSeller()" style="margin-left: 5px">
+                <Button
+                  type="info"
+                  :loading="submitLoading"
+                  @click="logisticsSeller()"
+                  style="margin-left: 5px"
+                >
                   查询物流
                 </Button>
               </dd>
             </dl>
-
           </div>
-          
         </div>
       </div>
     </Card>
@@ -273,33 +324,32 @@
         <dl>
           <dt>售后单号：</dt>
           <dd>
-            <div class="text-box">{{sn}}</div>
+            <div class="text-box">{{ sn }}</div>
           </dd>
         </dl>
         <dl>
           <dt>物流公司：</dt>
           <dd>
-            <div class="text-box">{{afterSaleInfo.mlogisticsName}}</div>
+            <div class="text-box">{{ afterSaleInfo.mlogisticsName }}</div>
           </dd>
         </dl>
         <dl>
           <dt>快递单号：</dt>
           <dd>
-            <div class="text-box">{{afterSaleInfo.mlogisticsNo}}</div>
+            <div class="text-box">{{ afterSaleInfo.mlogisticsNo }}</div>
           </dd>
         </dl>
         <div class="div-express-log">
           <ul class="express-log">
             <template v-if="Object.keys(logisticsInfo).length">
-              <li v-for="(item,index) in logisticsInfo.traces" :key="index">
-                <span class="time">{{item.AcceptTime}}</span>
-                <span class="detail">{{item.AcceptStation}}</span>
+              <li v-for="(item, index) in logisticsInfo.traces" :key="index">
+                <span class="time">{{ item.AcceptTime }}</span>
+                <span class="detail">{{ item.AcceptStation }}</span>
               </li>
             </template>
             <template v-else>
-              <li style="text-align:center;">暂无物流信息</li>
+              <li style="text-align: center">暂无物流信息</li>
             </template>
-            
           </ul>
         </div>
       </div>
@@ -312,14 +362,17 @@
 
 <script>
 import * as API_Order from "@/api/order";
-
+import vueQr from "vue-qr";
 export default {
+  components: {
+    "vue-qr": vueQr,
+  },
   name: "orderDetail",
   data() {
     return {
       sn: "", // 订单号
       logisticsModal: false, //查询物流模态框
-      
+
       logisticsInfo: {}, //物流信息
       afterSaleInfo: {}, // 售后信息
       afterSaleImage: [], //会员申诉图片
@@ -334,44 +387,45 @@ export default {
       refundPriceForm: {
         remark: "",
       },
-      afterSaleStatusList: [ // 售后状态列表
+      afterSaleStatusList: [
+        // 售后状态列表
         {
-          name: '申请中',
-          status: 'APPLY'
+          name: "申请中",
+          status: "APPLY",
         },
         {
-          name: '通过',
-          status: 'PASS'
+          name: "通过",
+          status: "PASS",
         },
         {
-          name: '拒绝',
-          status: 'REFUSE'
+          name: "拒绝",
+          status: "REFUSE",
         },
         {
-          name: '买家退货，待卖家收货',
-          status: 'BUYER_RETURN'
+          name: "买家退货，待卖家收货",
+          status: "BUYER_RETURN",
         },
         {
-          name: '卖家确认收货',
-          status: 'SELLER_CONFIRM'
+          name: "卖家确认收货",
+          status: "SELLER_CONFIRM",
         },
         {
-          name: '卖家终止售后',
-          status: 'SELLER_TERMINATION'
+          name: "卖家终止售后",
+          status: "SELLER_TERMINATION",
         },
         {
-          name: '买家取消售后',
-          status: 'BUYER_CANCEL'
+          name: "买家取消售后",
+          status: "BUYER_CANCEL",
         },
         {
-          name: '完成售后',
-          status: 'COMPLETE'
+          name: "完成售后",
+          status: "COMPLETE",
         },
         {
-          name: '等待平台退款',
-          status: 'WAIT_REFUND'
-        }
-      ]
+          name: "等待平台退款",
+          status: "WAIT_REFUND",
+        },
+      ],
     };
   },
   methods: {
@@ -382,13 +436,19 @@ export default {
         this.loading = false;
         if (res.success) {
           this.afterSaleInfo = res.result;
-          this.afterSaleInfo.showDelivery = this.showDelivery(this.afterSaleInfo.serviceStatus)
-          this.afterSaleInfo.serviceName = this.filterOrderStatus(this.afterSaleInfo.serviceStatus)
+          this.afterSaleInfo.showDelivery = this.showDelivery(
+            this.afterSaleInfo.serviceStatus
+          );
+          this.afterSaleInfo.serviceName = this.filterOrderStatus(
+            this.afterSaleInfo.serviceStatus
+          );
           this.afterSaleImage = (res.result.afterSaleImage || "").split(",");
           //退货地址去掉逗号
           if (this.afterSaleInfo.mconsigneeAddressPath)
-            this.afterSaleInfo.mconsigneeAddressPath =
-              this.afterSaleInfo.mconsigneeAddressPath.replaceAll(",", " ");
+            this.afterSaleInfo.mconsigneeAddressPath = this.afterSaleInfo.mconsigneeAddressPath.replaceAll(
+              ",",
+              " "
+            );
 
           this.$set(
             this.params,
@@ -397,15 +457,17 @@ export default {
           );
           // 如果显示物流信息，展示商家地址
           if (this.afterSaleInfo.showDelivery) {
-            API_Order.storeAddress(this.sn).then(resu => {
-              if(resu.success) {
-                const obj = resu.result
-                obj.salesConsigneeAddressPath = obj.salesConsigneeAddressPath.replaceAll(',', '')
+            API_Order.storeAddress(this.sn).then((resu) => {
+              if (resu.success) {
+                const obj = resu.result;
+                obj.salesConsigneeAddressPath = obj.salesConsigneeAddressPath.replaceAll(
+                  ",",
+                  ""
+                );
                 this.storeMsg = obj;
               }
-            })
+            });
           }
-          
         }
       });
     },
@@ -462,21 +524,24 @@ export default {
         }
       });
     },
-    filterOrderStatus (status) { // 获取订单状态中文
-      const ob = this.afterSaleStatusList.filter(e => { return e.status === status });
-      return ob[0].name
+    filterOrderStatus(status) {
+      // 获取订单状态中文
+      const ob = this.afterSaleStatusList.filter((e) => {
+        return e.status === status;
+      });
+      return ob[0].name;
     },
     // 根据订单状态判断是否显示物流信息
-    showDelivery (status) {
+    showDelivery(status) {
       let flag = false;
-      this.afterSaleStatusList.forEach((e,index) => {
+      this.afterSaleStatusList.forEach((e, index) => {
         // 订单为买家退货，待卖家收货之后的状态，并且不是买家取消售后，展示物流信息
-        if(e.status === status && index>=3 && index !==6) {
-          flag = true
+        if (e.status === status && index >= 3 && index !== 6) {
+          flag = true;
         }
-      })
-      return flag
-    }
+      });
+      return flag;
+    },
   },
   mounted() {
     this.sn = this.$route.query.sn;
@@ -484,7 +549,7 @@ export default {
   },
 };
 </script>
-<style lang="scss" >
+<style lang="scss">
 .ivu-col {
   width: 100% !important;
 }

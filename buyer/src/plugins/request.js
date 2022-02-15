@@ -142,7 +142,7 @@ service.interceptors.response.use(
     const errorResponse = error.response || {};
     const errorData = errorResponse.data || {};
 
-    if (errorResponse.status === 403) {
+    if (errorResponse.status === 403 || error.response.data.code === 20004) {
       isRefreshToken++;
 
       if (isRefreshToken === 1) {
