@@ -219,6 +219,7 @@ export default {
       getFullDiscountList(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
+          console.log(res)
           this.data = res.result.records;
           this.total = res.result.total;
         }

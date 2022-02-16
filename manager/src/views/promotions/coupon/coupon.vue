@@ -5,14 +5,14 @@
         ref="searchForm"
         :model="searchForm"
         inline
-        :label-width="70"
+        :label-width="75"
         class="search-form mb_10"
       >
-        <Form-item label="活动名称" prop="couponName">
+        <Form-item label="优惠券名称" prop="couponName">
           <Input
             type="text"
             v-model="searchForm.couponName"
-            placeholder="请输入活动名称"
+            placeholder="请输入优惠券名称"
             clearable
             style="width: 200px"
           />
@@ -349,6 +349,7 @@ export default {
       getPlatformCouponList(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
+          console.log(res)
           this.data = res.result.records;
           this.total = res.result.total;
         }
