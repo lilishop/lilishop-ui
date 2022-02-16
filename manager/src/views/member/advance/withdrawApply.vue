@@ -7,7 +7,7 @@
             <Input type="text" v-model="searchForm.memberName" placeholder="请输入会员名称" clearable style="width: 200px" />
           </Form-item>
           <Form-item label="审核状态" prop="applyStatus">
-            <Select v-model="searchForm.memberName" clearable style="width: 200px">
+            <Select v-model="searchForm.applyStatus" clearable style="width: 200px">
               <Option value="APPLY">申请中</Option>
               <Option value="VIA_AUDITING">审核通过(提现成功)</Option>
               <Option value="FAIL_AUDITING">审核拒绝</Option>

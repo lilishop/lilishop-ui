@@ -256,8 +256,8 @@ export const lowGoods = params => {
 };
 
 // 获取商品单位列表
-export const getGoodsUnitList = () => {
-  return getRequest(`/goods/goodsUnit`);
+export const getGoodsUnitList = params => {
+  return getRequest(`/goods/goodsUnit`,params);
 };
 //根据分类id获取关联品牌
 export const getCategoryBrandListDataSeller = (category_id, params) => {

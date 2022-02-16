@@ -53,8 +53,10 @@ export default {
   .content{
     width: 1200px;
     height: 100%;
-    margin:  auto;
-    position: relative;
+    position: fixed;
+    top:0;
+    left:50%;
+    margin-left:-600px;
   }
   .hr{
     width: 100%;

@@ -67,12 +67,14 @@
               prop="goodsUnit"
             >
               <Select v-model="baseInfoForm.goodsUnit" style="width: 100px">
+              <Scroll :on-reach-bottom="handleReachBottom" >
                 <Option
-                  v-for="(unit, i) in goodsUnitList"
-                  :key="i"
-                  :value="unit"
-                  >{{ unit }}
+                  v-for="(item, index) in goodsUnitList"
+                  :key="index"
+                  :value="item"
+                  >{{ item }}
                 </Option>
+              </Scroll>    
               </Select>
             </FormItem>
             <FormItem
@@ -694,6 +696,7 @@ export default {
     };
     return {
       regular,
+      total:0,
       accessToken: "", //令牌token
       goodsParams: "",
       categoryId: "", // 商品分类第三级id
@@ -777,6 +780,10 @@ export default {
         name: [regular.REQUIRED, regular.VARCHAR5],
         value: [regular.REQUIRED, regular.VARCHAR60],
         templateId: [regular.REQUIRED],
+      },
+      params:{
+        pageNumber:1,
+        pageSize:10
       },
       skuInfoRules: {},
       /** 品牌列表 */
@@ -957,11 +964,22 @@ export default {
         }
       );
     },
+     // 页面触底
+    handleReachBottom(){
+      setTimeout(() => {
+        if (this.params.pageNumber * this.params.pageSize <= this.total) {
+          this.params.pageNumber++;
+          this.GET_GoodsUnit();
+        }
+      }, 1000);
+    },
     // 获取商品单位
     GET_GoodsUnit() {
-      API_GOODS.getGoodsUnitList().then((res) => {
+      API_GOODS.getGoodsUnitList(this.params).then((res) => {
         if (res.success) {
-          this.goodsUnitList = res.result.records.map((i) => i.name);
+          console.log(res)
+          this.goodsUnitList.push(...res.result.records.map((i) => i.name));
+          this.total = res.result.total;
         }
       });
     },
@@ -1686,5 +1704,11 @@ export default {
 }
 .input-number {
   width: 100%;
+}
+</style>
+
+<style>
+.ivu-select .ivu-select-dropdown{
+  overflow: hidden !important;
 }
 </style>
