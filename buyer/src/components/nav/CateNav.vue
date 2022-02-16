@@ -1,28 +1,54 @@
 <template>
   <div class="cate-nav">
     <div class="nav-con">
-      <div class="all-categories hover-pointer" @mouseenter="showFirstList = true" @mouseleave="showFirstList = false">全部商品分类</div>
+      <div
+        class="all-categories hover-pointer"
+        @mouseenter="showFirstList = true"
+        @mouseleave="showFirstList = false"
+      >
+        全部商品分类
+      </div>
       <ul class="nav-item" v-if="showNavBar">
         <li
-          class ="nav-lis"
+          class="nav-lis"
           v-for="(item, index) in navList.list"
           :key="index"
           @click="linkTo(item.url)"
         >
           {{ item.name }}
         </li>
-      </ul>   
-    </div> <hr style="width:1200px;height:2.5px;background:#e4393c;margin-top:-1px;margin-bottom:5px;border:none;"/>
+      </ul>
+    </div>
     <!-- 全部商品分类 -->
-    <div class="cate-list" v-show="showAlways || showFirstList" @mouseenter="showFirstList = true" @mouseleave="showFirstList = false">
+    <div
+      class="cate-list"
+      v-show="showAlways || showFirstList"
+      @mouseenter="showFirstList = true"
+      @mouseleave="showFirstList = false"
+    >
       <!-- 第一级分类 -->
-      <div class="nav-side" :class="{'large-nav': large, 'opacity-nav': opacity}" @mouseleave="panel = false">
+      <div
+        class="nav-side"
+        :class="{ 'large-nav': large, 'opacity-nav': opacity }"
+        @mouseleave="panel = false"
+      >
         <ul>
-          <li v-for="(item, index) in cateList" :key="index" @mouseenter="showDetail(index)" >
-            <span class="nav-side-item" @click="goGoodsList(item.id)">{{item.name}}</span>
+          <li
+            v-for="(item, index) in cateList"
+            :key="index"
+            @mouseenter="showDetail(index)"
+          >
+            <span class="nav-side-item" @click="goGoodsList(item.id)">{{
+              item.name
+            }}</span>
             <span v-for="(second, secIndex) in item.children" :key="secIndex">
-              <span v-if="secIndex < 2" > / </span>
-              <span @click="goGoodsList(second.id, second.parentId)" class="nav-side-item" v-if="secIndex < 2">{{second.name}}</span>
+              <span v-if="secIndex < 2"> / </span>
+              <span
+                @click="goGoodsList(second.id, second.parentId)"
+                class="nav-side-item"
+                v-if="secIndex < 2"
+                >{{ second.name }}</span
+              >
             </span>
           </li>
         </ul>
@@ -30,14 +56,19 @@
       <!-- 展开分类 -->
       <div
         class="detail-item-panel"
-        :style="{'minHeight': large?'470px':'340px'}"
+        :style="{ minHeight: large ? '470px' : '340px' }"
         v-show="panel"
         @mouseenter="panel = true"
         @mouseleave="panel = false"
       >
         <div class="nav-detail-item">
           <template v-for="(item, index) in panelData">
-            <span @click="goGoodsList(item.id, item.parentId)" v-if="index < 8" :key="index">{{ item.name }}<Icon type="ios-arrow-forward" /></span>
+            <span
+              @click="goGoodsList(item.id, item.parentId)"
+              v-if="index < 8"
+              :key="index"
+              >{{ item.name }}<Icon type="ios-arrow-forward"
+            /></span>
           </template>
         </div>
         <ul>
@@ -46,13 +77,21 @@
             :key="index"
             class="detail-item-row"
           >
-            <span class="detail-item-title" @click="goGoodsList(items.id,items.parentId)">
+            <span
+              class="detail-item-title"
+              @click="goGoodsList(items.id, items.parentId)"
+            >
               {{ items.name }} <Icon type="ios-arrow-forward" />
               <span class="glyphicon glyphicon-menu-right"></span>
             </span>
             <div>
-              <span v-for="(item, subIndex) in items.children" @click="goGoodsList(item.id,items.id,items.parentId)"
-              :key="subIndex" class="detail-item">{{ item.name }}</span>
+              <span
+                v-for="(item, subIndex) in items.children"
+                @click="goGoodsList(item.id, items.id, items.parentId)"
+                :key="subIndex"
+                class="detail-item"
+                >{{ item.name }}</span
+              >
             </div>
           </li>
         </ul>
@@ -62,105 +101,116 @@
 </template>
 
 <script>
-import { getCategory } from '@/api/goods';
-import storage from '@/plugins/storage.js'
+import { getCategory } from "@/api/goods";
+import storage from "@/plugins/storage.js";
 export default {
-  name: 'GoodsListNav',
+  name: "GoodsListNav",
   props: {
-    showAlways: { // 总是显示下拉分类
+    showAlways: {
+      // 总是显示下拉分类
       default: false,
-      type: Boolean
+      type: Boolean,
     },
-    showNavBar: { // 显示全部商品分类右侧导航条
+    showNavBar: {
+      // 显示全部商品分类右侧导航条
       default: true,
-      type: Boolean
+      type: Boolean,
     },
     hover: {
       default: false,
-      type: Boolean
+      type: Boolean,
     },
-    large: { // 是否更高的高度
+    large: {
+      // 是否更高的高度
       default: false,
-      type: Boolean
+      type: Boolean,
     },
-    opacity: { // 是否背景透明
+    opacity: {
+      // 是否背景透明
       default: false,
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
-  data () {
+  data() {
     return {
       panel: false, // 二级分类展示
       panelData: [], // 二级分类数据
       showFirstList: false, // 始终展示一级列表
-      cateList: [] // 商品分类
-    }
+      cateList: [], // 商品分类
+    };
   },
   computed: {
-    navList () { // 导航列表
-      if (storage.getItem('navList')) {
-        return JSON.parse(storage.getItem('navList'))
+    navList() {
+      // 导航列表
+      if (storage.getItem("navList")) {
+        return JSON.parse(storage.getItem("navList"));
       } else {
-        return []
+        return [];
       }
-    }
+    },
   },
   methods: {
-    getCate () { // 获取分类数据
+    getCate() {
+      // 获取分类数据
       if (this.hover) return false;
-      getCategory(0).then(res => {
+      getCategory(0).then((res) => {
         if (res.success) {
           this.cateList = res.result;
-          this.$store.commit('SET_CATEGORY', res.result)
+          this.$store.commit("SET_CATEGORY", res.result);
           // 过期时间
           var expirationTime = new Date().setHours(new Date().getHours() + 1);
           // 存放过期时间
-          localStorage.setItem('category_expiration_time', expirationTime);
+          localStorage.setItem("category_expiration_time", expirationTime);
           // 存放分类信息
-          localStorage.setItem('category', JSON.stringify(res.result))
+          localStorage.setItem("category", JSON.stringify(res.result));
         }
       });
     },
-    showDetail (index) { // 展示全部分类
-      this.panel = true
-      this.panelData = this.cateList[index].children
+    showDetail(index) {
+      // 展示全部分类
+      this.panel = true;
+      this.panelData = this.cateList[index].children;
     },
-    goGoodsList (id, secondId, firstId) { // 分类共有三级，传全部分类过去
-      const arr = [firstId, secondId, id]
+    goGoodsList(id, secondId, firstId) {
+      // 分类共有三级，传全部分类过去
+      const arr = [firstId, secondId, id];
       if (!arr[1]) {
-        arr.splice(0, 2)
+        arr.splice(0, 2);
       }
       if (!arr[0]) {
-        arr.shift()
+        arr.shift();
       }
       let routerUrl = this.$router.resolve({
-        path: '/goodsList',
-        query: {categoryId: arr.toString()}
-      })
-      window.open(routerUrl.href, '_blank')
-    }
+        path: "/goodsList",
+        query: { categoryId: arr.toString() },
+      });
+      window.open(routerUrl.href, "_blank");
+    },
   },
-  mounted () {
-    if (localStorage.getItem('category') && localStorage.getItem('category_expiration_time')) {
+  mounted() {
+    if (
+      localStorage.getItem("category") &&
+      localStorage.getItem("category_expiration_time")
+    ) {
       // 如果缓存过期，则获取最新的信息
-      if (new Date() > localStorage.getItem('category_expiration_time')) {
+      if (new Date() > localStorage.getItem("category_expiration_time")) {
         this.getCate();
         return;
       }
-      this.cateList = JSON.parse(localStorage.getItem('category'))
+      this.cateList = JSON.parse(localStorage.getItem("category"));
     } else {
-      this.getCate()
+      this.getCate();
     }
-  }
+  },
 };
 </script>
 
 <style scoped lang="scss">
-.nav-lis:hover{
-  color:$theme_color !important;
+.nav-lis:hover {
+  color: $theme_color !important;
   cursor: pointer;
 }
-.cate-nav{
+.cate-nav {
   width: 1200px;
   position: relative;
   margin: 0 auto;
@@ -178,7 +228,7 @@ export default {
     background-color: $theme_color;
     text-align: center;
     font-size: 16px;
-    border-bottom:none;
+    border-bottom: none;
   }
   .nav-item {
     width: 1000px;
@@ -201,7 +251,7 @@ export default {
   }
 }
 // 分类列表
-.cate-list{
+.cate-list {
   margin: 0 auto;
   position: absolute;
   z-index: 1000;
@@ -216,14 +266,14 @@ export default {
   height: 335px;
   overflow: hidden;
 }
-.large-nav{
+.large-nav {
   height: 470px;
-  ul>li{
+  ul > li {
     line-height: 20px;
   }
 }
-.opacity-nav{
-  background-color:rgba(0,0,0,.5);
+.opacity-nav {
+  background-color: rgba(0, 0, 0, 0.5);
 }
 .nav-side ul {
   width: 100%;
@@ -236,7 +286,7 @@ export default {
   padding-left: 12px;
   font-size: 13px;
   line-height: 18px;
-  &:hover{
+  &:hover {
     background: #999395;
   }
 }
@@ -288,9 +338,11 @@ export default {
 .detail-item-title:hover {
   color: #e1251b;
 }
-.detail-item-row  {
+.detail-item-row {
   display: flex;
-  >div{flex: 1;}
+  > div {
+    flex: 1;
+  }
 }
 .detail-item {
   font-size: 12px;
@@ -298,7 +350,7 @@ export default {
   padding-right: 8px;
   cursor: pointer;
   border-left: 1px solid #ccc;
-  &:first-child{
+  &:first-child {
     border: none;
     padding-left: 0;
   }
