@@ -147,9 +147,11 @@ export default {
   cursor: pointer;
 }
 .store-search{
+  width:63px;
   padding: 0 9px;
   border-radius: 0;
   &:nth-child(2){
+    width:62px;
     margin-left: -5px;
   }
 }

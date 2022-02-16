@@ -61,12 +61,9 @@ export default {
 <style lang="scss" scoped>
 .content {
   width: 1200px;
-  height: 100%;
-  margin: auto;
-  position: fixed;
-  top: 0;
-  left: 50%;
-  margin-left: -600px;
+  height: 40px;
+  margin: 10px auto;
+  position: relative;
 }
 .cate {
   float: left;

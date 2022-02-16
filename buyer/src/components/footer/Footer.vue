@@ -43,7 +43,7 @@
                   {{config.icpCard}}
                 </a>
               </li>
-              <li v-if="config.icpMessage">
+              <li v-if="config.icpMessage" class="footer-bottmom">
                 <a href="https://beian.miit.gov.cn/" target="_blank">
                   {{config.icpMessage}}
                 </a>
@@ -51,7 +51,7 @@
             </div>
           </div>
 
-          <div class="information">
+          <div class="information footer-bottmom">
 
             <a class="flex " :href="config.company.href">
               <img class="zhizhao" src="@/assets/images/zhizhao.jpg" mode="" />{{config.company.name}}
@@ -173,12 +173,19 @@ export default {
   cursor: pointer;
   line-height: 26px;
 }
+.servece-type-info li:hover{
+  color:#b8b8be;
+}
 .servece-type-info li:first-child {
   font-size: 16px;
   line-height: 28px;
   font-weight: bold;
 }
-
+.servece-type-info li:first-child:hover{
+  // font-size:15px;
+  // font-weight: bold;
+  color:#b8b8be;
+}
 .friend-link {
   display: flex;
   align-items: flex-start;
@@ -206,6 +213,17 @@ export default {
 .friend-link-item li {
   padding: 5px 0px;
   float: left;
+}
+
+.friend-link-item li:hover{
+  color:#b8b8be;
+  margin-top:-2px;
+}
+.footer-bottmom:hover{
+   margin-top:0 !important;
+}
+.footer-bottmom>a:hover{
+   color:#e4393c;
 }
 .link-item {
   padding: 0px 8px;

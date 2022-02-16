@@ -1,16 +1,18 @@
 <template>
-  <div class="not-enough">
-    <ul class="nav-bar">
-      <li
-        v-for="(item, index) in conData.options.navList"
-        :class="currentIndex === index ? 'curr' : ''"
-        @click="changeCurr(index)"
-        :key="index"
-      >
-        <p>{{ item.title }}</p>
-        <p>{{ item.desc }}</p>
-      </li>
-    </ul>
+  <div class="not-enough" ref="obtain" id="demo">
+    <Affix :offset-top="62" @on-change="change">
+      <ul class="nav-bar" v-show="topSearchShow">
+        <li
+          v-for="(item, index) in conData.options.navList"
+          :class="currentIndex === index ? 'curr' : ''"
+          @click="changeCurr(index)"
+          :key="index"
+        >
+          <p @click="gotoDemo">{{ item.title }}</p>
+          <p @click="gotoDemo">{{ item.desc }}</p>
+        </li>
+      </ul>
+    </Affix>
     <div class="content" v-if="showContent">
       <div
         v-for="(item, index) in conData.options.list[currentIndex]"
@@ -29,17 +31,26 @@
 </template>
 <script>
 export default {
+  mounted() {
+    window.addEventListener('scroll',this.handleScrollx,true)
+  },
   props: {
     data: {
       type: Object,
-      default: null
-    }
+      default: null,
+    },
   },
-  data () {
+  data() {
     return {
+      screenHeight:document.body.clientHeight,
+      scrollHieght:0,
+      topSearchShow: true, //展示 导航条
+      topIndex: 0, // 当前滚动条位置 （取整）
+      scrollTops: 0,
+      open:'',
       currentIndex: 0, // 当前分类下标
       conData: this.data, // 装修数据
-      showContent: true // 是否展示内容
+      showContent: true, // 是否展示内容
     };
   },
   watch: {
@@ -47,14 +58,40 @@ export default {
       this.conData = val;
     },
     conData: function (val) {
-      this.$emit('content', val);
-    }
+      this.$emit("content", val);
+    },
   },
   methods: {
-    changeCurr (index) { // 选择分类
-      this.currentIndex = index;
+    handleScrollx(){
+      // console.log('滚动高度',window.pageYOffset) // 获取滚动条的高度
+      // console.log(this.$refs.obtain.getBoundingClientRect().top) //获取到距离顶部的距离
+      this.scrollHieght = Number(window.pageYOffset);//获取到距离顶部的距离
+      this.scrollTops = Number(this.$refs.obtain.getBoundingClientRect().top); // 获取到距离顶部的距离
+         this.topSearchShow = true; // 展示图钉
+          if(this.scrollTops < -660){ // 超过隐藏
+            this.topSearchShow = false;
+      }
+    },
+     toguid(path,id){
+      var path =path;
+      var Id = id;
+      localStorage.setItem('toId',Id);
+      this.$router.push(path);
+    },
+    change(status){ //获取是否获取到图钉
+      this.open = status
+    },
+    gotoDemo(){ // 跳转到demo的位置 
+    if(this.open){ // 获取到图钉之后在跳转当前位置
+       document.querySelector("#demo").scrollIntoView(true);
     }
-  }
+      //scrollIntoView()可以在所有的HTML元素上调用，通过滚动浏览器窗口或某个容器元素
+    },
+    changeCurr(index) {
+      // 选择分类
+      this.currentIndex = index;
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -63,10 +100,13 @@ export default {
   justify-content: center;
   width: 100%;
   margin-bottom: 10px;
-  background-color: #f3f5f7;
+  background-color: #f8f8f8;
   height: 60px;
   align-items: center;
   position: relative;
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
   li {
     padding: 0 30px;
     text-align: center;
@@ -140,5 +180,6 @@ export default {
       }
     }
   }
+
 }
 </style>

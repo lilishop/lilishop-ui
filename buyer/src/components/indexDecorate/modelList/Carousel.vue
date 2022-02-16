@@ -23,12 +23,18 @@
         <div class="person-msg">
           <img :src="userInfo.face" v-if="userInfo.face" alt />
           <Avatar icon="ios-person" class="mb_10" v-else size="80" />
-          <div>Hi，{{ userInfo.nickName || `欢迎来到${config.title}` | secrecyMobile }}</div>
+          <div>
+            Hi, {{
+              userInfo.nickName || `欢迎来到${config.title}` | secrecyMobile
+            }}
+          </div>
           <div v-if="userInfo.id">
-            <Button type="error" shape="circle" @click="$router.push('home')">会员中心</Button>
+            <Button class="btns" shape="circle" @click="$router.push('home')"
+              >会员中心</Button
+            >
           </div>
           <div v-else>
-            <Button type="error" @click="$router.push('login')" shape="circle"
+            <Button class="btns" @click="$router.push('login')" shape="circle"
               >请登录</Button
             >
           </div>
@@ -37,8 +43,14 @@
           <div>
             <span>常见问题</span>
             <ul class="article-list">
-              <li class="ellipsis" :alt="article.title" v-for="(article, index) in articleList" :key="index" @click="goArticle(article.id)">
-                {{article.title}}
+              <li
+                class="ellipsis"
+                :alt="article.title"
+                v-for="(article, index) in articleList"
+                :key="index"
+                @click="goArticle(article.id)"
+              >
+                {{ article.title }}
               </li>
             </ul>
           </div>
@@ -49,45 +61,48 @@
 </template>
 
 <script>
-
-import {articleList} from '@/api/common.js'
-import storage from '@/plugins/storage';
+import { articleList } from "@/api/common.js";
+import storage from "@/plugins/storage";
 export default {
-  name: 'modelCarousel',
-  props: ['data'],
-  data () {
+  name: "modelCarousel",
+  props: ["data"],
+  data() {
     return {
-      config:require('@/config'),
+      config: require("@/config"),
       userInfo: {}, // 用户信息
       articleList: [], // 常见问题
-      params: { // 请求常见问题参数
+      params: {
+        // 请求常见问题参数
         pageNumber: 1,
         pageSize: 5,
-        type: 'ANNOUNCEMENT',
-        sort: 'sort'
-      }
+        type: "ANNOUNCEMENT",
+        sort: "sort",
+      },
     };
   },
   methods: {
-    getArticleList () { // 获取常见问题列表
-      articleList(this.params).then(res => {
+    getArticleList() {
+      // 获取常见问题列表
+      articleList(this.params).then((res) => {
         if (res.success) {
-          this.articleList = res.result.records
+          this.articleList = res.result.records;
         }
-      })
-    },
-    goArticle (id) { // 跳转文章详情
-      let routeUrl = this.$router.resolve({
-        path: '/article',
-        query: {id}
       });
-      window.open(routeUrl.href, '_blank');
-    }
+    },
+    goArticle(id) {
+      // 跳转文章详情
+      let routeUrl = this.$router.resolve({
+        path: "/article",
+        query: { id },
+      });
+      window.open(routeUrl.href, "_blank");
+    },
   },
-  mounted () {
-    if (storage.getItem('userInfo')) this.userInfo = JSON.parse(storage.getItem('userInfo'));
-    this.getArticleList()
-  }
+  mounted() {
+    if (storage.getItem("userInfo"))
+      this.userInfo = JSON.parse(storage.getItem("userInfo"));
+    this.getArticleList();
+  },
 };
 </script>
 
@@ -98,6 +113,16 @@ export default {
   overflow: hidden;
 }
 
+.btns {
+  background-color:#363634 ;
+  line-height:30px;
+  color: white !important;
+}
+.btns:hover {
+  background-color: #363634;
+  line-height:32px !important;
+  color: #e5d790 !important;
+}
 /* 导航主体 */
 .nav-body {
   width: 1200px;
@@ -130,12 +155,14 @@ export default {
     flex-direction: column;
     margin: 20px auto;
     button {
-      height: 25px !important;
+      height: 30px !important;
       margin-top: 10px;
+      line-height: 30px;
+      border: none;
     }
     .ivu-btn-default {
-      color: $theme_color;
-      border-color: $theme_color;
+      // color: $theme_color;
+      // border-color: $theme_color;
     }
     img {
       margin-bottom: 10px;

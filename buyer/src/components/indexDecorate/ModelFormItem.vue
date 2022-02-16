@@ -2,13 +2,19 @@
   <div class="model-item" v-if="element && element.key">
     <!-- 轮播图模块，包括个人信息，快捷导航模块 -->
     <template v-if="element.type == 'carousel'">
-      <model-carousel :data="element" class="mb_20 width_1200_auto"></model-carousel>
+      <model-carousel
+        :data="element"
+        class="mb_20 width_1200_auto"
+      ></model-carousel>
     </template>
     <template v-if="element.type == 'carousel1'">
       <model-carousel1 :data="element" class="mb_20"></model-carousel1>
     </template>
     <template v-if="element.type == 'carousel2'">
-      <model-carousel2 :data="element" class="mb_20 width_1200_auto"></model-carousel2>
+      <model-carousel2
+        :data="element"
+        class="mb_20 width_1200_auto"
+      ></model-carousel2>
     </template>
     <!-- 热门广告 -->
     <template v-if="element.type == 'hotAdvert'">
@@ -37,13 +43,16 @@
     </template>
     <!-- 限时秒杀 待完善 -->
     <template v-if="element.type == 'seckill' && element.options.list.length">
-      <seckill :data="element"  class="mb_20 width_1200_auto"></seckill>
+      <seckill :data="element" class="mb_20 width_1200_auto"></seckill>
     </template>
     <!-- 折扣广告 -->
     <template v-if="element.type == 'discountAdvert'">
       <div
         class="discountAdvert"
-        :style="{'backgroundImage' :'url(' + require('@/assets/images/decorate.png') + ')'}"
+        :style="{
+          backgroundImage:
+            'url(' + require('@/assets/images/decorate.png') + ')',
+        }"
       >
         <img
           @click="linkTo(item.url)"
@@ -74,44 +83,53 @@
     </template>
     <!-- 新品排行 -->
     <template v-if="element.type == 'newGoodsSort'">
-      <new-goods-sort :data="element" class="mb_20 width_1200_auto"></new-goods-sort>
+      <new-goods-sort
+        :data="element"
+        class="mb_20 width_1200_auto"
+      ></new-goods-sort>
     </template>
     <!-- 首页广告 -->
     <template v-if="element.type == 'firstAdvert'">
-      <first-page-advert :data="element" class="mb_20 width_1200_auto"></first-page-advert>
+      <first-page-advert
+        :data="element"
+        class="mb_20 width_1200_auto"
+      ></first-page-advert>
     </template>
     <!-- 横幅广告 -->
-    <template  v-if="element.type == 'bannerAdvert'">
-      <div style="width:100%; text-align: center;">
-      <img
-        width="1200"
-        class="hover-pointer mb_20"
-
-        @click="linkTo(element.options.url)"
-        :src="element.options.img"
-        alt=""
-      />
+    <template v-if="element.type == 'bannerAdvert'">
+      <div style="width: 100%; text-align: center">
+        <img
+          width="1200"
+          class="hover-pointer mb_20"
+          @click="linkTo(element.options.url)"
+          :src="element.options.img"
+          alt=""
+        />
       </div>
     </template>
-    <template v-if="element.type == 'notEnough'">
-      <not-enough :data="element" class="mb_20 width_1200_auto"></not-enough>
+    <template v-if="element.type == 'notEnough'"
+        >
+      <not-enough
+        :data="element"
+        class="mb_20 width_1200_auto"
+      ></not-enough>
     </template>
   </div>
 </template>
 
 <script>
-import ModelCarousel from './modelList/Carousel.vue';
-import ModelCarousel1 from './modelList/Carousel1.vue';
-import ModelCarousel2 from './modelList/Carousel2.vue';
-import FirstPageAdvert from './modelList/FirstPageAdvert.vue';
-import NewGoodsSort from './modelList/NewGoodsSort.vue';
-import Recommend from './modelList/Recommend.vue';
-import NotEnough from './modelList/NotEnough.vue';
-import Seckill from './modelList/Seckill.vue';
+import ModelCarousel from "./modelList/Carousel.vue";
+import ModelCarousel1 from "./modelList/Carousel1.vue";
+import ModelCarousel2 from "./modelList/Carousel2.vue";
+import FirstPageAdvert from "./modelList/FirstPageAdvert.vue";
+import NewGoodsSort from "./modelList/NewGoodsSort.vue";
+import Recommend from "./modelList/Recommend.vue";
+import NotEnough from "./modelList/NotEnough.vue";
+import Seckill from "./modelList/Seckill.vue";
 
 export default {
-  name: 'modelFormItem',
-  props: ['element', 'select', 'index', 'data'],
+  name: "modelFormItem",
+  props: ["element", "select", "index", "data"],
   components: {
     ModelCarousel,
     ModelCarousel1,
@@ -120,18 +138,17 @@ export default {
     NewGoodsSort,
     FirstPageAdvert,
     NotEnough,
-    Seckill
+    Seckill,
   },
-  data () {
+  data() {
     return {
       showModal: false, // 控制模态框显隐
-      selected: {} // 已选数据
+      selected: {}, // 已选数据
     };
-  }
+  },
 };
 </script>
 <style lang="scss" scoped>
-
 .model-item {
   position: relative;
   margin-bottom: 10px;
@@ -181,7 +198,7 @@ export default {
   }
 }
 
-.width_1200_auto{
+.width_1200_auto {
   width: 1200px;
   margin: 0 auto;
   background-color: #fff;

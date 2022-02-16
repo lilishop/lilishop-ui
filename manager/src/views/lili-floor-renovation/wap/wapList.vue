@@ -32,7 +32,7 @@
         </div>
         <div class="no-more" v-if="list.length ==0">暂无更多模板</div>
       </div>
-      <Page :total="total" size="small" @on-change="(val) => {params.pageNumber = val; } " :current="params.pageNumber" :page-size="params.pageSize" />
+      <Page :total="total" size="small" @on-change="(val) => {params.pageNumber = val; } " :current="params.pageNumber" :page-size="params.pageSize" show-sizer  :page-size-opts="[10, 20, 50]" @on-page-size-change="changePageSize"/>
 
     </Card>
 
@@ -74,8 +74,8 @@ export default {
       params: { // 请求参数
         pageNumber: 1,
         pageSize: 10,
-        sort: "",
-        order: "asc",
+        sort: "createTime",
+        order: "desc",
         pageType: "INDEX",
         pageClientType: "H5",
       },
@@ -147,6 +147,12 @@ export default {
       this.$router.push({
         path: "/floorList/main",
       });
+    },
+     // 分页 改变页数
+     changePageSize(v) {
+      this.params.pageNumber = 1;
+      this.params.pageSize = v;
+      this.init();
     },
     // 删除模板
     handleDel(val) {

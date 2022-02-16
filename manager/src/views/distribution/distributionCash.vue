@@ -4,12 +4,12 @@
         <Form ref="searchForm" :model="searchForm"  class="search-form">
           <Form-item label="会员名称"  class="flex" prop="memberName">
             <Input
-              type="text" v-model="searchForm.memberName"
+              type="text" v-model="searchForm.memberName" clearable
               style="width: 200px"></Input>
           </Form-item>
           <Form-item label="编号" class="flex">
             <Input
-              type="text" v-model="searchForm.sn"
+              type="text" v-model="searchForm.sn" clearable
               style="width: 200px"></Input>
           </Form-item>
           <Form-item label="状态"

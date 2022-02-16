@@ -1,15 +1,36 @@
 <template>
   <div class="layout">
     <div class="goods-cell-title">
-      <div class="goods-item-title" :class="{ selected: selected.index == index }" @click="handleClickTitle(title, index)" v-for="(title, index) in res.list[0].titleWay" :key="index">
+      <div
+        class="goods-item-title"
+        :class="{ selected: selected.index == index }"
+        @click="handleClickTitle(title, index)"
+        v-for="(title, index) in res.list[0].titleWay"
+        :key="index"
+      >
         <h4>{{ title.title }}</h4>
         <div>{{ title.desc }}</div>
       </div>
     </div>
     <div class="goods-list">
-      <div v-if="item.___index != undefined  ?   (selected.index == item.___index) : ( selected.val == item.type)" class="goods-item" v-for="(item, item_index) in res.list[0].listWay" :key="item_index">
+      <div
+        v-if="
+          item.___index != undefined
+            ? selected.index == item.___index
+            : selected.val == item.type
+        "
+        class="goods-item"
+        v-for="(item, item_index) in res.list[0].listWay"
+        :key="item_index"
+      >
         <div class="goods-img">
-          <Icon size="20" color="#e1251b" @click="closeGoods(item, item_index)" class="goods-icon" type="ios-close-circle" />
+          <Icon
+            size="20"
+            color="#e1251b"
+            @click="closeGoods(item, item_index)"
+            class="goods-icon"
+            type="ios-close-circle"
+          />
           <img :src="item.img" alt />
         </div>
         <div class="goods-desc">
@@ -70,7 +91,7 @@ export default {
   }
   > div {
     font-weight: bold;
-    color: #e4393c !important;
+    color: $theme_color !important;
   }
 }
 .goods-cell-title {
@@ -137,7 +158,7 @@ export default {
     display: flex;
     > .goods-price {
       line-height: 2;
-      color: #e4393c;
+      color: $theme_color;
     }
   }
 }
