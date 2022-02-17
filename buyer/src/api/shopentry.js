@@ -53,7 +53,7 @@ export function getDetailById (id) {
 // 店铺分类
 export function getCateById (id) {
   return request({
-    url: `/buyer/goods/store/label/get/${id}`,
+    url: `/buyer/store/store/label/get/${id}`,
     needToken: true,
     method: Method.GET
   })

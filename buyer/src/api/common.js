@@ -88,7 +88,7 @@ export function articleDetail (id) {
 // 获取IM接口前缀
 export function getIMDetail () {
   return request({
-    url: `${commonUrl}/common/IM`,
+    url: `${commonUrl}/common/common/IM`,
     method: Method.GET
   });
 }
