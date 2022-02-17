@@ -2,17 +2,17 @@
   <div class="search">
     <Card>
       <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-        <Form-item label="用户名">
+        <Form-item label="店员名称">
           <Input
             type="text"
-            v-model="searchForm.username"
-            placeholder="请输入用户名"
+            v-model="searchForm.clerkName"
+            placeholder="请输入店员名称"
             clearable
             style="width: 200px"
           />
         </Form-item>
         <Form-item label="联系方式">
-          <Inputuser-manage
+          <Input
             type="text"
             v-model="searchForm.mobile"
             placeholder="请输入联系方式"
@@ -30,6 +30,7 @@
         <Button @click="delAll">批量删除</Button>
         <Button @click="resetPass">重置密码</Button>
       </Row>
+      <br>
       <Table
         :loading="loading"
         border
@@ -58,41 +59,93 @@
 
     <Modal
       :title="modalTitle"
+      v-model="userEditModalVisible"
+      :mask-closable="false"
+      :width="500"
+      :styles="{top: '30px'}"
+    >
+      <Form ref="form" :model="editForm" :label-width="80" :rules="formValidate">
+        <FormItem label="手机号">
+          <Input v-model="mobile" disabled/>
+        </FormItem>
+        <FormItem label="店员名称">
+          <Input v-model="clerkName" disabled/>
+        </FormItem>
+        <FormItem label="超级管理员" prop="isSuper">
+          <RadioGroup type="button" button-style="solid" v-model="editForm.isSuper">
+            <Radio :label="1">
+              <span>是</span>
+            </Radio>
+            <Radio :label="0">
+              <span>否</span>
+            </Radio>
+          </RadioGroup>
+        </FormItem>
+
+        <FormItem label="角色" prop="roles" v-if="editForm.isSuper == 0">
+          <Select v-model="editForm.roles" multiple>
+            <Option v-for="item in roleList" :value="item.id" :key="item.id" :label="item.name">
+
+            </Option>
+          </Select>
+        </FormItem>
+        <Form-item label="所属部门">
+          <department-tree-choose @on-change="handleEditSelectDepTree" ref="depTree"></department-tree-choose>
+        </Form-item>
+
+      </Form>
+      <div slot="footer">
+        <Button type="text" @click="userEditModalVisible = false">取消</Button>
+        <Button type="primary" :loading="submitLoading" @click="updateSubmit">提交</Button>
+      </div>
+    </Modal>
+
+    <Modal
+      :title="modalTitle"
       v-model="userModalVisible"
       :mask-closable="false"
       :width="500"
       :styles="{top: '30px'}"
     >
-      <Form ref="form" :model="form" :label-width="70" :rules="formValidate">
-        <FormItem label="用户名" prop="username">
+      <Form ref="form" :model="form" :label-width="80" :rules="formValidate">
+        <FormItem label="手机号" prop="mobile">
+          <Input placeholder="请输入要添加的会员手机号码" maxlength="11" style="width: 75%" v-model="form.mobile"
+                 autocomplete="off"/>
+          &nbsp;<Button v-if="!memberCheck" @click="checkClerk">校验</Button>
+          <Button v-if="memberCheck" @click="checkAgainClerk">重新校验</Button>
+        </FormItem>
+        <FormItem v-if="newMember" label="用户名" prop="username">
           <Input v-model="form.username" autocomplete="off"/>
         </FormItem>
-        <FormItem label="昵称" prop="username">
-          <Input v-model="form.nickName" autocomplete="off"/>
+        <FormItem v-if="oldMember" label="用户名" prop="username">
+          <Input v-model="form.username" autocomplete="off" disabled/>
         </FormItem>
-        <FormItem label="密码" prop="password" v-if="modalType==0" :error="errorPass">
+
+        <FormItem label="密码" prop="password" v-if="newMember" :error="errorPass">
           <Input type="password" password v-model="form.password" autocomplete="off"/>
         </FormItem>
-        <FormItem label="邮箱" prop="email">
-          <Input v-model="form.email"/>
+        <FormItem label="超级管理员" prop="isSuper" v-if="newMember || oldMember">
+          <RadioGroup type="button" button-style="solid" v-model="form.isSuper">
+            <Radio :label="1">
+              <span>是</span>
+            </Radio>
+            <Radio :label="0">
+              <span>否</span>
+            </Radio>
+          </RadioGroup>
         </FormItem>
-        <FormItem label="手机号" prop="mobile">
-          <Input v-model="form.mobile"/>
-        </FormItem>
-        <Form-item label="头像" prop="avatar">
-          <upload-pic-input v-model="form.avatar"></upload-pic-input>
-        </Form-item>
-        <Form-item label="所属部门">
-          <department-tree-choose @on-change="handleSelectDepTree" ref="depTree"></department-tree-choose>
-        </Form-item>
-        <FormItem label="角色" prop="roles">
+        <FormItem label="角色" prop="roles" v-if="(oldMember || newMember) && form.isSuper == 0">
           <Select v-model="form.roles" multiple>
             <Option v-for="item in roleList" :value="item.id" :key="item.id" :label="item.name">
 
             </Option>
           </Select>
         </FormItem>
+        <Form-item label="所属部门" v-if="oldMember || newMember">
+          <department-tree-choose @on-change="handleSelectDepTree" ref="depTree"></department-tree-choose>
+        </Form-item>
       </Form>
+
       <div slot="footer">
         <Button type="text" @click="userModalVisible = false">取消</Button>
         <Button type="primary" :loading="submitLoading" @click="submitUser">提交</Button>
@@ -103,13 +156,15 @@
 
 <script>
 import {
+  checkClerk,
   getUserListData,
   getAllRoleList,
   addUser,
   editOtherUser,
-  enableUser,
-  deleteUser,
-  resetPassword
+  enableClerk,
+  deleteClerk,
+  resetPassword,
+  getClerk
 } from "@/api/index";
 import {validateMobile} from "@/libs/validate";
 import departmentChoose from "@/views/my-components/lili/department-choose";
@@ -117,7 +172,7 @@ import departmentTreeChoose from "@/views/my-components/lili/department-tree-cho
 import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
 
 export default {
-  name: "user-manage",
+  name: "clerk-manage",
   components: {
     departmentChoose,
     departmentTreeChoose,
@@ -129,9 +184,8 @@ export default {
       selectCount: 0, // 已选数量
       selectList: [], // 已选数据列表
       searchForm: { // 请求参数
-        username: "",
+        clerkName: "",
         departmentId: "",
-        mobile: "",
         pageNumber: 1,
         pageSize: 10,
         sort: "createTime",
@@ -139,16 +193,30 @@ export default {
       },
       modalType: 0, // 新增编辑标识
       userModalVisible: false, // 用户modal显隐
+      userEditModalVisible:false,
       modalTitle: "", // modal标题
       form: { // 表单
         username: "",
         mobile: "",
-        email: "",
         sex: "",
+        isSuper: 0,
         roles: [],
         departmentId: "",
         departmentTitle: ""
       },
+
+      editForm: { // 表单
+        isSuper: 0,
+        roles: [],
+        departmentId: "",
+        departmentTitle: ""
+      },
+      mobile: "",
+      clerkName: "",
+
+      newMember: false,
+      oldMember: false,
+      memberCheck: false,
       roleList: [], // 角色列表
       errorPass: "", // 错误提示
       formValidate: { // 验证规则
@@ -161,10 +229,6 @@ export default {
         mobile: [
           {required: true, message: "手机号不能为空", trigger: "blur"},
           {validator: validateMobile, trigger: "blur"}
-        ],
-        email: [
-          {required: true, message: "请输入邮箱地址"},
-          {type: "email", message: "邮箱格式不正确"}
         ]
       },
       submitLoading: false, // 提交状态
@@ -176,41 +240,77 @@ export default {
           fixed: "left"
         },
         {
-          title: "用户名",
-          key: "username",
-          minWidth: 120,
+          title: "店员名称",
+          key: "clerkName",
+          minWidth: 100,
           sortable: true,
           fixed: "left"
         },
         {
-          title: "头像",
-          key: "avatar",
-          width: 80,
-          align: "center",
-          render: (h, params) => {
-            return h("Avatar", {
-              props: {
-                src: params.row.avatar
-              }
-            });
-          }
-        },
-        {
-          title: "手机",
+          title: "手机号码",
           key: "mobile",
-          width: 125
+          minWidth: 100,
+          fixed: "left"
         },
         {
-          title: "邮箱",
-          key: "email",
-          minWidth: 180,
-          sortable: true
+          title: "店主",
+          key: "status",
+          align: "center",
+          width: 130,
+          render: (h, params) => {
+            if (params.row.shopkeeper == true) {
+              return h("div", [
+                h("Badge", {
+                  props: {
+                    status: "success",
+                    text: "是"
+                  }
+                })
+              ]);
+            } else if (params.row.shopkeeper == false) {
+              return h("div", [
+                h("Badge", {
+                  props: {
+                    status: "error",
+                    text: "否"
+                  }
+                })
+              ]);
+            }
+          },
+        },
+        {
+          title: "超级管理员",
+          key: "status",
+          align: "center",
+          width: 130,
+          render: (h, params) => {
+            if (params.row.isSuper == true) {
+              return h("div", [
+                h("Badge", {
+                  props: {
+                    status: "success",
+                    text: "是"
+                  }
+                })
+              ]);
+            } else if (params.row.isSuper == false) {
+              return h("div", [
+                h("Badge", {
+                  props: {
+                    status: "error",
+                    text: "否"
+                  }
+                })
+              ]);
+            }
+          },
         },
         {
           title: "状态",
           key: "status",
           align: "center",
-          width: 110,
+          width: 130,
           render: (h, params) => {
             if (params.row.status == true) {
               return h("div", [
@@ -358,6 +458,41 @@ export default {
         this.form.departmentTitle = "";
       }
     },
+    // 选择部门回调
+    handleEditSelectDepTree(v) {
+      if (v) {
+        this.editForm.departmentId = v.departmentId;
+        this.editForm.departmentTitle = v.departmentTitle;
+      } else {
+        this.editForm.departmentId = "";
+        this.editForm.departmentTitle = "";
+      }
+    },
+    //重新校验会员
+    checkAgainClerk() {
+      this.memberCheck = false
+      this.newMember = false
+      this.oldMember = false
+    },
+    //检测当前店员
+    checkClerk() {
+      if (this.form.mobile) {
+        this.newMember = false
+        this.oldMember = false
+        checkClerk(this.form.mobile).then(res => {
+          if (!res.result.id) {
+            this.newMember = true
+          } else {
+            this.oldMember = true
+            this.form.username = res.result.username
+            this.form.password = res.result.password
+          }
+          this.form.isSuper = 1
+          this.memberCheck = true;
+        });
+      }
+
+    },
     // 搜索项部门选择
     handleSelectDep(v) {
       this.searchForm.departmentId = v;
@@ -413,7 +548,10 @@ export default {
     },
     // 重置密码
     resetPass() {
-      if(this.selectCount==0) {this.$Message.warning('请选中数据后重试!'); return}
+      if (this.selectCount == 0) {
+        this.$Message.warning('请选中数据后重试!');
+        return
+      }
       this.$Modal.confirm({
         title: "确认重置",
         content:
@@ -427,6 +565,7 @@ export default {
             ids += e.id + ",";
           });
           ids = ids.substring(0, ids.length - 1);
+          console.warn(ids)
           resetPassword(ids).then(res => {
             this.$Modal.remove();
             if (res.success) {
@@ -438,15 +577,28 @@ export default {
         }
       });
     },
+    updateSubmit(){
+      this.submitLoading = true;
+      console.warn(this.editForm)
+      editOtherUser(this.editForm.id,this.editForm).then(res => {
+        this.submitLoading = false;
+        if (res.success) {
+          this.$Message.success("操作成功");
+          this.getUserList();
+          this.userEditModalVisible = false;
+        }
+      });
+    },
     // 确认提交
     submitUser() {
       this.$refs.form.validate(valid => {
         if (valid) {
-          if (this.modalType == 0) {
-            // 添加用户 避免编辑后传入id
-            const params = JSON.parse(JSON.stringify(this.form))
-            delete params.id;
-            delete params.status;
+          // 添加用户 避免编辑后传入id
+          const params = JSON.parse(JSON.stringify(this.form))
+          console.warn(params)
+          delete params.id;
+          delete params.status;
+          if (this.newMember) {
             if (params.password == "" || params.password == undefined) {
               this.errorPass = "密码不能为空";
               return;
@@ -457,68 +609,64 @@ export default {
             }
             //todo
             params.password = this.md5(params.password)
-            this.submitLoading = true;
-            addUser(params).then(res => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("操作成功");
-                this.getUserList();
-                this.userModalVisible = false;
-              }
-            });
           } else {
-            // 编辑
-            this.submitLoading = true;
-            editOtherUser(this.form).then(res => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("操作成功");
-                this.getUserList();
-                this.userModalVisible = false;
-              }
-            });
+            params.password = this.form.password
           }
+          this.submitLoading = true;
+          addUser(params).then(res => {
+            this.submitLoading = false;
+            if (res.success) {
+              this.$Message.success("操作成功");
+              this.getUserList();
+              this.userModalVisible = false;
+            }
+          });
         }
       });
     },
     // 添加用户
     add() {
       this.modalType = 0;
-      this.modalTitle = "添加用户";
+      this.modalTitle = "添加店员";
       this.$refs.form.resetFields();
       this.form = { // 表单
         username: "",
         mobile: "",
-        email: "",
-        sex: "",
+        isSuper: 0,
         roles: [],
         departmentId: "",
         departmentTitle: ""
       },
-      this.$refs.depTree.setData("", "");
+        this.oldMember = false
+      this.newMember = false
       this.userModalVisible = true;
     },
     // 编辑用户
     edit(v) {
-      this.form = JSON.parse(JSON.stringify(v));
-      this.modalType = 1;
-      this.modalTitle = "编辑用户";
-      this.$refs.form.resetFields();
-      // 转换null为""
-      for (let attr in this.form) {
-        if (this.form[attr] == null) {
-          this.form[attr] = "";
+      console.warn(v)
+      getClerk(v.id).then(res => {
+        console.warn(res)
+        this.mobile = res.result.mobile
+        this.clerkName = res.result.clerkName
+        this.editForm.isSuper = 0
+        this.editForm.id = res.result.id
+        if(res.result.isSuper){
+          this.editForm.isSuper = 1
         }
-      }
-      this.$refs.depTree.setData(this.form.departmentId, this.form.departmentTitle);
-      let selectRolesId = [];
-      if (this.form.roles) {
-        this.form.roles.forEach(function (e) {
-          selectRolesId.push(e.id);
-        });
-      }
-      this.form.roles = selectRolesId;
-      this.userModalVisible = true;
+        this.editForm.departmentId = res.result.departmentId
+        this.$refs.depTree.setData(res.result.departmentId, res.result.departmentTitle);
+        let selectRolesId = [];
+        if (res.result.roles) {
+          res.result.roles.forEach(function (e) {
+            selectRolesId.push(e.id);
+          });
+        }
+        this.editForm.roles = selectRolesId;
+
+        this.modalTitle = "修改店员";
+        this.userEditModalVisible = true;
+      })
+
     },
     // 启用
     enable(v) {
@@ -527,10 +675,10 @@ export default {
       }
       this.$Modal.confirm({
         title: "确认启用",
-        content: "您确认要启用用户 " + v.username + " ?",
+        content: "您确认要启用用户 " + v.clerkName + " ?",
         loading: true,
         onOk: () => {
-          enableUser(v.id, params).then(res => {
+          enableClerk(v.id, params).then(res => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("操作成功");
@@ -547,10 +695,10 @@ export default {
       }
       this.$Modal.confirm({
         title: "确认禁用",
-        content: "您确认要禁用用户 " + v.username + " ?",
+        content: "您确认要禁用用户 " + v.clerkName + " ?",
         loading: true,
         onOk: () => {
-          enableUser(v.id, params).then(res => {
+          enableClerk(v.id, params).then(res => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("操作成功");
@@ -564,10 +712,10 @@ export default {
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
-        content: "您确认要删除用户 " + v.username + " ?",
+        content: "您确认要删除用户 " + v.clerkName + " ?",
         loading: true,
         onOk: () => {
-          deleteUser(v.id).then(res => {
+          deleteClerk(v.id).then(res => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("删除成功");
@@ -579,7 +727,6 @@ export default {
     },
     // 选中状态
     showSelect(e) {
-      this.exportData = e;
       this.selectList = e;
       this.selectCount = e.length;
     },
@@ -595,7 +742,7 @@ export default {
       }
       this.$Modal.confirm({
         title: "确认删除",
-        content: "您确认要删除所选的 " + this.selectCount + " 条数据?",
+        content: "您确认要删除所选的 " + this.selectCount + " 条店员?",
         loading: true,
         onOk: () => {
           let ids = "";
@@ -603,7 +750,7 @@ export default {
             ids += e.id + ",";
           });
           ids = ids.substring(0, ids.length - 1);
-          deleteUser(ids).then(res => {
+          deleteClerk(ids).then(res => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("删除成功");

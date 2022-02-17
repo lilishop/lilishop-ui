@@ -1,30 +1,6 @@
 <template>
   <div class="search">
     <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="商品名称" prop="goodsName">
-            <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px" />
-          </Form-item>
-          <Form-item label="状态" prop="status">
-            <Select v-model="searchForm.marketEnable" placeholder="请选择" clearable style="width: 200px">
-              <Option value="DOWN">下架</Option>
-              <Option value="UPPER">上架</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="商品类型" prop="status">
-            <Select v-model="searchForm.goodsType" placeholder="请选择" clearable style="width: 200px">
-              <Option value="PHYSICAL_GOODS">实物商品</Option>
-              <Option value="VIRTUAL_GOODS">虚拟商品</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="商品编号" prop="sn">
-            <Input type="text" v-model="searchForm.id" placeholder="商品编号" clearable style="width: 200px" />
-          </Form-item>
-          <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
-          <Button @click="handleReset" class="search-btn">重置</Button>
-        </Form>
-      </Row>
       <Row class="operation padding-row">
         <Button @click="addGoods" type="primary">添加商品</Button>
         <Dropdown @on-click="handleDropdown">
