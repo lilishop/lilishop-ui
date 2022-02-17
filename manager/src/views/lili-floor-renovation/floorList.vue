@@ -42,6 +42,7 @@
         </div>
         <div class="no-more" v-if="list.length == 0">暂无更多模板</div>
       </div>
+      <Page show-total :total="total" show-sizer  :page-size-opts="[10, 20, 50]" show-elevator style="float:right;overflow:hidden;"  @on-change="changePageNum" @on-page-size-change="changePageSize" :page-size="searchForm.pageSize"/>
     </Card>
     <Modal
       v-model="showModal"
@@ -71,10 +72,17 @@ export default {
     return {
       showModal: false, // 添加modal的显示
       selectedIndex: 0, // 首页还是专题选择的index
+      total:0,
       formData: {
         // 新建模态框的数据
         status: false, // 模板是否开启
         name: "", // 模板名称
+      },
+      searchForm:{
+        pageNumber:1,
+        pageSize:10,
+        sort: 'createTime',
+        order: 'desc'
       },
       columns: [
         // 列表展示的column
@@ -158,16 +166,29 @@ export default {
       });
     },
 
+     // 分页 修改页码
+    changePageNum (val) {
+      this.searchForm.pageNumber = val;
+      this.getTemplateList();
+    },
+     // 分页 修改页数
+    changePageSize (val) {
+      this.searchForm.pageNumber = 1;
+      this.searchForm.pageSize = val;
+      this.getTemplateList();
+    },
     getTemplateList() {
       //模板列表
-      let params = {
-        pageNumber: 1,
-        pageSize: 999,
-        pageType: "INDEX",
-        pageClientType: "PC",
-      };
-      API_floor.getHomeList(params).then((res) => {
+      // let params = {
+      //   pageNumber: 1,
+      //   pageSize: 999,
+      //   pageType: "INDEX",
+      //   pageClientType: "PC",
+      // };
+      API_floor.getHomeList(this.searchForm).then((res) => {
         if (res.success) {
+          // this.total
+          this.total = res.result.total
           this.list = res.result.records;
           this.list.forEach((e) => {
             if (e.pageShow === "OPEN") {
