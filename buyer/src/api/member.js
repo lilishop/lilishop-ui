@@ -3,7 +3,7 @@ import request, {Method} from '@/plugins/request.js';
 // 查询账户余额
 export function getMembersWallet () {
   return request({
-    url: '/buyer/passport/members/wallet',
+    url: '/buyer/passport/member/wallet',
     method: Method.GET,
     needToken: true
   });
@@ -52,7 +52,7 @@ export function recharge (params) {
 // 提现
 export function withdrawalApply (params) {
   return request({
-    url: '/buyer/passport/members/wallet/withdrawal',
+    url: '/buyer/passport/member/wallet/withdrawal',
     method: Method.POST,
     needToken: true,
     data: params
