@@ -571,6 +571,6 @@ export default {
   color: #999;
 }
 .menu-input {
-  width: 500px;
+  width: 162px;
 }
 </style>

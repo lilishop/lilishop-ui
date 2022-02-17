@@ -4,9 +4,9 @@
       <span @click="clickBreadcrumb(item,index)" :class="{'active':item.selected}" v-for="(item,index) in dateList"
         :key="index"> {{item.title}}</span>
       <div class="date-picker">
-        <Select @on-change="changeSelect(selectedWay)" v-model="month" placeholder="年月查询"
+        <Select @on-change="changeSelect(selectedWay)" v-model="month" placeholder="年月查询" clearable
           style="width:200px;margin-left:10px;">
-          <Option v-for="(item,index) in dates" :value="item.year+'-'+item.month" :key="index">
+          <Option v-for="(item,index) in dates" :value="item.year+'-'+item.month" :key="index" clearable>
             {{ item.year+'年'+item.month+'月' }}</Option>
         </Select>
       </div>

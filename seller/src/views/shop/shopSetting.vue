@@ -224,7 +224,7 @@ export default {
       },
       stockWarningFormValidate: {
         stockWarning: [
-          { required: true, message: "请输入库存预警数", trigger: "blur" },
+          { required: true, type:'number', message: "请输入库存预警数", trigger: "blur" },
         ],
       },
       udeskFormValidate: {

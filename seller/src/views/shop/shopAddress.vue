@@ -110,7 +110,7 @@
           mobile: [
             {
               required: true,
-              message: "请输入地址纬度",
+              message: "请输入联系电话号",
               trigger: "blur",
             },
             { validator: validateMobile,

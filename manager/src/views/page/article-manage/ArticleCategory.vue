@@ -2,7 +2,9 @@
   <div>
     <Card>
       <div class="operation mb_10">
-        <Button @click="addParent" type="primary" icon="md-add">添加一级分类</Button>
+        <Button @click="addParent" type="primary" icon="md-add"
+          >添加一级分类</Button
+        >
       </div>
       <tree-table
         ref="treeTable"
@@ -116,17 +118,12 @@ export default {
         parentId: "",
         sort: 1,
         level: 0,
-        articleCategoryName:""
+        articleCategoryName: "",
       },
       // 表单验证规则
       formValidate: {
-        articleCategoryName:[
-          regular.REQUIRED
-        ],
-        sort:[
-          regular.REQUIRED,
-          regular.INTEGER
-        ]
+        articleCategoryName: [regular.REQUIRED],
+        sort: [regular.REQUIRED,regular.INTEGER],
       },
       columns: [
         {
@@ -149,7 +146,7 @@ export default {
           template: "action",
         },
       ],
-      tableData: []  // 表格数据
+      tableData: [], // 表格数据
     };
   },
   methods: {
@@ -205,7 +202,13 @@ export default {
               if (res.success) {
                 this.$Message.success("添加成功");
 
-                this.formAdd = {};
+                this.formAdd = {
+                  // 添加或编辑表单对象初始化数据
+                  parentId: "",
+                  sort: 1,
+                  level: 0,
+                  articleCategoryName: "",
+                };
               } else {
                 // this.$Message.error(res.message);
               }
@@ -248,7 +251,7 @@ export default {
       });
     },
     // 获取分类数据
-    getAllList() {
+    getAllList(newval) {
       this.loading = true;
       getArticleCategory().then((res) => {
         this.loading = false;

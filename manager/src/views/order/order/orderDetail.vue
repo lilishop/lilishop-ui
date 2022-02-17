@@ -598,10 +598,10 @@ export default {
         },
         {
           title: "小计",
-          key: "flowPrice",
+          key: "subTotal",
           minWidth: 100,
           render: (h, params) => {
-            return h("div", this.$options.filters.unitPrice(params.row.flowPrice, "￥"));
+            return h("div", this.$options.filters.unitPrice(params.row.subTotal, "￥"));
           },
         },
       ],
@@ -674,7 +674,8 @@ export default {
     },
     modifyPrice() {
       //默认要修改的金额为订单总金额
-      this.modifyPriceForm.price = this.orderInfo.order.flowPrice;
+      this.modifyPriceForm.price = this.orderInfo.order.subTotal;
+      console.log(this.modifyPriceForm.price)
       this.modal = true;
     },
     //修改订单金额提交

@@ -145,3 +145,10 @@ export default {
   margin: 20px;
 }
 </style>
+<style>
+.ivu-card-extra{
+  right: 3px;
+  top:15px;
+  z-index: 99;
+}
+</style>

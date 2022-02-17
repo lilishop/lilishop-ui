@@ -16,6 +16,7 @@
       />
       <i class="cart-badge">{{ cartNum < 100 ? cartNum : "99" }}</i>
     </div>
+    <hr class="hr"/>
   </div>
 </template>
 <script>
@@ -59,6 +60,10 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.hr{
+  height:1px;
+  background:$theme_color;
+}
 .content {
   width: 1200px;
   height: 40px;
