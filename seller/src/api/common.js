@@ -9,3 +9,10 @@ export const getChildRegion = (id) => {
 export const getRegion = (params) => {
   return getRequest(`${commonUrl}/common/common/region/region`, params);
 };
+
+
+
+// 获取IM接口前缀
+export function getIMDetail () {
+  return getRequest(`${commonUrl}/common/common/IM`);
+}

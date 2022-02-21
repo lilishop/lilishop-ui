@@ -16,10 +16,12 @@
           <div class="shop-box">
             <div class="box-item">
               <div>店铺名称：{{userData.storeName || '暂无'}}</div>
-
             </div>
             <div class="box-item">
               <div>店铺状态：{{userData.storeDisable=='OPEN' ? '开启中' : '关闭'}}</div>
+            </div>
+            <div class="box-item" @click="im()">
+              <Button type="info">点击登录客服</Button>
             </div>
           </div>
 
@@ -199,6 +201,7 @@
 
 <script>
 import { getSellerHomeData, getHomeNotice } from "@/api/index";
+import { getIMDetail } from "@/api/common"
 import { seeArticle } from "@/api/pages";
 import Cookies from "js-cookie";
 
@@ -214,6 +217,7 @@ export default {
       noticesDetail: { // 平台公告详情
         title: "",
       },
+      IMLink:"",
     };
   },
   methods: {
@@ -240,6 +244,24 @@ export default {
       if (res.success) {
         this.noticesDetail = res.result;
         this.noticeFlage = true;
+      }
+    },
+    async im() {
+      // 获取访问Token
+      let accessToken = this.getStore("accessToken");
+      await this.getIMDetailMethods();
+      if (!accessToken) {
+        this.$Message.error("请登录后再联系客服");
+        return;
+      }
+      window.open(this.IMLink + "?token=" + accessToken);
+    },
+
+    // 获取im信息
+    async getIMDetailMethods() {
+      let res = await getIMDetail();
+      if (res.success) {
+        this.IMLink = res.result;
       }
     },
     // 获取首页数据
