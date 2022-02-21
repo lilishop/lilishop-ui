@@ -21,16 +21,7 @@
             <Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#666'" />
             {{storeCollected ? '已收藏店铺' : '收藏店铺'}}
           </span>
-          <!-- 
-               先看下udesk merchantEuid 是否有值
-               有的话 链接udesk
-               没有的话 显示云智服
-           -->
-          <span class="ml_10" v-if="storeMsg.merchantEuid" @click="IMService()">联系客服</span>
-
-          <span v-else @click="connectCs(storeMsg.yzfSign)" class="ml_10">
-            <Icon custom="icomoon icon-customer-service" />联系客服
-          </span>
+          <span class="ml_10" @click="IMService()">联系客服</span>
         </div>
       </div>
     </div>
@@ -58,6 +49,7 @@ import {
 } from "@/api/member";
 import { getDetailById } from "@/api/shopentry";
 import { getIMDetail } from "@/api/common";
+import Storage from "../plugins/storage";
 export default {
   name: "GoodsDetail",
   beforeRouteEnter(to, from, next) {
@@ -66,7 +58,6 @@ export default {
   },
   created() {
     this.getGoodsDetail();
-    // this.getIMDetailMethods();
   },
   data() {
     return {
@@ -80,8 +71,15 @@ export default {
   },
   methods: {
     // 跳转im客服
-    IMService() {
-      window.open(this.IM);
+    async IMService() {
+      // 获取访问Token
+      let accessToken = Storage.getItem('accessToken');
+      await this.getIMDetailMethods();
+      if (!accessToken) {
+        this.$Message.error("请登录后再联系客服");
+        return;
+      }
+      window.open(this.IMLink + "?token=" + accessToken + "&id=" + this.goodsMsg.data.storeId);
     },
     // 获取im信息
     async getIMDetailMethods() {
@@ -184,11 +182,6 @@ export default {
   watch: {
     "$route.query.skuId": function (val) {
       location.reload();
-    },
-  },
-  computed: {
-    IM() {
-      return this.IMLink + this.storeMsg.merchantEuid;
     },
   },
   components: {

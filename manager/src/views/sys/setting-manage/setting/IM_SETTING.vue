@@ -4,9 +4,6 @@
       <FormItem label="云IM地址" prop="httpUrl">
         <Input v-model="formValidate.httpUrl"/>
       </FormItem>
-      <FormItem label="平台ID" class="label-item" prop="tenantId">
-        <Input v-model="formValidate.tenantId"/>
-      </FormItem>
       <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
       </div>
@@ -22,8 +19,7 @@ export default {
     return {
       ruleValidate: {}, // 验证规则
       formValidate: { // 表单数据
-        httpUrl: "",
-        tenantId: ""
+        httpUrl: ""
       },
     };
   },
