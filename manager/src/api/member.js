@@ -45,7 +45,7 @@ export const getMemberInfoData = (id) => {
 
 //  修改会员基本信息
 export const updateMember = (params) => {
-  return putRequest(`/member`, params);
+  return putRequest(`/passport/member`, params);
 };
 
 //  添加会员基本信息
