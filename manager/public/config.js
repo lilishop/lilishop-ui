@@ -7,7 +7,6 @@ var BASE = {
       buyer: "http://localhost:8888",
       seller: "http://localhost:8889",
       manager: "http://localhost:8887"
-
     },
     API_PROD: {
       common: "https://common-api.pickmall.cn",
