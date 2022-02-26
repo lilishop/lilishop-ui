@@ -27,12 +27,6 @@ export const getHomeNotice = params => {
   return getRequest("/other/article/getByPage?type=STORE_ARTICLE&pageSize=15");
 };
 
-// 获取全部权限数据
-export const getCurrentPermissionList = (params) => {
-  return getRequest("/menu/memberMenu", params);
-};
-
-
 // 登陆
 export const getSellerHomeData = params => {
   return getRequest("/statistics/index", params);
