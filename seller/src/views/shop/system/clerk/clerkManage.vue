@@ -110,7 +110,7 @@
       <Form ref="form" :model="form" :label-width="80" :rules="formValidate">
         <FormItem label="手机号" prop="mobile">
           <Input placeholder="请输入要添加的会员手机号码" maxlength="11" style="width: 75%" v-model="form.mobile"
-                 autocomplete="off"/>
+                 autocomplete="off" @on-change="checkClerks"/>
           &nbsp;<Button v-if="!memberCheck" @click="checkClerk">校验</Button>
           <Button v-if="memberCheck" @click="checkAgainClerk">重新校验</Button>
         </FormItem>
@@ -180,6 +180,7 @@ export default {
   },
   data() {
     return {
+      open:0,
       loading: true, // 加载状态
       selectCount: 0, // 已选数量
       selectList: [], // 已选数据列表
@@ -197,7 +198,7 @@ export default {
       modalTitle: "", // modal标题
       form: { // 表单
         username: "",
-        mobile: "",
+        mobile: 0,
         sex: "",
         isSuper: 0,
         roles: [],
@@ -448,6 +449,16 @@ export default {
     init() {
       this.getUserList();
     },
+    checkClerks() {
+      this.open = this.form.mobile.length;
+      console.log(this.open)
+      if(this.open == 11 ){
+        this.checkClerk();  
+      }
+      if(this.open < 11){
+        this.checkAgainClerk()
+      }
+    },
     // 选择部门回调
     handleSelectDepTree(v) {
       if (v) {
@@ -626,6 +637,7 @@ export default {
     },
     // 添加用户
     add() {
+      // this.checkClerks();
       this.modalType = 0;
       this.modalTitle = "添加店员";
       this.$refs.form.resetFields();
@@ -637,7 +649,7 @@ export default {
         departmentId: "",
         departmentTitle: ""
       },
-        this.oldMember = false
+      this.oldMember = false
       this.newMember = false
       this.userModalVisible = true;
     },
