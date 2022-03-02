@@ -12,7 +12,7 @@
       </div>
     </template>
     <template slot-scope="{ row }" slot="goodsPrice">
-      <div>{{row.goodsPrice | unitPrice('￥')}}</div>
+      <div>{{row.applyRefundPrice | unitPrice('￥')}}</div>
     </template>
     </Table>
     <div>
