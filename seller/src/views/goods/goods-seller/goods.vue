@@ -1,6 +1,7 @@
 <template>
   <div class="search">
     <Card>
+
       <Row @keydown.enter.native="handleSearch">
         <Form
           ref="searchForm"

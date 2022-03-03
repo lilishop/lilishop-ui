@@ -1,6 +1,7 @@
 import lazyLoading from './lazyLoading.js';
 import Cookies from "js-cookie";
 import { result } from './routerJson.js';
+import { getCurrentPermissionList } from "@/api/index";
 
 const config = require('@/config/index')
 
@@ -326,43 +327,40 @@ util.initRouter = function (vm) { // 初始化路由
         return;
     }
 
-    if (!vm.$store.state.app.added) {
+  
         // 加载菜单
-        let menuData = result;
-        // 格式化数据，设置 空children 为 null
-        for(let i =0;i<menuData.length;i++){
-            let t = menuData[i].children
-            for(let k = 0;k<t.length;k++){
-                let tt = t[k].children;
-                for(let z = 0;z<tt.length;z++){
-                    tt[z].children = null
-                    // 给所有三级路由添加字段，显示一级菜单name，方便点击页签时的选中筛选
-                    tt[z].firstRouterName = menuData[i].name
+
+        getCurrentPermissionList().then(res => {
+            if (!res.success) return false;
+            let menuData = res.result;
+            // 格式化数据，设置 空children 为 null
+            for (let i = 0; i < menuData.length; i++) {
+                let t = menuData[i].children
+                for (let k = 0; k < t.length; k++) {
+                    let tt = t[k].children;
+                    for (let z = 0; z < tt.length; z++) {
+                        tt[z].children = null
+                        // 给所有三级路由添加字段，显示一级菜单name，方便点击页签时的选中筛选
+                        tt[z].firstRouterName = menuData[i].name
+                    }
                 }
             }
-        }
-        util.initAllMenuData(constRoutes, menuData);
-        util.initRouterNode(otherRoutes, otherRouter);
-        // 添加所有主界面路由
-        vm.$store.commit('updateAppRouter', constRoutes.filter(item => item.children.length > 0));
-        // 添加全局路由
-        vm.$store.commit('updateDefaultRouter', otherRoutes);
-        // 添加菜单路由
-        util.initMenuData(vm, menuData);
-        // 缓存数据 修改加载标识
-        window.localStorage.setItem('menuData', JSON.stringify(menuData));
-        vm.$store.commit('setAdded', true);
-    } else {
-        // 读取缓存数据
-        let data = window.localStorage.getItem('menuData');
-        if (!data) {
-            vm.$store.commit('setAdded', false);
-            return;
-        }
-        let menuData = JSON.parse(data);
-        // 添加菜单路由
-        util.initMenuData(vm, menuData);
-    }
+            if (!menuData) {
+                return;
+            }
+            util.initAllMenuData(constRoutes, menuData);
+            util.initRouterNode(otherRoutes, otherRouter);
+            // 添加所有主界面路由
+            vm.$store.commit('updateAppRouter', constRoutes.filter(item => item.children.length > 0));
+            // 添加全局路由
+            vm.$store.commit('updateDefaultRouter', otherRoutes);
+            // 添加菜单路由
+            util.initMenuData(vm, menuData);
+            // 缓存数据 修改加载标识
+            window.localStorage.setItem('menuData', JSON.stringify(menuData));
+            vm.$store.commit('setAdded', true);
+        })
+   
 };
 
 // 添加所有顶部导航栏下的菜单路由
@@ -370,7 +368,7 @@ util.initAllMenuData = function (constRoutes, data) {
 
     let allMenuData = [];
     data.forEach(e => {
-        if (e.type == -1) {
+        if (e.level == 0) {
             e.children.forEach(item => {
                 allMenuData.push(item);
             })
@@ -439,16 +437,15 @@ util.initRouterNode = function (routers, data) {  // data为所有子菜单数�
 
     for (var item of data) {
         let menu = Object.assign({}, item);
-        menu.component = lazyLoading(menu.component);
-
+        menu.component = lazyLoading(menu.frontRoute);
         if (item.children && item.children.length > 0) {
             menu.children = [];
             util.initRouterNode(menu.children, item.children);
         }
         let meta = {};
         // 给页面添加标题
-        meta.title = menu.title ? menu.title + " - "+config.title+"商家后台" : null;
-        meta.firstRouterName = menu.firstRouterName
+        meta.title = menu.title ? menu.title + " - " + config.title + "商家后台" : null;
+        meta.firstRouterName = item.firstRouterName
         meta.keepAlive = menu.keepAlive ? true : false
         menu.meta = meta;
 
