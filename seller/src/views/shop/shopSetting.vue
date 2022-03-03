@@ -47,7 +47,7 @@
                 style="width: 30%"
               ></Input>
             </FormItem>
-            <FormItem label="店铺简介" prop="content" class="wangEditor">
+            <FormItem label="店铺楼层" prop="content" class="wangEditor">
               <i-switch v-model="form.pageShow" @on-change="pageShow"></i-switch>
             </FormItem>
             <Form-item>
