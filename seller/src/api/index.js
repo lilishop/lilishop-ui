@@ -216,25 +216,25 @@ export const deleteMessageSend = (ids, params) => {
 
 // 分页获取文件数据
 export const getFileListData = params => {
-  return getRequest("/file", params);
+  return getRequest(`${commonUrl}/common/common/file`, params);
 };
 
 
 // 复制文件
 export const copyFile = params => {
-  return postRequest("/file/copy", params);
+  return postRequest(`${commonUrl}/common/common/file/copy`, params);
 };
 // 重命名文件
 export const renameFile = params => {
-  return postRequest("/file/rename", params);
+  return postRequest(`${commonUrl}/common/common/file/rename`, params);
 };
 // 删除文件
 export const deleteFile = (ids, params) => {
-  return deleteRequest(`/file/delete/${ids}`, params);
+  return deleteRequest(`${commonUrl}/common/common/file/delete/${ids}`, params);
 };
 // 下载文件
 export const aliDownloadFile = (fKey, params) => {
-  return getRequest(`/file/ali/download/${fKey}`, params);
+  return getRequest(`${commonUrl}/common/common/file/ali/download/${fKey}`, params);
 };
 
 

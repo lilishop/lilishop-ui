@@ -14,7 +14,7 @@
           <Button type="primary" @click="goodsData=[]; getQueryGoodsList();" icon="ios-search">搜索</Button>
         </div>
       </div>
-      <div style="positon:retavle;">
+      <div >
         <Scroll class="wap-content-list" :on-reach-bottom="handleReachBottom" :distance-to-edge="[3,3]">
 
           <div class="wap-content-item" :class="{ active: item.selected }" @click="checkedGoods(item, index)" v-for="(item, index) in goodsData" :key="index">

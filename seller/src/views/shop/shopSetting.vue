@@ -47,6 +47,9 @@
                 style="width: 30%"
               ></Input>
             </FormItem>
+            <FormItem label="店铺简介" prop="content" class="wangEditor">
+              <i-switch v-model="form.pageShow" @on-change="pageShow"></i-switch>
+            </FormItem>
             <Form-item>
               <Button
                 @click="handleSubmit"
@@ -257,6 +260,7 @@ export default {
         storeAddressDetail: "", //详细地址
         storeAddressIdPath: "", //地址
         storeDesc: "", // 店铺描述
+        pageShow:false,
       },
 
       // 表单验证规则
@@ -330,6 +334,9 @@ export default {
           }
         }
       });
+    },
+    pageShow(type){
+      this.form.pageShow = type
     },
     //修改售后地址
     regionClick() {

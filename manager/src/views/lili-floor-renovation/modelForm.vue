@@ -59,8 +59,8 @@
             width="800"
             :z-index="100"
             :mask-closable="false"
-            
-           
+
+
             >
             <!-- 顶部广告 -->
             <div class="modal-top-advert">
@@ -119,7 +119,7 @@
         <liliDialog
             ref="liliDialog"
             @selectedLink="selectedLink"
-           
+
         ></liliDialog>
         <!-- 选择图片 -->
         <Modal width="1200px" v-model="picModelFlag" footer-hide>

@@ -35,7 +35,20 @@ export const getHomeData = params => {
  */
 export const getHomeList = params => {
 
-  return getRequest("/pageData/pageDataList", params);
+  return getRequest("/other/pageData/pageDataList", params);
+};
+
+
+
+
+/**
+ * 发布页面
+ *
+ */
+
+ export const releasePageHome = (id) => {
+
+  return putRequest(`/other/pageData/release/${id}`);
 };
 
 
@@ -43,9 +56,9 @@ export const getHomeList = params => {
  * 修改楼层装修
  *
  */
-export const updateHome = (id,params) => {
+ export const updateHome = (id, params) => {
 
-  return putRequest(`/pageData/update/${id}`, params);
+  return putRequest(`/other/pageData/update/${id}`, params);
 };
 
 /**
@@ -54,16 +67,6 @@ export const updateHome = (id,params) => {
  */
 export const removePageHome = (id) => {
 
-  return deleteRequest(`/pageData/removePageData/${id}`);
-};
-
-
-/**
- * 发布页面
- *
- */
-export const releasePageHome = (id) => {
-
-  return putRequest(`/pageData/releasePageData`,id);
+  return deleteRequest(`/other/pageData/remove/${id}`);
 };
 

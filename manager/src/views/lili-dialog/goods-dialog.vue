@@ -4,19 +4,60 @@
       <div class="query-wrapper">
         <div class="query-item">
           <div>搜索范围</div>
-          <Input placeholder="商品名称" @on-clear="goodsData=[]; goodsParams.goodsName=''; goodsParams.pageNumber = 1; getQueryGoodsList()" @on-enter="()=>{goodsData=[];goodsParams.pageNumber =1; getQueryGoodsList();}" icon="ios-search" clearable
-            style="width: 150px" v-model="goodsParams.goodsName" />
+          <Input
+            placeholder="商品名称"
+            @on-clear="
+              goodsData = [];
+              goodsParams.goodsName = '';
+              goodsParams.pageNumber = 1;
+              getQueryGoodsList();
+            "
+            @on-enter="
+              () => {
+                goodsData = [];
+                goodsParams.pageNumber = 1;
+                getQueryGoodsList();
+              }
+            "
+            icon="ios-search"
+            clearable
+            style="width: 150px"
+            v-model="goodsParams.goodsName"
+          />
         </div>
         <div class="query-item">
-          <Cascader v-model="category" placeholder="请选择商品分类" style="width: 250px" :data="skuList"></Cascader>
+          <Cascader
+            v-model="category"
+            placeholder="请选择商品分类"
+            style="width: 250px"
+            :data="skuList"
+          ></Cascader>
         </div>
         <div class="query-item">
-          <Button type="primary" @click="goodsData=[]; getQueryGoodsList();" icon="ios-search">搜索</Button>
+          <Button
+            type="primary"
+            @click="
+              goodsData = [];
+              getQueryGoodsList();
+            "
+            icon="ios-search"
+            >搜索</Button
+          >
         </div>
       </div>
-      <div style="positon:retavle;">
-        <Scroll class="wap-content-list" :on-reach-bottom="handleReachBottom" :distance-to-edge="[3,3]">
-          <div class="wap-content-item" :class="{ active: item.selected }" @click="checkedGoods(item, index)" v-for="(item, index) in goodsData" :key="index">
+      <div>
+        <Scroll
+          class="wap-content-list"
+          :on-reach-bottom="handleReachBottom"
+          :distance-to-edge="[3, 3]"
+        >
+          <div
+            class="wap-content-item"
+            :class="{ active: item.selected }"
+            @click="checkedGoods(item, index)"
+            v-for="(item, index) in goodsData"
+            :key="index"
+          >
             <div>
               <img :src="item.thumbnail" alt="" />
             </div>
@@ -32,7 +73,6 @@
 
           <div v-if="empty" class="empty">暂无商品信息</div>
         </Scroll>
-
       </div>
     </div>
   </div>
@@ -44,8 +84,9 @@ export default {
     return {
       type: "multiple", //单选或者多选 single  multiple
       skuList: [], // 商品sku列表
-      total: 0,  // 商品总数
-      goodsParams: { // 商品请求参数
+      total: 0, // 商品总数
+      goodsParams: {
+        // 商品请求参数
         pageNumber: 1,
         pageSize: 18,
         order: "desc",
@@ -62,12 +103,12 @@ export default {
     };
   },
   props: {
-    selectedWay: { 
+    selectedWay: {
       type: Array,
-      default: function(){
-        return new Array()
-      }
-    }
+      default: function () {
+        return new Array();
+      },
+    },
   },
   watch: {
     category(val) {
@@ -78,7 +119,7 @@ export default {
         this.$emit("selected", this.selectedWay);
       },
       deep: true,
-      immediate: true
+      immediate: true,
     },
     "goodsParams.categoryPath": {
       handler: function () {
@@ -112,22 +153,21 @@ export default {
     },
     // 获取列表方法
     initGoods(res) {
-      if (res.result.records.length !=0) {
+      if (res.result.records.length != 0) {
         res.result.records.forEach((item) => {
           item.selected = false;
           item.___type = "goods"; //设置为goods让pc wap知道标识
-          this.selectedWay.forEach(e => {
+          this.selectedWay.forEach((e) => {
             if (e.id && e.id === item.id) {
-              item.selected = true
+              item.selected = true;
             }
-          })
+          });
         });
         /**
          * 解决数据请求中，滚动栏会一直上下跳动
          */
         this.total = res.result.total;
         this.goodsData.push(...res.result.records);
-
       } else {
         this.empty = true;
       }
@@ -138,12 +178,12 @@ export default {
         // 商品
         this.initGoods(res);
       });
-      if (localStorage.getItem('category')) {
-        this.deepGroup(JSON.parse(localStorage.getItem('category')))
+      if (localStorage.getItem("category")) {
+        this.deepGroup(JSON.parse(localStorage.getItem("category")));
       } else {
         setTimeout(() => {
-          this.deepGroup(JSON.parse(localStorage.getItem('category')))
-        },3000)
+          this.deepGroup(JSON.parse(localStorage.getItem("category")));
+        }, 3000);
       }
     },
 
@@ -203,9 +243,9 @@ export default {
         this.selectedWay.push(val);
       } else {
         val.selected = false;
-        for (let i = 0; i<this.selectedWay.length; i++ ) {
-          if (this.selectedWay[i].id===val.id) {
-            this.selectedWay.splice(i,1)
+        for (let i = 0; i < this.selectedWay.length; i++) {
+          if (this.selectedWay[i].id === val.id) {
+            this.selectedWay.splice(i, 1);
             break;
           }
         }

@@ -21,7 +21,7 @@ import { setStore, getStore, removeStore } from "@/libs/storage";
 import i18nBox from '@/views/lili-components/i18n-translate'
 import util from "@/libs/util";
 
-
+import liliDialog from '@/views/lili-dialog'
 import VueLazyload from "vue-lazyload";
 
 import * as filters from "@/utils/filters"; // global filter
@@ -35,6 +35,7 @@ Vue.use(VueLazyload, {
 });
 
 Vue.use(ViewUI);
+Vue.component('liliDialog',liliDialog)
 Vue.component('i18nBox',i18nBox)
 Vue.component("vue-qr", vueQr); //此处将vue-qr添加为全局组件
 
@@ -84,7 +85,7 @@ new Vue({
   mounted() {
     // 初始化菜单
     util.initRouter(this);
-   
+
     this.currentPageName = this.$route.name;
     // 显示打开的页面的列表
     this.$store.commit("setOpenedList");
