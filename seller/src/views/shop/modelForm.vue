@@ -27,7 +27,7 @@
                     </i-input>
                 </div>
             </div>
-            <!-- <div class="nav-con">
+            <div class="nav-con">
                 <div class="all-categories">全部商品分类</div>
                 <ul class="nav-item">
                     <li v-for="(item,index) in navList.list" :key="index">
@@ -37,7 +37,7 @@
                 <div class="setup-box">
                     <Button size="small" @click.stop="handleModel('quickNav')">编辑</Button>
                 </div>
-            </div> -->
+            </div>
             <!-- 装修主体 -->
             <div>
                 <draggable class="model-form-list"
