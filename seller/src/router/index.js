@@ -13,6 +13,14 @@ const RouterConfig = {
   routes: routers
 };
 
+/**
+ * 解决重复点击菜单会控制台报错bug
+ */
+ const routerPush = VueRouter.prototype.push
+ VueRouter.prototype.push = function push(location) {
+   return routerPush.call(this, location).catch(error=> error)
+ }
+
 export const router = new VueRouter(RouterConfig);
 
 router.beforeEach((to, from, next) => {
