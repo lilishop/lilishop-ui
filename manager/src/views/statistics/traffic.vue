@@ -43,7 +43,7 @@
 
     <Card class="card">
       <div>
-        <h4>客户增长报表</h4>
+        <h4>会员流量报表</h4>
         <Table class="table" stripe :columns="columns" :data="data"></Table>
 
       </div>
