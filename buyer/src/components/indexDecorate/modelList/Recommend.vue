@@ -161,7 +161,7 @@ export default {
           padding: 0 10px;
           font-size: 12px;
           >div:nth-child(1) {
-            width: 130px;
+
             margin-top: 30px;
             span:nth-child(1){
                 color: #fff;
@@ -169,7 +169,7 @@ export default {
                 padding: 0 5px;
                 background-color: #a25684;
                 display: block;
-                width: 120px;
+
                 overflow: hidden;
                 white-space: nowrap;
                 margin: 0 10px 10px 0;
