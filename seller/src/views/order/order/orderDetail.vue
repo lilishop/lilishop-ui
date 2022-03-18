@@ -643,7 +643,7 @@ export default {
           render: (h, params) => {
             return h(
               "div",
-              this.$options.filters.unitPrice(params.row.subTotal, "￥")
+              this.$options.filters.unitPrice(params.row.flowPrice, "￥")
             );
           },
         },
@@ -900,7 +900,7 @@ dl dt {
 
 
 .search {
- 
+
 
   .div-item {
     line-height: 35px;

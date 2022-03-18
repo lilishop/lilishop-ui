@@ -1,7 +1,11 @@
 <template>
   <Card>
     <Row class="operation">
-      <Button @click="handleAsyncRegion"  :loading="asyncLoading" type="primary" icon="md-add"
+      <Button
+        @click="handleAsyncRegion"
+        :loading="asyncLoading"
+        type="primary"
+        icon="md-add"
         >同步数据</Button
       >
     </Row>
@@ -10,7 +14,6 @@
         class="tree"
         :data="data"
         :load-data="loadData"
-        expand-node
         @on-select-change="changeTree"
       ></Tree>
       <div class="form">
@@ -27,7 +30,11 @@
             <Input v-model="formValidate.cityCode" />
           </FormItem>
           <FormItem label="行政区划级别" prop="cityCode">
-            <RadioGroup type="button" button-style="solid" v-model="formValidate.level">
+            <RadioGroup
+              type="button"
+              button-style="solid"
+              v-model="formValidate.level"
+            >
               <Radio disabled label="country">国家</Radio>
               <Radio disabled label="province">省份</Radio>
               <Radio disabled label="city">市</Radio>
@@ -95,16 +102,18 @@ import {
 export default {
   data() {
     return {
-      asyncLoading:false, // 加载状态
+      asyncLoading: false, // 加载状态
       num: 10, // 更新倒计时
-      modalFlag: false,  // 新增编辑标识
+      modalFlag: false, // 新增编辑标识
       timerNum: 10, // 定时器
       data: [], // 加载数据
       id: 0, // id
-      addValidate: { // 添加级别
+      addValidate: {
+        // 添加级别
         parentName: "无父级",
       },
-      formValidate: { // 表单数据
+      formValidate: {
+        // 表单数据
         adCode: "",
         cityCode: "",
         center: "",
@@ -112,7 +121,8 @@ export default {
         orderNum: "",
         level: "",
       },
-      ruleValidate: { // 验证规则
+      ruleValidate: {
+        // 验证规则
         adCode: [
           {
             required: true,
@@ -227,12 +237,13 @@ export default {
     },
     // 树结构点击事件
     changeTree(array, val) {
-      this.formValidate = val;
+      val.cityCode == "null" ? (val.cityCode = "") : val.cityCode;
+      this.$set(this, "formValidate", val);
     },
     // 异步加载数据
     loadData(item, callback) {
       item.loading = true;
-      console.log(item);
+      // console.log(item);
       getChildRegion(item.id).then((res) => {
         if (res.result.length <= 0) {
           item.loading = false;
@@ -302,7 +313,7 @@ export default {
           let timer;
           let number;
 
-          this.asyncLoading = true
+          this.asyncLoading = true;
 
           this.$Message.info({
             duration: this.timerNum,
@@ -315,9 +326,9 @@ export default {
                     on: {
                       click: () => {
                         this.$Message.destroy();
-                        this.asyncLoading = false
+                        this.asyncLoading = false;
                         clearInterval(number);
-                        clearTimeout(timer)
+                        clearTimeout(timer);
                       },
                     },
                   },
@@ -332,9 +343,9 @@ export default {
           }, 1000);
 
           timer = setTimeout(() => {
-            clearInterval(number)
+            clearInterval(number);
             asyncRegion().then((res) => {
-              this.asyncLoading = false
+              this.asyncLoading = false;
               this.$Message.loading("地区数据正在更新中！");
             });
           }, 10000);

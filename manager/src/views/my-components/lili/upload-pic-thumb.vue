@@ -62,7 +62,7 @@ export default {
   },
   props: {
     value: {
-      type: Object
+      type: null
     },
     draggable: {
       type: Boolean,

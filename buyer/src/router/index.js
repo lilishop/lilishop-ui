@@ -97,6 +97,14 @@ const ShopEntry = (resolve) =>
 
 Vue.use(Router);
 
+/**
+ * 解决重复点击菜单会控制台报错bug
+ */
+ const routerPush = Router.prototype.push
+ Router.prototype.push = function push(location) {
+   return routerPush.call(this, location).catch(error=> error)
+ }
+
 export default new Router({
   mode: "history",
   routes: [

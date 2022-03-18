@@ -147,12 +147,14 @@ export default {
   cursor: pointer;
 }
 .store-search{
-  width:63px;
+  width:55.6px;
   padding: 0 9px;
   border-radius: 0;
+  border-radius: 3px;
   &:nth-child(2){
-    width:62px;
-    margin-left: -5px;
+    width:55px;
+    margin-left: -2px;
+    border-radius: 3px;
   }
 }
 .btn-div{

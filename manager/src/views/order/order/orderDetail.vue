@@ -587,7 +587,7 @@ export default {
             if (!params.row.goodsPrice) {
               return h("div", this.$options.filters.unitPrice(0, "￥"));
             }
-            return h("div", this.$options.filters.unitPrice(params.row.goodsPrice, "￥"));
+            return h("div", this.$options.filters.unitPrice(params.row.unitPrice, "￥"));
           },
         },
 
@@ -601,7 +601,7 @@ export default {
           key: "subTotal",
           minWidth: 100,
           render: (h, params) => {
-            return h("div", this.$options.filters.unitPrice(params.row.subTotal, "￥"));
+            return h("div", this.$options.filters.unitPrice(params.row.flowPrice, "￥"));
           },
         },
       ],
@@ -674,8 +674,7 @@ export default {
     },
     modifyPrice() {
       //默认要修改的金额为订单总金额
-      this.modifyPriceForm.price = this.orderInfo.order.subTotal;
-      console.log(this.modifyPriceForm.price)
+      this.modifyPriceForm.price = this.orderInfo.order.flowPrice;
       this.modal = true;
     },
     //修改订单金额提交
