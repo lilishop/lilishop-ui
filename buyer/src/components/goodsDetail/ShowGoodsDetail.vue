@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height:auto;">
     <div class="item-intro-show">
       <div class="item-intro-detail" ref="itemIntroDetail">
         <div class="item-intro-nav item-tabs">
@@ -71,7 +71,7 @@
             </TabPane>
             <TabPane label="商品参数">
               <template v-if="detail.goodsParamsDTOList && detail.goodsParamsDTOList.length">
-                <div class="goods-params" v-for="item in detail.goodsParamsDTOList" :key="item.groupId">
+                <div class="goods-params" style="height:inherit;" v-for="item in detail.goodsParamsDTOList" :key="item.groupId">
                   <span class="ml_10">{{item.groupName}}</span>
                   <table class="mb_10" cellpadding='0' cellspacing="0" >
                     <tr v-for="param in item.goodsParamsItemDTOList" :key="param.paramId">
@@ -220,6 +220,7 @@ export default {
   width: 1200px;
   margin: 15px auto;
   display: flex;
+  overflow: scroll;
   flex-direction: row;
 
 }
