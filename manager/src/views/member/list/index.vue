@@ -51,6 +51,9 @@
     <!-- 修改模态框 -->
     <Modal v-model="descFlag" :title="descTitle" @on-ok="handleSubmitModal" width="500">
       <Form ref="form" :model="form" :rules="ruleValidate" :label-width="80">
+
+        <Input v-model="form.id" v-show="false"/>
+
         <FormItem label="头像">
           <img :src="form.face" class="face" />
           <Button type="text" class="upload" @click="() => {
@@ -462,7 +465,7 @@ export default {
 
     // 提交修改数据
     handleSubmitModal() {
-      const { nickName, sex, username, face, newPassword } = this.form;
+      const { nickName, sex, username, face, newPassword,id } = this.form;
       let time = new Date(this.form.birthday);
       let birthday =
         time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
@@ -474,6 +477,7 @@ export default {
         sex,
         birthday,
         face,
+        id
       };
       if (this.region != "undefined") {
         submit.regionId = this.regionId;
