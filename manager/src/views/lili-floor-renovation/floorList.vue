@@ -82,7 +82,9 @@ export default {
         pageNumber:1,
         pageSize:10,
         sort: 'createTime',
-        order: 'desc'
+        order: 'desc',
+        pageType:"INDEX",
+        pageClientType:"PC",
       },
       columns: [
         // 列表展示的column

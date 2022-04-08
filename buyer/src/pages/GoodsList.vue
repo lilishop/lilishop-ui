@@ -150,6 +150,12 @@ export default {
     $route() {
       const keyword = this.$route.query.keyword;
       this.handleSearch(keyword);
+      if (this.$route.query.categoryId) {
+        let cateId = this.$route.query.categoryId.split(",");
+        Object.assign(this.params, this.$route.query);
+        this.params.categoryId = cateId[cateId.length - 1];
+        this.getGoodsList();
+      }
     },
   },
   methods: {

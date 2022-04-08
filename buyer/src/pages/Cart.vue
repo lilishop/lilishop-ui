@@ -228,7 +228,7 @@ export default {
     return {
       couponAvailable: false, // 展示优惠券
       stepIndex: 0, // 当前处于哪一步，购物车==0，填写订单信息==1，成功提交订单==2
-      goodsTotal: 1, // 商品数量
+      goodsTotal: 0, // 商品数量
       checkedNum: 0, // 选中数量
       allChecked: false, // 全选
       loading: false, // 加载状态
@@ -278,7 +278,7 @@ export default {
         const list = this.cartList;
         list.forEach((shop) => {
           shop.skuList.forEach((goods) => {
-            if(goods.checked) {
+            if (goods.checked) {
               idArr.push(goods.goodsSku.id);
             }
           });
