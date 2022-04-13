@@ -19,17 +19,21 @@
       </div>
       <div v-else class="goods-type-list">
         <h2 @click="showGoodsTemplates = !showGoodsTemplates">返回</h2>
-        <div
-          class="goods-type-item template-item"
-          @click="handleClickGoodsTemplate(item)"
-          v-for="(item, tempIndex) in goodsTemplates"
-          :key="tempIndex"
-        >
-          <img :src="item.thumbnail" />
-          <div>
-            <h2>{{ item.goodsName }}</h2>
-            <p>{{ item.sellingPoint || "" }}</p>
-          </div>
+        <div class="goods-list-box">
+          <Scroll :on-reach-bottom="handleReachBottom">
+            <div
+              class="goods-type-item template-item"
+              @click="handleClickGoodsTemplate(item)"
+              v-for="(item, tempIndex) in goodsTemplates"
+              :key="tempIndex"
+            >
+              <img :src="item.thumbnail" />
+              <div>
+                <h2>{{ item.goodsName }}</h2>
+                <p>{{ item.sellingPoint || "" }}</p>
+              </div>
+            </div>
+          </Scroll>
         </div>
       </div>
     </Modal>
@@ -133,9 +137,29 @@ export default {
       categoryListLevel2: [],
       /** 3级分类列表*/
       categoryListLevel3: [],
+      searchParams: {
+        saveType: "TEMPLATE",
+        sort: "create_time",
+        order: "desc",
+        pageSize: 10,
+        pageNumber: 1,
+      },
+      templateTotal:0,
     };
   },
   methods: {
+    // 商品模版触底加载
+    handleReachBottom() {
+      setTimeout(() => {
+        if (
+          this.searchParams.pageNumber * this.searchParams.pageSize <=
+          this.templateTotal
+        ) {
+          this.searchParams.pageNumber++;
+          this.GET_GoodsTemplate();
+        }
+      }, 1000);
+    },
     // 点击商品类型
     handleClickGoodsType(val) {
       this.goodsTypeWay.map((item) => {
@@ -159,14 +183,10 @@ export default {
     },
     // 获取商品模板
     GET_GoodsTemplate() {
-      let searchParams = {
-        saveType: "TEMPLATE",
-        sort: "create_time",
-        order: "desc",
-      };
-      API_GOODS.getDraftGoodsListData(searchParams).then((res) => {
+      API_GOODS.getDraftGoodsListData(this.searchParams).then((res) => {
         if (res.success) {
-          this.goodsTemplates = res.result.records;
+          this.goodsTemplates.push(...res.result.records)
+          this.templateTotal = res.result.total
         }
       });
     },
@@ -217,7 +237,10 @@ export default {
         if (this.selectedTemplate.id) {
           this.$emit("change", { tempId: this.selectedTemplate.id });
         } else {
-          this.$emit("change", { category: this.category, goodsType: this.goodsType });
+          this.$emit("change", {
+            category: this.category,
+            goodsType: this.goodsType,
+          });
         }
       }
     },
@@ -229,4 +252,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "./addGoods.scss";
+/deep/ .ivu-scroll-container{
+  height:450px !important;
+}
 </style>

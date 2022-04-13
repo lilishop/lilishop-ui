@@ -76,15 +76,13 @@
     text-align: left;
   }
 }
-.sku-val{
+.sku-val {
   justify-content: flex-start;
   flex-wrap: wrap;
-  >.ivu-form{
+  > .ivu-form {
     flex-wrap: wrap !important;
   }
-  /deep/ .sku-item-content-val{
-  
-    
+  /deep/ .sku-item-content-val {
     margin-right: 20px;
   }
 }
@@ -123,16 +121,16 @@ div.base-info-item {
         display: flex;
         width: 100% !important;
         flex: 1;
-      
+
         flex-direction: column;
         align-items: flex-start;
         justify-content: flex-start;
         width: 100%;
-        >.ivu-card-body{
+        > .ivu-card-body {
           width: 100%;
         }
 
-        .ivu-card-body{
+        .ivu-card-body {
           width: 100%;
           justify-content: center;
           align-items: flex-start;
@@ -145,7 +143,6 @@ div.base-info-item {
           width: 100%;
         }
       }
-
     }
 
     .shop-category-text {
@@ -456,38 +453,6 @@ div.base-info-item {
 .goods-type-list {
   max-height: 500px;
   overflow-y: auto;
-
-  > .goods-type-item {
-    padding: 20px 0;
-    width: 100%;
-    cursor: pointer;
-    transition: 0.35s;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    /deep/ img {
-      margin-right: 20px;
-      width: 100px;
-    }
-
-    /deep/ h2 {
-      cursor: pointer;
-      font-size: 21px;
-      padding: 10px 0;
-      color: #333;
-    }
-
-    /deep/ p {
-      color: #999;
-      font-size: 14px;
-      margin-top: 10px;
-    }
-  }
-
-  > .goods-type-item:hover {
-    transform: translateY(-10px);
-  }
 }
 
 .template-item {
@@ -498,4 +463,41 @@ div.base-info-item {
   height: auto !important;
   max-height: auto !important;
   min-height: 240px !important;
+}
+
+.goods-type-item {
+  padding: 20px 0;
+  width: 100%;
+  cursor: pointer;
+  transition: 0.35s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /deep/ img {
+    margin-right: 20px;
+    width: 100px;
+    margin-left: 10px;
+  }
+
+
+
+  /deep/ p {
+    color: #999;
+    font-size: 14px;
+    margin-top: 10px;
+  }
+}
+
+.goods-type-item:hover {
+  background: #ededed;
+}
+.goods-list-box {
+  height: 450px;
+  overflow: auto;
+}
+h2 {
+  cursor: pointer;
+  font-size: 21px;
+  color: #333;
 }
