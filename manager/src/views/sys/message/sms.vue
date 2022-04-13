@@ -873,4 +873,7 @@ export default {
 .split-pane {
   padding: 10px;
 }
+.ivu-tabs{
+   min-height: 500px;
+}
 </style>
