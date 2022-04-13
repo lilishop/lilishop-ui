@@ -3,7 +3,7 @@
     <div class="nav-con">
       <div
         class="all-categories hover-pointer"
-        @mouseenter="showFirstList = true"
+        @mouseenter="showFirstLists"
         @mouseleave="showFirstList = false"
       >
         全部商品分类
@@ -16,6 +16,7 @@
           @click="linkTo(item.url)"
         >
           {{ item.name }}
+          <!-- {{item}} -->
         </li>
       </ul>
     </div>
@@ -62,9 +63,9 @@
         @mouseleave="panel = false"
       >
         <div class="nav-detail-item">
-          <template v-for="(item, index) in panelData">
+          <template v-for="(item,index) in panelData">
             <span
-              @click="goGoodsList(item.id, item.parentId)"
+              @click="goGoodsList(item.id,item.parentId)"
               v-if="index < 8"
               :key="index"
               >{{ item.name }}<Icon type="ios-arrow-forward"
@@ -150,6 +151,22 @@ export default {
     },
   },
   methods: {
+    showFirstLists(){
+      this.showFirstList = true;
+      if(
+      localStorage.getItem("category") &&
+      localStorage.getItem("category_expiration_time")
+    ) {
+      // this.getCate();
+      // 如果缓存过期，则获取最新的信息
+      if (new Date() > localStorage.getItem("category_expiration_time")) {
+        this.getCate();
+        return;
+      }
+      this.cateList = JSON.parse(localStorage.getItem("category"));
+      // this.$Message.info(cateList)
+      }
+    },
     getCate() {
       // 获取分类数据
       if (this.hover) return false;
