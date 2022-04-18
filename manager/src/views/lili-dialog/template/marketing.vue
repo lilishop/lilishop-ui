@@ -1,9 +1,14 @@
 <template>
   <div class="wrapper">
     <div class="list">
-
-      <div class="list-item" @click="clickPromotion(item,index)" v-for="(item,index) in Object.keys(promotionList)" :key="index" :class="{active:selectedIndex == index}">
-        {{ typeOption[item].title}}
+      <div
+        class="list-item"
+        v-for="(item, index) in Object.keys(promotionList)"
+        :key="index"
+        @click="clickPromotion(item, index)"
+        :class="{ active: selectedIndex == index }"
+      >
+        {{ typeOption(item).title }}
       </div>
 
       <!-- <div class="list-item" >暂无活动</div> -->
@@ -19,15 +24,30 @@
         </div> -->
 
         <div class="tables">
+          <Table
+            height="350"
+            border
+            tooltip
+            :loading="loading"
+            :columns="activeColumns"
+            :data="showPromotionList"
+          ></Table>
 
-          <Table height="350" border tooltip :loading="loading" :columns="activeColumns" :data="showPromotionList"></Table>
-
-          <Page @on-change="(val) => {params.pageNumber = val; } " :current="params.pageNumber" :page-size="params.pageSize" class="mt_10" :total="Number(totals)" size="small" show-elevator />
-
+          <Page
+            @on-change="
+              (val) => {
+                params.pageNumber = val;
+              }
+            "
+            :current="params.pageNumber"
+            :page-size="params.pageSize"
+            class="mt_10"
+            :total="Number(totals)"
+            size="small"
+            show-elevator
+          />
         </div>
-
       </div>
-
     </div>
   </div>
 </template>
@@ -47,11 +67,13 @@ export default {
       selectedIndex: 0, //左侧菜单选择
       promotions: "", //选中的活动key
       index: 999, // 已选下标
-      params: { // 请求参数
+      params: {
+        // 请求参数
         pageNumber: 1,
         pageSize: 10,
       },
-      pintuanColumns: [ // 表头
+      pintuanColumns: [
+        // 表头
         {
           title: "活动标题",
           key: "title",
@@ -89,7 +111,7 @@ export default {
                 "Button",
                 {
                   props: {
-                    type: this.index == params.index ? "primary" : "",
+                    // type: this.index == params.index ? "primary" : "",
                     size: "small",
                   },
                   on: {
@@ -147,7 +169,7 @@ export default {
               {
                 style: {},
               },
-              this.$options.filters.unitPrice(params.row.price, '￥')
+              this.$options.filters.unitPrice(params.row.price, "￥")
             );
           },
         },
@@ -181,13 +203,12 @@ export default {
                 "Button",
                 {
                   props: {
-                    type: this.index == params.index ? "primary" : "",
+                    // type: this.index == params.index ? "primary" : "",
                     size: "small",
                   },
                   on: {
                     click: () => {
                       this.selectedPromotion(params);
-                      console.log(this.index)
                     },
                   },
                 },
@@ -233,7 +254,7 @@ export default {
                 "Button",
                 {
                   props: {
-                    type: this.index == params.index ? "primary" : "",
+                    // type: this.index == params.index ? "primary" : "",
                     size: "small",
                   },
                   on: {
@@ -252,62 +273,6 @@ export default {
       promotionData: "", //商品集合
 
       showPromotionList: [], //显示当前促销的商品
-      typeOption: { // 活动选项
-        FULL_DISCOUNT: {
-          title: "满减",
-          methodsed: () => {
-            this.showPromotionList = [];
-            this.activeColumns = this.pintuanColumns;
-            this.params.promotionType = "FULL_DISCOUNT";
-
-            this.sortGoods("FULL_DISCOUNT");
-          },
-        },
-        PINTUAN: {
-          title: "拼团",
-          methodsed: (id) => {
-            this.showPromotionList = [];
-            this.activeColumns = this.pintuanColumns;
-            this.params.promotionType = "PINTUAN";
-            this.sortGoods("PINTUAN");
-          },
-        },
-        SECKILL: {
-          title: "秒杀",
-          methodsed: () => {
-            this.showPromotionList = [];
-            this.activeColumns = this.seckillColumns;
-            this.params.seckillId = this.promotionList["SECKILL"].id;
-            delete this.params.promotionType;
-
-            getPromotionSeckill(this.params).then((res) => {
-              delete this.params.seckillId;
-              this.showPromotionList = this.showPromotionList.concat(
-                res.result.records
-              );
-
-              this.totals = res.result.total;
-              console.log(this.totals);
-            });
-          },
-        },
-        COUPON: {
-          title: "优惠券",
-          methodsed: () => {
-            this.showPromotionList = [];
-            this.params.promotionType = "COUPON";
-            this.sortGoods("COUPON");
-          },
-        },
-        POINTS_GOODS: {
-          title: "积分商品",
-          methodsed: () => {
-            this.showPromotionList = [];
-            this.params.promotionType = "POINTS_GOODS";
-            this.sortGoods("POINTS_GOODS");
-          },
-        },
-      },
     };
   },
   mounted() {
@@ -317,8 +282,8 @@ export default {
     params: {
       handler() {
         this.index = 999;
-        this.typeOption[this.promotions] &&
-          this.typeOption[this.promotions].methodsed();
+        this.typeOption(this.promotions) &&
+          this.typeOption(this.promotions).methodsed();
       },
       deep: true,
     },
@@ -326,30 +291,76 @@ export default {
 
   methods: {
     sortGoods(type) {
-      this.loading = true;
+      this.loading = false;
       this.params.pageNumber - 1;
-      getPromotionGoods(this.promotionList[type].id, this.params).then(
-        (res) => {
-          this.loading = false;
-          if (res.result) {
-            this.$nextTick(() => {
-              this.showPromotionList = this.showPromotionList.concat(
-                res.result.records
-              );
-              console.log(this.totals);
-              this.totals = res.result.total;
-            });
-          }
-        }
-      );
+      this.showPromotionList = this.promotionList[type];
+    },
+    typeOption(type) {
+      // 活动选项
+      switch (type) {
+        case "FULL_DISCOUNT":
+          return {
+            title: "满减",
+            methodsed: () => {
+              this.showPromotionList = [];
+              this.activeColumns = this.pintuanColumns;
+
+              this.sortGoods("FULL_DISCOUNT");
+            },
+          };
+        case "PINTUAN":
+          return {
+            title: "拼团",
+            methodsed: (id) => {
+              this.showPromotionList = [];
+              this.activeColumns = this.pintuanColumns;
+              this.sortGoods("PINTUAN");
+            },
+          };
+
+        case "KANJIA":
+          return {
+            title: "砍价",
+            methodsed: (id) => {
+              this.showPromotionList = [];
+              this.activeColumns = this.pintuanColumns;
+              this.sortGoods("KANJIA");
+            },
+          };
+        case "SECKILL":
+          return {
+            title: "秒杀",
+            methodsed: () => {
+              this.showPromotionList = [];
+              this.activeColumns = this.seckillColumns;
+              this.sortGoods("SECKILL");
+            },
+          };
+        case "COUPON":
+          return {
+            title: "优惠券",
+            methodsed: () => {
+              this.showPromotionList = [];
+              this.sortGoods("COUPON");
+            },
+          };
+        case "POINTS_GOODS":
+          return {
+            title: "积分商品",
+            methodsed: () => {
+              this.showPromotionList = [];
+              this.sortGoods("POINTS_GOODS");
+            },
+          };
+        default:
+          return {};
+      }
     },
     // 选择活动
     selectedPromotion(val) {
-      console.log(val);
       val.row.___type = "marketing";
       val.row.___promotion = this.promotions;
       this.$emit("selected", [val.row]);
-      console.log([val.row]);
 
       this.index = val.index;
     },
@@ -359,19 +370,22 @@ export default {
       if (res.success) {
         this.loading = false;
         this.getPromotion(res);
-        this.clickPromotion(this.typeOption[Object.keys(res.result)[0]], 0);
+        // this.clickPromotion(this.typeOption[Object.keys(res.result)[0]], 0);
       } else {
         this.loading = false;
       }
     },
     getPromotion(res) {
-      this.promotionList = res.result;
-
-      if (Object.keys(res.result).length) {
-        this.typeOption[Object.keys(res.result)[0]].methodsed(
-          this.promotionList[Object.keys(res.result)[0]].id
-        );
+      if (res.result) {
+        this.promotionList = res.result;
+        this.typeOption(Object.keys(res.result)[0]).methodsed();
       }
+
+      // if (Object.keys(res.result).length) {
+      //   this.typeOption[Object.keys(res.result)[0]].methodsed(
+      //     this.promotionList[Object.keys(res.result)[0]].id
+      //   );
+      // }
     },
 
     // 点击某个活动查询活动列表
@@ -379,8 +393,8 @@ export default {
       this.promotions = val;
       this.selectedIndex = i;
       this.params.pageNumber = 1;
-      this.typeOption[val] &&
-        this.typeOption[val].methodsed(this.promotionList[val].id);
+      this.typeOption(val) &&
+        this.typeOption(val).methodsed(this.promotionList[val].id);
     },
   },
 };

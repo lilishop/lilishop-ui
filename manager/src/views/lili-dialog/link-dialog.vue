@@ -1,16 +1,24 @@
 <template>
   <div class="wrapper">
-
     <Tabs :value="wap[0].title" class="tabs">
-      <TabPane :label="item.title" :name="item.title" @click="clickTag(item, i)" v-for="(item, i) in wap" :key="i">
-        <component ref="lili-component" :is="templateWay[item.name]" @selected="
-          (val) => {
-            changed = val;
-          }
-        " />
+      <TabPane
+        :label="item.title"
+        :name="item.title"
+        @click="clickTag(item, i)"
+        v-for="(item, i) in wap"
+        :key="i"
+      >
+        <component
+          ref="lili-component"
+          :is="templateWay[item.name]"
+          @selected="
+            (val) => {
+              changed = val;
+            }
+          "
+        />
       </TabPane>
     </Tabs>
-
   </div>
 </template>
 <script>
@@ -27,7 +35,7 @@ export default {
       changed: "", // 变更模板
       selected: 0, // 已选数据
       selectedLink: "", //选中的链接
-      wap  // tab标签
+      wap, // tab标签
     };
   },
   watch: {
@@ -44,7 +52,9 @@ export default {
     });
 
     this.wap.forEach((item) => {
-      item.selected = false;
+      if (item) {
+        item.selected = false;
+      }
     });
   },
   methods: {},
