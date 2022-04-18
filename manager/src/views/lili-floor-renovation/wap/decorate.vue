@@ -215,7 +215,13 @@ export default {
     },
     // 回调选择的链接
     selectedLink(val) {
+      // 防止楼层添加的时候商品详情添加转义符号导致添加不成功问题
+      if (val) {
+        delete val.intro;
+        delete val.mobileIntro;
+      }
       this.selectedLinks.url = val;
+
     },
     // 回调的商品信息
     selectedGoodsData(val) {
