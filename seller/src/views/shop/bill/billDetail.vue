@@ -45,9 +45,15 @@
             <p>分销返现支出</p>
             <p class="theme_color">-{{bill.distributionCommission || 0  | unitPrice('￥')}}</p>
           </span>
+
+		  <span>
+		    <p>退单平台优惠券返还</p>
+		    <p class="theme_color">-{{bill.siteCouponRefundCommission || 0  | unitPrice('￥')}}</p>
+		  </span>
+		  
           <span>
-            <p>平台优惠券支出</p>
-            <p class="theme_color">-{{bill.siteCouponCommission || 0  | unitPrice('￥')}}</p>
+            <p>平台优惠券补贴</p>
+            <p class="increase-color">+{{bill.siteCouponCommission || 0  | unitPrice('￥')}}</p>
           </span>
           <span>
             <p>退单产生退还佣金金额</p>
@@ -57,11 +63,6 @@
           <span>
             <p>退单分销返现返还</p>
             <p class="increase-color">+{{bill.distributionRefundCommission || 0  | unitPrice('￥')}}</p>
-          </span>
-
-          <span>
-            <p>退单平台优惠券返还</p>
-            <p class="increase-color">+{{bill.siteCouponRefundCommission || 0  | unitPrice('￥')}}</p>
           </span>
           <span>
             <p>积分结算金额</p>
