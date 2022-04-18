@@ -221,6 +221,7 @@ export default {
   margin: 15px auto;
   display: flex;
   overflow: scroll;
+  overflow-x: hidden;
   flex-direction: row;
 
 }
