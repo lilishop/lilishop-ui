@@ -41,7 +41,7 @@ export const getPromotionGoods = (promotionId, params) => {
 
 // 获取当前进行中的促销活动
 export const getAllPromotion = params => {
-  return getRequest("/promotion/current", params);
+  return getRequest("/promotion/promotion/current", params);
 };
 
 // 获取拼团数据

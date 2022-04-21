@@ -101,7 +101,7 @@
                 >
                 <span
                   class="item-desc-pintuan"
-                  v-if="promotionMap['FULL_DISCOUNT'].fullRate"
+                  v-if="promotionMap['FULL_DISCOUNT'].fullRate && promotionMap['FULL_DISCOUNT'].fullRateFlag"
                   >满{{ promotionMap["FULL_DISCOUNT"].fullMoney }}元，立享{{
                     promotionMap["FULL_DISCOUNT"].fullRate
                   }}折</span

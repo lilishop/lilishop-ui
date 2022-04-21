@@ -520,6 +520,24 @@ export const modelData = [
     }
   },
   {
+    type: "notice",
+    name: "公告",
+    img: "md-image",
+    notAdd: false,
+    notLink: true,
+    notImg: true,
+    options: {
+      list: [
+        {
+          title: [{context: "这是一条公告"}],
+          color: "#666",
+          bk_color: "#FFF",
+          img: 'http://files.sxcfx.cn/upload/20220318/71e5d27aca82aeedf647052e1e4ceaaa.png'
+        }
+      ]
+    }
+  },
+  {
     type: "promotions",
     name: "促销活动",
     img: "md-image",

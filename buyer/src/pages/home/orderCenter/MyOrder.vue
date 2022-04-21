@@ -287,7 +287,7 @@ export default {
     },
     filterOrderStatus (status) { // 获取订单状态中文
       const ob = this.orderStatusList.filter(e => { return e.status === status });
-      return ob[0].name
+      return ob && ob[0] ? ob[0].name : status
     }
   }
 };

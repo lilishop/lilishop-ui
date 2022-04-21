@@ -274,6 +274,11 @@
                 class="decorate-notice"
               >
                 <Input v-model="t.context" style="width: 200px" />
+                <Icon
+                  @click="removeNotice(tindex)"
+                  size="16"
+                  type="md-close-circle"
+                />
               </div>
             </div>
           </div>
@@ -502,6 +507,11 @@ export default {
       this.$refs.ossManage.selectImage = true;
       this.selectedGoods = item;
       this.picModelFlag = true;
+    },
+    removeNotice(index) {
+      this.$nextTick(() => {
+        this.res.options.list[0].title.splice(index, 1);
+      });
     },
     // 关闭
     closeDecorate(index) {

@@ -46,5 +46,4 @@ export default {
   tpl_ad_list,
   promotions: tpl_promotions,
   tpl_activity_list,
-  tpl_adv
 };
