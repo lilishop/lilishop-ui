@@ -6,10 +6,23 @@
         style="margin-left: 20px"
         size="small"
         ghost
-        v-if="res.type == 'tpl_ad_list' || res.type == 'tpl_activity_list' || res.drawer"
+        v-if="
+          res.type == 'tpl_ad_list' ||
+          res.type == 'tpl_activity_list' ||
+          res.drawer
+        "
         type="primary"
         @click="selectStyle()"
         >选择风格</Button
+      >
+      <Button
+        style="margin-left: 20px"
+        size="small"
+        ghost
+        v-if="res.type == 'promotions' || res.drawerPromotions"
+        type="primary"
+        @click="selectPromotions()"
+        >选择促销活动</Button
       >
     </div>
 
@@ -29,17 +42,48 @@
       </div>
     </Drawer>
 
+    <!-- 右侧显示抽屉 -->
+    <Drawer
+      title="选择促销活动(最多只能展示两个活动)"
+      :closable="false"
+      width="400"
+      v-model="promotionsFlag"
+    >
+      <div class="drawer">
+        <div
+          class="drawer-item"
+          @click="clickDrawer(item, index)"
+          v-for="(item, index) in modelData"
+          :key="index"
+          v-if="item.drawerPromotions"
+        >
+          <img src alt />
+          <span>{{ item.name }}</span>
+        </div>
+      </div>
+    </Drawer>
+
     <!-- 卡片集合 -->
     <div
       class="decorate-list"
-      v-if="(res.type != 'tpl_ad_list' && res.type != 'tpl_activity_list') || res.drawer"
+      v-if="
+        (res.type != 'tpl_ad_list' &&
+          res.type != 'tpl_activity_list' &&
+          res.type != 'promotions') ||
+        res.drawer ||
+        res.drawerPromotions
+      "
     >
-      <div class="decorate-item" v-for="(item, index) in res.options.list" :key="index">
+      <div
+        class="decorate-item"
+        v-for="(item, index) in res.options.list"
+        :key="index"
+      >
         <div class="decorate-item-title">
           <div>卡片</div>
           <Icon
             @click="closeDecorate(index)"
-            v-if="res.close"
+            v-if="res.close || res.type == 'promotionDetail'"
             size="20"
             color="#e1251b"
             type="md-close-circle"
@@ -77,14 +121,19 @@
                     title_item.___index == bindGoods.___index ||
                     title_item.title == bindGoods.type
                   "
-                  v-for="(bindGoods, bindGoodsIndex) in res.options.list[0].listWay"
+                  v-for="(bindGoods, bindGoodsIndex) in res.options.list[0]
+                    .listWay"
                   :key="bindGoodsIndex"
                 >
                   {{ bindGoods.title }},
                 </div>
               </div>
               <div>
-                <Button @click="bindGoodsId(title_item)" size="small" ghost type="primary"
+                <Button
+                  @click="bindGoodsId(title_item)"
+                  size="small"
+                  ghost
+                  type="primary"
                   >选择商品</Button
                 >
               </div>
@@ -111,18 +160,137 @@
               >
             </div>
           </div>
+          <div
+            class="decorate-view"
+            v-if="item.title != void 0 && !res.notTitle && res.type == 'title'"
+          >
+            <div class="decorate-view-title">文字对齐方式</div>
+            <div class="card-box">
+              <div
+                class="card"
+                :class="{ active: textAlign == 'left' }"
+                @click="changeTextAlign('left')"
+              >
+                <img
+                  :src="require('@/assets/align-text-left.png')"
+                  class="align-text"
+                  alt=""
+                />
+              </div>
+              <div
+                class="card"
+                :class="{ active: textAlign == 'center' }"
+                @click="changeTextAlign('center')"
+              >
+                <img
+                  :src="require('@/assets/align-text-center.png')"
+                  class="align-text"
+                  alt=""
+                />
+              </div>
+              <!-- <div
+                class="card"
+                :class="{ active: textAlign == 'right' }"
+                @click="changeTextAlign('right')"
+              >
+                <img
+                  :src="require('@/assets/align-text-right.png')"
+                  class="align-text"
+                  alt=""
+                />
+              </div> -->
+            </div>
+          </div>
+          <div
+            class="decorate-view"
+            v-if="
+              item.title != void 0 &&
+              !res.notTitle &&
+              (res.type == 'title' ||
+                res.type == 'notice' ||
+                res.type == 'promotionDetail')
+            "
+          >
+            <div class="decorate-view-title">背景颜色</div>
+            <div class="decorate-view">
+              <ColorPicker v-model="item.bk_color" />
+              <Input v-model="item.bk_color" />
+            </div>
+          </div>
+
           <!-- 填写标题 -->
-          <div class="decorate-view" v-if="item.title != void 0 && !res.notTitle">
+          <div
+            class="decorate-view"
+            v-if="item.title != void 0 && !res.notTitle && res.type != 'notice'"
+          >
             <div class="decorate-view-title">菜单标题</div>
             <div>
               <Input v-model="item.title" style="width: 200px" />
             </div>
           </div>
+          <div
+            class="decorate-view"
+            v-if="
+              item.title != void 0 &&
+              !res.notTitle &&
+              (res.type == 'title' || res.type == 'notice')
+            "
+          >
+            <div class="decorate-view-title">标题颜色</div>
+            <div class="decorate-view">
+              <ColorPicker v-model="item.color" />
+              <Input v-model="item.color" />
+            </div>
+          </div>
+          <!-- 填写小标题 -->
+          <div
+            class="decorate-view"
+            v-if="item.title1 != void 0 && !res.notTitle"
+          >
+            <div class="decorate-view-title">小标题</div>
+            <div>
+              <Input v-model="item.title1" style="width: 200px" />
+            </div>
+          </div>
+          <div
+            class="decorate-view"
+            v-if="item.title1 != void 0 && !res.notTitle"
+          >
+            <div class="decorate-view-title">小标题颜色</div>
+            <div class="decorate-view">
+              <ColorPicker v-model="item.color1" />
+              <Input v-model="item.color1" />
+            </div>
+          </div>
+          <div
+            class="decorate-view"
+            v-if="res.type === 'notice' && !res.notTitle"
+          >
+            <div class="decorate-view-title">公告内容</div>
+            <div>
+              <div
+                v-for="(t, tindex) in item.title"
+                :key="tindex"
+                class="decorate-notice"
+              >
+                <Input v-model="t.context" style="width: 200px" />
+                <Icon
+                  @click="removeNotice(tindex)"
+                  size="16"
+                  type="md-close-circle"
+                />
+              </div>
+            </div>
+          </div>
+
           <!-- 填写链接 -->
 
           <div class="decorate-view" v-if="!res.notLink">
             <div class="decorate-view-title">选择链接</div>
-            <div v-if="item.url.length != 0" class="decorate-view-link">
+            <div
+              v-if="item.url && item.url.length != 0"
+              class="decorate-view-link"
+            >
               已选链接：
 
               <span>
@@ -133,38 +301,73 @@
                 }}
                 -
                 <!-- 当选择完链接之后的商品名称 -->
-                <span v-if="item.url.___type == 'goods'"> {{ item.url.goodsName }}</span>
+                <span v-if="item.url.___type == 'goods'">
+                  {{ item.url.goodsName }}</span
+                >
                 <!-- 当选择完链接之后的分类回调 -->
-                <span v-if="item.url.___type == 'category'"> {{ item.url.name }}</span>
+                <span v-if="item.url.___type == 'category'">
+                  {{ item.url.name }}</span
+                >
                 <!-- 当选择完链接之后的店铺回调 -->
-                <span v-if="item.url.___type == 'shops'"> {{ item.url.memberName }}</span>
+                <span v-if="item.url.___type == 'shops'">
+                  {{ item.url.memberName }}</span
+                >
                 <!-- 当选择完链接之后的其他回调 -->
-                <span v-if="item.url.___type == 'other'"> {{ item.url.title }}</span>
+                <span v-if="item.url.___type == 'other'">
+                  {{ item.url.title }}</span
+                >
                 <!-- 当选择完活动之后的其他回调 -->
                 <span v-if="item.url.___type == 'marketing'">
                   <span v-if="item.url.___promotion == 'SECKILL'"> 秒杀 </span>
-                  <span v-if="item.url.___promotion == 'FULL_DISCOUNT'"> 满减 </span>
+                  <span v-if="item.url.___promotion == 'FULL_DISCOUNT'">
+                    满减
+                  </span>
                   <span v-if="item.url.___promotion == 'PINTUAN'"> 拼团 </span>
                   {{ item.url.title || item.url.goodsName }}
                 </span>
                 <!-- 当选择完活动之后的其他回调 -->
-                <span v-if="item.url.___type == 'pages'"> {{ item.url.title }}</span>
+                <span v-if="item.url.___type == 'pages'">
+                  {{ item.url.title }}</span
+                >
               </span>
             </div>
+
             <div>
-              <Button ghost size="small" type="primary" @click="clickLink(item, index)"
+              <Button
+                ghost
+                size="small"
+                type="primary"
+                @click="clickLink(item, index)"
                 >选择链接</Button
               >
             </div>
           </div>
+          <!-- 链接地址-->
+          <div
+            class="decorate-view"
+            v-if="item.url && item.url.___type == 'other'"
+          >
+            <div class="decorate-view-title">外部链接</div>
+            <div>
+              <Input v-model="item.url.url" style="width: 200px" />
+            </div>
+          </div>
+
+          <p v-if="item.url && item.url.___type == 'other'">
+            (如非同域名下，则在小程序与公众号中无效)
+          </p>
         </div>
       </div>
     </div>
 
     <Button
-      v-if="res.type != 'tpl_ad_list' && res.type != 'tpl_activity_list' && !res.notAdd"
+      v-if="
+        res.type != 'tpl_ad_list' &&
+        res.type != 'tpl_activity_list' &&
+        !res.notAdd
+      "
       type="primary"
-      @click="addDecorate()"
+      @click="addDecorate(res.type)"
       ghost
       >添加</Button
     >
@@ -194,6 +397,8 @@ export default {
       picModelFlag: false, //图片选择器
       linkType: "goods", // dialog弹窗口类型
       styleFlag: false, //广告魔方开关
+      textAlign: this.res.options.list[0].textAlign || "center", //文字对齐方式
+      promotionsFlag: false, //广告魔方开关
       selectedLinkIndex: "", //选择链接的索引
       modelData, // 装修数据
       selectedGoods: "", // 已选商品
@@ -213,15 +418,12 @@ export default {
     selectStyle() {
       this.styleFlag = !this.styleFlag;
     },
+    selectPromotions() {
+      this.promotionsFlag = !this.promotionsFlag;
+    },
     // 回调选择的链接
     selectedLink(val) {
-      // 防止楼层添加的时候商品详情添加转义符号导致添加不成功问题
-      if (val) {
-        delete val.intro;
-        delete val.mobileIntro;
-      }
       this.selectedLinks.url = val;
-
     },
     // 回调的商品信息
     selectedGoodsData(val) {
@@ -257,6 +459,10 @@ export default {
       this.$refs.liliDialog.flag = true;
     },
 
+    changeTextAlign(val) {
+      this.res.options.list[0].textAlign = val;
+      this.textAlign = val;
+    },
     // 点击链接赋值一个唯一值，并将当前选择的模块赋值
     clickLink(val, index) {
       this.selectedLinks = val;
@@ -275,15 +481,21 @@ export default {
       });
     },
     //添加设置
-    addDecorate() {
-      let way = {
-        img: "https://picsum.photos/id/264/200/200",
-        title: "标题",
-        link: "",
-        url: "",
-        size: this.res.options.list[0]?.size,
-      };
-      this.res.options.list.push(way);
+    addDecorate(type) {
+      if (type === "notice") {
+        this.res.options.list[0].title.push({
+          content: "",
+        });
+      } else {
+        let way = {
+          img: "https://picsum.photos/id/264/200/200",
+          title: "标题",
+          link: "",
+          url: "",
+          size: this.res.options.list[0]?.size,
+        };
+        this.res.options.list.push(way);
+      }
     },
     // 图片选择器回显
     callbackSelected(val) {
@@ -295,6 +507,11 @@ export default {
       this.$refs.ossManage.selectImage = true;
       this.selectedGoods = item;
       this.picModelFlag = true;
+    },
+    removeNotice(index) {
+      this.$nextTick(() => {
+        this.res.options.list[0].title.splice(index, 1);
+      });
     },
     // 关闭
     closeDecorate(index) {

@@ -1,24 +1,33 @@
 <template>
   <div>
     <Row :gutter="30">
-      <Col span="6" v-for="(item,index) in linkList" :key="index" v-if="(item.title !== '拼团频道' && item.title !== '签到') || $route.name !== 'renovation'">
-        <div class="card" :class="{'active':selectedIndex == index}" @click="handleLink(item,index)">
+      <Col
+        span="4"
+        v-for="(item, index) in linkList"
+        :key="index"
+        v-if="
+          (item.title !== '拼团频道' && item.title !== '签到') ||
+          $route.name !== 'renovation'
+        "
+      >
+        <div
+          class="card"
+          :class="{ active: selectedIndex == index }"
+          @click="handleLink(item, index)"
+        >
           <Icon size="24" :type="item.icon" />
-          <p>{{item.title}}</p>
+          <p>{{ item.title }}</p>
         </div>
       </Col>
       <!-- 外部链接，只有pc端跳转 -->
-      <Col span="6" v-if="$route.name === 'renovation'">
-        <div class="card" :class="{'active':selectedIndex == linkList.length}" @click="handleLink(linkItem,linkList.length)">
-          <Poptip v-model="linkVisible">
-              <Icon size="24" :type="linkItem.icon" />
-              <p>{{linkItem.title}}</p>
-              <div slot="title">链接地址</div>
-              <div slot="content">
-                  <Input type="text" @keyup="handleLink(linkItem,linkList.length)" v-model="linkItem.url" placeholder="https://"></Input>
-              </div>
-          </Poptip>
-
+      <Col span="4">
+        <div
+          class="card"
+          :class="{ active: selectedIndex == linkList.length }"
+          @click="handleLink(linkItem, linkList.length)"
+        >
+          <Icon size="24" :type="linkItem.icon" />
+          <p>{{ linkItem.title }}</p>
         </div>
       </Col>
     </Row>
@@ -28,7 +37,8 @@
 export default {
   data() {
     return {
-      linkList: [ // 链接列表
+      linkList: [
+        // 链接列表
         {
           title: "首页",
           icon: "md-home",
@@ -89,13 +99,12 @@ export default {
           icon: "ios-basket",
           ___type: "point",
         },
-
       ],
       linkItem: {
         title: "外部链接",
         icon: "ios-link",
         ___type: "link",
-        url: ''
+        url: "",
       },
       linkVisible: false, // 是否显示外部链接
       selectedIndex: 9999999, // 已选index
@@ -103,14 +112,9 @@ export default {
   },
   methods: {
     handleLink(val, index) {
-      val = {...val,___type:'other'}
+      val = { ...val, ___type: "other" };
       this.selectedIndex = index;
-      if (index === this.linkList.length) {
-        this.linkVisible = true
-      } else {
-        this.linkVisible = false
-      }
-      this.$emit("selected",[val])
+      this.$emit("selected", [val]);
     },
   },
 };
@@ -132,8 +136,8 @@ export default {
   }
   border: 1px solid #ededed;
 }
-.card:hover{
-   background: #ededed;
+.card:hover {
+  background: #ededed;
 }
 .active {
   background: #ededed;

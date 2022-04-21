@@ -53,11 +53,19 @@
               <span class="describe">消费达到当前金额可以参与优惠</span>
             </FormItem>
             <FormItem label="优惠方式">
-              <RadioGroup type="button" button-style="solid" v-model="form.discountType">
-                <Radio :disabled="form.promotionStatus != 'NEW'" label="fullMinusFlag"
+              <RadioGroup
+                type="button"
+                button-style="solid"
+                v-model="form.discountType"
+              >
+                <Radio
+                  :disabled="form.promotionStatus != 'NEW'"
+                  label="fullMinusFlag"
                   >减现金</Radio
                 >
-                <Radio :disabled="form.promotionStatus != 'NEW'" label="fullRateFlag"
+                <Radio
+                  :disabled="form.promotionStatus != 'NEW'"
+                  label="fullRateFlag"
                   >打折</Radio
                 >
               </RadioGroup>
@@ -102,7 +110,9 @@
                 v-model="form.couponFlag"
                 >送优惠券</Checkbox
               >
-              <Checkbox :disabled="form.promotionStatus != 'NEW'" v-model="form.giftFlag"
+              <Checkbox
+                :disabled="form.promotionStatus != 'NEW'"
+                v-model="form.giftFlag"
                 >送赠品</Checkbox
               >
               <Checkbox
@@ -125,9 +135,12 @@
                 :loading="couponLoading"
                 style="width: 280px"
               >
-                <Option v-for="item in couponList" :value="item.id" :key="item.id">{{
-                  item.couponName
-                }}</Option>
+                <Option
+                  v-for="item in couponList"
+                  :value="item.id"
+                  :key="item.id"
+                  >{{ item.couponName }}</Option
+                >
               </Select>
             </FormItem>
             <FormItem v-if="form.giftFlag" label="赠品" prop="giftId">
@@ -140,9 +153,14 @@
                 :loading="giftLoading"
                 style="width: 280px"
               >
-                <Option v-for="item in giftList" :value="item.id" :key="item.id">{{
-                  item.goodsName
-                }}</Option>
+                <Option
+                  v-for="item in giftList"
+                  :value="item.id"
+                  :key="item.id"
+                  >
+                  {{ item.goodsName }}
+                  </Option
+                >
               </Select>
             </FormItem>
             <FormItem v-if="form.pointFlag" label="赠积分" prop="point">
@@ -155,17 +173,26 @@
               />
             </FormItem>
             <FormItem label="使用范围" prop="scopeType">
-              <RadioGroup type="button" button-style="solid" v-model="form.scopeType">
+              <RadioGroup
+                type="button"
+                button-style="solid"
+                v-model="form.scopeType"
+              >
                 <Radio :disabled="form.promotionStatus != 'NEW'" label="ALL"
                   >全品类</Radio
                 >
-                <Radio :disabled="form.promotionStatus != 'NEW'" label="PORTION_GOODS"
+                <Radio
+                  :disabled="form.promotionStatus != 'NEW'"
+                  label="PORTION_GOODS"
                   >指定商品</Radio
                 >
               </RadioGroup>
             </FormItem>
 
-            <FormItem style="width: 100%" v-if="form.scopeType == 'PORTION_GOODS'">
+            <FormItem
+              style="width: 100%"
+              v-if="form.scopeType == 'PORTION_GOODS'"
+            >
               <div
                 style="display: flex; margin-bottom: 10px"
                 v-if="form.promotionStatus == 'NEW'"
@@ -196,7 +223,7 @@
                 <template slot-scope="{ index }" slot="action">
                   <Button
                     type="error"
-                    :disabled="form.promotionStatus != 'NEW' && id"
+                    :disabled="form.promotionStatus != 'NEW' && !!id"
                     size="small"
                     ghost
                     @click="delGoods(index)"
@@ -210,7 +237,7 @@
               <Button type="text" @click="closeCurrentPage">返回</Button>
               <Button
                 type="primary"
-                :disabled="form.promotionStatus != 'NEW' && id"
+                :disabled="form.promotionStatus != 'NEW' && !!id"
                 :loading="submitLoading"
                 @click="handleSubmit"
                 >提交</Button
@@ -220,7 +247,10 @@
         </div>
       </Form>
     </Card>
-    <sku-select ref="skuSelect" @selectedGoodsData="selectedGoodsData"></sku-select>
+    <sku-select
+      ref="skuSelect"
+      @selectedGoodsData="selectedGoodsData"
+    ></sku-select>
   </div>
 </template>
 
@@ -280,7 +310,10 @@ export default {
         promotionName: [{ required: true, message: "活动名称不能为空" }],
         rangeTime: [{ required: true, message: "请选择活动时间" }],
         description: [{ required: true, message: "请填写活动描述" }],
-        price: [{ required: true, message: "请输入面额" }, { validator: checkPrice }],
+        price: [
+          { required: true, message: "请输入面额" },
+          { validator: checkPrice },
+        ],
         consumptionLimit: [{ required: true, validator: checkWeight }],
         fullMoney: [{ required: true, validator: checkWeight }],
         fullMinus: [
@@ -318,7 +351,10 @@ export default {
           key: "price",
           minWidth: 40,
           render: (h, params) => {
-            return h("div", this.$options.filters.unitPrice(params.row.price, "￥"));
+            return h(
+              "div",
+              this.$options.filters.unitPrice(params.row.price, "￥")
+            );
           },
         },
         {
@@ -343,8 +379,8 @@ export default {
     if (this.id) {
       this.getDetail();
     }
-    this.getCouponList();
-    this.getGiftList();
+    await this.getCouponList();
+    await this.getGiftList();
   },
   methods: {
     // 关闭当前页面
@@ -390,14 +426,19 @@ export default {
       this.$refs.form.validate((valid) => {
         if (valid) {
           const params = JSON.parse(JSON.stringify(this.form));
-          const strat = this.$options.filters.unixToDate(this.form.rangeTime[0] / 1000);
-          const end = this.$options.filters.unixToDate(this.form.rangeTime[1] / 1000);
+          const strat = this.$options.filters.unixToDate(
+            this.form.rangeTime[0] / 1000
+          );
+          const end = this.$options.filters.unixToDate(
+            this.form.rangeTime[1] / 1000
+          );
           params.startTime = strat;
           params.endTime = end;
 
           if (
             params.scopeType == "PORTION_GOODS" &&
-            (!params.promotionGoodsList || params.promotionGoodsList.length == 0)
+            (!params.promotionGoodsList ||
+              params.promotionGoodsList.length == 0)
           ) {
             this.$Modal.warning({ title: "提示", content: "请选择指定商品" });
             return;
@@ -463,9 +504,11 @@ export default {
           this.selectedGoods.forEach(function (e) {
             ids.push(e.id);
           });
-          this.form.promotionGoodsList = this.form.promotionGoodsList.filter((item) => {
-            return !ids.includes(item.id);
-          });
+          this.form.promotionGoodsList = this.form.promotionGoodsList.filter(
+            (item) => {
+              return !ids.includes(item.id);
+            }
+          );
         },
       });
     },
@@ -511,7 +554,10 @@ export default {
       let params = {
         pageSize: 10,
         pageNumber: 1,
-        goodsName: query,
+        id: query === this.form.giftId ? this.form.giftId : null,
+        goodsName: query === this.form.giftId ? null : query,
+        marketEnable: "UPPER",
+        authFlag: "PASS"
       };
       this.giftLoading = true;
       getGoodsSkuListDataSeller(params).then((res) => {

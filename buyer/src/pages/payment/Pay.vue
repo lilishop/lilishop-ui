@@ -92,7 +92,7 @@
           <div class="goods-list">
             <div
               class="goods-item"
-              v-for="(goods, goodsIndex) in shop.skuList"
+              v-for="(goods, goodsIndex) in shop.checkedSkuList"
               :key="goodsIndex"
             >
               <span
