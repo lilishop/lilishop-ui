@@ -3,6 +3,7 @@
     <Card>
       <Row class="operation">
         <Button @click="add()" type="primary">设置今日热词</Button>
+        <Button @click="deleteWords('')" type="primary">清空热词</Button>
       </Row>
       <Row>
         <p>
@@ -112,10 +113,16 @@ export default {
       this.modalVisible = true;
     },
     deleteWords(words) {
+      let title = "是否确定删除热词";
+      let content = "<p>您确定要删除此热词吗？</p>";
+      if (words === '') {
+        title = "是否确定清空热词";
+        content = "<p>您确定要清空热词吗？</p>";
+      }
       this.$Modal.confirm({
-        title: "是否确定删除热词",
-        content: "<p>您确定要删除此热词吗？</p>",
-        okText: "确实",
+        title: title,
+        content: content,
+        okText: "确定",
         cancelText: "取消",
         onOk: () => {
           deleteHotWords(words).then((res) => {
