@@ -34,7 +34,9 @@
       <div class="cart-goods">
         <div class="cart-goods-title">
           <div class="width_60">
-            <Checkbox v-model="allChecked" @on-change="changeChecked(allChecked, 'all')"
+            <Checkbox
+              v-model="allChecked"
+              @on-change="changeChecked(allChecked, 'all')"
               >全选</Checkbox
             >
           </div>
@@ -77,7 +79,9 @@
                   v-for="(item, index) in shop.couponList"
                   :key="index"
                 >
-                  <span v-if="item.couponType === 'PRICE'">￥{{ item.price }}</span>
+                  <span v-if="item.couponType === 'PRICE'"
+                    >￥{{ item.price }}</span
+                  >
                   <span v-if="item.couponType === 'DISCOUNT'"
                     >{{ item.couponDiscount }}折</span
                   >
@@ -100,12 +104,16 @@
               <div class="width_60">
                 <Checkbox
                   v-model="goods.checked"
-                  @on-change="changeChecked(goods.checked, 'goods', goods.goodsSku.id)"
+                  @on-change="
+                    changeChecked(goods.checked, 'goods', goods.goodsSku.id)
+                  "
                 ></Checkbox>
               </div>
               <div
                 class="goods-title"
-                @click="goGoodsDetail(goods.goodsSku.id, goods.goodsSku.goodsId)"
+                @click="
+                  goGoodsDetail(goods.goodsSku.id, goods.goodsSku.goodsId)
+                "
               >
                 <img
                   :src="
@@ -115,24 +123,34 @@
                 />
                 <div>
                   <p>{{ goods.goodsSku.goodsName }}</p>
-                  <template v-for="(promotion, promotionIndex) in goods.promotions">
+                  <template
+                    v-for="(promotion, promotionIndex) in goods.promotions"
+                  >
                     <div
                       class="promotion"
                       :key="promotionIndex"
                       v-if="promotion.promotionType === 'SECKILL'"
                     >
                       <span>秒杀</span>
-                      <promotion :time="promotion.endTime" type="cart"></promotion>
+                      <promotion
+                        :time="promotion.endTime"
+                        type="cart"
+                      ></promotion>
                     </div>
                   </template>
-                  <template v-for="(promotion, promotionIndex) in goods.promotions">
+                  <template
+                    v-for="(promotion, promotionIndex) in goods.promotions"
+                  >
                     <div
                       class="promotion"
                       :key="promotionIndex"
                       v-if="promotion.promotionType === 'FULL_DISCOUNT'"
                     >
                       <span>满优惠活动</span>
-                      <promotion :time="promotion.endTime" type="cart"></promotion>
+                      <promotion
+                        :time="promotion.endTime"
+                        type="cart"
+                      ></promotion>
                     </div>
                   </template>
                 </div>
@@ -155,22 +173,27 @@
                 {{ goods.subTotal | unitPrice("￥") }}
               </div>
               <div class="width_100">
-                <span
-                  class="handle-btn"
+                <Button
                   v-if="!goods.errorMessage"
+                  size="small"
+                  type="primary"
                   @click="delGoods(goods.goodsSku.id)"
-                  >删除</span
+                  >删除</Button
                 >
-                <span
-                  class="handle-btn"
+                <Button
                   v-if="!goods.errorMessage"
+                  size="small"
+                  type="info"
                   @click="collectGoods(goods.goodsSku.id)"
-                  >收藏</span
+                  style="margin-left: 10px"
+                  >收藏</Button
                 >
               </div>
               <div class="error-goods" v-if="goods.errorMessage">
-                <div>{{ goods.errorMessage }}</div>
-                <Button type="primary" @click="delGoods(goods.goodsSku.id)">删除</Button>
+                <div style="margin-top: 20px">{{ goods.errorMessage }}</div>
+                <Button type="primary" @click="delGoods(goods.goodsSku.id)"
+                  >删除</Button
+                >
               </div>
             </div>
           </template>
@@ -179,13 +202,19 @@
         <div class="cart-goods-footer">
           <div>
             <div class="width_60">
-              <Checkbox v-model="allChecked" @on-change="changeChecked(allChecked, 'all')"
+              <Checkbox
+                v-model="allChecked"
+                @on-change="changeChecked(allChecked, 'all')"
                 >全选</Checkbox
               >
             </div>
-            <div class="width_100 handle-btn" @click="delGoods()">删除选中商品</div>
+            <div class="width_100 handle-btn" @click="delGoods()">
+              删除选中商品
+            </div>
             <!-- <div class="width_100 handle-btn" @click="collectGoods">移到我的收藏</div> -->
-            <div class="width_100 handle-btn" @click="clearCart">清空购物车</div>
+            <div class="width_100 handle-btn" @click="clearCart">
+              清空购物车
+            </div>
           </div>
           <div>
             <div class="selected-count">
@@ -193,7 +222,9 @@
               >件商品
             </div>
             <div class="ml_20 save-price">
-              已节省<span>{{ priceDetailDTO.discountPrice | unitPrice("￥") }}</span>
+              已节省<span>{{
+                priceDetailDTO.discountPrice | unitPrice("￥")
+              }}</span>
             </div>
             <div class="ml_20 total-price">
               总价（不含运费）:
