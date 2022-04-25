@@ -3,7 +3,9 @@ import * as API_Other from "@/api/other";
 // 获取楼层装修信息
 export function initData(id) {
   API_Other.getHomeData(id).then(res => {
+    debugger
     homeData = res;
+    console.log(res)
   });
 }
 
@@ -11,9 +13,10 @@ export let homeData = {};
 
 /**
  * drawer:true   广告右侧打开抽屉中显示
+ * drawerPromotions:true   广告右侧打开抽屉中显示
  * ad_drawer:true 活动魔方右侧显示
  * notAdd: true 没有添加按钮
- * notLink: true 没有连接功能
+ * notLink: true 没有链接功能
  * notImg: true 没有选择图片功能
  * close:true 右侧关闭按钮
  */
@@ -81,14 +84,20 @@ export const modelData = [
     type: "title",
     name: "标题栏",
     img: "md-image",
+    // notTitle:true,
     notAdd: true,
-    notLink: true,
     notImg: true,
     options: {
       list: [
         {
           title: "标题",
-          color: "#000000"
+          color: "#fff",
+          title1: '领取',
+          color1: "#fff",
+          bk_color: "#FF0000",
+          textAlign: "center",
+          link: "",
+          url: ''
         }
       ]
     }
@@ -469,22 +478,22 @@ export const modelData = [
             {
               title: "精选",
               desc: "电子推荐",
-              ___index:0,
+              ___index: 0,
             },
             {
               title: "实惠",
               desc: "便宜好货",
-              ___index:1,
+              ___index: 1,
             },
             {
               title: "进口",
               desc: "国际自营",
-              ___index:2,
+              ___index: 2,
             },
             {
               title: "推荐",
               desc: "喂奶推荐",
-              ___index:3,
+              ___index: 3,
             }
           ],
           listWay: [
@@ -494,7 +503,7 @@ export const modelData = [
               title:
                 " 微软 (Microsoft) Xbox 无线控制器/手柄 湛蓝色 | 3.5mm耳机接口蓝牙连接 Xbox主机电脑平板通用",
               type: "精选",
-              ___index:0
+              ___index: 0
             },
             {
               img: "https://i.loli.net/2020/12/05/c9mptI5Pg8qJ6ny.png",
@@ -502,69 +511,106 @@ export const modelData = [
                 "宏碁(acer) DP高清线1.2版 2K*4KDisplayPort公对公接线笔记本电脑显卡连接显示器视频线1.5米",
               price: "190",
               type: "精选",
-              ___index:0
+              ___index: 0
             },
-            
+
           ]
         }
       ]
     }
+  },
+  {
+    type: "notice",
+    name: "公告",
+    img: "md-image",
+    notAdd: false,
+    notLink: true,
+    notImg: true,
+    options: {
+      list: [
+        {
+          title: [{context: "这是一条公告"}],
+          color: "#666",
+          bk_color: "#FFF",
+          img: 'http://files.sxcfx.cn/upload/20220318/71e5d27aca82aeedf647052e1e4ceaaa.png'
+        }
+      ]
+    }
+  },
+  {
+    type: "promotions",
+    name: "促销活动",
+    img: "md-image",
+    notAdd: true,
+    notLink: true,
+    notImg: true,
+    close: true,
+    options: {
+      list: []
+    }
+  },
+  {
+    notAdd: true,
+    notImg: true,
+    notLink: true,
+    drawerPromotions: true,
+    type: "promotionDetail",
+    promotionsType: "PINTUAN",
+    name: "拼团活动",
+    subBkColor: "#e1212b",
+    subName: "惊喜折扣",
+    subColor: "#fff",
+    img: "md-image",
+    options: {
+      list: []
+    }
+  },
+  {
+    notAdd: true,
+    notImg: true,
+    notLink: true,
+    drawerPromotions: true,
+    type: "promotionDetail",
+    promotionsType: "LIVE",
+    name: "直播活动",
+    subBkColor: "#e1212b",
+    subName: "优惠好价",
+    subColor: "#fff",
+    img: "md-image",
+    options: {
+      list: []
+    }
+  },
+  {
+    notAdd: true,
+    notImg: true,
+    notLink: true,
+    drawerPromotions: true,
+    type: "promotionDetail",
+    promotionsType: "SECKILL",
+    name: "秒杀活动",
+    subBkColor: "#e1212b",
+    subName: "x点场",
+    subColor: "#fff",
+    img: "md-image",
+    options: {
+      list: []
+    }
+  },
+  {
+    notAdd: true,
+    notImg: true,
+    notLink: true,
+    drawerPromotions: true,
+    type: "promotionDetail",
+    promotionsType: "KANJIA",
+    name: "砍价活动",
+    subBkColor: "#e1212b",
+    subName: "超值好物",
+    subColor: "#fff",
+    img: "md-image",
+    options: {
+      list: []
+    }
   }
-  // TODO 第一版本隐藏暂无此功能
-  // {
-  //   notAdd: true,
-  //   notImg: true,
-  //   type: "joinGroup",
-  //   name: "拼团活动",
-  //   img: "md-image",
-  //   options: {
-  //     list: [
-  //       {
-  //         title: "测试拼团"
-  //       }
-  //     ]
-  //   }
-  // },
-  // {
-  //   notAdd: true,
-  //   notImg: true,
-  //   type: "integral",
-  //   name: "积分活动",
-  //   img: "md-image",
-  //   options: {
-  //     list: [
-  //       {
-  //         title: "测试积分"
-  //       }
-  //     ]
-  //   }
-  // },
-  // {
-  //   notAdd: true,
-  //   notImg: true,
-  //   type: "spike",
-  //   name: "秒杀活动",
-  //   img: "md-image",
-  //   options: {
-  //     list: [
-  //       {
-  //         title: "测试秒杀"
-  //       }
-  //     ]
-  //   }
-  // },
-  // {
-  //   notAdd: true,
-  //   notImg: true,
-  //   type: "group",
-  //   name: "团购活动",
-  //   img: "md-image",
-  //   options: {
-  //     list: [
-  //       {
-  //         title: "测试团购"
-  //       }
-  //     ]
-  //   }
-  // }
 ];

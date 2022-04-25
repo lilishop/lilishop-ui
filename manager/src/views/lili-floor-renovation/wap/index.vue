@@ -15,7 +15,7 @@
         >
           <li
             v-for="(model, index) in modelData"
-            v-if="!model.drawer"
+            v-if="!model.drawer && !model.drawerPromotions"
             :key="index"
             class="model-item"
           >
@@ -77,7 +77,8 @@ import templates from "./template/index";
 import Draggable from "vuedraggable";
 import { modelData } from "./config";
 import decorate from "./decorate";
-import * as API_Other from '@/api/other'
+import * as API_Other from "@/api/other";
+import * as API_Promotions from "@/api/promotion";
 export default {
   components: {
     Draggable,
@@ -89,10 +90,12 @@ export default {
       modelData, // 装修模型
       qrcode: "", // 二维码
       selected: 0, // 已选下标
-      contentData: { // 总数据
+      contentData: {
+        // 总数据
         list: [],
       },
       decorateData: "", // 装修数据
+      decoratePromotionsData: "", // 装修数据
     };
   },
   watch: {
@@ -108,21 +111,14 @@ export default {
   },
 
   methods: {
-
-    enableBindGoodsShow(){
-
-    },
-
-
     // 初始化数据
     init() {
       if (!this.$route.query.id) return false;
-      API_Other.getHomeData(this.$route.query.id).then(res=>{
-        this.contentData = JSON.parse(res.result.pageData)
+      API_Other.getHomeData(this.$route.query.id).then((res) => {
+        this.contentData = JSON.parse(res.result.pageData);
 
-
-         this.handleComponent( this.contentData.list[0], 0)
-      })
+        this.handleComponent(this.contentData.list[0], 0);
+      });
     },
 
     // 中间组件拖动，右侧数据绑定不变
@@ -136,7 +132,6 @@ export default {
       this.$nextTick(() => {
         this.decorateData = "";
 
-        console.log(this.contentData.list.length);
         // 如果当前楼层不为一
         if (this.contentData.list.length > 1) {
           // 如果当前最底层 给下一层赋值
@@ -156,29 +151,86 @@ export default {
 
     // 点击楼层装修
     handleComponent(val, index) {
-      console.warn(val)
       this.selected = index;
       this.$set(this, "decorateData", val);
     },
     // 右侧栏回调
     handleDrawer(val) {
-    
       let newIndex = this.selected;
+      if (val.promotionsType) {
+        if (this.contentData.list[newIndex].options.list.length >= 2) {
+          this.$Message.error("最多只能展示两个活动");
+          return;
+        }
+        if (val.promotionsType === "LIVE") {
+          API_Promotions.getLiveList({
+            status: "START",
+            pageSize: 1,
+          }).then((res) => {
+            if (res.success && res.result.size > 0) {
+              API_Promotions.getLiveInfo(res.result.records[0].id).then(
+                (res) => {
+                  if (res.success) {
+                    this.contentData.list[newIndex].options.list.push({
+                      type: val.promotionsType,
+                      title: val.name,
+                      title1: val.subName,
+                      color1: val.subColor,
+                      bk_color: val.subBkColor,
+                      data: res.result.commodityList
+                        ? res.result.commodityList.splice(0,2)
+                        : [],
+                    });
+                  }
+                }
+              );
+            }
+          });
+        } else {
+          API_Promotions.getAllPromotion().then((res) => {
+            let exist = this.contentData.list[newIndex].options.list.find(
+              (i) => i.type === val.promotionsType
+            );
 
-      this.decorateData = "";
+            if (res.success && !exist) {
+              this.contentData.list[newIndex].options.list.push({
+                data: res.result[val.promotionsType]
+                  ? res.result[val.promotionsType].splice(0,2)
+                  : [],
+                type: val.promotionsType,
+                title1: val.subName,
+                color1: val.subColor,
+                bk_color: val.subBkColor,
+                title: val.name,
+              });
+            }
+          });
+        }
+        this.$set(this.contentData.list, newIndex, {
+          ...val,
+          options: {
+            ...this.contentData.list[newIndex].options,
+          },
+          // 绑定键值
+          model: val.type,
+        });
+      } else {
+        this.decorateData = "";
 
-      this.$set(this.contentData.list, newIndex, {
-        ...val,
-        options: {
-          ...val.options,
-        },
+        this.$set(this.contentData.list, newIndex, {
+          ...val,
+          options: {
+            ...val.options,
+          },
 
-        // 绑定键值
-        model: val.type,
-      });
-      this.contentData.list = JSON.parse(JSON.stringify(this.contentData.list));
-
-      this.$set(this, "decorateData", this.contentData.list[newIndex]);
+          // 绑定键值
+          model: val.type,
+        });
+        this.contentData.list = JSON.parse(
+          JSON.stringify(this.contentData.list)
+        );
+        this.$set(this, "decorateData", this.contentData.list[newIndex]);
+      }
     },
 
     // 封装拖拽参数

@@ -43,13 +43,20 @@
             <div>
               <span>{{ item.name }}</span>
               <Tag class="ml_10" v-if="item.isDefault" color="red">默认</Tag>
-              <Tag class="ml_10" v-if="item.alias" color="warning">{{ item.alias }} </Tag>
+              <Tag class="ml_10" v-if="item.alias" color="warning"
+                >{{ item.alias }}
+              </Tag>
             </div>
             <div>{{ item.mobile }}</div>
-            <div>{{ item.consigneeAddressPath | unitAddress }} {{ item.detail }}</div>
+            <div>
+              {{ item.consigneeAddressPath | unitAddress }} {{ item.detail }}
+            </div>
             <div class="edit-btn" v-show="showEditBtn === index">
               <span @click.stop="editAddress(item.id)">修改</span>
-              <span class="ml_10" v-if="!item.isDefault" @click.stop="delAddress(item)"
+              <span
+                class="ml_10"
+                v-if="!item.isDefault"
+                @click.stop="delAddress(item)"
                 >删除</span
               >
             </div>
@@ -80,45 +87,59 @@
           <span>商品信息</span>
           <span @click="$router.push('/cart')">返回购物车</span>
         </div>
-        <div class="goods-msg" v-for="(shop, shopIndex) in goodsList" :key="shopIndex">
-          <div class="shop-name">
-            <span>
-              <span class="hover-color" @click="goShopPage(shop.storeId)">{{
-                shop.storeName
-              }}</span
-              >&nbsp;&nbsp;
-            </span>
-          </div>
-          <div class="goods-list">
-            <div
-              class="goods-item"
-              v-for="(goods, goodsIndex) in shop.skuList"
-              :key="goodsIndex"
-            >
-              <span
-                class="hover-color"
-                @click="goGoodsDetail(goods.goodsSku.id, goods.goodsSku.goodsId)"
-              >
-                <img :src="goods.goodsSku.thumbnail" alt="" />
-                <span style="vertical-align: top">{{ goods.goodsSku.goodsName }}</span>
+        <div
+          class="goods-msg"
+          v-for="(shop, shopIndex) in goodsList"
+          :key="shopIndex"
+        >
+          <div v-if="shop.checked">
+            <div class="shop-name">
+              <span>
+                <span class="hover-color" @click="goShopPage(shop.storeId)">{{
+                  shop.storeName
+                }}</span
+                >&nbsp;&nbsp;
               </span>
-              <span class="goods-price">{{ goods.purchasePrice | unitPrice("￥") }}</span>
-              <span>x{{ goods.num }}</span>
-              <span>{{ goods.goodsSku.quantity > 0 ? "有货" : "无货" }}</span>
-              <span class="goods-price">{{ goods.subTotal | unitPrice("￥") }}</span>
             </div>
-          </div>
-          <div class="order-mark">
-            <Input
-              type="textarea"
-              maxlength="60"
-              v-model="shop.remark"
-              show-word-limit
-              placeholder="订单备注"
-            />
-            <span style="font-size: 12px; color: #999"
-              >提示：请勿填写有关支付、收货、发票方面的信息</span
-            >
+            <div class="goods-list">
+              <div
+                class="goods-item"
+                v-for="(goods, goodsIndex) in shop.checkedSkuList"
+                :key="goodsIndex"
+              >
+                <span
+                  class="hover-color"
+                  @click="
+                    goGoodsDetail(goods.goodsSku.id, goods.goodsSku.goodsId)
+                  "
+                >
+                  <img :src="goods.goodsSku.thumbnail" alt="" />
+                  <span style="vertical-align: top">{{
+                    goods.goodsSku.goodsName
+                  }}</span>
+                </span>
+                <span class="goods-price">{{
+                  goods.purchasePrice | unitPrice("￥")
+                }}</span>
+                <span>x{{ goods.num }}</span>
+                <span>{{ goods.goodsSku.quantity > 0 ? "有货" : "无货" }}</span>
+                <span class="goods-price">{{
+                  goods.subTotal | unitPrice("￥")
+                }}</span>
+              </div>
+            </div>
+            <div class="order-mark">
+              <Input
+                type="textarea"
+                maxlength="60"
+                v-model="shop.remark"
+                show-word-limit
+                placeholder="订单备注"
+              />
+              <span style="font-size: 12px; color: #999"
+                >提示：请勿填写有关支付、收货、发票方面的信息</span
+              >
+            </div>
           </div>
         </div>
       </div>
@@ -146,11 +167,19 @@
         </div>
         <div v-if="couponList.length === 0">无可用优惠券</div>
         <ul v-else class="coupon-list">
-          <li v-for="(item, index) in couponList" class="coupon-item" :key="index">
+          <li
+            v-for="(item, index) in couponList"
+            class="coupon-item"
+            :key="index"
+          >
             <div class="c-left">
               <div>
-                <span v-if="item.couponType === 'PRICE'" class="fontsize_12 global_color"
-                  >￥<span class="price">{{ item.price | unitPrice }}</span></span
+                <span
+                  v-if="item.couponType === 'PRICE'"
+                  class="fontsize_12 global_color"
+                  >￥<span class="price">{{
+                    item.price | unitPrice
+                  }}</span></span
                 >
                 <span
                   v-if="item.couponType === 'DISCOUNT'"
@@ -158,7 +187,9 @@
                   ><span class="price">{{ item.discount }}</span
                   >折</span
                 >
-                <span class="describe">满{{ item.consumeThreshold }}元可用</span>
+                <span class="describe"
+                  >满{{ item.consumeThreshold }}元可用</span
+                >
               </div>
               <p>使用范围：{{ useScope(item.scopeType) }}</p>
               <p>有效期：{{ item.endTime }}</p>
@@ -225,9 +256,17 @@
     </div>
     <BaseFooter></BaseFooter>
     <!-- 添加发票模态框 -->
-    <invoice-modal ref="invModal" :invoiceData="invoiceData" @change="getInvMsg" />
+    <invoice-modal
+      ref="invModal"
+      :invoiceData="invoiceData"
+      @change="getInvMsg"
+    />
     <!-- 选择地址模态框 -->
-    <address-manage ref="address" :id="addrId" @change="addrChange"></address-manage>
+    <address-manage
+      ref="address"
+      :id="addrId"
+      @change="addrChange"
+    ></address-manage>
   </div>
 </template>
 
@@ -303,6 +342,15 @@ export default {
         .then((res) => {
           this.$Spin.hide();
           if (res.success) {
+            if (
+              !res.result.checkedSkuList ||
+              res.result.checkedSkuList.length === 0
+            ) {
+              this.$router.push({
+                path: "/cart",
+                replace: true,
+              });
+            }
             this.goodsList = res.result.cartList;
             this.priceDetailDTO = res.result.priceDetailDTO;
             this.skuList = res.result.skuList;
@@ -313,11 +361,19 @@ export default {
             let notSupArea = res.result.notSupportFreight;
             this.selectedCoupon = {};
             if (res.result.platformCoupon)
-              this.selectedCoupon[res.result.platformCoupon.memberCoupon.id] = res.result.platformCoupon;
-            if (res.result.storeCoupons && Object.keys(res.result.storeCoupons)[0]) {
-              let storeMemberCouponsId = Object.keys(res.result.storeCoupons)[0];
-              let storeCouponId = res.result.storeCoupons[storeMemberCouponsId].memberCoupon.id;
-              this.selectedCoupon[storeCouponId] = res.result.storeCoupons[storeMemberCouponsId];
+              this.selectedCoupon[res.result.platformCoupon.memberCoupon.id] =
+                res.result.platformCoupon;
+            if (
+              res.result.storeCoupons &&
+              Object.keys(res.result.storeCoupons)[0]
+            ) {
+              let storeMemberCouponsId = Object.keys(
+                res.result.storeCoupons
+              )[0];
+              let storeCouponId =
+                res.result.storeCoupons[storeMemberCouponsId].memberCoupon.id;
+              this.selectedCoupon[storeCouponId] =
+                res.result.storeCoupons[storeMemberCouponsId];
             }
             if (notSupArea) {
               let content = [];
@@ -344,7 +400,10 @@ export default {
             const couponKeys = Object.keys(this.selectedCoupon);
             if (couponKeys.length) {
               this.couponList.forEach((e) => {
-                if (this.selectedCoupon[e.id] && e.id === this.selectedCoupon[e.id].memberCoupon.id) {
+                if (
+                  this.selectedCoupon[e.id] &&
+                  e.id === this.selectedCoupon[e.id].memberCoupon.id
+                ) {
                   this.usedCouponId.push(e.id);
                 }
               });
