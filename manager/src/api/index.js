@@ -439,11 +439,23 @@ export const setHotWords = (params) => {
 };
 
 // 删除热搜词
-export const deleteHotWords = (words) => {
-  return deleteRequest(`/hotwords/hotwords/${words}`);
+export const deleteHotWords = (params) => {
+  return deleteRequest(`/hotwords/hotwords`,params);
 };
 
 // 获取热搜词
 export const getHotWords = () => {
   return getRequest(`/hotwords/hotwords`);
 };
+
+// 获取热词统计
+export const getHotWordsStatistics = (params) => {
+  return getRequest(`/hotwords/hotwords/statistics`,params);
+};
+
+// 获取历史热词
+export const getHotWordsHistory = (params) => {
+  return getRequest(`/hotwords/hotwords/history`,params);
+};
+
+
