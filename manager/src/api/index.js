@@ -453,4 +453,9 @@ export const getHotWordsStatistics = (params) => {
   return getRequest(`/hotwords/hotwords/statistics`,params);
 };
 
+// 获取历史热词
+export const getHotWordsHistory = (params) => {
+  return getRequest(`/hotwords/hotwords/history`,params);
+};
+
 

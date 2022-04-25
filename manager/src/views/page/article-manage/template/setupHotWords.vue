@@ -29,7 +29,7 @@
         </div>
         <Button @click="addSetItem">添加配置</Button>
       </FormItem>
-      <FormItem label="每日保存数量" prop="saveNum">
+      <FormItem label="每日持久化热词数量" prop="saveNum">
         <InputNumber :min="0" v-model="formValidate.saveNum" />
       </FormItem>
 
