@@ -21,6 +21,7 @@ const app = {
       path: '',
       name: 'home_index'
     }],
+    hotWords:[], //今日热词数据
     // 面包屑数组 左侧菜单
     menuList: [],
     tagsList: [...otherRouter.children], //这块是面包屑的内容不能删除
