@@ -3,7 +3,7 @@ import request, {Method} from '@/plugins/request.js';
 // 查询账户余额
 export function getMembersWallet () {
   return request({
-    url: '/buyer/passport/member/wallet',
+    url: '/buyer/wallet/wallet',
     method: Method.GET,
     needToken: true
   });
