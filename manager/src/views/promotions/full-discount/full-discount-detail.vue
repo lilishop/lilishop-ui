@@ -165,7 +165,7 @@
             </FormItem>
 
             <div>
-              <Button @click="$router.push({ name: 'full-discount' })">返回</Button>
+              <Button @click="$router.push({ name: 'promotions/full-discount' })">返回</Button>
             </div>
           </div>
         </div>
