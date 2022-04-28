@@ -24,7 +24,7 @@
                   {{ userForm.username }}
                 </FormItem>
                 <FormItem label="昵称：" prop="nickName">
-                  <Input v-model="userForm.nickName" style="width: 250px"/>
+                  <Input maxlength="20" v-model="userForm.nickName" style="width: 250px"/>
                 </FormItem>
                 <FormItem>
                   <Button

@@ -149,7 +149,7 @@
       right: 0;
       top: 0;
       height: 100%;
-      width: 260px;
+
 
       .options {
         .ivu-select-dropdown {
@@ -161,20 +161,6 @@
         }
       }
 
-      .language {
-        display: inline-block;
-        width: 30px;
-        padding: 18px 0;
-        text-align: center;
-        cursor: pointer;
-        vertical-align: middle;
-      }
-
-      .switch-theme-con {
-        display: inline-block;
-        width: 40px;
-        height: 100%;
-      }
 
       .message-con {
         display: inline-block;
@@ -204,15 +190,17 @@
 
       .user-dropdown {
         &-menu-con {
-          position: absolute;
-          right: 0;
-          top: 0;
-          height: 100%;
+
           .main-user-name {
             font-size: 14px;
             display: inline-block;
             cursor: pointer;
             margin-right: 5px;
+            width: 200px;
+            overflow: hidden;
+            word-wrap: normal;
+            white-space: nowrap;
+            text-overflow: ellipsis;
 
             vertical-align: middle;
             overflow: hidden;

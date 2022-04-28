@@ -60,18 +60,18 @@
             <div class="div-item-left">发票抬头：</div>
             <div class="div-item-right">
               {{
-                orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : "暂无"
+                orderInfo.receipt && orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : "暂无"
               }}
             </div>
           </div>
 
           <div
             class="div-item"
-            v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId"
+            v-if="orderInfo.order.needReceipt == true && orderInfo.receipt &&  orderInfo.receipt.taxpayerId"
           >
             <div class="div-item-left">发票税号：</div>
             <div class="div-item-right">
-              {{ orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : "暂无" }}
+              {{ orderInfo.receipt && orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : "暂无" }}
             </div>
           </div>
 
@@ -79,7 +79,7 @@
             <div class="div-item-left">发票内容：</div>
             <div class="div-item-right">
               {{
-                orderInfo.receipt.receiptContent
+                orderInfo.receipt && orderInfo.receipt.receiptContent
                   ? orderInfo.receipt.receiptContent
                   : "暂无"
               }}
@@ -90,7 +90,7 @@
             <div class="div-item-left">发票金额：</div>
             <div class="div-item-right">
               {{
-                orderInfo.receipt.receiptPrice
+                orderInfo.receipt && orderInfo.receipt.receiptPrice
                   ? orderInfo.receipt.receiptPrice
                   : "暂无" | unitPrice("￥")
               }}
@@ -100,7 +100,7 @@
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">是否开票：</div>
             <div class="div-item-right">
-              {{ orderInfo.receipt.receiptStatus == 0 ? "未开" : "已开" }}
+              {{ orderInfo.receipt?(orderInfo.receipt.receiptStatus == 0 ? "未开" : "已开"):"空" }}
             </div>
           </div>
         </div>
@@ -135,18 +135,18 @@
             <div class="div-item-left">发票抬头：</div>
             <div class="div-item-right">
               {{
-                orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : "暂无"
+                orderInfo.receipt && orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : "暂无"
               }}
             </div>
           </div>
 
           <div
             class="div-item"
-            v-if="orderInfo.order.needReceipt == true && orderInfo.receipt.taxpayerId"
+            v-if="orderInfo.order.needReceipt == true && orderInfo.receipt && orderInfo.receipt.taxpayerId"
           >
             <div class="div-item-left">发票税号：</div>
             <div class="div-item-right">
-              {{ orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : "暂无" }}
+              {{ orderInfo.receipt && orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : "暂无" }}
             </div>
           </div>
 
@@ -154,7 +154,7 @@
             <div class="div-item-left">发票内容：</div>
             <div class="div-item-right">
               {{
-                orderInfo.receipt.receiptContent
+                orderInfo.receipt && orderInfo.receipt.receiptContent
                   ? orderInfo.receipt.receiptContent
                   : "暂无"
               }}
@@ -165,7 +165,7 @@
             <div class="div-item-left">发票金额：</div>
             <div class="div-item-right">
               {{
-                orderInfo.receipt.receiptPrice
+                orderInfo.receipt && orderInfo.receipt.receiptPrice
                   ? orderInfo.receipt.receiptPrice
                   : "暂无" | unitPrice("￥")
               }}
@@ -175,7 +175,7 @@
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">是否开票：</div>
             <div class="div-item-right">
-              {{ orderInfo.receipt.receiptStatus == 0 ? "未开" : "已开" }}
+              {{ orderInfo.receipt?(orderInfo.receipt.receiptStatus == 0 ? "未开" : "已开"):"空" }}
             </div>
           </div>
 

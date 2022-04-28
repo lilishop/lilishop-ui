@@ -1,3 +1,13 @@
+.lock-screen-back {
+  border-radius: 50%;
+  z-index: -1;
+  box-shadow: 0 0 0 0 #667aa6 inset;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 3s;
+}
 
 .main {
   position: absolute;
@@ -133,11 +143,13 @@
     }
 
     .header-avator-con {
+      display: flex;
+      align-items: center;
       position: absolute;
       right: 0;
       top: 0;
       height: 100%;
-      width: 300px;
+
 
       .options {
         .ivu-select-dropdown {
@@ -149,20 +161,6 @@
         }
       }
 
-      .language {
-        display: inline-block;
-        width: 30px;
-        padding: 18px 0;
-        text-align: center;
-        cursor: pointer;
-        vertical-align: middle;
-      }
-
-      .switch-theme-con {
-        display: inline-block;
-        width: 40px;
-        height: 100%;
-      }
 
       .message-con {
         display: inline-block;
@@ -192,15 +190,17 @@
 
       .user-dropdown {
         &-menu-con {
-          position: absolute;
-          right: 0;
-          top: 0;
-          height: 100%;
+
           .main-user-name {
             font-size: 14px;
             display: inline-block;
             cursor: pointer;
             margin-right: 5px;
+            width: 200px;
+            overflow: hidden;
+            word-wrap: normal;
+            white-space: nowrap;
+            text-overflow: ellipsis;
 
             vertical-align: middle;
             overflow: hidden;
@@ -243,13 +243,14 @@
 
   .single-page-con {
     min-width: 740px;
-    left: 180px;
     position: relative;
+    left: 180px;
     top: 100px;
     right: 0;
     bottom: 0;
     height: calc(100% - 110px);
     width: calc(100% - 180px);
+    overflow: auto;
     background-color: #f0f0f0;
     z-index: 1;
     transition: left 0.3s;
@@ -267,6 +268,9 @@
   }
 }
 
+.taglist-moving-animation-move {
+  transition: transform 0.3s;
+}
 
 .logo-con {
   width: 100%;
@@ -286,8 +290,6 @@
 }
 
 .menu-bar::-webkit-scrollbar {
-  // width: 6px;
-  // height: 6px;
   display: none;
 }
 
@@ -300,6 +302,14 @@
   background: #fff;
 }
 
+.nav-item {
+  font-size: 14px;
+}
+
+.main-nav-menu {
+  bottom: 10px;
+  position: relative;
+}
 
 .loading-position {
   position: absolute;
