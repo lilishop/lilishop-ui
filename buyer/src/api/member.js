@@ -52,7 +52,7 @@ export function recharge (params) {
 // 提现
 export function withdrawalApply (params) {
   return request({
-    url: '/buyer/passport/member/wallet/withdrawal',
+    url: '/buyer/wallet/wallet/withdrawal',
     method: Method.POST,
     needToken: true,
     data: params
