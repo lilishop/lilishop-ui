@@ -47,7 +47,7 @@
       <h3>商品详情</h3>
       <div class="shop-item">
 
-        <div class="goods-item">
+        <div  @click="handleClickGoods(res.goodsId)" class="goods-item">
           <div class="goods-img">
             <img class="img" :src="res.goodsImage" alt="">
           </div>
@@ -106,6 +106,14 @@ export default {
     };
   },
   props: ["res"],
+  methods: {
+    handleClickGoods(id) {
+      this.$router.push({
+        query: { id },
+        path: "/goods/goods-info/goodsDetail",
+      });
+    },
+  }
 };
 </script>
 <style lang="scss" scoped>
@@ -129,6 +137,7 @@ h3 {
   display: flex;
   width: 100%;
   margin: 16px;
+  cursor: pointer;
 }
 .count-price {
   display: flex;

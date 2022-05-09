@@ -1,5 +1,4 @@
 <template>
-
   <div class="wrapper">
     <Affix :offset-top="100">
       <Card class="card fixed-bottom">
@@ -12,67 +11,89 @@
         <h4>交易概况</h4>
         <div class="flex">
           <div class="transactionList">
-            <div class="transaction-item" v-for="(item,index) in transactionList" :key="index">
-              <h4>{{item.label}}</h4>
-              <div class="transaction-card" v-if="item.label=='转换'">
-
+            <div
+              class="transaction-item"
+              v-for="(item, index) in transactionList"
+              :key="index"
+            >
+              <h4>{{ item.label }}</h4>
+              <div class="transaction-card" v-if="item.label == '转换'">
                 <div class="card-item">
                   <div class="card-item-label">访客数UV</div>
-                  <div class="card-item-value">{{overViewList.uvNum || 0}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.uvNum || 0 }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">下单转化率</div>
-                  <div class="card-item-value">{{overViewList.orderConversionRate || '0%'}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.orderConversionRate || "0%" }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">付款转化率</div>
-                  <div class="card-item-value">{{overViewList.paymentsConversionRate ||'0%'}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.paymentsConversionRate || "0%" }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">全店转化率</div>
-                  <div class="card-item-value">{{overViewList.overallConversionRate || '0%'}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.overallConversionRate || "0%" }}
+                  </div>
                 </div>
-
               </div>
-              <div class="transaction-card" v-if="item.label=='订单'">
-
+              <div class="transaction-card" v-if="item.label == '订单'">
                 <div class="card-item">
                   <div class="card-item-label">下单笔数</div>
-                  <div class="card-item-value">{{overViewList.orderNum || 0}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.orderNum || 0 }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">下单人数</div>
-                  <div class="card-item-value">{{overViewList.orderMemberNum || 0}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.orderMemberNum || 0 }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">下单金额</div>
-                  <div class="card-item-value">{{overViewList.orderAmount| unitPrice('￥') }}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.orderAmount | unitPrice("￥") }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">付款笔数</div>
-                  <div class="card-item-value">{{overViewList.paymentOrderNum  || 0}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.paymentOrderNum || 0 }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">付款人数</div>
-                  <div class="card-item-value">{{overViewList.paymentsNum || 0}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.paymentsNum || 0 }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">付款金额</div>
-                  <div class="card-item-value">{{overViewList.paymentAmount | unitPrice('￥')}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.paymentAmount | unitPrice("￥") }}
+                  </div>
                 </div>
-
               </div>
-              <div class="transaction-card" v-if="item.label=='退单'">
-
+              <div class="transaction-card" v-if="item.label == '退单'">
                 <div class="card-item">
                   <div class="card-item-label">退单笔数</div>
-                  <div class="card-item-value">{{overViewList.refundOrderNum || 0}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.refundOrderNum || 0 }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">退单金额</div>
-                  <div class="card-item-value">{{overViewList.refundOrderPrice || 0 | unitPrice('￥')}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.refundOrderPrice || 0 | unitPrice("￥") }}
+                  </div>
                 </div>
-
               </div>
             </div>
           </div>
@@ -82,46 +103,40 @@
               <div class="block">
                 <div class="box">
                   <span>访客数</span>
-                  <span>{{overViewList.uvNum  || 0}}</span>
+                  <span>{{ overViewList.uvNum || 0 }}</span>
                 </div>
               </div>
               <!-- 中 -->
               <div class="block">
                 <div class="box">
                   <span>下单笔数</span>
-                  <span>{{overViewList.orderNum  || 0}}</span>
+                  <span>{{ overViewList.orderNum || 0 }}</span>
                 </div>
               </div>
               <!-- 下 -->
               <div class="block">
                 <div class="box">
                   <span>付款笔数</span>
-                  <span>{{overViewList.paymentOrderNum  || 0 }}</span>
+                  <span>{{ overViewList.paymentOrderNum || 0 }}</span>
                 </div>
               </div>
 
               <!-- 线 -->
-              <div class="rightBorder">
-
-              </div>
-              <div class="leftTopBorder">
-
-              </div>
-              <div class="leftBottomBorder">
-
-              </div>
+              <div class="rightBorder"></div>
+              <div class="leftTopBorder"></div>
+              <div class="leftBottomBorder"></div>
               <!--数据 -->
               <div class="leftTopTips">
-                <div>下单转化率 </div>
-                <div>{{overViewList.orderConversionRate  || '0%' }}</div>
+                <div>下单转化率</div>
+                <div>{{ overViewList.orderConversionRate || "0%" }}</div>
               </div>
               <div class="leftBottomTips">
                 <div>付款转化率</div>
-                <div>{{overViewList.paymentsConversionRate  || '0%'}}</div>
+                <div>{{ overViewList.paymentsConversionRate || "0%" }}</div>
               </div>
               <div class="rightTips">
                 <div>整体转换率</div>
-                <div>{{overViewList.overallConversionRate  || '0%'}}</div>
+                <div>{{ overViewList.overallConversionRate || "0%" }}</div>
               </div>
             </div>
           </div>
@@ -132,37 +147,52 @@
     <Card class="card">
       <div>
         <h4>交易趋势</h4>
-        <div>
-
-        </div>
+        <div></div>
       </div>
 
       <div>
-
         <div id="orderChart"></div>
-
       </div>
     </Card>
 
     <Card class="card">
       <div>
         <h4>订退单统计</h4>
-        <div class="breadcrumb" style="margin-bottom:20px;">
-          <RadioGroup v-model="orderOrRefund" type="button" size="small" button-style="solid">
+        <div class="breadcrumb" style="margin-bottom: 20px">
+          <RadioGroup
+            v-model="orderOrRefund"
+            type="button"
+            size="small"
+            button-style="solid"
+          >
             <Radio :label="1">订单</Radio>
             <Radio :label="0">退单</Radio>
           </RadioGroup>
         </div>
         <div>
           <Table stripe :columns="columns" :data="data"></Table>
-
         </div>
-        <Page size="small" @on-change="(index)=>{refundParams.pageNumber = index}" @on-page-size-change="(size)=>{refundParams.pageSize= size,refundParams.pageNumber = 1}" class="mt_10" show-total show-sizer show-elevator :total="total" />
-
+        <Page
+          v-if="showRecords"
+          size="small"
+          @on-change="
+            (index) => {
+              refundParams.pageNumber = index;
+            }
+          "
+          @on-page-size-change="
+            (size) => {
+              (refundParams.pageSize = size), (refundParams.pageNumber = 1);
+            }
+          "
+          class="mt_10"
+          show-total
+          show-sizer
+          show-elevator
+          :total="total"
+        />
       </div>
-
     </Card>
-
   </div>
 </template>
 <script>
@@ -177,7 +207,7 @@ export default {
 
   data() {
     return {
-      orderOrRefund: 1, // 订单还是单
+      orderOrRefund: 1, // 订单还是退单
       total: 0, // 总数
       // 订单状态
       orderStatusList: {
@@ -190,13 +220,15 @@ export default {
         TAKE: "已完成",
       },
 
-      serviceTypeList: { // 服务类型
+      serviceTypeList: {
+        // 服务类型
         CANCEL: "取消",
         RETURN_GOODS: "退货",
         EXCHANGE_GOODS: "换货",
         RETURN_MONEY: "退款",
       },
-      serviceStatusList: { // 服务状态
+      serviceStatusList: {
+        // 服务状态
         APPLY: "申请售后",
         PASS: "通过售后",
         REFUSE: "拒绝售后",
@@ -215,7 +247,8 @@ export default {
 
       columns: [], // 定退单title
 
-      orderColumns: [ // 表头
+      orderColumns: [
+        // 表头
         {
           type: "expand",
           width: 50,
@@ -265,8 +298,29 @@ export default {
             );
           },
         },
+        {
+          title: "操作",
+          key: "action",
+          render: (h, params) => {
+            return h('Button',{
+              props:{
+                size:'small'
+              },
+              on:{
+                click: () => {
+                 const { sn } = params.row
+                  this.$router.push({
+                    query: {sn},
+                    path: this.orderOrRefund == 1 ? 'order-detail' : 'after-order-detail' + '?sn='+sn
+                  })
+                }
+              }
+            },'查看')
+          },
+        },
       ],
-      refundColumns: [ // 表头
+      refundColumns: [
+        // 表头
         {
           type: "expand",
           width: 50,
@@ -348,6 +402,26 @@ export default {
             );
           },
         },
+        {
+          title: "操作",
+          key: "action",
+          render: (h, params) => {
+            return h('Button',{
+              props:{
+                size:'small'
+              },
+              on:{
+                click: () => {
+                 const { sn } = params.row
+                  this.$router.push({
+                    query: {sn},
+                    path: this.orderOrRefund == 1 ? 'order-detail' : 'after-order-detail' + '?sn='+sn
+                  })
+                }
+              }
+            },'查看')
+          },
+        },
       ],
 
       // 交易概况
@@ -415,8 +489,6 @@ export default {
         storeId: "",
         year: "",
       },
-
-      refundIndex: 0,
       // 退单订单
       refundParams: {
         pageNumber: 1,
@@ -425,6 +497,7 @@ export default {
         storeId: "",
         year: "",
       },
+      showRecords:false,
 
       //
       //
@@ -432,15 +505,16 @@ export default {
   },
   watch: {
     refundParams: {
-      handler() {
-        if (this.refundIndex == 1) {
-          this.getOrderRefundList();
-        } else {
-          this.getOrderList();
-        }
+      handler(val) {
+        this.getOrderList();
       },
       deep: true,
       immediate: true,
+    },
+    orderOrRefund() {
+      this.showRecords = false;
+      this.$set(this.refundParams, "pageNumber", 1);
+      this.getOrderList();
     },
     orderParams: {
       handler() {
@@ -454,15 +528,6 @@ export default {
       },
       deep: true,
     },
-    orderOrRefund:{ // 订单还是退单
-      handler (val) {
-        if (val == 1) {
-          this.getOrderList();
-        } else {
-          this.getOrderRefundList();
-        }
-      }
-    }
   },
   methods: {
     // 订单图
@@ -470,10 +535,10 @@ export default {
       // 默认已经加载 legend-filter 交互
       let data = this.chartList;
 
-      data.forEach(item=>{
-        item.createTime =  item.createTime.split(" ")[0]
-        item.title="交易额"
-      })
+      data.forEach((item) => {
+        item.createTime = item.createTime.split(" ")[0];
+        item.title = "交易额";
+      });
       this.orderChart.data(data);
 
       this.orderChart.tooltip({
@@ -484,8 +549,8 @@ export default {
       this.orderChart
         .line()
         .position("createTime*price")
-         .label("price")
-         .color("title")
+        .label("price")
+        .color("title")
         .shape("smooth");
 
       this.orderChart
@@ -515,7 +580,6 @@ export default {
       const res = await API_Goods.getOrderOverView(this.overViewParams);
       if (res.success) {
         this.overViewList = res.result;
-
       }
     },
     // 实例化订单图表
@@ -538,20 +602,19 @@ export default {
     },
     // 统计相关订单统计
     async getOrderList() {
-      const res = await API_Goods.statisticsOrderList(this.refundParams);
-      if (res.success) {
-        this.data = res.result.records;
-        this.columns = this.orderColumns;
-        this.total = res.result.total;
+      let res;
+      if (this.orderOrRefund == 1) {
+        // 订单
+        res = await API_Goods.statisticsOrderList(this.refundParams);
+      } else {
+        // 退单
+        res = await API_Goods.statisticsOrderRefundList(this.refundParams);
       }
-    },
-
-    //  统计相关退单统计
-    async getOrderRefundList() {
-      const res = await API_Goods.statisticsOrderRefundList(this.refundParams);
       if (res.success) {
+        this.showRecords = true;
         this.data = res.result.records;
-        this.columns = this.refundColumns;
+        this.columns =
+          this.orderOrRefund == 1 ? this.orderColumns : this.refundColumns;
         this.total = res.result.total;
       }
     },
@@ -585,9 +648,9 @@ export default {
     background: $theme_color;
   }
 }
-.breadcrumb{
-  span{
-      cursor: pointer;
+.breadcrumb {
+  span {
+    cursor: pointer;
   }
 }
 

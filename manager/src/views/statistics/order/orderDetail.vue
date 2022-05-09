@@ -1,82 +1,91 @@
 <template>
   <div class="wrapper">
-
     <div class="shop">
       <h3>订单详情</h3>
       <div class="shop-item">
         <div class="label-item">
           <span>订单来源</span>
-          <span>{{res.clientType | clientTypeWay}}</span>
+          <span>{{ res.clientType | clientTypeWay }}</span>
         </div>
         <div class="label-item">
           <span>订单状态</span>
-          <span>{{orderStatusList[res.orderStatus]}}</span>
+          <span>{{ orderStatusList[res.orderStatus] }}</span>
         </div>
         <div class="label-item">
           <span>付款状态</span>
-          <span>{{res.payStatus == "UNPAID"
-                ? "未付款"
-                : res.payStatus == "PAID"
-                ? "已付款"
-                : ""}}</span>
+          <span>{{
+            res.payStatus == "UNPAID"
+              ? "未付款"
+              : res.payStatus == "PAID"
+              ? "已付款"
+              : ""
+          }}</span>
         </div>
         <div class="label-item">
           <span>支付时间</span>
-          <span>{{res.paymentTime || '暂无'}}</span>
+          <span>{{ res.paymentTime || "暂无" }}</span>
         </div>
         <div class="label-item">
           <span>支付方式</span>
-          <span>{{res.paymentMethod == "ONLINE" ? "在线支付" : ""
-            }}{{ res.paymentMethod == "ALIPAY" ? "支付宝" : res.paymentMethod == "BANK_TRANSFER" ? "银行卡" : "" || '暂无'}}</span>
+          <span
+            >{{ res.paymentMethod == "ONLINE" ? "在线支付" : ""
+            }}{{
+              res.paymentMethod == "ALIPAY"
+                ? "支付宝"
+                : res.paymentMethod == "BANK_TRANSFER"
+                ? "银行卡"
+                : "" || "暂无"
+            }}</span
+          >
         </div>
-
       </div>
       <div class="shop-item">
         <div class="label-item">
           <span>用户名</span>
-          <span>{{res.memberName}}</span>
+          <span>{{ res.memberName }}</span>
         </div>
         <div class="label-item">
           <span>店铺名称</span>
-          <span>{{res.storeName}}</span>
+          <span>{{ res.storeName }}</span>
         </div>
         <div class="label-item">
           <span>创建时间</span>
-          <span>{{res.createTime}}</span>
+          <span>{{ res.createTime }}</span>
         </div>
-        
       </div>
       <h3>商品详情</h3>
       <div class="shop-item">
-
-        <div class="goods-item" v-for="(item,index) in res.orderItems" :key="index">
+        <div
+          class="goods-item"
+          @click="handleClickGoods(item.goodsId)"
+          v-for="(item, index) in res.orderItems"
+          :key="index"
+        >
           <div class="goods-img">
-            <img class="img" :src="item.image" alt="">
+            <img class="img" :src="item.image" alt="" />
           </div>
           <div class="goods-title">
-            <div>{{item.name}}</div>
-            <div>{{'x'+item.num}}</div>
-            <div class="goods-price">{{res.flowPrice |  unitPrice('￥')}}</div>
-
+            <div>{{ item.name }}</div>
+            <div>{{ "x" + item.num }}</div>
+            <div class="goods-price">{{ res.flowPrice | unitPrice("￥") }}</div>
           </div>
-
         </div>
       </div>
       <div class="count-price">
         <div class="label-item">
           <span>总价格</span>
-          <span class="flowPrice">{{res.flowPrice |  unitPrice('￥')}}</span>
+          <span class="flowPrice">{{ res.flowPrice | unitPrice("￥") }}</span>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 <script>
 export default {
   data() {
     return {
-      orderStatusList: { // 订单状态
+      orderStatusList: {
+        // 订单状态
         UNDELIVERED: "待发货",
         UNPAID: "未付款",
         PAID: "已付款",
@@ -88,10 +97,17 @@ export default {
     };
   },
   props: ["res"],
+  methods: {
+    handleClickGoods(id) {
+      this.$router.push({
+        query: { id },
+        path: "/goods/goods-info/goodsDetail",
+      });
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
-
 .shop {
   padding: 10px 0;
   background: #fff;
@@ -113,6 +129,7 @@ h3 {
   display: flex;
   width: 100%;
   margin: 16px;
+  cursor: pointer;
 }
 .count-price {
   display: flex;
