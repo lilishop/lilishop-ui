@@ -246,6 +246,24 @@ export default {
 
           },
         },
+		{
+		  title: "平台优惠券补贴金额",
+		  key: "siteCouponCommission",
+		  render: (h, params) => {
+		    if(params.row.siteCouponCommission == null){
+		      return h(
+		        "div",
+		        "-"
+		      );
+		    }else{
+		      return h(
+		        "div",
+		        this.$options.filters.unitPrice(params.row.siteCouponCommission, "￥")
+		      );
+		    }
+		
+		  },
+		},
         {
           title: "分销金额",
           key: "distributionRebate",

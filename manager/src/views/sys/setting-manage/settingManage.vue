@@ -22,10 +22,10 @@ export default {
       show: true, // 是否显示
       setting: [
         //基础配置
-        // {
-        //   type: "BASE_SETTING",
-        //   name: "基础配置",
-        // },
+        {
+          type: "BASE_SETTING",
+          name: "基础配置",
+        },
         //商品设置
         {
           type: "GOODS_SETTING",
