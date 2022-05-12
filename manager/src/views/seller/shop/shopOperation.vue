@@ -125,14 +125,14 @@
                   style="width: 350px"
                 />
               </FormItem>
-              <Divider orientation="left">腾讯云智服</Divider>
+              <!-- <Divider orientation="left">腾讯云智服</Divider>
               <FormItem label="唯一标识">
                 <Input v-model="shopForm.yzfSign" clearable style="width: 350px" />
               </FormItem>
               <FormItem label="小程序唯一标识">
                 <Input v-model="shopForm.yzfMpSign" clearable style="width: 350px" />
               </FormItem>
-              <Spin fix v-if="loading"></Spin>
+              <Spin fix v-if="loading"></Spin> -->
             </div>
           </TabPane>
 
@@ -299,24 +299,24 @@
             </FormItem>
           </TabPane>
 
-          <TabPane label="配送信息" class="tab" name="send">
+          <!-- <TabPane label="配送信息" class="tab" name="send"> -->
             <!-- 遮罩层  -->
-            <FormItem label="达达编码" prop="ddCode">
+            <!-- <FormItem label="达达编码" prop="ddCode">
               <Input
                 v-model="shopForm.ddCode"
                 maxlength="20"
                 clearable
                 style="width: 200px"
               />
-            </FormItem>
-          </TabPane>
+            </FormItem> -->
+          <!-- </TabPane> -->
 
           <TabPane label="结算信息" class="tab" name="settlement">
             <Alert type="error"
               >已添加<span class="theme_color">{{ settlementCycle.length }}</span
               >个结算日，最多可添加5个结算日，当月不包含所设日期时，将会顺延到下一个结算日</Alert
             >
-            <FormItem label="结算周期">
+            <FormItem label="结算日期">
               <Tag
                 v-for="item in settlementCycle"
                 :key="item"
@@ -339,7 +339,7 @@
                 size="small"
                 v-if="addSettlementBtn && settlementCycle.length < 5"
                 style="margin-left: 8px"
-                >添加结算周期
+                >添加结算日期
               </Button>
               <Button
                 v-if="addSettlementConfirmBtn"

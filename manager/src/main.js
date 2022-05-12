@@ -20,6 +20,11 @@ import * as filters from '@/utils/filters' // global filter
 import liliDialog from '@/views/lili-dialog'
 import i18nBox from '@/views/lili-components/i18n-translate'
 import {md5} from '@/utils/md5.js';
+
+// 打印
+import Print from 'vue-print-nb';
+Vue.use(Print);
+
 Vue.config.devtools = true;
 Vue.config.productionTip = false
 const PC_URL = BASE.PC_URL; // 跳转买家端地址 pc端
