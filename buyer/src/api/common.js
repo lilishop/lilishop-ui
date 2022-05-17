@@ -92,3 +92,13 @@ export function getIMDetail () {
     method: Method.GET
   });
 }
+
+
+//获取图片logo
+export function getLogoImg(){
+  return request ({
+    url:`${commonUrl}/common/common/logo`,
+    method: Method.GET,
+    needToken: false
+  })
+}

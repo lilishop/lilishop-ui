@@ -432,15 +432,15 @@ export const result = [{
             component: "shop/shopSetting",
             children: null,
           },
-          {
-            name: "shopAddress",
-            level: 2,
-            type: 0,
-            title: "自提管理",
-            path: "shopAddress",
-            component: "shop/shopAddress",
-            children: null,
-          }
+          // {
+          //   name: "shopAddress",
+          //   level: 2,
+          //   type: 0,
+          //   title: "自提管理",
+          //   path: "shopAddress",
+          //   component: "shop/shopAddress",
+          //   children: null,
+          // }
         ]
       }
     ]

@@ -6,7 +6,8 @@
     <!-- 左侧菜单 -->
     <div class="sidebar-menu-con menu-bar">
       <div class="logo-con">
-        <img src="../assets/logo.png" key="max-logo" />
+        <!-- <img src="../assets/logo.png" key="max-logo" /> -->
+        <img :src="domainLogo" key="max-logo" />
       </div>
       <shrinkable-menu></shrinkable-menu>
     </div>
@@ -23,8 +24,17 @@
           <message-tip v-if="tipsMessage" :res="tipsMessage"></message-tip>
           <!-- 用户头像 -->
           <div class="user-dropdown-menu-con">
-            <Row type="flex" justify="end" align="middle" class="user-dropdown-innercon">
-              <Dropdown transfer trigger="hover" @on-click="handleClickUserDropdown">
+            <Row
+              type="flex"
+              justify="end"
+              align="middle"
+              class="user-dropdown-innercon"
+            >
+              <Dropdown
+                transfer
+                trigger="hover"
+                @on-click="handleClickUserDropdown"
+              >
                 <div class="dropList">
                   <span class="main-user-name">{{ userInfo.nickName }}</span>
                   <Icon type="md-arrow-dropdown" />
@@ -37,8 +47,12 @@
                   <DropdownItem name="personalCenter">{{
                     $t("userCenter")
                   }}</DropdownItem>
-                  <DropdownItem name="changePass">{{ $t("changePass") }}</DropdownItem>
-                  <DropdownItem name="loginOut" divided>{{ $t("logout") }}</DropdownItem>
+                  <DropdownItem name="changePass">{{
+                    $t("changePass")
+                  }}</DropdownItem>
+                  <DropdownItem name="loginOut" divided>{{
+                    $t("logout")
+                  }}</DropdownItem>
                 </DropdownMenu>
               </Dropdown>
             </Row>
@@ -69,7 +83,8 @@ import messageTip from "./main-components/message-tip.vue";
 import circleLoading from "@/views/my-components/lili/circle-loading.vue";
 import Cookies from "js-cookie";
 import util from "@/libs/util.js";
-import { getNoticePage, logout } from "@/api/index";
+import { getNoticePage, logout, getSetting } from "@/api/index";
+import {getLogo} from "@/api/common"
 
 var client;
 export default {
@@ -85,6 +100,7 @@ export default {
       userInfo: "", // 用户信息
       navType: 1, // nav类型
       tipsMessage: "", // 通知消息
+      domainLogo: "",
     };
   },
   computed: {
@@ -113,6 +129,31 @@ export default {
       if (currWidth <= 1200) {
         this.sliceNum = 2;
       }
+      //获取domainLogo
+      getSetting("BASE_SETTING").then((res) => {
+        if (res.success) {
+          //动态获取icon
+          this.setStore("icon", res.result.domainLogo);
+          this.domainLogo = res.result.domainLogo;
+          let link =
+            document.querySelector("link[rel*='icon']") ||
+            document.createElement("link");
+          link.type = "image/x-icon";
+          link.href = res.result.domainLogo;
+          link.rel = "shortcut icon";
+          document.getElementsByTagName("head")[0].appendChild(link);
+          //动态获取siteName
+          this.setStore("title", res.result.siteName);
+          window.document.title = res.result.siteName + " - 运营后台";
+        }
+      });
+      getLogo().then((res)=>{
+        if(res.success&&res.result.settingValue){
+          let data = JSON.parse(res.result.settingValue);
+
+          console.log(data);
+        }
+      })
       // 读取未读消息数
       getNoticePage({}).then((res) => {
         if (res.success) {

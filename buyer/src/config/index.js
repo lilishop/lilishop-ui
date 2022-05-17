@@ -1,5 +1,7 @@
+var storage = require('@/plugins/storage');
 module.exports = {
-  title: "lili-shop", //配置显示在浏览器标签的title、底部信息、部分信息展示的值
+  //title: "lili-shop", //配置显示在浏览器标签的title、底部信息、部分信息展示的值
+  title:storage.default.getItem('siteName'),
   icpCard: "", // icp证
   company: {
     href: "https://pickmall.cn",
