@@ -2,16 +2,14 @@
   <div>
     <!-- 统计 -->
     <div class="card">
-      <h4>
-        基本信息
-      </h4>
+      <h4>基本信息</h4>
       <div class="count-list flex">
         <div class="count-item" @click="navigateTo('managerGoods')">
           <div>
             <Icon class="icon" size="31" type="md-photos" />
           </div>
           <div>
-            <div class="counts">{{homeData.goodsNum ||0}}</div>
+            <div class="counts">{{ homeData.goodsNum || 0 }}</div>
             <div>商品数量</div>
           </div>
         </div>
@@ -20,30 +18,27 @@
             <Icon class="icon" size="31" type="md-person" />
           </div>
           <div>
-            <div class="counts">{{homeData.memberNum ||0}}</div>
+            <div class="counts">{{ homeData.memberNum || 0 }}</div>
             <div>会员数量</div>
           </div>
-
         </div>
         <div class="count-item" @click="navigateTo('orderList')">
           <div>
             <Icon class="icon" size="31" type="md-list" />
           </div>
           <div>
-            <div class="counts">{{homeData.orderNum ||0}}</div>
+            <div class="counts">{{ homeData.orderNum || 0 }}</div>
             <div>订单数量</div>
           </div>
-
         </div>
         <div class="count-item" @click="navigateTo('shopList')">
           <div>
             <Icon class="icon" size="31" type="ios-stats" />
           </div>
           <div>
-            <div class="counts">{{homeData.storeNum ||0}}</div>
+            <div class="counts">{{ homeData.storeNum || 0 }}</div>
             <div>店铺数量</div>
           </div>
-
         </div>
       </div>
     </div>
@@ -53,27 +48,29 @@
       <h4>今日待办</h4>
       <div class="todo-list flex">
         <div class="todo-item" @click="navigateTo('applyGoods')">
-          <div class="counts">{{$store.state.notices.goods || 0}}</div>
+          <div class="counts">{{ $store.state.notices.goods || 0 }}</div>
           <div>待审核商品</div>
         </div>
         <div class="todo-item" @click="navigateTo('shopAuth')">
-          <div class="counts">{{$store.state.notices.store|| 0}}</div>
+          <div class="counts">{{ $store.state.notices.store || 0 }}</div>
           <div>待审核店铺</div>
         </div>
         <div class="todo-item" @click="navigateTo('orderComplaint')">
-          <div class="counts">{{$store.state.notices.complain|| 0}}</div>
+          <div class="counts">{{ $store.state.notices.complain || 0 }}</div>
           <div>待审核投诉</div>
         </div>
         <div class="todo-item" @click="navigateTo('afterSaleOrder')">
-          <div class="counts">{{$store.state.notices.refund|| 0}}</div>
+          <div class="counts">{{ $store.state.notices.refund || 0 }}</div>
           <div>待审核售后</div>
         </div>
         <div class="todo-item">
-          <div class="counts">{{$store.state.notices.distributionCash|| 0}}</div>
+          <div class="counts">
+            {{ $store.state.notices.distributionCash || 0 }}
+          </div>
           <div>待审核分销提现</div>
         </div>
         <div class="todo-item" @click="navigateTo('accountStatementBill')">
-          <div class="counts">{{$store.state.notices.waitPayBill|| 0}}</div>
+          <div class="counts">{{ $store.state.notices.waitPayBill || 0 }}</div>
           <div>待审核分账</div>
         </div>
       </div>
@@ -82,84 +79,75 @@
     <!-- 今日，流量概括 -->
     <div class="card flow">
       <div class="flow-list flex">
-        <div class="flow-item ">
+        <div class="flow-item">
           <div class="flow-member">
             <div>当前在线人数</div>
             <span>
-              {{homeData.currentNumberPeopleOnline || 0}}
+              {{ homeData.currentNumberPeopleOnline || 0 }}
             </span>
           </div>
           <div class="flow-wrapper">
-            <h4>
-              流量概括
-            </h4>
+            <h4>流量概括</h4>
             <div class="card flow-box flex">
               <div class="flow-box-item">
-                <div>
-                  今日访客数
-                </div>
+                <div>今日访客数</div>
                 <div class="counts">
-
-                  {{homeData.todayUV || 0}}
+                  {{ homeData.todayUV || 0 }}
                 </div>
               </div>
               <div class="flow-box-item">
-                <div>
-                  昨日访客数
-                </div>
+                <div>昨日访客数</div>
                 <div class="counts">
-                  {{homeData.yesterdayUV || 0}}
+                  {{ homeData.yesterdayUV || 0 }}
                 </div>
               </div>
             </div>
 
             <div class="flow-splice flex">
               <div class="flow-box-splice">
-                <div>
-                  前七日访客数
-                </div>
+                <div>前七日访客数</div>
                 <div class="counts">
-                  {{homeData.lastSevenUV || 0}}
+                  {{ homeData.lastSevenUV || 0 }}
                 </div>
               </div>
               <div class="flow-box-splice">
-                <div>
-                  前三十日访客数
-                </div>
+                <div>前三十日访客数</div>
                 <div class="counts">
-                  {{homeData.lastThirtyUV || 0}}
+                  {{ homeData.lastThirtyUV || 0 }}
                 </div>
               </div>
             </div>
           </div>
         </div>
         <div class="today-box">
-          <h4> 今日概括</h4>
+          <h4>今日概括</h4>
           <div class="today-list flex">
             <div class="today-item">
               <div>今日订单数</div>
-              <span>{{homeData.todayOrderNum}}</span>
+              <span>{{ homeData.todayOrderNum }}</span>
             </div>
             <div class="today-item">
               <div>今日交易额</div>
-              <span v-if="homeData.todayOrderPrice">￥{{homeData.todayOrderPrice  | unitPrice}}</span>
+              <span v-if="homeData.todayOrderPrice"
+                >￥{{ homeData.todayOrderPrice | unitPrice }}</span
+              >
               <span v-else>￥0.00</span>
             </div>
             <div class="today-item">
               <div>今日新增店铺</div>
-              <span>{{homeData.todayStoreNum || 0}}</span>
+              <span>{{ homeData.todayStoreNum || 0 }}</span>
             </div>
             <div class="today-item">
               <div>今日新增会员数</div>
-              <span>{{homeData.todayMemberNum || 0}}</span>
+              <span>{{ homeData.todayMemberNum || 0 }}</span>
             </div>
             <div class="today-item">
               <div>今日上架商品数量</div>
-              <span>{{homeData.todayGoodsNum || 0}}</span>
+              <span>{{ homeData.todayGoodsNum || 0 }}</span>
             </div>
             <div class="today-item">
               <div>今日新增评论</div>
-              <span>{{homeData.todayMemberEvaluation || 0}}</span>
+              <span>{{ homeData.todayMemberEvaluation || 0 }}</span>
             </div>
           </div>
         </div>
@@ -174,7 +162,7 @@
       </div>
     </div>
     <!-- chart -->
-    <div class="charts  flex">
+    <div class="charts flex">
       <div class="chart-item">
         <h4>流量走势</h4>
         <div id="pvChart"></div>
@@ -188,16 +176,22 @@
     <!-- top10商品 -->
     <div class="card transform">
       <h4>热卖商品TOP10</h4>
-      <Table stripe :columns="tophotGoodsColumns" :data="topHotGoodsData"></Table>
+      <Table
+        stripe
+        :columns="tophotGoodsColumns"
+        :data="topHotGoodsData"
+      ></Table>
     </div>
 
     <!-- top10店铺 -->
     <div class="card transform">
       <h4>热卖店铺TOP10</h4>
-      <Table stripe :columns="tophotShopsColumns" :data="topHotShopsData"></Table>
-
+      <Table
+        stripe
+        :columns="tophotShopsColumns"
+        :data="topHotShopsData"
+      ></Table>
     </div>
-    
   </div>
 </template>
 
@@ -217,7 +211,7 @@ export default {
       // 测试数据
       test: {
         a: "test",
-        languages:[]
+        languages: [],
       },
       // 测试数据结束
       tophotShopsColumns: [
@@ -418,6 +412,7 @@ export default {
 
       let data = [...uv, ...pv];
 
+      console.log("pv", data);
       this.pvChart.data(data);
       this.pvChart.scale({
         activeQuantity: {
@@ -491,13 +486,31 @@ export default {
     initHistoryMemberChart() {
       // 默认已经加载 legend-filter 交互
       let data = this.chartList;
-
+      let num = [];
+      let lastNum = [];
       data.forEach((item) => {
-        item.title = "历史在线人数";
-        item.date = item.date.substring(5);
-      });
-      this.historyMemberChart.data(data);
+        num.push({
+          date: item.date.substring(5),
+          title: "最近48小时",
+          num: item.num,
+          res: item.num,
+        });
 
+        lastNum.push({
+          date: item.date.substring(5),
+          title: "历史记录",
+          lastNum: item.lastNum || 0,
+          res: item.lastNum || 0,
+        });
+      });
+      let params = [...num, ...lastNum];
+      this.historyMemberChart.data(params);
+      this.historyMemberChart.scale({
+        activeQuantity: {
+          range: [0, 1],
+          nice: true,
+        },
+      });
       this.historyMemberChart.tooltip({
         showCrosshairs: true,
         shared: true,
@@ -505,14 +518,15 @@ export default {
 
       this.historyMemberChart
         .line()
-        .position("date*num")
-        .color("title", ["#ffaa71"])
+        .position("date*res")
+        .color("title", ["#ffaa71", "#398AB9"])
+        .label("res")
         .shape("smooth");
-
       this.historyMemberChart
         .point()
-        .position("date*num")
-        .color("title", ["#ffaa71"])
+        .position("date*res")
+        .color("title", ["#ffaa71", "#398AB9"])
+        .label("res")
         .shape("circle");
       this.historyMemberChart.render();
     },

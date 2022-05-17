@@ -67,14 +67,14 @@
               prop="goodsUnit"
             >
               <Select v-model="baseInfoForm.goodsUnit" style="width: 100px">
-              <Scroll :on-reach-bottom="handleReachBottom" >
-                <Option
-                  v-for="(item, index) in goodsUnitList"
-                  :key="index"
-                  :value="item"
-                  >{{ item }}
-                </Option>
-              </Scroll>    
+                <Scroll :on-reach-bottom="handleReachBottom">
+                  <Option
+                    v-for="(item, index) in goodsUnitList"
+                    :key="index"
+                    :value="item"
+                    >{{ item }}
+                  </Option>
+                </Scroll>
               </Select>
             </FormItem>
             <FormItem
@@ -604,7 +604,7 @@ export default {
     };
     return {
       regular,
-      total:0,
+      total: 0,
       accessToken: "", //令牌token
       goodsParams: "",
       categoryId: "", // 商品分类第三级id
@@ -689,9 +689,9 @@ export default {
         value: [regular.REQUIRED, regular.VARCHAR60],
         templateId: [regular.REQUIRED],
       },
-      params:{
-        pageNumber:1,
-        pageSize:10
+      params: {
+        pageNumber: 1,
+        pageSize: 10,
       },
       skuInfoRules: {},
       /** 品牌列表 */
@@ -700,6 +700,7 @@ export default {
       shopCategory: [],
       /** 商品单位列表 */
       goodsUnitList: [],
+      initSkuTableData: [],
       ignoreColumn: [
         // 添加规格时需要忽略的参数
         "_index",
@@ -871,8 +872,8 @@ export default {
         }
       );
     },
-     // 页面触底
-    handleReachBottom(){
+    // 页面触底
+    handleReachBottom() {
       setTimeout(() => {
         if (this.params.pageNumber * this.params.pageSize <= this.total) {
           this.params.pageNumber++;
@@ -884,7 +885,7 @@ export default {
     GET_GoodsUnit() {
       API_GOODS.getGoodsUnitList(this.params).then((res) => {
         if (res.success) {
-          console.log(res)
+          console.log(res);
           this.goodsUnitList.push(...res.result.records.map((i) => i.name));
           this.total = res.result.total;
         }
@@ -957,7 +958,7 @@ export default {
     renderGoodsDetailSku(skuList) {
       let skus = [];
       let skusInfo = [];
-      skuList.map((e) => {
+      skuList.map((e, skuListIndex) => {
         let sku = {
           id: e.id,
           sn: e.sn,
@@ -965,6 +966,7 @@ export default {
           cost: e.cost,
           quantity: e.quantity,
           weight: e.weight,
+          _id: new Date().getTime() + skuListIndex, // 标识
         };
         e.specList.forEach((u) => {
           if (u.specName === "images") {
@@ -978,8 +980,10 @@ export default {
               skusInfo.push({
                 name: u.specName,
                 spec_id: u.specNameId,
+                _id: new Date().getTime(),
                 spec_values: [
                   {
+                    _id: new Date().getTime(),
                     id: u.specValueId,
                     name: u.specName,
                     value: u.specValue || "",
@@ -994,6 +998,7 @@ export default {
                 ) {
                   sk.spec_values.push({
                     id: u.specValueId,
+                    _id: new Date().getTime(),
                     name: u.specName,
                     value: u.specValue || "",
                   });
@@ -1059,8 +1064,15 @@ export default {
       }
       // 写入对象，下标，具体对象
       this.$set(this.skuInfo, this.skuInfo.length, {
-        spec_values: [],
+        spec_values: [
+          {
+            name: "规格项",
+            value: "规格项值" + this.skuInfo.length,
+            _id: new Date().getTime() + Math.random(0.1),
+          },
+        ],
         name: "规格名",
+        _id: new Date().getTime(),
       });
       this.renderTableData();
     },
@@ -1117,6 +1129,7 @@ export default {
         this.$set(item.spec_values, item.spec_values.length, {
           name: item.name,
           value: "",
+          _id: new Date().getTime(),
         });
         this.baseInfoForm.regeneratorSkuFlag = true;
         /**
@@ -1142,8 +1155,9 @@ export default {
      */
     renderTableData() {
       this.skuTableColumn = [];
-      this.skuTableData = [];
       let pushData = [];
+      this.initSkuTableData = this.skuTableData;
+      this.skuTableData = [];
       //渲染头部
       this.skuInfo.forEach((sku) => {
         // !sku.name ? (sku.name = "规格名") : "";
@@ -1188,8 +1202,6 @@ export default {
       //克隆所有渲染的数据
       let cloneTemp = cloneObj(this.skuInfo);
 
-      //数据清空一次
-      this.$set(this, "skuTableData", []);
       //判定 是否存在规格分组
       if (cloneTemp[0]) {
         //存放最终结果
@@ -1199,12 +1211,31 @@ export default {
           result.push({
             [cloneTemp[0].name]: specItem.value,
             images: this.baseInfoForm.goodsGalleryFiles || [],
+            _name: cloneTemp[0].name,
+            ...specItem,
           });
         });
         cloneTemp.splice(0, 1);
         result = this.specIterator(result, cloneTemp);
         this.skuTableData = result;
-        console.log(this.skuTableData);
+        this.skuTableData.forEach((item, index) => {
+          this.initSkuTableData.forEach((sku) => {
+            // 多个规格项 判断每个id数组通过赋值
+            if (sku._id.length && this.scalarArrayEquals(item._id, sku._id)) {
+              this.skuTableData[index] = {
+                ...item,
+                ...sku,
+              };
+            } else if (item.value == sku[item._name] || item._id == sku._id) {
+              // 	// 单个规格项如果id重复 赋值
+              this.skuTableData[index] = {
+                ...sku,
+                ...item,
+              };
+              // }
+            }
+          });
+        });
       }
     },
     /**
@@ -1217,10 +1248,13 @@ export default {
       if (cloneTemp.length > 0) {
         let table = [];
         result.forEach((resItem) => {
-          cloneTemp[0].spec_values.forEach((valItem) => {
+          cloneTemp[0].spec_values.forEach((valItem,i) => {
             let obj = cloneObj(resItem);
             obj[cloneTemp[0].name] = valItem.value;
-
+            obj._name = obj[cloneTemp[0].name];
+            if (obj._id) {
+              obj._id = `${obj._id},${obj._id + i}`.split(",");
+            }
             table.push(obj);
           });
         });
@@ -1355,6 +1389,10 @@ export default {
             delete sku._rowKey;
             delete sku.specNameId;
             delete sku.specValueId;
+            delete sku._id;
+            delete sku.name;
+            delete sku.value;
+            delete sku._name
             return sku;
           });
 
@@ -1496,7 +1534,7 @@ export default {
 </style>
 
 <style>
-.ivu-select .ivu-select-dropdown{
+.ivu-select .ivu-select-dropdown {
   overflow: hidden !important;
 }
 </style>
