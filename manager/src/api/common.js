@@ -23,3 +23,8 @@ export const postVerifyImg = (params) => {
 export const getLogo = ()=>{
   return getRequest (`${commonUrl}/common/common/logo`);
 };
+
+// 获取系统基础信息
+export const getSetsite = () => {
+  return getRequest(`${commonUrl}/common/common/site`);
+};

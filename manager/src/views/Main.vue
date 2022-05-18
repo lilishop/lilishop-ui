@@ -83,8 +83,8 @@ import messageTip from "./main-components/message-tip.vue";
 import circleLoading from "@/views/my-components/lili/circle-loading.vue";
 import Cookies from "js-cookie";
 import util from "@/libs/util.js";
-import { getNoticePage, logout, getSetting } from "@/api/index";
-import {getLogo} from "@/api/common"
+import { getNoticePage, logout } from "@/api/index";
+import { getLogo, getSetsite } from "@/api/common";
 
 var client;
 export default {
@@ -130,30 +130,33 @@ export default {
         this.sliceNum = 2;
       }
       //获取domainLogo
-      getSetting("BASE_SETTING").then((res) => {
-        if (res.success) {
-          //动态获取icon
-          this.setStore("icon", res.result.domainLogo);
-          this.domainLogo = res.result.domainLogo;
-          let link =
-            document.querySelector("link[rel*='icon']") ||
-            document.createElement("link");
-          link.type = "image/x-icon";
-          link.href = res.result.domainLogo;
-          link.rel = "shortcut icon";
-          document.getElementsByTagName("head")[0].appendChild(link);
-          //动态获取siteName
-          this.setStore("title", res.result.siteName);
-          window.document.title = res.result.siteName + " - 运营后台";
-        }
-      });
-      getLogo().then((res)=>{
-        if(res.success&&res.result.settingValue){
-          let data = JSON.parse(res.result.settingValue);
+      getSetsite().then((res) => {
+        const { domainLogo, siteName } = JSON.parse(res.result.settingValue);
+        // console.log(data, "ressss");
 
-          console.log(data);
-        }
-      })
+        //list:res.result.settingValue.join(",")
+        this.domainLogo = domainLogo;
+        //动态获取icon
+        this.setStore("icon", this.domainLogo);
+        // this.domainLogo = this.domainLogo;
+        let link =
+          document.querySelector("link[rel*='icon']") ||
+          document.ceateElement("link");
+        link.type = "image/x-icon";
+        link.href = this.domainLogo;
+        link.rel = "shortcut icon";
+        document.getElementsByTagName("head")[0].appendChild(link);
+        //动态获取siteName
+        this.setStore("title", siteName);
+        window.document.title = siteName + " - 运营后台";
+      }),
+        getLogo().then((res) => {
+          if (res.success && res.result.settingValue) {
+            let data = JSON.parse(res.result.settingValue);
+
+            console.log(data);
+          }
+        });
       // 读取未读消息数
       getNoticePage({}).then((res) => {
         if (res.success) {
@@ -199,7 +202,12 @@ export default {
       });
       if (!openpageHasTag) {
         //  解决关闭当前标签后再点击回退按钮会退到当前页时没有标签的问题
-        util.openNewPage(this, name, this.$route.params || {}, this.$route.query || {});
+        util.openNewPage(
+          this,
+          name,
+          this.$route.params || {},
+          this.$route.query || {}
+        );
       }
     },
     //宽度动态计算
@@ -217,7 +225,7 @@ export default {
     $route(to, from) {
       this.checkTag(to.name);
       localStorage.currentPageName = to.name;
-    }
+    },
   },
   mounted() {
     this.init();
