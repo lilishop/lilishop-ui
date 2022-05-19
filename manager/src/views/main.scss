@@ -196,7 +196,7 @@
             display: inline-block;
             cursor: pointer;
             margin-right: 5px;
-            width: 200px;
+            max-width: 200px;
             overflow: hidden;
             word-wrap: normal;
             white-space: nowrap;
@@ -207,11 +207,6 @@
 
             text-align: right;
           }
-        }
-
-        &-innercon {
-          height: 100%;
-          padding-right: 14px;
         }
       }
 

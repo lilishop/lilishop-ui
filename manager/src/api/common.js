@@ -19,3 +19,12 @@ export const getVerifyImg = (verificationEnums) => {
 export const postVerifyImg = (params) => {
   return postRequestWithNoToken(`${commonUrl}/common/common/slider/${params.verificationEnums}`, params);
 };
+//获取LOGO
+export const getLogo = ()=>{
+  return getRequest (`${commonUrl}/common/common/logo`);
+};
+
+// 获取系统基础信息
+export const getSetsite = () => {
+  return getRequest(`${commonUrl}/common/common/site`);
+};

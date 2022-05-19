@@ -1125,6 +1125,7 @@ export default {
           this.$Message.error("规格值不能大于10个！");
           return;
         }
+
         this.$set(item.spec_values, item.spec_values.length, {
           name: item.name,
           value: "",
@@ -1209,7 +1210,6 @@ export default {
       this.skuTableColumn = pushData;
       //克隆所有渲染的数据
       let cloneTemp = cloneObj(this.skuInfo);
-
       if (cloneTemp[0]) {
         //存放最终结果
         let result = [];
@@ -1352,6 +1352,15 @@ export default {
           }
         });
       }
+    },
+    // 判断相同数组的值
+    scalarArrayEquals(array1, array2) {
+      return (
+        array1.length === array2.length &&
+        array1.every(function (v, i) {
+          return v === array2[i];
+        })
+      );
     },
     /** 自动完成表单所需方法*/
     filterMethod(value, option) {

@@ -30,19 +30,19 @@ let externals = {
 
 // 使用CDN的内容
 let cdn = {
-  css: ["https://cdn.jsdelivr.net/npm/view-design@4.1.1/dist/styles/iview.css"],
+  css: ["https://cdn.pickmall.cn/cdn/iview.css"],
   js: [
     // vue must at first!
-    "https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js",
-    "https://cdn.jsdelivr.net/npm/vuex@3.1.2/dist/vuex.min.js",
-    "https://cdn.jsdelivr.net/npm/vue-router@3.1.3/dist/vue-router.min.js",
-    "https://cdn.jsdelivr.net/npm/axios@0.19.0/dist/axios.min.js",
-    "https://cdn.jsdelivr.net/npm/view-design@4.1.1/dist/iview.min.js",
-    "https://cdn.jsdelivr.net/npm/vue-lazyload@1.3.3/vue-lazyload.min.js",
-    "https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js",
-    "https://cdn.jsdelivr.net/npm/dplayer@1.25.0/dist/DPlayer.min.js",
-    "https://cdn.jsdelivr.net/npm/wangeditor@latest/dist/wangEditor.min.js",
-    "https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js",
+    "https://cdn.pickmall.cn/cdn/vue.min.js",
+    "https://cdn.pickmall.cn/cdn/vuex.min.js",
+    "https://cdn.pickmall.cn/cdn/vue-router.min.js",
+    "https://cdn.pickmall.cn/cdn/axios.min.js",
+    "https://cdn.pickmall.cn/cdn/iview.min.js",
+    "https://cdn.pickmall.cn/cdn/vue-lazyload.min.js",
+    "https://cdn.pickmall.cn/cdn/js.cookie.min.js",
+    "https://cdn.pickmall.cn/cdn/DPlayer.min.js",
+    "https://cdn.pickmall.cn/cdn/wangEditor.min.js",
+    "https://cdn.pickmall.cn/cdn/sockjs.min.js",
     "https://gw.alipayobjects.com/os/lib/antv/g2/4.1.24/dist/g2.min.js"
   ]
 };

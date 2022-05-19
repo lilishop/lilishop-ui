@@ -56,7 +56,10 @@ import { handleSubmit } from "./validate";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 export default {
   title: "基础设置",
-  props: ["res", "type"],
+  props: {
+    res:Object,
+    type:''
+  },
   components: {
     ossManage,
   },
@@ -104,6 +107,8 @@ export default {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {
           this.$Message.success("保存成功!");
+          localStorage.setItem("icon", this.formValidate.domainLogo);
+          window.document.title = this.formValidate.siteName + " - 运营后台";
         } else {
           this.$Message.error("保存失败!");
         }

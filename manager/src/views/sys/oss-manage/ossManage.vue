@@ -26,7 +26,7 @@
                 style="width: 200px"
               />
             </Form-item>
-           
+
             <Form-item label="上传时间">
               <DatePicker
                 v-model="selectDate"
@@ -189,7 +189,7 @@
       </Row>
     </Card>
 
-      
+
 
     <Modal
       :title="modalTitle"
@@ -589,10 +589,6 @@ export default {
         video: {
           url: v.url,
         },
-        danmaku: {
-          id: v.fileKey,
-          api: "https://api.prprpr.me/dplayer/",
-        },
       });
       this.file = v;
       this.file.msize = ((v.fileSize * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
@@ -815,6 +811,6 @@ export default {
       this.init();
     }
   },
- 
+
 };
 </script>

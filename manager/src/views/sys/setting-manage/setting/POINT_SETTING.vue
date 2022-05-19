@@ -8,13 +8,13 @@
         </Input>
 
       </FormItem>
-      <FormItem label="积分抵扣付款" prop="money">
+      <!-- <FormItem label="积分抵扣付款" prop="money">
         <Input type="number" v-model="formValidate.money">
           <span slot="prepend">积分</span>
           <span slot="append"> = 1 人民币</span>
         </Input>
 
-      </FormItem>
+      </FormItem> -->
 
       <FormItem label="注册账号" prop="register">
         <Input type="number" v-model="formValidate.register">

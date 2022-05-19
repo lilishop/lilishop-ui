@@ -105,3 +105,14 @@ export const getArticle = (params) => {
 export const delArticle = (ids) => {
     return deleteRequest(`/other/article/delByIds/${ids}`)
 }
+
+
+
+//获取隐私协议数据
+export const getPrivacy = (type) => {
+    return getRequest(`/other/article/type/${type}`)
+}
+//修改隐私协议数据
+export const updatePrivacy = (id,type,params) => {
+    return putRequest(`/other/article/updateArticle/${type}?id=${id}`, params, {"Content-Type": "application/json"})
+}

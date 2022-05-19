@@ -93,9 +93,9 @@
           <p class="item">
             <span class="label">退货地址：</span>
             <span class="info">
-               {{storeInfo.salesConsigneeName || storeInfo.salesConsigneeMobile || storeInfo.salesConsigneeAddressPath || storeInfo.salesConsigneeDetail?storeInfo.salesConsigneeName + storeInfo.salesConsigneeMobile +' '+ storeInfo.salesConsigneeAddressPath + storeInfo.salesConsigneeDetail:'暂未完善'}}
+               {{storeInfo.salesConsigneeName !== 'null' ? storeInfo.salesConsigneeName : '' || storeInfo.salesConsigneeMobile !=='null' ?storeInfo.salesConsigneeMobile:''|| storeInfo.salesConsigneeAddressPath !=='null'?storeInfo.salesConsigneeAddressPath:'' || storeInfo.salesConsigneeDetail !=='null'?storeInfo.salesConsigneeDetail:'' ?storeInfo.salesConsigneeName + storeInfo.salesConsigneeMobile +' '+ storeInfo.salesConsigneeAddressPath + storeInfo.salesConsigneeDetail:'暂未完善'}}
+               
             </span>
-
           </p>
           <p class="item">
             <span class="label">店铺定位：</span>
