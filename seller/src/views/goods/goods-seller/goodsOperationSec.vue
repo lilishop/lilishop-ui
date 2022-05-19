@@ -1066,13 +1066,13 @@ export default {
       this.$set(this.skuInfo, this.skuInfo.length, {
         spec_values: [
           {
-            name: "规格项",
-            value: "规格项值" + this.skuInfo.length,
-            _id: new Date().getTime() + Math.random(0.1),
+            name: '规格名'+this.skuInfo.length,
+            value: '',
+            ['_id'+this.skuInfo.length]: new Date().getTime() + Math.random(0.1),
           },
         ],
-        name: "规格名",
-        _id: new Date().getTime(),
+        name: '规格名'+this.skuInfo.length,
+        ['_id'+this.skuInfo.length]: new Date().getTime(),
       });
       this.renderTableData();
     },
@@ -1126,6 +1126,7 @@ export default {
           this.$Message.error("规格值不能大于10个！");
           return;
         }
+
         this.$set(item.spec_values, item.spec_values.length, {
           name: item.name,
           value: "",
@@ -1201,7 +1202,6 @@ export default {
       this.skuTableColumn = pushData;
       //克隆所有渲染的数据
       let cloneTemp = cloneObj(this.skuInfo);
-
       //判定 是否存在规格分组
       if (cloneTemp[0]) {
         //存放最终结果
@@ -1212,21 +1212,26 @@ export default {
             [cloneTemp[0].name]: specItem.value,
             images: this.baseInfoForm.goodsGalleryFiles || [],
             _name: cloneTemp[0].name,
+
             ...specItem,
           });
         });
         cloneTemp.splice(0, 1);
+
         result = this.specIterator(result, cloneTemp);
         this.skuTableData = result;
+        console.log(result)
         this.skuTableData.forEach((item, index) => {
           this.initSkuTableData.forEach((sku) => {
             // 多个规格项 判断每个id数组通过赋值
-            if (sku._id.length && this.scalarArrayEquals(item._id, sku._id)) {
-              this.skuTableData[index] = {
-                ...item,
-                ...sku,
-              };
-            } else if (item.value == sku[item._name] || item._id == sku._id) {
+
+            // if (sku._id.length && this.scalarArrayEquals(item._id, sku._id)) {
+            //   this.skuTableData[index] = {
+            //     ...item,
+            //     ...sku,
+            //   };
+            // } else
+             if (item.value == sku[item._name] || item._id == sku._id) {
               // 	// 单个规格项如果id重复 赋值
               this.skuTableData[index] = {
                 ...sku,
@@ -1248,12 +1253,14 @@ export default {
       if (cloneTemp.length > 0) {
         let table = [];
         result.forEach((resItem) => {
-          cloneTemp[0].spec_values.forEach((valItem,i) => {
+          cloneTemp[0].spec_values.forEach((valItem, i) => {
             let obj = cloneObj(resItem);
             obj[cloneTemp[0].name] = valItem.value;
             obj._name = obj[cloneTemp[0].name];
+
             if (obj._id) {
-              obj._id = `${obj._id},${obj._id + i}`.split(",");
+              // obj._id = `${obj._id},${cloneTemp[0].spec_values[i+1]?._id }`.split(",");
+
             }
             table.push(obj);
           });
@@ -1282,6 +1289,15 @@ export default {
           }
         });
       }
+    },
+    // 判断相同数组的值
+    scalarArrayEquals(array1, array2) {
+      return (
+        array1.length === array2.length &&
+        array1.every(function (v, i) {
+          return v === array2[i];
+        })
+      );
     },
     /** 自动完成表单所需方法*/
     filterMethod(value, option) {
@@ -1392,7 +1408,7 @@ export default {
             delete sku._id;
             delete sku.name;
             delete sku.value;
-            delete sku._name
+            delete sku._name;
             return sku;
           });
 
