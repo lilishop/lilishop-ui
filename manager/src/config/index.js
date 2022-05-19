@@ -13,6 +13,6 @@ module.exports = {
    */
   aMapKey: "b440952723253aa9fe483e698057bf7d",
   website: "https://www.pickmall.cn", //官网地址
-  enableCDN: false, //生产环境 是否启用cdn加载 vue等js
+  enableCDN: true, //生产环境 是否启用cdn加载 vue等js
   port: 10003, //端口
 };
