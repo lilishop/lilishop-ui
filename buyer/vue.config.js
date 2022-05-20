@@ -31,7 +31,7 @@ let cdn = {
     "https://cdn.pickmall.cn/cdn/vue.min.js",
     "https://cdn.pickmall.cn/cdn/vuex.min.js",
     "https://cdn.pickmall.cn/cdn/vue-router.min.js",
-    "https://cdn.pickmall.cn/cdn/axios.min.js",
+    "https://cdn.pickmall.cn/cdn/axios0.19.2.js",
     "https://cdn.pickmall.cn/cdn/iview.min.js",
     "https://cdn.pickmall.cn/cdn/js.cookie.min.js",
   ]
