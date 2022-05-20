@@ -27,6 +27,13 @@ import VueLazyload from "vue-lazyload";
 import * as filters from "@/utils/filters"; // global filter
 
 import { md5 } from "@/utils/md5.js";
+const { aMapSecurityJsCode } = require("@/config");
+// 高德安全密钥
+if (aMapSecurityJsCode) {
+  window._AMapSecurityConfig = {
+    securityJsCode: aMapSecurityJsCode,
+  };
+}
 Vue.config.devtools = true;
 Vue.config.productionTip = false;
 Vue.use(VueLazyload, {
@@ -84,7 +91,7 @@ new Vue({
   mounted() {
     // 初始化菜单
     util.initRouter(this);
-   
+
     this.currentPageName = this.$route.name;
     // 显示打开的页面的列表
     this.$store.commit("setOpenedList");

@@ -32,16 +32,7 @@ export function sendSms (params) {
     params
   });
 }
-/**
- * 获取logo图标
- */
-export function getLogo () {
-  return request({
-    url: `${commonUrl}/common/logo`,
-    method: Method.GET,
-    needToken: false
-  });
-}
+
 // 地区数据，用于三级联动
 export function getRegion (id) {
   return request({
@@ -95,9 +86,9 @@ export function getIMDetail () {
 
 
 //获取图片logo
-export function getLogoImg(){
+export function getBaseSite(){
   return request ({
-    url:`${commonUrl}/common/common/logo`,
+    url:`${commonUrl}/common/common/site`,
     method: Method.GET,
     needToken: false
   })

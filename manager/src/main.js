@@ -24,6 +24,14 @@ import {md5} from '@/utils/md5.js';
 // 打印
 import Print from 'vue-print-nb';
 Vue.use(Print);
+const { aMapSecurityJsCode } = require("@/config");
+// 高德安全密钥
+if (aMapSecurityJsCode) {
+  window._AMapSecurityConfig = {
+    securityJsCode: aMapSecurityJsCode,
+  };
+}
+
 
 Vue.config.devtools = true;
 Vue.config.productionTip = false

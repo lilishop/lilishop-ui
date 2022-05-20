@@ -84,7 +84,7 @@ import circleLoading from "@/views/my-components/lili/circle-loading.vue";
 import Cookies from "js-cookie";
 import util from "@/libs/util.js";
 import { getNoticePage, logout } from "@/api/index";
-import { getLogo, getSetsite } from "@/api/common";
+import { getBaseSite } from "@/api/common";
 
 var client;
 export default {
@@ -130,18 +130,15 @@ export default {
         this.sliceNum = 2;
       }
       //获取domainLogo
-      getSetsite().then((res) => {
+      getBaseSite().then((res) => {
         const { domainLogo, siteName } = JSON.parse(res.result.settingValue);
-        // console.log(data, "ressss");
 
-        //list:res.result.settingValue.join(",")
         this.domainLogo = domainLogo;
         //动态获取icon
         this.setStore("icon", this.domainLogo);
-        // this.domainLogo = this.domainLogo;
         let link =
           document.querySelector("link[rel*='icon']") ||
-          document.ceateElement("link");
+          document.createElement("link");
         link.type = "image/x-icon";
         link.href = this.domainLogo;
         link.rel = "shortcut icon";
@@ -150,13 +147,7 @@ export default {
         this.setStore("title", siteName);
         window.document.title = siteName + " - 运营后台";
       }),
-        getLogo().then((res) => {
-          if (res.success && res.result.settingValue) {
-            let data = JSON.parse(res.result.settingValue);
 
-            console.log(data);
-          }
-        });
       // 读取未读消息数
       getNoticePage({}).then((res) => {
         if (res.success) {
