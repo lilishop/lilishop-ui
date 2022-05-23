@@ -29,13 +29,12 @@
       </Col>
     </Row>
 
-   
+
   </div>
 </template>
 
 <script>
 import { login, userMsg } from "@/api/index";
-import { validateMobile } from "@/libs/validate";
 import Cookies from "js-cookie";
 import Header from "@/views/main-components/header";
 import Footer from "@/views/main-components/footer";
@@ -71,24 +70,6 @@ export default {
           {
             required: true,
             message: "密码不能为空",
-            trigger: "blur",
-          },
-        ],
-        imgCode: [
-          {
-            required: true,
-            message: "验证码不能为空",
-            trigger: "blur",
-          },
-        ],
-        mobile: [
-          {
-            required: true,
-            message: "手机号不能为空",
-            trigger: "blur",
-          },
-          {
-            validator: validateMobile,
             trigger: "blur",
           },
         ],
@@ -167,7 +148,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
- 
+
 
   .verify-con {
     position: absolute;
