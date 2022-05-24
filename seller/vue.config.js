@@ -33,6 +33,7 @@ let cdn = {
   js: [
     // vue must at first!
     "https://cdn.pickmall.cn/cdn/vue.min.js",
+    "https://cdn.pickmall.cn/cdn/vuex.min.js",
     "https://cdn.pickmall.cn/cdn/vue-router.min.js",
     "https://cdn.pickmall.cn/cdn/axios.min.js",
     "https://cdn.pickmall.cn/cdn/iview.min.js",
