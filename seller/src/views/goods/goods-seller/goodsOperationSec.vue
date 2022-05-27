@@ -984,7 +984,7 @@ export default {
       if (this.wholesaleData.length < 3) {
         this.wholesaleData.push({
           price:
-            Number(this.wholesaleData[this.wholesaleData.length - 1].price) - 1,
+            Number(this.wholesaleData[this.wholesaleData.length - 1].price) - 0.01,
           num:
             Number(this.wholesaleData[this.wholesaleData.length - 1].num) + 1,
           goodsId: this.goodsId,
