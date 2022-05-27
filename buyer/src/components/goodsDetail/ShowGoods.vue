@@ -76,33 +76,33 @@
             </div>
             <!-- 商品原价 -->
             <div class="item-price-row" v-else>
+
+              <!-- 批发价格 -->
+              <div v-if="wholesaleNum.length">
+                <div class="flex">
+                  <div class="item-price-title">
+                    价 &nbsp;&nbsp;&nbsp;&nbsp;格
+                  </div>
+
+                  <div v-for="(item,index) in wholesalePrice" :key="index" class="item-price item-num">{{
+                    item | unitPrice("￥")
+                  }}</div>
+                </div>
+                <div class="flex">
+                  <div class="item-price-title">起 批 量</div>
+                  <div v-for="(item,index) in wholesaleNum" :key="index" class="item-num item-price-num">{{item}}{{skuDetail.goodsUnit}}</div>
+
+                </div>
+              </div>
+
               <!-- 普通价格 -->
-              <div>
+              <div v-else>
                 <span class="item-price-title"
                   >价 &nbsp;&nbsp;&nbsp;&nbsp;格</span
                 >
                 <span class="item-price">{{
                   skuDetail.price | unitPrice("￥")
                 }}</span>
-              </div>
-              <!-- 批发价格 -->
-              <div>
-                <div class="flex">
-                  <div class="item-price-title">
-                    价 &nbsp;&nbsp;&nbsp;&nbsp;格
-                  </div>
-                  <div class="item-price item-num">{{
-                    skuDetail.price | unitPrice("￥")
-                  }}</div>
-                  <div class="item-price item-num">{{
-                    skuDetail.price | unitPrice("￥")
-                  }}</div>
-                </div>
-                <div class="flex">
-                  <div class="item-price-title">起 批 量</div>
-                  <div class="item-num item-price-num">20-39</div>
-                  <div class="item-num item-price-num">40-90</div>
-                </div>
               </div>
             </div>
             <!-- 优惠券展示 -->
@@ -285,6 +285,7 @@ export default {
     detail: {
       handler(val) {
         this.skuDetail = val.data;
+        this.wholesaleList = val.wholesaleList
         this.swiperGoodsImg();
       },
       deep: true,
@@ -293,6 +294,7 @@ export default {
   },
   data() {
     return {
+      wholesaleList:[],
       count: 1, // 商品数量
       imgIndex: 0, // 展示图片下标
       currentSelceted: [], // 当前商品sku
@@ -311,9 +313,18 @@ export default {
       loading: false, // 立即购买loading
       loading1: false, // 加入购物车loading
       isCollected: false, // 是否收藏
+
     };
   },
   components: { PicZoom, Promotion },
+  computed: {
+    wholesalePrice(key){
+      return this.wholesaleList.length ? this.wholesaleList.map(item=>{ return item.price }) :[]
+    },
+    wholesaleNum(key){
+      return this.wholesaleList.length ? this.wholesaleList.map(item=>{ return item.num }) :[]
+    }
+  },
   methods: {
     select(index, value) {
       // 选择规格
