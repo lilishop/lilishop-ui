@@ -110,9 +110,6 @@ export default {
     },
     // 点击规格
     targetClickSku(val) {
-      // {skuId,goodId}
-      console.log("%c 规格信息", "color:green");
-      console.log(val);
       this.getGoodsDetail(val);
     },
     // 获取商品详情

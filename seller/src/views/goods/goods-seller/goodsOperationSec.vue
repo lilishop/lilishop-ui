@@ -86,6 +86,7 @@
                 type="button"
                 v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'"
                 button-style="solid"
+                @on-change="renderTableData(skuTableData)"
                 v-model="baseInfoForm.salesModel"
               >
                 <Radio title="零售型" label="RETAIL">零售型</Radio>
@@ -101,6 +102,82 @@
                   <span>虚拟型</span>
                 </Radio>
               </RadioGroup>
+            </FormItem>
+            <FormItem
+              class="form-item-view-el"
+              label="销售规则"
+              prop="wholesaleRule"
+              v-if="baseInfoForm.salesModel == 'WHOLESALE'"
+            >
+              <div class="form-item-view-wholesale">
+                <div>
+                  <Table
+                    border
+                    :columns="wholesaleColumns"
+                    :data="wholesaleData"
+                  >
+                    <template slot-scope="{ row, index }" slot="wholesaleNum">
+                      <div>
+                        <Input
+                          v-model="wholesaleData[index].num"
+                          type="number"
+                          min="1"
+                          number
+                          @on-blur="checkWholesaleNum(index)"
+                        >
+                          <span slot="append">{{
+                            baseInfoForm.goodsUnit || ""
+                          }}</span>
+                        </Input>
+                      </div>
+                    </template>
+                    <template slot-scope="{ row, index }" slot="wholesalePrice">
+                      <div
+                        style="
+                          display: flex;
+                          justify-content: space-between;
+                          align-items: center;
+                        "
+                      >
+                        <Input
+                          v-model="wholesaleData[index].price"
+                          type="number"
+                          number
+                          style="width: 190px"
+                          min="1"
+                          @on-blur="checkWholesalePrice(index)"
+                        >
+                          <span slot="append">元</span>
+                        </Input>
+                        <Button
+                          type="error"
+                          size="small"
+                          style="margin-left: 5px"
+                          v-if="index > 0"
+                          @click="handleDeleteWholesaleData(index)"
+                          >删除</Button
+                        >
+                      </div>
+                    </template>
+                  </Table>
+
+                  <Button
+                    v-if="wholesaleData.length < 3"
+                    style="margin-top: 10px"
+                    icon="md-add"
+                    @click="handleAddWholesaleData()"
+                  >
+                    添加价格区间
+                  </Button>
+                </div>
+                <div class="form-item-view-wholesale-preview">
+                  <Table
+                    border
+                    :columns="wholesalePreviewColumns"
+                    :data="wholesaleData"
+                  ></Table>
+                </div>
+              </div>
             </FormItem>
           </div>
           <h4>商品规格及图片</h4>
@@ -268,7 +345,6 @@
                   规格详细
                   <div slot="content">
                     <div slot="content">
-                      <!-- #TODO 此处有待优化  -->
                       <Table
                         class="mt_10"
                         :columns="skuTableColumn"
@@ -298,7 +374,9 @@
                             v-model="row.weight"
                             placeholder="请输入重量"
                             @on-change="updateSkuTable(row, 'weight')"
-                          />
+                          >
+                            <span slot="append">kg</span>
+                          </Input>
                         </div>
                         <template slot-scope="{ row }" slot="quantity">
                           <Input
@@ -306,7 +384,11 @@
                             v-model="row.quantity"
                             placeholder="请输入库存"
                             @on-change="updateSkuTable(row, 'quantity')"
-                          />
+                          >
+                            <span slot="append">{{
+                              baseInfoForm.goodsUnit || ""
+                            }}</span>
+                          </Input>
                         </template>
                         <template slot-scope="{ row }" slot="cost">
                           <Input
@@ -314,7 +396,9 @@
                             v-model="row.cost"
                             placeholder="请输入成本价"
                             @on-change="updateSkuTable(row, 'cost')"
-                          />
+                          >
+                            <span slot="append">元</span>
+                          </Input>
                         </template>
                         <template slot-scope="{ row }" slot="price">
                           <Input
@@ -322,7 +406,39 @@
                             v-model="row.price"
                             placeholder="请输入价格"
                             @on-change="updateSkuTable(row, 'price')"
-                          />
+                          >
+                            <span slot="append">元</span>
+                          </Input>
+                        </template>
+                        <template slot-scope="{ row }" slot="wholePrice0">
+                          <Input
+                            v-if="wholesaleData[0]"
+                            clearable
+                            disabled
+                            v-model="wholesaleData[0].price"
+                          >
+                            <span slot="append">元</span>
+                          </Input>
+                        </template>
+                        <template slot-scope="{ row }" slot="wholePrice1">
+                          <Input
+                            v-if="wholesaleData[1]"
+                            clearable
+                            disabled
+                            v-model="wholesaleData[1].price"
+                          >
+                            <span slot="append">元</span>
+                          </Input>
+                        </template>
+                        <template slot-scope="{ row }" slot="wholePrice2">
+                          <Input
+                            v-if="wholesaleData[2]"
+                            clearable
+                            disabled
+                            v-model="wholesaleData[2].price"
+                          >
+                            <span slot="append">元</span>
+                          </Input>
                         </template>
                         <template slot-scope="{ row }" slot="images">
                           <Button @click="editSkuPicture(row)">编辑图片</Button>
@@ -444,6 +560,19 @@
                     >{{ item.name }}
                   </Option>
                 </Select>
+              </FormItem>
+              <FormItem
+                v-if="baseInfoForm.salesModel == 'WHOLESALE'"
+                class="form-item-view-el"
+                label="商品重量"
+                prop="weight"
+              >
+                <Input
+                  v-model="baseInfoForm.weight"
+                  placeholder="请输入商品重量"
+                >
+                  <span slot="append">kg</span></Input
+                >
               </FormItem>
             </div>
             <h4>其他信息</h4>
@@ -586,30 +715,6 @@ export default {
         }
       }, 1000);
     };
-    // 表单验证项，商品编号
-    const checkSn = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error("商品编号不能为空"));
-      } else if (!/^[a-zA-Z0-9_\\-]+$/g.test(value)) {
-        callback(new Error("请输入数字、字母、下划线或者中划线"));
-      } else if (value.length > 30) {
-        callback(new Error("商品编号长度不能大于30"));
-      } else {
-        callback();
-      }
-    };
-    // 表单验证项，商品重量
-    const checkWeight = (rule, value, callback) => {
-      if (!value && typeof value !== "number") {
-        callback(new Error("重量不能为空"));
-      } else if (!regular.money.test(value)) {
-        callback(new Error("请输入正整数或者两位小数"));
-      } else if (parseFloat(value) > 99999999) {
-        callback(new Error("商品重量设置超过上限值"));
-      } else {
-        callback();
-      }
-    };
     return {
       regular,
       total: 0,
@@ -633,6 +738,44 @@ export default {
       showSkuPicture: false,
       //选择的sku
       selectedSku: {},
+      wholesalePreviewColumns: [
+        {
+          title: "销售规则",
+          width: 300,
+          render: (h, params) => {
+            let guide =
+              "当商品购买数量 ≥" +
+              params.row.num +
+              " 时，售价为 ￥" +
+              params.row.price +
+              " /" +
+              this.baseInfoForm.goodsUnit;
+            return h("div", guide);
+          },
+        },
+      ],
+      wholesaleColumns: [
+        {
+          title: "购买数量",
+          key: "num",
+          align: "center",
+          slot: "wholesaleNum",
+        },
+        {
+          title: "商品单价",
+          key: "price",
+          align: "center",
+          width: "280px",
+          slot: "wholesalePrice",
+        },
+      ],
+      wholesaleData: [
+        {
+          num: 0,
+          price: 0,
+          goodsId: this.goodsId,
+        },
+      ],
       /** 发布商品基本参数 */
       baseInfoForm: {
         salesModel: "RETAIL",
@@ -697,6 +840,7 @@ export default {
         name: [regular.REQUIRED, regular.VARCHAR5],
         value: [regular.REQUIRED, regular.VARCHAR60],
         templateId: [regular.REQUIRED],
+        weight: [regular.REQUIRED],
       },
       params: {
         pageNumber: 1,
@@ -829,6 +973,68 @@ export default {
         this.previewPicture = file.url;
       }
     },
+    handleAddWholesaleData() {
+      if (
+        this.wholesaleData.length === 1 &&
+        (this.wholesaleData[0].price <= 0 || this.wholesaleData[0].num <= 0)
+      ) {
+        this.$Message.error("请输入正确的销售规则");
+        return;
+      }
+      if (this.wholesaleData.length < 3) {
+        this.wholesaleData.push({
+          price:
+            Number(this.wholesaleData[this.wholesaleData.length - 1].price) - 1,
+          num:
+            Number(this.wholesaleData[this.wholesaleData.length - 1].num) + 1,
+          goodsId: this.goodsId,
+        });
+      }
+      this.renderTableData(this.skuTableData);
+    },
+    handleDeleteWholesaleData(index) {
+      this.wholesaleData.splice(index, 1);
+      this.renderTableData(this.skuTableData);
+    },
+    checkWholesaleNum(index) {
+      if (this.wholesaleData[index].num < 0) {
+        this.$Message.error("购买数量必须大于0");
+        this.wholesaleData[index].num = 0;
+        return;
+      }
+      if (
+        index > 0 &&
+        this.wholesaleData[index - 1].num >= this.wholesaleData[index].num
+      ) {
+        this.$Notice.error({
+          title: "在批发模式的销售规则中",
+          desc: "下一个购买数量必须大于上一个购买数量",
+          duration: 5,
+        });
+        this.wholesaleData[index].num = this.wholesaleData[index - 1].num + 1;
+      }
+      this.renderTableData(this.skuTableData);
+    },
+    checkWholesalePrice(index) {
+      if (this.wholesaleData[index].price < 0) {
+        this.$Message.error("商品单价必须大于0");
+        this.wholesaleData[index].price = 0;
+        return;
+      }
+      if (
+        index > 0 &&
+        this.wholesaleData[index - 1].price <= this.wholesaleData[index].price
+      ) {
+        this.$Notice.error({
+          title: "在批发模式的销售规则中",
+          desc: "下一个商品单价必须小于上一个商品单价",
+          duration: 5,
+        });
+        this.wholesaleData[index].price =
+          this.wholesaleData[index - 1].price - 0.01;
+      }
+      this.renderTableData(this.skuTableData);
+    },
     // 商品图片上传成功
     handleSuccessGoodsPicture(res, file) {
       if (file.response) {
@@ -946,6 +1152,17 @@ export default {
             let files = { url: i };
             return files;
           });
+      }
+
+      if (
+        response.result.wholesaleList &&
+        response.result.wholesaleList.length > 0
+      ) {
+        this.wholesaleData = response.result.wholesaleList;
+      }
+
+      if (response.result.salesModel === "WHOLESALE") {
+        this.baseInfoForm.weight = response.result.skuList[0].weight;
       }
 
       this.Get_SkuInfoByCategory(this.categoryId);
@@ -1178,28 +1395,46 @@ export default {
         });
       });
 
-      this.baseInfoForm.goodsType != "VIRTUAL_GOODS"
+      // 有成本价和价格的情况
+      this.baseInfoForm.salesModel !== "WHOLESALE"
+        ? pushData.push(
+            {
+              title: "成本价",
+              slot: "cost",
+            },
+            {
+              title: "价格",
+              slot: "price",
+            }
+          )
+        : "";
+
+      if (this.baseInfoForm.salesModel === "WHOLESALE" && this.wholesaleData) {
+        this.wholesaleData.forEach((item, index) => {
+          pushData.push({
+            title: "购买量 ≥ " + item.num,
+            slot: "wholePrice" + index,
+          });
+        });
+      }
+
+      // 有重量的情况
+      this.baseInfoForm.goodsType != "VIRTUAL_GOODS" &&
+      this.baseInfoForm.salesModel !== "WHOLESALE"
         ? pushData.push({
             title: "重量",
             slot: "weight",
           })
         : "";
+
       pushData.push(
-        {
-          title: "货号",
-          slot: "sn",
-        },
         {
           title: "库存",
           slot: "quantity",
         },
         {
-          title: "成本价",
-          slot: "cost",
-        },
-        {
-          title: "价格",
-          slot: "price",
+          title: "货号",
+          slot: "sn",
         },
         {
           title: "图片",
@@ -1266,7 +1501,11 @@ export default {
           cloneTemp[0].spec_values.forEach((valItem, _index) => {
             let obj = cloneObj(resItem);
             // 判断已存在数据数量是否大于渲染数据数量（认为是在编辑原存在数据的规格值）且规格值不为空且存在已存在数据，如符合条件，则认为为修改已存在数据
-            if (skus.length > result.length && valItem.value !== "" && skus[findIndex]) {
+            if (
+              skus.length > result.length &&
+              valItem.value !== "" &&
+              skus[findIndex]
+            ) {
               obj = cloneObj(skus[findIndex]);
             }
             let emptyFlag = false;
@@ -1320,7 +1559,11 @@ export default {
             }
 
             // 如原存在数据大于渲染数据（认为是在编辑原存在数据的规格值），且存在已存在数据，且规格值不为空。则将原数据索引后移1位
-            if (skus.length > result.length && (skus[findIndex] && valItem.value !== "")) {
+            if (
+              skus.length > result.length &&
+              skus[findIndex] &&
+              valItem.value !== ""
+            ) {
               findIndex++;
             }
 
@@ -1441,9 +1684,18 @@ export default {
     },
     /**  添加商品 **/
     save() {
-      // this.submitLoading = true;
+      this.submitLoading = true;
       this.$refs["baseInfoForm"].validate((valid) => {
         if (valid) {
+          if (this.baseInfoForm.salesModel === "WHOLESALE") {
+            for (let i = 0; i < this.wholesaleData.length; i++) {
+              this.checkWholesaleNum(i);
+              this.checkWholesalePrice(i);
+              this.wholesaleData[i].goodsId = this.goodsId;
+            }
+            this.baseInfoForm.wholesaleList = this.wholesaleData;
+          }
+          this.baseInfoForm.goodsId = this.goodsId;
           let submit = JSON.parse(JSON.stringify(this.baseInfoForm));
           if (
             submit.goodsGalleryFiles &&
@@ -1474,6 +1726,9 @@ export default {
             };
             if (sku.weight) {
               skuCopy.weight = sku.weight;
+            }
+            if (this.baseInfoForm.weight) {
+              skuCopy.weight = this.baseInfoForm.weight;
             }
             if (sku.id) {
               skuCopy.id = sku.id;
@@ -1564,6 +1819,9 @@ export default {
       });
     },
     SAVE_DRAFT_GOODS() {
+      if (this.baseInfoForm.salesModel === "WHOLESALE") {
+        this.baseInfoForm.wholesaleList = this.wholesaleData;
+      }
       // 保存模板
       API_GOODS.saveDraftGoods(this.baseInfoForm).then((res) => {
         if (res.success) {
