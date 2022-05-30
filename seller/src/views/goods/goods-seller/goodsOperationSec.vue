@@ -984,7 +984,8 @@ export default {
       if (this.wholesaleData.length < 3) {
         this.wholesaleData.push({
           price:
-            Number(this.wholesaleData[this.wholesaleData.length - 1].price) - 0.01,
+            Number(this.wholesaleData[this.wholesaleData.length - 1].price) -
+            0.01,
           num:
             Number(this.wholesaleData[this.wholesaleData.length - 1].num) + 1,
           goodsId: this.goodsId,
@@ -1459,7 +1460,7 @@ export default {
               cost: skus[index].cost,
               price: skus[index].price,
               [cloneTemp[0].name]: specItem.value,
-              images: this.baseInfoForm.goodsGalleryFiles || [],
+              images: skus[index].images || this.baseInfoForm.goodsGalleryFiles || [],
             };
             if (specItem.value !== "") {
               obj.id = skus[index].id;
