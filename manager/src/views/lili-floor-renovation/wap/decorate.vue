@@ -455,6 +455,7 @@ export default {
     },
     // 打开图片选择器
     liliDialogFlag(flag) {
+      this.$refs.liliDialog.clearGoodsSelected()
       this.$refs.liliDialog.goodsFlag = flag;
       this.$refs.liliDialog.flag = true;
     },
