@@ -122,7 +122,16 @@
                   "
                 />
                 <div>
-                  <p>{{ goods.goodsSku.goodsName }}</p>
+                  <p>
+                    {{ goods.goodsSku.goodsName }}
+                  </p>
+                  <p><Tag
+                    v-if="goods.goodsSku.salesModel === 'WHOLESALE'"
+                    class="goods-show-tag"
+                    color="purple"
+                  >
+                    批发商品
+                  </Tag></p>
                   <template
                     v-for="(promotion, promotionIndex) in goods.promotions"
                   >
