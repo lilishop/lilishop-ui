@@ -1,20 +1,44 @@
 <template>
   <div class="layout">
     <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
+
       <FormItem label="endPoint" prop="endPoint">
-        <Input v-model="formValidate.endPoint" />
+        <RadioGroup v-model="formValidate.type" type="button">
+          <Radio label="ALI_OSS">阿里OSS</Radio>
+          <Radio label="MINIO">MINIO</Radio>
+        </RadioGroup>
       </FormItem>
-      <FormItem label="bucketName" class="label-item" prop="bucketName">
-        <Input v-model="formValidate.bucketName" />
+      <!--      阿里云存储-->
+      <FormItem v-if="formValidate.type==='ALI_OSS'" label="endPoint" prop="endPoint">
+        <Input v-model="formValidate.endPoint"/>
       </FormItem>
-      <FormItem label="picLocation" prop="bucketName">
-        <Input v-model="formValidate.picLocation" />
+      <FormItem v-if="formValidate.type==='ALI_OSS'" label="bucketName" class="label-item" prop="bucketName">
+        <Input v-model="formValidate.bucketName"/>
       </FormItem>
-      <FormItem label="accessKeyId" prop="accessKeyId">
-        <Input v-model="formValidate.accessKeyId" />
+      <FormItem v-if="formValidate.type==='ALI_OSS'" label="picLocation" prop="bucketName">
+        <Input v-model="formValidate.picLocation"/>
       </FormItem>
-      <FormItem label="accessKeySecret" prop="accessKeySecret">
-        <Input v-model="formValidate.accessKeySecret" />
+      <FormItem v-if="formValidate.type==='ALI_OSS'" label="accessKeyId" prop="accessKeyId">
+        <Input v-model="formValidate.accessKeyId"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='ALI_OSS'" label="accessKeySecret" prop="accessKeySecret">
+        <Input v-model="formValidate.accessKeySecret"/>
+      </FormItem>
+
+
+      <!--      MINIO存储-->
+
+      <FormItem v-if="formValidate.type==='MINIO'" label="endpoint" prop="m_endpoint">
+        <Input v-model="formValidate.m_endpoint"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='MINIO'" label="accessKey" class="label-item" prop="m_accessKey">
+        <Input v-model="formValidate.m_accessKey"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='MINIO'" label="secretKey" prop="bucketName">
+        <Input v-model="formValidate.m_secretKey"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='MINIO'" label="bucketName" prop="accessKeyId">
+        <Input v-model="formValidate.m_bucketName"/>
       </FormItem>
       <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
@@ -24,18 +48,24 @@
   </div>
 </template>
 <script>
-import { setSetting } from "@/api/index";
-import { handleSubmit } from "./validate";
+import {setSetting} from "@/api/index";
+import {handleSubmit} from "./validate";
+
 export default {
   data() {
     return {
       ruleValidate: {}, // 验证规则
       formValidate: { // 表单数据
+        type: "",
         accessKeyId: "",
         accessKeySecret: "",
         bucketName: "",
         picLocation: "",
         endPoint: "",
+        m_endpoint: "",
+        m_accessKey: "",
+        m_secretKey: "",
+        m_bucketName: "",
       },
     };
   },
@@ -47,7 +77,7 @@ export default {
     // 保存
     submit(name) {
       let that = this;
-       if( handleSubmit(that, name )){
+      if (handleSubmit(that, name)) {
         this.setupSetting()
       }
     },
@@ -65,7 +95,7 @@ export default {
     init() {
       this.res = JSON.parse(this.res);
 
-      this.$set(this, "formValidate", { ...this.res });
+      this.$set(this, "formValidate", {...this.res});
       Object.keys(this.formValidate).forEach((item) => {
         this.ruleValidate[item] = [
           {
@@ -82,13 +112,16 @@ export default {
 
 <style lang="scss" scoped>
 @import "./style.scss";
+
 .label-item {
   display: flex;
 }
+
 /deep/ .ivu-input {
   width: 300px !important;
   margin: 0 10px;
 }
+
 .ivu-input-wrapper {
   width: 300px;
   margin-right: 10px;
