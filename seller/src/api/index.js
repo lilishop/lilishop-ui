@@ -45,10 +45,7 @@ export const userInfo = params => {
 export const userMsg = params => {
   return getRequest('/settings/storeSettings', params)
 }
-// 注册
-export const regist = params => {
-  return postRequest("/user/regist", params);
-};
+
 // 初始化验证码
 export const initCaptcha = params => {
   return getRequestWithNoToken("/common/captcha/init", params);
@@ -265,7 +262,7 @@ export const delGoodsUnit = (ids) => {
 
 //
 export const handleRefreshToken = (token) => {
-  return getRequestWithNoToken(`/login/refresh/${token}`);
+  return getRequestWithNoToken(`/passport/login/refresh/${token}`);
 };
 
 
