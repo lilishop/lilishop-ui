@@ -129,28 +129,15 @@ export default {
       if (currWidth <= 1200) {
         this.sliceNum = 2;
       }
-
-      if(!localStorage.getItem("icon")||!localStorage.getItem("title")||!localStorage.getItem("icontitle_expiration_time")) {
-        this.getSite();
-      }else{
-        // 如果缓存过期，则获取最新的信息
-        if (new Date() > localStorage.getItem("icontitle_expiration_time")) {
-          this.getSite();
-          return;
-        }else{
-          this.domainLogo = localStorage.getItem("icon");
-          let link =
-            document.querySelector("link[rel*='icon']") ||
-            document.createElement("link");
-          link.type = "image/x-icon";
-          link.href = localStorage.getItem("icon");
-          link.rel = "shortcut icon";
-          document.getElementsByTagName("head")[0].appendChild(link);
-          window.document.title = localStorage.getItem("title") + " - 运营后台";
-
-        }
-      }
-
+      this.domainLogo = localStorage.getItem("icon");
+      let link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.href = localStorage.getItem("icon");
+      link.rel = "shortcut icon";
+      document.getElementsByTagName("head")[0].appendChild(link);
+      window.document.title = localStorage.getItem("title") + " - 运营后台";
       // 读取未读消息数
       getNoticePage({}).then((res) => {
         if (res.success) {
@@ -160,28 +147,7 @@ export default {
         }
       });
     },
-    getSite(){
-      //获取domainLogo
-      getBaseSite().then((res) => {
-        const { domainLogo, siteName } = JSON.parse(res.result.settingValue);
-        this.domainLogo = domainLogo;
-        // 过期时间
-        var expirationTime = new Date().setHours(new Date().getHours() + 1);
-        // 存放过期时间
-        localStorage.setItem("icontitle_expiration_time", expirationTime);
-        // 存放信息
-        localStorage.setItem('icon', domainLogo);
-        localStorage.setItem('title', siteName);
-        let link =
-          document.querySelector("link[rel*='icon']") ||
-          document.createElement("link");
-        link.type = "image/x-icon";
-        link.href = domainLogo;
-        link.rel = "shortcut icon";
-        document.getElementsByTagName("head")[0].appendChild(link);
-        window.document.title = siteName + " - 运营后台";
-      })
-    },
+
     //用户头像下方抽屉点击
     handleClickUserDropdown(name) {
       //个人中心

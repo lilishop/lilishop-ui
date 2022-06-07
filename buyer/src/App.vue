@@ -14,19 +14,19 @@ export default {
   },
   methods:{
     init(){
-      if(!localStorage.getItem("siteName")||!localStorage.getItem("logoImg")||!localStorage.getItem("sitelogo_expiration_time")) {
+      if(!storage.getItem("siteName")||!storage.getItem("logoImg")||!storage.getItem("sitelogo_expiration_time")) {
         this.getSite();
       }else{
         // 如果缓存过期，则获取最新的信息
-        if (new Date() > localStorage.getItem("sitelogo_expiration_time")) {
+        if (new Date() > storage.getItem("sitelogo_expiration_time")) {
           this.getSite();
           return;
         }else{
-          window.document.title = localStorage.getItem("siteName");
+          window.document.title = storage.getItem("siteName");
           //动态获取icon
           let link =document.querySelector("link[rel*='icon']") ||document.createElement("link");
             link.type = "image/x-icon";
-            link.href = localStorage.getItem("logoImg");
+            link.href = storage.getItem("logoImg");
             link.rel = "shortcut icon";
             document.getElementsByTagName("head")[0].appendChild(link);
         }
@@ -41,10 +41,10 @@ export default {
           // 过期时间
           var expirationTime = new Date().setHours(new Date().getHours() + 1);
           // 存放过期时间
-          localStorage.setItem("sitelogo_expiration_time", expirationTime);
+          storage.setItem("sitelogo_expiration_time", expirationTime);
           // 存放信息
-          localStorage.setItem('siteName', data.siteName);
-          localStorage.setItem('logoImg', data.buyerSideLogo);
+          storage.setItem('siteName', data.siteName);
+          storage.setItem('logoImg', data.buyerSideLogo);
 
           window.document.title = data.siteName;
           //动态获取icon

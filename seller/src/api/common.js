@@ -16,3 +16,9 @@ export const getRegion = (params) => {
 export function getIMDetail () {
   return getRequest(`${commonUrl}/common/common/IM`);
 }
+
+
+//获取图片logo
+export function getBaseSite () {
+  return getRequest(`${commonUrl}/common/common/site`);
+}
