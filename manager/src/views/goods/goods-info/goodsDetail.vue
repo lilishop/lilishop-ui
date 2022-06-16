@@ -25,7 +25,7 @@
             <FormItem label="销售模式">
               {{ goods.salesModel === "RETAIL" ? "零售型" : "批发型" }}
             </FormItem>
-            <FormItem label="销售规则">
+            <FormItem label="销售规则" v-if="goods.salesModel !== 'RETAIL'">
               <Table
                 border
                 :columns="wholesalePreviewColumns"
