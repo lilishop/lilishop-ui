@@ -554,10 +554,7 @@ export default {
       orderDeliverFormValidate: {
         logisticsNo: [
           { required: true, message: "发货单号不能为空", trigger: "change" },
-        ],
-        logisticsId: [
-          { required: true, message: "请选择物流公司", trigger: "blur" },
-        ],
+        ]
       },
       addressRule: {
         consigneeName: [
