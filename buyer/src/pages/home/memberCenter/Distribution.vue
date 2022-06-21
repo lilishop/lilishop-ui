@@ -11,6 +11,16 @@
           <FormItem label="身份证号" prop="idNumber">
             <Input v-model="applyForm.idNumber"></Input>
           </FormItem>
+          <FormItem label="银行开户行" prop="settlementBankBranchName">
+            <Input v-model="applyForm.settlementBankBranchName"></Input>
+          </FormItem>
+          <FormItem label="银行开户名" prop="settlementBankAccountName">
+            <Input v-model="applyForm.settlementBankAccountName"></Input>
+          </FormItem>
+          <FormItem label="银行账号" prop="settlementBankAccountNum">
+            <Input v-model="applyForm.settlementBankAccountNum"></Input>
+          </FormItem>
+
           <FormItem>
             <Button type="primary" :loading="applyLoading" @click="apply">提交申请</Button>
           </FormItem>
@@ -161,6 +171,7 @@
 <script>
 import {distribution, applyDistribution, distCash, distCashHistory, getDistGoodsList, selectDistGoods} from '@/api/member.js'
 import { IDCard } from '@/plugins/RegExp.js';
+import {checkBankno} from '@/plugins/Foundation'
 import vueQr from 'vue-qr';
 export default {
   name: 'Distribution',
@@ -174,7 +185,41 @@ export default {
         idNumber: [
           {required: true, message: '请输入身份证号'},
           {pattern: IDCard, message: '请输入正确的身份证号'}
-        ]
+        ],
+        settlementBankBranchName: [
+          {
+            required: true,
+            message: "请输入银行开户行",
+            // 可以单个或者同时写两个触发验证方式
+            trigger: "blur",
+          },
+
+        ],
+        settlementBankAccountName: [
+          {
+            required: true,
+            message: "请输入银行开户名",
+            // 可以单个或者同时写两个触发验证方式
+            trigger: "blur",
+          },
+        ],
+        //银行账号
+        settlementBankAccountNum: [
+          {
+            required: true,
+            message: "银行账号不正确",
+            // 可以单个或者同时写两个触发验证方式
+            trigger: "blur",
+          },
+          {
+            validator: (rule, value, callback) => {
+              // 上面有说，返回true表示校验通过，返回false表示不通过
+              // this.$u.test.mobile()就是返回true或者false的
+              return checkBankno(value);
+            },
+            message: "银行账号不正确",
+          },
+        ],
       },
       tabName: 'goodsChecked', // 当前所在tab
       result: {}, // 审核结果
