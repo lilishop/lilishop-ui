@@ -496,7 +496,7 @@ export default {
 
         lastNum.push({
           date: item.date.substring(5),
-          title: "上周记录",
+          title: "上一周期",
           lastNum: item.lastNum || 0,
           res: item.lastNum || 0,
         });
