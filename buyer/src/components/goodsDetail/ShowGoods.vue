@@ -78,7 +78,7 @@
             <div class="item-price-row" v-else>
 
               <!-- 批发价格 -->
-              <div v-if="wholesaleNum.length">
+              <div v-if="wholesaleNum && wholesaleNum.length">
                 <div class="flex">
                   <div class="item-price-title">
                     价 &nbsp;&nbsp;&nbsp;&nbsp;格

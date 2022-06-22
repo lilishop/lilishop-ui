@@ -59,7 +59,7 @@
       >
         <template slot-scope="{ row }" slot="action">
           <Button
-            v-if="row.promotionStatus !== 'START'"
+            v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
             type="info"
             size="small"
             @click="see(row)"
@@ -78,7 +78,7 @@
           </Button>
           <Button
             class="ml_5"
-            v-if="row.promotionStatus === 'CLOSE'"
+            v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'END'"
             type="error"
             size="small"
             @click="remove(row)"
