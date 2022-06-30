@@ -14,26 +14,8 @@
           <FormItem label="文章标题" prop="title">
             <Input v-model="form.article.title" clearable style="width: 40%" />
           </FormItem>
-          <FormItem label="文章分类" prop="categoryId">
-            <Select v-model="treeValue" placeholder="请选择" clearable style="width: 180px">
-              <Option :value="treeValue" style="display: none">{{
-                      treeValue
-                    }}
-              </Option>
-              <Tree :data="treeDataDefault" @on-select-change="handleCheckChange"></Tree>
-            </Select>
-          </FormItem>
-          <FormItem label="文章排序" prop="sort">
-            <Input type="number" v-model="form.article.sort" clearable style="width: 10%" />
-          </FormItem>
           <FormItem class="form-item-view-el" label="文章内容" prop="content">
             <editor openXss v-model="form.article.content"></editor>
-          </FormItem>
-          <FormItem label="是否展示" prop="openStatus">
-            <i-switch size="large" v-model="form.article.openStatus"  >
-              <span slot="open">展示</span>
-              <span slot="close">隐藏</span>
-            </i-switch>
           </FormItem>
         </Form>
         <div slot="footer">
@@ -225,7 +207,6 @@ export default {
         if(res.result){
           this.modalVisible = true;
           this.form.article.categoryId = res.result.categoryId;
-          console.log(this.treeDataDefault);
           this.form.id = res.result.id;
           this.form.article.content =res.result.content;
           this.form.article.title = res.result.title;
