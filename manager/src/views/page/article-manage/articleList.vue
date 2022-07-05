@@ -109,7 +109,7 @@
               clearable
               style="width: 10%"
             />
-          </FormItem>x
+          </FormItem>
           <FormItem class="form-item-view-el" label="文章内容" prop="content">
             <editor
               ref="editor"
