@@ -530,17 +530,30 @@
                 ></Tree>
               </FormItem>
             </div>
-            <FormItem class="form-item-view-el" label="商品描述" prop="intro">
-              <editor eid="intro" v-model="baseInfoForm.intro"></editor>
+            <FormItem
+              style="width: 100%"
+              class="form-item-view-el"
+              label="商品描述"
+              prop="intro"
+            >
+              <editor
+                ref="editor"
+                openXss
+                v-model="baseInfoForm.intro"
+                :init="{ ...initEditor, height: '400px' }"
+              ></editor>
             </FormItem>
             <FormItem
+              style="width: 100%"
               class="form-item-view-el"
               label="移动端描述"
               prop="skuList"
             >
               <editor
-                eid="mobileIntro"
+                ref="editor"
+                openXss
                 v-model="baseInfoForm.mobileIntro"
+                :init="{ ...initEditor, height: '400px' }"
               ></editor>
             </FormItem>
           </div>
@@ -684,13 +697,15 @@ import * as API_GOODS from "@/api/goods";
 import * as API_Shop from "@/api/shops";
 import cloneObj from "@/utils/index";
 import vuedraggable from "vuedraggable";
-import editor from "@/views/my-components/lili/editor";
+import Editor from "@tinymce/tinymce-vue";
+import { initEditor } from "@/views/lili-components/editor/config";
 import { uploadFile } from "@/libs/axios";
 import { regular } from "@/utils";
 
 export default {
+  name: "goodsOperationSec",
   components: {
-    editor,
+    editor: Editor,
     vuedraggable,
   },
   props: {
@@ -717,6 +732,7 @@ export default {
     };
     return {
       regular,
+      initEditor,
       total: 0,
       global: 0,
       accessToken: "", //令牌token
@@ -1460,7 +1476,8 @@ export default {
               cost: skus[index].cost,
               price: skus[index].price,
               [cloneTemp[0].name]: specItem.value,
-              images: skus[index].images || this.baseInfoForm.goodsGalleryFiles || [],
+              images:
+                skus[index].images || this.baseInfoForm.goodsGalleryFiles || [],
             };
             if (specItem.value !== "") {
               obj.id = skus[index].id;
@@ -1882,4 +1899,7 @@ export default {
 .ivu-select .ivu-select-dropdown {
   overflow: hidden !important;
 }
+/* .tox-notifications-container{
+  display: none !important;
+} */
 </style>
