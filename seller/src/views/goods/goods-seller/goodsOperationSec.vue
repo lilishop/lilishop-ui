@@ -540,7 +540,7 @@
                 ref="editor"
                 openXss
                 v-model="baseInfoForm.intro"
-                :init="{ ...initEditor, height: '400px' }"
+                :init="{ ...initEditor, height: '800px' }"
               ></editor>
             </FormItem>
             <FormItem
@@ -553,7 +553,7 @@
                 ref="editor"
                 openXss
                 v-model="baseInfoForm.mobileIntro"
-                :init="{ ...initEditor, height: '400px' }"
+                :init="{ ...initEditor, height: '800px' }"
               ></editor>
             </FormItem>
           </div>
