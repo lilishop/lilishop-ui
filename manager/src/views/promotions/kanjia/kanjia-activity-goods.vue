@@ -112,7 +112,6 @@
             >查看
           </Button>
           <Button
-            v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'END'"
             type="error"
             size="small"
             style="margin-right: 10px"
