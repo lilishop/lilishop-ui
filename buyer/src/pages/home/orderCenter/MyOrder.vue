@@ -32,7 +32,7 @@
             </div>
           </div>
           <div>
-            <Button @click="delOrder(order.sn)" class="del-btn mr_10 fontsize_16" style="margin-top:-5px;" type="text" icon="ios-trash-outline" size="small"></Button>
+            <Button v-if="order.orderStatus === 'COMPLETED'" @click="delOrder(order.sn)" class="del-btn mr_10 fontsize_16" style="margin-top:-5px;" type="text" icon="ios-trash-outline" size="small"></Button>
             <span>{{ order.flowPrice | unitPrice("￥") }}</span>
           </div>
         </div>
