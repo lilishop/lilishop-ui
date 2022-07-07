@@ -211,7 +211,6 @@ export default {
       this.loading = true;
       getPrivacy(data.type).then((res) => {
         this.loading = false;
-        if(res.result){
           this.modalVisible = true;
           this.form.article.categoryId = res.result.categoryId;
           this.form.id = res.result.id;
@@ -221,7 +220,6 @@ export default {
           this.form.article.openStatus = res.result.openStatus;
           this.form.article.type = res.result.type;
           this.form.type =  res.result.type;
-        }
       });
       this.loading = false;
     },
