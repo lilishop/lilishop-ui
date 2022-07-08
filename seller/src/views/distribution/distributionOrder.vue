@@ -99,6 +99,12 @@ export default {
           width: 180,
           sortable: false,
         },
+        {
+          title: "解冻日期（T+1）",
+          key: "settleCycle",
+          width: 180,
+          sortable: false,
+        },
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
