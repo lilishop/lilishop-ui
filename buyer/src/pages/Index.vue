@@ -52,7 +52,7 @@ export default {
   methods: {
     getIndexData () {
       // 获取首页装修数据
-      indexData({ clientType: 'PC' }).then((res) => {
+      indexData({ clientType: 'PC' }).then(async (res) => {
         if (res.success) {
           let dataJson = JSON.parse(res.result.pageData);
           // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
@@ -65,7 +65,7 @@ export default {
               this.carouselLarge = true
               this.carouselOpacity = true
             } else if (type === 'seckill') {
-              let seckill = this.getListByDay()
+              let seckill = await this.getListByDay()
               dataJson.list[i].options.list = seckill
             }
           }
