@@ -217,6 +217,23 @@
               <Input v-model="item.bk_color" />
             </div>
           </div>
+          <div
+            class="decorate-view"
+            v-if="item.title != void 0 && !res.notTitle && res.type == 'notice'"
+          >
+            <div class="decorate-view-title">方向</div>
+            <div class="decorate-view">
+              <Select
+                style="width: 200px"
+                @on-change="changeDirection($event, item)"
+                v-model="item.direction"
+              >
+              {{item.direction}}
+                <Option label="横向" value="horizontal"></Option>
+                <Option label="纵向" value="vertical"></Option>
+              </Select>
+            </div>
+          </div>
 
           <!-- 填写标题 -->
           <div
@@ -364,10 +381,11 @@
       v-if="
         res.type != 'tpl_ad_list' &&
         res.type != 'tpl_activity_list' &&
-        !res.notAdd
+        !res.notAdd &&
+        res.direction != 'horizontal'
       "
       type="primary"
-      @click="addDecorate(res.type)"
+      @click="addDecorate(res.type, res)"
       ghost
       >添加</Button
     >
@@ -414,6 +432,14 @@ export default {
   },
   props: ["res"],
   methods: {
+    // 改变横纵切换title内容
+    changeDirection(val, data) {
+      if (val == "horizontal") {
+        const props = {...data}
+        data.title = []
+        data.title.push( props.title[0]);
+      }
+    },
     // 选择风格
     selectStyle() {
       this.styleFlag = !this.styleFlag;
@@ -455,7 +481,7 @@ export default {
     },
     // 打开图片选择器
     liliDialogFlag(flag) {
-      this.$refs.liliDialog.clearGoodsSelected()
+      this.$refs.liliDialog.clearGoodsSelected();
       this.$refs.liliDialog.goodsFlag = flag;
       this.$refs.liliDialog.flag = true;
     },
@@ -482,11 +508,16 @@ export default {
       });
     },
     //添加设置
-    addDecorate(type) {
+    addDecorate(type, data) {
       if (type === "notice") {
-        this.res.options.list[0].title.push({
-          content: "",
-        });
+        console.log(data)
+        if (data.options.list[0].direction == "vertical") {
+          this.res.options.list[0].title.push({
+            content: "",
+          });
+        } else {
+          this.$Message.error("仅纵向支持多添加");
+        }
       } else {
         let way = {
           img: "https://picsum.photos/id/264/200/200",

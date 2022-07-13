@@ -1,5 +1,5 @@
 <template>
-  <div class="seckill">
+  <div class="seckill" v-if="goodsList.length">
     <div class="aside hover-pointer" @click="goToSeckill">
       <div class="title">{{ actName }}</div>
       <div class="hour">
