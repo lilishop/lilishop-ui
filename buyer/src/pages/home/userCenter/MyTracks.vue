@@ -112,7 +112,7 @@ export default {
       tracksList(this.params).then((res) => {
         this.spinShow = false;
         if (res.success && res.result) {
-          this.list = res.result;
+          this.list = res.result.records;
         } else {
           this.list = [];
         }
