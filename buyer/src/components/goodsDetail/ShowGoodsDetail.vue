@@ -225,7 +225,6 @@ export default {
   width: 1200px;
   margin: 15px auto;
   display: flex;
-  overflow: scroll;
   overflow-x: hidden;
   flex-direction: row;
 
@@ -310,6 +309,9 @@ export default {
 .item-intro-img {
   width: 100%;
   min-height: 300px;
+  /deep/ img{
+    margin:0 auto;
+  }
 }
 .item-intro-img img{
   max-width: 1000px;
