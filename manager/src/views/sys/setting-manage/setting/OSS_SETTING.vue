@@ -28,9 +28,14 @@
 
       <!--      MINIO存储-->
 
+      <FormItem v-if="formValidate.type==='MINIO'" label="访问地址" prop="m_frontUrl">
+        <Input v-model="formValidate.m_frontUrl"/>
+        <span class="desc">配置MINIO nginx前端访问转发地址，一般为完整域名，例如：https://minio.pickmall.cn</span>
+      </FormItem>
       <FormItem v-if="formValidate.type==='MINIO'" label="endpoint" prop="m_endpoint">
         <Input v-model="formValidate.m_endpoint"/>
       </FormItem>
+
       <FormItem v-if="formValidate.type==='MINIO'" label="accessKey" class="label-item" prop="m_accessKey">
         <Input v-model="formValidate.m_accessKey"/>
       </FormItem>
@@ -40,6 +45,7 @@
       <FormItem v-if="formValidate.type==='MINIO'" label="bucketName" prop="accessKeyId">
         <Input v-model="formValidate.m_bucketName"/>
       </FormItem>
+
       <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
 
@@ -66,6 +72,7 @@ export default {
         m_accessKey: "",
         m_secretKey: "",
         m_bucketName: "",
+        m_frontUrl: ""
       },
     };
   },
@@ -125,5 +132,10 @@ export default {
 .ivu-input-wrapper {
   width: 300px;
   margin-right: 10px;
+}
+.desc {
+  margin-left: 5px;
+  font-size: 12px;
+  color: #999;
 }
 </style>
