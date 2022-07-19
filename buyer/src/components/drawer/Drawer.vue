@@ -290,7 +290,7 @@ export default {
       }
       this.loading = true
       tracksList(params).then(res => {
-        this.tracksList = res.result
+        this.tracksList = res.result.records
         this.loading = false
       }).catch(() => { this.loading = false })
     }

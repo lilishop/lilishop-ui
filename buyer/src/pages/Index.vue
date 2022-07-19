@@ -106,7 +106,7 @@ export default {
   background-color: #fff;
   position: fixed;
   top: 0;
-  z-index: 3000;
+  z-index: 99;
   box-shadow:0 0 10px 2px rgb(90 90 90 / 60%);
   transition: 0.35s;
 }
