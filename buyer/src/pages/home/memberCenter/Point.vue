@@ -2,7 +2,7 @@
   <div class="point">
     <card _Title="我的积分"/>
     <div class="point-content">
-      <span>剩余积分：<span>{{ pointObj.point || 0 }}</span></span>
+      <span>剩余积分：<span>{{ pointObj.points || 0 }}</span></span>
       <span>累计获得：<span>{{ pointObj.totalPoint || 0 }}</span></span>
     </div>
     <h3>积分日志</h3>

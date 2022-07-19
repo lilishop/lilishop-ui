@@ -152,7 +152,7 @@ export default {
             return h(
               "div",
               {},
-              params.row.point == void 0 ? "0" : params.row.point
+              params.row.points == void 0 ? "0" : params.row.points
             );
           },
         },

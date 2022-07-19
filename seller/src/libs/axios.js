@@ -94,7 +94,7 @@ service.interceptors.response.use(
         // 这种情况一般调到登录页
       } else if (error.response.status === 404) {
         // 避免刷新token报错
-      } else if (error.response.status === 403) {
+      } else if (error.response.status === 403 || error.response.data.code === 20004) {
         isRefreshToken++;
         if (isRefreshToken === 1) {
           const getTokenRes = await refreshToken();

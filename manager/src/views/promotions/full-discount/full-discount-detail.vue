@@ -137,7 +137,7 @@
             </FormItem>
             <FormItem v-if="form.pointFlag" label="赠积分" prop="point">
               <Input
-                v-model="form.point"
+                v-model="form.points"
                 type="number"
                 disabled
                 style="width: 260px"
