@@ -3,16 +3,16 @@ var BASE = {
    * @description api请求基础路径
    */
   API_DEV: {
-    common: "https://common-api.pickmall.cn",
-    buyer: "https://buyer-api.pickmall.cn",
-    seller: "https://store-api.pickmall.cn",
-    manager: "https://admin-api.pickmall.cn"
+    common: "http://101.43.247.178:30888",
+    buyer: "http://101.43.247.178:30888",
+    seller: "http://101.43.247.178:30888",
+    manager: "http://101.43.247.178:30888"
   },
   API_PROD: {
-    common: "https://common-api.pickmall.cn",
-    buyer: "https://buyer-api.pickmall.cn",
-    seller: "https://store-api.pickmall.cn",
-    manager: "https://admin-api.pickmall.cn"
+    common: "http://101.43.247.178:30888",
+    buyer: "http://101.43.247.178:30888",
+    seller: "http://101.43.247.178:30888",
+    manager: "http://101.43.247.178:30888"
   },
   /**
    * @description // 跳转买家端地址 pc端
