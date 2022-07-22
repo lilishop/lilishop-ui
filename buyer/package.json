@@ -15,7 +15,7 @@
     "less-loader": "^5.0.0",
     "mv-count-down": "^0.1.15",
     "node-sass": "^4.14.1",
-    "sass-loader": "^8.0.2",
+    "sass-loader": "^7.3.1",
     "psl": "^1.8.0",
     "qs": "^6.9.4",
     "uuid": "^8.3.2",
@@ -30,7 +30,7 @@
   "devDependencies": {
     "@vue/cli-service": "~4.5.0",
     "compression-webpack-plugin": "^5.0.0",
-    "sass-loader": "^8.0.2",
+    "sass-loader": "^7.3.1",
     "uglifyjs-webpack-plugin": "^2.2.0",
     "vue-template-compiler": "^2.6.11"
   },
