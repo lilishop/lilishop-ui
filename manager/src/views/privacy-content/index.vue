@@ -15,7 +15,13 @@
             <Input v-model="form.article.title" clearable style="width: 40%" />
           </FormItem>
           <FormItem class="form-item-view-el" label="文章内容" prop="content">
-            <editor openXss v-model="form.article.content"></editor>
+
+          <editor
+              ref="editor"
+              openXss
+               v-model="form.article.content"
+              :init="{ ...initEditor,height:'800px' }"
+            ></editor>
           </FormItem>
         </Form>
         <div slot="footer">
@@ -33,12 +39,12 @@ import {
   updatePrivacy,
   getPrivacy,
 } from "@/api/pages";
-import editor from "@/views/my-components/lili/editor";
-
+import Editor from "@tinymce/tinymce-vue";
+import { initEditor } from "@/views/lili-components/editor/config";
 export default {
   name: "privacy",
-  components: {
-    editor,
+ components: {
+    editor: Editor,
   },
   props: {
     selected: {
@@ -48,6 +54,7 @@ export default {
   },
   data() {
     return {
+      initEditor,
       loading: false, // 表单加载状态
       modalVisible: false, // 添加或编辑显示
       treeDataDefault: [],
@@ -204,7 +211,6 @@ export default {
       this.loading = true;
       getPrivacy(data.type).then((res) => {
         this.loading = false;
-        if(res.result){
           this.modalVisible = true;
           this.form.article.categoryId = res.result.categoryId;
           this.form.id = res.result.id;
@@ -214,7 +220,6 @@ export default {
           this.form.article.openStatus = res.result.openStatus;
           this.form.article.type = res.result.type;
           this.form.type =  res.result.type;
-        }
       });
       this.loading = false;
     },
