@@ -421,6 +421,9 @@ export default {
         continuedPrice: 0,
         selectedAll: false,
       };
+      if (!this.form.freightTemplateChildList) {
+        this.form.freightTemplateChildList = [];
+      }
       this.form.freightTemplateChildList.push(params);
     },
     //删除一个子模板
