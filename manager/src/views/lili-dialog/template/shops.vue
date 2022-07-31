@@ -48,8 +48,9 @@ export default {
       selected: 9999999999, //设置一个不可能选中的index
     };
   },
-  watch: {},
+  watch: {
 
+  },
   created() {
     this.init();
   },
@@ -63,6 +64,9 @@ export default {
       }, 1500);
     },
     init() {
+      if (this.$route.query.pageType) {
+        // todo: 区分供应商店铺
+      }
       this.loading = true;
       getShopListData(this.params).then((res) => {
         if (res.success) {

@@ -50,7 +50,10 @@ export default {
     this.$nextTick(() => {
       this.$refs["lili-component"][0].type = "single"; //商品页面设置成为单选
     });
-
+    
+    if (this.$route.query.pageType && this.$route.query.pageType === 'SUPPLIER') {
+      this.wap = this.wap.filter(i => i.scope === 'all');
+    }
     this.wap.forEach((item) => {
       if (item) {
         item.selected = false;

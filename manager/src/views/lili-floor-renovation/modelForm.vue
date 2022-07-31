@@ -155,7 +155,7 @@
       </div>
     </Modal>
     <!-- 选择商品。链接 -->
-    <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
+    <liliDialog ref="liliDialog" @selectedLink="selectedLink" @searchParams="goodsParams"></liliDialog>
     <!-- 选择图片 -->
     <Modal width="1200px" v-model="picModelFlag" footer-hide>
       <ossManage
@@ -210,6 +210,13 @@ export default {
           { name: "拍卖", url: "" },
           { name: "服装城", url: "" },
         ],
+      },
+      goodsParams: {
+        // 商品请求参数
+        pageNumber: 1,
+        pageSize: 10,
+        order: "desc",
+        sort: "createTime",
       },
     };
   },

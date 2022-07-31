@@ -27,7 +27,24 @@
             style="width: 200px"
           />
         </Form-item>
-        <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search"
+        <Form-item label="销售模式" prop="salesModel">
+          <Select
+            v-model="searchForm.salesModel"
+            placeholder="请选择"
+            clearable
+            style="width: 200px"
+          >
+            <Option value="RETAIL">零售</Option>
+            <Option value="PURCHASING">采购</Option>
+            <Option value="PROXY">代发</Option>
+            <Option value="WHOLESALE">批发</Option>
+          </Select>
+        </Form-item>
+        <Button
+          @click="handleSearch"
+          class="search-btn"
+          type="primary"
+          icon="ios-search"
           >搜索</Button
         >
       </Form>
@@ -115,7 +132,10 @@ export default {
           key: "price",
           minWidth: 130,
           render: (h, params) => {
-            return h("div", this.$options.filters.unitPrice(params.row.price, "￥"));
+            return h(
+              "div",
+              this.$options.filters.unitPrice(params.row.price, "￥")
+            );
           },
         },
         {
@@ -149,6 +169,28 @@ export default {
                     text: "审核拒绝",
                   },
                 }),
+              ]);
+            }
+          },
+        },
+        {
+          title: "销售模式",
+          key: "salesModel",
+          minWidth: 130,
+          render: (h, params) => {
+            if (params.row.salesModel == "RETAIL") {
+              return h("div", [h("tag", { props: { color: "blue" } }, "零售")]);
+            } else if (params.row.salesModel == "PURCHASING") {
+              return h("div", [
+                h("tag", { props: { color: "volcano" } }, "采购"),
+              ]);
+            } else if (params.row.salesModel == "PROXY") {
+              return h("div", [
+                h("tag", { props: { color: "green" } }, "代发"),
+              ]);
+            } else if (params.row.salesModel == "WHOLESALE") {
+              return h("div", [
+                h("tag", { props: { color: "geekblue" } }, "批发"),
               ]);
             }
           },

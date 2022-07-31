@@ -39,6 +39,7 @@ export default {
       modelData, // 可选模块数据
       modelForm: { list: [] }, // 模板数据
       submitLoading: false, // 提交加载状态
+      pageType: this.$route.query.pageType || ''
     };
   },
   methods: {
@@ -95,7 +96,7 @@ export default {
     modelForm: {
       deep: true,
       handler: function (val) {
-        console.log(val);
+        // console.log(val);
       },
     },
   },

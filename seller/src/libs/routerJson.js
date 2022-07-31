@@ -9,6 +9,7 @@ export const result = [{
     title: "商品",
     path: "",
     component: "",
+    role: "all",
     children: [{
       name: "goods-list",
       level: 1,
@@ -66,6 +67,7 @@ export const result = [{
     path: "",
     component: "",
     description: "",
+    role: "all",
     children: [{
         name: "order",
         level: 1,
@@ -160,6 +162,7 @@ export const result = [{
     title: "财务",
     path: "",
     component: "",
+    role: "all",
     children: [{
         name: "bill",
         level: 1,
@@ -215,6 +218,7 @@ export const result = [{
     title: "营销",
     path: "",
     component: "",
+    role: "Retailer",
     children: [{
         name: "promotion",
         level: 1,
@@ -334,6 +338,7 @@ export const result = [{
     title: "统计",
     path: "",
     component: "",
+    role: "Retailer",
     children: [{
       name: "statistics",
       level: 1,
@@ -379,6 +384,7 @@ export const result = [{
     path: "",
     component: "",
     description: "",
+    role: "all",
     children: [{
         name: "user-manage",
         level: 1,
@@ -452,6 +458,7 @@ export const result = [{
     title: "消息",
     path: "",
     component: "",
+    role: "Retailer",
     children: [{
       name: "user-manage",
       level: 1,

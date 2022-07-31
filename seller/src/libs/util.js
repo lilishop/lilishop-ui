@@ -320,27 +320,31 @@ util.initRouter = function (vm) { // 初始化路由
         component: 'error-page/404'
     }];
     // 判断用户是否登录
-    let userInfo = Cookies.get('userInfoSeller')
+    let userInfo = Cookies.get("userInfoSeller");
     if (!userInfo) {
         // 未登录
         return;
     }
+    userInfo = JSON.parse(Cookies.get("userInfoSeller"));
 
     if (!vm.$store.state.app.added) {
         // 加载菜单
         let menuData = result;
         // 格式化数据，设置 空children 为 null
-        for(let i =0;i<menuData.length;i++){
-            let t = menuData[i].children
-            for(let k = 0;k<t.length;k++){
+        for (let i = 0; i < menuData.length; i++) {
+            let t = menuData[i].children;
+            for (let k = 0; k < t.length; k++) {
                 let tt = t[k].children;
-                for(let z = 0;z<tt.length;z++){
+                for (let z = 0; z < tt.length; z++) {
                     tt[z].children = null
                     // 给所有三级路由添加字段，显示一级菜单name，方便点击页签时的选中筛选
                     tt[z].firstRouterName = menuData[i].name
                 }
             }
         }
+        menuData = menuData.filter(i => {
+            return i.role === 'all' || i.role === userInfo.role
+        });
         util.initAllMenuData(constRoutes, menuData);
         util.initRouterNode(otherRoutes, otherRouter);
         // 添加所有主界面路由
@@ -447,7 +451,7 @@ util.initRouterNode = function (routers, data) {  // data为所有子菜单数�
         }
         let meta = {};
         // 给页面添加标题
-        meta.title = menu.title ? menu.title + " - "+config.title+"商家后台" : null;
+        meta.title = menu.title ? menu.title + " - " + config.title + "商家后台" : null;
         meta.firstRouterName = menu.firstRouterName
         meta.keepAlive = menu.keepAlive ? true : false
         menu.meta = meta;

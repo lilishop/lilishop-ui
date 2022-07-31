@@ -4,13 +4,13 @@ import { router } from "../router/index";
 import { Message } from "view-design";
 import Cookies from "js-cookie";
 import { handleRefreshToken } from "@/api/index";
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 // 统一请求路径前缀
 export const baseUrl =
   (process.env.NODE_ENV === "development"
-    ?  BASE.API_DEV.seller
-    : BASE.API_PROD.seller) + BASE.PREFIX;
+    ? BASE.API_DEV.seller
+    : BASE.API_PROD.seller);
 export const commonUrl =
   process.env.NODE_ENV === "development"
     ? BASE.API_DEV.common
@@ -36,6 +36,14 @@ service.interceptors.request.use(
       uuid = uuidv4();
       setStore('uuid', uuid);
     }
+    if (config.client === 'Supplier') {
+      config.baseURL = config.baseURL + "/supplier";
+    } else {
+      if (!config.url.includes("common")) {
+        config.baseURL = config.baseURL + BASE.PREFIX;
+      }
+    }
+    console.log(config);
 
     config.headers["uuid"] = uuid;
     return config;
@@ -129,7 +137,7 @@ service.interceptors.response.use(
 function getTokenDebounce() {
   let lock = false;
   let success = false;
-  return function() {
+  return function () {
     if (!lock) {
       lock = true;
       let oldRefreshToken = getStore("refreshToken");
@@ -197,19 +205,19 @@ export const postRequest = (url, params, headers) => {
     transformRequest: headers
       ? undefined
       : [
-          function(data) {
-            let ret = "";
-            for (let it in data) {
-              ret +=
-                encodeURIComponent(it) +
-                "=" +
-                encodeURIComponent(data[it]) +
-                "&";
-            }
-            ret = ret.substring(0, ret.length - 1);
-            return ret;
+        function (data) {
+          let ret = "";
+          for (let it in data) {
+            ret +=
+              encodeURIComponent(it) +
+              "=" +
+              encodeURIComponent(data[it]) +
+              "&";
           }
-        ],
+          ret = ret.substring(0, ret.length - 1);
+          return ret;
+        }
+      ],
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       accessToken: accessToken,
@@ -255,19 +263,19 @@ export const putRequest = (url, params, headers) => {
     transformRequest: headers
       ? undefined
       : [
-          function(data) {
-            let ret = "";
-            for (let it in data) {
-              ret +=
-                encodeURIComponent(it) +
-                "=" +
-                encodeURIComponent(data[it]) +
-                "&";
-            }
-            ret = ret.substring(0, ret.length - 1);
-            return ret;
+        function (data) {
+          let ret = "";
+          for (let it in data) {
+            ret +=
+              encodeURIComponent(it) +
+              "=" +
+              encodeURIComponent(data[it]) +
+              "&";
           }
-        ],
+          ret = ret.substring(0, ret.length - 1);
+          return ret;
+        }
+      ],
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       accessToken: accessToken,
@@ -359,7 +367,7 @@ export const postRequestWithNoToken = (url, params) => {
  * @param {*} url
  * @param {*} params
  */
- export const postRequestWithNoTokenData = (url, params) => {
+export const postRequestWithNoTokenData = (url, params) => {
   return service({
     method: "post",
     url: `${url}`,
@@ -370,3 +378,19 @@ export const postRequestWithNoToken = (url, params) => {
   });
 };
 
+/**
+ * 无需token验证的请求 避免旧token过期导致请求失败
+ * @param {*} url
+ * @param {*} params
+ */
+export const postSupplierRequestWithNoTokenData = (url, params) => {
+  return service({
+    method: "post",
+    url: `${url}`,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    client: "Supplier",
+    data: params
+  });
+};

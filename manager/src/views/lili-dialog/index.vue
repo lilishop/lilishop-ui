@@ -2,7 +2,7 @@
   <Modal :styles="{ top: '120px' }" width="1160" @on-cancel="clickClose" @on-ok="clickOK" v-model="flag" :mask-closable="false" scrollable>
     <template v-if="flag">
       <goodsDialog @selected="(val) => {goodsData = val;}"
-        v-if="goodsFlag" ref="goodsDialog" :selectedWay='goodsData'/>
+        v-if="goodsFlag" ref="goodsDialog" :selectedWay='goodsData' :goodsParams="searchParams"/>
       <linkDialog @selectedLink="(val) => { linkData = val; }" v-else class="linkDialog" />
     </template>
   </Modal>
@@ -19,6 +19,7 @@ export default {
     return {
       goodsFlag: false, // 是否商品选择器
       goodsData: [], //选择的商品
+      searchParams: {},//商品查询参数
       linkData: "", //选择的链接
       flag: false, // modal显隐
     };
