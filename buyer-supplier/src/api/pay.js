@@ -10,7 +10,7 @@ import request, {
  */
 export function tradeDetail (params) {
   return request({
-    url: '/buyer/payment/cashier/tradeDetail',
+    url: '/supplier/payment/cashier/tradeDetail',
     needToken: true,
     method: Method.GET,
     params
@@ -26,7 +26,7 @@ export function tradeDetail (params) {
  */
 export function pay (params) {
   return request({
-    url: `/buyer/payment/cashier/pay/${params.paymentMethod}/${params.paymentClient}`,
+    url: `/supplier/payment/cashier/pay/${params.paymentMethod}/${params.paymentClient}`,
     needToken: true,
     method: Method.GET,
     params
@@ -40,7 +40,7 @@ export function pay (params) {
  */
 export function payCallback (params) {
   return request({
-    url: `/buyer/payment/cashier/result`,
+    url: `/supplier/payment/cashier/result`,
     needToken: true,
     method: Method.GET,
     params

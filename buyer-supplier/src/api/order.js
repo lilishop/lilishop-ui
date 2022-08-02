@@ -5,7 +5,7 @@ import request, {
 // 查询会员订单列表
 export function getOrderList (params) {
   return request({
-    url: `/buyer/order/order`,
+    url: `/supplier/order/order`,
     method: Method.GET,
     needToken: true,
     params
@@ -18,7 +18,7 @@ export function getOrderList (params) {
  */
 export function orderDetail (orderSn) {
   return request({
-    url: `/buyer/order/order/${orderSn}`,
+    url: `/supplier/order/order/${orderSn}`,
     method: Method.GET,
     needToken: true
   });
@@ -31,7 +31,7 @@ export function orderDetail (orderSn) {
  */
 export function cancelOrder (params) {
   return request({
-    url: `/buyer/order/order/${params.orderSn}/cancel`,
+    url: `/supplier/order/order/${params.orderSn}/cancel`,
     method: Method.POST,
     needToken: true,
     params
@@ -44,7 +44,7 @@ export function cancelOrder (params) {
  */
 export function delOrder (orderSn) {
   return request({
-    url: `/buyer/order/order/${orderSn}`,
+    url: `/supplier/order/order/${orderSn}`,
     method: Method.DELETE,
     needToken: true
   });
@@ -56,7 +56,7 @@ export function delOrder (orderSn) {
  */
 export function sureReceived (orderSn) {
   return request({
-    url: `/buyer/order/order/${orderSn}/receiving`,
+    url: `/supplier/order/order/${orderSn}/receiving`,
     method: Method.POST,
     needToken: true
   });
@@ -68,7 +68,7 @@ export function sureReceived (orderSn) {
  */
 export function getTraces (orderSn) {
   return request({
-    url: `/buyer/order/order/getTraces/${orderSn}`,
+    url: `/supplier/order/order/getTraces/${orderSn}`,
     method: Method.POST,
     needToken: true
   });
@@ -80,7 +80,7 @@ export function getTraces (orderSn) {
  */
 export function evolutionList (params) {
   return request({
-    url: `/buyer/member/evaluation`,
+    url: `/supplier/member/evaluation`,
     method: Method.GET,
     needToken: true,
     params
@@ -90,7 +90,7 @@ export function evolutionList (params) {
 // 添加交易投诉对话
 export function communication (params) {
   return request({
-    url: `/buyer/order/complain/communication`,
+    url: `/supplier/order/complain/communication`,
     method: Method.POST,
     needToken: true,
     params
@@ -100,7 +100,7 @@ export function communication (params) {
 // 退换货服务 提交物流
 export function afterSaleDelivery (params) {
   return request({
-    url: `/buyer/order/afterSale/delivery/${params.afterSaleSn}`,
+    url: `/supplier/order/afterSale/delivery/${params.afterSaleSn}`,
     method: Method.POST,
     needToken: true,
     params
@@ -109,7 +109,7 @@ export function afterSaleDelivery (params) {
 // 获取退货可选物流公司
 export function getLogisticsCompany () {
   return request({
-    url: `/buyer/other/logistics`,
+    url: `/supplier/other/logistics`,
     method: Method.GET,
     needToken: true,
     params: { pageNumber: 1, pageSize: 200, disabled: 'OPEN' }

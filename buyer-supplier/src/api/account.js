@@ -11,7 +11,7 @@ import request, {Method} from '@/plugins/request.js'
 // 获取密码状态
 export function getPwdStatus (params) {
   return request({
-    url: '/buyer/passport/member/wallet/check',
+    url: '/supplier/passport/member/wallet/check',
     method: Method.GET,
     needToken: true,
     params
@@ -21,7 +21,7 @@ export function getPwdStatus (params) {
 // 设置密码
 export function setPwd (params) {
   return request({
-    url: '/buyer/passport/member/wallet/set-password',
+    url: '/supplier/passport/member/wallet/set-password',
     method: Method.POST,
     needToken: true,
     data: params
@@ -31,7 +31,7 @@ export function setPwd (params) {
 // 设置支付密码
 export function setUpdatePwdOrdinary (params) {
   return request({
-    url: '/buyer/passport/member/wallet/update-password/ordinary',
+    url: '/supplier/passport/member/wallet/update-password/ordinary',
     method: Method.GET,
     needToken: true,
     data: params
@@ -41,7 +41,7 @@ export function setUpdatePwdOrdinary (params) {
 // 修改会员资料
 export function editMemberInfo (params) {
   return request({
-    url: '/buyer/passport/member/editOwn',
+    url: '/supplier/passport/member/editOwn',
     method: Method.PUT,
     needToken: true,
     data: params
@@ -51,7 +51,7 @@ export function editMemberInfo (params) {
 // 修改密码
 export function editPwd (params) {
   return request({
-    url: `/buyer/passport/member/modifyPass`,
+    url: `/supplier/passport/member/modifyPass`,
     method: Method.PUT,
     needToken: true,
     data: params
@@ -61,7 +61,7 @@ export function editPwd (params) {
 // 获取密码状态
 export function logout () {
   return request({
-    url: '/buyer/passport/member/logout',
+    url: '/supplier/passport/member/logout',
     method: Method.POST,
     needToken: true
   })

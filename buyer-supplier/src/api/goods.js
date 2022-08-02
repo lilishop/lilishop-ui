@@ -5,7 +5,7 @@ import request, {
 // 商品列表
 export function goodsList (params) {
   return request({
-    url: '/buyer/goods/goods/es',
+    url: '/supplier/goods/goods/es',
     method: Method.GET,
     needToken: false,
     params
@@ -15,7 +15,7 @@ export function goodsList (params) {
 // 商品分类 筛选条件  品牌， 尺寸等
 export function filterList (params) {
   return request({
-    url: '/buyer/goods/goods/es/related',
+    url: '/supplier/goods/goods/es/related',
     method: Method.GET,
     needToken: false,
     params
@@ -25,7 +25,7 @@ export function filterList (params) {
 // id获取商品详情
 export function goodsDetail (goodsId) {
   return request({
-    url: `/buyer/goods/goods/get/${goodsId}`,
+    url: `/supplier/goods/goods/get/${goodsId}`,
     method: Method.GET,
     needToken: false
   });
@@ -34,7 +34,7 @@ export function goodsDetail (goodsId) {
 // id获取商品Sku详情
 export function goodsSkuDetail (params) {
   return request({
-    url: `/buyer/goods/goods/sku/${params.goodsId}/${params.skuId}`,
+    url: `/supplier/goods/goods/sku/${params.goodsId}/${params.skuId}`,
     method: Method.GET,
     needToken: true,
     params
@@ -44,7 +44,7 @@ export function goodsSkuDetail (params) {
 // 获取所有商品分类
 export function getCategory (parentId) {
   return request({
-    url: `/buyer/goods/category/get/${parentId}`,
+    url: `/supplier/goods/category/get/${parentId}`,
     method: Method.GET,
     needToken: false
   });
@@ -53,7 +53,7 @@ export function getCategory (parentId) {
 // 当前拼团活动未成团会员
 export function pintuanMembers (pintuanId) {
   return request({
-    url: `/buyer/promotion/pintuan/${pintuanId}/members`,
+    url: `/supplier/promotion/pintuan/${pintuanId}/members`,
     method: Method.GET,
     needToken: false
   });
@@ -65,7 +65,7 @@ export function pintuanMembers (pintuanId) {
  */
 export function hotWords (params) {
   return request({
-    url: `/buyer/goods/goods/hot-words`,
+    url: `/supplier/goods/goods/hot-words`,
     method: Method.GET,
     needToken: false,
     params

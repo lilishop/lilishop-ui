@@ -48,7 +48,7 @@ export function getRegion (id) {
  */
 export function articleList (params) {
   return request({
-    url: `/buyer/other/article`,
+    url: `/supplier/other/article`,
     method: Method.GET,
     params
   });
@@ -60,7 +60,7 @@ export function articleList (params) {
  */
 export function articleCateList () {
   return request({
-    url: `/buyer/other/article/articleCategory/list`,
+    url: `/supplier/other/article/articleCategory/list`,
     method: Method.GET
   });
 }
@@ -68,7 +68,7 @@ export function articleCateList () {
 // 通过id获取文章
 export function articleDetail (id) {
   return request({
-    url: `/buyer/other/article/get/${id}`,
+    url: `/supplier/other/article/get/${id}`,
     method: Method.GET
   });
 }
