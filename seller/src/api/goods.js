@@ -3,15 +3,8 @@ import {
   getRequest,
   postRequest,
   putRequest,
-  deleteRequest,
-  importRequest,
-  getRequestWithNoToken,
-  commonUrl
+  deleteRequest
 } from "@/libs/axios";
-// 获取数据字典
-export const getDictData = "/dictData/getByType/";
-// Websocket
-export const ws = "/ws";
 
 // 获取当前店铺分类
 export const getShopGoodsLabelList = () => {
@@ -142,10 +135,6 @@ export const getGoodsSkuData = params => {
   return getRequest("/goods/goods/sku/list", params);
 };
 
-//  获取商品分页列表
-export const getGoodsListData = params => {
-  return getRequest("/goods/goods/list", params);
-};
 //  获取待审核商品分页列表
 export const getAuthGoodsListData = params => {
   return getRequest("/goods/auth/list", params);
@@ -234,14 +223,12 @@ export const updateGoodsSkuStocks = params => {
 export const getGoodsListDataSeller = params => {
   return getRequest("/goods/goods/list", params);
 };
-//  获取商品告警分页列表
-export const getGoodsListDataByStockSeller = params => {
-  return getRequest("/goods/goods/list/stock", params);
-};
+
 //  获取商品详情
 export const getGoods = id => {
   return getRequest(`/goods/goods/get/${id}`);
 };
+
 // 上架商品
 export const upGoods = params => {
   return putRequest(`/goods/goods/up`, params);
@@ -257,8 +244,9 @@ export const lowGoods = params => {
 
 // 获取商品单位列表
 export const getGoodsUnitList = params => {
-  return getRequest(`/goods/goodsUnit`,params);
+  return getRequest(`/goods/goodsUnit`, params);
 };
+
 //根据分类id获取关联品牌
 export const getCategoryBrandListDataSeller = (category_id, params) => {
   return getRequest(`/goods/category/${category_id}/brands`, params);

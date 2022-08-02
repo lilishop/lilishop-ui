@@ -36,15 +36,17 @@ service.interceptors.request.use(
       uuid = uuidv4();
       setStore('uuid', uuid);
     }
-    if (config.client === 'Supplier') {
-      config.baseURL = config.baseURL + "/supplier";
+
+    let userRole = getStore("role");
+    if ((userRole && userRole === 'Supplier') || config.client === 'Supplier') {
+      if (!config.url.includes("common")) {
+        config.baseURL = config.baseURL + "/supplier";
+      }
     } else {
       if (!config.url.includes("common")) {
         config.baseURL = config.baseURL + BASE.PREFIX;
       }
     }
-    console.log(config);
-
     config.headers["uuid"] = uuid;
     return config;
   },
@@ -392,5 +394,101 @@ export const postSupplierRequestWithNoTokenData = (url, params) => {
     },
     client: "Supplier",
     data: params
+  });
+};
+
+/**
+ * 无需token验证的请求 避免旧token过期导致请求失败
+ * @param {*} url
+ * @param {*} params
+ */
+export const getSupplierRequestWithNoToken = (url, params) => {
+  return service({
+    method: "get",
+    url: `${url}`,
+    client: "Supplier",
+    params: params
+  });
+};
+
+export const postSupplierRequest = (url, params, headers) => {
+  let accessToken = getStore("accessToken");
+  return service({
+    method: "post",
+    url: `${url}`,
+    data: params,
+    client: "Supplier",
+    transformRequest: headers
+      ? undefined
+      : [
+        function (data) {
+          let ret = "";
+          for (let it in data) {
+            ret +=
+              encodeURIComponent(it) +
+              "=" +
+              encodeURIComponent(data[it]) +
+              "&";
+          }
+          ret = ret.substring(0, ret.length - 1);
+          return ret;
+        }
+      ],
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      accessToken: accessToken,
+      ...headers
+    }
+  });
+};
+
+export const getSupplierRequest = (url, params, resBlob) => {
+  let accessToken = getStore("accessToken");
+  let data = {
+    method: "get",
+    url: `${url}`,
+    params: params,
+    headers: {
+      accessToken: accessToken
+    },
+    client: "Supplier",
+    responseType: "blob"
+  };
+  if (resBlob != "blob") {
+    delete data.responseType;
+  }
+
+
+  return service(data);
+};
+
+export const putSupplierRequest = (url, params, headers) => {
+  let accessToken = getStore("accessToken");
+  return service({
+    method: "put",
+    url: `${url}`,
+    data: params,
+    client: "Supplier",
+    transformRequest: headers
+      ? undefined
+      : [
+        function (data) {
+          let ret = "";
+          for (let it in data) {
+            ret +=
+              encodeURIComponent(it) +
+              "=" +
+              encodeURIComponent(data[it]) +
+              "&";
+          }
+          ret = ret.substring(0, ret.length - 1);
+          return ret;
+        }
+      ],
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      accessToken: accessToken,
+      ...headers
+    }
   });
 };

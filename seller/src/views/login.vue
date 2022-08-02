@@ -72,7 +72,7 @@
 
 <script>
 import { login, userMsg } from "@/api/index";
-import { loginSupplier } from "@/api/supplier";
+import { loginSupplier, supplierMsg } from "@/api/supplier";
 import Cookies from "js-cookie";
 import Header from "@/views/main-components/header";
 import Footer from "@/views/main-components/footer";
@@ -126,29 +126,54 @@ export default {
       this.setStore("accessToken", accessToken);
       this.setStore("refreshToken", res.result.refreshToken);
 
-      // 获取用户信息
-      userMsg().then((res) => {
-        if (res.success) {
-          this.setStore("saveLogin", this.saveLogin);
-          res.result.role = this.isRetailer ? "Retailer" : "Supplier";
-          if (this.saveLogin) {
-            // 保存7天
-            Cookies.set("userInfoSeller", JSON.stringify(res.result), {
-              expires: 7,
+      if (this.isRetailer) {
+        // 获取用户信息
+        userMsg().then((res) => {
+          if (res.success) {
+            this.setStore("saveLogin", this.saveLogin);
+            this.setStore("role", "Retailer");
+            if (this.saveLogin) {
+              // 保存7天
+              Cookies.set("userInfoSeller", JSON.stringify(res.result), {
+                expires: 7,
+              });
+            } else {
+              Cookies.set("userInfoSeller", JSON.stringify(res.result));
+            }
+            this.$store.commit("setAvatarPath", res.result.storeLogo);
+            // 加载菜单
+            util.initRouter(this);
+            this.$router.push({
+              name: "home_index",
             });
           } else {
-            Cookies.set("userInfoSeller", JSON.stringify(res.result));
+            this.loading = false;
           }
-          this.$store.commit("setAvatarPath", res.result.storeLogo);
-          // 加载菜单
-          util.initRouter(this);
-          this.$router.push({
-            name: "home_index",
-          });
-        } else {
-          this.loading = false;
-        }
-      });
+        });
+      } else {
+        supplierMsg().then((res) => {
+          if (res.success) {
+            this.setStore("saveLogin", this.saveLogin);
+            this.setStore("role", "Supplier");
+            if (this.saveLogin) {
+              // 保存7天
+              Cookies.set("userInfoSeller", JSON.stringify(res.result), {
+                expires: 7,
+              });
+            } else {
+              Cookies.set("userInfoSeller", JSON.stringify(res.result));
+            }
+            this.$store.commit("setAvatarPath", res.result.storeLogo);
+            // 加载菜单
+            util.initRouter(this);
+            this.$router.push({
+              name: "home_index",
+            });
+          } else {
+            this.loading = false;
+          }
+        });
+      }
     },
     changeClient() {
       this.isRetailer = !this.isRetailer;
@@ -156,6 +181,7 @@ export default {
       Cookies.set("userInfoSeller", "");
       this.$store.commit("clearOpenedSubmenu");
       this.setStore("accessToken", "");
+      this.setStore("role", "");
       window.localStorage.setItem("menuData", "");
       this.form.username = "";
       this.form.password = "";

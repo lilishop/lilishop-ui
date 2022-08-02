@@ -325,7 +325,6 @@ util.initRouter = function (vm) { // 初始化路由
         // 未登录
         return;
     }
-    userInfo = JSON.parse(Cookies.get("userInfoSeller"));
 
     if (!vm.$store.state.app.added) {
         // 加载菜单
@@ -342,8 +341,9 @@ util.initRouter = function (vm) { // 初始化路由
                 }
             }
         }
+        let userRole = window.localStorage.getItem("role");
         menuData = menuData.filter(i => {
-            return i.role === 'all' || i.role === userInfo.role
+            return i.role === 'all' || i.role === userRole
         });
         util.initAllMenuData(constRoutes, menuData);
         util.initRouterNode(otherRoutes, otherRouter);

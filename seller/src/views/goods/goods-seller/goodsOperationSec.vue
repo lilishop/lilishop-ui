@@ -89,8 +89,13 @@
                 @on-change="renderTableData(skuTableData)"
                 v-model="baseInfoForm.salesModel"
               >
-                <Radio title="零售型" label="RETAIL">零售型</Radio>
-                <Radio title="批发型" label="WHOLESALE">批发型</Radio>
+                <Radio
+                  v-for="(m, m_index) in currentSalesModelList"
+                  :key="m_index"
+                  :title="m.value"
+                  :label="m.key"
+                  >{{ m.value }}</Radio
+                >
               </RadioGroup>
               <RadioGroup
                 type="button"
@@ -754,6 +759,15 @@ export default {
       showSkuPicture: false,
       //选择的sku
       selectedSku: {},
+      currentSalesModelList: [],
+      supplierSalesModelList: [
+        { key: "PROXY", value: "代发" },
+        { key: "PURCHASING", value: "采购" },
+      ],
+      retailerSalesModelList: [
+        { key: "RETAIL", value: "零售" },
+        { key: "WHOLESALE", value: "批发" },
+      ],
       wholesalePreviewColumns: [
         {
           title: "销售规则",
@@ -1859,6 +1873,11 @@ export default {
         this.logisticsTemplate = res.result;
       }
     });
+    this.currentSalesModelList =
+        this.getStore("role") === "Supplier"
+          ? this.supplierSalesModelList
+          : this.retailerSalesModelList;
+          
     if (this.$route.query.id || this.$route.query.draftId) {
       // 编辑商品、模板
       this.GET_GoodData(this.$route.query.id, this.$route.query.draftId);

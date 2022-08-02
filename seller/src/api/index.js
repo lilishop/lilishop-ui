@@ -11,7 +11,7 @@ import {
 
 //获取所有city
 export const getAllCity = (params) => {
-  return getRequest(commonUrl+'/common/common/region/allCity', params)
+  return getRequest(commonUrl + '/common/common/region/allCity', params)
 }
 
 // 登陆
@@ -19,9 +19,7 @@ export const getHomeNotice = params => {
   return getRequest("/other/article/getByPage?type=STORE_ARTICLE&pageSize=15");
 };
 
-
-
-// 登陆
+// 获取home页数据
 export const getSellerHomeData = params => {
   return getRequest("/statistics/index", params);
 };
@@ -234,14 +232,10 @@ export const aliDownloadFile = (fKey, params) => {
   return getRequest(`/file/ali/download/${fKey}`, params);
 };
 
-
 // base64上传
 export const base64Upload = params => {
   return postRequest("/common/common/upload/file", params);
 };
-
-
-
 
 // 添加商品计量单位
 export const addGoodsUnit = (params) => {
