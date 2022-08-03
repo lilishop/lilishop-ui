@@ -110,10 +110,13 @@
             </FormItem>
             <FormItem
               class="form-item-view-el"
-              label="销售规则"
+              :label="
+                baseInfoForm.salesModel == 'WHOLESALE' ? '销售规则' : '阶梯价格'
+              "
               prop="wholesaleRule"
               v-if="
-                baseInfoForm.salesModel == 'WHOLESALE'
+                baseInfoForm.salesModel == 'WHOLESALE' ||
+                baseInfoForm.salesModel === 'PURCHASING'
               "
             >
               <div class="form-item-view-wholesale">
@@ -761,7 +764,12 @@ export default {
       showSkuPicture: false,
       //选择的sku
       selectedSku: {},
-      currentSalesModelList: [
+      currentSalesModelList: [],
+      supplierSalesModelList: [
+        { key: "PROXY", value: "代发" },
+        { key: "PURCHASING", value: "采购" },
+      ],
+      retailerSalesModelList: [
         { key: "RETAIL", value: "零售" },
         { key: "WHOLESALE", value: "批发" },
       ],
@@ -1122,6 +1130,14 @@ export default {
         }
       }, 1000);
     },
+    handleTemplateBottom() {
+      setTimeout(() => {
+        if (this.params.pageNumber * this.params.pageSize <= this.total) {
+          this.params.pageNumber++;
+          this.GET_GoodsUnit();
+        }
+      }, 1000);
+    },
     // 获取商品单位
     GET_GoodsUnit() {
       API_GOODS.getGoodsUnitList(this.params).then((res) => {
@@ -1201,7 +1217,7 @@ export default {
       this.getGoodsBrandList();
       /** 查询商品参数 */
       this.GET_GoodsParams();
-      /** 查询店铺商品分类 */
+      /** 查询店铺商品分类 */
       this.GET_ShopGoodsLabel();
       this.GET_GoodsUnit();
     },
@@ -1424,20 +1440,26 @@ export default {
       });
 
       // 有成本价和价格的情况
-      this.baseInfoForm.salesModel !== "WHOLESALE"
+      this.baseInfoForm.salesModel !== "WHOLESALE" &&
+      this.baseInfoForm.salesModel !== "PURCHASING"
         ? pushData.push(
             {
               title: "成本价",
               slot: "cost",
             },
             {
-              title: "价格",
+              title:
+                this.baseInfoForm.salesModel === "PROXY" ? "供应价格" : "价格",
               slot: "price",
             }
           )
         : "";
 
-      if (this.baseInfoForm.salesModel === "WHOLESALE" && this.wholesaleData) {
+      if (
+        (this.baseInfoForm.salesModel === "WHOLESALE" ||
+          this.baseInfoForm.salesModel === "PURCHASING") &&
+        this.wholesaleData
+      ) {
         this.wholesaleData.forEach((item, index) => {
           pushData.push({
             title: "购买量 ≥ " + item.num,
@@ -1870,6 +1892,11 @@ export default {
         this.logisticsTemplate = res.result;
       }
     });
+    this.currentSalesModelList =
+      this.getStore("role") === "Supplier"
+        ? this.supplierSalesModelList
+        : this.retailerSalesModelList;
+
     if (this.$route.query.id || this.$route.query.draftId) {
       // 编辑商品、模板
       this.GET_GoodData(this.$route.query.id, this.$route.query.draftId);

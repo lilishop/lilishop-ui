@@ -83,7 +83,7 @@ export default {
     return {
       saveLogin: true, // 保存登录状态
       loading: false, // 加载状态
-      isRetailer: true, //
+      isRetailer: false, //
       // selectClient: "Retailer",
       clientList: [
         { key: "Supplier", value: "供应端" },
@@ -121,29 +121,65 @@ export default {
       this.setStore("accessToken", accessToken);
       this.setStore("refreshToken", res.result.refreshToken);
 
-      // 获取用户信息
-      userMsg().then((res) => {
-        if (res.success) {
-          this.setStore("saveLogin", this.saveLogin);
-          this.setStore("role", "Retailer");
-          if (this.saveLogin) {
-            // 保存7天
-            Cookies.set("userInfoSeller", JSON.stringify(res.result), {
-              expires: 7,
+      if (this.isRetailer) {
+        // 获取用户信息
+        userMsg().then((res) => {
+          if (res.success) {
+            this.setStore("saveLogin", this.saveLogin);
+            this.setStore("role", "Retailer");
+            if (this.saveLogin) {
+              // 保存7天
+              Cookies.set("userInfoSeller", JSON.stringify(res.result), {
+                expires: 7,
+              });
+            } else {
+              Cookies.set("userInfoSeller", JSON.stringify(res.result));
+            }
+            this.$store.commit("setAvatarPath", res.result.storeLogo);
+            // 加载菜单
+            util.initRouter(this);
+            this.$router.push({
+              name: "home_index",
             });
           } else {
-            Cookies.set("userInfoSeller", JSON.stringify(res.result));
+            this.loading = false;
           }
-          this.$store.commit("setAvatarPath", res.result.storeLogo);
-          // 加载菜单
-          util.initRouter(this);
-          this.$router.push({
-            name: "home_index",
-          });
-        } else {
-          this.loading = false;
-        }
-      });
+        });
+      } else {
+        supplierMsg().then((res) => {
+          if (res.success) {
+            this.setStore("saveLogin", this.saveLogin);
+            this.setStore("role", "Supplier");
+            if (this.saveLogin) {
+              // 保存7天
+              Cookies.set("userInfoSeller", JSON.stringify(res.result), {
+                expires: 7,
+              });
+            } else {
+              Cookies.set("userInfoSeller", JSON.stringify(res.result));
+            }
+            this.$store.commit("setAvatarPath", res.result.storeLogo);
+            // 加载菜单
+            util.initRouter(this);
+            this.$router.push({
+              name: "home_index",
+            });
+          } else {
+            this.loading = false;
+          }
+        });
+      }
+    },
+    changeClient() {
+      this.isRetailer = !this.isRetailer;
+      Cookies.set("accessToken", "");
+      Cookies.set("userInfoSeller", "");
+      this.$store.commit("clearOpenedSubmenu");
+      this.setStore("accessToken", "");
+      this.setStore("role", "");
+      window.localStorage.setItem("menuData", "");
+      this.form.username = "";
+      this.form.password = "";
     },
     submitLogin() {
       // 登录提交
@@ -162,16 +198,29 @@ export default {
       let fd = new FormData();
       fd.append("username", this.form.username);
       fd.append("password", this.md5(this.form.password));
-      login(fd)
-        .then((res) => {
-          this.loading = false;
-          if (res && res.success) {
-            this.afterLogin(res);
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
+      if (this.isRetailer) {
+        login(fd)
+          .then((res) => {
+            this.loading = false;
+            if (res && res.success) {
+              this.afterLogin(res);
+            }
+          })
+          .catch(() => {
+            this.loading = false;
+          });
+      } else {
+        loginSupplier(fd)
+          .then((res) => {
+            this.loading = false;
+            if (res && res.success) {
+              this.afterLogin(res);
+            }
+          })
+          .catch(() => {
+            this.loading = false;
+          });
+      }
 
       this.$refs.verify.show = false;
     },

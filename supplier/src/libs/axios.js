@@ -36,7 +36,7 @@ service.interceptors.request.use(
       uuid = uuidv4();
       setStore('uuid', uuid);
     }
-
+    
     config.headers["uuid"] = uuid;
     return config;
   },
