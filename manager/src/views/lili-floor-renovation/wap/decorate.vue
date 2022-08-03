@@ -362,7 +362,7 @@
           <!-- 链接地址-->
           <div
             class="decorate-view"
-            v-if="item.url && item.url.___type == 'other'"
+            v-if="item.url.url && item.url.___type == 'other'"
           >
             <div class="decorate-view-title">外部链接</div>
             <div>
