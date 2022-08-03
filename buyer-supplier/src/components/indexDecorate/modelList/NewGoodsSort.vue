@@ -167,7 +167,7 @@ export default {
         height: 23px;
         top: 10px;
         right: 16px;
-        background: url(../../../assets/images/festival_icon.png);
+        background: url(/assets/images/festival_icon.png);
         color: #fff;
         text-align: center;
       }

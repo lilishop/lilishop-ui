@@ -173,7 +173,7 @@ export default {
     width: 190px;
     height: 100%;
     color: #fff;
-    background-image: url("../../../assets/images/seckillBg.png");
+    background-image: url("/assets/images/seckillBg.png");
 
     .title {
       width: 100%;
