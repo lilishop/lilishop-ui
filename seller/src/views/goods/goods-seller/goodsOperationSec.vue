@@ -1895,7 +1895,7 @@ export default {
 @import "./addGoods.scss";
 </style>
 
-<style>
+<style scoped>
 .ivu-select .ivu-select-dropdown {
   overflow: hidden !important;
 }
