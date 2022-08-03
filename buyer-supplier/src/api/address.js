@@ -5,7 +5,7 @@ import request, {
 // 会员收货地址列表
 export function memberAddress () {
   return request({
-    url: '/buyer/member/address',
+    url: '/supplier/member/address',
     needToken: true,
     method: Method.GET
   });
@@ -14,7 +14,7 @@ export function memberAddress () {
 // 添加收货地址
 export function newMemberAddress (params) {
   return request({
-    url: '/buyer/member/address',
+    url: '/supplier/member/address',
     needToken: true,
     method: Method.POST,
     data: params
@@ -24,7 +24,7 @@ export function newMemberAddress (params) {
 // 编辑收货地址
 export function editMemberAddress (params) {
   return request({
-    url: '/buyer/member/address',
+    url: '/supplier/member/address',
     needToken: true,
     method: Method.PUT,
     params
@@ -34,7 +34,7 @@ export function editMemberAddress (params) {
 // 删除收货地址
 export function delMemberAddress (id) {
   return request({
-    url: `/buyer/member/address/delById/${id}`,
+    url: `/supplier/member/address/delById/${id}`,
     needToken: true,
     method: Method.DELETE
   });
@@ -43,7 +43,7 @@ export function delMemberAddress (id) {
 // 根据id获取会员地址详情
 export function getAddrDetail (id) {
   return request({
-    url: `/buyer/member/address/get/${id}`,
+    url: `/supplier/member/address/get/${id}`,
     needToken: true,
     method: Method.GET
   });

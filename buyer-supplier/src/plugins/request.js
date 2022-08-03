@@ -25,6 +25,10 @@ export const sellerUrl =
   process.env.NODE_ENV === 'development'
     ? BASE.API_DEV.seller
     : BASE.API_PROD.seller;
+export const supplierUrl =
+  process.env.NODE_ENV === 'development'
+    ? BASE.API_DEV.supplier
+    : BASE.API_PROD.supplier;
 // 创建axios实例
 var isRefreshToken = 0;
 const refreshToken = getTokenDebounce();

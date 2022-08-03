@@ -5,7 +5,7 @@ import request, {
 // 店铺分页列表
 export function shopList (params) {
   return request({
-    url: '/buyer/store/store',
+    url: '/supplier/store/store',
     needToken: true,
     method: Method.GET,
     params
@@ -15,7 +15,7 @@ export function shopList (params) {
 // 申请店铺第一步-填写企业信息
 export function applyFirst (params) {
   return request({
-    url: '/buyer/store/store/apply/first',
+    url: '/supplier/store/store/apply/first',
     needToken: true,
     method: Method.PUT,
     params
@@ -25,7 +25,7 @@ export function applyFirst (params) {
 // 申请店铺第一步-填写企业信息
 export function applySecond (params) {
   return request({
-    url: '/buyer/store/store/apply/second',
+    url: '/supplier/store/store/apply/second',
     needToken: true,
     method: Method.PUT,
     params
@@ -35,7 +35,7 @@ export function applySecond (params) {
 // 申请店铺第一步-填写企业信息
 export function applyThird (params) {
   return request({
-    url: '/buyer/store/store/apply/third',
+    url: '/supplier/store/store/apply/third',
     needToken: true,
     method: Method.PUT,
     params
@@ -45,7 +45,7 @@ export function applyThird (params) {
 // 店铺详情
 export function getDetailById (id) {
   return request({
-    url: `/buyer/store/store/get/detail/${id}`,
+    url: `/supplier/store/store/get/detail/${id}`,
     needToken: true,
     method: Method.GET
   })
@@ -53,7 +53,7 @@ export function getDetailById (id) {
 // 店铺分类
 export function getCateById (id) {
   return request({
-    url: `/buyer/store/store/label/get/${id}`,
+    url: `/supplier/store/store/label/get/${id}`,
     needToken: true,
     method: Method.GET
   })
@@ -61,7 +61,7 @@ export function getCateById (id) {
 //  店铺入驻协议
 export function agreement () {
   return request({
-    url: `/buyer/other/article/type/STORE_REGISTER`,
+    url: `/supplier/other/article/type/STORE_REGISTER`,
     needToken: true,
     method: Method.GET
   })
@@ -70,7 +70,7 @@ export function agreement () {
 //  获取当前登录会员的店铺信息
 export function applyStatus () {
   return request({
-    url: `/buyer/store/store/apply`,
+    url: `/supplier/store/store/apply`,
     needToken: true,
     method: Method.GET
   })

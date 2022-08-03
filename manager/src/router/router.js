@@ -50,6 +50,24 @@ export const otherRouter = {
       component: () => import("@/views/goods/goods-manage/parameter.vue")
     },
     {
+      path: "supplier",
+      title: "供应商列表",
+      name: "supplier",
+      component: () => import("@/views/supplier/supplier/supplierList.vue")
+    },
+    {
+      path: "supplier-operation",
+      title: "供应商操作",
+      name: "shop-operation",
+      component: () => import("@/views/supplier/supplier/supplierOperation.vue")
+    },
+    {
+      path: "supplier-detail",
+      title: "供应商详细",
+      name: "supplier-detail",
+      component: () => import("@/views/supplier/supplier/supplierDetail.vue")
+    },
+    {
       path: "shop",
       title: "店铺列表",
       name: "shop",

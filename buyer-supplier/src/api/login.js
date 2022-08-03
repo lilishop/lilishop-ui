@@ -1,24 +1,12 @@
 
-import request, {Method, buyerUrl} from '@/plugins/request.js';
-
-/**
- * 注册
- */
-export function regist (params) {
-  return request({
-    url: '/buyer/passport/member/register',
-    method: Method.POST,
-    needToken: false,
-    data: params
-  });
-}
+import request, {Method, supplierUrl} from '@/plugins/request.js';
 
 /**
  * 账号密码登录
  */
 export function login (params) {
   return request({
-    url: '/buyer/passport/member/userLogin',
+    url: '/supplier/passport/login/userLogin',
     method: Method.POST,
     needToken: false,
     data: params,
@@ -31,7 +19,7 @@ export function login (params) {
  */
 export function smsLogin (params) {
   return request({
-    url: '/buyer/passport/member/smsLogin',
+    url: '/supplier/passport/login/smsLogin',
     method: Method.POST,
     needToken: false,
     data: params,
@@ -44,28 +32,10 @@ export function smsLogin (params) {
  */
 export function getMemberMsg (params) {
   return request({
-    url: '/buyer/passport/member',
+    url: '/supplier/passport/login',
     method: Method.GET,
     needToken: true,
     params
-  });
-}
-
-/**
- * 第三方登录 支付宝，微博，qq,微信
- */
-export function webLogin (type) {
-  window.open(`${buyerUrl}/buyer/passport/connect/connect/login/web/${type}`, 'blank');
-}
-
-/**
- * 第三方登录成功 回调接口
- */
-export function loginCallback (uuid) {
-  return request({
-    url: `/buyer/passport/connect/connect/result?state=${uuid}`,
-    method: Method.GET,
-    needToken: false
   });
 }
 
@@ -74,7 +44,7 @@ export function loginCallback (uuid) {
  */
 export function validateCode (params) {
   return request({
-    url: `/buyer/passport/member/resetByMobile`,
+    url: `/supplier/passport/member/resetByMobile`,
     method: Method.POST,
     needToken: false,
     params
@@ -86,7 +56,7 @@ export function validateCode (params) {
  */
 export function resetPassword (params) {
   return request({
-    url: `/buyer/passport/member/resetPassword`,
+    url: `/supplier/passport/member/resetPassword`,
     method: Method.POST,
     needToken: false,
     params

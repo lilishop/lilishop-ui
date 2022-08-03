@@ -3,7 +3,7 @@ import request, {Method} from '@/plugins/request.js';
 // 查询账户余额
 export function getMembersWallet () {
   return request({
-    url: '/buyer/wallet/wallet',
+    url: '/supplier/wallet/wallet',
     method: Method.GET,
     needToken: true
   });
@@ -12,7 +12,7 @@ export function getMembersWallet () {
 // 查询余额列表
 export function getDepositLog (params) {
   return request({
-    url: '/buyer/wallet/log',
+    url: '/supplier/wallet/log',
     method: Method.GET,
     needToken: true,
     params
@@ -22,7 +22,7 @@ export function getDepositLog (params) {
 // 查询充值记录
 export function getRecharge (params) {
   return request({
-    url: '/buyer/wallet/recharge',
+    url: '/supplier/wallet/recharge',
     method: Method.GET,
     needToken: true,
     params
@@ -32,7 +32,7 @@ export function getRecharge (params) {
 // 查询提现记录
 export function getWithdrawApply (params) {
   return request({
-    url: '/buyer/member/withdrawApply',
+    url: '/supplier/member/withdrawApply',
     method: Method.GET,
     needToken: true,
     params
@@ -42,7 +42,7 @@ export function getWithdrawApply (params) {
 // 在线充值
 export function recharge (params) {
   return request({
-    url: '/buyer/trade/recharge',
+    url: '/supplier/trade/recharge',
     method: Method.POST,
     needToken: true,
     data: params
@@ -52,7 +52,7 @@ export function recharge (params) {
 // 提现
 export function withdrawalApply (params) {
   return request({
-    url: '/buyer/wallet/wallet/withdrawal',
+    url: '/supplier/wallet/wallet/withdrawal',
     method: Method.POST,
     needToken: true,
     data: params
@@ -62,7 +62,7 @@ export function withdrawalApply (params) {
 // 收藏商品、店铺
 export function collectGoods (type, id) {
   return request({
-    url: `/buyer/member/collection/add/${type}/${id}`,
+    url: `/supplier/member/collection/add/${type}/${id}`,
     method: Method.POST,
     needToken: true
   });
@@ -71,7 +71,7 @@ export function collectGoods (type, id) {
 // 取消 收藏商品、店铺
 export function cancelCollect (type, id) {
   return request({
-    url: `/buyer/member/collection/delete/${type}/${id}`,
+    url: `/supplier/member/collection/delete/${type}/${id}`,
     method: Method.DELETE,
     needToken: true
   });
@@ -80,7 +80,7 @@ export function cancelCollect (type, id) {
 // 查看是否收藏
 export function isCollection (type, goodsId) {
   return request({
-    url: `/buyer/member/collection/isCollection/${type}/${goodsId}`,
+    url: `/supplier/member/collection/isCollection/${type}/${goodsId}`,
     method: Method.GET,
     needToken: true
   });
@@ -89,7 +89,7 @@ export function isCollection (type, goodsId) {
 // 会员收藏列表
 export function collectList (params) {
   return request({
-    url: `/buyer/member/collection/${params.type}`,
+    url: `/supplier/member/collection/${params.type}`,
     method: Method.GET,
     needToken: true,
     params
@@ -99,7 +99,7 @@ export function collectList (params) {
 // 单个商品评价
 export function goodsComment (params) {
   return request({
-    url: `/buyer/member/evaluation/${params.goodsId}/goodsEvaluation`,
+    url: `/supplier/member/evaluation/${params.goodsId}/goodsEvaluation`,
     method: Method.GET,
     needToken: false,
     params
@@ -109,7 +109,7 @@ export function goodsComment (params) {
 // 商品各评价类别数量
 export function goodsCommentNum (goodsId) {
   return request({
-    url: `/buyer/member/evaluation/${goodsId}/evaluationNumber`,
+    url: `/supplier/member/evaluation/${goodsId}/evaluationNumber`,
     method: Method.GET,
     needToken: false
   });
@@ -118,7 +118,7 @@ export function goodsCommentNum (goodsId) {
 // 添加会员评价
 export function addEvaluation (params) {
   return request({
-    url: `/buyer/member/evaluation`,
+    url: `/supplier/member/evaluation`,
     method: Method.POST,
     needToken: true,
     params
@@ -128,7 +128,7 @@ export function addEvaluation (params) {
 // 会员评价详情
 export function evaluationDetail (id) {
   return request({
-    url: `/buyer/member/evaluation/get/${id}`,
+    url: `/supplier/member/evaluation/get/${id}`,
     method: Method.GET,
     needToken: true
   });
@@ -137,7 +137,7 @@ export function evaluationDetail (id) {
 // 发票分页列表
 export function receiptList () {
   return request({
-    url: `/buyer/trade/receipt`,
+    url: `/supplier/trade/receipt`,
     method: Method.GET,
     needToken: true
   });
@@ -146,7 +146,7 @@ export function receiptList () {
 // 保存发票信息
 export function saveReceipt (params) {
   return request({
-    url: `/buyer/trade/receipt`,
+    url: `/supplier/trade/receipt`,
     method: Method.POST,
     needToken: true,
     params
@@ -156,7 +156,7 @@ export function saveReceipt (params) {
 // 获取可领取优惠券列表
 export function couponList (params) {
   return request({
-    url: `/buyer/promotion/coupon`,
+    url: `/supplier/promotion/coupon`,
     method: Method.GET,
     needToken: true,
     params
@@ -166,7 +166,7 @@ export function couponList (params) {
 // 会员优惠券列表
 export function memberCouponList (params) {
   return request({
-    url: `/buyer/promotion/coupon/getCoupons`,
+    url: `/supplier/promotion/coupon/getCoupons`,
     method: Method.GET,
     needToken: true,
     params
@@ -176,7 +176,7 @@ export function memberCouponList (params) {
 // 会员优惠券列表
 export function canUseCouponList (params) {
   return request({
-    url: `/buyer/promotion/coupon/canUse`,
+    url: `/supplier/promotion/coupon/canUse`,
     method: Method.GET,
     needToken: true,
     params
@@ -186,7 +186,7 @@ export function canUseCouponList (params) {
 // 领取优惠券
 export function receiveCoupon (couponId) {
   return request({
-    url: `/buyer/promotion/coupon/receive/${couponId}`,
+    url: `/supplier/promotion/coupon/receive/${couponId}`,
     method: Method.GET,
     needToken: true
   });
@@ -195,7 +195,7 @@ export function receiveCoupon (couponId) {
 // 获取申请售后列表
 export function afterSaleList (params) {
   return request({
-    url: `/buyer/order/afterSale/page`,
+    url: `/supplier/order/afterSale/page`,
     method: Method.GET,
     needToken: true,
     params
@@ -205,7 +205,7 @@ export function afterSaleList (params) {
 // 获取申请售后页面信息
 export function afterSaleInfo (sn) {
   return request({
-    url: `/buyer/order/afterSale/applyAfterSaleInfo/${sn}`,
+    url: `/supplier/order/afterSale/applyAfterSaleInfo/${sn}`,
     method: Method.GET,
     needToken: true
   });
@@ -214,7 +214,7 @@ export function afterSaleInfo (sn) {
 // 获取申请售后、投诉原因
 export function afterSaleReason (serviceType) {
   return request({
-    url: `/buyer/order/afterSale/get/afterSaleReason/${serviceType}`,
+    url: `/supplier/order/afterSale/get/afterSaleReason/${serviceType}`,
     method: Method.GET,
     needToken: true
   });
@@ -222,7 +222,7 @@ export function afterSaleReason (serviceType) {
 // 获取申请售后详情
 export function afterSaleDetail (sn) {
   return request({
-    url: `/buyer/order/afterSale/get/${sn}`,
+    url: `/supplier/order/afterSale/get/${sn}`,
     method: Method.GET,
     needToken: true
   });
@@ -230,7 +230,7 @@ export function afterSaleDetail (sn) {
 // 售后日志
 export function afterSaleLog (sn) {
   return request({
-    url: `/buyer/order/afterSale/get/getAfterSaleLog/${sn}`,
+    url: `/supplier/order/afterSale/get/getAfterSaleLog/${sn}`,
     method: Method.GET,
     needToken: true
   });
@@ -239,7 +239,7 @@ export function afterSaleLog (sn) {
 // 申请售后
 export function applyAfterSale (params) {
   return request({
-    url: `/buyer/order/afterSale/save/${params.orderItemSn}`,
+    url: `/supplier/order/afterSale/save/${params.orderItemSn}`,
     method: Method.POST,
     needToken: true,
     params
@@ -249,7 +249,7 @@ export function applyAfterSale (params) {
 // 取消售后申请
 export function cancelAfterSale (afterSaleSn) {
   return request({
-    url: `/buyer/order/afterSale/cancel/${afterSaleSn}`,
+    url: `/supplier/order/afterSale/cancel/${afterSaleSn}`,
     method: Method.POST,
     needToken: true
   });
@@ -258,7 +258,7 @@ export function cancelAfterSale (afterSaleSn) {
 // 投诉商品
 export function handleComplain (data) {
   return request({
-    url: `/buyer/order/complain`,
+    url: `/supplier/order/complain`,
     method: Method.POST,
     needToken: true,
     data
@@ -267,7 +267,7 @@ export function handleComplain (data) {
 // 分页获取我的投诉列表
 export function complainList (params) {
   return request({
-    url: `/buyer/order/complain`,
+    url: `/supplier/order/complain`,
     method: Method.GET,
     needToken: true,
     params
@@ -279,7 +279,7 @@ export function complainList (params) {
  */
 export function getComplainDetail (id) {
   return request({
-    url: `/buyer/order/complain/${id}`,
+    url: `/supplier/order/complain/${id}`,
     method: Method.GET,
     needToken: true
   });
@@ -290,7 +290,7 @@ export function getComplainDetail (id) {
  */
 export function clearComplain (id) {
   return request({
-    url: `/buyer/order/complain/status/${id}`,
+    url: `/supplier/order/complain/status/${id}`,
     method: Method.PUT,
     needToken: true
   });
@@ -301,7 +301,7 @@ export function clearComplain (id) {
  */
 export function distribution () {
   return request({
-    url: `/buyer/distribution/distribution`,
+    url: `/supplier/distribution/distribution`,
     method: Method.GET,
     needToken: true
   });
@@ -314,7 +314,7 @@ export function distribution () {
  */
 export function applyDistribution (params) {
   return request({
-    url: `/buyer/distribution/distribution`,
+    url: `/supplier/distribution/distribution`,
     method: Method.POST,
     needToken: true,
     params
@@ -326,7 +326,7 @@ export function applyDistribution (params) {
  */
 export function getDistOrderList (params) {
   return request({
-    url: `/buyer/distribution/order`,
+    url: `/supplier/distribution/order`,
     method: Method.GET,
     needToken: true,
     params
@@ -338,7 +338,7 @@ export function getDistOrderList (params) {
  */
 export function getDistGoodsList (params) {
   return request({
-    url: `/buyer/distribution/goods`,
+    url: `/supplier/distribution/goods`,
     method: Method.GET,
     needToken: true,
     params
@@ -352,7 +352,7 @@ export function getDistGoodsList (params) {
  */
 export function selectDistGoods (params) {
   return request({
-    url: `/buyer/distribution/goods/checked/${params.distributionGoodsId}`,
+    url: `/supplier/distribution/goods/checked/${params.distributionGoodsId}`,
     method: Method.GET,
     needToken: true,
     params
@@ -364,7 +364,7 @@ export function selectDistGoods (params) {
  */
 export function distCashHistory (params) {
   return request({
-    url: `/buyer/distribution/cash`,
+    url: `/supplier/distribution/cash`,
     method: Method.GET,
     needToken: true,
     params
@@ -376,7 +376,7 @@ export function distCashHistory (params) {
  */
 export function distCash (params) {
   return request({
-    url: `/buyer/distribution/cash`,
+    url: `/supplier/distribution/cash`,
     method: Method.POST,
     needToken: true,
     params
@@ -390,7 +390,7 @@ export function distCash (params) {
  */
 export function tracksList (params) {
   return request({
-    url: `/buyer/member/footprint`,
+    url: `/supplier/member/footprint`,
     method: Method.GET,
     needToken: true,
     params
@@ -402,7 +402,7 @@ export function tracksList (params) {
  */
 export function clearTracks () {
   return request({
-    url: `/buyer/member/footprint`,
+    url: `/supplier/member/footprint`,
     method: Method.DELETE,
     needToken: true
   });
@@ -414,7 +414,7 @@ export function clearTracks () {
  */
 export function clearTracksById (ids) {
   return request({
-    url: `/buyer/member/footprint/delByIds/${ids}`,
+    url: `/supplier/member/footprint/delByIds/${ids}`,
     method: Method.DELETE,
     needToken: true
   });
@@ -425,7 +425,7 @@ export function clearTracksById (ids) {
  */
 export function memberPoint (params) {
   return request({
-    url: `/buyer/member/memberPointsHistory/getMemberPointsHistoryVO`,
+    url: `/supplier/member/memberPointsHistory/getMemberPointsHistoryVO`,
     method: Method.GET,
     needToken: true,
     params
@@ -437,7 +437,7 @@ export function memberPoint (params) {
  */
 export function memberPointHistory (params) {
   return request({
-    url: `/buyer/member/memberPointsHistory/getByPage`,
+    url: `/supplier/member/memberPointsHistory/getByPage`,
     method: Method.GET,
     needToken: true,
     params
@@ -449,7 +449,7 @@ export function memberPointHistory (params) {
  */
 export function memberMsgList (params) {
   return request({
-    url: `/buyer/message/member`,
+    url: `/supplier/message/member`,
     method: Method.GET,
     needToken: true,
     params
@@ -462,7 +462,7 @@ export function memberMsgList (params) {
 
 export function readMemberMsg (id) {
   return request({
-    url: `/buyer/message/member/${id}`,
+    url: `/supplier/message/member/${id}`,
     method: Method.PUT,
     needToken: true
   });
@@ -473,7 +473,7 @@ export function readMemberMsg (id) {
  */
 export function delMemberMsg (id) {
   return request({
-    url: `/buyer/message/member/${id}`,
+    url: `/supplier/message/member/${id}`,
     method: Method.DELETE,
     needToken: true
   });
@@ -485,7 +485,7 @@ export function delMemberMsg (id) {
  */
 export function getGoodsDistribution (distributionId) {
   return request({
-    url: `/buyer/distribution/distribution/bindingDistribution/${distributionId}`,
+    url: `/supplier/distribution/distribution/bindingDistribution/${distributionId}`,
     method: Method.GET,
     needToken: true
   });

@@ -7,7 +7,7 @@ import request, {
  */
 export function seckillByDay (params) {
   return request({
-    url: '/buyer/promotion/seckill',
+    url: '/supplier/promotion/seckill',
     method: Method.GET,
     params
   });
@@ -18,7 +18,7 @@ export function seckillByDay (params) {
  */
 export function seckillByTimeline (timeline) {
   return request({
-    url: `/buyer/promotion/seckill/${timeline}`,
+    url: `/supplier/promotion/seckill/${timeline}`,
     method: Method.GET
   });
 }
@@ -28,7 +28,7 @@ export function seckillByTimeline (timeline) {
  */
 export function pointGoodsCategory (params) {
   return request({
-    url: `/buyer/promotion/pointsGoods/category`,
+    url: `/supplier/promotion/pointsGoods/category`,
     method: Method.GET,
     needToken: true,
     params
@@ -40,7 +40,7 @@ export function pointGoodsCategory (params) {
  */
 export function pointGoods (params) {
   return request({
-    url: `/buyer/promotion/pointsGoods`,
+    url: `/supplier/promotion/pointsGoods`,
     method: Method.GET,
     needToken: true,
     params
@@ -51,7 +51,7 @@ export function pointGoods (params) {
  */
 export function pointGoodsDetail (id) {
   return request({
-    url: `/buyer/promotion/pointsGoods/${id}`,
+    url: `/supplier/promotion/pointsGoods/${id}`,
     method: Method.GET,
     needToken: true,
     id
