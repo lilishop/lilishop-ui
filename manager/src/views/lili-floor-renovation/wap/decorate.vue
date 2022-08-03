@@ -370,7 +370,7 @@
             </div>
           </div>
 
-          <p v-if="item.url && item.url.___type == 'other'">
+          <p v-if="item.url.url && item.url.___type == 'other'">
             (如非同域名下，则在小程序与公众号中无效)
           </p>
         </div>
