@@ -104,7 +104,7 @@ export const editEmail = params => {
 };
 // 个人中心修改密码
 export const changePass = params => {
-  return postRequest("/login/modifyPass", params);
+  return postRequest("/passport/login/modifyPass", params);
 };
 // 个人中心修改手机
 export const changeMobile = params => {
