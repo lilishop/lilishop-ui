@@ -67,14 +67,12 @@
               prop="goodsUnit"
             >
               <Select v-model="baseInfoForm.goodsUnit" style="width: 100px">
-                <Scroll :on-reach-bottom="handleReachBottom">
-                  <Option
-                    v-for="(item, index) in goodsUnitList"
-                    :key="index"
-                    :value="item"
-                    >{{ item }}
-                  </Option>
-                </Scroll>
+                <Option
+                  v-for="(item, index) in goodsUnitList"
+                  :key="index"
+                  :value="item"
+                  >{{ item }}
+                </Option>
               </Select>
             </FormItem>
             <FormItem
@@ -533,7 +531,7 @@
             <FormItem
               style="width: 100%"
               class="form-item-view-el"
-              label="商品描述"
+              label="PC商品描述"
               prop="intro"
             >
               <editor
@@ -542,7 +540,13 @@
                 v-model="baseInfoForm.intro"
                 :init="{ ...initEditor, height: '800px' }"
               ></editor>
+              <div class="promise-intro-btn">
+                <Button type="primary" @click="promiseIntroEditor"
+                  >将PC商品描述同步到移动端描述</Button
+                >
+              </div>
             </FormItem>
+
             <FormItem
               style="width: 100%"
               class="form-item-view-el"
@@ -860,7 +864,7 @@ export default {
       },
       params: {
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 1000,
       },
       skuInfoRules: {},
       /** 品牌列表 */
@@ -1102,15 +1106,7 @@ export default {
         }
       );
     },
-    // 页面触底
-    handleReachBottom() {
-      setTimeout(() => {
-        if (this.params.pageNumber * this.params.pageSize <= this.total) {
-          this.params.pageNumber++;
-          this.GET_GoodsUnit();
-        }
-      }, 1000);
-    },
+
     // 获取商品单位
     GET_GoodsUnit() {
       API_GOODS.getGoodsUnitList(this.params).then((res) => {
@@ -1252,6 +1248,10 @@ export default {
       this.skuInfo = skusInfo;
       this.renderTableData(skus);
       this.skuTableData = skus;
+    },
+    // 将pc商品描述同步给移动端
+    promiseIntroEditor() {
+      this.baseInfoForm.mobileIntro = this.baseInfoForm.intro;
     },
 
     /** 根据当前分类id查询商品应包含的参数 */
