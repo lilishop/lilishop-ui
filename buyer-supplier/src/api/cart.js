@@ -7,7 +7,7 @@ import request, {
  */
 export function clearCart () {
   return request({
-    url: '/supplier/trade/carts',
+    url: '/buyer/trade/carts',
     method: Method.DELETE,
     needToken: true
   });
@@ -18,7 +18,7 @@ export function clearCart () {
  */
 export function cartGoodsAll () {
   return request({
-    url: '/supplier/trade/carts/all',
+    url: '/buyer/trade/carts/all',
     method: Method.GET,
     needToken: true
   });
@@ -29,7 +29,7 @@ export function cartGoodsAll () {
  */
 export function cartCount () {
   return request({
-    url: '/supplier/trade/carts/count',
+    url: '/buyer/trade/carts/count',
     method: Method.GET,
     needToken: true
   });
@@ -40,7 +40,7 @@ export function cartCount () {
  */
 export function cartGoodsPay (params) {
   return request({
-    url: '/supplier/trade/carts/checked',
+    url: '/buyer/trade/carts/checked',
     method: Method.GET,
     needToken: true,
     params
@@ -54,7 +54,7 @@ export function cartGoodsPay (params) {
  */
 export function addCartGoods (params) {
   return request({
-    url: '/supplier/trade/carts',
+    url: '/buyer/trade/carts',
     method: Method.POST,
     needToken: true,
     params
@@ -69,7 +69,7 @@ export function addCartGoods (params) {
  */
 export function createTrade (data) {
   return request({
-    url: '/supplier/trade/carts/create/trade',
+    url: '/buyer/trade/carts/create/trade',
     method: Method.POST,
     needToken: true,
     headers: {'Content-Type': 'application/json'},
@@ -85,7 +85,7 @@ export function createTrade (data) {
  */
 export function selectCoupon (params) {
   return request({
-    url: '/supplier/trade/carts/select/coupon',
+    url: '/buyer/trade/carts/select/coupon',
     method: Method.GET,
     needToken: true,
     params
@@ -97,7 +97,7 @@ export function selectCoupon (params) {
  */
 export function couponNum (params) {
   return request({
-    url: '/supplier/trade/carts/coupon/num',
+    url: '/buyer/trade/carts/coupon/num',
     method: Method.GET,
     needToken: true,
     params
@@ -110,7 +110,7 @@ export function couponNum (params) {
  */
 export function selectAddr (params) {
   return request({
-    url: `/supplier/trade/carts/shippingAddress`,
+    url: `/buyer/trade/carts/shippingAddress`,
     method: Method.GET,
     needToken: true,
     params
@@ -123,7 +123,7 @@ export function selectAddr (params) {
  */
 export function setCheckedAll (params) {
   return request({
-    url: `/supplier/trade/carts/sku/checked`,
+    url: `/buyer/trade/carts/sku/checked`,
     method: Method.POST,
     needToken: true,
     params
@@ -137,7 +137,7 @@ export function setCheckedAll (params) {
  */
 export function setCheckedSeller (params) {
   return request({
-    url: `/supplier/trade/carts/store/${params.storeId}`,
+    url: `/buyer/trade/carts/store/${params.storeId}`,
     method: Method.POST,
     needToken: true,
     params
@@ -151,7 +151,7 @@ export function setCheckedSeller (params) {
  */
 export function setCheckedGoods (params) {
   return request({
-    url: `/supplier/trade/carts/sku/checked/${params.skuId}`,
+    url: `/buyer/trade/carts/sku/checked/${params.skuId}`,
     method: Method.POST,
     needToken: true,
     params
@@ -165,7 +165,7 @@ export function setCheckedGoods (params) {
  */
 export function setCartGoodsNum (params) {
   return request({
-    url: `/supplier/trade/carts/sku/num/${params.skuId}`,
+    url: `/buyer/trade/carts/sku/num/${params.skuId}`,
     method: Method.POST,
     needToken: true,
     params
@@ -178,7 +178,7 @@ export function setCartGoodsNum (params) {
  */
 export function delCartGoods (params) {
   return request({
-    url: `/supplier/trade/carts/sku/remove`,
+    url: `/buyer/trade/carts/sku/remove`,
     method: Method.DELETE,
     needToken: true,
     params
@@ -192,7 +192,7 @@ export function delCartGoods (params) {
  */
 export function shippingMethod (params) {
   return request({
-    url: `/supplier/trade/carts/shippingMethod`,
+    url: `/buyer/trade/carts/shippingMethod`,
     method: Method.GET,
     needToken: true,
     params
@@ -206,7 +206,7 @@ export function shippingMethod (params) {
  */
 export function receiptSelect (params) {
   return request({
-    url: `/supplier/trade/carts/select/receipt`,
+    url: `/buyer/trade/carts/select/receipt`,
     method: Method.GET,
     needToken: true,
     params
