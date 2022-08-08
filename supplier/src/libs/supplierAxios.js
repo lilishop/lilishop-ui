@@ -1,18 +1,13 @@
 import axios from "axios";
-import { getStore, setStore } from "./storage";
-import { router } from "../router/index";
-import { Message } from "view-design";
+import {getStore, setStore} from "./storage";
+import {router} from "../router/index";
+import {Message} from "view-design";
 import Cookies from "js-cookie";
-import { handleRefreshToken } from "@/api/index";
-import { v4 as uuidv4 } from 'uuid';
+import {handleRefreshToken} from "@/api/index";
+import {v4 as uuidv4} from 'uuid';
 
 // 统一请求路径前缀
 export const baseUrl =
-  (process.env.NODE_ENV === "development"
-    ? BASE.API_DEV.seller
-    : BASE.API_PROD.seller) + BASE.PREFIX;
-// 统一请求路径前缀
-export const supplierUrl =
   (process.env.NODE_ENV === "development"
     ? BASE.API_DEV.supplier
     : BASE.API_PROD.supplier) + BASE.SUPPLIER_PREFIX;
@@ -27,11 +22,6 @@ const refreshToken = getTokenDebounce();
 const service = axios.create({
   timeout: 10000,
   baseURL: baseUrl
-});
-
-const supplierService = axios.create({
-  timeout: 10000,
-  baseURL: supplierUrl
 });
 service.interceptors.request.use(
   config => {
@@ -146,7 +136,7 @@ function getTokenDebounce() {
       handleRefreshToken(oldRefreshToken)
         .then(res => {
           if (res.success) {
-            let { accessToken, refreshToken } = res.result;
+            let {accessToken, refreshToken} = res.result;
             setStore("accessToken", accessToken);
             setStore("refreshToken", refreshToken);
 
@@ -179,7 +169,7 @@ function getTokenDebounce() {
   };
 }
 
-export const getRequest = (url, params, resBlob) => {
+export const getSupplierRequest = (url, params, resBlob) => {
   let accessToken = getStore("accessToken");
   let data = {
     method: "get",
@@ -196,7 +186,7 @@ export const getRequest = (url, params, resBlob) => {
   return service(data);
 };
 
-export const postRequest = (url, params, headers) => {
+export const postSupplierRequest = (url, params, headers) => {
   let accessToken = getStore("accessToken");
   return service({
     method: "post",
@@ -227,7 +217,7 @@ export const postRequest = (url, params, headers) => {
 };
 
 /** 不带form表单不带transformRequest */
-export const postRequestWithNoForm = (url, params) => {
+export const postSupplierRequestWithNoForm = (url, params) => {
   let accessToken = getStore("accessToken");
   return service({
     method: "post",
@@ -240,7 +230,7 @@ export const postRequestWithNoForm = (url, params) => {
   });
 };
 
-export const postRequestWithHeaders = (url, params) => {
+export const postSupplierRequestWithHeaders = (url, params) => {
   let accessToken = getStore("accessToken");
   return axios({
     method: "post",
@@ -254,7 +244,7 @@ export const postRequestWithHeaders = (url, params) => {
   });
 };
 
-export const putRequest = (url, params, headers) => {
+export const putSupplierRequest = (url, params, headers) => {
   let accessToken = getStore("accessToken");
   return service({
     method: "put",
@@ -284,7 +274,7 @@ export const putRequest = (url, params, headers) => {
   });
 };
 
-export const putRequestWithNoForm = (url, params) => {
+export const putRSupplierequestWithNoForm = (url, params) => {
   let accessToken = getStore("accessToken");
   return service({
     method: "put",
@@ -297,7 +287,7 @@ export const putRequestWithNoForm = (url, params) => {
   });
 };
 
-export const deleteRequest = (url, params) => {
+export const deleteSupplierRequest = (url, params) => {
   let accessToken = getStore("accessToken");
   return service({
     method: "delete",
@@ -309,7 +299,7 @@ export const deleteRequest = (url, params) => {
   });
 };
 
-export const importRequest = (url, params) => {
+export const importSupplierRequest = (url, params) => {
   let accessToken = getStore("accessToken");
   return service({
     method: "post",
@@ -321,27 +311,13 @@ export const importRequest = (url, params) => {
   });
 };
 
-export const uploadFileRequest = (url, params) => {
-  let accessToken = getStore("accessToken");
-  return service({
-    method: "post",
-    url: `${url}`,
-    data: params,
-    headers: {
-      accessToken: accessToken,
-      'Content-Type': 'multipart/form-data'
-    }
-  });
-};
-
-
 
 /**
  * 无需token验证的请求 避免旧token过期导致请求失败
  * @param {*} url
  * @param {*} params
  */
-export const getRequestWithNoToken = (url, params) => {
+export const getSupplierRequestWithNoToken = (url, params) => {
   return service({
     method: "get",
     url: `${url}`,
@@ -354,7 +330,7 @@ export const getRequestWithNoToken = (url, params) => {
  * @param {*} url
  * @param {*} params
  */
-export const postRequestWithNoToken = (url, params) => {
+export const postSupplierRequestWithNoToken = (url, params) => {
   return service({
     method: "post",
     url: `${url}`,
@@ -367,7 +343,7 @@ export const postRequestWithNoToken = (url, params) => {
  * @param {*} url
  * @param {*} params
  */
-export const postRequestWithNoTokenData = (url, params) => {
+export const postSupplierRequestWithNoTokenData = (url, params) => {
   return service({
     method: "post",
     url: `${url}`,
@@ -377,3 +353,4 @@ export const postRequestWithNoTokenData = (url, params) => {
     data: params
   });
 };
+

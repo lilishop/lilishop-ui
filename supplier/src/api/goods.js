@@ -5,6 +5,13 @@ import {
   putRequest,
   deleteRequest
 } from "@/libs/axios";
+// 统一请求路径前缀在libs/axios.js中修改
+import {
+  getSupplierRequest,
+  postSupplierRequest,
+  putSupplierRequest,
+  deleteSupplierRequest
+} from "@/libs/supplierAxios";
 
 // 获取当前店铺分类
 export const getShopGoodsLabelList = () => {
@@ -226,7 +233,7 @@ export const getGoodsListDataSeller = params => {
 
 //  获取商品详情
 export const getGoods = id => {
-  return getRequest(`/goods/goods/get/${id}`);
+  return getSupplierRequest(`/goods/goods/get/${id}`);
 };
 
 // 上架商品
@@ -235,7 +242,7 @@ export const upGoods = params => {
 };
 // 删除商品
 export const deleteGoods = params => {
-  return putRequest(`/goods/goods/delete`, params);
+  return deleteSupplierRequest(`/goods/goods/delete`, params);
 };
 //  下架商品
 export const lowGoods = params => {
@@ -253,13 +260,13 @@ export const getCategoryBrandListDataSeller = (category_id, params) => {
 };
 
 export function createGoods(params) {
-  return postRequest("/goods/goods/create", params, {
+  return postSupplierRequest("/goods/goods/create", params, {
     "Content-Type": "application/json"
   });
 }
 
 export function editGoods(goodsId, params) {
-  return putRequest(`/goods/goods/update/${goodsId}`, params, {
+  return putSupplierRequest(`/goods/goods/update/${goodsId}`, params, {
     "Content-Type": "application/json"
   });
 }
