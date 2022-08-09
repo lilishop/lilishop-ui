@@ -404,8 +404,12 @@ export const resetPassword = (params) => {
 };
 
 // 初始化商品索引
-export const createIndex = () => {
+export const createRetailerIndex = () => {
   return getRequest(`/other/elasticsearch`);
+};
+
+export const createSupplierIndex = () => {
+  return getRequest(`/supplier/other/elasticsearch`);
 };
 
 // 初始化商品索引

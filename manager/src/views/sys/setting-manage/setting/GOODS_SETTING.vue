@@ -1,61 +1,94 @@
 <template>
   <div class="layout">
-    <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
+    <Form
+      ref="formValidate"
+      :label-width="150"
+      label-position="right"
+      :model="formValidate"
+      :rules="ruleValidate"
+    >
       <FormItem label="商品审核" prop="goodsCheck">
-        <RadioGroup type="button" button-style="solid" v-model="formValidate.goodsCheck">
+        <RadioGroup
+          type="button"
+          button-style="solid"
+          v-model="formValidate.goodsCheck"
+        >
           <Radio label="true">开启</Radio>
           <Radio label="false">关闭</Radio>
-
         </RadioGroup>
       </FormItem>
       <div class="label-item">
-        <FormItem class="label-item" label="缩略图宽" prop="abbreviationPictureWidth">
+        <FormItem
+          class="label-item"
+          label="缩略图宽"
+          prop="abbreviationPictureWidth"
+        >
           <Input type="number" v-model="formValidate.abbreviationPictureWidth">
-          <span slot="prepend">宽</span>
-          <span slot="append">px</span>
+            <span slot="prepend">宽</span>
+            <span slot="append">px</span>
           </Input>
-
         </FormItem>
-        <FormItem class="label-item" label="缩略图高" prop="abbreviationPictureHeight">
+        <FormItem
+          class="label-item"
+          label="缩略图高"
+          prop="abbreviationPictureHeight"
+        >
           <Input type="number" v-model="formValidate.abbreviationPictureHeight">
-          <span slot="prepend">高</span>
-          <span slot="append">px</span>
+            <span slot="prepend">高</span>
+            <span slot="append">px</span>
           </Input>
         </FormItem>
       </div>
       <div class="label-item">
         <FormItem label="小图宽" prop="smallPictureWidth">
           <Input type="number" v-model="formValidate.smallPictureWidth">
-          <span slot="prepend">宽</span>
-          <span slot="append">px</span>
+            <span slot="prepend">宽</span>
+            <span slot="append">px</span>
           </Input>
-
         </FormItem>
         <FormItem label="小图高" class="label-item" prop="smallPictureHeight">
           <Input type="number" v-model="formValidate.smallPictureHeight">
-          <span slot="prepend">高</span>
-          <span slot="append">px</span>
+            <span slot="prepend">高</span>
+            <span slot="append">px</span>
           </Input>
         </FormItem>
       </div>
       <div class="label-item">
-        <FormItem class="label-item" label="原图宽高" prop="originalPictureWidth">
+        <FormItem
+          class="label-item"
+          label="原图宽高"
+          prop="originalPictureWidth"
+        >
           <Input type="number" v-model="formValidate.originalPictureWidth">
-          <span slot="prepend">宽</span>
-          <span slot="append">px</span>
+            <span slot="prepend">宽</span>
+            <span slot="append">px</span>
           </Input>
-
         </FormItem>
-        <FormItem class="label-item" label="原图宽高" prop="originalPictureHeight">
+        <FormItem
+          class="label-item"
+          label="原图宽高"
+          prop="originalPictureHeight"
+        >
           <Input type="number" v-model="formValidate.originalPictureHeight">
-          <span slot="prepend">高</span>
-          <span slot="append">px</span>
+            <span slot="prepend">高</span>
+            <span slot="append">px</span>
           </Input>
         </FormItem>
       </div>
       <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
-        <Button type="primary" style="margin-left: 100px" @click="createIndex()">重新生成所有商品索引</Button>
+        <Button
+          type="primary"
+          style="margin-left: 100px"
+          @click="createIndex('retailer')"
+          >生成零售端商品索引</Button
+        >
+        <Button
+          type="primary"
+          style="margin-left: 100px"
+          @click="createIndex('supllier')"
+          >生成供应端商品索引</Button
+        >
         <div class="progress-item" v-if="showProgress">
           <i-progress :percent="progressVal"></i-progress>
         </div>
@@ -64,7 +97,7 @@
   </div>
 </template>
 <script>
-import { setSetting, createIndex, getProgress } from "@/api/index";
+import { setSetting, createRetailerIndex,createSupplierIndex, getProgress } from "@/api/index";
 import { handleSubmit } from "./validate";
 export default {
   props: ["res", "type"],
@@ -98,8 +131,8 @@ export default {
       }
     },
     //重新生成所有商品索引
-    createIndex() {
-      createIndex().then((res) => {
+    createIndex(client) {
+      (client === "supllier" ? createSupplierIndex() : createRetailerIndex()).then((res) => {
         if (res.success) {
           this.$Message.success("开始生成!");
           this.showProgress = true;
