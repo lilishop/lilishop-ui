@@ -3,7 +3,7 @@
     <!-- 顶部logo -->
     <div class="top-content" @click='$refs.verify.show = false'>
       <div class="logo-box">
-        <img :src="$store.state.logoImg" @click="$router.push('/')" />
+        <img :src="$store.state.logoImg" @click="$router.push('/')"/>
         <div>欢迎登录</div>
       </div>
     </div>
@@ -13,7 +13,7 @@
       <Carousel loop :autoplay-speed="5000" class="login-carousel" arrow="never">
         <CarouselItem>
           <div class="demo-carousel" @click='$refs.verify.show = false'>
-            <img src="https://wanmi-b2b.oss-cn-shanghai.aliyuncs.com/201811141632252680" />
+            <img src="https://wanmi-b2b.oss-cn-shanghai.aliyuncs.com/201811141632252680"/>
           </div>
         </CarouselItem>
       </Carousel>
@@ -21,13 +21,12 @@
       <div class="form-box" @click='$refs.verify.show = false'>
         <div class="account-number">
           <div class="tab-switch">
-            <span>{{type?'账号登录':'验证码登录'}}</span>
-            <span @click="type = !type">{{type?'验证码登录':'账号登录'}}</span>
+            <span>{{ '账号登录' }}</span>
           </div>
         </div>
         <!-- 账号密码登录 -->
         <Form ref="formInline" :model="formData" :rules="ruleInline" v-show="type === true"
-          @click.self='$refs.verify.show = false'>
+              @click.self='$refs.verify.show = false'>
           <FormItem prop="username">
             <i-input type="text" v-model="formData.username" clearable placeholder="用户名">
               <Icon type="md-person" slot="prepend"></Icon>
@@ -35,38 +34,13 @@
           </FormItem>
           <FormItem prop="password">
             <i-input type="password" v-model="formData.password" clearable placeholder="密码">
-              <Icon type="md-lock" slot="prepend"> </Icon>
+              <Icon type="md-lock" slot="prepend"></Icon>
             </i-input>
           </FormItem>
           <FormItem>
             <Button type="error" @click.stop="handleSubmit('formInline')" long>登录</Button>
           </FormItem>
         </Form>
-        <!-- 验证码登录 -->
-        <Form ref="formSms" :model="formSms" :rules="ruleInline" v-show="type === false"
-          @click.self='$refs.verify.show = false'>
-          <FormItem prop="mobile">
-            <i-input type="text" v-model="formSms.mobile" clearable placeholder="手机号">
-              <Icon type="md-lock" slot="prepend"></Icon>
-            </i-input>
-          </FormItem>
-          <FormItem prop="code">
-            <i-input type="text" v-model="formSms.code" placeholder="手机验证码">
-              <Icon type="ios-text-outline" style="font-weight: bold" slot="prepend" />
-              <Button slot="append" @click="sendCode">{{ codeMsg }}</Button>
-            </i-input>
-          </FormItem>
-          <FormItem>
-            <Button @click.stop="verifyBtnClick" long
-              :type="verifyStatus?'success':'default'">{{verifyStatus?'验证通过':'点击完成安全验证'}}</Button>
-          </FormItem>
-          <FormItem>
-            <Button type="error" @click="handleSubmit('formSms')" long>登录</Button>
-          </FormItem>
-        </Form>
-        <div class="regist">
-          <span @click="$router.push('forgetPassword')">忘记密码</span>
-        </div>
       </div>
       <!-- 拼图验证码 -->
       <verify ref="verify" class="verify-con" verifyType="LOGIN" @change="verifyChange"></verify>
@@ -78,8 +52,8 @@
         <router-link to="/article?id=1371992704333905920" class="item" target="_blank">条款</router-link>
       </Row>
       <Row type="flex" justify="center" class="copyright">
-        Copyright © {{year}} - Present
-        <a href="https://pickmall.cn" target="_blank" style="margin: 0 5px">{{config.title}}</a>
+        Copyright © {{ year }} - Present
+        <a href="https://pickmall.cn" target="_blank" style="margin: 0 5px">{{ config.title }}</a>
         版权所有
       </Row>
     </div>
@@ -89,9 +63,8 @@
 <script>
 
 import * as RegExp from "@/plugins/RegExp.js";
-import { md5 } from "@/plugins/md5.js";
-import * as apiLogin from "@/api/login.js";
-import { sendSms } from "@/api/common.js";
+import {md5} from "@/plugins/md5.js";
+import {login, getMemberMsg} from "@/api/index";
 import storage from "@/plugins/storage.js";
 import verify from "@/components/verify";
 
@@ -102,7 +75,7 @@ export default {
   },
   data() {
     return {
-      config:require('@/config'),
+      config: require('@/config'),
       type: true, // true 账号登录  false 验证码登录
       formData: {
         // 登录表单
@@ -117,19 +90,19 @@ export default {
       verifyStatus: false, // 是否图片验证通过
       ruleInline: {
         // 验证规则
-        username: [{ required: true, message: "请输入用户名" }],
+        username: [{required: true, message: "请输入用户名"}],
         password: [
-          { required: true, message: "请输入密码" },
-          { type: "string", min: 6, message: "密码不能少于6位" },
+          {required: true, message: "请输入密码"},
+          {type: "string", min: 6, message: "密码不能少于6位"},
         ],
         mobile: [
-          { required: true, message: "请输入手机号码" },
+          {required: true, message: "请输入手机号码"},
           {
             pattern: RegExp.mobile,
             message: "请输入正确的手机号",
           },
         ],
-        code: [{ required: true, message: "请输入手机验证码" }],
+        code: [{required: true, message: "请输入手机验证码"}],
       },
       codeMsg: "发送验证码", // 验证码文字
       interval: null, // 定时器
@@ -142,73 +115,9 @@ export default {
     handleSubmit(name) {
       this.$refs[name].validate((valid) => {
         if (valid) {
-          if (this.type) {
-            this.$refs.verify.init();
-          } else {
-            let data = JSON.parse(JSON.stringify(this.formSms));
-            apiLogin.smsLogin(data).then((res) => {
-              this.$refs.verify.show = false;
-              if (res.success) {
-                this.$Message.success("登录成功");
-                storage.setItem("accessToken", res.result.accessToken);
-                storage.setItem("refreshToken", res.result.refreshToken);
-                apiLogin.getMemberMsg().then((res) => {
-                  if (res.success) {
-                    storage.setItem("userInfo", res.result);
-                    let query = this.$route.query;
-                    if (query.rePath) {
-                      this.$router.push({
-                        path: query.rePath,
-                        query: JSON.parse(query.query),
-                      });
-                    } else {
-                      this.$router.push("/");
-                    }
-                  }
-                });
-              } else {
-                this.$Message.error(res.message);
-              }
-            });
-          }
+          this.$refs.verify.init();
         }
       });
-    },
-    // 发送手机验证码
-    sendCode() {
-      if (this.time === 60) {
-        if (this.formSms.mobile === "") {
-          this.$Message.warning("请先填写手机号");
-          return;
-        }
-        if (!this.verifyStatus) {
-          this.$Message.warning("请先完成安全验证");
-          return;
-        }
-        let params = {
-          mobile: this.formSms.mobile,
-          verificationEnums: "LOGIN",
-        };
-        sendSms(params).then((res) => {
-          if (res.success) {
-            this.$Message.success("验证码发送成功");
-            let that = this;
-            this.interval = setInterval(() => {
-              that.time--;
-              if (that.time === 0) {
-                that.time = 60;
-                that.codeMsg = "重新发送";
-                that.verifyStatus = false;
-                clearInterval(that.interval);
-              } else {
-                that.codeMsg = that.time;
-              }
-            }, 1000);
-          } else {
-            this.$Message.warning(res.message);
-          }
-        });
-      }
     },
     verifyChange(con) {
       // 拼图验证码回显
@@ -220,14 +129,13 @@ export default {
         data.password = md5(data.password);
         this.$refs.verify.show = false;
         this.$Spin.show();
-        apiLogin
-          .login(data)
+        login(data)
           .then((res) => {
             if (res.success) {
               this.$Message.success("登录成功");
               storage.setItem("accessToken", res.result.accessToken);
               storage.setItem("refreshToken", res.result.refreshToken);
-              apiLogin.getMemberMsg().then((res) => {
+              getMemberMsg().then((res) => {
                 this.$Spin.hide();
                 if (res.success) {
                   storage.setItem("userInfo", res.result);
@@ -262,47 +170,6 @@ export default {
       }
     },
   },
-  mounted() {
-    let uuid = this.$route.query.state;
-    if (uuid) {
-      storage.setItem("uuid", uuid);
-      loginCallback(uuid).then((res) => {
-        if (res.success) {
-          const result = res.result;
-          storage.setItem("accessToken", result.accessToken);
-          storage.setItem("refreshToken", result.refreshToken);
-          apiLogin.getMemberMsg().then((res) => {
-            if (res.success) {
-              storage.setItem("userInfo", res.result);
-              let query = this.$route.query;
-              if (query.rePath) {
-                this.$router.push({
-                  path: query.rePath,
-                  query: JSON.parse(query.query),
-                });
-              } else {
-                this.$router.push("/");
-              }
-            }
-          });
-        }
-      });
-    }
-  },
-  watch: {
-    type(v) {
-      if (v) {
-        this.$refs.formInline.resetFields();
-      } else {
-        this.$refs.formSms.resetFields();
-      }
-      this.verifyStatus = false;
-      this.$refs.verify.show = false;
-      clearInterval(this.interval);
-      this.codeMsg = "发送验证码";
-      this.time = 60;
-    },
-  },
 };
 </script>
 <style scoped lang="scss">
@@ -310,6 +177,7 @@ export default {
   height: 100%;
   background-color: #f0f2f5;
 }
+
 .top-content {
   width: 100%;
   height: 80px;
@@ -326,19 +194,23 @@ export default {
     margin: 0 auto;
     display: flex;
     align-items: center;
+
     img {
       width: 150px;
       cursor: pointer;
     }
+
     div {
       font-size: 20px;
       margin-top: 10px;
     }
   }
 }
+
 .login-carousel {
   width: 100%;
   height: 550px;
+
   .demo-carousel {
     height: 550px;
     width: inherit;
@@ -361,15 +233,18 @@ export default {
   right: 15%;
   padding: 20px;
   background: rgba(255, 255, 255, 0.8);
+
   .account-number {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
     font-weight: bold;
+
     > div:nth-child(2) {
       color: $theme_color;
       cursor: pointer;
     }
+
     .tab-switch {
       height: 40px;
       font-size: 14px;
@@ -383,6 +258,7 @@ export default {
       span:nth-child(2) {
         cursor: pointer;
         padding-left: 10px;
+
         &:hover {
           color: $theme_color;
         }
@@ -400,6 +276,7 @@ export default {
 
 .other-login {
   margin: 0 auto;
+
   > svg {
     cursor: pointer;
     width: 24px;
@@ -407,18 +284,8 @@ export default {
     height: 24px;
   }
 }
-.regist {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: -10px;
-  span {
-    margin-left: 10px;
-    &:hover {
-      cursor: pointer;
-      color: $theme_color;
-    }
-  }
-}
+
+
 .foot {
   position: fixed;
   bottom: 4vh;
@@ -426,18 +293,22 @@ export default {
   left: calc(50% - 184px);
   color: rgba(0, 0, 0, 0.45);
   font-size: 14px;
+
   .help {
     margin: 0 auto;
     margin-bottom: 1vh;
     width: 60%;
+
     .item {
       color: rgba(0, 0, 0, 0.45);
     }
+
     :hover {
       color: rgba(0, 0, 0, 0.65);
     }
   }
 }
+
 .icon-hover {
   cursor: pointer;
 }

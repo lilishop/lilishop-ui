@@ -44,7 +44,7 @@ export function goodsSkuDetail (params) {
 // 获取所有商品分类
 export function getCategory (parentId) {
   return request({
-    url: `/supplier/goods/category/get/${parentId}`,
+    url: `/buyer/goods/category/get/${parentId}`,
     method: Method.GET,
     needToken: false
   });

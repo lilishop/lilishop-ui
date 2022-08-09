@@ -1,5 +1,5 @@
 // 统一请求路径前缀在libs/axios.js中修改
-import { postSupplierRequestWithNoTokenData, getSupplierRequestWithNoToken, getSupplierRequest, postSupplierRequest, putSupplierRequest } from '@/libs/axios';
+import { postSupplierRequestWithNoTokenData, getSupplierRequestWithNoToken, getSupplierRequest, postSupplierRequest, putSupplierRequest } from '@/libs/supplierAxios';
 
 
 // 登陆

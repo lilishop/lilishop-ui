@@ -51,7 +51,7 @@ export default {
   methods: {
     getIndexData () {
       // 获取首页装修数据
-      indexData({ clientType: 'PC' }).then(async (res) => {
+      indexData({ pageType: 'SUPPLIER' }).then(async (res) => {
         if (res.success) {
           let dataJson = JSON.parse(res.result.pageData);
           // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品

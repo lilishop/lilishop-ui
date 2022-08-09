@@ -1,7 +1,8 @@
 <template>
   <div>
     <Card>
-      <Button class="mb_10" v-if="supplierForm.storeDisable === 'APPLYING'" type="primary" @click="auditHandler">审核</Button>
+      <Button class="mb_10" v-if="supplierForm.storeDisable === 'APPLYING'" type="primary" @click="auditHandler">审核
+      </Button>
       <Tabs v-model="tabName" :animated="false" style="overflow: visible">
         <Form
           ref="supplierForm"
@@ -11,25 +12,30 @@
           :rules="supplierValidate"
           @on-validate="formValidate"
         >
+
           <TabPane label="基本信息" class="tab" name="base">
+
+            <Divider orientation="left" v-if="!supplierId">供应商账号</Divider>
+            <div v-if="!supplierId">
+              <FormItem label="账号" prop="username">
+                <Input v-model="supplierForm.username" clearable style="width: 350px"/>
+              </FormItem>
+
+              <FormItem label="密码" prop="password">
+                <Input v-model="supplierForm.password" type="password" clearable style="width: 350px"/>
+              </FormItem>
+            </div>
             <Divider orientation="left">基本信息</Divider>
             <!-- 遮罩层  -->
             <div v-if="isRead" class="mask">只读不可修改</div>
             <div>
-              <FormItem label="账号" prop="username">
-                <Input v-model="supplierForm.username" clearable style="width: 350px" />
-              </FormItem>
-
-              <FormItem label="密码" prop="password">
-                <Input v-model="supplierForm.password" type="password" clearable style="width: 350px" />
-              </FormItem>
 
               <FormItem label="供应商名称" prop="storeName">
-                <Input v-model="supplierForm.storeName" clearable style="width: 350px" />
+                <Input v-model="supplierForm.storeName" clearable style="width: 350px"/>
               </FormItem>
 
               <FormItem label="库存预警数量" prop="stockWarning">
-                <Input v-model="supplierForm.stockWarning" clearable style="width: 350px" />
+                <Input v-model="supplierForm.stockWarning" clearable style="width: 350px"/>
               </FormItem>
 
               <FormItem label="供应商定位" prop="shopCenter">
@@ -38,10 +44,12 @@
                   type="info"
                   v-if="!supplierForm.storeCenter"
                   @click="$refs.liliMap.showMap = true"
-                  >点击获取供应商定位</Button
+                >点击获取供应商定位
+                </Button
                 >
                 <Button type="success" v-else @click="$refs.liliMap.showMap = true"
-                  >已定位</Button
+                >已定位
+                </Button
                 >
               </FormItem>
 
@@ -71,7 +79,8 @@
                 />
                 <div>
                   <Button @click="handleCLickImg('storeLogo')" type="primary"
-                    >选择图片</Button
+                  >选择图片
+                  </Button
                   >
                 </div>
               </FormItem>
@@ -87,7 +96,7 @@
                   style="width: 400px"
                 />
               </FormItem>
-              <br />
+              <br/>
               <Divider orientation="left">退货收件地址</Divider>
               <FormItem label="收件人姓名" prop="salesConsigneeName">
                 <Input
@@ -104,7 +113,7 @@
                   style="width: 350px"
                 />
               </FormItem>
-              <FormItem label="地址信息"  prop="salesConsigneeAddressPath">
+              <FormItem label="地址信息" prop="salesConsigneeAddressPath">
                 <region
                   style="width: 350px"
                   @selected="selectedConsigneeRegion"
@@ -128,11 +137,11 @@
             <Divider orientation="left">公司信息</Divider>
             <div>
               <FormItem label="公司名称" prop="companyName">
-                <Input v-model="supplierForm.companyName" clearable style="width: 350px" />
+                <Input v-model="supplierForm.companyName" clearable style="width: 350px"/>
               </FormItem>
 
               <FormItem label="公司电话" prop="companyPhone">
-                <Input v-model="supplierForm.companyPhone" clearable style="width: 350px" />
+                <Input v-model="supplierForm.companyPhone" clearable style="width: 350px"/>
               </FormItem>
               <FormItem label="公司所在地" prop="companyAddressIdPath">
                 <region
@@ -142,7 +151,7 @@
                 />
               </FormItem>
               <FormItem label="公司详细地址" prop="companyAddress">
-                <Input v-model="supplierForm.companyAddress" clearable style="width: 350px" />
+                <Input v-model="supplierForm.companyAddress" clearable style="width: 350px"/>
               </FormItem>
               <FormItem label="员工总数" prop="employeeNum">
                 <InputNumber
@@ -164,7 +173,7 @@
                 <span style="margin-left: 10px">万</span>
               </FormItem>
               <FormItem label="联系人姓名" prop="linkName">
-                <Input v-model="supplierForm.linkName" clearable style="width: 200px" />
+                <Input v-model="supplierForm.linkName" clearable style="width: 200px"/>
               </FormItem>
               <FormItem label="联系人手机" prop="linkPhone">
                 <Input
@@ -175,26 +184,26 @@
                 />
               </FormItem>
               <FormItem label="电子邮箱" prop="companyEmail">
-                <Input v-model="supplierForm.companyEmail" clearable style="width: 200px" />
+                <Input v-model="supplierForm.companyEmail" clearable style="width: 200px"/>
               </FormItem>
 
               <Divider orientation="left">营业执照信息</Divider>
 
               <FormItem label="营业执照号" prop="licenseNum">
-                <Input v-model="supplierForm.licenseNum" clearable style="width: 200px" />
+                <Input v-model="supplierForm.licenseNum" clearable style="width: 200px"/>
               </FormItem>
 
               <FormItem label="法定经营范围" prop="scope">
-                <Input v-model="supplierForm.scope" clearable style="width: 200px" />
+                <Input v-model="supplierForm.scope" clearable style="width: 200px"/>
               </FormItem>
 
               <Divider orientation="left">法人信息</Divider>
 
               <FormItem label="法人姓名" prop="legalName">
-                <Input v-model="supplierForm.legalName" clearable style="width: 200px" />
+                <Input v-model="supplierForm.legalName" clearable style="width: 200px"/>
               </FormItem>
               <FormItem label="法人证件号" prop="legalId">
-                <Input v-model="supplierForm.legalId" clearable style="width: 200px" />
+                <Input v-model="supplierForm.legalId" clearable style="width: 200px"/>
               </FormItem>
               <FormItem label="法人身份证照片" prop="legalPhoto">
                 <Avatar
@@ -257,7 +266,8 @@
                 />
                 <div>
                   <Button @click="handleCLickImg('licencePhoto')" type="primary"
-                    >选择图片</Button
+                  >选择图片
+                  </Button
                   >
                 </div>
               </FormItem>
@@ -273,33 +283,34 @@
                   :indeterminate="indeterminate"
                   :value="checkAll"
                   @click.prevent.native="handleCheckAll"
-                  >全选
+                >全选
                 </Checkbox>
               </div>
               <CheckboxGroup v-model="checkAllGroup" @on-change="checkAllGroupChange">
                 <Checkbox v-for="(item, i) in categories" :key="i + 1" :label="item.id"
-                  >{{ item.name }}
+                >{{ item.name }}
                 </Checkbox>
               </CheckboxGroup>
             </FormItem>
           </TabPane>
 
           <!-- <TabPane label="配送信息" class="tab" name="send"> -->
-            <!-- 遮罩层  -->
-            <!-- <FormItem label="达达编码" prop="ddCode">
-              <Input
-                v-model="supplierForm.ddCode"
-                maxlength="20"
-                clearable
-                style="width: 200px"
-              />
-            </FormItem> -->
+          <!-- 遮罩层  -->
+          <!-- <FormItem label="达达编码" prop="ddCode">
+            <Input
+              v-model="supplierForm.ddCode"
+              maxlength="20"
+              clearable
+              style="width: 200px"
+            />
+          </FormItem> -->
           <!-- </TabPane> -->
 
           <TabPane label="结算信息" class="tab" name="settlement">
             <Alert type="error"
-              >已添加<span class="theme_color">{{ settlementCycle.length }}</span
-              >个结算日，最多可添加5个结算日，当月不包含所设日期时，将会顺延到下一个结算日</Alert
+            >已添加<span class="theme_color">{{ settlementCycle.length }}</span
+            >个结算日，最多可添加5个结算日，当月不包含所设日期时，将会顺延到下一个结算日
+            </Alert
             >
             <FormItem label="结算日期">
               <Tag
@@ -309,7 +320,7 @@
                 closable
                 style="marrgin-left: 10px"
                 @on-close="removeSettlementCycle"
-                >{{ item }}
+              >{{ item }}
               </Tag>
               <InputNumber
                 size="small"
@@ -324,7 +335,7 @@
                 size="small"
                 v-if="addSettlementBtn && settlementCycle.length < 5"
                 style="margin-left: 8px"
-                >添加结算日期
+              >添加结算日期
               </Button>
               <Button
                 v-if="addSettlementConfirmBtn"
@@ -332,7 +343,7 @@
                 @click="addSettlementCycleConfirm"
                 size="small"
                 style="margin-left: 8px"
-                >确认
+              >确认
               </Button>
             </FormItem>
           </TabPane>
@@ -344,10 +355,12 @@
           v-show="tabNameList.indexOf(tabName) > 0"
           class="mr_10"
           @click="prev"
-          >上一步</Button
+        >上一步
+        </Button
         >
         <Button type="primary" v-show="tabNameList.indexOf(tabName) < 3" @click="next"
-          >下一步</Button
+        >下一步
+        </Button
         >
         <Button
           type="primary"
@@ -362,7 +375,7 @@
     <liliMap ref="liliMap" @getAddress="getAddress"></liliMap>
 
     <Modal width="1200px" v-model="picModalFlag">
-      <ossManage @callback="callbackSelected" ref="ossManage" />
+      <ossManage @callback="callbackSelected" ref="ossManage"/>
     </Modal>
 
     <Modal v-model="auditModel" width="360">
@@ -375,10 +388,12 @@
       </div>
       <div slot="footer">
         <Button type="error" :loading="auditModalLoading" @click="audit('REFUSED')"
-          >驳回</Button
+        >驳回
+        </Button
         >
         <Button type="info" :loading="auditModalLoading" @click="audit('PASS')"
-          >通过</Button
+        >通过
+        </Button
         >
       </div>
     </Modal>
@@ -387,12 +402,12 @@
 
 <script>
 import ossManage from "@/views/sys/oss-manage/ossManage";
-import { getCategoryTree } from "@/api/goods";
-import { supplierDetail, supplierAdd, supplierEdit, supplierAudit } from "@/api/supplier";
+import {getCategoryTree} from "@/api/goods";
+import {supplierDetail, supplierAdd, supplierEdit, supplierAudit} from "@/api/supplier";
 import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
 import region from "@/views/lili-components/region";
 import liliMap from "@/views/my-components/map/index";
-import { md5 } from '@/utils/md5.js';
+import {md5} from '@/utils/md5.js';
 
 export default {
   name: "supplier-operation",
@@ -423,25 +438,27 @@ export default {
       tabNameList: ["base", "entry", "category", "settlement"], // tab栏name值数组
       supplierValidate: {
         // 表单验证规则
-        memberName: [{ required: true, message: "会员不能为空" }],
-        storeName: [{ required: true, message: "供应商名称不能为空" }],
-        stockWarning:[{ required: true, message: "库存预警数量不能为空" }],
-        companyAddress: [{ required: true, message: "公司地址不能为空" }],
-        storeAddressDetail: [{ required: true, message: "供应商详细地址不能为空" }],
-        storeDesc: [{ required: true, message: "供应商简介不能为空" }],
-        salesConsigneeName: [{ required: true, message: "收件人姓名不能为空" }],
-        salesConsigneeMobile: [{ required: true, message: "收件人手机不能为空" },
+        username: [{required: true, message: "账号不能为空"}],
+        password: [{required: true, message: "密码不能为空"}],
+        memberName: [{required: true, message: "会员不能为空"}],
+        storeName: [{required: true, message: "供应商名称不能为空"}],
+        stockWarning: [{required: true, message: "库存预警数量不能为空"}],
+        companyAddress: [{required: true, message: "公司地址不能为空"}],
+        storeAddressDetail: [{required: true, message: "供应商详细地址不能为空"}],
+        storeDesc: [{required: true, message: "供应商简介不能为空"}],
+        salesConsigneeName: [{required: true, message: "收件人姓名不能为空"}],
+        salesConsigneeMobile: [{required: true, message: "收件人手机不能为空"},
           {
             type: "string",
-              pattern: /^1[3|4|5|6|7|8][0-9]{9}$/,
+            pattern: /^1[3|4|5|6|7|8][0-9]{9}$/,
             message: "手机号格式出错",
             trigger: "blur",
           },],
-        salesConsigneeAddressPath: [{ required: true, message: "请选择售后地址" }],
-        salesConsigneeDetail: [{ required: true, message: "售后地址详情不能为空" }],
-        storeCenter: [{ required: true, message: "供应商未定位" }],
-        companyName: [{ required: true, message: "公司名称不能为空" }],
-        companyPhone: [{ required: true, message: "公司电话不能为空" }],
+        salesConsigneeAddressPath: [{required: true, message: "请选择售后地址"}],
+        salesConsigneeDetail: [{required: true, message: "售后地址详情不能为空"}],
+        storeCenter: [{required: true, message: "供应商未定位"}],
+        companyName: [{required: true, message: "公司名称不能为空"}],
+        companyPhone: [{required: true, message: "公司电话不能为空"}],
         employeeNum: [
           {
             required: true,
@@ -450,7 +467,7 @@ export default {
             trigger: "blur",
           },
         ],
-        companyAddressIdPath: [{ required: true, message: "请选择公司地址" }],
+        companyAddressIdPath: [{required: true, message: "请选择公司地址"}],
         registeredCapital: [
           {
             required: true,
@@ -459,9 +476,9 @@ export default {
             trigger: "blur",
           },
         ],
-        linkName: [{ required: true, message: "联系人姓名不能为空" }],
+        linkName: [{required: true, message: "联系人姓名不能为空"}],
         linkPhone: [
-          { required: true, message: "联系人手机号不能为空" },
+          {required: true, message: "联系人手机号不能为空"},
           {
             type: "string",
             pattern: /^1[3|4|5|6|7|8][0-9]{9}$/,
@@ -470,17 +487,17 @@ export default {
           },
         ],
         companyEmail: [
-          { required: true, message: "邮箱不能为空" },
-          { type: "email", message: "邮箱格式错误" },
+          {required: true, message: "邮箱不能为空"},
+          {type: "email", message: "邮箱格式错误"},
         ],
-        licenseNum: [{ required: true, message: "营业执照号不能为空" }],
-        scope: [{ required: true, message: "法定经营范围不能为空" }],
-        legalName: [{ required: true, message: "法人姓名不能为空" }],
-        legalId: [{ required: true, message: "法人证件号不能为空" }],
-        settlementBankAccountName: [{ required: true, message: "银行开户名不能为空" }],
-        settlementBankAccountNum: [{ required: true, message: "银行账号不能为空" }],
-        settlementBankBranchName: [{ required: true, message: "银行支行名称不能为空" }],
-        settlementBankJointName: [{ required: true, message: "支行联行号不能为空" }],
+        licenseNum: [{required: true, message: "营业执照号不能为空"}],
+        scope: [{required: true, message: "法定经营范围不能为空"}],
+        legalName: [{required: true, message: "法人姓名不能为空"}],
+        legalId: [{required: true, message: "法人证件号不能为空"}],
+        settlementBankAccountName: [{required: true, message: "银行开户名不能为空"}],
+        settlementBankAccountNum: [{required: true, message: "银行账号不能为空"}],
+        settlementBankBranchName: [{required: true, message: "银行支行名称不能为空"}],
+        settlementBankJointName: [{required: true, message: "支行联行号不能为空"}],
       },
       indeterminate: true, // 复选框全选样式
       checkAll: false, // 全选
@@ -612,7 +629,8 @@ export default {
       let index = this.tabNameList.indexOf(this.tabName) - 1;
       this.tabName = this.tabNameList[index];
     },
-    formValidate(prop, status, error) {},
+    formValidate(prop, status, error) {
+    },
     // 获取供应商详情
     getSupplierDetail() {
       supplierDetail(this.supplierId).then((res) => {
@@ -652,7 +670,7 @@ export default {
         if (valid) {
 
           const params = JSON.parse(JSON.stringify(this.supplierForm));
-          if(params.password){
+          if (params.password) {
             params.password = md5(params.password);
           }
           //处理经营类目，结算日
@@ -663,19 +681,19 @@ export default {
             supplierEdit(this.supplierId, params).then((res) => {
               if (res.success) {
                 this.$Message.success("编辑成功");
-                this.$router.push({ name: "supplierList" });
+                this.$router.push({name: "supplierList"});
               }
             });
           } else {
             const params = JSON.parse(JSON.stringify(this.supplierForm));
-            if(supplierForm.password){
-              supplierForm.password = md5(supplierForm.password);
+            if (params.password) {
+              params.password = md5(params.password);
             }
             supplierAdd(params).then((resp) => {
               if (resp.success) {
                 this.$Message.success("添加成功");
                 this.supplierForm = {};
-                this.$router.push({ name: "supplierList" });
+                this.$router.push({name: "supplierList"});
               }
             });
           }
@@ -737,7 +755,7 @@ export default {
           this.auditModel = false;
           if (res.success) {
             this.$Message.success("操作成功");
-            this.$router.push({ name: "shopAuth" });
+            this.$router.push({name: "shopAuth"});
           }
         });
       } else {
@@ -745,7 +763,7 @@ export default {
           this.auditModel = false;
           if (res.success) {
             this.$Message.success("操作成功");
-            this.$router.push({ name: "shopAuth" });
+            this.$router.push({name: "shopAuth"});
           }
         });
       }
@@ -802,6 +820,7 @@ export default {
     margin: 0 4px;
   }
 }
+
 .legal-photo {
   width: 100px;
   height: 100px;

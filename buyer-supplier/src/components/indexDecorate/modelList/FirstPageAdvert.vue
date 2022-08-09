@@ -75,7 +75,7 @@ export default {
     position: relative;
     display: block;
     height: 2px;
-    background: url(../../../assets/images/festival_icon.png);
+    background: url(/assets/images/festival_icon.png);
     z-index: 1;
   }
   .top-line {

@@ -361,12 +361,12 @@
           @click="prev"
           >上一步</Button
         >
-        <Button type="primary" v-show="tabNameList.indexOf(tabName) < 4" @click="next"
+        <Button type="primary" v-show="tabNameList.indexOf(tabName) < 3" @click="next"
           >下一步</Button
         >
         <Button
           type="primary"
-          v-show="tabNameList.indexOf(tabName) === 4"
+          v-show="tabNameList.indexOf(tabName) === 3"
           @click="save"
           v-if="!isRead"
         >
@@ -444,7 +444,7 @@ export default {
       addSettlementBtn: true, // 添加结算日按钮
       day: 1, //结算日
       tabName: "base", // tab栏name值
-      tabNameList: ["base", "entry", "category", "send", "settlement"], // tab栏name值数组
+      tabNameList: ["base", "entry", "category", "settlement"], // tab栏name值数组
       shopValidate: {
         // 表单验证规则
         memberName: [{ required: true, message: "会员不能为空" }],
