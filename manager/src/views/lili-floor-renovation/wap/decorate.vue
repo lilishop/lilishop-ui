@@ -333,6 +333,7 @@
                 <span v-if="item.url.___type == 'other'">
                   {{ item.url.title }}</span
                 >
+
                 <!-- 当选择完活动之后的其他回调 -->
                 <span v-if="item.url.___type == 'marketing'">
                   <span v-if="item.url.___promotion == 'SECKILL'"> 秒杀 </span>
@@ -362,7 +363,7 @@
           <!-- 链接地址-->
           <div
             class="decorate-view"
-            v-if="item.url.url && item.url.___type == 'other'"
+            v-if="item.url?.url && item.url.___type == 'other'"
           >
             <div class="decorate-view-title">外部链接</div>
             <div>
@@ -370,7 +371,7 @@
             </div>
           </div>
 
-          <p v-if="item.url.url && item.url.___type == 'other'">
+          <p v-if="item.url?.url && item.url.___type == 'other'">
             (如非同域名下，则在小程序与公众号中无效)
           </p>
         </div>
