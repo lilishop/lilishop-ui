@@ -409,14 +409,14 @@
         <dl>
           <dt>物流公司：</dt>
           <dd>
-            <div class="text-box">{{ logisticsInfo.shipper }}</div>
+            <div class="text-box">{{ logisticsInfo.shipper || orderInfo.order.logisticsName }}</div>
           </dd>
         </dl>
         <dl>
           <dt>快递单号：</dt>
           <dd>
             <div nctype="ordersSn" class="text-box">
-              {{ logisticsInfo.logisticCode }}
+              {{ logisticsInfo.logisticCode || orderInfo.order.logisticsNo }}
             </div>
           </dd>
         </dl>
