@@ -1,7 +1,8 @@
-/.vscode/
+*/.vscode/
 /.idea/
 /dist/
 .DS_Store
 node_modules/
 yarn.lock
 package-lock.json
+*/dist/
