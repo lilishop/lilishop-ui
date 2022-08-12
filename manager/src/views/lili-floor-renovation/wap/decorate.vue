@@ -416,7 +416,9 @@ export default {
       picModelFlag: false, //图片选择器
       linkType: "goods", // dialog弹窗口类型
       styleFlag: false, //广告魔方开关
-      textAlign: this.res.options.list[0].textAlign || "center", //文字对齐方式
+      textAlign: this.res.options.list[0]
+        ? this.res.options.list[0].textAlign
+        : "center", //文字对齐方式
       promotionsFlag: false, //广告魔方开关
       selectedLinkIndex: "", //选择链接的索引
       modelData, // 装修数据
