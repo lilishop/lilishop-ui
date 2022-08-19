@@ -228,7 +228,7 @@
                 @on-change="changeDirection($event, item)"
                 v-model="item.direction"
               >
-              {{item.direction}}
+                {{ item.direction }}
                 <Option label="横向" value="horizontal"></Option>
                 <Option label="纵向" value="vertical"></Option>
               </Select>
@@ -333,6 +333,7 @@
                 <span v-if="item.url.___type == 'other'">
                   {{ item.url.title }}</span
                 >
+
                 <!-- 当选择完活动之后的其他回调 -->
                 <span v-if="item.url.___type == 'marketing'">
                   <span v-if="item.url.___promotion == 'SECKILL'"> 秒杀 </span>
@@ -362,7 +363,7 @@
           <!-- 链接地址-->
           <div
             class="decorate-view"
-            v-if="item.url.url && item.url.___type == 'other'"
+            v-if="item.url && item.url.url && item.url.___type == 'other'"
           >
             <div class="decorate-view-title">外部链接</div>
             <div>
@@ -370,7 +371,7 @@
             </div>
           </div>
 
-          <p v-if="item.url.url && item.url.___type == 'other'">
+          <p v-if="item.url && item.url.url && item.url.___type == 'other'">
             (如非同域名下，则在小程序与公众号中无效)
           </p>
         </div>
@@ -415,7 +416,9 @@ export default {
       picModelFlag: false, //图片选择器
       linkType: "goods", // dialog弹窗口类型
       styleFlag: false, //广告魔方开关
-      textAlign: this.res.options.list[0].textAlign || "center", //文字对齐方式
+      textAlign: this.res.options.list[0]
+        ? this.res.options.list[0].textAlign
+        : "center", //文字对齐方式
       promotionsFlag: false, //广告魔方开关
       selectedLinkIndex: "", //选择链接的索引
       modelData, // 装修数据
@@ -435,9 +438,9 @@ export default {
     // 改变横纵切换title内容
     changeDirection(val, data) {
       if (val == "horizontal") {
-        const props = {...data}
-        data.title = []
-        data.title.push( props.title[0]);
+        const props = { ...data };
+        data.title = [];
+        data.title.push(props.title[0]);
       }
     },
     // 选择风格
@@ -510,7 +513,6 @@ export default {
     //添加设置
     addDecorate(type, data) {
       if (type === "notice") {
-        console.log(data)
         if (data.options.list[0].direction == "vertical") {
           this.res.options.list[0].title.push({
             content: "",
@@ -524,7 +526,7 @@ export default {
           title: "标题",
           link: "",
           url: "",
-          size: this.res.options.list[0]?.size,
+          size: this.res.options.list[0].size,
         };
         this.res.options.list.push(way);
       }

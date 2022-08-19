@@ -42,7 +42,12 @@
           </Select>
         </Form-item>
         <Form-item label="订单类型" prop="orderType">
-          <Select v-model="searchForm.orderPromotionType" placeholder="请选择" clearable style="width: 160px">
+          <Select
+            v-model="searchForm.orderPromotionType"
+            placeholder="请选择"
+            clearable
+            style="width: 160px"
+          >
             <Option value="NORMAL">普通订单</Option>
             <Option value="PINTUAN">拼团订单</Option>
             <Option value="GIFT">赠品订单</Option>
@@ -153,25 +158,6 @@ export default {
               return h("div", {}, "APP端");
             } else {
               return h("div", {}, params.row.clientType);
-            }
-          },
-        },
-
-        {
-          title: "订单类型",
-          key: "orderPromotionType",
-          width: 120,
-          render: (h, params) => {
-            if (params.row.orderPromotionType == "NORMAL") {
-              return h("div", [h("tag", {props: {color: "blue"}}, "普通订单")]);
-            } else if (params.row.orderPromotionType == "PINTUAN") {
-              return h("div", [h("tag", {props: {color: "volcano"}}, "拼团订单")]);
-            } else if (params.row.orderPromotionType == "GIFT") {
-              return h("div", [h("tag", {props: {color: "green"}}, "赠品订单")]);
-            } else if (params.row.orderPromotionType == "POINTS") {
-              return h("div", [h("tag", {props: {color: "geekblue"}}, "积分订单")]);
-            } else if (params.row.orderPromotionType == "KANJIA") {
-              return h("div", [h("tag", {props: {color: "pink"}}, "砍价订单")]);
             }
           },
         },
