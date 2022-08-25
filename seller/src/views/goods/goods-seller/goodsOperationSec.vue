@@ -1329,9 +1329,7 @@ export default {
     /** 移除当前规格项 进行数据变化*/
     handleCloseSkuItem($index, item) {
       this.skuInfo.splice($index, 1);
-      this.skuTableData.forEach((e, index) => {
-        delete e[item.name];
-      });
+      this.skuTableData.splice($index, 1);
       /**
        * 渲染规格详细表格
        */
