@@ -274,7 +274,10 @@
                                 placeholder="请输入规格名称"
                                 :filter-method="filterMethod"
                                 :data="skuData"
-                                @on-change="editSkuItem"
+                                @on-focus="changeSkuItem(item.name)"
+                                @on-change="
+                                  editSkuItem(item.name, $index, item)
+                                "
                               >
                               </AutoComplete>
                             </FormItem>
@@ -297,10 +300,8 @@
                                   placeholder="请输入规格项"
                                   :filter-method="filterMethod"
                                   :data="skuVal"
-                                  @on-focus="changeSkuVals(item.name)"
-                                  @on-change="
-                                    skuValueChange(val.value, index, item)
-                                  "
+                                  @on-focus="changeSkuVals(val, item.name)"
+                                  @on-change="skuValueChange(val, index, item)"
                                 >
                                 </AutoComplete>
                                 <Button
@@ -1298,24 +1299,55 @@ export default {
         this.$Message.error("规格项不能大于5个！");
         return;
       }
+      if (this.skuInfo.find((i) => i.name === "")) {
+        this.$Message.error("规格项不能为空！");
+        return;
+      }
       // 写入对象，下标，具体对象
       let num = this.global++;
       this.$set(this.skuInfo, this.skuInfo.length, {
-        spec_values: [{ name: "规格名" + num, value: "" }],
-        name: "规格名" + num,
+        spec_values: [{ name: "" + num, value: "" }],
+        name: "",
       });
+
       this.renderTableData(this.skuTableData);
     },
+    changeSkuItem(val) {
+      this.currentSkuItem = val;
+    },
     // 编辑规格名
-    editSkuItem() {
+    editSkuItem(val, index, item) {
+      if (this.skuTableData.find((i) => i[val])) {
+        this.$Message.error("已存在相同规格项！");
+        return;
+      }
+      this.skuTableData = this.skuTableData.map((e) => {
+        e[val] = e[this.currentSkuItem];
+        delete e[this.currentSkuItem];
+        return e;
+      });
+      this.currentSkuItem = val;
       this.renderTableData(this.skuTableData);
     },
     // 编辑规格值
-    async skuValueChange(val, index, item) {
+    skuValueChange(val, index, item) {
+      console.log("currentSkuVal: " + this.currentSkuVal);
+      if (this.skuTableData.find((i) => i[val.name] === val.value)) {
+        this.$Message.error("已存在相同规格值！");
+        return;
+      }
+      this.skuTableData = this.skuTableData.map((e) => {
+        if (e[val.name] === this.currentSkuVal) {
+          e[val.name] = val.value;
+        }
+        return e;
+      });
+      this.currentSkuVal = val.value;
       this.renderTableData(this.skuTableData);
     },
     // 获取焦点时，取得规格名对应的规格值
-    changeSkuVals(name) {
+    changeSkuVals(val, name) {
+      this.currentSkuVal = val.value;
       if (name) {
         this.skuData.forEach((e, index) => {
           if (e === name) {
@@ -1328,8 +1360,15 @@ export default {
     },
     /** 移除当前规格项 进行数据变化*/
     handleCloseSkuItem($index, item) {
-      this.skuInfo.splice($index, 1);
-      this.skuTableData.splice($index, 1);
+      if ($index === 0 && this.skuInfo.length === 1) {
+        this.skuInfo = [];
+        this.skuTableData = [];
+      } else {
+        this.skuInfo.splice($index, 1);
+        this.skuTableData.forEach((e, index) => {
+          delete e[item.name];
+        });
+      }
       /**
        * 渲染规格详细表格
        */
@@ -1357,7 +1396,6 @@ export default {
           this.$Message.error("规格值不能大于10个！");
           return;
         }
-
         this.$set(item.spec_values, item.spec_values.length, {
           name: item.name,
           value: "",
@@ -1491,6 +1529,11 @@ export default {
             });
           }
         });
+
+        // console.log("=====result=====");
+        // console.log(JSON.parse(JSON.stringify(result)));
+        // console.log("=====cloneTemp=====");
+        // console.log(JSON.parse(JSON.stringify(cloneTemp)));
         cloneTemp.splice(0, 1);
         result = this.specIterator(result, cloneTemp, skus);
         this.skuTableData = result;
@@ -1508,25 +1551,33 @@ export default {
       // console.log(JSON.parse(JSON.stringify(result)));
       // console.log("-----cloneTemp-----");
       // console.log(JSON.parse(JSON.stringify(cloneTemp)));
+      let empotyKey1 = "";
       //是否还可以循环
       if (cloneTemp.length > 0) {
         let table = [];
         // 已有数据索引
         let findIndex = 0;
         result.forEach((resItem, index) => {
+          empotyKey1 = Object.keys(resItem).find(ke => resItem[ke] === "");
           cloneTemp[0].spec_values.forEach((valItem, _index) => {
             let obj = cloneObj(resItem);
+            let containsEmptyValue =
+              valItem.value === "" || (!!empotyKey1 && obj[empotyKey1] === "");
+            // let containsEmptyValue = !!Object.values(obj).find(l => l === "");
+            // console.log(obj);
+            // console.log("-=-=-=-=-=-=-=-=-=-=-=-");
+
             // 判断已存在数据数量是否大于渲染数据数量（认为是在编辑原存在数据的规格值）且规格值不为空且存在已存在数据，如符合条件，则认为为修改已存在数据
             if (
               skus.length > result.length &&
-              valItem.value !== "" &&
+              !containsEmptyValue &&
               skus[findIndex]
             ) {
               obj = cloneObj(skus[findIndex]);
             }
             let emptyFlag = false;
             // 判断是否为规格项的第一个值，如果不为第一个值则判断为新加数据
-            if (cloneTemp[0].spec_values.length > 1 && valItem.value === "") {
+            if (cloneTemp[0].spec_values.length > 1 && containsEmptyValue) {
               delete obj.id;
               delete obj.sn;
               delete obj.quantity;
@@ -1548,7 +1599,7 @@ export default {
               skus &&
               skus[findIndex] &&
               (!skus[findIndex].id || obj.id === skus[findIndex].id) &&
-              valItem.value !== "" &&
+              !containsEmptyValue &&
               !emptyFlag
             ) {
               // 将原存在的数据放入结果中
@@ -1561,6 +1612,7 @@ export default {
                 weight: obj.weight || originSku.weight,
                 ...obj,
               };
+
               if (
                 originSku[valItem.name] === valItem.value ||
                 (obj.id && originSku.id === obj.id)
@@ -1578,25 +1630,24 @@ export default {
             if (
               skus.length > result.length &&
               skus[findIndex] &&
-              valItem.value !== ""
+              !containsEmptyValue
             ) {
               findIndex++;
             }
 
             obj[cloneTemp[0].name] = valItem.value;
+            // console.log(resItem);
+            // console.log(obj);
             table.push(obj);
           });
         });
-        result = [];
-        table.forEach((t) => {
-          result.push(t);
-        });
+        result = table;
         //清除当前循环的分组
         cloneTemp.splice(0, 1);
       } else {
         return result;
       }
-      return this.specIterator(result, cloneTemp, skus);
+      return this.specIterator(result, cloneTemp, skus, empotyKey1);
     },
     /** 根据分类id获取系统设置规格信息*/
     Get_SkuInfoByCategory(categoryId) {
