@@ -63,7 +63,7 @@ export default {
         pageSize: 10,
         sort: "createTime",
         order: "desc",
-        pageType: "INDEX",
+        pageType: "STORE",
         pageClientType: "H5",
       },
       total: 0, // 页面数量

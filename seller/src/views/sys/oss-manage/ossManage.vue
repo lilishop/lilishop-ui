@@ -26,7 +26,7 @@
                 style="width: 200px"
               />
             </Form-item>
-           
+
             <Form-item label="上传时间">
               <DatePicker
                 v-model="selectDate"
@@ -189,7 +189,7 @@
       </Row>
     </Card>
 
-      
+
 
     <Modal
       :title="modalTitle"
@@ -815,6 +815,6 @@ export default {
       this.init();
     }
   },
- 
+
 };
 </script>

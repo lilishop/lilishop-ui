@@ -1,14 +1,12 @@
 <template>
   <div class="merchant">
-    <!-- 普通店铺装修 -->
-    <div v-if="basePageData">
-      <BaseHeader />
+      <BaseHeader/>
       <!-- 搜索栏 -->
       <Search :store="true" @search="search"></Search>
       <!-- 店铺logo -->
       <div class="shop-logo">
         <div>
-          <img :src="storeMsg.storeLogo" height="80" alt="" />
+          <img :src="storeMsg.storeLogo" height="80" alt=""/>
           <div>
             <p>{{ storeMsg.storeName || "xx店铺" }}</p>
             <p
@@ -19,16 +17,16 @@
           </div>
           <div>
             <span class="hover-pointer" @click="collect"
-              ><Icon
-                type="ios-heart"
-                :color="storeCollected ? '#ed3f14' : '#fff'"
-              />{{ storeCollected ? "已收藏店铺" : "收藏店铺" }}</span
+            ><Icon
+              type="ios-heart"
+              :color="storeCollected ? '#ed3f14' : '#fff'"
+            />{{ storeCollected ? "已收藏店铺" : "收藏店铺" }}</span
             >
             <span
               style="width: 80px"
               class="hover-pointer ml_10"
               @click="connectCs(storeMsg.yzfSign)"
-              ><Icon custom="icomoon icon-customer-service" />联系客服</span
+            ><Icon custom="icomoon icon-customer-service"/>联系客服</span
             >
           </div>
         </div>
@@ -44,7 +42,8 @@
           <li class="cate-item" v-for="(cate, index) in cateList" :key="index">
             <Dropdown v-if="cate.children.length">
               <div @click.self="searchByCate(cate)">
-                {{ cate.labelName }} <Icon type="ios-arrow-down"></Icon>
+                {{ cate.labelName }}
+                <Icon type="ios-arrow-down"></Icon>
               </div>
               <DropdownMenu slot="list">
                 <DropdownItem
@@ -52,97 +51,79 @@
                   :name="sec.id"
                   v-for="sec in cate.children"
                   :key="sec.id"
-                  >{{ sec.labelName }}</DropdownItem
+                >{{ sec.labelName }}
+                </DropdownItem
                 >
               </DropdownMenu>
             </Dropdown>
             <span v-else @click.self="searchByCate(cate)">{{
-              cate.labelName
-            }}</span>
+                cate.labelName
+              }}</span>
           </li>
         </ul>
       </div>
 
       <div class="promotion-decorate">{{ cateName }}</div>
 
-      <div class="goods-list">
-        <empty v-if="goodsList.length === 0" />
-        <div
-          v-else
-          class="goods-show-info"
-          v-for="(item, index) in goodsList"
-          :key="index"
-          @click="goGoodsDetail(item.content.id, item.content.goodsId)"
-        >
-          <div class="goods-show-img">
-            <img width="220" height="220" :src="item.content.thumbnail" />
-          </div>
-          <div class="goods-show-price">
-            <span>
-              <span class="seckill-price text-danger">{{
-                item.content.price | unitPrice("￥")
-              }}</span>
-            </span>
-          </div>
-          <div class="goods-show-detail">
-            <span>{{ item.content.goodsName }}</span>
-          </div>
-          <div class="goods-show-num">
-            已有<span>{{ item.content.commentNum || 0 }}</span
-            >人评价
-          </div>
-        </div>
-      </div>
-      <div class="goods-page">
-        <Page
-          show-sizer
-          @on-change="changePageNum"
-          @on-page-size-change="changePageSize"
-          :total="total"
-          :page-size="params.pageSize"
-        ></Page>
-      </div>
-      <BaseFooter />
-    </div>
+<!--      <div class="goods-list">-->
+<!--        <empty v-if="goodsList.length === 0"/>-->
+<!--        <div-->
+<!--          v-else-->
+<!--          class="goods-show-info"-->
+<!--          v-for="(item, index) in goodsList"-->
+<!--          :key="index"-->
+<!--          @click="goGoodsDetail(item.content.id, item.content.goodsId)"-->
+<!--        >-->
+<!--          <div class="goods-show-img">-->
+<!--            <img width="220" height="220" :src="item.content.thumbnail"/>-->
+<!--          </div>-->
+<!--          <div class="goods-show-price">-->
+<!--            <span>-->
+<!--              <span class="seckill-price text-danger">{{-->
+<!--                  item.content.price | unitPrice("￥")-->
+<!--                }}</span>-->
+<!--            </span>-->
+<!--          </div>-->
+<!--          <div class="goods-show-detail">-->
+<!--            <span>{{ item.content.goodsName }}</span>-->
+<!--          </div>-->
+<!--          <div class="goods-show-num">-->
+<!--            已有<span>{{ item.content.commentNum || 0 }}</span-->
+<!--          >人评价-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div class="goods-page">-->
+<!--        <Page-->
+<!--          show-sizer-->
+<!--          @on-change="changePageNum"-->
+<!--          @on-page-size-change="changePageSize"-->
+<!--          :total="total"-->
+<!--          :page-size="params.pageSize"-->
+<!--        ></Page>-->
+<!--      </div>-->
+<!--      -->
 
-    <div v-if="enablePageData">
-      <drawer></drawer>
-      <!-- 固定头部 -->
-      <hover-search
-        class="hover-search"
-        :class="{ show: topSearchShow }"
-      ></hover-search>
-      <!-- 顶部广告 -->
-      <FixedTopPage :data="topAdvert"></FixedTopPage>
-      <!-- 头部 包括登录，我的订单等 -->
-      <BaseHeader></BaseHeader>
-      <!-- 搜索框、logo -->
-      <Search :store="true" @search="search"></Search>
-      <!-- 商品分类 -->
-      <cateNav
-        :showAlways="true"
-        v-if="showNav"
-        :large="carouselLarge"
-        :opacity="carouselOpacity"
-      ></cateNav>
-      <!-- 楼层装修部分 -->
-      <model-form ref="modelForm" :data="modelForm"></model-form>
-      <!-- 底部栏 -->
-      <BaseFooter></BaseFooter>
-    </div>
+
+    <!-- 楼层装修部分 -->
+    <model-form ref="modelForm" :data="modelForm"></model-form>
+
+    <BaseFooter/>
+
   </div>
 </template>
 
 <script>
-import { getDetailById, getCateById } from "@/api/shopentry";
-import { cancelCollect, collectGoods, isCollection } from "@/api/member";
-import { goodsList } from "@/api/goods";
+import {getDetailById, getCateById} from "@/api/shopentry";
+import {cancelCollect, collectGoods, isCollection} from "@/api/member";
+import {goodsList} from "@/api/goods";
 import Search from "@/components/Search";
 import ModelForm from "@/components/indexDecorate/ModelForm";
 import HoverSearch from "@/components/header/hoverSearch";
 import storage from "@/plugins/storage";
-import { getFloorStoreData } from "@/api/index.js";
-import { seckillByDay } from "@/api/promotion";
+import {getFloorStoreData} from "@/api/index.js";
+import {seckillByDay} from "@/api/promotion";
+
 export default {
   name: "Merchant",
   components: {
@@ -153,13 +134,12 @@ export default {
   data() {
     return {
       // 店铺装修的内容
-      modelForm: { list: [] }, // 楼层装修数据
+      modelForm: {list: []}, // 楼层装修数据
       topAdvert: {}, // 顶部广告
       showNav: false, // 是否展示分类栏
       topSearchShow: false, // 滚动后顶部搜索栏展示
       carouselLarge: false, // 不同轮播分类尺寸
       carouselOpacity: false, // 不同轮播分类样式,
-
       enablePageData: false, //是否显示楼层装修内容
       basePageData: false, //基础店铺信息
       storeMsg: {}, // 店铺信息
@@ -184,7 +164,7 @@ export default {
   methods: {
     getIndexData() {
       // 获取首页装修数据
-      getFloorStoreData({ clientType: "PC", num: this.$route.query.id ,pageType:'STORE'}).then(
+      getFloorStoreData({clientType: "PC", num: this.$route.query.id, pageType: 'STORE'}).then(
         (res) => {
           if (res.success) {
             let dataJson = JSON.parse(res.result.pageData);
@@ -226,35 +206,21 @@ export default {
       // 店铺信息
       getDetailById(this.$route.query.id).then((res) => {
         if (res.success) {
-          if (res.result.pageShow == "1") {
-            this.getIndexData();
-            let that = this;
-            window.onscroll = function () {
-              let top =
-                document.documentElement.scrollTop || document.body.scrollTop;
-              if (top > 300) {
-                that.topSearchShow = true;
-              } else {
-                that.topSearchShow = false;
-              }
-            };
-            // 楼层装修
-            this.enablePageData = true;
-          } else {
-            this.storeMsg = res.result;
-            document.title = this.storeMsg.storeName;
-            if (this.Cookies.getItem("userInfo")) {
-              isCollection("STORE", this.storeMsg.storeId).then((res) => {
-                if (res.success && res.result) {
-                  this.storeCollected = true;
-                }
-              });
-            }
-            this.basePageData = true;
 
-            this.getCateList();
-            this.getGoodsList();
-          }
+          this.storeMsg = res.result;
+
+
+          this.getIndexData();
+          let that = this;
+          window.onscroll = function () {
+            let top =
+              document.documentElement.scrollTop || document.body.scrollTop;
+            if (top > 300) {
+              that.topSearchShow = true;
+            } else {
+              that.topSearchShow = false;
+            }
+          };
         }
       });
     },
@@ -275,13 +241,14 @@ export default {
             this.total = res.result.totalElements;
           }
         })
-        .catch(() => {});
+        .catch(() => {
+        });
     },
     goGoodsDetail(skuId, goodsId) {
       // 跳转商品详情
       let routeUrl = this.$router.resolve({
         path: "/goodsDetail",
-        query: { skuId, goodsId },
+        query: {skuId, goodsId},
       });
       window.open(routeUrl.href, "_blank");
     },
@@ -330,15 +297,18 @@ export default {
 
 <style scoped lang="scss">
 @import "../assets/styles/goodsList.scss";
+
 .merchant {
   margin: 0 auto;
 }
+
 .shop-logo {
   position: relative;
   width: 100%;
   background-color: #666;
   padding: 4px;
   color: #fff;
+
   > div {
     display: flex;
     width: 1200px;
@@ -354,9 +324,11 @@ export default {
       width: 200px;
     }
   }
+
   p:nth-child(1) {
     font-size: 20px;
   }
+
   p:nth-child(2) {
     font-size: 14px;
     max-height: 40px;
@@ -367,21 +339,25 @@ export default {
 .store-category {
   background-color: #005aa0;
   color: #fff;
+
   .cate-list {
     width: 1200px;
     margin: 0 auto;
     clear: left;
     height: 30px;
     line-height: 30px;
+
     .cate-item {
       margin-right: 25px;
       float: left;
     }
+
     .cate-item:hover {
       cursor: pointer;
     }
   }
 }
+
 .promotion-decorate::before,
 .promotion-decorate::after {
   background-image: url("/src/assets/images/sprite@2x.png");

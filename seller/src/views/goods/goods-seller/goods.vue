@@ -181,7 +181,7 @@
       </div>
     </Modal>
     <Modal title="导入商品信息" v-model="importModal" :mask-closable="false">
-      <div>
+      <div style="text-align: center">
         <Upload :before-upload="handleUpload" name="files" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                 multiple type="drag" :action="action" :headers="accessToken">
           <div style="padding: 50px 0">
@@ -189,6 +189,7 @@
             <h2>选择或拖拽文件上传</h2>
           </div>
         </Upload>
+        <Button @click="exportGoods" type="text" style="color: red">下载导入模板</Button>
       </div>
       <div slot="footer">
         <Button type="text" @click="importModal = false">确定</Button>
@@ -206,9 +207,12 @@ import {
   lowGoods,
   deleteGoods,
   batchShipTemplate,
+  downLoadGoods
 } from "@/api/goods";
 import { baseUrl } from "@/libs/axios.js";
 import * as API_Shop from "@/api/shops";
+import Cookies from "js-cookie";
+import {uploadGoodsExcel} from "../../../api/goods";
 
 export default {
   name: "goods",
@@ -511,8 +515,50 @@ export default {
       this.upload();
       return false;
     },
+    /**
+     * 上传文件
+     */
+    async upload() {
+      let fd = new FormData();
+      fd.append("files", this.file);
+      let res = await uploadGoodsExcel(fd);
+      if (res.success) {
+        this.stepList.map((item) => {
+          item.checked = false;
+        });
+
+        this.stepList[2].checked = true;
+      }
+    },
     openImportGoods(){
       this.importModal = true
+    },
+    async exportGoods(){
+      downLoadGoods()
+        .then((res) => {
+          console.log(res)
+          const blob = new Blob([res], {
+            type: "application/vnd.ms-excel;charset=utf-8",
+          });
+          //对于<a>标签，只有 Firefox 和 Chrome（内核） 支持 download 属性
+          //IE10以上支持blob但是依然不支持download
+          if ("download" in document.createElement("a")) {
+            //支持a标签download的浏览器
+            const link = document.createElement("a"); //创建a标签
+            link.download = "商品批量导入模板.xls"; //a标签添加属性
+            link.style.display = "none";
+            link.href = URL.createObjectURL(blob);
+            document.body.appendChild(link);
+            link.click(); //执行下载
+            URL.revokeObjectURL(link.href); //释放url
+            document.body.removeChild(link); //释放标签
+          } else {
+            navigator.msSaveBlob(blob, fileName);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
     // 更新库存
     updateStock() {

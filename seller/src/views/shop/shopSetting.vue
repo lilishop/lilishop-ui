@@ -459,10 +459,9 @@ export default {
         }
       });
     },
-<<<<<<< HEAD
-    pageShow(type){
+    pageShow(type) {
       this.form.pageShow = type
-=======
+    },
     getDeliverAddress(){
       API_Shop.getDeliverAddress().then(res=>{
         if(res.success){
@@ -474,7 +473,6 @@ export default {
           }
         }
       })
->>>>>>> 4ea142ea086a3f534419a31b595de80497e16d90
     },
     //修改售后地址
     regionClick() {

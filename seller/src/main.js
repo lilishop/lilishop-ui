@@ -5,6 +5,7 @@ import "./styles/theme.less";
 import "core-js/stable";
 import vueQr from "vue-qr";
 
+import liliDialog from '@/views/lili-dialog'
 import App from "./App";
 import { router } from "./router/index";
 import store from "./store";
@@ -21,7 +22,6 @@ import { setStore, getStore, removeStore } from "@/libs/storage";
 import i18nBox from '@/views/lili-components/i18n-translate'
 import util from "@/libs/util";
 
-import liliDialog from '@/views/lili-dialog'
 import VueLazyload from "vue-lazyload";
 
 import * as filters from "@/utils/filters"; // global filter
@@ -37,6 +37,7 @@ Vue.use(VueLazyload, {
 Vue.use(ViewUI);
 Vue.component('liliDialog',liliDialog)
 Vue.component('i18nBox',i18nBox)
+Vue.component('liliDialog',liliDialog)
 Vue.component("vue-qr", vueQr); //此处将vue-qr添加为全局组件
 
 // 挂载全局使用的方法

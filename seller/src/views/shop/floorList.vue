@@ -126,7 +126,7 @@ export default {
           const data = this.formData;
           data.status ? (data.pageShow = "OPEN") : (data.pageShow = "CLOSE");
           delete data.status;
-          (data.pageType = "INDEX"), (data.pageClientType = "PC");
+          (data.pageType = "STORE"), (data.pageClientType = "PC");
           if (data.id) {
             API_floor.updateHome(data.id, data).then((res) => {
               this.$Message.success("编辑模板成功");

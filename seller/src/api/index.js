@@ -21,7 +21,6 @@ export const getAllCity = (params) => {
 export const getCurrentPermissionList = (params) => {
   return getRequest("/menu/memberMenu", params);
 };
-
 // 登陆
 export const getHomeNotice = params => {
   return getRequest("/other/article/getByPage?type=STORE_ARTICLE&pageSize=15");
@@ -131,7 +130,6 @@ export const unRelate = params => {
 export const getRelatedListData = params => {
   return getRequest("/relate/findByCondition", params);
 };
-
 // 获取用户数据 多条件
 export const getUserListData = params => {
   return getRequest("/clerk", params);

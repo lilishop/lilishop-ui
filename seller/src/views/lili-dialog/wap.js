@@ -21,6 +21,17 @@ export default [
   //   url: "3",
   //   name: "pages"
   // },
+
+  // {
+  //   title: "活动",
+  //   url: "3",
+  //   name: "marketing"
+  // },
+  // {
+  //   title: "页面",
+  //   url: "3",
+  //   name: "pages"
+  // },
   {
     title: "其他",
     url: "3",

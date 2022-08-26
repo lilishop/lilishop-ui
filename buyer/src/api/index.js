@@ -45,3 +45,14 @@ export function handleRefreshToken(token) {
     needToken: false,
   });
 }
+
+// /**
+//  * 获取店铺楼层数据
+//  */
+// export function getFloorStoreData(params) {
+//   return request({
+//     url: `/buyer/other/pageData?pageClientType=PC`,
+//     method: "get",
+//     params,
+//   });
+// }

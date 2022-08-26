@@ -4,10 +4,6 @@ import {
   postRequest,
   putRequest,
   deleteRequest,
-  importRequest,
-  getRequestWithNoToken,
-  putRequestWithNoForm,
-  postRequestWithNoForm,
 } from "@/libs/axios";
 
 /**
@@ -15,8 +11,7 @@ import {
  *
  */
 export const setHomeSetup = params => {
-
-  return postRequest("/other/pageData/add", params);
+  return postRequest("/settings/pageData/save", params);
 };
 
 /**
@@ -25,7 +20,7 @@ export const setHomeSetup = params => {
  */
 export const getHomeData = params => {
 
-  return getRequest(`/other/pageData/${params}`);
+  return getRequest(`/settings/pageData/${params}`);
 };
 
 
@@ -34,21 +29,8 @@ export const getHomeData = params => {
  *
  */
 export const getHomeList = params => {
+  return getRequest(`/settings/pageData/${params.pageClientType}/pageDataList`, params);
 
-  return getRequest("/other/pageData/pageDataList", params);
-};
-
-
-
-
-/**
- * 发布页面
- *
- */
-
- export const releasePageHome = (id) => {
-
-  return putRequest(`/other/pageData/release/${id}`);
 };
 
 
@@ -57,8 +39,7 @@ export const getHomeList = params => {
  *
  */
  export const updateHome = (id, params) => {
-
-  return putRequest(`/other/pageData/update/${id}`, params);
+  return putRequest(`/settings/pageData/update/${id}`, params);
 };
 
 /**
@@ -66,7 +47,15 @@ export const getHomeList = params => {
  *
  */
 export const removePageHome = (id) => {
+  return deleteRequest(`/settings/pageData/removePageData/${id}`);
+};
 
-  return deleteRequest(`/other/pageData/remove/${id}`);
+
+/**
+ * 发布页面
+ *
+ */
+export const releasePageHome = (id) => {
+  return putRequest(`/settings/pageData/release/${id}`);
 };
 

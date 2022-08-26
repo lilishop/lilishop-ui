@@ -61,7 +61,7 @@
             </ul>
           </div>
         </div>
-      </div>
+      </div>)
     </div>
     <!-- 左侧轮播装修 -->
     <Modal
@@ -166,14 +166,12 @@
             </table>
           </TabPane>
         </Tabs>
-        
       </div>
     </Modal>
     <!-- 选择商品。链接 -->
     <liliDialog
       ref="liliDialog"
       @selectedLink="selectedLink"
-     
     ></liliDialog>
     <!-- 选择图片 -->
     <Modal width="1200px" v-model="picModelFlag" footer-hide>

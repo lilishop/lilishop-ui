@@ -116,7 +116,7 @@ export default {
         : (this.submitWay.pageShow = "CLOSE");
 
       this.submitWay.pageData = JSON.stringify(this.$store.state.styleStore);
-      this.submitWay.pageType = "INDEX";
+      this.submitWay.pageType = "STORE";
 
       this.$route.query.id ? this.update() : this.submit(this.submitWay);
     },
@@ -128,7 +128,7 @@ export default {
         pageData: JSON.stringify(this.$store.state.styleStore),
         name: this.submitWay.name,
         pageShow: this.submitWay.pageShow,
-        pageType: "INDEX",
+        pageType: "STORE",
         pageClientType: "H5",
       })
         .then((res) => {

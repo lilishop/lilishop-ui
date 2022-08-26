@@ -491,14 +491,34 @@ export const result = [{
             children: null,
           },
           {
-            name: "shopAddress",
+            name: "wapList",
             level: 2,
             type: 0,
-            title: "自提管理",
-            path: "shopAddress",
-            component: "shop/shopAddress",
-            children: null,
-          }
+            title: "移动楼层",
+            path: "wapList",
+            component: "shop/wap/wapList",
+            children: null
+
+          },
+          {
+            name: "pcList",
+            level: 2,
+            type: 0,
+            title: "PC楼层",
+            path: "pcList",
+            component: "shop/floorList",
+            children: null
+
+          },
+          // {
+          //   name: "shopAddress",
+          //   level: 2,
+          //   type: 0,
+          //   title: "自提管理",
+          //   path: "shopAddress",
+          //   component: "shop/shopAddress",
+          //   children: null,
+          // }
         ]
       }
     ]

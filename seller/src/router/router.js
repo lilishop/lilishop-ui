@@ -103,6 +103,18 @@ export const otherRouter = {
       component: () => import("@/views/order/order/orderDetail.vue")
     },
     {
+      path: "/floorList/main",
+      title: "编辑模板",
+      name: "main",
+      component: () => import("@/views/shop/wap/main.vue")
+    },
+    {
+      path: "/pcFloorList/main",
+      title: "编辑模板",
+      name: "renovation",
+      component: () => import("@/views/shop/renovation.vue")
+    },
+    {
       path: "order-complaint-detail",
       title: "投诉详情",
       name: "order-complaint-detail",

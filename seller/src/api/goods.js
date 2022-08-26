@@ -6,7 +6,8 @@ import {
   deleteRequest,
   importRequest,
   getRequestWithNoToken,
-  commonUrl
+  commonUrl,
+  postRequestWithNoForm
 } from "@/libs/axios";
 // 获取数据字典
 export const getDictData = "/dictData/getByType/";
@@ -354,4 +355,14 @@ export const refundStatistics = params => {
 // 获取退款统计金额
 export const refundPriceStatistics = params => {
   return getRequest(`/statistics/refund/order/getPrice`, params);
+};
+
+//下载结算单
+export const downLoadGoods = () => {
+  return getRequest(`/goods/import/downLoad/`, {}, 'blob')
+}
+
+// 上传待发货的订单列表
+export const uploadGoodsExcel = params => {
+  return postRequestWithNoForm(`/goods/import/import`, params );
 };
