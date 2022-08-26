@@ -5,6 +5,7 @@ import "./styles/theme.less";
 import "core-js/stable";
 import vueQr from "vue-qr";
 
+import liliDialog from '@/views/lili-dialog'
 import App from "./App";
 import { router } from "./router/index";
 import store from "./store";
@@ -46,6 +47,7 @@ Vue.use(VueLazyload, {
 
 Vue.use(ViewUI);
 Vue.component('i18nBox',i18nBox)
+Vue.component('liliDialog',liliDialog)
 Vue.component("vue-qr", vueQr); //此处将vue-qr添加为全局组件
 
 // 挂载全局使用的方法
