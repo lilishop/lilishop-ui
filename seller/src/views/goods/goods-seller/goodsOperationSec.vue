@@ -243,6 +243,42 @@
                 />
               </Modal>
             </FormItem>
+            <FormItem
+              class="form-item-view-el"
+              label="商品视频"
+              prop="goodsVideo"
+            >
+              <div class="goods-video">
+                <div v-if="baseInfoForm.goodsVideo">
+                  <div>
+                    <video
+                      controls
+                      class="video"
+                      :src="baseInfoForm.goodsVideo"
+                    />
+                  </div>
+                </div>
+
+                <Upload
+                  ref="upload"
+                  :show-upload-list="false"
+                  :on-success="handleSuccessGoodsVideo"
+                  :format="['avi', 'wmv', 'mpeg', 'mp4', 'mov']"
+                  :on-format-error="handleFormatError"
+                  :on-exceeded-size="handleVideoMaxSize"
+                  :max-size="20480"
+                  multiple
+                  type="drag"
+                  :action="uploadFileUrl"
+                  :headers="{ ...accessToken }"
+                  style="margin-left: 10px"
+                >
+                  <Button icon="ios-cloud-upload-outline"
+                  >{{ baseInfoForm.goodsVideo ? "已" : "" }}上传视频</Button
+                  >
+                </Upload>
+              </div>
+            </FormItem>
             <div class="layout" style="width: 100%">
               <Collapse v-model="open_panel">
                 <Panel name="1">
@@ -758,6 +794,7 @@ export default {
       showSkuPicture: false,
       //选择的sku
       selectedSku: {},
+      goodsVideo: '',
       wholesalePreviewColumns: [
         {
           title: "销售规则",
@@ -1056,6 +1093,14 @@ export default {
       }
       this.renderTableData(this.skuTableData);
     },
+    // 视频上传成功
+    handleSuccessGoodsVideo(res, file) {
+      if (file.response) {
+        file.url = file.response.result;
+
+        this.baseInfoForm.goodsVideo = file.url;
+      }
+    },
     // 商品图片上传成功
     handleSuccessGoodsPicture(res, file) {
       if (file.response) {
@@ -1068,6 +1113,13 @@ export default {
       this.$Notice.warning({
         title: "文件格式不正确",
         desc: "文件 " + file.name + " 的格式不正确",
+      });
+    },
+    // ship大小不正确
+    handleVideoMaxSize(file) {
+      this.$Notice.warning({
+        title: "超过文件大小限制",
+        desc: "视频大小不能超过10MB",
       });
     },
     // 图片大小不正确

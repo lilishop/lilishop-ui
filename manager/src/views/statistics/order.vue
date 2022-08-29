@@ -193,6 +193,23 @@
         />
       </div>
     </Card>
+
+    <Card class="card">
+      <div>
+        <h4>活动订单统计</h4>
+        <div class="breadcrumb" style="margin-bottom:20px;">
+          <RadioGroup v-model="orderPromotionType" type="button" size="small" button-style="solid">
+            <Radio label="PINTUAN">拼团订单</Radio>
+            <Radio label="POINTS">积分订单</Radio>
+            <Radio label="KANJIA">砍价订单</Radio>
+          </RadioGroup>
+        </div>
+        <div>
+          <Table stripe :columns="orderPromotionCloums" :data="orderPromotionList"></Table>
+        </div>
+        <Page @on-change="(index)=>{promotionParams.pageNumber = index}" @on-page-size-change="(size)=>{promotionParams.pageSize= size}" class="mt_10" show-total show-elevator :total="orderPromotionTotal" />
+      </div>
+    </Card>
   </div>
 </template>
 <script>
@@ -207,6 +224,19 @@ export default {
 
   data() {
     return {
+      orderPromotionType: 'PINTUAN', //活动类型
+      orderPromotionCloums: [],  //活动表头
+      orderPromotionList: [], //数据
+      promotionParams: {
+        pageNumber: 1,
+        pageSize: 10,
+        searchType: "LAST_SEVEN",
+        orderPromotionType: "PINTUAN",
+        year: "",
+        month: '',
+        storeId: '',
+      },//查询参数
+      orderPromotionTotal: 0,//总数
       orderOrRefund: 1, // 订单还是退单
       total: 0, // 总数
       // 订单状态
@@ -528,6 +558,17 @@ export default {
       },
       deep: true,
     },
+    orderPromotionType: {
+      handler(val) {
+        this.promotionParams.orderPromotionType = val
+      },
+    },
+    promotionParams: {
+      handler() {
+        this.getOrderPromotionList();
+      },
+      deep: true,
+    },
   },
   methods: {
     // 订单图
@@ -572,7 +613,10 @@ export default {
       let callback = JSON.parse(JSON.stringify(item));
 
       this.orderParams = callback;
-
+      this.promotionParams.searchType = callback.searchType;
+      this.promotionParams.year = callback.year
+      this.promotionParams.month = callback.month
+      this.promotionParams.storeId = callback.storeId
       this.overViewParams = callback;
       this.refundParams = callback;
     },
@@ -627,6 +671,17 @@ export default {
       this.getOrderList();
       this.orderParams.year = data.getFullYear();
       this.overViewParams.year = data.getFullYear();
+      this.getOrderPromotionList();
+    },
+
+    //统计活动订单
+    async getOrderPromotionList(){
+      const res = await API_Goods.getOrderPromotionStatistics(this.promotionParams);
+      if (res.success) {
+        this.orderPromotionList = res.result.records;
+        this.orderPromotionCloums = this.orderColumns;
+        this.orderPromotionTotal = res.result.total;
+      }
     },
   },
 

@@ -160,6 +160,23 @@
       </div>
     </Card>
 
+    <Card class="card">
+      <div>
+        <h4>活动订单统计</h4>
+        <div class="breadcrumb" style="margin-bottom:20px;">
+          <RadioGroup v-model="orderPromotionType" type="button" size="small" button-style="solid">
+            <Radio label="PINTUAN">拼团订单</Radio>
+            <Radio label="POINTS">积分订单</Radio>
+            <Radio label="KANJIA">砍价订单</Radio>
+          </RadioGroup>
+        </div>
+        <div>
+          <Table stripe :columns="orderPromotionCloums" :data="orderPromotionList"></Table>
+        </div>
+        <Page @on-change="(index)=>{promotionParams.pageNumber = index}" @on-page-size-change="(size)=>{promotionParams.pageSize= size}" class="mt_10" show-total show-elevator :total="orderPromotionTotal" />
+      </div>
+    </Card>
+
   </div>
 </template>
 <script>
@@ -170,6 +187,7 @@ import orderRow from "./order/orderDetail";
 import refundRow from "./order/refundOrder";
 import affixTime from "@/views/lili-components/affix-time";
 import Cookies from "js-cookie";
+import {getOrderPromotionStatistics} from "@/api/goods";
 export default {
   components: { orderRow, refundRow, affixTime },
 
@@ -177,6 +195,10 @@ export default {
     return {
       orderOrRefund: 1, // 订单还是退单
       total:0, // 订单总数
+      orderPromotionTotal: 0,
+      orderPromotionType: "PINTUAN",
+      orderPromotionList: [],
+      orderPromotionCloums: [],
       // 订单状态
       orderStatusList: {
         UNDELIVERED: "待发货",
@@ -187,7 +209,6 @@ export default {
         COMPLETED: "已完成",
         TAKE: "已完成",
       },
-
       serviceTypeList: {
         // 服务类型
         CANCEL: "取消",
@@ -428,6 +449,15 @@ export default {
         year: "",
       },
 
+      promotionParams: {
+        pageNumber: 1,
+        pageSize: 10,
+        searchType: "LAST_SEVEN",
+        storeId: JSON.parse(Cookies.get("userInfoSeller")).id || "",
+        orderPromotionType: "PINTUAN",
+        year: "",
+      },
+
       //
       //
     };
@@ -467,6 +497,18 @@ export default {
         }
       },
     },
+    orderPromotionType: {
+      handler(val) {
+        this.promotionParams.orderPromotionType = val
+      },
+    },
+    promotionParams: {
+      handler() {
+        this.getOrderPromotionList();
+      },
+      deep: true,
+    },
+
   },
   methods: {
     // 订单图
@@ -509,7 +551,9 @@ export default {
       let callback = JSON.parse(JSON.stringify(item));
 
       this.orderParams = callback;
-
+      this.promotionParams.searchType = callback.searchType;
+      this.promotionParams.year = callback.year
+      this.promotionParams.month = callback.month
       this.overViewParams = callback;
       this.refundParams = callback;
     },
@@ -563,8 +607,19 @@ export default {
     initBaseParams() {
       let data = new Date();
       this.getOrderList();
+      this.getOrderPromotionList();
       this.orderParams.year = data.getFullYear();
       this.overViewParams.year = data.getFullYear();
+    },
+
+    //统计活动订单
+    async getOrderPromotionList(){
+      const res = await API_Goods.getOrderPromotionStatistics(this.promotionParams);
+      if (res.success) {
+        this.orderPromotionList = res.result.records;
+        this.orderPromotionCloums = this.orderColumns;
+        this.orderPromotionTotal = res.result.total;
+      }
     },
   },
 

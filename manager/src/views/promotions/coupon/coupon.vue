@@ -179,25 +179,26 @@ export default {
           },
         },
 
-        {
-          title: "已领取数量/总数量",
-          key: "publishNum",
-          width: 130,
-          render: (h, params) => {
-            return h(
-              "div",
-              params.row.receivedNum +
-                "/" +
-                (params.row.publishNum === 0 ? "不限制" : params.row.publishNum)
-            );
-          },
-        },
+        // {
+        //   title: "已领取数量/总数量",
+        //   key: "publishNum",
+        //   width: 130,
+        //   render: (h, params) => {
+        //     return h(
+        //       "div",
+        //       params.row.receivedNum +
+        //         "/" +
+        //         (params.row.publishNum === 0 ? "不限制" : params.row.publishNum)
+        //     );
+        //   },
+        // },
 
         {
-          title: "已被使用的数量/已领取数量",
+          title: "已使用/已领取/总数量",
           key: "publishNum",
           render: (h, params) => {
-            return h("div", params.row.usedNum + "/" + params.row.receivedNum);
+            //return h("div", params.row.usedNum + "/" + params.row.receivedNum);
+            return h("div", params.row.usedNum + "/" + params.row.receivedNum+"/" + (params.row.publishNum === 0 ? "不限制" : params.row.publishNum));
           },
         },
         {
