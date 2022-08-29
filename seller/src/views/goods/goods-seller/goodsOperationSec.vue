@@ -842,6 +842,7 @@ export default {
         release: 1,
         /** 是否为推荐商品 */
         recommend: 1,
+        goodsVideo: '',
         /** 店铺分类 */
         storeCategoryPath: "",
         brandId: 0,
@@ -1097,7 +1098,6 @@ export default {
     handleSuccessGoodsVideo(res, file) {
       if (file.response) {
         file.url = file.response.result;
-
         this.baseInfoForm.goodsVideo = file.url;
       }
     },
