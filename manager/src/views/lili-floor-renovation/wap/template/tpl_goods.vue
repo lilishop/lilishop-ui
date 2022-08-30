@@ -98,7 +98,7 @@ export default {
   padding: 10px;
   transition: 0.35s;
   display: flex;
-  cursor: pointer;
+  // cursor: pointer;
   > .goods-item-title {
     flex: 1;
     text-align: center;
