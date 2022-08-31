@@ -41,6 +41,10 @@ export const getBillDetail = (id, params) => {
 export const getLogistics = (id, params) => {
   return getRequest(`/other/logistics`, params)
 }
+//返回信息
+export const getIsCheck =(logisticsId) =>{
+  return getRequest(`other/logistics/${logisticsId}/getStoreLogistics`)
+}
 
 // 开启物流公司
 export const logisticsChecked = (id, params) => {
@@ -115,6 +119,11 @@ export const addShipTemplate = (params, headers) => {
 //新增运费模板
 export const editShipTemplate = (id, params, headers) => {
   return putRequest(`/setting/freightTemplate/${id}`, params, headers)
+}
+
+//修改电子面单等信息
+export const editChecked = (logisticsId,params) => {
+  return putRequest(`/other/logistics/${logisticsId}/updateStoreLogistics`,params)
 }
 
 
