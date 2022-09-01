@@ -95,7 +95,8 @@ export default {
   name: "logistics",
   data() {
     return {
-      openModal: true,
+      row: {},
+      openModal: false,
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
@@ -246,7 +247,7 @@ export default {
     },
     // 开启
     open(v) {
-      this.modalTitle = v;
+      this.row = v;
       this.openModal = true;
       this.searchForm.faceSheetFlag = "false"; //开弹框 等于v
       if (this.searchForm.faceSheetFlag == "true") {
@@ -257,15 +258,17 @@ export default {
     },
     //修改
     getFaceSheetInfo(v) {
+      this.row = v;
       this.logisticsId = v.logisticsId;
       this.openModalTitle = '修改信息';
       API_Shop.getIsCheck(this.logisticsId).then((res) => {
         if (res.success) {
           // this.searchForm = res.result.recordes;
-          this.faceSheetForm.faceSheetFlag = String(res.result.faceSheetFlag); //开弹框 等于v
-          if (this.faceSheetForm.faceSheetFlag == "true") {
+          this.faceSheetForm.faceSheetFlag = res.result.faceSheetFlag; //开弹框 等于v
+          if (this.faceSheetForm.faceSheetFlag === true) {
             this.onpenText = true;
           } else {
+            this.faceSheetForm.faceSheetFlag = false
             this.onpenText = false;
           }
           this.faceSheetForm.customerName = res.result.customerName;
@@ -275,6 +278,7 @@ export default {
           this.faceSheetForm.sendStaff = res.result.sendStaff;
         }
       });
+      this.openModal = true;
     },
     frontDownload(val) {
       var a = document.createElement("a"); //创建一个<a></a>标签
@@ -293,10 +297,9 @@ export default {
     },
 
     submit() {
-      if (v.selected === null || v.selected === "") {
-
+      if ( this.row.selected === null ||  this.row.selected === "") {
         API_Shop.logisticsChecked(
-          this.modalTitle.logisticsId,
+          this.row.logisticsId,
           this.faceSheetForm
         ).then((res) => {
           this.openModal = false;

@@ -17,6 +17,10 @@ export const queryExportOrder = params => {
   return getRequest(`/order/order/queryExportOrder`, params);
 };
 
+//获取电子面单
+export const getOrderFaceSheet= (orderSn,params) =>{
+  return postRequest(`/order/order/${orderSn}/createElectronicsFaceSheet`,params)
+}
 
 // 上传待发货的订单列表
 export const uploadDeliverExcel = params => {

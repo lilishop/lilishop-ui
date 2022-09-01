@@ -48,7 +48,17 @@ export const getIsCheck =(logisticsId) =>{
 
 // 开启物流公司
 export const logisticsChecked = (id, params) => {
-  return postRequest(`/other/logistics/${id}`, params)
+  return postRequest(`/other/logistics/${id}`, params, {
+    "Content-type": "application/json"
+  })
+}
+//获取发货地址
+export const getDeliverAddress = () =>{
+  return getRequest(`/settings/storeSettings/storeDeliverGoodsAddress`)
+}
+//修改发货地址
+export const editDeliverAddress = (params) =>{
+  return putRequest(`/settings/storeSettings/storeDeliverGoodsAddress`,params)
 }
 
 // 关闭开启物流公司
