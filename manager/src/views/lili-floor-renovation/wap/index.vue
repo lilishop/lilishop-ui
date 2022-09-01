@@ -178,7 +178,7 @@ export default {
                       color1: val.subColor,
                       bk_color: val.subBkColor,
                       data: res.result.commodityList
-                        ? res.result.commodityList.splice(0,2)
+                        ? res.result.commodityList.splice(0, 2)
                         : [],
                     });
                   }
