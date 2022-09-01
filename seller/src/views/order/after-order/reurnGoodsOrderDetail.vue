@@ -505,6 +505,7 @@ export default {
           this.getDetail();
         }
       });
+       this.submitLoading = false;
     },
     // 返回售后状态中文描述
     filterStatus(status) {
