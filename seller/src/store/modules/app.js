@@ -46,11 +46,11 @@ const app = {
     // 动态添加主界面路由，需要缓存
     updateAppRouter(state, routes) {
       state.routers.push(...routes);
-      routes.forEach(route => router.addRoute(route));
+      router.addRoutes(routes);
     },
     // 动态添加全局路由404、500等页面，不需要缓存
     updateDefaultRouter(state, routes) {
-      routes.forEach(route => router.addRoute(route));
+      router.addRoutes(routes);
     },
     setLoading(state, v) {
       state.loading = v;
