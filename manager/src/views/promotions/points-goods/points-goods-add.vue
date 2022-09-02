@@ -102,7 +102,7 @@
 <script>
 import { addPointsGoods, getPointsGoodsCategoryList } from "@/api/promotion";
 import { regular } from "@/utils";
-import skuSelect from "@/views/lili-dialog";
+import skuSelect from "@/components/lili-dialog";
 export default {
   name: "addPoinsGoods",
   components: {

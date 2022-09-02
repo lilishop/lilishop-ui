@@ -63,7 +63,7 @@
 
 <script>
   import * as API_Setting from "@/api/setting.js";
-  import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
+  import uploadPicThumb from "@/components/lili/upload-pic-thumb";
 
   export default {
     name: "smsSign",

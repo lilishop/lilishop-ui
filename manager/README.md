@@ -31,7 +31,7 @@ npm run lint
 ####  login.vue页面，测试时不走权限，直接return  318行
 ####  Main.vue 页面，241行，修改，避免报错
 
-#### main-components  头部，左侧所有内容
+#### main-parts  头部，左侧所有内容
 
-#### lili-floor-renovation  楼层装修模块
+#### decoration  楼层装修模块
      

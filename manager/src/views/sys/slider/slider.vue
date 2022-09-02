@@ -115,7 +115,7 @@
 </template>
 <script>
 import * as API_Setting from "@/api/setting";
-import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
+import uploadPicInput from "@/components/lili/upload-pic-input";
 export default {
   components: {
     uploadPicInput

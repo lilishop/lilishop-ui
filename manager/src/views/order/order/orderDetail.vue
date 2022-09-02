@@ -505,7 +505,7 @@
 <script>
 import * as API_Order from "@/api/order";
 import * as RegExp from "@/libs/RegExp.js";
-import region from "@/views/lili-components/region";
+import region from "@/components/region";
 import vueQr from "vue-qr";
 export default {
   name: "orderList",

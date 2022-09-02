@@ -24,7 +24,7 @@
 <script>
 import {Chart} from "@antv/g2";
 import {getHotWordsStatistics} from "@/api/index";
-import affixTime from "@/views/lili-components/affix-time";
+import affixTime from "@/components/affix-time";
 
 export default {
   components: {

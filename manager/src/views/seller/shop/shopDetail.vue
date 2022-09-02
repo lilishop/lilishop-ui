@@ -530,7 +530,7 @@
 </template>
 
 <script>
-  import region from "@/views/lili-components/region";
+  import region from "@/components/region";
   import ossManage from "@/views/sys/oss-manage/ossManage";
   import * as RegExp from '@/libs/RegExp.js';
   import {getCategoryTree} from "@/api/goods";

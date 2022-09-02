@@ -147,7 +147,7 @@ import {
   updateArticleStatus,
 } from "@/api/pages";
 import Editor from "@tinymce/tinymce-vue";
-import { initEditor } from "@/views/lili-components/editor/config";
+import { initEditor } from "@/components/editor/config";
 export default {
   name: "article",
   components: {

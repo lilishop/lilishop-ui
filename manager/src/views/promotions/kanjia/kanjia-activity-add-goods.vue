@@ -74,7 +74,7 @@
 <script>
 import { saveKanJiaActivityGoods } from "@/api/promotion";
 import { regular } from "@/utils";
-import skuSelect from "@/views/lili-dialog";
+import skuSelect from "@/components/lili-dialog";
 
 export default {
   name: "add-kanjia-activity-goods",

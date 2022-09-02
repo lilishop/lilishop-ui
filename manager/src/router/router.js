@@ -257,13 +257,13 @@ export const otherRouter = {
       path: "/floorList/renovation",
       title: "编辑模板",
       name: "renovation",
-      component: () => import("@/views/lili-floor-renovation/renovation.vue")
+      component: () => import("@/views/page-decoration/renovation.vue")
     },
     {
       path: "/floorList/main",
       title: "编辑模板",
       name: "main",
-      component: () => import("@/views/lili-floor-renovation/wap/main.vue")
+      component: () => import("@/views/page-decoration/wap/main.vue")
     },
     {
       path: "add-sms-sign",

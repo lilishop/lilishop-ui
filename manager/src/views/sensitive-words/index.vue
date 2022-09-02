@@ -55,7 +55,7 @@ import {
   updateSensitiveWords
 } from "@/api/index";
 export default {
-  name: "sensitiveWords",
+  name: "sensitive-words",
   data() {
     return {
       loading: true, // 表单加载状态

@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import SetPassword from "@/views/my-components/lili/set-password";
+import SetPassword from "@/components/lili/set-password";
 import { changePass } from "@/api/index";
 
 export default {
