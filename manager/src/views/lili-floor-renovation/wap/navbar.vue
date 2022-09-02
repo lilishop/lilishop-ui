@@ -9,9 +9,7 @@
         v-for="(item, index) in way"
         :key="index"
         :type="item.selected ? 'primary' : ''"
-      >
-        {{ item.title }}
-      </Button>
+      >{{ item.title }}</Button>
     </div>
     <div class="model-title-view-btn">
       <!-- TODO 后期会补全 目前版本暂无 -->
@@ -21,7 +19,7 @@
           <div>临时预览</div>
           <div ref="qrCodeUrl"></div>
         </div>
-      </Poptip> -->
+      </Poptip>-->
       <Button size="default" type="primary" @click="handleSpinShow">保存模板</Button>
 
       <Modal
@@ -33,7 +31,8 @@
       >
         <div v-if="progress">
           <div class="model-item">
-            模板名称 <Input style="width: 200px" v-model="submitWay.name" />
+            模板名称
+            <Input style="width: 200px" v-model="submitWay.name"/>
           </div>
           <div class="model-item">
             是否立即发布
@@ -45,7 +44,7 @@
 
           <Button type="primary" @click="save()">保存</Button>
         </div>
-        <Progress v-else :percent="num" status="active" />
+        <Progress v-else :percent="num" status="active"/>
       </Modal>
     </div>
   </div>
@@ -54,6 +53,7 @@
 import * as API_Other from "@/api/other.js";
 
 export default {
+  props: ["pagetype"],
   data() {
     return {
       progress: true, // 展示进度
@@ -61,11 +61,11 @@ export default {
       saveDialog: false, // 加载状态
       way: [
         // 装修tab栏切换
-        {
-          title: "首页",
-          name: "index",
-          selected: true,
-        },
+        // {
+        //   title: "首页",
+        //   name: "index",
+        //   selected: true,
+        // },
         // {
         //   title: "全屏广告",
         //   name: "advertising",
@@ -82,11 +82,23 @@ export default {
         // 表单信息
         pageShow: this.$route.query.type || false,
         name: this.$route.query.name || "模板名称",
-        pageClientType: "H5",
-      },
+        pageClientType: "H5"
+      }
     };
   },
-  watch: {},
+  watch: {
+    pagetype: {
+      handler(val) {
+        this.way.length = 0;
+        if (val == "INDEX") {
+          this.way.push({ title: "首页", name: "index", selected: true });
+        } else if (val == "SPECIAL") {
+          this.way.push({ title: "专题", name: "special", selected: true });
+        }
+      },
+      immediate: true
+    }
+  },
   mounted() {},
   methods: {
     clickBtn(val) {
@@ -116,7 +128,8 @@ export default {
         : (this.submitWay.pageShow = "CLOSE");
 
       this.submitWay.pageData = JSON.stringify(this.$store.state.styleStore);
-      this.submitWay.pageType = "INDEX";
+      // this.submitWay.pageType = "INDEX";
+      this.submitWay.pageType = this.pagetype;
 
       this.$route.query.id ? this.update() : this.submit(this.submitWay);
     },
@@ -128,10 +141,11 @@ export default {
         pageData: JSON.stringify(this.$store.state.styleStore),
         name: this.submitWay.name,
         pageShow: this.submitWay.pageShow,
-        pageType: "INDEX",
-        pageClientType: "H5",
+        // pageType: "INDEX",
+        pageType: this.pagetype,
+        pageClientType: "H5"
       })
-        .then((res) => {
+        .then(res => {
           this.num = 50;
           if (res.success) {
             this.num = 80;
@@ -147,13 +161,13 @@ export default {
           }
           console.log(res);
         })
-        .catch((error) => {});
+        .catch(error => {});
     },
 
     // 返回查询数据页面
     goback() {
       this.$router.push({
-        path: "/wapList",
+        path: "/wapList"
       });
     },
 
@@ -161,7 +175,7 @@ export default {
     submit(submitWay) {
       this.progress = false;
       API_Other.setHomeSetup(submitWay)
-        .then((res) => {
+        .then(res => {
           this.num = 50;
           if (res.success) {
             this.num = 80;
@@ -178,9 +192,9 @@ export default {
           }
           console.log(res);
         })
-        .catch((error) => {});
-    },
-  },
+        .catch(error => {});
+    }
+  }
 };
 </script>
 <style scoped lang="scss">

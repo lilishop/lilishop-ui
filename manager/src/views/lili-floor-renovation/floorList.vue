@@ -82,7 +82,9 @@ export default {
         pageNumber:1,
         pageSize:10,
         sort: 'createTime',
-        order: 'desc'
+        order: 'desc',
+        pageType:"INDEX",
+        pageClientType:"PC",
       },
       columns: [
         // 列表展示的column
@@ -106,10 +108,10 @@ export default {
           type: "INDEX",
           title: "首页",
         },
-        // {
-        //   type: "SPECIAL",
-        //   title: "专题",
-        // },
+        {
+          type: "SPECIAL",
+          title: "专题",
+        }
       ],
       list: [], // 模板列表
     };
@@ -125,7 +127,8 @@ export default {
           const data = this.formData;
           data.status ? (data.pageShow = "OPEN") : (data.pageShow = "CLOSE");
           delete data.status;
-          (data.pageType = "INDEX"), (data.pageClientType = "PC");
+          // (data.pageType = "INDEX"), (data.pageClientType = "PC");
+          (data.pageType = this.searchForm.pageType), (data.pageClientType = "PC");
           if (data.id) {
             API_floor.updateHome(data.id, data).then((res) => {
               this.$Message.success("编辑模板成功");
@@ -143,6 +146,13 @@ export default {
           this.loading = false;
         }
       });
+    },
+    
+    clickType(type,index){
+      this.searchForm.pageNumber = 1
+      this.searchForm.pageType = type;
+      this.selectedIndex = index;
+      this.getTemplateList();
     },
 
     createTemp() {
