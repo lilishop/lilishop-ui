@@ -361,12 +361,12 @@
           @click="prev"
           >上一步</Button
         >
-        <Button type="primary" v-show="tabNameList.indexOf(tabName) < 4" @click="next"
+        <Button type="primary" v-show="tabNameList.indexOf(tabName) < tabNameList.length - 1" @click="next"
           >下一步</Button
         >
         <Button
           type="primary"
-          v-show="tabNameList.indexOf(tabName) === 4"
+          v-show="tabNameList.indexOf(tabName) === tabNameList.length - 1"
           @click="save"
           v-if="!isRead"
         >
@@ -413,9 +413,9 @@ import memberLayout from "@/views/member/list/index";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import { getCategoryTree } from "@/api/goods";
 import { shopDetail, shopAdd, shopEdit, getShopByMemberId, shopAudit } from "@/api/shops";
-import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
-import region from "@/views/lili-components/region";
-import liliMap from "@/views/my-components/map/index";
+import uploadPicInput from "@/components/lili/upload-pic-input";
+import region from "@/components/region";
+import liliMap from "@/components/map/index";
 
 export default {
   name: "shop-operation",
