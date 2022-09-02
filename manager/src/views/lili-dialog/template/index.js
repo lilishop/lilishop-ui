@@ -5,6 +5,7 @@ import marketing from './marketing.vue'
 import pages from './pages.vue'
 import goods from '../goods-dialog.vue'
 import other from './other.vue'
+import special from './special.vue'
 export default {
   pages,
   marketing,
@@ -12,4 +13,5 @@ export default {
   category,
   goods,
   other,
+  special
 }

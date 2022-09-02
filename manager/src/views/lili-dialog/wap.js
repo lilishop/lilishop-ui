@@ -29,5 +29,10 @@ export default [
     title: "其他",
     url: "3",
     name: "other"
-  }
+  },
+  {
+    title: "专题",
+    url: "4",
+    name: "special"
+  },
 ];

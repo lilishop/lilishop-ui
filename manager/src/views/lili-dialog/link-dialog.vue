@@ -1,16 +1,26 @@
 <template>
   <div class="wrapper">
-
     <Tabs :value="wap[0].title" class="tabs">
-      <TabPane :label="item.title" :name="item.title" @click="clickTag(item, i)" v-for="(item, i) in wap" :key="i">
-        <component ref="lili-component" :is="templateWay[item.name]" @selected="
-          (val) => {
-            changed = val;
-          }
-        " />
+      <!-- <template v-for="(item, i) in wap"> -->
+      <TabPane
+        v-for="(item, i) in wap"
+        :label="item.title"
+        :name="item.title"
+        @click="clickTag(item, i)"
+        :key="i"
+      >
+        <component
+          ref="lili-component"
+          :is="templateWay[item.name]"
+          @selected="
+              (val) => {
+                changed = val;
+              }
+            "
+        />
       </TabPane>
+      <!-- </template> -->
     </Tabs>
-
   </div>
 </template>
 <script>
@@ -19,7 +29,7 @@ import goodsDialog from "./goods-dialog";
 import templateWay from "./template/index";
 export default {
   components: {
-    goodsDialog,
+    goodsDialog
   },
   data() {
     return {
@@ -27,7 +37,7 @@ export default {
       changed: "", // 变更模板
       selected: 0, // 已选数据
       selectedLink: "", //选中的链接
-      wap  // tab标签
+      wap // tab标签
     };
   },
   watch: {
@@ -35,19 +45,32 @@ export default {
       handler(val) {
         this.$emit("selectedLink", val[0]); //因为是单选，所以直接返回第一个
       },
-      deep: true,
-    },
+      deep: true
+    }
   },
   mounted() {
     this.$nextTick(() => {
       this.$refs["lili-component"][0].type = "single"; //商品页面设置成为单选
     });
 
-    this.wap.forEach((item) => {
-      item.selected = false;
+    this.wap.forEach(item => {
+      if (item) {
+        item.selected = false;
+      }
     });
   },
-  methods: {},
+  methods: {
+    // isVisible(item) {
+    //   const type = this.$route.query.pagetype;
+    //   if (type == "INDEX" && [ "discover"].includes(item.name)) {
+    //     return false;
+    //   }else if(type == "DISCOVER" && item.name == 'special'){
+    //     return false;
+    //   }else{
+    //     return true
+    //   }
+    // },
+  }
 };
 </script>
 <style scoped lang="scss">
