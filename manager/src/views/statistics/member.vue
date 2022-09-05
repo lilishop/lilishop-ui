@@ -26,7 +26,7 @@
 <script>
 import * as API_Member from "@/api/member";
 import { Chart } from "@antv/g2";
-import affixTime from "@/views/lili-components/affix-time";
+import affixTime from "@/components/affix-time";
 
 export default {
   components: { affixTime },

@@ -22,7 +22,7 @@
     "sockjs-client": "^1.4.0",
     "swiper": "^6.3.5",
     "uuid": "^8.3.2",
-    "view-design": "^4.2.0",
+    "view-design": "^4.7.0",
     "vue": "^2.6.10",
     "vue-awesome-swiper": "^4.1.1",
     "vue-i18n": "^8.15.1",

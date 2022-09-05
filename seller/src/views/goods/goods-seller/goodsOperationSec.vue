@@ -289,8 +289,6 @@
                               <FormItem
                                 v-for="(val, index) in item.spec_values"
                                 :key="index"
-                                :prop="'spec_values.' + index + '.value'"
-                                :rules="[regular.REQUIRED, regular.VARCHAR60]"
                                 class="sku-item-content-val flex"
                                 label="规格项"
                               >
@@ -311,7 +309,7 @@
                                   size="small"
                                   style="margin-left: 10px"
                                   type="primary"
-                                  @click="handleCloseSkuValue(val, index)"
+                                  @click="handleCloseSkuValue(val, index, item)"
                                 >
                                   删除
                                 </Button>
@@ -1494,14 +1492,18 @@ export default {
       this.renderTableData(this.skuTableData);
     },
     /** 移除当前规格值 */
-    handleCloseSkuValue(item, index) {
+    handleCloseSkuValue(item, index, spec) {
+      if (spec.spec_values.length <= 1) {
+        this.$Message.error("至少保留一个规格值！");
+        return;
+      }
       this.skuInfo.forEach((i) => {
-        if (i.name === item.name) {
+        if (i.name === spec.name) {
           i.spec_values.splice(index, 1);
         }
       });
       this.skuTableData = this.skuTableData.filter(
-        (e) => e[item.name] !== item.value
+        (e) => e[spec.name] !== item.value
       );
       this.baseInfoForm.regeneratorSkuFlag = true;
     },

@@ -303,7 +303,7 @@
           <!-- 填写链接 -->
 
           <div class="decorate-view" v-if="!res.notLink">
-            <div class="decorate-view-title">选择链接</div>
+            <div class="decorate-view-title">选择模式</div>
             <div
               v-if="item.url && item.url.length != 0"
               class="decorate-view-link"
@@ -351,13 +351,16 @@
             </div>
 
             <div>
-              <Button
-                ghost
-                size="small"
-                type="primary"
-                @click="clickLink(item, index)"
-                >选择链接</Button
+              <RadioGroup
+                @on-change="clickLink(item, index, res)"
+                v-model="item.model"
+                type="button"
               >
+                <Radio value="link" label="link">链接</Radio>
+                <Radio v-if="res.onlyImg" value="hotzone" label="hotzone"
+                  >热区</Radio
+                >
+              </RadioGroup>
             </div>
           </div>
           <!-- 链接地址-->
@@ -405,7 +408,7 @@
 <script>
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import { modelData } from "./config";
-import ways from "@/views/lili-dialog/wap.js"; // 选择链接的类型
+import ways from "@/components/lili-dialog/wap.js"; // 选择链接的类型
 export default {
   components: {
     ossManage,
@@ -494,9 +497,11 @@ export default {
       this.textAlign = val;
     },
     // 点击链接赋值一个唯一值，并将当前选择的模块赋值
-    clickLink(val, index) {
-      this.selectedLinks = val;
-      this.liliDialogFlag(false);
+    clickLink(val, index, oval) {
+      if (val.model === "link") {
+        this.selectedLinks = val;
+        this.liliDialogFlag(false);
+      }
     },
     //点击图片解析成base64
     changeFile(item, index) {
@@ -527,9 +532,19 @@ export default {
           link: "",
           url: "",
           size: this.res.options.list[0].size,
+          model: "link",
         };
         this.res.options.list.push(way);
       }
+    },
+    addHotPoint() {
+      let way = {
+        img: "https://picsum.photos/id/264/200/200",
+        text: "标题",
+        link: "",
+        url: "",
+      };
+      this.res.options.list[0].points.push(way);
     },
     // 图片选择器回显
     callbackSelected(val) {

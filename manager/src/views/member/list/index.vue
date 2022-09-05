@@ -104,7 +104,7 @@
 </template>
 
 <script>
-import region from "@/views/lili-components/region";
+import region from "@/components/region";
 import * as API_Member from "@/api/member.js";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import * as RegExp from "@/libs/RegExp.js";

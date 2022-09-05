@@ -34,11 +34,11 @@
 <script>
 import { login, userInfo } from "@/api/index";
 import Cookies from "js-cookie";
-import Header from "@/views/main-components/header";
-import Footer from "@/views/main-components/footer";
-import LangSwitch from "@/views/main-components/lang-switch";
+import Header from "@/views/main-parts/header";
+import Footer from "@/views/main-parts/footer";
+import LangSwitch from "@/views/main-parts/lang-switch";
 import util from "@/libs/util.js";
-import verify from "@/views/my-components/verify";
+import verify from "@/components/verify";
 
 export default {
   components: {

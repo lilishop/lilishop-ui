@@ -25,6 +25,7 @@ export const modelData = [
     type: "carousel",
     name: "图片轮播",
     img: "md-image",
+    onlyImg: true,
     notTitle: false,
     close: true,
     options: {
@@ -33,19 +34,22 @@ export const modelData = [
           img: "https://i.loli.net/2020/12/05/fKH4CwImpbuD5Xj.png",
           url: "",
           link: "",
-          size: "750*350"
+          size: "750*350",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2020/12/05/12kleCgrSLfKoQs.png",
           url: "",
           link: "",
-          size: "750*350"
+          size: "750*350",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/ZlzcCdnpejtN9gL.png",
           url: "",
           link: "",
-          size: "750*350"
+          size: "750*350",
+          model: "link"
         }
       ]
     }
@@ -55,6 +59,7 @@ export const modelData = [
     name: "左一右二",
     notAdd: true,
     drawer: true,
+    onlyImg: true,
     view: "tpl_ad_list",
     img: "md-image",
     options: {
@@ -63,19 +68,22 @@ export const modelData = [
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "335*335"
+          size: "335*335",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/kdB3AE9ay4c1SnN.png",
           url: "",
           link: "",
-          size: "335*177"
+          size: "335*177",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/FmDr9ksiXeEqYLU.png",
           url: "",
           link: "",
-          size: "335*177"
+          size: "335*177",
+          model: "link"
         }
       ]
     }
@@ -97,7 +105,8 @@ export const modelData = [
           bk_color: "#FF0000",
           textAlign: "center",
           link: "",
-          url: ''
+          url: '',
+          model: "link"
         }
       ]
     }
@@ -107,7 +116,7 @@ export const modelData = [
     name: "左二右一",
     notAdd: true,
     drawer: true,
-
+    onlyImg: true,
     img: "md-image",
     options: {
       list: [
@@ -115,19 +124,22 @@ export const modelData = [
           img: "https://i.loli.net/2021/05/14/kdB3AE9ay4c1SnN.png",
           url: "",
           link: "",
-          size: "335*177"
+          size: "335*177",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/FmDr9ksiXeEqYLU.png",
           url: "",
           link: "",
-          size: "335*177"
+          size: "335*177",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "335*335"
+          size: "335*335",
+          model: "link"
         }
       ]
     }
@@ -137,7 +149,7 @@ export const modelData = [
     name: "三列单行",
     drawer: true,
     notAdd: true,
-
+    onlyImg: true,
     img: "md-image",
     options: {
       list: [
@@ -145,19 +157,22 @@ export const modelData = [
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "226*226 (1:1)"
+          size: "226*226 (1:1)",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "226*226 (1:1)"
+          size: "226*226 (1:1)",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "226*226 (1:1)"
+          size: "226*226 (1:1)",
+          model: "link"
         }
       ]
     }
@@ -167,7 +182,7 @@ export const modelData = [
     name: "一张大图",
     drawer: true,
     notAdd: true,
-
+    onlyImg: true,
     img: "md-image",
     options: {
       list: [
@@ -175,7 +190,8 @@ export const modelData = [
           img: "https://i.loli.net/2020/12/05/8wSNWbnqujDh6HL.png",
           url: "",
           link: "",
-          size: "750*280"
+          size: "750*280",
+          model: "link"
         }
       ]
     }
@@ -185,7 +201,7 @@ export const modelData = [
     name: "两张横图",
     drawer: true,
     notAdd: true,
-
+    onlyImg: true,
     img: "md-image",
     options: {
       list: [
@@ -193,13 +209,15 @@ export const modelData = [
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "335*220"
+          size: "335*220",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "335*220"
+          size: "335*220",
+          model: "link"
         }
       ]
     }
@@ -209,7 +227,7 @@ export const modelData = [
     name: "上一下二",
     drawer: true,
     notAdd: true,
-
+    onlyImg: true,
     img: "md-image",
     options: {
       list: [
@@ -217,19 +235,22 @@ export const modelData = [
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "710*170"
+          size: "710*170",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "335*170"
+          size: "335*170",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "335*170"
+          size: "335*170",
+          model: "link"
         }
       ]
     }
@@ -239,7 +260,7 @@ export const modelData = [
     name: "上二下一",
     drawer: true,
     notAdd: true,
-
+    onlyImg: true,
     img: "md-image",
     options: {
       list: [
@@ -247,20 +268,22 @@ export const modelData = [
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-
-          size: "335*170"
+          size: "335*170",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "335*170"
+          size: "335*170",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "710*170"
+          size: "710*170",
+          model: "link"
         }
       ]
     }
@@ -270,7 +293,7 @@ export const modelData = [
     name: "五列单行",
     drawer: true,
     notAdd: true,
-
+    onlyImg: true,
     img: "md-image",
     options: {
       list: [
@@ -278,31 +301,36 @@ export const modelData = [
           img: "https://picsum.photos/id/127/200/200",
           url: "",
           link: "",
-          size: "75*75（1:1）"
+          size: "75*75（1:1）",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "75*75（1:1）"
+          size: "75*75（1:1）",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "75*75（1:1）"
+          size: "75*75（1:1）",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "75*75（1:1）"
+          size: "75*75（1:1）",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "75*75（1:1）"
+          size: "75*75（1:1）",
+          model: "link"
         }
       ]
     }
@@ -312,7 +340,7 @@ export const modelData = [
     name: "四列单行",
     drawer: true,
     notAdd: true,
-
+    onlyImg: true,
     img: "md-image",
     options: {
       list: [
@@ -320,25 +348,29 @@ export const modelData = [
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "88*88（1:1）"
+          size: "88*88（1:1）",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "88*88（1:1）"
+          size: "88*88（1:1）",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "88*88（1:1）"
+          size: "88*88（1:1）",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
-          size: "88*88（1:1）"
+          size: "88*88（1:1）",
+          model: "link"
         }
       ]
     }
@@ -357,28 +389,32 @@ export const modelData = [
           url: "",
           link: "",
           title: "文字",
-          size: "88*88（1:1）"
+          size: "88*88（1:1）",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
           title: "文字",
-          size: "88*88（1:1）"
+          size: "88*88（1:1）",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
           title: "文字",
-          size: "88*88（1:1）"
+          size: "88*88（1:1）",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2021/05/14/dtNvI5UxchXn8gz.png",
           url: "",
           link: "",
           title: "文字",
-          size: "88*88（1:1）"
+          size: "88*88（1:1）",
+          model: "link"
         }
       ]
     }
@@ -410,35 +446,40 @@ export const modelData = [
           url: "",
           link: "",
           title: "标题",
-          size: "88*88 (1:1)"
+          size: "88*88 (1:1)",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2020/12/05/JXR5K3sbIeENjqH.png",
           url: "",
           link: "",
           title: "标题",
-          size: "88*88 (1:1)"
+          size: "88*88 (1:1)",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2020/12/05/KlZfnCFIdEV231Y.png",
           url: "",
           link: "",
           title: "标题",
-          size: "88*88 (1:1)"
+          size: "88*88 (1:1)",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2020/12/05/GfmMyN2wrUVIlci.png",
           url: "",
           link: "",
           title: "标题",
-          size: "88*88 (1:1)"
+          size: "88*88 (1:1)",
+          model: "link"
         },
         {
           img: "https://i.loli.net/2020/12/05/eznDa3iNby5FkYL.png",
           url: "",
           link: "",
           title: "标题",
-          size: "88*88 (1:1)"
+          size: "88*88 (1:1)",
+          model: "link"
         }
       ]
     }
@@ -529,10 +570,10 @@ export const modelData = [
     options: {
       list: [
         {
-          title: [{context: "这是一条公告"}],
+          title: [{ context: "这是一条公告" }],
           color: "#666",
           bk_color: "#FFF",
-          direction:"horizontal",
+          direction: "horizontal",
           img: 'http://files.sxcfx.cn/upload/20220318/71e5d27aca82aeedf647052e1e4ceaaa.png'
         }
       ]

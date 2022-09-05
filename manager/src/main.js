@@ -17,8 +17,8 @@ import { setStore, getStore, removeStore } from '@/libs/storage'
 import util from '@/libs/util'
 
 import * as filters from '@/utils/filters' // global filter
-import liliDialog from '@/views/lili-dialog'
-import i18nBox from '@/views/lili-components/i18n-translate'
+import liliDialog from '@/components/lili-dialog'
+import i18nBox from '@/components/i18n-translate'
 import {md5} from '@/utils/md5.js';
 
 // 打印

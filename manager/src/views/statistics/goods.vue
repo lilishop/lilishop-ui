@@ -21,7 +21,7 @@
 <script>
 import memberLayout from "@/views/member/list";
 import * as API_Goods from "@/api/goods";
-import affixTime from "@/views/lili-components/affix-time";
+import affixTime from "@/components/affix-time";
 
 export default {
   components: {

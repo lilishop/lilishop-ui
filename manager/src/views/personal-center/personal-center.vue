@@ -59,7 +59,7 @@
 import {
   userInfoEdit,
 } from "@/api/index";
-import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
+import uploadPicThumb from "@/components/lili/upload-pic-thumb";
 import Cookies from "js-cookie";
 import util from "@/libs/util";
 

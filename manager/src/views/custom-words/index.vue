@@ -59,7 +59,7 @@ import {
 
 import { regular } from "@/utils";
 export default {
-  name: "customWords",
+  name: "custom-words",
   data() {
     return {
       loading: true, // 表单加载状态

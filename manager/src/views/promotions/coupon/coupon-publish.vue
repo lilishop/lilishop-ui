@@ -230,7 +230,7 @@ import {
 } from "@/api/promotion";
 import { getCategoryTree } from "@/api/goods";
 import { regular } from "@/utils";
-import skuSelect from "@/views/lili-dialog";
+import skuSelect from "@/components/lili-dialog";
 
 export default {
   name: "edit-platform-coupon",
