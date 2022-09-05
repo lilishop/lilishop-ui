@@ -264,6 +264,11 @@ export default {
         if (valid) {
           this.submitLoading = true;
           if (this.modalType === 0) {
+            if(this.data.find(item=>item.specName == this.form.specName)){
+              this.$Message.error('请勿添加重复规格名称!')
+              this.submitLoading = false
+              return
+            }
             // 添加 避免编辑后传入id等数据
             delete this.form.id;
             insertSpec(this.form).then((res) => {
