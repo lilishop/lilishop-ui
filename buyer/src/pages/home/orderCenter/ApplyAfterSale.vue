@@ -165,6 +165,7 @@ export default {
           let params = Object.assign(this.info, this.form)
           params.images = this.uploadList.toString()
           params.orderItemSn = this.$route.query.sn
+          params.reason = this.reasonList.find(item => item.id == params.reason).reason
           applyAfterSale(params).then(res => {
             if (res.success) {
               this.$Message.success('售后申请提交成功，请到售后订单查看！')

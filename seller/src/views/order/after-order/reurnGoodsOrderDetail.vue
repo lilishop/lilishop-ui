@@ -495,6 +495,7 @@ export default {
       this.submitLoading = true;
       if (this.params.remark == "") {
         this.$Message.error("请输入备注信息");
+        this.submitLoading = false;
         return;
       }
       API_Order.afterSaleSellerReview(this.sn, this.params).then((res) => {
