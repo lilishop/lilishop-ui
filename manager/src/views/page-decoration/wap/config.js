@@ -21,11 +21,31 @@ export let homeData = {};
  * close:true 右侧关闭按钮
  */
 export const modelData = [
+
+  {
+    type: "flexOne",
+    name: "图片",
+    // drawer: true,
+    notAdd: true,
+    onlyImg: true,
+    img: "md-image",
+    options: {
+      list: [
+        {
+          img: "https://i.loli.net/2020/12/05/8wSNWbnqujDh6HL.png",
+          url: "",
+          link: "",
+          size: "750*280",
+          model: "link"
+        }
+      ]
+    }
+  },
   {
     type: "carousel",
-    name: "图片轮播",
+    name: "轮播图",
     img: "md-image",
-    onlyImg: true,
+    // onlyImg: true,
     notTitle: false,
     close: true,
     options: {
@@ -59,7 +79,7 @@ export const modelData = [
     name: "左一右二",
     notAdd: true,
     drawer: true,
-    onlyImg: true,
+    // onlyImg: true,
     view: "tpl_ad_list",
     img: "md-image",
     options: {
@@ -116,7 +136,7 @@ export const modelData = [
     name: "左二右一",
     notAdd: true,
     drawer: true,
-    onlyImg: true,
+    // onlyImg: true,
     img: "md-image",
     options: {
       list: [
@@ -149,7 +169,7 @@ export const modelData = [
     name: "三列单行",
     drawer: true,
     notAdd: true,
-    onlyImg: true,
+    // onlyImg: true,
     img: "md-image",
     options: {
       list: [
@@ -172,25 +192,6 @@ export const modelData = [
           url: "",
           link: "",
           size: "226*226 (1:1)",
-          model: "link"
-        }
-      ]
-    }
-  },
-  {
-    type: "flexOne",
-    name: "一张大图",
-    drawer: true,
-    notAdd: true,
-    onlyImg: true,
-    img: "md-image",
-    options: {
-      list: [
-        {
-          img: "https://i.loli.net/2020/12/05/8wSNWbnqujDh6HL.png",
-          url: "",
-          link: "",
-          size: "750*280",
           model: "link"
         }
       ]
@@ -201,7 +202,7 @@ export const modelData = [
     name: "两张横图",
     drawer: true,
     notAdd: true,
-    onlyImg: true,
+    // onlyImg: true,
     img: "md-image",
     options: {
       list: [
@@ -227,7 +228,7 @@ export const modelData = [
     name: "上一下二",
     drawer: true,
     notAdd: true,
-    onlyImg: true,
+    // onlyImg: true,
     img: "md-image",
     options: {
       list: [
@@ -260,7 +261,7 @@ export const modelData = [
     name: "上二下一",
     drawer: true,
     notAdd: true,
-    onlyImg: true,
+    // onlyImg: true,
     img: "md-image",
     options: {
       list: [
@@ -293,7 +294,7 @@ export const modelData = [
     name: "五列单行",
     drawer: true,
     notAdd: true,
-    onlyImg: true,
+    // onlyImg: true,
     img: "md-image",
     options: {
       list: [
@@ -340,7 +341,7 @@ export const modelData = [
     name: "四列单行",
     drawer: true,
     notAdd: true,
-    onlyImg: true,
+    // onlyImg: true,
     img: "md-image",
     options: {
       list: [

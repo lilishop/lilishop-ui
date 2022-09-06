@@ -4,10 +4,10 @@ export default {
   bind: function (el, binding, vnode) {
     const MIN_LIMIT = _.MIN_LIMIT
 
-    el.addEventListener('mousedown', handleMouseDown,{ passive: false })
+    el.addEventListener('mousedown', handleMouseDown, { passive: false })
 
-    function handleMouseDown (e) {
-      console.log('additem', e)
+    function handleMouseDown(e) {
+      // console.log('additem', e)
       e && e.preventDefault()
 
       let itemInfo = {
@@ -30,10 +30,10 @@ export default {
 
       vnode.context.addItem(setting)// 这里去添加并发送了add通知，不应该发送通知
 
-      window.addEventListener('mousemove', handleChange,{ passive: false })
-      window.addEventListener('mouseup', handleMouseUp,{ passive: false })
+      window.addEventListener('mousemove', handleChange, { passive: false })
+      window.addEventListener('mouseup', handleMouseUp, { passive: false })
 
-      function handleChange (e) {
+      function handleChange(e) {
         e && e.preventDefault()
 
         let moveX = _.getPageX(e) - preX
@@ -57,7 +57,7 @@ export default {
         })
       }
 
-      function handleMouseUp () {
+      function handleMouseUp() {
         let perInfo = {
           topPer: _.decimalPoint(itemInfo.top / container.height),
           leftPer: _.decimalPoint(itemInfo.left / container.width),
@@ -66,6 +66,7 @@ export default {
           img: "",
           link: "",
           type: "",
+          title: ""
         }
 
         if (vnode.context.isOverRange()) {

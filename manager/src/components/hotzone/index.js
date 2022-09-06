@@ -1,4 +1,4 @@
-import hotzone from './components/Hotzone.vue'
+import hotzone from './index.vue'
 
 hotzone.install = (Vue) => {
   Vue.component(hotzone.name, hotzone)

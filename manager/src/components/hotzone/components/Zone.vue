@@ -50,6 +50,7 @@
       <li class="hz-u-square hz-u-square-bc" data-pointer="dealBC"></li>
       <li class="hz-u-square hz-u-square-br" data-pointer="dealBR"></li>
     </ul>
+   
     <Modal
       v-model="showModal"
       title="编辑热区"
@@ -58,11 +59,7 @@
       :mask="false"
       ok-text="保存"
       @on-ok="saveZone"
-      @on-cancel="
-        () => {
-          showModal = false;
-        }
-      "
+      @on-cancel="cancelZone"
     >
       <div>
         <div class="hz-edit-img">
@@ -70,14 +67,15 @@
         </div>
 
         <Form :model="zoneForm" :label-width="80">
-          <FormItem label="图片链接：">
+          <!-- <FormItem label="图片链接：">
             <Input v-model="zoneForm.img"></Input>
             <Button size="small" type="primary" @click="handleSelectImg"
               >选择图片</Button
             >
-          </FormItem>
+            :v-model="zoneForm.type === 'goods' ? zoneForm.goodsName : zoneForm.link"
+          </FormItem> -->
           <FormItem label="跳转链接：">
-            <Input v-model="zoneForm.link"></Input>
+            <Input type="textarea" v-if="zoneForm.type === 'other' && zoneForm.title === '外部链接'" v-model="zoneForm.link" ></Input>
             <Button size="small" type="primary" @click="handleSelectLink"
               >选择链接</Button
             >
@@ -108,6 +106,7 @@ export default {
   components: {
     ossManage,
   },
+
   data() {
     return {
       zoneTop: "",
@@ -119,6 +118,7 @@ export default {
       showModal: false,
       picModelFlag: false,
       currentIndex: 0,
+      currentShowIndex: -1,
       zoneForm: {
         img: "",
         link: "",
@@ -126,10 +126,8 @@ export default {
       },
     };
   },
-
   props: ["index", "setting"],
   mounted() {
-    console.log(this.setting);
     this.setZoneInfo(this.setting);
   },
   methods: {
@@ -139,9 +137,10 @@ export default {
       this.zoneWidth = this.getZoneStyle(val.widthPer);
       this.zoneHeight = this.getZoneStyle(val.heightPer);
       this.tooSmall = val.widthPer < 0.01 && val.heightPer < 0.01;
-      this.zoneForm.img = val.img;
-      this.zoneForm.link = val.link;
-      this.zoneForm.type = val.type;
+      this.zoneForm = {
+        ...val,
+        ...this.zoneForm,
+      };
     },
     handlehideZone(isHide = true) {
       if (this.hideZone === isHide) {
@@ -162,6 +161,7 @@ export default {
     showModalFn(index) {
       this.showModal = true;
       this.currentIndex = index;
+      console.log(this.zoneForm);
     },
     // 选择图片
     handleSelectImg() {
@@ -183,8 +183,40 @@ export default {
     selectedLink(val) {
       this.zoneForm.link = this.$options.filters.formatLinkType(val);
       this.zoneForm.type = val.___type;
+      this.zoneForm.title = val.title;
+      switch (val.___type) {
+        case "goods":
+          this.zoneForm.id = val.id;
+          this.zoneForm.goodsId = val.goodsId;
+          this.zoneForm.goodsName = val.goodsName;
+          break;
+        case "category":
+          this.zoneForm.id = val.allId;
+          this.zoneForm.name = val.name;
+          break;
+        case "shops":
+          this.zoneForm.id = val.id;
+          this.zoneForm.storeName = val.storeName;
+          break;
+        case "pages":
+          this.zoneForm.id = val.id;
+          this.zoneForm.___path = val.___path;
+          this.zoneForm.title = val.title;
+          break;
+        case "marketing":
+          this.zoneForm.id = val.id;
+          this.zoneForm.goodsId = val.goodsId;
+          this.zoneForm.goodsName = val.goodsName;
+          break;
+        default:
+          break;
+      }
+      this.changeInfo(this.zoneForm);
     },
     saveZone() {},
+    cancelZone() {
+      this.showModal = false;
+    },
     delZone() {
       this.delItem(this.currentIndex);
     },
