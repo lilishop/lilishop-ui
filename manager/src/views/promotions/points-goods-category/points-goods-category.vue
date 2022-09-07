@@ -58,7 +58,7 @@ import {
   updatePointsGoodsCategory,
   deletePointsGoodsCategoryById,
 } from "@/api/promotion";
-import TreeTable from "@/views/my-components/tree-table/Table/Table";
+import TreeTable from "@/components/tree-table/Table/Table";
 
 export default {
   name: "pointsGoodsCategory",

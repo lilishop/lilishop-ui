@@ -194,7 +194,7 @@ import {
   getCategoryTree,
 } from "@/api/goods";
 
-import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
+import uploadPicInput from "@/components/lili/upload-pic-input";
 import { regular } from "@/utils";
 export default {
   name: "goods-category",

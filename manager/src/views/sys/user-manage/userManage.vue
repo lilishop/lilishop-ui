@@ -112,9 +112,9 @@ import {
   resetPassword
 } from "@/api/index";
 import {validateMobile} from "@/libs/validate";
-import departmentChoose from "@/views/my-components/lili/department-choose";
-import departmentTreeChoose from "@/views/my-components/lili/department-tree-choose";
-import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
+import departmentChoose from "@/components/lili/department-choose";
+import departmentTreeChoose from "@/components/lili/department-tree-choose";
+import uploadPicInput from "@/components/lili/upload-pic-input";
 
 export default {
   name: "user-manage",

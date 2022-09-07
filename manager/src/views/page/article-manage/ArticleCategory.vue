@@ -94,8 +94,8 @@ import {
   delArticleCategory,
   updateArticleCategory,
 } from "@/api/pages";
-import TreeTable from "@/views/my-components/tree-table/Table/Table";
-import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
+import TreeTable from "@/components/tree-table/Table/Table";
+import uploadPicInput from "@/components/lili/upload-pic-input";
 import { regular } from "@/utils";
 export default {
   name: "lili-components",

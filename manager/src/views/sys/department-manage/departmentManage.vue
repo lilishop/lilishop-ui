@@ -1,4 +1,3 @@
-
 <template>
   <div class="search">
     <Card>
@@ -175,7 +174,6 @@ import {
   addDepartment,
   editDepartment,
   deleteDepartment,
-  searchDepartment,
   getUserByDepartmentId,
   getRoleList,
   updateDepartmentRole,
@@ -197,7 +195,8 @@ export default {
       editTitle: "", // 编辑标题
       selectedRole: [], //选择的角色
       searchKey: "", // 搜索关键字
-      form: { // 提交表单
+      form: {
+        // 提交表单
         id: "",
         title: "",
         parentId: "",
@@ -207,7 +206,8 @@ export default {
       },
 
       formAdd: {}, // 新增表单
-      formValidate: { // 验证规则
+      formValidate: {
+        // 验证规则
         title: [{ required: true, message: "名称不能为空", trigger: "blur" }],
         sortOrder: [
           {
@@ -234,7 +234,7 @@ export default {
       initDepartment().then((res) => {
         this.loading = false;
         if (res.success) {
-          this.data = res.result;
+          this.data = this.bubbleSort(res.result);
         }
       });
     },
@@ -266,13 +266,13 @@ export default {
         this.userLoading = true;
 
         getUserByDepartmentId(data.id).then((res) => {
-          let way =[]
-          res.result && res.result.forEach((item) => {
-            way.push(item.roleId)
-          })
-           this.$set(this,'selectedRole',way)
-          console.warn( this.selectedRole);
-
+          let way = [];
+          res.result &&
+            res.result.forEach((item) => {
+              way.push(item.roleId);
+            });
+          this.$set(this, "selectedRole", way);
+          console.warn(this.selectedRole);
         });
 
         getRoleList({
@@ -291,6 +291,23 @@ export default {
         this.cancelSelect();
       }
     },
+
+    // 排序
+    bubbleSort(array) {
+      const len = array.length;
+      if (len < 2) return array;
+      for (let i = 0; i < len; i++) {
+        for (let j = 0; j < i; j++) {
+          if (array[j].sortOrder > array[i].sortOrder) {
+            const temp = array[j].sortOrder;
+            array[j].sortOrder = array[i];
+            array[i] = temp;
+          }
+        }
+      }
+      return array;
+    },
+
     // 取消选择
     cancelSelect() {
       let data = this.$refs.tree.getSelectedNodes()[0];
@@ -303,7 +320,6 @@ export default {
     },
     // 选择上级部门
     selectTreeEdit(v) {
-
       if (v.length > 0) {
         // 转换null为""
         for (let attr in v[0]) {
@@ -345,7 +361,7 @@ export default {
 
           Promise.all([
             editDepartment(this.form.id, this.form),
-            updateDepartmentRole(this.form.id, roleWay)
+            updateDepartmentRole(this.form.id, roleWay),
           ]).then((res) => {
             this.submitLoading = false;
             if (res[0].success) {
@@ -447,5 +463,4 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "@/styles/tree-common.scss";
-
 </style>

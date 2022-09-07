@@ -178,7 +178,7 @@ export default {
                       color1: val.subColor,
                       bk_color: val.subBkColor,
                       data: res.result.commodityList
-                        ? res.result.commodityList.splice(0,2)
+                        ? res.result.commodityList.splice(0, 2)
                         : [],
                     });
                   }
@@ -195,7 +195,7 @@ export default {
             if (res.success && !exist) {
               this.contentData.list[newIndex].options.list.push({
                 data: res.result[val.promotionsType]
-                  ? res.result[val.promotionsType].splice(0,2)
+                  ? res.result[val.promotionsType].splice(0, 2)
                   : [],
                 type: val.promotionsType,
                 title1: val.subName,

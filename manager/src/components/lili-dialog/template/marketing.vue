@@ -380,7 +380,7 @@ export default {
     getPromotion(res) {
       if (res.result) {
         this.promotionList = res.result;
-        this.typeOption(Object.keys(res.result)[0]).methodsed();
+        Object.keys(res.result)[0] && this.typeOption(Object.keys(res.result)[0]).methodsed();
       }
 
       // if (Object.keys(res.result).length) {

@@ -361,12 +361,12 @@
           @click="prev"
           >上一步</Button
         >
-        <Button type="primary" v-show="tabNameList.indexOf(tabName) < 4" @click="next"
+        <Button type="primary" v-show="tabNameList.indexOf(tabName) < tabNameList.length - 1" @click="next"
           >下一步</Button
         >
         <Button
           type="primary"
-          v-show="tabNameList.indexOf(tabName) === 4"
+          v-show="tabNameList.indexOf(tabName) === tabNameList.length - 1"
           @click="save"
           v-if="!isRead"
         >
@@ -413,9 +413,9 @@ import memberLayout from "@/views/member/list/index";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import { getCategoryTree } from "@/api/goods";
 import { shopDetail, shopAdd, shopEdit, getShopByMemberId, shopAudit } from "@/api/shops";
-import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
-import region from "@/views/lili-components/region";
-import liliMap from "@/views/my-components/map/index";
+import uploadPicInput from "@/components/lili/upload-pic-input";
+import region from "@/components/region";
+import liliMap from "@/components/map/index";
 
 export default {
   name: "shop-operation",
@@ -444,7 +444,7 @@ export default {
       addSettlementBtn: true, // 添加结算日按钮
       day: 1, //结算日
       tabName: "base", // tab栏name值
-      tabNameList: ["base", "entry", "category", "send", "settlement"], // tab栏name值数组
+      tabNameList: ["base", "entry", "category", "settlement"], // tab栏name值数组
       shopValidate: {
         // 表单验证规则
         memberName: [{ required: true, message: "会员不能为空" }],

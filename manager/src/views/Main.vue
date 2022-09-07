@@ -77,10 +77,10 @@
 </template>
 
 <script>
-import shrinkableMenu from "./main-components/shrinkable-menu/shrinkable-menu.vue";
-import tagsPageOpened from "./main-components/tags-page-opened.vue";
-import messageTip from "./main-components/message-tip.vue";
-import circleLoading from "@/views/my-components/lili/circle-loading.vue";
+import shrinkableMenu from "./main-parts/shrinkable-menu/shrinkable-menu.vue";
+import tagsPageOpened from "./main-parts/tags-page-opened.vue";
+import messageTip from "./main-parts/message-tip.vue";
+import circleLoading from "@/components/lili/circle-loading.vue";
 import Cookies from "js-cookie";
 import util from "@/libs/util.js";
 import { getNoticePage, logout } from "@/api/index";

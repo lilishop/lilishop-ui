@@ -94,7 +94,7 @@
             <span class="label">退货地址：</span>
             <span class="info">
                {{storeInfo.salesConsigneeName !== 'null' ? storeInfo.salesConsigneeName : '' || storeInfo.salesConsigneeMobile !=='null' ?storeInfo.salesConsigneeMobile:''|| storeInfo.salesConsigneeAddressPath !=='null'?storeInfo.salesConsigneeAddressPath:'' || storeInfo.salesConsigneeDetail !=='null'?storeInfo.salesConsigneeDetail:'' ?storeInfo.salesConsigneeName + storeInfo.salesConsigneeMobile +' '+ storeInfo.salesConsigneeAddressPath + storeInfo.salesConsigneeDetail:'暂未完善'}}
-               
+
             </span>
           </p>
           <p class="item">
@@ -133,7 +133,7 @@
             </span>
           </p>
           <p class="item">
-            
+
             <span class="label">营业执照号：</span>
             <span class="info">{{storeInfo.licenseNum}}</span>
           </p>
@@ -147,22 +147,48 @@
               <img style="height: 100px;width: 100px" :src="storeInfo.licencePhoto">
             </span>
           </p>
-
           <p class="item">
             <span class="label">银行名称：</span>
-            <span class="info">{{storeInfo.settlementBankAccountName}}</span>
+            <span class="info">
+              {{
+                  storeInfo.settlementBankAccountName == "null" ||
+                  !storeInfo.settlementBankAccountName
+                    ? ""
+                    : storeInfo.settlementBankAccountName
+                }}
+            </span>
           </p>
           <p class="item">
             <span class="label">银行账号：</span>
-            <span class="info">{{storeInfo.settlementBankAccountNum}}</span>
+            <span class="info">
+              {{
+                  storeInfo.settlementBankAccountNum == "null" ||
+                  !storeInfo.settlementBankAccountNum
+                    ? ""
+                    : storeInfo.settlementBankAccountNum
+                }}
+            </span>
           </p>
           <p class="item">
             <span class="label">银行开户支行名称：</span>
-            <span class="info">{{storeInfo.settlementBankBranchName}}</span>
+            <span class="info">
+              {{
+                  storeInfo.settlementBankBranchName == "null" ||
+                  !storeInfo.settlementBankBranchName
+                    ? ""
+                    : storeInfo.settlementBankBranchName
+                }}
+            </span>
           </p>
           <p class="item">
             <span class="label">银行支行联行号：</span>
-            <span class="info">{{storeInfo.settlementBankJointName}}</span>
+            <span class="info">
+              {{
+                  storeInfo.settlementBankJointName == "null" ||
+                  !storeInfo.settlementBankJointName
+                    ? ""
+                    : storeInfo.settlementBankJointName
+              }}</span>
           </p>
           <p class="item">
             <span class="label">结算周期：</span>
@@ -176,7 +202,7 @@
                 >{{ item }}
                 </Tag>
               </template>
-               
+
             </span>
           </p>
         </div>
@@ -530,7 +556,7 @@
 </template>
 
 <script>
-  import region from "@/views/lili-components/region";
+  import region from "@/components/region";
   import ossManage from "@/views/sys/oss-manage/ossManage";
   import * as RegExp from '@/libs/RegExp.js';
   import {getCategoryTree} from "@/api/goods";

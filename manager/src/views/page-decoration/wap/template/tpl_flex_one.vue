@@ -15,7 +15,6 @@ export default {
 .flex-one{
     width: 100%;
     display: block;
-    height: 110px;
     overflow: hidden;
     >img{
         width: 100%;

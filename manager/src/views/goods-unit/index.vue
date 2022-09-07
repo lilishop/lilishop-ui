@@ -220,6 +220,12 @@ export default {
           this.submitLoading = true;
 
           if (this.modalTitle == "添加") {
+
+            if(this.data.find(item=>item.name == this.form.name)){
+              this.$Message.error('请勿添加重复计量单位!')
+              this.submitLoading = false
+              return
+            }
             // 添加 避免编辑后传入id等数据 记得删除
             delete this.form.id;
             addGoodsUnit(this.form).then((res) => {

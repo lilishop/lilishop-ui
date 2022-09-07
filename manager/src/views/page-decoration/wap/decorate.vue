@@ -145,7 +145,7 @@
             <div>
               <img class="show-image" :src="item.img" alt />
 
-              <div class="tips">
+              <div class="tips" v-if="!res.onlyImg">
                 建议尺寸
                 <span>{{ item.size }}</span>
               </div>
@@ -302,6 +302,17 @@
 
           <!-- 填写链接 -->
 
+          <div class="decorate-view" v-if="res.onlyImg">
+            <div class="decorate-view-title">选择模式</div>
+
+            <div>
+              <RadioGroup v-model="item.model" type="button">
+                <Radio value="link" label="link">链接</Radio>
+                <Radio value="hotzone" label="hotzone">热区</Radio>
+              </RadioGroup>
+            </div>
+          </div>
+
           <div class="decorate-view" v-if="!res.notLink">
             <div class="decorate-view-title">选择链接</div>
             <div
@@ -349,31 +360,31 @@
                 >
               </span>
             </div>
-
             <div>
               <Button
                 ghost
                 size="small"
                 type="primary"
-                @click="clickLink(item, index)"
-                >选择链接</Button
+                @click="clickLink(item, index, res)"
+              >
+                {{ item.model === "hotzone" ? "绘制热区" : "选择链接" }}</Button
               >
             </div>
-          </div>
-          <!-- 链接地址-->
-          <div
-            class="decorate-view"
-            v-if="item.url && item.url.url && item.url.___type == 'other'"
-          >
-            <div class="decorate-view-title">外部链接</div>
-            <div>
-              <Input v-model="item.url.url" style="width: 200px" />
+            <!-- 链接地址-->
+            <div
+              class="decorate-view"
+              v-if="item.url && item.url.url && item.url.___type == 'other'"
+            >
+              <div class="decorate-view-title">外部链接</div>
+              <div>
+                <Input v-model="item.url.url" style="width: 200px" />
+              </div>
             </div>
-          </div>
 
-          <p v-if="item.url && item.url.url && item.url.___type == 'other'">
-            (如非同域名下，则在小程序与公众号中无效)
-          </p>
+            <p v-if="item.url && item.url.url && item.url.___type == 'other'">
+              (如非同域名下，则在小程序与公众号中无效)
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -397,6 +408,8 @@
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
 
+    <hotzone ref="hotzone" @changeZone="changeZone"></hotzone>
+
     <Modal width="1200px" v-model="picModelFlag">
       <ossManage @callback="callbackSelected" ref="ossManage" />
     </Modal>
@@ -405,10 +418,12 @@
 <script>
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import { modelData } from "./config";
-import ways from "@/views/lili-dialog/wap.js"; // 选择链接的类型
+import hotzone from "@/components/hotzone";
+import ways from "@/components/lili-dialog/wap.js"; // 选择链接的类型
 export default {
   components: {
     ossManage,
+    hotzone,
   },
   data() {
     return {
@@ -452,6 +467,9 @@ export default {
     },
     // 回调选择的链接
     selectedLink(val) {
+      delete val.selected;
+      delete val.intro;
+      delete val.mobileIntro;
       this.selectedLinks.url = val;
     },
     // 回调的商品信息
@@ -494,9 +512,23 @@ export default {
       this.textAlign = val;
     },
     // 点击链接赋值一个唯一值，并将当前选择的模块赋值
-    clickLink(val, index) {
+    clickLink(val, index, oval) {
       this.selectedLinks = val;
-      this.liliDialogFlag(false);
+      if (val.model === "hotzone") {
+        if (!val.zoneInfo) {
+          val.zoneInfo = [];
+        }
+        this.$refs.hotzone.flag = true;
+        this.$refs.hotzone.res = val;
+      } else {
+        this.liliDialogFlag(false);
+      }
+    },
+    addZone(zoneInfo) {
+      this.selectedLinks.zoneInfo.push(zoneInfo);
+    },
+    changeZone(zoneInfo) {
+      this.selectedLinks.zoneInfo = zoneInfo;
     },
     //点击图片解析成base64
     changeFile(item, index) {
@@ -527,9 +559,19 @@ export default {
           link: "",
           url: "",
           size: this.res.options.list[0].size,
+          model: "link",
         };
         this.res.options.list.push(way);
       }
+    },
+    addHotPoint() {
+      let way = {
+        img: "https://picsum.photos/id/264/200/200",
+        text: "标题",
+        link: "",
+        url: "",
+      };
+      this.res.options.list[0].points.push(way);
     },
     // 图片选择器回显
     callbackSelected(val) {

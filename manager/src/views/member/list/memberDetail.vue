@@ -471,12 +471,12 @@
 </template>
 
 <script>
-import region from "@/views/lili-components/region";
-import * as API_Member from "@/api/member.js";
-import ossManage from "@/views/sys/oss-manage/ossManage";
-import liliMap from "@/views/my-components/map/index";
-import * as RegExp from "@/libs/RegExp.js";
-import * as API_Order from "@/api/order.js";
+  import region from "@/components/region";
+  import * as API_Member from "@/api/member.js";
+  import ossManage from "@/views/sys/oss-manage/ossManage";
+  import liliMap from "@/components/map/index";
+  import * as RegExp from '@/libs/RegExp.js';
+  import * as API_Order from "@/api/order.js";
 
 export default {
   name: "memberDetail",

@@ -152,7 +152,7 @@ export default {
       this.formAdd.labelName = "";
       this.showParent = true;
       delete this.formAdd.id;
-      this.formAdd.parentId = v.id;
+      this.formAdd.parentId = v.id || 0;
       this.modalVisible = true;
     },
     // 编辑分类
@@ -162,7 +162,7 @@ export default {
       this.formAdd.id = v.id;
       this.formAdd.labelName = v.labelName;
       this.formAdd.level = v.level;
-      this.formAdd.parentId = v.parentId;
+      this.formAdd.parentId = v.parentId || 0;
       this.formAdd.sortOrder = v.sortOrder;
       this.showParent = false;
       this.modalVisible = true;
@@ -176,7 +176,8 @@ export default {
       this.showParent = true;
       delete this.formAdd.id;
       this.formAdd.parentId = 0;
-      this.formAdd.sortOrder = 1
+      this.formAdd.sortOrder = 1;
+      this.formAdd.level = 0;
       this.modalVisible = true;
 
     },
@@ -185,7 +186,6 @@ export default {
       this.$refs.formAdd.validate(valid => {
         if (valid) {
           this.submitLoading = true;
-          console.log(this.formAdd);
           if (this.modalType === 0) {
             // 添加 避免编辑后传入id等数据 记得删除
             delete this.formAdd.id;

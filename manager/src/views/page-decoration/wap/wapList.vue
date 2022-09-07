@@ -131,7 +131,6 @@ export default {
           }
         });
         this.list = res.result.records;
-        console.log(this.list);
         this.total = res.result.total;
       });
     },

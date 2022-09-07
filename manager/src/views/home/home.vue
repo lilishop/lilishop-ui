@@ -200,7 +200,7 @@ import { homeStatistics, hotGoods, hotShops, getNoticePage } from "@/api/index";
 import * as API_Goods from "@/api/goods";
 import { Chart } from "@antv/g2";
 import * as API_Member from "@/api/member";
-// import i18nBox from '@/views/lili-components/i18n-translate'
+// import i18nBox from '@/components/i18n-translate'
 export default {
   name: "home",
   // components:{

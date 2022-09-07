@@ -3,8 +3,8 @@
     <div class="content-goods-publish">
       <Form
         ref="baseInfoForm"
-        :model="baseInfoForm"
         :label-width="120"
+        :model="baseInfoForm"
         :rules="baseInfoFormRule"
       >
         <div class="base-info-item">
@@ -12,36 +12,36 @@
           <div class="form-item-view">
             <FormItem label="商品分类">
               <span class="goods-category-name">{{
-                this.baseInfoForm.categoryName[0]
-              }}</span>
+                  this.baseInfoForm.categoryName[0]
+                }}</span>
               <span> &gt; {{ this.baseInfoForm.categoryName[1] }}</span>
               <span> &gt; {{ this.baseInfoForm.categoryName[2] }}</span>
             </FormItem>
             <FormItem label="商品名称" prop="goodsName">
               <Input
-                type="text"
                 v-model="baseInfoForm.goodsName"
-                placeholder="商品名称"
                 clearable
+                placeholder="商品名称"
                 style="width: 260px"
+                type="text"
               />
             </FormItem>
 
             <FormItem label="商品价格" prop="price">
               <Input
-                type="text"
                 v-model="baseInfoForm.price"
-                placeholder="商品价格"
                 clearable
+                placeholder="商品价格"
                 style="width: 260px"
+                type="text"
               />
             </FormItem>
             <FormItem label="商品卖点" prop="sellingPoint">
               <Input
                 v-model="baseInfoForm.sellingPoint"
-                type="textarea"
                 :rows="4"
                 style="width: 260px"
+                type="textarea"
               />
             </FormItem>
             <FormItem label="商品品牌" prop="brandId">
@@ -52,9 +52,9 @@
               >
                 <Option
                   v-for="item in brandList"
-                  :value="item.id"
                   :key="item.id"
                   :label="item.name"
+                  :value="item.id"
                 ></Option>
               </Select>
             </FormItem>
@@ -71,7 +71,7 @@
                   v-for="(item, index) in goodsUnitList"
                   :key="index"
                   :value="item"
-                  >{{ item }}
+                >{{ item }}
                 </Option>
               </Select>
             </FormItem>
@@ -81,55 +81,55 @@
               prop="salesModel"
             >
               <RadioGroup
-                type="button"
                 v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'"
-                button-style="solid"
-                @on-change="renderTableData(skuTableData)"
                 v-model="baseInfoForm.salesModel"
+                button-style="solid"
+                type="button"
+                @on-change="renderTableData(skuTableData)"
               >
-                <Radio title="零售型" label="RETAIL">零售型</Radio>
-                <Radio title="批发型" label="WHOLESALE">批发型</Radio>
+                <Radio label="RETAIL" title="零售型">零售型</Radio>
+                <Radio label="WHOLESALE" title="批发型">批发型</Radio>
               </RadioGroup>
               <RadioGroup
-                type="button"
                 v-else
-                button-style="solid"
                 v-model="baseInfoForm.salesModel"
+                button-style="solid"
+                type="button"
               >
-                <Radio title="零售型" label="RETAIL">
+                <Radio label="RETAIL" title="零售型">
                   <span>虚拟型</span>
                 </Radio>
               </RadioGroup>
             </FormItem>
             <FormItem
+              v-if="baseInfoForm.salesModel == 'WHOLESALE'"
               class="form-item-view-el"
               label="销售规则"
               prop="wholesaleRule"
-              v-if="baseInfoForm.salesModel == 'WHOLESALE'"
             >
               <div class="form-item-view-wholesale">
                 <div>
                   <Table
-                    border
                     :columns="wholesaleColumns"
                     :data="wholesaleData"
+                    border
                   >
-                    <template slot-scope="{ row, index }" slot="wholesaleNum">
+                    <template slot="wholesaleNum" slot-scope="{ row, index }">
                       <div>
                         <Input
                           v-model="wholesaleData[index].num"
-                          type="number"
                           min="1"
                           number
+                          type="number"
                           @on-blur="checkWholesaleNum(index)"
                         >
                           <span slot="append">{{
-                            baseInfoForm.goodsUnit || ""
-                          }}</span>
+                              baseInfoForm.goodsUnit || ""
+                            }}</span>
                         </Input>
                       </div>
                     </template>
-                    <template slot-scope="{ row, index }" slot="wholesalePrice">
+                    <template slot="wholesalePrice" slot-scope="{ row, index }">
                       <div
                         style="
                           display: flex;
@@ -139,21 +139,22 @@
                       >
                         <Input
                           v-model="wholesaleData[index].price"
-                          type="number"
+                          min="1"
                           number
                           style="width: 190px"
-                          min="1"
+                          type="number"
                           @on-blur="checkWholesalePrice(index)"
                         >
                           <span slot="append">元</span>
                         </Input>
                         <Button
-                          type="error"
+                          v-if="index > 0"
                           size="small"
                           style="margin-left: 5px"
-                          v-if="index > 0"
+                          type="error"
                           @click="handleDeleteWholesaleData(index)"
-                          >删除</Button
+                        >删除
+                        </Button
                         >
                       </div>
                     </template>
@@ -161,8 +162,8 @@
 
                   <Button
                     v-if="wholesaleData.length < 3"
-                    style="margin-top: 10px"
                     icon="md-add"
+                    style="margin-top: 10px"
                     @click="handleAddWholesaleData()"
                   >
                     添加价格区间
@@ -170,9 +171,9 @@
                 </div>
                 <div class="form-item-view-wholesale-preview">
                   <Table
-                    border
                     :columns="wholesalePreviewColumns"
                     :data="wholesaleData"
+                    border
                   ></Table>
                 </div>
               </div>
@@ -187,26 +188,26 @@
             >
               <div style="display: flex; flex-wrap: flex-start">
                 <vuedraggable
-                  :list="baseInfoForm.goodsGalleryFiles"
                   :animation="200"
+                  :list="baseInfoForm.goodsGalleryFiles"
                 >
                   <div
-                    class="demo-upload-list"
                     v-for="(item, __index) in baseInfoForm.goodsGalleryFiles"
                     :key="__index"
+                    class="demo-upload-list"
                   >
                     <template>
-                      <img :src="item.url" />
+                      <img :src="item.url"/>
                       <div class="demo-upload-list-cover">
                         <div>
                           <Icon
-                            type="md-search"
                             size="30"
+                            type="md-search"
                             @click.native="handleViewGoodsPicture(item.url)"
                           ></Icon>
                           <Icon
-                            type="md-trash"
                             size="30"
+                            type="md-trash"
                             @click.native="handleRemoveGoodsPicture(item)"
                           ></Icon>
                         </div>
@@ -217,28 +218,28 @@
 
                 <Upload
                   ref="upload"
-                  :show-upload-list="false"
-                  :on-success="handleSuccessGoodsPicture"
-                  :format="['jpg', 'jpeg', 'png']"
-                  :on-format-error="handleFormatError"
-                  :on-exceeded-size="handleMaxSize"
-                  :max-size="1024"
-                  :before-upload="handleBeforeUploadGoodsPicture"
-                  multiple
-                  type="drag"
                   :action="uploadFileUrl"
+                  :before-upload="handleBeforeUploadGoodsPicture"
+                  :format="['jpg', 'jpeg', 'png']"
                   :headers="{ ...accessToken }"
+                  :max-size="1024"
+                  :on-exceeded-size="handleMaxSize"
+                  :on-format-error="handleFormatError"
+                  :on-success="handleSuccessGoodsPicture"
+                  :show-upload-list="false"
+                  multiple
                   style="margin-left: 10px"
+                  type="drag"
                 >
                   <div style="width: 148px; height: 148px; line-height: 148px">
-                    <Icon type="md-add" size="20"></Icon>
+                    <Icon size="20" type="md-add"></Icon>
                   </div>
                 </Upload>
               </div>
-              <Modal title="View Image" v-model="goodsPictureVisible">
+              <Modal v-model="goodsPictureVisible" title="View Image">
                 <img
-                  :src="previewGoodsPicture"
                   v-if="goodsPictureVisible"
+                  :src="previewGoodsPicture"
                   style="width: 100%"
                 />
               </Modal>
@@ -256,25 +257,28 @@
                       >
                         <Card :bordered="true" class="ivu-card-body">
                           <Button
-                            type="primary"
                             slot="extra"
+                            type="primary"
                             @click="handleCloseSkuItem($index, item)"
                           >
                             删除规格
                           </Button>
                           <div>
                             <FormItem
-                              label="规格名"
                               class="sku-item-content-val flex"
+                              label="规格名"
                             >
                               <AutoComplete
-                                style="width: 150px"
                                 v-model="item.name"
+                                :data="skuData"
+                                :filter-method="filterMethod"
                                 :maxlength="30"
                                 placeholder="请输入规格名称"
-                                :filter-method="filterMethod"
-                                :data="skuData"
-                                @on-change="editSkuItem"
+                                style="width: 150px"
+                                @on-focus="changeSkuItem(item.name)"
+                                @on-change="
+                                  editSkuItem(item.name, $index, item)
+                                "
                               >
                               </AutoComplete>
                             </FormItem>
@@ -287,27 +291,25 @@
                                 :key="index"
                                 class="sku-item-content-val flex"
                                 label="规格项"
-                                :prop="'spec_values.' + index + '.value'"
-                                :rules="[regular.REQUIRED, regular.VARCHAR60]"
                               >
                                 <AutoComplete
+                                  ref="input"
                                   v-model="val.value"
-                                  style="width: 150px"
+                                  :data="skuVal"
+                                  :filter-method="filterMethod"
                                   :maxlength="30"
                                   placeholder="请输入规格项"
-                                  :filter-method="filterMethod"
-                                  :data="skuVal"
-                                  @on-focus="changeSkuVals(item.name)"
-                                  @on-change="
-                                    skuValueChange(val.value, index, item)
-                                  "
+                                  style="width: 150px"
+                                  @on-focus="changeSkuVals(val, item.name)"
+                                  @on-blur="checkSkuVal(val, index)"
+                                  @on-change="skuValueChange(val, index, item)"
                                 >
                                 </AutoComplete>
                                 <Button
-                                  type="primary"
                                   size="small"
                                   style="margin-left: 10px"
-                                  @click="handleCloseSkuValue(val, index)"
+                                  type="primary"
+                                  @click="handleCloseSkuValue(val, index, item)"
                                 >
                                   删除
                                 </Button>
@@ -316,7 +318,8 @@
                           </div>
                           <div>
                             <Button @click="addSpec($index, item)"
-                              >添加规格值</Button
+                            >添加规格值
+                            </Button
                             >
                           </div>
                         </Card>
@@ -324,18 +327,20 @@
                     </Form>
                     <Button
                       class="add-sku-btn"
-                      type="primary"
                       size="small"
+                      type="primary"
                       @click="addSkuItem"
-                      >添加规格项</Button
+                    >添加规格项
+                    </Button
                     >
                     &nbsp;
                     <Button
                       class="add-sku-btn"
-                      type="warning"
                       size="small"
+                      type="warning"
                       @click="handleClearSku"
-                      >清空规格项</Button
+                    >清空规格项
+                    </Button
                     >
                   </div>
                 </Panel>
@@ -344,9 +349,9 @@
                   <div slot="content">
                     <div slot="content">
                       <Table
-                        class="mt_10"
                         :columns="skuTableColumn"
                         :data="skuTableData"
+                        class="mt_10"
                         style="
                           width: 100%;
                           .ivu-table-overflowX {
@@ -354,100 +359,100 @@
                           }
                         "
                       >
-                        <template slot-scope="{ row }" slot="sn">
+                        <template slot="sn" slot-scope="{ row }">
                           <Input
-                            clearable
                             v-model="row.sn"
+                            clearable
                             placeholder="请输入货号"
                             @on-change="updateSkuTable(row, 'sn')"
                           />
                         </template>
                         <div
-                          slot-scope="{ row }"
+                          v-if="baseInfoForm.goodsType !== 'VIRTUAL_GOODS'"
                           slot="weight"
-                          v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'"
+                          slot-scope="{ row }"
                         >
                           <Input
-                            clearable
                             v-model="row.weight"
+                            clearable
                             placeholder="请输入重量"
                             @on-change="updateSkuTable(row, 'weight')"
                           >
                             <span slot="append">kg</span>
                           </Input>
                         </div>
-                        <template slot-scope="{ row }" slot="quantity">
+                        <template slot="quantity" slot-scope="{ row }">
                           <Input
-                            clearable
                             v-model="row.quantity"
+                            clearable
                             placeholder="请输入库存"
                             @on-change="updateSkuTable(row, 'quantity')"
                           >
                             <span slot="append">{{
-                              baseInfoForm.goodsUnit || ""
-                            }}</span>
+                                baseInfoForm.goodsUnit || ""
+                              }}</span>
                           </Input>
                         </template>
-                        <template slot-scope="{ row }" slot="cost">
+                        <template slot="cost" slot-scope="{ row }">
                           <Input
-                            clearable
                             v-model="row.cost"
+                            clearable
                             placeholder="请输入成本价"
                             @on-change="updateSkuTable(row, 'cost')"
                           >
                             <span slot="append">元</span>
                           </Input>
                         </template>
-                        <template slot-scope="{ row }" slot="price">
+                        <template slot="price" slot-scope="{ row }">
                           <Input
-                            clearable
                             v-model="row.price"
+                            clearable
                             placeholder="请输入价格"
                             @on-change="updateSkuTable(row, 'price')"
                           >
                             <span slot="append">元</span>
                           </Input>
                         </template>
-                        <template slot-scope="{ row }" slot="wholePrice0">
+                        <template slot="wholePrice0" slot-scope="{ row }">
                           <Input
                             v-if="wholesaleData[0]"
+                            v-model="wholesaleData[0].price"
                             clearable
                             disabled
-                            v-model="wholesaleData[0].price"
                           >
                             <span slot="append">元</span>
                           </Input>
                         </template>
-                        <template slot-scope="{ row }" slot="wholePrice1">
+                        <template slot="wholePrice1" slot-scope="{ row }">
                           <Input
                             v-if="wholesaleData[1]"
+                            v-model="wholesaleData[1].price"
                             clearable
                             disabled
-                            v-model="wholesaleData[1].price"
                           >
                             <span slot="append">元</span>
                           </Input>
                         </template>
-                        <template slot-scope="{ row }" slot="wholePrice2">
+                        <template slot="wholePrice2" slot-scope="{ row }">
                           <Input
                             v-if="wholesaleData[2]"
+                            v-model="wholesaleData[2].price"
                             clearable
                             disabled
-                            v-model="wholesaleData[2].price"
                           >
                             <span slot="append">元</span>
                           </Input>
                         </template>
-                        <template slot-scope="{ row }" slot="images">
+                        <template slot="images" slot-scope="{ row }">
                           <Button @click="editSkuPicture(row)">编辑图片</Button>
                           <Modal
                             v-model="showSkuPicture"
                             :styles="{ top: '30px' }"
-                            class-name="sku-preview-modal"
-                            title="编辑图片"
-                            ok-text="结束编辑"
-                            @on-ok="updateSkuPicture()"
                             cancel-text="取消"
+                            class-name="sku-preview-modal"
+                            ok-text="结束编辑"
+                            title="编辑图片"
+                            @on-ok="updateSkuPicture()"
                           >
                             <div class="preview-picture">
                               <img
@@ -455,19 +460,19 @@
                                 :src="previewPicture"
                               />
                             </div>
-                            <Divider />
+                            <Divider/>
                             <vuedraggable
-                              :list="selectedSku.images"
                               :animation="200"
+                              :list="selectedSku.images"
                               style="display: inline-block"
                             >
                               <div
-                                class="sku-upload-list"
                                 v-for="(img, __index) in selectedSku.images"
                                 :key="__index"
+                                class="sku-upload-list"
                               >
                                 <template>
-                                  <img :src="img.url" />
+                                  <img :src="img.url"/>
                                   <div class="sku-upload-list-cover">
                                     <Icon
                                       type="md-search"
@@ -483,21 +488,21 @@
                             </vuedraggable>
                             <Upload
                               ref="uploadSku"
-                              :show-upload-list="false"
-                              :on-success="handleSuccess"
-                              :format="['jpg', 'jpeg', 'png']"
-                              :on-format-error="handleFormatError"
-                              :on-exceeded-size="handleMaxSize"
-                              :max-size="1024"
-                              :before-upload="handleBeforeUpload"
-                              multiple
-                              type="drag"
                               :action="uploadFileUrl"
+                              :before-upload="handleBeforeUpload"
+                              :format="['jpg', 'jpeg', 'png']"
                               :headers="{ ...accessToken }"
+                              :max-size="1024"
+                              :on-exceeded-size="handleMaxSize"
+                              :on-format-error="handleFormatError"
+                              :on-success="handleSuccess"
+                              :show-upload-list="false"
+                              multiple
                               style="display: inline-block; width: 58px"
+                              type="drag"
                             >
                               <div>
-                                <Icon type="ios-camera" size="55"></Icon>
+                                <Icon size="55" type="ios-camera"></Icon>
                               </div>
                             </Upload>
                           </Modal>
@@ -519,45 +524,46 @@
               >
                 <Tree
                   ref="tree"
-                  style="text-align: left"
+                  :check-strictly="false"
                   :data="shopCategory"
                   show-checkbox
+                  style="text-align: left"
                   @on-select-change="selectTree"
                   @on-check-change="changeSelect"
-                  :check-strictly="false"
                 ></Tree>
               </FormItem>
             </div>
             <FormItem
-              style="width: 100%"
               class="form-item-view-el"
               label="PC商品描述"
               prop="intro"
+              style="width: 100%"
             >
               <editor
                 ref="editor"
-                openXss
                 v-model="baseInfoForm.intro"
                 :init="{ ...initEditor, height: '800px' }"
+                openXss
               ></editor>
               <div class="promise-intro-btn">
                 <Button type="primary" @click="promiseIntroEditor"
-                  >将PC商品描述同步到移动端描述</Button
+                >将PC商品描述同步到移动端描述
+                </Button
                 >
               </div>
             </FormItem>
 
             <FormItem
-              style="width: 100%"
               class="form-item-view-el"
               label="移动端描述"
               prop="skuList"
+              style="width: 100%"
             >
               <editor
                 ref="editor"
-                openXss
                 v-model="baseInfoForm.mobileIntro"
                 :init="{ ...initEditor, height: '800px' }"
+                openXss
               ></editor>
             </FormItem>
           </div>
@@ -572,9 +578,9 @@
                 <Select v-model="baseInfoForm.templateId" style="width: 200px">
                   <Option
                     v-for="item in logisticsTemplate"
-                    :value="item.id"
                     :key="item.id"
-                    >{{ item.name }}
+                    :value="item.id"
+                  >{{ item.name }}
                   </Option>
                 </Select>
               </FormItem>
@@ -600,14 +606,14 @@
                 prop="release"
               >
                 <RadioGroup
-                  type="button"
-                  button-style="solid"
                   v-model="baseInfoForm.release"
+                  button-style="solid"
+                  type="button"
                 >
-                  <Radio title="立即发布" :label="1">
+                  <Radio :label="1" title="立即发布">
                     <span>立即发布</span>
                   </Radio>
-                  <Radio title="放入仓库" :label="0">
+                  <Radio :label="0" title="放入仓库">
                     <span>放入仓库</span>
                   </Radio>
                 </RadioGroup>
@@ -618,14 +624,14 @@
                 prop="skuList"
               >
                 <RadioGroup
-                  type="button"
-                  button-style="solid"
                   v-model="baseInfoForm.recommend"
+                  button-style="solid"
+                  type="button"
                 >
-                  <Radio title="推荐" :label="1">
+                  <Radio :label="1" title="推荐">
                     <span>推荐</span>
                   </Radio>
-                  <Radio title="不推荐" :label="0">
+                  <Radio :label="0" title="不推荐">
                     <span>不推荐</span>
                   </Radio>
                 </RadioGroup>
@@ -633,12 +639,12 @@
             </div>
             <div class="form-item-view-bottom">
               <Collapse
-                v-model="params_panel"
                 v-for="(paramsGroup, groupIndex) in goodsParams"
+                :key="paramsGroup.groupName"
+                v-model="params_panel"
                 :title="paramsGroup.groupName"
                 class="mb_10"
                 style="text-align: left"
-                :key="paramsGroup.groupName"
               >
                 <Panel :name="paramsGroup.groupName">
                   {{ paramsGroup.groupName }}
@@ -650,9 +656,9 @@
                     >
                       <Select
                         v-model="params.paramValue"
+                        clearable
                         placeholder="请选择"
                         style="width: 200px"
-                        clearable
                         @on-change="
                           selectParams(
                             paramsGroup,
@@ -665,9 +671,9 @@
                       >
                         <Option
                           v-for="option in params.options.split(',')"
+                          :key="option"
                           :label="option"
                           :value="option"
-                          :key="option"
                         ></Option>
                       </Select>
                     </FormItem>
@@ -683,12 +689,12 @@
     <div class="footer">
       <ButtonGroup>
         <Button
+          v-if="!$route.query.id && !$route.query.draftId"
           type="primary"
           @click="pre"
-          v-if="!$route.query.id && !$route.query.draftId"
-          >上一步
+        >上一步
         </Button>
-        <Button type="primary" @click="save" :loading="submitLoading">
+        <Button :loading="submitLoading" type="primary" @click="save">
           {{ this.$route.query.id ? "保存" : "保存商品" }}
         </Button>
         <Button type="primary" @click="saveToDraft">保存为模版</Button>
@@ -702,9 +708,9 @@ import * as API_Shop from "@/api/shops";
 import cloneObj from "@/utils/index";
 import vuedraggable from "vuedraggable";
 import Editor from "@tinymce/tinymce-vue";
-import { initEditor } from "@/views/lili-components/editor/config";
-import { uploadFile } from "@/libs/axios";
-import { regular } from "@/utils";
+import {initEditor} from "@/views/lili-components/editor/config";
+import {uploadFile} from "@/libs/axios";
+import {regular} from "@/utils";
 
 export default {
   name: "goodsOperationSec",
@@ -854,9 +860,9 @@ export default {
       validateError: [],
       baseInfoFormRule: {
         goodsName: [regular.REQUIRED, regular.WHITE_SPACE, regular.VARCHAR60],
-        price: [regular.REQUIRED, { validator: checkPrice }],
+        price: [regular.REQUIRED, {validator: checkPrice}],
         sellingPoint: [regular.REQUIRED, regular.VARCHAR60],
-        goodsUnit: [{ required: true, message: "请选择计量单位" }],
+        goodsUnit: [{required: true, message: "请选择计量单位"}],
         name: [regular.REQUIRED, regular.VARCHAR5],
         value: [regular.REQUIRED, regular.VARCHAR60],
         templateId: [regular.REQUIRED],
@@ -866,6 +872,7 @@ export default {
         pageNumber: 1,
         pageSize: 1000,
       },
+      currentSkuVal: "",
       skuInfoRules: {},
       /** 品牌列表 */
       brandList: [],
@@ -917,7 +924,7 @@ export default {
       ) {
         this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[
           paramsIndex
-        ] = {
+          ] = {
           paramName: "",
           paramValue: "",
           isIndex: "",
@@ -928,7 +935,7 @@ export default {
       }
       this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[
         paramsIndex
-      ] = {
+        ] = {
         paramName: params.paramName,
         paramValue: value,
         isIndex: params.isIndex,
@@ -1093,7 +1100,7 @@ export default {
         this.selectedSku.images !== undefined &&
         this.selectedSku.images.length > 5;
       if (check) {
-        this.$Notice.warning({ title: "图片数量不能大于五张" });
+        this.$Notice.warning({title: "图片数量不能大于五张"});
         return false;
       }
     },
@@ -1152,7 +1159,7 @@ export default {
       response.result.recommend
         ? (response.result.recommend = 1)
         : (response.result.recommend = 0);
-      this.baseInfoForm = { ...this.baseInfoForm, ...response.result };
+      this.baseInfoForm = {...this.baseInfoForm, ...response.result};
       this.baseInfoForm.release = 1; //即使是被放入仓库，修改的时候也会显示会立即发布
       this.categoryId = response.result.categoryPath.split(",")[2];
 
@@ -1162,8 +1169,7 @@ export default {
       ) {
         this.baseInfoForm.goodsGalleryFiles =
           response.result.goodsGalleryList.map((i) => {
-            let files = { url: i };
-            return files;
+            return {url: i};
           });
       }
 
@@ -1194,6 +1200,7 @@ export default {
     renderGoodsDetailSku(skuList) {
       let skus = [];
       let skusInfo = [];
+      console.log(skuList);
       skuList.map((e) => {
         let sku = {
           id: e.id,
@@ -1246,8 +1253,8 @@ export default {
         skus.push(sku);
       });
       this.skuInfo = skusInfo;
-      this.renderTableData(skus);
       this.skuTableData = skus;
+      this.renderTableData(skus);
     },
     // 将pc商品描述同步给移动端
     promiseIntroEditor() {
@@ -1277,10 +1284,10 @@ export default {
               });
             });
             // 循环参数分组
-            this.goodsParams.forEach((parmsGroup) => {
-              parmsGroup.params.forEach((param) => {
+            this.goodsParams.forEach((paramsGroup) => {
+              paramsGroup.params.forEach((param) => {
                 paramsArr.forEach((arr) => {
-                  if (param.paramName == arr.paramName) {
+                  if (param.paramName === arr.paramName) {
                     param.paramValue = arr.paramValue;
                   }
                 });
@@ -1298,40 +1305,130 @@ export default {
         this.$Message.error("规格项不能大于5个！");
         return;
       }
+      if (this.skuInfo.find((i) => i.name === "")) {
+        this.$Message.error("规格项不能为空！");
+        return;
+      }
       // 写入对象，下标，具体对象
-      let num = this.global++;
       this.$set(this.skuInfo, this.skuInfo.length, {
-        spec_values: [{ name: "规格名" + num, value: "" }],
-        name: "规格名" + num,
+        spec_values: [{name: "", value: ""}],
+        name: "",
       });
+
       this.renderTableData(this.skuTableData);
     },
+    changeSkuItem(val) {
+      this.currentSkuItem = val;
+    },
     // 编辑规格名
-    editSkuItem() {
+    editSkuItem(val, index, item) {
+      if (this.skuTableData.find((i) => i[val])) {
+        this.$Message.error("已存在相同规格项！");
+        return;
+      }
+      this.skuTableData = this.skuTableData.map((e) => {
+        e[val] = e[this.currentSkuItem];
+        delete e[this.currentSkuItem];
+        return e;
+      });
+      this.currentSkuItem = val;
       this.renderTableData(this.skuTableData);
     },
     // 编辑规格值
-    async skuValueChange(val, index, item) {
+    skuValueChange(val, index, item) {
+      if (this.skuTableData.find((i) => i[val.name] === val.value)) {
+        this.$Message.error("已存在相同规格值！");
+        return;
+      }
+      let curVal = this.currentSkuVal;
+      this.skuTableData = this.skuTableData.map((e) => {
+        if (e[val.name] === curVal) {
+          e[val.name] = val.value;
+        }
+        return e;
+      });
+      this.currentSkuVal = val.value;
       this.renderTableData(this.skuTableData);
     },
     // 获取焦点时，取得规格名对应的规格值
-    changeSkuVals(name) {
+    changeSkuVals(val, name) {
+      this.currentSkuVal = val.value;
       if (name) {
         this.skuData.forEach((e, index) => {
           if (e === name) {
-            if (this.skuVal.length != this.skuVals[index].length) {
+            if (this.skuVal.length !== this.skuVals[index].length) {
               this.skuVal = this.skuVals[index];
             }
           }
         });
       }
     },
+    checkSkuVal(val) {
+      if (val.value === "") {
+        this.$Message.error("规格值不能为空！");
+      }
+    },
     /** 移除当前规格项 进行数据变化*/
     handleCloseSkuItem($index, item) {
-      this.skuInfo.splice($index, 1);
-      this.skuTableData.forEach((e, index) => {
-        delete e[item.name];
-      });
+      if ($index === 0 && this.skuInfo.length === 1) {
+        this.skuInfo = [];
+        this.skuTableData = [];
+      } else {
+        // 获取当前操作的规格项，在规格项数组中的位置（下标）
+        let itemIndex = 0;
+        this.skuInfo.forEach((i, _index) => {
+          if (i.name === item.name) {
+            itemIndex = _index;
+          }
+        });
+        if (itemIndex === this.skuInfo.length - 1) {
+          // 如果当前为最后一个规格项，则按照下标按照最后一个规格项生成规则删除
+          // 最后一个规格项生成规格数据规则： 如为最后一个规格项，则在规格列表每隔1个中删除n(n为最后一个规格项的规格值列表数量 - 1)个规格数据，生成一个规格数据
+
+          // 除了当前操作的规格项的规格项列表，用于获取所有规格项的规格值列表总数
+          let filterSkuInfo = this.skuInfo.filter(i => i.name !== item.name);
+          let index = 1;
+          let totalLength = 1;
+          filterSkuInfo.forEach(skuInfo => {
+            totalLength *= skuInfo.spec_values.length;
+          });
+          // 去除第一个，因为第一个不需要生成新的规格数据
+          item.spec_values.splice(0, 1);
+          for (let i = 0; i < totalLength; i++) {
+            // 移除对应的规格数据
+            this.skuTableData.splice(index, item.spec_values.length);
+            index++;
+          }
+        } else {
+          // 当前规格项生成规格数据的时候，每次应该生成的条数
+          let currentNum = this.skuInfo[this.skuInfo.length - 1].spec_values.length;
+          for (let i = this.skuInfo.length - 2; i > itemIndex; i--) {
+            // 计算每次删除规格数据后移动的位置（计算规则为，以最后的规格项的规格值数量为基础，乘以其他规格项的规格值总数）
+            currentNum *= this.skuInfo[i].spec_values.length;
+          }
+          // 移除对应规格数据的起始索引，起始位置为每次生成条数的下一位
+          let beginIndex = currentNum + 1;
+
+          let filterSkuInfo = this.skuInfo.filter(i => i.name !== item.name);
+          let totalLength = 1;
+          filterSkuInfo.forEach(skuInfo => {
+            totalLength *= skuInfo.spec_values.length;
+          });
+          for (let i = 0; i < totalLength; i++) {
+            // 移除对应的规格数据，删除数量为 每次生成条数 * （当前规格项的规格值总数 - 1）
+            this.skuTableData.splice(beginIndex, currentNum * (item.spec_values.length - 1));
+            beginIndex += currentNum;
+          }
+
+        }
+        this.skuInfo.splice($index, 1)
+
+
+        this.skuTableData = this.skuTableData.map((e) => {
+          delete e[item.name];
+          return e;
+        });
+      }
       /**
        * 渲染规格详细表格
        */
@@ -1341,8 +1438,8 @@ export default {
     validateEmpty(params) {
       let flag = true;
       params.forEach((item) => {
-        for (var key in item) {
-          if (item[key] != "0" && !item.value) {
+        for (const key in item) {
+          if (item[key] !== "0" && !item.value) {
             this.$Message.error("请必填规格项");
             flag = false;
             return false; // 终止程序
@@ -1359,16 +1456,34 @@ export default {
           this.$Message.error("规格值不能大于10个！");
           return;
         }
-
+        let beforeLength = item.spec_values.length;
         this.$set(item.spec_values, item.spec_values.length, {
           name: item.name,
           value: "",
         });
+        if (item.spec_values.length > 1) {
+          let index = beforeLength;
+          let filterSkuInfo = this.skuInfo.filter(i => i.name !== item.name);
+          let totalLength = 1;
+          filterSkuInfo.forEach(skuInfo => {
+            totalLength *= skuInfo.spec_values.length;
+          });
+          for (let i = 0; i < totalLength; i++) {
+            let find = cloneObj(this.skuTableData[index - 1]);
+            find[item.name] = "";
+            find.id = "";
+            find.price && (find.price = "");
+            find.sn && (find.sn = "");
+            find.cost && (find.cost = "");
+            find.quantity && (find.quantity = "");
+            find.weight && (find.weight = "");
+
+            this.skuTableData.splice(index, 0, find);
+            index += beforeLength + 1;
+          }
+
+        }
         this.baseInfoForm.regeneratorSkuFlag = true;
-        /**
-         * 渲染规格详细表格
-         */
-        this.renderTableData(this.skuTableData);
       }
     },
     handleClearSku() {
@@ -1377,21 +1492,20 @@ export default {
       this.renderTableData(this.skuTableData);
     },
     /** 移除当前规格值 */
-    handleCloseSkuValue(item, index) {
-      // this.skuInfo[item.name].spec_values.splice(index, 1);
+    handleCloseSkuValue(item, index, spec) {
+      if (spec.spec_values.length <= 1) {
+        this.$Message.error("至少保留一个规格值！");
+        return;
+      }
       this.skuInfo.forEach((i) => {
-        if (i.name === item.name) {
+        if (i.name === spec.name) {
           i.spec_values.splice(index, 1);
         }
       });
       this.skuTableData = this.skuTableData.filter(
-        (e, index) => e[item.name] !== item.value
+        (e) => e[spec.name] !== item.value
       );
       this.baseInfoForm.regeneratorSkuFlag = true;
-      /**
-       * 渲染规格详细表格
-       */
-      this.renderTableData(this.skuTableData);
     },
 
     /**
@@ -1399,12 +1513,10 @@ export default {
      */
     renderTableData(skus) {
       this.skuTableColumn = [];
-      // this.skuTableData = [];
       let pushData = [];
-      //渲染头部
+      // 渲染头部
       this.skuInfo.forEach((sku) => {
-        // !sku.name ? (sku.name = "规格名") : "";
-        //列名称
+        // 列名称
         let columnName = sku.name;
         pushData.push({
           title: columnName,
@@ -1413,18 +1525,18 @@ export default {
       });
 
       // 有成本价和价格的情况
-      this.baseInfoForm.salesModel !== "WHOLESALE"
-        ? pushData.push(
-            {
-              title: "成本价",
-              slot: "cost",
-            },
-            {
-              title: "价格",
-              slot: "price",
-            }
-          )
-        : "";
+      if (this.baseInfoForm.salesModel !== "WHOLESALE") {
+        pushData.push(
+          {
+            title: "成本价",
+            slot: "cost",
+          },
+          {
+            title: "价格",
+            slot: "price",
+          }
+        )
+      }
 
       if (this.baseInfoForm.salesModel === "WHOLESALE" && this.wholesaleData) {
         this.wholesaleData.forEach((item, index) => {
@@ -1436,13 +1548,13 @@ export default {
       }
 
       // 有重量的情况
-      this.baseInfoForm.goodsType != "VIRTUAL_GOODS" &&
-      this.baseInfoForm.salesModel !== "WHOLESALE"
-        ? pushData.push({
-            title: "重量",
-            slot: "weight",
-          })
-        : "";
+      if (this.baseInfoForm.goodsType !== "VIRTUAL_GOODS" &&
+        this.baseInfoForm.salesModel !== "WHOLESALE") {
+        pushData.push({
+          title: "重量",
+          slot: "weight",
+        });
+      }
 
       pushData.push(
         {
@@ -1461,21 +1573,42 @@ export default {
 
       this.skuTableColumn = pushData;
       //克隆所有渲染的数据
-      let cloneTemp = cloneObj(this.skuInfo);
-      if (cloneTemp[0]) {
+      if (this.skuInfo.length > 0) {
         //存放最终结果
         let result = [];
-        //循环选中的 sku 数据
-        cloneTemp[0].spec_values.forEach((specItem, index) => {
-          // 如存在数据，则将数据赋值
-          if (skus && skus[index] && specItem.value !== "") {
+        this.skuIndex = 0;
+
+        this.skuTableData = this.specIterator(result, this.skuInfo, this.skuTableData);
+      }
+    },
+
+
+    /**
+     * 迭代属性，形成表格
+     * result 渲染的数据
+     * array spec数据
+     */
+    specIterator(result, spec, skus) {
+      let table = result;
+      if (spec.length > 0) {
+
+        //清除当前循环的分组
+        let cloneTemp = cloneObj(spec);
+        cloneTemp.shift();
+        spec[0].spec_values.forEach(specItem => {
+
+          let index = this.skuIndex;
+          if (table[index]) {
+            table[index][spec[0].name] = specItem.value;
+          } else if (skus && skus[index] && specItem.value !== "") {
             let obj = {
+              ...skus[index],
               id: skus[index].id,
               sn: skus[index].sn,
               quantity: skus[index].quantity,
               cost: skus[index].cost,
               price: skus[index].price,
-              [cloneTemp[0].name]: specItem.value,
+              [spec[0].name]: specItem.value,
               images:
                 skus[index].images || this.baseInfoForm.goodsGalleryFiles || [],
             };
@@ -1485,120 +1618,20 @@ export default {
             if (skus[index].weight !== "") {
               obj.weight = skus[index].weight;
             }
-            result.push(obj);
+            table.push(obj);
           } else {
-            result.push({
-              [cloneTemp[0].name]: specItem.value,
+            table.push({
+              [spec[0].name]: specItem.value,
               images: this.baseInfoForm.goodsGalleryFiles || [],
             });
           }
-        });
-        cloneTemp.splice(0, 1);
-        result = this.specIterator(result, cloneTemp, skus);
-        this.skuTableData = result;
-      }
-    },
-    /**
-     * 迭代属性，形成表格
-     * result 渲染的数据
-     * array spec数据
-     */
-    specIterator(result, cloneTemp, skus) {
-      // console.log("-----skus-----");
-      // console.log(JSON.parse(JSON.stringify(skus)));
-      // console.log("-----result-----");
-      // console.log(JSON.parse(JSON.stringify(result)));
-      // console.log("-----cloneTemp-----");
-      // console.log(JSON.parse(JSON.stringify(cloneTemp)));
-      //是否还可以循环
-      if (cloneTemp.length > 0) {
-        let table = [];
-        // 已有数据索引
-        let findIndex = 0;
-        result.forEach((resItem, index) => {
-          cloneTemp[0].spec_values.forEach((valItem, _index) => {
-            let obj = cloneObj(resItem);
-            // 判断已存在数据数量是否大于渲染数据数量（认为是在编辑原存在数据的规格值）且规格值不为空且存在已存在数据，如符合条件，则认为为修改已存在数据
-            if (
-              skus.length > result.length &&
-              valItem.value !== "" &&
-              skus[findIndex]
-            ) {
-              obj = cloneObj(skus[findIndex]);
-            }
-            let emptyFlag = false;
-            // 判断是否为规格项的第一个值，如果不为第一个值则判断为新加数据
-            if (cloneTemp[0].spec_values.length > 1 && valItem.value === "") {
-              delete obj.id;
-              delete obj.sn;
-              delete obj.quantity;
-              delete obj.cost;
-              delete obj.price;
-              delete obj.weight;
-            }
 
-            // 判断渲染数据中是否存在空值，存在空值则判断新加数据
-            for (let key in obj) {
-              if (!obj[key]) {
-                emptyFlag = true;
-                break;
-              }
-            }
-
-            // 判断当前渲染数据是否已有数据
-            if (
-              skus &&
-              skus[findIndex] &&
-              (!skus[findIndex].id || obj.id === skus[findIndex].id) &&
-              valItem.value !== "" &&
-              !emptyFlag
-            ) {
-              // 将原存在的数据放入结果中
-              let originSku = skus[findIndex];
-              obj = {
-                sn: obj.sn || originSku.sn,
-                quantity: obj.quantity || originSku.quantity,
-                cost: obj.cost || originSku.cost,
-                price: obj.price || originSku.price,
-                weight: obj.weight || originSku.weight,
-                ...obj,
-              };
-              if (
-                originSku[valItem.name] === valItem.value ||
-                (obj.id && originSku.id === obj.id)
-              ) {
-                obj.id = originSku.id;
-              }
-
-              // 视为处理完成已存在数据，将原数据索引后移1位
-              if (skus.length == result.length) {
-                findIndex++;
-              }
-            }
-
-            // 如原存在数据大于渲染数据（认为是在编辑原存在数据的规格值），且存在已存在数据，且规格值不为空。则将原数据索引后移1位
-            if (
-              skus.length > result.length &&
-              skus[findIndex] &&
-              valItem.value !== ""
-            ) {
-              findIndex++;
-            }
-
-            obj[cloneTemp[0].name] = valItem.value;
-            table.push(obj);
-          });
-        });
-        result = [];
-        table.forEach((t) => {
-          result.push(t);
-        });
-        //清除当前循环的分组
-        cloneTemp.splice(0, 1);
+          table = this.specIterator(table, cloneTemp, skus, index);
+        })
       } else {
-        return result;
+        this.skuIndex++;
       }
-      return this.specIterator(result, cloneTemp, skus);
+      return table;
     },
     /** 根据分类id获取系统设置规格信息*/
     Get_SkuInfoByCategory(categoryId) {
@@ -1628,7 +1661,7 @@ export default {
       return option.toUpperCase().indexOf(value.toUpperCase()) !== -1;
     },
     /** 数据改变之后 抛出数据 */
-    updateSkuTable(row, item, type = "deafult") {
+    updateSkuTable(row, item, type = "default") {
       let index = row._index;
       this.baseInfoForm.regeneratorSkuFlag = true;
       /** 进行自定义校验 判断是否是数字（小数也能通过）重量 */
@@ -1816,11 +1849,11 @@ export default {
           onOk: () => {
             delete this.baseInfoForm.id;
             this.SAVE_DRAFT_GOODS();
-            return;
+
           },
           onCancel: () => {
             this.SAVE_DRAFT_GOODS();
-            return;
+
           },
         });
         return;
@@ -1844,7 +1877,7 @@ export default {
       API_GOODS.saveDraftGoods(this.baseInfoForm).then((res) => {
         if (res.success) {
           this.$Message.info("保存成功！");
-          this.$router.push({ name: "template-goods" });
+          this.$router.push({name: "template-goods"});
         }
       });
     },
@@ -1899,6 +1932,7 @@ export default {
 .ivu-select .ivu-select-dropdown {
   overflow: hidden !important;
 }
+
 /* .tox-notifications-container{
   display: none !important;
 } */

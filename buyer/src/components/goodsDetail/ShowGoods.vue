@@ -76,7 +76,6 @@
             </div>
             <!-- 商品原价 -->
             <div class="item-price-row" v-else>
-
               <!-- 批发价格 -->
               <div v-if="wholesaleNum && wholesaleNum.length">
                 <div class="flex">
@@ -84,14 +83,23 @@
                     价 &nbsp;&nbsp;&nbsp;&nbsp;格
                   </div>
 
-                  <div v-for="(item,index) in wholesalePrice" :key="index" class="item-price item-num">{{
-                    item | unitPrice("￥")
-                  }}</div>
+                  <div
+                    v-for="(item, index) in wholesalePrice"
+                    :key="index"
+                    class="item-price item-num"
+                  >
+                    {{ item | unitPrice("￥") }}
+                  </div>
                 </div>
                 <div class="flex">
                   <div class="item-price-title">起 批 量</div>
-                  <div v-for="(item,index) in wholesaleNum" :key="index" class="item-num item-price-num">{{item}}{{skuDetail.goodsUnit}}</div>
-
+                  <div
+                    v-for="(item, index) in wholesaleNum"
+                    :key="index"
+                    class="item-num item-price-num"
+                  >
+                    {{ item }}{{ skuDetail.goodsUnit }}
+                  </div>
                 </div>
               </div>
 
@@ -106,24 +114,47 @@
               </div>
             </div>
             <!-- 优惠券展示 -->
-            <div class="item-price-row" v-if="promotionMap['COUPON'].length">
-              <p>
+            <div class="item-price-coupon-row" v-if="promotionMap['COUPON'].length">
+              <p class="Ellipsis">
                 <span class="item-price-title">优 惠 券</span>
-                <span
-                  class="item-coupon"
-                  v-for="(item, index) in promotionMap['COUPON']"
-                  :key="index"
-                  @click="receiveCoupon(item.id)"
-                >
-                  <span v-if="item.couponType == 'PRICE'"
-                    >满{{ item.consumeThreshold }}减{{ item.price }}</span
+                <span>
+                  <span
+                    class="item-coupon"
+                    v-for="(item, index) in promotionMap['COUPON'].slice(0, 6)"
+                    :key="index"
+                    @click="receiveCoupon(item.id)"
                   >
-                  <span v-if="item.couponType == 'DISCOUNT'"
-                    >满{{ item.consumeThreshold }}打{{
-                      item.couponDiscount
-                    }}折</span
-                  >
+                    <span v-if="item.couponType == 'PRICE'"
+                      >满{{ item.consumeThreshold }}减{{ item.price }}</span
+                    >
+                    <span v-if="item.couponType == 'DISCOUNT'"
+                      >满{{ item.consumeThreshold }}打{{
+                        item.couponDiscount
+                      }}折</span
+                    >
+                  </span>
                 </span>
+
+                <div class="dropdown" v-if="promotionMap['COUPON'].length > 6">
+                    <span>展开更多</span>
+                    <div class="dropdown-content">
+                      <span
+                        class="item-coupon"
+                        v-for="(item, index) in promotionMap['COUPON'].slice(6, promotionMap['COUPON'].length)"
+                        :key="index"
+                        @click="receiveCoupon(item.id)"
+                      >
+                        <span v-if="item.couponType == 'PRICE'"
+                          >满{{ item.consumeThreshold }}减{{ item.price }}</span
+                        >
+                        <span v-if="item.couponType == 'DISCOUNT'"
+                          >满{{ item.consumeThreshold }}打{{
+                            item.couponDiscount
+                          }}折</span
+                        >
+                      </span>
+                    </div>
+                  </div>
               </p>
             </div>
             <!-- 满减展示 -->
@@ -285,7 +316,7 @@ export default {
     detail: {
       handler(val) {
         this.skuDetail = val.data;
-        this.wholesaleList = val.wholesaleList
+        this.wholesaleList = val.wholesaleList;
         this.swiperGoodsImg();
       },
       deep: true,
@@ -294,7 +325,7 @@ export default {
   },
   data() {
     return {
-      wholesaleList:[],
+      wholesaleList: [],
       count: 1, // 商品数量
       imgIndex: 0, // 展示图片下标
       currentSelceted: [], // 当前商品sku
@@ -313,17 +344,24 @@ export default {
       loading: false, // 立即购买loading
       loading1: false, // 加入购物车loading
       isCollected: false, // 是否收藏
-
     };
   },
   components: { PicZoom, Promotion },
   computed: {
-    wholesalePrice(key){
-      return this.wholesaleList.length ? this.wholesaleList.map(item=>{ return item.price }) :[]
+    wholesalePrice(key) {
+      return this.wholesaleList.length
+        ? this.wholesaleList.map((item) => {
+            return item.price;
+          })
+        : [];
     },
-    wholesaleNum(key){
-      return this.wholesaleList.length ? this.wholesaleList.map(item=>{ return item.num }) :[]
-    }
+    wholesaleNum(key) {
+      return this.wholesaleList.length
+        ? this.wholesaleList.map((item) => {
+            return item.num;
+          })
+        : [];
+    },
   },
   methods: {
     select(index, value) {
@@ -519,23 +557,22 @@ export default {
   width: 175px;
   margin-left: 30px;
 }
-.flex{
+.flex {
   display: flex;
 }
 .inventory {
   padding-left: 4px;
 }
 
-
 .wrapper {
   @include white_background_color();
 }
 
-.item-num{
-  text-align:center;
+.item-num {
+  text-align: center;
   width: 100px;
 }
-.item-price-num{
+.item-price-num {
   font-size: 16px;
   color: #666;
 }
@@ -647,14 +684,65 @@ export default {
   margin-left: 5px;
 }
 
+.item-price-coupon-row {
+  display: flex;
+  align-items: center;
+  margin: 5px 0px;
+}
+
+.Ellipsis {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; //控制显示几行
+  -webkit-box-orient: vertical; //webbox方向
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  z-index: 999;
+}
+
+.dropdown .item-coupon {
+  display: flex;
+  align-content: center;
+  align-items: center;
+  color: $theme_color;
+  margin: 5px 0;
+  font-size: 12px;
+  background-color: #ffdedf;
+  border: 1px dotted $theme_color;
+  cursor: pointer;
+
+  span {
+    padding: 3px;
+  }
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  padding: 12px 16px;
+}
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
 .item-coupon {
   margin-right: 5px;
-  padding: 3px;
+  padding: 0 5px;
   color: $theme_color;
   font-size: 12px;
   background-color: #ffdedf;
   border: 1px dotted $theme_color;
   cursor: pointer;
+
+  span {
+    padding: 3px;
+  }
 }
 .item-promotion {
   margin-right: 5px;
@@ -663,8 +751,17 @@ export default {
   font-size: 12px;
   border: 1px solid $theme_color;
 }
+
+.item-price-right {
+  display: flex;
+  align-content: center;
+  align-items: center;
+}
+
 .item-remarks-sum {
-  padding-left: 8px;
+  width: 70px;
+  text-align: center;
+  padding: 0 10px;
   border-left: 1px solid $border_color;
 }
 
