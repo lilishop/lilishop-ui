@@ -137,10 +137,8 @@ export default {
       this.zoneWidth = this.getZoneStyle(val.widthPer);
       this.zoneHeight = this.getZoneStyle(val.heightPer);
       this.tooSmall = val.widthPer < 0.01 && val.heightPer < 0.01;
-      this.zoneForm = {
-        ...val,
-        ...this.zoneForm,
-      };
+      this.zoneForm.link = val.link;
+      this.settingZone(val);
     },
     handlehideZone(isHide = true) {
       if (this.hideZone === isHide) {
@@ -161,7 +159,6 @@ export default {
     showModalFn(index) {
       this.showModal = true;
       this.currentIndex = index;
-      console.log(this.zoneForm);
     },
     // 选择图片
     handleSelectImg() {
@@ -182,7 +179,11 @@ export default {
     // 已选链接
     selectedLink(val) {
       this.zoneForm.link = this.$options.filters.formatLinkType(val);
-      this.zoneForm.type = val.___type;
+      this.settingZone(val);
+      this.changeInfo(this.zoneForm);
+    },
+    settingZone(val) {
+      this.zoneForm.type = val.___type || val.type;
       this.zoneForm.title = val.title;
       switch (val.___type) {
         case "goods":
@@ -211,7 +212,6 @@ export default {
         default:
           break;
       }
-      this.changeInfo(this.zoneForm);
     },
     saveZone() {},
     cancelZone() {
