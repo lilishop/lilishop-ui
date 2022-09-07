@@ -169,6 +169,7 @@ export default {
       // 改变热区并发送change通知
       Object.assign(this.zones[index], info);
       this.hasChange("changeInfo");
+      this.$forceUpdate();
     },
     addItem(setting) {
       this.zones.push(setting);
