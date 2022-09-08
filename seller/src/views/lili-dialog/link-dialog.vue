@@ -1,85 +1,55 @@
 <template>
   <div class="wrapper">
-    <div class="wap-list">
-      <div
-        class="wap-item"
-        @click="clickTag(item, i)"
-        v-for="(item, i) in wap"
-        :key="i"
-        :class="{ active: selected == i }"
-      >
-        {{ item.title }}
-      </div>
-    </div>
-    <div class="wap-content"></div>
 
-    <!-- 弹出选择商品的modal -->
-    <Modal
-      title="选择"
-      :styles="{ top: '120px' }"
-      width="750"
-      @on-cancel="clickClose"
-      @on-ok="clickClose"
-      v-model="flag"
-      :mask-closable="false"
-      scrollable
-    >
-      <goodsDialog
-        @selected="
+    <Tabs :value="wap[0].title" class="tabs">
+
+      <TabPane :label="item.title" :name="item.title" @click="clickTag(item, i)" v-for="(item, i) in wap" :key="i">
+        <component ref="lili-component" :is="templateWay[item.name]" @selected="
           (val) => {
-            goodsData = val;
+            changed = val;
           }
-        "
-        ref="goodsDialog"
-      />
-    </Modal>
+        " />
+      </TabPane>
+    </Tabs>
+
   </div>
 </template>
 <script>
 import wap from "./wap.js";
 import goodsDialog from "./goods-dialog";
+import templateWay from "./template/index";
 export default {
   components: {
     goodsDialog,
   },
   data() {
     return {
-      goodsData: "", // 商品列表
-      flag: false, // 控制商品模块显隐
-      selected: 0, // 已选模块
+      templateWay, // 模板数据
+      changed: "", // 变更模板
+      selected: 0, // 已选数据
       selectedLink: "", //选中的链接
-      wap, // tab标签栏数据
+      wap  // tab标签
     };
   },
   watch: {
-    selectedLink(val) {
-      this.$emit("selectedLink", val);
+    changed: {
+      handler(val) {
+        this.$emit("selectedLink", val[0]); //因为是单选，所以直接返回第一个
+      },
+      deep: true,
     },
   },
   mounted() {
+    this.$nextTick(() => {
+      console.log( this.$refs["lili-component"])
+      this.$refs["lili-component"][0].type = "single"; //商品页面设置成为单选
+    });
+
     this.wap.forEach((item) => {
       item.selected = false;
     });
   },
-  methods: {
-    clickClose() {
-      this.flag = false;
-    },
-
-    // 点击链接
-    clickTag(val, i) {
-      this.selected = i;
-      if (!val.openGoods) {
-        this.selectedLink = val;
-      }
-      //   打开选择商品
-      else {
-        this.$refs.goodsDialog.selectedWay = [];
-        this.$refs.goodsDialog.type = "single";
-        this.flag = true;
-      }
-    },
-  },
+  methods: {},
 };
 </script>
 <style scoped lang="scss">
@@ -90,6 +60,9 @@ export default {
 }
 .wap-flex {
   margin: 2px;
+}
+.tabs {
+  width: 100%;
 }
 
 /deep/ .ivu-modal {

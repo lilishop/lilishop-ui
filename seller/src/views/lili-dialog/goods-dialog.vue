@@ -14,7 +14,7 @@
           <Button type="primary" @click="goodsData=[]; getQueryGoodsList();" icon="ios-search">搜索</Button>
         </div>
       </div>
-      <div style="positon:retavle;">
+      <div >
         <Scroll class="wap-content-list" :on-reach-bottom="handleReachBottom" :distance-to-edge="[3,3]">
 
           <div class="wap-content-item" :class="{ active: item.selected }" @click="checkedGoods(item, index)" v-for="(item, index) in goodsData" :key="index">
@@ -24,7 +24,6 @@
             <div class="wap-content-desc">
               <div class="wap-content-desc-title">{{ item.goodsName }}</div>
               <div class="wap-sku">{{ item.goodsUnit }}</div>
-              <div class="wap-sku"><Tag :color="item.salesModel === 'RETAIL' ? 'default' : 'geekblue'">{{item.salesModel === "RETAIL" ? "零售型" : "批发型"}}</Tag></div>
               <div class="wap-content-desc-bottom">
                 <div>￥{{ item.price | unitPrice }}</div>
               </div>
@@ -66,7 +65,6 @@ export default {
         categoryPath: "",
         marketEnable: "UPPER",
         authFlag: "PASS",
-        sort:"createTime"
       },
       category: [], // 选中的商品分类
       goodsData: [], // 商品列表
@@ -246,7 +244,9 @@ export default {
   margin: 10px 7px;
   padding: 6px 0;
 }
+// .wap-content-item{
 
+// }
 .active {
   background: url("../../assets/selected.png") no-repeat;
   background-position: right;

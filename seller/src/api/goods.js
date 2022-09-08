@@ -336,6 +336,12 @@ export const statisticsOrderRefundList = params => {
   return getRequest(`/statistics/order/refund`, params);
 };
 
+// 统计相关活动订单统计
+
+export const getOrderPromotionStatistics = params => {
+  return getRequest(`/statistics/order/promotion`, params);
+};
+
 // 获取行业统计列表
 export const goodsCategoryStatistics = params => {
   return getRequest(`/statistics/goods/getCategoryByPage`, params);

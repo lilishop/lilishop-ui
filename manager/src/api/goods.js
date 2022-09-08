@@ -192,6 +192,12 @@ export const getOrderOverView = (params) => {
   return getRequest(`/statistics/order/overview`, params)
 }
 
+// 统计相关活动订单统计
+
+export const getOrderPromotionStatistics = params => {
+  return getRequest(`/statistics/order/promotion`, params);
+};
+
 // 统计相关订单统计
 
 export const statisticsOrderList = (params) => {

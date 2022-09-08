@@ -15,7 +15,7 @@ export function unitPrice(val, unit, location) {
   }
   return (unit || "") + price;
 }
-// 转义 
+// 转义
 export function enCode(v1) {
   var entry = {
     "&#39;": "'",
@@ -161,4 +161,61 @@ export function formatDate(date, fmt) {
     }
   }
   return fmt;
+}
+
+// 楼层装修，选择链接处理跳转方式
+export function formatLinkType (item) {
+  const types = ['goods', 'category', 'shops', 'marketing', 'pages', 'other'] // 所有跳转的分类 依次为 商品、分类、店铺、活动、页面、其他
+  let url = '';
+  switch (item.___type) {
+    case 'goods':
+      url =  `/goodsDetail?skuId=${item.id}&goodsId=${item.goodsId}`;
+      break;
+
+    case 'category':
+      url = `/goodsList?categoryId=${item.allId}`;
+      break;
+
+    case 'shops':
+      url = `/merchant?id=${item.id}`;
+      break;
+
+    case 'marketing': // 暂无数据，需要后续修改
+      url = `/seckill?id=${item.id}`;
+      break;
+
+    case 'pages': // 暂无数据，需要后续修改
+      url = `/article?id=${item.id}`;
+      break;
+
+    case 'other':
+      switch (item.title) {
+        case '首页':
+          url = '/';
+          break;
+        case '购物车':
+          url = '/cart';
+          break;
+        case '我的订单':
+          url = '/home/MyOrder';
+          break;
+        case '收藏商品':
+          url = '/home/Favorites';
+          break;
+        case '个人中心':
+          url = '/home';
+          break;
+        case '外部链接':
+          url = item.url;
+          break;
+        case '秒杀频道':
+          url = '/seckill';
+          break;
+        case '领券中心':
+          url = '/coupon';
+          break;
+      }
+      break;
+  }
+  return url;
 }
