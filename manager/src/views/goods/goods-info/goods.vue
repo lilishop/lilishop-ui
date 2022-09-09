@@ -386,8 +386,10 @@ export default {
     // 编辑
     edit(v) {
       this.id = v.id;
-      if (v.underMessage != "{}") {
+      if (v.underMessage) {
         this.underForm.reason = v.underMessage;
+      } else {
+        this.underForm.reason = "";
       }
       this.modalVisible = true;
     },
