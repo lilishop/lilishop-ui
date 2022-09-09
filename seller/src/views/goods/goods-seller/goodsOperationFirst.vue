@@ -144,7 +144,7 @@ export default {
         pageSize: 10,
         pageNumber: 1,
       },
-      templateTotal:0,
+      templateTotal: 0,
     };
   },
   methods: {
@@ -185,8 +185,8 @@ export default {
     GET_GoodsTemplate() {
       API_GOODS.getDraftGoodsListData(this.searchParams).then((res) => {
         if (res.success) {
-          this.goodsTemplates.push(...res.result.records)
-          this.templateTotal = res.result.total
+          this.goodsTemplates.push(...res.result.records);
+          this.templateTotal = res.result.total;
         }
       });
     },
@@ -234,13 +234,15 @@ export default {
         this.$Message.error("必须选择到三级分类");
         return;
       } else if (this.category[2].name) {
+        let params = {
+          category: this.category,
+          goodsType: this.goodsType,
+        };
         if (this.selectedTemplate.id) {
-          this.$emit("change", { tempId: this.selectedTemplate.id });
+          params.tempId = this.selectedTemplate.id;
+          this.$emit("change", params);
         } else {
-          this.$emit("change", {
-            category: this.category,
-            goodsType: this.goodsType,
-          });
+          this.$emit("change", params);
         }
       }
     },
@@ -252,7 +254,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "./addGoods.scss";
-/deep/ .ivu-scroll-container{
-  height:450px !important;
+/deep/ .ivu-scroll-container {
+  height: 450px !important;
 }
 </style>

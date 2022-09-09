@@ -1,5 +1,5 @@
 <template>
-  <Modal :styles="{ top: '120px' }" width="1160" @on-cancel="clickClose" @on-ok="clickOK" v-model="flag" :mask-closable="false" scrollable>
+  <Modal :styles="{ top: '120px' }" width="1160" z-index="10000" @on-cancel="clickClose" @on-ok="clickOK" v-model="flag" :mask-closable="false" scrollable>
     <template v-if="flag">
       <goodsDialog @selected="(val) => {goodsData = val;}"
         v-if="goodsFlag" ref="goodsDialog" :selectedWay='goodsData'/>
