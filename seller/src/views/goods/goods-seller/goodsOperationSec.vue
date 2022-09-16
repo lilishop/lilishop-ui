@@ -1197,7 +1197,7 @@ export default {
 
         this.baseInfoForm.categoryPath = cateId.toString();
       }
-      this.baseInfoForm.goodsType &&
+      this.firstData.goodsType &&
         (this.baseInfoForm.goodsType = this.firstData.goodsType);
     },
     // 渲染sku数据
