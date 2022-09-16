@@ -92,3 +92,20 @@ export function resetPassword (params) {
     params
   });
 }
+
+export function getSCLoginCode(params) {
+  return request({
+    url: `/buyer/passport/member/pc_session`,
+    method: Method.POST,
+    needToken: false,
+    params
+  });
+}
+export function sCLogin(token,params) {
+  return request({
+    url: `/buyer/passport/member/session_login/`+token,
+    method: Method.POST,
+    needToken: false,
+    params
+  });
+}

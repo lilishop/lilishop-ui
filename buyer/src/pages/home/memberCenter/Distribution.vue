@@ -244,6 +244,7 @@
     <Modal v-model="qrcodeShow" title="分销商品" width="800">
       <Alert type="warning"> 下载二维码或者复制链接分享商品 </Alert>
       <div style="width: 200px; height: 200px; border: 1px solid #eee">
+        {{qrcode}}{{qrcodeData}}
         <vue-qr
           :text="qrcode"
           :callback="qrcodeData"
