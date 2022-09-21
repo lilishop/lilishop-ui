@@ -30,6 +30,12 @@
         <!--扫码登录-->
         <div v-show="scannerCodeLoginFLag">
           <div class="qr-container">
+            <div class='qr-shadow flex' v-show="qrCodeStatus == 'fail'">
+              <span>
+                二维码已失效
+              </span>
+              <Button size='small' @click="createPCLoginSession">刷新二维码</Button>
+            </div>
             <vue-qr
               :text="qrCode"
               :margin="0"
@@ -165,6 +171,7 @@ export default {
   },
   data() {
     return {
+      qrCodeStatus:"success", //
       qrCode: '',
       qrSessionToken:'',
       //是否是二维码登录
@@ -349,6 +356,7 @@ export default {
       getSCLoginCode({}).then(response=>{
         this.clearQRLoginInfo();
         if (response.code == 200) {
+          this.qrCodeStatus = 'success'
           let session = response.result;
           this.qrSessionToken = session.token;
           if (session.status === 0) {
@@ -364,7 +372,8 @@ export default {
     async refreshQrCode() {
       if (!this.qrCodeTimer) {
         this.qrCodeTimer = setInterval(() => {
-          this.createPCLoginSession();
+
+          this.qrCodeStatus = 'fail' // 如果过期将二维码转为失效状态
         }, 21 * 1000);
       }
     },
@@ -458,6 +467,27 @@ export default {
 .qr-container{
   text-align: center;
   margin: 20px 0;
+  position: relative;
+  >.qr-shadow{
+    background: rgba(0, 0, 0, 0.45);
+    position: absolute;
+    left: 50%;
+    margin-left: -75px;
+    top: 0;
+    z-index: 99;
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: #fff;
+    >span{
+      margin-bottom: 20px;
+      font-size: 13px;
+      letter-spacing: 2px;
+    }
+  }
 }
 .top-content {
   width: 100%;
@@ -618,4 +648,5 @@ export default {
 .icon-hover {
   cursor: pointer;
 }
+
 </style>
