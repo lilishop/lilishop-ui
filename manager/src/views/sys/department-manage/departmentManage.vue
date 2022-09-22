@@ -299,8 +299,8 @@ export default {
       for (let i = 0; i < len; i++) {
         for (let j = 0; j < i; j++) {
           if (array[j].sortOrder > array[i].sortOrder) {
-            const temp = array[j].sortOrder;
-            array[j].sortOrder = array[i];
+            const temp = array[j];
+            array[j] = array[i];
             array[i] = temp;
           }
         }
