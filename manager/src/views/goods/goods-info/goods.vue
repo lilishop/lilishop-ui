@@ -377,17 +377,19 @@ export default {
       this.loading = true;
       getGoodsListData(this.searchForm).then((res) => {
         this.loading = false;
-        if (res.records) {
-          this.data = res.records;
-          this.total = res.total;
+        if (res.success) {
+          this.data = res.result.records;
+          this.total = res.result.total;
         }
       });
     },
     // 编辑
     edit(v) {
       this.id = v.id;
-      if (v.underMessage != "{}") {
+      if (v.underMessage) {
         this.underForm.reason = v.underMessage;
+      } else {
+        this.underForm.reason = "";
       }
       this.modalVisible = true;
     },

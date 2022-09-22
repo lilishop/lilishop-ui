@@ -44,7 +44,7 @@ export const addLiveStoreGoods = (params) => {
 // 店铺直播间添加
 export const addLiveGoods = (params) => {
 
-  return putRequest(`/broadcast/studio/push/${params.roomId}/${params.liveGoodsId}`)
+  return putRequest(`/broadcast/studio/push/${params.roomId}/${params.liveGoodsId}`, {goodsId: params.goodsId})
 }
 
 // 获取拼团列表

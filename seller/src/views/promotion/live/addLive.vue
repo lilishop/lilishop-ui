@@ -438,6 +438,7 @@ export default {
       addLiveGoods({
         roomId: this.$route.query.roomId,
         liveGoodsId: way.liveGoodsId,
+        goodsId: way.goodsId,
       }).then((res) => {
         if (res.success) {
           this.liveData.push(way);
