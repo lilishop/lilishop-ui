@@ -421,7 +421,7 @@ export default {
       storage.setItem("uuid", uuid);
       loginCallback(uuid).then((res) => {
         if (res.success) {
-          this.loginSuccess(result.accessToken,result.refreshToken);
+          this.loginSuccess(res.result.accessToken,res.result.refreshToken);
         }
       });
     }
