@@ -377,9 +377,9 @@ export default {
       this.loading = true;
       getGoodsListData(this.searchForm).then((res) => {
         this.loading = false;
-        if (res.records) {
-          this.data = res.records;
-          this.total = res.total;
+        if (res.success) {
+          this.data = res.result.records;
+          this.total = res.result.total;
         }
       });
     },

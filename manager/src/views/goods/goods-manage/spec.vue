@@ -18,7 +18,9 @@
             style="width: 200px"
           />
         </Form-item>
-        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
+        <Button @click="handleSearch" type="primary" class="search-btn"
+          >搜索</Button
+        >
       </Form>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加</Button>
@@ -56,10 +58,14 @@
       :mask-closable="false"
       :width="500"
     >
-      <Form ref="form" :model="form" :label-width="100"
-            :rules="formValidate">
+      <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
         <FormItem label="规格名称" prop="specName">
-          <Input v-model="form.specName" maxlength="30" clearable style="width: 100%"/>
+          <Input
+            v-model="form.specName"
+            maxlength="30"
+            clearable
+            style="width: 100%"
+          />
         </FormItem>
         <FormItem label="规格值" prop="specValue">
           <Select
@@ -72,28 +78,30 @@
             popper-class="spec-values-popper"
             style="width: 100%; text-align: left; margin-right: 10px"
           >
-            <Option v-for="item in specValue" :value="item" :label="item" :key="item">
+            <Option
+              v-for="item in specValue"
+              :value="item"
+              :label="item"
+              :key="item"
+            >
             </Option>
           </Select>
         </FormItem>
       </Form>
       <div slot="footer">
         <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="saveSpec">提交</Button>
+        <Button type="primary" :loading="submitLoading" @click="saveSpec"
+          >提交</Button
+        >
       </div>
     </Modal>
   </div>
 </template>
 
 <script>
-import {
-  getSpecListData,
-  insertSpec,
-  updateSpec,
-  delSpec
-} from "@/api/goods";
+import { getSpecListData, insertSpec, updateSpec, delSpec } from "@/api/goods";
 
-import {regular} from "@/utils";
+import { regular } from "@/utils";
 export default {
   name: "spec",
   components: {},
@@ -116,10 +124,7 @@ export default {
           regular.REQUIRED,
           // regular.VARCHAR20
         ],
-        specValue: [
-          regular.REQUIRED,
-          regular.VARCHAR255
-        ],
+        specValue: [regular.REQUIRED, regular.VARCHAR255],
       },
       form: {
         // 添加或编辑表单对象初始化数据
@@ -147,7 +152,7 @@ export default {
           title: "规格值",
           key: "specValue",
           minWidth: 250,
-          tooltip: true
+          tooltip: true,
         },
         {
           title: "操作",
@@ -157,7 +162,6 @@ export default {
           width: 250,
           render: (h, params) => {
             return h("div", [
-
               h(
                 "Button",
                 {
@@ -253,8 +257,10 @@ export default {
       // 带多条件搜索参数获取表单数据 请自行修改接口
       getSpecListData(this.searchForm).then((res) => {
         this.loading = false;
-        this.data = res.records;
-        this.total = res.total;
+        if (res.success) {
+          this.data = res.result.records;
+          this.total = res.result.total;
+        }
       });
       this.loading = false;
     },
@@ -264,10 +270,10 @@ export default {
         if (valid) {
           this.submitLoading = true;
           if (this.modalType === 0) {
-            if(this.data.find(item=>item.specName == this.form.specName)){
-              this.$Message.error('请勿添加重复规格名称!')
-              this.submitLoading = false
-              return
+            if (this.data.find((item) => item.specName == this.form.specName)) {
+              this.$Message.error("请勿添加重复规格名称!");
+              this.submitLoading = false;
+              return;
             }
             // 添加 避免编辑后传入id等数据
             delete this.form.id;
@@ -298,7 +304,7 @@ export default {
       this.modalType = 0;
       this.modalTitle = "添加";
       this.$refs.form.resetFields();
-      this.specValue = '';
+      this.specValue = "";
       delete this.form.id;
       this.modalVisible = true;
     },
@@ -319,9 +325,9 @@ export default {
       this.form.specValue = v.specValue;
 
       if (localVal && localVal.indexOf("," > 0)) {
-        this.form.specValue = localVal.split(",")
-        this.specValue = this.form.specValue
-        this.$set(this, 'specValue', this.form.specValue)
+        this.form.specValue = localVal.split(",");
+        this.specValue = this.form.specValue;
+        this.$set(this, "specValue", this.form.specValue);
       } else {
         this.specValue = [];
       }
@@ -365,7 +371,7 @@ export default {
             if (res.success) {
               this.$Message.success("删除成功");
               this.clearSelectAll();
-              this.searchForm.pageNumber = 1
+              this.searchForm.pageNumber = 1;
               this.getDataList();
             }
           });
