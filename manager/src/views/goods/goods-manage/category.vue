@@ -285,7 +285,7 @@ export default {
     getSpecList() {
       getSpecificationList().then((res) => {
         if (res.length != 0) {
-          this.specifications = res;
+          this.specifications = res.result;
         }
       });
     },
