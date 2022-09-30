@@ -139,6 +139,20 @@
               </div>
             </div>
           </div>
+          <div class="decorate-view" v-if="res.type == 'carousel'">
+            <div class="decorate-view-title">
+              <Button
+                @click="slotBanner(res, item, index, 'up')"
+                style="margin-right: 10px"
+                size="small"
+                >上移</Button
+              ><Button
+                @click="slotBanner(res, item, index, 'down')"
+                size="small"
+                >下移</Button
+              >
+            </div>
+          </div>
           <!-- 选择照片 -->
           <div class="decorate-view" v-if="!res.notImg">
             <div class="decorate-view-title">选择照片</div>
@@ -166,28 +180,20 @@
           >
             <div class="decorate-view-title">文字对齐方式</div>
             <div class="card-box">
-              <div
+              <Button
                 class="card"
                 :class="{ active: textAlign == 'left' }"
                 @click="changeTextAlign('left')"
               >
-                <img
-                  :src="require('@/assets/align-text-left.png')"
-                  class="align-text"
-                  alt=""
-                />
-              </div>
-              <div
+                左
+              </Button>
+              <Button
                 class="card"
                 :class="{ active: textAlign == 'center' }"
                 @click="changeTextAlign('center')"
               >
-                <img
-                  :src="require('@/assets/align-text-center.png')"
-                  class="align-text"
-                  alt=""
-                />
-              </div>
+                中
+              </Button>
               <!-- <div
                 class="card"
                 :class="{ active: textAlign == 'right' }"
@@ -322,12 +328,18 @@
               已选链接：
 
               <span>
-                {{
+                <!-- {{
                   ways.find((e) => {
                     return item.url.___type == e.name;
-                  }).title
-                }}
+                  }) ? ways.find((e) => {
+                    return item.url.___type == e.name;
+                  }).title : '发现'
+                }} -->
                 -
+                <!-- 当选择完链接之后的专题名称 -->
+                <span v-if="item.url.pageType == 'special'">
+                  {{ item.url.name }}</span
+                >
                 <!-- 当选择完链接之后的商品名称 -->
                 <span v-if="item.url.___type == 'goods'">
                   {{ item.url.goodsName }}</span
@@ -343,6 +355,10 @@
                 <!-- 当选择完链接之后的其他回调 -->
                 <span v-if="item.url.___type == 'other'">
                   {{ item.url.title }}</span
+                >
+                <!-- 当选择完链接之后的其他回调 -->
+                <span v-if="item.url.___type == 'brand'">
+                  {{ item.url.name }}</span
                 >
 
                 <!-- 当选择完活动之后的其他回调 -->
@@ -450,6 +466,33 @@ export default {
   },
   props: ["res"],
   methods: {
+    slotBanner(val, key, index, down) {
+      console.log(val);
+      if (down == "down") {
+        this.downData(val.options.list, index);
+      } else {
+        this.upData(val.options.list, index);
+      }
+    },
+    upData(arr, index) {
+      let newArr = [];
+      if (arr.length > 1 && index !== 0) {
+        newArr = this.swapItems(arr, index, index - 1);
+      }
+      return newArr;
+    },
+    swapItems(arr, index1, index2) {
+      arr[index1] = arr.splice(index2, 1, arr[index1])[0];
+      return arr;
+    },
+    downData(arr,index) {
+      let newArr = [];
+      if (arr.length > 1 && index !== arr.length - 1) {
+        newArr = this.swapItems(arr, index, index + 1);
+      }
+      return newArr;
+    },
+
     // 改变横纵切换title内容
     changeDirection(val, data) {
       if (val == "horizontal") {
@@ -467,6 +510,7 @@ export default {
     },
     // 回调选择的链接
     selectedLink(val) {
+      console.log(val);
       delete val.selected;
       delete val.intro;
       delete val.mobileIntro;
@@ -558,7 +602,7 @@ export default {
           title: "标题",
           link: "",
           url: "",
-          size: this.res.options.list[0].size,
+          size: this.res.options.list[0] ? this.res.options.list[0].size : "",
           model: "link",
         };
         this.res.options.list.push(way);

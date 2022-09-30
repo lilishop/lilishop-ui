@@ -53,6 +53,15 @@ export const removePageHome = (id) => {
   return deleteRequest(`/other/pageData/remove/${id}`);
 };
 
+// 弹窗广告
+export const getOpenHomeData = params => {
+  return getRequest(`/other/pageData/pageType/${params}`);
+};
+// 保存修改弹窗广告
+export const addOpenHomeData = params => {
+  return postRequest(`/other/pageData/pageType/${params}`);
+};
+
 
 /**
  * 发布页面
