@@ -9,6 +9,7 @@ import Vue from 'vue';
 
 const app = {
   state: {
+
     styleStore: "", // 移动端楼层装修中选择风格存储
     added: false, // 加载路由标识
     navList: [], // 顶部菜单

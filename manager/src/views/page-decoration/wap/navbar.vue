@@ -22,7 +22,9 @@
           <div ref="qrCodeUrl"></div>
         </div>
       </Poptip> -->
-      <Button size="default" type="primary" @click="handleSpinShow">保存模板</Button>
+      <Button size="default" type="primary" @click="handleSpinShow"
+        >保存模板</Button
+      >
 
       <Modal
         title="保存中"
@@ -54,6 +56,7 @@
 import * as API_Other from "@/api/other.js";
 
 export default {
+  props: ["pagetype"],
   data() {
     return {
       progress: true, // 展示进度
@@ -66,16 +69,16 @@ export default {
           name: "index",
           selected: true,
         },
-        // {
-        //   title: "全屏广告",
-        //   name: "advertising",
-        //   selected: false,
-        // },
-        // {
-        //   title: "弹窗广告",
-        //   name: "alertAdvertising",
-        //   selected: false,
-        // },
+        {
+          title: "全屏广告",
+          name: "advertising",
+          selected: false,
+        },
+        {
+          title: "弹窗广告",
+          name: "ALERT",
+          selected: false,
+        },
       ],
 
       submitWay: {
@@ -86,7 +89,23 @@ export default {
       },
     };
   },
-  watch: {},
+  watch: {
+    pagetype: {
+      handler(val) {
+        this.way.length = 0;
+        if (val == "INDEX") {
+          this.way.push({ title: "首页", name: "index", selected: true });
+        } else if (val == "SPECIAL") {
+          this.way.push({ title: "专题", name: "special", selected: true });
+        } else if (val == "ALERT") {
+          this.way.push({ title: "开屏广告", name: "alert", selected: true });
+        }else if (val == "OPEN_SCREEN_ANIMATION") {
+          this.way.push({ title: "app开屏页面", name: "OPEN_SCREEN_ANIMATION", selected: true });
+        }
+      },
+      immediate: true,
+    },
+  },
   mounted() {},
   methods: {
     clickBtn(val) {
@@ -106,7 +125,10 @@ export default {
 
     // 填写是否发布，模板名称之后保存
     save() {
-      if (this.$store.state.styleStore == void 0) {
+      if (
+        this.$store.state.styleStore == void 0 &&
+        (this.$route.query.pagetype && this.$route.query.pagetype != 'ALERT' &&  this.$route.query.pagetype != 'OPEN_SCREEN_ANIMATION')
+      ) {
         this.$Message.error("请装修楼层");
         return false;
       }
@@ -116,21 +138,74 @@ export default {
         : (this.submitWay.pageShow = "CLOSE");
 
       this.submitWay.pageData = JSON.stringify(this.$store.state.styleStore);
-      this.submitWay.pageType = "INDEX";
+      this.submitWay.pageType =  this.$route.query.pagetype ||  "INDEX";
+      // this.submitWay.pageType = this.pagetype;
 
-      this.$route.query.id ? this.update() : this.submit(this.submitWay);
+      if (this.$route.query.pagetype == 'ALERT' || this.$route.query.pagetype == 'OPEN_SCREEN_ANIMATION') {
+        this.update(this.submitWay);
+      } else {
+        this.$route.query.id ? this.updateHome() : this.submit(this.submitWay);
+      }
+
+      // this.$route.query.id ? this.update() : this.submit(this.submitWay);
     },
 
     // 更新
-    update() {
+    updateHome() {
       this.progress = false;
       API_Other.updateHome(this.$route.query.id, {
         pageData: JSON.stringify(this.$store.state.styleStore),
         name: this.submitWay.name,
         pageShow: this.submitWay.pageShow,
-        pageType: "INDEX",
+        pageType: this.submitWay.pageType,
         pageClientType: "H5",
       })
+        .then((res) => {
+          this.num = 50;
+          if (res.success) {
+            this.num = 80;
+            /**制作保存成功动画¸ */
+            setTimeout(() => {
+              this.saveDialog = false;
+              this.$Message.success("修改成功");
+              this.goback();
+            }, 1000);
+          } else {
+            this.saveDialog = false;
+            this.$Message.error("修改失败，请稍后重试");
+          }
+          console.log(res);
+        })
+        .catch((error) => {});
+    },
+
+    // 更新
+    update(submitWay) {
+      console.log(this.$store.state.openStyleStore[0], "123123123");
+      if (this.$store.state.openStyleStore == void 0) {
+        this.$Message.error("请装修楼层!");
+        return false;
+      }
+      this.progress = false;
+
+      let id = this.$route.query.id;
+      const pagetype = this.$route.query.pagetype;
+      console.log(this.$store.state.openStyleStore, submitWay);
+      const pageType = {
+        INDEX: "INDEX",
+        ALERT: "OPEN_SCREEN_PAGE",
+        OPEN_SCREEN_ANIMATION: "OPEN_SCREEN_ANIMATION",
+      }[pagetype ? pagetype : "INDEX"];
+
+      if (pagetype) {
+        submitWay.pageData = JSON.stringify(
+          this.$store.state.openStyleStore[0]
+        );
+        submitWay.pageType = pageType;
+        id = this.$store.state.openStoreId;
+      }
+
+      API_Other.updateHome(id, submitWay)
         .then((res) => {
           this.num = 50;
           if (res.success) {

@@ -1,15 +1,20 @@
 <template>
   <div class="wrapper">
     <Card class="category">
-      <div :class="{active:i == selectedIndex}" class="category-item" v-for="(typeItem,i) in pageTypes" :key="typeItem.type">
-        <div @click="clickType(typeItem.type,i)">{{typeItem.title}}</div>
+      <div
+        :class="{ active: i == selectedIndex }"
+        class="category-item"
+        v-for="(typeItem, i) in pageTypes"
+        :key="typeItem.type"
+      >
+        <div @click="clickType(typeItem.type, i)">{{ typeItem.title }}</div>
       </div>
     </Card>
     <Card class="content">
       <Button type="primary" @click="handleAdd()">添加页面</Button>
       <div class="list">
         <Spin size="large" fix v-if="loading"></Spin>
-        <div class="item item-title" >
+        <div class="item item-title">
           <div>页面名称</div>
           <div class="item-config">
             <div>状态</div>
@@ -24,20 +29,36 @@
               <span slot="open">开</span>
               <span slot="close">关</span>
             </i-switch>
-            <Button type="info" placement="right" @click="handleEdit(item)" size="small">修改</Button>
-            <Poptip confirm title="删除此模板？" @on-ok="handleDel(item)" >
+            <Button
+              type="info"
+              placement="right"
+              @click="handleEdit(item)"
+              size="small"
+              >修改</Button
+            >
+            <Poptip confirm title="删除此模板？" @on-ok="handleDel(item)">
               <Button type="error" size="small">删除</Button>
             </Poptip>
           </div>
         </div>
-        <div class="no-more" v-if="list.length ==0">暂无更多模板</div>
+        <div class="no-more" v-if="list.length == 0">暂无更多模板</div>
       </div>
-      <Page :total="total" size="small" @on-change="(val) => {params.pageNumber = val; } " :current="params.pageNumber" :page-size="params.pageSize" show-sizer  :page-size-opts="[10, 20, 50]" @on-page-size-change="changePageSize"/>
-
+      <Page
+        :total="total"
+        size="small"
+        @on-change="
+          (val) => {
+            params.pageNumber = val;
+          }
+        "
+        :current="params.pageNumber"
+        :page-size="params.pageSize"
+        show-sizer
+        :page-size-opts="[10, 20, 50]"
+        @on-page-size-change="changePageSize"
+      />
     </Card>
-
   </div>
-
 </template>
 <script>
 import * as API_Other from "@/api/other.js";
@@ -46,7 +67,8 @@ export default {
   data() {
     return {
       selectedIndex: 0, // 装修那个页面的下标
-      columns: [ // 表头
+      columns: [
+        // 表头
         {
           title: "页面名称",
           key: "name",
@@ -61,7 +83,8 @@ export default {
       ],
 
       loading: false, // 加载状态
-      pageTypes: [ // 装修类型
+      pageTypes: [
+        // 装修类型
         {
           type: "INDEX",
           title: "首页",
@@ -70,8 +93,18 @@ export default {
           type: "SPECIAL",
           title: "专题",
         },
+
+        // {
+        //   type: "ALERT",
+        //   title: "开屏广告",
+        // },
+        // {
+        //   type: "OPEN_SCREEN_ANIMATION",
+        //   title: "app开屏页面",
+        // },
       ],
-      params: { // 请求参数
+      params: {
+        // 请求参数
         pageNumber: 1,
         pageSize: 10,
         sort: "createTime",
@@ -84,23 +117,38 @@ export default {
     };
   },
   watch: {
-    params: {
-      handler(val) {
-        // this.pageNumber++;
-        this.init();
-      },
-      deep: true,
-    },
+    // params: {
+    //   handler(val) {
+    //     // this.pageNumber++;
+    //     this.init();
+    //   },
+    //   deep: true,
+    // },
   },
   mounted() {
     this.init();
   },
   methods: {
     // 切换tab
-    clickType(val,index) {
-      this.params.pageNumber = 1
-      this.selectedIndex = index
-      this.params.pageType = val;
+    clickType(val, index) {
+      if (val == "ALERT") {
+        this.$router.push({
+          path: "/floorList/main",
+          query: { pagetype: val },
+        });
+        return;
+      } else if (val == "OPEN_SCREEN_ANIMATION") {
+        this.$router.push({
+          path: "/floorList/main",
+          query: { pagetype: val },
+        });
+        return;
+      } else {
+        this.params.pageNumber = 1;
+        this.selectedIndex = index;
+        this.params.pageType = val;
+        this.init();
+      }
     },
     // 是否发布
     changeSwitch(item) {
@@ -131,6 +179,7 @@ export default {
           }
         });
         this.list = res.result.records;
+        console.log(this.list);
         this.total = res.result.total;
       });
     },
@@ -138,17 +187,23 @@ export default {
     handleEdit(val) {
       this.$router.push({
         path: "/floorList/main",
-        query: { id: val.id, name: val.name, type: val.pageShow },
+        query: {
+          id: val.id,
+          name: val.name,
+          type: val.pageShow,
+          pagetype: this.params.pageType,
+        },
       });
     },
     // 添加模板
     handleAdd() {
       this.$router.push({
         path: "/floorList/main",
+        query: { pagetype: this.params.pageType },
       });
     },
-     // 分页 改变页数
-     changePageSize(v) {
+    // 分页 改变页数
+    changePageSize(v) {
       this.params.pageNumber = 1;
       this.params.pageSize = v;
       this.init();
@@ -178,7 +233,7 @@ export default {
   background: #ededed;
 }
 .item-title {
-  background: #d7e7f5!important;
+  background: #d7e7f5 !important;
   height: 54px;
 }
 .no-more {
@@ -222,7 +277,7 @@ export default {
     align-items: center;
   }
 }
-.item:nth-of-type(2n+1) {
+.item:nth-of-type(2n + 1) {
   background: #f5f7fa;
 }
 </style>
