@@ -93,15 +93,14 @@ export default {
           type: "SPECIAL",
           title: "专题",
         },
-
-        // {
-        //   type: "ALERT",
-        //   title: "开屏广告",
-        // },
-        // {
-        //   type: "OPEN_SCREEN_ANIMATION",
-        //   title: "app开屏页面",
-        // },
+        {
+          type: "ALERT",
+          title: "开屏广告",
+        },
+        {
+          type: "OPEN_SCREEN_ANIMATION",
+          title: "app开屏页面",
+        },
       ],
       params: {
         // 请求参数
