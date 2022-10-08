@@ -167,13 +167,15 @@ import {
   getClerk
 } from "@/api/index";
 import {validateMobile} from "@/libs/validate";
-
+import departmentChoose from "@/views/my-components/lili/department-choose";
+import departmentTreeChoose from "@/views/my-components/lili/department-tree-choose";
 import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
 
 export default {
   name: "clerk-manage",
   components: {
-
+    departmentChoose,
+    departmentTreeChoose,
     uploadPicInput,
   },
   data() {

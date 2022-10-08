@@ -23,6 +23,11 @@ export const getHomeNotice = params => {
   return getRequest("/other/article/getByPage?type=STORE_ARTICLE&pageSize=15");
 };
 
+// 搜索部门
+export const searchDepartment = (params) => {
+  return getRequest("/permission/department/search", params);
+};
+
 
 
 // 登陆
