@@ -345,7 +345,7 @@
           logo: "",
           sellerLogo: "",
         },
-        point: { // 积分设置
+        points: { // 积分设置
           register: "",
           login: "",
           money: ""

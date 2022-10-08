@@ -109,7 +109,7 @@ export default {
         return false;
       }
       this.formValidate.pointSettingItems.push({
-        point: "0",
+        points: "0",
         day: this.formValidate.pointSettingItems.length,
       });
     },

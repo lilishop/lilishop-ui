@@ -61,14 +61,14 @@ export default {
       modalVisible: false, //弹出框
       form: {
         keywords: "",
-        point: 0,
+        points: 0,
       },
       data: [], // 表单数据
 
       // 表单验证规则
       formValidate: {
         keywords: [regular.REQUIRED, regular.VARCHAR20],
-        point: [regular.REQUIRED, regular.NUMBER],
+        points: [regular.REQUIRED, regular.NUMBER],
       },
     };
   },

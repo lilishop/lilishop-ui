@@ -1,7 +1,13 @@
 <template>
   <div>
     <Card>
-      <Button class="mb_10" v-if="shopForm.storeDisable === 'APPLYING'" type="primary" @click="auditHandler">审核</Button>
+      <Button
+        class="mb_10"
+        v-if="shopForm.storeDisable === 'APPLYING'"
+        type="primary"
+        @click="auditHandler"
+        >审核</Button
+      >
       <Tabs v-model="tabName" :animated="false" style="overflow: visible">
         <Form
           ref="shopForm"
@@ -25,7 +31,11 @@
                 </div>
               </FormItem>
               <FormItem label="店铺名称" prop="storeName">
-                <Input v-model="shopForm.storeName" clearable style="width: 350px" />
+                <Input
+                  v-model="shopForm.storeName"
+                  clearable
+                  style="width: 350px"
+                />
               </FormItem>
 
               <FormItem label="是否自营" prop="selfOperated">
@@ -47,7 +57,10 @@
                   @click="$refs.liliMap.showMap = true"
                   >点击获取店铺定位</Button
                 >
-                <Button type="success" v-else @click="$refs.liliMap.showMap = true"
+                <Button
+                  type="success"
+                  v-else
+                  @click="$refs.liliMap.showMap = true"
                   >已定位</Button
                 >
               </FormItem>
@@ -143,11 +156,19 @@
             <Divider orientation="left">公司信息</Divider>
             <div>
               <FormItem label="公司名称" prop="companyName">
-                <Input v-model="shopForm.companyName" clearable style="width: 350px" />
+                <Input
+                  v-model="shopForm.companyName"
+                  clearable
+                  style="width: 350px"
+                />
               </FormItem>
 
               <FormItem label="公司电话" prop="companyPhone">
-                <Input v-model="shopForm.companyPhone" clearable style="width: 350px" />
+                <Input
+                  v-model="shopForm.companyPhone"
+                  clearable
+                  style="width: 350px"
+                />
               </FormItem>
               <FormItem label="公司所在地" prop="companyAddressIdPath">
                 <region
@@ -157,7 +178,11 @@
                 />
               </FormItem>
               <FormItem label="公司详细地址" prop="companyAddress">
-                <Input v-model="shopForm.companyAddress" clearable style="width: 350px" />
+                <Input
+                  v-model="shopForm.companyAddress"
+                  clearable
+                  style="width: 350px"
+                />
               </FormItem>
               <FormItem label="员工总数" prop="employeeNum">
                 <InputNumber
@@ -179,7 +204,11 @@
                 <span style="margin-left: 10px">万</span>
               </FormItem>
               <FormItem label="联系人姓名" prop="linkName">
-                <Input v-model="shopForm.linkName" clearable style="width: 200px" />
+                <Input
+                  v-model="shopForm.linkName"
+                  clearable
+                  style="width: 200px"
+                />
               </FormItem>
               <FormItem label="联系人手机" prop="linkPhone">
                 <Input
@@ -190,26 +219,62 @@
                 />
               </FormItem>
               <FormItem label="电子邮箱" prop="companyEmail">
-                <Input v-model="shopForm.companyEmail" clearable style="width: 200px" />
+                <Input
+                  v-model="shopForm.companyEmail"
+                  clearable
+                  style="width: 200px"
+                />
               </FormItem>
 
               <Divider orientation="left">营业执照信息</Divider>
 
               <FormItem label="营业执照号" prop="licenseNum">
-                <Input v-model="shopForm.licenseNum" clearable style="width: 200px" />
+                <Input
+                  v-model="shopForm.licenseNum"
+                  clearable
+                  style="width: 200px"
+                />
+              </FormItem>
+
+              <FormItem label="营业执照电子版" prop="licencePhoto">
+                <Avatar
+                  style="height: 100px; width: 100px"
+                  v-if="shopForm.licencePhoto"
+                  shape="square"
+                  icon="ios-person"
+                  size="default"
+                  :src="shopForm.licencePhoto"
+                />
+                <div>
+                  <Button @click="handleCLickImg('licencePhoto')" type="primary"
+                    >选择图片</Button
+                  >
+                </div>
               </FormItem>
 
               <FormItem label="法定经营范围" prop="scope">
-                <Input v-model="shopForm.scope" clearable style="width: 200px" />
+                <Input
+                  v-model="shopForm.scope"
+                  clearable
+                  style="width: 200px"
+                />
               </FormItem>
 
               <Divider orientation="left">法人信息</Divider>
 
               <FormItem label="法人姓名" prop="legalName">
-                <Input v-model="shopForm.legalName" clearable style="width: 200px" />
+                <Input
+                  v-model="shopForm.legalName"
+                  clearable
+                  style="width: 200px"
+                />
               </FormItem>
               <FormItem label="法人证件号" prop="legalId">
-                <Input v-model="shopForm.legalId" clearable style="width: 200px" />
+                <Input
+                  v-model="shopForm.legalId"
+                  clearable
+                  style="width: 200px"
+                />
               </FormItem>
               <FormItem label="法人身份证照片" prop="legalPhoto">
                 <Avatar
@@ -228,7 +293,9 @@
                   @click.native="handleCLickImg('legalPhoto', 1)"
                   :src="shopForm.legalPhoto[1]"
                 />
-                <span>点击图片上传身份证正反面，要求身份证清晰，四角无缺漏</span>
+                <span
+                  >点击图片上传身份证正反面，要求身份证清晰，四角无缺漏</span
+                >
               </FormItem>
 
               <Divider orientation="left">结算银行信息</Divider>
@@ -260,22 +327,6 @@
                   style="width: 200px"
                 />
               </FormItem>
-
-              <FormItem label="许可证电子版">
-                <Avatar
-                  style="height: 100px; width: 100px"
-                  v-if="shopForm.licencePhoto"
-                  shape="square"
-                  icon="ios-person"
-                  size="default"
-                  :src="shopForm.licencePhoto"
-                />
-                <div>
-                  <Button @click="handleCLickImg('licencePhoto')" type="primary"
-                    >选择图片</Button
-                  >
-                </div>
-              </FormItem>
               <Spin fix v-if="loading"></Spin>
             </div>
           </TabPane>
@@ -291,8 +342,14 @@
                   >全选
                 </Checkbox>
               </div>
-              <CheckboxGroup v-model="checkAllGroup" @on-change="checkAllGroupChange">
-                <Checkbox v-for="(item, i) in categories" :key="i + 1" :label="item.id"
+              <CheckboxGroup
+                v-model="checkAllGroup"
+                @on-change="checkAllGroupChange"
+              >
+                <Checkbox
+                  v-for="(item, i) in categories"
+                  :key="i + 1"
+                  :label="item.id"
                   >{{ item.name }}
                 </Checkbox>
               </CheckboxGroup>
@@ -300,8 +357,8 @@
           </TabPane>
 
           <!-- <TabPane label="配送信息" class="tab" name="send"> -->
-            <!-- 遮罩层  -->
-            <!-- <FormItem label="达达编码" prop="ddCode">
+          <!-- 遮罩层  -->
+          <!-- <FormItem label="达达编码" prop="ddCode">
               <Input
                 v-model="shopForm.ddCode"
                 maxlength="20"
@@ -313,7 +370,9 @@
 
           <TabPane label="结算信息" class="tab" name="settlement">
             <Alert type="error"
-              >已添加<span class="theme_color">{{ settlementCycle.length }}</span
+              >已添加<span class="theme_color">{{
+                settlementCycle.length
+              }}</span
               >个结算日，最多可添加5个结算日，当月不包含所设日期时，将会顺延到下一个结算日</Alert
             >
             <FormItem label="结算日期">
@@ -361,7 +420,10 @@
           @click="prev"
           >上一步</Button
         >
-        <Button type="primary" v-show="tabNameList.indexOf(tabName) < tabNameList.length - 1" @click="next"
+        <Button
+          type="primary"
+          v-show="tabNameList.indexOf(tabName) < tabNameList.length - 1"
+          @click="next"
           >下一步</Button
         >
         <Button
@@ -397,7 +459,10 @@
         <p>您确认要审核通过该店铺</p>
       </div>
       <div slot="footer">
-        <Button type="error" :loading="auditModalLoading" @click="audit('REFUSED')"
+        <Button
+          type="error"
+          :loading="auditModalLoading"
+          @click="audit('REFUSED')"
           >驳回</Button
         >
         <Button type="info" :loading="auditModalLoading" @click="audit('PASS')"
@@ -412,7 +477,13 @@
 import memberLayout from "@/views/member/list/index";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import { getCategoryTree } from "@/api/goods";
-import { shopDetail, shopAdd, shopEdit, getShopByMemberId, shopAudit } from "@/api/shops";
+import {
+  shopDetail,
+  shopAdd,
+  shopEdit,
+  getShopByMemberId,
+  shopAudit,
+} from "@/api/shops";
 import uploadPicInput from "@/components/lili/upload-pic-input";
 import region from "@/components/region";
 import liliMap from "@/components/map/index";
@@ -450,7 +521,9 @@ export default {
         memberName: [{ required: true, message: "会员不能为空" }],
         storeName: [{ required: true, message: "店铺名称不能为空" }],
         companyAddress: [{ required: true, message: "公司地址不能为空" }],
-        storeAddressDetail: [{ required: true, message: "店铺详细地址不能为空" }],
+        storeAddressDetail: [
+          { required: true, message: "店铺详细地址不能为空" },
+        ],
         storeDesc: [{ required: true, message: "店铺简介不能为空" }],
         storeCenter: [{ required: true, message: "店铺未定位" }],
         companyName: [{ required: true, message: "公司名称不能为空" }],
@@ -487,13 +560,22 @@ export default {
           { type: "email", message: "邮箱格式错误" },
         ],
         licenseNum: [{ required: true, message: "营业执照号不能为空" }],
+        licencePhoto: [{ required: true, message: "营业执照号不能为空" }],
         scope: [{ required: true, message: "法定经营范围不能为空" }],
         legalName: [{ required: true, message: "法人姓名不能为空" }],
         legalId: [{ required: true, message: "法人证件号不能为空" }],
-        settlementBankAccountName: [{ required: true, message: "银行开户名不能为空" }],
-        settlementBankAccountNum: [{ required: true, message: "银行账号不能为空" }],
-        settlementBankBranchName: [{ required: true, message: "银行支行名称不能为空" }],
-        settlementBankJointName: [{ required: true, message: "支行联行号不能为空" }],
+        settlementBankAccountName: [
+          { required: true, message: "银行开户名不能为空" },
+        ],
+        settlementBankAccountNum: [
+          { required: true, message: "银行账号不能为空" },
+        ],
+        settlementBankBranchName: [
+          { required: true, message: "银行支行名称不能为空" },
+        ],
+        settlementBankJointName: [
+          { required: true, message: "支行联行号不能为空" },
+        ],
 
         salesConsigneeMobile: [
           {

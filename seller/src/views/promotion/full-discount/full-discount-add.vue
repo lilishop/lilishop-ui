@@ -329,7 +329,7 @@ export default {
         ],
         couponId: [{ required: true, message: "请选择优惠券" }],
         giftId: [{ required: true, message: "请选择赠品" }],
-        point: [{ required: true, message: "请填写积分" }],
+        points: [{ required: true, message: "请填写积分" }],
       },
       couponList: [], // 店铺优惠券列表
       giftList: [], // 赠品列表
