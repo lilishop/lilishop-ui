@@ -1,8 +1,13 @@
 <template>
   <div class="wrapper">
     <Card class="category">
-      <div :class="{active:i == selectedIndex}" class="category-item" v-for="(typeItem,i) in pageTypes" :key="typeItem.type">
-        <div @click="clickType(typeItem.type,i)">{{typeItem.title}}</div>
+      <div
+        :class="{ active: i == selectedIndex }"
+        class="category-item"
+        v-for="(typeItem, i) in pageTypes"
+        :key="typeItem.type"
+      >
+        <div @click="clickType(typeItem.type, i)">{{ typeItem.title }}</div>
       </div>
     </Card>
     <Card class="content">
@@ -70,6 +75,14 @@ export default {
           type: "SPECIAL",
           title: "专题",
         },
+        //  {
+        //   type: "ALERT",
+        //   title: "开屏广告",
+        // },
+        // {
+        //   type: "OPEN_SCREEN_ANIMATION",
+        //   title: "app开屏页面",
+        // },
       ],
       params: { // 请求参数
         pageNumber: 1,
@@ -84,23 +97,38 @@ export default {
     };
   },
   watch: {
-    params: {
-      handler(val) {
-        // this.pageNumber++;
-        this.init();
-      },
-      deep: true,
-    },
+    // params: {
+    //   handler(val) {
+    //     // this.pageNumber++;
+    //     this.init();
+    //   },
+    //   deep: true,
+    // },
   },
   mounted() {
     this.init();
   },
   methods: {
     // 切换tab
-    clickType(val,index) {
-      this.params.pageNumber = 1
-      this.selectedIndex = index
-      this.params.pageType = val;
+     clickType(val, index) {
+      if (val == "ALERT") {
+        this.$router.push({
+          path: "/floorList/main",
+          query: { pagetype: val },
+        });
+        return;
+      } else if (val == "OPEN_SCREEN_ANIMATION") {
+        this.$router.push({
+          path: "/floorList/main",
+          query: { pagetype: val },
+        });
+        return;
+      } else {
+        this.params.pageNumber = 1;
+        this.selectedIndex = index;
+        this.params.pageType = val;
+        this.init();
+      }
     },
     // 是否发布
     changeSwitch(item) {
@@ -138,13 +166,19 @@ export default {
     handleEdit(val) {
       this.$router.push({
         path: "/floorList/main",
-        query: { id: val.id, name: val.name, type: val.pageShow },
+        query: {
+          id: val.id,
+          name: val.name,
+          type: val.pageShow,
+          pagetype: this.params.pageType,
+        },
       });
     },
     // 添加模板
     handleAdd() {
       this.$router.push({
         path: "/floorList/main",
+        query: { pagetype: this.params.pageType },
       });
     },
      // 分页 改变页数

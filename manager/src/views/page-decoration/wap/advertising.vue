@@ -70,17 +70,24 @@
           </div>
         </div>
         <!-- <Button type="primary" @click="addDecorate()" ghost>添加</Button> -->
-        <liliDialog ref="liliDialog" :types="linkType"></liliDialog>
+        <liliDialog ref="liliDialog"    @selectedLink="selectedLink" :types="linkType"></liliDialog>
       </div>
+      <Modal width="1200px" v-model="picModelFlag">
+         <ossManage @callback="callbackSelected" ref="ossManage" />
+      </Modal>
     </div>
   </div>
 </template>
 <script>
-
+import ossManage from "@/views/sys/oss-manage/ossManage";
+import * as API_Other from "@/api/other.js";
 export default {
+   components: {
+    ossManage,
+  },
   data() {
     return {
-
+      picModelFlag: false, //图片选择器
       type: "full", // 是否全屏
 
       //全屏广告
@@ -91,31 +98,60 @@ export default {
           size: "750*1624",
         },
       ],
-
+      selectedLinks: {},
       linkType: "", // 选择类型
     };
   },
+   watch: {
+    advertising: {
+      handler(val) {
+        this.$store.state.openStyleStore = val;
+        console.log(
+          "this.$store.state.openStyleStore",
+          this.$store.state.openStyleStore
+        );
+      },
+      deep: true,
+    },
+  },
+  mounted() {
+    this.openPage();
+  },
   methods: {
+    openPage() {
+      const alertType = this.$route.query.pagetype;
+      const pageType = {
+        INDEX: "INDEX",
+        ALERT: "OPEN_SCREEN_PAGE",
+        OPEN_SCREEN_ANIMATION: "OPEN_SCREEN_ANIMATION",
+      }[alertType ? alertType : "INDEX"];
+
+      API_Other.getOpenHomeData(pageType).then((res) => {
+        this.$store.state.openStoreId = res.result.id;
+        res.result.pageData
+          ? this.$set(this, "advertising", [JSON.parse(res.result.pageData)])
+          : "";
+      });
+    },
     // 点击链接
     clickLink(item) {
       this.$refs.liliDialog.open('link')
     },
-    //点击图片解析成base64
-    changeFile(item, index) {
-      const file = document.getElementById("files" + index).files[0];
-      if (file == void 0) return false;
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      this.$nextTick((res) => {
-        reader.onload = (e) => {
-          item.img = e.target.result;
-        };
-      });
+    // 回调选择的链接
+    selectedLink(val) {
+      this.selectedLinks.url = val;
+
+      this.advertising[0].config = val;
     },
     // 点击选择照片
-    handleClickFile(item, index) {
-      document.getElementById("files" + index).click();
-    },
+    handleClickFile() {
+      this.$refs.ossManage.selectImage = true;
+      this.picModelFlag = true;
+    }, // 图片选择器回显
+    callbackSelected(val) {
+      this.picModelFlag = false;
+      this.advertising[0].img = val.url;
+    }
   },
 };
 </script>
