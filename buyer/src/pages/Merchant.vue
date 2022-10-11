@@ -1,67 +1,36 @@
 <template>
   <div class="merchant">
-      <BaseHeader/>
-      <!-- 搜索栏 -->
-      <Search :store="true" @search="search"></Search>
-      <!-- 店铺logo -->
-      <div class="shop-logo">
+    <BaseHeader />
+    <!-- 搜索栏 -->
+    <Search :store="true" @search="search"></Search>
+    <!-- 店铺logo -->
+    <div class="shop-logo">
+      <div>
+        <img :src="storeMsg.storeLogo" height="80" alt="">
         <div>
-          <img :src="storeMsg.storeLogo" height="80" alt=""/>
-          <div>
-            <p>{{ storeMsg.storeName || "xx店铺" }}</p>
-            <p
-              class="ellipsis"
-              :alt="storeMsg.storeDesc"
-              v-html="storeMsg.storeDesc"
-            ></p>
-          </div>
-          <div>
-            <span class="hover-pointer" @click="collect"
-            ><Icon
-              type="ios-heart"
-              :color="storeCollected ? '#ed3f14' : '#fff'"
-            />{{ storeCollected ? "已收藏店铺" : "收藏店铺" }}</span
-            >
-            <span
-              style="width: 80px"
-              class="hover-pointer ml_10"
-              @click="connectCs(storeMsg.yzfSign)"
-            ><Icon custom="icomoon icon-customer-service"/>联系客服</span
-            >
-          </div>
+          <p>{{storeMsg.storeName || 'xx店铺'}}</p>
+          <p class="ellipsis" :alt="storeMsg.storeDesc" v-html="storeMsg.storeDesc"></p>
+        </div>
+        <div>
+          <span class="hover-pointer" @click="collect"><Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#fff'" />{{storeCollected?'已收藏店铺':'收藏店铺'}}</span>
+          <span style="width:80px" class="hover-pointer ml_10" @click="IMService()"><Icon custom="icomoon icon-customer-service"  />联系客服</span>
         </div>
       </div>
-      <div class="store-category">
-        <ul class="cate-list">
-          <li
-            class="cate-item"
-            @click="searchByCate({ id: '', labelName: '店铺推荐' })"
-          >
-            首页
-          </li>
-          <li class="cate-item" v-for="(cate, index) in cateList" :key="index">
-            <Dropdown v-if="cate.children.length">
-              <div @click.self="searchByCate(cate)">
-                {{ cate.labelName }}
-                <Icon type="ios-arrow-down"></Icon>
-              </div>
-              <DropdownMenu slot="list">
-                <DropdownItem
-                  @click.native="searchByCate(sec)"
-                  :name="sec.id"
-                  v-for="sec in cate.children"
-                  :key="sec.id"
-                >{{ sec.labelName }}
-                </DropdownItem
-                >
-              </DropdownMenu>
-            </Dropdown>
-            <span v-else @click.self="searchByCate(cate)">{{
-                cate.labelName
-              }}</span>
-          </li>
-        </ul>
-      </div>
+    </div>
+    <div  class="store-category">
+      <ul class="cate-list">
+        <li class="cate-item" @click="searchByCate({id:'', labelName: '店铺推荐'})">首页</li>
+        <li class="cate-item" v-for="(cate, index) in cateList" :key="index">
+          <Dropdown v-if="cate.children.length">
+            <div @click.self="searchByCate(cate)">{{cate.labelName}} <Icon type="ios-arrow-down"></Icon></div>
+            <DropdownMenu slot="list">
+                <DropdownItem @click.native="searchByCate(sec)" :name="sec.id" v-for="sec in cate.children" :key="sec.id">{{sec.labelName}}</DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+          <span v-else @click.self="searchByCate(cate)">{{cate.labelName}}</span>
+        </li>
+      </ul>
+    </div>
 
       <div class="promotion-decorate">{{ cateName }}</div>
 
@@ -115,16 +84,9 @@
 </template>
 
 <script>
-import {getDetailById, getCateById} from "@/api/shopentry";
-import {cancelCollect, collectGoods, isCollection} from "@/api/member";
-import {goodsList} from "@/api/goods";
-import Search from "@/components/Search";
-import ModelForm from "@/components/indexDecorate/ModelForm";
-import HoverSearch from "@/components/header/hoverSearch";
-import storage from "@/plugins/storage";
-import {getFloorStoreData} from "@/api/index.js";
-import {seckillByDay} from "@/api/promotion";
-
+import {getDetailById, getCateById} from '@/api/shopentry'
+import { cancelCollect, collectGoods, isCollection } from '@/api/member';
+import {goodsList} from '@/api/goods';
 export default {
   name: "Merchant",
   components: {
@@ -145,8 +107,7 @@ export default {
       cateList: [], // 店铺分裂
       goodsList: [], // 商品列表
       total: 0, // 商品数量
-      params: {
-        // 请求参数
+      params: { // 请求参数
         pageNumber: 1,
         pageSize: 20,
         keyword: "",
@@ -161,65 +122,18 @@ export default {
     this.getStoreMsg();
   },
   methods: {
-    getIndexData() {
-      // 获取首页装修数据
-      getFloorStoreData({clientType: "PC", num: this.$route.query.id, pageType: 'STORE'}).then(
-        (res) => {
-          if (res.success) {
-            let dataJson = JSON.parse(res.result.pageData);
-            // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
-            // 轮播图根据不同轮播，样式不同
-            for (let i = 0; i < dataJson.list.length; i++) {
-              let type = dataJson.list[i].type;
-              if (type === "carousel2") {
-                this.carouselLarge = true;
-              } else if (type === "carousel1") {
-                this.carouselLarge = true;
-                this.carouselOpacity = true;
-              }
-
-              // else if (type === "seckill") {
-              //   let seckill = this.getListByDay();
-              //   dataJson.list[i].options.list = seckill;
-              // }
-            }
-            this.modelForm = dataJson;
-            storage.setItem("navList", dataJson.list[1]);
-            this.showNav = true;
-            this.topAdvert = dataJson.list[0];
-          }
-        }
-      );
-    },
-    // async getListByDay() {
-    //   // 当天秒杀活动
-    //   const res = await seckillByDay();
-    //   if (res.success && res.result.length) {
-    //     return res.result;
-    //   } else {
-    //     return [];
-    //   }
-    // },
-
-    getStoreMsg() {
-      // 店铺信息
-      getDetailById(this.$route.query.id).then((res) => {
+    getStoreMsg () { // 店铺信息
+      getDetailById(this.$route.query.id).then(res => {
         if (res.success) {
-
-          this.storeMsg = res.result;
-
-
-          this.getIndexData();
-          let that = this;
-          window.onscroll = function () {
-            let top =
-              document.documentElement.scrollTop || document.body.scrollTop;
-            if (top > 300) {
-              that.topSearchShow = true;
-            } else {
-              that.topSearchShow = false;
-            }
-          };
+          this.storeMsg = res.result
+          document.title = this.storeMsg.storeName
+          if (this.Cookies.getItem('userInfo')) {
+            isCollection('STORE', this.storeMsg.storeId).then(res => {
+              if (res.success && res.result) {
+                this.storeCollected = true;
+              }
+            })
+          }
         }
       });
     },
