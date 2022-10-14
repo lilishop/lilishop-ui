@@ -1473,18 +1473,35 @@ export default {
           filterSkuInfo.forEach((skuInfo) => {
             totalLength *= skuInfo.spec_values.length;
           });
-          for (let i = 0; i < totalLength; i++) {
-            let find = cloneObj(this.skuTableData[index - 1]);
-            find[item.name] = "";
-            find.id = "";
-            find.price && (find.price = "");
-            find.sn && (find.sn = "");
-            find.cost && (find.cost = "");
-            find.quantity && (find.quantity = "");
-            find.weight && (find.weight = "");
+          if ($index === 0) {
+            index = 1;
+            for (let i = 0; i < totalLength; i++) {
+              let find = cloneObj(this.skuTableData[index - 1]);
+              find[item.name] = "";
+              find.id = "";
+              find.price && (find.price = "");
+              find.sn && (find.sn = "");
+              find.cost && (find.cost = "");
+              find.quantity && (find.quantity = "");
+              find.weight && (find.weight = "");
 
-            this.skuTableData.splice(index, 0, find);
-            index += beforeLength + 1;
+              this.skuTableData.splice(this.skuTableData.length, 0, find);
+              index ++;
+            }
+          } else {
+            for (let i = 0; i < totalLength; i++) {
+              let find = cloneObj(this.skuTableData[index - 1]);
+              find[item.name] = "";
+              find.id = "";
+              find.price && (find.price = "");
+              find.sn && (find.sn = "");
+              find.cost && (find.cost = "");
+              find.quantity && (find.quantity = "");
+              find.weight && (find.weight = "");
+
+              this.skuTableData.splice(index, 0, find);
+              index += $index === 0 ? beforeLength : beforeLength + 1;
+            }
           }
         }
         this.baseInfoForm.regeneratorSkuFlag = true;

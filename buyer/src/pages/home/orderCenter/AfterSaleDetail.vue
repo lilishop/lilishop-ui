@@ -5,7 +5,7 @@
     <Card class="mb_10" v-if="(afterSale.serviceStatus == 'PASS' &&
           afterSale.serviceType != 'RETURN_MONEY') || (afterSale.afterSaleAllowOperationVO && afterSale.afterSaleAllowOperationVO.cancel)">
       <Button type="success" @click="openModal" v-if="afterSale.serviceStatus == 'PASS' &&
-          afterSale.serviceType != 'RETURN_MONEY'" size="small">提交物流</Button>
+          afterSale.serviceType != 'RETURN_MONEY'" size="small">提交物流</Button>&nbsp;
       <Button type="error" @click="cancel(afterSale.sn)" v-if="afterSale.afterSaleAllowOperationVO && afterSale.afterSaleAllowOperationVO.cancel" size="small">取消售后</Button>
     </Card>
     <div class="order-card">
