@@ -6,7 +6,17 @@
 .decorate-view-link {
   font-size: 12px;
   margin: 0 4px;
+  flex:8;
   color: #999;
+}
+.decorate-view-btn{
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  >button{
+
+    width: 70px;
+  }
 }
 
 .decorate-view-style {
@@ -97,6 +107,7 @@
 
 .decorate-view-title {
   margin-right: 10px;
+
 }
 
 .decorate-item {
@@ -160,4 +171,26 @@
 
 .active {
   background: #ededed;
+}
+.title-item{
+  border-bottom: 1px solid #ededed;
+  padding:10px 10px 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  >.title-btn{
+    display: flex;
+  }
+}
+.title-goodsName{
+  /* 适用于webkit内核和移动端 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+
+}
+.title-tooltip{
+  white-space: normal;
 }

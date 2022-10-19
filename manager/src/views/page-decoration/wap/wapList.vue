@@ -97,13 +97,13 @@ export default {
     };
   },
   watch: {
-    // params: {
-    //   handler(val) {
-    //     // this.pageNumber++;
-    //     this.init();
-    //   },
-    //   deep: true,
-    // },
+    params: {
+      handler(val) {
+        // this.pageNumber++;
+        this.init();
+      },
+      deep: true,
+    },
   },
   mounted() {
     this.init();
