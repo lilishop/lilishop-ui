@@ -28,8 +28,9 @@
     </div>
     <Alert type="warning" v-if="res.name == '商品分类'">装修提示
         <template slot="desc">
-            <div style="color:red"> 如果当前装修内容不是最后一项且绑定为分类，则会默认展示当前分类的100条商品内容。</div>
-            <div style="color:red"> 如果当前装修内容是最后一项且绑定为分类，则会默认会根据当前分类触底加载</div>
+            <div style="color:red"> 如果当前装修模块不是最后一项模块且模块内容绑定为分类，则会默认展示绑定分类的100条商品信息。</div>
+            <div style="color:red"> 如果当前装修模块是最后一项模块且模块内容绑定为分类，则会默认会根据绑定分类触底加载商品信息。</div>
+            <div style="color:red"> 如果当前装修内容不为分类，则会展示当前商品的静态信息。</div>
         </template>
      </Alert>
 
