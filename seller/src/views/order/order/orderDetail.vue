@@ -805,7 +805,6 @@ export default {
     Toprints(){
       if(this.form.logisticsId != null && this.form.logisticsId != ''){
         this.orderDeliverModal = false;
-        this.modalPrint = true;
       }
     },
     //订单发货提交

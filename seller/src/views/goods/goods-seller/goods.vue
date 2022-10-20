@@ -525,6 +525,8 @@ export default {
       if (res.success) {
         this.stepList.map((item) => {
           item.checked = false;
+          this.$Message.success("导入成功")
+          this.importModal = false
         });
 
         this.stepList[2].checked = true;
