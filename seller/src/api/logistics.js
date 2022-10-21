@@ -31,4 +31,8 @@ export const updateLogistics = (id,params) => {
   return putRequest(`/other/logistics/${id}`,params);
 };
 
+export const getCheckedOn = params =>{
+  return getRequest(`/other/logistics/getCheckedFaceSheet`,params);
+}
+
 

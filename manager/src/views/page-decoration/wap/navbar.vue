@@ -9,9 +9,7 @@
         v-for="(item, index) in way"
         :key="index"
         :type="item.selected ? 'primary' : ''"
-      >
-        {{ item.title }}
-      </Button>
+      >{{ item.title }}</Button>
     </div>
     <div class="model-title-view-btn">
       <!-- TODO 后期会补全 目前版本暂无 -->
@@ -21,7 +19,7 @@
           <div>临时预览</div>
           <div ref="qrCodeUrl"></div>
         </div>
-      </Poptip> -->
+      </Poptip>-->
       <Button size="default" type="primary" @click="handleSpinShow">保存模板</Button>
 
       <Modal
@@ -33,7 +31,8 @@
       >
         <div v-if="progress">
           <div class="model-item">
-            模板名称 <Input style="width: 200px" v-model="submitWay.name" />
+            模板名称
+            <Input style="width: 200px" v-model="submitWay.name"/>
           </div>
           <div class="model-item">
             是否立即发布
@@ -45,7 +44,7 @@
 
           <Button type="primary" @click="save()">保存</Button>
         </div>
-        <Progress v-else :percent="num" status="active" />
+        <Progress v-else :percent="num" status="active"/>
       </Modal>
     </div>
   </div>
@@ -54,6 +53,7 @@
 import * as API_Other from "@/api/other.js";
 
 export default {
+  props: ["pagetype"],
   data() {
     return {
       progress: true, // 展示进度
@@ -82,8 +82,8 @@ export default {
         // 表单信息
         pageShow: this.$route.query.type || false,
         name: this.$route.query.name || "模板名称",
-        pageClientType: "H5",
-      },
+        pageClientType: "H5"
+      }
     };
   },
   watch: {
@@ -158,7 +158,7 @@ export default {
         pageType: this.submitWay.pageType,
         pageClientType: "H5",
       })
-        .then((res) => {
+        .then(res => {
           this.num = 50;
           if (res.success) {
             this.num = 80;
@@ -174,7 +174,7 @@ export default {
           }
           console.log(res);
         })
-        .catch((error) => {});
+        .catch(error => {});
     },
 
 
@@ -237,7 +237,7 @@ export default {
     submit(submitWay) {
       this.progress = false;
       API_Other.setHomeSetup(submitWay)
-        .then((res) => {
+        .then(res => {
           this.num = 50;
           if (res.success) {
             this.num = 80;
@@ -254,9 +254,9 @@ export default {
           }
           console.log(res);
         })
-        .catch((error) => {});
-    },
-  },
+        .catch(error => {});
+    }
+  }
 };
 </script>
 <style scoped lang="scss">

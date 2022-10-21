@@ -6,6 +6,9 @@ import {
   deleteRequest,
   getRequestWithNoToken,
   postRequestWithNoTokenData,
+  putRequestWithNoForm,
+  postRequestWithNoToken,
+  postRequestWithNoForm,
   commonUrl,
 } from "@/libs/axios";
 
@@ -14,12 +17,14 @@ export const getAllCity = (params) => {
   return getRequest(commonUrl+'/common/common/region/allCity', params)
 }
 
+// 获取全部权限数据
+export const getCurrentPermissionList = (params) => {
+  return getRequest("/menu/memberMenu", params);
+};
 // 登陆
 export const getHomeNotice = params => {
   return getRequest("/other/article/getByPage?type=STORE_ARTICLE&pageSize=15");
 };
-
-
 
 // 登陆
 export const getSellerHomeData = params => {
@@ -122,10 +127,9 @@ export const unRelate = params => {
 export const getRelatedListData = params => {
   return getRequest("/relate/findByCondition", params);
 };
-
 // 获取用户数据 多条件
 export const getUserListData = params => {
-  return getRequest("/user/getByCondition", params);
+  return getRequest("/clerk", params);
 };
 // 通过用户名搜索
 export const searchUserByName = (username, params) => {
@@ -138,7 +142,7 @@ export const getAllUserData = params => {
 
 // 添加用户
 export const addUser = params => {
-  return postRequest("/user/admin/add", params);
+  return postRequest("/clerk", params);
 };
 // 编辑用户
 export const editUser = params => {
@@ -213,25 +217,25 @@ export const deleteMessageSend = (ids, params) => {
 
 // 分页获取文件数据
 export const getFileListData = params => {
-  return getRequest("/file", params);
+  return getRequest(`${commonUrl}/common/common/file`, params);
 };
 
 
 // 复制文件
 export const copyFile = params => {
-  return postRequest("/file/copy", params);
+  return postRequest(`${commonUrl}/common/common/file/copy`, params);
 };
 // 重命名文件
 export const renameFile = params => {
-  return postRequest("/file/rename", params);
+  return postRequest(`${commonUrl}/common/common/file/rename`, params);
 };
 // 删除文件
 export const deleteFile = (ids, params) => {
-  return deleteRequest(`/file/delete/${ids}`, params);
+  return deleteRequest(`${commonUrl}/common/common/file/delete/${ids}`, params);
 };
 // 下载文件
 export const aliDownloadFile = (fKey, params) => {
-  return getRequest(`/file/ali/download/${fKey}`, params);
+  return getRequest(`${commonUrl}/common/common/file/ali/download/${fKey}`, params);
 };
 
 
@@ -263,6 +267,102 @@ export const delGoodsUnit = (ids) => {
 //
 export const handleRefreshToken = (token) => {
   return getRequestWithNoToken(`/passport/login/refresh/${token}`);
+};
+
+// 获取一级部门
+export const initDepartment = (params) => {
+  return getRequest("/department", params);
+};
+// 添加部门
+export const addDepartment = (params) => {
+  return postRequest("/department", params);
+};
+// 删除部门
+export const deleteDepartment = (ids, params) => {
+  return deleteRequest(`/department/${ids}`, params);
+};
+// 编辑部门
+export const editDepartment = (ids, params) => {
+  return putRequest(`/department/${ids} `, params);
+};
+// 加载部门子级数据
+export const loadDepartment = (id) => {
+  return getRequest(`/department/${id}`);
+};
+
+// 通过部门获取全部角色数据
+export const getUserByDepartmentId = (id, params) => {
+  return getRequest(`/departmentRole/${id}`, params);
+};
+
+// 分页获取角色数据
+export const getRoleList = (params) => {
+  return getRequest("/role", params);
+};
+
+// 通过部门修改绑定角色
+export const updateDepartmentRole = (id, params) => {
+  return putRequestWithNoForm(`/departmentRole/${id}`, params);
+};
+
+// 获取全部权限数据
+export const getAllPermissionList = (params) => {
+  return getRequest("/menu/tree", params);
+};
+
+// 添加角色
+export const addRole = (params) => {
+  return postRequest("/role", params);
+};
+// 删除角色
+export const deleteRole = (ids, params) => {
+  return deleteRequest(`/role/${ids}`, params);
+};
+// 编辑角色
+export const editRole = (params) => {
+  return putRequest(`/role/${params.roleId}`, params);
+};
+
+// 分配角色权限
+export const editRolePerm = (params) => {
+  return postRequest("/role/editRolePerm", params);
+};
+// 查看某角色拥有的菜单
+export const selectRoleMenu = (params) => {
+  return getRequest(`/roleMenu/${params}`);
+};
+// 保存角色菜单
+export const saveRoleMenu = (id, params) => {
+  return postRequestWithNoForm(`/roleMenu/${id}`, params);
+};
+// 获取全部角色数据
+export const getAllRoleList = (params) => {
+  return getRequest("/role", params);
+};
+export const checkClerk = (mobile) => {
+  return postRequest(`/clerk/${mobile}/check`);
+};
+
+// 重置用户密码
+export const resetPassword = (params) => {
+  return postRequest(`/clerk/resetPassword/${params}`);
+};
+// 删除用户
+export const deleteClerk = (ids) => {
+  return deleteRequest(`/clerk/delByIds/${ids}`);
+};
+
+// 禁 启用用户
+export const enableClerk = (id, params) => {
+  return putRequest(`/clerk/enable/${id}`, params);
+};
+// 获取店员详细
+export const getClerk = (id) => {
+  return getRequest(`/clerk/${id}`);
+};
+
+export const editOtherUser = (id, params) => {
+  return putRequest(`/clerk/${id}`,params);
 };
 
 

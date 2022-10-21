@@ -11,7 +11,10 @@ import layout from "./index";
 import navbar from "./navbar";
 export default {
   components: {
-    navbar,
+    navbar
+  },
+  mounted() {
+    this.pagetype = this.$route.query.pagetype;
   },
   data() {
     return {
@@ -30,7 +33,8 @@ export default {
     this.pagetype = this.$route.query.pagetype;
   },
   methods: {
-    selected(val) { // 顶部栏点击切换
+    selected(val) {
+      // 顶部栏点击切换
       this.name = val;
     }
   }

@@ -4,10 +4,6 @@ import {
   postRequest,
   putRequest,
   deleteRequest,
-  importRequest,
-  getRequestWithNoToken,
-  putRequestWithNoForm,
-  postRequestWithNoForm,
 } from "@/libs/axios";
 
 /**
@@ -15,8 +11,7 @@ import {
  *
  */
 export const setHomeSetup = params => {
-
-  return postRequest("/other/pageData/add", params);
+  return postRequest("/settings/pageData/save", params);
 };
 
 /**
@@ -25,7 +20,7 @@ export const setHomeSetup = params => {
  */
 export const getHomeData = params => {
 
-  return getRequest(`/other/pageData/${params}`);
+  return getRequest(`/settings/pageData/${params}`);
 };
 
 
@@ -34,8 +29,8 @@ export const getHomeData = params => {
  *
  */
 export const getHomeList = params => {
+  return getRequest(`/settings/pageData/${params.pageClientType}/pageDataList`, params);
 
-  return getRequest("/pageData/pageDataList", params);
 };
 
 
@@ -43,9 +38,8 @@ export const getHomeList = params => {
  * 修改楼层装修
  *
  */
-export const updateHome = (id,params) => {
-
-  return putRequest(`/pageData/update/${id}`, params);
+ export const updateHome = (id, params) => {
+  return putRequest(`/settings/pageData/update/${id}`, params);
 };
 
 /**
@@ -53,8 +47,7 @@ export const updateHome = (id,params) => {
  *
  */
 export const removePageHome = (id) => {
-
-  return deleteRequest(`/pageData/removePageData/${id}`);
+  return deleteRequest(`/settings/pageData/removePageData/${id}`);
 };
 
 
@@ -63,7 +56,6 @@ export const removePageHome = (id) => {
  *
  */
 export const releasePageHome = (id) => {
-
-  return putRequest(`/pageData/releasePageData`,id);
+  return putRequest(`/settings/pageData/release/${id}`);
 };
 

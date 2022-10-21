@@ -389,6 +389,42 @@ export const result = [{
         children: []
       },
       {
+        name: "clerk",
+        level: 1,
+        type: 0,
+        title: "店员设置",
+        path: "",
+        component: "Main",
+        children: [
+          {
+            name: "clerkManage",
+            level: 2,
+            type: 0,
+            title: "店员管理",
+            path: "clerkManage",
+            component: "shop/system/clerk/clerkManage",
+            children: null
+          },{
+            name: "storeDepartmentManage",
+            level: 2,
+            type: 0,
+            title: "部门管理",
+            path: "storeDepartmentManage",
+            component: "shop/system/department/storeDepartmentManage",
+            children: null
+          },
+          {
+            name: "storeRole",
+            level: 2,
+            type: 0,
+            title: "角色权限",
+            path: "storeRole",
+            component: "shop/system/role/storeRoleManage",
+            children: null
+          }
+        ]
+      },
+      {
         name: "ship",
         level: 1,
         type: 0,
@@ -415,6 +451,7 @@ export const result = [{
           }
         ]
       },
+
       {
         name: "shop",
         level: 1,
@@ -423,7 +460,8 @@ export const result = [{
         path: "/shop",
         component: "Main",
         description: "",
-        children: [{
+        children: [
+         {
             name: "shopSetting",
             level: 2,
             type: 0,
@@ -432,6 +470,35 @@ export const result = [{
             component: "shop/shopSetting",
             children: null,
           },
+          {
+            name: "wapList",
+            level: 2,
+            type: 0,
+            title: "移动楼层",
+            path: "wapList",
+            component: "shop/wap/wapList",
+            children: null
+
+          },
+          {
+            name: "pcList",
+            level: 2,
+            type: 0,
+            title: "PC楼层",
+            path: "pcList",
+            component: "shop/floorList",
+            children: null
+
+          },
+          // {
+          //   name: "shopAddress",
+          //   level: 2,
+          //   type: 0,
+          //   title: "自提管理",
+          //   path: "shopAddress",
+          //   component: "shop/shopAddress",
+          //   children: null,
+          // }
           // {
           //   name: "shopAddress",
           //   level: 2,
@@ -469,5 +536,6 @@ export const result = [{
         children: null
       }]
     }]
-  }
+  },
+
 ];

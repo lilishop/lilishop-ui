@@ -1,6 +1,7 @@
 <template>
   <div class="search">
     <Card>
+
       <Row @keydown.enter.native="handleSearch">
         <Form
           ref="searchForm"
@@ -66,6 +67,7 @@
       </Row>
       <Row class="operation padding-row">
         <Button @click="addGoods" type="primary">添加商品</Button>
+        <Button @click="openImportGoods" type="primary">导入商品</Button>
         <Dropdown @on-click="handleDropdown">
           <Button type="default">
             批量操作
@@ -189,6 +191,21 @@
         <Button type="primary" @click="saveShipTemplate">更新</Button>
       </div>
     </Modal>
+    <Modal title="导入商品信息" v-model="importModal" :mask-closable="false">
+      <div style="text-align: center">
+        <Upload :before-upload="handleUpload" name="files" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                multiple type="drag" :action="action" :headers="accessToken">
+          <div style="padding: 50px 0">
+            <Icon type="ios-cloud-upload" size="102" style="color: #3399ff"></Icon>
+            <h2>选择或拖拽文件上传</h2>
+          </div>
+        </Upload>
+        <Button @click="exportGoods" type="text" style="color: red">下载导入模板</Button>
+      </div>
+      <div slot="footer">
+        <Button type="text" @click="importModal = false">确定</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -201,13 +218,20 @@ import {
   lowGoods,
   deleteGoods,
   batchShipTemplate,
+  downLoadGoods
 } from "@/api/goods";
+import { baseUrl } from "@/libs/axios.js";
 import * as API_Shop from "@/api/shops";
+import Cookies from "js-cookie";
+import {uploadGoodsExcel} from "../../../api/goods";
 
 export default {
   name: "goods",
   data() {
     return {
+      accessToken: {}, // 验证token
+      importModal: false,
+      action: baseUrl + "/goods/import/import", // 上传接口
       id: "", //要操作的id
       loading: true, // 表单加载状态
       shipTemplateForm: {}, // 物流模板
@@ -510,6 +534,59 @@ export default {
         }
       });
     },
+    // 上传数据
+    handleUpload(file) {
+      this.file = file;
+      this.upload();
+      return false;
+    },
+    /**
+     * 上传文件
+     */
+    async upload() {
+      let fd = new FormData();
+      fd.append("files", this.file);
+      let res = await uploadGoodsExcel(fd);
+      if (res.success) {
+        this.stepList.map((item) => {
+          item.checked = false;
+          this.$Message.success("导入成功")
+          this.importModal = false
+        });
+
+        this.stepList[2].checked = true;
+      }
+    },
+    openImportGoods(){
+      this.importModal = true
+    },
+    async exportGoods(){
+      downLoadGoods()
+        .then((res) => {
+          console.log(res)
+          const blob = new Blob([res], {
+            type: "application/vnd.ms-excel;charset=utf-8",
+          });
+          //对于<a>标签，只有 Firefox 和 Chrome（内核） 支持 download 属性
+          //IE10以上支持blob但是依然不支持download
+          if ("download" in document.createElement("a")) {
+            //支持a标签download的浏览器
+            const link = document.createElement("a"); //创建a标签
+            link.download = "商品批量导入模板.xls"; //a标签添加属性
+            link.style.display = "none";
+            link.href = URL.createObjectURL(blob);
+            document.body.appendChild(link);
+            link.click(); //执行下载
+            URL.revokeObjectURL(link.href); //释放url
+            document.body.removeChild(link); //释放标签
+          } else {
+            navigator.msSaveBlob(blob, fileName);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
     // 更新库存
     updateStock() {
       let updateStockList = this.stockList.map((i) => {
@@ -751,9 +828,7 @@ export default {
   },
   mounted() {
     this.init();
-  },
-  mounted() {
-    this.init();
+    this.accessToken.accessToken = this.getStore("accessToken");
   },
 };
 </script>

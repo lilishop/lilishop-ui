@@ -14,7 +14,7 @@
       <Button type="primary" @click="handleAdd()">添加页面</Button>
       <div class="list">
         <Spin size="large" fix v-if="loading"></Spin>
-        <div class="item item-title" >
+        <div class="item item-title">
           <div>页面名称</div>
           <div class="item-config">
             <div>状态</div>
@@ -30,19 +30,25 @@
               <span slot="close">关</span>
             </i-switch>
             <Button type="info" placement="right" @click="handleEdit(item)" size="small">修改</Button>
-            <Poptip confirm title="删除此模板？" @on-ok="handleDel(item)" >
+            <Poptip confirm title="删除此模板？" @on-ok="handleDel(item)">
               <Button type="error" size="small">删除</Button>
             </Poptip>
           </div>
         </div>
         <div class="no-more" v-if="list.length ==0">暂无更多模板</div>
       </div>
-      <Page :total="total" size="small" @on-change="(val) => {params.pageNumber = val; } " :current="params.pageNumber" :page-size="params.pageSize" show-sizer  :page-size-opts="[10, 20, 50]" @on-page-size-change="changePageSize"/>
-
+      <Page
+        :total="total"
+        size="small"
+        @on-change="(val) => {params.pageNumber = val; } "
+        :current="params.pageNumber"
+        :page-size="params.pageSize"
+        show-sizer
+        :page-size-opts="[10, 20, 50]"
+        @on-page-size-change="changePageSize"
+      />
     </Card>
-
   </div>
-
 </template>
 <script>
 import * as API_Other from "@/api/other.js";
@@ -51,25 +57,27 @@ export default {
   data() {
     return {
       selectedIndex: 0, // 装修那个页面的下标
-      columns: [ // 表头
+      columns: [
+        // 表头
         {
           title: "页面名称",
-          key: "name",
+          key: "name"
         },
         {
-          title: "状态",
+          title: "状态"
         },
         {
           title: "操作",
-          key: "action",
-        },
+          key: "action"
+        }
       ],
 
       loading: false, // 加载状态
-      pageTypes: [ // 装修类型
+      pageTypes: [
+        // 装修类型
         {
           type: "INDEX",
-          title: "首页",
+          title: "首页"
         },
         {
           type: "SPECIAL",
@@ -84,26 +92,27 @@ export default {
         //   title: "app开屏页面",
         // },
       ],
-      params: { // 请求参数
+      params: {
+        // 请求参数
         pageNumber: 1,
         pageSize: 10,
         sort: "createTime",
         order: "desc",
         pageType: "INDEX",
-        pageClientType: "H5",
+        pageClientType: "H5"
       },
       total: 0, // 页面数量
-      list: [], // 总数据
+      list: [] // 总数据
     };
   },
   watch: {
-    params: {
-      handler(val) {
-        // this.pageNumber++;
-        this.init();
-      },
-      deep: true,
-    },
+    // params: {
+    //   handler(val) {
+    //     // this.pageNumber++;
+    //     this.init();
+    //   },
+    //   deep: true,
+    // },
   },
   mounted() {
     this.init();
@@ -133,7 +142,7 @@ export default {
     // 是否发布
     changeSwitch(item) {
       this.loading = true;
-      API_Other.releasePageHome(item.id).then((res) => {
+      API_Other.releasePageHome(item.id).then(res => {
         if (res.result) {
           this.loading = false;
           this.$Message.success("发布成功");
@@ -148,10 +157,10 @@ export default {
     // 初始化数据
     init() {
       this.loading = true;
-      API_Other.getHomeList(this.params).then((res) => {
+      API_Other.getHomeList(this.params).then(res => {
         if (!res.result) return false;
         this.loading = false;
-        res.result.records.forEach((item) => {
+        res.result.records.forEach(item => {
           if (item.pageShow == "OPEN") {
             item.pageShow = true;
           } else {
@@ -181,8 +190,8 @@ export default {
         query: { pagetype: this.params.pageType },
       });
     },
-     // 分页 改变页数
-     changePageSize(v) {
+    // 分页 改变页数
+    changePageSize(v) {
       this.params.pageNumber = 1;
       this.params.pageSize = v;
       this.init();
@@ -190,7 +199,7 @@ export default {
     // 删除模板
     handleDel(val) {
       this.loading = true;
-      API_Other.removePageHome(val.id).then((res) => {
+      API_Other.removePageHome(val.id).then(res => {
         if (res.result) {
           this.loading = false;
           this.init();
@@ -199,8 +208,8 @@ export default {
 
         this.loading = false;
       });
-    },
-  },
+    }
+  }
 };
 </script>
 <style scoped lang="scss">
@@ -212,7 +221,7 @@ export default {
   background: #ededed;
 }
 .item-title {
-  background: #d7e7f5!important;
+  background: #d7e7f5 !important;
   height: 54px;
 }
 .no-more {
@@ -256,7 +265,7 @@ export default {
     align-items: center;
   }
 }
-.item:nth-of-type(2n+1) {
+.item:nth-of-type(2n + 1) {
   background: #f5f7fa;
 }
 </style>
