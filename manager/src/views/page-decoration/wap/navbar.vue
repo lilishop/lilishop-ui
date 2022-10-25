@@ -229,7 +229,7 @@ export default {
     // 返回查询数据页面
     goBack() {
       this.$router.push({
-        path: "page-decoration/wap",
+        path: "/wapList",
       });
     },
 
