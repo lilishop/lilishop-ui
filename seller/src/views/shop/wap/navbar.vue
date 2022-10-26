@@ -153,7 +153,7 @@ export default {
     // 返回查询数据页面
     goback() {
       this.$router.push({
-        path: "/shop/wapList",
+        path: "/wapList",
       });
     },
 
