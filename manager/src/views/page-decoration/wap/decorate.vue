@@ -621,6 +621,7 @@ export default {
     },
     // 回调选择的链接
     selectedLink(val) {
+      this.selectedLinks.zoneInfo = []
       delete val.selected;
       delete val.intro;
       delete val.mobileIntro;
