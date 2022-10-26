@@ -15,6 +15,7 @@
     "less-loader": "^5.0.0",
     "mv-count-down": "^0.1.15",
     "node-sass": "^4.14.1",
+    "postcss-loader": "^7.0.1",
     "psl": "^1.8.0",
     "qs": "^6.9.4",
     "sass-loader": "^7.3.1",
