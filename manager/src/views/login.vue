@@ -1,30 +1,60 @@
 <template>
-  <div class="login" @click='$refs.verify.show = false'>
+  <div class="login" @click="$refs.verify.show = false">
     <Row @keydown.enter.native="submitLogin" class="flex">
       <Col style="width: 368px">
-      <Header />
-      <Row style="flex-direction: column;">
+        <Header />
+        <Row style="flex-direction: column">
+          <Form
+            ref="usernameLoginForm"
+            :model="form"
+            :rules="rules"
+            class="form"
+          >
+            <FormItem prop="username">
+              <Input
+                v-model="form.username"
+                prefix="ios-contact"
+                size="large"
+                clearable
+                placeholder="请输入用户名"
+                autocomplete="off"
+              />
+            </FormItem>
+            <FormItem prop="password">
+              <Input
+                type="password"
+                v-model="form.password"
+                prefix="ios-lock"
+                size="large"
+                password
+                placeholder="请输入密码"
+                autocomplete="off"
+              />
+            </FormItem>
+          </Form>
 
-        <Form ref="usernameLoginForm" :model="form" :rules="rules" class="form">
-          <FormItem prop="username">
-            <Input v-model="form.username" prefix="ios-contact" size="large" clearable placeholder="请输入用户名" autocomplete="off" />
-          </FormItem>
-          <FormItem prop="password">
-            <Input type="password" v-model="form.password" prefix="ios-lock" size="large" password placeholder="请输入密码" autocomplete="off" />
-          </FormItem>
-        </Form>
-
-        <Row>
-          <Button class="login-btn" type="primary" size="large" :loading="loading" @click="submitLogin" long>
-            <span v-if="!loading">{{ $t("login") }}</span>
-            <span v-else>{{ $t("logining") }}</span>
-          </Button>
+          <Row>
+            <Button
+              class="login-btn"
+              type="primary"
+              size="large"
+              :loading="loading"
+              @click="submitLogin"
+              long
+            >
+              <span v-if="!loading">{{ $t("login") }}</span>
+              <span v-else>{{ $t("logining") }}</span>
+            </Button>
+          </Row>
         </Row>
-
-      </Row>
-      <!-- 拼图验证码 -->
-      <verify ref="verify" class="verify-con" verifyType="LOGIN" @change="verifyChange"></verify>
-      <Footer />
+        <!-- 拼图验证码 -->
+        <verify
+          ref="verify"
+          class="verify-con"
+          verifyType="LOGIN"
+          @change="verifyChange"
+        ></verify>
+        <Footer />
       </Col>
       <!-- <LangSwitch /> -->
     </Row>
@@ -45,7 +75,7 @@ export default {
     LangSwitch,
     Header,
     Footer,
-    verify
+    verify,
   },
   data() {
     return {
@@ -113,8 +143,8 @@ export default {
       this.loading = true;
 
       let fd = new FormData();
-      fd.append('username',this.form.username)
-      fd.append('password',this.md5(this.form.password))
+      fd.append("username", this.form.username);
+      fd.append("password", this.md5(this.form.password));
       login(fd)
         .then((res) => {
           if (res && res.success) {
@@ -142,7 +172,6 @@ export default {
   align-items: center;
   justify-content: center;
 
-
   .verify-con {
     position: absolute;
     top: 150px;
@@ -151,7 +180,6 @@ export default {
   }
   .form {
     padding-top: 1vh;
-
   }
 
   .login-btn {
@@ -169,10 +197,9 @@ export default {
     transition: 0.35s;
   }
   .login-btn:hover {
-    opacity: .9;
+    opacity: 0.9;
     border-radius: 10px;
   }
-
 }
 .flex {
   justify-content: center;

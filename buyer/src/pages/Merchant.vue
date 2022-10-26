@@ -202,21 +202,21 @@ export default {
         this.IMLink = res.result;
       }
     },
-    getStoreMsg () { // 店铺信息
-      getDetailById(this.$route.query.id).then(res => {
-        if (res.success) {
-          this.storeMsg = res.result
-          document.title = this.storeMsg.storeName
-          if (this.Cookies.getItem('userInfo')) {
-            isCollection('STORE', this.storeMsg.storeId).then(res => {
-              if (res.success && res.result) {
-                this.storeCollected = true;
-              }
-            })
-          }
-        }
-      })
-    },
+    // getStoreMsg () { // 店铺信息
+    //   getDetailById(this.$route.query.id).then(res => {
+    //     if (res.success) {
+    //       this.storeMsg = res.result
+    //       document.title = this.storeMsg.storeName
+    //       if (this.Cookies.getItem('userInfo')) {
+    //         isCollection('STORE', this.storeMsg.storeId).then(res => {
+    //           if (res.success && res.result) {
+    //             this.storeCollected = true;
+    //           }
+    //         })
+    //       }
+    //     }
+    //   })
+    // },
     // async getListByDay() {
     //   // 当天秒杀活动
     //   const res = await seckillByDay();
@@ -227,28 +227,28 @@ export default {
     //   }
     // },
 
-    // getStoreMsg() {
-    //   // 店铺信息
-    //   getDetailById(this.$route.query.id).then((res) => {
-    //     if (res.success) {
-    //
-    //       this.storeMsg = res.result;
-    //
-    //
-    //       this.getIndexData();
-    //       let that = this;
-    //       window.onscroll = function () {
-    //         let top =
-    //           document.documentElement.scrollTop || document.body.scrollTop;
-    //         if (top > 300) {
-    //           that.topSearchShow = true;
-    //         } else {
-    //           that.topSearchShow = false;
-    //         }
-    //       };
-    //     }
-    //   });
-    // },
+    getStoreMsg() {
+      // 店铺信息
+      getDetailById(this.$route.query.id).then((res) => {
+        if (res.success) {
+
+          this.storeMsg = res.result;
+
+
+          this.getIndexData();
+          let that = this;
+          window.onscroll = function () {
+            let top =
+              document.documentElement.scrollTop || document.body.scrollTop;
+            if (top > 300) {
+              that.topSearchShow = true;
+            } else {
+              that.topSearchShow = false;
+            }
+          };
+        }
+      });
+    },
     getCateList() {
       // 店铺分类
       getCateById(this.$route.query.id).then((res) => {
