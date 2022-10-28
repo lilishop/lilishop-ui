@@ -62,7 +62,7 @@
           {{ nowHour >= list[currIndex].timeLine ? "立即抢购" : "即将开始" }}
         </div>
         <div
-          v-if="nowHour >= list[currIndex].timeLine"
+          v-if="nowHour >= list[currIndex].timeLine && item.quantity <=  item.salesNum"
           class="goods-seckill-btn goods-seckill-btn-gray"
         >
           已售罄
@@ -209,6 +209,8 @@ export default {
   line-height: 35px;
   font-size: 14px;
   background-color: $theme_color;
+  margin-bottom: 1px;
+  margin-right: 1px;
 }
 .goods-seckill-btn-gray {
   background-color: #666;
@@ -256,10 +258,10 @@ export default {
   }
 }
 .goods-show-info1 {
-  width: 275px;
+  width: 290px;
   padding: 6px;
   margin: 10px 0px;
-  margin-left: 5px;
+  margin-left: 8px;
   position: relative;
   border: 1px solid #fff;
   cursor: pointer;
