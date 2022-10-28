@@ -58,7 +58,6 @@
         :columns="columns"
         :data="data"
         ref="table"
-        class="mt_10"
         @on-selection-change="changeSelect"
       >
         <template slot-scope="{ row }" slot="action">
@@ -154,13 +153,13 @@ export default {
         {
           title: "活动名称",
           key: "promotionName",
-          minWidth: 100,
+          width: 100,
           fixed: "left",
         },
         {
           title: "优惠券名称",
           key: "couponName",
-          minWidth: 100,
+          width: 100,
           tooltip: true,
         },
         {
@@ -182,7 +181,7 @@ export default {
         {
           title: "已领取数量/总数量",
           key: "publishNum",
-          width: 130,
+          width: 150,
           render: (h, params) => {
             return h(
               "div",
@@ -196,6 +195,7 @@ export default {
         {
           title: "已被使用的数量/已领取数量",
           key: "publishNum",
+          width: 130,
           render: (h, params) => {
             return h("div", params.row.usedNum + "/" + params.row.receivedNum);
           },
