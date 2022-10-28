@@ -40,7 +40,7 @@
       <Page
         :total="total"
         size="small"
-        @on-change="(val) => {params.pageNumber = val; } "
+        @on-change="changePageNum"
         :current="params.pageNumber"
         :page-size="params.pageSize"
         show-sizer
@@ -138,6 +138,12 @@ export default {
         this.params.pageType = val;
         this.init();
       }
+    },
+
+    // 分页 修改页码
+    changePageNum (val) {
+      this.params.pageNumber = val;
+      this.init();
     },
     // 是否发布
     changeSwitch(item) {

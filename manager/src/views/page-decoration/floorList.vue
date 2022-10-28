@@ -42,7 +42,7 @@
         </div>
         <div class="no-more" v-if="list.length == 0">暂无更多模板</div>
       </div>
-      <Page show-total :total="total" show-sizer  :page-size-opts="[10, 20, 50]" show-elevator style="float:right;overflow:hidden;"  @on-change="changePageNum" @on-page-size-change="changePageSize" :page-size="searchForm.pageSize"/>
+      <Page show-total :total="total" show-sizer size="small" :page-size-opts="[10, 20, 50]" show-elevator style="float:right;overflow:hidden;"  @on-change="changePageNum" @on-page-size-change="changePageSize" :page-size="searchForm.pageSize"/>
     </Card>
     <Modal
       v-model="showModal"
@@ -147,7 +147,7 @@ export default {
         }
       });
     },
-    
+
     clickType(type,index){
       this.searchForm.pageNumber = 1
       this.searchForm.pageType = type;
