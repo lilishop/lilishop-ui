@@ -9,9 +9,7 @@
         v-for="(item, index) in way"
         :key="index"
         :type="item.selected ? 'primary' : ''"
-      >
-        {{ item.title }}
-      </Button>
+      >{{ item.title }}</Button>
     </div>
     <div class="model-title-view-btn">
       <!-- TODO 后期会补全 目前版本暂无 -->
@@ -21,10 +19,8 @@
           <div>临时预览</div>
           <div ref="qrCodeUrl"></div>
         </div>
-      </Poptip> -->
-      <Button size="default" type="primary" @click="handleSpinShow"
-        >保存模板</Button
-      >
+      </Poptip>-->
+      <Button size="default" type="primary" @click="handleSpinShow">保存模板</Button>
 
       <Modal
         title="保存中"
@@ -35,7 +31,8 @@
       >
         <div v-if="progress">
           <div class="model-item">
-            模板名称 <Input style="width: 200px" v-model="submitWay.name" />
+            模板名称
+            <Input style="width: 200px" v-model="submitWay.name"/>
           </div>
           <div class="model-item">
             是否立即发布
@@ -47,7 +44,7 @@
 
           <Button type="primary" @click="save()">保存</Button>
         </div>
-        <Progress v-else :percent="num" status="active" />
+        <Progress v-else :percent="num" status="active"/>
       </Modal>
     </div>
   </div>
@@ -85,8 +82,8 @@ export default {
         // 表单信息
         pageShow: this.$route.query.type || false,
         name: this.$route.query.name || "模板名称",
-        pageClientType: "H5",
-      },
+        pageClientType: "H5"
+      }
     };
   },
   watch: {
@@ -125,7 +122,7 @@ export default {
 
     // 填写是否发布，模板名称之后保存
     save() {
-      if (
+       if (
         this.$store.state.styleStore == void 0 &&
         (this.$route.query.pagetype && this.$route.query.pagetype != 'ALERT' &&  this.$route.query.pagetype != 'OPEN_SCREEN_ANIMATION')
       ) {
@@ -138,6 +135,7 @@ export default {
         : (this.submitWay.pageShow = "CLOSE");
 
       this.submitWay.pageData = JSON.stringify(this.$store.state.styleStore);
+      this.submitWay.pageType = "INDEX";
       this.submitWay.pageType =  this.$route.query.pagetype ||  "INDEX";
       // this.submitWay.pageType = this.pagetype;
 
@@ -160,7 +158,7 @@ export default {
         pageType: this.submitWay.pageType,
         pageClientType: "H5",
       })
-        .then((res) => {
+        .then(res => {
           this.num = 50;
           if (res.success) {
             this.num = 80;
@@ -168,7 +166,7 @@ export default {
             setTimeout(() => {
               this.saveDialog = false;
               this.$Message.success("修改成功");
-              this.goback();
+              this.goBack();
             }, 1000);
           } else {
             this.saveDialog = false;
@@ -176,8 +174,9 @@ export default {
           }
           console.log(res);
         })
-        .catch((error) => {});
+        .catch(error => {});
     },
+
 
     // 更新
     update(submitWay) {
@@ -214,7 +213,7 @@ export default {
             setTimeout(() => {
               this.saveDialog = false;
               this.$Message.success("修改成功");
-              this.goback();
+              this.goBack();
             }, 1000);
           } else {
             this.saveDialog = false;
@@ -225,10 +224,11 @@ export default {
         .catch((error) => {});
     },
 
+
     // 返回查询数据页面
-    goback() {
+    goBack() {
       this.$router.push({
-        path: "/decoration/wap",
+        path: "/wapList",
       });
     },
 
@@ -236,7 +236,7 @@ export default {
     submit(submitWay) {
       this.progress = false;
       API_Other.setHomeSetup(submitWay)
-        .then((res) => {
+        .then(res => {
           this.num = 50;
           if (res.success) {
             this.num = 80;
@@ -244,7 +244,7 @@ export default {
             setTimeout(() => {
               this.saveDialog = false;
               this.$Message.success("保存成功");
-              this.goback();
+              this.goBack();
             }, 1000);
           } else {
             this.progress = true;
@@ -253,9 +253,9 @@ export default {
           }
           console.log(res);
         })
-        .catch((error) => {});
-    },
-  },
+        .catch(error => {});
+    }
+  }
 };
 </script>
 <style scoped lang="scss">

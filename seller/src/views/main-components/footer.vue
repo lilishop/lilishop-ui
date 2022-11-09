@@ -6,17 +6,22 @@
       <a class="item" :href="config.website" target="_blank">条款</a>
     </Row>
     <Row type="flex" justify="center" class="copyright">
-      Copyright © {{year}} - Present
-      <a :href="config.website" class="href" target="_blank" style="margin:0 5px;">{{config.title}}</a>
+      Copyright © {{ year }} - Present
+      <a
+        :href="config.website"
+        class="href"
+        target="_blank"
+        style="margin: 0 5px"
+        >{{ config.title }}</a
+      >
     </Row>
   </div>
 </template>
 
 <script>
-
-const config = require('@/config/index')
+const config = require("@/config/index");
 export default {
-  name: "footer",
+  // name: "footer",
   data() {
     return {
       config,
@@ -45,5 +50,4 @@ export default {
     }
   }
 }
-
 </style>

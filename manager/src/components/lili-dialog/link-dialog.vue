@@ -18,6 +18,7 @@
           "
         />
       </TabPane>
+      <!-- </template> -->
     </Tabs>
   </div>
 </template>
@@ -27,7 +28,7 @@ import goodsDialog from "./goods-dialog";
 import templateWay from "./template/index";
 export default {
   components: {
-    goodsDialog,
+    goodsDialog
   },
   data() {
     return {
@@ -43,8 +44,8 @@ export default {
       handler(val) {
         this.$emit("selectedLink", val[0]); //因为是单选，所以直接返回第一个
       },
-      deep: true,
-    },
+      deep: true
+    }
   },
   mounted() {
     this.$nextTick(() => {
@@ -57,7 +58,18 @@ export default {
       }
     });
   },
-  methods: {},
+  methods: {
+    // isVisible(item) {
+    //   const type = this.$route.query.pagetype;
+    //   if (type == "INDEX" && [ "discover"].includes(item.name)) {
+    //     return false;
+    //   }else if(type == "DISCOVER" && item.name == 'special'){
+    //     return false;
+    //   }else{
+    //     return true
+    //   }
+    // },
+  }
 };
 </script>
 <style scoped lang="scss">

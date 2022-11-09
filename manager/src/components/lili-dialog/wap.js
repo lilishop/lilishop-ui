@@ -34,5 +34,5 @@ export default [
     title: "其他",
     url: "3",
     name: "other"
-  }
+  },
 ];

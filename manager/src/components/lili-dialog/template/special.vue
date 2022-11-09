@@ -36,7 +36,6 @@ import { getHomeList }  from "@/api/other.js";
 export default {
   data() {
     return {
-      
       loading: true, //表格请求数据为true
       promotionList: "", // 活动列表
       selectedIndex: 0, //左侧菜单选择

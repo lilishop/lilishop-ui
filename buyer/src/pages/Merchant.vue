@@ -1,12 +1,10 @@
 <template>
   <div class="merchant">
-    <BaseHeader />
-    <!-- 搜索栏 -->
-    <Search :store="true" @search="search"></Search>
-    <!-- 店铺logo -->
-    <div class="shop-logo">
-      <div>
-        <img :src="storeMsg.storeLogo" height="80" alt="">
+      <BaseHeader/>
+      <!-- 搜索栏 -->
+      <Search :store="true" @search="search"></Search>
+      <!-- 店铺logo -->
+      <div class="shop-logo">
         <div>
           <p>{{storeMsg.storeName || 'xx店铺'}}</p>
           <p class="ellipsis" :alt="storeMsg.storeDesc" v-html="storeMsg.storeDesc"></p>
@@ -16,21 +14,37 @@
           <span style="width:80px" class="hover-pointer ml_10" @click="IMService()"><Icon custom="icomoon icon-customer-service"  />联系客服</span>
         </div>
       </div>
-    </div>
-    <div  class="store-category">
-      <ul class="cate-list">
-        <li class="cate-item" @click="searchByCate({id:'', labelName: '店铺推荐'})">首页</li>
-        <li class="cate-item" v-for="(cate, index) in cateList" :key="index">
-          <Dropdown v-if="cate.children.length">
-            <div @click.self="searchByCate(cate)">{{cate.labelName}} <Icon type="ios-arrow-down"></Icon></div>
-            <DropdownMenu slot="list">
-                <DropdownItem @click.native="searchByCate(sec)" :name="sec.id" v-for="sec in cate.children" :key="sec.id">{{sec.labelName}}</DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
-          <span v-else @click.self="searchByCate(cate)">{{cate.labelName}}</span>
-        </li>
-      </ul>
-    </div>
+      <div class="store-category">
+        <ul class="cate-list">
+          <li
+            class="cate-item"
+            @click="searchByCate({ id: '', labelName: '店铺推荐' })"
+          >
+            首页
+          </li>
+          <li class="cate-item" v-for="(cate, index) in cateList" :key="index">
+            <Dropdown v-if="cate.children.length">
+              <div @click.self="searchByCate(cate)">
+                {{ cate.labelName }}
+                <Icon type="ios-arrow-down"></Icon>
+              </div>
+              <DropdownMenu slot="list">
+                <DropdownItem
+                  @click.native="searchByCate(sec)"
+                  :name="sec.id"
+                  v-for="sec in cate.children"
+                  :key="sec.id"
+                >{{ sec.labelName }}
+                </DropdownItem
+                >
+              </DropdownMenu>
+            </Dropdown>
+            <span v-else @click.self="searchByCate(cate)">{{
+                cate.labelName
+              }}</span>
+          </li>
+        </ul>
+      </div>
 
       <div class="promotion-decorate">{{ cateName }}</div>
 
@@ -79,14 +93,22 @@
 
     <BaseFooter/>
 
-
   </div>
 </template>
 
 <script>
-import {getDetailById, getCateById} from '@/api/shopentry'
-import { cancelCollect, collectGoods, isCollection } from '@/api/member';
-import {goodsList} from '@/api/goods';
+import { getIMDetail } from "@/api/common";
+import Storage from "../plugins/storage";
+import {getDetailById, getCateById} from "@/api/shopentry";
+import {cancelCollect, collectGoods, isCollection} from "@/api/member";
+import {goodsList} from "@/api/goods";
+import Search from "@/components/Search";
+import ModelForm from "@/components/indexDecorate/ModelForm";
+import HoverSearch from "@/components/header/hoverSearch";
+import storage from "@/plugins/storage";
+import {getFloorStoreData} from "@/api/index.js";
+import {seckillByDay} from "@/api/promotion";
+
 export default {
   name: "Merchant",
   components: {
@@ -103,11 +125,15 @@ export default {
       topSearchShow: false, // 滚动后顶部搜索栏展示
       carouselLarge: false, // 不同轮播分类尺寸
       carouselOpacity: false, // 不同轮播分类样式,
+      enablePageData: false, //是否显示楼层装修内容
+      basePageData: false, //基础店铺信息
       storeMsg: {}, // 店铺信息
       cateList: [], // 店铺分裂
       goodsList: [], // 商品列表
       total: 0, // 商品数量
-      params: { // 请求参数
+      IMLink:"",
+      params: {
+        // 请求参数
         pageNumber: 1,
         pageSize: 20,
         keyword: "",
@@ -122,18 +148,104 @@ export default {
     this.getStoreMsg();
   },
   methods: {
-    getStoreMsg () { // 店铺信息
-      getDetailById(this.$route.query.id).then(res => {
-        if (res.success) {
-          this.storeMsg = res.result
-          document.title = this.storeMsg.storeName
-          if (this.Cookies.getItem('userInfo')) {
-            isCollection('STORE', this.storeMsg.storeId).then(res => {
-              if (res.success && res.result) {
-                this.storeCollected = true;
+    getIndexData() {
+      // 获取首页装修数据
+      getFloorStoreData({clientType: "PC", num: this.$route.query.id, pageType: 'STORE'}).then(
+        (res) => {
+          if (res.success) {
+            let dataJson = JSON.parse(res.result.pageData);
+            // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
+            // 轮播图根据不同轮播，样式不同
+            for (let i = 0; i < dataJson.list.length; i++) {
+              let type = dataJson.list[i].type;
+              if (type === "carousel2") {
+                this.carouselLarge = true;
+              } else if (type === "carousel1") {
+                this.carouselLarge = true;
+                this.carouselOpacity = true;
               }
-            })
+
+              // else if (type === "seckill") {
+              //   let seckill = this.getListByDay();
+              //   dataJson.list[i].options.list = seckill;
+              // }
+            }
+            this.modelForm = dataJson;
+            storage.setItem("navList", dataJson.list[1]);
+            this.showNav = true;
+            this.topAdvert = dataJson.list[0];
           }
+        }
+      );
+    },
+    // 跳转im客服
+    async IMService() {
+      // 获取访问Token
+      let accessToken = Storage.getItem("accessToken");
+      await this.getIMDetailMethods();
+      if (!accessToken) {
+        this.$Message.error("请登录后再联系客服");
+        return;
+      }
+      window.open(
+        this.IMLink +
+        "?token=" +
+        accessToken +
+        "&id=" +
+        this.storeMsg.storeId
+      );
+    },
+    // 获取im信息
+    async getIMDetailMethods() {
+      let res = await getIMDetail();
+      if (res.success) {
+        this.IMLink = res.result;
+      }
+    },
+    // getStoreMsg () { // 店铺信息
+    //   getDetailById(this.$route.query.id).then(res => {
+    //     if (res.success) {
+    //       this.storeMsg = res.result
+    //       document.title = this.storeMsg.storeName
+    //       if (this.Cookies.getItem('userInfo')) {
+    //         isCollection('STORE', this.storeMsg.storeId).then(res => {
+    //           if (res.success && res.result) {
+    //             this.storeCollected = true;
+    //           }
+    //         })
+    //       }
+    //     }
+    //   })
+    // },
+    // async getListByDay() {
+    //   // 当天秒杀活动
+    //   const res = await seckillByDay();
+    //   if (res.success && res.result.length) {
+    //     return res.result;
+    //   } else {
+    //     return [];
+    //   }
+    // },
+
+    getStoreMsg() {
+      // 店铺信息
+      getDetailById(this.$route.query.id).then((res) => {
+        if (res.success) {
+
+          this.storeMsg = res.result;
+
+
+          this.getIndexData();
+          let that = this;
+          window.onscroll = function () {
+            let top =
+              document.documentElement.scrollTop || document.body.scrollTop;
+            if (top > 300) {
+              that.topSearchShow = true;
+            } else {
+              that.topSearchShow = false;
+            }
+          };
         }
       });
     },

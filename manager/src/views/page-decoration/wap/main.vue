@@ -11,7 +11,10 @@ import layout from "./index";
 import navbar from "./navbar";
 export default {
   components: {
-    navbar,
+    navbar
+  },
+  mounted() {
+    this.pagetype = this.$route.query.pagetype;
   },
   mounted() {
     if (this.$route.query.pagetype == "ALERT") {
@@ -28,6 +31,15 @@ export default {
       name: "index", // 装修的页面
       pagetype: "INDEX",
     };
+  },
+  mounted() {
+    if (this.$route.query.pagetype == "ALERT") {
+      this.name = "alertAdvertising";
+    }
+    if (this.$route.query.pagetype == "OPEN_SCREEN_ANIMATION") {
+      this.name = "advertising";
+    }
+    this.pagetype = this.$route.query.pagetype;
   },
   methods: {
     selected(val) {

@@ -10,6 +10,9 @@
       <FormItem label="reqURL" prop="reqURL">
         <Input v-model="formValidate.reqURL" />
       </FormItem>
+      <FormItem label="电子面单URL" prop="sheetReqURL">
+        <Input v-model="formValidate.sheetReqURL" />
+      </FormItem>
       <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
 
@@ -24,7 +27,7 @@ export default {
   data() {
     return {
       ruleValidate: {}, // 验证规则
-      formValidate: { ebusinessID: "", reqURL: "", appKey: "" }, // 表单数据
+      formValidate: { ebusinessID: "", reqURL: "", appKey: "" ,sheetReqURL: "" ,}, // 表单数据
     };
   },
   props: ["res",'type'],

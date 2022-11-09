@@ -39,6 +39,174 @@ export const modelData = [
     },
   },
   {
+    type: 'seckill',
+    name: '促销活动',
+    icon: 'md-image',
+    showName: '',
+    options: {
+      list: [{
+          time: 6,
+          goodsList: [{
+              img: require('@/assets/nav/1.jpg'),
+              price: 20,
+              originalPrice: 30,
+              name: '阿迪达斯三叶草asdasdafads123213a',
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/2.jpg'),
+              price: 20,
+              originalPrice: 30,
+              name: '阿迪达斯三叶草asdasdafadsa',
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/3.jpg'),
+              price: 20,
+              originalPrice: 30,
+              name: '阿迪达斯三叶草asdasdafadsa',
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/4.jpg'),
+              price: 20,
+              originalPrice: 30,
+              name: '阿迪达斯三叶草asdasdafadsa',
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/5.jpg'),
+              price: 20,
+              originalPrice: 30,
+              name: '阿迪达斯三叶草asdasdafadsa',
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/1.jpg'),
+              price: 20,
+              originalPrice: 30,
+              name: '阿迪达斯三叶草asdasdafadsa',
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/2.jpg'),
+              price: 20,
+              originalPrice: 30,
+              name: '阿迪达斯三叶草asdasdafadsa',
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/3.jpg'),
+              price: 20,
+              originalPrice: 30,
+              name: '阿迪达斯三叶草asdasdafadsa',
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/4.jpg'),
+              price: 20,
+              originalPrice: 30,
+              name: '阿迪达斯三叶草asdasdafadsa',
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/5.jpg'),
+              price: 20,
+              originalPrice: 30,
+              name: '阿迪达斯三叶草asdasdafadsa',
+              url: ''
+            },
+          ]
+        },
+        {
+          time: 8,
+          goodsList: [{
+              img: require('@/assets/nav/1.jpg'),
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/2.jpg'),
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/3.jpg'),
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/4.jpg'),
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/5.jpg'),
+              url: ''
+            },
+          ]
+        },
+        {
+          time: 10,
+          goodsList: [{
+              img: require('@/assets/nav/1.jpg'),
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/2.jpg'),
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/3.jpg'),
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/4.jpg'),
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/5.jpg'),
+              url: ''
+            },
+          ]
+        },
+        {
+          time: 12,
+          goodsList: [{
+              img: require('@/assets/nav/1.jpg'),
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/2.jpg'),
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/3.jpg'),
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/4.jpg'),
+              url: ''
+            },
+            {
+              img: require('@/assets/nav/5.jpg'),
+              url: ''
+            },
+          ]
+        },
+        {
+          time: 14,
+          goodsList: []
+        },
+        {
+          time: 16,
+          goodsList: []
+        },
+        {
+          time: 18,
+          goodsList: []
+        }
+
+      ]
+    },
+  },
+  {
     type: 'discountAdvert',
     name: '折扣广告',
     icon: 'md-image',

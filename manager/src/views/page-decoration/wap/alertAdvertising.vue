@@ -48,7 +48,7 @@
                     @click="handleClickFile(item, index)"
                     ghost
                     type="primary"
-                    >选择照片</Button
+                    >选择链接</Button
                   >
                 </div>
               </div>
@@ -75,6 +75,9 @@
           :types="linkType"
         ></liliDialog>
       </div>
+      <Modal width="1200px" v-model="picModelFlag">
+      <ossManage @callback="callbackSelected" ref="ossManage" />
+    </Modal>
     </div>
     <Modal width="1200px" v-model="picModelFlag">
       <ossManage @callback="callbackSelected" ref="ossManage" />
@@ -85,7 +88,7 @@
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import * as API_Other from "@/api/other.js";
 export default {
-  components: {
+   components: {
     ossManage,
   },
   data() {
@@ -100,10 +103,10 @@ export default {
         },
       ],
       linkType: "", // 选择类型
-
       selectedLinks: {},
     };
   },
+
   watch: {
     advertising: {
       handler(val) {

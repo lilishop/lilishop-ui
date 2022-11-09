@@ -1,6 +1,43 @@
 <template>
     <div class="model-form">
         <div class="model-content">
+            <!-- 头部广告，登录信息，不需要拖拽 -->
+            <div class="top-fixed-advert" :style="{backgroundColor:topAdvert.bgColor}">
+                <img :src="topAdvert.img" width="1200" height="80" alt="">
+                <div class="setup-box">
+                    <Button size="small" @click.stop="handleModel('topAdvert')">编辑</Button>
+                </div>
+            </div>
+            <div class="header-con">
+                <div></div>
+                <ul class="detail">
+                    <li>立即注册</li>
+                    <li>请登录</li>
+                    <li>我的订单</li>
+                    <li>我的足迹</li>
+                    <li><Icon size="18" type="ios-cart-outline" ></Icon>购物车</li>
+                    <li>店铺入驻</li>
+                </ul>
+            </div>
+            <div class="search-con">
+                <img :src="require('@/assets/logo.png')" class="logo" alt="">
+                <div class="search">
+                    <i-input  size="large" placeholder="输入你想查找的商品">
+                        <Button slot="append">搜索</Button>
+                    </i-input>
+                </div>
+            </div>
+            <div class="nav-con">
+                <div class="all-categories">全部商品分类</div>
+                <ul class="nav-item">
+                    <li v-for="(item,index) in navList.list" :key="index">
+                        <a href="#">{{item.name}}</a>
+                    </li>
+                </ul>
+                <div class="setup-box">
+                    <Button size="small" @click.stop="handleModel('quickNav')">编辑</Button>
+                </div>
+            </div>
             <!-- 装修主体 -->
             <div>
                 <draggable class="model-form-list"

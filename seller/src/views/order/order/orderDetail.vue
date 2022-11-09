@@ -28,6 +28,7 @@
         <Button v-if="allowOperation.ship" @click="orderDeliver" type="primary"
           >发货</Button
         >
+        <Button  @click="Toprint" type="primary" ghost v-if="allowOperation.ship">打印电子面单</Button>
       </div>
     </Card>
 
@@ -440,13 +441,31 @@
         <span>订单发货</span>
       </p>
       <div>
+        <Form :model="faceSheetForm" ref="faceSheetForm" v-if="facesheetFlag" :rules="faceSheetFormValidate">
+          <FormItem label="物流公司"  prop="logisticsId" style="position: relative" :label-width="90">
+            <Select
+              v-model="faceSheetForm.logisticsId"
+              placeholder="请选择"
+              style="width: 250px"
+            >
+              <Option
+                v-for="(item, i) in checkedLogistics"
+                :key="i"
+                :value="item.logisticsId"
+              >{{ item.name }}
+              </Option>
+            </Select>
+          </FormItem>
+        </Form>
         <Form
+          v-else
           ref="orderDeliveryForm"
           :model="orderDeliveryForm"
           :label-width="90"
           :rules="orderDeliverFormValidate"
           style="position: relative"
         >
+
           <FormItem label="物流公司" prop="logisticsId">
             <Select
               v-model="orderDeliveryForm.logisticsId"
@@ -456,12 +475,13 @@
               <Option
                 v-for="(item, i) in checkedLogistics"
                 :key="i"
-                :value="item.id"
-                >{{ item.name }}
+                :value="item.logisticsId"
+              >{{ item.name }}
               </Option>
             </Select>
           </FormItem>
-          <FormItem label="物流单号" prop="logisticsNo">
+          <!-- v-if="showOrder" -->
+          <FormItem label="物流单号" prop="logisticsNo" >
             <Input
               v-model="orderDeliveryForm.logisticsNo"
               style="width: 250px"
@@ -535,6 +555,7 @@
 
 <script>
 import * as API_Order from "@/api/order";
+import * as API_Logistics from "@/api/logistics";
 import liliMap from "@/views/my-components/map/index";
 import * as RegExp from "@/libs/RegExp.js";
 import region from "@/views/lili-components/region";
@@ -557,6 +578,16 @@ export default {
       region: [], //地区
       regionId: [], //地区id
       showRegion: false,
+      someJSONdata: '',
+      faceSheetForm: {
+        logisticsId: '',
+      },
+      faceSheetFormValidate: {
+        logisticsId: [
+          { required: true, message: "请选择物流公司"},
+        ],
+      },
+      facesheetFlag: false, //电子面单标识
       orderLogModal: false, //弹出调整价格框
       logisticsModal: false, //弹出查询物流框
       orderDeliverModal: false, //订单发货弹出框
@@ -786,6 +817,15 @@ export default {
         }
       });
     },
+    Toprint(){
+      this.facesheetFlag = true;
+      API_Logistics.getCheckedOn().then(res => {
+        if (res.success) {
+          this.checkedLogistics = res.result;
+          this.orderDeliverModal = true;
+        }
+      });
+    },
     // 修改订单金额
     modifyPrice() {
       //默认要修改的金额为订单总金额
@@ -825,6 +865,7 @@ export default {
     },
     //订单发货
     orderDeliver() {
+      this.facesheetFlag = false
       API_Order.getLogisticsChecked().then((res) => {
         if (res.success) {
           this.checkedLogistics = res.result;
@@ -832,21 +873,39 @@ export default {
         }
       });
     },
+    Toprints(){
+      if(this.form.logisticsId != null && this.form.logisticsId != ''){
+        this.orderDeliverModal = false;
+      }
+    },
     //订单发货提交
     orderDeliverySubmit() {
-      this.$refs.orderDeliveryForm.validate((valid) => {
-        if (valid) {
-          API_Order.orderDelivery(this.sn, this.orderDeliveryForm).then(
-            (res) => {
+      if(this.facesheetFlag){
+        this.$refs['faceSheetForm'].validate((valid) => {
+          if (valid) {
+            API_Order.getOrderFaceSheet(this.sn, this.faceSheetForm).then(res => {
               if (res.success) {
-                this.$Message.success("订单发货成功");
-                this.orderDeliverModal = false;
-                this.getDataDetail();
+                this.someJSONdata = res.result;
+                this.Toprints();
               }
-            }
-          );
-        }
-      });
+            })
+          }
+        })
+      }else{
+        this.$refs['orderDeliveryForm'].validate((valid) => {
+          if (valid) {
+            API_Order.orderDelivery(this.sn,this.orderDeliveryForm).then(
+              (res) => {
+                if (res.success) {
+                  this.$Message.success("订单发货成功");
+                  this.orderDeliverModal = false;
+                  this.getDataDetail();
+                }
+              }
+            );
+          }
+        });
+      }
     },
     //弹出修改收货地址框
     editAddress() {
