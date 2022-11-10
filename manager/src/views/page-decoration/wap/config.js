@@ -521,21 +521,25 @@ export const modelData = [
               title: "精选",
               desc: "电子推荐",
               ___index: 0,
+              bindCategory:""
             },
             {
               title: "实惠",
               desc: "便宜好货",
               ___index: 1,
+              bindCategory:""
             },
             {
               title: "进口",
               desc: "国际自营",
               ___index: 2,
+              bindCategory:""
             },
             {
               title: "推荐",
               desc: "喂奶推荐",
               ___index: 3,
+              bindCategory:""
             }
           ],
           listWay: [
@@ -561,6 +565,7 @@ export const modelData = [
       ]
     }
   },
+
   {
     type: "notice",
     name: "公告",

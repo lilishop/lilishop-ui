@@ -153,7 +153,11 @@ export default {
     // 返回查询数据页面
     goback() {
       this.$router.push({
+<<<<<<< HEAD
         path: "/shop/wapList",
+=======
+        path: "/wapList",
+>>>>>>> 38618819962d2f4ad7da4d3bc213d151943f1744
       });
     },
 

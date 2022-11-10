@@ -71,6 +71,9 @@
         <!-- <Button type="primary" @click="addDecorate()" ghost>添加</Button> -->
         <liliDialog ref="liliDialog"    @selectedLink="selectedLink" :types="linkType"></liliDialog>
       </div>
+      <Modal width="1200px" v-model="picModelFlag">
+         <ossManage @callback="callbackSelected" ref="ossManage" />
+      </Modal>
     </div>
     <Modal width="1200px" v-model="picModelFlag">
       <ossManage @callback="callbackSelected" ref="ossManage" />
@@ -81,7 +84,7 @@
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import * as API_Other from "@/api/other.js";
 export default {
-  components: {
+   components: {
     ossManage,
   },
   data() {
@@ -96,13 +99,13 @@ export default {
           size: "750*1624",
         },
       ],
-
+      selectedLinks: {},
       linkType: "", // 选择类型
 
       selectedLinks: {},
     };
   },
-  watch: {
+   watch: {
     advertising: {
       handler(val) {
         this.$store.state.openStyleStore = val;
@@ -132,9 +135,16 @@ export default {
           ? this.$set(this, "advertising", [JSON.parse(res.result.pageData)])
           : "";
       });
-    }, // 点击链接
+    },
+    // 点击链接
     clickLink(item) {
-      this.$refs.liliDialog.open("link");
+      this.$refs.liliDialog.open('link')
+    },
+    // 回调选择的链接
+    selectedLink(val) {
+      this.selectedLinks.url = val;
+
+      this.advertising[0].config = val;
     },
     // 回调选择的链接
     selectedLink(val) {
@@ -144,14 +154,14 @@ export default {
     },
 
     // 点击选择照片
-    handleClickFile(item, index) {
+    handleClickFile() {
       this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
     }, // 图片选择器回显
     callbackSelected(val) {
       this.picModelFlag = false;
       this.advertising[0].img = val.url;
-    },
+    }
   },
 };
 </script>

@@ -139,7 +139,25 @@ export const otherRouter = {
       title: "发货",
       name: "export-order-deliver",
       component: () => import("@/views/order/order/exportOrderDeliver.vue")
-    }
+    },
+    {
+      path: "order-detail",
+      title: "订单详情",
+      name: "order-detail",
+      component: () => import("@/views/order/order/orderDetail.vue")
+    },
+    {
+      path: "/floorList/main",
+      title: "编辑模板",
+      name: "main",
+      component: () => import("@/views/shop/wap/main.vue")
+    },
+    {
+      path: "/pcFloorList/main",
+      title: "编辑模板",
+      name: "renovation",
+      component: () => import("@/views/shop/renovation.vue")
+    },
     // {
     //   path: "/*",
     //   name: "error-404",

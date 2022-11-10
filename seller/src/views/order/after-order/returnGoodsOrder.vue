@@ -263,7 +263,6 @@
           this.loading = false;
           if (res.success) {
             this.data = res.result.records;
-
             this.total = res.result.total;
           }
         });

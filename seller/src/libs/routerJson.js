@@ -451,6 +451,7 @@ export const result = [{
           }
         ]
       },
+
       {
         name: "shop",
         level: 1,
@@ -459,7 +460,8 @@ export const result = [{
         path: "/shop",
         component: "Main",
         description: "",
-        children: [{
+        children: [
+         {
             name: "shopSetting",
             level: 2,
             type: 0,
@@ -497,6 +499,15 @@ export const result = [{
           //   component: "shop/shopAddress",
           //   children: null,
           // }
+          // {
+          //   name: "shopAddress",
+          //   level: 2,
+          //   type: 0,
+          //   title: "自提管理",
+          //   path: "shopAddress",
+          //   component: "shop/shopAddress",
+          //   children: null,
+          // }
         ]
       }
     ]
@@ -525,5 +536,6 @@ export const result = [{
         children: null
       }]
     }]
-  }
+  },
+
 ];

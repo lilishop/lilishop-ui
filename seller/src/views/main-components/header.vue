@@ -9,11 +9,11 @@
 <script>
 import { getBaseSite } from "@/api/common.js";
 export default {
-  name: "header",
-  data(){
-    return{
-      storeSideLogo: require('@/assets/logo.png')
-    }
+  // name: "header",
+  data() {
+    return {
+      storeSideLogo: require("@/assets/logo.png"),
+    };
   },
   methods: {
     init() {
@@ -54,7 +54,7 @@ export default {
           // 存放信息
           localStorage.setItem("sellersiteName", data.siteName);
           localStorage.setItem("sellerlogoImg", data.storeSideLogo);
-        console.log(data,'datadadada')
+          console.log(data, "datadadada");
           window.document.title = data.siteName;
           //动态获取icon
           let link =

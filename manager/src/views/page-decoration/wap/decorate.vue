@@ -2,6 +2,7 @@
   <div class="decorate">
     <div class="decorate-title">
       {{ res.name }}
+
       <Button
         style="margin-left: 20px"
         size="small"
@@ -25,6 +26,13 @@
         >选择促销活动</Button
       >
     </div>
+    <Alert type="warning" v-if="res.name == '商品分类'">装修提示
+        <template slot="desc">
+            <div style="color:red"> 如果当前装修模块不是最后一项模块且模块内容绑定为分类，则会默认展示绑定分类的100条商品信息。</div>
+            <div style="color:red"> 如果当前装修模块是最后一项模块且模块内容绑定为分类，则会默认会根据绑定分类触底加载商品信息。</div>
+            <div style="color:red"> 如果当前装修内容不为分类，则会展示当前商品的静态信息。</div>
+        </template>
+     </Alert>
 
     <!-- 右侧显示抽屉 -->
     <Drawer title="选择风格" :closable="false" width="400" v-model="styleFlag">
@@ -110,12 +118,14 @@
               </div>
             </div>
             <div class="decorate-view">
-              <div class="decorate-view-title">绑定商品</div>
+              <div class="decorate-view-title">绑定</div>
+              <div   class="decorate-view-link">
               <div
-                class="decorate-view-link"
+
                 v-if="res.options.list[0].listWay.length != 0"
               >
                 <!-- 绑定商品选择器回调已选择的商品 -->
+
                 <div
                   v-if="
                     title_item.___index == bindGoods.___index ||
@@ -124,17 +134,52 @@
                   v-for="(bindGoods, bindGoodsIndex) in res.options.list[0]
                     .listWay"
                   :key="bindGoodsIndex"
+                  class="title-item wes-2"
                 >
-                  {{ bindGoods.title }},
+                  <Tooltip max-width="200" placement="left">
+                    <div slot="content" class="title-tooltip">
+                      {{ bindGoods.title }}
+                    </div>
+                    <div class="title-goodsName">
+                      {{ bindGoods.title }}
+                    </div>
+                  </Tooltip>
+                  <div class="title-btn">
+                    <Button
+                      @click="
+                        slotGoods(
+                          res.options.list[0].listWay,
+                          title_item.___index,
+                          bindGoods,
+                          'up'
+                        )
+                      "
+                      style="margin-right: 10px"
+                      size="small"
+                      >上移</Button
+                    >
+                  </div>
+                </div>
+
+              </div>
+               <!-- 显示绑定分类 -->
+                <div v-if="title_item.bindCategory" >
+                  绑定分类为：{{ title_item.bindCategory.name }}
                 </div>
               </div>
-              <div>
+
+              <div class="decorate-view-btn">
                 <Button
-                  @click="bindGoodsId(title_item)"
+                  @click="bindGoodsId(title_item,title_index)"
                   size="small"
-                  ghost
-                  type="primary"
                   >选择商品</Button
+                >
+                <Button
+                  @click="bindGoodsCategory(title_index)"
+                  size="small"
+
+                  style='margin-top:20px'
+                  >选择分类</Button
                 >
               </div>
             </div>
@@ -331,10 +376,12 @@
                 <!-- {{
                   ways.find((e) => {
                     return item.url.___type == e.name;
-                  }) ? ways.find((e) => {
-                    return item.url.___type == e.name;
-                  }).title : '发现'
-                }} -->
+                  })
+                    ? ways.find((e) => {
+                        return item.url.___type == e.name;
+                      }).title
+                    : "发现"
+                }}
                 -
                 <!-- 当选择完链接之后的专题名称 -->
                 <span v-if="item.url.pageType == 'special'">
@@ -424,6 +471,10 @@
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
 
+    <Modal width='800px' title="选择分类" v-model="enableSelectCategory">
+      <categoryTemplate v-if="enableSelectCategory" @selected="confirmCategory" />
+    </Modal>
+
     <hotzone ref="hotzone" @changeZone="changeZone"></hotzone>
 
     <Modal width="1200px" v-model="picModelFlag">
@@ -436,10 +487,12 @@ import ossManage from "@/views/sys/oss-manage/ossManage";
 import { modelData } from "./config";
 import hotzone from "@/components/hotzone";
 import ways from "@/components/lili-dialog/wap.js"; // 选择链接的类型
+import categoryTemplate from "@/components/lili-dialog/template/category"; // 选择链接的类型
 export default {
   components: {
     ossManage,
     hotzone,
+    categoryTemplate
   },
   data() {
     return {
@@ -456,6 +509,8 @@ export default {
       selectedGoods: "", // 已选商品
       selectedLinks: "", // 已选链接
       modelList: "", // 装修列表
+      enableSelectCategory:false, //商品是否绑定分类
+      goodsSelectedIndex:0, //绑定商品分类的索引
     };
   },
   watch: {
@@ -466,6 +521,59 @@ export default {
   },
   props: ["res"],
   methods: {
+    // 选择分类
+    confirmCategory(val){
+      let data = {...this.res.options.list[0].titleWay[this.goodsSelectedIndex]}
+      let callback = {
+        id:val[0].id,
+        name:val[0].name,
+        categoryIdWay:val[0].id
+      };
+      data = {
+        ...data,
+        bindCategory:callback
+      }
+      this.res.options.list[0].listWay = this.res.options.list[0].listWay.filter(item=>{
+        return item.___index != this.goodsSelectedIndex
+      })
+      this.res.options.list[0].titleWay[this.goodsSelectedIndex] = data
+
+      console.log( this.res.options.list[0])
+    },
+    // 商品排序
+    slotGoods(list, key, val) {
+      const newVal = [];
+      let newValIndex = 0;
+      // 给当前点击的商品分组
+      list.forEach((item, index) => {
+        if (item.___index == key) {
+          newVal.push(item);
+        }
+      });
+      // 获得当前点击商品的索引
+      newVal.forEach((item, index) => {
+        if (item.id == val.id) {
+          newValIndex = index;
+        }
+      });
+      // 进行商品排序
+      this.upData(newVal, newValIndex);
+      if (list.length == newVal.length) {
+        list = newVal;
+      } else {
+        let newList;
+        newVal.forEach((item, index) => {
+          newList = list.filter((child) => {
+            return child.id != item.id && child.___index != key;
+          });
+        });
+        list = [...newList, ...newVal];
+      }
+
+      this.$set(this.res.options.list[0], "listWay", list);
+    },
+
+    // 轮播图排序
     slotBanner(val, key, index, down) {
       console.log(val);
       if (down == "down") {
@@ -485,14 +593,13 @@ export default {
       arr[index1] = arr.splice(index2, 1, arr[index1])[0];
       return arr;
     },
-    downData(arr,index) {
+    downData(arr, index) {
       let newArr = [];
       if (arr.length > 1 && index !== arr.length - 1) {
         newArr = this.swapItems(arr, index, index + 1);
       }
       return newArr;
     },
-
     // 改变横纵切换title内容
     changeDirection(val, data) {
       if (val == "horizontal") {
@@ -510,7 +617,7 @@ export default {
     },
     // 回调选择的链接
     selectedLink(val) {
-      console.log(val);
+      this.selectedLinks.zoneInfo = []
       delete val.selected;
       delete val.intro;
       delete val.mobileIntro;
@@ -532,12 +639,21 @@ export default {
         };
       });
       this.res.options.list[0].listWay.push(...data);
+      // 清除已经绑定的分类
+      this.res.options.list[0].titleWay[this.goodsSelectedIndex].bindCategory = ""
       this.linkType = "";
     },
     // 绑定商品
-    bindGoodsId(val) {
+    bindGoodsId(val,index) {
       this.selectedGoods = val;
+      this.goodsSelectedIndex = index
       this.liliDialogFlag(true);
+    },
+    // 绑定分类
+    bindGoodsCategory(index,key){
+      this.enableSelectCategory = true
+      this.goodsSelectedIndex = index
+
     },
     // 点击抽屉
     clickDrawer(item, index) {

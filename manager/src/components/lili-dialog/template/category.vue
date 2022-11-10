@@ -89,7 +89,7 @@ export default {
           // this.handleClickChild(category[0], 0);
         },3000)
       }
-      
+
     },
   },
 };
@@ -114,5 +114,6 @@ export default {
 }
 .wrapper {
   overflow: hidden;
+  display: flex;
 }
 </style>

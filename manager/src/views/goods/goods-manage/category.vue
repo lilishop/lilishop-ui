@@ -5,6 +5,7 @@
         <Button @click="addParent" icon="md-add">添加一级分类</Button>
       </div>
       <Table
+      update-show-children
         class="table"
         :load-data="handleLoadData"
         row-key="id"

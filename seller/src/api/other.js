@@ -29,7 +29,6 @@ export const getHomeData = params => {
  *
  */
 export const getHomeList = params => {
-
   return getRequest("/settings/pageData/pageDataList", params);
 };
 
@@ -38,8 +37,7 @@ export const getHomeList = params => {
  * 修改楼层装修
  *
  */
-export const updateHome = (id,params) => {
-
+ export const updateHome = (id, params) => {
   return putRequest(`/settings/pageData/update/${id}`, params);
 };
 
@@ -48,7 +46,6 @@ export const updateHome = (id,params) => {
  *
  */
 export const removePageHome = (id) => {
-
   return deleteRequest(`/settings/pageData/removePageData/${id}`);
 };
 

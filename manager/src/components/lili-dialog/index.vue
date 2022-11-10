@@ -1,9 +1,25 @@
 <template>
-  <Modal :styles="{ top: '120px' }" width="1160" z-index="10000" @on-cancel="clickClose" @on-ok="clickOK" v-model="flag" :mask-closable="false" scrollable>
+  <Modal :styles="{ top: '120px' }" width="1160" :z-index="10000" @on-cancel="clickClose" @on-ok="clickOK" v-model="flag" :mask-closable="false" scrollable>
     <template v-if="flag">
-      <goodsDialog @selected="(val) => {goodsData = val;}"
-        v-if="goodsFlag" ref="goodsDialog" :selectedWay='goodsData'/>
-      <linkDialog @selectedLink="(val) => { linkData = val; }" v-else class="linkDialog" />
+      <goodsDialog
+        @selected="
+          (val) => {
+            goodsData = val;
+          }
+        "
+        v-if="goodsFlag"
+        ref="goodsDialog"
+        :selectedWay="goodsData"
+      />
+      <linkDialog
+        @selectedLink="
+          (val) => {
+            linkData = val;
+          }
+        "
+        v-else
+        class="linkDialog"
+      />
     </template>
   </Modal>
 </template>
@@ -13,7 +29,7 @@ import linkDialog from "./link-dialog";
 export default {
   components: {
     goodsDialog,
-    linkDialog
+    linkDialog,
   },
   data() {
     return {
@@ -56,12 +72,11 @@ export default {
       if (type == "goods") {
         this.goodsFlag = true;
         if (mutiple) {
-          this.singleGoods()
+          this.singleGoods();
         }
       } else {
         this.goodsFlag = false;
       }
-
     },
     // 关闭组件
     close() {
