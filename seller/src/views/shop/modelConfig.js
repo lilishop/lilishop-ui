@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 38618819962d2f4ad7da4d3bc213d151943f1744
 export const modelData = [
   {
     type: 'hotAdvert',

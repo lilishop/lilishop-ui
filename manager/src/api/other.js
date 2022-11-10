@@ -57,10 +57,6 @@ export const removePageHome = (id) => {
 export const getOpenHomeData = params => {
   return getRequest(`/other/pageData/pageType/${params}`);
 };
-// 保存修改弹窗广告
-export const addOpenHomeData = params => {
-  return postRequest(`/other/pageData/pageType/${params}`);
-};
 
 
 /**
@@ -100,10 +96,7 @@ export const getMemberMessage = (params) => {
   return getRequest(`/other/memberMessage`, params);
 };
 
-// 弹窗广告
-export const getOpenHomeData = params => {
-  return getRequest(`/other/pageData/pageType/${params}`);
-};
+
 // 保存修改弹窗广告
 export const addOpenHomeData = params => {
   return postRequest(`/other/pageData/pageType/${params}`);

@@ -19,15 +19,10 @@
           <div>临时预览</div>
           <div ref="qrCodeUrl"></div>
         </div>
-<<<<<<< HEAD
       </Poptip> -->
       <Button size="default" type="primary" @click="handleSpinShow"
         >保存模板</Button
       >
-=======
-      </Poptip>-->
-      <Button size="default" type="primary" @click="handleSpinShow">保存模板</Button>
->>>>>>> 38618819962d2f4ad7da4d3bc213d151943f1744
 
       <Modal
         title="保存中"

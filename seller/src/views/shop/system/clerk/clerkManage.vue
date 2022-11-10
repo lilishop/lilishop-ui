@@ -453,11 +453,7 @@ export default {
       this.open = this.form.mobile.length;
       console.log(this.open)
       if(this.open == 11 ){
-<<<<<<< HEAD
         this.checkClerk();
-=======
-        this.checkClerk();  
->>>>>>> 38618819962d2f4ad7da4d3bc213d151943f1744
       }
       if(this.open < 11){
         this.checkAgainClerk()
