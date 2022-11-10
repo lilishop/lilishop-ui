@@ -434,21 +434,21 @@ export const modelData = [
       ]
     }
   },
-  {
-    type: "search",
-    name: "搜索",
-    img: "md-image",
-    notAdd: true,
-    notLink: true,
-    notImg: true,
-    options: {
-      list: [
-        {
-          title: "搜索"
-        }
-      ]
-    }
-  },
+  // {
+  //   type: "search",
+  //   name: "搜索",
+  //   img: "md-image",
+  //   notAdd: true,
+  //   notLink: true,
+  //   notImg: true,
+  //   options: {
+  //     list: [
+  //       {
+  //         title: "搜索"
+  //       }
+  //     ]
+  //   }
+  // },
   {
     type: "goods",
     name: "商品分类",
@@ -504,7 +504,7 @@ export const modelData = [
               type: "精选",
               ___index:0
             },
-            
+
           ]
         }
       ]
