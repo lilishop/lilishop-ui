@@ -453,7 +453,7 @@ export default {
       this.open = this.form.mobile.length;
       console.log(this.open)
       if(this.open == 11 ){
-        this.checkClerk();  
+        this.checkClerk();
       }
       if(this.open < 11){
         this.checkAgainClerk()

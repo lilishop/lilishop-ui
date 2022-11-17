@@ -1,8 +1,6 @@
 <template>
   <div class="model-carousel2">
     <div class="nav-body clearfix">
-      <!-- 侧边导航 -->
-      <div class="nav-side">分类占位区</div>
       <div class="nav-content setup-content">
         <!-- 轮播图 -->
         <Carousel autoplay>
@@ -39,29 +37,6 @@
           </div>
         </div>
       </div>
-      <div class="nav-right">
-        <div class="person-msg">
-          <img :src="userInfo.face" v-if="userInfo.face" alt />
-          <Avatar icon="ios-person" class="mb_10" v-else size="80" />
-          <div>Hi，{{ userInfo.nickName || "欢迎来到管理后台" | secrecyMobile }}</div>
-          <div v-if="userInfo.id">
-            <Button type="error" shape="circle">会员中心</Button>
-          </div>
-          <div v-else>
-            <Button type="error" shape="circle">请登录</Button>
-          </div>
-        </div>
-        <div class="shop-msg">
-          <div>
-            <span>常见问题</span>
-            <ul class="article-list">
-              <li class="ellipsis" :alt="article.title" v-for="(article, index) in articleList" :key="index" @click="goArticle(article.id)">
-                {{article.title}}
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>)
     </div>
     <!-- 左侧轮播装修 -->
     <Modal

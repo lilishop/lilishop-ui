@@ -1,8 +1,7 @@
 import lazyLoading from './lazyLoading.js';
 import Cookies from "js-cookie";
-
-import { result } from './routerJson.js';
 import { getCurrentPermissionList } from "@/api/index";
+
 
 const config = require('@/config/index')
 

@@ -29,8 +29,7 @@ export const getHomeData = params => {
  *
  */
 export const getHomeList = params => {
-  return getRequest(`/settings/pageData/${params.pageClientType}/pageDataList`, params);
-
+  return getRequest("/settings/pageData/pageDataList", params);
 };
 
 

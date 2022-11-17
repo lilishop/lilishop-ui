@@ -11,17 +11,6 @@ export function indexData(params) {
 }
 
 /**
- * 获取店铺楼层数据
- */
-export function getFloorStoreData(params) {
-  return request({
-    url: `/buyer/other/pageData?pageClientType=PC`,
-    method: "get",
-    params,
-  });
-}
-
-/**
  * 楼层装修数据
  * @param pageClientType 客户端类型,可用值:PC,H5,WECHAT_MP,APP
  * @param pageType 页面类型,可用值:INDEX,STORE,SPECIAL
@@ -46,13 +35,13 @@ export function handleRefreshToken(token) {
   });
 }
 
-// /**
-//  * 获取店铺楼层数据
-//  */
-// export function getFloorStoreData(params) {
-//   return request({
-//     url: `/buyer/other/pageData?pageClientType=PC`,
-//     method: "get",
-//     params,
-//   });
-// }
+/**
+ * 获取店铺楼层数据
+ */
+export function getFloorStoreData(params) {
+  return request({
+    url: `/buyer/other/pageData?pageClientType=PC`,
+    method: "get",
+    params,
+  });
+}

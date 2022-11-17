@@ -125,8 +125,6 @@ export default {
       topSearchShow: false, // 滚动后顶部搜索栏展示
       carouselLarge: false, // 不同轮播分类尺寸
       carouselOpacity: false, // 不同轮播分类样式,
-      enablePageData: false, //是否显示楼层装修内容
-      basePageData: false, //基础店铺信息
       storeMsg: {}, // 店铺信息
       cateList: [], // 店铺分裂
       goodsList: [], // 商品列表
