@@ -589,10 +589,6 @@ export default {
         video: {
           url: v.url,
         },
-        danmaku: {
-          id: v.fileKey,
-          api: "https://api.prprpr.me/dplayer/",
-        },
       });
       this.file = v;
       this.file.msize = ((v.fileSize * 1.0) / (1024 * 1024)).toFixed(2) + " MB";

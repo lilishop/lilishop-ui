@@ -176,7 +176,7 @@
     ></liliDialog>
 
     <Modal width="1200px" v-model="picModelFlag">
-      <ossManage @callback="callbackSelected" ref="ossManage" />
+      <ossManage  @callback="callbackSelected" ref="ossManage" />
     </Modal>
   </div>
 </template>
@@ -286,7 +286,7 @@ export default {
     },
     // 点击选择图片
     handleClickFile(item, index) {
-      // this.$refs.ossManage.selectImage = true;
+      this.$refs.ossManage.selectImage = true;
       this.selectedGoods = item;
       this.picModelFlag = true;
     },
