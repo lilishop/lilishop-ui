@@ -215,6 +215,10 @@ export default {
     },
     // 回调选择的链接
     selectedLink(val) {
+      // 需删除图片中 intro 和 mobileIntro 可能存在转义符导致json出错问题
+      delete val.selected;
+      delete val.intro;
+      delete val.mobileIntro;
       this.selectedLinks.url = val;
     },
     // 回调的商品信息
@@ -232,6 +236,7 @@ export default {
           ...item,
         };
       });
+
       this.res.options.list[0].listWay.push(...data);
       this.linkType = "";
     },
