@@ -36,7 +36,7 @@
             <i-col span="4">
               <Tooltip transfer>
                   <div class="content">{{item.content}}</div>
-                  <div style="white-space: normal;" slot="content">
+                  <div style="white-space: normal;word-break:break-all" slot="content">
                     {{item.content}}
                   </div>
               </Tooltip>
@@ -160,7 +160,11 @@ export default {
   color: #999;
   max-height: 60px;
   overflow: hidden;
-  word-wrap: break-word;
+  // word-wrap: break-word;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;/*设置方向*/
+  -webkit-line-clamp:3;/*设置超过为省略号的行数*/
+  word-break:break-all; 
 }
 
 .eval-detail {
