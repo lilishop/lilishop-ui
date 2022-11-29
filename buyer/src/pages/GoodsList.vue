@@ -66,7 +66,7 @@
                   v-if="item.content.salesModel === 'WHOLESALE'"
                   class="goods-show-tag"
                   color="purple"
-                  >
+                >
                   批发
                 </Tag>
                 <span>{{ item.content.goodsName }}</span>
@@ -76,32 +76,29 @@
                 >人评价
               </div>
               <div class="goods-show-seller">
-                <Tag
-                  class="goods-show-buyer"
-                  v-if="item.content.selfOperated"
-                  size="default"
-                  color="error"
-                  >自营
-                </Tag>
-                <div class="goods-show-right">
-                  <div
-                    class="goods-show-middle"
-                    v-if="goodsListType.content.goodsType == 'VIRTUAL_GOODS'"
-                  >
-                    虚拟
-                  </div>
-                  <div
-                    class="goods-show-middle"
-                    v-else-if="
-                      goodsListType.content.goodsType == 'PHYSICAL_GOODS'
-                    "
-                  >
-                    实物
-                  </div>
-                </div>
                 <span class="text-bottom" style="color: #e4393c">{{
                   item.content.storeName
                 }}</span>
+              </div>
+
+              <div class="goods-show-right">
+                <Tag class="goods-show-tag" color="red" v-if="item.content.selfOperated">
+                  自营
+                </Tag>
+                <Tag
+                  class="goods-show-tag" color="blue"
+                  v-if="goodsListType.content.goodsType == 'VIRTUAL_GOODS'"
+                >
+                  虚拟
+                </Tag>
+                <Tag
+                  class="goods-show-tag" color="blue"
+                  v-else-if="
+                    goodsListType.content.goodsType == 'PHYSICAL_GOODS'
+                  "
+                >
+                  实物
+                </Tag>
               </div>
             </div>
           </div>
@@ -257,11 +254,12 @@ export default {
 <style scoped lang="scss">
 @import "../assets/styles/goodsList.scss";
 .goods-show-info > .goods-show-seller > .goods-show-buyer {
-  height: 16px;
-  width: 30px;
+  width: 35px;
+  height: 17px;
   white-space: nowrap;
   line-height: 17px;
   text-align: center;
+  align-content: center;
   padding: 0 3px;
   background-color: #e23a3a;
 }
@@ -298,27 +296,48 @@ export default {
   border: 1px solid #ccc;
 }
 .goods-show-right {
-  width: 35px;
-  height: 17px;
-  // vertical-align:middle;
-  overflow: hidden;
-  margin-top: 1.5px;
-  margin-right: 5px;
-  line-height: 16px;
-  background: white;
-  border-radius: 4px;
-  margin-bottom: 5px;
+  display: flex;
+  flex-direction: row;
+  margin-top: 5px;
+}
+
+
+.goods-show-self {
   float: left;
+  height: 16px;
+  line-height: 16px;
+  padding: 0 3px;
+  margin-right: 3px;
+  overflow: hidden;
   text-align: center;
+  font-style: normal;
+  font-size: 12px;
+  background: #e23a3a;
+  color: #fff;
+  border-radius: 2px;
+}
+
+.goods-show-middle {
+  float: left;
+  height: 16px;
+  line-height: 16px;
+  padding: 0 3px;
+  margin-right: 3px;
+  overflow: hidden;
+  text-align: center;
+  font-style: normal;
+  font-size: 12px;
   border: 1px solid rgba(112, 123, 187, 0.8);
   color: rgba(112, 123, 187, 0.8);
 }
-.goods-show-middle:hover {
-  color: rgba(2, 15, 88, 0.6);
-  border: 0.2px solid rgba(0, 13, 87, 0.6);
-  border-radius: 4px;
-  line-height: 18px;
-}
+
+// .goods-show-middle:hover {
+//   color: rgba(2, 15, 88, 0.6);
+//   border: 0.2px solid rgba(0, 13, 87, 0.6);
+//   border-radius: 4px;
+//   line-height: 18px;
+// }
+
 .item-as-title {
   width: 100%;
   height: 36px;
