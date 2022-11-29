@@ -371,7 +371,7 @@ export default {
     changeCount(val) {
       if (this.wholesaleList && this.wholesaleList.length > 0) {
         if (this.count <= this.wholesaleList[0].num) {
-          this.$Message.warning("购买数量不能小于起批数量");
+          this.$Message.warning("批发商品购买数量不能小于起批数量");
           this.count = this.wholesaleList[0].num;
         }
       }
