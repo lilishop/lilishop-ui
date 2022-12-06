@@ -238,6 +238,7 @@
                 :disabled="skuDetail.quantity === 0"
                 v-model="count"
                 :precision="0.1"
+                @on-blur="changeCount"
               ></InputNumber>
               <span class="inventory"> 库存{{ skuDetail.quantity }}</span>
             </div>
@@ -317,6 +318,9 @@ export default {
       handler(val) {
         this.skuDetail = val.data;
         this.wholesaleList = val.wholesaleList;
+        if (this.wholesaleList && this.wholesaleList.length > 0) {
+          this.count = this.wholesaleList[0].num;
+        }
         this.swiperGoodsImg();
       },
       deep: true,
@@ -364,6 +368,14 @@ export default {
     },
   },
   methods: {
+    changeCount(val) {
+      if (this.wholesaleList && this.wholesaleList.length > 0) {
+        if (this.count <= this.wholesaleList[0].num) {
+          this.$Message.warning("批发商品购买数量不能小于起批数量");
+          this.count = this.wholesaleList[0].num;
+        }
+      }
+    },
     select(index, value) {
       // 选择规格
       this.$set(this.currentSelceted, index, value);

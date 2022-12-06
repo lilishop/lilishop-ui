@@ -113,6 +113,7 @@ export default {
         this.spinShow = false;
         if (res.success && res.result.records.length) {
           this.list = res.result.records;
+          this.total = res.result.total
         } else {
           this.list = [];
         }

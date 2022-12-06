@@ -296,6 +296,10 @@ export const editDepartment = (ids, params) => {
 export const loadDepartment = (id) => {
   return getRequest(`/department/${id}`);
 };
+// 搜索部门
+export const searchDepartment = (params) => {
+  return getRequest("/department", params);
+};
 
 // 通过部门获取全部角色数据
 export const getUserByDepartmentId = (id, params) => {

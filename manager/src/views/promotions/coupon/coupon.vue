@@ -146,26 +146,26 @@ export default {
         // 表头
         {
           type: "selection",
-          width: 60,
+          width: 100,
           align: "center",
           fixed: "left",
         },
         {
           title: "活动名称",
           key: "promotionName",
-          width: 100,
+          width: 180,
           fixed: "left",
         },
         {
           title: "优惠券名称",
           key: "couponName",
-          width: 100,
+          width: 180,
           tooltip: true,
         },
         {
           title: "面额/折扣",
           key: "price",
-          width: 100,
+          width: 150,
           render: (h, params) => {
             if (params.row.price) {
               return h(
@@ -181,7 +181,7 @@ export default {
         {
           title: "已领取数量/总数量",
           key: "publishNum",
-          width: 150,
+          width: 180,
           render: (h, params) => {
             return h(
               "div",
@@ -195,7 +195,7 @@ export default {
         {
           title: "已使用/已领取/总数量",
           key: "publishNum",
-          width: 130,
+          width: 200,
           render: (h, params) => {
             //return h("div", params.row.usedNum + "/" + params.row.receivedNum);
             return h("div", params.row.usedNum + "/" + params.row.receivedNum+"/" + (params.row.publishNum === 0 ? "不限制" : params.row.publishNum));
@@ -204,7 +204,7 @@ export default {
         {
           title: "优惠券类型",
           key: "couponType",
-          width: 120,
+          width: 150,
           render: (h, params) => {
             let text = "";
             if (params.row.couponType === "DISCOUNT") {
@@ -226,7 +226,7 @@ export default {
         },
         {
           title: "活动时间",
-          width: 150,
+          width: 200,
           render: (h, params) => {
             if (
               params?.row?.getType === "ACTIVITY" &&
@@ -247,18 +247,18 @@ export default {
           title: "状态",
           width: 100,
           key: "promotionStatus",
+          align: "center",
           fixed: "right",
           render: (h, params) => {
             return promotionsStatusRender(h, params);
           },
-          minWidth: 70,
         },
         {
           title: "操作",
           slot: "action",
           align: "center",
           fixed: "right",
-          width: 130,
+          width: 150,
         },
       ],
       data: [], // 表单数据
