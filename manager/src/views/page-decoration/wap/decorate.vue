@@ -26,13 +26,20 @@
         >选择促销活动</Button
       >
     </div>
-    <Alert type="warning" v-if="res.name == '商品分类'">装修提示
-        <template slot="desc">
-            <div style="color:red"> 如果当前装修模块不是最后一项模块且模块内容绑定为分类，则会默认展示绑定分类的100条商品信息。</div>
-            <div style="color:red"> 如果当前装修模块是最后一项模块且模块内容绑定为分类，则会默认会根据绑定分类触底加载商品信息。</div>
-            <div style="color:red"> 如果当前装修内容不为分类，则会展示当前商品的静态信息。</div>
-        </template>
-     </Alert>
+    <Alert type="warning" v-if="res.name == '商品分类'"
+      >装修提示
+      <template slot="desc">
+        <div style="color: red">
+          如果当前装修模块不是最后一项模块且模块内容绑定为分类，则会默认展示绑定分类的100条商品信息。
+        </div>
+        <div style="color: red">
+          如果当前装修模块是最后一项模块且模块内容绑定为分类，则会默认会根据绑定分类触底加载商品信息。
+        </div>
+        <div style="color: red">
+          如果当前装修内容不为分类，则会展示当前商品的静态信息。
+        </div>
+      </template>
+    </Alert>
 
     <!-- 右侧显示抽屉 -->
     <Drawer title="选择风格" :closable="false" width="400" v-model="styleFlag">
@@ -119,66 +126,61 @@
             </div>
             <div class="decorate-view">
               <div class="decorate-view-title">绑定</div>
-              <div   class="decorate-view-link">
-              <div
+              <div class="decorate-view-link">
+                <div v-if="res.options.list[0].listWay.length != 0">
+                  <!-- 绑定商品选择器回调已选择的商品 -->
 
-                v-if="res.options.list[0].listWay.length != 0"
-              >
-                <!-- 绑定商品选择器回调已选择的商品 -->
-
-                <div
-                  v-if="
-                    title_item.___index == bindGoods.___index ||
-                    title_item.title == bindGoods.type
-                  "
-                  v-for="(bindGoods, bindGoodsIndex) in res.options.list[0]
-                    .listWay"
-                  :key="bindGoodsIndex"
-                  class="title-item wes-2"
-                >
-                  <Tooltip max-width="200" placement="left">
-                    <div slot="content" class="title-tooltip">
-                      {{ bindGoods.title }}
+                  <div
+                    v-if="
+                      title_item.___index == bindGoods.___index ||
+                      title_item.title == bindGoods.type
+                    "
+                    v-for="(bindGoods, bindGoodsIndex) in res.options.list[0]
+                      .listWay"
+                    :key="bindGoodsIndex"
+                    class="title-item wes-2"
+                  >
+                    <Tooltip max-width="200" placement="left">
+                      <div slot="content" class="title-tooltip">
+                        {{ bindGoods.title }}
+                      </div>
+                      <div class="title-goodsName">
+                        {{ bindGoods.title }}
+                      </div>
+                    </Tooltip>
+                    <div class="title-btn">
+                      <Button
+                        @click="
+                          slotGoods(
+                            res.options.list[0].listWay,
+                            title_item.___index,
+                            bindGoods,
+                            'up'
+                          )
+                        "
+                        style="margin-right: 10px"
+                        size="small"
+                        >上移</Button
+                      >
                     </div>
-                    <div class="title-goodsName">
-                      {{ bindGoods.title }}
-                    </div>
-                  </Tooltip>
-                  <div class="title-btn">
-                    <Button
-                      @click="
-                        slotGoods(
-                          res.options.list[0].listWay,
-                          title_item.___index,
-                          bindGoods,
-                          'up'
-                        )
-                      "
-                      style="margin-right: 10px"
-                      size="small"
-                      >上移</Button
-                    >
                   </div>
                 </div>
-
-              </div>
-               <!-- 显示绑定分类 -->
-                <div v-if="title_item.bindCategory" >
+                <!-- 显示绑定分类 -->
+                <div v-if="title_item.bindCategory">
                   绑定分类为：{{ title_item.bindCategory.name }}
                 </div>
               </div>
 
               <div class="decorate-view-btn">
                 <Button
-                  @click="bindGoodsId(title_item,title_index)"
+                  @click="bindGoodsId(title_item, title_index)"
                   size="small"
                   >选择商品</Button
                 >
                 <Button
                   @click="bindGoodsCategory(title_index)"
                   size="small"
-
-                  style='margin-top:20px'
+                  style="margin-top: 20px"
                   >选择分类</Button
                 >
               </div>
@@ -437,21 +439,31 @@
                 {{ item.model === "hotzone" ? "绘制热区" : "选择链接" }}</Button
               >
             </div>
-            <!-- 链接地址-->
-            <div
-              class="decorate-view"
-              v-if="item.url && item.url.url && item.url.___type == 'other'"
-            >
-              <div class="decorate-view-title">外部链接</div>
-              <div>
-                <Input v-model="item.url.url" style="width: 200px" />
-              </div>
-            </div>
-
-            <p v-if="item.url && item.url.url && item.url.___type == 'other'">
-              (如非同域名下，则在小程序与公众号中无效)
-            </p>
           </div>
+          <!-- 链接地址-->
+          <div
+            class="decorate-view"
+            v-if="
+              item.url &&
+              item.url.url !== undefined &&
+              item.url.___type == 'other'
+            "
+          >
+            <div class="decorate-view-title">外部链接</div>
+            <div>
+              <Input v-model="item.url.url" style="width: 200px" />
+            </div>
+          </div>
+
+          <p
+            v-if="
+              item.url &&
+              item.url.url !== undefined &&
+              item.url.___type == 'other'
+            "
+          >
+            (如非同域名下，则在小程序与公众号中无效)
+          </p>
         </div>
       </div>
     </div>
@@ -475,8 +487,11 @@
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
 
-    <Modal width='800px' title="选择分类" v-model="enableSelectCategory">
-      <categoryTemplate v-if="enableSelectCategory" @selected="confirmCategory" />
+    <Modal width="800px" title="选择分类" v-model="enableSelectCategory">
+      <categoryTemplate
+        v-if="enableSelectCategory"
+        @selected="confirmCategory"
+      />
     </Modal>
 
     <hotzone ref="hotzone" @changeZone="changeZone"></hotzone>
@@ -496,7 +511,7 @@ export default {
   components: {
     ossManage,
     hotzone,
-    categoryTemplate
+    categoryTemplate,
   },
   data() {
     return {
@@ -513,8 +528,8 @@ export default {
       selectedGoods: "", // 已选商品
       selectedLinks: "", // 已选链接
       modelList: "", // 装修列表
-      enableSelectCategory:false, //商品是否绑定分类
-      goodsSelectedIndex:0, //绑定商品分类的索引
+      enableSelectCategory: false, //商品是否绑定分类
+      goodsSelectedIndex: 0, //绑定商品分类的索引
     };
   },
   watch: {
@@ -526,23 +541,26 @@ export default {
   props: ["res"],
   methods: {
     // 选择分类
-    confirmCategory(val){
-      let data = {...this.res.options.list[0].titleWay[this.goodsSelectedIndex]}
+    confirmCategory(val) {
+      let data = {
+        ...this.res.options.list[0].titleWay[this.goodsSelectedIndex],
+      };
       let callback = {
-        id:val[0].id,
-        name:val[0].name,
-        categoryIdWay:val[0].id
+        id: val[0].id,
+        name: val[0].name,
+        categoryIdWay: val[0].id,
       };
       data = {
         ...data,
-        bindCategory:callback
-      }
-      this.res.options.list[0].listWay = this.res.options.list[0].listWay.filter(item=>{
-        return item.___index != this.goodsSelectedIndex
-      })
-      this.res.options.list[0].titleWay[this.goodsSelectedIndex] = data
+        bindCategory: callback,
+      };
+      this.res.options.list[0].listWay =
+        this.res.options.list[0].listWay.filter((item) => {
+          return item.___index != this.goodsSelectedIndex;
+        });
+      this.res.options.list[0].titleWay[this.goodsSelectedIndex] = data;
 
-      console.log( this.res.options.list[0])
+      console.log(this.res.options.list[0]);
     },
     // 商品排序
     slotGoods(list, key, val) {
@@ -621,7 +639,7 @@ export default {
     },
     // 回调选择的链接
     selectedLink(val) {
-      this.selectedLinks.zoneInfo = []
+      this.selectedLinks.zoneInfo = [];
       delete val.selected;
       delete val.intro;
       delete val.mobileIntro;
@@ -644,20 +662,20 @@ export default {
       });
       this.res.options.list[0].listWay.push(...data);
       // 清除已经绑定的分类
-      this.res.options.list[0].titleWay[this.goodsSelectedIndex].bindCategory = ""
+      this.res.options.list[0].titleWay[this.goodsSelectedIndex].bindCategory =
+        "";
       this.linkType = "";
     },
     // 绑定商品
-    bindGoodsId(val,index) {
+    bindGoodsId(val, index) {
       this.selectedGoods = val;
-      this.goodsSelectedIndex = index
+      this.goodsSelectedIndex = index;
       this.liliDialogFlag(true);
     },
     // 绑定分类
-    bindGoodsCategory(index,key){
-      this.enableSelectCategory = true
-      this.goodsSelectedIndex = index
-
+    bindGoodsCategory(index, key) {
+      this.enableSelectCategory = true;
+      this.goodsSelectedIndex = index;
     },
     // 点击抽屉
     clickDrawer(item, index) {
