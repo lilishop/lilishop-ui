@@ -535,6 +535,7 @@
               prop="intro"
               style="width: 100%"
             >
+             <Alert class='editor-alert' type="warning">将文件夹下的图片进行拖拽到文本框内，即可完成单/多图片上传。</Alert>
               <editor
                 ref="editor"
                 v-model="baseInfoForm.intro"
@@ -1954,7 +1955,9 @@ export default {
 .ivu-select .ivu-select-dropdown {
   overflow: hidden !important;
 }
-
+.editor-alert{
+  text-align: left;
+}
 /* .tox-notifications-container{
   display: none !important;
 } */
