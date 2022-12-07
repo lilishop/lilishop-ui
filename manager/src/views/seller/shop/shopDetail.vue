@@ -871,7 +871,9 @@
           this.$set(this, "storeInfo", res.result);
           //因switch开关需要用到true或者false 所以进行一次格式化
           this.storeInfo.storeDisable = this.storeInfo.storeDisable === "OPEN" ? true : false
-          this.checkAllGroup = this.storeInfo.goodsManagementCategory.split(",");
+          if(this.storeInfo.goodsManagementCategory != null){
+            this.checkAllGroup = this.storeInfo.goodsManagementCategory.split(",");
+          }
           this.storeInfo.legalPhoto = this.storeInfo.legalPhoto.split(",");
         });
       },
