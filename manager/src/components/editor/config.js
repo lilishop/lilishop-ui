@@ -1,6 +1,6 @@
 import plugins from "./plugins";
 import toobar from "./toolbar";
-import { upLoadFileMethods } from "@/api/common";
+import { upLoadFile } from "@/api/common";
 
 export const initEditor = {
   height: "400px",
@@ -18,7 +18,7 @@ export const initEditor = {
     const formData = new FormData();
     formData.append("file", blobInfo.blob());
     try {
-      const res = await upLoadFileMethods(formData);
+      const res = await upLoadFile(formData);
       if (res.result) {
         success(res.result)
       } else {
