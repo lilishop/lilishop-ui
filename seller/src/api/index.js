@@ -369,4 +369,9 @@ export const editOtherUser = (id, params) => {
   return putRequest(`/clerk/${id}`,params);
 };
 
-
+// /**
+//  *  搜索部门 先加入此api防止运行warn
+//  */
+// export const searchDepartment = (params) => {
+//   return getRequest("/permission/department/search", params);
+// };

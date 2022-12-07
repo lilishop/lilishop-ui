@@ -5,20 +5,17 @@ import { upLoadFileMethods } from "@/api/common";
 export const initEditor = {
   height: "400px",
   language: "zh_CN",
-  menubar: "file edit insert view format table", // 菜单:指定应该出现哪些菜单
+  menubar: "file edit  view format table", // 菜单:指定应该出现哪些菜单
   toolbar: toobar, // 分组工具栏控件
   plugins: plugins, // 插件(比如: advlist | link | image | preview等)
   object_resizing: false, // 是否禁用表格图片大小调整
   end_container_on_empty_block: true, // enter键 分块
   powerpaste_word_import: "merge", // 是否保留word粘贴样式  clean | merge
-  code_dialog_height: 450, // 代码框高度 、宽度
-  code_dialog_width: 1000,
   advlist_bullet_styles: "square", // 无序列表 有序列表
   maxSize: "2097152", // 设置图片大小
   accept: "image/jpeg, image/png", // 设置图片上传规则
   images_upload_handler: async function (blobInfo, success, failure) {
     const formData = new FormData();
-    console.log("请求")
     formData.append("file", blobInfo.blob());
     try {
       const res = await upLoadFileMethods(formData);
