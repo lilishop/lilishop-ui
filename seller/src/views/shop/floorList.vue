@@ -25,14 +25,25 @@
         <div class="item" v-for="(item, index) in list" :key="index">
           <div>{{ item.name || "暂无模板昵称" }}</div>
           <div class="item-config">
-            <i-switch v-model="item.pageShow" @on-change="releaseTemplate(item.id)">
+            <i-switch
+              v-model="item.pageShow"
+              @on-change="releaseTemplate(item.id)"
+            >
               <span slot="open">开</span>
               <span slot="close">关</span>
             </i-switch>
-            <Button type="info" placement="right" @click="Template(item)" size="small"
+            <Button
+              type="info"
+              placement="right"
+              @click="Template(item)"
+              size="small"
               >编辑</Button
             >
-            <Button type="success" placement="right" @click="decorate(item)" size="small"
+            <Button
+              type="success"
+              placement="right"
+              @click="decorate(item)"
+              size="small"
               >装修</Button
             >
             <Poptip confirm title="删除此模板？" @on-ok="delTemplate(item.id)">
@@ -42,7 +53,17 @@
         </div>
         <div class="no-more" v-if="list.length == 0">暂无更多模板</div>
       </div>
-      <Page show-total :total="total" show-sizer  :page-size-opts="[10, 20, 50]" show-elevator style="float:right;overflow:hidden;"  @on-change="changePageNum" @on-page-size-change="changePageSize" :page-size="searchForm.pageSize"/>
+      <Page
+        show-total
+        :total="total"
+        show-sizer
+        :page-size-opts="[10, 20, 50]"
+        show-elevator
+        style="float: right; overflow: hidden"
+        @on-change="changePageNum"
+        @on-page-size-change="changePageSize"
+        :page-size="searchForm.pageSize"
+      />
     </Card>
     <Modal
       v-model="showModal"
@@ -72,18 +93,18 @@ export default {
     return {
       showModal: false, // 添加modal的显示
       selectedIndex: 0, // 首页还是专题选择的index
-      total:0,
+      total: 0,
       formData: {
         // 新建模态框的数据
         status: false, // 模板是否开启
         name: "", // 模板名称
       },
-      searchForm:{
-        pageNumber:1,
-        pageSize:10,
-        sort: 'createTime',
-        order: 'desc',
-        pageClientType:'PC'
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 10,
+        sort: "createTime",
+        order: "desc",
+        pageClientType: "PC",
       },
       columns: [
         // 列表展示的column
@@ -167,13 +188,13 @@ export default {
       });
     },
 
-     // 分页 修改页码
-    changePageNum (val) {
+    // 分页 修改页码
+    changePageNum(val) {
       this.searchForm.pageNumber = val;
       this.getTemplateList();
     },
-     // 分页 修改页数
-    changePageSize (val) {
+    // 分页 修改页数
+    changePageSize(val) {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = val;
       this.getTemplateList();
@@ -189,7 +210,7 @@ export default {
       API_floor.getHomeList(this.searchForm).then((res) => {
         if (res.success) {
           // this.total
-          this.total = res.result.total
+          this.total = res.result.total;
           this.list = res.result.records;
           this.list.forEach((e) => {
             if (e.pageShow === "OPEN") {
