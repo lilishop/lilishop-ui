@@ -1,95 +1,104 @@
 <template>
   <div class="merchant">
-      <BaseHeader/>
-      <!-- 搜索栏 -->
-      <Search :store="true" @search="search"></Search>
-      <!-- 店铺logo -->
-      <div class="shop-logo">
-        <div>
-          <p>{{storeMsg.storeName || 'xx店铺'}}</p>
-          <p class="ellipsis" :alt="storeMsg.storeDesc" v-html="storeMsg.storeDesc"></p>
-        </div>
-        <div>
-          <span class="hover-pointer" @click="collect"><Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#fff'" />{{storeCollected?'已收藏店铺':'收藏店铺'}}</span>
-          <span style="width:80px" class="hover-pointer ml_10" @click="IMService()"><Icon custom="icomoon icon-customer-service"  />联系客服</span>
-        </div>
+    <BaseHeader/>
+    <!-- 搜索栏 -->
+    <Search :store="true" @search="search"></Search>
+    <!-- 店铺logo -->
+    <div class="shop-logo">
+      <div>
+        <p>{{ storeMsg.storeName || 'xx店铺' }}</p>
+        <p class="ellipsis" :alt="storeMsg.storeDesc" v-html="storeMsg.storeDesc"></p>
       </div>
-      <div class="store-category">
-        <ul class="cate-list">
-          <li
-            class="cate-item"
-            @click="searchByCate({ id: '', labelName: '店铺推荐' })"
-          >
-            首页
-          </li>
-          <li class="cate-item" v-for="(cate, index) in cateList" :key="index">
-            <Dropdown v-if="cate.children.length">
-              <div @click.self="searchByCate(cate)">
-                {{ cate.labelName }}
-                <Icon type="ios-arrow-down"></Icon>
-              </div>
-              <DropdownMenu slot="list">
-                <DropdownItem
-                  @click.native="searchByCate(sec)"
-                  :name="sec.id"
-                  v-for="sec in cate.children"
-                  :key="sec.id"
-                >{{ sec.labelName }}
-                </DropdownItem
-                >
-              </DropdownMenu>
-            </Dropdown>
-            <span v-else @click.self="searchByCate(cate)">{{
-                cate.labelName
-              }}</span>
-          </li>
-        </ul>
+      <div>
+        <span class="hover-pointer" @click="collect"><Icon type="ios-heart"
+                                                           :color="storeCollected ? '#ed3f14' : '#fff'"/>{{
+            storeCollected ? '已收藏店铺' : '收藏店铺'
+          }}</span>
+        <span style="width:80px" class="hover-pointer ml_10" @click="IMService()"><Icon
+          custom="icomoon icon-customer-service"/>联系客服</span>
       </div>
+    </div>
+    <div class="store-category">
+      <ul class="cate-list">
+        <li
+          class="cate-item"
+          @click="searchByCate({ id: '', labelName: '店铺推荐' })"
+        >
+          首页
+        </li>
+        <li class="cate-item" v-for="(cate, index) in cateList" :key="index">
+          <Dropdown v-if="cate.children.length">
+            <div @click.self="searchByCate(cate)">
+              {{ cate.labelName }}
+              <Icon type="ios-arrow-down"></Icon>
+            </div>
+            <DropdownMenu slot="list">
+              <DropdownItem
+                @click.native="searchByCate(sec)"
+                :name="sec.id"
+                v-for="sec in cate.children"
+                :key="sec.id"
+              >{{ sec.labelName }}
+              </DropdownItem
+              >
+            </DropdownMenu>
+          </Dropdown>
+          <span v-else @click.self="searchByCate(cate)">{{
+              cate.labelName
+            }}</span>
+        </li>
+      </ul>
+    </div>
 
+
+    <div v-if="storeMsg.pageShow&&storeMsg.pageShow==='1'">
+      <!-- 楼层装修部分 -->
+      <model-form ref="modelForm" :data="modelForm"></model-form>
+    </div>
+
+
+    <div v-else>
       <div class="promotion-decorate">{{ cateName }}</div>
+      <div class="goods-list">
 
-<!--      <div class="goods-list">-->
-<!--        <empty v-if="goodsList.length === 0"/>-->
-<!--        <div-->
-<!--          v-else-->
-<!--          class="goods-show-info"-->
-<!--          v-for="(item, index) in goodsList"-->
-<!--          :key="index"-->
-<!--          @click="goGoodsDetail(item.content.id, item.content.goodsId)"-->
-<!--        >-->
-<!--          <div class="goods-show-img">-->
-<!--            <img width="220" height="220" :src="item.content.thumbnail"/>-->
-<!--          </div>-->
-<!--          <div class="goods-show-price">-->
-<!--            <span>-->
-<!--              <span class="seckill-price text-danger">{{-->
-<!--                  item.content.price | unitPrice("￥")-->
-<!--                }}</span>-->
-<!--            </span>-->
-<!--          </div>-->
-<!--          <div class="goods-show-detail">-->
-<!--            <span>{{ item.content.goodsName }}</span>-->
-<!--          </div>-->
-<!--          <div class="goods-show-num">-->
-<!--            已有<span>{{ item.content.commentNum || 0 }}</span-->
-<!--          >人评价-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--      <div class="goods-page">-->
-<!--        <Page-->
-<!--          show-sizer-->
-<!--          @on-change="changePageNum"-->
-<!--          @on-page-size-change="changePageSize"-->
-<!--          :total="total"-->
-<!--          :page-size="params.pageSize"-->
-<!--        ></Page>-->
-<!--      </div>-->
-<!--      -->
+        <empty v-if="goodsList.length === 0"/>
+        <div
+          v-else
+          class="goods-show-info"
+          v-for="(item, index) in goodsList"
+          :key="index"
+          @click="goGoodsDetail(item.content.id, item.content.goodsId)"
+        >
+          <div class="goods-show-img">
+            <img width="220" height="220" :src="item.content.thumbnail"/>
+          </div>
+          <div class="goods-show-price">
+            <span>
+              <span class="seckill-price text-danger">{{
+                  item.content.price | unitPrice("￥")
+                }}</span>
+            </span>
+          </div>
+          <div class="goods-show-detail">
+            <span>{{ item.content.goodsName }}</span>
+          </div>
+          <div class="goods-show-num">
+            已有<span>{{ item.content.commentNum || 0 }}</span
+          >人评价
+          </div>
+        </div>
+      </div>
+      <div class="goods-page">
+        <Page
+          show-sizer
+          @on-change="changePageNum"
+          @on-page-size-change="changePageSize"
+          :total="total"
+          :page-size="params.pageSize"
+        ></Page>
+      </div>
 
-
-    <!-- 楼层装修部分 -->
-    <model-form ref="modelForm" :data="modelForm"></model-form>
+    </div>
 
     <BaseFooter/>
 
@@ -97,7 +106,7 @@
 </template>
 
 <script>
-import { getIMDetail } from "@/api/common";
+import {getIMDetail} from "@/api/common";
 import Storage from "../plugins/storage";
 import {getDetailById, getCateById} from "@/api/shopentry";
 import {cancelCollect, collectGoods, isCollection} from "@/api/member";
@@ -131,7 +140,7 @@ export default {
       cateList: [], // 店铺分裂
       goodsList: [], // 商品列表
       total: 0, // 商品数量
-      IMLink:"",
+      IMLink: "",
       params: {
         // 请求参数
         pageNumber: 1,
@@ -234,8 +243,13 @@ export default {
 
           this.storeMsg = res.result;
 
+          //判定如果开启楼层展示，则获取页面信息 否则读取商品信息
+          if (this.storeMsg.pageShow && this.storeMsg.pageShow === '1') {
 
-          this.getIndexData();
+            this.getIndexData();
+          } else {
+            this.getGoodsList();
+          }
           let that = this;
           window.onscroll = function () {
             let top =
