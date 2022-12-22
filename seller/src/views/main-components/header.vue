@@ -20,6 +20,7 @@ export default {
       if (
         !localStorage.getItem("sellersiteName") ||
         !localStorage.getItem("sellerlogoImg") ||
+        !localStorage.getItem("sellerIconImg") ||
         !localStorage.getItem("seller_expiration_time")
       ) {
         this.getSite();
@@ -36,7 +37,7 @@ export default {
             document.querySelector("link[rel*='icon']") ||
             document.createElement("link");
           link.type = "image/x-icon";
-          link.href = localStorage.getItem("sellerlogoImg");
+          link.href = localStorage.getItem("sellerIconImg");
           link.rel = "shortcut icon";
           document.getElementsByTagName("head")[0].appendChild(link);
         }
@@ -54,6 +55,7 @@ export default {
           // 存放信息
           localStorage.setItem("sellersiteName", data.siteName);
           localStorage.setItem("sellerlogoImg", data.storeSideLogo);
+          localStorage.setItem("sellerIconImg", data.storeSideIcon);
           console.log(data, "datadadada");
           window.document.title = data.siteName;
           //动态获取icon
@@ -61,7 +63,7 @@ export default {
             document.querySelector("link[rel*='icon']") ||
             document.createElement("link");
           link.type = "image/x-icon";
-          link.href = data.storeSideLogo;
+          link.href = data.storeSideIcon;
           link.rel = "shortcut icon";
           document.getElementsByTagName("head")[0].appendChild(link);
         }

@@ -124,7 +124,7 @@ export default {
             document.querySelector("link[rel*='icon']") ||
             document.createElement("link");
           link.type = "image/x-icon";
-          link.href = localStorage.getItem("sellerlogoImg");
+          link.href = localStorage.getItem("sellerIconImg");
           link.rel = "shortcut icon";
           document.getElementsByTagName("head")[0].appendChild(link);
 
