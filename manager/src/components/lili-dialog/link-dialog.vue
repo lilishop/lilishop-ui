@@ -51,7 +51,42 @@ export default {
     this.$nextTick(() => {
       this.$refs["lili-component"][0].type = "single"; //商品页面设置成为单选
     });
-
+    let url  = window.location.href
+    if(url.indexOf('/floorList/renovation') != -1){
+      //此处去重防止移动楼层多次点击push 太多数据
+      let obj = {};
+            this.wap = this.wap.reduce((cur, next) => {
+              //对象去重
+              if (next.title != undefined) {
+                obj[next.title]
+                  ? ""
+                  : (obj[next.title] = true && cur.push(next));
+              }
+              return cur;
+      }, []);
+      this.wap.forEach((items,indexs) => {
+        if(items.title == '活动'){
+          console.log(32323232323232)
+          this.wap.splice(indexs,1)
+        }
+      })
+    }else{
+      this.wap.push( {
+        title: "活动",
+        url: "3",
+        name: "marketing"
+      })
+      let obj = {};
+            this.wap = this.wap.reduce((cur, next) => {
+              //对象去重
+              if (next.title != undefined) {
+                obj[next.title]
+                  ? ""
+                  : (obj[next.title] = true && cur.push(next));
+              }
+              return cur;
+      }, []);
+    }
     this.wap.forEach((item) => {
       if (item) {
         item.selected = false;
