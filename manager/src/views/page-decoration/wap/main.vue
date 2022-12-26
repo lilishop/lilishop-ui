@@ -13,9 +13,7 @@ export default {
   components: {
     navbar
   },
-  mounted() {
-    this.pagetype = this.$route.query.pagetype;
-  },
+
   data() {
     return {
       layout, // 装修模块

@@ -47,7 +47,7 @@
       </Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page
-          :current="searchForm.pageNumber + 1"
+          :current="searchForm.pageNumber"
           :total="total"
           :page-size="searchForm.pageSize"
           @on-change="changePage"
@@ -80,7 +80,7 @@ export default {
       submitLoading: false, // 加载状态
       searchForm: {
         // 搜索框初始化对象
-        pageNumber: 0, // 当前页数
+        pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
       },
       total: 0, // 总数
