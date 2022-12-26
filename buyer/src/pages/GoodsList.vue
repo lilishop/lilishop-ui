@@ -87,14 +87,14 @@
                 </Tag>
                 <Tag
                   class="goods-show-tag" color="blue"
-                  v-if="goodsListType.content.goodsType == 'VIRTUAL_GOODS'"
+                  v-if="item.content.goodsType == 'VIRTUAL_GOODS'"
                 >
                   虚拟
                 </Tag>
                 <Tag
                   class="goods-show-tag" color="blue"
                   v-else-if="
-                    goodsListType.content.goodsType == 'PHYSICAL_GOODS'
+                    item.content.goodsType == 'PHYSICAL_GOODS'
                   "
                 >
                   实物
