@@ -28,6 +28,8 @@ export default {
       this.Handler = new Date().getTime() - this.beforeUnload;
       if (this.Handler <= 5) {
         localStorage.setItem('btnHide', 1)
+        var storage = window.localStorage;
+        storage.clear()
       }
     },
   },

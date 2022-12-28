@@ -1,6 +1,6 @@
 <template>
   <div class="flex">
-    <el-container  class="ov-hidden flex-10 full-height ">
+    <el-container class="ov-hidden flex-10 full-height ">
       <PanelHeader ref="panelHeader" :data="params" :online="isOnline" :keyboard="inputEvent"
         @event="handleHeaderEvent" />
       <!-- 主体信息 -->
@@ -35,9 +35,9 @@
 
             <!-- 其它对话消息 -->
             <div v-else class="message-box record-box" :class="{
-              'direction-rt': item.float == 'right',
-              'checkbox-border': multiSelect.isOpen === true,
-            }">
+  'direction-rt': item.float == 'right',
+  'checkbox-border': multiSelect.isOpen === true,
+}">
               <aside v-show="multiSelect.isOpen" class="checkbox-column">
                 <i class="el-icon-success" :class="{ selected: verifyMultiSelect(item.id) }"
                   @click="triggerMultiSelect(item.id)" />
@@ -60,28 +60,28 @@
                   </span>
                   <!-- 文本消息 -->
                   <div v-if="item.messageType == 'MESSAGE'" class="text-message" :class="{
-                    left: item.float == 'left',
-                    right: item.float == 'right',
-                  }">
+  left: item.float == 'left',
+  right: item.float == 'right',
+}">
                     <div class="arrow"></div>
 
                     <pre v-html="item.text" />
                   </div>
 
-                  <div v-else-if="item.messageType == 'GOODS'" class="text-message" :class="{
-                    left: item.float == 'left',
-                    right: item.float == 'right',
-                  }">
-                    <div class="base" @click="linkToGoods(item.text.goodsId,item.text.id)">
+                  <div v-else-if="item.messageType == 'GOODS' && item.text != null" class="text-message" :class="{
+  left: item.float == 'left',
+  right: item.float == 'right',
+}">
+                    <div class="base" @click="linkToGoods(item.text.goodsId, item.text.id)">
+                      <div>
+                        <img :src="item.text.thumbnail" class="image" />
+                      </div>
+                      <div style="margin-left: 13px">
+                        <a> {{ item.text.goodsName }} </a>
                         <div>
-                            <img :src="item.text.thumbnail" class="image" />
+                          <span style="color: red;">￥{{ item.text.price }}</span>
                         </div>
-                        <div style="margin-left: 13px">
-                            <a> {{ item.text.goodsName }} </a>
-                            <div>
-                                <span style="color: red;">￥{{ item.text.price }}</span>
-                            </div>
-                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -133,18 +133,18 @@
         </template>
       </el-footer>
       <el-aside width="200px">
-        
+
       </el-aside>
-     
+
     </el-container>
 
     <!-- 消息管理器 -->
     <transition name="el-fade-in-linear">
       <TalkSearchRecord v-if="findChatRecord" :params="{
-        talk_type: params.talk_type,
-        receiver_id: params.receiver_id,
-        title: params.nickname,
-      }" @close="findChatRecord = false" />
+  talk_type: params.talk_type,
+  receiver_id: params.receiver_id,
+  title: params.nickname,
+}" @close="findChatRecord = false" />
     </transition>
 
     <!-- 链接信息 -->
@@ -206,7 +206,7 @@ export default {
       default: false,
     },
   },
-  data() {
+  data () {
     return {
       // 记录加载相关参数
       textReplaceEmoji,
@@ -260,7 +260,7 @@ export default {
   },
   watch: {
     // 监听面板传递参数
-    params() {
+    params () {
       this.loadRecord.minRecord = 0;
       this.tipsBoard = false;
       this.multiSelect = {
@@ -271,7 +271,7 @@ export default {
       this.loadChatRecords();
     },
   },
-  mounted() {
+  mounted () {
     this.loadChatRecords();
   },
   methods: {
@@ -279,7 +279,7 @@ export default {
     sendTime: formatTime,
 
     // 处理 Header 组件事件
-    handleHeaderEvent(event_name) {
+    handleHeaderEvent (event_name) {
       switch (event_name) {
         case "history":
           this.findChatRecord = true;
@@ -303,7 +303,7 @@ export default {
     // },
     // #TODO 冗余代码
 
-    formatDateToString(date) {
+    formatDateToString (date) {
       var year = date.getFullYear();
       var month = date.getMonth() + 1;
       var day = date.getDate();
@@ -318,7 +318,7 @@ export default {
      * @param format 转换格式
      * @returns {*|string}
      */
-    unixToDate(unix, format) {
+    unixToDate (unix, format) {
       if (!unix) return unix;
       let _format = format || "yyyy-MM-dd hh:mm:ss";
       const d = new Date(unix);
@@ -347,7 +347,7 @@ export default {
       return _format;
     },
 
-    formateDateAndTimeToString(date) {
+    formateDateAndTimeToString (date) {
       var hours = date.getHours();
       var mins = date.getMinutes();
       var secs = date.getSeconds();
@@ -363,7 +363,7 @@ export default {
     // #冗余代码结束
 
     // 回车键发送消息回调事件
-    submitSendMessage(content) {
+    submitSendMessage (content) {
       console.log("发送", content);
       const record = {
         operation_type: "MESSAGE",
@@ -417,7 +417,7 @@ export default {
     },
 
     // 推送编辑事件消息
-    onKeyboardEvent(text) {
+    onKeyboardEvent (text) {
       this.$store.commit("UPDATE_TALK_ITEM", {
         index_name: this.index_name,
         draft_text: text,
@@ -448,7 +448,7 @@ export default {
 
 
     // 加载用户聊天详情信息
-    loadChatRecords() {
+    loadChatRecords () {
       console.log(this.records.length, 'this.records.length ')
       if (this.loadRecord.pageNumber === 0 || this.params.clickFlag) {
         this.loadRecord.pageNumber = 1
@@ -458,7 +458,7 @@ export default {
       }
       const user_id = this.id;
       const data = {
-        pageNumber: this.loadRecord.pageNumber ,
+        pageNumber: this.loadRecord.pageNumber,
         pageSize: this.loadChatRecords.pageSize,
         talkId: this.params.talkId,
       };
@@ -475,7 +475,7 @@ export default {
           if (item.toUser > 0) {
             item.float = item.fromUser == user_id ? "right" : "left";
           }
-          if(item.messageType === 'GOODS'){
+          if (item.messageType === 'GOODS') {
             item.text = JSON.parse(item.text)
           }
           return { ...item, [key]: key };
@@ -496,7 +496,7 @@ export default {
     },
 
     // 多选处理方式
-    handleMultiMode(value) {
+    handleMultiMode (value) {
       if (value == "close") {
         this.closeMultiSelect();
         return false;
@@ -537,7 +537,7 @@ export default {
     },
 
     // 确认消息转发联系人事件
-    confirmSelectContacts(data) {
+    confirmSelectContacts (data) {
       let user_ids = [];
       let group_ids = [];
       data.forEach((item) => {
@@ -568,7 +568,7 @@ export default {
     },
 
     // 处理消息时间是否显示
-    compareTime(index, datetime) {
+    compareTime (index, datetime) {
       if (datetime == undefined) {
         return false;
       }
@@ -601,12 +601,12 @@ export default {
     },
 
     // 查看好友用户信息
-    catFriendDetail(value) {
+    catFriendDetail (value) {
       this.$user(value);
     },
 
     // 撤回消息
-    revokeRecords(index, item) {
+    revokeRecords (index, item) {
       ServeRevokeRecords({
         record_id: item.id,
       }).then((res) => {
@@ -617,7 +617,7 @@ export default {
     },
 
     // 删除消息
-    removeRecords(index, item) {
+    removeRecords (index, item) {
       let receiver_id = item.receiver_id;
       if (item.talk_type == 1 && item.user_id != this.id) {
         receiver_id = item.user_id;
@@ -635,29 +635,29 @@ export default {
     },
 
     // 从列表中删除记录
-    delRecords(arr) {
+    delRecords (arr) {
       this.$store.commit("BATCH_DELETE_DIALOGUE", arr);
       return this;
     },
 
     // 开启多选模式
-    openMultiSelect() {
+    openMultiSelect () {
       this.multiSelect.isOpen = true;
     },
 
     // 关闭多选模式
-    closeMultiSelect() {
+    closeMultiSelect () {
       this.multiSelect.isOpen = false;
       this.multiSelect.items = [];
     },
 
     // 判断记录是否选中
-    verifyMultiSelect(records_id) {
+    verifyMultiSelect (records_id) {
       return this.multiSelect.items.indexOf(records_id) >= 0;
     },
 
     // 触发多选事件
-    triggerMultiSelect(records_id) {
+    triggerMultiSelect (records_id) {
       let i = this.multiSelect.items.indexOf(records_id);
       if (i >= 0) {
         this.multiSelect.items.splice(i, 1);
@@ -674,14 +674,14 @@ export default {
     },
 
     // 验证是否存在选择的指定类型的消息
-    verifyMultiSelectType(type) {
+    verifyMultiSelectType (type) {
       return this.records.some((item) => {
         return this.verifyMultiSelect(item.id) && item.messageType == type;
       });
     },
 
     // 消息点击右键触发自定义菜单
-    onCopy(idx, item, event) {
+    onCopy (idx, item, event) {
       let menus = [];
       let content = "";
       if (document.getElementById("copy_class_" + item.id)) {
@@ -765,12 +765,12 @@ export default {
       event.preventDefault();
     },
 
-    hideChatGroup() {
+    hideChatGroup () {
       this.group.panel = false;
     },
 
     // 修改群聊免打扰状态
-    disturbChange(detail) {
+    disturbChange (detail) {
       this.$store.commit("UPDATE_TALK_ITEM", {
         index_name: `2_${this.params.receiver_id}`,
         is_disturb: parseInt(detail.status),
@@ -778,17 +778,17 @@ export default {
     },
 
     // 退出群聊回调事件
-    quitGroupSuccess() {
+    quitGroupSuccess () {
       this.$emit("close-talk");
     },
 
     // 同步群信息
-    syncGroupInfo(groupInfo) {
+    syncGroupInfo (groupInfo) {
       this.$refs.panelHeader.setGroupNum(groupInfo.members_num);
     },
 
     // 对话面板滚动事件
-    talkPanelScroll(e) {
+    talkPanelScroll (e) {
       if (e.target.scrollTop == 0 && this.loadRecord.status == 1) {
         this.loadChatRecords();
         return;
@@ -802,7 +802,7 @@ export default {
     },
 
     // 聊天版本滚动到底部
-    talkPanelScrollBottom() {
+    talkPanelScrollBottom () {
       let el = document.getElementById("lumenChatPanel");
       el.scrollTop = el.scrollHeight;
     },
@@ -869,26 +869,28 @@ export default {
     color: black;
   }
 }
+
 .base {
-    margin-top: 5px;
-    height: 120px;
-    display: flex;
+  margin-top: 5px;
+  height: 120px;
+  display: flex;
 
-    div {
-      width: 100px;
-      overflow: hidden;
-      text-overflow:ellipsis;
-      margin-top: 8px;
-      white-space: nowrap;
-    }
+  div {
+    width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 8px;
+    white-space: nowrap;
+  }
 
-    .image {
-        height: 100px;
-        margin-top: 3px;
-        width: 100px
-    }
+  .image {
+    height: 100px;
+    margin-top: 3px;
+    width: 100px
+  }
 
 }
+
 .talk-bubble {
   position: absolute;
   left: 0px;
