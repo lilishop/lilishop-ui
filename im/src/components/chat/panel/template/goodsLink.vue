@@ -10,7 +10,7 @@
                 <div>
                     <span style="color: red;">￥{{ goodsDetail.price }}</span>
                 </div>
-                <el-button class="store-button" type="danger" v-if="!sendFlag" size="mini" @click="submitSendMessage()"
+                <el-button class="click-button" type="danger" v-if="!sendFlag" size="mini" @click="submitSendMessage()"
                     plain>发送</el-button>
             </div>
         </div>
@@ -151,6 +151,10 @@ export default {
     display: flex;
 
     div {
+        overflow: hidden;
+        text-overflow:ellipsis;
+        margin-top: 8px;
+        white-space: nowrap;
         margin-top: 8px;
     }
 
@@ -161,7 +165,11 @@ export default {
     }
 
 }
-
+.click-button{
+    margin-top: 8px;
+    background-color: white;
+    border-color: #F56C6C;
+}
 .separate {
     margin-top: 8px;
 }
