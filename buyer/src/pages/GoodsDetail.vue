@@ -95,11 +95,10 @@ export default {
     },
     // 获取im信息
     async getIMDetailMethods () {
-      // let res = await getIMDetail();
-      // if (res.success) {
-      //   this.IMLink = res.result;
-      // }
-      this.IMLink = 'http://192.168.0.139:8000'
+      let res = await getIMDetail();
+      if (res.success) {
+        this.IMLink = res.result;
+      }
     },
     // 点击规格
     targetClickSku (val) {

@@ -48,7 +48,6 @@
         </el-tab-pane>
       </el-tabs>
     </div>
-
   </div>
 </template>
 
@@ -185,6 +184,11 @@ export default {
     // margin-top: 8px;
     // 
     // margin-top: 4px;
+  }
+
+  .price {
+    color: red;
+    margin-top: 15px;
   }
 
   .image {
