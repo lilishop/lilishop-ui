@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="width: 350px;">
     当前浏览
     <div class="base">
       <div>
@@ -158,11 +158,7 @@ export default {
   height: 120px;
   display: flex;
 
-  <<<<<<< HEAD div {
-    margin-top: 8px;
-  }
-
-  =======div {
+  div {
     overflow: hidden;
     text-overflow: ellipsis;
     margin-top: 8px;
@@ -170,7 +166,7 @@ export default {
     margin-top: 8px;
   }
 
-  >>>>>>>aa4dbc1bbd212aedbdfbecefb3f5f977aec0cc14 .image {
+  .image {
     height: 100px;
     margin-top: 3px;
     width: 100px
