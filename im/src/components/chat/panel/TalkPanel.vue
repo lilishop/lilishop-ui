@@ -869,7 +869,26 @@ export default {
     color: black;
   }
 }
+.base {
+    margin-top: 5px;
+    height: 120px;
+    display: flex;
 
+    div {
+      width: 100px;
+      overflow: hidden;
+      text-overflow:ellipsis;
+      margin-top: 8px;
+      white-space: nowrap;
+    }
+
+    .image {
+        height: 100px;
+        margin-top: 3px;
+        width: 100px
+    }
+
+}
 .talk-bubble {
   position: absolute;
   left: 0px;

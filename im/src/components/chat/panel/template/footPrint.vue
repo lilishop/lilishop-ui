@@ -2,7 +2,7 @@
     <div>
         最近浏览
         <dl>
-            <dd v-for="(item, index) in list">
+            <dd v-for="item in list" v-infinite-scroll="loadMore()">
                 <div class="base" @click="linkToGoods(item.goodsId,item.id)">
                     <div>
                         <img :src="item.thumbnail" class="image" />
@@ -31,6 +31,9 @@ export default {
         "el-button": button,
     },
     methods:{
+        loadMore(){
+            this.$emit('loadMore')
+        },
     },
     props: {
         list: {
@@ -54,6 +57,10 @@ export default {
     display: flex;
 
     div {
+        overflow: hidden;
+        text-overflow:ellipsis;
+        margin-top: 8px;
+        white-space: nowrap;
         margin-top: 4px;
     }
 

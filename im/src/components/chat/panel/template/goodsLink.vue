@@ -158,16 +158,30 @@ export default {
   height: 120px;
   display: flex;
 
-  div {
+  <<<<<<< HEAD div {
     margin-top: 8px;
   }
 
-  .image {
+  =======div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 8px;
+    white-space: nowrap;
+    margin-top: 8px;
+  }
+
+  >>>>>>>aa4dbc1bbd212aedbdfbecefb3f5f977aec0cc14 .image {
     height: 100px;
     margin-top: 3px;
     width: 100px
   }
 
+}
+
+.click-button {
+  margin-top: 8px;
+  background-color: white;
+  border-color: #F56C6C;
 }
 
 .separate {
