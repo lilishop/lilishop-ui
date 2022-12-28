@@ -98,7 +98,11 @@ export default {
           "?token=" +
           accessToken +
           "&id=" +
-          this.goodsMsg.data.storeId
+          this.goodsMsg.data.storeId +
+          "&goodsId=" +
+          this.goodsMsg.data.goodsId +
+          "&skuId=" +
+          this.goodsMsg.data.id
       );
     },
     // 获取im信息

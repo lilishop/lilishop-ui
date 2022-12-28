@@ -4,7 +4,7 @@ var BASE = {
      */
     API_DEV: {
       common: "http://192.168.0.113:8890",
-      buyer: "http://192.168.0.113:8888",
+      buyer: "http://192.168.0.113:8898",
       seller: "https://store-api.pickmall.cn",
       manager: "https://admin-api.pickmall.cn"
     },

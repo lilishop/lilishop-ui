@@ -254,7 +254,7 @@ export default {
         this.$Message.error("请登录后再联系客服");
         return;
       }
-      window.open(this.IMLink + "?token=" + accessToken);
+      window.open(" http://192.168.0.113:8000?token=" + accessToken);
     },
 
     // 获取im信息
