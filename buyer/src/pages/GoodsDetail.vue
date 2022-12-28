@@ -8,26 +8,18 @@
       <div class="shop-nav-container">
         <Breadcrumb>
           <BreadcrumbItem to="/">首页</BreadcrumbItem>
-          <BreadcrumbItem
-            v-for="(item, index) in categoryBar"
-            :to="goGoodsList(index)"
-            target="_blank"
-            :key="index"
-          >
+          <BreadcrumbItem v-for="(item, index) in categoryBar" :to="goGoodsList(index)" target="_blank" :key="index">
             {{ item.name }}
           </BreadcrumbItem>
         </Breadcrumb>
         <div class="store-collect">
           <span class="mr_10" v-if="goodsMsg.data">
             <router-link :to="'Merchant?id=' + goodsMsg.data.storeId">{{
-              goodsMsg.data.storeName
-            }}</router-link>
+    goodsMsg.data.storeName
+}}</router-link>
           </span>
           <span @click="collect">
-            <Icon
-              type="ios-heart"
-              :color="storeCollected ? '#ed3f14' : '#666'"
-            />
+            <Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#666'" />
             {{ storeCollected ? "已收藏店铺" : "收藏店铺" }}
           </span>
           <span class="ml_10" @click="IMService()">联系客服</span>
@@ -36,11 +28,7 @@
     </div>
 
     <!-- 商品信息展示 -->
-    <ShowGoods
-      @handleClickSku="targetClickSku"
-      v-if="goodsMsg.data"
-      :detail="goodsMsg"
-    ></ShowGoods>
+    <ShowGoods @handleClickSku="targetClickSku" v-if="goodsMsg.data" :detail="goodsMsg"></ShowGoods>
     <!-- 商品详细展示 -->
     <ShowGoodsDetail v-if="goodsMsg.data" :detail="goodsMsg"></ShowGoodsDetail>
 
@@ -66,14 +54,14 @@ import { getIMDetail } from "@/api/common";
 import Storage from "../plugins/storage";
 export default {
   name: "GoodsDetail",
-  beforeRouteEnter(to, from, next) {
+  beforeRouteEnter (to, from, next) {
     window.scrollTo(0, 0);
     next();
   },
-  created() {
+  created () {
     this.getGoodsDetail();
   },
-  data() {
+  data () {
     return {
       goodsMsg: {}, // 商品信息
       isLoading: false, // 加载状态
@@ -85,7 +73,7 @@ export default {
   },
   methods: {
     // 跳转im客服
-    async IMService() {
+    async IMService () {
       // 获取访问Token
       let accessToken = Storage.getItem("accessToken");
       await this.getIMDetailMethods();
@@ -95,29 +83,30 @@ export default {
       }
       window.open(
         this.IMLink +
-          "?token=" +
-          accessToken +
-          "&id=" +
-          this.goodsMsg.data.storeId +
-          "&goodsId=" +
-          this.goodsMsg.data.goodsId +
-          "&skuId=" +
-          this.goodsMsg.data.id
+        "?token=" +
+        accessToken +
+        "&id=" +
+        this.goodsMsg.data.storeId +
+        "&goodsId=" +
+        this.goodsMsg.data.goodsId +
+        "&skuId=" +
+        this.goodsMsg.data.id
       );
     },
     // 获取im信息
-    async getIMDetailMethods() {
-      let res = await getIMDetail();
-      if (res.success) {
-        this.IMLink = res.result;
-      }
+    async getIMDetailMethods () {
+      // let res = await getIMDetail();
+      // if (res.success) {
+      //   this.IMLink = res.result;
+      // }
+      this.IMLink = 'http://192.168.0.139:8000'
     },
     // 点击规格
-    targetClickSku(val) {
+    targetClickSku (val) {
       this.getGoodsDetail(val);
     },
     // 获取商品详情
-    getGoodsDetail(val) {
+    getGoodsDetail (val) {
       this.isLoading = true;
       const params = val || this.$route.query;
 
@@ -183,7 +172,7 @@ export default {
           this.$router.push("/");
         });
     },
-    goGoodsList(currIndex) {
+    goGoodsList (currIndex) {
       // 跳转商品列表
       const arr = [];
       this.categoryBar.forEach((e, index) => {
@@ -193,7 +182,7 @@ export default {
       });
       return location.origin + "/goodsList?categoryId=" + arr.toString();
     },
-    async collect() {
+    async collect () {
       // 收藏店铺
       if (this.storeCollected) {
         let cancel = await cancelCollect("STORE", this.goodsMsg.data.storeId);
