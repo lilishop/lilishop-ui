@@ -12,9 +12,9 @@
             <img :src="item.thumbnail" class="image" />
           </div>
           <div style="margin-left: 13px">
-            <a>{{ item.goodsName }}</a>
-            <div>
-              <span style="color: red;">￥{{ item.price }}</span>
+            {{ item.goodsName }}
+            <div class="price">
+              <span>￥{{ item.price }}</span>
             </div>
           </div>
         </div>
@@ -108,8 +108,12 @@ export default {
     text-overflow: ellipsis;
     margin-top: 8px;
     white-space: nowrap;
-    margin-top: 4px;
   }
+
+  .price {
+    color: red;
+    margin-top: 15px;
+  } 
 
   .image {
     height: 100px;
@@ -122,4 +126,5 @@ export default {
 .separate {
   margin-top: 8px;
 }
+
 </style>
