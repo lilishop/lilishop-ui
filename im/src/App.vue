@@ -27,9 +27,9 @@ export default {
     unloadHandler (e) {
       this.Handler = new Date().getTime() - this.beforeUnload;
       if (this.Handler <= 5) {
-        localStorage.setItem('btnHide', 1)
         var storage = window.localStorage;
         storage.clear()
+        localStorage.setItem('btnHide', 1)
       }
     },
   },

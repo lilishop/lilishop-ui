@@ -24,3 +24,7 @@ export const ServeGetStoreDetail = (storeId) => {
 export const ServeGetFootPrint = (params) => {
   return get(`/im/user/history`,params);
 };
+// 获取订单列表信息
+export const ServeGetOrderPrint = (params) => {
+  return get(`/im/orders/orders`,params);
+};

@@ -8,9 +8,7 @@
               <div class="base">
                 <div>
                   <img :src="item.thumbnail" class="image" />
-
                 </div>
-
                 <div style="margin-left: 13px">
                   <a class="goods_name" @click="linkToGoods(item.goodsId, item.id)">{{ item.goodsName }}</a>
                   <div style="margin-top: 8px;">
@@ -27,22 +25,19 @@
         </el-tab-pane>
         <el-tab-pane label="订单列表" name="orders">
           <dl>
-            <dd v-for="item in list" v-infinite-scroll="loadMore">
-              <div class="base">
-                <div>
-                  <img :src="item.thumbnail" class="image" />
-                </div>
-                <div style="margin-left: 13px">
-                  <a class="goods_name" @click="linkToGoods(item.goodsId, item.id)">{{ item.goodsName }}</a>
-                  <div style="margin-top: 10px;">
-                    <span style="color: red;">￥{{ item.price }}</span>
-                  </div>
-                  <div>
-                    <el-button class="store-button" type="danger" v-if="item.btnHide == 1" size="mini"
-                      @click="submitSendGoodsMessage(item)" plain>发送</el-button>
-                  </div>
+            <dd v-for="(item, index) in orderList" v-infinite-scroll="loadMore" :key="index">
+              <div style="margin-bottom: 20px;">
+                <span class="orderSn">订单号：{{ item.sn }}</span>
+                <img :src="item.groupImages" alt="暂无图片"
+                  style="height: 100px; width: 100px;margin-top: 10px; vertical-align: middle; ">
+                <span class="orderGoodsName" @click="linkToOrders(item.sn)"> {{ item.groupName }}</span>
+                <span style="margin-left: 10px; color: red;">{{ item.paymentTime }}</span>
+                <div class="orderBtn">
+                  <el-button type="danger" class="store-button" v-if="item.btnHide == 1" size="mini"
+                    @click="submitSendOrderMessage(item, index)" plain>发送</el-button>
                 </div>
               </div>
+
             </dd>
           </dl>
         </el-tab-pane>
@@ -80,6 +75,7 @@ export default {
     "el-tab-pane": TabPane,
   },
   methods: {
+    //跳转订单列表
 
     scrollBottom (e) {
       const { scrollTop, scrollHeight, clientHeight } = e.srcElement
@@ -92,7 +88,6 @@ export default {
     },
     // 发送消息回调事件
     submitSendGoodsMessage (item) {
-      console.log("发送");
       const context = {
         id: item.id,
         goodsId: item.goodsId,
@@ -108,7 +103,27 @@ export default {
         context: context,
         talk_id: this.toUser.id,
       };
-      this.$emit('sendMessage', record, context);
+      this.$emit('sendMessage', record, context, 'GOODS');
+      localStorage.setItem(item.goodsId, 0)
+      item.btnHide = 0
+    },
+    // 发送订单列表
+    submitSendOrderMessage (item, index) {
+      const context = {
+        sn: item.sn,
+        groupImages: item.groupImages,
+        paymentTime: item.paymentTime,
+        groupName: item.groupName,
+      }
+      const record = {
+        operation_type: "MESSAGE",
+        to: this.toUser.userId,
+        from: this.id,
+        message_type: "ORDER",
+        context: context,
+        talk_id: this.toUser.id,
+      };
+      this.$emit('sendMessage', record, context, 'ORDER');
       localStorage.setItem(item.goodsId, 0)
       item.btnHide = 0
     },
@@ -121,9 +136,13 @@ export default {
       type: Array,
       default: [],
     },
+    orderList: {
+      type: Array,
+      default: []
+    }
   },
   mounted () {
-    console.log(this.list, 'list');
+    console.log(this.orderList, 'orderList');
     this.btnHide = localStorage.getItem('btnHide')
   }
 }
@@ -131,6 +150,30 @@ export default {
 </script>
 
 <style scoped lang="less">
+.orderGoodsName {
+  width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: absolute;
+  margin-left: 10px;
+  margin-top: 10px;
+}
+
+.orderSn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap
+}
+
+.orderBtn {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 15px;
+  position: relative;
+  bottom: 30px;
+}
+
 .goods_name {
   text-overflow: -o-ellipsis-lastline;
   overflow: hidden;
@@ -169,22 +212,13 @@ export default {
 .store-button {
   background-color: white;
   border-color: #F56C6C;
-
+  margin-top: 10px;
 }
 
 .base {
   margin-top: 5px;
   height: 120px;
   display: flex;
-
-  div {
-    // overflow: hidden;
-    // text-overflow: ellipsis;
-    // white-space: nowrap;
-    // margin-top: 8px;
-    // 
-    // margin-top: 4px;
-  }
 
   .price {
     color: red;

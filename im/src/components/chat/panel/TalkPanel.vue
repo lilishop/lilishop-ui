@@ -84,9 +84,17 @@
                       </div>
                     </div>
                   </div>
-
-                  <!-- {{ item.text }} -->
-
+                  <div v-else-if="item.messageType == 'ORDER' && item.text != null" class="text-message" :class="{
+  left: item.float == 'left',
+  right: item.float == 'right',
+}">
+                    <a> 订单号:{{ item.text.sn }} </a>
+                    <div class="baseTwo">
+                      <img :src="item.text.groupImages" style="height: 100px;width: 100px;margin-top: 10px;" />
+                      <span class="orderGoodsName" @click="linkToOrders(item.text.sn)">{{ item.text.groupName }}</span>
+                      <span class="orderGoodsTime">{{ item.text.paymentTime }}</span>
+                    </div>
+                  </div>
                   <!-- 图片消息 -->
                   <!-- <image-message
                     v-else-if="item.messageType == 2 && item.file.file_type == 1"
@@ -478,6 +486,9 @@ export default {
           if (item.messageType === 'GOODS') {
             item.text = JSON.parse(item.text)
           }
+          if (item.messageType === 'ORDER') {
+            item.text = JSON.parse(item.text)
+          }
           return { ...item, [key]: key };
         });
         this.$store.commit("UNSHIFT_DIALOGUE", records);
@@ -809,6 +820,29 @@ export default {
 };
 </script>
 <style lang="less" scoped>
+.orderSn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap
+}
+
+.orderGoodsName {
+  width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: absolute;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.orderGoodsTime {
+  margin-left: 10px;
+  color: red;
+  position: absolute;
+  margin-top: 35px;
+}
+
 .main-box {
   position: relative;
 }
@@ -868,6 +902,7 @@ export default {
     color: black;
   }
 }
+
 
 .base {
   margin-top: 5px;

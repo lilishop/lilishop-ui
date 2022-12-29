@@ -4,7 +4,8 @@
       <div style="margin-left: 12px;" v-if="toUser.storeFlag">
         <GoodsLink :goodsDetail="goodsDetail" v-if="toUser.userId === goodsDetail.storeId"
           @sendMessage="submitSendMessage" />
-        <FootPrint :list="footPrintList" @loadMore="loadMoreFootPrint()" @sendMessage="submitSendMessage" />
+        <FootPrint :list="footPrintList" @loadMore="loadMoreFootPrint()" :orderList="orderPrintList"
+          @sendMessage="submitSendMessage" />
       </div>
     </el-tab-pane>
     <el-tab-pane label="店铺信息" name="UserInfo" v-if="toUser.storeFlag">
@@ -17,7 +18,7 @@
 
 <script>
 import { Tabs, TabPane } from 'element-ui'
-import { ServeGetStoreDetail, ServeGetUserDetail, ServeGetFootPrint } from '@/api/user'
+import { ServeGetStoreDetail, ServeGetUserDetail, ServeGetFootPrint, ServeGetOrderPrint } from '@/api/user'
 import { ServeGetGoodsDetail } from '@/api/goods'
 import StoreDetail from "@/components/chat/panel/template/storeDetail.vue";
 import FootPrint from "@/components/chat/panel/template/footPrint.vue";
@@ -64,12 +65,11 @@ export default {
         storeId: '',
       },
       goodsDetail: {},
-      footPrintList: [],
+      footPrintList: [], // 商品
+      orderPrintList: []// 订单
     }
   },
   mounted () {
-    console.log(this.id)
-    console.log(this.toUser)
     if (this.toUser.storeFlag) {
       this.getStoreDetail()
     } else {
@@ -127,23 +127,29 @@ export default {
             res.result.records.splice(index, 1)
           }
         });
-        console.log(this.footPrintParams, 'this.footPrintParamsthis.footPrintParamsthis.footPrintParams');
         this.footPrintList.push(...res.result.records)
       })
-      //删除掉刚加入的商品
+      // 订单列表
+      ServeGetOrderPrint(this.footPrintParams).then((res) => {
+        if (res.code == 200) {
+          res.result.records.forEach((item) => {
+            this.orderPrintList.push({
+              ...item,
+              btnHide: 1
+            })
+          })
+          // this.orderPrintList.push(...res.result.records)
+        }
+      })
     },
 
     // 发送消息回调事件
-    submitSendMessage (record, context) {
-      console.log("发送");
+    submitSendMessage (record, context, messageType) {
       SocketInstance.emit("event_talk", record);
-
       this.$store.commit("UPDATE_TALK_ITEM", {
         index_name: this.index_name,
         draft_text: "",
       });
-
-
       /**
        * 插入数据
        */
@@ -152,13 +158,11 @@ export default {
         fromUser: this.id,
         toUser: record.to,
         isRead: false,
-        messageType: "GOODS",
+        messageType: messageType,
         text: context,
         float: "right",
       };
 
-      console.log("insterChat", insterChat);
-      // console.log("插入对话记录",'')
       // 插入对话记录
       this.$store.commit("PUSH_DIALOGUE", insterChat);
       // 获取聊天面板元素节点

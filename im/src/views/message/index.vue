@@ -7,22 +7,22 @@
           <el-container class="full-height" direction="vertical">
             <!-- 搜索栏 -->
             <el-header height="60px" class="header">
-            <div class="user-login" v-popover:usercard>
-              <div class="user-box">
-                <face :text="face" class="user-face"></face>
+              <div class="user-login" v-popover:usercard>
+                <div class="user-box">
+                  <face :text="face" class="user-face"></face>
+                </div>
               </div>
-            </div>
-            <p class="user-status">
-              <span v-if="name">{{ name }}</span>
-              <span v-else>用户名称</span>
-            </p>
-          </el-header>
+              <p class="user-status">
+                <span v-if="name">{{ name }}</span>
+                <span v-else>用户名称</span>
+              </p>
+            </el-header>
             <el-header height="60px" class="header">
               <div class="from-search">
                 <el-input v-model="input" prefix-icon="el-icon-search" placeholder="搜索好友" size="small" />
               </div>
             </el-header>
-          <!-- <el-header height="118px" class="logo-header">
+            <!-- <el-header height="118px" class="logo-header">
 
           </el-header> -->
             <!-- 置顶栏 -->
@@ -80,8 +80,8 @@
                         <div class="card-name">
                           <p class="nickname">
                             {{
-                                item.remark_name ? item.remark_name : item.name
-                            }}
+    item.remark_name ? item.remark_name : item.name
+}}
                           </p>
                           <div v-show="item.unread" class="larkc-tag">
                             {{ item.unread }}条未读
@@ -106,13 +106,13 @@
                         </div>
                       </div>
                       <div class="talk-message">
-                            <span v-if="item.lastMessageType === 'MESSAGE'">{{ item.lastTalkMessage }}</span>
-                            <span v-if="item.lastMessageType === 'GOODS'">[商品链接]</span>
-                          </div>
+                        <span v-if="item.lastMessageType === 'MESSAGE'">{{ item.lastTalkMessage }}</span>
+                        <span v-if="item.lastMessageType === 'GOODS'">[商品链接]</span>
+                      </div>
                       <div class="content">
                         <template v-if="
-                          index_name != item.index_name && item.draft_text
-                        ">
+  index_name != item.index_name && item.draft_text
+">
                           <span class="draft-color">[草稿]</span>
                           <span>{{ item.draft_text }}</span>
                         </template>
@@ -137,9 +137,9 @@
 
         <!-- 聊天面板容器 -->
         <el-main class="main-box ov-hidden full-height no-padding flex">
-          <WelcomeModule  class="flex-8" v-if="index_name == null" />
-          <TalkPanel   v-else class="full-height flex-8" :params="params" :goodsParams="goodsParams" :is-online="isFriendOnline" @change-talk="changeTalk"
-            @close-talk="closeTalk" />
+          <WelcomeModule class="flex-8" v-if="index_name == null" />
+          <TalkPanel v-else class="full-height flex-8" :params="params" :goodsParams="goodsParams"
+            :is-online="isFriendOnline" @change-talk="changeTalk" @close-talk="closeTalk" />
           <!-- <OtherLink :toUser="toUser" :goodsParams="goodsParams" :id="id" class="flex-4"/> -->
         </el-main>
       </el-container>
@@ -179,7 +179,7 @@ export default {
     OtherLink,
     WelcomeModule,
   },
-  data() {
+  data () {
     return {
       activeIndex: 9999999, //默认样式索引
       subHeaderShadow: false,
@@ -192,8 +192,8 @@ export default {
         nickname: "",
         clickFlag: true,
       },
-      
-      goodsParams:{
+
+      goodsParams: {
         goodsId: '',
         skuId: '',
       },
@@ -225,7 +225,7 @@ export default {
       toUser: (state) => state.user.toUser,
     }),
     // 计算置顶栏目的高度
-    subHeaderPx() {
+    subHeaderPx () {
       const n = 7; // 一排能显示的用户数
       const num = this.topItems.length;
       let len = 60;
@@ -238,17 +238,17 @@ export default {
     },
 
     // 当前对话好友在线状态
-    isFriendOnline() {
+    isFriendOnline () {
       let index = findTalkIndex(this.index_name);
       return index >= 0 && this.talks[index].is_online == 1;
     },
   },
   watch: {
-    talkItems(val) {
+    talkItems (val) {
       val ? this.$set(this, "userTalkItem", val) : "";
     },
     // 搜索用户的时候 根据当前用户表进行模糊搜索
-    input(val, oldVal) {
+    input (val, oldVal) {
       console.log(val, oldVal);
       if (val) {
         let str = ["", ...val, ""].join(".*");
@@ -260,7 +260,7 @@ export default {
         this.userTalkItem = this.talkItems;
       }
     },
-    unreadNum(value) {
+    unreadNum (value) {
       clearInterval(this.interval);
       console.log("%c 更新未读消息", "color:#32ccbc");
       this.$store.commit("SET_UNREAD_NUM", value);
@@ -276,7 +276,7 @@ export default {
     },
 
     // 监听好友在线状态
-    monitorFriendsStatus(value) {
+    monitorFriendsStatus (value) {
       this.$store.commit("UPDATE_TALK_ITEM", {
         index_name: `1_${value.friend_id}`,
         is_online: value.status,
@@ -284,15 +284,15 @@ export default {
     },
   },
 
-  beforeRouteUpdate(to, from, next) {
+  beforeRouteUpdate (to, from, next) {
     let index_name = getCacheIndexName();
     if (index_name) this.clickTab(index_name);
     next();
   },
-  beforeCreate() {
+  beforeCreate () {
     setToken(this.$route.query.token);
   },
-  async created() {
+  async created () {
     await this.initialize();
     await this.loadUserSetting();
     /**
@@ -303,10 +303,10 @@ export default {
 
   },
 
-  mounted() {
+  mounted () {
     this.scrollEvent();
   },
-  destroyed() {
+  destroyed () {
     document.title = title;
     clearInterval(this.interval);
     this.clearTalk();
@@ -316,18 +316,18 @@ export default {
     beautifyTime,
 
     //创建会话
-    async createTalk(id) {
+    async createTalk (id) {
       await ServeCreateTalkList(id);
 
       await this.loadChatList();
     },
     // header 功能栏隐藏事件
-    closeSubMenu() {
+    closeSubMenu () {
       this.subMenu = false;
     },
 
     // 清除当前对话
-    clearTalk() {
+    clearTalk () {
       this.params = {
         talk_type: 0,
         receiver_id: 0,
@@ -343,7 +343,7 @@ export default {
     },
 
     // 工具栏事件
-    triggerSubMenu(type) {
+    triggerSubMenu (type) {
       this.closeSubMenu();
 
       if (type == 1) {
@@ -354,14 +354,14 @@ export default {
     },
 
     // 监听自定义滚动条事件
-    scrollEvent() {
+    scrollEvent () {
       let scrollbarEl = this.$refs.menusScrollbar.wrap;
       scrollbarEl.onscroll = () => {
         this.subHeaderShadow = scrollbarEl.scrollTop > 0;
       };
     },
     // 获取用户对话列表
-    loadChatList() {
+    loadChatList () {
       this.loadStatus = this.talkNum == 0 ? 0 : 1;
 
       ServeGetTalkList()
@@ -393,7 +393,7 @@ export default {
     },
 
     // 切换聊天栏目
-    clickTab(id, val, index) {
+    clickTab (id, val, index) {
       if (!id) return;
       this.activeIndex = index;
       let item =
@@ -433,13 +433,13 @@ export default {
       });
     },
     // 修改当前对话
-    changeTalk(index_name) {
+    changeTalk (index_name) {
       console.log("修改当前对话", index_name);
       sessionStorage.setItem("send_message_index_name", index_name);
       this.loadChatList();
     },
     // 关闭当前对话及刷新对话列表
-    closeTalk() {
+    closeTalk () {
       this.$store.commit("UPDATE_DIALOGUE_MESSAGE", {
         talk_type: 0,
         receiver_id: 0,
@@ -449,7 +449,7 @@ export default {
       this.loadChatList();
     },
     // 对话列表的右键自定义菜单
-    talkItemsMenu(item, event) {
+    talkItemsMenu (item, event) {
       let items = {
         items: [
           {
@@ -526,7 +526,7 @@ export default {
       return false;
     },
     // 置顶栏右键菜单栏
-    topItemsMenu(item, event) {
+    topItemsMenu (item, event) {
       this.$contextmenu({
         items: [
           {
@@ -544,7 +544,7 @@ export default {
       return false;
     },
     // 会话列表置顶
-    topChatItem(item) {
+    topChatItem (item) {
       ServeTopTalkList({
         list_id: item.id,
         type: item.is_top == 0 ? 1 : 2,
@@ -558,7 +558,7 @@ export default {
       });
     },
     // 设置消息免打扰
-    setNotDisturb(item) {
+    setNotDisturb (item) {
       ServeSetNotDisturb({
         talk_type: item.talk_type,
         receiver_id: item.receiver_id,
@@ -573,7 +573,7 @@ export default {
       });
     },
     // 移除会话列表
-    delChatItem(item) {
+    delChatItem (item) {
       ServeDeleteTalkList({
         list_id: item.id,
       }).then(({ code }) => {
@@ -584,7 +584,7 @@ export default {
       });
     },
     // 解除好友关系
-    removeFriend(item) {
+    removeFriend (item) {
       ServeDeleteContact({
         friend_id: item.receiver_id,
       }).then(({ code }) => {
@@ -598,7 +598,7 @@ export default {
       });
     },
     // 修改好友备注信息
-    editFriendRemarks(item) {
+    editFriendRemarks (item) {
       let title = `您正在设置【${item.name}】好友的备注信息`;
 
       if (item.remark_name) {
@@ -611,7 +611,7 @@ export default {
         customClass: "border-radius0",
         inputPlaceholder: "请设置好友备注信息",
         inputValue: item.remark_name ? item.remark_name : item.name,
-        inputValidator(val) {
+        inputValidator (val) {
           return val == null || val == "" ? "好友备注不能为空" : true;
         },
       })
@@ -979,11 +979,13 @@ export default {
     }
   }
 }
-.talk-message{
+
+.talk-message {
   font-size: 12px;
-  color:#8f959e;
+  color: #8f959e;
 }
-.user-face{
+
+.user-face {
   height: 100%;
   width: 100%;
 }

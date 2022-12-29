@@ -32,6 +32,10 @@ Vue.prototype.linkToStore = function (storeId) {  // 跳转买家端商品
    console.log(`${config.PC_URL}/Merchant?id=${storeId}`)
    window.open(`${config.PC_URL}/Merchant?id=${storeId}`, '_blank')
  };
+ // 订单跳转商家订单页面
+ Vue.prototype.linkToOrders = function (sn) {  // 跳转买家端商品
+  window.open(`${config.STORE_URL}/order-detail?sn=${sn}`, '_blank')
+};
 const Instance = new Vue({
   router,
   store,
