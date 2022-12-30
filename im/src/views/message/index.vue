@@ -108,6 +108,7 @@
                       <div class="talk-message">
                         <span v-if="item.lastMessageType === 'MESSAGE'">{{ item.lastTalkMessage }}</span>
                         <span v-if="item.lastMessageType === 'GOODS'">[商品链接]</span>
+                        <span v-if="item.lastMessageType === 'ORDER'">[订单链接]</span>
                       </div>
                       <div class="content">
                         <template v-if="

@@ -21,19 +21,19 @@ import '@/assets/css/global.less'
 
 Vue.config.productionTip = false
 Vue.mixin(MainMixin)  // 引入mixins
-Vue.component('face',face)
-Vue.component('face-null',faceNull)
+Vue.component('face', face)
+Vue.component('face-null', faceNull)
 
 Vue.prototype.linkToGoods = function (goodsId, skuId) {  // 跳转买家端商品
   console.log(`${config.PC_URL}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`)
   window.open(`${config.PC_URL}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`, '_blank')
 };
 Vue.prototype.linkToStore = function (storeId) {  // 跳转买家端商品
-   console.log(`${config.PC_URL}/Merchant?id=${storeId}`)
-   window.open(`${config.PC_URL}/Merchant?id=${storeId}`, '_blank')
- };
- // 订单跳转商家订单页面
- Vue.prototype.linkToOrders = function (sn) {  // 跳转买家端商品
+  console.log(`${config.PC_URL}/Merchant?id=${storeId}`)
+  window.open(`${config.PC_URL}/Merchant?id=${storeId}`, '_blank')
+};
+// 订单跳转商家订单页面
+Vue.prototype.linkToOrders = function (sn) {  // 跳转买家端订单
   window.open(`${config.STORE_URL}/order-detail?sn=${sn}`, '_blank')
 };
 const Instance = new Vue({

@@ -68,7 +68,7 @@
                     <pre v-html="item.text" />
                   </div>
 
-                  <div v-else-if="item.messageType == 'GOODS' && item.text != null" class="text-message" :class="{
+                  <div v-if="item.messageType == 'GOODS' && item.text != null" class="text-message" :class="{
   left: item.float == 'left',
   right: item.float == 'right',
 }">
@@ -84,7 +84,7 @@
                       </div>
                     </div>
                   </div>
-                  <div v-else-if="item.messageType == 'ORDER' && item.text != null" class="text-message" :class="{
+                  <div v-if="item.messageType == 'ORDER' && item.text != null" class="text-message" :class="{
   left: item.float == 'left',
   right: item.float == 'right',
 }">
@@ -483,10 +483,10 @@ export default {
           if (item.toUser > 0) {
             item.float = item.fromUser == user_id ? "right" : "left";
           }
-          if (item.messageType === 'GOODS') {
+          if (item.messageType == 'GOODS') {
             item.text = JSON.parse(item.text)
           }
-          if (item.messageType === 'ORDER') {
+          if (item.messageType == 'ORDER') {
             item.text = JSON.parse(item.text)
           }
           return { ...item, [key]: key };

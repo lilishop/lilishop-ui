@@ -28,7 +28,7 @@
             <dd v-for="(item, index) in orderList" v-infinite-scroll="loadMore" :key="index">
               <div style="margin-bottom: 20px;">
                 <span class="orderSn">订单号：{{ item.sn }}</span>
-                <img :src="item.groupImages" alt="暂无图片"
+                <img :src="item.groupImages" alt=""
                   style="height: 100px; width: 100px;margin-top: 10px; vertical-align: middle; ">
                 <span class="orderGoodsName" @click="linkToOrders(item.sn)"> {{ item.groupName }}</span>
                 <span style="margin-left: 10px; color: red;">{{ item.paymentTime }}</span>

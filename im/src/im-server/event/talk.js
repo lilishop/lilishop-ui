@@ -39,7 +39,6 @@ class Talk extends Base {
    */
   constructor(resource) {
     super();
-    console.log("接口构造 resource", resource);
     this.sender_id = resource.fromUser; //发送
     this.receiver_id = resource.toUser; //接收
     this.talk_type = resource.messageType; //类型
@@ -60,7 +59,7 @@ class Talk extends Base {
    * @returns
    */
   isCurrSender() {
-    console.log("sender_id", this.sender_id);
+    // console.log("sender_id", this.sender_id);
     return this.sender_id == this.getAccountId();
   }
 
@@ -108,7 +107,7 @@ class Talk extends Base {
 
   handle() {
     let store = this.getStoreInstance();
-    console.log("触发handle");
+    // console.log("触发handle");
     // 判断当前是否在聊天页面
     if (!this.isTalkPage()) {
       store.commit("INCR_UNREAD_NUM");
@@ -116,10 +115,10 @@ class Talk extends Base {
       // 判断消息是否来自于我自己，否则会提示消息通知
       return !this.isCurrSender() && this.showMessageNocice();
     }
-    console.log("this.receiver_id", this.receiver_id);
-    console.log("this.sender_id", this.sender_id);
+    // console.log("this.receiver_id", this.receiver_id);
+    // console.log("this.sender_id", this.sender_id);
     let isTrue = this.isTalk(1, this.receiver_id, this.sender_id);
-    console.log("判断当前是否正在和好友对话", isTrue);
+    // console.log("判断当前是否正在和好友对话", isTrue);
     // 判断当前是否正在和好友对话
     if (isTrue) {
       this.insertTalkRecord();
@@ -177,7 +176,7 @@ class Talk extends Base {
     } else if (talk_type == 2) {
       receiver_id = this.receiver_id;
     }
-    console.log("加载对接节点", this.resource);
+    // console.log("加载对接节点", this.resource);
 
     ServeCreateTalkList(receiver_id).then(({ code, data }) => {
       if (code == 200) {
@@ -192,7 +191,7 @@ class Talk extends Base {
   insertTalkRecord() {
     let store = this.getStoreInstance();
     let record = this.resource;
-    console.log("插入谈话记录", record);
+    // console.log("插入谈话记录", record);
 
     record.float = this.getFloatType();
 
@@ -213,13 +212,13 @@ class Talk extends Base {
         el.scrollTop = el.scrollHeight;
       });
     } else {
-      console.log("%c SET_TLAK_UNREAD_MESSAGE %c", "color:red");
+      // console.log("%c SET_TLAK_UNREAD_MESSAGE %c", "color:red");
       store.commit("SET_TLAK_UNREAD_MESSAGE", {
         content: this.getTalkText(),
         nickname: record.name,
       });
     }
-    console.log("%c 准备更新...UPDATE_TALK_ITEM ", "color:red");
+    // console.log("%c 准备更新...UPDATE_TALK_ITEM ", "color:red");
 
     store.commit("UPDATE_TALK_ITEM", {
       index_name: this.getIndexName(),
@@ -228,7 +227,7 @@ class Talk extends Base {
     });
 
     if (this.talk_type == 1 && this.getAccountId() !== this.sender_id) {
-      console.log("%c 清除 未读数...ServeClearTalkUnreadNum ", "color:blue");
+      // console.log("%c 清除 未读数...ServeClearTalkUnreadNum ", "color:blue");
       ServeClearTalkUnreadNum({
         talk_type: 1,
         receiver_id: this.sender_id,
@@ -240,7 +239,6 @@ class Talk extends Base {
    * 更新对话列表记录
    */
   updateTalkItem() {
-    console.log("%c 更新对话列表记录", "color:#32ccbc");
     let store = this.getStoreInstance();
 
     store.commit("INCR_UNREAD_NUM");

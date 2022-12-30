@@ -253,11 +253,12 @@ export default {
       // 获取访问Token
       let accessToken = this.getStore("accessToken");
       await this.getIMDetailMethods();
+      let res = await getIMDetail();
       if (!accessToken) {
         this.$Message.error("请登录后再联系客服");
         return;
       }
-      window.open(" http://192.168.0.139:8000?token=" + accessToken);
+      window.open(`${res.result}?token=` + accessToken);
     },
 
     // 获取im信息

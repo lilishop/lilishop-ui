@@ -27,7 +27,7 @@ export default {
   },
   mutations: {
     // 更新对话
-    UPDATE_DIALOGUE_MESSAGE(state, resource) {
+    UPDATE_DIALOGUE_MESSAGE (state, resource) {
       state.records = [];
       state.talk_type = parseInt(resource.talk_type);
       state.receiver_id = parseInt(resource.receiver_id);
@@ -41,26 +41,26 @@ export default {
     },
 
     // 数组头部压入对话记录1494593861786271744 1494593778193793024
-    UNSHIFT_DIALOGUE(state, records) {
+    UNSHIFT_DIALOGUE (state, records) {
       // console.log("%c 数组头部压入对话记录", "color:green");
       // console.log("state", state);
       // console.log("records", records);
-      if(state.records.length>0){
+      if (state.records.length > 0) {
         state.records.unshift(...records);
-      }else{
+      } else {
         state.records.push(...records);
       }
-      
-      console.log("最后的数据",state.records)
+
+      // console.log("最后的数据",state.records)
     },
 
     // 推送对话记录
-    PUSH_DIALOGUE(state, record) {
+    PUSH_DIALOGUE (state, record) {
       state.records.push(record);
     },
 
     // 更新对话记录
-    UPDATE_DIALOGUE(state, resource) {
+    UPDATE_DIALOGUE (state, resource) {
       for (let i in state.records) {
         if (state.records[i].id === resource.id) {
           Object.assign(state.records[i], resource);
@@ -70,11 +70,11 @@ export default {
     },
 
     // 删除对话记录
-    DELETE_DIALOGUE(state, index) {
+    DELETE_DIALOGUE (state, index) {
       state.records.splice(index, 1);
     },
 
-    BATCH_DELETE_DIALOGUE(state, ids) {
+    BATCH_DELETE_DIALOGUE (state, ids) {
       ids.forEach((record_id) => {
         let index = state.records.findIndex((item) => item.id == record_id);
         if (index >= 0) state.records.splice(index, 1);
@@ -82,7 +82,7 @@ export default {
     },
 
     // 数组头部压入对话记录
-    SET_DIALOGUE(state, records) {
+    SET_DIALOGUE (state, records) {
       state.records = records;
     },
   },

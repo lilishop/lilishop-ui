@@ -49,9 +49,9 @@ class WsSocket {
     // 定义 WebSocket 原生方法
     this.events = Object.assign(
       {
-        onError: (evt) => {},
-        onOpen: (evt) => {},
-        onClose: (evt) => {},
+        onError: (evt) => { },
+        onOpen: (evt) => { },
+        onClose: (evt) => { },
       },
       events
     );
@@ -63,7 +63,7 @@ class WsSocket {
    * @param {String} event 事件名
    * @param {Function} callBack 回调方法
    */
-  on(event, callBack) {
+  on (event, callBack) {
     // 对应 socket-instance.js
     console.log("事件绑定", event, callBack);
     this.onCallBacks[event] = callBack;
@@ -73,7 +73,7 @@ class WsSocket {
   /**
    * 加载 WebSocket
    */
-  loadSocket() {
+  loadSocket () {
     // 判断当前是否已经连接
     if (this.connect != null) {
       this.connect.close();
@@ -93,14 +93,14 @@ class WsSocket {
   /**
    * 连接 Websocket
    */
-  connection() {
+  connection () {
     this.loadSocket();
   }
 
   /**
    * 掉线重连 Websocket
    */
-  reconnect() {
+  reconnect () {
     console.log("掉线重连接");
     let reconnect = this.config.reconnect;
     if (reconnect.lockReconnect || reconnect.number == 0) {
@@ -129,8 +129,8 @@ class WsSocket {
    *
    * @param {Object} evt Websocket 消息
    */
-  onParse(evt) {
-   
+  onParse (evt) {
+
     const res = JSON.parse(evt.data).result;
 
     //如果创建时间是时间戳类型则转换为 日期类型，否则新压入栈的消息的创建时间和从数据库读取出来的创建时间格式对不上，处理的时候会出异常。
@@ -146,7 +146,7 @@ class WsSocket {
    * @param format 转换格式
    * @returns {*|string}
    */
-  unixToDate(unix, format) {
+  unixToDate (unix, format) {
     if (!unix) return unix;
     let _format = format || "yyyy-MM-dd hh:mm:ss";
     const d = new Date(unix);
@@ -161,16 +161,16 @@ class WsSocket {
     };
     if (/(y+)/.test(_format))
       _format = _format.replace(
-          RegExp.$1,
-          (d.getFullYear() + "").substr(4 - RegExp.$1.length)
+        RegExp.$1,
+        (d.getFullYear() + "").substr(4 - RegExp.$1.length)
       );
     for (const k in o)
       if (new RegExp("(" + k + ")").test(_format))
         _format = _format.replace(
-            RegExp.$1,
-            RegExp.$1.length === 1
-                ? o[k]
-                : ("00" + o[k]).substr(("" + o[k]).length)
+          RegExp.$1,
+          RegExp.$1.length === 1
+            ? o[k]
+            : ("00" + o[k]).substr(("" + o[k]).length)
         );
     return _format;
   }
@@ -180,7 +180,7 @@ class WsSocket {
    *
    * @param {Object} evt Websocket 消息
    */
-  onOpen(evt) {
+  onOpen (evt) {
     this.events.onOpen(evt);
 
     if (this.config.heartbeat.enabled) {
@@ -193,7 +193,7 @@ class WsSocket {
    *
    * @param {Object} evt Websocket 消息
    */
-  onClose(evt) {
+  onClose (evt) {
     console.log("关闭连接", evt);
     if (this.config.heartbeat.enabled) {
       clearInterval(this.config.heartbeat.setInterval);
@@ -212,7 +212,7 @@ class WsSocket {
    *
    * @param {Object} evt Websocket 消息
    */
-  onError(evt) {
+  onError (evt) {
     this.events.onError(evt);
   }
 
@@ -221,20 +221,23 @@ class WsSocket {
    *
    * @param {Object} evt Websocket 消息
    */
-  onMessage(evt) {
+  onMessage (evt) {
     let result = this.onParse(evt);
     console.log("接收消息", result, "color:red");
     // 判断消息事件是否被绑定
     // event_talk;
-
+    let params = {
+      ...this.onParse(evt),
+      text: JSON.parse(this.onParse(evt).text)
+    }
     // 指定推送消息
-    this.onCallBacks["event_talk"](result);
+    this.onCallBacks["event_talk"](params);
   }
 
   /**
    * WebSocket心跳检测
    */
-  heartbeat() {
+  heartbeat () {
     console.log("WebSocket心跳检测");
     this.config.heartbeat.setInterval = setInterval(() => {
       this.connect.send("PING");
@@ -246,14 +249,14 @@ class WsSocket {
    *
    * @param {Object} message
    */
-  send(message) {
+  send (message) {
     this.connect.send(JSON.stringify(message));
   }
 
   /**
    * 关闭连接
    */
-  close() {
+  close () {
     this.connect.close();
   }
 
@@ -263,7 +266,7 @@ class WsSocket {
    * @param {String} event 事件名
    * @param {Object} data 数据
    */
-  emit(event, data) {
+  emit (event, data) {
     if (this.connect && this.connect.readyState === 1) {
       this.connect.send(JSON.stringify(data));
     } else {

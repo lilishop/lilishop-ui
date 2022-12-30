@@ -50,7 +50,7 @@ class SocketInstance {
   }
 
   // 连接 WebSocket 服务
-  connect() {
+  connect () {
     console.log("🔗连接 WebSocket");
     this.socket.connection();
   }
@@ -58,7 +58,7 @@ class SocketInstance {
   /**
    * 注册回调消息处理事件
    */
-  registerEvents() {
+  registerEvents () {
     this.socket.on("event_talk", (data) => {
       console.log("接收到消息,event_talk", data);
       new TalkEvent(data).handle();
@@ -99,7 +99,7 @@ class SocketInstance {
    *
    * @param {Boolean} status 连接状态
    */
-  updateSocketStatus(status) {
+  updateSocketStatus (status) {
     store.commit("UPDATE_SOCKET_STATUS", status);
   }
 
@@ -109,7 +109,7 @@ class SocketInstance {
    * @param {String} event 事件名
    * @param {Object} data 数据
    */
-  emit(event, data) {
+  emit (event, data) {
     this.socket.emit(event, data);
   }
 }
