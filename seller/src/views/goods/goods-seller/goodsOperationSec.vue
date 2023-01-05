@@ -1,5 +1,8 @@
 <template>
   <div>
+    <Modal title="预览图片" v-model="visible">
+      <img :src="previewImage" v-if="visible" style="width: 100%">
+    </Modal>
     <div class="content-goods-publish">
       <Form
         ref="baseInfoForm"
@@ -440,7 +443,7 @@
                           </Input>
                         </template>
                         <template slot="images" slot-scope="{ row }">
-                          <Button @click="editSkuPicture(row)">编辑图片</Button>
+                          <div @mouseover="mouseOver(row)" @mouseleave="mouseLeave"><Button @click="editSkuPicture(row)" type="error" >编辑图片 ！</Button></div>
                           <Modal
                             v-model="showSkuPicture"
                             :styles="{ top: '30px' }"
@@ -510,6 +513,20 @@
               </Collapse>
             </div>
           </div>
+          <h4 v-if="showContent">规格描述内容</h4>
+          <div v-if="showContent" class="form-item-view">
+              <div >
+                <FormItem
+                  class="form-item-view-el"
+                  :label="contentImage"
+                >
+                  <!-- {{item.url}} -->
+                  <div style="width:100%;display:flex;" v-for="(item,index) in listImages.images" :key="index">
+                    <img style="width:100px;flex:1;margin-top:10px;cursor:pointer;" :src="item.url" @click="getImages(item.url)"/>
+                  </div>
+                </FormItem>
+              </div>
+            </div>
           <h4>商品详情描述</h4>
           <div class="form-item-view">
             <div class="tree-bar">
@@ -735,6 +752,11 @@ export default {
       regular,
       initEditor,
       total: 0,
+      showContent:false,
+      listImages:[],
+      contentImage:"",
+      visible: false, // 图片预览
+      previewImage: '', // 预览图片地址
       global: 0,
       accessToken: "", //令牌token
       goodsParams: "",
@@ -886,6 +908,22 @@ export default {
     };
   },
   methods: {
+    getImages(v){
+      this.previewImage = v;
+      this.visible = true;
+    },
+    mouseOver(v){
+      this.showContent = true
+      this.listImages = v
+      if(this.listImages.images.length <= 0){
+        this.contentImage = '规格专属图片暂无'
+      }else{
+        this.contentImage = '当前规格专属图片'
+      }
+    },
+    mouseLeave(){
+      // this.showContent = false
+    },  
     /**
      * 选择参数
      * @paramsGroup 参数分组
@@ -937,6 +975,7 @@ export default {
     },
     // 编辑sku图片
     editSkuPicture(row) {
+      this.showContent = false
       if (row.images && row.images.length > 0) {
         this.previewPicture = row.images[0].url;
       }
