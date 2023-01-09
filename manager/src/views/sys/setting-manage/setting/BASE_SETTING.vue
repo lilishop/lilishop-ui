@@ -18,6 +18,14 @@
           <Button @click="onClickImg('domainLogo')">选择图片</Button>
         </div>
       </FormItem>
+      <FormItem label="后台Icon" prop="domainIcon">
+        <div class="label-item-upload">
+
+          <img v-if="formValidate.domainIcon" class="img" :src="formValidate.domainIcon" />
+          <img v-else class="img" src="../../../../assets/emptyImg.png" alt="">
+          <Button @click="onClickImg('domainIcon')">选择图片</Button>
+        </div>
+      </FormItem>
       <FormItem label="买家端Logo" prop="buyerSideLogo">
         <div class="label-item-upload">
           <img v-if="formValidate.buyerSideLogo" class="img" :src="formValidate.buyerSideLogo" />
@@ -25,11 +33,25 @@
           <Button @click="onClickImg('buyerSideLogo')">选择图片</Button>
         </div>
       </FormItem>
+      <FormItem label="买家端Icon" prop="buyerSideIcon">
+        <div class="label-item-upload">
+          <img v-if="formValidate.buyerSideIcon" class="img" :src="formValidate.buyerSideIcon" />
+          <img v-else class="img" src="../../../../assets/emptyImg.png" alt="">
+          <Button @click="onClickImg('buyerSideIcon')">选择图片</Button>
+        </div>
+      </FormItem>
       <FormItem label="商家端Logo" prop="storeSideLogo">
         <div class="label-item-upload">
           <img v-if="formValidate.storeSideLogo" class="img" :src="formValidate.storeSideLogo" />
           <img v-else class="img" src="../../../../assets/emptyImg.png" alt="">
           <Button @click="onClickImg('storeSideLogo')">选择图片</Button>
+        </div>
+      </FormItem>
+      <FormItem label="商家端Icon" prop="storeSideIcon">
+        <div class="label-item-upload">
+          <img v-if="formValidate.storeSideIcon" class="img" :src="formValidate.storeSideIcon" />
+          <img v-else class="img" src="../../../../assets/emptyImg.png" alt="">
+          <Button @click="onClickImg('storeSideIcon')">选择图片</Button>
         </div>
       </FormItem>
 

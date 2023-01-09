@@ -43,7 +43,7 @@ export default {
     getSite() {
       //获取domainLogo
       getBaseSite().then((res) => {
-        const { domainLogo, siteName } = JSON.parse(res.result.settingValue);
+        const { domainLogo, domainIcon, siteName } = JSON.parse(res.result.settingValue);
         this.domainLogo = domainLogo;
         // 过期时间
         var expirationTime = new Date().setHours(new Date().getHours() + 1);
@@ -51,6 +51,7 @@ export default {
         localStorage.setItem("icontitle_expiration_time", expirationTime);
         // 存放信息
         localStorage.setItem("icon", domainLogo);
+        localStorage.setItem("domainIcon", domainIcon);
         localStorage.setItem("title", siteName);
         let link =
           document.querySelector("link[rel*='icon']") ||

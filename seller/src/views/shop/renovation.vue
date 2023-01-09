@@ -3,10 +3,18 @@
     <!-- 左侧模块列表 -->
     <div class="model-list">
       <div class="classification-title">基础模块</div>
-      <draggable tag="ul" :list="modelData" v-bind="{group:{ name:'model', pull:'clone',put:false},sort:false, ghostClass: 'ghost'}"   >
+      <draggable
+        tag="ul"
+        :list="modelData"
+        v-bind="{
+          group: { name: 'model', pull: 'clone', put: false },
+          sort: false,
+          ghostClass: 'ghost',
+        }"
+      >
         <li v-for="(model, index) in modelData" :key="index" class="model-item">
           <Icon :type="model.icon" />
-          <span>{{model.name}}</span>
+          <span>{{ model.name }}</span>
         </li>
       </draggable>
     </div>
@@ -16,7 +24,9 @@
     </div>
     <!-- 操作按钮 -->
     <div class="btn-bar">
-      <Button type="primary" :loading="submitLoading" @click="saveTemplate">保存模板</Button>
+      <Button type="primary" :loading="submitLoading" @click="saveTemplate"
+        >保存模板</Button
+      >
       <Button class="ml_10" @click="resetTemplate">还原模板</Button>
     </div>
   </div>
@@ -44,21 +54,21 @@ export default {
   methods: {
     saveTemplate() {
       // 保存模板
-      this.submitTemplate(this.$route.query.pageShow ? 'OPEN' : 'CLOSE')
+      this.submitTemplate(this.$route.query.pageShow ? "OPEN" : "CLOSE");
     },
     // 提交模板
     submitTemplate(pageShow) {
-      this.submitLoading = true
-      const modelForm = JSON.parse(JSON.stringify(this.modelForm)) 
+      this.submitLoading = true;
+      const modelForm = JSON.parse(JSON.stringify(this.modelForm));
       modelForm.list.unshift(this.$refs.modelForm.navList);
       modelForm.list.unshift(this.$refs.modelForm.topAdvert);
       const data = {
         id: this.$route.query.id,
         pageData: JSON.stringify(modelForm),
-        pageShow
+        pageShow,
       };
       API_floor.updateHome(this.$route.query.id, data).then((res) => {
-        this.submitLoading = false
+        this.submitLoading = false;
         if (res.success) {
           this.$Message.success("保存模板成功");
         }

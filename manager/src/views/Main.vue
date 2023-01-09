@@ -134,7 +134,7 @@ export default {
         document.querySelector("link[rel*='icon']") ||
         document.createElement("link");
       link.type = "image/x-icon";
-      link.href = localStorage.getItem("icon");
+      link.href = localStorage.getItem("domainIcon");
       link.rel = "shortcut icon";
       document.getElementsByTagName("head")[0].appendChild(link);
       window.document.title = localStorage.getItem("title") + " - 运营后台";

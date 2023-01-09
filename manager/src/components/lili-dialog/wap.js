@@ -21,7 +21,7 @@ export default [
     name: "marketing"
   },
   {
-    title: "页面",
+    title: "文章",
     url: "3",
     name: "pages"
   },

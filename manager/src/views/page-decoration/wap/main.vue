@@ -13,18 +13,7 @@ export default {
   components: {
     navbar
   },
-  mounted() {
-    this.pagetype = this.$route.query.pagetype;
-  },
-  mounted() {
-    if (this.$route.query.pagetype == "ALERT") {
-      this.name = "alertAdvertising";
-    }
-    if (this.$route.query.pagetype == "OPEN_SCREEN_ANIMATION") {
-      this.name = "advertising";
-    }
-    this.pagetype = this.$route.query.pagetype;
-  },
+
   data() {
     return {
       layout, // 装修模块
@@ -45,8 +34,8 @@ export default {
     selected(val) {
       // 顶部栏点击切换
       this.name = val;
-    },
-  },
+    }
+  }
 };
 </script>
 <style scoped lang="scss">

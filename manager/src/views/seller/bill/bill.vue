@@ -13,7 +13,7 @@
           <Select v-model="searchForm.billStatus" clearable style="width:160px">
             <Option value="OUT">已出账</Option>
             <Option value="CHECK">已对账</Option>
-            <Option value="EXAMINE">已审核</Option>
+            <!-- <Option value="EXAMINE">已审核</Option> -->
             <Option value="COMPLETE">已付款</Option>
           </Select>
         </Form-item>

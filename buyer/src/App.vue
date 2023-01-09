@@ -26,7 +26,7 @@ export default {
           //动态获取icon
           let link =document.querySelector("link[rel*='icon']") ||document.createElement("link");
             link.type = "image/x-icon";
-            link.href = storage.getItem("logoImg");
+            link.href = storage.getItem("siteIcon");
             link.rel = "shortcut icon";
             document.getElementsByTagName("head")[0].appendChild(link);
         }
@@ -45,12 +45,12 @@ export default {
           // 存放信息
           storage.setItem('siteName', data.siteName);
           storage.setItem('logoImg', data.buyerSideLogo);
-
+          storage.setItem("siteIcon",data.buyerSideIcon);
           window.document.title = data.siteName;
           //动态获取icon
           let link =document.querySelector("link[rel*='icon']") ||document.createElement("link");
           link.type = "image/x-icon";
-          link.href = data.buyerSideLogo;
+          link.href = data.buyerSideIcon;
           link.rel = "shortcut icon";
           document.getElementsByTagName("head")[0].appendChild(link);
         }

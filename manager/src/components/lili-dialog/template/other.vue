@@ -22,6 +22,7 @@
       <!-- 外部链接，只有pc端跳转 -->
       <Col span="4">
         <div
+          v-if="linkVisible"
           class="card"
           :class="{ active: selectedIndex == linkList.length }"
           @click="handleLink(linkItem, linkList.length)"
@@ -106,10 +107,36 @@ export default {
         ___type: "link",
         url: "",
       },
-      linkVisible: false, // 是否显示外部链接
+      linkVisible: true, // 是否显示外部链接
       selectedIndex: 9999999, // 已选index
     };
   },
+  created(){
+    // console.log(window.location.href)
+    let urls = window.location.href
+    if(urls.indexOf('/floorList/renovation') != -1){
+      this.linkList.forEach((items,indexs)=>{
+        if(items.title == '砍价'){
+          console.log(12321322,indexs)
+          this.linkList.splice(indexs,1)
+        }
+      })
+      this.linkList.forEach((item,index)=>{
+        if(item.title == '小程序直播'){
+          this.linkList.splice(index,1)
+        }
+      })
+      this.linkList.forEach((itemss,indexss)=>{
+        if(itemss.title == '积分商城'){
+          this.linkList.splice(indexss,1)
+        }
+      })
+      this.linkVisible = true
+    }else{
+      this.linkVisible = false
+    }
+
+  },  
   methods: {
     handleLink(val, index) {
       val = { ...val, ___type: "other" };

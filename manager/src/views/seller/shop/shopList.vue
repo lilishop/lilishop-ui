@@ -24,7 +24,7 @@
           <Select v-model="searchForm.storeDisable" clearable style="width: 200px">
             <Option value="OPEN">开启中</Option>
             <Option value="CLOSED">已关闭</Option>
-            <Option value="APPLY">申请中</Option>
+            <!-- <Option value="APPLY">申请中</Option> -->
             <Option value="APPLYING">审核中</Option>
             <Option value="REFUSED">审核拒绝</Option>
           </Select>
@@ -329,6 +329,7 @@ export default {
     },
     // 获取列表数据
     getDataList() {
+      console.log(this.searchForm)
       this.loading = true;
       // 带多条件搜索参数获取表单数据 请自行修改接口
       getShopListData(this.searchForm).then((res) => {

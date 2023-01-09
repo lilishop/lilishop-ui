@@ -12,7 +12,7 @@
           />
         </Form-item>
         <Form-item label="联系方式">
-          <Inputuser-manage
+          <Input
             type="text"
             v-model="searchForm.mobile"
             placeholder="请输入联系方式"
