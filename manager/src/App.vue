@@ -5,9 +5,9 @@
 </template>
 
 <script>
-import {getCategoryTree} from '@/api/goods.js'
+import { getCategoryTree } from '@/api/goods.js'
 export default {
-  updated() {
+  updated () {
     if (!localStorage.getItem('category') && this.$route.path !== '/login') {
       getCategoryTree(0).then(res => {
         if (res.success) {
@@ -49,7 +49,8 @@ body {
 .ivu-tag {
   cursor: pointer;
 }
-.tox-notifications-container{
+
+.tox-notifications-container {
   display: none !important;
 }
 </style>
