@@ -35,9 +35,9 @@
 
             <!-- 其它对话消息 -->
             <div v-else class="message-box record-box" :class="{
-  'direction-rt': item.float == 'right',
-  'checkbox-border': multiSelect.isOpen === true,
-}">
+              'direction-rt': item.float == 'right',
+              'checkbox-border': multiSelect.isOpen === true,
+            }">
               <aside v-show="multiSelect.isOpen" class="checkbox-column">
                 <i class="el-icon-success" :class="{ selected: verifyMultiSelect(item.id) }"
                   @click="triggerMultiSelect(item.id)" />
@@ -59,48 +59,63 @@
                     {{ unixToDate(item.createTime, "MM月dd日 hh:mm") }}
                   </span>
                   <!-- 文本消息 -->
-                  <div v-if="item.messageType == 'MESSAGE'" class="text-message" :class="{
-  left: item.float == 'left',
-  right: item.float == 'right',
-}">
+                  <div v-if="item.messageType == 'MESSAGE'" style="background-color: #d0e9ff;color: black;"
+                    class="text-message" :class="{
+                      left: item.float == 'left',
+                      right: item.float == 'right',
+                    }">
                     <div class="arrow"></div>
 
                     <pre v-html="item.text" />
                   </div>
 
-                  <div v-if="item.messageType == 'GOODS' && item.text != null" class="text-message" :class="{
-  left: item.float == 'left',
-  right: item.float == 'right',
-}">
+                  <div v-if="item.messageType == 'GOODS' && item.text != null" class="goodsStyle " :class="{
+                    left: item.float == 'left',
+                    right: item.float == 'right',
+                  }">
                     <div class="base" @click="linkToGoods(item.text.goodsId, item.text.id)">
                       <div>
                         <img :src="item.text.thumbnail" class="image" />
                       </div>
-                      <div style="margin-left: 13px">
-                        <a> {{ item.text.goodsName }} </a>
-                        <div>
-                          <span style="color: red;">￥{{ item.text.price }}</span>
+                      <div>
+                        <div class="goods_name">
+                          <el-tooltip class="item" effect="dark" :content="item.text.goodsName" placement="top-start">
+                            <a> {{ item.text.goodsName }} </a>
+                          </el-tooltip>
+                        </div>
+                        <div class="price">
+                          <span>￥{{ item.text.price }}</span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div v-if="item.messageType == 'ORDER' && item.text != null" class="text-message" :class="{
-  left: item.float == 'left',
-  right: item.float == 'right',
-}">
-                    <a> 订单号:{{ item.text.sn }} </a>
+                  <div v-if="item.messageType == 'ORDER' && item.text != null" class="oderStyle" :class="{
+                    left: item.float == 'left',
+                    right: item.float == 'right',
+                  }">
+                    <div class="oedersn">
+                      <el-tooltip class="item" effect="dark" :content="item.text.sn" placement="top-start">
+                        <a> 订单号:{{ item.text.sn }} </a>
+                      </el-tooltip>
+                    </div>
                     <div class="baseTwo">
                       <img :src="item.text.groupImages" style="height: 100px;width: 100px;margin-top: 10px;" />
                       <span class="orderGoodsName" @click="linkToOrders(item.text.sn)">{{ item.text.groupName }}</span>
                       <span class="orderGoodsTime">{{ item.text.paymentTime }}</span>
+                      <span class="orderFlowPrice">
+                        订单金额：￥{{ item.text.flowPrice }}
+                      </span>
+                      <span class="order_status"
+                        :style="{ 'color': item.text.orderStatus == 'CANCELLED' || item.text.orderStatus == 'UNPAID' || item.text.orderStatus == ' TAKE' ? '#5a606b' : '#f23030' }">{{
+                          item.text.orderStatus == 'CANCELLED' ? '已取消' : item.text.orderStatus == 'UNPAID' ? '未付款' :
+                            item.text.orderStatus ==
+                              'PAID' ? '已付款' : item.text.orderStatus == 'UNDELIVERED' ? '待发货' : item.text.orderStatus ==
+                                'DELIVERED'
+                                ? '已发货' : item.text.orderStatus == ' COMPLETED' ? '已完成' : item.text.orderStatus == ' TAKE' ?
+                                  '待校验' : ''
+                        }}</span>
                     </div>
                   </div>
-                  <!-- 图片消息 -->
-                  <!-- <image-message
-                    v-else-if="item.messageType == 2 && item.file.file_type == 1"
-                    :src="item.file.file_url"
-                    @contextmenu.native="onCopy(idx, item, $event)"
-                  /> -->
                 </div>
               </main>
             </div>
@@ -149,10 +164,10 @@
     <!-- 消息管理器 -->
     <transition name="el-fade-in-linear">
       <TalkSearchRecord v-if="findChatRecord" :params="{
-  talk_type: params.talk_type,
-  receiver_id: params.receiver_id,
-  title: params.nickname,
-}" @close="findChatRecord = false" />
+        talk_type: params.talk_type,
+        receiver_id: params.receiver_id,
+        title: params.nickname,
+      }" @close="findChatRecord = false" />
     </transition>
 
     <!-- 链接信息 -->
@@ -820,6 +835,67 @@ export default {
 };
 </script>
 <style lang="less" scoped>
+.order_status {
+  height: 30px;
+  width: 60px;
+  background: #ffeded;
+  margin-right: 20px;
+  text-align: center;
+  line-height: 25px;
+  margin-left: 15px;
+  border-radius: 10px;
+}
+
+.oderStyle {
+  border: 1px solid #f2f2f2;
+  width: 330px;
+  border-radius: 4px;
+
+  .oedersn {
+    margin: 10px 0 10px 5px;
+    width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.goodsStyle {
+  border: 1px solid #f2f2f2;
+  width: 300px;
+  height: 120px;
+  display: flex;
+  border-radius: 4px;
+
+  .goods_name {
+    color: black;
+    width: 150px;
+    font-size: 15px;
+    color: #333333;
+    margin-top: 30px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .image {
+    height: 70px;
+    margin-top: 3px;
+    width: 70px;
+    background-size: cover;
+    margin: 20px;
+  }
+
+  .price {
+    color: #999;
+    margin-top: 20px;
+  }
+
+  .base {
+    display: flex;
+  }
+}
+
 .orderSn {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -830,7 +906,7 @@ export default {
   width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  // white-space: nowrap;
   position: absolute;
   margin-top: 10px;
   margin-left: 10px;
@@ -838,9 +914,14 @@ export default {
 
 .orderGoodsTime {
   margin-left: 10px;
-  color: red;
+  color: #999;
   position: absolute;
-  margin-top: 35px;
+  margin-top: 70px;
+}
+
+.orderFlowPrice {
+  color: #999;
+  margin-bottom: 20px;
 }
 
 .main-box {
@@ -904,26 +985,26 @@ export default {
 }
 
 
-.base {
-  margin-top: 5px;
-  height: 120px;
-  display: flex;
+// .base {
+//   margin-top: 5px;
+//   height: 120px;
+//   display: flex;
 
-  div {
-    width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 8px;
-    white-space: nowrap;
-  }
+//   div {
+//     width: 100px;
+//     // overflow: hidden;
+//     // text-overflow: ellipsis;
+//     margin-top: 8px;
+//     // white-space: nowrap;
+//   }
 
-  .image {
-    height: 100px;
-    margin-top: 3px;
-    width: 100px
-  }
+//   .image {
+//     height: 100px;
+//     margin-top: 3px;
+//     width: 100px
+//   }
 
-}
+// }
 
 .talk-bubble {
   position: absolute;
@@ -1101,7 +1182,7 @@ export default {
 }
 
 @bg-left-color: #f5f5f5;
-@bg-right-color: #1ebafc;
+@bg-right-color: #ffffff;
 
 .text-message {
   position: relative;

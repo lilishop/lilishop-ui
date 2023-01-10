@@ -15,12 +15,12 @@
         <div class="store-collect">
           <span class="mr_10" v-if="goodsMsg.data">
             <router-link :to="'Merchant?id=' + goodsMsg.data.storeId">{{
-    goodsMsg.data.storeName
-}}</router-link>
+              goodsMsg.data.storeName
+            }}</router-link>
           </span>
           <span @click="collect">
             <Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#666'" />
-            {{ storeCollected ? "已收藏店铺" : "收藏店铺" }}
+            {{ storeCollected? "已收藏店铺": "收藏店铺" }}
           </span>
           <span class="ml_10" @click="IMService()">联系客服</span>
         </div>
@@ -81,8 +81,19 @@ export default {
         this.$Message.error("请登录后再联系客服");
         return;
       }
+      // window.open(
+      //   this.IMLink +
+      //   "?token=" +
+      //   accessToken +
+      //   "&id=" +
+      //   this.goodsMsg.data.storeId +
+      //   "&goodsId=" +
+      //   this.goodsMsg.data.goodsId +
+      //   "&skuId=" +
+      //   this.goodsMsg.data.id
+      // );
       window.open(
-        this.IMLink +
+        'http://192.168.0.139:8000/' +
         "?token=" +
         accessToken +
         "&id=" +

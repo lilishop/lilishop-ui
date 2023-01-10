@@ -70,6 +70,8 @@ export default {
     }
   },
   mounted () {
+    localStorage.setItem('storeFlag', this.toUser.storeFlag)
+    console.log(this.toUser.storeFlag, 'this.toUser.storeFlag');
     if (this.toUser.storeFlag) {
       this.getStoreDetail()
     } else {
