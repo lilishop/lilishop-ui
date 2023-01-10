@@ -75,3 +75,15 @@ export function applyStatus () {
     method: Method.GET
   })
 }
+
+/**
+ * 获取自提点信息
+ * @param storeId
+ */
+ export function getStoreAddress(storeId,params) {
+  return request({
+    url: `/buyer/store/address/page/${storeId}`,
+    method: Method.GET,
+    params
+  });
+}

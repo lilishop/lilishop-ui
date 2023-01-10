@@ -212,3 +212,52 @@ export function receiptSelect (params) {
     params
   });
 }
+
+/**
+ * 获取全部配送方式
+ */
+ export function shippingMethodList(params) {
+  return request({
+    url: `/buyer/trade/carts/shippingMethodList`,
+    method: Method.GET,
+    needToken: true,
+    params: params,
+  });
+}
+
+/**
+ * 获取全部配送方式
+ */
+ export function storeAddressList(params) {
+  return request({
+    url: `/buyer/store/address/shippingMethodList`,
+    method: Method.GET,
+    needToken: true,
+    params: params,
+  });
+}
+
+/**
+ * 设置自提地址ID
+ * @param addressId
+ */
+ export function setStoreAddressId(storeAddressId,way) {
+  return request({
+    url: `/buyer/trade/carts/storeAddress?storeAddressId=${storeAddressId}&way=${way}`,
+    method: Method.GET,
+    needToken: true,
+  });
+}
+
+/**
+ * 提交配送方式
+ * @param params
+ */
+ export function setShipMethod(params) {
+  return request({
+    url: "/buyer/trade/carts/shippingMethod",
+    method: Method.PUT,
+    needToken: true,
+    params,
+  });
+}
