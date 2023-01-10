@@ -92,7 +92,9 @@ export default {
           render: (h, params) => {
             if (params.row.couponActivityType === "REGISTERED") {
               return h("div", ["注册赠券"]);
-            } else {
+            }else if(params.row.couponActivityType === 'AUTO_COUPON'){
+              return h("div", ["自动发券"]);
+            }else {
               return h("div", ["精确发券"]);
             }
           },
@@ -112,6 +114,25 @@ export default {
           },
         },
         {
+          title: "领取频率",
+          key: "couponFrequencyEnum",
+          minWidth: 120,
+          render: (h, params) => {
+            console.log(params)
+            let text = ''
+            if (params.row.couponFrequencyEnum === "DAY") {
+              text = "每日";
+            } else if(params.row.couponFrequencyEnum === "WEEK") {
+              text = "每周";
+            } else if(params.row.couponFrequencyEnum === 'MONTH'){
+              text = '每月'
+            } else {
+              text = '/'
+            }
+            return h("div", [text]);
+          },
+        },
+        {
           title: "活动时间",
           minWidth: 150,
           render: (h, params) => {
@@ -121,6 +142,8 @@ export default {
                   innerHTML: params.row.startTime + "<br/>" + params.row.endTime,
                 },
               });
+            }else{
+              return h("div", '/');
             }
           },
         },
