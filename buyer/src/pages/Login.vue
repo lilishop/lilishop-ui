@@ -235,6 +235,7 @@ export default {
                 this.$Message.success("登录成功");
                 storage.setItem("accessToken", res.result.accessToken);
                 storage.setItem("refreshToken", res.result.refreshToken);
+                storage.setItem('getTimes',0)
                 apiLogin.getMemberMsg().then((res) => {
                   if (res.success) {
                     storage.setItem("userInfo", res.result);

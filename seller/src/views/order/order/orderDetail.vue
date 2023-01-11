@@ -228,6 +228,31 @@
             <span class="label">优惠券金额：</span>
             <span class="txt"> {{ orderInfo.order.priceDetailDTO.couponPrice | unitPrice('￥') }} </span>
           </li>
+          <li v-if="orderInfo.order.priceDetailDTO.discountPriceDetail != undefined && orderInfo.order.priceDetailDTO.discountPriceDetail && orderInfo.order.priceDetailDTO.discountPriceDetail != null && orderInfo.order.priceDetailDTO.discountPriceDetail != ''">      
+            <div class="label">
+              <Poptip trigger="hover" placement="left" width="200">
+                <Icon v-if="typeList.length > 0"  type="ios-alert-outline" size="17" @click="getOrderPrice" color="#cc0000"/>
+              <template #content>
+                <div class="api" style="text-align:left;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>优惠详情：</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr  v-for="(item,index) in typeList" :key="index">
+                            <td>{{item.promotionName}}：</td>
+                            <td>¥{{ item.discountPrice | unitPrice }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+              </template>
+            </Poptip>
+            <span>优惠详情：</span>
+            </div>
+            </li>
           <li>
             <span class="label">运费：</span>
             <span class="txt">{{
@@ -238,18 +263,31 @@
               <span class="label">修改金额：</span>
               <span class="txt theme_color">¥{{ orderInfo.order.priceDetailDTO.updatePrice | unitPrice }}</span>
             </li>
+            <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index" > 
+            <hr style="border:1px dashed black;">
+              <span class="label" v-if="index == 1 && typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
+              <span class="txt" style="border-bottom: 1px dashed;font-size:10px !important;" v-if="index == 1 &&  typeList.length > 1">¥{{ item.discountPrice | unitPrice }}</span>
+              <span class="label" v-if="index == 0 &&  typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
+              <span class="txt" style="border-top: 1px dashed;font-size:10px !important;" v-if="index == 0 && typeList.length > 1">¥{{ item.discountPrice | unitPrice }}</span>
+              <span class="label" v-if="typeList.length == 1 && index == 0" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
+              <span class="txt"  v-if="typeList.length == 1 && index == 0" style="border-top: 1px dashed;border-bottom: 1px dashed;font-size:10px !important;">¥{{ item.discountPrice | unitPrice }}</span>
+            </li> -->
           <li v-if="orderInfo.order.priceDetailDTO.payPoint != 0">
             <span class="label">使用积分：</span>
             <span class="txt">{{
               orderInfo.order.priceDetailDTO.payPoint
             }}</span>
           </li>
-
           <li>
             <span class="label">应付金额：</span>
             <span class="txt flowPrice"
               >¥{{ orderInfo.order.flowPrice | unitPrice }}</span
             >
+            <!-- <template v-if="orderInfo.order.priceDetailDTO.discountPriceDetail != undefined && orderInfo.order.priceDetailDTO.discountPriceDetail && orderInfo.order.priceDetailDTO.discountPriceDetail != null && orderInfo.order.priceDetailDTO.discountPriceDetail != ''">
+                <Space style="height:20px;float: right;text-align: center;margin-left:30px;margin-right:53px;">
+                      <Button type="primary" ghost size="small" @click="getOrderPrice()">优惠详情</Button>
+                </Space>
+            </template> -->
           </li>
         </ul>
       </div>
@@ -568,6 +606,8 @@ export default {
   },
   data() {
     return {
+      typeList:[],
+      showPrices:false,
       printHiddenFlag:false,//隐藏信息
       printInfoObj:{
         id: "printInfo",//要打印的id名 无#号
@@ -804,6 +844,28 @@ export default {
         }
       });
     },
+    getOrderPrice(){
+      if(this.showPrices){
+        this.showPrices = false
+      }else if(!this.showPrices){
+        this.showPrices = true
+      }
+    },
+    getContentPrice(){
+          for (let i = 0; i < this.typeList.length; i++) {
+          for (let j = i + 1; j < this.typeList.length; j++) {
+            if (this.typeList[i].promotionId === this.typeList[j].promotionId) {
+              this.typeList[i].discountPrice = this.typeList[i].discountPrice + this.typeList[j].discountPrice
+              this.typeList.splice(j, 1)
+            }
+          }
+        }
+        console.log(this.typeList)
+        if(this.typeList.length >= 3){
+          console.log(123123)
+          this.getContentPrice()
+        }
+    },  
     //获取订单详细信息
     getDataDetail() {
       this.loading = true;
@@ -814,6 +876,9 @@ export default {
           this.allowOperation = res.result.allowOperationVO;
           this.data = res.result.orderItems;
           this.orderLogData = res.result.orderLogs;
+          this.typeList = JSON.parse(JSON.stringify(res.result.order.priceDetailDTO.discountPriceDetail));
+          this.getContentPrice()
+          this.getOrderPrice()
         }
       });
     },
@@ -1055,7 +1120,7 @@ dl dt {
 
   .goods-total {
     padding: 20px;
-    height: 150px;
+    height: 220px;
     width: 100%;
 
     ul {
@@ -1069,12 +1134,14 @@ dl dt {
     .label {
       float: left;
       width: 500px;
+      font-size: 14px;
       text-align: right;
     }
 
     .txt {
       float: left;
       width: 130px;
+      font-size: 14px;
       text-align: right;
       font-family: verdana;
     }
