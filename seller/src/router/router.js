@@ -158,6 +158,12 @@ export const otherRouter = {
       name: "renovation",
       component: () => import("@/views/shop/renovation.vue")
     },
+    {
+      path: "promotions/coupon-receive",
+      title: "优惠券领取记录",
+      name: "coupon-receive",
+      component: () => import("@/views/promotion/coupon/coupon-receive.vue"),
+    },
     // {
     //   path: "/*",
     //   name: "error-404",

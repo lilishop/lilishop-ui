@@ -82,20 +82,24 @@
               </div>
 
               <div class="goods-show-right">
-                <Tag class="goods-show-tag" color="red" v-if="item.content.selfOperated">
+                <Tag
+                  class="goods-show-tag"
+                  color="red"
+                  v-if="item.content.selfOperated"
+                >
                   自营
                 </Tag>
                 <Tag
-                  class="goods-show-tag" color="blue"
+                  class="goods-show-tag"
+                  color="blue"
                   v-if="item.content.goodsType == 'VIRTUAL_GOODS'"
                 >
                   虚拟
                 </Tag>
                 <Tag
-                  class="goods-show-tag" color="blue"
-                  v-else-if="
-                    item.content.goodsType == 'PHYSICAL_GOODS'
-                  "
+                  class="goods-show-tag"
+                  color="blue"
+                  v-else-if="item.content.goodsType == 'PHYSICAL_GOODS'"
                 >
                   实物
                 </Tag>
@@ -155,13 +159,21 @@ export default {
   watch: {
     $route() {
       const keyword = this.$route.query.keyword;
-      this.handleSearch(keyword);
+      if (keyword) {
+        this.handleSearch(keyword);
+      }
       if (this.$route.query.categoryId) {
         let cateId = this.$route.query.categoryId.split(",");
         Object.assign(this.params, this.$route.query);
         this.params.categoryId = cateId[cateId.length - 1];
-        this.getGoodsList();
       }
+      if (this.$route.query.promotionType) {
+        this.params.promotionType = this.$route.query.promotionType;
+      }
+      if (this.$route.query.promotionsId) {
+        this.params.promotionsId = this.$route.query.promotionsId;
+      }
+      this.getGoodsList();
     },
   },
   methods: {
@@ -300,7 +312,6 @@ export default {
   flex-direction: row;
   margin-top: 5px;
 }
-
 
 .goods-show-self {
   float: left;

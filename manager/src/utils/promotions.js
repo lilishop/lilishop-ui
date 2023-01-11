@@ -57,4 +57,31 @@ export function promotionsScopeTypeRender(h, params) {
   ]);
 }
 
-
+export function memberPromotionsStatusRender(h, status) {
+  let text = "未知",
+    color = "red";
+  if (status == "NEW") {
+    text = "已领取";
+    color = "geekblue";
+  } else if (status == "USED") {
+    text = "已使用";
+    color = "green";
+  } else if (status == "EXPIRE") {
+    text = "已过期";
+    color = "red";
+  } else if (status == "CLOSED") {
+    text = "已作废";
+    color = "red";
+  }
+  return h("div", [
+    h(
+      "Tag",
+      {
+        props: {
+          color: color,
+        },
+      },
+      text
+    ),
+  ]);
+}
