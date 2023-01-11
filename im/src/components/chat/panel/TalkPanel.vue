@@ -472,7 +472,6 @@ export default {
 
     // 加载用户聊天详情信息
     loadChatRecords () {
-      console.log(this.records.length, 'this.records.length ')
       if (this.loadRecord.pageNumber === 0 || this.params.clickFlag) {
         this.loadRecord.pageNumber = 1
         this.params.clickFlag = false

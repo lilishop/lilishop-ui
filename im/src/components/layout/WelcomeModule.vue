@@ -2,7 +2,6 @@
   <div class="welcome-box">
     <div class="famous-box">
       <img src="~@/assets/image/chat.png" width="300" />
-     
     </div>
   </div>
 </template>
@@ -10,10 +9,10 @@
 <script>
 export default {
   components: {},
-  data() {
+  data () {
     return {}
   },
-  created() {},
+  created () { },
   methods: {},
 }
 </script>

@@ -21,7 +21,6 @@ const Talk = {
   getters: {
     // 过滤所有置顶对话列表
     topItems: (state) => {
-      console.log(state.items, 'state.items');
       return state.items.filter((item) => item.is_top == 1);
     },
     talkItems: (state) => {
@@ -40,7 +39,6 @@ const Talk = {
   mutations: {
     // 设置对话列表
     SET_TALK_ITEMS (state, resource) {
-      console.log("设置对话列表", resource.items);
       Vue.set(state, 'items', resource.items)
     },
 

@@ -1,7 +1,7 @@
 <template>
   <el-tabs v-model="activeName" @tab-click="handleClick" type="card" :stretch=true>
     <el-tab-pane :label="toUser.storeFlag ? '正在咨询' : '他的足迹'" name="history">
-      <div style="margin-left: 12px;" v-if="toUser.storeFlag">
+      <div style="margin-left: 12px;">
         <GoodsLink :goodsDetail="goodsDetail" v-if="toUser.userId === goodsDetail.storeId"
           @sendMessage="submitSendMessage" />
         <FootPrint :list="footPrintList" @loadMore="loadMoreFootPrint()" :orderList="orderPrintList"
@@ -71,7 +71,6 @@ export default {
   },
   mounted () {
     localStorage.setItem('storeFlag', this.toUser.storeFlag)
-    console.log(this.toUser.storeFlag, 'this.toUser.storeFlag');
     if (this.toUser.storeFlag) {
       this.getStoreDetail()
     } else {
@@ -143,6 +142,7 @@ export default {
           // this.orderPrintList.push(...res.result.records)
         }
       })
+      console.log("this.orderPrintListthis.orderPrintList", this.orderPrintList);
     },
 
     // 发送消息回调事件

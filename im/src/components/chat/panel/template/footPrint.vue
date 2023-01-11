@@ -7,7 +7,8 @@
             <dd v-for="item in list" v-infinite-scroll="loadMore">
               <div class="base">
                 <div>
-                  <img style="width: 60px; height: 60px;" :src="item.thumbnail" class="image" />
+                  <img style="width: 60px; height: 60px;margin-left: 40px;box-sizing: border-box;" :src="item.thumbnail"
+                    class="image" />
                 </div>
                 <div class="recent_views">
                   <el-tooltip class="item" effect="dark" :content="item.goodsName" placement="top-start">
@@ -17,13 +18,14 @@
                   <div style="display: flex;">
                     <div style="margin-top: 20px;">
                       <span style="color: red;">￥{{ item.price }}</span>
+                      <div class="goods_store_button">
+                        <el-button type="danger" v-if="item.btnHide == 1 && toUser.storeFlag" size="mini"
+                          @click="submitSendGoodsMessage(item)" plain>发送</el-button>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div>
-                  <el-button class="goods_store_button" type="danger" v-if="item.btnHide == 1" size="mini"
-                    @click="submitSendGoodsMessage(item)" plain>发送</el-button>
-                </div>
+
               </div>
               <div class="Underline"></div>
             </dd>
@@ -43,8 +45,8 @@
                     <span class="orderGoodsName" @click="linkToOrders(item.sn)"> {{ item.groupName }}</span>
                   </el-tooltip>
                   <div class="orderBtn">
-                    <el-button type="danger" class="store-button" v-if="item.btnHide == 1" size="mini"
-                      @click="submitSendOrderMessage(item, index)" plain>发送</el-button>
+                    <el-button type="danger" class="store-button" v-if="item.btnHide == 1 && toUser.storeFlag"
+                      size="mini" @click="submitSendOrderMessage(item, index)" plain>发送</el-button>
                   </div>
                 </div>
                 <div class="order_footer">
@@ -85,7 +87,6 @@ export default {
     ...mapGetters(["talkItems"]),
     ...mapState({
       id: (state) => state.user.id,
-
       toUser: (state) => state.user.toUser,
     }),
   },
@@ -163,10 +164,11 @@ export default {
     orderList: {
       type: Array,
       default: []
-    }
+    },
   },
   mounted () {
-    console.log(this.orderList, 'orderList');
+    //  state.user.toUser
+    console.log(this.$store.state.user.toUser, '  this.$store.state.user.toUser  this.$store.state.user.toUser  this.$store.state.user.toUser');
     this.btnHide = localStorage.getItem('btnHide')
   }
 }
@@ -185,6 +187,8 @@ export default {
 
 .Underline {
   border: 1px solid silver;
+  width: 90%;
+  margin: 0 auto;
 }
 
 .recent_views {
@@ -322,12 +326,11 @@ export default {
 }
 
 .goods_store_button {
+  display: inline;
   background-color: white;
   border-color: #F56C6C;
-  margin-top: 10px;
-  position: relative;
-  right: 60%;
-  top: 45%;
+  position: absolute;
+  left: 70%;
 }
 
 .base {

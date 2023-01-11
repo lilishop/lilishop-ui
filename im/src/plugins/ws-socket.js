@@ -65,7 +65,6 @@ class WsSocket {
    */
   on (event, callBack) {
     // 对应 socket-instance.js
-    console.log("事件绑定", event, callBack);
     this.onCallBacks[event] = callBack;
     return this;
   }

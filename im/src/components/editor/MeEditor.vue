@@ -33,99 +33,66 @@
             <p class="tip-title">发起投票</p>
           </li> -->
 
-<!--          <p class="text-tips no-select">-->
-<!--            <span>按Enter发送 / Shift+Enter 换行</span>-->
-<!--            <el-popover placement="top-end" width="600" trigger="click">-->
-<!--              <div class="editor-books">-->
-<!--                <div class="books-title">编辑说明:</div>-->
-<!--                <p>-->
-<!--                  1.-->
-<!--                  支持上传QQ及微信截图，在QQ或微信中截图后使用Ctrl+v上传图片。-->
-<!--                </p>-->
-<!--                <p>-->
-<!--                  2.-->
-<!--                  支持浏览器及Word文档中的图片复制上传、复制后使用Ctrl+v上传图片。-->
-<!--                </p>-->
-<!--                <p>3. 支持图片拖拽上传。</p>-->
-<!--                <p>4. 支持文件上传 ( 文件小于100M ) 。</p>-->
-<!--                <p>5. 按Enter发送 / Shift+Enter 换行。</p>-->
-<!--                <p>-->
-<!--                  6.-->
-<!--                  注意：当文件正在上传时，请勿关闭网页或离开当前对话框，否则将导致文件停止上传或上传失败。-->
-<!--                </p>-->
-<!--              </div>-->
-<!--              <i class="el-icon-info" slot="reference" />-->
-<!--            </el-popover>-->
-<!--          </p>-->
+          <!--          <p class="text-tips no-select">-->
+          <!--            <span>按Enter发送 / Shift+Enter 换行</span>-->
+          <!--            <el-popover placement="top-end" width="600" trigger="click">-->
+          <!--              <div class="editor-books">-->
+          <!--                <div class="books-title">编辑说明:</div>-->
+          <!--                <p>-->
+          <!--                  1.-->
+          <!--                  支持上传QQ及微信截图，在QQ或微信中截图后使用Ctrl+v上传图片。-->
+          <!--                </p>-->
+          <!--                <p>-->
+          <!--                  2.-->
+          <!--                  支持浏览器及Word文档中的图片复制上传、复制后使用Ctrl+v上传图片。-->
+          <!--                </p>-->
+          <!--                <p>3. 支持图片拖拽上传。</p>-->
+          <!--                <p>4. 支持文件上传 ( 文件小于100M ) 。</p>-->
+          <!--                <p>5. 按Enter发送 / Shift+Enter 换行。</p>-->
+          <!--                <p>-->
+          <!--                  6.-->
+          <!--                  注意：当文件正在上传时，请勿关闭网页或离开当前对话框，否则将导致文件停止上传或上传失败。-->
+          <!--                </p>-->
+          <!--              </div>-->
+          <!--              <i class="el-icon-info" slot="reference" />-->
+          <!--            </el-popover>-->
+          <!--          </p>-->
         </ul>
 
-        <el-popover
-          ref="popoverEmoticon"
-          placement="top-start"
-          trigger="click"
-          width="300"
-          popper-class="no-padding el-popover-em"
-        >
+        <el-popover ref="popoverEmoticon" placement="top-start" trigger="click" width="300"
+          popper-class="no-padding el-popover-em">
           <MeEditorEmoticon ref="editorEmoticon" @selected="selecteEmoticon" />
         </el-popover>
 
-        <form
-          enctype="multipart/form-data"
-          style="display: none"
-          ref="fileFrom"
-        >
-          <input
-            type="file"
-            ref="restFile"
-            accept="image/*"
-            @change="uploadImageChange"
-          />
+        <form enctype="multipart/form-data" style="display: none" ref="fileFrom">
+          <input type="file" ref="restFile" accept="image/*" @change="uploadImageChange" />
           <input type="file" ref="restFile2" @change="uploadFileChange" />
         </form>
       </el-header>
       <el-main class="no-padding textarea">
-        <textarea
-          ref="textarea"
-          v-paste="pasteImage"
-          v-drag="dragPasteImage"
-          v-model.trim="editorText"
-          rows="6"
-          placeholder="你想要的聊点什么呢 ..."
-          @keydown="keydownEvent($event)"
-          @input="inputEvent($event)"
-        />
+        <textarea ref="textarea" v-paste="pasteImage" v-drag="dragPasteImage" v-model.trim="editorText" rows="6"
+          placeholder="你想要的聊点什么呢 ..." @keydown="keydownEvent($event)" @input="inputEvent($event)" />
       </el-main>
     </el-container>
 
     <!-- 图片查看器 -->
-    <MeEditorImageView
-      ref="imageViewer"
-      v-model="imageViewer.isShow"
-      :file="imageViewer.file"
-      @confirm="confirmUploadImage"
-    />
+    <MeEditorImageView ref="imageViewer" v-model="imageViewer.isShow" :file="imageViewer.file"
+      @confirm="confirmUploadImage" />
 
     <MeEditorRecorder v-if="recorder" @close="recorder = false" />
 
     <!-- 代码块编辑器 -->
-    <TalkCodeBlock
-      v-if="codeBlock.isShow"
-      :edit-mode="codeBlock.editMode"
-      @close="codeBlock.isShow = false"
-      @confirm="confirmCodeBlock"
-    />
+    <TalkCodeBlock v-if="codeBlock.isShow" :edit-mode="codeBlock.editMode" @close="codeBlock.isShow = false"
+      @confirm="confirmCodeBlock" />
 
     <!-- 文件上传管理器 -->
     <MeEditorFileManage ref="filesManager" v-model="filesManager.isShow" />
 
-    <MeEditorVote
-      v-if="vote.isShow"
-      @close="
-        () => {
-          this.vote.isShow = false;
-        }
-      "
-    />
+    <MeEditorVote v-if="vote.isShow" @close="
+  () => {
+    this.vote.isShow = false;
+  }
+    " />
   </div>
 </template>
 
@@ -156,20 +123,20 @@ export default {
     MeEditorVote,
   },
   computed: {
-    talkUser() {
+    talkUser () {
       return this.$store.state.dialogue.index_name;
     },
-    isGroupTalk() {
+    isGroupTalk () {
       return this.$store.state.dialogue.talk_type == 2;
     },
   },
   watch: {
-    talkUser(n_index_name) {
+    talkUser (n_index_name) {
       this.$refs.filesManager.clear();
       this.editorText = this.getDraftText(n_index_name);
     },
   },
-  data() {
+  data () {
     return {
       // 当前编辑的内容
       editorText: "",
@@ -205,13 +172,13 @@ export default {
   },
   methods: {
     // 读取对话编辑草稿信息 并赋值给当前富文本
-    getDraftText(index_name) {
+    getDraftText (index_name) {
       console.log("findTalk(index_name)", findTalk(index_name));
       return findTalk(index_name)?.draft_text || "";
     },
 
     //复制粘贴图片回调方法
-    pasteImage(e) {
+    pasteImage (e) {
       let files = getPasteImgs(e);
       if (files.length == 0) return;
 
@@ -219,19 +186,19 @@ export default {
     },
 
     //拖拽上传图片回调方法
-    dragPasteImage(e) {
+    dragPasteImage (e) {
       let files = getDragPasteImg(e);
       if (files.length == 0) return;
 
       this.openImageViewer(files[0]);
     },
 
-    inputEvent(e) {
+    inputEvent (e) {
       this.$emit("keyboard-event", e.target.value);
     },
 
     // 键盘按下监听事件
-    keydownEvent(e) {
+    keydownEvent (e) {
       if (e.keyCode == 13 && this.editorText == "") {
         e.preventDefault();
       }
@@ -256,13 +223,13 @@ export default {
     },
 
     // 选择图片文件后回调方法
-    uploadImageChange(e) {
+    uploadImageChange (e) {
       this.openImageViewer(e.target.files[0]);
       this.$refs.restFile.value = null;
     },
 
     // 选择文件回调事件
-    uploadFileChange(e) {
+    uploadFileChange (e) {
       let maxsize = 100 * 1024 * 1024;
       if (e.target.files.length == 0) {
         return false;
@@ -288,13 +255,13 @@ export default {
     },
 
     // 打开图片查看器
-    openImageViewer(file) {
+    openImageViewer (file) {
       this.imageViewer.isShow = true;
       this.imageViewer.file = file;
     },
 
     // 代码块编辑器确认完成回调事件
-    confirmCodeBlock(data) {
+    confirmCodeBlock (data) {
       const { talk_type, receiver_id } = this.$store.state.dialogue;
       ServeSendTalkCodeBlock({
         talk_type,
@@ -315,7 +282,7 @@ export default {
     },
 
     // 确认上传图片消息回调事件
-    confirmUploadImage() {
+    confirmUploadImage () {
       let fileData = new FormData();
       fileData.append("file", this.imageViewer.file);
 
@@ -340,7 +307,8 @@ export default {
     },
 
     // 选中表情包回调事件
-    selecteEmoticon(data) {
+    selecteEmoticon (data) {
+      console.log(data);
       if (data.type == 1) {
         let value = this.editorText;
         let el = this.$refs.textarea;
@@ -362,6 +330,8 @@ export default {
         }
       } else {
         const { talk_type, receiver_id } = this.$store.state.dialogue;
+        console.log(talk_type);
+        console.log(receiver_id);
         ServeSendEmoticon({
           talk_type,
           receiver_id,
