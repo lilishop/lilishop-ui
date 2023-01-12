@@ -500,6 +500,9 @@ export default {
           if (item.messageType == 'GOODS') {
             item.text = JSON.parse(item.text)
           }
+          if (item.messageType == 'MESSAGE') {
+            item.text = textReplaceEmoji(item.text)
+          }
           if (item.messageType == 'ORDER') {
             item.text = JSON.parse(item.text)
           }

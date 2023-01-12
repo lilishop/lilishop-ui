@@ -81,19 +81,8 @@ export default {
         this.$Message.error("请登录后再联系客服");
         return;
       }
-      // window.open(
-      //   this.IMLink +
-      //   "?token=" +
-      //   accessToken +
-      //   "&id=" +
-      //   this.goodsMsg.data.storeId +
-      //   "&goodsId=" +
-      //   this.goodsMsg.data.goodsId +
-      //   "&skuId=" +
-      //   this.goodsMsg.data.id
-      // );
       window.open(
-        'http://192.168.0.139:8000/' +
+        this.IMLink +
         "?token=" +
         accessToken +
         "&id=" +
@@ -103,6 +92,17 @@ export default {
         "&skuId=" +
         this.goodsMsg.data.id
       );
+      // window.open(
+      //   'http://192.168.0.139:8000/' +
+      //   "?token=" +
+      //   accessToken +
+      //   "&id=" +
+      //   this.goodsMsg.data.storeId +
+      //   "&goodsId=" +
+      //   this.goodsMsg.data.goodsId +
+      //   "&skuId=" +
+      //   this.goodsMsg.data.id
+      // );
     },
     // 获取im信息
     async getIMDetailMethods () {

@@ -51,11 +51,11 @@
                 </div>
                 <div class="order_footer">
                   <span> 订单金额： <span style="color: red;">￥{{ item.orderItems[0].goodsPrice }}</span></span>
-                  <span class="order_status"
-                    :style="{ 'color': item.orderStatus == 'CANCELLED' || item.orderStatus == 'UNPAID' || item.orderStatus == ' TAKE' ? '#5a606b' : '#f23030' }">{{
+                  <span class="order_status" v-if="item.orderStatus"
+                    :style="{ 'color': item.orderStatus == 'CANCELLED' || item.orderStatus == 'UNPAID' || item.orderStatus == 'TAKE' ? '#5a606b' : '#f23030' }">{{
   item.orderStatus == 'CANCELLED' ? '已取消' : item.orderStatus == 'UNPAID' ? '未付款' : item.orderStatus ==
     'PAID' ? '已付款' : item.orderStatus == 'UNDELIVERED' ? '待发货' : item.orderStatus == 'DELIVERED'
-      ? '已发货' : item.orderStatus == ' COMPLETED' ? '已完成' : item.orderStatus == ' TAKE' ? '待校验' : ''
+      ? '已发货' : item.orderStatus == 'COMPLETED' ? '已完成' : item.orderStatus == 'TAKE' ? '待校验' : ''
                     }}</span>
                 </div>
 
@@ -168,7 +168,7 @@ export default {
   },
   mounted () {
     //  state.user.toUser
-    console.log(this.$store.state.user.toUser, '  this.$store.state.user.toUser  this.$store.state.user.toUser  this.$store.state.user.toUser');
+    console.log(this.orderList, '  this.$store.state.user.toUser  this.$store.state.user.toUser  this.$store.state.user.toUser');
     this.btnHide = localStorage.getItem('btnHide')
   }
 }
