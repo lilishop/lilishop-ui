@@ -77,7 +77,7 @@ export default {
       this.getMemberDetail()
     }
     this.getFootPrint()
-    if (this.goodsParams) {
+    if (this.goodsParams && this.toUser.storeFlag == true) {
       this.getGoodsDetail()
     }
   },
