@@ -89,9 +89,9 @@
     <MeEditorFileManage ref="filesManager" v-model="filesManager.isShow" />
 
     <MeEditorVote v-if="vote.isShow" @close="
-  () => {
-    this.vote.isShow = false;
-  }
+      () => {
+        this.vote.isShow = false;
+      }
     " />
   </div>
 </template>
@@ -308,7 +308,6 @@ export default {
 
     // 选中表情包回调事件
     selecteEmoticon (data) {
-      console.log(data);
       if (data.type == 1) {
         let value = this.editorText;
         let el = this.$refs.textarea;
@@ -330,8 +329,6 @@ export default {
         }
       } else {
         const { talk_type, receiver_id } = this.$store.state.dialogue;
-        console.log(talk_type);
-        console.log(receiver_id);
         ServeSendEmoticon({
           talk_type,
           receiver_id,

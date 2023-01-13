@@ -110,8 +110,8 @@ const emojis = {
 };
 
 /**
- * 符号表情
- */
+* 符号表情
+*/
 const symbol = [
   "😠", "😩", "😲", "😞", "😵", "😰", "😒", "😍", "😤", "😜", "😝", "😋", "😘", "😚", "😷",
   "😳", "😃", "😅", "😆", "😁", "😂", "😊", "☺", "😄", "😢",
@@ -121,19 +121,17 @@ const symbol = [
 ];
 
 const emojisKeys = Object.keys(emojis);
-
 export const emojiList = {
   symbol,
   emojis
 }
 
 const regEmoji = emojisKeys.map((value) => '|\\' + value).join('').replace('|', '')
-
 /**
- * 替换表情文字
- * 
- * @param {String} content 需要替换的字符串
- */
+* 替换表情文字
+* 
+* @param {String} content 需要替换的字符串
+*/
 export function textReplaceEmoji (content) {
   if (!content) {
     return ""
@@ -142,3 +140,4 @@ export function textReplaceEmoji (content) {
     return emojis[$1];
   });
 }
+export const emojistwo = Object.keys(emojis)

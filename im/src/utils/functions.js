@@ -7,7 +7,7 @@ import config from "@/config/config";
  *
  * @param {Object} datetime
  */
-export function formatTime(datetime) {
+export function formatTime (datetime) {
   if (datetime == null) return "";
 
   datetime = datetime.replace(/-/g, "/");
@@ -60,7 +60,7 @@ export function formatTime(datetime) {
  *
  * @param {String} value 文件大小(字节)
  */
-export function formatSize(value) {
+export function formatSize (value) {
   if (null == value || value == "") {
     return "0";
   }
@@ -77,7 +77,7 @@ export function formatSize(value) {
  *
  * @param {String} fileName
  */
-export function getFileExt(fileName) {
+export function getFileExt (fileName) {
   let ext = fileName.split(".");
   ext = ext[ext.length - 1]; // 获取文件后缀名
   return ext;
@@ -88,7 +88,7 @@ export function getFileExt(fileName) {
  * @param {String} imgsrc
  * @param {String} name
  */
-export function downloadIamge(imgsrc, name) {
+export function downloadIamge (imgsrc, name) {
   //下载图片地址和图片名
   let image = new Image();
   // 解决跨域 Canvas 污染问题
@@ -114,7 +114,7 @@ export function downloadIamge(imgsrc, name) {
  *
  * @param {String} imgsrc 例如图片名： D8x5f13a53dbc4b9_350x345.png
  */
-export function getImageInfo(imgsrc) {
+export function getImageInfo (imgsrc) {
   let data = {
     width: 0,
     height: 0,
@@ -138,14 +138,14 @@ export function getImageInfo(imgsrc) {
  *
  * @param {Number} cr_id
  */
-export function download(cr_id) {
+export function download (cr_id) {
   let api = config.BASE_API_URL;
   let token = getToken();
   try {
     let link = document.createElement("a");
     link.href = `${api}/download/user-chat-file?cr_id=${cr_id}&token=${token}`;
     link.click();
-  } catch (e) {}
+  } catch (e) { }
 }
 
 /**
@@ -155,7 +155,7 @@ export function download(cr_id) {
  * @param {String} cFormat
  * @returns {String | null}
  */
-export function parseTime(time, cFormat) {
+export function parseTime (time, cFormat) {
   if (arguments.length === 0) {
     return null;
   }
@@ -205,7 +205,7 @@ export function parseTime(time, cFormat) {
  *
  * @param {String} str
  */
-export function trim(str, type = null) {
+export function trim (str, type = null) {
   if (type) {
     return str.replace(/(^\s*)|(\s*$)/g, "");
   } else if (type == "l") {
@@ -221,19 +221,19 @@ export function trim(str, type = null) {
  * @param {String} url
  * @returns {Object}
  */
-export function param2Obj(url) {
+export function param2Obj (url) {
   const search = url.split("?")[1];
 
   if (!search) return {};
 
   return JSON.parse(
     '{"' +
-      decodeURIComponent(search)
-        .replace(/"/g, '\\"')
-        .replace(/&/g, '","')
-        .replace(/=/g, '":"')
-        .replace(/\+/g, " ") +
-      '"}'
+    decodeURIComponent(search)
+      .replace(/"/g, '\\"')
+      .replace(/&/g, '","')
+      .replace(/=/g, '":"')
+      .replace(/\+/g, " ") +
+    '"}'
   );
 }
 
@@ -241,7 +241,7 @@ export function param2Obj(url) {
  * @param {Object} json
  * @returns {Array}
  */
-export function param(json) {
+export function param (json) {
   if (!json) return "";
   return cleanArray(
     Object.keys(json).map((key) => {
@@ -256,7 +256,7 @@ export function param(json) {
  * @param {Array} actual
  * @returns {Array}
  */
-export function cleanArray(actual) {
+export function cleanArray (actual) {
   const newArray = [];
   for (let i = 0; i < actual.length; i++) {
     if (actual[i]) {
@@ -271,7 +271,7 @@ export function cleanArray(actual) {
  * @param {HTMLElement} element
  * @param {String} className
  */
-export function toggleClass(element, className) {
+export function toggleClass (element, className) {
   if (!element || !className) {
     return;
   }
@@ -295,7 +295,7 @@ export function toggleClass(element, className) {
  * @param {String} cls
  * @returns {Boolean}
  */
-export function hasClass(ele, cls) {
+export function hasClass (ele, cls) {
   return !!ele.className.match(new RegExp("(\\s|^)" + cls + "(\\s|$)"));
 }
 
@@ -305,7 +305,7 @@ export function hasClass(ele, cls) {
  * @param {HTMLElement} elm
  * @param {String} cls
  */
-export function addClass(ele, cls) {
+export function addClass (ele, cls) {
   if (!hasClass(ele, cls)) ele.className += " " + cls;
 }
 
@@ -315,7 +315,7 @@ export function addClass(ele, cls) {
  * @param {HTMLElement} elm
  * @param {String} cls
  */
-export function removeClass(ele, cls) {
+export function removeClass (ele, cls) {
   if (hasClass(ele, cls)) {
     const reg = new RegExp("(\\s|^)" + cls + "(\\s|$)");
     ele.className = ele.className.replace(reg, " ");
@@ -328,7 +328,7 @@ export function removeClass(ele, cls) {
  * @param {String} src
  * @param {Number} width
  */
-export function imgZoom(src, width = 200) {
+export function imgZoom (src, width = 200) {
   const info = getImageInfo(src);
 
   if (info.width < width) {
@@ -350,7 +350,7 @@ export function imgZoom(src, width = 200) {
  * @export
  * @returns
  */
-export function getSelection() {
+export function getSelection () {
   return window.getSelection
     ? window.getSelection().toString()
     : document.selection.createRange().text;
@@ -386,7 +386,7 @@ export const copyTextToClipboard = (value, callback) => {
  *
  * @param {String} phone  手机号
  */
-export function hidePhone(phone) {
+export function hidePhone (phone) {
   return phone.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2");
 }
 
@@ -395,7 +395,7 @@ export function hidePhone(phone) {
  *
  * @param {Object} datetime
  */
-export function beautifyTime(datetime = "") {
+export function beautifyTime (datetime = "") {
   if (datetime == null) {
     return "";
   }
@@ -446,7 +446,7 @@ export function beautifyTime(datetime = "") {
   return `${minutes}分钟前`;
 }
 
-export function getSort(fn) {
+export function getSort (fn) {
   return function (a, b) {
     let ret = 0;
 
@@ -465,7 +465,7 @@ export function getSort(fn) {
  *
  * @param {*} arr
  */
-export function getMutipSort(arr) {
+export function getMutipSort (arr) {
   return function (a, b) {
     let tmp;
     let i = 0;
@@ -484,7 +484,7 @@ export function getMutipSort(arr) {
  * @param {String} text 文本
  * @param {String} color 超链接颜色
  */
-export function textReplaceLink(text, color = "#409eff") {
+export function textReplaceLink (text, color = "#409eff") {
   let exp =
     /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi;
   return text.replace(
@@ -501,7 +501,7 @@ export function textReplaceLink(text, color = "#409eff") {
  * @param {*} immediate
  * @returns
  */
-export function debounce(func, wait, immediate) {
+export function debounce (func, wait, immediate) {
   let timeout;
 
   return function () {

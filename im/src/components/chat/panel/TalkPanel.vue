@@ -65,8 +65,8 @@
                       right: item.float == 'right',
                     }">
                     <div class="arrow"></div>
-
-                    <pre v-html="item.text" />
+                    <pre v-if="!emojistwo.includes(item.text)" v-html="item.text" />
+                    <pre v-if="emojistwo.includes(item.text)" v-html="textReplaceEmoji(item.text)" />
                   </div>
 
                   <div v-if="item.messageType == 'GOODS' && item.text != null" class="goodsStyle " :class="{
@@ -176,7 +176,7 @@
 </template>
 <script>
 import { textReplaceLink } from "@/utils/functions";
-import { textReplaceEmoji } from "@/utils/emojis";
+import { textReplaceEmoji, emojistwo } from "@/utils/emojis";
 import OtherLink from "@/components/chat/panel/OtherLink.vue";
 import { mapState, mapGetters } from "vuex";
 import TalkSearchRecord from "@/components/chat/TalkSearchRecord";
@@ -233,6 +233,7 @@ export default {
     return {
       // 记录加载相关参数
       textReplaceEmoji,
+      emojistwo,
       textReplaceLink,
       loadRecord: {
         status: 0,
@@ -387,7 +388,6 @@ export default {
 
     // 回车键发送消息回调事件
     submitSendMessage (content) {
-      console.log("发送", content);
       const record = {
         operation_type: "MESSAGE",
         to: this.params.receiver_id,
@@ -396,6 +396,9 @@ export default {
         context: content,
         talk_id: this.params.talkId,
       };
+      // if (record.messageType == 'MESSAGE"') {
+      //   record.text = this.textReplaceEmoji(record.content)
+      // }
       SocketInstance.emit("event_talk", record);
 
       this.$store.commit("UPDATE_TALK_ITEM", {
@@ -415,8 +418,6 @@ export default {
         text: content,
         float: "right",
       };
-
-      console.log("insterChat", insterChat);
       // console.log("插入对话记录",'')
       // 插入对话记录
       this.$store.commit("PUSH_DIALOGUE", insterChat);
@@ -500,9 +501,9 @@ export default {
           if (item.messageType == 'GOODS') {
             item.text = JSON.parse(item.text)
           }
-          if (item.messageType == '"MESSAGE"') {
-            item.text = textReplaceEmoji(item.text)
-          }
+          // if (item.messageType == 'MESSAGE"') {
+          //   item.text = this.textReplaceEmoji(item.text)
+          // }
           if (item.messageType == 'ORDER') {
             item.text = JSON.parse(item.text)
           }
