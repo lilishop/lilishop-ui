@@ -514,7 +514,8 @@ export default {
           ? (this.loadRecord.status = 1)
           : (this.loadRecord.status = 2);
         this.$nextTick(() => {
-          if (data.record_id == 0 || !data.record_id) {
+          // if (data.record_id == 0 || !data.record_id) {
+          if (data.record_id == 0 || data.pageNumber == 1) {
             el.scrollTop = el.scrollHeight
           } else {
             el.scrollTop = el.scrollHeight - scrollHeight

@@ -18,8 +18,7 @@
 
 <script>
 import { Tabs, TabPane } from 'element-ui'
-import { ServeGetStoreDetail, ServeGetUserDetail, ServeGetFootPrint, ServeGetOrderPrint } from '@/api/user'
-import { ServeGetGoodsDetail } from '@/api/goods'
+import { ServeGetStoreDetail, ServeGetUserDetail, ServeGetFootPrint, ServeGetOrderPrint, ServeGetGoodsDetail, ServeStoreGetFootPrint,ServeStoreGetOrderPrint } from '@/api/user'
 import StoreDetail from "@/components/chat/panel/template/storeDetail.vue";
 import FootPrint from "@/components/chat/panel/template/footPrint.vue";
 import GoodsLink from "@/components/chat/panel/template/goodsLink.vue";
@@ -103,46 +102,70 @@ export default {
       })
     },
     getGoodsDetail () {
-      ServeGetGoodsDetail(this.goodsParams).then(res => {
-        if (res.success) {
-          this.goodsDetail = res.result.data
-        }
-      })
+      if(this.toUser.storeFlag){
+        ServeGetGoodsDetail(this.goodsParams).then(res => {
+          if (res.success) {
+            this.goodsDetail = res.result.data
+          }
+        })
+      }
     },
-    getFootPrint () {
+    getFootPrint() {
       if (this.toUser.storeFlag) {
         this.footPrintParams.memberId = this.id
         this.footPrintParams.storeId = this.toUser.userId
+        ServeGetFootPrint(this.footPrintParams).then(res => {
+          res.result.records.forEach((item, index) => {
+            if (localStorage.getItem(item.goodsId)) {
+              item.btnHide = 0
+            } else {
+              item.btnHide = 1
+            }
+            if (item.goodsId === this.goodsParams.goodsId) {
+              res.result.records.splice(index, 1)
+            }
+          });
+          this.footPrintList.push(...res.result.records)
+        })
+
+        // 订单列表
+        ServeGetOrderPrint(this.footPrintParams).then((res) => {
+          if (res.code == 200) {
+            res.result.records.forEach((item) => {
+              this.orderPrintList.push({
+                ...item,
+                btnHide: 1
+              })
+            })
+          }
+        })
       } else {
         this.footPrintParams.memberId = this.toUser.userId
         this.footPrintParams.storeId = this.id
-      }
-      ServeGetFootPrint(this.footPrintParams).then(res => {
-        res.result.records.forEach((item, index) => {
-          if (localStorage.getItem(item.goodsId)) {
-            item.btnHide = 0
-          } else {
-            item.btnHide = 1
-          }
-          if (item.goodsId === this.goodsParams.goodsId) {
-            res.result.records.splice(index, 1)
-          }
-        });
-        this.footPrintList.push(...res.result.records)
-      })
-      // 订单列表
-      ServeGetOrderPrint(this.footPrintParams).then((res) => {
-        if (res.code == 200) {
-          res.result.records.forEach((item) => {
-            this.orderPrintList.push({
-              ...item,
-              btnHide: 1
+        ServeStoreGetFootPrint(this.footPrintParams).then(res => {
+          res.result.records.forEach((item, index) => {
+            if (localStorage.getItem(item.goodsId)) {
+              item.btnHide = 0
+            } else {
+              item.btnHide = 1
+            }
+            if (item.goodsId === this.goodsParams.goodsId) {
+              res.result.records.splice(index, 1)
+            }
+          });
+          this.footPrintList.push(...res.result.records)
+        })
+        ServeStoreGetOrderPrint(this.footPrintParams).then((res) => {
+          if (res.code == 200) {
+            res.result.records.forEach((item) => {
+              this.orderPrintList.push({
+                ...item,
+                btnHide: 1
+              })
             })
-          })
-          // this.orderPrintList.push(...res.result.records)
-        }
-      })
-      console.log("this.orderPrintListthis.orderPrintList", this.orderPrintList);
+          }
+        })
+      }
     },
 
     // 发送消息回调事件

@@ -26,7 +26,7 @@ Vue.component('face-null', faceNull)
 
 Vue.prototype.linkToGoods = function (goodsId, skuId) {  // 跳转买家端商品
   if (localStorage.getItem('storeFlag') == 'false') {
-    window.open(`${config.PC_STORE_GOODS}goods-operation-edit?id=${goodsId}`, '_blank')
+    window.open(`${config.PC_STORE}goods-operation-edit?id=${goodsId}`, '_blank')
   } else {
     window.open(`${config.PC_URL}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`, '_blank')
   }
@@ -39,10 +39,10 @@ Vue.prototype.linkToStore = function (storeId) {  // 跳转商家端商品
 Vue.prototype.linkToOrders = function (sn) {
   if (localStorage.getItem('storeFlag') == 'false') {
     // 商家
-    window.open(`${config.PC_STORE_GOODS}order-detail?sn=${sn}`, '_blank')
+    window.open(`${config.PC_STORE}order-detail?sn=${sn}`, '_blank')
   } else {
     // 用户
-    window.open(`${config.STORE_URL}/OrderDetail?sn=${sn}`, '_blank')
+    window.open(`${config.PC_URL}/OrderDetail?sn=${sn}`, '_blank')
   }
 };
 
