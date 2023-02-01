@@ -400,7 +400,7 @@ export const getChildRegion = (id) => {
 
 // 重置用户密码
 export const resetPassword = (params) => {
-  return postRequest(`/passport/user/resetPassword/${params}"`);
+  return postRequest(`/passport/user/resetPassword/${params}`);
 };
 
 // 初始化商品索引

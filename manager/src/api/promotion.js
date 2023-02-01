@@ -209,28 +209,34 @@ export const auditApplySeckill = params => {
 export const getFullDiscountList = params => {
   return getRequest(`/promotion/fullDiscount`, params);
 };
+
 // 满优惠列表
 export const getFullDiscountById = id => {
   return getRequest(`/promotion/fullDiscount/${id}`);
 };
+
 // 开启、关闭满额活动
 export const updateFullDiscount = (id, promotionStatus) => {
   return putRequest(`/promotion/fullDiscount/status/${id}`)
 }
+
 // 积分商品列表
 export const getPointsGoodsList = params => {
   return getRequest(`/promotion/pointsGoods`, params);
 };
+
 // 积分商品详情
 export const getPointsGoodsById = id => {
   return getRequest(`/promotion/pointsGoods/${id}`);
 };
+
 // 添加积分商品
 export const addPointsGoods = params => {
   return postRequest(`/promotion/pointsGoods`, params, {
     "Content-type": "application/json"
   });
 };
+
 // 修改积分商品
 export const updatePointsGoods = params => {
   return putRequest(`/promotion/pointsGoods`, params, {
@@ -250,19 +256,28 @@ export const deletePointsGoodsStatus = id => {
 export const getPointsGoodsCategoryList = params => {
   return getRequest(`/promotion/pointsGoodsCategory`, params);
 };
+
 // 积分商品分类详情
 export const getPointsGoodsCategoryById = id => {
   return getRequest(`/promotion/pointsGoodsCategory/${id}`);
 };
+
 // 添加积分商品分类
 export const addPointsGoodsCategory = params => {
   return postRequest(`/promotion/pointsGoodsCategory`, params);
 };
+
 // 更新积分商品分类
 export const updatePointsGoodsCategory = params => {
   return putRequest(`/promotion/pointsGoodsCategory`, params);
 };
+
 // 删除积分商品分类
 export const deletePointsGoodsCategoryById = id => {
   return deleteRequest(`/promotion/pointsGoodsCategory/${id}`);
+};
+
+// 获取优惠券领取记录
+export const getCouponReceiveList = (params) => {
+  return getRequest("/promotion/coupon/received", params);
 };

@@ -53,7 +53,7 @@
         ></Step>
       </Steps>
     </div>
-    <div class="order-card">
+    <div class="order-card" v-if="order.order.deliveryMethod == 'LOGISTICS'">
       <h3>收货人信息</h3>
       <p>收货人：{{ order.order.consigneeName }}</p>
       <p>手机号码：{{ order.order.consigneeMobile | secrecyMobile }}</p>
@@ -61,6 +61,11 @@
         收货地址：{{ order.order.consigneeAddressPath | unitAddress }}
         {{ order.order.consigneeDetail }}
       </p>
+    </div>
+    <div class="order-card" v-if="order.order.deliveryMethod == 'SELF_PICK_UP'">
+      <h3>自提点信息</h3>
+      <p>自提点名称：{{ order.order.storeAddressPath }}</p>
+      <p>联系方式：{{ order.order.storeAddressMobile }}</p>
     </div>
     <div class="order-card">
       <h3>付款信息</h3>
@@ -70,7 +75,7 @@
     <div class="order-card" v-if="!order.order.verificationCode">
       <h3>配送信息</h3>
       <p>配送方式：{{ order.deliveryMethodValue }}</p>
-      <p>配送状态：{{ order.deliverStatusValue }}</p>
+      <p v-if="order.order.deliveryMethod === 'LOGISTICS'">配送状态：{{ order.deliverStatusValue }}</p>
       <p v-if="logistics">
         物流信息：{{ logistics.shipper || "暂无物流信息" }}
       </p>
@@ -270,6 +275,9 @@ export default {
         if (res.success) {
           this.order = res.result;
           this.progressList = res.result.orderLogs;
+          if (this.order.order.deliveryMethod === 'LOGISTICS') {
+            this.traces();
+          }
         }
       });
     },
@@ -336,7 +344,6 @@ export default {
   },
   mounted() {
     this.getDetail();
-    this.traces();
   },
 };
 </script>

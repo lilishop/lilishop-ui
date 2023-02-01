@@ -125,7 +125,7 @@
             <FormItem label="有效期" prop="rangeTime">
               <div v-if="form.getType == 'ACTIVITY'">
                 <RadioGroup v-model="rangeTimeType">
-                  <Radio :disabled="disabled" :label="1">起止时间</Radio>
+                  <Radio :disabled="disabled" :label="1" v-if="form.getType !== 'ACTIVITY'">起止时间</Radio>
                   <Radio :disabled="disabled" :label="0">固定时间</Radio>
                 </RadioGroup>
               </div>
@@ -144,6 +144,7 @@
               <div class="effectiveDays" v-if="rangeTimeType == 0">
                 领取当天开始
                 <InputNumber
+                  :disabled="disabled"
                   v-model="form.effectiveDays"
                   :min="1"
                   style="width: 100px"
@@ -242,6 +243,11 @@ export default {
       handler(val) {
         if (val == "FREE") {
           this.rangeTimeType = 1;
+        }else{
+          this.rangeTimeType = 0;
+        }
+        if(this.rangeTimeType == 0){
+          delete this.formRule.rangeTime
         }
       },
       deep: true,
@@ -301,6 +307,7 @@ export default {
         promotionGoodsList: [],
         scopeIdGoods: [],
         rangeDayType: "",
+        effectiveDays:1,
       },
       id: this.$route.query.id, // 优惠券id
       submitLoading: false, // 添加或编辑提交状态

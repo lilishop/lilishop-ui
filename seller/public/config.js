@@ -25,5 +25,5 @@ var BASE = {
   /**
    *  @description api请求基础路径前缀
    */
-  PREFIX: "/store"
+  PREFIX: "/store",
 };

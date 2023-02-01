@@ -34,6 +34,22 @@
               >
                 <Radio label="REGISTERED">新人发券</Radio>
                 <Radio label="SPECIFY">精确发券</Radio>
+                <Radio label="INVITE_NEW">邀新赠券</Radio>
+                <Radio label="AUTO_COUPON">自动赠券</Radio>
+              </RadioGroup>
+            </FormItem>
+            <FormItem
+              label="领取频率"
+              v-if="form.couponActivityType === 'AUTO_COUPON'"
+            >
+            <RadioGroup
+                type="button"
+                button-style="solid"
+                v-model="form.couponFrequencyEnum"
+              >
+                <Radio label="DAY">每日一次</Radio>
+                <Radio label="WEEK">每周一次</Radio>
+                <Radio label="MONTH">每月一次</Radio>
               </RadioGroup>
             </FormItem>
             <FormItem
@@ -161,6 +177,7 @@ export default {
         endTime: "", //结束时间
         memberDTOS: [], //指定会员范围
         couponActivityItems: [], //优惠券列表
+        couponFrequencyEnum:"", //选择周期
       },
       submitLoading: false, // 添加或编辑提交状态
       selectCouponList: [], //选择的优惠券列表
@@ -323,7 +340,7 @@ export default {
       // 清空原有数据
       this.form.couponActivityItems = this.selectCouponList.map((item) => {
         return {
-          num: 0,
+          num: 1,
           couponId: item.id,
         };
       });
@@ -341,6 +358,33 @@ export default {
     },
     /** 保存平台优惠券 */
     handleSubmit() {
+      if(this.form.couponFrequencyEnum !== ''){
+        console.log(this.activityScope)
+        if(this.form.activityScope == 'ALL'){
+          this.form.startTime = this.$options.filters.unixToDate(this.rangeTime[0] / 1000);
+          this.form.endTime = this.$options.filters.unixToDate(this.rangeTime[1] / 1000);
+
+          this.$refs.form.validate((valid) => {
+            if (valid) {
+              const params = JSON.parse(JSON.stringify(this.form));
+              this.submitLoading = true;
+              // 添加 避免编辑后传入id等数据 记得删除
+              delete params.id;
+              saveActivityCoupon(params).then((res) => {
+                this.submitLoading = false;
+                if (res.success) {
+                  this.$Message.success("优惠券活动创建成功");
+                  this.closeCurrentPage();
+                }
+              });
+            }
+          });
+        }else {
+          this.$Message.info('自动发券只能全用户发送')
+          this.form.couponActivityType = 'SPECIFY'
+          this.form.activityScope = 'ALL'
+        }
+      }else{
       this.form.startTime = this.$options.filters.unixToDate(this.rangeTime[0] / 1000);
       this.form.endTime = this.$options.filters.unixToDate(this.rangeTime[1] / 1000);
 
@@ -359,6 +403,8 @@ export default {
           });
         }
       });
+      }
+    
     },
     // 关闭当前页面
     closeCurrentPage() {

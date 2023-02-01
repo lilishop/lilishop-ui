@@ -10,6 +10,15 @@ export function indexData(params) {
   });
 }
 
+// 获取自动发券
+export function getAutoCoup(){
+  return request({
+    url: "/buyer/promotion/coupon/activity",
+    method: Method.GET,
+    needToken: true,
+  });
+}
+
 /**
  * 楼层装修数据
  * @param pageClientType 客户端类型,可用值:PC,H5,WECHAT_MP,APP

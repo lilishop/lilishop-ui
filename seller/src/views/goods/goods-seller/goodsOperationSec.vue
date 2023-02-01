@@ -1435,6 +1435,10 @@ export default {
         this.$Message.error("已存在相同规格值！");
         return;
       }
+      if (val.value === '') {
+        this.$Message.error("规格值不能为空！");
+        return;
+      }
       let curVal = this.currentSkuVal;
       this.skuTableData = this.skuTableData.map((e) => {
         if (e[val.name] === curVal) {

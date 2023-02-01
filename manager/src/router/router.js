@@ -194,6 +194,12 @@ export const otherRouter = {
       component: () => import("@/views/promotions/coupon/coupon.vue")
     },
     {
+      path: "promotions/coupon-receive",
+      title: "优惠券领取记录",
+      name: "coupon-receive",
+      component: () => import("@/views/promotions/coupon/coupon-receive.vue"),
+    },
+    {
       path: "promotions/add-platform-coupon",
       title: "添加平台优惠券",
       name: "add-platform-coupon",

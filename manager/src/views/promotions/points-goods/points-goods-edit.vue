@@ -33,11 +33,7 @@
               <Select
                 v-model="form.pointsGoodsCategoryId"
                 :label-in-value="true"
-                @on-change="
-                  (val) => {
-                    changeCategory(val, index);
-                  }
-                "
+                @on-change="changeCategory"
               >
                 <Option v-for="item in categoryList" :value="item.id" :key="item.id">{{
                   item.name
@@ -97,7 +93,10 @@ export default {
   name: "editPointsGoods",
   data() {
     return {
+      pointsGoodsCategoryId:'',
+      pointsGoodsCategoryName:'',
       form: {
+        
         /** 活动名称 */
         promotionName: "",
         /** 报名截止时间 */
@@ -110,6 +109,7 @@ export default {
         seckillRule: "",
         goodsSku: {},
         promotionStatus: "NEW",
+       
       },
       categoryList: [], // 分类列表
       id: this.$route.query.id, // 活动id
@@ -134,6 +134,12 @@ export default {
     }
   },
   methods: {
+    // 分类
+    changeCategory(v){
+      console.log(v);
+      this.pointsGoodsCategoryId=v.value
+      this.pointsGoodsCategoryName=v.label
+    },
     // 关闭当前页面
     closeCurrentPage() {
       this.$store.commit("removeTag", "edit-points-goods");
@@ -167,7 +173,12 @@ export default {
           this.form.startTime = start;
           this.form.endTime = end;
           this.submitLoading = true;
-          updatePointsGoods(this.form).then((res) => {
+          let params={
+            ...this.form,
+            pointsGoodsCategoryId: this.pointsGoodsCategoryId,
+            pointsGoodsCategoryName:this.pointsGoodsCategoryName
+          }
+          updatePointsGoods(params).then((res) => {
             this.submitLoading = false;
             if (res.success) {
               this.$Message.success("积分商品修改成功");

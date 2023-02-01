@@ -9,7 +9,7 @@
         ref="table"
       ></Table>
     </Card>
-    <Modal v-model="openModal" :title="openModalTitle" @on-ok="submit">
+    <Modal v-model="openModal" :title="openModalTitle" @on-ok="submit" @on-cancel="cancelModal">
       <h3 style="color: #ff3c2a; margin-bottom: 10px">是否需要电子面单</h3>
       <RadioGroup
         v-model="faceSheetForm.faceSheetFlag"
@@ -245,6 +245,10 @@ export default {
       });
       this.loading = false;
     },
+    cancelModal(){
+      this.faceSheetFlag = false;
+      this.faceSheetForm.faceSheetFlag = false;
+    },
     // 开启
     open(v) {
       this.row = v;
@@ -284,7 +288,7 @@ export default {
       var a = document.createElement("a"); //创建一个<a></a>标签
       //根据点击按钮来下载不同文件
       if (val === 'use') {
-        a.href = "static/open.xlsx"; // 给a标签的href属性值加上地址，注意，这里是绝对路径，不用加 点.
+        a.href = "static/instructions.xlsx"; // 给a标签的href属性值加上地址，注意，这里是绝对路径，不用加 点.
         a.download = "使用说明.xlsx"; //设置下载文件文件名，这里加上.xlsx指定文件类型，pdf文件就指定.fpd即可
       } else if (val === 'type') {
         a.href = "static/logisticsType.xlsx"; // 给a标签的href属性值加上地址，注意，这里是绝对路径，不用加 点.

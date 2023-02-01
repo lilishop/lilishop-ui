@@ -17,6 +17,17 @@
             style="width: 200px"
           />
         </Form-item>
+        <Form-item label="获取方式" prop="getType">
+          <Select
+            v-model="searchForm.getType"
+            placeholder="请选择"
+            clearable
+            style="width: 200px"
+          >
+            <Option value="FREE">免费获取</Option>
+            <Option value="ACTIVITY">活动获取</Option>
+          </Select>
+        </Form-item>
         <Form-item label="活动状态" prop="promotionStatus">
           <Select
             v-model="searchForm.promotionStatus"
@@ -50,6 +61,7 @@
       <Row class="operation padding-row" v-if="getType !== 'ACTIVITY'">
         <Button @click="add" type="primary">添加优惠券</Button>
         <Button @click="delAll">批量关闭</Button>
+        <Button @click="receivePage()" type="info">优惠券领取记录</Button>
       </Row>
       <Table
         v-if="refreshTable"
@@ -96,6 +108,13 @@
             size="small"
             @click="remove(row)"
             >删除
+          </Button>
+          <Button
+            style="margin: 5px"
+            type="info"
+            size="small"
+            @click="receivePage(row.id)"
+            >领取记录
           </Button>
         </template>
       </Table>
@@ -151,12 +170,6 @@ export default {
           fixed: "left",
         },
         {
-          title: "活动名称",
-          key: "promotionName",
-          width: 180,
-          fixed: "left",
-        },
-        {
           title: "优惠券名称",
           key: "couponName",
           width: 180,
@@ -199,6 +212,24 @@ export default {
           render: (h, params) => {
             //return h("div", params.row.usedNum + "/" + params.row.receivedNum);
             return h("div", params.row.usedNum + "/" + params.row.receivedNum+"/" + (params.row.publishNum === 0 ? "不限制" : params.row.publishNum));
+          },
+        },
+        {
+          title: "获取方式",
+          width: 120,
+          key: "getType",
+          render: (h, params) => {
+            if (params.row.getType === "FREE") {
+              return h("Tag", { props: { color: "red" } }, "免费获取");
+            } else if (params.row.getType === "ACTIVITY") {
+              return h("Tag", { props: { color: "volcano" } }, "活动获取");
+            } else if (params.row.getType === "INSIDE") {
+              return h("Tag", { props: { color: "lime" } }, "内购");
+            } else if (params.row.getType === "IGAME") {
+              return h("Tag", { props: { color: "lime" } }, "游戏人生");
+            } else {
+              return h("Tag", { props: { color: "purple" } }, "未知");
+            }
           },
         },
         {
@@ -324,6 +355,13 @@ export default {
     check() {
       // 选中的优惠券
       this.$emit("selected", this.selectList);
+    },
+    receivePage(id) {
+      if (id) {
+        this.$router.push({ name: "coupon-receive", query: { couponId: id } });
+      } else {
+        this.$router.push({ name: "coupon-receive" });
+      }
     },
     // 初始化数据
     init() {

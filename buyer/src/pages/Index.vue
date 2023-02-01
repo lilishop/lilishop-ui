@@ -1,5 +1,27 @@
 <template>
   <div class="container">
+    <Modal v-model="showCpmodel" width="350">
+            <template #header>
+                <p style="color:black;text-align:left">
+                    <!-- <Icon type="ios-information-circle"></Icon> -->
+                    <span>活动优惠券</span>
+                </p>
+            </template>
+              <template>
+                  <Scroll :on-reach-bottom="handleReachBottom">
+                      <Card dis-hover v-for="(item, index) in autoCoupList" :key="index" style="margin: 10px 15px">
+                            <span v-if="item.couponType === 'PRICE'" class="fontsize_12 global_color" style="font-size: 15px;">￥<span class="price">{{item.price | unitPrice}}</span></span>
+                            <span v-if="item.couponType === 'DISCOUNT'" class="fontsize_12 global_color" style="font-size: 15px;"><span class="price">{{item.discount}}</span>折</span>
+                            <span class="describe" style="font-size: 15px;margin-left: 5px;">满{{item.consumeThreshold}}元可用</span>
+                            <p style="font-size: 10px;">使用范围：{{useScope(item.scopeType, item.storeName)}}</p>
+                            <p style="font-size: 10px;">有效期：{{item.endTime}}</p>
+                      </Card>
+                  </Scroll>
+              </template>
+            <template #footer>
+                <Button type="error" @click="showCpmodel=false">确定</Button>
+            </template>
+        </Modal>
     <drawer></drawer>
     <!-- 固定头部 -->
     <hover-search class="hover-search" :class="{show: topSearchShow}"></hover-search>
@@ -22,8 +44,8 @@
 import Search from '@/components/Search';
 import ModelForm from '@/components/indexDecorate/ModelForm';
 import HoverSearch from '@/components/header/hoverSearch';
-import storage from '@/plugins/storage';
-import { indexData } from '@/api/index.js';
+import storage from "@/plugins/storage";
+import { indexData,getAutoCoup } from '@/api/index.js';
 import {seckillByDay} from '@/api/promotion'
 export default {
   name: 'Index',
@@ -38,9 +60,14 @@ export default {
         that.topSearchShow = false;
       }
     };
+    if(storage.getItem('userInfo')){
+      this.getAutoCoup()
+    }
   },
   data () {
     return {
+      autoCoupList:[],
+      showCpmodel:false,
       modelForm: { list: [] }, // 楼层装修数据
       topAdvert: {}, // 顶部广告
       showNav: false, // 是否展示分类栏
@@ -49,7 +76,73 @@ export default {
       carouselOpacity: false // 不同轮播分类样式
     };
   },
+  // created(){
+   
+  // },
   methods: {
+    // 优惠券可用范围
+    useScope (type, storeName) {
+      let shop = '平台';
+      let goods = '全部商品'
+      if (storeName !== 'platform') shop = storeName
+      switch (type) {
+        case 'ALL':
+          goods = '全部商品'
+          break;
+        case 'PORTION_GOODS':
+          goods = '部分商品'
+          break;
+        case 'PORTION_GOODS_CATEGORY':
+          goods = '部分分类商品'
+          break;
+      }
+      return `${shop}${goods}可用`
+    },
+    getAutoCoup(){
+      let data = new Date()
+      let datas = data.getDate()
+      let hours = data.getHours()
+      let flagCoup = storage.getItem('getTimes') //缓存
+      if(flagCoup && flagCoup != undefined && flagCoup != null){  //判断当前是否有缓存
+        if(Number(datas) > Number(flagCoup)){ //判断缓存是否小于当前天数
+          if(Number(hours) >= 6){//超过或等于6时清楚缓存
+            storage.setItem('getTimes',datas)//存储缓存
+            this.getcps()
+          }
+        }
+      }else{
+        // window.localStorage.setItem('getTimes',datas)//存储缓存
+        this.getcps()
+      }
+    },  
+    getcps(){
+      console.log(123123)
+      let data = new Date()
+      let datas = data.getDate()
+      getAutoCoup().then(res=>{ //调用自动发券
+            if(res.success){
+              this.autoCoupList.push(...res.result);
+              let objs = {};
+              this.autoCoupList = this.autoCoupList.reduce((cur, next) => {
+                //对象去重
+                if (next.id != undefined) {
+                  objs[next.id]
+                    ? ""
+                    : (objs[next.id] = true && cur.push(next));
+                }
+                return cur;
+              }, []);
+              if(this.autoCoupList != '' && this.autoCoupList.length > 0){
+                console.log(1231232132)
+                this.showCpmodel = true;
+              }
+              storage.setItem('getTimes',datas)//存储缓存
+            }
+      })
+    }, 
+    handleReachBottom(){
+      console.log(111)
+    } , 
     getIndexData () {
       // 获取首页装修数据
       indexData({ clientType: 'PC' }).then(async (res) => {
@@ -94,6 +187,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
+ @import '../assets/styles/coupon.scss';
 .container {
   @include sub_background_color($light_background_color);
 }
