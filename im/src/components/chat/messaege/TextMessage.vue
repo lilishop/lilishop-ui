@@ -1,12 +1,9 @@
 <template>
-  <div
-    class="text-message"
-    :class="{
-      left: float == 'left',
-      right: float == 'right',
-      'max-width': !fullWidth,
-    }"
-  >
+  <div class="text-message" :class="{
+    left: float == 'left',
+    right: float == 'right',
+    'max-width': !fullWidth,
+  }">
     <div v-if="arrow" class="arrow"></div>
     <pre v-html="html" />
   </div>
@@ -35,12 +32,12 @@ export default {
       default: false,
     },
   },
-  data() {
+  data () {
     return {
       html: "",
     };
   },
-  created() {
+  created () {
     const text = textReplaceLink(
       this.content,
       this.float == "right" ? "#ffffff" : "rgb(9 149 208)"

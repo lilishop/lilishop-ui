@@ -3,6 +3,8 @@ export default {
   BASE_API_URL: process.env.VUE_APP_API_BASE_URL || "",
   BASE_WS_URL: process.env.VUE_APP_WEB_SOCKET_URL || "",
   BASE_COMMON: process.env.VUE_APP_COMMON || "",
-  PC_URL: process.env.VUE_APP_PC_URL || "",
-  STORE_URL:process.env.VUE_APP_PC_ORDER_URL || "http://192.168.0.139:10002",
+  BASE_BUYER: process.env.VUE_APP_BUYER || "",
+  BASE_SELLER: process.env.VUE_APP_SELLER || "",
+  PC_URL: process.env.VUE_APP_PC_URL || "https://pc-b2b2c.pickmall.cn",
+  PC_STORE: process.env.VUE_APP_PC_STORE || 'https://store-b2b2c.pickmall.cn',
 };

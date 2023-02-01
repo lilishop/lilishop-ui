@@ -11,7 +11,7 @@
           <span style="color: red;">￥{{ goodsDetail.price }}</span>
         </div>
         <div v-if="hide">
-          <el-button class="store-button" type="danger" v-if="!sendFlag && btnHide == 1" size="mini"
+          <el-button class="store-button" type="danger" v-if="btnHide == 1 && toUser.storeFlag" size="mini"
             @click="submitSendMessage()" plain>发送</el-button>
         </div>
       </div>
@@ -27,7 +27,6 @@ import SocketInstance from "@/im-server/socket-instance";
 export default {
   data () {
     return {
-      sendFlag: false,
       btnHide: undefined,
       hide: true
     }
@@ -169,7 +168,7 @@ export default {
   .image {
     height: 100px;
     margin-top: 3px;
-    width: 100px
+    width: 100px;
   }
 
 }
