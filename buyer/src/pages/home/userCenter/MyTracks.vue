@@ -112,7 +112,9 @@ export default {
       tracksList(this.params).then((res) => {
         this.spinShow = false;
         if (res.success && res.result.records.length) {
-          this.list = res.result.records;
+          this.list = res.result.records.filter(item =>{
+            return item != null
+          });
           this.total = res.result.total
         } else {
           this.list = [];

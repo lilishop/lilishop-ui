@@ -46,9 +46,9 @@ class Talk extends Base {
     this.resource = resource;
 
     // 判断发送者消息是否在当前用户列表中 
-    if(this.sender_id && !vm.$store.state.talks.items.find(item=>{
+    if (this.sender_id && !vm.$store.state.talks.items.find(item => {
       return item.userId == this.sender_id
-    })){
+    })) {
       // 没有当前用户，未在当前列表 进行重新加载
       vm.loadUserSetting('update')
     }
@@ -58,7 +58,7 @@ class Talk extends Base {
    * 判断消息发送者是否来自于我
    * @returns
    */
-  isCurrSender() {
+  isCurrSender () {
     // console.log("sender_id", this.sender_id);
     return this.sender_id == this.getAccountId();
   }
@@ -68,7 +68,7 @@ class Talk extends Base {
    *
    * @return String
    */
-  getIndexName() {
+  getIndexName () {
     if (this.talk_type == 2) {
       return `${this.talk_type}_${this.receiver_id}`;
     }
@@ -83,7 +83,7 @@ class Talk extends Base {
    *
    * @returns
    */
-  getFloatType() {
+  getFloatType () {
     let userId = this.resource.userId;
 
     if (userId == 0) return "center";
@@ -94,18 +94,21 @@ class Talk extends Base {
   /**
    * 获取聊天列表左侧的对话信息
    */
-  getTalkText() {
+  getTalkText () {
     let text = this.resource.content || this.resource.text;
     switch (this.resource.msg_type) {
       case 'GOODS':
         text = "[商品链接]";
+        break;
+      case 'ORDERS':
+        text = "[订单链接]";
         break;
     }
 
     return text;
   }
 
-  handle() {
+  handle () {
     let store = this.getStoreInstance();
     // console.log("触发handle");
     // 判断当前是否在聊天页面
@@ -131,7 +134,7 @@ class Talk extends Base {
    * 显示消息提示
    * @returns
    */
-  showMessageNocice() {
+  showMessageNocice () {
     let avatar = this.resource.avatar;
     let nickname = this.resource.nickname;
     let talk_type = this.resource.talk_type;
@@ -167,7 +170,7 @@ class Talk extends Base {
   /**
    * 加载对接节点
    */
-  addTalkItem() {
+  addTalkItem () {
     let receiver_id = this.sender_id;
     let talk_type = this.talk_type;
 
@@ -188,7 +191,7 @@ class Talk extends Base {
   /**
    * 插入对话记录
    */
-  insertTalkRecord() {
+  insertTalkRecord () {
     let store = this.getStoreInstance();
     let record = this.resource;
     // console.log("插入谈话记录", record);
@@ -238,7 +241,7 @@ class Talk extends Base {
   /**
    * 更新对话列表记录
    */
-  updateTalkItem() {
+  updateTalkItem () {
     let store = this.getStoreInstance();
 
     store.commit("INCR_UNREAD_NUM");

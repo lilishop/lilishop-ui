@@ -80,8 +80,8 @@
                         <div class="card-name">
                           <p class="nickname">
                             {{
-    item.remark_name ? item.remark_name : item.name
-}}
+                              item.remark_name ? item.remark_name : item.name
+                            }}
                           </p>
                           <div v-show="item.unread" class="larkc-tag">
                             {{ item.unread }}条未读
@@ -112,8 +112,8 @@
                       </div>
                       <div class="content">
                         <template v-if="
-  index_name != item.index_name && item.draft_text
-">
+                          index_name != item.index_name && item.draft_text
+                        ">
                           <span class="draft-color">[草稿]</span>
                           <span>{{ item.draft_text }}</span>
                         </template>
@@ -424,7 +424,6 @@ export default {
 
       this.$nextTick(() => {
         if (id == this.index_name.split("_")[1]) {
-          console.log("已读");
           this.$store.commit("UPDATE_TALK_ITEM", {
             userId: id,
             index_name: "MESSAGE_" + this.index_name.split("_")[1],

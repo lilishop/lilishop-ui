@@ -53,6 +53,7 @@
       <Row class="operator padding-row">
         <Button @click="add" type="primary">添加</Button>
         <Button @click="delAll" class="ml_10">批量关闭</Button>
+        <Button @click="receivePage()" class="ml_10" type="info">优惠券领取记录</Button>
       </Row>
       <Table
         class="mt_10"
@@ -86,6 +87,13 @@
             @click="remove(row)"
             >关闭</Button
           >
+          <Button
+            style="margin: 5px"
+            type="info"
+            size="small"
+            @click="receivePage(row.id)"
+            >领取记录
+          </Button>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">
@@ -134,11 +142,6 @@ export default {
           type: "selection",
           width: 60,
           align: "center",
-          fixed: "left",
-        },
-        {
-          title: "活动名称",
-          key: "promotionName",
           fixed: "left",
         },
         {
@@ -204,7 +207,7 @@ export default {
         },
         {
           title: "活动时间",
-
+          width: 150,
           render: (h, params) => {
             if (
               params?.row?.getType === "ACTIVITY" &&
@@ -245,6 +248,13 @@ export default {
   methods: {
     init() {
       this.getDataList();
+    },
+    receivePage(id) {
+      if (id) {
+        this.$router.push({ name: "coupon-receive", query: { couponId: id } });
+      } else {
+        this.$router.push({ name: "coupon-receive" });
+      }
     },
     add() {
       this.$router.push({ name: "add-coupon" });

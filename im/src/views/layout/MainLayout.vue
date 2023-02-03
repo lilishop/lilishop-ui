@@ -72,17 +72,17 @@ export default {
     }),
   },
   watch: {
-    unreadNum(n, o) {
+    unreadNum (n, o) {
       if (n > 0 && n > o && this.notifyCueTone) {
         this.play();
       }
     },
   },
-  created() {
+  created () {
     this.setApplyNum();
   },
   methods: {
-    play() {
+    play () {
       document
         .querySelector("#audio")
         .play()
@@ -90,10 +90,10 @@ export default {
           console.error("消息提示音播放异常");
         });
     },
-    logout() {
+    logout () {
       this.$store.dispatch("ACT_USER_LOGOUT");
     },
-    setApplyNum() {
+    setApplyNum () {
       // TODO 暂且return
       return;
       ServeFindFriendApplyNum().then((res) => {
@@ -108,7 +108,7 @@ export default {
 <style lang="less" >
 .main-layout {
   position: fixed;
-  width: 75%;
+  width: 80%;
   height: 80%;
   top: 0;
   right: 0;
@@ -120,7 +120,7 @@ export default {
   border-radius: 5px;
 
   &.full-mode {
-    width: 70%;
+    width: 1200px;
     height: 85%;
     border-radius: 0;
   }

@@ -10,7 +10,7 @@ const KEY_INDEX_NAME = "send_message_index_name";
  *
  * @param {String} index_name
  */
-export function findTalkIndex(index_name) {
+export function findTalkIndex (index_name) {
   return store.state.talks.items.findIndex(
     (item) => item.index_name == index_name
   );
@@ -21,7 +21,7 @@ export function findTalkIndex(index_name) {
  *
  * @param {String} index_name
  */
-export function findTalk(index_name) {
+export function findTalk (index_name) {
   return store.state.talks.items.find((item) => item.index_name == index_name);
 }
 
@@ -30,8 +30,7 @@ export function findTalk(index_name) {
  *
  * @param {Object} params
  */
-export function formatTalkItem(params) {
-  console.log(params);
+export function formatTalkItem (params) {
   let options = {
     id: "",
     disable: false,
@@ -58,7 +57,7 @@ export function formatTalkItem(params) {
  * @param {Integer} talk_type 对话类型[1:私聊;2:群聊;]
  * @param {Integer} receiver_id 接收者ID
  */
-export function toTalk(talk_type, receiver_id) {
+export function toTalk (talk_type, receiver_id) {
   ServeCreateTalkList(receiver_id).then(({ code, data }) => {
     console.log("ServeCreateTalkList", data);
     if (code == 200) {
@@ -78,7 +77,7 @@ export function toTalk(talk_type, receiver_id) {
  *
  * @returns
  */
-export function getCacheIndexName() {
+export function getCacheIndexName () {
   let index_name = sessionStorage.getItem(KEY_INDEX_NAME);
   if (index_name) {
     sessionStorage.removeItem(KEY_INDEX_NAME);
