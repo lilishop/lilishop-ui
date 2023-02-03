@@ -35,28 +35,31 @@
         <el-tab-pane label="订单列表" name="orders">
           <dl>
             <dd v-for="(item, index) in orderList" v-infinite-scroll="loadMore" :key="index">
-              <div class="orderlist">
-                <div class="order_top">
+              <div class="orderlist" >
+                <div class="order_top order_padding">
                   <span class="order_sn">订单号:{{ item.sn }}</span>
                 </div>
-                <div class="order_section">
+                <div class="order_section order_padding">
                   <img :src="item.groupImages" alt="">
                   <el-tooltip class="item" effect="dark" :content="item.groupName" placement="top-start">
                     <span class="orderGoodsName" @click="linkToOrders(item.sn)"> {{ item.groupName }}</span>
                   </el-tooltip>
-                  <div class="orderBtn">
+                  <div class="orderBtn ">
                     <el-button type="danger" class="store-button" v-if="item.btnHide == 1 && toUser.storeFlag"
                       size="mini" @click="submitSendOrderMessage(item, index)" plain>发送</el-button>
                   </div>
                 </div>
-                <div class="order_footer">
+                <div class="order_footer order_padding" >
                   <span> 订单金额： <span style="color: red;">￥{{ item.orderItems[0].goodsPrice }}</span></span>
-                  <span class="order_status" v-if="item.orderStatus"
+                  <!-- <span class="order_status" v-if="item.orderStatus"
                     :style="{ 'color': item.orderStatus == 'CANCELLED' || item.orderStatus == 'UNPAID' || item.orderStatus == 'TAKE' ? '#5a606b' : '#f23030' }">{{
   item.orderStatus == 'CANCELLED' ? '已取消' : item.orderStatus == 'UNPAID' ? '未付款' : item.orderStatus ==
     'PAID' ? '已付款' : item.orderStatus == 'UNDELIVERED' ? '待发货' : item.orderStatus == 'DELIVERED'
       ? '已发货' : item.orderStatus == 'COMPLETED' ? '已完成' : item.orderStatus == 'TAKE' ? '待校验' : ''
-                    }}</span>
+                    }}</span> -->
+                    <el-tag :type="col[item.orderStatus]">{{ item.orderStatus == 'STAY_PICKED_UP' ? '待自提' :item.orderStatus == 'CANCELLED' ? '已取消' : item.orderStatus == 'UNPAID' ? '未付款' : item.orderStatus ==
+    'PAID' ? '已付款' : item.orderStatus == 'UNDELIVERED' ? '待发货' : item.orderStatus == 'DELIVERED'
+      ? '已发货' : item.orderStatus == 'COMPLETED' ? '已完成' : item.orderStatus == 'TAKE' ? '待校验' : ''}}</el-tag>
                 </div>
 
               </div>
@@ -80,7 +83,17 @@ export default {
     return {
       activeName: 'goods',
       btnHide: undefined,
-      hide: true
+      hide: true,
+      col:{
+        CANCELLED:'error',
+        PAID:'error',
+        TAKE:'',
+        COMPLETED:'success',
+        DELIVERED:'danger',
+        UNDELIVERED:'warning',
+        UNPAID:'',
+        STAY_PICKED_UP:''
+      },
     }
   },
   computed: {
@@ -187,7 +200,7 @@ export default {
 
 .Underline {
   border: 1px solid silver;
-  width: 90%;
+  // width: 90%;
   margin: 0 auto;
 }
 
@@ -196,11 +209,11 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  width: 260px;
+  width: 232px;
 }
 
 .box {
-  width: 400px;
+  max-width: 362px;
 
   .top {
     text-align: center;
@@ -222,7 +235,8 @@ export default {
   }
 
   .item {
-    margin: 4px;
+    // margin: 4px;
+    margin-top:16px
   }
 
   .left .el-tooltip__popper,
@@ -236,14 +250,18 @@ export default {
 }
 
 .orderlist {
+  max-width:352px;
   margin-bottom: 10px;
   background: #fff;
   color: #5a606b;
+  box-sizing: border-box;
 }
+.box::-webkit-scrollbar {
+        width: 0px!important;
+    }
 
 .order_top {
   border-bottom: 1px solid #f2f2f2;
-
   .order_sn {}
 }
 
@@ -252,8 +270,8 @@ export default {
   height: 100px;
 
   img {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     margin-top: 20px;
   }
 }
@@ -294,11 +312,20 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap
 }
-
-/deep/ .el-tabs__item.is-top:last-child {
-  color: black;
+ /deep/ .el-tabs__header{
+  position: absolute;
+  width: 362px;
+  height: 50px;
+  left: 0;
+  z-index: 2;
+  background: #ffffff;
+ }
+// /deep/ .el-tabs__item.is-top:last-child {
+//   color: black;
+// }
+/deep/.is-active{
+  color: #f23030;
 }
-
 /deep/.el-tabs__active-bar {
   background-color: #f23030;
 }
@@ -312,13 +339,18 @@ export default {
   justify-content: center;
   align-items: center;
 }
-
-.box {
-  height: 500px;
-  overflow: auto;
-  width: 350px;
+/deep/.el-tabs__content{
+    margin-top: 50px;
 }
-
+.box {
+  height: 700px;
+  overflow: auto;
+  // margin-top: 50px;
+  // width: 350px;
+}
+.order_padding{
+  padding:0 10px;
+}
 .store-button {
   background-color: white;
   border-color: #F56C6C;
@@ -354,4 +386,12 @@ export default {
 .separate {
   margin-top: 8px;
 }
+// .el-tabs--card {
+//   height: calc(100vh - 110px);
+//   overflow-y: auto; 
+// }
+// /deep/.el-tab-pane {
+//   height: calc(100vh - 110px);
+//   overflow-y: auto;
+// }
 </style>

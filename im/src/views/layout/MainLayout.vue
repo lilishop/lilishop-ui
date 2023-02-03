@@ -96,11 +96,6 @@ export default {
     setApplyNum () {
       // TODO 暂且return
       return;
-      ServeFindFriendApplyNum().then((res) => {
-        if (res.code == 200 && res.data.unread > 0) {
-          this.$store.commit("INCR_APPLY_NUM");
-        }
-      });
     },
   },
 };
@@ -239,29 +234,29 @@ export default {
   background-color: #121212;
   transition: ease-in 0.5s;
 
-  &.bag001 {
-    background: url(~@/assets/image/background/001.jpg);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-  }
+  // &.bag001 {
+  //   background: url(~@/assets/image/background/001.jpg);
+  //   background-repeat: no-repeat;
+  //   background-size: 100% 100%;
+  // }
 
-  &.bag002 {
-    background: url(~@/assets/image/background/002.jpg);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-  }
+  // &.bag002 {
+  //   background: url(~@/assets/image/background/002.jpg);
+  //   background-repeat: no-repeat;
+  //   background-size: 100% 100%;
+  // }
 
-  &.bag003 {
-    background: url(~@/assets/image/background/003.jpg);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-  }
+  // &.bag003 {
+  //   background: url(~@/assets/image/background/003.jpg);
+  //   background-repeat: no-repeat;
+  //   background-size: 100% 100%;
+  // }
 
-  &.bag004 {
-    background: url(~@/assets/image/background/005.png);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-  }
+  // &.bag004 {
+  //   background: url(~@/assets/image/background/005.png);
+  //   background-repeat: no-repeat;
+  //   background-size: 100% 100%;
+  // }
 }
 
 @keyframes notifymove {

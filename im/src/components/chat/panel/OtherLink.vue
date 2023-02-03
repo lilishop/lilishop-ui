@@ -1,7 +1,7 @@
 <template>
   <el-tabs v-model="activeName" @tab-click="handleClick" type="card" :stretch=true>
     <el-tab-pane :label="toUser.storeFlag ? '正在咨询' : '他的足迹'" name="history">
-      <div style="margin-left: 12px;">
+      <div>
         <GoodsLink :goodsDetail="goodsDetail" v-if="toUser.userId === goodsDetail.storeId"
           @sendMessage="submitSendMessage" />
         <FootPrint :list="footPrintList" @loadMore="loadMoreFootPrint()" :orderList="orderPrintList"
@@ -57,6 +57,7 @@ export default {
       localStorage.setItem('storeFlag', this.toUser.storeFlag)
       this.footPrintList = []
       this.orderPrintList = []
+      this.footPrintParams.pageNumber = 1
       if (this.toUser.storeFlag) {
         this.getStoreDetail()
       } 
@@ -75,7 +76,7 @@ export default {
       storeInfo: {}, //店铺信息
       memberInfo: {}, //会员信息
       footPrintParams: {
-        pageSize: 10,
+        pageSize: 20,
         pageNumber: 1,
         memberId: '',
         storeId: '',
@@ -133,6 +134,9 @@ export default {
         this.footPrintParams.memberId = this.id
         this.footPrintParams.storeId = this.toUser.userId
         ServeGetFootPrint(this.footPrintParams).then(res => {
+          res.result.records=res.result.records.filter((item)=>{
+            return item!=null
+          })
           res.result.records.forEach((item, index) => {
             if (localStorage.getItem(item.goodsId)) {
               item.btnHide = 0
@@ -142,10 +146,9 @@ export default {
             if (item.goodsId === this.goodsParams.goodsId) {
               res.result.records.splice(index, 1)
             }
-          });
+          });         
           this.footPrintList.push(...res.result.records)
         })
-
         // 订单列表
         ServeGetOrderPrint(this.footPrintParams).then((res) => {
           if (res.code == 200) {
@@ -161,6 +164,9 @@ export default {
         this.footPrintParams.memberId = this.toUser.userId
         this.footPrintParams.storeId = this.id
         ServeStoreGetFootPrint(this.footPrintParams).then(res => {
+          res.result.records=res.result.records.filter((item)=>{
+            return item!=null
+          })
           res.result.records.forEach((item, index) => {
             if (localStorage.getItem(item.goodsId)) {
               item.btnHide = 0
@@ -264,6 +270,9 @@ export default {
 }
 
 /deep/ .el-tab-pane {
-  margin-left: 12px;
+  // margin-left: 12px;
+}
+/deep/.el-tabs__nav-scroll{
+  min-width: 362px;
 }
 </style>
