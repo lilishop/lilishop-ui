@@ -117,13 +117,20 @@
           </template>
         </Col>
         <Col span="12">
-          <div class="div-item">
+          <div class="div-item" v-if="orderInfo.order.deliveryMethod != 'SELF_PICK_UP'">
             <div class="div-item-left">收货信息：</div>
             <div class="div-item-right">
               {{ orderInfo.order.consigneeName }}
               {{ orderInfo.order.consigneeMobile }}
               {{ orderInfo.order.consigneeAddressPath }}
               {{ orderInfo.order.consigneeDetail }}
+            </div>
+          </div>
+          <div class="div-item"  v-if="orderInfo.order.deliveryMethod == 'SELF_PICK_UP'">
+            <div class="div-item-left">自提信息：</div>
+            <div class="div-item-right">
+              {{ orderInfo.order.storeAddressPath }}
+              {{ orderInfo.order.storeAddressMobile }}
             </div>
           </div>
           <div class="div-item">
