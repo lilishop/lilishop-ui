@@ -1,5 +1,5 @@
 <template>
-  <div style="width: 350px;">
+  <div style="max-width: 362px;">
     当前浏览
     <div class="base">
       <div>

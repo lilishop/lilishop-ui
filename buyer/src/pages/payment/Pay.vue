@@ -220,11 +220,14 @@
     <!-- 底部支付栏 -->
     <div class="order-footer width_1200">
       <div class="pay ml_20" @click="pay">提交订单</div>
-      <div class="pay-address" v-if="addressList.length">
+      <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'LOGISTICS'">
         配送至：{{ selectedAddress.consigneeAddressPath | unitAddress }}
         {{ selectedAddress.detail }}&nbsp;&nbsp;收货人：{{
             selectedAddress.name
         }}&nbsp;&nbsp;{{ selectedAddress.mobile }}
+      </div>
+      <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'SELF_PICK_UP'">
+        自提地点：{{selectedStoreAddress.address}} &nbsp;&nbsp;联系方式：{{ selectedStoreAddress.mobile }} 
       </div>
     </div>
     <BaseFooter></BaseFooter>

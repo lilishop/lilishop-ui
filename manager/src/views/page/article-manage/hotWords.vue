@@ -34,7 +34,7 @@ export default {
       templatesWay: [
         {
           template: "todayHotWords",
-          label: "今日热次",
+          label: "今日热词",
         },
         {
           template: "historyHotWords",
