@@ -222,17 +222,22 @@ class WsSocket {
    */
   onMessage (evt) {
     let result = this.onParse(evt);
-    console.log("接收消息", result, "color:red");
-    // 判断消息事件是否被绑定
-    // event_talk;
-    let params = {
-      ...this.onParse(evt),
-      text: JSON.parse(this.onParse(evt).text)
+    if (this.onParse(evt).text.includes('goodsName') || this.onParse(evt).text.includes('groupName')) {
+      let params = {
+        ...this.onParse(evt),
+        text: JSON.parse(this.onParse(evt).text)
+      }
+      this.onCallBacks["event_talk"](params);
+    } else {
+      let params = {
+        ...this.onParse(evt),
+        text: this.onParse(evt).text
+      }
+      this.onCallBacks["event_talk"](params);
     }
     // 指定推送消息
-    this.onCallBacks["event_talk"](params);
-  }
 
+  }
   /**
    * WebSocket心跳检测
    */
