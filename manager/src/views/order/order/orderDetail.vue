@@ -274,7 +274,7 @@
                 {{ orderInfo.order.priceDetailDTO.couponPrice | unitPrice("￥") }}
               </span>
             </li>
-            <li v-if="orderInfo.order.priceDetailDTO.discountPriceDetail != undefined && orderInfo.order.priceDetailDTO.discountPriceDetail && orderInfo.order.priceDetailDTO.discountPriceDetail != null && orderInfo.order.priceDetailDTO.discountPriceDetail != ''">      
+            <li v-if="orderInfo.order.priceDetailDTO.discountPriceDetail != undefined && orderInfo.order.priceDetailDTO.discountPriceDetail && orderInfo.order.priceDetailDTO.discountPriceDetail != null && orderInfo.order.priceDetailDTO.discountPriceDetail != ''">
             <div class="label">
               <Poptip trigger="hover" placement="left" width="200">
                 <Icon v-if="typeList.length > 0"  type="ios-alert-outline" size="17" @click="getOrderPrice" color="#cc0000"/>
@@ -302,7 +302,7 @@
              <!-- <li v-if="showPrices">
                 <span class="label" style="color: #cc0000;font-size: 14px;" v-if="typeList.length > 0" >优惠详情：</span>
               </li> -->
-              <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index"> 
+              <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index">
                 <span class="label" v-if="index == 1 && typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
                 <span class="txt" style="border-bottom: 1px dashed;font-size:10px !important;" v-if="index == 1 &&  typeList.length > 1">¥{{ item.discountPrice | unitPrice }}</span>
                 <span class="label" v-if="index == 0 &&  typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
@@ -514,9 +514,9 @@
                   <div v-for="(item,index) in orderInfo.orderItems" :key="index" class="printgooditem">
                     <div class="printgoodname">
                       <p>{{item.goodsName}}</p>
-                      <div class="printgoodguid">
+                      <div class="printgoodguid" v-if="item.specs">
                         <span v-for="(itemchild, keychild) in JSON.parse(item.specs)" :key="keychild">
-                          <span class="printgoodguiditem" v-if="keychild != 'images'">
+                          <span class="printgoodguiditem" v-if="keychild !== 'images'">
                             {{ keychild }} : {{ itemchild }}
                           </span>
                         </span>
@@ -529,7 +529,7 @@
           </Row>
         </div>
       </div>
-      
+
       <div slot="footer" style="text-align: right">
         <Button @click="printModal = false">关闭</Button>
         <Button type="primary" v-print="printInfoObj">打印发货单</Button>
@@ -739,7 +739,7 @@ export default {
   methods: {
     gotoHomes(){
       return false
-    },  
+    },
     //修改地址
     regionClick() {
       this.showRegion = true;
@@ -784,7 +784,7 @@ export default {
           console.log(123123)
           this.getContentPrice()
         }
-    },  
+    },
     // 获取订单详情
     getDataList() {
       this.loading = true;

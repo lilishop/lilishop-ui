@@ -117,10 +117,7 @@ export default {
       // 获取用户信息
       userMsg().then((res) => {
         if (res.success) {
-          // location.reload();
-          // this.$router.go(0);
 
-          console.log("Huoqu ");
           this.setStore("saveLogin", this.saveLogin);
           if (this.saveLogin) {
             // 保存7天

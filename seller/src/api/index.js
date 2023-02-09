@@ -27,9 +27,9 @@ export const getHomeNotice = params => {
 };
 
 // 搜索部门
-export const searchDepartment = (params) => {
-  return getRequest("/permission/department/search", params);
-};
+// export const searchDepartment = (params) => {
+//   return getRequest("/permission/department/search", params);
+// };
 
 
 
