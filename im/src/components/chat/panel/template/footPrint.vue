@@ -17,7 +17,7 @@
 
                   <div style="display: flex;">
                     <div style="margin-top: 20px;">
-                      <span style="color: red;">￥{{ item.price }}</span>
+                      <span style="color: red;">{{ item.price | unitPrice("￥") }}</span>
                       <div class="goods_store_button">
                         <el-button type="danger" v-if="item.btnHide == 1 && toUser.storeFlag" size="mini"
                           @click="submitSendGoodsMessage(item)" plain>发送</el-button>
@@ -35,7 +35,7 @@
         <el-tab-pane label="订单列表" name="orders">
           <dl>
             <dd v-for="(item, index) in orderList" v-infinite-scroll="loadMore" :key="index">
-              <div class="orderlist" >
+              <div class="orderlist">
                 <div class="order_top order_padding">
                   <span class="order_sn">订单号:{{ item.sn }}</span>
                 </div>
@@ -49,17 +49,24 @@
                       size="mini" @click="submitSendOrderMessage(item, index)" plain>发送</el-button>
                   </div>
                 </div>
-                <div class="order_footer order_padding" >
-                  <span> 订单金额： <span style="color: red;">￥{{ item.orderItems[0].goodsPrice }}</span></span>
+                <div class="order_footer order_padding">
+                  <span> 订单金额： <span style="color: red;">{{
+                    item.orderItems[0].goodsPrice | unitPrice("￥")
+                  }}</span></span>
                   <!-- <span class="order_status" v-if="item.orderStatus"
                     :style="{ 'color': item.orderStatus == 'CANCELLED' || item.orderStatus == 'UNPAID' || item.orderStatus == 'TAKE' ? '#5a606b' : '#f23030' }">{{
   item.orderStatus == 'CANCELLED' ? '已取消' : item.orderStatus == 'UNPAID' ? '未付款' : item.orderStatus ==
     'PAID' ? '已付款' : item.orderStatus == 'UNDELIVERED' ? '待发货' : item.orderStatus == 'DELIVERED'
       ? '已发货' : item.orderStatus == 'COMPLETED' ? '已完成' : item.orderStatus == 'TAKE' ? '待校验' : ''
                     }}</span> -->
-                    <el-tag :type="col[item.orderStatus]">{{ item.orderStatus == 'STAY_PICKED_UP' ? '待自提' :item.orderStatus == 'CANCELLED' ? '已取消' : item.orderStatus == 'UNPAID' ? '未付款' : item.orderStatus ==
-    'PAID' ? '已付款' : item.orderStatus == 'UNDELIVERED' ? '待发货' : item.orderStatus == 'DELIVERED'
-      ? '已发货' : item.orderStatus == 'COMPLETED' ? '已完成' : item.orderStatus == 'TAKE' ? '待校验' : ''}}</el-tag>
+                  <el-tag :type="col[item.orderStatus]">{{
+                    item.orderStatus == 'STAY_PICKED_UP' ? '待自提'
+                      : item.orderStatus == 'CANCELLED' ? '已取消' : item.orderStatus == 'UNPAID' ? '未付款' : item.orderStatus
+                        ==
+                        'PAID' ? '已付款' : item.orderStatus == 'UNDELIVERED' ? '待发货' : item.orderStatus == 'DELIVERED'
+                          ? '已发货' : item.orderStatus == 'COMPLETED' ? '已完成' : item.orderStatus == 'TAKE' ? '待校验' :
+                            ''
+                  }}</el-tag>
                 </div>
 
               </div>
@@ -75,24 +82,26 @@
 <script>
 import { Tag, button, Tabs, TabPane, InfiniteScroll } from 'element-ui'
 import { mapState, mapGetters } from "vuex";
+import { unitPrice } from '@/plugins/filters';
+
 export default {
   directives: {
     "infinite-scroll": InfiniteScroll,
   },
-  data() {
+  data () {
     return {
       activeName: 'goods',
       btnHide: undefined,
       hide: true,
-      col:{
-        CANCELLED:'error',
-        PAID:'error',
-        TAKE:'',
-        COMPLETED:'success',
-        DELIVERED:'danger',
-        UNDELIVERED:'warning',
-        UNPAID:'',
-        STAY_PICKED_UP:''
+      col: {
+        CANCELLED: 'error',
+        PAID: 'error',
+        TAKE: '',
+        COMPLETED: 'success',
+        DELIVERED: 'danger',
+        UNDELIVERED: 'warning',
+        UNPAID: '',
+        STAY_PICKED_UP: ''
       },
     }
   },
@@ -112,17 +121,17 @@ export default {
   methods: {
     //跳转订单列表
 
-    scrollBottom(e) {
+    scrollBottom (e) {
       const { scrollTop, scrollHeight, clientHeight } = e.srcElement
       if (scrollTop + clientHeight >= scrollHeight) {
         this.$emit('loadMore')
       }
     },
-    loadMore() {
+    loadMore () {
 
     },
     // 发送消息回调事件
-    submitSendGoodsMessage(item) {
+    submitSendGoodsMessage (item) {
       const context = {
         id: item.id,
         goodsId: item.goodsId,
@@ -143,7 +152,7 @@ export default {
       item.btnHide = 0
     },
     // 发送订单列表
-    submitSendOrderMessage(item, index) {
+    submitSendOrderMessage (item, index) {
       console.log(item, 'item');
       const context = {
         sn: item.sn,
@@ -165,7 +174,7 @@ export default {
       localStorage.setItem(item.goodsId, 0)
       item.btnHide = 0
     },
-    handleClick(tab, event) {
+    handleClick (tab, event) {
       console.log(tab, event);
     }
   },
@@ -179,7 +188,7 @@ export default {
       default: []
     },
   },
-  mounted() {
+  mounted () {
     //  state.user.toUser
     console.log(this.orderList, '  this.$store.state.user.toUser  this.$store.state.user.toUser  this.$store.state.user.toUser');
     this.btnHide = localStorage.getItem('btnHide')
@@ -236,7 +245,7 @@ export default {
 
   .item {
     // margin: 4px;
-    margin-top:16px
+    margin-top: 16px
   }
 
   .left .el-tooltip__popper,
@@ -250,18 +259,20 @@ export default {
 }
 
 .orderlist {
-  max-width:352px;
+  max-width: 352px;
   margin-bottom: 10px;
   background: #fff;
   color: #5a606b;
   box-sizing: border-box;
 }
+
 .box::-webkit-scrollbar {
-        width: 0px!important;
-    }
+  width: 0px !important;
+}
 
 .order_top {
   border-bottom: 1px solid #f2f2f2;
+
   .order_sn {}
 }
 
@@ -312,20 +323,23 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap
 }
- /deep/ .el-tabs__header{
+
+/deep/ .el-tabs__header {
   position: absolute;
   width: 362px;
   height: 50px;
   left: 0;
   z-index: 2;
   background: #ffffff;
- }
+}
+
 // /deep/ .el-tabs__item.is-top:last-child {
 //   color: black;
 // }
-/deep/.is-active{
+/deep/.is-active {
   color: #f23030;
 }
+
 /deep/.el-tabs__active-bar {
   background-color: #f23030;
 }
@@ -339,18 +353,22 @@ export default {
   justify-content: center;
   align-items: center;
 }
-/deep/.el-tabs__content{
-    margin-top: 50px;
+
+/deep/.el-tabs__content {
+  margin-top: 50px;
 }
+
 .box {
   height: 700px;
   overflow: auto;
   // margin-top: 50px;
   // width: 350px;
 }
-.order_padding{
-  padding:0 10px;
+
+.order_padding {
+  padding: 0 10px;
 }
+
 .store-button {
   background-color: white;
   border-color: #F56C6C;
@@ -386,6 +404,7 @@ export default {
 .separate {
   margin-top: 8px;
 }
+
 // .el-tabs--card {
 //   height: calc(100vh - 110px);
 //   overflow-y: auto; 

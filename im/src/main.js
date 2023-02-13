@@ -15,6 +15,10 @@ import './core/filter'
 import './core/directives'
 import '@/permission'
 import '@/icons'
+import * as filters from "./plugins/filters";
+Object.keys(filters).forEach((key) => {
+  Vue.filter(key, filters[key]);
+});
 
 // 引入自定义全局css
 import '@/assets/css/global.less'

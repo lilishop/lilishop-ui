@@ -84,7 +84,7 @@
                           </el-tooltip>
                         </div>
                         <div class="price">
-                          <span>￥{{ item.text.price }}</span>
+                          <span>{{ item.text.price | unitPrice('￥') }}</span>
                         </div>
                       </div>
                     </div>
@@ -103,7 +103,7 @@
                       <span class="orderGoodsName" @click="linkToOrders(item.text.sn)">{{ item.text.groupName }}</span>
                       <span class="orderGoodsTime">{{ item.text.paymentTime }}</span>
                       <span class="orderFlowPrice">
-                        订单金额：￥{{ item.text.flowPrice }}
+                        订单金额：{{ item.text.flowPrice | unitPrice('￥') }}
                       </span>
                       <span class="order_status"
                         :style="{ 'color': item.text.orderStatus == 'CANCELLED' || item.text.orderStatus == 'UNPAID' || item.text.orderStatus == ' TAKE' ? '#5a606b' : '#f23030' }">{{
@@ -171,7 +171,7 @@
     </transition>
 
     <!-- 链接信息 -->
-    <OtherLink :toUser="toUser" :id="id" :goodsParams="goodsParams" class="flex-4"  />
+    <OtherLink :toUser="toUser" :id="id" :goodsParams="goodsParams" class="flex-4" />
   </div>
 </template>
 <script>
@@ -186,6 +186,7 @@ import PanelToolbar from "./PanelToolbar";
 import SocketInstance from "@/im-server/socket-instance";
 import { SvgMentionDown } from "@/core/icons";
 import { formatTime, parseTime, copyTextToClipboard } from "@/utils/functions";
+import { unitPrice } from '@/plugins/filters';
 
 import {
   ServeTalkRecords,
@@ -293,7 +294,7 @@ export default {
         mode: 0,
       };
       this.loadChatRecords();
-      
+
     },
   },
   mounted () {
