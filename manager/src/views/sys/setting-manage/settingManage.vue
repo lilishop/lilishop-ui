@@ -42,20 +42,20 @@ export default {
           type: "WITHDRAWAL_SETTING",
           name: "提现设置",
         },
-        //  快递鸟设置
+        //  快递查询设置
         {
-          type: "KUAIDI_SETTING",
-          name: "快递鸟设置",
+          type: "LOGISTICS_SETTING",
+          name: "快递查询设置",
         },
-        //阿里OSS配置
+        //静态资源配置
         {
           type: "OSS_SETTING",
-          name: "OSS配置",
+          name: "静态资源配置",
         },
-        //阿里短信配置
+        //短信配置
         {
           type: "SMS_SETTING",
-          name: "阿里短信配置",
+          name: "短信配置",
         },
         //阿里短信配置
         {

@@ -1,21 +1,27 @@
 <template>
   <div class="layout">
     <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
-      <FormItem label="ebusinessID" prop="ebusinessID">
-        <Input v-model="formValidate.ebusinessID" />
+      <FormItem label="平台 " prop="endPoint">
+        <RadioGroup v-model="formValidate.type" type="button">
+          <Radio label="KDNIAO">快递鸟</Radio>
+          <Radio label="KUAIDI100">快递100</Radio>
+        </RadioGroup>
       </FormItem>
-      <FormItem label="appKey" prop="appKey">
-        <Input class="label-appkey" v-model="formValidate.appKey" />
+      <FormItem v-if="formValidate.type==='KDNIAO'" label="快递鸟 商户ID" prop="kdniaoEbusinessID">
+        <Input v-model="formValidate.kdniaoEbusinessID" />
       </FormItem>
-      <FormItem label="reqURL" prop="reqURL">
-        <Input v-model="formValidate.reqURL" />
+      <FormItem v-if="formValidate.type==='KDNIAO'" label="快递鸟 AppKey" prop="kdniaoAppKey">
+        <Input class="label-appkey" v-model="formValidate.kdniaoAppKey" />
       </FormItem>
-      <FormItem label="电子面单URL" prop="sheetReqURL">
-        <Input v-model="formValidate.sheetReqURL" />
+
+      <FormItem v-if="formValidate.type==='KUAIDI100'" label="快递100 授权码" prop="kuaidi100Customer">
+        <Input class="label-appkey" v-model="formValidate.kuaidi100Customer" />
+      </FormItem>
+      <FormItem v-if="formValidate.type==='KUAIDI100'" label="快递100 Key" prop="kuaidi100Key">
+        <Input class="label-appkey" v-model="formValidate.kuaidi100Key" />
       </FormItem>
       <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
-
       </div>
     </Form>
   </div>
@@ -27,7 +33,12 @@ export default {
   data() {
     return {
       ruleValidate: {}, // 验证规则
-      formValidate: { ebusinessID: "", reqURL: "", appKey: "" ,sheetReqURL: "" ,}, // 表单数据
+      formValidate: {   // 表单数据
+        type: "",
+        kdniaoEbusinessID: "",
+        kdniaoAppKey: "" ,
+        kuaidi100Customer: "" ,
+        kuaidi100Key: "" ,},
     };
   },
   props: ["res",'type'],
