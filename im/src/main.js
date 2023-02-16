@@ -30,7 +30,7 @@ Vue.component('face-null', faceNull)
 
 Vue.prototype.linkToGoods = function (goodsId, skuId) {  // 跳转买家端商品
   if (localStorage.getItem('storeFlag') == 'false') {
-    window.open(`${config.PC_STORE}goods-operation-edit?id=${goodsId}`, '_blank')
+    window.open(`${config.PC_URL}goodsDetail?skuId=${skuId}&goodsId=${goodsId}`, '_blank')
   } else {
     window.open(`${config.PC_URL}goodsDetail?skuId=${skuId}&goodsId=${goodsId}`, '_blank')
   }

@@ -37,7 +37,7 @@
             <dd v-for="(item, index) in orderList" v-infinite-scroll="loadMore" :key="index">
               <div class="orderlist">
                 <div class="order_top order_padding">
-                  <span class="order_sn">订单号:{{ item.sn }}</span>
+                  <span class="order_sn" @click="linkToOrders(item.sn)">订单号:{{ item.sn }}</span>
                 </div>
                 <div class="order_section order_padding">
                   <img :src="item.groupImages" alt="">
@@ -53,12 +53,6 @@
                   <span> 订单金额： <span style="color: red;">{{
                     item.orderItems[0].goodsPrice | unitPrice("￥")
                   }}</span></span>
-                  <!-- <span class="order_status" v-if="item.orderStatus"
-                    :style="{ 'color': item.orderStatus == 'CANCELLED' || item.orderStatus == 'UNPAID' || item.orderStatus == 'TAKE' ? '#5a606b' : '#f23030' }">{{
-  item.orderStatus == 'CANCELLED' ? '已取消' : item.orderStatus == 'UNPAID' ? '未付款' : item.orderStatus ==
-    'PAID' ? '已付款' : item.orderStatus == 'UNDELIVERED' ? '待发货' : item.orderStatus == 'DELIVERED'
-      ? '已发货' : item.orderStatus == 'COMPLETED' ? '已完成' : item.orderStatus == 'TAKE' ? '待校验' : ''
-                    }}</span> -->
                   <el-tag :type="col[item.orderStatus]">{{
                     item.orderStatus == 'STAY_PICKED_UP' ? '待自提'
                       : item.orderStatus == 'CANCELLED' ? '已取消' : item.orderStatus == 'UNPAID' ? '未付款' : item.orderStatus

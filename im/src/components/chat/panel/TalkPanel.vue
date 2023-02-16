@@ -92,7 +92,7 @@
                   <div v-if="item.messageType == 'ORDER' && item.text != null" class="oderStyle" :class="{
                     left: item.float == 'left',
                     right: item.float == 'right',
-                  }">
+                  }" @click="linkToOrders(item.text.sn)">
                     <div class="oedersn">
                       <el-tooltip class="item" effect="dark" :content="item.text.sn" placement="top-start">
                         <a> 订单号:{{ item.text.sn }} </a>
@@ -100,7 +100,7 @@
                     </div>
                     <div class="baseTwo">
                       <img :src="item.text.groupImages" style="height: 100px;width: 100px;margin-top: 10px;" />
-                      <span class="orderGoodsName" @click="linkToOrders(item.text.sn)">{{ item.text.groupName }}</span>
+                      <span class="orderGoodsName">{{ item.text.groupName }}</span>
                       <span class="orderGoodsTime">{{ item.text.paymentTime }}</span>
                       <span class="orderFlowPrice">
                         订单金额：{{ item.text.flowPrice | unitPrice('￥') }}
