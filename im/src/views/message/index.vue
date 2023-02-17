@@ -653,7 +653,9 @@ export default {
 /deep/ .el-scrollbar__wrap {
   overflow-x: hidden;
 }
-
+.user-status{
+  margin-left: 10px;
+}
 .aside-box {
   position: relative;
   border-right: 1px solid rgb(245, 245, 245);

@@ -2,7 +2,7 @@ import axios from "axios";
 import config from "@/config/config";
 import { getToken, removeAll } from "@/utils/auth";
 
-import { Notification } from "element-ui";
+import { Notification, MessageBox } from "element-ui";
 import qs from "qs";
 
 // 创建 axios 实例
@@ -20,15 +20,46 @@ const request = axios.create({
  * @param {*} error
  */
 const errorHandler = (error) => {
+  console.log(error);
   // 判断是否是响应错误信息
   if (error.response) {
     if (error.response.status == 401) {
       removeAll();
       location.reload();
-    } else {
+    } else if (error.response.status == 403) {
+      /**
+       * 403提示将重新从商家移动端进入当前页面
+       */
+      MessageBox("当前登录已失效，请从商家管理后台重新登录。", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        closeOnPressEscape: false,
+        closeOnClickModal: false,
+        type: "warning",
+      })
+        .then(() => {
+          window.close();
+          Notification({
+            title:"登录失效提示",
+            message: "请手动关闭当前页面",
+            type:"error",
+            position: "top-right",
+          });
+        })
+        .catch(() => {
+         
+          Notification({
+            title:"登录失效提示",
+            message: "请手动关闭当前页面",
+            type:"error",
+            position: "top-right",
+          });
+        });
+    } else if(error.response.status == 400){
       Notification({
-        message: "网络异常,请稍后再试...",
+        message: error.response.data.message,
         position: "top-right",
+        type:"error",
       });
     }
   }
@@ -39,6 +70,7 @@ const errorHandler = (error) => {
 // 请求拦截器
 request.interceptors.request.use((config) => {
   const token = getToken();
+
   if (token) {
     config.headers["accessToken"] = `${token}`;
     return config;

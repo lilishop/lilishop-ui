@@ -98,22 +98,29 @@
                         <a> 订单号:{{ item.text.sn }} </a>
                       </el-tooltip>
                     </div>
-                    <div class="baseTwo">
-                      <img :src="item.text.groupImages" style="height: 100px;width: 100px;margin-top: 10px;" />
+                    <div class="goods-shared-box">
+                      <div>
+                        <img :src="item.text.groupImages" style="height: 100px;width: 100px;" />
+                      </div>
+                      <div class="shared-goods">
                       <span class="orderGoodsName">{{ item.text.groupName }}</span>
-                      <span class="orderGoodsTime">{{ item.text.paymentTime }}</span>
+                      <div class="orderGoodsTime">{{ item.text.paymentTime }}</div>
                       <span class="orderFlowPrice">
-                        订单金额：{{ item.text.flowPrice | unitPrice('￥') }}
-                      </span>
-                      <span class="order_status"
-                        :style="{ 'color': item.text.orderStatus == 'CANCELLED' || item.text.orderStatus == 'UNPAID' || item.text.orderStatus == ' TAKE' ? '#5a606b' : '#f23030' }">{{
-                          item.text.orderStatus == 'CANCELLED' ? '已取消' : item.text.orderStatus == 'UNPAID' ? '未付款' :
-                            item.text.orderStatus ==
-                              'PAID' ? '已付款' : item.text.orderStatus == 'UNDELIVERED' ? '待发货' : item.text.orderStatus ==
-                                'DELIVERED'
-                                ? '已发货' : item.text.orderStatus == ' COMPLETED' ? '已完成' : item.text.orderStatus == ' TAKE' ?
-                                  '待校验' : ''
-                        }}</span>
+                        订单金额：<span>{{ item.text.flowPrice | unitPrice('￥') }}</span>
+                      </span> 
+                      <div class="order-status">
+                        <el-tag 
+                          size="mini"
+                          :type="item.text.orderStatus == 'CANCELLED' || item.text.orderStatus == 'UNPAID' || item.text.orderStatus == ' TAKE' ? 'info' : 'danger'">{{
+                            item.text.orderStatus == 'CANCELLED' ? '已取消' : item.text.orderStatus == 'UNPAID' ? '未付款' :
+                              item.text.orderStatus ==
+                                'PAID' ? '已付款' : item.text.orderStatus == 'UNDELIVERED' ? '待发货' : item.text.orderStatus ==
+                                  'DELIVERED'
+                                  ? '已发货' : item.text.orderStatus == ' COMPLETED' ? '已完成' : item.text.orderStatus == ' TAKE' ?
+                                    '待校验' : ''
+                          }}</el-tag>
+                      </div>
+                        </div>
                     </div>
                   </div>
                 </div>
@@ -841,25 +848,18 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-.order_status {
-  height: 30px;
-  width: 60px;
-  background: #ffeded;
-  margin-right: 20px;
-  text-align: center;
-  line-height: 25px;
-  margin-left: 15px;
-  border-radius: 10px;
-}
+
 
 .oderStyle {
   border: 1px solid #f2f2f2;
   width: 330px;
   border-radius: 4px;
+  padding: 8px;
 
   .oedersn {
-    margin: 10px 0 10px 5px;
+    margin: 10px 0 10px 0;
     width: 300px;
+    font-size: 12px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -867,6 +867,7 @@ export default {
 }
 
 .goodsStyle {
+  cursor: pointer;
   border: 1px solid #f2f2f2;
   width: 300px;
   height: 120px;
@@ -893,7 +894,7 @@ export default {
   }
 
   .price {
-    color: #999;
+    color: red;
     margin-top: 20px;
   }
 
@@ -913,21 +914,24 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   // white-space: nowrap;
-  position: absolute;
-  margin-top: 10px;
-  margin-left: 10px;
+
+  font-size: 14px;
+ 
 }
 
 .orderGoodsTime {
-  margin-left: 10px;
+  font-size: 12px;
   color: #999;
-  position: absolute;
-  margin-top: 70px;
 }
 
 .orderFlowPrice {
   color: #999;
-  margin-bottom: 20px;
+
+  font-size: 12px;
+  >span{
+    color: red;
+    font-size: 18px;
+  }
 }
 
 .main-box {
@@ -1241,5 +1245,17 @@ export default {
     font-family: "Microsoft YaHei";
     line-height: 25px;
   }
+}
+.goods-shared-box{
+  display: flex;
+  >.shared-goods{
+    padding-left: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+}
+.order-status{
+  text-align: right;
 }
 </style>

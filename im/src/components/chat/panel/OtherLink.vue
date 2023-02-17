@@ -275,4 +275,13 @@ export default {
 /deep/.el-tabs__nav-scroll{
   min-width: 362px;
 }
+/deep/ .el-tabs__item{
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/deep/ .el-tabs__header{
+  margin-bottom: 0;
+}
 </style>

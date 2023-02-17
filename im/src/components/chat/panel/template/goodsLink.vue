@@ -1,5 +1,5 @@
 <template>
-  <div style="max-width: 362px;">
+  <div class="current-preview">
     当前浏览
     <div class="base">
       <div>
@@ -16,7 +16,6 @@
         </div>
       </div>
     </div>
-    <hr class="separate" />
   </div>
 </template>
 
@@ -40,6 +39,7 @@ export default {
     }),
   },
   mounted () {
+    console.log(this.goodsDetail)
     this.btnHide = localStorage.getItem('btnHide')
   },
   components: {
@@ -150,6 +150,9 @@ export default {
 .store-button {
   background-color: white;
   border-color: #F56C6C;
+}
+.current-preview{
+  padding: 16px;
 }
 
 .base {
