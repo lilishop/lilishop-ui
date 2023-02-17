@@ -2,27 +2,29 @@
   <div class="layout">
     <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
 
-      <FormItem label="endPoint" prop="endPoint">
+      <FormItem label="平台" prop="endPoint">
         <RadioGroup v-model="formValidate.type" type="button">
           <Radio label="ALI_OSS">阿里OSS</Radio>
           <Radio label="MINIO">MINIO</Radio>
+          <Radio label="HUAWEI_OBS">华为云OBS</Radio>
+          <Radio label="TENCENT_COS">腾讯云COS</Radio>
         </RadioGroup>
       </FormItem>
       <!--      阿里云存储-->
-      <FormItem v-if="formValidate.type==='ALI_OSS'" label="endPoint" prop="endPoint">
-        <Input v-model="formValidate.endPoint"/>
+      <FormItem v-if="formValidate.type==='ALI_OSS'" label="节点" prop="aliyunOSSEndPoint">
+        <Input v-model="formValidate.aliyunOSSEndPoint"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='ALI_OSS'" label="bucketName" class="label-item" prop="bucketName">
-        <Input v-model="formValidate.bucketName"/>
+      <FormItem v-if="formValidate.type==='ALI_OSS'" label="储存空间" class="label-item" prop="aliyunOSSBucketName">
+        <Input v-model="formValidate.aliyunOSSBucketName"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='ALI_OSS'" label="picLocation" prop="bucketName">
-        <Input v-model="formValidate.picLocation"/>
+      <FormItem v-if="formValidate.type==='ALI_OSS'" label="存放路径路径" prop="aliyunOSSPicLocation">
+        <Input v-model="formValidate.aliyunOSSPicLocation"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='ALI_OSS'" label="accessKeyId" prop="accessKeyId">
-        <Input v-model="formValidate.accessKeyId"/>
+      <FormItem v-if="formValidate.type==='ALI_OSS'" label="密钥id" prop="aliyunOSSAccessKeyId">
+        <Input v-model="formValidate.aliyunOSSAccessKeyId"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='ALI_OSS'" label="accessKeySecret" prop="accessKeySecret">
-        <Input v-model="formValidate.accessKeySecret"/>
+      <FormItem v-if="formValidate.type==='ALI_OSS'" label="密钥" prop="aliyunOSSAccessKeySecret">
+        <Input v-model="formValidate.aliyunOSSAccessKeySecret"/>
       </FormItem>
 
 
@@ -35,7 +37,6 @@
       <FormItem v-if="formValidate.type==='MINIO'" label="endpoint" prop="m_endpoint">
         <Input v-model="formValidate.m_endpoint"/>
       </FormItem>
-
       <FormItem v-if="formValidate.type==='MINIO'" label="accessKey" class="label-item" prop="m_accessKey">
         <Input v-model="formValidate.m_accessKey"/>
       </FormItem>
@@ -45,6 +46,36 @@
       <FormItem v-if="formValidate.type==='MINIO'" label="bucketName" prop="accessKeyId">
         <Input v-model="formValidate.m_bucketName"/>
       </FormItem>
+
+
+      <!--      华为云存储-->
+      <FormItem v-if="formValidate.type==='HUAWEI_OBS'" label="发起者的Access Key" prop="huaweicloudOBSAccessKey">
+        <Input v-model="formValidate.huaweicloudOBSAccessKey"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='HUAWEI_OBS'" label="密钥" class="label-item" prop="huaweicloudOBSSecretKey">
+        <Input v-model="formValidate.huaweicloudOBSSecretKey"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='HUAWEI_OBS'" label="节点" prop="huaweicloudOBSEndPoint">
+        <Input v-model="formValidate.huaweicloudOBSEndPoint"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='HUAWEI_OBS'" label="桶" prop="huaweicloudOBSBucketName">
+        <Input v-model="formValidate.huaweicloudOBSBucketName"/>
+      </FormItem>
+
+      <!--      腾讯云存储-->
+      <FormItem v-if="formValidate.type==='TENCENT_COS'" label="用户的SecretId" prop="tencentCOSSecretId">
+        <Input v-model="formValidate.tencentCOSSecretId"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='TENCENT_COS'" label="用户的SecretKey" class="label-item" prop="tencentCOSSecretKey">
+        <Input v-model="formValidate.tencentCOSSecretKey"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='TENCENT_COS'" label="bucket的地域" prop="tencentCOSRegion">
+        <Input v-model="formValidate.tencentCOSRegion"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='TENCENT_COS'" label="bucket" prop="tencentCOSBucket">
+        <Input v-model="formValidate.tencentCOSBucket"/>
+      </FormItem>
+
 
       <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
@@ -63,16 +94,25 @@ export default {
       ruleValidate: {}, // 验证规则
       formValidate: { // 表单数据
         type: "",
-        accessKeyId: "",
-        accessKeySecret: "",
-        bucketName: "",
-        picLocation: "",
-        endPoint: "",
+        aliyunOSSAccessKeyId: "",
+        aliyunOSSAccessKeySecret: "",
+        aliyunOSSBucketName: "",
+        aliyunOSSPicLocation: "",
+        aliyunOSSEndPoint: "",
         m_endpoint: "",
         m_accessKey: "",
         m_secretKey: "",
         m_bucketName: "",
-        m_frontUrl: ""
+        m_frontUrl: "",
+        huaweicloudOBSAccessKey: "",
+        huaweicloudOBSSecretKey: "",
+        huaweicloudOBSEndPoint: "",
+        huaweicloudOBSBucketName: "",
+        tencentCOSSecretId: "",
+        tencentCOSSecretKey: "",
+        tencentCOSRegion: "",
+        tencentCOSBucket: "",
+        tencentCOSEndPoint: "",
       },
     };
   },

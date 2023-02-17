@@ -1,17 +1,51 @@
 <template>
   <div class="layout">
     <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
-      <FormItem label="accessKeyId" prop="accessKeyId">
-        <Input v-model="formValidate.accessKeyId" />
+      <FormItem label="平台" prop="endPoint">
+        <RadioGroup v-model="formValidate.type" type="button">
+          <Radio label="ALI">阿里云</Radio>
+          <Radio label="HUAWEI">华为云</Radio>
+          <Radio label="TENCENT">腾讯云</Radio>
+        </RadioGroup>
       </FormItem>
-      <FormItem label="accessSecret" prop="accessSecret">
-        <Input v-model="formValidate.accessSecret" />
+
+      <!--      阿里云-->
+      <FormItem v-if="formValidate.type==='ALI'" label="accessKeyId" prop="accessKeyId">
+        <Input v-model="formValidate.accessKeyId"/>
       </FormItem>
-      <FormItem label="regionId" prop="regionId">
-        <Input v-model="formValidate.regionId" />
+      <FormItem v-if="formValidate.type==='ALI'" label="accessSecret" prop="accessSecret">
+        <Input v-model="formValidate.accessSecret"/>
       </FormItem>
-      <FormItem label="signName" prop="signName">
-        <Input v-model="formValidate.signName" />
+      <FormItem v-if="formValidate.type==='ALI'" label="短信签名" prop="signName">
+        <Input v-model="formValidate.signName"/>
+      </FormItem>
+
+      <!--      华为云-->
+      <FormItem v-if="formValidate.type==='HUAWEI'" label="APP_Key" prop="huaweiAppKey">
+        <Input v-model="formValidate.huaweiAppKey"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='HUAWEI'" label="APP_Secret" prop="huaweiAppSecret">
+        <Input v-model="formValidate.huaweiAppSecret"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='HUAWEI'" label="短信签名通道号" prop="huaweiSender">
+        <Input v-model="formValidate.huaweiSender"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='HUAWEI'" label="短信签名" prop="huaweiSignature">
+        <Input v-model="formValidate.huaweiSignature"/>
+      </FormItem>
+
+      <!--      腾讯云-->
+      <FormItem v-if="formValidate.type==='TENCENT'" label="用户的 SecretId" prop="tencentSecretId">
+        <Input v-model="formValidate.tencentSecretId"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='TENCENT'" label="用户的 SecretKey" prop="tencentSecretKey">
+        <Input v-model="formValidate.tencentSecretKey"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='TENCENT'" label="短信应用ID" prop="tencentSdkAppId">
+        <Input v-model="formValidate.tencentSdkAppId"/>
+      </FormItem>
+      <FormItem v-if="formValidate.type==='TENCENT'" label="短信签名" prop="tencentSignName">
+        <Input v-model="formValidate.tencentSignName"/>
       </FormItem>
 
       <div class="label-btns">
@@ -22,8 +56,9 @@
   </div>
 </template>
 <script>
-import { setSetting } from "@/api/index";
-import { handleSubmit } from "./validate";
+import {setSetting} from "@/api/index";
+import {handleSubmit} from "./validate";
+
 export default {
   data() {
     return {
@@ -33,6 +68,14 @@ export default {
         regionId: "",
         picLocation: "",
         accessSecret: "",
+        tencentSecretId: "",
+        tencentSecretKey: "",
+        tencentSdkAppId: "",
+        tencentSignName: "",
+        huaweiAppKey: "",
+        huaweiAppSecret: "",
+        huaweiSender: "",
+        huaweiSignature: "",
       },
     };
   },
@@ -44,7 +87,7 @@ export default {
     // 保存
     submit(name) {
       let that = this;
-       if( handleSubmit(that, name )){
+      if (handleSubmit(that, name)) {
         this.setupSetting()
       }
     },
@@ -62,7 +105,7 @@ export default {
     init() {
       this.res = JSON.parse(this.res);
 
-      this.$set(this, "formValidate", { ...this.res });
+      this.$set(this, "formValidate", {...this.res});
       Object.keys(this.formValidate).forEach((item) => {
         this.ruleValidate[item] = [
           {
@@ -79,13 +122,16 @@ export default {
 
 <style lang="scss" scoped>
 @import "./style.scss";
+
 .label-item {
   display: flex;
 }
+
 /deep/ .ivu-input {
   width: 300px !important;
   margin: 0 10px;
 }
+
 .ivu-input-wrapper {
   width: 300px;
   margin-right: 10px;
