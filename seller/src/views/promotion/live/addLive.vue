@@ -200,8 +200,8 @@
                   {{ row.price | unitPrice("￥") }}至{{ row.price2 | unitPrice("￥") }}
                 </div>
                 <div v-if="row.priceType == 3">
-                  {{ row.price | unitPrice("￥")
-                  }}<span class="original-price">{{ row.price2 | unitPrice("￥") }}</span>
+                  {{ row.price2 | unitPrice("￥")
+                  }}<span class="original-price">{{ row.price | unitPrice("￥") }}</span>
                 </div>
               </div>
             </template>
@@ -345,6 +345,7 @@ export default {
     };
   },
   mounted() {
+
     /**
      * 如果query.id有值说明是查看详情
      * liveStatus 可以判断当前直播状态 从而区分数据 是否是未开始、已开启、已关闭、
@@ -610,7 +611,7 @@ export default {
               if (res.success) {
                 this.$Message.success("添加成功!");
 
-                this.$router.push({ path: "/promotion/live" });
+                this.$router.push({ path: "/live" });
               }
               this.spinShow = false;
             });

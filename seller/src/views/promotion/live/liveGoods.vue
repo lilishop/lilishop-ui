@@ -55,7 +55,7 @@
             <div v-else>
               <div v-if="row.priceType == 1">{{row.price | unitPrice('￥')}}</div>
               <div v-if="row.priceType == 2">{{row.price | unitPrice('￥')}}至{{row.price2 | unitPrice('￥')}}</div>
-              <div v-if="row.priceType == 3">{{row.price | unitPrice('￥')}}<span class="original-price">{{row.price2 | unitPrice('￥')}}</span></div>
+              <div v-if="row.priceType == 3">{{row.price2 | unitPrice('￥')}}<span class="original-price">{{row.price | unitPrice('￥')}}</span></div>
             </div>
 
           </template>
@@ -264,7 +264,7 @@ export default {
     async saveLiveGoods() {
       this.saveGoodsLoading = true;
       let submit = this.liveGoodsData.map((element) => {
-        console.log(element);
+
         return {
           goodsId: element.goodsId, //商品id
           goodsImage: element.small, //商品图片  最大为 300 * 300
