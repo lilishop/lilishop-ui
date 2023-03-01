@@ -14,6 +14,7 @@ const request = axios.create({
   timeout: 20000,
 });
 
+let isRefreshing = false
 /**
  * 异常拦截处理器
  *
@@ -27,10 +28,12 @@ const errorHandler = (error) => {
       removeAll();
       location.reload();
     } else if (error.response.status == 403) {
+      if(!isRefreshing){
+      
       /**
        * 403提示将重新从商家移动端进入当前页面
        */
-      MessageBox("当前登录已失效，请从商家管理后台重新登录。", "提示", {
+      MessageBox("当前登录已失效，请从关闭重新进入。", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         closeOnPressEscape: false,
@@ -38,6 +41,7 @@ const errorHandler = (error) => {
         type: "warning",
       })
         .then(() => {
+          isRefreshing = true
           window.close();
           Notification({
             title:"登录失效提示",
@@ -45,9 +49,10 @@ const errorHandler = (error) => {
             type:"error",
             position: "top-right",
           });
+
         })
         .catch(() => {
-         
+          isRefreshing = true
           Notification({
             title:"登录失效提示",
             message: "请手动关闭当前页面",
@@ -55,6 +60,8 @@ const errorHandler = (error) => {
             position: "top-right",
           });
         });
+        isRefreshing = false
+      }
     } else if(error.response.status == 400){
       Notification({
         message: error.response.data.message,

@@ -58,16 +58,21 @@
                     {{ item.float == "right" ? name : toUser.name }} |
                     {{ unixToDate(item.createTime, "MM月dd日 hh:mm") }}
                   </span>
-                  <!-- 文本消息 -->
-                  <div v-if="item.messageType == 'MESSAGE'" style="background-color: #d0e9ff;color: black;"
-                    class="text-message" :class="{
-                      left: item.float == 'left',
-                      right: item.float == 'right',
-                    }">
-                    <div class="arrow"></div>
-                    <pre v-if="!emojistwo.includes(item.text)" v-html="item.text" />
-                    <pre v-if="emojistwo.includes(item.text)" v-html="textReplaceEmoji(item.text)" />
+                  <div class="flex flex-a-c">
+                    <i @click="againSendMessage(item)" v-if="item.webSocketStatus" class="el-icon-refresh-left again main-color"></i>
+                    <!-- 文本消息 -->
+                    <div v-if="item.messageType == 'MESSAGE'" style="background-color: #d0e9ff;color: black;"
+                      class="text-message" :class="{
+                        left: item.float == 'left',
+                        right: item.float == 'right',
+                      }">
+                      <div class="arrow"></div>
+                      <pre v-if="!emojistwo.includes(item.text)" v-html="item.text" />
+                      <pre v-if="emojistwo.includes(item.text)" v-html="textReplaceEmoji(item.text)" />
+                    </div>
+                   
                   </div>
+                   <div v-if="item.webSocketStatus" class="tips">网络异常发送失败，请重新发送。</div>
 
                   <div v-if="item.messageType == 'GOODS' && item.text != null" class="goodsStyle " :class="{
                     left: item.float == 'left',
@@ -93,17 +98,24 @@
                     left: item.float == 'left',
                     right: item.float == 'right',
                   }" @click="linkToOrders(item.text.sn)">
+                  
                     <div class="oedersn">
                       <el-tooltip class="item" effect="dark" :content="item.text.sn" placement="top-start">
                         <a> 订单号:{{ item.text.sn }} </a>
                       </el-tooltip>
                     </div>
                     <div class="goods-shared-box">
-                      <div>
-                        <img :src="item.text.groupImages" style="height: 100px;width: 100px;" />
+                     
+                      <div class="goods-item" v-for="(order,orderIndex) in item.text.orderItems" :key="orderIndex">
+                        <img :src="order.image" style="height: 100px;width: 100px;" />
+                        <div>
+                          <span class="orderGoodsName">{{ order.name }}</span>
+                          <div class="goods-item-price">
+                           <span>{{ order.goodsPrice | unitPrice('￥') }}</span>
+                          </div> 
+                        </div>
                       </div>
                       <div class="shared-goods">
-                      <span class="orderGoodsName">{{ item.text.groupName }}</span>
                       <div class="orderGoodsTime">{{ item.text.paymentTime }}</div>
                       <span class="orderFlowPrice">
                         订单金额：<span>{{ item.text.flowPrice | unitPrice('￥') }}</span>
@@ -394,6 +406,12 @@ export default {
       );
     },
     // #冗余代码结束
+
+    // 重新发送消息
+    againSendMessage(val){
+     
+      this.submitSendMessage(val.text)
+    },
 
     // 回车键发送消息回调事件
     submitSendMessage (content) {
@@ -848,7 +866,21 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-
+.flex-a-c{
+  align-items: center;
+  >div{
+    margin-left: 10px;
+  }
+}
+.tips{
+  margin-top:10px;
+  color: #999;
+  font-size: 12px;
+}
+.again{
+  margin-top: 5px;
+  cursor: pointer;
+}
 
 .oderStyle {
   border: 1px solid #f2f2f2;
@@ -926,12 +958,17 @@ export default {
 
 .orderFlowPrice {
   color: #999;
-
+  
   font-size: 12px;
   >span{
     color: red;
     font-size: 18px;
   }
+}
+.goods-item-price{
+  margin-top: 10px;
+  font-size: 13px;
+   color: red;
 }
 
 .main-box {
@@ -1247,7 +1284,14 @@ export default {
   }
 }
 .goods-shared-box{
-  display: flex;
+   cursor: pointer;
+  >.goods-item{
+   
+    margin: 10px 0;
+    display: flex;
+    border-bottom: 1px solid #ededed;
+    align-items: center;
+  }
   >.shared-goods{
     padding-left: 10px;
     display: flex;

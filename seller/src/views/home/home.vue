@@ -21,7 +21,7 @@
               <div>店铺状态：{{ userData.storeDisable == 'OPEN' ? '开启中' : '关闭' }}</div>
             </div>
             <div class="box-item" @click="im()">
-              <Button type="info">点击登录客服</Button>
+              <Button type="info" :loading='load'>点击登录客服</Button>
             </div>
           </div>
 
@@ -207,7 +207,7 @@ import { getSellerHomeData, getHomeNotice } from "@/api/index";
 import { getIMDetail } from "@/api/common"
 import { seeArticle } from "@/api/pages";
 import Cookies from "js-cookie";
-
+import { userMsg } from "@/api/index";
 export default {
   name: "home",
   data () {
@@ -221,8 +221,10 @@ export default {
         title: "",
       },
       IMLink: "",
+      load:false, //加载Im
     };
   },
+
   methods: {
     // 跳转页面
     navigateTo (name) {
@@ -249,16 +251,24 @@ export default {
         this.noticeFlage = true;
       }
     },
+
+    /**
+     * 点击登录im的时候需要去判断一下当前店铺信息是否失效
+     * 失效的话重新请求刷新token保证最新的token去访问im
+     */
     async im () {
       // 获取访问Token
       let accessToken = this.getStore("accessToken");
+      this.load = true
       await this.getIMDetailMethods();
-      let res = await getIMDetail();
-      if (!accessToken) {
-        this.$Message.error("请登录后再联系客服");
-        return;
+      const userInfo = await userMsg();
+      this.load = false
+      if (userInfo.success && this.IMLink) {
+        window.open(`${this.IMLink}?token=` + accessToken);
       }
-      window.open(`${res.result}?token=` + accessToken);
+      else{
+        this.$Message.error("请登录后再联系客服");
+      }
     },
 
     // 获取im信息

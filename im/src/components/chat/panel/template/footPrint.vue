@@ -3,7 +3,7 @@
     <div class="tab">
       <el-tabs v-model="activeName" @tab-click="handleClick" :stretch=true>
         <el-tab-pane label="最近浏览" name="goods">
-          <dl>
+          <dl v-if='list.length' class='base-list'>
             <dd :key="index"  @click="linkToGoods(item.goodsId, item.id)" v-for="(item,index) in list" v-infinite-scroll="loadMore">
               <div class="base">
                 <div>
@@ -27,32 +27,38 @@
             </dd>
 
           </dl>
+          <div v-else class='no-more'>
+              {{noMoreList.goods.title}}
+          </div>
         </el-tab-pane>
         <el-tab-pane label="订单列表" name="orders">
-          <dl>
-            <dd v-for="(item, index) in orderList" v-infinite-scroll="loadMore" :key="index">
+          <dl class='base-order-list' v-if='orderList.length'>
+            <dd  v-for="(item, index) in orderList" v-infinite-scroll="loadMore" :key="index">
               <div class="order-list">
                 <div class="order-top order-padding">
                   <span class="order-sn" @click="linkToOrders(item.sn)">订单号:{{ item.sn }}</span>
                 </div>
                 <div class="order-section order-padding">
-                  <img :src="item.groupImages" alt="">
-                  <span class="order-goods-name" @click="linkToOrders(item.sn)"> {{ item.groupName }}</span>
+                  <div class="order-items" v-for="(order,orderIndex) in item.orderItems" :key="orderIndex">
+                      <img :src="order.image" alt="">
+                      <span class="order-goods-name" @click="linkToOrders(item.sn)"> {{ order.name }}</span>
+                      <span class="price">{{order.goodsPrice | unitPrice("￥")}}</span>
+                  </div>
+                  <!-- <img  :src="item.groupImages" alt=""> -->
+                 
                   <div class="order-btn ">
                     <el-button class="store-button" v-if="item.btnHide == 1 && toUser.storeFlag"
                       size="mini" @click="submitSendOrderMessage(item, index)" plain>发送</el-button>
                   </div>
                 </div>
                 <div class="order-footer order-padding">
-                  <span> 订单金额： <span style="color: red;">{{
-                    item.orderItems[0].goodsPrice | unitPrice("￥")
-                  }}</span></span>
+                  <span></span>
                   <el-tag  size='mini' :type="col[item.orderStatus]">{{
                     item.orderStatus == 'STAY_PICKED_UP' ? '待自提'
                       : item.orderStatus == 'CANCELLED' ? '已取消' : item.orderStatus == 'UNPAID' ? '未付款' : item.orderStatus
                         ==
                         'PAID' ? '已付款' : item.orderStatus == 'UNDELIVERED' ? '待发货' : item.orderStatus == 'DELIVERED'
-                          ? '已发货' : item.orderStatus == 'COMPLETED' ? '已完成' : item.orderStatus == 'TAKE' ? '待校验' :
+                          ? '已发货' : item.orderStatus == 'COMPLETED' ? '已完成' : item.orderStatus == 'TAKE' ? '待核销' :
                             ''
                   }}</el-tag>
                 </div>
@@ -61,6 +67,9 @@
             
             </dd>
           </dl>
+          <div v-else class='no-more'>
+              {{noMoreList.orders.title}}
+          </div>
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -78,12 +87,16 @@ export default {
   },
   data () {
     return {
+      noMoreList:{
+        'goods':{title:'暂无最近浏览',value:false},
+        'orders':{title:'暂无订单信息',value:false},
+      },
       activeName: 'goods',
       btnHide: undefined,
       hide: true,
       col: {
-        CANCELLED: 'error',
-        PAID: 'error',
+        CANCELLED: 'danger',
+        PAID: 'danger',
         TAKE: '',
         COMPLETED: 'success',
         DELIVERED: 'danger',
@@ -142,12 +155,14 @@ export default {
     // 发送订单列表
     submitSendOrderMessage (item, index) {
       console.log(item, 'item');
+    
       const context = {
         sn: item.sn,
         groupImages: item.groupImages,
         paymentTime: item.paymentTime,
         groupName: item.groupName,
         flowPrice: item.flowPrice,
+        orderItems:item.orderItems,
         orderStatus: item.orderStatus
       }
       const record = {
@@ -163,7 +178,7 @@ export default {
       item.btnHide = 0
     },
     handleClick (tab, event) {
-      console.log(tab, event);
+      
     }
   },
   props: {
@@ -178,7 +193,7 @@ export default {
   },
   mounted () {
     //  state.user.toUser
-    console.log(this.orderList, '  this.$store.state.user.toUser  this.$store.state.user.toUser  this.$store.state.user.toUser');
+    // console.log(this.orderList, '  this.$store.state.user.toUser  this.$store.state.user.toUser  this.$store.state.user.toUser');
     this.btnHide = localStorage.getItem('btnHide')
   }
 }
@@ -193,7 +208,12 @@ export default {
   white-space: nowrap;
   width: 200px;
 }
-
+.no-more{
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+  margin-top: 20px;
+}
 
 .box {
   max-width: 362px;
@@ -374,4 +394,18 @@ export default {
 //   height: calc(100vh - 110px);
 //   overflow-y: auto;
 // }
+.base-list{
+  padding-bottom: 120px;
+}
+.base-order-list{
+  padding-bottom: 100px;
+}
+.price{
+  color: red;
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+.order-items{
+  margin-bottom: 10px;
+}
 </style>

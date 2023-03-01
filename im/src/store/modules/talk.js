@@ -37,6 +37,7 @@ const Talk = {
     talkNum: (state) => state.items.length,
   },
   mutations: {
+   
     // 设置对话列表
     SET_TALK_ITEMS (state, resource) {
       Vue.set(state, 'items', resource.items)

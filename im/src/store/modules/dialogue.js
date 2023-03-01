@@ -21,11 +21,15 @@ export default {
         float: "",
       },
     ],
-
+    webSocketWithOut:false, // ws 是否是掉线 无输出状态
     // 对话索引（聊天对话的唯一索引）
     index_name: null,
   },
   mutations: {
+     // 设置ws状态
+     SET_WS_STATUS: (state,resource) =>{
+      state.webSocketWithOut = resource
+    },
     // 更新对话
     UPDATE_DIALOGUE_MESSAGE (state, resource) {
       state.records = [];
@@ -56,6 +60,8 @@ export default {
 
     // 推送对话记录
     PUSH_DIALOGUE (state, record) {
+      record = {...record,webSocketStatus:state.webSocketWithOut}
+      console.log("推送对话",)
       state.records.push(record);
     },
 
