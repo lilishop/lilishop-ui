@@ -22,7 +22,7 @@
             <Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#666'" />
             {{ storeCollected? "已收藏店铺": "收藏店铺" }}
           </span>
-          <span class="ml_10" @click="IMService()">联系客服</span>
+          <span class="ml_10" @click="IMService(goodsMsg.data.storeId)">联系客服</span>
         </div>
       </div>
     </div>
@@ -127,11 +127,13 @@ export default {
                 }
               });
             }
+
             if (!this.storeMsg) {
               // 获取店铺信息
               getDetailById(this.goodsMsg.data.storeId).then((res) => {
                 if (res.success) {
                   this.storeMsg = res.result;
+
                 }
               });
             }

@@ -14,7 +14,7 @@
                                                            :color="storeCollected ? '#ed3f14' : '#fff'"/>{{
             storeCollected ? '已收藏店铺' : '收藏店铺'
           }}</span>
-        <span style="width:80px" class="hover-pointer ml_10" @click="IMService()"><Icon
+        <span style="width:80px" class="hover-pointer ml_10" @click="IMService(storeMsg.storeId)"><Icon
           custom="icomoon icon-customer-service"/>联系客服</span>
       </div>
     </div>
@@ -220,6 +220,7 @@ export default {
         if (res.success) {
 
           this.storeMsg = res.result;
+          console.log(this.storeMsg)
 
           //判定如果开启楼层展示，则获取页面信息 否则读取商品信息
           if (this.storeMsg.pageShow && this.storeMsg.pageShow === '1') {

@@ -15,14 +15,15 @@ export default {
   },
   methods: {
     // 跳转im客服
-    async IMService() {
+    async IMService(id) {
+
       // 获取访问Token
       let accessToken = Storage.getItem("accessToken");
       await this.getIMDetailMethods();
       const userInfo = await getMemberMsg();
       if (userInfo.success) {
         window.open(
-          this.IMLink + "?token=" + accessToken + "&id=" + this.storeMsg.storeId
+          this.IMLink + "?token=" + accessToken + "&id=" + id || this.storeMsg.storeId
         );
       } else {
         this.$Message.error("请登录后再联系客服");
