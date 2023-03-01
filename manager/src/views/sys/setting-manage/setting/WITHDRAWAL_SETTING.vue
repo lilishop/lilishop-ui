@@ -6,11 +6,25 @@
         <i-switch v-model="formValidate.apply" style="margin-top:7px;"><span slot="open">开</span>
           <span slot="close">关</span>
         </i-switch>
-
       </FormItem>
+
+      <FormItem  label="最低提现金额" prop="minPrice">
+        <Input class="label-appkey" v-model="formValidate.minPrice" />
+      </FormItem>
+
+      <FormItem label="提现方式" prop="type">
+        <RadioGroup v-model="formValidate.type">
+          <Radio label="WECHAT">微信</Radio>
+          <Radio label="ALI">支付宝</Radio>
+        </RadioGroup>
+      </FormItem>
+
+      <FormItem label="微信提现应用ID" prop="wechatAppId">
+        <Input class="label-appkey" v-model="formValidate.wechatAppId" />
+      </FormItem>
+
       <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
-
       </div>
     </Form>
   </div>
@@ -23,6 +37,9 @@ export default {
     return {
       formValidate: { // 表单数据
         apply: true,
+        minPrice: "",
+        type: "",
+        wechatAppId: "",
       },
 
       switchTitle: "提现审核是否开启", // 切换title
@@ -42,6 +59,7 @@ export default {
     },
     // 保存设置
     setupSetting() {
+
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {
           this.$Message.success("保存成功!");
