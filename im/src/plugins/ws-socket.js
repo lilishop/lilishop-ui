@@ -105,6 +105,8 @@ class WsSocket {
     connect.onmessage = this.onMessage.bind(this);
     connect.onclose = this.onClose.bind(this);
     this.connect = connect;
+    
+    store.commit('SET_WS_STATUS',false);
   }
 
   /**
