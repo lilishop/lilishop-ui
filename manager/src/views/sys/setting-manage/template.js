@@ -2,7 +2,7 @@ import BASE_SETTING from "./setting/BASE_SETTING";
 import GOODS_SETTING from "./setting/GOODS_SETTING";
 import ORDER_SETTING from "./setting/ORDER_SETTING";
 import POINT_SETTING from "./setting/POINT_SETTING";
-import KUAIDI_SETTING from "./setting/KUAIDI_SETTING";
+import LOGISTICS_SETTING from "./setting/LOGISTICS_SETTING";
 import OSS_SETTING from "./setting/OSS_SETTING";
 import SMS_SETTING from "./setting/SMS_SETTING";
 import IM_SETTING from "./setting/IM_SETTING";
@@ -18,7 +18,7 @@ export default {
   GOODS_SETTING,
   ORDER_SETTING,
   POINT_SETTING,
-  KUAIDI_SETTING,
+  LOGISTICS_SETTING,
   OSS_SETTING,
   SMS_SETTING,
   IM_SETTING,

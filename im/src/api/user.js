@@ -23,22 +23,22 @@ export const ServeGetStoreDetail = (storeId) => {
 
 // 获取用户历史足迹
 export const ServeGetFootPrint = (params) => {
-  return get(`${config.BASE_BUYER}/buyer/member/footprint`,params);
+  return get(`${config.BASE_BUYER}/buyer/member/footprint`, params);
 };
 
 // 商家获取用户历史足迹
 export const ServeStoreGetFootPrint = (params) => {
-  return get(`${config.BASE_SELLER}/store/member/footprint`,params);
+  return get(`${config.BASE_SELLER}/store/member/footprint`, params);
 };
 
 // 获取用户订单列表信息
 export const ServeGetOrderPrint = (params) => {
-  return get(`${config.BASE_BUYER}/buyer/order/order`,params);
+  return get(`${config.BASE_BUYER}/buyer/order/order`, params);
 };
 
 // 商家获取用户订单列表信息
 export const ServeStoreGetOrderPrint = (params) => {
-  return get(`${config.BASE_SELLER}/store/order/order`,params);
+  return get(`${config.BASE_SELLER}/store/order/order`, params);
 };
 
 // 获取商品信息

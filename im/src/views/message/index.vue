@@ -9,7 +9,7 @@
             <el-header height="60px" class="header">
               <div class="user-login" v-popover:usercard>
                 <div class="user-box">
-                  <face :text="face" class="user-face"></face>
+                  <face :text="face" :name="name" class="user-face"></face>
                 </div>
               </div>
               <p class="user-status">
@@ -263,7 +263,7 @@ export default {
     },
     unreadNum (value) {
       clearInterval(this.interval);
-      console.log("%c 更新未读消息", "color:#32ccbc");
+      // console.log("%c 更新未读消息", "color:#32ccbc");
       this.$store.commit("SET_UNREAD_NUM", value);
 
       if (value > 0) {
@@ -653,7 +653,9 @@ export default {
 /deep/ .el-scrollbar__wrap {
   overflow-x: hidden;
 }
-
+.user-status{
+  margin-left: 10px;
+}
 .aside-box {
   position: relative;
   border-right: 1px solid rgb(245, 245, 245);

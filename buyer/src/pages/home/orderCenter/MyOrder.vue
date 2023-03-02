@@ -4,7 +4,7 @@
     <card _Title="我的订单" :_Size="16" :_Tabs="changeWay" @_Change="change" v-if="!homePage"></card>
     <card _Title="我的订单" :_Size="16" :_Tabs="changeWay" @_Change="change" _More="全部订单" _Src="/home/MyOrder" v-else></card>
     <!-- 搜索 筛选 -->
-    <div class="mb_20 box" v-if="!homePage">
+    <div class="mb_24 box" v-if="!homePage">
       <div class="global_float_right" >
         <Input
           class="width_300"

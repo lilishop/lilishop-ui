@@ -58,16 +58,21 @@
                     {{ item.float == "right" ? name : toUser.name }} |
                     {{ unixToDate(item.createTime, "MM月dd日 hh:mm") }}
                   </span>
-                  <!-- 文本消息 -->
-                  <div v-if="item.messageType == 'MESSAGE'" style="background-color: #d0e9ff;color: black;"
-                    class="text-message" :class="{
-                      left: item.float == 'left',
-                      right: item.float == 'right',
-                    }">
-                    <div class="arrow"></div>
-                    <pre v-if="!emojistwo.includes(item.text)" v-html="item.text" />
-                    <pre v-if="emojistwo.includes(item.text)" v-html="textReplaceEmoji(item.text)" />
+                  <div class="flex flex-a-c">
+                    <i @click="againSendMessage(item)" v-if="item.webSocketStatus" class="el-icon-refresh-left again main-color"></i>
+                    <!-- 文本消息 -->
+                    <div v-if="item.messageType == 'MESSAGE'" style="background-color: #d0e9ff;color: black;"
+                      class="text-message" :class="{
+                        left: item.float == 'left',
+                        right: item.float == 'right',
+                      }">
+                      <div class="arrow"></div>
+                      <pre v-if="!emojistwo.includes(item.text)" v-html="item.text" />
+                      <pre v-if="emojistwo.includes(item.text)" v-html="textReplaceEmoji(item.text)" />
+                    </div>
+                   
                   </div>
+                   <div v-if="item.webSocketStatus" class="tips">网络异常发送失败，请重新发送。</div>
 
                   <div v-if="item.messageType == 'GOODS' && item.text != null" class="goodsStyle " :class="{
                     left: item.float == 'left',
@@ -84,7 +89,7 @@
                           </el-tooltip>
                         </div>
                         <div class="price">
-                          <span>￥{{ item.text.price }}</span>
+                          <span>{{ item.text.price | unitPrice('￥') }}</span>
                         </div>
                       </div>
                     </div>
@@ -92,28 +97,42 @@
                   <div v-if="item.messageType == 'ORDER' && item.text != null" class="oderStyle" :class="{
                     left: item.float == 'left',
                     right: item.float == 'right',
-                  }">
+                  }" @click="linkToOrders(item.text.sn)">
+                  
                     <div class="oedersn">
                       <el-tooltip class="item" effect="dark" :content="item.text.sn" placement="top-start">
                         <a> 订单号:{{ item.text.sn }} </a>
                       </el-tooltip>
                     </div>
-                    <div class="baseTwo">
-                      <img :src="item.text.groupImages" style="height: 100px;width: 100px;margin-top: 10px;" />
-                      <span class="orderGoodsName" @click="linkToOrders(item.text.sn)">{{ item.text.groupName }}</span>
-                      <span class="orderGoodsTime">{{ item.text.paymentTime }}</span>
+                    <div class="goods-shared-box">
+                     
+                      <div class="goods-item" v-for="(order,orderIndex) in item.text.orderItems" :key="orderIndex">
+                        <img :src="order.image" style="height: 100px;width: 100px;" />
+                        <div>
+                          <span class="orderGoodsName">{{ order.name }}</span>
+                          <div class="goods-item-price">
+                           <span>{{ order.goodsPrice | unitPrice('￥') }}</span>
+                          </div> 
+                        </div>
+                      </div>
+                      <div class="shared-goods">
+                      <div class="orderGoodsTime">{{ item.text.paymentTime }}</div>
                       <span class="orderFlowPrice">
-                        订单金额：￥{{ item.text.flowPrice }}
-                      </span>
-                      <span class="order_status"
-                        :style="{ 'color': item.text.orderStatus == 'CANCELLED' || item.text.orderStatus == 'UNPAID' || item.text.orderStatus == ' TAKE' ? '#5a606b' : '#f23030' }">{{
-                          item.text.orderStatus == 'CANCELLED' ? '已取消' : item.text.orderStatus == 'UNPAID' ? '未付款' :
-                            item.text.orderStatus ==
-                              'PAID' ? '已付款' : item.text.orderStatus == 'UNDELIVERED' ? '待发货' : item.text.orderStatus ==
-                                'DELIVERED'
-                                ? '已发货' : item.text.orderStatus == ' COMPLETED' ? '已完成' : item.text.orderStatus == ' TAKE' ?
-                                  '待校验' : ''
-                        }}</span>
+                        订单金额：<span>{{ item.text.flowPrice | unitPrice('￥') }}</span>
+                      </span> 
+                      <div class="order-status">
+                        <el-tag 
+                          size="mini"
+                          :type="item.text.orderStatus == 'CANCELLED' || item.text.orderStatus == 'UNPAID' || item.text.orderStatus == ' TAKE' ? 'info' : 'danger'">{{
+                            item.text.orderStatus == 'CANCELLED' ? '已取消' : item.text.orderStatus == 'UNPAID' ? '未付款' :
+                              item.text.orderStatus ==
+                                'PAID' ? '已付款' : item.text.orderStatus == 'UNDELIVERED' ? '待发货' : item.text.orderStatus ==
+                                  'DELIVERED'
+                                  ? '已发货' : item.text.orderStatus == ' COMPLETED' ? '已完成' : item.text.orderStatus == ' TAKE' ?
+                                    '待校验' : ''
+                          }}</el-tag>
+                      </div>
+                        </div>
                     </div>
                   </div>
                 </div>
@@ -171,7 +190,7 @@
     </transition>
 
     <!-- 链接信息 -->
-    <OtherLink :toUser="toUser" :id="id" :goodsParams="goodsParams" class="flex-4"  />
+    <OtherLink :toUser="toUser" :id="id" :goodsParams="goodsParams" class="flex-4" />
   </div>
 </template>
 <script>
@@ -186,6 +205,7 @@ import PanelToolbar from "./PanelToolbar";
 import SocketInstance from "@/im-server/socket-instance";
 import { SvgMentionDown } from "@/core/icons";
 import { formatTime, parseTime, copyTextToClipboard } from "@/utils/functions";
+import { unitPrice } from '@/plugins/filters';
 
 import {
   ServeTalkRecords,
@@ -293,7 +313,7 @@ export default {
         mode: 0,
       };
       this.loadChatRecords();
-      
+
     },
   },
   mounted () {
@@ -386,6 +406,12 @@ export default {
       );
     },
     // #冗余代码结束
+
+    // 重新发送消息
+    againSendMessage(val){
+     
+      this.submitSendMessage(val.text)
+    },
 
     // 回车键发送消息回调事件
     submitSendMessage (content) {
@@ -840,25 +866,32 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-.order_status {
-  height: 30px;
-  width: 60px;
-  background: #ffeded;
-  margin-right: 20px;
-  text-align: center;
-  line-height: 25px;
-  margin-left: 15px;
-  border-radius: 10px;
+.flex-a-c{
+  align-items: center;
+  >div{
+    margin-left: 10px;
+  }
+}
+.tips{
+  margin-top:10px;
+  color: #999;
+  font-size: 12px;
+}
+.again{
+  margin-top: 5px;
+  cursor: pointer;
 }
 
 .oderStyle {
   border: 1px solid #f2f2f2;
   width: 330px;
   border-radius: 4px;
+  padding: 8px;
 
   .oedersn {
-    margin: 10px 0 10px 5px;
+    margin: 10px 0 10px 0;
     width: 300px;
+    font-size: 12px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -866,6 +899,7 @@ export default {
 }
 
 .goodsStyle {
+  cursor: pointer;
   border: 1px solid #f2f2f2;
   width: 300px;
   height: 120px;
@@ -892,7 +926,7 @@ export default {
   }
 
   .price {
-    color: #999;
+    color: red;
     margin-top: 20px;
   }
 
@@ -912,21 +946,29 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   // white-space: nowrap;
-  position: absolute;
-  margin-top: 10px;
-  margin-left: 10px;
+
+  font-size: 14px;
+ 
 }
 
 .orderGoodsTime {
-  margin-left: 10px;
+  font-size: 12px;
   color: #999;
-  position: absolute;
-  margin-top: 70px;
 }
 
 .orderFlowPrice {
   color: #999;
-  margin-bottom: 20px;
+  
+  font-size: 12px;
+  >span{
+    color: red;
+    font-size: 18px;
+  }
+}
+.goods-item-price{
+  margin-top: 10px;
+  font-size: 13px;
+   color: red;
 }
 
 .main-box {
@@ -1240,5 +1282,24 @@ export default {
     font-family: "Microsoft YaHei";
     line-height: 25px;
   }
+}
+.goods-shared-box{
+   cursor: pointer;
+  >.goods-item{
+   
+    margin: 10px 0;
+    display: flex;
+    border-bottom: 1px solid #ededed;
+    align-items: center;
+  }
+  >.shared-goods{
+    padding-left: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+}
+.order-status{
+  text-align: right;
 }
 </style>

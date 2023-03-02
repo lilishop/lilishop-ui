@@ -278,10 +278,10 @@ export default {
     },
     //添加验证码源
     add() {
+      this.$refs.form.resetFields()
       this.form.type = this.searchForm.type;
       this.modalVisible = true;
       this.modalType = 0;
-      this.$refs.form.resetFields()
       this.modalTitle = "添加验证码源";
     },
     //修改验证码源

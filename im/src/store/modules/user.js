@@ -19,7 +19,6 @@ let state = {
 // 判断用户是否登录
 if (getToken()) {
   let userInfo = getUserInfo();
-  console.error(userInfo)
   state.name = userInfo.name;
   state.id = userInfo.id;
   state.face = userInfo.face ? userInfo.face : state.avatar;

@@ -234,7 +234,7 @@ export default {
         ],
         companyPhone: [
           { required: true, message: '请填写公司电话' },
-          { pattern: RegExp.TEL, message: '请填写正确的号码' }
+          { pattern: RegExp.mobile, message: '请填写正确的号码' }
         ],
         companyEmail: [
           { required: true, message: '请填写电子邮箱' },

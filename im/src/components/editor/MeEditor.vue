@@ -173,7 +173,6 @@ export default {
   methods: {
     // 读取对话编辑草稿信息 并赋值给当前富文本
     getDraftText (index_name) {
-      console.log("findTalk(index_name)", findTalk(index_name));
       return findTalk(index_name)?.draft_text || "";
     },
 

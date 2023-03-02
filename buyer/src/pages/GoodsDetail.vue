@@ -22,7 +22,7 @@
             <Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#666'" />
             {{ storeCollected? "已收藏店铺": "收藏店铺" }}
           </span>
-          <span class="ml_10" @click="IMService()">联系客服</span>
+          <span class="ml_10" @click="IMService(goodsMsg.data.storeId)">联系客服</span>
         </div>
       </div>
     </div>
@@ -50,8 +50,7 @@ import {
   getGoodsDistribution,
 } from "@/api/member";
 import { getDetailById } from "@/api/shopentry";
-import { getIMDetail } from "@/api/common";
-import Storage from "../plugins/storage";
+import imTalk from '@/components/mixes/talkIm'
 export default {
   name: "GoodsDetail",
   beforeRouteEnter (to, from, next) {
@@ -61,6 +60,7 @@ export default {
   created () {
     this.getGoodsDetail();
   },
+  mixins: [imTalk],
   data () {
     return {
       goodsMsg: {}, // 商品信息
@@ -68,49 +68,11 @@ export default {
       categoryBar: [], // 分类
       storeCollected: false, // 商品收藏
       storeMsg: {}, // 店铺信息
-      IMLink: "",
+
     };
   },
   methods: {
-    // 跳转im客服
-    async IMService () {
-      // 获取访问Token
-      let accessToken = Storage.getItem("accessToken");
-      await this.getIMDetailMethods();
-      if (!accessToken) {
-        this.$Message.error("请登录后再联系客服");
-        return;
-      }
-      window.open(
-        this.IMLink +
-        "?token=" +
-        accessToken +
-        "&id=" +
-        this.goodsMsg.data.storeId +
-        "&goodsId=" +
-        this.goodsMsg.data.goodsId +
-        "&skuId=" +
-        this.goodsMsg.data.id
-      );
-      // window.open(
-      //   'http://192.168.0.139:8000/' +
-      //   "?token=" +
-      //   accessToken +
-      //   "&id=" +
-      //   this.goodsMsg.data.storeId +
-      //   "&goodsId=" +
-      //   this.goodsMsg.data.goodsId +
-      //   "&skuId=" +
-      //   this.goodsMsg.data.id
-      // );
-    },
-    // 获取im信息
-    async getIMDetailMethods () {
-      let res = await getIMDetail();
-      if (res.success) {
-        this.IMLink = res.result;
-      }
-    },
+
     // 点击规格
     targetClickSku (val) {
       this.getGoodsDetail(val);
@@ -165,11 +127,13 @@ export default {
                 }
               });
             }
+
             if (!this.storeMsg) {
               // 获取店铺信息
               getDetailById(this.goodsMsg.data.storeId).then((res) => {
                 if (res.success) {
                   this.storeMsg = res.result;
+
                 }
               });
             }

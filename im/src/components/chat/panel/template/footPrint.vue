@@ -1,71 +1,75 @@
 <template>
-  <div class="box" @scroll="scrollBottom">
+  <div class="box" :style="{height:toUser.storeFlag ? '858px' : '815px'}" @scroll="scrollBottom">
     <div class="tab">
       <el-tabs v-model="activeName" @tab-click="handleClick" :stretch=true>
         <el-tab-pane label="最近浏览" name="goods">
-          <dl>
-            <dd v-for="item in list" v-infinite-scroll="loadMore">
+          <dl v-if='list.length' class='base-list'>
+            <dd :key="index"  @click="linkToGoods(item.goodsId, item.id)" v-for="(item,index) in list" v-infinite-scroll="loadMore">
               <div class="base">
                 <div>
-                  <img style="width: 60px; height: 60px;margin-left: 40px;box-sizing: border-box;" :src="item.thumbnail"
+                  <img style="width: 60px; height: 60px;margin-left:20px;box-sizing: border-box;" :src="item.thumbnail"
                     class="image" />
                 </div>
                 <div class="recent_views">
-                  <el-tooltip class="item" effect="dark" :content="item.goodsName" placement="top-start">
-                    <a class="goods_name" @click="linkToGoods(item.goodsId, item.id)">{{ item.goodsName }}</a>
-                  </el-tooltip>
-
+                  <a class="goods_name">{{ item.goodsName }}</a>
                   <div style="display: flex;">
                     <div style="margin-top: 20px;">
-                      <span style="color: red;">￥{{ item.price }}</span>
+                      <span class='goods-price'>{{ item.price | unitPrice("￥") }}</span>
                       <div class="goods_store_button">
-                        <el-button type="danger" v-if="item.btnHide == 1 && toUser.storeFlag" size="mini"
-                          @click="submitSendGoodsMessage(item)" plain>发送</el-button>
+                       
                       </div>
                     </div>
                   </div>
                 </div>
-
+                <div class="review"> <el-button  v-if="item.btnHide == 1 && toUser.storeFlag" size="mini"
+                          @click.stop="submitSendGoodsMessage(item)" plain>发送</el-button></div>
               </div>
-              <div class="Underline"></div>
             </dd>
 
           </dl>
+          <div v-else class='no-more'>
+              {{noMoreList.goods.title}}
+          </div>
         </el-tab-pane>
         <el-tab-pane label="订单列表" name="orders">
-          <dl>
-            <dd v-for="(item, index) in orderList" v-infinite-scroll="loadMore" :key="index">
-              <div class="orderlist" >
-                <div class="order_top order_padding">
-                  <span class="order_sn">订单号:{{ item.sn }}</span>
+          <dl class='base-order-list' v-if='orderList.length'>
+            <dd  v-for="(item, index) in orderList" v-infinite-scroll="loadMore" :key="index">
+              <div class="order-list">
+                <div class="order-top order-padding">
+                  <span class="order-sn" @click="linkToOrders(item.sn)">订单号:{{ item.sn }}</span>
                 </div>
-                <div class="order_section order_padding">
-                  <img :src="item.groupImages" alt="">
-                  <el-tooltip class="item" effect="dark" :content="item.groupName" placement="top-start">
-                    <span class="orderGoodsName" @click="linkToOrders(item.sn)"> {{ item.groupName }}</span>
-                  </el-tooltip>
-                  <div class="orderBtn ">
-                    <el-button type="danger" class="store-button" v-if="item.btnHide == 1 && toUser.storeFlag"
+                <div class="order-section order-padding">
+                  <div class="order-items" v-for="(order,orderIndex) in item.orderItems" :key="orderIndex">
+                      <img :src="order.image" alt="">
+                      <span class="order-goods-name" @click="linkToOrders(item.sn)"> {{ order.name }}</span>
+                      <span class="price">{{order.goodsPrice | unitPrice("￥")}}</span>
+                  </div>
+                  <!-- <img  :src="item.groupImages" alt=""> -->
+                 
+                  <div class="order-btn ">
+                    <el-button class="store-button" v-if="item.btnHide == 1 && toUser.storeFlag"
                       size="mini" @click="submitSendOrderMessage(item, index)" plain>发送</el-button>
                   </div>
                 </div>
-                <div class="order_footer order_padding" >
-                  <span> 订单金额： <span style="color: red;">￥{{ item.orderItems[0].goodsPrice }}</span></span>
-                  <!-- <span class="order_status" v-if="item.orderStatus"
-                    :style="{ 'color': item.orderStatus == 'CANCELLED' || item.orderStatus == 'UNPAID' || item.orderStatus == 'TAKE' ? '#5a606b' : '#f23030' }">{{
-  item.orderStatus == 'CANCELLED' ? '已取消' : item.orderStatus == 'UNPAID' ? '未付款' : item.orderStatus ==
-    'PAID' ? '已付款' : item.orderStatus == 'UNDELIVERED' ? '待发货' : item.orderStatus == 'DELIVERED'
-      ? '已发货' : item.orderStatus == 'COMPLETED' ? '已完成' : item.orderStatus == 'TAKE' ? '待校验' : ''
-                    }}</span> -->
-                    <el-tag :type="col[item.orderStatus]">{{ item.orderStatus == 'STAY_PICKED_UP' ? '待自提' :item.orderStatus == 'CANCELLED' ? '已取消' : item.orderStatus == 'UNPAID' ? '未付款' : item.orderStatus ==
-    'PAID' ? '已付款' : item.orderStatus == 'UNDELIVERED' ? '待发货' : item.orderStatus == 'DELIVERED'
-      ? '已发货' : item.orderStatus == 'COMPLETED' ? '已完成' : item.orderStatus == 'TAKE' ? '待校验' : ''}}</el-tag>
+                <div class="order-footer order-padding">
+                  <span></span>
+                  <el-tag  size='mini' :type="col[item.orderStatus]">{{
+                    item.orderStatus == 'STAY_PICKED_UP' ? '待自提'
+                      : item.orderStatus == 'CANCELLED' ? '已取消' : item.orderStatus == 'UNPAID' ? '未付款' : item.orderStatus
+                        ==
+                        'PAID' ? '已付款' : item.orderStatus == 'UNDELIVERED' ? '待发货' : item.orderStatus == 'DELIVERED'
+                          ? '已发货' : item.orderStatus == 'COMPLETED' ? '已完成' : item.orderStatus == 'TAKE' ? '待核销' :
+                            ''
+                  }}</el-tag>
                 </div>
 
               </div>
-              <div class="Underline"></div>
+            
             </dd>
           </dl>
+          <div v-else class='no-more'>
+              {{noMoreList.orders.title}}
+          </div>
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -75,24 +79,30 @@
 <script>
 import { Tag, button, Tabs, TabPane, InfiniteScroll } from 'element-ui'
 import { mapState, mapGetters } from "vuex";
+import { unitPrice } from '@/plugins/filters';
+
 export default {
   directives: {
     "infinite-scroll": InfiniteScroll,
   },
-  data() {
+  data () {
     return {
+      noMoreList:{
+        'goods':{title:'暂无最近浏览',value:false},
+        'orders':{title:'暂无订单信息',value:false},
+      },
       activeName: 'goods',
       btnHide: undefined,
       hide: true,
-      col:{
-        CANCELLED:'error',
-        PAID:'error',
-        TAKE:'',
-        COMPLETED:'success',
-        DELIVERED:'danger',
-        UNDELIVERED:'warning',
-        UNPAID:'',
-        STAY_PICKED_UP:''
+      col: {
+        CANCELLED: 'danger',
+        PAID: 'danger',
+        TAKE: '',
+        COMPLETED: 'success',
+        DELIVERED: 'danger',
+        UNDELIVERED: 'warning',
+        UNPAID: '',
+        STAY_PICKED_UP: ''
       },
     }
   },
@@ -112,17 +122,17 @@ export default {
   methods: {
     //跳转订单列表
 
-    scrollBottom(e) {
+    scrollBottom (e) {
       const { scrollTop, scrollHeight, clientHeight } = e.srcElement
       if (scrollTop + clientHeight >= scrollHeight) {
         this.$emit('loadMore')
       }
     },
-    loadMore() {
+    loadMore () {
 
     },
     // 发送消息回调事件
-    submitSendGoodsMessage(item) {
+    submitSendGoodsMessage (item) {
       const context = {
         id: item.id,
         goodsId: item.goodsId,
@@ -143,14 +153,16 @@ export default {
       item.btnHide = 0
     },
     // 发送订单列表
-    submitSendOrderMessage(item, index) {
+    submitSendOrderMessage (item, index) {
       console.log(item, 'item');
+    
       const context = {
         sn: item.sn,
         groupImages: item.groupImages,
         paymentTime: item.paymentTime,
         groupName: item.groupName,
         flowPrice: item.flowPrice,
+        orderItems:item.orderItems,
         orderStatus: item.orderStatus
       }
       const record = {
@@ -165,8 +177,8 @@ export default {
       localStorage.setItem(item.goodsId, 0)
       item.btnHide = 0
     },
-    handleClick(tab, event) {
-      console.log(tab, event);
+    handleClick (tab, event) {
+      
     }
   },
   props: {
@@ -179,9 +191,9 @@ export default {
       default: []
     },
   },
-  mounted() {
+  mounted () {
     //  state.user.toUser
-    console.log(this.orderList, '  this.$store.state.user.toUser  this.$store.state.user.toUser  this.$store.state.user.toUser');
+    // console.log(this.orderList, '  this.$store.state.user.toUser  this.$store.state.user.toUser  this.$store.state.user.toUser');
     this.btnHide = localStorage.getItem('btnHide')
   }
 }
@@ -189,27 +201,18 @@ export default {
 </script>
 
 <style scoped lang="less">
-.order_status {
-  height: 25px;
-  width: 60px;
-  background: #ffeded;
-  margin-right: 20px;
-  text-align: center;
-  line-height: 25px;
-}
-
-.Underline {
-  border: 1px solid silver;
-  // width: 90%;
-  margin: 0 auto;
-}
-
 .recent_views {
   margin-left: 13px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  width: 232px;
+  width: 200px;
+}
+.no-more{
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+  margin-top: 20px;
 }
 
 .box {
@@ -236,7 +239,7 @@ export default {
 
   .item {
     // margin: 4px;
-    margin-top:16px
+    margin-top: 16px
   }
 
   .left .el-tooltip__popper,
@@ -245,51 +248,44 @@ export default {
   }
 }
 
-.Underline {
-  // border: 5px solid red;
-}
-
-.orderlist {
-  max-width:352px;
+.order-list {
+  padding: 9px;
+  transition: 0.35s;
+  cursor: pointer;
   margin-bottom: 10px;
   background: #fff;
   color: #5a606b;
   box-sizing: border-box;
 }
+
+
 .box::-webkit-scrollbar {
-        width: 0px!important;
-    }
-
-.order_top {
-  border-bottom: 1px solid #f2f2f2;
-  .order_sn {}
+  width: 0px !important;
 }
-
-.order_section {
-  border-bottom: 1px solid #f2f2f2;
-  height: 100px;
-
+.order-section {
+  margin: 10px 0;
+  font-size: 12px;
   img {
     width: 60px;
     height: 60px;
-    margin-top: 20px;
   }
 }
 
-.order_footer {
-  border-bottom: 1px solid #f2f2f2;
+.order-footer {
+  font-size: 12px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
-.orderGoodsName {
+.order-goods-name {
   width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   position: absolute;
   margin-left: 10px;
-  margin-top: 10px;
+
   font-weight: 500;
 }
 
@@ -299,37 +295,29 @@ export default {
   white-space: nowrap
 }
 
-.orderBtn {
+.order-btn {
   display: flex;
   justify-content: flex-end;
-  margin-right: 15px;
   position: relative;
   bottom: 55px;
 }
 
 .goods_name {
+  transition: .35s;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap
+  white-space: nowrap;
+  font-size:12px;
 }
- /deep/ .el-tabs__header{
+
+/deep/ .el-tabs__header {
   position: absolute;
   width: 362px;
   height: 50px;
   left: 0;
   z-index: 2;
   background: #ffffff;
- }
-// /deep/ .el-tabs__item.is-top:last-child {
-//   color: black;
-// }
-/deep/.is-active{
-  color: #f23030;
 }
-/deep/.el-tabs__active-bar {
-  background-color: #f23030;
-}
-
 /deep/ .el-tabs__nav.is-top {
   height: 50px;
 }
@@ -339,52 +327,64 @@ export default {
   justify-content: center;
   align-items: center;
 }
-/deep/.el-tabs__content{
-    margin-top: 50px;
+
+/deep/.el-tabs__content {
+  margin-top: 50px;
 }
+/deep/ .el-tabs{
+  width: 100%;
+}
+
 .box {
-  height: 700px;
   overflow: auto;
   // margin-top: 50px;
   // width: 350px;
 }
-.order_padding{
-  padding:0 10px;
-}
-.store-button {
-  background-color: white;
-  border-color: #F56C6C;
-  margin-top: 10px;
-}
 
-.goods_store_button {
-  display: inline;
-  background-color: white;
-  border-color: #F56C6C;
-  position: absolute;
-  left: 70%;
+.order-padding {
+  padding: 0 10px;
 }
 
 .base {
-  margin-top: 5px;
+  padding: 8px;
+  cursor: pointer;
+  transition: .35s;
   height: 80px;
   display: flex;
-
-  .price {
-    color: red;
-    margin-top: 15px;
-  }
-
+  
   .image {
     height: 100px;
     margin-top: 3px;
     width: 100px;
   }
+  >.review{
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    transition: 0.35s;
+    opacity: 0;
+   
+  }
+}
+.base:hover,.order-list:hover{
+  background: #ededed;
+  padding-left: 14px;
+  >.review{
+    opacity: 1;
+  
+  }
+}
+.goods-price{
+  transition: .35s;
+  font-size: 14px;
+  color:#f23030;
 
 }
-
 .separate {
   margin-top: 8px;
+}
+.order-sn{
+  font-size: 12px;
 }
 // .el-tabs--card {
 //   height: calc(100vh - 110px);
@@ -394,4 +394,18 @@ export default {
 //   height: calc(100vh - 110px);
 //   overflow-y: auto;
 // }
+.base-list{
+  padding-bottom: 120px;
+}
+.base-order-list{
+  padding-bottom: 100px;
+}
+.price{
+  color: red;
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+.order-items{
+  margin-bottom: 10px;
+}
 </style>
