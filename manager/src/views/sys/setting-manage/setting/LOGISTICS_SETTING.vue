@@ -5,21 +5,40 @@
         <RadioGroup v-model="formValidate.type" type="button">
           <Radio label="KDNIAO">快递鸟</Radio>
           <Radio label="KUAIDI100">快递100</Radio>
+          <Radio label="SHUNFENG">顺丰</Radio>
         </RadioGroup>
       </FormItem>
-      <FormItem v-if="formValidate.type==='KDNIAO'" label="快递鸟 商户ID" prop="kdniaoEbusinessID">
+      <FormItem v-if="formValidate.type === 'KDNIAO'" label="快递鸟 商户ID" prop="kdniaoEbusinessID">
         <Input v-model="formValidate.kdniaoEbusinessID" />
       </FormItem>
-      <FormItem v-if="formValidate.type==='KDNIAO'" label="快递鸟 AppKey" prop="kdniaoAppKey">
+      <FormItem v-if="formValidate.type === 'KDNIAO'" label="快递鸟 AppKey" prop="kdniaoAppKey">
         <Input class="label-appkey" v-model="formValidate.kdniaoAppKey" />
       </FormItem>
 
-      <FormItem v-if="formValidate.type==='KUAIDI100'" label="快递100 授权码" prop="kuaidi100Customer">
+      <FormItem v-if="formValidate.type === 'KUAIDI100'" label="快递100 授权码" prop="kuaidi100Customer">
         <Input class="label-appkey" v-model="formValidate.kuaidi100Customer" />
       </FormItem>
-      <FormItem v-if="formValidate.type==='KUAIDI100'" label="快递100 Key" prop="kuaidi100Key">
+      <FormItem v-if="formValidate.type === 'KUAIDI100'" label="快递100 Key" prop="kuaidi100Key">
         <Input class="label-appkey" v-model="formValidate.kuaidi100Key" />
       </FormItem>
+      <div v-if="formValidate.type === 'SHUNFENG'">
+        <FormItem label="顾客编码" prop="clientCode">
+          <Input v-model="formValidate.clientCode" />
+        </FormItem>
+        <FormItem label="校验码" prop="checkWord">
+          <Input v-model="formValidate.checkWord" />
+        </FormItem>
+        <FormItem label="请求地址" prop="callUrl">
+          <Input class="label-appkey" v-model="formValidate.callUrl" />
+        </FormItem>
+
+        <FormItem label="打印模板" prop="templateCode">
+          <Input class="label-appkey" v-model="formValidate.templateCode" />
+        </FormItem>
+        <FormItem label="月结号" prop="monthlyCardNo">
+          <Input class="label-appkey" v-model="formValidate.monthlyCardNo" />
+        </FormItem>
+      </div>
       <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
       </div>
@@ -36,12 +55,13 @@ export default {
       formValidate: {   // 表单数据
         type: "",
         kdniaoEbusinessID: "",
-        kdniaoAppKey: "" ,
-        kuaidi100Customer: "" ,
-        kuaidi100Key: "" ,},
+        kdniaoAppKey: "",
+        kuaidi100Customer: "",
+        kuaidi100Key: "",
+      },
     };
   },
-  props: ["res",'type'],
+  props: ["res", 'type'],
   created() {
     this.init();
   },
@@ -49,7 +69,7 @@ export default {
     // 验证
     submit(name) {
       let that = this;
-       if( handleSubmit(that, name )){
+      if (handleSubmit(that, name)) {
         this.setupSetting()
       }
     },
@@ -83,15 +103,17 @@ export default {
 
 <style lang="scss" scoped>
 @import "./style.scss";
+
 .label-item {
   display: flex;
 }
+
 /deep/ .ivu-input {
   width: 300px !important;
   margin: 0 10px;
 }
+
 .ivu-input-wrapper {
   width: 300px;
   margin-right: 10px;
-}
-</style>
+}</style>
