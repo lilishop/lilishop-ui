@@ -46,3 +46,17 @@ export function payCallback (params) {
     params
   });
 }
+
+/**
+ * 支付结果查询
+ * @param orderType 交易类型,可用值:TRADE,ORDER,RECHARGE
+ * @param sn   订单编号
+ */
+export function withdrawalSettingVO (params) {
+  return request({
+    url: `/buyer/wallet/wallet/withdrawalSettingVO`,
+    needToken: true,
+    method: Method.GET,
+    params
+  });
+}
