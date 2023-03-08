@@ -10,6 +10,11 @@ export const loginRouter = {
   },
   component: () => import("@/views/login.vue")
 };
+export const forgetPasswordRouter = {
+  path: "/forgetPassword",
+  name: "forgetPassword",
+  component: () => import("@/views/ForgetPassword.vue")
+};
 
 // 作为Main组件的子页面展示但是不在左侧菜单显示的路由写在otherRouter里
 export const otherRouter = {
@@ -193,4 +198,4 @@ export const page500 = {
   component: () => import("@/views/error-page/500.vue")
 };
 // 所有上面定义的路由都要写在下面的routers里
-export const routers = [loginRouter, otherRouter, page500, page403];
+export const routers = [loginRouter, forgetPasswordRouter, otherRouter, page500, page403];

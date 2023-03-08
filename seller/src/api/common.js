@@ -1,4 +1,4 @@
-import { commonUrl, getRequest, uploadFileRequest ,uploadFile} from "@/libs/axios";
+import { commonUrl, getRequest, uploadFileRequest, uploadFile, request} from "@/libs/axios";
 
 // 通过id获取子地区
 export const getChildRegion = (id) => {
@@ -25,3 +25,10 @@ export const upLoadFileMethods = (bold) => {
   console.log(bold)
   return uploadFileRequest(uploadFile, bold);
 };
+
+/**
+ * 发送短信验证码
+ */
+export function sendSms (params) {
+  return getRequest(`${commonUrl}/common/common/sms/${params.verificationEnums}/${params.mobile}`,params);
+}
