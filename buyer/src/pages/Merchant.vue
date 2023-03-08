@@ -14,7 +14,7 @@
                                                            :color="storeCollected ? '#ed3f14' : '#fff'"/>{{
             storeCollected ? '已收藏店铺' : '收藏店铺'
           }}</span>
-        <span style="width:80px" class="hover-pointer ml_10" @click="IMService()"><Icon
+        <span style="width:80px" class="hover-pointer ml_10" @click="IMService(storeMsg.storeId)"><Icon
           custom="icomoon icon-customer-service"/>联系客服</span>
       </div>
     </div>
@@ -106,8 +106,7 @@
 </template>
 
 <script>
-import {getIMDetail} from "@/api/common";
-import Storage from "../plugins/storage";
+
 import {getDetailById, getCateById} from "@/api/shopentry";
 import {cancelCollect, collectGoods, isCollection} from "@/api/member";
 import {goodsList} from "@/api/goods";
@@ -117,6 +116,7 @@ import HoverSearch from "@/components/header/hoverSearch";
 import storage from "@/plugins/storage";
 import {getFloorStoreData} from "@/api/index.js";
 import {seckillByDay} from "@/api/promotion";
+import imTalk from '@/components/mixes/talkIm'
 
 export default {
   name: "Merchant",
@@ -125,6 +125,7 @@ export default {
     ModelForm,
     HoverSearch,
   },
+  mixins: [imTalk],
   data() {
     return {
       // 店铺装修的内容
@@ -140,7 +141,6 @@ export default {
       cateList: [], // 店铺分裂
       goodsList: [], // 商品列表
       total: 0, // 商品数量
-      IMLink: "",
       params: {
         // 请求参数
         pageNumber: 1,
@@ -187,30 +187,8 @@ export default {
         }
       );
     },
-    // 跳转im客服
-    async IMService() {
-      // 获取访问Token
-      let accessToken = Storage.getItem("accessToken");
-      await this.getIMDetailMethods();
-      if (!accessToken) {
-        this.$Message.error("请登录后再联系客服");
-        return;
-      }
-      window.open(
-        this.IMLink +
-        "?token=" +
-        accessToken +
-        "&id=" +
-        this.storeMsg.storeId
-      );
-    },
-    // 获取im信息
-    async getIMDetailMethods() {
-      let res = await getIMDetail();
-      if (res.success) {
-        this.IMLink = res.result;
-      }
-    },
+
+
     // getStoreMsg () { // 店铺信息
     //   getDetailById(this.$route.query.id).then(res => {
     //     if (res.success) {
@@ -242,6 +220,7 @@ export default {
         if (res.success) {
 
           this.storeMsg = res.result;
+          console.log(this.storeMsg)
 
           //判定如果开启楼层展示，则获取页面信息 否则读取商品信息
           if (this.storeMsg.pageShow && this.storeMsg.pageShow === '1') {

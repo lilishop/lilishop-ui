@@ -329,7 +329,7 @@ export default {
         content: "您确认关闭此物流公司?",
         loading: true,
         onOk: () => {
-          API_Shop.logisticsUnChecked(v.selected).then((res) => {
+          API_Shop.logisticsUnChecked(v.logisticsId).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("物流公司关闭成功");

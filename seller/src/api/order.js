@@ -81,6 +81,11 @@ export const orderDelivery = (sn, params) => {
   return postRequest(`/order/order/${sn}/delivery`, params);
 };
 
+// 订单发货
+export const orderShunFengDelivery = (sn) => {
+  return postRequest(`/order/order/${sn}/shunfeng/delivery`);
+};
+
 // 获取商家选中的物流公司
 export const getLogisticsChecked = () => {
   return getRequest(`/other/logistics/getChecked`);

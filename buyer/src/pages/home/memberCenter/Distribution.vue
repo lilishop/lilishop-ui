@@ -527,7 +527,7 @@ export default {
   top: -200px;
   left: 200px;
 }
-/depp/ .ivu-alert-message {
+/deep/ .ivu-alert-message {
   p {
     margin: 4px 0;
   }

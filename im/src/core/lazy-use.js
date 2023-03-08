@@ -85,5 +85,4 @@ Vue.prototype.$alert = MessageBox.alert
 import Contextmenu from 'vue-contextmenujs'
 Vue.use(Contextmenu)
 
-process.env.NODE_ENV !== 'production' &&
-  console.warn('[Lumen-IM] NOTICE: element-ui use lazy-load.')
+
