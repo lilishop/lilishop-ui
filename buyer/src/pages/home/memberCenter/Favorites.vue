@@ -25,7 +25,7 @@
             <Button size="small" type="primary" @click="buynow(item.skuId, item.goodsId)" v-if="params.type === 'GOODS'">立即购买</Button>
             <Button size="small" type="primary" @click="goShop(item.id)" v-else>店铺购买</Button>
             <Button size="small" v-if="params.type === 'GOODS'" @click="cancel(item.skuId)">取消收藏</Button>
-            <Button size="small" v-if="params.type === 'SHOP'" @click="cancel(item.id)">取消收藏</Button>
+            <Button size="small" v-if="params.type === 'STORE'" @click="cancelStore(item.id)">取消收藏</Button>
           </div>
         </div>
       </template>
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { collectList, cancelCollect } from '@/api/member.js'
+import { collectList, cancelCollect,storeCollectList,cancelStoreCollect} from '@/api/member.js'
 export default {
   name: 'Favorites',
   props: {
@@ -66,10 +66,16 @@ export default {
         if (res.success) this.list = res.result.records;
       })
     },
+    getStoreList () { // 获取收藏列表
+      this.spinShow = true
+      storeCollectList(this.params).then(res => {
+        this.spinShow = false
+        if (res.success) this.list = res.result.records;
+      })
+    },
     change (index) { // tab栏切换
-      if (index === 0) { this.params.type = 'GOODS' }
-      if (index === 1) { this.params.type = 'SHOP' }
-      this.getList()
+      if (index === 0) { this.params.type = 'GOODS',this.getList()}
+      if (index === 1) { this.params.type = 'STORE',this.getStoreList()}
     },
     cancel (id) { // 取消收藏
       let typeName = this.params.type === 'GOODS' ? '商品' : '店铺'
@@ -80,6 +86,20 @@ export default {
           cancelCollect(this.params.type, id).then(res => {
             if (res.success) {
               this.getList();
+            }
+          })
+        }
+      });
+    },
+    cancelStore (id) { // 取消收藏
+      let typeName = this.params.type === 'GOODS' ? '商品' : '店铺'
+      this.$Modal.confirm({
+        title: 'Title',
+        content: `<p>确定取消收藏该${typeName}吗？</p>`,
+        onOk: () => {
+          cancelStoreCollect(this.params.type, id).then(res => {
+            if (res.success) {
+              this.getStoreList();
             }
           })
         }
