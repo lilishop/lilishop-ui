@@ -32,7 +32,7 @@ export function getRecharge (params) {
 // 查询提现记录
 export function getWithdrawApply (params) {
   return request({
-    url: '/buyer/member/withdrawApply',
+    url: '/buyer/wallet/withdrawApply',
     method: Method.GET,
     needToken: true,
     params
