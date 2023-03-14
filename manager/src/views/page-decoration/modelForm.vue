@@ -33,7 +33,7 @@
         </div>
       </div>
       <div class="nav-con">
-        <div class="all-categories">全部商品分类11</div>
+        <div class="all-categories">全部商品分类</div>
         <ul class="nav-item">
           <li v-for="(item, index) in navList.list" :key="index">
             <a href="#">{{ item.name }}</a>
