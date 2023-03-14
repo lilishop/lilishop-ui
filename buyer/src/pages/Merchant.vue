@@ -108,7 +108,7 @@
 <script>
 
 import {getDetailById, getCateById} from "@/api/shopentry";
-import {cancelCollect, collectGoods, isCollection} from "@/api/member";
+import {cancelStoreCollect, collectStore, isStoreCollection} from "@/api/member";
 import {goodsList} from "@/api/goods";
 import Search from "@/components/Search";
 import ModelForm from "@/components/indexDecorate/ModelForm";
@@ -294,13 +294,13 @@ export default {
     async collect() {
       // 收藏店铺
       if (this.storeCollected) {
-        let cancel = await cancelCollect("STORE", this.storeMsg.storeId);
+        let cancel = await cancelStoreCollect("STORE", this.storeMsg.storeId);
         if (cancel.success) {
           this.$Message.success("已取消收藏");
           this.storeCollected = false;
         }
       } else {
-        let collect = await collectGoods("STORE", this.storeMsg.storeId);
+        let collect = await collectStore("STORE", this.storeMsg.storeId);
         if (collect.code === 200) {
           this.storeCollected = true;
           this.$Message.success("收藏店铺成功,可以前往个人中心我的收藏查看");
