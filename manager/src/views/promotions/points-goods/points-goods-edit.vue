@@ -96,7 +96,7 @@ export default {
       pointsGoodsCategoryId:'',
       pointsGoodsCategoryName:'',
       form: {
-        
+
         /** 活动名称 */
         promotionName: "",
         /** 报名截止时间 */
@@ -109,7 +109,7 @@ export default {
         seckillRule: "",
         goodsSku: {},
         promotionStatus: "NEW",
-       
+
       },
       categoryList: [], // 分类列表
       id: this.$route.query.id, // 活动id
@@ -175,8 +175,8 @@ export default {
           this.submitLoading = true;
           let params={
             ...this.form,
-            pointsGoodsCategoryId: this.pointsGoodsCategoryId,
-            pointsGoodsCategoryName:this.pointsGoodsCategoryName
+            pointsGoodsCategoryId: this.pointsGoodsCategoryId || this.form.pointsGoodsCategoryId,
+            pointsGoodsCategoryName:this.pointsGoodsCategoryName || this.form.pointsGoodsCategoryName
           }
           updatePointsGoods(params).then((res) => {
             this.submitLoading = false;
