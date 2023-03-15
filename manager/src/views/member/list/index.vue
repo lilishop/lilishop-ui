@@ -465,10 +465,11 @@ export default {
 
     // 提交修改数据
     handleSubmitModal() {
+      debugger
       const { nickName, sex, username, face, newPassword,id } = this.form;
       let time = new Date(this.form.birthday);
-      let birthday = time ?
-        time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate() : '';
+      let birthday = this.form.birthday=== undefined?'':
+        time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
       let submit = {
         regionId: this.form.regionId,
         region: this.form.region,

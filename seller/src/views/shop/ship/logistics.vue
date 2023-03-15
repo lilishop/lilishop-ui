@@ -139,7 +139,7 @@ export default {
           minWidth: 120,
           sortable: true,
           render: (h, params) => {
-            if (params.row.selected === null || params.row.selected === "") {
+            if (!params.row.selected) {
               return h("div", [h("tag", {props: {color: "volcano"}}, "关闭")]);
             } else {
               return h("div", [h("tag", {props: {color: "green"}}, "开启")]);
@@ -152,7 +152,7 @@ export default {
           align: "center",
           width: 200,
           render: (h, params) => {
-            if (params.row.selected === null) {
+            if (!params.row.selected) {
               return h("div", [
                 h(
                   "Button",
@@ -301,7 +301,7 @@ export default {
     },
 
     submit() {
-      if ( this.row.selected === null ||  this.row.selected === "") {
+      if ( !this.row.selected) {
         API_Shop.logisticsChecked(
           this.row.logisticsId,
           this.faceSheetForm
@@ -329,7 +329,7 @@ export default {
         content: "您确认关闭此物流公司?",
         loading: true,
         onOk: () => {
-          API_Shop.logisticsUnChecked(v.selected).then((res) => {
+          API_Shop.logisticsUnChecked(v.logisticsId).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("物流公司关闭成功");

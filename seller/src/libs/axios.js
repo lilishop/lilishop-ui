@@ -188,6 +188,38 @@ export const getRequest = (url, params, resBlob) => {
   return service(data);
 };
 
+export const getRequestHasHeader = (url, params, headers) => {
+  let accessToken = getStore("accessToken");
+  let data = {
+    method: "get",
+    url: `${url}`,
+    params: params,
+    transformRequest: headers
+      ? undefined
+      : [
+          function(data) {
+            let ret = "";
+            for (let it in data) {
+              ret +=
+                encodeURIComponent(it) +
+                "=" +
+                encodeURIComponent(data[it]) +
+                "&";
+            }
+            ret = ret.substring(0, ret.length - 1);
+            return ret;
+          }
+        ],
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      accessToken: accessToken,
+      ...headers
+    },
+    responseType: "blob"
+  };
+  return service(data);
+};
+
 export const postRequest = (url, params, headers) => {
   let accessToken = getStore("accessToken");
   return service({

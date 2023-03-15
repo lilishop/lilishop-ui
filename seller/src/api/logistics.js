@@ -4,6 +4,7 @@ import {
   postRequest,
   putRequest,
   deleteRequest,
+  getRequestHasHeader,
   importRequest,
   getRequestWithNoToken
 } from "@/libs/axios";
@@ -33,6 +34,15 @@ export const updateLogistics = (id,params) => {
 
 export const getCheckedOn = params =>{
   return getRequest(`/other/logistics/getCheckedFaceSheet`,params);
+}
+
+//获取物流设置
+export const getLogisticsSetting = () =>{
+  return getRequest(`/other/logistics`);
+}
+
+export const getShunFengFaceSheet = (url,headers) =>{
+  return getRequestHasHeader(`${url}`,null,headers);
 }
 
 

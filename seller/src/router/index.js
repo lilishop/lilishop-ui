@@ -3,7 +3,7 @@ import ViewUI from 'view-design';
 import Util from '../libs/util';
 import VueRouter from 'vue-router';
 import Cookies from 'js-cookie';
-import {routers} from './router';
+import { routers } from './router';
 
 Vue.use(VueRouter);
 
@@ -16,10 +16,10 @@ const RouterConfig = {
 /**
  * 解决重复点击菜单会控制台报错bug
  */
- const routerPush = VueRouter.prototype.push
- VueRouter.prototype.push = function push(location) {
-   return routerPush.call(this, location).catch(error=> error)
- }
+const routerPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location) {
+  return routerPush.call(this, location).catch(error => error)
+}
 
 export const router = new VueRouter(RouterConfig);
 
@@ -32,10 +32,15 @@ router.beforeEach((to, from, next) => {
   const name = to.name;
 
   if (!Cookies.get('userInfoSeller') && name !== 'login') {
-    // 判断是否已经登录且前往的页面不是登录页
-    next({
-      name: 'login'
-    });
+    if (name === 'forgetPassword') {
+      console.log(name)
+      Util.toDefaultPage([...routers], name, router, next);
+    } else {
+      // 判断是否已经登录且前往的页面不是登录页
+      next({
+        name: 'login'
+      });
+    }
   } else if (Cookies.get('userInfoSeller') && name === 'login') {
     // 判断是否已经登录且前往的是登录页
     Util.title();

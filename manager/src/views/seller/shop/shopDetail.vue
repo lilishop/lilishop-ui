@@ -87,7 +87,17 @@
           <p class="item">
             <span class="label">店铺所在地：</span>
             <span class="info">
-              {{storeInfo.storeAddressPath || storeInfo.storeAddressDetail?storeInfo.storeAddressPath +storeInfo.storeAddressDetail:"暂未完善"}}
+              <span>
+                {{
+                (storeInfo.storeAddressPath!==null && storeInfo.storeAddressPath!=='' && storeInfo.storeAddressPath!=="null" && storeInfo.storeAddressPath!==undefined )? storeInfo.storeAddressPath: ""
+                }}
+              </span>
+              <span>
+                {{
+                (storeInfo.storeAddressDetail!==null && storeInfo.storeAddressDetail!=='' && storeInfo.storeAddressDetail!=="null" && storeInfo.storeAddressDetail!==undefined )? storeInfo.storeAddressDetail:""
+                }}
+              </span>
+              {{(storeInfo.storeAddressPath!==null && storeInfo.storeAddressPath!=='' && storeInfo.storeAddressPath!=="null" && storeInfo.storeAddressPath!==undefined) || (storeInfo.storeAddressDetail!==null && storeInfo.storeAddressDetail!=='' && storeInfo.storeAddressDetail!=="null" && storeInfo.storeAddressDetail!==undefined )?"":"暂未完善"}}
             </span>
           </p>
           <p class="item">

@@ -59,7 +59,7 @@ export function withdrawalApply (params) {
   });
 }
 
-// 收藏商品、店铺
+// 收藏商品
 export function collectGoods (type, id) {
   return request({
     url: `/buyer/member/collection/add/${type}/${id}`,
@@ -68,7 +68,16 @@ export function collectGoods (type, id) {
   });
 }
 
-// 取消 收藏商品、店铺
+// 收藏店铺
+export function collectStore (type, id) {
+  return request({
+    url: `/buyer/member/storeCollection/add/${type}/${id}`,
+    method: Method.POST,
+    needToken: true
+  });
+}
+
+// 取消 收藏商品
 export function cancelCollect (type, id) {
   return request({
     url: `/buyer/member/collection/delete/${type}/${id}`,
@@ -77,7 +86,16 @@ export function cancelCollect (type, id) {
   });
 }
 
-// 查看是否收藏
+// 取消 收藏店铺
+export function cancelStoreCollect (type, id) {
+  return request({
+    url: `/buyer/member/storeCollection/delete/${type}/${id}`,
+    method: Method.DELETE,
+    needToken: true
+  });
+}
+
+// 查看是否收藏商品
 export function isCollection (type, goodsId) {
   return request({
     url: `/buyer/member/collection/isCollection/${type}/${goodsId}`,
@@ -86,10 +104,29 @@ export function isCollection (type, goodsId) {
   });
 }
 
-// 会员收藏列表
+// 查看是否收藏店铺
+export function isStoreCollection (type, goodsId) {
+  return request({
+    url: `/buyer/member/storeCollection/isCollection/${type}/${goodsId}`,
+    method: Method.GET,
+    needToken: true
+  });
+}
+
+// 会员收藏商品列表
 export function collectList (params) {
   return request({
     url: `/buyer/member/collection/${params.type}`,
+    method: Method.GET,
+    needToken: true,
+    params
+  });
+}
+
+// 会员收藏店铺列表
+export function storeCollectList (params) {
+  return request({
+    url: `/buyer/member/storeCollection/${params.type}`,
     method: Method.GET,
     needToken: true,
     params
