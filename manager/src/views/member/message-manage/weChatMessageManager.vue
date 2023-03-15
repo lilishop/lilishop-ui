@@ -281,6 +281,9 @@ export default {
     wechatFormDataEdit() {
       this.$refs['wechatFormData'].validate((valid) => {
         if (valid) {
+          if(!this.wechatFormData.updateTime){
+            this.wechatFormData.updateTime = ''
+          }
           editWechatMessageTemplate(this.id, this.wechatFormData).then(res => {
             if (res.message === 'success') {
               this.$Message.success('微信模板修改成功');
