@@ -29,7 +29,7 @@ class SocketInstance {
   constructor() {
     this.socket = new WsSocket(
       () => {
-        return `${config.BASE_WS_URL}/` + getToken();
+        return `${config.BASE_WS_URL}?token=` + getToken();
       },
       {
         onError: (evt) => {
