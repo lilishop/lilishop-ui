@@ -159,9 +159,9 @@ export default {
   watch: {
     $route() {
       const keyword = this.$route.query.keyword;
-      if (keyword) {
+      // if (keyword) {
         this.handleSearch(keyword);
-      }
+      // }
       if (this.$route.query.categoryId) {
         let cateId = this.$route.query.categoryId.split(",");
         Object.assign(this.params, this.$route.query);
