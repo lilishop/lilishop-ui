@@ -30,9 +30,9 @@ Vue.component('face-null', faceNull)
 
 Vue.prototype.linkToGoods = function (goodsId, skuId) {  // 跳转买家端商品
   if (localStorage.getItem('storeFlag') == 'false') {
-    window.open(`${config.PC_URL}goodsDetail?skuId=${skuId}&goodsId=${goodsId}`, '_blank')
+    window.open(`${config.PC_URL}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`, '_blank')
   } else {
-    window.open(`${config.PC_URL}goodsDetail?skuId=${skuId}&goodsId=${goodsId}`, '_blank')
+    window.open(`${config.PC_URL}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`, '_blank')
   }
 };
 Vue.prototype.linkToStore = function (storeId) {  // 跳转商家端商品
