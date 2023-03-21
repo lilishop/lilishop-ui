@@ -342,11 +342,13 @@ export default {
       this.$refs.form.validate((valid) => {
         if (valid) {
           this.submitLoading = true;
-          const versionUpdateDate = this.$options.filters.unixToDate(
-            this.form.versionUpdateDate / 1000
-          );
-          this.form.versionUpdateDate = versionUpdateDate;
-          this.form.updateTime = versionUpdateDate;
+          if(JSON.stringify(this.form.versionUpdateDate).includes('T')){
+              const versionUpdateDate = this.$options.filters.unixToDate(
+              this.form.versionUpdateDate / 1000
+            );
+            this.form.versionUpdateDate = versionUpdateDate;
+            this.form.updateTime = versionUpdateDate;
+          }
           if (this.modalType == 0) {
             // 添加 避免编辑后传入id等数据 记得删除
             delete this.form.id;
