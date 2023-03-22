@@ -49,7 +49,7 @@ export default {
     // 提交模板
     submitTemplate(pageShow) {
       this.submitLoading = true
-      const modelForm = JSON.parse(JSON.stringify(this.modelForm)) 
+      const modelForm = JSON.parse(JSON.stringify(this.modelForm))
       modelForm.list.unshift(this.$refs.modelForm.navList);
       modelForm.list.unshift(this.$refs.modelForm.topAdvert);
       const data = {
@@ -107,7 +107,7 @@ export default {
   display: flex;
 }
 .model-list {
-  width: 120px;
+  width: 130px;
   height: auto;
   padding: 10px;
   background: #fff;
@@ -121,17 +121,21 @@ export default {
     line-height: 30px;
   }
   .model-item {
-    width: 100px;
+    width: 110px;
     height: 30px;
     background: #eee;
     margin-top: 10px;
     line-height: 30px;
     text-align: center;
     color: #999;
+    transition:0.15s;
+    border-radius: 4px;
     &:hover {
-      border: 1px dashed #409eff;
-      color: #409eff;
+
+      background: $theme_color;
       cursor: move;
+      color: #fff;
+
     }
   }
   .ghost::after {

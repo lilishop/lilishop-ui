@@ -16,7 +16,6 @@ export default {
   methods: {
     // 跳转im客服
     async IMService(id) {
-
       // 获取访问Token
       let accessToken = Storage.getItem("accessToken");
       await this.getIMDetailMethods();

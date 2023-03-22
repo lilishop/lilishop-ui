@@ -5,14 +5,13 @@
       <div class="nav-side"></div>
       <div class="nav-content">
         <!-- 轮播图 -->
-        <Carousel autoplay>
+<!--        autoplay autoplay-speed="10000"-->
+        <Carousel :height="333.9" >
           <CarouselItem v-for="(item, index) in data.options.list" :key="index">
-            <div style="overflow: hidden">
+            <div class="swiper-img" >
               <img
                 :src="item.img"
-                width="790"
                 @click="linkTo(item.url)"
-                height="340"
                 class="hover-pointer"
               />
             </div>
@@ -21,47 +20,62 @@
       </div>
       <div class="nav-right">
         <div class="person-msg">
-          <img :src="userInfo.face" v-if="userInfo.face" alt />
-          <Avatar icon="ios-person" class="mb_10" v-else size="80" />
-          <div>
+          <img class="user-face" :src="userInfo.face || defaultAvatar"  alt />
+          <div class="welcome">
             Hi, {{
               userInfo.nickName || `欢迎来到${config.title}` | secrecyMobile
             }}
           </div>
           <div v-if="userInfo.id">
-            <Button class="btns" shape="circle" @click="$router.push('home')"
-              >会员中心</Button
+            <div class="icon-list flex flex-j-sb" @click="entryControl">
+              <div class="icon-item" :key="index" v-for="(item,index) in recentList">
+                <div class="value">
+                  {{ item.value}}
+                </div>
+                <div class="label">
+                  {{ item.label}}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="flex flex-a-c ">
+            <div class="btns" @click="$router.push('login')" shape="circle"
+            >登录</div
+            >
+            <div class="btns sign-up" @click="$router.push('signUp')" shape="circle"
+            >注册</div
             >
           </div>
-          <div v-else>
-            <Button class="btns" @click="$router.push('login')" shape="circle"
-              >请登录</Button
-            >
+
+          <div class="gray-line"></div>
+          <div class="icon-list flex flex-j-sb" @click="entryControl">
+            <div class="icon-item" :key="index" v-for="(item,index) in entranceList">
+              <img class="icon" :src="require(`@/assets/iconfont/${item.icon}.png`)">
+              <div>
+                {{ item.label}}
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="shop-msg">
-          <div>
-            <span>常见问题</span>
-            <ul class="article-list">
-              <li
-                class="ellipsis"
-                :alt="article.title"
-                v-for="(article, index) in articleList"
-                :key="index"
-                @click="goArticle(article.id)"
-              >
-                {{ article.title }}
-              </li>
-            </ul>
+          <div class="icon-list flex flex-j-sb" @click="entryControl">
+            <div class="icon-item" :key="index" v-for="(item,index) in appendList">
+              <img class="icon" :src="require(`@/assets/iconfont/${item.icon}.png`)">
+              <div>
+                {{ item.label}}
+              </div>
+            </div>
           </div>
+
+
+
         </div>
+
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { articleList } from "@/api/common.js";
+
 import storage from "@/plugins/storage";
 export default {
   name: "modelCarousel",
@@ -69,60 +83,225 @@ export default {
   data() {
     return {
       config: require("@/config"),
+      defaultAvatar: require("@/assets/images/default.png"),
       userInfo: {}, // 用户信息
-      articleList: [], // 常见问题
-      params: {
-        // 请求常见问题参数
-        pageNumber: 1,
-        pageSize: 5,
-        type: "ANNOUNCEMENT",
-        sort: "sort",
-      },
+      entranceList:[
+        {
+          icon:"collage",
+          label:"宝贝收藏"
+        },
+        {
+          icon:"shop",
+          label:"收藏店铺"
+        },
+        {
+          icon:"carts",
+          label:"购物车"
+        },
+        {
+          icon:"story",
+          label:"我的足迹"
+        },
+      ],
+      appendList:[
+        {
+          icon:"support",
+          label:"帮助中心"
+        },
+        {
+          icon:"feedback",
+          label:"问题反馈"
+        },
+        {
+          icon:"notice",
+          label:"平台公告"
+        },
+        {
+          icon:"notification",
+          label:"我的消息"
+        },
+      ],
+      recentList:[
+        {
+          value:"0",
+          label:"购物车"
+        },
+        {
+          value:"0",
+          label:"待收货"
+        },
+        {
+          value:"0",
+          label:"待发货"
+        },
+        {
+          value:"0",
+          label:"代付款"
+        },
+      ],
     };
   },
   methods: {
-    getArticleList() {
-      // 获取常见问题列表
-      articleList(this.params).then((res) => {
-        if (res.success) {
-          this.articleList = res.result.records;
-        }
-      });
-    },
-    goArticle(id) {
-      // 跳转文章详情
-      let routeUrl = this.$router.resolve({
-        path: "/article",
-        query: { id },
-      });
-      window.open(routeUrl.href, "_blank");
+    // 快捷跳转中心
+    entryControl(){
+
     },
   },
-  mounted() {
+   mounted() {
     if (storage.getItem("userInfo"))
       this.userInfo = JSON.parse(storage.getItem("userInfo"));
-    this.getArticleList();
+
   },
 };
 </script>
 
 <style scoped lang="scss">
+.label{
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 14px;
+  text-align: center;
+  letter-spacing: 0px;
+
+  color: #666666;
+}
+.swiper-img{
+  overflow: hidden;
+  width: 637px;
+  height: 329.9px;
+}
+
+.icon-list{
+  width: 216px
+}
+.icon-list:nth-last-of-type(1){
+  margin-top: 20px;
+}
+.hot-box{
+  margin-top: 35px;
+  width: 216px;
+
+}
+.hot-tag{
+  margin-right: 6px;
+  width: 36px;
+  height: 18px;
+  border-radius: 4px;
+  opacity: 1;
+  font-size: 12px;
+  border: 1px solid $theme_color;
+  color: $theme_color;
+  text-align: center;
+  line-height: 18px;
+}
+.gray-line{
+  width: 216px;
+  height: 1px;
+  border: 1px solid #E5E5E5;
+  margin-bottom: 13px;
+}
+.icon{
+  width: 20px !important;
+  height: 20px !important;
+  margin-bottom: 7px;
+}
+.icon-item{
+
+  cursor: pointer;
+  text-align: center;
+  >div{
+    font-size: 11px;
+    font-weight: normal;
+    line-height: 13px;
+    text-align: center;
+    letter-spacing: 0px;
+
+    color: #666666;
+  }
+  >.value{
+    font-size: 14px;
+
+    line-height: 17px;
+    text-align: center;
+    font-weight: 400;
+    letter-spacing: 0px;
+    margin-bottom: 3px;
+    color: $theme_color;
+  }
+  >.label{
+    font-weight: 400;
+    font-size: 12px;
+
+    line-height: 14px;
+    text-align: center;
+    letter-spacing: 0px;
+    color: #666666;
+    margin-bottom: 13px;
+  }
+}
 .model-carousel {
   width: 1200px;
   height: 340px;
   overflow: hidden;
 }
+.hover-pointer{
+  //display: block;
+  //width: 100%;
+  //height: 100%;
+  width: 637px;
+  height: 329.9px;
+  object-fit: cover;
+  border-radius: 10px;
 
+
+}
+.welcome{
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 17px;
+  text-align: center;
+  letter-spacing: 0px;
+
+  color: #333333;
+}
+.hr{
+  width: 216px;
+  height: 1px;
+  border: 1px solid #E5E5E5;
+}
 .btns {
-  background-color:#363634 ;
-  line-height:30px;
-  color: white !important;
+  margin-top: 21px;
+  margin-bottom: 13px;
+  width: 77px;
+  height: 28px;
+  border-radius: 14px;
+  opacity: 1;
+  font-size: 13px;
+  font-weight: normal;
+  line-height: 28px;
+  text-align: center;
+  cursor: pointer;
+  letter-spacing: 0px;
+
+  color: #FFFFFF;
+  background: $theme_color;
 }
-.btns:hover {
-  background-color: #363634;
-  line-height:32px !important;
-  color: #e5d790 !important;
+.sign-up{
+  background: #F39519;
+  margin-left: 10px;
 }
+.avatar{
+  margin-bottom: 13px;
+}
+.user-face{
+
+    margin-bottom: 12px;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+
+}
+
 /* 导航主体 */
 .nav-body {
   width: 1200px;
@@ -131,45 +310,47 @@ export default {
 }
 
 .nav-side {
-  height: 100%;
-  width: 200px;
+  height: 334px;
+  width: 263.2px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
   float: left;
   padding: 0px;
   color: #fff;
   background-color: #6e6568;
+
+
 }
+
 
 /*导航内容*/
 .nav-content {
-  width: 790px;
-  overflow: hidden;
+  width: 637px;
+  margin-left: 10.8px;
+
+  margin-top: 10px;
+  height: 333.9px;
+
   float: left;
   position: relative;
 }
 .nav-right {
   float: left;
-  width: 210px;
+  margin-top: 10px;
+  width: 263.2px;
+  margin-left: 10px;
+
+  border-radius: 10px;
+  background: #FFFFFF;
   .person-msg {
+    height: 333px;
     display: flex;
     align-items: center;
     flex-direction: column;
-    margin: 20px auto;
-    button {
-      height: 30px !important;
-      margin-top: 10px;
-      line-height: 30px;
-      border: none;
-    }
-    .ivu-btn-default {
-      // color: $theme_color;
-      // border-color: $theme_color;
-    }
-    img {
-      margin-bottom: 10px;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-    }
+    padding-top: 28px;
+    padding-bottom: 25px;
+
+
   }
   .shop-msg {
     div {

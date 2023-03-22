@@ -1,22 +1,27 @@
 <template>
   <div class="scroll-show">
     <div class="content clearfix">
-      <cateNav class="cate" :hover="true" :showNavBar="false"></cateNav>
+      <cateNav class="cate" :hover="true" :showNavBar="false"
+               useClass="fixed-show"></cateNav>
       <Search
         class="search-con"
         :hover="true"
+        ref="search"
         :showLogo="false"
         :showTag="false"
+        useClass="fixed-show"
       ></Search>
-      <Icon
-        type="ios-cart-outline"
-        @click="goCartList"
-        class="cart-icon"
-        @mouseenter.native="getCartList"
-      />
-      <i class="cart-badge">{{ cartNum < 100 ? cartNum : "99" }}</i>
+      <div class="flex flex-a-c cart">
+        <Icon
+          type="ios-cart-outline"
+          @click="goCartList"
+          class="cart-icon"
+          @mouseenter.native="getCartList"
+        />
+        <i class="cart-badge">{{ cartNum < 100 ? cartNum : "99" }}</i>
+      </div>
     </div>
-    <hr class="hr"/>
+
   </div>
 </template>
 <script>
@@ -53,6 +58,7 @@ export default {
     },
   },
   mounted() {
+
     if (storage.getItem("userInfo")) {
       this.userInfo = JSON.parse(storage.getItem("userInfo"));
     }
@@ -60,14 +66,11 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.hr{
-  height:1px;
-  background:$theme_color;
-}
+
 .content {
   width: 1200px;
   height: 40px;
-  margin: 10px auto;
+  margin: 0 auto;
   position: relative;
 }
 .cate {
@@ -80,11 +83,14 @@ export default {
   overflow: hidden;
   margin-top: -27px;
 }
+.cart{
+  height: 60px;
+}
 .cart-icon {
   width: 30px;
   float: left;
   font-size: 25px;
-  margin-top: 8px;
+
   color: $theme_color;
   z-index: 1;
   position: relative;
@@ -106,6 +112,6 @@ export default {
   line-height: 17px;
   text-align: center;
   z-index: 5;
-  top: 3px;
+  top: 10px;
 }
 </style>

@@ -81,6 +81,11 @@
     <template v-if="element.type == 'recommend'">
       <recommend :data="element" class="mb_20 width_1200_auto"></recommend>
     </template>
+
+    <!-- 一行三列 -->
+    <template v-if="element.type == 'oneRowThreeColumns'">
+      <oneRowThreeColumns :data="element" class="mb_20 width_1200_auto"></oneRowThreeColumns>
+    </template>
     <!-- 新品排行 -->
     <template v-if="element.type == 'newGoodsSort'">
       <new-goods-sort
@@ -100,7 +105,7 @@
       <div style="width: 100%; text-align: center">
         <img
           width="1200"
-          class="hover-pointer mb_20"
+          class="hover-pointer mb_20 bannerAd"
           @click="linkTo(element.options.url)"
           :src="element.options.img"
           alt=""
@@ -126,6 +131,7 @@ import NewGoodsSort from "./modelList/NewGoodsSort.vue";
 import Recommend from "./modelList/Recommend.vue";
 import NotEnough from "./modelList/NotEnough.vue";
 import Seckill from "./modelList/Seckill.vue";
+import oneRowThreeColumns from "./modelList/oneRowThreeColumns.vue";
 
 export default {
   name: "modelFormItem",
@@ -139,6 +145,7 @@ export default {
     FirstPageAdvert,
     NotEnough,
     Seckill,
+    oneRowThreeColumns
   },
   data() {
     return {
@@ -153,7 +160,11 @@ export default {
   position: relative;
   margin-bottom: 10px;
 }
-
+.bannerAd{
+  width: 1183px;
+  height: 166.6px;
+  border-radius: 10px;
+}
 /** 热门广告 */
 .advert-list {
   background: $theme_color;
@@ -201,6 +212,6 @@ export default {
 .width_1200_auto {
   width: 1200px;
   margin: 0 auto;
-  background-color: #fff;
+
 }
 </style>

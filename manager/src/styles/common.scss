@@ -13,7 +13,7 @@
   border-radius: 1em;
   background-color: rgba(50,50,50,.1);
 }
-.ivu-table table{ 
+.ivu-table table{
   width: 100%!important;
 }
 
@@ -98,5 +98,31 @@ $theme_color: #FF5C58;
   color: $theme_color !important;
 }
 $bg_color: #f1f6fa;
+
+.wes {
+  /* 多出部分用省略号表示 , 用于一行 */
+  overflow: hidden;
+  word-wrap: normal;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.wes-2 {
+  /* 适用于webkit内核和移动端 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.wes-3 {
+  /* 适用于webkit内核和移动端 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+
 
 @import "./table-common.scss";

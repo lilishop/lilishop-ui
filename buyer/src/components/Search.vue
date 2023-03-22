@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div class="container">
+  <div class="navbar" :class="{'small-search-box':useClass == 'fixed-show'}">
+    <div class="container flex flex-a-c">
       <img
         :src="$store.state.logoImg"
         v-if="showLogo"
@@ -8,31 +8,36 @@
         alt=""
         @click="$router.push('/')"
       />
-      <i-input
-        v-model="searchData"
-        size="large"
-        class="search"
-        placeholder="输入你想查找的商品"
-        @keyup.enter.native="search"
-      >
-        <Button v-if="!store"  slot="append" @click="search">搜索</Button>
-      </i-input>
-      <div v-if="store" class="btn-div">
-        <Button class="store-search" type="warning" @click="searchStore">搜本店</Button>
-        <Button class="store-search" type="primary" @click="search">搜全站</Button>
-      </div>
-      <template v-if="showTag">
-        <div style="height:12px" v-if="promotionTags.length === 0"></div>
-        <div v-else>
-          <Tag
-            v-for="(item, index) in promotionTags"
-            :key="index"
-            class="mr_10"
-          >
-            <span class="hover-color" @click="selectTags(item)">{{ item }}</span>
-          </Tag>
+      <div :class="{'small-search-box':useClass == 'fixed-show'}" class="search-box">
+        <i-input
+          v-model="searchData"
+          size="large"
+          class="search "
+          placeholder="输入你想查找的商品"
+          @keyup.enter.native="search"
+        >
+
+          <div class="search-icon" slot="append">
+            <Icon type="ios-search" size="21"/>
+          </div>
+        </i-input>
+        <div v-if="store" class="btn-div">
+          <Button class="store-search" type="warning" @click="searchStore">搜本店</Button>
+          <Button class="store-search" type="primary" @click="search">搜全站</Button>
         </div>
-      </template>
+        <template v-if="showTag">
+          <div style="height:12px" v-if="promotionTags.length === 0"></div>
+          <div v-else class="history-list flex">
+            <div
+              v-for="(item, index) in promotionTags"
+              :key="index"
+              class="mr_10"
+            >
+              <span class="history-item" @click="selectTags(item)">{{ item }}</span>
+            </div>
+          </div>
+        </template>
+      </div>
     </div>
   </div>
 </template>
@@ -40,6 +45,7 @@
 <script>
 import storage from '@/plugins/storage.js'
 import {hotWords} from '@/api/goods.js'
+
 export default {
   name: 'search',
   props: {
@@ -58,30 +64,34 @@ export default {
     hover: {
       type: Boolean,
       default: false
+    },
+    useClass:{
+      type:null,
+      default:''
     }
   },
-  data () {
+  data() {
     return {
       searchData: '' // 搜索内容
     };
   },
   methods: {
-    selectTags (item) { // 选择热门标签
+    selectTags(item) { // 选择热门标签
       this.searchData = item;
       this.search();
     },
-    search () { // 全平台搜索商品
+    search() { // 全平台搜索商品
       this.$router.push({
         path: '/goodsList',
-        query: { keyword: this.searchData }
+        query: {keyword: this.searchData}
       });
     },
-    searchStore () { // 店铺搜索商品
+    searchStore() { // 店铺搜索商品
       this.$emit('search', this.searchData)
     }
   },
   computed: {
-    promotionTags () {
+    promotionTags() {
       if (this.$store.state.hotWordsList) {
         return JSON.parse(this.$store.state.hotWordsList)
       } else {
@@ -89,7 +99,7 @@ export default {
       }
     }
   },
-  created () {
+  created() {
     this.searchData = this.$route.query.keyword
     if (!this.hover) { // 首页顶部固定搜索栏不调用热词接口
       // 搜索热词每5分钟请求一次
@@ -111,27 +121,65 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-.container {
-  margin: 30px auto;
-  width: 460px;
-  position: relative;
+.navbar {
+  height: 113px;
+  background: #fff;
 }
+.small-search-box{
+  height: 60px;
+
+  margin: 0 !important;
+}
+.search-input {
+
+}
+
+.container {
+  position: relative;
+  width: 1200px;
+  margin: 0 auto;
+  height: 100%;
+}
+
 .search {
+  width: 778.4px;
   margin: 10px 0px 5px 0;
+
+  border-radius: 18.9px;
+
+
   /deep/ .ivu-input.ivu-input-large {
-    border: 2px solid $theme_color;
-    font-size: 12px;
-    height: 34px;
+    border: 1.4px solid $theme_color;
+    box-sizing: border-box;
+    border-radius: 19.6px;
+    position: relative;
+    padding-left: 26px;
+    font-size: 14px;
+    font-weight: normal;
+    height: 37.8px;
+    color: #999;
     &:focus {
       box-shadow: none;
     }
   }
+
   /deep/ .ivu-input-group-append {
-    border: 1px solid $theme_color;
-    border-left: none;
-    height: 30px;
+    border-radius: 19.6px !important;
+    cursor: pointer;
+    box-sizing: border-box;
+    border: 1.4px solid $theme_color;
+    width: 67.2px;
+    height: 37.8px;
+    position: absolute;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 0;
+    z-index: 99;
     background-color: $theme_color;
     color: #ffffff;
+
     button {
       font-size: 14px;
       font-weight: 600;
@@ -139,28 +187,46 @@ export default {
     }
   }
 }
+.search-box{
+  margin-left: 28px;
+}
 .logo-img {
-  position: absolute;
-  left: -360px;
-  top: -9px;
   max-width: 150px;
   cursor: pointer;
 }
-.store-search{
-  width:55.6px;
+
+.store-search {
+  width: 55.6px;
   padding: 0 9px;
   border-radius: 0;
   border-radius: 3px;
-  &:nth-child(2){
-    width:55px;
+
+  &:nth-child(2) {
+    width: 55px;
     margin-left: -2px;
     border-radius: 3px;
   }
 }
-.btn-div{
+
+.btn-div {
   position: relative;
   height: 0px;
   top: -38px;
   left: 352px;
+}
+
+.history-list {
+  margin-top: 2px;
+  margin-left: 28px;
+}
+
+.history-item {
+  font-size: 13px;
+  font-weight: normal;
+  line-height: 16px;
+  letter-spacing: 0px;
+  margin-right: 17px;
+  color: #666666;
+  cursor: pointer;
 }
 </style>

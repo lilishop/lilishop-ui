@@ -3,20 +3,20 @@
     <footer class="footer">
       <div class="clearfix"></div>
       <div class="icon-row">
-        <div class="footer-icon">
-          <h5 class="footer-icon-child"></h5>
+        <div class="footer-icon flex flex-a-c">
+          <h5 class="footer-icon-child">多</h5>
           <span class="footer-icon-text">品类齐全，轻松购物</span>
         </div>
-        <div class="footer-icon">
-          <h5 class="footer-icon-child footer-icon-child-2"></h5>
+        <div class="footer-icon flex flex-a-c">
+          <h5 class="footer-icon-child footer-icon-child-2">块</h5>
           <span class="footer-icon-text">多仓直发，极速配送</span>
         </div>
-        <div class="footer-icon">
-          <h5 class="footer-icon-child footer-icon-child-3"></h5>
+        <div class="footer-icon flex flex-a-c">
+          <h5 class="footer-icon-child footer-icon-child-3">好</h5>
           <span class="footer-icon-text">正品行货，精致服务</span>
         </div>
-        <div class="footer-icon">
-          <h5 class="footer-icon-child footer-icon-child-4"></h5>
+        <div class="footer-icon flex flex-a-c">
+          <h5 class="footer-icon-child footer-icon-child-4">省</h5>
           <span class="footer-icon-text">天天低价，畅选无忧</span>
         </div>
       </div>
@@ -37,27 +37,28 @@
               </li>
 
             </ul>
-            <div class="icp">
-              <li v-if="config.icpCard">
-                <a :href='"https://tsm.miit.gov.cn/dxxzsp/xkz/xkzgl/resource/qiyesearch.jsp?num="+config.icpCard+"&type=xuke"' target="_blank">
-                  {{config.icpCard}}
-                </a>
-              </li>
-              <li v-if="config.icpMessage" class="footer-bottmom">
-                <a href="https://beian.miit.gov.cn/" target="_blank">
-                  {{config.icpMessage}}
-                </a>
-              </li>
-            </div>
+
           </div>
 
-          <div class="information footer-bottmom">
-
-            <a class="flex " :href="config.company.href">
-              <img class="zhizhao" src="@/assets/images/zhizhao.jpg" mode="" />{{config.company.name}}
-            </a>
           </div>
+        <div class="information footer-bottmom">
+          <div class="icp">
+            <li v-if="config.icpCard">
+              <a :href='"https://tsm.miit.gov.cn/dxxzsp/xkz/xkzgl/resource/qiyesearch.jsp?num="+config.icpCard+"&type=xuke"' target="_blank">
+                {{config.icpCard}}
+              </a>
+            </li>
+            <li v-if="config.icpMessage" class="footer-bottmom">
+              <a href="https://beian.miit.gov.cn/" target="_blank">
+                {{config.icpMessage}}
+              </a>
+            </li>
+          </div>
+          <a class="flex " :href="config.company.href">
+            <img class="zhizhao" src="@/assets/images/zhizhao.jpg" mode="" />{{config.company.name}}
+          </a>
         </div>
+
         <div class="clearfix"></div>
         <div class="copyright">
           <p>Copyright © {{year}} {{config.title}}</p>
@@ -77,7 +78,7 @@ export default {
       guideArr: [
         // 导航链接
         ["购物指南", "购物流程", "会员介绍", "生活旅行", "常见问题"],
-        ["配送方式", "上门自提", "配送服务查询", "收取标准", "物流规则"],
+        ["配送方式", "上门自提", "配送查询", "收取标准", "物流规则"],
         ["支付方式", "在线支付", "公司转账", "余额支付", "积分支付"],
         ["售后服务", "售后政策", "退款说明", "返修/退货", "取消订单"],
       ],
@@ -101,40 +102,36 @@ export default {
 /*****************************底 部 开 始*****************************/
 .footer {
   width: 100%;
-  padding-top: 30px;
-
-  @include background_color($light_background_color);
+  height: 370px;
+  background: #FFFFFF;
 }
 .icon-row {
-  margin: 15px auto;
-  padding-top: 8px;
-  width: 1000px;
-  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 1056px;
+  height: 71px;
+  margin: 0 auto;
 }
 .footer-icon {
-  margin-left: 17px;
-  margin-right: 17px;
   float: left;
 }
 .footer-icon-child {
-  margin-top: 10px;
   overflow: hidden;
-  position: absolute;
-  width: 36px;
-  height: 42px;
-  background-image: url("../../assets/images/footer/ico_service.png");
-  text-indent: -999px;
+  width: 36.4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18.2px;
+  font-weight: normal;
+  color: #333;
+  height: 36.4px;
+  border: 1.4px solid #CECECE;
+  border-radius: 50%;
 }
-.footer-icon-child-2 {
-  background-position: 0 -43px;
-}
-.footer-icon-child-3 {
-  background-position: 0 -86px;
-}
-.footer-icon-child-4 {
-  background-position: 0 -129px;
-}
+
 .icp {
+  margin-right: 30px !important;
   >*{
     margin: 0 4px;
   }
@@ -148,59 +145,69 @@ export default {
   }
 }
 .footer-icon-text {
-  margin-left: 45px;
-  font-size: 18px;
-  font-weight: bold;
-  line-height: 64px;
+  margin-left: 11px;
+  font-size: 16px;
+
+  font-weight: normal;
+
+  text-align: center;
 }
 .service-intro {
   width: 100%;
   border-top: 1px solid $border_color;
 }
 .servece-type {
-  margin: 15px auto;
-  width: 800px;
+  width: 952px;
+  margin: 22px auto 10px auto;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-}
 
+}
+.servece-type-info{
+
+}
 .servece-type-info ul {
   list-style: none;
 }
 .servece-type-info li {
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
-  line-height: 26px;
+  font-weight: normal;
+  line-height: 15px;
+  text-align: center;
+  margin-bottom: 13px;
+  color: #333;
 }
-.servece-type-info li:hover{
-  color:#b8b8be;
-}
+
 .servece-type-info li:first-child {
-  font-size: 16px;
-  line-height: 28px;
-  font-weight: bold;
+  font-size: 14.82px;
+  font-weight: normal;
+  line-height: 18px;
+
+  letter-spacing: 0px;
+  margin-bottom: 17px;
+  color: #333333;
 }
-.servece-type-info li:first-child:hover{
-  // font-size:15px;
-  // font-weight: bold;
-  color:#b8b8be;
-}
+
 .friend-link {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: center;
   width: 908px;
   padding: 10px 0;
   margin: 0px auto;
   border-top: 1px solid $border_color;
 }
 .information {
+  margin-top: 23px;
+  margin-bottom: 21px;
   display: flex;
-  flex-direction: column;
-  > * {
-    margin: 2px 0;
-  }
+  justify-content: center;
+
+}
+a{
+  color: #3457FF;
 }
 .zhizhao {
   width: 20px;
@@ -213,35 +220,38 @@ export default {
 .friend-link-item li {
   padding: 5px 0px;
   float: left;
+  margin-right: 59px;
+  font-weight: normal;
+  line-height: 13px;
+  color: #333333;
 }
 
-.friend-link-item li:hover{
-  color:#b8b8be;
-  margin-top:-2px;
-}
-.footer-bottmom:hover{
-   margin-top:0 !important;
-}
-.footer-bottmom>a:hover{
-   color:#e4393c;
-}
+
+
 .link-item {
   padding: 0px 8px;
   cursor: pointer;
-  border-right: 1px solid $border_color;
+
 }
 .link-last-item {
   border: none;
 }
 .copyright {
   width: 100%;
-  line-height: 30px;
+  cursor: pointer;
   text-align: center;
+  height:25px;
+  opacity: 1;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 13px;
+
+  letter-spacing: 0px;
+
+  color: #959595;
 }
-.copyright a {
-  color: #232323;
-  font-size: 20px;
-}
+
 .footer-icon-text {
   @include title_color($light_title_color);
 }

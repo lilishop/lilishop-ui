@@ -301,6 +301,25 @@ export const modelData = [{
     },
   },
   {
+    type: 'seckill-only-album',
+    name: '促销活动-图片版',
+    icon: 'md-image',
+    showName: '',
+    options: {
+      list: [{
+        time: 6,
+        goodsList: [{
+          img: require('@/assets/nav/1.jpg'),
+
+          url: ''
+        },
+
+        ]
+      },
+      ]
+    },
+  },
+  {
     type: 'discountAdvert',
     name: '折扣广告',
     icon: 'md-image',
@@ -679,6 +698,67 @@ export const modelData = [{
       img: '',
       url: '',
       size: '1200*自定义'
+    },
+  },
+  {
+    type: 'oneRowThreeColumns',
+    name: '一行三列',
+    icon: 'md-image',
+    options: {
+      list:[
+        {
+          img: require('@/assets/nav/decorate8.png'),
+          url:"",
+          size:"385*165"
+        },
+        {
+          img: require('@/assets/nav/decorate8.png'),
+          url:"",
+          size:"385*165"
+        },
+        {
+          img: require('@/assets/nav/decorate8.png'),
+          url:"",
+          size:"385*165"
+        },
+      ]
+    },
+  },
+  {
+    type: 'goodsType',
+    name: '商品模块',
+    icon: 'md-image',
+    options: {
+      title:"智能家居",
+      labels:[
+        {
+          label: '音箱',
+          ___index:0,
+
+        },
+        {
+          label: '门锁',
+          ___index:1
+        },
+        {
+          label: '路由器',
+          ___index:2
+        },
+        {
+          label: '智能设备',
+          ___index:3
+        },
+      ],
+      list:[
+        {
+          img: "https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+          price: "120",
+          title:" 微软 (Microsoft) Xbox 无线控制器/手柄 湛蓝色 | 3.5mm耳机接口蓝牙连接 Xbox主机电脑平板通用",
+          desc:"万家宝藏好店等你来",
+          ___index: 0
+        },
+
+      ]
     },
   },
   {

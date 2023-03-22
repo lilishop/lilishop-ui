@@ -22,7 +22,7 @@
                 <Button type="error" @click="showCpmodel=false">确定</Button>
             </template>
         </Modal>
-    <drawer></drawer>
+
     <!-- 固定头部 -->
     <hover-search class="hover-search" :class="{show: topSearchShow}"></hover-search>
     <!-- 顶部广告 -->
@@ -37,6 +37,8 @@
     <model-form ref="modelForm" :data="modelForm"></model-form>
     <!-- 底部栏 -->
     <BaseFooter></BaseFooter>
+    <!-- 侧边栏 -->
+    <fixedBar class="fixed-bar"></fixedBar>
   </div>
 </template>
 
@@ -44,6 +46,7 @@
 import Search from '@/components/Search';
 import ModelForm from '@/components/indexDecorate/ModelForm';
 import HoverSearch from '@/components/header/hoverSearch';
+import fixedBar from '@/components/fixed/index';
 import storage from "@/plugins/storage";
 import { indexData,getAutoCoup } from '@/api/index.js';
 import {seckillByDay} from '@/api/promotion'
@@ -77,7 +80,7 @@ export default {
     };
   },
   // created(){
-   
+
   // },
   methods: {
     // 优惠券可用范围
@@ -114,7 +117,7 @@ export default {
         // window.localStorage.setItem('getTimes',datas)//存储缓存
         this.getcps()
       }
-    },  
+    },
     getcps(){
       console.log(123123)
       let data = new Date()
@@ -139,10 +142,10 @@ export default {
               storage.setItem('getTimes',datas)//存储缓存
             }
       })
-    }, 
+    },
     handleReachBottom(){
-      console.log(111)
-    } , 
+
+    } ,
     getIndexData () {
       // 获取首页装修数据
       indexData({ clientType: 'PC' }).then(async (res) => {
@@ -181,7 +184,8 @@ export default {
   components: {
     Search,
     ModelForm,
-    HoverSearch
+    HoverSearch,
+    fixedBar
   }
 };
 </script>
@@ -213,4 +217,37 @@ export default {
   transform: translateZ(0);
   top: 0;
 }
+
+
+
+
+/* 2K */
+@media screen and (min-width: 2561px) and (max-width: 3840px) {
+  /* 样式 */
+  .fixed-bar{
+    position: fixed;
+    right:900px;
+    top: 500px;
+  }
+}
+
+/* 1080p */
+@media screen and (max-width: 2560px) {
+  /* 样式 */
+  .fixed-bar{
+    position: fixed;
+    right:300px;
+    top: 500px;
+  }
+}
+
+@media screen and (max-width: 2025px) {
+  /* 样式 */
+  .fixed-bar{
+    position: fixed;
+    right:150px;
+    top: 400px;
+  }
+}
+
 </style>
