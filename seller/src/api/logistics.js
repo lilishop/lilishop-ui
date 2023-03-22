@@ -38,7 +38,7 @@ export const getCheckedOn = params =>{
 
 //获取物流设置
 export const getLogisticsSetting = () =>{
-  return getRequest(`/other/logistics/setting`);
+  return getRequest(`/other/logistics`);
 }
 
 export const getShunFengFaceSheet = (url,headers) =>{

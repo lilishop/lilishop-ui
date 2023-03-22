@@ -169,7 +169,7 @@ export default {
     // 开启或关闭活动
     openOrClose(row) {
       let name = "开启";
-      if (row.promotionStatus === "START") {
+      if (row.promotionStatus === 'NEW' ||row.promotionStatus === "START") {
         name = "关闭";
         this.$Modal.confirm({
           title: "提示",

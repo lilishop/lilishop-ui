@@ -44,9 +44,9 @@ import ShowGoods from "@/components/goodsDetail/ShowGoods";
 import ShowGoodsDetail from "@/components/goodsDetail/ShowGoodsDetail";
 import { goodsSkuDetail } from "@/api/goods";
 import {
-  cancelCollect,
-  collectGoods,
-  isCollection,
+  cancelStoreCollect,
+  collectStore,
+  isStoreCollection,
   getGoodsDistribution,
 } from "@/api/member";
 import { getDetailById } from "@/api/shopentry";
@@ -121,7 +121,7 @@ export default {
             this.$set(this, "goodsMsg", res.result);
             // 判断是否收藏
             if (this.Cookies.getItem("userInfo")) {
-              isCollection("STORE", this.goodsMsg.data.storeId).then((res) => {
+              isStoreCollection("STORE", this.goodsMsg.data.storeId).then((res) => {
                 if (res.success && res.result) {
                   this.storeCollected = true;
                 }
@@ -159,13 +159,13 @@ export default {
     async collect () {
       // 收藏店铺
       if (this.storeCollected) {
-        let cancel = await cancelCollect("STORE", this.goodsMsg.data.storeId);
+        let cancel = await cancelStoreCollect("STORE", this.goodsMsg.data.storeId);
         if (cancel.success) {
           this.$Message.success("已取消收藏");
           this.storeCollected = false;
         }
       } else {
-        let collect = await collectGoods("STORE", this.goodsMsg.data.storeId);
+        let collect = await collectStore("STORE", this.goodsMsg.data.storeId);
         if (collect.code === 200) {
           this.storeCollected = true;
           this.$Message.success("收藏店铺成功,可以前往个人中心我的收藏查看");

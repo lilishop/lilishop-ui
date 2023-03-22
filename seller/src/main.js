@@ -7,7 +7,7 @@ import vueQr from "vue-qr";
 
 import liliDialog from '@/views/lili-dialog'
 import App from "./App";
-import { router } from "./router/index";
+import {router} from "./router/index";
 import store from "./store";
 import {
   getRequest,
@@ -17,7 +17,7 @@ import {
   importRequest,
   uploadFileRequest
 } from "@/libs/axios";
-import { setStore, getStore, removeStore } from "@/libs/storage";
+import {setStore, getStore, removeStore} from "@/libs/storage";
 
 import i18nBox from '@/views/lili-components/i18n-translate'
 import util from "@/libs/util";
@@ -26,10 +26,12 @@ import VueLazyload from "vue-lazyload";
 
 import * as filters from "@/utils/filters"; // global filter
 
-import { md5 } from "@/utils/md5.js";
-const { aMapSecurityJsCode } = require("@/config");
+import {md5} from "@/utils/md5.js";
+
+const {aMapSecurityJsCode, inputMaxLength} = require("@/config");
 // 打印
 import Print from 'vue-print-nb';
+
 Vue.use(Print);
 // 高德安全密钥
 if (aMapSecurityJsCode) {
@@ -44,10 +46,14 @@ Vue.use(VueLazyload, {
   loading: require("./assets/loading2.gif")
 });
 
-Vue.use(ViewUI);
-Vue.component('liliDialog',liliDialog)
-Vue.component('i18nBox',i18nBox)
-Vue.component('liliDialog',liliDialog)
+
+const copyViewUi = {...ViewUI}
+copyViewUi.Input.props.maxlength.default = inputMaxLength // 挂载最大输入值
+Vue.use(copyViewUi);
+
+Vue.component('liliDialog', liliDialog)
+Vue.component('i18nBox', i18nBox)
+Vue.component('liliDialog', liliDialog)
 Vue.component("vue-qr", vueQr); //此处将vue-qr添加为全局组件
 
 // 挂载全局使用的方法
@@ -63,19 +69,19 @@ Vue.prototype.removeStore = removeStore;
 Vue.prototype.md5 = md5;
 const PC_URL = BASE.PC_URL; // 跳转买家端地址 pc端
 const WAP_URL = BASE.WAP_URL; // 跳转买家端地址 wap端
-Vue.prototype.linkTo = function(goodsId, skuId) {
+Vue.prototype.linkTo = function (goodsId, skuId) {
   // 跳转买家端商品
   window.open(
     `${PC_URL}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`,
     "_blank"
   );
 };
-Vue.prototype.wapLinkTo = function(goodsId, skuId) {
+Vue.prototype.wapLinkTo = function (goodsId, skuId) {
   // app端二维码
   return `${WAP_URL}/pages/product/goods?id=${skuId}&goodsId=${goodsId}`;
 };
 
-Array.prototype.remove = function(from, to) {
+Array.prototype.remove = function (from, to) {
   var rest = this.slice((to || from) + 1 || this.length);
   this.length = from < 0 ? this.length + from : from;
   return this.push.apply(this, rest);

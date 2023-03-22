@@ -14,7 +14,7 @@
         <InputNumber :min="1" :max="365" style="width:100px;" v-model="form.distributionDay"></InputNumber>
       </FormItem>
       <FormItem label="分销结算天数" prop="cashDay">
-        <InputNumber :min="1"  :max="365"  style="width:100px;" v-model="form.cashDay"></InputNumber>
+        <InputNumber :min="0"  :max="365"  style="width:100px;" v-model="form.cashDay"></InputNumber>
       </FormItem>
       <FormItem>
         <Button type="primary" @click="submit">保存</Button>
