@@ -882,9 +882,11 @@ export default {
         this.$refs['faceSheetForm'].validate((valid) => {
           if (valid) {
             API_Order.getOrderFaceSheet(this.sn, this.faceSheetForm).then(res => {
-              if (res.success) {
+              if (res.result && res.result.printTemplate) {
                 this.someJSONdata = res.result.printTemplate;
-                this.Toprints();
+                this.Toprints();               
+              }else {
+                this.$Message.error(res.result.Reason);
               }
             })
           }
