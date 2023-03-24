@@ -261,7 +261,7 @@
       <Alert type="warning"> 下载二维码或者复制链接分享商品 </Alert>
       <div style="width: 200px; height: 200px; border: 1px solid #eee">
         <vue-qr
-          :text="qrcode"
+          :text="qrcodeH5"
           :callback="qrcodeData"
           :margin="0"
           colorDark="#000"
@@ -380,6 +380,7 @@ export default {
         order: "desc",
       },
       qrcode: "", // 二维码
+      qrcodeH5:"",//H5二维码
       qrcodeShow: false, // 显示二维码
       base64Img: "", // base64编码
       goodsNameCurr: "", // 当前分销商品名称
@@ -470,6 +471,7 @@ export default {
     fenxiao(row) {
       // 分销商品
       this.qrcode = `${location.origin}/goodsDetail?skuId=${row.skuId}&goodsId=${row.goodsId}&distributionId=${this.result.id}`;
+      this.qrcodeH5 = `${location.origin}/pages/product/goods?skuId=${row.skuId}&goodsId=${row.goodsId}&distributionId=${this.result.id}`;
       this.goodsNameCurr = row.goodsName;
       this.qrcodeShow = true;
     },
