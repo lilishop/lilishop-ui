@@ -226,7 +226,23 @@
         >
       </Alert>
     </div>
-
+  <!-- 分销资格被清退 -->
+  <div v-if="status === 4">
+        <Alert type="error">
+          您的分销资格已被清退。请联系管理员或进行申诉
+          
+          <Button style="margin-left: 50px;" type="warning" @click="repaying">申诉</Button>
+        </Alert>
+  </div>
+     <!-- 分销申诉审核 -->
+     <div v-if="status === 5">
+      <Alert type="success">
+        您提交的申诉正在审核
+        <template slot="desc"
+          >提交认证申请后，工作人员将在三个工作日进行核对完成审核</template
+        >
+      </Alert>
+    </div>
     <Modal v-model="withdrawApplyModal" width="530">
       <p slot="header">
         <Icon type="edit"></Icon>
@@ -245,7 +261,7 @@
       <Alert type="warning"> 下载二维码或者复制链接分享商品 </Alert>
       <div style="width: 200px; height: 200px; border: 1px solid #eee">
         <vue-qr
-          :text="qrcode"
+          :text="qrcodeH5"
           :callback="qrcodeData"
           :margin="0"
           colorDark="#000"
@@ -364,6 +380,7 @@ export default {
         order: "desc",
       },
       qrcode: "", // 二维码
+      qrcodeH5:"",//H5二维码
       qrcodeShow: false, // 显示二维码
       base64Img: "", // base64编码
       goodsNameCurr: "", // 当前分销商品名称
@@ -454,6 +471,7 @@ export default {
     fenxiao(row) {
       // 分销商品
       this.qrcode = `${location.origin}/goodsDetail?skuId=${row.skuId}&goodsId=${row.goodsId}&distributionId=${this.result.id}`;
+      this.qrcodeH5 = `${location.origin}/pages/product/goods?skuId=${row.skuId}&goodsId=${row.goodsId}&distributionId=${this.result.id}`;
       this.goodsNameCurr = row.goodsName;
       this.qrcodeShow = true;
     },
@@ -469,19 +487,32 @@ export default {
         if (res.success) this.logData = res.result;
       });
     },
+    //申诉
+    repaying(){
+      applyDistribution().then((res) => {
+            this.applyLoading = false;
+            if (res.success) {
+              this.$Message.success("申诉已提交，请等待管理员审核");
+              // this.status = 1;
+            }
+          });
+    },
     distribution() {
       // 获取分销商信息
       distribution().then((res) => {
         if (res.result) {
           this.result = res.result;
           let type = res.result.distributionStatus;
-
           if (type === "PASS") {
             this.status = 2;
             this.getGoodsData();
-          } else if (type === "RETREAT" || type === "REFUSE") {
+          } else if ( type === "REFUSE") {
             this.status = 0;
-          } else {
+          } else if (type === "RETREAT") {
+            this.status = 4;
+          }else if (type === "APPEAL") {
+            this.status = 5;
+          }else {
             this.status = 1;
           }
         } else if (!res.data.success && res.data.code === 22000) {

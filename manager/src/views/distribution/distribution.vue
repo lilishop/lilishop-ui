@@ -149,6 +149,8 @@ export default {
               return h("Tag", {props: {color: "volcano",},},"清退");
             } else if (params.row.distributionStatus == "REFUSE") {
               return h("Tag", {props: {color: "red",},},"拒绝");
+            }else if (params.row.distributionStatus == "APPEAL") {
+              return h("Tag", {props: {color: "geekblue",},},"申诉中");
             }
           },
         },
@@ -178,7 +180,7 @@ export default {
                     style: {
                       marginRight: "5px",
                       display:
-                        params.row.distributionStatus != "RETREAT"
+                        params.row.distributionStatus != "RETREAT" && params.row.distributionStatus != "APPEAL"
                           ? "block"
                           : "none",
                     },
@@ -200,7 +202,7 @@ export default {
                     style: {
                       marginRight: "5px",
                       display:
-                        params.row.distributionStatus == "RETREAT"
+                        params.row.distributionStatus == "RETREAT" || params.row.distributionStatus == "APPEAL"
                           ? "block"
                           : "none",
                     },
