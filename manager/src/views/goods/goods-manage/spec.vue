@@ -1,98 +1,44 @@
 <template>
   <div class="search">
     <Card>
-      <Form
-        @keydown.enter.native="handleSearch"
-        ref="searchForm"
-        :model="searchForm"
-        inline
-        :label-width="70"
-        class="search-form"
-      >
+      <Form @keydown.enter.native="handleSearch" ref="searchForm" :model="searchForm" inline :label-width="70"
+        class="search-form">
         <Form-item label="规格名称" prop="specName">
-          <Input
-            type="text"
-            v-model="searchForm.specName"
-            placeholder="请输入规格名称"
-            clearable
-            style="width: 200px"
-          />
+          <Input type="text" v-model="searchForm.specName" placeholder="请输入规格名称" clearable style="width: 200px" />
         </Form-item>
-        <Button @click="handleSearch" type="primary" class="search-btn"
-          >搜索</Button
-        >
+        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
       </Form>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加</Button>
         <Button @click="delAll">批量删除</Button>
       </Row>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="changeSelect"
-      >
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"
+        @on-sort-change="changeSort" @on-selection-change="changeSelect">
       </Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
-          :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
-          size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
+          @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator
+          show-sizer></Page>
       </Row>
     </Card>
-    <Modal
-      :title="modalTitle"
-      v-model="modalVisible"
-      :mask-closable="false"
-      :width="500"
-    >
+    <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="500">
       <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
         <FormItem label="规格名称" prop="specName">
-          <Input
-            v-model="form.specName"
-            maxlength="30"
-            clearable
-            style="width: 100%"
-          />
+          <Input v-model="form.specName" maxlength="30" clearable style="width: 100%" />
         </FormItem>
+        {{ form }}
         <FormItem label="规格值" prop="specValue">
-          <Select
-            v-model="form.specValue"
-            placeholder="输入后回车添加"
-            multiple
-            filterable
-            allow-create
-            :popper-append-to-body="false"
-            popper-class="spec-values-popper"
-            style="width: 100%; text-align: left; margin-right: 10px"
-          >
-            <Option
-              v-for="item in specValue"
-              :value="item"
-              :label="item"
-              :key="item"
-            >
+          <Select v-model="form.specValue" placeholder="输入后回车添加" multiple filterable allow-create
+            :popper-append-to-body="false" popper-class="spec-values-popper"
+            style="width: 100%; text-align: left; margin-right: 10px">
+            <Option v-for="item in specValue" :value="item" :label="item" :key="item">
             </Option>
           </Select>
         </FormItem>
       </Form>
       <div slot="footer">
         <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="saveSpec"
-          >提交</Button
-        >
+        <Button type="primary" :loading="submitLoading" @click="saveSpec">提交</Button>
       </div>
     </Modal>
   </div>
@@ -310,6 +256,7 @@ export default {
     },
     //弹出编辑框
     edit(v) {
+      console.log(v);
       this.modalType = 1;
       this.modalTitle = "编辑";
       // 转换null为""
@@ -319,18 +266,19 @@ export default {
         }
       }
       let localVal = v.specValue;
-
+      console.log(localVal.split(","))
       this.form.specName = v.specName;
       this.form.id = v.id;
-      this.form.specValue = v.specValue;
-
+      this.$nextTick(() => {
+        this.$set(this.form, 'specValue', localVal.split(","))
+      })
+      
       if (localVal && localVal.indexOf("," > 0)) {
-        this.form.specValue = localVal.split(",");
         this.specValue = this.form.specValue;
-        this.$set(this, "specValue", this.form.specValue);
       } else {
         this.specValue = [];
       }
+      console.log("form.specValue", this.form);
       this.modalVisible = true;
     },
     // 删除规格
