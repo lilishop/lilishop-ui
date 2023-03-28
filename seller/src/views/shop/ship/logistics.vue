@@ -40,21 +40,21 @@
               class="faceSheetInput"
             ></Input>
           </FormItem>
-          <FormItem label="customerPwd" prop="monthCode">
+          <FormItem label="monthCode" prop="monthCode">
             <Input
               v-model="faceSheetForm.monthCode"
               type="text"
               class="faceSheetInput"
             ></Input
             ></FormItem>
-          <FormItem label="customerPwd" prop="sendSite">
+          <FormItem label="sendSite" prop="sendSite">
             <Input
               v-model="faceSheetForm.sendSite"
               type="text"
               class="faceSheetInput"
             ></Input
             ></FormItem>
-          <FormItem label="customerPwd" prop="sendStaff">
+          <FormItem label="sendStaff" prop="sendStaff">
             <Input
               v-model="faceSheetForm.sendStaff"
               type="text"
