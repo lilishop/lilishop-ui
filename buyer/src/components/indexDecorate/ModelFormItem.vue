@@ -86,6 +86,14 @@
     <template v-if="element.type == 'oneRowThreeColumns'">
       <oneRowThreeColumns :data="element" class="mb_20 width_1200_auto"></oneRowThreeColumns>
     </template>
+    <!-- 商品模块 -->
+    <template v-if="element.type == 'goodsType'">
+      <goodsAndType :paramData="element" class="mb_20 width_1200_auto"></goodsAndType>
+    </template>
+    <!-- 商品模块 -->
+    <template v-if="element.type == 'onlyGoodsModel'">
+      <onlyGoodsModel :data="element" class="mb_20 width_1200_auto"></onlyGoodsModel>
+    </template>
     <!-- 新品排行 -->
     <template v-if="element.type == 'newGoodsSort'">
       <new-goods-sort
@@ -132,6 +140,9 @@ import Recommend from "./modelList/Recommend.vue";
 import NotEnough from "./modelList/NotEnough.vue";
 import Seckill from "./modelList/Seckill.vue";
 import oneRowThreeColumns from "./modelList/oneRowThreeColumns.vue";
+import goodsAndType from "./modelList/goodsAndType.vue";
+import onlyGoodsModel from "./modelList/onlyGoodsModel.vue";
+
 
 export default {
   name: "modelFormItem",
@@ -145,7 +156,9 @@ export default {
     FirstPageAdvert,
     NotEnough,
     Seckill,
-    oneRowThreeColumns
+    oneRowThreeColumns,
+    goodsAndType,
+    onlyGoodsModel
   },
   data() {
     return {

@@ -119,6 +119,14 @@
     <template v-if="element.type == 'goodsType'">
       <goodsType :data="element" class="mb_20 width_1200_auto"></goodsType>
     </template>
+    <!-- 商品模块2 -->
+    <template v-if="element.type == 'onlyGoodsModel'">
+      <onlyGoodsModel :data="element" class="mb_20 width_1200_auto"></onlyGoodsModel>
+    </template>
+    <!-- 混合模块 -->
+    <template v-if="element.type == 'mixModel'">
+      <mixModel :data="element" class="mb_20 width_1200_auto"></mixModel>
+    </template>
     <!-- 一行三列 -->
     <template v-if="element.type == 'oneRowThreeColumns'">
       <oneRowThreeColumns :data="element" class="mb_20 width_1200_auto"></oneRowThreeColumns>
@@ -252,6 +260,9 @@ import Seckill from "./modelList/seckill.vue";
 import goodsType from "./modelList/goodsAndType.vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 
+import mixModel from "./modelList/mixModel.vue";
+import onlyGoodsModel from "./modelList/onlyGoodsModel.vue";
+
 import oneRowThreeColumns from "./modelList/oneRowThreeColumns.vue";
 import seckillOnlyAlbum from "./modelList/seckill-only-album.vue";
 export default {
@@ -269,7 +280,9 @@ export default {
     goodsType,
     ossManage,
     oneRowThreeColumns,
-    "seckill-only-album":seckillOnlyAlbum
+    "seckill-only-album":seckillOnlyAlbum,
+    onlyGoodsModel,
+    mixModel
   },
   data() {
     return {

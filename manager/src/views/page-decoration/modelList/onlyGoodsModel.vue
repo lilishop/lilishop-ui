@@ -1,38 +1,18 @@
 <template>
   <div class="goods-type-wrapper">
-    <div class="flex goods-type-line">
-      <div class="goods-type-title">{{ data.options.title }}</div>
-      <div class="flex goods-type-labels">
-        <div
-          @click="tabCurrentlyIndex = index"
-          :class="{ active: tabCurrentlyIndex === index }"
-          class="goods-type-item"
-          v-for="(item, index) in data.options.labels"
-          :key="index"
-        >
-          {{ item.label }}
-        </div>
-      </div>
-    </div>
-
     <!-- 商品部分 -->
     <div class="goods-list flex">
       <div
         class="goods-list-item"
-        v-for="(item, index) in data.options.list.filter((subset) => {
-          return subset.___index == tabCurrentlyIndex;
-        })"
+        v-for="(item, index) in data.options.list"
         :key="index"
       >
-        <div class="goods-img">
-          <img :src="item.img" />
-        </div>
         <div>
           <div class="goods-name wes-2">{{ item.title }}</div>
           <div class="goods-desc">{{ item.desc }}</div>
         </div>
-        <div class="goods-price">
-          {{ item.price | unitPrice("￥") }}
+        <div class="goods-img">
+          <img :src="item.img" />
         </div>
       </div>
       <div class="setup-box">
@@ -40,7 +20,7 @@
           <Button
             size="small"
             @click.stop="handleSelectModel(data.options.list)"
-            >编辑</Button
+          >编辑</Button
           >
         </div>
       </div>
@@ -55,42 +35,14 @@
       :mask-closable="false"
     >
       <div class="modal-tab-bar">
-        <div class="tab-bar">
-          标题
-          <Input style="width: 300px" v-model="data.options.title"></Input>
-        </div>
-        <div class="tab-bar" v-if="data.options.labels[tabCurrentlyIndex]">
-          标签
-          <Input
-            style="width: 300px"
-            v-model="data.options.labels[tabCurrentlyIndex].label"
-          ></Input>
-        </div>
-        <Tabs
-          type="card"
-          @on-click="handleClickTab"
-          :value="tabIndex"
-          :draggable="true"
-
-        >
-          <Button @click="handleTabsAdd" size="small" slot="extra">增加</Button>
-          <TabPane
-            v-for="(tab,tabIndex) in data.options.labels"
-            :key="tabIndex"
-            :label="tab.label"
-            :name="tab.___index + ''"
-          >
             <div class="flex flex-a-c">
-              <Button class="del-btn" type="primary" @click="handleContextMenuDelete(tab,tabIndex)">删除当前标签</Button>
               <Button class="add-goods" @click="addCurrentGoods">
                 添加商品
               </Button>
             </div>
 
             <div
-              v-for="(item, index) in data.options.list.filter((subset) => {
-                return subset.___index == tabCurrentlyIndex;
-              })"
+              v-for="(item, index) in data.options.list"
               :key="index"
               class="draggable"
             >
@@ -107,12 +59,11 @@
                       <Input v-model="item.desc"></Input>
                     </div>
                   </div>
-                  <Button @click="delGoods(item)">删除</Button>
+                  <Button @click="delGoods(item,index)">删除</Button>
                 </div>
               </div>
             </div>
-          </TabPane>
-        </Tabs>
+
       </div>
     </Modal>
 
@@ -128,8 +79,7 @@
 <script>
 
 export default {
-  name: "goods",
-
+  name: "onlyGoodsList",
   props: {
     data: {
       type: Object,
@@ -138,58 +88,21 @@ export default {
   },
   data() {
     return {
+      flag:false,
       tabIndex:0,
       current: 0,
       showModal: false,
       selected: {}, // 已选数据
       picModelFlag: false,
-      tabCurrentlyIndex: 0, // 选项卡索引
     };
   },
   mounted(){
-    this.tabIndex = this.data.options.labels[0].___index
+
   },
   methods: {
-    /**
-     * 算出最大的index 然后索引叠加
-     */
-    handleTabsAdd() {
-      let findAllIndex = this.data.options.labels.map((item) => {
-        return item.___index;
-      });
-      let max = Math.max.apply(null, findAllIndex);
-
-      this.data.options.labels.push({
-        label: "标签" + (max + 1),
-        ___index: max + 1,
-      });
-    },
-    // 删除标签
-    handleContextMenuDelete(item,index) {
-      // 删除标签下关联的商品
-      this.data.options.list.forEach((lab,currently)=>{
-        if(lab.___index == item.___index){
-           this.data.options.list.splice(currently,1)
-        }
-      })
-      // 删除当前标签
-      this.data.options.labels.splice(index,1)
-    },
     // 删除商品
-    delGoods(val) {
-      this.data.options.list.forEach((item, i) => {
-        if (
-          item.title == val.title &&
-          item.___index == this.tabCurrentlyIndex
-        ) {
-          this.data.options.list.splice(i, 1);
-        }
-      });
-    },
-    // 切换选项卡
-    handleClickTab(name) {
-      console.log(name)
-      this.tabCurrentlyIndex = name;
+    delGoods(val,i) {
+      this.data.options.list.splice(i, 1);
     },
     // 添加当前选项卡中的商品
     addCurrentGoods() {
@@ -211,7 +124,6 @@ export default {
             title: item.goodsName,
             desc: "",
             url: `/goodsDetail?skuId=${item.id}&goodsId=${item.goodsId}`,
-            ___index: this.tabCurrentlyIndex,
           };
           this.data.options.list.push(pushGoodsDetail);
         });
@@ -285,6 +197,7 @@ export default {
   justify-content: space-between;
 }
 .goods-list-item {
+  padding-top: 34.8px;
   margin-bottom: 14.3px;
   width: 287px;
   height: 343.7px;
@@ -306,23 +219,25 @@ export default {
   }
 }
 .goods-name {
-  font-size: 18px;
+  margin-bottom: 11.9px;
+  font-size: 25px;
   font-weight: normal;
-  line-height: 22px;
+  line-height: 30px;
   text-align: center;
   letter-spacing: 0px;
-  width: 200px;
-  margin: 0 auto 12.4px auto;
+
   color: #333333;
+
   -webkit-text-stroke: #979797 0.7px; /* 浏览器可能不支持 */
 }
 .goods-desc {
-  font-size: 14px;
+  margin-bottom: 30px;
+  font-size: 16px;
   font-weight: normal;
-  line-height: 17px;
+  line-height: 19px;
   text-align: center;
   letter-spacing: 0px;
-  margin-bottom: 12.4px;
+
   color: #666666;
 
   -webkit-text-stroke: #979797 0.7px; /* 浏览器可能不支持 */

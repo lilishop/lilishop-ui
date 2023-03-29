@@ -755,12 +755,106 @@ export const modelData = [{
           price: "120",
           title:" 微软 (Microsoft) Xbox 无线控制器/手柄 湛蓝色 | 3.5mm耳机接口蓝牙连接 Xbox主机电脑平板通用",
           desc:"万家宝藏好店等你来",
+          url:'',
           ___index: 0
         },
 
       ]
     },
   },
+  {
+    type: 'onlyGoodsModel',
+    name: '商品模块2',
+    icon: 'md-image',
+    options: {
+      list:[
+        {
+          img: "https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+          price: "120",
+          title:" 微软 (Microsoft) Xbox 无线控制器/手柄 湛蓝色 | 3.5mm耳机接口蓝牙连接 Xbox主机电脑平板通用",
+          desc:"万家宝藏好店等你来",
+          url:'',
+        },
+      ]
+    },
+  },
+  {
+    type: 'mixModel',
+    name: '混合模块',
+    icon: 'md-image',
+    options: {
+      left:{
+        model:'goods',
+        //数据集合
+        data:{
+          image:{
+            url:"",
+            src:require('@/assets/mix-bg1.png')
+          },
+          list:[
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+              title:"商品标题",
+              price:"120",
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+              title:"商品标题",
+              price:"120",
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+              title:"商品标题",
+              price:"120",
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+              title:"商品标题",
+              price:"120",
+              url:"",
+            },
+          ],
+          badge:"精选",
+        }
+      },
+      right:{
+        model:'brand',
+        data:{
+          image:{
+            url:"",
+            src:require('@/assets/mix-bg2.png')
+          },
+          list:[
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+              url:"",
+            },
+          ],
+          badge:"",
+        }
+      },
+    },
+  },
+
+
   {
     type: 'notEnough',
     name: '还没逛够',

@@ -108,7 +108,8 @@ export default {
 }
 .model-list {
   width: 130px;
-  height: auto;
+  height: 450px;
+  overflow-y: auto;
   padding: 10px;
   background: #fff;
   margin-top: 60px;

@@ -38,7 +38,7 @@
     <!-- 底部栏 -->
     <BaseFooter></BaseFooter>
     <!-- 侧边栏 -->
-    <fixedBar class="fixed-bar"></fixedBar>
+    <fixedBar class="fixed-bar" :class="{'show-fixed': topSearchShow}"></fixedBar>
   </div>
 </template>
 
@@ -217,8 +217,24 @@ export default {
   transform: translateZ(0);
   top: 0;
 }
-
-
+.fixed-bar{
+  opacity: 0 !important;
+  transform: translateY(-10px);
+  transition: .35s;
+  z-index: 999999;
+  height: 0px !important;
+  overflow: hidden;
+}
+.show-fixed{
+  height: 354px !important;
+  opacity: 1 !important;
+  transform: translateY(0);
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  -o-transform: translateZ(0);
+  transform: translateZ(0);
+}
 
 
 /* 2K */
@@ -241,12 +257,14 @@ export default {
   }
 }
 
+
+
 @media screen and (max-width: 2025px) {
   /* 样式 */
   .fixed-bar{
     position: fixed;
     right:150px;
-    top: 400px;
+    top: 300px;
   }
 }
 
