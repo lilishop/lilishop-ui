@@ -10,10 +10,10 @@
         <Button v-if="allowOperation.take" @click="orderTake" type="primary">订单核销</Button>
         <Button v-if="allowOperation.ship" @click="orderDeliver" type="primary">发货</Button>
 
-        <Button @click="sfPrint" type="primary" ghost
-          v-if="allowOperation.showLogistics && logisticsType == 'SHUNFENG'">下载面单</Button>
-        <Button @click="Toprint" type="primary" ghost
-          v-if="allowOperation.ship && logisticsType != 'SHUNFENG'">打印电子面单</Button>
+<!--        <Button @click="sfPrint" type="primary" ghost-->
+<!--          v-if="allowOperation.showLogistics && logisticsType == 'SHUNFENG'">下载面单</Button>-->
+<!--        <Button @click="Toprint" type="primary" ghost-->
+<!--          v-if="allowOperation.ship && logisticsType != 'SHUNFENG'">打印电子面单</Button>-->
       </div>
     </Card>
 
@@ -228,7 +228,7 @@
             <span class="label">修改金额：</span>
             <span class="txt theme_color">¥{{ orderInfo.order.priceDetailDTO.updatePrice | unitPrice }}</span>
           </li>
-          <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index" > 
+          <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index" >
             <hr style="border:1px dashed black;">
               <span class="label" v-if="index == 1 && typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
               <span class="txt" style="border-bottom: 1px dashed;font-size:10px !important;" v-if="index == 1 &&  typeList.length > 1">¥{{ item.discountPrice | unitPrice }}</span>
@@ -816,29 +816,12 @@ export default {
     //订单发货
     orderDeliver() {
       this.facesheetFlag = false
-      if (this.logisticsType == 'SHUNFENG') {
-        this.$Modal.confirm({
-          title: "确认发货",
-          content: "您确认使用顺丰发货 " + this.sn + " 订单?",
-          loading: true,
-          onOk: () => {
-            API_Order.orderShunFengDelivery(this.sn).then((res) => {
-              if (res.success) {
-                this.$Modal.remove();
-                this.$Message.success("订单发货成功");
-                this.getDataDetail()
-              }
-            })
-          }
-        })
-      } else {
-        API_Order.getLogisticsChecked().then((res) => {
-          if (res.success) {
-            this.checkedLogistics = res.result;
-            this.orderDeliverModal = true;
-          }
-        });
-      }
+      API_Order.getLogisticsChecked().then((res) => {
+        if (res.success) {
+          this.checkedLogistics = res.result;
+          this.orderDeliverModal = true;
+        }
+      });
     },
     //顺丰打印面单
     sfPrint() {
@@ -884,7 +867,7 @@ export default {
             API_Order.getOrderFaceSheet(this.sn, this.faceSheetForm).then(res => {
               if (res.result && res.result.printTemplate) {
                 this.someJSONdata = res.result.printTemplate;
-                this.Toprints();               
+                this.Toprints();
               }else {
                 this.$Message.error(res.result.Reason);
               }
