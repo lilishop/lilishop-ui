@@ -49,9 +49,11 @@
             </FormItem>
             <FormItem label="店铺楼层" prop="content" class="wangEditor">
               <i-switch v-model="form.pageShow" @on-change="pageShow"></i-switch>
+               <span class="desc">店铺楼层装修是否开启，开启后移动端PC端将会自动展示装修的内容</span>
             </FormItem>
             <FormItem label="开启自提" prop="content" class="wangEditor">
               <i-switch v-model="form.selfPickFlag" @on-change="changeSelfPickFlag"></i-switch>
+               <span class="desc">店铺是否开启自提功能</span>
             </FormItem>
             <Form-item>
               <Button
@@ -216,6 +218,7 @@
                 style="width: 20%"
               />
             </FormItem>
+
             <Form-item>
               <Button
                 @click="stockWarningHandleSubmit"
@@ -227,7 +230,8 @@
             </Form-item>
           </Form>
         </TabPane>
-        <TabPane label="客服设置" name="UDESK">
+        <!-- Udesk 坐席功能 后续维护 -->
+        <!-- <TabPane label="客服设置" name="UDESK">
           <Form
             ref="udeskForm"
             :model="udeskForm"
@@ -252,7 +256,7 @@
               </Button>
             </Form-item>
           </Form>
-        </TabPane>
+        </TabPane> -->
       </Tabs>
     </Card>
 
@@ -597,3 +601,9 @@ export default {
   },
 };
 </script>
+<style scoped lang="scss">
+.desc{
+  margin-left: 10px;
+  color: #999;
+}
+</style>
