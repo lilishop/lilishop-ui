@@ -179,7 +179,7 @@ export const deleteDepartment = (ids, params) => {
 };
 // 搜索部门
 export const searchDepartment = (params) => {
-  return getRequest("/permission/department/search", params);
+  return getRequest("/permission/department", params);
 };
 
 /****************************** 部门结束 */

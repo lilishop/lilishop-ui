@@ -233,6 +233,21 @@ export default {
           },
         },
         {
+          title: "退款金额",
+          key: "actualRefundPrice",
+          width: 110,
+          render: (h, params) => {
+            if (params.row.actualRefundPrice == null) {
+              return h("div", this.$options.filters.unitPrice(0, "￥"));
+            } else {
+              return h(
+                "div",
+                this.$options.filters.unitPrice(params.row.actualRefundPrice, "￥")
+              );
+            }
+          },
+        },
+        {
           title: "售后类型",
           key: "serviceType",
           width: 100,
@@ -278,6 +293,11 @@ export default {
         {
           title: "申请时间",
           key: "createTime",
+          width: 180,
+        },
+        {
+          title: "处理时间",
+          key: "updateTime",
           width: 180,
         },
         {

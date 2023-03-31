@@ -82,6 +82,12 @@
             <span class="info">{{ memberInfo.createTime }}</span>
           </p>
         </div>
+        <div class="ant-col-md-6" v-if="memberInfo.haveStore">
+          <p class="item">
+            <span class="label">店铺名称：</span>
+            <span class="info">{{ memberInfo.storeName }}</span>
+          </p>
+        </div>
       </div>
     </Card>
 

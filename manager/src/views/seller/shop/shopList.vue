@@ -6,7 +6,7 @@
           <Input
             type="text"
             v-model="searchForm.memberName"
-            placeholder="请输入会员名称"
+            placeholder="请输入会员名称1"
             clearable
             style="width: 200px"
           />

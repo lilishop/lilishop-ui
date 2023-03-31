@@ -28,6 +28,16 @@
           />
         </Form-item>
 
+        <Form-item label="收件人" prop="consigneeMobile">
+          <Input
+            type="text"
+            v-model="searchForm.consigneeMobile"
+            placeholder="请输入收件人手机号"
+            clearable
+            style="width: 180px"
+          />
+        </Form-item>
+
         <Form-item label="订单类型" prop="orderType">
           <Select v-model="searchForm.orderType" placeholder="请选择" clearable style="width: 160px">
             <Option value="NORMAL">普通订单</Option>
