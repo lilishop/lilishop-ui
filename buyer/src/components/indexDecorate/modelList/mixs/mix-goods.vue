@@ -1,25 +1,27 @@
 <template>
-  <div class="flex" v-if="data.options.right.model == 'brand'">
-    <div class="left-side" >
-      <img :src="data.options.right.data.image.src" alt="">
-    </div>
-    <div>
-      <div class="badge-box flex">
-        <div class="round">
-          <Icon type="ios-arrow-forward" />
-        </div>
-
-
+    <div class="flex" v-if="data.options.left.model == 'goods'">
+      <div class="left-side" >
+        <img :src="data.options.left.data.image.src" alt="">
       </div>
-      <div class="flex goods-list">
-        <div class="goods-item flex" :key="index" v-for="(item,index) in data.options.right.data.list">
-          <div class="goods-thumbnail">
-            <img :src="item.img" alt="">
+      <div>
+          <div class="badge-box flex">
+            <div class="badge">
+              {{data.options.left.data.badge}}
+            </div>
           </div>
-        </div>
+          <div class="flex goods-list">
+            <div class="goods-item flex" :key="index" v-for="(item,index) in data.options.left.data.list">
+              <div class="goods-thumbnail">
+                <img :src="item.img" alt="">
+              </div>
+              <div class="goods-detail">
+                <div class="goods-detail-title">{{item.title}}</div>
+                <div class="goods-detail-price">{{item.price | unitPrice('¥')}}</div>
+              </div>
+            </div>
+          </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -73,18 +75,8 @@ export default {
   }
 }
 .badge-box{
-  margin-top: 33px;
+
   justify-content:right;
-  >.round{
-    width: 17.5px;
-    height: 17.5px;
-    opacity: 1;
-    border-radius: 50%;
-    text-align: center;
-    line-height: 17.5px;
-    border: 0.7px solid #333333;
-    margin-right: 17.5px;
-  }
 }
 .goods-list{
   flex-wrap: wrap;
@@ -94,23 +86,24 @@ export default {
 .goods-item{
   display: flex;
   align-items: center;
-  justify-content: center;
-  width:50%;
-  height: 85px;
+  width: 173.6px;
+  height: 119px;
   border-radius: 9.8px;
   opacity: 1;
   transition: .35s;
   background: #FFFFFF;
   margin-bottom:9px;
-
+  &:hover{
+    box-shadow: 0px 1px 6px 0px #E5E5E5;
+  }
 
 }
 .left-side {
   >img{
-    width: 254px;
-    height: 344px;
-    border-radius: 9.8px 0px 0px 9.8px;
-    opacity: 1;
+    border-radius: 10px 0px 0px 10px;
+    display: block;
+    width: 196.7px;
+    height: 343.7px;
   }
 }
 .badge {

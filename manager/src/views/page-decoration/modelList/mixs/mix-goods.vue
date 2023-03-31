@@ -6,7 +6,7 @@
       <div>
           <div class="badge-box flex">
             <div class="badge">
-              {{data.options.left.data.badge}}
+              {{data.options.left.data.badge.label}}
             </div>
           </div>
           <div class="flex goods-list">
@@ -75,6 +75,7 @@ export default {
   }
 }
 .badge-box{
+
   justify-content:right;
 }
 .goods-list{

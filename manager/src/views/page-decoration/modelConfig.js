@@ -789,7 +789,8 @@ export const modelData = [{
         data:{
           image:{
             url:"",
-            src:require('@/assets/mix-bg1.png')
+            src:require('@/assets/mix-bg1.png'),
+            size:"197 * 344"
           },
           list:[
             {
@@ -817,7 +818,11 @@ export const modelData = [{
               url:"",
             },
           ],
-          badge:"精选",
+          badge:{
+            label:"精选",
+            url:""
+          }
+
         }
       },
       right:{
@@ -825,7 +830,8 @@ export const modelData = [{
         data:{
           image:{
             url:"",
-            src:require('@/assets/mix-bg2.png')
+            src:require('@/assets/mix-bg2.png'),
+            size:"254 * 344"
           },
           list:[
             {
@@ -845,6 +851,18 @@ export const modelData = [{
             },
             {
               img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+              title:"商品标题",
+              price:"120",
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+              title:"商品标题",
+              price:"120",
               url:"",
             },
           ],
