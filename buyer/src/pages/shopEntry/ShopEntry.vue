@@ -26,7 +26,7 @@
         v-if="storeDisable === 'REFUSED' && currentIndex === 3">重新申请</Button>
     </div>
 
-    <Modal title="店铺入驻协议" v-model="showAgreement" width="1200" :closable="false" :mask-closable="false">
+    <Modal title="店铺入驻协议" v-model="showAgreement" width="1200"  :closable="false" :mask-closable="false">
       <div class="agreeent-con" v-html="agreementCon"></div>
 
       <div slot="footer" style="text-align: center">
@@ -172,6 +172,7 @@ export default {
 }
 .agreeent-con {
   max-height: 500px;
+  overflow: auto
 }
 .success-page {
   height: 500px;
