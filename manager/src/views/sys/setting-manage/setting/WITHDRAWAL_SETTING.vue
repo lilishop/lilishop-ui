@@ -9,7 +9,7 @@
       </FormItem>
 
       <FormItem  label="最低提现金额" prop="minPrice">
-        <Input class="label-appkey" v-model="formValidate.minPrice" />
+        ￥<Input class="label-appkey" v-model="formValidate.minPrice" />
       </FormItem>
 
       <FormItem label="提现方式" prop="type">

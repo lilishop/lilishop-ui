@@ -3,6 +3,7 @@
     <Row>
       <Col span="24">
       <Card class="article-detail">
+        <Alert>隐私协议在移动端中 设置->关于我们->对应的文章展示</Alert>
         <Table :loading="loading" border :columns="columns" :data="data" ref="table">
         </Table>
       </Card>
