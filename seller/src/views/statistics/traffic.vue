@@ -190,6 +190,7 @@ export default {
     },
     // 初始化
     init() {
+      this.orderChart ? this.orderChart.clear() : ''
       API_Member.getStatisticsList(this.params).then((res) => {
         if (res.result) {
           this.data = res.result;

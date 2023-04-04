@@ -139,7 +139,7 @@ export default {
                     "Button",
                     {
                       props: {
-                        type: "success",
+                        type: "primary",
                         size: "small",
                       },
                       style: {

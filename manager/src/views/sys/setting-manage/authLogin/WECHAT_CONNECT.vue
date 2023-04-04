@@ -49,7 +49,7 @@
 <script>
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
-import { getPaymentSupportForm } from "@/api/setting";
+
 export default {
   data() {
     return {
