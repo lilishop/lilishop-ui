@@ -28,8 +28,8 @@ export const getHomeData = params => {
  * 查询楼层装修
  *
  */
-export const getHomeList = params => {
-  return getRequest("/settings/pageData/pageDataList", params);
+export const getHomeList = (pageClientType,params) => {
+  return getRequest(`/settings/pageData/${pageClientType}/pageDataList`, params);
 };
 
 

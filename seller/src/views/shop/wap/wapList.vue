@@ -107,7 +107,7 @@ export default {
     // 初始化数据
     init() {
       this.loading = true;
-      API_Other.getHomeList(this.params).then((res) => {
+      API_Other.getHomeList(this.params.pageClientType,this.params).then((res) => {
         if (!res.result) return false;
         this.loading = false;
         res.result.records.forEach((item) => {

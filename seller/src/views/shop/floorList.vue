@@ -207,7 +207,7 @@ export default {
       //   pageType: "INDEX",
       //   pageClientType: "PC",
       // };
-      API_floor.getHomeList(this.searchForm).then((res) => {
+      API_floor.getHomeList(this.searchForm.pageClientType,this.searchForm).then((res) => {
         if (res.success) {
           // this.total
           this.total = res.result.total;
