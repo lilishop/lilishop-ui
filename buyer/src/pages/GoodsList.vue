@@ -229,7 +229,7 @@ export default {
         .then((res) => {
           this.loading = false;
           if (res.success) {
-            this.goodsList = res.result;
+            this.goodsList = res.result.records;
             this.total = res.result.total;
           }
         })
