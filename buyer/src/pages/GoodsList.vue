@@ -49,35 +49,35 @@
               class="goods-show-info"
               v-for="(item, index) in goodsList"
               :key="index"
-              @click="goGoodsDetail(item.id, item.content.goodsId)"
+              @click="goGoodsDetail(item.id, item.goodsId)"
             >
               <div class="goods-show-img">
-                <img width="220" height="220" :src="item.content.thumbnail" />
+                <img width="220" height="220" :src="item.thumbnail" />
               </div>
               <div class="goods-show-price">
                 <span>
                   <span class="seckill-price text-danger">{{
-                    item.content.price | unitPrice("￥")
+                    item.price | unitPrice("￥")
                   }}</span>
                 </span>
               </div>
               <div class="goods-show-detail">
                 <Tag
-                  v-if="item.content.salesModel === 'WHOLESALE'"
+                  v-if="item.salesModel === 'WHOLESALE'"
                   class="goods-show-tag"
                   color="purple"
                 >
                   批发
                 </Tag>
-                <span>{{ item.content.goodsName }}</span>
+                <span>{{ item.goodsName }}</span>
               </div>
               <div class="goods-show-num">
-                已有<span>{{ item.content.commentNum || 0 }}</span
+                已有<span>{{ item.commentNum || 0 }}</span
                 >人评价
               </div>
               <div class="goods-show-seller">
                 <span class="text-bottom" style="color: #e4393c">{{
-                  item.content.storeName
+                  item.storeName
                 }}</span>
               </div>
 
@@ -85,21 +85,21 @@
                 <Tag
                   class="goods-show-tag"
                   color="red"
-                  v-if="item.content.selfOperated"
+                  v-if="item.selfOperated"
                 >
                   自营
                 </Tag>
                 <Tag
                   class="goods-show-tag"
                   color="blue"
-                  v-if="item.content.goodsType == 'VIRTUAL_GOODS'"
+                  v-if="item.goodsType === 'VIRTUAL_GOODS'"
                 >
                   虚拟
                 </Tag>
                 <Tag
                   class="goods-show-tag"
                   color="blue"
-                  v-else-if="item.content.goodsType == 'PHYSICAL_GOODS'"
+                  v-else-if="item.goodsType === 'PHYSICAL_GOODS'"
                 >
                   实物
                 </Tag>
@@ -146,7 +146,6 @@ export default {
       ],
       goodsList: [], // 商品列表
       loading: false, // 加载状态
-      goodsListType: "",
       total: 0, // 列表总数
       params: {
         // 请求参数
@@ -230,11 +229,8 @@ export default {
         .then((res) => {
           this.loading = false;
           if (res.success) {
-            this.goodsList = res.result.content;
-            this.total = res.result.totalElements;
-            for (var i = 0; i < this.goodsList.length; i++) {
-              this.goodsListType = this.goodsList[i];
-            }
+            this.goodsList = res.result.records;
+            this.total = res.result.total;
           }
         })
         .catch(() => {

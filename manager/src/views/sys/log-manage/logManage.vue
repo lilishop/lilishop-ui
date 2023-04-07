@@ -47,16 +47,16 @@
           openTip ? "关闭提示" : "开启提示"
         }}</Button>
       </Row>
-      <Row v-show="openTip">
-        <Alert show-icon>
-          <span>展示详细内容</span>
-          <Icon type="ios-bulb-outline" slot="icon"></Icon>
-          <i-switch size="large" v-model="showDev">
-            <span slot="open">开发</span>
-            <span slot="close">普通</span>
-          </i-switch>
-        </Alert>
-      </Row>
+      <div v-show="openTip">
+          <Alert show-icon>
+            <span>展示详细内容</span>
+            <Icon type="ios-bulb-outline" slot="icon"></Icon>
+            <i-switch class="switch" size="large" v-model="showDev">
+              <span slot="open">开发</span>
+              <span slot="close">普通</span>
+            </i-switch>
+          </Alert>
+      </div>
 
       <Table
         v-if="showDev"
@@ -323,3 +323,8 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.switch{
+  margin-left: 20px;
+}
+</style>
