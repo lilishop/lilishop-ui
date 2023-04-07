@@ -16,23 +16,28 @@ export default {
       iconList:[
         {
           icon:"user",
-          label:"会员中心"
+          label:"会员中心",
+          path:"/home"
         },
         {
           icon:"consumer",
-          label:"客服"
+          label:"客服",
+          path:"/home"
         },
         {
           icon:"notification",
-          label:"消息"
+          label:"消息",
+          path:"/home/MsgList"
         },
         {
           icon:"feedback",
-          label:"反馈"
+          label:"反馈",
+          path:"/home"
         },
         {
           icon:"back",
-          label:"顶部"
+          label:"顶部",
+          path:"back"
         },
       ],
       isScrolling:false,
@@ -62,7 +67,7 @@ export default {
       }
     },
     handleClickIcon(val){
-        if(val.icon === 'back'){
+        if(val.path === 'back'){
           this.scrollToTop()
         }
     }

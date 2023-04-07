@@ -15,10 +15,10 @@
       </div>
     </div>
     <!-- 商品部分 -->
-    <div class="goods-list flex-j-sb">
+    <div class="only-goods-list flex-j-sb">
       <div
         v-if="paramData.options"
-        class="goods-list-item"
+        class="only-goods-list-item"
         v-for="(item, index) in paramData.options.list.filter((client) => {
           return client.___index == current;
         })"
@@ -104,7 +104,10 @@ export default {
   color: #ffffff;
   background: $theme_color;
 }
-.goods-list-item {
+.only-goods-list{
+  display: flex;
+}
+.only-goods-list-item {
   padding-top: 30px;
   width: 287px;
   height: 343.7px;

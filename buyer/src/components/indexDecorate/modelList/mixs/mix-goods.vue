@@ -1,16 +1,17 @@
 <template>
     <div class="flex" v-if="data.options.left.model == 'goods'">
-      <div class="left-side" >
+      <div class="left-side"  @click="linkTo(data.options.right.data.image.url)">
         <img :src="data.options.left.data.image.src" alt="">
       </div>
-      <div>
+      <div class="right-side">
           <div class="badge-box flex">
-            <div class="badge">
-              {{data.options.left.data.badge}}
+            <div class="badge"  @click="linkTo(data.options.right.data.image.url)">
+              {{data.options.left.data.badge.label}}
             </div>
           </div>
           <div class="flex goods-list">
-            <div class="goods-item flex" :key="index" v-for="(item,index) in data.options.left.data.list">
+
+            <div class="goods-item flex"  @click="linkTo(item.url)" :key="index" v-for="(item,index) in data.options.left.data.list">
               <div class="goods-thumbnail">
                 <img :src="item.img" alt="">
               </div>
@@ -45,8 +46,8 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.goods-detail{
-
+.right-side{
+  width: 387px;
 }
 .goods-detail-title{
   font-size: 13px;
@@ -79,11 +80,13 @@ export default {
   justify-content:right;
 }
 .goods-list{
+  width: 387px;
   flex-wrap: wrap;
   justify-content:space-between;
   padding: 0 16px;
 }
 .goods-item{
+  cursor: pointer;
   display: flex;
   align-items: center;
   width: 173.6px;

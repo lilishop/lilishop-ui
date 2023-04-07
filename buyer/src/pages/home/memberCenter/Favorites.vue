@@ -53,11 +53,12 @@ export default {
       params: { // 请求参数
         pageNumber: 1,
         pageSize: 100,
-        type: 'GOODS'
+        type: this.$route.query.type || 'GOODS'
       },
       spinShow: false // 加载状态
     };
   },
+
   methods: {
     getList () { // 获取收藏列表
       this.spinShow = true
@@ -123,6 +124,7 @@ export default {
   mounted () {
     if (this.homePage) this.params.pageSize = 5;
     this.getList()
+
   }
 };
 </script>

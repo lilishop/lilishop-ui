@@ -27,8 +27,8 @@
             }}
           </div>
           <div v-if="userInfo.id">
-            <div class="icon-list flex flex-j-sb" @click="entryControl">
-              <div class="icon-item" :key="index" v-for="(item,index) in recentList">
+            <div class="icon-list flex flex-j-sb" >
+              <div class="icon-item" :key="index"  @click="entryControl(item)" v-for="(item,index) in recentList">
                 <div class="value">
                   {{ item.value}}
                 </div>
@@ -48,16 +48,16 @@
           </div>
 
           <div class="gray-line"></div>
-          <div class="icon-list flex flex-j-sb" @click="entryControl">
-            <div class="icon-item" :key="index" v-for="(item,index) in entranceList">
+          <div class="icon-list flex flex-j-sb" >
+            <div class="icon-item" @click="entryControl(item)" :key="index" v-for="(item,index) in entranceList">
               <img class="icon" :src="require(`@/assets/iconfont/${item.icon}.png`)">
               <div>
                 {{ item.label}}
               </div>
             </div>
           </div>
-          <div class="icon-list flex flex-j-sb" @click="entryControl">
-            <div class="icon-item" :key="index" v-for="(item,index) in appendList">
+          <div class="icon-list flex flex-j-sb" >
+            <div class="icon-item" :key="index"  @click="entryControl(item)" v-for="(item,index) in appendList">
               <img class="icon" :src="require(`@/assets/iconfont/${item.icon}.png`)">
               <div>
                 {{ item.label}}
@@ -88,19 +88,23 @@ export default {
       entranceList:[
         {
           icon:"collage",
-          label:"宝贝收藏"
+          label:"宝贝收藏",
+          path:"/home/Favorites"
         },
         {
           icon:"shop",
-          label:"收藏店铺"
+          label:"收藏店铺",
+          path:"/home/Favorites?type=STORE"
         },
         {
           icon:"carts",
-          label:"购物车"
+          label:"购物车",
+          path:"/cart"
         },
         {
           icon:"story",
-          label:"我的足迹"
+          label:"我的足迹",
+          path:"/home/MyTracks"
         },
       ],
       appendList:[
@@ -143,8 +147,9 @@ export default {
   },
   methods: {
     // 快捷跳转中心
-    entryControl(){
-
+    entryControl(val){
+      console.log(val)
+      this.$router.push(val.path)
     },
   },
    mounted() {

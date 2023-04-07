@@ -1,9 +1,9 @@
 <template>
   <div class="flex" v-if="data.options.right.model == 'brand'">
-    <div class="left-side" >
+    <div class="left-side" @click="linkTo(data.options.right.data.image.url)">
       <img :src="data.options.right.data.image.src" alt="">
     </div>
-    <div>
+    <div class="right-side">
       <div class="badge-box flex">
         <div class="round">
           <Icon type="ios-arrow-forward" />
@@ -12,7 +12,7 @@
 
       </div>
       <div class="flex goods-list">
-        <div class="goods-item flex" :key="index" v-for="(item,index) in data.options.right.data.list">
+        <div class="goods-item flex" @click="linkTo(item.url)" :key="index" v-for="(item,index) in data.options.right.data.list">
           <div class="goods-thumbnail">
             <img :src="item.img" alt="">
           </div>
@@ -43,8 +43,8 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.goods-detail{
-
+.right-side{
+  width: 330px;
 }
 .goods-detail-title{
   font-size: 13px;
@@ -59,7 +59,7 @@ export default {
   font-weight: normal;
   line-height: 17px;
   letter-spacing: 0px;
-  color: #F31947;
+  color: $theme_color;
   margin-top: 8px;
   margin-bottom:10px;
 }
@@ -87,6 +87,7 @@ export default {
   }
 }
 .goods-list{
+   width: 330px;
   flex-wrap: wrap;
   justify-content:space-between;
   padding: 0 16px;

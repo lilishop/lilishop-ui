@@ -1,9 +1,9 @@
 <template>
   <div class="goods-type-wrapper">
     <!-- 商品部分 -->
-    <div class="goods-list flex" >
+    <div class="only-goods-list flex" >
       <div
-        class="goods-list-item"
+        class="only-goods-list-item"
         v-for="(item, index) in data.options.list"
         :key="index"
         @click="handleClick(item)"
@@ -86,7 +86,7 @@ export default {
   margin-left: 20px;
   margin-bottom: 10px;
 }
-.goods-list {
+.only-goods-list {
   position: relative;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -101,7 +101,7 @@ export default {
   align-items: center;
   justify-content: space-between;
 }
-.goods-list-item {
+.only-goods-list-item {
   padding-top: 34.8px;
   margin-bottom: 14.3px;
   width: 287px;
@@ -155,7 +155,7 @@ export default {
   text-align: center;
   letter-spacing: 0px;
 
-  color: #f31947;
+  color: $theme_color;
   -webkit-text-stroke: #979797 0.7px; /* 浏览器可能不支持 */
 }
 .goods-type-line {
@@ -172,7 +172,7 @@ export default {
   color: #333333;
 }
 .active {
-  color: #f31947;
+  color: $theme_color;
 }
 .goods-type-labels {
   font-size: 21px;

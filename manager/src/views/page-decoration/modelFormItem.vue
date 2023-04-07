@@ -127,6 +127,10 @@
     <template v-if="element.type == 'mixModel'">
       <mixModel :data="element" class="mb_20 width_1200_auto"></mixModel>
     </template>
+    <!-- 为你推荐 -->
+    <template v-if="element.type == 'forYour'">
+      <forYour :data="element" class="mb_20 width_1200_auto"></forYour>
+    </template>
     <!-- 一行三列 -->
     <template v-if="element.type == 'oneRowThreeColumns'">
       <oneRowThreeColumns :data="element" class="mb_20 width_1200_auto"></oneRowThreeColumns>
@@ -261,6 +265,7 @@ import goodsType from "./modelList/goodsAndType.vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 
 import mixModel from "./modelList/mixModel.vue";
+import forYour from "./modelList/forYour.vue";
 import onlyGoodsModel from "./modelList/onlyGoodsModel.vue";
 
 import oneRowThreeColumns from "./modelList/oneRowThreeColumns.vue";
@@ -282,7 +287,8 @@ export default {
     oneRowThreeColumns,
     "seckill-only-album":seckillOnlyAlbum,
     onlyGoodsModel,
-    mixModel
+    mixModel,
+    forYour
   },
   data() {
     return {

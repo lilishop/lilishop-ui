@@ -94,6 +94,14 @@
     <template v-if="element.type == 'onlyGoodsModel'">
       <onlyGoodsModel :data="element" class="mb_20 width_1200_auto"></onlyGoodsModel>
     </template>
+    <!-- 混合模块 -->
+    <template v-if="element.type == 'mixModel'">
+      <mixModel :data="element" class="mb_20 width_1200_auto"></mixModel>
+    </template>
+    <!-- 混合模块 -->
+    <template v-if="element.type == 'forYour'">
+      <forYour :data="element" class="mb_20 width_1200_auto"></forYour>
+    </template>
     <!-- 新品排行 -->
     <template v-if="element.type == 'newGoodsSort'">
       <new-goods-sort
@@ -142,6 +150,8 @@ import Seckill from "./modelList/Seckill.vue";
 import oneRowThreeColumns from "./modelList/oneRowThreeColumns.vue";
 import goodsAndType from "./modelList/goodsAndType.vue";
 import onlyGoodsModel from "./modelList/onlyGoodsModel.vue";
+import mixModel from "./modelList/mixModel.vue";
+import forYour from "./modelList/forYour.vue";
 
 
 export default {
@@ -158,7 +168,9 @@ export default {
     Seckill,
     oneRowThreeColumns,
     goodsAndType,
-    onlyGoodsModel
+    onlyGoodsModel,
+    mixModel,
+    forYour
   },
   data() {
     return {
@@ -223,7 +235,7 @@ export default {
 }
 
 .width_1200_auto {
-  width: 1200px;
+  width: 1184px;
   margin: 0 auto;
 
 }

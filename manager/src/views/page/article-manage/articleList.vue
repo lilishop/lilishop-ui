@@ -149,7 +149,7 @@ import {
 import Editor from "@tinymce/tinymce-vue";
 import { initEditor } from "@/components/editor/config";
 export default {
-  name: "article",
+
   components: {
     editor: Editor,
   },

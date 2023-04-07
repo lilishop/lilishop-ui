@@ -789,7 +789,7 @@ export const modelData = [{
         data:{
           image:{
             url:"",
-            src:require('@/assets/mix-bg1.png'),
+            src:'https://lili-system.oss-cn-beijing.aliyuncs.com/mix-bg1.png',
             size:"197 * 344"
           },
           list:[
@@ -830,7 +830,7 @@ export const modelData = [{
         data:{
           image:{
             url:"",
-            src:require('@/assets/mix-bg2.png'),
+            src:'https://lili-system.oss-cn-beijing.aliyuncs.com/mix-bg2.png',
             size:"254 * 344"
           },
           list:[
@@ -872,6 +872,80 @@ export const modelData = [{
     },
   },
 
+  {
+    type: 'forYour',
+    name: '为你推荐',
+    icon: 'md-image',
+    options: {
+        model:'goods',
+        title:"为你推荐",
+        //数据集合
+        data:{
+          image:{
+            url:"",
+            src:'https://lili-system.oss-cn-beijing.aliyuncs.com/mix-bg3.png',
+            size:"197 * 344"
+          },
+          list:[
+            {
+              img:"https://lili-system.oss-cn-beijing.aliyuncs.com/example1.png",
+              title:"标题",
+              desc:"精品好物等你挑",
+              url:"",
+              size:"346 * 554"
+            },
+            {
+              img:"https://lili-system.oss-cn-beijing.aliyuncs.com/example2.png",
+              title:"标题",
+              desc:"精品好物等你挑",
+              url:"",
+              size:"190 * 156"
+            },
+            {
+              img:"https://lili-system.oss-cn-beijing.aliyuncs.com/example3.png",
+              title:"标题",
+              desc:"精品好物等你挑",
+              url:"",
+              size:"190 * 156"
+            },
+            {
+              img:"https://lili-system.oss-cn-beijing.aliyuncs.com/example4.png",
+              title:"标题",
+              desc:"精品好物等你挑",
+              url:"",
+              size:"190 * 156"
+            },
+          ],
+          hot:{
+            title:"最近热卖",
+            list:[
+              {
+                img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+                title:"商品标题",
+                price:"120",
+                url:"",
+              },{
+                img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+                title:"商品标题",
+                price:"120",
+                url:"",
+              },{
+                img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+                title:"商品标题",
+                price:"120",
+                url:"",
+              },{
+                img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+                title:"商品标题",
+                price:"120",
+                url:"",
+              },
+            ]
+          }
+      },
+
+    },
+  },
 
   {
     type: 'notEnough',

@@ -66,7 +66,6 @@ export default {
       }, []);
       this.wap.forEach((items,indexs) => {
         if(items.title == '活动'){
-          console.log(32323232323232)
           this.wap.splice(indexs,1)
         }
       })
