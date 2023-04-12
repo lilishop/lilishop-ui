@@ -96,7 +96,7 @@ export default {
       pointsGoodsCategoryId:'',
       pointsGoodsCategoryName:'',
       form: {
-        
+
         /** 活动名称 */
         promotionName: "",
         /** 报名截止时间 */
@@ -109,7 +109,7 @@ export default {
         seckillRule: "",
         goodsSku: {},
         promotionStatus: "NEW",
-       
+
       },
       categoryList: [], // 分类列表
       id: this.$route.query.id, // 活动id
@@ -118,6 +118,7 @@ export default {
         settlementPrice: [{ required: true, message: "请填写结算价格" }],
         pointsGoodsCategoryId: [{ required: true, message: "请选择积分商品分类" }],
         points: [{ required: true, message: "请填写兑换积分" }],
+        activeStock: [{ required: true, message: "请填写库存" }],
       },
       options: {
         disabledDate(date) {
