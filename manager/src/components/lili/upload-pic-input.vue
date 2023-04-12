@@ -14,12 +14,12 @@
           <Poptip slot="append" transfer trigger="hover" title="图片预览" placement="right">
             <Icon type="md-eye" class="see-icon" />
             <div slot="content">
-              <img :src="currentValue" alt="该资源不存在" style="width: 100%;margin: 0 auto;display: block;" />
+              <img :src="currentValue" alt="该资源不存在" style="max-width: 300px;margin: 0 auto;display: block;" />
               <a @click="viewImage=true" style="margin-top:5px;text-align:right;display:block">查看大图</a>
             </div>
           </Poptip>
       </Input>
-      
+
       <Upload
         :action="uploadFileUrl"
         :headers="accessToken"
@@ -40,7 +40,7 @@
     </div>
 
     <Modal title="图片预览" v-model="viewImage" :styles="{top: '30px'}" draggable>
-      <img :src="currentValue" alt="该资源不存在" style="width: 100%;margin: 0 auto;display: block;" />
+      <img :src="currentValue" alt="该资源不存在" style="max-width: 300px;margin: 0 auto;display: block;" />
       <div slot="footer">
         <Button @click="viewImage=false">关闭</Button>
       </div>

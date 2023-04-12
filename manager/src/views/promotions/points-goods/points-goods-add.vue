@@ -28,7 +28,8 @@
                 </template>
 
                 <template slot-scope="{ index }" slot="settlementPrice">
-                  <Input
+                  <InputNumber
+                    :min="0"
                     type="number"
                     v-model="promotionGoodsList[index].settlementPrice"
                   />
@@ -54,10 +55,18 @@
                   </Select>
                 </template>
                 <template slot-scope="{ index }" slot="activeStock">
-                  <Input type="number" v-model="promotionGoodsList[index].activeStock" />
+                  <InputNumber
+                    :min="0"
+                    type="number"
+                    v-model="promotionGoodsList[index].activeStock"
+                  />
                 </template>
                 <template slot-scope="{ index }" slot="points">
-                  <Input type="number" v-model="promotionGoodsList[index].points" />
+                  <InputNumber
+                    :min="0"
+                    type="number"
+                    v-model="promotionGoodsList[index].points"
+                  />
                 </template>
               </Table>
             </FormItem>
@@ -370,8 +379,8 @@ export default {
           settlementPrice: e.settlementPrice || 0,
           pointsGoodsCategoryId: e.pointsGoodsCategoryId || 0,
           pointsGoodsCategoryName: e.pointsGoodsCategoryName || "",
-          activeStock: e.activeStock || 0,
-          points: e.points || 0,
+          activeStock: e.activeStock || 1,
+          points: e.points || 1,
           skuId: e.id,
           goodsId: e.goodsId,
           originalPrice: e.price || 0,
