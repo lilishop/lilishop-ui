@@ -36,6 +36,11 @@
     </p>
     <div class="order-card">
       <p class="global_color fontsize_18">{{ order.orderStatusValue }}</p>
+      <div v-if="order.orderStatusValue=='未付款'" class="left-tips-count-down" style="color: #e4393c;">
+          <mv-count-down :startTime="startTime" class="count-down" :endTime="endTime" :endText="endText"
+            :dayTxt="'天'" :hourTxt="'小时'"  :minutesTxt="'分钟'" :secondsTxt="'秒'" :isStart="isStart">
+          </mv-count-down>
+      </div>
       <p>订单号：{{ order.order.sn }}</p>
       <div style="color: #999" class="operation-time">
         操作时间：{{ order.order.updateTime || order.order.createTime }}
@@ -102,6 +107,10 @@
         </p>
       </template>
       <div v-else style="color: #999; margin-left: 5px">未开发票</div>
+    </div>
+    <div class="order-card" v-if="order.order.giftPoint">
+      <h3>促销赠送积分：</h3>
+        <p>积分：+{{ order.order.giftPoint}}</p>
     </div>
     <!-- 订单商品 -->
     <div class="goods">
@@ -189,6 +198,11 @@
           ><span>+{{ order.order.freightPrice | unitPrice("￥") }}</span
           ><br />
         </div>
+        <div v-if="order.order.priceDetailDTO.payPoint">
+          <span>积分：</span
+          ><span>- {{ order.order.priceDetailDTO.payPoint  }}</span
+          ><br />
+        </div>
         <div v-if="order.order.priceDetailDTO.couponPrice">
           <span>优惠券：</span
           ><span
@@ -236,7 +250,11 @@ import {
   cancelOrder,
 } from "@/api/order.js";
 import { afterSaleReason } from "@/api/member";
+import MvCountDown from 'mv-count-down'
 export default {
+  components: {
+    MvCountDown
+  },
   name: "order-detail",
   data() {
     return {
@@ -250,6 +268,10 @@ export default {
       },
       cancelAvail: false, // 取消订单modal控制
       cancelReason: [], // 取消订单原因
+      startTime: new Date().getTime(), // 开始时间（时间戳）
+      endTime: 0, // 完成的时间（时间戳）
+      endText: '订单已超时取消', // 倒计时完成的提示文本
+      isStart: false, // 控制倒计时开始的时机（异步请求完成开启）
     };
   },
   methods: {
@@ -273,7 +295,9 @@ export default {
       // 获取订单详情
       orderDetail(this.$route.query.sn).then((res) => {
         if (res.success) {
+          this.endTime = Date.parse(res.result.cancelOrderTime)
           this.order = res.result;
+          this.isStart = true
           this.progressList = res.result.orderLogs;
           if (this.order.order.deliveryMethod === 'LOGISTICS') {
             this.traces();

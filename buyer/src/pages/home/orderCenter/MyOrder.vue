@@ -26,7 +26,9 @@
       >
         <div class="order-header">
           <div>
-            <div>{{ filterOrderStatus(order.orderStatus) }}</div>
+            <div>{{ filterOrderStatus(order.orderStatus) }}
+              <Tag type="border" >{{filterOrderPromotion(order.orderPromotionType)}}</Tag>
+            </div>
             <div>
               订单号：{{ order.sn }} &nbsp; &nbsp; &nbsp;{{order.createTime}}
             </div>
@@ -111,7 +113,8 @@
 <script>
 import { getOrderList, sureReceived, cancelOrder, delOrder } from '@/api/order';
 import { afterSaleReason } from '@/api/member';
-import { orderStatusList } from '../enumeration.js'
+import { orderStatusList,orderPromotionList } from '../enumeration.js'
+
 export default {
   name: 'MyOrder',
   props: {
@@ -136,6 +139,7 @@ export default {
       },
       // 状态数组
       orderStatusList,
+      orderPromotionList,
       changeWay: ['全部订单', '待付款', '待收货', '已完成'], // 订单状态
       total: 0, // 数据总数
       spinShow: false, // 加载状态
@@ -288,6 +292,10 @@ export default {
     filterOrderStatus (status) { // 获取订单状态中文
       const ob = this.orderStatusList.filter(e => { return e.status === status });
       return ob && ob[0] ? ob[0].name : status
+    },
+    filterOrderPromotion (status) { // 获取订单活动状态中文
+      const ob = this.orderPromotionList.filter(e => { return e.status === status });
+      return ob && ob[0] ? ob[0].name : status
     }
   }
 };
@@ -374,6 +382,9 @@ export default {
         margin-bottom: 10px;
       }
     }
+  }
+  .ivu-tag{
+   margin-left: 20px!important;
   }
 }
 </style>

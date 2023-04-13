@@ -215,6 +215,7 @@
                 clearable
                 style="width: 20%"
               />
+              <span style="color: #999;margin-left: 20px;">0 表示不预警</span>
             </FormItem>
             <Form-item>
               <Button
@@ -294,7 +295,7 @@ export default {
       },
       //库存预警form
       stockWarningForm: {
-        stockWarning: "", // 库存预警数量
+        stockWarning: 0, // 库存预警数量
       },
       //im form
       udeskForm: {
@@ -454,7 +455,7 @@ export default {
           Cookies.set("userInfoSeller", JSON.stringify(res.result));
           //库存预警数赋值
           this.$nextTick(() => {
-            this.stockWarningForm.stockWarning = res.result.stockWarning + "";
+            this.stockWarningForm.stockWarning = res.result.stockWarning ;
           });
           if (res.result.merchantEuid) {
             //赋予坐席id

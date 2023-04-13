@@ -6,7 +6,7 @@
         @keydown.enter.native="handleSearch"
         :model="searchForm"
         inline
-        :label-width="70"
+        :label-width="100"
         class="search-form"
       >
         <Form-item label="订单号" prop="orderSn">
@@ -38,7 +38,7 @@
           />
         </Form-item>
 
-        <Form-item label="订单类型" prop="orderType">
+        <Form-item label="订单促销类型" prop="orderPromotionType">
           <Select v-model="searchForm.orderType" placeholder="请选择" clearable style="width: 160px">
             <Option value="NORMAL">普通订单</Option>
             <Option value="PINTUAN">拼团订单</Option>
@@ -207,19 +207,23 @@ export default {
           },
         },
         {
-          title: "订单类型",
+          title: "订单促销类型",
           key: "orderPromotionType",
           width: 120,
           render: (h, params) => {
-            if (params.row.orderType == "NORMAL") {
+            if (params.row.orderPromotionType == "NORMAL") {
               return h("div", [h("tag", {props: {color: "blue"}}, "普通订单")]);
-            } else if (params.row.orderType == "PINTUAN") {
+            } else if (params.row.orderPromotionType == "PINTUAN") {
               return h("div", [h("tag", {props: {color: "volcano"}}, "拼团订单")]);
-            } else if (params.row.orderType == "GIFT") {
+            } else if (params.row.orderPromotionType == "GIFT") {
               return h("div", [h("tag", {props: {color: "green"}}, "赠品订单")]);
-            } else if (params.row.orderType == "VIRTUAL") {
+            } else if (params.row.orderPromotionType == "VIRTUAL") {
               return h("div", [h("tag", {props: {color: "geekblue"}}, "核验订单")]);
-            }
+            }else if (params.row.orderPromotionType == "KANJIA") {
+              return h("div", [h("tag", {props: {color: "magenta"}}, "砍价订单")]);
+            }else if (params.row.orderPromotionType == "POINTS") {
+              return h("div", [h("tag", {props: {color: "cyan"}}, "积分订单")]);
+            }  
           },
         },
         {

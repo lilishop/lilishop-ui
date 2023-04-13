@@ -38,6 +38,29 @@ export const orderStatusList = [
     status: 'STAY_PICKED_UP'
   }
 ]
+// 订单活动状态
+export const orderPromotionList = [
+  {
+    name: '普通订单',
+    status: 'NORMAL'
+  },
+  {
+    name: '拼团订单',
+    status: 'PINTUAN'
+  },
+  {
+    name: '赠品订单',
+    status: 'GIFT'
+  },
+  {
+    name: '积分订单',
+    status: 'POINTS'
+  },
+  {
+    name: '砍价订单',
+    status: 'KANJIA'
+  }
+]
 // 订单售后状态
 export const afterSaleStatusList = [
   {
