@@ -167,7 +167,7 @@
               <InputNumber
                 :min="0"
                 :disabled="form.promotionStatus != 'NEW'"
-                v-model="form.point"
+                v-model="form.points"
                 type="number"
                 style="width: 280px"
               />

@@ -10,8 +10,8 @@
         <p class="ellipsis" :alt="storeMsg.storeDesc" v-html="storeMsg.storeDesc"></p>
       </div>
       <div>
-        <span class="hover-pointer" @click="collect"><Icon type="ios-heart"
-                                                           :color="storeCollected ? '#ed3f14' : '#fff'"/>{{
+        <span class="hover-pointer" @click="collect">
+          <Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#fff'"/>{{
             storeCollected ? '已收藏店铺' : '收藏店铺'
           }}</span>
         <span style="width:80px" class="hover-pointer ml_10" @click="IMService(storeMsg.storeId)"><Icon
@@ -51,7 +51,7 @@
     </div>
 
 
-    <div v-if="storeMsg.pageShow&&storeMsg.pageShow==='1'">
+    <div v-if="storeMsg.pageShow&&storeMsg.pageShow=='1'">
       <!-- 楼层装修部分 -->
       <model-form ref="modelForm" :data="modelForm"></model-form>
     </div>
@@ -219,10 +219,16 @@ export default {
 
           this.storeMsg = res.result;
           console.log(this.storeMsg)
-
+            // 判断是否收藏
+            if (this.Cookies.getItem("userInfo")) {
+              isStoreCollection("STORE", this.$route.query.id).then((res) => {
+                if (res.success && res.result) {
+                  this.storeCollected = true;
+                }
+              });
+            }   
           //判定如果开启楼层展示，则获取页面信息 否则读取商品信息
-          if (this.storeMsg.pageShow && this.storeMsg.pageShow === '1') {
-
+          if (this.storeMsg.pageShow && this.storeMsg.pageShow == '1') {
             this.getIndexData();
           } else {
             this.getGoodsList();
@@ -373,7 +379,12 @@ export default {
     }
   }
 }
-
+.hover-pointer{
+  &:hover {
+        // cursor: pointer;
+        color: $theme_color;
+      }
+} 
 .promotion-decorate::before,
 .promotion-decorate::after {
   background-image: url("/src/assets/images/sprite@2x.png");

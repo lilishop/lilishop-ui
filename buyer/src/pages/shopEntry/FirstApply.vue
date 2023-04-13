@@ -262,7 +262,11 @@ export default {
     next () {
       this.$refs.firstForm.validate((valid) => {
         if (valid) {
-          this.loading = true;
+          if(this.form.legalPhoto.length < 2){
+            this.$Message.warning('请上传法人身份证正反面')
+            return
+          }
+          this.loading = true; 
           let params = JSON.parse(JSON.stringify(this.form));
           params.legalPhoto = this.form.legalPhoto.toString();
           params.licencePhoto = this.form.licencePhoto.toString();

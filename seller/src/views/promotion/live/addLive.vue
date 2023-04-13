@@ -654,7 +654,7 @@ export default {
   font-size: 12px;
 }
 .goods-table {
-  width: 1000px;
+  max-width: 1000px;
   margin: 10px 0;
 }
 .upload-list {
