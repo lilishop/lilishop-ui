@@ -67,6 +67,7 @@
             <Option value="COMPLETED">已完成</Option>
             <Option value="TAKE">待核验</Option>
             <Option value="CANCELLED">已取消</Option>
+            <Option value="STAY_PICKED_UP">待自提</Option>
           </Select>
         </Form-item>
         <Button
@@ -265,6 +266,10 @@ export default {
             } else if (params.row.orderStatus == "UNDELIVERED") {
               return h("div", [
                 h("tag", { props: { color: "geekblue" } }, "待发货"),
+              ]);
+            } else if (params.row.orderStatus == "STAY_PICKED_UP") {
+              return h("div", [
+                h("tag", { props: { color: "geekblue" } }, "待自提"),
               ]);
             } else if (params.row.orderStatus == "DELIVERED") {
               return h("div", [

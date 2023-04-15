@@ -84,7 +84,7 @@
             <dl>
               <dt>实际退款金额</dt>
               <dd>
-                <Input v-model="params.actualRefundPrice" style="width: 260px" />
+                <InputNumber :min="0" v-model="params.actualRefundPrice" style="width: 260px" />
               </dd>
             </dl>
             <dl>

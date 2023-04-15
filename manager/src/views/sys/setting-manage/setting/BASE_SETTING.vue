@@ -3,7 +3,8 @@
     <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
 
       <FormItem label="站点名称" prop="siteName">
-        <Input v-model="formValidate.siteName" />
+        <Input style="width:200px;" v-model="formValidate.siteName" />
+        <span class="desc">配置买家端站点名称</span>
       </FormItem>
       <FormItem label="icp" prop="icp">
 
@@ -16,6 +17,7 @@
           <img v-if="formValidate.domainLogo" class="img" :src="formValidate.domainLogo" />
           <img v-else class="img" src="../../../../assets/emptyImg.png" alt="">
           <Button @click="onClickImg('domainLogo')">选择图片</Button>
+           <span class="desc">后台管理左上角logo展示 	17∶6</span>
         </div>
       </FormItem>
       <FormItem label="后台Icon" prop="domainIcon">
@@ -24,6 +26,7 @@
           <img v-if="formValidate.domainIcon" class="img" :src="formValidate.domainIcon" />
           <img v-else class="img" src="../../../../assets/emptyImg.png" alt="">
           <Button @click="onClickImg('domainIcon')">选择图片</Button>
+            <span class="desc">后台管理网站icon展示 	1∶1</span>
         </div>
       </FormItem>
       <FormItem label="买家端Logo" prop="buyerSideLogo">
@@ -31,6 +34,7 @@
           <img v-if="formValidate.buyerSideLogo" class="img" :src="formValidate.buyerSideLogo" />
           <img v-else class="img" src="../../../../assets/emptyImg.png" alt="">
           <Button @click="onClickImg('buyerSideLogo')">选择图片</Button>
+           <span class="desc">买家端logo展示 	17∶6</span>
         </div>
       </FormItem>
       <FormItem label="买家端Icon" prop="buyerSideIcon">
@@ -38,6 +42,7 @@
           <img v-if="formValidate.buyerSideIcon" class="img" :src="formValidate.buyerSideIcon" />
           <img v-else class="img" src="../../../../assets/emptyImg.png" alt="">
           <Button @click="onClickImg('buyerSideIcon')">选择图片</Button>
+            <span class="desc">买家端网站icon展示 	1∶1</span>
         </div>
       </FormItem>
       <FormItem label="商家端Logo" prop="storeSideLogo">
@@ -45,6 +50,7 @@
           <img v-if="formValidate.storeSideLogo" class="img" :src="formValidate.storeSideLogo" />
           <img v-else class="img" src="../../../../assets/emptyImg.png" alt="">
           <Button @click="onClickImg('storeSideLogo')">选择图片</Button>
+          <span class="desc">商家端logo展示 	17∶6</span>
         </div>
       </FormItem>
       <FormItem label="商家端Icon" prop="storeSideIcon">
@@ -52,11 +58,13 @@
           <img v-if="formValidate.storeSideIcon" class="img" :src="formValidate.storeSideIcon" />
           <img v-else class="img" src="../../../../assets/emptyImg.png" alt="">
           <Button @click="onClickImg('storeSideIcon')">选择图片</Button>
+           <span class="desc">商家端icon展示 	1∶1</span>
         </div>
       </FormItem>
 
       <FormItem label="站点地址" prop="staticPageAddress">
-        <Input v-model="formValidate.staticPageAddress" />
+        <Input  style="width:200px;" v-model="formValidate.staticPageAddress" />
+
       </FormItem>
       <FormItem label="wap站点地址" prop="staticPageWapAddress">
         <Input v-model="formValidate.staticPageWapAddress" />

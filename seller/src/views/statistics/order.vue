@@ -523,6 +523,7 @@ export default {
     },
     // 实例化订单图表
     async initOrderChartList(name) {
+      this.orderChart ? this.orderChart.clear() : ''
       const res = await API_Goods.getOrderChart(this.orderParams);
       if (res.success) {
         this.chartList = res.result;
