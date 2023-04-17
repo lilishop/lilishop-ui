@@ -8,7 +8,8 @@
           <Button v-if="allowOperation.cancel" @click="orderCancel" type="warning" ghost>订单取消</Button>
           <Button v-if="orderInfo.order.orderStatus === 'UNPAID'" @click="confirmPrice" type="primary">收款</Button>
           <Button @click="orderLog" type="info" ghost>订单日志</Button>
-          <Button @click="printOrder" type="primary" ghost style="float:right;">打印发货单</Button>
+          <Button @click="printOrder" type="primary" ghost style="float:right;"
+            v-if="$route.query.orderType != 'VIRTUAL'">打印发货单</Button>
         </div>
       </Card>
       <Card class="mt_10 clearfix">
@@ -112,10 +113,10 @@
             <div class="div-item-right">{{ orderInfo.order.remark }}</div>
           </div>
 
-          <div class="div-item" v-if="orderInfo.order.needReceipt == false">
+          <!-- <div class="div-item" v-if="orderInfo.order.needReceipt == false">
             <div class="div-item-left">发票信息：</div>
             <div class="div-item-right">暂无发票信息</div>
-          </div>
+          </div> -->
 
           <!-- <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票抬头：</div>
@@ -163,7 +164,7 @@
             </div>
           </div> -->
 
-          <div class="div-item">
+          <div class="div-item" v-if="$route.query.orderType != 'VIRTUAL'">
             <div class="div-item-left">配送方式：</div>
             <div class="div-item-right">
               {{ orderInfo.deliveryMethodValue }}
