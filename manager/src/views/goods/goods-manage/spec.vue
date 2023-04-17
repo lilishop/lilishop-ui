@@ -26,7 +26,6 @@
         <FormItem label="规格名称" prop="specName">
           <Input v-model="form.specName" maxlength="30" clearable style="width: 100%" />
         </FormItem>
-        {{ form }}
         <FormItem label="规格值" prop="specValue">
           <Select v-model="form.specValue" placeholder="输入后回车添加" multiple filterable allow-create
             :popper-append-to-body="false" popper-class="spec-values-popper"
@@ -51,7 +50,7 @@ import { regular } from "@/utils";
 export default {
   name: "spec",
   components: {},
-  data() {
+  data () {
     return {
       loading: true, // 表单加载状态
       modalType: 0, // 添加或编辑标识
@@ -151,28 +150,28 @@ export default {
   },
   methods: {
     //初始化，获取数据
-    init() {
+    init () {
       this.getDataList();
     },
     //修改分页
-    changePage(v) {
+    changePage (v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
     //修改页面大小
-    changePageSize(v) {
+    changePageSize (v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
     //搜索参数
-    handleSearch() {
+    handleSearch () {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
     //重置搜索参数
-    handleReset() {
+    handleReset () {
       this.$refs.searchForm.resetFields();
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
@@ -180,7 +179,7 @@ export default {
       this.getDataList();
     },
     //更改排序
-    changeSort(e) {
+    changeSort (e) {
       this.searchForm.sort = e.key;
       this.searchForm.order = e.order;
       if (e.order === "normal") {
@@ -189,16 +188,16 @@ export default {
       this.getDataList();
     },
     //清除已选择
-    clearSelectAll() {
+    clearSelectAll () {
       this.$refs.table.selectAll(false);
     },
     //修改已选择
-    changeSelect(e) {
+    changeSelect (e) {
       this.selectList = e;
       this.selectCount = e.length;
     },
     //获取数据
-    getDataList() {
+    getDataList () {
       this.loading = true;
       // 带多条件搜索参数获取表单数据 请自行修改接口
       getSpecListData(this.searchForm).then((res) => {
@@ -211,7 +210,7 @@ export default {
       this.loading = false;
     },
     //新增规格
-    saveSpec() {
+    saveSpec () {
       this.$refs.form.validate((valid) => {
         if (valid) {
           this.submitLoading = true;
@@ -246,7 +245,7 @@ export default {
       });
     },
     //弹出添加框
-    add() {
+    add () {
       this.modalType = 0;
       this.modalTitle = "添加";
       this.$refs.form.resetFields();
@@ -255,7 +254,7 @@ export default {
       this.modalVisible = true;
     },
     //弹出编辑框
-    edit(v) {
+    edit (v) {
       console.log(v);
       this.modalType = 1;
       this.modalTitle = "编辑";
@@ -272,7 +271,7 @@ export default {
       this.$nextTick(() => {
         this.$set(this.form, 'specValue', localVal.split(","))
       })
-      
+
       if (localVal && localVal.indexOf("," > 0)) {
         this.specValue = this.form.specValue;
       } else {
@@ -282,7 +281,7 @@ export default {
       this.modalVisible = true;
     },
     // 删除规格
-    remove(v) {
+    remove (v) {
       this.$Modal.confirm({
         title: "确认删除",
         content: "您确认要删除 " + v.specName + " ?",
@@ -299,7 +298,7 @@ export default {
       });
     },
     // 批量删除
-    delAll() {
+    delAll () {
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未选择要删除的数据");
         return;
@@ -327,7 +326,7 @@ export default {
       });
     },
   },
-  mounted() {
+  mounted () {
     this.init();
   },
 };
