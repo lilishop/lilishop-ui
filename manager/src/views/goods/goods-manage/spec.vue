@@ -29,7 +29,7 @@
         <FormItem label="规格值" prop="specValue">
           <Select v-model="form.specValue" placeholder="输入后回车添加" multiple filterable allow-create
             :popper-append-to-body="false" popper-class="spec-values-popper"
-            style="width: 100%; text-align: left; margin-right: 10px">
+            style="width: 100%; text-align: left; margin-right: 10px" @on-create="handleCreate2">
             <Option v-for="item in specValue" :value="item" :label="item" :key="item">
             </Option>
           </Select>
@@ -149,6 +149,9 @@ export default {
     };
   },
   methods: {
+    handleCreate2 (v) {
+      console.log(v);
+    },
     //初始化，获取数据
     init () {
       this.getDataList();
@@ -255,7 +258,6 @@ export default {
     },
     //弹出编辑框
     edit (v) {
-      console.log(v);
       this.modalType = 1;
       this.modalTitle = "编辑";
       // 转换null为""
@@ -265,19 +267,17 @@ export default {
         }
       }
       let localVal = v.specValue;
-      console.log(localVal.split(","))
       this.form.specName = v.specName;
       this.form.id = v.id;
-      this.$nextTick(() => {
-        this.$set(this.form, 'specValue', localVal.split(","))
-      })
-
+      // this.$nextTick(() => {
+      //   this.$set(this.form, 'specValue', localVal.split(","))
+      // })
+      this.form.specValue = localVal.split(",")
       if (localVal && localVal.indexOf("," > 0)) {
         this.specValue = this.form.specValue;
       } else {
         this.specValue = [];
       }
-      console.log("form.specValue", this.form);
       this.modalVisible = true;
     },
     // 删除规格
