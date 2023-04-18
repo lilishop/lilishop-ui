@@ -1,13 +1,13 @@
 <template>
   <div class="wrapper">
-    <card _Title="资金管理" />
+    <card _Title="资金管理"/>
 
     <div class="box">
       <div class="mb_20 account-price">
         <span class="subTips">账户余额：</span>
         <span class="global_color mr_10" style="font-size:26px">￥{{ memberDeposit | unitPrice }}</span>
         <span class="subTips">冻结金额：</span>
-        <span class="">￥{{ frozenDeposit | unitPrice}}</span>
+        <span class="">￥{{ frozenDeposit | unitPrice }}</span>
       </div>
       <div class="account-btns">
         <Button type="primary" @click="recharge">在线充值</Button>
@@ -22,19 +22,19 @@
       <div>
         <Form
           ref="formData"
-          :model="formData"
-          label-position="left"
           :label-width="100"
+          :model="formData"
           :rules="formValidate"
+          label-position="left"
         >
           <FormItem label="充值金额" prop="price">
-            <Input v-model="formData.price" size="large" number maxlength="9"
-              ><span slot="append">元</span></Input>
+            <Input v-model="formData.price" maxlength="9" number size="large"
+            ><span slot="append">元</span></Input>
           </FormItem>
         </Form>
       </div>
       <div slot="footer" style="text-align: center">
-        <Button type="success" size="large" @click="rechargePrice">充值</Button>
+        <Button size="large" type="success" @click="rechargePrice">充值</Button>
       </div>
     </Modal>
     <!-- 提现申请 -->
@@ -46,23 +46,45 @@
       <div>
         <Form
           ref="withdrawApplyFormData"
+          :label-width="120"
           :model="withdrawApplyFormData"
-          label-position="left"
-          :label-width="100"
           :rules="withdrawApplyFormValidate"
         >
+          <FormItem label="提现类型" prop="type">
+            <Select v-model="withdrawApplyFormData.type" disabled>
+              <Option value="ALI">支付宝</Option>
+              <Option value="WECHAT">微信</Option>
+            </Select>
+          </FormItem>
           <FormItem label="提现金额" prop="price">
             <Input
               v-model="withdrawApplyFormData.price"
-              size="large"
-              number
               maxlength="9"
-              ><span slot="append">元</span></Input>
+              number
+              size="large"
+            ><span slot="append">元</span></Input>
+            <span style="color: red">最低提现金额 {{ withdrawApplyFormData.minPrice }}元</span>
+          </FormItem>
+          <FormItem v-if="withdrawApplyFormData.type === 'ALI'" label="真实姓名" prop="realName">
+            <Input
+              v-model="withdrawApplyFormData.realName"
+              maxlength="9"
+              number
+              size="large"
+            ></Input>
+          </FormItem>
+          <FormItem v-if="withdrawApplyFormData.type === 'ALI'" label="第三方登录账号" prop="connectNumber">
+            <Input
+              v-model="withdrawApplyFormData.connectNumber"
+              maxlength="9"
+              number
+              size="large"
+            ></Input>
           </FormItem>
         </Form>
       </div>
       <div slot="footer" style="text-align: center">
-        <Button type="success" size="large" @click="withdrawal">提现</Button>
+        <Button size="large" type="success" @click="withdrawal">提现</Button>
       </div>
     </Modal>
     <!-- 余额日志 -->
@@ -73,15 +95,15 @@
         <div class="page-size">
           <Page
             :current="walletForm.pageNumber"
-            :total="logColumnsData.total"
             :page-size="walletForm.pageSize"
+            :page-size-opts="[10, 20, 50]"
+            :total="logColumnsData.total"
+            show-sizer
+            show-total
+            size="small"
+            transfer
             @on-change="changePage"
             @on-page-size-change="changePageSize"
-            :page-size-opts="[10, 20, 50]"
-            size="small"
-            show-total
-            show-sizer
-            transfer
           ></Page>
         </div>
       </TabPane>
@@ -95,15 +117,15 @@
         <div class="page-size">
           <Page
             :current="rechargeForm.pageNumber"
-            :total="rechargeListData.total"
             :page-size="rechargeForm.pageSize"
+            :page-size-opts="[10, 20, 50]"
+            :total="rechargeListData.total"
+            show-sizer
+            show-total
+            size="small"
+            transfer
             @on-change="rechargeChangePage"
             @on-page-size-change="rechargeChangePageSize"
-            :page-size-opts="[10, 20, 50]"
-            size="small"
-            show-total
-            show-sizer
-            transfer
           ></Page>
         </div>
       </TabPane>
@@ -117,15 +139,15 @@
         <div class="page-size">
           <Page
             :current="withdrawApplyForm.pageNumber"
-            :total="withdrawApplyColumnsListData.total"
             :page-size="withdrawApplyForm.pageSize"
+            :page-size-opts="[10, 20, 50]"
+            :total="withdrawApplyColumnsListData.total"
+            show-sizer
+            show-total
+            size="small"
+            transfer
             @on-change="withdrawChangePage"
             @on-page-size-change="withdrawChangePageSize"
-            :page-size-opts="[10, 20, 50]"
-            size="small"
-            show-total
-            show-sizer
-            transfer
           ></Page>
         </div>
       </TabPane>
@@ -134,17 +156,12 @@
 </template>
 
 <script>
-import {
-  getMembersWallet,
-  getDepositLog,
-  getRecharge,
-  getWithdrawApply,
-  recharge,
-  withdrawalApply
-} from '@/api/member';
+import {getDepositLog, getMembersWallet, getRecharge, getWithdrawApply, recharge, withdrawalApply} from '@/api/member';
+import {withdrawalSettingVO} from "@/api/pay";
+
 export default {
   name: 'MoneyManagement',
-  data () {
+  data() {
     return {
       frozenDeposit: 0, // 冻结余额
       memberDeposit: 0, // 余额
@@ -157,7 +174,11 @@ export default {
       },
       // 提现金额
       withdrawApplyFormData: {
-        price: 1
+        price: 1,
+        minPrice: 1,
+        type: '',
+        realName: '',
+        connectNumber: '',
       },
       // 余额日志
       walletForm: {
@@ -180,17 +201,23 @@ export default {
       // 提现申请校验
       withdrawApplyFormValidate: {
         price: [
-          { required: true, message: '请输入大于0小于9999的合法提现金额' },
+          {required: true, message: '请输入大于0小于9999的合法提现金额'},
           {
             pattern: /^[1-9]\d{0,3}(\.\d{1,2})?$/,
             message: '请输入大于0小于9999的合法提现金额',
             trigger: 'change'
           }
-        ]
+        ],
+        realName: [
+          {required: true, message: '请输入真实姓名'},
+        ],
+        connectNumber: [
+          {required: true, message: '请输入第三方登录账号'},
+        ],
       },
       formValidate: {
         price: [
-          { required: true, message: '请输入大于等于1小于9999的合法充值金额' },
+          {required: true, message: '请输入大于等于1小于9999的合法充值金额'},
           {
             pattern: /^[1-9]\d{0,3}(\.\d{1,2})?$/,
             message: '请输入大于等于1小于9999的合法充值金额',
@@ -362,12 +389,12 @@ export default {
       withdrawApplyColumnsListData: {} // 提现记录
     };
   },
-  mounted () {
+  mounted() {
     this.init();
   },
   methods: {
     // 初始化数据
-    init () {
+    init() {
       getMembersWallet().then((res) => {
         this.frozenDeposit = res.result.memberFrozenWallet;
         this.memberDeposit = res.result.memberWallet;
@@ -378,7 +405,7 @@ export default {
         }
       });
     },
-    tabPaneChange (v) {
+    tabPaneChange(v) {
       // 如果查询充值记录
       if (v === 'recharge') {
         this.getRechargeData();
@@ -393,7 +420,7 @@ export default {
       }
     },
     // 充值记录
-    getRechargeData () {
+    getRechargeData() {
       getRecharge(this.rechargeForm).then((res) => {
         if (res.message === 'success') {
           this.rechargeListData = res.result;
@@ -401,7 +428,7 @@ export default {
       });
     },
     // 提现记录
-    getWithdrawApplyData () {
+    getWithdrawApplyData() {
       getWithdrawApply(this.withdrawApplyForm).then((res) => {
         if (res.message === 'success') {
           this.withdrawApplyColumnsListData = res.result;
@@ -409,49 +436,49 @@ export default {
       });
     },
     // 余额日志
-    changePage (v) {
+    changePage(v) {
       this.walletForm.pageNumber = v;
       this.init();
     },
-    changePageSize (v) {
+    changePageSize(v) {
       this.walletForm.pageNumber = 1;
       this.walletForm.pageSize = v;
       this.init();
     },
     // 充值记录
-    rechargeChangePage (v) {
+    rechargeChangePage(v) {
       this.rechargeForm.pageNumber = v;
       this.getRechargeData();
     },
-    rechargeChangePageSize (v) {
+    rechargeChangePageSize(v) {
       this.rechargeForm.pageNumber = 1;
       this.rechargeForm.pageSize = v;
       this.getRechargeData();
     },
     // 提现记录
-    withdrawChangePage (v) {
+    withdrawChangePage(v) {
       this.withdrawApplyForm.pageNumber = v;
       this.getWithdrawApplyData();
     },
-    withdrawChangePageSize (v) {
+    withdrawChangePageSize(v) {
       this.withdrawApplyForm.pageNumber = 1;
       this.withdrawApplyForm.pageSize = v;
       this.getWithdrawApplyData();
     },
     // 弹出在线充值框
-    recharge () {
+    recharge() {
       this.formData.price = 1;
       this.modal = true;
     },
     // 在线充值
-    rechargePrice () {
+    rechargePrice() {
       this.$refs['formData'].validate((valid) => {
         if (valid) {
           recharge(this.formData).then((res) => {
             if (res.message === 'success') {
               this.$router.push({
                 path: '/payment',
-                query: { orderType: 'RECHARGE', sn: res.result.rechargeSn }
+                query: {orderType: 'RECHARGE', sn: res.result.rechargeSn}
               });
             }
           });
@@ -459,12 +486,23 @@ export default {
       });
     },
     // 申请提现弹出框
-    withdrawalApply () {
-      this.withdrawApplyFormData.price = 1;
+    withdrawalApply() {
       this.withdrawApplyModal = true;
+      this.withdrawApplyFormData.minPrice = 1;
+      this.withdrawApplyFormData.price = 1;
+      this.withdrawApplyFormData.type = '';
+      this.withdrawApplyFormData.realName = '';
+      this.withdrawApplyFormData.connectNumber = '';
+      withdrawalSettingVO().then((res) => {
+        if (res.code === 200) {
+          this.withdrawApplyFormData.minPrice = res.result.minPrice;
+          this.withdrawApplyFormData.type = res.result.type;
+          this.withdrawApplyFormData.price = 1;
+        }
+      });
     },
     // 提现
-    withdrawal () {
+    withdrawal() {
       this.$refs['withdrawApplyFormData'].validate((valid) => {
         if (valid) {
           withdrawalApply(this.withdrawApplyFormData).then((res) => {
@@ -482,25 +520,30 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .box {
   margin: 20px 0;
 }
+
 .page-size {
   margin: 15px 0px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
 }
+
 .account-price {
   font-weight: bold;
 }
+
 .subTips {
   margin-left: 10px;
 }
+
 .account-btns {
   margin: 10px 0;
 }
+
 .ivu-btn {
   margin: 0 4px;
 }

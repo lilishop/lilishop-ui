@@ -22,6 +22,7 @@
         <span v-if="storeDisable == 'REFUSED'">审核未通过,请修改资质信息，如有疑问请联系管理员</span>
       </div>
       <Button v-if="currentIndex === 3" @click="$router.push('/')">返回</Button>
+      &nbsp;
       <Button type="primary" @click='currentIndex = 0'
         v-if="storeDisable === 'REFUSED' && currentIndex === 3">重新申请</Button>
     </div>
@@ -162,7 +163,7 @@ export default {
   padding: 10px 20px;
 
   h1 {
-    
+
     margin-top: 20px;
   }
 }

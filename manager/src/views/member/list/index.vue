@@ -325,6 +325,7 @@ export default {
   methods: {
     // 回调给父级
     callback(val, index) {
+      this.selectMember.forEach(item=>{item.___selected = false})
       this.$set(val, "___selected", !val.___selected);
       console.log(val.___selected);
       console.log(this.selectMember);

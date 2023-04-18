@@ -33,39 +33,37 @@
       <div>
         <h3 class="ml_10">结算详细</h3>
         <div class="bill-detail-price">
+          <div class="flex bill-item">
             <span>
               <p>退单金额</p>
               <p class="theme_color">-{{bill.refundPrice || 0 | unitPrice('￥')}}</p>
             </span>
-
             <span>
               <p>平台收取佣金</p>
               <p class="theme_color">-{{bill.commissionPrice || 0 | unitPrice('￥')}}</p>
             </span>
-        		  <span>
-        		    <p>退单产生退还佣金金额</p>
-        		    <p class="increase-color">+{{bill.refundCommissionPrice || 0  | unitPrice('￥')}}</p>
-        		  </span>
-
             <span>
               <p>分销返现支出</p>
               <p class="theme_color">-{{bill.distributionCommission || 0  | unitPrice('￥')}}</p>
             </span>
-        		  <span>
-        		    <p>退单分销返现返还</p>
-        		    <p class="increase-color">+{{bill.distributionRefundCommission || 0  | unitPrice('￥')}}</p>
-        		  </span>
-
             <span>
               <p>退单平台优惠券补贴返还</p>
               <p class="theme_color">-{{bill.siteCouponRefundCommission || 0  | unitPrice('￥')}}</p>
             </span>
-
+             </div>
+            <div class="flex bill-item">
             <span>
               <p>平台优惠券补贴</p>
               <p class="increase-color">+{{bill.siteCouponCommission || 0  | unitPrice('￥')}}</p>
             </span>
-
+              <span>
+        		    <p>退单产生退还佣金金额</p>
+        		    <p class="increase-color">+{{bill.refundCommissionPrice || 0  | unitPrice('￥')}}</p>
+        		  </span>
+        		  <span>
+        		    <p>退单分销返现返还</p>
+        		    <p class="increase-color">+{{bill.distributionRefundCommission || 0  | unitPrice('￥')}}</p>
+        		  </span>
             <span>
               <p>积分结算金额</p>
               <p class="increase-color">+{{bill.pointSettlementPrice || 0  | unitPrice('￥')}}</p>
@@ -74,6 +72,7 @@
               <p>砍价商品结算金额</p>
               <p class="increase-color">+{{bill.kanjiaSettlementPrice || 0  | unitPrice('￥')}}</p>
             </span>
+            </div>
           </div>
         </div>
     </Card>
@@ -263,7 +262,7 @@ export default {
 		        this.$options.filters.unitPrice(params.row.siteCouponCommission, "￥")
 		      );
 		    }
-		
+
 		  },
 		},
         {
@@ -669,11 +668,10 @@ table {
   }
 }
 .bill-detail-price {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+  width: 1200px;
+  margin: 10px 0;
   padding: 10px;
-  > span {
+  /deep/ span {
     font-size: 14px;
     text-align: center;
     width: 200px;
@@ -685,5 +683,12 @@ table {
   .increase-color {
     color: green;
   }
+  div{
+
+  margin: 20px 0;
+  }
+}
+.bill-item{
+  justify-content: flex-start;
 }
 </style>

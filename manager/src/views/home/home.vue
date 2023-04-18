@@ -337,6 +337,7 @@ export default {
 
     // 实例化订单图表
     async initOrderChartList(name) {
+      this.orderChart ? this.orderChart.clear() : ''
       const res = await API_Goods.getOrderChart(this.orderParams);
       if (res.success) {
         this.chartList = res.result;
@@ -446,6 +447,7 @@ export default {
 
     // 浏览量
     async getPvChart() {
+      this.pvChart ? this.pvChart.clear() : ''
       API_Member.getStatisticsList(this.params).then((res) => {
         if (res.result) {
           this.data = res.result;
@@ -464,6 +466,7 @@ export default {
     },
     // 实例化会员流量图表
     async initHistoryMemberChartList() {
+      this.historyMemberChart ? this.historyMemberChart.clear() : ''
       const res = await API_Member.historyMemberChartList();
       if (res.success) {
         this.chartList = res.result;
