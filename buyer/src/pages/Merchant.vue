@@ -10,13 +10,8 @@
         <p :alt="storeMsg.storeDesc" class="ellipsis" v-html="storeMsg.storeDesc"></p>
       </div>
       <div>
-<<<<<<< HEAD
-        <span class="hover-pointer" @click="collect">
-          <Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#fff'"/>{{
-=======
         <span class="hover-pointer" @click="collect"><Icon :color="storeCollected ? '#ed3f14' : '#fff'"
                                                            type="ios-heart"/>{{
->>>>>>> master
             storeCollected ? '已收藏店铺' : '收藏店铺'
           }}</span>
         <span class="hover-pointer ml_10" style="width:80px" @click="IMService(storeMsg.storeId)"><Icon
@@ -230,7 +225,7 @@ export default {
                   this.storeCollected = true;
                 }
               });
-            }   
+            }
           //判定如果开启楼层展示，则获取页面信息 否则读取商品信息
           if (this.storeMsg.pageShow && this.storeMsg.pageShow == '1') {
             this.getIndexData();
@@ -388,7 +383,7 @@ export default {
         // cursor: pointer;
         color: $theme_color;
       }
-} 
+}
 .promotion-decorate::before,
 .promotion-decorate::after {
   background-image: url("/src/assets/images/sprite@2x.png");
