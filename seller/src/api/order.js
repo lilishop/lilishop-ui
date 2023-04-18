@@ -141,3 +141,13 @@ export const getReceiptPage = params => {
 export const invoicing = id => {
   return postRequest(`/trade/receipt/${id}/invoicing`);
 };
+
+//付款单对账
+export const paymentReconciliation= (params) => {
+  return putRequest(`/payment/paymentLog`, params)
+}
+
+//退款单对账
+export const refundReconciliation = (params) => {
+  return putRequest(`/payment/refundLog`, params)
+}

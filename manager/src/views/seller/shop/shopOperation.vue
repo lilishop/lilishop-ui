@@ -409,6 +409,15 @@
                 >确认
               </Button>
             </FormItem>
+            <FormItem label="二级商户ID" prop="subMchid">
+              <Input
+                v-model.number="shopForm.subMchid"
+                clearable
+                style="width: 200px"
+                type="number"
+              />
+              <div style="color: #a0a0a0">微信进件后成功后返回的唯一标识</div>
+            </FormItem>
           </TabPane>
         </Form>
       </Tabs>
@@ -524,6 +533,7 @@ export default {
         storeAddressDetail: [
           { required: true, message: "店铺详细地址不能为空" },
         ],
+        subMchid: [{ required: true, message: "二级商户ID不能为空" }],
         storeDesc: [{ required: true, message: "店铺简介不能为空" }],
         storeCenter: [{ required: true, message: "店铺未定位" }],
         companyName: [{ required: true, message: "公司名称不能为空" }],
@@ -623,6 +633,7 @@ export default {
         storeLogo: "",
         storeDesc: "",
         ddCode: "",
+        subMchid: "",
       },
       categories: [], // 分类
 
@@ -781,6 +792,7 @@ export default {
           params.settlementCycle = this.settlementCycle;
           if (this.shopId) {
             delete params.memberId;
+            if (!params.subMchid) delete params.memberId;
             shopEdit(this.shopId, params).then((res) => {
               if (res.success) {
                 this.$Message.success("编辑成功");

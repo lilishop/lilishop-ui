@@ -28,7 +28,7 @@
           alt="">
         <span>支付宝</span>
       </div>
-      <div v-if="support.includes('WECHAT')" class="-box-item" @click="handlePay('WECHAT')">
+      <div v-if="support.includes('WECHAT_PARTNER')" class="-box-item" @click="handlePay('WECHAT_PARTNER')">
         <img
           src="https://dss1.bdstatic.com/6OF1bjeh1BF3odCf/it/u=3774939867,2826752539&fm=74&app=80&f=JPEG&size=f121,121?sec=1880279984&t=796e842a5ef2d16d9edc872d6f1147ef"
           alt="">

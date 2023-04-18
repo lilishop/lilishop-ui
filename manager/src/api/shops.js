@@ -47,29 +47,29 @@ export const shopDetail = (id) => {
 
 // 获取结算单分页
 export const getBuyBillPage = (params) => {
-  return getRequest(`/order/bill/getByPage`,params)
+  return getRequest(`/payment/bill/getByPage`,params)
 }
 
 // 获取结算单详情
 export const getBuyBillDetail = (id) => {
-  return getRequest(`/order/bill/get/${id}`)
+  return getRequest(`/payment/bill/get/${id}`)
 }
 
 
 // 获取商家结算单流水分页
 export const getStoreFlow = (id,params) => {
-  return getRequest(`/order/bill/${id}/getStoreFlow`,params)
+  return getRequest(`/payment/bill/${id}/getStoreFlow`,params)
 }
 
 // 审核结算单
 
 export const examine = (id) => {
-  return putRequest(`/order/bill/examine/${id}`)
+  return putRequest(`/payment/bill/examine/${id}`)
 }
 // 审核结算单
 
 export const pay = (id) => {
-  return putRequest(`/order/bill/pay/${id}`)
+  return putRequest(`/payment/bill/pay/${id}`)
 }
 
 //获取所有商家
@@ -81,3 +81,47 @@ export const getShopList = () => {
 export const getShopByMemberId = (id) => {
   return getRequest(`/store/store/${id}/member`)
 }
+
+// 提交申请单
+export const postConstruction = (params) => {
+  return postRequest(`/payment/wechatApplyment/create`, params, {
+    "content-type": "application/json",
+  });
+};
+
+//编辑进件信息
+export const editputConstruction = (id, params) => {
+  return putRequest(`/payment/wechatApplyment/update/${id}`, params, {
+    "Content-Type": "application/json",
+  });
+};
+// 保存进件-草稿
+export const draftSave = (params) => {
+  return postRequest(`/payment/wechatApplyment/save`,params, {
+    "Content-Type": "application/json",
+  });
+};
+//获取进件-二级商户
+export const editConstruction = (id) => {
+  return getRequest(`/payment/wechatApplyment/get/${id}`);
+};
+// 进件-申请单列表
+export const getConstruction = (params) => {
+  return getRequest("/payment/wechatApplyment", params);
+};
+// 进件详情
+export const syncStatus = (id) => {
+  return getRequest(`/payment/wechatApplyment/applyments/${id}`);
+};
+// 进件-通过id获取子地区
+export const getRegion = (id) => {
+  return getRequest(`/common/common/region/${id}`);
+};
+// 获取进件-对公银行信息
+// export const getBankInfo = (params) => {
+//   return getRequest(`/payment/wechatApplyment/getBankInfo`, params);
+// };
+// 获取进件-对私银行信息
+export const getBankInfo = (params) => {
+  return getRequest(`/payment/wechatApplyment/getPersonalBank`, params);
+};
