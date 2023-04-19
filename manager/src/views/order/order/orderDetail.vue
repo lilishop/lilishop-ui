@@ -113,17 +113,10 @@
             <div class="div-item-right">{{ orderInfo.order.remark }}</div>
           </div>
 
-<<<<<<< HEAD
           <div class="div-item">
             <div class="div-item-left">支付时间：</div>
             <div class="div-item-right">{{ orderInfo.order.paymentTime }}</div>
           </div>
-=======
-          <!-- <div class="div-item" v-if="orderInfo.order.needReceipt == false">
-            <div class="div-item-left">发票信息：</div>
-            <div class="div-item-right">暂无发票信息</div>
-          </div> -->
->>>>>>> master
 
           <!-- <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票抬头：</div>
@@ -171,11 +164,7 @@
             </div>
           </div> -->
 
-<<<<<<< HEAD
-          <div class="div-item" v-if="orderInfo.order.orderType ===NORMAL">
-=======
           <div class="div-item" v-if="$route.query.orderType != 'VIRTUAL'">
->>>>>>> master
             <div class="div-item-left">配送方式：</div>
             <div class="div-item-right">
               {{ orderInfo.deliveryMethodValue }}
@@ -239,17 +228,6 @@
                 {{ orderInfo.order.priceDetailDTO.couponPrice | unitPrice("￥") }}
               </span>
             </li>
-<<<<<<< HEAD
-            <li v-if="orderInfo.order.priceDetailDTO.discountPriceDetail != undefined && orderInfo.order.priceDetailDTO.discountPriceDetail && orderInfo.order.priceDetailDTO.discountPriceDetail != null && orderInfo.order.priceDetailDTO.discountPriceDetail != ''">
-            <div class="label">
-              <Poptip trigger="hover" placement="left" width="200">
-                <Icon v-if="typeList.length > 0"  type="ios-alert-outline" size="17" @click="getOrderPrice" color="#cc0000"/>
-              <template #content>
-                <div class="api" style="text-align:left;">
-                <table>
-                    <thead>
-                        <tr>
-=======
             <li
               v-if="orderInfo.order.priceDetailDTO.discountPriceDetail != undefined && orderInfo.order.priceDetailDTO.discountPriceDetail && orderInfo.order.priceDetailDTO.discountPriceDetail != null && orderInfo.order.priceDetailDTO.discountPriceDetail != ''">
               <div class="label">
@@ -261,7 +239,6 @@
                       <table>
                         <thead>
                           <tr>
->>>>>>> master
                             <th>优惠详情：</th>
                           </tr>
                         </thead>
@@ -281,11 +258,7 @@
             <!-- <li v-if="showPrices">
                 <span class="label" style="color: #cc0000;font-size: 14px;" v-if="typeList.length > 0" >优惠详情：</span>
               </li> -->
-<<<<<<< HEAD
-              <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index">
-=======
             <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index"> 
->>>>>>> master
                 <span class="label" v-if="index == 1 && typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
                 <span class="txt" style="border-bottom: 1px dashed;font-size:10px !important;" v-if="index == 1 &&  typeList.length > 1">¥{{ item.discountPrice | unitPrice }}</span>
                 <span class="label" v-if="index == 0 &&  typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
@@ -433,23 +406,6 @@
             </Col>
           </Row>
           <Row>
-<<<<<<< HEAD
-              <Col span="24">
-                <p class="printgoodtitle">商品信息</p>
-                <div class="printgoodinfo">
-                  <div v-for="(item,index) in orderInfo.orderItems" :key="index" class="printgooditem">
-                    <div class="printgoodname">
-                      <p>{{item.goodsName}}</p>
-                      <div class="printgoodguid" v-if="item.specs">
-                        <span v-for="(itemchild, keychild) in JSON.parse(item.specs)" :key="keychild">
-                          <span class="printgoodguiditem" v-if="keychild !== 'images'">
-                            {{ keychild }} : {{ itemchild }}
-                          </span>
-                        </span>
-                      </div>
-                    </div>
-                    <span class="printgoodnumber">数量：{{item.num}}</span>
-=======
             <Col span="24">
             <p class="printgoodtitle">商品信息</p>
             <div class="printgoodinfo">
@@ -462,7 +418,6 @@
                         {{ keychild }} : {{ itemchild }}
                       </span>
                     </span>
->>>>>>> master
                   </div>
                 </div>
                 <span class="printgoodnumber">数量：{{ item.num }}</span>
@@ -721,20 +676,12 @@ export default {
             this.typeList.splice(j, 1)
           }
         }
-<<<<<<< HEAD
-        console.log(this.typeList)
-        if(this.typeList.length >= 3){
-          console.log(123123)
-          this.getContentPrice()
-        }
-=======
       }
       console.log(this.typeList)
       if (this.typeList.length >= 3) {
         console.log(123123)
         this.getContentPrice()
       }
->>>>>>> master
     },
     // 获取订单详情
     getDataList () {
