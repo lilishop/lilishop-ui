@@ -180,6 +180,7 @@ export default {
     },
     // 初始化数据
     init() {
+      this.orderChart ? this.orderChart.clear() : ''
       API_Member.getMemberStatistics(this.params).then((res) => {
         if (res.result) {
           res.result.forEach((item) => {

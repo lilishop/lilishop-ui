@@ -492,7 +492,7 @@ export default {
     liliMap,
     region,
   },
-  data() {
+  data () {
     return {
       typeList: [],
       showPrices: false,
@@ -698,27 +698,27 @@ export default {
   },
   methods: {
     //修改地址
-    regionClick() {
+    regionClick () {
       this.showRegion = true;
       this.regionId = "";
     },
     //弹出订单核销框
-    orderTake() {
+    orderTake () {
       this.orderTakeForm.qrCode = this.orderInfo.order.verificationCode;
       this.orderTakeModal = true;
     },
     //打印发货单
-    printOrder() {
+    printOrder () {
       this.printModal = true;
     },
-    printHiddenInfo() {
+    printHiddenInfo () {
       this.printHiddenFlag = !this.printHiddenFlag;
     },
-    printCancel() {
+    printCancel () {
       // this.printHiddenFlag = false;
     },
     //订单核销提交
-    orderTakeSubmit() {
+    orderTakeSubmit () {
       this.$refs.orderTakeForm.validate((valid) => {
         if (valid) {
           API_Order.orderTake(this.sn, this.orderTakeForm.qrCode).then(
@@ -733,14 +733,14 @@ export default {
         }
       });
     },
-    getOrderPrice() {
+    getOrderPrice () {
       if (this.showPrices) {
         this.showPrices = false
       } else if (!this.showPrices) {
         this.showPrices = true
       }
     },
-    getContentPrice() {
+    getContentPrice () {
       for (let i = 0; i < this.typeList.length; i++) {
         for (let j = i + 1; j < this.typeList.length; j++) {
           if (this.typeList[i].promotionId === this.typeList[j].promotionId) {
@@ -756,7 +756,7 @@ export default {
       }
     },
     //获取订单详细信息
-    getDataDetail() {
+    getDataDetail () {
       this.loading = true;
       API_Order.getOrderDetail(this.sn).then((res) => {
         this.loading = false;
@@ -771,7 +771,7 @@ export default {
         }
       });
     },
-    Toprint() {
+    Toprint () {
       this.facesheetFlag = true;
       API_Logistics.getCheckedOn().then(res => {
         if (res.success) {
@@ -781,13 +781,13 @@ export default {
       });
     },
     // 修改订单金额
-    modifyPrice() {
+    modifyPrice () {
       //默认要修改的金额为订单总金额
       this.modifyPriceForm.orderPrice = this.orderInfo.order.flowPrice;
       this.modal = true;
     },
     //修改订单金额提交
-    modifyPriceSubmit() {
+    modifyPriceSubmit () {
       this.$refs.modifyPriceForm.validate((valid) => {
         if (valid) {
           API_Order.modifyOrderPrice(this.sn, this.modifyPriceForm).then(
@@ -803,12 +803,12 @@ export default {
       });
     },
     // 选中的地址
-    selectedRegion(val) {
+    selectedRegion (val) {
       this.region = val[1];
       this.regionId = val[0];
     },
     //查询物流
-    logistics() {
+    logistics () {
       this.logisticsModal = true;
           console.log(this.orderInfo)
       API_Order.getTraces(this.sn).then((res) => {
@@ -818,7 +818,7 @@ export default {
       });
     },
     //订单发货
-    orderDeliver() {
+    orderDeliver () {
       this.facesheetFlag = false
       API_Order.getLogisticsChecked().then((res) => {
         if (res.success) {
@@ -828,7 +828,7 @@ export default {
       });
     },
     //顺丰打印面单
-    sfPrint() {
+    sfPrint () {
       API_Order.getOrderFaceSheet(this.sn, this.faceSheetForm).then(res => {
         if (res.success) {
           let headers = {
@@ -858,13 +858,13 @@ export default {
         }
       })
     },
-    Toprints() {
+    Toprints () {
       if (this.form.logisticsId != null && this.form.logisticsId != '') {
         this.orderDeliverModal = false;
       }
     },
     //订单发货提交
-    orderDeliverySubmit() {
+    orderDeliverySubmit () {
       if (this.facesheetFlag) {
         this.$refs['faceSheetForm'].validate((valid) => {
           if (valid) {
@@ -895,7 +895,7 @@ export default {
       }
     },
     //弹出修改收货地址框
-    editAddress() {
+    editAddress () {
       this.addressModal = true;
       this.showRegion = false;
       this.regionId = this.orderInfo.order.consigneeAddressIdPath;
@@ -909,7 +909,7 @@ export default {
         this.orderInfo.order.consigneeAddressIdPath;
     },
     //修改收货地址
-    editAddressSubmit() {
+    editAddressSubmit () {
       if (this.regionId == "") {
         this.$Message.error("请选择地址");
         return;
@@ -931,7 +931,7 @@ export default {
       });
     },
 
-    getLogisticsSetting() {
+    getLogisticsSetting () {
       API_Logistics.getLogisticsSetting().then(res => {
         if (res.success) {
           this.logisticsType = res.result;
@@ -940,13 +940,13 @@ export default {
     },
 
   },
-  mounted() {
+  mounted () {
     this.sn = this.$route.query.sn;
     this.getDataDetail();
     this.getLogisticsSetting();
   },
   // 如果是从详情页返回列表页，修改列表页keepAlive为true，确保不刷新页面
-  beforeRouteLeave(to, from, next) {
+  beforeRouteLeave (to, from, next) {
     if (to.name === 'orderList' || to.name === 'virtualOrderList') {
       to.meta.keepAlive = true
     }

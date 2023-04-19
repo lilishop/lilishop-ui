@@ -142,16 +142,48 @@ export const refundPrice = (afterSaleSn, params) => {
 
 //平台收款记录
 export const paymentLog = (params) => {
-  return getRequest(`/order/paymentLog`, params)
+  return getRequest(`/payment/paymentLog`, params)
 }
-
+//付款单对账
+export const paymentReconciliation= (params) => {
+  return putRequest(`/payment/paymentLog`, params)
+}
 
 //平台退款记录
 export const refundLog = (params) => {
-  return getRequest(`/order/refundLog`, params)
+  return getRequest(`/payment/refundLog`, params)
+}
+//退款单对账
+export const refundReconciliation = (params) => {
+  return putRequest(`/payment/refundLog`, params)
 }
 
 //售后单商家收货信息
 export const storeAddress = (sn) => {
   return getRequest(`/order/afterSale/getStoreAfterSaleAddress/${sn}`)
 }
+
+//获取分账记录分页
+export const withdrawLog = (params) => {
+  return getRequest(`/payment/withdrawLog`, params);
+};
+
+//获取提现记录分页
+export const outOrderLog = (params) => {
+  return getRequest(`/payment/outOrderLog`, params);
+};
+//通过分账单号获取分账详情列表
+export const detailLog = (outOrderNo) => {
+  return getRequest(`/payment/outOrderLog/getDetailLog/${outOrderNo}`);
+};
+//获取微信账单接口分页
+export const wechatBill = (params) => {
+  return getRequest(`/payment/wechatBill`, params);
+};
+//通过id获取微信账单接口
+export const detailWechatBill= (id) => {
+  return getRequest(`/payment/wechatBill/get/${id}`);
+};
+
+
+

@@ -20,7 +20,7 @@ export function tradeDetail (params) {
 /**
  * 支付
  * @param orderType 交易类型,可用值:TRADE,ORDER,RECHARGE
- * @param paymentMethod 支付方式 可用值:ALIPAY,WECHAT
+ * @param paymentMethod 支付方式 可用值:ALIPAY,WECHAT_PARTNER
  * @param payClient  调起方式 可用值：APP,NATIVE,JSAPI,H5
  * @param sn   订单编号
  */
@@ -41,6 +41,20 @@ export function pay (params) {
 export function payCallback (params) {
   return request({
     url: `/buyer/payment/cashier/result`,
+    needToken: true,
+    method: Method.GET,
+    params
+  });
+}
+
+/**
+ * 支付结果查询
+ * @param orderType 交易类型,可用值:TRADE,ORDER,RECHARGE
+ * @param sn   订单编号
+ */
+export function withdrawalSettingVO (params) {
+  return request({
+    url: `/buyer/wallet/wallet/withdrawalSettingVO`,
     needToken: true,
     method: Method.GET,
     params

@@ -1,5 +1,5 @@
 <template>
-  <div class="search">   
+  <div class="search">
     <Card>
       <Row @keydown.enter.native="handleSearch">
         <Form ref="searchForm" :model="searchForm" inline :label-width="100" class="search-form">
@@ -28,6 +28,13 @@
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
         </Form>
       </Row>
+      <Button
+        style="margin-top: 10px"
+        @click="entryReconciliation"
+        type="primary"
+        icon="ios-paper-outline"
+      >对 账</Button
+      >
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
@@ -80,11 +87,15 @@ export default {
               return h("div", [
                 h("Tag", { props: { color: "green" } }, "微信"),
               ]);
+            } else if (params.row.paymentMethod === "WECHAT_PARTNER") {
+              return h("div", [
+                h("Tag", { props: { color: "blue" } }, "微信服务商"),
+              ]);
             } else if (params.row.paymentMethod === "ALIPAY") {
               return h("div", [
                 h("Tag", { props: { color: "blue" } }, "支付宝"),
               ]);
-            } else if (params.row.paymentMethod === "WALLET") {
+            }else if (params.row.paymentMethod === "WALLET") {
               return h("div", [
                 h("Tag", { props: { color: "geekblue" } }, "余额支付"),
               ]);
@@ -158,9 +169,21 @@ export default {
           fixed: "right",
           render: (h, params) => {
             if (params.row.payStatus == "PAID") {
-              return h("div", [h("Tag", {props:{color:'green'}}, "已付款")]);
+              return h("div", [
+                h("Tag", { props: { color: "green" } }, "已付款"),
+              ]);
+            } else if (params.row.payStatus === "ACCOUNT") {
+              return h("div", [
+                h("Tag", { props: { color: "orange" } }, "已对账"),
+              ]);
+            } else if (params.row.payStatus === "ACCOUNT_ERROR") {
+              return h("div", [
+                h("Tag", { props: { color: "blue" } }, "对账失败"),
+              ]);
             } else {
-              return h("div", [h("Tag", {props:{color:'red'}}, "未付款")]);
+              return h("div", [
+                h("Tag", { props: { color: "red" } }, "未付款"),
+              ]);
             }
           },
         },
@@ -195,6 +218,24 @@ export default {
       // 改变日期格式
       this.searchForm.startDate = val[0];
       this.searchForm.endDate = val[1];
+    },
+    //收款对账
+    entryReconciliation() {
+      this.$Modal.confirm({
+        title: "提示",
+        content:
+          "<p>您确定要收款对账？此操作需异步进行，等待约一分钟刷新列表查看</p>",
+        onOk: () => {
+          API_Order.paymentReconciliation(this.sn).then((res) => {
+            if (res.success) {
+              this.$Message.success("对账成功");
+              this.getDataList();
+            } else {
+              this.$Message.error(res.message);
+            }
+          });
+        },
+      });
     },
     // 获取列表
     getDataList() {
