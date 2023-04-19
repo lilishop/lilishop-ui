@@ -8,6 +8,7 @@ module.exports = {
     name: "北京宏业汇成科技有限公司",
   }, //公司信息
   icpMessage: "京ICP备20009696号-1", //icp备案
+  webQrcode:"https://m-b2b2c.pickmall.cn",//分销商品移动端二维码，H5跳转地址
   /**
    * 高德地图申请链接
    * https://lbs.amap.com/api/javascript-api/guide/abc/prepare

@@ -18,7 +18,7 @@ export const ServeGetUserDetail = (memberId) => {
 
 // 获取店铺相关设置信息
 export const ServeGetStoreDetail = (storeId) => {
-  return get(`${config.BASE_BUYER}/buyer/store/store/store/${storeId}`);
+  return get(`${config.BASE_BUYER}/buyer/store/store/get/detail/${storeId}`);
 };
 
 // 获取用户历史足迹

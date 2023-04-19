@@ -15,7 +15,7 @@
         </div>
         </div>
         <div>
-          <el-button class="store-button" @click="linkToStore(storeInfo.id)" size="mini"
+          <el-button class="store-button" @click="linkToStore(storeInfo.storeId)" size="mini"
             plain>进入店铺</el-button>
         </div>
       </div>

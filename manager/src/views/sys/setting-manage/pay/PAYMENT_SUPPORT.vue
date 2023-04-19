@@ -71,6 +71,7 @@ export default {
         ALIPAY: "支付宝支付",
         WECHAT: "微信支付",
         WALLET: "余额支付",
+        WECHAT_PARTNER:"微信服务商支付",
       },
       supportForm: "", // 支持的支付方式
     };

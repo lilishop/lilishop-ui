@@ -259,21 +259,39 @@
     </Modal>
     <Modal v-model="qrcodeShow" title="分销商品" width="800">
       <Alert type="warning"> 下载二维码或者复制链接分享商品 </Alert>
-      <div style="width: 200px; height: 200px; border: 1px solid #eee">
+      <div class="qrcode">
+        <div style="width: 150px; height: 150px; border: 1px solid #eee">
         <vue-qr
-          :text="qrcodeH5"
+          :text="qrcode"
           :callback="qrcodeData"
           :margin="0"
           colorDark="#000"
           colorLight="#fff"
-          :size="200"
+          :size="150"
         ></vue-qr>
+        <div class="qrcode-platform">PC端</div>
         <Button class="download-btn" type="success" @click="downloadQrcode"
           >下载二维码</Button
         >
       </div>
-      <div class="mt_10">
-        商品链接：<Input style="width: 400px" v-model="qrcode"></Input>
+      <div style="width: 150px; height: 150px; border: 1px solid #eee">
+        <vue-qr
+          :text="qrcodeH5"
+          :callback="qrcodeDataH5"
+          :margin="0"
+          colorDark="#000"
+          colorLight="#fff"
+          :size="150"
+        ></vue-qr>
+        <div class="qrcode-platform">移动应用端</div>
+        <Button class="download-btn" type="success" @click="downloadQrcodeH5"
+          >下载二维码</Button
+        >
+      </div>
+      </div>
+      
+      <div class="mt_10" style="margin-top: 100px;">
+        商品链接：<Input style="width: 600px" v-model="qrcode"></Input>
       </div>
     </Modal>
   </div>
@@ -296,6 +314,7 @@ export default {
   components: { vueQr },
   data() {
     return {
+      config:require('@/config'),
       status: 0, // 申请状态，0为未申请 1 申请中 2 申请完成 3 功能暂未开启
       applyForm: {}, // 申请表单
       rules: {
@@ -383,6 +402,7 @@ export default {
       qrcodeH5:"",//H5二维码
       qrcodeShow: false, // 显示二维码
       base64Img: "", // base64编码
+      base64ImgH5: "", // base64H5编码
       goodsNameCurr: "", // 当前分销商品名称
     };
   },
@@ -423,12 +443,24 @@ export default {
       // 二维码base64地址
       this.base64Img = data64;
     },
+    qrcodeDataH5(data64) {
+      // 二维码H5端base64地址
+      this.base64ImgH5 = data64;
+    },
     downloadQrcode() {
       // 下载二维码
       let a = document.createElement("a"); // 生成一个a元素
       let event = new MouseEvent("click"); // 创建一个单击事件
       a.download = this.goodsNameCurr || "photo";
       a.href = this.base64Img; // 将生成的URL设置为a.href属性
+      a.dispatchEvent(event); // 触发a的单击事件
+    },
+    downloadQrcodeH5(){
+       // 下载H5二维码
+      let a = document.createElement("a"); // 生成一个a元素
+      let event = new MouseEvent("click"); // 创建一个单击事件
+      a.download = this.goodsNameCurr || "photo";
+      a.href = this.base64ImgH5; // 将生成的URL设置为a.href属性
       a.dispatchEvent(event); // 触发a的单击事件
     },
     tabPaneChange(tab) {
@@ -471,7 +503,7 @@ export default {
     fenxiao(row) {
       // 分销商品
       this.qrcode = `${location.origin}/goodsDetail?skuId=${row.skuId}&goodsId=${row.goodsId}&distributionId=${this.result.id}`;
-      this.qrcodeH5 = `${location.origin}/pages/product/goods?skuId=${row.skuId}&goodsId=${row.goodsId}&distributionId=${this.result.id}`;
+      this.qrcodeH5 = `${this.config.webQrcode}/pages/product/goods?skuId=${row.skuId}&goodsId=${row.goodsId}&distributionId=${this.result.id}`;
       this.goodsNameCurr = row.goodsName;
       this.qrcodeShow = true;
     },
@@ -554,9 +586,11 @@ export default {
   }
 }
 .download-btn {
-  position: relative;
-  top: -200px;
-  left: 200px;
+  // position: relative;
+  // top: -200px;
+  // left: 200px;
+  margin-left: 25px;
+    margin-top: 5px
 }
 /deep/ .ivu-alert-message {
   p {
@@ -571,4 +605,15 @@ export default {
     margin: 6px 0;
   }
 }
+.qrcode{
+  display: flex;
+  justify-content: space-evenly;
+  padding-top: 10px
+  
+}
+.qrcode-platform{
+    text-align: center;
+    font-size: 14px;
+    margin: 5px;
+  }
 </style>
