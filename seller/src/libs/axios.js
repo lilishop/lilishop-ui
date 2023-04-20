@@ -91,6 +91,7 @@ service.interceptors.response.use(
     // 返回状态码不为200时候的错误处理
     if (error.response) {
       if (error.response.status === 401) {
+        Message.error(error.response.data.message);
         // 这种情况一般调到登录页
       } else if (error.response.status === 404) {
         // 避免刷新token报错

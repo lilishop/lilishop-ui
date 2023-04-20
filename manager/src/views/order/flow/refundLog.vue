@@ -246,8 +246,6 @@ export default {
             if (res.success) {
               this.$Message.success("对账成功");
               this.getDataList();
-            } else {
-              this.$Message.error(res.message);
             }
           });
         },
