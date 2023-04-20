@@ -20,7 +20,7 @@ export const editNoticeMessage = (id, params) => {
 
 //微信消息同步
 export const wechatMessageSync = (params) => {
-  return getRequest("/wechat/wechatMessage/init", params)
+  return postRequest("/wechat/wechatMessage/init", params)
 }
 //分页获取微信消息
 export const getWechatMessagePage = (params) => {
@@ -38,7 +38,7 @@ export const delWechatMessageTemplate = (id, params) => {
 
 //微信消息订阅同步
 export const wechatMPMessageSync = (params) => {
-  return getRequest("/wechat/wechatMPMessage/init", params)
+  return postRequest("/wechat/wechatMPMessage/init", params)
 }
 //分页获取微信消息订阅
 export const getWechatMPMessagePage = (params) => {

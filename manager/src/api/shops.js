@@ -109,9 +109,9 @@ export const editConstruction = (id) => {
 export const getConstruction = (params) => {
   return getRequest("/payment/wechatApplyment", params);
 };
-// 进件详情
+// 同步进件详情
 export const syncStatus = (id) => {
-  return getRequest(`/payment/wechatApplyment/applyments/${id}`);
+  return postRequest(`/payment/wechatApplyment/applyments/${id}`);
 };
 // 进件-通过id获取子地区
 export const getRegion = (id) => {
