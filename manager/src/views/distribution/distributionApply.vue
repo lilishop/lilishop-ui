@@ -49,6 +49,27 @@
         ></Page>
       </Row>
     </Card>
+    <Modal
+        v-model="detailModal"
+        title="分销申请详情" :mask-closable="false" :width="500">
+        <Form :label-width="120">
+        <FormItem label="姓名：">
+          <span>{{detailList.name}}</span>
+        </FormItem>
+        <FormItem label="身份证号：">
+          <span>{{detailList.idNumber}}</span>
+        </FormItem>
+        <FormItem label="银行开户行：">
+          <span>{{detailList.settlementBankBranchName}}</span>
+        </FormItem>
+        <FormItem label="银行开户名：">
+          <span>{{detailList.settlementBankAccountName}}</span>
+        </FormItem>
+        <FormItem label="银行卡账号：">
+          <span>{{detailList.settlementBankAccountNum}}</span>
+        </FormItem>
+      </Form>
+    </Modal>
   </div>
 </template>
 
@@ -59,6 +80,8 @@ export default {
   name: "distributionApply",
   data() {
     return {
+      detailList:{},//分享认证详情
+      detailModal:false,//详情弹窗
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
@@ -127,6 +150,23 @@ export default {
                 },
                 "拒绝"
               ),
+              h(
+                  "Button",
+                  {
+                    props: {
+                      size: "small",
+                    },
+                    style: {
+                      marginLeft: "5px",
+                    },
+                    on: {
+                      click: () => {                       
+                        this.showDetail(params.row);
+                      },
+                    },
+                  },
+                  "查看"
+                ),
             ]);
           },
         },
@@ -196,6 +236,11 @@ export default {
         },
       });
     },
+     //查看详情
+     showDetail(v){
+      this.detailList = v
+      this.detailModal = true
+    }
   },
   mounted() {
     this.init();
