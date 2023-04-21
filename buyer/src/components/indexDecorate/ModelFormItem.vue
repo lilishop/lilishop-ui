@@ -234,9 +234,4 @@ export default {
   }
 }
 
-.width_1200_auto {
-  width: 1184px;
-  margin: 0 auto;
-
-}
 </style>

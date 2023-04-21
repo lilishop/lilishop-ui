@@ -20,9 +20,9 @@ export default {
           path:"/home"
         },
         {
-          icon:"consumer",
-          label:"客服",
-          path:"/home"
+          icon:"carts",
+          label:"购物车",
+          path:"/cart"
         },
         {
           icon:"notification",
@@ -30,9 +30,9 @@ export default {
           path:"/home/MsgList"
         },
         {
-          icon:"feedback",
-          label:"反馈",
-          path:"/home"
+          icon:"collage",
+          label:"收藏",
+          path:"/home/Favorites"
         },
         {
           icon:"back",
@@ -69,6 +69,8 @@ export default {
     handleClickIcon(val){
         if(val.path === 'back'){
           this.scrollToTop()
+        }else{
+          this.$router.push(val.path)
         }
     }
   }

@@ -194,7 +194,7 @@ export default {
                 "Button",
                 {
                   props: {
-                    type: "success",
+                    type: "primary",
                     size: "small",
                   },
                   style: {
@@ -216,7 +216,7 @@ export default {
                 "Button",
                 {
                   props: {
-                    type: "primary",
+                    type: "default",
                     size: "small",
                   },
                   style: {

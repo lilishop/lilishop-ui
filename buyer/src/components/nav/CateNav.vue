@@ -1,6 +1,6 @@
 <template>
-  <div class="cate-nav" :class="{'fixed-show':useClass == 'fixed-show'}">
-    <div class="nav-con"  >
+  <div class="cate-nav width_1200_auto" :class="{'fixed-show':useClass == 'fixed-show'}">
+    <div class="nav-con" :class="{'background-white':useClass == 'background-white'}">
       <div
         class="all-categories hover-pointer"
         @mouseenter="showFirstLists"
@@ -23,6 +23,7 @@
     <!-- 全部商品分类 -->
     <div
       class="cate-list"
+      :style="{'top':!showNavBar ?'60px':'46px'}"
       v-show="showAlways || showFirstList"
       @mouseenter="showFirstList = true"
       @mouseleave="showFirstList = false"
@@ -227,6 +228,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.background-white{
+  background: #fff;
+}
 .nav-lis:hover {
   color: $theme_color !important;
   cursor: pointer;
@@ -257,13 +261,11 @@ export default {
   right: 0;
 }
 .cate-nav {
-  width: 1200px;
   position: relative;
   margin: 14px auto 0 auto;
 }
 /** 商品分类 */
 .nav-con {
-  width: 1200px;
   height: 46px;
   margin: 0 auto;
   display: flex;
@@ -309,6 +311,7 @@ export default {
 .cate-list {
   margin: 0 auto;
   position: absolute;
+
   z-index: 1000;
 }
 

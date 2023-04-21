@@ -1,6 +1,6 @@
 <template>
   <div class="navbar" :class="{'small-search-box':useClass == 'fixed-show'}">
-    <div class="container flex flex-a-c">
+    <div class="container width_1200_auto flex flex-a-c">
       <img
         :src="$store.state.logoImg"
         v-if="showLogo"
@@ -17,7 +17,7 @@
           @keyup.enter.native="search"
         >
 
-          <div class="search-icon" slot="append">
+          <div class="search-icon" slot="append" @click="search">
             <Icon type="ios-search" size="21"/>
           </div>
         </i-input>
@@ -130,14 +130,10 @@ export default {
 
   margin: 0 !important;
 }
-.search-input {
-
-}
 
 .container {
   position: relative;
-  width: 1200px;
-  margin: 0 auto;
+
   height: 100%;
 }
 

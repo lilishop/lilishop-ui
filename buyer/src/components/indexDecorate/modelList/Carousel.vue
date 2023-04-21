@@ -110,19 +110,23 @@ export default {
       appendList:[
         {
           icon:"support",
-          label:"帮助中心"
+          label:"帮助中心",
+          path:"/article"
         },
         {
           icon:"feedback",
-          label:"问题反馈"
+          label:"我的评论",
+          path:"/home/CommentList"
         },
         {
           icon:"notice",
-          label:"平台公告"
+          label:"收货地址",
+          path:"/home/MyAddress"
         },
         {
           icon:"notification",
-          label:"我的消息"
+          label:"我的消息",
+          path:"/home/MsgList"
         },
       ],
       recentList:[
@@ -148,7 +152,6 @@ export default {
   methods: {
     // 快捷跳转中心
     entryControl(val){
-      console.log(val)
       this.$router.push(val.path)
     },
   },
@@ -322,7 +325,7 @@ export default {
   float: left;
   padding: 0px;
   color: #fff;
-  background-color: #6e6568;
+  // background-color: #6e6568;
 
 
 }

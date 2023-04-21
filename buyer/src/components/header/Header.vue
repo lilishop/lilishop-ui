@@ -1,6 +1,6 @@
 <template>
   <div class="box">
-    <div class="nav">
+    <div class="nav width_1200_auto">
       <ul class="location flex">
         <li v-if="$route.path.includes('home')" style="margin-left:10px">
           <router-link to="/">首页</router-link>
@@ -199,8 +199,6 @@ export default {
 }
 
 .nav {
-  margin: 0 auto;
-  width: 1200px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
