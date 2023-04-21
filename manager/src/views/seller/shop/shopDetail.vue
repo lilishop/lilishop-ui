@@ -130,11 +130,11 @@
         <div class="ant-col-md-6">
           <p class="item">
             <span class="label">法人姓名：</span>
-            <span class="info">{{storeInfo.legalName}}人</span>
+            <span class="info">{{storeInfo.legalName}}</span>
           </p>
           <p class="item">
             <span class="label">法人身份证：</span>
-            <span class="info">{{storeInfo.legalId}}人</span>
+            <span class="info">{{storeInfo.legalId}}</span>
           </p>
           <p class="item">
             <span class="label">身份证照片：</span>
