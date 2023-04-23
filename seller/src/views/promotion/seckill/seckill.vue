@@ -14,20 +14,14 @@
           </Select>
         </Form-item>
         <Form-item label="活动时间">
-          <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 200px"></DatePicker>
+          <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 200px">
+          </DatePicker>
         </Form-item>
         <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
         <Button @click="handleReset" class="ml_10">重置</Button>
       </Form>
 
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        class="mt_10"
-      >
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10">
         <template slot-scope="{ row }" slot="applyEndTime">
           {{ unixDate(row.applyEndTime) }}
         </template>
@@ -37,25 +31,14 @@
           }}</Tag>
         </template>
         <template slot-scope="{ row }" slot="action">
-          <Button
-            v-if="row.promotionStatus === 'NEW'"
-            type="primary"
-            size="small"
-            @click="manage(row)"
-            >管理</Button
-          >
-          <Button
-            v-else
-            type="info"
-            size="small"
-            @click="manage(row)"
-            >查看</Button
-          >
+          <Button v-if="row.promotionStatus === 'NEW'" type="primary" size="small" @click="manage(row)">管理</Button>
+          <Button v-else type="info" size="small" @click="manage(row)">查看</Button>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
-          size="small" show-total show-elevator show-sizer></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
+          @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator
+          show-sizer></Page>
       </Row>
     </Card>
   </div>
@@ -66,9 +49,9 @@ import { seckillList } from "@/api/promotion";
 export default {
   name: "seckill",
   components: {},
-  data() {
+  data () {
     return {
-      selectDate:[],
+      selectDate: [],
       loading: true, // 表单加载状态
       searchForm: {
         // 搜索框初始化对象
@@ -141,27 +124,27 @@ export default {
   },
   methods: {
     // 初始化数据
-    init() {
+    init () {
       this.getDataList();
     },
     // 分页 改变页码
-    changePage(v) {
+    changePage (v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
     // 分页 改变页数
-    changePageSize(v) {
+    changePageSize (v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
     // 搜索
-    handleSearch() {
+    handleSearch () {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
     // 重置
-    handleReset() {
+    handleReset () {
       this.searchForm = {};
       this.selectDate = "";
       this.searchForm.pageNumber = 1;
@@ -169,11 +152,11 @@ export default {
       this.getDataList();
     },
     // 管理
-    manage(row) {
+    manage (row) {
       this.$router.push({ name: "seckill-goods", query: { id: row.id } });
     },
     // 获取列表数据
-    getDataList() {
+    getDataList () {
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
         this.searchForm.startTime = this.selectDate[0].getTime();
@@ -191,11 +174,11 @@ export default {
         }
       });
     },
-    unixDate(time) {
+    unixDate (time) {
       // 处理报名截止时间
       return this.$options.filters.unixToDate(new Date(time) / 1000);
     },
-    unixHours(item) {
+    unixHours (item) {
       // 处理小时场次
       let hourArr = item.split(",");
       for (let i = 0; i < hourArr.length; i++) {
@@ -204,16 +187,16 @@ export default {
       return hourArr;
     },
   },
-  mounted() {
+  mounted () {
     this.init();
   },
   // 页面缓存处理，从该页面离开时，修改KeepAlive为false，保证进入该页面是刷新
-  beforeRouteLeave(to, from, next) {
+  beforeRouteLeave (to, from, next) {
     from.meta.keepAlive = false
     next()
   }
 };
 </script>
 <style lang="scss"  scoped>
-
+@import "@/styles/table-common.scss";
 </style>
