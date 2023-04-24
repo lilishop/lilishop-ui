@@ -455,7 +455,6 @@
                 <div class="printgoodname">
                   <p>{{ item.goodsName }}</p>
                   <div class="printgoodguid">
-                    {{ item }}
                     <span v-for="(itemchild, keychild) in JSON.parse(item.specs)" :key="keychild">
                       <span class="printgoodguiditem" v-if="keychild != 'images'">
                         {{ keychild }} : {{ itemchild }}
