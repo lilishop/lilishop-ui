@@ -308,15 +308,15 @@ export default {
     },
 
     //验证是否绑定openid
-    async verification() {
-      this.bindOpenId = true;
-      const res = await weChatApply(this.qrCode);
-      if (res.success && res.result) {
-        this.$Message.success("已绑定");
-        this.submitFrom.contact_info.openid = res.result;
-      }
-      this.bindOpenId = false;
-    },
+    // async verification() {
+    //   this.bindOpenId = true;
+    //   const res = await weChatApply(this.qrCode);
+    //   if (res.success && res.result) {
+    //     this.$Message.success("已绑定");
+    //     this.submitFrom.contact_info.openid = res.result;
+    //   }
+    //   this.bindOpenId = false;
+    // },
     Examplediagram() {
       window.open("https://kf.qq.com/faq/220509Y3Yvym220509fQvYR7.html");
     },

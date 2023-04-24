@@ -93,14 +93,6 @@
     mounted () {
       this.outOrderNo = this.$route.query.outOrderNo;
       this.getDataList();
-      if (this.groupSkuId) {
-        API_Order.stagesDetail({ orderSn: this.sn }).then((res) => {
-          console.log(res, 'res');
-          if (res.success) {
-            this.stagesData = res.result.records
-          }
-        });
-      }
     },
   };
   </script>
