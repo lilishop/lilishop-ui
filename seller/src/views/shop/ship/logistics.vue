@@ -107,13 +107,13 @@ export default {
       },
       openModalTitle: '开启信息',
       ruleValidate: {
-        customerName: [{ required: true, message: "请填写必填项" ,trigger: "blur" }],
-        payType: [{ required: true, message: "请填写必填项" ,trigger: "change" }],
-        expType: [{ required: true, message: "请填写必填项" ,trigger: "blur" }],
-        customerPwd: [{ required: true, message: "请填写必填项" ,trigger: "blur" }],
-        monthCode: [{ required: true, message: "请填写必填项" ,trigger: "blur" }],
-        sendSite: [{ required: true, message: "请填写必填项" ,trigger: "blur" }],
-        sendStaff: [{ required: true, message: "请填写必填项" ,trigger: "blur" }],
+        // customerName: [{ required: true, message: "请填写必填项" ,trigger: "blur" }],
+        // payType: [{ required: true, message: "请填写必填项" ,trigger: "change" }],
+        // expType: [{ required: true, message: "请填写必填项" ,trigger: "blur" }],
+        // customerPwd: [{ required: true, message: "请填写必填项" ,trigger: "blur" }],
+        // monthCode: [{ required: true, message: "请填写必填项" ,trigger: "blur" }],
+        // sendSite: [{ required: true, message: "请填写必填项" ,trigger: "blur" }],
+        // sendStaff: [{ required: true, message: "请填写必填项" ,trigger: "blur" }],
 
       },
       faceSheetForm: {
