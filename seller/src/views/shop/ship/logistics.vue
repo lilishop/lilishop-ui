@@ -280,6 +280,8 @@ export default {
           this.faceSheetForm.monthCode = res.result.monthCode;
           this.faceSheetForm.sendSite = res.result.sendSite;
           this.faceSheetForm.sendStaff = res.result.sendStaff;
+          this.faceSheetForm.payType = res.result.payType;
+          this.faceSheetForm.expType = res.result.expType;
         }
       });
       this.openModal = true;
