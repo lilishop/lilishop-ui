@@ -48,6 +48,7 @@
 import {tradeDetail, pay} from '@/api/pay.js';
 import MvCountDown from 'mv-count-down'
 import {Message} from 'view-design';
+import axios from 'axios';
 
 export default {
   components: {
@@ -98,14 +99,18 @@ export default {
         this.$Modal.confirm({
           title: '支付确认',
           content: '<p>确认使用余额支付吗？</p>',
-          onOk: () => {
+          onOk: async() => {
             pay(params).then(res => {
               if (res.success) {
-                this.$Message.warning(res.message)
-                this.$router.push('/payDone');
-              } else {
-                this.$Message.warning(res.message)
-              }
+                // this.$Message.warning(res.message)
+                axios.get(res.result.url).then((res)=>{
+                  if (res.status == 200) {
+                  this.$router.push('/payDone');
+                  }
+                }).catch(e=>{
+                  this.$Message.warning(e.message)
+                })
+              } 
             })
           }
         });
