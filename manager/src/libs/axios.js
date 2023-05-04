@@ -20,7 +20,7 @@ export const uploadFile = commonUrl + "/common/common/upload/file";
 
 
 const service = axios.create({
-  timeout: 8000,
+  timeout: 80000,
   baseURL: managerUrl
 });
 var isRefreshToken = 0;

@@ -6,12 +6,7 @@
     <div class="promotion-decorate">限时秒杀</div>
     <ul class="time-line">
       <template v-for="(time, index) in list">
-        <li
-          v-if="index < 5"
-          @click="currIndex = index"
-          :key="index"
-          :class="{ currTimeline: currIndex === index }"
-        >
+        <li v-if="index < 5" @click="currIndex = index" :key="index" :class="{ currTimeline: currIndex === index }">
           <div>{{ time.timeLine + ":00" }}</div>
           <div v-if="currIndex === index">
             <p>{{ nowHour >= time.timeLine ? "秒杀中" : "即将开始" }}</p>
@@ -30,13 +25,8 @@
     <!-- 秒杀商品列表 -->
     <div class="goods-list">
       <empty v-if="goodsList.length === 0" />
-      <div
-        v-else
-        class="goods-show-info1"
-        v-for="(item, index) in goodsList"
-        :key="index"
-        @click="goGoodsDetail(item.skuId, item.goodsId)"
-      >
+      <div v-else class="goods-show-info1" v-for="(item, index) in goodsList" :key="index"
+        @click="goGoodsDetail(item.skuId, item.goodsId)">
         <div class="goods-show-img">
           <img width="200" height="200" :src="item.goodsImage" />
         </div>
@@ -53,42 +43,28 @@
         <div class="goods-show-detail">
           <span>{{ item.goodsName }}</span>
         </div>
-        <div
-          class="goods-seckill-btn"
-          :class="{
-            'goods-seckill-btn-gray': nowHour < list[currIndex].timeLine,
-          }"
-        >
+        <div class="goods-seckill-btn" :class="{
+          'goods-seckill-btn-gray': nowHour < list[currIndex].timeLine,
+        }">
           {{ nowHour >= list[currIndex].timeLine ? "立即抢购" : "即将开始" }}
         </div>
-        <div
-          v-if="nowHour >= list[currIndex].timeLine && item.quantity <=  item.salesNum"
-          class="goods-seckill-btn goods-seckill-btn-gray"
-        >
+        <div v-if="nowHour >= list[currIndex].timeLine && item.quantity <= item.salesNum"
+          class="goods-seckill-btn goods-seckill-btn-gray">
           已售罄
         </div>
         <div v-if="nowHour >= list[currIndex].timeLine" class="goods-show-num1">
-          <span
-            >已售{{
-              (item.quantity && item.quantity > 0
-                ? Math.ceil(
-                    (item.salesNum / (item.quantity + item.salesNum)) * 100
-                  )
-                : 100) + "%"
-            }}</span
-          ><Progress
-            hide-info
-            stroke-color="#df0021"
-            style="width: 110px"
-            class="ml_10"
-            :percent="
-              item.quantity && item.quantity > 0
-                ? Math.ceil(
-                    (item.salesNum / (item.quantity + item.salesNum)) * 100
-                  )
-                : 100
-            "
-          />
+          <span>已售{{
+            (item.quantity && item.quantity > 0
+              ? Math.ceil(
+                (item.salesNum / (item.quantity + item.salesNum)) * 100
+              )
+              : 100) + "%"
+          }}</span><Progress hide-info stroke-color="#df0021" style="width: 110px" class="ml_10" :percent="item.quantity && item.quantity > 0
+      ? Math.ceil(
+        (item.salesNum / (item.quantity + item.salesNum)) * 100
+      )
+      : 100
+    " />
         </div>
         <div class="goods-show-seller">
           <span>{{ item.storeName }}</span>
@@ -101,7 +77,7 @@
 <script>
 import { seckillByDay } from "@/api/promotion";
 export default {
-  data() {
+  data () {
     return {
       list: [], // 秒杀时段列表
       goodsList: [], // 商品列表
@@ -112,19 +88,19 @@ export default {
       nowHour: new Date().getHours(), // 当前小时数
     };
   },
-  beforeDestroy() {
+  beforeDestroy () {
     // 销毁前清除定时器
     clearInterval(this.interval);
   },
   watch: {
-    currIndex(val) {
+    currIndex (val) {
       clearInterval(this.interval);
       this.interval = null;
       this.nowHour = new Date().getHours();
       this.countDown(val);
       this.goodsList = this.list[val].seckillGoodsList;
     },
-    diffSeconds(val) {
+    diffSeconds (val) {
       const hours = Math.floor(val / 3600);
       // 当前秒数 / 60，向下取整
       // 获取到所有分钟数 3600 / 60 = 60分钟
@@ -138,7 +114,7 @@ export default {
         clearInterval(this.interval);
         this.interval = null;
       }
-      function filteTime(time) {
+      function filteTime (time) {
         if (time < 10) {
           return "0" + time;
         } else {
@@ -148,7 +124,7 @@ export default {
     },
   },
   methods: {
-    getListByDay() {
+    getListByDay () {
       // 当天秒杀活动
       seckillByDay().then((res) => {
         if (res.success) {
@@ -158,7 +134,7 @@ export default {
         }
       });
     },
-    goGoodsDetail(skuId, goodsId) {
+    goGoodsDetail (skuId, goodsId) {
       // 跳转商品详情
       let routeUrl = this.$router.resolve({
         path: "/goodsDetail",
@@ -166,7 +142,7 @@ export default {
       });
       window.open(routeUrl.href, "_blank");
     },
-    countDown(currIndex) {
+    countDown (currIndex) {
       // 倒计时
       // 0点时间戳
       let zeroTime = new Date(new Date().toLocaleDateString()).getTime();
@@ -191,13 +167,14 @@ export default {
       }, 1000);
     },
   },
-  mounted() {
+  mounted () {
     this.getListByDay();
   },
 };
 </script>
 <style lang="scss" scoped>
 @import "../../assets/styles/goodsList.scss";
+
 .goods-seckill-btn {
   position: absolute;
   right: 0;
@@ -212,19 +189,23 @@ export default {
   margin-bottom: 1px;
   margin-right: 1px;
 }
+
 .goods-seckill-btn-gray {
   background-color: #666;
 }
+
 .promotion-decorate::before,
 .promotion-decorate::after {
   background-image: url("/src/assets/images/sprite@2x.png");
 }
+
 .time-line {
   width: 1200px;
   height: 60px;
   margin: 0 auto;
   background-color: #fff;
   display: flex;
+
   li {
     padding: 0 30px;
     font-size: 16px;
@@ -233,9 +214,11 @@ export default {
     height: 100%;
     display: flex;
     align-items: center;
+
     &:hover {
       cursor: pointer;
     }
+
     .not-curr {
       border: 1px solid #999;
       border-radius: 20px;
@@ -245,18 +228,22 @@ export default {
       font-weight: normal;
     }
   }
+
   .currTimeline {
     background-color: $theme_color;
     color: #fff;
-    > div:nth-child(1) {
+
+    >div:nth-child(1) {
       font-size: 20px;
     }
-    > div:nth-child(2) {
+
+    >div:nth-child(2) {
       font-size: 14px;
       margin-left: 10px;
     }
   }
 }
+
 .goods-show-info1 {
   width: 290px;
   padding: 6px;
@@ -267,15 +254,18 @@ export default {
   cursor: pointer;
   background-color: #fff;
 }
+
 .goods-show-info1:hover {
   border: 1px solid #ccc;
   box-shadow: 0px 0px 15px #ccc;
 }
+
 .goods-show-img {
   display: flex;
   justify-content: center;
 }
+
 .ivu-progress-success .ivu-progress-bg {
-    background-color: #111fff;
+  background-color: #111fff;
 }
 </style>

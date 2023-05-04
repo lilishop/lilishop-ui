@@ -89,7 +89,6 @@ export default {
           : this.Cookies.getItem("distributionId");
       // 如果有分销信息
       if (distributionId) {
-        console.log(distributionId);
         // 先存储
         this.Cookies.setItem("distributionId", params.distributionId);
         let _this = this;

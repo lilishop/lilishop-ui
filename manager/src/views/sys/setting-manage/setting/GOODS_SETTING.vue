@@ -7,6 +7,7 @@
           <Radio label="false">关闭</Radio>
 
         </RadioGroup>
+         <span class="desc">商品审核关闭后，商家添加商品则无需审核直接上架</span>
       </FormItem>
       <div class="label-item">
         <FormItem class="label-item" label="缩略图宽" prop="abbreviationPictureWidth">

@@ -3,7 +3,9 @@
     <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
       <FormItem label="云IM地址" prop="httpUrl">
         <Input v-model="formValidate.httpUrl"/>
+        <span class="desc">配置买家端联系客服以及商家端登录客服跳转的路径</span>
       </FormItem>
+
       <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
       </div>

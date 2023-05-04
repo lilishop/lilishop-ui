@@ -7,14 +7,14 @@
     <div class="shop-logo">
       <div>
         <p>{{ storeMsg.storeName || 'xx店铺' }}</p>
-        <p class="ellipsis" :alt="storeMsg.storeDesc" v-html="storeMsg.storeDesc"></p>
+        <p :alt="storeMsg.storeDesc" class="ellipsis" v-html="storeMsg.storeDesc"></p>
       </div>
       <div>
-        <span class="hover-pointer" @click="collect">
-          <Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#fff'"/>{{
+        <span class="hover-pointer" @click="collect"><Icon :color="storeCollected ? '#ed3f14' : '#fff'"
+                                                           type="ios-heart"/>{{
             storeCollected ? '已收藏店铺' : '收藏店铺'
           }}</span>
-        <span style="width:80px" class="hover-pointer ml_10" @click="IMService(storeMsg.storeId)"><Icon
+        <span class="hover-pointer ml_10" style="width:80px" @click="IMService(storeMsg.storeId)"><Icon
           custom="icomoon icon-customer-service"/>联系客服</span>
       </div>
     </div>
@@ -26,7 +26,7 @@
         >
           首页
         </li>
-        <li class="cate-item" v-for="(cate, index) in cateList" :key="index">
+        <li v-for="(cate, index) in cateList" :key="index" class="cate-item">
           <Dropdown v-if="cate.children.length">
             <div @click.self="searchByCate(cate)">
               {{ cate.labelName }}
@@ -34,10 +34,10 @@
             </div>
             <DropdownMenu slot="list">
               <DropdownItem
-                @click.native="searchByCate(sec)"
-                :name="sec.id"
                 v-for="sec in cate.children"
                 :key="sec.id"
+                :name="sec.id"
+                @click.native="searchByCate(sec)"
               >{{ sec.labelName }}
               </DropdownItem
               >
@@ -51,7 +51,7 @@
     </div>
 
 
-    <div v-if="storeMsg.pageShow&&storeMsg.pageShow=='1'">
+    <div v-if="storeMsg.pageShow&&storeMsg.pageShow==='1'">
       <!-- 楼层装修部分 -->
       <model-form ref="modelForm" :data="modelForm"></model-form>
     </div>
@@ -63,38 +63,38 @@
 
         <empty v-if="goodsList.length === 0"/>
         <div
-          v-else
-          class="goods-show-info"
           v-for="(item, index) in goodsList"
+          v-else
           :key="index"
-          @click="goGoodsDetail(item.content.id, item.content.goodsId)"
+          class="goods-show-info"
+          @click="goGoodsDetail(item.id, item.goodsId)"
         >
           <div class="goods-show-img">
-            <img width="220" height="220" :src="item.content.thumbnail"/>
+            <img :src="item.thumbnail" height="220" width="220" alt=""/>
           </div>
           <div class="goods-show-price">
             <span>
               <span class="seckill-price text-danger">{{
-                  item.content.price | unitPrice("￥")
+                  item.price | unitPrice("￥")
                 }}</span>
             </span>
           </div>
           <div class="goods-show-detail">
-            <span>{{ item.content.goodsName }}</span>
+            <span>{{ item.goodsName }}</span>
           </div>
           <div class="goods-show-num">
-            已有<span>{{ item.content.commentNum || 0 }}</span
+            已有<span>{{ item.commentNum || 0 }}</span
           >人评价
           </div>
         </div>
       </div>
       <div class="goods-page">
         <Page
+          :page-size="params.pageSize"
+          :total="total"
           show-sizer
           @on-change="changePageNum"
           @on-page-size-change="changePageSize"
-          :total="total"
-          :page-size="params.pageSize"
         ></Page>
       </div>
 
@@ -107,15 +107,14 @@
 
 <script>
 
-import {getDetailById, getCateById} from "@/api/shopentry";
-import {cancelStoreCollect, collectStore, isStoreCollection} from "@/api/member";
+import {getCateById, getDetailById} from "@/api/shopentry";
+import {cancelStoreCollect, collectStore} from "@/api/member";
 import {goodsList} from "@/api/goods";
 import Search from "@/components/Search";
 import ModelForm from "@/components/indexDecorate/ModelForm";
 import HoverSearch from "@/components/header/hoverSearch";
 import storage from "@/plugins/storage";
 import {getFloorStoreData} from "@/api/index.js";
-import {seckillByDay} from "@/api/promotion";
 import imTalk from '@/components/mixes/talkIm'
 
 export default {
@@ -135,6 +134,8 @@ export default {
       topSearchShow: false, // 滚动后顶部搜索栏展示
       carouselLarge: false, // 不同轮播分类尺寸
       carouselOpacity: false, // 不同轮播分类样式,
+      enablePageData: false, //是否显示楼层装修内容
+      basePageData: false, //基础店铺信息
       storeMsg: {}, // 店铺信息
       cateList: [], // 店铺分裂
       goodsList: [], // 商品列表
@@ -163,8 +164,8 @@ export default {
             let dataJson = JSON.parse(res.result.pageData);
             // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
             // 轮播图根据不同轮播，样式不同
-            for (let i = 0; i < dataJson.list.length; i++) {
-              let type = dataJson.list[i].type;
+            for (const element of dataJson.list) {
+              let type = element.type;
               if (type === "carousel2") {
                 this.carouselLarge = true;
               } else if (type === "carousel1") {
@@ -219,16 +220,10 @@ export default {
 
           this.storeMsg = res.result;
           console.log(this.storeMsg)
-            // 判断是否收藏
-            if (this.Cookies.getItem("userInfo")) {
-              isStoreCollection("STORE", this.$route.query.id).then((res) => {
-                if (res.success && res.result) {
-                  this.storeCollected = true;
-                }
-              });
-            }   
+
           //判定如果开启楼层展示，则获取页面信息 否则读取商品信息
-          if (this.storeMsg.pageShow && this.storeMsg.pageShow == '1') {
+          if (this.storeMsg.pageShow && this.storeMsg.pageShow === '1') {
+
             this.getIndexData();
           } else {
             this.getGoodsList();
@@ -259,8 +254,8 @@ export default {
       goodsList(this.params)
         .then((res) => {
           if (res.success) {
-            this.goodsList = res.result.content;
-            this.total = res.result.totalElements;
+            this.goodsList = res.result;
+            this.total = res.result.total;
           }
         })
         .catch(() => {
@@ -317,7 +312,7 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 @import "../assets/styles/goodsList.scss";
 
 .merchant {
@@ -379,12 +374,7 @@ export default {
     }
   }
 }
-.hover-pointer{
-  &:hover {
-        // cursor: pointer;
-        color: $theme_color;
-      }
-} 
+
 .promotion-decorate::before,
 .promotion-decorate::after {
   background-image: url("/src/assets/images/sprite@2x.png");

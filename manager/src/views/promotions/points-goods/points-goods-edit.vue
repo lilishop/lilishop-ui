@@ -118,6 +118,7 @@ export default {
         settlementPrice: [{ required: true, message: "请填写结算价格" }],
         pointsGoodsCategoryId: [{ required: true, message: "请选择积分商品分类" }],
         points: [{ required: true, message: "请填写兑换积分" }],
+        activeStock: [{ required: true, message: "请填写库存" }],
       },
       options: {
         disabledDate(date) {

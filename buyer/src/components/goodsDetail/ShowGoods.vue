@@ -518,6 +518,7 @@ export default {
       receiveCoupon(id).then((res) => {
         if (res.success) {
           this.$Message.success("优惠券领取成功");
+          this.$emit("getGoodsDetail", {});
         } else {
           this.$Message.warning(res.message);
         }
@@ -529,12 +530,12 @@ export default {
       let keysArr = Object.keys(this.detail.promotionMap);
       if (keysArr.length === 0) return false;
 
-      for (let i = 0; i < keysArr.length; i++) {
-        let key = keysArr[i].split("-")[0];
+      for (const element of keysArr) {
+        let key = element.split("-")[0];
         if (key === "COUPON") {
-          this.promotionMap[key].push(this.detail.promotionMap[keysArr[i]]);
+          this.promotionMap[key].push(this.detail.promotionMap[element]);
         } else {
-          this.promotionMap[key] = this.detail.promotionMap[keysArr[i]];
+          this.promotionMap[key] = this.detail.promotionMap[element];
         }
       }
     },

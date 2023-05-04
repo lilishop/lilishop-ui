@@ -71,10 +71,15 @@ export default {
       this.search();
     },
     search () { // 全平台搜索商品
-      this.$router.push({
-        path: '/goodsList',
-        query: { keyword: this.searchData }
-      });
+      const url = this.$route.path;
+      if(url == '/goodsList'){
+        this.$emit('search', this.searchData)
+      }else{
+        this.$router.push({
+          path: '/goodsList',
+          query: { keyword: this.searchData }
+        });
+      }
     },
     searchStore () { // 店铺搜索商品
       this.$emit('search', this.searchData)
