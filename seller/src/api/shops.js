@@ -14,27 +14,27 @@ export const getShopListData = (params) => {
 }
 // 获取结算单分页
 export const getBillPage = (params) => {
-  return getRequest(`/order/bill/getByPage`, params)
+  return getRequest(`/payment/bill/getByPage`, params)
 }
 
 // 获取商家结算单流水分页
 export const getSellerFlow = (id, params) => {
-  return getRequest(`/order/bill/${id}/getStoreFlow`, params)
+  return getRequest(`/payment/bill/${id}/getStoreFlow`, params)
 }
 
 // 商家核对结算单
 export const reconciliation = (id, params) => {
-  return putRequest(`/order/bill/check/${id}/`, params)
+  return putRequest(`/payment/bill/check/${id}/`, params)
 }
 
 // 获取商家分销订单流水分页
 export const getDistributionFlow = (id, params) => {
-  return getRequest(`/order/bill/${id}/getDistributionFlow`, params)
+  return getRequest(`/payment/bill/${id}/getDistributionFlow`, params)
 }
 
 // 获取商家结算单详细
 export const getBillDetail = (id, params) => {
-  return getRequest(`/order/bill/get/${id}`, params)
+  return getRequest(`/payment/bill/get/${id}`, params)
 }
 
 // 获取所有物流公司

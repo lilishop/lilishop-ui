@@ -9,7 +9,8 @@
             <el-header height="60px" class="header">
               <div class="user-login" v-popover:usercard>
                 <div class="user-box">
-                  <face :text="face" :name="name" class="user-face"></face>
+                  <face :text="face" :name="name" v-if="face&& face != 'undefined'" class="user-face"></face>
+                  <face-null :text="face" v-else></face-null>
                 </div>
               </div>
               <p class="user-status">

@@ -9,7 +9,79 @@ import Vue from 'vue';
 
 const app = {
   state: {
-
+    // 微信进件主体类型
+    weChatApplyList:[
+      {
+        title: "小微商户",
+        value: "2401",
+        desc: "指无营业执照的个人商家。",
+      },
+      {
+        title: "个体卖家",
+        value: "2500",
+        desc: "无营业执照，已持续从事电子商务经营活动满6个月，且期间经营收入累计超过20万元的个人商家。",
+      },
+      {
+        title: "个体工商户",
+        value: "4",
+        desc: "营业执照上的主体类型一般为个体户、个体工商户、个体经营",
+      },
+      {
+        title: "企业",
+        value: "2",
+        desc: "营业执照上的主体类型一般为有限公司、有限责任公司",
+      },
+      {
+        title: "事业单位",
+        value: "3",
+        desc: "包括国内各类事业单位，如：医疗、教育、学校等单位",
+      },
+      {
+        title: "社会组织",
+        value: "1708",
+        desc: "包括社会团体、民办非企业、基金会、基层群众性自治组织、农村集体经济组织等组织",
+      },
+      {
+        title: "政府机关",
+        value: "2502",
+        desc: "包括国内各级、各类政府机关，如：机关党委、税务、民政、人社、工商、商务、市监等",
+      },
+    ],
+    // 微信进件经营者/法人证件类型
+    weChatApplyDocTypeList:[
+      {
+        title: "中国大陆居民-身份证",
+        value: "IDENTIFICATION_TYPE_MAINLAND_IDCARD",
+      },
+      {
+        title: "其他国家或地区居民-护照",
+        value: "IDENTIFICATION_TYPE_OVERSEA_PASSPORT",
+      },
+      {
+        title: "中国香港居民--来往内地通行证",
+        value: "IDENTIFICATION_TYPE_HONGKONG",
+      },
+      {
+        title: "中国澳门居民--来往内地通行证",
+        value: "IDENTIFICATION_TYPE_MACAO",
+      },
+      {
+        title: "中国台湾居民--来往大陆通行证",
+        value: "IDENTIFICATION_TYPE_TAIWAN",
+      },
+      {
+        title: "外国人居留证",
+        value: "IDENTIFICATION_TYPE_FOREIGN_RESIDENT",
+      },
+      {
+        title: "港澳居民证",
+        value: "IDENTIFICATION_TYPE_HONGKONG_MACAO_RESIDENT",
+      },
+      {
+        title: "台湾居民证",
+        value: "IDENTIFICATION_TYPE_TAIWAN_RESIDENT",
+      },
+    ],
     styleStore: "", // 移动端楼层装修中选择风格存储
     added: false, // 加载路由标识
     navList: [], // 顶部菜单

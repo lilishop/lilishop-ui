@@ -39,7 +39,7 @@
         </Form-item>
 
         <Form-item label="订单促销类型" prop="orderPromotionType">
-          <Select v-model="searchForm.orderType" placeholder="请选择" clearable style="width: 160px">
+          <Select v-model="searchForm.orderPromotionType" placeholder="请选择" clearable style="width: 160px">
             <Option value="NORMAL">普通订单</Option>
             <Option value="PINTUAN">拼团订单</Option>
             <Option value="GIFT">赠品订单</Option>
@@ -175,7 +175,7 @@ export default {
         order: "desc", // 默认排序方式
         startDate: "", // 起始时间
         endDate: "", // 终止时间
-        orderType: "",
+        orderPromotionType: "",
         orderSn: "",
         buyerName: "",
         orderStatus: "",

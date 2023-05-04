@@ -18,7 +18,8 @@
         <li v-show="!!userInfo.username">
           <div class="username-p">
             <div>
-              <Avatar class="person-icon" :src="userInfo.face" icon="person" size="small" />
+              <Avatar class="person-icon" v-if="userInfo.face && userInfo.face !='undefined'" :src="userInfo.face" icon="person" size="small" />
+              <Avatar class="person-icon" icon="ios-person"  v-else  />
               <span class="username">{{ userInfo.nickName? userInfo.nickName : userInfo.username | secrecyMobile }}</span>
             </div>
             <transition name='fade'>
@@ -249,8 +250,8 @@ export default {
   color: $theme_color;
 }
 .person-icon {
-  color: $theme_color;
-  background-color: #f0cdb2;
+  // color: $theme_color;
+  // background-color: #f0cdb2;
 }
 
 .shopping-cart-list {

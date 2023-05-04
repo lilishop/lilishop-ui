@@ -39,6 +39,7 @@
                       <Rate disabled :value="Number(item.descriptionScore)" allow-half class="remarks-star"></Rate>
                     </p>
                     <p class="remarks-content">{{item.content}}</p>
+                    <p v-if="item.reply" class="remarks-content" style="color: #666666;font-size: 12px;">商家回复 ：{{ item.reply }}</p>
                     <div class="comment-img" v-if="item.images">
                       <div v-for="(img, imgIndex) in item.images.split(',')"
                        @click="previewImg(img, item)"

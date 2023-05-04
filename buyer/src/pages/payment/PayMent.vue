@@ -28,7 +28,7 @@
           alt="">
         <span>支付宝</span>
       </div>
-      <div v-if="support.includes('WECHAT')" class="-box-item" @click="handlePay('WECHAT')">
+      <div v-if="support.includes('WECHAT_PARTNER')" class="-box-item" @click="handlePay('WECHAT_PARTNER')">
         <img
           src="https://dss1.bdstatic.com/6OF1bjeh1BF3odCf/it/u=3774939867,2826752539&fm=74&app=80&f=JPEG&size=f121,121?sec=1880279984&t=796e842a5ef2d16d9edc872d6f1147ef"
           alt="">
@@ -48,6 +48,7 @@
 import {tradeDetail, pay} from '@/api/pay.js';
 import MvCountDown from 'mv-count-down'
 import {Message} from 'view-design';
+import axios from 'axios';
 
 export default {
   components: {
@@ -98,14 +99,18 @@ export default {
         this.$Modal.confirm({
           title: '支付确认',
           content: '<p>确认使用余额支付吗？</p>',
-          onOk: () => {
+          onOk: async() => {
             pay(params).then(res => {
               if (res.success) {
-                this.$Message.warning(res.message)
-                this.$router.push('/payDone');
-              } else {
-                this.$Message.warning(res.message)
-              }
+                // this.$Message.warning(res.message)
+                axios.get(res.result.url).then((res)=>{
+                  if (res.status == 200) {
+                  this.$router.push('/payDone');
+                  }
+                }).catch(e=>{
+                  this.$Message.warning(e.message)
+                })
+              } 
             })
           }
         });

@@ -20,7 +20,7 @@ export function tradeDetail (params) {
 /**
  * 支付
  * @param orderType 交易类型,可用值:TRADE,ORDER,RECHARGE
- * @param paymentMethod 支付方式 可用值:ALIPAY,WECHAT
+ * @param paymentMethod 支付方式 可用值:ALIPAY,WECHAT_PARTNER
  * @param payClient  调起方式 可用值：APP,NATIVE,JSAPI,H5
  * @param sn   订单编号
  */

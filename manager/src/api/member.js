@@ -27,7 +27,7 @@ export const delMemberReview = (id) => {
 };
 // 修改评价状态
 export const updateMemberReview = (id, params) => {
-  return getRequest(`/member/evaluation/updateStatus/${id}`, params);
+  return putRequest(`/member/evaluation/updateStatus/${id}`, params);
 };
 
 //  添加或修改

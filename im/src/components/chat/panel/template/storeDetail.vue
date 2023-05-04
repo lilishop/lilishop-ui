@@ -11,11 +11,11 @@
           <el-tag style="margin-left: 10px;" type="danger" v-if="storeInfo.selfOperated" size="mini">自营</el-tag>
         </div>
         <div>
-          <span class="title_left_name"> 联系方式:</span> <span class="title_right_name">{{ storeInfo.memberName }}</span>
+          <span class="title_left_name"> 联系方式:</span> <span class="title_right_name">{{ storeInfo.storeMobile }}</span>
         </div>
         </div>
         <div>
-          <el-button class="store-button" @click="linkToStore(storeInfo.id)" size="mini"
+          <el-button class="store-button" @click="linkToStore(storeInfo.storeId)" size="mini"
             plain>进入店铺</el-button>
         </div>
       </div>

@@ -20,13 +20,15 @@
           </Form-item>
           <Form-item label="退款状态">
             <Select
-              v-model="searchForm.isRefund"
+              v-model="searchForm.refundStatus"
               placeholder="请选择"
               clearable
               style="width: 200px"
             >
-              <Option value="false">未退款</Option>
-              <Option value="true">已退款</Option>
+              <Option value="REFUND">已退款</Option>
+              <Option value="UNREFUND">待退款</Option>
+              <Option value="ACCOUNT">已对账</Option>
+              <Option value="ACCOUNT_ERROR">对账失败</Option>
             </Select>
           </Form-item>
           <Form-item label="退款时间">
@@ -49,6 +51,14 @@
           >
         </Form>
       </Row>
+      <Button
+        style="margin-top: 10px"
+        @click="refundReconciliation"
+        type="primary"
+        icon="ios-paper-outline"
+      >
+        对 账</Button
+      >
       <Table
         :loading="loading"
         border
@@ -167,10 +177,29 @@ export default {
         },
         {
           title: "退款状态",
-          key: "isRefund",
-          align:"center",
+          key: "refundStatus",
+          align: "center",
           width: 200,
-          slot: "actions",
+          fixed: "right",
+          render: (h, params) => {
+            if (params.row.refundStatus == "REFUND") {
+              return h("div", [
+                h("Tag", { props: { color: "green" } }, "已退款"),
+              ]);
+            } else if (params.row.refundStatus === "UNREFUND") {
+              return h("div", [
+                h("Tag", { props: { color: "orange" } }, "待退款"),
+              ]);
+            } else if (params.row.refundStatus === "ACCOUNT") {
+              return h("div", [
+                h("Tag", { props: { color: "blue" } }, "已对账"),
+              ]);
+            } else if (params.row.refundStatus === "ACCOUNT_ERROR") {
+              return h("div", [
+                h("Tag", { props: { color: "blue" } }, "对账失败"),
+              ]);
+            }
+          },
         },
       ],
       data: [], // 表单数据
@@ -205,6 +234,22 @@ export default {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
       }
+    },
+    //退款流水对账
+    refundReconciliation() {
+      this.$Modal.confirm({
+        title: "提示",
+        content:
+          "<p>您确定要退款单对账？此操作需异步进行，等待约一分钟刷新列表查看</p>",
+        onOk: () => {
+          API_Order.refundReconciliation(this.sn).then((res) => {
+            if (res.success) {
+              this.$Message.success("对账成功");
+              this.getDataList();
+            }
+          });
+        },
+      });
     },
     // 获取列表数据
     getDataList() {

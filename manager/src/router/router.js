@@ -282,6 +282,11 @@ export const otherRouter = {
       title: "查看直播",
       name: "live-detail",
       component: () => import("@/views/promotions/live/live-detail.vue")
+    }, {
+      path: "submitApplication",
+      title: "提交申请单",
+      name: "submitApplication",
+      component: () => import("@/views/seller/construction/tabApplication"),
     }
   ]
 };

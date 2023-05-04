@@ -113,10 +113,10 @@
             <div class="div-item-right">{{ orderInfo.order.remark }}</div>
           </div>
 
-          <!-- <div class="div-item" v-if="orderInfo.order.needReceipt == false">
-            <div class="div-item-left">发票信息：</div>
-            <div class="div-item-right">暂无发票信息</div>
-          </div> -->
+          <div class="div-item">
+            <div class="div-item-left">支付时间：</div>
+            <div class="div-item-right">{{ orderInfo.order.paymentTime }}</div>
+          </div>
 
           <!-- <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票抬头：</div>

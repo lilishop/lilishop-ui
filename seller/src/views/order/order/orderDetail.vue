@@ -43,6 +43,10 @@
             {{ orderInfo.order.createTime }}
           </div>
         </div>
+        <div class="div-item">
+            <div class="div-item-left">支付时间：</div>
+            <div class="div-item-right">{{ orderInfo.order.paymentTime }}</div>
+          </div>
         <div class="div-item" v-if="orderInfo.order.needReceipt == false">
           <div class="div-item-left">发票信息：</div>
           <div class="div-item-right">暂无发票信息</div>
@@ -451,7 +455,6 @@
                 <div class="printgoodname">
                   <p>{{ item.goodsName }}</p>
                   <div class="printgoodguid">
-                    {{ item }}
                     <span v-for="(itemchild, keychild) in JSON.parse(item.specs)" :key="keychild">
                       <span class="printgoodguiditem" v-if="keychild != 'images'">
                         {{ keychild }} : {{ itemchild }}

@@ -31,7 +31,7 @@
       </div>
       <div class="nav-right">
         <div class="person-msg">
-          <img :src="userInfo.face" v-if="userInfo.face" alt />
+          <img :src="userInfo.face" v-if="userInfo.face && userInfo.face !='undefined'" alt />
           <Avatar icon="ios-person" class="mb_10" v-else size="80" />
           <div>Hi，{{ userInfo.nickName || `欢迎来到${config.title}` | secrecyMobile }}</div>
           <div v-if="userInfo.id">

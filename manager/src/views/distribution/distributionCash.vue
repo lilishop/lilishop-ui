@@ -233,9 +233,10 @@ export default {
             content: "您确认要审核"+result+"么?",
             loading: true,
             onOk: () => {
+                this.$Modal.remove();
                 auditDistributionCash(this.form.id,{result:this.result}).then(res => {
                     if (res.success) {
-                      this.$Modal.remove();
+                      // this.$Modal.remove();
                       this.$Message.success("审核成功");
                       this.getDataList();
                       this.modalVisible = false;

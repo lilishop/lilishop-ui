@@ -51,7 +51,7 @@
     </div>
 
 
-    <div v-if="storeMsg.pageShow&&storeMsg.pageShow==='1'">
+    <div v-if="storeMsg.pageShow&&storeMsg.pageShow=='1'">
       <!-- 楼层装修部分 -->
       <model-form ref="modelForm" :data="modelForm"></model-form>
     </div>
@@ -134,8 +134,6 @@ export default {
       topSearchShow: false, // 滚动后顶部搜索栏展示
       carouselLarge: false, // 不同轮播分类尺寸
       carouselOpacity: false, // 不同轮播分类样式,
-      enablePageData: false, //是否显示楼层装修内容
-      basePageData: false, //基础店铺信息
       storeMsg: {}, // 店铺信息
       cateList: [], // 店铺分裂
       goodsList: [], // 商品列表
@@ -220,10 +218,16 @@ export default {
 
           this.storeMsg = res.result;
           console.log(this.storeMsg)
-
+            // 判断是否收藏
+            if (this.Cookies.getItem("userInfo")) {
+              isStoreCollection("STORE", this.$route.query.id).then((res) => {
+                if (res.success && res.result) {
+                  this.storeCollected = true;
+                }
+              });
+            }
           //判定如果开启楼层展示，则获取页面信息 否则读取商品信息
-          if (this.storeMsg.pageShow && this.storeMsg.pageShow === '1') {
-
+          if (this.storeMsg.pageShow && this.storeMsg.pageShow == '1') {
             this.getIndexData();
           } else {
             this.getGoodsList();
@@ -374,7 +378,12 @@ export default {
     }
   }
 }
-
+.hover-pointer{
+  &:hover {
+        // cursor: pointer;
+        color: $theme_color;
+      }
+}
 .promotion-decorate::before,
 .promotion-decorate::after {
   background-image: url("/src/assets/images/sprite@2x.png");
