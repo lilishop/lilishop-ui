@@ -251,6 +251,8 @@ export default {
         return "审核通过(提现成功)";
       } else if (val === "FAIL_AUDITING") {
         return "审核拒绝";
+      } else if (val === "ERROR") {
+        return "提现失败";
       } else {
         return "未知状态";
       }
