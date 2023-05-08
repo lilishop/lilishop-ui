@@ -295,15 +295,19 @@ export default {
             this.$Modal.warning({ title: "提示", content: "请选择指定商品" });
             return;
           }
+
           if (params.scopeType == "ALL") {
             delete params.promotionGoodsList;
             params.number = -1;
           } else {
+            let scopeId = [];
             params.number = 1;
             params.promotionGoodsList.forEach((e) => {
-              e.startTime = params.stratTime;
+              e.startTime = params.startTime;
               e.endTime = params.endTime;
+              scopeId.push(e.skuId);
             });
+            params.scopeId = scopeId.toString();
           }
           if (params.discountType == "fullMinusFlag") {
             params.fullMinusFlag = true;
