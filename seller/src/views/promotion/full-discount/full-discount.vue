@@ -1,29 +1,12 @@
 <template>
   <div class="search">
     <Card>
-      <Form
-        ref="searchForm"
-        :model="searchForm"
-        inline
-        :label-width="70"
-        class="search-form"
-      >
+      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
         <Form-item label="活动名称">
-          <Input
-            type="text"
-            v-model="searchForm.promotionName"
-            placeholder="请输入活动名称"
-            clearable
-            style="width: 200px"
-          />
+          <Input type="text" v-model="searchForm.promotionName" placeholder="请输入活动名称" clearable style="width: 200px" />
         </Form-item>
         <Form-item label="活动状态" prop="promotionStatus">
-          <Select
-            v-model="searchForm.promotionStatus"
-            placeholder="请选择"
-            clearable
-            style="width: 200px"
-          >
+          <Select v-model="searchForm.promotionStatus" placeholder="请选择" clearable style="width: 200px">
             <Option value="NEW">未开始</Option>
             <Option value="START">已开始/上架</Option>
             <Option value="END">已结束/下架</Option>
@@ -31,13 +14,7 @@
           </Select>
         </Form-item>
         <Form-item label="活动时间">
-          <DatePicker
-            v-model="selectDate"
-            type="daterange"
-            clearable
-            placeholder="选择起始时间"
-            style="width: 200px"
-          >
+          <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 200px">
           </DatePicker>
         </Form-item>
         <Form-item>
@@ -60,54 +37,21 @@
         </template>
         <template slot-scope="{ row }" slot="action">
           <div>
-            <Button
-              type="primary"
-              v-if="row.promotionStatus == 'NEW'"
-              size="small"
-              @click="edit(row)"
-              >编辑</Button
-            >
+            <Button type="primary" v-if="row.promotionStatus == 'NEW'" size="small" @click="edit(row)">编辑</Button>
             <Button type="info" v-else size="small" @click="edit(row)">查看</Button>
-            <Button
-              type="success"
-              v-if="row.promotionStatus === 'START'"
-              style="margin-left: 5px"
-              size="small"
-              @click="openOrClose(row)"
-              >关闭</Button
-            >
-            <Button
-              type="success"
-              v-if="row.promotionStatus === 'CLOSE'"
-              style="margin-left: 5px"
-              size="small"
-              @click="openOrClose(row)"
-              >开启</Button
-            >
-            <Button
-              type="error"
-              :disabled="row.promotionStatus == 'START'"
-              style="margin-left: 5px"
-              size="small"
-              @click="del(row)"
-              >删除</Button
-            >
+            <Button type="success" v-if="row.promotionStatus === 'START'" style="margin-left: 5px" size="small"
+              @click="openOrClose(row)">关闭</Button>
+            <Button type="success" v-if="row.promotionStatus === 'CLOSE'" style="margin-left: 5px" size="small"
+              @click="openOrClose(row)">开启</Button>
+            <Button type="error" :disabled="row.promotionStatus == 'START'" style="margin-left: 5px" size="small"
+              @click="del(row)">删除</Button>
           </div>
         </template>
       </Table>
       <Row type="flex" justify="end" class="page operation">
-        <Page
-          :current="searchForm.pageNumber"
-          :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
-          size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
+          @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator
+          show-sizer></Page>
       </Row>
     </Card>
   </div>
@@ -120,7 +64,7 @@ import {
 } from "@/api/promotion.js";
 export default {
   name: "full-cut",
-  data() {
+  data () {
     return {
       total: 0,
       selectDate: [],
@@ -198,31 +142,31 @@ export default {
   },
   methods: {
     // 改变页码
-    newAct() {
+    newAct () {
       this.$router.push({ name: "full-discount-detail" });
     },
     // 初始化数据
-    init() {
+    init () {
       this.getDataList();
     },
     // 改变页数
-    changePage(v) {
+    changePage (v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
     // 改变页码
-    changePageSize(v) {
+    changePageSize (v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
     // 搜索
-    handleSearch() {
+    handleSearch () {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
     // 重置
-    handleReset() {
+    handleReset () {
       this.selectDate = "";
       this.searchForm = {};
       this.searchForm.pageNumber = 1;
@@ -230,11 +174,11 @@ export default {
       this.getDataList();
     },
     //  编辑
-    edit(row) {
+    edit (row) {
       this.$router.push({ name: "full-discount-detail", query: { id: row.id } });
     },
     // 删除
-    del(row) {
+    del (row) {
       this.$Modal.confirm({
         title: "提示",
         // 记得确认修改此处
@@ -253,7 +197,7 @@ export default {
       });
     },
     // 开启或关闭活动
-    openOrClose(row) {
+    openOrClose (row) {
       let name = "开启";
       let status = "START";
       if (row.promotionStatus === "START") {
@@ -325,7 +269,7 @@ export default {
       }
     },
     // 获取列表数据
-    getDataList() {
+    getDataList () {
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
         this.searchForm.startTime = this.selectDate[0].getTime();
@@ -343,17 +287,19 @@ export default {
       });
     },
   },
-  mounted() {
+  mounted () {
     this.init();
   },
   // 页面缓存处理，从该页面离开时，修改KeepAlive为false，保证进入该页面是刷新
-  beforeRouteLeave(to, from, next) {
+  beforeRouteLeave (to, from, next) {
     from.meta.keepAlive = false;
     next();
   },
 };
 </script>
 <style lang="scss" scoped>
+@import "@/styles/table-common.scss";
+
 .operation {
   margin: 10px 0;
 }

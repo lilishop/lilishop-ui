@@ -2,7 +2,7 @@
   <div class="layout">
     <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
 
-      <FormItem label="平台" prop="endPoint">
+      <FormItem label="平台" >
         <RadioGroup v-model="formValidate.type" type="button">
           <Radio label="ALI_OSS">阿里OSS</Radio>
           <Radio label="MINIO">MINIO</Radio>
@@ -11,68 +11,68 @@
         </RadioGroup>
       </FormItem>
       <!--      阿里云存储-->
-      <FormItem v-if="formValidate.type==='ALI_OSS'" label="节点" prop="aliyunOSSEndPoint">
+      <FormItem v-if="formValidate.type==='ALI_OSS'" key="aliyunOSSEndPoint" label="节点" prop="aliyunOSSEndPoint">
         <Input v-model="formValidate.aliyunOSSEndPoint"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='ALI_OSS'" label="储存空间" class="label-item" prop="aliyunOSSBucketName">
+      <FormItem v-if="formValidate.type==='ALI_OSS'" key="aliyunOSSBucketName" label="储存空间" class="label-item" prop="aliyunOSSBucketName">
         <Input v-model="formValidate.aliyunOSSBucketName"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='ALI_OSS'" label="存放路径路径" prop="aliyunOSSPicLocation">
+      <FormItem v-if="formValidate.type==='ALI_OSS'" key="aliyunOSSPicLocation" label="存放路径路径" prop="aliyunOSSPicLocation">
         <Input v-model="formValidate.aliyunOSSPicLocation"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='ALI_OSS'" label="密钥id" prop="aliyunOSSAccessKeyId">
+      <FormItem v-if="formValidate.type==='ALI_OSS'" key="aliyunOSSAccessKeyId" label="密钥id" prop="aliyunOSSAccessKeyId">
         <Input v-model="formValidate.aliyunOSSAccessKeyId"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='ALI_OSS'" label="密钥" prop="aliyunOSSAccessKeySecret">
+      <FormItem v-if="formValidate.type==='ALI_OSS'" key="aliyunOSSAccessKeySecret" label="密钥" prop="aliyunOSSAccessKeySecret">
         <Input v-model="formValidate.aliyunOSSAccessKeySecret"/>
       </FormItem>
 
 
       <!--      MINIO存储-->
 
-      <FormItem v-if="formValidate.type==='MINIO'" label="访问地址" prop="m_frontUrl">
+      <FormItem v-if="formValidate.type==='MINIO'" label="访问地址" key="m_frontUrl" prop="m_frontUrl">
         <Input v-model="formValidate.m_frontUrl"/>
         <span class="desc">配置MINIO nginx前端访问转发地址，一般为完整域名，例如：https://minio.pickmall.cn</span>
       </FormItem>
-      <FormItem v-if="formValidate.type==='MINIO'" label="endpoint" prop="m_endpoint">
+      <FormItem v-if="formValidate.type==='MINIO'" label="endpoint" key="m_endpoint" prop="m_endpoint">
         <Input v-model="formValidate.m_endpoint"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='MINIO'" label="accessKey" class="label-item" prop="m_accessKey">
+      <FormItem v-if="formValidate.type==='MINIO'" label="accessKey" key="m_accessKey" class="label-item" prop="m_accessKey">
         <Input v-model="formValidate.m_accessKey"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='MINIO'" label="secretKey" prop="bucketName">
+      <FormItem v-if="formValidate.type==='MINIO'" label="secretKey" key="m_secretKey" prop="m_secretKey">
         <Input v-model="formValidate.m_secretKey"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='MINIO'" label="bucketName" prop="accessKeyId">
+      <FormItem v-if="formValidate.type==='MINIO'" label="bucketName" key="m_bucketName" prop="m_bucketName">
         <Input v-model="formValidate.m_bucketName"/>
       </FormItem>
 
 
       <!--      华为云存储-->
-      <FormItem v-if="formValidate.type==='HUAWEI_OBS'" label="发起者的Access Key" prop="huaweicloudOBSAccessKey">
+      <FormItem v-if="formValidate.type==='HUAWEI_OBS'" label="发起者的Access Key" key="huaweicloudOBSAccessKey" prop="huaweicloudOBSAccessKey">
         <Input v-model="formValidate.huaweicloudOBSAccessKey"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='HUAWEI_OBS'" label="密钥" class="label-item" prop="huaweicloudOBSSecretKey">
+      <FormItem v-if="formValidate.type==='HUAWEI_OBS'" label="密钥" class="label-item" key="huaweicloudOBSSecretKey" prop="huaweicloudOBSSecretKey">
         <Input v-model="formValidate.huaweicloudOBSSecretKey"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='HUAWEI_OBS'" label="节点" prop="huaweicloudOBSEndPoint">
+      <FormItem v-if="formValidate.type==='HUAWEI_OBS'" label="节点" key="huaweicloudOBSEndPoint" prop="huaweicloudOBSEndPoint">
         <Input v-model="formValidate.huaweicloudOBSEndPoint"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='HUAWEI_OBS'" label="桶" prop="huaweicloudOBSBucketName">
+      <FormItem v-if="formValidate.type==='HUAWEI_OBS'" label="桶" key="huaweicloudOBSBucketName" prop="huaweicloudOBSBucketName">
         <Input v-model="formValidate.huaweicloudOBSBucketName"/>
       </FormItem>
 
       <!--      腾讯云存储-->
-      <FormItem v-if="formValidate.type==='TENCENT_COS'" label="用户的SecretId" prop="tencentCOSSecretId">
+      <FormItem v-if="formValidate.type==='TENCENT_COS'" label="用户的SecretId" key="tencentCOSSecretId" prop="tencentCOSSecretId">
         <Input v-model="formValidate.tencentCOSSecretId"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='TENCENT_COS'" label="用户的SecretKey" class="label-item" prop="tencentCOSSecretKey">
+      <FormItem v-if="formValidate.type==='TENCENT_COS'" label="用户的SecretKey" key="tencentCOSSecretKey" class="label-item" prop="tencentCOSSecretKey">
         <Input v-model="formValidate.tencentCOSSecretKey"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='TENCENT_COS'" label="bucket的地域" prop="tencentCOSRegion">
+      <FormItem v-if="formValidate.type==='TENCENT_COS'" label="bucket的地域" key="tencentCOSRegion" prop="tencentCOSRegion">
         <Input v-model="formValidate.tencentCOSRegion"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='TENCENT_COS'" label="bucket" prop="tencentCOSBucket">
+      <FormItem v-if="formValidate.type==='TENCENT_COS'" label="bucket" key="tencentCOSBucket" prop="tencentCOSBucket">
         <Input v-model="formValidate.tencentCOSBucket"/>
       </FormItem>
 
@@ -179,3 +179,4 @@ export default {
   color: #999;
 }
 </style>
+

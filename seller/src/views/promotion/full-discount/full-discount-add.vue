@@ -6,251 +6,101 @@
           <h4>基本信息</h4>
           <div class="form-item-view">
             <FormItem label="活动名称" prop="promotionName">
-              <Input
-                type="text"
-                v-model="form.promotionName"
-                :disabled="form.promotionStatus != 'NEW'"
-                placeholder="活动名称"
-                clearable
-                style="width: 280px"
-              />
+              <Input type="text" v-model="form.promotionName" :disabled="form.promotionStatus != 'NEW'" placeholder="活动名称"
+                clearable style="width: 280px" />
             </FormItem>
             <FormItem label="活动时间" prop="rangeTime">
-              <DatePicker
-                type="datetimerange"
-                v-model="form.rangeTime"
-                :disabled="form.promotionStatus != 'NEW'"
-                format="yyyy-MM-dd HH:mm:ss"
-                placeholder="请选择"
-                :options="options"
-                style="width: 280px"
-              >
+              <DatePicker type="datetimerange" v-model="form.rangeTime" :disabled="form.promotionStatus != 'NEW'"
+                format="yyyy-MM-dd HH:mm:ss" placeholder="请选择" :options="options" style="width: 280px">
               </DatePicker>
             </FormItem>
             <FormItem label="活动描述" prop="description">
-              <Input
-                v-model="form.description"
-                :disabled="form.promotionStatus != 'NEW'"
-                type="textarea"
-                :rows="4"
-                clearable
-                style="width: 280px"
-              />
+              <Input v-model="form.description" :disabled="form.promotionStatus != 'NEW'" type="textarea" :rows="4"
+                clearable style="width: 280px" />
             </FormItem>
           </div>
 
           <h4>优惠设置</h4>
           <div class="form-item-view">
             <FormItem label="优惠门槛" prop="fullMoney">
-              <Input
-                type="text"
-                v-model="form.fullMoney"
-                :disabled="form.promotionStatus != 'NEW'"
-                placeholder="优惠门槛"
-                clearable
-                style="width: 280px"
-              />
+              <Input type="text" v-model="form.fullMoney" :disabled="form.promotionStatus != 'NEW'" placeholder="优惠门槛"
+                clearable style="width: 280px" />
               <span class="describe">消费达到当前金额可以参与优惠</span>
             </FormItem>
             <FormItem label="优惠方式">
-              <RadioGroup
-                type="button"
-                button-style="solid"
-                v-model="form.discountType"
-              >
-                <Radio
-                  :disabled="form.promotionStatus != 'NEW'"
-                  label="fullMinusFlag"
-                  >减现金</Radio
-                >
-                <Radio
-                  :disabled="form.promotionStatus != 'NEW'"
-                  label="fullRateFlag"
-                  >打折</Radio
-                >
+              <RadioGroup type="button" button-style="solid" v-model="form.discountType">
+                <Radio :disabled="form.promotionStatus != 'NEW'" label="fullMinusFlag">减现金</Radio>
+                <Radio :disabled="form.promotionStatus != 'NEW'" label="fullRateFlag">打折</Radio>
               </RadioGroup>
             </FormItem>
-            <FormItem
-              v-if="form.discountType == 'fullMinusFlag'"
-              label="优惠金额"
-              prop="fullMinus"
-            >
-              <Input
-                :disabled="form.promotionStatus != 'NEW'"
-                type="text"
-                v-model="form.fullMinus"
-                placeholder="优惠金额"
-                clearable
-                style="width: 280px"
-              />
+            <FormItem v-if="form.discountType == 'fullMinusFlag'" label="优惠金额" prop="fullMinus">
+              <Input :disabled="form.promotionStatus != 'NEW'" type="text" v-model="form.fullMinus" placeholder="优惠金额"
+                clearable style="width: 280px" />
             </FormItem>
-            <FormItem
-              v-if="form.discountType == 'fullRateFlag'"
-              label="优惠折扣"
-              prop="fullRate"
-            >
-              <Input
-                :disabled="form.promotionStatus != 'NEW'"
-                type="text"
-                v-model="form.fullRate"
-                placeholder="优惠折扣"
-                clearable
-                style="width: 280px"
-              />
+            <FormItem v-if="form.discountType == 'fullRateFlag'" label="优惠折扣" prop="fullRate">
+              <Input :disabled="form.promotionStatus != 'NEW'" type="text" v-model="form.fullRate" placeholder="优惠折扣"
+                clearable style="width: 280px" />
               <span class="describe">优惠折扣为0-10之间数字，可有一位小数</span>
             </FormItem>
             <FormItem label="额外赠送">
-              <Checkbox
-                :disabled="form.promotionStatus != 'NEW'"
-                v-model="form.freeFreightFlag"
-                >免邮费</Checkbox
-              >
-              <Checkbox
-                :disabled="form.promotionStatus != 'NEW'"
-                v-model="form.couponFlag"
-                >送优惠券</Checkbox
-              >
-              <Checkbox
-                :disabled="form.promotionStatus != 'NEW'"
-                v-model="form.giftFlag"
-                >送赠品</Checkbox
-              >
-              <Checkbox
-                :disabled="form.promotionStatus != 'NEW'"
-                v-if="
-                  Cookies.get('userInfoSeller') &&
-                  JSON.parse(Cookies.get('userInfoSeller')).selfOperated
-                "
-                v-model="form.pointFlag"
-                >送积分</Checkbox
-              >
+              <Checkbox :disabled="form.promotionStatus != 'NEW'" v-model="form.freeFreightFlag">免邮费</Checkbox>
+              <Checkbox :disabled="form.promotionStatus != 'NEW'" v-model="form.couponFlag">送优惠券</Checkbox>
+              <Checkbox :disabled="form.promotionStatus != 'NEW'" v-model="form.giftFlag">送赠品</Checkbox>
+              <Checkbox :disabled="form.promotionStatus != 'NEW'" v-if="Cookies.get('userInfoSeller') &&
+                JSON.parse(Cookies.get('userInfoSeller')).selfOperated
+                " v-model="form.pointFlag">送积分</Checkbox>
             </FormItem>
             <FormItem v-if="form.couponFlag" label="赠送优惠券" prop="couponId">
-              <Select
-                v-model="form.couponId"
-                :disabled="form.promotionStatus != 'NEW'"
-                filterable
-                :remote-method="getCouponList"
-                placeholder="输入优惠券名称搜索"
-                :loading="couponLoading"
-                style="width: 280px"
-              >
-                <Option
-                  v-for="item in couponList"
-                  :value="item.id"
-                  :key="item.id"
-                  >{{ item.couponName }}</Option
-                >
+              <Select v-model="form.couponId" :disabled="form.promotionStatus != 'NEW'" filterable
+                :remote-method="getCouponList" placeholder="输入优惠券名称搜索" :loading="couponLoading" style="width: 280px">
+                <Option v-for="item in couponList" :value="item.id" :key="item.id">{{ item.couponName }}</Option>
               </Select>
             </FormItem>
             <FormItem v-if="form.giftFlag" label="赠品" prop="giftId">
-              <Select
-                :disabled="form.promotionStatus != 'NEW'"
-                v-model="form.giftId"
-                filterable
-                :remote-method="getGiftList"
-                placeholder="输入赠品名称搜索"
-                :loading="giftLoading"
-                style="width: 280px"
-              >
-                <Option
-                  v-for="item in giftList"
-                  :value="item.id"
-                  :key="item.id"
-                  >
+              <Select :disabled="form.promotionStatus != 'NEW'" v-model="form.giftId" filterable
+                :remote-method="getGiftList" placeholder="输入赠品名称搜索" :loading="giftLoading" style="width: 280px">
+                <Option v-for="item in giftList" :value="item.id" :key="item.id">
                   {{ item.goodsName }}
-                  </Option
-                >
+                </Option>
               </Select>
             </FormItem>
             <FormItem v-if="form.pointFlag" label="赠积分" prop="point">
-              <InputNumber
-                :min="0"
-                :disabled="form.promotionStatus != 'NEW'"
-                v-model="form.point"
-                type="number"
-                style="width: 280px"
-              />
+              <InputNumber :min="0" :disabled="form.promotionStatus != 'NEW'" v-model="form.point" type="number"
+                style="width: 280px" />
             </FormItem>
             <FormItem label="使用范围" prop="scopeType">
-              <RadioGroup
-                type="button"
-                button-style="solid"
-                v-model="form.scopeType"
-              >
-                <Radio :disabled="form.promotionStatus != 'NEW'" label="ALL"
-                  >全品类</Radio
-                >
-                <Radio
-                  :disabled="form.promotionStatus != 'NEW'"
-                  label="PORTION_GOODS"
-                  >指定商品</Radio
-                >
+              <RadioGroup type="button" button-style="solid" v-model="form.scopeType">
+                <Radio :disabled="form.promotionStatus != 'NEW'" label="ALL">全品类</Radio>
+                <Radio :disabled="form.promotionStatus != 'NEW'" label="PORTION_GOODS">指定商品</Radio>
               </RadioGroup>
             </FormItem>
 
-            <FormItem
-              style="width: 100%"
-              v-if="form.scopeType == 'PORTION_GOODS'"
-            >
-              <div
-                style="display: flex; margin-bottom: 10px"
-                v-if="form.promotionStatus == 'NEW'"
-              >
+            <FormItem style="width: 100%" v-if="form.scopeType == 'PORTION_GOODS'">
+              <div style="display: flex; margin-bottom: 10px" v-if="form.promotionStatus == 'NEW'">
                 <Button type="primary" @click="openSkuList">选择商品</Button>
-                <Button
-                  type="error"
-                  ghost
-                  style="margin-left: 10px"
-                  @click="delSelectGoods"
-                  >批量删除</Button
-                >
+                <Button type="error" ghost style="margin-left: 10px" @click="delSelectGoods">批量删除</Button>
               </div>
-              <Table
-                border
-                :columns="columns"
-                :data="form.promotionGoodsList"
-                @on-selection-change="changeSelect"
-              >
+              <Table border :columns="columns" :data="form.promotionGoodsList" @on-selection-change="changeSelect">
                 <template slot-scope="{ row }" slot="QRCode">
-                  <img
-                    :src="row.QRCode || '../../../assets/lili.png'"
-                    width="50px"
-                    height="50px"
-                    alt=""
-                  />
+                  <img :src="row.QRCode || '../../../assets/lili.png'" width="50px" height="50px" alt="" />
                 </template>
                 <template slot-scope="{ index }" slot="action">
-                  <Button
-                    type="error"
-                    :disabled="form.promotionStatus != 'NEW' && !!id"
-                    size="small"
-                    ghost
-                    @click="delGoods(index)"
-                    >删除</Button
-                  >
+                  <Button type="error" :disabled="form.promotionStatus != 'NEW' && !!id" size="small" ghost
+                    @click="delGoods(index)">删除</Button>
                 </template>
               </Table>
             </FormItem>
 
             <div>
               <Button type="text" @click="closeCurrentPage">返回</Button>
-              <Button
-                type="primary"
-                :disabled="form.promotionStatus != 'NEW' && !!id"
-                :loading="submitLoading"
-                @click="handleSubmit"
-                >提交</Button
-              >
+              <Button type="primary" :disabled="form.promotionStatus != 'NEW' && !!id" :loading="submitLoading"
+                @click="handleSubmit">提交</Button>
             </div>
           </div>
         </div>
       </Form>
     </Card>
-    <sku-select
-      ref="skuSelect"
-      @selectedGoodsData="selectedGoodsData"
-    ></sku-select>
+    <sku-select ref="skuSelect" @selectedGoodsData="selectedGoodsData"></sku-select>
   </div>
 </template>
 
@@ -270,7 +120,7 @@ export default {
   components: {
     skuSelect,
   },
-  data() {
+  data () {
     const checkPrice = (rule, value, callback) => {
       if (!value && value !== 0) {
         return callback(new Error("面额不能为空"));
@@ -369,29 +219,31 @@ export default {
         },
       ],
       options: {
-        disabledDate(date) {
+        disabledDate (date) {
           return date && date.valueOf() < Date.now() - 86400000;
         },
       },
     };
   },
-  async mounted() {
+  async mounted () {
     if (this.id) {
       this.getDetail();
+      this.columns.shift()
+      this.columns.pop()
     }
     await this.getCouponList();
     await this.getGiftList();
   },
   methods: {
     // 关闭当前页面
-    closeCurrentPage() {
+    closeCurrentPage () {
       this.$store.commit("removeTag", "full-cut-detail");
       localStorage.storeOpenedList = JSON.stringify(
         this.$store.state.app.storeOpenedList
       );
       this.$router.go(-1);
     },
-    openSkuList() {
+    openSkuList () {
       // 显示商品选择器
       this.$refs.skuSelect.open("goods");
       let data = JSON.parse(JSON.stringify(this.form.promotionGoodsList));
@@ -400,7 +252,7 @@ export default {
       });
       this.$refs.skuSelect.goodsData = data;
     },
-    getDetail() {
+    getDetail () {
       // 获取活动详情
       getFullDiscountById(this.id).then((res) => {
         console.log(res);
@@ -422,7 +274,7 @@ export default {
       });
     },
     /** 保存 */
-    handleSubmit() {
+    handleSubmit () {
       this.$refs.form.validate((valid) => {
         if (valid) {
           const params = JSON.parse(JSON.stringify(this.form));
@@ -489,11 +341,11 @@ export default {
       });
     },
 
-    changeSelect(e) {
+    changeSelect (e) {
       // 已选商品批量选择
       this.selectedGoods = e;
     },
-    delSelectGoods() {
+    delSelectGoods () {
       // 多选删除商品
       if (this.selectedGoods.length <= 0) {
         this.$Message.warning("您还未选择要删除的数据");
@@ -515,11 +367,11 @@ export default {
         },
       });
     },
-    delGoods(index) {
+    delGoods (index) {
       // 删除商品
       this.form.promotionGoodsList.splice(index, 1);
     },
-    selectedGoodsData(item) {
+    selectedGoodsData (item) {
       // 回显已选商品
       let list = [];
       item.forEach((e) => {
@@ -535,7 +387,7 @@ export default {
       });
       this.form.promotionGoodsList = list;
     },
-    getCouponList(query) {
+    getCouponList (query) {
       // 优惠券列表
       let params = {
         pageSize: 10,
@@ -552,7 +404,7 @@ export default {
         }
       });
     },
-    getGiftList(query) {
+    getGiftList (query) {
       // 赠品列表
       let params = {
         pageSize: 10,
@@ -586,11 +438,13 @@ h4 {
   line-height: 40px;
   text-align: left;
 }
+
 .describe {
   font-size: 12px;
   margin-left: 10px;
   color: #999;
 }
+
 .ivu-form-item {
   margin-bottom: 24px !important;
 }

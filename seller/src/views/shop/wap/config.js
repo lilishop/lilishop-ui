@@ -17,7 +17,26 @@ export let homeData = {};
  * notImg: true 没有选择图片功能
  * close:true 右侧关闭按钮
  */
+
 export const modelData = [
+  {
+    type: "flexOne",
+    name: "图片",
+    notAdd: true,
+    onlyImg: true,
+    img: "md-image",
+    options: {
+      list: [
+        {
+          img: "https://i.loli.net/2020/12/05/8wSNWbnqujDh6HL.png",
+          url: "",
+          link: "",
+          size: "750*280",
+          model: "link"
+        }
+      ]
+    }
+  },
   {
     type: "carousel",
     name: "图片轮播",
