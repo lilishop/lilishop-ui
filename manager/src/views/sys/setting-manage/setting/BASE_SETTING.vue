@@ -87,7 +87,10 @@ import ossManage from "@/views/sys/oss-manage/ossManage";
 export default {
   title: "基础设置",
   props: {
-    res:Object,
+    res:{
+      type:null,
+      default:""
+    },
     type:''
   },
   components: {
@@ -108,7 +111,8 @@ export default {
         staticPageWapAddress: "",
       },
       selected: "", // 已选数据
-      ruleValidate: {} // 验证规则
+      ruleValidate: {}, // 验证规则
+      result:""
     };
   },
   created() {
@@ -146,10 +150,9 @@ export default {
     },
     /**添加必填项 */
     init() {
-      this.res = JSON.parse(this.res);
-
-      this.$set(this, "formValidate", { ...this.res });
-      Object.keys(this.res).forEach((item) => {
+      this.result = JSON.parse(this.res);
+      this.$set(this, "formValidate", { ...this.result });
+      Object.keys(this.result).forEach((item) => {
         this.ruleValidate[item] = [
           {
             required: true,

@@ -74,6 +74,7 @@ export default {
     return {
       ruleValidate: {}, // 验证规则
       formValidate: {}, // 表单数据
+      result: "",
     };
   },
   props: ["res", "type"],
@@ -115,15 +116,15 @@ export default {
     },
     // 实例化数据
     init() {
-      this.res = JSON.parse(this.res);
-      Object.keys(this.res).map((item) => {
+      this.result = JSON.parse(this.res);
+      Object.keys(this.result).map((item) => {
         if (item == "pointSettingItems") {
           return false;
         }
-        this.res[item] += "";
+        this.result[item] += "";
       });
 
-      this.$set(this, "formValidate", {...this.res});
+      this.$set(this, "formValidate", {...this.result});
 
       Object.keys(this.formValidate).forEach((item) => {
         this.ruleValidate[item] = [
