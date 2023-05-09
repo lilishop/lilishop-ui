@@ -269,11 +269,12 @@ export default {
       let localVal = v.specValue;
       this.form.specName = v.specName;
       this.form.id = v.id;
-      // this.$nextTick(() => {
-      //   this.$set(this.form, 'specValue', localVal.split(","))
-      // })
-      this.form.specValue = localVal.split(",")
+      this.$nextTick(() => {
+        this.$set(this.form, 'specValue', v.specValue);
+      })
+
       if (localVal && localVal.indexOf("," > 0)) {
+        this.$set(this.form, 'specValue', localVal.split(","));
         this.specValue = this.form.specValue;
       } else {
         this.specValue = [];
