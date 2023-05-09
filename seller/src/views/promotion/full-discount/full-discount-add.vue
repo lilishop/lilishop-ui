@@ -299,11 +299,14 @@ export default {
             delete params.promotionGoodsList;
             params.number = -1;
           } else {
+            let scopeId = [];
             params.number = 1;
             params.promotionGoodsList.forEach((e) => {
-              e.startTime = params.stratTime;
+              e.startTime = params.startTime;
               e.endTime = params.endTime;
+              scopeId.push(e.skuId);
             });
+            params.scopeId = scopeId.toString();
           }
           if (params.discountType == "fullMinusFlag") {
             params.fullMinusFlag = true;

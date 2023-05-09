@@ -118,44 +118,89 @@
               <Input v-model="item.title" style="width: 200px" />
             </div>
           </div>
-          <!-- 填写链接 -->
+
+          <div class="decorate-view" v-if="res.onlyImg">
+            <div class="decorate-view-title">选择模式</div>
+
+            <div>
+              <RadioGroup v-model="item.model" type="button">
+                <Radio value="link" label="link">链接</Radio>
+                <Radio value="hotzone" label="hotzone">热区</Radio>
+              </RadioGroup>
+            </div>
+          </div>
+
           <div class="decorate-view" v-if="!res.notLink">
             <div class="decorate-view-title">选择链接</div>
-            <div v-if="item.url.length != 0" class="decorate-view-link">
+            <div
+              v-if="item.url && item.url.length != 0"
+              class="decorate-view-link"
+            >
               已选链接：
 
               <span>
-                {{
+                <!-- {{
                   ways.find((e) => {
                     return item.url.___type == e.name;
-                  }).title
+                  })
+                    ? ways.find((e) => {
+                        return item.url.___type == e.name;
+                      }).title
+                    : "发现"
                 }}
                 -
+                <!-- 当选择完链接之后的专题名称 -->
+                <span v-if="item.url.pageType == 'special'">
+                  {{ item.url.name }}</span
+                >
                 <!-- 当选择完链接之后的商品名称 -->
-                <span v-if="item.url.___type == 'goods'"> {{ item.url.goodsName }}</span>
+                <span v-if="item.url.___type == 'goods'">
+                  {{ item.url.goodsName }}</span
+                >
                 <!-- 当选择完链接之后的分类回调 -->
-                <span v-if="item.url.___type == 'category'"> {{ item.url.name }}</span>
+                <span v-if="item.url.___type == 'category'">
+                  {{ item.url.name }}</span
+                >
                 <!-- 当选择完链接之后的店铺回调 -->
-                <span v-if="item.url.___type == 'shops'"> {{ item.url.memberName }}</span>
+                <span v-if="item.url.___type == 'shops'">
+                  {{ item.url.memberName }}</span
+                >
                 <!-- 当选择完链接之后的其他回调 -->
-                <span v-if="item.url.___type == 'other'"> {{ item.url.title }}</span>
+                <span v-if="item.url.___type == 'other'">
+                  {{ item.url.title }}</span
+                >
+                <!-- 当选择完链接之后的其他回调 -->
+                <span v-if="item.url.___type == 'brand'">
+                  {{ item.url.name }}</span
+                >
+
                 <!-- 当选择完活动之后的其他回调 -->
                 <span v-if="item.url.___type == 'marketing'">
                   <span v-if="item.url.___promotion == 'SECKILL'"> 秒杀 </span>
-                  <span v-if="item.url.___promotion == 'FULL_DISCOUNT'"> 满减 </span>
+                  <span v-if="item.url.___promotion == 'FULL_DISCOUNT'">
+                    满减
+                  </span>
                   <span v-if="item.url.___promotion == 'PINTUAN'"> 拼团 </span>
                   {{ item.url.title || item.url.goodsName }}
                 </span>
                 <!-- 当选择完活动之后的其他回调 -->
-                <span v-if="item.url.___type == 'pages'"> {{ item.url.title }}</span>
+                <span v-if="item.url.___type == 'pages'">
+                  {{ item.url.title }}</span
+                >
               </span>
             </div>
             <div>
-              <Button ghost size="small" type="primary" @click="clickLink(item, index)"
-                >选择链接</Button
+              <Button
+                ghost
+                size="small"
+                type="primary"
+                @click="clickLink(item, index, res)"
+              >
+                {{ item.model === "hotzone" ? "绘制热区" : "选择链接" }}</Button
               >
             </div>
           </div>
+          <!-- 链接地址-->
 
         </div>
       </div>
@@ -174,7 +219,7 @@
       @selectedLink="selectedLink"
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
-
+    <hotzone ref="hotzone" @changeZone="changeZone"></hotzone>
     <Modal width="1200px" v-model="picModelFlag">
       <ossManage  @callback="callbackSelected" ref="ossManage" />
     </Modal>
@@ -182,11 +227,13 @@
 </template>
 <script>
 import ossManage from "@/views/sys/oss-manage/ossManage";
+import hotzone from "@/views/shop/hotzone";
 import { modelData } from "./config";
 import ways from "@/views/lili-dialog/wap.js"; // 选择链接的类型
 export default {
   components: {
     ossManage,
+    hotzone,
   },
   data() {
     return {
@@ -215,6 +262,7 @@ export default {
     },
     // 回调选择的链接
     selectedLink(val) {
+      this.selectedLinks.zoneInfo = [];
       // 需删除图片中 intro 和 mobileIntro 可能存在转义符导致json出错问题
       delete val.selected;
       delete val.intro;
@@ -257,9 +305,23 @@ export default {
     },
 
     // 点击链接赋值一个唯一值，并将当前选择的模块赋值
-    clickLink(val, index) {
+    clickLink(val, index, oval) {
       this.selectedLinks = val;
-      this.liliDialogFlag(false);
+      if (val.model === "hotzone") {
+        if (!val.zoneInfo) {
+          val.zoneInfo = [];
+        }
+        this.$refs.hotzone.flag = true;
+        this.$refs.hotzone.res = val;
+      } else {
+        this.liliDialogFlag(false);
+      }
+    },
+    addZone(zoneInfo) {
+      this.selectedLinks.zoneInfo.push(zoneInfo);
+    },
+    changeZone(zoneInfo) {
+      this.selectedLinks.zoneInfo = zoneInfo;
     },
     //点击图片解析成base64
     changeFile(item, index) {

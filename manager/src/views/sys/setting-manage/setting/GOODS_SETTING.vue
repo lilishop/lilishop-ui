@@ -85,6 +85,7 @@ export default {
       showProgress: false,
       intervalProgress: null,
       ruleValidate: {}, // 验证规则
+      result:""
     };
   },
   created() {
@@ -152,12 +153,12 @@ export default {
 
     // 实例化数据
     init() {
-      this.res = JSON.parse(this.res);
+      this.result = JSON.parse(this.res);
 
-      Object.keys(this.res).map((item) => {
-        this.res[item] += "";
+      Object.keys(this.result).map((item) => {
+        this.result[item] += "";
       });
-      this.$set(this, "formValidate", { ...this.res });
+      this.$set(this, "formValidate", { ...this.result });
       Object.keys(this.formValidate).forEach((item) => {
         this.ruleValidate[item] = [
           {

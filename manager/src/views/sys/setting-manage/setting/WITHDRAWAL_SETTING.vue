@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
 
-    <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
+    <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate">
       <FormItem label="提现审核是否开启">
         <i-switch v-model="formValidate.apply" style="margin-top:7px;"><span slot="open">开</span>
           <span slot="close">关</span>
@@ -35,6 +35,7 @@ import { handleSubmit } from "./validate";
 export default {
   data() {
     return {
+      result:"",
       formValidate: { // 表单数据
         apply: true,
         minPrice: "",
@@ -70,8 +71,8 @@ export default {
     },
     // 实例化数据
     init() {
-      this.res = JSON.parse(this.res);
-      this.$set(this, "formValidate", { ...this.res });
+      this.result = JSON.parse(this.res);
+      this.$set(this, "formValidate", { ...this.result });
     },
   },
 };

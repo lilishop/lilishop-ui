@@ -23,6 +23,7 @@ export default {
       formValidate: { // 表单数据
         httpUrl: ""
       },
+      result:"",
     };
   },
   props: ["res", "type"],
@@ -49,9 +50,9 @@ export default {
     },
     // 实例化数据
     init() {
-      this.res = JSON.parse(this.res);
+      this.result = JSON.parse(this.res);
 
-      this.$set(this, "formValidate", {...this.res});
+      this.$set(this, "formValidate", {...this.result});
       Object.keys(this.formValidate).forEach((item) => {
         this.ruleValidate[item] = [
           {

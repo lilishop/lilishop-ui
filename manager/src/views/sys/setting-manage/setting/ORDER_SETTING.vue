@@ -56,6 +56,7 @@ export default {
         closeAfterSale: "",
         closeComplaint:""
       },
+      result:""
     };
   },
   props: ["res", "type"],
@@ -82,11 +83,11 @@ export default {
     },
     // 实例化数据
     init() {
-      this.res = JSON.parse(this.res);
-      Object.keys(this.res).map((item) => {
-        this.res[item] += "";
+      this.result = JSON.parse(this.res);
+      Object.keys(this.result).map((item) => {
+        this.result[item] += "";
       });
-      this.$set(this, "formValidate", { ...this.res });
+      this.$set(this, "formValidate", { ...this.result });
       Object.keys(this.formValidate).forEach((item) => {
         this.ruleValidate[item] = [
           {
