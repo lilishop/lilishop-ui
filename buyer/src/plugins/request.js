@@ -160,7 +160,7 @@ service.interceptors.response.use(
         Message.error(errorData.message || _message);
       }
     }
-    return Promise.reject(error);
+    return Promise.reject(errorData);
   }
 );
 

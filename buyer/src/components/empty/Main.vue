@@ -7,6 +7,7 @@
       alt=""
     />
     <p v-if="_Title">{{ _Title }}</p>
+    <slot></slot>
   </div>
 </template>
 
@@ -35,6 +36,6 @@ export default {
 }
 p {
   cursor: pointer;
- 
+
 }
 </style>
