@@ -466,7 +466,6 @@ export default {
 
     // 提交修改数据
     handleSubmitModal() {
-      debugger
       const { nickName, sex, username, face, newPassword,id } = this.form;
       let time = new Date(this.form.birthday);
       let birthday = this.form.birthday=== undefined?'':
@@ -491,7 +490,7 @@ export default {
       API_Member.updateMember(submit).then((res) => {
         if (res.result) {
           this.$Message.success("修改成功！");
-          this.init();
+          this.getData();
         }
       });
     },
