@@ -190,6 +190,43 @@
         ></Page>
       </Row>
     </Card>
+
+    <Modal v-model="validateFlag">
+      <Form >
+        <FormItem label="付款户名" label-width="120px">
+          {{account_validation.account_name}}
+        </FormItem>
+        <FormItem label="付款卡号" label-width="120px">
+          {{account_validation.account_no}}
+        </FormItem>
+        <FormItem label="汇款金额" label-width="120px">
+          {{account_validation.pay_amount}}
+        </FormItem>
+
+
+
+        <FormItem label="收款卡号" label-width="120px">
+          {{account_validation.destination_account_number}}
+        </FormItem>
+
+        <FormItem label="收款户名" label-width="120px">
+          {{account_validation.destination_account_name}}
+        </FormItem>
+
+        <FormItem label="开户银行" label-width="120px">
+         {{account_validation.destination_account_bank}}
+        </FormItem>
+        <FormItem label="省市信息" label-width="120px">
+         {{account_validation.city}}
+        </FormItem>
+        <FormItem label="备注信息" label-width="120px">
+          {{account_validation.remark}}
+        </FormItem>
+        <FormItem label="汇款截止时间" label-width="120px">
+          {{account_validation.deadline}}
+        </FormItem>
+      </Form>
+    </Modal>
   </div>
 </template>
 
@@ -199,6 +236,9 @@ export default {
   name: "agencyList",
   data() {
     return {
+      account_validation:{
+
+      },
       labelFlag: false,
       Choices: "multiple",
       showHide: false,
@@ -306,6 +346,27 @@ export default {
                 },
                 "同步"
               ),
+              h(
+                "Button",
+                {
+                  props: {
+                    type: "info",
+                    size: "small",
+                    ghost: true,
+                    display:params.row.status == 'ACCOUNT_NEED_VERIFY' ? 'inline-block' : 'none'
+                  },
+                  style: {
+                    marginRight: "5px",
+                  },
+                  on: {
+                    click: () => {
+                      this.asyncPayAccount(params.row);
+                    },
+                  },
+                },
+                "汇款账户验证信息"
+              ),
+
             ]);
           },
         },
@@ -313,6 +374,7 @@ export default {
       data: [], // 表单数据
       total: 0, // 表单数据总数
       selectedShop: false, //用于是否选择店铺
+      validateFlag:false,
     };
   },
   computed: {
@@ -321,6 +383,11 @@ export default {
     },
   },
   methods: {
+    // 验证支付信息
+    asyncPayAccount(params){
+      this.validateFlag = true;
+      this.account_validation = params.accountValidation
+    },
     hanleReset() {
       this.searchForm = {
         // 搜索框初始化对象

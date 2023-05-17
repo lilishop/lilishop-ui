@@ -160,6 +160,15 @@
               submitFrom.contact_info.contact_id_doc_period_end = $event
             "
           />
+
+          <Button @click="longTimeEffect" :type="
+                submitFrom.contact_info.contact_id_doc_period_end == '长期'
+                  ? 'primary'
+                  : 'default'
+              " style="margin-left: 10px">长期有效
+              </Button>
+
+
         </FormItem>
         <FormItem
           v-if="submitFrom.contact_info.contact_type === '66'"
@@ -301,6 +310,11 @@ export default {
     },
   },
   methods: {
+    // 设置为长期有效
+    longTimeEffect () {
+      this.$set(this.submitFrom.contact_info, 'contact_id_doc_period_end', '长期');
+      this.$forceUpdate()
+      },
     validated() {
       return this.$refs["submitFrom.contact_info"].validate((valid) => {
         return valid;
