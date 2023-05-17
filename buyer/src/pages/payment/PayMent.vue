@@ -7,13 +7,13 @@
         <div class="left-tips-time">请您尽快完成支付，否则订单会被自动取消</div>
         <div class="left-tips-count-down">
           <mv-count-down :startTime="startTime" class="count-down"
-            :endTime="endTime"
-            :endText="endText"
-            :dayTxt="'天'"
-            :hourTxt="'小时'"
-            :minutesTxt="'分钟'"
-            :secondsTxt="'秒'"
-            :isStart="isStart"></mv-count-down>
+                         :endTime="endTime"
+                         :endText="endText"
+                         :dayTxt="'天'"
+                         :hourTxt="'小时'"
+                         :minutesTxt="'分钟'"
+                         :secondsTxt="'秒'"
+                         :isStart="isStart"></mv-count-down>
 
         </div>
       </div>
@@ -48,7 +48,6 @@
 import {tradeDetail, pay} from '@/api/pay.js';
 import MvCountDown from 'mv-count-down'
 import {Message} from 'view-design';
-import axios from 'axios';
 
 export default {
   components: {
@@ -99,18 +98,14 @@ export default {
         this.$Modal.confirm({
           title: '支付确认',
           content: '<p>确认使用余额支付吗？</p>',
-          onOk: async() => {
+          onOk: () => {
             pay(params).then(res => {
               if (res.success) {
-                // this.$Message.warning(res.message)
-                axios.get(res.result.url).then((res)=>{
-                  if (res.status == 200) {
-                  this.$router.push('/payDone');
-                  }
-                }).catch(e=>{
-                  this.$Message.warning(e.message)
-                })
-              } 
+                this.$Message.warning(res.message)
+                this.$router.push('/payDone');
+              } else {
+                this.$Message.warning(res.message)
+              }
             })
           }
         });

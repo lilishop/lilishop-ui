@@ -64,8 +64,8 @@
                 </Option>
               </Select>
             </FormItem>
-            <FormItem v-if="form.pointFlag" label="赠积分" prop="point">
-              <InputNumber :min="0" :disabled="form.promotionStatus != 'NEW'" v-model="form.point" type="number"
+            <FormItem v-if="form.pointFlag" label="赠积分" prop="points">
+              <InputNumber :min="0" :disabled="form.promotionStatus != 'NEW'" v-model="form.points" type="number"
                 style="width: 280px" />
             </FormItem>
             <FormItem label="使用范围" prop="scopeType">
@@ -179,7 +179,7 @@ export default {
         ],
         couponId: [{ required: true, message: "请选择优惠券" }],
         giftId: [{ required: true, message: "请选择赠品" }],
-        point: [{ required: true, message: "请填写积分" }],
+        points: [{ required: true, message: "请填写积分" }],
       },
       couponList: [], // 店铺优惠券列表
       giftList: [], // 赠品列表
