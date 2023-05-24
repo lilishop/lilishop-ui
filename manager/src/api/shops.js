@@ -117,11 +117,25 @@ export const syncStatus = (id) => {
 export const getRegion = (id) => {
   return getRequest(`/common/common/region/${id}`);
 };
+
+
+
 // 获取进件-对公银行信息
-// export const getBankInfo = (params) => {
-//   return getRequest(`/payment/wechatApplyment/getBankInfo`, params);
-// };
-// 获取进件-对私银行信息
 export const getBankInfo = (params) => {
+  return getRequest(`/payment/wechatApplyment/getBankInfo`, params);
+};
+// 获取进件-对私银行信息
+export const getPersonalBankInfo = (params) => {
   return getRequest(`/payment/wechatApplyment/getPersonalBank`, params);
+};
+
+
+// 获取支行信息
+export const getBranches= (params) => {
+  return getRequest(`/payment/wechatApplyment/branches`, params);
+};
+
+// 用户选择地区
+export const getProvinces = (params) => {
+  return getRequest(`/payment/wechatApplyment/provinces`, params);
 };

@@ -25,8 +25,12 @@
         </FormItem>
 
         <FormItem prop="account_bank" label="开户银行">
-          <Input disabled style="width:200px;" v-model="submitFrom.account_info.account_bank" />
-          <Button style="margin-left:10px;" @click="searchBank">选择</Button>
+          <Input
+            disabled
+            style="width: 200px"
+            v-model="submitFrom.account_info.account_bank"
+          />
+          <Button style="margin-left: 10px" @click="searchBank">选择</Button>
           <!-- <Select
             v-model="submitFrom.account_info.account_bank"
             :remote-method="bankHandleSearch"
@@ -39,9 +43,7 @@
             <Option v-for="(item,index) in bankData" :value="item.bankName"  :key="index" >{{item.bankName}}</Option>
           </Select> -->
           <div class="hr-top">
-            1、17家直连银行，请根据<a href="#" @click="bakRules"
-              >对照表</a
-            >
+            1、17家直连银行，请根据<a href="#" @click="bakRules">对照表</a>
             直接填写银行名 ;
           </div>
           <div>2、非17家直连银行，该参数请填写为“其他银行”。</div>
@@ -59,12 +61,11 @@
             注：仅当省市区编号对照表中无对应的省市区编号时，可向上取该银行对应市级编号或省级编号。
           </div>
         </FormItem>
-        <FormItem  label="开户名称" prop="account_name">
+        <FormItem label="开户名称" prop="account_name">
           <Input
             v-model="submitFrom.account_info.account_name"
             placeholder="请输入开户名称 "
           ></Input>
-
         </FormItem>
         <FormItem prop="bank_branch_id" label="联行号">
           <Input
@@ -76,24 +77,25 @@
           </div>
           <div>
             2、详细参见
-            <a href="#" @click="bankNameRules"
-              >全称（含支行）对照表。</a
-            >
+            <a href="#" @click="bankNameRules">全称（含支行）对照表。</a>
           </div>
         </FormItem>
         <FormItem prop="bank_name" label="全称（含支行）">
           <Input
             v-model="submitFrom.account_info.bank_name"
             placeholder="请输入全称（含支行）"
+            disabled
+            style="width: 300px"
           ></Input>
+          <Button style="margin-left: 10px" @click="searchBank">选择</Button>
+
           <div class="hr-top">
             1、17家直连银行无需填写，如为其他银行，则全称（含支行）和
             联行号二选一。
           </div>
           <div>
             2、需填写银行全称，如"深圳农村商业银行XXX支行"，详细参见
-            <a href="#" @click="bankNameRules">全称（含支行）对照表。</a
-            >。
+            <a href="#" @click="bankNameRules">全称（含支行）对照表。</a>。
           </div>
         </FormItem>
         <FormItem prop="account_number" label="银行账号">
@@ -134,137 +136,208 @@
             <Button @click="onClickImg('bank_card_front_img')">选择图片</Button>
           </div>
         </FormItem> -->
-<!--        <h3>银行账户证明材料</h3>-->
-<!--        <FormItem FormItem label="结算证明函">-->
-<!--          <div class="label-item-upload">-->
-<!--            <img-->
-<!--              v-if="-->
-<!--                submitFrom.account_info.account_cert_info &&-->
-<!--                submitFrom.account_info.account_cert_info.settlement_cert_pic-->
-<!--              "-->
-<!--              class="img"-->
-<!--              :src="-->
-<!--                submitFrom.account_info.account_cert_info.settlement_cert_pic-->
-<!--              "-->
-<!--            />-->
-<!--            <img-->
-<!--              v-else-->
-<!--              class="img"-->
-<!--              src="../../../../assets/emptyImg.png"-->
-<!--              alt=""-->
-<!--            />-->
-<!--            <Button @click="onClickImg('settlement_cert_pic')">选择图片</Button>-->
-<!--          </div>-->
-<!--          <div class="hr-top">-->
-<!--            请参照 <a href="#" @click="printCert">示例图</a>打印结算证明函。-->
-<!--          </div>-->
-<!--        </FormItem>-->
-<!--        <FormItem FormItem label="关系证明函">-->
-<!--          <div class="label-item-upload">-->
-<!--            <img-->
-<!--              v-if="-->
-<!--                submitFrom.account_info.account_cert_info &&-->
-<!--                submitFrom.account_info.account_cert_info.relation_cert_pic-->
-<!--              "-->
-<!--              class="img"-->
-<!--              :src="submitFrom.account_info.account_cert_info.relation_cert_pic"-->
-<!--            />-->
-<!--            <img-->
-<!--              v-else-->
-<!--              class="img"-->
-<!--              src="../../../../assets/emptyImg.png"-->
-<!--              alt=""-->
-<!--            />-->
-<!--            <Button @click="onClickImg('relation_cert_pic')">选择图片</Button>-->
-<!--          </div>-->
-<!--          <div class="hr-top">-->
-<!--            请参照-->
-<!--            <a href="#" @click="printRelationCert">示例图</a>-->
-<!--            打印关系证明函。-->
-<!--          </div>-->
-<!--        </FormItem>-->
-<!--        <FormItem FormItem label="其他补充证明">-->
-<!--          <div class="label-item-upload">-->
-<!--            <div-->
-<!--              class="flex"-->
-<!--              v-if="submitFrom.account_info.account_cert_info &&-->
-<!--                submitFrom.account_info.account_cert_info.other_cert_pics.length-->
-<!--              "-->
-<!--            >-->
-<!--              <div-->
-<!--                class="img-item"-->
-<!--                v-for="(item, index) in submitFrom.account_info-->
-<!--                  .account_cert_info.other_cert_pics"-->
-<!--                :key="index"-->
-<!--              >-->
-<!--                <img class="img" :src="item" />-->
-<!--                <Icon @click="handleDelImg(index)" size="20" type="md-close" />-->
-<!--              </div>-->
-<!--            </div>-->
-<!--            <img-->
-<!--              v-else-->
-<!--              class="img"-->
-<!--              src="../../../../assets/emptyImg.png"-->
-<!--              alt=""-->
-<!--            />-->
-<!--            <Button @click="onClickImg('other_cert_pics')">选择图片</Button>-->
-<!--          </div>-->
-<!--          <div class="hr-top">-->
-<!--            请提供非同名结算的法律法规、政策通知、政府或上级部门公文等证明文件，以作上述材料的补充证明。-->
-<!--          </div>-->
-<!--        </FormItem>-->
-<!--        <FormItem-->
-<!--          label="开户许可证"-->
-<!--          prop="opening_permit_img"-->
-<!--          key="opening_permit_img"-->
-<!--          v-if="submitFrom.account_info.bank_account_type === '74'"-->
-<!--        >-->
-<!--          <div class="label-item-upload">-->
-<!--            <Input-->
-<!--              v-show="false"-->
-<!--              v-model="submitFrom.account_info.opening_permit_img"-->
-<!--            ></Input>-->
-<!--            <img-->
-<!--              v-if="submitFrom.account_info && submitFrom.account_info.opening_permit_img"-->
-<!--              class="img"-->
-<!--              :src="submitFrom.account_info.opening_permit_img"-->
-<!--            />-->
-<!--            <img-->
-<!--              v-else-->
-<!--              class="img"-->
-<!--              src="../../../../assets/emptyImg.png"-->
-<!--              alt=""-->
-<!--            />-->
-<!--            <Button @click="onClickImg('opening_permit_img')">选择图片</Button>-->
-<!--          </div>-->
-<!--        </FormItem>-->
+        <!--        <h3>银行账户证明材料</h3>-->
+        <!--        <FormItem FormItem label="结算证明函">-->
+        <!--          <div class="label-item-upload">-->
+        <!--            <img-->
+        <!--              v-if="-->
+        <!--                submitFrom.account_info.account_cert_info &&-->
+        <!--                submitFrom.account_info.account_cert_info.settlement_cert_pic-->
+        <!--              "-->
+        <!--              class="img"-->
+        <!--              :src="-->
+        <!--                submitFrom.account_info.account_cert_info.settlement_cert_pic-->
+        <!--              "-->
+        <!--            />-->
+        <!--            <img-->
+        <!--              v-else-->
+        <!--              class="img"-->
+        <!--              src="../../../../assets/emptyImg.png"-->
+        <!--              alt=""-->
+        <!--            />-->
+        <!--            <Button @click="onClickImg('settlement_cert_pic')">选择图片</Button>-->
+        <!--          </div>-->
+        <!--          <div class="hr-top">-->
+        <!--            请参照 <a href="#" @click="printCert">示例图</a>打印结算证明函。-->
+        <!--          </div>-->
+        <!--        </FormItem>-->
+        <!--        <FormItem FormItem label="关系证明函">-->
+        <!--          <div class="label-item-upload">-->
+        <!--            <img-->
+        <!--              v-if="-->
+        <!--                submitFrom.account_info.account_cert_info &&-->
+        <!--                submitFrom.account_info.account_cert_info.relation_cert_pic-->
+        <!--              "-->
+        <!--              class="img"-->
+        <!--              :src="submitFrom.account_info.account_cert_info.relation_cert_pic"-->
+        <!--            />-->
+        <!--            <img-->
+        <!--              v-else-->
+        <!--              class="img"-->
+        <!--              src="../../../../assets/emptyImg.png"-->
+        <!--              alt=""-->
+        <!--            />-->
+        <!--            <Button @click="onClickImg('relation_cert_pic')">选择图片</Button>-->
+        <!--          </div>-->
+        <!--          <div class="hr-top">-->
+        <!--            请参照-->
+        <!--            <a href="#" @click="printRelationCert">示例图</a>-->
+        <!--            打印关系证明函。-->
+        <!--          </div>-->
+        <!--        </FormItem>-->
+        <!--        <FormItem FormItem label="其他补充证明">-->
+        <!--          <div class="label-item-upload">-->
+        <!--            <div-->
+        <!--              class="flex"-->
+        <!--              v-if="submitFrom.account_info.account_cert_info &&-->
+        <!--                submitFrom.account_info.account_cert_info.other_cert_pics.length-->
+        <!--              "-->
+        <!--            >-->
+        <!--              <div-->
+        <!--                class="img-item"-->
+        <!--                v-for="(item, index) in submitFrom.account_info-->
+        <!--                  .account_cert_info.other_cert_pics"-->
+        <!--                :key="index"-->
+        <!--              >-->
+        <!--                <img class="img" :src="item" />-->
+        <!--                <Icon @click="handleDelImg(index)" size="20" type="md-close" />-->
+        <!--              </div>-->
+        <!--            </div>-->
+        <!--            <img-->
+        <!--              v-else-->
+        <!--              class="img"-->
+        <!--              src="../../../../assets/emptyImg.png"-->
+        <!--              alt=""-->
+        <!--            />-->
+        <!--            <Button @click="onClickImg('other_cert_pics')">选择图片</Button>-->
+        <!--          </div>-->
+        <!--          <div class="hr-top">-->
+        <!--            请提供非同名结算的法律法规、政策通知、政府或上级部门公文等证明文件，以作上述材料的补充证明。-->
+        <!--          </div>-->
+        <!--        </FormItem>-->
+        <!--        <FormItem-->
+        <!--          label="开户许可证"-->
+        <!--          prop="opening_permit_img"-->
+        <!--          key="opening_permit_img"-->
+        <!--          v-if="submitFrom.account_info.bank_account_type === '74'"-->
+        <!--        >-->
+        <!--          <div class="label-item-upload">-->
+        <!--            <Input-->
+        <!--              v-show="false"-->
+        <!--              v-model="submitFrom.account_info.opening_permit_img"-->
+        <!--            ></Input>-->
+        <!--            <img-->
+        <!--              v-if="submitFrom.account_info && submitFrom.account_info.opening_permit_img"-->
+        <!--              class="img"-->
+        <!--              :src="submitFrom.account_info.opening_permit_img"-->
+        <!--            />-->
+        <!--            <img-->
+        <!--              v-else-->
+        <!--              class="img"-->
+        <!--              src="../../../../assets/emptyImg.png"-->
+        <!--              alt=""-->
+        <!--            />-->
+        <!--            <Button @click="onClickImg('opening_permit_img')">选择图片</Button>-->
+        <!--          </div>-->
+        <!--        </FormItem>-->
       </Form>
     </Card>
     <Modal width="1200px" v-model="picModelFlag">
       <ossManage @callback="callbackSelected" ref="ossManage" />
     </Modal>
     <Modal title="选择银行" v-model="showBankList">
-      <Input placeholder="请输入搜索银行" v-model="searchBankName" />
-      <div class='bank-list'>
+      <div class="label-item">1、选择地区</div>
 
-        <div v-for="(item,index) in bankData" class='bank-item flex ' :key="index">
-          <div>{{item.bankBranchName}}</div>
-          <div><Button size="small" @click="handlerSearchBank(item)">选择</Button></div>
+      <Cascader
+        :data="cityData"
+        filterable
+        v-model="cityCode"
+        @on-change="changeCityCode"
+      ></Cascader>
+
+      <div class="label-item">2、选择银行</div>
+      <RadioGroup v-model="choiceBank" class="label-radio">
+        <Radio label="0">
+          <span>对公银行</span>
+        </Radio>
+        <Radio label="1">
+          <span>对私银行</span>
+        </Radio>
+      </RadioGroup>
+      <Input
+        :placeholder="`请输入搜索${choiceBank === '0' ? '对公' : '对私'}银行`"
+        v-model="searchBankName"
+      />
+      <div class="bank-list">
+        <div
+          v-for="(item, index) in bankData"
+          class="bank-item flex"
+          :key="index"
+        >
+          <div>{{ item.bank_alias }}</div>
+          <div>
+            <Button
+              size="small"
+              :type="
+                choiceBankData.bank_alias == item.bank_alias
+                  ? 'primary'
+                  : 'default'
+              "
+              @click="handlerSearchBank(item)"
+              >{{
+                choiceBankData.bank_alias == item.bank_alias ? "已" : ""
+              }}选择</Button
+            >
+          </div>
         </div>
       </div>
-       <Page :total="bankTotal" size="small"
-        @on-change="changePageNum"
-        style="text-align:right"
-        @on-page-size-change="changePageSize"
-        :page-size="bankPageParams.pageSize"
-        ></Page>
+      <div>
+        <div class="label-item">3、选择支行</div>
+        <Input
+          :placeholder="!enableChoiceBranch ? '请先选择地区和银行' : '搜索支行'"
+          :disabled="!enableChoiceBranch"
+          v-model="searchBranch"
+        />
+
+        <div class="bank-list">
+          <div
+            v-for="(item, index) in branchBankData"
+            class="bank-item flex"
+            :key="index"
+          >
+            <div>{{ item.bank_branch_name }}</div>
+            <div>
+              <Button
+                :type="
+                  choiceBranch.bank_branch_id == item.bank_branch_id
+                    ? 'primary'
+                    : 'default'
+                "
+                size="small"
+                @click="handlerBranch(item)"
+                >{{
+                  choiceBranch.bank_branch_id == item.bank_branch_id
+                    ? "已"
+                    : ""
+                }}选择</Button
+              >
+            </div>
+          </div>
+        </div>
+      </div>
     </Modal>
   </div>
 </template>
 <script>
 import ossManage from "@/views/sys/oss-manage/ossManage";
-import { getBankInfo } from "@/api/shops";
+import {
+  getBankInfo,
+  getPersonalBankInfo,
+  getProvinces,
+  getBranches,
+} from "@/api/shops";
 
+import { mapMutations, mapState } from "vuex";
 import { regular } from "@/utils";
 export default {
   components: {
@@ -272,35 +345,44 @@ export default {
   },
   data() {
     return {
+      enableChoiceBranch: false,
+      choiceBank: "0", // 0 对公 1 对私
       picModelFlag: false, // 预览图片显隐
       selected: "", // 已选数据
       bankData: [], // 银行数据
-      searchLoading:false,
-      searchBankName:"",
-      bankPageParams:{
-        pageNumber:1,
-        pageSize:20,
-        bankName:""
-      },
-      bankTotal:0,
-      showBankList:false,
-      account_info:{
-        bank_account_type:[regular.REQUIRED],
-        account_bank:[regular.REQUIRED],
-        bank_address_code:[regular.REQUIRED],
+      branchBankData: [],
+      originBankData: [], // 原始银行数据
+      searchLoading: false,
+      searchBankName: "",
+      searchBranch: "",
+      bankTotal: 0,
+      showBankList: false,
+      cityData: [], // 地区数据
+      originCityData: [], // 原始地区数据
+      cityCode: [], // 地区编码
+      choiceBankData: "",
+      choiceBranch: "",
+      account_info: {
+        bank_account_type: [regular.REQUIRED],
+        account_bank: [regular.REQUIRED],
+        bank_address_code: [regular.REQUIRED],
         // bank_category:[regular.REQUIRED],
-        bank_branch_id:[regular.REQUIRED],
-        account_number:[regular.REQUIRED],
-        bank_name:[regular.REQUIRED],
-        account_name:[regular.REQUIRED],
-        opening_permit_img:[
+        bank_branch_id: [regular.REQUIRED],
+        account_number: [regular.REQUIRED],
+        bank_name: [regular.REQUIRED],
+        account_name: [regular.REQUIRED],
+        opening_permit_img: [
           { required: true, message: "参数必填", trigger: "change" },
         ],
 
         // bank_card_front_img:[
         //   { required: true, message: "参数必填", trigger: "change" },
         // ]
-      }
+      },
+
+      itemsPerLoad: 1000, // 每次加载的数据条数
+      loadInterval: 2000, // 加载数据的间隔时间（毫秒）
+      currentIndex: 0, // 当前已加载的数据索引
     };
   },
   props: {
@@ -309,61 +391,171 @@ export default {
       default: () => {},
     },
   },
-  watch:{
-
-    searchBankName(val){
-      if(val){
-        this.bankPageParams.pageNumber = 1
-
-        this.bankHandleSearch(val)
+  watch: {
+    // 搜索支行
+    searchBranch() {
+      if (val) {
+        this.deepFind(val, "branch");
+      } else {
+        this.cityData = this.originCityData;
       }
-    }
+    },
+    // 搜索银行
+    searchBankName(val) {
+      if (val) {
+        this.deepFind(val, "bank");
+      } else {
+        this.bankData = this.originBankData.slice(0, this.itemsPerLoad);
+      }
+    },
+    choiceBank(val) {
+      this.bankData = [];
 
+      setTimeout(() => {
+        this.fetchBankList();
+      }, 300);
+    },
+    cityCode(val) {
+      if (val && this.choiceBankData && this.choiceBankData.bank_alias_code) {
+        this.fetchBranch();
+      }
+    },
+    choiceBankData(val) {
+      if (val && this.cityCode.length) {
+        this.fetchBranch();
+      }
+    },
   },
   mounted() {
-    this.bankHandleSearch();
+    this.fetchProvinces();
+  },
+
+  computed: {
+    // 将 store 映射到当前组件的计算属性
+    ...mapState({
+      bankList: (state) => state.app.bankList,
+    }),
   },
   methods: {
-    validated(){
-      return this.$refs['submitFrom.account_info'].validate((valid) => {
-        return valid
-      })
+    ...mapMutations(["setBankList"]),
+
+    changeCityCode(val) {
+      this.$set(this, "cityCode", val);
+    },
+    handlerBranch(val) {
+      console.log(val);
+      this.choiceBranch = val;
+      this.submitFrom.account_info.bank_name = val.bank_branch_name;
+      this.submitFrom.account_info.bank_branch_id = val.bank_branch_id;
     },
 
-    handlerSearchBank(val){
-      this.submitFrom.account_info.account_bank = val.accountBank
-      this.submitFrom.account_info.bank_address_code = val.bankAliasCode
-      this.submitFrom.account_info.bank_name = val.bankBranchName
-      this.submitFrom.account_info.bank_branch_id = val.bankBranchId
-
-      this.showBankList = false
+    // 模糊搜索 value就是要搜索的内容 data是要搜索的数据
+    deepFind(value, type) {
+      let str = ["", ...value, ""].join(".*");
+      let reg = new RegExp(str);
+      if (type == "bank") {
+        this.bankData = this.originBankData.filter((item) =>
+          reg.test(item.bank_alias)
+        );
+      } else {
+        this.cityData = this.originCityData.filter((item) =>
+          reg.test(item.bank_alias)
+        );
+      }
     },
-    searchBank(){
-      this.showBankList = true;
-    },
-    changePageNum(val){
-      this.bankPageParams.pageNumber = val;
-      this.bankHandleSearch();
-    },
-    changePageSize(val){
-      this.bankPageParams.pageNumber = 1;
-      this.bankPageParams.pageSize = val;
-      this.bankHandleSearch();
-    },
-    bankHandleSearch() {
-      this.bankPageParams.bankName = this.searchBankName
-      this.searchLoading = true
-      getBankInfo(this.bankPageParams).then(
-        (res) => {
-          this.searchLoading = false
-          if (res.success) {
-            this.bankData = res.result.records;
-            console.log(this.bankData)
-            this.bankTotal = res.result.total
-          }
+    // 获取支行信息
+    async fetchBranch() {
+      if (this.cityCode.length && this.choiceBankData.bank_alias_code) {
+        const res = await getBranches({
+          cityCode: this.cityCode[this.cityCode.length - 1],
+          bankAliasCode: this.choiceBankData.bank_alias_code,
+        });
+        if (res.success) {
+          this.enableChoiceBranch = res.result.length ? true : false;
+          this.branchBankData = res.result;
         }
-      );
+      }
     },
+    // 获取地区
+    async fetchProvinces() {
+      const res = await getProvinces();
+      if (res.success) {
+        let result = res.result.map((item) => {
+          return {
+            label: item.province_name,
+            value: item.province_code + "", // 就这里不转换成string 的话 回显不上去 为此改了3个小时的bug = =
+            children: item.citiesList.map((child) => {
+              return {
+                label: child.city_name,
+                value: child.city_code + "",
+              };
+            }),
+          };
+        });
+        this.originCityData = result;
+        this.cityData = result;
+      }
+    },
+
+    // 获取银行列表
+    async fetchBankList() {
+      let res;
+      let label;
+
+      if (this.choiceBank === "0" && !this.bankList.companyBankList.length) {
+        res = await getBankInfo();
+        label = "companyBankList";
+      } else if (
+        this.choiceBank === "1" &&
+        !this.bankList.personalBankList.length
+      ) {
+        res = await getPersonalBankInfo();
+        label = "personalBankList";
+      }
+      if (res && res.success) {
+        // 给vuex赋值
+        this.setBankList({ label, value: res.result });
+        // 赋值操作
+        this.originBankData = res.result;
+        this.bankData = res.result.slice(0, this.itemsPerLoad);
+
+        // 开始定时加载数据 #TODO 感觉不需要一般来说都是直接搜索的不会自己去查找银行所以默认就展示1000个
+        // this.setTimeSlowShowBankList();
+      } else {
+        let key =
+          this.choiceBank === "0" ? "companyBankList" : "personalBankList";
+        this.originBankData = this.bankList[key];
+        this.bankData = this.bankList[key].slice(0, this.itemsPerLoad);
+      }
+    },
+
+    // 缓慢加载数据
+    setTimeSlowShowBankList() {
+      if (this.currentIndex < this.originBankData.length) {
+        const endIndex = this.currentIndex + this.itemsPerLoad;
+        const newItems = this.originBankData.slice(this.currentIndex, endIndex);
+        this.bankData = [...this.bankData, ...newItems];
+        this.currentIndex = endIndex;
+        setTimeout(this.setTimeSlowShowBankList(), this.loadInterval);
+      }
+    },
+
+    validated() {
+      return this.$refs["submitFrom.account_info"].validate((valid) => {
+        return valid;
+      });
+    },
+
+    handlerSearchBank(val) {
+      this.choiceBankData = val;
+      this.submitFrom.account_info.account_bank = val.account_bank;
+      this.submitFrom.account_info.bank_address_code = val.account_bank_code;
+    },
+    searchBank() {
+      this.showBankList = true;
+      this.fetchBankList();
+    },
+
     printRelationCert() {
       window.open("https://kf.qq.com/faq/220127YjURBN220127fuA7bE.html");
     },
@@ -411,10 +603,10 @@ export default {
         this.submitFrom.account_info.account_cert_info[this.selected].push(
           val.url
         );
-      } else if (this.selected === 'opening_permit_img') {
-        this.$set(this.submitFrom.account_info,'opening_permit_img',val.url)
-      }else if (this.selected === 'bank_card_front_img') {
-          this.$set(this.submitFrom.account_info,'bank_card_front_img',val.url)
+      } else if (this.selected === "opening_permit_img") {
+        this.$set(this.submitFrom.account_info, "opening_permit_img", val.url);
+      } else if (this.selected === "bank_card_front_img") {
+        this.$set(this.submitFrom.account_info, "bank_card_front_img", val.url);
       } else {
         this.submitFrom.account_info.account_cert_info[this.selected] = val.url;
       }
@@ -454,15 +646,24 @@ div {
   position: absolute;
   right: 0;
 }
-.bank-item{
+.bank-item {
   padding: 16px;
   border-bottom: 1px solid #ededed;
   align-items: center;
   justify-content: space-between;
 }
-.bank-list{
+.bank-list {
   margin: 10px 0;
-  height: 400px;
+  height: 200px;
   overflow-y: auto;
+}
+
+.label-item {
+  color: #666;
+  font-size: 12px;
+  padding: 10px 0;
+}
+.label-radio {
+  margin-bottom: 10px;
 }
 </style>

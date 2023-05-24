@@ -9,6 +9,12 @@ import Vue from 'vue';
 
 const app = {
   state: {
+    // 银行列表
+    bankList:{
+      personalBankList:[], // 对私
+      companyBankList:[] // 对公
+    },
+
     // 微信进件主体类型
     weChatApplyList:[
       {
@@ -104,6 +110,11 @@ const app = {
     dontCache: ['test', 'test']
   },
   mutations: {
+    // 设置银行列表
+    setBankList(status,res){
+      status.bankList[res.label] = res.value
+      console.log(status.bankList,res)
+    },
     // 动态添加主界面路由，需要缓存
     updateAppRouter(state, routes) {
       state.routers.push(...routes);

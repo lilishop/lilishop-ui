@@ -37,7 +37,7 @@
               v-for="item in mainType"
               :value="item.value"
               :key="item.value"
-            >{{ item.title }}</Option
+              >{{ item.title }}</Option
             >
           </Select>
         </Form-item>
@@ -58,10 +58,10 @@
           type="primary"
           icon="ios-search"
           class="search-btn"
-        >搜索</Button
+          >搜索</Button
         >
         <Button @click="hanleReset" class="search-btn" icon="md-refresh"
-        >重置</Button
+          >重置</Button
         >
       </Form>
       <Row class="operation padding-row">
@@ -101,8 +101,8 @@
             <div style="margin-left: 13px; margin-top: 3px">
               <div class="div-zoom">
                 <span>{{
-                    `超级管理员姓名:${row.contactInfo.contact_name}`
-                  }}</span>
+                  `超级管理员姓名:${row.contactInfo.contact_name}`
+                }}</span>
               </div>
             </div>
           </div>
@@ -113,8 +113,8 @@
             <div style="margin-left: 13px; margin-top: 3px">
               <div class="div-zoom">
                 <span>{{
-                    `超级管理员身份证件号码:${row.contactInfo.contact_id_number}`
-                  }}</span>
+                  `超级管理员身份证件号码:${row.contactInfo.contact_id_number}`
+                }}</span>
               </div>
             </div>
           </div>
@@ -125,8 +125,8 @@
             <div style="margin-left: 13px; margin-top: 3px">
               <div class="div-zoom">
                 <span>{{
-                    `超级管理员微信OpenID:${row.contactInfo.openid}`
-                  }}</span>
+                  `超级管理员微信OpenID:${row.contactInfo.openid}`
+                }}</span>
               </div>
             </div>
           </div>
@@ -146,8 +146,8 @@
             <div style="margin-left: 13px; margin-top: 3px">
               <div class="div-zoom" v-if="row.settlementInfo">
                 <span>{{
-                    `入驻结算规则ID:${row.settlementInfo.settlement_id}`
-                  }}</span>
+                  `入驻结算规则ID:${row.settlementInfo.settlement_id}`
+                }}</span>
               </div>
             </div>
           </div>
@@ -155,8 +155,8 @@
             <div style="margin-left: 13px; margin-top: 3px">
               <div class="div-zoom" v-if="row.settlementInfo">
                 <span>{{
-                    `所属行业:${row.settlementInfo.qualification_type}`
-                  }}</span>
+                  `所属行业:${row.settlementInfo.qualification_type}`
+                }}</span>
               </div>
             </div>
           </div>
@@ -191,39 +191,37 @@
       </Row>
     </Card>
 
-    <Modal v-model="validateFlag">
-      <Form >
+    <Modal v-model="validateFlag" width="500px">
+      <Form v-if="account_validation">
         <FormItem label="付款户名" label-width="120px">
-          {{account_validation.account_name}}
+          {{ account_validation.account_name }}
         </FormItem>
         <FormItem label="付款卡号" label-width="120px">
-          {{account_validation.account_no}}
+          {{ account_validation.account_no }}
         </FormItem>
         <FormItem label="汇款金额" label-width="120px">
-          {{account_validation.pay_amount}}
+          {{ account_validation.pay_amount }}
         </FormItem>
 
-
-
         <FormItem label="收款卡号" label-width="120px">
-          {{account_validation.destination_account_number}}
+          {{ account_validation.destination_account_number }}
         </FormItem>
 
         <FormItem label="收款户名" label-width="120px">
-          {{account_validation.destination_account_name}}
+          {{ account_validation.destination_account_name }}
         </FormItem>
 
         <FormItem label="开户银行" label-width="120px">
-         {{account_validation.destination_account_bank}}
+          {{ account_validation.destination_account_bank }}
         </FormItem>
         <FormItem label="省市信息" label-width="120px">
-         {{account_validation.city}}
+          {{ account_validation.city }}
         </FormItem>
         <FormItem label="备注信息" label-width="120px">
-          {{account_validation.remark}}
+          {{ account_validation.remark }}
         </FormItem>
         <FormItem label="汇款截止时间" label-width="120px">
-          {{account_validation.deadline}}
+          {{ account_validation.deadline }}
         </FormItem>
       </Form>
     </Modal>
@@ -236,9 +234,7 @@ export default {
   name: "agencyList",
   data() {
     return {
-      account_validation:{
-
-      },
+      account_validation: "",
       labelFlag: false,
       Choices: "multiple",
       showHide: false,
@@ -353,7 +349,10 @@ export default {
                     type: "info",
                     size: "small",
                     ghost: true,
-                    display:params.row.status == 'ACCOUNT_NEED_VERIFY' ? 'inline-block' : 'none'
+                    display:
+                      params.row.status == "ACCOUNT_NEED_VERIFY"
+                        ? "inline-block"
+                        : "none",
                   },
                   style: {
                     marginRight: "5px",
@@ -366,7 +365,6 @@ export default {
                 },
                 "汇款账户验证信息"
               ),
-
             ]);
           },
         },
@@ -374,7 +372,7 @@ export default {
       data: [], // 表单数据
       total: 0, // 表单数据总数
       selectedShop: false, //用于是否选择店铺
-      validateFlag:false,
+      validateFlag: false,
     };
   },
   computed: {
@@ -384,9 +382,10 @@ export default {
   },
   methods: {
     // 验证支付信息
-    asyncPayAccount(params){
+    asyncPayAccount(params) {
+      console.log(params)
       this.validateFlag = true;
-      this.account_validation = params.accountValidation
+      this.account_validation = params.accountValidation;
     },
     hanleReset() {
       this.searchForm = {
