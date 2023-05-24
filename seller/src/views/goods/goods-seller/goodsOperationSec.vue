@@ -592,7 +592,7 @@
               <editor
                 ref="editor"
                 v-model="baseInfoForm.intro"
-                :init="{ ...initEditor, height: '800px' }"
+                 height='800px'
                 openXss
               ></editor>
               <div class="promise-intro-btn">
@@ -609,9 +609,9 @@
               style="width: 100%"
             >
               <editor
-                ref="editor"
+                ref="introEditor"
                 v-model="baseInfoForm.mobileIntro"
-                :init="{ ...initEditor, height: '800px' }"
+                height='800px'
                 openXss
               ></editor>
             </FormItem>
@@ -751,15 +751,16 @@ import * as API_GOODS from "@/api/goods";
 import * as API_Shop from "@/api/shops";
 import cloneObj from "@/utils/index";
 import vuedraggable from "vuedraggable";
-import Editor from "@tinymce/tinymce-vue";
-import { initEditor } from "@/views/lili-components/editor/config";
+import tinymec from "@/views/lili-components/editor/index.vue";
+
+
 import { uploadFile } from "@/libs/axios";
 import { regular } from "@/utils";
 
 export default {
   name: "goodsOperationSec",
   components: {
-    editor: Editor,
+    editor: tinymec,
     vuedraggable,
   },
   props: {
@@ -786,7 +787,7 @@ export default {
     };
     return {
       regular,
-      initEditor,
+
       total: 0,
       showContent:false,
       listImages:[],
@@ -961,7 +962,7 @@ export default {
     },
     mouseLeave(){
       // this.showContent = false
-    },  
+    },
     /**
      * 选择参数
      * @paramsGroup 参数分组
@@ -1353,7 +1354,13 @@ export default {
     },
     // 将pc商品描述同步给移动端
     promiseIntroEditor() {
+      this.$nextTick(()=>{
+        this.$refs.introEditor.setContent(this.baseInfoForm.intro);
+      })
+
       this.baseInfoForm.mobileIntro = this.baseInfoForm.intro;
+
+      this.$forceUpdate();
     },
 
     /** 根据当前分类id查询商品应包含的参数 */

@@ -1,10 +1,11 @@
 import plugins from "./plugins";
 import toobar from "./toolbar";
-import { upLoadFileMethods } from "@/api/common";
 
+import {uploadFile} from "@/libs/axios";
+const localCDN = window.location.origin + "/tinymce"; //本地引入
 export const initEditor = {
-  height: "400px",
-  language: "zh_CN",
+  base_url: localCDN,
+  language: "zh-Hans",
   menubar: "file edit  view format table", // 菜单:指定应该出现哪些菜单
   toolbar: toobar, // 分组工具栏控件
   plugins: plugins, // 插件(比如: advlist | link | image | preview等)
@@ -14,18 +15,22 @@ export const initEditor = {
   advlist_bullet_styles: "square", // 无序列表 有序列表
   maxSize: "2097152", // 设置图片大小
   accept: "image/jpeg, image/png", // 设置图片上传规则
+  browser_spellcheck: true, // 拼写检查
+  branding: false, // 去水印
+  elementpath: false, // 禁用编辑器底部的状态栏
+  statusbar: false, // 隐藏编辑器底部的状态栏
   images_upload_handler: async function (blobInfo, success, failure) {
     const formData = new FormData();
     formData.append("file", blobInfo.blob());
     try {
-      const res = await upLoadFileMethods(formData);
+      const res = await uploadFile(formData);
       if (res.result) {
-        success(res.result)
+        success(res.result);
       } else {
         failure("上传文件有误请稍后重试");
       }
     } catch (e) {
-      failure('上传出错')
+      failure("上传出错");
     }
   },
   // init_instance_callback: function (editor) {
@@ -52,6 +57,5 @@ export const initEditor = {
     ul,ol{ list-style-position:inside; }
     `, // 设置样式
   statusbar: false, // 隐藏编辑器底部的状态栏
-  elementpath: false, // 禁用编辑器底部的状态栏
   paste_data_images: true, // 允许粘贴图像
 };
