@@ -16,23 +16,32 @@
       <div class="tips-status">
         <span>账单状态 ：</span>
         <span class="theme_color">{{
-          bill.billStatus | unixSellerBillStatus
-        }}</span>
+            bill.billStatus | unixSellerBillStatus
+          }}</span>
         <Button
           v-if="bill.billStatus == 'CHECK'"
           size="mini"
           type="primary"
           @click="pass()"
-          >付款</Button
+        >付款
+        </Button
         >
       </div>
 
       <table>
         <tbody>
-          <tr v-for="(item, index) in data" :key="index">
-            <td>{{ item.name }}：</td>
-            <td>{{ item.value }}</td>
-          </tr>
+        <tr v-for="(item, index) in data" :key="index">
+          <td>{{ item.name }}：</td>
+          <td>{{ item.value }}</td>
+        </tr>
+        <tr>
+          <td><b>线下支付：</b></td>
+          <td><b><span style="color: red">{{ bill.offlinePrice|| 0 | unitPrice("￥")  }}</span></b></td>
+        </tr>
+        <tr>
+          <td><b>余额支付：</b></td>
+          <td><b><span style="color: red">{{ bill.walletPrice || 0 | unitPrice("￥") }}</span></b></td>
+        </tr>
         </tbody>
       </table>
       <div>
@@ -70,7 +79,7 @@
               +{{ bill.refundCommissionPrice || 0 | unitPrice("￥") }}
             </p>
           </span>
-           <span>
+          <span>
             <p>退单金额</p>
             <p class="theme_color">
               -{{ bill.refundPrice || 0 | unitPrice("￥") }}
@@ -151,6 +160,7 @@
 <script>
 import * as filters from "@/utils/filters";
 import * as API_Shop from "@/api/shops";
+
 export default {
   name: "bill-detail",
   data() {
@@ -545,51 +555,62 @@ export default {
 .flex {
   justify-content: space-between;
   flex-wrap: wrap;
+
   > p {
     width: 50%;
     margin: 15px 0;
   }
 }
+
 .tips-status {
   padding: 10px;
   font-size: 14px;
+
   > span {
     font-weight: bold;
     margin-right: 8px;
   }
+
   > span:nth-of-type(2) {
     color: $theme_color;
   }
 }
+
 table {
   font-size: 14px;
   margin-left: 40px;
+
   tr {
     font-size: 12px;
     height: 40px;
     padding: 10px;
+
     td:nth-child(1) {
       width: 120px;
     }
   }
 }
+
 .bill-detail-price {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   padding: 10px;
+
   > span {
     font-size: 14px;
     text-align: center;
     width: 200px;
     margin-bottom: 20px;
   }
+
   .increase-color {
     color: green;
-    margin-top:5px
+    margin-top: 5px
   }
+
   .theme_color {
-    margin-top:5px
+    margin-top: 5px
   }
 
 }
