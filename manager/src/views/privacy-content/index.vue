@@ -21,7 +21,8 @@
               ref="editor"
               openXss
                v-model="form.article.content"
-              :init="{ ...initEditor,height:'800px' }"
+              height='800px'
+              v-if="modalVisible"
             ></editor>
           </FormItem>
         </Form>
@@ -40,12 +41,13 @@ import {
   updatePrivacy,
   getPrivacy,
 } from "@/api/pages";
-import Editor from "@tinymce/tinymce-vue";
-import { initEditor } from "@/components/editor/config";
+import tinymec from "@/components/editor/index.vue";
+
+
 export default {
   name: "privacy",
  components: {
-    editor: Editor,
+    editor: tinymec,
   },
   props: {
     selected: {
@@ -55,7 +57,7 @@ export default {
   },
   data() {
     return {
-      initEditor,
+
       loading: false, // 表单加载状态
       modalVisible: false, // 添加或编辑显示
       treeDataDefault: [],
