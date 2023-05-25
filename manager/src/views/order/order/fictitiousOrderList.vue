@@ -241,7 +241,7 @@ export default {
         content: "您确定要收款吗？",
         loading: true,
         onOk: () => {
-          API_Order.orderPay(v.sn).then(res => {
+          API_Order.tradePay(v.tradeSn).then(res => {
             if (res.success) {
               this.$Message.success("收款成功")
               this.getDataList()

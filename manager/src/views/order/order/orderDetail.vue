@@ -6,7 +6,7 @@
           <Button v-if="allowOperation.editPrice" @click="modifyPrice">调整价格</Button>
           <Button v-if="allowOperation.editConsignee" @click="editAddress" type="primary" ghost>修改收货地址</Button>
           <Button v-if="allowOperation.cancel" @click="orderCancel" type="warning" ghost>订单取消</Button>
-          <Button v-if="orderInfo.order.orderStatus === 'UNPAID'" @click="confirmPrice" type="primary">收款</Button>
+          <Button v-if="orderInfo.order.orderStatus === 'UNPAID'" @click="showTrade" type="primary">收款</Button>
           <Button @click="orderLog" type="info" ghost>订单日志</Button>
           <Button @click="printOrder" type="primary" ghost style="float:right;"
             v-if="$route.query.orderType != 'VIRTUAL'">打印发货单</Button>
@@ -255,17 +255,6 @@
                 <span>优惠详情：</span>
               </div>
             </li>
-            <!-- <li v-if="showPrices">
-                <span class="label" style="color: #cc0000;font-size: 14px;" v-if="typeList.length > 0" >优惠详情：</span>
-              </li> -->
-            <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index"> 
-                <span class="label" v-if="index == 1 && typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
-                <span class="txt" style="border-bottom: 1px dashed;font-size:10px !important;" v-if="index == 1 &&  typeList.length > 1">¥{{ item.discountPrice | unitPrice }}</span>
-                <span class="label" v-if="index == 0 &&  typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
-                <span class="txt" style="border-top: 1px dashed;font-size:10px !important;" v-if="index == 0 && typeList.length > 1">¥{{ item.discountPrice | unitPrice }}</span>
-                <span class="label" v-if="typeList.length == 1 && index == 0" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
-                <span class="txt"  v-if="typeList.length == 1 && index == 0" style="border-top: 1px dashed;border-bottom: 1px dashed;font-size:10px !important;">¥{{ item.discountPrice | unitPrice }}</span>
-              </li> -->
             <li>
               <span class="label">运费：</span>
               <span class="txt">{{
@@ -361,6 +350,86 @@
         <Button type="primary" @click="editAddressSubmit">修改</Button>
       </div>
     </Modal>
+    <!--交易详情-->
+    <Modal v-model="showTradeModal" width="60">
+      <p slot="header">
+        <span>交易详情</span>
+      </p>
+      <div>交易信息</div>
+      <Card class="mt_10 clearfix">
+        <div style=" float: left;">
+          <div class="div-item" >
+            <div class="div-item-left">交易号：</div>
+            <div class="div-item-right">{{ tradeDetail.trade.sn }}</div>
+          </div>
+
+          <div class="div-item" >
+            <div class="div-item-left">下单时间：</div>
+            <div class="div-item-right">
+              {{ tradeDetail.trade.createTime }}
+            </div>
+          </div>
+
+          <div class="div-item" >
+            <div class="div-item-left">交易总金额：</div>
+            <div class="div-item-right" style="color:red;">
+             ￥{{ tradeDetail.trade.flowPrice | unitPrice }}
+            </div>
+          </div>
+        </div>
+
+      </Card>
+      <div>
+
+
+        <div style="margin: 10px 0px">收款订单列表</div>
+        <Collapse simple>
+          <Panel v-for="(order,index) in tradeDetail.orderDetailVOList" >
+            序号：{{index+1}} / 总金额：￥<span style="color: red">{{order.order.flowPrice | unitPrice}}</span> / 订单：{{order.order.sn}}
+            <template #content>
+
+
+
+
+            <Table :loading="loading" border :columns="columns" :data="order.orderItems" ref="table" sortable="custom">
+              <!-- 商品栏目格式化 -->
+              <template slot="goodsSlot" slot-scope="{ row }">
+                <div style="margin-top: 5px; height: 80px; display: flex">
+                  <div style="">
+                    <img :src="row.image" style="height: 60px; margin-top: 1px; width: 60px" />
+                  </div>
+
+                  <div style="margin-left: 13px">
+                    <div class="div-zoom">
+                      <a @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
+                    </div>
+                    <span v-for="(item, key) in JSON.parse(row.specs)" :key="key">
+                  <span v-show="key != 'images'" style="font-size: 12px; color: #999999">
+                    {{ key }} : {{ item }}
+                  </span>
+                </span>
+                    <Poptip trigger="hover" style="display: block" title="扫码在手机中查看" transfer>
+                      <div slot="content">
+                        <vue-qr :text="wapLinkTo(row.goodsId, row.skuId)" :margin="0" colorDark="#000" colorLight="#fff"
+                                :size="150"></vue-qr>
+                      </div>
+                      <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="" />
+                    </Poptip>
+                  </div>
+                </div>
+              </template>
+            </Table>
+            </template>
+          </Panel>
+        </Collapse>
+      </div>
+
+      <div slot="footer" style="text-align: right">
+        <Button @click="() => {showTradeModal=false}">取消</Button>
+        <Button @click="confirmPrice"  type="primary">线下收款</Button>
+      </div>
+    </Modal>
+
     <!-- 订单日志 -->
     <Modal v-model="orderLogModal" width="60">
       <p slot="header">
@@ -467,6 +536,9 @@ export default {
       checkedLogistics: [], //选中的物流公司集合
       allowOperation: {}, //订单可才做选项
       sn: "", //订单编号
+      showTradeModal: false, //显示交易详情
+      tradeSn: "", //交易编号
+      tradeDetail: [],//交易详情
       orderInfo: {
         order: {
           priceDetailDTO: {},
@@ -643,14 +715,17 @@ export default {
       this.showRegion = true;
       this.regionId = "";
     },
+    showTrade() {
+      this.showTradeModal = true;
+    },
     //确认收款
     confirmPrice () {
       this.$Modal.confirm({
         title: "提示",
         content:
-          "<p>您确定要收款吗？线下收款涉及库存变更，需异步进行，等待约一分钟刷新列表查看</p>",
+          "<p>您确定要收款吗？线下收款只能针对交易付款，并非只针对当前订单进行付款，请确认您的操作</p>",
         onOk: () => {
-          API_Order.orderPay(this.sn).then((res) => {
+          API_Order.tradePay(this.tradeSn).then((res) => {
             if (res.success) {
               this.$Message.success("收款成功");
               this.getDataList();
@@ -677,7 +752,6 @@ export default {
           }
         }
       }
-      console.log(this.typeList)
       if (this.typeList.length >= 3) {
         console.log(123123)
         this.getContentPrice()
@@ -695,6 +769,18 @@ export default {
           this.typeList = JSON.parse(JSON.stringify(res.result.order.priceDetailDTO.discountPriceDetail));
           this.getContentPrice()
           this.getOrderPrice()
+        }
+      });
+      this.getTradeDetail()
+    },
+    // 获取订单详情
+    getTradeDetail () {
+      this.loading = true;
+      API_Order.tradeDetail(this.sn).then((res) => {
+        this.loading = false;
+        if (res.success) {
+          this.tradeDetail=res.result;
+          this.tradeSn=res.result.trade.sn;
         }
       });
     },
@@ -825,7 +911,7 @@ export default {
   flex: 6;
 }
 
-.search {
+
   .operation {
     margin-bottom: 2vh;
   }
@@ -898,7 +984,7 @@ export default {
       font-size: 22px;
     }
   }
-}
+
 
 .f14 {
   font-size: 14px;
