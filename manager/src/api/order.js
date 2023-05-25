@@ -78,14 +78,19 @@ export const getOrderList = (params) => {
   return getRequest(`/order/order`, params)
 }
 
-//  订单付款
-export const orderPay = (sn) => {
+//  交易付款
+export const tradePay = (sn) => {
   return postRequest(`/order/order/${sn}/pay`)
 }
 
-//  订单付款
+// 订单详情
 export const orderDetail = (sn) => {
   return getRequest(`/order/order/${sn}`)
+}
+
+//  交易详情
+export const tradeDetail = (sn) => {
+  return getRequest(`/order/order/getTrade/${sn}`)
 }
 
 //  修改订单价格
