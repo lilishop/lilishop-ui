@@ -28,6 +28,15 @@
             <td>{{item.name}}</td>
             <td>{{item.value}}</td>
           </tr>
+
+          <tr>
+            <td><b>线下支付：</b></td>
+            <td><b><span style="color: red">{{ bill.offlinePrice|| 0 | unitPrice("￥")  }}</span></b></td>
+          </tr>
+          <tr>
+            <td><b>余额支付：</b></td>
+            <td><b><span style="color: red">{{ bill.walletPrice || 0 | unitPrice("￥") }}</span></b></td>
+          </tr>
         </tbody>
       </table>
       <div>
