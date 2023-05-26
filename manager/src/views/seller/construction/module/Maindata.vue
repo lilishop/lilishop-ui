@@ -258,6 +258,13 @@
               <DatePicker clearable type="date" placeholder="请选择身份证有效期结束时间" format="yyyy-MM-dd"
                 @on-change="submitFrom.id_card_info.id_card_valid_time = $event"
                 v-model="submitFrom.id_card_info.id_card_valid_time" />
+
+                <Button @click="longTimeEffect('id_card_valid_time')" :type="
+                submitFrom.id_card_info.id_card_valid_time == '长期'
+                  ? 'primary'
+                  : 'default'
+              " style="margin-left: 10px">长期有效
+              </Button>
             </FormItem>
           </div>
 
@@ -551,9 +558,15 @@ export default {
 
   methods: {
     // 设置为长期有效
-    longTimeEffect () {
+    longTimeEffect (type) {
+      // 身份证有效期结束时间
+      if(type == 'id_card_valid_time'){
+
+        this.$set(this.submitFrom.id_card_info, 'id_card_valid_time', '长期');
+      }else{
 
       this.$set(this.submitFrom.business_license_info, 'business_time_endTime', '长期');
+    }
       this.$forceUpdate()
 
     },
