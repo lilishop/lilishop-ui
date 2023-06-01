@@ -14,7 +14,7 @@
                                                            type="ios-heart"/>{{
             storeCollected ? '已收藏店铺' : '收藏店铺'
           }}</span>
-        <span class="hover-pointer ml_10" style="width:80px" @click="IMService(storeMsg.storeId)"><Icon
+        <span class="hover-pointer ml_10" style="width:80px" @click="IMService(storeMsg.storeId,null,null)"><Icon
           custom="icomoon icon-customer-service"/>联系客服</span>
       </div>
     </div>
