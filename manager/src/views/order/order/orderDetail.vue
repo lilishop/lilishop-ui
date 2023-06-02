@@ -384,7 +384,7 @@
 
         <div style="margin: 10px 0px">收款订单列表</div>
         <Collapse simple>
-          <Panel v-for="(order,index) in tradeDetail.orderDetailVOList" >
+          <Panel v-for="(order,index) in tradeDetail.orderDetailVOList" :key="index">
             序号：{{index+1}} / 总金额：￥<span style="color: red">{{order.order.flowPrice | unitPrice}}</span> / 订单：{{order.order.sn}}
             <template #content>
 

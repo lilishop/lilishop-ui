@@ -3,13 +3,16 @@
     <!-- 使用 fullscreen 类来控制是否全屏显示 -->
     <div :class="{ fullscreen: fullscreen }" class="tinymce-container">
       <!-- 使用 tinymce-textarea 类作为编辑器的文本区域 -->
+      <uploadImage @callback="insertImage" />
       <textarea :id="tinymceId" class="tinymce-textarea" />
     </div>
   </div>
 </template>
 <script>
 import { initEditor } from "@/components/editor/config";
+import uploadImage from "@/components/editor/upload-image.vue";
 export default {
+  components:{uploadImage},
   name: "Tinymce",
   props: {
     value: {
@@ -51,6 +54,10 @@ export default {
     },
   },
   methods: {
+    // 数据返回并给富文本框插入图片
+    insertImage(arr){
+      arr.forEach(v => window.tinymce.get(this.tinymceId).insertContent(`<img  src="${v}" >`))
+    },
     init() {
       // 初始化编辑器
       this.initTinymce();
@@ -59,6 +66,7 @@ export default {
       const _this = this;
       window.tinymce.init({
         selector: `#${this.tinymceId}`,
+        convert_urls: false,
         init_instance_callback: (editor) => {
           if (_this.value) {
             // 如果有初始值，则设置编辑器的内容为初始值
@@ -82,6 +90,7 @@ export default {
           });
         },
         ..._this.initEditor,
+
         height:this.height
       });
     },
@@ -91,7 +100,7 @@ export default {
     },
     getContent() {
       // 获取编辑器的内容
-      window.tinymce.get(this.tinymceId).getContent();
+     return  window.tinymce.get(this.tinymceId).getContent();
     },
     destroyTinymce() {
       const tinymce = window.tinymce.get(this.tinymceId);

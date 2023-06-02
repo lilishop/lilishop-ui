@@ -16,24 +16,11 @@ export const initEditor = {
   advlist_bullet_styles: "square", // 无序列表 有序列表
   maxSize: "2097152", // 设置图片大小
   accept: "image/jpeg, image/png", // 设置图片上传规则
+  paste_data_images:false,
   browser_spellcheck: true, // 拼写检查
   branding: false, // 去水印
   elementpath: false, // 禁用编辑器底部的状态栏
   statusbar: false, // 隐藏编辑器底部的状态栏
-  images_upload_handler: async function (blobInfo, success, failure) {
-    const formData = new FormData();
-    formData.append("file", blobInfo.blob());
-    try {
-      const res = await upLoadFile(formData);
-      if (res.result) {
-        success(res.result);
-      } else {
-        failure("上传文件有误请稍后重试");
-      }
-    } catch (e) {
-      failure("上传出错");
-    }
-  },
   // init_instance_callback: function (editor) {
   //   var freeTiny = document.querySelector(".tox .tox-notification--in .tox-notification .tox-notification--warning .tox .tox-notification--warning .tox-notifications-container");
   //   freeTiny.style.display = "none";
@@ -57,6 +44,4 @@ export const initEditor = {
 
     ul,ol{ list-style-position:inside; }
     `, // 设置样式
-  statusbar: false, // 隐藏编辑器底部的状态栏
-  paste_data_images: true, // 允许粘贴图像
 };
