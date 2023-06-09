@@ -178,7 +178,7 @@ export default {
         {
           title: "面额/折扣",
           key: "price",
-          width: 150,
+          // width: 150,
           render: (h, params) => {
             if (params.row.price) {
               return h(
@@ -215,7 +215,7 @@ export default {
         },
         {
           title: "获取方式",
-          width: 120,
+          // width: 120,
           key: "getType",
           render: (h, params) => {
             if (params.row.getType === "FREE") {
@@ -234,7 +234,7 @@ export default {
         {
           title: "优惠券类型",
           key: "couponType",
-          width: 150,
+          // width: 150,
           render: (h, params) => {
             let text = "";
             if (params.row.couponType === "DISCOUNT") {
@@ -249,7 +249,7 @@ export default {
         {
           title: "品类描述",
           key: "scopeType",
-          width: 120,
+          // width: 120,
           render: (h, params) => {
             return promotionsScopeTypeRender(h, params);
           },
