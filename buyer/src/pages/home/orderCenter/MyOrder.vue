@@ -70,7 +70,8 @@
             <Button @click="goPay(order.sn)" size="small" type="success" v-if="order.allowOperationVO.pay">去支付</Button>
             <Button @click="received(order.sn)" size="small" type="warning" v-if="order.allowOperationVO.rog">确认收货</Button>
             <!-- 售后 -->
-            <Button v-if="order.groupAfterSaleStatus && order.groupAfterSaleStatus.includes('NOT_APPLIED')" @click="applyAfterSale(order.orderItems)" size="small">申请售后</Button>
+            <Button v-if="order.groupAfterSaleStatus && (order.groupAfterSaleStatus==='NOT_APPLIED'|| order.groupAfterSaleStatus==='PART_AFTER_SALE' )"
+                    @click="applyAfterSale(order.orderItems)" size="small">申请售后</Button>
           </div>
         </div>
       </div>
@@ -206,7 +207,7 @@ export default {
     applyAfterSale (goodsItem) { // 申请售后
       let arr = []
       goodsItem.forEach(e => {
-        if (e.afterSaleStatus === 'NOT_APPLIED') {
+        if (e.afterSaleStatus === 'NOT_APPLIED'|| e.afterSaleStatus === 'PART_AFTER_SALE') {
           arr.push(e)
         }
       });

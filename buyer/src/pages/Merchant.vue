@@ -14,7 +14,7 @@
                                                            type="ios-heart"/>{{
             storeCollected ? '已收藏店铺' : '收藏店铺'
           }}</span>
-        <span class="hover-pointer ml_10" style="width:80px" @click="IMService(storeMsg.storeId)"><Icon
+        <span class="hover-pointer ml_10" style="width:80px" @click="IMService(storeMsg.storeId,null,null)"><Icon
           custom="icomoon icon-customer-service"/>联系客服</span>
       </div>
     </div>
@@ -60,7 +60,6 @@
     <div v-else>
       <div class="promotion-decorate">{{ cateName }}</div>
       <div class="goods-list">
-
         <empty v-if="goodsList.length === 0"/>
         <div
           v-for="(item, index) in goodsList"
@@ -69,8 +68,9 @@
           class="goods-show-info"
           @click="goGoodsDetail(item.id, item.goodsId)"
         >
+
           <div class="goods-show-img">
-            <img :src="item.thumbnail" height="220" width="220" alt=""/>
+            <img :src="item.small" height="220" width="220" alt=""/>
           </div>
           <div class="goods-show-price">
             <span>
@@ -254,7 +254,7 @@ export default {
       goodsList(this.params)
         .then((res) => {
           if (res.success) {
-            this.goodsList = res.result;
+            this.goodsList = res.result.records;
             this.total = res.result.total;
           }
         })

@@ -22,7 +22,7 @@
             <Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#666'" />
             {{ storeCollected? "已收藏店铺": "收藏店铺" }}
           </span>
-          <span class="ml_10" @click="IMService(goodsMsg.data.storeId)">联系客服</span>
+          <span class="ml_10" @click="IMService(goodsMsg.data.storeId,goodsMsg.data.goodsId,goodsMsg.data.id)">联系客服</span>
         </div>
       </div>
     </div>
