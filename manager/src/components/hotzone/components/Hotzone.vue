@@ -159,6 +159,8 @@ export default {
           return `促销活动商品：${zone.goodsName}`;
         case "other":
           return `${zone.title}`;
+        case "special":
+          return `专题：${zone.title}`;
         default:
           return "请选择跳转链接";
       }

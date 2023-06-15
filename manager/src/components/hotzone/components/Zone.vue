@@ -185,6 +185,12 @@ export default {
     settingZone(val) {
       this.zoneForm.type = val.___type || val.type;
       this.zoneForm.title = val.title;
+      if(val.pageType == "special"){
+          this.zoneForm.id = val.id;
+          this.zoneForm.pageType = val.pageType
+          this.zoneForm.type = val.pageType
+          this.zoneForm.title = val.name
+        }
       switch (val.___type) {
         case "goods":
           this.zoneForm.id = val.id;
