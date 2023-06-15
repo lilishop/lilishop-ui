@@ -174,7 +174,6 @@ export default {
             this.saveDialog = false;
             this.$Message.error("修改失败，请稍后重试");
           }
-          console.log(res);
         })
         .catch(error => {});
     },
@@ -182,7 +181,6 @@ export default {
 
     // 更新
     update(submitWay) {
-      console.log(this.$store.state.openStyleStore[0], "123123123");
       if (this.$store.state.openStyleStore == void 0) {
         this.$Message.error("请装修楼层!");
         return false;
@@ -191,7 +189,6 @@ export default {
 
       let id = this.$route.query.id;
       const pagetype = this.$route.query.pagetype;
-      console.log(this.$store.state.openStyleStore, submitWay);
       const pageType = {
         INDEX: "INDEX",
         ALERT: "OPEN_SCREEN_PAGE",
@@ -221,7 +218,6 @@ export default {
             this.saveDialog = false;
             this.$Message.error("修改失败，请稍后重试");
           }
-          console.log(res);
         })
         .catch((error) => {});
     },
@@ -229,9 +225,7 @@ export default {
 
     // 返回查询数据页面
     goBack() {
-      this.$router.push({
-        path: "/wapList",
-      });
+      this.$router.go(-1);
     },
 
     // 保存
@@ -253,7 +247,6 @@ export default {
             this.saveDialog = false;
             this.$Message.error("保存失败，请稍后重试");
           }
-          console.log(res);
         })
         .catch(error => {});
     }
