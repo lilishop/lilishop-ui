@@ -118,6 +118,7 @@ export default {
         .then((res) => {
           this.isLoading = false;
           if (res.success) {
+
             const result = res.result;
             const cateName = res.result.categoryName;
             const cateId = result.data.categoryPath.split(",");
@@ -126,7 +127,7 @@ export default {
               // 插入分类id和name
               cateArr.push({
                 id: e,
-                name: cateName[index],
+                name: cateName ? cateName[index] : "",
               });
             });
             this.categoryBar = cateArr;
