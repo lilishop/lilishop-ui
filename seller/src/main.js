@@ -28,7 +28,7 @@ import * as filters from "@/utils/filters"; // global filter
 
 import {md5} from "@/utils/md5.js";
 
-const {aMapSecurityJsCode, inputMaxLength} = require("@/config");
+const {aMapSecurityJsCode, inputMaxLength,mainColor} = require("@/config");
 // 打印
 import Print from 'vue-print-nb';
 
@@ -46,6 +46,9 @@ Vue.use(VueLazyload, {
   loading: require("./assets/loading2.gif")
 });
 
+// 引入价格格式化组件
+import priceColorScheme from 'price-color'
+Vue.use(priceColorScheme);
 
 const copyViewUi = {...ViewUI}
 copyViewUi.Input.props.maxlength.default = inputMaxLength // 挂载最大输入值
@@ -66,6 +69,7 @@ Vue.prototype.uploadFileRequest = uploadFileRequest;
 Vue.prototype.setStore = setStore;
 Vue.prototype.getStore = getStore;
 Vue.prototype.removeStore = removeStore;
+Vue.prototype.$mainColor = mainColor;
 Vue.prototype.md5 = md5;
 const PC_URL = BASE.PC_URL; // 跳转买家端地址 pc端
 const WAP_URL = BASE.WAP_URL; // 跳转买家端地址 wap端

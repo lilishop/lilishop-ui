@@ -155,10 +155,7 @@ export default {
           width: 100,
           render: (h, params) => {
             if (params.row.price) {
-              return h(
-                "div",
-                this.$options.filters.unitPrice(params.row.price || 0, "￥")
-              );
+              return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
             } else {
               return h("div", (params.row.couponDiscount || 0) + "折");
             }

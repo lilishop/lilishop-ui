@@ -142,13 +142,10 @@
             title: "申请退款金额",
             key: "applyRefundPrice",
             width: 130,
-
             render: (h, params) => {
-              return h(
-                "div",
-                this.$options.filters.unitPrice(params.row.applyRefundPrice, "￥")
-              );
+              return h("priceColorScheme", {props:{value:params.row.applyRefundPrice,color:this.$mainColor}} );
             },
+
           },
           {
             title: "会员",

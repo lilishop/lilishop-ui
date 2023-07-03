@@ -82,7 +82,7 @@
             title: "账单号",
             key: "sn",
             minWidth: 250,
-            tooltip: true          
+            tooltip: true
           },
           {
             title: "生成时间",
@@ -103,10 +103,7 @@
             key: "billPrice",
             minWidth: 100,
             render: (h, params) => {
-              return h(
-                "div",
-                this.$options.filters.unitPrice(params.row.billPrice, "￥")
-              );
+              return h("priceColorScheme", {props:{value:params.row.billPrice,color:this.$mainColor}} );
             },
           },
 

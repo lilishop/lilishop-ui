@@ -96,10 +96,7 @@ export default {
           key: "billPrice",
           width: 150,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.receiptPrice, "￥")
-            );
+            return h("priceColorScheme", {props:{value:params.row.receiptPrice,color:this.$mainColor}} );
           },
         },
         {

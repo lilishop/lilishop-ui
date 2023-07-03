@@ -22,7 +22,9 @@
               </dl>
               <dl>
                 <dt>申请退款金额</dt>
-                <dd>{{ afterSaleInfo.applyRefundPrice | unitPrice('￥') }}</dd>
+                <dd>
+                  <priceColorScheme :value="afterSaleInfo.applyRefundPrice" :color="$mainColor" />
+                </dd>
               </dl>
               <dl v-if="afterSaleInfo.actualRefundPrice">
                 <dt>实际退款金额</dt>
@@ -89,7 +91,9 @@
 
               <dl>
                 <dt>申请退款金额</dt>
-                <dd>{{ afterSaleInfo.applyRefundPrice | unitPrice('￥') }}</dd>
+                <dd>
+                  <priceColorScheme :value="afterSaleInfo.applyRefundPrice" :color="$mainColor" />
+                </dd>
               </dl>
               <dl v-if="params.serviceStatus == 'PASS'">
                 <dt>实际退款金额</dt>

@@ -106,11 +106,9 @@
             key: "billPrice",
             minWidth: 100,
             render: (h, params) => {
-              return h(
-                "div",
-                this.$options.filters.unitPrice(params.row.billPrice, "￥")
-              );
+              return h("priceColorScheme", {props:{value:params.row.billPrice,color:this.$mainColor}} );
             },
+
           },
 
 

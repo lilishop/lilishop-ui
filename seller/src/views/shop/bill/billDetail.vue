@@ -180,10 +180,7 @@ export default {
           title: "订单金额",
           key: "finalPrice",
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.finalPrice, "￥")
-            );
+            return h("priceColorScheme", {props:{value:params.row.finalPrice,color:this.$mainColor}} );
           },
         },
         {
@@ -191,13 +188,7 @@ export default {
           key: "kanjiaSettlementPrice",
           render: (h, params) => {
             if (params.row.kanjiaSettlementPrice) {
-              return h(
-                "div",
-                this.$options.filters.unitPrice(
-                  params.row.kanjiaSettlementPrice,
-                  "￥"
-                )
-              );
+              return h("priceColorScheme", {props:{value:params.row.kanjiaSettlementPrice,color:this.$mainColor}} );
             } else {
               return h("div", "￥0.00");
             }

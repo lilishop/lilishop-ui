@@ -53,9 +53,9 @@
               </div>
             </RadioGroup>
             <div v-else>
-              <div v-if="row.priceType == 1">{{row.price | unitPrice('￥')}}</div>
-              <div v-if="row.priceType == 2">{{row.price | unitPrice('￥')}}至{{row.price2 | unitPrice('￥')}}</div>
-              <div v-if="row.priceType == 3">{{row.price2 | unitPrice('￥')}}<span class="original-price">{{row.price | unitPrice('￥')}}</span></div>
+              <div v-if="row.priceType == 1"><priceColorScheme :value="row.price" :color="$mainColor" /></div>
+              <div class="flex" v-if="row.priceType == 2"><priceColorScheme :value="row.price" :color="$mainColor" />至<priceColorScheme :value="row.price2" :color="$mainColor" /></div>
+              <div class="flex" v-if="row.priceType == 3"><priceColorScheme :value="row.price2" :color="$mainColor" /><span class="original-price">{{row.price | unitPrice('￥')}}</span></div>
             </div>
 
           </template>
@@ -380,5 +380,10 @@ h4 {
   font-size: 12px;
   line-height: 40px;
   text-align: left;
+}
+.flex{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 </style>

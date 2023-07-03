@@ -235,11 +235,9 @@ export default {
           key: "finalPrice",
           width: 120,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.finalPrice, "￥")
-            );
+            return h("priceColorScheme", {props:{value:params.row.finalPrice,color:this.$mainColor}} );
           },
+
         },
         {
           title: "平台分佣",

@@ -196,7 +196,7 @@
                 订单金额
               </dt>
               <dd>
-                {{ complaintInfo.orderPrice | unitPrice('￥')}}
+                <priceColorScheme :value="complaintInfo.orderPrice" :color="$mainColor"></priceColorScheme>
               </dd>
             </dl>
 

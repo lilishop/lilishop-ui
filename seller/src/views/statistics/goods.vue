@@ -47,10 +47,7 @@ export default {
           title: "销售金额",
           key: "price",
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.price)
-            );
+            return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
           },
         },
       ],
