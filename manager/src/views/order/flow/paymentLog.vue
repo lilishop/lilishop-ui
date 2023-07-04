@@ -1,5 +1,5 @@
 <template>
-  <div class="search">   
+  <div class="search">
     <Card>
       <Row @keydown.enter.native="handleSearch">
         <Form ref="searchForm" :model="searchForm" inline :label-width="100" class="search-form">
@@ -145,10 +145,7 @@ export default {
           key: "flowPrice",
           minWidth: 80,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.flowPrice, "￥")
-            );
+            return h("priceColorScheme", {props:{value:params.row.flowPrice,color:this.$mainColor}} );
           },
         },
         {

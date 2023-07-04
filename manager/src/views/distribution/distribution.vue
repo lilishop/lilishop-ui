@@ -105,11 +105,9 @@ export default {
           width: 150,
           sortable: false,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.rebateTotal, "￥")
-            );
+            return h("priceColorScheme", {props:{value:params.row.rebateTotal,color:this.$mainColor}} );
           },
+
         },
         {
           title: "可用金额",
@@ -117,10 +115,7 @@ export default {
           width: 150,
           sortable: false,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.canRebate, "￥")
-            );
+            return h("priceColorScheme", {props:{value:params.row.canRebate,color:'green'}} );
           },
         },
         {
@@ -129,10 +124,7 @@ export default {
           width: 150,
           sortable: false,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.commissionFrozen, "￥")
-            );
+            return h("priceColorScheme", {props:{value:params.row.commissionFrozen,color:'#347dda'}} );
           },
         },
         {

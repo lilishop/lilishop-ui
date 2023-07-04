@@ -292,10 +292,7 @@ export default {
           title: "价格",
           key: "flowPrice",
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.flowPrice, "￥")
-            );
+            return h("priceColorScheme", {props:{value:params.row.flowPrice,color:this.$mainColor}} );
           },
         },
         {
@@ -381,11 +378,7 @@ export default {
           title: "申请退款金额",
           key: "applyRefundPrice",
           render: (h, params) => {
-            return h(
-              "div",
-              "￥" +
-                (params.row.applyRefundPrice ? params.row.applyRefundPrice : 0)
-            );
+            return h("priceColorScheme", {props:{value:params.row.applyRefundPrice,color:this.$mainColor}} );
           },
         },
         {

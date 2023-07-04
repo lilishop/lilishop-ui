@@ -38,7 +38,8 @@
           <div class="form-item-view">
             <FormItem label="商品编号"> {{ goods.id }}</FormItem>
             <FormItem label="商品价格">
-              ¥{{ goods.price | unitPrice }}
+              <priceColorScheme :value="goods.price" :color="$mainColor"></priceColorScheme>
+
             </FormItem>
             <FormItem label="商品图片">
               <div
@@ -179,8 +180,8 @@ export default {
             specs: sku.goodsName,
             sn: sku.sn,
             weight: sku.weight,
-            cost: that.$options.filters.unitPrice(sku.cost, "¥"),
-            price: that.$options.filters.unitPrice(sku.price, "¥"),
+            cost: sku.cost,
+            price:sku.price,
             image: sku.thumbnail,
           });
         });
@@ -196,10 +197,17 @@ export default {
             {
               title: "成本",
               key: "cost",
+              render: (h, params) => {
+                console.log(params)
+                return h("priceColorScheme", {props:{value:params.row.cost,color:this.$mainColor}} );
+              },
             },
             {
               title: "价格",
               key: "price",
+              render: (h, params) => {
+                return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
+              },
             }
           );
         }

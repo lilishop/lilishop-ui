@@ -91,10 +91,14 @@
           </div>
         </template>
         <template slot-scope="{ row }" slot="price">
-          <div>{{ row.originalPrice | unitPrice("￥") }}</div>
+          <div>
+            <priceColorScheme :value="row.originalPrice" :color="$mainColor"></priceColorScheme>
+          </div>
         </template>
         <template slot-scope="{ row }" slot="settlementPrice">
-          <div>{{ row.settlementPrice | unitPrice("￥") }}</div>
+          <div>
+            <priceColorScheme :value="row.settlementPrice" :color="$mainColor"></priceColorScheme>
+          </div>
         </template>
         <template slot-scope="{ row }" slot="quantity">
           <div>{{ row.activeStock }}</div>

@@ -76,10 +76,16 @@ export default {
             let text = "未知";
             if (params.row.couponType === "DISCOUNT") {
               text = params.row.couponDiscount + "折";
+              return h("div", [text]);
             } else if (params.row.couponType === "PRICE") {
-              text = "¥" + params.row.price;
+              return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
+
+            }else{
+              return h("div", [text]);
             }
-            return h("div", [text]);
+
+
+
           },
         },
         {

@@ -229,7 +229,10 @@
               </div>
 
               <div class="points-top-text">
-                {{memberWalletInfo.memberWallet?memberWalletInfo.memberWallet:0 | unitPrice('￥')}}
+
+                <priceColorScheme :value="memberWalletInfo.memberWallet" :color="$mainColor" :customer="{'fontSize':'21px'}" >
+                </priceColorScheme>
+
               </div>
             </div>
             <div style="min-width: 120px;">
@@ -237,8 +240,9 @@
                 冻结余额
               </div>
               <div class="points-top-text">
-                {{memberWalletInfo.memberFrozenWallet?memberWalletInfo.memberFrozenWallet:0 | unitPrice('￥')}}
-              </div>
+                <priceColorScheme :value="memberWalletInfo.memberFrozenWallet" :color="$mainColor" :customer="{'fontSize':'21px'}" >
+                </priceColorScheme>
+               </div>
             </div>
           </div>
           <Table
@@ -419,21 +423,9 @@
             width: 150,
             render: (h, params) => {
               if (params.row.pointType == 'INCREASE') {
-                return h('div', [
-                  h('span', {
-                    style: {
-                      color: 'green'
-                    }
-                  }, "+" + params.row.variablePoint),
-                ]);
+                return h("priceColorScheme", {props:{value:params.row.variablePoint,color:'green',unit:"+"}} );
               } else {
-                return h('div', [
-                  h('span', {
-                    style: {
-                      color: 'red'
-                    }
-                  }, '-' + params.row.variablePoint),
-                ]);
+                return h("priceColorScheme", {props:{value:params.row.variablePoint,color:this.$mainColor,unit:"-"}} );
               }
             }
           },
@@ -463,8 +455,8 @@
             key: "flowPrice",
             width: 130,
             render: (h, params) => {
-              return h("div", this.$options.filters.unitPrice(params.row.flowPrice, '￥'));
-            }
+              return h("priceColorScheme", {props:{value:params.row.flowPrice,color:this.$mainColor}} );
+            },
           },
           {
             title: "订单类型",
@@ -768,21 +760,9 @@
             width: 150,
             render: (h, params) => {
               if (params.row.money >0) {
-                return h('div', [
-                  h('span', {
-                    style:{
-                      color: 'green'
-                    }
-                  }, this.$options.filters.unitPrice(params.row.money,'￥')),
-                ]);
+                return h("priceColorScheme", {props:{value:params.row.money,color:'green'}} );
               } else if (params.row.money < 0) {
-                return h('div', [
-                  h('span', {
-                    style:{
-                      color: 'red'
-                    }
-                  }, this.$options.filters.unitPrice(params.row.money,'￥')),
-                ]);
+                return h("priceColorScheme", {props:{value:params.row.money,color:this.$mainColor}} );
               }
             },
           },
@@ -839,11 +819,10 @@
             width: 130,
             render: (h, params) => {
               if(params.row.receiptPrice == null){
-                return h("div", this.$options.filters.unitPrice(0, '￥'));
+                return h("priceColorScheme", {props:{value:0,color:this.$mainColor}} );
               }else{
-                return h("div", this.$options.filters.unitPrice(params.row.receiptPrice, '￥'));
+                return h("priceColorScheme", {props:{value:params.row.receiptPrice,color:this.$mainColor}} );
               }
-
             }
           },
           {

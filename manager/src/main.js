@@ -25,7 +25,7 @@ import {md5} from '@/utils/md5.js';
 import Print from 'vue-print-nb';
 
 Vue.use(Print);
-const {aMapSecurityJsCode, inputMaxLength} = require("@/config");
+const {aMapSecurityJsCode, inputMaxLength,mainColor } = require("@/config");
 // 高德安全密钥
 if (aMapSecurityJsCode) {
   window._AMapSecurityConfig = {
@@ -45,6 +45,9 @@ Vue.prototype.wapLinkTo = function (goodsId, skuId) { // app端二维码
   return `${WAP_URL}/pages/product/goods?id=${skuId}&goodsId=${goodsId}`
 };
 
+// 引入价格格式化组件
+import priceColorScheme from 'price-color'
+Vue.use(priceColorScheme);
 
 const copyViewUi = {...ViewUI}
 copyViewUi.Input.props.maxlength.default = inputMaxLength // 挂载最大输入值
@@ -66,6 +69,7 @@ Vue.prototype.uploadFileRequest = uploadFileRequest;
 Vue.prototype.setStore = setStore;
 Vue.prototype.getStore = getStore;
 Vue.prototype.removeStore = removeStore;
+Vue.prototype.$mainColor = mainColor;
 Vue.prototype.md5 = md5;
 
 Array.prototype.remove = function (from, to) {

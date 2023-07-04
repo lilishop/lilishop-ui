@@ -93,23 +93,10 @@
             width: 110,
             render: (h, params) => {
               if (params.row.pointType == 'INCREASE') {
-                return h('div', [
-                  h('span', {
-                    style: {
-                      color: 'green'
-                    }
-                  }, "+" + params.row.variablePoint),
-                ]);
+                return h("priceColorScheme", {props:{value:params.row.variablePoint,color:'green',unit:"+"}} );
               } else {
-                return h('div', [
-                  h('span', {
-                    style: {
-                      color: 'red'
-                    }
-                  }, '-' + params.row.variablePoint),
-                ]);
+                return h("priceColorScheme", {props:{value:params.row.variablePoint,color:this.$mainColor,unit:"-"}} );
               }
-
             }
           },
           {

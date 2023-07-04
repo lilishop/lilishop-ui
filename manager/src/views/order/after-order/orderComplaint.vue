@@ -112,6 +112,7 @@
           },
           {
             title: "投诉主题",
+            width: 100,
             key: "complainTopic",
             tooltip: true
           },

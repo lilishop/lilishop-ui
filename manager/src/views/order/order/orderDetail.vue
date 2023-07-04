@@ -76,11 +76,10 @@
           <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票金额：</div>
             <div class="div-item-right">
-              {{
-                orderInfo.receipt && orderInfo.receipt.receiptPrice
-                ? orderInfo.receipt.receiptPrice
-                : "暂无" | unitPrice("￥")
-              }}
+
+              <priceColorScheme  v-if="orderInfo.receipt && orderInfo.receipt.receiptPrice" :value="orderInfo.receipt.receiptPrice" :color="$mainColor"></priceColorScheme>
+              <span v-else>暂无</span>
+
             </div>
           </div>
 
@@ -225,7 +224,8 @@
             ">
               <span class="label">优惠券金额：</span>
               <span class="txt">
-                {{ orderInfo.order.priceDetailDTO.couponPrice | unitPrice("￥") }}
+                <priceColorScheme :value="orderInfo.order.priceDetailDTO.couponPrice" :color="$mainColor"></priceColorScheme>
+
               </span>
             </li>
             <li
@@ -258,7 +258,7 @@
             <!-- <li v-if="showPrices">
                 <span class="label" style="color: #cc0000;font-size: 14px;" v-if="typeList.length > 0" >优惠详情：</span>
               </li> -->
-            <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index"> 
+            <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index">
                 <span class="label" v-if="index == 1 && typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
                 <span class="txt" style="border-bottom: 1px dashed;font-size:10px !important;" v-if="index == 1 &&  typeList.length > 1">¥{{ item.discountPrice | unitPrice }}</span>
                 <span class="label" v-if="index == 0 &&  typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>

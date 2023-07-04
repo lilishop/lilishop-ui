@@ -773,19 +773,9 @@
             key: "applyRefundPrice",
             width: 110,
             render: (h, params) => {
-              if (params.row.applyRefundPrice == null) {
-                return h(
-                  "div",
-                  this.$options.filters.unitPrice(0, "￥")
-                );
-              } else {
-                return h(
-                  "div",
-                  this.$options.filters.unitPrice(params.row.applyRefundPrice, "￥")
-                );
-              }
-
+              return h("priceColorScheme", {props:{value:params.row.applyRefundPrice,color:this.$mainColor}} );
             },
+
           },
           {
             title: "售后类型",

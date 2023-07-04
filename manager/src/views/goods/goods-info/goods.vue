@@ -200,10 +200,7 @@ export default {
           key: "price",
           width: 130,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.price, "￥")
-            );
+            return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
           },
         },
         {

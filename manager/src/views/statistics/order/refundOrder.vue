@@ -18,7 +18,9 @@
         </div>
         <div class="label-item">
           <span>申请退款金额</span>
-          <span>{{res.applyRefundPrice || 0 | unitPrice('￥')}}</span>
+          <span>
+            <priceColorScheme :value="res.applyRefundPrice" :color="$mainColor"></priceColorScheme>
+          </span>
         </div>
         <div class="label-item">
           <span>商家备注</span>

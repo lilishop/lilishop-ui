@@ -104,10 +104,7 @@
             width: 160,
             sortable: true,
             render: (h, params) => {
-              return h(
-                "div",
-                this.$options.filters.unitPrice(params.row.rechargeMoney, "￥")
-              );
+              return h("priceColorScheme", {props:{value:params.row.rechargeMoney,color:this.$mainColor,unit:"+"}} );
             },
           },
           {

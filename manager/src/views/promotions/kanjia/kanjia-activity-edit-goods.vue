@@ -15,7 +15,9 @@
               <div>{{ form.goodsSku.storeName }}</div>
             </FormItem>
             <FormItem label="商品价格">
-              <div>{{ form.goodsSku.price | unitPrice('￥') }}</div>
+              <div>
+                <priceColorScheme :value="form.goodsSku.price" :color="$mainColor"></priceColorScheme>
+              </div>
             </FormItem>
             <FormItem label="商品库存">
               <div>{{ form.goodsSku.quantity }}</div>
@@ -30,7 +32,7 @@
                 style="width: 260px"
               />
             </FormItem>
-           
+
             <FormItem label="最低可砍" prop="lowestPrice">
               <Input
                 :disabled="onlyView"
@@ -83,7 +85,7 @@
         </div>
       </Form>
     </Card>
-    
+
   </div>
 </template>
 
@@ -97,7 +99,7 @@
 
   export default {
     name: "editKanjiaActivityGoods",
-   
+
     watch: {},
     data() {
       const checkSettlementPrice = (rule, value, callback) => {
@@ -158,7 +160,7 @@
             {required: true, message: "请输入结算金额"},
             {validator: checkSettlementPrice},
           ],
-         
+
           lowestPrice: [
             {required: true, message: "请输入最低可砍金额"},
             {validator: checkLowestPrice},
@@ -216,7 +218,7 @@
               this.$Message.error("活动库存不能为0且不能超过商品库存");
               return
             }
-          
+
             // 结算价格金额格式校验
             if (!regular.money.test(params.settlementPrice)) {
               this.$Message.error("结算价格金额格式不正确");

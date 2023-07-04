@@ -81,11 +81,9 @@ export default {
           key: "billPrice",
           width: 130,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.billPrice, "￥")
-            );
+            return h("priceColorScheme", {props:{value:params.row.billPrice,color:this.$mainColor}} );
           },
+
         },
         {
           title: "状态",

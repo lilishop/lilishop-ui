@@ -37,7 +37,7 @@
           <span>{{showList.memberName}}</span>
         </FormItem>
         <FormItem label="申请金额">
-          <span>{{showList.applyMoney | unitPrice}}</span>
+          <priceColorScheme :value="showList.applyMoney" :color="$mainColor"></priceColorScheme>
         </FormItem>
         <FormItem label="提现状态">
           <span>{{showList.applyStatus | paramTypeFilter}}</span>
@@ -46,7 +46,7 @@
           <span>{{showList.createTime}}</span>
         </FormItem>
         <FormItem label="审核备注">
-          <Input v-model="audit" />
+          <Input v-model="audit" type="textarea" />
         </FormItem>
 
       </Form>
@@ -66,7 +66,8 @@
           <span>{{showList.memberName}}</span>
         </FormItem>
         <FormItem label="申请金额：">
-          <span>{{showList.applyMoney}}</span>
+          <priceColorScheme :value="showList.applyMoney" :color="$mainColor"></priceColorScheme>
+
         </FormItem>
         <FormItem label="提现状态：">
           <span>{{showList.applyStatus | paramTypeFilter}}</span>
@@ -78,7 +79,7 @@
           <span>{{showList.inspectTime}}</span>
         </FormItem>
         <FormItem label="审核备注：">
-          <span>{{showList.inspectRemark}}</span>
+          <span>{{showList.inspectRemark || '暂无备注'}}</span>
         </FormItem>
 
       </Form>
@@ -143,15 +144,12 @@ export default {
           key: "applyMoney",
           align: "left",
           width: 120,
+
           render: (h, params) => {
-            return h("div", [
-              h(
-                "span",
-                {},
-                this.$options.filters.unitPrice(params.row.applyMoney)
-              ),
-            ]);
+            return h("priceColorScheme", {props:{value:params.row.applyMoney,color:this.$mainColor}} );
           },
+
+
         },
         {
           title: "提现状态",

@@ -74,7 +74,10 @@
       <div class="count-price">
         <div class="label-item">
           <span>总价格</span>
-          <span class="flowPrice">{{ res.flowPrice | unitPrice("￥") }}</span>
+          <span class="flowPrice">
+            <priceColorScheme :value="row.flowPrice" :color="$mainColor"></priceColorScheme>
+
+          </span>
         </div>
       </div>
     </div>

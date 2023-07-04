@@ -250,7 +250,8 @@ export default {
           minWidth: 120,
           render: (h, params) => {
             if (params.row.price) {
-              return h("div", this.$options.filters.unitPrice(params.row.price, "￥"));
+              return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
+
             } else {
               return h("div", params.row.couponDiscount + "折");
             }
@@ -404,7 +405,7 @@ export default {
         }
       });
       }
-    
+
     },
     // 关闭当前页面
     closeCurrentPage() {

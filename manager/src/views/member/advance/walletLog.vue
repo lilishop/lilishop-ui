@@ -52,30 +52,10 @@ export default {
           key: "money",
           width: 150,
           render: (h, params) => {
-            if (params.row.money > 0) {
-              return h("div", [
-                h(
-                  "span",
-                  {
-                    style: {
-                      color: "green",
-                    },
-                  },
-                  this.$options.filters.unitPrice(params.row.money, "￥")
-                ),
-              ]);
+            if (params.row.money >0) {
+              return h("priceColorScheme", {props:{value:params.row.money,color:'green'}} );
             } else if (params.row.money < 0) {
-              return h("div", [
-                h(
-                  "span",
-                  {
-                    style: {
-                      color: "red",
-                    },
-                  },
-                  this.$options.filters.unitPrice(-params.row.money, "- ￥")
-                ),
-              ]);
+              return h("priceColorScheme", {props:{value:params.row.money,color:this.$mainColor}} );
             }
           },
         },

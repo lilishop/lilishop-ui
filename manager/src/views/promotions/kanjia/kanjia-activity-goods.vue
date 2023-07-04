@@ -217,10 +217,7 @@ export default {
           key: "settlementPrice",
           minWidth: 100,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.settlementPrice, "￥")
-            );
+            return h("priceColorScheme", {props:{value:params.row.settlementPrice,color:this.$mainColor}} );
           },
         },
         {

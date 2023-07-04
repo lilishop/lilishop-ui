@@ -20,7 +20,7 @@
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
       </Form>
       <Row class="operation padding-row">
-       
+
       </Row>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-selection-change="changeSelect">
       </Table>
@@ -92,11 +92,9 @@ export default {
           key: "billPrice",
           width: 130,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.billPrice, "￥")
-            );
+            return h("priceColorScheme", {props:{value:params.row.billPrice,color:this.$mainColor}} );
           },
+
         },
         {
           title: "状态",

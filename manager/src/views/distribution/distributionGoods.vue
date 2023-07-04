@@ -98,11 +98,9 @@ export default {
           key: "price",
           minWidth: 100,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.price, "￥")
-            );
+            return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
           },
+
         },
         {
           title: "库存",
@@ -126,11 +124,9 @@ export default {
           minWidth: 100,
           sortable: false,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.commission, "￥")
-            );
+            return h("priceColorScheme", {props:{value:params.row.commission,color:this.$mainColor}} );
           },
+
         },
         {
           title: "操作",

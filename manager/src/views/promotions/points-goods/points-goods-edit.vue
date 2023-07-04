@@ -15,7 +15,9 @@
               <div>{{ form.goodsSku.storeName }}</div>
             </FormItem>
             <FormItem label="商品价格">
-              <div>{{ form.goodsSku.price | unitPrice("￥") }}</div>
+              <div>
+                <priceColorScheme :value="form.goodsSku.price" :color="$mainColor"></priceColorScheme>
+              </div>
             </FormItem>
             <FormItem label="库存">
               <div>{{ form.goodsSku.quantity }}</div>

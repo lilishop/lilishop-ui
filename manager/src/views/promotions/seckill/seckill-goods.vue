@@ -18,7 +18,9 @@
         ref="table"
       >
         <template slot-scope="{ row }" slot="originalPrice">
-          <div>{{ row.originalPrice | unitPrice("￥") }}</div>
+          <div>
+            <priceColorScheme :value="row.originalPrice" :color="$mainColor"></priceColorScheme>
+          </div>
         </template>
 
         <template slot-scope="{ row }" slot="quantity">
@@ -26,7 +28,9 @@
         </template>
 
         <template slot-scope="{ row }" slot="price">
-          <div>{{ row.price | unitPrice("￥") }}</div>
+          <div>
+            <priceColorScheme :value="row.price" :color="$mainColor"></priceColorScheme>
+          </div>
         </template>
 
         <template slot-scope="{ row }" slot="time">

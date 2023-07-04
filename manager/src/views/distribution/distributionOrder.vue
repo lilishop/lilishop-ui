@@ -126,13 +126,10 @@
             minWidth:80,
             sortable: false,
             render: (h, params) => {
-              if(params.row.rebate == null){
-                return h("div", this.$options.filters.unitPrice(0, '￥'));
-              }else{
-                return h("div", this.$options.filters.unitPrice(params.row.rebate, '￥'));
-              }
+              return h("priceColorScheme", {props:{value:params.row.rebate,color:this.$mainColor}} );
+            },
 
-            }
+
           },
           {
             fixed: "right",

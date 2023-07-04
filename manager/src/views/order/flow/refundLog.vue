@@ -153,11 +153,9 @@ export default {
           key: "totalAmount",
           minWidth: 120,
           render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.totalAmount, "￥")
-            );
+            return h("priceColorScheme", {props:{value:params.row.totalAmount,color:this.$mainColor}} );
           },
+
         },
         {
           title: "申请时间",
