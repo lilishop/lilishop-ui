@@ -27,23 +27,6 @@
               style="width: 200px"
             />
           </Form-item>
-          <Form-item label="售后状态">
-            <Select
-              v-model="searchForm.serviceStatus"
-              placeholder="全部"
-              clearable
-              style="width: 200px"
-            >
-              <Option value="APPLY">申请售后</Option>
-              <Option value="PASS">通过售后</Option>
-              <Option value="REFUSE">拒绝售后</Option>
-              <Option value="BUYER_RETURN">买家退货，待卖家收货</Option>
-              <Option value="SELLER_CONFIRM">卖家确认收货</Option>
-              <Option value="SELLER_TERMINATION">卖家终止售后</Option>
-              <Option value="BUYER_CANCEL">买家取消售后</Option>
-              <Option value="COMPLETE">完成售后</Option>
-            </Select>
-          </Form-item>
           <Form-item label="申请时间">
             <DatePicker
               v-model="selectDate"
@@ -93,6 +76,13 @@
           >
         </Form>
       </Row>
+
+      <div class="order-tab">
+        <div v-for="(item,index) in serviceStatus" :key="index" :class="{'current': currentStatus === item.value}" @click="serviceStatusClick(item)">
+          {{item.title}}
+        </div>
+      </div>
+
       <Table
         :loading="loading"
         border
@@ -305,6 +295,18 @@ export default {
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
+      serviceStatus: [
+        {title: '全部', value: ''},
+        {title: '申请售后', value: 'APPLY'},
+        {title: '通过售后', value: 'PASS'},
+        {title: '拒绝售后', value: 'REFUSE'},
+        {title: '待收货', value: 'BUYER_RETURN'},
+        {title: '确认收货', value: 'SELLER_CONFIRM'},
+        {title: '完成售后', value: 'COMPLETE'},
+        {title: '卖家终止售后', value: 'SELLER_TERMINATION'},
+        {title: '买家取消售后', value: 'BUYER_CANCEL'}
+      ],
+      currentStatus: ''
     };
   },
   methods: {
@@ -349,7 +351,7 @@ export default {
       this.total = this.data.length;
       this.loading = false;
     },
-    // 跳转订单详情
+    // 跳转售后详情
     detail(v) {
       let sn = v.sn;
       this.$router.push({
@@ -357,9 +359,39 @@ export default {
         query: { sn: sn },
       });
     },
+    // 售后筛选
+    serviceStatusClick(item) {
+      this.currentStatus = item.value;
+      this.searchForm.serviceStatus = item.value;
+      this.getDataList();
+    },
   },
   mounted() {
     this.init();
   },
 };
 </script>
+
+<style lang="scss" scoped>
+
+.order-tab {
+
+  width: 950px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f0f0f0;
+  padding: 0 10px;
+  margin: 10px 20px 10px 0;
+  div {
+    text-align: center;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .current {
+    background-color: #ffffff;
+  }
+}
+</style>

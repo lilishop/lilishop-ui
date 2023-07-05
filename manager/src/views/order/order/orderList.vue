@@ -91,7 +91,7 @@
       </div>
 
       <div class="order-tab">
-        <div v-for="(item,index) in order_status" :key="index" :class="{'current': current_status === item.value}" @click="orderStatusClick(item)">
+        <div v-for="(item,index) in orderStatus" :key="index" :class="{'current': currentStatus === item.value}" @click="orderStatusClick(item)">
           {{item.title}}
         </div>
       </div>
@@ -323,7 +323,7 @@ export default {
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
-      order_status: [
+      orderStatus: [
         {title: '全部', value: ''},
         {title: '未付款', value: 'UNPAID'},
         {title: '已付款', value: 'PAID'},
@@ -335,7 +335,7 @@ export default {
         {title: '已取消', value: 'CANCELLED'},
 
       ],
-      current_status: ''
+      currentStatus: ''
     };
   },
   methods: {
@@ -407,7 +407,7 @@ export default {
     },
     // 订单筛选
     orderStatusClick(item) {
-      this.current_status = item.value;
+      this.currentStatus = item.value;
       this.searchForm.orderStatus = item.value;
       this.getDataList();
     },
