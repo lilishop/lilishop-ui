@@ -3,7 +3,7 @@
     <BaseHeader></BaseHeader>
     <Search @search="handleSearch"></Search>
     <drawer></drawer>
-    <cateNav useClass="background-white"></cateNav>
+    <cateNav class="cate-nav" useClass="background-white"></cateNav>
     <div class="container">
       <!-- 商品筛选栏 -->
       <GoodsClassNav @getParams="getParams"></GoodsClassNav>
@@ -261,7 +261,9 @@ export default {
 
 <style scoped lang="scss">
 @import "../assets/styles/goodsList.scss";
-
+.cate-nav{
+  margin-top: 10px;
+}
 .goods-show-info > .goods-show-seller > .goods-show-buyer {
   width: 35px;
   height: 17px;

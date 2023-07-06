@@ -223,7 +223,6 @@ export default {
   font-weight: normal;
   text-decoration: none;
 
-  border-left: 1px solid #ccc !important;
   cursor: pointer;
   color: #fff;
 }

@@ -2,7 +2,7 @@
   <div>
     <BaseHeader></BaseHeader>
     <Search></Search>
-    <cateNav></cateNav>
+
     <!-- 添加成功提示 -->
     <div class="add-info-box-container">
       <div class="add-info-box">

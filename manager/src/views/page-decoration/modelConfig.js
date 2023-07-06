@@ -301,25 +301,6 @@ export const modelData = [{
     },
   },
   {
-    type: 'seckill-only-album',
-    name: '促销活动-图片版',
-    icon: 'md-image',
-    showName: '',
-    options: {
-      list: [{
-        time: 6,
-        goodsList: [{
-          img: require('@/assets/nav/1.jpg'),
-
-          url: ''
-        },
-
-        ]
-      },
-      ]
-    },
-  },
-  {
     type: 'discountAdvert',
     name: '折扣广告',
     icon: 'md-image',
