@@ -145,7 +145,6 @@ export default {
             this.saveDialog = false;
             this.$Message.error("修改失败，请稍后重试");
           }
-          console.log(res);
         })
         .catch((error) => {});
     },
@@ -176,7 +175,6 @@ export default {
             this.saveDialog = false;
             this.$Message.error("保存失败，请稍后重试");
           }
-          console.log(res);
         })
         .catch((error) => {});
     },

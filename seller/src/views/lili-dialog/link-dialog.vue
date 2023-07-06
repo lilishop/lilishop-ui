@@ -41,7 +41,6 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      console.log( this.$refs["lili-component"])
       this.$refs["lili-component"][0].type = "single"; //商品页面设置成为单选
     });
 

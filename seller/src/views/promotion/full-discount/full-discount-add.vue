@@ -252,7 +252,7 @@ export default {
     getDetail () {
       // 获取活动详情
       getFullDiscountById(this.id).then((res) => {
-        console.log(res);
+
         let data = res.result;
         if (data.scopeType === "ALL") {
           data.promotionGoodsList = [];

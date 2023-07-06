@@ -563,7 +563,6 @@ export default {
     async exportGoods(){
       downLoadGoods()
         .then((res) => {
-          console.log(res)
           const blob = new Blob([res], {
             type: "application/vnd.ms-excel;charset=utf-8",
           });

@@ -237,10 +237,10 @@
       //投诉详情
       detail(v) {
         let id = v.id;
-        this.$router.push({
+        this.$options.filters.customRouterPush({
           name: "order-complaint-detail",
           query: { id: id },
-        });
+        })
       },
     },
     mounted() {

@@ -1,10 +1,8 @@
 <template>
   <div>
-    <Affix :offset-top="100">
       <Card class="card fixed-bottom">
         <affixTime @selected="clickBreadcrumb" />
       </Card>
-    </Affix>
     <Card class="card">
       <div>
         <h4>流量概况</h4>
@@ -218,6 +216,11 @@ export default {
 };
 </script>
 <style scoped lang="scss">
+.fixed-bottom{
+  position:sticky;
+  z-index: 999;
+  top: 0;
+}
 .table {
   margin-top: 10px;
 }

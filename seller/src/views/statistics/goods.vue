@@ -1,10 +1,10 @@
 <template>
   <div>
-    <Affix :offset-top="100">
+
       <Card class="card fixed-bottom">
         <affixTime :closeShop="true" @selected="clickBreadcrumb"/>
       </Card>
-    </Affix>
+
     <Card class="card">
 
       <Tabs @on-click="handleClickType">
@@ -23,10 +23,12 @@
 import affixTime from "@/views/lili-components/affix-time";
 import * as API_Goods from "@/api/goods";
 import Cookies from "js-cookie";
+
 export default {
   components: { affixTime },
   data() {
     return {
+      setting:"",
       params: { // 请求参数
         searchType: "LAST_SEVEN",
         year: "",
@@ -53,6 +55,9 @@ export default {
       ],
       data: [], // 表格数据
     };
+  },
+  computed:{
+
   },
   methods: {
     // tab切换
@@ -83,29 +88,11 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-.page-col {
-  text-align: right;
-  margin: 10px 0;
+.fixed-bottom{
+  position:sticky;
+  z-index: 999;
+  top: 0;
 }
-
-.order-col {
-  display: flex;
-
-  > div {
-    margin-right: 8px;
-    padding: 16px;
-    font-size: 15px;
-  }
-}
-
-.order-list {
-  display: flex;
-}
-
-.tips {
-  margin: 0 8px;
-}
-
 .card {
   margin-bottom: 10px;
 }

@@ -270,10 +270,10 @@
       // 退货订单详情
       detail(v) {
         let sn = v.sn;
-        this.$router.push({
+        this.$options.filters.customRouterPush({
           name: "return-goods-order-detail",
           query: { sn: sn },
-        });
+        })
 
       },
     },

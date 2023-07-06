@@ -201,7 +201,7 @@ export default {
       loadDepartment(item.id).then((res) => {
         this.loadingEdit = false;
         if (res.success) {
-          console.log(res.result);
+
           callback(res.result);
         }
       });
@@ -303,7 +303,7 @@ export default {
             editDepartment(this.form.id, this.form),
             updateDepartmentRole(this.form.id, roleWay)
           ]).then((res) => {
-            console.warn(res)
+
             this.submitLoading = false;
             if (res[0].success) {
               this.$Message.success("编辑成功");
@@ -359,7 +359,7 @@ export default {
     },
     // 选中回调
     changeSelect(v) {
-      console.log(v);
+
       this.selectCount = v.length;
       this.selectList = v;
     },

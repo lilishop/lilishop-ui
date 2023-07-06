@@ -221,12 +221,12 @@ export default {
   methods: {
     //获取状态
     getfaceSheetFlag(e) {
-      console.log(e);
+
       if (e === true) {
-        console.log("打开");
+
         this.onpenText = true;
       } else {
-        console.log("关闭");
+
         this.onpenText = false;
       }
     },

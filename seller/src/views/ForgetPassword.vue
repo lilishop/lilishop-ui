@@ -186,7 +186,6 @@ export default {
 
           apiLogin.forgetAndModify(params).then(res => {
             this.loading1 = false;
-            console.log(res);
             if (res.success) {
               this.$Message.success('修改密码成功');
               this.$router.push('login');

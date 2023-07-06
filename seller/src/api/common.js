@@ -22,7 +22,6 @@ export function getBaseSite() {
 
 // 上传文件
 export const upLoadFileMethods = (bold) => {
-  console.log(bold)
   return uploadFileRequest(uploadFile, bold);
 };
 

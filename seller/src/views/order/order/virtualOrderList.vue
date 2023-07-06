@@ -252,10 +252,10 @@ export default {
     // 跳转详情
     detail(v) {
       let sn = v.sn;
-      this.$router.push({
+      this.$options.filters.customRouterPush({
         name: "order-detail",
         query: { sn: sn },
-      });
+      })
     },
   },
   mounted() {

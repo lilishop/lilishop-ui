@@ -228,7 +228,7 @@
             <span class="label">修改金额：</span>
             <span class="txt theme_color">¥{{ orderInfo.order.priceDetailDTO.updatePrice | unitPrice }}</span>
           </li>
-          <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index" > 
+          <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index" >
             <hr style="border:1px dashed black;">
               <span class="label" v-if="index == 1 && typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
               <span class="txt" style="border-bottom: 1px dashed;font-size:10px !important;" v-if="index == 1 &&  typeList.length > 1">¥{{ item.discountPrice | unitPrice }}</span>
@@ -744,9 +744,9 @@ export default {
           }
         }
       }
-      console.log(this.typeList)
+
       if (this.typeList.length >= 3) {
-        console.log(123123)
+
         this.getContentPrice()
       }
     },
@@ -849,7 +849,7 @@ export default {
             const blob = new Blob([res], {
               type: "application/pdf;charset=utf-8",
             });
-            console.log("出发blob");
+
             //对于<a>标签，只有 Firefox 和 Chrome（内核） 支持 download 属性
             //IE10以上支持blob但是依然不支持download
             if ("download" in document.createElement("a")) {

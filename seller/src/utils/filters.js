@@ -32,6 +32,21 @@ export function enCode(v1) {
   return v1;
 }
 
+import {router} from "@/router/index";
+/**
+ * 自定义跳转
+ */
+export function customRouterPush(push){
+  const setting = window.localStorage.getItem('setting');
+  if(setting.isUseTabsRouter){
+    router.push(push)
+  }
+  else{
+    let url = router.resolve(push);
+    window.open(url.href, '_blank');
+  }
+}
+
 
 /**
  * 订单来源

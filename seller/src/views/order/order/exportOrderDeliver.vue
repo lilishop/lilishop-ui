@@ -81,7 +81,6 @@ export default {
     // 点击选择步骤
     handleCheckStep(val) {
       if (val.title.search("3") == -1) {
-        console.warn(val);
         this.stepList.map((item) => {
           item.checked = false;
         });

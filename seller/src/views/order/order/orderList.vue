@@ -401,10 +401,11 @@ export default {
     // 查看订单详情
     detail(v) {
       let sn = v.sn;
-      this.$router.push({
+      this.$options.filters.customRouterPush({
         name: "order-detail",
         query: { sn: sn },
-      });
+      })
+
     },
   },
   mounted() {

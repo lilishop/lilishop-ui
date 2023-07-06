@@ -207,11 +207,10 @@
       // 跳转结算详情
       detail(v) {
         let id = v.id;
-        this.$router.push({
+        this.$options.filters.customRouterPush({
           name: "bill-detail",
           query: { id: id },
-        });
-
+        })
       },
     },
     mounted () {

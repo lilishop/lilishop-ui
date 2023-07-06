@@ -6,20 +6,20 @@
   <div class="main">
     <div class="sidebar-menu-con menu-bar">
       <div class="logo-con">
-        <!-- <img src="../assets/logo.png" key="max-logo" /> -->
         <img :src="storeSideLogo" key="max-logo" />
       </div>
       <shrinkable-menu></shrinkable-menu>
     </div>
     <!-- 顶部标题栏主体 -->
-    <div class="main-header-con">
+    <div class="main-header-con" :style="{ height: setting.isUseTabsRouter ? '100px' : '60px' }">
       <div class="main-header">
         <div
-          :class="{
-            'header-avator-con': navType != 4,
-            'header-avator-con nav4': navType == 4,
-          }"
+          class="header-avator-con"
         >
+          <!-- 左侧栏 -->
+          <div>
+
+          </div>
           <!-- 用户头像 -->
           <div class="user-dropdown-menu-con">
             <Row
@@ -28,15 +28,22 @@
               align="middle"
               class="user-dropdown-innercon"
             >
+              <ul class="nav-list">
+                <li class="nav-item " @click="handleClickSetting">
+                  <Tooltip content="设置">
+                    <Icon size="16" type="md-settings" />
+                  </Tooltip>
+                </li>
+              </ul>
               <Dropdown
                 transfer
                 trigger="hover"
                 @on-click="handleClickUserDropdown"
               >
                 <div class="dropList">
-                  <span class="main-user-name">{{ userInfo.storeName }}</span>
-                  <Icon type="md-arrow-dropdown" />
+
                   <Avatar
+                    icon="ios-person"
                     :src="userInfo.storeLogo"
                     style="background: #fff; margin-left: 10px"
                   ></Avatar>
@@ -51,11 +58,11 @@
         </div>
       </div>
       <!-- 已打开的页面标签 -->
-      <div class="tags-con">
+      <div class="tags-con" v-if="setting.isUseTabsRouter">
         <tags-page-opened :pageTagsList="pageTagsList"></tags-page-opened>
       </div>
     </div>
-    <div class="single-page-con">
+    <div class="single-page-con" :style="{ 'top': setting.isUseTabsRouter ? '100px' : '60px', height: setting.isUseTabsRouter ? 'calc(100% - 110px)' : 'calc(100% - 70px)' }">
       <div class="single-page">
         <!-- <keep-alive :include="cachePage"> -->
         <!-- </keep-alive> -->
@@ -67,6 +74,8 @@
     </div>
     <!-- 全局加载动画 -->
     <circleLoading class="loading-position" v-show="loading" />
+    <!-- 右侧抽屉配置 -->
+    <configDrawer ref="config"/>
   </div>
 </template>
 
@@ -74,25 +83,34 @@
 import shrinkableMenu from "./main-components/shrinkable-menu/shrinkable-menu.vue";
 import tagsPageOpened from "./main-components/tags-page-opened.vue";
 import circleLoading from "@/views/my-components/lili/circle-loading.vue";
+import configDrawer from "@/views/main-components/config-drawer.vue";
+
 import Cookies from "js-cookie";
 import util from "@/libs/util.js";
 import { logout } from "@/api/index";
-
+const config = require("@/config/index.js");
 export default {
   components: {
     shrinkableMenu,
     tagsPageOpened,
-    circleLoading
+    circleLoading,
+    configDrawer
   },
   data() {
     return {
+      config,
       sliceNum: 5, // 展示nav数量
       userInfo: {}, // 用户信息
-      navType: 1, // nav类型
+
       storeSideLogo: "", //logo图片
     };
   },
   computed: {
+    setting(){
+      let data = this.$store.state.setting
+
+      return data.setting
+    },
     loading() {
       return this.$store.state.app.loading;
     },
@@ -110,6 +128,9 @@ export default {
     },
   },
   methods: {
+    handleClickSetting() {
+      this.$refs.config.open();
+    },
     // 初始化方法
     init() {
       // 菜单
@@ -119,14 +140,14 @@ export default {
       }
       this.storeSideLogo = localStorage.getItem("sellerlogoImg");
       window.document.title = localStorage.getItem("sellersiteName");
-        //动态获取icon
-          let link =
-            document.querySelector("link[rel*='icon']") ||
-            document.createElement("link");
-          link.type = "image/x-icon";
-          link.href = localStorage.getItem("sellerIconImg");
-          link.rel = "shortcut icon";
-          document.getElementsByTagName("head")[0].appendChild(link);
+      //动态获取icon
+      let link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.href = localStorage.getItem("sellerIconImg");
+      link.rel = "shortcut icon";
+      document.getElementsByTagName("head")[0].appendChild(link);
 
       let userInfo = JSON.parse(Cookies.get("userInfoSeller"));
       this.userInfo = userInfo;

@@ -246,7 +246,8 @@ export default {
     },
     // 管理拼团商品
     manage(v, status) {
-      this.$router.push({ name: "pintuan-goods", query: { id: v.id, status: status } });
+      this.$options.filters.customRouterPush({name: "pintuan-goods", query: { id: v.id, status: status }}  )
+
     },
     // 手动开启拼团活动
     open(v) {

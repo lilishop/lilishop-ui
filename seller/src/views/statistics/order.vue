@@ -1,13 +1,9 @@
 <template>
 
   <div class="wrapper">
-    <Affix :offset-top="100">
       <Card class="card fixed-bottom">
-
         <affixTime @selected="clickBreadcrumb" />
-
       </Card>
-    </Affix>
 
     <Card class="card">
       <div>
@@ -430,7 +426,6 @@ export default {
   watch: {
     refundParams: {
       handler() {
-        console.log(this.refundIndex);
         if (this.refundIndex == 1) {
           this.getOrderRefundList();
         } else {
@@ -570,6 +565,11 @@ export default {
 };
 </script>
 <style scoped lang="scss">
+.fixed-bottom{
+  position:sticky;
+  z-index: 999;
+  top: 0;
+}
 .active {
   color: $theme_color;
   position: relative;

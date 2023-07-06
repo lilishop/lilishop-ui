@@ -451,9 +451,9 @@ export default {
     },
     checkClerks() {
       this.open = this.form.mobile.length;
-      console.log(this.open)
+
       if(this.open == 11 ){
-        this.checkClerk();  
+        this.checkClerk();
       }
       if(this.open < 11){
         this.checkAgainClerk()
@@ -576,7 +576,7 @@ export default {
             ids += e.id + ",";
           });
           ids = ids.substring(0, ids.length - 1);
-          console.warn(ids)
+
           resetPassword(ids).then(res => {
             this.$Modal.remove();
             if (res.success) {
@@ -590,7 +590,7 @@ export default {
     },
     updateSubmit(){
       this.submitLoading = true;
-      console.warn(this.editForm)
+
       editOtherUser(this.editForm.id,this.editForm).then(res => {
         this.submitLoading = false;
         if (res.success) {
@@ -606,7 +606,6 @@ export default {
         if (valid) {
           // 添加用户 避免编辑后传入id
           const params = JSON.parse(JSON.stringify(this.form))
-          console.warn(params)
           delete params.id;
           delete params.status;
           if (this.newMember) {
@@ -655,9 +654,9 @@ export default {
     },
     // 编辑用户
     edit(v) {
-      console.warn(v)
+
       getClerk(v.id).then(res => {
-        console.warn(res)
+
         this.mobile = res.result.mobile
         this.clerkName = res.result.clerkName
         this.editForm.isSuper = 0

@@ -136,7 +136,7 @@ export default {
       this.$nextTick(() => {
         this.decorateData = "";
 
-        console.log(this.contentData.list.length);
+
         // 如果当前楼层不为一
         if (this.contentData.list.length > 1) {
           // 如果当前最底层 给下一层赋值
@@ -156,13 +156,13 @@ export default {
 
     // 点击楼层装修
     handleComponent(val, index) {
-      console.warn(val)
+
       this.selected = index;
       this.$set(this, "decorateData", val);
     },
     // 右侧栏回调
     handleDrawer(val) {
-    
+
       let newIndex = this.selected;
 
       this.decorateData = "";

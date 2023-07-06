@@ -586,7 +586,7 @@ export default {
       let selectedNodes = this.$refs.tree.getCheckedAndIndeterminateNodes();
       let way = [];
       selectedNodes.forEach((e) => {
-        console.log(e)
+
         let perm = {
           title: e.title,
           isSuper: e.isSuper ? e.isSuper = 1 : e.isSuper = 0 || 0,
@@ -597,7 +597,7 @@ export default {
         this.$set(this,'saveRoleWay',way)
 
       });
-      console.log(this.saveRoleWay)
+
     },
 
     /**保存权限 */

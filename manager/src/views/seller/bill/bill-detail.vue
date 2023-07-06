@@ -516,7 +516,6 @@ export default {
           this.refundTotal = res.result.total;
 
           this.$set(this, "refund", res.result.records);
-          console.log();
         }
       });
       this.refundTotal = this.refund.length;

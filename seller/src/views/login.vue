@@ -144,7 +144,6 @@ export default {
           // location.reload();
           // this.$router.go(0);
 
-          console.log("Huoqu ");
           this.setStore("saveLogin", this.saveLogin);
           if (this.saveLogin) {
             // 保存7天
@@ -296,6 +295,6 @@ export default {
     opacity: 0.9;
     border-radius: 10px;
   }
-  
+
 }
 </style>

@@ -94,6 +94,13 @@ Array.prototype.remove = function (from, to) {
 Object.keys(filters).forEach(key => {
   Vue.filter(key, filters[key]);
 });
+
+
+
+
+
+
+
 /* eslint-disable no-new */
 new Vue({
   el: "#app",
