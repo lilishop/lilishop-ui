@@ -1,28 +1,29 @@
 <template>
-  <div class="cate-nav">
-    <div class="nav-con">
+  <div class="cate-nav width_1200_auto" :class="{'fixed-show':useClass == 'fixed-show'}">
+    <div class="nav-con" :class="{'background-white':useClass == 'background-white'}">
       <div
         class="all-categories hover-pointer"
         @mouseenter="showFirstLists"
         @mouseleave="showFirstList = false"
       >
-        全部商品分类
+        商品分类
       </div>
-      <ul class="nav-item" v-if="showNavBar">
+      <ul class="nav-item " v-if="showNavBar">
         <li
-          class="nav-lis"
+          class="nav-lis flex flex-a-c flex-j-c"
           v-for="(item, index) in navList.list"
           :key="index"
           @click="linkTo(item.url)"
         >
           {{ item.name }}
-          <!-- {{item}} -->
+          <div class="colum"></div>
         </li>
       </ul>
     </div>
     <!-- 全部商品分类 -->
     <div
       class="cate-list"
+      :style="{'top':!showNavBar ?'60px':'46px'}"
       v-show="showAlways || showFirstList"
       @mouseenter="showFirstList = true"
       @mouseleave="showFirstList = false"
@@ -131,6 +132,10 @@ export default {
       default: false,
       type: Boolean,
     },
+    useClass:{
+      type:null,
+      default:''
+    }
   },
   data() {
     return {
@@ -223,46 +228,81 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.background-white{
+  background: #fff;
+}
 .nav-lis:hover {
   color: $theme_color !important;
   cursor: pointer;
+
+}
+.nav-lis{
+  width: 103px;
+  text-align: center;
+  position: relative;
+}
+.fixed-show{
+  margin-top: 0 !important;
+  >.nav-con{
+  >.all-categories{
+    align-items: center !important;
+    height: 60px;
+    display: inherit;
+    justify-content: center;
+    padding: 0 !important;
+  }
+  }
+}
+.colum{
+  height: 14.7px;
+  opacity: 1;
+  border: 0.7px solid #CBC8C8;
+  position: absolute;
+  right: 0;
 }
 .cate-nav {
-  width: 1200px;
   position: relative;
-  margin: 0 auto;
+  margin: 14px auto 0 auto;
 }
 /** 商品分类 */
 .nav-con {
-  width: 1200px;
-  height: 40px;
+  height: 46px;
   margin: 0 auto;
   display: flex;
   .all-categories {
-    width: 200px;
-    line-height: 40px;
-    color: #fff;
-    background-color: $theme_color;
-    text-align: center;
-    font-size: 16px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding-left: 37.4px;
+    background: #FFFFFF;
+    width: 263.2px;
+    padding-top: 15.4px;
+    line-height: 20px;
     border-bottom: none;
+    font-size: 16.8px;
+    font-weight: normal;
+    color: #333333;
+    letter-spacing: 0px;
   }
   .nav-item {
-    width: 1000px;
-    height: 40px;
-    line-height: 40px;
+    width: 914px;
+    height: 46px;
+    border-radius: 10px;
+    background: #FFFFFF;
+    margin-left: 10px;
+    line-height: 46px;
     overflow: hidden;
     list-style: none;
     // background-color: #eee;
     display: flex;
     li {
       float: left;
-      font-weight: bold;
-      margin-left: 20px;
-      color: rgb(129, 127, 127);
-      font-size: 15px;
+      font-size: 17px;
+      font-weight: normal;
+      color: #333333;
+
+
       &:hover {
-        color: #e1251b;
+        color: $theme_color;
       }
     }
   }
@@ -271,17 +311,33 @@ export default {
 .cate-list {
   margin: 0 auto;
   position: absolute;
+
   z-index: 1000;
 }
 
 .nav-side {
-  width: 200px;
+  width: 263.2px;
+  color: #666;
   float: left;
-  padding: 0px;
-  color: #fff;
-  background-color: #6e6568;
-  height: 335px;
-  overflow: hidden;
+  overflow:hidden;
+
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  background-color: #fff;
+  height: 340px;
+  ////自动移滚动条样式
+  //&::-webkit-scrollbar {
+  //  width: 1px;
+  //  height: 5px;
+  //}
+  //&::-webkit-scrollbar-thumb {
+  //  border-radius: 1em;
+  //  background-color: rgba(50, 50, 50, 0.3);
+  //}
+  //&::-webkit-scrollbar-track {
+  //  border-radius: 1em;
+  //  background-color: rgba(50, 50, 50, 0.1);
+  //}
 }
 .large-nav {
   height: 470px;
@@ -294,22 +350,16 @@ export default {
 }
 .nav-side ul {
   width: 100%;
-  padding: 0px;
-  padding-top: 5px;
   list-style: none;
 }
 .nav-side li {
-  padding: 7.5px 0;
-  padding-left: 12px;
+  padding: 0 0 16.2px 37.4px;
   font-size: 13px;
   line-height: 18px;
-  &:hover {
-    background: #999395;
-  }
 }
 .nav-side-item:hover {
   cursor: pointer;
-  color: #e1251b;
+  color: $theme_color;
 }
 
 /*显示商品详细信息*/
@@ -335,10 +385,11 @@ export default {
   padding-left: 12px;
   margin-right: 15px;
   font-size: 12px;
-  background-color: #6e6568;
+  color: #333;
 }
 .nav-detail-item span:hover {
-  background-color: #e1251b;
+  background-color: $theme_color;
+  color: #fff;
 }
 .detail-item-panel li {
   line-height: 30px;
@@ -353,7 +404,7 @@ export default {
   text-align: right;
 }
 .detail-item-title:hover {
-  color: #e1251b;
+  color: $theme_color;
 }
 .detail-item-row {
   display: flex;
@@ -373,6 +424,6 @@ export default {
   }
 }
 .detail-item:hover {
-  color: #e1251b;
+  color: $theme_color;
 }
 </style>

@@ -10,20 +10,28 @@ $warning_color: #ff9900;
 $error_color: #ed3f14;
 $handle-btn-color: #438cde;
 
-$theme_color: #e4393c;
+$theme_color: #F31947;
 
 $border_color: #dddee1;
 $title_color: #8c8c8c;
 $light_title_color: #1c2438;
 $light_content_color: #495060;
 $light_sub_color: #80848f;
-$light_background_color: #f8f8f9;
+$light_background_color: #F5F5F7;
 $light_white_background_color: #fff;
 // 暗黑主题颜色
 $dark_background_color: #141414;
 $dark_sub_background_color: #1d1d1d; //稍微浅一点的
 $dark_content_color: #d5d5d5;
 
+
+.wes-2 {
+	/* 适用于webkit内核和移动端 */
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
+}
 /***** 封装一些方法可用于 黑暗主题 ，明亮主题 *****/
 
 // 背景颜色
@@ -283,10 +291,24 @@ li {
         left: auto;
     }
 }
+.flex{
+  display: flex;
+}
+.flex-a-c{
+  align-items: center;
+}
+.flex-j-sb{
+  justify-content: space-between;
+}
+.flex-j-c{
+  justify-content: center;
+}
 
+.width_1200_auto {
+  width: 1184px;
+  margin: 0 auto;
 
-
-
+}
 
 
 

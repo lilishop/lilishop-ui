@@ -65,12 +65,12 @@ export default {
     handleScrollx(){
       // console.log('滚动高度',window.pageYOffset) // 获取滚动条的高度
       // console.log(this.$refs.obtain.getBoundingClientRect().top) //获取到距离顶部的距离
-      this.scrollHieght = Number(window.pageYOffset);//获取到距离顶部的距离
-      this.scrollTops = Number(this.$refs.obtain.getBoundingClientRect().top); // 获取到距离顶部的距离
-         this.topSearchShow = true; // 展示图钉
-          if(this.scrollTops < -660){ // 超过隐藏
-            this.topSearchShow = false;
-      }
+      // this.scrollHieght = Number(window.pageYOffset);//获取到距离顶部的距离
+      // this.scrollTops = Number(this.$refs.obtain.getBoundingClientRect().top); // 获取到距离顶部的距离
+      //    this.topSearchShow = true; // 展示图钉
+      //     if(this.scrollTops < -660){ // 超过隐藏
+      //       this.topSearchShow = false;
+      // }
     },
      toguid(path,id){
       var path =path;
@@ -81,7 +81,7 @@ export default {
     change(status){ //获取是否获取到图钉
       this.open = status
     },
-    gotoDemo(){ // 跳转到demo的位置 
+    gotoDemo(){ // 跳转到demo的位置
     if(this.open){ // 获取到图钉之后在跳转当前位置
        document.querySelector("#demo").scrollIntoView(true);
     }

@@ -10,7 +10,7 @@
           >)
         </div>
       </div>
-      <Search :showTag="false" :showLogo="false"></Search>
+
     </div>
     <Divider />
     <!-- 购物车主体 -->
@@ -245,7 +245,7 @@
       </div>
       <Spin size="large" fix v-if="loading"></Spin>
     </div>
-    <BaseFooter></BaseFooter>
+    <BaseFooter class="footer"></BaseFooter>
   </div>
 </template>
 
@@ -449,6 +449,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.footer{
+  margin-top: 10px;
+}
 /** logo 搜索 start **/
 .logo {
   height: 40px;
@@ -781,4 +784,5 @@ export default {
 .ivu-input-number-input {
   text-align: center;
 }
+
 </style>

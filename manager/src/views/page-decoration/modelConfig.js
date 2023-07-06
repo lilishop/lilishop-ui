@@ -682,6 +682,253 @@ export const modelData = [{
     },
   },
   {
+    type: 'oneRowThreeColumns',
+    name: '一行三列',
+    icon: 'md-image',
+    options: {
+      list:[
+        {
+          img: require('@/assets/nav/decorate8.png'),
+          url:"",
+          size:"385*165"
+        },
+        {
+          img: require('@/assets/nav/decorate8.png'),
+          url:"",
+          size:"385*165"
+        },
+        {
+          img: require('@/assets/nav/decorate8.png'),
+          url:"",
+          size:"385*165"
+        },
+      ]
+    },
+  },
+  {
+    type: 'goodsType',
+    name: '商品模块',
+    icon: 'md-image',
+    options: {
+      title:"智能家居",
+      labels:[
+        {
+          label: '音箱',
+          ___index:0,
+
+        },
+        {
+          label: '门锁',
+          ___index:1
+        },
+        {
+          label: '路由器',
+          ___index:2
+        },
+        {
+          label: '智能设备',
+          ___index:3
+        },
+      ],
+      list:[
+        {
+          img: "https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+          price: "120",
+          title:" 微软 (Microsoft) Xbox 无线控制器/手柄 湛蓝色 | 3.5mm耳机接口蓝牙连接 Xbox主机电脑平板通用",
+          desc:"万家宝藏好店等你来",
+          url:'',
+          ___index: 0
+        },
+
+      ]
+    },
+  },
+  {
+    type: 'onlyGoodsModel',
+    name: '商品模块2',
+    icon: 'md-image',
+    options: {
+      list:[
+        {
+          img: "https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+          price: "120",
+          title:" 微软 (Microsoft) Xbox 无线控制器/手柄 湛蓝色 | 3.5mm耳机接口蓝牙连接 Xbox主机电脑平板通用",
+          desc:"万家宝藏好店等你来",
+          url:'',
+        },
+      ]
+    },
+  },
+  {
+    type: 'mixModel',
+    name: '混合模块',
+    icon: 'md-image',
+    options: {
+      left:{
+        model:'goods',
+        //数据集合
+        data:{
+          image:{
+            url:"",
+            src:'https://lili-system.oss-cn-beijing.aliyuncs.com/mix-bg1.png',
+            size:"197 * 344"
+          },
+          list:[
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+              title:"商品标题",
+              price:"120",
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+              title:"商品标题",
+              price:"120",
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+              title:"商品标题",
+              price:"120",
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+              title:"商品标题",
+              price:"120",
+              url:"",
+            },
+          ],
+          badge:{
+            label:"精选",
+            url:""
+          }
+
+        }
+      },
+      right:{
+        model:'brand',
+        data:{
+          image:{
+            url:"",
+            src:'https://lili-system.oss-cn-beijing.aliyuncs.com/mix-bg2.png',
+            size:"254 * 344"
+          },
+          list:[
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+              title:"商品标题",
+              price:"120",
+              url:"",
+            },
+            {
+              img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+              title:"商品标题",
+              price:"120",
+              url:"",
+            },
+          ],
+          badge:"",
+        }
+      },
+    },
+  },
+
+  {
+    type: 'forYour',
+    name: '为你推荐',
+    icon: 'md-image',
+    options: {
+        model:'goods',
+        title:"为你推荐",
+        //数据集合
+        data:{
+          image:{
+            url:"",
+            src:'https://lili-system.oss-cn-beijing.aliyuncs.com/mix-bg3.png',
+            size:"197 * 344"
+          },
+          list:[
+            {
+              img:"https://lili-system.oss-cn-beijing.aliyuncs.com/example1.png",
+              title:"标题",
+              desc:"精品好物等你挑",
+              url:"",
+              size:"346 * 554"
+            },
+            {
+              img:"https://lili-system.oss-cn-beijing.aliyuncs.com/example2.png",
+              title:"标题",
+              desc:"精品好物等你挑",
+              url:"",
+              size:"190 * 156"
+            },
+            {
+              img:"https://lili-system.oss-cn-beijing.aliyuncs.com/example3.png",
+              title:"标题",
+              desc:"精品好物等你挑",
+              url:"",
+              size:"190 * 156"
+            },
+            {
+              img:"https://lili-system.oss-cn-beijing.aliyuncs.com/example4.png",
+              title:"标题",
+              desc:"精品好物等你挑",
+              url:"",
+              size:"190 * 156"
+            },
+          ],
+          hot:{
+            title:"最近热卖",
+            list:[
+              {
+                img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+                title:"商品标题",
+                price:"120",
+                url:"",
+              },{
+                img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+                title:"商品标题",
+                price:"120",
+                url:"",
+              },{
+                img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+                title:"商品标题",
+                price:"120",
+                url:"",
+              },{
+                img:"https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
+                title:"商品标题",
+                price:"120",
+                url:"",
+              },
+            ]
+          }
+      },
+
+    },
+  },
+
+  {
     type: 'notEnough',
     name: '还没逛够',
     icon: 'md-image',

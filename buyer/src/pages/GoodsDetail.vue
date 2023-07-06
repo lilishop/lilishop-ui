@@ -3,7 +3,6 @@
     <BaseHeader></BaseHeader>
     <Search></Search>
     <drawer></drawer>
-    <ShopHeader :detail="storeMsg"></ShopHeader>
     <div class="shop-item-path">
       <div class="shop-nav-container">
         <Breadcrumb>
@@ -45,7 +44,7 @@
 
 <script>
 import Search from "@/components/Search";
-import ShopHeader from "@/components/header/ShopHeader";
+
 import ShowGoods from "@/components/goodsDetail/ShowGoods";
 import empty from "@/components/empty/Main";
 import ShowGoodsDetail from "@/components/goodsDetail/ShowGoodsDetail";
@@ -192,7 +191,6 @@ export default {
   watch: {},
   components: {
     Search,
-    ShopHeader,
     ShowGoods,
     ShowGoodsDetail,
     empty

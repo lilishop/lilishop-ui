@@ -1,9 +1,9 @@
 <template>
-  <div>
+  <div class="wrapper">
     <BaseHeader></BaseHeader>
     <Search @search="handleSearch"></Search>
     <drawer></drawer>
-    <cateNav></cateNav>
+    <cateNav class="cate-nav" useClass="background-white"></cateNav>
     <div class="container">
       <!-- 商品筛选栏 -->
       <GoodsClassNav @getParams="getParams"></GoodsClassNav>
@@ -261,6 +261,9 @@ export default {
 
 <style scoped lang="scss">
 @import "../assets/styles/goodsList.scss";
+.cate-nav{
+  margin-top: 10px;
+}
 .goods-show-info > .goods-show-seller > .goods-show-buyer {
   width: 35px;
   height: 17px;
@@ -288,7 +291,7 @@ export default {
 }
 .container {
   margin: 15px auto;
-  width: 1200px;
+  width: 1184px;
   min-width: 1000px;
   position: relative;
 }
@@ -299,92 +302,14 @@ export default {
   display: flex;
 }
 /* ---------------侧边广告栏开始------------------- */
-.as-box {
-  width: 200px;
-  border: 1px solid #ccc;
-}
+
 .goods-show-right {
   display: flex;
   flex-direction: row;
   margin-top: 5px;
 }
 
-.goods-show-self {
-  float: left;
-  height: 16px;
-  line-height: 16px;
-  padding: 0 3px;
-  margin-right: 3px;
-  overflow: hidden;
-  text-align: center;
-  font-style: normal;
-  font-size: 12px;
-  background: #e23a3a;
-  color: #fff;
-  border-radius: 2px;
-}
 
-.goods-show-middle {
-  float: left;
-  height: 16px;
-  line-height: 16px;
-  padding: 0 3px;
-  margin-right: 3px;
-  overflow: hidden;
-  text-align: center;
-  font-style: normal;
-  font-size: 12px;
-  border: 1px solid rgba(112, 123, 187, 0.8);
-  color: rgba(112, 123, 187, 0.8);
-}
-
-// .goods-show-middle:hover {
-//   color: rgba(2, 15, 88, 0.6);
-//   border: 0.2px solid rgba(0, 13, 87, 0.6);
-//   border-radius: 4px;
-//   line-height: 18px;
-// }
-
-.item-as-title {
-  width: 100%;
-  height: 36px;
-  color: $theme_color;
-  line-height: 36px;
-  font-size: 18px;
-}
-.item-as-title span:first-child {
-  margin-left: 20px;
-}
-.item-as-title span:last-child {
-  float: right;
-  margin-right: 15px;
-  font-size: 10px;
-  color: rgb(204, 204, 204);
-}
-.item-as {
-  width: 160px;
-  margin: 18px auto;
-}
-.item-as-img {
-  width: 160px;
-  height: 160px;
-  margin: 0px auto;
-}
-.item-as-price span {
-  font-size: 18px;
-}
-.item-as-intro {
-  margin-top: 5px;
-  font-size: 12px;
-}
-.item-as-selled {
-  margin-top: 5px;
-  font-size: 12px;
-}
-.item-as-selled span {
-  color: #005aa0;
-}
-/* ---------------侧边广告栏结束------------------- */
 
 /* ---------------商品栏开始------------------- */
 .goods-list-box {
