@@ -53,23 +53,23 @@
             style="width: 160px"
           ></DatePicker>
         </Form-item>
-        <Form-item label="订单状态" prop="orderStatus">
-          <Select
-            v-model="searchForm.orderStatus"
-            placeholder="请选择"
-            clearable
-            style="width: 160px"
-          >
-            <Option value="UNPAID">未付款</Option>
-            <Option value="PAID">已付款</Option>
-            <Option value="UNDELIVERED">待发货</Option>
-            <Option value="DELIVERED">已发货</Option>
-            <Option value="COMPLETED">已完成</Option>
-            <Option value="TAKE">待核验</Option>
-            <Option value="CANCELLED">已取消</Option>
-            <Option value="STAY_PICKED_UP">待自提</Option>
-          </Select>
-        </Form-item>
+<!--        <Form-item label="订单状态" prop="orderStatus">-->
+<!--          <Select-->
+<!--            v-model="searchForm.orderStatus"-->
+<!--            placeholder="请选择"-->
+<!--            clearable-->
+<!--            style="width: 160px"-->
+<!--          >-->
+<!--            <Option value="UNPAID">未付款</Option>-->
+<!--            <Option value="PAID">已付款</Option>-->
+<!--            <Option value="UNDELIVERED">待发货</Option>-->
+<!--            <Option value="DELIVERED">已发货</Option>-->
+<!--            <Option value="COMPLETED">已完成</Option>-->
+<!--            <Option value="TAKE">待核验</Option>-->
+<!--            <Option value="CANCELLED">已取消</Option>-->
+<!--            <Option value="STAY_PICKED_UP">待自提</Option>-->
+<!--          </Select>-->
+<!--        </Form-item>-->
         <Button
           @click="handleSearch"
           type="primary"
@@ -88,6 +88,12 @@
         >
           <Button type="info" class="export"> 导出订单 </Button>
         </download-excel>
+      </div>
+
+      <div class="order-tab">
+        <div v-for="(item,index) in orderStatus" :key="index" :class="{'current': currentStatus === item.value}" @click="orderStatusClick(item)">
+          {{item.title}}
+        </div>
       </div>
 
       <Table
@@ -317,6 +323,19 @@ export default {
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
+      orderStatus: [
+        {title: '全部', value: ''},
+        {title: '未付款', value: 'UNPAID'},
+        {title: '已付款', value: 'PAID'},
+        {title: '待发货', value: 'UNDELIVERED'},
+        {title: '已发货', value: 'DELIVERED'},
+        {title: '待核验', value: 'TAKE'},
+        {title: '待自提', value: 'STAY_PICKED_UP'},
+        {title: '已完成', value: 'COMPLETED'},
+        {title: '已取消', value: 'CANCELLED'},
+
+      ],
+      currentStatus: ''
     };
   },
   methods: {
@@ -386,6 +405,12 @@ export default {
         this.$Message.warning("导出订单失败，请重试");
       }
     },
+    // 订单筛选
+    orderStatusClick(item) {
+      this.currentStatus = item.value;
+      this.searchForm.orderStatus = item.value;
+      this.getDataList();
+    },
   },
   mounted() {
     this.init();
@@ -398,5 +423,24 @@ export default {
 }
 .export-excel-wrapper {
   display: inline;
+}
+.order-tab {
+  width: 950px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f0f0f0;
+  padding: 0 10px;
+  margin-bottom: 10px;
+  div {
+    text-align: center;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .current {
+    background-color: #ffffff;
+  }
 }
 </style>
