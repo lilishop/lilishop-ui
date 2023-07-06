@@ -2,7 +2,6 @@
   <div style="background: #fff">
     <BaseHeader></BaseHeader>
     <Search></Search>
-    <drawer></drawer>
     <div class="shop-item-path">
       <div class="shop-nav-container">
         <Breadcrumb>

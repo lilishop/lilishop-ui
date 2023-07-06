@@ -2,7 +2,6 @@
   <div class="wrapper">
     <BaseHeader></BaseHeader>
     <Search @search="handleSearch"></Search>
-    <drawer></drawer>
     <cateNav class="cate-nav" useClass="background-white"></cateNav>
     <div class="container">
       <!-- 商品筛选栏 -->
