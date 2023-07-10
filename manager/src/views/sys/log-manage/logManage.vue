@@ -275,6 +275,9 @@ export default {
           align: "center",
           width: 170,
           sortType: "desc",
+          render:(h,params)=>{
+            return h('span',this.$options.filters.unixToDate(params.row.createTime / 1000))
+          }
         },
       ],
       data: [], // 日志数据
