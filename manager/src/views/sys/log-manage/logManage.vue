@@ -150,6 +150,9 @@ export default {
           key: "createTime",
           align: "center",
           width: 170,
+          render:(h,params)=>{
+            return h('span',this.$options.filters.unixToDate(params.row.createTime / 1000))
+          }
         },
       ],
       columns_dev: [
