@@ -16,7 +16,7 @@
           @click="linkTo(item.url)"
         >
           {{ item.name }}
-          <div class="colum"></div>
+          <div class="colum" v-if="index !== navList.list.length - 1"></div>
         </li>
       </ul>
     </div>

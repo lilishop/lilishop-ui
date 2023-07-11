@@ -2,11 +2,11 @@
   <div class="merchant">
     <BaseHeader/>
     <!-- 搜索栏 -->
-    <Search :store="true" @search="search"></Search>
+    <Search  :storeId="storeMsg.storeId" @search="search"></Search>
     <!-- 店铺logo -->
     <div class="shop-logo">
       <div>
-        <p>{{ storeMsg.storeName || 'xx店铺' }}</p>
+        <p>{{ storeMsg.storeName || '店铺' }}</p>
         <p :alt="storeMsg.storeDesc" class="ellipsis" v-html="storeMsg.storeDesc"></p>
       </div>
       <div>

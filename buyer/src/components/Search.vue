@@ -21,10 +21,6 @@
             <Icon type="ios-search" size="21"/>
           </div>
         </i-input>
-        <div v-if="store" class="btn-div">
-          <Button class="store-search" type="warning" @click="searchStore">搜本店</Button>
-          <Button class="store-search" type="primary" @click="search">搜全站</Button>
-        </div>
         <template v-if="showTag">
           <div style="height:12px" v-if="promotionTags.length === 0"></div>
           <div v-else class="history-list flex">
@@ -57,9 +53,9 @@ export default {
       type: Boolean,
       default: true
     },
-    store: { // 是否为店铺页面
-      type: Boolean,
-      default: false
+    storeId: { // 是否为店铺页面
+      type: String,
+      default: ""
     },
     hover: {
       type: Boolean,
@@ -85,10 +81,14 @@ export default {
       if(url == '/goodsList'){
         this.$emit('search', this.searchData)
       }else{
-        this.$router.push({
-          path: '/goodsList',
-          query: { keyword: this.searchData }
-        });
+        const pushData = {
+          path:'/goodsList',
+          query: { keyword: this.searchData },
+        }
+        if(this.storeId) pushData.query.storeId = this.storeId
+
+
+        this.$router.push(pushData);
       }
     },
     searchStore() { // 店铺搜索商品
@@ -129,6 +129,10 @@ export default {
 .navbar {
   height: 113px;
   background: #fff;
+}
+.search-icon{
+  width: 100%;
+  height: 100%;
 }
 .small-search-box{
   height: 60px;

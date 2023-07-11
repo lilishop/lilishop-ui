@@ -2,7 +2,7 @@
   <div class="wrapper">
     <BaseHeader></BaseHeader>
     <Search @search="handleSearch"></Search>
-    <cateNav class="cate-nav" useClass="background-white"></cateNav>
+
     <div class="container">
       <!-- 商品筛选栏 -->
       <GoodsClassNav @getParams="getParams"></GoodsClassNav>
@@ -289,7 +289,7 @@ export default {
   vertical-align: middle;
 }
 .container {
-  margin: 15px auto;
+  margin:25px auto 15px auto;
   width: 1184px;
   min-width: 1000px;
   position: relative;
