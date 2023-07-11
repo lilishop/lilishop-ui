@@ -39,7 +39,7 @@
       <TabPane label="微信消息" name="WECHAT">
         <div class="search">
             <Row class="operation mt_10">
-              <Button @click="weChatSync" type="primary">同步微信消息</Button>
+              <Button @click="weChatSync" type="primary">初始化微信消息</Button>
             </Row>
             <Table
               :loading="loading"
@@ -65,7 +65,7 @@
       <TabPane label="微信小程序订阅消息" name="WECHATMP">
         <div class="search">
             <Row class="operation mt_10">
-              <Button @click="weChatSync('mp')" type="primary">同步微信小程序订阅消息</Button>
+              <Button @click="weChatSync('mp')" type="primary">初始化微信小程序订阅消息</Button>
             </Row>
             <Table
               :loading="loading"
