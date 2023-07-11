@@ -53,9 +53,7 @@
             <span slot="close">关</span>
           </i-switch>
         </FormItem>
-        <FormItem label="电子面单表单">
-          <Input v-model="form.formItems" clearable style="width: 100%"/>
-        </FormItem>
+
         <FormItem label="禁用状态" prop="disabled">
 
           <i-switch true-value="OPEN" false-value="CLOSE" v-model="form.disabled" size="large">
@@ -230,7 +228,7 @@
         this.form.name = v.name;
         this.form.code = v.code;
         this.form.standBy = v.standBy;
-        this.form.formItems = v.formItems;
+
         this.form.disabled = v.disabled === 'CLOSE' ? 'OPEN' : 'CLOSE';
         updateLogistics(v.id, this.form).then((res) => {
           if (res.success) {
@@ -290,7 +288,7 @@
         this.form.code = v.code;
         console.log(v)
         this.form.standBy = v.standBy;
-        this.form.formItems = v.formItems;
+
 
 
 
