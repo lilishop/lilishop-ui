@@ -203,6 +203,21 @@
                 <Input v-model="shopForm.scope" clearable style="width: 200px" />
               </FormItem>
 
+              <FormItem label="营业执照电子版">
+                <Avatar
+                  style="height: 100px; width: 100px"
+                  v-if="shopForm.licencePhoto"
+                  shape="square"
+                  icon="ios-person"
+                  size="default"
+                  :src="shopForm.licencePhoto"
+                />
+                <div>
+                  <Button @click="handleCLickImg('licencePhoto')" type="primary"
+                  >选择图片</Button
+                  >
+                </div>
+              </FormItem>
               <Divider orientation="left">法人信息</Divider>
 
               <FormItem label="法人姓名" prop="legalName">
@@ -261,21 +276,6 @@
                 />
               </FormItem>
 
-              <FormItem label="许可证电子版">
-                <Avatar
-                  style="height: 100px; width: 100px"
-                  v-if="shopForm.licencePhoto"
-                  shape="square"
-                  icon="ios-person"
-                  size="default"
-                  :src="shopForm.licencePhoto"
-                />
-                <div>
-                  <Button @click="handleCLickImg('licencePhoto')" type="primary"
-                    >选择图片</Button
-                  >
-                </div>
-              </FormItem>
               <Spin fix v-if="loading"></Spin>
             </div>
           </TabPane>
