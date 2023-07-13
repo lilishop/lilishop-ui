@@ -17,9 +17,6 @@
       <FormItem v-if="formValidate.type==='ALI_OSS'" key="aliyunOSSBucketName" label="储存空间" class="label-item" prop="aliyunOSSBucketName">
         <Input v-model="formValidate.aliyunOSSBucketName"/>
       </FormItem>
-      <FormItem v-if="formValidate.type==='ALI_OSS'" key="aliyunOSSPicLocation" label="存放路径路径" prop="aliyunOSSPicLocation">
-        <Input v-model="formValidate.aliyunOSSPicLocation"/>
-      </FormItem>
       <FormItem v-if="formValidate.type==='ALI_OSS'" key="aliyunOSSAccessKeyId" label="密钥id" prop="aliyunOSSAccessKeyId">
         <Input v-model="formValidate.aliyunOSSAccessKeyId"/>
       </FormItem>
@@ -97,7 +94,6 @@ export default {
         aliyunOSSAccessKeyId: "",
         aliyunOSSAccessKeySecret: "",
         aliyunOSSBucketName: "",
-        aliyunOSSPicLocation: "",
         aliyunOSSEndPoint: "",
         m_endpoint: "",
         m_accessKey: "",
