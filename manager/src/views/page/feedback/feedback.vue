@@ -80,6 +80,8 @@
         searchForm: { // 请求参数
           pageNumber: 1,
           pageSize: 10,
+          sort: "createTime",
+          order: "desc",
         },
         formValidate: false, // modal显隐
         columns: [ // 表头

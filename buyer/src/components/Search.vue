@@ -22,7 +22,11 @@
           </div>
         </i-input>
         <template v-if="showTag">
-          <div style="height:12px" v-if="promotionTags.length === 0"></div>
+          <div class="only-store" v-if="storeId" @click="research()">
+            切换为{{!onlyStore ? '店铺内' : '平台'}}搜索
+
+          </div>
+          <div v-if="promotionTags.length === 0"></div>
           <div v-else class="history-list flex">
             <div
               v-for="(item, index) in promotionTags"
@@ -35,6 +39,7 @@
         </template>
       </div>
     </div>
+
   </div>
 </template>
 
@@ -66,15 +71,24 @@ export default {
       default:''
     }
   },
+  watch:{
+    storeId(val){
+      this.onlyStore = val ? true : false
+    }
+  },
   data() {
     return {
-      searchData: '' // 搜索内容
+      searchData: '', // 搜索内容
+      onlyStore:false,
     };
   },
   methods: {
     selectTags(item) { // 选择热门标签
       this.searchData = item;
       this.search();
+    },
+    research(){
+      this.onlyStore = !this.onlyStore
     },
     search () { // 全平台搜索商品
       const url = this.$route.path;
@@ -85,7 +99,7 @@ export default {
           path:'/goodsList',
           query: { keyword: this.searchData },
         }
-        if(this.storeId) pushData.query.storeId = this.storeId
+        if(this.storeId && this.onlyStore) pushData.query.storeId = this.storeId
 
 
         this.$router.push(pushData);
@@ -106,6 +120,7 @@ export default {
   },
   created() {
     this.searchData = this.$route.query.keyword
+
     if (!this.hover) { // 首页顶部固定搜索栏不调用热词接口
       // 搜索热词每5分钟请求一次
       const reloadTime = storage.getItem('hotWordsReloadTime')
@@ -126,6 +141,11 @@ export default {
 };
 </script>
 <style scoped lang="scss">
+.only-store{
+  text-align: right;
+  color:$theme_color;
+  cursor: pointer;
+}
 .navbar {
   height: 113px;
   background: #fff;
@@ -221,7 +241,7 @@ export default {
 }
 
 .history-list {
-  margin-top: 2px;
+
   margin-left: 28px;
 }
 
