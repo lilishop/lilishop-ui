@@ -25,9 +25,6 @@
         <FormItem label="accessSecret" prop="accessSecret">
           <Input v-model="form.accessSecret" clearable style="width: 100%"/>
         </FormItem>
-        <FormItem label="regionId" prop="regionId">
-          <Input v-model="form.regionId" clearable style="width: 100%"/>
-        </FormItem>
         <FormItem label="signName" prop="signName">
           <Input v-model="form.signName" clearable style="width: 100%"/>
         </FormItem>
