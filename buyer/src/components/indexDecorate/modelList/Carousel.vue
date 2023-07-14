@@ -154,7 +154,8 @@ export default {
   methods: {
     // 快捷跳转中心
     entryControl(val) {
-      this.$router.push(val.path)
+      let url = this.$router.resolve(val.path);
+      window.open(url.href, '_blank');
     },
   },
   mounted() {

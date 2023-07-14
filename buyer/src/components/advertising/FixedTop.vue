@@ -24,7 +24,7 @@ export default {
 .advertising {
   height: 80px;
   width: 100%;
-  background-color: $theme_color;
+
   text-align: center;
   overflow: hidden;
   position: relative;
