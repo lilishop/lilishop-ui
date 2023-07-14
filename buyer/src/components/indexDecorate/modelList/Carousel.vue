@@ -6,7 +6,7 @@
       <div class="nav-content">
         <!-- 轮播图 -->
 <!--        autoplay autoplay-speed="10000"-->
-        <Carousel :height="333.9" autoplay autoplay-speed="5000">
+        <Carousel :height="333.9" autoplay :autoplay-speed="5000">
           <CarouselItem  v-for="(item, index) in data.options.list" :key="index">
             <div class="swiper-img" >
               <img
