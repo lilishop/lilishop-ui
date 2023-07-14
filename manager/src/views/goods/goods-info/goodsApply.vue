@@ -286,10 +286,10 @@ export default {
     //查看商品详情
     showDetail(v) {
       let id = v.id;
-      this.$router.push({
+      this.$options.filters.customRouterPush({
         name: "goods-detail",
         query: { id: id },
-      });
+      })
     },
   },
   mounted() {

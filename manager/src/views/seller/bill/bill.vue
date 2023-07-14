@@ -197,10 +197,10 @@ export default {
     },
     detail(v) { // 账单详情
       let id = v.id;
-      this.$router.push({
+      this.$options.filters.customRouterPush({
         name: "bill-detail",
         query: { id: id },
-      });
+      })
     },
     remove(v) {
       this.$Modal.confirm({

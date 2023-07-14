@@ -12,59 +12,67 @@
       <shrinkable-menu></shrinkable-menu>
     </div>
     <!-- 顶部标题栏主体 -->
-    <div class="main-header-con">
+    <div class="main-header-con" :style="{ height: setting.isUseTabsRouter ? '100px' : '60px' }">
       <div class="main-header">
-        <div
-          :class="{
-            'header-avator-con': navType != 4,
-            'header-avator-con nav4': navType == 4,
-          }"
-        >
-          <!-- 通知消息 -->
-          <message-tip v-if="tipsMessage" :res="tipsMessage"></message-tip>
-          <!-- 用户头像 -->
-          <div class="user-dropdown-menu-con">
-            <Row
-              type="flex"
-              justify="end"
-              align="middle"
-              class="user-dropdown-innercon"
-            >
-              <Dropdown
-                transfer
-                trigger="hover"
-                @on-click="handleClickUserDropdown"
+        <div class="header-avator-con">
+          <!-- 左侧栏 -->
+          <div>
+
+          </div>
+          <div class="flex flex-a-c user-module">
+            <!-- 通知消息 -->
+            <message-tip v-if="tipsMessage" :res="tipsMessage"></message-tip>
+            <!-- 用户头像 -->
+            <div class="user-dropdown-menu-con">
+              <Row
+                type="flex"
+                justify="end"
+                align="middle"
+                class="user-dropdown-innercon"
               >
-                <div class="dropList">
-                  <span class="main-user-name">{{ userInfo.nickName }}</span>
-                  <Icon type="md-arrow-dropdown" />
-                  <Avatar
-                    :src="avatarPath"
-                    style="background: #fff; margin-left: 10px"
-                  ></Avatar>
-                </div>
-                <DropdownMenu slot="list">
-                  <DropdownItem name="personalCenter">{{
-                    $t("userCenter")
-                  }}</DropdownItem>
-                  <DropdownItem name="changePass">{{
-                    $t("changePass")
-                  }}</DropdownItem>
-                  <DropdownItem name="loginOut" divided>{{
-                    $t("logout")
-                  }}</DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-            </Row>
+                <ul class="nav-list">
+                  <li class="nav-item " @click="handleClickSetting">
+                    <Tooltip content="设置">
+                      <Icon size="16" type="md-settings" />
+                    </Tooltip>
+                  </li>
+                </ul>
+                <Dropdown
+                  transfer
+                  trigger="hover"
+                  @on-click="handleClickUserDropdown"
+                >
+                  <div class="dropList">
+                    <span class="main-user-name">{{ userInfo.nickName }}</span>
+                    <Avatar
+                      icon="ios-person"
+                      :src="avatarPath"
+                      style="background: #fff; margin-left: 10px"
+                    ></Avatar>
+                  </div>
+                  <DropdownMenu slot="list">
+                    <DropdownItem name="personalCenter">{{
+                      $t("userCenter")
+                    }}</DropdownItem>
+                    <DropdownItem name="changePass">{{
+                      $t("changePass")
+                    }}</DropdownItem>
+                    <DropdownItem name="loginOut" divided>{{
+                      $t("logout")
+                    }}</DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+              </Row>
+            </div>
           </div>
         </div>
       </div>
       <!-- 已打开的页面标签 -->
-      <div class="tags-con">
+      <div class="tags-con"  v-if="setting.isUseTabsRouter">
         <tags-page-opened :pageTagsList="pageTagsList"></tags-page-opened>
       </div>
     </div>
-    <div class="single-page-con">
+    <div class="single-page-con"  :style="{ 'top': setting.isUseTabsRouter ? '100px' : '60px', height: setting.isUseTabsRouter ? 'calc(100% - 110px)' : 'calc(100% - 70px)' }">
       <div class="single-page">
         <!-- <keep-alive :include="cachePage"> -->
         <router-view></router-view>
@@ -73,6 +81,8 @@
     </div>
     <!-- 全局加载动画 -->
     <circleLoading class="loading-position" v-show="loading" />
+    <!-- 右侧抽屉配置 -->
+    <configDrawer ref="config"/>
   </div>
 </template>
 
@@ -81,29 +91,37 @@ import shrinkableMenu from "./main-parts/shrinkable-menu/shrinkable-menu.vue";
 import tagsPageOpened from "./main-parts/tags-page-opened.vue";
 import messageTip from "./main-parts/message-tip.vue";
 import circleLoading from "@/components/lili/circle-loading.vue";
+import configDrawer from "@/components/lili/config-drawer.vue";
 import Cookies from "js-cookie";
 import util from "@/libs/util.js";
 import { getNoticePage, logout } from "@/api/index";
 import { getBaseSite } from "@/api/common";
 
 var client;
+const config = require("@/config/index.js");
 export default {
   components: {
     shrinkableMenu,
     tagsPageOpened,
     messageTip,
     circleLoading,
+    configDrawer
   },
   data() {
     return {
+      config,
       sliceNum: 5, // 展示nav数量
       userInfo: "", // 用户信息
-      navType: 1, // nav类型
       tipsMessage: "", // 通知消息
       domainLogo: "",
     };
   },
   computed: {
+    setting(){
+      let data = this.$store.state.setting
+
+      return data.setting
+    },
     loading() {
       return this.$store.state.app.loading;
     },
@@ -119,6 +137,9 @@ export default {
   },
 
   methods: {
+    handleClickSetting() {
+      this.$refs.config.open();
+    },
     init() {
       // 菜单初始化
       let userInfo = JSON.parse(Cookies.get("userInfoManager"));

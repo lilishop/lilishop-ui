@@ -439,7 +439,7 @@ export default {
     },
     //查看会员
     detail(row) {
-      this.$router.push({ name: "member-detail", query: { id: row.id } });
+      this.$options.filters.customRouterPush({ name: "member-detail", query: { id: row.id } })
     },
 
     //禁用会员

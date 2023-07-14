@@ -354,10 +354,10 @@ export default {
     // 跳转售后详情
     detail(v) {
       let sn = v.sn;
-      this.$router.push({
+      this.$options.filters.customRouterPush({
         name: "after-order-detail",
         query: { sn: sn },
-      });
+      })
     },
     // 售后筛选
     serviceStatusClick(item) {

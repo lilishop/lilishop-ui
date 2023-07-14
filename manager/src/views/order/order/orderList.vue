@@ -383,10 +383,11 @@ export default {
     // 跳转详情页面
     detail(v) {
       let sn = v.sn;
-      this.$router.push({
+      this.$options.filters.customRouterPush({
         name: "order-detail",
         query: { sn: sn },
-      });
+      })
+
     },
     // 导出订单
     async exportOrder() {

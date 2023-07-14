@@ -267,13 +267,11 @@ export default {
     },
     // 订单详情
     detail (v) {
-      console.log(v.orderType);
       let sn = v.sn;
-      this.$router.push({
+      this.$options.filters.customRouterPush({
         name: "order-detail",
         query: { sn: sn, orderType: v.orderType },
-      });
-
+      })
     },
     // 订单筛选
     orderStatusClick(item) {

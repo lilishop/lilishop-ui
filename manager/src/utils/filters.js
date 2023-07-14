@@ -15,7 +15,7 @@ export function unitPrice(val, unit, location) {
   }
   return (unit || '') + price
 }
-// 转义 
+// 转义
 export function enCode(v1) {
   var entry = {
     "&#39;": "'",
@@ -30,6 +30,25 @@ export function enCode(v1) {
   });
 
   return v1;
+}
+
+import {router} from "@/router/index";
+/**
+ * 自定义跳转
+ */
+export function customRouterPush(push){
+  const setting = window.localStorage.getItem('admin-setting') ? JSON.parse(window.localStorage.getItem('admin-setting')) : {};
+
+  if(setting.isUseTabsRouter){
+    router.push(push)
+  }
+  else{
+    if(Object.keys(setting).length == 0){router.push(push)}
+    else{
+      let url = router.resolve(push);
+      window.open(url.href, '_blank');
+    }
+  }
 }
 
 

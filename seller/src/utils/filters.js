@@ -43,8 +43,11 @@ export function customRouterPush(push){
     router.push(push)
   }
   else{
-    let url = router.resolve(push);
-    window.open(url.href, '_blank');
+    if(Object.keys(setting).length == 0){router.push(push)}
+    else{
+      let url = router.resolve(push);
+      window.open(url.href, '_blank');
+    }
   }
 }
 

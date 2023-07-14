@@ -400,7 +400,8 @@ export default {
 
     //详细
     detail(row) {
-      this.$router.push({ name: "member-detail", query: { id: row.id } });
+      this.$options.filters.customRouterPush({ name: "member-detail", query: { id: row.id } })
+
     },
     //启用会员
     enable(v) {
