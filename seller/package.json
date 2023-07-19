@@ -15,7 +15,7 @@
     "@antv/g2": "^4.1.14",
     "@tinymce/tinymce-vue": "^3.2.0",
     "axios": "^0.21.1",
-    "dplayer": "^1.27.0",
+    "dplayer": "^1.27.1",
     "js-cookie": "^2.2.1",
     "node-sass": "^4.14.1",
     "price-color": "^1.0.2",

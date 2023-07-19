@@ -2,7 +2,7 @@
   <div>
     <BaseHeader></BaseHeader>
     <Search></Search>
-    <cateNav></cateNav>
+
     <div class="title-bg"><p>文章帮助中心</p></div>
     <div class="container width_1200">
       <Layout class="layoutAll">

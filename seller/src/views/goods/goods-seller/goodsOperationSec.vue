@@ -4,12 +4,7 @@
       <img :src="previewImage" v-if="visible" style="width: 100%">
     </Modal>
     <div class="content-goods-publish">
-      <Form
-        ref="baseInfoForm"
-        :label-width="120"
-        :model="baseInfoForm"
-        :rules="baseInfoFormRule"
-      >
+      <Form ref="baseInfoForm" :label-width="120" :model="baseInfoForm" :rules="baseInfoFormRule">
         <div class="base-info-item">
           <h4>基本信息</h4>
           <div class="form-item-view">
@@ -21,325 +16,186 @@
               <span> &gt; {{ this.baseInfoForm.categoryName[2] }}</span>
             </FormItem>
             <FormItem label="商品名称" prop="goodsName">
-              <Input
-                v-model="baseInfoForm.goodsName"
-                clearable
-                placeholder="商品名称"
-                style="width: 260px"
-                type="text"
-              />
+              <Input v-model="baseInfoForm.goodsName" clearable placeholder="商品名称" style="width: 260px" type="text" />
             </FormItem>
 
             <FormItem label="商品价格" prop="price">
-              <Input
-                v-model="baseInfoForm.price"
-                clearable
-                placeholder="商品价格"
-                style="width: 260px"
-                type="text"
-              />
+              <Input v-model="baseInfoForm.price" clearable placeholder="商品价格" style="width: 260px" type="text" />
             </FormItem>
             <FormItem label="商品卖点" prop="sellingPoint">
-              <Input
-                v-model="baseInfoForm.sellingPoint"
-                :rows="4"
-                style="width: 260px"
-                type="textarea"
-              />
+              <Input v-model="baseInfoForm.sellingPoint" :rows="4" style="width: 260px" type="textarea" />
             </FormItem>
             <FormItem label="商品品牌" prop="brandId">
-              <Select
-                v-model="baseInfoForm.brandId"
-                filterable
-                style="width: 200px"
-              >
-                <Option
-                  v-for="item in brandList"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.id"
-                ></Option>
+              <Select v-model="baseInfoForm.brandId" filterable style="width: 200px">
+                <Option v-for="item in brandList" :key="item.id" :label="item.name" :value="item.id"></Option>
               </Select>
             </FormItem>
           </div>
           <h4>商品交易信息</h4>
           <div class="form-item-view">
-            <FormItem
-              class="form-item-view-el"
-              label="计量单位"
-              prop="goodsUnit"
-            >
+            <FormItem class="form-item-view-el" label="计量单位" prop="goodsUnit">
               <Select v-model="baseInfoForm.goodsUnit" style="width: 100px">
-                <Option
-                  v-for="(item, index) in goodsUnitList"
-                  :key="index"
-                  :value="item"
-                  >{{ item }}
+                <Option v-for="(item, index) in goodsUnitList" :key="index" :value="item">{{ item }}
                 </Option>
               </Select>
             </FormItem>
-            <FormItem
-              class="form-item-view-el"
-              label="销售模式"
-              prop="salesModel"
-            >
-              <RadioGroup
-                v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'"
-                v-model="baseInfoForm.salesModel"
-                button-style="solid"
-                type="button"
-                @on-change="renderTableData(skuTableData)"
-              >
+            <FormItem class="form-item-view-el" label="销售模式" prop="salesModel">
+              <RadioGroup v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'" v-model="baseInfoForm.salesModel"
+                button-style="solid" type="button" @on-change="renderTableData(skuTableData)">
                 <Radio label="RETAIL" title="零售型">零售型</Radio>
                 <Radio label="WHOLESALE" title="批发型">批发型</Radio>
               </RadioGroup>
-              <RadioGroup
-                v-else
-                v-model="baseInfoForm.salesModel"
-                button-style="solid"
-                type="button"
-              >
+              <RadioGroup v-else v-model="baseInfoForm.salesModel" button-style="solid" type="button">
                 <Radio label="RETAIL" title="零售型">
                   <span>虚拟型</span>
                 </Radio>
               </RadioGroup>
             </FormItem>
-            <FormItem
-              v-if="baseInfoForm.salesModel == 'WHOLESALE'"
-              class="form-item-view-el"
-              label="销售规则"
-              prop="wholesaleRule"
-            >
+            <FormItem v-if="baseInfoForm.salesModel == 'WHOLESALE'" class="form-item-view-el" label="销售规则"
+              prop="wholesaleRule">
               <div class="form-item-view-wholesale">
                 <div>
-                  <Table
-                    :columns="wholesaleColumns"
-                    :data="wholesaleData"
-                    border
-                  >
+                  <Table :columns="wholesaleColumns" :data="wholesaleData" border>
                     <template slot="wholesaleNum" slot-scope="{ row, index }">
                       <div>
-                        <Input
-                          v-model="wholesaleData[index].num"
-                          min="1"
-                          number
-                          type="number"
-                          @on-blur="checkWholesaleNum(index)"
-                        >
-                          <span slot="append">{{
-                            baseInfoForm.goodsUnit || ""
-                          }}</span>
+                        <Input v-model="wholesaleData[index].num" min="1" number type="number"
+                          @on-blur="checkWholesaleNum(index)">
+                        <span slot="append">{{
+                          baseInfoForm.goodsUnit || ""
+                        }}</span>
                         </Input>
                       </div>
                     </template>
                     <template slot="wholesalePrice" slot-scope="{ row, index }">
-                      <div
-                        style="
+                      <div style="
                           display: flex;
                           justify-content: space-between;
                           align-items: center;
-                        "
-                      >
-                        <Input
-                          v-model="wholesaleData[index].price"
-                          min="1"
-                          number
-                          style="width: 190px"
-                          type="number"
-                          @on-blur="checkWholesalePrice(index)"
-                        >
-                          <span slot="append">元</span>
+                        ">
+                        <Input v-model="wholesaleData[index].price" min="1" number style="width: 190px" type="number"
+                          @on-blur="checkWholesalePrice(index)">
+                        <span slot="append">元</span>
                         </Input>
-                        <Button
-                          v-if="index > 0"
-                          size="small"
-                          style="margin-left: 5px"
-                          type="error"
-                          @click="handleDeleteWholesaleData(index)"
-                          >删除
+                        <Button v-if="index > 0" size="small" style="margin-left: 5px" type="error"
+                          @click="handleDeleteWholesaleData(index)">删除
                         </Button>
                       </div>
                     </template>
                   </Table>
 
-                  <Button
-                    v-if="wholesaleData.length < 3"
-                    icon="md-add"
-                    style="margin-top: 10px"
-                    @click="handleAddWholesaleData()"
-                  >
+                  <Button v-if="wholesaleData.length < 3" icon="md-add" style="margin-top: 10px"
+                    @click="handleAddWholesaleData()">
                     添加价格区间
                   </Button>
                 </div>
                 <div class="form-item-view-wholesale-preview">
-                  <Table
-                    :columns="wholesalePreviewColumns"
-                    :data="wholesaleData"
-                    border
-                  ></Table>
+                  <Table :columns="wholesalePreviewColumns" :data="wholesaleData" border></Table>
                 </div>
               </div>
             </FormItem>
           </div>
           <h4>商品规格及图片</h4>
           <div class="form-item-view">
-            <FormItem
-              class="form-item-view-el required"
-              label="商品图片"
-              prop="goodsGalleryFiles"
-            >
+            <FormItem class="form-item-view-el required" label="商品图片" prop="goodsGalleryFiles">
               <div style="display: flex; flex-wrap: flex-start">
-                <vuedraggable
-                  :animation="200"
-                  :list="baseInfoForm.goodsGalleryFiles"
-                >
-                  <div
-                    v-for="(item, __index) in baseInfoForm.goodsGalleryFiles"
-                    :key="__index"
-                    class="demo-upload-list"
-                  >
+                <vuedraggable :animation="200" :list="baseInfoForm.goodsGalleryFiles">
+                  <div v-for="(item, __index) in baseInfoForm.goodsGalleryFiles" :key="__index" class="demo-upload-list">
                     <template>
                       <img :src="item.url" />
                       <div class="demo-upload-list-cover">
                         <div>
-                          <Icon
-                            size="30"
-                            type="md-search"
-                            @click.native="handleViewGoodsPicture(item.url)"
-                          ></Icon>
-                          <Icon
-                            size="30"
-                            type="md-trash"
-                            @click.native="handleRemoveGoodsPicture(item)"
-                          ></Icon>
+                          <Icon size="30" type="md-search" @click.native="handleViewGoodsPicture(item.url)"></Icon>
+                          <Icon size="30" type="md-trash" @click.native="handleRemoveGoodsPicture(item)"></Icon>
                         </div>
                       </div>
                     </template>
                   </div>
                 </vuedraggable>
 
-                <Upload
-                  ref="upload"
-                  :action="uploadFileUrl"
-                  :before-upload="handleBeforeUploadGoodsPicture"
-                  :format="['jpg', 'jpeg', 'png']"
-                  :headers="{ ...accessToken }"
-                  :max-size="1024"
-                  :on-exceeded-size="handleMaxSize"
-                  :on-format-error="handleFormatError"
-                  :on-success="handleSuccessGoodsPicture"
-                  :show-upload-list="false"
-                  multiple
-                  style="margin-left: 10px"
-                  type="drag"
-                >
+                <Upload ref="upload" :action="uploadFileUrl" :before-upload="handleBeforeUploadGoodsPicture"
+                  :format="['jpg', 'jpeg', 'png']" :headers="{ ...accessToken }" :max-size="2048"
+                  :on-exceeded-size="handleMaxSize" :on-format-error="handleFormatError"
+                  :on-success="handleSuccessGoodsPicture" :show-upload-list="false" multiple type="drag">
                   <div style="width: 148px; height: 148px; line-height: 148px">
                     <Icon size="20" type="md-add"></Icon>
                   </div>
                 </Upload>
               </div>
               <Modal v-model="goodsPictureVisible" title="View Image">
-                <img
-                  v-if="goodsPictureVisible"
-                  :src="previewGoodsPicture"
-                  style="width: 100%"
-                />
+                <img v-if="goodsPictureVisible" :src="previewGoodsPicture" style="width: 100%" />
               </Modal>
             </FormItem>
+            <div class="flex mb-10">
+              <div class="goods-video-label">
+                上传视频
+              </div>
+              <div class="flex goods-video" >
+                <div>
+                  <Upload ref="upload" :action="uploadFileUrl" v-if="!baseInfoForm.goodsVideo" style="width: 150px; height: 150px;"
+                    :format="['mp4', 'avi',]" :headers="{ ...accessToken }" :max-size="10240"
+                    :on-exceeded-size="handleMaxSize" :on-format-error="handleFormatError"
+                    :on-success="handleSuccessGoodsVideo" :show-upload-list="false" type="drag">
+                    <div style="width: 148px; height: 148px; line-height: 148px">
+                      <Icon size="20" type="md-add"></Icon>
+                    </div>
+                  </Upload>
+                  <span class="theme_color" v-if="baseInfoForm.goodsVideo">已成功上传视频</span>
+                </div>
+
+                <Button class="view-video" v-if="baseInfoForm.goodsVideo" @click="showGoodsVideo = true">查看视频</Button>
+                <Button type="primary" v-if="baseInfoForm.goodsVideo" @click="baseInfoForm.goodsVideo = ''">删除视频</Button>
+              </div>
+            </div>
+
             <div class="layout" style="width: 100%">
               <Collapse v-model="open_panel">
                 <Panel name="1">
                   自定义规格项
                   <div slot="content">
                     <Form>
-                      <div
-                        v-for="(item, $index) in skuInfo"
-                        :key="$index"
-                        class="sku-item-content"
-                      >
+                      <div v-for="(item, $index) in skuInfo" :key="$index" class="sku-item-content">
                         <Card :bordered="true" class="ivu-card-body">
-                          <Button
-                            slot="extra"
-                            type="primary"
-                            @click="handleCloseSkuItem($index, item)"
-                          >
+                          <Button slot="extra" type="primary" @click="handleCloseSkuItem($index, item)">
                             删除规格
                           </Button>
                           <div>
-                            <FormItem
-                              class="sku-item-content-val flex"
-                              label="规格名"
-                            >
-                              <AutoComplete
-                                v-model="item.name"
-                                :data="skuData"
-                                :filter-method="filterMethod"
-                                :maxlength="30"
-                                placeholder="请输入规格名称"
-                                style="width: 150px"
-                                @on-focus="changeSkuItem(item.name)"
-                                @on-change="
+                            <FormItem class="sku-item-content-val flex" label="规格名">
+                              <AutoComplete v-model="item.name" :data="skuData" :filter-method="filterMethod"
+                                :maxlength="30" placeholder="请输入规格名称" style="width: 150px"
+                                @on-focus="changeSkuItem(item.name)" @on-change="
                                   editSkuItem(item.name, $index, item)
-                                "
-                              >
+                                  ">
                               </AutoComplete>
                             </FormItem>
                           </div>
                           <div class="flex sku-val">
                             <Form :model="item" class="flex">
                               <!--规格值文本列表-->
-                              <FormItem
-                                v-for="(val, index) in item.spec_values"
-                                :key="index"
-                                class="sku-item-content-val flex"
-                                label="规格项"
-                              >
-                                <AutoComplete
-                                  ref="input"
-                                  v-model="val.value"
-                                  :data="skuVal"
-                                  :filter-method="filterMethod"
-                                  :maxlength="30"
-                                  placeholder="请输入规格项"
-                                  style="width: 150px"
-                                  @on-focus="changeSkuVals(val, item.name)"
-                                  @on-blur="checkSkuVal(val, index)"
-                                  @on-change="skuValueChange(val, index, item)"
-                                >
+                              <FormItem v-for="(val, index) in item.spec_values" :key="index"
+                                class="sku-item-content-val flex" label="规格项">
+                                <AutoComplete ref="input" v-model="val.value" :data="skuVal" :filter-method="filterMethod"
+                                  :maxlength="30" placeholder="请输入规格项" style="width: 150px"
+                                  @on-focus="changeSkuVals(val, item.name)" @on-blur="checkSkuVal(val, index)"
+                                  @on-change="skuValueChange(val, index, item)">
                                 </AutoComplete>
-                                <Button
-                                  size="small"
-                                  style="margin-left: 10px"
-                                  type="primary"
-                                  @click="handleCloseSkuValue(val, index, item)"
-                                >
+                                <Button size="small" style="margin-left: 10px" type="primary"
+                                  @click="handleCloseSkuValue(val, index, item)">
                                   删除
                                 </Button>
                               </FormItem>
                             </Form>
                           </div>
                           <div>
-                            <Button @click="addSpec($index, item)"
-                              >添加规格值
+                            <Button @click="addSpec($index, item)">添加规格值
                             </Button>
                           </div>
                         </Card>
                       </div>
                     </Form>
-                    <Button
-                      class="add-sku-btn"
-                      size="small"
-                      type="primary"
-                      @click="addSkuItem"
-                      >添加规格项
+                    <Button class="add-sku-btn" size="small" type="primary" @click="addSkuItem">添加规格项
                     </Button>
                     &nbsp;
-                    <Button
-                      class="add-sku-btn"
-                      size="small"
-                      type="warning"
-                      @click="handleClearSku"
-                      >清空规格项
+                    <Button class="add-sku-btn" size="small" type="warning" @click="handleClearSku">清空规格项
                     </Button>
                   </div>
                 </Panel>
@@ -347,159 +203,81 @@
                   规格详细
                   <div slot="content">
                     <div slot="content">
-                      <Table
-                        :columns="skuTableColumn"
-                        :data="skuTableData"
-                        class="mt_10"
-                        style="
+                      <Table :columns="skuTableColumn" :data="skuTableData" class="mt_10" style="
                           width: 100%;
                           .ivu-table-overflowX {
                             overflow-x: hidden;
                           }
-                        "
-                      >
+                        ">
                         <template slot="sn" slot-scope="{ row }">
-                          <Input
-                            v-model="row.sn"
-                            clearable
-                            placeholder="请输入货号"
-                            @on-change="updateSkuTable(row, 'sn')"
-                          />
+                          <Input v-model="row.sn" clearable placeholder="请输入货号" @on-change="updateSkuTable(row, 'sn')" />
                         </template>
-                        <div
-                          v-if="baseInfoForm.goodsType !== 'VIRTUAL_GOODS'"
-                          slot="weight"
-                          slot-scope="{ row }"
-                        >
-                          <Input
-                            v-model="row.weight"
-                            clearable
-                            placeholder="请输入重量"
-                            @on-change="updateSkuTable(row, 'weight')"
-                          >
-                            <span slot="append">kg</span>
+                        <div v-if="baseInfoForm.goodsType !== 'VIRTUAL_GOODS'" slot="weight" slot-scope="{ row }">
+                          <Input v-model="row.weight" clearable placeholder="请输入重量"
+                            @on-change="updateSkuTable(row, 'weight')">
+                          <span slot="append">kg</span>
                           </Input>
                         </div>
                         <template slot="quantity" slot-scope="{ row }">
-                          <Input
-                            v-model="row.quantity"
-                            clearable
-                            placeholder="请输入库存"
-                            @on-change="updateSkuTable(row, 'quantity')"
-                          >
-                            <span slot="append">{{
-                              baseInfoForm.goodsUnit || ""
-                            }}</span>
+                          <Input v-model="row.quantity" clearable placeholder="请输入库存"
+                            @on-change="updateSkuTable(row, 'quantity')">
+                          <span slot="append">{{
+                            baseInfoForm.goodsUnit || ""
+                          }}</span>
                           </Input>
                         </template>
                         <template slot="cost" slot-scope="{ row }">
-                          <Input
-                            v-model="row.cost"
-                            clearable
-                            placeholder="请输入成本价"
-                            @on-change="updateSkuTable(row, 'cost')"
-                          >
-                            <span slot="append">元</span>
+                          <Input v-model="row.cost" clearable placeholder="请输入成本价"
+                            @on-change="updateSkuTable(row, 'cost')">
+                          <span slot="append">元</span>
                           </Input>
                         </template>
                         <template slot="price" slot-scope="{ row }">
-                          <Input
-                            v-model="row.price"
-                            clearable
-                            placeholder="请输入价格"
-                            @on-change="updateSkuTable(row, 'price')"
-                          >
-                            <span slot="append">元</span>
+                          <Input v-model="row.price" clearable placeholder="请输入价格"
+                            @on-change="updateSkuTable(row, 'price')">
+                          <span slot="append">元</span>
                           </Input>
                         </template>
                         <template slot="wholePrice0" slot-scope="{ row }">
-                          <Input
-                            v-if="wholesaleData[0]"
-                            v-model="wholesaleData[0].price"
-                            clearable
-                            disabled
-                          >
-                            <span slot="append">元</span>
+                          <Input v-if="wholesaleData[0]" v-model="wholesaleData[0].price" clearable disabled>
+                          <span slot="append">元</span>
                           </Input>
                         </template>
                         <template slot="wholePrice1" slot-scope="{ row }">
-                          <Input
-                            v-if="wholesaleData[1]"
-                            v-model="wholesaleData[1].price"
-                            clearable
-                            disabled
-                          >
-                            <span slot="append">元</span>
+                          <Input v-if="wholesaleData[1]" v-model="wholesaleData[1].price" clearable disabled>
+                          <span slot="append">元</span>
                           </Input>
                         </template>
                         <template slot="wholePrice2" slot-scope="{ row }">
-                          <Input
-                            v-if="wholesaleData[2]"
-                            v-model="wholesaleData[2].price"
-                            clearable
-                            disabled
-                          >
-                            <span slot="append">元</span>
+                          <Input v-if="wholesaleData[2]" v-model="wholesaleData[2].price" clearable disabled>
+                          <span slot="append">元</span>
                           </Input>
                         </template>
                         <template slot="images" slot-scope="{ row }">
-                          <div @mouseover="mouseOver(row)" @mouseleave="mouseLeave"><Button @click="editSkuPicture(row)" type="error" >编辑图片 ！</Button></div>
-                          <Modal
-                            v-model="showSkuPicture"
-                            :styles="{ top: '30px' }"
-                            cancel-text="取消"
-                            class-name="sku-preview-modal"
-                            ok-text="结束编辑"
-                            title="编辑图片"
-                            @on-ok="updateSkuPicture()"
-                          >
+                          <div @mouseover="mouseOver(row)" @mouseleave="mouseLeave"><Button @click="editSkuPicture(row)"
+                              type="error">编辑图片 ！</Button></div>
+                          <Modal v-model="showSkuPicture" :styles="{ top: '30px' }" cancel-text="取消"
+                            class-name="sku-preview-modal" ok-text="结束编辑" title="编辑图片" @on-ok="updateSkuPicture()">
                             <div class="preview-picture">
-                              <img
-                                v-if="previewPicture !== ''"
-                                :src="previewPicture"
-                              />
+                              <img v-if="previewPicture !== ''" :src="previewPicture" />
                             </div>
                             <Divider />
-                            <vuedraggable
-                              :animation="200"
-                              :list="selectedSku.images"
-                              style="display: inline-block"
-                            >
-                              <div
-                                v-for="(img, __index) in selectedSku.images"
-                                :key="__index"
-                                class="sku-upload-list"
-                              >
+                            <vuedraggable :animation="200" :list="selectedSku.images" style="display: inline-block">
+                              <div v-for="(img, __index) in selectedSku.images" :key="__index" class="sku-upload-list">
                                 <template>
                                   <img :src="img.url" />
                                   <div class="sku-upload-list-cover">
-                                    <Icon
-                                      type="md-search"
-                                      @click="handleView(img.url)"
-                                    ></Icon>
-                                    <Icon
-                                      type="md-trash"
-                                      @click="handleRemove(img, __index)"
-                                    ></Icon>
+                                    <Icon type="md-search" @click="handleView(img.url)"></Icon>
+                                    <Icon type="md-trash" @click="handleRemove(img, __index)"></Icon>
                                   </div>
                                 </template>
                               </div>
                             </vuedraggable>
-                            <Upload
-                              ref="uploadSku"
-                              :action="uploadFileUrl"
-                              :before-upload="handleBeforeUpload"
-                              :format="['jpg', 'jpeg', 'png']"
-                              :headers="{ ...accessToken }"
-                              :max-size="1024"
-                              :on-exceeded-size="handleMaxSize"
-                              :on-format-error="handleFormatError"
-                              :on-success="handleSuccess"
-                              :show-upload-list="false"
-                              multiple
-                              style="display: inline-block; width: 58px"
-                              type="drag"
-                            >
+                            <Upload ref="uploadSku" :action="uploadFileUrl" :before-upload="handleBeforeUpload"
+                              :format="['jpg', 'jpeg', 'png']" :headers="{ ...accessToken }" :max-size="2048"
+                              :on-exceeded-size="handleMaxSize" :on-format-error="handleFormatError"
+                              :on-success="handleSuccess" :show-upload-list="false" multiple
+                              style="display: inline-block; width: 58px" type="drag">
                               <div>
                                 <Icon size="55" type="ios-camera"></Icon>
                               </div>
@@ -515,114 +293,58 @@
           </div>
           <h4 v-if="showContent">规格描述内容</h4>
           <div v-if="showContent" class="form-item-view">
-              <div >
-                <FormItem
-                  class="form-item-view-el"
-                  :label="contentImage"
-                >
-                  <!-- {{item.url}} -->
-                  <div style="width:100%;display:flex;" v-for="(item,index) in listImages.images" :key="index">
-                    <img style="width:100px;flex:1;margin-top:10px;cursor:pointer;" :src="item.url" @click="getImages(item.url)"/>
-                  </div>
-                </FormItem>
-              </div>
+            <div>
+              <FormItem class="form-item-view-el" :label="contentImage">
+                <!-- {{item.url}} -->
+                <div style="width:100%;display:flex;" v-for="(item, index) in listImages.images" :key="index">
+                  <img style="width:100px;flex:1;margin-top:10px;cursor:pointer;" :src="item.url"
+                    @click="getImages(item.url)" />
+                </div>
+              </FormItem>
             </div>
+          </div>
           <h4>商品详情描述</h4>
           <div class="form-item-view">
             <div class="tree-bar">
-              <FormItem
-                class="form-item-view-el"
-                label="店内分类"
-                prop="shopCategory"
-              >
-                <Tree
-                  ref="tree"
-                  :check-strictly="false"
-                  :data="shopCategory"
-                  show-checkbox
-                  style="text-align: left"
-                  @on-select-change="selectTree"
-                  @on-check-change="changeSelect"
-                ></Tree>
+              <FormItem class="form-item-view-el" label="店内分类" prop="shopCategory">
+                <Tree ref="tree" :check-strictly="false" :data="shopCategory" show-checkbox style="text-align: left"
+                  @on-select-change="selectTree" @on-check-change="changeSelect"></Tree>
               </FormItem>
             </div>
-            <FormItem
-              class="form-item-view-el"
-              label="PC商品描述"
-              prop="intro"
-              style="width: 100%"
-            >
-             <Alert class='editor-alert' type="warning">将文件夹下的图片进行拖拽到文本框内，即可完成单/多图片上传。</Alert>
-              <editor
-                ref="editor"
-                v-model="baseInfoForm.intro"
-                :init="{ ...initEditor, height: '800px' }"
-                openXss
-              ></editor>
+            <FormItem class="form-item-view-el" label="PC商品描述" prop="intro" style="width: 100%">
+              <Alert class='editor-alert' type="warning">将文件夹下的图片进行拖拽到文本框内，即可完成单/多图片上传。</Alert>
+              <editor ref="editor" v-model="baseInfoForm.intro" :init="{ ...initEditor, height: '800px' }" openXss>
+              </editor>
               <div class="promise-intro-btn">
-                <Button type="primary" @click="promiseIntroEditor"
-                  >将PC商品描述同步到移动端描述
+                <Button type="primary" @click="promiseIntroEditor">将PC商品描述同步到移动端描述
                 </Button>
               </div>
             </FormItem>
 
-            <FormItem
-              class="form-item-view-el"
-              label="移动端描述"
-              prop="skuList"
-              style="width: 100%"
-            >
-              <editor
-                ref="editor"
-                v-model="baseInfoForm.mobileIntro"
-                :init="{ ...initEditor, height: '800px' }"
-                openXss
-              ></editor>
+            <FormItem class="form-item-view-el" label="移动端描述" prop="skuList" style="width: 100%">
+              <editor ref="editor" v-model="baseInfoForm.mobileIntro" :init="{ ...initEditor, height: '800px' }" openXss>
+              </editor>
             </FormItem>
           </div>
           <div v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'">
             <h4>商品物流信息</h4>
             <div class="form-item-view">
-              <FormItem
-                class="form-item-view-el"
-                label="物流模板"
-                prop="templateId"
-              >
+              <FormItem class="form-item-view-el" label="物流模板" prop="templateId">
                 <Select v-model="baseInfoForm.templateId" style="width: 200px">
-                  <Option
-                    v-for="item in logisticsTemplate"
-                    :key="item.id"
-                    :value="item.id"
-                    >{{ item.name }}
+                  <Option v-for="item in logisticsTemplate" :key="item.id" :value="item.id">{{ item.name }}
                   </Option>
                 </Select>
               </FormItem>
-              <FormItem
-                v-if="baseInfoForm.salesModel == 'WHOLESALE'"
-                class="form-item-view-el"
-                label="商品重量"
-                prop="weight"
-              >
-                <Input
-                  v-model="baseInfoForm.weight"
-                  placeholder="请输入商品重量"
-                >
-                  <span slot="append">kg</span></Input
-                >
+              <FormItem v-if="baseInfoForm.salesModel == 'WHOLESALE'" class="form-item-view-el" label="商品重量"
+                prop="weight">
+                <Input v-model="baseInfoForm.weight" placeholder="请输入商品重量">
+                <span slot="append">kg</span></Input>
               </FormItem>
             </div>
             <h4>其他信息</h4>
             <div class="form-item-view">
-              <FormItem
-                class="form-item-view-el"
-                label="商品发布"
-                prop="release"
-              >
-                <RadioGroup
-                  v-model="baseInfoForm.release"
-                  button-style="solid"
-                  type="button"
-                >
+              <FormItem class="form-item-view-el" label="商品发布" prop="release">
+                <RadioGroup v-model="baseInfoForm.release" button-style="solid" type="button">
                   <Radio :label="1" title="立即发布">
                     <span>立即发布</span>
                   </Radio>
@@ -631,16 +353,8 @@
                   </Radio>
                 </RadioGroup>
               </FormItem>
-              <FormItem
-                class="form-item-view-el"
-                label="商品推荐"
-                prop="skuList"
-              >
-                <RadioGroup
-                  v-model="baseInfoForm.recommend"
-                  button-style="solid"
-                  type="button"
-                >
+              <FormItem class="form-item-view-el" label="商品推荐" prop="skuList">
+                <RadioGroup v-model="baseInfoForm.recommend" button-style="solid" type="button">
                   <Radio :label="1" title="推荐">
                     <span>推荐</span>
                   </Radio>
@@ -651,43 +365,24 @@
               </FormItem>
             </div>
             <div class="form-item-view-bottom">
-              <Collapse
-                v-for="(paramsGroup, groupIndex) in goodsParams"
-                :key="paramsGroup.groupName"
-                v-model="params_panel"
-                :title="paramsGroup.groupName"
-                class="mb_10"
-                style="text-align: left"
-              >
+              <Collapse v-for="(paramsGroup, groupIndex) in goodsParams" :key="paramsGroup.groupName"
+                v-model="params_panel" :title="paramsGroup.groupName" class="mb_10" style="text-align: left">
                 <Panel :name="paramsGroup.groupName">
                   {{ paramsGroup.groupName }}
                   <p slot="content">
-                    <FormItem
-                      v-for="(params, paramsIndex) in paramsGroup.params"
-                      :key="paramsIndex"
-                      :label="`${params.paramName}：`"
-                    >
-                      <Select
-                        v-model="params.paramValue"
-                        clearable
-                        placeholder="请选择"
-                        style="width: 200px"
-                        @on-change="
-                          selectParams(
-                            paramsGroup,
-                            groupIndex,
-                            params,
-                            paramsIndex,
-                            params.paramValue
-                          )
-                        "
-                      >
-                        <Option
-                          v-for="option in params.options.split(',')"
-                          :key="option"
-                          :label="option"
-                          :value="option"
-                        ></Option>
+                    <FormItem v-for="(params, paramsIndex) in paramsGroup.params" :key="paramsIndex"
+                      :label="`${params.paramName}：`">
+                      <Select v-model="params.paramValue" clearable placeholder="请选择" style="width: 200px" @on-change="
+                        selectParams(
+                          paramsGroup,
+                          groupIndex,
+                          params,
+                          paramsIndex,
+                          params.paramValue
+                        )
+                        ">
+                        <Option v-for="option in params.options.split(',')" :key="option" :label="option" :value="option">
+                        </Option>
                       </Select>
                     </FormItem>
                   </p>
@@ -708,6 +403,12 @@
         <Button type="primary" @click="saveToDraft">保存为模版</Button>
       </ButtonGroup>
     </div>
+
+    <Modal v-model="showGoodsVideo" title="查看视频">
+      <div id="dplayer">
+
+      </div>
+    </Modal>
   </div>
 </template>
 <script>
@@ -719,6 +420,7 @@ import Editor from "@tinymce/tinymce-vue";
 import { initEditor } from "@/views/lili-components/editor/config";
 import { uploadFile } from "@/libs/axios";
 import { regular } from "@/utils";
+import DPlayer from 'dplayer';
 
 export default {
   name: "goodsOperationSec",
@@ -752,9 +454,10 @@ export default {
       regular,
       initEditor,
       total: 0,
-      showContent:false,
-      listImages:[],
-      contentImage:"",
+      goodsVideo: "",
+      showContent: false,
+      listImages: [],
+      contentImage: "",
       visible: false, // 图片预览
       previewImage: '', // 预览图片地址
       global: 0,
@@ -847,6 +550,7 @@ export default {
         goodsParamsDTOList: [],
         /** 商品分类中文名 */
         categoryName: [],
+        goodsVideo: "",
       },
       /** 表格头 */
       skuTableColumn: [],
@@ -893,6 +597,8 @@ export default {
       shopCategory: [],
       /** 商品单位列表 */
       goodsUnitList: [],
+      // 展示商品视频
+      showGoodsVideo: false,
       ignoreColumn: [
         // 添加规格时需要忽略的参数
         "_index",
@@ -907,23 +613,31 @@ export default {
       ],
     };
   },
+  watch: {
+    // 如果点击了展示商品视频，则初始化商品视频
+    showGoodsVideo(val) {
+      if (val) {
+        this.initVideo();
+      }
+    }
+  },
   methods: {
-    getImages(v){
+    getImages(v) {
       this.previewImage = v;
       this.visible = true;
     },
-    mouseOver(v){
+    mouseOver(v) {
       this.showContent = true
       this.listImages = v
-      if(this.listImages.images.length <= 0){
+      if (this.listImages.images.length <= 0) {
         this.contentImage = '规格专属图片暂无'
-      }else{
+      } else {
         this.contentImage = '当前规格专属图片'
       }
     },
-    mouseLeave(){
+    mouseLeave() {
       // this.showContent = false
-    },  
+    },
     /**
      * 选择参数
      * @paramsGroup 参数分组
@@ -981,6 +695,19 @@ export default {
       }
       this.selectedSku = row;
       this.showSkuPicture = true;
+    },
+    // 初始化视频操作
+    initVideo() {
+      if (this.baseInfoForm.goodsVideo) {
+        this.goodsVideo = new DPlayer({
+          container: document.getElementById('dplayer'),
+          video: {
+            url: this.baseInfoForm.goodsVideo,
+            pic: ''
+          },
+        });
+      }
+      console.log('初始化操作')
     },
     pre() {
       // 上一步
@@ -1107,11 +834,17 @@ export default {
         desc: "文件 " + file.name + " 的格式不正确",
       });
     },
+    handleSuccessGoodsVideo(res, file) {
+      if (file.response) {
+        file.url = file.response.result;
+        this.baseInfoForm.goodsVideo = file.url;
+      }
+    },
     // 图片大小不正确
-    handleMaxSize(file) {
+    handleMaxSize(size = 2) {
       this.$Notice.warning({
         title: "超过文件大小限制",
-        desc: "图片大小不能超过1MB",
+        desc: `图片大小不能超过${size}MB`,
       });
     },
     // 图片上传前钩子
@@ -1530,7 +1263,7 @@ export default {
               find.weight && (find.weight = "");
 
               this.skuTableData.splice(this.skuTableData.length, 0, find);
-              index ++;
+              index++;
             }
           } else {
             for (let i = 0; i < totalLength; i++) {
@@ -1975,6 +1708,8 @@ export default {
         this.categoryId = cateId[2];
         this.baseInfoForm.categoryPath = cateId.toString();
         this.baseInfoForm.goodsType = this.firstData.goodsType;
+
+
         /** 获取该商城分类下 商品参数信息 */
         this.GET_GoodsParams();
         /** 查询品牌列表 */
@@ -1998,10 +1733,32 @@ export default {
 .ivu-select .ivu-select-dropdown {
   overflow: hidden !important;
 }
-.editor-alert{
+
+.editor-alert {
   text-align: left;
 }
+
+#dplayer {
+
+}
+
 /* .tox-notifications-container{
   display: none !important;
 } */
+.goods-video-label {
+  width: 120px;
+  text-align: right;
+  padding: 10px 12px 10px 0;
+}
+
+.goods-video {
+  align-items: center;
+}
+
+.mb-10 {
+  margin-bottom: 10px;
+}
+.view-video{
+  margin: 0 10px;
+}
 </style>

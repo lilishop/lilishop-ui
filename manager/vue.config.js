@@ -24,7 +24,6 @@ let externals = {
   "js-cookie": "Cookies",
   "sockjs-client": "SockJS",
   "@antv/g2": "G2",
-  dplayer: "DPlayer"
 };
 
 // 使用CDN的内容
@@ -39,8 +38,6 @@ let cdn = {
     "https://cdn.pickmall.cn/cdn/iview.min.js",
     "https://cdn.pickmall.cn/cdn/vue-lazyload.min.js",
     "https://cdn.pickmall.cn/cdn/js.cookie.min.js",
-    "https://cdn.pickmall.cn/cdn/DPlayer.min.js",
-
     "https://cdn.pickmall.cn/cdn/sockjs.min.js",
     "https://gw.alipayobjects.com/os/lib/antv/g2/4.1.24/dist/g2.min.js"
   ]
