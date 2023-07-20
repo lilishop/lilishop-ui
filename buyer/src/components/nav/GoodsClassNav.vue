@@ -153,7 +153,9 @@
           </div>
         </div>
       </template>
-      <div @click="moreOptions" v-if="tagsContent.length>4" class="more-options">{{showTagCount===5?'更多筛选项':'收起筛选项'}}<Icon :type="showTagCount===5?'ios-arrow-down':'ios-arrow-up'" /></div>
+      <div @click="moreOptions" v-if="tagsContent.length>4" class="more-options">
+      {{showTagCount===5?'更多筛选项':'收起筛选项'}}
+      </div>
     </div>
   </div>
 </template>
