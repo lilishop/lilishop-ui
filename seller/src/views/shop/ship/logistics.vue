@@ -1,81 +1,45 @@
 <template>
   <div class="logistics">
     <Card>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-      ></Table>
+      <Table :loading="loading" border :columns="columns" :data="data" ref="table"></Table>
     </Card>
     <Modal v-model="openModal" :title="openModalTitle" @on-ok="submit" @on-cancel="cancelModal">
       <h3 style="color: #ff3c2a; margin-bottom: 10px">是否需要电子面单</h3>
-      <RadioGroup
-        v-model="faceSheetForm.faceSheetFlag"
-        style="margin-bottom: 20px"
-        @on-change="getfaceSheetFlag($event)"
-      >
-        <Radio :label="true">
-          <span>需要</span>
-        </Radio>
-        <Radio :label="false">
-          <span>不需要</span>
-        </Radio>
-      </RadioGroup>
-      <Card v-if="onpenText" class="modalStyle">
+
+      <ButtonGroup style="margin-bottom: 10px;">
+        <Button :type="faceSheetForm.faceSheetFlag ? 'primary' : 'default'"
+          @click="faceSheetForm.faceSheetFlag = true">需要</Button>
+        <Button :type="!faceSheetForm.faceSheetFlag ? 'primary' : 'default'"
+          @click="faceSheetForm.faceSheetFlag = false">不需要</Button>
+      </ButtonGroup>
+      <Card v-if="openText" class="modalStyle">
         <h3 style="color: #ff3c2a; margin-bottom: 10px">请输入详细信息</h3>
         <Form ref="formValidate" :label-width="150" label-position="right" :model="faceSheetForm" :rules="ruleValidate">
           <FormItem label="customerName" prop="customerName">
-            <Input
-              v-model="faceSheetForm.customerName"
-              type="text"
-              class="faceSheetInput"
-            ></Input
-            ></FormItem>
+            <Input v-model="faceSheetForm.customerName" type="text" class="faceSheetInput"></Input>
+          </FormItem>
           <FormItem label="customerPwd" prop="customerPwd">
-            <Input
-              v-model="faceSheetForm.customerPwd"
-              type="text"
-              class="faceSheetInput"
-            ></Input>
+            <Input v-model="faceSheetForm.customerPwd" type="text" class="faceSheetInput"></Input>
           </FormItem>
           <FormItem label="monthCode" prop="monthCode">
-            <Input
-              v-model="faceSheetForm.monthCode"
-              type="text"
-              class="faceSheetInput"
-            ></Input
-            ></FormItem>
+            <Input v-model="faceSheetForm.monthCode" type="text" class="faceSheetInput"></Input>
+          </FormItem>
           <FormItem label="sendSite" prop="sendSite">
-            <Input
-              v-model="faceSheetForm.sendSite"
-              type="text"
-              class="faceSheetInput"
-            ></Input
-            ></FormItem>
+            <Input v-model="faceSheetForm.sendSite" type="text" class="faceSheetInput"></Input>
+          </FormItem>
           <FormItem label="sendStaff" prop="sendStaff">
-            <Input
-              v-model="faceSheetForm.sendStaff"
-              type="text"
-              class="faceSheetInput"
-            ></Input
-            ></FormItem>
+            <Input v-model="faceSheetForm.sendStaff" type="text" class="faceSheetInput"></Input>
+          </FormItem>
           <FormItem label="支付方式" prop="payType">
-            <Select
-              v-model="faceSheetForm.payType"
-              class="faceSheetInput">
+            <Select v-model="faceSheetForm.payType" class="faceSheetInput">
               <Option value="1">现付</Option>
               <Option value="2">到付</Option>
               <Option value="3">月结</Option>
               <Option value="4">第三方支付(仅SF支持)</Option>
-            </Select
-            ></FormItem>
+            </Select>
+          </FormItem>
           <FormItem label="快递类型" prop="expType">
-            <Input
-              v-model="faceSheetForm.expType"
-              type="text"
-              class="faceSheetInput"/>
+            <Input v-model="faceSheetForm.expType" type="text" class="faceSheetInput" />
           </FormItem>
           <div style="width:100%;text-align:center;">
             <a style="padding-right: 20px" @click="frontDownload('use')">使用说明</a>
@@ -83,7 +47,7 @@
           </div>
         </Form>
       </Card>
-      <br/>
+      <br />
     </Modal>
   </div>
 </template>
@@ -140,9 +104,9 @@ export default {
           sortable: true,
           render: (h, params) => {
             if (!params.row.selected) {
-              return h("div", [h("tag", {props: {color: "volcano"}}, "关闭")]);
+              return h("div", [h("tag", { props: { color: "volcano" } }, "关闭")]);
             } else {
-              return h("div", [h("tag", {props: {color: "green"}}, "开启")]);
+              return h("div", [h("tag", { props: { color: "green" } }, "开启")]);
             }
           }
         },
@@ -215,19 +179,25 @@ export default {
         },
       ],
       data: [], // 表单数据
-      onpenText: false,
+      openText: false,
     };
+  },
+  watch: {
+    'faceSheetForm.faceSheetFlag'(val) {
+      this.openText = val ? true : false
+      console.log(this.openText )
+    }
   },
   methods: {
     //获取状态
     getfaceSheetFlag(e) {
-
+      console.log(e);
       if (e === true) {
-
-        this.onpenText = true;
+        console.log("打开");
+        this.openText = true;
       } else {
-
-        this.onpenText = false;
+        console.log("关闭");
+        this.openText = false;
       }
     },
     // 初始化数据
@@ -245,7 +215,7 @@ export default {
       });
       this.loading = false;
     },
-    cancelModal(){
+    cancelModal() {
       this.faceSheetFlag = false;
       this.faceSheetForm.faceSheetFlag = false;
     },
@@ -255,9 +225,9 @@ export default {
       this.openModal = true;
       this.searchForm.faceSheetFlag = "false"; //开弹框 等于v
       if (this.searchForm.faceSheetFlag == "true") {
-        this.onpenText = true;
+        this.openText = true;
       } else {
-        this.onpenText = false;
+        this.openText = false;
       }
     },
     //修改
@@ -270,10 +240,10 @@ export default {
           // this.searchForm = res.result.recordes;
           this.faceSheetForm.faceSheetFlag = res.result.faceSheetFlag; //开弹框 等于v
           if (this.faceSheetForm.faceSheetFlag === true) {
-            this.onpenText = true;
+            this.openText = true;
           } else {
             this.faceSheetForm.faceSheetFlag = false
-            this.onpenText = false;
+            this.openText = false;
           }
           this.faceSheetForm.customerName = res.result.customerName;
           this.faceSheetForm.customerPwd = res.result.customerPwd;
@@ -303,7 +273,7 @@ export default {
     },
 
     submit() {
-      if ( !this.row.selected) {
+      if (!this.row.selected) {
         API_Shop.logisticsChecked(
           this.row.logisticsId,
           this.faceSheetForm
@@ -349,7 +319,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .faceSheetInput{
-    width: 300px;
-  }
+.faceSheetInput {
+  width: 300px;
+}
 </style>
