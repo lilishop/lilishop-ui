@@ -293,7 +293,7 @@
               @click="buyNow"
               >立即购买</Button
             >
-            <Tooltip content="观看视频">
+            <Tooltip content="观看视频" v-if="skuDetail.goodsVideo">
               <img class="view-video" @click="showGoodsVideo = true" :src="require('@/assets/iconfont/play.svg')" alt="">
             </Tooltip>
           </div>
