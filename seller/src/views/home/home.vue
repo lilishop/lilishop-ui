@@ -154,7 +154,7 @@
     </div>
 
     <div class="card ">
-      <h4>整体数据</h4>
+      <h4>统计数据</h4>
       <div class="count-list flex">
         <div class="count-item" @click="navigateTo('goods')">
           <div>
@@ -162,7 +162,7 @@
           </div>
           <div>
             <div class="counts">{{ homeData.goodsNum || 0 }}</div>
-            <div>商品数量</div>
+            <div>整体商品数量</div>
           </div>
 
         </div>
@@ -172,7 +172,7 @@
           </div>
           <div>
             <div class="counts">{{ homeData.orderPrice || 0 | unitPrice('￥') }}</div>
-            <div>订单总额</div>
+            <div>今日订单总额</div>
           </div>
 
         </div>
@@ -183,7 +183,7 @@
           </div>
           <div>
             <div class="counts">{{ homeData.orderNum || 0 }}</div>
-            <div>订单数量</div>
+            <div>今日订单数量</div>
           </div>
 
         </div>
@@ -193,7 +193,7 @@
           </div>
           <div>
             <div class="counts">{{ homeData.storeUV || 0 }}</div>
-            <div>访客数量</div>
+            <div>今日访客数量</div>
           </div>
 
         </div>
