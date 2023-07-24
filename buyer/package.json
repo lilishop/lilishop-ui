@@ -10,6 +10,7 @@
   "dependencies": {
     "@amap/amap-jsapi-loader": "0.0.7",
     "axios": "^0.19.2",
+    "dplayer": "^1.27.1",
     "js-cookie": "^2.2.1",
     "less": "^2.7.0",
     "less-loader": "^5.0.0",

@@ -272,8 +272,6 @@ import liliMap from "@/views/my-components/map/index";
 import regionMap from "@/views/lili-components/region";
 import * as RegExp from "@/libs/RegExp.js";
 import Cookies from "js-cookie";
-import {editDeliverAddress, getDeliverAddress} from "../../api/shops";
-
 export default {
   name: "shopSetting",
   components: {
@@ -298,7 +296,7 @@ export default {
       },
       //库存预警form
       stockWarningForm: {
-        stockWarning: "", // 库存预警数量
+        stockWarning: 0, // 库存预警数量
       },
       //im form
       udeskForm: {
@@ -458,7 +456,7 @@ export default {
           Cookies.set("userInfoSeller", JSON.stringify(res.result));
           //库存预警数赋值
           this.$nextTick(() => {
-            this.stockWarningForm.stockWarning = res.result.stockWarning + "";
+            this.stockWarningForm.stockWarning = res.result.stockWarning;
           });
           if (res.result.merchantEuid) {
             //赋予坐席id
@@ -479,7 +477,6 @@ export default {
       API_Shop.getDeliverAddress().then(res=>{
         if(res.success){
           if(res.result!= '' && res.result != null){
-            console.log(89898999998)
             this.addressGoods = res.result;
             this.regionGoods = res.result.salesConsignorAddressPath;
             this.regionIdS = res.result.salesConsignorAddressId;

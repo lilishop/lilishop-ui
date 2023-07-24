@@ -70,7 +70,7 @@ export default {
                 "Button",
                 {
                   props: {
-                    type: this.index == params.index ? "primary" : "",
+                    type: this.index == params.index ? "primary" : "default",
                     size: "small",
                   },
                   on: {

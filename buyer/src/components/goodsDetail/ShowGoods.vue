@@ -4,22 +4,15 @@
       <!-- 详情左侧展示数据、图片，收藏、举报 -->
       <div class="item-detail-left">
         <!-- 大图、放大镜 -->
+        <!-- <div  id="dplayer"></div> -->
         <div class="item-detail-big-img">
-          <pic-zoom :url="imgList[imgIndex].url" :scale="2"></pic-zoom>
+
+          <pic-zoom  :url="imgList[imgIndex].url" :scale="2"></pic-zoom>
         </div>
-        <div
-          v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
-          style="margin-top:10px;rgb(153, 149, 149);"
-        >
-          实物商品
-        </div>
-        <div
-          v-else-if="skuDetail.goodsType == 'VIRTUAL_GOODS'"
-          style="margin-top:10px;rgb(153, 149, 149);"
-        >
-          虚拟商品
-        </div>
+
+        <!-- <div  id="dplayer"></div> -->
         <div class="item-detail-img-row">
+
           <div
             class="item-detail-img-small"
             @mouseover="imgIndex = index"
@@ -44,6 +37,18 @@
         <div class="item-detail-title">
           <p>
             {{ skuDetail.goodsName }}
+            <Tag
+              v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
+              style="margin-top:10px;rgb(153, 149, 149);"
+            >
+              实物商品
+            </Tag>
+            <Tag
+              v-else-if="skuDetail.goodsType == 'VIRTUAL_GOODS'"
+              style="margin-top:10px;rgb(153, 149, 149);"
+            >
+              虚拟商品
+            </Tag>
           </p>
         </div>
         <div class="sell-point">
@@ -272,7 +277,8 @@
             class="add-buy-car"
             v-if="$route.query.way !== 'POINT' && skuDetail.authFlag === 'PASS'"
           >
-            <Button
+
+           <Button
               type="error"
               v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
               :loading="loading"
@@ -287,9 +293,15 @@
               @click="buyNow"
               >立即购买</Button
             >
+            <Tooltip content="观看视频" v-if="skuDetail.goodsVideo">
+              <img class="view-video" @click="showGoodsVideo = true" :src="require('@/assets/iconfont/play.svg')" alt="">
+            </Tooltip>
           </div>
         </div>
       </div>
+      <Modal title="浏览视频" v-model="showGoodsVideo">
+        <div id="dplayer"></div>
+      </Modal>
     </div>
   </div>
 </template>
@@ -297,6 +309,7 @@
 <script>
 import Promotion from "./Promotion.vue";
 import PicZoom from "vue-piczoom"; // 图片放大
+import DPlayer from "dplayer";
 import {
   collectGoods,
   isCollection,
@@ -304,6 +317,7 @@ import {
   cancelCollect,
 } from "@/api/member.js";
 import { addCartGoods } from "@/api/cart.js";
+
 export default {
   name: "ShowGoods",
   props: {
@@ -321,14 +335,22 @@ export default {
         if (this.wholesaleList && this.wholesaleList.length > 0) {
           this.count = this.wholesaleList[0].num;
         }
+
         this.swiperGoodsImg();
       },
       deep: true,
       immediate: true,
     },
+    showGoodsVideo(val){
+      if(val){
+        this.initVideo();
+      }
+    }
   },
   data() {
     return {
+      showGoodsVideo:false,
+      goodsVideo:"",
       wholesaleList: [],
       count: 1, // 商品数量
       imgIndex: 0, // 展示图片下标
@@ -368,6 +390,24 @@ export default {
     },
   },
   methods: {
+    // 初始化video
+    initVideo(){
+      if(!this.goodsVideo ){
+        setTimeout(()=>{
+        this.goodsVideo = new DPlayer({
+          container: document.getElementById('dplayer'),
+          video: {
+              url:this.skuDetail.goodsVideo,
+          },
+      });
+      },100)
+      }
+
+
+
+    },
+
+
     changeCount(val) {
       if (this.wholesaleList && this.wholesaleList.length > 0) {
         if (this.count <= this.wholesaleList[0].num) {
@@ -544,6 +584,7 @@ export default {
           this.imgList = e.specImage;
         }
       });
+
     },
   },
   mounted() {
@@ -599,6 +640,7 @@ export default {
 
 .item-detail-left {
   width: 350px;
+
   margin-right: 30px;
 }
 
@@ -607,8 +649,14 @@ export default {
   height: 350px;
   box-shadow: 0px 0px 8px $border_color;
   cursor: pointer;
-}
 
+
+
+}
+#dplayer{
+    width: 100%;
+    height: 100%;
+  }
 .item-detail-big-img img {
   width: 100%;
 }
@@ -842,11 +890,14 @@ export default {
 
 .add-buy-car-box {
   width: 100%;
+
   margin-top: 15px;
   border-top: 1px dotted $border_color;
 }
 
 .add-buy-car {
+  display: flex;
+  align-items: center;
   margin-top: 15px;
   > * {
     margin: 0 4px;
@@ -868,6 +919,9 @@ export default {
   font-size: 12px;
   color: red;
   margin-bottom: 5px;
+}
+.view-video{
+  cursor: pointer;
 }
 /******************商品图片及购买详情结束******************/
 </style>
