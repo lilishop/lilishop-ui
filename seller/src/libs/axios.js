@@ -1,6 +1,6 @@
 import axios from "axios";
 import { getStore, setStore } from "./storage";
-import { router } from "../router/index";
+import { router  } from "../router/index";
 import { Message } from "view-design";
 import Cookies from "js-cookie";
 import { handleRefreshToken } from "@/api/index";
@@ -23,6 +23,15 @@ const service = axios.create({
   timeout: 10000,
   baseURL: baseUrl
 });
+
+const recordCurrentPath = () => {
+   return router.history.current.fullPath
+}
+// 跳转登录页
+const redirectLogin = () => {
+  router.push({path:'/login',query:{redirect: recordCurrentPath()}});
+}
+
 service.interceptors.request.use(
   config => {
     if (config.method == "get") {
@@ -72,7 +81,7 @@ service.interceptors.response.use(
           } else {
             Message.error("未知错误，请重新登录");
           }
-          router.push("/login");
+          redirectLogin();
         }
         break;
       case 500:
@@ -110,7 +119,7 @@ service.interceptors.response.use(
             }
           } else {
             Cookies.set("userInfoSeller", "");
-            router.push("/login");
+            redirectLogin();
           }
           isRefreshToken = 0;
         }

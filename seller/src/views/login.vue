@@ -1,4 +1,4 @@
-<template>
+ <template>
   <div class="login" @click="$refs.verify.show = false">
     <Row type="flex" @keydown.enter.native="submitLogin">
       <Col style="width: 368px">
@@ -156,10 +156,14 @@ export default {
 
           util.initRouter(this);
           this.$store.commit("setAvatarPath", res.result.storeLogo);
+
+          const redirectRouter = this.$route.query.redirect;
           // 加载菜单
-          this.$router.push({
-            name: "home_index",
-          });
+          const push = {
+            path: redirectRouter || "/home",
+          }
+
+          this.$router.push(push);
         } else {
           this.loading = false;
         }
