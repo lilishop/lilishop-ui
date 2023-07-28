@@ -19,12 +19,14 @@
         </Carousel>
       </div>
       <div class="nav-right">
-        <div class="person-msg" @click="entryControl({ path: 'home' })">
-          <img class="user-face" :src="userInfo.face || defaultAvatar"  alt />
-          <div class="welcome">
-            Hi, {{
-              userInfo.nickName || `欢迎来到${config.title}` | secrecyMobile
-            }}
+        <div class="person-msg">
+          <div class="user-box" @click="entryControl({ path: 'home' })">
+            <img class="user-face" :src="userInfo.face || defaultAvatar"  alt />
+            <div class="welcome">
+              Hi, {{
+                userInfo.nickName || `欢迎来到${config.title}` | secrecyMobile
+              }}
+            </div>
           </div>
           <div v-if="userInfo.id">
             <div class="icon-list"></div>
@@ -154,6 +156,7 @@ export default {
   methods: {
     // 快捷跳转中心
     entryControl(val) {
+      console.log("val",val)
       let url = this.$router.resolve(val.path);
       window.open(url.href, '_blank');
     },
@@ -382,7 +385,9 @@ export default {
     padding-top: 28px;
     padding-bottom: 25px;
 
-
+    >.user-box{
+      text-align: center;
+    }
   }
 
   .shop-msg {
