@@ -182,7 +182,6 @@ export default {
   text-align: center;
 }
 .title-bg{
-  border-top: 3px solid $theme_color;
   height: 100px;
   width: 100%;
   background-color: #7b7b7b;
