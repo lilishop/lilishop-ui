@@ -10,6 +10,7 @@ module.exports = {
   aMapSecurityJsCode: "2bd0fbf621881f4c77be74f0e76495f3", // 高德web端js申请的安全密钥
   aMapKey: "7f11113750315d8543daaf5c3ba353ca", //高德web端js申请的api key
   website: "https://www.pickmall.cn", //官网地址
+  aMapSwitch:false, //是否开启高德定位
   enableCDN: true, //生产环境 是否启用cdn加载 vue等js
   port: 10002, //端口
   inputMaxLength: "140", //全局输入框默认最大输入长度字

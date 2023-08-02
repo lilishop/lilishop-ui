@@ -19,7 +19,7 @@ import {
 } from "@/libs/axios";
 import {setStore, getStore, removeStore} from "@/libs/storage";
 
-import i18nBox from '@/views/lili-components/i18n-translate'
+
 import util from "@/libs/util";
 
 import VueLazyload from "vue-lazyload";
@@ -55,7 +55,7 @@ copyViewUi.Input.props.maxlength.default = inputMaxLength // 挂载最大输入�
 Vue.use(copyViewUi);
 
 Vue.component('liliDialog', liliDialog)
-Vue.component('i18nBox', i18nBox)
+
 Vue.component('liliDialog', liliDialog)
 Vue.component("vue-qr", vueQr); //此处将vue-qr添加为全局组件
 

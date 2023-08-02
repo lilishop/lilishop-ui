@@ -36,7 +36,8 @@
           <Input v-model="form.addressName" clearable style="width: 90%"/>
         </FormItem>
         <FormItem label="详细地址" prop="address">
-          <Input v-model="form.address" @on-focus="$refs.liliMap.showMap = true" clearable style="width: 90%"/>
+          <span>{{ form.address || '暂无地址' }}</span>
+          <Button type="default" style="margin-left: 10px;" @click="$refs.map.open()">选择地址</Button>
         </FormItem>
         <FormItem label="联系电话" prop="mobile">
           <Input v-model="form.mobile" clearable style="width: 90%" maxlength="11"/>
@@ -50,20 +51,21 @@
         >
       </div>
     </Modal>
-    <liliMap ref="liliMap" @getAddress="getAddress"></liliMap>
+    <multipleMap ref="map" @callback="getAddress"></multipleMap>
   </div>
 </template>
 
 <script>
   import * as API_Shop from "@/api/shops";
   import { validateMobile } from "@/libs/validate";
-  import liliMap from "@/views/my-components/map/index";
+
+  import multipleMap from "@/views/my-components/map/multiple-map";
 
 
   export default {
     name: "shopAddress",
     components: {
-      liliMap
+      multipleMap
     },
     data() {
       return {
@@ -224,10 +226,19 @@
         this.getDataList();
       },
       //获取地址
-      getAddress(item){
-        this.$set(this.form, 'address', item.addr)
-        this.form.address = item.address
-        this.form.center = item.position.lat + "," + item.position.lng
+      getAddress(val){
+        if(val.type === 'select'){
+          const paths = val.data.map(item => item.name).join(',')
+          this.$set(this.form, 'address', paths)
+
+          this.form.center = val.data[val.data.length - 1].center
+        }
+        else{
+            this.$set(this.form, 'address', val.data.addr)
+            this.form.address = val.data.address
+            this.form.center = val.data.position.lng + "," + val.data.position.lat
+        }
+
       },
       // 获取数据
       getDataList() {

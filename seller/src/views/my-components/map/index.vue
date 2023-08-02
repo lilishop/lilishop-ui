@@ -1,31 +1,23 @@
 <template>
   <div class="map">
-    <Modal v-model="showMap" title="选择地址" width="800">
-      <div class="address">{{ addrContent.address }}</div>
-      <div id="map-container"></div>
 
-      <div class="search-con">
-        <Input
-          placeholder="输入关键字搜索"
-          id="input-map"
-          v-model="mapSearch"
-        />
-        <ul>
-          <li
-            v-for="(tip, index) in tips"
-            :key="index"
-            @click="selectAddr(tip.location)"
-          >
-            <p>{{ tip.name }}</p>
-            <p>{{ tip.district + tip.address }}</p>
-          </li>
-        </ul>
-      </div>
-      <div slot="footer">
-        <Button type="default" @click="showMap = false">取消</Button>
-        <Button type="primary" :loading="loading" @click="ok">确定</Button>
-      </div>
-    </Modal>
+    <div class="address">{{ addrContent.address }}</div>
+    <div id="map-container"></div>
+
+    <div class="search-con">
+      <Input placeholder="输入关键字搜索" id="input-map" v-model="mapSearch" />
+      <ul>
+        <li v-for="(tip, index) in tips" :key="index" @click="selectAddr(tip.location)">
+          <p>{{ tip.name }}</p>
+          <p>{{ tip.district + tip.address }}</p>
+        </li>
+      </ul>
+    </div>
+    <div slot="footer" class="footer">
+
+      <Button type="primary" :loading="loading" @click="ok">确定</Button>
+    </div>
+
   </div>
 </template>
 <script>
@@ -56,21 +48,25 @@ export default {
   },
   methods: {
     ok() {
-      // 确定选择
-      this.loading = true;
-      const params = {
-        cityCode: this.addrContent.regeocode.addressComponent.citycode,
-        townName: this.addrContent.regeocode.addressComponent.township,
-      };
-      getRegion(params).then((res) => {
-        if (res.success) {
-          this.addrContent.addr = res.result.name.replace(/,/g, " ");
-          this.addrContent.addrId = res.result.id;
-          this.loading = false;
-          this.showMap = false;
-          this.$emit("getAddress", this.addrContent);
-        }
-      });
+
+      if (this.addrContent && this.addrContent.regeocode) {
+        const params = {
+          cityCode: this.addrContent.regeocode.addressComponent.citycode,
+          townName: this.addrContent.regeocode.addressComponent.township,
+        };
+        getRegion(params).then((res) => {
+          if (res.success) {
+            this.addrContent.addr = res.result.name.replace(/,/g, " ");
+            this.addrContent.addrId = res.result.id;
+            this.loading = false;
+
+            this.$emit("getAddress", this.addrContent);
+          }
+        });
+      } else {
+        this.$Message.error('未获取到坐标信息！请查看高德API配置是否正确')
+      }
+
     },
     init() {
       AMapLoader.load({
@@ -122,7 +118,7 @@ export default {
             that.addrContent = positionResult;
           });
         })
-        .catch((e) => {});
+        .catch((e) => { });
     },
     searchOfMap(val) {
       // 地图搜索
@@ -162,16 +158,20 @@ export default {
   right: 20px;
   top: 64px;
   width: 260px;
+
   ul {
     width: 260px;
-    height: 400px;
+    height: 360px;
     overflow: scroll;
+
     li {
       padding: 5px;
+
       p:nth-child(2) {
         color: #999;
         font-size: 12px;
       }
+
       &:hover {
         background-color: #eee;
         cursor: pointer;
@@ -184,5 +184,10 @@ export default {
   margin-bottom: 10px;
   // color: $theme_color;
   font-weight: bold;
+}
+
+.footer {
+  text-align: right;
+  margin: 10px 0;
 }
 </style>

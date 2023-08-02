@@ -12,7 +12,7 @@
 
         <Button @click="sfPrint" type="primary" ghost
           v-if="allowOperation.showLogistics && logisticsType == 'SHUNFENG'">下载面单</Button>
-        <Button @click="Toprint" type="primary" ghost
+        <Button @click="toPrint" type="primary" ghost
           v-if="allowOperation.ship && logisticsType != 'SHUNFENG'">打印电子面单</Button>
       </div>
     </Card>
@@ -290,11 +290,11 @@
             <Input v-model="addressForm.consigneeMobile" size="large" maxlength="11"></Input>
           </FormItem>
           <FormItem label="地址信息" prop="consigneeAddressPath">
-            <Input v-model="addressForm.consigneeAddressPath" disabled style="width: 325px" v-if="showRegion == false" />
-            <Button v-if="showRegion == false" size="small" @click="regionClick" :loading="submitLoading" type="primary"
+            <span>{{ addressForm.consigneeAddressPath }}</span>
+            <Button  size="small" type="default" @click="$refs.map.open()"
               style="margin-left: 8px">修改
             </Button>
-            <region style="width: 400px" @selected="selectedRegion" v-if="showRegion == true" />
+
           </FormItem>
           <FormItem label="详细地址" prop="consigneeDetail">
             <Input v-model="addressForm.consigneeDetail" size="large" maxlength="11"></Input>
@@ -471,24 +471,27 @@
         <Button type="primary" v-print="printInfoObj">打印发货单</Button>
       </div>
     </Modal>
+
+    <multipleMap ref="map" @callback="getAddress"></multipleMap>
   </div>
 </template>
 
 <script>
 import * as API_Order from "@/api/order";
 import * as API_Logistics from "@/api/logistics";
-import liliMap from "@/views/my-components/map/index";
 import * as RegExp from "@/libs/RegExp.js";
-import region from "@/views/lili-components/region";
+
+import multipleMap from "@/views/my-components/map/multiple-map";
+
 
 export default {
   name: "orderDetail",
   components: {
-    liliMap,
-    region,
+    multipleMap,
   },
   data () {
     return {
+      loading:false,
       typeList: [],
       showPrices: false,
       printHiddenFlag: false,//隐藏信息
@@ -498,10 +501,8 @@ export default {
         extraHead: '',//头部文字 默认空
       },
       submitLoading: false, // 添加或编辑提交状态
-      region: [], //地区
-      regionId: [], //地区id
       logisticsType: 'KUAIDINIAO', //物流类型
-      showRegion: false,
+
       someJSONdata: '',
       faceSheetForm: {
         logisticsId: '',
@@ -692,11 +693,20 @@ export default {
     };
   },
   methods: {
-    //修改地址
-    regionClick () {
-      this.showRegion = true;
-      this.regionId = "";
+    // 回调地址信息
+    getAddress(val){
+      if(val.type === 'select'){
+          const paths = val.data.map(item => item.name).join(',')
+          const ids = val.data.map(item => item.id).join(',')
+          this.$set(this.addressForm, 'consigneeAddressPath', paths)
+          this.$set(this.addressForm, 'consigneeAddressIdPath', ids)
+      }
+      else{
+          this.$set(this.addressForm, 'consigneeAddressPath', val.data.addr)
+          this.$set(this.addressForm, 'consigneeAddressIdPath', val.data.addrId)
+      }
     },
+
     //弹出订单核销框
     orderTake () {
       this.orderTakeForm.qrCode = this.orderInfo.order.verificationCode;
@@ -766,7 +776,7 @@ export default {
         }
       });
     },
-    Toprint () {
+    toPrint () {
       this.facesheetFlag = true;
       API_Logistics.getCheckedOn().then(res => {
         if (res.success) {
@@ -796,11 +806,6 @@ export default {
           );
         }
       });
-    },
-    // 选中的地址
-    selectedRegion (val) {
-      this.region = val[1];
-      this.regionId = val[0];
     },
     //查询物流
     logistics () {
@@ -869,7 +874,7 @@ export default {
         }
       })
     },
-    Toprints () {
+    toPrints () {
       if (this.form.logisticsId != null && this.form.logisticsId != '') {
         this.orderDeliverModal = false;
       }
@@ -882,7 +887,7 @@ export default {
             API_Order.getOrderFaceSheet(this.sn, this.faceSheetForm).then(res => {
               if (res.success) {
                 this.someJSONdata = res.result.printTemplate;
-                this.Toprints();
+                this.toPrints();
               }
             })
           }
@@ -906,9 +911,6 @@ export default {
     //弹出修改收货地址框
     editAddress () {
       this.addressModal = true;
-      this.showRegion = false;
-      this.regionId = this.orderInfo.order.consigneeAddressIdPath;
-      this.region = this.orderInfo.order.consigneeAddressPath;
       this.addressForm.consigneeName = this.orderInfo.order.consigneeName;
       this.addressForm.consigneeMobile = this.orderInfo.order.consigneeMobile;
       this.addressForm.consigneeDetail = this.orderInfo.order.consigneeDetail;
@@ -919,12 +921,6 @@ export default {
     },
     //修改收货地址
     editAddressSubmit () {
-      if (this.regionId == "") {
-        this.$Message.error("请选择地址");
-        return;
-      }
-      this.addressForm.consigneeAddressPath = this.region;
-      this.addressForm.consigneeAddressIdPath = this.regionId;
       this.$refs.addressForm.validate((valid) => {
         if (valid) {
           API_Order.editOrderConsignee(this.sn, this.addressForm).then(
