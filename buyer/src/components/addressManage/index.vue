@@ -12,12 +12,8 @@
           <i-input v-model="formData.name" style="width: 600px"></i-input>
         </FormItem>
         <FormItem label="收件地区" prop="address">
-          <i-input
-            v-model="formData.address"
-            disabled
-            style="width: 600px"
-          ></i-input>
-          <Button type="primary" size="small" @click="$refs.map.showMap = true">选择</Button>
+          {{ formData.address || '暂无地址' }}
+          <Button type="primary" style="margin-left: 10px;" size="small" @click="$refs.map.open()">选择</Button>
         </FormItem>
         <FormItem label="详细地址" prop="detail">
           <i-input v-model="formData.detail" style="width: 600px"></i-input>
@@ -43,12 +39,12 @@
         <Button type="primary" class="mr_10" :loading="loading" @click="save">保存收货地址</Button>
       </div>
     </Modal>
-    <lili-map ref="map" @getAddress="getAddress"></lili-map>
+    <multipleMap ref="map" @callback="getAddress"></multipleMap>
   </div>
 </template>
 
 <script>
-import liliMap from '@/components/map';
+import multipleMap from "@/components/map/multiple-map";
 import {
   newMemberAddress,
   editMemberAddress,
@@ -129,14 +125,24 @@ export default {
         }
       });
     },
-    getAddress (item) {
-      // 获取地图选择信息
-      this.mapMsg = item;
-      this.$set(this.formData, 'address', item.addr);
-      this.$set(this.formData, 'consigneeAddressIdPath', item.addrId);
-      this.$set(this.formData, 'detail', item.detail);
-      this.formData.lat = item.position.lat;
-      this.formData.lon = item.position.lng;
+    getAddress (val) {
+       // 获取地图选择信息
+       if(val.type === 'select'){
+        const paths = val.data.map(item => item.name).join(',')
+        const ids = val.data.map(item => item.id).join(',')
+        this.$set(this.formData,'address',paths)
+        this.$set(this.formData,'consigneeAddressIdPath',ids)
+        const coord = val.data[val.data.length - 1].center.split(',')
+        this.formData.lat = coord[1]
+        this.formData.lon = coord[0]
+      }else{
+        this.$set(this.formData, "address", val.data.addr);
+        this.$set(this.formData, "consigneeAddressIdPath", val.data.addrId);
+        this.$set(this.formData, "detail", val.data.address);
+        this.formData.lat = val.data.position.lat;
+        this.formData.lon = val.data.position.lng;
+      }
+
     },
     show () { // 地址模态框显示
       this.showAddr = true;
@@ -158,7 +164,7 @@ export default {
     }
   },
   components: {
-    liliMap
+    multipleMap
   }
 };
 </script>

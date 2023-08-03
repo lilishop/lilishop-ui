@@ -7,8 +7,9 @@
           <i-input v-model="formData.name" placeholder="请输入收件人姓名" style="width: 600px"></i-input>
         </FormItem>
         <FormItem label="收件地区" prop="address">
-          <i-input v-model="formData.address" disabled placeholder="请选择收货地址" style="width: 600px"></i-input>
-          <Button type="primary" size="small" @click="$refs.map.showMap = true">选择</Button>
+          <span>{{ formData.address || '暂无地址' }}</span>
+
+          <Button type="default" style="margin-left: 10px;" size="small" @click="$refs.map.open()">选择</Button>
         </FormItem>
         <FormItem label="详细地址" prop="detail">
           <i-input v-model="formData.detail" placeholder="请输入详细地址" style="width: 600px"></i-input>
@@ -29,14 +30,15 @@
       <Button type="primary" class="mr_10" :loading="loading" @click="save">保存收货地址</Button>
       <Button @click="$router.back()">返回</Button>
     </div>
-    <lili-map ref="map" @getAddress="getAddress"></lili-map>
+
+    <multipleMap  ref="map" @callback="getAddress" />
   </div>
 </template>
 
 <script>
 import card from "@/components/card";
-import liliMap from "@/components/map";
 
+import multipleMap from "@/components/map/multiple-map";
 import * as RegExp from "@/plugins/RegExp.js";
 import {
   newMemberAddress,
@@ -117,15 +119,25 @@ export default {
         }
       });
     },
-    getAddress(item) {
+    getAddress(val) {
       // 获取地图选择信息
-      console.log(item);
-      this.mapMsg = item;
-      this.$set(this.formData, "address", item.addr);
-      this.$set(this.formData, "consigneeAddressIdPath", item.addrId);
-      this.$set(this.formData, "detail", item.detail);
-      this.formData.lat = item.position.lat;
-      this.formData.lon = item.position.lng;
+      if(val.type === 'select'){
+        const paths = val.data.map(item => item.name).join(',')
+        const ids = val.data.map(item => item.id).join(',')
+        this.$set(this.formData,'address',paths)
+        this.$set(this.formData,'consigneeAddressIdPath',ids)
+        const coord = val.data[val.data.length - 1].center.split(',')
+        this.formData.lat = coord[1]
+        this.formData.lon = coord[0]
+      }else{
+        this.$set(this.formData, "address", val.data.addr);
+        this.$set(this.formData, "consigneeAddressIdPath", val.data.addrId);
+        this.$set(this.formData, "detail", val.data.address);
+        this.formData.lat = val.data.position.lat;
+        this.formData.lon = val.data.position.lng;
+      }
+
+
     },
   },
   mounted() {
@@ -134,7 +146,7 @@ export default {
   },
   components: {
     card,
-    liliMap,
+    multipleMap
   },
 };
 </script>

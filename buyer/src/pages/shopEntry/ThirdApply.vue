@@ -60,24 +60,10 @@
           >
         </Select>
       </FormItem>
-      <FormItem prop="storeCenter" label="店铺定位">
-        <Button
-          type="info"
-          v-if="!form.storeCenter"
-          @click="$refs.liliMap.showMap = true"
-        >点击获取店铺定位</Button>
-        <Button
-          type="success"
-          v-else
-          @click="$refs.liliMap.showMap = true"
-        >已定位</Button>
-      </FormItem>
+
       <FormItem prop="storeAddressIdPath" label="店铺所在地">
-        <region
-          style="width: 250px"
-          @selected="selectedRegion"
-          :addressId="address"
-        />
+        <span>{{ form.storeAddressPath || '暂无地址' }}</span>
+        <Button type="default" style="margin-left: 10px;" @click="$refs.map.open()">选择</Button>
       </FormItem>
       <FormItem prop="storeAddressDetail" label="店铺详细地址">
         <Input
@@ -107,16 +93,20 @@
     <Modal title="View Image" v-model="visible">
       <img :src="previewPicture" v-if="visible" style="width: 100%" />
     </Modal>
-    <lili-map ref="liliMap" @getAddress="getAddress" :useApi="false"></lili-map>
+    <multipleMap ref="map" @callback="getAddress" />
   </div>
 </template>
 <script>
 import { applyThird } from '@/api/shopentry';
 import { getCategory } from '@/api/goods';
-import Map from '@/components/map/index';
+
 import storage from '@/plugins/storage';
 import { commonUrl } from '@/plugins/request.js';
-import region from '@/components/map/region.vue';
+
+
+import multipleMap from "@/components/map/multiple-map";
+
+
 export default {
   props: {
     content: {
@@ -124,7 +114,7 @@ export default {
       type: Object
     }
   },
-  components: { liliMap: Map, region },
+  components: { multipleMap },
   data () {
     return {
       loading: false, // 加载状态
@@ -132,7 +122,7 @@ export default {
       action: commonUrl + '/common/common/upload/file', // 上传地址
       accessToken: {}, // 验证token
       previewPicture: '', // 预览图片
-      address: '', // 回显地址
+
       visible: false, // 图片预览
       form: { // 表单数据
         storeLogo: []
@@ -217,12 +207,22 @@ export default {
       this.form[listName].splice(index, 1);
     },
     // 选择坐标回调
-    getAddress (item) {
-      this.$set(
-        this.form,
-        'storeCenter',
-        item.position.lng + ',' + item.position.lat
-      );
+    getAddress (val) {
+      if(val.type === 'select'){
+        const paths = val.data.map(item => item.name).join(',')
+        const ids = val.data.map(item => item.id).join(',')
+        this.$set(this.form, "storeAddressPath", paths);
+        this.$set(this.form, "storeAddressIdPath", ids);
+        this.form.storeCenter = val.data[val.data.length - 1].center
+      }else{
+        this.$set(this.form, "storeAddressPath", val.data.addr);
+        this.$set(this.form, "storeAddressIdPath", val.data.addrId);
+        this.$set(
+          this.form,
+          'storeCenter',
+          val.data.position.lng + ',' + val.data.position.lat
+        );
+      }
     },
     // 获取商品分类
     getCategoryList () {
@@ -230,15 +230,8 @@ export default {
         if (res.success) this.categoryList = res.result;
       });
     },
-    // 地址选择回显
-    selectedRegion (item) {
-      this.$set(this.form, 'storeAddressIdPath', item[0].toString());
-      this.$set(
-        this.form,
-        'storeAddressPath',
-        item[1].toString().replace(/\s/g, '')
-      );
-    }
+
+
   },
   mounted () {
     this.accessToken.accessToken = storage.getItem('accessToken');
@@ -253,7 +246,6 @@ export default {
       } else {
         this.form.storeLogo = [];
       }
-      this.address = this.form.storeAddressIdPath;
       this.$forceUpdate();
     }
     this.$refs.thirdForm.resetFields()

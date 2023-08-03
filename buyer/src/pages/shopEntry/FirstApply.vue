@@ -10,11 +10,8 @@
         />
       </FormItem>
       <FormItem prop="companyAddressIdPath" label="公司所在地">
-        <region
-          style="width: 250px"
-          @selected="selectedRegion"
-          :addressId="address"
-        />
+        <span>{{ form.companyAddressPath || '暂无地址' }}</span>
+        <Button type="default" style="margin-left: 10px;" @click="$refs.map.open()">选择</Button>
       </FormItem>
       <FormItem prop="companyAddress" label="公司详细地址">
         <Input
@@ -187,16 +184,18 @@
     <Modal title="View Image" v-model="visible">
       <img :src="previewPicture" v-if="visible" style="width: 100%" />
     </Modal>
+
+    <multipleMap ref="map" @callback="getAddress" />
   </div>
 </template>
 <script>
 import { applyFirst } from '@/api/shopentry';
 import * as RegExp from '@/plugins/RegExp.js';
-import region from '@/components/map/region.vue';
+import multipleMap from "@/components/map/multiple-map";
 import storage from '@/plugins/storage';
 import { commonUrl } from '@/plugins/request.js';
 export default {
-  components: { region },
+  components: { multipleMap },
   props: {
     content: {
       default: {},
@@ -209,7 +208,7 @@ export default {
       accessToken: {}, // 验证token
       visible: false, // 预览图片
       loading: false, // 加载状态
-      address: '', // 地址
+
       previewPicture: '', // 预览图片url
       form: { // 表单数据
         legalPhoto: [],
@@ -258,6 +257,19 @@ export default {
     };
   },
   methods: {
+    // 获取店铺地址
+    getAddress(val){
+      if(val.type === 'select'){
+        const paths = val.data.map(item => item.name).join(',')
+        const ids = val.data.map(item => item.id).join(',')
+        this.$set(this.form, 'companyAddressIdPath', ids)
+        this.$set(this.form, 'companyAddressPath', paths)
+      }else{
+        this.$set(this.form, 'companyAddressIdPath', val.data.addrId)
+        this.$set(this.form, 'companyAddressPath', val.data.addr)
+      }
+    },
+
     // 下一步
     next () {
       this.$refs.firstForm.validate((valid) => {
@@ -279,15 +291,7 @@ export default {
         }
       });
     },
-    // 地址选择回显
-    selectedRegion (item) {
-      this.$set(this.form, 'companyAddressIdPath', item[0].toString());
-      this.$set(
-        this.form,
-        'companyAddressPath',
-        item[1].toString().replace(/\s/g, '')
-      );
-    },
+
     // 上传之前
     beforeUpload () {
       this.uploadLoading = true;
@@ -354,7 +358,7 @@ export default {
       if (this.form.licencePhoto) {
         this.form.legalPhoto = this.content.legalPhoto.split(',');
         this.form.licencePhoto = this.content.licencePhoto.split(',');
-        this.address = this.form.companyAddressIdPath;
+
       }
     }
   }
