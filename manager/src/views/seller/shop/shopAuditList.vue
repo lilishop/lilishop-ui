@@ -37,14 +37,9 @@
 <script>
   import {
     getShopListData,
-    shopAudit
   } from "@/api/shops";
-  import shopOperation from "./shopOperation";
   export default {
     name: "shop",
-    components: {
-      shopOperation,
-    },
     data() {
       return {
         loading: true, // 表单加载状态
@@ -198,7 +193,7 @@
       edit(v) {
         this.$router.push({ path: '/shop-operation', query: { shopId: v.id } });
       },
-      
+
     },
     mounted() {
       this.init();

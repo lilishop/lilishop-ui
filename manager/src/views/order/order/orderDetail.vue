@@ -345,11 +345,8 @@
             <Input v-model="addressForm.consigneeMobile" size="large" maxlength="11"></Input>
           </FormItem>
           <FormItem label="地址信息" prop="consigneeAddressPath">
-            <Input v-model="addr" disabled style="width: 305px" v-if="showRegion == false" />
-            <Button v-if="showRegion == false" @click="regionClick" :loading="submitLoading" type="primary"
-              icon="ios-create-outline" style="margin-left: 8px">修改
-            </Button>
-            <region style="width: 400px" @selected="selectedRegion" v-if="showRegion == true" />
+            {{ addr }}
+            <Button type="default" @click="$refs.map.open()">选择</Button>
           </FormItem>
           <FormItem label="详细地址" prop="consigneeDetail">
             <Input v-model="addressForm.consigneeDetail" size="large" maxlength="50"></Input>
@@ -433,18 +430,23 @@
         <Button type="primary" v-print="printInfoObj">打印发货单</Button>
       </div>
     </Modal>
+
+
+    <multipleMap ref="map" @callback="selectedRegion" />
   </div>
 </template>
 
 <script>
 import * as API_Order from "@/api/order";
 import * as RegExp from "@/libs/RegExp.js";
-import region from "@/components/region";
+
+import multipleMap from "@/components/map/multiple-map";
 import vueQr from "vue-qr";
 export default {
   name: "orderList",
   components: {
-    region,
+
+    multipleMap,
     "vue-qr": vueQr,
   },
   data () {
@@ -458,10 +460,10 @@ export default {
         extraHead: '',//头部文字 默认空
       },
       loading: false, //加载表格
-      submitLoading: false, // 添加或编辑提交状态
+
       addr: "", //地区
-      regionId: [], //地区id
-      showRegion: false, // 显示地区
+
+
       orderLogInfo: [], //订单日志数据
       orderLogModal: false, //弹出调整价格框
       checkedLogistics: [], //选中的物流公司集合
@@ -638,11 +640,7 @@ export default {
     gotoHomes () {
       return false
     },
-    //修改地址
-    regionClick () {
-      this.showRegion = true;
-      this.regionId = "";
-    },
+
     //确认收款
     confirmPrice () {
       this.$Modal.confirm({
@@ -719,8 +717,17 @@ export default {
     },
     // 选中的地址
     selectedRegion (val) {
-      this.addr = val[1];
-      this.regionId = val[0];
+      if(val.type === 'select'){
+        const paths = val.data.map(item => item.name).join(',')
+        const ids = val.data.map(item => item.id).join(',')
+        this.$set(this,'addr',paths)
+        this.$set(this,'regionId',ids)
+      }
+      else{
+        this.$set(this,'addr',val.data.addr)
+        this.$set(this,'regionId',val.data.addrId)
+      }
+
     },
     //订单取消
     orderCancel () {
@@ -761,7 +768,6 @@ export default {
     //弹出修改收货地址框
     editAddress () {
       this.addressModal = true;
-      this.showRegion = false;
       this.addr = this.orderInfo.order.consigneeAddressPath;
       this.regionId = this.orderInfo.order.consigneeAddressIdPath;
       this.addressForm.consigneeName = this.orderInfo.order.consigneeName;

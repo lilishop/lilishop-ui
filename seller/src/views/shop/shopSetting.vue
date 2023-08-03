@@ -14,7 +14,7 @@
             <FormItem label="详细地址" prop="shopAddressDetail">
               <Input v-model="form.storeAddressDetail" clearable style="width: 20%" maxlength="50" />
             </FormItem>
-            <FormItem label="店铺LOGO：">
+            <FormItem label="店铺LOGO">
               <upload-pic-thumb v-model="form.storeLogo" :multiple="false"></upload-pic-thumb>
             </FormItem>
             <FormItem label="店铺简介" prop="content" class="wangEditor">

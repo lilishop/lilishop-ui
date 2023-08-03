@@ -49,7 +49,7 @@
 </template>
 
 <script>
-  import region from "@/components/region";
+
   import * as API_Member from "@/api/member.js";
   import ossManage from "@/views/sys/oss-manage/ossManage";
 
@@ -57,7 +57,7 @@
     // 积分历史页面
     name: "point",
     components: {
-      region,
+
       ossManage,
     },
     data() {

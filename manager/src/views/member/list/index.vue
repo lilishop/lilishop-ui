@@ -85,26 +85,23 @@
           <DatePicker type="date" format="yyyy-MM-dd" v-model="form.birthday" style="width: 220px"></DatePicker>
         </FormItem>
         <FormItem label="所在地" prop="mail">
-          <div class="form-item" v-if="!updateRegion">
-            <Input disabled style="width: 250px" :value="form.region" />
-            <Button type="text" @click="() => {
-                  this.updateRegion = !this.updateRegion;
-                }">修改</Button>
-          </div>
-          <div class="form-item" v-else>
-            <region style="width: 250px" @selected="selectedRegion" />
-          </div>
+          {{ form.region || '暂无地址' }}
+
+
+          <Button style="margin-left: 10px;" @click="$refs.map.open()">选择</Button>
+
         </FormItem>
       </Form>
     </Modal>
     <Modal width="1200px" v-model="picModelFlag">
       <ossManage @callback="callbackSelected" ref="ossManage" />
     </Modal>
+    <multipleMap ref="map" @callback="selectedRegion"/>
   </div>
 </template>
 
 <script>
-import region from "@/components/region";
+import multipleMap from "@/components/map/multiple-map";
 import * as API_Member from "@/api/member.js";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import * as RegExp from "@/libs/RegExp.js";
@@ -112,7 +109,7 @@ import * as RegExp from "@/libs/RegExp.js";
 export default {
   name: "member",
   components: {
-    region,
+    multipleMap,
     ossManage,
   },
   data() {
@@ -121,7 +118,7 @@ export default {
       descFlag: false, //编辑查看框
       loading: true, // 表单加载状态
       addFlag: false, // modal显隐控制
-      updateRegion: false, // 地区
+
       addMemberForm: {
         // 添加用户表单
         mobile: "",
@@ -382,7 +379,7 @@ export default {
     editPerm(val) {
       this.descTitle = `查看用户 ${val.username}`;
       this.descFlag = true;
-      this.updateRegion = false;
+
       this.getMemberInfo(val.id);
     },
     addMember() {
@@ -434,8 +431,18 @@ export default {
 
     // 选中的地址
     selectedRegion(val) {
-      this.region = val[1];
-      this.regionId = val[0];
+      if(val.type === 'select'){
+        const paths = val.data.map(item => item.name).join(',')
+        const ids = val.data.map(item => item.id).join(',')
+
+        this.$set(this.form,'region',paths)
+        this.$set(this.form,'regionId',ids)
+
+      }
+      else{
+        this.$set(this.form,'region',val.data.addr)
+        this.$set(this.form,'regionId',val.data.addrId)
+      }
     },
     //查看会员
     detail(row) {
@@ -466,13 +473,13 @@ export default {
 
     // 提交修改数据
     handleSubmitModal() {
-      const { nickName, sex, username, face, newPassword,id } = this.form;
+      const { nickName, sex, username, face, newPassword,id,regionId,region } = this.form;
       let time = new Date(this.form.birthday);
       let birthday = this.form.birthday=== undefined?'':
         time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
       let submit = {
-        regionId: this.form.regionId,
-        region: this.form.region,
+        regionId,
+        region,
         nickName,
         username,
         sex,
@@ -480,10 +487,7 @@ export default {
         face,
         id
       };
-      if (this.region != "undefined") {
-        submit.regionId = this.regionId;
-        submit.region = this.region;
-      }
+
       if (newPassword) {
         submit.password = this.md5(newPassword);
       }

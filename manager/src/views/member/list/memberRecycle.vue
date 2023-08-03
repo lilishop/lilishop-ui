@@ -134,40 +134,29 @@
           ></DatePicker>
         </FormItem>
         <FormItem label="所在地" prop="mail">
-          <div class="form-item" v-if="!updateRegion">
-            <Input disabled style="width: 250px" :value="formValidate.region" />
-            <Button
-              type="text"
-              @click="
-                () => {
-                  this.updateRegion = !this.updateRegion;
-                }
-              "
-              >修改
-            </Button>
-          </div>
-          <div class="form-item" v-else>
-            <region style="width: 250px" @selected="selectedRegion" />
-          </div>
+          {{ formValidate.region || '暂无地址' }}
+          <Button style="margin-left: 10px;" @click="$refs.map.open()">选择</Button>
         </FormItem>
       </Form>
     </Modal>
     <Modal width="1200px" v-model="picModelFlag">
       <ossManage @callback="callbackSelected" ref="ossManage" />
     </Modal>
+    <multipleMap ref="map" @callback="selectedRegion" />
   </div>
 </template>
 
 <script>
-import region from "@/components/region";
+
 import * as API_Member from "@/api/member.js";
 import ossManage from "@/views/sys/oss-manage/ossManage";
-
+import multipleMap from "@/components/map/multiple-map";
 export default {
   name: "memberRecycle",
   components: {
-    region,
+
     ossManage,
+    multipleMap
   },
   data() {
     return {
@@ -176,7 +165,7 @@ export default {
       descFlag: false, //编辑查看框
       openSearch: true, // 显示搜索
       loading: true, // 表单加载状态
-      updateRegion: false, // 显示所在地
+
       searchForm: {
         // 请求参数
         pageNumber: 1,
@@ -363,7 +352,7 @@ export default {
     editPerm(val) {
       this.descTitle = `查看用户 ${val.username}`;
       this.descFlag = true;
-      this.updateRegion = false;
+
       this.getMemberInfo(val.id);
     },
     /**
@@ -394,8 +383,18 @@ export default {
 
     // 选中的地址
     selectedRegion(val) {
-      this.region = val[1];
-      this.regionId = val[0];
+      if(val.type === 'select'){
+        const paths = val.data.map(item => item.name).join(',')
+        const ids = val.data.map(item => item.id).join(',')
+
+        this.$set(this.formValidate,'region',paths)
+        this.$set(this.formValidate,'regionId',ids)
+
+      }
+      else{
+        this.$set(this.formValidate,'region',val.data.addr)
+        this.$set(this.formValidate,'regionId',val.data.addrId)
+      }
     },
 
     //详细
@@ -427,14 +426,14 @@ export default {
 
     // 提交修改数据
     handleSubmitModal() {
-      const { nickName, sex, username, face, newPassword, id } =
+      const { nickName, sex, username, face, newPassword, id ,regionId,region} =
         this.formValidate;
       let time = new Date(this.formValidate.birthday);
       let birthday =
         time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
       let submit = {
-        regionId: this.regionId || "",
-        region: this.region || "",
+        regionId:regionId,
+        region: region,
         nickName,
         username,
         sex,

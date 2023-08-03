@@ -18,7 +18,7 @@ import util from '@/libs/util'
 
 import * as filters from '@/utils/filters' // global filter
 import liliDialog from '@/components/lili-dialog'
-import i18nBox from '@/components/i18n-translate'
+
 import {md5} from '@/utils/md5.js';
 
 // 打印
@@ -56,7 +56,7 @@ Vue.use(copyViewUi, {
 });
 
 Vue.component('liliDialog', liliDialog)
-Vue.component('i18nBox', i18nBox)
+
 
 
 // 挂载全局使用的方法

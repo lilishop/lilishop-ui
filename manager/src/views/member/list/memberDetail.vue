@@ -331,8 +331,8 @@
           <Input v-model="addressForm.mobile" clearable style="width: 80%" maxlength="11"/>
         </FormItem>
         <FormItem label="收货人地址" prop="consigneeAddressPath">
-          <Input v-model="addressForm.consigneeAddressPath" @on-focus="$refs.liliMap.showMap = true" clearable
-                 style="width: 80%"/>
+          <span>{{ addressForm.consigneeAddressPath || '暂无地址' }}</span>
+          <Button @click="$refs.map.open()" style="margin-left: 10px;">选择</Button>
         </FormItem>
         <FormItem label="详细地址" prop="detail">
           <Input v-model="addressForm.detail" maxlength="35" clearable style="width: 80%"/>
@@ -352,24 +352,23 @@
         <Button type="primary" :loading="submitLoading" @click="addressSubmit">保存</Button>
       </div>
     </Modal>
-    <liliMap ref="liliMap" @getAddress="getAddress"></liliMap>
+    <multipleMap ref="map" @callback="getAddress"></multipleMap>
   </div>
 </template>
 
 <script>
-  import region from "@/components/region";
+
   import * as API_Member from "@/api/member.js";
   import ossManage from "@/views/sys/oss-manage/ossManage";
-  import liliMap from "@/components/map/index";
+  import multipleMap from "@/components/map/multiple-map";
   import * as RegExp from '@/libs/RegExp.js';
   import * as API_Order from "@/api/order.js";
 
   export default {
     name: "memberDetail",
     components: {
-      region,
       ossManage,
-      liliMap
+      multipleMap
     },
     data() {
       return {
@@ -381,7 +380,9 @@
         addressModalVisible: false, //会员地址操作弹出框
         addressForm: {
           id: "",
-          isDefault: "0"
+          isDefault: "0",
+          consigneeAddressPath:"",
+          consigneeAddressIdPath:""
 
         },//会员地址操作form
         selectDate: null, // 选择时间段
@@ -1004,12 +1005,24 @@
 
       },
       //获取地址
-      getAddress(item) {
-        this.$set(this.addressForm, 'consigneeAddressPath', item.addr)
-        this.$set(this.addressForm, 'consigneeAddressIdPath', item.addrId)
-        this.addressForm.address = item.address
-        this.addressForm.lat = item.position.lat
-        this.addressForm.lon = item.position.lng
+      getAddress(val) {
+        if (val.type === 'select') {
+          const paths = val.data.map(item => item.name).join(',')
+          const ids = val.data.map(item => item.id).join(',')
+
+          this.$set(this.addressForm,'consigneeAddressPath',paths)
+          this.$set(this.addressForm,'consigneeAddressIdPath',ids)
+
+          // 解析center 转为经纬度
+          const coord = val.data[val.data.length - 1].center.split(',')
+          this.addressForm.lat = coord[1]
+          this.addressForm.lon = coord[0]
+        }else{
+          this.$set(this.addressForm,'consigneeAddressPath', val.data.addr)
+          this.$set(this.addressForm,'consigneeAddressIdPath',val.data.addrId)
+          this.addressForm.lat = val.data.position.lat
+          this.addressForm.lon = val.data.position.lng
+        }
       },
       //删除会员地址
       memberAddressRemove(v) {

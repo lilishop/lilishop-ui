@@ -95,7 +95,11 @@ export default {
     },
     // 选择完成
     finished() {
-      const params = this.chiosend.filter((item) => item.value !== "");
+      if(!this.chiosend[0]){
+        this.$Message.error("请选择地址")
+        return
+      }
+      const params = this.chiosend.filter((item) => item!=="" && item.value !== "");
       this.enableMap = false;
       this.$emit('callback', {
         type: this.mapDefault,

@@ -8,6 +8,7 @@ module.exports = {
   //FIXME 请检查当前高德key创建的日期，如果2021年12月02日之前申请的 无需填写安全密钥
   aMapSecurityJsCode:"2bd0fbf621881f4c77be74f0e76495f3", // 高德web端js申请的安全密钥
   aMapKey: "7f11113750315d8543daaf5c3ba353ca", //高德web端js申请的api key
+  aMapSwitch:false, //是否开启高德定位
   website: "https://www.pickmall.cn", //官网地址
   enableCDN: true, //生产环境 是否启用cdn加载 vue等js
   port: 10003, //端口

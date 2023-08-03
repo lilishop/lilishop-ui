@@ -19,7 +19,7 @@
               <FormItem label="会员名称" prop="memberName">
                 <div class="item">
                   <Input disabled v-model="shopForm.memberName" />
-                  <Button @click="selectMember()" v-if="!$route.query.shopId"
+                  <Button type="default" @click="selectMember()" v-if="!$route.query.shopId"
                     >选择会员</Button
                   >
                 </div>
@@ -39,9 +39,21 @@
                 </RadioGroup>
               </FormItem>
 
-              <FormItem label="店铺定位" prop="shopCenter">
-                <!-- <Input v-model="shopForm.storeCenter" @on-focus="$refs.liliMap.showMap = true" clearable style="width: 350px" /> -->
-                <Button
+              <FormItem label="店铺所在地" prop="storeAddressPath">
+                <span>{{shopForm.storeAddressPath || '暂无地址'}}</span>
+                <Button style="margin-left: 10px;" type="default" @click="handleClickAddress('storeAddressPath')">选择</Button>
+              </FormItem>
+
+              <FormItem label="店铺详细地址" prop="storeAddressDetail">
+                <Input
+                  v-model="shopForm.storeAddressDetail"
+                  clearable
+                  style="width: 350px"
+                />
+              </FormItem>
+
+              <!-- <FormItem label="店铺定位" prop="shopCenter">
+                 <Button
                   type="info"
                   v-if="!shopForm.storeCenter"
                   @click="$refs.liliMap.showMap = true"
@@ -50,22 +62,9 @@
                 <Button type="success" v-else @click="$refs.liliMap.showMap = true"
                   >已定位</Button
                 >
-              </FormItem>
+              </FormItem> -->
 
-              <FormItem label="店铺所在地" prop="storeAddressPath">
-                <Input
-                  disabled
-                  v-model="shopForm.storeAddressPath"
-                  style="width: 350px"
-                />
-              </FormItem>
-              <FormItem label="店铺详细地址" prop="storeAddressDetail">
-                <Input
-                  v-model="shopForm.storeAddressDetail"
-                  clearable
-                  style="width: 350px"
-                />
-              </FormItem>
+
 
               <FormItem label="店铺logo" class="storeLogo">
                 <Avatar
@@ -112,11 +111,8 @@
                 />
               </FormItem>
               <FormItem label="地址信息">
-                <region
-                  style="width: 350px"
-                  @selected="selectedConsigneeRegion"
-                  :addressId="returnAddress"
-                />
+                {{ shopForm.salesConsigneeAddressPath || '暂无地址' }}
+                <Button style="margin-left: 10px;" type="default" @click="handleClickAddress('salesConsigneeAddressPath')">选择</Button>
               </FormItem>
               <FormItem label="详细地址">
                 <Input
@@ -150,11 +146,13 @@
                 <Input v-model="shopForm.companyPhone" clearable style="width: 350px" />
               </FormItem>
               <FormItem label="公司所在地" prop="companyAddressIdPath">
-                <region
+                <span>{{ shopForm.companyAddressPath }}</span>
+                <Button style="margin-left: 10px;" @click="handleClickAddress('companyAddressPath')">选择</Button>
+                <!-- <region
                   style="width: 350px"
                   @selected="selectedRegion"
                   :addressId="address"
-                />
+                /> -->
               </FormItem>
               <FormItem label="公司详细地址" prop="companyAddress">
                 <Input v-model="shopForm.companyAddress" clearable style="width: 350px" />
@@ -374,7 +372,7 @@
         </Button>
       </div>
     </Card>
-    <liliMap ref="liliMap" @getAddress="getAddress"></liliMap>
+
 
     <Modal width="1200px" v-model="picModalFlag">
       <ossManage @callback="callbackSelected" ref="ossManage" />
@@ -405,6 +403,8 @@
         >
       </div>
     </Modal>
+
+    <multipleMap ref="map" @callback="getAddress" />
   </div>
 </template>
 
@@ -414,17 +414,15 @@ import ossManage from "@/views/sys/oss-manage/ossManage";
 import { getCategoryTree } from "@/api/goods";
 import { shopDetail, shopAdd, shopEdit, getShopByMemberId, shopAudit } from "@/api/shops";
 import uploadPicInput from "@/components/lili/upload-pic-input";
-import region from "@/components/region";
-import liliMap from "@/components/map/index";
+import multipleMap from "@/components/map/multiple-map";
 
 export default {
   name: "shop-operation",
   components: {
     uploadPicInput,
     ossManage,
-    region,
     memberLayout,
-    liliMap,
+    multipleMap,
   },
 
   data() {
@@ -448,6 +446,7 @@ export default {
       shopValidate: {
         // 表单验证规则
         memberName: [{ required: true, message: "会员不能为空" }],
+        storeAddressPath: [{ required: true, message: "店铺地址不能为空" }],
         storeName: [{ required: true, message: "店铺名称不能为空" }],
         companyAddress: [{ required: true, message: "公司地址不能为空" }],
         storeAddressDetail: [{ required: true, message: "店铺详细地址不能为空" }],
@@ -511,6 +510,8 @@ export default {
       settlementCycle: [], // 结算周期
       shopForm: {
         // 店铺数据
+        storeAddressPath:"",
+
         settlementCycle: "",
         selfOperated: "false",
         memberName: "",
@@ -546,9 +547,16 @@ export default {
 
       infoResult: {}, // 店铺详情
       picIndex: "", // 存储身份证图片下标，方便赋值
+      currentAddress:"", //当前选中的地址
     };
   },
   methods: {
+    // 选择地址
+    handleClickAddress(val){
+      this.currentAddress = val;
+      this.$refs.map.open();
+
+    },
     // 选择会员的回调
     callbackMember(val) {
       if (val) {
@@ -723,10 +731,43 @@ export default {
       });
     },
     // 点击定位获取店铺地址
-    getAddress(item) {
-      this.shopForm.storeCenter = item.position.lng + "," + item.position.lat;
-      this.$set(this.shopForm, "storeAddressPath", item.addr);
-      this.$set(this.shopForm, "storeAddressIdPath", item.addrId);
+    getAddress(val) {
+      if (val.type === 'select') {
+        const paths = val.data.map(item => item.name).join(',')
+
+        const ids = val.data.map(item => item.id).join(',')
+
+        if(this.currentAddress === 'storeAddressPath'){
+          this.$set(this.shopForm, "storeAddressPath", paths);
+          this.$set(this.shopForm, "storeAddressIdPath", ids);
+
+          this.shopForm.center = val.data[val.data.length - 1].center
+        }else if(this.currentAddress === 'salesConsigneeAddressPath'){
+          this.$set(this.shopForm, "salesConsigneeAddressPath", paths);
+          this.$set(this.shopForm, "salesConsigneeAddressId", ids);
+        }else if(this.currentAddress === 'companyAddressPath'){
+          this.$set(this.shopForm, "companyAddressPath", paths);
+          this.$set(this.shopForm, "companyAddressIdPath", ids);
+        }
+
+
+      }
+      else{
+        if(this.currentAddress === 'storeAddressPath'){
+          this.shopForm.storeCenter = val.data.position.lng + "," + val.data.position.lat;
+          this.$set(this.shopForm, "storeAddressPath", val.data.addr);
+          this.$set(this.shopForm, "storeAddressIdPath", val.data.addrId);
+        }else if(this.currentAddress === 'salesConsigneeAddressPath'){
+          this.$set(this.shopForm, "salesConsigneeAddressPath", val.data.addr);
+          this.$set(this.shopForm, "salesConsigneeAddressId", val.data.addrId);
+        }else if(this.currentAddress === 'companyAddressPath'){
+          this.$set(this.shopForm, "companyAddressPath", val.data.addr);
+          this.$set(this.shopForm, "companyAddressIdPath", val.data.addrId);
+        }
+
+        console.log(this.shopForm.storeAddressPath)
+
+      }
     },
     // 全部选中
     handleCheckAll() {
