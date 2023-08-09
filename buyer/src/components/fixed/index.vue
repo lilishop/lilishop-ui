@@ -45,11 +45,13 @@ export default {
     }
   },
   mounted() {
+    const vm = this
     // 添加滚轮事件监听器
     window.addEventListener('wheel', function() {
-      if (this.isScrolling) {
+      if (vm.isScrolling) {
         // 如果页面正在滚动，则取消定时器并设置 isScrolling 为 false
-        window.cancelAnimationFrame(this.timeoutId);
+        window.cancelAnimationFrame(vm.timeoutId);
+        vm.isScrolling  = false;
       }
     });
 
