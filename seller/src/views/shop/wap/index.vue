@@ -116,6 +116,21 @@ export default {
 
     // 初始化数据
     init() {
+       // 先读缓存，如果缓存有值则读缓存。
+       const cache = this.getStore('sellerMobilePageCache')
+        if(cache){
+          this.$Modal.confirm({
+          title: '提示',
+          content: '获取到本地有缓存数据，是否使用缓存数据？',
+          okText: '使用',
+          cancelText: '取消',
+          onOk: () => {
+            const data = JSON.parse(cache);
+            this.contentData = data;
+          }
+        });
+
+        }
       if (!this.$route.query.id) return false;
       API_Other.getHomeData(this.$route.query.id).then(res=>{
         this.contentData = JSON.parse(res.result.pageData)

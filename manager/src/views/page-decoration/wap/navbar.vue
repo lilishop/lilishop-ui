@@ -110,7 +110,6 @@ export default {
     },
   },
   mounted() {
-    console.log( this.getStore('managerMobilePageCache') )
     this.hasCache = this.getStore('managerMobilePageCache') ? true : false;
   },
   methods: {
