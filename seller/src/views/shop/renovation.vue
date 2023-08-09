@@ -45,7 +45,7 @@ export default {
   },
   mounted() {
       // 先读缓存，如果缓存有值则读缓存。
-    const cache = this.getStore('managerPCPageCache')
+    const cache = this.getStore('sellerPCPageCache')
     this.hasCache = !!cache;
       if(cache){
         this.$Modal.confirm({
@@ -84,7 +84,7 @@ export default {
   },
   methods: {
     clearCache(){
-      this.setStore('managerPCPageCache', '')
+      this.setStore('sellerPCPageCache', '')
       this.$Message.success('清除成功')
     },
       // 将楼层装修的内容写入到本地缓存中
@@ -92,7 +92,7 @@ export default {
       const data ={...this.modelForm}
       data.list.unshift(this.$refs.modelForm.navList);
       data.list.unshift(this.$refs.modelForm.topAdvert);
-      this.setStore('managerPCPageCache', data)
+      this.setStore('sellerPCPageCache', data)
       this.$Message.success('写入成功')
     },
     saveTemplate() {
