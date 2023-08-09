@@ -112,6 +112,7 @@ export default {
                 {
                   props: {
                     // type: this.index == params.index ? "primary" : "",
+                    type: 'default',
                     size: "small",
                   },
                   on: {
@@ -204,6 +205,7 @@ export default {
                 {
                   props: {
                     // type: this.index == params.index ? "primary" : "",
+                    type: 'default',
                     size: "small",
                   },
                   on: {
@@ -255,6 +257,7 @@ export default {
                 {
                   props: {
                     // type: this.index == params.index ? "primary" : "",
+                    type: 'default',
                     size: "small",
                   },
                   on: {

@@ -20,6 +20,7 @@
           <div ref="qrCodeUrl"></div>
         </div>
       </Poptip>-->
+      <Button size="default" type="default" v-if="hasCache" @click="clearCache">清空本地缓存</Button>
       <Button size="default" type="primary" @click="handleSpinShow">保存模板</Button>
 
       <Modal
@@ -41,6 +42,10 @@
               <span slot="close">关</span>
             </i-switch>
           </div>
+          <div class="model-item">
+            将当前装修内容写入到本地缓存中，下次进入页面时可继续使用
+            <Button type="small" @click="witeLocalStore">写入</Button>
+          </div>
 
           <Button type="primary" @click="save()">保存</Button>
         </div>
@@ -56,6 +61,7 @@ export default {
   props: ["pagetype"],
   data() {
     return {
+      hasCache:false, // 是否有缓存
       progress: true, // 展示进度
       num: 20, // 提交进度
       saveDialog: false, // 加载状态
@@ -103,8 +109,21 @@ export default {
       immediate: true,
     },
   },
-  mounted() {},
+  mounted() {
+    console.log( this.getStore('managerMobilePageCache') )
+    this.hasCache = this.getStore('managerMobilePageCache') ? true : false;
+  },
   methods: {
+    clearCache(){
+      this.setStore('managerMobilePageCache','');
+      this.$Message.success('清空成功')
+    },
+    // 将楼层装修的内容写入到本地缓存中
+    witeLocalStore(){
+      this.setStore('managerMobilePageCache', this.$store.state.styleStore)
+      this.$Message.success('写入成功')
+    },
+
     clickBtn(val) {
       this.way.forEach((item, index) => {
         item.selected = false;

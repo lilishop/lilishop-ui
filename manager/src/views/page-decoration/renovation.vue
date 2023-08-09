@@ -18,6 +18,9 @@
     <div class="btn-bar">
       <Button type="primary" :loading="submitLoading" @click="saveTemplate">保存模板</Button>
       <Button class="ml_10" @click="resetTemplate">还原模板</Button>
+      <Button class="ml_10" @click="witeLocalStore">将装修内容写入到本地</Button>
+
+      <Button class="ml_10" v-if="hasCache" @click="clearCache">清空本地装修缓存</Button>
     </div>
   </div>
 </template>
@@ -32,16 +35,57 @@ export default {
     ModelForm,
   },
   mounted() {
+     // 先读缓存，如果缓存有值则读缓存。
+    const cache = this.getStore('managerPCPageCache')
+    this.hasCache = !!cache;
+      if(cache){
+        this.$Modal.confirm({
+        title: '提示',
+        content: '获取到本地有缓存数据，是否使用缓存数据？',
+        okText: '使用',
+        cancelText: '取消',
+        onOk: () => {
+          let pageData = cache;
+          if (pageData) {
+            pageData = JSON.parse(pageData);
+            if (pageData.list[0].type === "topAdvert") {
+              // topAdvert 为顶部广告 navList为导航栏
+              this.$refs.modelForm.topAdvert = pageData.list[0];
+              this.$refs.modelForm.navList = pageData.list[1];
+              pageData.list.splice(0, 2);
+              this.modelForm = pageData;
+            } else {
+              this.modelForm = { list: [] };
+            }
+          } else {
+            this.modelForm = { list: [] };
+          }
+        }
+      });
+    }
     this.getTemplateItem(this.$route.query.id);
   },
   data() {
     return {
+      hasCache:false,
       modelData, // 可选模块数据
       modelForm: { list: [] }, // 模板数据
       submitLoading: false, // 提交加载状态
     };
   },
   methods: {
+    clearCache(){
+      this.setStore('managerPCPageCache', '')
+      this.$Message.success('清除成功')
+    },
+      // 将楼层装修的内容写入到本地缓存中
+    witeLocalStore(){
+      const data ={...this.modelForm}
+      data.list.unshift(this.$refs.modelForm.navList);
+      data.list.unshift(this.$refs.modelForm.topAdvert);
+      this.setStore('managerPCPageCache', data)
+      this.$Message.success('写入成功')
+    },
     saveTemplate() {
       // 保存模板
       this.submitTemplate(this.$route.query.pageShow ? 'OPEN' : 'CLOSE')

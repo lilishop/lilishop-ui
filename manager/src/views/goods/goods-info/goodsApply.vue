@@ -208,6 +208,7 @@ export default {
                 "Button",
                 {
                   props: {
+                    type: 'default',
                     size: "small",
                   },
                   on: {

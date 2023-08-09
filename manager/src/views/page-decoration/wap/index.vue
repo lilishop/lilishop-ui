@@ -113,12 +113,29 @@ export default {
   methods: {
     // 初始化数据
     init() {
+      // 先读缓存，如果缓存有值则读缓存。
+      const cache = this.getStore('managerMobilePageCache')
+        if(cache){
+          this.$Modal.confirm({
+          title: '提示',
+          content: '获取到本地有缓存数据，是否使用缓存数据？',
+          okText: '使用',
+          cancelText: '取消',
+          onOk: () => {
+            const data = JSON.parse(cache);
+            this.contentData = data;
+          }
+        });
+
+        }
       if (!this.$route.query.id) return false;
+
       API_Other.getHomeData(this.$route.query.id).then((res) => {
         this.contentData = JSON.parse(res.result.pageData);
 
         this.handleComponent(this.contentData.list[0], 0);
       });
+
     },
 
     // 中间组件拖动，右侧数据绑定不变
