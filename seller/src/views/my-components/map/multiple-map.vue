@@ -75,13 +75,21 @@ export default {
           if (res.result.length && val.id !== 0) {
             this.chiosend[index] = val
           }
+          else if(!res.result.length){
+            this.chiosend[index] = val
+          }
           this.data[level] = res.result;
           if (level == 'city') {
             this.data.area = []
             this.data.street = []
+            this.chiosend.splice(1, 3, "","","");
           }
           if (level == 'area') {
             this.data.street = []
+            this.chiosend.splice(2, 2, "","");
+          }
+          if (level == 'street') {
+            this.chiosend.splice(3, 1, "");
           }
         });
       }
