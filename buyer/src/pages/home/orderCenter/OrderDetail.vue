@@ -94,7 +94,7 @@
     </div>
     <div class="order-card" v-if="order.order.payStatus === 'PAID'">
       <h3>发票信息</h3>
-      <template v-if="order.order.needReceipt">
+      <template v-if="order.order.needReceipt && order.receipt">
         <p>发票抬头：{{ order.receipt.receiptTitle }}</p>
         <p>发票内容：{{ order.receipt.receiptContent }}</p>
         <p v-if="order.receipt.taxpayerId">
