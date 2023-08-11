@@ -143,6 +143,7 @@ export default {
           this.$Message.success("保存成功!");
           localStorage.setItem("icon", this.formValidate.domainLogo);
           window.document.title = this.formValidate.siteName + " - 运营后台";
+          this.setStore("title", this.formValidate.siteName);
         } else {
           this.$Message.error("保存失败!");
         }

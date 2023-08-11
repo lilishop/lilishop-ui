@@ -298,7 +298,7 @@
       </p>
       <div>
         <Form ref="modifyPriceForm" :model="modifyPriceForm" label-position="left" :label-width="70"
-          :rules="modifyPriceValidate">
+          :rules="modifyPriceValidate" @submit.native.prevent>
           <FormItem label="订单金额" prop="price">
             <InputNumber style="width: 100px" v-model="modifyPriceForm.price" :min="0" :max="999999"></InputNumber>
             <span class="ml_10">元</span>
