@@ -8,7 +8,7 @@
           <span class="footer-icon-text">品类齐全，轻松购物</span>
         </div>
         <div class="footer-icon flex flex-a-c">
-          <h5 class="footer-icon-child footer-icon-child-2">块</h5>
+          <h5 class="footer-icon-child footer-icon-child-2">快</h5>
           <span class="footer-icon-text">多仓直发，极速配送</span>
         </div>
         <div class="footer-icon flex flex-a-c">
