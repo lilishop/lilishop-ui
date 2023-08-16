@@ -33,6 +33,7 @@ import util from "@/libs/util.js";
 export default {
   name: "shrinkableMenu",
   computed: {
+
     // 二级菜单列表
     menuList() {
       return this.$store.state.app.menuList;
@@ -54,7 +55,7 @@ export default {
           this.selectNav(val.meta.firstRouterName)
         }
       }
-    } 
+    }
   },
   methods: {
     changeMenu(name) { //二级路由点击
@@ -63,12 +64,10 @@ export default {
       });
     },
     selectNav(name) { // 一级路由点击
+      this.$store.commit("childrenMenu",this.$refs.childrenMenu)
       this.$store.commit("setCurrNav", name);
       this.setStore("currNav", name);
       util.initRouter(this);
-      this.$nextTick(()=>{
-        this.$refs.childrenMenu.updateActiveName()
-      })
     },
   }
 };

@@ -360,6 +360,11 @@ util.initRouter = function (vm) { // 初始化路由
     // 缓存数据 修改加载标识
     window.localStorage.setItem('menuData', JSON.stringify(menuData));
     vm.$store.commit('setAdded', true);
+    if(vm.$store.state.app.refMenu){
+      vm.$nextTick(()=>{
+        vm.$store.state.app.refMenu.updateActiveName();
+      });
+    }
   })
 
 };

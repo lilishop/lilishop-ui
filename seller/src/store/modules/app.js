@@ -40,9 +40,13 @@ const app = {
     tagsList: [...otherRouter.children],
     messageCount: 0,
     // 在这里定义你不想要缓存的页面的name属性值(参见路由配置router.js)
-    dontCache: ['test', 'test']
+    dontCache: ['test', 'test'],
+    refMenu:""
   },
   mutations: {
+    childrenMenu(state,v){
+      state.refMenu = v
+    },
     // 动态添加主界面路由，需要缓存
     updateAppRouter(state, routes) {
       state.routers.push(...routes);
