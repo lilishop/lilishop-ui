@@ -2,19 +2,19 @@
   <div class="layout">
     <Form ref="formValidate" :label-width="160" label-position="right" :model="formValidate" :rules="ruleValidate">
       <FormItem label="appId" prop="appId">
-        <Input class="w200" v-model="formValidate.appId" />
+        <Input maxlength="300" class="w200" v-model="formValidate.appId" />
       </FormItem>
       <FormItem label="certPath" prop="certPath">
-        <Input  v-model="formValidate.certPath" />
+        <Input maxlength="300"  v-model="formValidate.certPath" />
       </FormItem>
       <FormItem label="alipayPublicCertPath" prop="alipayPublicCertPath">
-        <Input v-model="formValidate.alipayPublicCertPath" />
+        <Input maxlength="300" v-model="formValidate.alipayPublicCertPath" />
       </FormItem>
       <FormItem label="privateKey" class="label-item" prop="privateKey">
-        <Input v-model="formValidate.privateKey" />
+        <Input maxlength="300" v-model="formValidate.privateKey" />
       </FormItem>
       <FormItem label="rootCertPath" prop="rootCertPath">
-        <Input v-model="formValidate.rootCertPath" />
+        <Input maxlength="300" v-model="formValidate.rootCertPath" />
       </FormItem>
 
       <div class="label-btns">

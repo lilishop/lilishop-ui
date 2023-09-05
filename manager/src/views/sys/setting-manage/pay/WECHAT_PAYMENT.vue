@@ -8,11 +8,11 @@
       :rules="ruleValidate"
     >
       <FormItem label="appId" prop="appId">
-        <Input class="w200" v-model="formValidate.appId" />
+        <Input maxlength="300" class="w200" v-model="formValidate.appId" />
         <p style="color: red">*APP应用 AppID 非必填</p>
       </FormItem>
       <FormItem label="mpAppId" prop="mpAppId">
-        <Input class="w200" v-model="formValidate.mpAppId" />
+        <Input maxlength="300" class="w200" v-model="formValidate.mpAppId" />
         <p style="color: red">*小程序 AppID 非必填</p>
       </FormItem>
       <FormItem label="serviceAppId" prop="serviceAppId">
@@ -20,23 +20,23 @@
         <p style="color: red">*服务号 AppID 非必填</p>
       </FormItem>
       <FormItem label="mchId" prop="mchId">
-        <Input class="w200" v-model="formValidate.mchId" />
+        <Input maxlength="300" class="w200" v-model="formValidate.mchId" />
       </FormItem>
       <FormItem label="apiKey3" prop="apiKey3">
-        <Input v-model="formValidate.apiKey3" />
+        <Input maxlength="300" v-model="formValidate.apiKey3" />
       </FormItem>
       <FormItem label="apiclient_cert_p12" class="label-item" prop="apiclient_cert_p12">
-        <Input v-model="formValidate.apiclient_cert_p12" />
+        <Input maxlength="300" v-model="formValidate.apiclient_cert_p12" />
       </FormItem>
       <FormItem label="apiclient_cert_pem" prop="apiclient_cert_pem">
-        <Input v-model="formValidate.apiclient_cert_pem" />
+        <Input maxlength="300" v-model="formValidate.apiclient_cert_pem" />
       </FormItem>
       <FormItem label="apiclient_key" prop="apiclient_key">
-        <Input v-model="formValidate.apiclient_key" />
+        <Input maxlength="300" v-model="formValidate.apiclient_key" />
       </FormItem>
 
       <FormItem label="serialNumber" prop="serialNumber">
-        <Input v-model="formValidate.serialNumber" />
+        <Input maxlength="300" v-model="formValidate.serialNumber" />
       </FormItem>
       <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
