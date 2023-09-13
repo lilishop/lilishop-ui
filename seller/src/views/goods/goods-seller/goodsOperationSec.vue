@@ -298,7 +298,7 @@
                 <!-- {{item.url}} -->
                 <div style="width:100%;display:flex;" v-for="(item, index) in listImages.images" :key="index">
                   <img style="width:100px;flex:1;margin-top:10px;cursor:pointer;" :src="item.url"
-                    @click="getImages(item.url)" />
+                    @click="handleView(item.url)" />
                 </div>
               </FormItem>
             </div>

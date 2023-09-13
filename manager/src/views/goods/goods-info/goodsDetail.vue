@@ -18,6 +18,15 @@
             <FormItem label="商品卖点">
               {{ goods.sellingPoint }}
             </FormItem>
+            <FormItem label="商品参数">
+             <div v-if="goods.goodsParamsDTOList && goods.goodsParamsDTOList.length" v-for="(item,index) in goods.goodsParamsDTOList" :key="index">
+               <div style="margin-bottom: 10px; display: flex; align-items: center;" >
+                  {{ item.groupName }} : <tag v-for="(child,i) in item.goodsParamsItemDTOList" :key="i">
+                  {{ child.paramName }} - {{ child.paramValue }}
+                  </tag>
+               </div>
+             </div>
+            </FormItem>
           </div>
           <h4>商品交易信息</h4>
           <div class="form-item-view">

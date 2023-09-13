@@ -335,6 +335,7 @@ export default {
       this.selectDate = null;
       this.searchForm.startDate = "";
       this.searchForm.endDate = "";
+      this.searchForm.orderType = "NORMAL",
       // 重新加载数据
       this.getDataList();
     },
