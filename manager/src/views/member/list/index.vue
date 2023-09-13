@@ -55,7 +55,7 @@
         <Input v-model="form.id" v-show="false"/>
 
         <FormItem label="头像">
-          <img :src="form.face" class="face" />
+          <img :src="form.face || defaultPic" class="face" />
           <Button type="text" class="upload" @click="() => {
                 this.picModelFlag = true;
                 this.$refs.ossManage.selectImage = true;
@@ -114,6 +114,7 @@ export default {
   },
   data() {
     return {
+      defaultPic:require('@/assets/default.png'),
       descTitle: "", // modal标题
       descFlag: false, //编辑查看框
       loading: true, // 表单加载状态
