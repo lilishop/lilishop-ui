@@ -162,7 +162,7 @@
           </div>
           <div>
             <div class="counts">{{ homeData.goodsNum || 0 }}</div>
-            <div>整体商品数量</div>
+            <div>上架商品数量</div>
           </div>
 
         </div>

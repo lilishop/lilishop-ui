@@ -35,7 +35,7 @@
             </Radio>
           </RadioGroup>
           <br />
-          <span style="color: #cccccc">开启虚拟成团后，24小时人数未满的团，系统将会模拟匿名买家凑满人数，使该团成团；您只需要对已付款参团的真实买家发货；建议合理开启以提高</span>
+          <span style="color: #cccccc">开启虚拟成团后，24小时人数未满的团，系统将会模拟匿名买家凑满人数，使该团成团；您只需要对已付款参团的真实买家发货；建议合理开启以提高成团率</span>
         </FormItem>
         <FormItem label="拼团规则" prop="pintuanRule">
           <Input v-model="form.pintuanRule" type="textarea" :rows="4" clearable maxlength="255" style="width: 260px" />
@@ -173,7 +173,7 @@ export default {
           this.form = data;
           // 此处将值转换为 1 true ，0 false 不然ivew radio组件会报错
           this.form.fictitious ? this.$set(this.form, "fictitious", 1)  : this.$set(this.form, "fictitious", 0);
-    
+
        }
       });
     },
