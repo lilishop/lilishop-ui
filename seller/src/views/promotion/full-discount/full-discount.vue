@@ -168,9 +168,13 @@ export default {
     // 重置
     handleReset () {
       this.selectDate = "";
-      this.searchForm = {};
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm = {
+        // 搜索框初始化对象
+        pageNumber: 1, // 当前页数
+        pageSize: 10, // 页面大小
+        sort: "startTime", // 默认排序字段
+        order: "desc", // 默认排序方式
+      };
       this.getDataList();
     },
     //  编辑
