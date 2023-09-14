@@ -2,7 +2,7 @@
   <div>
     <Card>
       <Row>
-        <Form ref="searchForm" :model="searchForm" @keydown.enter.native="handleSearch" inline :label-width="70" class="search-form">
+        <Form ref="searchForm" :model="searchForm" @keydown.enter.native="handleSearch" @submit.native.prevent inline :label-width="70" class="search-form">
           <Form-item label="会员名称" prop="memberName">
             <Input type="text" v-model="searchForm.memberName" placeholder="请输入会员名称" clearable style="width: 200px"/>
           </Form-item>
@@ -48,10 +48,10 @@
             <div class="div-height"> 店铺名称：{{ infoData.storeName }}</div>
             <div class="div-height"> 订单号：{{ infoData.orderNo }}</div>
           </div>
-          
+
           <div class="border-b">
             <List>
-              
+
               <ListItem>
                 <ListItemMeta :avatar="infoData.memberProfile" :title="infoData.memberName"
                   :description="infoData.content"/>
@@ -69,7 +69,7 @@
                        v-for="(img,index) in infoData.images.split(',')"  :src="img"
                        alt="" :key="index"/>
                   </template>
-                  
+
                 </div>
               </div>
             </List>

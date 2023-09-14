@@ -8,6 +8,7 @@
         inline
         style="margin-top:10px"
         :label-width="70"
+        @submit.native.prevent
         class="search-form"
       >
         <Form-item label="会员名称" prop="username">

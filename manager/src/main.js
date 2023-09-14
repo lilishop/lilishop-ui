@@ -38,8 +38,16 @@ Vue.config.devtools = true;
 Vue.config.productionTip = false
 const PC_URL = BASE.PC_URL; // 跳转买家端地址 pc端
 const WAP_URL = BASE.WAP_URL; // 跳转买家端地址 wap端
-Vue.prototype.linkTo = function (goodsId, skuId) {  // 跳转买家端商品
-  window.open(`${PC_URL}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`, '_blank')
+Vue.prototype.linkTo = function (goodsId, skuId) {
+  // 跳转买家端商品
+  let src;
+  if (skuId) {
+    src = `${PC_URL}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`;
+  } else {
+    src = `${PC_URL}/goodsDetail?goodsId=${goodsId}`;
+  }
+
+  window.open(src, "_blank");
 };
 Vue.prototype.wapLinkTo = function (goodsId, skuId) { // app端二维码
   return `${WAP_URL}/pages/product/goods?id=${skuId}&goodsId=${goodsId}`
