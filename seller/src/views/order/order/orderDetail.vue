@@ -357,7 +357,7 @@
           </dd>
         </dl>
         <dl>
-          <dt>快递单号：</dt>
+          <dt>物流单号：</dt>
           <dd>
             <div nctype="ordersSn" class="text-box">
               {{ logisticsInfo.logisticCode || orderInfo.order.logisticsNo }}
