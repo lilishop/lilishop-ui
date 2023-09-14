@@ -85,8 +85,8 @@
               <Option v-for="item in companyList" :value="item.id" :key="item.id">{{ item.name }}</Option>
             </Select>
           </FormItem>
-          <FormItem label="快递单号" prop="logisticsNo">
-            <Input v-model="form.logisticsNo" placeholder="请填写快递单号"></Input>
+          <FormItem label="物流单号" prop="logisticsNo">
+            <Input v-model="form.logisticsNo" placeholder="请填写物流单号"></Input>
           </FormItem>
           <FormItem label="发货时间" prop="mDeliverTime">
             <DatePicker type="date" style="width:100%" v-model="form.mDeliverTime" @on-change="changeTime" format="yyyy-MM-dd" placeholder="选择发货时间"></DatePicker>

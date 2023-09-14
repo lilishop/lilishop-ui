@@ -340,7 +340,7 @@
           </dd>
         </dl>
         <dl>
-          <dt>快递单号：</dt>
+          <dt>物流单号：</dt>
           <dd>
             <div class="text-box">{{ afterSaleInfo.mlogisticsNo }}</div>
           </dd>
