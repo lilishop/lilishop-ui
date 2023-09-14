@@ -49,10 +49,14 @@ Vue.prototype.linkTo = function (goodsId, skuId) {
 
   window.open(src, "_blank");
 };
-Vue.prototype.wapLinkTo = function (goodsId, skuId) { // app端二维码
-  return `${WAP_URL}/pages/product/goods?id=${skuId}&goodsId=${goodsId}`
+Vue.prototype.wapLinkTo = function (goodsId, skuId) {
+  // app端二维码
+  if (skuId) {
+    return `${WAP_URL}/pages/product/goods?id=${skuId}&goodsId=${goodsId}`;
+  } else {
+    return `${WAP_URL}/pages/product/goods?goodsId=${goodsId}`;
+  }
 };
-
 // 引入价格格式化组件
 import priceColorScheme from 'price-color'
 Vue.use(priceColorScheme);
