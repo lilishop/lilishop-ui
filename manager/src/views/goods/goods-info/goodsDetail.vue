@@ -72,6 +72,14 @@
                 </Modal>
               </div>
             </FormItem>
+            <FormItem label="商品视频">
+              <video
+                v-if="goods.goodsVideo"
+                controls
+                class="player"
+                :src="goods.goodsVideo"
+              />
+            </FormItem>
             <FormItem label="商品规格">
               <Table :columns="skuColumn" :data="skuData">
                 <template slot="showImage" slot-scope="scope">
