@@ -83,11 +83,13 @@
             <FormItem label="商品规格">
               <Table :columns="skuColumn" :data="skuData">
                 <template slot="showImage" slot-scope="scope">
-                  <div style="margin-top: 5px; height: 80px; display: flex">
+                  <div style="margin-top: 5px; display: flex">
                     <div>
                       <img
-                        :src="scope.row.image"
-                        style="height: 60px; margin-top: 1px; width: 60px"
+                        v-for="(item,index) in scope.row.image"
+                        :key="index"
+                        :src="item"
+                        style="height: 60px; margin:10px; width: 60px"
                       />
                     </div>
                   </div>
@@ -199,7 +201,8 @@ export default {
             weight: sku.weight,
             cost: sku.cost,
             price:sku.price,
-            image: sku.thumbnail,
+            image: sku.goodsGalleryList,
+            quantity:sku.quantity
           });
         });
         if (res.result.salesModel === "WHOLESALE" && res.result.wholesaleList) {
@@ -222,9 +225,12 @@ export default {
             {
               title: "价格",
               key: "price",
-              render: (h, params) => {
-                return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
+              render: (h, params) => {v
+                return h("priceColorScheme", {props:{alue:params.row.price,color:this.$mainColor}} );
               },
+            },{
+              title: "库存",
+              key: "quantity",
             }
           );
         }
