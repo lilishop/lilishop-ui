@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <Card>
-      <Form ref="searchForm" @keydown.enter.native="handleSearch" :model="searchForm" inline :label-width="70"
+      <Form ref="searchForm" @submit.native.prevent @keydown.enter.native="handleSearch" :model="searchForm" inline :label-width="70"
             class="search-form">
         <Form-item label="品牌名称">
           <Input type="text" v-model="searchForm.name" placeholder="请输入品牌名称" clearable style="width: 200px"/>
