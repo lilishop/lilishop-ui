@@ -31,7 +31,7 @@ export default {
 
       selectedWay: {
         // 可选时间项
-        title: "最近7天",
+        title: "过去7天",
         selected: true,
         searchType: "LAST_SEVEN",
       },
@@ -56,12 +56,12 @@ export default {
           searchType: "YESTERDAY",
         },
         {
-          title: "最近7天",
+          title: "过去7天",
           selected: true,
           searchType: "LAST_SEVEN",
         },
         {
-          title: "最近30天",
+          title: "过去30天",
           selected: false,
           searchType: "LAST_THIRTY",
         },

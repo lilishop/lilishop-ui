@@ -20,13 +20,13 @@ export default {
       month: "", // 所选月份
 
       defuaultWay: {
-        title: "最近7天",
+        title: "过去7天",
         selected: true,
         searchType: "LAST_SEVEN",
       },
 
       selectedWay: {
-        title: "最近7天",
+        title: "过去7天",
         selected: true,
         searchType: "LAST_SEVEN",
       },
@@ -51,12 +51,12 @@ export default {
           searchType: "YESTERDAY",
         },
         {
-          title: "最近7天",
+          title: "过去7天",
           selected: true,
           searchType: "LAST_SEVEN",
         },
         {
-          title: "最近30天",
+          title: "过去30天",
           selected: false,
           searchType: "LAST_THIRTY",
         },
