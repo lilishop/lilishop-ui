@@ -277,9 +277,14 @@ export default {
       this.getDataList();
     },
     handleReset() {
-      this.searchForm = {};
+      this.searchForm = {
+        // 搜索框初始化对象
+        pageNumber: 1, // 当前页数
+        pageSize: 10, // 页面大小
+        sort: "startTime", // 默认排序字段
+        order: "desc", // 默认排序方式
+      };
       this.selectDate = "";
-      this.searchForm.pageNumber = 1;
       this.getDataList();
     },
     clearSelectAll() {

@@ -199,6 +199,7 @@
             <Icon type="ios-cloud-upload" size="102" style="color: #3399ff"></Icon>
             <h2>选择或拖拽文件上传</h2>
           </div>
+          <Spin fix v-if="spinShow"></Spin>
         </Upload>
         <Button @click="exportGoods" type="text" style="color: red">下载导入模板</Button>
       </div>
@@ -222,13 +223,14 @@ import {
 } from "@/api/goods";
 import { baseUrl } from "@/libs/axios.js";
 import * as API_Shop from "@/api/shops";
-import Cookies from "js-cookie";
+
 import {uploadGoodsExcel} from "../../../api/goods";
 
 export default {
   name: "goods",
   data() {
     return {
+      spinShow:false,
       accessToken: {}, // 验证token
       importModal: false,
       action: baseUrl + "/goods/import/import", // 上传接口
@@ -546,15 +548,11 @@ export default {
     async upload() {
       let fd = new FormData();
       fd.append("files", this.file);
+      this.spinShow = false
       let res = await uploadGoodsExcel(fd);
       if (res.success) {
-        this.stepList.map((item) => {
-          item.checked = false;
-          this.$Message.success("导入成功")
-          this.importModal = false
-        });
-
-        this.stepList[2].checked = true;
+        this.spinShow = true
+        this.$Message.success("导入成功")
       }
     },
     openImportGoods(){

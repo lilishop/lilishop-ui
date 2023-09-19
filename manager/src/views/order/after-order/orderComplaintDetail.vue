@@ -151,7 +151,7 @@
                 <img :src="complaintInfo.goodsImage" height="60px">
               </dt>
               <dd>
-                <a>{{complaintInfo.goodsName}}</a><br>
+                <a @click="linkTo(complaintInfo.goodsId, complaintInfo.skuId)">{{complaintInfo.goodsName}}</a><br>
                 <span>￥{{complaintInfo.goodsPrice}} * {{complaintInfo.num}}(数量)</span>
               </dd>
             </dl>

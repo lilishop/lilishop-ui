@@ -205,10 +205,15 @@ export default {
     },
     // 重置
     handleReset() {
-      this.searchForm = {};
+      this.searchForm = {
+        // 搜索框初始化对象
+        pageNumber: 0, // 当前页数
+        pageSize: 10, // 页面大小
+        sort: "startTime",
+        order: "desc", // 默认排序方式
+      };
       this.selectDate = "";
-      this.searchForm.pageNumber = 0;
-      this.searchForm.pageSize = 10;
+
       this.getDataList();
     },
     // 时间段分别赋值
