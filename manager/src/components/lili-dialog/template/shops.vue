@@ -13,7 +13,7 @@
         </div>
       </div>
       <div>
-        <Scroll class="wap-content-list" :on-reach-bottom="handleReachBottom" :distance-to-edge="23">
+        <div class="wap-content-list" >
           <div class="wap-content-item" @click="clickShop(item,index)" :class="{ active:selected == index }" v-for="(item, index) in shopsData" :key="index">
             <div>
               <img class="shop-logo" :src="item.storeLogo" alt="" />
@@ -26,7 +26,18 @@
             </div>
           </div>
           <Spin size="large" fix v-if="loading"></Spin>
-        </Scroll>
+        </div>
+        <Page
+          :total="total"
+          class="pageration"
+          @on-change="changePageSize"
+          :page-size="params.pageSize"
+          size="small"
+          show-total
+          show-elevator
+
+        >
+        </Page>
       </div>
     </div>
   </div>
@@ -40,7 +51,7 @@ export default {
       total: "", // 总数
       params: { // 请求参数
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 12,
         storeDisable: "OPEN",
         storeName: "",
       },
@@ -54,13 +65,9 @@ export default {
     this.init();
   },
   methods: {
-    handleReachBottom() {
-      setTimeout(() => {
-        if (this.params.pageNumber * this.params.pageSize <= this.total) {
-          this.params.pageNumber++;
-          this.init();
-        }
-      }, 1500);
+    changePageSize(v){
+      this.params.pageNumber = v;
+      this.init();
     },
     init() {
       this.loading = true;
@@ -71,7 +78,7 @@ export default {
            */
           this.total = res.result.total;
 
-          this.shopsData.push(...res.result.records);
+          this.shopsData = res.result.records;
 
           this.loading = false;
         }
@@ -95,13 +102,15 @@ export default {
   color: #999;
 }
 .wap-content-list {
+  display: flex;
   flex-wrap: wrap;
+  height: 340px;
 }
+
 .shop-logo {
   object-fit: cover;
 }
-.wap-content-item {
-}
+
 .active {
   background: url("../../../assets/selected.png") no-repeat;
   background-position: right;
