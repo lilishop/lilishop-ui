@@ -107,7 +107,7 @@
             </FormItem>
             <FormItem label="权限url" v-if="form.level != 0" class="block-tool">
               <Tooltip placement="right" content="*号模糊匹配，逗号分割" transfer>
-                <Input class="menu-input" v-model="form.permission" type="textarea" />
+                <Input class="menu-input" v-model="form.permission" type="textarea" maxlength="1000" />
               </Tooltip>
             </FormItem>
             <FormItem label="排序值" prop="sortOrder">
