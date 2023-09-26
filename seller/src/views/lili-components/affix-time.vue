@@ -101,6 +101,9 @@ export default {
 
         this.$emit("selected", this.selectedWay);
       } else {
+        const current = this.dateList.find(item=>{return item.selected})
+        this.selectedWay = current
+        this.$emit("selected", this.selectedWay);
       }
     },
     // 点击时间筛选
@@ -111,14 +114,15 @@ export default {
       item.selected = true;
       item.storeId = this.storeId;
       this.month = "";
-
+      const dateList = this.dateList
+      let currentDate
        if (item.searchType == "") {
         if (
           dateList.some((date) => {
             return date.title == item.title;
           })
         ) {
-          item.searchType = date.searchType;
+          item.searchType = currentDate.searchType;
         } else {
           item.searchType = "LAST_SEVEN";
         }

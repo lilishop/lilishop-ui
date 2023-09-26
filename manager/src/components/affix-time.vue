@@ -138,6 +138,9 @@ export default {
 
         this.$emit("selected", this.selectedWay);
       } else {
+        const current = this.dateList.find(item=>{return item.selected})
+        this.selectedWay = current
+        this.$emit("selected", this.selectedWay);
       }
     },
     // 变更时间
@@ -148,14 +151,16 @@ export default {
       item.selected = true;
       item.storeId = this.storeId;
       this.month = "";
-
+      const dateList = this.dateList
+      let currentDate
       if (item.searchType == "") {
         if (
           dateList.some((date) => {
+            currentDate = date
             return date.title == item.title;
           })
         ) {
-          item.searchType = date.searchType;
+          item.searchType = currentDate.searchType;
         } else {
           item.searchType = "LAST_SEVEN";
         }
@@ -182,8 +187,6 @@ export default {
 .active {
   color: $theme_color;
   position: relative;
-}
-.date-picker {
 }
 .active:before {
   content: "";
