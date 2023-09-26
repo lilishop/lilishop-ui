@@ -368,6 +368,8 @@ export default {
             if (params.row.applyStatus === 'APPLY') {
               return h('div', [h('span', {}, '申请中')]);
             } else if (params.row.applyStatus === 'VIA_AUDITING') {
+              return h('div', [h('span', {}, '审核通过')]);
+            } else if (params.row.applyStatus === 'SUCCESS') {
               return h('div', [h('span', {}, '提现成功')]);
             } else if (params.row.applyStatus === 'ERROR') {
               return h('div', [h('span', {}, '提现失败')]);
