@@ -24,7 +24,7 @@
 
         <FormItem>
           <Button type="primary" :loading="applyLoading" @click="apply"
-            >提交申请</Button
+          >提交申请</Button
           >
         </FormItem>
       </Form>
@@ -34,7 +34,7 @@
       <Alert type="success">
         您提交的信息正在审核
         <template slot="desc"
-          >提交认证申请后，工作人员将在三个工作日进行核对完成审核</template
+        >提交认证申请后，工作人员将在三个工作日进行核对完成审核</template
         >
       </Alert>
     </div>
@@ -42,11 +42,11 @@
     <div v-if="status === 2">
       <div class="tips">
 
-          <p>分销下线付款之后会生成分销订单。</p>
-          <p>
-            冻结金额：用户提现金额即为冻结金额，审核通过后扣除冻结金额，审核拒绝之后冻结金额返回可提现金额。
-          </p>
-          <p>可提现金额：分销订单佣金T+1解冻后可变为可提现金额。</p>
+        <p>分销下线付款之后会生成分销订单。</p>
+        <p>
+          冻结金额：用户提现金额即为冻结金额，审核通过后扣除冻结金额，审核拒绝之后冻结金额返回可提现金额。
+        </p>
+        <p>可提现金额：分销订单佣金T+1解冻后可变为可提现金额。</p>
 
       </div>
 
@@ -54,7 +54,7 @@
         <div class="mb_20 account-price">
           <span class="subTips">可提现金额：</span>
           <span class="fontsize_48 global_color"
-            >￥{{ result.canRebate | unitPrice }}</span
+          >￥{{ result.canRebate | unitPrice }}</span
           >
           <span class="subTips">冻结金额：</span>
           <span class="">￥{{ result.commissionFrozen | unitPrice }}</span>
@@ -65,7 +65,7 @@
             size="small"
             class="ml_20"
             @click="withdrawApplyModal = true"
-            >申请提现</Button
+          >申请提现</Button
           >
         </div>
       </div>
@@ -102,13 +102,13 @@
                 size="small"
                 style="margin-right: 5px"
                 @click="fenxiao(row)"
-                >分销商品</Button
+              >分销商品</Button
               >
               <Button
                 type="error"
                 size="small"
                 @click="selectGoods(row.id, false)"
-                >取消选择</Button
+              >取消选择</Button
               >
             </template>
           </Table>
@@ -156,7 +156,7 @@
                 size="small"
                 style="margin-right: 5px"
                 @click="selectGoods(row.id, true)"
-                >选择商品</Button
+              >选择商品</Button
               >
             </template>
           </Table>
@@ -197,8 +197,8 @@
                   row.distributionCashStatus == "APPLY"
                     ? "待处理"
                     : row.distributionCashStatus == "VIA_AUDITING"
-                    ? "通过"
-                    : "拒绝"
+                      ? "通过"
+                      : "拒绝"
                 }}</span
               >
             </template>
@@ -222,11 +222,27 @@
       <Alert type="error">
         分销功能暂未开启
         <template slot="desc"
-          >提交认证申请后，工作人员将在三个工作日进行核对完成审核</template
+        >提交认证申请后，工作人员将在三个工作日进行核对完成审核</template
         >
       </Alert>
     </div>
+    <!-- 分销资格被清退 -->
+    <div v-if="status === 4">
+      <Alert type="error">
+        您的分销资格已被清退。请联系管理员或进行申诉
 
+        <Button style="margin-left: 50px;" type="warning" @click="repaying">申诉</Button>
+      </Alert>
+    </div>
+    <!-- 分销申诉审核 -->
+    <div v-if="status === 5">
+      <Alert type="success">
+        您提交的申诉正在审核
+        <template slot="desc"
+        >提交认证申请后，工作人员将在三个工作日进行核对完成审核</template
+        >
+      </Alert>
+    </div>
     <Modal v-model="withdrawApplyModal" width="530">
       <p slot="header">
         <Icon type="edit"></Icon>
@@ -234,7 +250,7 @@
       </p>
       <div>
         <Input v-model="withdrawPrice" size="large" number maxlength="9"
-          ><span slot="append">元</span></Input
+        ><span slot="append">元</span></Input
         >
       </div>
       <div slot="footer" style="text-align: center">
@@ -243,21 +259,39 @@
     </Modal>
     <Modal v-model="qrcodeShow" title="分销商品" width="800">
       <Alert type="warning"> 下载二维码或者复制链接分享商品 </Alert>
-      <div style="width: 200px; height: 200px; border: 1px solid #eee">
-        <vue-qr
-          :text="qrcode"
-          :callback="qrcodeData"
-          :margin="0"
-          colorDark="#000"
-          colorLight="#fff"
-          :size="200"
-        ></vue-qr>
-        <Button class="download-btn" type="success" @click="downloadQrcode"
+      <div class="qrcode">
+        <div style="width: 150px; height: 150px; border: 1px solid #eee">
+          <vue-qr
+            :text="qrcode"
+            :callback="qrcodeData"
+            :margin="0"
+            colorDark="#000"
+            colorLight="#fff"
+            :size="150"
+          ></vue-qr>
+          <div class="qrcode-platform">PC端</div>
+          <Button class="download-btn" type="success" @click="downloadQrcode"
           >下载二维码</Button
-        >
+          >
+        </div>
+        <div style="width: 150px; height: 150px; border: 1px solid #eee">
+          <vue-qr
+            :text="qrcodeH5"
+            :callback="qrcodeDataH5"
+            :margin="0"
+            colorDark="#000"
+            colorLight="#fff"
+            :size="150"
+          ></vue-qr>
+          <div class="qrcode-platform">移动应用端</div>
+          <Button class="download-btn" type="success" @click="downloadQrcodeH5"
+          >下载二维码</Button
+          >
+        </div>
       </div>
-      <div class="mt_10">
-        商品链接：<Input style="width: 400px" v-model="qrcode"></Input>
+
+      <div class="mt_10" style="margin-top: 100px;">
+        商品链接：<Input style="width: 600px" v-model="qrcode"></Input>
       </div>
     </Modal>
   </div>
@@ -280,6 +314,7 @@ export default {
   components: { vueQr },
   data() {
     return {
+      config:require('@/config'),
       status: 0, // 申请状态，0为未申请 1 申请中 2 申请完成 3 功能暂未开启
       applyForm: {}, // 申请表单
       rules: {
@@ -364,8 +399,10 @@ export default {
         order: "desc",
       },
       qrcode: "", // 二维码
+      qrcodeH5:"",//H5二维码
       qrcodeShow: false, // 显示二维码
       base64Img: "", // base64编码
+      base64ImgH5: "", // base64H5编码
       goodsNameCurr: "", // 当前分销商品名称
     };
   },
@@ -406,12 +443,24 @@ export default {
       // 二维码base64地址
       this.base64Img = data64;
     },
+    qrcodeDataH5(data64) {
+      // 二维码H5端base64地址
+      this.base64ImgH5 = data64;
+    },
     downloadQrcode() {
       // 下载二维码
       let a = document.createElement("a"); // 生成一个a元素
       let event = new MouseEvent("click"); // 创建一个单击事件
       a.download = this.goodsNameCurr || "photo";
       a.href = this.base64Img; // 将生成的URL设置为a.href属性
+      a.dispatchEvent(event); // 触发a的单击事件
+    },
+    downloadQrcodeH5(){
+      // 下载H5二维码
+      let a = document.createElement("a"); // 生成一个a元素
+      let event = new MouseEvent("click"); // 创建一个单击事件
+      a.download = this.goodsNameCurr || "photo";
+      a.href = this.base64ImgH5; // 将生成的URL设置为a.href属性
       a.dispatchEvent(event); // 触发a的单击事件
     },
     tabPaneChange(tab) {
@@ -453,7 +502,8 @@ export default {
     },
     fenxiao(row) {
       // 分销商品
-      this.qrcode = `${location.origin}/goodsDetail?skuId=${row.skuId}&goodsId=${row.goodsId}&distributionId=${this.result.id}`;
+      this.qrcode = `${this.config.PC_DOMAIN}/goodsDetail?skuId=${row.skuId}&goodsId=${row.goodsId}&distributionId=${this.result.id}`;
+      this.qrcodeH5 = `${this.config.WAP_DOMAIN}/pages/product/goods?skuId=${row.skuId}&goodsId=${row.goodsId}&distributionId=${this.result.id}`;
       this.goodsNameCurr = row.goodsName;
       this.qrcodeShow = true;
     },
@@ -469,19 +519,32 @@ export default {
         if (res.success) this.logData = res.result;
       });
     },
+    //申诉
+    repaying(){
+      applyDistribution().then((res) => {
+        this.applyLoading = false;
+        if (res.success) {
+          this.$Message.success("申诉已提交，请等待管理员审核");
+          // this.status = 1;
+        }
+      });
+    },
     distribution() {
       // 获取分销商信息
       distribution().then((res) => {
         if (res.result) {
           this.result = res.result;
           let type = res.result.distributionStatus;
-
           if (type === "PASS") {
             this.status = 2;
             this.getGoodsData();
-          } else if (type === "RETREAT" || type === "REFUSE") {
+          } else if ( type === "REFUSE") {
             this.status = 0;
-          } else {
+          } else if (type === "RETREAT") {
+            this.status = 4;
+          }else if (type === "APPEAL") {
+            this.status = 5;
+          }else {
             this.status = 1;
           }
         } else if (!res.data.success && res.data.code === 22000) {
@@ -523,9 +586,11 @@ export default {
   }
 }
 .download-btn {
-  position: relative;
-  top: -200px;
-  left: 200px;
+  // position: relative;
+  // top: -200px;
+  // left: 200px;
+  margin-left: 25px;
+  margin-top: 5px
 }
 /deep/ .ivu-alert-message {
   p {
@@ -539,5 +604,16 @@ export default {
   >p{
     margin: 6px 0;
   }
+}
+.qrcode{
+  display: flex;
+  justify-content: space-evenly;
+  padding-top: 10px
+
+}
+.qrcode-platform{
+  text-align: center;
+  font-size: 14px;
+  margin: 5px;
 }
 </style>
