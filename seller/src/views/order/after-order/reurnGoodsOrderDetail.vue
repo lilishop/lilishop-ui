@@ -8,8 +8,15 @@
             <div class="div-form-default">
               <h3>售后申请</h3>
               <dl>
-                <dt>售后状态</dt>
-                <dd>{{filterStatus(afterSaleInfo.serviceStatus)}}</dd>
+                <dt>售后商品</dt>
+                <dd>
+                  <div>
+                    <img :src="afterSaleInfo.goodsImage" style="height: 60px">
+                  </div>
+                  <a>{{ afterSaleInfo.goodsName }}</a><br>
+                  <span>{{ afterSaleInfo.num }}(数量)</span>
+                </dd>
+
               </dl>
 
               <dl>
@@ -155,20 +162,6 @@
 
           </div>
           <div class="div-flow-right">
-            <div class="div-form-default">
-              <h3>相关商品交易信息</h3>
-              <dl>
-                <dt>
-                  <img :src="afterSaleInfo.goodsImage" height="60px">
-                </dt>
-                <dd>
-                  <a>{{ afterSaleInfo.goodsName }}</a><br>
-                  <span>{{ afterSaleInfo.num }}(数量)</span><br>
-
-                </dd>
-              </dl>
-
-            </div>
             <div class="div-form-default">
               <h3>订单相关信息</h3>
               <dl>
