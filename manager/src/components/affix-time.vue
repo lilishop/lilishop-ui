@@ -209,10 +209,14 @@ export default {
     cursor: pointer;
   }
 }
+
 .active {
   color: $theme_color;
   position: relative;
 }
+
+.date-picker {}
+
 .active:before {
   content: "";
   position: absolute;

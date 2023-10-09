@@ -10,39 +10,33 @@
             item.year + '年' + item.month + '月' }}</Option>
         </Select>
       </div>
-
     </div>
   </div>
 </template>
 <script>
-import Cookies from "js-cookie";
+import { getShopListData } from "@/api/shops.js";
 export default {
   props: ["closeShop"],
   data() {
     return {
-      month: "", // 所选月份
-
-      defuaultWay: {
-        title: "最近7天",
-        selected: true,
-        searchType: "LAST_SEVEN",
-      },
+      month: "", // 月份
 
       selectedWay: {
-        title: "最近7天",
+        // 可选时间项
+        title: "过去7天",
         selected: true,
         searchType: "LAST_SEVEN",
       },
       storeId: "", // 店铺id
       dates: [], // 日期列表
-      params: { // 请求参数
+      params: {
+        // 请求参数
         pageNumber: 1,
         pageSize: 10,
         storeName: "",
-        storeId: "",
       },
-
       dateList: [
+        // 筛选条件
         {
           title: "今天",
           selected: false,
@@ -54,17 +48,18 @@ export default {
           searchType: "YESTERDAY",
         },
         {
-          title: "最近7天",
+          title: "过去7天",
           selected: true,
           searchType: "LAST_SEVEN",
         },
         {
-          title: "最近30天",
+          title: "过去30天",
           selected: false,
           searchType: "LAST_THIRTY",
         },
       ],
       originDateList: [
+        // 筛选条件
         {
           title: "今天",
           selected: false,
@@ -76,23 +71,54 @@ export default {
           searchType: "YESTERDAY",
         },
         {
-          title: "最近7天",
+          title: "过去7天",
           selected: true,
           searchType: "LAST_SEVEN",
         },
         {
-          title: "最近30天",
+          title: "过去30天",
           selected: false,
           searchType: "LAST_THIRTY",
         },
       ],
+
+      shopTotal: "", // 店铺总数
+      shopsData: [], // 店铺数据
     };
   },
   mounted() {
-    this.storeId = JSON.parse(Cookies.get("userInfoSeller")).id;
     this.getFiveYears();
+    this.getShopList();
   },
   methods: {
+    // 页面触底
+    handleReachBottom() {
+      setTimeout(() => {
+        if (this.params.pageNumber * this.params.pageSize <= this.shopTotal) {
+          this.params.pageNumber++;
+          this.getShopList();
+        }
+      }, 1500);
+    },
+    // 查询店铺列表
+    getShopList() {
+      getShopListData(this.params).then((res) => {
+        if (res.success) {
+          /**
+           * 解决数据请求中，滚动栏会一直上下跳动
+           */
+          this.shopTotal = res.result.total;
+
+          this.shopsData.push(...res.result.records);
+        }
+      });
+    },
+    // 变更店铺
+    changeshop(val) {
+      this.selectedWay.storeId = this.storeId;
+      this.$emit("selected", this.selectedWay);
+    },
+
     // 获取近5年 年月
     getFiveYears() {
       let getYear = new Date().getFullYear();
@@ -114,7 +140,7 @@ export default {
       }
       this.dates = dates.reverse();
     },
-    // 选择回调
+    // 改变已选店铺
     changeSelect(e) {
       this.month = e
       if (this.month) {
@@ -136,13 +162,13 @@ export default {
 
       }
     },
-    // 点击时间筛选
+    // 变更时间
     clickBreadcrumb(item) {
 
       let currentIndex;
-      this.dateList.forEach((res, index) => {
+      this.dateList.forEach((res,index) => {
         res.selected = false;
-        if (res.title === item.title) {
+        if(res.title === item.title){
           currentIndex = index
         }
       });
@@ -150,7 +176,7 @@ export default {
       item.storeId = this.storeId;
       this.month = "";
       if (item.searchType == "") {
-        let currentDate = this.originDateList[currentIndex].searchType
+       let currentDate = this.originDateList[currentIndex].searchType
         if (currentDate) {
           item.searchType = currentDate
         } else {
