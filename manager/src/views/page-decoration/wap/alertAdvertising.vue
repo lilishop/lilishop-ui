@@ -66,6 +66,13 @@
                   >
                 </div>
               </div>
+
+              <div class="decorate-view">
+                <div class="decorate-view-title">当前页面状态</div>
+                <div>
+                  <Tag :type="result.pageShow === 'OPEN'  ? 'green' : 'red'">{{result.pageShow === 'OPEN' ? '开启' : '关闭'}}</Tag>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -90,6 +97,7 @@ export default {
   },
   data() {
     return {
+      result:"",
       picModelFlag: false, //图片选择器
       type: "full", // 展示方式
       //全屏广告
@@ -140,6 +148,7 @@ export default {
         res.result.pageData
           ? this.$set(this, "advertising", [JSON.parse(res.result.pageData)])
           : "";
+        this.result = res.result
       });
     },
     // 图片选择器回显
