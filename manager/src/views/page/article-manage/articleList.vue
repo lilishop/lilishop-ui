@@ -36,7 +36,7 @@
             </Form>
           </Row>
           <Row class="operation padding-row">
-            <Button @click="add" type="primary">添加</Button>
+            <Button @click="add" v-if="!selected" type="primary">添加</Button>
           </Row>
           <Table
             :loading="loading"

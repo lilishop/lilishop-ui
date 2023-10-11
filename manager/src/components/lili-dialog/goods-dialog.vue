@@ -46,10 +46,8 @@
         </div>
       </div>
       <div>
-        <Scroll
+        <div
           class="wap-content-list"
-          :on-reach-bottom="handleReachBottom"
-          :distance-to-edge="[3, 3]"
         >
           <div
             class="wap-content-item"
@@ -63,8 +61,8 @@
             </div>
             <div class="wap-content-desc">
               <div class="wap-content-desc-title">{{ item.goodsName }}</div>
-              <div class="wap-sku">{{ item.goodsUnit }}</div>
-              <div class="wap-sku"><Tag :color="item.salesModel === 'RETAIL' ? 'default' : 'geekblue'">{{item.salesModel === "RETAIL" ? "零售型" : "批发型"}}</Tag></div>
+
+              <div class="wap-sku">{{ item.goodsUnit }}<Tag style="margin-left: 10px;" :color="item.salesModel === 'RETAIL' ? 'default' : 'geekblue'">{{item.salesModel === "RETAIL" ? "零售型" : "批发型"}}</Tag></div>
               <div class="wap-content-desc-bottom">
                 <div>￥{{ item.price | unitPrice }}</div>
               </div>
@@ -73,7 +71,18 @@
           <Spin size="large" fix v-if="loading"></Spin>
 
           <div v-if="empty" class="empty">暂无商品信息</div>
-        </Scroll>
+        </div>
+        <Page
+          :total="total"
+          class="pageration"
+          @on-change="changePageSize"
+          :page-size="goodsParams.pageSize"
+          size="small"
+          show-total
+          show-elevator
+
+        >
+        </Page>
       </div>
     </div>
   </div>
@@ -89,7 +98,7 @@ export default {
       goodsParams: {
         // 商品请求参数
         pageNumber: 1,
-        pageSize: 18,
+        pageSize: 15,
         order: "desc",
         goodsName: "",
         sn: "",
@@ -135,17 +144,9 @@ export default {
     this.init();
   },
   methods: {
-    // 触底加载更多方法
-    handleReachBottom() {
-      setTimeout(() => {
-        if (
-          this.goodsParams.pageNumber * this.goodsParams.pageSize <=
-          this.total
-        ) {
-          this.goodsParams.pageNumber++;
-          this.getQueryGoodsList();
-        }
-      }, 1500);
+    changePageSize(v){
+      this.goodsParams.pageNumber = v;
+      this.getQueryGoodsList();
     },
     // 获取商品列表
     getQueryGoodsList() {
@@ -169,7 +170,7 @@ export default {
          * 解决数据请求中，滚动栏会一直上下跳动
          */
         this.total = res.result.total;
-        this.goodsData.push(...res.result.records);
+        this.goodsData = res.result.records;
       } else {
         this.empty = true;
       }
@@ -180,13 +181,11 @@ export default {
         // 商品
         this.initGoods(res);
       });
-      if (localStorage.getItem("category")) {
-        this.deepGroup(JSON.parse(localStorage.getItem("category")));
-      } else {
-        setTimeout(() => {
-          this.deepGroup(JSON.parse(localStorage.getItem("category")));
-        }, 3000);
-      }
+      API_Goods.getCategoryTree({deleteFlag: false}).then((res) => {
+        if (res.success) {
+          this.deepGroup(res.result);
+        }
+      });
     },
 
     deepGroup(val) {
@@ -271,7 +270,10 @@ export default {
   padding: 0;
 }
 .wap-content-list {
+  display: flex;
   position: relative;
+  flex-wrap: wrap;
+  height: 340px;
 }
 .wap-content-item {
   width: 210px;

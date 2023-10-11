@@ -15,7 +15,7 @@
       <model-form ref="modelForm" :data="modelForm"></model-form>
     </div>
     <!-- 操作按钮 -->
-    <div class="btn-bar">
+    <div class="btn-bar" :class="{'top':isHiddenBar}">
       <Button type="primary" :loading="submitLoading" @click="saveTemplate">保存模板</Button>
       <Button class="ml_10" @click="resetTemplate">还原模板</Button>
       <Button class="ml_10" @click="witeLocalStore">将装修内容写入到本地</Button>
@@ -35,6 +35,8 @@ export default {
     ModelForm,
   },
   mounted() {
+    const setting = window.localStorage.getItem('admin-setting') ? JSON.parse(window.localStorage.getItem('admin-setting')) : {};
+    this.isHiddenBar = setting.isUseTabsRouter
      // 先读缓存，如果缓存有值则读缓存。
     const cache = this.getStore('managerPCPageCache')
     this.hasCache = !!cache;
@@ -71,6 +73,7 @@ export default {
       modelData, // 可选模块数据
       modelForm: { list: [] }, // 模板数据
       submitLoading: false, // 提交加载状态
+      isHiddenBar:true,
     };
   },
   methods: {
@@ -219,6 +222,9 @@ export default {
   padding: 10px;
   box-shadow: 1px 1px 10px #999;
   z-index: 99;
+
+}
+.top{
   top: 100px;
 }
 </style>

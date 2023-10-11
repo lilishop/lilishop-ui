@@ -21,7 +21,8 @@
   font-size: 12px;
   color: #999;
   overflow: hidden;
-
+  display: flex;
+  align-items: center;
   text-overflow: ellipsis;
 
   white-space: nowrap;
@@ -65,13 +66,16 @@
   background: #ededed;
 }
 
-
+.pageration {
+  text-align: right;
+  padding-right: 20px;
+}
 .wap-content-item {
 
   cursor: pointer;
 
   display: flex;
-  height: 100px;
+  height: 90px;
   padding: 2px;
   overflow: hidden;
   align-items: center;

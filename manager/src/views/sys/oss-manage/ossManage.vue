@@ -1,203 +1,233 @@
 <style lang="scss">
 @import "./ossManage.scss";
+.group-row {
+  padding-top: 10px;
+  border-top: 1px solid #ededed;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  > * {
+    margin-right: 10px;
+  }
+}
+.article-category {
+  flex: 2;
+  min-width: 200px;
+}
+.table {
+  flex: 11;
+}
+.ivu-card {
+  width: 100%;
+}
+.modal-footer {
+  text-align: center;
+  > * {
+    margin: 0 10px;
+  }
+}
 </style>
 <template>
   <div class="search">
-    <Card>
-      <div class="operation">
-        <Row @keydown.enter.native="handleSearch">
-          <Form ref="searchForm" :model="searchForm" inline :label-width="85"    class="search-form"
-          >
-            <Form-item label="原文件名" prop="name">
-              <Input
-                type="text"
-                v-model="searchForm.name"
-                placeholder="请输入原文件名"
-                clearable
-                style="width: 200px"
-              />
-            </Form-item>
-            <Form-item label="存储文件名" prop="fileKey">
-              <Input
-                type="text"
-                v-model="searchForm.fileKey"
-                placeholder="请输入存储文件名"
-                clearable
-                style="width: 200px"
-              />
-            </Form-item>
-
-            <Form-item label="上传时间">
-              <DatePicker
-                v-model="selectDate"
-                type="daterange"
-                format="yyyy-MM-dd"
-                clearable
-                @on-change="selectDateRange"
-                placeholder="选择起始时间"
-                style="width: 200px"
-              ></DatePicker>
-            </Form-item>
-             <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn"
+    <Row>
+      <Card>
+        <div class="operation">
+          <Row @keydown.enter.native="handleSearch">
+            <Form
+              ref="searchForm"
+              :label-width="85"
+              :model="searchForm"
+              class="search-form"
+              inline
+            >
+              <Form-item label="上传时间">
+                <DatePicker
+                  v-model="selectDate"
+                  clearable
+                  format="yyyy-MM-dd"
+                  placeholder="选择起始时间"
+                  style="width: 200px"
+                  type="daterange"
+                  @on-change="selectDateRange"
+                ></DatePicker>
+              </Form-item>
+              <Button
+                class="search-btn"
+                icon="ios-search"
+                type="primary"
+                @click="handleSearch"
               >搜索
               </Button>
-          </Form>
-        </Row>
-        <div class="oss-operation padding-row">
-          <div>
-            <Upload
-              style="display:inline-block;"
-              :action="commonUrl + '/common/common/upload/file'"
-              :headers="accessToken"
-              :on-success="handleSuccess"
-              :on-error="handleError"
-              :show-upload-list="false"
-              :max-size="2048"
-              :on-exceeded-size="handleMaxSize"
-              multiple
-              ref="up"
-            >
-              <Button type="primary">上传文件</Button>
-            </Upload>
-            <Dropdown @on-click="handleDropdown">
-              <Button>
-                更多操作
-                <Icon type="md-arrow-dropdown"/>
-              </Button>
-              <DropdownMenu slot="list">
-                <DropdownItem name="refresh">刷新</DropdownItem>
-                <DropdownItem v-show="showType == 'list'" name="removeAll">批量删除
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-
-          <div>
-            <RadioGroup
-              v-model="fileType"
-              @on-change="changeFileType"
-              type="button" button-style="solid"
-              style="margin-right: 25px"
-            >
-              <Radio label="all">所有类型</Radio>
-              <Radio label="pic">图片</Radio>
-              <Radio label="video">视频</Radio>
-            </RadioGroup>
-            <RadioGroup
-              v-model="showType"
-              type="button" button-style="solid"
-              @on-change="changeShowType"
-            >
-              <Radio title="列表" label="list">
-                <Icon type="md-list"></Icon>
-              </Radio>
-              <Radio title="缩略图" label="thumb">
-                <Icon type="ios-apps"></Icon>
-              </Radio>
-            </RadioGroup>
+            </Form>
+          </Row>
+          <div class="oss-operation padding-row">
+            <div>
+              <Upload
+                ref="up"
+                :action="commonUrl + '/common/common/upload/file'"
+                :data="{
+                  directoryPath: searchForm.fileDirectoryId,
+                }"
+                :headers="accessToken"
+                :max-size="20480"
+                :on-error="handleError"
+                :on-exceeded-size="handleMaxSize"
+                :on-success="handleSuccess"
+                :show-upload-list="false"
+                multiple
+                style="display: inline-block"
+              >
+                <Button>上传图片</Button>
+              </Upload>
+              <Dropdown @on-click="handleDropdown" v-if="!isComponent">
+                <Button>
+                  更多操作
+                  <Icon type="md-arrow-dropdown"/>
+                </Button>
+                <DropdownMenu slot="list">
+                  <DropdownItem name="refresh">刷新</DropdownItem>
+                  <DropdownItem v-show="showType == 'list'" name="removeAll"
+                  >批量删除
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div v-show="showType == 'list'">
-        <Row >
-          <Alert show-icon>
-            已选择
-            <span >{{ selectCount }}</span> 项
-            <a class="select-clear" @click="clearSelectAll">清空</a>
-            <span v-if="selectCount > 0" style="margin-left: 15px"
-            >共计 {{ totalSize }} 存储量</span
-            >
-          </Alert>
-        </Row>
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          ref="table"
-          sortable="custom"
-          @on-sort-change="changeSort"
-          @on-selection-change="changeSelect"
-        ></Table>
-      </div>
-      <div v-show="showType == 'thumb'">
-        <div class="oss-wrapper">
-          <Card v-for="(item, i) in data" :key="i" class="oss-card">
-            <div class="content">
-              <img
-                @click="showPic(item)"
-                v-if="item.fileType.indexOf('image') >= 0"
-                class="img"
-                :src="item.url"
-              />
-              <div
-                v-else-if="item.fileType.indexOf('video') >= 0"
-                class="video"
-                @click="showVideo(item)"
+        <Alert show-icon v-if="!isComponent">
+          已选择
+          <span>{{ selectCount }}</span> 项
+          <a class="select-clear" @click="clearSelectAll">清空</a>
+          <span v-if="selectCount > 0" style="margin-left: 15px"
+          >共计 {{ totalSize }} 存储量</span
+          >
+        </Alert>
+
+        <div v-show="showType === 'list'" >
+          <div class="flex">
+            <div class="article-category mr_10">
+              <Tree
+                :data="treeData"
+                @on-contextmenu="handleContextMenu"
+                @on-select-change="handleCateChange"
               >
-                <!-- 文件小于5MB显示video -->
-                <video class="cover" v-if="item.fileSize < 1024 * 1024 * 5">
-                  <source :src="item.url"/>
-                </video>
-                <img class="play" src="@/assets/play.png"/>
-              </div>
-              <div v-else class="other">
-                <div class="name">{{ item.name }}</div>
-                <div class="key">{{ item.fileKey }}</div>
-                <div class="info">
-                  文件类型：{{ item.fileType }} 文件大小：{{
-                    ((item.fileSize * 1.0) / (1024 * 1024)).toFixed(2)
-                  }}
-                  MB 创建时间：{{ item.createTime }}
-                </div>
-              </div>
-              <div class="actions">
-                <div class="btn">
-                  <Tooltip content="下载" placement="top">
-                    <Icon @click="download(item)" type="md-download" size="16"/>
-                  </Tooltip>
-                </div>
-                <div class="btn">
-                  <Tooltip content="重命名" placement="top">
-                    <Icon @click="rename(item)" type="md-create" size="16"/>
-                  </Tooltip>
-                </div>
-                <div class="btn-no">
-                  <Tooltip content="删除" placement="top">
-                    <Icon @click="remove(item)" type="md-trash" size="16"/>
-                  </Tooltip>
-                </div>
+                <template slot="contextMenu" v-if="!isComponent">
+                  <DropdownItem @click.native="handleContextMenuEdit"
+                  >编辑
+                  </DropdownItem
+                  >
+                  <DropdownItem
+                    style="color: #ed4014"
+                    @click.native="handleContextMenuDelete"
+                  >删除
+                  </DropdownItem
+                  >
+                </template>
+              </Tree>
+              <Alert v-if="!isComponent">鼠标右键编辑/删除分组</Alert>
+              <div class="group-row flex" v-if="!isComponent">
+                <Button @click="handleClickAddGroup">添加分组</Button>
               </div>
             </div>
-          </Card>
+
+            <Table
+              ref="table"
+              :columns="isComponent ? viewColumns : columns"
+              :data="data"
+              :loading="loading"
+              border
+              class="table"
+              sortable="custom"
+              @on-sort-change="changeSort"
+              @on-selection-change="changeSelect"
+            >
+              <template slot="fileKey" slot-scope="{ row }">
+                <a @click="copyFileUrl(row)">{{ row.fileKey }}</a>
+              </template>
+            </Table>
+          </div>
         </div>
-      </div>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
-          :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="pageSizeOpts"
-          size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
-
-
-
+        <div v-show="showType === 'thumb'">
+          <div class="oss-wrapper">
+            <Card v-for="(item, i) in data" :key="i" class="oss-card">
+              <div class="content">
+                <img
+                  v-if="item.fileType.indexOf('image') >= 0"
+                  :src="item.url"
+                  class="img"
+                  @click="showPic(item)"
+                />
+                <div
+                  v-else-if="item.fileType.indexOf('video') >= 0"
+                  class="video"
+                  @click="showVideo(item)"
+                >
+                  <!-- 文件小于5MB显示video -->
+                  <video v-if="item.fileSize < 1024 * 1024 * 5" class="cover">
+                    <source :src="item.url"/>
+                  </video>
+                  <img class="play" src="@/assets/play.png"/>
+                </div>
+                <div v-else class="other">
+                  <div class="name">{{ item.name }}</div>
+                  <div class="key">{{ item.fileKey }}</div>
+                  <div class="info">
+                    文件类型：{{ item.fileType }} 文件大小：{{
+                      ((item.fileSize * 1.0) / (1024 * 1024)).toFixed(2)
+                    }}
+                    MB 创建时间：{{ item.createTime }}
+                  </div>
+                </div>
+                <div class="actions">
+                  <div class="btn">
+                    <Tooltip content="下载" placement="top">
+                      <Icon
+                        size="16"
+                        type="md-download"
+                        @click="download(item)"
+                      />
+                    </Tooltip>
+                  </div>
+                  <div class="btn">
+                    <Tooltip content="重命名" placement="top">
+                      <Icon size="16" type="md-create" @click="rename(item)"/>
+                    </Tooltip>
+                  </div>
+                  <div class="btn-no">
+                    <Tooltip content="删除" placement="top">
+                      <Icon size="16" type="md-trash" @click="remove(item)"/>
+                    </Tooltip>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+        <Row class="mt_10" justify="end" type="flex">
+          <Page
+            :current="searchForm.pageNumber"
+            :page-size="searchForm.pageSize"
+            :page-size-opts="pageSizeOpts"
+            :total="total"
+            show-elevator
+            show-sizer
+            show-total
+            size="small"
+            @on-change="changePage"
+            @on-page-size-change="changePageSize"
+          ></Page>
+        </Row>
+      </Card>
+    </Row>
     <Modal
-      :title="modalTitle"
       v-model="modalVisible"
       :mask-closable="false"
+      :title="modalTitle"
       :width="500"
     >
-      <Form ref="form" :model="form" :label-width="95" :rules="formValidate">
+      <Form ref="form" :label-width="95" :model="form" :rules="formValidate">
         <FormItem label="原文件名" prop="name">
           <Input v-model="form.name"/>
         </FormItem>
@@ -207,10 +237,9 @@
       </Form>
       <div slot="footer">
         <Button type="text" @click="handleCancel">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="handleSubmit"
+        <Button :loading="submitLoading" type="primary" @click="handleSubmit"
         >提交
-        </Button
-        >
+        </Button>
       </div>
     </Modal>
 
@@ -233,8 +262,8 @@
       v-model="videoVisible"
       :title="videoTitle"
       :width="800"
-      @on-cancel="closeVideo"
       draggable
+      @on-cancel="closeVideo"
     >
       <div id="dplayer"></div>
       <div slot="footer">
@@ -245,32 +274,96 @@
         >
       </div>
     </Modal>
+
+    <!-- 添加分组修改分组编辑框 -->
+    <Modal
+      v-model="enableGroup"
+      :title="insertOrUpdate === 'insert' ? '添加分组' : '修改分组'"
+      :loading="groupLoading"
+      @on-ok="submitAddGroup"
+      footer-hide
+    >
+      <Form
+        ref="formValidate"
+        :label-width="80"
+        :model="groupFormValidate"
+        :rules="groupRuleValidate"
+      >
+        <FormItem label="所在分组" prop="id">
+          <Cascader
+            v-model="groupFormValidate.id"
+            :data="treeData"
+            change-on-select
+          ></Cascader>
+        </FormItem>
+        <FormItem label="分组名称" prop="directoryName">
+          <Input v-model="groupFormValidate.directoryName"/>
+        </FormItem>
+      </Form>
+      <div class="modal-footer">
+        <Button @click="enableGroup = false">取消</Button>
+        <Button type="primary" @click="submitAddGroup">确定</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 
 <script>
 import {
+  addFileDirectory,
+  deleteFile,
+  delFileDirectory,
+  getFileDirectory,
   getFileListData,
   renameFile,
-  deleteFile,
+  updateFileDirectory,
 } from "@/api/index";
 import DPlayer from "dplayer";
-
-const config = require('@/config/index')
 import { commonUrl } from "@/libs/axios";
-var dp;
+
+const config = require("@/config/index");
+
+let dp;
 export default {
   name: "oss-manage",
-  props:{
-    isComponent:{
+  props: {
+    isComponent: {
       default: false,
-      type:Boolean
+      type: Boolean,
+    },
+    choose: {
+      type: String,
+      default: ""
     }
   },
   data() {
     return {
       commonUrl, // 上传文件路径
       config, // api地址
+      fileDirectoryId: "",
+
+      groupFormValidate: {
+        id: [],
+        directoryName: "",
+      },
+      groupRuleValidate: {
+        directoryName: [
+          {
+            required: true,
+            message: "请输入分组名称",
+            trigger: "blur",
+          },
+        ],
+        id: [
+          {
+            required: true,
+            message: "请选择分组",
+            trigger: "blur",
+            type: "array",
+          },
+        ],
+      },
+      enableGroup: false, // 是否展示分组
       selectImage: false, //是否是选择
       accessToken: {}, // 上传token鉴权
       loading: false, // 表单加载状态
@@ -297,7 +390,8 @@ export default {
       },
       selectDate: null, // 选择日期绑定modal
       oldKey: "", // 请求参数
-      form: { // 表单
+      form: {
+        // 表单
         name: "",
         fileKey: "",
       },
@@ -319,31 +413,15 @@ export default {
           align: "center",
         },
         {
-          title: "原文件名",
-          key: "name",
-          minWidth: 130,
-          sortable: true,
-          ellipsis: false,
-          tooltip: true,
-        },
-        {
-          title: "存储文件名",
-          key: "fileKey",
-          width: 165,
-          sortable: true,
-          ellipsis: false,
-          tooltip: true,
-        },
-        {
           title: "缩略图(点击预览)",
           key: "url",
-          width: 150,
+          width: 300,
           align: "center",
           render: (h, params) => {
             if (params.row.fileType.includes("image") > 0) {
               return h("img", {
                 attrs: {
-                  src: params.row.url || '',
+                  src: params.row.url || "",
                   alt: "加载图片失败",
                 },
                 style: {
@@ -414,7 +492,6 @@ export default {
           title: "文件类型",
           key: "fileType",
           width: 115,
-          sortable: true,
           className: this.selectImage == true ? "none" : "",
         },
         {
@@ -432,46 +509,39 @@ export default {
         {
           title: "上传者",
           key: "createBy",
-          width: 120,
-          sortable: true,
+          width: 200,
           render: (h, params) => {
             let m = "";
-            if(params.row.userEnums=="MANAGER"){
-            m="[管理员]"
-            }else if(params.row.userEnums=="STORE"){
-              m="[店铺]"
-            }else{
-              m="[会员]"
+            if (params.row.userEnums == "MANAGER") {
+              m = "[管理员]";
+            } else if (params.row.userEnums == "STORE") {
+              m = "[店铺]";
+            } else {
+              m = "[会员]";
             }
-            m += params.row.createBy
+            m += params.row.createBy;
             return h("span", m);
           },
-        },
-        {
-          title: "上传时间",
-          key: "createTime",
-          width: 180,
-          sortable: true,
-          sortType: "desc",
         },
         {
           title: "操作",
           key: "action",
           align: "center",
           fixed: "right",
-          width: 200,
+          // width: 300,
           render: (h, params) => {
             return h("div", [
               h(
                 "Button",
                 {
                   props: {
-                    type: "primary",
+                    type: "default",
                     size: "small",
                   },
                   style: {
                     marginRight: "5px",
-                    display: this.selectImage == true ? "inline-block" : "none",
+                    display:
+                      this.selectImage === true ? "inline-block" : "none",
                   },
                   on: {
                     click: () => {
@@ -504,25 +574,6 @@ export default {
                 "Button",
                 {
                   props: {
-                    size: "small",
-                    type: 'success'
-                  },
-                  style: {
-                    marginRight: "5px",
-                    display: this.selectImage == true ? "none" : "inline-block",
-                  },
-                  on: {
-                    click: () => {
-                      this.rename(params.row);
-                    },
-                  },
-                },
-                "重命名"
-              ),
-              h(
-                "Button",
-                {
-                  props: {
                     type: "error",
                     size: "small",
                   },
@@ -541,17 +592,301 @@ export default {
           },
         },
       ],
+      viewColumns: [
+        {
+          title: "缩略图(点击预览)",
+          key: "url",
+          // width: 150,
+          align: "center",
+          render: (h, params) => {
+            if (params.row.fileType.includes("image") > 0) {
+              return h("img", {
+                attrs: {
+                  src: params.row.url || "",
+                  alt: "加载图片失败",
+                },
+                style: {
+                  cursor: "pointer",
+                  width: "80px",
+                  height: "60px",
+                  margin: "10px 0",
+                  "object-fit": "contain",
+                },
+                on: {
+                  click: () => {
+                    this.showPic(params.row);
+                  },
+                },
+              });
+            } else if (params.row.fileType.includes("video") > 0) {
+              // 如果视频文件大小超过5MB不予加载video
+              if (params.row.fileSize < 1024 * 1024 * 5) {
+                return h(
+                  "video",
+                  {
+                    style: {
+                      cursor: "pointer",
+                      width: "80px",
+                      height: "60px",
+                      margin: "10px 0",
+                      "object-fit": "contain",
+                    },
+                    on: {
+                      click: () => {
+                        this.showVideo(params.row);
+                      },
+                    },
+                  },
+                  [
+                    h("source", {
+                      attrs: {
+                        src: params.row.url,
+                      },
+                    }),
+                  ]
+                );
+              } else {
+                return h("img", {
+                  attrs: {
+                    src: require("@/assets/play.png"),
+                  },
+                  style: {
+                    cursor: "pointer",
+                    width: "80px",
+                    height: "60px",
+                    margin: "10px 0",
+                    "object-fit": "contain",
+                  },
+                  on: {
+                    click: () => {
+                      this.showVideo(params.row);
+                    },
+                  },
+                });
+              }
+            } else {
+              return h("span", "非多媒体类型");
+            }
+          },
+        },
+        {
+          title: "上传者",
+          key: "createBy",
+          width: 120,
+          sortable: true,
+          render: (h, params) => {
+            let m = "";
+            if (params.row.userEnums == "MANAGER") {
+              m = "[管理员]";
+            } else if (params.row.userEnums == "STORE") {
+              m = "[店铺]";
+            } else {
+              m = "[会员]";
+            }
+            m += params.row.createBy;
+            return h("span", m);
+          },
+        },
+        {
+          title: "操作",
+          key: "action",
+          align: "center",
+          fixed: "right",
+          width: 300,
+          render: (h, params) => {
+            return h("div", [
+              h(
+                "Button",
+                {
+                  props: {
+                    type: "default",
+                    size: "small",
+                  },
+                  style: {
+                    marginRight: "5px",
+                    display:
+                      this.selectImage === true ? "inline-block" : "none",
+                  },
+                  on: {
+                    click: () => {
+                      this.selectedParams(params.row);
+                    },
+                  },
+                },
+                "选择"
+              )
+            ]);
+          },
+        },
+      ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
       pageSizeOpts: [5, 10, 20], // 页码展示项
+      list: [], // 列表
+      //树结构
+      treeData: [],
+      treeDataDefault: [],
+      selectedGroupData: "",
+      insertOrUpdate: "insert",
+      groupLoading: false,
     };
   },
-  watch:{
+  watch: {
     selectImage(val) {
-      if (val && !this.data.length) this.init()
+      if (val && !this.data.length) this.init();
+    },
+    choose(val) {
+      if (val) this.selectImage = val
     }
   },
+
   methods: {
+    handleContextMenu(val) {
+      console.log("val", val);
+      this.selectedGroupData = val;
+    },
+    // 编辑分组
+    handleContextMenuEdit(val) {
+      this.insertOrUpdate = "update";
+
+      this.enableGroup = true;
+      // this.groupFormValidate = this.selectedGroupData;
+
+      this.groupFormValidate.directoryName = this.selectedGroupData.title;
+      this.groupFormValidate.id = [this.selectedGroupData.value];
+      this.groupFormValidate.level = this.selectedGroupData.level;
+
+      this.groupFormValidate.parentId = this.selectedGroupData.parentId;
+      console.log(this.groupFormValidate);
+    },
+    // 删除分组
+    async handleContextMenuDelete(val) {
+      this.$Modal.confirm({
+        title: "提示",
+        content: "是否删除该分组",
+        onOk: async () => {
+          const res = await delFileDirectory(this.selectedGroupData.value);
+          if (res.success) {
+            this.$Message.success("删除成功!");
+            this.getAllList();
+          }
+        },
+      });
+    },
+    // 保存/修改分组
+    async submitAddGroup() {
+      this.$refs["formValidate"].validate(async (valid) => {
+        if (valid) {
+          let res
+          const params = { ...this.groupFormValidate };
+
+          if (this.insertOrUpdate === "insert") {
+            // params.directoryType = this.selectedGroupData.directoryType
+            params.parentId = params.id[params.id.length - 1];
+            // params.type = this.selectedGroupData.type
+            params.level =
+              params.parentId == "0" ? 0 : this.selectedGroupData.level + 1;
+            delete params.id;
+            res = await addFileDirectory(params);
+          } else {
+            params.id = params.id[params.id.length - 1];
+            res = await updateFileDirectory(params);
+          }
+
+          if (res.success) {
+            this.$Message.success("操作成功!");
+            this.enableGroup = false;
+            this.getAllList();
+          }
+          this.$Modal.remove();
+        } else {
+          this.$Message.error("请填写完整信息!");
+        }
+      });
+    },
+    // 添加/修改分组
+    handleClickAddGroup() {
+      this.insertOrUpdate = "insert";
+      if (this.selectedGroupData) {
+        this.groupFormValidate.id = [this.selectedGroupData.value];
+      } else {
+        this.groupFormValidate.id = ["0"];
+      }
+      this.enableGroup = true;
+      this.groupFormValidate.directoryName = "";
+    },
+    copyFileUrl(row) {
+      const textArea = document.createElement("textarea");
+      textArea.value = row.url;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand("copy");
+        this.$Message.success("复制成功");
+      } catch (err) {
+        console.error("Unable to copy to clipboard", err);
+      }
+      document.body.removeChild(textArea);
+    },
+
+    // 获取全部文件目录
+    getAllList(parent_id) {
+      this.loading = true;
+      getFileDirectory(parent_id).then((res) => {
+        this.loading = false;
+        if (res.success) {
+          this.treeData = this.getTree(res.result);
+          this.treeDataDefault = this.getTree(res.result);
+          this.treeData.unshift({
+            title: "全部图片",
+            label: "全部分类",
+            value: "0",
+            level: 0,
+            children: [],
+            id: "0",
+            categoryId: 0,
+          });
+        }
+      });
+    },
+    // 文件目录分类格式化方法
+    getTree(tree = []) {
+      let arr = [];
+      if (!!tree && tree.length !== 0) {
+        tree.forEach((item) => {
+          let obj = {};
+          obj.title = item.directoryName;
+          obj.value = item.id; // 拥有者id
+          obj.type = item.directoryType; // 用户类型
+          obj.label = item.directoryName;
+          obj.level = item.level;
+          obj.expand = false;
+          obj.selected = false;
+          obj.contextmenu = true;
+          obj.parentId = item.parentId;
+          obj.children = this.getTree(item.children); // 递归调用
+          arr.push(obj);
+        });
+      }
+      return arr;
+    },
+
+    // 选择分类回调
+    handleCateChange(data) {
+      this.selectedGroupData = data[0];
+      let {value, type} = data[0];
+      this.list.push({
+        value,
+        type,
+      });
+      this.searchForm.fileDirectoryId = value;
+      if (value === "0") {
+        delete this.searchForm.fileDirectoryId;
+      }
+      this.searchForm.userEnums = type;
+      this.getDataList();
+    },
     /**
      * 选择
      */
@@ -560,9 +895,9 @@ export default {
     },
     // 更多操作
     handleDropdown(name) {
-      if (name == "refresh") {
+      if (name === "refresh") {
         this.getDataList();
-      } else if (name == "removeAll") {
+      } else if (name === "removeAll") {
         this.removeAll();
       }
     },
@@ -572,6 +907,7 @@ export default {
         accessToken: this.getStore("accessToken"),
       };
       this.getDataList();
+      this.getAllList();
     },
     // 查看大图
     showPic(v) {
@@ -725,14 +1061,17 @@ export default {
             ids += e.id + ",";
           });
           ids = ids.substring(0, ids.length - 1);
-          deleteFile(ids).then((res) => {
+          deleteFile({ids: ids}).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("批量删除文件成功");
               this.clearSelectAll();
               this.getDataList();
             }
-          });
+          })
+            .catch((err) => {
+              console.log("失败", err);
+            });
         },
       });
     },
@@ -743,13 +1082,13 @@ export default {
         content: "您确认要删除文件 " + v.name + " ?",
         loading: true,
         onOk: () => {
-          deleteFile(v.id).then((res) => {
+          deleteFile({ids: v.id}).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("删除文件 " + v.name + " 成功");
               this.getDataList();
             }
-          });
+          })
         },
       });
     },
@@ -792,6 +1131,7 @@ export default {
     },
     // 清除选中状态
     clearSelectAll() {
+      console.log("清除选中状态");
       this.$refs.table.selectAll(false);
       this.totalSize = "";
     },
@@ -807,10 +1147,10 @@ export default {
     },
   },
   mounted() {
-    if(!this.isComponent) { // 是组件的话，初始化不调用接口
+    if (!this.isComponent) {
+      // 是组件的话，初始化不调用接口
       this.init();
     }
   },
-
 };
 </script>
