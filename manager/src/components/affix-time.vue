@@ -1,20 +1,20 @@
 <template>
   <div>
     <div class="breadcrumb">
-      <span @click="clickBreadcrumb(item,index)" :class="{'active':item.selected}" v-for="(item,index) in dateList"
-        :key="index"> {{item.title}}</span>
+      <span @click="clickBreadcrumb(item, index)" :class="{ 'active': item.selected }" v-for="(item, index) in dateList"
+        :key="index"> {{ item.title }}</span>
       <div class="date-picker">
-        <Select @on-change="changeSelect(selectedWay)" v-model="month" placeholder="年月查询" clearable
+        <Select @on-change="changeSelect($event, selectedWay)" :value="month" placeholder="年月查询" clearable
           style="width:200px;margin-left:10px;">
-          <Option v-for="(item,index) in dates" :value="item.year+'-'+item.month" :key="index" clearable>
-            {{ item.year+'年'+item.month+'月' }}</Option>
+          <Option v-for="(item, i) in dates" :value="item.year + '-' + item.month" :key="i" clearable>
+            {{ item.year + '年' + item.month + '月' }}</Option>
         </Select>
       </div>
       <div class="shop-list" v-if="!closeShop">
         <Select clearable @on-change="changeshop(selectedWay)" v-model="storeId" placeholder="店铺查询"
           style="width:200px;margin-left:10px;">
           <Scroll :on-reach-bottom="handleReachBottom">
-            <Option v-for="(item,index) in shopsData" :value="item.id" :key="index">{{ item.storeName }}</Option>
+            <Option v-for="(item, index) in shopsData" :value="item.id" :key="index">{{ item.storeName }}</Option>
           </Scroll>
         </Select>
       </div>
@@ -31,7 +31,7 @@ export default {
 
       selectedWay: {
         // 可选时间项
-        title: "最近7天",
+        title: "过去7天",
         selected: true,
         searchType: "LAST_SEVEN",
       },
@@ -56,12 +56,35 @@ export default {
           searchType: "YESTERDAY",
         },
         {
-          title: "最近7天",
+          title: "过去7天",
           selected: true,
           searchType: "LAST_SEVEN",
         },
         {
-          title: "最近30天",
+          title: "过去30天",
+          selected: false,
+          searchType: "LAST_THIRTY",
+        },
+      ],
+      originDateList: [
+        // 筛选条件
+        {
+          title: "今天",
+          selected: false,
+          searchType: "TODAY",
+        },
+        {
+          title: "昨天",
+          selected: false,
+          searchType: "YESTERDAY",
+        },
+        {
+          title: "过去7天",
+          selected: true,
+          searchType: "LAST_SEVEN",
+        },
+        {
+          title: "过去30天",
           selected: false,
           searchType: "LAST_THIRTY",
         },
@@ -126,8 +149,8 @@ export default {
       this.dates = dates.reverse();
     },
     // 改变已选店铺
-    changeSelect() {
-      console.log(this.month);
+    changeSelect(e) {
+      this.month = e
       if (this.month) {
         this.dateList.forEach((res) => {
           res.selected = false;
@@ -138,29 +161,36 @@ export default {
 
         this.$emit("selected", this.selectedWay);
       } else {
+
+        const current = this.dateList.find(item => { return item.selected })
+        this.selectedWay = current
+        this.clickBreadcrumb(current)
+        this.$emit("selected", this.selectedWay);
+
+
       }
     },
     // 变更时间
     clickBreadcrumb(item) {
-      this.dateList.forEach((res) => {
+
+      let currentIndex;
+      this.dateList.forEach((res,index) => {
         res.selected = false;
+        if(res.title === item.title){
+          currentIndex = index
+        }
       });
       item.selected = true;
       item.storeId = this.storeId;
       this.month = "";
-
       if (item.searchType == "") {
-        if (
-          dateList.some((date) => {
-            return date.title == item.title;
-          })
-        ) {
-          item.searchType = date.searchType;
+       let currentDate = this.originDateList[currentIndex].searchType
+        if (currentDate) {
+          item.searchType = currentDate
         } else {
           item.searchType = "LAST_SEVEN";
         }
       }
-
       this.selectedWay = item;
       this.selectedWay.year = new Date().getFullYear();
       this.selectedWay.month = "";
@@ -174,17 +204,19 @@ export default {
 .breadcrumb {
   display: flex;
   align-items: center;
-  > span {
+  >span {
     margin-right: 15px;
     cursor: pointer;
   }
 }
+
 .active {
   color: $theme_color;
   position: relative;
 }
-.date-picker {
-}
+
+.date-picker {}
+
 .active:before {
   content: "";
   position: absolute;

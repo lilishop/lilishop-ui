@@ -7,7 +7,13 @@
             <h3>投诉信息</h3>
             <dl>
               <dt>投诉商品</dt>
-              <dd>{{ complaintInfo.goodsName }}</dd>
+              <dd>
+                <div>
+                  <img :src="complaintInfo.goodsImage" style="height: 60px">
+                </div>
+                <a>{{ complaintInfo.goodsName }}</a><br>
+                <span>￥{{ complaintInfo.goodsPrice | unitPrice }} * {{ complaintInfo.num }}(数量)</span>
+              </dd>
             </dl>
             <dl>
               <dt>投诉状态</dt>
@@ -160,19 +166,6 @@
 
         </div>
         <div class="div-flow-right">
-          <div class="div-form-default">
-            <h3>相关商品交易信息</h3>
-            <dl>
-              <dt>
-                <img :src="complaintInfo.goodsImage" height="60px">
-              </dt>
-              <dd>
-                <a>{{ complaintInfo.goodsName }}</a><br>
-                <span>￥{{ complaintInfo.goodsPrice | unitPrice }} * {{ complaintInfo.num }}(数量)</span>
-              </dd>
-            </dl>
-
-          </div>
           <div class="div-form-default">
             <h3>订单相关信息</h3>
             <dl>

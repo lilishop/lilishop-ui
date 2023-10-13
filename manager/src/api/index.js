@@ -490,4 +490,24 @@ export const getHotWordsHistory = (params) => {
   return getRequest(`/hotwords/hotwords/history`,params);
 };
 
+// 获取文件目录列表
+export const getFileDirectory = () => {
+  return getRequest(commonUrl+`/common/resource/fileDirectory`);
+};
 
+// 添加文件目录
+export const addFileDirectory = (params) => {
+  return postRequestWithNoForm(commonUrl+`/common/resource/fileDirectory`,params);
+};
+
+
+// 修改文件目录
+export const updateFileDirectory = (params) => {
+  return putRequestWithNoForm(commonUrl+`/common/resource/fileDirectory`,params);
+};
+
+
+// 删除文件目录
+export const delFileDirectory = (id) => {
+  return deleteRequest(commonUrl+`/common/resource/fileDirectory/${id}`);
+};
