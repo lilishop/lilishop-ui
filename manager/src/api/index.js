@@ -261,6 +261,38 @@ export const searchPermission = (params) => {
 /****************************** 权限结束 */
 
 
+/****************************** 店铺权限 */
+// 获取全部权限数据
+export const getStoreAllPermissionList = (params) => {
+  return getRequest("/permission/storeMenu/tree", params);
+};
+
+// 获取全部权限数据
+export const getStoreCurrentPermissionList = (params) => {
+  return getRequest("/permission/storeMenu/memberMenu", params);
+};
+
+// 添加权限
+export const addStorePermission = (params) => {
+  return postRequest("/permission/storeMenu", params);
+};
+
+// 编辑权限
+export const editStorePermission = (params) => {
+  return putRequest(`/permission/storeMenu/${params.id}`, params);
+};
+// 删除权限
+export const deleteStorePermission = (ids, params) => {
+  return deleteRequest(`/permission/storeMenu/${ids}`, params);
+};
+// 搜索权限
+export const searchStorePermission = (params) => {
+  return getRequest("/permission/storeMenu", params);
+};
+
+/****************************** 权限结束 */
+
+
 // 分页获取日志数据
 export const getLogListData = (params) => {
   return getRequest("/setting/log/getAllByPage", params);
@@ -458,4 +490,24 @@ export const getHotWordsHistory = (params) => {
   return getRequest(`/hotwords/hotwords/history`,params);
 };
 
+// 获取文件目录列表
+export const getFileDirectory = () => {
+  return getRequest(commonUrl+`/common/resource/fileDirectory`);
+};
 
+// 添加文件目录
+export const addFileDirectory = (params) => {
+  return postRequestWithNoForm(commonUrl+`/common/resource/fileDirectory`,params);
+};
+
+
+// 修改文件目录
+export const updateFileDirectory = (params) => {
+  return putRequestWithNoForm(commonUrl+`/common/resource/fileDirectory`,params);
+};
+
+
+// 删除文件目录
+export const delFileDirectory = (id) => {
+  return deleteRequest(commonUrl+`/common/resource/fileDirectory/${id}`);
+};
