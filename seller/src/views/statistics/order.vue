@@ -152,7 +152,7 @@
         <div>
           <Table stripe :columns="columns" :data="data"></Table>
         </div>
-        <Page @on-change="(index)=>{refundParams.pageNumber = index}" @on-page-size-change="(size)=>{refundParams.pageSize= size}" class="mt_10" show-total show-elevator :total="total" />
+        <Page @on-change="pageNumberChange" @on-page-size-change="pageSizeChange" class="mt_10" show-total show-elevator :total="total" />
       </div>
     </Card>
 
@@ -377,12 +377,12 @@ export default {
           value: "YESTERDAY",
         },
         {
-          title: "最近7天",
+          title: "过去7天",
           selected: true,
           value: "LAST_SEVEN",
         },
         {
-          title: "最近30天",
+          title: "过去30天",
           selected: false,
           value: "LAST_THIRTY",
         },
@@ -459,6 +459,14 @@ export default {
     },
   },
   methods: {
+    pageNumberChange(val){
+      this.refundParams.pageNumber = val
+      this.getOrderList();
+    },
+    pageSizeChange(val){
+      this.refundParams.pageSize = val
+      this.getOrderList();
+    },
     // 订单图
     initOrderChart() {
       // 默认已经加载 legend-filter 交互

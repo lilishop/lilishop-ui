@@ -172,18 +172,20 @@
         <div>
           <Table stripe :columns="columns" :data="data"></Table>
         </div>
+        <!-- (index) => {
+              refundParams.pageNumber = index;
+            } -->
+        <!-- (size) => {
+              (refundParams.pageSize = size), (refundParams.pageNumber = 1);
+            } -->
         <Page
           v-if="showRecords"
           size="small"
           @on-change="
-            (index) => {
-              refundParams.pageNumber = index;
-            }
+            pageNumberChange
           "
           @on-page-size-change="
-            (size) => {
-              (refundParams.pageSize = size), (refundParams.pageNumber = 1);
-            }
+            pageSizeChange
           "
           class="mt_10"
           show-total
@@ -452,12 +454,12 @@ export default {
           value: "YESTERDAY",
         },
         {
-          title: "最近7天",
+          title: "过去7天",
           selected: true,
           value: "LAST_SEVEN",
         },
         {
-          title: "最近30天",
+          title: "过去30天",
           selected: false,
           value: "LAST_THIRTY",
         },
@@ -523,6 +525,14 @@ export default {
     },
   },
   methods: {
+    pageNumberChange(val){
+      this.refundParams.pageNumber = val
+      this.getOrderList();
+    },
+    pageSizeChange(val){
+      this.refundParams.pageSize = val
+      this.getOrderList();
+    },
     // 订单图
     initOrderChart() {
       // 默认已经加载 legend-filter 交互
@@ -563,11 +573,13 @@ export default {
 
     clickBreadcrumb(item, index) {
       let callback = JSON.parse(JSON.stringify(item));
-
+      console.log("callback",callback)
       this.orderParams = callback;
 
       this.overViewParams = callback;
       this.refundParams = callback;
+      this.refundParams.pageNumber = 1
+      this.refundParams.pageSize = 10
     },
 
     // 实例化订单概览

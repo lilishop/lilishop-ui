@@ -204,7 +204,6 @@ export default {
 .breadcrumb {
   display: flex;
   align-items: center;
-
   >span {
     margin-right: 15px;
     cursor: pointer;

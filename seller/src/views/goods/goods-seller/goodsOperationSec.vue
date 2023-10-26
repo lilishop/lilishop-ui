@@ -156,12 +156,12 @@
                       <div v-for="(item, $index) in skuInfo" :key="$index" class="sku-item-content">
                         <Card :bordered="true" class="ivu-card-body">
                           <Button slot="extra" type="primary" @click="handleCloseSkuItem($index, item)">
-                            删除规格
+                            删除规格项
                           </Button>
                           <div>
-                            <FormItem class="sku-item-content-val flex" label="规格名">
+                            <FormItem class="sku-item-content-val flex" label="规格项名">
                               <AutoComplete v-model="item.name" :data="skuData" :filter-method="filterMethod"
-                                :maxlength="30" placeholder="请输入规格名称" style="width: 150px"
+                                :maxlength="30" placeholder="请输入规格项名称" style="width: 150px"
                                 @on-focus="changeSkuItem(item.name)" @on-change="
                                   editSkuItem(item.name, $index, item)
                                   ">
@@ -1565,6 +1565,13 @@ export default {
 
           if (flag) {
             this.$Message.error(paramValue + " 参数值不能为空");
+            this.submitLoading = false;
+            return;
+          }
+
+          if (this.goodsUnitList && !this.goodsUnitList.find(i => i === this.baseInfoForm.goodsUnit)) {
+            submit.goodsUnit = ""
+            this.$Message.error("商品单位不存在");
             this.submitLoading = false;
             return;
           }

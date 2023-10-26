@@ -4,18 +4,10 @@
       <span @click="clickBreadcrumb(item, index)" :class="{ 'active': item.selected }" v-for="(item, index) in dateList"
         :key="index"> {{ item.title }}</span>
       <div class="date-picker">
-        <Select @on-change="changeSelect($event, selectedWay)" :value="month" placeholder="年月查询" clearable
+        <Select @on-change="changeSelect($event, selectedWay)" :value="month" placeholder="年月查询"
           style="width:200px;margin-left:10px;">
-          <Option v-for="(item, i) in dates" :value="item.year + '-' + item.month" :key="i" clearable>
-            {{ item.year + '年' + item.month + '月' }}</Option>
-        </Select>
-      </div>
-      <div class="shop-list" v-if="!closeShop">
-        <Select clearable @on-change="changeshop(selectedWay)" v-model="storeId" placeholder="店铺查询"
-          style="width:200px;margin-left:10px;">
-          <Scroll :on-reach-bottom="handleReachBottom">
-            <Option v-for="(item, index) in shopsData" :value="item.id" :key="index">{{ item.storeName }}</Option>
-          </Scroll>
+          <Option v-for="(item, index) in dates" :value="item.year + '-' + item.month" :key="index">{{
+            item.year + '年' + item.month + '月' }}</Option>
         </Select>
       </div>
     </div>

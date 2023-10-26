@@ -1,7 +1,6 @@
 #代码目录
 code_path=$PWD
 
-git checkout master
 git pull
 
 cd ${code_path}/manager

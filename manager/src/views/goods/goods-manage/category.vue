@@ -114,14 +114,14 @@
             <InputNumber v-model="formAdd.sortOrder"></InputNumber>
           </FormItem>
           <FormItem label="佣金比例(%)" prop="commissionRate" style="width: 345px">
-            <InputNumber v-model="formAdd.commissionRate"></InputNumber>
+            <InputNumber :max="100" :min="0" v-model="formAdd.commissionRate"></InputNumber>
           </FormItem>
           <FormItem label="是否启用" prop="deleteFlag">
             <i-switch
               size="large"
               v-model="formAdd.deleteFlag"
-              :true-value="0"
-              :false-value="1"
+              :true-value="false"
+              :false-value="true"
             >
               <span slot="open">启用</span>
               <span slot="close">禁用</span>
