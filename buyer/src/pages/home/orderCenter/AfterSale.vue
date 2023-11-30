@@ -9,7 +9,7 @@
           class="width_300"
           search
           enter-button
-          v-model="params.sn"
+          v-model="params.keywords"
           @on-search="getList"
           placeholder="请输入订单号搜索"
         />

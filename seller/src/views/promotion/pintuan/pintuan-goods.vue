@@ -277,6 +277,7 @@ export default {
     delGoods(index) {
       // 删除商品
       this.goodsData.splice(index, 1);
+      this.selectCount = 0;
     },
     delAll() {
       // 批量删除商品
@@ -295,6 +296,7 @@ export default {
           this.goodsData = this.goodsData.filter((item) => {
             return !ids.includes(item.skuId);
           });
+          this.selectCount = 0;
         },
       });
     },
