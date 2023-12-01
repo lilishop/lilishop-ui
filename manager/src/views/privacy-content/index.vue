@@ -17,12 +17,12 @@
           </FormItem>
           <FormItem class="form-item-view-el" label="文章内容" prop="content">
 
-          <editor
-              ref="editor"
-              openXss
-               v-model="form.article.content"
-              :init="{ ...initEditor,height:'800px' }"
-            ></editor>
+           <editor
+                ref="editor"
+                openXss
+                 v-model="form.article.content"
+                 v-if="modalVisible"
+              ></editor>
           </FormItem>
         </Form>
         <div slot="footer">
@@ -40,12 +40,12 @@ import {
   updatePrivacy,
   getPrivacy,
 } from "@/api/pages";
-import Editor from "@tinymce/tinymce-vue";
-import { initEditor } from "@/components/editor/config";
+import tinymec from "@/components/editor/index.vue";
+
 export default {
   name: "privacy",
  components: {
-    editor: Editor,
+    editor: tinymec,
   },
   props: {
     selected: {
@@ -55,7 +55,6 @@ export default {
   },
   data() {
     return {
-      initEditor,
       loading: false, // 表单加载状态
       modalVisible: false, // 添加或编辑显示
       treeDataDefault: [],

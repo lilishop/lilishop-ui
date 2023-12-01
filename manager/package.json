@@ -12,7 +12,6 @@
   "dependencies": {
     "@amap/amap-jsapi-loader": "0.0.7",
     "@antv/g2": "^4.1.12",
-    "@tinymce/tinymce-vue": "^3.2.0",
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "dplayer": "^1.26.0",
