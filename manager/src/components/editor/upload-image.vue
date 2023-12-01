@@ -88,6 +88,9 @@ export default {
     };
   },
   methods: {
+    confirmUrl(){
+
+    },
     handleClickUploadImage(){
       this.show = true
     },
@@ -100,7 +103,6 @@ export default {
     // 移除商品图片
     handleRemoveGoodsPicture(__index) {
       this.images.splice(__index, 1);
-      // this.images = this.images.filter((i) => i.url !== file.url);
     },
     // 图片大小不正确
     handleMaxSize(file) {
