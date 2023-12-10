@@ -312,9 +312,12 @@
               </FormItem>
             </div>
             <FormItem class="form-item-view-el" label="PC商品描述" prop="intro" style="width: 100%">
-              <Alert class='editor-alert' type="warning">将文件夹下的图片进行拖拽到文本框内，即可完成单/多图片上传。</Alert>
-              <editor ref="editor" v-model="baseInfoForm.intro" :init="{ ...initEditor, height: '800px' }" openXss>
-              </editor>
+              <editor
+                ref="editor"
+                v-model="baseInfoForm.intro"
+                height="800px"
+                openXss
+              ></editor>
               <div class="promise-intro-btn">
                 <Button type="primary" @click="promiseIntroEditor">将PC商品描述同步到移动端描述
                 </Button>
@@ -322,8 +325,12 @@
             </FormItem>
 
             <FormItem class="form-item-view-el" label="移动端描述" prop="skuList" style="width: 100%">
-              <editor ref="editor" v-model="baseInfoForm.mobileIntro" :init="{ ...initEditor, height: '800px' }" openXss>
-              </editor>
+              <editor
+                ref="introEditor"
+                v-model="baseInfoForm.mobileIntro"
+                height="800px"
+                openXss
+              ></editor>
             </FormItem>
           </div>
           <div v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'">
@@ -416,8 +423,8 @@ import * as API_GOODS from "@/api/goods";
 import * as API_Shop from "@/api/shops";
 import cloneObj from "@/utils/index";
 import vuedraggable from "vuedraggable";
-import Editor from "@tinymce/tinymce-vue";
-import { initEditor } from "@/views/lili-components/editor/config";
+import tinymec from "@/views/lili-components/editor/index.vue";
+
 import { uploadFile } from "@/libs/axios";
 import { regular } from "@/utils";
 import DPlayer from 'dplayer';
@@ -425,7 +432,7 @@ import DPlayer from 'dplayer';
 export default {
   name: "goodsOperationSec",
   components: {
-    editor: Editor,
+    editor: tinymec,
     vuedraggable,
   },
   props: {
@@ -452,7 +459,7 @@ export default {
     };
     return {
       regular,
-      initEditor,
+
       total: 0,
       goodsVideo: "",
       showContent: false,
@@ -1035,7 +1042,13 @@ export default {
     },
     // 将pc商品描述同步给移动端
     promiseIntroEditor() {
+      this.$nextTick(() => {
+        this.$refs.introEditor.setContent(this.baseInfoForm.intro);
+      })
+
       this.baseInfoForm.mobileIntro = this.baseInfoForm.intro;
+
+      this.$forceUpdate();
     },
 
     /** 根据当前分类id查询商品应包含的参数 */

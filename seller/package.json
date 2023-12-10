@@ -13,7 +13,6 @@
     "-": "0.0.1",
     "@amap/amap-jsapi-loader": "0.0.7",
     "@antv/g2": "^4.1.14",
-    "@tinymce/tinymce-vue": "^3.2.0",
     "axios": "^0.21.1",
     "dplayer": "^1.27.1",
     "js-cookie": "^2.2.1",
