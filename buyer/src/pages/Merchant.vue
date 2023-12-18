@@ -227,6 +227,7 @@ export default {
             this.getIndexData();
           } else {
             this.getGoodsList();
+            this.getCateList();
           }
           let that = this;
           window.onscroll = function () {
@@ -246,6 +247,7 @@ export default {
       getCateById(this.$route.query.id).then((res) => {
         if (res.success) {
           this.cateList = res.result;
+          console.log(this.cateList,'cateList')
         }
       });
     },
