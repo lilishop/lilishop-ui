@@ -214,14 +214,14 @@ export default {
           });
         } else {
           this.skuColumn.push(
-            {
-              title: "成本",
-              key: "cost",
-              render: (h, params) => {
-                console.log(params)
-                return h("priceColorScheme", {props:{value:params.row.cost,color:this.$mainColor}} );
-              },
-            },
+            // {
+            //   title: "成本",
+            //   key: "cost",
+            //   render: (h, params) => {
+            //     console.log(params)
+            //     return h("priceColorScheme", {props:{value:params.row.cost,color:this.$mainColor}} );
+            //   },
+            // },
             {
               title: "价格",
               key: "price",

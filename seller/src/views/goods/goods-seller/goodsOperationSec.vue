@@ -29,6 +29,7 @@
               <Select v-model="baseInfoForm.brandId" filterable style="width: 200px">
                 <Option v-for="item in brandList" :key="item.id" :label="item.name" :value="item.id"></Option>
               </Select>
+                <Button shape="circle" icon="md-refresh" @click="refresh('brand')" class="refresh-icon" type="text"></Button>
             </FormItem>
           </div>
           <h4>商品交易信息</h4>
@@ -38,6 +39,7 @@
                 <Option v-for="(item, index) in goodsUnitList" :key="index" :value="item">{{ item }}
                 </Option>
               </Select>
+              <Button shape="circle" icon="md-refresh" @click="refresh('goodsUnit')" class="refresh-icon" type="text"></Button>
             </FormItem>
             <FormItem class="form-item-view-el" label="销售模式" prop="salesModel">
               <RadioGroup v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'" v-model="baseInfoForm.salesModel"
@@ -61,7 +63,7 @@
                         <Input v-model="wholesaleData[index].num" min="1" number type="number"
                           @on-blur="checkWholesaleNum(index)">
                         <span slot="append">{{
-                          baseInfoForm.goodsUnit || ""
+                           baseInfoForm.goodsUnit || ""
                         }}</span>
                         </Input>
                       </div>
@@ -226,12 +228,12 @@
                           }}</span>
                           </Input>
                         </template>
-                        <template slot="cost" slot-scope="{ row }">
+                        <!-- <template slot="cost" slot-scope="{ row }">
                           <Input v-model="row.cost" clearable placeholder="请输入成本价"
                             @on-change="updateSkuTable(row, 'cost')">
                           <span slot="append">元</span>
                           </Input>
-                        </template>
+                        </template> -->
                         <template slot="price" slot-scope="{ row }">
                           <Input v-model="row.price" clearable placeholder="请输入价格"
                             @on-change="updateSkuTable(row, 'price')">
@@ -341,6 +343,7 @@
                   <Option v-for="item in logisticsTemplate" :key="item.id" :value="item.id">{{ item.name }}
                   </Option>
                 </Select>
+                <Button shape="circle" icon="md-refresh" @click="refresh('template')" class="refresh-icon" type="text"></Button>
               </FormItem>
               <FormItem v-if="baseInfoForm.salesModel == 'WHOLESALE'" class="form-item-view-el" label="商品重量"
                 prop="weight">
@@ -611,7 +614,7 @@ export default {
         "_index",
         "_rowKey",
         "sn",
-        "cost",
+        // "cost",
         "price",
         "weight",
         "quantity",
@@ -629,6 +632,17 @@ export default {
     }
   },
   methods: {
+    // 局部刷新
+    refresh(v){
+      if( v == 'template'){
+        this.GET_ShipTemplate()
+      }else if( v == 'goodsUnit'){
+        this.goodsUnitList = []
+        this.GET_GoodsUnit()
+      }else{
+        this.getGoodsBrandList()
+      }
+    },
     getImages(v) {
       this.previewImage = v;
       this.visible = true;
@@ -990,7 +1004,7 @@ export default {
           id: e.id,
           sn: e.sn,
           price: e.price,
-          cost: e.cost,
+          // cost: e.cost,
           quantity: e.quantity,
           weight: e.weight,
         };
@@ -1273,7 +1287,7 @@ export default {
               find.id = "";
               find.price && (find.price = "");
               find.sn && (find.sn = "");
-              find.cost && (find.cost = "");
+              // find.cost && (find.cost = "");
               find.quantity && (find.quantity = "");
               find.weight && (find.weight = "");
 
@@ -1287,7 +1301,7 @@ export default {
               find.id = "";
               find.price && (find.price = "");
               find.sn && (find.sn = "");
-              find.cost && (find.cost = "");
+              // find.cost && (find.cost = "");
               find.quantity && (find.quantity = "");
               find.weight && (find.weight = "");
 
@@ -1340,10 +1354,10 @@ export default {
       // 有成本价和价格的情况
       if (this.baseInfoForm.salesModel !== "WHOLESALE") {
         pushData.push(
-          {
-            title: "成本价",
-            slot: "cost",
-          },
+          // {
+          //   title: "成本价",
+          //   slot: "cost",
+          // },
           {
             title: "价格",
             slot: "price",
@@ -1422,7 +1436,7 @@ export default {
               id: skus[index].id,
               sn: skus[index].sn,
               quantity: skus[index].quantity,
-              cost: skus[index].cost,
+              cost: 1,
               price: skus[index].price,
               [spec[0].name]: specItem.value,
               images:
@@ -1503,18 +1517,19 @@ export default {
           this.validatatxt = "请输入0~99999999之间的整数";
           return;
         }
-      } else if (item === "cost" || item === "price") {
-        if (
-          !regular.money.test(row[item]) ||
-          parseInt(row[item]) < 0 ||
-          parseInt(row[item]) > 99999999
-        ) {
-          // 成本价 价格
-          this.validateError.push([index, item]);
-          this.validatatxt = "请输入0~99999999之间的价格";
-          return;
-        }
-      }
+      } 
+      // else if (item === "cost" || item === "price") {
+      //   if (
+      //     !regular.money.test(row[item]) ||
+      //     parseInt(row[item]) < 0 ||
+      //     parseInt(row[item]) > 99999999
+      //   ) {
+      //     // 成本价 价格
+      //     this.validateError.push([index, item]);
+      //     this.validatatxt = "请输入0~99999999之间的价格";
+      //     return;
+      //   }
+      // }
       this.$nextTick(() => {
         this.skuTableData[index][item] = row[item];
       });
@@ -1592,7 +1607,7 @@ export default {
           submit.skuList = [];
           this.skuTableData.map((sku) => {
             let skuCopy = {
-              cost: sku.cost,
+              cost: 1,
               price: sku.price,
               quantity: sku.quantity,
               sn: sku.sn,
@@ -1702,17 +1717,20 @@ export default {
         }
       });
     },
+    GET_ShipTemplate(){
+       // 获取物流模板
+       API_Shop.getShipTemplate().then((res) => {
+      if (res.success) {
+        this.logisticsTemplate = res.result;
+      }
+    });
+    }     
   },
   mounted() {
     this.accessToken = {
       accessToken: this.getStore("accessToken"),
     };
-    // 获取物流模板
-    API_Shop.getShipTemplate().then((res) => {
-      if (res.success) {
-        this.logisticsTemplate = res.result;
-      }
-    });
+    this.GET_ShipTemplate()
     if (this.$route.query.id || this.$route.query.draftId) {
       // 编辑商品、模板
       this.GET_GoodData(this.$route.query.id, this.$route.query.draftId);
@@ -1782,5 +1800,8 @@ export default {
 }
 .view-video{
   margin: 0 10px;
+}
+.refresh-icon{
+  margin-left: 10px;
 }
 </style>
