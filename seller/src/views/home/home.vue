@@ -2,7 +2,7 @@
   <div>
 
     <Modal v-model="noticeFlage" :title="noticesDetail.title">
-      <div v-if="noticesDetail" v-html="noticesDetail.content">
+      <div v-if="noticesDetail" class="noticesDetail" v-html="noticesDetail.content">
 
       </div>
     </Modal>
@@ -294,4 +294,10 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "./home.scss";
+.noticesDetail{
+  /deep/ img{
+    max-width: 100%;
+    max-height: 200px;
+  }
+}
 </style>
