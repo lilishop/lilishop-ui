@@ -16,7 +16,7 @@
                 <img :src="item.img" width="210" height="210" :alt="item.name">
                 <p>{{item.name}}</p>
                 <p>
-                    <span>{{item.price | unitPrice('￥')}}</span> 
+                    <span>{{item.price | unitPrice('￥')}}</span>
                     <!-- <span>{{item.price | unitPrice('￥')}}</span> -->
                 </p>
                 <div class="setup-box">
@@ -100,10 +100,10 @@ export default {
         },
         handleSelectGoods(item) { // 调起选择商品弹窗
             if(item) this.selected = item;
-            this.$refs.liliDialog.open('goods', 'single')
-            setTimeout(() => {
-                this.$refs.liliDialog.goodsData = [this.selected]
-            }, 500);
+            this.$refs.liliDialog.flag = true;
+            this.$refs.liliDialog.goodsFlag = true;
+            this.$refs.liliDialog.singleGoods();
+
         },
         // 选择商品回调
         selectedGoodsData(val){
@@ -175,16 +175,16 @@ export default {
             cursor: pointer;
         }
         border-right: 1px solid #eee;
-        
+
     }
     li:last-of-type{
         border: none;
     }
-   
+
     .curr{
         p:nth-child(1){
             background-color: $theme_color;
-            
+
             color: #fff;
         }
         p:nth-child(2){
