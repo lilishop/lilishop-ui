@@ -26,7 +26,7 @@
       <Button type="primary" @click='currentIndex = 0'
         v-if="storeDisable === 'REFUSED' && currentIndex === 3">重新申请</Button>
     </div>
- 
+
     <Modal title="店铺入驻协议" v-model="showAgreement" width="1200" :closable="false" :mask-closable="false">
       <Scroll :on-reach-bottom="handleReachBottom">
         <div class="agreeent-con" v-html="agreementCon"></div>
@@ -42,6 +42,7 @@
   </div>
 </template>
 <script>
+
 import { agreement, applyStatus } from "@/api/shopentry";
 import firstApply from "./FirstApply";
 import secondApply from "./SecondApply";
@@ -152,8 +153,11 @@ export default {
     },
   },
   mounted() {
-    this.getData("init");
-    this.getArticle();
+
+      this.getData("init");
+      this.getArticle();
+
+
   },
 };
 </script>
@@ -180,7 +184,7 @@ export default {
   max-height: 500px;
   ::v-deep img{
     max-width: 100%;
-    max-height: 200px;
+
   }
 }
 .success-page {
