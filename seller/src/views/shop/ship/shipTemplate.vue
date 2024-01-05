@@ -294,6 +294,7 @@ export default {
       this.operation = "INFO";
       this.currentTab = "INFO";
       this.getData();
+      this.$Message.success("刷新成功");
     },
     //运费模板数据
     getData() {
