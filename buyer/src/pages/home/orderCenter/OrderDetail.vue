@@ -106,17 +106,17 @@
     <!-- 订单商品 -->
     <div class="goods">
       <div class="shop-name">
-        <span @click="shopPage(order.order.storeId)">{{
-          order.order.storeName
-        }}</span>
+        <span @click="shopPage(order.order.storeId)">{{order.order.storeName}}</span>
       </div>
       <table>
         <thead>
           <tr>
-            <th width="40%">商品</th>
-            <th width="20%">货号</th>
+            <th width="30%">商品</th>
+            <th width="15%">货号</th>
             <th width="10%">单价</th>
-            <th width="10%">数量</th>
+            <th width="5%">数量</th>
+            <th width="10%">退款状态</th>
+            <th width="10%">实际退款金额</th>
             <th width="10%">小计</th>
             <th width="10%">操作</th>
           </tr>
@@ -141,6 +141,8 @@
             <td>{{ goods.id }}</td>
             <td>{{ goods.goodsPrice | unitPrice("￥") }}</td>
             <td>{{ goods.num }}</td>
+            <td>{{refundPriceList(goods.isRefund)}}</td>
+            <td>{{ goods.refundPrice | unitPrice("￥") }}</td>
             <td>{{ (goods.goodsPrice * goods.num) | unitPrice("￥") }}</td>
             <td>
               <Button
@@ -253,6 +255,21 @@ export default {
     };
   },
   methods: {
+    // 退款状态枚举
+    refundPriceList(status) {
+      switch (status) {
+      case 'ALL_REFUND':
+        return "全部退款";
+      case 'PART_REFUND':
+        return "部分退款";
+      case 'NO_REFUND':
+        return "未退款";
+      case 'REFUNDING':
+        return "退款中";
+      default:
+          return "未退款";
+      }
+    },
     goodsDetail(skuId, goodsId) {
       // 跳转商品详情
       let routeUrl = this.$router.resolve({
