@@ -241,7 +241,7 @@
                   <Option value="DELIVERED">已发货</Option>
                   <Option value="COMPLETED">已完成</Option>
                   <Option value="TAKE">待核验</Option>
-                  <Option value="CANCELLED">已取消</Option>
+                  <Option value="CANCELLED">已关闭</Option>
                 </Select>
               </Form-item>
               <Form-item label="支付状态" prop="payStatus">
@@ -660,7 +660,7 @@
               } else if (params.row.orderStatus == "TAKE") {
                 return h('div', [h('span', {}, '待核验'),]);
               } else if (params.row.orderStatus == "CANCELLED") {
-                return h('div', [h('span', {}, '已取消'),]);
+                return h('div', [h('span', {}, '已关闭'),]);
               }
             }
           },

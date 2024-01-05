@@ -597,6 +597,11 @@ export default {
           minWidth: 80,
         },
         {
+          title: "退款数量",
+          key: "returnGoodsNumber",
+          minWidth: 80,
+        },
+        {
           title: "小计",
           key: "subTotal",
           minWidth: 100,
