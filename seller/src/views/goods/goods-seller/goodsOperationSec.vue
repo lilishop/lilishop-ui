@@ -1131,6 +1131,10 @@ export default {
         this.$Message.error("已存在相同规格项！");
         return;
       }
+      if (this.zz(0, val) > 20) {
+        this.$Message.error("规格项最多十个字符长度！");
+        return;
+      }
       this.skuTableData = this.skuTableData.map((e) => {
         e[val] = e[this.currentSkuItem];
         delete e[this.currentSkuItem];
@@ -1138,6 +1142,18 @@ export default {
       });
       this.currentSkuItem = val;
       this.renderTableData(this.skuTableData);
+    },
+    // 正则验证（中文超过10个英文数字超过20个）
+    zz(len, value) {
+      for(let i=0; i<value.length; i++) {
+        //正则表达式判断中文
+        if (/[\u4e00-\u9fa5]/.test(value[i])) {
+          len+=2;
+        } else {
+          len++;
+        }
+      }
+      return len;
     },
     // 编辑规格值
     skuValueChange(val, index, item) {
@@ -1147,6 +1163,10 @@ export default {
       }
       if (val.value === '') {
         this.$Message.error("规格值不能为空！");
+        return;
+      }
+      if (this.zz(0, val.value) > 20) {
+        this.$Message.error("规格值最多十个字符长度！");
         return;
       }
       let curVal = this.currentSkuVal;
