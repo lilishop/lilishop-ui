@@ -294,6 +294,7 @@
             v-model="groupFormValidate.id"
             :data="treeData"
             change-on-select
+            @on-change="treeDataChange"
           ></Cascader>
         </FormItem>
         <FormItem label="分组名称" prop="directoryName">
@@ -344,6 +345,7 @@ export default {
 
       groupFormValidate: {
         id: [],
+        level: 0,
         directoryName: "",
       },
       groupRuleValidate: {
@@ -742,7 +744,6 @@ export default {
 
   methods: {
     handleContextMenu(val) {
-      console.log("val", val);
       this.selectedGroupData = val;
     },
     // 编辑分组
@@ -757,7 +758,6 @@ export default {
       this.groupFormValidate.level = this.selectedGroupData.level;
 
       this.groupFormValidate.parentId = this.selectedGroupData.parentId;
-      console.log(this.groupFormValidate);
     },
     // 删除分组
     async handleContextMenuDelete(val) {
@@ -773,6 +773,15 @@ export default {
         },
       });
     },
+    treeDataChange(value, selectedData) {
+      if (value && value.length) {
+        if (value[value.length -1] == '0') {
+          this.groupFormValidate.level = 0;
+        } else {
+          this.groupFormValidate.level = Number(selectedData[selectedData.length -1].level) + 1;
+        }
+      }
+    },
     // 保存/修改分组
     async submitAddGroup() {
       this.$refs["formValidate"].validate(async (valid) => {
@@ -784,8 +793,6 @@ export default {
             // params.directoryType = this.selectedGroupData.directoryType
             params.parentId = params.id[params.id.length - 1];
             // params.type = this.selectedGroupData.type
-            params.level =
-              params.parentId == "0" ? 0 : this.selectedGroupData.level + 1;
             delete params.id;
             res = await addFileDirectory(params);
           } else {
@@ -875,14 +882,14 @@ export default {
     // 选择分类回调
     handleCateChange(data) {
       this.selectedGroupData = data[0];
-      let {value, type} = data[0];
-      this.list.push({
-        value,
-        type,
-      });
+      let {value, type, level} = data[0];
+      this.list.push({value, type, level});
       this.searchForm.fileDirectoryId = value;
-      if (value === "0") {
+      if (value === "0" || value === 0) {
         delete this.searchForm.fileDirectoryId;
+        this.groupFormValidate.level = 0;
+      } else {
+        this.groupFormValidate.level = Number(level) + 1;
       }
       this.searchForm.userEnums = type;
       this.getDataList();
@@ -1061,7 +1068,7 @@ export default {
             ids += e.id + ",";
           });
           ids = ids.substring(0, ids.length - 1);
-          deleteFile({ids: ids}).then((res) => {
+          deleteFile(ids).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("批量删除文件成功");
@@ -1082,7 +1089,7 @@ export default {
         content: "您确认要删除文件 " + v.name + " ?",
         loading: true,
         onOk: () => {
-          deleteFile({ids: v.id}).then((res) => {
+          deleteFile(v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("删除文件 " + v.name + " 成功");
@@ -1131,7 +1138,6 @@ export default {
     },
     // 清除选中状态
     clearSelectAll() {
-      console.log("清除选中状态");
       this.$refs.table.selectAll(false);
       this.totalSize = "";
     },
