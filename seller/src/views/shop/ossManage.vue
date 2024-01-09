@@ -281,6 +281,18 @@
               }
             },
           },
+          {title: "文件类型", key: "fileType", width: 115, className: this.selectImage == true ? "none" : "",},
+          {
+            title: "文件大小",
+            key: "fileSize",
+            width: 115,
+            sortable: true,
+            className: this.selectImage == true ? "none" : "",
+            render: (h, params) => {
+              let m = ((params.row.fileSize * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
+              return h("span", m);
+            },
+          },
           {
             title: "上传者",
             key: "createBy",
@@ -304,7 +316,7 @@
             key: "action",
             align: "center",
             fixed: "right",
-            width: 300,
+            width: 150,
             render: (h, params) => {
               return h("div", [
                 h("Button", {
@@ -338,12 +350,25 @@
           directoryName: [{required: true, message: "请输入分组名称", trigger: "blur",},],
           id: [{required: true, message: "请选择分组", trigger: "blur", type: "array",},],
         },
+        selectImage: false, //是否是选择
       }
     },
-    props:{
-      isComponent:{
+    props: {
+      isComponent: {
         default: false,
-        type:Boolean
+        type: Boolean,
+      },
+      choose: {
+        type: String,
+        default: ""
+      }
+    },
+    watch: {
+      selectImage(val) {
+        if (val && !this.data.length) this.init();
+      },
+      choose(val) {
+        if (val) this.selectImage = val
       }
     },
     mounted() {
@@ -656,6 +681,12 @@
           });
         }
         return arr;
+      },
+      /**
+       * 选择
+       */
+      selectedParams(val) {
+        this.$emit("callback", val);
       },
     }
   }

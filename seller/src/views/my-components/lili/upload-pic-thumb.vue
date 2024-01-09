@@ -22,28 +22,32 @@
           </div>
         </div>
       </vuedraggable>
-      <Upload
-        :disabled="disable"
-        ref="upload"
-        :multiple="multiple"
-        :show-upload-list="false"
-        :on-success="handleSuccess"
-        :on-error="handleError"
-        :format="['jpg','jpeg','png','gif']"
-        :max-size="1024"
-        :on-format-error="handleFormatError"
-        :on-exceeded-size="handleMaxSize"
-        :before-upload="handleBeforeUpload"
-        type="drag"
-        :action="uploadFileUrl"
-        :headers="accessToken"
-        style="display: inline-block;width:58px;"
-        v-if="!isView"
-      >
-        <div style="width: 58px;height:58px;line-height: 58px;">
-          <Icon type="md-camera" size="20"></Icon>
-        </div>
-      </Upload>
+      <div style="display: inline-block; width: 60px; height: 60px;border: 1px dashed #dcdee2;border-radius: 4px;line-height: 60px;text-align: center;"
+           @click="handleCLickImg('uploadList')">
+          <Icon size="20" type="md-camera"></Icon>
+      </div>
+      <!--<Upload-->
+        <!--:disabled="disable"-->
+        <!--ref="upload"-->
+        <!--:multiple="multiple"-->
+        <!--:show-upload-list="false"-->
+        <!--:on-success="handleSuccess"-->
+        <!--:on-error="handleError"-->
+        <!--:format="['jpg','jpeg','png','gif']"-->
+        <!--:max-size="1024"-->
+        <!--:on-format-error="handleFormatError"-->
+        <!--:on-exceeded-size="handleMaxSize"-->
+        <!--:before-upload="handleBeforeUpload"-->
+        <!--type="drag"-->
+        <!--:action="uploadFileUrl"-->
+        <!--:headers="accessToken"-->
+        <!--style="display: inline-block;width:58px;"-->
+        <!--v-if="!isView"-->
+      <!--&gt;-->
+        <!--<div style="width: 58px;height:58px;line-height: 58px;">-->
+          <!--<Icon type="md-camera" size="20"></Icon>-->
+        <!--</div>-->
+      <!--</Upload>-->
     </div>
     <Modal title="图片预览" v-model="viewImage" :styles="{top: '30px'}" draggable>
       <img :src="imgUrl" alt="无效的图片链接" style="width: 100%;margin: 0 auto;display: block;" />
@@ -51,16 +55,22 @@
         <Button @click="viewImage=false">关闭</Button>
       </div>
     </Modal>
+
+    <Modal width="1200px" v-model="picModalFlag" @on-ok="confirmUrls">
+      <ossManage @callback="callbackSelected" @selected="(list)=>{ selectedImage = list}" ref="ossManage" />
+    </Modal>
   </div>
 </template>
 
 <script>
 import { uploadFile } from "@/libs/axios";
 import vuedraggable from "vuedraggable";
+import ossManage from "@/views/shop/ossManage";
 export default {
   name: "uploadPicThumb",
   components: {
-    vuedraggable
+    vuedraggable,
+    ossManage
   },
   props: {
     value: { // 默认值
@@ -97,10 +107,33 @@ export default {
       uploadFileUrl: uploadFile, // 上传文件
       uploadList: [], // 上传文件列表
       viewImage: false, // 是否预览图片
-      imgUrl: "" // 图片地址
+      imgUrl: "", // 图片地址
+      picModalFlag: false, // 图片选择器
+      selectedFormBtnName: "", // 点击图片绑定form
+      selectedImage: [],
     };
   },
   methods: {
+    // 选择图片modal
+    handleCLickImg(val, index) {
+      this.$refs.ossManage.selectImage = true;
+      this.picModalFlag = true;
+      this.selectedFormBtnName = val;
+    },
+    // 图片选择后回调
+    callbackSelected(val) {
+      this.picModalFlag = false;
+      if (!this.multiple && this.uploadList && this.uploadList.length > 0) {
+        // 删除第一张
+        this.uploadList.splice(0, 1);
+      }
+      this.uploadList.push(val);
+      // 返回组件值
+      this.returnValue();
+    },
+    confirmUrls(){
+
+    },
     onEnd() {
       this.returnValue();
     },

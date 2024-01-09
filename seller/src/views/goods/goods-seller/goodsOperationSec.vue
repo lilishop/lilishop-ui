@@ -1,7 +1,7 @@
 <template>
   <div>
     <Modal title="预览图片" v-model="visible">
-      <img :src="previewImage" v-if="visible" style="width: 100%">
+      <img :src="previewPicture" v-if="visible" style="width: 100%">
     </Modal>
     <div class="content-goods-publish">
       <Form ref="baseInfoForm" :label-width="120" :model="baseInfoForm" :rules="baseInfoFormRule">
@@ -113,15 +113,17 @@
                     </template>
                   </div>
                 </vuedraggable>
-
-                <Upload ref="upload" :action="uploadFileUrl" :before-upload="handleBeforeUploadGoodsPicture"
-                  :format="['jpg', 'jpeg', 'png']" :headers="{ ...accessToken }" :max-size="2048"
-                  :on-exceeded-size="handleMaxSize" :on-format-error="handleFormatError"
-                  :on-success="handleSuccessGoodsPicture" :show-upload-list="false" multiple type="drag">
-                  <div style="width: 148px; height: 148px; line-height: 148px">
-                    <Icon size="20" type="md-add"></Icon>
-                  </div>
-                </Upload>
+                <div style="width: 148px; height: 148px; line-height: 148px;border: 1px dashed #dcdee2;" @click="handleCLickImg('goodsGalleryFiles')">
+                  <Icon size="20" type="md-add"></Icon>
+                </div>
+                <!--<Upload ref="upload" :action="uploadFileUrl" :before-upload="handleBeforeUploadGoodsPicture"-->
+                  <!--:format="['jpg', 'jpeg', 'png']" :headers="{ ...accessToken }" :max-size="2048"-->
+                  <!--:on-exceeded-size="handleMaxSize" :on-format-error="handleFormatError"-->
+                  <!--:on-success="handleSuccessGoodsPicture" :show-upload-list="false" multiple type="drag">-->
+                  <!--<div style="width: 148px; height: 148px; line-height: 148px">-->
+                    <!--<Icon size="20" type="md-add"></Icon>-->
+                  <!--</div>-->
+                <!--</Upload>-->
               </div>
               <Modal v-model="goodsPictureVisible" title="View Image">
                 <img v-if="goodsPictureVisible" :src="previewGoodsPicture" style="width: 100%" />
@@ -264,26 +266,33 @@
                               <img v-if="previewPicture !== ''" :src="previewPicture" />
                             </div>
                             <Divider />
-                            <vuedraggable :animation="200" :list="selectedSku.images" style="display: inline-block">
-                              <div v-for="(img, __index) in selectedSku.images" :key="__index" class="sku-upload-list">
-                                <template>
-                                  <img :src="img.url" />
-                                  <div class="sku-upload-list-cover">
-                                    <Icon type="md-search" @click="handleView(img.url)"></Icon>
-                                    <Icon type="md-trash" @click="handleRemove(img, __index)"></Icon>
-                                  </div>
-                                </template>
+                            <div style="display: flex;align-items: flex-start;">
+                              <vuedraggable :animation="200" :list="selectedSku.images" style="display: inline-block">
+                                <div v-for="(img, __index) in selectedSku.images" :key="__index" class="sku-upload-list">
+                                  <template>
+                                    <img :src="img.url" />
+                                    <div class="sku-upload-list-cover">
+                                      <Icon type="md-search" @click="handleView(img.url)"></Icon>
+                                      <Icon type="md-trash" @click="handleRemove(img, __index)"></Icon>
+                                    </div>
+                                  </template>
+                                </div>
+                              </vuedraggable>
+                              <div style="display: inline-block; width: 60px; height: 60px;border: 1px dashed #dcdee2;border-radius: 4px;" @click="handleCLickImg('selectedSkuImages')">
+                                <div>
+                                  <Icon size="55" type="ios-camera"></Icon>
+                                </div>
                               </div>
-                            </vuedraggable>
-                            <Upload ref="uploadSku" :action="uploadFileUrl" :before-upload="handleBeforeUpload"
-                              :format="['jpg', 'jpeg', 'png']" :headers="{ ...accessToken }" :max-size="2048"
-                              :on-exceeded-size="handleMaxSize" :on-format-error="handleFormatError"
-                              :on-success="handleSuccess" :show-upload-list="false" multiple
-                              style="display: inline-block; width: 58px" type="drag">
-                              <div>
-                                <Icon size="55" type="ios-camera"></Icon>
-                              </div>
-                            </Upload>
+                            </div>
+                            <!--<Upload ref="uploadSku" :action="uploadFileUrl" :before-upload="handleBeforeUpload"-->
+                              <!--:format="['jpg', 'jpeg', 'png']" :headers="{ ...accessToken }" :max-size="2048"-->
+                              <!--:on-exceeded-size="handleMaxSize" :on-format-error="handleFormatError"-->
+                              <!--:on-success="handleSuccess" :show-upload-list="false" multiple-->
+                              <!--style="display: inline-block; width: 58px" type="drag">-->
+                              <!--<div>-->
+                                <!--<Icon size="55" type="ios-camera"></Icon>-->
+                              <!--</div>-->
+                            <!--</Upload>-->
                           </Modal>
                         </template>
                       </Table>
@@ -419,6 +428,14 @@
 
       </div>
     </Modal>
+
+    <!--<Modal width="1200px" v-model="picModalFlag">-->
+      <!--<ossManage @callback="callbackSelected" ref="ossManage" />-->
+    <!--</Modal>-->
+    <Modal width="1200px" v-model="picModalFlag" @on-ok="confirmUrls">
+      <ossManage @callback="callbackSelected" @selected="(list)=>{ selectedImage = list}" ref="ossManage" />
+    </Modal>
+
   </div>
 </template>
 <script>
@@ -431,12 +448,16 @@ import tinymec from "@/views/lili-components/editor/index.vue";
 import { uploadFile } from "@/libs/axios";
 import { regular } from "@/utils";
 import DPlayer from 'dplayer';
+// import ossManage from "@/views/sys/oss-manage/ossManage";
+import ossManage from "@/views/shop/ossManage";
+
 
 export default {
   name: "goodsOperationSec",
   components: {
     editor: tinymec,
     vuedraggable,
+    ossManage
   },
   props: {
     firstData: {
@@ -621,6 +642,9 @@ export default {
         "specId",
         "specValueId",
       ],
+      picModalFlag: false, // 图片选择器
+      selectedFormBtnName: "", // 点击图片绑定form
+      selectedImage: [],
     };
   },
   watch: {
@@ -632,6 +656,29 @@ export default {
     }
   },
   methods: {
+    // 选择图片modal
+    handleCLickImg(val, index) {
+      this.$refs.ossManage.selectImage = true;
+      this.picModalFlag = true;
+      this.selectedFormBtnName = val;
+      // this.picIndex = index;
+    },
+    // 图片选择后回调
+    callbackSelected(val) {
+      this.picModalFlag = false;
+      if (val && this.selectedFormBtnName == 'selectedSkuImages') {
+        this.selectedSku.images.push(val);
+      } else {
+        this.baseInfoForm[this.selectedFormBtnName].push(val);
+      }
+    },
+    confirmUrls(){
+      if (this.selectedImage && this.selectedFormBtnName == 'selectedSkuImages') {
+        this.selectedSku.images = [...this.selectedSku.images, ...this.selectedImage];
+      } else {
+        this.baseInfoForm[this.selectedFormBtnName] = [...this.baseInfoForm[this.selectedFormBtnName], ...this.selectedImage];
+      }
+    },
     // 局部刷新
     refresh(v){
       if( v == 'template'){
@@ -728,7 +775,6 @@ export default {
           },
         });
       }
-      console.log('初始化操作')
     },
     pre() {
       // 上一步

@@ -226,7 +226,8 @@
   </div>
 </template>
 <script>
-import ossManage from "@/views/sys/oss-manage/ossManage";
+// import ossManage from "@/views/sys/oss-manage/ossManage";
+import ossManage from "@/views/shop/ossManage";
 import hotzone from "@/views/shop/hotzone";
 import { modelData } from "./config";
 import ways from "@/views/lili-dialog/wap.js"; // 选择链接的类型

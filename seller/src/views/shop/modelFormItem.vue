@@ -204,9 +204,7 @@
           >
         </div>
         <div>
-          选择图片：<Button size="small" type="primary" @click="handleSelectImg"
-            >选择图片</Button
-          >&nbsp;
+          选择图片：<Button size="small" type="primary" @click="handleSelectImg">选择图片</Button>&nbsp;
         </div>
       </div>
     </Modal>
@@ -218,11 +216,7 @@
     ></liliDialog>
     <!-- 选择图片 -->
     <Modal width="1200px" v-model="picModelFlag" footer-hide>
-      <ossManage
-        @callback="callbackSelected"
-        :isComponent="true"
-        ref="ossManage"
-      />
+      <ossManage @callback="callbackSelected" :isComponent="true" ref="ossManage"/>
     </Modal>
   </div>
 </template>
@@ -236,7 +230,8 @@ import NewGoodsSort from "./modelList/newGoodsSort.vue";
 import Recommend from "./modelList/recommend.vue";
 import NotEnough from "./modelList/notEnough.vue";
 import Seckill from "./modelList/seckill.vue";
-import ossManage from "@/views/sys/oss-manage/ossManage";
+// import ossManage from "@/views/sys/oss-manage/ossManage";
+import ossManage from "@/views/shop/ossManage";
 
 export default {
   name: "modelFormItem",

@@ -161,7 +161,8 @@
 <script>
 import Draggable from "vuedraggable";
 import ModelFormItem from "./modelFormItem.vue";
-import ossManage from "@/views/sys/oss-manage/ossManage";
+// import ossManage from "@/views/sys/oss-manage/ossManage";
+import ossManage from "@/views/shop/ossManage";
 export default {
   name: "modelForm",
   components: {

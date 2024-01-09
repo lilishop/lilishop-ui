@@ -99,7 +99,8 @@
 <script>
 import changeSize from "../directives/changeSize";
 import dragItem from "../directives/dragItem";
-import ossManage from "@/views/sys/oss-manage/ossManage";
+// import ossManage from "@/views/sys/oss-manage/ossManage";
+import ossManage from "@/views/shop/ossManage";
 
 export default {
   name: "Zone",

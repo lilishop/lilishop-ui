@@ -27,7 +27,7 @@
                   <Icon
                     size="30"
                     type="md-trash"
-                    @click.native="handleRemoveGoodsPicture(item)"
+                    @click.native="handleRemoveGoodsPicture(__index)"
                   ></Icon>
                 </div>
               </div>
@@ -64,8 +64,8 @@
 <script>
 import vuedraggable from "vuedraggable";
 import {uploadFile} from "@/libs/axios";
-import OssManage from "@/views/sys/oss-manage/ossManage";
-
+// import OssManage from "@/views/sys/oss-manage/ossManage";
+import OssManage from "@/views/shop/ossManage";
 export default {
   name: "upload-image",
   components: {
@@ -89,7 +89,7 @@ export default {
   },
   methods: {
     handleClickUploadImage(){
-      this.show = true
+      this.show = true;
     },
     // 回调给父级
     callback() {
@@ -98,7 +98,7 @@ export default {
       this.$emit('callback',formatImages)
     },
     // 移除商品图片
-    handleRemoveGoodsPicture(file) {
+    handleRemoveGoodsPicture(__index) {
       this.images.splice(__index, 1);
     },
     // 图片大小不正确
@@ -134,7 +134,7 @@ export default {
     },
     // 从资源库中导入图片
     importOSS(){
-      this.showOssManager = true
+      this.showOssManager = true;
       this.$refs.ossManage.selectImage = true;
     }
   }
