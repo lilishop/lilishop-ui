@@ -19,24 +19,24 @@
             </div>
           </Poptip>
       </Input>
-
-      <Upload
-        :action="uploadFileUrl"
-        :headers="accessToken"
-        :on-success="handleSuccess"
-        :on-error="handleError"
-        :format="['jpg','jpeg','png','gif','bmp']"
-        accept=".jpg, .jpeg, .png, .gif, .bmp"
-        :max-size="1024"
-        :on-format-error="handleFormatError"
-        :on-exceeded-size="handleMaxSize"
-        :before-upload="beforeUpload"
-        :show-upload-list="false"
-        ref="up"
-        class="upload"
-      >
-        <Button :loading="loading" :size="size" :disabled="disabled">上传图片</Button>
-      </Upload>
+      <Button @click="handleCLickImg('storeLogo')">选择图片</Button>
+      <!--<Upload-->
+        <!--:action="uploadFileUrl"-->
+        <!--:headers="accessToken"-->
+        <!--:on-success="handleSuccess"-->
+        <!--:on-error="handleError"-->
+        <!--:format="['jpg','jpeg','png','gif','bmp']"-->
+        <!--accept=".jpg, .jpeg, .png, .gif, .bmp"-->
+        <!--:max-size="1024"-->
+        <!--:on-format-error="handleFormatError"-->
+        <!--:on-exceeded-size="handleMaxSize"-->
+        <!--:before-upload="beforeUpload"-->
+        <!--:show-upload-list="false"-->
+        <!--ref="up"-->
+        <!--class="upload"-->
+      <!--&gt;-->
+        <!--<Button :loading="loading" :size="size" :disabled="disabled">上传图片</Button>-->
+      <!--</Upload>-->
     </div>
 
     <Modal title="图片预览" v-model="viewImage" :styles="{top: '30px'}" draggable>
@@ -45,13 +45,22 @@
         <Button @click="viewImage=false">关闭</Button>
       </div>
     </Modal>
+
+    <Modal width="1200px" v-model="picModalFlag">
+      <ossManage @callback="callbackSelected" ref="ossManage" />
+    </Modal>
+
   </div>
 </template>
 
 <script>
 import { uploadFile } from "@/api/index";
+import ossManage from "@/views/sys/oss-manage/ossManage";
 export default {
   name: "uploadPicInput",
+  components: {
+    ossManage,
+  },
   props: {
     value: String,
     size: {
@@ -86,10 +95,26 @@ export default {
       currentValue: this.value, // 当前值
       loading: false, // 加载状态
       viewImage: false, // 预览图片modal
-      uploadFileUrl: uploadFile // 上传地址
+      uploadFileUrl: uploadFile, // 上传地址
+      picModalFlag: false, // 图片选择器
+      selectedFormBtnName: "", // 点击图片绑定form
+      picIndex: "", // 存储身份证图片下标，方便赋值
     };
   },
   methods: {
+    // 选择图片modal
+    handleCLickImg(val, index) {
+      this.$refs.ossManage.selectImage = true;
+      this.picModalFlag = true;
+      this.selectedFormBtnName = val;
+      this.picIndex = index;
+    },
+    // 图片回显
+    callbackSelected(val) {
+      this.picModalFlag = false;
+      this.currentValue = val.url;
+      this.picIndex = "";
+    },
     // 初始化
     init() {
       this.accessToken = {
@@ -125,6 +150,7 @@ export default {
       this.loading = false;
       if (res.success) {
         this.currentValue = res.result;
+        console.log('this.currentValue', this.currentValue);
         this.$emit("input", this.currentValue);
         this.$emit("on-change", this.currentValue);
       } else {
