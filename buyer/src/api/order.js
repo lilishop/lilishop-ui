@@ -115,3 +115,21 @@ export function getLogisticsCompany () {
     params: { pageNumber: 1, pageSize: 200, disabled: 'OPEN' }
   });
 }
+
+//查询包裹列表
+export const getPackage = (sn) => {
+  return request({
+    url: `/buyer/order/order/getPackage/${sn}`,
+    method: Method.GET,
+    needToken: true,
+  })
+}
+
+//查询物流
+export const getTracesList = (sn, params) => {
+  return request({
+    url: `/buyer/order/order/getTracesList/${sn}`,
+    method: Method.GET,
+    needToken: true,
+  })
+};

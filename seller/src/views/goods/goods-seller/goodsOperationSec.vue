@@ -213,6 +213,11 @@
                             overflow-x: hidden;
                           }
                         ">
+                        <template slot="yujing" slot-scope="{ row }">
+                          <Input v-model="row.yujing" clearable placeholder="请输入库存预警" @on-change="updateSkuTable(row, 'yujing')">
+                          <span slot="append">{{baseInfoForm.goodsUnit || ""}}</span>
+                          </Input>
+                        </template>
                         <template slot="sn" slot-scope="{ row }">
                           <Input v-model="row.sn" clearable placeholder="请输入货号" @on-change="updateSkuTable(row, 'sn')" />
                         </template>
@@ -1416,7 +1421,10 @@ export default {
           key: columnName,
         });
       });
-
+      pushData.push({
+        title: "库存预警",
+        slot: "yujing",
+      });
       // 有成本价和价格的情况
       if (this.baseInfoForm.salesModel !== "WHOLESALE") {
         pushData.push(

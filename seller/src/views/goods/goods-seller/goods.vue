@@ -162,6 +162,9 @@
         <TabPane label="批量规格更新" name="stockAll">
           <Input type="number" v-model="stockAllUpdate" placeholder="统一规格修改" />
         </TabPane>
+        <TabPane label="库存预警更新" name="yujing">
+          <Table class="mt_10" :columns="yujingColumns" :data="stockList" border></Table>
+        </TabPane>
       </Tabs>
 
       <div slot="footer">
@@ -258,6 +261,49 @@ export default {
         sellerName: "",
       },
       updateStockColumns: [
+        {
+          title: "库存预警",
+          key: "sn",
+          minWidth: 120,
+          render: (h, params) => {
+            return h("div", {}, params.row.simpleSpecs);
+          },
+        },
+        {
+          title: "审核状态",
+          key: "authFlag",
+          width: 130,
+          render: (h, params) => {
+            if (params.row.authFlag == "TOBEAUDITED") {
+              return h("Tag", { props: { color: "blue" } }, "待审核");
+            } else if (params.row.authFlag == "PASS") {
+              return h("Tag", { props: { color: "green" } }, "通过");
+            } else if (params.row.authFlag == "REFUSE") {
+              return h("Tag", { props: { color: "red" } }, "审核拒绝");
+            }
+          },
+        },
+        {
+          title: "操作",
+          key: "action",
+          align: "center",
+          width: 200,
+          render: (h, params) => {
+            let vm = this;
+            return h("InputNumber", {
+              props: {
+                value: params.row.quantity,
+              },
+              on: {
+                "on-change": (event) => {
+                  vm.stockList[params.index].quantity = event;
+                },
+              },
+            });
+          },
+        },
+      ],
+      yujingColumns: [
         {
           title: "sku规格",
           key: "sn",

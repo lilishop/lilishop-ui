@@ -141,3 +141,20 @@ export const getReceiptPage = params => {
 export const invoicing = id => {
   return postRequest(`/trade/receipt/${id}/invoicing`);
 };
+
+//查询包裹列表
+export const getPackage = (orderSn) => {
+  return getRequest(`/order/order/getPackage/${orderSn}`);
+}
+
+//分包裹发货
+export const partDelivery = (orderSn,params) => {
+  return postRequest(`/order/order/${orderSn}/partDelivery`,params,{
+    "Content-type": "application/json"
+  })
+}
+
+//查询物流
+export const getTracesList = (sn) => {
+  return getRequest(`/order/order/getTracesList/${sn}`);
+}

@@ -72,6 +72,9 @@
       <p>支付方式：{{ order.paymentMethodValue }}</p>
       <p>付款状态：{{ order.payStatusValue }}</p>
     </div>
+    <div v-if="order.allowOperationVO.showLogistics || orderPackage.length > 0 || logistics">
+      <Button type="info" @click="logisticsList()" size="small">查看物流</Button>
+    </div>
     <div class="order-card" v-if="!order.order.verificationCode">
       <h3>配送信息</h3>
       <p>配送方式：{{ order.deliveryMethodValue }}</p>
@@ -228,6 +231,70 @@
         </Radio>
       </RadioGroup>
     </Modal>
+
+    <!--查询物流-->
+    <Modal v-model="logisticsModal" width="40">
+      <p slot="header"><span>查询物流</span></p>
+      <div class="layui-layer-wrap">
+        <dl>
+          <dt>订单号：</dt>
+          <dd><div class="text-box">{{ order.order.sn }}</div></dd>
+        </dl>
+      </div>
+      <div v-if="orderPackage.length > 0" v-for="(packageItem, packageIndex) in orderPackage" :key="packageIndex">
+        <div class="layui-layer-wrap">
+          <dl><dt>物流公司：</dt>
+            <dd><div class="text-box">{{ packageItem.logisticsName }}</div></dd>
+          </dl>
+          <dl><dt>快递单号：</dt>
+            <dd><div nctype="ordersSn" class="text-box">{{ packageItem.logisticsNo }}</div></dd>
+          </dl>
+          <div class="div-express-log">
+            <ul class="express-log express-log-name">
+              <li v-for="(item, index) in packageItem.orderPackageItemList" :key="index">
+                <span class="time" style="width: 50%;"><span>商品名称：</span><span>{{ item.goodsName }}</span></span>
+                <span class="time" style="width: 30%;"><span>发货时间：</span><span>{{ item.logisticsTime }}</span></span>
+                <span class="time" style="width: 20%;"><span>发货数量：</span><span>{{ item.deliverNumber }}</span></span>
+              </li>
+            </ul>
+            <div class="div-express-log">
+              <ul class="express-log" v-if="packageItem.traces && packageItem.traces.traces">
+                <li v-for="(item, index) in packageItem.traces.traces" :key="index">
+                  <span class="time">{{ item.AcceptTime || item.acceptTime }}</span>
+                  <span class="detail">{{ item.AcceptStation || item.remark }}</span>
+                </li>
+              </ul>
+              <ul class="express-log" v-else><li>暂无物流信息</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-if = "orderPackage.length == 0 && logistics">
+        <div class="layui-layer-wrap">
+          <dl>
+            <dt>物流公司：</dt>
+            <dd><div class="text-box">{{ logistics.shipper }}</div></dd>
+          </dl>
+          <dl>
+            <dt>快递单号：</dt>
+            <dd><div nctype="ordersSn" class="text-box">{{ logistics.logisticCode }}</div></dd>
+          </dl>
+          <div class="div-express-log">
+            <ul class="express-log" v-if="logistics && logistics.traces">
+              <li v-for="(item, index) in logistics.traces" :key="index">
+                <span class="time">{{ item.AcceptTime }}</span>
+                <span class="detail">{{ item.AcceptStation }}</span>
+              </li>
+            </ul>
+            <ul class="express-log" v-else><li>暂无物流信息</li></ul>
+          </div>
+        </div>
+      </div>
+      <div slot="footer" style="text-align: right">
+        <Button @click="logisticsModal = false">取消</Button>
+      </div>
+    </Modal>
+
   </div>
 </template>
 <script>
@@ -236,6 +303,7 @@ import {
   getTraces,
   sureReceived,
   cancelOrder,
+  getPackage
 } from "@/api/order.js";
 import { afterSaleReason } from "@/api/member";
 export default {
@@ -252,6 +320,9 @@ export default {
       },
       cancelAvail: false, // 取消订单modal控制
       cancelReason: [], // 取消订单原因
+      orderPackage: [],
+      packageTraceList: [],
+      logisticsModal: false,
     };
   },
   methods: {
@@ -293,10 +364,18 @@ export default {
           this.order = res.result;
           this.progressList = res.result.orderLogs;
           if (this.order.order.deliveryMethod === 'LOGISTICS') {
+            this.getOrderPackage(this.order.order.sn);
             this.traces();
           }
         }
       });
+    },
+    getOrderPackage(sn) {
+      getPackage(sn).then(res => {
+        if (res.success) {
+          this.orderPackage = res.result
+        }
+      })
     },
     traces() {
       // 物流信息
@@ -305,6 +384,15 @@ export default {
           this.logistics = res.result;
         }
       });
+    },
+    logisticsList() {
+      this.logisticsModal = true;
+      this.packageTraceList = this.orderPackage;
+      // getTracesList(this.order.order.sn).then((res) => {
+      //   if (res.success && res.result != null) {
+      //     this.packageTraceList = res.result;
+      //   }
+      // });
     },
     received(sn) {
       // 确认收货
@@ -479,5 +567,74 @@ table {
 /** 订单进度条 */
 .progress {
   margin: 15px 0;
+}
+
+.div-express-log {
+  max-height: 300px;
+  border: solid 1px #e7e7e7;
+  background: #fafafa;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.express-log {
+  /*margin: 5px -10px 5px 5px;*/
+  padding: 10px;
+  list-style-type: none;
+
+  .time {
+    width: 30%;
+    display: inline-block;
+    float: left;
+  }
+
+  .detail {
+    width: 60%;
+    margin-left: 30px;
+    display: inline-block;
+  }
+
+  li {
+    line-height: 30px;
+  }
+}
+
+.express-log-name {
+  li {
+    display: flex;
+    span  {
+      display: flex;
+    }
+  }
+}
+
+.layui-layer-wrap {
+  dl {
+    border-top: solid 1px #f5f5f5;
+    margin-top: -1px;
+    overflow: hidden;
+
+    dt {
+      font-size: 14px;
+      line-height: 28px;
+      display: inline-block;
+      padding: 8px 1% 8px 0;
+      color: #999;
+    }
+
+    dd {
+      font-size: 14px;
+      line-height: 28px;
+      display: inline-block;
+      padding: 8px 0 8px 8px;
+      border-left: solid 1px #f5f5f5;
+
+      .text-box {
+        line-height: 40px;
+        color: #333;
+        word-break: break-all;
+      }
+    }
+  }
 }
 </style>
