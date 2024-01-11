@@ -77,13 +77,13 @@
               @click="manage(row, 'view')"
               >查看</Button
             >
-            <Button
-              type="error"
-              size="small"
-              v-if="row.promotionStatus != 'START'"
-              @click="remove(row)"
-              >删除</Button
-            >
+            <!--<Button-->
+              <!--type="error"-->
+              <!--size="small"-->
+              <!--v-if="row.promotionStatus != 'START'"-->
+              <!--@click="remove(row)"-->
+              <!--&gt;删除</Button-->
+            <!--&gt;-->
             <Button
               type="success"
               v-if="row.promotionStatus == 'CLOSE'"

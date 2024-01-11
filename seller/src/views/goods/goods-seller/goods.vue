@@ -148,9 +148,9 @@
       title="更新库存"
       v-model="updateStockModalVisible"
       :mask-closable="false"
-      :width="500"
+      :width="610"
     >
-      <Tabs value="updateStock">
+      <Tabs value="updateStock" v-model="updateStockType">
         <TabPane label="手动规格更新" name="updateStock">
           <Table
             class="mt_10"
@@ -162,8 +162,11 @@
         <TabPane label="批量规格更新" name="stockAll">
           <Input type="number" v-model="stockAllUpdate" placeholder="统一规格修改" />
         </TabPane>
-        <TabPane label="库存预警更新" name="yujing">
-          <Table class="mt_10" :columns="yujingColumns" :data="stockList" border></Table>
+        <TabPane label="手动库存预警更新" name="alertQuantity">
+          <Table class="mt_10" :columns="alertQuantityColumns" :data="alertQuantityList" border></Table>
+        </TabPane>
+        <TabPane label="批量库存预警更新" name="alertQuantityAll">
+          <Input type="number" v-model="stockAllAlertQuantity" placeholder="统一库存预警修改" />
         </TabPane>
       </Tabs>
 
@@ -218,6 +221,7 @@ import {
   getGoodsListDataSeller,
   getGoodsSkuListDataSeller,
   updateGoodsSkuStocks,
+  updateGoodsAlertStocks,
   upGoods,
   lowGoods,
   deleteGoods,
@@ -244,6 +248,7 @@ export default {
       logisticsTemplate: [], // 物流列表
       updateStockModalVisible: false, // 更新库存模态框显隐
       stockAllUpdate: undefined, // 更新库存数量
+      stockAllAlertQuantity: undefined, // 更新规格预警数量
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -252,6 +257,7 @@ export default {
         order: "desc", // 默认排序方式
       },
       stockList: [], // 库存列表
+      alertQuantityList: [],  // 库存预警列表
       form: {
         // 添加或编辑表单对象初始化数据
         goodsName: "",
@@ -262,7 +268,7 @@ export default {
       },
       updateStockColumns: [
         {
-          title: "库存预警",
+          title: "sku规格",
           key: "sn",
           minWidth: 120,
           render: (h, params) => {
@@ -303,9 +309,9 @@ export default {
           },
         },
       ],
-      yujingColumns: [
+      alertQuantityColumns: [
         {
-          title: "sku规格",
+          title: "库存预警",
           key: "sn",
           minWidth: 120,
           render: (h, params) => {
@@ -335,11 +341,11 @@ export default {
             let vm = this;
             return h("InputNumber", {
               props: {
-                value: params.row.quantity,
+                value: params.row.alertQuantity,
               },
               on: {
                 "on-change": (event) => {
-                  vm.stockList[params.index].quantity = event;
+                  vm.alertQuantityList[params.index].alertQuantity = event;
                 },
               },
             });
@@ -537,6 +543,7 @@ export default {
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
+      updateStockType: 'updateStock',  // 更新库存状态
     };
   },
   methods: {
@@ -577,8 +584,11 @@ export default {
       getGoodsSkuListDataSeller({ goodsId: id, pageSize: 1000 }).then((res) => {
         if (res.success) {
           this.updateStockModalVisible = true;
+          this.updateStockType = 'updateStock';
           this.stockAllUpdate = undefined;
           this.stockList = res.result.records;
+          this.stockAllAlertQuantity = undefined;
+          this.alertQuantityList = res.result.records;
         }
       });
     },
@@ -631,21 +641,41 @@ export default {
         });
     },
     // 更新库存
-    updateStock() {
-      let updateStockList = this.stockList.map((i) => {
-        let j = { skuId: i.id, quantity: i.quantity };
-        if (this.stockAllUpdate) {
-          j.quantity = this.stockAllUpdate;
-        }
-        return j;
-      });
-      updateGoodsSkuStocks(updateStockList).then((res) => {
-        if (res.success) {
-          this.updateStockModalVisible = false;
-          this.$Message.success("更新库存成功");
-          this.getDataList();
-        }
-      });
+    updateStock () {
+      if (this.updateStockType === 'alertQuantity' || this.updateStockType === 'alertQuantityAll') {
+        // alertQuantity 手动库存预警更新，alertQuantityAll 批量库存预警更新
+        let updateAlertQuantityList = this.alertQuantityList.map((i) => {
+          let j = { skuId: i.id, alertQuantity: i.alertQuantity };
+          if (this.stockAllAlertQuantity) {
+            j.alertQuantity = this.stockAllAlertQuantity;
+          }
+          return j;
+        });
+        updateGoodsAlertStocks(updateAlertQuantityList).then((res) => {
+          if (res.success) {
+            this.updateStockModalVisible = false;
+            this.$Message.success("更新库存预警成功");
+            this.getDataList();
+          }
+        });
+      } else if (this.updateStockType === 'updateStock' || this.updateStockType === 'stockAll') {
+        // updateStock 手动规格更新，stockAll 批量规格更新
+        let updateStockList = this.stockList.map((i) => {
+          let j = { skuId: i.id, quantity: i.quantity };
+          if (this.stockAllUpdate) {
+            j.quantity = this.stockAllUpdate;
+          }
+          return j;
+        });
+        updateGoodsSkuStocks(updateStockList).then((res) => {
+          if (res.success) {
+            this.updateStockModalVisible = false;
+            this.$Message.success("更新库存成功");
+            this.getDataList();
+          }
+        });
+      }
+
     },
     // 改变页码
     changePage(v) {

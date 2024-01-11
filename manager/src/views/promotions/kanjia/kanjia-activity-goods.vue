@@ -111,13 +111,13 @@
             @click="edit(row, 'onlyView')"
             >查看
           </Button>
-          <Button
-            type="error"
-            size="small"
-            style="margin-right: 10px"
-            @click="delAll(row)"
-            >删除
-          </Button>
+          <!--<Button-->
+            <!--type="error"-->
+            <!--size="small"-->
+            <!--style="margin-right: 10px"-->
+            <!--@click="delAll(row)"-->
+            <!--&gt;删除-->
+          <!--</Button>-->
         </template>
       </Table>
       <Row type="flex" justify="end" class="page">

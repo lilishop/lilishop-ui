@@ -99,16 +99,16 @@
             @click="close(row)"
             >关闭
           </Button>
-          <Button
-            class="ml_5"
-            v-if="
-              row.promotionStatus === 'CLOSE' || row.promotionStatus === 'END'
-            "
-            type="error"
-            size="small"
-            @click="remove(row)"
-            >删除
-          </Button>
+          <!--<Button-->
+            <!--class="ml_5"-->
+            <!--v-if="-->
+              <!--row.promotionStatus === 'CLOSE' || row.promotionStatus === 'END'-->
+            <!--"-->
+            <!--type="error"-->
+            <!--size="small"-->
+            <!--@click="remove(row)"-->
+            <!--&gt;删除-->
+          <!--</Button>-->
           <Button
             style="margin: 5px"
             type="info"
@@ -286,7 +286,7 @@ export default {
           slot: "action",
           align: "center",
           fixed: "right",
-          width: 150,
+          width: 250,
         },
       ],
       data: [], // 表单数据

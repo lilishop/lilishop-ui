@@ -231,6 +231,13 @@ export const updateGoodsSkuStocks = params => {
     "Content-Type": "application/json"
   });
 };
+// 更新商品库存预警
+export const updateGoodsAlertStocks = params => {
+  return putRequest("/goods/goods/update/alert/stocks", params, {
+    "Content-Type": "application/json"
+  });
+};
+
 //  获取商品分页列表
 export const getGoodsListDataSeller = params => {
   return getRequest("/goods/goods/list", params);

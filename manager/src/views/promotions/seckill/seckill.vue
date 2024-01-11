@@ -93,14 +93,14 @@
                 >关闭</Button
               >
               &nbsp;
-              <Button
-                type="error"
-                size="small"
-                v-if="row.promotionStatus == 'CLOSE' || row.promotionStatus == 'END'"
-                ghost
-                @click="expire(row)"
-                >删除</Button
-              >
+              <!--<Button-->
+                <!--type="error"-->
+                <!--size="small"-->
+                <!--v-if="row.promotionStatus == 'CLOSE' || row.promotionStatus == 'END'"-->
+                <!--ghost-->
+                <!--@click="expire(row)"-->
+                <!--&gt;删除</Button-->
+              <!--&gt;-->
             </template>
           </Table>
 

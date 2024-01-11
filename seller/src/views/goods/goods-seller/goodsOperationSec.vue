@@ -213,8 +213,8 @@
                             overflow-x: hidden;
                           }
                         ">
-                        <template slot="yujing" slot-scope="{ row }">
-                          <Input v-model="row.yujing" clearable placeholder="请输入库存预警" @on-change="updateSkuTable(row, 'yujing')">
+                        <template slot="alertQuantity" slot-scope="{ row }">
+                          <Input v-model="row.alertQuantity" clearable placeholder="请输入库存预警" @on-change="updateSkuTable(row, 'alertQuantity')">
                           <span slot="append">{{baseInfoForm.goodsUnit || ""}}</span>
                           </Input>
                         </template>
@@ -644,6 +644,7 @@ export default {
         "price",
         "weight",
         "quantity",
+        "alertQuantity",
         "specId",
         "specValueId",
       ],
@@ -1057,6 +1058,7 @@ export default {
           price: e.price,
           // cost: e.cost,
           quantity: e.quantity,
+          alertQuantity: e.alertQuantity,
           weight: e.weight,
         };
         e.specList.forEach((u) => {
@@ -1360,6 +1362,7 @@ export default {
               find.sn && (find.sn = "");
               // find.cost && (find.cost = "");
               find.quantity && (find.quantity = "");
+              find.alertQuantity && (find.alertQuantity = "");
               find.weight && (find.weight = "");
 
               this.skuTableData.splice(this.skuTableData.length, 0, find);
@@ -1374,6 +1377,7 @@ export default {
               find.sn && (find.sn = "");
               // find.cost && (find.cost = "");
               find.quantity && (find.quantity = "");
+              find.alertQuantity && (find.alertQuantity = "");
               find.weight && (find.weight = "");
 
               this.skuTableData.splice(index, 0, find);
@@ -1421,10 +1425,7 @@ export default {
           key: columnName,
         });
       });
-      pushData.push({
-        title: "库存预警",
-        slot: "yujing",
-      });
+
       // 有成本价和价格的情况
       if (this.baseInfoForm.salesModel !== "WHOLESALE") {
         pushData.push(
@@ -1458,11 +1459,14 @@ export default {
           slot: "weight",
         });
       }
-
       pushData.push(
         {
           title: "库存",
           slot: "quantity",
+        },
+        {
+          title: "库存预警",
+          slot: "alertQuantity",
         },
         {
           title: "货号",
@@ -1510,6 +1514,7 @@ export default {
               id: skus[index].id,
               sn: skus[index].sn,
               quantity: skus[index].quantity,
+              alertQuantity: skus[index].alertQuantity,
               cost: 1,
               price: skus[index].price,
               [spec[0].name]: specItem.value,
@@ -1591,7 +1596,18 @@ export default {
           this.validatatxt = "请输入0~99999999之间的整数";
           return;
         }
-      } 
+      } else if (item === "alertQuantity") {
+        if (
+          !/^[0-9]\d*$/.test(row[item]) ||
+          parseInt(row[item]) < 0 ||
+          parseInt(row[item]) > 99999999
+        ) {
+          // 库存预警
+          this.validateError.push([index, item]);
+          this.validatatxt = "请输入0~99999999之间的整数";
+          return;
+        }
+      }
       // else if (item === "cost" || item === "price") {
       //   if (
       //     !regular.money.test(row[item]) ||
@@ -1684,6 +1700,7 @@ export default {
               cost: 1,
               price: sku.price,
               quantity: sku.quantity,
+              alertQuantity: sku.alertQuantity,
               sn: sku.sn,
               images: sku.images,
             };
