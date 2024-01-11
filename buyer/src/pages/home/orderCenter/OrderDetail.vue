@@ -257,7 +257,7 @@
                 <span class="time" style="width: 20%;"><span>发货数量：</span><span>{{ item.deliverNumber }}</span></span>
               </li>
             </ul>
-            <div class="div-express-log">
+            <div class="div-express-log" style="overflow: hidden;">
               <ul class="express-log" v-if="packageItem.traces && packageItem.traces.traces">
                 <li v-for="(item, index) in packageItem.traces.traces" :key="index">
                   <span class="time">{{ item.AcceptTime || item.acceptTime }}</span>
@@ -568,6 +568,53 @@ table {
 .progress {
   margin: 15px 0;
 }
+
+.layui-layer-wrap {
+  dl {
+    border-top: solid 1px #f5f5f5;
+    margin-top: -1px;
+    overflow: hidden;
+
+    dt {
+      font-size: 14px;
+      line-height: 28px;
+      display: inline-block;
+      padding: 8px 1% 8px 0;
+      color: #999;
+    }
+
+    dd {
+      font-size: 14px;
+      line-height: 28px;
+      display: inline-block;
+      padding: 8px 0 8px 8px;
+      border-left: solid 1px #f5f5f5;
+
+      .text-box {
+        line-height: 40px;
+        color: #333;
+        word-break: break-all;
+      }
+    }
+  }
+}
+
+.layui-layer-wrap > .div-express-log {
+  max-height: 300px;
+}
+/deep/ .layui-layer-wrap > .div-express-log::-webkit-scrollbar{
+  width: 1px;
+  height: 5px;
+}
+/deep/ .layui-layer-wrap > .div-express-log::-webkit-scrollbar-thumb{
+  border-radius: 1em;
+  background-color: rgba(50,50,50,.3);
+}
+/deep/ .layui-layer-wrap > .div-express-log::-webkit-scrollbar-track{
+  border-radius: 1em;
+  background-color: rgba(50,50,50,.1);
+}
+
 
 .div-express-log {
   max-height: 300px;
