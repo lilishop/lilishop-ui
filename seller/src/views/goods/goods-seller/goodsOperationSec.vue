@@ -178,9 +178,9 @@
                               <FormItem v-for="(val, index) in item.spec_values" :key="index"
                                 class="sku-item-content-val flex" label="规格项">
                                 <AutoComplete ref="input" v-model="val.value" :data="skuVal" :filter-method="filterMethod"
-                                  :maxlength="30" placeholder="请输入规格项" style="width: 150px"
+                                  :maxlength="10" placeholder="请输入规格项" style="width: 150px"
                                   @on-focus="changeSkuVals(val, item.name)" @on-blur="checkSkuVal(val, index)"
-                                  @on-change="skuValueChange(val, index, item)">
+                                  @on-change="skuValueChange(val, index, item, $index)">
                                 </AutoComplete>
                                 <Button size="small" style="margin-left: 10px" type="primary"
                                   @click="handleCloseSkuValue(val, index, item)">
@@ -196,6 +196,7 @@
                         </Card>
                       </div>
                     </Form>
+                    {{skuInfo}}
                     <Button class="add-sku-btn" size="small" type="primary" @click="addSkuItem">添加规格项
                     </Button>
                     &nbsp;
@@ -1220,18 +1221,47 @@ export default {
       }
       return len;
     },
+    truncateString(str) {
+      let len = str.length; // 获取原始字符串的长度
+      if (len <= 10 && /^[\u4e00-\u9fa5]+$/.test(str)) { // 判断字符串长度小于等于10且只包含中文时直接返回原字符串
+        return str;
+      } else {
+        let count = 0; // 记录已经统计的字节数（UTF-8编码）
+        for (let i = 0; i < len; i++) {
+          let charCode = str.charCodeAt(i);
+          if ((charCode >= 0x0001 && charCode <= 0x007F) || (charCode >= 0xFF60 && charCode <= 0xFF9F)) { // ASCII字符或全角字符
+            count += 1;
+          } else {
+            count += 2; // UTF-8编码中非ASCII字符占两个字节
+          }
+          if (count > 10 * 2) { // 当已经统计的字节数大于10*2时，说明已经达到了限制条件
+            break;
+          }
+        }
+        console.log('根据统计得到的字节数进行切片并返回结果', str, str.substr(0, Math.floor((count - 1) / 2)));
+        return str.substr(0, Math.floor((count - 1) / 2)); // 根据统计得到的字节数进行切片并返回结果
+      }
+    },
     // 编辑规格值
-    skuValueChange(val, index, item) {
+    skuValueChange(val, index, item, $index) {
+      if (this.zz(0, val.value) > 20) {
+        this.$Message.error("规格值最多十个字符长度！");
+        // val.value = val.value.toString().slice(0, 4);
+        this.$forceUpdate();// 调用该方法会触发组件的重新渲染
+        // val.value = this.truncateString(val.value);
+        this.skuInfo[$index].spec_values[index].value = this.truncateString(val.value);
+        // this.$set(this.skuInfo[$index].spec_values[index], 'value', this.truncateString(val.value));
+        // this.$set(item, 'value', this.truncateString(val.value));
+        this.$forceUpdate();// 调用该方法会触发组件的重新渲染
+        return;
+      }
+      console.log('编辑规格值改变', item);
       if (this.skuTableData.find((i) => i[val.name] === val.value)) {
         this.$Message.error("已存在相同规格值！");
         return;
       }
       if (val.value === '') {
         this.$Message.error("规格值不能为空！");
-        return;
-      }
-      if (this.zz(0, val.value) > 20) {
-        this.$Message.error("规格值最多十个字符长度！");
         return;
       }
       let curVal = this.currentSkuVal;
@@ -1437,7 +1467,7 @@ export default {
           key: columnName,
         });
       });
-
+      console.log('渲染头部', this.skuInfo);
       // 有成本价和价格的情况
       if (this.baseInfoForm.salesModel !== "WHOLESALE") {
         pushData.push(
