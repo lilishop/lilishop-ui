@@ -688,12 +688,12 @@ export default {
     // 局部刷新
     refresh(v){
       if( v == 'template'){
-        this.GET_ShipTemplate()
+        this.GET_ShipTemplate('localRefresh');
       }else if( v == 'goodsUnit'){
         this.goodsUnitList = []
-        this.GET_GoodsUnit()
+        this.GET_GoodsUnit('localRefresh');
       }else{
-        this.getGoodsBrandList()
+        this.getGoodsBrandList('localRefresh');
       }
     },
     getImages(v) {
@@ -942,20 +942,32 @@ export default {
     },
 
     /** 查询商品品牌列表 */
-    getGoodsBrandList() {
+    getGoodsBrandList(type) {
       API_GOODS.getCategoryBrandListDataSeller(this.categoryId).then(
         (response) => {
           this.brandList = response;
+          if(type === 'localRefresh') {
+            this.$Message.success("刷新成功");
+          }
         }
-      );
+      ).catch(() => {
+        if(type === 'localRefresh') {
+          this.$Message.error("刷新失败，请重试");
+        }
+      });
     },
 
     // 获取商品单位
-    GET_GoodsUnit() {
+    GET_GoodsUnit(type) {
       API_GOODS.getGoodsUnitList(this.params).then((res) => {
         if (res.success) {
           this.goodsUnitList.push(...res.result.records.map((i) => i.name));
           this.total = res.result.total;
+        }
+        if (type === 'localRefresh' && res.success) {
+          this.$Message.success("刷新成功");
+        } else if(type === 'localRefresh') {
+          this.$Message.error("刷新失败，请重试");
         }
       });
     },
@@ -1809,11 +1821,16 @@ export default {
         }
       });
     },
-    GET_ShipTemplate(){
+    GET_ShipTemplate(type){
        // 获取物流模板
        API_Shop.getShipTemplate().then((res) => {
       if (res.success) {
         this.logisticsTemplate = res.result;
+      }
+      if (type === 'localRefresh' && res.success) {
+        this.$Message.success("刷新成功");
+      } else if(type === 'localRefresh') {
+        this.$Message.error("刷新失败，请重试");
       }
     });
     }     
