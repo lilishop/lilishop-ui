@@ -1197,18 +1197,10 @@ export default {
         this.$Message.error("已存在相同规格项！");
         return;
       }
-      // if (this.zz(0, val) > 20) {
-      //   this.$Message.error("规格项最多十个字符长度！");
-      //   return;
-      // }
       if (this.zz(0, val) > 20) {
         this.$Message.error("规格值最多十个字符长度！");
         // val = val.toString().slice(0, 4);
-        this.$forceUpdate();// 调用该方法会触发组件的重新渲染
-        // val = this.truncateString(val);
-        this.skuInfo[index].name = this.truncateString(val);
-        // this.$set(this.skuInfo[$index].spec_values[index], 'value', this.truncateString(val));
-        // this.$set(item, 'value', this.truncateString(val));
+        this.skuInfo[index].name = this.countCharacters(val, 10);
         this.$forceUpdate();// 调用该方法会触发组件的重新渲染
         // return;
       }
@@ -1232,26 +1224,25 @@ export default {
       }
       return len;
     },
-    truncateString(str) {
-      let len = str.length; // 获取原始字符串的长度
-      if (len <= 10 && /^[\u4e00-\u9fa5]+$/.test(str)) { // 判断字符串长度小于等于10且只包含中文时直接返回原字符串
+    countCharacters (defaultStr, defaultNum) {
+      let str = '' + defaultStr || '',
+        num = + defaultNum || 0,
+        res = '',
+        length = 0;
+      if (!str || !num) {
         return str;
-      } else {
-        let count = 0; // 记录已经统计的字节数（UTF-8编码）
-        for (let i = 0; i < len; i++) {
-          let charCode = str.charCodeAt(i);
-          if ((charCode >= 0x0001 && charCode <= 0x007F) || (charCode >= 0xFF60 && charCode <= 0xFF9F)) { // ASCII字符或全角字符
-            count += 1;
-          } else {
-            count += 2; // UTF-8编码中非ASCII字符占两个字节
-          }
-          if (count > 10 * 2) { // 当已经统计的字节数大于10*2时，说明已经达到了限制条件
-            break;
-          }
-        }
-        // console.log('根据统计得到的字节数进行切片并返回结果', str, str.substr(0, Math.floor((count - 1) / 2)));
-        return str.substr(0, Math.floor((count + 1) / 2)); // 根据统计得到的字节数进行切片并返回结果
       }
+      // 循环字符串，判断长度 最少也会返回一个字
+      for (const i in str) {
+        res += str[i];
+        // 测试长度
+        length += /[\u4e00-\u9fa5]/.test(str[i]) ? 2 : 1;
+        // 如果长度大于设置长度 或者 循环到最后则终止循环
+        if (length >= num || +i == str.length - 1) {
+          break;
+        }
+      }
+      return res;
     },
     // 编辑规格值
     skuValueChange(val, index, item, $index) {
@@ -1266,18 +1257,10 @@ export default {
       if (this.zz(0, val.value) > 20) {
         this.$Message.error("规格值最多十个字符长度！");
         // val.value = val.value.toString().slice(0, 4);
-        this.$forceUpdate();// 调用该方法会触发组件的重新渲染
-        // val.value = this.truncateString(val.value);
-        this.skuInfo[$index].spec_values[index].value = this.truncateString(val.value);
-        // this.$set(this.skuInfo[$index].spec_values[index], 'value', this.truncateString(val.value));
-        // this.$set(item, 'value', this.truncateString(val.value));
+        this.skuInfo[$index].spec_values[index].value = this.countCharacters(val.value, 10);
         this.$forceUpdate();// 调用该方法会触发组件的重新渲染
         // return;
       }
-      // console.log('编辑规格值改变', item);
-
-
-
       let curVal = this.currentSkuVal;
       this.skuTableData = this.skuTableData.map((e) => {
         if (e[val.name] === curVal) {
