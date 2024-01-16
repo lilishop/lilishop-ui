@@ -52,7 +52,7 @@
                 <div class="hover-color" @click="goodsDetail(goods.skuId, goods.goodsId)">{{ goods.name }}</div>
                 <div class="mt_10">
                   <span class="global_color">{{ goods.goodsPrice | unitPrice("￥") }} </span>x {{ goods.num }}
-                  <span style="margin-left: 10px;color: #ff9900;">{{refundPriceList(goods.isRefund)}}&nbsp;{{ goods.refundPrice | unitPrice("￥") }}</span>
+                  <span style="margin-left: 10px;color: #ff9900;">{{refundPriceList(goods.isRefund)}}</span>
                 </div>
                 <Button v-if="goods.commentStatus == 'UNFINISHED'" @click="comment(order.sn, goodsIndex)" size="small" type="success" class="fontsize_12" style="position:relative;top:-22px;left:190px;margin-right:10px">评价</Button>
                 <Button v-if="goods.complainStatus == 'NO_APPLY'" @click="complain(order.sn, goodsIndex)" type="warning" class="fontsize_12" size="small" style="position:relative;top:-22px;left:190px">投诉</Button>
@@ -162,11 +162,11 @@ export default {
         case 'PART_REFUND':
           return "部分退款";
         case 'NO_REFUND':
-          return "未退款";
+          return "";
         case 'REFUNDING':
           return "退款中";
         default:
-          return "未退款";
+          return "";
       }
     },
     goodsDetail (skuId, goodsId) {
