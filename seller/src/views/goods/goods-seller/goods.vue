@@ -162,12 +162,12 @@
         <TabPane label="批量规格更新" name="stockAll">
           <Input type="number" v-model="stockAllUpdate" placeholder="统一规格修改" />
         </TabPane>
-        <TabPane label="手动库存预警更新" name="alertQuantity">
-          <Table class="mt_10" :columns="alertQuantityColumns" :data="alertQuantityList" border></Table>
-        </TabPane>
-        <TabPane label="批量库存预警更新" name="alertQuantityAll">
-          <Input type="number" v-model="stockAllAlertQuantity" placeholder="统一库存预警修改" />
-        </TabPane>
+        <!--<TabPane label="手动库存预警更新" name="alertQuantity">-->
+          <!--<Table class="mt_10" :columns="alertQuantityColumns" :data="alertQuantityList" border></Table>-->
+        <!--</TabPane>-->
+        <!--<TabPane label="批量库存预警更新" name="alertQuantityAll">-->
+          <!--<Input type="number" v-model="stockAllAlertQuantity" placeholder="统一库存预警修改" />-->
+        <!--</TabPane>-->
       </Tabs>
 
       <div slot="footer">

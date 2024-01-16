@@ -213,11 +213,11 @@
                             overflow-x: hidden;
                           }
                         ">
-                        <template slot="alertQuantity" slot-scope="{ row }">
-                          <Input v-model="row.alertQuantity" clearable placeholder="请输入库存预警" @on-change="updateSkuTable(row, 'alertQuantity')">
-                          <span slot="append">{{baseInfoForm.goodsUnit || ""}}</span>
-                          </Input>
-                        </template>
+                        <!--<template slot="alertQuantity" slot-scope="{ row }">-->
+                          <!--<Input v-model="row.alertQuantity" clearable placeholder="请输入库存预警" @on-change="updateSkuTable(row, 'alertQuantity')">-->
+                          <!--<span slot="append">{{baseInfoForm.goodsUnit || ""}}</span>-->
+                          <!--</Input>-->
+                        <!--</template>-->
                         <template slot="sn" slot-scope="{ row }">
                           <Input v-model="row.sn" clearable placeholder="请输入货号" @on-change="updateSkuTable(row, 'sn')" />
                         </template>
@@ -644,7 +644,7 @@ export default {
         "price",
         "weight",
         "quantity",
-        "alertQuantity",
+        // "alertQuantity",
         "specId",
         "specValueId",
       ],
@@ -1058,7 +1058,7 @@ export default {
           price: e.price,
           // cost: e.cost,
           quantity: e.quantity,
-          alertQuantity: e.alertQuantity,
+          // alertQuantity: e.alertQuantity,
           weight: e.weight,
         };
         e.specList.forEach((u) => {
@@ -1362,7 +1362,7 @@ export default {
               find.sn && (find.sn = "");
               // find.cost && (find.cost = "");
               find.quantity && (find.quantity = "");
-              find.alertQuantity && (find.alertQuantity = "");
+              // find.alertQuantity && (find.alertQuantity = "");
               find.weight && (find.weight = "");
 
               this.skuTableData.splice(this.skuTableData.length, 0, find);
@@ -1377,7 +1377,7 @@ export default {
               find.sn && (find.sn = "");
               // find.cost && (find.cost = "");
               find.quantity && (find.quantity = "");
-              find.alertQuantity && (find.alertQuantity = "");
+              // find.alertQuantity && (find.alertQuantity = "");
               find.weight && (find.weight = "");
 
               this.skuTableData.splice(index, 0, find);
@@ -1464,10 +1464,10 @@ export default {
           title: "库存",
           slot: "quantity",
         },
-        {
-          title: "库存预警",
-          slot: "alertQuantity",
-        },
+        // {
+        //   title: "库存预警",
+        //   slot: "alertQuantity",
+        // },
         {
           title: "货号",
           slot: "sn",
@@ -1514,7 +1514,7 @@ export default {
               id: skus[index].id,
               sn: skus[index].sn,
               quantity: skus[index].quantity,
-              alertQuantity: skus[index].alertQuantity,
+              // alertQuantity: skus[index].alertQuantity,
               cost: 1,
               price: skus[index].price,
               [spec[0].name]: specItem.value,
@@ -1596,18 +1596,19 @@ export default {
           this.validatatxt = "请输入0~99999999之间的整数";
           return;
         }
-      } else if (item === "alertQuantity") {
-        if (
-          !/^[0-9]\d*$/.test(row[item]) ||
-          parseInt(row[item]) < 0 ||
-          parseInt(row[item]) > 99999999
-        ) {
-          // 库存预警
-          this.validateError.push([index, item]);
-          this.validatatxt = "请输入0~99999999之间的整数";
-          return;
-        }
       }
+      // else if (item === "alertQuantity") {
+      //   if (
+      //     !/^[0-9]\d*$/.test(row[item]) ||
+      //     parseInt(row[item]) < 0 ||
+      //     parseInt(row[item]) > 99999999
+      //   ) {
+      //     // 库存预警
+      //     this.validateError.push([index, item]);
+      //     this.validatatxt = "请输入0~99999999之间的整数";
+      //     return;
+      //   }
+      // }
       // else if (item === "cost" || item === "price") {
       //   if (
       //     !regular.money.test(row[item]) ||
@@ -1700,7 +1701,7 @@ export default {
               cost: 1,
               price: sku.price,
               quantity: sku.quantity,
-              alertQuantity: sku.alertQuantity,
+              // alertQuantity: sku.alertQuantity,
               sn: sku.sn,
               images: sku.images,
             };
