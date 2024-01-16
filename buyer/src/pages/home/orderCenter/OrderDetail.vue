@@ -30,6 +30,7 @@
         size="small"
         >取消订单</Button
       >
+      <Button v-if="order.allowOperationVO.showLogistics || orderPackage.length > 0 || logistics" type="info" @click="logisticsList()" size="small">查看物流</Button>
     </Card>
     <p class="verificationCode" v-if="order.order.verificationCode">
       核验码：<span>{{ order.order.verificationCode }}</span>
@@ -71,9 +72,6 @@
       <h3>付款信息</h3>
       <p>支付方式：{{ order.paymentMethodValue }}</p>
       <p>付款状态：{{ order.payStatusValue }}</p>
-    </div>
-    <div v-if="order.allowOperationVO.showLogistics || orderPackage.length > 0 || logistics">
-      <Button type="info" @click="logisticsList()" size="small">查看物流</Button>
     </div>
     <div class="order-card" v-if="!order.order.verificationCode">
       <h3>配送信息</h3>
