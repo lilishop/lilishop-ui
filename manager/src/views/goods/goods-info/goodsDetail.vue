@@ -226,7 +226,7 @@ export default {
               title: "价格",
               key: "price",
               render: (h, params) => {
-                return h("priceColorScheme", {props:{alue:params.row.price,color:this.$mainColor}} );
+                return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
               },
             },{
               title: "库存",
