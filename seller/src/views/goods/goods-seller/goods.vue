@@ -162,12 +162,6 @@
         <TabPane label="批量规格更新" name="stockAll">
           <Input type="number" v-model="stockAllUpdate" placeholder="统一规格修改" />
         </TabPane>
-        <TabPane label="手动库存预警更新" name="alertQuantity">
-          <Table class="mt_10" :columns="alertQuantityColumns" :data="alertQuantityList" border></Table>
-        </TabPane>
-        <TabPane label="批量库存预警更新" name="alertQuantityAll">
-          <Input type="number" v-model="stockAllAlertQuantity" placeholder="统一库存预警修改" />
-        </TabPane>
       </Tabs>
 
       <div slot="footer">
@@ -221,7 +215,6 @@ import {
   getGoodsListDataSeller,
   getGoodsSkuListDataSeller,
   updateGoodsSkuStocks,
-  updateGoodsAlertStocks,
   upGoods,
   lowGoods,
   deleteGoods,
@@ -248,7 +241,6 @@ export default {
       logisticsTemplate: [], // 物流列表
       updateStockModalVisible: false, // 更新库存模态框显隐
       stockAllUpdate: undefined, // 更新库存数量
-      stockAllAlertQuantity: undefined, // 更新规格预警数量
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -257,7 +249,6 @@ export default {
         order: "desc", // 默认排序方式
       },
       stockList: [], // 库存列表
-      alertQuantityList: [],  // 库存预警列表
       form: {
         // 添加或编辑表单对象初始化数据
         goodsName: "",
@@ -303,49 +294,6 @@ export default {
               on: {
                 "on-change": (event) => {
                   vm.stockList[params.index].quantity = event;
-                },
-              },
-            });
-          },
-        },
-      ],
-      alertQuantityColumns: [
-        {
-          title: "库存预警",
-          key: "sn",
-          minWidth: 120,
-          render: (h, params) => {
-            return h("div", {}, params.row.simpleSpecs);
-          },
-        },
-        {
-          title: "审核状态",
-          key: "authFlag",
-          width: 130,
-          render: (h, params) => {
-            if (params.row.authFlag == "TOBEAUDITED") {
-              return h("Tag", { props: { color: "blue" } }, "待审核");
-            } else if (params.row.authFlag == "PASS") {
-              return h("Tag", { props: { color: "green" } }, "通过");
-            } else if (params.row.authFlag == "REFUSE") {
-              return h("Tag", { props: { color: "red" } }, "审核拒绝");
-            }
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          width: 200,
-          render: (h, params) => {
-            let vm = this;
-            return h("InputNumber", {
-              props: {
-                value: params.row.alertQuantity,
-              },
-              on: {
-                "on-change": (event) => {
-                  vm.alertQuantityList[params.index].alertQuantity = event;
                 },
               },
             });
@@ -587,8 +535,6 @@ export default {
           this.updateStockType = 'updateStock';
           this.stockAllUpdate = undefined;
           this.stockList = res.result.records;
-          this.stockAllAlertQuantity = undefined;
-          this.alertQuantityList = res.result.records;
         }
       });
     },
@@ -642,23 +588,7 @@ export default {
     },
     // 更新库存
     updateStock () {
-      if (this.updateStockType === 'alertQuantity' || this.updateStockType === 'alertQuantityAll') {
-        // alertQuantity 手动库存预警更新，alertQuantityAll 批量库存预警更新
-        let updateAlertQuantityList = this.alertQuantityList.map((i) => {
-          let j = { skuId: i.id, alertQuantity: i.alertQuantity };
-          if (this.stockAllAlertQuantity) {
-            j.alertQuantity = this.stockAllAlertQuantity;
-          }
-          return j;
-        });
-        updateGoodsAlertStocks(updateAlertQuantityList).then((res) => {
-          if (res.success) {
-            this.updateStockModalVisible = false;
-            this.$Message.success("更新库存预警成功");
-            this.getDataList();
-          }
-        });
-      } else if (this.updateStockType === 'updateStock' || this.updateStockType === 'stockAll') {
+      if (this.updateStockType === 'updateStock' || this.updateStockType === 'stockAll') {
         // updateStock 手动规格更新，stockAll 批量规格更新
         let updateStockList = this.stockList.map((i) => {
           let j = { skuId: i.id, quantity: i.quantity };

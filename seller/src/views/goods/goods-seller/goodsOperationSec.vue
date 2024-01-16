@@ -213,11 +213,6 @@
                             overflow-x: hidden;
                           }
                         ">
-                        <template slot="alertQuantity" slot-scope="{ row }">
-                          <Input v-model="row.alertQuantity" clearable placeholder="请输入库存预警" @on-change="updateSkuTable(row, 'alertQuantity')">
-                          <span slot="append">{{baseInfoForm.goodsUnit || ""}}</span>
-                          </Input>
-                        </template>
                         <template slot="sn" slot-scope="{ row }">
                           <Input v-model="row.sn" clearable placeholder="请输入货号" @on-change="updateSkuTable(row, 'sn')" />
                         </template>
