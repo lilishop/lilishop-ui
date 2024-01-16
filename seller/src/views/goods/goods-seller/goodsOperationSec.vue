@@ -196,7 +196,7 @@
                         </Card>
                       </div>
                     </Form>
-                    {{skuInfo}}
+                    <!--{{skuInfo}}-->
                     <Button class="add-sku-btn" size="small" type="primary" @click="addSkuItem">添加规格项
                     </Button>
                     &nbsp;
@@ -1197,9 +1197,20 @@ export default {
         this.$Message.error("已存在相同规格项！");
         return;
       }
+      // if (this.zz(0, val) > 20) {
+      //   this.$Message.error("规格项最多十个字符长度！");
+      //   return;
+      // }
       if (this.zz(0, val) > 20) {
-        this.$Message.error("规格项最多十个字符长度！");
-        return;
+        this.$Message.error("规格值最多十个字符长度！");
+        // val = val.toString().slice(0, 4);
+        this.$forceUpdate();// 调用该方法会触发组件的重新渲染
+        // val = this.truncateString(val);
+        this.skuInfo[index].name = this.truncateString(val);
+        // this.$set(this.skuInfo[$index].spec_values[index], 'value', this.truncateString(val));
+        // this.$set(item, 'value', this.truncateString(val));
+        this.$forceUpdate();// 调用该方法会触发组件的重新渲染
+        // return;
       }
       this.skuTableData = this.skuTableData.map((e) => {
         e[val] = e[this.currentSkuItem];
@@ -1238,12 +1249,20 @@ export default {
             break;
           }
         }
-        console.log('根据统计得到的字节数进行切片并返回结果', str, str.substr(0, Math.floor((count - 1) / 2)));
-        return str.substr(0, Math.floor((count - 1) / 2)); // 根据统计得到的字节数进行切片并返回结果
+        // console.log('根据统计得到的字节数进行切片并返回结果', str, str.substr(0, Math.floor((count - 1) / 2)));
+        return str.substr(0, Math.floor((count + 1) / 2)); // 根据统计得到的字节数进行切片并返回结果
       }
     },
     // 编辑规格值
     skuValueChange(val, index, item, $index) {
+      if (this.skuTableData.find((i) => i[val.name] === val.value)) {
+        this.$Message.error("已存在相同规格值！");
+        return;
+      }
+      if (val.value === '') {
+        this.$Message.error("规格值不能为空！");
+        return;
+      }
       if (this.zz(0, val.value) > 20) {
         this.$Message.error("规格值最多十个字符长度！");
         // val.value = val.value.toString().slice(0, 4);
@@ -1253,17 +1272,12 @@ export default {
         // this.$set(this.skuInfo[$index].spec_values[index], 'value', this.truncateString(val.value));
         // this.$set(item, 'value', this.truncateString(val.value));
         this.$forceUpdate();// 调用该方法会触发组件的重新渲染
-        return;
+        // return;
       }
-      console.log('编辑规格值改变', item);
-      if (this.skuTableData.find((i) => i[val.name] === val.value)) {
-        this.$Message.error("已存在相同规格值！");
-        return;
-      }
-      if (val.value === '') {
-        this.$Message.error("规格值不能为空！");
-        return;
-      }
+      // console.log('编辑规格值改变', item);
+
+
+
       let curVal = this.currentSkuVal;
       this.skuTableData = this.skuTableData.map((e) => {
         if (e[val.name] === curVal) {
@@ -1467,7 +1481,6 @@ export default {
           key: columnName,
         });
       });
-      console.log('渲染头部', this.skuInfo);
       // 有成本价和价格的情况
       if (this.baseInfoForm.salesModel !== "WHOLESALE") {
         pushData.push(
