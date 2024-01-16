@@ -38,6 +38,7 @@
             type="primary"
             @click="
               goodsData = [];
+              goodsParams.pageNumber = 1;
               getQueryGoodsList();
             "
             icon="ios-search"
