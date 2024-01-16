@@ -1460,10 +1460,6 @@ export default {
           slot: "quantity",
         },
         {
-          title: "库存预警",
-          slot: "alertQuantity",
-        },
-        {
           title: "货号",
           slot: "sn",
         },

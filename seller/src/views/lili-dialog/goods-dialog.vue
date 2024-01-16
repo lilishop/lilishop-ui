@@ -4,14 +4,14 @@
       <div class="query-wrapper">
         <div class="query-item">
           <div>搜索范围</div>
-          <Input placeholder="商品名称" @on-clear="goodsData=[]; goodsParams.goodsName='';  getQueryGoodsList()" @on-enter="()=>{goodsData=[]; getQueryGoodsList();}" clearable style="width: 150px"
+          <Input placeholder="商品名称" @on-clear="goodsData=[]; goodsParams.goodsName=''; goodsParams.pageNumber = 1;  getQueryGoodsList()" @on-enter="()=>{goodsData=[]; goodsParams.pageNumber = 1; getQueryGoodsList();}" clearable style="width: 150px"
             v-model="goodsParams.goodsName" />
         </div>
         <div class="query-item">
           <Cascader v-model="category" placeholder="请选择商品分类" style="width: 150px" :data="cateList"></Cascader>
         </div>
         <div class="query-item">
-          <Button type="primary" @click="goodsData=[]; getQueryGoodsList();" icon="ios-search">搜索</Button>
+          <Button type="primary" @click="goodsData=[]; goodsParams.pageNumber = 1; getQueryGoodsList();" icon="ios-search">搜索</Button>
         </div>
       </div>
       <div >
