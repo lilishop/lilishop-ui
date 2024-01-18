@@ -178,9 +178,9 @@
                               <FormItem v-for="(val, index) in item.spec_values" :key="index"
                                 class="sku-item-content-val flex" label="规格项">
                                 <AutoComplete ref="input" v-model="val.value" :data="skuVal" :filter-method="filterMethod"
-                                  :maxlength="30" placeholder="请输入规格项" style="width: 150px"
+                                  :maxlength="10" placeholder="请输入规格项" style="width: 150px"
                                   @on-focus="changeSkuVals(val, item.name)" @on-blur="checkSkuVal(val, index)"
-                                  @on-change="skuValueChange(val, index, item)">
+                                  @on-change="skuValueChange(val, index, item, $index)">
                                 </AutoComplete>
                                 <Button size="small" style="margin-left: 10px" type="primary"
                                   @click="handleCloseSkuValue(val, index, item)">
@@ -196,6 +196,7 @@
                         </Card>
                       </div>
                     </Form>
+                    <!--{{skuInfo}}-->
                     <Button class="add-sku-btn" size="small" type="primary" @click="addSkuItem">添加规格项
                     </Button>
                     &nbsp;
@@ -1197,8 +1198,11 @@ export default {
         return;
       }
       if (this.zz(0, val) > 20) {
-        this.$Message.error("规格项最多十个字符长度！");
-        return;
+        this.$Message.error("规格值最多十个字符长度！");
+        // val = val.toString().slice(0, 4);
+        this.skuInfo[index].name = this.countCharacters(val, 10);
+        this.$forceUpdate();// 调用该方法会触发组件的重新渲染
+        // return;
       }
       this.skuTableData = this.skuTableData.map((e) => {
         e[val] = e[this.currentSkuItem];
@@ -1220,8 +1224,28 @@ export default {
       }
       return len;
     },
+    countCharacters (defaultStr, defaultNum) {
+      let str = '' + defaultStr || '',
+        num = + defaultNum || 0,
+        res = '',
+        length = 0;
+      if (!str || !num) {
+        return str;
+      }
+      // 循环字符串，判断长度 最少也会返回一个字
+      for (const i in str) {
+        res += str[i];
+        // 测试长度
+        length += /[\u4e00-\u9fa5]/.test(str[i]) ? 2 : 1;
+        // 如果长度大于设置长度 或者 循环到最后则终止循环
+        if (length >= num || +i == str.length - 1) {
+          break;
+        }
+      }
+      return res;
+    },
     // 编辑规格值
-    skuValueChange(val, index, item) {
+    skuValueChange(val, index, item, $index) {
       if (this.skuTableData.find((i) => i[val.name] === val.value)) {
         this.$Message.error("已存在相同规格值！");
         return;
@@ -1232,7 +1256,10 @@ export default {
       }
       if (this.zz(0, val.value) > 20) {
         this.$Message.error("规格值最多十个字符长度！");
-        return;
+        // val.value = val.value.toString().slice(0, 4);
+        this.skuInfo[$index].spec_values[index].value = this.countCharacters(val.value, 10);
+        this.$forceUpdate();// 调用该方法会触发组件的重新渲染
+        // return;
       }
       let curVal = this.currentSkuVal;
       this.skuTableData = this.skuTableData.map((e) => {
@@ -1437,7 +1464,6 @@ export default {
           key: columnName,
         });
       });
-
       // 有成本价和价格的情况
       if (this.baseInfoForm.salesModel !== "WHOLESALE") {
         pushData.push(
