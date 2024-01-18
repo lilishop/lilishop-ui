@@ -308,6 +308,7 @@
         ) {
           // 校验未通过 进行提示
           this.$Message.error("请输入0~99999999之间的数字值")
+          row.alertQuantity = 0
           this.checkFlag = false;
           return;
         }
