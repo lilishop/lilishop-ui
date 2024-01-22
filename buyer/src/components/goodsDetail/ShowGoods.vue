@@ -354,7 +354,7 @@ export default {
       count: 1, // 商品数量
       imgIndex: 0, // 展示图片下标
       currentSelceted: [], // 当前商品sku
-      imgList: [{ url: "" }], // 商品图片列表
+      imgList: [], // 商品图片列表
       skuDetail: {
         specList: [],
       }, // sku详情
@@ -580,12 +580,13 @@ export default {
     swiperGoodsImg() {
       this.skuDetail.specList.forEach((e) => {
         if (e.specName === "images") {
-          this.imgList = this.skuDetail.goodsGalleryList;
+          this.imgList = this.skuDetail.goodsGalleryList.filter(i => i.indexOf("\"url\":") === -1 && i.indexOf("\"status\":") === -1);
         }
       });
       if (!this.imgList) {
         this.imgList = [this.skuDetail.original];
       }
+      console.log(this.imgList);
 
     },
   },
