@@ -16,7 +16,7 @@
 <!--              <Option value="TAKE">待核验</Option>-->
 <!--              <Option value="COMPLETE">已完成</Option>-->
 <!--              <Option value="WAIT_PINTUAN">待成团</Option>-->
-<!--              <Option value="CANCELLED">已取消</Option>-->
+<!--              <Option value="CANCELLED">已关闭</Option>-->
 <!--            </Select>-->
 <!--          </Form-item>-->
           <Form-item label="下单时间">
@@ -127,7 +127,7 @@ export default {
             } else if (params.row.orderStatus == "TAKE") {
               return h("div", [h("tag", { props: { color: "volcano" } }, "待核验")]);
             } else if (params.row.orderStatus == "CANCELLED") {
-              return h("div", [h("tag", { props: { color: "red" } }, "已取消")]);
+              return h("div", [h("tag", { props: { color: "red" } }, "已关闭")]);
             }
           }
         },
@@ -191,7 +191,7 @@ export default {
         {title: '已付款', value: 'PAID'},
         {title: '待核验', value: 'TAKE'},
         {title: '已完成', value: 'COMPLETED'},
-        {title: '已取消', value: 'CANCELLED'},
+        {title: '已关闭', value: 'CANCELLED'},
       ],
       currentStatus: ''
     };

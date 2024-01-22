@@ -12,16 +12,11 @@ function resolve(dir) {
 const assetsCDN = {
   externals: {
     vue: 'Vue',
-    'vue-router': 'VueRouter',
-    vuex: 'Vuex',
-    axios: 'axios',
+
   },
   css: [],
   js: [
-    'https://unpkg.com/vue@2.6.11/dist/vue.min.js',
-    'https://unpkg.com/vue-router@3.4.9/dist/vue-router.min.js',
-    'https://unpkg.com/vuex@3.5.1/dist/vuex.min.js',
-    'https://unpkg.com/axios@0.21.0/dist/axios.min.js',
+    'https://cdn.pickmall.cn/cdn/vue.min.js',
   ],
 }
 

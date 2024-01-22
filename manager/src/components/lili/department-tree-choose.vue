@@ -57,6 +57,7 @@ export default {
       departmentTitle: "", // modal标题
       searchKey: "", // 搜索关键词
       dataDep: [], // 部门列表
+      cloneDep: [], // 克隆部门列表
       selectDep: [], // 已选部门
       departmentId: [] // 部门id
     };
@@ -67,27 +68,20 @@ export default {
       initDepartment().then(res => {
         if (res.success) {
           this.dataDep = res.result;
+
+          this.cloneDep = JSON.parse(JSON.stringify(this.dataDep));
         }
       });
     },
     searchDep() {
       // 搜索部门
       if (this.searchKey) {
-        this.depLoading = true;
-        searchDepartment({title: this.searchKey}).then(res => {
-          this.depLoading = false;
-          if (res.success) {
-            res.result.forEach(function (e) {
-              if (e.status == -1) {
-                e.title = "[已禁用] " + e.title;
-                e.disabled = true;
-              }
-            });
-            this.dataDep = res.result;
-          }
+        this.dataDep = this.cloneDep.filter(item => {
+          return item.title.indexOf(this.searchKey) > -1;
         });
+
       } else {
-        this.initDepartmentData();
+        this.dataDep = JSON.parse(JSON.stringify(this.cloneDep));
       }
     },
     // 选择回调

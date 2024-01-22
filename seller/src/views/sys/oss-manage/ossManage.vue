@@ -804,6 +804,7 @@ export default {
         size += item.fileSize * 1.0;
       });
       this.totalSize = ((size * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
+      this.$emit('selected',e)
     },
   },
   mounted() {

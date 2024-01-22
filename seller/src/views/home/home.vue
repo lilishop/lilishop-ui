@@ -2,7 +2,7 @@
   <div>
 
     <Modal v-model="noticeFlage" :title="noticesDetail.title">
-      <div v-if="noticesDetail" v-html="noticesDetail.content">
+      <div v-if="noticesDetail" class="noticesDetail" v-html="noticesDetail.content">
 
       </div>
     </Modal>
@@ -111,12 +111,12 @@
                 投诉
               </div>
             </div>
-            <div class="detail-item" @click="navigateTo('goods')">
-              <div>
-                <span>{{ homeData.waitUpper || 0 }}</span>
-                <div>待上架</div>
+            <div class="detail-item" >
+              <div @click="navigateTo('alert-goods-quantity')">
+                <span>{{ homeData.alertQuantityNum || 0 }}</span>
+                <div>库存预警</div>
               </div>
-              <div>
+              <div @click="navigateTo('goods')">
                 <span>{{ homeData.waitAuth || 0 }}</span>
                 <div>审核中</div>
               </div>
@@ -294,4 +294,10 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "./home.scss";
+.noticesDetail{
+  /deep/ img{
+    max-width: 100%;
+    max-height: 200px;
+  }
+}
 </style>

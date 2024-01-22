@@ -111,12 +111,12 @@
             />
           </FormItem>
           <FormItem class="form-item-view-el" label="文章内容" prop="content">
-            <editor
-              ref="editor"
-              openXss
-              v-model="form.content"
-              :init="{ ...initEditor,height:'800px' }"
-            ></editor>
+              <tinymec
+                ref="editor"
+                openXss
+                v-model="form.content"
+                v-if="modalVisible"
+              ></tinymec>
           </FormItem>
           <FormItem label="是否展示" prop="openStatus">
             <i-switch size="large" v-model="form.openStatus">
@@ -146,12 +146,10 @@ import {
   seeArticle,
   updateArticleStatus,
 } from "@/api/pages";
-import Editor from "@tinymce/tinymce-vue";
-import { initEditor } from "@/components/editor/config";
+import tinymec from "@/components/editor/index.vue";
 export default {
-
   components: {
-    editor: Editor,
+     tinymec: tinymec,
   },
   props: {
     selected: {
@@ -161,7 +159,6 @@ export default {
   },
   data() {
     return {
-      initEditor: initEditor,
       selectedIndex: 99999, // 已选下标
       loading: true, // 表单加载状态
       modalType: 0, // 添加或编辑标识

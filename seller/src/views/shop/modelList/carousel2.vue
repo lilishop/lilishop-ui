@@ -181,7 +181,8 @@
 </template>
 
 <script>
-import ossManage from "@/views/sys/oss-manage/ossManage";
+// import ossManage from "@/views/sys/oss-manage/ossManage";
+import ossManage from "@/views/shop/ossManage";
 export default {
   name: "modelCarousel",
   props: ["data"],

@@ -235,7 +235,7 @@ export default {
           slot: "action",
           align: "center",
           fixed: "right",
-          maxWidth: 140,
+          maxWidth: 240,
         },
       ],
       data: [], // 表单数据

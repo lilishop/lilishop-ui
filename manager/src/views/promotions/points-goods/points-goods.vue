@@ -124,14 +124,14 @@
             style="margin-right: 5px"
             >关闭</Button
           >
-          <Button
-            v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'END'"
-            type="error"
-            size="small"
-            @click="close(row.id)"
-            style="margin-right: 5px"
-            >删除</Button
-          >
+          <!--<Button-->
+            <!--v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'END'"-->
+            <!--type="error"-->
+            <!--size="small"-->
+            <!--@click="close(row.id)"-->
+            <!--style="margin-right: 5px"-->
+            <!--&gt;删除</Button-->
+          <!--&gt;-->
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">

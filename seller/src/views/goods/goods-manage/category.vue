@@ -140,8 +140,10 @@ export default {
       this.loading = true;
       let that = this;
       setTimeout(function () {
+        that.init();
+        that.$Message.success("刷新成功");
         that.loading = false;
-      }, 1000);
+      }, 500);
     },
     //添加子分类
     addChildren(v) {
@@ -260,5 +262,8 @@ export default {
 .table {
   min-height: 100vh;
   height: auto;
+}
+.operation {
+  margin-bottom: 10px;
 }
 </style>

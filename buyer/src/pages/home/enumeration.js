@@ -30,7 +30,7 @@ export const orderStatusList = [
     status: 'TAKE'
   },
   {
-    name: '已取消',
+    name: '已关闭',
     status: 'CANCELLED'
   },
   {

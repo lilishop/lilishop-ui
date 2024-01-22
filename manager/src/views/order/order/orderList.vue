@@ -66,7 +66,7 @@
 <!--            <Option value="DELIVERED">已发货</Option>-->
 <!--            <Option value="COMPLETED">已完成</Option>-->
 <!--            <Option value="TAKE">待核验</Option>-->
-<!--            <Option value="CANCELLED">已取消</Option>-->
+<!--            <Option value="CANCELLED">已关闭</Option>-->
 <!--            <Option value="STAY_PICKED_UP">待自提</Option>-->
 <!--          </Select>-->
 <!--        </Form-item>-->
@@ -289,7 +289,7 @@ export default {
               ]);
             } else if (params.row.orderStatus == "CANCELLED") {
               return h("div", [
-                h("tag", { props: { color: "red" } }, "已取消"),
+                h("tag", { props: { color: "red" } }, "已关闭"),
               ]);
             }
           },
@@ -332,7 +332,7 @@ export default {
         {title: '待核验', value: 'TAKE'},
         {title: '待自提', value: 'STAY_PICKED_UP'},
         {title: '已完成', value: 'COMPLETED'},
-        {title: '已取消', value: 'CANCELLED'},
+        {title: '已关闭', value: 'CANCELLED'},
 
       ],
       currentStatus: ''

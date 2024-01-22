@@ -43,8 +43,8 @@
               @click="openOrClose(row)">关闭</Button>
             <Button type="success" v-if="row.promotionStatus === 'CLOSE'" style="margin-left: 5px" size="small"
               @click="openOrClose(row)">开启</Button>
-            <Button type="error" :disabled="row.promotionStatus == 'START'" style="margin-left: 5px" size="small"
-              @click="del(row)">删除</Button>
+            <!--<Button type="error" :disabled="row.promotionStatus == 'START'" style="margin-left: 5px" size="small"-->
+              <!--@click="del(row)">删除</Button>-->
           </div>
         </template>
       </Table>

@@ -84,8 +84,8 @@ export default {
         pageSize: 10, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
-        startDate: "", // 起始时间
-        endDate: "", // 终止时间
+        startTime: "", // 起始时间
+        endTime: "", // 终止时间
       },
       selectDate: null,
       form: {
@@ -232,8 +232,8 @@ export default {
     // 选择日期回调
     selectDateRange(v) {
       if (v) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
+        this.searchForm.startTime = v[0];
+        this.searchForm.endTime = v[1];
       }
     },
     // 获取列表数据

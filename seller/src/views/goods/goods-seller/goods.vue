@@ -148,9 +148,9 @@
       title="更新库存"
       v-model="updateStockModalVisible"
       :mask-closable="false"
-      :width="500"
+      :width="610"
     >
-      <Tabs value="updateStock">
+      <Tabs value="updateStock" v-model="updateStockType">
         <TabPane label="手动规格更新" name="updateStock">
           <Table
             class="mt_10"
@@ -491,6 +491,7 @@ export default {
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
+      updateStockType: 'updateStock',  // 更新库存状态
     };
   },
   methods: {
@@ -531,6 +532,7 @@ export default {
       getGoodsSkuListDataSeller({ goodsId: id, pageSize: 1000 }).then((res) => {
         if (res.success) {
           this.updateStockModalVisible = true;
+          this.updateStockType = 'updateStock';
           this.stockAllUpdate = undefined;
           this.stockList = res.result.records;
         }
@@ -585,21 +587,25 @@ export default {
         });
     },
     // 更新库存
-    updateStock() {
-      let updateStockList = this.stockList.map((i) => {
-        let j = { skuId: i.id, quantity: i.quantity };
-        if (this.stockAllUpdate) {
-          j.quantity = this.stockAllUpdate;
-        }
-        return j;
-      });
-      updateGoodsSkuStocks(updateStockList).then((res) => {
-        if (res.success) {
-          this.updateStockModalVisible = false;
-          this.$Message.success("更新库存成功");
-          this.getDataList();
-        }
-      });
+    updateStock () {
+      if (this.updateStockType === 'updateStock' || this.updateStockType === 'stockAll') {
+        // updateStock 手动规格更新，stockAll 批量规格更新
+        let updateStockList = this.stockList.map((i) => {
+          let j = { skuId: i.id, quantity: i.quantity };
+          if (this.stockAllUpdate) {
+            j.quantity = this.stockAllUpdate;
+          }
+          return j;
+        });
+        updateGoodsSkuStocks(updateStockList).then((res) => {
+          if (res.success) {
+            this.updateStockModalVisible = false;
+            this.$Message.success("更新库存成功");
+            this.getDataList();
+          }
+        });
+      }
+
     },
     // 改变页码
     changePage(v) {

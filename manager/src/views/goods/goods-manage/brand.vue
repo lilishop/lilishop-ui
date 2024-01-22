@@ -10,6 +10,7 @@
       </Form>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加</Button>
+        <Button @click="refresh">刷新</Button>
       </Row>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table"></Table>
       <Row type="flex" justify="end" class="mt_10">
@@ -313,6 +314,15 @@ export default {
       this.$refs.form.resetFields();
       delete this.form.id;
       this.modalVisible = true;
+    },
+    // 刷新
+    refresh() {
+      this.loading = true;
+      setTimeout(() => {
+        this.getDataList();
+        this.loading = false;
+        this.$Message.success("刷新成功");
+      }, 500);
     },
     // 编辑
     edit(v) {
