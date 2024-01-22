@@ -130,6 +130,9 @@ export default {
             });
             this.categoryBar = cateArr;
             this.$set(this, "goodsMsg", res.result);
+            if (!this.goodsMsg.data.intro) {
+              this.goodsMsg.data.intro = ''
+            }
             // 判断是否收藏
             if (this.Cookies.getItem("userInfo")) {
               isStoreCollection("STORE", this.goodsMsg.data.storeId).then((res) => {
