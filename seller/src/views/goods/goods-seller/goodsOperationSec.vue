@@ -287,8 +287,7 @@
                           .ivu-table-overflowX {
                             overflow-x: hidden;
                           }
-                        "
-                             @mouseenter="handleMouseEnter">
+                        ">
                         <template slot="sn" slot-scope="{ row }">
                           <Input v-model="row.sn" clearable placeholder="请输入货号"
                                  @on-change="updateSkuTable(row, 'sn')"/>
@@ -530,6 +529,7 @@ export default {
       total: 0,
       goodsVideo: "",
       showContent: false,
+      loadingVideo: false,
       listImages: [],
       newSkuValues: [],
       contentImage: "",
@@ -720,6 +720,13 @@ export default {
           item.images = []
         })
       }
+    },
+    // ship大小不正确
+    handleVideoMaxSize(file) {
+      this.$Notice.warning({
+        title: "超过文件大小限制",
+        desc: "视频大小不能超过10MB",
+      });
     },
     onAddSku(index) {
       if (!this.newSkuValues[index]) {
@@ -953,6 +960,7 @@ export default {
     },
     // 商品图片上传成功
     handleSuccessGoodsPicture(res, file) {
+      this.$Spin.hide();
       if (file.response) {
         file.url = file.response.result;
         this.baseInfoForm.goodsGalleryFiles.push(file.url);
