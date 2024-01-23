@@ -863,7 +863,7 @@ export default {
     },
     // 移除已选图片
     handleRemove(item, index) {
-      images.splice(index, 1)
+      item.splice(index, 1)
       this.previewPicture = "";
     },
     // 查看商品大图
