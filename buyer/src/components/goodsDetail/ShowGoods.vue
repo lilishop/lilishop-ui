@@ -586,7 +586,6 @@ export default {
       if (!this.imgList) {
         this.imgList = [this.skuDetail.original];
       }
-      console.log(this.imgList);
 
     },
   },
