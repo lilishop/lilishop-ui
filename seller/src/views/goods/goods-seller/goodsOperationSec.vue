@@ -1634,7 +1634,7 @@ export default {
               // alertQuantity: skus[index].alertQuantity,
               cost: 1,
               price: skus[index].price,
-              [spec[0].name]: specItem.value,
+              [spec[0].name]: skus[index][spec[0].name] ? skus[index][spec[0].name] : specItem.value,
               images:
                 skus[index].images || this.baseInfoForm.goodsGalleryFiles || [],
             };
