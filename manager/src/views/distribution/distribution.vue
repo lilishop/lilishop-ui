@@ -90,19 +90,23 @@ export default {
         {
           title: "会员名称",
           key: "memberName",
-          minWidth: 120,
+          minWidth: 200,
           tooltip: true,
         },
         {
           title: "推广单数",
           key: "distributionOrderCount",
-          minWidth: 120,
-          width: 150,
+          minWidth: 200,
+        },
+        {
+          title: "推广人数",
+          key: "peopleNum",
+          minWidth: 200,
         },
         {
           title: "分销金额",
           key: "rebateTotal",
-          width: 150,
+          minWidth: 200,
           sortable: false,
           render: (h, params) => {
             return h("priceColorScheme", {props:{value:params.row.rebateTotal,color:this.$mainColor}} );
@@ -110,9 +114,9 @@ export default {
 
         },
         {
-          title: "可用金额",
+          title: "可提现金额",
           key: "canRebate",
-          width: 150,
+          minWidth: 200,
           sortable: false,
           render: (h, params) => {
             return h("priceColorScheme", {props:{value:params.row.canRebate,color:'green'}} );
@@ -121,7 +125,7 @@ export default {
         {
           title: "冻结金额",
           key: "commissionFrozen",
-          width: 150,
+          minWidth: 200,
           sortable: false,
           render: (h, params) => {
             return h("priceColorScheme", {props:{value:params.row.commissionFrozen,color:'#347dda'}} );
@@ -130,7 +134,7 @@ export default {
         {
           title: "状态",
           key: "distributionStatus",
-          width: 150,
+          minWidth: 200,
           sortable: false,
           render: (h, params) => {
             if (params.row.distributionStatus == "PASS") {
@@ -149,7 +153,7 @@ export default {
           key: "action",
           align: "center",
           fixed: "right",
-          width: 140,
+          minWidth: 200,
           render: (h, params) => {
             return h(
               "div",
@@ -159,7 +163,42 @@ export default {
                   justifyContent: "center",
                 },
               },
-              [
+              [h(
+                "Button",
+                {
+                  props: {
+                    type: "success",
+                    size: "small",
+                  },
+                  style: {
+                    marginRight: "5px",
+                  },
+                  on: {
+                    click: () => {
+                      this.memberList(params.row);
+                    },
+                  },
+                },
+                "下级用户"
+              ),
+              h(
+                "Button",
+                {
+                  props: {
+                    type: "info",
+                    size: "small",
+                  },
+                  style: {
+                    marginRight: "5px",
+                  },
+                  on: {
+                    click: () => {
+                      this.groupList(params.row);
+                    },
+                  },
+                },
+                "团队列表"
+                ),
                 h(
                   "Button",
                   {
@@ -214,6 +253,14 @@ export default {
     };
   },
   methods: {
+    //团队列表
+    groupList(row){
+      this.$router.push({ name: "group-list", query: { id: row.id } });
+    },
+    memberList(row){
+      this.$router.push({ name: "distribution-member", query: { id: row.id } });
+
+    },
     // 初始化数据
     init() {
       this.getDataList();

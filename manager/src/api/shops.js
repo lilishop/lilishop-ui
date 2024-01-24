@@ -81,3 +81,9 @@ export const getShopList = () => {
 export const getShopByMemberId = (id) => {
   return getRequest(`/store/store/${id}/member`)
 }
+
+//根据id获取店铺信息
+export const downloadBill = (id) => {
+  return getRequest(`/order/bill/downLoad/${id}`, {}, 'blob')
+}
+
