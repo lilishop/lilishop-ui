@@ -334,7 +334,7 @@
       handleSearch() {
         this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = 10;
-        this.searchForm.categoryPath = this.category.join(",")
+        this.searchForm.categoryPath = this.category ? this.category.join(",") : null;
         this.getDataList();
       },
       // 重置搜索条件
