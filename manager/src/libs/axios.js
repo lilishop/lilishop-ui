@@ -171,17 +171,23 @@ function getTokenDebounce() {
   };
 }
 
-export const getRequest = (url, params) => {
+export const getRequest = (url, params, resBlob) => {
   let accessToken = getStore("accessToken");
-  return service({
+  let data = {
     method: "get",
     url: `${url}`,
     params: params,
     headers: {
       accessToken: accessToken
-    }
-  });
+    },
+    responseType: "blob"
+  };
+  if (resBlob != "blob") {
+    delete data.responseType;
+  }
+  return service(data);
 };
+
 
 export const postRequest = (url, params, headers) => {
   let accessToken = getStore("accessToken");
