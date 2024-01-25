@@ -54,7 +54,7 @@
         ></Step>
       </Steps>
     </div>
-    <div class="order-card" v-if="order.order.deliveryMethod == 'LOGISTICS'">
+    <div class="order-card" v-if="order.order.deliveryMethod === 'LOGISTICS' && order.order.orderType !== 'VIRTUAL'">
       <h3>收货人信息</h3>
       <p>收货人：{{ order.order.consigneeName }}</p>
       <p>手机号码：{{ order.order.consigneeMobile | secrecyMobile }}</p>
@@ -63,7 +63,7 @@
         {{ order.order.consigneeDetail }}
       </p>
     </div>
-    <div class="order-card" v-if="order.order.deliveryMethod == 'SELF_PICK_UP'">
+    <div class="order-card" v-if="order.order.deliveryMethod === 'SELF_PICK_UP'">
       <h3>自提点信息</h3>
       <p>自提点名称：{{ order.order.storeAddressPath }}</p>
       <p>联系方式：{{ order.order.storeAddressMobile }}</p>
@@ -73,7 +73,7 @@
       <p>支付方式：{{ order.paymentMethodValue }}</p>
       <p>付款状态：{{ order.payStatusValue }}</p>
     </div>
-    <div class="order-card" v-if="!order.order.verificationCode">
+    <div class="order-card" v-if="!order.order.verificationCode && order.order.orderType !== 'VIRTUAL'">
       <h3>配送信息</h3>
       <p>配送方式：{{ order.deliveryMethodValue }}</p>
       <p v-if="order.order.deliveryMethod === 'LOGISTICS'">配送状态：{{ order.deliverStatusValue }}</p>
@@ -187,7 +187,7 @@
           ><span>{{ order.order.goodsPrice | unitPrice("￥") }}</span
           ><br />
         </div>
-        <div>
+        <div v-if="order.order.orderType !== 'VIRTUAL'">
           <span>运费：</span
           ><span>+{{ order.order.freightPrice | unitPrice("￥") }}</span
           ><br />
