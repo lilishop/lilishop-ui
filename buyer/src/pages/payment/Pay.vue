@@ -18,7 +18,7 @@
     <Divider />
     <div class="content width_1200">
       <!-- 收货地址 -->
-      <div class="address" v-if="selectedDeliverMethod === 'LOGISTICS'">
+      <div class="address" v-if="selectedDeliverMethod === 'LOGISTICS' && goodsType !== 'VIRTUAL_GOODS'">
         <div class="card-head">
           <span>收货人信息</span>
           <span @click="goAddressManage">管理收货人地址</span>
@@ -89,7 +89,7 @@
       </div>
       <div>
       </div>
-      <div class="goods-content">
+      <div class="goods-content" v-if="goodsType !== 'VIRTUAL_GOODS'">
         <div class="card-head mt_20 mb_20">
           <span>配送方式</span>
         </div>
@@ -227,7 +227,7 @@
         }}&nbsp;&nbsp;{{ selectedAddress.mobile }}
       </div>
       <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'SELF_PICK_UP'">
-        自提地点：{{selectedStoreAddress.address}} &nbsp;&nbsp;联系方式：{{ selectedStoreAddress.mobile }} 
+        自提地点：{{selectedStoreAddress.address}} &nbsp;&nbsp;联系方式：{{ selectedStoreAddress.mobile }}
       </div>
     </div>
     <BaseFooter></BaseFooter>
@@ -266,6 +266,7 @@ export default {
       invoiceAvailable: false, // 发票编辑按钮
       showEditBtn: "", // 鼠标移入显示编辑按钮
       orderMark: "", // 订单备注
+      goodsType: "", // 商品类型
       storeMoreAddr: false,
       invoiceData: {
         // 发票数据
@@ -390,6 +391,9 @@ export default {
             this.goodsList = res.result.cartList;
             this.priceDetailDTO = res.result.priceDetailDTO;
             this.skuList = res.result.skuList;
+            if (res.result.skuList[0] && res.result.skuList[0].goodsSku) {
+              this.goodsType = res.result.skuList[0].goodsSku.goodsType;
+            }
             this.storeId = this.goodsList[0].storeId
             if (res.result.receiptVO) {
               this.invoiceData = res.result.receiptVO;

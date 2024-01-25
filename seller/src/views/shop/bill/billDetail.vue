@@ -325,7 +325,7 @@ export default {
                   return h("div", this.$options.filters.unitPrice(params.row.billPrice, "￥")
                   );
                 }else{
-                  return h("priceColorScheme", {props: {value: (0-params.row.finalPrice), color: this.$mainColor}});
+                  return h("priceColorScheme", {props: {value: (0-params.row.billPrice), color: this.$mainColor}});
                 }
               },
             },
@@ -337,7 +337,7 @@ export default {
           align: 'center',
           children: [{
             title: "补贴",
-            key: "billPrice",
+            key: "subsidy",
             render: (h, params) => {
               if (params.row.pointSettlementPrice == 0) {
                 return h("div", "-");
@@ -351,25 +351,25 @@ export default {
           },
             {
               title: "用户实付",
-              key: "billPrice",
-              render: (h, params) => {
-                if(params.row.flowType == "PAY"){
-                  return h("div", this.$options.filters.unitPrice(params.row.siteCouponCommission, "￥")
-                  );
-                }else{
-                  return h("priceColorScheme", {props: {value: (0-params.row.siteCouponCommission)}});
-                }
-              },
-            },
-            {
-              title: "合计",
-              key: "billPrice",
+              key: "finalPrice",
               render: (h, params) => {
                 if(params.row.flowType == "PAY"){
                   return h("div", this.$options.filters.unitPrice(params.row.finalPrice, "￥")
                   );
                 }else{
-                  return h("priceColorScheme", {props: {value: (0-params.row.billPrice)}});
+                  return h("priceColorScheme", {props: {value: (0-params.row.finalPrice)}});
+                }
+              },
+            },
+            {
+              title: "合计",
+              key: "total",
+              render: (h, params) => {
+                if(params.row.flowType == "PAY"){
+                  return h("div", this.$options.filters.unitPrice((params.row.finalPrice+(params.row.pointSettlementPrice+params.row.kanjiaSettlementPrice+params.row.siteCouponCommission)), "￥")
+                  );
+                }else{
+                  return h("priceColorScheme", {props: {value: (0-(params.row.finalPrice+(params.row.pointSettlementPrice+params.row.kanjiaSettlementPrice+params.row.siteCouponCommission)))}});
                 }
               },
             },
@@ -381,7 +381,7 @@ export default {
           align: 'center',
           children: [{
             title: "平台服务费",
-            key: "billPrice",
+            key: "commissionPrice",
             render: (h, params) => {
               if (params.row.commissionPrice == 0) {
                 return h("div", "-");
@@ -405,18 +405,6 @@ export default {
                 }else{
                   return h("priceColorScheme", {props: {value: (0-params.row.distributionRebate)}});
                 }
-
-                // if (params.row.distributionRebate == null) {
-                //   return h("div", "-");
-                // } else {
-                //   return h(
-                //     "div",
-                //     this.$options.filters.unitPrice(
-                //       params.row.distributionRebate,
-                //       "￥"
-                //     )
-                //   );
-                // }
               },
             },
             {
