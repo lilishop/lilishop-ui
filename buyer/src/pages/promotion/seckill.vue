@@ -40,7 +40,7 @@
             }}</span>
           </span>
         </div>
-        <div class="goods-show-detail">
+        <div class="goods-show-detail" style="margin-bottom: 20px">
           <span>{{ item.goodsName }}</span>
         </div>
         <div class="goods-seckill-btn" :class="{
@@ -56,12 +56,12 @@
           <span>已售{{
             (item.quantity && item.quantity > 0
               ? Math.ceil(
-                (item.salesNum / (item.quantity + item.salesNum)) * 100
+                (item.salesNum / (item.quantity)) * 100
               )
               : 100) + "%"
           }}</span><Progress hide-info stroke-color="#df0021" style="width: 110px" class="ml_10" :percent="item.quantity && item.quantity > 0
       ? Math.ceil(
-        (item.salesNum / (item.quantity + item.salesNum)) * 100
+        (item.salesNum / (item.quantity)) * 100
       )
       : 100
     " />
