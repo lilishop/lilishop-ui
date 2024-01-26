@@ -53,11 +53,6 @@ export const getDistributionCash = (params) => {
 export const auditDistributionCash = (id,params) => {
     return postRequest(`/distribution/cash/audit/${id}`, params)
 }
-//分销会员列表
-export const getDistributionMember = (id,params) => {
-  return getRequest(`/distribution/distribution/memberList/${id}`, params)
-}
-//查看分销团队列表
-export const getDistributionGroup = (id,params) => {
-  return getRequest(`/distribution/distribution/groupList/${id}`, params)
-}
+
+
+

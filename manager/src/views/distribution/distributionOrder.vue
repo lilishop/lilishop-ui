@@ -11,7 +11,7 @@
             style="width: 200px"
           />
         </Form-item>
-        <Form-item label="分销员" prop="distributionName">
+        <Form-item label="分销商" prop="distributionName">
           <Input
             type="text"
             v-model="searchForm.distributionName"
@@ -104,7 +104,7 @@
           },
 
           {
-            title: "分销员",
+            title: "分销商",
             key: "distributionName",
             tooltip: true,
             minWidth:80,

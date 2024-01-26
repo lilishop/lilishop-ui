@@ -103,6 +103,11 @@ export default {
 
         },
         {
+          title: "库存",
+          key: "quantity",
+          minWidth: 80,
+        },
+        {
           title: "添加时间",
           key: "createTime",
           minWidth: 100,
