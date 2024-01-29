@@ -26,7 +26,7 @@
         <Input type='number' v-model="formValidate.closeAfterSale">
         <span slot="append">天</span>
         </Input>
-        <span class="desc">订单完成后，多少天内允许退单，如果天数为0,不限制退款时间</span>
+        <span class="desc">订单完成后，多少天内允许退单，如果天数为0,则完成订单当天可以退单，之后就不再允许。</span>
       </FormItem>
       <FormItem label="已完成订单允许投诉" prop="closeComplaint">
         <Input type='number' v-model="formValidate.closeComplaint">
