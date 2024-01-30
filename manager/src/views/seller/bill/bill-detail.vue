@@ -307,7 +307,7 @@ export default {
         pageSize: 10, // 页面大小
         sort: "id", // 默认排序字段
         order: "desc", // 默认排序方式
-        flowType: "PAY",
+        // flowType: "PAY",
         startDate: null,
         endDate: null,
       },
