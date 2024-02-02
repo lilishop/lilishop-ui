@@ -85,14 +85,14 @@
     ></liliDialog>
     <!-- 选择图片 -->
     <Modal width="1200px" v-model="picModelFlag" footer-hide>
-      <ossManage @callback="callbackSelected" ref="ossManage" />
+      <ossManage @callback="callbackSelected" :isComponent="true" ref="ossManage" />
     </Modal>
   </div>
 </template>
 
 <script>
 // import ossManage from "@/views/sys/oss-manage/ossManage";
-import ossManage from "@/views/shop/ossManage";
+import ossManage from "@/views/shop/ossManages";
 export default {
   name: "modelCarousel",
   props: ["data"],

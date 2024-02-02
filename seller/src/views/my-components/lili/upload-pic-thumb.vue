@@ -57,7 +57,7 @@
     </Modal>
 
     <Modal width="1200px" v-model="picModalFlag" @on-ok="confirmUrls">
-      <ossManage @callback="callbackSelected" @selected="(list)=>{ selectedImage = list}" ref="ossManage" />
+      <ossManage @callback="callbackSelected"  :isComponent="true" @selected="(list)=>{ selectedImage = list}" ref="ossManage" />
     </Modal>
   </div>
 </template>
@@ -65,7 +65,7 @@
 <script>
 import { uploadFile } from "@/libs/axios";
 import vuedraggable from "vuedraggable";
-import ossManage from "@/views/shop/ossManage";
+import ossManage from "@/views/shop/ossManages";
 export default {
   name: "uploadPicThumb",
   components: {

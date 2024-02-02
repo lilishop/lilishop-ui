@@ -1,0 +1,263 @@
+.search {
+  .oss-operation {
+    margin-bottom: 2vh;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+
+    button {
+      margin-right: 5px;
+    }
+  }
+}
+
+.none {
+  display: none;
+}
+
+.oss-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.oss-card {
+  margin: 10px 20px 10px 0;
+  width: 290px;
+
+  :hover {
+    .content .other .name {
+      color: #1890ff;
+      transition: color .3s;
+    }
+  }
+
+  cursor: pointer;
+
+  .ivu-card-body {
+    padding: 0;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+
+    :hover {
+      .play {
+        transition: opacity .3s;
+        opacity: 1 !important;
+      }
+    }
+
+    .img {
+      height: 135px;
+      object-fit: cover;
+    }
+
+    .video {
+      height: 135px;
+      position: relative;
+
+      .cover {
+        height: 100%;
+        width: 100%;
+        object-fit: fill;
+      }
+
+      .play {
+        position: absolute;
+        top: 43px;
+        left: 117px;
+        height: 50px;
+        width: 50px;
+        opacity: 0.8;
+      }
+    }
+
+    .other {
+      padding: 16px;
+      height: 135px;
+
+      .name {
+        font-size: 16px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        color: rgba(0, 0, 0, .85);
+        font-weight: 500;
+        margin-bottom: 4px;
+      }
+
+      .key {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        height: 45px;
+        word-break: break-all;
+        color: rgba(0, 0, 0, .45);
+      }
+
+      .info {
+        font-size: 12px;
+        color: rgba(0, 0, 0, .45);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        height: 36px;
+        word-break: break-all;
+      }
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      height: 50px;
+      background: #f7f9fa;
+      border-top: 1px solid #e8e8e8;
+
+      i:hover {
+        color: #1890ff;
+      }
+
+      .btn {
+        display: flex;
+        justify-content: center;
+        width: 33.33%;
+        border-right: 1px solid #e8e8e8;
+      }
+
+      .btn-no {
+        display: flex;
+        justify-content: center;
+        width: 33.33%;
+      }
+    }
+  }
+}
+
+
+.oss-manage-box {
+  .file-list {
+    height: 100%;
+    box-sizing: border-box;
+    border-right: 1px solid #e5e6eb;
+    padding: 16px 0 24px;
+  }
+  .pic-list {
+    height: 100%;
+    box-sizing: border-box;
+    padding: 0 0 24px 0;
+  }
+  .img-box {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-start;
+    align-content: flex-start;
+    margin-top: 20px;
+    .img-item {
+      width: 120px;
+      height: 158px;
+      box-sizing: border-box;
+      margin: 0 13px 8px;
+      position: relative;
+      .card {
+        width: 120px;
+        height: 120px;
+        border-radius: 8px;
+        border: 2px solid transparent;
+        overflow: hidden;
+        box-sizing: border-box;
+        position: relative;
+        img {
+          width: 100%;
+          height: 100%;
+        }
+        .checkbox {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          z-index: 1000;
+        }
+        .preview {
+          width: 100%;
+          height: 26px;
+          background-color: #ffffff;
+          text-align: center;
+          line-height: 30px;
+          color: #666666;
+          position: absolute;
+          left: 0;
+          bottom: 0;
+          display: flex;
+          flex-wrap: nowrap;
+          > div {
+            width: 100%;
+            flex: 1;
+          }
+        }
+      }
+      .card:hover,
+      .custom-checkbox-card-checked {
+        border: 2px solid #ff5c58;
+      }
+      .text {
+        width: 120px;
+        height: 36px;
+        cursor: pointer;
+        color: #252931;
+        font-size: 14px;
+        line-height: 36px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: center;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+      }
+    }
+  }
+  .page-box {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+  .pagination-box {
+    display: flex;
+    flex-direction: row-reverse;
+  }
+  /* Checkbox默认的样式 */
+  .check-box {
+    .ivu-checkbox {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      z-index: 100;
+    }
+  }
+  /* 覆盖iView默认的Checkbox样式 */
+  .ivu-checkbox-wrapper {
+    /*font-size: 16px; !* 修改字体大小 *!*/
+    /*color: #495060; !* 修改文本颜色 *!*/
+    /* 添加其他需要的样式 */
+  }
+  .ivu-checkbox-inner {
+    /*width: 20px; !* 修改选框大小 *!*/
+    /*height: 20px;*/
+    /*border-color: #dcdee2; !* 修改边框颜色 *!*/
+    /* 添加其他需要的样式 */
+  }
+  /* 当Checkbox被选中时的样式 */
+  .ivu-checkbox-checked .ivu-checkbox-inner {
+    /*background-color: #2db7f5; !* 修改选中时的背景颜色 *!*/
+  }
+  /* 当Checkbox不可用时的样式 */
+  .ivu-checkbox-disabled .ivu-checkbox-inner {
+    /*background-color: #e9e9e9; !* 修改禁用状态下的背景颜色 *!*/
+  }
+
+  .demo-tree-render .ivu-tree-title{
+    width: 94%;
+  }
+}
+

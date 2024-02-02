@@ -102,7 +102,7 @@
           <h4>商品规格及图片</h4>
           <div class="form-item-view">
             <FormItem class="form-item-view-el required" label="主图" prop="goodsGalleryFiles">
-              <div style="display: flex; flex-wrap: flex-start">
+              <div style="display: flex; flex-wrap: wrap;">
                 <vuedraggable :animation="200" :list="baseInfoForm.goodsGalleryFiles">
                   <div v-for="(item, __index) in baseInfoForm.goodsGalleryFiles" :key="__index"
                        class="demo-upload-list">
@@ -110,27 +110,29 @@
                       <img :src="item"/>
                       <div class="demo-upload-list-cover">
                         <div>
-                          <Icon size="30" type="md-search" @click.native="handleViewGoodsPicture(item.url)"></Icon>
+                          <Icon size="30" type="md-search" @click.native="handleViewGoodsPicture(item)"></Icon>
                           <Icon size="30" type="md-trash" @click.native="handleRemoveGoodsPicture(item)"></Icon>
                         </div>
                       </div>
                     </template>
                   </div>
                 </vuedraggable>
-
-                <Upload ref="upload"
-                        :action="uploadFileUrl" :before-upload="handleBeforeUploadGoodsPicture"
-                        :format="['jpg', 'jpeg', 'png', 'webp']"
-                        :headers="{ ...accessToken }"
-                        :max-size="2048" :on-error="() => { $Spin.hide(); }" :on-exceeded-size="handleMaxSize"
-                        :on-format-error="handleFormatError" :on-progress="() => { $Spin.show(); }"
-                        :on-success="handleSuccessGoodsPicture" :show-upload-list="false" multiple
-                        style="margin-left: 10px"
-                        type="drag">
-                  <div style="width: 148px; height: 148px; line-height: 148px">
-                    <Icon size="20" type="md-add"></Icon>
-                  </div>
-                </Upload>
+                <!--<Upload ref="upload"-->
+                        <!--:action="uploadFileUrl" :before-upload="handleBeforeUploadGoodsPicture"-->
+                        <!--:format="['jpg', 'jpeg', 'png', 'webp']"-->
+                        <!--:headers="{ ...accessToken }"-->
+                        <!--:max-size="2048" :on-error="() => { $Spin.hide(); }" :on-exceeded-size="handleMaxSize"-->
+                        <!--:on-format-error="handleFormatError" :on-progress="() => { $Spin.show(); }"-->
+                        <!--:on-success="handleSuccessGoodsPicture" :show-upload-list="false" multiple-->
+                        <!--style="margin-left: 10px"-->
+                        <!--type="drag">-->
+                  <!--<div style="width: 148px; height: 148px; line-height: 148px">-->
+                    <!--<Icon size="20" type="md-add"></Icon>-->
+                  <!--</div>-->
+                <!--</Upload>-->
+              </div>
+              <div style="width: 100%;display: flex;justify-content: start;margin-top: 10px;">
+                <Button @click="handleCLickImg('goodsGalleryFiles')" type="primary">上传图片</Button>
               </div>
               <Modal v-model="goodsPictureVisible" title="View Image">
                 <img v-if="goodsPictureVisible" :src="previewGoodsPicture" style="width: 100%"/>
@@ -474,7 +476,7 @@
     <!--<ossManage @callback="callbackSelected" ref="ossManage" />-->
     <!--</Modal>-->
     <Modal v-model="picModalFlag" width="1200px" @on-ok="confirmUrls">
-      <ossManage ref="ossManage" @callback="callbackSelected" @selected="(list)=>{ selectedImage = list}"/>
+      <ossManage ref="ossManage" :isComponent="true" @callback="callbackSelected" @selected="(list)=>{ selectedImage = list}"/>
     </Modal>
 
   </div>
@@ -490,7 +492,7 @@ import {uploadFile} from "@/libs/axios";
 import {regular} from "@/utils";
 import DPlayer from 'dplayer';
 // import ossManage from "@/views/sys/oss-manage/ossManage";
-import ossManage from "@/views/shop/ossManage";
+import ossManage from "@/views/shop/ossManages";
 
 
 export default {
@@ -745,8 +747,9 @@ export default {
       if (val && this.selectedFormBtnName == 'selectedSkuImages') {
         this.selectedSku.images.push(val);
       } else {
-        this.baseInfoForm[this.selectedFormBtnName].push(val);
+        this.baseInfoForm[this.selectedFormBtnName].push(val.url);
       }
+
     },
     confirmUrls() {
       if (this.selectedImage && this.selectedFormBtnName == 'selectedSkuImages') {
