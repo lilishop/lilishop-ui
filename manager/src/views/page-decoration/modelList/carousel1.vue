@@ -84,7 +84,7 @@
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
     <Modal width="1200px" v-model="picModelFlag" footer-hide>
-      <ossManage @callback="callbackSelected" ref="ossManage" />
+      <ossManage @callback="callbackSelected" :isComponent="true" ref="ossManage" />
     </Modal>
   </div>
 </template>

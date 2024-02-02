@@ -27,6 +27,7 @@
     margin: 0 10px;
   }
 }
+
 </style>
 <template>
   <div class="search">
@@ -61,164 +62,250 @@
               </Button>
             </Form>
           </Row>
-          <div class="oss-operation padding-row">
-            <div>
-              <Upload
-                ref="up"
-                :action="commonUrl + '/common/common/upload/file'"
-                :data="{
+
+          <Row class="oss-manage-box">
+            <Col :span="isComponent?5:4">
+              <div class="file-list">
+                <div class="article-category mr_10">
+                  <Tree :data="treeData" :render="renderContent" @on-select-change.self="handleCateChange" class="demo-tree-render"></Tree>
+                  <div class="group-row flex" v-if="!isComponent">
+                    <Button @click="handleClickAddGroup">添加分组</Button>
+                  </div>
+                </div>
+              </div>
+            </Col>
+            <Col :span="isComponent?19:20">
+              <div class="pic-list">
+                <div>
+                  <div class="oss-operation padding-row" style="display: flex;flex-direction: row-reverse;">
+                    <div>
+                      <Upload
+                        ref="up"
+                        :action="commonUrl + '/common/common/upload/file'"
+                        :data="{
                   directoryPath: searchForm.fileDirectoryId,
                 }"
-                :headers="accessToken"
-                :max-size="20480"
-                :on-error="handleError"
-                :on-exceeded-size="handleMaxSize"
-                :on-success="handleSuccess"
-                :show-upload-list="false"
-                multiple
-                style="display: inline-block"
-              >
-                <Button>上传图片</Button>
-              </Upload>
-              <Dropdown @on-click="handleDropdown" v-if="!isComponent">
-                <Button>
-                  更多操作
-                  <Icon type="md-arrow-dropdown"/>
-                </Button>
-                <DropdownMenu slot="list">
-                  <DropdownItem name="refresh">刷新</DropdownItem>
-                  <DropdownItem v-show="showType == 'list'" name="removeAll"
-                  >批量删除
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-            </div>
-          </div>
-        </div>
-
-        <Alert show-icon v-if="!isComponent">
-          已选择
-          <span>{{ selectCount }}</span> 项
-          <a class="select-clear" @click="clearSelectAll">清空</a>
-          <span v-if="selectCount > 0" style="margin-left: 15px"
-          >共计 {{ totalSize }} 存储量</span
-          >
-        </Alert>
-
-        <div v-show="showType === 'list'" >
-          <div class="flex">
-            <div class="article-category mr_10">
-              <Tree
-                :data="treeData"
-                @on-contextmenu="handleContextMenu"
-                @on-select-change="handleCateChange"
-              >
-                <template slot="contextMenu" v-if="!isComponent">
-                  <DropdownItem @click.native="handleContextMenuEdit"
-                  >编辑
-                  </DropdownItem
-                  >
-                  <DropdownItem
-                    style="color: #ed4014"
-                    @click.native="handleContextMenuDelete"
-                  >删除
-                  </DropdownItem
-                  >
-                </template>
-              </Tree>
-              <Alert v-if="!isComponent">鼠标右键编辑/删除分组</Alert>
-              <div class="group-row flex" v-if="!isComponent">
-                <Button @click="handleClickAddGroup">添加分组</Button>
-              </div>
-            </div>
-
-            <Table
-              ref="table"
-              :columns="isComponent ? viewColumns : columns"
-              :data="data"
-              :loading="loading"
-              border
-              class="table"
-              sortable="custom"
-              @on-sort-change="changeSort"
-              @on-selection-change="changeSelect"
-            >
-              <template slot="fileKey" slot-scope="{ row }">
-                <a @click="copyFileUrl(row)">{{ row.fileKey }}</a>
-              </template>
-            </Table>
-          </div>
-        </div>
-        <div v-show="showType === 'thumb'">
-          <div class="oss-wrapper">
-            <Card v-for="(item, i) in data" :key="i" class="oss-card">
-              <div class="content">
-                <img
-                  v-if="item.fileType.indexOf('image') >= 0"
-                  :src="item.url"
-                  class="img"
-                  @click="showPic(item)"
-                />
-                <div
-                  v-else-if="item.fileType.indexOf('video') >= 0"
-                  class="video"
-                  @click="showVideo(item)"
-                >
-                  <!-- 文件小于5MB显示video -->
-                  <video v-if="item.fileSize < 1024 * 1024 * 5" class="cover">
-                    <source :src="item.url"/>
-                  </video>
-                  <img class="play" src="@/assets/play.png"/>
-                </div>
-                <div v-else class="other">
-                  <div class="name">{{ item.name }}</div>
-                  <div class="key">{{ item.fileKey }}</div>
-                  <div class="info">
-                    文件类型：{{ item.fileType }} 文件大小：{{
-                      ((item.fileSize * 1.0) / (1024 * 1024)).toFixed(2)
-                    }}
-                    MB 创建时间：{{ item.createTime }}
+                        :headers="accessToken"
+                        :max-size="20480"
+                        :on-error="handleError"
+                        :on-exceeded-size="handleMaxSize"
+                        :on-success="handleSuccess"
+                        :show-upload-list="false"
+                        multiple
+                        style="display: inline-block"
+                      >
+                        <Button>上传图片</Button>
+                      </Upload>
+                      <Dropdown @on-click="handleDropdown" v-if="!isComponent">
+                        <Button>
+                          更多操作
+                          <Icon type="md-arrow-dropdown"/>
+                        </Button>
+                        <DropdownMenu slot="list">
+                          <DropdownItem name="refresh">刷新</DropdownItem>
+                          <DropdownItem v-show="showType == 'list'" name="removeAll"
+                          >批量删除
+                          </DropdownItem>
+                        </DropdownMenu>
+                      </Dropdown>
+                    </div>
                   </div>
                 </div>
-                <div class="actions">
-                  <div class="btn">
-                    <Tooltip content="下载" placement="top">
-                      <Icon
-                        size="16"
-                        type="md-download"
-                        @click="download(item)"
-                      />
-                    </Tooltip>
-                  </div>
-                  <div class="btn">
-                    <Tooltip content="重命名" placement="top">
-                      <Icon size="16" type="md-create" @click="rename(item)"/>
-                    </Tooltip>
-                  </div>
-                  <div class="btn-no">
-                    <Tooltip content="删除" placement="top">
-                      <Icon size="16" type="md-trash" @click="remove(item)"/>
-                    </Tooltip>
-                  </div>
+                <div>
+                  <CheckboxGroup v-model="selectedOss" @on-change="selectOssChange">
+                    <div class="img-box">
+                      <div v-for="(item, index) in data" :key="index" class="img-item">
+                        <Checkbox :label="item.id+','+item.url" class="check-box">
+                          <template>
+                            <div class="card"  @mouseenter.active="onMouseOver(item, index)" @mouseleave.active="onMouseOut(item, index)">
+                              <!--<div class="custom-checkbox-card-mask"><div class="custom-checkbox-card-mask-dot"/></div>-->
+                              <img :src="item.url" alt="" />
+                              <div v-if="item.isShowPreview" class="preview">
+                                <div @click.prevent="download(item)"><Tooltip content="下载"><Icon type="md-cloud-download" size="18" /></Tooltip></div>
+                                <div @click.prevent="remove(item)"><Tooltip content="删除"><Icon type="md-trash" size="18" /></Tooltip></div>
+                                <div @click.prevent="showPic(item)"><Tooltip content="预览"><Icon type="ios-eye" size="22" /></Tooltip></div>
+                              </div>
+                            </div>
+                          </template>
+                        </Checkbox>
+                        <div>
+                          <Tooltip :content="item.name" placement="bottom">
+                            <div class="text">{{item.name}}</div>
+                          </Tooltip>
+                        </div>
+                      </div>
+                    </div>
+                  </CheckboxGroup>
+                </div>
+                <div class="page-box">
+                  <Page :total="total" :page-size="searchForm.pageSize" show-elevator @on-change="pageChange" size="small" />
                 </div>
               </div>
-            </Card>
-          </div>
+            </Col>
+          </Row>
+
+
+
+
+          <!--<div class="oss-operation padding-row">-->
+            <!--<div>-->
+              <!--<Upload-->
+                <!--ref="up"-->
+                <!--:action="commonUrl + '/common/common/upload/file'"-->
+                <!--:data="{-->
+                  <!--directoryPath: searchForm.fileDirectoryId,-->
+                <!--}"-->
+                <!--:headers="accessToken"-->
+                <!--:max-size="20480"-->
+                <!--:on-error="handleError"-->
+                <!--:on-exceeded-size="handleMaxSize"-->
+                <!--:on-success="handleSuccess"-->
+                <!--:show-upload-list="false"-->
+                <!--multiple-->
+                <!--style="display: inline-block"-->
+              <!--&gt;-->
+                <!--<Button>上传图片</Button>-->
+              <!--</Upload>-->
+              <!--<Dropdown @on-click="handleDropdown" v-if="!isComponent">-->
+                <!--<Button>-->
+                  <!--更多操作-->
+                  <!--<Icon type="md-arrow-dropdown"/>-->
+                <!--</Button>-->
+                <!--<DropdownMenu slot="list">-->
+                  <!--<DropdownItem name="refresh">刷新</DropdownItem>-->
+                  <!--<DropdownItem v-show="showType == 'list'" name="removeAll"-->
+                  <!--&gt;批量删除-->
+                  <!--</DropdownItem>-->
+                <!--</DropdownMenu>-->
+              <!--</Dropdown>-->
+            <!--</div>-->
+          <!--</div>-->
         </div>
-        <Row class="mt_10" justify="end" type="flex">
-          <Page
-            :current="searchForm.pageNumber"
-            :page-size="searchForm.pageSize"
-            :page-size-opts="pageSizeOpts"
-            :total="total"
-            show-elevator
-            show-sizer
-            show-total
-            size="small"
-            @on-change="changePage"
-            @on-page-size-change="changePageSize"
-          ></Page>
-        </Row>
+
+        <!--<Alert show-icon v-if="!isComponent">-->
+          <!--已选择-->
+          <!--<span>{{ selectCount }}</span> 项-->
+          <!--<a class="select-clear" @click="clearSelectAll">清空</a>-->
+          <!--<span v-if="selectCount > 0" style="margin-left: 15px"-->
+          <!--&gt;共计 {{ totalSize }} 存储量</span-->
+          <!--&gt;-->
+        <!--</Alert>-->
+
+        <!--<div v-show="showType === 'list'" >-->
+          <!--<div class="flex">-->
+            <!--<div class="article-category mr_10">-->
+              <!--<Tree-->
+                <!--:data="treeData"-->
+                <!--@on-contextmenu="handleContextMenu"-->
+                <!--@on-select-change="handleCateChange"-->
+              <!--&gt;-->
+                <!--<template slot="contextMenu" v-if="!isComponent">-->
+                  <!--<DropdownItem @click.native="handleContextMenuEdit"-->
+                  <!--&gt;编辑-->
+                  <!--</DropdownItem-->
+                  <!--&gt;-->
+                  <!--<DropdownItem-->
+                    <!--style="color: #ed4014"-->
+                    <!--@click.native="handleContextMenuDelete"-->
+                  <!--&gt;删除-->
+                  <!--</DropdownItem-->
+                  <!--&gt;-->
+                <!--</template>-->
+              <!--</Tree>-->
+              <!--<Alert v-if="!isComponent">鼠标右键编辑/删除分组</Alert>-->
+              <!--<div class="group-row flex" v-if="!isComponent">-->
+                <!--<Button @click="handleClickAddGroup">添加分组</Button>-->
+              <!--</div>-->
+            <!--</div>-->
+
+            <!--<Table-->
+              <!--ref="table"-->
+              <!--:columns="isComponent ? viewColumns : columns"-->
+              <!--:data="data"-->
+              <!--:loading="loading"-->
+              <!--border-->
+              <!--class="table"-->
+              <!--sortable="custom"-->
+              <!--@on-sort-change="changeSort"-->
+              <!--@on-selection-change="changeSelect"-->
+            <!--&gt;-->
+              <!--<template slot="fileKey" slot-scope="{ row }">-->
+                <!--<a @click="copyFileUrl(row)">{{ row.fileKey }}</a>-->
+              <!--</template>-->
+            <!--</Table>-->
+          <!--</div>-->
+        <!--</div>-->
+
+        <!--<div v-show="showType === 'thumb'">-->
+          <!--<div class="oss-wrapper">-->
+            <!--<Card v-for="(item, i) in data" :key="i" class="oss-card">-->
+              <!--<div class="content">-->
+                <!--<img-->
+                  <!--v-if="item.fileType.indexOf('image') >= 0"-->
+                  <!--:src="item.url"-->
+                  <!--class="img"-->
+                  <!--@click="showPic(item)"-->
+                <!--/>-->
+                <!--<div-->
+                  <!--v-else-if="item.fileType.indexOf('video') >= 0"-->
+                  <!--class="video"-->
+                  <!--@click="showVideo(item)"-->
+                <!--&gt;-->
+                  <!--&lt;!&ndash; 文件小于5MB显示video &ndash;&gt;-->
+                  <!--<video v-if="item.fileSize < 1024 * 1024 * 5" class="cover">-->
+                    <!--<source :src="item.url"/>-->
+                  <!--</video>-->
+                  <!--<img class="play" src="@/assets/play.png"/>-->
+                <!--</div>-->
+                <!--<div v-else class="other">-->
+                  <!--<div class="name">{{ item.name }}</div>-->
+                  <!--<div class="key">{{ item.fileKey }}</div>-->
+                  <!--<div class="info">-->
+                    <!--文件类型：{{ item.fileType }} 文件大小：{{-->
+                      <!--((item.fileSize * 1.0) / (1024 * 1024)).toFixed(2)-->
+                    <!--}}-->
+                    <!--MB 创建时间：{{ item.createTime }}-->
+                  <!--</div>-->
+                <!--</div>-->
+                <!--<div class="actions">-->
+                  <!--<div class="btn">-->
+                    <!--<Tooltip content="下载" placement="top">-->
+                      <!--<Icon-->
+                        <!--size="16"-->
+                        <!--type="md-download"-->
+                        <!--@click="download(item)"-->
+                      <!--/>-->
+                    <!--</Tooltip>-->
+                  <!--</div>-->
+                  <!--<div class="btn">-->
+                    <!--<Tooltip content="重命名" placement="top">-->
+                      <!--<Icon size="16" type="md-create" @click="rename(item)"/>-->
+                    <!--</Tooltip>-->
+                  <!--</div>-->
+                  <!--<div class="btn-no">-->
+                    <!--<Tooltip content="删除" placement="top">-->
+                      <!--<Icon size="16" type="md-trash" @click="remove(item)"/>-->
+                    <!--</Tooltip>-->
+                  <!--</div>-->
+                <!--</div>-->
+              <!--</div>-->
+            <!--</Card>-->
+          <!--</div>-->
+        <!--</div>-->
+        <!--<Row class="mt_10" justify="end" type="flex">-->
+          <!--<Page-->
+            <!--:current="searchForm.pageNumber"-->
+            <!--:page-size="searchForm.pageSize"-->
+            <!--:page-size-opts="pageSizeOpts"-->
+            <!--:total="total"-->
+            <!--show-elevator-->
+            <!--show-sizer-->
+            <!--show-total-->
+            <!--size="small"-->
+            <!--@on-change="changePage"-->
+            <!--@on-page-size-change="changePageSize"-->
+          <!--&gt;</Page>-->
+        <!--</Row>-->
       </Card>
     </Row>
     <Modal
@@ -342,7 +429,6 @@ export default {
       commonUrl, // 上传文件路径
       config, // api地址
       fileDirectoryId: "",
-
       groupFormValidate: {
         id: [],
         level: 0,
@@ -384,7 +470,7 @@ export default {
         fileKey: "",
         fileType: "",
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 27, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
         startDate: "", // 起始时间
@@ -731,6 +817,27 @@ export default {
       selectedGroupData: "",
       insertOrUpdate: "insert",
       groupLoading: false,
+      // 图片列表
+      selectedOss: [],
+      myData: [
+        {
+          title: 'parent 1',
+          expand: true,
+          render: (h, { root, node, data }) => {
+            return h('span', {style: {display: 'inline-block', width: '100%'}}, [
+              h('span', [h("Icon", {type: 'ios-folder-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
+              h('span', {style: {display: 'inline-block', float: 'right', marginRight: '32px'}},
+                [h("Button", {...this.buttonProps, icon: 'ios-add', type: 'primary', style: {width: '64px'}, onClick: () => { this.append(data) }})
+              ])
+            ]);
+          },
+          children: [
+            {title: 'child 1-1', expand: true, children: [{title: 'leaf 1-1-1', expand: true}, {title: 'leaf 1-1-2', expand: true}]},
+            {title: 'child 1-2', expand: true, children: [{title: 'leaf 1-2-1', expand: true}, {title: 'leaf 1-2-1', expand: true}]}
+          ]
+        }
+      ],
+      buttonProps: {type: 'default', size: 'small',},
     };
   },
   watch: {
@@ -739,11 +846,64 @@ export default {
     },
     choose(val) {
       if (val) this.selectImage = val
+    },
+    selectedOss(val) {
+      if (val) {
+        this.$emit("callback", {url: val[val.length-1].split(',')[1]});
+      }
     }
   },
 
   methods: {
+    onMouseOver(item, index) {
+      this.$set(this.data[index], 'isShowPreview', true);
+      this.$forceUpdate();
+    },
+    onMouseOut(item, index) {
+      this.$set(this.data[index], 'isShowPreview', false);
+    },
+    // 复选框值改变时触发
+    selectOssChange(e) {
+      if (e) {
+        this.selectList = e.map(item => {return { id: item.split(',')[0]}});
+        this.selectCount = e.length;
+        // let size = 0;
+        // e.forEach((item) => {size += item.fileSize * 1.0;});
+        // this.totalSize = ((size * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
+        this.$emit("selected", e);
+      }
+    },
+    // 页码改变时回调
+    pageChange(value) {
+      this.$set(this, 'selectedOss', []);
+      this.searchForm.pageNumber = value;
+      this.getDataList();
+    },
+    // 自定义tree节点显示内容和交互
+    renderContent (h, { root, node, data }) {
+      return h('span', {style: {display: 'inline-block', width: '100%'}},
+      [
+        h('span', [h("Icon", {type: 'ios-paper-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
+        h('span', {style: {display: 'inline-block', float: 'right', marginRight: '10px'}},
+        [
+          h("Dropdown", {style: {marginLeft: "4px"}},
+            [
+            h("Icon", {props: {type: 'ios-more', size: "20",}, style: {display: 'inline-block'}, on:{click: () => {}}}),
+            h("DropdownMenu", {slot: "list"
+            }, [
+              h("DropdownItem", { nativeOn:{click: () => {this.handleContextMenuEdit()}} }, "编辑"),
+              h("DropdownItem", { nativeOn:{click: () => {this.handleContextMenuDelete()}} }, "删除"),
+            ])
+          ]),
+        ])
+      ]);
+    },
+
+
+
+
     handleContextMenu(val) {
+      console.log('handleContextMenu', val);
       this.selectedGroupData = val;
     },
     // 编辑分组
@@ -768,6 +928,7 @@ export default {
           const res = await delFileDirectory(this.selectedGroupData.value);
           if (res.success) {
             this.$Message.success("删除成功!");
+            this.getDataList();
             this.getAllList();
           }
         },
@@ -870,7 +1031,7 @@ export default {
           obj.level = item.level;
           obj.expand = false;
           obj.selected = false;
-          obj.contextmenu = true;
+          obj.contextmenu = false;
           obj.parentId = item.parentId;
           obj.children = this.getTree(item.children); // 递归调用
           arr.push(obj);
@@ -881,18 +1042,21 @@ export default {
 
     // 选择分类回调
     handleCateChange(data) {
-      this.selectedGroupData = data[0];
-      let {value, type, level} = data[0];
-      this.list.push({value, type, level});
-      this.searchForm.fileDirectoryId = value;
-      if (value === "0" || value === 0) {
-        delete this.searchForm.fileDirectoryId;
-        this.groupFormValidate.level = 0;
-      } else {
-        this.groupFormValidate.level = Number(level) + 1;
+      if (data) {
+        this.selectedGroupData = data[0];
+        let {value, type, level} = data[0];
+        this.list.push({value, type, level});
+        this.searchForm.fileDirectoryId = value;
+        if (value === "0" || value === 0) {
+          delete this.searchForm.fileDirectoryId;
+          this.groupFormValidate.level = 0;
+        } else {
+          this.groupFormValidate.level = Number(level) + 1;
+        }
+        this.searchForm.userEnums = type;
+        this.getDataList();
+        this.$set(this, 'selectedOss', []);
       }
-      this.searchForm.userEnums = type;
-      this.getDataList();
     },
     /**
      * 选择
@@ -903,7 +1067,7 @@ export default {
     // 更多操作
     handleDropdown(name) {
       if (name === "refresh") {
-        this.getDataList();
+        this.getDataList('refresh');
       } else if (name === "removeAll") {
         this.removeAll();
       }
@@ -981,7 +1145,7 @@ export default {
       this.getDataList();
     },
     // 获取列表数据
-    getDataList() {
+    getDataList(type = null) {
       if (this.showType == "list") {
         this.pageSizeOpts = [10, 20, 50];
       } else {
@@ -993,6 +1157,9 @@ export default {
 
         this.data = res.result.records;
         this.total = res.result.total;
+        if (type === 'refresh') {
+          this.$Message.success('刷新成功！');
+        }
       });
     },
     // 搜索
@@ -1064,16 +1231,15 @@ export default {
         loading: true,
         onOk: () => {
           let ids = "";
-          this.selectList.forEach(function (e) {
-            ids += e.id + ",";
-          });
+          this.selectList.forEach(function (e) {ids += e.id + ",";});
           ids = ids.substring(0, ids.length - 1);
           deleteFile(ids).then((res) => {
             this.$Modal.remove();
             if (res.success) {
+              this.$set(this, 'selectedOss', []);
+              // this.clearSelectAll();
+              this.init();
               this.$Message.success("批量删除文件成功");
-              this.clearSelectAll();
-              this.getDataList();
             }
           })
             .catch((err) => {
@@ -1157,6 +1323,8 @@ export default {
     if (!this.isComponent) {
       // 是组件的话，初始化不调用接口
       this.init();
+    } else {
+      this.searchForm.pageSize =18; // 页面大小
     }
   },
 };

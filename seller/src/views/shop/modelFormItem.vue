@@ -231,7 +231,7 @@ import Recommend from "./modelList/recommend.vue";
 import NotEnough from "./modelList/notEnough.vue";
 import Seckill from "./modelList/seckill.vue";
 // import ossManage from "@/views/sys/oss-manage/ossManage";
-import ossManage from "@/views/shop/ossManage";
+import ossManage from "@/views/shop/ossManages";
 
 export default {
   name: "modelFormItem",

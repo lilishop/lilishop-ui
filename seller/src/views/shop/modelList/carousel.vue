@@ -121,7 +121,7 @@
 
 <script>
 // import ossManage from "@/views/sys/oss-manage/ossManage";
-import ossManage from "@/views/shop/ossManage";
+import ossManage from "@/views/shop/ossManages";
 export default {
   name: "modelCarousel",
   props: ["data"],

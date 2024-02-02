@@ -221,13 +221,13 @@
     ></liliDialog>
     <hotzone ref="hotzone" @changeZone="changeZone"></hotzone>
     <Modal width="1200px" v-model="picModelFlag">
-      <ossManage  @callback="callbackSelected" ref="ossManage" />
+      <ossManage  @callback="callbackSelected" :isComponent="true" ref="ossManage" />
     </Modal>
   </div>
 </template>
 <script>
 // import ossManage from "@/views/sys/oss-manage/ossManage";
-import ossManage from "@/views/shop/ossManage";
+import ossManage from "@/views/shop/ossManages";
 import hotzone from "@/views/shop/hotzone";
 import { modelData } from "./config";
 import ways from "@/views/lili-dialog/wap.js"; // 选择链接的类型

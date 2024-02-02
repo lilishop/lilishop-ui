@@ -375,7 +375,7 @@
 
 
     <Modal width="1200px" v-model="picModalFlag">
-      <ossManage @callback="callbackSelected" ref="ossManage" />
+      <ossManage @callback="callbackSelected" :isComponent="true" ref="ossManage" />
     </Modal>
 
     <Modal width="1200px" v-model="memberModalFlag">
