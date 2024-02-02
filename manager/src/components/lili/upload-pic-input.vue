@@ -47,7 +47,7 @@
     </Modal>
 
     <Modal width="1200px" v-model="picModalFlag">
-      <ossManage @callback="callbackSelected" ref="ossManage" />
+      <ossManage @callback="callbackSelected" ref="ossManage" isComponent="true" />
     </Modal>
 
   </div>
