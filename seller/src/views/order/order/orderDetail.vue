@@ -299,7 +299,7 @@
 
           </FormItem>
           <FormItem label="详细地址" prop="consigneeDetail">
-            <Input v-model="addressForm.consigneeDetail" size="large" maxlength="11"></Input>
+            <Input v-model="addressForm.consigneeDetail" size="large"></Input>
           </FormItem>
         </Form>
       </div>

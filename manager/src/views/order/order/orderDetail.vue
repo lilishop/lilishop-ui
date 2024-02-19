@@ -349,7 +349,7 @@
             <Button type="default" @click="$refs.map.open()">选择</Button>
           </FormItem>
           <FormItem label="详细地址" prop="consigneeDetail">
-            <Input v-model="addressForm.consigneeDetail" size="large" maxlength="50"></Input>
+            <Input v-model="addressForm.consigneeDetail" size="large" ></Input>
           </FormItem>
         </Form>
       </div>
