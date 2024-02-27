@@ -1,7 +1,7 @@
 <template>
   <div>
     <Card>
-      <Row @keydown.enter.native="handleSearch">
+      <Row @keydown.enter.native.prevent="handleSearch">
         <Form
           ref="searchForm"
           :model="searchForm"
@@ -68,10 +68,9 @@
 
 <script>
 import {
-  getDistributionListData,
-  retreatDistribution,
-  resumeDistribution,
-  auditDistribution,
+getDistributionListData,
+resumeDistribution,
+retreatDistribution
 } from "@/api/distribution";
 import { distributionStatusList } from "./dataJson.js";
 export default {

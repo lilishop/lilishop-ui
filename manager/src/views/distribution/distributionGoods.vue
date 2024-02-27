@@ -1,7 +1,7 @@
 <template>
   <div>
     <Card>
-      <Form @keydown.enter.native="handleSearch" ref="searchForm" :model="searchForm" inline :label-width="70"
+      <Form @keydown.enter.native.prevent="handleSearch" ref="searchForm" :model="searchForm" inline :label-width="70"
         class="search-form">
         <Form-item label="商品名称" prop="goodsName">
           <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px" />
@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import { getDistributionGoods, delDistributionGoods } from "@/api/distribution";
+import { delDistributionGoods, getDistributionGoods } from "@/api/distribution";
 import vueQr from "vue-qr";
 export default {
   components: {
