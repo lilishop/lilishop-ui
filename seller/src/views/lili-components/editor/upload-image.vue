@@ -57,7 +57,7 @@
     </Modal>
 
     <Modal width="1000" v-model="showOssManager" @on-ok="confirmUrls">
-    <OssManage ref="ossManage" @selected="(list)=>{ selectedImage = list}" @callback="handleCallback" />
+    <OssManage ref="ossManage" :isComponent="true" @selected="(list)=>{ selectedImage = list}" @callback="handleCallback" />
     </Modal>
   </div>
 </template>

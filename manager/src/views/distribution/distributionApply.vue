@@ -1,7 +1,7 @@
 <template>
   <div>
     <Card>
-      <Row @keydown.enter.native="handleSearch">
+      <Row @keydown.enter.native.prevent="handleSearch">
         <Form
           ref="searchForm"
           :model="searchForm"
@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import { getDistributionListData, auditDistribution } from "@/api/distribution";
+import { auditDistribution, getDistributionListData } from "@/api/distribution";
 
 export default {
   name: "distributionApply",

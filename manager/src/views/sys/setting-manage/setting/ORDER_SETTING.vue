@@ -26,7 +26,7 @@
         <Input type='number' v-model="formValidate.closeAfterSale">
         <span slot="append">天</span>
         </Input>
-        <span class="desc">订单完成后，多少天内允许退单，如果天数为0,则不允许退单</span>
+        <span class="desc">订单完成后，多少天内允许退单，如果天数为0,则完成订单当天可以退单，之后就不再允许。</span>
       </FormItem>
       <FormItem label="已完成订单允许投诉" prop="closeComplaint">
         <Input type='number' v-model="formValidate.closeComplaint">
@@ -54,9 +54,9 @@ export default {
         autoEvaluation: "",
         autoReceive: "",
         closeAfterSale: "",
-        closeComplaint:""
+        closeComplaint: ""
       },
-      result:""
+      result: ""
     };
   },
   props: ["res", "type"],
@@ -114,16 +114,20 @@ export default {
 
 <style lang="scss" scoped>
 @import "./style.scss";
+
 .label-item {
   display: flex;
 }
+
 .ivu-input-wrapper {
   width: 100px;
   margin-right: 10px;
 }
+
 /deep/ .ivu-input {
   width: 100px !important;
 }
+
 .desc {
   font-size: 12px;
   color: #999;

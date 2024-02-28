@@ -276,19 +276,7 @@ export const otherRouter = {
       title: "查看直播",
       name: "live-detail",
       component: () => import("@/views/promotions/live/live-detail.vue")
-    },
-    {
-      path: "group-list",
-      title: "分销团队",
-      name: "group-list",
-      component: () => import("@/views/distribution/distributionGroup.vue")
-    },
-    {
-      path: "distribution-member",
-      title: "分销会员列表",
-      name: "distribution-member",
-      component: () => import("@/views/distribution/distributionMember.vue")
-    },
+    }
   ]
 };
 

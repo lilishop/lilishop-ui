@@ -8,7 +8,7 @@
         <Button @click="orderLogModal = true" type="primary">订单日志</Button>
         <Button @click="printOrder" type="primary" ghost style="float:right;">打印发货单</Button>
         <Button v-if="allowOperation.take" @click="orderTake" type="primary">订单核销</Button>
-        <Button v-if="allowOperation.ship" @click="orderDeliver" type="primary">发货</Button>
+        <!-- <Button v-if="allowOperation.ship" @click="orderDeliver" type="primary">发货</Button> -->
 
         <Button v-if="allowOperation.ship" @click="groupShip" type="primary">分包裹发货</Button>
 
@@ -299,7 +299,7 @@
 
           </FormItem>
           <FormItem label="详细地址" prop="consigneeDetail">
-            <Input v-model="addressForm.consigneeDetail" size="large" maxlength="11"></Input>
+            <Input v-model="addressForm.consigneeDetail" size="large"></Input>
           </FormItem>
         </Form>
       </div>
@@ -420,7 +420,7 @@
         <Form :model="faceSheetForm" ref="faceSheetForm" v-if="facesheetFlag" :rules="faceSheetFormValidate">
           <FormItem label="物流公司" prop="logisticsId" style="position: relative" :label-width="90">
             <Select v-model="faceSheetForm.logisticsId" placeholder="请选择" style="width: 250px">
-              <Option v-for="(item, i) in checkedLogistics" :key="i" :value="item.logisticsId">{{ item.name }}
+              <Option v-for="(item, i) in checkedLogistics" :key="i" :value="item.id">{{ item.name }}
               </Option>
             </Select>
           </FormItem>
@@ -429,7 +429,7 @@
           :rules="orderDeliverFormValidate" style="position: relative">
           <FormItem label="物流公司" prop="logisticsId">
             <Select v-model="orderDeliveryForm.logisticsId" placeholder="请选择" style="width: 250px">
-              <Option v-for="(item, i) in checkedLogistics" :key="i" :value="item.logisticsId">{{ item.name }}
+              <Option v-for="(item, i) in checkedLogistics" :key="i" :value="item.id">{{ item.name }}
               </Option>
             </Select>
           </FormItem>
@@ -1116,6 +1116,7 @@ export default {
           }
         })
       } else {
+        console.log("this.orderDeliveryForm",this.orderDeliveryForm)
         this.$refs['orderDeliveryForm'].validate((valid) => {
           if (valid) {
             API_Order.orderDelivery(this.sn, this.orderDeliveryForm).then(
