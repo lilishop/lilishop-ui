@@ -206,7 +206,7 @@
                                                 :filter-method="filterMethod"
                                                 :maxlength="30" placeholder="请输入规格值" style="width: 180px"
                                                 @on-focus="changeSkuVals(val, item.name)"
-                                                @on-blur="checkSkuVal(val, index)"
+                                                @on-blur="checkSkuVal(val, $index, item)"
                                                 @on-change="skuValueChange(val, index, item)">
                                   </AutoComplete>
                                   <a style="margin-left: 6px" v-if="val.value && val.value !== ''">
@@ -689,6 +689,7 @@ export default {
       picModalFlag: false, // 图片选择器
       selectedFormBtnName: "", // 点击图片绑定form
       selectedImage: [],
+      lastEditSkuValue: '',
     };
   },
   watch: {
@@ -1323,7 +1324,6 @@ export default {
         return;
       }
       if (val.value === '') {
-        this.$Message.error("规格值不能为空！");
         return;
       }
       if (this.zz(0, val.value) > 20) {
@@ -1333,6 +1333,7 @@ export default {
         this.$forceUpdate();// 调用该方法会触发组件的重新渲染
         // return;
       }
+      this.lastEditSkuValue = val.value;
       let curVal = this.currentSkuVal;
       this.skuTableData = this.skuTableData.map((e) => {
         if (e[val.name] === curVal) {
@@ -1359,6 +1360,10 @@ export default {
     checkSkuVal(val) {
       if (val.value === "") {
         this.$Message.error("规格值不能为空！");
+        this.skuInfo[skuIndex] && (this.skuInfo[skuIndex].spec_values = this.skuInfo[skuIndex].spec_values.filter((i) => i.value !== ""));
+        this.skuTableData = this.skuTableData.filter(
+          (e) => e[spec.name] !== this.lastEditSkuValue
+        );
       }
     },
     /** 移除当前规格项 进行数据变化*/
