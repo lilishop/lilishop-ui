@@ -1,4 +1,4 @@
- <template>
+<template>
   <div class="login" @click="$refs.verify.show = false">
     <Row type="flex" @keydown.enter.native="submitLogin">
       <Col style="width: 368px">
@@ -9,12 +9,12 @@
             <!--账号密码登录-->
             <Form ref="usernameLoginForm" :model="form" :rules="rules" class="form">
               <FormItem prop="username">
-                <Input v-model="form.username" prefix="ios-contact" size="large" clearable placeholder="请输入用户名"
+                <Input v-model="form.username" prefix="ios-contact" clearable placeholder="请输入用户名"
                   autocomplete="off" />
               </FormItem>
               <FormItem prop="password">
-                <Input type="password" v-model="form.password" prefix="ios-lock" size="large" password placeholder="请输入密码"
-                  autocomplete="off" />
+                <Input type="password" v-model="form.password" prefix="ios-lock" password
+                  placeholder="请输入密码" autocomplete="off" />
               </FormItem>
             </Form>
             <div class="register">
@@ -25,21 +25,21 @@
             <!-- 验证码登录 -->
             <Form ref="formSms" :model="formSms" :rules="ruleInline" @click.self='$refs.verify.show = false'>
               <FormItem prop="mobile">
-                <i-input type="text" v-model="formSms.mobile" clearable placeholder="手机号">
+                <i-input type="text" maxlength="11" v-model="formSms.mobile" clearable placeholder="手机号">
                   <Icon type="md-lock" slot="prepend"></Icon>
                 </i-input>
               </FormItem>
               <FormItem prop="code">
                 <i-input type="text" v-model="formSms.code" placeholder="手机验证码">
                   <Icon type="ios-text-outline" style="font-weight: bold" slot="prepend" />
-                  <Button slot="append" @click="sendCode">{{ codeMsg }}</Button>
+                  <Button slot="append" @click="sendCode" :loading="sendCodeLoading">{{ codeMsg }}</Button>
                 </i-input>
               </FormItem>
               <FormItem>
-                <Button @click.stop="verifyBtnClick" long :type="verifyStatus ? 'success' : 'default'">{{ verifyStatus ?
+                <!-- <Button @click.stop="verifyBtnClick" long :type="verifyStatus ? 'success' : 'default'">{{ verifyStatus ?
                   '验证通过' :
                   '点击完成安全验证' }}
-                </Button>
+                </Button> -->
               </FormItem>
             </Form>
           </Tab-pane>
@@ -60,14 +60,13 @@
 </template>
 
 <script>
-import { getCurrentPermissionList } from "@/api/index";
-import { login, userMsg, storeSmsLogin } from "@/api/index";
 import { sendSms } from "@/api/common.js";
-import Cookies from "js-cookie";
-import Header from "@/views/main-components/header";
-import Footer from "@/views/main-components/footer";
+import { login, storeSmsLogin, userMsg } from "@/api/index";
 import util from "@/libs/util.js";
+import Footer from "@/views/main-components/footer";
+import Header from "@/views/main-components/header";
 import verify from "@/views/my-components/verify";
+import Cookies from "js-cookie";
 export default {
   components: {
     Header,
@@ -77,6 +76,7 @@ export default {
   data() {
     return {
       saveLogin: true, // 保存登录状态
+      sendCodeLoading:false,
       loading: false, // 加载状态
       verifyStatus: false, // 是否图片验证通过
       time: 60, // 倒计时
@@ -171,26 +171,30 @@ export default {
     },
     // 发送手机验证码
     sendCode() {
+      if (this.formSms.mobile === "") {
+        this.$Message.warning("请先填写手机号");
+        return;
+      }
+      if (!this.verifyStatus) {
+        this.$refs.verify.init();
+        return
+      }
       if (this.time === 60) {
-        if (this.formSms.mobile === "") {
-          this.$Message.warning("请先填写手机号");
-          return;
-        }
-        if (!this.verifyStatus) {
-          this.$Message.warning("请先完成安全验证");
-          return;
-        }
+        this.sendCodeLoading = true
         let params = {
           mobile: this.formSms.mobile,
           verificationEnums: "LOGIN",
         };
         sendSms(params).then((res) => {
+
           if (res.success) {
             this.$Message.success("验证码发送成功");
             let that = this;
             this.interval = setInterval(() => {
+              // this.sendCodeLoading = false
               that.time--;
               if (that.time === 0) {
+                this.sendCodeLoading = false
                 that.time = 60;
                 that.codeMsg = "重新发送";
                 that.verifyStatus = false;
@@ -202,6 +206,8 @@ export default {
           } else {
             this.$Message.warning(res.message);
           }
+        }).catch(() => {
+          this.sendCodeLoading = false
         });
       }
     },
@@ -216,10 +222,16 @@ export default {
       } else if (this.loginType == 'mobileLogin') {
         this.$refs['formSms'].validate((valid) => {
           if (valid) {
+            this.loading = true;
+
             storeSmsLogin(this.formSms).then(res => {
+              this.loading = false;
+
               if (res.success) {
                 this.afterLogin(res)
               }
+            }).catch(() => {
+              this.loading = false;
             })
           }
         })
@@ -244,8 +256,12 @@ export default {
           .catch(() => {
             this.loading = false;
           });
+      } else {
+        this.verifyStatus = true;
+
+        this.sendCode()
       }
-      this.verifyStatus = true;
+
       this.$refs.verify.show = false;
     },
 

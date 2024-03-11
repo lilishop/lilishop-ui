@@ -1,15 +1,15 @@
 <template>
   <div>
     <Card>
-        <Form ref="searchForm" :model="searchForm"  class="search-form">
+        <Form ref="searchForm" @keydown.enter.native.prevent="handleSearch" :model="searchForm"  class="search-form">
           <Form-item label="会员名称"  class="flex" prop="memberName">
             <Input
-              type="text" v-model="searchForm.memberName" clearable
+              type="text" placeholder="请输入会员名称" v-model="searchForm.memberName" clearable
               style="width: 200px"></Input>
           </Form-item>
           <Form-item label="编号" class="flex">
             <Input
-              type="text" v-model="searchForm.sn" clearable
+              type="text" placeholder="请输入编号" v-model="searchForm.sn" clearable
               style="width: 200px"></Input>
           </Form-item>
           <Form-item label="状态"
@@ -55,10 +55,10 @@
 
 <script>
 import {
-        getDistributionCash,
-        auditDistributionCash
-    } from "@/api/distribution";
-import {cashStatusList} from './dataJson'
+auditDistributionCash,
+getDistributionCash
+} from "@/api/distribution";
+import { cashStatusList } from './dataJson';
 export default {
   name: "distributionCash",
   data() {
