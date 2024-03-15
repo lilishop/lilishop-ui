@@ -111,9 +111,12 @@ export default {
     },
     // 图片回显
     callbackSelected(val) {
+      console.log('图片回显', val);
       this.picModalFlag = false;
       this.currentValue = val.url;
       this.picIndex = "";
+      this.$emit("input", this.currentValue);
+      this.$emit("on-change", this.currentValue);
     },
     // 初始化
     init() {
@@ -150,7 +153,6 @@ export default {
       this.loading = false;
       if (res.success) {
         this.currentValue = res.result;
-        console.log('this.currentValue', this.currentValue);
         this.$emit("input", this.currentValue);
         this.$emit("on-change", this.currentValue);
       } else {
@@ -174,6 +176,7 @@ export default {
         return;
       }
       this.currentValue = value;
+      this.$emit("input", this.currentValue);
       this.$emit("on-change", this.currentValue);
     }
   },
