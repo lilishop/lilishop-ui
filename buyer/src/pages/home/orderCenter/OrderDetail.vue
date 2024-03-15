@@ -204,6 +204,10 @@
           <span>活动优惠：</span
           ><span>-{{ order.order.discountPrice | unitPrice("￥") }}</span>
         </div>
+        <div v-if="order.order.priceDetailDTO.updatePrice">
+          <span>修改价格：</span
+          ><span>{{ order.order.priceDetailDTO.updatePrice | unitPrice("￥") }}</span>
+        </div>
         <div>
           <span>应付金额：</span>
           <span class="actrual-price">{{
