@@ -53,6 +53,15 @@
                   @on-change="selectDateRange"
                 ></DatePicker>
               </Form-item>
+              <Form-item label="上传人" prop="ownerName">
+                <Input
+                  type="text"
+                  v-model="searchForm.ownerName"
+                  placeholder="图片拥有者名称"
+                  clearable
+                  style="width: 200px"
+                />
+              </Form-item>
               <Button
                 class="search-btn"
                 icon="ios-search"
@@ -469,8 +478,9 @@ export default {
         name: "",
         fileKey: "",
         fileType: "",
+        ownerName: "",
         pageNumber: 1, // 当前页数
-        pageSize: 27, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
         startDate: "", // 起始时间
@@ -1138,7 +1148,7 @@ export default {
     changeShowType() {
       this.searchForm.pageNumber = 1;
       if (this.showType == "list") {
-        this.searchForm.pageSize = 10;
+        this.searchForm.pageSize = 20;
       } else {
         this.searchForm.pageSize = 12;
       }
@@ -1167,7 +1177,7 @@ export default {
       this.searchForm.title = this.searchForm.name;
       this.searchForm.pageNumber = 1;
       if (this.showType == "list") {
-        this.searchForm.pageSize = 5;
+        this.searchForm.pageSize = 20;
       } else {
         this.searchForm.pageSize = 12;
       }
