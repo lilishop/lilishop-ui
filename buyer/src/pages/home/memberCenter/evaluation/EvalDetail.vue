@@ -60,24 +60,27 @@
               v-model="orderGoods.content"
             />
           </div>
-          <div>
-            <span class="color999">商家回复：</span>
-            <span>{{ orderGoods.reply }}</span>
-          </div>
           <div style="display: flex; align-items: center">
             <template v-if="orderGoods.images">
-              <div
-                class="demo-upload-list"
-                v-for="(img, index) in orderGoods.images.split(',')"
-                :key="index"
-              >
+              <div class="demo-upload-list" v-for="(img, index) in orderGoods.images.split(',')" :key="index">
                 <img :src="img" />
-                <div class="demo-upload-list-cover">
-                  <Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon>
-                </div>
+                <div class="demo-upload-list-cover"><Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon></div>
               </div>
             </template>
           </div>
+          <div style="margin-top: 20px;" v-if="orderGoods.reply || orderGoods.replyImage">
+            <span class="color999">商家回复：</span>
+            <span>{{ orderGoods.reply }}</span>
+            <div style="display: flex; align-items: center">
+              <template v-if="orderGoods.replyImage">
+                <div class="demo-upload-list" v-for="(img, index) in orderGoods.replyImage.split(',')" :key="index">
+                  <img :src="img" />
+                  <div class="demo-upload-list-cover"><Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon></div>
+                </div>
+              </template>
+            </div>
+          </div>
+
         </div>
       </li>
     </ul>
