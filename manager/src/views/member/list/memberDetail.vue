@@ -342,8 +342,8 @@
         </FormItem>
         <FormItem label="默认" prop="isDefault">
           <RadioGroup type="button" button-style="solid" v-model="addressForm.isDefault">
-            <Radio label="1">是</Radio>
-            <Radio label="0">否</Radio>
+            <Radio :label="1">是</Radio>
+            <Radio :label="0">否</Radio>
           </RadioGroup>
         </FormItem>
       </Form>
@@ -380,7 +380,7 @@
         addressModalVisible: false, //会员地址操作弹出框
         addressForm: {
           id: "",
-          isDefault: "0",
+          isDefault: 0,
           consigneeAddressPath:"",
           consigneeAddressIdPath:""
 
@@ -657,7 +657,7 @@
             key: "isDefault",
             width: 80,
             render: (h, params) => {
-              if (params.row.isDefault == "1") {
+              if (params.row.isDefault) {
                 return h('div', [
                   h('span', {}, "是"),
                 ]);
@@ -960,14 +960,16 @@
         this.addressModalVisible = true
         this.addressForm = {
           id: "",
-          isDefault: "0",
+          isDefault: 0,
         }
 
       },
       //修改TA的收货地址
       editAddress(v) {
         this.addressModalTitle = "修改会员地址";
-        this.$set(this, "addressForm", v);
+        this.addressForm = JSON.parse(JSON.stringify(v));
+        this.addressForm.isDefault = v.isDefault?1:0;
+        // this.$set(this, "addressForm", v);
         delete this.addressForm.updateTime;
         this.addressModalVisible = true
       },
@@ -978,7 +980,7 @@
           if (valid) {
             this.submitLoading = true;
             let submit = JSON.parse(JSON.stringify(this.addressForm))
-            submit.isDefault == "1" ? submit.isDefault  = true :  submit.isDefault = false
+            submit.isDefault ? submit.isDefault  = true :  submit.isDefault = false
             if (submit.id != "") {
               //修改地址
               API_Member.editMemberAddress(submit).then((res) => {
