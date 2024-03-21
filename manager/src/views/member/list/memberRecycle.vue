@@ -414,7 +414,7 @@ export default {
         onOk: () => {
           API_Member.updateMemberStatus(params).then((res) => {
             if (res.success) {
-              this.$Message.success("禁用成功");
+              this.$Message.success("启用成功");
               this.getData();
             } else {
               // this.$Message.error(res.message);
