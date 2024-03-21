@@ -708,7 +708,7 @@ export default {
           params.settlementCycle = this.settlementCycle;
           if (this.shopId) {
             delete params.memberId;
-            shopEdit(this.shopId, params).then((res) => {
+            shopEdit(this.shopId, this.filterFun(params)).then((res) => {
               if (res.success) {
                 this.$Message.success("编辑成功");
                 this.$router.push({ name: "shopList" });
@@ -720,7 +720,7 @@ export default {
               this.$Message.error("请选择开店的会员");
               return;
             }
-            shopAdd(params).then((resp) => {
+            shopAdd(this.filterFun(params)).then((resp) => {
               if (resp.success) {
                 this.$Message.success("添加成功");
                 this.shopForm = {};
@@ -730,6 +730,15 @@ export default {
           }
         }
       });
+    },
+    // 筛选值为空的参数
+    filterFun (params) {
+      Object.entries(params).map(value => {
+        if (!value[1] || value[1] === '' || value[1] === 'null') {
+          delete params[value[0]];
+        }
+      });
+      return params;
     },
     // 点击定位获取店铺地址
     getAddress(val) {
@@ -765,9 +774,6 @@ export default {
           this.$set(this.shopForm, "companyAddressPath", val.data.addr);
           this.$set(this.shopForm, "companyAddressIdPath", val.data.addrId);
         }
-
-        console.log(this.shopForm.storeAddressPath)
-
       }
     },
     // 全部选中
