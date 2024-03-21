@@ -59,7 +59,7 @@
                 <div class="card-item">
                   <div class="card-item-label">下单金额</div>
                   <div class="card-item-value">
-                    {{ overViewList.orderAmount | unitPrice("￥") }}
+                    {{ overViewList.orderAmount || 0 | unitPrice("￥") }}
                   </div>
                 </div>
                 <div class="card-item">
@@ -77,7 +77,7 @@
                 <div class="card-item">
                   <div class="card-item-label">付款金额</div>
                   <div class="card-item-value">
-                    {{ overViewList.paymentAmount | unitPrice("￥") }}
+                    {{ overViewList.paymentAmount || 0 | unitPrice("￥") }}
                   </div>
                 </div>
               </div>
@@ -393,7 +393,7 @@ export default {
           render: (h, params) => {
             return h(
               "div",
-              this.$options.filters.unitPrice(params.row.flowPrice, "￥")
+              this.$options.filters.unitPrice(params.row.flowPrice?params.row.flowPrice:0, "￥")
             );
           },
         },

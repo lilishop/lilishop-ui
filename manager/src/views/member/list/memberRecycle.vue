@@ -410,7 +410,7 @@ export default {
       };
       this.$Modal.confirm({
         title: "提示",
-        content: "<p>启用用此会员？</p>",
+        content: "<p>确定启用此会员？</p>",
         onOk: () => {
           API_Member.updateMemberStatus(params).then((res) => {
             if (res.success) {

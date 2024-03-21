@@ -201,7 +201,7 @@
                 <Input v-model="shopForm.scope" clearable style="width: 200px" />
               </FormItem>
 
-              <FormItem label="营业执照电子版">
+              <FormItem label="营业执照电子版" prop="licencePhoto">
                 <Avatar
                   style="height: 100px; width: 100px"
                   v-if="shopForm.licencePhoto"
@@ -487,6 +487,7 @@ export default {
         ],
         licenseNum: [{ required: true, message: "营业执照号不能为空" }],
         scope: [{ required: true, message: "法定经营范围不能为空" }],
+        licencePhoto: [{ required: true, message: "营业执照电子版不能为空" }],
         legalName: [{ required: true, message: "法人姓名不能为空" }],
         legalId: [{ required: true, message: "法人证件号不能为空" }],
         settlementBankAccountName: [{ required: true, message: "银行开户名不能为空" }],
