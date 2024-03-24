@@ -37,9 +37,9 @@
 </template>
 
 <script>
-import storage from '@/plugins/storage.js';
 import { editMemberInfo } from '@/api/account.js';
 import { commonUrl } from '@/plugins/request.js';
+import storage from '@/plugins/storage.js';
 export default {
   name: 'Profile',
   data () {
@@ -70,6 +70,7 @@ export default {
             if (res.success) {
               this.$Message.success('修改个人资料成功')
               storage.setItem('userInfo', res.result)
+              this.$router.go(0)
             }
           })
         }
