@@ -47,6 +47,7 @@
                         <img :src="img" alt="">
                       </div>
                     </div>
+
                     <div class="preview-img"  v-if="item.previewImg"  @click.prevent="hidePreviewImg(item)">
                       <div>
                         <span @click.stop="rotatePreviewImg(0, item)"><Icon type="md-refresh" />左转</span>
@@ -58,6 +59,22 @@
                       <span class="remarks-item">{{item.goodsName}}</span>
                       <span class="remarks-time">{{item.createTime}}</span>
                     </p>
+
+                    <!-- 商家回复 -->
+                    <div class="reply" v-if="item.reply">
+                      <p>商家回复</p>
+                      <div>
+                        <p class="remarks-content">{{ item.reply }}</p>
+                        <div>
+                          <div class="comment-img" v-if="item.replyImage">
+                            <div v-for="(img, imgIndex) in item.replyImage.split(',')"  @click="$previewImage(img)" :key="imgIndex">
+                              <img :src="img" alt="">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
                 <div class="remarks-page">
@@ -505,5 +522,11 @@ table{
   border-bottom: 1px solid #eee;
   margin-left: 30px;
   span{color:#999}
+}
+.reply{
+  >*{
+    margin: 4px;
+  }
+
 }
 </style>
