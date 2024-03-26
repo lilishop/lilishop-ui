@@ -80,7 +80,7 @@
         <liliDialog ref="liliDialog"    @selectedLink="selectedLink" :types="linkType"></liliDialog>
       </div>
       <Modal width="1200px" v-model="picModelFlag">
-         <ossManage @callback="callbackSelected" :isComponent="true" ref="ossManage" />
+         <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage" />
       </Modal>
     </div>
   </div>

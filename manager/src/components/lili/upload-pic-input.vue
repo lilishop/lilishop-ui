@@ -47,7 +47,7 @@
     </Modal>
 
     <Modal width="1200px" v-model="picModalFlag">
-      <ossManage @callback="callbackSelected" ref="ossManage" isComponent="true" />
+      <ossManage @callback="callbackSelected" ref="ossManage" :isComponent="true" :initialize="picModalFlag" />
     </Modal>
 
   </div>
@@ -111,7 +111,6 @@ export default {
     },
     // 图片回显
     callbackSelected(val) {
-      console.log('图片回显', val);
       this.picModalFlag = false;
       this.currentValue = val.url;
       this.picIndex = "";

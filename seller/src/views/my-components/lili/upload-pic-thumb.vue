@@ -56,8 +56,8 @@
       </div>
     </Modal>
 
-    <Modal width="1200px" v-model="picModalFlag" @on-ok="confirmUrls">
-      <ossManage @callback="callbackSelected"  :isComponent="true" @selected="(list)=>{ selectedImage = list}" ref="ossManage" />
+    <Modal width="1200px" v-model="picModelFlag" @on-ok="confirmUrls">
+      <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" @selected="(list)=>{ selectedImage = list}" ref="ossManage" />
     </Modal>
   </div>
 </template>
@@ -108,7 +108,7 @@ export default {
       uploadList: [], // 上传文件列表
       viewImage: false, // 是否预览图片
       imgUrl: "", // 图片地址
-      picModalFlag: false, // 图片选择器
+      picModelFlag: false, // 图片选择器
       selectedFormBtnName: "", // 点击图片绑定form
       selectedImage: [],
     };
@@ -117,12 +117,12 @@ export default {
     // 选择图片modal
     handleCLickImg(val, index) {
       this.$refs.ossManage.selectImage = true;
-      this.picModalFlag = true;
+      this.picModelFlag = true;
       this.selectedFormBtnName = val;
     },
     // 图片选择后回调
     callbackSelected(val) {
-      this.picModalFlag = false;
+      this.picModelFlag = false;
       if (!this.multiple && this.uploadList && this.uploadList.length > 0) {
         // 删除第一张
         this.uploadList.splice(0, 1);

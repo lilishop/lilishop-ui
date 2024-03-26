@@ -217,7 +217,11 @@
       choose: {
         type: String,
         default: ""
-      }
+      },
+      initialize: {
+        type: Boolean,
+        default: false,
+      },
     },
     data() {
       return {
@@ -643,8 +647,14 @@
         if (val) this.selectImage = val
       },
       selectedOss(val) {
-        if (val) {
+        if (val && val.length) {
           this.$emit("callback", {url: val[val.length-1].split(',')[1]});
+        }
+      },
+      // 初始化监听 是否清空所选图片
+      initialize(val) {
+        if (val && this.isComponent) {
+          this.selectedOss = [];
         }
       }
     },

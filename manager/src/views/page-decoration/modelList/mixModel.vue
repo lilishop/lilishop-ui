@@ -152,6 +152,7 @@
       <ossManage
         @callback="callbackSelected"
         :isComponent="true"
+        :initialize="picModelFlag"
         ref="ossManage"
       />
     </Modal>

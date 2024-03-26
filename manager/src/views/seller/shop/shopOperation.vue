@@ -374,8 +374,8 @@
     </Card>
 
 
-    <Modal width="1200px" v-model="picModalFlag">
-      <ossManage @callback="callbackSelected" :isComponent="true" ref="ossManage" />
+    <Modal width="1200px" v-model="picModelFlag">
+      <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage" />
     </Modal>
 
     <Modal width="1200px" v-model="memberModalFlag">
@@ -433,7 +433,7 @@ export default {
       loading: false,
       auditModel: false,
       auditModalLoading: false,
-      picModalFlag: false, // 图片选择器
+      picModelFlag: false, // 图片选择器
       address: "", // 地址
       returnAddress: "", // 退货地址
       memberModalFlag: false, // 商家账号
@@ -634,13 +634,13 @@ export default {
     // 选择图片modal
     handleCLickImg(val, index) {
       this.$refs.ossManage.selectImage = true;
-      this.picModalFlag = true;
+      this.picModelFlag = true;
       this.selectedFormBtnName = val;
       this.picIndex = index;
     },
     // 图片回显
     callbackSelected(val) {
-      this.picModalFlag = false;
+      this.picModelFlag = false;
       if (this.picIndex === 0 || this.picIndex === 1) {
         this.shopForm[this.selectedFormBtnName][this.picIndex] = val.url;
       } else {

@@ -472,11 +472,11 @@
       </div>
     </Modal>
 
-    <!--<Modal width="1200px" v-model="picModalFlag">-->
+    <!--<Modal width="1200px" v-model="picModelFlag">-->
     <!--<ossManage @callback="callbackSelected" ref="ossManage" />-->
     <!--</Modal>-->
-    <Modal v-model="picModalFlag" width="1200px" @on-ok="confirmUrls">
-      <ossManage ref="ossManage" :isComponent="true" @callback="callbackSelected" @selected="(list)=>{ selectedImage = list}"/>
+    <Modal v-model="picModelFlag" width="1200px" @on-ok="confirmUrls">
+      <ossManage ref="ossManage" :isComponent="true" :initialize="picModelFlag" @callback="callbackSelected" @selected="(list)=>{ selectedImage = list}"/>
     </Modal>
 
   </div>
@@ -688,7 +688,7 @@ export default {
         "specId",
         "specValueId",
       ],
-      picModalFlag: false, // 图片选择器
+      picModelFlag: false, // 图片选择器
       selectedFormBtnName: "", // 点击图片绑定form
       selectedImage: [],
       lastEditSkuValue: '',
@@ -706,7 +706,7 @@ export default {
     // 选择图片modal
     handleCLickImg(val, index) {
       this.$refs.ossManage.selectImage = true;
-      this.picModalFlag = true;
+      this.picModelFlag = true;
       this.selectedFormBtnName = val;
       // this.picIndex = index;
     },
@@ -744,7 +744,7 @@ export default {
     },
     // 图片选择后回调
     callbackSelected(val) {
-      this.picModalFlag = false;
+      this.picModelFlag = false;
       if (val && this.selectedFormBtnName == 'selectedSkuImages') {
         this.selectedSku.images.push(val);
       } else {

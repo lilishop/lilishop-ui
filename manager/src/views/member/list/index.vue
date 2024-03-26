@@ -94,7 +94,7 @@
       </Form>
     </Modal>
     <Modal width="1200px" v-model="picModelFlag">
-      <ossManage @callback="callbackSelected" :isComponent="true" ref="ossManage" />
+      <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage" />
     </Modal>
     <multipleMap ref="map" @callback="selectedRegion"/>
   </div>
