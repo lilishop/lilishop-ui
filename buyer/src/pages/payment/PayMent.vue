@@ -78,6 +78,8 @@ export default {
           this.support = this.payDetail.support
           this.walletValue = this.payDetail.walletValue
         }
+      }).catch((err) => {
+        this.$router.push({name: 'MyOrder'});
       });
     },
     // 支付
