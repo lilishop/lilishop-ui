@@ -124,7 +124,7 @@
           <div class="today-list flex">
             <div class="today-item">
               <div>今日订单数</div>
-              <span>{{ homeData.todayOrderNum }}</span>
+              <span>{{ homeData.todayOrderNum || 0 }}</span>
             </div>
             <div class="today-item">
               <div>今日交易额</div>
