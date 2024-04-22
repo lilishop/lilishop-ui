@@ -550,11 +550,12 @@ export default {
     async upload() {
       let fd = new FormData();
       fd.append("files", this.file);
-      this.spinShow = false
+      this.spinShow = true
       let res = await uploadGoodsExcel(fd);
+      this.spinShow = false
       if (res.success) {
-        this.spinShow = true
         this.$Message.success("导入成功")
+        this.init();
       }
     },
     openImportGoods(){
