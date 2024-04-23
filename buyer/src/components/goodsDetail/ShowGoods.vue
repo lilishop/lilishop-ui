@@ -334,7 +334,7 @@ export default {
         if (this.wholesaleList && this.wholesaleList.length > 0) {
           this.count = this.wholesaleList[0].num;
         }
-
+        this.promotion();
         this.swiperGoodsImg();
       },
       deep: true,
@@ -563,6 +563,7 @@ export default {
       });
     },
     promotion() {
+      this.promotionMap = {SECKILL: null, FULL_DISCOUNT: null, COUPON: []};
       // 格式化促销活动，返回当前促销的对象
       if (!this.detail.promotionMap) return false;
       let keysArr = Object.keys(this.detail.promotionMap);
@@ -600,7 +601,7 @@ export default {
     }
 
     this.formatSku(this.goodsSpecList);
-    this.promotion();
+    // this.promotion();
     document.title = this.skuDetail.goodsName;
   },
 };
