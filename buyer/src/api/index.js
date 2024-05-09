@@ -1,5 +1,16 @@
 import request, { Method } from "@/plugins/request.js";
 
+/**
+ * 获取首页专题数据
+ */
+export function getTopicData(id) {
+  return request({
+    url: `/buyer/other/pageData/get/${id}`,
+    method: Method.GET,
+  });
+}
+
+
 // 获取首页楼层装修数据
 export function indexData(params) {
   return request({

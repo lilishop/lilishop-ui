@@ -42,6 +42,7 @@ export default {
   watch: {
     changed: {
       handler(val) {
+        console.log(val,'changed')
         this.$emit("selectedLink", val[0]); //因为是单选，所以直接返回第一个
       },
       deep: true

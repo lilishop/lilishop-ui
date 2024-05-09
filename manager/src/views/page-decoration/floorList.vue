@@ -17,7 +17,9 @@
         <div class="item item-title">
           <div>页面名称</div>
           <div class="item-config">
-            <div>状态</div>
+            <div>
+              <div v-if="searchForm.pageType !== 'SPECIAL'">状态</div>
+            </div>
             <div>操作</div>
           </div>
         </div>
@@ -25,30 +27,35 @@
         <div class="item" v-for="(item, index) in list" :key="index">
           <div>{{ item.name || "暂无模板昵称" }}</div>
           <div class="item-config">
+            <div>
             <i-switch
+              v-if="searchForm.pageType !== 'SPECIAL'"
               v-model="item.pageShow"
               @on-change="releaseTemplate(item.id)"
             >
               <span slot="open">开</span>
               <span slot="close">关</span>
             </i-switch>
-            <Button
-              type="info"
-              placement="right"
-              @click="Template(item)"
-              size="small"
-              >编辑</Button
-            >
-            <Button
-              type="success"
-              placement="right"
-              @click="decorate(item)"
-              size="small"
-              >装修</Button
-            >
-            <Poptip confirm title="删除此模板？" @on-ok="delTemplate(item.id)">
-              <Button type="error" size="small">删除</Button>
-            </Poptip>
+            </div>
+            <div class="action">
+                <Button
+                  type="info"
+                  placement="right"
+                  @click="Template(item)"
+                  size="small"
+                  >编辑</Button
+                >
+                <Button
+                  type="success"
+                  placement="right"
+                  @click="decorate(item)"
+                  size="small"
+                  >装修</Button
+                >
+              <Poptip confirm title="删除此模板？" @on-ok="delTemplate(item.id)">
+                <Button type="error" size="small">删除</Button>
+              </Poptip>
+            </div>
           </div>
         </div>
         <div class="no-more" v-if="list.length == 0">暂无更多模板</div>
@@ -193,9 +200,11 @@ export default {
 
     decorate(val) {
       // 装修
+      const data = { id: val.id, pageShow: val.pageShow,pageType:this.searchForm.pageType }
+
       this.$router.push({
         name: "renovation",
-        query: { id: val.id, pageShow: val.pageShow },
+        query: data,
       });
     },
 
@@ -235,6 +244,8 @@ export default {
     },
 
     releaseTemplate(id) {
+      console.log(id)
+      // id.pageType = 'SPECIAL'
       //发布模板
       API_floor.releasePageHome(id).then((res) => {
         if (res.success) {
@@ -303,6 +314,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   > .item-config {
+
     width: 250px;
     display: flex;
     justify-content: space-between;
@@ -314,5 +326,10 @@ export default {
 }
 .item:nth-of-type(2n + 1) {
   background: #f5f7fa;
+}
+.action{
+  display: flex;
+  align-items: center;
+  width: 100px;
 }
 </style>

@@ -88,7 +88,7 @@ const Home = (resolve) => require(["@/pages/user/Home"], resolve);
 
 const Merchant = (resolve) => require(["@/pages/Merchant"], resolve);
 const UserMain = (resolve) => require(["@/pages/home/Main"], resolve);
-
+const topic = (resolve) => require(["@/pages/Topic"], resolve);
 /**
  * 店铺入驻
  */
@@ -112,6 +112,11 @@ export default new Router({
       path: "/", // 首页
       name: "Index",
       component: Index,
+    },
+    {
+      path: "/topic", // 首页
+      name: "topic",
+      component: topic,
     },
     {
       path: "/login", // 登陆
