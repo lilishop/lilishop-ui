@@ -32,7 +32,7 @@
     <!-- 搜索框、logo -->
     <Search></Search>
     <!-- 商品分类 -->
-    <cateNav :showAlways="true" v-if="showNav && $route.query.pageType === 'SPECIAL'" :large="carouselLarge" :opacity="carouselOpacity"></cateNav>
+    <cateNav :showAlways="true" v-if="showNav" :large="carouselLarge" :opacity="carouselOpacity"></cateNav>
     <!-- 楼层装修部分 -->
     <model-form ref="modelForm" :data="modelForm"></model-form>
     <!-- 底部栏 -->
