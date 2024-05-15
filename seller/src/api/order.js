@@ -42,6 +42,11 @@ export const modifyOrderPrice = (sn, params) => {
   return putRequest(`/order/order/update/${sn}/price`, params);
 };
 
+// 修改订单备注
+export const modifyOrderRemark = (sn, params) => {
+  return putRequest(`/order/order/${sn}/sellerRemark`, params);
+};
+
 // 取消订单
 export const cancelOrder = (sn, params) => {
   return postRequest(`/order/order/${sn}/cancel`, params);

@@ -16,6 +16,7 @@
           v-if="allowOperation.showLogistics && logisticsType == 'SHUNFENG'">下载面单</Button>
         <Button @click="toPrint" type="primary" ghost
           v-if="allowOperation.ship && logisticsType != 'SHUNFENG'">打印电子面单</Button>
+        <Button @click="modifyRemark" type="primary">添加备注</Button>
       </div>
     </Card>
 
@@ -275,6 +276,23 @@
       <div slot="footer" style="text-align: right">
         <Button @click="modal = false">关闭</Button>
         <Button type="primary" @click="modifyPriceSubmit">调整</Button>
+      </div>
+    </Modal>
+    <Modal v-model="sellerRemarkModal" width="530">
+      <p slot="header">
+        <Icon type="edit"></Icon>
+        <span>编辑备注</span>
+      </p>
+      <div>
+        <Form ref="modifyRemarkForm" :model="modifyRemarkForm" label-position="left" :label-width="100">
+          <FormItem label="订单备注" prop="sellerRemark">
+            <Input v-model="modifyRemarkForm.sellerRemark" size="large" maxlength="20"></Input>
+          </FormItem>
+        </Form>
+      </div>
+      <div slot="footer" style="text-align: right">
+        <Button @click="sellerRemarkModal = false">关闭</Button>
+        <Button type="primary" @click="modifyRemarkSubmit">确认</Button>
       </div>
     </Modal>
     <!--收件地址弹出框-->
@@ -621,6 +639,10 @@ export default {
       //调整价格表单
       modifyPriceForm: {
         orderPrice: 0,
+      },
+      //修改订单备注表单
+      modifyRemarkForm: {
+        sellerRemark: 0,
       },
       //订单核销表单
       orderTakeForm: {
@@ -999,6 +1021,26 @@ export default {
               if (res.success) {
                 this.$Message.success("修改订单金额成功");
                 this.modal = false;
+                this.getDataDetail();
+              }
+            }
+          );
+        }
+      });
+    },
+    modifyRemark () {
+      this.modifyRemarkForm.sellerRemark = this.orderInfo.order.sellerRemark;
+      this.sellerRemarkModal = true;
+    },
+    //修改订单备注提交
+    modifyRemarkSubmit () {
+      this.$refs.modifyRemarkForm.validate((valid) => {
+        if (valid) {
+          API_Order.modifyOrderRemark(this.sn, this.modifyRemarkForm).then(
+            (res) => {
+              if (res.success) {
+                this.$Message.success("编辑订单备注成功");
+                this.sellerRemarkModal = false;
                 this.getDataDetail();
               }
             }
