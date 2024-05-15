@@ -34,6 +34,10 @@
           </div>
         </div>
         <div class="div-item">
+            <div class="div-item-left">订单备注：</div>
+            <div class="div-item-right">{{ orderInfo.order.sellerRemark }}</div>
+          </div>
+        <div class="div-item">
           <div class="div-item-left">订单状态：</div>
           <div class="div-item-right">
             {{ orderInfo.orderStatusValue }}
