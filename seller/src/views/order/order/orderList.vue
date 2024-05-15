@@ -143,6 +143,13 @@ export default {
           key: "sn",
           minWidth: 200,
           tooltip: true,
+          render: (h, params) => {
+            if (params.row.sellerRemark) {
+              return h("div", {}, params.row.sellerRemark + " ("+params.row.sn+")");
+            } else {
+              return h("div", {}, params.row.sn);
+            }
+          },
         },
         {
           title: "订单来源",

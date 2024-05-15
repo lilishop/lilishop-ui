@@ -640,6 +640,7 @@ export default {
       },
       modal: false, //弹出调整价格框
       printModal: false,//弹出打印发货单
+      sellerRemarkModal: false,//弹出编辑订单备注
       //调整价格表单
       modifyPriceForm: {
         orderPrice: 0,
