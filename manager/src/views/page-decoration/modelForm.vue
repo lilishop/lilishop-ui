@@ -32,7 +32,7 @@
           </i-input>
         </div>
       </div>
-      <div class="nav-con">
+      <div class="nav-con" v-if="$route.query.pageType !== 'SPECIAL'">
         <div class="all-categories">全部商品分类</div>
         <ul class="nav-item">
           <li v-for="(item, index) in navList.list" :key="index">
@@ -134,7 +134,7 @@
               <td>
                 <Input
                   v-model="item.url"
-                  :disabled="!!item.type && item.type !== 'link'"
+                  disabled
                 />
               </td>
               <!-- <td><Input v-model="item.sort"/></td> -->
@@ -232,6 +232,8 @@ export default {
     },
     // 已选链接
     selectedLink(val) {
+
+
       if (this.showModalNav) {
         this.selectedNav.url = this.$options.filters.formatLinkType(val);
         this.selectedNav.type =

@@ -79,6 +79,12 @@ export default {
       carouselOpacity: false // 不同轮播分类样式
     };
   },
+  props:{
+    pageData:{
+      type:null,
+      default:""
+    }
+  },
   // created(){
 
   // },
@@ -136,7 +142,6 @@ export default {
                 return cur;
               }, []);
               if(this.autoCoupList != '' && this.autoCoupList.length > 0){
-                console.log(1231232132)
                 this.showCpmodel = true;
               }
               storage.setItem('getTimes',datas)//存储缓存
@@ -147,31 +152,41 @@ export default {
 
     } ,
     getIndexData () {
-      // 获取首页装修数据
-      indexData({ clientType: 'PC' }).then(async (res) => {
-        if (res.success) {
-          let dataJson = JSON.parse(res.result.pageData);
-          // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
-          // 轮播图根据不同轮播，样式不同
-          for (let i = 0; i < dataJson.list.length; i++) {
-            let type = dataJson.list[i].type
-            if (type === 'carousel2') {
-              this.carouselLarge = true;
-            } else if (type === 'carousel1') {
-              this.carouselLarge = true
-              this.carouselOpacity = true
-            } else if (type === 'seckill') {
-              let seckill = await this.getListByDay()
-              dataJson.list[i].options.list = seckill
-            }
+      if(this.pageData){
+        this.parsePageData(JSON.stringify(this.pageData))
+      }
+      else{
+        // 获取首页装修数据
+        indexData({ clientType: 'PC' }).then(async (res) => {
+          if (res.success && res.result) {
+            this.parsePageData(res.result.pageData)
           }
-          this.modelForm = dataJson;
-          storage.setItem('navList', dataJson.list[1])
-          this.showNav = true
-          this.topAdvert = dataJson.list[0];
-        }
-      });
+        });
+      }
     },
+
+    async parsePageData(pageData){
+      let dataJson = JSON.parse(pageData);
+      // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
+      // 轮播图根据不同轮播，样式不同
+      for (let i = 0; i < dataJson.list.length; i++) {
+        let type = dataJson.list[i].type
+        if (type === 'carousel2') {
+          this.carouselLarge = true;
+        } else if (type === 'carousel1') {
+          this.carouselLarge = true
+          this.carouselOpacity = true
+        } else if (type === 'seckill') {
+          let seckill = await this.getListByDay()
+          dataJson.list[i].options.list = seckill
+        }
+      }
+      this.modelForm = dataJson;
+      storage.setItem('navList', dataJson.list[1])
+      this.showNav = true
+      this.topAdvert = dataJson.list[0];
+    },
+
     async getListByDay () { // 当天秒杀活动
       const res = await seckillByDay()
       if (res.success && res.result.length) {

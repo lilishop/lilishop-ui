@@ -14,11 +14,9 @@
           </Table>
 
           <Page
-            @on-change="
-              (val) => {
-                params.pageNumber = val;
-              }
-            "
+
+            @on-change="changePageNum"
+            @on-page-size-change="changePageSize"
             :current="params.pageNumber"
             :page-size="params.pageSize"
             class="mt_10"
@@ -76,7 +74,7 @@ export default {
                   on: {
                     click: () => {
                       this.index = params.index;
-                      params.row = {...params.row,pageType:'special'}
+                      params.row = {...params.row,pageType:'special',___type:'special'}
                       this.$emit("selected", [params.row]);
                     },
                   },
@@ -94,12 +92,24 @@ export default {
   },
 
   methods: {
+    changePageNum (val) { // 修改评论页码
+      this.params.pageNumber = val;
+      this.init();
+    },
+    changePageSize (val) { // 修改评论页数
+      this.params.pageNumber = 1;
+      this.params.pageSize = val;
+      this.init();
+    },
     // 获取话题的标题
     async init() {
+      // 根据当前路径判断当前是H5还是PC
+      this.params.pageClientType = this.$route.name === 'renovation' ? 'PC' : 'H5'
       let res = await getHomeList(this.params);
       if (res.success) {
         this.loading = false;
-         this.data= res.result.records
+        this.data= res.result.records
+        this.total = res.result.total
       } else {
         this.loading = false;
       }
