@@ -387,7 +387,7 @@
       >
         <FormItem label="所在分组" prop="id">
           <Cascader
-            v-model="groupFormValidate.id"
+            v-model="defaultValue"
             :data="treeData"
             change-on-select
             @on-change="treeDataChange"
@@ -447,6 +447,7 @@ export default {
         level: 0,
         directoryName: "",
       },
+      defaultValue: [], // 默认分组id
       groupRuleValidate: {
         directoryName: [
           {
@@ -871,7 +872,12 @@ export default {
       if (val && this.isComponent) {
         this.selectedOss = [];
       }
-    }
+    },
+    defaultValue(val) {
+      if (val) {
+        this.groupFormValidate.parentId = val;
+      }
+    },
   },
 
   methods: {
@@ -901,22 +907,33 @@ export default {
     },
     // 自定义tree节点显示内容和交互
     renderContent (h, { root, node, data }) {
-      return h('span', {style: {display: 'inline-block', width: '100%'}},
-      [
-        h('span', [h("Icon", {type: 'ios-paper-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
-        h('span', {style: {display: 'inline-block', float: 'right', marginRight: '10px'}},
-        [
-          h("Dropdown", {style: {marginLeft: "4px"}},
-            [
-            h("Icon", {props: {type: 'ios-more', size: "20",}, style: {display: 'inline-block'}, on:{click: () => {}}}),
-            h("DropdownMenu", {slot: "list"
-            }, [
-              h("DropdownItem", { nativeOn:{click: () => {this.handleContextMenuEdit()}} }, "编辑"),
-              h("DropdownItem", { nativeOn:{click: () => {this.handleContextMenuDelete()}} }, "删除"),
-            ])
-          ]),
-        ])
-      ]);
+      if (data.value === '0') {
+        return h('span', {style: {display: 'inline-block', width: '100%'}},
+          [
+            h('span', [h("Icon", {type: 'ios-paper-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
+            h('span', {style: {display: 'inline-block', float: 'right', marginRight: '10px'}}, [])
+          ]
+        );
+      } else {
+        return h('span', {style: {display: 'inline-block', width: '100%'}},
+          [
+            h('span', [h("Icon", {type: 'ios-paper-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
+            h('span', {style: {display: 'inline-block', float: 'right', marginRight: '10px'}},
+              [
+                h("Dropdown", {style: {marginLeft: "4px"}},
+                  [
+                    h("Icon", {props: {type: 'ios-more', size: "20",}, style: {display: 'inline-block'}, on:{click: () => {}}}),
+                    h("DropdownMenu", {slot: "list"
+                    }, [
+                      h("DropdownItem", { nativeOn:{click: () => {this.handleContextMenuEdit(root, node, data)}} }, "编辑"),
+                      h("DropdownItem", { nativeOn:{click: () => {this.handleContextMenuDelete()}} }, "删除"),
+                    ])
+                  ]),
+              ])
+          ]
+        );
+      }
+
     },
 
 
@@ -927,17 +944,14 @@ export default {
       this.selectedGroupData = val;
     },
     // 编辑分组
-    handleContextMenuEdit(val) {
+    handleContextMenuEdit(root, node, data) {
       this.insertOrUpdate = "update";
-
       this.enableGroup = true;
-      // this.groupFormValidate = this.selectedGroupData;
-
-      this.groupFormValidate.directoryName = this.selectedGroupData.title;
-      this.groupFormValidate.id = [this.selectedGroupData.value];
-      this.groupFormValidate.level = this.selectedGroupData.level;
-
-      this.groupFormValidate.parentId = this.selectedGroupData.parentId;
+      this.groupFormValidate.directoryName = data.label;
+      this.groupFormValidate.id = [data.value];
+      this.groupFormValidate.level = data.level;
+      this.groupFormValidate.parentId = data.parentId;
+      this.defaultValue = [data.parentId];
     },
     // 删除分组
     async handleContextMenuDelete(val) {
@@ -969,15 +983,13 @@ export default {
         if (valid) {
           let res
           const params = { ...this.groupFormValidate };
-
           if (this.insertOrUpdate === "insert") {
-            // params.directoryType = this.selectedGroupData.directoryType
             params.parentId = params.id[params.id.length - 1];
-            // params.type = this.selectedGroupData.type
             delete params.id;
             res = await addFileDirectory(params);
           } else {
             params.id = params.id[params.id.length - 1];
+            params.parentId = params.parentId[params.parentId.length - 1];
             res = await updateFileDirectory(params);
           }
 
