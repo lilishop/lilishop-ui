@@ -32,6 +32,11 @@ export const getOrderList = params => {
   return getRequest(`/order/order`, params);
 };
 
+//  导出订单列表
+export const exportOrder = (params) => {
+  return getRequest(`/order/order/queryExportOrder`, params,'blob')
+};
+
 // 获取普通订单详细信息
 export const getOrderDetail = sn => {
   return getRequest(`/order/order/${sn}`);

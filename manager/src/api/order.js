@@ -78,6 +78,11 @@ export const getOrderList = (params) => {
   return getRequest(`/order/order`, params)
 }
 
+//  导出订单列表
+export const exportOrder = (params) => {
+  return getRequest(`/order/order/queryExportOrder`, params,'blob')
+}
+
 //  订单付款
 export const orderPay = (sn) => {
   return postRequest(`/order/order/${sn}/pay`)

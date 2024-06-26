@@ -73,18 +73,20 @@
         <Button @click="handleReset" class="search-btn">重置</Button>
       </Form>
       <div class="export">
-        <Button type="primary" class="mr_10" @click="expressOrderDeliver">
-          批量发货
-        </Button>
-        <download-excel
-          style="display: inline-block"
-          :data="data"
-          :fields="excelColumns"
-          :fetch="exportOrder"
-          name="待发货订单.xls"
-        >
-          <Button>导出待发货订单</Button>
-        </download-excel>
+        <Button type="primary" class="mr_10" @click="expressOrderDeliver">批量发货</Button>
+        <Button @click="exportOrder" type="info" class="export">导出订单</Button>
+        <Poptip @keydown.enter.native="orderVerification" placement="bottom-start" width="400">
+          <Button class="export">
+            核验订单
+          </Button>
+          <div class="api" slot="content">
+            <h2>核验码</h2>
+            <div style="margin:10px 0;">
+              <Input v-model="orderCode" style="width:300px; margin-right:10px;" />
+              <Button style="primary" @click="orderVerification">核验</Button>
+            </div>
+          </div>
+        </Poptip>
       </div>
       <Table
         :loading="loading"
@@ -115,6 +117,7 @@
 import * as API_Order from "@/api/order";
 import JsonExcel from "vue-json-excel";
 import Cookies from "js-cookie";
+import {verificationCode} from "@/api/order";
 export default {
   name: "orderList",
   components: {
@@ -307,6 +310,19 @@ export default {
   },
   methods: {
     /**
+     * 核验订单
+     */
+    async orderVerification() {
+      let result = await verificationCode(this.orderCode);
+
+      if (result.success) {
+        this.$router.push({
+          name: "order-detail",
+          query: { sn: result.result.sn || this.orderCode },
+        });
+      }
+    },
+    /**
      * 批量发货
      */
     expressOrderDeliver() {
@@ -364,47 +380,37 @@ export default {
         }
       });
     },
-    // 导出的待发货订单数据
+    // 导出订单
     async exportOrder() {
-      let userInfo = JSON.parse(Cookies.get("userInfoSeller"));
-      const params = {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10000, // 页面大小
-        sort: "startDate", // 默认排序字段
-        order: "desc", // 默认排序方式
-        startDate: "", // 起始时间
-        endDate: "", // 终止时间
-        orderSn: "",
-        buyerName: "",
-        tag: "WAIT_SHIP",
-        orderType: "NORMAL",
-        storeId: userInfo.id,
-      };
-      const res = await API_Order.queryExportOrder(params);
-      if (res.success) {
-        if (res.result.length === 0) {
-          this.$Message.warning("暂无待发货订单");
-          return [];
-        }
-        for (let i = 0; i < res.result.length; i++) {
-          res.result[i].index = i + 1;
-          res.result[i].consigneeAddress =
-            res.result[i].consigneeAddressPath.replace(/,/g, "") +
-            res.result[i].consigneeDetail;
-          res.result[i].goodsPrice = this.$options.filters.unitPrice(
-            res.result[i].goodsPrice,
-            "￥"
-          );
-          res.result[i].flowPrice = this.$options.filters.unitPrice(
-            res.result[i].flowPrice,
-            "￥"
-          );
-        }
-        return res.result;
-      } else {
-        this.$Message.warning("导出订单失败，请重试");
+      if(this.searchForm.startDate==""||this.searchForm.endDate==""){
+        this.$Message.error("必须选择时间范围，搜索后进行导出！");
+      }else{
+        API_Order.exportOrder(this.searchForm)
+          .then((res) => {
+            const blob = new Blob([res], {
+              type: "application/vnd.ms-excel;charset=utf-8",
+            });
+            //对于<a>标签，只有 Firefox 和 Chrome（内核） 支持 download 属性
+            //IE10以上支持blob但是依然不支持download
+            if ("download" in document.createElement("a")) {
+              //支持a标签download的浏览器
+              const link = document.createElement("a"); //创建a标签
+              link.download = "订单列表.xlsx"; //a标签添加属性
+              link.style.display = "none";
+              link.href = URL.createObjectURL(blob);
+              document.body.appendChild(link);
+              link.click(); //执行下载
+              URL.revokeObjectURL(link.href); //释放url
+              document.body.removeChild(link); //释放标签
+            } else {
+              navigator.msSaveBlob(blob, fileName);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       }
+
     },
     // 查看订单详情
     detail(v) {

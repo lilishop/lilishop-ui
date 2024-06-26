@@ -79,15 +79,7 @@
         >
       </Form>
       <div>
-        <download-excel
-          class="export-excel-wrapper"
-          :data="data"
-          :fields="fields"
-          :fetch="exportOrder"
-          name="商品订单.xls"
-        >
-          <Button type="info" class="export"> 导出订单 </Button>
-        </download-excel>
+        <Button @click="exportOrder" type="info" class="export">导出订单</Button>
       </div>
 
       <div class="order-tab">
@@ -391,20 +383,35 @@ export default {
     },
     // 导出订单
     async exportOrder() {
-      const params = JSON.parse(JSON.stringify(this.searchForm));
-      params.pageNumber = 1;
-      params.pageSize = 10000;
-      const result = await API_Order.getOrderList(params);
-      if (result.success) {
-        if (result.result.records.length === 0) {
-          this.$Message.warning("暂无待发货订单");
-          return [];
-        } else {
-          return result.result.records;
-        }
-      } else {
-        this.$Message.warning("导出订单失败，请重试");
+      if(this.searchForm.startDate==""||this.searchForm.endDate==""){
+        this.$Message.error("必须选择时间范围，搜索后进行导出！");
+      }else{
+        API_Order.exportOrder(this.searchForm)
+          .then((res) => {
+            const blob = new Blob([res], {
+              type: "application/vnd.ms-excel;charset=utf-8",
+            });
+            //对于<a>标签，只有 Firefox 和 Chrome（内核） 支持 download 属性
+            //IE10以上支持blob但是依然不支持download
+            if ("download" in document.createElement("a")) {
+              //支持a标签download的浏览器
+              const link = document.createElement("a"); //创建a标签
+              link.download = "订单列表.xlsx"; //a标签添加属性
+              link.style.display = "none";
+              link.href = URL.createObjectURL(blob);
+              document.body.appendChild(link);
+              link.click(); //执行下载
+              URL.revokeObjectURL(link.href); //释放url
+              document.body.removeChild(link); //释放标签
+            } else {
+              navigator.msSaveBlob(blob, fileName);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       }
+
     },
     // 订单筛选
     orderStatusClick(item) {
