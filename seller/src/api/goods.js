@@ -207,15 +207,6 @@ export const getSkuPage = params => {
   return getRequest(`/goodsSku/getByPage`, params);
 };
 
-//  获取商品规格值列表
-// export const getSpecValuesListSellerData = (id, params) => {
-//   return getRequest(`/goods/spec-values/values/${id}`, params);
-// };
-//  添加商品规格值
-// export const saveSpecValuesSeller = (id, params) => {
-//   return postRequest(`/goods/spec-values/save/${id}`, params);
-// };
-
 //  获取商品规格分页列表
 export const getSpecListSellerData = params => {
   return getRequest("/goods/spec/page", params);
@@ -223,6 +214,16 @@ export const getSpecListSellerData = params => {
 //  添加或修改规格设置
 export const insertSpecSeller = params => {
   return postRequest("/goods/spec", params);
+};
+
+//  导出商品库存
+export const queryExportStock = (params) => {
+  return getRequest(`/goods/goods/queryExportStock`, params,'blob')
+}
+
+// 上传商品库存列表
+export const importStockExcel = params => {
+  return postRequestWithNoForm(`/goods/goods/importStockExcel`, params );
 };
 
 //  更新商品库存
