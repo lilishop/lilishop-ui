@@ -7,22 +7,25 @@
       :model="formValidate"
       :rules="ruleValidate"
     >
-      <FormItem label="appId" prop="appId">
-        <Input maxlength="300" class="w200" v-model="formValidate.appId" />
-        <p style="color: red">*APP应用 AppID 非必填</p>
+      <FormItem label="JSAPI支付应用ID" prop="jsapiAppId">
+        <Input maxlength="300" class="w200" v-model="formValidate.jsapiAppId" />
       </FormItem>
-      <FormItem label="mpAppId" prop="mpAppId">
+      <FormItem label="Native支付应用ID" prop="nativeAppId">
+        <Input maxlength="300" class="w200" v-model="formValidate.nativeAppId" />
+      </FormItem>
+      <FormItem label="小程序支付应用id" prop="mpAppId">
         <Input maxlength="300" class="w200" v-model="formValidate.mpAppId" />
-        <p style="color: red">*小程序 AppID 非必填</p>
       </FormItem>
-      <FormItem label="serviceAppId" prop="serviceAppId">
-        <Input class="w200" v-model="formValidate.serviceAppId" />
-        <p style="color: red">*服务号 AppID 非必填</p>
+      <FormItem label="H5支付应用ID" prop="h5AppId">
+        <Input maxlength="300" class="w200" v-model="formValidate.h5AppId" />
       </FormItem>
-      <FormItem label="mchId" prop="mchId">
+      <FormItem label="APP支付应用ID" prop="appAppId">
+        <Input maxlength="300" class="w200" v-model="formValidate.appAppId" />
+      </FormItem>
+      <FormItem label="商户号" prop="mchId">
         <Input maxlength="300" class="w200" v-model="formValidate.mchId" />
       </FormItem>
-      <FormItem label="apiKey3" prop="apiKey3">
+      <FormItem label="APIv3密钥" prop="apiKey3">
         <Input maxlength="300" v-model="formValidate.apiKey3" />
       </FormItem>
       <FormItem label="apiclient_cert_p12" class="label-item" prop="apiclient_cert_p12">
@@ -34,8 +37,7 @@
       <FormItem label="apiclient_key" prop="apiclient_key">
         <Input maxlength="300" v-model="formValidate.apiclient_key" />
       </FormItem>
-
-      <FormItem label="serialNumber" prop="serialNumber">
+      <FormItem label="API证书-证书序列号" prop="serialNumber">
         <Input maxlength="300" v-model="formValidate.serialNumber" />
       </FormItem>
       <div class="label-btns">
