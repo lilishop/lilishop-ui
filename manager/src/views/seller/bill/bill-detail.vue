@@ -354,7 +354,7 @@ export default {
                   return h("div", this.$options.filters.unitPrice(params.row.billPrice, "￥")
                   );
                 } else {
-                  return h("priceColorScheme", {props: {value: (0 - params.row.finalPrice), color: this.$mainColor}});
+                  return h("priceColorScheme", {props: {value: (0 - params.row.billPrice), color: this.$mainColor}});
                 }
               },
             },
@@ -383,10 +383,10 @@ export default {
               key: "billPrice",
               render: (h, params) => {
                 if (params.row.flowType == "PAY") {
-                  return h("div", this.$options.filters.unitPrice(params.row.siteCouponCommission, "￥")
+                  return h("div", this.$options.filters.unitPrice(params.row.finalPrice, "￥")
                   );
                 } else {
-                  return h("priceColorScheme", {props: {value: (0 - params.row.siteCouponCommission)}});
+                  return h("priceColorScheme", {props: {value: (0 - params.row.finalPrice)}});
                 }
               },
             },
@@ -398,7 +398,7 @@ export default {
                   return h("div", this.$options.filters.unitPrice(params.row.finalPrice, "￥")
                   );
                 } else {
-                  return h("priceColorScheme", {props: {value: (0 - params.row.billPrice)}});
+                  return h("priceColorScheme", {props: {value: (0 - params.row.finalPrice)}});
                 }
               },
             },
@@ -415,10 +415,10 @@ export default {
               if (params.row.commissionPrice == 0) {
                 return h("div", "-");
               } else if (params.row.flowType == "PAY") {
-                return h("div", this.$options.filters.unitPrice(params.row.commissionPrice, "￥")
-                );
-              } else {
                 return h("priceColorScheme", {props: {value: (0 - params.row.commissionPrice)}});
+
+              } else {
+                return h("div", this.$options.filters.unitPrice(params.row.commissionPrice, "￥"));
               }
             },
           },
@@ -429,10 +429,9 @@ export default {
                 if (params.row.distributionRebate == 0) {
                   return h("div", "-");
                 } else if (params.row.flowType == "PAY") {
-                  return h("div", this.$options.filters.unitPrice(params.row.distributionRebate, "￥")
-                  );
-                } else {
                   return h("priceColorScheme", {props: {value: (0 - params.row.distributionRebate)}});
+                } else {
+                  return h("div", this.$options.filters.unitPrice(params.row.distributionRebate, "￥"));
                 }
               },
             },
@@ -441,10 +440,9 @@ export default {
               key: "billPrice",
               render: (h, params) => {
                 if (params.row.flowType == "PAY") {
-                  return h("div", this.$options.filters.unitPrice((params.row.commissionPrice + params.row.distributionRebate), "￥")
-                  );
-                } else {
                   return h("priceColorScheme", {props: {value: (0 - (params.row.commissionPrice + params.row.distributionRebate))}});
+                } else {
+                  return h("div", this.$options.filters.unitPrice((params.row.commissionPrice + params.row.distributionRebate), "￥"));
                 }
               },
             }]

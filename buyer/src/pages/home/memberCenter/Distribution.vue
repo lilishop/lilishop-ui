@@ -348,14 +348,6 @@ export default {
             // 可以单个或者同时写两个触发验证方式
             trigger: "blur",
           },
-          {
-            validator: (rule, value, callback) => {
-              // 上面有说，返回true表示校验通过，返回false表示不通过
-              // this.$u.test.mobile()就是返回true或者false的
-              return checkBankno(value);
-            },
-            message: "银行账号不正确",
-          },
         ],
       },
       tabName: "goodsChecked", // 当前所在tab
@@ -415,7 +407,7 @@ export default {
       this.$refs.form.validate((valid) => {
         if (valid) {
           this.applyLoading = true;
-          applyDistribution(this.form).then((res) => {
+          applyDistribution(this.applyForm).then((res) => {
             this.applyLoading = false;
             if (res.success) {
               this.$Message.success("申请已提交，请等待管理员审核");

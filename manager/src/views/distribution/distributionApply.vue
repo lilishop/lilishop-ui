@@ -73,18 +73,38 @@ export default {
         {
           title: "会员名称",
           key: "memberName",
-          minWidth: 150,
+          minWidth: 100,
           tooltip: true,
         },
         {
-          title: "会员姓名",
+          title: "姓名",
           key: "name",
+          minWidth: 100,
+        },
+        {
+          title: "身份证号",
+          key: "idNumber",
+          minWidth: 120,
+        },
+        {
+          title: "结算银行开户行名称",
+          key: "settlementBankAccountName",
+          minWidth: 120,
+        },
+        {
+          title: "结算银行开户账号",
+          key: "settlementBankAccountNum",
+          minWidth: 120,
+        },
+        {
+          title: "结算银行开户支行名称",
+          key: "settlementBankBranchName",
           minWidth: 120,
         },
         {
           title: "提交时间",
           key: "createTime",
-          minWidth: 150,
+          minWidth: 100,
         },
         {
           title: "操作",

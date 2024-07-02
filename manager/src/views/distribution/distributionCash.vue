@@ -106,6 +106,31 @@ export default {
           minWidth: 130
         },
         {
+          title: "姓名",
+          key: "name",
+          minWidth: 100,
+        },
+        {
+          title: "身份证号",
+          key: "idNumber",
+          minWidth: 120,
+        },
+        {
+          title: "结算银行开户行名称",
+          key: "settlementBankAccountName",
+          minWidth: 120,
+        },
+        {
+          title: "结算银行开户账号",
+          key: "settlementBankAccountNum",
+          minWidth: 120,
+        },
+        {
+          title: "结算银行开户支行名称",
+          key: "settlementBankBranchName",
+          minWidth: 120,
+        },
+        {
           title: "处理时间",
           key: "updateTime",
           minWidth: 130

@@ -209,10 +209,7 @@
       filterStatus (status) { // 过滤订单状态
         const arr = [
           {status: 'WAIT_BILL', title: '待结算'},
-          {status: 'NO_COMPLETED', title: '未完成'},
-          {status: 'WAIT_CASH', title: '待提现'},
-          {status: 'COMPLETE_CASH', title: '提现完成'},
-          {status: 'CANCEL', title: '订单取消'},
+          {status: 'COMPLETE', title: '完成'},
           {status: 'REFUND', title: '退款'},
         ]
         for (let i=0;i<arr.length;i++) {

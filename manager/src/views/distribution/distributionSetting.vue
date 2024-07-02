@@ -13,9 +13,6 @@
       <FormItem label="分销关系绑定天数" prop="distributionDay">
         <InputNumber :min="1" :max="365" style="width:100px;" v-model="form.distributionDay"></InputNumber>
       </FormItem>
-      <FormItem label="分销结算天数" prop="cashDay">
-        <InputNumber :min="0"  :max="365"  style="width:100px;" v-model="form.cashDay"></InputNumber>
-      </FormItem>
       <FormItem>
         <Button type="primary" @click="submit">保存</Button>
       </FormItem>
@@ -34,16 +31,12 @@ export default {
         // 添加或编辑表单对象初始化数据
         isOpen: true,
         distributionDay: 0, //分销关系绑定天数
-        cashDay: 0, //分销结算天数
       },
       formRule: {
         isOpen: [
           regular.REQUIRED
         ],
         distributionDay: [
-          regular.REQUIRED
-        ],
-        cashDay: [
           regular.REQUIRED
         ],
       }

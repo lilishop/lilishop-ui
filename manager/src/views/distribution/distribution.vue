@@ -27,7 +27,8 @@
                 v-for="item in distributionStatusList"
                 :value="item.value"
                 :key="item.value"
-                >{{ item.label }}</Option
+              >{{ item.label }}
+              </Option
               >
             </Select>
           </Form-item>
@@ -36,7 +37,8 @@
             type="primary"
             icon="ios-search"
             class="search-btn"
-            >搜索</Button
+          >搜索
+          </Button
           >
         </Form>
       </Row>
@@ -63,16 +65,37 @@
         ></Page>
       </Row>
     </Card>
+    <Modal title="修改分销员" v-model="modalVisible" :mask-closable="false" :width="600">
+      <Form ref="distributionForm" :model="distributionForm" :label-width="150" :rules="distributionFormValidate">
+        <FormItem label="姓名" prop="name">
+          <Input v-model="distributionForm.name" clearable style="width: 100%"/>
+        </FormItem>
+        <FormItem label="身份证号" prop="idNumber">
+          <Input v-model="distributionForm.idNumber" clearable style="width: 100%"/>
+        </FormItem>
+        <FormItem label="结算银行开户行名称" prop="settlementBankAccountName">
+          <Input v-model="distributionForm.settlementBankAccountName" clearable style="width: 100%"/>
+        </FormItem>
+        <FormItem label="结算银行开户账号" prop="settlementBankAccountNum">
+          <Input v-model="distributionForm.settlementBankAccountNum" clearable style="width: 100%"/>
+        </FormItem>
+        <FormItem label="结算银行开户支行名称" prop="settlementBankBranchName">
+          <Input v-model="distributionForm.settlementBankBranchName" clearable style="width: 100%"/>
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button type="text" @click="modalVisible = false">取消</Button>
+        <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 
 <script>
-import {
-getDistributionListData,
-resumeDistribution,
-retreatDistribution
-} from "@/api/distribution";
-import { distributionStatusList } from "./dataJson.js";
+import {editDistribution, getDistributionListData, resumeDistribution, retreatDistribution} from "@/api/distribution";
+import {distributionStatusList} from "./dataJson.js";
+import {regular} from "@/utils";
+
 export default {
   name: "distribution",
   components: {},
@@ -80,6 +103,38 @@ export default {
     return {
       distributionStatusList, // 分销状态
       loading: true, // 表单加载状态
+      modalVisible: false, // 添加或编辑显示
+      distributionForm: {
+        name: "",
+        idNumber: "",
+        settlementBankAccountName: "",
+        settlementBankAccountNum: "",
+        settlementBankBranchName: ""
+      },
+      // 表单验证规则
+      distributionFormValidate: {
+        name: [
+          regular.REQUIRED,
+          regular.VARCHAR20
+        ],
+        idNumber: [
+          regular.REQUIRED,
+          regular.VARCHAR20
+        ],
+        settlementBankAccountName: [
+          regular.REQUIRED,
+          regular.VARCHAR20
+        ],
+        settlementBankAccountNum: [
+          regular.REQUIRED,
+          regular.VARCHAR20
+        ],
+        settlementBankBranchName: [
+          regular.REQUIRED,
+          regular.VARCHAR20
+        ],
+      },
+      submitLoading: false, // 编辑提交状态
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -93,10 +148,44 @@ export default {
           tooltip: true,
         },
         {
+          title: "姓名",
+          key: "name",
+          minWidth: 100,
+        },
+        {
+          title: "身份证号",
+          key: "idNumber",
+          minWidth: 120,
+        },
+        {
+          title: "结算银行开户行名称",
+          key: "settlementBankAccountName",
+          minWidth: 120,
+        },
+        {
+          title: "结算银行开户账号",
+          key: "settlementBankAccountNum",
+          minWidth: 120,
+        },
+        {
+          title: "结算银行开户支行名称",
+          key: "settlementBankBranchName",
+          minWidth: 120,
+        },
+        {
           title: "推广单数",
           key: "distributionOrderCount",
           minWidth: 120,
           width: 150,
+        },
+        {
+          title: "分销订单金额",
+          key: "distributionOrderPrice",
+          width: 150,
+          sortable: false,
+          render: (h, params) => {
+            return h("priceColorScheme", {props: {value: params.row.distributionOrderPrice, color: this.$mainColor}});
+          },
         },
         {
           title: "分销金额",
@@ -104,17 +193,17 @@ export default {
           width: 150,
           sortable: false,
           render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.rebateTotal,color:this.$mainColor}} );
+            return h("priceColorScheme", {props: {value: params.row.rebateTotal, color: this.$mainColor}});
           },
 
         },
         {
-          title: "可用金额",
+          title: "待提现金额",
           key: "canRebate",
           width: 150,
           sortable: false,
           render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.canRebate,color:'green'}} );
+            return h("priceColorScheme", {props: {value: params.row.canRebate, color: 'green'}});
           },
         },
         {
@@ -123,7 +212,7 @@ export default {
           width: 150,
           sortable: false,
           render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.commissionFrozen,color:'#347dda'}} );
+            return h("priceColorScheme", {props: {value: params.row.commissionFrozen, color: '#347dda'}});
           },
         },
         {
@@ -133,13 +222,13 @@ export default {
           sortable: false,
           render: (h, params) => {
             if (params.row.distributionStatus == "PASS") {
-              return h("Tag", {props: {color: "green",},},"通过");
+              return h("Tag", {props: {color: "green",},}, "通过");
             } else if (params.row.distributionStatus == "APPLY") {
-              return h("Tag", {props: {color: "geekblue",},},"待审核");
+              return h("Tag", {props: {color: "geekblue",},}, "待审核");
             } else if (params.row.distributionStatus == "RETREAT") {
-              return h("Tag", {props: {color: "volcano",},},"清退");
+              return h("Tag", {props: {color: "volcano",},}, "清退");
             } else if (params.row.distributionStatus == "REFUSE") {
-              return h("Tag", {props: {color: "red",},},"拒绝");
+              return h("Tag", {props: {color: "red",},}, "拒绝");
             }
           },
         },
@@ -203,6 +292,31 @@ export default {
                   },
                   "恢复"
                 ),
+                h(
+                  "Button",
+                  {
+                    props: {
+                      type: "info",
+                      size: "small",
+                    },
+                    style: {
+                      marginRight: "5px",
+                    },
+                    on: {
+                      click: () => {
+                        this.edit(params.row);
+                      },
+                    },
+                  },
+                  "编辑"
+                ), h(
+                "div",
+                {
+                  style: {
+                    display: "flex",
+                    justifyContent: "center",
+                  },
+                })
               ]
             );
           },
@@ -281,6 +395,36 @@ export default {
             }
           });
         },
+      });
+    },
+    // 编辑
+    edit(v) {
+      this.$refs.distributionForm.resetFields();
+      // 转换null为""
+      for (let attr in v) {
+        if (v[attr] === null) {
+          v[attr] = "";
+        }
+      }
+      let str = JSON.stringify(v);
+      let data = JSON.parse(str);
+      this.distributionForm = data;
+      this.modalVisible = true;
+    },
+    // 提交表单
+    handleSubmit() {
+      this.$refs.distributionForm.validate((valid) => {
+        if (valid) {
+          // 编辑
+          editDistribution(this.distributionForm).then((res) => {
+            this.submitLoading = false;
+            if (res.success) {
+              this.$Message.success("操作成功");
+              this.getDataList();
+              this.modalVisible = false;
+            }
+          });
+        }
       });
     },
   },
