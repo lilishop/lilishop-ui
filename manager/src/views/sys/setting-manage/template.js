@@ -12,6 +12,7 @@ import WECHAT_PAYMENT from "./pay/WECHAT_PAYMENT";
 import PAYMENT_SUPPORT from "./pay/PAYMENT_SUPPORT";
 import WECHAT_CONNECT from "./authLogin/WECHAT_CONNECT";
 import QQ_CONNECT from "./authLogin/QQ_CONNECT";
+import CONNECT_SETTING from "./authLogin/CONNECT_SETTING";
 
 export default {
   BASE_SETTING,
@@ -27,5 +28,6 @@ export default {
   WECHAT_PAYMENT,
   ALIPAY_PAYMENT,
   WECHAT_CONNECT,
+  CONNECT_SETTING,
   QQ_CONNECT
 };

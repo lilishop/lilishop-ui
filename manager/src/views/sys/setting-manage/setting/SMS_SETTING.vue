@@ -1,6 +1,29 @@
 <template>
   <div class="layout">
     <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
+      <FormItem label="是否测试模式" prop="isTestModel">
+        <RadioGroup type="button" button-style="solid" v-model="formValidate.isTestModel">
+          <Radio label="true">开启</Radio>
+          <Radio label="false">关闭</Radio>
+        </RadioGroup>
+        <span class="desc">测试模式则不实际发送短信，短信验证码为：111111</span>
+      </FormItem>
+      <FormItem label="登录短信模板CODE" prop="loginTemplateCode">
+        <Input v-model="formValidate.loginTemplateCode"/>
+      </FormItem>
+      <FormItem label="注册短信模板CODE" prop="registerTemplateCode">
+        <Input v-model="formValidate.registerTemplateCode"/>
+      </FormItem>
+      <FormItem label="找回密码短信模板CODE" prop="findPasswordTemplateCode">
+        <Input v-model="formValidate.findPasswordTemplateCode"/>
+      </FormItem>
+      <FormItem label="设置密码短信模板CODE" prop="walletPasswordTemplateCode">
+        <Input v-model="formValidate.walletPasswordTemplateCode"/>
+      </FormItem>
+      <FormItem label="支付密码短信模板CODE" prop="payPasswordTemplateCode">
+        <Input v-model="formValidate.payPasswordTemplateCode"/>
+      </FormItem>
+
       <FormItem label="平台" prop="endPoint">
         <RadioGroup v-model="formValidate.type" type="button">
           <Radio label="ALI">阿里云</Radio>
@@ -8,7 +31,6 @@
           <Radio label="TENCENT">腾讯云</Radio>
         </RadioGroup>
       </FormItem>
-
       <!--      阿里云-->
       <FormItem v-if="formValidate.type==='ALI'" label="accessKeyId" prop="accessKeyId">
         <Input v-model="formValidate.accessKeyId"/>
@@ -65,6 +87,12 @@ export default {
       result: "",
       ruleValidate: {}, // 验证规则
       formValidate: { // 表单数据
+        isTestModel:1,
+        loginTemplateCode:"",
+        registerTemplateCode:"",
+        findPasswordTemplateCode:"",
+        walletPasswordTemplateCode:"",
+        payPasswordTemplateCode:"",
         accessKeyId: "",
         regionId: "",
         picLocation: "",
@@ -105,6 +133,10 @@ export default {
     // 实例化数据
     init() {
       this.result = JSON.parse(this.res);
+
+      Object.keys(this.result).map((item) => {
+        this.result[item] += "";
+      });
 
       this.$set(this, "formValidate", {...this.result});
       Object.keys(this.formValidate).forEach((item) => {

@@ -64,14 +64,12 @@ export default {
         },
       ],
       authLogin: [
+        // 登录设置
+        {type: "CONNECT_SETTING", name: "登录设置"},
         // 微信设置
         {type: "WECHAT_CONNECT", name: "微信设置"},
         // QQ设置
         {type: "QQ_CONNECT", name: "QQ设置"},
-        //微博联合登陆
-        // {type: "WEIBO_CONNECT", name: "微博联合登陆"},
-        // //支付宝配置
-        // {type: "ALIPAY_CONNECT", name: "支付宝配置"},
       ],
       pay: [
         //支付宝支付设置

@@ -11,12 +11,14 @@
         <Input maxlength="300" v-model="formValidate.alipayPublicCertPath" />
       </FormItem>
       <FormItem label="privateKey" class="label-item" prop="privateKey">
-        <Input maxlength="300" v-model="formValidate.privateKey" />
+        <Input maxlength="3000" v-model="formValidate.privateKey" />
       </FormItem>
       <FormItem label="rootCertPath" prop="rootCertPath">
         <Input maxlength="300" v-model="formValidate.rootCertPath" />
       </FormItem>
-
+      <FormItem label="支付回调域名" prop="callbackUrl">
+        <Input maxlength="300" v-model="formValidate.callbackUrl" />
+      </FormItem>
       <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
 
@@ -37,6 +39,7 @@ export default {
         bucketName: "",
         picLocation: "",
         endPoint: "",
+        callbackUrl:"",
       },
     };
   },

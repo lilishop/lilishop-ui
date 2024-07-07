@@ -26,7 +26,7 @@
 
             <Divider orientation="left">登录设置</Divider>
             <div class="pay-list">
-              <Form style="width:100%;" ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="80">
+              <Form style="width:100%;" ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="100">
                 <FormItem label="appId" prop="appId">
                   <Input @on-enter="setupSetting" class="label-appkey" v-model="item.appId" />
                 </FormItem>

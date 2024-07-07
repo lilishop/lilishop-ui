@@ -40,6 +40,9 @@
       <FormItem label="API证书-证书序列号" prop="serialNumber">
         <Input maxlength="300" v-model="formValidate.serialNumber" />
       </FormItem>
+      <FormItem label="支付回调域名" prop="callbackUrl">
+        <Input maxlength="300" v-model="formValidate.callbackUrl" />
+      </FormItem>
       <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
       </div>
