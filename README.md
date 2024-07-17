@@ -19,6 +19,64 @@
 [![star](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop/stargazers)
 &nbsp;&nbsp;![github](https://img.shields.io/github/stars/hongyehuicheng/lilishop.svg?style=social&logo=#181717)
 
+## 开发项目
+
+#### 安装Node.js
+保证`node`版本`14`,推荐 14.17.0
+
+可以使用 `yarn` 或者 `npm` 进行安装
+
+#### yarn 安装/启动
+```
+// 如果没有 yarn 安装yarn
+npm install yarn -g
+
+// 切换源
+yarn config set registry https://registry.npmmirror.com
+
+// 以buyer项目为例
+cd buyer
+
+yarn install
+
+yarn dev
+```
+
+#### npm 安装/启动
+```
+npm config set registry https://registry.npmmirror.com
+
+// 以buyer项目为例
+cd buyer
+
+npm run install
+
+npm run dev
+```
+
+#### FAQ
+
+##### npmmirror镜像源报错 451 Unavailable For Legal Reasons
+```
+//切换其他的镜像源
+
+// npm
+npm config set registry http://mirrors.cloud.tencent.com/npm/
+
+// yarn
+yarn config set registry http://mirrors.cloud.tencent.com/npm/
+```
+
+##### 安装不上去
+
+可以按照这个思路排查一下
+
+```
+1. 看下Node.js 是否是14.17.0
+2. 项目目录下是否有 package-lock.json 或者 .npmrc 或者 .yarnrc 设置了镜像源， 如果有可以删除重新install
+3. 切换当前 npm 或者 yarn 镜像源重试
+```
+
 
 ### 商城介绍
 **官网**：https://pickmall.cn
