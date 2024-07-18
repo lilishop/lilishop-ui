@@ -10,7 +10,6 @@
     "dev": "vue-cli-service serve"
   },
   "dependencies": {
-    "-": "0.0.1",
     "@amap/amap-jsapi-loader": "0.0.7",
     "@antv/g2": "^4.1.14",
     "axios": "^0.21.1",
