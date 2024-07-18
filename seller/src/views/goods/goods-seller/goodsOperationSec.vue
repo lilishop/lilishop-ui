@@ -185,9 +185,7 @@
                               <div>
                                 <AutoComplete v-model="item.name" :filter-method="filterMethod"
                                               :maxlength="30" placeholder="请输入规格项名称" style="width: 150px"
-                                              @on-focus="changeSkuItem(item.name)" @on-change="
-                                  editSkuItem(item.name, $index, item)
-                                  ">
+                                              @on-focus="changeSkuItem(item.name)" @on-change="editSkuItem(item.name, $index, item)">
                                 </AutoComplete>
 
                                 <iSwitch v-if="$index === 0" style="margin-left: 10px" size="small" @on-change="changeSkuOpenImage" v-model="openImage" /><span v-if="$index === 0" style="margin-left: 5px">添加规格图片</span>
@@ -1639,10 +1637,10 @@ export default {
               id: skus[index].id,
               sn: skus[index].sn,
               quantity: skus[index].quantity,
-              // alertQuantity: skus[index].alertQuantity,
-              cost: 1,
+              cost: skus[index].cost,
               price: skus[index].price,
-              [spec[0].name]: skus[index][spec[0].name] ? skus[index][spec[0].name] : specItem.value,
+              // [spec[0].name]: skus[index][spec[0].name] ? skus[index][spec[0].name] : specItem.value,
+              [spec[0].name]: specItem.value,
               images:
                 skus[index].images || this.baseInfoForm.goodsGalleryFiles || [],
             };
