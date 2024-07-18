@@ -1,203 +1,167 @@
 <style lang="scss">
 @import "./ossManage.scss";
+.group-row {
+  padding-top: 10px;
+  border-top: 1px solid #ededed;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  > * {
+    margin-right: 10px;
+  }
+}
+.article-category {
+  flex: 2;
+  min-width: 200px;
+}
+.table {
+  flex: 11;
+}
+.ivu-card {
+  width: 100%;
+}
+.modal-footer {
+  text-align: center;
+  > * {
+    margin: 0 10px;
+  }
+}
+
 </style>
 <template>
   <div class="search">
-    <Card>
-      <div class="operation">
-        <Row @keydown.enter.native="handleSearch">
-          <Form ref="searchForm" :model="searchForm" inline :label-width="85"    class="search-form"
-          >
-            <Form-item label="原文件名" prop="name">
-              <Input
-                type="text"
-                v-model="searchForm.name"
-                placeholder="请输入原文件名"
-                clearable
-                style="width: 200px"
-              />
-            </Form-item>
-            <Form-item label="存储文件名" prop="fileKey">
-              <Input
-                type="text"
-                v-model="searchForm.fileKey"
-                placeholder="请输入存储文件名"
-                clearable
-                style="width: 200px"
-              />
-            </Form-item>
-
-            <Form-item label="上传时间">
-              <DatePicker
-                v-model="selectDate"
-                type="daterange"
-                format="yyyy-MM-dd"
-                clearable
-                @on-change="selectDateRange"
-                placeholder="选择起始时间"
-                style="width: 200px"
-              ></DatePicker>
-            </Form-item>
-             <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn"
+    <Row>
+      <Card>
+        <div class="operation">
+          <Row @keydown.enter.native="handleSearch">
+            <Form
+              ref="searchForm"
+              :label-width="85"
+              :model="searchForm"
+              class="search-form"
+              inline
+            >
+              <Form-item label="上传时间">
+                <DatePicker
+                  v-model="selectDate"
+                  clearable
+                  format="yyyy-MM-dd"
+                  placeholder="选择起始时间"
+                  style="width: 200px"
+                  type="daterange"
+                  @on-change="selectDateRange"
+                ></DatePicker>
+              </Form-item>
+              <Form-item label="上传人" prop="ownerName">
+                <Input
+                  type="text"
+                  v-model="searchForm.ownerName"
+                  placeholder="图片拥有者名称"
+                  clearable
+                  style="width: 200px"
+                />
+              </Form-item>
+              <Button
+                class="search-btn"
+                icon="ios-search"
+                type="primary"
+                @click="handleSearch"
               >搜索
               </Button>
-          </Form>
-        </Row>
-        <div class="oss-operation padding-row">
-          <div>
-            <Upload
-              style="display:inline-block;"
-              :action="commonUrl + '/common/common/upload/file'"
-              :headers="accessToken"
-              :on-success="handleSuccess"
-              :on-error="handleError"
-              :show-upload-list="false"
-              :max-size="2048"
-              :on-exceeded-size="handleMaxSize"
-              multiple
-              ref="up"
-            >
-              <Button type="primary">上传文件</Button>
-            </Upload>
-            <Dropdown @on-click="handleDropdown">
-              <Button>
-                更多操作
-                <Icon type="md-arrow-dropdown"/>
-              </Button>
-              <DropdownMenu slot="list">
-                <DropdownItem name="refresh">刷新</DropdownItem>
-                <DropdownItem v-show="showType == 'list'" name="removeAll">批量删除
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          </div>
+            </Form>
+          </Row>
 
-          <div>
-            <RadioGroup
-              v-model="fileType"
-              @on-change="changeFileType"
-              type="button" button-style="solid"
-              style="margin-right: 25px"
-            >
-              <Radio label="all">所有类型</Radio>
-              <Radio label="pic">图片</Radio>
-              <Radio label="video">视频</Radio>
-            </RadioGroup>
-            <RadioGroup
-              v-model="showType"
-              type="button" button-style="solid"
-              @on-change="changeShowType"
-            >
-              <Radio title="列表" label="list">
-                <Icon type="md-list"></Icon>
-              </Radio>
-              <Radio title="缩略图" label="thumb">
-                <Icon type="ios-apps"></Icon>
-              </Radio>
-            </RadioGroup>
-          </div>
+          <Row class="oss-manage-box">
+            <Col :span="isComponent?5:4">
+              <div class="file-list">
+                <div class="article-category mr_10">
+                  <Tree :data="treeData" :render="renderContent" @on-select-change.self="handleCateChange" class="demo-tree-render"></Tree>
+                  <div class="group-row flex" v-if="!isComponent">
+                    <Button @click="handleClickAddGroup">添加分组</Button>
+                  </div>
+                </div>
+              </div>
+            </Col>
+            <Col :span="isComponent?19:20">
+              <div class="pic-list">
+                <div>
+                  <div class="oss-operation padding-row" style="display: flex;flex-direction: row-reverse;">
+                    <div>
+                      <Upload
+                        ref="up"
+                        :action="commonUrl + '/common/common/upload/file'"
+                        :data="{
+                  directoryPath: searchForm.fileDirectoryId,
+                }"
+                        :headers="accessToken"
+                        :max-size="20480"
+                        :on-error="handleError"
+                        :on-exceeded-size="handleMaxSize"
+                        :on-success="handleSuccess"
+                        :show-upload-list="false"
+                        multiple
+                        style="display: inline-block"
+                      >
+                        <Button>上传图片</Button>
+                      </Upload>
+                      <Dropdown @on-click="handleDropdown" v-if="!isComponent">
+                        <Button>
+                          更多操作
+                          <Icon type="md-arrow-dropdown"/>
+                        </Button>
+                        <DropdownMenu slot="list">
+                          <DropdownItem name="refresh">刷新</DropdownItem>
+                          <DropdownItem v-show="showType == 'list'" name="removeAll"
+                          >批量删除
+                          </DropdownItem>
+                        </DropdownMenu>
+                      </Dropdown>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <CheckboxGroup v-model="selectedOss" @on-change="selectOssChange">
+                    <div class="img-box">
+                      <div v-for="(item, index) in data" :key="index" class="img-item">
+                        <Checkbox :label="item.id+','+item.url" class="check-box">
+                          <template>
+                            <div class="card"  @mouseenter.active="onMouseOver(item, index)" @mouseleave.active="onMouseOut(item, index)">
+                              <!--<div class="custom-checkbox-card-mask"><div class="custom-checkbox-card-mask-dot"/></div>-->
+                              <img :src="item.url" alt="" />
+                              <div v-if="item.isShowPreview" class="preview">
+                                <div @click.prevent="download(item)"><Tooltip content="下载"><Icon type="md-cloud-download" size="18" /></Tooltip></div>
+                                <div @click.prevent="remove(item)"><Tooltip content="删除"><Icon type="md-trash" size="18" /></Tooltip></div>
+                                <div @click.prevent="showPic(item)"><Tooltip content="预览"><Icon type="ios-eye" size="22" /></Tooltip></div>
+                              </div>
+                            </div>
+                          </template>
+                        </Checkbox>
+                        <div>
+                          <Tooltip :content="item.name" placement="bottom">
+                            <div class="text">{{item.name}}</div>
+                          </Tooltip>
+                        </div>
+                      </div>
+                    </div>
+                  </CheckboxGroup>
+                </div>
+                <div class="page-box">
+                  <Page :total="total" :page-size="searchForm.pageSize" show-elevator @on-change="pageChange" size="small" />
+                </div>
+              </div>
+            </Col>
+          </Row>
         </div>
-      </div>
-
-      <div v-show="showType == 'list'">
-        <Row >
-          <Alert show-icon>
-            已选择
-            <span >{{ selectCount }}</span> 项
-            <a class="select-clear" @click="clearSelectAll">清空</a>
-            <span v-if="selectCount > 0" style="margin-left: 15px"
-            >共计 {{ totalSize }} 存储量</span
-            >
-          </Alert>
-        </Row>
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          ref="table"
-          sortable="custom"
-          @on-sort-change="changeSort"
-          @on-selection-change="changeSelect"
-        ></Table>
-      </div>
-      <div v-show="showType == 'thumb'">
-        <div class="oss-wrapper">
-          <Card v-for="(item, i) in data" :key="i" class="oss-card">
-            <div class="content">
-              <img
-                @click="showPic(item)"
-                v-if="item.fileType.indexOf('image') >= 0"
-                class="img"
-                :src="item.url"
-              />
-              <div
-                v-else-if="item.fileType.indexOf('video') >= 0"
-                class="video"
-                @click="showVideo(item)"
-              >
-                <!-- 文件小于5MB显示video -->
-                <video class="cover" v-if="item.fileSize < 1024 * 1024 * 5">
-                  <source :src="item.url"/>
-                </video>
-                <img class="play" src="@/assets/play.png"/>
-              </div>
-              <div v-else class="other">
-                <div class="name">{{ item.name }}</div>
-                <div class="key">{{ item.fileKey }}</div>
-                <div class="info">
-                  文件类型：{{ item.fileType }} 文件大小：{{
-                    ((item.fileSize * 1.0) / (1024 * 1024)).toFixed(2)
-                  }}
-                  MB 创建时间：{{ item.createTime }}
-                </div>
-              </div>
-              <div class="actions">
-                <div class="btn">
-                  <Tooltip content="下载" placement="top">
-                    <Icon @click="download(item)" type="md-download" size="16"/>
-                  </Tooltip>
-                </div>
-                <div class="btn">
-                  <Tooltip content="重命名" placement="top">
-                    <Icon @click="rename(item)" type="md-create" size="16"/>
-                  </Tooltip>
-                </div>
-                <div class="btn-no">
-                  <Tooltip content="删除" placement="top">
-                    <Icon @click="remove(item)" type="md-trash" size="16"/>
-                  </Tooltip>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
-          :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="pageSizeOpts"
-          size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
-
-
-
+      </Card>
+    </Row>
     <Modal
-      :title="modalTitle"
       v-model="modalVisible"
       :mask-closable="false"
+      :title="modalTitle"
       :width="500"
     >
-      <Form ref="form" :model="form" :label-width="95" :rules="formValidate">
+      <Form ref="form" :label-width="95" :model="form" :rules="formValidate">
         <FormItem label="原文件名" prop="name">
           <Input v-model="form.name"/>
         </FormItem>
@@ -207,10 +171,9 @@
       </Form>
       <div slot="footer">
         <Button type="text" @click="handleCancel">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="handleSubmit"
+        <Button :loading="submitLoading" type="primary" @click="handleSubmit"
         >提交
-        </Button
-        >
+        </Button>
       </div>
     </Modal>
 
@@ -233,8 +196,8 @@
       v-model="videoVisible"
       :title="videoTitle"
       :width="800"
-      @on-cancel="closeVideo"
       draggable
+      @on-cancel="closeVideo"
     >
       <div id="dplayer"></div>
       <div slot="footer">
@@ -245,32 +208,102 @@
         >
       </div>
     </Modal>
+
+    <!-- 添加分组修改分组编辑框 -->
+    <Modal
+      v-model="enableGroup"
+      :title="insertOrUpdate === 'insert' ? '添加分组' : '修改分组'"
+      :loading="groupLoading"
+      @on-ok="submitAddGroup"
+      footer-hide
+    >
+      <Form
+        ref="formValidate"
+        :label-width="80"
+        :model="groupFormValidate"
+        :rules="groupRuleValidate"
+      >
+        <FormItem label="所在分组" prop="id">
+          <Cascader
+            v-model="defaultValue"
+            :data="treeData"
+            change-on-select
+            @on-change="treeDataChange"
+          ></Cascader>
+        </FormItem>
+        <FormItem label="分组名称" prop="directoryName">
+          <Input v-model="groupFormValidate.directoryName"/>
+        </FormItem>
+      </Form>
+      <div class="modal-footer">
+        <Button @click="enableGroup = false">取消</Button>
+        <Button type="primary" @click="submitAddGroup">确定</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 
 <script>
 import {
+  addFileDirectory,
+  deleteFile,
+  delFileDirectory,
+  getFileDirectory,
   getFileListData,
   renameFile,
-  deleteFile,
+  updateFileDirectory,
 } from "@/api/index";
 import DPlayer from "dplayer";
-
-const config = require('@/config/index')
 import { commonUrl } from "@/libs/axios";
-var dp;
+
+const config = require("@/config/index");
+
+let dp;
 export default {
   name: "oss-manage",
-  props:{
-    isComponent:{
+  props: {
+    isComponent: {
       default: false,
-      type:Boolean
-    }
+      type: Boolean,
+    },
+    choose: {
+      type: String,
+      default: ""
+    },
+    initialize: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
       commonUrl, // 上传文件路径
       config, // api地址
+      fileDirectoryId: "",
+      groupFormValidate: {
+        id: [],
+        level: 0,
+        directoryName: "",
+      },
+      defaultValue: [], // 默认分组id
+      groupRuleValidate: {
+        directoryName: [
+          {
+            required: true,
+            message: "请输入分组名称",
+            trigger: "blur",
+          },
+        ],
+        id: [
+          {
+            required: true,
+            message: "请选择分组",
+            trigger: "blur",
+            type: "array",
+          },
+        ],
+      },
+      enableGroup: false, // 是否展示分组
       selectImage: false, //是否是选择
       accessToken: {}, // 上传token鉴权
       loading: false, // 表单加载状态
@@ -288,8 +321,9 @@ export default {
         name: "",
         fileKey: "",
         fileType: "",
+        ownerName: "",
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
         startDate: "", // 起始时间
@@ -297,7 +331,8 @@ export default {
       },
       selectDate: null, // 选择日期绑定modal
       oldKey: "", // 请求参数
-      form: { // 表单
+      form: {
+        // 表单
         name: "",
         fileKey: "",
       },
@@ -319,31 +354,15 @@ export default {
           align: "center",
         },
         {
-          title: "原文件名",
-          key: "name",
-          minWidth: 130,
-          sortable: true,
-          ellipsis: false,
-          tooltip: true,
-        },
-        {
-          title: "存储文件名",
-          key: "fileKey",
-          width: 165,
-          sortable: true,
-          ellipsis: false,
-          tooltip: true,
-        },
-        {
           title: "缩略图(点击预览)",
           key: "url",
-          width: 150,
+          width: 300,
           align: "center",
           render: (h, params) => {
             if (params.row.fileType.includes("image") > 0) {
               return h("img", {
                 attrs: {
-                  src: params.row.url || '',
+                  src: params.row.url || "",
                   alt: "加载图片失败",
                 },
                 style: {
@@ -414,7 +433,6 @@ export default {
           title: "文件类型",
           key: "fileType",
           width: 115,
-          sortable: true,
           className: this.selectImage == true ? "none" : "",
         },
         {
@@ -432,46 +450,39 @@ export default {
         {
           title: "上传者",
           key: "createBy",
-          width: 120,
-          sortable: true,
+          width: 200,
           render: (h, params) => {
             let m = "";
-            if(params.row.userEnums=="MANAGER"){
-            m="[管理员]"
-            }else if(params.row.userEnums=="STORE"){
-              m="[店铺]"
-            }else{
-              m="[会员]"
+            if (params.row.userEnums == "MANAGER") {
+              m = "[管理员]";
+            } else if (params.row.userEnums == "STORE") {
+              m = "[店铺]";
+            } else {
+              m = "[会员]";
             }
-            m += params.row.createBy
+            m += params.row.createBy;
             return h("span", m);
           },
-        },
-        {
-          title: "上传时间",
-          key: "createTime",
-          width: 180,
-          sortable: true,
-          sortType: "desc",
         },
         {
           title: "操作",
           key: "action",
           align: "center",
           fixed: "right",
-          width: 200,
+          // width: 300,
           render: (h, params) => {
             return h("div", [
               h(
                 "Button",
                 {
                   props: {
-                    type: "primary",
+                    type: "default",
                     size: "small",
                   },
                   style: {
                     marginRight: "5px",
-                    display: this.selectImage == true ? "inline-block" : "none",
+                    display:
+                      this.selectImage === true ? "inline-block" : "none",
                   },
                   on: {
                     click: () => {
@@ -504,25 +515,6 @@ export default {
                 "Button",
                 {
                   props: {
-                    size: "small",
-                    type: 'success'
-                  },
-                  style: {
-                    marginRight: "5px",
-                    display: this.selectImage == true ? "none" : "inline-block",
-                  },
-                  on: {
-                    click: () => {
-                      this.rename(params.row);
-                    },
-                  },
-                },
-                "重命名"
-              ),
-              h(
-                "Button",
-                {
-                  props: {
                     type: "error",
                     size: "small",
                   },
@@ -541,17 +533,401 @@ export default {
           },
         },
       ],
+      viewColumns: [
+        {
+          title: "缩略图(点击预览)",
+          key: "url",
+          // width: 150,
+          align: "center",
+          render: (h, params) => {
+            if (params.row.fileType.includes("image") > 0) {
+              return h("img", {
+                attrs: {
+                  src: params.row.url || "",
+                  alt: "加载图片失败",
+                },
+                style: {
+                  cursor: "pointer",
+                  width: "80px",
+                  height: "60px",
+                  margin: "10px 0",
+                  "object-fit": "contain",
+                },
+                on: {
+                  click: () => {
+                    this.showPic(params.row);
+                  },
+                },
+              });
+            } else if (params.row.fileType.includes("video") > 0) {
+              // 如果视频文件大小超过5MB不予加载video
+              if (params.row.fileSize < 1024 * 1024 * 5) {
+                return h(
+                  "video",
+                  {
+                    style: {
+                      cursor: "pointer",
+                      width: "80px",
+                      height: "60px",
+                      margin: "10px 0",
+                      "object-fit": "contain",
+                    },
+                    on: {
+                      click: () => {
+                        this.showVideo(params.row);
+                      },
+                    },
+                  },
+                  [
+                    h("source", {
+                      attrs: {
+                        src: params.row.url,
+                      },
+                    }),
+                  ]
+                );
+              } else {
+                return h("img", {
+                  attrs: {
+                    src: require("@/assets/play.png"),
+                  },
+                  style: {
+                    cursor: "pointer",
+                    width: "80px",
+                    height: "60px",
+                    margin: "10px 0",
+                    "object-fit": "contain",
+                  },
+                  on: {
+                    click: () => {
+                      this.showVideo(params.row);
+                    },
+                  },
+                });
+              }
+            } else {
+              return h("span", "非多媒体类型");
+            }
+          },
+        },
+        {
+          title: "上传者",
+          key: "createBy",
+          width: 120,
+          sortable: true,
+          render: (h, params) => {
+            let m = "";
+            if (params.row.userEnums == "MANAGER") {
+              m = "[管理员]";
+            } else if (params.row.userEnums == "STORE") {
+              m = "[店铺]";
+            } else {
+              m = "[会员]";
+            }
+            m += params.row.createBy;
+            return h("span", m);
+          },
+        },
+        {
+          title: "操作",
+          key: "action",
+          align: "center",
+          fixed: "right",
+          width: 300,
+          render: (h, params) => {
+            return h("div", [
+              h(
+                "Button",
+                {
+                  props: {
+                    type: "default",
+                    size: "small",
+                  },
+                  style: {
+                    marginRight: "5px",
+                    display:
+                      this.selectImage === true ? "inline-block" : "none",
+                  },
+                  on: {
+                    click: () => {
+                      this.selectedParams(params.row);
+                    },
+                  },
+                },
+                "选择"
+              )
+            ]);
+          },
+        },
+      ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
       pageSizeOpts: [5, 10, 20], // 页码展示项
+      list: [], // 列表
+      //树结构
+      treeData: [],
+      treeDataDefault: [],
+      selectedGroupData: "",
+      insertOrUpdate: "insert",
+      groupLoading: false,
+      // 图片列表
+      selectedOss: [],
+      myData: [
+        {
+          title: 'parent 1',
+          expand: true,
+          render: (h, { root, node, data }) => {
+            return h('span', {style: {display: 'inline-block', width: '100%'}}, [
+              h('span', [h("Icon", {type: 'ios-folder-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
+              h('span', {style: {display: 'inline-block', float: 'right', marginRight: '32px'}},
+                [h("Button", {...this.buttonProps, icon: 'ios-add', type: 'primary', style: {width: '64px'}, onClick: () => { this.append(data) }})
+                ])
+            ]);
+          },
+          children: [
+            {title: 'child 1-1', expand: true, children: [{title: 'leaf 1-1-1', expand: true}, {title: 'leaf 1-1-2', expand: true}]},
+            {title: 'child 1-2', expand: true, children: [{title: 'leaf 1-2-1', expand: true}, {title: 'leaf 1-2-1', expand: true}]}
+          ]
+        }
+      ],
+      buttonProps: {type: 'default', size: 'small',},
     };
   },
-  watch:{
+  watch: {
     selectImage(val) {
-      if (val && !this.data.length) this.init()
-    }
+      if (val && !this.data.length) this.init();
+    },
+    choose(val) {
+      if (val) this.selectImage = val
+    },
+    selectedOss(val) {
+      if (val && val.length) {
+        this.$emit("callback", {url: val[val.length-1].split(',')[1]});
+      }
+    },
+    // 初始化监听 是否清空所选图片
+    initialize(val) {
+      if (val && this.isComponent) {
+        this.selectedOss = [];
+      }
+    },
+    defaultValue(val) {
+      if (val) {
+        this.groupFormValidate.parentId = val;
+      }
+    },
   },
+
   methods: {
+    onMouseOver(item, index) {
+      this.$set(this.data[index], 'isShowPreview', true);
+      this.$forceUpdate();
+    },
+    onMouseOut(item, index) {
+      this.$set(this.data[index], 'isShowPreview', false);
+    },
+    // 复选框值改变时触发
+    selectOssChange(e) {
+      if (e) {
+        this.selectList = e.map(item => {return { id: item.split(',')[0]}});
+        this.selectCount = e.length;
+        // let size = 0;
+        // e.forEach((item) => {size += item.fileSize * 1.0;});
+        // this.totalSize = ((size * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
+        this.$emit("selected", e);
+      }
+    },
+    // 页码改变时回调
+    pageChange(value) {
+      this.$set(this, 'selectedOss', []);
+      this.searchForm.pageNumber = value;
+      this.getDataList();
+    },
+    // 自定义tree节点显示内容和交互
+    renderContent (h, { root, node, data }) {
+      if (data.value === '0') {
+        return h('span', {style: {display: 'inline-block', width: '100%'}},
+          [
+            h('span', [h("Icon", {type: 'ios-paper-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
+            h('span', {style: {display: 'inline-block', float: 'right', marginRight: '10px'}}, [])
+          ]
+        );
+      } else {
+        return h('span', {style: {display: 'inline-block', width: '100%'}},
+          [
+            h('span', [h("Icon", {type: 'ios-paper-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
+            h('span', {style: {display: 'inline-block', float: 'right', marginRight: '10px'}},
+              [
+                h("Dropdown", {style: {marginLeft: "4px"}},
+                  [
+                    h("Icon", {props: {type: 'ios-more', size: "20",}, style: {display: 'inline-block'}, on:{click: () => {}}}),
+                    h("DropdownMenu", {slot: "list"
+                    }, [
+                      h("DropdownItem", { nativeOn:{click: () => {this.handleContextMenuEdit(root, node, data)}} }, "编辑"),
+                      h("DropdownItem", { nativeOn:{click: () => {this.handleContextMenuDelete(data)}} }, "删除"),
+                    ])
+                  ]),
+              ])
+          ]
+        );
+      }
+
+    },
+
+
+
+
+    handleContextMenu(val) {
+      console.log('handleContextMenu', val);
+      this.selectedGroupData = val;
+    },
+    // 编辑分组
+    handleContextMenuEdit(root, node, data) {
+      this.insertOrUpdate = "update";
+      this.enableGroup = true;
+      this.groupFormValidate.directoryName = data.label;
+      this.groupFormValidate.id = [data.value];
+      this.groupFormValidate.level = data.level;
+      this.groupFormValidate.parentId = data.parentId;
+      this.defaultValue = [data.parentId];
+    },
+    // 删除分组
+    async handleContextMenuDelete(val) {
+      this.$Modal.confirm({
+        title: "提示",
+        content: "是否删除该分组",
+        onOk: async () => {
+          const res = await delFileDirectory([val.value]);
+          if (res.success) {
+            this.$Message.success("删除成功!");
+            this.getDataList();
+            this.getAllList();
+          }
+        },
+      });
+    },
+    treeDataChange(value, selectedData) {
+      if (value && value.length) {
+        if (value[value.length -1] == '0') {
+          this.groupFormValidate.level = 0;
+        } else {
+          this.groupFormValidate.level = Number(selectedData[selectedData.length -1].level) + 1;
+        }
+      }
+    },
+    // 保存/修改分组
+    async submitAddGroup() {
+      this.$refs["formValidate"].validate(async (valid) => {
+        if (valid) {
+          let res
+          const params = { ...this.groupFormValidate };
+          if (this.insertOrUpdate === "insert") {
+            params.parentId = params.id[params.id.length - 1];
+            delete params.id;
+            res = await addFileDirectory(params);
+          } else {
+            params.id = params.id[params.id.length - 1];
+            params.parentId = params.parentId[params.parentId.length - 1];
+            res = await updateFileDirectory(params);
+          }
+
+          if (res.success) {
+            this.$Message.success("操作成功!");
+            this.enableGroup = false;
+            this.getAllList();
+          }
+          this.$Modal.remove();
+        } else {
+          this.$Message.error("请填写完整信息!");
+        }
+      });
+    },
+    // 添加/修改分组
+    handleClickAddGroup() {
+      this.insertOrUpdate = "insert";
+      if (this.selectedGroupData) {
+        this.groupFormValidate.id = [this.selectedGroupData.value];
+      } else {
+        this.groupFormValidate.id = ["0"];
+      }
+      this.enableGroup = true;
+      this.groupFormValidate.directoryName = "";
+    },
+    copyFileUrl(row) {
+      const textArea = document.createElement("textarea");
+      textArea.value = row.url;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand("copy");
+        this.$Message.success("复制成功");
+      } catch (err) {
+        console.error("Unable to copy to clipboard", err);
+      }
+      document.body.removeChild(textArea);
+    },
+
+    // 获取全部文件目录
+    getAllList(parent_id) {
+      this.loading = true;
+      getFileDirectory(parent_id).then((res) => {
+        this.loading = false;
+        if (res.success) {
+          this.treeData = this.getTree(res.result);
+          this.treeDataDefault = this.getTree(res.result);
+          this.treeData.unshift({
+            title: "全部图片",
+            label: "全部分类",
+            value: "0",
+            level: 0,
+            children: [],
+            id: "0",
+            categoryId: 0,
+          });
+        }
+      });
+    },
+    // 文件目录分类格式化方法
+    getTree(tree = []) {
+      let arr = [];
+      if (!!tree && tree.length !== 0) {
+        tree.forEach((item) => {
+          let obj = {};
+          obj.title = item.directoryName;
+          obj.value = item.id; // 拥有者id
+          obj.type = item.directoryType; // 用户类型
+          obj.label = item.directoryName;
+          obj.level = item.level;
+          obj.expand = false;
+          obj.selected = false;
+          obj.contextmenu = false;
+          obj.parentId = item.parentId;
+          obj.children = this.getTree(item.children); // 递归调用
+          arr.push(obj);
+        });
+      }
+      return arr;
+    },
+
+    // 选择分类回调
+    handleCateChange(data) {
+      if (data) {
+        this.selectedGroupData = data[0];
+        let {value, type, level} = data[0];
+        this.list.push({value, type, level});
+        this.searchForm.fileDirectoryId = value;
+        if (value === "0" || value === 0) {
+          delete this.searchForm.fileDirectoryId;
+          this.groupFormValidate.level = 0;
+        } else {
+          this.groupFormValidate.level = Number(level) + 1;
+        }
+        this.searchForm.userEnums = type;
+        this.getDataList();
+        this.$set(this, 'selectedOss', []);
+      }
+    },
     /**
      * 选择
      */
@@ -560,9 +936,9 @@ export default {
     },
     // 更多操作
     handleDropdown(name) {
-      if (name == "refresh") {
-        this.getDataList();
-      } else if (name == "removeAll") {
+      if (name === "refresh") {
+        this.getDataList('refresh');
+      } else if (name === "removeAll") {
         this.removeAll();
       }
     },
@@ -572,6 +948,7 @@ export default {
         accessToken: this.getStore("accessToken"),
       };
       this.getDataList();
+      this.getAllList();
     },
     // 查看大图
     showPic(v) {
@@ -631,14 +1008,14 @@ export default {
     changeShowType() {
       this.searchForm.pageNumber = 1;
       if (this.showType == "list") {
-        this.searchForm.pageSize = 10;
+        this.searchForm.pageSize = 20;
       } else {
         this.searchForm.pageSize = 12;
       }
       this.getDataList();
     },
     // 获取列表数据
-    getDataList() {
+    getDataList(type = null) {
       if (this.showType == "list") {
         this.pageSizeOpts = [10, 20, 50];
       } else {
@@ -650,6 +1027,9 @@ export default {
 
         this.data = res.result.records;
         this.total = res.result.total;
+        if (type === 'refresh') {
+          this.$Message.success('刷新成功！');
+        }
       });
     },
     // 搜索
@@ -657,7 +1037,7 @@ export default {
       this.searchForm.title = this.searchForm.name;
       this.searchForm.pageNumber = 1;
       if (this.showType == "list") {
-        this.searchForm.pageSize = 5;
+        this.searchForm.pageSize = 20;
       } else {
         this.searchForm.pageSize = 12;
       }
@@ -721,18 +1101,20 @@ export default {
         loading: true,
         onOk: () => {
           let ids = "";
-          this.selectList.forEach(function (e) {
-            ids += e.id + ",";
-          });
+          this.selectList.forEach(function (e) {ids += e.id + ",";});
           ids = ids.substring(0, ids.length - 1);
           deleteFile(ids).then((res) => {
             this.$Modal.remove();
             if (res.success) {
+              this.$set(this, 'selectedOss', []);
+              // this.clearSelectAll();
+              this.init();
               this.$Message.success("批量删除文件成功");
-              this.clearSelectAll();
-              this.getDataList();
             }
-          });
+          })
+            .catch((err) => {
+              console.log("失败", err);
+            });
         },
       });
     },
@@ -749,7 +1131,7 @@ export default {
               this.$Message.success("删除文件 " + v.name + " 成功");
               this.getDataList();
             }
-          });
+          })
         },
       });
     },
@@ -804,14 +1186,16 @@ export default {
         size += item.fileSize * 1.0;
       });
       this.totalSize = ((size * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
-      this.$emit('selected',e)
+      this.$emit("selected", e)
     },
   },
   mounted() {
-    if(!this.isComponent) { // 是组件的话，初始化不调用接口
+    if (!this.isComponent) {
+      // 是组件的话，初始化不调用接口
       this.init();
+    } else {
+      this.searchForm.pageSize =18; // 页面大小
     }
   },
-
 };
 </script>
