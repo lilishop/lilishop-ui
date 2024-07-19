@@ -19,6 +19,10 @@
 [![star](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop/stargazers)
 &nbsp;&nbsp;![github](https://img.shields.io/github/stars/hongyehuicheng/lilishop.svg?style=social&logo=#181717)
 
+## 开发部署视频
+[lilishop-ui如何运行](https://www.bilibili.com/video/BV1B28EeJEnP/)
+
+
 ## 开发项目
 
 #### 安装Node.js
