@@ -19,8 +19,11 @@
 [![star](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop/stargazers)
 &nbsp;&nbsp;![github](https://img.shields.io/github/stars/hongyehuicheng/lilishop.svg?style=social&logo=#181717)
 
-## 开发部署视频
-[lilishop-ui如何运行](https://www.bilibili.com/video/BV1B28EeJEnP/)
+## 如何在本地环境运行lilishop-ui部署视频
+https://www.bilibili.com/video/BV1B28EeJEnP/
+
+## 如何在服务器上部署lilishop-ui
+https://www.bilibili.com/video/BV1WD87eoE9F/
 
 
 ## 开发项目
