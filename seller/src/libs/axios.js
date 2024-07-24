@@ -20,10 +20,10 @@ export const uploadFile = commonUrl + "/common/common/upload/file";
 var isRefreshToken = 0;
 const refreshToken = getTokenDebounce();
 const service = axios.create({
-  timeout: 10000,
+
   baseURL: baseUrl
 });
-
+axios.defaults.timeout = 100000
 const recordCurrentPath = () => {
    return router.history.current.fullPath
 }
