@@ -850,7 +850,7 @@
         if (val) this.selectImage = val
       },
       selectedOss(val) {
-        if (val) {
+        if (val && val.length > 0 && val[val.length-1].split(',')[1]) {
           this.$emit("callback", {url: val[val.length-1].split(',')[1]});
         }
       }
@@ -1044,7 +1044,7 @@
 
       // 选择分类回调
       handleCateChange(data) {
-        if (data) {
+        if (data && data.length > 0) {
           this.selectedGroupData = data[0];
           let {value, type, level} = data[0];
           this.list.push({value, type, level});
