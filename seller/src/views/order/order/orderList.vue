@@ -36,6 +36,7 @@
             <Option value="UNPAID">未付款</Option>
             <Option value="PAID">已付款</Option>
             <Option value="UNDELIVERED">待发货</Option>
+            <Option value="PARTS_DELIVERED">部分发货</Option>
             <Option value="DELIVERED">已发货</Option>
             <Option value="COMPLETED">已完成</Option>
             <Option value="CANCELLED">已取消</Option>
@@ -233,9 +234,13 @@ export default {
               return h("div", [
                 h("tag", { props: { color: "geekblue" } }, "待发货"),
               ]);
-            }else if (params.row.orderStatus == "STAY_PICKED_UP") {
+            } else if (params.row.orderStatus == "STAY_PICKED_UP") {
               return h("div", [
                 h("tag", { props: { color: "geekblue" } }, "待自提"),
+              ]);
+            } else if (params.row.orderStatus == "PARTS_DELIVERED") {
+              return h("div", [
+                h("tag", { props: { color: "cyan" } }, "部分发货"),
               ]);
             } else if (params.row.orderStatus == "DELIVERED") {
               return h("div", [
