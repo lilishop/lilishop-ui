@@ -339,15 +339,15 @@ export default {
               this.sortGoods("SECKILL");
             },
           };
-        case "COUPON":
-          return {
-            title: "优惠券",
-            methodsed: () => {
-              this.showPromotionList = [];
-              this.activeColumns = this.pintuanColumns;
-              this.sortGoods("COUPON");
-            },
-          };
+        // case "COUPON":
+        //   return {
+        //     title: "优惠券",
+        //     methodsed: () => {
+        //       this.showPromotionList = [];
+        //       this.activeColumns = this.pintuanColumns;
+        //       this.sortGoods("COUPON");
+        //     },
+        //   };
         case "POINTS_GOODS":
           return {
             title: "积分商品",
@@ -383,6 +383,8 @@ export default {
     getPromotion(res) {
       if (res.result) {
         this.promotionList = res.result;
+        // 去除优惠券
+        delete this.promotionList.COUPON;
         Object.keys(res.result)[0] && this.typeOption(Object.keys(res.result)[0]).methodsed();
       }
 
