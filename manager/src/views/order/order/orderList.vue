@@ -267,6 +267,10 @@ export default {
               return h("div", [
                 h("tag", { props: { color: "geekblue" } }, "待自提"),
               ]);
+            } else if (params.row.orderStatus == "PARTS_DELIVERED") {
+              return h("div", [
+                h("tag", { props: { color: "cyan" } }, "部分发货"),
+              ]);
             } else if (params.row.orderStatus == "DELIVERED") {
               return h("div", [
                 h("tag", { props: { color: "cyan" } }, "已发货"),
@@ -320,6 +324,7 @@ export default {
         {title: '未付款', value: 'UNPAID'},
         {title: '已付款', value: 'PAID'},
         {title: '待发货', value: 'UNDELIVERED'},
+        {title: '部分发货', value: 'PARTS_DELIVERED'},
         {title: '已发货', value: 'DELIVERED'},
         {title: '待核验', value: 'TAKE'},
         {title: '待自提', value: 'STAY_PICKED_UP'},

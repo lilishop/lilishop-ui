@@ -18,6 +18,10 @@ export const orderStatusList = [
     status: 'UNDELIVERED'
   },
   {
+    name: '部分发货',
+    status: 'PARTS_DELIVERED'
+  },
+  {
     name: '已发货',
     status: 'DELIVERED'
   },

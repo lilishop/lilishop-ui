@@ -134,7 +134,7 @@
               <td>
                 <Input
                   v-model="item.url"
-                  disabled
+                  :disabled="!item.title || item.title !== '外部链接'"
                 />
               </td>
               <!-- <td><Input v-model="item.sort"/></td> -->
@@ -201,15 +201,16 @@ export default {
         bgColor: "#de000d",
         size: "1200*80",
       },
+      currentIndex: 0,
       navList: {
         // 分类nav数据
         type: "navBar",
         list: [
-          { name: "秒杀", url: "" },
-          { name: "闪购", url: "" },
-          { name: "优惠券", url: "" },
-          { name: "拍卖", url: "" },
-          { name: "服装城", url: "" },
+          { name: "秒杀", url: "", title: "" },
+          { name: "闪购", url: "", title: "" },
+          { name: "优惠券", url: "", title: "" },
+          { name: "拍卖", url: "", title: "" },
+          { name: "服装城", url: "", title: "" },
         ],
       },
     };
@@ -228,21 +229,19 @@ export default {
       // 调起选择链接弹窗
       if (item) this.selectedNav = item;
       this.$refs.liliDialog.open("link");
-      console.log(item);
+      this.currentIndex = index;
     },
     // 已选链接
     selectedLink(val) {
 
-
       if (this.showModalNav) {
         this.selectedNav.url = this.$options.filters.formatLinkType(val);
-        this.selectedNav.type =
-          val.___type === "other" && val.url === "" ? "link" : "other";
+        this.selectedNav.type = val.___type === "other" && val.url === "" ? "link" : "other";
       } else {
         this.topAdvert.url = this.$options.filters.formatLinkType(val);
-        this.topAdvert.type =
-          val.___type === "other" && val.url === "" ? "link" : "other";
+        this.topAdvert.type = val.___type === "other" && val.url === "" ? "link" : "other";
       }
+      this.navList.list[this.currentIndex].title = val.title;
     },
     handleDelNav(index) {
       // 删除导航
@@ -250,7 +249,9 @@ export default {
     },
     handleAddNav() {
       // 添加导航
-      this.navList.list.push({ name: "", url: "" });
+      this.navList.list.push({ name: "", url: "", title: "" });this.$nextTick(() => {
+        this.selectedNav.title = val.title;
+      });
     },
     // 拖动结束回调
     handleMoveEnd({ newIndex, oldIndex }) {
