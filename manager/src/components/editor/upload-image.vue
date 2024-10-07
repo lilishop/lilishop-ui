@@ -57,13 +57,14 @@
     </Modal>
 
     <Modal width="1000" v-model="showOssManager" @on-ok="confirmUrls">
-    <OssManage ref="ossManage" :isComponent="true" :initialize="showOssManager" @selected="handleCallback"  />
+    <OssManage ref="ossManage" :isComponent="true" :initialize="showOssManager"  @selected="(list)=>{ selectedImage = list}" @callback="handleCallback" />
     </Modal>
   </div>
 </template>
 <script>
 import vuedraggable from "vuedraggable";
-import { uploadFile } from "@/libs/axios";
+import {uploadFile} from "@/libs/axios";
+// import OssManage from "@/views/sys/oss-manage/ossManage";
 import OssManage from "@/views/sys/oss-manage/ossManage.vue";
 
 export default {
@@ -88,11 +89,8 @@ export default {
     };
   },
   methods: {
-    confirmUrl(){
-
-    },
     handleClickUploadImage(){
-      this.show = true
+      this.show = true;
     },
     // 回调给父级
     callback() {
@@ -122,21 +120,22 @@ export default {
     handleSuccessGoodsPicture(res, file) {
       if (file.response) {
         file.url = file.response.result;
-          this.images.push(file);
+        this.images.push(file);
       }
     },
     confirmUrls(){
-      this.selectedImage.length ? this.selectedImage.forEach(element => {
-        this.images.push({ url: element.url })
-      }):''
+      // this.selectedImage.length ? this.selectedImage.forEach(element => {
+      //   this.images.push({ url: element.url })
+      // }):''
       this.showOssManager = false
     },
     handleCallback(val){
-      this.selectedImage = val
+      this.$Message.success("导入成功")
+      this.images.push({url:val.url})
     },
     // 从资源库中导入图片
     importOSS(){
-      this.showOssManager = true
+      this.showOssManager = true;
       this.$refs.ossManage.selectImage = true;
     }
   }
