@@ -237,8 +237,10 @@ export default {
     },
     // 树结构点击事件
     changeTree(array, val) {
-      val.cityCode == "null" ? (val.cityCode = "") : val.cityCode;
-      this.$set(this, "formValidate", val);
+      const cloneVal = JSON.parse(JSON.stringify(val))
+      cloneVal.cityCode == "null" ? (cloneVal.cityCode = "") : cloneVal.cityCode;
+      this.$set(this, "formValidate", cloneVal);
+      this.$refs.formValidate.resetFields()
     },
     // 异步加载数据
     loadData(item, callback) {
