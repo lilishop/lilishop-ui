@@ -65,11 +65,13 @@ export default {
               }
               return cur;
       }, []);
-      this.wap.forEach((items,indexs) => {
-        if(items.title == '活动'){
-          this.wap.splice(indexs,1)
-        }
-      })
+      if (this.$route.path !== '/floorList/main') {
+        this.wap.forEach((items, indexs) => {
+          if (items.title == '活动') {
+            this.wap.splice(indexs, 1)
+          }
+        })
+      }
     }else{
       this.wap.push( {
         title: "活动",

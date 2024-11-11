@@ -73,13 +73,6 @@ export default {
         pageSize: 10,
       },
       pintuanColumns: [
-        // 表头
-        {
-          title: "活动标题",
-          key: "title",
-          tooltip: true,
-          width: 250,
-        },
         {
           title: "商品名称",
           key: "goodsName",
@@ -386,6 +379,7 @@ export default {
         // 去除优惠券
         delete this.promotionList.COUPON;
         Object.keys(res.result)[0] && this.typeOption(Object.keys(res.result)[0]).methodsed();
+        this.promotions = Object.keys(res.result)[0];
       }
 
       // if (Object.keys(res.result).length) {
