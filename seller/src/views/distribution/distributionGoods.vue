@@ -22,11 +22,11 @@
 
             <div style="margin-left: 13px;">
               <div class="div-zoom">
-                <a @click="linkTo(row.id,row.skuId)">{{row.goodsName}}</a>
+                <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
               </div>
               <Poptip trigger="hover" title="扫码在手机中查看" transfer>
                 <div slot="content">
-                  <vue-qr :text="wapLinkTo(row.id,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
+                  <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
                 </div>
                 <img src="../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
               </Poptip>
