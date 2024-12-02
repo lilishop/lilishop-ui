@@ -39,7 +39,7 @@
             <dl v-if="afterSaleInfo.actualRefundPrice">
               <dt>实际退款金额</dt>
               <dd>
-                <priceColorScheme :value="afterSaleInfo.applyRefundPrice" :color="$mainColor"></priceColorScheme>
+                <priceColorScheme :value="afterSaleInfo.actualRefundPrice" :color="$mainColor"></priceColorScheme>
               </dd>
             </dl>
             <dl v-if="afterSaleInfo.refundPoint">
