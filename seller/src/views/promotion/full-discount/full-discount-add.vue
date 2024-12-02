@@ -377,6 +377,7 @@ export default {
           price: e.price,
           quantity: e.quantity,
           storeId: e.storeId,
+          goodsId:e.goodsId,
           storeName: e.storeName,
           thumbnail: e.thumbnail,
           skuId: e.id,
