@@ -36,14 +36,15 @@
               prop="couponDiscount"
               v-if="form.couponType == 'DISCOUNT'"
             >
-              <Input
+              <InputNumber
                 :disabled="disabled"
-                type="number"
-                v-model="form.couponDiscount"
                 placeholder="折扣"
-                clearable
-                style="width: 260px"
-              />
+                :max="9.9"
+                :min="0.1"
+                :step="0.1"
+                v-model="form.couponDiscount"
+                style="width: 260px">
+              </InputNumber>
               <span class="describe">请输入0-10之间数字，可以输入一位小数</span>
             </FormItem>
             <FormItem label="面额" prop="price" v-if="form.couponType == 'PRICE'">
