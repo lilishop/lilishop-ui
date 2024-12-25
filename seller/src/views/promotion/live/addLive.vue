@@ -64,115 +64,19 @@
 
         <!-- 分享卡片 -->
         <FormItem label="分享卡片封面" prop="feedsImg">
-          <div class="upload-list" v-if="liveForm.feedsImg">
-            <template>
-              <img :src="liveForm.feedsImg" />
-              <div class="upload-list-cover">
-                <Icon
-                  type="ios-eye-outline"
-                  @click.native="handleView(liveForm.feedsImg)"
-                ></Icon>
-                <Icon
-                  type="ios-trash-outline"
-                  @click.native="handleRemove('feedsImg')"
-                ></Icon>
-              </div>
-            </template>
-          </div>
-          <Upload
-            v-if="liveForm.feedsImg.length == 0"
-            ref="upload"
-            :show-upload-list="false"
-            :on-success="handleFeedsImgSuccess"
-            :format="['jpg', 'jpeg', 'png']"
-            :on-format-error="handleFormatError"
-            :max-size="1024"
-            :on-exceeded-size="handleMaxSize"
-            type="drag"
-            :action="action"
-            :headers="accessToken"
-            style="display: inline-block; width: 58px"
-          >
-            <div style="width: 58px; height: 58px; line-height: 58px">
-              <Icon type="ios-camera" size="20"></Icon>
-            </div>
-          </Upload>
+          <upload-pic-thumb v-model="liveForm.feedsImg" :multiple="false"></upload-pic-thumb>
           <div class="tips">直播间分享图，图片规则：建议像素800*640，大小不超过1M；</div>
         </FormItem>
 
         <!-- 直播间背景墙 -->
         <FormItem label="直播间背景墙" prop="coverImg">
-          <div class="upload-list" v-if="liveForm.coverImg">
-            <template>
-              <img :src="liveForm.coverImg" />
-              <div class="upload-list-cover">
-                <Icon
-                  type="ios-eye-outline"
-                  @click.native="handleView(liveForm.coverImg)"
-                ></Icon>
-                <Icon
-                  type="ios-trash-outline"
-                  @click.native="handleRemove('coverImg')"
-                ></Icon>
-              </div>
-            </template>
-          </div>
-          <Upload
-            v-if="liveForm.coverImg.length == 0"
-            ref="upload"
-            :show-upload-list="false"
-            :on-success="handleCoverImgSuccess"
-            :format="['jpg', 'jpeg', 'png']"
-            :on-format-error="handleFormatError"
-            :max-size="1024"
-            :on-exceeded-size="handleMaxSize"
-            type="drag"
-            :action="action"
-            :headers="accessToken"
-            style="display: inline-block; width: 58px"
-          >
-            <div style="width: 58px; height: 58px; line-height: 58px">
-              <Icon type="ios-camera" size="20"></Icon>
-            </div>
-          </Upload>
+          <upload-pic-thumb v-model="liveForm.coverImg" :multiple="false"></upload-pic-thumb>
           <div class="tips">直播间背景图，图片规则：建议像素1080*1920，大小不超过1M</div>
         </FormItem>
 
         <!-- 直播间背景墙 -->
         <FormItem label="直播间分享图" prop="shareImg">
-          <div class="upload-list" v-if="liveForm.shareImg">
-            <template>
-              <img :src="liveForm.shareImg" />
-              <div class="upload-list-cover">
-                <Icon
-                  type="ios-eye-outline"
-                  @click.native="handleView(liveForm.shareImg)"
-                ></Icon>
-                <Icon
-                  type="ios-trash-outline"
-                  @click.native="handleRemove('shareImg')"
-                ></Icon>
-              </div>
-            </template>
-          </div>
-          <Upload
-            v-if="liveForm.shareImg.length == 0"
-            ref="upload"
-            :show-upload-list="false"
-            :on-success="handleShareImgSuccess"
-            :format="['jpg', 'jpeg', 'png']"
-            :on-format-error="handleFormatError"
-            :max-size="1024"
-            :on-exceeded-size="handleMaxSize"
-            type="drag"
-            :action="action"
-            :headers="accessToken"
-            style="display: inline-block; width: 58px"
-          >
-            <div style="width: 58px; height: 58px; line-height: 58px">
-              <Icon type="ios-camera" size="20"></Icon>
-            </div>
-          </Upload>
+          <upload-pic-thumb v-model="liveForm.shareImg" :multiple="false"></upload-pic-thumb>
           <div class="tips">直播间分享图，图片规则：建议像素800*640，大小不超过1M</div>
         </FormItem>
 
@@ -261,6 +165,7 @@
 
 <script>
 import { uploadFile } from "@/libs/axios";
+import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
 import {
   addLive,
   addLiveGoods,
@@ -272,6 +177,7 @@ import liveGoods from "./liveGoods";
 export default {
   components: {
     liveGoods,
+    uploadPicThumb,
   },
   data() {
     return {

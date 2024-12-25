@@ -571,8 +571,9 @@
           </div>
         </template>
         <template slot="numSlot" slot-scope="{ row, index }">
-          <InputNumber :min="0" :max="row.___num - row.deliverNumber" v-model="data[index].canNum">
-          </InputNumber>
+          <InputNumber v-model="row.canNum" :disabled="!selectGroupShipGoods.find(item=>item.id === row.id)"
+                       :max="row.___num - row.deliverNumber - row.returnNum" :min="0"
+                       @on-change="changeNum($event,index)"></InputNumber>
         </template>
       </Table>
       <div slot="footer">
@@ -872,6 +873,16 @@ export default {
         }
       });
     },
+    changeNum(number, index) {
+      const current = this.data[index]
+      if (this.selectGroupShipGoods.length) {
+        this.selectGroupShipGoods.forEach(item => {
+          if (item.skuId === current.skuId) {
+            item.canNum = number
+          }
+        })
+      }
+    },
     // 分包裹发货
     confirmShipGroupGoods () {
       this.$refs.groupOrderDeliveryForm.validate(async (valid) => {
@@ -1145,7 +1156,7 @@ export default {
       })
     },
     toPrints () {
-      if (this.form.logisticsId != null && this.form.logisticsId != '') {
+      if (this.faceSheetForm.logisticsId != null && this.faceSheetForm.logisticsId != '') {
         this.orderDeliverModal = false;
       }
     },
