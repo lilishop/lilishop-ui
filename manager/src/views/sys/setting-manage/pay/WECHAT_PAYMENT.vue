@@ -28,11 +28,17 @@
       <FormItem label="APIv3密钥" prop="apiKey3">
         <Input maxlength="300" v-model="formValidate.apiKey3" />
       </FormItem>
-      <FormItem class="form-item-view-el" label="apiclient_key" prop="apiclient_key">
-        <Input v-model="formValidate.apiclient_key" :rows="6" maxlength="2500" show-word-limit type="textarea" placeholder="Enter something..." />
-      </FormItem>
       <FormItem label="API证书-证书序列号" prop="serialNumber">
         <Input maxlength="300" v-model="formValidate.serialNumber" />
+      </FormItem>
+      <FormItem class="form-item-view-el" label="apiclient_key" prop="apiclient_key">
+        <Input v-model="formValidate.apiclientKey" :rows="6" maxlength="2500" show-word-limit type="textarea" placeholder="Enter something..." />
+      </FormItem>
+      <FormItem label="公钥证书ID" prop="公钥证书ID">
+        <Input maxlength="300" v-model="formValidate.publicId" />
+      </FormItem>
+      <FormItem class="form-item-view-el" label="公钥证书" prop="publicKey">
+        <Input v-model="formValidate.publicKey" :rows="6" maxlength="2500" show-word-limit type="textarea" placeholder="Enter something..." />
       </FormItem>
       <FormItem label="支付回调域名" prop="callbackUrl">
         <Input maxlength="300" v-model="formValidate.callbackUrl" />
