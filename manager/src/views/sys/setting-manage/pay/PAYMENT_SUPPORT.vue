@@ -73,6 +73,7 @@ export default {
         WALLET: "余额支付",
       },
       supportForm: "", // 支持的支付方式
+      checkSupport: {},
     };
   },
   props: ["res", "type"],
@@ -96,7 +97,7 @@ export default {
           this.setupSetting();
         },
         onCancel: () => {
-          val.splice(val.length - 1, 1);
+          this.formValidate = JSON.parse(JSON.stringify(this.checkSupport));
         },
       });
     },
@@ -105,6 +106,7 @@ export default {
       setSetting(this.type, { paymentSupportItems: this.formValidate }).then(
         (res) => {
           if (res.success) {
+            this.checkSupport =  JSON.parse(JSON.stringify(this.formValidate));
             this.$Message.success("保存成功!");
             this.$Modal.remove();
           } else {
@@ -117,12 +119,13 @@ export default {
     // 实例化数据
     async init() {
       this.formValidate = JSON.parse(this.res).paymentSupportItems;
-
+      this.checkSupport =  JSON.parse(JSON.stringify(this.formValidate));
       console.log(this.formValidate);
 
       await getPaymentSupportForm().then((res) => {
         // res.result.payments = ["H5", "PC"];
         this.supportForm = res.result;
+
       });
     },
   },
