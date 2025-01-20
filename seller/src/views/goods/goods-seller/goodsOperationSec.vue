@@ -203,6 +203,7 @@
 
 
                                   <AutoComplete ref="input" v-model="val.value"
+                                                :disabled="containsSameSkuItem"
                                                 :filter-method="filterMethod"
                                                 :maxlength="30" placeholder="请输入规格值" style="width: 180px"
                                                 @on-focus="changeSkuVals(val, item.name)"
@@ -257,6 +258,7 @@
 
                               <FormItem v-if="item.spec_values.length < 10 && item.spec_values.length >= 1 && item.spec_values[0].value !== ''" class="sku-item-content-val flex" label="" style="line-height: 32px;">
                                 <AutoComplete ref="input" v-model="newSkuValues[$index]"
+                                              :disabled="containsSameSkuItem"
                                               :filter-method="filterMethod"
                                               :maxlength="30" placeholder="自定义规格值" style="width: 180px"
                                               @on-blur="addSpec($index, item)"
@@ -630,6 +632,10 @@ export default {
       skuTableColumn: [],
       /** 表格数据 */
       skuTableData: [],
+      // 持久化的sku数据
+      skuTableDataCopy: [],
+      // 持久化的sku数据
+      skuInfoCopy: [],
       /** 默认的规格参数 */
       skuData: [],
       /** 默认的规格值 */
@@ -671,6 +677,9 @@ export default {
       shopCategory: [],
       /** 商品单位列表 */
       goodsUnitList: [],
+      containsSameSkuItem: false,
+      containsSameSkuValue: false,
+      containsSameSkuNewValue: false,
       // 展示商品视频
       showGoodsVideo: false,
       ignoreColumn: [
@@ -1246,6 +1255,14 @@ export default {
     },
     /** 添加规格项 */
     addSkuItem() {
+      if (this.containsSameSkuItem) {
+        this.$Message.error("存在重复规格项！");
+        return;
+      }
+      if (this.containsSameSkuValue) {
+        this.$Message.error("存在重复规格值！");
+        return;
+      }
       if (this.skuInfo.length >= 5) {
         this.$Message.error("规格项不能大于5个！");
         return;
@@ -1269,8 +1286,10 @@ export default {
     editSkuItem(val, index, item) {
       if (this.skuTableData.find((i) => i[val])) {
         this.$Message.error("已存在相同规格项！");
+        this.containsSameSkuItem = true;
         return;
       }
+      this.containsSameSkuItem = false;
       if (this.zz(0, val) > 20) {
         this.$Message.error("规格值最多十个字符长度！");
         // val = val.toString().slice(0, 4);
@@ -1322,8 +1341,13 @@ export default {
     skuValueChange(val, index, item, $index) {
       if (this.skuTableData.find((i) => i[val.name] === val.value)) {
         this.$Message.error("已存在相同规格值！");
+
+        this.skuInfo = cloneObj(this.skuInfoCopy);
+        this.skuTableData = cloneObj(this.skuTableDataCopy);
         return;
       }
+
+      this.containsSameSkuValue = false;
       if (val.value === '') {
         return;
       }
@@ -1343,6 +1367,8 @@ export default {
         return e;
       });
       this.currentSkuVal = val.value;
+      this.skuTableDataCopy = cloneObj(this.skuTableData);
+      this.skuInfoCopy = cloneObj(this.skuInfo);
       this.renderTableData(this.skuTableData);
     },
     // 获取焦点时，取得规格名对应的规格值
@@ -1365,6 +1391,12 @@ export default {
         this.skuTableData = this.skuTableData.filter(
           (e) => e[spec.name] !== this.lastEditSkuValue
         );
+      }
+
+      // 判断是否存在重复规格值
+      if(!this.skuTableData.find((i) => i[val.name] === val.value)) {
+        this.skuTableDataCopy = cloneObj(this.skuTableData);
+        this.skuInfoCopy = cloneObj(this.skuInfo);
       }
     },
     /** 移除当前规格项 进行数据变化*/
@@ -1456,6 +1488,21 @@ export default {
         this.$Message.error("请输入规格值");
         return;
       }
+
+      if (this.containsSameSkuItem) {
+        this.$Message.error("存在重复规格项！");
+        return;
+      }
+
+      if (item.spec_values.find((i) => i.value === this.newSkuValues[$index])) {
+        this.newSkuValues[$index] = "";
+        this.skuInfo = cloneObj(this.skuInfoCopy);
+        this.skuTableData = cloneObj(this.skuTableDataCopy);
+        this.$Message.error("存在重复规格值！");
+        this.containsSameSkuNewValue = true;
+        return;
+      }
+
       if (this.validateEmpty(item.spec_values)) {
         if (item.spec_values.length >= 10) {
           this.$Message.error("规格值不能大于10个！");
@@ -1514,6 +1561,9 @@ export default {
         }
         this.baseInfoForm.regeneratorSkuFlag = true;
         this.newSkuValues[$index] = "";
+
+        this.skuTableDataCopy = cloneObj(this.skuTableData);
+        this.skuInfoCopy = cloneObj(this.skuInfo);
       }
     },
     handleClearSku() {
@@ -1780,6 +1830,14 @@ export default {
     },
     /**  添加商品 **/
     save() {
+      if (this.containsSameSkuItem) {
+        this.$Message.error("存在重复规格项！");
+        return;
+      }
+      if (this.containsSameSkuValue) {
+        this.$Message.error("存在重复规格值！");
+        return;
+      }
       this.submitLoading = true;
       this.$refs["baseInfoForm"].validate((valid) => {
         if (valid) {
