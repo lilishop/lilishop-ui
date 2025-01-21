@@ -738,17 +738,6 @@ export default {
         desc: "视频大小不能超过10MB",
       });
     },
-    onAddSku(index) {
-      if (!this.newSkuValues[index]) {
-        this.$Message.error('请输入规格值')
-        return
-      }
-      this.skuInfo[index].spec_values.push({
-        name: this.newSkuValues[index].name,
-        value: this.newSkuValues[index],
-        images: this.openImage ? [] : this.baseInfoForm.goodsGalleryFiles
-      })
-    },
     // 图片选择后回调
     callbackSelected(val) {
       this.picModelFlag = false;
@@ -1302,6 +1291,11 @@ export default {
         delete e[this.currentSkuItem];
         return e;
       });
+
+      this.skuInfo[index].name = val;
+      this.skuInfo[index].spec_values.forEach((e) => {
+        e.name = val;
+      });
       this.currentSkuItem = val;
       this.renderTableData(this.skuTableData);
     },
@@ -1394,7 +1388,7 @@ export default {
       }
 
       // 判断是否存在重复规格值
-      if(!this.skuTableData.find((i) => i[val.name] === val.value)) {
+      if (!this.skuTableData.find((i) => i[val.name] === val.value)) {
         this.skuTableDataCopy = cloneObj(this.skuTableData);
         this.skuInfoCopy = cloneObj(this.skuInfo);
       }
