@@ -34,10 +34,18 @@
       <FormItem class="form-item-view-el" label="apiclient_key" prop="apiclient_key">
         <Input v-model="formValidate.apiclientKey" :rows="6" maxlength="2500" show-word-limit type="textarea" placeholder="Enter something..." />
       </FormItem>
-      <FormItem label="公钥证书ID" prop="公钥证书ID">
+      <FormItem label="加签方式" prop="publicType">
+        <RadioGroup type="button" button-style="solid" v-model="formValidate.publicType" @change="handlePublicTypeChange">
+          <Radio label="CERT">平台证书</Radio>
+          <Radio label="KEY">微信支付公钥</Radio>
+        </RadioGroup>
+        <span class="desc">商户接收APIv3的请求应答、回调时验签使用，以下两种方式只能使用一种</span>
+      </FormItem>
+      <!-- 当加签方式选择“KEY”时展示 -->
+      <FormItem v-if="formValidate.publicType === 'KEY'" label="公钥证书ID" prop="publicId">
         <Input maxlength="300" v-model="formValidate.publicId" />
       </FormItem>
-      <FormItem class="form-item-view-el" label="公钥证书" prop="publicKey">
+      <FormItem v-if="formValidate.publicType === 'KEY'" class="form-item-view-el" label="公钥证书" prop="publicKey">
         <Input v-model="formValidate.publicKey" :rows="6" maxlength="2500" show-word-limit type="textarea" placeholder="Enter something..." />
       </FormItem>
       <FormItem label="支付回调域名" prop="callbackUrl">
@@ -97,7 +105,7 @@ export default {
           ];
         }
       });
-    },
+    }
   },
 };
 </script>

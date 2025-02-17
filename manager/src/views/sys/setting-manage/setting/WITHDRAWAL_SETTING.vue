@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
 
-    <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate">
+    <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
       <FormItem label="提现审核是否开启">
         <i-switch v-model="formValidate.apply" style="margin-top:7px;"><span slot="open">开</span>
           <span slot="close">关</span>
@@ -36,12 +36,8 @@ export default {
   data() {
     return {
       result:"",
-      formValidate: { // 表单数据
-        apply: true,
-        minPrice: "",
-        type: "",
-        wechatAppId: "",
-      },
+      ruleValidate: {}, // 验证规则
+      formValidate: {},// 表单数据
 
       switchTitle: "提现审核是否开启", // 切换title
     };
@@ -72,7 +68,29 @@ export default {
     // 实例化数据
     init() {
       this.result = JSON.parse(this.res);
+      Object.keys(this.result).map((item) => {
+        this.result[item] += "";
+      });
       this.$set(this, "formValidate", { ...this.result });
+      Object.keys(this.formValidate).forEach((item) => {
+        this.ruleValidate[item] = [
+          {
+            required: true,
+            message: "请填写必填项",
+            trigger: "blur",
+          },
+          {
+            validator: (rule, value, callback) => {
+              if (value < 0) {
+                callback(new Error("不能输入负数！"));
+              } else {
+                callback();
+              }
+            },
+            trigger: "change",
+          },
+        ];
+      });
     },
   },
 };
