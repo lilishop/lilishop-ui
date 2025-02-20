@@ -619,7 +619,6 @@ table {
 
 
 .div-express-log {
-  max-height: 300px;
   border: solid 1px #e7e7e7;
   background: #fafafa;
   overflow-y: auto;

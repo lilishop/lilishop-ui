@@ -192,9 +192,6 @@
           </div>
         </TabPane>
         <TabPane label="TA收货地址" name="address">
-          <Row class="operation padding-row">
-            <Button @click="addMemberAddress" type="primary">新增</Button>
-          </Row>
           <Table
             :loading="loading"
             border
@@ -398,7 +395,6 @@
           ],
           consigneeAddressPath: [{required: true, message: "收货人地址不能为空"}],
           detail: [{required: true, message: "收货人详细地址不能为空"}],
-          alias: [{required: true, message: "收货人地址别名不能为空"}],
         },//会员地址操作表单校验
         //历史积分表格
         pointsColumns: [
@@ -669,58 +665,6 @@
 
             }
           },
-          {
-            title: "操作",
-            key: "action",
-            align: "center",
-            width: 120,
-            fixed: "right",
-            render: (h, params) => {
-              return h("div", {
-                style: {
-                  display: "flex",
-                  justifyContent: "center"
-                }
-              }, [
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "error",
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                    },
-                    on: {
-                      click: () => {
-                        this.memberAddressRemove(params.row);
-                      },
-                    },
-                  },
-                  "删除"
-                ),
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                    },
-                    on: {
-                      click: () => {
-                        this.editAddress(params.row);
-                      },
-                    },
-                  },
-                  "编辑"
-                ),
-              ]);
-            },
-          },
 
         ],
         addressData: [],//历史积分数据
@@ -953,25 +897,6 @@
           }
         });
         this.loading = false;
-      },
-      //新增TA的收货地址
-      addMemberAddress() {
-        this.addressModalTitle = "新增会员地址";
-        this.addressModalVisible = true
-        this.addressForm = {
-          id: "",
-          isDefault: 0,
-        }
-
-      },
-      //修改TA的收货地址
-      editAddress(v) {
-        this.addressModalTitle = "修改会员地址";
-        this.addressForm = JSON.parse(JSON.stringify(v));
-        this.addressForm.isDefault = v.isDefault?1:0;
-        // this.$set(this, "addressForm", v);
-        delete this.addressForm.updateTime;
-        this.addressModalVisible = true
       },
       //新增或者修改表单提交
       addressSubmit() {

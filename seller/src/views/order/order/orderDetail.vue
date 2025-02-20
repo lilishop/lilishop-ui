@@ -442,7 +442,7 @@
         <Form :model="faceSheetForm" ref="faceSheetForm" v-if="facesheetFlag" :rules="faceSheetFormValidate">
           <FormItem label="物流公司" prop="logisticsId" style="position: relative" :label-width="90">
             <Select v-model="faceSheetForm.logisticsId" placeholder="请选择" style="width: 250px">
-              <Option v-for="(item, i) in checkedLogistics" :key="i" :value="item.id">{{ item.name }}
+              <Option v-for="(item, i) in checkedLogistics" :key="i" :value="item.logisticsId">{{ item.name }}
               </Option>
             </Select>
           </FormItem>
@@ -451,7 +451,7 @@
           :rules="orderDeliverFormValidate" style="position: relative">
           <FormItem label="物流公司" prop="logisticsId">
             <Select v-model="orderDeliveryForm.logisticsId" placeholder="请选择" style="width: 250px">
-              <Option v-for="(item, i) in checkedLogistics" :key="i" :value="item.id">{{ item.name }}
+              <Option v-for="(item, i) in checkedLogistics" :key="i" :value="item.logisticsId">{{ item.name }}
               </Option>
             </Select>
           </FormItem>
@@ -571,8 +571,9 @@
           </div>
         </template>
         <template slot="numSlot" slot-scope="{ row, index }">
-          <InputNumber :min="0" :max="row.___num - row.deliverNumber" v-model="data[index].canNum">
-          </InputNumber>
+          <InputNumber v-model="row.canNum" :disabled="!selectGroupShipGoods.find(item=>item.id === row.id)"
+                       :max="row.___num - row.deliverNumber - row.returnNum" :min="0"
+                       @on-change="changeNum($event,index)"></InputNumber>
         </template>
       </Table>
       <div slot="footer">
@@ -872,6 +873,16 @@ export default {
         }
       });
     },
+    changeNum(number, index) {
+      const current = this.data[index]
+      if (this.selectGroupShipGoods.length) {
+        this.selectGroupShipGoods.forEach(item => {
+          if (item.skuId === current.skuId) {
+            item.canNum = number
+          }
+        })
+      }
+    },
     // 分包裹发货
     confirmShipGroupGoods () {
       this.$refs.groupOrderDeliveryForm.validate(async (valid) => {
@@ -1145,7 +1156,7 @@ export default {
       })
     },
     toPrints () {
-      if (this.form.logisticsId != null && this.form.logisticsId != '') {
+      if (this.faceSheetForm.logisticsId != null && this.faceSheetForm.logisticsId != '') {
         this.orderDeliverModal = false;
       }
     },
@@ -1155,9 +1166,11 @@ export default {
         this.$refs['faceSheetForm'].validate((valid) => {
           if (valid) {
             API_Order.getOrderFaceSheet(this.sn, this.faceSheetForm).then(res => {
-              if (res.success) {
+              if (res.success && res.result.printTemplate) {
                 this.someJSONdata = res.result.printTemplate;
                 this.toPrints();
+              }else{
+                this.$Message.success("电子面单发货失败！");
               }
             })
           }
