@@ -109,8 +109,6 @@
                 API_Index.read(v.id).then(res => {
                   this.loading = false;
                   if (res.success) {
-                    this.$Message.success("操作成功");
-                    this.currentMessageType = "unread"
                     this.getAll();
                   }
                 });
@@ -137,9 +135,7 @@
                 API_Index.deleteMessage(v.id).then(res => {
                   this.loading = false;
                   if (res.success) {
-                    this.$Message.success("删除成功");
-                    this.currentMessageType = "read"
-                    this.getAll();
+                    this.refreshMessage()
                   }
                 });
               }
@@ -166,9 +162,7 @@
                 API_Index.reductionMessage(v.id).then(res => {
                   this.loading = false;
                   if (res.success) {
-                    this.setCurrentMesType("read");
-                    this.recycleBinCount -= 1
-                    this.hasReadCount +=1
+                    this.refreshMessage()
                   }
                 });
               }
@@ -194,9 +188,7 @@
                 API_Index.clearMessage(v.id).then(res => {
                   this.loading = false;
                   if (res.success) {
-                    this.$Message.success("删除成功");
-                    this.currentMessageType = "recycleBin"
-                    this.getAll();
+                    this.refreshMessage()
                   }
                 });
               }
@@ -383,9 +375,7 @@
         API_Index.read(v.id).then(res => {
           this.loading = false;
           if (res.success) {
-            this.$Message.success("操作成功");
-            this.currentMessageType = "unread"
-            this.getAll();
+            this.getAll()();
           }
         });
       }
