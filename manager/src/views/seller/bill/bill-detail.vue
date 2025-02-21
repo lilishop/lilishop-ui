@@ -508,6 +508,7 @@ export default {
         loading: true,
         onOk: () => {
           API_Shop.pay(this.id).then((res) => {
+            this.$Modal.remove();
             if (res.success) {
               this.$Message.success(res.message);
               this.init();

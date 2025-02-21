@@ -3,7 +3,6 @@
     <Card>
       <Form ref="form" :model="form" :rules="formRule">
         <div class="base-info-item">
-          <h4>添加积分商品</h4>
           <div class="form-item-view">
             <FormItem astyle="width: 100%">
               <div style="display: flex; margin-bottom: 10px">
@@ -13,7 +12,8 @@
                   ghost
                   style="margin-left: 10px"
                   @click="delSelectGoods"
-                  >批量删除</Button
+                >批量删除
+                </Button
                 >
               </div>
               <Table
@@ -50,7 +50,8 @@
                       v-for="item in categoryList"
                       :value="item.id"
                       :key="item.id"
-                      >{{ item.name }}</Option
+                    >{{ item.name }}
+                    </Option
                     >
                   </Select>
                 </template>
@@ -71,33 +72,16 @@
               </Table>
             </FormItem>
 
-            <FormItem label="兑换时间" prop="time">
-              <DatePicker
-                type="datetime"
-                v-model="form.startTime"
-                format="yyyy-MM-dd HH:mm:ss"
-                placeholder="请选择"
-                :options="options"
-                clearable
-                style="width: 200px"
-              >
-              </DatePicker>
-              -
-              <DatePicker
-                type="datetime"
-                v-model="form.endTime"
-                format="yyyy-MM-dd HH:mm:ss"
-                :options="options"
-                placeholder="请选择"
-                clearable
-                style="width: 200px"
-              >
+            <FormItem label="活动时间" prop="rangeTime">
+              <DatePicker type="datetimerange" v-model="form.rangeTime" format="yyyy-MM-dd HH:mm:ss"
+                          placeholder="请选择" :options="options" style="width: 260px">
               </DatePicker>
             </FormItem>
             <div>
               <Button type="text" @click="closeCurrentPage">返回</Button>
               <Button type="primary" :loading="submitLoading" @click="handleSubmit"
-                >提交</Button
+              >提交
+              </Button
               >
             </div>
           </div>
@@ -109,31 +93,19 @@
 </template>
 
 <script>
-import { addPointsGoods, getPointsGoodsCategoryList } from "@/api/promotion";
-import { regular } from "@/utils";
+import {addPointsGoods, getPointsGoodsCategoryList} from "@/api/promotion";
+import {regular} from "@/utils";
 import skuSelect from "@/components/lili-dialog";
+
 export default {
   name: "addPoinsGoods",
   components: {
     skuSelect,
   },
   data() {
-    const isLtEndDate = (rule, value, callback) => {
-      if (new Date(value).getTime() > new Date(this.form.endTime).getTime()) {
-        callback(new Error());
-      } else {
-        callback();
-      }
-    };
-    const isGtStartDate = (rule, value, callback) => {
-      if (new Date(value).getTime() < new Date(this.form.startTime).getTime()) {
-        callback(new Error());
-      } else {
-        callback();
-      }
-    };
     return {
       form: {
+        rangeTime: ["",""],
         promotionGoodsList: [], // 活动商品列表
       },
       showTable: true,
@@ -142,50 +114,7 @@ export default {
       submitLoading: false, // 添加或编辑提交状态
       selectedGoods: [], // 已选商品列表，便于删除
       formRule: {
-        startTime: [
-          {
-            required: true,
-            type: "date",
-            message: "请选择开始时间",
-          },
-          {
-            trigger: "change",
-            message: "开始时间要小于结束时间",
-            validator: isLtEndDate,
-          },
-        ],
-        endTime: [
-          {
-            required: true,
-            type: "date",
-            message: "请选择结束时间",
-          },
-          {
-            trigger: "change",
-            message: "结束时间要大于开始时间",
-            validator: isGtStartDate,
-          },
-        ],
-        discount: [
-          { required: true, message: "请输入折扣" },
-          {
-            pattern: regular.discount,
-            message: "请输入0-10的数字,可有一位小数",
-          },
-        ],
-        sellerCommission: [
-          { required: true, message: "请输入店铺承担比例" },
-          { pattern: regular.rate, message: "请输入0-100的正整数" },
-        ],
-        publishNum: [
-          { required: true, message: "请输入发放数量" },
-          { pattern: regular.Integer, message: "请输入正整数" },
-        ],
-        couponLimitNum: [
-          { required: true, message: "请输入领取限制" },
-          { pattern: regular.Integer, message: "请输入正整数" },
-        ],
-        description: [{ required: true, message: "请输入范围描述" }],
+        rangeTime: [{required: true, message: "请选择活动时间"}],
       },
       columns: [
         {
@@ -219,7 +148,7 @@ export default {
           key: "price",
           minWidth: 40,
           render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
+            return h("priceColorScheme", {props: {value: params.row.price, color: this.$mainColor}});
           },
         },
         {
@@ -293,14 +222,16 @@ export default {
     },
     /** 保存积分商品 */
     handleSubmit() {
+      this.form.startTime=this.form.rangeTime[0]
+      this.form.endTime=this.form.rangeTime[1]
       this.$refs.form.validate((valid) => {
         if (valid) {
           let params = this.promotionGoodsList;
           const start = this.$options.filters.unixToDate(this.form.startTime / 1000);
           const end = this.$options.filters.unixToDate(this.form.endTime / 1000);
 
-          if (!params || params.length == 0) {
-            this.$Modal.warning({ title: "提示", content: "请选择指定商品" });
+          if (!params || params.length === 0) {
+            this.$Modal.warning({title: "提示", content: "请选择指定商品"});
             return;
           }
 
@@ -373,7 +304,7 @@ export default {
       let list = [];
       item.forEach((e) => {
         const obj = {
-          settlementPrice: e.settlementPrice || 0,
+          settlementPrice: e.settlementPrice || e.price,
           pointsGoodsCategoryId: e.pointsGoodsCategoryId || 0,
           pointsGoodsCategoryName: e.pointsGoodsCategoryName || "",
           activeStock: e.activeStock || 1,
@@ -407,11 +338,13 @@ h4 {
   line-height: 40px;
   text-align: left;
 }
+
 .describe {
   font-size: 12px;
   margin-left: 10px;
   color: #999;
 }
+
 .wrapper {
   min-height: 800px;
 }
