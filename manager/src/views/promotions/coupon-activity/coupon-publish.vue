@@ -34,7 +34,7 @@
               >
                 <Radio label="REGISTERED">新人发券</Radio>
                 <Radio label="SPECIFY">精确发券</Radio>
-                <Radio label="INVITE_NEW">邀新赠券</Radio>
+<!--                <Radio label="INVITE_NEW">邀新赠券</Radio>-->
                 <Radio label="AUTO_COUPON">自动赠券</Radio>
               </RadioGroup>
             </FormItem>
