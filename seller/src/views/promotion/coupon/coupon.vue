@@ -154,10 +154,12 @@ export default {
           key: "price",
           width: 100,
           render: (h, params) => {
-            if (params.row.price) {
+            if (params.row.couponType === "PRICE") {
               return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
-            } else {
+            } else if(params.row.couponType === "DISCOUNT") {
               return h("div", (params.row.couponDiscount || 0) + "折");
+            }else{
+              return h("div", "未知");
             }
           },
         },

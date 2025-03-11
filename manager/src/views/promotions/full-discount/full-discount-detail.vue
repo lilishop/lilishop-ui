@@ -81,14 +81,14 @@
               label="优惠折扣"
               prop="fullRate"
             >
-              <Input
-                type="text"
-                v-model="form.fullRate"
+              <InputNumber
                 placeholder="优惠折扣"
-                disabled
-                clearable
-                style="width: 260px"
-              />
+                :max="9.9"
+                :min="0.1"
+                :step="0.1"
+                precision="1"
+                v-model="form.fullRate"
+                style="width: 260px"/>
               <span class="describe">优惠折扣为0-10之间数字，可有一位小数</span>
             </FormItem>
             <FormItem label="额外赠送">

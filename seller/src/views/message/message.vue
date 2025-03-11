@@ -24,11 +24,6 @@
               <Icon v-show="currentMessageType == 'read'" type="md-checkmark"></Icon>
             </transition>
             <span class="mes-type-btn-text">已读消息</span>
-            <Badge
-              class="message-count-badge-outer"
-              class-name="message-count-badge"
-              :count="hasReadCount"
-            ></Badge>
           </div>
         </Button>
       </div>
@@ -39,11 +34,6 @@
               <Icon v-show="currentMessageType == 'recycleBin'" type="md-checkmark"></Icon>
             </transition>
             <span class="mes-type-btn-text">回收站</span>
-            <Badge
-              class="message-count-badge-outer"
-              class-name="message-count-badge"
-              :count="recycleBinCount"
-            ></Badge>
           </div>
         </Button>
       </div>
@@ -98,7 +88,6 @@
 </template>
 
 <script>
-  import Cookies from "js-cookie";
   import * as API_Index from "@/api/index";
 
   export default {
@@ -120,8 +109,6 @@
                 API_Index.read(v.id).then(res => {
                   this.loading = false;
                   if (res.success) {
-                    this.$Message.success("操作成功");
-                    this.currentMessageType = "unread"
                     this.getAll();
                   }
                 });
@@ -148,9 +135,7 @@
                 API_Index.deleteMessage(v.id).then(res => {
                   this.loading = false;
                   if (res.success) {
-                    this.$Message.success("删除成功");
-                    this.currentMessageType = "read"
-                    this.getAll();
+                    this.refreshMessage()
                   }
                 });
               }
@@ -177,9 +162,7 @@
                 API_Index.reductionMessage(v.id).then(res => {
                   this.loading = false;
                   if (res.success) {
-                    this.setCurrentMesType("read");
-                    this.recycleBinCount -= 1
-                    this.hasReadCount +=1
+                    this.refreshMessage()
                   }
                 });
               }
@@ -205,9 +188,7 @@
                 API_Index.clearMessage(v.id).then(res => {
                   this.loading = false;
                   if (res.success) {
-                    this.$Message.success("删除成功");
-                    this.currentMessageType = "recycleBin"
-                    this.getAll();
+                    this.refreshMessage()
                   }
                 });
               }
@@ -390,6 +371,13 @@
       },
       getContent(v) {
         this.mes.content = v.content;
+
+        API_Index.read(v.id).then(res => {
+          this.loading = false;
+          if (res.success) {
+            this.getAll()();
+          }
+        });
       }
     },
     mounted() {

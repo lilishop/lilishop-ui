@@ -38,10 +38,10 @@
                 :max="9.9"
                 :min="0.1"
                 :step="0.1"
+                precision="1"
                 v-model="form.couponDiscount"
-                style="width: 260px">
-              </InputNumber>
-              <span class="describe">请输入0-10之间数字，可以输入一位小数</span>
+                style="width: 260px"/>
+              <span class="describe">请输入0-10的数字,可有一位小数</span>
             </FormItem>
             <FormItem label="面额" prop="price" v-if="form.couponType == 'PRICE'">
               <Input
@@ -256,7 +256,6 @@ export default {
       formRule: {
         promotionName: [{ required: true, message: "活动名称不能为空" }],
         couponName: [{ required: true, message: "优惠券名称不能为空" }],
-        couponLimitNum: [{ required: true, message: "领取限制不能为空" }],
         price: [{ required: true, message: "请输入面额" }, { validator: checkPrice }],
         consumeThreshold: [
           { required: true, message: "请输入消费门槛" },
