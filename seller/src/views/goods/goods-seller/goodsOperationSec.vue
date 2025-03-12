@@ -408,7 +408,7 @@
                   <p slot="content">
                     <FormItem v-for="(paramsItem, paramsIndex) in paramsGroup.params" :key="paramsIndex"
                       :label="`${paramsItem.paramName}：`"
-                      :rules="{ required: paramsItem.required, message: '参数不能为空' }">
+                      :rules="{ required: paramsItem.required, message: '参数不能为空', trigger: 'blur'}">
                       <Select v-model="paramsItem.paramValue" clearable placeholder="请选择" style="width: 200px" @on-change="
                         selectParams(
                           paramsGroup,
@@ -1809,17 +1809,15 @@ export default {
         this.$Message.error("存在重复规格值！");
         return;
       }
-      console.log(this.baseInfoForm.goodsParamsDTOList)
       let checkFlag = false;
       this.goodsParams.forEach(group => {
         group.params.forEach(param => {
           if(param.required){
             const check = this.baseInfoForm.goodsParamsDTOList.some(paramsGroup =>
-              paramsGroup.some(paramsItem => paramsItem.paramId === param.id)
+              paramsGroup.goodsParamsItemDTOList.some(paramsItem => paramsItem.paramId === param.id)
             );
             if(!check){
               checkFlag = !check;
-
             }
           }
         })
