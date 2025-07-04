@@ -40,5 +40,8 @@
     "> 1%",
     "last 2 versions",
     "not dead"
-  ]
+  ],
+  "resolutions": {
+    "minimatch": "^3.1.2"
+  }
 }
