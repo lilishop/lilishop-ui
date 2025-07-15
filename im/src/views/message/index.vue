@@ -65,9 +65,14 @@
                   > -->
                 </p>
                 <!-- 对话列表 -->
-                <template v-if="loadStatus === 1">
-                  <div v-for="(item, index) in userTalkItem" :key="item.id" class="talk-item pointer"
-                    :class="{ active: activeIndex == index }" @click="clickTab(item.userId, item, index)">
+                <RecycleScroller
+                  :item-size="64"
+                  :items="userTalkItem"
+                    :prerender="10"
+                  v-slot="{ item, index }"
+                >
+               
+                  <div v-bind:key="item.id" class="talk-item pointer" :class="{ active: activeIndex == index }" @click="clickTab(item.userId, item, index)">
                     <div class="avatar-box">
                       <face :text="item.face" v-if="item.face"></face>
                       <face-null :text="item.name" v-else></face-null>
@@ -79,9 +84,7 @@
                       <div class="title">
                         <div class="card-name">
                           <p class="nickname">
-                            {{
-                              item.remark_name ? item.remark_name : item.name
-                            }}
+                            {{ item.remark_name ? item.remark_name : item.name }}
                           </p>
                           <div v-show="item.unread" class="larkc-tag">
                             {{ item.unread }}条未读
@@ -89,11 +92,9 @@
                           <div v-show="item.is_top" class="larkc-tag top">
                             TOP
                           </div>
-
                           <div v-show="item.is_robot" class="larkc-tag top">
                             BOT
                           </div>
-
                           <div v-show="item.talk_type == 2" class="larkc-tag group">
                             群组
                           </div>
@@ -111,9 +112,7 @@
                         <span v-if="item.lastMessageType === 'ORDER'">[订单链接]</span>
                       </div>
                       <div class="content">
-                        <template v-if="
-                          index_name != item.index_name && item.draft_text
-                        ">
+                        <template v-if="index_name != item.index_name && item.draft_text">
                           <span class="draft-color">[草稿]</span>
                           <span>{{ item.draft_text }}</span>
                         </template>
@@ -124,13 +123,12 @@
                             </span>
                             <span v-else>[群消息]</span>
                           </template>
-
                           <span>{{ item.msg_text }}</span>
                         </template>
                       </div>
                     </div>
                   </div>
-                </template>
+                </RecycleScroller>
               </el-main>
             </el-scrollbar>
           </el-container>
@@ -151,6 +149,8 @@
   </div>
 </template>
 <script>
+import { RecycleScroller } from 'vue-virtual-scroller'
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { mapGetters, mapState } from "vuex";
 import MainLayout from "@/views/layout/MainLayout";
 import WelcomeModule from "@/components/layout/WelcomeModule";
@@ -179,6 +179,7 @@ export default {
     UserSearch,
     OtherLink,
     WelcomeModule,
+    RecycleScroller
   },
   data () {
     return {

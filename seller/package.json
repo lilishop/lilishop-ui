@@ -49,5 +49,8 @@
     "view-design": "^4.6.1",
     "vue-cli-plugin-style-resources-loader": "^0.1.4",
     "vue-template-compiler": "^2.6.10"
+  },
+  "resolutions": {
+    "minimatch": "^3.1.2"
   }
 }
