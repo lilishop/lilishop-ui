@@ -482,7 +482,7 @@ export default {
         regionId,
         region,
         nickName,
-        username,
+
         sex,
         birthday,
         face,

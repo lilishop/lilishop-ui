@@ -435,7 +435,7 @@ export default {
         regionId:regionId,
         region: region,
         nickName,
-        username,
+
         sex,
         birthday,
         face: face || "",
