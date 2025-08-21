@@ -15,7 +15,7 @@
             v-model="searchForm.goodsName"
             placeholder="请输入商品名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="商品编号" prop="id">
@@ -24,13 +24,15 @@
             v-model="searchForm.id"
             placeholder="请输入商品编号"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search"
           >搜索</Button
         >
       </Form>
+    </Card>
+    <Card>
       <Table
         :loading="loading"
         border

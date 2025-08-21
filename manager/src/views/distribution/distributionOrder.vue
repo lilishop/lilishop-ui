@@ -8,7 +8,7 @@
             v-model="searchForm.orderSn"
             placeholder="请输入订单编号"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="分销商" prop="distributionName">
@@ -17,21 +17,23 @@
             v-model="searchForm.distributionName"
             placeholder="请输入分销商名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="店铺名称">
           <Select v-model="searchForm.storeId" placeholder="请选择" @on-query-change="searchChange" filterable
-                  clearable style="width: 150px">
+                  clearable style="width: 240px">
             <Option v-for="item in shopList" :value="item.id" :key="item.id">{{ item.storeName }}</Option>
           </Select>
         </Form-item>
         <Form-item label="订单时间">
           <DatePicker type="daterange" v-model="timeRange" format="yyyy-MM-dd" placeholder="选择时间"
-                      style="width: 210px"></DatePicker>
+                      style="width: 240px"></DatePicker>
         </Form-item>
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
       </Form>
+      </Card>
+    <Card>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10">
         <template slot-scope="{row}" slot="goodsMsg">
           <div class="goods-msg">

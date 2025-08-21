@@ -15,13 +15,13 @@
               v-model="searchForm.memberName"
               placeholder="请输入会员名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="状态">
             <Select
               v-model="searchForm.distributionStatus"
-              style="width: 200px"
+              style="width: 240px"
             >
               <Option
                 v-for="item in distributionStatusList"
@@ -42,6 +42,8 @@
           >
         </Form>
       </Row>
+      </Card>
+    <Card>
       <Table
         :loading="loading"
         border

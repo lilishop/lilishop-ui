@@ -15,7 +15,7 @@
               v-model="searchForm.orderSn"
               placeholder="请输入订单编号"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="售后单号" prop="sn">
@@ -24,7 +24,7 @@
               v-model="searchForm.sn"
               placeholder="请输入售后单号"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="申请时间">
@@ -35,7 +35,7 @@
               clearable
               @on-change="selectDateRange"
               placeholder="选择起始时间"
-              style="width: 200px"
+              style="width: 240px"
             ></DatePicker>
           </Form-item>
           <Form-item label="商家名称" prop="storeName">
@@ -44,7 +44,7 @@
               v-model="searchForm.storeName"
               placeholder="请输入商家名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="会员名称" prop="memberName">
@@ -53,7 +53,7 @@
               v-model="searchForm.memberName"
               placeholder="请输入会员名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="售后类型">
@@ -61,7 +61,7 @@
               v-model="searchForm.serviceType"
               placeholder="全部"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             >
               <Option value="RETURN_MONEY">退款</Option>
               <Option value="RETURN_GOODS">退货</Option>
@@ -76,11 +76,13 @@
           >
         </Form>
       </Row>
-
+    </Card>
+    <Card>
       <div class="order-tab">
-        <div v-for="(item,index) in serviceStatus" :key="index" :class="{'current': currentStatus === item.value}" @click="serviceStatusClick(item)">
-          {{item.title}}
-        </div>
+        <Tabs v-model="currentStatus" @on-click="serviceStatusClick">
+          <TabPane v-for="(item,index) in serviceStatus" :key="index" :label="item.title" :name="item.value">
+          </TabPane>
+        </Tabs>
       </div>
 
       <Table
@@ -361,8 +363,8 @@ export default {
     },
     // 售后筛选
     serviceStatusClick(item) {
-      this.currentStatus = item.value;
-      this.searchForm.serviceStatus = item.value;
+      this.currentStatus = item;  // 使用参数 item
+      this.searchForm.serviceStatus = item;  // 使用参数 item
       this.getDataList();
     },
   },
@@ -371,27 +373,12 @@ export default {
   },
 };
 </script>
-
 <style lang="scss" scoped>
-
+// Tab组件样式
 .order-tab {
-
-  width: 950px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #f0f0f0;
-  padding: 0 10px;
-  margin: 10px 20px 10px 0;
-  div {
-    text-align: center;
-    padding: 4px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  .current {
-    background-color: #ffffff;
+  margin-top: 20px;
+  ::v-deep .ivu-tabs-tab {
+    font-size: 14px;
   }
 }
 </style>

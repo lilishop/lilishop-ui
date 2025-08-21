@@ -1,7 +1,9 @@
 <template>
+  
   <div class="search">
+    <Button style="margin-bottom: 10px" @click="back()">返回</Button>
     <Card>
-      <Button style="margin-bottom: 10px" @click="back()">返回</Button>
+      
       <Form
         ref="searchForm"
         :model="searchForm"
@@ -15,7 +17,7 @@
             v-model="searchForm.couponName"
             placeholder="请输入优惠券名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="会员名称" prop="memberName">
@@ -24,7 +26,7 @@
             v-model="searchForm.memberName"
             placeholder="请输入会员名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="获取方式" prop="getType">
@@ -32,7 +34,7 @@
             v-model="searchForm.getType"
             placeholder="请选择"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           >
             <Option value="FREE">免费获取</Option>
             <Option value="ACTIVITY">活动获取</Option>
@@ -43,7 +45,7 @@
             v-model="searchForm.memberCouponStatus"
             placeholder="请选择"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           >
             <Option value="NEW">已领取</Option>
             <Option value="USED">已使用</Option>
@@ -57,7 +59,7 @@
             type="daterange"
             clearable
             placeholder="选择起始时间"
-            style="width: 200px"
+            style="width: 240px"
           ></DatePicker>
         </Form-item>
         <Button
@@ -68,6 +70,8 @@
           >搜索</Button
         >
       </Form>
+    </Card>
+    <Card>
       <Table
         v-if="refreshTable"
         :loading="loading"

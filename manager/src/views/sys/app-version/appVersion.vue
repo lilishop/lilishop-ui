@@ -3,14 +3,15 @@
     <Card>
       <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form" @keydown.enter.native="handleSearch">
         <Form-item label="系统类型" prop="orderSn">
-          <Select v-model="searchForm.type" placeholder="请选择系统类型" clearable style="width: 200px">
+          <Select v-model="searchForm.type" placeholder="请选择系统类型" clearable style="width: 240px">
             <Option value="IOS">苹果</Option>
             <Option value="ANDROID">安卓</Option>
           </Select>
         </Form-item>
         <Button @click="handleSearch" type="primary" icon="ios-search">搜索</Button>
       </Form>
-
+    </Card>
+    <Card>
       <Button class="mt_10 mb_10" @click="addAppVersion" type="primary">添加</Button>
 
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"  ></Table>

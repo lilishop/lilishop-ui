@@ -4,7 +4,7 @@
       <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form mb_10"
         @keydown.enter.native="handleSearch">
         <Form-item label="商品名称" prop="goodsName">
-          <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px" />
+          <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 240px" />
         </Form-item>
         <Form-item label="商品编号" prop="id">
           <Input
@@ -22,6 +22,8 @@
           <Button @click="handleReset">重置</Button>
         </Form-item>
       </Form>
+      </Card>
+    <Card>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"

@@ -5,15 +5,15 @@
           <Form-item label="会员名称"  class="flex" prop="memberName">
             <Input
               type="text" placeholder="请输入会员名称" v-model="searchForm.memberName" clearable
-              style="width: 200px"></Input>
+              style="width: 240px"></Input>
           </Form-item>
           <Form-item label="编号" class="flex">
             <Input
               type="text" placeholder="请输入编号" v-model="searchForm.sn" clearable
-              style="width: 200px"></Input>
+              style="width: 240px"></Input>
           </Form-item>
           <Form-item label="状态"
-                     style="width: 200px">
+                     style="width: 240px">
             <Select v-model="searchForm.distributionCashStatus" clearable style="width: 150px">
                 <Option v-for="item in cashStatusList" :value="item.value" :key="item.value">{{ item.label }}</Option>
             </Select>
@@ -22,6 +22,8 @@
             <Button @click="handleSearch" type="primary">搜索</Button>
           </Form-item>
         </Form>
+        </Card>
+    <Card>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
       <Row type="flex" justify="end" class="page padding-row">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator show-sizer></Page>

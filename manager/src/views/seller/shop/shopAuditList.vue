@@ -8,7 +8,7 @@
             v-model="searchForm.memberName"
             placeholder="请输入会员名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="店铺名称" prop="storeName">
@@ -17,14 +17,16 @@
             v-model="searchForm.storeName"
             placeholder="请输入店铺名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="创建时间" prop="createTime">
-          <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px"></DatePicker>
+          <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 240px"></DatePicker>
         </Form-item>
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
       </Form>
+      </Card>
+    <Card>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"

@@ -14,7 +14,7 @@
             v-model="searchForm.couponName"
             placeholder="请输入优惠券名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="获取方式" prop="getType">
@@ -22,7 +22,7 @@
             v-model="searchForm.getType"
             placeholder="请选择"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           >
             <Option value="FREE">免费获取</Option>
             <Option value="ACTIVITY">活动获取</Option>
@@ -33,7 +33,7 @@
             v-model="searchForm.promotionStatus"
             placeholder="请选择"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           >
             <Option value="NEW">未开始</Option>
             <Option value="START">已开始/上架</Option>
@@ -47,7 +47,7 @@
             type="daterange"
             clearable
             placeholder="选择起始时间"
-            style="width: 200px"
+            style="width: 240px"
           ></DatePicker>
         </Form-item>
         <Button
@@ -58,6 +58,8 @@
           >搜索</Button
         >
       </Form>
+    </Card>
+    <Card>
       <Row class="operation padding-row" v-if="getType !== 'ACTIVITY'">
         <Button @click="add" type="primary">添加优惠券</Button>
         <Button @click="delAll">批量关闭</Button>

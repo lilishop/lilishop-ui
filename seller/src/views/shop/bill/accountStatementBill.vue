@@ -16,7 +16,7 @@
               format="yyyy-MM-dd HH:mm:ss"
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             ></DatePicker>
           </Form-item>
           <Form-item label="结束时间" prop="endDate">
@@ -27,13 +27,15 @@
               di
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             ></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
           <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
+      </Card>
+    <Card>
       <Table
         :loading="loading"
         border

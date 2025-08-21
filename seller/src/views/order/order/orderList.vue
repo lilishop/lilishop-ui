@@ -14,7 +14,7 @@
             v-model="searchForm.orderSn"
             clearable
             placeholder="请输入订单编号"
-            style="width: 160px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="会员名称" prop="buyerName">
@@ -23,7 +23,7 @@
             v-model="searchForm.buyerName"
             clearable
             placeholder="请输入会员名称"
-            style="width: 160px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="订单状态" prop="orderStatus">
@@ -31,7 +31,7 @@
             v-model="searchForm.orderStatus"
             placeholder="请选择"
             clearable
-            style="width: 160px"
+            style="width: 240px"
           >
             <Option value="UNPAID">未付款</Option>
             <Option value="PAID">已付款</Option>
@@ -48,7 +48,7 @@
             v-model="searchForm.orderPromotionType"
             placeholder="请选择"
             clearable
-            style="width: 160px"
+            style="width: 240px"
           >
             <Option value="NORMAL">普通订单</Option>
             <Option value="PINTUAN">拼团订单</Option>
@@ -65,7 +65,7 @@
             clearable
             @on-change="selectDateRange"
             placeholder="选择起始时间"
-            style="width: 160px"
+            style="width: 240px"
           ></DatePicker>
         </Form-item>
         <Button @click="handleSearch" type="primary" class="search-btn"
@@ -73,6 +73,8 @@
         >
         <Button @click="handleReset" class="search-btn">重置</Button>
       </Form>
+      </Card>
+    <Card>
       <div class="export">
         <Button type="primary" class="mr_10" @click="expressOrderDeliver">批量发货</Button>
         <Button @click="exportOrder" type="info" class="export">导出订单</Button>

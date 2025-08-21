@@ -4,10 +4,12 @@
       <Form @submit.native.prevent @keydown.enter.native="handleSearch" ref="searchForm" :model="searchForm" inline :label-width="70"
         class="search-form">
         <Form-item label="规格名称" prop="specName">
-          <Input type="text" v-model="searchForm.specName" placeholder="请输入规格名称" clearable style="width: 200px" />
+          <Input type="text" v-model="searchForm.specName" placeholder="请输入规格名称" clearable style="width: 240px" />
         </Form-item>
         <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
       </Form>
+    </Card>
+    <Card>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加</Button>
         <Button @click="delAll">批量删除</Button>

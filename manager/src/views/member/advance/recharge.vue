@@ -14,7 +14,7 @@
             v-model="searchForm.memberName"
             placeholder="请输入会员名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="充值单号" prop="rechargeSn">
@@ -23,7 +23,7 @@
             v-model="searchForm.rechargeSn"
             placeholder="请输入充值单号"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="支付时间">
@@ -34,11 +34,13 @@
             clearable
             @on-change="selectDateRange"
             placeholder="选择起始时间"
-            style="width: 200px"
+            style="width: 240px"
           ></DatePicker>
         </Form-item>
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
       </Form>
+    </Card>
+    <Card>
       <Table
         :loading="loading"
         border

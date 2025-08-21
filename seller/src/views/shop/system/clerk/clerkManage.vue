@@ -8,7 +8,7 @@
             v-model="searchForm.clerkName"
             placeholder="请输入店员名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="联系方式">
@@ -17,7 +17,7 @@
             v-model="searchForm.mobile"
             placeholder="请输入联系方式"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="部门">
@@ -25,6 +25,8 @@
         </Form-item>
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
       </Form>
+      </Card>
+        <Card>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加</Button>
         <Button @click="delAll">批量删除</Button>

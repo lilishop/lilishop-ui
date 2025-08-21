@@ -3,14 +3,14 @@
     <Card>
       <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
         <Form-item label="账单编号" prop="sn">
-          <Input type="text" v-model="searchForm.sn" placeholder="请输入账单编号" clearable style="width: 200px" />
+          <Input type="text" v-model="searchForm.sn" placeholder="请输入账单编号" clearable style="width: 240px" />
         </Form-item>
         <Form-item label="出帐时间" prop="createTime">
-          <DatePicker v-model="selectDate" type="daterange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px">
+          <DatePicker v-model="selectDate" type="daterange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 240px">
           </DatePicker>
         </Form-item>
         <Form-item label="筛选状态">
-          <Select v-model="searchForm.billStatus" clearable style="width:160px">
+          <Select v-model="searchForm.billStatus" clearable style="width:240px">
             <Option value="OUT">已出账</Option>
             <Option value="CHECK">已对账</Option>
             <!-- <Option value="EXAMINE">已审核</Option> -->
@@ -19,6 +19,8 @@
         </Form-item>
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
       </Form>
+      </Card>
+    <Card>
       <Row class="operation padding-row">
 
       </Row>

@@ -15,7 +15,7 @@
               v-model="searchForm.memberName"
               placeholder="请输入会员名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Button
@@ -26,6 +26,8 @@
           >
         </Form>
       </Row>
+      </Card>
+    <Card>
       <Table
         class="mt_10"
         :loading="loading"

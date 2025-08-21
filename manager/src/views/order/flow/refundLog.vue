@@ -15,7 +15,7 @@
               v-model="searchForm.orderSn"
               placeholder="订单/交易号"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="退款状态">
@@ -23,7 +23,7 @@
               v-model="searchForm.isRefund"
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             >
               <Option value="false">未退款</Option>
               <Option value="true">已退款</Option>
@@ -37,7 +37,7 @@
               clearable
               @on-change="selectDateRange"
               placeholder="选择起始时间"
-              style="width: 200px"
+              style="width: 240px"
             ></DatePicker>
           </Form-item>
           <Button
@@ -49,6 +49,8 @@
           >
         </Form>
       </Row>
+      </Card>
+    <Card>
       <Table
         :loading="loading"
         border

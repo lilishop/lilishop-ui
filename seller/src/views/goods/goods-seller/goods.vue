@@ -16,7 +16,7 @@
               v-model="searchForm.goodsName"
               placeholder="请输入商品名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="状态" prop="status">
@@ -24,7 +24,7 @@
               v-model="searchForm.marketEnable"
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             >
               <Option value="DOWN">下架</Option>
               <Option value="UPPER">上架</Option>
@@ -35,7 +35,7 @@
               v-model="searchForm.salesModel"
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             >
               <Option value="RETAIL">零售</Option>
               <Option value="WHOLESALE">批发</Option>
@@ -46,7 +46,7 @@
               v-model="searchForm.goodsType"
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             >
               <Option value="PHYSICAL_GOODS">实物商品</Option>
               <Option value="VIRTUAL_GOODS">虚拟商品</Option>
@@ -58,13 +58,15 @@
               v-model="searchForm.id"
               placeholder="商品编号"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
           <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
+    </Card>
+    <Card>
       <Row class="operation padding-row">
         <Button @click="addGoods" type="primary">添加商品</Button>
         <Button @click="openImportGoods" type="primary">导入商品</Button>

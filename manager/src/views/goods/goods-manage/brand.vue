@@ -4,13 +4,14 @@
       <Form ref="searchForm" @submit.native.prevent @keydown.enter.native="handleSearch" :model="searchForm" inline :label-width="70"
             class="search-form">
         <Form-item label="品牌名称">
-          <Input type="text" v-model="searchForm.name" placeholder="请输入品牌名称" clearable style="width: 200px"/>
+          <Input type="text" v-model="searchForm.name" placeholder="请输入品牌名称" clearable style="width: 240px"/>
         </Form-item>
         <Button @click="handleSearch" type="primary">搜索</Button>
       </Form>
+    </Card>
+    <Card>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加</Button>
-        <Button @click="refresh">刷新</Button>
       </Row>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table"></Table>
       <Row type="flex" justify="end" class="mt_10">
@@ -315,15 +316,7 @@ export default {
       delete this.form.id;
       this.modalVisible = true;
     },
-    // 刷新
-    refresh() {
-      this.loading = true;
-      setTimeout(() => {
-        this.getDataList();
-        this.loading = false;
-        this.$Message.success("刷新成功");
-      }, 500);
-    },
+    
     // 编辑
     edit(v) {
       this.modalType = 1;

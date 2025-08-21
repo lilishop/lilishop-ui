@@ -3,7 +3,6 @@
     <Card>
       <Row class="operation">
         <Button @click="add" type="primary">添加</Button>
-        <Button @click="refresh">刷新</Button>
         <Button @click="delAll">批量删除</Button>
       </Row>
       <Table
@@ -285,15 +284,7 @@ export default {
         },
       });
     },
-    // 刷新
-    refresh() {
-      this.loading = true;
-      setTimeout(() => {
-        this.getDataList();
-        this.loading = false;
-        this.$Message.success("刷新成功");
-      }, 500);
-    },
+
     // 全部删除
     delAll() {
       if (this.selectCount <= 0) {

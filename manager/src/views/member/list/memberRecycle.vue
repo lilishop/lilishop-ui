@@ -16,7 +16,7 @@
                 v-model="searchForm.username"
                 placeholder="请输入会员名称"
                 clearable
-                style="width: 200px"
+                style="width: 240px"
               />
             </Form-item>
 
@@ -26,7 +26,7 @@
                 v-model="searchForm.mobile"
                 placeholder="请输入会员联系方式"
                 clearable
-                style="width: 200px"
+                style="width: 240px"
               />
             </Form-item>
             <Button
@@ -38,6 +38,8 @@
             >
           </Form>
         </Row>
+      </Card>
+      <Card>
         <Table
           :loading="loading"
           border

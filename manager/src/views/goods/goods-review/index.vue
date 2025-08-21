@@ -4,11 +4,13 @@
       <Row>
         <Form ref="searchForm" :model="searchForm" @keydown.enter.native="handleSearch" @submit.native.prevent inline :label-width="70" class="search-form">
           <Form-item label="会员名称" prop="memberName">
-            <Input type="text" v-model="searchForm.memberName" placeholder="请输入会员名称" clearable style="width: 200px"/>
+            <Input type="text" v-model="searchForm.memberName" placeholder="请输入会员名称" clearable style="width: 240px"/>
           </Form-item>
           <Button @click="handleSearch" type="primary" class="search-btn" icon="ios-search">搜索</Button>
         </Form>
       </Row>
+    </Card>
+    <Card>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10">
         <!-- 页面展示 -->
         <template slot="shopDisableSlot" slot-scope="scope">

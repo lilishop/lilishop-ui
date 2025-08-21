@@ -3,15 +3,17 @@
     <Card>
       <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
         <Form-item label="账单编号" prop="sn">
-          <Input type="text" v-model="searchForm.sn" placeholder="请输入账单编号" clearable style="width: 200px" />
+          <Input type="text" v-model="searchForm.sn" placeholder="请输入账单编号" clearable style="width: 240px" />
         </Form-item>
         <Form-item label="出帐时间" prop="createTime">
-          <DatePicker v-model="selectDate" type="daterange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px">
+          <DatePicker v-model="selectDate" type="daterange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 240px">
           </DatePicker>
         </Form-item>
 
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
       </Form>
+      </Card>
+    <Card>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10" @on-selection-change="changeSelect">
       </Table>
       <Row type="flex" justify="end" class="mt_10">

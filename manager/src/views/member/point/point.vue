@@ -1,12 +1,12 @@
 <template>
   <div class="search">
-    <Card style="padding:0 10px 10px 0">
+    <Card >
       <Form
         @keydown.enter.native="handleSearch"
         ref="searchForm"
         :model="searchForm"
         inline
-        style="margin-top:10px"
+        
         :label-width="70"
         @submit.native.prevent
         class="search-form"
@@ -17,11 +17,13 @@
             v-model="searchForm.memberName"
             placeholder="请输入会员名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
           </Form-item>
         <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search">搜索</Button >
       </Form>
+      </Card>
+    <Card>
       <Table
         :loading="loading"
         border

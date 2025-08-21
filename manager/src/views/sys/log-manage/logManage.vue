@@ -14,7 +14,7 @@
             v-model="searchForm.searchKey"
             placeholder="请输入搜索日志内容"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="操作人" prop="operatorName">
@@ -23,7 +23,7 @@
             v-model="searchForm.operatorName"
             placeholder="请输入操作人"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="创建时间">
@@ -34,15 +34,16 @@
             clearable
             @on-change="selectDateRange"
             placeholder="选择起始时间"
-            style="width: 200px"
+            style="width: 240px"
           ></DatePicker>
         </Form-item>
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn"
           >搜索</Button
         >
       </Form>
+      </Card>
+    <Card>
       <Row class="operation padding-row">
-        <Button @click="getLogList" icon="md-refresh">刷新</Button>
         <Button type="dashed" @click="openTip = !openTip">{{
           openTip ? "关闭提示" : "开启提示"
         }}</Button>

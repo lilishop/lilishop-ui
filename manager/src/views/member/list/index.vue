@@ -4,19 +4,21 @@
       <Row @keydown.enter.native="handleSearch">
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
           <Form-item label="会员名称" prop="username">
-            <Input type="text" v-model="searchForm.username" placeholder="请输入会员名称" clearable style="width: 200px" />
+            <Input type="text" v-model="searchForm.username" placeholder="请输入会员名称" clearable style="width: 240px" />
           </Form-item>
 
           <Form-item label="会员昵称" prop="nickName">
-            <Input type="text" v-model="searchForm.nickName" placeholder="请输入会员昵称" clearable style="width: 200px" />
+            <Input type="text" v-model="searchForm.nickName" placeholder="请输入会员昵称" clearable style="width: 240px" />
           </Form-item>
 
           <Form-item label="联系方式" prop="mobile">
-            <Input type="text" v-model="searchForm.mobile" placeholder="请输入会员联系方式" clearable style="width: 200px" />
+            <Input type="text" v-model="searchForm.mobile" placeholder="请输入会员联系方式" clearable style="width: 240px" />
           </Form-item>
           <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search">搜索</Button>
         </Form>
       </Row>
+      </Card>
+      <Card>
       <Row class="operation padding-row" v-if="!selectedMember">
         <Button @click="addMember" type="primary">添加会员</Button>
       </Row>
@@ -517,4 +519,5 @@ export default {
   height: 60px;
   border-radius: 50%;
 }
+
 </style>

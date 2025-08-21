@@ -19,10 +19,9 @@
   width: 100% !important;
   display: flex;
   align-items: center;
-  background-color: #f0f0f0;
+  // background-color: #f0f0f0;
   border-radius: 0.4em;
-  padding: 10px;
-  margin: 0;
+
   flex-wrap: wrap;
   > .ivu-form-item {
     margin: 8px 10px !important;
@@ -41,4 +40,9 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
   overflow: hidden;
+}
+
+// 为Card组件之间增加间距
+.ivu-card + .ivu-card {
+  margin-top: 10px;
 }

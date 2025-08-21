@@ -9,7 +9,7 @@
               v-model="searchForm.memberName"
               clearable
               placeholder="请输入会员名称"
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="订单号" prop="orderSn">
@@ -18,11 +18,11 @@
               v-model="searchForm.orderSn"
               clearable
               placeholder="请输入订单号"
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="状态" prop="status">
-            <Select v-model="searchForm.status" placeholder="请选择订单状态" clearable style="width: 200px">
+            <Select v-model="searchForm.status" placeholder="请选择订单状态" clearable style="width: 240px">
               <Option value="NEW">新投诉</Option>
               <Option value="CANCEL">已撤销</Option>
               <Option value="WAIT_APPEAL">待申诉</Option>
@@ -36,6 +36,8 @@
           <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
+      </Card>
+    <Card>
       <Table
         :loading="loading"
         border

@@ -3,11 +3,13 @@
     <Card>
       <Form ref="searchForm" :model="params" inline :label-width="100" class="search-form">
         <Form-item label="商品名称">
-          <Input type="text" v-model="params.name" placeholder="请输入商品名称" clearable style="width: 200px" />
+          <Input type="text" v-model="params.name" placeholder="请输入商品名称" clearable style="width: 240px" />
         </Form-item>
 
         <Button @click="getLiveGoodsMethods('clear')" type="primary" class="search-btn" icon="ios-search">搜索</Button>
       </Form>
+      </Card>
+    <Card>
       <h4 v-if="!reviewed">
         由于直播商品需经过小程序直播平台的审核，你需要在此先提审商品，为了不影响直播间选取商品，请提前1天提审商品；
       </h4>

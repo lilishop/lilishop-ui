@@ -15,7 +15,7 @@
               v-model="searchForm.goodsName"
               placeholder="请输入商品名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="活动状态" prop="promotionStatus">
@@ -23,7 +23,7 @@
               v-model="searchForm.promotionStatus"
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             >
               <Option value="NEW">未开始</Option>
               <Option value="START">已开始/上架</Option>
@@ -37,7 +37,7 @@
               type="daterange"
               clearable
               placeholder="选择起始时间"
-              style="width: 200px"
+              style="width: 240px"
             >
             </DatePicker>
           </Form-item>
@@ -50,6 +50,8 @@
           >
         </Form>
       </Row>
+      </Card>
+    <Card>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加砍价</Button>
       </Row>

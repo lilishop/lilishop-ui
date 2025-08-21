@@ -48,7 +48,7 @@
                   clearable
                   format="yyyy-MM-dd"
                   placeholder="选择起始时间"
-                  style="width: 200px"
+                  style="width: 240px"
                   type="daterange"
                   @on-change="selectDateRange"
                 ></DatePicker>
@@ -59,7 +59,7 @@
                   v-model="searchForm.ownerName"
                   placeholder="图片拥有者名称"
                   clearable
-                  style="width: 200px"
+                  style="width: 240px"
                 />
               </Form-item>
               <Button
@@ -71,7 +71,7 @@
               </Button>
             </Form>
           </Row>
-
+        </div></Card><Card><div>
           <Row class="oss-manage-box">
             <Col :span="isComponent?5:4">
               <div class="file-list">

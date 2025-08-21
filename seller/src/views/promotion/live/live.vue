@@ -4,7 +4,7 @@
       <Form ref="searchForm" :model="searchForm" inline :label-width="100" class="search-form">
 
         <Form-item label="直播状态" prop="promotionStatus">
-          <Select v-model="searchForm.status" placeholder="请选择" clearable style="width: 200px">
+          <Select v-model="searchForm.status" placeholder="请选择" clearable style="width: 240px">
             <Option value="NEW">未开始</Option>
             <Option value="START">直播中</Option>
             <Option value="END">已结束</Option>
@@ -14,6 +14,8 @@
 
         <Button @click="handleSearch" type="primary" class="search-btn" icon="ios-search">搜索</Button>
       </Form>
+      </Card>
+    <Card>
       <div class="btns">
         <Button @click="createLive()" type="primary">创建直播</Button>
       </div>

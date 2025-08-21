@@ -4,34 +4,26 @@
       <Row @keydown.enter.native="handleSearch">
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
           <Form-item label="订单号" prop="orderSn">
-            <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单号" clearable style="width: 200px" />
+            <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单号" clearable style="width: 240px" />
           </Form-item>
           <Form-item label="会员名称" prop="buyerName">
-            <Input type="text" v-model="searchForm.buyerName" placeholder="请输入会员名称" clearable style="width: 200px" />
+            <Input type="text" v-model="searchForm.buyerName" placeholder="请输入会员名称" clearable style="width: 240px" />
           </Form-item>
-<!--          <Form-item label="订单状态" prop="orderStatus">-->
-<!--            <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 200px">-->
-<!--              <Option value="NEW">新订单</Option>-->
-<!--              <Option value="CONFIRM">已确认</Option>-->
-<!--              <Option value="TAKE">待核验</Option>-->
-<!--              <Option value="COMPLETE">已完成</Option>-->
-<!--              <Option value="WAIT_PINTUAN">待成团</Option>-->
-<!--              <Option value="CANCELLED">已关闭</Option>-->
-<!--            </Select>-->
-<!--          </Form-item>-->
           <Form-item label="下单时间">
             <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable
-              @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px"></DatePicker>
+              @on-change="selectDateRange" placeholder="选择起始时间" style="width: 240px"></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
 
         </Form>
       </Row>
-
+    </Card>
+    <Card>
       <div class="order-tab">
-        <div v-for="(item,index) in orderStatus" :key="index" :class="{'current': currentStatus === item.value}" @click="orderStatusClick(item)">
-          {{item.title}}
-        </div>
+        <Tabs v-model="currentStatus" @on-click="orderStatusClick">
+          <TabPane v-for="(item,index) in orderStatus" :key="index" :label="item.title" :name="item.value">
+          </TabPane>
+        </Tabs>
       </div>
 
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10" sortable="custom"
@@ -275,8 +267,8 @@ export default {
     },
     // 订单筛选
     orderStatusClick(item) {
-      this.currentStatus = item.value;
-      this.searchForm.orderStatus = item.value;
+      this.currentStatus = item;  // 使用参数 item
+      this.searchForm.orderStatus = item;  // 使用参数 item
       this.getDataList();
     },
   },
@@ -288,23 +280,11 @@ export default {
 
 
 <style lang="scss" scoped>
+// Tab组件样式
 .order-tab {
-  margin: 10px 20px 10px 0;
-  width: 950px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #f0f0f0;
-  padding: 0 10px;
-  div {
-    text-align: center;
-    padding: 4px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  .current {
-    background-color: #ffffff;
+  margin-top: 20px;
+  ::v-deep .ivu-tabs-tab {
+    font-size: 14px;
   }
 }
 </style>

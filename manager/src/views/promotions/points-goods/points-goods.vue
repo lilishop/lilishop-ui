@@ -15,7 +15,7 @@
               v-model="searchForm.goodsName"
               placeholder="请输入商品名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="积分区间">
@@ -24,7 +24,7 @@
               v-model="searchForm.pointsS"
               placeholder="请输入开始区间"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
             -
             <Input
@@ -32,11 +32,11 @@
               v-model="searchForm.pointsE"
               placeholder="请输入结束区间"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="状态">
-            <Select v-model="searchForm.promotionStatus" style="width: 200px">
+            <Select v-model="searchForm.promotionStatus" style="width: 240px">
               <Option v-for="item in statusList" :value="item.value" :key="item.value">{{
                 item.label
               }}</Option>
@@ -48,7 +48,7 @@
               v-model="searchForm.skuId"
               placeholder="请输入SKU编码"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Button
@@ -60,6 +60,8 @@
           >
         </Form>
       </Row>
+      </Card>
+    <Card>
       <Row class="operation padding-row">
         <Button @click="addPointsGoods" type="primary">添加积分商品</Button>
       </Row>

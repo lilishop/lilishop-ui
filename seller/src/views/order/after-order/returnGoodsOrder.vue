@@ -9,7 +9,7 @@
               v-model="searchForm.goodsName"
               clearable
               placeholder="请输入商品名称"
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="会员名称" prop="memberName">
@@ -18,7 +18,7 @@
               v-model="searchForm.memberName"
               clearable
               placeholder="请输入会员名称"
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="订单编号" prop="orderSn">
@@ -27,7 +27,7 @@
               v-model="searchForm.orderSn"
               clearable
               placeholder="请输入订单编号"
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
 
@@ -39,13 +39,15 @@
               clearable
               @on-change="selectDateRange"
               placeholder="选择起始时间"
-              style="width: 200px"
+              style="width: 240px"
             ></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
           <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
+      </Card>
+    <Card>
       <Table
         :loading="loading"
         border
