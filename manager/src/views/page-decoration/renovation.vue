@@ -104,6 +104,7 @@ export default {
         pageData: JSON.stringify(modelForm),
         // 如果是专题页面永远关闭
         pageShow: this.$route.query.pageType === 'SPECIAL' ? 'CLOSE' : pageShow,
+        pageClientType: 'PC',
       };
       API_floor.updateHome(this.$route.query.id, data).then((res) => {
         this.submitLoading = false
