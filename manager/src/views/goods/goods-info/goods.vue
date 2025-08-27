@@ -36,17 +36,6 @@
             style="width: 240px"
           />
         </Form-item>
-        <Form-item label="状态" prop="status">
-          <Select
-            v-model="searchForm.marketEnable"
-            placeholder="请选择"
-            clearable
-            style="width: 240px"
-          >
-            <Option value="UPPER">上架</Option>
-            <Option value="DOWN">下架</Option>
-          </Select>
-        </Form-item>
         <Form-item label="销售模式" prop="status">
           <Select
             v-model="searchForm.salesModel"
@@ -79,46 +68,67 @@
       </Form>
     </Card>
     <Card>
+
+       <div class="goods-tab">
+        <Tabs v-model="currentStatus" @on-click="goodsStatusClick">
+          <TabPane v-for="(item,index) in goodsStatusWithCount" :key="index" :label="item.title" :name="item.value">
+          </TabPane>
+        </Tabs>
+      </div>
+
+      <!-- 批量操作按钮 -->
+      <div class="batch-operations" style="margin: 10px 0;">
+        <Button 
+          type="success" 
+          :disabled="selectedRows.length === 0"
+          @click="batchUpper"
+          style="margin-right: 10px;"
+        >
+          批量上架
+        </Button>
+        <Button 
+          type="warning" 
+          :disabled="selectedRows.length === 0"
+          @click="batchLower"
+          style="margin-right: 10px;"
+        >
+          批量下架
+        </Button>
+        <Button 
+          v-if="currentStatus === 'TOBEAUDITED'"
+          type="primary" 
+          :disabled="selectedRows.length === 0"
+          @click="batchAudit"
+        >
+          批量审核
+        </Button>
+      </div>
+
       <Table
         :loading="loading"
-        border
         :columns="columns"
         :data="data"
         ref="table"
         class="mt_10"
+        @on-select="onSelect"
+        @on-select-all="onSelectAll"
+        @on-selection-change="onSelectionChange"
       >
+        <!-- 商品图片格式化 -->
+        <template slot="imageSlot" slot-scope="{ row }">
+          <div style="margin-top: 5px;">
+            <img
+              :src="row.original"
+              style="height: 50px; width: 50px; object-fit: cover;"
+            />
+          </div>
+        </template>
+        
         <!-- 商品栏目格式化 -->
         <template slot="goodsSlot" slot-scope="{ row }">
-          <div style="margin: 5px 0px; height: 80px; display: flex">
-            <div style="">
-              <img
-                :src="row.original"
-                style="height: 60px; margin-top: 1px; width: 60px"
-              />
-            </div>
-
-            <div style="margin-left: 13px">
-              <div class="div-zoom">
-                <a @click="linkTo(row.id, row.skuId)">{{ row.goodsName }}</a>
-              </div>
-              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-                <div slot="content">
-                  <vue-qr
-                    :text="wapLinkTo(row.id, row.skuId)"
-                    :margin="0"
-                    colorDark="#000"
-                    colorLight="#fff"
-                    :size="150"
-                  ></vue-qr>
-                </div>
-                <img
-                  src="../../../assets/qrcode.svg"
-                  class="hover-pointer"
-                  width="20"
-                  height="20"
-                  alt=""
-                />
-              </Poptip>
+          <div style="margin: 5px 0px; padding: 10px 0px;">
+            <div class="div-zoom">
+              <a @click="linkTo(row.id, row.skuId)">{{ row.goodsName }}</a>
             </div>
           </div>
         </template>
@@ -130,7 +140,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -156,11 +166,61 @@
         >
       </div>
     </Modal>
+    <Modal
+      title="商品审核"
+      v-model="auditModalVisible"
+      :mask-closable="false"
+      :width="500"
+    >
+      <Form ref="auditForm" :model="goodsAuditForm" :label-width="100">
+        <FormItem label="审核结果" prop="auth_flag">
+          <RadioGroup v-model="goodsAuditForm.auth_flag">
+            <Radio :label="1">审核通过</Radio>
+            <Radio :label="2">审核拒绝</Radio>
+          </RadioGroup>
+        </FormItem>
+        <FormItem label="审核备注" prop="reason" v-if="goodsAuditForm.auth_flag === 2">
+          <Input v-model="goodsAuditForm.reason" type="textarea" :rows="3" placeholder="请输入拒绝原因" />
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button type="text" @click="auditModalVisible = false">取消</Button>
+        <Button type="primary" @click="confirmAudit">提交审核</Button>
+      </div>
+    </Modal>
+    <!-- 批量审核弹框 -->
+    <Modal
+      title="批量商品审核"
+      v-model="batchAuditModalVisible"
+      :mask-closable="false"
+      :width="500"
+    >
+      <Form ref="batchAuditForm" :model="batchAuditForm" :label-width="100">
+        <FormItem label="审核结果" prop="auth_flag">
+          <RadioGroup v-model="batchAuditForm.auth_flag">
+            <Radio :label="1">审核通过</Radio>
+            <Radio :label="2">审核拒绝</Radio>
+          </RadioGroup>
+        </FormItem>
+        <FormItem label="审核备注" prop="reason" v-if="batchAuditForm.auth_flag === 2">
+          <Input v-model="batchAuditForm.reason" type="textarea" :rows="3" placeholder="请输入拒绝原因" />
+        </FormItem>
+        <FormItem label="选中商品">
+          <div style="max-height: 200px; overflow-y: auto;">
+            <Tag v-for="item in selectedRows" :key="item.id" style="margin: 2px;">{{item.goodsName}}</Tag>
+          </div>
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button type="text" @click="batchAuditModalVisible = false">取消</Button>
+        <Button type="primary" @click="submitBatchAudit">提交审核</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 
 <script>
-import { getGoodsListData, upGoods, lowGoods } from "@/api/goods";
+import { getGoodsListData,getGoodsNumerData, upGoods, lowGoods, authGoods } from "@/api/goods";
 import vueQr from "vue-qr";
 export default {
   components: {
@@ -175,7 +235,7 @@ export default {
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "create_time", // 默认排序字段
         order: "desc", // 默认排序方式
       },
@@ -183,8 +243,31 @@ export default {
         // 下架原因
         reason: "",
       },
+      goodsAuditForm: {
+        // 商品审核表单
+        auth_flag: 1,
+      },
+      auditModalVisible: false, // 审核弹框显示状态
+      currentAuditGoods: null, // 当前审核的商品
       submitLoading: false, // 添加或编辑提交状态
       columns: [
+        {
+          type: 'selection',
+          width: 60,
+          align: 'center'
+        },
+        {
+          title: "商品ID",
+          key: "id",
+          width: 180,
+          tooltip: true,
+        },
+        {
+          title: "商品图片",
+          key: "original",
+          width: 180,
+          slot: "imageSlot",
+        },
         {
           title: "商品名称",
           key: "goodsName",
@@ -192,17 +275,27 @@ export default {
           slot: "goodsSlot",
         },
         {
-          title: "商品编号",
-          key: "id",
-          minWidth: 150,
-          tooltip: true,
-        },
-        {
           title: "价格",
           key: "price",
-          width: 130,
+          width: 100,
           render: (h, params) => {
             return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
+          },
+        },
+        {
+          title: "销量",
+          key: "buyCount",
+          width: 100,
+          render: (h, params) => {
+            return h("span", params.row.buyCount || 0);
+          },
+        },
+        {
+          title: "库存",
+          key: "quantity",
+          width: 100,
+          render: (h, params) => {
+            return h("span", params.row.quantity || 0);
           },
         },
         {
@@ -222,7 +315,7 @@ export default {
         {
           title: "商品类型",
           key: "goodsType",
-          width: 130,
+          width: 120,
           render: (h, params) => {
             if (params.row.goodsType === "PHYSICAL_GOODS") {
               return h("Tag", { props: { color: "green" } }, "实物商品");
@@ -236,7 +329,7 @@ export default {
         {
           title: "状态",
           key: "marketEnable",
-          width: 100,
+          width: 120,
           render: (h, params) => {
             if (params.row.marketEnable == "DOWN") {
               return h("Tag", { props: { color: "volcano" } }, "下架");
@@ -248,7 +341,7 @@ export default {
         {
           title: "审核状态",
           key: "authFlag",
-          width: 130,
+          width: 180,
           render: (h, params) => {
             if (params.row.authFlag == "TOBEAUDITED") {
               return h("Tag", { props: { color: "volcano" } }, "待审核");
@@ -262,7 +355,7 @@ export default {
         {
           title: "店铺名称",
           key: "storeName",
-          minWidth: 100,
+          width: 180,  // 使用minWidth替代width
           tooltip: true,
         },
         {
@@ -270,19 +363,61 @@ export default {
           key: "action",
           align: "center",
           fixed: "right",
-          width: 150,
+          width: 200,
           render: (h, params) => {
-            if (params.row.marketEnable == "DOWN") {
+            // 如果是待审核状态，显示审核按钮
+            if (params.row.authFlag === "TOBEAUDITED") {
               return h("div", [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
                     style: {
-                      marginRight: "5px",
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.openAuditModal(params.row);
+                      },
+                    },
+                  },
+                  "审核"
+                ),
+                h("span", {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.showDetail(params.row);
+                      },
+                    },
+                  },
+                  "查看"
+                ),
+              ]);
+            }
+            // 原有的上架/下架逻辑
+            else if (params.row.marketEnable == "DOWN") {
+              return h("div", [
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
                     },
                     on: {
                       click: () => {
@@ -292,11 +427,19 @@ export default {
                   },
                   "上架"
                 ),
+                h("span", {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      size: "small",
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
                     },
                     on: {
                       click: () => {
@@ -310,14 +453,12 @@ export default {
             } else {
               return h("div", [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "error",
-                      size: "small",
-                    },
                     style: {
-                      marginRight: "5px",
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
                     },
                     on: {
                       click: () => {
@@ -327,11 +468,19 @@ export default {
                   },
                   "下架"
                 ),
+                h("span", {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      size: "small",
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
                     },
                     on: {
                       click: () => {
@@ -348,12 +497,37 @@ export default {
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
+      currentStatus: '',
+      goodsNumerData: {},
+      goodsAuditForm: {
+        // 商品编辑表单
+        auth_flag: 1,
+      },
+      selectedRows: [], // 选中的行数据
+      selectAll: false, // 全选状态
+      batchAuditModalVisible: false, // 批量审核弹框显示状态
+      batchAuditForm: {
+        auth_flag: 1,
+        reason: ''
+      },
     };
+  },
+  computed: {
+    goodsStatusWithCount() {
+      return [
+        {title: '全部', value: ''},
+        {title: `出售中${this.goodsNumerData.upperGoodsNum ? '(' + this.goodsNumerData.upperGoodsNum + ')' : ''}`, value: 'UPPER'},
+        {title: `仓库中${this.goodsNumerData.downGoodsNum ? '(' + this.goodsNumerData.downGoodsNum + ')' : ''}`, value: 'DOWN'},
+        {title: `待审核${this.goodsNumerData.auditGoodsNum ? '(' + this.goodsNumerData.auditGoodsNum + ')' : ''}`, value: 'TOBEAUDITED'},
+        {title: `审核未通过${this.goodsNumerData.refuseGoodsNum ? '(' + this.goodsNumerData.refuseGoodsNum + ')' : ''}`, value: 'REFUSE'}
+      ];
+    }
   },
   methods: {
     // 初始化数据
     init() {
       this.getDataList();
+      this.getNumberData();
     },
     // 分页 改变页码
     changePage(v) {
@@ -368,8 +542,9 @@ export default {
     // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
+      this.getNumberData();
     },
     // 获取数据
     getDataList() {
@@ -381,6 +556,15 @@ export default {
           this.total = res.result.total;
         }
       });
+    },
+    getNumberData() {
+      // 创建一个不包含goodsStatus字段的搜索参数
+      const { goodsStatus, ...searchParams } = this.searchForm;
+      getGoodsNumerData(searchParams).then((res) => {
+        if (res.success) {
+          this.goodsNumerData = res.result;
+        }
+      })
     },
     // 编辑
     edit(v) {
@@ -394,27 +578,36 @@ export default {
     },
     // 下架
     lower() {
-      lowGoods(this.id, this.underForm).then((res) => {
+      let params = {
+        goodsId: this.id,
+        reason:this.underForm.reason
+      };
+      lowGoods(params).then((res) => {
         this.$Modal.remove();
         if (res.success) {
           this.$Message.success("操作成功");
           this.modalVisible = false;
           this.getDataList();
+          this.getNumberData(); // 添加这行
         }
       });
     },
-    // 商家
+    // 上架
     upper(v) {
       this.$Modal.confirm({
         title: "确认上架",
         content: "您确认要上架 " + v.goodsName + " ?",
         loading: true,
         onOk: () => {
-          upGoods(v.id).then((res) => {
+           let params = {
+            goodsId: v.id
+          };
+          upGoods(params).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("上架成功");
               this.getDataList();
+              this.getNumberData(); // 添加这行
             }
           });
         },
@@ -429,9 +622,249 @@ export default {
         query: { id: id },
       })
     },
+    
+    // 商品状态筛选
+    goodsStatusClick(item) {
+      // 根据选择的状态设置搜索条件
+      if (item === 0) {
+        // 全部：清除状态筛选
+        delete this.searchForm.goodsStatus;
+      } else {
+        // 其他状态正常赋值
+        this.searchForm.goodsStatus = item;
+      }
+      this.currentStatus = item;
+      
+      // tab切换时清除选中内容
+      this.selectedRows = [];
+      if (this.$refs.table) {
+        this.$refs.table.selectAll(false);
+      }
+      
+      this.getDataList();
+    },
+    examine(v, authFlag) {
+      // 审核商品
+      let examine = "通过";
+      this.goodsAuditForm.authFlag = "PASS";
+      if (authFlag != 1) {
+        examine = "拒绝";
+        this.goodsAuditForm.authFlag = "REFUSE";
+      }
+      this.$Modal.confirm({
+        title: "确认审核",
+        content: "您确认要审核" + examine + " " + v.goodsName + " ?",
+        loading: true,
+        onOk: () => {
+          this.goodsAuditForm.goodsIds=v.id;
+          authGoods(this.goodsAuditForm).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success("审核成功");
+              this.getDataList();
+              this.getNumberData();
+            }
+          });
+        },
+      });
+    },
+    
+    // 打开审核弹框
+    openAuditModal(goods) {
+      this.currentAuditGoods = goods;
+      this.goodsAuditForm.auth_flag = 1;
+      this.goodsAuditForm.reason = '';
+      this.auditModalVisible = true;
+    },
+    
+    // 确认审核（二次确认）
+    confirmAudit() {
+      const auditText = this.goodsAuditForm.auth_flag === 1 ? '通过' : '拒绝';
+      this.$Modal.confirm({
+        title: '确认审核',
+        content: `您确认要审核${auditText} "${this.currentAuditGoods.goodsName}" 吗？`,
+        loading: true,
+        onOk: () => {
+          this.submitAudit();
+        },
+      });
+    },
+    
+    // 提交审核
+    submitAudit() {
+      const auditForm = {
+        authFlag: this.goodsAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE',
+        reason: this.goodsAuditForm.reason || '',
+        goodsId:this.currentAuditGoods.id
+      };
+      
+      authGoods(auditForm).then((res) => {
+        this.$Modal.remove();
+        if (res.success) {
+          this.$Message.success('审核成功');
+          this.auditModalVisible = false;
+          this.getDataList();
+          this.getNumberData();
+        }
+      });
+    },
+    
+    // 选择框事件处理
+    onSelect(selection, row) {
+      // 单行选择时触发
+    },
+    
+    onSelectAll(selection) {
+      // 全选时触发
+    },
+    
+    onSelectionChange(selection) {
+      this.selectedRows = selection;
+    },
+    
+    // 批量上架
+    batchUpper() {
+      if (this.selectedRows.length === 0) {
+        this.$Message.warning('请先选择要上架的商品');
+        return;
+      }
+      
+      const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
+      this.$Modal.confirm({
+        title: '确认批量上架',
+        content: `您确认要上架以下商品吗？\n${goodsNames}`,
+        loading: true,
+        onOk: () => {
+          // 提取所有选中商品的ID
+          const goodsIds = this.selectedRows.map(item => item.id);
+          const params = {
+            goodsId: goodsIds // 传递ID数组
+          };
+          
+          upGoods(params).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success('批量上架成功');
+              this.selectedRows = [];
+              this.selectAll = false;
+              this.getDataList();
+              this.getNumberData();
+            }
+          }).catch(() => {
+            this.$Modal.remove();
+          });
+        }
+      });
+    },
+    
+    // 批量下架
+    batchLower() {
+      if (this.selectedRows.length === 0) {
+        this.$Message.warning('请先选择要下架的商品');
+        return;
+      }
+      
+      const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
+      this.$Modal.confirm({
+        title: '确认批量下架',
+        content: `您确认要下架以下商品吗？\n${goodsNames}`,
+        loading: true,
+        onOk: () => {
+          // 提取所有选中商品的ID
+          const goodsIds = this.selectedRows.map(item => item.id);
+          const params = {
+            goodsId: goodsIds, // 传递ID数组
+            reason: '批量下架操作' // 可以设置默认下架原因
+          };
+          
+          lowGoods(params).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success('批量下架成功');
+              this.selectedRows = [];
+              this.selectAll = false;
+              this.getDataList();
+              this.getNumberData();
+            }
+          }).catch(() => {
+            this.$Modal.remove();
+          });
+        }
+      });
+    },
+    
+    // 批量审核
+    batchAudit() {
+      if (this.selectedRows.length === 0) {
+        this.$Message.warning('请先选择要审核的商品');
+        return;
+      }
+      
+      // 重置批量审核表单
+      this.batchAuditForm = {
+        auth_flag: 1,
+        reason: ''
+      };
+      this.batchAuditModalVisible = true;
+    },
+    
+    // 提交批量审核
+    submitBatchAudit() {
+      if (this.selectedRows.length === 0) {
+        this.$Message.warning('请先选择要审核的商品');
+        return;
+      }
+      
+      // 如果是拒绝审核，必须填写原因
+      if (this.batchAuditForm.auth_flag === 2 && !this.batchAuditForm.reason.trim()) {
+        this.$Message.warning('审核拒绝时必须填写拒绝原因');
+        return;
+      }
+      
+      const actionText = this.batchAuditForm.auth_flag === 1 ? '通过' : '拒绝';
+      const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
+      
+      this.$Modal.confirm({
+        title: `确认批量审核${actionText}`,
+        content: `您确认要${actionText}以下商品的审核吗？\n${goodsNames}`,
+        loading: true,
+        onOk: () => {
+          // 提取所有选中商品的ID
+          const goodsIds = this.selectedRows.map(item => item.id);
+          const params = {
+            goodsId: goodsIds, // 传递ID数组
+            authFlag: this.batchAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE',
+            reason: this.batchAuditForm.reason || ''
+          };
+          
+          // 修正：直接调用authGoods，不传递'batch'参数
+          authGoods(params).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success(`批量审核${actionText}成功`);
+              this.selectedRows = [];
+              this.selectAll = false;
+              this.batchAuditModalVisible = false;
+              this.getDataList();
+              this.getNumberData();
+            }
+          }).catch(() => {
+            this.$Modal.remove();
+          });
+        }
+      });
+    }
   },
   mounted() {
     this.init();
   },
 };
 </script>
+<style lang="scss" scoped>
+// Tab组件样式
+.goods-tab {
+  ::v-deep .ivu-tabs-tab {
+    font-size: 14px;
+  }
+}
+</style>

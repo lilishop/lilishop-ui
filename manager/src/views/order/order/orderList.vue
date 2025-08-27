@@ -502,7 +502,6 @@ export default {
 
 // Tab组件样式
 .order-tab {
-  margin-top: 20px;
   ::v-deep .ivu-tabs-tab {
     font-size: 14px;
   }

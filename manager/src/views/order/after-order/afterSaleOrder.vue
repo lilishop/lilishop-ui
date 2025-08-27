@@ -9,6 +9,16 @@
           :label-width="70"
           class="search-form"
         >
+          <Form-item label="关键字" prop="keywords" style="display: block; width: 100%;">
+            <Input
+              type="text"
+              v-model="searchForm.keywords"
+              placeholder="请输入商品名称、订单编号搜索"
+              clearable
+              style="width: 240px"
+            />
+          </Form-item>
+          <br>
           <Form-item label="订单编号" prop="orderSn">
             <Input
               type="text"
@@ -87,7 +97,6 @@
 
       <Table
         :loading="loading"
-        border
         :columns="columns"
         :data="data"
         ref="table"
@@ -104,24 +113,9 @@
               <div class="div-zoom">
                 <a @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
               </div>
-              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-                <div slot="content">
-                  <vue-qr
-                    :text="wapLinkTo(row.goodsId, row.skuId)"
-                    :margin="0"
-                    colorDark="#000"
-                    colorLight="#fff"
-                    :size="150"
-                  ></vue-qr>
-                </div>
-                <img
-                  src="../../../assets/qrcode.svg"
-                  class="hover-pointer"
-                  width="20"
-                  height="20"
-                  alt=""
-                />
-              </Poptip>
+              <div style="color: #999; font-size: 12px; margin-top: 5px;">
+                商品ID: {{ row.goodsId }}
+              </div>
             </div>
           </div>
         </template>
@@ -133,7 +127,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -158,7 +152,7 @@ export default {
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
         startDate: "", // 起始时间
@@ -168,6 +162,7 @@ export default {
         serviceStatus: "",
         storeName: "",
         sn: "",
+        keywords: "", // 新增关键字搜索字段
       },
       selectDate: null, // 选择时间段
       form: {
@@ -191,6 +186,13 @@ export default {
           minWidth: 120,
           tooltip: true,
         },
+        // 移除这个独立的商品ID列
+        // {
+        //   title: "商品ID",
+        //   key: "goodsId",
+        //   minWidth: 120,
+        //   tooltip: true,
+        // },
         {
           title: "商品",
           key: "goodsName",
@@ -199,14 +201,20 @@ export default {
           slot: "goodsSlot",
         },
         {
+          title: "会员ID",
+          key: "memberId",
+          minWidth: 120,
+          tooltip: true,
+        },
+        {
           title: "会员名称",
           key: "memberName",
           width: 140,
         },
         {
-          title: "商家名称",
+          title: "店铺名称",
           key: "storeName",
-          minWidth: 100,
+          width: 100,
           tooltip: true,
         },
         {
@@ -235,7 +243,7 @@ export default {
         {
           title: "售后状态",
           key: "serviceStatus",
-          width: 150,
+          width: 180,
           render: (h, params) => {
             if (params.row.serviceStatus == "APPLY") {
               return h("div", [h("tag", { props: { color: "blue" } }, "申请中")]);
@@ -330,7 +338,7 @@ export default {
     // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
     // 开始结束时间分别赋值
@@ -362,9 +370,15 @@ export default {
       })
     },
     // 售后筛选
+    // 售后筛选
     serviceStatusClick(item) {
-      this.currentStatus = item;  // 使用参数 item
-      this.searchForm.serviceStatus = item;  // 使用参数 item
+      this.currentStatus = item;
+      // 如果是全部（空字符串），则删除serviceStatus字段
+      if (item === 0) {
+        delete this.searchForm.serviceStatus;
+      } else {
+        this.searchForm.serviceStatus = item;
+      }
       this.getDataList();
     },
   },
@@ -376,7 +390,6 @@ export default {
 <style lang="scss" scoped>
 // Tab组件样式
 .order-tab {
-  margin-top: 20px;
   ::v-deep .ivu-tabs-tab {
     font-size: 14px;
   }

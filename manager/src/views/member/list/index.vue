@@ -3,6 +3,10 @@
     <Card>
       <Row @keydown.enter.native="handleSearch">
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+          <Form-item label="会员ID" prop="id">
+            <Input type="text" v-model="searchForm.id" placeholder="请输入会员ID" clearable style="width: 240px" />
+          </Form-item>
+          
           <Form-item label="会员名称" prop="username">
             <Input type="text" v-model="searchForm.username" placeholder="请输入会员名称" clearable style="width: 240px" />
           </Form-item>
@@ -23,10 +27,10 @@
         <Button @click="addMember" type="primary">添加会员</Button>
       </Row>
 
-      <Table :loading="loading" border :columns="columns" class="mt_10" :data="data" ref="table"></Table>
+      <Table :loading="loading" :columns="columns" class="mt_10" :data="data" ref="table"></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
-          @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator
+          @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]" size="small" show-total show-elevator
           show-sizer></Page>
       </Row>
     </Card>
@@ -131,8 +135,9 @@ export default {
       searchForm: {
         // 请求参数
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         order: "desc",
+        id: "",
         username: "",
         mobile: "",
         disabled: "OPEN",
@@ -154,18 +159,46 @@ export default {
       ruleValidate: {}, //修改验证
       columns: [
         {
+          title: "会员ID",
+          key: "id",
+          minWidth: 120,  // 减少宽度
+          tooltip: true,
+        },
+        {
+          title: "头像",
+          key: "face",
+          minWidth: 80,
+          align: "center",
+          render: (h, params) => {
+            return h("img", {
+              attrs: {
+                src: params.row.face || require('@/assets/default.png'),
+                alt: "头像"
+              },
+              style: {
+                width: "30px",
+                height: "30px",
+                borderRadius: "50%",
+                objectFit: "cover"
+              }
+            });
+          }
+        },
+        {
           title: "会员名称",
           key: "username",
           tooltip: true,
+          minWidth: 150,  // 减少宽度
         },
         {
           title: "会员昵称",
           key: "nickName",
           tooltip: true,
+          minWidth: 150,  // 减少宽度
         },
         {
           title: "联系方式",
-          width: 130,
+          minWidth: 130,
           key: "mobile",
           render: (h, params) => {
             if (params.row.mobile == null) {
@@ -178,13 +211,18 @@ export default {
         {
           title: "注册时间",
           key: "createTime",
-          width: 180,
+          minWidth: 160,  // 减少宽度
+        },
+        {
+          title: "最后登录时间",
+          key: "lastLoginDate",
+          minWidth: 160,  // 减少宽度
         },
 
         {
           title: "积分数量",
           align: "left",
-          width: 100,
+          minWidth: 120,  // 增加宽度
           render: (h, params) => {
             return h(
               "div",
@@ -197,7 +235,7 @@ export default {
           title: "操作",
           key: "action",
           align: "center",
-          width: 200,
+          minWidth: 160,
           fixed: "right",
           render: (h, params) => {
             return h(
@@ -375,7 +413,7 @@ export default {
     // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getData();
     },
     //查看详情修改
