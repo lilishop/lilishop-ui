@@ -9,6 +9,15 @@
         :label-width="70"
         class="search-form"
       >
+        <Form-item label="关键字" prop="keywords" style="display: block; width: 100%;">
+          <Input
+            type="text"
+            v-model="searchForm.keywords"
+            placeholder="请输入商品名称/收货人/收货人手机号/店铺名称"
+            clearable
+            style="width: 500px"
+          />
+        </Form-item>
         <Form-item label="订单号" prop="orderSn">
           <Input
             type="text"
@@ -27,7 +36,24 @@
             style="width: 240px"
           />
         </Form-item>
-
+        <Form-item label="商品名称" prop="goodsName">
+          <Input
+            type="text"
+            v-model="searchForm.goodsName"
+            placeholder="请输入商品名称"
+            clearable
+            style="width: 240px"
+          />
+        </Form-item>
+        <Form-item label="收货人" prop="shipName">
+          <Input
+            type="text"
+            v-model="searchForm.shipName"
+            placeholder="请输入收货人姓名"
+            clearable
+            style="width: 240px"
+          />
+        </Form-item>
         <Form-item label="订单类型" prop="orderType">
           <Select
             v-model="searchForm.orderPromotionType"
@@ -40,6 +66,19 @@
             <Option value="GIFT">赠品订单</Option>
             <Option value="POINTS">积分订单</Option>
             <Option value="KANJIA">砍价订单</Option>
+          </Select>
+        </Form-item>
+        <Form-item label="支付方式" prop="paymentMethod">
+          <Select
+            v-model="searchForm.paymentMethod"
+            placeholder="请选择支付方式"
+            clearable
+            style="width: 240px"
+          >
+            <Option value="WECHAT">微信支付</Option>
+            <Option value="ALIPAY">支付宝</Option>
+            <Option value="WALLET">余额支付</Option>
+            <Option value="BANK_TRANSFER">线下转账</Option>
           </Select>
         </Form-item>
         <Form-item label="下单时间">
@@ -74,7 +113,6 @@
       </div>
       <Table
         :loading="loading"
-        border
         :columns="columns"
         :data="data"
         ref="table"
@@ -88,7 +126,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -147,15 +185,19 @@ export default {
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
         startDate: "", // 起始时间
         endDate: "", // 终止时间
         orderType: "",
         orderSn: "",
+        keywords: "", // 新增关键字搜索字段
         buyerName: "",
+        goodsName: "", // 新增商品名称筛选字段
+        shipName: "", // 新增收货人筛选字段
         orderStatus: "",
+        paymentMethod: "", // 新增支付方式筛选字段
       },
       selectDate: null,
       columns: [
@@ -165,7 +207,6 @@ export default {
           minWidth: 240,
           tooltip: true,
         },
-
         {
           title: "订单来源",
           key: "clientType",
@@ -218,6 +259,19 @@ export default {
           minWidth: 130,
           tooltip: true,
         },
+        
+        {
+          title: "会员ID",
+          key: "memberId",
+          minWidth: 120,
+          tooltip: true,
+        },
+        {
+          title: "店铺名称",
+          key: "storeName",
+          minWidth: 150,
+          tooltip: true,
+        },
 
         {
           title: "订单金额",
@@ -229,7 +283,24 @@ export default {
           },
 
         },
-
+        {
+          title: "支付方式",
+          key: "paymentMethod",
+          width: 120,
+          render: (h, params) => {
+            if (params.row.paymentMethod == "WECHAT") {
+              return h("div", {}, "微信支付");
+            } else if (params.row.paymentMethod == "ALIPAY") {
+              return h("div", {}, "支付宝");
+            } else if (params.row.paymentMethod == "WALLET") {
+              return h("div", {}, "余额支付");
+            } else if (params.row.paymentMethod == "BANK_TRANSFER") {
+              return h("div", {}, "线下转账");
+            } else {
+              return h("div", {}, params.row.paymentMethod || "-");
+            }
+          },
+        },
         {
           title: "订单状态",
           key: "orderStatus",
@@ -338,7 +409,7 @@ export default {
     // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
     // 起止时间从新赋值
@@ -404,8 +475,15 @@ export default {
     },
     // 订单筛选
     orderStatusClick(name) {
+      if (name === 0) {
+        // 点击"全部"时，设置为空字符串，在getDataList中会被过滤掉
+        this.searchForm.orderStatus = '';
+      } else {
+        // 其他状态正常赋值
+        this.searchForm.orderStatus = name;
+      }
       this.currentStatus = name;
-      this.searchForm.orderStatus = name;
+     
       this.getDataList();
     },
   },
@@ -429,7 +507,4 @@ export default {
     font-size: 14px;
   }
 }
-
-
-
 </style>
