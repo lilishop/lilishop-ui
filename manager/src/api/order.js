@@ -160,3 +160,8 @@ export const refundLog = (params) => {
 export const storeAddress = (sn) => {
   return getRequest(`/order/afterSale/getStoreAfterSaleAddress/${sn}`)
 }
+
+// 获取订单数量统计
+export const getOrderNum = (params) => {
+  return getRequest(`/order/order/orderNum`, params)
+}

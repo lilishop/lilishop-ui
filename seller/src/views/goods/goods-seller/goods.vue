@@ -67,21 +67,21 @@
       </Row>
     </Card>
     <Card>
+
+      <div class="goods-tab">
+        <Tabs v-model="currentStatus" @on-click="goodsStatusClick">
+          <TabPane v-for="(item,index) in goodsStatusWithCount" :key="index" :label="item.title" :name="item.value">
+          </TabPane>
+        </Tabs>
+      </div>
+
       <Row class="operation padding-row">
-        <Button @click="addGoods" type="primary">添加商品</Button>
-        <Button @click="openImportGoods" type="primary">导入商品</Button>
-        <Dropdown @on-click="handleDropdown">
-          <Button type="default">
-            批量操作
-            <Icon type="ios-arrow-down"></Icon>
-          </Button>
-          <DropdownMenu slot="list">
-            <DropdownItem name="uppers">批量上架</DropdownItem>
-            <DropdownItem name="lowers">批量下架</DropdownItem>
-            <DropdownItem name="deleteAll">批量删除</DropdownItem>
-            <DropdownItem name="batchShipTemplate">批量设置物流模板</DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
+        <Button @click="addGoods" type="info">添加商品</Button>
+        <Button @click="openImportGoods" >导入商品</Button>
+        <Button @click="openImportGoods" >批量上架</Button>
+        <Button @click="openImportGoods" >批量下架</Button>
+        <Button @click="openImportGoods" >批量删除</Button>
+        <Button @click="openImportGoods" >批量设置物流模板</Button>
       </Row>
 
       <Table
@@ -95,11 +95,11 @@
       >
         <!-- 商品栏目格式化 -->
         <template slot="goodsSlot" slot-scope="{ row }">
-          <div style="margin-top: 5px; height: 90px; display: flex">
+          <div style=" height: 60px; display: flex">
             <div style="">
               <img
                 :src="row.original"
-                style="height: 80px; margin-top: 3px; width: 70px"
+                style="height: 50px; margin-top: 3px; width: 50px"
               />
             </div>
 
@@ -107,25 +107,7 @@
               <div class="div-zoom">
                 <a @click="linkTo(row.id, row.skuId)">{{ row.goodsName }}</a>
               </div>
-              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-                <div slot="content">
-                  <!-- <vueQr>123</vueQr> -->
-                  <vue-qr
-                    :text="wapLinkTo(row.id, row.skuId)"
-                    :margin="0"
-                    colorDark="#000"
-                    colorLight="#fff"
-                    :size="150"
-                  ></vue-qr>
-                </div>
-                <img
-                  src="../../../assets/qrcode.svg"
-                  class="hover-pointer"
-                  width="20"
-                  height="20"
-                  alt=""
-                />
-              </Poptip>
+              
             </div>
           </div>
         </template>
@@ -137,7 +119,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -221,7 +203,8 @@ import {
   lowGoods,
   deleteGoods,
   batchShipTemplate,
-  downLoadGoods
+  downLoadGoods,
+  getGoodsNumerData
 } from "@/api/goods";
 import { baseUrl } from "@/libs/axios.js";
 import * as API_Shop from "@/api/shops";
@@ -246,7 +229,7 @@ export default {
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "create_time", // 默认排序字段
         order: "desc", // 默认排序方式
       },
@@ -259,6 +242,213 @@ export default {
         price: "",
         sellerName: "",
       },
+      columns: [
+        {
+          type: "selection",
+          width: 60,
+          align: "center",
+        },
+         {
+          title: "商品ID",
+          key: "id",
+          width: 180,
+          tooltip: true,
+        },
+        {
+          title: "商品",
+          key: "goodsName",
+          minWidth: 200,
+          slot: "goodsSlot",
+        },
+        {
+          title: "销售模式",
+          key: "salesModel",
+          width: 150,
+          render: (h, params) => {
+            if (params.row.salesModel === "RETAIL") {
+              return h("div", [h("Tag", { props: { color: "blue" } }, "零售")]);
+            } else if (params.row.salesModel === "WHOLESALE") {
+              return h("div", [h("Tag", { props: { color: "green" } }, "批发")]);
+            }
+          },
+        },
+        {
+          title: "商品类型",
+          key: "goodsType",
+          width: 150,
+          render: (h, params) => {
+            if (params.row.goodsType === "PHYSICAL_GOODS") {
+              return h("div", [h("Tag", { props: { color: "blue" } }, "实物")]);
+            } else if (params.row.goodsType === "VIRTUAL_GOODS") {
+              return h("div", [h("Tag", { props: { color: "green" } }, "虚拟")]);
+            }
+          },
+        },
+        {
+          title: "价格",
+          key: "price",
+          width: 150,
+          render: (h, params) => {
+            return h("div", "￥" + params.row.price);
+          },
+        },
+        {
+          title: "销量",
+          key: "buyCount",
+          width: 150,
+          render: (h, params) => {
+            return h("span", params.row.buyCount || 0);
+          },
+        },
+        {
+          title: "库存",
+          key: "quantity",
+          width: 150,
+          render: (h, params) => {
+            return h("span", params.row.quantity || 0);
+          },
+        },
+        {
+          title: "审核状态",
+          key: "authFlag",
+          width: 150,
+          render: (h, params) => {
+            if (params.row.authFlag === "TOBEAUDITED") {
+              return h("Tag", { props: { color: "gold" } }, "待审核");
+            } else if (params.row.authFlag === "PASS") {
+              return h("Tag", { props: { color: "green" } }, "审核通过");
+            } else if (params.row.authFlag === "REFUSE") {
+              return h("Tag", { props: { color: "red" } }, "审核拒绝");
+            }
+          },
+        },
+        {
+          title: "状态",
+          key: "marketEnable",
+          width: 150,
+          render: (h, params) => {
+            if (params.row.marketEnable === "UPPER") {
+              return h("Tag", { props: { color: "green" } }, "上架");
+            } else if (params.row.marketEnable === "DOWN") {
+              return h("Tag", { props: { color: "red" } }, "下架");
+            }
+          },
+        },
+        {
+          title: "操作",
+          key: "action",
+          align: "center",
+          fixed: "right",
+          width: 200,
+          render: (h, params) => {
+            if (params.row.marketEnable == "DOWN") {
+              return h("div", [
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.editGoods(params.row);
+                      },
+                    },
+                  },
+                  "编辑"
+                ),
+                h("span", {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.upper(params.row);
+                      },
+                    },
+                  },
+                  "上架"
+                ),
+              ]);
+            } else {
+              return h("div", [
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.editGoods(params.row);
+                      },
+                    },
+                  },
+                  "编辑"
+                ),
+                h("span", {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.getStockDetail(params.row.id);
+                      },
+                    },
+                  },
+                  "库存"
+                ),
+                h("span", {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.lower(params.row);
+                      },
+                    },
+                  },
+                  "下架"
+                ),
+              ]);
+            }
+          },
+        },
+      ],
       updateStockColumns: [
         {
           title: "sku规格",
@@ -286,220 +476,140 @@ export default {
           title: "操作",
           key: "action",
           align: "center",
-          width: 200,
-          render: (h, params) => {
-            let vm = this;
-            return h("InputNumber", {
-              props: {
-                value: params.row.quantity,
-              },
-              on: {
-                "on-change": (event) => {
-                  vm.stockList[params.index].quantity = event;
-                },
-              },
-            });
-          },
-        },
-      ],
-      // 表单验证规则
-      formValidate: {},
-      submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
-      columns: [
-        {
-          type: "selection",
-          width: 60,
-          align: "center",
-        },
-        {
-          title: "商品编号",
-          key: "id",
-          width: 180,
-          tooltip: true,
-        },
-        {
-          title: "商品名称",
-          key: "goodsName",
-          minWidth: 200,
-          slot: "goodsSlot",
-        },
-        {
-          title: "销售模式",
-          key: "salesModel",
-          width: 100,
-          render: (h, params) => {
-            if (params.row.salesModel === "RETAIL") {
-              return h("Tag", { props: { color: "orange" } }, "零售");
-            } else if (params.row.salesModel === "WHOLESALE") {
-              return h("Tag", { props: { color: "magenta" } }, "批发");
-            } else {
-              return h("Tag", { props: { color: "volcano" } }, "其他类型");
-            }
-          },
-        },
-        {
-          title: "商品类型",
-          key: "goodsType",
-          width: 130,
-          render: (h, params) => {
-            if (params.row.goodsType === "PHYSICAL_GOODS") {
-              return h("Tag", { props: { color: "geekblue" } }, "实物商品");
-            } else if (params.row.goodsType === "VIRTUAL_GOODS") {
-              return h("Tag", { props: { color: "purple" } }, "虚拟商品");
-            } else {
-              return h("Tag", { props: { color: "cyan" } }, "电子卡券");
-            }
-          },
-        },
-        {
-          title: "商品价格",
-          key: "price",
-          width: 130,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
-          },
-        },
-        {
-          title: "库存",
-          key: "quantity",
-          width: 120,
-          render: (h, params) => {
-            if (params.row.quantity) {
-              return h("div", params.row.quantity);
-            } else {
-              return h("div", 0);
-            }
-          },
-        },
-        {
-          title: "审核状态",
-          key: "authFlag",
-          width: 120,
-          render: (h, params) => {
-            if (params.row.authFlag == "PASS") {
-              return h("Tag", { props: { color: "green" } }, "通过");
-            } else if (params.row.authFlag == "TOBEAUDITED") {
-              return h("Tag", { props: { color: "volcano" } }, "待审核");
-            } else if (params.row.authFlag == "REFUSE") {
-              return h("Tag", { props: { color: "red" } }, "审核拒绝");
-            }
-          },
-        },
-        {
-          title: "上架状态",
-          key: "marketEnable",
-          width: 130,
-          sortable: false,
-          render: (h, params) => {
-            if (params.row.marketEnable == "DOWN") {
-              return h("Tag", { props: { color: "red" } }, "下架");
-            } else if (params.row.marketEnable == "UPPER") {
-              return h("Tag", { props: { color: "green" } }, "上架");
-            }
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
           fixed: "right",
           width: 200,
           render: (h, params) => {
-            let enableOrDisable = "";
-            let showEditStock = "";
             if (params.row.marketEnable == "DOWN") {
-              enableOrDisable = h(
-                "Button",
-                {
-                  props: {
-                    size: "small",
-                    type: "success",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.upper(params.row);
+              return h("div", [
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.editGoods(params.row);
+                      },
                     },
                   },
-                },
-                "上架"
-              );
+                  "编辑"
+                ),
+                h("span", {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.upper(params.row);
+                      },
+                    },
+                  },
+                  "上架"
+                ),
+              ]);
             } else {
-              showEditStock = h(
-                "Button",
-                {
-                  props: {
-                    type: "default",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.getStockDetail(params.row.id);
+              return h("div", [
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.editGoods(params.row);
+                      },
                     },
                   },
-                },
-                "库存"
-              );
-              enableOrDisable = h(
-                "Button",
-                {
-                  props: {
-                    type: "warning",
-                    size: "small",
-                  },
+                  "编辑"
+                ),
+                h("span", {
                   style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.lower(params.row);
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.getStockDetail(params.row.id);
+                      },
                     },
                   },
-                },
-                "下架"
-              );
+                  "库存"
+                ),
+                h("span", {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.lower(params.row);
+                      },
+                    },
+                  },
+                  "下架"
+                ),
+              ]);
             }
-            return h("div", [
-              h(
-                "Button",
-                {
-                  props: {
-                    type: "info",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.editGoods(params.row);
-                    },
-                  },
-                },
-                "编辑"
-              ),
-              showEditStock,
-              enableOrDisable,
-            ]);
           },
         },
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
       updateStockType: 'updateStock',  // 更新库存状态
+      goodsNumerData: {},
+      currentStatus: '',
     };
+  },
+  computed: {
+    goodsStatusWithCount() {
+      return [
+        {title: '全部', value: ''},
+        {title: `出售中${this.goodsNumerData.upperGoodsNum ? '(' + this.goodsNumerData.upperGoodsNum + ')' : ''}`, value: 'UPPER'},
+        {title: `仓库中${this.goodsNumerData.downGoodsNum ? '(' + this.goodsNumerData.downGoodsNum + ')' : ''}`, value: 'DOWN'},
+        {title: `待审核${this.goodsNumerData.auditGoodsNum ? '(' + this.goodsNumerData.auditGoodsNum + ')' : ''}`, value: 'TOBEAUDITED'},
+        {title: `审核未通过${this.goodsNumerData.refuseGoodsNum ? '(' + this.goodsNumerData.refuseGoodsNum + ')' : ''}`, value: 'REFUSE'}
+      ];
+    }
   },
   methods: {
     init() {
       // 初始化数据
       this.getDataList();
+      this.getNumberData();
     },
     // 添加商品
     addGoods() {
@@ -624,16 +734,18 @@ export default {
     // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
+      this.getNumberData();
     },
     // 重置搜索条件
     handleReset() {
       this.searchForm = {};
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       // 重新加载数据
       this.getDataList();
+      this.getNumberData();
     },
     // 清除多选
     clearSelectAll() {
@@ -831,6 +943,35 @@ export default {
         },
       });
     },
+    getNumberData() {
+      // 创建一个不包含goodsStatus字段的搜索参数
+      const { goodsStatus, ...searchParams } = this.searchForm;
+      getGoodsNumerData(searchParams).then((res) => {
+        if (res.success) {
+          this.goodsNumerData = res.result;
+        }
+      })
+    },
+    // 商品状态筛选
+    goodsStatusClick(item) {
+      // 根据选择的状态设置搜索条件
+      if (item === 0) {
+        // 全部：清除状态筛选
+        delete this.searchForm.goodsStatus;
+      } else {
+        // 其他状态正常赋值
+        this.searchForm.goodsStatus = item;
+      }
+      this.currentStatus = item;
+      
+      // tab切换时清除选中内容
+      this.selectedRows = [];
+      if (this.$refs.table) {
+        this.$refs.table.selectAll(false);
+      }
+      
+      this.getDataList();
+    },
   },
   mounted() {
     this.init();
@@ -840,4 +981,10 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "@/styles/table-common.scss";
+// Tab组件样式
+.goods-tab {
+  ::v-deep .ivu-tabs-tab {
+    font-size: 14px;
+  }
+}
 </style>

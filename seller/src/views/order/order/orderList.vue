@@ -8,6 +8,15 @@
         :label-width="70"
         class="search-form"
       >
+      <Form-item label="关键字" prop="keywords" style="display: block; width: 100%;">
+          <Input
+            type="text"
+            v-model="searchForm.keywords"
+            placeholder="请输入商品名称/收货人/收货人手机号/店铺名称"
+            clearable
+            style="width: 500px"
+          />
+        </Form-item>
         <Form-item label="订单编号" prop="orderSn">
           <Input
             type="text"
@@ -26,22 +35,14 @@
             style="width: 240px"
           />
         </Form-item>
-        <Form-item label="订单状态" prop="orderStatus">
-          <Select
-            v-model="searchForm.orderStatus"
-            placeholder="请选择"
+         <Form-item label="收货人" prop="shipName">
+          <Input
+            type="text"
+            v-model="searchForm.shipName"
+            placeholder="请输入收货人姓名"
             clearable
             style="width: 240px"
-          >
-            <Option value="UNPAID">未付款</Option>
-            <Option value="PAID">已付款</Option>
-            <Option value="UNDELIVERED">待发货</Option>
-            <Option value="PARTS_DELIVERED">部分发货</Option>
-            <Option value="DELIVERED">已发货</Option>
-            <Option value="COMPLETED">已完成</Option>
-            <Option value="CANCELLED">已取消</Option>
-            <Option value="STAY_PICKED_UP">待自提</Option>
-          </Select>
+          />
         </Form-item>
         <Form-item label="订单类型" prop="orderType">
           <Select
@@ -75,6 +76,12 @@
       </Form>
       </Card>
     <Card>
+      <div class="order-tab">
+        <Tabs v-model="currentStatus" @on-click="orderStatusClick">
+          <TabPane v-for="(item,index) in orderStatusWithCount" :key="index" :label="item.title" :name="item.value">
+          </TabPane>
+        </Tabs>
+      </div>
       <div class="export">
         <Button type="primary" class="mr_10" @click="expressOrderDeliver">批量发货</Button>
         <Button @click="exportOrder" type="info" class="export">导出订单</Button>
@@ -93,7 +100,6 @@
       </div>
       <Table
         :loading="loading"
-        border
         :columns="columns"
         :data="data"
         ref="table"
@@ -210,6 +216,12 @@ export default {
           tooltip: true,
         },
         {
+          title: "会员ID",
+          key: "memberId",
+          minWidth: 120,
+          tooltip: true,
+        },
+        {
           title: "订单金额",
           key: "flowPrice",
           minWidth: 100,
@@ -264,6 +276,24 @@ export default {
           },
         },
         {
+          title: "支付方式",
+          key: "paymentMethod",
+          width: 120,
+          render: (h, params) => {
+            if (params.row.paymentMethod == "WECHAT") {
+              return h("div", {}, "微信支付");
+            } else if (params.row.paymentMethod == "ALIPAY") {
+              return h("div", {}, "支付宝");
+            } else if (params.row.paymentMethod == "WALLET") {
+              return h("div", {}, "余额支付");
+            } else if (params.row.paymentMethod == "BANK_TRANSFER") {
+              return h("div", {}, "线下转账");
+            } else {
+              return h("div", {}, params.row.paymentMethod || "-");
+            }
+          },
+        },
+        {
           title: "下单时间",
           key: "createTime",
           width: 170,
@@ -299,6 +329,7 @@ export default {
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
+      orderNumData: {}, // 新增：订单数量统计数据
       excelColumns: {
         // 导出excel的参数
         编号: "index",
@@ -313,7 +344,37 @@ export default {
         店铺名称: "storeName",
         创建时间: "createTime",
       },
+      orderStatus: [
+        {title: '全部', value: ''},
+        {title: '未付款', value: 'UNPAID'},
+        {title: '已付款', value: 'PAID'},
+        {title: '待发货', value: 'UNDELIVERED'},
+        {title: '部分发货', value: 'PARTS_DELIVERED'},
+        {title: '已发货', value: 'DELIVERED'},
+        {title: '待核验', value: 'TAKE'},
+        {title: '待自提', value: 'STAY_PICKED_UP'},
+        {title: '已完成', value: 'COMPLETED'},
+        {title: '已关闭', value: 'CANCELLED'},
+      ],
+      currentStatus: ''
     };
+  },
+  computed: {
+    // 新增：带数量的订单状态选项
+    orderStatusWithCount() {
+      return [
+        {title: '全部', value: ''},
+        {title: `未付款${this.orderNumData.waitPayNum ? '(' + this.orderNumData.waitPayNum + ')' : ''}`, value: 'UNPAID'},
+        {title: `已付款${this.orderNumData.waitDeliveryNum ? '(' + this.orderNumData.waitDeliveryNum + ')' : ''}`, value: 'PAID'},
+        {title: `待发货${this.orderNumData.waitShipNum ? '(' + this.orderNumData.waitShipNum + ')' : ''}`, value: 'UNDELIVERED'},
+        {title: `部分发货${this.orderNumData.partsDeliveredNumNum ? '(' + this.orderNumData.partsDeliveredNumNum + ')' : ''}`, value: 'PARTS_DELIVERED'},
+        {title: `已发货${this.orderNumData.deliveredNum ? '(' + this.orderNumData.deliveredNum + ')' : ''}`, value: 'DELIVERED'},
+        {title: `待核验${this.orderNumData.waitCheckNum ? '(' + this.orderNumData.waitCheckNum + ')' : ''}`, value: 'TAKE'},
+        {title: `待自提${this.orderNumData.waitSelfPickNum ? '(' + this.orderNumData.waitSelfPickNum + ')' : ''}`, value: 'STAY_PICKED_UP'},
+        {title: `已完成${this.orderNumData.finishNum ? '(' + this.orderNumData.finishNum + ')' : ''}`, value: 'COMPLETED'},
+        {title: `已关闭${this.orderNumData.closeNum ? '(' + this.orderNumData.closeNum + ')' : ''}`, value: 'CANCELLED'},
+      ];
+    }
   },
   methods: {
     /**
@@ -340,6 +401,7 @@ export default {
     // 初始化数据
     init() {
       this.getDataList();
+      this.getOrderNumData(); // 新增：获取订单数量统计
     },
     // 改变页码
     changePage(v) {
@@ -356,6 +418,7 @@ export default {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
+      this.getOrderNumData(); // 新增：搜索时也更新数量统计
     },
     // 重置
     handleReset() {
@@ -428,6 +491,30 @@ export default {
       })
 
     },
+    // 订单筛选
+    orderStatusClick(name) {
+      if (name === 0) {
+        // 点击"全部"时，设置为空字符串，在getDataList中会被过滤掉
+        this.searchForm.orderStatus = '';
+      } else {
+        // 其他状态正常赋值
+        this.searchForm.orderStatus = name;
+      }
+      this.currentStatus = name;
+     
+      this.getDataList();
+    },
+    getOrderNumData() {
+      // 创建一个不包含orderStatus字段的搜索参数
+      const { orderStatus, ...searchParams } = this.searchForm;
+      API_Order.getOrderNum(searchParams).then((res) => {
+        if (res.success) {
+          this.orderNumData = res.result;
+        }
+      }).catch((err) => {
+        console.error('获取订单数量统计失败:', err);
+      });
+    },
   },
   mounted() {
     this.init();
@@ -437,6 +524,7 @@ export default {
     from.meta.keepAlive = false;
     next();
   },
+  
 };
 </script>
 <style lang="scss">
@@ -444,5 +532,11 @@ export default {
 @import "@/styles/table-common.scss";
 .export {
   margin: 10px 20px 10px 0;
+}
+// Tab组件样式
+.order-tab {
+  ::v-deep .ivu-tabs-tab {
+    font-size: 14px;
+  }
 }
 </style>

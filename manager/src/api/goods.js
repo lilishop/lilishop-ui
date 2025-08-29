@@ -101,20 +101,23 @@ export const getGoodsCategory = (parent_id) => {
 }
 
 //  上架商品
-export const upGoods = (id, params) => {
-    return putRequest(`/goods/goods/${id}/up`, params)
-  }
-  //  下架商品
-  export const lowGoods = (id, params) => {
-    return putRequest(`/goods/goods/${id}/under`, params)
-  }
+export const upGoods = (params) => {
+    return putRequest(`/goods/goods/up`, params)
+}
+
+//  下架商品
+export const lowGoods = (params) => {
+return putRequest(`/goods/goods/under`, params)
+}
 
 //  获取商品sku分页列表
 export const getGoodsSkuData = (params) => {
     return getRequest('/goods/goods/sku/list', params)
 }
-
-
+// 获取商品数量
+export const getGoodsNumerData = (params) => {
+    return getRequest('/goods/goods/goodsNumber', params)
+}
 //  获取商品分页列表
 export const getGoodsListData = (params) => {
     return getRequest('/goods/goods/list', params)
@@ -124,8 +127,8 @@ export const getAuthGoodsListData = (params) => {
     return getRequest('/goods/goods/auth/list', params)
 }
 //  审核商品
-export const authGoods = (id, params) => {
-    return putRequest(`/goods/goods/${id}/auth`, params)
+export const authGoods = (params) => {
+    return putRequest(`/goods/goods/auth`, params)
 }
 
 //查询分类绑定参数信息

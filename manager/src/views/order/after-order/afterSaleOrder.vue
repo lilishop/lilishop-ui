@@ -370,7 +370,6 @@ export default {
       })
     },
     // 售后筛选
-    // 售后筛选
     serviceStatusClick(item) {
       this.currentStatus = item;
       // 如果是全部（空字符串），则删除serviceStatus字段

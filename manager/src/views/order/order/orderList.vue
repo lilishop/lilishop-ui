@@ -104,7 +104,7 @@
     <Card>
       <div class="order-tab">
         <Tabs v-model="currentStatus" @on-click="orderStatusClick">
-          <TabPane v-for="(item,index) in orderStatus" :key="index" :label="item.title" :name="item.value">
+          <TabPane v-for="(item,index) in orderStatusWithCount" :key="index" :label="item.title" :name="item.value">
           </TabPane>
         </Tabs>
       </div>
@@ -374,6 +374,7 @@ export default {
       ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
+      orderNumData: {}, // 新增：订单数量统计数据
       orderStatus: [
         {title: '全部', value: ''},
         {title: '未付款', value: 'UNPAID'},
@@ -385,15 +386,32 @@ export default {
         {title: '待自提', value: 'STAY_PICKED_UP'},
         {title: '已完成', value: 'COMPLETED'},
         {title: '已关闭', value: 'CANCELLED'},
-
       ],
       currentStatus: ''
     };
+  },
+  computed: {
+    // 新增：带数量的订单状态选项
+    orderStatusWithCount() {
+      return [
+        {title: '全部', value: ''},
+        {title: `未付款${this.orderNumData.waitPayNum ? '(' + this.orderNumData.waitPayNum + ')' : ''}`, value: 'UNPAID'},
+        {title: `已付款${this.orderNumData.waitDeliveryNum ? '(' + this.orderNumData.waitDeliveryNum + ')' : ''}`, value: 'PAID'},
+        {title: `待发货${this.orderNumData.waitShipNum ? '(' + this.orderNumData.waitShipNum + ')' : ''}`, value: 'UNDELIVERED'},
+        {title: `部分发货${this.orderNumData.partsDeliveredNumNum ? '(' + this.orderNumData.partsDeliveredNumNum + ')' : ''}`, value: 'PARTS_DELIVERED'},
+        {title: `待收货${this.orderNumData.deliveredNum ? '(' + this.orderNumData.deliveredNum + ')' : ''}`, value: 'DELIVERED'},
+        {title: `待核验${this.orderNumData.waitCheckNum ? '(' + this.orderNumData.waitCheckNum + ')' : ''}`, value: 'TAKE'},
+        {title: `待自提${this.orderNumData.waitSelfPickNum ? '(' + this.orderNumData.waitSelfPickNum + ')' : ''}`, value: 'STAY_PICKED_UP'},
+        {title: `已完成${this.orderNumData.finishNum ? '(' + this.orderNumData.finishNum + ')' : ''}`, value: 'COMPLETED'},
+        {title: `已关闭${this.orderNumData.closeNum ? '(' + this.orderNumData.closeNum + ')' : ''}`, value: 'CANCELLED'},
+      ];
+    }
   },
   methods: {
     // 初始化数据
     init() {
       this.getDataList();
+      this.getOrderNumData(); // 新增：获取订单数量统计
     },
     // 分页 改变页码
     changePage(v) {
@@ -411,6 +429,7 @@ export default {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getDataList();
+      this.getOrderNumData(); // 新增：搜索时也更新数量统计
     },
     // 起止时间从新赋值
     selectDateRange(v) {
@@ -485,6 +504,17 @@ export default {
       this.currentStatus = name;
      
       this.getDataList();
+    },
+    getOrderNumData() {
+      // 创建一个不包含orderStatus字段的搜索参数
+      const { orderStatus, ...searchParams } = this.searchForm;
+      API_Order.getOrderNum(searchParams).then((res) => {
+        if (res.success) {
+          this.orderNumData = res.result;
+        }
+      }).catch((err) => {
+        console.error('获取订单数量统计失败:', err);
+      });
     },
   },
   mounted() {

@@ -168,3 +168,8 @@ export const partDelivery = (orderSn,params) => {
 export const getTracesList = (sn) => {
   return getRequest(`/order/order/getTracesList/${sn}`);
 }
+
+// 获取订单数量统计
+export const getOrderNum = (params) => {
+  return getRequest(`/order/order/orderNum`, params);
+}

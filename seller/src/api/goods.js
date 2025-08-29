@@ -147,6 +147,10 @@ export const getGoodsSkuData = params => {
 export const getGoodsListData = params => {
   return getRequest("/goods/goods/list", params);
 };
+// 获取商品数量
+export const getGoodsNumerData = (params) => {
+    return getRequest('/goods/goods/goodsNumber', params)
+}
 //  获取待审核商品分页列表
 export const getAuthGoodsListData = params => {
   return getRequest("/goods/auth/list", params);
