@@ -90,7 +90,7 @@
     <Card>
       <div class="order-tab">
         <Tabs v-model="currentStatus" @on-click="serviceStatusClick">
-          <TabPane v-for="(item,index) in serviceStatus" :key="index" :label="item.title" :name="item.value">
+          <TabPane v-for="item in serviceStatusWithCount" :key="item.value" :label="item.title" :name="item.value">
           </TabPane>
         </Tabs>
       </div>
@@ -316,13 +316,15 @@ export default {
         {title: '卖家终止售后', value: 'SELLER_TERMINATION'},
         {title: '买家取消售后', value: 'BUYER_CANCEL'}
       ],
-      currentStatus: ''
+      currentStatus: '',
+       afterSaleNumData: {} // 售后数量统计数据
     };
   },
   methods: {
     // 初始化数据
     init() {
       this.getDataList();
+      this.getAfterSaleNumData();
     },
     // 分页 改变页码
     changePage(v) {
@@ -340,6 +342,7 @@ export default {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getDataList();
+      this.getAfterSaleNumData();
     },
     // 开始结束时间分别赋值
     selectDateRange(v) {
@@ -358,9 +361,19 @@ export default {
           this.total = res.result.total;
         }
       });
+      // 获取售后状态数量
       this.total = this.data.length;
       this.loading = false;
     },
+    // 获取售后数量统计
+     getAfterSaleNumData() {
+      const { serviceStatus, ...searchParams } = this.searchForm;
+       API_Order.getAfterSaleNumVO(searchParams).then((res) => {
+         if (res.success) {
+           this.afterSaleNumData = res.result;
+         }
+       });
+     },
     // 跳转售后详情
     detail(v) {
       let sn = v.sn;
@@ -379,12 +392,30 @@ export default {
         this.searchForm.serviceStatus = item;
       }
       this.getDataList();
+      this.getAfterSaleNumData();
     },
   },
   mounted() {
     this.init();
   },
-};
+  computed: {
+     // 带数量的售后状态
+     serviceStatusWithCount() {
+       return [
+         {title: '全部', value: ''},
+         {title: `申请售后${this.afterSaleNumData.applyNum ? '(' + this.afterSaleNumData.applyNum + ')' : ''}`, value: 'APPLY'},
+         {title: `通过售后${this.afterSaleNumData.passNum ? '(' + this.afterSaleNumData.passNum + ')' : ''}`, value: 'PASS'},
+         {title: `拒绝售后${this.afterSaleNumData.refuseNum ? '(' + this.afterSaleNumData.refuseNum + ')' : ''}`, value: 'REFUSE'},
+         {title: `待收货${this.afterSaleNumData.buyerReturnNum ? '(' + this.afterSaleNumData.buyerReturnNum + ')' : ''}`, value: 'BUYER_RETURN'},
+         {title: `确认收货${this.afterSaleNumData.sellerConfirmNum ? '(' + this.afterSaleNumData.sellerConfirmNum + ')' : ''}`, value: 'SELLER_CONFIRM'},
+         {title: `完成售后${this.afterSaleNumData.completeNum ? '(' + this.afterSaleNumData.completeNum + ')' : ''}`, value: 'COMPLETE'},
+         {title: `卖家终止售后${this.afterSaleNumData.sellerTerminationNum ? '(' + this.afterSaleNumData.sellerTerminationNum + ')' : ''}`, value: 'SELLER_TERMINATION'},
+         {title: `买家取消售后${this.afterSaleNumData.buyerCancelNum ? '(' + this.afterSaleNumData.buyerCancelNum + ')' : ''}`, value: 'BUYER_CANCEL'},
+         {title: `等待平台退款${this.afterSaleNumData.waitRefundNum ? '(' + this.afterSaleNumData.waitRefundNum + ')' : ''}`, value: 'WAIT_REFUND'}
+       ];
+     }
+   }
+  }
 </script>
 <style lang="scss" scoped>
 // Tab组件样式

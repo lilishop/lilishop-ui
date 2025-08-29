@@ -165,3 +165,8 @@ export const storeAddress = (sn) => {
 export const getOrderNum = (params) => {
   return getRequest(`/order/order/orderNum`, params)
 }
+
+// 获取售后数量统计
+export const getAfterSaleNumVO = (params) => {
+  return getRequest(`/order/afterSale/afterSaleNumVO`, params)
+}

@@ -50,8 +50,7 @@
     <Card>
       <div class="order-tab">
         <Tabs v-model="currentStatus" @on-click="serviceStatusClick">
-          <TabPane v-for="(item,index) in serviceStatus" :key="index" :label="item.title" :name="item.value">
-          </TabPane>
+          <TabPane v-for="item in serviceStatusWithCount" :key="item.value" :label="item.title" :name="item.value"/>
         </Tabs>
       </div>
       <Table
@@ -114,7 +113,7 @@
           order: "desc", // 默认排序方式
           startDate: "", // 起始时间
           endDate: "", // 终止时间
-          serviceType:"RETURN_GOODS",
+          // serviceType:"RETURN_GOODS",
           orderSn:"",
           memberName:"",
           goodsName:""
@@ -232,15 +231,18 @@
           {title: '确认收货', value: 'SELLER_CONFIRM'},
           {title: '完成售后', value: 'COMPLETE'},
           {title: '卖家终止售后', value: 'SELLER_TERMINATION'},
-          {title: '买家取消售后', value: 'BUYER_CANCEL'}
+          {title: '买家取消售后', value: 'BUYER_CANCEL'},
+          {title: '等待平台退款', value: 'WAIT_REFUND'}
         ],
-        currentStatus: ''
+        currentStatus: '',
+        afterSaleNumData: {} // 售后数量统计数据
       };
     },
     methods: {
       // 初始化数据
       init() {
         this.getDataList();
+        this.getAfterSaleNumData();
       },
       // 改变页码
       changePage(v) {
@@ -257,6 +259,7 @@
         this.searchForm.pageNumber = 1;
         this.searchForm.pageSize = 20;
         this.getDataList();
+        this.getAfterSaleNumData();
       },
       // 重置
       handleReset() {
@@ -268,7 +271,7 @@
           order: "desc", // 默认排序方式
           startDate: "", // 起始时间
           endDate: "", // 终止时间
-          serviceType:"RETURN_GOODS",
+          // serviceType:"RETURN_GOODS",
           orderSn:"",
           memberName:"",
           goodsName:""
@@ -276,6 +279,7 @@
         this.searchForm = defaultForm;
         this.selectDate = ''
         this.getDataList();
+        this.getAfterSaleNumData();
       },
       // 范围时间选择格式化
       selectDateRange(v) {
@@ -297,6 +301,15 @@
         this.total = this.data.length;
         this.loading = false;
       },
+      // 获取售后数量统计
+      getAfterSaleNumData() {
+        const { serviceStatus, ...searchParams } = this.searchForm;
+        API_Order.getAfterSaleNumVO(searchParams).then((res) => {
+          if (res.success) {
+            this.afterSaleNumData = res.result;
+          }
+        });
+      },
       // 退货订单详情
       detail(v) {
         let sn = v.sn;
@@ -316,10 +329,28 @@
           this.searchForm.serviceStatus = item;
         }
         this.getDataList();
+        this.getAfterSaleNumData();
       },
     },
     mounted () {
       this.init();
+    },
+    computed: {
+      // 带数量的售后状态
+      serviceStatusWithCount() {
+        return [
+          {title: '全部', value: ''},
+          {title: `申请售后${this.afterSaleNumData.applyNum ? '(' + this.afterSaleNumData.applyNum + ')' : ''}`, value: 'APPLY'},
+          {title: `通过售后${this.afterSaleNumData.passNum ? '(' + this.afterSaleNumData.passNum + ')' : ''}`, value: 'PASS'},
+          {title: `拒绝售后${this.afterSaleNumData.refuseNum ? '(' + this.afterSaleNumData.refuseNum + ')' : ''}`, value: 'REFUSE'},
+          {title: `待收货${this.afterSaleNumData.buyerReturnNum ? '(' + this.afterSaleNumData.buyerReturnNum + ')' : ''}`, value: 'BUYER_RETURN'},
+          {title: `确认收货${this.afterSaleNumData.sellerConfirmNum ? '(' + this.afterSaleNumData.sellerConfirmNum + ')' : ''}`, value: 'SELLER_CONFIRM'},
+          {title: `完成售后${this.afterSaleNumData.completeNum ? '(' + this.afterSaleNumData.completeNum + ')' : ''}`, value: 'COMPLETE'},
+          {title: `卖家终止售后${this.afterSaleNumData.sellerTerminationNum ? '(' + this.afterSaleNumData.sellerTerminationNum + ')' : ''}`, value: 'SELLER_TERMINATION'},
+          {title: `买家取消售后${this.afterSaleNumData.buyerCancelNum ? '(' + this.afterSaleNumData.buyerCancelNum + ')' : ''}`, value: 'BUYER_CANCEL'},
+          {title: `等待平台退款${this.afterSaleNumData.waitRefundNum ? '(' + this.afterSaleNumData.waitRefundNum + ')' : ''}`, value: 'WAIT_REFUND'}
+        ];
+      }
     },
     // 页面缓存处理，从该页面离开时，修改KeepAlive为false，保证进入该页面是刷新
     beforeRouteLeave(to, from, next) {
