@@ -78,10 +78,10 @@
       <Row class="operation padding-row">
         <Button @click="addGoods" type="info">添加商品</Button>
         <Button @click="openImportGoods" >导入商品</Button>
-        <Button @click="openImportGoods" >批量上架</Button>
-        <Button @click="openImportGoods" >批量下架</Button>
-        <Button @click="openImportGoods" >批量删除</Button>
-        <Button @click="openImportGoods" >批量设置物流模板</Button>
+        <Button @click="uppers" >批量上架</Button>
+        <Button @click="lowers" >批量下架</Button>
+        <Button @click="deleteAll" >批量删除</Button>
+        <Button @click="batchShipTemplate" >批量设置物流模板</Button>
       </Row>
 
       <Table
@@ -143,9 +143,7 @@
             border
           ></Table>
         </TabPane>
-        <TabPane label="批量规格更新" name="stockAll">
-          <Input type="number" v-model="stockAllUpdate" placeholder="统一规格修改" />
-        </TabPane>
+        
       </Tabs>
 
       <div slot="footer">
@@ -226,6 +224,8 @@ export default {
       logisticsTemplate: [], // 物流列表
       updateStockModalVisible: false, // 更新库存模态框显隐
       stockAllUpdate: undefined, // 更新库存数量
+      selectList: [], // 选中的商品列表
+      selectCount: 0, // 选中的商品数量
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -381,6 +381,28 @@ export default {
                   },
                   "上架"
                 ),
+                h("span", {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.copyGoods(params.row);
+                      },
+                    },
+                  },
+                  "复制"
+                ),
               ]);
             } else {
               return h("div", [
@@ -443,6 +465,28 @@ export default {
                     },
                   },
                   "下架"
+                ),
+                h("span", {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.copyGoods(params.row);
+                      },
+                    },
+                  },
+                  "复制"
                 ),
               ]);
             }
@@ -459,131 +503,22 @@ export default {
           },
         },
         {
-          title: "审核状态",
-          key: "authFlag",
-          width: 130,
-          render: (h, params) => {
-            if (params.row.authFlag == "TOBEAUDITED") {
-              return h("Tag", { props: { color: "blue" } }, "待审核");
-            } else if (params.row.authFlag == "PASS") {
-              return h("Tag", { props: { color: "green" } }, "通过");
-            } else if (params.row.authFlag == "REFUSE") {
-              return h("Tag", { props: { color: "red" } }, "审核拒绝");
-            }
-          },
-        },
-        {
           title: "操作",
           key: "action",
           align: "center",
-          fixed: "right",
           width: 200,
           render: (h, params) => {
-            if (params.row.marketEnable == "DOWN") {
-              return h("div", [
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.editGoods(params.row);
-                      },
-                    },
-                  },
-                  "编辑"
-                ),
-                h("span", {
-                  style: {
-                    margin: "0 8px",
-                    color: "#dcdee2"
-                  }
-                }, "|"),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.upper(params.row);
-                      },
-                    },
-                  },
-                  "上架"
-                ),
-              ]);
-            } else {
-              return h("div", [
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.editGoods(params.row);
-                      },
-                    },
-                  },
-                  "编辑"
-                ),
-                h("span", {
-                  style: {
-                    margin: "0 8px",
-                    color: "#dcdee2"
-                  }
-                }, "|"),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.getStockDetail(params.row.id);
-                      },
-                    },
-                  },
-                  "库存"
-                ),
-                h("span", {
-                  style: {
-                    margin: "0 8px",
-                    color: "#dcdee2"
-                  }
-                }, "|"),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.lower(params.row);
-                      },
-                    },
-                  },
-                  "下架"
-                ),
-              ]);
-            }
+            let vm = this;
+            return h("InputNumber", {
+              props: {
+                value: params.row.quantity,
+              },
+              on: {
+                "on-change": (event) => {
+                  vm.stockList[params.index].quantity = event;
+                },
+              },
+            });
           },
         },
       ],
@@ -618,6 +553,10 @@ export default {
     // 编辑商品
     editGoods(v) {
       this.$router.push({ name: "goods-operation-edit", query: { id: v.id } });
+    },
+    // 复制商品
+    copyGoods(v) {
+      this.$router.push({ name: "goods-operation", query: { copyId: v.id } });
     },
 
     //批量操作
@@ -852,7 +791,7 @@ export default {
           let params = {
             goodsId: ids.toString(),
           };
-          // 批量上架
+          // 批量下架
           lowGoods(params).then((res) => {
             this.$Modal.remove();
             if (res.success) {

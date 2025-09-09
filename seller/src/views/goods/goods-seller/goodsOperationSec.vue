@@ -1053,6 +1053,11 @@ export default {
       this.baseInfoForm = { ...this.baseInfoForm, ...response.result };
       this.baseInfoForm.release = 1; //即使是被放入仓库，修改的时候也会显示会立即发布
       this.categoryId = response.result.categoryPath.split(",")[2];
+      
+      // 如果是复制商品，需要清除ID，确保提交时作为新商品
+      if (this.$route.query.copyId) {
+        this.baseInfoForm.id = "";
+      }
 
       if (
         response.result.goodsGalleryList &&
@@ -1837,7 +1842,11 @@ export default {
             }
             this.baseInfoForm.wholesaleList = this.wholesaleData;
           }
-          this.baseInfoForm.goodsId = this.goodsId;
+          
+          // 判断是否是复制商品
+          if (!this.$route.query.copyId) {
+            this.baseInfoForm.goodsId = this.goodsId;
+          }
           let submit = JSON.parse(JSON.stringify(this.baseInfoForm));
           if (
             submit.goodsGalleryFiles &&
@@ -1918,7 +1927,8 @@ export default {
           submit.recommend
             ? (submit.recommend = true)
             : (submit.recommend = false);
-          if (this.goodsId) {
+          // 判断是否是复制商品
+          if (this.goodsId && !this.$route.query.copyId) {
             API_GOODS.editGoods(this.goodsId, submit).then((res) => {
               if (res.success) {
                 this.submitLoading = false;
@@ -1926,6 +1936,9 @@ export default {
               } else {
                 this.submitLoading = false;
               }
+            }).catch(() => {
+              this.submitLoading = false;
+              this.$Message.error("保存失败，请重试");
             });
           } else {
             API_GOODS.createGoods(submit).then((res) => {
@@ -2018,6 +2031,9 @@ export default {
     if (this.$route.query.id || this.$route.query.draftId) {
       // 编辑商品、模板
       this.GET_GoodData(this.$route.query.id, this.$route.query.draftId);
+    } else if (this.$route.query.copyId) {
+      // 复制商品
+      this.GET_GoodData(this.$route.query.copyId);
     } else {
       // 新增商品、模板
       if (this.firstData.tempId) {
