@@ -1314,7 +1314,7 @@ export default {
       return res;
     },
     // 编辑规格值
-    skuValueChange(val, index, item, $index) {
+    skuValueChange(val, index, item) {
       if (this.skuTableData.find((i) => i[val.name] === val.value)) {
         this.$Message.error("已存在相同规格值！");
 
@@ -1330,7 +1330,8 @@ export default {
       if (this.zz(0, val.value) > 20) {
         this.$Message.error("规格值最多十个字符长度！");
         // val.value = val.value.toString().slice(0, 4);
-        this.skuInfo[$index].spec_values[index].value = this.countCharacters(val.value, 10);
+        // 使用传入的 item 引用，避免对未定义的 $index 访问
+        item.spec_values[index].value = this.countCharacters(val.value, 10);
         this.$forceUpdate();// 调用该方法会触发组件的重新渲染
         // return;
       }
@@ -1360,12 +1361,15 @@ export default {
         });
       }
     },
-    checkSkuVal(val) {
+    checkSkuVal(val, groupIndex, spec) {
       if (val.value === "") {
         this.$Message.error("规格值不能为空！");
-        this.skuInfo[skuIndex] && (this.skuInfo[skuIndex].spec_values = this.skuInfo[skuIndex].spec_values.filter((i) => i.value !== ""));
+        // 移除当前规格组中的空值
+        if (this.skuInfo[groupIndex]) {
+          this.skuInfo[groupIndex].spec_values = this.skuInfo[groupIndex].spec_values.filter((i) => i.value !== "");
+        }
         this.skuTableData = this.skuTableData.filter(
-          (e) => e[spec.name] !== this.lastEditSkuValue
+          (e) => e[spec && spec.name] !== this.lastEditSkuValue
         );
       }
 
