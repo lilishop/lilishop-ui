@@ -11,7 +11,7 @@
             <FormItem label="商品分类">
               <span class="goods-category-name">{{
                 this.baseInfoForm.categoryName[0]
-              }}</span>
+                }}</span>
               <span> &gt; {{ this.baseInfoForm.categoryName[1] }}</span>
               <span> &gt; {{ this.baseInfoForm.categoryName[2] }}</span>
             </FormItem>
@@ -66,7 +66,7 @@
                           @on-blur="checkWholesaleNum(index)">
                         <span slot="append">{{
                           baseInfoForm.goodsUnit || ""
-                        }}</span>
+                          }}</span>
                         </Input>
                       </div>
                     </template>
@@ -233,8 +233,8 @@
                                     :on-exceeded-size="handleMaxSize" :on-format-error="handleFormatError"
                                     :on-progress="() => { $Spin.show(); }" :on-success="(res, file) => {
                                       handleSuccess(res, file, val.images)
-                                    }" :show-upload-list="false"
-                                    style="width: 180px;height: 140px;margin-right: 10px" type="drag">
+                                    }" :show-upload-list="false" style="width: 180px;height: 140px;margin-right: 10px"
+                                    type="drag">
                                     <div>
                                       <Icon size="136" type="ios-camera"></Icon>
                                     </div>
@@ -291,7 +291,7 @@
                             @on-change="updateSkuTable(row, 'quantity')">
                           <span slot="append">{{
                             baseInfoForm.goodsUnit || ""
-                          }}</span>
+                            }}</span>
                           </Input>
                         </template>
                         <template slot="cost" slot-scope="{ row }">
@@ -408,16 +408,17 @@
                   <p slot="content">
                     <FormItem v-for="(paramsItem, paramsIndex) in paramsGroup.params" :key="paramsIndex"
                       :label="`${paramsItem.paramName}：`"
-                      :rules="{ required: paramsItem.required, message: '参数不能为空', trigger: 'blur'}">
-                      <Select v-model="paramsItem.paramValue" clearable placeholder="请选择" style="width: 200px" @on-change="
-                        selectParams(
-                          paramsGroup,
-                          groupIndex,
-                          paramsItem,
-                          paramsIndex,
-                          paramsItem.paramValue
-                        )
-                        ">
+                      :rules="{ required: paramsItem.required, message: '参数不能为空', trigger: 'blur' }">
+                      <Select v-model="paramsItem.paramValue" clearable placeholder="请选择" style="width: 200px"
+                        @on-change="
+                          selectParams(
+                            paramsGroup,
+                            groupIndex,
+                            paramsItem,
+                            paramsIndex,
+                            paramsItem.paramValue
+                          )
+                          ">
                         <Option v-for="option in paramsItem.options.split(',')" :key="option" :label="option"
                           :value="option">
                         </Option>
@@ -1053,7 +1054,7 @@ export default {
       this.baseInfoForm = { ...this.baseInfoForm, ...response.result };
       this.baseInfoForm.release = 1; //即使是被放入仓库，修改的时候也会显示会立即发布
       this.categoryId = response.result.categoryPath.split(",")[2];
-      
+
       // 如果是复制商品，需要清除ID，确保提交时作为新商品
       if (this.$route.query.copyId) {
         this.baseInfoForm.id = "";
@@ -1315,6 +1316,7 @@ export default {
     },
     // 编辑规格值
     skuValueChange(val, index, item) {
+
       if (this.skuTableData.find((i) => i[val.name] === val.value)) {
         this.$Message.error("已存在相同规格值！");
 
@@ -1324,9 +1326,6 @@ export default {
       }
 
       this.containsSameSkuValue = false;
-      if (val.value === '') {
-        return;
-      }
       if (this.zz(0, val.value) > 20) {
         this.$Message.error("规格值最多十个字符长度！");
         // val.value = val.value.toString().slice(0, 4);
@@ -1363,7 +1362,6 @@ export default {
     },
     checkSkuVal(val, groupIndex, spec) {
       if (val.value === "") {
-        this.$Message.error("规格值不能为空！");
         // 移除当前规格组中的空值
         if (this.skuInfo[groupIndex]) {
           this.skuInfo[groupIndex].spec_values = this.skuInfo[groupIndex].spec_values.filter((i) => i.value !== "");
@@ -1821,17 +1819,17 @@ export default {
       let checkFlag = false;
       this.goodsParams.forEach(group => {
         group.params.forEach(param => {
-          if(param.required){
+          if (param.required) {
             const check = this.baseInfoForm.goodsParamsDTOList.some(paramsGroup =>
               paramsGroup.goodsParamsItemDTOList.some(paramsItem => paramsItem.paramId === param.id)
             );
-            if(!check){
+            if (!check) {
               checkFlag = !check;
             }
           }
         })
       })
-      if(checkFlag){
+      if (checkFlag) {
         this.$Message.error("存在未填写的参数项");
         return;
       }
@@ -1846,7 +1844,7 @@ export default {
             }
             this.baseInfoForm.wholesaleList = this.wholesaleData;
           }
-          
+
           // 判断是否是复制商品
           if (!this.$route.query.copyId) {
             this.baseInfoForm.goodsId = this.goodsId;
