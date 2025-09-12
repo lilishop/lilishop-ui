@@ -192,7 +192,7 @@
 
                           </div>
                           <div class="sku-val">
-                            <div style="margin-bottom: 10px;font-weight: bold;display: flex">规格值</div>
+                            <div style="margin-bottom: 10px;font-weight: bold;display: flex">规格值 (输入完成后，鼠标点击其他地方后生效)</div>
                             <Form :model="item" class="flex">
                               <!--规格值文本列表-->
                               <FormItem v-for="(val, index) in item.spec_values" :key="index"
