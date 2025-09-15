@@ -1368,12 +1368,12 @@ export default {
         // 内联错误提示，不使用弹窗
         this.$set(val, '_error', '规格值不能为空！');
         // 移除当前规格组中的空值
-        // if (this.skuInfo[groupIndex]) {
-        //   this.skuInfo[groupIndex].spec_values = this.skuInfo[groupIndex].spec_values.filter((i) => i.value !== "");
-        // }
-        // this.skuTableData = this.skuTableData.filter(///
-        //   (e) => e[spec && spec.name] !== this.lastEditSkuValue
-        // );
+        if (this.skuInfo[groupIndex]) {
+          this.skuInfo[groupIndex].spec_values = this.skuInfo[groupIndex].spec_values.filter((i) => i.value !== "");
+        }
+        this.skuTableData = this.skuTableData.filter(
+          (e) => e[spec && spec.name] !== this.lastEditSkuValue
+        );
       } else if (val._error) {
         // 清除错误
         this.$delete(val, '_error');
