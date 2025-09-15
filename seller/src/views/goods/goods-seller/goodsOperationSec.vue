@@ -1320,6 +1320,9 @@ export default {
     // 编辑规格值
     skuValueChange(val, index, item) {
 
+      if (val.value === '') {
+        return;
+      }
       if (this.skuTableData.find((i) => i[val.name] === val.value)) {
         this.$Message.error("已存在相同规格值！");
 
@@ -1367,16 +1370,15 @@ export default {
       if (val.value === "") {
         // 内联错误提示，不使用弹窗
         this.$set(val, '_error', '规格值不能为空！');
-        // 移除当前规格组中的空值
-        if (this.skuInfo[groupIndex]) {
-          this.skuInfo[groupIndex].spec_values = this.skuInfo[groupIndex].spec_values.filter((i) => i.value !== "");
-        }
-        this.skuTableData = this.skuTableData.filter(
-          (e) => e[spec && spec.name] !== this.lastEditSkuValue
-        );
       } else if (val._error) {
         // 清除错误
         this.$delete(val, '_error');
+        if (this.skuInfo[groupIndex]) {
+          this.skuInfo[groupIndex].spec_values = this.skuInfo[groupIndex].spec_values.filter((i) => i.value !== "");
+        }
+        // this.skuTableData = this.skuTableData.filter(
+        //   (e) => e[spec && spec.name] !== this.lastEditSkuValue
+        // );
       }
 
       // 判断是否存在重复规格值
