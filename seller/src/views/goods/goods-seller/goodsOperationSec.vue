@@ -206,11 +206,14 @@
                                     @on-blur="checkSkuVal(val, $index, item)"
                                     @on-change="skuValueChange(val, index, item)">
                                   </AutoComplete>
-                                  <a style="margin-left: 6px" v-if="val.value && val.value !== ''">
+                                  <a style="margin-left: 6px" >
                                     <Icon size="15" type="md-trash" @click="handleCloseSkuValue(val, index, item)">
                                     </Icon>
                                   </a>
                                 </div>
+
+                                  <!-- 内联错误提示 -->
+                                  <div v-if="val._error" class="sku-inline-error">{{ val._error }}</div>
                                 <div v-if="$index === 0 && openImage" style="margin-top: 10px">
                                   <vuedraggable :animation="200" :list="val.images">
                                     <div v-for="(img, __index) in val.images" :key="__index" class="sku-upload-list"
@@ -1362,13 +1365,18 @@ export default {
     },
     checkSkuVal(val, groupIndex, spec) {
       if (val.value === "") {
+        // 内联错误提示，不使用弹窗
+        this.$set(val, '_error', '规格值不能为空！');
         // 移除当前规格组中的空值
-        if (this.skuInfo[groupIndex]) {
-          this.skuInfo[groupIndex].spec_values = this.skuInfo[groupIndex].spec_values.filter((i) => i.value !== "");
-        }
-        this.skuTableData = this.skuTableData.filter(
-          (e) => e[spec && spec.name] !== this.lastEditSkuValue
-        );
+        // if (this.skuInfo[groupIndex]) {
+        //   this.skuInfo[groupIndex].spec_values = this.skuInfo[groupIndex].spec_values.filter((i) => i.value !== "");
+        // }
+        // this.skuTableData = this.skuTableData.filter(///
+        //   (e) => e[spec && spec.name] !== this.lastEditSkuValue
+        // );
+      } else if (val._error) {
+        // 清除错误
+        this.$delete(val, '_error');
       }
 
       // 判断是否存在重复规格值
@@ -2068,6 +2076,15 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+/* 规格值内联错误提示样式 */
+.sku-inline-error {
+  font-size: 12px;
+  line-height: 16px;
+  color: #ed4014; /* 与 iview 错误色系一致 */
+  margin-left: 4px;
+  margin-top: 4px;
+  white-space: nowrap;
+}
 @import "./addGoods.scss";
 </style>
 
@@ -2080,7 +2097,7 @@ export default {
   text-align: left;
 }
 
-#dplayer {}
+
 
 /* .tox-notifications-container{
   display: none !important;
