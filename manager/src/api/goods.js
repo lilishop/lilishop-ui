@@ -128,7 +128,11 @@ export const getAuthGoodsListData = (params) => {
 }
 //  审核商品
 export const authGoods = (params) => {
-    return putRequest(`/goods/goods/auth`, params)
+  return putRequest(`/goods/goods/auth`, params,{
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
 }
 
 //查询分类绑定参数信息
