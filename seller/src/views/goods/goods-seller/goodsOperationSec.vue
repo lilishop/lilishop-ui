@@ -1370,6 +1370,17 @@ export default {
       if (val.value === "") {
         // 内联错误提示，不使用弹窗
         this.$set(val, '_error', '规格值不能为空！');
+
+        // 如果规格项和规格名称存在，从表格数据中移除包含该空规格值的行
+        if (spec && spec.name && this.skuInfo[groupIndex]) {
+          // 从表格数据中过滤掉包含该空规格值的行
+          this.skuTableData = this.skuTableData.filter(item => {
+            return item[spec.name] !== val.value && item[spec.name] !== "";
+          });
+
+          // 重新渲染表格数据
+          this.renderTableData(this.skuTableData);
+        }
       } else if (val._error) {
         // 清除错误
         this.$delete(val, '_error');
@@ -1507,46 +1518,36 @@ export default {
           itemValue.images = this.baseInfoForm.goodsGalleryFiles
         }
         this.$set(item.spec_values, item.spec_values.length, itemValue);
-        if (item.spec_values.length > 1) {
-          let index = beforeLength;
-          let filterSkuInfo = this.skuInfo.filter((i) => i.name !== item.name);
-          let totalLength = 1;
-          filterSkuInfo.forEach((skuInfo) => {
-            totalLength *= skuInfo.spec_values.length;
+
+        // 生成新的规格组合
+        const newCombinations = this.generateSkuCombinations(this.skuInfo);
+
+        // 保留原有组合的属性值
+        this.skuTableData = newCombinations.map(combination => {
+          // 查找匹配的原有组合
+          const existingCombination = this.skuTableData.find(item => {
+            // 检查所有规格项是否匹配
+            return this.skuInfo.every(info => {
+              return item[info.name] === combination[info.name];
+            });
           });
-          if ($index === 0) {
-            index = 1;
-            for (let i = 0; i < totalLength; i++) {
-              let find = cloneObj(this.skuTableData[index - 1]);
-              find[item.name] = this.newSkuValues[$index];
-              find.id = "";
-              find.price && (find.price = "");
-              find.sn && (find.sn = "");
-              // find.cost && (find.cost = "");
-              find.quantity && (find.quantity = "");
-              // find.alertQuantity && (find.alertQuantity = "");
-              find.weight && (find.weight = "");
 
-              this.skuTableData.splice(this.skuTableData.length, 0, find);
-              index++;
-            }
+          if (existingCombination) {
+            // 保留原有组合的属性值
+            return {
+              ...combination,
+              id: existingCombination.id || "",
+              sn: existingCombination.sn || "",
+              quantity: existingCombination.quantity || "",
+              cost: existingCombination.cost || "",
+              price: existingCombination.price || "",
+              weight: existingCombination.weight || ""
+            };
           } else {
-            for (let i = 0; i < totalLength; i++) {
-              let find = cloneObj(this.skuTableData[index - 1]);
-              find[item.name] = this.newSkuValues[$index];
-              find.id = "";
-              find.price && (find.price = "");
-              find.sn && (find.sn = "");
-              // find.cost && (find.cost = "");
-              find.quantity && (find.quantity = "");
-              // find.alertQuantity && (find.alertQuantity = "");
-              find.weight && (find.weight = "");
-
-              this.skuTableData.splice(index, 0, find);
-              index += $index === 0 ? beforeLength : beforeLength + 1;
-            }
+            // 新组合使用默认值
+            return combination;
           }
-        }
+        });
         this.baseInfoForm.regeneratorSkuFlag = true;
         this.newSkuValues[$index] = "";
 
@@ -1565,14 +1566,44 @@ export default {
         this.$Message.error("至少保留一个规格值！");
         return;
       }
+
+      // 从规格项中移除规格值
       this.skuInfo.forEach((i) => {
         if (i.name === spec.name) {
           i.spec_values.splice(index, 1);
         }
       });
-      this.skuTableData = this.skuTableData.filter(
-        (e) => e[spec.name] !== item.value
-      );
+
+      // 生成新的规格组合
+      const newCombinations = this.generateSkuCombinations(this.skuInfo);
+
+      // 保留原有组合的属性值
+      this.skuTableData = newCombinations.map(combination => {
+        // 查找匹配的原有组合
+        const existingCombination = this.skuTableData.find(item => {
+          // 检查所有规格项是否匹配
+          return this.skuInfo.every(info => {
+            return item[info.name] === combination[info.name];
+          });
+        });
+
+        if (existingCombination) {
+          // 保留原有组合的属性值
+          return {
+            ...combination,
+            id: existingCombination.id || "",
+            sn: existingCombination.sn || "",
+            quantity: existingCombination.quantity || "",
+            cost: existingCombination.cost || "",
+            price: existingCombination.price || "",
+            weight: existingCombination.weight || ""
+          };
+        } else {
+          // 新组合使用默认值
+          return combination;
+        }
+      });
+
       this.baseInfoForm.regeneratorSkuFlag = true;
     },
 
@@ -1640,17 +1671,37 @@ export default {
       );
 
       this.skuTableColumn = pushData;
-      //克隆所有渲染的数据
-      if (this.skuInfo.length > 0) {
-        //存放最终结果
-        let result = [];
-        this.skuIndex = 0;
 
-        this.skuTableData = this.specIterator(
-          result,
-          this.skuInfo,
-          this.skuTableData
-        );
+      // 生成规格组合
+      if (this.skuInfo.length > 0) {
+        const newCombinations = this.generateSkuCombinations(this.skuInfo);
+
+        // 保留原有组合的属性值
+        this.skuTableData = newCombinations.map(combination => {
+          // 查找匹配的原有组合
+          const existingCombination = skus.find(item => {
+            // 检查所有规格项是否匹配
+            return this.skuInfo.every(info => {
+              return item[info.name] === combination[info.name];
+            });
+          });
+
+          if (existingCombination) {
+            // 保留原有组合的属性值
+            return {
+              ...combination,
+              id: existingCombination.id || "",
+              sn: existingCombination.sn || "",
+              quantity: existingCombination.quantity || "",
+              cost: existingCombination.cost || "",
+              price: existingCombination.price || "",
+              weight: existingCombination.weight || ""
+            };
+          } else {
+            // 新组合使用默认值
+            return combination;
+          }
+        });
       }
     },
 
@@ -1689,7 +1740,7 @@ export default {
               obj.weight = skus[index].weight;
             }
             table.push(obj);
-          } else {
+          } else if (specItem.value !== "") {
             table.push({
               [spec[0].name]: specItem.value,
               images: this.baseInfoForm.goodsGalleryFiles || [],
@@ -1703,6 +1754,63 @@ export default {
       }
       return table;
     },
+    /**
+     * 生成所有可能的规格组合
+     * @param {Array} skuInfo 规格信息
+     * @returns {Array} 所有可能的规格组合
+     */
+    generateSkuCombinations(skuInfo) {
+      if (!skuInfo || skuInfo.length === 0) {
+        return [];
+      }
+
+      // 提取每个规格项的规格值
+      const specValues = skuInfo.map(item => {
+        return item.spec_values
+          .filter(val => val.value !== "") // 过滤掉空值
+          .map(val => ({
+            name: item.name,
+            value: val.value,
+            images: val.images || this.baseInfoForm.goodsGalleryFiles || []
+          }));
+      });
+
+      // 如果有规格项没有有效的规格值，返回空数组
+      if (specValues.some(values => values.length === 0)) {
+        return [];
+      }
+
+      // 递归生成所有组合
+      const generateCombinations = (index, current) => {
+        if (index === specValues.length) {
+          // 基本属性
+          const combination = {
+            images: this.baseInfoForm.goodsGalleryFiles || []
+          };
+
+          // 添加规格属性
+          current.forEach(spec => {
+            combination[spec.name] = spec.value;
+
+            // 如果是第一个规格项且有图片，使用其图片
+            if (spec.name === skuInfo[0].name) {
+              combination.images = spec.images;
+            }
+          });
+
+          return [combination];
+        }
+
+        const results = [];
+        for (const value of specValues[index]) {
+          results.push(...generateCombinations(index + 1, [...current, value]));
+        }
+        return results;
+      };
+
+      return generateCombinations(0, []);
+    },
+
     /** 根据分类id获取系统设置规格信息*/
     Get_SkuInfoByCategory(categoryId) {
       if (categoryId) {
