@@ -78,25 +78,25 @@
 
       <!-- 批量操作按钮 -->
       <div class="batch-operations" style="margin: 10px 0;">
-        <Button 
-          type="success" 
+        <Button
+          type="success"
           :disabled="selectedRows.length === 0"
           @click="batchUpper"
           style="margin-right: 10px;"
         >
           批量上架
         </Button>
-        <Button 
-          type="warning" 
+        <Button
+          type="warning"
           :disabled="selectedRows.length === 0"
           @click="batchLower"
           style="margin-right: 10px;"
         >
           批量下架
         </Button>
-        <Button 
+        <Button
           v-if="currentStatus === 'TOBEAUDITED'"
-          type="primary" 
+          type="primary"
           :disabled="selectedRows.length === 0"
           @click="batchAudit"
         >
@@ -123,7 +123,7 @@
             />
           </div>
         </template>
-        
+
         <!-- 商品栏目格式化 -->
         <template slot="goodsSlot" slot-scope="{ row }">
           <div style="margin: 5px 0px; padding: 10px 0px;">
@@ -179,9 +179,9 @@
             <Radio :label="2">审核拒绝</Radio>
           </RadioGroup>
         </FormItem>
-        <FormItem label="审核备注" prop="reason" v-if="goodsAuditForm.auth_flag === 2">
+        <!-- <FormItem label="审核备注" prop="reason" v-if="goodsAuditForm.auth_flag === 2">
           <Input v-model="goodsAuditForm.reason" type="textarea" :rows="3" placeholder="请输入拒绝原因" />
-        </FormItem>
+        </FormItem> -->
       </Form>
       <div slot="footer">
         <Button type="text" @click="auditModalVisible = false">取消</Button>
@@ -622,7 +622,7 @@ export default {
         query: { id: id },
       })
     },
-    
+
     // 商品状态筛选
     goodsStatusClick(item) {
       // 根据选择的状态设置搜索条件
@@ -634,13 +634,13 @@ export default {
         this.searchForm.goodsStatus = item;
       }
       this.currentStatus = item;
-      
+
       // tab切换时清除选中内容
       this.selectedRows = [];
       if (this.$refs.table) {
         this.$refs.table.selectAll(false);
       }
-      
+
       this.getDataList();
     },
     examine(v, authFlag) {
@@ -651,13 +651,18 @@ export default {
         examine = "拒绝";
         this.goodsAuditForm.authFlag = "REFUSE";
       }
+
       this.$Modal.confirm({
         title: "确认审核",
         content: "您确认要审核" + examine + " " + v.goodsName + " ?",
         loading: true,
         onOk: () => {
           this.goodsAuditForm.goodsIds=v.id;
-          authGoods(this.goodsAuditForm).then((res) => {
+          let formData = new FormData();
+          formData.append('goodsIds', v.id);
+          formData.append('authFlag', this.goodsAuditForm.authFlag);
+
+          authGoods(formData).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("审核成功");
@@ -668,7 +673,7 @@ export default {
         },
       });
     },
-    
+
     // 打开审核弹框
     openAuditModal(goods) {
       this.currentAuditGoods = goods;
@@ -676,7 +681,7 @@ export default {
       this.goodsAuditForm.reason = '';
       this.auditModalVisible = true;
     },
-    
+
     // 确认审核（二次确认）
     confirmAudit() {
       const auditText = this.goodsAuditForm.auth_flag === 1 ? '通过' : '拒绝';
@@ -689,16 +694,13 @@ export default {
         },
       });
     },
-    
+
     // 提交审核
     submitAudit() {
-      const auditForm = {
-        authFlag: this.goodsAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE',
-        reason: this.goodsAuditForm.reason || '',
-        goodsId:this.currentAuditGoods.id
-      };
-      
-      authGoods(auditForm).then((res) => {
+      let formData = new FormData();
+      formData.append('goodsIds', this.currentAuditGoods.id);
+      formData.append('authFlag', this.goodsAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE');
+      authGoods(formData).then((res) => {
         this.$Modal.remove();
         if (res.success) {
           this.$Message.success('审核成功');
@@ -708,27 +710,27 @@ export default {
         }
       });
     },
-    
+
     // 选择框事件处理
     onSelect(selection, row) {
       // 单行选择时触发
     },
-    
+
     onSelectAll(selection) {
       // 全选时触发
     },
-    
+
     onSelectionChange(selection) {
       this.selectedRows = selection;
     },
-    
+
     // 批量上架
     batchUpper() {
       if (this.selectedRows.length === 0) {
         this.$Message.warning('请先选择要上架的商品');
         return;
       }
-      
+
       const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
       this.$Modal.confirm({
         title: '确认批量上架',
@@ -740,7 +742,7 @@ export default {
           const params = {
             goodsId: goodsIds // 传递ID数组
           };
-          
+
           upGoods(params).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -756,14 +758,14 @@ export default {
         }
       });
     },
-    
+
     // 批量下架
     batchLower() {
       if (this.selectedRows.length === 0) {
         this.$Message.warning('请先选择要下架的商品');
         return;
       }
-      
+
       const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
       this.$Modal.confirm({
         title: '确认批量下架',
@@ -776,7 +778,7 @@ export default {
             goodsId: goodsIds, // 传递ID数组
             reason: '批量下架操作' // 可以设置默认下架原因
           };
-          
+
           lowGoods(params).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -792,14 +794,14 @@ export default {
         }
       });
     },
-    
+
     // 批量审核
     batchAudit() {
       if (this.selectedRows.length === 0) {
         this.$Message.warning('请先选择要审核的商品');
         return;
       }
-      
+
       // 重置批量审核表单
       this.batchAuditForm = {
         auth_flag: 1,
@@ -807,23 +809,23 @@ export default {
       };
       this.batchAuditModalVisible = true;
     },
-    
+
     // 提交批量审核
     submitBatchAudit() {
       if (this.selectedRows.length === 0) {
         this.$Message.warning('请先选择要审核的商品');
         return;
       }
-      
+
       // 如果是拒绝审核，必须填写原因
       if (this.batchAuditForm.auth_flag === 2 && !this.batchAuditForm.reason.trim()) {
         this.$Message.warning('审核拒绝时必须填写拒绝原因');
         return;
       }
-      
+
       const actionText = this.batchAuditForm.auth_flag === 1 ? '通过' : '拒绝';
       const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
-      
+
       this.$Modal.confirm({
         title: `确认批量审核${actionText}`,
         content: `您确认要${actionText}以下商品的审核吗？\n${goodsNames}`,
@@ -831,14 +833,14 @@ export default {
         onOk: () => {
           // 提取所有选中商品的ID
           const goodsIds = this.selectedRows.map(item => item.id);
-          const params = {
-            goodsId: goodsIds, // 传递ID数组
-            authFlag: this.batchAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE',
-            reason: this.batchAuditForm.reason || ''
-          };
-          
+
+          let formData = new FormData();
+          formData.append('goodsId', goodsIds);
+          formData.append('authFlag', this.batchAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE');
+          formData.append('reason', this.batchAuditForm.reason || '');
+
           // 修正：直接调用authGoods，不传递'batch'参数
-          authGoods(params).then((res) => {
+          authGoods(formData).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success(`批量审核${actionText}成功`);

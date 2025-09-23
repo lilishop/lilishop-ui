@@ -276,7 +276,11 @@ export default {
         content: "您确认要审核" + examine + " " + v.goodsName + " ?",
         loading: true,
         onOk: () => {
-          authGoods(v.id, this.goodsAuditForm).then((res) => {
+          let formData = new FormData();
+          formData.append('goodsIds', v.id);
+          formData.append('authFlag', this.goodsAuditForm.authFlag);
+
+          authGoods(formData).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("审核成功");
