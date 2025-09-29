@@ -4,6 +4,9 @@
   "private": true,
   "description": "lilishop-ui",
   "author": "lili-platform",
+  "engines": {
+    "node": ">=14"
+  },
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -15,10 +18,10 @@
     "axios": "^0.21.1",
     "dplayer": "^1.27.1",
     "js-cookie": "^2.2.1",
-    "node-sass": "^4.14.1",
+    "sass": "^1.63.6",
     "price-color": "^1.0.2",
     "s": "^1.0.0",
-    "sass-loader": "^8.0.2",
+    "sass-loader": "^10.4.1",
     "sockjs-client": "^1.4.0",
     "swiper": "^6.3.5",
     "uuid": "^8.3.2",
@@ -51,6 +54,8 @@
     "vue-template-compiler": "^2.6.10"
   },
   "resolutions": {
-    "minimatch": "^3.1.2"
+    "minimatch": "^3.1.2",
+    "node-sass": "npm:sass@^1.63.6",
+    "@achrinza/node-ipc": "9.2.2"
   }
 }

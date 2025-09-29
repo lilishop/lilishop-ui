@@ -254,7 +254,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "./addGoods.scss";
-/deep/ .ivu-scroll-container {
+::v-deep .ivu-scroll-container {
   height: 450px !important;
 }
 </style>

@@ -11,7 +11,7 @@ h4 {
   margin: 20px 0;
   font-size: 18px;
 }
-/deep/ .ivu-icon {
+::v-deep .ivu-icon {
   margin-right: 10px;
 }
 .rate-box {
@@ -82,7 +82,7 @@ h4 {
   font-weight: bold;
   width: 286px;
   display: flex;
-  /deep/ span {
+  ::v-deep span {
     color: $theme_color;
     font-size: 18px;
   }

@@ -225,7 +225,7 @@
 <style lang="scss" scoped>
   // 建议引入通用样式 可删除下面样式代码
    @import "@/styles/table-common.scss";
-   /deep/ .ivu-col{
+   ::v-deep .ivu-col{
      min-height: 100vh;
    }
 </style>

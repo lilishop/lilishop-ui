@@ -353,7 +353,7 @@ export default {
   .search {
     width: 460px;
     margin: 0 auto;
-    /deep/ .ivu-input.ivu-input-large {
+    ::v-deep .ivu-input.ivu-input-large {
       border: 2px solid $theme_color;
       font-size: 12px;
       height: 34px;
@@ -361,7 +361,7 @@ export default {
         box-shadow: none;
       }
     }
-    /deep/ .ivu-input-group-append {
+    ::v-deep .ivu-input-group-append {
       border: 1px solid $theme_color;
       border-left: none;
       height: 30px;

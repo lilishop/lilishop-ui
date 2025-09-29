@@ -85,7 +85,7 @@
     flex-wrap: wrap !important;
   }
 
-  /deep/ .sku-item-content-val {
+  ::v-deep .sku-item-content-val {
     margin-right: 20px;
   }
 }
@@ -215,7 +215,7 @@ div.base-info-item {
   }
 
   /*teatarea*/
-  /deep/ .el-textarea {
+  ::v-deep .el-textarea {
     width: 150%;
   }
 
@@ -226,7 +226,7 @@ div.base-info-item {
 
 /*折叠面板*/
 .el-collapse-item {
-  /deep/ .el-collapse-item__header {
+  ::v-deep .el-collapse-item__header {
     text-align: left;
     background-color: #f8f8f8;
     padding: 0 10px;
@@ -240,7 +240,7 @@ div.base-info-item {
     width: 25%;
   }
 
-  /deep/ .el-form-item__content {
+  ::v-deep .el-form-item__content {
     margin-left: 120px;
     text-align: left;
   }
@@ -251,7 +251,7 @@ div.base-info-item {
     color: #999;
   }
 
-  /deep/ .el-collapse-item__content {
+  ::v-deep .el-collapse-item__content {
     padding: 10px 0;
     text-align: left;
   }
@@ -296,11 +296,11 @@ div.base-info-item {
 
 /*图片上传组件第一张图设置封面*/
 .goods-images {
-  /deep/ li.el-upload-list__item:first-child {
+  ::v-deep li.el-upload-list__item:first-child {
     position: relative;
   }
 
-  /deep/ li.el-upload-list__item:first-child:after {
+  ::v-deep li.el-upload-list__item:first-child:after {
     content: "封";
     color: #fff;
     font-weight: bold;
@@ -394,7 +394,7 @@ div.base-info-item {
 }
 
 .required {
-  /deep/ .ivu-form-item-label::before {
+  ::v-deep .ivu-form-item-label::before {
     content: "*";
     display: inline-block;
     margin-right: 4px;
@@ -483,7 +483,7 @@ div.base-info-item {
   justify-content: center;
   align-items: center;
 
-  /deep/ img {
+  ::v-deep img {
     margin-right: 20px;
     width: 100px;
     margin-left: 10px;
@@ -491,7 +491,7 @@ div.base-info-item {
 
 
 
-  /deep/ p {
+  ::v-deep p {
     color: #999;
     font-size: 14px;
     margin-top: 10px;
