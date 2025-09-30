@@ -19,6 +19,14 @@
 [![star](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop/stargazers)
 &nbsp;&nbsp;![github](https://img.shields.io/github/stars/hongyehuicheng/lilishop.svg?style=social&logo=#181717)
 
+## 2025-9-30日更新
+兼容更高的node版本，比如20、18、16，不再局限于原本的14版本
+
+没有二开过的项目直接拉最新代码即可，二开项目可以跟着提交记录一起同步修改 install出现问题检查的话删除 "package-lock.json" 重新install
+
+****
+
+
 ## 如何在本地环境运行lilishop-ui部署视频
 https://www.bilibili.com/video/BV1B28EeJEnP/
 
@@ -29,7 +37,10 @@ https://www.bilibili.com/video/BV1WD87eoE9F/
 ## 开发项目
 
 #### 安装Node.js
+
 保证`node`版本`14`,推荐 14.17.0
+
+2025-9-30日拉的代码之后不限制于node版本
 
 可以使用 `yarn` 或者 `npm` 进行安装
 
