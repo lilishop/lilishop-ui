@@ -66,7 +66,7 @@
    
    # 对于 Node.js v18 或 v20
    NODE_OPTIONS=--openssl-legacy-provider npm run dev
-   或者 npm run dev:18
+   或者 npm run dev
    ```
 
 4. **生产构建命令**:
@@ -76,7 +76,7 @@
    
    # 对于 Node.js v18 或 v20
    NODE_OPTIONS=--openssl-legacy-provider npm run build
-   或者 npm run dev:18
+   或者 npm run dev
    ```
 
 ## 未来考虑

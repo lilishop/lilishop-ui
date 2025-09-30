@@ -161,7 +161,7 @@ export default {
   display: flex;
 }
 
-/deep/ .ivu-input {
+::v-deep .ivu-input {
   width: 300px !important;
   margin: 0 10px;
 }

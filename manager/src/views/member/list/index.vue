@@ -6,7 +6,7 @@
           <Form-item label="会员ID" prop="id">
             <Input type="text" v-model="searchForm.id" placeholder="请输入会员ID" clearable style="width: 240px" />
           </Form-item>
-          
+
           <Form-item label="会员名称" prop="username">
             <Input type="text" v-model="searchForm.username" placeholder="请输入会员名称" clearable style="width: 240px" />
           </Form-item>
@@ -546,10 +546,10 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-/deep/ .ivu-table-wrapper {
+::v-deep .ivu-table-wrapper {
   width: 100%;
 }
-/deep/ .ivu-card {
+::v-deep .ivu-card {
   width: 100%;
 }
 .face {

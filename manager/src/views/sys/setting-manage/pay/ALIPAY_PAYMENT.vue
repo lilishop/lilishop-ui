@@ -90,12 +90,12 @@ export default {
   display: flex;
 }
 .w200 {
-  /deep/ .ivu-input {
+  ::v-deep .ivu-input {
     width: 250px !important;
     margin: 0 10px;
   }
 }
-/deep/ .ivu-input {
+::v-deep .ivu-input {
   width: 450px !important;
   margin: 0 10px;
 }

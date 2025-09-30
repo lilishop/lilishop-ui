@@ -84,7 +84,7 @@
   text-align: center;
   font-weight: bold;
   line-height: 2;
-  /deep/ img {
+  ::v-deep img {
     margin: 0 auto;
   }
 }

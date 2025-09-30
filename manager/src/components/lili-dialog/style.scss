@@ -42,12 +42,12 @@
   }
 }
 
-/deep/ .ivu-scroll-container {
+::v-deep .ivu-scroll-container {
   width: 100% !important;
   height: 400px !important;
 }
 
-/deep/ .ivu-scroll-content {
+::v-deep .ivu-scroll-content {
   /* */
   display: flex;
   flex-wrap: wrap;
@@ -81,7 +81,7 @@
   align-items: center;
   margin: 10px;
 
-  /deep/ img {
+  ::v-deep img {
     width: 60px;
     height: 60px;
     text-align: center;

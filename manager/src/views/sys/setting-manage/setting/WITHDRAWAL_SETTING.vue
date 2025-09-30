@@ -98,7 +98,7 @@ export default {
 
 <style lang="scss" scoped>
 @import "./style.scss";
-/deep/ .ivu-form-item-content{
+::v-deep .ivu-form-item-content{
   align-items: center;
   padding-bottom: 5px;
 }

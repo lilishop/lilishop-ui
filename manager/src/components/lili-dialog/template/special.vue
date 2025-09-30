@@ -137,7 +137,7 @@ img {
   overflow: auto;
   width: 100%;
 }
-/deep/ .ivu-table-wrapper {
+::v-deep .ivu-table-wrapper {
   width: 100%;
 }
 .list {
