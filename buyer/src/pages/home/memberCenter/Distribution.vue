@@ -584,7 +584,7 @@ export default {
   margin-left: 25px;
   margin-top: 5px
 }
-/deep/ .ivu-alert-message {
+::v-deep .ivu-alert-message {
   p {
     margin: 4px 0;
   }

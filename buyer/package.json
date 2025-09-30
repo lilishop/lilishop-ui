@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "vue-cli-service serve",
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "serve": "NODE_OPTIONS=--openssl-legacy-provider vue-cli-service serve",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider vue-cli-service build",
+    "dev": "NODE_OPTIONS=--openssl-legacy-provider vue-cli-service serve"
+  },
+  "engines": {
+    "node": ">=14"
   },
   "dependencies": {
     "@amap/amap-jsapi-loader": "0.0.7",
@@ -15,11 +18,10 @@
     "less": "^2.7.0",
     "less-loader": "^5.0.0",
     "mv-count-down": "^0.1.15",
-    "node-sass": "^4.14.1",
-    "postcss-loader": "^7.0.1",
+    "sass": "^1.63.6",
+    "postcss-loader": "^4.3.0",
     "psl": "^1.8.0",
     "qs": "^6.9.4",
-    "sass-loader": "^7.3.1",
     "uuid": "^8.3.2",
     "view-design": "^4.3.2",
     "vue": "^2.6.11",
@@ -32,7 +34,7 @@
   "devDependencies": {
     "@vue/cli-service": "~4.5.0",
     "compression-webpack-plugin": "^5.0.0",
-    "sass-loader": "^7.3.1",
+    "sass-loader": "^10.4.1",
     "uglifyjs-webpack-plugin": "^2.2.0",
     "vue-template-compiler": "^2.6.11"
   },
@@ -42,6 +44,8 @@
     "not dead"
   ],
   "resolutions": {
-    "minimatch": "^3.1.2"
+    "minimatch": "^3.1.2",
+    "node-sass": "npm:sass@^1.63.6",
+    "@achrinza/node-ipc": "9.2.2"
   }
 }

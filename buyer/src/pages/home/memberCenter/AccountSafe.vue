@@ -54,7 +54,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  /deep/ .ivu-col-span-2, .ivu-col-span-4 {
+  ::v-deep .ivu-col-span-2, .ivu-col-span-4 {
     text-align: center;
     color: $theme_color;
   }
@@ -71,7 +71,7 @@ export default {
     border-bottom: 1px solid $border_color;
     padding: 16px 0;
 
-    /deep/ .ivu-col {
+    ::v-deep .ivu-col {
       padding: 8px 0;
 
     }

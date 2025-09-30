@@ -326,7 +326,7 @@ export default {
 .item-intro-img {
   width: 100%;
   min-height: 300px;
-  /deep/ img{
+  ::v-deep img{
     margin:0 auto;
   }
 }
@@ -472,7 +472,7 @@ export default {
 .ivu-tabs-ink-bar {
   background-color: $theme_color !important;
 }
-/deep/.ivu-tabs-bar{
+::v-deep.ivu-tabs-bar{
   border: none;
 }
 .item-tabs > .ivu-tabs > .ivu-tabs-bar .ivu-tabs-tab{

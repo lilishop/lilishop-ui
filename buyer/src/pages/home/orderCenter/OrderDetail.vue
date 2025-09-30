@@ -604,15 +604,15 @@ table {
 .layui-layer-wrap > .div-express-log {
   max-height: 300px;
 }
-/deep/ .layui-layer-wrap > .div-express-log::-webkit-scrollbar{
+::v-deep .layui-layer-wrap > .div-express-log::-webkit-scrollbar{
   width: 1px;
   height: 5px;
 }
-/deep/ .layui-layer-wrap > .div-express-log::-webkit-scrollbar-thumb{
+::v-deep .layui-layer-wrap > .div-express-log::-webkit-scrollbar-thumb{
   border-radius: 1em;
   background-color: rgba(50,50,50,.3);
 }
-/deep/ .layui-layer-wrap > .div-express-log::-webkit-scrollbar-track{
+::v-deep .layui-layer-wrap > .div-express-log::-webkit-scrollbar-track{
   border-radius: 1em;
   background-color: rgba(50,50,50,.1);
 }

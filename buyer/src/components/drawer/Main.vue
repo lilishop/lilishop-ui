@@ -147,11 +147,11 @@ export default {
     justify-content: center;
     flex-direction: column;
   }
-  /deep/.popup .ivu-drawer-body{
+  ::v-deep.popup .ivu-drawer-body{
     padding: 0!important;
     background-color: #eee;
   }
-  /deep/.popup .ivu-drawer-wrap{
+  ::v-deep.popup .ivu-drawer-wrap{
     z-index: 3001;
   }
 </style>
