@@ -19,10 +19,19 @@
 [![star](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop/stargazers)
 &nbsp;&nbsp;![github](https://img.shields.io/github/stars/hongyehuicheng/lilishop.svg?style=social&logo=#181717)
 
-## 2025-9-30日更新
-兼容更高的node版本，比如20、18、16，不再局限于原本的14版本
+## 2025-10-10日更新
+兼容更高的node版本16
+
+这里我用的是node版本 v16.20.2
+
+npm版本 8.19.4
+
+
+
 
 没有二开过的项目直接拉最新代码即可，二开项目可以跟着提交记录一起同步修改 install出现问题检查的话删除 "package-lock.json" 重新install
+
+Q&A 为什么不升级更高的node版本？ :因为高node版本 OpenSSL 改动 导致旧版本 Webpack 插件会失效 试了好几次如果兼容的话 需要升级Webpack5以及其他的插件 升级内容较多 为了更稳定的还是尽量少动为主
 
 ****
 
@@ -40,7 +49,7 @@ https://www.bilibili.com/video/BV1WD87eoE9F/
 
 保证`node`版本`14`,推荐 14.17.0
 
-2025-9-30日拉的代码之后不限制于node版本
+2025-10-10日拉的代码之后不限制于node版本为14，这里只是以14版本为例子
 
 可以使用 `yarn` 或者 `npm` 进行安装
 
