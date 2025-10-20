@@ -54,9 +54,14 @@
           </Input>
         </FormItem>
       </div>
-      <div class="label-btns">
+     <div class="label-btns">
         <Button type="primary" @click="submit('formValidate')">保存</Button>
-        <Button type="primary" style="margin-left: 100px" @click="createIndex()">重新生成所有商品索引</Button>
+        <div class="es-buttons">
+          <Button type="success" @click="createIndex()">重新生成所有商品索引</Button>
+          <Button type="info" @click="deleteDownGoods()">删除ES中下架的商品</Button>
+          <Button type="warning" @click="generateCache()">生成所有商品的缓存</Button>
+          <Button type="error" @click="deleteNotExistIndex()">删除不存在的索引</Button>
+        </div>
         <div class="progress-item" v-if="showProgress">
           <i-progress :percent="progressVal"></i-progress>
         </div>
@@ -65,7 +70,7 @@
   </div>
 </template>
 <script>
-import { setSetting, createIndex, getProgress } from "@/api/index";
+import { setSetting, createIndex, getProgress, deleteGoodsDown, generateGoodsCache, delSkuIndex } from "@/api/index";
 import { handleSubmit } from "./validate";
 export default {
   props: ["res", "type"],
@@ -137,6 +142,36 @@ export default {
               }
             });
           }, 1000);
+        }
+      });
+    },
+    //删除ES中下架的商品
+    deleteDownGoods() {
+      deleteGoodsDown().then((res) => {
+        if (res.success) {
+          this.$Message.success("删除成功!");
+        } else {
+          this.$Message.error("删除失败!");
+        }
+      });
+    },
+    //生成所有商品的缓存
+    generateCache() {
+      generateGoodsCache().then((res) => {
+        if (res.success) {
+          this.$Message.success("生成成功!");
+        } else {
+          this.$Message.error("生成失败!");
+        }
+      });
+    },
+    //删除不存在的索引
+    deleteNotExistIndex() {
+      delSkuIndex().then((res) => {
+        if (res.success) {
+          this.$Message.success("删除成功!");
+        } else {
+          this.$Message.error("删除失败!");
         }
       });
     },

@@ -445,6 +445,21 @@ export const getProgress = () => {
   return getRequest(`/other/elasticsearch/progress`);
 };
 
+// 删除ES中下架的商品
+export const deleteGoodsDown = () => {
+  return getRequest(`/other/elasticsearch/deleteGoodsDown`);
+};
+
+// 删除不存在的索引
+export const delSkuIndex = () => {
+  return getRequest(`/other/elasticsearch/delSkuIndex`);
+};
+
+// 生成所有商品的缓存
+export const generateGoodsCache = () => {
+  return getRequest(`/other/elasticsearch/cache`);
+};
+
 // 分页查询自定义分词
 export const getCustomWordsPage = (params) => {
   return getRequest(`/other/customWords/page`, params);
