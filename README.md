@@ -22,6 +22,24 @@
 
 npm版本 8.19.4
 
+使用yarn install 然后执行 yarn dev
+
+yarn 安装/启动
+```
+// 如果没有 yarn 安装yarn
+npm install yarn -g
+
+// 切换源
+yarn config set registry https://registry.npmmirror.com
+
+// 以buyer项目为例
+cd buyer
+
+yarn install
+
+yarn dev
+```
+
 
 
 
@@ -65,17 +83,6 @@ yarn install
 yarn dev
 ```
 
-#### npm 安装/启动
-```
-npm config set registry https://registry.npmmirror.com
-
-// 以buyer项目为例
-cd buyer
-
-npm run install
-
-npm run dev
-```
 
 #### FAQ
 
