@@ -192,6 +192,7 @@
           show-sizer
           show-elevator
           :total="total"
+          :page-size-opts="[20, 50, 100]"
         />
       </div>
     </Card>
@@ -487,7 +488,7 @@ export default {
       // 退单订单
       refundParams: {
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         searchType: "LAST_SEVEN",
         storeId: "",
         year: "",

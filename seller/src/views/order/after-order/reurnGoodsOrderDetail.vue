@@ -24,6 +24,10 @@
                 <dd>{{ afterSaleInfo.sn }}</dd>
               </dl>
               <dl>
+                <dt>售后状态</dt>
+                <dd>{{ filterStatus(afterSaleInfo.serviceStatus) }}</dd>
+              </dl>
+              <dl>
                 <dt>退货退款原因</dt>
                 <dd>{{ afterSaleInfo.reason }}</dd>
               </dl>
@@ -390,17 +394,17 @@ export default {
       },
       // 售后状态
       afterSaleStatus: [
-        { status: "APPLY", label: "申请售后" },
-        { status: "PASS", label: "申请通过" },
-        { status: "REFUSE", label: "申请拒绝" },
+        { status: "APPLY", label: "申请中" },
+        { status: "PASS", label: "通过售后" },
+        { status: "REFUSE", label: "拒绝售后" },
         { status: "BUYER_RETURN", label: "买家退货，待卖家收货" },
         { status: "SELLER_RE_DELIVERY", label: "商家换货" },
         { status: "SELLER_CONFIRM", label: "卖家确认收货" },
         { status: "SELLER_TERMINATION", label: "卖家终止售后" },
         { status: "BUYER_CONFIRM", label: "买家确认收货" },
         { status: "BUYER_CANCEL", label: "买家取消售后" },
-        { status: "WAIT_REFUND", label: "等待平台退款" },
-        { status: "COMPLETE", label: "已完成" },
+        { status: "WAIT_REFUND", label: "待平台退款" },
+        { status: "COMPLETE", label: "完成售后" },
       ],
     };
   },

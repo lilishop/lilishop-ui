@@ -106,7 +106,7 @@
         <template slot="goodsSlot" slot-scope="{ row }">
           <div style="margin-top: 5px; height: 80px; display: flex">
             <div style="">
-              <img :src="row.goodsImage" style="height: 60px; margin-top: 3px" />
+              <img :src="row.goodsImage" style="width: 60px; height: 60px; margin-top: 3px; object-fit: cover; border-radius: 4px;" />
             </div>
 
             <div style="margin-left: 13px">

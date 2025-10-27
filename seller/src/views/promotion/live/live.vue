@@ -28,7 +28,7 @@
       </Tabs>
       <Table :columns="liveColumns" :data="liveData"></Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePageNumber" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePageNumber" @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]"
           size="small" show-total show-elevator show-sizer></Page>
       </Row>
 
@@ -45,7 +45,7 @@ export default {
       total: 0,
       // 查询的form
       searchForm: {
-        pageSize: 10,
+        pageSize: 20,
         pageNumber: 1,
         status: "NEW",
       },
