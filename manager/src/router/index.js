@@ -27,8 +27,6 @@ router.beforeEach((to, from, next) => {
   ViewUI.LoadingBar.start();
   Util.title(to.meta.title);
 
-  next();
-
   const name = to.name;
 
   if (!Cookies.get('userInfoManager') && name !== 'login') {

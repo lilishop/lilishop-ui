@@ -36,6 +36,7 @@
     "compression-webpack-plugin": "^5.0.0",
     "eslint": "^8.28.0",
     "eslint-plugin-vue": "^6.2.2",
+    "file-loader": "^6.2.0",
     "less": "^3.0.4",
     "less-loader": "^5.0.0",
     "postcss": "^8.4.20",
