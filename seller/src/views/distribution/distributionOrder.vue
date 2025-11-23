@@ -63,16 +63,14 @@ export default {
           width: 100,
           sortable: false,
           render: (h, params) => {
-            if (params.row.distributionOrderStatus == "COMPLETE_CASH") {
-              return h("Tag", { props: { color: "green" } },"提现完成");
-            } else if (params.row.distributionOrderStatus == "WAIT_BILL") {
-              return h("Tag", { props: { color: "blue" } } ,"待结算");
-            } else if (params.row.distributionOrderStatus == "WAIT_CASH") {
-              return h("Tag", { props: { color: "orange" } }, "待提现");
-            } else if (params.row.distributionOrderStatus == "CANCEL") {
-              return h("Tag", { props: { color: "red" } }, "订单已取消");
-            }else if (params.row.distributionOrderStatus == "REFUND") {
-              return h("Tag", { props: { color: "magenta" } }, "退款");
+            if (params.row.distributionOrderStatus == "NO_COMPLETED") {
+              return h("Tag", { props: { color: "orange" } }, "未完成");
+            } else if (params.row.distributionOrderStatus == "COMPLETE") {
+              return h("Tag", { props: { color: "green" } }, "完成");
+            } else if (params.row.distributionOrderStatus == "REFUND") {
+              return h("Tag", { props: { color: "red" } }, "退款");
+            } else {
+              return h("Tag", { props: { color: "orange" } }, "未完成");
             }
 
           },

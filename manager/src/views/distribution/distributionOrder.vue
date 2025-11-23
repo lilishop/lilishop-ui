@@ -210,7 +210,7 @@
       },
       filterStatus (status) { // 过滤订单状态
         const arr = [
-          {status: 'WAIT_BILL', title: '待结算'},
+          {status: 'NO_COMPLETED', title: '未完成'},
           {status: 'COMPLETE', title: '完成'},
           {status: 'REFUND', title: '退款'},
         ]
@@ -219,21 +219,20 @@
             return arr[i].title;
           }
         }
+        return '未完成'; // 默认返回未完成
       },
       filterStatusColor (status) { // 状态tag标签颜色
         const arr = [
-          {status: 'WAIT_BILL', color: 'blue'},
-          {status: 'WAIT_CASH', color: 'orange'},
-          {status: 'COMPLETE_CASH', color: 'green'},
-          {status: 'CANCEL', color: 'red'},
-          {status: 'NO_COMPLETED', color: 'red'},
-          {status: 'REFUND', color: 'magenta'},
+          {status: 'NO_COMPLETED', color: 'orange'},
+          {status: 'COMPLETE', color: 'green'},
+          {status: 'REFUND', color: 'red'},
         ]
         for (let i=0;i<arr.length;i++) {
           if (arr[i].status === status) {
             return arr[i].color;
           }
         }
+        return 'orange'; // 默认返回橙色
       }
     },
     mounted() {
