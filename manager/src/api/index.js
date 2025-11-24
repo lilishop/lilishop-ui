@@ -111,7 +111,7 @@ export const changeMobile = (params) => {
 };
 // 获取用户数据 多条件
 export const getUserListData = (params) => {
-  return getRequest("/passport/user", params);
+  return getRequest("/passport/user/getByCondition", params);
 };
 // 通过用户名搜索
 export const searchUserByName = (username, params) => {

@@ -110,16 +110,14 @@ export default {
           fixed: "right",
           width: 120,
           render: (h, params) => {
-            return h("div", [
+            return h("div", { class: "ops" }, [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -215,5 +213,15 @@ export default {
 <style lang="scss" scoped>
 ::v-deep .ivu-col {
   min-height: 100vh;
+}
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
 }
 </style>

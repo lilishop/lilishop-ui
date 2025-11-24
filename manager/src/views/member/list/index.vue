@@ -248,15 +248,13 @@ export default {
               },
               [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      size: "small",
-                      type: params.row.___selected ? "primary" : "default",
-                    },
                     style: {
-                      marginRight: "5px",
-                      display: this.selectedMember ? "block" : "none",
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
+                      display: this.selectedMember ? "inline-block" : "none",
                     },
                     on: {
                       click: () => {
@@ -266,17 +264,25 @@ export default {
                   },
                   params.row.___selected ? "已选择" : "选择"
                 ),
-
                 h(
-                  "Button",
+                  "span",
                   {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
                     style: {
-                      marginRight: "5px",
-                      display: this.selectedMember ? "none" : "block",
+                      margin: "0 8px",
+                      color: "#dcdee2",
+                      display: this.selectedMember ? "inline-block" : "none",
+                    },
+                  },
+                  "|"
+                ),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
+                      display: this.selectedMember ? "none" : "inline-block",
                     },
                     on: {
                       click: () => {
@@ -287,16 +293,24 @@ export default {
                   "查看"
                 ),
                 h(
-                  "Button",
+                  "span",
                   {
-                    props: {
-                      type: "info",
-                      size: "small",
-                      ghost: true,
-                    },
                     style: {
-                      marginRight: "5px",
-                      display: this.selectedMember ? "none" : "block",
+                      margin: "0 8px",
+                      color: "#dcdee2",
+                      display: this.selectedMember ? "none" : "inline-block",
+                    },
+                  },
+                  "|"
+                ),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
+                      display: this.selectedMember ? "none" : "inline-block",
                     },
                     on: {
                       click: () => {
@@ -307,15 +321,24 @@ export default {
                   "编辑"
                 ),
                 h(
-                  "Button",
+                  "span",
                   {
-                    props: {
-                      size: "small",
-                      type: "error",
-                    },
                     style: {
-                      marginRight: "5px",
-                      display: this.selectedMember ? "none" : "block",
+                      margin: "0 8px",
+                      color: "#dcdee2",
+                      display: this.selectedMember ? "none" : "inline-block",
+                    },
+                  },
+                  "|"
+                ),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
+                      display: this.selectedMember ? "none" : "inline-block",
                     },
                     on: {
                       click: () => {

@@ -35,14 +35,11 @@
           />
         </template>
         <template slot-scope="{ index }" slot="action">
-          <Button
-            type="error"
-            size="small"
-            ghost
+          <a
             v-if="status === 'manager'"
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
             @click="delGoods(index)"
-            >删除</Button
-          >
+          >删除</a>
         </template>
       </Table>
       <Row type="flex" justify="end" class="page operation">

@@ -58,48 +58,15 @@
       <Table :loading="loading" border :columns="columns" :data="data" ref="table">
         <template slot-scope="{ row }" slot="action">
           <div class="row">
-            <Button
-              type="default"
-              size="small"
-              v-if="row.promotionStatus == 'NEW'"
-              @click="edit(row)"
-              >编辑</Button
-            >
-            <Button
-              type="info"
-              v-if="row.promotionStatus == 'NEW'"
-              size="small"
-              @click="manage(row, 'manager')"
-              >管理</Button
-            >
-            <Button
-              type="info"
-              v-if="row.promotionStatus !== 'NEW' && row.promotionStatus !== 'CLOSE'"
-              size="small"
-              @click="manage(row, 'view')"
-              >查看</Button
-            >
-            <!--<Button-->
-              <!--type="error"-->
-              <!--size="small"-->
-              <!--v-if="row.promotionStatus != 'START'"-->
-              <!--@click="remove(row)"-->
-              <!--&gt;删除</Button-->
-            <!--&gt;-->
-            <Button
-              type="success"
-              v-if="row.promotionStatus == 'CLOSE'"
-              size="small"
-              @click="open(row)"
-              >开启</Button
-            >
-            <Button
-              type="warning"
-              v-if="row.promotionStatus == 'START'"
-              size="small"
-              @click="close(row)"
-              >关闭</Button
-            >
+            <a v-if="row.promotionStatus == 'NEW'" @click="edit(row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">编辑</a>
+            <span v-if="row.promotionStatus == 'NEW'" style="margin:0 8px;color:#dcdee2">|</span>
+            <a v-if="row.promotionStatus == 'NEW'" @click="manage(row, 'manager')" style="color:#2d8cf0;cursor:pointer;text-decoration:none">管理</a>
+            <span v-if="row.promotionStatus !== 'NEW' && row.promotionStatus !== 'CLOSE'" style="margin:0 8px;color:#dcdee2">|</span>
+            <a v-if="row.promotionStatus !== 'NEW' && row.promotionStatus !== 'CLOSE'" @click="manage(row, 'view')" style="color:#2d8cf0;cursor:pointer;text-decoration:none">查看</a>
+            <span v-if="row.promotionStatus == 'CLOSE'" style="margin:0 8px;color:#dcdee2">|</span>
+            <a v-if="row.promotionStatus == 'CLOSE'" @click="open(row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">开启</a>
+            <span v-if="row.promotionStatus == 'START'" style="margin:0 8px;color:#dcdee2">|</span>
+            <a v-if="row.promotionStatus == 'START'" @click="close(row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">关闭</a>
           </div>
         </template>
       </Table>

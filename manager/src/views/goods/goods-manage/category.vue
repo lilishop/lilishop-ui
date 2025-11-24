@@ -15,54 +15,31 @@
       >
         <template slot="action" slot-scope="scope">
           <Dropdown v-show="scope.row.level == 2" trigger="click">
-            <Button size="small">
+            <a class="ops-link">
               绑定
               <Icon type="ios-arrow-down"></Icon>
-            </Button>
+            </a>
             <DropdownMenu slot="list">
-              <DropdownItem @click.native="brandOperation(scope.row)"
-                >编辑绑定品牌</DropdownItem
-              >
-              <DropdownItem @click.native="specOperation(scope.row)"
-                >编辑绑定规格</DropdownItem
-              >
-              <DropdownItem @click.native="parameterOperation(scope.row)"
-                >编辑绑定参数</DropdownItem
-              >
+              <DropdownItem @click.native="brandOperation(scope.row)">编辑绑定品牌</DropdownItem>
+              <DropdownItem @click.native="specOperation(scope.row)">编辑绑定规格</DropdownItem>
+              <DropdownItem @click.native="parameterOperation(scope.row)">编辑绑定参数</DropdownItem>
             </DropdownMenu>
           </Dropdown>
-
-          &nbsp;
+          <span class="ops-sep">|</span>
           <Dropdown trigger="click">
-            <Button size="small">
+            <a class="ops-link">
               操作
               <Icon type="ios-arrow-down"></Icon>
-            </Button>
+            </a>
             <DropdownMenu slot="list">
               <DropdownItem @click.native="edit(scope.row)">编辑</DropdownItem>
-              <DropdownItem
-                v-if="scope.row.deleteFlag == 1"
-                @click.native="enable(scope.row)"
-                >启用</DropdownItem
-              >
-              <DropdownItem
-                v-if="scope.row.deleteFlag == 0"
-                @click.native="disable(scope.row)"
-                >禁用</DropdownItem
-              >
+              <DropdownItem v-if="scope.row.deleteFlag == 1" @click.native="enable(scope.row)">启用</DropdownItem>
+              <DropdownItem v-if="scope.row.deleteFlag == 0" @click.native="disable(scope.row)">禁用</DropdownItem>
               <DropdownItem @click.native="remove(scope.row)">删除</DropdownItem>
             </DropdownMenu>
           </Dropdown>
-          &nbsp;
-          <Button
-            v-show="scope.row.level != 2"
-            type="primary"
-            @click="addChildren(scope.row)"
-            size="small"
-            icon="md-add"
-            style="margin-right: 5px"
-            >添加子分类
-          </Button>
+          <span v-if="scope.row.level != 2" class="ops-sep">|</span>
+          <a v-show="scope.row.level != 2" class="ops-link" @click="addChildren(scope.row)">添加子分类</a>
         </template>
 
         <template slot="commissionRate" slot-scope="scope">
@@ -549,5 +526,15 @@ export default {
 .table {
   min-height: 100vh;
   height: auto;
+}
+.ops-link {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops-sep {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
 }
 </style>

@@ -194,49 +194,49 @@ export default {
           fixed: "right",
           render: (h, params) => {
             if (params.row.applyStatus == "APPLY") {
-              return h(
-                "Button",
-                {
-                  props: {
-                    type: "primary",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.showList = {};
-                      this.roleModalVisible = true;
-                      this.showList = params.row;
-                      this.audit =""
+              return h("div", { class: "ops" }, [
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
+                    },
+                    on: {
+                      click: () => {
+                        this.showList = {};
+                        this.roleModalVisible = true;
+                        this.showList = params.row;
+                        this.audit = "";
+                      },
                     },
                   },
-                },
-                "审核"
-              );
+                  "审核"
+                ),
+              ]);
             } else {
-              return h(
-                "Button",
-                {
-                  props: {
-                    type: "default",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.showList = {};
-                      this.queryModalVisible = true;
-                      this.showList = params.row;
-                      this.modalTitle = "查看";
+              return h("div", { class: "ops" }, [
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
+                    },
+                    on: {
+                      click: () => {
+                        this.showList = {};
+                        this.queryModalVisible = true;
+                        this.showList = params.row;
+                        this.modalTitle = "查看";
+                      },
                     },
                   },
-                },
-                "查看"
-              );
+                  "查看"
+                ),
+              ]);
             }
           },
         },
@@ -347,4 +347,16 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
+}
+</style>
 

@@ -39,14 +39,11 @@
         </template>
         <template slot-scope="{ row }" slot="action">
           <div>
-            <Button type="primary" v-if="row.promotionStatus == 'NEW'" size="small" @click="edit(row)">编辑</Button>
-            <Button type="info" v-else size="small" @click="edit(row)">查看</Button>
-            <Button type="success" v-if="row.promotionStatus === 'START'" style="margin-left: 5px" size="small"
-              @click="openOrClose(row)">关闭</Button>
-            <Button type="success" v-if="row.promotionStatus === 'CLOSE'" style="margin-left: 5px" size="small"
-              @click="openOrClose(row)">开启</Button>
-            <!--<Button type="error" :disabled="row.promotionStatus == 'START'" style="margin-left: 5px" size="small"-->
-              <!--@click="del(row)">删除</Button>-->
+            <a v-if="row.promotionStatus == 'NEW'" @click="edit(row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">编辑</a>
+            <a v-else @click="edit(row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">查看</a>
+            <span v-if="row.promotionStatus === 'START' || row.promotionStatus === 'CLOSE'" style="margin:0 8px;color:#dcdee2">|</span>
+            <a v-if="row.promotionStatus === 'START'" @click="openOrClose(row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">关闭</a>
+            <a v-if="row.promotionStatus === 'CLOSE'" @click="openOrClose(row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">开启</a>
           </div>
         </template>
       </Table>

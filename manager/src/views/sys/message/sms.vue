@@ -279,18 +279,17 @@ export default {
           title: "操作",
           key: "action",
           align: "center",
+          fixed: "right",
           width: 150,
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "primary",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -343,20 +342,16 @@ export default {
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small"
-                  },
                   style: {
-                    marginRight: "5px",
-                  },
-                  attrs: {
-                    disabled: params.row.templateStatus == 2 ? false : true,
+                    color: params.row.templateStatus == 2 ? "#2d8cf0" : "#c5c8ce",
+                    cursor: params.row.templateStatus == 2 ? "pointer" : "not-allowed",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
+                      if (params.row.templateStatus != 2) return;
                       this.editTemplate(params.row);
                     },
                   },
@@ -364,20 +359,21 @@ export default {
                 "编辑"
               ),
               h(
-                "Button",
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
+              ),
+              h(
+                "a",
                 {
-                  props: {
-                    type: "error",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
-                  },
-                  attrs: {
-                    disabled: params.row.templateStatus == 0 ? true : false,
+                    color: params.row.templateStatus == 0 ? "#c5c8ce" : "#2d8cf0",
+                    cursor: params.row.templateStatus == 0 ? "not-allowed" : "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
+                      if (params.row.templateStatus == 0) return;
                       this.deleteSmsTemplate(params.row);
                     },
                   },
@@ -415,21 +411,16 @@ export default {
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small",
-                    icon: "ios-create-outline",
-                  },
-                  attrs: {
-                    disabled: params.row.signStatus == 2 ? false : true,
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: params.row.signStatus == 2 ? "#2d8cf0" : "#c5c8ce",
+                    cursor: params.row.signStatus == 2 ? "pointer" : "not-allowed",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
+                      if (params.row.signStatus != 2) return;
                       this.editSign(params.row);
                     },
                   },
@@ -437,21 +428,21 @@ export default {
                 "编辑"
               ),
               h(
-                "Button",
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
+              ),
+              h(
+                "a",
                 {
-                  props: {
-                    type: "error",
-                    size: "small",
-                    icon: "ios-create-outline",
-                  },
-                  attrs: {
-                    disabled: params.row.signStatus == 0 ? true : false,
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: params.row.signStatus == 0 ? "#c5c8ce" : "#2d8cf0",
+                    cursor: params.row.signStatus == 0 ? "not-allowed" : "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
+                      if (params.row.signStatus == 0) return;
                       this.deleteSmsSign(params.row);
                     },
                   },

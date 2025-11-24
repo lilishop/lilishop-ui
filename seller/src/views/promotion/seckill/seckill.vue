@@ -32,8 +32,8 @@
           }}</Tag>
         </template>
         <template slot-scope="{ row }" slot="action">
-          <Button v-if="row.promotionStatus === 'NEW'" type="primary" size="small" @click="manage(row)">管理</Button>
-          <Button v-else type="info" size="small" @click="manage(row)">查看</Button>
+          <a v-if="row.promotionStatus === 'NEW'" @click="manage(row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">管理</a>
+          <a v-else @click="manage(row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">查看</a>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">

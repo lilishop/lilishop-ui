@@ -230,92 +230,56 @@ export default {
           width: 200,
           fixed: "right",
           render: (h, params) => {
+            const linkStyle = {
+              color: "#2d8cf0",
+              cursor: "pointer",
+              textDecoration: "none",
+            };
+            const sep = h(
+              "span",
+              { style: { margin: "0 8px", color: "#dcdee2" } },
+              "|"
+            );
+            const children = [];
+            if (this.selectedMember) {
+              children.push(
+                h(
+                  "a",
+                  { style: linkStyle, on: { click: () => this.callback(params.row) } },
+                  "选择"
+                )
+              );
+              children.push(sep);
+            }
+            children.push(
+              h(
+                "a",
+                { style: linkStyle, on: { click: () => this.detail(params.row) } },
+                "查看"
+              )
+            );
+            if (!this.selectedMember) {
+              children.push(sep);
+              children.push(
+                h(
+                  "a",
+                  { style: linkStyle, on: { click: () => this.enable(params.row) } },
+                  "启用"
+                )
+              );
+              children.push(sep);
+              children.push(
+                h(
+                  "a",
+                  { style: linkStyle, on: { click: () => this.editPerm(params.row) } },
+                  "编辑"
+                )
+              );
+            }
             return h(
               "div",
-              {
-                style: {
-                  display: "flex",
-                  justifyContent: "center",
-                },
-              },
-              [
-                h(
-                  "Button",
-                  {
-                    props: {
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                      display: this.selectedMember ? "block" : "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.callback(params.row);
-                      },
-                    },
-                  },
-                  "选择"
-                ),
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                    },
-                    on: {
-                      click: () => {
-                        this.detail(params.row);
-                      },
-                    },
-                  },
-                  "查看"
-                ),
-
-                h(
-                  "Button",
-                  {
-                    props: {
-                      size: "small",
-                      type: "success",
-                    },
-                    style: {
-                      marginRight: "5px",
-                      display: this.selectedMember ? "none" : "block",
-                    },
-                    on: {
-                      click: () => {
-                        this.enable(params.row);
-                      },
-                    },
-                  },
-                  "启用"
-                ),
-
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "info",
-                      size: "small",
-                      ghost: true,
-                    },
-                    style: {
-                      marginRight: "5px",
-                    },
-                    on: {
-                      click: () => {
-                        this.editPerm(params.row);
-                      },
-                    },
-                  },
-                  "编辑"
-                ),
-              ]
+              { class: "ops", style: { display: "flex", justifyContent: "center" } },
+              children
             );
           },
         },
@@ -464,5 +428,15 @@ export default {
   width: 60px;
   height: 60px;
   border-radius: 50%;
+}
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
 }
 </style>

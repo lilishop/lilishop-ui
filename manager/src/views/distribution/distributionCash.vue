@@ -160,50 +160,34 @@ export default {
           fixed: "right",
           width: 130,
           render: (h, params) => {
-            if(params.row.distributionCashStatus != 'APPLY'){
-                return h("div", [
-                  h(
-                    "Button",
-                    {
-                      props: {
-                        type: "primary",
-                        size: "small",
-                      },
-                      style: {
-                        marginRight: "5px"
-                      },
-                      on: {
-                        click: () => {
-                          this.view(params.row);
-                        }
+            if (params.row.distributionCashStatus != 'APPLY') {
+              return h("div", { class: "ops" }, [
+                h(
+                  "a",
+                  {
+                    on: {
+                      click: () => {
+                        this.view(params.row);
                       }
-                    },
-                    "查看"
-                  ),
-
-                ]);
-            }else {
-                return h("div", [
-                  h(
-                    "Button",
-                    {
-                      props: {
-                        type: "primary",
-                        size: "small",
-                      },
-                      style: {
-                        marginRight: "5px"
-                      },
-                      on: {
-                        click: () => {
-                          this.edit(params.row);
-                        }
+                    }
+                  },
+                  "查看"
+                ),
+              ]);
+            } else {
+              return h("div", { class: "ops" }, [
+                h(
+                  "a",
+                  {
+                    on: {
+                      click: () => {
+                        this.edit(params.row);
                       }
-                    },
-                    "审核"
-                  ),
-
-                ]);
+                    }
+                  },
+                  "审核"
+                ),
+              ]);
             }
           }
         }
@@ -312,3 +296,15 @@ export default {
   }
 };
 </script>
+<style lang="scss" scoped>
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
+}
+</style>

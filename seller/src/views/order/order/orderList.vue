@@ -302,18 +302,17 @@ export default {
           title: "操作",
           key: "action",
           align: "center",
-          width: 100,
+          fixed: "right",
+          width: 200,
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {

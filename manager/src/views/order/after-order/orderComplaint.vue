@@ -144,24 +144,22 @@
             }
           },
 
-          {
-            title: "操作",
-            key: "action",
-            align: "center",
-            fixed: "right",
-            width: 150,
-            render: (h, params) => {
+        {
+          title: "操作",
+          key: "action",
+          align: "center",
+          fixed: "right",
+          width: 150,
+          render: (h, params) => {
               if(params.row.complainStatus === "COMPLETE"){
                 return h("div", [
                   h(
-                    "Button",
+                    "a",
                     {
-                      props: {
-                        type: "info",
-                        size: "small",
-                      },
                       style: {
-                        marginRight: "5px",
+                        color: "#2d8cf0",
+                        cursor: "pointer",
+                        textDecoration: "none",
                       },
                       on: {
                         click: () => {
@@ -175,14 +173,12 @@
               }else{
                 return h("div", [
                   h(
-                    "Button",
+                    "a",
                     {
-                      props: {
-                        type: "primary",
-                        size: "small",
-                      },
                       style: {
-                        marginRight: "5px",
+                        color: "#2d8cf0",
+                        cursor: "pointer",
+                        textDecoration: "none",
                       },
                       on: {
                         click: () => {

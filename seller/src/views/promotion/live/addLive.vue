@@ -114,29 +114,23 @@
             </template>
             <template slot-scope="{ row, index }" slot="action">
               <div class="action">
-                <Button
-                  size="small"
-                  type="primary"
-                  :disabled="liveStatus != 'NEW'"
+                <a
+                  v-if="liveStatus == 'NEW'"
+                  style="color:#2d8cf0;cursor:pointer;text-decoration:none"
                   @click="deleteGoods(row, index)"
-                  >删除</Button
-                >
-                <Button
-                  size="small"
-                  ghost
-                  type="primary"
-                  :disabled="liveStatus != 'NEW'"
+                >删除</a>
+                <span v-if="liveStatus == 'NEW'" style="margin:0 8px;color:#dcdee2">|</span>
+                <a
+                  v-if="liveStatus == 'NEW'"
+                  style="color:#2d8cf0;cursor:pointer;text-decoration:none"
                   @click="onMove(row.id, 1)"
-                  >上移</Button
-                >
-                <Button
-                  size="small"
-                  ghost
-                  type="primary"
-                  :disabled="liveStatus != 'NEW'"
+                >上移</a>
+                <span v-if="liveStatus == 'NEW'" style="margin:0 8px;color:#dcdee2">|</span>
+                <a
+                  v-if="liveStatus == 'NEW'"
+                  style="color:#2d8cf0;cursor:pointer;text-decoration:none"
                   @click="onMove(row.id, 0)"
-                  >下移</Button
-                >
+                >下移</a>
               </div>
             </template>
           </Table>

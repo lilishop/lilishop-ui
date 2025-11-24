@@ -266,13 +266,12 @@ export default {
             let enableOrDisable = "";
             if (params.row.status == true) {
               enableOrDisable = h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: 'default',
-                    size: "small"
-                  },
                   style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     marginRight: "5px"
                   },
                   on: {
@@ -285,13 +284,12 @@ export default {
               );
             } else {
               enableOrDisable = h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "success",
-                    size: "small"
-                  },
                   style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     marginRight: "5px"
                   },
                   on: {
@@ -305,13 +303,12 @@ export default {
             }
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small"
-                  },
                   style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     marginRight: "5px"
                   },
                   on: {
@@ -322,13 +319,24 @@ export default {
                 },
                 "编辑"
               ),
+              h(
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
+              ),
               enableOrDisable,
               h(
-                "Button",
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
+              ),
+              h(
+                "a",
                 {
-                  props: {
-                    type: "error",
-                    size: "small"
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none"
                   },
                   on: {
                     click: () => {

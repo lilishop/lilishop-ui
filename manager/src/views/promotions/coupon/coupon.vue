@@ -75,49 +75,30 @@
         @on-selection-change="changeSelect"
       >
         <template slot-scope="{ row }" slot="action">
-          <Button
-            v-if="
-              row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'
-            "
-            type="info"
-            size="small"
+          <a
+            v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
+            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
             @click="see(row)"
-            >编辑
-          </Button>
-          <Button
+            >编辑</a>
+          <a
             v-else
-            type="default"
-            size="small"
+            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
             @click="see(row, 'onlyView')"
-            >查看
-          </Button>
-          <Button
-            class="ml_5"
-            v-if="
-              row.promotionStatus === 'START' || row.promotionStatus === 'NEW'
-            "
-            type="error"
-            size="small"
+            >查看</a>
+          <span
+            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+            style="margin: 0 8px; color: #dcdee2"
+            >|</span>
+          <a
+            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
             @click="close(row)"
-            >关闭
-          </Button>
-          <!--<Button-->
-            <!--class="ml_5"-->
-            <!--v-if="-->
-              <!--row.promotionStatus === 'CLOSE' || row.promotionStatus === 'END'-->
-            <!--"-->
-            <!--type="error"-->
-            <!--size="small"-->
-            <!--@click="remove(row)"-->
-            <!--&gt;删除-->
-          <!--</Button>-->
-          <Button
-            style="margin: 5px"
-            type="info"
-            size="small"
+            >关闭</a>
+          <span style="margin: 0 8px; color: #dcdee2">|</span>
+          <a
+            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
             @click="receivePage(row.id)"
-            >领取记录
-          </Button>
+            >领取记录</a>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">

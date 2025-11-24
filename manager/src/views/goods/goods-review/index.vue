@@ -189,18 +189,15 @@ export default {
           width: 150,
           align: "center",
           fixed: "right",
-
           render: (h, params) => {
-            return h("div", [
+            return h("div", { class: "ops" }, [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    size: "small",
-                    type: "info",
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -211,22 +208,38 @@ export default {
                 "查看"
               ),
               h(
-                "Button",
+                "span",
                 {
-                  props: {
-                    type: "error",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
+                    margin: "0 8px",
+                    color: "#dcdee2",
                   },
+                },
+                "|"
+              ),
+              h(
+                "Poptip",
+                {
+                  props: { confirm: true, title: "确认删除" },
                   on: {
-                    click: () => {
+                    "on-ok": () => {
                       this.remove(params.row);
                     },
                   },
                 },
-                "删除"
+                [
+                  h(
+                    "a",
+                    {
+                      style: {
+                        color: "#2d8cf0",
+                        cursor: "pointer",
+                        textDecoration: "none",
+                      },
+                    },
+                    "删除"
+                  ),
+                ]
               ),
             ]);
           },
@@ -371,5 +384,15 @@ label {
 .score-content {
   margin: 5px 0;
   span{margin-right: 20px;}
+}
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
 }
 </style>

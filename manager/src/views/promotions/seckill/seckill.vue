@@ -64,45 +64,34 @@
             class="mt_10"
           >
             <template slot-scope="{ row }" slot="action">
-              <Button
-                type="info"
-                size="small"
-                class="mr_5"
+              <a
                 v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
+                style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
                 @click="edit(row)"
-                >编辑</Button
-              >
-
-              <Button type="info" size="small" class="mr_5" v-else @click="manage(row)"
-                >查看</Button
-              >
-
-              <Button
-                type="success"
-                size="small"
-                class="mr_5"
-                v-if="row.promotionStatus == 'NEW'"
+                >编辑</a>
+              <a
+                v-else
+                style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
                 @click="manage(row)"
-                >管理</Button
-              >
-
-              <Button
-                type="error"
-                size="small"
+                >查看</a>
+              <span
+                v-if="row.promotionStatus"
+                style="margin:0 8px;color:#dcdee2"
+                >|</span>
+              <a
+                v-if="row.promotionStatus == 'NEW'"
+                style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
+                @click="manage(row)"
+                >管理</a>
+              <span
+                v-if="row.promotionStatus == 'NEW'"
+                style="margin:0 8px;color:#dcdee2"
+                >|</span>
+              <a
                 v-if="row.promotionStatus == 'START' || row.promotionStatus == 'NEW'"
-                class="mr_5"
+                style="color:#2d8cf0;cursor:pointer;text-decoration:none"
                 @click="off(row)"
-                >关闭</Button
-              >
-              &nbsp;
-              <!--<Button-->
-                <!--type="error"-->
-                <!--size="small"-->
-                <!--v-if="row.promotionStatus == 'CLOSE' || row.promotionStatus == 'END'"-->
-                <!--ghost-->
-                <!--@click="expire(row)"-->
-                <!--&gt;删除</Button-->
-              <!--&gt;-->
+                >关闭</a>
             </template>
           </Table>
 

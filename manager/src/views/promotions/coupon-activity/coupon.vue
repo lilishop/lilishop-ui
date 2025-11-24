@@ -13,20 +13,19 @@
         sortable="custom"
       >
         <template slot-scope="{ row }" slot="action">
-          <Button type="info" size="small" style="margin-right: 10px" @click="info(row)">
-            查看
-          </Button>
-          <Button
-            v-if="
-              (!checked && row.promotionStatus === 'START') ||
-              row.promotionStatus === 'NEW'
-            "
-            type="error"
-            size="small"
-            style="margin-right: 10px"
+          <a
+            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
+            @click="info(row)"
+          >查看</a>
+          <span
+            v-if="(!checked && row.promotionStatus === 'START') || row.promotionStatus === 'NEW'"
+            style="margin: 0 8px; color: #dcdee2"
+          >|</span>
+          <a
+            v-if="(!checked && row.promotionStatus === 'START') || row.promotionStatus === 'NEW'"
+            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
             @click="remove(row)"
-            >关闭
-          </Button>
+          >关闭</a>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">

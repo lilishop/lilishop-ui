@@ -181,43 +181,48 @@
             key: "action",
             align: "center",
             width: 200,
-            render: (h, params) => {
-              return h("div", [
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px"
-                    },
-                    on: {
-                      click: () => {
-                        this.edit(params.row);
-                      }
-                    }
+          render: (h, params) => {
+            return h("div", [
+              h(
+                "a",
+                {
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
+                    marginRight: "5px"
                   },
-                  "编辑"
-                ),
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "error",
-                      size: "small",
-                    },
-                    on: {
-                      click: () => {
-                        this.remove(params.row);
-                      }
+                  on: {
+                    click: () => {
+                      this.edit(params.row);
                     }
+                  }
+                },
+                "编辑"
+              ),
+              h(
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
+              ),
+              h(
+                "a",
+                {
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none"
                   },
-                  "删除"
-                )
-              ]);
-            },
+                  on: {
+                    click: () => {
+                      this.remove(params.row);
+                    }
+                  }
+                },
+                "删除"
+              )
+            ]);
+          },
           },
         ],
         data: [], // 表单数据

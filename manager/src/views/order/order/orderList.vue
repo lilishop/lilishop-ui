@@ -357,17 +357,26 @@ export default {
           width: 100,
           render: (h, params) => {
             return h(
-              "Button",
-              {
-                props: { type: "info", size: "small" },
-                style: { marginRight: "5px" },
-                on: {
-                  click: () => {
-                    this.detail(params.row);
+              "div",
+              { class: "ops" },
+              [
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
+                    },
+                    on: {
+                      click: () => {
+                        this.detail(params.row);
+                      },
+                    },
                   },
-                },
-              },
-              "查看"
+                  "查看"
+                ),
+              ]
             );
           },
         },
@@ -535,5 +544,15 @@ export default {
   ::v-deep .ivu-tabs-tab {
     font-size: 14px;
   }
+}
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
 }
 </style>

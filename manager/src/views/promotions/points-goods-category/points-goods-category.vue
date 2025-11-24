@@ -18,8 +18,15 @@
         primary-key="id"
       >
         <template slot="action" slot-scope="scope">
-          <Button @click.native="edit(scope.row)" style="margin-right:10px;" size="small">编辑</Button>
-          <Button @click.native="remove(scope.row)" type="primary" size="small">删除</Button>
+          <a
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:10px"
+            @click.native="edit(scope.row)"
+            >编辑</a>
+          <span style="margin:0 8px;color:#dcdee2">|</span>
+          <a
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
+            @click.native="remove(scope.row)"
+            >删除</a>
         </template>
       </tree-table>
       <Row type="flex" justify="end" class="mt_10">

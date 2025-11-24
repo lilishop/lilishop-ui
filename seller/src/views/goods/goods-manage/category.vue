@@ -7,7 +7,7 @@
       </div>
       <tree-table
         ref="treeTable"
-        size="default"
+        size="small"
         :loading="loading"
         :data="tableData"
 
@@ -18,29 +18,11 @@
         :expand-type="false"
         primary-key="id">
         <template slot="action" slot-scope="scope">
-          <Button
-            type="dashed"
-            @click="edit(scope.row)"
-            size="small"
-            style="margin-right:5px"
-          >编辑
-          </Button>
-          <Button
-            v-show="scope.row.level != 1 "
-            type="info"
-            @click="addChildren(scope.row)"
-            size="small"
-            style="margin-right:5px"
-          >添加子分类
-          </Button>
-          <Button
-            type="error"
-            @click="remove(scope.row)"
-            size="small"
-            style="margin-right:5px"
-          >删除
-          </Button>
-
+          <a @click="edit(scope.row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">编辑</a>
+          <span style="margin:0 8px;color:#dcdee2">|</span>
+          <a v-show="scope.row.level != 1" @click="addChildren(scope.row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">添加子分类</a>
+          <span style="margin:0 8px;color:#dcdee2">|</span>
+          <a @click="remove(scope.row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">删除</a>
         </template>
       </tree-table>
 

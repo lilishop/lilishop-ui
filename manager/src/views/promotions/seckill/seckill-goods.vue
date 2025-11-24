@@ -46,7 +46,7 @@
           />
         </template>
         <template slot-scope="{ row, index }" slot="action">
-          <Button type="error" size="small" @click="delGoods(index, row)">删除 </Button>
+          <a style="color:#2d8cf0;cursor:pointer;text-decoration:none" @click="delGoods(index, row)">删除</a>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">

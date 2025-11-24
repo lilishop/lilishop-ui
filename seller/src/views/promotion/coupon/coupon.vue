@@ -67,35 +67,30 @@
         @on-selection-change="changeSelect"
       >
         <template slot-scope="{ row }" slot="action">
-          <Button
-            v-if="
-              row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'
-            "
-            type="info"
-            size="small"
+          <a
+            v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'"
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
             @click="see(row)"
-            >编辑</Button
-          >
-          <Button v-else type="default" size="small" @click="see(row, 'only')"
-            >查看</Button
-          >
-          <Button
-            v-if="
-              row.promotionStatus === 'START' || row.promotionStatus === 'NEW'
-            "
-            type="error"
-            size="small"
-            :style="{ marginLeft: '5px' }"
+          >编辑</a>
+          <a
+            v-else
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
+            @click="see(row, 'only')"
+          >查看</a>
+          <span style="margin: 0 8px; color: #dcdee2">|</span>
+          <a
+            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
             @click="remove(row)"
-            >关闭</Button
-          >
-          <Button
-            style="margin: 5px"
-            type="info"
-            size="small"
+          >关闭</a>
+          <span
+            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+            style="margin: 0 8px; color: #dcdee2"
+          >|</span>
+          <a
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
             @click="receivePage(row.id)"
-            >领取记录
-          </Button>
+          >领取记录</a>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">

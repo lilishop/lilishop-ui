@@ -302,20 +302,26 @@ export default {
           title: "操作",
           key: "action",
           render: (h, params) => {
-            return h('Button',{
-              props:{
-                size:'small'
-              },
-              on:{
-                click: () => {
-                 const { sn } = params.row
-                  this.$router.push({
-                    query: {sn},
-                    path: this.orderOrRefund == 1 ? 'order-detail' : 'after-order-detail' + '?sn='+sn
-                  })
+            return h(
+              'a',
+              {
+                style: {
+                  color: '#2d8cf0',
+                  cursor: 'pointer',
+                  textDecoration: 'none'
+                },
+                on: {
+                  click: () => {
+                    const { sn } = params.row
+                    this.$router.push({
+                      query: { sn },
+                      path: this.orderOrRefund == 1 ? 'order-detail' : 'after-order-detail' + '?sn=' + sn
+                    })
+                  }
                 }
-              }
-            },'查看')
+              },
+              '查看'
+            )
           },
         },
       ],

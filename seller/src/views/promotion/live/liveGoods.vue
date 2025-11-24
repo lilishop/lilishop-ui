@@ -62,10 +62,12 @@
 
           </template>
 
-          <template slot-scope="{ row,index }" slot="action">
-            <Button v-if="params.auditStatus == 99" type="primary" @click="()=>{liveGoodsData.splice(index,1)}">删除</Button>
-            <Button v-if="params.auditStatus != 99 && !reviewed" ghost type="primary" @click="()=>{$router.push({path:'/goods-operation-edit',query:{id:row.goodsId}})}">查看</Button>
-            <Button v-if="reviewed" :type="row.___selected ? 'primary' : 'default'" @click="selectedLiveGoods(row,index)">{{row.___selected ? '已':''}}选择</Button>
+          <template slot-scope="{ row ,index }" slot="action">
+            <a v-if="params.auditStatus == 99" @click="liveGoodsData.splice(index,1)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">删除</a>
+            <span v-if="params.auditStatus == 99 || (params.auditStatus != 99 && !reviewed) || reviewed" style="margin:0 8px;color:#dcdee2">|</span>
+            <a v-if="params.auditStatus != 99 && !reviewed" @click="$router.push({path:'/goods-operation-edit',query:{id:row.goodsId}})" style="color:#2d8cf0;cursor:pointer;text-decoration:none">查看</a>
+            <span v-if="reviewed" style="margin:0 8px;color:#dcdee2">|</span>
+            <a v-if="reviewed" @click="selectedLiveGoods(row,index)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">{{row.___selected ? '已':''}}选择</a>
           </template>
         </Table>
         <div class="flex">

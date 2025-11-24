@@ -72,15 +72,19 @@
         </template>
         <template slot-scope="{ row }" slot="action">
           <div>
-            <Button type="info" size="small" @click="view(row)">查看</Button>
-            <Button
-              type="error"
+            <a
+              :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
+              @click="view(row)"
+            >查看</a>
+            <span
               v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'START'"
-              style="margin-left: 5px"
-              size="small"
+              style="margin: 0 8px; color: #dcdee2"
+            >|</span>
+            <a
+              v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'START'"
+              :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
               @click="openOrClose(row)"
-              >关闭</Button
-            >
+            >关闭</a>
           </div>
         </template>
       </Table>

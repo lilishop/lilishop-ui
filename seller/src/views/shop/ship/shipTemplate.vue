@@ -20,8 +20,15 @@
                     <time style="margin-right: 20px" title="最后编辑时间">
                       <i class="icon-time"></i>{{item.updateTime}}
                     </time>
-                    <Button @click="edit(item)" type="info">修改</Button>
-                    <Button @click="remove(item.id)" type="error">删除</Button>
+                    <a
+                      style="color:#2d8cf0;cursor:pointer;text-decoration:none"
+                      @click="edit(item)"
+                    >修改</a>
+                    <span style="margin: 0 8px; color: #dcdee2">|</span>
+                    <a
+                      style="color:#2d8cf0;cursor:pointer;text-decoration:none"
+                      @click="remove(item.id)"
+                    >删除</a>
                   </span>
                 </th>
               </tr>
@@ -113,12 +120,14 @@
                             </InputNumber>
                           </td>
                           <td class="nscs-table-handle">
-                            <Button @click="editRegion(item,index)" type="info" size="small"
-                              style="margin-bottom: 5px">修改
-                            </Button>
-                            <Button @click="removeTemplateChildren(index)"  type="error"
-                              size="small" style="margin-bottom: 5px">删除
-                            </Button>
+                            <a
+                              @click="editRegion(item,index)"
+                              style="display:inline-block;margin-bottom:5px;color:#2d8cf0;cursor:pointer;text-decoration:none"
+                            >修改</a>
+                            <a
+                              @click="removeTemplateChildren(index)"
+                              style="display:inline-block;margin-bottom:5px;color:#2d8cf0;cursor:pointer;text-decoration:none"
+                            >删除</a>
                           </td>
                         </tr>
                       </tbody>
@@ -629,5 +638,12 @@ em {
 }
 .baoyou {
   margin: 6px 10px 0;
+}
+/* 操作链接与分隔符不加粗 */
+.order tbody tr th .fr a {
+  font-weight: normal;
+}
+.order tbody tr th .fr span {
+  font-weight: normal;
 }
 </style>

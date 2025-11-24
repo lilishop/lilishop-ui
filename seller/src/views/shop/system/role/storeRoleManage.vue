@@ -166,14 +166,12 @@ export default {
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "warning",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -183,15 +181,14 @@ export default {
                 },
                 "菜单权限"
               ),
+              h("span", { style: { margin: "0 8px", color: "#dcdee2" } }, "|"),
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    size: "small",
-                    type: "info",
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -201,12 +198,14 @@ export default {
                 },
                 "编辑"
               ),
+              h("span", { style: { margin: "0 8px", color: "#dcdee2" } }, "|"),
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "error",
-                    size: "small",
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {

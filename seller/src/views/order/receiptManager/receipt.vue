@@ -159,33 +159,20 @@ export default {
           title: "操作",
           key: "action",
           align: "center",
-          width: 80,
+          fixed: 'right',
+          width: 200,
           render: (h, params) => {
+            const disabled = !(((params.row.orderStatus === "COMPLETED" || params.row.orderStatus === "DELIVERED")) && params.row.receiptStatus === 0);
+            const style = disabled
+              ? { color: "#c5c8ce", cursor: "not-allowed", textDecoration: "none" }
+              : { color: "#2d8cf0", cursor: "pointer", textDecoration: "none" };
+            const on = disabled ? {} : { click: () => { this.invoicing(params.row); } };
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small",
-                  },
-                  attrs: {
-                    disabled:
-                      !(
-                        (params.row.orderStatus === "COMPLETED"
-                          ||params.row.orderStatus === "DELIVERED")
-
-                        &&
-                        params.row.receiptStatus === 0),
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.invoicing(params.row);
-                    },
-                  },
+                  style,
+                  on,
                 },
                 "开票"
               ),

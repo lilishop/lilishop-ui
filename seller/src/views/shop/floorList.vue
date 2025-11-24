@@ -32,22 +32,18 @@
               <span slot="open">开</span>
               <span slot="close">关</span>
             </i-switch>
-            <Button
-              type="info"
-              placement="right"
+            <a
+              style="color:#2d8cf0;cursor:pointer;text-decoration:none"
               @click="Template(item)"
-              size="small"
-              >编辑</Button
-            >
-            <Button
-              type="success"
-              placement="right"
+            >编辑</a>
+            <span style="margin: 0 8px; color: #dcdee2">|</span>
+            <a
+              style="color:#2d8cf0;cursor:pointer;text-decoration:none"
               @click="decorate(item)"
-              size="small"
-              >装修</Button
-            >
+            >装修</a>
+            <span style="margin: 0 8px; color: #dcdee2">|</span>
             <Poptip confirm title="删除此模板？" @on-ok="delTemplate(item.id)">
-              <Button type="error" size="small">删除</Button>
+              <a style="color:#2d8cf0;cursor:pointer;text-decoration:none">删除</a>
             </Poptip>
           </div>
         </div>

@@ -110,30 +110,20 @@
           <div>{{ row.endTime }}</div>
         </template>
         <template slot-scope="{ row }" slot="action">
-          <Button
+          <a
             v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
-            type="info"
-            size="small"
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
             @click="edit(row.id)"
-            style="margin-right: 5px"
-            >编辑</Button
-          >
-          <Button
+            >编辑</a>
+          <span
             v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
-            type="warning"
-            size="small"
+            style="margin:0 8px;color:#dcdee2"
+            >|</span>
+          <a
+            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
             @click="statusChanged(row.id, 'CLOSE')"
-            style="margin-right: 5px"
-            >关闭</Button
-          >
-          <!--<Button-->
-            <!--v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'END'"-->
-            <!--type="error"-->
-            <!--size="small"-->
-            <!--@click="close(row.id)"-->
-            <!--style="margin-right: 5px"-->
-            <!--&gt;删除</Button-->
-          <!--&gt;-->
+            >关闭</a>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">

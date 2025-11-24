@@ -20,9 +20,13 @@
               <span slot="open">开</span>
               <span slot="close">关</span>
             </i-switch>
-            <Button type="info" placement="right" @click="handleEdit(item)" size="small">修改</Button>
+            <a
+              style="color:#2d8cf0;cursor:pointer;text-decoration:none"
+              @click="handleEdit(item)"
+            >修改</a>
+            <span style="margin: 0 8px; color: #dcdee2">|</span>
             <Poptip confirm title="删除此模板？" @on-ok="handleDel(item)" >
-              <Button type="error" size="small">删除</Button>
+              <a style="color:#2d8cf0;cursor:pointer;text-decoration:none">删除</a>
             </Poptip>
           </div>
         </div>

@@ -584,13 +584,12 @@
                 }
               }, [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
                     style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
                       marginRight: "5px",
                     },
                     on: {

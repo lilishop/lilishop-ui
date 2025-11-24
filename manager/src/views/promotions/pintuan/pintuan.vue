@@ -52,16 +52,19 @@
         class="mt_10"
       >
         <template slot-scope="{ row }" slot="action">
-          <Button type="info" size="small" @click="view(row)" style="margin-right: 5px"
-            >查看</Button
-          >
-          <Button
-            type="error"
-            size="small"
+          <a
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
+            @click="view(row)"
+          >查看</a>
+          <span
             v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+            style="margin:0 8px;color:#dcdee2"
+          >|</span>
+          <a
+            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
             @click="close(row)"
-            >关闭
-          </Button>
+          >关闭</a>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">

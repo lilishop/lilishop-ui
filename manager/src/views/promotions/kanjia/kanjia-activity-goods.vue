@@ -98,28 +98,18 @@
           <div>{{ row.stock }}</div>
         </template>
         <template slot-scope="{ row }" slot="action">
-          <Button
+          <a
             v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
-            type="info"
-            size="small"
-            style="margin-right: 10px"
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:10px"
             @click="edit(row)"
             >编辑
-          </Button>
-          <Button
+          </a>
+          <a
             v-else
-            size="small"
-            style="margin-right: 10px"
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:10px"
             @click="edit(row, 'onlyView')"
             >查看
-          </Button>
-          <!--<Button-->
-            <!--type="error"-->
-            <!--size="small"-->
-            <!--style="margin-right: 10px"-->
-            <!--@click="delAll(row)"-->
-            <!--&gt;删除-->
-          <!--</Button>-->
+          </a>
         </template>
       </Table>
       <Row type="flex" justify="end" class="page">

@@ -91,8 +91,11 @@
                   <img :src="row.QRCode || '../../../assets/lili.png'" width="50px" height="50px" alt="" />
                 </template>
                 <template slot-scope="{ index }" slot="action">
-                  <Button type="error" :disabled="form.promotionStatus != 'NEW' && !!id" size="small" ghost
-                    @click="delGoods(index)">删除</Button>
+                  <a
+                    v-if="form.promotionStatus == 'NEW' || !id"
+                    style="color:#2d8cf0;cursor:pointer;text-decoration:none"
+                    @click="delGoods(index)"
+                  >删除</a>
                 </template>
               </Table>
             </FormItem>

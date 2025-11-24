@@ -367,77 +367,75 @@ export default {
             let enableOrDisable = "";
             if (params.row.status == true) {
               enableOrDisable = h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    size: "small"
-                  },
                   style: {
-                    marginRight: "5px"
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
                       this.disable(params.row);
-                    }
-                  }
+                    },
+                  },
                 },
                 "禁用"
               );
             } else {
               enableOrDisable = h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "success",
-                    size: "small"
-                  },
                   style: {
-                    marginRight: "5px"
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
                       this.enable(params.row);
-                    }
-                  }
+                    },
+                  },
                 },
                 "启用"
               );
             }
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small"
-                  },
                   style: {
-                    marginRight: "5px"
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
                       this.edit(params.row);
-                    }
-                  }
+                    },
+                  },
                 },
                 "编辑"
               ),
+              h("span", { style: { margin: "0 8px", color: "#dcdee2" } }, "|"),
               enableOrDisable,
+              h("span", { style: { margin: "0 8px", color: "#dcdee2" } }, "|"),
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "error",
-                    size: "small"
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
                       this.remove(params.row);
-                    }
-                  }
+                    },
+                  },
                 },
                 "删除"
-              )
+              ),
             ]);
           }
         }

@@ -152,14 +152,12 @@ export default {
             let enableOrDisable = "";
             if (params.row.storeDisable == "OPEN") {
               enableOrDisable = h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    size: "small",
-                    type: "error"
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -171,14 +169,12 @@ export default {
               );
             } else if (params.row.storeDisable == "CLOSED") {
               enableOrDisable = h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "success",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -191,14 +187,12 @@ export default {
             } else if (params.row.storeDisable == "APPLYING") {
               return h("div", [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
                     style: {
-                      marginRight: "5px",
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
                     },
                     on: {
                       click: () => {
@@ -209,14 +203,17 @@ export default {
                   "审核"
                 ),
                 h(
-                  "Button",
+                  "span",
+                  { style: { margin: "0 8px", color: "#dcdee2" } },
+                  "|"
+                ),
+                h(
+                  "a",
                   {
-                    props: {
-                      type: "primary",
-                      size: "small",
-                    },
                     style: {
-                      marginRight: "5px",
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
                     },
                     on: {
                       click: () => {
@@ -231,14 +228,12 @@ export default {
 
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type:"default",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     display: this.selectedShop ? "inline-block" : "none",
                   },
                   on: {
@@ -250,14 +245,17 @@ export default {
                 "选择"
               ),
               h(
-                "Button",
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2", display: this.selectedShop ? "inline-block" : "none" } },
+                "|"
+              ),
+              h(
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -268,15 +266,17 @@ export default {
                 "查看"
               ),
               h(
-                "Button",
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
+              ),
+              h(
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small",
-                    ghost:true
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -285,6 +285,11 @@ export default {
                   },
                 },
                 "修改"
+              ),
+              h(
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
               ),
               enableOrDisable,
             ]);

@@ -411,14 +411,8 @@
               let enableOrDisable = "";
               if (params.row.noticeStatus == "OPEN") {
                 enableOrDisable = h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      size: "small"
-                    },
-                    style: {
-                      marginRight: "5px"
-                    },
                     on: {
                       click: () => {
                         this.disable(params.row);
@@ -429,15 +423,8 @@
                 );
               } else {
                 enableOrDisable = h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "success",
-                      size: "small"
-                    },
-                    style: {
-                      marginRight: "5px"
-                    },
                     on: {
                       click: () => {
                         this.enable(params.row);
@@ -447,18 +434,16 @@
                   "开启"
                 );
               }
-              return h("div", [
+              return h("div", { class: "ops" }, [
                 enableOrDisable,
                 h(
-                  "Button",
+                  "span",
+                  { style: { margin: "0 8px", color: "#dcdee2" } },
+                  "|"
+                ),
+                h(
+                  "a",
                   {
-                    props: {
-                      type: "primary",
-                      size: "small"
-                    },
-                    style: {
-                      marginRight: "5px"
-                    },
                     on: {
                       click: () => {
                         this.edit(params.row);
@@ -491,22 +476,19 @@
             minWidth: 50,
             align: "center",
             render: (h, params) => {
-              return h(
-                "Button",
-                {
-                  props: {
-                    size: "small",
-                    type: "error",
-                    ghost: true,
-                  },
-                  on: {
-                    click: () => {
-                      this.delUser(params.index);
+              return h("div", { class: "ops" }, [
+                h(
+                  "a",
+                  {
+                    on: {
+                      click: () => {
+                        this.delUser(params.index);
+                      },
                     },
                   },
-                },
-                "删除"
-              );
+                  "删除"
+                )
+              ]);
             },
           },
         ],
@@ -574,17 +556,10 @@
             fixed: "right",
             width: 140,
             render: (h, params) => {
-              return h("div", [
+              return h("div", { class: "ops" }, [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "info",
-                      size: "small"
-                    },
-                    style: {
-                      marginRight: "5px"
-                    },
                     on: {
                       click: () => {
                         this.detail(params.row);
@@ -594,15 +569,13 @@
                   "详细"
                 ),
                 h(
-                  "Button",
+                  "span",
+                  { style: { margin: "0 8px", color: "#dcdee2" } },
+                  "|"
+                ),
+                h(
+                  "a",
                   {
-                    props: {
-                      type: "error",
-                      size: "small"
-                    },
-                    style: {
-                      marginRight: "5px"
-                    },
                     on: {
                       click: () => {
                         this.delete(params.row.id);
@@ -1024,4 +997,16 @@
 </script>
 <style lang="scss">
   @import "sms.scss";
+</style>
+<style lang="scss" scoped>
+  .ops a {
+    color: #2d8cf0;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .ops span {
+    display: inline-block;
+    margin: 0 8px;
+    color: #dcdee2;
+  }
 </style>

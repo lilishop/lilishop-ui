@@ -314,13 +314,16 @@ export default {
           minWidth: 50,
           align: "center",
           render: (h, params) => {
+            if (this.disabled) {
+              return h("div");
+            }
             return h(
-              "Button",
+              "a",
               {
-                props: {
-                  size: "small",
-                  type: "error",
-                  ghost: true,
+                style: {
+                  color: "#2d8cf0",
+                  cursor: "pointer",
+                  textDecoration: "none",
                 },
                 on: {
                   click: () => {

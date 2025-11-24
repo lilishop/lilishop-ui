@@ -115,17 +115,10 @@ export default {
           fixed: "right",
           width: 200,
           render: (h, params) => {
-            return h("div", [
+            return h("div", { class: "ops" }, [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "success",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
                   on: {
                     click: () => {
                       this.audit(params.row, "PASS");
@@ -134,13 +127,10 @@ export default {
                 },
                 "通过"
               ),
+              h("span", {}, "|"),
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "error",
-                    size: "small",
-                  },
                   on: {
                     click: () => {
                       this.audit(params.row, "REFUSE");
@@ -224,3 +214,15 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
+}
+</style>
