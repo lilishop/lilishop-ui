@@ -45,7 +45,7 @@ export default {
         order: "desc",
         pageClientType: "H5",
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         pageType: "SPECIAL",
       },
       total: 0, // 表单数据总数

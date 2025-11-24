@@ -49,7 +49,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10,20,50]"
+          :page-size-opts="[20,50,100]"
           size="small"
           show-total
           show-elevator
@@ -135,7 +135,7 @@ export default {
         departmentId: "",
         mobile: "",
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         sort: "createTime",
         order: "desc"
       },
@@ -399,7 +399,7 @@ export default {
     // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getUserList();
     },
     // 排序

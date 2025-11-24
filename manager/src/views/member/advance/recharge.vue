@@ -56,7 +56,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -79,7 +79,7 @@
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
           sort: "createTime", // 默认排序字段
           order: "desc", // 默认排序方式
           startDate: "", // 起始时间
@@ -175,11 +175,11 @@
         this.getDataList();
       },
       // 搜索
-      handleSearch() {
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 10;
-        this.getDataList();
-      },
+    handleSearch() {
+      this.searchForm.pageNumber = 1;
+      this.searchForm.pageSize = 20;
+      this.getDataList();
+    },
       // 时间段赋值
       selectDateRange(v) {
         if (v) {

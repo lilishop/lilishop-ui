@@ -56,7 +56,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -82,11 +82,11 @@ export default {
       openTip: true, // 显示提示
       loading: false, // 表单加载状态
       submitLoading: false, // 加载状态
-      searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-      },
+        searchForm: {
+          // 搜索框初始化对象
+          pageNumber: 1, // 当前页数
+          pageSize: 20, // 页面大小
+        },
       total: 0, // 总数
       selectList: [], // 多选数据
       selectCount: 0, // 多选计数

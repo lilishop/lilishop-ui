@@ -70,7 +70,7 @@ export default {
       params: {
         // 请求参数
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
       },
       pintuanColumns: [
         {

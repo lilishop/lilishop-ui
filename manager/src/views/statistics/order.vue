@@ -586,7 +586,7 @@ export default {
       this.overViewParams = callback;
       this.refundParams = callback;
       this.refundParams.pageNumber = 1
-      this.refundParams.pageSize = 10
+      this.refundParams.pageSize = 20
     },
 
     // 实例化订单概览

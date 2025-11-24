@@ -47,7 +47,7 @@
                   :page-size="searchMessageForm.pageSize"
                   @on-change="messageChangePage"
                   @on-page-size-change="messageChangePageSize"
-                  :page-size-opts="[10, 20, 50]"
+                  :page-size-opts="[20, 50, 100]"
                   size="small"
                   show-total
                   show-elevator
@@ -71,7 +71,7 @@
                   :page-size="searchForm.pageSize"
                   @on-change="changePage"
                   @on-page-size-change="changePageSize"
-                  :page-size-opts="[10, 20, 50]"
+                  :page-size-opts="[20, 50, 100]"
                   size="small"
                   show-total
                   show-elevator
@@ -241,7 +241,7 @@
               :page-size="searchShopMessageForm.pageSize"
               @on-change="shopMessageChangePage"
               @on-page-size-change="shopMessageChangePageSize"
-              :page-size-opts="[10, 20, 50]"
+              :page-size-opts="[20, 50, 100]"
               size="small"
               show-total
               show-elevator
@@ -268,7 +268,7 @@
               :page-size="searchMemberMessageForm.pageSize"
               @on-change="memberMessageChangePage"
               @on-page-size-change="memberMessageChangePageSize"
-              :page-size-opts="[10, 20, 50]"
+              :page-size-opts="[20, 50, 100]"
               size="small"
               show-total
               show-elevator
@@ -311,7 +311,7 @@
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
           sort: "createTime", // 默认排序字段
           order: "desc", // 默认排序方式
         },
@@ -329,19 +329,19 @@
         searchMessageForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
         },
         //发送给店铺的消息
         searchShopMessageForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
         },
         //发送给会员的消息
         searchMemberMessageForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
         },
         form: {
           noticeNode: "",

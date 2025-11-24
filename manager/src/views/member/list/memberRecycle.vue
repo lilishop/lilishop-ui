@@ -57,7 +57,7 @@
             :page-size="searchForm.pageSize"
             @on-change="changePage"
             @on-page-size-change="changePageSize"
-            :page-size-opts="[10, 20, 50]"
+            :page-size-opts="[20, 50, 100]"
             size="small"
             show-total
             show-elevator
@@ -171,7 +171,7 @@ export default {
       searchForm: {
         // 请求参数
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         order: "desc",
         username: "",
         mobile: "",
@@ -311,7 +311,7 @@ export default {
     // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getData();
     },
     //查看详情修改

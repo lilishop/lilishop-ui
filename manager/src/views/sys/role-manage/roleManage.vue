@@ -7,7 +7,7 @@
       </Row>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="pageNumber" :total="total" :page-size="pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total
+        <Page :current="pageNumber" :total="total" :page-size="pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]" size="small" show-total
           show-elevator show-sizer></Page>
       </Row>
     </Card>
@@ -230,7 +230,7 @@ export default {
       ],
       data: [], // 角色数据
       pageNumber: 1, // 页数
-      pageSize: 10, // 每页数量
+      pageSize: 20, // 每页数量
       total: 0, // 总数
       permData: [], // 菜单权限数据
       editRolePermId: "", // 编辑权限id

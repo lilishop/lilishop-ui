@@ -11,7 +11,7 @@
 
             <Row type="flex" justify="end" class="mt_10">
               <Page :current="smsSearchForm.pageNumber" :total="smsTotal" :page-size="smsSearchForm.pageSize" @on-change="smsChangePage" @on-page-size-change="smsChangePageSize"
-                :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator show-sizer></Page>
+                :page-size-opts="[20, 50, 100]" size="small" show-total show-elevator show-sizer></Page>
             </Row>
           </TabPane>
           <TabPane label="短信模板" name="TEMPLATE">
@@ -23,7 +23,7 @@
             </Table>
             <Row type="flex" justify="end" class="mt_10">
               <Page :current="templateSearchForm.pageNumber" :total="templateTotal" :page-size="templateSearchForm.pageSize" @on-change="templateChangePage"
-                @on-page-size-change="templateChangePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator show-sizer></Page>
+                @on-page-size-change="templateChangePageSize" :page-size-opts="[20, 50, 100]" size="small" show-total show-elevator show-sizer></Page>
             </Row>
           </TabPane>
           <TabPane label="短信签名" name="SIGN">
@@ -49,7 +49,7 @@
             </Table>
             <Row type="flex" justify="end" class="mt_10">
               <Page :current="signSearchForm.pageNumber" :total="signTotal" :page-size="signSearchForm.pageSize" @on-change="signChangePage" @on-page-size-change="signChangePageSize"
-                :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator show-sizer></Page>
+                :page-size-opts="[20, 50, 100]" size="small" show-total show-elevator show-sizer></Page>
             </Row>
           </TabPane>
         </Tabs>
@@ -181,12 +181,12 @@ export default {
       signSearchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
       },
       //短信模板查询form
       templateSearchForm: {
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
       },
       //会员条数查询form
       memberSearchFrom: {
@@ -203,7 +203,7 @@ export default {
         sort: "createTime",
         order: "desc",
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
       },
       smsForm: { // 短信模板数据
         smsName: "",

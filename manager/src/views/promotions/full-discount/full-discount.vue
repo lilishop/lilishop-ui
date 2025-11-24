@@ -95,7 +95,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -115,13 +115,13 @@ export default {
       selectDate: [],
       total: 0,
       loading: false, // 表单加载状态
-      searchForm: {
-        // 请求参数
-        pageNumber: 1,
-        pageSize: 10,
-        sort: "createTime",
-        order: "desc",
-      },
+        searchForm: {
+          // 请求参数
+          pageNumber: 1,
+          pageSize: 20,
+          sort: "createTime",
+          order: "desc",
+        },
       columns: [
         // 表头
         {
@@ -209,7 +209,7 @@ export default {
     handleSearch() {
       // 搜索
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
     // 获取列表数据

@@ -65,7 +65,7 @@
         :total="total"
         show-sizer
         size="small"
-        :page-size-opts="[10, 20, 50]"
+        :page-size-opts="[20, 50, 100]"
         show-elevator
         style="float: right; overflow: hidden"
         @on-change="changePageNum"
@@ -109,7 +109,7 @@ export default {
       },
       searchForm: {
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         sort: "createTime",
         order: "desc",
         pageType: "INDEX",

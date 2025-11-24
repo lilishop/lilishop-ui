@@ -93,14 +93,14 @@
                 :current="pointSearchForm.pageNumber"
                 :total="pointTotal"
                 :page-size="pointSearchForm.pageSize"
-                @on-change="pointChangePage"
-                @on-page-size-change="pointChangePageSize"
-                :page-size-opts="[10, 20, 50]"
-                size="small"
-                show-total
-                show-elevator
-                show-sizer
-              ></Page>
+              @on-change="pointChangePage"
+              @on-page-size-change="pointChangePageSize"
+              :page-size-opts="[20, 50, 100]"
+              size="small"
+              show-total
+              show-elevator
+              show-sizer
+            ></Page>
             </Row>
           </div>
         </TabPane>
@@ -180,14 +180,14 @@
                 :current="orderSearchForm.pageNumber"
                 :total="orderTotal"
                 :page-size="orderSearchForm.pageSize"
-                @on-change="orderChangePage"
-                @on-page-size-change="orderChangePageSize"
-                :page-size-opts="[10, 20, 50]"
-                size="small"
-                show-total
-                show-elevator
-                show-sizer
-              ></Page>
+              @on-change="orderChangePage"
+              @on-page-size-change="orderChangePageSize"
+              :page-size-opts="[20, 50, 100]"
+              size="small"
+              show-total
+              show-elevator
+              show-sizer
+            ></Page>
             </Row>
           </div>
         </TabPane>
@@ -210,7 +210,7 @@
               :page-size="addressSearchForm.pageSize"
               @on-change="addressChangePage"
               @on-page-size-change="addressChangePageSize"
-              :page-size-opts="[10, 20, 50]"
+              :page-size-opts="[20, 50, 100]"
               size="small"
               show-total
               show-elevator
@@ -259,7 +259,7 @@
               :page-size="walletSearchForm.pageSize"
               @on-change="walletChangePage"
               @on-page-size-change="walletChangePageSize"
-              :page-size-opts="[10, 20, 50]"
+              :page-size-opts="[20, 50, 100]"
               size="small"
               show-total
               show-elevator
@@ -304,7 +304,7 @@
               :page-size="receiptRecordSearchForm.pageSize"
               @on-change="walletChangePage"
               @on-page-size-change="walletChangePageSize"
-              :page-size-opts="[10, 20, 50]"
+              :page-size-opts="[20, 50, 100]"
               size="small"
               show-total
               show-elevator
@@ -438,7 +438,7 @@
         //历史积分数据查询form
         pointSearchForm: {
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
         },
         orderColumns: [
           {
@@ -610,7 +610,7 @@
         //TA的订单form
         orderSearchForm: {
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
           payStatus: "",
           orderSn: "",
           orderType: "",
@@ -671,7 +671,7 @@
         //TA的收货地址form
         addressSearchForm: {
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
         },
         //消费记录
         walletColumns: [
@@ -725,7 +725,7 @@
         //TA的余额消费记录
         walletSearchForm: {
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
           sort: "createTime", // 默认排序字段
           order: "desc", // 默认排序方式
         },
@@ -734,7 +734,7 @@
         //TA的发票记录
         receiptRecordSearchForm: {
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
           sort: "createTime", // 默认排序字段
           order: "desc", // 默认排序方式
         },
@@ -853,6 +853,8 @@
       //查询TA的发票记录
       getReceiptRecordData(){
         this.loading = true;
+        this.receiptRecordSearchForm.pageNumber = 1;
+        this.receiptRecordSearchForm.pageSize = 20;
         this.receiptRecordSearchForm.memberId = this.id
         API_Order.getReceiptPage(this.receiptRecordSearchForm).then((res) => {
           this.loading = false;
@@ -867,6 +869,8 @@
       //查询TA的订单
       getOrderData() {
         this.loading = true;
+        this.orderSearchForm.pageNumber = 1;
+        this.orderSearchForm.pageSize = 20;
         this.orderSearchForm.memberId = this.id
         API_Order.getOrderList(this.orderSearchForm).then((res) => {
           this.loading = false;

@@ -44,7 +44,7 @@
         :current="params.pageNumber"
         :page-size="params.pageSize"
         show-sizer
-        :page-size-opts="[10, 20, 50]"
+        :page-size-opts="[20, 50, 100]"
         @on-page-size-change="changePageSize"
       />
     </Card>
@@ -95,7 +95,7 @@ export default {
       params: {
         // 请求参数
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         sort: "createTime",
         order: "desc",
         pageType: "INDEX",
