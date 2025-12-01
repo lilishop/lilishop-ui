@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { getPwdStatus } from '@/api/account';
+// import { getPwdStatus } from '@/api/account';
 export default {
   name: 'AccountSafe',
   data () {
@@ -40,15 +40,15 @@ export default {
       this.$router.push({name: 'ModifyPwd', query: { status: 1 }})
     },
     // 获取密码状态
-    getPwdStatus () {
-      getPwdStatus().then(res => {
-        if (res) {
-          this.pwdStatus = '修改密码'
-        } else {
-          this.pwdStatus = '设置密码'
-        }
-      });
-    }
+    // getPwdStatus () {
+    //   getPwdStatus().then(res => {
+    //     if (res) {
+    //       this.pwdStatus = '修改密码'
+    //     } else {
+    //       this.pwdStatus = '设置密码'
+    //     }
+    //   });
+    // }
   }
 }
 </script>
