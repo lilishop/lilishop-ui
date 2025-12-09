@@ -371,7 +371,7 @@ export const refundPriceStatistics = params => {
 
 //下载结算单
 export const downLoadGoods = () => {
-  return getRequest(`/goods/import/downLoad/`, {}, 'blob')
+  return getRequest(`/goods/import/downLoad`, {}, 'blob')
 }
 
 // 上传待发货的订单列表
