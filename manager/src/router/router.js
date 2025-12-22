@@ -98,6 +98,12 @@ export const otherRouter = {
       component: () => import("@/views/goods/goods-manage/parameter.vue")
     },
     {
+      path: "goods-parameter-edit",
+      title: "商品参数维护",
+      name: "goods-parameter-edit",
+      component: () => import("@/views/goods/goods-manage/parameter-edit.vue")
+    },
+    {
       path: "goods-spec",
       title: "商品参数",
       name: "goods-spec",

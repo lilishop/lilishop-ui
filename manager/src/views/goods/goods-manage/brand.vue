@@ -26,12 +26,47 @@
           <Input v-model="form.name" clearable style="width: 100%"/>
         </FormItem>
         <FormItem label="品牌图标" prop="logo">
-          <upload-pic-input v-model="form.logo" style="width: 100%"></upload-pic-input>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <img
+              :src="form.logo || defaultPic"
+              alt="品牌图标"
+              style="width: 80px; height: 60px; object-fit: contain; border: 1px solid #dcdee2; border-radius: 4px; background: #fff;"
+            />
+            <Button type="text" @click="openLogoPicker">修改</Button>
+          </div>
         </FormItem>
       </Form>
       <div slot="footer">
         <Button type="text" @click="modalVisible = false">取消</Button>
         <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
+      </div>
+    </Modal>
+
+    <Modal width="1200px" v-model="picModelFlag" footer-hide>
+      <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage" />
+    </Modal>
+
+    <Modal
+      :title="categoryModalTitle"
+      v-model="categoryModalVisible"
+      :mask-closable="false"
+      :width="700"
+    >
+      <div style="position: relative; max-height: 520px; overflow: auto;">
+        <Spin size="large" fix v-if="categoryTreeLoading"></Spin>
+        <Tree
+          ref="categoryTree"
+          :key="categoryTreeKey"
+          :data="categoryTreeData"
+          show-checkbox
+          @on-check-change="onCategoryTreeCheckChange"
+        ></Tree>
+      </div>
+      <div slot="footer">
+        <Button type="text" @click="categoryModalVisible = false">取消</Button>
+        <Button type="primary" :loading="categorySubmitLoading" @click="submitBrandCategory"
+          >提交</Button
+        >
       </div>
     </Modal>
   </div>
@@ -44,22 +79,35 @@ import {
   updateBrand,
   disableBrand,
   delBrand,
+  getCategoryTree,
+  getBrandCategoryListData,
+  saveBrandCategory,
 } from "@/api/goods";
-import uploadPicInput from "@/components/lili/upload-pic-input";
+import ossManage from "@/views/sys/oss-manage/ossManage";
 
 import {regular} from "@/utils";
 
 export default {
   name: "brand",
   components: {
-    uploadPicInput
+    ossManage
   },
   data() {
     return {
+      defaultPic: require("@/assets/default.png"),
       loading: true, // 表单加载状态
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
+      picModelFlag: false, // 图片选择器
+      categoryModalVisible: false,
+      categoryModalTitle: "关联分类",
+      categoryTreeLoading: false,
+      categoryTreeData: [],
+      categoryTreeKey: 0,
+      categorySubmitLoading: false,
+      currentBrandId: "",
+      selectedCategoryIds: [],
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
@@ -118,11 +166,24 @@ export default {
           key: "deleteFlag",
           align: "left",
           render: (h, params) => {
-            if (params.row.deleteFlag == 0) {
-              return h("Tag", {props: {color: "green",},}, "启用");
-            } else if (params.row.deleteFlag == 1) {
-              return h("Tag", {props: {color: "volcano",},}, "禁用");
-            }
+            return h(
+              "i-switch",
+              {
+                props: {
+                  value: params.row.deleteFlag == 0,
+                  size: "large",
+                },
+                on: {
+                  "on-change": (checked) => {
+                    this.handleStatusSwitchChange(params.row, checked);
+                  },
+                },
+              },
+              [
+                h("span", { slot: "open" }, "启用"),
+                h("span", { slot: "close" }, "禁用"),
+              ]
+            );
           },
           filters: [
             {
@@ -146,48 +207,10 @@ export default {
         {
           title: "操作",
           key: "action",
-          width: 180,
+          width: 210,
           align: "center",
           fixed: "right",
           render: (h, params) => {
-            let enableOrDisable = "";
-            if (params.row.deleteFlag == 0) {
-              enableOrDisable = h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.disable(params.row);
-                    },
-                  },
-                },
-                "禁用"
-              );
-            } else {
-              enableOrDisable = h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.enable(params.row);
-                    },
-                  },
-                },
-                "启用"
-              );
-            }
             return h("div", [
               h(
                 "a",
@@ -196,7 +219,6 @@ export default {
                     color: "#2d8cf0",
                     cursor: "pointer",
                     textDecoration: "none",
-                    marginRight: "5px",
                   },
                   on: {
                     click: () => {
@@ -211,7 +233,22 @@ export default {
                 { style: { margin: "0 8px", color: "#dcdee2" } },
                 "|"
               ),
-              enableOrDisable,
+              h(
+                "a",
+                {
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
+                  },
+                  on: {
+                    click: () => {
+                      this.openCategoryModal(params.row);
+                    },
+                  },
+                },
+                "关联分类"
+              ),
               h(
                 "span",
                 { style: { margin: "0 8px", color: "#dcdee2" } },
@@ -242,6 +279,100 @@ export default {
     };
   },
   methods: {
+    openLogoPicker() {
+      this.$refs.ossManage.selectImage = true;
+      this.picModelFlag = true;
+    },
+    callbackSelected(val) {
+      this.picModelFlag = false;
+      this.form.logo = val.url;
+    },
+    buildCategoryTreeNodes(list, selectedSet) {
+      if (!Array.isArray(list) || list.length === 0) return [];
+      return list.map((item) => {
+        const children = this.buildCategoryTreeNodes(item.children || [], selectedSet);
+        return {
+          id: item.id,
+          title: item.name,
+          expand: true,
+          checked: selectedSet.has(item.id),
+          children,
+        };
+      });
+    },
+    async openCategoryModal(row) {
+      this.currentBrandId = row.id;
+      this.categoryModalTitle = "关联分类 - " + (row.name || "");
+      this.categoryModalVisible = true;
+      this.categoryTreeLoading = true;
+      this.categoryTreeKey += 1;
+      this.categoryTreeData = [];
+      this.selectedCategoryIds = [];
+      try {
+        const [treeRes, bindRes] = await Promise.all([
+          getCategoryTree(),
+          getBrandCategoryListData(row.id),
+        ]);
+        const selectedIds = Array.isArray(bindRes?.result)
+          ? bindRes.result
+              .map((x) => (typeof x === "string" ? x : x && x.id))
+              .filter(Boolean)
+          : [];
+        this.selectedCategoryIds = selectedIds;
+        const selectedSet = new Set(selectedIds);
+        this.categoryTreeData = treeRes && treeRes.success
+          ? this.buildCategoryTreeNodes(treeRes.result || [], selectedSet)
+          : [];
+      } finally {
+        this.categoryTreeLoading = false;
+      }
+    },
+    onCategoryTreeCheckChange(checkedNodes) {
+      if (!Array.isArray(checkedNodes)) {
+        this.selectedCategoryIds = [];
+        return;
+      }
+      this.selectedCategoryIds = checkedNodes
+        .map((node) => node && node.id)
+        .filter(Boolean);
+    },
+    submitBrandCategory() {
+      if (!this.currentBrandId) return;
+      this.categorySubmitLoading = true;
+      saveBrandCategory(
+        this.currentBrandId,
+        (this.selectedCategoryIds || []).map((id) => String(id))
+      ).then((res) => {
+        this.categorySubmitLoading = false;
+        if (res && res.success) {
+          this.$Message.success("操作成功");
+          this.categoryModalVisible = false;
+          return;
+        }
+      }).catch(() => {
+        this.categorySubmitLoading = false;
+      });
+    },
+    handleStatusSwitchChange(row, checked) {
+      const disable = !checked;
+      this.$Modal.confirm({
+        title: disable ? "确认禁用" : "确认启用",
+        content: "您确认要" + (disable ? "禁用" : "启用") + "品牌 " + row.name + " ?",
+        loading: true,
+        onOk: () => {
+          disableBrand(row.id, { disable }).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success("操作成功");
+            }
+            this.getDataList();
+          });
+        },
+        onCancel: () => {
+          this.$nextTick(() => this.$forceUpdate());
+        },
+      });
+    },
     // 删除品牌
     async delBrand(id) {
       let res = await delBrand(id);
@@ -336,40 +467,6 @@ export default {
       let data = JSON.parse(str);
       this.form = data;
       this.modalVisible = true;
-    },
-    // 启用品牌
-    enable(v) {
-      this.$Modal.confirm({
-        title: "确认启用",
-        content: "您确认要启用品牌 " + v.name + " ?",
-        loading: true,
-        onOk: () => {
-          disableBrand(v.id, {disable: false}).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-    // 禁用
-    disable(v) {
-      this.$Modal.confirm({
-        title: "确认禁用",
-        content: "您确认要禁用品牌 " + v.name + " ?",
-        loading: true,
-        onOk: () => {
-          disableBrand(v.id, {disable: true}).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
     },
   },
   mounted() {

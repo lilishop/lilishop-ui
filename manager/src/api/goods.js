@@ -32,6 +32,26 @@ export const getCategoryBrandListData = (category_id, params) => {
 export const saveCategoryBrand = (category_id, params) => {
     return postRequest(`/goods/categoryBrand/${category_id}`, params)
 }
+// 根据品牌id获取关联分类
+export const getBrandCategoryListData = (brand_id, params) => {
+    return getRequest(`/goods/categoryBrand/${brand_id}`, params)
+}
+// 保存品牌分类关联
+export const saveBrandCategory = (brand_id, categoryIds) => {
+    return postRequest(`/goods/categoryBrand/${brand_id}`, categoryIds, {
+      "Content-Type": "application/json"
+    })
+}
+
+export const getParameterCategoryListData = (parameter_id, params) => {
+    return getRequest(`/goods/parameters/category/${parameter_id}`, params)
+}
+
+export const saveParameterCategory = (parameter_id, categoryIds) => {
+    return postRequest(`/goods/parameters/category/${parameter_id}`, categoryIds, {
+      "Content-Type": "application/json"
+    })
+}
 //保存获取关联规格
 export const saveCategorySpec = (category_id, params) => {
     return postRequest(`/goods/categorySpec/${category_id}`, params)
@@ -140,17 +160,28 @@ export const getCategoryParamsListData = (id, params) => {
     return getRequest(`/goods/categoryParameters/${id}`, params)
 }
 
+// 参数组分页列表
+export const getCategoryParametersGroupPage = (params) => {
+    return getRequest(`/goods/categoryParameters`, params)
+}
+
 //查询商品绑定参数信息
 export const getCategoryParamsByGoodsId = (goodsId, categoryId) => {
     return getRequest(`/goods/parameters/${goodsId}/${categoryId}`)
 }
+export const getGoodsParamsPage = (params) => {
+    return getRequest(`/goods/parameters`, params)
+}
+export const getGoodsParamsDetail = (id, params) => {
+    return getRequest(`/goods/parameters/${id}`, params)
+}
 //保存参数
-export const insertGoodsParams = (params) => {
-    return postRequest('/goods/parameters', params)
+export const insertGoodsParams = (params, headers) => {
+    return postRequest('/goods/parameters', params, headers)
 }
 //更新参数
-export const updateGoodsParams = (params) => {
-    return putRequest('/goods/parameters', params)
+export const updateGoodsParams = (params, headers) => {
+    return putRequest('/goods/parameters', params, headers)
 }
 //删除参数
 export const deleteParams = (id, params) => {

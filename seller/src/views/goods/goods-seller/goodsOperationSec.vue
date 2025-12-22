@@ -32,10 +32,8 @@
               <Button class="refresh-icon" icon="md-refresh" shape="circle" type="text"
                 @click="refresh('brand')"></Button>
             </FormItem>
-          </div>
-          <h4>商品交易信息</h4>
-          <div class="form-item-view">
-            <FormItem class="form-item-view-el" label="计量单位" prop="goodsUnit">
+             
+              <FormItem class="form-item-view-el" label="计量单位" prop="goodsUnit">
               <Select v-model="baseInfoForm.goodsUnit" style="width: 100px">
                 <Option v-for="(item, index) in goodsUnitList" :key="index" :value="item">{{ item }}
                 </Option>
@@ -97,7 +95,18 @@
                 </div>
               </div>
             </FormItem>
+            <FormItem class="form-item-view-el" label="商品发布" prop="release">
+                <RadioGroup v-model="baseInfoForm.release" button-style="solid" type="button">
+                  <Radio :label="1" title="上架">
+                    <span>上架</span>
+                  </Radio>
+                  <Radio :label="0" title="下架">
+                    <span>下架</span>
+                  </Radio>
+                </RadioGroup>
+              </FormItem>
           </div>
+
           <h4>商品规格及图片</h4>
           <div class="form-item-view">
             <FormItem class="form-item-view-el required" label="主图" prop="goodsGalleryFiles">
@@ -380,56 +389,18 @@
                 <span slot="append">kg</span></Input>
               </FormItem>
             </div>
-            <h4>其他信息</h4>
+            <h4>参数信息</h4>
             <div class="form-item-view">
-              <FormItem class="form-item-view-el" label="商品发布" prop="release">
-                <RadioGroup v-model="baseInfoForm.release" button-style="solid" type="button">
-                  <Radio :label="1" title="立即发布">
-                    <span>立即发布</span>
-                  </Radio>
-                  <Radio :label="0" title="放入仓库">
-                    <span>放入仓库</span>
-                  </Radio>
-                </RadioGroup>
+              <FormItem v-for="(paramsItem, paramsIndex) in goodsParams" :key="paramsItem.id || paramsIndex"
+                :label="`${paramsItem.paramName}：`"
+                :rules="{ required: !!paramsItem.required, message: '参数不能为空', trigger: 'change' }">
+                <Select v-model="paramsItem.paramValue" clearable placeholder="请选择" style="width: 200px"
+                  @on-change="(val) => selectParams(paramsItem, val)">
+                  <Option v-for="option in getParamOptions(paramsItem.options)" :key="option" :label="option"
+                    :value="option">
+                  </Option>
+                </Select>
               </FormItem>
-              <FormItem class="form-item-view-el" label="商品推荐" prop="skuList">
-                <RadioGroup v-model="baseInfoForm.recommend" button-style="solid" type="button">
-                  <Radio :label="1" title="推荐">
-                    <span>推荐</span>
-                  </Radio>
-                  <Radio :label="0" title="不推荐">
-                    <span>不推荐</span>
-                  </Radio>
-                </RadioGroup>
-              </FormItem>
-            </div>
-            <div class="form-item-view-bottom">
-              <Collapse v-for="(paramsGroup, groupIndex) in goodsParams" :key="paramsGroup.groupName"
-                v-model="params_panel" :title="paramsGroup.groupName" class="mb_10" style="text-align: left">
-                <Panel :name="paramsGroup.groupName">
-                  {{ paramsGroup.groupName }}
-                  <p slot="content">
-                    <FormItem v-for="(paramsItem, paramsIndex) in paramsGroup.params" :key="paramsIndex"
-                      :label="`${paramsItem.paramName}：`"
-                      :rules="{ required: paramsItem.required, message: '参数不能为空', trigger: 'blur' }">
-                      <Select v-model="paramsItem.paramValue" clearable placeholder="请选择" style="width: 200px"
-                        @on-change="
-                          selectParams(
-                            paramsGroup,
-                            groupIndex,
-                            paramsItem,
-                            paramsIndex,
-                            paramsItem.paramValue
-                          )
-                          ">
-                        <Option v-for="option in paramsItem.options.split(',')" :key="option" :label="option"
-                          :value="option">
-                        </Option>
-                      </Select>
-                    </FormItem>
-                  </p>
-                </Panel>
-              </Collapse>
             </div>
           </div>
         </div>
@@ -442,7 +413,6 @@
         <Button :loading="submitLoading" type="primary" @click="save">
           {{ this.$route.query.id ? "保存" : "保存商品" }}
         </Button>
-        <Button type="primary" @click="saveToDraft">保存为模版</Button>
       </ButtonGroup>
     </div>
 
@@ -519,7 +489,7 @@ export default {
       previewImage: '', // 预览图片地址
       global: 0,
       accessToken: "", //令牌token
-      goodsParams: "",
+      goodsParams: [],
       categoryId: "", // 商品分类第三级id
       //提交状态
       submitLoading: false,
@@ -763,54 +733,41 @@ export default {
     mouseLeave() {
       // this.showContent = false
     },
-    /**
-     * 选择参数
-     * @paramsGroup 参数分组
-     * @groupIndex 参数分组下标
-     * @params 参数选项
-     * @paramIndex 参数下标值
-     * @value 参数选项值
-     */
-    selectParams(paramsGroup, groupIndex, params, paramsIndex, value) {
-      if (!this.baseInfoForm.goodsParamsDTOList[groupIndex]) {
-        this.baseInfoForm.goodsParamsDTOList[groupIndex] = {
-          groupId: "",
-          groupName: "",
-          goodsParamsItemDTOList: [],
-        };
+    getParamOptions(options) {
+      if (!options) return [];
+      return String(options)
+        .split(",")
+        .map((i) => i.trim())
+        .filter((i) => i);
+    },
+    selectParams(params, value) {
+      if (!Array.isArray(this.baseInfoForm.goodsParamsDTOList)) {
+        this.$set(this.baseInfoForm, "goodsParamsDTOList", []);
       }
-      //赋予分组id、分组名称
-      this.baseInfoForm.goodsParamsDTOList[groupIndex].groupId =
-        paramsGroup.groupId;
-      this.baseInfoForm.goodsParamsDTOList[groupIndex].groupName =
-        paramsGroup.groupName;
+      const list = this.baseInfoForm.goodsParamsDTOList;
+      const paramId = params && params.id ? String(params.id) : "";
+      const index = list.findIndex((i) => String(i.paramId) === paramId);
 
-      //参数详细为空，则赋予
-      if (
-        !this.baseInfoForm.goodsParamsDTOList[groupIndex]
-          .goodsParamsItemDTOList[paramsIndex]
-      ) {
-        this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[
-          paramsIndex
-        ] = {
-          paramName: "",
-          paramValue: "",
-          isIndex: "",
-          // required: "",
-          paramId: "",
-          sort: "",
-        };
+      if (!value && value !== 0) {
+        if (index >= 0) {
+          list.splice(index, 1);
+        }
+        return;
       }
-      this.baseInfoForm.goodsParamsDTOList[groupIndex].goodsParamsItemDTOList[
-        paramsIndex
-      ] = {
+      const newItem = {
+        paramId,
         paramName: params.paramName,
         paramValue: value,
-        isIndex: params.isIndex,
-        // required: params.required,
-        paramId: params.id,
-        sort: params.sort,
+        isIndex: params.isIndex || 0,
+        required: params.required || 0,
+        sort: params.sort || 0,
       };
+
+      if (index >= 0) {
+        this.$set(list, index, newItem);
+      } else {
+        list.push(newItem);
+      }
     },
     // 编辑sku图片
     editSkuPicture(row) {
@@ -1191,40 +1148,75 @@ export default {
 
     /** 根据当前分类id查询商品应包含的参数 */
     GET_GoodsParams() {
-      this.goodsParams = []
+      this.goodsParams = [];
+      this.params_panel = [];
       API_GOODS.getCategoryParamsListDataSeller(this.categoryId).then(
         (response) => {
           if (!response || response.length <= 0) {
             return;
           }
-          this.goodsParams = response;
 
-          //展开选项卡
-          this.goodsParams.forEach((item) => {
-            this.params_panel.push(item.groupName);
-          });
-          if (this.baseInfoForm.goodsParamsDTOList) {
-            // 已选值集合
-            const paramsArr = [];
-            this.baseInfoForm.goodsParamsDTOList.forEach((group) => {
-              group.goodsParamsItemDTOList.forEach((param) => {
-                param.groupId = group.groupId;
-                paramsArr.push(param);
-              });
-            });
-            // 循环参数分组
-            this.goodsParams.forEach((paramsGroup) => {
-              paramsGroup.params.forEach((param) => {
-                paramsArr.forEach((arr) => {
-                  if (param.paramName === arr.paramName) {
-                    param.paramValue = arr.paramValue;
-                  }
-                });
-              });
-            });
-          } else {
+          if (!Array.isArray(this.baseInfoForm.goodsParamsDTOList)) {
             this.baseInfoForm.goodsParamsDTOList = [];
           }
+
+          const mergedSelected = new Map();
+          const selectedList = [];
+          this.baseInfoForm.goodsParamsDTOList.forEach((item) => {
+            if (!item) return;
+            if (Array.isArray(item.goodsParamsItemDTOList)) {
+              selectedList.push(...item.goodsParamsItemDTOList);
+            } else if (item.paramId || item.paramName) {
+              selectedList.push(item);
+            }
+          });
+          selectedList.forEach((param) => {
+            if (!param) return;
+              const key = param.paramId ? String(param.paramId) : param.paramName;
+              if (!key) return;
+              mergedSelected.set(key, param);
+          });
+
+          this.baseInfoForm.goodsParamsDTOList = Array.from(mergedSelected.values()).map((p) => {
+            return {
+              paramId: p.paramId ? String(p.paramId) : "",
+              paramName: p.paramName,
+              paramValue: p.paramValue,
+              isIndex: p.isIndex || 0,
+              required: p.required || 0,
+              sort: p.sort || 0,
+            };
+          });
+
+          const findSelectedValue = (param) => {
+            if (!param) return undefined;
+            const byId = mergedSelected.get(String(param.id));
+            if (byId) return byId.paramValue;
+            const byName = mergedSelected.get(param.paramName);
+            if (byName) return byName.paramValue;
+            return undefined;
+          };
+
+          const isGrouped = response[0] && Array.isArray(response[0].params);
+          const flatParams = isGrouped
+            ? response.reduce((acc, g) => {
+              if (g && Array.isArray(g.params)) {
+                acc.push(...g.params);
+              }
+              return acc;
+            }, [])
+            : response;
+
+          this.goodsParams = flatParams
+            .map((p) => {
+              const selectedValue = findSelectedValue(p);
+              return {
+                ...p,
+                paramValue:
+                  selectedValue !== undefined ? selectedValue : p.paramValue,
+              };
+            })
+            .sort((a, b) => Number(a.sort || 0) - Number(b.sort || 0));
         }
       );
     },
@@ -1935,18 +1927,16 @@ export default {
         return;
       }
       let checkFlag = false;
-      this.goodsParams.forEach(group => {
-        group.params.forEach(param => {
-          if (param.required) {
-            const check = this.baseInfoForm.goodsParamsDTOList.some(paramsGroup =>
-              paramsGroup.goodsParamsItemDTOList.some(paramsItem => paramsItem.paramId === param.id)
-            );
-            if (!check) {
-              checkFlag = !check;
-            }
-          }
-        })
-      })
+      this.goodsParams.forEach((param) => {
+        if (!param || !param.required) return;
+        const check = this.baseInfoForm.goodsParamsDTOList.some((paramsItem) => {
+          if (String(paramsItem.paramId) !== String(param.id)) return false;
+          return !!paramsItem.paramValue;
+        });
+        if (!check) {
+          checkFlag = true;
+        }
+      });
       if (checkFlag) {
         this.$Message.error("存在未填写的参数项");
         return;
@@ -2075,57 +2065,6 @@ export default {
           this.submitLoading = false;
 
           this.$Message.error("还有必填项未做处理，请检查表单");
-        }
-      });
-    },
-    /** 保存为模板 */
-    saveToDraft() {
-      this.baseInfoForm.skuList = this.skuTableData;
-      if (this.baseInfoForm.goodsGalleryFiles.length > 0) {
-        this.baseInfoForm.goodsGalleryList =
-          this.baseInfoForm.goodsGalleryFiles.map((i) => i);
-      }
-      this.baseInfoForm.categoryName = [];
-      this.baseInfoForm.saveType = "TEMPLATE";
-
-      if (this.$route.query.draftId) {
-        this.baseInfoForm.id = this.$route.query.draftId;
-        this.$Modal.confirm({
-          title: "当前模板已存在",
-          content: "当前模板已存在，保存为新模板或替换原模板",
-          okText: "保存新模板",
-          cancelText: "替换旧模板",
-          closable: true,
-          onOk: () => {
-            delete this.baseInfoForm.id;
-            this.SAVE_DRAFT_GOODS();
-          },
-          onCancel: () => {
-            this.SAVE_DRAFT_GOODS();
-          },
-        });
-        return;
-      }
-
-      this.$Modal.confirm({
-        title: "保存模板",
-        content: "是否确定保存",
-        okText: "保存",
-        closable: true,
-        onOk: () => {
-          this.SAVE_DRAFT_GOODS();
-        },
-      });
-    },
-    SAVE_DRAFT_GOODS() {
-      if (this.baseInfoForm.salesModel === "WHOLESALE") {
-        this.baseInfoForm.wholesaleList = this.wholesaleData;
-      }
-      // 保存模板
-      API_GOODS.saveDraftGoods(this.baseInfoForm).then((res) => {
-        if (res.success) {
-          this.$Message.info("保存成功！");
-          this.$router.push({ name: "template-goods" });
         }
       });
     },

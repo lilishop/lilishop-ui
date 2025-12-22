@@ -2,7 +2,7 @@
   <div>
     <!-- 选择商品类型 -->
     <Modal v-model="selectGoodsType" width="550" :closable="false">
-      <div class="goods-type-list" v-if="!showGoodsTemplates">
+      <div class="goods-type-list">
         <div
           class="goods-type-item"
           :class="{ 'active-goods-type': item.check }"
@@ -15,25 +15,6 @@
             <h2>{{ item.title }}</h2>
             <p>{{ item.desc }}</p>
           </div>
-        </div>
-      </div>
-      <div v-else class="goods-type-list">
-        <h2 @click="showGoodsTemplates = !showGoodsTemplates">返回</h2>
-        <div class="goods-list-box">
-          <Scroll :on-reach-bottom="handleReachBottom">
-            <div
-              class="goods-type-item template-item"
-              @click="handleClickGoodsTemplate(item)"
-              v-for="(item, tempIndex) in goodsTemplates"
-              :key="tempIndex"
-            >
-              <img :src="item.thumbnail" />
-              <div>
-                <h2>{{ item.goodsName }}</h2>
-                <p>{{ item.sellingPoint || "" }}</p>
-              </div>
-            </div>
-          </Scroll>
         </div>
       </div>
     </Modal>
@@ -79,9 +60,6 @@
         <span v-show="category[1].name">> {{ category[1].name }}</span>
         <span v-show="category[2].name">> {{ category[2].name }}</span>
       </p>
-      <template v-if="selectedTemplate.goodsName">
-        <Divider>已选商品模版:{{ selectedTemplate.goodsName }}</Divider>
-      </template>
     </div>
     <!-- 底部按钮 -->
     <div class="footer">
@@ -97,10 +75,7 @@ import * as API_GOODS from "@/api/goods";
 export default {
   data() {
     return {
-      selectedTemplate: {}, // 已选模板
       selectGoodsType: false, // 展示选择商品分类modal
-      goodsTemplates: [], // 商品模板列表
-      showGoodsTemplates: false, //是否显示选择商品模板
       goodsTypeWay: [
         {
           title: "实物商品",
@@ -114,12 +89,6 @@ export default {
           img: require("@/assets/goodsType2.png"),
           desc: "虚拟核验，无需物流",
           type: "VIRTUAL_GOODS",
-          check: false,
-        },
-        {
-          title: "商品模板导入",
-          img: require("@/assets/goodsTypeTpl.png"),
-          desc: "商品模板，一键导入",
           check: false,
         },
       ],
@@ -137,29 +106,9 @@ export default {
       categoryListLevel2: [],
       /** 3级分类列表*/
       categoryListLevel3: [],
-      searchParams: {
-        saveType: "TEMPLATE",
-        sort: "create_time",
-        order: "desc",
-        pageSize: 10,
-        pageNumber: 1,
-      },
-      templateTotal: 0,
     };
   },
   methods: {
-    // 商品模版触底加载
-    handleReachBottom() {
-      setTimeout(() => {
-        if (
-          this.searchParams.pageNumber * this.searchParams.pageSize <=
-          this.templateTotal
-        ) {
-          this.searchParams.pageNumber++;
-          this.GET_GoodsTemplate();
-        }
-      }, 1000);
-    },
     // 点击商品类型
     handleClickGoodsType(val) {
       this.goodsTypeWay.map((item) => {
@@ -167,28 +116,7 @@ export default {
       });
 
       val.check = !val.check;
-      if (!val.type) {
-        this.GET_GoodsTemplate();
-        this.showGoodsTemplates = true;
-      } else {
-        this.goodsType = val.type;
-        this.selectedTemplate = {};
-      }
-    },
-    // 点击商品模板
-    handleClickGoodsTemplate(val) {
-      this.selectedTemplate = val;
-      this.selectGoodsType = false;
-      this.$emit("change", { tempId: val.id });
-    },
-    // 获取商品模板
-    GET_GoodsTemplate() {
-      API_GOODS.getDraftGoodsListData(this.searchParams).then((res) => {
-        if (res.success) {
-          this.goodsTemplates.push(...res.result.records);
-          this.templateTotal = res.result.total;
-        }
-      });
+      this.goodsType = val.type;
     },
     /** 选择商城商品分类 */
     handleSelectCategory(row, index, level) {
@@ -223,7 +151,7 @@ export default {
     // 下一步
     next() {
       window.scrollTo(0, 0);
-      if (!this.goodsType && !this.selectedTemplate.goodsName) {
+      if (!this.goodsType) {
         this.$Message.error("请选择商品类型");
         return;
       }
@@ -238,12 +166,7 @@ export default {
           category: this.category,
           goodsType: this.goodsType,
         };
-        if (this.selectedTemplate.id) {
-          params.tempId = this.selectedTemplate.id;
-          this.$emit("change", params);
-        } else {
-          this.$emit("change", params);
-        }
+        this.$emit("change", params);
       }
     },
   },
@@ -254,7 +177,4 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "./addGoods.scss";
-::v-deep .ivu-scroll-container {
-  height: 450px !important;
-}
 </style>

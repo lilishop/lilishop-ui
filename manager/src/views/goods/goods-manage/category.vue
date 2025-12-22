@@ -14,32 +14,14 @@
         :columns="columns"
       >
         <template slot="action" slot-scope="scope">
-          <Dropdown v-show="scope.row.level == 2" trigger="click">
-            <a class="ops-link">
-              绑定
-              <Icon type="ios-arrow-down"></Icon>
-            </a>
-            <DropdownMenu slot="list">
-              <DropdownItem @click.native="brandOperation(scope.row)">编辑绑定品牌</DropdownItem>
-              <DropdownItem @click.native="specOperation(scope.row)">编辑绑定规格</DropdownItem>
-              <DropdownItem @click.native="parameterOperation(scope.row)">编辑绑定参数</DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
-          <span class="ops-sep">|</span>
-          <Dropdown trigger="click">
-            <a class="ops-link">
-              操作
-              <Icon type="ios-arrow-down"></Icon>
-            </a>
-            <DropdownMenu slot="list">
-              <DropdownItem @click.native="edit(scope.row)">编辑</DropdownItem>
-              <DropdownItem v-if="scope.row.deleteFlag == 1" @click.native="enable(scope.row)">启用</DropdownItem>
-              <DropdownItem v-if="scope.row.deleteFlag == 0" @click.native="disable(scope.row)">禁用</DropdownItem>
-              <DropdownItem @click.native="remove(scope.row)">删除</DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
-          <span v-if="scope.row.level != 2" class="ops-sep">|</span>
-          <a v-show="scope.row.level != 2" class="ops-link" @click="addChildren(scope.row)">添加子分类</a>
+          <div class="ops">
+            <template v-if="scope.row.level == 2">
+              <a class="ops-link" @click="parameterOperation(scope.row)">编辑绑定参数</a>
+            </template>
+            <a class="ops-link" @click="edit(scope.row)">编辑</a>
+            <a class="ops-link" @click="remove(scope.row)">删除</a>
+            <a v-show="scope.row.level != 2" class="ops-link" @click="addChildren(scope.row)">添加子分类</a>
+          </div>
         </template>
 
         <template slot="commissionRate" slot-scope="scope">
@@ -49,12 +31,17 @@
         </template>
 
         <template slot="deleteFlag" slot-scope="{ row }">
-          <Tag
-            :class="{ ml_10: row.deleteFlag }"
-            :color="row.deleteFlag == false ? 'success' : 'error'"
+          <i-switch
+            size="large"
+            v-model="row.deleteFlag"
+            :true-value="false"
+            :false-value="true"
+            :loading="row._statusLoading"
+            @on-change="onStatusSwitchChange(row, $event)"
           >
-            {{ row.deleteFlag == false ? "正常启用" : "禁用" }}</Tag
-          >
+            <span slot="open">开启</span>
+            <span slot="close">关闭</span>
+          </i-switch>
         </template>
       </Table>
 
@@ -249,6 +236,52 @@ export default {
     };
   },
   methods: {
+    normalizeCategoryTree(list) {
+      if (!Array.isArray(list) || list.length === 0) return;
+      list.forEach((item) => {
+        if (!item || typeof item !== "object") return;
+        if (item.deleteFlag === 0) item.deleteFlag = false;
+        else if (item.deleteFlag === 1) item.deleteFlag = true;
+        else item.deleteFlag = !!item.deleteFlag;
+        if (Array.isArray(item.children) && item.children.length) {
+          this.normalizeCategoryTree(item.children);
+        }
+      });
+    },
+    onStatusSwitchChange(row, nextDeleteFlag) {
+      const previousDeleteFlag = !nextDeleteFlag;
+      const isClosing = nextDeleteFlag === true;
+      this.$Modal.confirm({
+        title: isClosing ? "确认关闭" : "确认开启",
+        content:
+          "您是否要" +
+          (isClosing ? "关闭" : "开启") +
+          "当前分类 " +
+          row.name +
+          " 及其子分类?",
+        loading: true,
+        okText: "是",
+        cancelText: "否",
+        onOk: () => {
+          this.$set(row, "_statusLoading", true);
+          disableCategory(row.id, { enableOperations: isClosing ? true : 0 }).then(
+            (res) => {
+              this.$Modal.remove();
+              this.$set(row, "_statusLoading", false);
+              if (res && res.success) {
+                this.$Message.success("操作成功");
+                this.getAllList(0);
+                return;
+              }
+              row.deleteFlag = previousDeleteFlag;
+            }
+          );
+        },
+        onCancel: () => {
+          row.deleteFlag = previousDeleteFlag;
+        },
+      });
+    },
     // 初始化数据
     init() {
       this.getAllList(0);
@@ -411,6 +444,7 @@ export default {
               child._loading = false;
               child.children = [];
             });
+            this.normalizeCategoryTree(val.children);
             // 模拟加载
             setTimeout(() => {
               callback(val.children);
@@ -419,6 +453,7 @@ export default {
         });
       } else {
         this.deepCategoryChildren(item.id, this.categoryList);
+        this.normalizeCategoryTree(this.checkedCategoryChildren);
         setTimeout(() => {
           callback(this.checkedCategoryChildren);
         }, 100);
@@ -446,6 +481,7 @@ export default {
         this.loading = false;
         if (res.success) {
           localStorage.setItem("category", JSON.stringify(res.result));
+          this.normalizeCategoryTree(res.result);
           this.categoryList = JSON.parse(JSON.stringify(res.result));
           this.tableData = res.result.map((item) => {
             if(this.recordLevel[0] && item.id === this.recordLevel[0]) {
@@ -532,9 +568,18 @@ export default {
   cursor: pointer;
   text-decoration: none;
 }
-.ops-sep {
-  display: inline-block;
-  margin: 0 8px;
+.ops {
+  display: flex;
+  flex-wrap: wrap;
+}
+.ops-link + .ops-link {
+  margin-left: 16px;
+  position: relative;
+}
+.ops-link + .ops-link::before {
+  content: "|";
+  position: absolute;
+  left: -10px;
   color: #dcdee2;
 }
 </style>

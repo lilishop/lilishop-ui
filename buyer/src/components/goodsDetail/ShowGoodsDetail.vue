@@ -87,14 +87,12 @@
               </div>
             </TabPane>
             <TabPane label="商品参数">
-              <template v-if="detail.goodsParamsDTOList && detail.goodsParamsDTOList.length">
-                <div class="goods-params" style="height:inherit;" v-for="item in detail.goodsParamsDTOList" :key="item.groupId">
-                  <span class="ml_10">{{item.groupName}}</span>
-                  <table class="mb_10" cellpadding='0' cellspacing="0" >
-                    <tr v-for="param in item.goodsParamsItemDTOList" :key="param.paramId">
-                      <td style="text-align: center">{{param.paramName}}</td><td>{{param.paramValue}}</td>
-                    </tr>
-                  </table>
+              <template v-if="goodsParamsList.length">
+                <div class="item-param-container">
+                  <div class="item-param-box" v-for="param in goodsParamsList" :key="param.paramId || param.paramName">
+                    <span class="item-param-title">{{ param.paramName }}：</span>
+                    <span class="item-param-content">{{ param.paramValue || '-' }}</span>
+                  </div>
                 </div>
               </template>
               <div v-else>暂无商品参数</div>
@@ -134,6 +132,29 @@ export default {
     // 商品详情
     skuDetail () {
       return this.detail.data;
+    },
+    goodsParamsList () {
+      const list = this.detail && Array.isArray(this.detail.goodsParamsDTOList) ? this.detail.goodsParamsDTOList : [];
+      const flat = [];
+
+      list.forEach((item) => {
+        if (!item) return;
+        if (Array.isArray(item.goodsParamsItemDTOList)) {
+          flat.push(...item.goodsParamsItemDTOList);
+        } else {
+          flat.push(item);
+        }
+      });
+
+      const cleaned = flat.filter((p) => p && (p.paramName || p.paramId));
+      const hasSort = cleaned.some((p) => p && p.sort !== undefined && p.sort !== null);
+      if (!hasSort) return cleaned;
+
+      return cleaned.slice().sort((a, b) => {
+        const sa = Number(a && a.sort) || 0;
+        const sb = Number(b && b.sort) || 0;
+        return sa - sb;
+      });
     }
   },
   methods: {
@@ -336,14 +357,12 @@ export default {
 /************* 商品参数 *************/
 .item-param-container {
   display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-  justify-content: space-between;
+  flex-direction: column;
 }
 .item-param-box {
   padding: 5px;
   padding-left: 30px;
-  width: 240px;
+  width: 100%;
   height: 36px;
   font-size: 14px;
 }
