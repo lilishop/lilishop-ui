@@ -1,5 +1,19 @@
 <template>
   <div class="search">
+    <Card class="points-statistics-card">
+      <Row type="flex" justify="space-around" align="middle" class="points-statistics">
+        <Col :xs="24" :sm="12" class="points-statistics-item">
+          <div class="points-statistics-title">已发放积分数</div>
+          <div class="points-statistics-subtitle">历史累计发放积分数</div>
+          <div class="points-statistics-value">{{ formatNumber(pointsStatistics.totalPoint) }}</div>
+        </Col>
+        <Col :xs="24" :sm="12" class="points-statistics-item">
+          <div class="points-statistics-title">未使用积分数</div>
+          <div class="points-statistics-subtitle">会员账户未使用积分数</div>
+          <div class="points-statistics-value">{{ formatNumber(pointsStatistics.unUsedPoint) }}</div>
+        </Col>
+      </Row>
+    </Card>
     <Card >
       <Form
         @keydown.enter.native="handleSearch"
@@ -30,7 +44,7 @@
         :columns="columns"
         :data="data"
         ref="table"
-        class="mt_10"
+        class="mt_10 point-table"
       >
       </Table>
       <Row type="flex" justify="end" class="mt_10">
@@ -54,18 +68,17 @@
 <script>
 
   import * as API_Member from "@/api/member.js";
-  import ossManage from "@/views/sys/oss-manage/ossManage";
 
   export default {
     // 积分历史页面
     name: "point",
-    components: {
-
-      ossManage,
-    },
     data() {
       return {
         loading: true, // 表单加载状态
+        pointsStatistics: {
+          totalPoint: 0,
+          unUsedPoint: 0,
+        },
         searchForm: { // 请求参数
           pageNumber: 1,
           pageSize: 20,
@@ -80,20 +93,20 @@
           {
             title: "操作内容",
             key: "content",
-            minWidth: 180,
+            minWidth: 200,
             tooltip: true
           },
 
           {
             title: "之前积分",
             key: "beforePoint",
-            width: 110,
+            width: 200,
           },
 
           {
             title: "变动积分",
             key: "variablePoint",
-            width: 110,
+            width: 200,
             render: (h, params) => {
               if (params.row.pointType == 'INCREASE') {
                 return h("priceColorScheme", {props:{value:params.row.variablePoint,color:'green',unit:"+"}} );
@@ -105,12 +118,12 @@
           {
             title: "当前积分",
             key: "point",
-            width: 110,
+            width: 200,
           },
           {
             title: "操作时间",
             key: "createTime",
-            width: 170
+            width: 200
           },
 
         ],
@@ -125,7 +138,23 @@
       },
       // 初始化数据
       init() {
+        this.getStatistics();
         this.getData();
+      },
+      getStatistics() {
+        API_Member.queryMemberPointsStatistics().then((res) => {
+          if (res && res.success && res.result) {
+            this.pointsStatistics = {
+              totalPoint: res.result.totalPoint || 0,
+              unUsedPoint: res.result.unUsedPoint || 0,
+            };
+          }
+        });
+      },
+      formatNumber(value) {
+        const numericValue = Number(value || 0);
+        if (!Number.isFinite(numericValue)) return "0";
+        return numericValue.toLocaleString();
       },
       // 分页 改变页码
       changePage(v) {
@@ -163,6 +192,47 @@
   };
 </script>
 <style lang="scss" scoped>
+  .points-statistics-card {
+    margin-bottom: 10px;
+  }
+
+  .points-statistics {
+    width: 100%;
+  }
+
+  .points-statistics-item {
+    padding: 10px 0;
+    text-align: center;
+  }
+
+  .points-statistics-title {
+    font-size: 14px;
+    color: #17233d;
+    line-height: 20px;
+  }
+
+  .points-statistics-subtitle {
+    font-size: 12px;
+    color: #808695;
+    line-height: 18px;
+    margin-top: 4px;
+  }
+
+  .points-statistics-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fa6419;
+    line-height: 26px;
+    margin-top: 8px;
+  }
+
+  .point-table {
+    ::v-deep .ivu-table-border th,
+    ::v-deep .ivu-table-border td {
+      border-right: 0;
+    }
+  }
+
   .face {
     width: 60px;
     height: 60px;

@@ -117,6 +117,9 @@ export const getMemberNum = (params) => {
 export const getHistoryPointData = (params) => {
   return getRequest(`/member/memberPointsHistory/getByPage`, params);
 };
+export const queryMemberPointsStatistics = () => {
+  return getRequest(`/member/memberPointsHistory/queryMemberPointsStatistics`);
+};
 //查询会员的收货地址
 export const getMemberAddressData = (id, params) => {
   return getRequest(`/member/address/${id}`, params);
