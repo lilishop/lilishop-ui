@@ -389,19 +389,19 @@
                 <span slot="append">kg</span></Input>
               </FormItem>
             </div>
-            <h4>参数信息</h4>
-            <div class="form-item-view">
-              <FormItem v-for="(paramsItem, paramsIndex) in goodsParams" :key="paramsItem.id || paramsIndex"
-                :label="`${paramsItem.paramName}：`"
-                :rules="{ required: !!paramsItem.required, message: '参数不能为空', trigger: 'change' }">
-                <Select v-model="paramsItem.paramValue" clearable placeholder="请选择" style="width: 200px"
-                  @on-change="(val) => selectParams(paramsItem, val)">
-                  <Option v-for="option in getParamOptions(paramsItem.options)" :key="option" :label="option"
-                    :value="option">
-                  </Option>
-                </Select>
-              </FormItem>
-            </div>
+          </div>
+          <h4>参数信息</h4>
+          <div class="form-item-view">
+            <FormItem v-for="(paramsItem, paramsIndex) in goodsParams" :key="paramsItem.id || paramsIndex"
+              :label="`${paramsItem.paramName}：`"
+              :rules="{ required: !!paramsItem.required, message: '参数不能为空', trigger: 'change' }">
+              <Select v-model="paramsItem.paramValue" clearable placeholder="请选择" style="width: 200px"
+                @on-change="(val) => selectParams(paramsItem, val)">
+                <Option v-for="option in getParamOptions(paramsItem.options)" :key="option" :label="option"
+                  :value="option">
+                </Option>
+              </Select>
+            </FormItem>
           </div>
         </div>
       </Form>

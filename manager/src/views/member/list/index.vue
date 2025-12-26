@@ -99,6 +99,34 @@
         </FormItem>
       </Form>
     </Modal>
+    <Modal v-model="walletIncreaseFlag" title="增加余额" width="420">
+      <Form ref="walletIncreaseForm" :model="walletIncreaseForm" :rules="walletIncreaseRule" :label-width="90">
+        <FormItem label="充值金额" prop="rechargeMoney">
+          <InputNumber v-model="walletIncreaseForm.rechargeMoney" :min="0.01" :precision="2" style="width: 240px" />
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button @click="walletIncreaseFlag = false">取消</Button>
+        <Button type="primary" :loading="walletIncreaseLoading" @click="submitWalletIncrease">确定</Button>
+      </div>
+    </Modal>
+    <Modal v-model="memberPointFlag" title="修改积分" width="420">
+      <Form ref="memberPointForm" :model="memberPointForm" :rules="memberPointRule" :label-width="90">
+        <FormItem label="类型" prop="type">
+          <RadioGroup type="button" button-style="solid" v-model="memberPointForm.type">
+            <Radio label="INCREASE">增加</Radio>
+            <Radio label="REDUCE">减少</Radio>
+          </RadioGroup>
+        </FormItem>
+        <FormItem label="积分" prop="point">
+          <InputNumber v-model="memberPointForm.point" :min="1" :precision="0" style="width: 240px" />
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button @click="memberPointFlag = false">取消</Button>
+        <Button type="primary" :loading="memberPointLoading" @click="submitMemberPoint">确定</Button>
+      </div>
+    </Modal>
     <Modal width="1200px" v-model="picModelFlag">
       <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage" />
     </Modal>
@@ -144,6 +172,50 @@ export default {
       },
       picModelFlag: false, // 选择图片
       form: {}, // 表单数据
+      walletIncreaseFlag: false,
+      walletIncreaseLoading: false,
+      walletIncreaseForm: {
+        memberId: "",
+        rechargeMoney: null,
+      },
+      walletIncreaseRule: {
+        rechargeMoney: [
+          { required: true, type: "number", message: "请输入充值金额", trigger: "change" },
+          {
+            validator: (rule, value, callback) => {
+              if (typeof value !== "number" || value <= 0) {
+                callback(new Error("充值金额必须大于0"));
+                return;
+              }
+              callback();
+            },
+            trigger: "change",
+          },
+        ],
+      },
+      memberPointFlag: false,
+      memberPointLoading: false,
+      memberPointForm: {
+        memberId: "",
+        point: null,
+        type: "INCREASE",
+      },
+      memberPointRule: {
+        type: [{ required: true, message: "请选择类型", trigger: "change" }],
+        point: [
+          { required: true, type: "number", message: "请输入积分", trigger: "change" },
+          {
+            validator: (rule, value, callback) => {
+              if (typeof value !== "number" || value <= 0) {
+                callback(new Error("积分必须大于0"));
+                return;
+              }
+              callback();
+            },
+            trigger: "change",
+          },
+        ],
+      },
       addRule: {
         // 验证规则
         mobile: [
@@ -194,7 +266,7 @@ export default {
           title: "会员昵称",
           key: "nickName",
           tooltip: true,
-          minWidth: 150,  // 减少宽度
+          minWidth: 120,  // 减少宽度
         },
         {
           title: "联系方式",
@@ -232,18 +304,100 @@ export default {
           },
         },
         {
+          title: "余额",
+          key: "memberWallet",
+          width: 120,
+          render: (h, params) => {
+            return h("priceColorScheme", {props:{value:params.row.memberWallet}} );
+          },
+        },
+        {
           title: "操作",
           key: "action",
           align: "center",
           minWidth: 160,
           fixed: "right",
           render: (h, params) => {
-            return h(
-              "div",
+            if (this.selectedMember) {
+              return h(
+                "div",
+                {
+                  style: {
+                    display: "flex",
+                    justifyContent: "center",
+                  },
+                },
+                [
+                  h(
+                    "a",
+                    {
+                      style: {
+                        color: "#2d8cf0",
+                        cursor: "pointer",
+                        textDecoration: "none",
+                      },
+                      on: {
+                        click: () => {
+                          this.callback(params.row, params.index);
+                        },
+                      },
+                    },
+                    params.row.___selected ? "已选择" : "选择"
+                  ),
+                ]
+              );
+            }
+
+            const divider = h(
+              "span",
               {
                 style: {
-                  display: "flex",
-                  justifyContent: "center",
+                  margin: "0 8px",
+                  color: "#dcdee2",
+                },
+              },
+              "|"
+            );
+
+            const viewLink = h(
+              "a",
+              {
+                style: {
+                  color: "#2d8cf0",
+                  cursor: "pointer",
+                  textDecoration: "none",
+                },
+                on: {
+                  click: () => {
+                    this.detail(params.row);
+                  },
+                },
+              },
+              "查看"
+            );
+
+            const moreDropdown = h(
+              "Dropdown",
+              {
+                props: {
+                  trigger: "click",
+                  transfer: true,
+                },
+                on: {
+                  "on-click": (name) => {
+                    if (name === "edit") {
+                      this.editPerm(params.row);
+                    }
+                    if (name === "disabled") {
+                      this.disabled(params.row);
+                    }
+                    if (name === "increaseWallet") {
+                      this.openWalletIncrease(params.row);
+                    }
+                    if (name === "updatePoint") {
+                      this.openMemberPoint(params.row);
+                    }
+                  },
                 },
               },
               [
@@ -254,101 +408,78 @@ export default {
                       color: "#2d8cf0",
                       cursor: "pointer",
                       textDecoration: "none",
-                      display: this.selectedMember ? "inline-block" : "none",
+                      display: "inline-flex",
+                      alignItems: "center",
                     },
-                    on: {
-                      click: () => {
-                        this.callback(params.row, params.index);
+                  },
+                  [
+                    h("span", "更多"),
+                    h("Icon", {
+                      props: {
+                        type: "md-arrow-dropdown",
                       },
-                    },
-                  },
-                  params.row.___selected ? "已选择" : "选择"
-                ),
-                h(
-                  "span",
-                  {
-                    style: {
-                      margin: "0 8px",
-                      color: "#dcdee2",
-                      display: this.selectedMember ? "inline-block" : "none",
-                    },
-                  },
-                  "|"
-                ),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none",
-                      display: this.selectedMember ? "none" : "inline-block",
-                    },
-                    on: {
-                      click: () => {
-                        this.detail(params.row);
+                      style: {
+                        marginLeft: "4px",
                       },
-                    },
-                  },
-                  "查看"
+                    }),
+                  ]
                 ),
                 h(
-                  "span",
+                  "DropdownMenu",
                   {
-                    style: {
-                      margin: "0 8px",
-                      color: "#dcdee2",
-                      display: this.selectedMember ? "none" : "inline-block",
-                    },
+                    slot: "list",
                   },
-                  "|"
-                ),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none",
-                      display: this.selectedMember ? "none" : "inline-block",
-                    },
-                    on: {
-                      click: () => {
-                        this.editPerm(params.row);
+                  [
+                    h(
+                      "DropdownItem",
+                      {
+                        props: {
+                          name: "edit",
+                        },
                       },
-                    },
-                  },
-                  "编辑"
-                ),
-                h(
-                  "span",
-                  {
-                    style: {
-                      margin: "0 8px",
-                      color: "#dcdee2",
-                      display: this.selectedMember ? "none" : "inline-block",
-                    },
-                  },
-                  "|"
-                ),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none",
-                      display: this.selectedMember ? "none" : "inline-block",
-                    },
-                    on: {
-                      click: () => {
-                        this.disabled(params.row);
+                      "编辑会员"
+                    ),
+                    h(
+                      "DropdownItem",
+                      {
+                        props: {
+                          name: "increaseWallet",
+                        },
                       },
-                    },
-                  },
-                  "禁用"
+                      "增加余额"
+                    ),
+                    h(
+                      "DropdownItem",
+                      {
+                        props: {
+                          name: "updatePoint",
+                        },
+                      },
+                      "修改积分"
+                    ),
+                    h(
+                      "DropdownItem",
+                      {
+                        props: {
+                          name: "disabled",
+                        },
+                      },
+                      "禁用会员"
+                    ),
+                  ]
                 ),
               ]
+            );
+
+            return h(
+              "div",
+              {
+                style: {
+                  display: "flex",
+                  justifyContent: "center",
+                },
+              },
+              [viewLink, divider, moreDropdown]
             );
           },
         },
@@ -532,6 +663,69 @@ export default {
             }
           });
         },
+      });
+    },
+
+    openWalletIncrease(row) {
+      this.walletIncreaseLoading = false;
+      this.$set(this, "walletIncreaseForm", { memberId: row.id, rechargeMoney: null });
+      this.walletIncreaseFlag = true;
+      this.$nextTick(() => {
+        this.$refs.walletIncreaseForm && this.$refs.walletIncreaseForm.resetFields();
+      });
+    },
+    submitWalletIncrease() {
+      this.$refs.walletIncreaseForm.validate((valid) => {
+        if (!valid) return;
+        this.walletIncreaseLoading = true;
+        API_Member.increaseMemberWallet({
+          memberId: this.walletIncreaseForm.memberId,
+          rechargeMoney: this.walletIncreaseForm.rechargeMoney,
+        })
+          .then((res) => {
+            if (res && res.success) {
+              this.$Message.success("充值成功");
+              this.walletIncreaseFlag = false;
+              this.getData();
+            } else {
+              this.$Message.error((res && res.message) || "充值失败");
+            }
+          })
+          .finally(() => {
+            this.walletIncreaseLoading = false;
+          });
+      });
+    },
+
+    openMemberPoint(row) {
+      this.memberPointLoading = false;
+      this.$set(this, "memberPointForm", { memberId: row.id, point: null, type: "INCREASE" });
+      this.memberPointFlag = true;
+      this.$nextTick(() => {
+        this.$refs.memberPointForm && this.$refs.memberPointForm.resetFields();
+      });
+    },
+    submitMemberPoint() {
+      this.$refs.memberPointForm.validate((valid) => {
+        if (!valid) return;
+        this.memberPointLoading = true;
+        API_Member.updateMemberPoint({
+          memberId: this.memberPointForm.memberId,
+          point: this.memberPointForm.point,
+          type: this.memberPointForm.type,
+        })
+          .then((res) => {
+            if (res && res.success) {
+              this.$Message.success("修改成功");
+              this.memberPointFlag = false;
+              this.getData();
+            } else {
+              this.$Message.error((res && res.message) || "修改失败");
+            }
+          })
+          .finally(() => {
+            this.memberPointLoading = false;
+          });
       });
     },
 

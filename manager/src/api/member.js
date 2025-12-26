@@ -137,3 +137,11 @@ export const editMemberAddress = (params) => {
 export const getMemberWallet = (params) => {
   return getRequest(`/wallet/wallet`, params);
 };
+
+export const increaseMemberWallet = (params) => {
+  return putRequest(`/wallet/wallet/increase`, params);
+};
+
+export const updateMemberPoint = (params) => {
+  return putRequest(`/passport/member/updateMemberPoint`, params);
+};
