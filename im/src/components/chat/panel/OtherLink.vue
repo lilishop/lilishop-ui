@@ -121,13 +121,23 @@ export default {
     //   })
     // },
     getGoodsDetail () {
-      if(this.toUser.storeFlag){
-        ServeGetGoodsDetail(this.goodsParams).then(res => {
-          if (res.success) {
-            this.goodsDetail = res.result.data
-          }
-        })
+      // 检查必要参数是否存在
+      if (!this.toUser.storeFlag) {
+        return
       }
+      
+      if (!this.goodsParams || !this.goodsParams.goodsId) {
+        console.warn('getGoodsDetail: goodsParams 或 goodsId 参数缺失')
+        return
+      }
+
+      ServeGetGoodsDetail(this.goodsParams).then(res => {
+        if (res.success) {
+          this.goodsDetail = res.result.data
+        }
+      }).catch(error => {
+        console.error('获取商品详情失败:', error)
+      })
     },
     getFootPrint() {
       if (this.toUser.storeFlag) {

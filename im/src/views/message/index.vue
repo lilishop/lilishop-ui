@@ -289,6 +289,8 @@ export default {
   beforeRouteUpdate (to, from, next) {
     let index_name = getCacheIndexName();
     if (index_name) this.clickTab(index_name);
+    // 更新商品参数
+    this.initGoodsParams(to.query);
     next();
   },
   beforeCreate () {
@@ -296,8 +298,10 @@ export default {
   },
   async created () {
     await this.initialize();
-    await this.loadUserSetting();
-    /**
+    await this.loadUserSetting();    
+    // 初始化商品参数
+    this.initGoodsParams(this.$route.query);
+        /**
      * 如果说有id 说明是用户点击 “联系客服” 进入的该页面
      * 所以创建会话 并请求用户列表
      * 如果没有id说明当前商家登录 直接请求用户列表
@@ -316,6 +320,16 @@ export default {
   methods: {
     // 美化时间格式
     beautifyTime,
+
+    // 初始化商品参数
+    initGoodsParams (query) {
+      this.goodsParams = {
+        goodsId: query.goodsId || '',
+        skuId: query.skuId || '',
+      };
+      
+      console.log('初始化商品参数:', this.goodsParams);
+    },
 
     //创建会话
     async createTalk (id) {
