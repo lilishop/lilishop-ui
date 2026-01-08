@@ -43,7 +43,7 @@
             </FormItem>
             <FormItem class="form-item-view-el" label="销售模式" prop="salesModel">
               <RadioGroup v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'" v-model="baseInfoForm.salesModel"
-                button-style="solid" type="button" @on-change="renderTableData(skuTableData)">
+                button-style="solid" type="button" @on-change="handleSalesModeChange">
                 <Radio label="RETAIL" title="零售型">零售型</Radio>
                 <Radio label="WHOLESALE" title="批发型">批发型</Radio>
               </RadioGroup>
@@ -394,9 +394,10 @@
           <div class="form-item-view">
             <FormItem v-for="(paramsItem, paramsIndex) in goodsParams" :key="paramsItem.id || paramsIndex"
               :label="`${paramsItem.paramName}：`"
-              :rules="{ required: !!paramsItem.required, message: '参数不能为空', trigger: 'change' }">
-              <Select v-model="paramsItem.paramValue" clearable placeholder="请选择" style="width: 200px"
-                @on-change="(val) => selectParams(paramsItem, val)">
+              :prop="`goodsParams.${paramsIndex}.paramValue`"
+              :rules="paramsItem.required ? { required: true, message: `${paramsItem.paramName}不能为空`, trigger: 'change' } : {}">
+              <Select v-model="baseInfoForm.goodsParams[paramsIndex].paramValue" clearable placeholder="请选择" style="width: 200px"
+                @on-change="(val) => selectParams(paramsItem, val, paramsIndex)">
                 <Option v-for="option in getParamOptions(paramsItem.options)" :key="option" :label="option"
                   :value="option">
                 </Option>
@@ -578,6 +579,8 @@ export default {
         /** 商品分类中文名 */
         categoryName: [],
         goodsVideo: "",
+        /** 商品参数用于验证 */
+        goodsParams: [],
       },
       /** 表格头 */
       skuTableColumn: [],
@@ -740,10 +743,24 @@ export default {
         .map((i) => i.trim())
         .filter((i) => i);
     },
-    selectParams(params, value) {
+    selectParams(params, value, paramsIndex) {
       if (!Array.isArray(this.baseInfoForm.goodsParamsDTOList)) {
         this.$set(this.baseInfoForm, "goodsParamsDTOList", []);
       }
+      
+      // 确保baseInfoForm.goodsParams存在
+      if (!Array.isArray(this.baseInfoForm.goodsParams)) {
+        this.$set(this.baseInfoForm, "goodsParams", []);
+      }
+      
+      // 确保对应索引的参数项存在
+      if (!this.baseInfoForm.goodsParams[paramsIndex]) {
+        this.$set(this.baseInfoForm.goodsParams, paramsIndex, {});
+      }
+      
+      // 更新baseInfoForm中的值用于验证
+      this.$set(this.baseInfoForm.goodsParams[paramsIndex], 'paramValue', value || '');
+      
       const list = this.baseInfoForm.goodsParamsDTOList;
       const paramId = params && params.id ? String(params.id) : "";
       const index = list.findIndex((i) => String(i.paramId) === paramId);
@@ -752,6 +769,8 @@ export default {
         if (index >= 0) {
           list.splice(index, 1);
         }
+        // 清空表单项的值
+        this.$set(params, 'paramValue', '');
         return;
       }
       const newItem = {
@@ -768,6 +787,9 @@ export default {
       } else {
         list.push(newItem);
       }
+
+      // 同步更新表单项的值
+      this.$set(params, 'paramValue', value);
     },
     // 编辑sku图片
     editSkuPicture(row) {
@@ -852,10 +874,30 @@ export default {
         });
       }
       this.renderTableData(this.skuTableData);
+      this.syncWholesalePriceToSku();
     },
     handleDeleteWholesaleData(index) {
       this.wholesaleData.splice(index, 1);
       this.renderTableData(this.skuTableData);
+      this.syncWholesalePriceToSku();
+    },
+    // 同步批发价格到SKU
+    syncWholesalePriceToSku() {
+      if (this.baseInfoForm.salesModel === 'WHOLESALE' && this.wholesaleData.length > 0) {
+        // 使用第一个批发价格作为SKU的基础价格
+        const basePrice = this.wholesaleData[0].price || 0;
+        this.skuTableData.forEach(sku => {
+          sku.price = basePrice;
+        });
+      }
+    },
+    // 处理销售模式切换
+    handleSalesModeChange() {
+      this.renderTableData(this.skuTableData);
+      // 如果切换到批发模式，同步价格
+      if (this.baseInfoForm.salesModel === 'WHOLESALE') {
+        this.syncWholesalePriceToSku();
+      }
     },
     checkWholesaleNum(index) {
       if (this.wholesaleData[index].num < 0) {
@@ -875,6 +917,7 @@ export default {
         this.wholesaleData[index].num = this.wholesaleData[index - 1].num + 1;
       }
       this.renderTableData(this.skuTableData);
+      this.syncWholesalePriceToSku();
     },
     checkWholesalePrice(index) {
       if (this.wholesaleData[index].price < 0) {
@@ -895,6 +938,7 @@ export default {
           this.wholesaleData[index - 1].price - 0.01;
       }
       this.renderTableData(this.skuTableData);
+      this.syncWholesalePriceToSku();
     },
     // 商品图片上传成功
     handleSuccessGoodsPicture(res, file) {
@@ -1213,10 +1257,25 @@ export default {
               return {
                 ...p,
                 paramValue:
-                  selectedValue !== undefined ? selectedValue : p.paramValue,
+                  selectedValue !== undefined ? selectedValue : (p.paramValue || ""),
               };
             })
             .sort((a, b) => Number(a.sort || 0) - Number(b.sort || 0));
+
+          // 初始化baseInfoForm.goodsParams用于表单验证
+          this.$set(this.baseInfoForm, 'goodsParams', []);
+          this.goodsParams.forEach((param, index) => {
+            this.$set(this.baseInfoForm.goodsParams, index, {
+              paramValue: param.paramValue || ''
+            });
+          });
+
+          // 确保表单验证能正确初始化
+          this.$nextTick(() => {
+            if (this.$refs.baseInfoForm) {
+              this.$refs.baseInfoForm.clearValidate();
+            }
+          });
         }
       );
     },
@@ -1686,12 +1745,20 @@ export default {
               sn: existingCombination.sn || "",
               quantity: existingCombination.quantity || "",
               cost: existingCombination.cost || "",
-              price: existingCombination.price || "",
+              price: existingCombination.price || (this.baseInfoForm.salesModel === 'WHOLESALE' && this.wholesaleData.length > 0 ? this.wholesaleData[0].price : ""),
               weight: existingCombination.weight || ""
             };
           } else {
-            // 新组合使用默认值
-            return combination;
+            // 新组合使用默认值，批发模式下设置默认价格
+            return {
+              ...combination,
+              id: "",
+              sn: "",
+              quantity: "",
+              cost: "",
+              price: this.baseInfoForm.salesModel === 'WHOLESALE' && this.wholesaleData.length > 0 ? this.wholesaleData[0].price : "",
+              weight: ""
+            };
           }
         });
       }
@@ -1927,6 +1994,7 @@ export default {
         return;
       }
       let checkFlag = false;
+      let missingParams = [];
       this.goodsParams.forEach((param) => {
         if (!param || !param.required) return;
         const check = this.baseInfoForm.goodsParamsDTOList.some((paramsItem) => {
@@ -1935,10 +2003,11 @@ export default {
         });
         if (!check) {
           checkFlag = true;
+          missingParams.push(param.paramName);
         }
       });
       if (checkFlag) {
-        this.$Message.error("存在未填写的参数项");
+        this.$Message.error(`以下参数为必填项：${missingParams.join('、')}`);
         return;
       }
       this.submitLoading = true;
