@@ -368,6 +368,31 @@ export const setSetting = (key, params) => {
   return putRequestWithNoForm(`/setting/setting/put/${key}`, params);
 };
 
+// 微信视频号小店类目（三级）
+export const getWxChannelsThirdCategory = (params) => {
+  return getRequest(`/wxchannels/category/third`, params);
+};
+
+// 微信视频号商品分页
+export const getWxChannelsGoodsPage = (params) => {
+  return getRequest(`/wxchannels/goods`, params);
+};
+
+// 微信视频号订单分页
+export const getWxChannelsOrderPage = (params) => {
+  return getRequest(`/wxchannels/order`, params);
+};
+
+// 微信视频号概况
+export const getWxChannelsOverviewSummary = (params) => {
+  return getRequest(`/wxchannels/overview/summary`, params);
+};
+
+// 微信视频号退单分页
+export const getWxChannelsRefundPage = (params) => {
+  return getRequest(`/wxchannels/refund`, params);
+};
+
 // 分页查询敏感词
 
 export const getSensitiveWordsPage = (params) => {

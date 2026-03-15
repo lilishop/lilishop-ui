@@ -78,10 +78,19 @@
       <Row class="operation padding-row">
         <Button @click="addGoods" type="info">添加商品</Button>
         <Button @click="openImportGoods" >导入商品</Button>
-        <Button @click="uppers" >批量上架</Button>
-        <Button @click="lowers" >批量下架</Button>
-        <Button @click="deleteAll" >批量删除</Button>
-        <Button @click="batchShipTemplate" >批量设置物流模板</Button>
+        <Dropdown @on-click="handleDropdown">
+          <Button>
+            批量修改
+            <Icon type="ios-arrow-down"></Icon>
+          </Button>
+          <DropdownMenu slot="list">
+            <DropdownItem name="uppers">批量上架</DropdownItem>
+            <DropdownItem name="lowers">批量下架</DropdownItem>
+            <DropdownItem name="scheduleMarket">批量定时上下架</DropdownItem>
+            <DropdownItem name="batchShipTemplate">批量设置物流模板</DropdownItem>
+            <DropdownItem name="deleteAll">批量删除</DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
       </Row>
 
       <Table
@@ -173,6 +182,55 @@
         <Button type="primary" @click="saveShipTemplate">更新</Button>
       </div>
     </Modal>
+
+    <Modal
+      title="批量定时上下架"
+      v-model="scheduleMarketModal"
+      :mask-closable="false"
+      :width="520"
+    >
+      <Form
+        ref="scheduleMarketFormRef"
+        :model="scheduleMarketForm"
+        :label-width="120"
+      >
+        <FormItem label="状态" prop="status">
+          <Select v-model="scheduleMarketForm.status" style="width: 200px">
+            <Option value="UPPER">上架</Option>
+            <Option value="DOWN">下架</Option>
+          </Select>
+        </FormItem>
+        <FormItem label="触发时间" prop="triggerTime">
+          <DatePicker
+            v-model="scheduleMarketForm.triggerTime"
+            type="datetime"
+            format="yyyy-MM-dd HH:mm:ss"
+            :options="scheduleMarketDatePickerOptions"
+            :time-picker-options="scheduleMarketTimePickerOptions"
+            @on-change="handleScheduleMarketTimeChange"
+            placeholder="请选择"
+            clearable
+            style="width: 240px"
+          ></DatePicker>
+        </FormItem>
+        <FormItem label="原因" prop="reason">
+          <Input
+            v-model="scheduleMarketForm.reason"
+            type="textarea"
+            :rows="3"
+            placeholder="可选"
+          />
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button type="text" @click="scheduleMarketModal = false">取消</Button>
+        <Button
+          type="primary"
+          :loading="scheduleMarketLoading"
+          @click="submitScheduleMarket"
+        >确定</Button>
+      </div>
+    </Modal>
     <Modal title="导入商品信息" v-model="importModal" :mask-closable="false">
       <div style="text-align: center">
         <Upload :before-upload="handleUpload" name="files" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
@@ -202,7 +260,8 @@ import {
   deleteGoods,
   batchShipTemplate,
   downLoadGoods,
-  getGoodsNumerData
+  getGoodsNumerData,
+  scheduleGoodsMarket
 } from "@/api/goods";
 import { baseUrl } from "@/libs/axios.js";
 import * as API_Shop from "@/api/shops";
@@ -224,6 +283,13 @@ export default {
       logisticsTemplate: [], // 物流列表
       updateStockModalVisible: false, // 更新库存模态框显隐
       stockAllUpdate: undefined, // 更新库存数量
+      scheduleMarketModal: false,
+      scheduleMarketLoading: false,
+      scheduleMarketForm: {
+        status: "UPPER",
+        triggerTime: null,
+        reason: ""
+      },
       selectList: [], // 选中的商品列表
       selectCount: 0, // 选中的商品数量
       searchForm: {
@@ -538,6 +604,46 @@ export default {
         {title: `待审核${this.goodsNumerData.auditGoodsNum ? '(' + this.goodsNumerData.auditGoodsNum + ')' : ''}`, value: 'TOBEAUDITED'},
         {title: `审核未通过${this.goodsNumerData.refuseGoodsNum ? '(' + this.goodsNumerData.refuseGoodsNum + ')' : ''}`, value: 'REFUSE'}
       ];
+    },
+    scheduleMarketDatePickerOptions() {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayStartMs = todayStart.getTime();
+      return {
+        disabledDate(date) {
+          if (!date) return false;
+          return date.getTime() < todayStartMs;
+        }
+      };
+    },
+    scheduleMarketTimePickerOptions() {
+      const now = new Date();
+      const selected = this.scheduleMarketForm && this.scheduleMarketForm.triggerTime
+        ? (this.scheduleMarketForm.triggerTime instanceof Date
+          ? this.scheduleMarketForm.triggerTime
+          : new Date(this.scheduleMarketForm.triggerTime))
+        : null;
+
+      const isToday = selected
+        ? selected.getFullYear() === now.getFullYear() &&
+          selected.getMonth() === now.getMonth() &&
+          selected.getDate() === now.getDate()
+        : true;
+
+      if (!isToday) {
+        return {};
+      }
+
+      const nowH = now.getHours();
+      const nowM = now.getMinutes();
+      const nowS = now.getSeconds();
+
+      return {
+        disabledHours: () => Array.from({ length: nowH }, (_, i) => i),
+        disabledMinutes: (hour) => (hour === nowH ? Array.from({ length: nowM }, (_, i) => i) : []),
+        disabledSeconds: (hour, minute) =>
+          hour === nowH && minute === nowM ? Array.from({ length: nowS + 1 }, (_, i) => i) : []
+      };
     }
   },
   methods: {
@@ -568,6 +674,10 @@ export default {
       //批量下架
       if (v == "lowers") {
         this.lowers();
+      }
+      //批量定时上下架
+      if (v == "scheduleMarket") {
+        this.openScheduleMarketModal();
       }
       //批量删除商品
       if (v == "deleteAll") {
@@ -732,6 +842,84 @@ export default {
       });
       this.shipTemplateForm.goodsId = data;
       this.shipTemplateModal = true;
+    },
+    openScheduleMarketModal() {
+      if (this.selectCount <= 0) {
+        this.$Message.warning("您还未选择要定时上下架的商品");
+        return;
+      }
+      this.scheduleMarketForm = {
+        status: "UPPER",
+        triggerTime: null,
+        reason: ""
+      };
+      this.scheduleMarketModal = true;
+    },
+    handleScheduleMarketTimeChange() {
+      if (!this.scheduleMarketForm || !this.scheduleMarketForm.triggerTime) return;
+      const selected =
+        this.scheduleMarketForm.triggerTime instanceof Date
+          ? this.scheduleMarketForm.triggerTime
+          : new Date(this.scheduleMarketForm.triggerTime);
+
+      const selectedMs = selected.getTime();
+      if (!Number.isFinite(selectedMs)) return;
+      if (selectedMs <= Date.now()) {
+        this.$Message.warning("触发时间只能选择当前时间之后");
+        this.scheduleMarketForm.triggerTime = new Date(Date.now() + 60 * 1000);
+      }
+    },
+    submitScheduleMarket() {
+      if (this.selectCount <= 0) {
+        this.$Message.warning("您还未选择要定时上下架的商品");
+        return;
+      }
+      if (!this.scheduleMarketForm.status) {
+        this.$Message.warning("请选择状态");
+        return;
+      }
+      if (!this.scheduleMarketForm.triggerTime) {
+        this.$Message.warning("请选择触发时间");
+        return;
+      }
+
+      const triggerTime =
+        this.scheduleMarketForm.triggerTime instanceof Date
+          ? this.scheduleMarketForm.triggerTime.getTime()
+          : new Date(this.scheduleMarketForm.triggerTime).getTime();
+
+      if (!Number.isFinite(triggerTime)) {
+        this.$Message.error("触发时间格式不正确");
+        return;
+      }
+      if (triggerTime <= Date.now()) {
+        this.$Message.warning("触发时间需大于当前时间");
+        return;
+      }
+
+      const goodsIds = this.selectList.map((i) => i.id);
+
+      const payload = {
+        goodsIds,
+        status: this.scheduleMarketForm.status,
+        triggerTime,
+        reason: this.scheduleMarketForm.reason || undefined
+      };
+
+      this.scheduleMarketLoading = true;
+      scheduleGoodsMarket(payload)
+        .then((res) => {
+          if (res && res.success) {
+            this.$Message.success("设置成功");
+            this.scheduleMarketModal = false;
+            this.clearSelectAll();
+            this.getDataList();
+            this.getNumberData();
+          }
+        })
+        .finally(() => {
+          this.scheduleMarketLoading = false;
+        });
     },
     // 获取商品列表数据
     getDataList() {

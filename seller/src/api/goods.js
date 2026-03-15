@@ -268,6 +268,13 @@ export const lowGoods = params => {
   return putRequest(`/goods/goods/under`, params);
 };
 
+// 定时上下架商品
+export const scheduleGoodsMarket = params => {
+  return postRequest(`/goods/goods/schedule/market`, params, {
+    "Content-Type": "application/json"
+  });
+};
+
 // 获取商品单位列表
 export const getGoodsUnitList = params => {
   return getRequest(`/goods/goodsUnit`,params);
