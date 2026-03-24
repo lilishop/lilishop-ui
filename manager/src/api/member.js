@@ -148,3 +148,25 @@ export const increaseMemberWallet = (params) => {
 export const updateMemberPoint = (params) => {
   return putRequest(`/passport/member/updateMemberPoint`, params);
 };
+
+export const getMemberGroupByPage = (params) => {
+  return getRequest("/member/memberGroup/getByPage", params);
+};
+export const getMemberGroup = (id) => {
+  return getRequest(`/member/memberGroup/get/${id}`);
+};
+export const addMemberGroup = (params) => {
+  return postRequest(`/member/memberGroup`, params);
+};
+export const updateMemberGroup = (id, params) => {
+  return putRequest(`/member/memberGroup/update/${id}`, params);
+};
+export const deleteMemberGroup = (id) => {
+  return deleteRequest(`/member/memberGroup/delete/${id}`);
+};
+
+export const addMemberGroupUsers = (groupId, memberIds) => {
+  return postRequest(`/member/memberGroup/${groupId}/users`, {
+    memberIds: Array.isArray(memberIds) ? memberIds.join(",") : memberIds,
+  });
+};

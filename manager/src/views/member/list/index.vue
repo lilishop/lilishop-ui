@@ -18,6 +18,11 @@
           <Form-item label="联系方式" prop="mobile">
             <Input type="text" v-model="searchForm.mobile" placeholder="请输入会员联系方式" clearable style="width: 240px" />
           </Form-item>
+          <Form-item label="会员分组" prop="groupId">
+            <Select v-model="searchForm.groupId" clearable filterable style="width: 240px">
+              <Option v-for="item in memberGroupList" :value="item.id" :key="item.id">{{ item.groupName }}</Option>
+            </Select>
+          </Form-item>
           <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search">搜索</Button>
         </Form>
       </Row>
@@ -25,9 +30,22 @@
       <Card>
       <Row class="operation padding-row" v-if="!selectedMember">
         <Button @click="addMember" type="primary">添加会员</Button>
+        <Button
+          style="margin-left: 10px;"
+          type="primary"
+          :disabled="selectedRows.length === 0"
+          @click="openSetMemberGroup"
+        >设定会员分组</Button>
       </Row>
 
-      <Table :loading="loading" :columns="columns" class="mt_10" :data="data" ref="table"></Table>
+      <Table
+        :loading="loading"
+        :columns="tableColumns"
+        class="mt_10"
+        :data="data"
+        ref="table"
+        @on-selection-change="onSelectionChange"
+      ></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
           @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]" size="small" show-total show-elevator
@@ -127,6 +145,19 @@
         <Button type="primary" :loading="memberPointLoading" @click="submitMemberPoint">确定</Button>
       </div>
     </Modal>
+    <Modal v-model="memberGroupFlag" title="设定会员分组" width="420">
+      <Form ref="memberGroupForm" :model="memberGroupForm" :rules="memberGroupRule" :label-width="90">
+        <FormItem label="会员分组" prop="groupId">
+          <Select v-model="memberGroupForm.groupId" clearable filterable style="width: 240px">
+            <Option v-for="item in memberGroupList" :value="item.id" :key="item.id">{{ item.groupName }}</Option>
+          </Select>
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button @click="memberGroupFlag = false">取消</Button>
+        <Button type="primary" :loading="memberGroupLoading" @click="submitSetMemberGroup">确定</Button>
+      </div>
+    </Modal>
     <Modal width="1200px" v-model="picModelFlag">
       <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage" />
     </Modal>
@@ -145,6 +176,19 @@ export default {
   components: {
     multipleMap,
     ossManage,
+  },
+  computed: {
+    tableColumns() {
+      if (this.selectedMember) return this.columns;
+      return [
+        {
+          type: "selection",
+          width: 60,
+          align: "center",
+        },
+        ...this.columns,
+      ];
+    },
   },
   data() {
     return {
@@ -169,6 +213,7 @@ export default {
         username: "",
         mobile: "",
         disabled: "OPEN",
+        groupId: "",
       },
       picModelFlag: false, // 选择图片
       form: {}, // 表单数据
@@ -200,6 +245,16 @@ export default {
         point: null,
         type: "INCREASE",
       },
+      selectedRows: [],
+      memberGroupFlag: false,
+      memberGroupLoading: false,
+      memberGroupForm: {
+        groupId: "",
+      },
+      memberGroupRule: {
+        groupId: [{ required: true, message: "请选择会员分组", trigger: "change" }],
+      },
+      memberGroupList: [],
       memberPointRule: {
         type: [{ required: true, message: "请选择类型", trigger: "change" }],
         point: [
@@ -515,6 +570,52 @@ export default {
     },
   },
   methods: {
+    onSelectionChange(selection) {
+      this.selectedRows = selection || [];
+    },
+    openSetMemberGroup() {
+      this.memberGroupFlag = true;
+      this.memberGroupLoading = false;
+      this.memberGroupForm = { groupId: "" };
+      this.$nextTick(() => {
+        if (this.$refs.memberGroupForm) this.$refs.memberGroupForm.resetFields();
+      });
+      this.loadMemberGroupList();
+    },
+    loadMemberGroupList() {
+      API_Member.getMemberGroupByPage({ pageNumber: 1, pageSize: 1000 }).then((res) => {
+        if (res && res.success && res.result) {
+          this.memberGroupList = res.result.records || [];
+        }
+      });
+    },
+    clearSelection() {
+      if (this.$refs.table && this.$refs.table.clearSelection) {
+        this.$refs.table.clearSelection();
+      }
+    },
+    submitSetMemberGroup() {
+      if (this.selectedRows.length === 0) {
+        this.$Message.warning("请先选择会员");
+        return;
+      }
+      this.$refs.memberGroupForm.validate((valid) => {
+        if (!valid) return;
+        const memberIds = this.selectedRows.map((item) => item.id);
+        this.memberGroupLoading = true;
+        API_Member.addMemberGroupUsers(this.memberGroupForm.groupId, memberIds).then((res) => {
+          this.memberGroupLoading = false;
+          if (res && res.success) {
+            this.$Message.success("设置成功");
+            this.memberGroupFlag = false;
+            this.selectedRows = [];
+            this.clearSelection();
+          } else if (res && res.message) {
+            this.$Message.error(res.message);
+          }
+        });
+      });
+    },
     // 回调给父级
     callback(val, index) {
       this.selectMember.forEach(item=>{item.___selected = false})
@@ -594,6 +695,11 @@ export default {
 
     //查询会员列表
     getData() {
+      this.loading = true;
+      if (!this.selectedMember) {
+        this.selectedRows = [];
+        this.clearSelection();
+      }
       API_Member.getMemberListData(this.searchForm).then((res) => {
         if (res.result.records) {
           this.loading = false;
@@ -759,6 +865,9 @@ export default {
   },
   mounted() {
     this.getData();
+    if (!this.selectedMember) {
+      this.loadMemberGroupList();
+    }
   },
 };
 </script>

@@ -147,6 +147,12 @@ export const otherRouter = {
       name: "member-detail",
       component: () => import("@/views/member/list/memberDetail.vue")
     },
+    {
+      path: "member-group",
+      title: "会员分组",
+      name: "member-group",
+      component: () => import("@/views/member/group/index.vue")
+    },
 
     {
       path: "goods/goods-info/goodsDetail",
