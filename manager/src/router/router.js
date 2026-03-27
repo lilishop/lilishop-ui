@@ -92,6 +92,12 @@ export const otherRouter = {
       component: () => import("@/views/goods/goods-manage/category.vue")
     },
     {
+      path: "goods-group",
+      title: "商品分组",
+      name: "goods-group",
+      component: () => import("@/views/goods/group/index.vue")
+    },
+    {
       path: "goods-parameter",
       title: "商品参数",
       name: "goods-parameter",
@@ -152,6 +158,12 @@ export const otherRouter = {
       title: "会员分组",
       name: "member-group",
       component: () => import("@/views/member/group/index.vue")
+    },
+    {
+      path: "message-template",
+      title: "消息模版",
+      name: "message-template",
+      component: () => import("@/views/sys/message/messageTemplate.vue")
     },
 
     {

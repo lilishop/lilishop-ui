@@ -142,6 +142,32 @@ export const getGoodsNumerData = (params) => {
 export const getGoodsListData = (params) => {
     return getRequest('/goods/goods/list', params)
 }
+// 商品分组分页
+export const getGoodsGroupByPage = (params) => {
+    return getRequest('/goods/goodsGroup/getByPage', params)
+}
+// 商品分组详情
+export const getGoodsGroup = (id) => {
+    return getRequest(`/goods/goodsGroup/get/${id}`)
+}
+// 新增商品分组
+export const addGoodsGroup = (params) => {
+    return postRequest('/goods/goodsGroup', params)
+}
+// 修改商品分组
+export const updateGoodsGroup = (id, params) => {
+    return putRequest(`/goods/goodsGroup/update/${id}`, params)
+}
+// 删除商品分组
+export const deleteGoodsGroup = (id) => {
+    return deleteRequest(`/goods/goodsGroup/delete/${id}`)
+}
+// 设定商品分组（批量）
+export const addGoodsGroupItems = (groupId, goodsIds) => {
+    return postRequest(`/goods/goodsGroup/${groupId}/goods`, {
+        goodsIds: Array.isArray(goodsIds) ? goodsIds.join(",") : goodsIds,
+    })
+}
 //  获取待审核商品分页列表
 export const getAuthGoodsListData = (params) => {
     return getRequest('/goods/goods/auth/list', params)

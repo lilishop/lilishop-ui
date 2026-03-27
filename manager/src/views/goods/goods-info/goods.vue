@@ -58,6 +58,17 @@
             <Option value="VIRTUAL_GOODS">虚拟商品</Option>
           </Select>
         </Form-item>
+        <Form-item label="商品分组" prop="groupId">
+          <Select
+            v-model="searchForm.groupId"
+            placeholder="请选择商品分组"
+            clearable
+            filterable
+            style="width: 240px"
+          >
+            <Option v-for="item in goodsGroupList" :value="item.id" :key="item.id">{{ item.groupName }}</Option>
+          </Select>
+        </Form-item>
         <Button
           @click="handleSearch"
           class="search-btn"
@@ -78,6 +89,14 @@
 
       <!-- 批量操作按钮 -->
       <div class="batch-operations" style="margin: 10px 0;">
+        <Button
+          type="primary"
+          :disabled="selectedRows.length === 0"
+          @click="openSetGoodsGroup"
+          style="margin-right: 10px;"
+        >
+          批量设置分组
+        </Button>
         <Button
           type="success"
           :disabled="selectedRows.length === 0"
@@ -216,11 +235,32 @@
         <Button type="primary" @click="submitBatchAudit">提交审核</Button>
       </div>
     </Modal>
+    <Modal v-model="goodsGroupFlag" title="批量设置商品分组" width="420">
+      <Form ref="goodsGroupForm" :model="goodsGroupForm" :rules="goodsGroupRule" :label-width="90">
+        <FormItem label="商品分组" prop="groupId">
+          <Select v-model="goodsGroupForm.groupId" clearable filterable style="width: 240px">
+            <Option v-for="item in goodsGroupList" :value="item.id" :key="item.id">{{ item.groupName }}</Option>
+          </Select>
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button @click="goodsGroupFlag = false">取消</Button>
+        <Button type="primary" :loading="goodsGroupLoading" @click="submitSetGoodsGroup">确定</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 
 <script>
-import { getGoodsListData,getGoodsNumerData, upGoods, lowGoods, authGoods } from "@/api/goods";
+import {
+  getGoodsListData,
+  getGoodsNumerData,
+  upGoods,
+  lowGoods,
+  authGoods,
+  getGoodsGroupByPage,
+  addGoodsGroupItems
+} from "@/api/goods";
 import vueQr from "vue-qr";
 export default {
   components: {
@@ -238,6 +278,7 @@ export default {
         pageSize: 20, // 页面大小
         sort: "create_time", // 默认排序字段
         order: "desc", // 默认排序方式
+        groupId: "",
       },
       underForm: {
         // 下架原因
@@ -510,6 +551,15 @@ export default {
         auth_flag: 1,
         reason: ''
       },
+      goodsGroupFlag: false,
+      goodsGroupLoading: false,
+      goodsGroupList: [],
+      goodsGroupForm: {
+        groupId: ""
+      },
+      goodsGroupRule: {
+        groupId: [{ required: true, message: "请选择商品分组", trigger: "change" }]
+      }
     };
   },
   computed: {
@@ -528,6 +578,7 @@ export default {
     init() {
       this.getDataList();
       this.getNumberData();
+      this.loadGoodsGroupList();
     },
     // 分页 改变页码
     changePage(v) {
@@ -854,6 +905,51 @@ export default {
             this.$Modal.remove();
           });
         }
+      });
+    },
+    loadGoodsGroupList() {
+      getGoodsGroupByPage({ pageNumber: 1, pageSize: 1000 }).then((res) => {
+        if (res && res.success && res.result) {
+          this.goodsGroupList = res.result.records || [];
+        }
+      });
+    },
+    openSetGoodsGroup() {
+      if (this.selectedRows.length === 0) {
+        this.$Message.warning("请先选择商品");
+        return;
+      }
+      this.goodsGroupFlag = true;
+      this.goodsGroupLoading = false;
+      this.goodsGroupForm = { groupId: "" };
+      this.$nextTick(() => {
+        if (this.$refs.goodsGroupForm) this.$refs.goodsGroupForm.resetFields();
+      });
+      this.loadGoodsGroupList();
+    },
+    submitSetGoodsGroup() {
+      this.$refs.goodsGroupForm.validate((valid) => {
+        if (!valid) return;
+        const goodsIds = this.selectedRows.map((item) => item.id);
+        this.goodsGroupLoading = true;
+        addGoodsGroupItems(this.goodsGroupForm.groupId, goodsIds).then((res) => {
+          this.goodsGroupLoading = false;
+          if (res && res.success) {
+            this.$Message.success("设置成功");
+            this.goodsGroupFlag = false;
+            this.selectedRows = [];
+            this.selectAll = false;
+            if (this.$refs.table && this.$refs.table.selectAll) {
+              this.$refs.table.selectAll(false);
+            }
+            this.getDataList();
+          } else if (res && res.message) {
+            this.$Message.error(res.message);
+          }
+        }).catch(() => {
+          this.goodsGroupLoading = false;
+          this.$Message.error("设置失败，请检查权限或后端接口");
+        });
       });
     }
   },
