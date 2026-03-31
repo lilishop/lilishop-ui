@@ -159,12 +159,7 @@ export const otherRouter = {
       name: "member-group",
       component: () => import("@/views/member/group/index.vue")
     },
-    {
-      path: "message-template",
-      title: "消息模版",
-      name: "message-template",
-      component: () => import("@/views/sys/message/messageTemplate.vue")
-    },
+    
 
     {
       path: "goods/goods-info/goodsDetail",
