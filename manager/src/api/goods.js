@@ -134,6 +134,18 @@ return putRequest(`/goods/goods/under`, params)
 export const getGoodsSkuData = (params) => {
     return getRequest('/goods/goods/sku/list', params)
 }
+
+// 设置单个商品规格虚拟销量
+export const updateGoodsSkuVirtualSales = (skuId, params) => {
+    return putRequest(`/goods/goods/virtualSales/${skuId}`, params)
+}
+
+// 批量设置商品规格虚拟销量
+export const batchUpdateGoodsSkuVirtualSales = (params) => {
+    return putRequest('/goods/goods/virtualSales', params, {
+        "Content-Type": "application/json"
+    })
+}
 // 获取商品数量
 export const getGoodsNumerData = (params) => {
     return getRequest('/goods/goods/goodsNumber', params)
