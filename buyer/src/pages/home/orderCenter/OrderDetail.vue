@@ -95,12 +95,43 @@
     </div>
     <div class="order-card" v-if="order.order.payStatus === 'PAID'">
       <h3>发票信息</h3>
-      <template v-if="order.order.needReceipt && order.receipt">
-        <p>发票抬头：{{ order.receipt.receiptTitle }}</p>
-        <p>发票内容：{{ order.receipt.receiptContent }}</p>
+      <!-- 以 li_receipt 为准：needReceipt 可能为 null/false 导致有 receipt 仍显示「未开发票」 -->
+      <template v-if="hasValidReceipt()">
+        <p>发票类型：{{ formatReceiptType(order.receipt) }}</p>
+        <p>发票抬头：{{ formatReceiptHeaderType(order.receipt) }}</p>
+        <p v-if="isPersonalReceipt(order.receipt) && order.receipt.personalName">
+          个人名称：{{ order.receipt.personalName }}
+        </p>
+        <p v-if="order.receipt.companyName">
+          单位名称：{{ order.receipt.companyName }}
+        </p>
         <p v-if="order.receipt.taxpayerId">
           纳税人识别号：{{ order.receipt.taxpayerId }}
         </p>
+        <p v-if="order.receipt.companyAddress">
+          单位地址：{{ order.receipt.companyAddress }}
+        </p>
+        <p v-if="order.receipt.companyPhone">
+          单位电话：{{ order.receipt.companyPhone }}
+        </p>
+        <p v-if="order.receipt.bankName">
+          开户银行：{{ order.receipt.bankName }}
+        </p>
+        <p v-if="order.receipt.bankAccount">
+          银行账号：{{ order.receipt.bankAccount }}
+        </p>
+        <p>发票内容：{{ order.receipt.receiptContent }}</p>
+        <p v-if="order.receipt.receiptPhone">
+          收票人手机：{{ order.receipt.receiptPhone }}
+        </p>
+        <p v-if="order.receipt.receiptEmail">
+          收票人邮箱：{{ order.receipt.receiptEmail }}
+        </p>
+        <div v-if="Number(order.receipt.receiptStatus) === 1" class="receipt-action">
+          <Button size="small" type="primary" ghost @click="viewReceiptInvoice(order.receipt)">
+            查看发票
+          </Button>
+        </div>
       </template>
       <div v-else style="color: #999; margin-left: 5px">未开发票</div>
     </div>
@@ -307,7 +338,7 @@ import {
   cancelOrder,
   getPackage
 } from "@/api/order.js";
-import { afterSaleReason } from "@/api/member";
+import { afterSaleReason, receiptDetail } from "@/api/member";
 export default {
   name: "order-detail",
   data() {
@@ -328,6 +359,51 @@ export default {
     };
   },
   methods: {
+    isVatSpecialReceipt (receipt) {
+      if (!receipt) return false;
+      const rt = receipt.receiptType != null ? String(receipt.receiptType).trim() : "";
+      if (rt === "2" || rt === "增值税专用发票" || receipt.invoiceKind === "VAT_SPECIAL") {
+        return true;
+      }
+      return false;
+    },
+    isPersonalReceipt (receipt) {
+      return !this.isVatSpecialReceipt(receipt);
+    },
+    formatReceiptType (receipt) {
+      if (!receipt) return "";
+      const rt = receipt.receiptType != null ? String(receipt.receiptType).trim() : "";
+      if (rt === "电子普通发票" || rt === "增值税专用发票") return rt;
+      return this.isVatSpecialReceipt(receipt) ? "增值税专用发票" : "电子普通发票";
+    },
+    formatReceiptHeaderType (receipt) {
+      if (!receipt) return "";
+      if (this.isVatSpecialReceipt(receipt)) return "单位";
+      if (receipt.taxpayerId) return "单位";
+      return "个人";
+    },
+    hasValidReceipt () {
+      const receipt = this.order && this.order.receipt;
+      if (!receipt) return false;
+      const content = receipt.receiptContent ? String(receipt.receiptContent).trim() : '';
+      const title = receipt.receiptTitle ? String(receipt.receiptTitle).trim() : '';
+      const taxpayerId = receipt.taxpayerId ? String(receipt.taxpayerId).trim() : '';
+      // 后端有时会返回占位 receipt（如 receiptContent=不开发票），这里过滤掉
+      if (content === '不开发票') return false;
+      return Boolean(content || title || taxpayerId);
+    },
+    getInvoiceAddress (receipt) {
+      if (!receipt) return "";
+      return receipt.invoiceAddress || receipt.invoiceFileUrl || "";
+    },
+    viewReceiptInvoice (receipt) {
+      const invoiceAddress = this.getInvoiceAddress(receipt);
+      if (!invoiceAddress) {
+        this.$Message.warning("暂无发票附件");
+        return;
+      }
+      window.open(invoiceAddress, "_blank");
+    },
     // 退款状态枚举
     refundPriceList(status) {
       switch (status) {
@@ -359,11 +435,21 @@ export default {
       });
       window.open(routeUrl.href, "_blank");
     },
-    getDetail() {
+    async getDetail() {
       // 获取订单详情
-      orderDetail(this.$route.query.sn).then((res) => {
+      orderDetail(this.$route.query.sn).then(async (res) => {
         if (res.success) {
           this.order = res.result;
+          const receiptId =
+            (res.result.order && res.result.order.receiptId) ||
+            res.result.receiptId ||
+            (res.result.receipt && res.result.receipt.id);
+          if (receiptId) {
+            const receiptRes = await receiptDetail(receiptId);
+            if (receiptRes && receiptRes.success && receiptRes.result) {
+              this.$set(this.order, "receipt", receiptRes.result);
+            }
+          }
           this.progressList = res.result.orderLogs;
           if (this.order.order.deliveryMethod === 'LOGISTICS') {
             this.getOrderPackage(this.order.order.sn);
@@ -623,6 +709,10 @@ table {
   background: #fafafa;
   overflow-y: auto;
   overflow-x: auto;
+}
+
+.receipt-action {
+  margin-top: 12px;
 }
 
 .express-log {
