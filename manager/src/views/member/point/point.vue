@@ -83,6 +83,20 @@
             class="member-table"
           >
           </Table>
+          <Row type="flex" justify="end" class="mt_10">
+            <Page
+              :current="memberSearchForm.pageNumber"
+              :total="memberTotal"
+              :page-size="memberSearchForm.pageSize"
+              @on-change="changeMemberPage"
+              @on-page-size-change="changeMemberPageSize"
+              :page-size-opts="[15, 30, 50, 100]"
+              size="small"
+              show-total
+              show-elevator
+              show-sizer
+            ></Page>
+          </Row>
         </Card>
       </TabPane>
       <TabPane label="积分增减记录" name="pointChangeRecord">
@@ -161,7 +175,7 @@
         },
         memberSearchForm: {
           pageNumber: 1,
-          pageSize: 10,
+          pageSize: 15,
           nickName: "",
           username: "",
           disabled: "",
@@ -284,6 +298,7 @@
         ],
         data: [], // 表单数据
         memberData: [],
+        memberTotal: 0,
         total: 0, // 表单数据总数
       };
     },
@@ -338,6 +353,15 @@
         this.memberSearchForm.pageNumber = 1;
         this.getMemberList();
       },
+      changeMemberPage(v) {
+        this.memberSearchForm.pageNumber = v;
+        this.getMemberList();
+      },
+      changeMemberPageSize(v) {
+        this.memberSearchForm.pageNumber = 1;
+        this.memberSearchForm.pageSize = v;
+        this.getMemberList();
+      },
       getMemberList() {
         this.memberLoading = true;
         const params = {
@@ -353,6 +377,7 @@
           this.memberLoading = false;
           if (res && res.success && res.result && res.result.records) {
             this.memberData = res.result.records;
+            this.memberTotal = res.result.total;
           }
         }).catch(() => {
           this.memberLoading = false;
