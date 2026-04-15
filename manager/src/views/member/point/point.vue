@@ -90,7 +90,7 @@
               :page-size="memberSearchForm.pageSize"
               @on-change="changeMemberPage"
               @on-page-size-change="changeMemberPageSize"
-              :page-size-opts="[15, 30, 50, 100]"
+              :page-size-opts="[20, 50, 100]"
               size="small"
               show-total
               show-elevator
@@ -175,7 +175,7 @@
         },
         memberSearchForm: {
           pageNumber: 1,
-          pageSize: 15,
+          pageSize: 20,
           nickName: "",
           username: "",
           disabled: "",
