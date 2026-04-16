@@ -30,6 +30,11 @@ export const updateMemberReview = (id, params) => {
   return getRequest(`/member/evaluation/updateStatus/${id}`, params);
 };
 
+// 修改评价置顶状态
+export const updateMemberReviewTop = (id, params) => {
+  return putRequest(`/member/evaluation/updateTop/${id}`, params);
+};
+
 //  添加或修改
 export const insertOrUpdateSpec = (params) => {
   return postRequest("/memberNoticeSenter/insertOrUpdate", params);
