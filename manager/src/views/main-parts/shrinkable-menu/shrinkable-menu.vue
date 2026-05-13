@@ -10,7 +10,7 @@
     <Menu
       ref="childrenMenu"
       :active-name="$route.name"
-      width="100px"
+      width="120px"
       @on-select="changeMenu"
     >
       <template v-for="item in menuList">
@@ -71,7 +71,7 @@ export default {
 <style lang="scss" scoped>
 .ivu-shrinkable-menu{
     height: calc(100% - 60px);
-    width: 180px;
+    width: 200px;
     display: flex;
 }
 

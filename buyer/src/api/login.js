@@ -69,6 +69,32 @@ export function loginCallback (uuid) {
   });
 }
 
+export function getThirdAccountBindList () {
+  return request({
+    url: '/buyer/passport/connect/bind/list',
+    method: Method.GET,
+    needToken: true
+  });
+}
+
+export function bindThirdAccount (data) {
+  return request({
+    url: '/buyer/passport/connect/bind',
+    method: Method.POST,
+    needToken: true,
+    data
+  });
+}
+
+export function unbindThirdAccount (data) {
+  return request({
+    url: '/buyer/passport/connect/bind/unbind',
+    method: Method.POST,
+    needToken: true,
+    data
+  });
+}
+
 /**
  * 忘记密码  验证手机验证码
  */
@@ -108,4 +134,13 @@ export function sCLogin(token,params) {
     needToken: false,
     params
   });
+}
+
+export function getWechatH5QrCode (params) {
+  return request({
+    url: '/buyer/other/wechat/h5/qrcode',
+    method: Method.GET,
+    needToken: true,
+    params
+  })
 }

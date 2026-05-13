@@ -175,3 +175,56 @@ export const addMemberGroupUsers = (groupId, memberIds) => {
     memberIds: Array.isArray(memberIds) ? memberIds.join(",") : memberIds,
   });
 };
+
+// 客户等级
+export const getMemberGradeByPage = (params) => {
+  return getRequest("/member/memberGrade/getByPage");
+};
+export const getMemberGrade = (id) => {
+  return getRequest(`/member/memberGrade/get/${id}`);
+};
+export const addMemberGrade = (params) => {
+  return postRequest(`/member/memberGrade`, params);
+};
+export const updateMemberGrade = (id, params) => {
+  return putRequest(`/member/memberGrade/update/${id}`, params);
+};
+export const updateMemberGradeState = (id, state) => {
+  return putRequest(`/member/memberGrade/state/${id}?state=${state}`);
+};
+export const deleteMemberGrade = (id) => {
+  return deleteRequest(`/member/memberGrade/delete/${id}`);
+};
+export const getMemberExperienceByPage = (params) => {
+  return getRequest(`/member/memberGrade/experience/getByPage`, params);
+};
+
+// 客户权益
+export const getMemberBenefitByPage = (params) => {
+  return getRequest("/member/benefit/getByPage", params);
+};
+
+export const getMemberBenefit = (id) => {
+  return getRequest(`/member/benefit/get/${id}`);
+};
+
+export const addMemberBenefit = (params) => {
+  return postRequest("/member/benefit", params);
+};
+
+export const updateMemberBenefit = (id, params) => {
+  return putRequest(`/member/benefit/update/${id}`, params);
+};
+
+export const updateMemberBenefitState = (id, state) => {
+  return putRequest(`/member/benefit/state/${id}?state=${state}`);
+};
+
+export const deleteMemberBenefit = (id) => {
+  return deleteRequest(`/member/benefit/delete/${id}`);
+};
+
+/** 客户权益类型枚举（管理端） */
+export const getMemberBenefitTypes = () => {
+  return getRequest("/member/benefit/types");
+};

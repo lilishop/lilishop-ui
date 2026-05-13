@@ -489,6 +489,31 @@ export function memberPointHistory (params) {
     params
   });
 }
+
+export function memberGradeCurrent (params) {
+  return request({
+    url: `/buyer/member/memberGrade/current`,
+    method: Method.GET,
+    needToken: true,
+    params
+  })
+}
+
+export function memberGradeRules () {
+  return request({
+    url: `/buyer/member/memberGrade/rules`,
+    method: Method.GET,
+    needToken: true
+  })
+}
+
+export function memberGradeList () {
+  return request({
+    url: `/buyer/member/memberGrade/list`,
+    method: Method.GET,
+    needToken: true
+  })
+}
 /**
  * 分页获取会员站内信
  * @param {Object} params 请求参数，包括pageNumber、pageSize、status

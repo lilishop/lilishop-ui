@@ -23,6 +23,11 @@
               <Option v-for="item in memberGroupList" :value="item.id" :key="item.id">{{ item.groupName }}</Option>
             </Select>
           </Form-item>
+          <Form-item label="会员等级" prop="gradeId">
+            <Select v-model="searchForm.gradeId" clearable filterable style="width: 240px">
+              <Option v-for="item in memberGradeList" :value="item.id" :key="item.id">{{ item.gradeName }}</Option>
+            </Select>
+          </Form-item>
           <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search">搜索</Button>
         </Form>
       </Row>
@@ -255,6 +260,7 @@ export default {
         groupId: [{ required: true, message: "请选择会员分组", trigger: "change" }],
       },
       memberGroupList: [],
+      memberGradeList: [],
       memberPointRule: {
         type: [{ required: true, message: "请选择类型", trigger: "change" }],
         point: [
@@ -356,6 +362,23 @@ export default {
               {},
               params.row.point == void 0 ? "0" : params.row.point
             );
+          },
+        },
+        {
+          title: "经验值",
+          key: "experience",
+          minWidth: 100,
+          render: (h, params) => {
+            return h("div", {}, params.row.experience == null ? "0" : params.row.experience);
+          },
+        },
+        {
+          title: "会员等级",
+          key: "gradeName",
+          minWidth: 120,
+          tooltip: true,
+          render: (h, params) => {
+            return h("div", {}, params.row.gradeName || "-");
           },
         },
         {
@@ -586,6 +609,13 @@ export default {
       API_Member.getMemberGroupByPage({ pageNumber: 1, pageSize: 1000 }).then((res) => {
         if (res && res.success && res.result) {
           this.memberGroupList = res.result.records || [];
+        }
+      });
+    },
+    loadMemberGradeList() {
+      API_Member.getMemberGradeByPage({ pageNumber: 1, pageSize: 1000 }).then((res) => {
+        if (res && res.success && res.result) {
+          this.memberGradeList = res.result || [];
         }
       });
     },
@@ -867,6 +897,7 @@ export default {
     this.getData();
     if (!this.selectedMember) {
       this.loadMemberGroupList();
+      this.loadMemberGradeList();
     }
   },
 };

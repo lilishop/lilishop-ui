@@ -54,14 +54,40 @@ export default {
   },
   mounted () {
     this.formItem = JSON.parse(storage.getItem('userInfo'))
+    this.formItem.birthday = this.normalizeBirthday(this.formItem.birthday)
     this.accessToken.accessToken = storage.getItem('accessToken');
   },
   methods: {
+    normalizeBirthday (value) {
+      if (!value) return ''
+      if (value instanceof Date) return value
+      if (typeof value === 'number') return new Date(value)
+      if (typeof value === 'string') {
+        const m = value.match(/^(\d{4})-(\d{2})-(\d{2})/)
+        if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
+        const d = new Date(value)
+        return isNaN(d.getTime()) ? '' : d
+      }
+      return ''
+    },
+    formatBirthday (value) {
+      if (!value) return null
+      if (typeof value === 'string') {
+        const m = value.match(/^(\d{4})-(\d{2})-(\d{2})/)
+        return m ? `${m[1]}-${m[2]}-${m[3]}` : null
+      }
+      const d = value instanceof Date ? value : new Date(value)
+      if (isNaN(d.getTime())) return null
+      const yyyy = d.getFullYear()
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      const dd = String(d.getDate()).padStart(2, '0')
+      return `${yyyy}-${mm}-${dd}`
+    },
     save () { // 保存
       this.$refs.form.validate(valid => {
         if (valid) {
           let params = {
-            birthday: this.$options.filters.unixToDate(this.formItem.birthday / 1000, 'yyyy-MM-dd'),
+            birthday: this.formatBirthday(this.formItem.birthday),
             face: this.formItem.face,
             nickName: this.formItem.nickName,
             sex: this.formItem.sex

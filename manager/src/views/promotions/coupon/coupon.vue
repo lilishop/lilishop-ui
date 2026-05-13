@@ -127,6 +127,7 @@ import {
 import {
   promotionsStatusRender,
   promotionsScopeTypeRender,
+  promotionsCouponActivityTimeRender,
 } from "@/utils/promotions";
 
 export default {
@@ -148,13 +149,14 @@ export default {
         // 表头
         {
           type: "selection",
-          width: 100,
+          width: 52,
           align: "center",
-          fixed: "left",
+          /* 不使用 fixed：左侧固定列与主体表格分开渲染，叠加全局 .ivu-table table{width:100%} 易在接缝处留白；勾选列无需横向钉住 */
         },
         {
           title: "优惠券名称",
           key: "couponName",
+          minWidth: 140,
           width: 180,
           tooltip: true,
         },
@@ -238,21 +240,7 @@ export default {
         {
           title: "活动时间",
           width: 200,
-          render: (h, params) => {
-            if (
-              params?.row?.getType === "ACTIVITY" &&
-              params?.row?.rangeDayType === "DYNAMICTIME"
-            ) {
-              return h("div", "长期有效");
-            } else if (params?.row?.startTime && params?.row?.endTime) {
-              return h("div", {
-                domProps: {
-                  innerHTML:
-                    params.row.startTime + "<br/>" + params.row.endTime,
-                },
-              });
-            }
-          },
+          render: promotionsCouponActivityTimeRender,
         },
         {
           title: "状态",

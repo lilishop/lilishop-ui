@@ -39,7 +39,7 @@ export const otherRouter = {
     },
     {
       path: "category",
-      title: "类型列表",
+      title: "分类列表",
       name: "category",
       component: () => import("@/views/goods/goods-manage/category.vue")
     },
@@ -105,15 +105,9 @@ export const otherRouter = {
     },
     {
       path: "goods-parameter-edit",
-      title: "商品参数维护",
+      title: "编辑商品参数",
       name: "goods-parameter-edit",
       component: () => import("@/views/goods/goods-manage/parameter-edit.vue")
-    },
-    {
-      path: "goods-spec",
-      title: "商品参数",
-      name: "goods-spec",
-      component: () => import("@/views/goods/goods-manage/spec.vue")
     },
     {
       path: "order-complaint-detail",
@@ -158,6 +152,30 @@ export const otherRouter = {
       title: "会员分组",
       name: "member-group",
       component: () => import("@/views/member/group/index.vue")
+    },
+    {
+      path: "member-grade",
+      title: "客户等级",
+      name: "member-grade",
+      component: () => import("@/views/member/grade/index.vue")
+    },
+    {
+      path: "member-benefit",
+      title: "客户权益管理",
+      name: "member-benefit",
+      component: () => import("@/views/member/benefit/index.vue")
+    },
+    {
+      path: "member-grade-experience",
+      title: "等级权益设置",
+      name: "member-grade-experience",
+      component: () => import("@/views/member/grade/experience-setting.vue")
+    },
+    {
+      path: "member-grade-experience-log",
+      title: "客户经验值记录",
+      name: "member-grade-experience-log",
+      component: () => import("@/views/member/grade/experience-log.vue")
     },
     
 

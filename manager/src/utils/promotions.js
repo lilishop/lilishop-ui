@@ -85,3 +85,36 @@ export function memberPromotionsStatusRender(h, status) {
     ),
   ]);
 }
+
+/**
+ * 平台优惠券「活动时间 / 有效期」文案（活动获取券：effectiveDays 为领取后有效天数）
+ */
+export function formatPromotionCouponValidityHtml(row) {
+  if (!row) return "-";
+  if (row.getType === "ACTIVITY") {
+    const days = row.effectiveDays;
+    if (days !== undefined && days !== null && days !== "") {
+      const n = Number(days);
+      if (!Number.isNaN(n) && n > 0) {
+        return `领取后${n}天有效`;
+      }
+    }
+  }
+  if (row.startTime && row.endTime) {
+    return `${row.startTime}<br/>${row.endTime}`;
+  }
+  if (row.getType === "ACTIVITY" && row.rangeDayType === "DYNAMICTIME") {
+    return "长期有效";
+  }
+  return "-";
+}
+
+/** Table 列 render：活动时间（与 formatPromotionCouponValidityHtml 一致） */
+export function promotionsCouponActivityTimeRender(h, params) {
+  const html = formatPromotionCouponValidityHtml(params.row);
+  if (html === "-") return h("div", "-");
+  if (html.indexOf("<br/>") !== -1) {
+    return h("div", { domProps: { innerHTML: html } });
+  }
+  return h("div", html);
+}

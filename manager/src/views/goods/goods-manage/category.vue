@@ -15,9 +15,6 @@
       >
         <template slot="action" slot-scope="scope">
           <div class="ops">
-            <template v-if="scope.row.level == 2">
-              <a class="ops-link" @click="parameterOperation(scope.row)">编辑绑定参数</a>
-            </template>
             <a class="ops-link" @click="edit(scope.row)">编辑</a>
             <a class="ops-link" @click="remove(scope.row)">删除</a>
             <a v-show="scope.row.level != 2" class="ops-link" @click="addChildren(scope.row)">添加子分类</a>
@@ -339,10 +336,6 @@ export default {
           this.modalBrandVisible = false;
         }
       });
-    },
-    // 编辑绑定参数
-    parameterOperation(v) {
-      this.$router.push({ name: "parameter", query: { id: v.id } });
     },
     // 添加子分类
     addChildren(v) {

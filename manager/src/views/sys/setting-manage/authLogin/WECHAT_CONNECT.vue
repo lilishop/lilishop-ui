@@ -55,10 +55,10 @@ export default {
     return {
       ruleValidate: {}, // 验证规则
       way: { // 类型
-        APP: "移动应用端",
-        H5: "移动端",
-        WECHAT_MP: "小程序端",
-        PC: "PC端",
+        APP: "APP",
+        H5: "手机网页（微商城）",
+        WECHAT_MP: "微信小程序",
+        PC: "WEB网页",
       },
       formValidate: {} // 表单数据
     };
