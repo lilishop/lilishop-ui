@@ -304,7 +304,7 @@
                 :page-size="orderSearchForm.pageSize"
                 @on-change="orderChangePage"
                 @on-page-size-change="orderChangePageSize"
-                :page-size-opts="[10, 20, 50]"
+                :page-size-opts="[20, 50, 100]"
                 size="small"
                 show-total
                 show-elevator
@@ -427,7 +427,7 @@
                 :page-size="refundGoodsOrderSearchForm.pageSize"
                 @on-change="refundGoodsOrderChangePage"
                 @on-page-size-change="refundGoodsOrderChangePageSize"
-                :page-size-opts="[10, 20, 50]"
+                :page-size-opts="[20, 50, 100]"
                 size="small"
                 show-total
                 show-elevator
@@ -550,7 +550,7 @@
                 :page-size="refundOrderSearchForm.pageSize"
                 @on-change="refundOrderChangePage"
                 @on-page-size-change="refundOrderChangePageSize"
-                :page-size-opts="[10, 20, 50]"
+                :page-size-opts="[20, 50, 100]"
                 size="small"
                 show-total
                 show-elevator
@@ -731,7 +731,7 @@
         //TA的订单form
         orderSearchForm: {
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
           payStatus: "",
           orderSn: "",
           orderType: "",
@@ -834,12 +834,12 @@
         //TA的退货单form
         refundGoodsOrderSearchForm: {
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
         },
         //TA的退款单form
         refundOrderSearchForm: {
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
         },
         refundOrderData: [],//售后单数据
         refundOrderTotal: 0,//售后单总条数

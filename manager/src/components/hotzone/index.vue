@@ -57,11 +57,11 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-/deep/ .ivu-modal {
+::v-deep .ivu-modal {
   overflow: hidden;
   height: 650px !important;
 }
-/deep/ .ivu-modal-body {
+::v-deep .ivu-modal-body {
   width: 100%;
   height: 500px;
   overflow: hidden;

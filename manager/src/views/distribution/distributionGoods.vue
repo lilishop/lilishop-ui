@@ -4,10 +4,12 @@
       <Form @keydown.enter.native.prevent="handleSearch" ref="searchForm" :model="searchForm" inline :label-width="70"
         class="search-form">
         <Form-item label="商品名称" prop="goodsName">
-          <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px" />
+          <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 240px" />
         </Form-item>
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
       </Form>
+      </Card>
+    <Card>
       <Row class="operation" style="margin:10px 0;">
         <Button @click="delAll" type="primary">批量下架</Button>
       </Row>
@@ -30,7 +32,7 @@
       </Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
-          @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator
+          @on-page-size-change="changePageSize" :page-size-opts="[20,50,100]" size="small" show-total show-elevator
           show-sizer></Page>
       </Row>
     </Card>
@@ -51,7 +53,7 @@ export default {
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
       },
@@ -135,14 +137,10 @@ export default {
           fixed: "right",
           minWidth: 100,
           render: (h, params) => {
-            return h("div", [
+            return h("div", { class: "ops" }, [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "error",
-                    size: "small",
-                  },
                   on: {
                     click: () => {
                       this.remove(params.row);
@@ -178,7 +176,7 @@ export default {
     // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
     // 清除选中状态
@@ -254,5 +252,17 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
+}
+</style>
 
 

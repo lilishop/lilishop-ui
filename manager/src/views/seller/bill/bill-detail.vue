@@ -44,7 +44,7 @@
           <Row type="flex" justify="end" class="mt_10">
             <Page :current="orderParam.pageNumber" :total="orderTotal" :page-size="orderParam.pageSize"
                   @on-change="orderChangePage" @on-page-size-change="orderChangePageSize" size="small" show-total
-                  show-elevator></Page>
+                  :page-size-opts="[20, 50, 100]" show-elevator show-sizer></Page>
           </Row>
         </Tab-pane>
       </Tabs>
@@ -304,7 +304,7 @@ export default {
       orderParam: {
         // 请求参数
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "id", // 默认排序字段
         order: "desc", // 默认排序方式
         // flowType: "PAY",

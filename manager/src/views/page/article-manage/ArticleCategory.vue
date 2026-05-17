@@ -19,29 +19,21 @@
         primary-key="id"
       >
         <template slot="action" slot-scope="scope">
-          <Button
-            type="info"
+          <a
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
             @click="edit(scope.row)"
-            size="small"
-            style="margin-right: 5px"
-            >编辑
-          </Button>
-
-          <Button
-            type="error"
+          >编辑</a>
+          <span style="margin:0 8px;color:#dcdee2">|</span>
+          <a
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
             @click="remove(scope.row)"
-            size="small"
-            style="margin-right: 5px"
-            >删除
-          </Button>
-          <Button
+          >删除</a>
+          <span v-show="scope.row.level != 1" style="margin:0 8px;color:#dcdee2">|</span>
+          <a
             v-show="scope.row.level != 1"
-            type="success"
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
             @click="addChildren(scope.row)"
-            size="small"
-            style="margin-right: 5px"
-            >添加子分类
-          </Button>
+          >添加子分类</a>
         </template>
       </tree-table>
     </Card>

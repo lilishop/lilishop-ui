@@ -55,10 +55,10 @@ export default {
     return {
       ruleValidate: {}, // 验证规则
       way: { // 类型
-        APP: "移动应用端",
-        H5: "移动端",
-        WECHAT_MP: "小程序端",
-        PC: "PC端",
+        APP: "APP",
+        H5: "手机网页（微商城）",
+        WECHAT_MP: "微信小程序",
+        PC: "WEB网页",
       },
       formValidate: {} // 表单数据
     };
@@ -132,7 +132,7 @@ export default {
   margin-right: 20px;
   display: flex;
   margin-bottom: 20px;
-  /deep/ .ivu-card-body {
+  ::v-deep .ivu-card-body {
     padding: 0 16px !important;
   }
 }
@@ -150,7 +150,7 @@ export default {
   padding-bottom: 10px;
   flex-direction: column;
   align-items: center;
-  /deep/ .ivu-btn {
+  ::v-deep .ivu-btn {
     width: 100px;
   }
 }

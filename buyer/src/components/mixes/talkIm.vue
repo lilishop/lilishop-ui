@@ -25,11 +25,11 @@ export default {
         //携带商品Id,在IM可以发送商品信息
         if(goodsId && skuId){
           window.open(
-            this.IMLink + "?token=" + accessToken + "&id=" + id || this.storeMsg.storeId + "&goodsId=" + goodsId + "&skuId=" + skuId
+            this.IMLink + "?token=" + accessToken + "&id=" + (id || this.storeMsg.storeId) + "&goodsId=" + goodsId + "&skuId=" + skuId
           );
         }else{
           window.open(
-            this.IMLink + "?token=" + accessToken + "&id=" + id || this.storeMsg.storeId
+            this.IMLink + "?token=" + accessToken + "&id=" + (id || this.storeMsg.storeId)
           );
         }
 

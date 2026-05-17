@@ -295,7 +295,7 @@ export default {
 <style lang="scss" scoped>
 @import "./home.scss";
 .noticesDetail{
-  /deep/ img{
+  ::v-deep img{
     max-width: 100%;
     max-height: 200px;
   }

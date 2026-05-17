@@ -1,9 +1,27 @@
-/deep/ .ivu-input{
+::v-deep .ivu-input{
   width: 200px !important;
 }
 
 .label-btns{
   margin-left: 150px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.es-buttons{
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: 10px;
+}
+
+::v-deep .label-btns > .ivu-btn{
+  margin-right: 10px;
+}
+
+::v-deep .es-buttons .ivu-btn{
+  margin-right: 10px;
+  margin-bottom: 10px;
 }
 
 .ivu-form-item{
@@ -21,7 +39,7 @@
   margin-right: 10px;
 }
 
-/deep/ .ivu-form-item-content {
+::v-deep .ivu-form-item-content {
   margin-left: 0 !important;
   display: flex;
 }

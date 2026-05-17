@@ -32,6 +32,26 @@ export const getCategoryBrandListData = (category_id, params) => {
 export const saveCategoryBrand = (category_id, params) => {
     return postRequest(`/goods/categoryBrand/${category_id}`, params)
 }
+// 根据品牌id获取关联分类
+export const getBrandCategoryListData = (brand_id, params) => {
+    return getRequest(`/goods/categoryBrand/${brand_id}`, params)
+}
+// 保存品牌分类关联
+export const saveBrandCategory = (brand_id, categoryIds) => {
+    return postRequest(`/goods/categoryBrand/${brand_id}`, categoryIds, {
+      "Content-Type": "application/json"
+    })
+}
+
+export const getParameterCategoryListData = (parameter_id, params) => {
+    return getRequest(`/goods/parameters/category/${parameter_id}`, params)
+}
+
+export const saveParameterCategory = (parameter_id, categoryIds) => {
+    return postRequest(`/goods/parameters/category/${parameter_id}`, categoryIds, {
+      "Content-Type": "application/json"
+    })
+}
 //保存获取关联规格
 export const saveCategorySpec = (category_id, params) => {
     return postRequest(`/goods/categorySpec/${category_id}`, params)
@@ -101,31 +121,76 @@ export const getGoodsCategory = (parent_id) => {
 }
 
 //  上架商品
-export const upGoods = (id, params) => {
-    return putRequest(`/goods/goods/${id}/up`, params)
-  }
-  //  下架商品
-  export const lowGoods = (id, params) => {
-    return putRequest(`/goods/goods/${id}/under`, params)
-  }
+export const upGoods = (params) => {
+    return putRequest(`/goods/goods/up`, params)
+}
+
+//  下架商品
+export const lowGoods = (params) => {
+return putRequest(`/goods/goods/under`, params)
+}
 
 //  获取商品sku分页列表
 export const getGoodsSkuData = (params) => {
     return getRequest('/goods/goods/sku/list', params)
 }
 
+// 设置单个商品规格虚拟销量
+export const updateGoodsSkuVirtualSales = (skuId, params) => {
+    return putRequest(`/goods/goods/virtualSales/${skuId}`, params)
+}
 
+// 批量设置商品规格虚拟销量
+export const batchUpdateGoodsSkuVirtualSales = (params) => {
+    return putRequest('/goods/goods/virtualSales', params, {
+        "Content-Type": "application/json"
+    })
+}
+// 获取商品数量
+export const getGoodsNumerData = (params) => {
+    return getRequest('/goods/goods/goodsNumber', params)
+}
 //  获取商品分页列表
 export const getGoodsListData = (params) => {
     return getRequest('/goods/goods/list', params)
+}
+// 商品分组分页
+export const getGoodsGroupByPage = (params) => {
+    return getRequest('/goods/goodsGroup/getByPage', params)
+}
+// 商品分组详情
+export const getGoodsGroup = (id) => {
+    return getRequest(`/goods/goodsGroup/get/${id}`)
+}
+// 新增商品分组
+export const addGoodsGroup = (params) => {
+    return postRequest('/goods/goodsGroup', params)
+}
+// 修改商品分组
+export const updateGoodsGroup = (id, params) => {
+    return putRequest(`/goods/goodsGroup/update/${id}`, params)
+}
+// 删除商品分组
+export const deleteGoodsGroup = (id) => {
+    return deleteRequest(`/goods/goodsGroup/delete/${id}`)
+}
+// 设定商品分组（批量）
+export const addGoodsGroupItems = (groupId, goodsIds) => {
+    return postRequest(`/goods/goodsGroup/${groupId}/goods`, {
+        goodsIds: Array.isArray(goodsIds) ? goodsIds.join(",") : goodsIds,
+    })
 }
 //  获取待审核商品分页列表
 export const getAuthGoodsListData = (params) => {
     return getRequest('/goods/goods/auth/list', params)
 }
 //  审核商品
-export const authGoods = (id, params) => {
-    return putRequest(`/goods/goods/${id}/auth`, params)
+export const authGoods = (params) => {
+  return putRequest(`/goods/goods/auth`, params,{
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
 }
 
 //查询分类绑定参数信息
@@ -133,17 +198,28 @@ export const getCategoryParamsListData = (id, params) => {
     return getRequest(`/goods/categoryParameters/${id}`, params)
 }
 
+// 参数组分页列表
+export const getCategoryParametersGroupPage = (params) => {
+    return getRequest(`/goods/categoryParameters`, params)
+}
+
 //查询商品绑定参数信息
 export const getCategoryParamsByGoodsId = (goodsId, categoryId) => {
     return getRequest(`/goods/parameters/${goodsId}/${categoryId}`)
 }
+export const getGoodsParamsPage = (params) => {
+    return getRequest(`/goods/parameters`, params)
+}
+export const getGoodsParamsDetail = (id, params) => {
+    return getRequest(`/goods/parameters/${id}`, params)
+}
 //保存参数
-export const insertGoodsParams = (params) => {
-    return postRequest('/goods/parameters', params)
+export const insertGoodsParams = (params, headers) => {
+    return postRequest('/goods/parameters', params, headers)
 }
 //更新参数
-export const updateGoodsParams = (params) => {
-    return putRequest('/goods/parameters', params)
+export const updateGoodsParams = (params, headers) => {
+    return putRequest('/goods/parameters', params, headers)
 }
 //删除参数
 export const deleteParams = (id, params) => {

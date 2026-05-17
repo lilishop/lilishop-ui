@@ -9,7 +9,7 @@
               v-model="searchForm.memberName"
               clearable
               placeholder="请输入会员名称"
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="订单号" prop="orderSn">
@@ -18,11 +18,11 @@
               v-model="searchForm.orderSn"
               clearable
               placeholder="请输入订单号"
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="状态" prop="status">
-            <Select v-model="searchForm.status" placeholder="请选择订单状态" clearable style="width: 200px">
+            <Select v-model="searchForm.status" placeholder="请选择订单状态" clearable style="width: 240px">
               <Option value="NEW">新投诉</Option>
               <Option value="CANCEL">已撤销</Option>
               <Option value="WAIT_APPEAL">待申诉</Option>
@@ -36,6 +36,8 @@
           <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
+      </Card>
+    <Card>
       <Table
         :loading="loading"
         border
@@ -61,7 +63,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -88,7 +90,7 @@
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
           sort: "createTime", // 默认排序字段
           order: "desc", // 默认排序方式
         },
@@ -139,19 +141,18 @@
             title: "操作",
             key: "action",
             align: "center",
-            width: 120,
+            fixed: 'right',
+            width: 200,
             render: (h, params) => {
-              if(params.row.complainStatus === "COMPLETE"){
+              if (params.row.complainStatus === "COMPLETE") {
                 return h("div", [
                   h(
-                    "Button",
+                    "a",
                     {
-                      props: {
-                        type: "info",
-                        size: "small"
-                      },
                       style: {
-                        marginRight: "5px",
+                        color: "#2d8cf0",
+                        cursor: "pointer",
+                        textDecoration: "none",
                       },
                       on: {
                         click: () => {
@@ -162,17 +163,15 @@
                     "详情"
                   ),
                 ]);
-              }else{
+              } else {
                 return h("div", [
                   h(
-                    "Button",
+                    "a",
                     {
-                      props: {
-                        type: "primary",
-                        size: "small"
-                      },
                       style: {
-                        marginRight: "5px",
+                        color: "#2d8cf0",
+                        cursor: "pointer",
+                        textDecoration: "none",
                       },
                       on: {
                         click: () => {
@@ -211,14 +210,14 @@
       // 搜索
       handleSearch() {
         this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 10;
+        this.searchForm.pageSize = 20;
         this.getDataList();
       },
       // 重置
       handleReset() {
         this.searchForm = {}
         this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 10;
+        this.searchForm.pageSize = 20;
         this.getDataList();
       },
       // 获取数据

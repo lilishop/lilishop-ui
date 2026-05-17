@@ -10,7 +10,7 @@ h4 {
   margin: 20px 0;
   font-size: 18px;
 }
-/deep/ .ivu-icon {
+::v-deep .ivu-icon {
   margin-left: 40px;
   margin-right: 40px;
 }

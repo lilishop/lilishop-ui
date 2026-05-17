@@ -15,7 +15,7 @@
               v-model="searchForm.memberName"
               placeholder="请输入会员名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Button
@@ -26,6 +26,8 @@
           >
         </Form>
       </Row>
+      </Card>
+    <Card>
       <Table
         class="mt_10"
         :loading="loading"
@@ -41,7 +43,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -63,7 +65,7 @@ export default {
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
         startDate: "", // 起始时间
@@ -113,17 +115,10 @@ export default {
           fixed: "right",
           width: 200,
           render: (h, params) => {
-            return h("div", [
+            return h("div", { class: "ops" }, [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "success",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
                   on: {
                     click: () => {
                       this.audit(params.row, "PASS");
@@ -132,13 +127,10 @@ export default {
                 },
                 "通过"
               ),
+              h("span", {}, "|"),
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "error",
-                    size: "small",
-                  },
                   on: {
                     click: () => {
                       this.audit(params.row, "REFUSE");
@@ -174,7 +166,7 @@ export default {
     // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
     // 获取列表数据
@@ -222,3 +214,15 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
+}
+</style>

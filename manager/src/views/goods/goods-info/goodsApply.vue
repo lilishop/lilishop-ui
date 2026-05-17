@@ -15,7 +15,7 @@
             v-model="searchForm.goodsName"
             placeholder="请输入商品名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="商品编号" prop="id">
@@ -24,13 +24,15 @@
             v-model="searchForm.id"
             placeholder="请输入商品编号"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search"
           >搜索</Button
         >
       </Form>
+    </Card>
+    <Card>
       <Table
         :loading="loading"
         border
@@ -64,7 +66,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -88,7 +90,7 @@ export default {
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "create_time", // 默认排序字段
         order: "desc", // 默认排序方式
       },
@@ -169,13 +171,12 @@ export default {
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "success",
-                    size: "small",
-                  },
                   style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     marginRight: "5px",
                   },
                   on: {
@@ -187,13 +188,17 @@ export default {
                 "通过"
               ),
               h(
-                "Button",
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
+              ),
+              h(
+                "a",
                 {
-                  props: {
-                    type: "error",
-                    size: "small",
-                  },
                   style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     marginRight: "5px",
                   },
                   on: {
@@ -205,11 +210,17 @@ export default {
                 "拒绝"
               ),
               h(
-                "Button",
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
+              ),
+              h(
+                "a",
                 {
-                  props: {
-                    type: 'default',
-                    size: "small",
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none"
                   },
                   on: {
                     click: () => {
@@ -245,7 +256,7 @@ export default {
     handleSearch() {
       // 搜索
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
     getDataList() {
@@ -274,7 +285,11 @@ export default {
         content: "您确认要审核" + examine + " " + v.goodsName + " ?",
         loading: true,
         onOk: () => {
-          authGoods(v.id, this.goodsAuditForm).then((res) => {
+          let formData = new FormData();
+          formData.append('goodsIds', v.id);
+          formData.append('authFlag', this.goodsAuditForm.authFlag);
+
+          authGoods(formData).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("审核成功");

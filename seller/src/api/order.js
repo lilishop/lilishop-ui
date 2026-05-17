@@ -147,9 +147,14 @@ export const getReceiptPage = params => {
   return getRequest(`/trade/receipt`, params);
 };
 
-//获取发票列表
-export const invoicing = id => {
-  return postRequest(`/trade/receipt/${id}/invoicing`);
+//获取发票详情
+export const getReceiptDetail = id => {
+  return getRequest(`/trade/receipt/get/${id}`);
+};
+
+//开发票
+export const invoicing = (id, params) => {
+  return postRequest(`/trade/receipt/${id}/invoicing`, params);
 };
 
 //查询包裹列表
@@ -167,4 +172,14 @@ export const partDelivery = (orderSn,params) => {
 //查询物流
 export const getTracesList = (sn) => {
   return getRequest(`/order/order/getTracesList/${sn}`);
+}
+
+// 获取订单数量统计
+export const getOrderNum = (params) => {
+  return getRequest(`/order/order/orderNum`, params);
+}
+
+// 获取售后数量统计
+export const getAfterSaleNumVO = (params) => {
+  return getRequest(`/order/afterSale/afterSaleNumVO`, params);
 }

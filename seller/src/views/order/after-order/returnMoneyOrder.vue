@@ -8,7 +8,7 @@
             v-model="searchForm.goodsName"
             clearable
             placeholder="请输入商品名称"
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="会员名称" prop="memberName">
@@ -17,7 +17,7 @@
             v-model="searchForm.memberName"
             clearable
             placeholder="请输入会员名称"
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="订单编号" prop="orderSn">
@@ -26,7 +26,7 @@
             v-model="searchForm.orderSn"
             clearable
             placeholder="请输入订单编号"
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
 
@@ -38,13 +38,14 @@
             clearable
             @on-change="selectDateRange"
             placeholder="选择起始时间"
-            style="width: 200px"
+            style="width: 240px"
           ></DatePicker>
         </Form-item>
         <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
         <Button @click="handleReset" class="search-btn">重置</Button>
       </Form>
-
+    </Card>
+        <Card>
       <Table
         :loading="loading"
         border
@@ -84,7 +85,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -106,7 +107,7 @@
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
           sort: "createTime", // 默认排序字段
           order: "desc", // 默认排序方式
           startDate: "", // 起始时间
@@ -183,18 +184,17 @@
             title: "操作",
             key: "action",
             align: "center",
-            width: 100,
+            fixed: 'right',
+            width: 200,
             render: (h, params) => {
               return h("div", [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
                     style: {
-                      marginRight: "5px",
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
                     },
                     on: {
                       click: () => {
@@ -230,7 +230,7 @@
       // 搜索
       handleSearch() {
         this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 10;
+        this.searchForm.pageSize = 20;
         this.getDataList();
       },
       // 重置
@@ -238,7 +238,7 @@
         this.searchForm = {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
           sort: "createTime", // 默认排序字段
           order: "desc", // 默认排序方式
           startDate: "", // 起始时间

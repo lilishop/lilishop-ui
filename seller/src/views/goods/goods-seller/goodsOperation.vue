@@ -44,8 +44,8 @@ export default {
     }
   },
   mounted() {
-    // 编辑商品、模板
-    if (this.$route.query.id || this.$route.query.draftId) {
+    // 编辑商品、模板、复制商品
+    if (this.$route.query.id || this.$route.query.draftId || this.$route.query.copyId) {
       this.activestep = 1;
     } else {
       this.activestep = 0

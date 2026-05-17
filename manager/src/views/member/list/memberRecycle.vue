@@ -16,7 +16,7 @@
                 v-model="searchForm.username"
                 placeholder="请输入会员名称"
                 clearable
-                style="width: 200px"
+                style="width: 240px"
               />
             </Form-item>
 
@@ -26,7 +26,7 @@
                 v-model="searchForm.mobile"
                 placeholder="请输入会员联系方式"
                 clearable
-                style="width: 200px"
+                style="width: 240px"
               />
             </Form-item>
             <Button
@@ -38,6 +38,8 @@
             >
           </Form>
         </Row>
+      </Card>
+      <Card>
         <Table
           :loading="loading"
           border
@@ -55,7 +57,7 @@
             :page-size="searchForm.pageSize"
             @on-change="changePage"
             @on-page-size-change="changePageSize"
-            :page-size-opts="[10, 20, 50]"
+            :page-size-opts="[20, 50, 100]"
             size="small"
             show-total
             show-elevator
@@ -169,7 +171,7 @@ export default {
       searchForm: {
         // 请求参数
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         order: "desc",
         username: "",
         mobile: "",
@@ -228,92 +230,56 @@ export default {
           width: 200,
           fixed: "right",
           render: (h, params) => {
+            const linkStyle = {
+              color: "#2d8cf0",
+              cursor: "pointer",
+              textDecoration: "none",
+            };
+            const sep = h(
+              "span",
+              { style: { margin: "0 8px", color: "#dcdee2" } },
+              "|"
+            );
+            const children = [];
+            if (this.selectedMember) {
+              children.push(
+                h(
+                  "a",
+                  { style: linkStyle, on: { click: () => this.callback(params.row) } },
+                  "选择"
+                )
+              );
+              children.push(sep);
+            }
+            children.push(
+              h(
+                "a",
+                { style: linkStyle, on: { click: () => this.detail(params.row) } },
+                "查看"
+              )
+            );
+            if (!this.selectedMember) {
+              children.push(sep);
+              children.push(
+                h(
+                  "a",
+                  { style: linkStyle, on: { click: () => this.enable(params.row) } },
+                  "启用"
+                )
+              );
+              children.push(sep);
+              children.push(
+                h(
+                  "a",
+                  { style: linkStyle, on: { click: () => this.editPerm(params.row) } },
+                  "编辑"
+                )
+              );
+            }
             return h(
               "div",
-              {
-                style: {
-                  display: "flex",
-                  justifyContent: "center",
-                },
-              },
-              [
-                h(
-                  "Button",
-                  {
-                    props: {
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                      display: this.selectedMember ? "block" : "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.callback(params.row);
-                      },
-                    },
-                  },
-                  "选择"
-                ),
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                    },
-                    on: {
-                      click: () => {
-                        this.detail(params.row);
-                      },
-                    },
-                  },
-                  "查看"
-                ),
-
-                h(
-                  "Button",
-                  {
-                    props: {
-                      size: "small",
-                      type: "success",
-                    },
-                    style: {
-                      marginRight: "5px",
-                      display: this.selectedMember ? "none" : "block",
-                    },
-                    on: {
-                      click: () => {
-                        this.enable(params.row);
-                      },
-                    },
-                  },
-                  "启用"
-                ),
-
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "info",
-                      size: "small",
-                      ghost: true,
-                    },
-                    style: {
-                      marginRight: "5px",
-                    },
-                    on: {
-                      click: () => {
-                        this.editPerm(params.row);
-                      },
-                    },
-                  },
-                  "编辑"
-                ),
-              ]
+              { class: "ops", style: { display: "flex", justifyContent: "center" } },
+              children
             );
           },
         },
@@ -345,7 +311,7 @@ export default {
     // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getData();
     },
     //查看详情修改
@@ -435,7 +401,7 @@ export default {
         regionId:regionId,
         region: region,
         nickName,
-        username,
+
         sex,
         birthday,
         face: face || "",
@@ -462,5 +428,15 @@ export default {
   width: 60px;
   height: 60px;
   border-radius: 50%;
+}
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
 }
 </style>

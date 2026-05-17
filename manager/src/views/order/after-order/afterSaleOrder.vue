@@ -9,13 +9,23 @@
           :label-width="70"
           class="search-form"
         >
+          <Form-item label="关键字" prop="keywords" style="display: block; width: 100%;">
+            <Input
+              type="text"
+              v-model="searchForm.keywords"
+              placeholder="请输入商品名称、订单编号搜索"
+              clearable
+              style="width: 240px"
+            />
+          </Form-item>
+          <br>
           <Form-item label="订单编号" prop="orderSn">
             <Input
               type="text"
               v-model="searchForm.orderSn"
               placeholder="请输入订单编号"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="售后单号" prop="sn">
@@ -24,7 +34,7 @@
               v-model="searchForm.sn"
               placeholder="请输入售后单号"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="申请时间">
@@ -35,7 +45,7 @@
               clearable
               @on-change="selectDateRange"
               placeholder="选择起始时间"
-              style="width: 200px"
+              style="width: 240px"
             ></DatePicker>
           </Form-item>
           <Form-item label="商家名称" prop="storeName">
@@ -44,7 +54,7 @@
               v-model="searchForm.storeName"
               placeholder="请输入商家名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="会员名称" prop="memberName">
@@ -53,7 +63,7 @@
               v-model="searchForm.memberName"
               placeholder="请输入会员名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="售后类型">
@@ -61,7 +71,7 @@
               v-model="searchForm.serviceType"
               placeholder="全部"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             >
               <Option value="RETURN_MONEY">退款</Option>
               <Option value="RETURN_GOODS">退货</Option>
@@ -76,16 +86,17 @@
           >
         </Form>
       </Row>
-
+    </Card>
+    <Card>
       <div class="order-tab">
-        <div v-for="(item,index) in serviceStatus" :key="index" :class="{'current': currentStatus === item.value}" @click="serviceStatusClick(item)">
-          {{item.title}}
-        </div>
+        <Tabs v-model="currentStatus" @on-click="serviceStatusClick">
+          <TabPane v-for="item in serviceStatusWithCount" :key="item.value" :label="item.title" :name="item.value">
+          </TabPane>
+        </Tabs>
       </div>
 
       <Table
         :loading="loading"
-        border
         :columns="columns"
         :data="data"
         ref="table"
@@ -95,31 +106,16 @@
         <template slot="goodsSlot" slot-scope="{ row }">
           <div style="margin-top: 5px; height: 80px; display: flex">
             <div style="">
-              <img :src="row.goodsImage" style="height: 60px; margin-top: 3px" />
+              <img :src="row.goodsImage" style="width: 60px; height: 60px; margin-top: 3px; object-fit: cover; border-radius: 4px;" />
             </div>
 
             <div style="margin-left: 13px">
               <div class="div-zoom">
                 <a @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
               </div>
-              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-                <div slot="content">
-                  <vue-qr
-                    :text="wapLinkTo(row.goodsId, row.skuId)"
-                    :margin="0"
-                    colorDark="#000"
-                    colorLight="#fff"
-                    :size="150"
-                  ></vue-qr>
-                </div>
-                <img
-                  src="../../../assets/qrcode.svg"
-                  class="hover-pointer"
-                  width="20"
-                  height="20"
-                  alt=""
-                />
-              </Poptip>
+              <div style="color: #999; font-size: 12px; margin-top: 5px;">
+                商品ID: {{ row.goodsId }}
+              </div>
             </div>
           </div>
         </template>
@@ -131,7 +127,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -156,7 +152,7 @@ export default {
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
         startDate: "", // 起始时间
@@ -166,6 +162,7 @@ export default {
         serviceStatus: "",
         storeName: "",
         sn: "",
+        keywords: "", // 新增关键字搜索字段
       },
       selectDate: null, // 选择时间段
       form: {
@@ -189,6 +186,13 @@ export default {
           minWidth: 120,
           tooltip: true,
         },
+        // 移除这个独立的商品ID列
+        // {
+        //   title: "商品ID",
+        //   key: "goodsId",
+        //   minWidth: 120,
+        //   tooltip: true,
+        // },
         {
           title: "商品",
           key: "goodsName",
@@ -197,14 +201,20 @@ export default {
           slot: "goodsSlot",
         },
         {
+          title: "会员ID",
+          key: "memberId",
+          minWidth: 120,
+          tooltip: true,
+        },
+        {
           title: "会员名称",
           key: "memberName",
           width: 140,
         },
         {
-          title: "商家名称",
+          title: "店铺名称",
           key: "storeName",
-          minWidth: 100,
+          width: 100,
           tooltip: true,
         },
         {
@@ -233,7 +243,7 @@ export default {
         {
           title: "售后状态",
           key: "serviceStatus",
-          width: 150,
+          width: 180,
           render: (h, params) => {
             if (params.row.serviceStatus == "APPLY") {
               return h("div", [h("tag", { props: { color: "blue" } }, "申请中")]);
@@ -272,14 +282,12 @@ export default {
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none"
                   },
                   on: {
                     click: () => {
@@ -306,13 +314,15 @@ export default {
         {title: '卖家终止售后', value: 'SELLER_TERMINATION'},
         {title: '买家取消售后', value: 'BUYER_CANCEL'}
       ],
-      currentStatus: ''
+      currentStatus: '',
+       afterSaleNumData: {} // 售后数量统计数据
     };
   },
   methods: {
     // 初始化数据
     init() {
       this.getDataList();
+      this.getAfterSaleNumData();
     },
     // 分页 改变页码
     changePage(v) {
@@ -328,8 +338,9 @@ export default {
     // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
+      this.getAfterSaleNumData();
     },
     // 开始结束时间分别赋值
     selectDateRange(v) {
@@ -348,9 +359,19 @@ export default {
           this.total = res.result.total;
         }
       });
+      // 获取售后状态数量
       this.total = this.data.length;
       this.loading = false;
     },
+    // 获取售后数量统计
+     getAfterSaleNumData() {
+      const { serviceStatus, ...searchParams } = this.searchForm;
+       API_Order.getAfterSaleNumVO(searchParams).then((res) => {
+         if (res.success) {
+           this.afterSaleNumData = res.result;
+         }
+       });
+     },
     // 跳转售后详情
     detail(v) {
       let sn = v.sn;
@@ -361,37 +382,44 @@ export default {
     },
     // 售后筛选
     serviceStatusClick(item) {
-      this.currentStatus = item.value;
-      this.searchForm.serviceStatus = item.value;
+      this.currentStatus = item;
+      // 如果是全部（空字符串），则删除serviceStatus字段
+      if (item === 0) {
+        delete this.searchForm.serviceStatus;
+      } else {
+        this.searchForm.serviceStatus = item;
+      }
       this.getDataList();
+      this.getAfterSaleNumData();
     },
   },
   mounted() {
     this.init();
   },
-};
-</script>
-
-<style lang="scss" scoped>
-
-.order-tab {
-
-  width: 950px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #f0f0f0;
-  padding: 0 10px;
-  margin: 10px 20px 10px 0;
-  div {
-    text-align: center;
-    padding: 4px 12px;
-    border-radius: 4px;
-    cursor: pointer;
+  computed: {
+     // 带数量的售后状态
+     serviceStatusWithCount() {
+       return [
+         {title: '全部', value: ''},
+         {title: `申请售后${this.afterSaleNumData.applyNum ? '(' + this.afterSaleNumData.applyNum + ')' : ''}`, value: 'APPLY'},
+         {title: `通过售后${this.afterSaleNumData.passNum ? '(' + this.afterSaleNumData.passNum + ')' : ''}`, value: 'PASS'},
+         {title: `拒绝售后${this.afterSaleNumData.refuseNum ? '(' + this.afterSaleNumData.refuseNum + ')' : ''}`, value: 'REFUSE'},
+         {title: `待收货${this.afterSaleNumData.buyerReturnNum ? '(' + this.afterSaleNumData.buyerReturnNum + ')' : ''}`, value: 'BUYER_RETURN'},
+         {title: `确认收货${this.afterSaleNumData.sellerConfirmNum ? '(' + this.afterSaleNumData.sellerConfirmNum + ')' : ''}`, value: 'SELLER_CONFIRM'},
+         {title: `完成售后${this.afterSaleNumData.completeNum ? '(' + this.afterSaleNumData.completeNum + ')' : ''}`, value: 'COMPLETE'},
+         {title: `卖家终止售后${this.afterSaleNumData.sellerTerminationNum ? '(' + this.afterSaleNumData.sellerTerminationNum + ')' : ''}`, value: 'SELLER_TERMINATION'},
+         {title: `买家取消售后${this.afterSaleNumData.buyerCancelNum ? '(' + this.afterSaleNumData.buyerCancelNum + ')' : ''}`, value: 'BUYER_CANCEL'},
+         {title: `等待平台退款${this.afterSaleNumData.waitRefundNum ? '(' + this.afterSaleNumData.waitRefundNum + ')' : ''}`, value: 'WAIT_REFUND'}
+       ];
+     }
+   }
   }
-  .current {
-    background-color: #ffffff;
+</script>
+<style lang="scss" scoped>
+// Tab组件样式
+.order-tab {
+  ::v-deep .ivu-tabs-tab {
+    font-size: 14px;
   }
 }
 </style>

@@ -3,28 +3,57 @@
     <Card>
       <Row @keydown.enter.native="handleSearch">
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
+          <Form-item label="会员ID" prop="id">
+            <Input type="text" v-model="searchForm.id" placeholder="请输入会员ID" clearable style="width: 240px" />
+          </Form-item>
+
           <Form-item label="会员名称" prop="username">
-            <Input type="text" v-model="searchForm.username" placeholder="请输入会员名称" clearable style="width: 200px" />
+            <Input type="text" v-model="searchForm.username" placeholder="请输入会员名称" clearable style="width: 240px" />
           </Form-item>
 
           <Form-item label="会员昵称" prop="nickName">
-            <Input type="text" v-model="searchForm.nickName" placeholder="请输入会员昵称" clearable style="width: 200px" />
+            <Input type="text" v-model="searchForm.nickName" placeholder="请输入会员昵称" clearable style="width: 240px" />
           </Form-item>
 
           <Form-item label="联系方式" prop="mobile">
-            <Input type="text" v-model="searchForm.mobile" placeholder="请输入会员联系方式" clearable style="width: 200px" />
+            <Input type="text" v-model="searchForm.mobile" placeholder="请输入会员联系方式" clearable style="width: 240px" />
+          </Form-item>
+          <Form-item label="会员分组" prop="groupId">
+            <Select v-model="searchForm.groupId" clearable filterable style="width: 240px">
+              <Option v-for="item in memberGroupList" :value="item.id" :key="item.id">{{ item.groupName }}</Option>
+            </Select>
+          </Form-item>
+          <Form-item label="会员等级" prop="gradeId">
+            <Select v-model="searchForm.gradeId" clearable filterable style="width: 240px">
+              <Option v-for="item in memberGradeList" :value="item.id" :key="item.id">{{ item.gradeName }}</Option>
+            </Select>
           </Form-item>
           <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search">搜索</Button>
         </Form>
       </Row>
+      </Card>
+      <Card>
       <Row class="operation padding-row" v-if="!selectedMember">
         <Button @click="addMember" type="primary">添加会员</Button>
+        <Button
+          style="margin-left: 10px;"
+          type="primary"
+          :disabled="selectedRows.length === 0"
+          @click="openSetMemberGroup"
+        >设定会员分组</Button>
       </Row>
 
-      <Table :loading="loading" border :columns="columns" class="mt_10" :data="data" ref="table"></Table>
+      <Table
+        :loading="loading"
+        :columns="tableColumns"
+        class="mt_10"
+        :data="data"
+        ref="table"
+        @on-selection-change="onSelectionChange"
+      ></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
-          @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator
+          @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]" size="small" show-total show-elevator
           show-sizer></Page>
       </Row>
     </Card>
@@ -93,6 +122,47 @@
         </FormItem>
       </Form>
     </Modal>
+    <Modal v-model="walletIncreaseFlag" title="增加余额" width="420">
+      <Form ref="walletIncreaseForm" :model="walletIncreaseForm" :rules="walletIncreaseRule" :label-width="90">
+        <FormItem label="充值金额" prop="rechargeMoney">
+          <InputNumber v-model="walletIncreaseForm.rechargeMoney" :min="0.01" :precision="2" style="width: 240px" />
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button @click="walletIncreaseFlag = false">取消</Button>
+        <Button type="primary" :loading="walletIncreaseLoading" @click="submitWalletIncrease">确定</Button>
+      </div>
+    </Modal>
+    <Modal v-model="memberPointFlag" title="修改积分" width="420">
+      <Form ref="memberPointForm" :model="memberPointForm" :rules="memberPointRule" :label-width="90">
+        <FormItem label="类型" prop="type">
+          <RadioGroup type="button" button-style="solid" v-model="memberPointForm.type">
+            <Radio label="INCREASE">增加</Radio>
+            <Radio label="REDUCE">减少</Radio>
+          </RadioGroup>
+        </FormItem>
+        <FormItem label="积分" prop="point">
+          <InputNumber v-model="memberPointForm.point" :min="1" :precision="0" style="width: 240px" />
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button @click="memberPointFlag = false">取消</Button>
+        <Button type="primary" :loading="memberPointLoading" @click="submitMemberPoint">确定</Button>
+      </div>
+    </Modal>
+    <Modal v-model="memberGroupFlag" title="设定会员分组" width="420">
+      <Form ref="memberGroupForm" :model="memberGroupForm" :rules="memberGroupRule" :label-width="90">
+        <FormItem label="会员分组" prop="groupId">
+          <Select v-model="memberGroupForm.groupId" clearable filterable style="width: 240px">
+            <Option v-for="item in memberGroupList" :value="item.id" :key="item.id">{{ item.groupName }}</Option>
+          </Select>
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button @click="memberGroupFlag = false">取消</Button>
+        <Button type="primary" :loading="memberGroupLoading" @click="submitSetMemberGroup">确定</Button>
+      </div>
+    </Modal>
     <Modal width="1200px" v-model="picModelFlag">
       <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage" />
     </Modal>
@@ -112,6 +182,19 @@ export default {
     multipleMap,
     ossManage,
   },
+  computed: {
+    tableColumns() {
+      if (this.selectedMember) return this.columns;
+      return [
+        {
+          type: "selection",
+          width: 60,
+          align: "center",
+        },
+        ...this.columns,
+      ];
+    },
+  },
   data() {
     return {
       defaultPic:require('@/assets/default.png'),
@@ -129,14 +212,71 @@ export default {
       searchForm: {
         // 请求参数
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20, // 页面大小
         order: "desc",
+        id: "",
         username: "",
         mobile: "",
         disabled: "OPEN",
+        groupId: "",
       },
       picModelFlag: false, // 选择图片
       form: {}, // 表单数据
+      walletIncreaseFlag: false,
+      walletIncreaseLoading: false,
+      walletIncreaseForm: {
+        memberId: "",
+        rechargeMoney: null,
+      },
+      walletIncreaseRule: {
+        rechargeMoney: [
+          { required: true, type: "number", message: "请输入充值金额", trigger: "change" },
+          {
+            validator: (rule, value, callback) => {
+              if (typeof value !== "number" || value <= 0) {
+                callback(new Error("充值金额必须大于0"));
+                return;
+              }
+              callback();
+            },
+            trigger: "change",
+          },
+        ],
+      },
+      memberPointFlag: false,
+      memberPointLoading: false,
+      memberPointForm: {
+        memberId: "",
+        point: null,
+        type: "INCREASE",
+      },
+      selectedRows: [],
+      memberGroupFlag: false,
+      memberGroupLoading: false,
+      memberGroupForm: {
+        groupId: "",
+      },
+      memberGroupRule: {
+        groupId: [{ required: true, message: "请选择会员分组", trigger: "change" }],
+      },
+      memberGroupList: [],
+      memberGradeList: [],
+      memberPointRule: {
+        type: [{ required: true, message: "请选择类型", trigger: "change" }],
+        point: [
+          { required: true, type: "number", message: "请输入积分", trigger: "change" },
+          {
+            validator: (rule, value, callback) => {
+              if (typeof value !== "number" || value <= 0) {
+                callback(new Error("积分必须大于0"));
+                return;
+              }
+              callback();
+            },
+            trigger: "change",
+          },
+        ],
+      },
       addRule: {
         // 验证规则
         mobile: [
@@ -152,18 +292,46 @@ export default {
       ruleValidate: {}, //修改验证
       columns: [
         {
+          title: "会员ID",
+          key: "id",
+          minWidth: 120,  // 减少宽度
+          tooltip: true,
+        },
+        {
+          title: "头像",
+          key: "face",
+          minWidth: 80,
+          align: "center",
+          render: (h, params) => {
+            return h("img", {
+              attrs: {
+                src: params.row.face || require('@/assets/default.png'),
+                alt: "头像"
+              },
+              style: {
+                width: "30px",
+                height: "30px",
+                borderRadius: "50%",
+                objectFit: "cover"
+              }
+            });
+          }
+        },
+        {
           title: "会员名称",
           key: "username",
           tooltip: true,
+          minWidth: 150,  // 减少宽度
         },
         {
           title: "会员昵称",
           key: "nickName",
           tooltip: true,
+          minWidth: 120,  // 减少宽度
         },
         {
           title: "联系方式",
-          width: 130,
+          minWidth: 130,
           key: "mobile",
           render: (h, params) => {
             if (params.row.mobile == null) {
@@ -176,13 +344,18 @@ export default {
         {
           title: "注册时间",
           key: "createTime",
-          width: 180,
+          minWidth: 160,  // 减少宽度
+        },
+        {
+          title: "最后登录时间",
+          key: "lastLoginDate",
+          minWidth: 160,  // 减少宽度
         },
 
         {
           title: "积分数量",
           align: "left",
-          width: 100,
+          minWidth: 120,  // 增加宽度
           render: (h, params) => {
             return h(
               "div",
@@ -192,12 +365,190 @@ export default {
           },
         },
         {
+          title: "经验值",
+          key: "experience",
+          minWidth: 100,
+          render: (h, params) => {
+            return h("div", {}, params.row.experience == null ? "0" : params.row.experience);
+          },
+        },
+        {
+          title: "会员等级",
+          key: "gradeName",
+          minWidth: 120,
+          tooltip: true,
+          render: (h, params) => {
+            return h("div", {}, params.row.gradeName || "-");
+          },
+        },
+        {
+          title: "余额",
+          key: "memberWallet",
+          width: 120,
+          render: (h, params) => {
+            return h("priceColorScheme", {props:{value:params.row.memberWallet}} );
+          },
+        },
+        {
           title: "操作",
           key: "action",
           align: "center",
-          width: 200,
+          minWidth: 160,
           fixed: "right",
           render: (h, params) => {
+            if (this.selectedMember) {
+              return h(
+                "div",
+                {
+                  style: {
+                    display: "flex",
+                    justifyContent: "center",
+                  },
+                },
+                [
+                  h(
+                    "a",
+                    {
+                      style: {
+                        color: "#2d8cf0",
+                        cursor: "pointer",
+                        textDecoration: "none",
+                      },
+                      on: {
+                        click: () => {
+                          this.callback(params.row, params.index);
+                        },
+                      },
+                    },
+                    params.row.___selected ? "已选择" : "选择"
+                  ),
+                ]
+              );
+            }
+
+            const divider = h(
+              "span",
+              {
+                style: {
+                  margin: "0 8px",
+                  color: "#dcdee2",
+                },
+              },
+              "|"
+            );
+
+            const viewLink = h(
+              "a",
+              {
+                style: {
+                  color: "#2d8cf0",
+                  cursor: "pointer",
+                  textDecoration: "none",
+                },
+                on: {
+                  click: () => {
+                    this.detail(params.row);
+                  },
+                },
+              },
+              "查看"
+            );
+
+            const moreDropdown = h(
+              "Dropdown",
+              {
+                props: {
+                  trigger: "click",
+                  transfer: true,
+                },
+                on: {
+                  "on-click": (name) => {
+                    if (name === "edit") {
+                      this.editPerm(params.row);
+                    }
+                    if (name === "disabled") {
+                      this.disabled(params.row);
+                    }
+                    if (name === "increaseWallet") {
+                      this.openWalletIncrease(params.row);
+                    }
+                    if (name === "updatePoint") {
+                      this.openMemberPoint(params.row);
+                    }
+                  },
+                },
+              },
+              [
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
+                      display: "inline-flex",
+                      alignItems: "center",
+                    },
+                  },
+                  [
+                    h("span", "更多"),
+                    h("Icon", {
+                      props: {
+                        type: "md-arrow-dropdown",
+                      },
+                      style: {
+                        marginLeft: "4px",
+                      },
+                    }),
+                  ]
+                ),
+                h(
+                  "DropdownMenu",
+                  {
+                    slot: "list",
+                  },
+                  [
+                    h(
+                      "DropdownItem",
+                      {
+                        props: {
+                          name: "edit",
+                        },
+                      },
+                      "编辑会员"
+                    ),
+                    h(
+                      "DropdownItem",
+                      {
+                        props: {
+                          name: "increaseWallet",
+                        },
+                      },
+                      "增加余额"
+                    ),
+                    h(
+                      "DropdownItem",
+                      {
+                        props: {
+                          name: "updatePoint",
+                        },
+                      },
+                      "修改积分"
+                    ),
+                    h(
+                      "DropdownItem",
+                      {
+                        props: {
+                          name: "disabled",
+                        },
+                      },
+                      "禁用会员"
+                    ),
+                  ]
+                ),
+              ]
+            );
+
             return h(
               "div",
               {
@@ -206,86 +557,7 @@ export default {
                   justifyContent: "center",
                 },
               },
-              [
-                h(
-                  "Button",
-                  {
-                    props: {
-                      size: "small",
-                      type: params.row.___selected ? "primary" : "default",
-                    },
-                    style: {
-                      marginRight: "5px",
-                      display: this.selectedMember ? "block" : "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.callback(params.row, params.index);
-                      },
-                    },
-                  },
-                  params.row.___selected ? "已选择" : "选择"
-                ),
-
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                      display: this.selectedMember ? "none" : "block",
-                    },
-                    on: {
-                      click: () => {
-                        this.detail(params.row);
-                      },
-                    },
-                  },
-                  "查看"
-                ),
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "info",
-                      size: "small",
-                      ghost: true,
-                    },
-                    style: {
-                      marginRight: "5px",
-                      display: this.selectedMember ? "none" : "block",
-                    },
-                    on: {
-                      click: () => {
-                        this.editPerm(params.row);
-                      },
-                    },
-                  },
-                  "编辑"
-                ),
-                h(
-                  "Button",
-                  {
-                    props: {
-                      size: "small",
-                      type: "error",
-                    },
-                    style: {
-                      marginRight: "5px",
-                      display: this.selectedMember ? "none" : "block",
-                    },
-                    on: {
-                      click: () => {
-                        this.disabled(params.row);
-                      },
-                    },
-                  },
-                  "禁用"
-                ),
-              ]
+              [viewLink, divider, moreDropdown]
             );
           },
         },
@@ -321,6 +593,59 @@ export default {
     },
   },
   methods: {
+    onSelectionChange(selection) {
+      this.selectedRows = selection || [];
+    },
+    openSetMemberGroup() {
+      this.memberGroupFlag = true;
+      this.memberGroupLoading = false;
+      this.memberGroupForm = { groupId: "" };
+      this.$nextTick(() => {
+        if (this.$refs.memberGroupForm) this.$refs.memberGroupForm.resetFields();
+      });
+      this.loadMemberGroupList();
+    },
+    loadMemberGroupList() {
+      API_Member.getMemberGroupByPage({ pageNumber: 1, pageSize: 1000 }).then((res) => {
+        if (res && res.success && res.result) {
+          this.memberGroupList = res.result.records || [];
+        }
+      });
+    },
+    loadMemberGradeList() {
+      API_Member.getMemberGradeByPage({ pageNumber: 1, pageSize: 1000 }).then((res) => {
+        if (res && res.success && res.result) {
+          this.memberGradeList = res.result || [];
+        }
+      });
+    },
+    clearSelection() {
+      if (this.$refs.table && this.$refs.table.clearSelection) {
+        this.$refs.table.clearSelection();
+      }
+    },
+    submitSetMemberGroup() {
+      if (this.selectedRows.length === 0) {
+        this.$Message.warning("请先选择会员");
+        return;
+      }
+      this.$refs.memberGroupForm.validate((valid) => {
+        if (!valid) return;
+        const memberIds = this.selectedRows.map((item) => item.id);
+        this.memberGroupLoading = true;
+        API_Member.addMemberGroupUsers(this.memberGroupForm.groupId, memberIds).then((res) => {
+          this.memberGroupLoading = false;
+          if (res && res.success) {
+            this.$Message.success("设置成功");
+            this.memberGroupFlag = false;
+            this.selectedRows = [];
+            this.clearSelection();
+          } else if (res && res.message) {
+            this.$Message.error(res.message);
+          }
+        });
+      });
+    },
     // 回调给父级
     callback(val, index) {
       this.selectMember.forEach(item=>{item.___selected = false})
@@ -373,7 +698,7 @@ export default {
     // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getData();
     },
     //查看详情修改
@@ -400,6 +725,11 @@ export default {
 
     //查询会员列表
     getData() {
+      this.loading = true;
+      if (!this.selectedMember) {
+        this.selectedRows = [];
+        this.clearSelection();
+      }
       API_Member.getMemberListData(this.searchForm).then((res) => {
         if (res.result.records) {
           this.loading = false;
@@ -472,6 +802,69 @@ export default {
       });
     },
 
+    openWalletIncrease(row) {
+      this.walletIncreaseLoading = false;
+      this.$set(this, "walletIncreaseForm", { memberId: row.id, rechargeMoney: null });
+      this.walletIncreaseFlag = true;
+      this.$nextTick(() => {
+        this.$refs.walletIncreaseForm && this.$refs.walletIncreaseForm.resetFields();
+      });
+    },
+    submitWalletIncrease() {
+      this.$refs.walletIncreaseForm.validate((valid) => {
+        if (!valid) return;
+        this.walletIncreaseLoading = true;
+        API_Member.increaseMemberWallet({
+          memberId: this.walletIncreaseForm.memberId,
+          rechargeMoney: this.walletIncreaseForm.rechargeMoney,
+        })
+          .then((res) => {
+            if (res && res.success) {
+              this.$Message.success("充值成功");
+              this.walletIncreaseFlag = false;
+              this.getData();
+            } else {
+              this.$Message.error((res && res.message) || "充值失败");
+            }
+          })
+          .finally(() => {
+            this.walletIncreaseLoading = false;
+          });
+      });
+    },
+
+    openMemberPoint(row) {
+      this.memberPointLoading = false;
+      this.$set(this, "memberPointForm", { memberId: row.id, point: null, type: "INCREASE" });
+      this.memberPointFlag = true;
+      this.$nextTick(() => {
+        this.$refs.memberPointForm && this.$refs.memberPointForm.resetFields();
+      });
+    },
+    submitMemberPoint() {
+      this.$refs.memberPointForm.validate((valid) => {
+        if (!valid) return;
+        this.memberPointLoading = true;
+        API_Member.updateMemberPoint({
+          memberId: this.memberPointForm.memberId,
+          point: this.memberPointForm.point,
+          type: this.memberPointForm.type,
+        })
+          .then((res) => {
+            if (res && res.success) {
+              this.$Message.success("修改成功");
+              this.memberPointFlag = false;
+              this.getData();
+            } else {
+              this.$Message.error((res && res.message) || "修改失败");
+            }
+          })
+          .finally(() => {
+            this.memberPointLoading = false;
+          });
+      });
+    },
+
     // 提交修改数据
     handleSubmitModal() {
       const { nickName, sex, username, face, newPassword,id,regionId,region } = this.form;
@@ -482,7 +875,7 @@ export default {
         regionId,
         region,
         nickName,
-        username,
+
         sex,
         birthday,
         face,
@@ -502,14 +895,18 @@ export default {
   },
   mounted() {
     this.getData();
+    if (!this.selectedMember) {
+      this.loadMemberGroupList();
+      this.loadMemberGradeList();
+    }
   },
 };
 </script>
 <style lang="scss" scoped>
-/deep/ .ivu-table-wrapper {
+::v-deep .ivu-table-wrapper {
   width: 100%;
 }
-/deep/ .ivu-card {
+::v-deep .ivu-card {
   width: 100%;
 }
 .face {
@@ -517,4 +914,5 @@ export default {
   height: 60px;
   border-radius: 50%;
 }
+
 </style>

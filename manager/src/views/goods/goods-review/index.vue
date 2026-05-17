@@ -4,11 +4,16 @@
       <Row>
         <Form ref="searchForm" :model="searchForm" @keydown.enter.native="handleSearch" @submit.native.prevent inline :label-width="70" class="search-form">
           <Form-item label="会员名称" prop="memberName">
-            <Input type="text" v-model="searchForm.memberName" placeholder="请输入会员名称" clearable style="width: 200px"/>
+            <Input type="text" v-model="searchForm.memberName" placeholder="请输入会员名称" clearable style="width: 240px"/>
+          </Form-item>
+          <Form-item label="商品名称" prop="goodsName">
+            <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 240px"/>
           </Form-item>
           <Button @click="handleSearch" type="primary" class="search-btn" icon="ios-search">搜索</Button>
         </Form>
       </Row>
+    </Card>
+    <Card>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10">
         <!-- 页面展示 -->
         <template slot="shopDisableSlot" slot-scope="scope">
@@ -21,7 +26,7 @@
       </Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
-              @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
+              @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]"
               size="small" show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
@@ -110,7 +115,8 @@ export default {
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
+        goodsName: "",
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
         startDate: "", // 起始时间
@@ -133,6 +139,30 @@ export default {
           tooltip: true,
         },
         {
+          title: "评论内容",
+          key: "content",
+          minWidth: 220,
+          align: "left",
+          tooltip: true,
+        },
+        {
+          title: "是否置顶",
+          key: "top",
+          align: "center",
+          width: 100,
+          render: (h, params) => {
+            return h(
+              "Tag",
+              {
+                props: {
+                  color: params.row.top ? "red" : "default",
+                },
+              },
+              params.row.top ? "已置顶" : "未置顶"
+            );
+          },
+        },
+        {
           title: "评价",
           key: "grade",
           align: "left",
@@ -146,27 +176,6 @@ export default {
               return h("Tag", {props: {color: "red",},}, "差评");
             }
           }
-        },
-        {
-          title: "物流评分",
-          key: "deliveryScore",
-          render: (h, params) => {
-            return h('div',params.row.deliveryScore || 5 + '星')
-          },
-        },
-        {
-          title: "服务评分",
-          key: "deliveryScore",
-          render: (h, params) => {
-            return h('div',params.row.serviceScore || 5 + '星')
-          },
-        },
-        {
-          title: "描述评分",
-          key: "deliveryScore",
-          render: (h, params) => {
-            return h('div',params.row.descriptionScore || 5 + '星')
-          },
         },
         {
           title: "评价时间",
@@ -184,21 +193,18 @@ export default {
         {
           title: "操作",
           key: "action",
-          width: 150,
+          width: 220,
           align: "center",
           fixed: "right",
-
           render: (h, params) => {
-            return h("div", [
+            return h("div", { class: "ops" }, [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    size: "small",
-                    type: "info",
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -209,22 +215,64 @@ export default {
                 "查看"
               ),
               h(
-                "Button",
+                "span",
                 {
-                  props: {
-                    type: "error",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
+                    margin: "0 8px",
+                    color: "#dcdee2",
+                  },
+                },
+                "|"
+              ),
+              h(
+                "a",
+                {
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
+                      this.updateTop(params.row);
+                    },
+                  },
+                },
+                params.row.top ? "取消置顶" : "置顶评论"
+              ),
+              h(
+                "span",
+                {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2",
+                  },
+                },
+                "|"
+              ),
+              h(
+                "Poptip",
+                {
+                  props: { confirm: true, title: "确认删除" },
+                  on: {
+                    "on-ok": () => {
                       this.remove(params.row);
                     },
                   },
                 },
-                "删除"
+                [
+                  h(
+                    "a",
+                    {
+                      style: {
+                        color: "#2d8cf0",
+                        cursor: "pointer",
+                        textDecoration: "none",
+                      },
+                    },
+                    "删除"
+                  ),
+                ]
               ),
             ]);
           },
@@ -263,7 +311,7 @@ export default {
     // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
     //列表直接选择页面是否展示
@@ -271,6 +319,25 @@ export default {
       let status = v.status;
       API_Member.updateMemberReview(v.id, {status: status}).then((res) => {
         this.init();
+      });
+    },
+    // 置顶评论
+    updateTop(v) {
+      const top = !v.top;
+      API_Member.updateMemberReviewTop(v.id, { top }).then((res) => {
+        if (res.success) {
+          this.data = this.data.map((item) => {
+            if (item.goodsId !== v.goodsId) {
+              return item;
+            }
+            return {
+              ...item,
+              top: item.id === v.id ? top : false,
+            };
+          });
+          this.$Message.success(top ? "置顶成功!" : "取消置顶成功!");
+          this.init();
+        }
       });
     },
     // 获取列表
@@ -369,5 +436,15 @@ label {
 .score-content {
   margin: 5px 0;
   span{margin-right: 20px;}
+}
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
 }
 </style>

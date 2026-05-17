@@ -862,7 +862,7 @@ export default {
   z-index: 9;
 }
 
-/deep/ .ivu-tabs-bar {
+::v-deep .ivu-tabs-bar {
   margin: 0;
 }
 

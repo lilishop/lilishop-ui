@@ -11,7 +11,7 @@
 
             <Row type="flex" justify="end" class="mt_10">
               <Page :current="smsSearchForm.pageNumber" :total="smsTotal" :page-size="smsSearchForm.pageSize" @on-change="smsChangePage" @on-page-size-change="smsChangePageSize"
-                :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator show-sizer></Page>
+                :page-size-opts="[20, 50, 100]" size="small" show-total show-elevator show-sizer></Page>
             </Row>
           </TabPane>
           <TabPane label="短信模板" name="TEMPLATE">
@@ -23,7 +23,7 @@
             </Table>
             <Row type="flex" justify="end" class="mt_10">
               <Page :current="templateSearchForm.pageNumber" :total="templateTotal" :page-size="templateSearchForm.pageSize" @on-change="templateChangePage"
-                @on-page-size-change="templateChangePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator show-sizer></Page>
+                @on-page-size-change="templateChangePageSize" :page-size-opts="[20, 50, 100]" size="small" show-total show-elevator show-sizer></Page>
             </Row>
           </TabPane>
           <TabPane label="短信签名" name="SIGN">
@@ -49,7 +49,7 @@
             </Table>
             <Row type="flex" justify="end" class="mt_10">
               <Page :current="signSearchForm.pageNumber" :total="signTotal" :page-size="signSearchForm.pageSize" @on-change="signChangePage" @on-page-size-change="signChangePageSize"
-                :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator show-sizer></Page>
+                :page-size-opts="[20, 50, 100]" size="small" show-total show-elevator show-sizer></Page>
             </Row>
           </TabPane>
         </Tabs>
@@ -181,12 +181,12 @@ export default {
       signSearchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
       },
       //短信模板查询form
       templateSearchForm: {
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
       },
       //会员条数查询form
       memberSearchFrom: {
@@ -203,7 +203,7 @@ export default {
         sort: "createTime",
         order: "desc",
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
       },
       smsForm: { // 短信模板数据
         smsName: "",
@@ -279,18 +279,17 @@ export default {
           title: "操作",
           key: "action",
           align: "center",
+          fixed: "right",
           width: 150,
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "primary",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -343,20 +342,16 @@ export default {
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small"
-                  },
                   style: {
-                    marginRight: "5px",
-                  },
-                  attrs: {
-                    disabled: params.row.templateStatus == 2 ? false : true,
+                    color: params.row.templateStatus == 2 ? "#2d8cf0" : "#c5c8ce",
+                    cursor: params.row.templateStatus == 2 ? "pointer" : "not-allowed",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
+                      if (params.row.templateStatus != 2) return;
                       this.editTemplate(params.row);
                     },
                   },
@@ -364,20 +359,21 @@ export default {
                 "编辑"
               ),
               h(
-                "Button",
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
+              ),
+              h(
+                "a",
                 {
-                  props: {
-                    type: "error",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
-                  },
-                  attrs: {
-                    disabled: params.row.templateStatus == 0 ? true : false,
+                    color: params.row.templateStatus == 0 ? "#c5c8ce" : "#2d8cf0",
+                    cursor: params.row.templateStatus == 0 ? "not-allowed" : "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
+                      if (params.row.templateStatus == 0) return;
                       this.deleteSmsTemplate(params.row);
                     },
                   },
@@ -415,21 +411,16 @@ export default {
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small",
-                    icon: "ios-create-outline",
-                  },
-                  attrs: {
-                    disabled: params.row.signStatus == 2 ? false : true,
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: params.row.signStatus == 2 ? "#2d8cf0" : "#c5c8ce",
+                    cursor: params.row.signStatus == 2 ? "pointer" : "not-allowed",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
+                      if (params.row.signStatus != 2) return;
                       this.editSign(params.row);
                     },
                   },
@@ -437,21 +428,21 @@ export default {
                 "编辑"
               ),
               h(
-                "Button",
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
+              ),
+              h(
+                "a",
                 {
-                  props: {
-                    type: "error",
-                    size: "small",
-                    icon: "ios-create-outline",
-                  },
-                  attrs: {
-                    disabled: params.row.signStatus == 0 ? true : false,
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: params.row.signStatus == 0 ? "#c5c8ce" : "#2d8cf0",
+                    cursor: params.row.signStatus == 0 ? "not-allowed" : "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
+                      if (params.row.signStatus == 0) return;
                       this.deleteSmsSign(params.row);
                     },
                   },

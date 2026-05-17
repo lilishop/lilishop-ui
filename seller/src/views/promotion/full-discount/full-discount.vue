@@ -3,10 +3,10 @@
     <Card>
       <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
         <Form-item label="活动名称">
-          <Input type="text" v-model="searchForm.promotionName" placeholder="请输入活动名称" clearable style="width: 200px" />
+          <Input type="text" v-model="searchForm.promotionName" placeholder="请输入活动名称" clearable style="width: 240px" />
         </Form-item>
         <Form-item label="活动状态" prop="promotionStatus">
-          <Select v-model="searchForm.promotionStatus" placeholder="请选择" clearable style="width: 200px">
+          <Select v-model="searchForm.promotionStatus" placeholder="请选择" clearable style="width: 240px">
             <Option value="NEW">未开始</Option>
             <Option value="START">已开始/上架</Option>
             <Option value="END">已结束/下架</Option>
@@ -14,7 +14,7 @@
           </Select>
         </Form-item>
         <Form-item label="活动时间">
-          <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 200px">
+          <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 240px">
           </DatePicker>
         </Form-item>
         <Form-item>
@@ -22,6 +22,8 @@
           <Button @click="handleReset" class="ml_10">重置</Button>
         </Form-item>
       </Form>
+    </Card>
+    <Card>  
       <Row class="operation">
         <Button type="primary" @click="newAct">新增</Button>
       </Row>
@@ -37,20 +39,17 @@
         </template>
         <template slot-scope="{ row }" slot="action">
           <div>
-            <Button type="primary" v-if="row.promotionStatus == 'NEW'" size="small" @click="edit(row)">编辑</Button>
-            <Button type="info" v-else size="small" @click="edit(row)">查看</Button>
-            <Button type="success" v-if="row.promotionStatus === 'START'" style="margin-left: 5px" size="small"
-              @click="openOrClose(row)">关闭</Button>
-            <Button type="success" v-if="row.promotionStatus === 'CLOSE'" style="margin-left: 5px" size="small"
-              @click="openOrClose(row)">开启</Button>
-            <!--<Button type="error" :disabled="row.promotionStatus == 'START'" style="margin-left: 5px" size="small"-->
-              <!--@click="del(row)">删除</Button>-->
+            <a v-if="row.promotionStatus == 'NEW'" @click="edit(row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">编辑</a>
+            <a v-else @click="edit(row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">查看</a>
+            <span v-if="row.promotionStatus === 'START' || row.promotionStatus === 'CLOSE'" style="margin:0 8px;color:#dcdee2">|</span>
+            <a v-if="row.promotionStatus === 'START'" @click="openOrClose(row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">关闭</a>
+            <a v-if="row.promotionStatus === 'CLOSE'" @click="openOrClose(row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">开启</a>
           </div>
         </template>
       </Table>
       <Row type="flex" justify="end" class="page operation">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
-          @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator
+          @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]" size="small" show-total show-elevator
           show-sizer></Page>
       </Row>
     </Card>
@@ -72,7 +71,7 @@ export default {
       searchForm: {
         // 列表请求参数
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         sort: "startTime",
         order: "desc",
       },
@@ -171,7 +170,7 @@ export default {
       this.searchForm = {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "startTime", // 默认排序字段
         order: "desc", // 默认排序方式
       };

@@ -18,10 +18,31 @@
         primary-key="id"
       >
         <template slot="action" slot-scope="scope">
-          <Button @click.native="edit(scope.row)" style="margin-right:10px;" size="small">编辑</Button>
-          <Button @click.native="remove(scope.row)" type="primary" size="small">删除</Button>
+          <a
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:10px"
+            @click.native="edit(scope.row)"
+            >编辑</a>
+          <span style="margin:0 8px;color:#dcdee2">|</span>
+          <a
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
+            @click.native="remove(scope.row)"
+            >删除</a>
         </template>
       </tree-table>
+      <Row type="flex" justify="end" class="mt_10">
+        <Page
+          :current="searchForm.pageNumber"
+          :total="total"
+          :page-size="searchForm.pageSize"
+          @on-change="changePage"
+          @on-page-size-change="changePageSize"
+          :page-size-opts="[20, 50, 100]"
+          size="small"
+          show-total
+          show-elevator
+          show-sizer
+        ></Page>
+      </Row>
     </Card>
     <Modal
       :title="modalTitle"
@@ -74,6 +95,12 @@ export default {
       modalTitle: "", // 添加或编辑标题
       showParent: false, // 是否展示上级菜单
       parentTitle: "", // 父级菜单名称
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "sortOrder",
+        order: "asc"
+      },
       formAdd: {
         // 添加或编辑表单对象初始化数据
         parentId: 0,
@@ -93,6 +120,11 @@ export default {
           minWidth: "120px",
         },
         {
+          title: "排序值",
+          key: "sortOrder",
+          minWidth: "120px",
+        },
+        {
           title: "操作",
           key: "action",
           align: "center",
@@ -103,6 +135,7 @@ export default {
         },
       ],
       tableData: [], // 表格数据
+      total: 0
     };
   },
   methods: {
@@ -185,13 +218,34 @@ export default {
     // 获取所有分类
     getAllList() {
       this.loading = true;
-      getPointsGoodsCategoryList().then((res) => {
+      getPointsGoodsCategoryList(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
-          this.tableData = res.result.records;
+          const records = res.result.records || [];
+          const sortFn = (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0);
+          const sortRecursively = (list = []) => {
+            list.sort(sortFn);
+            list.forEach((item) => {
+              if (Array.isArray(item.children) && item.children.length) {
+                sortRecursively(item.children);
+              }
+            });
+            return list;
+          };
+          this.tableData = sortRecursively(records);
+          this.total = res.result.total || 0;
         }
       });
     },
+    changePage(v) {
+      this.searchForm.pageNumber = v;
+      this.getAllList();
+    },
+    changePageSize(v) {
+      this.searchForm.pageNumber = 1;
+      this.searchForm.pageSize = v;
+      this.getAllList();
+    }
   },
   mounted() {
     this.init();

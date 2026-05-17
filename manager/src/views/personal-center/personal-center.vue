@@ -188,7 +188,7 @@ export default {
   }
 }
 
-/deep/ .upload-list {
+::v-deep .upload-list {
   img {
     width: 100%;
     height: 100%;

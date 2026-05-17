@@ -1,5 +1,5 @@
 
-/deep/ .ivu-modal-mask,.ivu-modal-wrap{
+::v-deep .ivu-modal-mask,::v-deep .ivu-modal-wrap{
   z-index: 800;
 }
 .decorate-view-link{

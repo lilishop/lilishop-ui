@@ -15,7 +15,7 @@
               v-model="searchForm.couponName"
               placeholder="请输入优惠券名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="活动状态" prop="promotionStatus">
@@ -23,7 +23,7 @@
               v-model="searchForm.promotionStatus"
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             >
               <Option value="NEW">未开始</Option>
               <Option value="START">已开始/上架</Option>
@@ -37,7 +37,7 @@
               type="daterange"
               clearable
               placeholder="选择起始时间"
-              style="width: 200px"
+              style="width: 240px"
             ></DatePicker>
           </Form-item>
           <Button
@@ -50,6 +50,8 @@
           <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
+      </Card>
+    <Card>
       <Row class="operator padding-row">
         <Button @click="add" type="primary">添加</Button>
         <Button @click="delAll" class="ml_10">批量关闭</Button>
@@ -65,35 +67,30 @@
         @on-selection-change="changeSelect"
       >
         <template slot-scope="{ row }" slot="action">
-          <Button
-            v-if="
-              row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'
-            "
-            type="info"
-            size="small"
+          <a
+            v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'CLOSE'"
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
             @click="see(row)"
-            >编辑</Button
-          >
-          <Button v-else type="default" size="small" @click="see(row, 'only')"
-            >查看</Button
-          >
-          <Button
-            v-if="
-              row.promotionStatus === 'START' || row.promotionStatus === 'NEW'
-            "
-            type="error"
-            size="small"
-            :style="{ marginLeft: '5px' }"
+          >编辑</a>
+          <a
+            v-else
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
+            @click="see(row, 'only')"
+          >查看</a>
+          <span style="margin: 0 8px; color: #dcdee2">|</span>
+          <a
+            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
             @click="remove(row)"
-            >关闭</Button
-          >
-          <Button
-            style="margin: 5px"
-            type="info"
-            size="small"
+          >关闭</a>
+          <span
+            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+            style="margin: 0 8px; color: #dcdee2"
+          >|</span>
+          <a
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
             @click="receivePage(row.id)"
-            >领取记录
-          </Button>
+          >领取记录</a>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">

@@ -29,6 +29,11 @@
               class="user-dropdown-innercon"
             >
               <ul class="nav-list">
+                <li class="nav-item " @click="im">
+                  <Tooltip content="联系客服">
+                    <Button type="info" size="small" :loading='load' icon="md-chatbubbles">客服</Button>
+                  </Tooltip>
+                </li>
                 <li class="nav-item " @click="handleClickSetting">
                   <Tooltip content="设置">
                     <Icon size="16" type="md-settings" />
@@ -88,6 +93,8 @@ import configDrawer from "@/views/main-components/config-drawer.vue";
 import Cookies from "js-cookie";
 import util from "@/libs/util.js";
 import { logout } from "@/api/index";
+import { getIMDetail } from "@/api/common";
+import { userMsg } from "@/api/index";
 const config = require("@/config/index.js");
 export default {
   components: {
@@ -103,6 +110,8 @@ export default {
       userInfo: {}, // 用户信息
 
       storeSideLogo: "", //logo图片
+      IMLink: "", // IM链接
+      load: false, // 加载IM状态
     };
   },
   computed: {
@@ -131,6 +140,34 @@ export default {
     handleClickSetting() {
       this.$refs.config.open();
     },
+    
+    /**
+     * 点击登录im的时候需要去判断一下当前店铺信息是否失效
+     * 失效的话重新请求刷新token保证最新的token去访问im
+     */
+    async im () {
+       // 获取访问Token
+       let accessToken = this.getStore("accessToken");
+       this.load = true
+       await this.getIMDetailMethods();
+       const userInfo = await userMsg();
+       this.load = false
+       if (userInfo.success && this.IMLink) {
+         window.open(`${this.IMLink}?token=` + accessToken);
+       }
+       else{
+         this.$Message.error("请登录后再联系客服");
+       }
+     },
+
+    // 获取im信息
+     async getIMDetailMethods () {
+       let res = await getIMDetail();
+       if (res.success) {
+         this.IMLink = res.result;
+       }
+     },
+    
     // 初始化方法
     init() {
       // 菜单

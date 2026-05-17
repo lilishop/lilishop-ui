@@ -3,20 +3,21 @@
     <Card>
       <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form" @keydown.enter.native="handleSearch">
         <Form-item label="系统类型" prop="orderSn">
-          <Select v-model="searchForm.type" placeholder="请选择系统类型" clearable style="width: 200px">
+          <Select v-model="searchForm.type" placeholder="请选择系统类型" clearable style="width: 240px">
             <Option value="IOS">苹果</Option>
             <Option value="ANDROID">安卓</Option>
           </Select>
         </Form-item>
         <Button @click="handleSearch" type="primary" icon="ios-search">搜索</Button>
       </Form>
-
+    </Card>
+    <Card>
       <Button class="mt_10 mb_10" @click="addAppVersion" type="primary">添加</Button>
 
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"  ></Table>
 
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]" size="small"
           show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
@@ -131,7 +132,7 @@ export default {
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
         type: "",
@@ -212,18 +213,17 @@ export default {
           title: "操作",
           key: "action",
           align: "center",
+          fixed: "right",
           width: 230,
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -234,16 +234,17 @@ export default {
                 "查看"
               ),
               h(
-                "Button",
-
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
+              ),
+              h(
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small",
-                    ghost: true,
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -254,14 +255,17 @@ export default {
                 "修改"
               ),
               h(
-                "Button",
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
+              ),
+              h(
+                "a",
                 {
-                  props: {
-                    type: "error",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {

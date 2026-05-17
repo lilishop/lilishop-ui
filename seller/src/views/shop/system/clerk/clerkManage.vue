@@ -8,7 +8,7 @@
             v-model="searchForm.clerkName"
             placeholder="请输入店员名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="联系方式">
@@ -17,7 +17,7 @@
             v-model="searchForm.mobile"
             placeholder="请输入联系方式"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="部门">
@@ -25,6 +25,8 @@
         </Form-item>
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
       </Form>
+      </Card>
+        <Card>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加</Button>
         <Button @click="delAll">批量删除</Button>
@@ -365,77 +367,75 @@ export default {
             let enableOrDisable = "";
             if (params.row.status == true) {
               enableOrDisable = h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    size: "small"
-                  },
                   style: {
-                    marginRight: "5px"
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
                       this.disable(params.row);
-                    }
-                  }
+                    },
+                  },
                 },
                 "禁用"
               );
             } else {
               enableOrDisable = h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "success",
-                    size: "small"
-                  },
                   style: {
-                    marginRight: "5px"
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
                       this.enable(params.row);
-                    }
-                  }
+                    },
+                  },
                 },
                 "启用"
               );
             }
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small"
-                  },
                   style: {
-                    marginRight: "5px"
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
                       this.edit(params.row);
-                    }
-                  }
+                    },
+                  },
                 },
                 "编辑"
               ),
+              h("span", { style: { margin: "0 8px", color: "#dcdee2" } }, "|"),
               enableOrDisable,
+              h("span", { style: { margin: "0 8px", color: "#dcdee2" } }, "|"),
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "error",
-                    size: "small"
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
                       this.remove(params.row);
-                    }
-                  }
+                    },
+                  },
                 },
                 "删除"
-              )
+              ),
             ]);
           }
         }

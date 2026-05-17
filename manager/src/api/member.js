@@ -30,6 +30,11 @@ export const updateMemberReview = (id, params) => {
   return getRequest(`/member/evaluation/updateStatus/${id}`, params);
 };
 
+// 修改评价置顶状态
+export const updateMemberReviewTop = (id, params) => {
+  return putRequest(`/member/evaluation/updateTop/${id}`, params);
+};
+
 //  添加或修改
 export const insertOrUpdateSpec = (params) => {
   return postRequest("/memberNoticeSenter/insertOrUpdate", params);
@@ -117,6 +122,9 @@ export const getMemberNum = (params) => {
 export const getHistoryPointData = (params) => {
   return getRequest(`/member/memberPointsHistory/getByPage`, params);
 };
+export const queryMemberPointsStatistics = () => {
+  return getRequest(`/member/memberPointsHistory/queryMemberPointsStatistics`);
+};
 //查询会员的收货地址
 export const getMemberAddressData = (id, params) => {
   return getRequest(`/member/address/${id}`, params);
@@ -136,4 +144,87 @@ export const editMemberAddress = (params) => {
 //查询会员预存款
 export const getMemberWallet = (params) => {
   return getRequest(`/wallet/wallet`, params);
+};
+
+export const increaseMemberWallet = (params) => {
+  return putRequest(`/wallet/wallet/increase`, params);
+};
+
+export const updateMemberPoint = (params) => {
+  return putRequest(`/passport/member/updateMemberPoint`, params);
+};
+
+export const getMemberGroupByPage = (params) => {
+  return getRequest("/member/memberGroup/getByPage", params);
+};
+export const getMemberGroup = (id) => {
+  return getRequest(`/member/memberGroup/get/${id}`);
+};
+export const addMemberGroup = (params) => {
+  return postRequest(`/member/memberGroup`, params);
+};
+export const updateMemberGroup = (id, params) => {
+  return putRequest(`/member/memberGroup/update/${id}`, params);
+};
+export const deleteMemberGroup = (id) => {
+  return deleteRequest(`/member/memberGroup/delete/${id}`);
+};
+
+export const addMemberGroupUsers = (groupId, memberIds) => {
+  return postRequest(`/member/memberGroup/${groupId}/users`, {
+    memberIds: Array.isArray(memberIds) ? memberIds.join(",") : memberIds,
+  });
+};
+
+// 客户等级
+export const getMemberGradeByPage = (params) => {
+  return getRequest("/member/memberGrade/getByPage");
+};
+export const getMemberGrade = (id) => {
+  return getRequest(`/member/memberGrade/get/${id}`);
+};
+export const addMemberGrade = (params) => {
+  return postRequest(`/member/memberGrade`, params);
+};
+export const updateMemberGrade = (id, params) => {
+  return putRequest(`/member/memberGrade/update/${id}`, params);
+};
+export const updateMemberGradeState = (id, state) => {
+  return putRequest(`/member/memberGrade/state/${id}?state=${state}`);
+};
+export const deleteMemberGrade = (id) => {
+  return deleteRequest(`/member/memberGrade/delete/${id}`);
+};
+export const getMemberExperienceByPage = (params) => {
+  return getRequest(`/member/memberGrade/experience/getByPage`, params);
+};
+
+// 客户权益
+export const getMemberBenefitByPage = (params) => {
+  return getRequest("/member/benefit/getByPage", params);
+};
+
+export const getMemberBenefit = (id) => {
+  return getRequest(`/member/benefit/get/${id}`);
+};
+
+export const addMemberBenefit = (params) => {
+  return postRequest("/member/benefit", params);
+};
+
+export const updateMemberBenefit = (id, params) => {
+  return putRequest(`/member/benefit/update/${id}`, params);
+};
+
+export const updateMemberBenefitState = (id, state) => {
+  return putRequest(`/member/benefit/state/${id}?state=${state}`);
+};
+
+export const deleteMemberBenefit = (id) => {
+  return deleteRequest(`/member/benefit/delete/${id}`);
+};
+
+/** 客户权益类型枚举（管理端） */
+export const getMemberBenefitTypes = () => {
+  return getRequest("/member/benefit/types");
 };

@@ -4,10 +4,10 @@
       <Row @keydown.enter.native="handleSearch">
         <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
           <Form-item label="会员名称" prop="memberName">
-            <Input type="text" v-model="searchForm.memberName" placeholder="请输入会员名称" clearable style="width: 200px" />
+            <Input type="text" v-model="searchForm.memberName" placeholder="请输入会员名称" clearable style="width: 240px" />
           </Form-item>
           <Form-item label="审核状态" prop="applyStatus">
-            <Select v-model="searchForm.applyStatus" clearable style="width: 200px">
+            <Select v-model="searchForm.applyStatus" clearable style="width: 240px">
               <Option value="APPLY">申请中</Option>
               <Option value="VIA_AUDITING">审核通过</Option>
               <Option value="FAIL_AUDITING">审核拒绝</Option>
@@ -16,7 +16,7 @@
             </Select>
           </Form-item>
           <Form-item label="申请时间">
-            <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px"></DatePicker>
+            <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 240px"></DatePicker>
           </Form-item>
           <Form-item style="margin-left: -35px" class="br">
             <Button @click="handleSearch" type="primary" icon="ios-search">搜索
@@ -24,9 +24,11 @@
           </Form-item>
         </Form>
       </Row>
+    </Card>
+    <Card>
       <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]" size="small"
           show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
@@ -115,7 +117,7 @@ export default {
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
         startDate: "", // 起始时间
@@ -192,49 +194,49 @@ export default {
           fixed: "right",
           render: (h, params) => {
             if (params.row.applyStatus == "APPLY") {
-              return h(
-                "Button",
-                {
-                  props: {
-                    type: "primary",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.showList = {};
-                      this.roleModalVisible = true;
-                      this.showList = params.row;
-                      this.audit =""
+              return h("div", { class: "ops" }, [
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
+                    },
+                    on: {
+                      click: () => {
+                        this.showList = {};
+                        this.roleModalVisible = true;
+                        this.showList = params.row;
+                        this.audit = "";
+                      },
                     },
                   },
-                },
-                "审核"
-              );
+                  "审核"
+                ),
+              ]);
             } else {
-              return h(
-                "Button",
-                {
-                  props: {
-                    type: "default",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.showList = {};
-                      this.queryModalVisible = true;
-                      this.showList = params.row;
-                      this.modalTitle = "查看";
+              return h("div", { class: "ops" }, [
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
+                    },
+                    on: {
+                      click: () => {
+                        this.showList = {};
+                        this.queryModalVisible = true;
+                        this.showList = params.row;
+                        this.modalTitle = "查看";
+                      },
                     },
                   },
-                },
-                "查看"
-              );
+                  "查看"
+                ),
+              ]);
             }
           },
         },
@@ -291,13 +293,13 @@ export default {
     },
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
     handleReset() {
       this.$refs.searchForm.resetFields();
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.selectDate = null;
       this.searchForm.startDate = "";
       this.searchForm.endDate = "";
@@ -345,4 +347,16 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
+}
+</style>
 

@@ -285,8 +285,8 @@ export default {
     getCouponList(query) {
       // 优惠券列表
       let params = {
-        pageSize: 10,
-        pageNumber: 0,
+        pageSize: 20,
+        pageNumber: 1,
         getType: "ACTIVITY",
         storeId: "",
         couponName: query,
@@ -303,7 +303,7 @@ export default {
     getGiftList(query) {
       // 赠品列表
       let params = {
-        pageSize: 10,
+        pageSize: 20,
         pageNumber: 1,
         id: query === this.form.giftId ? this.form.giftId : null,
         goodsName: query === this.form.giftId ? null : query,

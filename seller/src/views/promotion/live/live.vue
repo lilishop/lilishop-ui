@@ -4,7 +4,7 @@
       <Form ref="searchForm" :model="searchForm" inline :label-width="100" class="search-form">
 
         <Form-item label="直播状态" prop="promotionStatus">
-          <Select v-model="searchForm.status" placeholder="请选择" clearable style="width: 200px">
+          <Select v-model="searchForm.status" placeholder="请选择" clearable style="width: 240px">
             <Option value="NEW">未开始</Option>
             <Option value="START">直播中</Option>
             <Option value="END">已结束</Option>
@@ -14,6 +14,8 @@
 
         <Button @click="handleSearch" type="primary" class="search-btn" icon="ios-search">搜索</Button>
       </Form>
+      </Card>
+    <Card>
       <div class="btns">
         <Button @click="createLive()" type="primary">创建直播</Button>
       </div>
@@ -26,7 +28,7 @@
       </Tabs>
       <Table :columns="liveColumns" :data="liveData"></Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePageNumber" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePageNumber" @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]"
           size="small" show-total show-elevator show-sizer></Page>
       </Row>
 
@@ -43,7 +45,7 @@ export default {
       total: 0,
       // 查询的form
       searchForm: {
-        pageSize: 10,
+        pageSize: 20,
         pageNumber: 1,
         status: "NEW",
       },
@@ -120,14 +122,12 @@ export default {
               },
               [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "error",
-                      size: "small",
-                    },
                     style: {
-                      marginRight: "5px",
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
                     },
                     on: {
                       click: () => {

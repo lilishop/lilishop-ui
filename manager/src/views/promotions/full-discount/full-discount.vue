@@ -15,7 +15,7 @@
               v-model="searchForm.promotionName"
               placeholder="请输入活动名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="活动状态" prop="promotionStatus">
@@ -23,7 +23,7 @@
               v-model="searchForm.promotionStatus"
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             >
               <Option value="NEW">未开始</Option>
               <Option value="START">已开始/上架</Option>
@@ -37,7 +37,7 @@
               type="daterange"
               clearable
               placeholder="选择起始时间"
-              style="width: 200px"
+              style="width: 240px"
             >
             </DatePicker>
           </Form-item>
@@ -50,6 +50,8 @@
           >
         </Form>
       </Row>
+      </Card>
+    <Card>
       <Table
         :loading="loading"
         border
@@ -70,15 +72,19 @@
         </template>
         <template slot-scope="{ row }" slot="action">
           <div>
-            <Button type="info" size="small" @click="view(row)">查看</Button>
-            <Button
-              type="error"
+            <a
+              :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
+              @click="view(row)"
+            >查看</a>
+            <span
               v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'START'"
-              style="margin-left: 5px"
-              size="small"
+              style="margin: 0 8px; color: #dcdee2"
+            >|</span>
+            <a
+              v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'START'"
+              :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
               @click="openOrClose(row)"
-              >关闭</Button
-            >
+            >关闭</a>
           </div>
         </template>
       </Table>
@@ -89,7 +95,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -109,13 +115,13 @@ export default {
       selectDate: [],
       total: 0,
       loading: false, // 表单加载状态
-      searchForm: {
-        // 请求参数
-        pageNumber: 1,
-        pageSize: 10,
-        sort: "createTime",
-        order: "desc",
-      },
+        searchForm: {
+          // 请求参数
+          pageNumber: 1,
+          pageSize: 20,
+          sort: "createTime",
+          order: "desc",
+        },
       columns: [
         // 表头
         {
@@ -203,7 +209,7 @@ export default {
     handleSearch() {
       // 搜索
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
     // 获取列表数据

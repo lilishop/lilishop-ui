@@ -381,7 +381,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-/deep/ .ivu-col {
+::v-deep .ivu-col {
   width: 100% !important;
 }
 

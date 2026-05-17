@@ -8,7 +8,7 @@
             v-model="searchForm.orderSn"
             placeholder="请输入订单编号"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="分销商" prop="distributionName">
@@ -17,21 +17,23 @@
             v-model="searchForm.distributionName"
             placeholder="请输入分销商名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="店铺名称">
           <Select v-model="searchForm.storeId" placeholder="请选择" @on-query-change="searchChange" filterable
-                  clearable style="width: 150px">
+                  clearable style="width: 240px">
             <Option v-for="item in shopList" :value="item.id" :key="item.id">{{ item.storeName }}</Option>
           </Select>
         </Form-item>
         <Form-item label="订单时间">
           <DatePicker type="daterange" v-model="timeRange" format="yyyy-MM-dd" placeholder="选择时间"
-                      style="width: 210px"></DatePicker>
+                      style="width: 240px"></DatePicker>
         </Form-item>
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
       </Form>
+      </Card>
+    <Card>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10">
         <template slot-scope="{row}" slot="goodsMsg">
           <div class="goods-msg">
@@ -56,7 +58,7 @@
       </Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize"
-          @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]"
+          @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[20,50,100]"
           size="small" show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
@@ -85,7 +87,7 @@
         loading: true, // 表单加载状态
         searchForm: { // 搜索框初始化对象
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
           sort:"create_time",
           order:"desc"
         },
@@ -162,7 +164,7 @@
       // 搜索
       handleSearch() {
         this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 10;
+        this.searchForm.pageSize = 20;
         this.getDataList();
       },
       // 获取列表数据
@@ -190,7 +192,7 @@
       getShopList(val) { // 获取店铺列表 搜索用
         const params = {
           pageNumber: 1,
-          pageSize: 10,
+          pageSize: 20,
           storeName: ''
         }
         if (val) {
@@ -208,7 +210,7 @@
       },
       filterStatus (status) { // 过滤订单状态
         const arr = [
-          {status: 'WAIT_BILL', title: '待结算'},
+          {status: 'NO_COMPLETED', title: '未完成'},
           {status: 'COMPLETE', title: '完成'},
           {status: 'REFUND', title: '退款'},
         ]
@@ -217,21 +219,20 @@
             return arr[i].title;
           }
         }
+        return '未完成'; // 默认返回未完成
       },
       filterStatusColor (status) { // 状态tag标签颜色
         const arr = [
-          {status: 'WAIT_BILL', color: 'blue'},
-          {status: 'WAIT_CASH', color: 'orange'},
-          {status: 'COMPLETE_CASH', color: 'green'},
-          {status: 'CANCEL', color: 'red'},
-          {status: 'NO_COMPLETED', color: 'red'},
-          {status: 'REFUND', color: 'magenta'},
+          {status: 'NO_COMPLETED', color: 'orange'},
+          {status: 'COMPLETE', color: 'green'},
+          {status: 'REFUND', color: 'red'},
         ]
         for (let i=0;i<arr.length;i++) {
           if (arr[i].status === status) {
             return arr[i].color;
           }
         }
+        return 'orange'; // 默认返回橙色
       }
     },
     mounted() {

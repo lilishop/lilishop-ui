@@ -8,7 +8,7 @@
             v-model="searchForm.username"
             placeholder="请输入用户名"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="联系方式">
@@ -17,14 +17,16 @@
             v-model="searchForm.mobile"
             placeholder="请输入联系方式"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="部门">
-          <department-choose @on-change="handleSelectDep" style="width: 150px;" ref="dep"></department-choose>
+          <department-choose @on-change="handleSelectDep" style="width: 240px;" ref="dep"></department-choose>
         </Form-item>
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
       </Form>
+      </Card>
+    <Card>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加</Button>
         <Button @click="delAll">批量删除</Button>
@@ -47,7 +49,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10,20,50]"
+          :page-size-opts="[20,50,100]"
           size="small"
           show-total
           show-elevator
@@ -133,7 +135,7 @@ export default {
         departmentId: "",
         mobile: "",
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         sort: "createTime",
         order: "desc"
       },
@@ -264,13 +266,12 @@ export default {
             let enableOrDisable = "";
             if (params.row.status == true) {
               enableOrDisable = h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: 'default',
-                    size: "small"
-                  },
                   style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     marginRight: "5px"
                   },
                   on: {
@@ -283,13 +284,12 @@ export default {
               );
             } else {
               enableOrDisable = h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "success",
-                    size: "small"
-                  },
                   style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     marginRight: "5px"
                   },
                   on: {
@@ -303,13 +303,12 @@ export default {
             }
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small"
-                  },
                   style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     marginRight: "5px"
                   },
                   on: {
@@ -320,13 +319,24 @@ export default {
                 },
                 "编辑"
               ),
+              h(
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
+              ),
               enableOrDisable,
               h(
-                "Button",
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
+              ),
+              h(
+                "a",
                 {
-                  props: {
-                    type: "error",
-                    size: "small"
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none"
                   },
                   on: {
                     click: () => {
@@ -389,7 +399,7 @@ export default {
     // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getUserList();
     },
     // 排序

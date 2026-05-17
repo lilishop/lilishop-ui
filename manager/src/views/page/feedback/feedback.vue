@@ -16,7 +16,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -79,7 +79,7 @@
         form: {}, // 表单数据
         searchForm: { // 请求参数
           pageNumber: 1,
-          pageSize: 10,
+          pageSize: 20,
           sort: "createTime",
           order: "desc",
         },
@@ -133,17 +133,10 @@
             align: "center",
             width: 130,
             render: (h, params) => {
-              return h("div", [
+              return h("div", { class: "ops" }, [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      size: "small",
-                      type: "info"
-                    },
-                    style: {
-                      marginRight: "5px",
-                    },
                     on: {
                       click: () => {
                         this.detail(params.row);
@@ -208,3 +201,15 @@
     },
   };
 </script>
+<style lang="scss" scoped>
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
+}
+</style>

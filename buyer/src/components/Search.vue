@@ -173,7 +173,7 @@ export default {
   border-radius: 18.9px;
 
 
-  /deep/ .ivu-input.ivu-input-large {
+  ::v-deep .ivu-input.ivu-input-large {
     border: 1.4px solid $theme_color;
     box-sizing: border-box;
     border-radius: 19.6px;
@@ -188,7 +188,7 @@ export default {
     }
   }
 
-  /deep/ .ivu-input-group-append {
+  ::v-deep .ivu-input-group-append {
     border-radius: 19.6px !important;
     cursor: pointer;
     box-sizing: border-box;

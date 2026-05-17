@@ -84,10 +84,10 @@ export default {
     border-top: 1.4px solid #e2e2e2;
   }
   &:hover {
-    /deep/ .goods-name {
+    ::v-deep .goods-name {
       color: $theme_color;
     }
-    /deep/ .goods-desc {
+    ::v-deep .goods-desc {
       color: $theme_color;
     }
   }

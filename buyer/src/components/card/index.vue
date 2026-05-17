@@ -113,12 +113,12 @@ export default {
     }
   }
 
-  /deep/ .ivu-card, .ivu-card-head, ._Card {
+  ::v-deep .ivu-card, .ivu-card-head, ._Card {
     margin-bottom: 20px;
     @include white_background_color();
   }
 
-  /deep/ .ivu-card-head {
+  ::v-deep .ivu-card-head {
     position: relative;
     padding: 0 14px;
     height: 50px;
@@ -140,7 +140,7 @@ export default {
     cursor: pointer;
   }
 
-  /deep/ .ivu-card-body {
+  ::v-deep .ivu-card-body {
     padding: 0 !important;
     display: none;
   }

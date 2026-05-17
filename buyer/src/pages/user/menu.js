@@ -76,6 +76,11 @@ const member = [{
     icon: '',
     title: '我的积分',
     path: 'Point'
+  },
+  {
+    icon: '',
+    title: '我的等级',
+    path: 'MemberGrade'
   }
   ],
   display: true

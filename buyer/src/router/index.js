@@ -68,6 +68,8 @@ const ComplainDetail = (resolve) =>
   require(["@/pages/home/memberCenter/ComplainDetail"], resolve);
 const Point = (resolve) =>
   require(["@/pages/home/memberCenter/Point"], resolve);
+const MemberGrade = (resolve) =>
+  require(["@/pages/home/memberCenter/MemberGrade"], resolve);
 const MsgList = (resolve) =>
   require(["@/pages/home/memberCenter/memberMsg/MsgList"], resolve);
 const MsgDetail = (resolve) =>
@@ -325,6 +327,12 @@ export default new Router({
           name: "Point",
           component: Point,
           meta: { title: "我的积分" },
+        },
+        {
+          path: "MemberGrade",
+          name: "MemberGrade",
+          component: MemberGrade,
+          meta: { title: "我的等级" },
         },
         {
           path: "Profile",

@@ -19,7 +19,7 @@
               </dd>
             </dl>
             <dl>
-              <dt>退货状态</dt>
+              <dt>售后状态</dt>
               <dd>{{ afterSaleInfo.serviceName }}</dd>
             </dl>
             <dl>
@@ -376,11 +376,11 @@ export default {
           status: "APPLY",
         },
         {
-          name: "通过",
+          name: "通过售后",
           status: "PASS",
         },
         {
-          name: "拒绝",
+          name: "拒绝售后",
           status: "REFUSE",
         },
         {
@@ -404,7 +404,7 @@ export default {
           status: "COMPLETE",
         },
         {
-          name: "等待平台退款",
+          name: "待平台退款",
           status: "WAIT_REFUND",
         },
       ],
@@ -511,7 +511,7 @@ export default {
       const ob = this.afterSaleStatusList.filter((e) => {
         return e.status === status;
       });
-      return ob[0].name;
+      return ob.length > 0 ? ob[0].name : status;
     },
     // 根据订单状态判断是否显示物流信息
     showDelivery(status) {

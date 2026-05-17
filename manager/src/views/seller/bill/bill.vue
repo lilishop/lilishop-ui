@@ -3,14 +3,14 @@
     <Card>
       <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
         <Form-item label="账单编号" prop="sn">
-          <Input type="text" v-model="searchForm.sn" placeholder="请输入账单编号" clearable style="width: 200px" />
+          <Input type="text" v-model="searchForm.sn" placeholder="请输入账单编号" clearable style="width: 240px" />
         </Form-item>
         <Form-item label="出帐时间" prop="createTime">
-          <DatePicker v-model="selectDate" type="daterange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 200px">
+          <DatePicker v-model="selectDate" type="daterange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 240px">
           </DatePicker>
         </Form-item>
         <Form-item label="筛选状态">
-          <Select v-model="searchForm.billStatus" clearable style="width:160px">
+          <Select v-model="searchForm.billStatus" clearable style="width:240px">
             <Option value="OUT">已出账</Option>
             <Option value="CHECK">已对账</Option>
             <!-- <Option value="EXAMINE">已审核</Option> -->
@@ -19,13 +19,15 @@
         </Form-item>
         <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
       </Form>
+      </Card>
+    <Card>
       <Row class="operation padding-row">
 
       </Row>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-selection-change="changeSelect">
       </Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]"
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]"
           size="small" show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
@@ -44,7 +46,7 @@ export default {
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
         startDate: "", // 起始时间
@@ -119,16 +121,14 @@ export default {
           fixed: "right",
           width: 120,
           render: (h, params) => {
-            return h("div", [
+            return h("div", { class: "ops" }, [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small",
-                  },
                   style: {
-                    marginRight: "5px",
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -160,7 +160,7 @@ export default {
     },
     handleSearch() { // 搜索
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
     changeSelect(e) { // 表格选中
@@ -252,3 +252,15 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
+}
+</style>

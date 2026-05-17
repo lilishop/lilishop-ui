@@ -16,7 +16,7 @@
               v-model="searchForm.goodsName"
               placeholder="请输入商品名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="状态" prop="status">
@@ -24,7 +24,7 @@
               v-model="searchForm.marketEnable"
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             >
               <Option value="DOWN">下架</Option>
               <Option value="UPPER">上架</Option>
@@ -35,7 +35,7 @@
               v-model="searchForm.salesModel"
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             >
               <Option value="RETAIL">零售</Option>
               <Option value="WHOLESALE">批发</Option>
@@ -46,7 +46,7 @@
               v-model="searchForm.goodsType"
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             >
               <Option value="PHYSICAL_GOODS">实物商品</Option>
               <Option value="VIRTUAL_GOODS">虚拟商品</Option>
@@ -58,26 +58,37 @@
               v-model="searchForm.id"
               placeholder="商品编号"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
           <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
+    </Card>
+    <Card>
+
+      <div class="goods-tab">
+        <Tabs v-model="currentStatus" @on-click="goodsStatusClick">
+          <TabPane v-for="(item,index) in goodsStatusWithCount" :key="index" :label="item.title" :name="item.value">
+          </TabPane>
+        </Tabs>
+      </div>
+
       <Row class="operation padding-row">
-        <Button @click="addGoods" type="primary">添加商品</Button>
-        <Button @click="openImportGoods" type="primary">导入商品</Button>
+        <Button @click="addGoods" type="info">添加商品</Button>
+        <Button @click="openImportGoods" >导入商品</Button>
         <Dropdown @on-click="handleDropdown">
-          <Button type="default">
-            批量操作
+          <Button>
+            批量修改
             <Icon type="ios-arrow-down"></Icon>
           </Button>
           <DropdownMenu slot="list">
             <DropdownItem name="uppers">批量上架</DropdownItem>
             <DropdownItem name="lowers">批量下架</DropdownItem>
-            <DropdownItem name="deleteAll">批量删除</DropdownItem>
+            <DropdownItem name="scheduleMarket">批量定时上下架</DropdownItem>
             <DropdownItem name="batchShipTemplate">批量设置物流模板</DropdownItem>
+            <DropdownItem name="deleteAll">批量删除</DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </Row>
@@ -93,11 +104,11 @@
       >
         <!-- 商品栏目格式化 -->
         <template slot="goodsSlot" slot-scope="{ row }">
-          <div style="margin-top: 5px; height: 90px; display: flex">
+          <div style=" height: 60px; display: flex">
             <div style="">
               <img
                 :src="row.original"
-                style="height: 80px; margin-top: 3px; width: 70px"
+                style="height: 50px; margin-top: 3px; width: 50px"
               />
             </div>
 
@@ -105,25 +116,7 @@
               <div class="div-zoom">
                 <a @click="linkTo(row.id, row.skuId)">{{ row.goodsName }}</a>
               </div>
-              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-                <div slot="content">
-                  <!-- <vueQr>123</vueQr> -->
-                  <vue-qr
-                    :text="wapLinkTo(row.id, row.skuId)"
-                    :margin="0"
-                    colorDark="#000"
-                    colorLight="#fff"
-                    :size="150"
-                  ></vue-qr>
-                </div>
-                <img
-                  src="../../../assets/qrcode.svg"
-                  class="hover-pointer"
-                  width="20"
-                  height="20"
-                  alt=""
-                />
-              </Poptip>
+              
             </div>
           </div>
         </template>
@@ -135,7 +128,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -159,9 +152,7 @@
             border
           ></Table>
         </TabPane>
-        <TabPane label="批量规格更新" name="stockAll">
-          <Input type="number" v-model="stockAllUpdate" placeholder="统一规格修改" />
-        </TabPane>
+        
       </Tabs>
 
       <div slot="footer">
@@ -189,6 +180,55 @@
       <div slot="footer">
         <Button type="text" @click="shipTemplateModal = false">取消</Button>
         <Button type="primary" @click="saveShipTemplate">更新</Button>
+      </div>
+    </Modal>
+
+    <Modal
+      title="批量定时上下架"
+      v-model="scheduleMarketModal"
+      :mask-closable="false"
+      :width="520"
+    >
+      <Form
+        ref="scheduleMarketFormRef"
+        :model="scheduleMarketForm"
+        :label-width="120"
+      >
+        <FormItem label="状态" prop="status">
+          <Select v-model="scheduleMarketForm.status" style="width: 200px">
+            <Option value="UPPER">上架</Option>
+            <Option value="DOWN">下架</Option>
+          </Select>
+        </FormItem>
+        <FormItem label="触发时间" prop="triggerTime">
+          <DatePicker
+            v-model="scheduleMarketForm.triggerTime"
+            type="datetime"
+            format="yyyy-MM-dd HH:mm:ss"
+            :options="scheduleMarketDatePickerOptions"
+            :time-picker-options="scheduleMarketTimePickerOptions"
+            @on-change="handleScheduleMarketTimeChange"
+            placeholder="请选择"
+            clearable
+            style="width: 240px"
+          ></DatePicker>
+        </FormItem>
+        <FormItem label="原因" prop="reason">
+          <Input
+            v-model="scheduleMarketForm.reason"
+            type="textarea"
+            :rows="3"
+            placeholder="可选"
+          />
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button type="text" @click="scheduleMarketModal = false">取消</Button>
+        <Button
+          type="primary"
+          :loading="scheduleMarketLoading"
+          @click="submitScheduleMarket"
+        >确定</Button>
       </div>
     </Modal>
     <Modal title="导入商品信息" v-model="importModal" :mask-closable="false">
@@ -219,7 +259,9 @@ import {
   lowGoods,
   deleteGoods,
   batchShipTemplate,
-  downLoadGoods
+  downLoadGoods,
+  getGoodsNumerData,
+  scheduleGoodsMarket
 } from "@/api/goods";
 import { baseUrl } from "@/libs/axios.js";
 import * as API_Shop from "@/api/shops";
@@ -241,10 +283,19 @@ export default {
       logisticsTemplate: [], // 物流列表
       updateStockModalVisible: false, // 更新库存模态框显隐
       stockAllUpdate: undefined, // 更新库存数量
+      scheduleMarketModal: false,
+      scheduleMarketLoading: false,
+      scheduleMarketForm: {
+        status: "UPPER",
+        triggerTime: null,
+        reason: ""
+      },
+      selectList: [], // 选中的商品列表
+      selectCount: 0, // 选中的商品数量
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "create_time", // 默认排序字段
         order: "desc", // 默认排序方式
       },
@@ -257,6 +308,257 @@ export default {
         price: "",
         sellerName: "",
       },
+      columns: [
+        {
+          type: "selection",
+          width: 60,
+          align: "center",
+        },
+         {
+          title: "商品ID",
+          key: "id",
+          width: 180,
+          tooltip: true,
+        },
+        {
+          title: "商品",
+          key: "goodsName",
+          minWidth: 200,
+          slot: "goodsSlot",
+        },
+        {
+          title: "销售模式",
+          key: "salesModel",
+          width: 150,
+          render: (h, params) => {
+            if (params.row.salesModel === "RETAIL") {
+              return h("div", [h("Tag", { props: { color: "blue" } }, "零售")]);
+            } else if (params.row.salesModel === "WHOLESALE") {
+              return h("div", [h("Tag", { props: { color: "green" } }, "批发")]);
+            }
+          },
+        },
+        {
+          title: "商品类型",
+          key: "goodsType",
+          width: 150,
+          render: (h, params) => {
+            if (params.row.goodsType === "PHYSICAL_GOODS") {
+              return h("div", [h("Tag", { props: { color: "blue" } }, "实物")]);
+            } else if (params.row.goodsType === "VIRTUAL_GOODS") {
+              return h("div", [h("Tag", { props: { color: "green" } }, "虚拟")]);
+            }
+          },
+        },
+        {
+          title: "价格",
+          key: "price",
+          width: 150,
+          render: (h, params) => {
+            return h("div", "￥" + params.row.price);
+          },
+        },
+        {
+          title: "销量",
+          key: "buyCount",
+          width: 150,
+          render: (h, params) => {
+            return h("span", params.row.buyCount || 0);
+          },
+        },
+        {
+          title: "库存",
+          key: "quantity",
+          width: 150,
+          render: (h, params) => {
+            return h("span", params.row.quantity || 0);
+          },
+        },
+        {
+          title: "审核状态",
+          key: "authFlag",
+          width: 150,
+          render: (h, params) => {
+            if (params.row.authFlag === "TOBEAUDITED") {
+              return h("Tag", { props: { color: "gold" } }, "待审核");
+            } else if (params.row.authFlag === "PASS") {
+              return h("Tag", { props: { color: "green" } }, "审核通过");
+            } else if (params.row.authFlag === "REFUSE") {
+              return h("Tag", { props: { color: "red" } }, "审核拒绝");
+            }
+          },
+        },
+        {
+          title: "状态",
+          key: "marketEnable",
+          width: 150,
+          render: (h, params) => {
+            if (params.row.marketEnable === "UPPER") {
+              return h("Tag", { props: { color: "green" } }, "上架");
+            } else if (params.row.marketEnable === "DOWN") {
+              return h("Tag", { props: { color: "red" } }, "下架");
+            }
+          },
+        },
+        {
+          title: "操作",
+          key: "action",
+          align: "center",
+          fixed: "right",
+          width: 200,
+          render: (h, params) => {
+            if (params.row.marketEnable == "DOWN") {
+              return h("div", [
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.editGoods(params.row);
+                      },
+                    },
+                  },
+                  "编辑"
+                ),
+                h("span", {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.upper(params.row);
+                      },
+                    },
+                  },
+                  "上架"
+                ),
+                h("span", {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.copyGoods(params.row);
+                      },
+                    },
+                  },
+                  "复制"
+                ),
+              ]);
+            } else {
+              return h("div", [
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.editGoods(params.row);
+                      },
+                    },
+                  },
+                  "编辑"
+                ),
+                h("span", {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.getStockDetail(params.row.id);
+                      },
+                    },
+                  },
+                  "库存"
+                ),
+                h("span", {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.lower(params.row);
+                      },
+                    },
+                  },
+                  "下架"
+                ),
+                h("span", {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2"
+                  }
+                }, "|"),
+                h(
+                  "a",
+                  {
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none"
+                    },
+                    on: {
+                      click: () => {
+                        this.copyGoods(params.row);
+                      },
+                    },
+                  },
+                  "复制"
+                ),
+              ]);
+            }
+          },
+        },
+      ],
       updateStockColumns: [
         {
           title: "sku规格",
@@ -264,20 +566,6 @@ export default {
           minWidth: 120,
           render: (h, params) => {
             return h("div", {}, params.row.simpleSpecs);
-          },
-        },
-        {
-          title: "审核状态",
-          key: "authFlag",
-          width: 130,
-          render: (h, params) => {
-            if (params.row.authFlag == "TOBEAUDITED") {
-              return h("Tag", { props: { color: "blue" } }, "待审核");
-            } else if (params.row.authFlag == "PASS") {
-              return h("Tag", { props: { color: "green" } }, "通过");
-            } else if (params.row.authFlag == "REFUSE") {
-              return h("Tag", { props: { color: "red" } }, "审核拒绝");
-            }
           },
         },
         {
@@ -300,204 +588,69 @@ export default {
           },
         },
       ],
-      // 表单验证规则
-      formValidate: {},
-      submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
-      columns: [
-        {
-          type: "selection",
-          width: 60,
-          align: "center",
-        },
-        {
-          title: "商品编号",
-          key: "id",
-          width: 180,
-          tooltip: true,
-        },
-        {
-          title: "商品名称",
-          key: "goodsName",
-          minWidth: 200,
-          slot: "goodsSlot",
-        },
-        {
-          title: "销售模式",
-          key: "salesModel",
-          width: 100,
-          render: (h, params) => {
-            if (params.row.salesModel === "RETAIL") {
-              return h("Tag", { props: { color: "orange" } }, "零售");
-            } else if (params.row.salesModel === "WHOLESALE") {
-              return h("Tag", { props: { color: "magenta" } }, "批发");
-            } else {
-              return h("Tag", { props: { color: "volcano" } }, "其他类型");
-            }
-          },
-        },
-        {
-          title: "商品类型",
-          key: "goodsType",
-          width: 130,
-          render: (h, params) => {
-            if (params.row.goodsType === "PHYSICAL_GOODS") {
-              return h("Tag", { props: { color: "geekblue" } }, "实物商品");
-            } else if (params.row.goodsType === "VIRTUAL_GOODS") {
-              return h("Tag", { props: { color: "purple" } }, "虚拟商品");
-            } else {
-              return h("Tag", { props: { color: "cyan" } }, "电子卡券");
-            }
-          },
-        },
-        {
-          title: "商品价格",
-          key: "price",
-          width: 130,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
-          },
-        },
-        {
-          title: "库存",
-          key: "quantity",
-          width: 120,
-          render: (h, params) => {
-            if (params.row.quantity) {
-              return h("div", params.row.quantity);
-            } else {
-              return h("div", 0);
-            }
-          },
-        },
-        {
-          title: "审核状态",
-          key: "authFlag",
-          width: 120,
-          render: (h, params) => {
-            if (params.row.authFlag == "PASS") {
-              return h("Tag", { props: { color: "green" } }, "通过");
-            } else if (params.row.authFlag == "TOBEAUDITED") {
-              return h("Tag", { props: { color: "volcano" } }, "待审核");
-            } else if (params.row.authFlag == "REFUSE") {
-              return h("Tag", { props: { color: "red" } }, "审核拒绝");
-            }
-          },
-        },
-        {
-          title: "上架状态",
-          key: "marketEnable",
-          width: 130,
-          sortable: false,
-          render: (h, params) => {
-            if (params.row.marketEnable == "DOWN") {
-              return h("Tag", { props: { color: "red" } }, "下架");
-            } else if (params.row.marketEnable == "UPPER") {
-              return h("Tag", { props: { color: "green" } }, "上架");
-            }
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          fixed: "right",
-          width: 200,
-          render: (h, params) => {
-            let enableOrDisable = "";
-            let showEditStock = "";
-            if (params.row.marketEnable == "DOWN") {
-              enableOrDisable = h(
-                "Button",
-                {
-                  props: {
-                    size: "small",
-                    type: "success",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.upper(params.row);
-                    },
-                  },
-                },
-                "上架"
-              );
-            } else {
-              showEditStock = h(
-                "Button",
-                {
-                  props: {
-                    type: "default",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.getStockDetail(params.row.id);
-                    },
-                  },
-                },
-                "库存"
-              );
-              enableOrDisable = h(
-                "Button",
-                {
-                  props: {
-                    type: "warning",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.lower(params.row);
-                    },
-                  },
-                },
-                "下架"
-              );
-            }
-            return h("div", [
-              h(
-                "Button",
-                {
-                  props: {
-                    type: "info",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.editGoods(params.row);
-                    },
-                  },
-                },
-                "编辑"
-              ),
-              showEditStock,
-              enableOrDisable,
-            ]);
-          },
-        },
-      ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
       updateStockType: 'updateStock',  // 更新库存状态
+      goodsNumerData: {},
+      currentStatus: '',
     };
+  },
+  computed: {
+    goodsStatusWithCount() {
+      return [
+        {title: '全部', value: ''},
+        {title: `出售中${this.goodsNumerData.upperGoodsNum ? '(' + this.goodsNumerData.upperGoodsNum + ')' : ''}`, value: 'UPPER'},
+        {title: `仓库中${this.goodsNumerData.downGoodsNum ? '(' + this.goodsNumerData.downGoodsNum + ')' : ''}`, value: 'DOWN'},
+        {title: `待审核${this.goodsNumerData.auditGoodsNum ? '(' + this.goodsNumerData.auditGoodsNum + ')' : ''}`, value: 'TOBEAUDITED'},
+        {title: `审核未通过${this.goodsNumerData.refuseGoodsNum ? '(' + this.goodsNumerData.refuseGoodsNum + ')' : ''}`, value: 'REFUSE'}
+      ];
+    },
+    scheduleMarketDatePickerOptions() {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayStartMs = todayStart.getTime();
+      return {
+        disabledDate(date) {
+          if (!date) return false;
+          return date.getTime() < todayStartMs;
+        }
+      };
+    },
+    scheduleMarketTimePickerOptions() {
+      const now = new Date();
+      const selected = this.scheduleMarketForm && this.scheduleMarketForm.triggerTime
+        ? (this.scheduleMarketForm.triggerTime instanceof Date
+          ? this.scheduleMarketForm.triggerTime
+          : new Date(this.scheduleMarketForm.triggerTime))
+        : null;
+
+      const isToday = selected
+        ? selected.getFullYear() === now.getFullYear() &&
+          selected.getMonth() === now.getMonth() &&
+          selected.getDate() === now.getDate()
+        : true;
+
+      if (!isToday) {
+        return {};
+      }
+
+      const nowH = now.getHours();
+      const nowM = now.getMinutes();
+      const nowS = now.getSeconds();
+
+      return {
+        disabledHours: () => Array.from({ length: nowH }, (_, i) => i),
+        disabledMinutes: (hour) => (hour === nowH ? Array.from({ length: nowM }, (_, i) => i) : []),
+        disabledSeconds: (hour, minute) =>
+          hour === nowH && minute === nowM ? Array.from({ length: nowS + 1 }, (_, i) => i) : []
+      };
+    }
   },
   methods: {
     init() {
       // 初始化数据
       this.getDataList();
+      this.getNumberData();
     },
     // 添加商品
     addGoods() {
@@ -506,6 +659,10 @@ export default {
     // 编辑商品
     editGoods(v) {
       this.$router.push({ name: "goods-operation-edit", query: { id: v.id } });
+    },
+    // 复制商品
+    copyGoods(v) {
+      this.$router.push({ name: "goods-operation", query: { copyId: v.id } });
     },
 
     //批量操作
@@ -517,6 +674,10 @@ export default {
       //批量下架
       if (v == "lowers") {
         this.lowers();
+      }
+      //批量定时上下架
+      if (v == "scheduleMarket") {
+        this.openScheduleMarketModal();
       }
       //批量删除商品
       if (v == "deleteAll") {
@@ -622,16 +783,18 @@ export default {
     // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
+      this.getNumberData();
     },
     // 重置搜索条件
     handleReset() {
       this.searchForm = {};
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       // 重新加载数据
       this.getDataList();
+      this.getNumberData();
     },
     // 清除多选
     clearSelectAll() {
@@ -679,6 +842,84 @@ export default {
       });
       this.shipTemplateForm.goodsId = data;
       this.shipTemplateModal = true;
+    },
+    openScheduleMarketModal() {
+      if (this.selectCount <= 0) {
+        this.$Message.warning("您还未选择要定时上下架的商品");
+        return;
+      }
+      this.scheduleMarketForm = {
+        status: "UPPER",
+        triggerTime: null,
+        reason: ""
+      };
+      this.scheduleMarketModal = true;
+    },
+    handleScheduleMarketTimeChange() {
+      if (!this.scheduleMarketForm || !this.scheduleMarketForm.triggerTime) return;
+      const selected =
+        this.scheduleMarketForm.triggerTime instanceof Date
+          ? this.scheduleMarketForm.triggerTime
+          : new Date(this.scheduleMarketForm.triggerTime);
+
+      const selectedMs = selected.getTime();
+      if (!Number.isFinite(selectedMs)) return;
+      if (selectedMs <= Date.now()) {
+        this.$Message.warning("触发时间只能选择当前时间之后");
+        this.scheduleMarketForm.triggerTime = new Date(Date.now() + 60 * 1000);
+      }
+    },
+    submitScheduleMarket() {
+      if (this.selectCount <= 0) {
+        this.$Message.warning("您还未选择要定时上下架的商品");
+        return;
+      }
+      if (!this.scheduleMarketForm.status) {
+        this.$Message.warning("请选择状态");
+        return;
+      }
+      if (!this.scheduleMarketForm.triggerTime) {
+        this.$Message.warning("请选择触发时间");
+        return;
+      }
+
+      const triggerTime =
+        this.scheduleMarketForm.triggerTime instanceof Date
+          ? this.scheduleMarketForm.triggerTime.getTime()
+          : new Date(this.scheduleMarketForm.triggerTime).getTime();
+
+      if (!Number.isFinite(triggerTime)) {
+        this.$Message.error("触发时间格式不正确");
+        return;
+      }
+      if (triggerTime <= Date.now()) {
+        this.$Message.warning("触发时间需大于当前时间");
+        return;
+      }
+
+      const goodsIds = this.selectList.map((i) => i.id);
+
+      const payload = {
+        goodsIds,
+        status: this.scheduleMarketForm.status,
+        triggerTime,
+        reason: this.scheduleMarketForm.reason || undefined
+      };
+
+      this.scheduleMarketLoading = true;
+      scheduleGoodsMarket(payload)
+        .then((res) => {
+          if (res && res.success) {
+            this.$Message.success("设置成功");
+            this.scheduleMarketModal = false;
+            this.clearSelectAll();
+            this.getDataList();
+            this.getNumberData();
+          }
+        })
+        .finally(() => {
+          this.scheduleMarketLoading = false;
+        });
     },
     // 获取商品列表数据
     getDataList() {
@@ -738,7 +979,7 @@ export default {
           let params = {
             goodsId: ids.toString(),
           };
-          // 批量上架
+          // 批量下架
           lowGoods(params).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -829,6 +1070,35 @@ export default {
         },
       });
     },
+    getNumberData() {
+      // 创建一个不包含goodsStatus字段的搜索参数
+      const { goodsStatus, ...searchParams } = this.searchForm;
+      getGoodsNumerData(searchParams).then((res) => {
+        if (res.success) {
+          this.goodsNumerData = res.result;
+        }
+      })
+    },
+    // 商品状态筛选
+    goodsStatusClick(item) {
+      // 根据选择的状态设置搜索条件
+      if (item === 0) {
+        // 全部：清除状态筛选
+        delete this.searchForm.goodsStatus;
+      } else {
+        // 其他状态正常赋值
+        this.searchForm.goodsStatus = item;
+      }
+      this.currentStatus = item;
+      
+      // tab切换时清除选中内容
+      this.selectedRows = [];
+      if (this.$refs.table) {
+        this.$refs.table.selectAll(false);
+      }
+      
+      this.getDataList();
+    },
   },
   mounted() {
     this.init();
@@ -838,4 +1108,10 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "@/styles/table-common.scss";
+// Tab组件样式
+.goods-tab {
+  ::v-deep .ivu-tabs-tab {
+    font-size: 14px;
+  }
+}
 </style>

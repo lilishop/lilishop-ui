@@ -236,7 +236,7 @@ export default {
 <style lang="scss" scoped>
 .action {
   display: flex;
-  /deep/ .ivu-btn {
+  ::v-deep .ivu-btn {
     margin: 0 5px !important;
   }
 }

@@ -1,7 +1,9 @@
 <template>
+  
   <div class="search">
+    <Button style="margin-bottom: 10px" @click="back()">返回</Button>
     <Card>
-      <Button style="margin-bottom: 10px" @click="back()">返回</Button>
+      
       <Form
         ref="searchForm"
         :model="searchForm"
@@ -15,7 +17,7 @@
             v-model="searchForm.couponName"
             placeholder="请输入优惠券名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="会员名称" prop="memberName">
@@ -24,7 +26,7 @@
             v-model="searchForm.memberName"
             placeholder="请输入会员名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="获取方式" prop="getType">
@@ -32,7 +34,7 @@
             v-model="searchForm.getType"
             placeholder="请选择"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           >
             <Option value="FREE">免费获取</Option>
             <Option value="ACTIVITY">活动获取</Option>
@@ -43,7 +45,7 @@
             v-model="searchForm.memberCouponStatus"
             placeholder="请选择"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           >
             <Option value="NEW">已领取</Option>
             <Option value="USED">已使用</Option>
@@ -57,7 +59,7 @@
             type="daterange"
             clearable
             placeholder="选择起始时间"
-            style="width: 200px"
+            style="width: 240px"
           ></DatePicker>
         </Form-item>
         <Button
@@ -68,6 +70,8 @@
           >搜索</Button
         >
       </Form>
+    </Card>
+    <Card>
       <Table
         v-if="refreshTable"
         :loading="loading"
@@ -86,7 +90,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -108,15 +112,15 @@ export default {
   data() {
     return {
       loading: true, // 表单加载状态
-      searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-        sort: "create_time", // 默认排序字段
-        order: "desc", // 默认排序方式
-        getType: "", // 默认排序方式
-        couponId: this.$route.query.couponId, // 优惠券id
-      },
+        searchForm: {
+          // 搜索框初始化对象
+          pageNumber: 1, // 当前页数
+          pageSize: 20, // 页面大小
+          sort: "create_time", // 默认排序字段
+          order: "desc", // 默认排序方式
+          getType: "", // 默认排序方式
+          couponId: this.$route.query.couponId, // 优惠券id
+        },
       selectList: [], // 多选数据
       selectCount: 0, // 多选计数
       columns: [
@@ -280,7 +284,7 @@ export default {
     handleSearch() {
       // 搜索
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
     /**

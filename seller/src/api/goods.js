@@ -147,6 +147,10 @@ export const getGoodsSkuData = params => {
 export const getGoodsListData = params => {
   return getRequest("/goods/goods/list", params);
 };
+// 获取商品数量
+export const getGoodsNumerData = (params) => {
+    return getRequest('/goods/goods/goodsNumber', params)
+}
 //  获取待审核商品分页列表
 export const getAuthGoodsListData = params => {
   return getRequest("/goods/auth/list", params);
@@ -264,6 +268,13 @@ export const lowGoods = params => {
   return putRequest(`/goods/goods/under`, params);
 };
 
+// 定时上下架商品
+export const scheduleGoodsMarket = params => {
+  return postRequest(`/goods/goods/schedule/market`, params, {
+    "Content-Type": "application/json"
+  });
+};
+
 // 获取商品单位列表
 export const getGoodsUnitList = params => {
   return getRequest(`/goods/goodsUnit`,params);
@@ -367,7 +378,7 @@ export const refundPriceStatistics = params => {
 
 //下载结算单
 export const downLoadGoods = () => {
-  return getRequest(`/goods/import/downLoad/`, {}, 'blob')
+  return getRequest(`/goods/import/downLoad`, {}, 'blob')
 }
 
 // 上传待发货的订单列表

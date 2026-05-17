@@ -79,7 +79,7 @@
             &nbsp;&nbsp;{{ mes.time }}
           </p>
           <div class="message-content-body">
-            <p class="message-content" v-html="mes.content">{{ mes.content }}</p>
+            <p class="message-content" v-html="mes.content"></p>
           </div>
         </div>
       </transition>
@@ -95,15 +95,15 @@
     data() {
       const markAsReadBtn = (h, params) => {
         return h(
-          "Button",
+          "a",
           {
-            props: {
-              icon: "md-eye-off",
-              size: "small"
+            style: {
+              color: "#2d8cf0",
+              cursor: "pointer",
+              textDecoration: "none",
             },
             on: {
               click: () => {
-                // 标记已读
                 let v = params.row;
                 this.loading = true;
                 API_Index.read(v.id).then(res => {
@@ -112,87 +112,82 @@
                     this.getAll();
                   }
                 });
-              }
-            }
+              },
+            },
           },
           "标为已读"
         );
       };
       const deleteMesBtn = (h, params) => {
         return h(
-          "Button",
+          "a",
           {
-            props: {
-              icon: "md-trash",
-              size: "small",
-              type: "error"
+            style: {
+              color: "#2d8cf0",
+              cursor: "pointer",
+              textDecoration: "none",
             },
             on: {
               click: () => {
-                // 移除
                 let v = params.row;
                 this.loading = true;
                 API_Index.deleteMessage(v.id).then(res => {
                   this.loading = false;
                   if (res.success) {
-                    this.refreshMessage()
+                    this.refreshMessage();
                   }
                 });
-              }
-            }
+              },
+            },
           },
           "删除"
         );
       };
       const restoreBtn = (h, params) => {
         return h(
-          "Button",
+          "a",
           {
-            props: {
-              icon: "md-redo",
-              size: "small"
-            },
             style: {
-              margin: "0 5px 0 0"
+              color: "#2d8cf0",
+              cursor: "pointer",
+              textDecoration: "none",
             },
             on: {
               click: () => {
-                // 还原
                 let v = params.row;
                 API_Index.reductionMessage(v.id).then(res => {
                   this.loading = false;
                   if (res.success) {
-                    this.refreshMessage()
+                    this.refreshMessage();
                   }
                 });
-              }
-            }
+              },
+            },
           },
           "还原"
         );
       };
       const deleteRealBtn = (h, params) => {
         return h(
-          "Button",
+          "a",
           {
-            props: {
-              icon: "md-trash",
-              size: "small",
-              type: "error"
+            style: {
+              color: "#2d8cf0",
+              cursor: "pointer",
+              textDecoration: "none",
             },
             on: {
               click: () => {
-                // 彻底删除
                 let v = params.row;
                 this.loading = true;
                 API_Index.clearMessage(v.id).then(res => {
                   this.loading = false;
                   if (res.success) {
-                    this.refreshMessage()
+                    this.refreshMessage();
                   }
                 });
-              }
-            }
+              },
+            },
           },
           "彻底删除"
         );
@@ -287,6 +282,7 @@
               } else {
                 return h("div", [
                   restoreBtn(h, params),
+                  h("span", { style: { margin: "0 8px", color: "#dcdee2" } }, "|"),
                   deleteRealBtn(h, params)
                 ]);
               }

@@ -114,5 +114,5 @@ export const getPrivacy = (type) => {
 }
 //修改隐私协议数据
 export const updatePrivacy = (id,type,params) => {
-    return putRequest(`/other/article/updateArticle/${type}?id=${id}`, params, {"Content-Type": "application/json"})
+    return putRequest(`/other/article/updateArticle/${type}/${id}`, params, {"Content-Type": "application/json"})
 }

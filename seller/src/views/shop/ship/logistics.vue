@@ -3,7 +3,7 @@
     <Card>
       <Table :loading="loading" border :columns="columns" :data="data" ref="table"></Table>
     </Card>
-    <Modal v-model="openModal" :title="openModalTitle" @on-ok="submit" @on-cancel="cancelModal">
+    <Modal v-model="openModal" :title="openModalTitle" @on-ok="submit" @on-cancel="cancelModal" :width="700">
       <h3 style="color: #ff3c2a; margin-bottom: 10px">是否需要电子面单</h3>
 
       <ButtonGroup style="margin-bottom: 10px;">
@@ -14,20 +14,20 @@
       </ButtonGroup>
       <Card v-if="openText" class="modalStyle">
         <h3 style="color: #ff3c2a; margin-bottom: 10px">请输入详细信息</h3>
-        <Form ref="formValidate" :label-width="150" label-position="right" :model="faceSheetForm" :rules="ruleValidate">
-          <FormItem label="customerName" prop="customerName">
+        <Form ref="formValidate" :label-width="250" label-position="right" :model="faceSheetForm" :rules="ruleValidate">
+          <FormItem label="电子面单客户账户/月结账号/客户代码" prop="customerName">
             <Input v-model="faceSheetForm.customerName" type="text" class="faceSheetInput"></Input>
           </FormItem>
-          <FormItem label="customerPwd" prop="customerPwd">
+          <FormItem label="客户密码/电子面单密码" prop="customerPwd">
             <Input v-model="faceSheetForm.customerPwd" type="text" class="faceSheetInput"></Input>
           </FormItem>
-          <FormItem label="monthCode" prop="monthCode">
+          <FormItem label="电子面单密钥" prop="monthCode">
             <Input v-model="faceSheetForm.monthCode" type="text" class="faceSheetInput"></Input>
           </FormItem>
-          <FormItem label="sendSite" prop="sendSite">
+          <FormItem label="归属网点/网点编码/电子面单承载编号" prop="sendSite">
             <Input v-model="faceSheetForm.sendSite" type="text" class="faceSheetInput"></Input>
           </FormItem>
-          <FormItem label="sendStaff" prop="sendStaff">
+          <FormItem label="收件快递员" prop="sendStaff">
             <Input v-model="faceSheetForm.sendStaff" type="text" class="faceSheetInput"></Input>
           </FormItem>
           <FormItem label="支付方式" prop="payType">
@@ -119,14 +119,12 @@ export default {
             if (!params.row.selected) {
               return h("div", [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "success",
-                      size: "small",
-                    },
                     style: {
-                      marginRight: "5px",
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
                     },
                     on: {
                       click: () => {
@@ -140,14 +138,12 @@ export default {
             } else {
               return h("div", [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "error",
-                      size: "small",
-                    },
                     style: {
-                      marginRight: "5px",
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
                     },
                     on: {
                       click: () => {
@@ -157,12 +153,14 @@ export default {
                   },
                   "关闭"
                 ),
+                h("span", { style: { margin: "0 8px", color: "#dcdee2" } }, "|"),
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "info",
-                      size: "small",
+                    style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
                     },
                     on: {
                       click: () => {

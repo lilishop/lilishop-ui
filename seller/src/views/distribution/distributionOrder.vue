@@ -3,14 +3,15 @@
     <Card>
       <Form ref="searchForm" :model="searchForm" inline :label-width="70"  @keydown.enter.native="handleSearch" class="search-form">
         <Form-item label="订单编号" prop="orderSn">
-          <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单编号" clearable style="width: 200px" />
+          <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单编号" clearable style="width: 240px" />
         </Form-item>
         <Form-item label="订单时间">
-          <DatePicker type="daterange" v-model="timeRange" format="yyyy-MM-dd" placeholder="选择时间" style="width: 210px"></DatePicker>
+          <DatePicker type="daterange" v-model="timeRange" format="yyyy-MM-dd" placeholder="选择时间" style="width: 240px"></DatePicker>
         </Form-item>
         <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
       </Form>
-
+    </Card>
+    <Card>
       <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table"></Table>
       <Row type="flex" justify="end" class="mt_10">
         <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small"
@@ -62,16 +63,14 @@ export default {
           width: 100,
           sortable: false,
           render: (h, params) => {
-            if (params.row.distributionOrderStatus == "COMPLETE_CASH") {
-              return h("Tag", { props: { color: "green" } },"提现完成");
-            } else if (params.row.distributionOrderStatus == "WAIT_BILL") {
-              return h("Tag", { props: { color: "blue" } } ,"待结算");
-            } else if (params.row.distributionOrderStatus == "WAIT_CASH") {
-              return h("Tag", { props: { color: "orange" } }, "待提现");
-            } else if (params.row.distributionOrderStatus == "CANCEL") {
-              return h("Tag", { props: { color: "red" } }, "订单已取消");
-            }else if (params.row.distributionOrderStatus == "REFUND") {
-              return h("Tag", { props: { color: "magenta" } }, "退款");
+            if (params.row.distributionOrderStatus == "NO_COMPLETED") {
+              return h("Tag", { props: { color: "orange" } }, "未完成");
+            } else if (params.row.distributionOrderStatus == "COMPLETE") {
+              return h("Tag", { props: { color: "green" } }, "完成");
+            } else if (params.row.distributionOrderStatus == "REFUND") {
+              return h("Tag", { props: { color: "red" } }, "退款");
+            } else {
+              return h("Tag", { props: { color: "orange" } }, "未完成");
             }
 
           },

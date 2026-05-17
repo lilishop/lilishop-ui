@@ -13,7 +13,7 @@
             format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           ></DatePicker>
         </Form-item>
         <Form-item label="结束时间" prop="endDate">
@@ -24,11 +24,11 @@
             di
             placeholder="请选择"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           ></DatePicker>
         </Form-item>
         <Form-item label="状态" prop="orderStatus">
-          <Select v-model="searchForm.billStatus" placeholder="请选择" clearable style="width: 200px">
+          <Select v-model="searchForm.billStatus" placeholder="请选择" clearable style="width: 240px">
             <Option value="OUT">已出账</Option>
             <Option value="CHECK">已对账</Option>
             <Option value="COMPLETE">已完成</Option>
@@ -37,6 +37,8 @@
         <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
         <Button @click="handleReset" class="search-btn">重置</Button>
       </Form>
+      </Card>
+    <Card>
       <Table
         :loading="loading"
         border
@@ -133,18 +135,17 @@
             title: "操作",
             key: "action",
             align: "center",
-            width: 120,
+            fixed: 'right',
+            width: 200,
             render: (h, params) => {
               return h("div", [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
                     style: {
-                      marginRight: "5px",
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
                     },
                     on: {
                       click: () => {

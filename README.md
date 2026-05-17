@@ -1,16 +1,12 @@
 ## Lilishop B2B2C商城系统
 
-#### 欢迎交流需求，交流业务，交流技术（基础问题自行解决，其他问题先看文档后提问）
-
-#### 不用削尖脑袋往老群里加，老群活跃度较低，很多潜水党，新群相对而言活跃一些 :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: :tw-1f606: 
 
 #### PS： **演示站点所有环境均部署master分支。如果有演示站点问题，可以反馈，如果演示站点没问题本地运行有问题，需自行处理** 
 
-##### 交流 qq 1群 961316482（已满）
-##### 交流 qq 2群 875294241（已满）
-##### 交流 qq 3群 263785057（已满）
-##### 交流 qq 4群 674617534 (已满)
-##### 交流 qq 5群 594675235 
+-   **[在线客服](https://work.weixin.qq.com/kfid/kfc4d8dc24a73c15f44)**
+-   **微信交流1群（已满）**
+-   **微信交流2群**:
+    ![微信群](https://lilishop-wechat.oss-cn-beijing.aliyuncs.com/wechat.jpg)
 
 ##### 体验 公众号/小程序/APP 体验，扫描二维码
 
@@ -18,6 +14,41 @@
 
 [![star](https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark)](https://gitee.com/beijing_hongye_huicheng/lilishop/stargazers)
 &nbsp;&nbsp;![github](https://img.shields.io/github/stars/hongyehuicheng/lilishop.svg?style=social&logo=#181717)
+
+## 2025-10-10日更新
+兼容更高的node版本16
+
+这里我用的是node版本 v16.20.2
+
+npm版本 8.19.4
+
+使用yarn install 然后执行 yarn dev
+
+yarn 安装/启动
+```
+// 如果没有 yarn 安装yarn
+npm install yarn -g
+
+// 切换源
+yarn config set registry https://registry.npmmirror.com
+
+// 以buyer项目为例
+cd buyer
+
+yarn install
+
+yarn dev
+```
+
+
+
+
+没有二开过的项目直接拉最新代码即可，二开项目可以跟着提交记录一起同步修改 install出现问题检查的话删除 "package-lock.json" 重新install
+
+Q&A 为什么不升级更高的node版本？ :因为高node版本 OpenSSL 改动 导致旧版本 Webpack 插件会失效 试了好几次如果兼容的话 需要升级Webpack5以及其他的插件 升级内容较多 为了更稳定的还是尽量少动为主
+
+****
+
 
 ## 如何在本地环境运行lilishop-ui部署视频
 https://www.bilibili.com/video/BV1B28EeJEnP/
@@ -29,7 +60,10 @@ https://www.bilibili.com/video/BV1WD87eoE9F/
 ## 开发项目
 
 #### 安装Node.js
+
 保证`node`版本`14`,推荐 14.17.0
+
+2025-10-10日拉的代码之后不限制于node版本为14，这里只是以14版本为例子
 
 可以使用 `yarn` 或者 `npm` 进行安装
 
@@ -49,17 +83,6 @@ yarn install
 yarn dev
 ```
 
-#### npm 安装/启动
-```
-npm config set registry https://registry.npmmirror.com
-
-// 以buyer项目为例
-cd buyer
-
-npm run install
-
-npm run dev
-```
 
 #### FAQ
 
@@ -222,16 +245,6 @@ PS：手机验证码为 ‘111111’
 3.软件受国家计算机软件著作权保护（登记号：2021SR0805085）。
 
 4.限制商用，如果需要商业使用请联系我们。QQ3409056806.或者加入qq群联系群主。
-
-
-
-### 交流群
-
-##### 交流 qq 1群 961316482（已满）
-##### 交流 qq 2群 875294241（已满）
-##### 交流 qq 3群 263785057（已满）
-##### 交流 qq 4群 674617534（已满）
-##### 交流 qq 5群 594675235 
 
 ### 附录
 有人有自己的学习视频、学习记录文档、希望宣传关联开源项目等均可以私聊仓库所有者。

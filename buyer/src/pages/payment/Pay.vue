@@ -157,8 +157,11 @@
             </span></span>
         </div>
         <div class="inovice-content">
-          <span>{{ invoiceData.receiptTitle }}</span>
-          <span>{{ invoiceData.receiptContent }}</span>
+          <template v-if="hasInvoiceInfo">
+            <span>{{ invoiceDisplayTitle }}</span>
+            <span>{{ invoiceData.receiptContent }}</span>
+          </template>
+          <span v-else>不开发票</span>
           <span @click="editInvoice">编辑</span>
         </div>
       </div>
@@ -258,6 +261,28 @@ import { canUseCouponList } from "@/api/member.js";
 export default {
   name: "Pay",
   components: { invoiceModal, addressManage },
+  computed: {
+    hasInvoiceInfo() {
+      const title =
+        this.invoiceData.personalName ||
+        this.invoiceData.companyName ||
+        this.invoiceData.receiptTitle;
+      const content = this.invoiceData.receiptContent;
+      if (content && String(content).trim() === "不开发票") return false;
+      return Boolean(
+        (title && String(title).trim()) ||
+        (content && String(content).trim())
+      );
+    },
+    invoiceDisplayTitle() {
+      return (
+        this.invoiceData.personalName ||
+        this.invoiceData.companyName ||
+        this.invoiceData.receiptTitle ||
+        ""
+      );
+    },
+  },
   data() {
     return {
       selectedStoreAddress: 'm',
@@ -270,8 +295,7 @@ export default {
       storeMoreAddr: false,
       invoiceData: {
         // 发票数据
-        receiptTitle: "个人",
-        receiptContent: "不开发票",
+        //receiptContent: "不开发票",
       },
       searchForm: {
         pageNumber: 1,

@@ -111,7 +111,7 @@ export const changeMobile = (params) => {
 };
 // 获取用户数据 多条件
 export const getUserListData = (params) => {
-  return getRequest("/passport/user", params);
+  return getRequest("/passport/user/getByCondition", params);
 };
 // 通过用户名搜索
 export const searchUserByName = (username, params) => {
@@ -368,6 +368,31 @@ export const setSetting = (key, params) => {
   return putRequestWithNoForm(`/setting/setting/put/${key}`, params);
 };
 
+// 微信视频号小店类目（三级）
+export const getWxChannelsThirdCategory = (params) => {
+  return getRequest(`/wxchannels/category/third`, params);
+};
+
+// 微信视频号商品分页
+export const getWxChannelsGoodsPage = (params) => {
+  return getRequest(`/wxchannels/goods`, params);
+};
+
+// 微信视频号订单分页
+export const getWxChannelsOrderPage = (params) => {
+  return getRequest(`/wxchannels/order`, params);
+};
+
+// 微信视频号概况
+export const getWxChannelsOverviewSummary = (params) => {
+  return getRequest(`/wxchannels/overview/summary`, params);
+};
+
+// 微信视频号退单分页
+export const getWxChannelsRefundPage = (params) => {
+  return getRequest(`/wxchannels/refund`, params);
+};
+
 // 分页查询敏感词
 
 export const getSensitiveWordsPage = (params) => {
@@ -443,6 +468,21 @@ export const createIndex = () => {
 // 初始化商品索引
 export const getProgress = () => {
   return getRequest(`/other/elasticsearch/progress`);
+};
+
+// 删除ES中下架的商品
+export const deleteGoodsDown = () => {
+  return getRequest(`/other/elasticsearch/deleteGoodsDown`);
+};
+
+// 删除不存在的索引
+export const delSkuIndex = () => {
+  return getRequest(`/other/elasticsearch/delSkuIndex`);
+};
+
+// 生成所有商品的缓存
+export const generateGoodsCache = () => {
+  return getRequest(`/other/elasticsearch/cache`);
 };
 
 // 分页查询自定义分词

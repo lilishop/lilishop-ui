@@ -33,7 +33,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-/deep/ .ivu-card-body {
+::v-deep .ivu-card-body {
   height: 414px;
   overflow: auto;
 }
@@ -69,11 +69,11 @@ export default {
   height: 416px;
   overflow: hidden;
 }
-/deep/ .ivu-table {
+::v-deep .ivu-table {
   height: 300px !important;
   overflow: auto;
 }
-/deep/ .ivu-card-body {
+::v-deep .ivu-card-body {
   padding: 0;
   height: auto;
 }

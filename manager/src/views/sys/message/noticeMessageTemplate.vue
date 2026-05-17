@@ -47,7 +47,7 @@
                   :page-size="searchMessageForm.pageSize"
                   @on-change="messageChangePage"
                   @on-page-size-change="messageChangePageSize"
-                  :page-size-opts="[10, 20, 50]"
+                  :page-size-opts="[20, 50, 100]"
                   size="small"
                   show-total
                   show-elevator
@@ -71,7 +71,7 @@
                   :page-size="searchForm.pageSize"
                   @on-change="changePage"
                   @on-page-size-change="changePageSize"
-                  :page-size-opts="[10, 20, 50]"
+                  :page-size-opts="[20, 50, 100]"
                   size="small"
                   show-total
                   show-elevator
@@ -241,7 +241,7 @@
               :page-size="searchShopMessageForm.pageSize"
               @on-change="shopMessageChangePage"
               @on-page-size-change="shopMessageChangePageSize"
-              :page-size-opts="[10, 20, 50]"
+              :page-size-opts="[20, 50, 100]"
               size="small"
               show-total
               show-elevator
@@ -268,7 +268,7 @@
               :page-size="searchMemberMessageForm.pageSize"
               @on-change="memberMessageChangePage"
               @on-page-size-change="memberMessageChangePageSize"
-              :page-size-opts="[10, 20, 50]"
+              :page-size-opts="[20, 50, 100]"
               size="small"
               show-total
               show-elevator
@@ -311,7 +311,7 @@
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
           sort: "createTime", // 默认排序字段
           order: "desc", // 默认排序方式
         },
@@ -329,19 +329,19 @@
         searchMessageForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
         },
         //发送给店铺的消息
         searchShopMessageForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
         },
         //发送给会员的消息
         searchMemberMessageForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
         },
         form: {
           noticeNode: "",
@@ -411,14 +411,8 @@
               let enableOrDisable = "";
               if (params.row.noticeStatus == "OPEN") {
                 enableOrDisable = h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      size: "small"
-                    },
-                    style: {
-                      marginRight: "5px"
-                    },
                     on: {
                       click: () => {
                         this.disable(params.row);
@@ -429,15 +423,8 @@
                 );
               } else {
                 enableOrDisable = h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "success",
-                      size: "small"
-                    },
-                    style: {
-                      marginRight: "5px"
-                    },
                     on: {
                       click: () => {
                         this.enable(params.row);
@@ -447,18 +434,16 @@
                   "开启"
                 );
               }
-              return h("div", [
+              return h("div", { class: "ops" }, [
                 enableOrDisable,
                 h(
-                  "Button",
+                  "span",
+                  { style: { margin: "0 8px", color: "#dcdee2" } },
+                  "|"
+                ),
+                h(
+                  "a",
                   {
-                    props: {
-                      type: "primary",
-                      size: "small"
-                    },
-                    style: {
-                      marginRight: "5px"
-                    },
                     on: {
                       click: () => {
                         this.edit(params.row);
@@ -491,22 +476,19 @@
             minWidth: 50,
             align: "center",
             render: (h, params) => {
-              return h(
-                "Button",
-                {
-                  props: {
-                    size: "small",
-                    type: "error",
-                    ghost: true,
-                  },
-                  on: {
-                    click: () => {
-                      this.delUser(params.index);
+              return h("div", { class: "ops" }, [
+                h(
+                  "a",
+                  {
+                    on: {
+                      click: () => {
+                        this.delUser(params.index);
+                      },
                     },
                   },
-                },
-                "删除"
-              );
+                  "删除"
+                )
+              ]);
             },
           },
         ],
@@ -574,17 +556,10 @@
             fixed: "right",
             width: 140,
             render: (h, params) => {
-              return h("div", [
+              return h("div", { class: "ops" }, [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "info",
-                      size: "small"
-                    },
-                    style: {
-                      marginRight: "5px"
-                    },
                     on: {
                       click: () => {
                         this.detail(params.row);
@@ -594,15 +569,13 @@
                   "详细"
                 ),
                 h(
-                  "Button",
+                  "span",
+                  { style: { margin: "0 8px", color: "#dcdee2" } },
+                  "|"
+                ),
+                h(
+                  "a",
                   {
-                    props: {
-                      type: "error",
-                      size: "small"
-                    },
-                    style: {
-                      marginRight: "5px"
-                    },
                     on: {
                       click: () => {
                         this.delete(params.row.id);
@@ -1024,4 +997,16 @@
 </script>
 <style lang="scss">
   @import "sms.scss";
+</style>
+<style lang="scss" scoped>
+  .ops a {
+    color: #2d8cf0;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .ops span {
+    display: inline-block;
+    margin: 0 8px;
+    color: #dcdee2;
+  }
 </style>

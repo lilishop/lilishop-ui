@@ -70,7 +70,7 @@ export default {
       params: {
         // 请求参数
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
       },
       pintuanColumns: [
         {
@@ -101,12 +101,12 @@ export default {
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    // type: this.index == params.index ? "primary" : "",
-                    type: 'default',
-                    size: "small",
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -194,12 +194,12 @@ export default {
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    // type: this.index == params.index ? "primary" : "",
-                    type: 'default',
-                    size: "small",
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -246,12 +246,12 @@ export default {
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    // type: this.index == params.index ? "primary" : "",
-                    type: 'default',
-                    size: "small",
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                   },
                   on: {
                     click: () => {
@@ -420,7 +420,7 @@ img {
   overflow: auto;
   width: 100%;
 }
-/deep/ .ivu-table-wrapper {
+::v-deep .ivu-table-wrapper {
   width: 100%;
 }
 .list {

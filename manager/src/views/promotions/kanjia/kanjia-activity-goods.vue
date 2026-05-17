@@ -15,7 +15,7 @@
               v-model="searchForm.goodsName"
               placeholder="请输入商品名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="活动状态" prop="promotionStatus">
@@ -23,7 +23,7 @@
               v-model="searchForm.promotionStatus"
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             >
               <Option value="NEW">未开始</Option>
               <Option value="START">已开始/上架</Option>
@@ -37,7 +37,7 @@
               type="daterange"
               clearable
               placeholder="选择起始时间"
-              style="width: 200px"
+              style="width: 240px"
             >
             </DatePicker>
           </Form-item>
@@ -50,6 +50,8 @@
           >
         </Form>
       </Row>
+      </Card>
+    <Card>
       <Row class="operation padding-row">
         <Button @click="add" type="primary">添加砍价</Button>
       </Row>
@@ -96,28 +98,18 @@
           <div>{{ row.stock }}</div>
         </template>
         <template slot-scope="{ row }" slot="action">
-          <Button
+          <a
             v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
-            type="info"
-            size="small"
-            style="margin-right: 10px"
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:10px"
             @click="edit(row)"
             >编辑
-          </Button>
-          <Button
+          </a>
+          <a
             v-else
-            size="small"
-            style="margin-right: 10px"
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:10px"
             @click="edit(row, 'onlyView')"
             >查看
-          </Button>
-          <!--<Button-->
-            <!--type="error"-->
-            <!--size="small"-->
-            <!--style="margin-right: 10px"-->
-            <!--@click="delAll(row)"-->
-            <!--&gt;删除-->
-          <!--</Button>-->
+          </a>
         </template>
       </Table>
       <Row type="flex" justify="end" class="page">
@@ -127,7 +119,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -156,14 +148,14 @@ export default {
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
-      searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-        sort: "createTime", // 默认排序字段
-        order: "desc", // 默认排序方式
-        goodsName: "",
-      },
+        searchForm: {
+          // 搜索框初始化对象
+          pageNumber: 1, // 当前页数
+          pageSize: 20, // 页面大小
+          sort: "createTime", // 默认排序字段
+          order: "desc", // 默认排序方式
+          goodsName: "",
+        },
       form: {
         // 添加或编辑表单对象初始化数据
       },
@@ -281,7 +273,7 @@ export default {
     },
     handleSearch() {
       this.searchForm.pageNumber = 0;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
     changeSort(e) {

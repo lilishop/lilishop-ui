@@ -287,7 +287,7 @@ div.base-info-item {
   }
 
   /*teatarea*/
-  /deep/ .el-textarea {
+  ::v-deep .el-textarea {
     width: 150%;
   }
 
@@ -315,11 +315,11 @@ div.base-info-item {
 
 /*图片上传组件第一张图设置封面*/
 .goods-images {
-  /deep/ li.el-upload-list__item:first-child {
+  ::v-deep li.el-upload-list__item:first-child {
     position: relative;
   }
 
-  /deep/ li.el-upload-list__item:first-child:after {
+  ::v-deep li.el-upload-list__item:first-child:after {
     content: "封";
     color: #fff;
     font-weight: bold;

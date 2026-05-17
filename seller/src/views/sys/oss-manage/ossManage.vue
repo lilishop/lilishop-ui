@@ -48,7 +48,7 @@
                   clearable
                   format="yyyy-MM-dd"
                   placeholder="选择起始时间"
-                  style="width: 200px"
+                  style="width: 240px"
                   type="daterange"
                   @on-change="selectDateRange"
                 ></DatePicker>
@@ -59,7 +59,7 @@
                   v-model="searchForm.ownerName"
                   placeholder="图片拥有者名称"
                   clearable
-                  style="width: 200px"
+                  style="width: 240px"
                 />
               </Form-item>
               <Button
@@ -71,7 +71,9 @@
               </Button>
             </Form>
           </Row>
-
+        </div>
+      </Card><Card>
+        <div class="operation">
           <Row class="oss-manage-box">
             <Col :span="isComponent?5:4">
               <div class="file-list">
@@ -473,16 +475,14 @@ export default {
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "default",
-                    size: "small",
-                  },
                   style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     marginRight: "5px",
-                    display:
-                      this.selectImage === true ? "inline-block" : "none",
+                    display: this.selectImage === true ? "inline-block" : "none",
                   },
                   on: {
                     click: () => {
@@ -493,13 +493,23 @@ export default {
                 "选择"
               ),
               h(
-                "Button",
+                "span",
                 {
-                  props: {
-                    type: "info",
-                    size: "small",
-                  },
                   style: {
+                    margin: "0 8px",
+                    color: "#dcdee2",
+                    display: this.selectImage === true ? "inline-block" : "none",
+                  },
+                },
+                "|"
+              ),
+              h(
+                "a",
+                {
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     marginRight: "5px",
                     display: this.selectImage == true ? "none" : "inline-block",
                   },
@@ -512,13 +522,23 @@ export default {
                 "下载"
               ),
               h(
-                "Button",
+                "span",
                 {
-                  props: {
-                    type: "error",
-                    size: "small",
-                  },
                   style: {
+                    margin: "0 8px",
+                    color: "#dcdee2",
+                    display: this.selectImage == true ? "none" : "inline-block",
+                  },
+                },
+                "|"
+              ),
+              h(
+                "a",
+                {
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     display: this.selectImage == true ? "none" : "inline-block",
                   },
                   on: {
@@ -637,16 +657,14 @@ export default {
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "default",
-                    size: "small",
-                  },
                   style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     marginRight: "5px",
-                    display:
-                      this.selectImage === true ? "inline-block" : "none",
+                    display: this.selectImage === true ? "inline-block" : "none",
                   },
                   on: {
                     click: () => {
@@ -655,7 +673,7 @@ export default {
                   },
                 },
                 "选择"
-              )
+              ),
             ]);
           },
         },

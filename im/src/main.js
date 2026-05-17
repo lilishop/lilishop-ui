@@ -33,6 +33,11 @@ Object.keys(filters).forEach((key) => {
   Vue.filter(key, filters[key]);
 });
 
+
+import VueVirtualScroller from 'vue-virtual-scroller'
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
+Vue.component('RecycleScroller', VueVirtualScroller.RecycleScroller)
+
 // 引入自定义全局css
 import '@/assets/css/global.less'
 

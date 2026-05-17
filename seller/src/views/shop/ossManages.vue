@@ -416,67 +416,85 @@
             align: "center",
             fixed: "right",
             // width: 300,
-            render: (h, params) => {
-              return h("div", [
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "default",
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                      display:
-                        this.selectImage === true ? "inline-block" : "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.selectedParams(params.row);
-                      },
+          render: (h, params) => {
+            return h("div", [
+              h(
+                "a",
+                {
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
+                    marginRight: "5px",
+                    display: this.selectImage === true ? "inline-block" : "none",
+                  },
+                  on: {
+                    click: () => {
+                      this.selectedParams(params.row);
                     },
                   },
-                  "选择"
-                ),
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                      display: this.selectImage == true ? "none" : "inline-block",
-                    },
-                    on: {
-                      click: () => {
-                        this.download(params.row);
-                      },
+                },
+                "选择"
+              ),
+              h(
+                "span",
+                {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2",
+                    display: this.selectImage === true ? "inline-block" : "none",
+                  },
+                },
+                "|"
+              ),
+              h(
+                "a",
+                {
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
+                    marginRight: "5px",
+                    display: this.selectImage == true ? "none" : "inline-block",
+                  },
+                  on: {
+                    click: () => {
+                      this.download(params.row);
                     },
                   },
-                  "下载"
-                ),
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "error",
-                      size: "small",
-                    },
-                    style: {
-                      display: this.selectImage == true ? "none" : "inline-block",
-                    },
-                    on: {
-                      click: () => {
-                        this.remove(params.row);
-                      },
+                },
+                "下载"
+              ),
+              h(
+                "span",
+                {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2",
+                    display: this.selectImage == true ? "none" : "inline-block",
+                  },
+                },
+                "|"
+              ),
+              h(
+                "a",
+                {
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
+                    display: this.selectImage == true ? "none" : "inline-block",
+                  },
+                  on: {
+                    click: () => {
+                      this.remove(params.row);
                     },
                   },
-                  "删除"
-                ),
-              ]);
-            },
+                },
+                "删除"
+              ),
+            ]);
+          },
           },
         ],
         viewColumns: [
@@ -583,13 +601,12 @@
             render: (h, params) => {
               return h("div", [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "default",
-                      size: "small",
-                    },
                     style: {
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
                       marginRight: "5px",
                       display:
                         this.selectImage === true ? "inline-block" : "none",

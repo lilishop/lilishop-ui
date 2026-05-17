@@ -192,6 +192,7 @@
           show-sizer
           show-elevator
           :total="total"
+          :page-size-opts="[20, 50, 100]"
         />
       </div>
     </Card>
@@ -301,20 +302,26 @@ export default {
           title: "操作",
           key: "action",
           render: (h, params) => {
-            return h('Button',{
-              props:{
-                size:'small'
-              },
-              on:{
-                click: () => {
-                 const { sn } = params.row
-                  this.$router.push({
-                    query: {sn},
-                    path: this.orderOrRefund == 1 ? 'order-detail' : 'after-order-detail' + '?sn='+sn
-                  })
+            return h(
+              'a',
+              {
+                style: {
+                  color: '#2d8cf0',
+                  cursor: 'pointer',
+                  textDecoration: 'none'
+                },
+                on: {
+                  click: () => {
+                    const { sn } = params.row
+                    this.$router.push({
+                      query: { sn },
+                      path: this.orderOrRefund == 1 ? 'order-detail' : 'after-order-detail' + '?sn=' + sn
+                    })
+                  }
                 }
-              }
-            },'查看')
+              },
+              '查看'
+            )
           },
         },
       ],
@@ -487,7 +494,7 @@ export default {
       // 退单订单
       refundParams: {
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         searchType: "LAST_SEVEN",
         storeId: "",
         year: "",
@@ -579,7 +586,7 @@ export default {
       this.overViewParams = callback;
       this.refundParams = callback;
       this.refundParams.pageNumber = 1
-      this.refundParams.pageSize = 10
+      this.refundParams.pageSize = 20
     },
 
     // 实例化订单概览
@@ -782,7 +789,7 @@ export default {
       z-index: 2;
     }
   }
-  /deep/ .box {
+  ::v-deep .box {
     color: #fff;
     position: absolute;
 

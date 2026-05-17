@@ -188,6 +188,20 @@
         align-items: center;
       }
 
+      /* 顶部右侧自定义按钮列表，确保水平排列 */
+      .nav-list {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .nav-list .nav-item {
+        display: inline-flex;
+        align-items: center;
+      }
+
 
       .full-screen-btn-con {
         display: inline-block;

@@ -180,6 +180,15 @@ export function receiptList () {
   });
 }
 
+// 发票详情
+export function receiptDetail (id) {
+  return request({
+    url: `/buyer/trade/receipt/${id}`,
+    method: Method.GET,
+    needToken: true
+  });
+}
+
 // 保存发票信息
 export function saveReceipt (params) {
   return request({
@@ -479,6 +488,31 @@ export function memberPointHistory (params) {
     needToken: true,
     params
   });
+}
+
+export function memberGradeCurrent (params) {
+  return request({
+    url: `/buyer/member/memberGrade/current`,
+    method: Method.GET,
+    needToken: true,
+    params
+  })
+}
+
+export function memberGradeRules () {
+  return request({
+    url: `/buyer/member/memberGrade/rules`,
+    method: Method.GET,
+    needToken: true
+  })
+}
+
+export function memberGradeList () {
+  return request({
+    url: `/buyer/member/memberGrade/list`,
+    method: Method.GET,
+    needToken: true
+  })
 }
 /**
  * 分页获取会员站内信

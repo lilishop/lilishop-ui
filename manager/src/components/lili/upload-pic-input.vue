@@ -39,14 +39,20 @@
       <!--</Upload>-->
     </div>
 
-    <Modal title="图片预览" v-model="viewImage" :styles="{top: '30px'}" draggable>
+    <Modal
+      title="图片预览"
+      v-model="viewImage"
+      :styles="{ top: '30px' }"
+      :z-index="3500"
+      draggable
+    >
       <img :src="currentValue" alt="该资源不存在" style="max-width: 300px;margin: 0 auto;display: block;" />
       <div slot="footer">
         <Button @click="viewImage=false">关闭</Button>
       </div>
     </Modal>
 
-    <Modal width="1200px" v-model="picModalFlag">
+    <Modal width="1200px" v-model="picModalFlag" :z-index="3500">
       <ossManage @callback="callbackSelected" ref="ossManage" :isComponent="true" :initialize="picModalFlag" />
     </Modal>
 

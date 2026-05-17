@@ -55,7 +55,7 @@
                 :page-size="weChatSearchForm.pageSize"
                 @on-change="changePage"
                 @on-page-size-change="changePageSize"
-                :page-size-opts="[10,20,50]"
+                :page-size-opts="[20, 50, 100]"
                 size="small"
               ></Page>
             </Row>
@@ -82,7 +82,7 @@
                 :page-size="weChatMPSearchForm.pageSize"
                 @on-change="changePage"
                 @on-page-size-change="changePageSize"
-                :page-size-opts="[10,20,50]"
+                :page-size-opts="[20, 50, 100]"
                 size="small"
               ></Page>
             </Row>
@@ -126,12 +126,12 @@ export default {
       weChatSearchForm: {
         // 搜索框对应data对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
       },
       weChatMPSearchForm: {
         // 搜索框对应data对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
       },
       weChatColumns: [
         {
@@ -178,14 +178,12 @@ export default {
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "primary",
-                    size: "small"
-                  },
                   style: {
-                    marginRight: "5px"
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none"
                   },
                   on: {
                     click: () => {
@@ -196,14 +194,17 @@ export default {
                 "编辑"
               ),
               h(
-                "Button",
+                "span",
+                { style: { margin: "0 8px", color: "#dcdee2" } },
+                "|"
+              ),
+              h(
+                "a",
                 {
-                  props: {
-                    type: "error",
-                    size: "small"
-                  },
                   style: {
-                    marginRight: "5px"
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none"
                   },
                   on: {
                     click: () => {

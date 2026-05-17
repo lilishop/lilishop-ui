@@ -15,7 +15,7 @@
               v-model="searchForm.goodsName"
               placeholder="请输入商品名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="积分区间">
@@ -24,7 +24,7 @@
               v-model="searchForm.pointsS"
               placeholder="请输入开始区间"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
             -
             <Input
@@ -32,11 +32,11 @@
               v-model="searchForm.pointsE"
               placeholder="请输入结束区间"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="状态">
-            <Select v-model="searchForm.promotionStatus" style="width: 200px">
+            <Select v-model="searchForm.promotionStatus" style="width: 240px">
               <Option v-for="item in statusList" :value="item.value" :key="item.value">{{
                 item.label
               }}</Option>
@@ -48,7 +48,7 @@
               v-model="searchForm.skuId"
               placeholder="请输入SKU编码"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Button
@@ -60,6 +60,8 @@
           >
         </Form>
       </Row>
+      </Card>
+    <Card>
       <Row class="operation padding-row">
         <Button @click="addPointsGoods" type="primary">添加积分商品</Button>
       </Row>
@@ -108,30 +110,20 @@
           <div>{{ row.endTime }}</div>
         </template>
         <template slot-scope="{ row }" slot="action">
-          <Button
+          <a
             v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
-            type="info"
-            size="small"
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
             @click="edit(row.id)"
-            style="margin-right: 5px"
-            >编辑</Button
-          >
-          <Button
+            >编辑</a>
+          <span
             v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
-            type="warning"
-            size="small"
+            style="margin:0 8px;color:#dcdee2"
+            >|</span>
+          <a
+            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
             @click="statusChanged(row.id, 'CLOSE')"
-            style="margin-right: 5px"
-            >关闭</Button
-          >
-          <!--<Button-->
-            <!--v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'END'"-->
-            <!--type="error"-->
-            <!--size="small"-->
-            <!--@click="close(row.id)"-->
-            <!--style="margin-right: 5px"-->
-            <!--&gt;删除</Button-->
-          <!--&gt;-->
+            >关闭</a>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">
@@ -141,7 +133,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -169,13 +161,13 @@ export default {
   data() {
     return {
       loading: true, // 表单加载状态
-      searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-        sort: "createTime",
-        order: "desc", // 默认排序方式
-      },
+        searchForm: {
+          // 搜索框初始化对象
+          pageNumber: 1, // 当前页数
+          pageSize: 20, // 页面大小
+          sort: "createTime",
+          order: "desc", // 默认排序方式
+        },
       statusList: [
         // 活动状态
         { label: "未开始", value: "NEW" },
@@ -273,17 +265,17 @@ export default {
       this.getDataList();
     },
     // 搜索
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      if (this.searchForm.pointsS) {
-        this.searchForm.points =
-          this.searchForm.pointsS +
-          "_" +
-          (this.searchForm.pointsE ? this.searchForm.pointsE : "");
-      }
-      this.getDataList();
-    },
+      handleSearch() {
+        this.searchForm.pageNumber = 1;
+        this.searchForm.pageSize = 20;
+        if (this.searchForm.pointsS) {
+          this.searchForm.points =
+            this.searchForm.pointsS +
+            "_" +
+            (this.searchForm.pointsE ? this.searchForm.pointsE : "");
+        }
+        this.getDataList();
+      },
     // 获取列表数据
     getDataList() {
       this.loading = true;

@@ -95,14 +95,11 @@
                 />
               </template>
               <template slot-scope="{ row, index }" slot="action">
-                <Button
-                  type="error"
+                <a
                   v-if="promotionStatus === 'NEW'"
-                  size="small"
-                  ghost
+                  style="color:#2d8cf0;cursor:pointer;text-decoration:none"
                   @click="delGoods(index, row)"
-                  >删除
-                </Button>
+                >删除</a>
               </template>
             </Table>
           </TabPane>

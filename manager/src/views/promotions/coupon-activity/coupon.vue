@@ -13,20 +13,19 @@
         sortable="custom"
       >
         <template slot-scope="{ row }" slot="action">
-          <Button type="info" size="small" style="margin-right: 10px" @click="info(row)">
-            查看
-          </Button>
-          <Button
-            v-if="
-              (!checked && row.promotionStatus === 'START') ||
-              row.promotionStatus === 'NEW'
-            "
-            type="error"
-            size="small"
-            style="margin-right: 10px"
+          <a
+            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
+            @click="info(row)"
+          >查看</a>
+          <span
+            v-if="(!checked && row.promotionStatus === 'START') || row.promotionStatus === 'NEW'"
+            style="margin: 0 8px; color: #dcdee2"
+          >|</span>
+          <a
+            v-if="(!checked && row.promotionStatus === 'START') || row.promotionStatus === 'NEW'"
+            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
             @click="remove(row)"
-            >关闭
-          </Button>
+          >关闭</a>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">
@@ -36,7 +35,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -60,13 +59,13 @@ export default {
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
-      searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-        sort: "createTime", // 默认排序字段
-        order: "desc", // 默认排序方式
-      },
+        searchForm: {
+          // 搜索框初始化对象
+          pageNumber: 1, // 当前页数
+          pageSize: 20, // 页面大小
+          sort: "createTime", // 默认排序字段
+          order: "desc", // 默认排序方式
+        },
       form: {
         // 添加或编辑表单对象初始化数据
         promotionName: "",
@@ -202,7 +201,7 @@ export default {
     //搜索活动
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
     //数据获取

@@ -16,7 +16,7 @@
               format="yyyy-MM-dd HH:mm:ss"
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             ></DatePicker>
           </Form-item>
           <Form-item label="结束时间" prop="endDate">
@@ -27,13 +27,15 @@
               di
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             ></DatePicker>
           </Form-item>
           <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
           <Button @click="handleReset" class="search-btn">重置</Button>
         </Form>
       </Row>
+      </Card>
+    <Card>
       <Table
         :loading="loading"
         border
@@ -49,7 +51,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -71,7 +73,7 @@
         searchForm: {
           // 搜索框初始化对象
           pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
+          pageSize: 20, // 页面大小
           sort: "createTime", // 默认排序字段
           order: "desc", // 默认排序方式
           startDate: "", // 起始时间
@@ -129,18 +131,17 @@
             title: "操作",
             key: "action",
             align: "center",
-            width: 120,
+            fixed: 'right',
+            width: 200,
             render: (h, params) => {
               return h("div", [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
                     style: {
-                      marginRight: "5px",
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
                     },
                     on: {
                       click: () => {
@@ -223,7 +224,7 @@
 <style lang="scss" scoped>
   // 建议引入通用样式 可删除下面样式代码
    @import "@/styles/table-common.scss";
-   /deep/ .ivu-col{
+   ::v-deep .ivu-col{
      min-height: 100vh;
    }
 </style>

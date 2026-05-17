@@ -15,7 +15,7 @@
               v-model="searchForm.promotionName"
               placeholder="请输入活动名称"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             />
           </Form-item>
           <Form-item label="活动状态" prop="promotionStatus">
@@ -23,7 +23,7 @@
               v-model="searchForm.promotionStatus"
               placeholder="请选择"
               clearable
-              style="width: 200px"
+              style="width: 240px"
             >
               <Option value="NEW">未开始</Option>
               <Option value="START">已开始/上架</Option>
@@ -37,7 +37,7 @@
               type="daterange"
               clearable
               placeholder="选择起始时间"
-              style="width: 200px"
+              style="width: 240px"
             >
             </DatePicker>
           </Form-item>
@@ -51,6 +51,8 @@
           >
         </Form>
       </Row>
+    </Card>
+    <Card>
       <Tabs value="list" class="mt_10" @on-click="clickTabPane">
         <TabPane label="秒杀活动列表" name="list">
           <Table
@@ -62,45 +64,34 @@
             class="mt_10"
           >
             <template slot-scope="{ row }" slot="action">
-              <Button
-                type="info"
-                size="small"
-                class="mr_5"
+              <a
                 v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
+                style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
                 @click="edit(row)"
-                >编辑</Button
-              >
-
-              <Button type="info" size="small" class="mr_5" v-else @click="manage(row)"
-                >查看</Button
-              >
-
-              <Button
-                type="success"
-                size="small"
-                class="mr_5"
-                v-if="row.promotionStatus == 'NEW'"
+                >编辑</a>
+              <a
+                v-else
+                style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
                 @click="manage(row)"
-                >管理</Button
-              >
-
-              <Button
-                type="error"
-                size="small"
+                >查看</a>
+              <span
+                v-if="row.promotionStatus"
+                style="margin:0 8px;color:#dcdee2"
+                >|</span>
+              <a
+                v-if="row.promotionStatus == 'NEW'"
+                style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
+                @click="manage(row)"
+                >管理</a>
+              <span
+                v-if="row.promotionStatus == 'NEW'"
+                style="margin:0 8px;color:#dcdee2"
+                >|</span>
+              <a
                 v-if="row.promotionStatus == 'START' || row.promotionStatus == 'NEW'"
-                class="mr_5"
+                style="color:#2d8cf0;cursor:pointer;text-decoration:none"
                 @click="off(row)"
-                >关闭</Button
-              >
-              &nbsp;
-              <!--<Button-->
-                <!--type="error"-->
-                <!--size="small"-->
-                <!--v-if="row.promotionStatus == 'CLOSE' || row.promotionStatus == 'END'"-->
-                <!--ghost-->
-                <!--@click="expire(row)"-->
-                <!--&gt;删除</Button-->
-              <!--&gt;-->
+                >关闭</a>
             </template>
           </Table>
 
@@ -112,7 +103,7 @@
               :page-size="searchForm.pageSize"
               @on-change="changePage"
               @on-page-size-change="changePageSize"
-              :page-size-opts="[10, 20, 50]"
+              :page-size-opts="[20, 50, 100]"
               size="small"
               show-total
               show-elevator
@@ -142,13 +133,13 @@ export default {
     return {
       selectDate: [],
       loading: true, // 表单加载状态
-      searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-        sort: "createTime",
-        order: "desc", // 默认排序方式
-      },
+        searchForm: {
+          // 搜索框初始化对象
+          pageNumber: 1, // 当前页数
+          pageSize: 20, // 页面大小
+          sort: "createTime",
+          order: "desc", // 默认排序方式
+        },
       setupFlag: false, //默认不请求设置
       columns: [
         // 表单
@@ -221,11 +212,11 @@ export default {
       this.getDataList();
     },
     // 搜索
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      this.getDataList();
-    },
+      handleSearch() {
+        this.searchForm.pageNumber = 1;
+        this.searchForm.pageSize = 20;
+        this.getDataList();
+      },
     edit(v) {
       // 编辑
       this.$router.push({ name: "manager-seckill-add", query: { id: v.id } });

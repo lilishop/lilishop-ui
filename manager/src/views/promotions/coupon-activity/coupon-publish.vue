@@ -211,12 +211,12 @@ export default {
           align: "center",
           render: (h, params) => {
             return h(
-              "Button",
+              "a",
               {
-                props: {
-                  size: "small",
-                  type: "error",
-                  ghost: true,
+                style: {
+                  color: "#2d8cf0",
+                  cursor: "pointer",
+                  textDecoration: "none"
                 },
                 on: {
                   click: () => {

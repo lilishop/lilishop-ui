@@ -14,7 +14,7 @@
             v-model="searchForm.couponName"
             placeholder="请输入优惠券名称"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           />
         </Form-item>
         <Form-item label="获取方式" prop="getType">
@@ -22,7 +22,7 @@
             v-model="searchForm.getType"
             placeholder="请选择"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           >
             <Option value="FREE">免费获取</Option>
             <Option value="ACTIVITY">活动获取</Option>
@@ -33,7 +33,7 @@
             v-model="searchForm.promotionStatus"
             placeholder="请选择"
             clearable
-            style="width: 200px"
+            style="width: 240px"
           >
             <Option value="NEW">未开始</Option>
             <Option value="START">已开始/上架</Option>
@@ -47,7 +47,7 @@
             type="daterange"
             clearable
             placeholder="选择起始时间"
-            style="width: 200px"
+            style="width: 240px"
           ></DatePicker>
         </Form-item>
         <Button
@@ -58,6 +58,8 @@
           >搜索</Button
         >
       </Form>
+    </Card>
+    <Card>
       <Row class="operation padding-row" v-if="getType !== 'ACTIVITY'">
         <Button @click="add" type="primary">添加优惠券</Button>
         <Button @click="delAll">批量关闭</Button>
@@ -73,49 +75,30 @@
         @on-selection-change="changeSelect"
       >
         <template slot-scope="{ row }" slot="action">
-          <Button
-            v-if="
-              row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'
-            "
-            type="info"
-            size="small"
+          <a
+            v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
+            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
             @click="see(row)"
-            >编辑
-          </Button>
-          <Button
+            >编辑</a>
+          <a
             v-else
-            type="default"
-            size="small"
+            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
             @click="see(row, 'onlyView')"
-            >查看
-          </Button>
-          <Button
-            class="ml_5"
-            v-if="
-              row.promotionStatus === 'START' || row.promotionStatus === 'NEW'
-            "
-            type="error"
-            size="small"
+            >查看</a>
+          <span
+            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+            style="margin: 0 8px; color: #dcdee2"
+            >|</span>
+          <a
+            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
             @click="close(row)"
-            >关闭
-          </Button>
-          <!--<Button-->
-            <!--class="ml_5"-->
-            <!--v-if="-->
-              <!--row.promotionStatus === 'CLOSE' || row.promotionStatus === 'END'-->
-            <!--"-->
-            <!--type="error"-->
-            <!--size="small"-->
-            <!--@click="remove(row)"-->
-            <!--&gt;删除-->
-          <!--</Button>-->
-          <Button
-            style="margin: 5px"
-            type="info"
-            size="small"
+            >关闭</a>
+          <span style="margin: 0 8px; color: #dcdee2">|</span>
+          <a
+            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
             @click="receivePage(row.id)"
-            >领取记录
-          </Button>
+            >领取记录</a>
         </template>
       </Table>
       <Row type="flex" justify="end" class="mt_10">
@@ -125,7 +108,7 @@
           :page-size="searchForm.pageSize"
           @on-change="changePage"
           @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          :page-size-opts="[20, 50, 100]"
           size="small"
           show-total
           show-elevator
@@ -144,6 +127,7 @@ import {
 import {
   promotionsStatusRender,
   promotionsScopeTypeRender,
+  promotionsCouponActivityTimeRender,
 } from "@/utils/promotions";
 
 export default {
@@ -151,27 +135,28 @@ export default {
   data() {
     return {
       loading: true, // 表单加载状态
-      searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-        sort: "create_time", // 默认排序字段
-        order: "desc", // 默认排序方式
-        getType: "", // 默认排序方式
-      },
+        searchForm: {
+          // 搜索框初始化对象
+          pageNumber: 1, // 当前页数
+          pageSize: 20, // 页面大小
+          sort: "create_time", // 默认排序字段
+          order: "desc", // 默认排序方式
+          getType: "", // 默认排序方式
+        },
       selectList: [], // 多选数据
       selectCount: 0, // 多选计数
       columns: [
         // 表头
         {
           type: "selection",
-          width: 100,
+          width: 52,
           align: "center",
-          fixed: "left",
+          /* 不使用 fixed：左侧固定列与主体表格分开渲染，叠加全局 .ivu-table table{width:100%} 易在接缝处留白；勾选列无需横向钉住 */
         },
         {
           title: "优惠券名称",
           key: "couponName",
+          minWidth: 140,
           width: 180,
           tooltip: true,
         },
@@ -255,21 +240,7 @@ export default {
         {
           title: "活动时间",
           width: 200,
-          render: (h, params) => {
-            if (
-              params?.row?.getType === "ACTIVITY" &&
-              params?.row?.rangeDayType === "DYNAMICTIME"
-            ) {
-              return h("div", "长期有效");
-            } else if (params?.row?.startTime && params?.row?.endTime) {
-              return h("div", {
-                domProps: {
-                  innerHTML:
-                    params.row.startTime + "<br/>" + params.row.endTime,
-                },
-              });
-            }
-          },
+          render: promotionsCouponActivityTimeRender,
         },
         {
           title: "状态",
@@ -386,7 +357,7 @@ export default {
     handleSearch() {
       // 搜索
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
     clearSelectAll() {

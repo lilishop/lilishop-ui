@@ -306,13 +306,12 @@ export default {
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "default",
-                    size: "small",
-                  },
                   style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     marginRight: "5px",
                   },
                   on: {

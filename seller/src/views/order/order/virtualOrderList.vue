@@ -3,13 +3,13 @@
     <Card>
       <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
         <Form-item label="订单编号" prop="orderSn">
-          <Input type="text" v-model="searchForm.orderSn" clearable placeholder="请输入订单编号" style="width: 160px" />
+          <Input type="text" v-model="searchForm.orderSn" clearable placeholder="请输入订单编号" style="width: 240px" />
         </Form-item>
         <Form-item label="会员名称" prop="buyerName">
-          <Input type="text" v-model="searchForm.buyerName" clearable placeholder="请输入会员名称" style="width: 160px" />
+          <Input type="text" v-model="searchForm.buyerName" clearable placeholder="请输入会员名称" style="width: 240px" />
         </Form-item>
         <Form-item label="订单状态" prop="orderStatus">
-          <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 160px">
+          <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 240px">
             <Option value="UNPAID">未付款</Option>
             <Option value="PAID">已付款</Option>
             <Option value="COMPLETED">已完成</Option>
@@ -18,11 +18,13 @@
           </Select>
         </Form-item>
         <Form-item label="下单时间">
-          <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 160px"></DatePicker>
+          <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 240px"></DatePicker>
         </Form-item>
         <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
         <Button @click="handleReset" class="search-btn">重置</Button>
       </Form>
+      </Card>
+    <Card>
       <div>
         <Poptip @keydown.enter.native="orderVerification" placement="bottom-start" width="400">
           <Button class="export">
@@ -40,7 +42,7 @@
       </div>
       <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort"></Table>
       <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
+        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]" size="small"
           show-total show-elevator show-sizer></Page>
       </Row>
     </Card>
@@ -59,7 +61,7 @@ export default {
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
+        pageSize: 20, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
         startDate: "", // 起始时间
@@ -151,13 +153,12 @@ export default {
           render: (h, params) => {
             return h("div", [
               h(
-                "Button",
+                "a",
                 {
-                  props: {
-                    type: "info",
-                    size: "small",
-                  },
                   style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
                     marginRight: "5px",
                   },
                   on: {

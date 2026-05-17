@@ -155,14 +155,12 @@
             render: (h, params) => {
               return h("div", [
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "success",
-                      size: "small",
-                    },
                     style: {
-                      marginRight: "5px",
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
                     },
                     on: {
                       click: () => {
@@ -172,15 +170,14 @@
                   },
                   "修改"
                 ),
+                h("span", { style: { margin: "0 8px", color: "#dcdee2" } }, "|"),
                 h(
-                  "Button",
+                  "a",
                   {
-                    props: {
-                      type: "error",
-                      size: "small",
-                    },
                     style: {
-                      marginRight: "5px",
+                      color: "#2d8cf0",
+                      cursor: "pointer",
+                      textDecoration: "none",
                     },
                     on: {
                       click: () => {
@@ -189,7 +186,7 @@
                     },
                   },
                   "删除"
-                )
+                ),
               ]);
             },
           },

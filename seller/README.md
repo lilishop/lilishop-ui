@@ -1,29 +1,9 @@
 # LILISHOP-UI
 
-## Project setup
-```
-npm install
-```
+# LiliShop UI Seller 的 Node.js 版本兼容性
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+本文档概述了 LiliShop UI seller 项目的 Node.js 版本兼容性。
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Run your tests
-```
-npm run test
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
 
 ### Customize configuration
 详情点击 [https://cli.vuejs.org/zn/config/](https://cli.vuejs.org/zn/config/).

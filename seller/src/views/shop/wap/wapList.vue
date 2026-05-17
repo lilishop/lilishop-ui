@@ -20,15 +20,19 @@
               <span slot="open">开</span>
               <span slot="close">关</span>
             </i-switch>
-            <Button type="info" placement="right" @click="handleEdit(item)" size="small">修改</Button>
+            <a
+              style="color:#2d8cf0;cursor:pointer;text-decoration:none"
+              @click="handleEdit(item)"
+            >修改</a>
+            <span style="margin: 0 8px; color: #dcdee2">|</span>
             <Poptip confirm title="删除此模板？" @on-ok="handleDel(item)" >
-              <Button type="error" size="small">删除</Button>
+              <a style="color:#2d8cf0;cursor:pointer;text-decoration:none">删除</a>
             </Poptip>
           </div>
         </div>
         <div class="no-more" v-if="list.length ==0">暂无更多模板</div>
       </div>
-      <Page :total="total" size="small" @on-change="(val) => {params.pageNumber = val; } " :current="params.pageNumber" :page-size="params.pageSize" show-sizer  :page-size-opts="[10, 20, 50]" @on-page-size-change="changePageSize"/>
+      <Page :total="total" size="small" @on-change="(val) => {params.pageNumber = val; } " :current="params.pageNumber" :page-size="params.pageSize" show-sizer  :page-size-opts="[20, 50, 100]" @on-page-size-change="changePageSize"/>
 
     </Card>
 
@@ -60,7 +64,7 @@ export default {
 
       params: { // 请求参数
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         sort: "createTime",
         order: "desc",
         pageType: "STORE",
