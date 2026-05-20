@@ -277,14 +277,22 @@ export default {
         this.$Message.error("审核备注不能为空");
         return;
       }
-      withdrawApply(params).then((res) => {
-        this.loading = false;
-        if (res == true) {
-          this.$Message.success("操作成功");
-          this.roleModalVisible = false;
-          this.getDataList();
-        }
-      });
+      this.submitLoading = true;
+      withdrawApply(params)
+        .then((result) => {
+          const success = result === true || (result && result.success === true);
+          if (success) {
+            this.$Message.success("操作成功");
+            this.roleModalVisible = false;
+            this.queryModalVisible = false;
+            this.audit = "";
+            this.showList = {};
+            this.getDataList();
+          }
+        })
+        .finally(() => {
+          this.submitLoading = false;
+        });
     },
     init() {
       this.getDataList();
