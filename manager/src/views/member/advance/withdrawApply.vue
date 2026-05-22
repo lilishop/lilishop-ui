@@ -6,10 +6,11 @@
           <Form-item label="会员名称" prop="memberName">
             <Input type="text" v-model="searchForm.memberName" placeholder="请输入会员名称" clearable style="width: 240px" />
           </Form-item>
-          <Form-item label="审核状态" prop="applyStatus">
+          <Form-item label="提现状态" prop="applyStatus">
             <Select v-model="searchForm.applyStatus" clearable style="width: 240px">
               <Option value="APPLY">申请中</Option>
               <Option value="VIA_AUDITING">审核通过</Option>
+              <Option value="WAIT_USER_CONFIRM">用户确认</Option>
               <Option value="FAIL_AUDITING">审核拒绝</Option>
               <Option value="SUCCESS">提现成功</Option>
               <Option value="ERROR">提现失败</Option>
@@ -165,6 +166,8 @@ export default {
               return h("Tag", { props: { color: "volcano" } }, "申请中");
             } else if (params.row.applyStatus == "VIA_AUDITING") {
               return h("Tag", { props: { color: "green" } }, "审核通过");
+            } else if (params.row.applyStatus == "WAIT_USER_CONFIRM") {
+              return h("Tag", { props: { color: "gold" } }, "用户确认");
             } else if (params.row.applyStatus == "SUCCESS") {
               return h("Tag", { props: { color: "blue" } }, "提现成功");
             } else if (params.row.applyStatus == "ERROR") {
@@ -251,8 +254,12 @@ export default {
         return "申请中";
       } else if (val === "VIA_AUDITING") {
         return "审核通过(提现成功)";
+      } else if (val === "WAIT_USER_CONFIRM") {
+        return "用户确认";
       } else if (val === "FAIL_AUDITING") {
         return "审核拒绝";
+      } else if (val === "SUCCESS") {
+        return "提现成功";
       } else if (val === "ERROR") {
         return "提现失败";
       } else {
@@ -270,14 +277,22 @@ export default {
         this.$Message.error("审核备注不能为空");
         return;
       }
-      withdrawApply(params).then((res) => {
-        this.loading = false;
-        if (res == true) {
-          this.$Message.success("操作成功");
-          this.roleModalVisible = false;
-          this.getDataList();
-        }
-      });
+      this.submitLoading = true;
+      withdrawApply(params)
+        .then((result) => {
+          const success = result === true || (result && result.success === true);
+          if (success) {
+            this.$Message.success("操作成功");
+            this.roleModalVisible = false;
+            this.queryModalVisible = false;
+            this.audit = "";
+            this.showList = {};
+            this.getDataList();
+          }
+        })
+        .finally(() => {
+          this.submitLoading = false;
+        });
     },
     init() {
       this.getDataList();
