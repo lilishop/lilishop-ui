@@ -81,27 +81,25 @@ const member = [{
     icon: '',
     title: '我的等级',
     path: 'MemberGrade'
-  }
-  ],
-  display: true
-}];
-
-// 账户中心
-const user = [{
-  icon: '',
-  title: '账户中心',
-  menus: [{
+  },
+  {
     icon: '',
     title: '我的优惠券',
     path: 'Coupons'
   },
   {
     icon: '',
-    title: '资金管理',
+    title: '我的余额',
     path: 'MoneyManagement'
-  }],
+  },
+  {
+    icon: '',
+    title: '我的礼品卡',
+    path: 'MyGiftCards'
+  }
+  ],
   display: true
-}]
+}];
 
 // 活动中心
 // const activity = [{
@@ -171,6 +169,6 @@ const user = [{
 // ]
 // wholesale[0], shop[0]
 let menuList = []
-menuList.push(order[0], member[0], user[0])
+menuList.push(order[0], member[0])
 
 export default menuList

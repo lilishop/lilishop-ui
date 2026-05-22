@@ -57,3 +57,50 @@ export function pointGoodsDetail (id) {
     id
   });
 }
+
+/**
+ * 分页查询当前客户礼品卡
+ */
+export function getGiftCardCashMemberCardPage (params) {
+  return request({
+    url: '/buyer/promotion/giftCardCash/memberCard',
+    method: Method.GET,
+    needToken: true,
+    params
+  });
+}
+
+/**
+ * 绑定礼品卡（卡号 + 兑换码/卡密）
+ */
+export function bindGiftCardCashMemberCard (data) {
+  return request({
+    url: '/buyer/promotion/giftCardCash/memberCard/bind',
+    method: Method.POST,
+    needToken: true,
+    headers: { 'Content-Type': 'application/json' },
+    data
+  });
+}
+
+/**
+ * 激活礼品卡
+ */
+export function activateGiftCardCashMemberCard (memberCardId) {
+  return request({
+    url: `/buyer/promotion/giftCardCash/memberCard/${memberCardId}/activate`,
+    method: Method.POST,
+    needToken: true
+  });
+}
+
+/**
+ * 下单页可用礼品卡列表
+ */
+export function getAvailableGiftCardCashMemberCards () {
+  return request({
+    url: '/buyer/promotion/giftCardCash/memberCard/available',
+    method: Method.GET,
+    needToken: true
+  });
+}

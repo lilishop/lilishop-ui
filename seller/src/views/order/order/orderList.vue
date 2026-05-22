@@ -280,7 +280,9 @@ export default {
           key: "paymentMethod",
           width: 120,
           render: (h, params) => {
-            if (params.row.paymentMethod == "WECHAT") {
+            if (params.row.paymentMethod == "NOT_ACTUALLY_PAID") {
+              return h("div", {}, "-");
+            } else if (params.row.paymentMethod == "WECHAT") {
               return h("div", {}, "微信支付");
             } else if (params.row.paymentMethod == "ALIPAY") {
               return h("div", {}, "支付宝");

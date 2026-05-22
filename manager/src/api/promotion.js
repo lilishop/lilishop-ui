@@ -3,7 +3,8 @@ import {
   getRequest,
   postRequest,
   putRequest,
-  deleteRequest
+  deleteRequest,
+  importRequest
 } from "@/libs/axios";
 
 // 获取秒杀活动申请列表
@@ -280,4 +281,72 @@ export const deletePointsGoodsCategoryById = id => {
 // 获取优惠券领取记录
 export const getCouponReceiveList = (params) => {
   return getRequest("/promotion/coupon/received", params);
+};
+
+// 现金礼品卡活动分页
+export const getGiftCardCashActivityPage = (params) => {
+  return getRequest("/promotion/giftCardCash/activity", params);
+};
+
+// 新建礼品卡活动
+export const saveGiftCardCashActivity = (params) => {
+  return postRequest("/promotion/giftCardCash/activity", params, {
+    "Content-type": "application/json",
+  });
+};
+
+// 礼品卡活动详情
+export const getGiftCardCashActivity = (id) => {
+  return getRequest(`/promotion/giftCardCash/activity/${id}`);
+};
+
+// 更新礼品卡活动
+export const updateGiftCardCashActivity = (id, params) => {
+  return putRequest(`/promotion/giftCardCash/activity/${id}`, params, {
+    "Content-type": "application/json",
+  });
+};
+
+// 活动下批量制卡
+export const giftCardCashBatchCreate = (activityId, params) => {
+  return postRequest(
+    `/promotion/giftCardCash/activity/${activityId}/batchCreate`,
+    params,
+    {
+      "Content-type": "application/json",
+    }
+  );
+};
+
+// 下载批量发卡 Excel 模板
+export const downloadGiftCardCashIssueTemplate = () => {
+  return getRequest("/promotion/giftCardCash/issue/template", {}, "blob");
+};
+
+// 按活动上传 Excel 批量发卡（multipart：file）
+export const giftCardCashIssueImportByActivity = (activityId, formData) => {
+  return importRequest(
+    `/promotion/giftCardCash/activity/${activityId}/issueImport`,
+    formData
+  );
+};
+
+// 制卡批次分页
+export const getGiftCardCashCreateBatchPage = (params) => {
+  return getRequest("/promotion/giftCardCash/createBatch", params);
+};
+
+// 发卡/发送记录分页
+export const getGiftCardCashIssueBatchPage = (params) => {
+  return getRequest("/promotion/giftCardCash/issueBatch", params);
+};
+
+// 礼品卡使用记录分页
+export const getGiftCardCashUsageRecordPage = (params) => {
+  return getRequest("/promotion/giftCardCash/usageRecord", params);
+};
+
+// 卡密凭证分页（平台库存+会员资产）
+export const getGiftCardCashCredentialPage = (params) => {
+  return getRequest("/promotion/giftCardCash/credential", params);
 };

@@ -93,6 +93,21 @@ export function selectCoupon (params) {
 }
 
 /**
+ * 选择礼品卡
+ * @param way 购物车购买：CART/立即购买：BUY_NOW/拼团购买：PINTUAN / 积分购买：POINT
+ * @param credentialId 礼品卡凭证 id；used=false 且不传则清空全部
+ * @param used 使用 true / 弃用 false
+ */
+export function selectGiftCard (params) {
+  return request({
+    url: '/buyer/trade/carts/select/giftCard',
+    method: Method.GET,
+    needToken: true,
+    params
+  });
+}
+
+/**
  * 可用优惠券数量
  */
 export function couponNum (params) {

@@ -10,7 +10,7 @@
             theme="light"
             width="auto"
             :active-name="$route.name"
-            :open-names="['订单中心', '会员中心', '账户中心']"
+            :open-names="['订单中心', '会员中心']"
             @on-select="onSelect"
           >
             <div class="user-icon">

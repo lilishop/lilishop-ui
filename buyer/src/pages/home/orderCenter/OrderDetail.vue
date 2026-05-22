@@ -231,6 +231,14 @@
             }}</span
           >
         </div>
+        <div v-if="order.order.priceDetailDTO.giftCardPrice">
+          <span>礼品卡抵扣：</span
+          ><span
+            >-{{
+              order.order.priceDetailDTO.giftCardPrice || 0 | unitPrice("￥")
+            }}</span
+          >
+        </div>
         <div v-if="order.order.discountPrice">
           <span>活动优惠：</span
           ><span>-{{ order.order.discountPrice | unitPrice("￥") }}</span>

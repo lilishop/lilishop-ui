@@ -195,6 +195,60 @@
           </li>
         </ul>
       </div>
+      <!-- 礼品卡 -->
+      <div class="invoice pay-gcc-module">
+        <div class="pay-gcc-head">
+          <div class="pay-gcc-title">
+            使用礼品卡
+            <span class="pay-gcc-deduct">
+              (已抵扣 <span class="pay-gcc-deduct-num">{{ giftCardDeductAmount | unitPrice("¥") }}</span
+              >)
+            </span>
+          </div>
+          <a href="javascript:void(0)" class="pay-gcc-help" @click.prevent="giftCardNoticeModal = true">
+            使用说明 <Icon type="ios-help-circle-outline" />
+          </a>
+        </div>
+        <div class="pay-gcc-body">
+          <div class="pay-gcc-panel">
+            <div class="pay-gcc-grid-wrap">
+              <div v-if="giftCardList.length === 0" class="pay-gcc-empty">暂无可用礼品卡</div>
+              <div v-else class="pay-gcc-cards">
+                <div
+                  v-for="(item, index) in giftCardList"
+                  :key="item.id || index"
+                  class="pay-gcc-item"
+                  @click="toggleGiftCard(item)"
+                >
+                  <div class="pay-gcc-item-inner">
+                    <div class="pay-gcc-pattern" aria-hidden="true" />
+                    <div class="pay-gcc-item-main">
+                      <div class="pay-gcc-top-row">
+                        <div class="pay-gcc-left">
+                          <div class="pay-gcc-name">{{ item.giftCardName || "礼品卡" }}</div>
+                          <div class="pay-gcc-face">面值{{ formatGiftFaceValue(item.faceValue) }}元</div>
+                        </div>
+                        <div class="pay-gcc-right-meta">
+                          <div class="pay-gcc-type">现金卡</div>
+                          <div class="pay-gcc-valid">{{ formatGiftExpire(item) }}</div>
+                        </div>
+                      </div>
+                      <div class="pay-gcc-balance-row">
+                        <span class="pay-gcc-amt">¥{{ item.balance != null ? (item.balance | unitPrice) : "0.00" }}</span>
+                        <span class="pay-gcc-bal-label">余额</span>
+                      </div>
+                      <div class="pay-gcc-no">{{ item.cardNo }}</div>
+                    </div>
+                  </div>
+                  <div v-if="isGiftCardSelected(item)" class="pay-gcc-corner">
+                    <Icon type="md-checkmark" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <!-- 订单价格 -->
       <div class="order-price">
         <div>
@@ -208,6 +262,9 @@
         </div>
         <div v-if="priceDetailDTO.couponPrice > 0">
           <span>优惠券金额：</span><span>-{{ priceDetailDTO.couponPrice | unitPrice("￥") }}</span>
+        </div>
+        <div v-if="giftCardDeductAmount > 0">
+          <span>礼品卡抵扣：</span><span>-{{ giftCardDeductAmount | unitPrice("￥") }}</span>
         </div>
 
         <div v-if="$route.query.way === 'POINTS'">
@@ -238,6 +295,14 @@
     <invoice-modal ref="invModal" :invoiceData="invoiceData" @change="getInvMsg" />
     <!-- 选择地址模态框 -->
     <address-manage ref="address" :id="addrId" @change="addrChange"></address-manage>
+    <Modal v-model="giftCardNoticeModal" title="礼品卡使用说明" footer-hide width="520">
+      <p class="pay-gcc-notice-p">
+        请在礼品卡有效期内使用；结算时勾选礼品卡即可按规则抵扣订单金额，可与优惠券等活动叠加规则以平台说明为准。放弃勾选或取消抵扣将恢复对应余额。
+      </p>
+      <div class="pay-gcc-notice-foot">
+        <Button type="primary" @click="giftCardNoticeModal = false">我知道了</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -250,6 +315,7 @@ import {
   createTrade,
   selectAddr,
   selectCoupon,
+  selectGiftCard,
   setShipMethod,
   setStoreAddressId,
   shippingMethodList,
@@ -281,6 +347,30 @@ export default {
         this.invoiceData.receiptTitle ||
         ""
       );
+    },
+    giftCardDeductAmount() {
+      if (this.tradeGiftCardDeductTotal != null && Number(this.tradeGiftCardDeductTotal) > 0) {
+        return Number(this.tradeGiftCardDeductTotal);
+      }
+      const items = this.giftCardDeductItems || [];
+      let sum = 0;
+      items.forEach((it) => {
+        sum += Number(it.deductAmount || 0);
+      });
+      if (sum > 0) {
+        return sum;
+      }
+      const p = this.priceDetailDTO || {};
+      const n = Number(
+        p.giftCardPrice != null
+          ? p.giftCardPrice
+          : p.giftCardDiscountPrice != null
+            ? p.giftCardDiscountPrice
+            : p.memberCardPrice != null
+              ? p.memberCardPrice
+              : 0
+      );
+      return Number.isFinite(n) ? n : 0;
     },
   },
   data() {
@@ -326,6 +416,11 @@ export default {
       usedCouponId: [], // 已使用优惠券id
       selectedCoupon: {}, // 已选优惠券对象
       storeId: '', //店铺Id
+      giftCardList: [], // TradeDTO.canUseGiftCards
+      giftCardNoticeModal: false,
+      giftCardDeductItems: [], // 已选礼品卡抵扣明细（TradeDTO.giftCardDeductItems）
+      tradeGiftCardDeductTotal: null, // TradeDTO.giftCardDeductTotal
+      selectedGiftCardCredentialIds: [], // 已选凭证 id，与 deductItems 同步
     };
   },
   mounted() {
@@ -476,11 +571,109 @@ export default {
                 this.$forceUpdate();
               });
             }
+            this.giftCardDeductItems = Array.isArray(res.result.giftCardDeductItems)
+              ? res.result.giftCardDeductItems
+              : [];
+            this.tradeGiftCardDeductTotal =
+              res.result.giftCardDeductTotal != null && res.result.giftCardDeductTotal !== ""
+                ? Number(res.result.giftCardDeductTotal)
+                : null;
+            this.giftCardList = Array.isArray(res.result.canUseGiftCards) ? res.result.canUseGiftCards : [];
+            this.syncGiftCardSelectionFromCart(res.result);
           }
         })
         .catch(() => {
           this.$Spin.hide();
         });
+    },
+    syncGiftCardSelectionFromCart(result) {
+      if (!result) {
+        this.selectedGiftCardCredentialIds = [];
+        return;
+      }
+      const selectedIds = result.selectedGiftCardIds;
+      if (Array.isArray(selectedIds) && selectedIds.length) {
+        this.selectedGiftCardCredentialIds = selectedIds
+          .map((id) => (id != null && id !== "" ? String(id) : ""))
+          .filter(Boolean);
+        return;
+      }
+      const items = Array.isArray(result.giftCardDeductItems) ? result.giftCardDeductItems : [];
+      if (items.length) {
+        this.selectedGiftCardCredentialIds = items
+          .map((it) => (it.credentialId != null && it.credentialId !== "" ? String(it.credentialId) : ""))
+          .filter(Boolean);
+        return;
+      }
+      const pd = result.priceDetailDTO || {};
+      const id =
+        result.selectedGiftCardCredentialId ||
+        result.usedGiftCardCredentialId ||
+        pd.selectedGiftCardCredentialId ||
+        pd.usedGiftCardCredentialId ||
+        (result.selectedGiftCard && (result.selectedGiftCard.id || result.selectedGiftCard.credentialId)) ||
+        (result.giftCardCashSelected && result.giftCardCashSelected.id) ||
+        null;
+      this.selectedGiftCardCredentialIds =
+        id != null && id !== "" ? [String(id)] : [];
+    },
+    formatGiftFaceValue(val) {
+      if (val == null || val === "") {
+        return "—";
+      }
+      const n = Number(val);
+      if (Number.isNaN(n)) {
+        return String(val);
+      }
+      return Number.isInteger(n) ? String(n) : n.toFixed(2).replace(/\.?0+$/, "");
+    },
+    formatGiftExpire(row) {
+      const t = row && row.expireTime;
+      if (!t) {
+        return "长期有效";
+      }
+      const d = new Date(t);
+      if (Number.isNaN(d.getTime())) {
+        return "长期有效";
+      }
+      if (d.getFullYear() >= 2099) {
+        return "长期有效";
+      }
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day} 到期`;
+    },
+    toggleGiftCard(item) {
+      if (!item || item.id == null || item.id === "") {
+        return;
+      }
+      if (this.isGiftCardSelected(item)) {
+        this.useGiftCard(item.id, false);
+      } else {
+        this.useGiftCard(item.id, true);
+      }
+    },
+    isGiftCardSelected(item) {
+      if (!item || !this.selectedGiftCardCredentialIds.length) {
+        return false;
+      }
+      const id = item.id != null ? String(item.id) : "";
+      return id && this.selectedGiftCardCredentialIds.includes(id);
+    },
+    useGiftCard(credentialId, used) {
+      const params = {
+        way: this.$route.query.way,
+        used,
+      };
+      if (credentialId != null && credentialId !== "") {
+        params.credentialId = String(credentialId);
+      }
+      selectGiftCard(params).then((res) => {
+        if (res.success) {
+          this.init();
+        }
+      });
     },
     getCouponNum() {
       // 获取可用优惠券数量
@@ -1188,5 +1381,190 @@ export default {
 .coupon-list {
   max-height: 260px;
   overflow: scroll;
+}
+
+.pay-gcc-module {
+  margin-top: 10px;
+}
+.pay-gcc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+.pay-gcc-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+}
+.pay-gcc-deduct {
+  margin-left: 8px;
+  font-size: 14px;
+  font-weight: normal;
+  color: #666;
+}
+.pay-gcc-deduct-num {
+  color: #e54d42;
+  font-weight: 600;
+}
+.pay-gcc-help {
+  font-size: 13px;
+  color: #999;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.pay-gcc-help:hover {
+  color: $theme_color;
+}
+.pay-gcc-body {
+  min-height: 120px;
+  margin-top: 16px;
+}
+.pay-gcc-panel {
+  position: relative;
+}
+.pay-gcc-grid-wrap {
+  position: relative;
+  min-height: 100px;
+}
+.pay-gcc-empty {
+  padding: 24px 0;
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+}
+.pay-gcc-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 18px;
+}
+.pay-gcc-item {
+  position: relative;
+  width: 280px;
+  max-width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.pay-gcc-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+.pay-gcc-item-inner {
+  position: relative;
+  min-height: 150px;
+  background: linear-gradient(135deg, #ff9a4a 0%, #ff7729 48%, #e86a1f 100%);
+}
+.pay-gcc-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.2;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    -32deg,
+    transparent,
+    transparent 5px,
+    rgba(255, 255, 255, 0.45) 5px,
+    rgba(255, 255, 255, 0.45) 6px
+  );
+}
+.pay-gcc-item-main {
+  position: relative;
+  z-index: 1;
+  padding: 14px 14px 12px;
+  color: #fff;
+}
+.pay-gcc-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.pay-gcc-name {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.pay-gcc-face {
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.92;
+}
+.pay-gcc-right-meta {
+  text-align: right;
+  flex-shrink: 0;
+}
+.pay-gcc-type {
+  font-size: 15px;
+  font-weight: 700;
+}
+.pay-gcc-valid {
+  margin-top: 6px;
+  font-size: 11px;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+.pay-gcc-balance-row {
+  margin-top: 14px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.pay-gcc-amt {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.pay-gcc-bal-label {
+  font-size: 13px;
+  opacity: 0.9;
+}
+.pay-gcc-no {
+  margin-top: 10px;
+  font-size: 11px;
+  opacity: 0.75;
+  word-break: break-all;
+  line-height: 1.4;
+}
+.pay-gcc-corner {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.pay-gcc-corner::before {
+  content: "";
+  position: absolute;
+  right: -22px;
+  bottom: -22px;
+  width: 44px;
+  height: 44px;
+  background: #e54d42;
+  transform: rotate(45deg);
+}
+.pay-gcc-corner .ivu-icon {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  color: #fff;
+  font-size: 15px;
+  z-index: 1;
+}
+.pay-gcc-notice-p {
+  line-height: 1.75;
+  color: #515a6e;
+  margin-bottom: 16px;
+}
+.pay-gcc-notice-foot {
+  text-align: right;
 }
 </style>

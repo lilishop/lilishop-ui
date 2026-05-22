@@ -124,6 +124,17 @@ export default {
                 );
               },
             }, {
+              title: '礼品卡补贴',
+              key: 'giftCardSubsidy',
+              align: 'center',
+              width: 200,
+              render: (h, params) => {
+                return h(
+                  "div",
+                  this.$options.filters.unitPrice(params.row.giftCardSubsidy, "￥")
+                );
+              },
+            }, {
               title: '分销佣金',
               key: 'distributionCommission',
               align: 'center',
@@ -205,6 +216,19 @@ export default {
                 });
               },
             }, {
+              title: '礼品卡返还',
+              key: 'giftCardRefundSubsidy',
+              align: 'center',
+              width: 200,
+              render: (h, params) => {
+                return h("priceColorScheme", {
+                  props: {
+                    value: (0 - params.row.giftCardRefundSubsidy),
+                    color: this.$mainColor
+                  }
+                });
+              },
+            }, {
               title: '退单返还分销佣金',
               key: 'distributionRefundCommission',
               align: 'center',
@@ -237,12 +261,14 @@ export default {
           siteCouponCommission: 0,
           pointSettlementPrice: 0,
           kanjiaSettlementPrice: 0,
+          giftCardSubsidy: 0,
           distributionCommission: 0,
           commissionPrice: 0,
           refundPrice: 0,
           siteCouponRefundCommission: 0,
           pointRefundSettlementPrice: 0,
           kanjiaRefundSettlementPrice: 0,
+          giftCardRefundSubsidy: 0,
           distributionRefundCommission: 0,
           refundCommissionPrice: 0
         },
@@ -568,6 +594,8 @@ export default {
     // 账单详细
     initTable() {
       let bill = this.bill;
+      const money = (val) =>
+        val === null || val === undefined || val === "" ? 0 : val;
 
       this.data[0].name = "结算单状态";
       this.data[0].value = filters.unixSellerBillStatus(bill.billStatus);
@@ -596,19 +624,21 @@ export default {
       this.data[8].name = "支付时间";
       this.data[8].value = bill.payTime === null ? "未付款" : bill.payTime;
 
-      this.billData[0].billPrice = this.bill.billPrice;
-      this.billData[0].orderPrice = this.bill.orderPrice;
-      this.billData[0].siteCouponCommission = this.bill.siteCouponCommission;
-      this.billData[0].pointSettlementPrice = this.bill.pointSettlementPrice;
-      this.billData[0].kanjiaSettlementPrice = this.bill.kanjiaSettlementPrice;
-      this.billData[0].distributionCommission = this.bill.distributionCommission;
-      this.billData[0].commissionPrice = this.bill.commissionPrice;
-      this.billData[0].refundPrice = this.bill.refundPrice;
-      this.billData[0].siteCouponRefundCommission = this.bill.siteCouponRefundCommission;
-      this.billData[0].pointRefundSettlementPrice = this.bill.pointRefundSettlementPrice;
-      this.billData[0].kanjiaRefundSettlementPrice = this.bill.kanjiaRefundSettlementPrice;
-      this.billData[0].distributionRefundCommission = this.bill.distributionRefundCommission;
-      this.billData[0].refundCommissionPrice = this.bill.refundCommissionPrice;
+      this.billData[0].billPrice = money(this.bill.billPrice);
+      this.billData[0].orderPrice = money(this.bill.orderPrice);
+      this.billData[0].siteCouponCommission = money(this.bill.siteCouponCommission);
+      this.billData[0].pointSettlementPrice = money(this.bill.pointSettlementPrice);
+      this.billData[0].kanjiaSettlementPrice = money(this.bill.kanjiaSettlementPrice);
+      this.billData[0].giftCardSubsidy = money(this.bill.giftCardSubsidy);
+      this.billData[0].distributionCommission = money(this.bill.distributionCommission);
+      this.billData[0].commissionPrice = money(this.bill.commissionPrice);
+      this.billData[0].refundPrice = money(this.bill.refundPrice);
+      this.billData[0].siteCouponRefundCommission = money(this.bill.siteCouponRefundCommission);
+      this.billData[0].pointRefundSettlementPrice = money(this.bill.pointRefundSettlementPrice);
+      this.billData[0].kanjiaRefundSettlementPrice = money(this.bill.kanjiaRefundSettlementPrice);
+      this.billData[0].giftCardRefundSubsidy = money(this.bill.giftCardRefundSubsidy);
+      this.billData[0].distributionRefundCommission = money(this.bill.distributionRefundCommission);
+      this.billData[0].refundCommissionPrice = money(this.bill.refundCommissionPrice);
     },
     getOrder() {
       API_Shop.getStoreFlow(this.id, this.orderParam).then((res) => {

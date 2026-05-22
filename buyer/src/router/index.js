@@ -76,15 +76,16 @@ const MsgDetail = (resolve) =>
   require(["@/pages/home/memberCenter/memberMsg/MsgDetail"], resolve);
 
 /*
- * 会员中心
- * 账户中心
- * */
+ * 会员中心（我的优惠券、我的余额等）
+ */
 const Coupons = (resolve) =>
   require(["@/pages/home/userCenter/Coupons"], resolve);
 const MyTracks = (resolve) =>
   require(["@/pages/home/userCenter/MyTracks"], resolve);
 const MoneyManagement = (resolve) =>
   require(["@/pages/home/userCenter/MoneyManagement"], resolve);
+const MyGiftCards = (resolve) =>
+  require(["@/pages/home/userCenter/MyGiftCards"], resolve);
 
 const Home = (resolve) => require(["@/pages/user/Home"], resolve);
 
@@ -261,6 +262,13 @@ export default new Router({
           path: "MoneyManagement",
           name: "MoneyManagement",
           component: MoneyManagement,
+          meta: { title: "我的余额" },
+        },
+        {
+          path: "MyGiftCards",
+          name: "MyGiftCards",
+          component: MyGiftCards,
+          meta: { title: "我的礼品卡" },
         },
         {
           path: "Complain",
@@ -271,6 +279,7 @@ export default new Router({
           path: "Coupons",
           name: "Coupons",
           component: Coupons,
+          meta: { title: "我的优惠券" },
         },
         {
           path: "CommentList",

@@ -225,6 +225,41 @@ export const otherRouter = {
       component: () => import("@/views/promotions/coupon/coupon.vue")
     },
     {
+      path: "promotions/gift-card-cash",
+      title: "礼品卡",
+      name: "manager-gift-card-cash",
+      component: () =>
+        import("@/views/promotions/gift-card-cash/gift-card-cash-activity.vue")
+    },
+    {
+      path: "promotions/add-gift-card-cash-activity",
+      title: "添加礼品卡",
+      name: "add-gift-card-cash-activity",
+      component: () =>
+        import("@/views/promotions/gift-card-cash/gift-card-cash-activity-add.vue")
+    },
+    {
+      path: "promotions/edit-gift-card-cash-activity",
+      title: "编辑礼品卡",
+      name: "edit-gift-card-cash-activity",
+      component: () =>
+        import("@/views/promotions/gift-card-cash/gift-card-cash-activity-add.vue")
+    },
+    {
+      path: "promotions/gift-card-cash-records",
+      title: "礼品卡记录",
+      name: "gift-card-cash-records",
+      component: () =>
+        import("@/views/promotions/gift-card-cash/gift-card-cash-records.vue")
+    },
+    {
+      path: "promotions/gift-card-cash-batch-credentials",
+      title: "制卡批次卡密",
+      name: "gift-card-cash-batch-credentials",
+      component: () =>
+        import("@/views/promotions/gift-card-cash/gift-card-cash-batch-credentials.vue")
+    },
+    {
       path: "promotions/coupon-receive",
       title: "优惠券领取记录",
       name: "coupon-receive",
