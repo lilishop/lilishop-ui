@@ -1,10 +1,226 @@
 <template>
   <div class="experience-setting">
-    <Card>
-      <Form :label-width="120" label-position="right">
-        <Table :loading="loading" :columns="columns" :data="form.items" class="mt_10 experience-table"></Table>
-        <FormItem label="经验值说明" style="margin-top: 16px" class="desc-item">
-          <Input
+    <el-card>
+      <el-form label-width="120px" label-position="right">
+        <el-table
+          v-loading="loading"
+          :data="form.items"
+          class="mt_10 experience-table"
+          style="width: 100%"
+        >
+          <el-table-column label="是否开启" width="90" align="center">
+            <template #default="{ row, $index }">
+              <el-checkbox
+                v-if="row"
+                :model-value="!!form.items[$index].enabled"
+                @change="(checked) => updateRuleEnabled($index, checked)"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column prop="ruleName" label="类型" width="160" />
+          <el-table-column label="经验值(1-100)" min-width="700">
+            <template #default="{ row, $index }">
+              <template v-if="row">
+                <div v-if="row.ruleKey === 'REGISTER'" class="rule-cell">
+                  <div class="rule-row">
+                    <span class="rule-label">获得经验值:</span>
+                    <el-input
+                      :model-value="formatInputValue(form.items[$index].value)"
+                      style="width: 120px"
+                      @input="(val) => updateRuleValue($index, val)"
+                      @blur="() => commitRuleValue($index)"
+                    />
+                  </div>
+                  <div class="rule-tip">会员注册成功后可获得经验值</div>
+                </div>
+
+                <div v-else-if="row.ruleKey === 'SHARE'" class="rule-cell">
+                  <div class="rule-row rule-row-wrap">
+                    <div class="rule-inline">
+                      <span class="rule-label">分享商品详情页获得经验值：</span>
+                      <el-input
+                        :model-value="formatInputValue(form.items[$index].value)"
+                        style="width: 120px"
+                        @input="(val) => updateRuleValue($index, val)"
+                        @blur="() => commitRuleValue($index)"
+                      />
+                    </div>
+                    <div class="rule-inline">
+                      <span class="rule-label">可获得经验值限额：</span>
+                      <el-input
+                        :model-value="formatInputValue(form.items[$index].maxValue)"
+                        style="width: 120px"
+                        @input="(val) => updateRuleMaxValue($index, val)"
+                        @blur="() => commitRuleMaxValue($index)"
+                      />
+                    </div>
+                  </div>
+                  <div class="rule-tip">会员分享商城页面可获得的经验值</div>
+                </div>
+
+                <div v-else-if="row.ruleKey === 'COMMENT'" class="rule-cell">
+                  <div class="rule-row rule-row-wrap">
+                    <span class="rule-label">对已购买商品完成提交评论获得经验值：</span>
+                    <el-input
+                      :model-value="formatInputValue(form.items[$index].value)"
+                      style="width: 120px"
+                      @input="(val) => updateRuleValue($index, val)"
+                      @blur="() => commitRuleValue($index)"
+                    />
+                  </div>
+                  <div class="rule-tip">仅针对评论字数大于30字的评论进行发放</div>
+                </div>
+
+                <div v-else-if="row.ruleKey === 'FOLLOW_STORE'" class="rule-cell">
+                  <div class="rule-row rule-row-wrap">
+                    <div class="rule-inline">
+                      <span class="rule-label">获得经验值：</span>
+                      <el-input
+                        :model-value="formatInputValue(form.items[$index].value)"
+                        style="width: 120px"
+                        @input="(val) => updateRuleValue($index, val)"
+                        @blur="() => commitRuleValue($index)"
+                      />
+                    </div>
+                    <div class="rule-inline">
+                      <span class="rule-label">可获得经验值限额：</span>
+                      <el-input
+                        :model-value="formatInputValue(form.items[$index].maxValue)"
+                        style="width: 120px"
+                        @input="(val) => updateRuleMaxValue($index, val)"
+                        @blur="() => commitRuleMaxValue($index)"
+                      />
+                    </div>
+                  </div>
+                  <div class="rule-tip">关注店铺可获得经验值，每个客户D相同店铺仅第一次关注可进行获得</div>
+                </div>
+
+                <div v-else-if="row.ruleKey === 'PROFILE'" class="rule-cell">
+                  <div class="rule-row rule-row-wrap">
+                    <span class="rule-label">获得经验值：</span>
+                    <el-input
+                      :model-value="formatInputValue(form.items[$index].value)"
+                      style="width: 120px"
+                      @input="(val) => updateRuleValue($index, val)"
+                      @blur="() => commitRuleValue($index)"
+                    />
+                  </div>
+                  <div class="rule-tip">完善个人基本信息可获得经验值，每个会员仅可获得一次</div>
+                </div>
+
+                <div v-else-if="row.ruleKey === 'BIND_WECHAT'" class="rule-cell">
+                  <div class="rule-row rule-row-wrap">
+                    <span class="rule-label">获取经验值：</span>
+                    <el-input
+                      :model-value="formatInputValue(form.items[$index].value)"
+                      style="width: 120px"
+                      @input="(val) => updateRuleValue($index, val)"
+                      @blur="() => commitRuleValue($index)"
+                    />
+                  </div>
+                  <div class="rule-tip">绑定微信成功获得经验值，每个会员仅可获得一次</div>
+                </div>
+
+                <div v-else-if="row.ruleKey === 'ADD_ADDRESS'" class="rule-cell">
+                  <div class="rule-row rule-row-wrap">
+                    <span class="rule-label">获取经验值：</span>
+                    <el-input
+                      :model-value="formatInputValue(form.items[$index].value)"
+                      style="width: 120px"
+                      @input="(val) => updateRuleValue($index, val)"
+                      @blur="() => commitRuleValue($index)"
+                    />
+                  </div>
+                  <div class="rule-tip">添加收货地址后获得经验值，每个会员仅可获得一次</div>
+                </div>
+
+                <div v-else-if="row.ruleKey === 'SHARE_REGISTER'" class="rule-cell">
+                  <div class="rule-row rule-row-wrap">
+                    <div class="rule-inline">
+                      <span class="rule-label">获取的经验值：</span>
+                      <el-input
+                        :model-value="formatInputValue(form.items[$index].value)"
+                        style="width: 120px"
+                        @input="(val) => updateRuleValue($index, val)"
+                        @blur="() => commitRuleValue($index)"
+                      />
+                    </div>
+                    <div class="rule-inline">
+                      <span class="rule-label">可获得经验值限额：</span>
+                      <el-input
+                        :model-value="formatInputValue(form.items[$index].maxValue)"
+                        style="width: 120px"
+                        @input="(val) => updateRuleMaxValue($index, val)"
+                        @blur="() => commitRuleMaxValue($index)"
+                      />
+                    </div>
+                  </div>
+                  <div class="rule-tip">仅被注册成功后才可获得相应奖励经验值</div>
+                </div>
+
+                <div v-else-if="row.ruleKey === 'SHARE_BUY'" class="rule-cell">
+                  <div class="rule-row rule-row-wrap">
+                    <div class="rule-inline">
+                      <span class="rule-label">获取的经验值：</span>
+                      <el-input
+                        :model-value="formatInputValue(form.items[$index].value)"
+                        style="width: 120px"
+                        @input="(val) => updateRuleValue($index, val)"
+                        @blur="() => commitRuleValue($index)"
+                      />
+                    </div>
+                    <div class="rule-inline">
+                      <span class="rule-label">可获得经验值限额：</span>
+                      <el-input
+                        :model-value="formatInputValue(form.items[$index].maxValue)"
+                        style="width: 120px"
+                        @input="(val) => updateRuleMaxValue($index, val)"
+                        @blur="() => commitRuleMaxValue($index)"
+                      />
+                    </div>
+                  </div>
+                  <div class="rule-tip">仅被购买成功后才可获得相应奖励经验值</div>
+                </div>
+
+                <div v-else-if="row.ruleKey === 'SIGN_IN'" class="rule-cell">
+                  <div class="rule-row rule-row-wrap">
+                    <span class="rule-label">获取的经验值：</span>
+                    <el-input
+                      :model-value="formatInputValue(form.items[$index].value)"
+                      style="width: 120px"
+                      @input="(val) => updateRuleValue($index, val)"
+                      @blur="() => commitRuleValue($index)"
+                    />
+                  </div>
+                  <div class="rule-tip">客户每日签到后可获的经验值</div>
+                </div>
+
+                <div v-else-if="row.ruleKey === 'CONSUME'" class="rule-cell">
+                  <div class="rule-row rule-row-wrap">
+                    <span class="rule-label">1元获取经验值：</span>
+                    <el-input
+                      :model-value="formatInputValue(form.items[$index].value)"
+                      style="width: 120px"
+                      @input="(val) => updateRuleValue($index, val)"
+                      @blur="() => commitRuleValue($index)"
+                    />
+                  </div>
+                  <div class="rule-tip">客户消费1元可获取经验值，向下取整</div>
+                </div>
+
+                <el-input
+                  v-else
+                  :model-value="formatInputValue(form.items[$index].value)"
+                  style="width: 120px"
+                  @input="(val) => updateRuleValue($index, val)"
+                  @blur="() => commitRuleValue($index)"
+                />
+              </template>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-form-item label="经验值说明" style="margin-top: 16px" class="desc-item">
+          <el-input
             v-model="form.description"
             type="textarea"
             :rows="4"
@@ -12,12 +228,12 @@
             show-word-limit
             placeholder="请输入经验值说明"
           />
-        </FormItem>
-        <FormItem>
-          <Button type="primary" :loading="submitLoading" @click="submit">保存</Button>
-        </FormItem>
-      </Form>
-    </Card>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" :loading="submitLoading" @click="submit">保存</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
   </div>
 </template>
 
@@ -58,340 +274,33 @@ export default {
       loading: false,
       submitLoading: false,
       form: defaultForm(),
-      columns: [
-        {
-          title: "是否开启",
-          key: "enabled",
-          width: 90,
-          align: "center",
-          render: (h, params) => {
-            return h("Checkbox", {
-              props: { value: !!this.form.items[params.index].enabled },
-              on: {
-                "on-change": (checked) => {
-                  this.updateRuleEnabled(params.index, checked);
-                },
-              },
-            });
-          },
-        },
-        {
-          title: "类型",
-          key: "ruleName",
-          width: 160,
-        },
-        {
-          title: "经验值(1-100)",
-          key: "value",
-          minWidth: 700,
-          render: (h, params) => {
-            const row = this.form.items[params.index] || {};
-            const inputNode = h("Input", {
-              style: { width: "120px" },
-              props: {
-                value: row.value == null ? "" : String(row.value),
-                number: true,
-              },
-              on: {
-                input: (val) => {
-                  this.updateRuleValue(params.index, val);
-                },
-                "on-change": (v) => {
-                  this.updateRuleValue(params.index, v);
-                },
-                "on-blur": () => {
-                  this.commitRuleValue(params.index);
-                },
-              },
-            });
-            const maxInputNode = h("Input", {
-              style: { width: "120px" },
-              props: {
-                value: row.maxValue == null ? "" : String(row.maxValue),
-                number: true,
-              },
-              on: {
-                input: (val) => {
-                  this.updateRuleMaxValue(params.index, val);
-                },
-                "on-change": (v) => {
-                  this.updateRuleMaxValue(params.index, v);
-                },
-                "on-blur": () => {
-                  this.commitRuleMaxValue(params.index);
-                },
-              },
-            });
-            if (params.row.ruleKey === "REGISTER") {
-              return h(
-                "div",
-                { style: { display: "flex", flexDirection: "column", alignItems: "flex-start" } },
-                [
-                  h(
-                    "div",
-                    { style: { display: "flex", alignItems: "center" } },
-                    [h("span", { style: { marginRight: "8px" } }, "获得经验值:"), inputNode]
-                  ),
-                  h(
-                    "div",
-                    { style: { marginTop: "6px", color: "#808695", fontSize: "12px" } },
-                    "会员注册成功后可获得经验值"
-                  ),
-                ]
-              );
-            }
-            if (params.row.ruleKey === "SHARE") {
-              return h(
-                "div",
-                { style: { display: "flex", flexDirection: "column", alignItems: "flex-start" } },
-                [
-                  h(
-                    "div",
-                    { style: { display: "flex", alignItems: "center", flexWrap: "wrap" } },
-                    [
-                      h(
-                        "div",
-                        { style: { display: "flex", alignItems: "center", marginRight: "16px" } },
-                        [h("span", { style: { marginRight: "8px" } }, "分享商品详情页获得经验值："), inputNode]
-                      ),
-                      h(
-                        "div",
-                        { style: { display: "flex", alignItems: "center" } },
-                        [h("span", { style: { marginRight: "8px" } }, "可获得经验值限额："), maxInputNode]
-                      ),
-                    ]
-                  ),
-                  h(
-                    "div",
-                    { style: { marginTop: "6px", color: "#808695", fontSize: "12px" } },
-                    "会员分享商城页面可获得的经验值"
-                  ),
-                ]
-              );
-            }
-            if (params.row.ruleKey === "COMMENT") {
-              return h(
-                "div",
-                { style: { display: "flex", flexDirection: "column", alignItems: "flex-start" } },
-                [
-                  h(
-                    "div",
-                    { style: { display: "flex", alignItems: "center", flexWrap: "wrap" } },
-                    [h("span", { style: { marginRight: "8px" } }, "对已购买商品完成提交评论获得经验值："), inputNode]
-                  ),
-                  h(
-                    "div",
-                    { style: { marginTop: "6px", color: "#808695", fontSize: "12px" } },
-                    "仅针对评论字数大于30字的评论进行发放"
-                  ),
-                ]
-              );
-            }
-            if (params.row.ruleKey === "FOLLOW_STORE") {
-              return h(
-                "div",
-                { style: { display: "flex", flexDirection: "column", alignItems: "flex-start" } },
-                [
-                  h(
-                    "div",
-                    { style: { display: "flex", alignItems: "center", flexWrap: "wrap" } },
-                    [
-                      h(
-                        "div",
-                        { style: { display: "flex", alignItems: "center", marginRight: "16px" } },
-                        [h("span", { style: { marginRight: "8px" } }, "获得经验值："), inputNode]
-                      ),
-                      h(
-                        "div",
-                        { style: { display: "flex", alignItems: "center" } },
-                        [h("span", { style: { marginRight: "8px" } }, "可获得经验值限额："), maxInputNode]
-                      ),
-                    ]
-                  ),
-                  h(
-                    "div",
-                    { style: { marginTop: "6px", color: "#808695", fontSize: "12px" } },
-                    "关注店铺可获得经验值，每个客户D相同店铺仅第一次关注可进行获得"
-                  ),
-                ]
-              );
-            }
-            if (params.row.ruleKey === "PROFILE") {
-              return h(
-                "div",
-                { style: { display: "flex", flexDirection: "column", alignItems: "flex-start" } },
-                [
-                  h(
-                    "div",
-                    { style: { display: "flex", alignItems: "center", flexWrap: "wrap" } },
-                    [h("span", { style: { marginRight: "8px" } }, "获得经验值："), inputNode]
-                  ),
-                  h(
-                    "div",
-                    { style: { marginTop: "6px", color: "#808695", fontSize: "12px" } },
-                    "完善个人基本信息可获得经验值，每个会员仅可获得一次"
-                  ),
-                ]
-              );
-            }
-            if (params.row.ruleKey === "BIND_WECHAT") {
-              return h(
-                "div",
-                { style: { display: "flex", flexDirection: "column", alignItems: "flex-start" } },
-                [
-                  h(
-                    "div",
-                    { style: { display: "flex", alignItems: "center", flexWrap: "wrap" } },
-                    [h("span", { style: { marginRight: "8px" } }, "获取经验值："), inputNode]
-                  ),
-                  h(
-                    "div",
-                    { style: { marginTop: "6px", color: "#808695", fontSize: "12px" } },
-                    "绑定微信成功获得经验值，每个会员仅可获得一次"
-                  ),
-                ]
-              );
-            }
-            if (params.row.ruleKey === "ADD_ADDRESS") {
-              return h(
-                "div",
-                { style: { display: "flex", flexDirection: "column", alignItems: "flex-start" } },
-                [
-                  h(
-                    "div",
-                    { style: { display: "flex", alignItems: "center", flexWrap: "wrap" } },
-                    [h("span", { style: { marginRight: "8px" } }, "获取经验值："), inputNode]
-                  ),
-                  h(
-                    "div",
-                    { style: { marginTop: "6px", color: "#808695", fontSize: "12px" } },
-                    "添加收货地址后获得经验值，每个会员仅可获得一次"
-                  ),
-                ]
-              );
-            }
-            if (params.row.ruleKey === "SHARE_REGISTER") {
-              return h(
-                "div",
-                { style: { display: "flex", flexDirection: "column", alignItems: "flex-start" } },
-                [
-                  h(
-                    "div",
-                    { style: { display: "flex", alignItems: "center", flexWrap: "wrap" } },
-                    [
-                      h(
-                        "div",
-                        { style: { display: "flex", alignItems: "center", marginRight: "16px" } },
-                        [h("span", { style: { marginRight: "8px" } }, "获取的经验值："), inputNode]
-                      ),
-                      h(
-                        "div",
-                        { style: { display: "flex", alignItems: "center" } },
-                        [h("span", { style: { marginRight: "8px" } }, "可获得经验值限额："), maxInputNode]
-                      ),
-                    ]
-                  ),
-                  h(
-                    "div",
-                    { style: { marginTop: "6px", color: "#808695", fontSize: "12px" } },
-                    "仅被注册成功后才可获得相应奖励经验值"
-                  ),
-                ]
-              );
-            }
-            if (params.row.ruleKey === "SHARE_BUY") {
-              return h(
-                "div",
-                { style: { display: "flex", flexDirection: "column", alignItems: "flex-start" } },
-                [
-                  h(
-                    "div",
-                    { style: { display: "flex", alignItems: "center", flexWrap: "wrap" } },
-                    [
-                      h(
-                        "div",
-                        { style: { display: "flex", alignItems: "center", marginRight: "16px" } },
-                        [h("span", { style: { marginRight: "8px" } }, "获取的经验值："), inputNode]
-                      ),
-                      h(
-                        "div",
-                        { style: { display: "flex", alignItems: "center" } },
-                        [h("span", { style: { marginRight: "8px" } }, "可获得经验值限额："), maxInputNode]
-                      ),
-                    ]
-                  ),
-                  h(
-                    "div",
-                    { style: { marginTop: "6px", color: "#808695", fontSize: "12px" } },
-                    "仅被购买成功后才可获得相应奖励经验值"
-                  ),
-                ]
-              );
-            }
-            if (params.row.ruleKey === "SIGN_IN") {
-              return h(
-                "div",
-                { style: { display: "flex", flexDirection: "column", alignItems: "flex-start" } },
-                [
-                  h(
-                    "div",
-                    { style: { display: "flex", alignItems: "center", flexWrap: "wrap" } },
-                    [h("span", { style: { marginRight: "8px" } }, "获取的经验值："), inputNode]
-                  ),
-                  h(
-                    "div",
-                    { style: { marginTop: "6px", color: "#808695", fontSize: "12px" } },
-                    "客户每日签到后可获的经验值"
-                  ),
-                ]
-              );
-            }
-            if (params.row.ruleKey === "CONSUME") {
-              return h(
-                "div",
-                { style: { display: "flex", flexDirection: "column", alignItems: "flex-start" } },
-                [
-                  h(
-                    "div",
-                    { style: { display: "flex", alignItems: "center", flexWrap: "wrap" } },
-                    [h("span", { style: { marginRight: "8px" } }, "1元获取经验值："), inputNode]
-                  ),
-                  h(
-                    "div",
-                    { style: { marginTop: "6px", color: "#808695", fontSize: "12px" } },
-                    "客户消费1元可获取经验值，向下取整"
-                  ),
-                ]
-              );
-            }
-            return inputNode;
-          },
-        },
-      ],
     };
   },
   mounted() {
     this.loadData();
   },
   methods: {
+    formatInputValue(v) {
+      return v == null ? "" : String(v);
+    },
     getRawInputValue(v) {
       return v && v.target ? v.target.value : v;
     },
     updateRuleEnabled(index, enabled) {
       const item = this.form.items[index] || {};
-      this.$set(this.form.items, index, {
+      this.form.items[index] = {
         ...item,
         enabled: !!enabled,
-      });
+      };
     },
     updateRuleValue(index, v) {
       const raw = this.getRawInputValue(v);
       const next = Number(raw);
       const item = this.form.items[index] || {};
-      this.$set(this.form.items, index, {
+      this.form.items[index] = {
         ...item,
         value: Number.isFinite(next) ? next : null,
-      });
+      };
     },
     commitRuleValue(index) {
       const item = this.form.items[index] || {};
@@ -402,41 +311,41 @@ export default {
         else if (next > 100) value = 100;
         else value = Math.floor(next);
       }
-      this.$set(this.form.items, index, {
+      this.form.items[index] = {
         ...item,
         value,
-      });
+      };
     },
     updateRuleMaxValue(index, v) {
       const raw = this.getRawInputValue(v);
       const item = this.form.items[index] || {};
       if (raw == null || raw === "") {
-        this.$set(this.form.items, index, {
+        this.form.items[index] = {
           ...item,
           maxValue: null,
-        });
+        };
         return;
       }
       const next = Number(raw);
-      this.$set(this.form.items, index, {
+      this.form.items[index] = {
         ...item,
         maxValue: Number.isFinite(next) ? next : null,
-      });
+      };
     },
     commitRuleMaxValue(index) {
       const item = this.form.items[index] || {};
       if (item.maxValue == null || item.maxValue === "") {
-        this.$set(this.form.items, index, {
+        this.form.items[index] = {
           ...item,
           maxValue: null,
-        });
+        };
         return;
       }
       const next = Number(item.maxValue);
-      this.$set(this.form.items, index, {
+      this.form.items[index] = {
         ...item,
         maxValue: Number.isFinite(next) && next >= 1 ? Math.floor(next) : null,
-      });
+      };
     },
     normalizeConfig(val) {
       if (!val) return {};
@@ -535,21 +444,52 @@ export default {
   padding: 2px 0;
 }
 
-::v-deep .experience-table .ivu-table th {
+.rule-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.rule-row {
+  display: flex;
+  align-items: center;
+}
+
+.rule-row-wrap {
+  flex-wrap: wrap;
+}
+
+.rule-inline {
+  display: flex;
+  align-items: center;
+  margin-right: 16px;
+}
+
+.rule-label {
+  margin-right: 8px;
+}
+
+.rule-tip {
+  margin-top: 6px;
+  color: #808695;
+  font-size: 12px;
+}
+
+:deep(.experience-table .el-table__header th) {
   background: #fafbfc;
 }
 
-::v-deep .experience-table .ivu-table td {
+:deep(.experience-table .el-table__body td) {
   padding-top: 12px;
   padding-bottom: 12px;
 }
 
-::v-deep .experience-table .ivu-table-cell {
+:deep(.experience-table .cell) {
   font-size: 13px;
   line-height: 1.7;
 }
 
-::v-deep .desc-item .ivu-form-item-label {
+:deep(.desc-item .el-form-item__label) {
   font-size: 16px;
   font-weight: 600;
 }

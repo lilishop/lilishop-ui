@@ -1,79 +1,65 @@
 <template>
   <div class="layout">
-    <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
-      <FormItem label="消费1元赠送积分" prop="consumer">
-        <Input type="number" v-model="formValidate.consumer">
-          <span slot="append">积分</span>
-        </Input>
+    <el-form ref="formValidate" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
+      <el-form-item label="消费1元赠送积分" prop="consumer">
+        <el-input type="number" v-model="formValidate.consumer">
+          <template #append>积分</template>
+        </el-input>
+      </el-form-item>
 
-      </FormItem>
-      <!-- <FormItem label="积分抵扣付款" prop="money">
-        <Input type="number" v-model="formValidate.money">
-          <span slot="prepend">积分</span>
-          <span slot="append"> = 1 人民币</span>
-        </Input>
+      <el-form-item label="注册账号" prop="register">
+        <el-input type="number" v-model="formValidate.register">
+          <template #append>积分</template>
+        </el-input>
+      </el-form-item>
 
-      </FormItem> -->
+      <el-form-item label="每日签到积分" prop="signIn">
+        <el-input type="number" v-model="formValidate.signIn">
+          <template #append>积分</template>
+        </el-input>
+      </el-form-item>
+      <el-form-item label="订单评价赠送积分" prop="comment">
+        <el-input type="number" v-model="formValidate.comment">
+          <template #append>积分</template>
+        </el-input>
+      </el-form-item>
 
-      <FormItem label="注册账号" prop="register">
-        <Input type="number" v-model="formValidate.register">
-          <span slot="append">积分</span>
-        </Input>
-      </FormItem>
-      <!-- <FormItem label="登录" class="label-item" prop="login">
-        <Input type="number" v-model="formValidate.login">
-
-        <span slot="append">积分</span>
-        </Input>
-
-      </FormItem> -->
-
-      <FormItem label="每日签到积分" prop="signIn">
-        <Input type="number" v-model="formValidate.signIn">
-          <span slot="append">积分</span>
-        </Input>
-
-      </FormItem>
-      <FormItem label="订单评价赠送积分" prop="comment">
-        <Input type="number" v-model="formValidate.comment">
-          <span slot="append">积分</span>
-        </Input>
-
-      </FormItem>
-
-      <FormItem class="label-item" v-for="(point,index) in  formValidate.pointSettingItems" :key="index"
-                :label="'签到设置'+(index+1)">
+      <el-form-item
+        class="label-item"
+        v-for="(point, index) in formValidate.pointSettingItems"
+        :key="index"
+        :label="'签到设置' + (index + 1)"
+      >
         <div class="label-item">
-
-          <InputNumber :min="1" v-model="point.day"></InputNumber>
-
-          <InputNumber :min="0" v-model="point.point"></InputNumber>
-
-          <Button ghost type="error" @click="delSign(point,index)">删除</Button>
-          <span class="ml_10">签到<span class="theme_color">{{ point.day }}</span>天，赠送<span
-            class="theme_color">{{ point.point }}</span>积分</span>
+          <el-input-number :min="1" v-model="point.day" />
+          <el-input-number :min="0" v-model="point.point" />
+          <el-button plain type="danger" @click="delSign(point, index)">删除</el-button>
+          <span class="ml_10"
+            >签到<span class="theme_color">{{ point.day }}</span
+            >天，赠送<span class="theme_color">{{ point.point }}</span
+            >积分</span
+          >
         </div>
-
-      </FormItem>
-      <FormItem label="操作：">
-        <Button @click="addSign">新增签到</Button>
-      </FormItem>
+      </el-form-item>
+      <el-form-item label="操作：">
+        <el-button @click="addSign">新增签到</el-button>
+      </el-form-item>
       <div class="label-btns">
-        <Button type="primary" @click="submit('formValidate')">保存</Button>
+        <el-button type="primary" @click="submit('formValidate')">保存</el-button>
       </div>
-    </Form>
+    </el-form>
   </div>
 </template>
 
 <script>
-import {setSetting} from "@/api/index";
-import {handleSubmit} from "./validate";
+import { setSetting } from "@/api/index";
+import { handleSubmit } from "./validate";
 
 export default {
   data() {
     return {
-      ruleValidate: {}, // 验证规则
-      formValidate: {}, // 表单数据
+      ruleValidate: {},
+      formValidate: {},
       result: "",
     };
   },
@@ -82,14 +68,12 @@ export default {
     this.init();
   },
   methods: {
-    // 保存
     submit(name) {
-      let that = this;
+      const that = this;
       if (handleSubmit(that, name)) {
         this.setupSetting();
       }
     },
-    // 保存设置
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {
@@ -114,7 +98,6 @@ export default {
         day: this.formValidate.pointSettingItems.length,
       });
     },
-    // 实例化数据
     init() {
       this.result = JSON.parse(this.res);
       Object.keys(this.result).map((item) => {
@@ -124,7 +107,7 @@ export default {
         this.result[item] += "";
       });
 
-      this.$set(this, "formValidate", {...this.result});
+      this.formValidate = { ...this.result };
 
       Object.keys(this.formValidate).forEach((item) => {
         this.ruleValidate[item] = [
@@ -156,33 +139,33 @@ export default {
 .label-item {
   display: flex;
 
-  > .ivu-input-number {
+  > .el-input-number {
     width: 100px;
     margin-right: 5px;
   }
 
-  > .ivu-input-number:nth-last-of-type(1) {
+  > .el-input-number:nth-last-of-type(1) {
     width: 150px;
     margin-right: 5px;
   }
 
-  > .ivu-input {
+  > .el-input {
     width: 100px;
     margin: 0 10px;
   }
 }
 
-::v-deep .ivu-input {
+:deep(.el-input){
   width: 70px !important;
 }
 
-.ivu-input-wrapper {
+.el-input {
   width: 70px;
   margin-right: 10px;
 }
 
 .label-btns {
-  ::v-deep .ivu-btn {
+  :deep(.el-button){
     margin-right: 10px;
   }
 }

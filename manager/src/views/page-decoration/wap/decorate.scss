@@ -1,5 +1,5 @@
-::v-deep .ivu-modal-mask,
-.ivu-modal-wrap {
+:deep(.ivu-modal-mask),
+:deep(.ivu-modal-wrap) {
   z-index: 800;
 }
 

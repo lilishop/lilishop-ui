@@ -23,7 +23,8 @@
   border-radius: 0.4em;
 
   flex-wrap: wrap;
-  > .ivu-form-item {
+  > .ivu-form-item,
+  > .el-form-item {
     margin: 8px 10px !important;
   }
 }
@@ -42,7 +43,12 @@
   overflow: hidden;
 }
 
-// 为Card组件之间增加间距
+// 列表页相邻 Card 间距（Element Plus）
+.search > .el-card + .el-card {
+  margin-top: 10px;
+}
+
+// 兼容遗留 iView
 .ivu-card + .ivu-card {
   margin-top: 10px;
 }

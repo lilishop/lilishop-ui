@@ -1,355 +1,198 @@
 <template>
-  <div>
-    <Card>
-      <Row @keydown.enter.native.prevent="handleSearch">
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
-          <Form-item label="会员名称" prop="memberName">
-            <Input
-              type="text"
-              v-model="searchForm.memberName"
-              placeholder="请输入会员名称"
-              clearable
-              style="width: 240px"
+  <div class="search">
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="会员名称" prop="memberName">
+          <el-input
+            v-model="searchForm.memberName"
+            placeholder="请输入会员名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="searchForm.distributionStatus" style="width: 240px">
+            <el-option
+              v-for="item in distributionStatusList"
+              :key="item.value"
+              :value="item.value"
+              :label="item.label"
             />
-          </Form-item>
-          <Form-item label="状态">
-            <Select
-              v-model="searchForm.distributionStatus"
-              style="width: 240px"
-            >
-              <Option
-                v-for="item in distributionStatusList"
-                :value="item.value"
-                :key="item.value"
-              >{{ item.label }}
-              </Option
-              >
-            </Select>
-          </Form-item>
-          <Button
-            @click="handleSearch"
-            type="primary"
-            icon="ios-search"
-            class="search-btn"
-          >搜索
-          </Button
-          >
-        </Form>
-      </Row>
-      </Card>
-    <Card>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <el-table
         ref="table"
+        v-loading="loading"
+        border
+        :data="data"
         class="mt_10"
-      ></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+        style="width: 100%"
+      >
+        <el-table-column prop="memberName" label="会员名称" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="name" label="姓名" min-width="100" />
+        <el-table-column prop="idNumber" label="身份证号" min-width="120" />
+        <el-table-column prop="settlementBankAccountName" label="结算银行开户行名称" min-width="120" />
+        <el-table-column prop="settlementBankAccountNum" label="结算银行开户账号" min-width="120" />
+        <el-table-column prop="settlementBankBranchName" label="结算银行开户支行名称" min-width="120" />
+        <el-table-column prop="distributionOrderCount" label="推广单数" width="150" />
+        <el-table-column label="分销订单金额" width="150">
+          <template #default="{ row }">
+            <priceColorScheme v-if="row" :value="row.distributionOrderPrice" :color="$mainColor" />
+          </template>
+        </el-table-column>
+        <el-table-column label="分销金额" width="150">
+          <template #default="{ row }">
+            <priceColorScheme v-if="row" :value="row.rebateTotal" :color="$mainColor" />
+          </template>
+        </el-table-column>
+        <el-table-column label="待提现金额" width="150">
+          <template #default="{ row }">
+            <priceColorScheme v-if="row" :value="row.canRebate" color="green" />
+          </template>
+        </el-table-column>
+        <el-table-column label="冻结金额" width="150">
+          <template #default="{ row }">
+            <priceColorScheme v-if="row" :value="row.commissionFrozen" color="#347dda" />
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="150">
+          <template #default="{ row }">
+            <template v-if="row">
+              <el-tag v-if="row.distributionStatus == 'PASS'" type="success">通过</el-tag>
+              <el-tag v-else-if="row.distributionStatus == 'APPLY'" type="primary">待审核</el-tag>
+              <el-tag v-else-if="row.distributionStatus == 'RETREAT'" type="warning">清退</el-tag>
+              <el-tag v-else-if="row.distributionStatus == 'REFUSE'" type="danger">拒绝</el-tag>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="200" align="center" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a v-if="row.distributionStatus != 'RETREAT'" class="link-text" @click="retreat(row)">清退</a>
+              <a v-if="row.distributionStatus == 'RETREAT'" class="link-text" @click="resume(row)">恢复</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="edit(row)">编辑</a>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
-    <Modal title="修改分销员" v-model="modalVisible" :mask-closable="false" :width="600">
-      <Form ref="distributionForm" :model="distributionForm" :label-width="150" :rules="distributionFormValidate">
-        <FormItem label="姓名" prop="name">
-          <Input v-model="distributionForm.name" clearable style="width: 100%"/>
-        </FormItem>
-        <FormItem label="身份证号" prop="idNumber">
-          <Input v-model="distributionForm.idNumber" clearable style="width: 100%"/>
-        </FormItem>
-        <FormItem label="结算银行开户行名称" prop="settlementBankAccountName">
-          <Input v-model="distributionForm.settlementBankAccountName" clearable style="width: 100%"/>
-        </FormItem>
-        <FormItem label="结算银行开户账号" prop="settlementBankAccountNum">
-          <Input v-model="distributionForm.settlementBankAccountNum" clearable style="width: 100%"/>
-        </FormItem>
-        <FormItem label="结算银行开户支行名称" prop="settlementBankBranchName">
-          <Input v-model="distributionForm.settlementBankBranchName" clearable style="width: 100%"/>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
       </div>
-    </Modal>
+    </el-card>
+
+    <el-dialog
+      v-model="modalVisible"
+      title="修改分销员"
+      width="600px"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
+      <el-form
+        ref="distributionForm"
+        :model="distributionForm"
+        label-width="150px"
+        :rules="distributionFormValidate"
+      >
+        <el-form-item label="姓名" prop="name">
+          <el-input v-model="distributionForm.name" clearable style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="身份证号" prop="idNumber">
+          <el-input v-model="distributionForm.idNumber" clearable style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="结算银行开户行名称" prop="settlementBankAccountName">
+          <el-input v-model="distributionForm.settlementBankAccountName" clearable style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="结算银行开户账号" prop="settlementBankAccountNum">
+          <el-input v-model="distributionForm.settlementBankAccountNum" clearable style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="结算银行开户支行名称" prop="settlementBankBranchName">
+          <el-input v-model="distributionForm.settlementBankBranchName" clearable style="width: 100%" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="modalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">提交</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import {editDistribution, getDistributionListData, resumeDistribution, retreatDistribution} from "@/api/distribution";
-import {distributionStatusList} from "./dataJson.js";
-import {regular} from "@/utils";
+import { editDistribution, getDistributionListData, resumeDistribution, retreatDistribution } from "@/api/distribution";
+import { distributionStatusList } from "./dataJson.js";
+import { regular } from "@/utils";
 
 export default {
   name: "distribution",
-  components: {},
   data() {
     return {
-      distributionStatusList, // 分销状态
-      loading: true, // 表单加载状态
-      modalVisible: false, // 添加或编辑显示
+      distributionStatusList,
+      loading: true,
+      modalVisible: false,
       distributionForm: {
         name: "",
         idNumber: "",
         settlementBankAccountName: "",
         settlementBankAccountNum: "",
-        settlementBankBranchName: ""
+        settlementBankBranchName: "",
       },
-      // 表单验证规则
       distributionFormValidate: {
-        name: [
-          regular.REQUIRED,
-          regular.VARCHAR20
-        ],
-        idNumber: [
-          regular.REQUIRED,
-          regular.VARCHAR20
-        ],
-        settlementBankAccountName: [
-          regular.REQUIRED,
-          regular.VARCHAR20
-        ],
-        settlementBankAccountNum: [
-          regular.REQUIRED,
-          regular.VARCHAR20
-        ],
-        settlementBankBranchName: [
-          regular.REQUIRED,
-          regular.VARCHAR20
-        ],
+        name: [regular.REQUIRED, regular.VARCHAR20],
+        idNumber: [regular.REQUIRED, regular.VARCHAR20],
+        settlementBankAccountName: [regular.REQUIRED, regular.VARCHAR20],
+        settlementBankAccountNum: [regular.REQUIRED, regular.VARCHAR20],
+        settlementBankBranchName: [regular.REQUIRED, regular.VARCHAR20],
       },
-      submitLoading: false, // 编辑提交状态
+      submitLoading: false,
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 20, // 页面大小
+        pageNumber: 1,
+        pageSize: 20,
       },
-      columns: [
-        {
-          title: "会员名称",
-          key: "memberName",
-          minWidth: 120,
-          tooltip: true,
-        },
-        {
-          title: "姓名",
-          key: "name",
-          minWidth: 100,
-        },
-        {
-          title: "身份证号",
-          key: "idNumber",
-          minWidth: 120,
-        },
-        {
-          title: "结算银行开户行名称",
-          key: "settlementBankAccountName",
-          minWidth: 120,
-        },
-        {
-          title: "结算银行开户账号",
-          key: "settlementBankAccountNum",
-          minWidth: 120,
-        },
-        {
-          title: "结算银行开户支行名称",
-          key: "settlementBankBranchName",
-          minWidth: 120,
-        },
-        {
-          title: "推广单数",
-          key: "distributionOrderCount",
-          minWidth: 120,
-          width: 150,
-        },
-        {
-          title: "分销订单金额",
-          key: "distributionOrderPrice",
-          width: 150,
-          sortable: false,
-          render: (h, params) => {
-            return h("priceColorScheme", {props: {value: params.row.distributionOrderPrice, color: this.$mainColor}});
-          },
-        },
-        {
-          title: "分销金额",
-          key: "rebateTotal",
-          width: 150,
-          sortable: false,
-          render: (h, params) => {
-            return h("priceColorScheme", {props: {value: params.row.rebateTotal, color: this.$mainColor}});
-          },
-
-        },
-        {
-          title: "待提现金额",
-          key: "canRebate",
-          width: 150,
-          sortable: false,
-          render: (h, params) => {
-            return h("priceColorScheme", {props: {value: params.row.canRebate, color: 'green'}});
-          },
-        },
-        {
-          title: "冻结金额",
-          key: "commissionFrozen",
-          width: 150,
-          sortable: false,
-          render: (h, params) => {
-            return h("priceColorScheme", {props: {value: params.row.commissionFrozen, color: '#347dda'}});
-          },
-        },
-        {
-          title: "状态",
-          key: "distributionStatus",
-          width: 150,
-          sortable: false,
-          render: (h, params) => {
-            if (params.row.distributionStatus == "PASS") {
-              return h("Tag", {props: {color: "green",},}, "通过");
-            } else if (params.row.distributionStatus == "APPLY") {
-              return h("Tag", {props: {color: "geekblue",},}, "待审核");
-            } else if (params.row.distributionStatus == "RETREAT") {
-              return h("Tag", {props: {color: "volcano",},}, "清退");
-            } else if (params.row.distributionStatus == "REFUSE") {
-              return h("Tag", {props: {color: "red",},}, "拒绝");
-            }
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          fixed: "right",
-          width: 140,
-          render: (h, params) => {
-            return h(
-              "div",
-              {
-                style: {
-                  display: "flex",
-                  justifyContent: "center",
-                },
-              },
-              [
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "error",
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                      display:
-                        params.row.distributionStatus != "RETREAT"
-                          ? "block"
-                          : "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.retreat(params.row);
-                      },
-                    },
-                  },
-                  "清退"
-                ),
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "success",
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                      display:
-                        params.row.distributionStatus == "RETREAT"
-                          ? "block"
-                          : "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.resume(params.row);
-                      },
-                    },
-                  },
-                  "恢复"
-                ),
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                    },
-                    on: {
-                      click: () => {
-                        this.edit(params.row);
-                      },
-                    },
-                  },
-                  "编辑"
-                ), h(
-                "div",
-                {
-                  style: {
-                    display: "flex",
-                    justifyContent: "center",
-                  },
-                })
-              ]
-            );
-          },
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      data: [],
+      total: 0,
     };
   },
   methods: {
-    // 初始化数据
     init() {
       this.getDataList();
     },
-    // 分页 改变页码
-    changePage(v) {
-      this.searchForm.pageNumber = v;
+    changePage() {
       this.getDataList();
     },
-    // 分页 改变页数
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
+    changePageSize() {
+      this.searchForm.pageNumber = 1;
       this.getDataList();
     },
-    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getDataList();
     },
-    // 获取列表数据
     getDataList() {
       this.loading = true;
       this.searchForm.status = "PASS";
@@ -361,15 +204,12 @@ export default {
         }
       });
     },
-    // 清退分销商
     retreat(v) {
       this.$Modal.confirm({
         title: "提示",
-        // 记得确认修改此处
         content: "您确认要清退 " + v.memberName + " ?",
         loading: true,
         onOk: () => {
-          // 删除
           retreatDistribution(v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -380,15 +220,12 @@ export default {
         },
       });
     },
-    // 恢复分销商
     resume(v) {
       this.$Modal.confirm({
         title: "提示",
-        // 记得确认修改此处
         content: "您确认要恢复 " + v.memberName + " ?",
         loading: true,
         onOk: () => {
-          // 删除
           resumeDistribution(v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -399,10 +236,8 @@ export default {
         },
       });
     },
-    // 编辑
     edit(v) {
-      this.$refs.distributionForm.resetFields();
-      // 转换null为""
+      this.$refs.distributionForm?.resetFields();
       for (let attr in v) {
         if (v[attr] === null) {
           v[attr] = "";
@@ -413,11 +248,9 @@ export default {
       this.distributionForm = data;
       this.modalVisible = true;
     },
-    // 提交表单
     handleSubmit() {
       this.$refs.distributionForm.validate((valid) => {
         if (valid) {
-          // 编辑
           editDistribution(this.distributionForm).then((res) => {
             this.submitLoading = false;
             if (res.success) {

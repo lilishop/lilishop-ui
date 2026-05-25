@@ -7,7 +7,7 @@
             </li>
             <div class="setup-box" style="width:100px;left:1100px;">
                 <div>
-                    <Button size="small" @click.stop="handleSelectModel">编辑</Button>
+                    <el-button size="small" @click.stop="handleSelectModel">编辑</el-button>
                 </div>
             </div>
         </ul>
@@ -16,26 +16,26 @@
                 <img :src="item.img" width="210" height="210" :alt="item.name">
                 <p>{{item.name}}</p>
                 <p>
-                    <span>{{item.price | unitPrice('￥')}}</span> 
-                    <!-- <span>{{item.price | unitPrice('￥')}}</span> -->
+                    <span>{{ $filters.unitPrice(item.price, '￥') }}</span>
+                    <!-- <span>{{ $filters.unitPrice(item.price, '￥') }}</span> -->
                 </p>
                 <div class="setup-box">
                     <div>
-                        <Button size="small" @click.stop="handleSelectGoods(item)">编辑</Button>
+                        <el-button size="small" @click.stop="handleSelectGoods(item)">编辑</el-button>
                     </div>
                 </div>
             </div>
         </div>
-        <Modal
+        <el-dialog
             v-model="showModal"
             title="装修"
-            draggable
+            
             width="800"
-            :z-index="100"
-            :mask-closable="false"
-            >
+            
+            :close-on-click-modal="false"
+             append-to-body destroy-on-close>
             <div class="modal-tab-bar">
-                <Button type="primary" size='small' @click="handleAddNav">添加分类</Button>
+                <el-button type="primary" size='small' @click="handleAddNav">添加分类</el-button>
                 <table cellspacing="0">
                     <thead>
                         <tr>
@@ -46,16 +46,16 @@
                     </thead>
                     <tbody>
                         <tr v-for="(item, index) in conData.options.navList" :key="index">
-                            <td><Input v-model="item.title" /></td>
-                            <td><Input v-model="item.desc" /></td>
+                            <td><el-input v-model="item.title" /></td>
+                            <td><el-input v-model="item.desc" /></td>
                             <td v-if="index!=0">
-                                <Button type="error" size="small" @click="handleDelNav(index)">删除</Button>
+                                <el-button type="danger" size="small" @click="handleDelNav(index)">删除</el-button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-        </Modal>
+        </el-dialog>
         <!-- 选择商品。链接 -->
         <liliDialog
             ref="liliDialog"

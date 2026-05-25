@@ -1,102 +1,171 @@
 <template>
   <div class="search">
-    <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="会员名称" prop="memberName">
-            <Input type="text" v-model="searchForm.memberName" placeholder="请输入会员名称" clearable style="width: 240px" />
-          </Form-item>
-          <Form-item label="提现状态" prop="applyStatus">
-            <Select v-model="searchForm.applyStatus" clearable style="width: 240px">
-              <Option value="APPLY">申请中</Option>
-              <Option value="VIA_AUDITING">审核通过</Option>
-              <Option value="WAIT_USER_CONFIRM">用户确认</Option>
-              <Option value="FAIL_AUDITING">审核拒绝</Option>
-              <Option value="SUCCESS">提现成功</Option>
-              <Option value="ERROR">提现失败</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="申请时间">
-            <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 240px"></DatePicker>
-          </Form-item>
-          <Form-item style="margin-left: -35px" class="br">
-            <Button @click="handleSearch" type="primary" icon="ios-search">搜索
-            </Button>
-          </Form-item>
-        </Form>
-      </Row>
-    </Card>
-    <Card>
-      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]" size="small"
-          show-total show-elevator show-sizer></Page>
-      </Row>
-    </Card>
-    <Modal :title="modalTitle" v-model="roleModalVisible" :mask-closable="false" :width="500">
-      <Form :label-width="80">
-        <FormItem label="申请编号">
-          <span>{{showList.sn}}</span>
-        </FormItem>
-        <FormItem label="用户名称">
-          <span>{{showList.memberName}}</span>
-        </FormItem>
-        <FormItem label="申请金额">
-          <priceColorScheme :value="showList.applyMoney" :color="$mainColor"></priceColorScheme>
-        </FormItem>
-        <FormItem label="提现状态">
-          <span>{{showList.applyStatus | paramTypeFilter}}</span>
-        </FormItem>
-        <FormItem label="申请时间">
-          <span>{{showList.createTime}}</span>
-        </FormItem>
-        <FormItem label="审核备注">
-          <Input v-model="audit" type="textarea" />
-        </FormItem>
-
-      </Form>
-      <div slot="footer" v-if="showList.applyStatus == 'APPLY'">
-        <Button type="text" @click="submitRole(false)">拒绝</Button>
-        <Button type="primary" :loading="submitLoading" @click="submitRole(true)">通过
-        </Button>
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="会员名称" prop="memberName">
+          <el-input
+            v-model="searchForm.memberName"
+            placeholder="请输入会员名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="提现状态" prop="applyStatus">
+          <el-select v-model="searchForm.applyStatus" clearable style="width: 240px">
+            <el-option label="申请中" value="APPLY" />
+            <el-option label="审核通过" value="VIA_AUDITING" />
+            <el-option label="用户确认" value="WAIT_USER_CONFIRM" />
+            <el-option label="审核拒绝" value="FAIL_AUDITING" />
+            <el-option label="提现成功" value="SUCCESS" />
+            <el-option label="提现失败" value="ERROR" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="申请时间">
+          <el-date-picker
+            v-model="selectDate"
+            type="datetimerange"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            clearable
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            placeholder="选择起始时间"
+            style="width: 360px"
+            @change="selectDateRange"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+    <el-card>
+      <el-table
+        v-loading="loading"
+        border
+        :data="data"
+        ref="table"
+        class="mt_10"
+        style="width: 100%"
+        @sort-change="changeSort"
+        @selection-change="changeSelect"
+      >
+        <el-table-column prop="sn" label="申请编号" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="memberName" label="用户名称" min-width="120" show-overflow-tooltip />
+        <el-table-column label="申请金额" width="120">
+          <template #default="{ row }">
+            <priceColorScheme v-if="row" :value="row.applyMoney" :color="$mainColor" />
+          </template>
+        </el-table-column>
+        <el-table-column label="提现状态" width="120">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="applyStatusTagType(row.applyStatus)">
+              {{ applyStatusText(row.applyStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="申请时间" width="170" sortable="custom" />
+        <el-table-column prop="inspectTime" label="审核时间" width="170" />
+        <el-table-column label="操作" width="120" align="center" fixed="right">
+          <template #default="{ row }">
+            <div v-if="row" class="ops">
+              <a class="link-text" v-if="row.applyStatus === 'APPLY'" @click="openAudit(row)">审核</a>
+              <a class="link-text" v-else @click="openQuery(row)">查看</a>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
       </div>
-    </Modal>
+    </el-card>
 
-    <Modal :title="modalTitle" v-model="queryModalVisible" :mask-closable="false" :width="500">
-      <Form :label-width="80">
-        <FormItem label="申请编号：">
-          <span>{{showList.sn}}</span>
-        </FormItem>
-        <FormItem label="用户名称：">
-          <span>{{showList.memberName}}</span>
-        </FormItem>
-        <FormItem label="申请金额：">
-          <priceColorScheme :value="showList.applyMoney" :color="$mainColor"></priceColorScheme>
+    <el-dialog
+      v-model="roleModalVisible"
+      :title="modalTitle"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <el-form label-width="80px">
+        <el-form-item label="申请编号">
+          <span>{{ showList.sn }}</span>
+        </el-form-item>
+        <el-form-item label="用户名称">
+          <span>{{ showList.memberName }}</span>
+        </el-form-item>
+        <el-form-item label="申请金额">
+          <priceColorScheme :value="showList.applyMoney" :color="$mainColor" />
+        </el-form-item>
+        <el-form-item label="提现状态">
+          <span>{{ paramTypeFilter(showList.applyStatus) }}</span>
+        </el-form-item>
+        <el-form-item label="申请时间">
+          <span>{{ showList.createTime }}</span>
+        </el-form-item>
+        <el-form-item label="审核备注">
+          <el-input v-model="audit" type="textarea" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <template v-if="showList.applyStatus === 'APPLY'">
+          <el-button @click="submitRole(false)">拒绝</el-button>
+          <el-button type="primary" :loading="submitLoading" @click="submitRole(true)">通过</el-button>
+        </template>
+      </template>
+    </el-dialog>
 
-        </FormItem>
-        <FormItem label="提现状态：">
-          <span>{{showList.applyStatus | paramTypeFilter}}</span>
-        </FormItem>
-        <FormItem label="申请时间：">
-          <span>{{showList.createTime}}</span>
-        </FormItem>
-        <FormItem label="审核时间：">
-          <span>{{showList.inspectTime}}</span>
-        </FormItem>
-        <FormItem label="审核备注：">
-          <span>{{showList.inspectRemark || '暂无备注'}}</span>
-        </FormItem>
-
-      </Form>
-      <div slot="footer" v-if="showList.applyStatus == 'APPLY'">
-        <Button type="text" @click="submitRole(false)">拒绝</Button>
-        <Button type="primary" :loading="submitLoading" @click="submitRole(true)">通过
-        </Button>
-      </div>
-      <div slot="footer" v-else>
-        <Button type="text" @click="queryModalVisible = false">取消</Button>
-      </div>
-    </Modal>
+    <el-dialog
+      v-model="queryModalVisible"
+      :title="modalTitle"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <el-form label-width="100px">
+        <el-form-item label="申请编号：">
+          <span>{{ showList.sn }}</span>
+        </el-form-item>
+        <el-form-item label="用户名称：">
+          <span>{{ showList.memberName }}</span>
+        </el-form-item>
+        <el-form-item label="申请金额：">
+          <priceColorScheme :value="showList.applyMoney" :color="$mainColor" />
+        </el-form-item>
+        <el-form-item label="提现状态：">
+          <span>{{ paramTypeFilter(showList.applyStatus) }}</span>
+        </el-form-item>
+        <el-form-item label="申请时间：">
+          <span>{{ showList.createTime }}</span>
+        </el-form-item>
+        <el-form-item label="审核时间：">
+          <span>{{ showList.inspectTime }}</span>
+        </el-form-item>
+        <el-form-item label="审核备注：">
+          <span>{{ showList.inspectRemark || "暂无备注" }}</span>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <template v-if="showList.applyStatus === 'APPLY'">
+          <el-button @click="submitRole(false)">拒绝</el-button>
+          <el-button type="primary" :loading="submitLoading" @click="submitRole(true)">通过</el-button>
+        </template>
+        <el-button v-else @click="queryModalVisible = false">取消</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -105,169 +174,68 @@ import { getUserWithdrawApply, withdrawApply } from "@/api/member";
 
 export default {
   name: "withdrawApply",
-  components: {},
   data() {
     return {
-      modalTitle: "", //弹出框标题
-      openSearch: true, // 显示搜索
-      openTip: true, // 显示提示
-      loading: true, // 表单加载状态
-      audit: "", // 审核备注
-      roleModalVisible: false, // 审核模态框
-      queryModalVisible: false, // 审核模态框
+      modalTitle: "",
+      loading: true,
+      audit: "",
+      roleModalVisible: false,
+      queryModalVisible: false,
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 20, // 页面大小
-        sort: "createTime", // 默认排序字段
-        order: "desc", // 默认排序方式
-        startDate: "", // 起始时间
-        endDate: "", // 终止时间
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+        startDate: "",
+        endDate: "",
         memberName: "",
         applyStatus: "",
       },
-      selectDate: null, // 选择时间段
-      submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
-      showList: {}, // 可操作选项
-      columns: [
-        {
-          title: "申请编号",
-          key: "sn",
-          align: "left",
-          tooltip: true,
-        },
-        {
-          title: "用户名称",
-          key: "memberName",
-          align: "left",
-          tooltip: true,
-        },
-        {
-          title: "申请金额",
-          key: "applyMoney",
-          align: "left",
-          width: 120,
-
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.applyMoney,color:this.$mainColor}} );
-          },
-
-
-        },
-        {
-          title: "提现状态",
-          align: "left",
-          key: "applyStatus",
-          width: 120,
-          render: (h, params) => {
-            if (params.row.applyStatus == "APPLY") {
-              return h("Tag", { props: { color: "volcano" } }, "申请中");
-            } else if (params.row.applyStatus == "VIA_AUDITING") {
-              return h("Tag", { props: { color: "green" } }, "审核通过");
-            } else if (params.row.applyStatus == "WAIT_USER_CONFIRM") {
-              return h("Tag", { props: { color: "gold" } }, "用户确认");
-            } else if (params.row.applyStatus == "SUCCESS") {
-              return h("Tag", { props: { color: "blue" } }, "提现成功");
-            } else if (params.row.applyStatus == "ERROR") {
-              return h("Tag", { props: { color: "blue" } }, "提现失败");
-            } else {
-              return h("Tag", { props: { color: "red" } }, "审核拒绝");
-            }
-          }
-        },
-        {
-          title: "申请时间",
-          key: "createTime",
-          align: "left",
-          width: 170,
-        },
-        {
-          title: "审核时间",
-          key: "inspectTime",
-          align: "left",
-          width: 170,
-        },
-        {
-          title: "操作",
-          key: "action",
-          width: 120,
-          align: "center",
-          fixed: "right",
-          render: (h, params) => {
-            if (params.row.applyStatus == "APPLY") {
-              return h("div", { class: "ops" }, [
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.showList = {};
-                        this.roleModalVisible = true;
-                        this.showList = params.row;
-                        this.audit = "";
-                      },
-                    },
-                  },
-                  "审核"
-                ),
-              ]);
-            } else {
-              return h("div", { class: "ops" }, [
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.showList = {};
-                        this.queryModalVisible = true;
-                        this.showList = params.row;
-                        this.modalTitle = "查看";
-                      },
-                    },
-                  },
-                  "查看"
-                ),
-              ]);
-            }
-          },
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      selectDate: null,
+      submitLoading: false,
+      selectList: [],
+      selectCount: 0,
+      showList: {},
+      data: [],
+      total: 0,
     };
   },
-  filters: {
-    paramTypeFilter(val) {
-      if (val === "APPLY") {
-        return "申请中";
-      } else if (val === "VIA_AUDITING") {
-        return "审核通过(提现成功)";
-      } else if (val === "WAIT_USER_CONFIRM") {
-        return "用户确认";
-      } else if (val === "FAIL_AUDITING") {
-        return "审核拒绝";
-      } else if (val === "SUCCESS") {
-        return "提现成功";
-      } else if (val === "ERROR") {
-        return "提现失败";
-      } else {
-        return "未知状态";
-      }
-    },
-  },
   methods: {
+    paramTypeFilter(val) {
+      if (val === "APPLY") return "申请中";
+      if (val === "VIA_AUDITING") return "审核通过(提现成功)";
+      if (val === "WAIT_USER_CONFIRM") return "用户确认";
+      if (val === "FAIL_AUDITING") return "审核拒绝";
+      if (val === "SUCCESS") return "提现成功";
+      if (val === "ERROR") return "提现失败";
+      return "未知状态";
+    },
+    applyStatusText(status) {
+      if (status === "APPLY") return "申请中";
+      if (status === "VIA_AUDITING") return "审核通过";
+      if (status === "WAIT_USER_CONFIRM") return "用户确认";
+      if (status === "SUCCESS") return "提现成功";
+      if (status === "ERROR") return "提现失败";
+      return "审核拒绝";
+    },
+    applyStatusTagType(status) {
+      if (status === "APPLY") return "warning";
+      if (status === "VIA_AUDITING") return "success";
+      if (status === "WAIT_USER_CONFIRM") return "warning";
+      if (status === "SUCCESS") return "primary";
+      if (status === "ERROR") return "primary";
+      return "danger";
+    },
+    openAudit(row) {
+      this.showList = { ...row };
+      this.audit = "";
+      this.roleModalVisible = true;
+    },
+    openQuery(row) {
+      this.showList = { ...row };
+      this.modalTitle = "查看";
+      this.queryModalVisible = true;
+    },
     submitRole(res) {
       const params = {};
       params.applyId = this.showList.id;
@@ -319,33 +287,36 @@ export default {
       this.searchForm.startDate = "";
       this.searchForm.endDate = "";
       this.searchForm.memberName = "";
-      // 重新加载数据
       this.getDataList();
     },
     changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
+      this.searchForm.sort = e.prop || e.key;
+      this.searchForm.order = e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
+      if (!e.order) {
         this.searchForm.order = "";
       }
       this.getDataList();
     },
     clearSelectAll() {
-      this.$refs.table.selectAll(false);
+      if (this.$refs.table) {
+        this.$refs.table.clearSelection();
+      }
     },
     changeSelect(e) {
       this.selectList = e;
       this.selectCount = e.length;
     },
     selectDateRange(v) {
-      if (v) {
+      if (v && v.length === 2) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
+      } else {
+        this.searchForm.startDate = "";
+        this.searchForm.endDate = "";
       }
     },
     getDataList() {
       this.loading = true;
-      // 带多条件搜索参数获取表单数据 请自行修改接口
       getUserWithdrawApply(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
@@ -353,8 +324,6 @@ export default {
           this.total = res.result.total;
         }
       });
-      this.total = this.data.length;
-      this.loading = false;
     },
   },
   mounted() {
@@ -374,4 +343,3 @@ export default {
   color: #dcdee2;
 }
 </style>
-

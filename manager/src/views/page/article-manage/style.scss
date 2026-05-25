@@ -1,4 +1,4 @@
-::v-deep .ivu-input{
+:deep(.ivu-input){
   width: 200px !important;
 }
 
@@ -16,7 +16,7 @@
   margin-right: 10px;
 }
 
-::v-deep .ivu-form-item-content {
+:deep(.ivu-form-item-content){
   margin-left: 0 !important;
   display: flex;
 }

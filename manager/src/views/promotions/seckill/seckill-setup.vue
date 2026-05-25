@@ -1,23 +1,37 @@
 <template>
   <div v-if="templateShow">
-    <Form :model="form" :label-width="120">
-      <FormItem label="每日场次设置">
-        <Row :gutter="16" class="row">
-          <Col class="time-item" @click.native="handleClickTime(item,index)" v-for="(item,index) in this.times" :key="index" span="3">
-          <div class="time" :class="{'active':item.check}">{{item.time}}:00</div>
-          </Col>
-        </Row>
-      </FormItem>
-      <FormItem label="秒杀规则">
-        <Input type="textarea" :autosize="{minRows: 4,}" v-model="form.seckillRule" placeholder="申请规则" clearable style="width: 360px; margin-left:10px" />
-      </FormItem>
-      <FormItem>
+    <el-form :model="form" label-width="120px">
+      <el-form-item label="每日场次设置">
+        <el-row :gutter="16" class="row">
+          <el-col
+            v-for="(item, index) in times"
+            :key="index"
+            :span="3"
+            class="time-item"
+          >
+            <div class="time" :class="{ active: item.check }" @click="handleClickTime(item, index)">
+              {{ item.time }}:00
+            </div>
+          </el-col>
+        </el-row>
+      </el-form-item>
+      <el-form-item label="秒杀规则">
+        <el-input
+          v-model="form.seckillRule"
+          type="textarea"
+          :autosize="{ minRows: 4 }"
+          placeholder="申请规则"
+          clearable
+          style="width: 360px"
+        />
+      </el-form-item>
+      <el-form-item>
         <div class="foot-btn">
-          <Button @click="closeCurrentPage" style="margin-right: 5px">返回</Button>
-          <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
+          <el-button @click="closeCurrentPage">返回</el-button>
+          <el-button type="primary" :loading="submitLoading" @click="handleSubmit">提交</el-button>
         </div>
-      </FormItem>
-    </Form>
+      </el-form-item>
+    </el-form>
   </div>
 </template>
 
@@ -26,45 +40,29 @@ import { getSetting, setSetting } from "@/api/index";
 export default {
   data() {
     return {
-      templateShow:false, // 设置是否显示
+      templateShow: false,
       submitLoading: false,
-      times: [], //时间集合 1-24点
+      times: [],
       form: {
         seckillRule: "",
       },
     };
   },
   mounted() {
-    /**
-     * 初始化
-     */
     this.init();
   },
   methods: {
-    /**
-     * 关闭当前页面
-     */
     closeCurrentPage() {
       this.$store.commit("removeTag", "manager-seckill-add");
-      localStorage.pageOpenedList = JSON.stringify(
-        this.$store.state.app.pageOpenedList
-      );
+      localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList);
       this.$router.go(-1);
     },
-    /**
-     * 提交秒杀信息
-     */
     async handleSubmit() {
-      let hours = this.times
-        .filter((item) => {
-          return item.check;
-        })
-        .map((item) => {
-          return item.time;
-        })
+      const hours = this.times
+        .filter((item) => item.check)
+        .map((item) => item.time)
         .join(",");
-
-      let result = await setSetting("SECKILL_SETTING", {
+      const result = await setSetting("SECKILL_SETTING", {
         seckillRule: this.form.seckillRule,
         hours,
       });
@@ -73,42 +71,30 @@ export default {
         this.init();
       }
     },
-
-    /**
-     * 初始化当前信息
-     */
     async init() {
-      let result = await getSetting("SECKILL_SETTING");
+      const result = await getSetting("SECKILL_SETTING");
       if (result.success) {
-        this.templateShow = true
+        this.templateShow = true;
         this.form.seckillRule = result.result.seckillRule;
-        this.times=[]
+        this.times = [];
         for (let i = 0; i < 24; i++) {
-          // 将数据拆出
+          let matched = false;
           if (result.result.hours) {
-            let way = result.result.hours.split(",");
+            const way = result.result.hours.split(",");
             way.forEach((hours) => {
               if (hours == i) {
-                this.times.push({
-                  time: i,
-                  check: true,
-                });
+                this.times.push({ time: i, check: true });
+                matched = true;
               }
             });
           }
-          if (!this.times[i]) {
-            this.times.push({
-              time: i,
-              check: false,
-            });
+          if (!matched) {
+            this.times.push({ time: i, check: false });
           }
         }
       }
     },
-    /**
-     * 选中时间
-     */
-    handleClickTime(val, index) {
+    handleClickTime(val) {
       val.check = !val.check;
     },
   },
@@ -121,10 +107,8 @@ export default {
 }
 .foot-btn {
   margin-left: 10px;
-}
-.time-list {
   display: flex;
-  flex-wrap: wrap;
+  gap: 8px;
 }
 .active {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
@@ -140,11 +124,10 @@ export default {
   align-items: center;
   display: flex;
   background: #f3f5f7;
-  height: 100%;
+  height: 50px;
+  font-size: 15px;
 }
 .time-item {
-  height: 50px;
   margin: 8px 0;
-  font-size: 15px;
 }
 </style>

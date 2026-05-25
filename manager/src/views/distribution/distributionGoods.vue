@@ -1,214 +1,182 @@
 <template>
   <div>
-    <Card>
-      <Form @keydown.enter.native.prevent="handleSearch" ref="searchForm" :model="searchForm" inline :label-width="70"
-        class="search-form">
-        <Form-item label="商品名称" prop="goodsName">
-          <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 240px" />
-        </Form-item>
-        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-      </Form>
-      </Card>
-    <Card>
-      <Row class="operation" style="margin:10px 0;">
-        <Button @click="delAll" type="primary">批量下架</Button>
-      </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom"
-        @on-selection-change="changeSelect">
-        <template slot="goodsName" slot-scope="{row}">
-          <div>
-            <div class="div-zoom">
-              <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
-            </div>
-            <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-              <div slot="content">
-                <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)" :margin="0" colorDark="#000" colorLight="#fff"
-                  :size="150"></vue-qr>
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter.prevent="handleSearch"
+      >
+        <el-form-item label="商品名称" prop="goodsName">
+          <el-input
+            v-model="searchForm.goodsName"
+            placeholder="请输入商品名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <div class="operation" style="margin: 10px 0">
+        <el-button type="primary" @click="delAll">批量下架</el-button>
+      </div>
+
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+        @selection-change="changeSelect"
+      >
+        <el-table-column type="selection" width="55" align="center" fixed="left" />
+        <el-table-column label="商品图片" width="120" align="center" fixed="left">
+          <template #default="{ row }">
+            <img
+              v-if="row"
+              :src="row.thumbnail || ''"
+              alt="商品图"
+              style="cursor: pointer; width: 80px; height: 60px; margin: 10px 0; object-fit: contain"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="商品名称" min-width="220" show-overflow-tooltip>
+          <template #default="{ row }">
+            <template v-if="row">
+              <div class="div-zoom">
+                <a class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
               </div>
-              <img src="../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
-            </Poptip>
-          </div>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
-          @on-page-size-change="changePageSize" :page-size-opts="[20,50,100]" size="small" show-total show-elevator
-          show-sizer></Page>
-      </Row>
-    </Card>
+              <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
+                <template #reference>
+                  <img
+                    src="../../assets/qrcode.svg"
+                    class="hover-pointer"
+                    width="20"
+                    height="20"
+                    alt="qrcode"
+                  />
+                </template>
+                <vue-qr
+                  :text="wapLinkTo(row.goodsId, row.skuId)"
+                  :margin="0"
+                  color-dark="#000"
+                  color-light="#fff"
+                  :size="150"
+                />
+              </el-popover>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column label="商品价格" min-width="110">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">{{ $filters.unitPrice(row.price, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="quantity" label="库存" min-width="80" />
+        <el-table-column prop="createTime" label="添加时间" min-width="160" />
+        <el-table-column prop="storeName" label="店铺名称" min-width="120" show-overflow-tooltip />
+        <el-table-column label="佣金金额" min-width="110">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">{{ $filters.unitPrice(row.commission, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" min-width="100" align="center" fixed="right">
+          <template #default="{ row }">
+            <a v-if="row" class="link-text" @click="remove(row)">下架</a>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
 import { delDistributionGoods, getDistributionGoods } from "@/api/distribution";
 import vueQr from "vue-qr";
+
 export default {
-  components: {
-    "vue-qr": vueQr,
-  },
   name: "distributionGoods",
+  components: { vueQr },
   data() {
     return {
-      loading: true, // 表单加载状态
+      loading: true,
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 20, // 页面大小
-        sort: "createTime", // 默认排序字段
-        order: "desc", // 默认排序方式
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
       },
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
-      columns: [
-        // 表头
-        {
-          type: "selection",
-          width: 60,
-          align: "center",
-          fixed: "left",
-        },
-        {
-          title: "商品图片",
-          fixed: "left",
-          key: "thumbnail",
-          width: 120,
-          align: "center",
-          render: (h, params) => {
-            return h("img", {
-              attrs: {
-                src: params.row.thumbnail || '',
-                alt: "加载图片失败",
-              },
-              style: {
-                cursor: "pointer",
-                width: "80px",
-                height: "60px",
-                margin: "10px 0",
-                "object-fit": "contain",
-              },
-            });
-          },
-        },
-        {
-          title: "商品名称",
-          slot: "goodsName",
-          minWidth: 200,
-          tooltip: true,
-        },
-        {
-          title: "商品价格",
-          key: "price",
-          minWidth: 100,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
-          },
-
-        },
-        {
-          title: "库存",
-          key: "quantity",
-          minWidth: 80,
-        },
-        {
-          title: "添加时间",
-          key: "createTime",
-          minWidth: 100,
-        },
-        {
-          title: "店铺名称",
-          key: "storeName",
-          minWidth: 100,
-          tooltip: true,
-        },
-        {
-          title: "佣金金额",
-          key: "commission",
-          minWidth: 100,
-          sortable: false,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.commission,color:this.$mainColor}} );
-          },
-
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          fixed: "right",
-          minWidth: 100,
-          render: (h, params) => {
-            return h("div", { class: "ops" }, [
-              h(
-                "a",
-                {
-                  on: {
-                    click: () => {
-                      this.remove(params.row);
-                    },
-                  },
-                },
-                "下架"
-              ),
-            ]);
-          },
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      selectList: [],
+      selectCount: 0,
+      data: [],
+      total: 0,
     };
   },
   methods: {
-    // 初始化数据
     init() {
       this.getDataList();
     },
-    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
       this.clearSelectAll();
     },
-    // 分页 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getDataList();
     },
-    // 清除选中状态
     clearSelectAll() {
-      this.$refs.table.selectAll(false);
+      this.$refs.table?.clearSelection();
     },
-    // 选中后赋值
     changeSelect(e) {
       this.selectList = e;
       this.selectCount = e.length;
     },
-    // 获取列表数据
     getDataList() {
       this.loading = true;
-      getDistributionGoods(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-      this.total = this.data.length;
-      this.loading = false;
+      getDistributionGoods(this.searchForm)
+        .then((res) => {
+          if (res.success) {
+            this.data = res.result.records;
+            this.total = res.result.total;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
-    // 下架商品
     remove(v) {
       this.$Modal.confirm({
         title: "确认下架",
         content: "您确认要下架么?",
         loading: true,
         onOk: () => {
-          // 下架
           delDistributionGoods(v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -219,7 +187,6 @@ export default {
         },
       });
     },
-    // 批量下架
     delAll() {
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未选择要下架的数据");
@@ -230,11 +197,7 @@ export default {
         content: "您确认要下架所选的 " + this.selectCount + " 条数据?",
         loading: true,
         onOk: () => {
-          let ids = [];
-          this.selectList.forEach((item) => {
-            ids.push(item.id);
-          });
-          // 批量下架
+          const ids = this.selectList.map((item) => item.id);
           delDistributionGoods(ids.toString()).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -252,17 +215,24 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
-.ops a {
-  color: #2d8cf0;
+.link-text {
+  color: #409eff;
   cursor: pointer;
   text-decoration: none;
 }
-.ops span {
-  display: inline-block;
-  margin: 0 8px;
-  color: #dcdee2;
+.div-zoom {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+.hover-pointer {
+  cursor: pointer;
+  vertical-align: middle;
+}
+.mt_10 {
+  margin-top: 10px;
 }
 </style>
-
-

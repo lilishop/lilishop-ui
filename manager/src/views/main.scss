@@ -24,14 +24,14 @@
   }
 
   .sidebar-menu-con {
-    height: 100%;
+    height: calc(100% - 60px);
     position: fixed;
-    top: 0;
+    top: 60px;
     left: 0;
     z-index: 21;
     transition: width 0.3s; // background: rgb(73, 80, 96)
     background: #fff;
-    box-shadow: rgba(0, 21, 41, 0.35) 2px 0px 6px;
+    box-shadow: rgba(0, 21, 41, 0.12) 2px 0 6px;
   }
 
   .layout-text {
@@ -52,11 +52,11 @@
     box-sizing: border-box;
     position: fixed;
     display: block;
-    padding-left: 200px;
+    padding-left: 0;
     width: 100%;
-    height: 100px;
-    z-index: 20;
-    box-shadow: 0 2px 1px 1px rgba(100, 100, 100, 0.1);
+    height: 60px;
+    z-index: 22;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
     transition: padding 0.3s;
   }
 
@@ -81,22 +81,29 @@
   }
 
   .tags-con {
-    height: 40px;
+    height: 44px;
     z-index: -1;
-    background: #f0f0f0;
+    background: #fff;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
 
     .tags-outer-scroll-con {
       position: relative;
       box-sizing: border-box;
-      padding-right: 120px;
+      padding-right: 12px;
       width: 100%;
       height: 100%;
+      display: flex;
+      align-items: center;
 
       .tags-inner-scroll-body {
         position: absolute;
-        padding: 2px 10px;
+        padding: 0 6px;
         overflow: visible;
         white-space: nowrap;
+        display: flex;
+        align-items: center;
+        height: 100%;
         transition: left 0.3s ease;
       }
 
@@ -119,13 +126,32 @@
     min-width: 740px;
     height: 60px;
     background: #fff;
-    box-shadow: 0 2px 1px 1px rgba(100, 100, 100, 0.1);
     position: relative;
     z-index: 11;
+    display: flex;
+    align-items: center;
 
     .navicon-con {
       margin: 6px;
       display: inline-block;
+    }
+
+    .header-logo-con {
+      flex-shrink: 0;
+      width: 200px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 12px;
+
+      img {
+        display: block;
+        max-height: 44px;
+        max-width: 100%;
+        width: auto;
+        height: auto;
+      }
     }
 
     .header-middle-con {
@@ -146,7 +172,8 @@
       display: flex;
       align-items: center;
       padding: 0 30px;
-      justify-content: space-between;
+      justify-content: flex-end;
+      margin-left: auto;
       height: 100%;
 
 
@@ -162,9 +189,9 @@
 
 
       .message-con {
-        display: inline-block;
-
-        padding: 18px 0;
+        display: inline-flex;
+        align-items: center;
+        height: 100%;
         text-align: center;
         cursor: pointer;
 
@@ -215,15 +242,29 @@
     }
   }
 
+  .breadcrumb-bar {
+    position: fixed;
+    top: 60px;
+    left: 212px;
+    right: 0;
+    height: 44px;
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    z-index: 19;
+    display: flex;
+    align-items: center;
+    padding: 0;
+  }
+
   .single-page-con {
     min-width: 740px;
     position: relative;
-    left: 220px;
+    left: 200px;
     top: 100px;
     right: 0;
     bottom: 0;
     height: calc(100% - 110px);
-    width: calc(100% - 220px);
+    width: calc(100% - 200px);
     overflow: auto;
     background-color: #f0f0f0;
     z-index: 1;
@@ -231,7 +272,7 @@
 
     .single-page {
       position: relative;
-      margin: 10px;
+      margin: 10px 12px;
     }
   }
 
@@ -247,15 +288,7 @@
 }
 
 .logo-con {
-  width: 100%;
-  height: 60px;
-  padding: 8px;
-  text-align: center;
-  border-bottom: 1px solid #eee;
-  img {
-    height: 44px;
-    width: auto;
-  }
+  display: none;
 }
 
 .menu-bar {

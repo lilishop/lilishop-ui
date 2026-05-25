@@ -1,120 +1,180 @@
 <template>
   <div class="search">
-    <Card>
-      <Row class="operation padding-row">
-        <Button type="primary" @click="openAdd">添加客户等级</Button>
-      </Row>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        class="mt_10"
-      ></Table>
-    </Card>
+    <el-card>
+      <div class="operation padding-row">
+        <el-button type="primary" @click="openAdd">添加客户等级</el-button>
+      </div>
 
-    <Modal v-model="addFlag" title="添加客户等级" width="720" :z-index="950" :mask-closable="false">
-      <Form ref="addForm" :model="formAdd" :rules="rules" :label-width="110">
-        <FormItem label="等级名称" prop="gradeName">
-          <Input v-model="formAdd.gradeName" maxlength="50" placeholder="请输入等级名称" />
-        </FormItem>
-        <FormItem label="是否默认" prop="isDefault">
-          <RadioGroup v-model="formAdd.isDefault">
-            <Radio :label="true">是</Radio>
-            <Radio :label="false">否</Radio>
-          </RadioGroup>
-        </FormItem>
-        <FormItem label="等级图标" prop="gradeImage">
-          <upload-pic-input v-model="formAdd.gradeImage"></upload-pic-input>
-        </FormItem>
-        <FormItem label="等级背景图" prop="gradeBackground">
-          <upload-pic-input v-model="formAdd.gradeBackground"></upload-pic-input>
-        </FormItem>
-        <FormItem label="字体颜色" prop="gradeFontColor">
-          <Input v-model="formAdd.gradeFontColor" maxlength="20" placeholder="如：#333333" />
-        </FormItem>
-        <FormItem label="所需经验值" prop="requiredExperience">
-          <InputNumber v-model="formAdd.requiredExperience" :min="1" :precision="0" style="width: 220px"></InputNumber>
-        </FormItem>
-        <FormItem label="等级排序" prop="gradeSort">
-          <InputNumber v-model="formAdd.gradeSort" :min="1" :max="9999" :precision="0" style="width: 220px"></InputNumber>
-        </FormItem>
-        <FormItem label="等级开关" prop="gradeState">
-          <RadioGroup v-model="formAdd.gradeState">
-            <Radio label="OPEN">开启</Radio>
-            <Radio label="CLOSE">关闭</Radio>
-          </RadioGroup>
-        </FormItem>
-        <FormItem label="关联权益" prop="benefitIds">
-          <Select
-            :value="addBenefitOrder"
+      <el-table v-loading="loading" border :data="data" class="mt_10" style="width: 100%">
+        <el-table-column prop="gradeName" label="等级名称" width="130" show-overflow-tooltip />
+        <el-table-column label="默认等级" width="95">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="row.isDefault === true ? 'success' : 'info'">
+              {{ row.isDefault === true ? "是" : "否" }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="等级图标" width="100">
+          <template #default="{ row }">
+            <span v-if="row && !row.gradeImage">-</span>
+            <img
+              v-else-if="row"
+              :src="row.gradeImage"
+              alt="等级图标"
+              style="width: 48px; height: 48px; object-fit: contain; border: 1px solid #dcdee2; border-radius: 4px; background: #fff"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="等级背景图" width="120">
+          <template #default="{ row }">
+            <span v-if="row && !row.gradeBackground">-</span>
+            <img
+              v-else-if="row"
+              :src="row.gradeBackground"
+              alt="等级背景图"
+              style="width: 64px; height: 40px; object-fit: cover; border: 1px solid #dcdee2; border-radius: 4px; background: #fff"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="requiredExperience" label="所需经验值" width="110" />
+        <el-table-column prop="gradeSort" label="等级排序" width="95" />
+        <el-table-column label="状态" width="118" align="center">
+          <template #default="{ row }">
+            <el-switch
+              v-if="row"
+              :model-value="row.gradeState === 'OPEN'"
+              inline-prompt
+              active-text="开启"
+              inactive-text="关闭"
+              :loading="!!row._gradeStateLoading"
+              @change="(checked) => onGradeStateSwitch(row, checked)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="130" align="center">
+          <template #default="{ row }">
+            <div v-if="row" class="ops" style="display: flex; justify-content: center">
+              <a class="link-text" @click="openEdit(row)">编辑</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="remove(row)">删除</a>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+    <el-dialog v-model="addFlag" title="添加客户等级" width="720px" :z-index="950" :close-on-click-modal="false" destroy-on-close>
+      <el-form ref="addForm" :model="formAdd" :rules="rules" label-width="110px">
+        <el-form-item label="等级名称" prop="gradeName">
+          <el-input v-model="formAdd.gradeName" maxlength="50" placeholder="请输入等级名称" />
+        </el-form-item>
+        <el-form-item label="是否默认" prop="isDefault">
+          <el-radio-group v-model="formAdd.isDefault">
+            <el-radio :value="true">是</el-radio>
+            <el-radio :value="false">否</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="等级图标" prop="gradeImage">
+          <upload-pic-input v-model="formAdd.gradeImage" />
+        </el-form-item>
+        <el-form-item label="等级背景图" prop="gradeBackground">
+          <upload-pic-input v-model="formAdd.gradeBackground" />
+        </el-form-item>
+        <el-form-item label="字体颜色" prop="gradeFontColor">
+          <el-input v-model="formAdd.gradeFontColor" maxlength="20" placeholder="如：#333333" />
+        </el-form-item>
+        <el-form-item label="所需经验值" prop="requiredExperience">
+          <el-input-number v-model="formAdd.requiredExperience" :min="1" :precision="0" style="width: 220px" />
+        </el-form-item>
+        <el-form-item label="等级排序" prop="gradeSort">
+          <el-input-number v-model="formAdd.gradeSort" :min="1" :max="9999" :precision="0" style="width: 220px" />
+        </el-form-item>
+        <el-form-item label="等级开关" prop="gradeState">
+          <el-radio-group v-model="formAdd.gradeState">
+            <el-radio value="OPEN">开启</el-radio>
+            <el-radio value="CLOSE">关闭</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="关联权益" prop="benefitIds">
+          <el-select
+            :model-value="addBenefitOrder"
             multiple
             filterable
             placeholder="请选择客户权益"
             style="width: 100%"
-            @on-change="onAddBenefitIdsChange"
+            @change="onAddBenefitIdsChange"
           >
-            <Option v-for="b in benefitOptions" :key="b.id" :value="String(b.id)">{{ benefitOptionLabel(b) }}</Option>
-          </Select>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button @click="addFlag = false">取消</Button>
-        <Button type="primary" :loading="submitAddLoading" @click="submitAdd">确定</Button>
-      </div>
-    </Modal>
+            <el-option
+              v-for="b in benefitOptions"
+              :key="b.id"
+              :value="String(b.id)"
+              :label="benefitOptionLabel(b)"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addFlag = false">取消</el-button>
+        <el-button type="primary" :loading="submitAddLoading" @click="submitAdd">确定</el-button>
+      </template>
+    </el-dialog>
 
-    <Modal v-model="editFlag" title="编辑客户等级" width="720" :z-index="950" :mask-closable="false">
-      <Form ref="editForm" :model="formEdit" :rules="rules" :label-width="110">
-        <Input v-model="formEdit.id" v-show="false" />
-        <FormItem label="等级名称" prop="gradeName">
-          <Input v-model="formEdit.gradeName" maxlength="50" placeholder="请输入等级名称" />
-        </FormItem>
-        <FormItem label="是否默认" prop="isDefault">
-          <RadioGroup v-model="formEdit.isDefault">
-            <Radio :label="true">是</Radio>
-            <Radio :label="false">否</Radio>
-          </RadioGroup>
-        </FormItem>
-        <FormItem label="等级图标" prop="gradeImage">
-          <upload-pic-input v-model="formEdit.gradeImage"></upload-pic-input>
-        </FormItem>
-        <FormItem label="等级背景图" prop="gradeBackground">
-          <upload-pic-input v-model="formEdit.gradeBackground"></upload-pic-input>
-        </FormItem>
-        <FormItem label="字体颜色" prop="gradeFontColor">
-          <Input v-model="formEdit.gradeFontColor" maxlength="20" placeholder="如：#333333" />
-        </FormItem>
-        <FormItem label="所需经验值" prop="requiredExperience">
-          <InputNumber v-model="formEdit.requiredExperience" :min="1" :precision="0" style="width: 220px"></InputNumber>
-        </FormItem>
-        <FormItem label="等级排序" prop="gradeSort">
-          <InputNumber v-model="formEdit.gradeSort" :min="1" :max="9999" :precision="0" style="width: 220px"></InputNumber>
-        </FormItem>
-        <FormItem label="等级开关" prop="gradeState">
-          <RadioGroup v-model="formEdit.gradeState">
-            <Radio label="OPEN">开启</Radio>
-            <Radio label="CLOSE">关闭</Radio>
-          </RadioGroup>
-        </FormItem>
-        <FormItem label="关联权益" prop="benefitIds">
-          <Select
-            :value="editBenefitOrder"
+    <el-dialog v-model="editFlag" title="编辑客户等级" width="720px" :z-index="950" :close-on-click-modal="false" destroy-on-close>
+      <el-form ref="editForm" :model="formEdit" :rules="rules" label-width="110px">
+        <el-input v-model="formEdit.id" style="display: none" />
+        <el-form-item label="等级名称" prop="gradeName">
+          <el-input v-model="formEdit.gradeName" maxlength="50" placeholder="请输入等级名称" />
+        </el-form-item>
+        <el-form-item label="是否默认" prop="isDefault">
+          <el-radio-group v-model="formEdit.isDefault">
+            <el-radio :value="true">是</el-radio>
+            <el-radio :value="false">否</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="等级图标" prop="gradeImage">
+          <upload-pic-input v-model="formEdit.gradeImage" />
+        </el-form-item>
+        <el-form-item label="等级背景图" prop="gradeBackground">
+          <upload-pic-input v-model="formEdit.gradeBackground" />
+        </el-form-item>
+        <el-form-item label="字体颜色" prop="gradeFontColor">
+          <el-input v-model="formEdit.gradeFontColor" maxlength="20" placeholder="如：#333333" />
+        </el-form-item>
+        <el-form-item label="所需经验值" prop="requiredExperience">
+          <el-input-number v-model="formEdit.requiredExperience" :min="1" :precision="0" style="width: 220px" />
+        </el-form-item>
+        <el-form-item label="等级排序" prop="gradeSort">
+          <el-input-number v-model="formEdit.gradeSort" :min="1" :max="9999" :precision="0" style="width: 220px" />
+        </el-form-item>
+        <el-form-item label="等级开关" prop="gradeState">
+          <el-radio-group v-model="formEdit.gradeState">
+            <el-radio value="OPEN">开启</el-radio>
+            <el-radio value="CLOSE">关闭</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="关联权益" prop="benefitIds">
+          <el-select
+            :model-value="editBenefitOrder"
             multiple
             filterable
             placeholder="请选择客户权益"
             style="width: 100%"
-            @on-change="onEditBenefitIdsChange"
+            @change="onEditBenefitIdsChange"
           >
-            <Option v-for="b in benefitOptions" :key="b.id" :value="String(b.id)">{{ benefitOptionLabel(b) }}</Option>
-          </Select>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button @click="editFlag = false">取消</Button>
-        <Button type="primary" :loading="submitEditLoading" @click="submitEdit">确定</Button>
-      </div>
-    </Modal>
+            <el-option
+              v-for="b in benefitOptions"
+              :key="b.id"
+              :value="String(b.id)"
+              :label="benefitOptionLabel(b)"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editFlag = false">取消</el-button>
+        <el-button type="primary" :loading="submitEditLoading" @click="submitEdit">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -135,7 +195,6 @@ const buildDefaultForm = () => ({
   benefitIds: "",
 });
 
-/** 权益多选：新勾选追加到末尾，取消勾选移除，保持已有顺序 */
 function syncOrderedBenefitIds(prevOrder, selected) {
   const sel = Array.isArray(selected) ? selected.map((id) => String(id)) : [];
   const out = [];
@@ -157,144 +216,6 @@ export default {
   data() {
     return {
       loading: true,
-      columns: [
-        {
-          title: "等级名称",
-          key: "gradeName",
-          width: 130,
-          tooltip: true,
-        },
-        {
-          title: "默认等级",
-          key: "isDefault",
-          width: 95,
-          render: (h, params) => {
-            const yes = params.row.isDefault === true;
-            return h(
-              "Tag",
-              {
-                props: {
-                  color: yes ? "success" : "default",
-                },
-              },
-              yes ? "是" : "否"
-            );
-          },
-        },
-        {
-          title: "等级图标",
-          key: "gradeImage",
-          width: 100,
-          render: (h, params) => {
-            if (!params.row.gradeImage) return h("span", "-");
-            return h("img", {
-              attrs: {
-                src: params.row.gradeImage,
-                alt: "等级图标",
-              },
-              style: {
-                width: "48px",
-                height: "48px",
-                objectFit: "contain",
-                border: "1px solid #dcdee2",
-                borderRadius: "4px",
-                background: "#fff",
-              },
-            });
-          },
-        },
-        {
-          title: "等级背景图",
-          key: "gradeBackground",
-          width: 120,
-          render: (h, params) => {
-            if (!params.row.gradeBackground) return h("span", "-");
-            return h("img", {
-              attrs: {
-                src: params.row.gradeBackground,
-                alt: "等级背景图",
-              },
-              style: {
-                width: "64px",
-                height: "40px",
-                objectFit: "cover",
-                border: "1px solid #dcdee2",
-                borderRadius: "4px",
-                background: "#fff",
-              },
-            });
-          },
-        },
-        {
-          title: "所需经验值",
-          key: "requiredExperience",
-          width: 110,
-        },
-        {
-          title: "等级排序",
-          key: "gradeSort",
-          width: 95,
-        },
-        {
-          title: "状态",
-          key: "gradeState",
-          width: 118,
-          align: "center",
-          render: (h, params) => {
-            const row = params.row;
-            return h("i-switch", {
-              props: {
-                value: row.gradeState === "OPEN",
-                size: "large",
-                loading: !!row._gradeStateLoading,
-              },
-              on: {
-                "on-change": (checked) => {
-                  this.onGradeStateSwitch(row, checked);
-                },
-              },
-            }, [
-              h("span", { slot: "open" }, "开启"),
-              h("span", { slot: "close" }, "关闭"),
-            ]);
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          width: 130,
-          render: (h, params) => {
-            const linkStyle = {
-              color: "#2d8cf0",
-              cursor: "pointer",
-              textDecoration: "none",
-            };
-            const sep = h(
-              "span",
-              { style: { margin: "0 8px", color: "#dcdee2" } },
-              "|"
-            );
-            return h(
-              "div",
-              { class: "ops", style: { display: "flex", justifyContent: "center" } },
-              [
-                h(
-                  "a",
-                  { style: linkStyle, on: { click: () => this.openEdit(params.row) } },
-                  "编辑"
-                ),
-                sep,
-                h(
-                  "a",
-                  { style: linkStyle, on: { click: () => this.remove(params.row) } },
-                  "删除"
-                ),
-              ]
-            );
-          },
-        },
-      ],
       data: [],
       addFlag: false,
       editFlag: false,
@@ -302,7 +223,6 @@ export default {
       submitEditLoading: false,
       formAdd: buildDefaultForm(),
       formEdit: buildDefaultForm(),
-      /** 关联权益 id 顺序（与 benefitIds 一致） */
       addBenefitOrder: [],
       editBenefitOrder: [],
       benefitOptions: [],
@@ -506,19 +426,19 @@ export default {
         title: "提示",
         content: `<p>确定${text}该客户等级？</p>`,
         onOk: () => {
-          this.$set(row, "_gradeStateLoading", true);
+          row._gradeStateLoading = true;
           return API_Member.updateMemberGradeState(row.id, nextState)
             .then((res) => {
-              this.$set(row, "_gradeStateLoading", false);
+              row._gradeStateLoading = false;
               if (res && res.success) {
                 this.$Message.success(`${text}成功`);
-                this.$set(row, "gradeState", nextState);
+                row.gradeState = nextState;
               } else {
                 this.getData();
               }
             })
             .catch(() => {
-              this.$set(row, "_gradeStateLoading", false);
+              row._gradeStateLoading = false;
             });
         },
       });
@@ -545,3 +465,15 @@ export default {
   },
 };
 </script>
+<style scoped>
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
+}
+</style>

@@ -1,205 +1,156 @@
 <template>
   <div class="search">
-    <Card>
-      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-        <Form-item label="会员名称" prop="memberName">
-          <Input
-            type="text"
+    <el-card>
+      <el-form ref="searchForm" :model="searchForm" inline label-width="70px" class="search-form">
+        <el-form-item label="会员名称" prop="memberName">
+          <el-input
             v-model="searchForm.memberName"
             placeholder="请输入会员名称"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Form-item label="店铺名称" prop="storeName">
-          <Input
-            type="text"
+        </el-form-item>
+        <el-form-item label="店铺名称" prop="storeName">
+          <el-input
             v-model="searchForm.storeName"
             placeholder="请输入店铺名称"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Form-item label="创建时间" prop="createTime">
-          <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 240px"></DatePicker>
-        </Form-item>
-        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-      </Form>
-      </Card>
-    <Card>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]"
-              size="small" show-total show-elevator show-sizer></Page>
-      </Row>
-    </Card>
+        </el-form-item>
+        <el-form-item label="创建时间" prop="createTime">
+          <el-date-picker
+            v-model="selectDate"
+            type="datetimerange"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            clearable
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            placeholder="选择起始时间"
+            style="width: 240px"
+            @change="selectDateRange"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+      >
+        <el-table-column prop="storeName" label="店铺名称" min-width="120" align="left" />
+        <el-table-column prop="memberName" label="会员名称" min-width="120" align="left" />
+        <el-table-column label="店铺地址" width="300">
+          <template #default="{ row }">
+            <el-tag v-if="row">{{ row.storeAddressPath || "暂未填写" }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="是否自营" width="120" align="left">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="row.selfOperated ? '' : 'success'">
+              {{ row.selfOperated ? "自营" : "非自营" }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" width="170" align="left" />
+        <el-table-column label="操作" width="170" align="center" fixed="right">
+          <template #default="{ row }">
+            <a
+              v-if="row && row.storeDisable == 'APPLYING'"
+              class="link-text"
+              @click="edit(row)"
+            >查看</a>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
-  import {
-    getShopListData,
-  } from "@/api/shops";
-  export default {
-    name: "shop",
-    data() {
-      return {
-        loading: true, // 表单加载状态
-        searchForm: {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-          pageSize: 20, // 页面大小
-          sort: "createTime", // 默认排序字段
-          order: "desc", // 默认排序方式
-          startDate: "", // 起始时间
-          endDate: "", // 终止时间
-        },
-        selectDate: null, // 创建时间
-        columns: [
-          // 表头
-          {
-            title: "店铺名称",
-            key: "storeName",
-            minWidth: 120,
-            align: "left",
-          },
-          {
-            title: "会员名称",
-            key: "memberName",
-            align: "left",
-            minWidth: 120,
-          },
-          {
-            title: "店铺地址",
-            key: "storeAddressPath",
-            width: 300,
-            sortable: false,
-            render: (h, params) => {
-            return h(
-              "Tag",
-              {
+import { getShopListData } from "@/api/shops";
 
-              },
-              params.row.storeAddressPath ||  "暂未填写"
-            );
-          },
-          },
-          {
-            title: "是否自营",
-            key: "selfOperated",
-            align: "left",
-            width: 120,
-            render: (h, params) => {
-              return h(
-                "Tag",
-                {
-                  props: {
-                    color: params.row.selfOperated ? "default" : "success",
-                  },
-                },
-                params.row.selfOperated ? "自营" : "非自营"
-              );
-            },
-          },
-
-          {
-            title: "创建时间",
-            key: "createTime",
-            align: "left",
-            width: 170,
-            sortable: false,
-          },
-          {
-            title: "操作",
-            key: "action",
-            width: 170,
-            align: "center",
-            fixed: "right",
-            render: (h, params) => {
-              if (params.row.storeDisable == "APPLYING") {
-                return h(
-                    "Button",
-                    {
-                      props: {
-                        type: "info",
-                        size: "small",
-                      },
-                      style: {
-                        marginRight: "5px",
-                      },
-                      on: {
-                        click: () => {
-                          this.edit(params.row);
-                        },
-                      },
-                    },
-                    "查看"
-                  )
-              }
-            },
-          },
-        ],
-        data: [], // 表单数据
-        total: 0 // 表单数据总数
-      };
+export default {
+  name: "shop",
+  data() {
+    return {
+      loading: true,
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+        startDate: "",
+        endDate: "",
+      },
+      selectDate: null,
+      data: [],
+      total: 0,
+    };
+  },
+  methods: {
+    callback(val) {
+      this.$emit("callback", val);
     },
-
-    methods: {
-      // 回调给父级
-      callback(val) {
-        this.$emit("callback", val);
-      },
-      // 初始化数据
-      init() {
-        this.getDataList();
-      },
-      // 分页 改变页码
-      changePage(v) {
-        this.searchForm.pageNumber = v;
-        this.getDataList();
-      },
-      // 分页 改变页数
-      changePageSize(v) {
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = v;
-        this.getDataList();
-      },
-      // 搜索
-      handleSearch() {
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 20;
-        this.getDataList();
-      },
-      // 起止时间从新赋值
-      selectDateRange(v) {
-        if (v) {
-          this.searchForm.startDate = v[0];
-          this.searchForm.endDate = v[1];
-        }
-      },
-      // 获取列表数据
-      getDataList() {
-        this.loading = true;
-        // 带多条件搜索参数获取表单数据 请自行修改接口
-        this.searchForm.storeDisable='APPLYING'
-        getShopListData(this.searchForm).then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        });
-        this.total = this.data.length;
+    init() {
+      this.getDataList();
+    },
+    changePage() {
+      this.getDataList();
+    },
+    changePageSize() {
+      this.searchForm.pageNumber = 1;
+      this.getDataList();
+    },
+    handleSearch() {
+      this.searchForm.pageNumber = 1;
+      this.searchForm.pageSize = 20;
+      this.getDataList();
+    },
+    selectDateRange(v) {
+      if (v) {
+        this.searchForm.startDate = v[0];
+        this.searchForm.endDate = v[1];
+      }
+    },
+    getDataList() {
+      this.loading = true;
+      this.searchForm.storeDisable = "APPLYING";
+      getShopListData(this.searchForm).then((res) => {
         this.loading = false;
-      },
-      // 查看店铺
-      edit(v) {
-        this.$router.push({ path: '/shop-operation', query: { shopId: v.id } });
-      },
-
+        if (res.success) {
+          this.data = res.result.records;
+          this.total = res.result.total;
+        }
+      });
     },
-    mounted() {
-      this.init();
+    edit(v) {
+      this.$router.push({ path: "/shop-operation", query: { shopId: v.id } });
     },
-  };
+  },
+  mounted() {
+    this.init();
+  },
+};
 </script>

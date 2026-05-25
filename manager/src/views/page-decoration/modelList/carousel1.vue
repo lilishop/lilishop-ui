@@ -5,30 +5,30 @@
       <div class="nav-side">分类占位区</div>
       <div class="nav-content setup-content">
         <!-- 轮播图 -->
-        <Carousel autoplay @on-change="autoChange">
-          <CarouselItem v-for="(item, index) in data.options.list" :key="index">
+        <el-carousel autoplay @change="autoChange">
+          <el-carousel-item v-for="(item, index) in data.options.list" :key="index">
             <div style="overflow: hidden">
               <img :src="item.img" width="1200" height="470" />
             </div>
-          </CarouselItem>
-        </Carousel>
+          </el-carousel-item>
+        </el-carousel>
         <div class="setup-box">
           <div>
-            <Button size="small" @click.stop="handleSelectModel">编辑</Button>
+            <el-button size="small" @click.stop="handleSelectModel">编辑</el-button>
           </div>
         </div>
       </div>
     </div>
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="快捷导航"
-      draggable
+      
       width="800"
-      :z-index="100"
-      :mask-closable="false"
-    >
+      
+      :close-on-click-modal="false"
+     append-to-body destroy-on-close>
       <div class="modal-tab-bar">
-        <Button type="primary" size="small" @click="handleAdd">添加轮播</Button>
+        <el-button type="primary" size="small" @click="handleAdd">添加轮播</el-button>
         &nbsp;
         <span class="ml_10">图片尺寸:{{ data.size }}</span>
         <span style="color: red" class="fz_12 ml_10"
@@ -55,37 +55,37 @@
                 />
               </td>
               <td>
-                <Input
+                <el-input
                   class="outsideUrl"
                   v-model="item.url"
                   :disabled="!!item.type && item.type !== 'link'"
                 />
               </td>
               <td>
-                <Button type="info" size="small" @click="handleSelectLink(item)"
-                  >选择链接</Button
+                <el-button type="info" size="small" @click="handleSelectLink(item)"
+                  >选择链接</el-button
                 >&nbsp;
-                <ColorPicker size="small" v-model="item.bgColor" />
+                <el-color-picker size="small" v-model="item.bgColor" />
                 &nbsp;
-                <Button
-                  type="error"
-                  ghost
+                <el-button
+                  type="danger"
+                  plain
                   size="small"
                   @click="handleDel(index)"
-                  >删除</Button
+                  >删除</el-button
                 >
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-    </Modal>
+    </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
-    <Modal width="1200px" v-model="picModelFlag" footer-hide>
-      <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage" />
-    </Modal>
+    <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
+      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" ref="ossManage" />
+    </el-dialog>
   </div>
 </template>
 
@@ -138,7 +138,7 @@ export default {
     },
     selectedLink(val) {
       // 选择链接回调
-      this.selected.url = this.$options.filters.formatLinkType(val);
+      this.selected.url = this.$filters.formatLinkType(val);
       this.selected.type =
         val.___type === "other" && val.url === "" ? "link" : "other";
     },

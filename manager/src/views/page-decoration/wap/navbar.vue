@@ -3,54 +3,56 @@
   <div class="model-title">
     <div>店铺装修</div>
     <div class="btns">
-      <Button
+      <el-button
         @click="clickBtn(item)"
         size="small"
         v-for="(item, index) in way"
         :key="index"
         :type="item.selected ? 'primary' : ''"
-      >{{ item.title }}</Button>
+      >{{ item.title }}</el-button>
     </div>
     <div class="model-title-view-btn">
       <!-- TODO 后期会补全 目前版本暂无 -->
       <!-- <Poptip placement="bottom" width="100">
-        <Button size="default" @click="creatQrCode">预览模板</Button>
-        <div slot="content" class="default-view-content">
+        <el-button size="default" @click="creatQrCode">预览模板</el-button>
+        <template #content><div class="default-view-content">
           <div>临时预览</div>
           <div ref="qrCodeUrl"></div>
         </div>
-      </Poptip>-->
-      <Button size="default" type="default" v-if="hasCache" @click="clearCache">清空本地缓存</Button>
-      <Button size="default" type="primary" @click="handleSpinShow">保存模板</Button>
+      </template></el-popconfirm>-->
+      <el-button size="default" type="default" v-if="hasCache" @click="clearCache">清空本地缓存</el-button>
+      <el-button size="default" type="primary" @click="handleSpinShow">保存模板</el-button>
 
-      <Modal
+      <el-dialog
         title="保存中"
         v-model="saveDialog"
-        :closable="true"
-        :mask-closable="false"
-        :footer-hide="true"
+        :show-close="true"
+        :close-on-click-modal="false"
+        append-to-body
+        destroy-on-close
       >
         <div v-if="progress">
           <div class="model-item">
             模板名称
-            <Input style="width: 200px" v-model="submitWay.name"/>
+            <el-input style="width: 200px" v-model="submitWay.name" />
           </div>
           <div class="model-item">
             是否立即发布
-            <i-switch v-model="submitWay.pageShow">
-              <span slot="open">开</span>
-              <span slot="close">关</span>
-            </i-switch>
+            <el-switch
+              v-model="submitWay.pageShow"
+              active-text="开"
+              inactive-text="关"
+            />
           </div>
           <div class="model-item">
             将当前装修内容写入到本地缓存中，下次进入页面时可继续使用
-            <Button type="small" @click="witeLocalStore">写入</Button>
+            <el-button type="small" @click="witeLocalStore">写入</el-button>
           </div>
 
-          <Button type="primary" @click="save()">保存</Button>
+          <el-button type="primary" @click="save()">保存</el-button>
         </div>
-        <Progress v-else :percent="num" status="active"/>
-      </Modal>
+        <el-progress v-else :percentage="num" status="success" />
+      </el-dialog>
     </div>
   </div>
 </template>

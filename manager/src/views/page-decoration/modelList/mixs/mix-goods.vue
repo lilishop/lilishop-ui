@@ -16,7 +16,7 @@
               </div>
               <div class="goods-detail">
                 <div class="goods-detail-title">{{item.title}}</div>
-                <div class="goods-detail-price">{{item.price | unitPrice('¥')}}</div>
+                <div class="goods-detail-price">{{ $filters.unitPrice(item.price, '¥') }}</div>
               </div>
             </div>
           </div>

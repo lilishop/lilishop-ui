@@ -1,39 +1,128 @@
 <template>
   <div class="search">
-    <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="订单号" prop="orderSn">
-            <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单号" clearable style="width: 240px" />
-          </Form-item>
-          <Form-item label="会员名称" prop="buyerName">
-            <Input type="text" v-model="searchForm.buyerName" placeholder="请输入会员名称" clearable style="width: 240px" />
-          </Form-item>
-          <Form-item label="下单时间">
-            <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable
-              @on-change="selectDateRange" placeholder="选择起始时间" style="width: 240px"></DatePicker>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="订单号" prop="orderSn">
+          <el-input
+            v-model="searchForm.orderSn"
+            placeholder="请输入订单号"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="会员名称" prop="buyerName">
+          <el-input
+            v-model="searchForm.buyerName"
+            placeholder="请输入会员名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="下单时间">
+          <el-date-picker
+            v-model="selectDate"
+            type="datetimerange"
+            value-format="YYYY-MM-DD"
+            clearable
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            placeholder="选择起始时间"
+            style="width: 240px"
+            @change="selectDateRange"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
-        </Form>
-      </Row>
-    </Card>
-    <Card>
+    <el-card>
       <div class="order-tab">
-        <Tabs v-model="currentStatus" @on-click="orderStatusClick">
-          <TabPane v-for="(item,index) in orderStatus" :key="index" :label="item.title" :name="item.value">
-          </TabPane>
-        </Tabs>
+        <el-tabs v-model="currentStatus" @tab-click="onStatusTabClick">
+          <el-tab-pane
+            v-for="(item, index) in orderStatus"
+            :key="index"
+            :label="item.title"
+            :name="item.value"
+          />
+        </el-tabs>
       </div>
 
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10" sortable="custom"
-        @on-sort-change="changeSort"></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
-          @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]" size="small" show-total show-elevator
-          show-sizer></Page>
-      </Row>
-    </Card>
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+        @sort-change="changeSort"
+      >
+        <el-table-column prop="sn" label="订单号" min-width="230" show-overflow-tooltip />
+        <el-table-column prop="createTime" label="下单时间" width="200" />
+        <el-table-column label="订单来源" width="95">
+          <template #default="{ row }">
+            <span v-if="row">
+              <span v-if="row.clientType == 'H5'">移动端</span>
+              <span v-else-if="row.clientType == 'PC'">PC端</span>
+              <span v-else-if="row.clientType == 'WECHAT_MP'">小程序端</span>
+              <span v-else-if="row.clientType == 'APP'">移动应用端</span>
+              <span v-else>{{ row.clientType }}</span>
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="memberName" label="买家名称" width="130" />
+        <el-table-column label="订单金额" prop="flowPrice" min-width="120" sortable="custom">
+          <template #default="{ row }">
+            <priceColorScheme v-if="row" :value="row.flowPrice" :color="$mainColor" />
+          </template>
+        </el-table-column>
+        <el-table-column label="订单状态" width="95">
+          <template #default="{ row }">
+            <template v-if="row">
+              <el-tag v-if="row.orderStatus == 'UNPAID'" type="danger">未付款</el-tag>
+              <el-tag v-else-if="row.orderStatus == 'PAID'" type="primary">已付款</el-tag>
+              <el-tag v-else-if="row.orderStatus == 'COMPLETED'" type="success">已完成</el-tag>
+              <el-tag v-else-if="row.orderStatus == 'TAKE'" type="warning">待核验</el-tag>
+              <el-tag v-else-if="row.orderStatus == 'CANCELLED'" type="info">已关闭</el-tag>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="200" align="center">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a
+                class="link-text"
+                :class="{ disabled: row.orderStatus != 'UNPAID' }"
+                @click="row.orderStatus == 'UNPAID' && confirmPrice(row)"
+              >收款</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="detail(row)">查看</a>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
@@ -42,192 +131,63 @@ import * as API_Order from "@/api/order";
 
 export default {
   name: "fictitiousOrderList",
-  data () {
+  data() {
     return {
-      loading: true, // 表单加载状态
+      loading: true,
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 20, // 页面大小
-        sort: "", // 默认排序字段
-        order: "", // 默认排序方式
-        startDate: "", // 起始时间
-        endDate: "", // 终止时间
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "",
+        order: "",
+        startDate: "",
+        endDate: "",
         orderType: "VIRTUAL",
         orderSn: "",
         buyerName: "",
-        orderStatus: ""
+        orderStatus: "",
       },
-
-      selectDate: null, // 下单时间
-      columns: [
-        {
-          title: "订单号",
-          key: "sn",
-          minWidth: 230,
-          tooltip: true
-        },
-        {
-          title: "下单时间",
-          key: "createTime",
-          width: 200,
-        },
-        {
-          title: "订单来源",
-          key: "clientType",
-          width: 95,
-          render: (h, params) => {
-            if (params.row.clientType == "H5") {
-              return h("div", {}, "移动端");
-            } else if (params.row.clientType == "PC") {
-              return h("div", {}, "PC端");
-            } else if (params.row.clientType == "WECHAT_MP") {
-              return h("div", {}, "小程序端");
-            } else if (params.row.clientType == "APP") {
-              return h("div", {}, "移动应用端");
-            } else {
-              return h("div", {}, params.row.clientType);
-            }
-          },
-        },
-        {
-          title: "买家名称",
-          key: "memberName",
-          width: 130,
-        },
-        {
-          title: "订单金额",
-          key: "flowPrice",
-          minWidth: 120,
-          sortable: true,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.flowPrice,color:this.$mainColor}} );
-          },
-        },
-
-        {
-          title: "订单状态",
-          key: "orderStatus",
-          width: 95,
-          render: (h, params) => {
-            if (params.row.orderStatus == "UNPAID") {
-              return h("div", [h("tag", { props: { color: "magenta" } }, "未付款")]);
-            } else if (params.row.orderStatus == "PAID") {
-              return h("div", [h("tag", { props: { color: "blue" } }, "已付款")]);
-            } else if (params.row.orderStatus == "COMPLETED") {
-              return h("div", [h("tag", { props: { color: "green" } }, "已完成")]);
-            } else if (params.row.orderStatus == "TAKE") {
-              return h("div", [h("tag", { props: { color: "volcano" } }, "待核验")]);
-            } else if (params.row.orderStatus == "CANCELLED") {
-              return h("div", [h("tag", { props: { color: "red" } }, "已关闭")]);
-            }
-          }
-        },
-
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          width: 200,
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "Button",
-
-                {
-                  props: {
-                    type: "primary",
-                    size: "small",
-                  },
-                  attrs: {
-                    disabled: params.row.orderStatus == "UNPAID" ? false : true,
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.confirmPrice(params.row);
-                    },
-                  },
-                },
-                "收款"
-              ),
-              h(
-                "Button",
-                {
-                  props: {
-                    type: "info",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.detail(params.row);
-                    },
-                  },
-                },
-                "查看"
-              ),
-            ]);
-          },
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      selectDate: null,
+      data: [],
+      total: 0,
       orderStatus: [
-        {title: '全部', value: ''},
-        {title: '未付款', value: 'UNPAID'},
-        {title: '已付款', value: 'PAID'},
-        {title: '待核验', value: 'TAKE'},
-        {title: '已完成', value: 'COMPLETED'},
-        {title: '已关闭', value: 'CANCELLED'},
+        { title: "全部", value: "" },
+        { title: "未付款", value: "UNPAID" },
+        { title: "已付款", value: "PAID" },
+        { title: "待核验", value: "TAKE" },
+        { title: "已完成", value: "COMPLETED" },
+        { title: "已关闭", value: "CANCELLED" },
       ],
-      currentStatus: ''
+      currentStatus: "",
     };
   },
   methods: {
-    // 初始化数据
-    init () {
+    init() {
       this.getDataList();
     },
-    // 分页 改变页码
-    changePage (v) {
-      this.searchForm.pageNumber = v;
+    changePage() {
       this.getDataList();
     },
-    // 分页 改变页数
-    changePageSize (v) {
+    changePageSize() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
       this.getDataList();
     },
-    // 搜索
-    handleSearch () {
+    handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getDataList();
     },
-    // 列表排序
-    changeSort (e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
+    changeSort(e) {
+      this.searchForm.sort = e.prop;
+      this.searchForm.order = e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
       this.getDataList();
     },
-    // 起止时间从新赋值
-    selectDateRange (v) {
+    selectDateRange(v) {
       if (v) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
       }
     },
-    // 获取列表数据
-    getDataList () {
+    getDataList() {
       this.loading = true;
       API_Order.getOrderList(this.searchForm).then((res) => {
         this.loading = false;
@@ -236,55 +196,45 @@ export default {
           this.total = res.result.total;
         }
       });
-      this.total = this.data.length;
-      this.loading = false;
     },
-    //确认收款
-    confirmPrice (v) {
+    confirmPrice(v) {
       this.$Modal.confirm({
         title: "确认收款",
         content: "您确定要收款吗？",
         loading: true,
         onOk: () => {
-          API_Order.orderPay(v.sn).then(res => {
+          API_Order.orderPay(v.sn).then((res) => {
             if (res.success) {
-              this.$Message.success("收款成功")
-              this.getDataList()
+              this.$Message.success("收款成功");
+              this.getDataList();
             }
             this.$Modal.remove();
-          })
+          });
         },
       });
-
     },
-    // 订单详情
-    detail (v) {
+    detail(v) {
       let sn = v.sn;
-      this.$options.filters.customRouterPush({
+      this.$filters.customRouterPush({
         name: "order-detail",
         query: { sn: sn, orderType: v.orderType },
-      })
+      });
     },
-    // 订单筛选
-    orderStatusClick(item) {
-      this.currentStatus = item;  // 使用参数 item
-      this.searchForm.orderStatus = item;  // 使用参数 item
+    onStatusTabClick(tab) {
+      const item = tab.paneName;
+      this.currentStatus = item;
+      this.searchForm.orderStatus = item;
       this.getDataList();
     },
   },
-  mounted () {
+  mounted() {
     this.init();
   },
 };
 </script>
 
-
 <style lang="scss" scoped>
-// Tab组件样式
 .order-tab {
   margin-top: 20px;
-  ::v-deep .ivu-tabs-tab {
-    font-size: 14px;
-  }
 }
 </style>

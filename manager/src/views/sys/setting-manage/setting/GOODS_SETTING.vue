@@ -1,72 +1,68 @@
 <template>
   <div class="layout">
-    <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
-      <FormItem label="商品审核" prop="goodsCheck">
-        <RadioGroup type="button" button-style="solid" v-model="formValidate.goodsCheck">
-          <Radio label="true">开启</Radio>
-          <Radio label="false">关闭</Radio>
-
-        </RadioGroup>
-         <span class="desc">商品审核关闭后，商家添加商品则无需审核直接上架</span>
-      </FormItem>
+    <el-form ref="formValidate" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
+      <el-form-item label="商品审核" prop="goodsCheck">
+        <el-radio-group v-model="formValidate.goodsCheck">
+          <el-radio-button value="true">开启</el-radio-button>
+          <el-radio-button value="false">关闭</el-radio-button>
+        </el-radio-group>
+        <span class="desc">商品审核关闭后，商家添加商品则无需审核直接上架</span>
+      </el-form-item>
       <div class="label-item">
-        <FormItem class="label-item" label="缩略图宽" prop="abbreviationPictureWidth">
-          <Input type="number" v-model="formValidate.abbreviationPictureWidth">
-          <span slot="prepend">宽</span>
-          <span slot="append">px</span>
-          </Input>
-
-        </FormItem>
-        <FormItem class="label-item" label="缩略图高" prop="abbreviationPictureHeight">
-          <Input type="number" v-model="formValidate.abbreviationPictureHeight">
-          <span slot="prepend">高</span>
-          <span slot="append">px</span>
-          </Input>
-        </FormItem>
+        <el-form-item class="label-item" label="缩略图宽" prop="abbreviationPictureWidth">
+          <el-input type="number" v-model="formValidate.abbreviationPictureWidth">
+            <template #prepend>宽</template>
+            <template #append>px</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item class="label-item" label="缩略图高" prop="abbreviationPictureHeight">
+          <el-input type="number" v-model="formValidate.abbreviationPictureHeight">
+            <template #prepend>高</template>
+            <template #append>px</template>
+          </el-input>
+        </el-form-item>
       </div>
       <div class="label-item">
-        <FormItem label="小图宽" prop="smallPictureWidth">
-          <Input type="number" v-model="formValidate.smallPictureWidth">
-          <span slot="prepend">宽</span>
-          <span slot="append">px</span>
-          </Input>
-
-        </FormItem>
-        <FormItem label="小图高" class="label-item" prop="smallPictureHeight">
-          <Input type="number" v-model="formValidate.smallPictureHeight">
-          <span slot="prepend">高</span>
-          <span slot="append">px</span>
-          </Input>
-        </FormItem>
+        <el-form-item label="小图宽" prop="smallPictureWidth">
+          <el-input type="number" v-model="formValidate.smallPictureWidth">
+            <template #prepend>宽</template>
+            <template #append>px</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="小图高" class="label-item" prop="smallPictureHeight">
+          <el-input type="number" v-model="formValidate.smallPictureHeight">
+            <template #prepend>高</template>
+            <template #append>px</template>
+          </el-input>
+        </el-form-item>
       </div>
       <div class="label-item">
-        <FormItem class="label-item" label="原图宽高" prop="originalPictureWidth">
-          <Input type="number" v-model="formValidate.originalPictureWidth">
-          <span slot="prepend">宽</span>
-          <span slot="append">px</span>
-          </Input>
-
-        </FormItem>
-        <FormItem class="label-item" label="原图宽高" prop="originalPictureHeight">
-          <Input type="number" v-model="formValidate.originalPictureHeight">
-          <span slot="prepend">高</span>
-          <span slot="append">px</span>
-          </Input>
-        </FormItem>
+        <el-form-item class="label-item" label="原图宽高" prop="originalPictureWidth">
+          <el-input type="number" v-model="formValidate.originalPictureWidth">
+            <template #prepend>宽</template>
+            <template #append>px</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item class="label-item" label="原图宽高" prop="originalPictureHeight">
+          <el-input type="number" v-model="formValidate.originalPictureHeight">
+            <template #prepend>高</template>
+            <template #append>px</template>
+          </el-input>
+        </el-form-item>
       </div>
-     <div class="label-btns">
-        <Button type="primary" @click="submit('formValidate')">保存</Button>
+      <div class="label-btns">
+        <el-button type="primary" @click="submit('formValidate')">保存</el-button>
         <div class="es-buttons">
-          <Button type="success" @click="createIndex()">重新生成所有商品索引</Button>
-          <Button type="info" @click="deleteDownGoods()">删除ES中下架的商品</Button>
-          <Button type="warning" @click="generateCache()">生成所有商品的缓存</Button>
-          <Button type="error" @click="deleteNotExistIndex()">删除不存在的索引</Button>
+          <el-button type="success" @click="createIndex()">重新生成所有商品索引</el-button>
+          <el-button type="info" @click="deleteDownGoods()">删除ES中下架的商品</el-button>
+          <el-button type="warning" @click="generateCache()">生成所有商品的缓存</el-button>
+          <el-button type="danger" @click="deleteNotExistIndex()">删除不存在的索引</el-button>
         </div>
         <div class="progress-item" v-if="showProgress">
-          <i-progress :percent="progressVal"></i-progress>
+          <el-progress :percentage="progressVal" />
         </div>
       </div>
-    </Form>
+    </el-form>
   </div>
 </template>
 <script>
@@ -77,7 +73,6 @@ export default {
   data() {
     return {
       formValidate: {
-        // 表单数据
         goodsCheck: 1,
         smallPictureHeight: "0",
         smallPictureWidth: "0",
@@ -89,22 +84,20 @@ export default {
       progressVal: 0,
       showProgress: false,
       intervalProgress: null,
-      ruleValidate: {}, // 验证规则
-      result:""
+      ruleValidate: {},
+      result: "",
     };
   },
   created() {
     this.init();
   },
   methods: {
-    //保存
     submit(name) {
-      let that = this;
+      const that = this;
       if (handleSubmit(that, name)) {
         this.setupSetting();
       }
     },
-    //重新生成所有商品索引
     createIndex() {
       createIndex().then((res) => {
         if (res.success) {
@@ -113,15 +106,13 @@ export default {
           setTimeout(() => {
             this.intervalProgress = setInterval(() => {
               getProgress().then((resp) => {
-                let progressResult = resp.result;
+                const progressResult = resp.result;
                 if (progressResult != null && progressResult.flag === 0) {
                   clearInterval(this.intervalProgress);
                   this.showProgress = false;
                   this.$Message.success("生成成功!");
                 } else {
-                  this.progressVal = Math.floor(
-                    (progressResult.processed / progressResult.total) * 100
-                  );
+                  this.progressVal = Math.floor((progressResult.processed / progressResult.total) * 100);
                 }
               });
             }, 1000);
@@ -130,22 +121,19 @@ export default {
           this.showProgress = true;
           this.intervalProgress = setInterval(() => {
             getProgress().then((resp) => {
-              let progressResult = resp.result;
+              const progressResult = resp.result;
               if (progressResult != null && progressResult.flag === 0) {
                 clearInterval(this.intervalProgress);
                 this.showProgress = false;
                 this.$Message.success("生成成功!");
               } else {
-                this.progressVal = Math.floor(
-                  (progressResult.processed / progressResult.total) * 100
-                );
+                this.progressVal = Math.floor((progressResult.processed / progressResult.total) * 100);
               }
             });
           }, 1000);
         }
       });
     },
-    //删除ES中下架的商品
     deleteDownGoods() {
       deleteGoodsDown().then((res) => {
         if (res.success) {
@@ -155,7 +143,6 @@ export default {
         }
       });
     },
-    //生成所有商品的缓存
     generateCache() {
       generateGoodsCache().then((res) => {
         if (res.success) {
@@ -165,7 +152,6 @@ export default {
         }
       });
     },
-    //删除不存在的索引
     deleteNotExistIndex() {
       delSkuIndex().then((res) => {
         if (res.success) {
@@ -175,7 +161,6 @@ export default {
         }
       });
     },
-    // 保存设置
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {
@@ -185,15 +170,12 @@ export default {
         }
       });
     },
-
-    // 实例化数据
     init() {
       this.result = JSON.parse(this.res);
-
       Object.keys(this.result).map((item) => {
         this.result[item] += "";
       });
-      this.$set(this, "formValidate", { ...this.result });
+      this.formValidate = { ...this.result };
       Object.keys(this.formValidate).forEach((item) => {
         this.ruleValidate[item] = [
           {
@@ -223,7 +205,7 @@ export default {
 .label-item {
   display: flex;
 }
-::v-deep .ivu-input {
+:deep(.el-input){
   width: 100px !important;
 }
 </style>

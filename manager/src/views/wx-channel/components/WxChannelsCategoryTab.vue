@@ -1,19 +1,33 @@
 <template>
   <div class="wx-channel-category">
     <div class="toolbar">
-      <i-switch v-model="forceRefresh" size="large">
-        <span slot="open">强刷</span>
-        <span slot="close">缓存</span>
-      </i-switch>
-      <Button
-        type="primary"
-        @click="loadThirdCategories"
-        :loading="loading"
-        style="margin-left: 10px"
-        >刷新</Button
-      >
+      <el-switch v-model="forceRefresh" active-text="强刷" inactive-text="缓存" />
+      <el-button type="primary" :loading="loading" style="margin-left: 10px" @click="loadThirdCategories">
+        刷新
+      </el-button>
     </div>
-    <Table border :loading="loading" :columns="columns" :data="data"></Table>
+    <el-table v-loading="loading" border :data="data" style="width: 100%">
+      <el-table-column prop="firstCatName" label="一级类目" min-width="150" show-overflow-tooltip />
+      <el-table-column prop="secondCatName" label="二级类目" min-width="150" show-overflow-tooltip />
+      <el-table-column prop="thirdCatName" label="三级类目" min-width="200" show-overflow-tooltip />
+      <el-table-column prop="thirdCatId" label="三级类目ID" width="120" />
+      <el-table-column prop="qualification" label="类目资质" min-width="220" show-overflow-tooltip />
+      <el-table-column label="类目资质类型" width="120">
+        <template #default="{ row }">
+          <el-tag v-if="row" :type="qualificationTagType(row.qualificationType)">
+            {{ qualificationLabel(row.qualificationType) }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="productQualification" label="商品资质" min-width="220" show-overflow-tooltip />
+      <el-table-column label="商品资质类型" width="120">
+        <template #default="{ row }">
+          <el-tag v-if="row" :type="qualificationTagType(row.productQualificationType)">
+            {{ qualificationLabel(row.productQualificationType) }}
+          </el-tag>
+        </template>
+      </el-table-column>
+    </el-table>
   </div>
 </template>
 
@@ -27,48 +41,21 @@ export default {
       forceRefresh: false,
       loading: false,
       data: [],
-      columns: [
-        { title: "一级类目", key: "firstCatName", minWidth: 150, tooltip: true },
-        { title: "二级类目", key: "secondCatName", minWidth: 150, tooltip: true },
-        { title: "三级类目", key: "thirdCatName", minWidth: 200, tooltip: true },
-        { title: "三级类目ID", key: "thirdCatId", width: 120 },
-        { title: "类目资质", key: "qualification", minWidth: 220, tooltip: true },
-        {
-          title: "类目资质类型",
-          key: "qualificationType",
-          width: 120,
-          render: (h, params) => {
-            const val = params.row.qualificationType;
-            const map = { 0: "不需要", 1: "必填", 2: "选填" };
-            return h(
-              "Tag",
-              { props: { color: val === 1 ? "red" : val === 2 ? "orange" : "green" } },
-              map[val] || "-"
-            );
-          },
-        },
-        { title: "商品资质", key: "productQualification", minWidth: 220, tooltip: true },
-        {
-          title: "商品资质类型",
-          key: "productQualificationType",
-          width: 120,
-          render: (h, params) => {
-            const val = params.row.productQualificationType;
-            const map = { 0: "不需要", 1: "必填", 2: "选填" };
-            return h(
-              "Tag",
-              { props: { color: val === 1 ? "red" : val === 2 ? "orange" : "green" } },
-              map[val] || "-"
-            );
-          },
-        },
-      ],
     };
   },
   mounted() {
     this.loadThirdCategories();
   },
   methods: {
+    qualificationLabel(val) {
+      const map = { 0: "不需要", 1: "必填", 2: "选填" };
+      return map[val] || "-";
+    },
+    qualificationTagType(val) {
+      if (val === 1) return "danger";
+      if (val === 2) return "warning";
+      return "success";
+    },
     loadThirdCategories() {
       this.loading = true;
       getWxChannelsThirdCategory({ forceRefresh: !!this.forceRefresh })

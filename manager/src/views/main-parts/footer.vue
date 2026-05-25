@@ -1,31 +1,24 @@
 <template>
   <div class="foot">
-    <Row type="flex" justify="space-around" class="help">
+    <el-row justify="space-around" class="help">
       <a class="item" :href="config.website" target="_blank">帮助</a>
       <a class="item" :href="config.website" target="_blank">隐私</a>
       <a class="item" :href="config.website" target="_blank">条款</a>
-    </Row>
-    <Row type="flex" justify="center" class="copyright">
+    </el-row>
+    <el-row justify="center" class="copyright">
       Copyright © {{ year }} - Present
-      <a
-        :href="config.website"
-        class="href"
-        target="_blank"
-        style="margin: 0 5px"
-        >{{ config.title }}</a
-      >
-    </Row>
+      <a :href="config.website" class="href" target="_blank" style="margin: 0 5px">{{ config.title }}</a>
+    </el-row>
   </div>
 </template>
 
 <script>
 const config = require("@/config/index");
 export default {
-  // name: "footer",
   data() {
     return {
       config,
-      year: new Date().getFullYear(), // 年
+      year: new Date().getFullYear(),
     };
   },
 };

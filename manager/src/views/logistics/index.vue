@@ -1,321 +1,249 @@
 <template>
   <div class="search">
-    <Card>
-      <Row class="operation padding-row">
-        <Button @click="add" type="primary">添加</Button>
-      </Row>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-      >
-        <!-- 页面展示 -->
-        <template slot="disableSlot" slot-scope="{row}">
-          <i-switch size="large"  :true-value="true" :false-value="false"  :value="row.switch" @on-change="changeSwitch(row)">
-            <span slot="open">开启</span>
-            <span slot="close">禁用</span>
-          </i-switch>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
-          :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
-          size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
-    <Modal
-      :title="modalTitle"
-      v-model="modalVisible"
-      :mask-closable="false"
-      :width="500"
-    >
-      <Form ref="form" :model="form" :label-width="120" :rules="formValidate">
-        <FormItem label="物流公司名称" prop="name">
-          <Input v-model="form.name" clearable style="width: 100%"/>
-        </FormItem>
-        <FormItem label="物流公司代码" prop="code">
-          <Input v-model="form.code" clearable style="width: 100%"/>
-        </FormItem>
-        <FormItem label="支持电子面单">
-          <i-switch   v-model="form.standBy" size="large">
-            <span slot="open">开</span>
-            <span slot="close">关</span>
-          </i-switch>
-        </FormItem>
-
-        <FormItem label="禁用状态" prop="disabled">
-
-          <i-switch true-value="OPEN" false-value="CLOSE" v-model="form.disabled" size="large">
-            <span slot="open">开启</span>
-            <span slot="close">禁用</span>
-          </i-switch>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="handleSubmit"
-        >提交
-        </Button
-        >
+    <el-card>
+      <div class="operation padding-row" style="margin-bottom: 10px">
+        <el-button type="primary" @click="add">添加</el-button>
       </div>
-    </Modal>
+
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        style="width: 100%"
+      >
+        <el-table-column prop="name" label="物流公司名称" min-width="120" />
+        <el-table-column prop="code" label="物流公司编码" min-width="120" />
+        <el-table-column label="状态" width="150" align="center">
+          <template #default="{ row }">
+            <el-switch
+              v-if="row"
+              v-model="row.switch"
+              inline-prompt
+              active-text="开启"
+              inactive-text="禁用"
+              @change="changeSwitch(row)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" width="180" />
+        <el-table-column label="操作" width="150" align="center">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a class="link-text"  @click="detail(row)">修改</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="remove(row)">删除</a>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
+
+    <el-dialog
+      v-model="modalVisible"
+      :title="modalTitle"
+      width="500px"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
+      <el-form ref="form" :model="form" :rules="formValidate" label-width="120px">
+        <el-form-item label="物流公司名称" prop="name">
+          <el-input v-model="form.name" clearable style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="物流公司代码" prop="code">
+          <el-input v-model="form.code" clearable style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="支持电子面单">
+          <el-switch
+            v-model="form.standBy"
+            inline-prompt
+            active-text="开"
+            inactive-text="关"
+          />
+        </el-form-item>
+        <el-form-item label="禁用状态" prop="disabled">
+          <el-switch
+            v-model="form.disabled"
+            inline-prompt
+            active-value="OPEN"
+            inactive-value="CLOSE"
+            active-text="开启"
+            inactive-text="禁用"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="modalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
+          提交
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-  import {
-    getLogisticsPage,
-    updateLogistics,
-    addLogistics,
-    delLogistics,
-  } from "@/api/logistics";
+import {
+  getLogisticsPage,
+  updateLogistics,
+  addLogistics,
+  delLogistics,
+} from "@/api/logistics";
 
-  export default {
-    name: "logistics",
-    data() {
-      return {
-        loading: true, // 表单加载状态
-        modalVisible: false, // 添加或编辑显示
-        modalTitle: "", // 添加或编辑标题
-        searchForm: {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-          pageSize: 20, // 页面大小
-          sort: "createTime", // 默认排序字段
-          order: "desc", // 默认排序方式
-          name: "",
-        },
-        form: {
-          // 添加或编辑表单对象初始化数据
-          name: "",
-          disabled:"CLOSE"
-        },
-        // 表单验证规则
-        formValidate: {
-          name: [
-            {
-              required: true,
-              message: "请输入物流公司名称",
-              trigger: "blur",
-            },
-          ],
-        },
-        submitLoading: false, // 添加或编辑提交状态
-        columns: [
+const defaultForm = () => ({
+  name: "",
+  code: "",
+  standBy: false,
+  disabled: "CLOSE",
+});
+
+export default {
+  name: "logistics",
+  data() {
+    return {
+      loading: true,
+      modalVisible: false,
+      modalTitle: "",
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+        name: "",
+      },
+      form: defaultForm(),
+      formValidate: {
+        name: [
           {
-            title: "物流公司名称",
-            key: "name",
-            minWidth: 120,
-            sortable: false,
-          },
-          {
-            title: "物流公司编码",
-            key: "code",
-            minWidth: 120,
-            sortable: false,
-          },
-          {
-            title: "状态",
-            key: "disabled",
-            width: 150,
-            slot: "disableSlot",
-          },
-          {
-            title: "创建时间",
-            key: "createTime",
-            width: 180,
-            sortable: false,
-          },
-          {
-            title: "操作",
-            key: "action",
-            align: "center",
-            width: 150,
-            render: (h, params) => {
-              return h("div", [
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "info",
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                    },
-                    on: {
-                      click: () => {
-                        this.detail(params.row);
-                      },
-                    },
-                  },
-                  "修改"
-                ),
-                h(
-                  "Button",
-                  {
-                    props: {
-                      type: "error",
-                      size: "small",
-                    },
-                    style: {
-                      marginRight: "5px",
-                    },
-                    on: {
-                      click: () => {
-                        this.remove(params.row);
-                      },
-                    },
-                  },
-                  "删除"
-                ),
-              ]);
-            },
+            required: true,
+            message: "请输入物流公司名称",
+            trigger: "blur",
           },
         ],
-        data: [], // 表单数据
-        total: 0, // 表单数据总数
-      };
+      },
+      submitLoading: false,
+      data: [],
+      total: 0,
+      id: "",
+    };
+  },
+  methods: {
+    init() {
+      this.getDataList();
     },
-    methods: {
-      // 初始化
-      init() {
-        this.getDataList();
-      },
-      // 分页 改变页码
-      changePage(v) {
-        this.searchForm.pageNumber = v;
-        this.getDataList();
-      },
-      // 分页 改变页数
-      changePageSize(v) {
-        this.searchForm.pageSize = v;
-        this.getDataList();
-      },
-      // 获取列表
-      getDataList() {
-        this.loading = true;
-
-        getLogisticsPage(this.searchForm).then((res) => {
-          this.loading = false;
-          if (res.success) {
-            const data = res.result.records;
-            data.forEach(e => {
-              e.switch = e.disabled === 'OPEN' ? true : false;
-              e.standBy = e.standBy == 'null' || !e.standBy ? false : true;
-            });
-            this.data = data;
-            console.log(data)
-            this.total = res.result.total;
-          }
-        });
-        this.total = this.data.length;
+    changePage() {
+      this.getDataList();
+    },
+    changePageSize() {
+      this.searchForm.pageNumber = 1;
+      this.getDataList();
+    },
+    getDataList() {
+      this.loading = true;
+      getLogisticsPage(this.searchForm).then((res) => {
         this.loading = false;
-      },
-      // switch 切换状态
-      changeSwitch (v) {
-        this.form.name = v.name;
-        this.form.code = v.code;
-        this.form.standBy = v.standBy;
+        if (res.success) {
+          const data = res.result.records;
+          data.forEach((e) => {
+            e.switch = e.disabled === "OPEN";
+            e.standBy = e.standBy == "null" || !e.standBy ? false : !!e.standBy;
+          });
+          this.data = data;
+          this.total = res.result.total;
+        }
+      });
+    },
+    changeSwitch(row) {
+      this.form.name = row.name;
+      this.form.code = row.code;
+      this.form.standBy = row.standBy;
+      this.form.disabled = row.disabled === "CLOSE" ? "OPEN" : "CLOSE";
+      updateLogistics(row.id, this.form).then((res) => {
+        if (res.success) {
+          this.$Message.success("操作成功");
+          this.getDataList();
+        } else {
+          row.switch = !row.switch;
+        }
+      });
+    },
+    handleSubmit() {
+      this.$refs.form.validate((valid) => {
+        if (!valid) return;
+        this.submitLoading = true;
 
-        this.form.disabled = v.disabled === 'CLOSE' ? 'OPEN' : 'CLOSE';
-        updateLogistics(v.id, this.form).then((res) => {
-          if (res.success) {
-            this.$Message.success("操作成功");
-            this.getDataList();
-          }
-        });
-      },
-      // 确认提交
-      handleSubmit() {
-        this.$refs.form.validate((valid) => {
-          if (valid) {
-            this.submitLoading = true;
-
-            if (this.modalTitle == "添加") {
-              // 添加 避免编辑后传入id等数据 记得删除
-              delete this.form.id;
-
-
-              addLogistics(this.form).then((res) => {
-                this.submitLoading = false;
-                if (res.success) {
-                  this.$Message.success("操作成功");
-                  this.getDataList();
-                  this.modalVisible = false;
-                }
-              });
-            } else {
-              // 编辑
-              updateLogistics(this.id, this.form).then((res) => {
-                this.submitLoading = false;
-                if (res.success) {
-                  this.$Message.success("操作成功");
-                  this.getDataList();
-                  this.modalVisible = false;
-                }
-              });
+        if (this.modalTitle === "添加") {
+          const payload = { ...this.form };
+          delete payload.id;
+          addLogistics(payload).then((res) => {
+            this.submitLoading = false;
+            if (res.success) {
+              this.$Message.success("操作成功");
+              this.getDataList();
+              this.modalVisible = false;
             }
-          }
-        });
-      },
-      // 添加信息
-      add() {
-        this.modalTitle = "添加";
-        this.form = {};
-        this.$refs.form.resetFields();
-
-        this.modalVisible = true;
-      },
-      // 编辑
-      detail(v) {
-        this.id = v.id;
-        this.modalTitle = "修改";
-        this.modalVisible = true;
-
-        this.form.name = v.name;
-        this.form.code = v.code;
-        console.log(v)
-        this.form.standBy = v.standBy;
-
-
-
-
-        this.form.disabled = v.disabled
-      },
-      // 删除物流公司
-      remove(v) {
-        this.$Modal.confirm({
-          title: "确认删除",
-          // 记得确认修改此处
-          content: "您确认要删除 " + v.name + " ?",
-          loading: true,
-          onOk: () => {
-            // 删除
-            delLogistics(v.id).then((res) => {
-              this.$Modal.remove();
-              if (res.success) {
-                this.$Message.success("操作成功");
-                this.getDataList();
-              }
-            });
-          },
-        });
-      },
+          });
+        } else {
+          updateLogistics(this.id, this.form).then((res) => {
+            this.submitLoading = false;
+            if (res.success) {
+              this.$Message.success("操作成功");
+              this.getDataList();
+              this.modalVisible = false;
+            }
+          });
+        }
+      });
     },
-    mounted() {
-      this.init();
+    add() {
+      this.modalTitle = "添加";
+      this.form = defaultForm();
+      this.$nextTick(() => {
+        this.$refs.form?.resetFields();
+      });
+      this.modalVisible = true;
     },
-  };
+    detail(v) {
+      this.id = v.id;
+      this.modalTitle = "修改";
+      this.form = {
+        name: v.name,
+        code: v.code,
+        standBy: v.standBy == "null" || !v.standBy ? false : !!v.standBy,
+        disabled: v.disabled,
+      };
+      this.modalVisible = true;
+    },
+    remove(v) {
+      this.$Modal.confirm({
+        title: "确认删除",
+        content: "您确认要删除 " + v.name + " ?",
+        onOk: () => {
+          return delLogistics(v.id).then((res) => {
+            if (res.success) {
+              this.$Message.success("操作成功");
+              this.getDataList();
+            }
+          });
+        },
+      });
+    },
+  },
+  mounted() {
+    this.init();
+  },
+};
 </script>

@@ -1,73 +1,92 @@
 <template>
   <div class="search">
-    <Card>
-      <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
-        <FormItem label="参数名称" prop="paramName">
-          <Input v-model="form.paramName" clearable style="width: 520px" />
-        </FormItem>
-        <FormItem label="是否必填" prop="required">
-          <RadioGroup v-model="form.required">
-            <Radio :label="0">否</Radio>
-            <Radio :label="1">是</Radio>
-          </RadioGroup>
-          <span style="margin-left: 10px; color: #999; font-size: 12px"
-            >商品发布时参数是否必填</span
-          >
-        </FormItem>
-        <FormItem label="是否索引" prop="isIndex">
-          <RadioGroup v-model="form.isIndex">
-            <Radio :label="0">否</Radio>
-            <Radio :label="1">是</Radio>
-          </RadioGroup>
-          <span style="margin-left: 10px; color: #999; font-size: 12px"
-            >开启索引后，用户将可以通过该参数筛选商品，索引开关不影响商详页的参数展示</span
-          >
-        </FormItem>
-        <FormItem label="排序" prop="sort">
-          <InputNumber :min="0" type="number" v-model="form.sort" style="width: 520px" />
-        </FormItem>
-        <FormItem label="参数值" prop="options">
-          <Table :columns="optionColumns" :data="form.options" border size="small" style="width: 520px" />
+    <el-card>
+      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+        <el-form-item label="参数名称" prop="paramName">
+          <el-input v-model="form.paramName" clearable style="width: 520px" />
+        </el-form-item>
+        <el-form-item label="是否必填" prop="required">
+          <el-radio-group v-model="form.required">
+            <el-radio :value="0">否</el-radio>
+            <el-radio :value="1">是</el-radio>
+          </el-radio-group>
+          <span style="margin-left: 10px; color: #999; font-size: 12px">商品发布时参数是否必填</span>
+        </el-form-item>
+        <el-form-item label="是否索引" prop="isIndex">
+          <el-radio-group v-model="form.isIndex">
+            <el-radio :value="0">否</el-radio>
+            <el-radio :value="1">是</el-radio>
+          </el-radio-group>
+          <span style="margin-left: 10px; color: #999; font-size: 12px">
+            开启索引后，用户将可以通过该参数筛选商品，索引开关不影响商详页的参数展示
+          </span>
+        </el-form-item>
+        <el-form-item label="排序" prop="sort">
+          <el-input-number :min="0" v-model="form.sort" style="width: 520px" />
+        </el-form-item>
+        <el-form-item label="参数值" prop="options">
+          <el-table :data="form.options" border size="small" style="width: 520px">
+            <el-table-column label="参数值" min-width="420">
+              <template #default="{ row, $index }">
+                <el-input
+                  v-if="row"
+                  v-model="form.options[$index].value"
+                  clearable
+                  @blur="touchOptionsValidate"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="90" align="center">
+              <template #default="{ row, $index }">
+                <a v-if="row" class="link-text" @click="removeOptionRow($index)">
+                  删除
+                </a>
+              </template>
+            </el-table-column>
+          </el-table>
           <div style="margin-top: 10px">
-            <Button type="primary" @click="addOptionRow">新增</Button>
+            <el-button type="primary" @click="addOptionRow">新增</el-button>
           </div>
-        </FormItem>
-        <FormItem label="关联分类">
-          <Button type="default" @click="openCategoryModal">选择分类</Button>
-          <span v-if="selectedCategoryNamesText" style="margin-left: 10px; color: #999; font-size: 12px"
-            >{{ selectedCategoryNamesText }}</span
-          >
-          <span v-else style="margin-left: 10px; color: #999; font-size: 12px"
-            >已选择{{ selectedCategoryIds.length }}个分类</span
-          >
-        </FormItem>
-        <FormItem>
-          <Button type="default" @click="back">返回</Button>
-          <Button type="primary" :loading="submitLoading" @click="handleSubmit">保存</Button>
-        </FormItem>
-      </Form>
-    </Card>
+        </el-form-item>
+        <el-form-item label="关联分类">
+          <el-button @click="openCategoryModal">选择分类</el-button>
+          <span v-if="selectedCategoryNamesText" style="margin-left: 10px; color: #999; font-size: 12px">
+            {{ selectedCategoryNamesText }}</span>
+          <span v-else style="margin-left: 10px; color: #999; font-size: 12px">
+            已选择{{ selectedCategoryIds.length }}个分类
+          </span>
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="back">返回</el-button>
+          <el-button type="primary" :loading="submitLoading" @click="handleSubmit">保存</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
-    <Modal
-      :title="categoryModalTitle"
+    <el-dialog
       v-model="categoryModalVisible"
-      :mask-closable="false"
-      :width="700"
+      :title="categoryModalTitle"
+      width="700px"
+      :close-on-click-modal="false"
     >
-      <div style="position: relative; max-height: 520px; overflow: auto;">
-        <Spin size="large" fix v-if="categoryTreeLoading"></Spin>
-        <Tree
+      <div v-loading="categoryTreeLoading" style="position: relative; max-height: 520px; overflow: auto">
+        <el-tree
+          ref="categoryTree"
           :key="categoryTreeKey"
           :data="categoryTreeData"
+          :props="{ label: 'title', children: 'children' }"
+          node-key="id"
           show-checkbox
-          @on-check-change="onCategoryTreeCheckChange"
-        ></Tree>
+          default-expand-all
+          :default-checked-keys="selectedCategoryIds"
+          @check="onCategoryTreeCheckChange"
+        />
       </div>
-      <div slot="footer">
-        <Button type="text" @click="categoryModalVisible = false">取消</Button>
-        <Button type="primary" style="margin-left: 8px" @click="categoryModalVisible = false">确定</Button>
-      </div>
-    </Modal>
+      <template #footer>
+        <el-button @click="categoryModalVisible = false">取消</el-button>
+        <el-button type="primary" style="margin-left: 8px" @click="categoryModalVisible = false">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -190,51 +209,6 @@ export default {
         isIndex: 0,
         sort: 0,
       },
-      optionColumns: [
-        {
-          title: "参数值",
-          key: "value",
-          minWidth: 420,
-          render: (h, params) => {
-            return h("Input", {
-              props: {
-                value: params.row.value,
-                clearable: true,
-              },
-              on: {
-                input: (val) => {
-                  if (!Array.isArray(this.form.options)) this.form.options = [];
-                  if (!this.form.options[params.index]) return;
-                  this.form.options[params.index].value = val;
-                },
-                "on-blur": () => {
-                  this.touchOptionsValidate();
-                },
-              },
-            });
-          },
-        },
-        {
-          title: "操作",
-          width: 90,
-          align: "center",
-          render: (h, params) => {
-            return h(
-              "Button",
-              {
-                props: {
-                  type: "error",
-                  size: "small",
-                },
-                on: {
-                  click: () => this.removeOptionRow(params.index),
-                },
-              },
-              "删除",
-            );
-          },
-        },
-      ],
       formValidate: {
         paramName: [regular.REQUIRED, regular.VARCHAR5],
         options: [{ required: true, validator: validateOptions, trigger: "change" }],
@@ -253,8 +227,8 @@ export default {
       const selectedSet = new Set(toStringArray(this.selectedCategoryIds));
       const isSelected = (node) => {
         if (!node) return false;
-        const id = node.id !== undefined && node.id !== null ? String(node.id) : "";
-        if (id && selectedSet.has(id)) return true;
+        const nodeId = node.id !== undefined && node.id !== null ? String(node.id) : "";
+        if (nodeId && selectedSet.has(nodeId)) return true;
         const children = Array.isArray(node.children) ? node.children : [];
         if (children.length === 0) return false;
         return children.every(isSelected);
@@ -276,11 +250,11 @@ export default {
   watch: {
     "form.required"(val) {
       const n = normalize01(val, 0);
-      if (val !== n) this.$set(this.form, "required", n);
+      if (val !== n) this.form.required = n;
     },
     "form.isIndex"(val) {
       const n = normalize01(val, 0);
-      if (val !== n) this.$set(this.form, "isIndex", n);
+      if (val !== n) this.form.isIndex = n;
     },
   },
   methods: {
@@ -302,18 +276,13 @@ export default {
       this.form.options.splice(index, 1);
       this.touchOptionsValidate();
     },
-    buildCategoryTreeNodes(list, selectedSet) {
+    buildCategoryTreeNodes(list) {
       if (!Array.isArray(list) || list.length === 0) return [];
-      return list.map((item) => {
-        const children = this.buildCategoryTreeNodes(item.children || [], selectedSet);
-        return {
-          id: item.id,
-          title: item.name,
-          expand: true,
-          checked: selectedSet.has(String(item.id)),
-          children,
-        };
-      });
+      return list.map((item) => ({
+        id: item.id,
+        title: item.name,
+        children: this.buildCategoryTreeNodes(item.children || []),
+      }));
     },
     async loadDetail(parameterId) {
       if (!parameterId) return;
@@ -337,7 +306,6 @@ export default {
       this.categoryTreeLoading = true;
       this.categoryTreeKey += 1;
       try {
-        const selectedSet = new Set(toStringArray(this.selectedCategoryIds));
         if (!Array.isArray(this.categoryTreeSource) || this.categoryTreeSource.length === 0) {
           const treeRes = await getCategoryTree();
           this.categoryTreeSource = treeRes && treeRes.success ? treeRes.result || [] : [];
@@ -345,17 +313,13 @@ export default {
           buildCategoryIdNameMap(this.categoryTreeSource, map);
           this.categoryIdNameMap = map;
         }
-        this.categoryTreeData = this.buildCategoryTreeNodes(this.categoryTreeSource || [], selectedSet);
+        this.categoryTreeData = this.buildCategoryTreeNodes(this.categoryTreeSource || []);
       } finally {
         this.categoryTreeLoading = false;
       }
     },
-    onCategoryTreeCheckChange(checkedNodes) {
-      if (!Array.isArray(checkedNodes)) {
-        this.selectedCategoryIds = [];
-        return;
-      }
-      this.selectedCategoryIds = toStringArray(checkedNodes.map((node) => node && node.id).filter(Boolean));
+    onCategoryTreeCheckChange(_data, checkedInfo) {
+      this.selectedCategoryIds = toStringArray(checkedInfo?.checkedKeys || []);
     },
     initForm() {
       if (this.id) {

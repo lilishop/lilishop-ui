@@ -1,164 +1,108 @@
 <template>
   <div>
-    <Card>
+    <el-card>
       <div class="operation mb_10">
-        <Button @click="addParent" type="primary" icon="md-add"
-          >添加一级分类</Button
-        >
+        <el-button type="primary" @click="addParent">添加一级分类</el-button>
       </div>
-      <tree-table
-        ref="treeTable"
-        size="default"
-        :loading="loading"
+
+      <el-table
+        v-loading="loading"
         :data="tableData"
-        :columns="columns"
-        :border="true"
-        :show-index="false"
-        :is-fold="true"
-        :expand-type="false"
-        primary-key="id"
+        row-key="id"
+        border
+        default-expand-all
+        :tree-props="{ children: 'children' }"
+        style="width: 100%"
       >
-        <template slot="action" slot-scope="scope">
-          <a
-            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
-            @click="edit(scope.row)"
-          >编辑</a>
-          <span style="margin:0 8px;color:#dcdee2">|</span>
-          <a
-            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
-            @click="remove(scope.row)"
-          >删除</a>
-          <span v-show="scope.row.level != 1" style="margin:0 8px;color:#dcdee2">|</span>
-          <a
-            v-show="scope.row.level != 1"
-            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
-            @click="addChildren(scope.row)"
-          >添加子分类</a>
-        </template>
-      </tree-table>
-    </Card>
-    <Modal
-      :title="modalTitle"
+        <el-table-column prop="articleCategoryName" label="分类名称" min-width="200" />
+        <el-table-column prop="sort" label="排序" width="120" />
+        <el-table-column label="操作" width="320" align="center">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a class="link-text" @click="edit(row)">编辑</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="remove(row)">删除</a>
+              <template v-if="row.level != 1">
+                <span class="op-split">|</span>
+                <a class="link-text" @click="addChildren(row)">添加子分类</a>
+              </template>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+    <el-dialog
       v-model="modalVisible"
-      :mask-closable="false"
-      :width="500"
+      :title="modalTitle"
+      width="500px"
+      :close-on-click-modal="false"
+      destroy-on-close
     >
-      <Form
-        ref="form"
-        :model="formAdd"
-        :label-width="100"
-        :rules="formValidate"
-      >
-        <div v-if="showParent">
-          <FormItem label="上级分类" prop="parentId">
-            {{ parentTitle }}
-            <Input
-              v-model="formAdd.parentId"
-              clearable
-              style="width: 100%; display: none"
-            />
-          </FormItem>
-        </div>
-        <FormItem label="分类名称" prop="articleCategoryName">
-          <Input
-            v-model="formAdd.articleCategoryName"
-            clearable
-            style="width: 100%"
-          />
-        </FormItem>
-        <FormItem label="排序值" prop="sort">
-          <InputNumber v-model="formAdd.sort"></InputNumber>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="Submit"
-          >提交</Button
-        >
-      </div>
-    </Modal>
+      <el-form ref="form" :model="formAdd" label-width="100px" :rules="formValidate">
+        <el-form-item v-if="showParent" label="上级分类" prop="parentId">
+          {{ parentTitle }}
+          <el-input v-model="formAdd.parentId" style="display: none" />
+        </el-form-item>
+        <el-form-item label="分类名称" prop="articleCategoryName">
+          <el-input v-model="formAdd.articleCategoryName" clearable />
+        </el-form-item>
+        <el-form-item label="排序值" prop="sort">
+          <el-input-number v-model="formAdd.sort" style="width: 100%" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="modalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="Submit">提交</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
+
 <script>
-import {
-  saveArticleCategory,
-  getArticleCategory,
-  delArticleCategory,
-  updateArticleCategory,
-} from "@/api/pages";
-import TreeTable from "@/components/tree-table/Table/Table";
-import uploadPicInput from "@/components/lili/upload-pic-input";
+import { saveArticleCategory, getArticleCategory, delArticleCategory, updateArticleCategory } from "@/api/pages";
 import { regular } from "@/utils";
+
 export default {
   name: "lili-components",
-  components: {
-    TreeTable,
-    uploadPicInput,
-  },
   data() {
     return {
-      submitLoading:false,
-      loading: false, // 加载状态
-      expandLevel: 1, // 展开的层级
-      modalType: 0, // 添加或编辑标识
-      modalVisible: false, // 添加或编辑显示
-      modalTitle: "", // 添加或编辑标题
-      showParent: false, // 是否展示上级菜单
-      parentTitle: "", // 父级菜单名称
+      submitLoading: false,
+      loading: false,
+      expandLevel: 1,
+      modalType: 0,
+      modalVisible: false,
+      modalTitle: "",
+      showParent: false,
+      parentTitle: "",
       formAdd: {
-        // 添加或编辑表单对象初始化数据
         parentId: "",
         sort: 1,
         level: 0,
         articleCategoryName: "",
       },
-      // 表单验证规则
       formValidate: {
         articleCategoryName: [regular.REQUIRED],
-        sort: [regular.REQUIRED,regular.INTEGER],
+        sort: [regular.REQUIRED, regular.INTEGER],
       },
-      columns: [
-        {
-          title: "分类名称",
-          key: "articleCategoryName",
-          witt: "100px",
-        },
-        {
-          title: "排序",
-          key: "sort",
-          width: "100px",
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          headerAlign: "center",
-          width: "400px",
-          type: "template",
-          template: "action",
-        },
-      ],
-      tableData: [], // 表格数据
+      tableData: [],
     };
   },
   methods: {
-    // 初始化数据
     init() {
       this.getAllList();
     },
-    // 添加子分类
     addChildren(v) {
       this.modalType = 0;
       this.modalTitle = "添加子分类";
       this.formAdd.articleCategoryName = "";
       this.parentTitle = v.articleCategoryName;
-      this.formAdd.level = eval(v.level + "+1");
+      this.formAdd.level = Number(v.level) + 1;
       this.showParent = true;
       delete this.formAdd.id;
       this.formAdd.parentId = v.id;
       this.modalVisible = true;
     },
-    // 编辑分类
     edit(v) {
       this.modalType = 1;
       this.modalTitle = "编辑";
@@ -170,68 +114,55 @@ export default {
       this.showParent = false;
       this.modalVisible = true;
     },
-    // 添加一级分类
     addParent() {
       this.modalType = 0;
       this.modalTitle = "添加一级分类";
       this.parentTitle = "顶级分类";
       this.showParent = true;
-      this.$refs.form.resetFields();
+      this.$refs.form?.resetFields();
       delete this.formAdd.id;
       this.formAdd.parentId = 0;
       this.modalVisible = true;
     },
-    // 提交
     Submit() {
       this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          if (this.modalType === 0) {
-            // 添加 避免编辑后传入id等数据 记得删除
-            delete this.formAdd.id;
-            saveArticleCategory(this.formAdd).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("添加成功");
-
-                this.formAdd = {
-                  // 添加或编辑表单对象初始化数据
-                  parentId: "",
-                  sort: 1,
-                  level: 0,
-                  articleCategoryName: "",
-                };
-              } else {
-                // this.$Message.error(res.message);
-              }
-              this.getAllList();
-              this.modalVisible = false;
-            });
-          } else {
-            // 编辑
-            updateArticleCategory(this.formAdd, this.formAdd.id).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("修改成功");
-              } else {
-                // this.$Message.error(res.message);
-              }
-              this.getAllList();
-              this.modalVisible = false;
-              this.$refs.form.resetFields();
-            });
-          }
+        if (!valid) return;
+        this.submitLoading = true;
+        if (this.modalType === 0) {
+          delete this.formAdd.id;
+          saveArticleCategory(this.formAdd).then((res) => {
+            this.submitLoading = false;
+            if (res.success) {
+              this.$Message.success("添加成功");
+              this.formAdd = {
+                parentId: "",
+                sort: 1,
+                level: 0,
+                articleCategoryName: "",
+              };
+            }
+            this.getAllList();
+            this.modalVisible = false;
+          });
+        } else {
+          updateArticleCategory(this.formAdd, this.formAdd.id).then((res) => {
+            this.submitLoading = false;
+            if (res.success) {
+              this.$Message.success("修改成功");
+            }
+            this.getAllList();
+            this.modalVisible = false;
+            this.$refs.form.resetFields();
+          });
         }
       });
     },
-    // 删除分类
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
         content: "您确认要删除 " + v.articleCategoryName + " ?",
         loading: true,
         onOk: () => {
-          // 删除
           delArticleCategory(v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -242,74 +173,17 @@ export default {
         },
       });
     },
-    // 获取分类数据
-    getAllList(newval) {
+    getAllList() {
       this.loading = true;
-      getArticleCategory().then((res) => {
-        this.loading = false;
-        if (res.success) {
-          // 仅展开指定级数 默认后台已展开所有
-          let expandLevel = this.expandLevel;
-          res.result.forEach(function (e) {
-            if (expandLevel == 1) {
-              if (e.level == 0) {
-                e.expand = false;
-              }
-              if (e.children && e.children.length > 0) {
-                e.children.forEach(function (c) {
-                  if (c.level == 1) {
-                    c.expand = false;
-                  }
-                  if (c.children && c.children.length > 0) {
-                    c.children.forEach(function (b) {
-                      if (b.level == 2) {
-                        b.expand = false;
-                      }
-                    });
-                  }
-                });
-              }
-            } else if (expandLevel == 2) {
-              if (e.level == 0) {
-                e.expand = true;
-              }
-              if (e.children && e.children.length > 0) {
-                e.children.forEach(function (c) {
-                  if (c.level == 1) {
-                    c.expand = false;
-                  }
-                  if (c.children && c.children.length > 0) {
-                    c.children.forEach(function (b) {
-                      if (b.level == 2) {
-                        b.expand = false;
-                      }
-                    });
-                  }
-                });
-              }
-            } else if (expandLevel == 3) {
-              if (e.level == 0) {
-                e.expand = true;
-              }
-              if (e.children && e.children.length > 0) {
-                e.children.forEach(function (c) {
-                  if (c.level == 1) {
-                    c.expand = true;
-                  }
-                  if (c.children && c.children.length > 0) {
-                    c.children.forEach(function (b) {
-                      if (b.level == 2) {
-                        b.expand = false;
-                      }
-                    });
-                  }
-                });
-              }
-            }
-          });
-          this.tableData = res.result;
-        }
-      });
+      getArticleCategory()
+        .then((res) => {
+          if (res.success) {
+            this.tableData = res.result || [];
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
   },
   mounted() {
@@ -317,10 +191,18 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
-.article {
-  font-size: 16px;
-  font-weight: 400;
-  margin: 12px 0;
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+.op-split {
+  margin: 0 8px;
+  color: #dcdee2;
+}
+.mb_10 {
+  margin-bottom: 10px;
 }
 </style>

@@ -24,13 +24,14 @@
         :key="item_index"
       >
         <div class="goods-img">
-          <Icon
-            size="20"
+          <el-icon
+            :size="20"
             color="#e1251b"
             @click="closeGoods(item, item_index)"
             class="goods-icon"
-            type="ios-close-circle"
-          />
+          >
+            <CircleClose />
+          </el-icon>
           <img :src="item.img" alt />
         </div>
         <div class="goods-desc">
@@ -38,7 +39,7 @@
             {{ item.title }}
           </div>
           <div class="goods-bottom">
-            <div class="goods-price">￥{{ item.price | unitPrice }}</div>
+            <div class="goods-price">￥{{ $filters.unitPrice(item.price) }}</div>
           </div>
         </div>
       </div>
@@ -46,7 +47,9 @@
   </div>
 </template>
 <script>
+import { CircleClose } from "@element-plus/icons-vue";
 export default {
+  components: { CircleClose },
   data() {
     return {
       selected: {

@@ -1,128 +1,139 @@
 <template>
-  <div class="seckill">
-    <Card>
-      <Row>
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
-          <Form-item label="活动名称" prop="promotionName">
-            <Input
-              type="text"
-              v-model="searchForm.promotionName"
-              placeholder="请输入活动名称"
-              clearable
-              style="width: 240px"
-            />
-          </Form-item>
-          <Form-item label="活动状态" prop="promotionStatus">
-            <Select
-              v-model="searchForm.promotionStatus"
-              placeholder="请选择"
-              clearable
-              style="width: 240px"
-            >
-              <Option value="NEW">未开始</Option>
-              <Option value="START">已开始/上架</Option>
-              <Option value="END">已结束/下架</Option>
-              <Option value="CLOSE">紧急关闭/作废</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="活动时间">
-            <DatePicker
-              v-model="selectDate"
-              type="daterange"
-              clearable
-              placeholder="选择起始时间"
-              style="width: 240px"
-            >
-            </DatePicker>
-          </Form-item>
-
-          <Button
-            @click="handleSearch"
-            type="primary"
-            icon="ios-search"
-            class="search-btn"
-            >搜索</Button
+  <div class="search seckill">
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="活动名称" prop="promotionName">
+          <el-input
+            v-model="searchForm.promotionName"
+            placeholder="请输入活动名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="活动状态" prop="promotionStatus">
+          <el-select
+            v-model="searchForm.promotionStatus"
+            placeholder="请选择"
+            clearable
+            style="width: 240px"
           >
-        </Form>
-      </Row>
-    </Card>
-    <Card>
-      <Tabs value="list" class="mt_10" @on-click="clickTabPane">
-        <TabPane label="秒杀活动列表" name="list">
-          <Table
-            :loading="loading"
-            border
-            :columns="columns"
-            :data="data"
+            <el-option label="未开始" value="NEW" />
+            <el-option label="已开始/上架" value="START" />
+            <el-option label="已结束/下架" value="END" />
+            <el-option label="紧急关闭/作废" value="CLOSE" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="活动时间">
+          <el-date-picker
+            v-model="selectDate"
+            type="daterange"
+            clearable
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <el-tabs v-model="activeTab" class="mt_10">
+        <el-tab-pane label="秒杀活动列表" name="list">
+          <el-table
             ref="table"
+            v-loading="loading"
+            border
+            :data="data"
             class="mt_10"
+            style="width: 100%"
           >
-            <template slot-scope="{ row }" slot="action">
-              <a
-                v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
-                style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
-                @click="edit(row)"
-                >编辑</a>
-              <a
-                v-else
-                style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
-                @click="manage(row)"
-                >查看</a>
-              <span
-                v-if="row.promotionStatus"
-                style="margin:0 8px;color:#dcdee2"
-                >|</span>
-              <a
-                v-if="row.promotionStatus == 'NEW'"
-                style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
-                @click="manage(row)"
-                >管理</a>
-              <span
-                v-if="row.promotionStatus == 'NEW'"
-                style="margin:0 8px;color:#dcdee2"
-                >|</span>
-              <a
-                v-if="row.promotionStatus == 'START' || row.promotionStatus == 'NEW'"
-                style="color:#2d8cf0;cursor:pointer;text-decoration:none"
-                @click="off(row)"
-                >关闭</a>
-            </template>
-          </Table>
+            <el-table-column
+              prop="promotionName"
+              label="活动名称"
+              min-width="140"
+              show-overflow-tooltip
+            />
+            <el-table-column prop="startTime" label="开始时间" width="180" />
+            <el-table-column prop="applyEndTime" label="申请截止时间" width="180" />
+            <el-table-column label="活动状态" width="110">
+              <template #default="{ row }">
+                <el-tag v-if="row" :type="promotionStatusTagType(row.promotionStatus)">
+                  {{ promotionStatusText(row.promotionStatus) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="seckillRule"
+              label="申请规则"
+              min-width="120"
+              show-overflow-tooltip
+            />
+            <el-table-column label="操作" width="250" align="center" fixed="right">
+              <template #default="{ row }">
+                <template v-if="row">
+                  <a
+                    v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
+                    class="link-text"
+                    @click="edit(row)"
+                  >
+                    编辑
+                  </a>
+                  <a v-else class="link-text" @click="manage(row)">查看</a>
+                  <span v-if="row.promotionStatus" class="op-split">|</span>
+                  <a
+                    v-if="row.promotionStatus == 'NEW'"
+                    class="link-text"
+                    @click="manage(row)"
+                  >
+                    管理
+                  </a>
+                  <span v-if="row.promotionStatus == 'NEW'" class="op-split">|</span>
+                  <a
+                    v-if="row.promotionStatus == 'START' || row.promotionStatus == 'NEW'"
+                    class="link-text"
+                    @click="off(row)"
+                  >
+                    关闭
+                  </a>
+                </template>
+              </template>
+            </el-table-column>
+          </el-table>
 
-          <Row type="flex" justify="end" class="mt_10">
-            <Page
-              style="margin: 20px 0"
-              :current="searchForm.pageNumber"
+          <div class="mt_10" style="display: flex; justify-content: flex-end">
+            <el-pagination
+              v-model:current-page="searchForm.pageNumber"
+              v-model:page-size="searchForm.pageSize"
+              :page-sizes="[20, 50, 100]"
               :total="total"
-              :page-size="searchForm.pageSize"
-              @on-change="changePage"
-              @on-page-size-change="changePageSize"
-              :page-size-opts="[20, 50, 100]"
+              layout="total, sizes, prev, pager, next, jumper"
               size="small"
-              show-total
-              show-elevator
-              show-sizer
-            ></Page>
-          </Row>
-        </TabPane>
-        <TabPane label="秒杀活动设置" name="setup">
-          <setupSeckill v-if="setupFlag"></setupSeckill>
-        </TabPane>
-      </Tabs>
-    </Card>
+              @current-change="changePage"
+              @size-change="changePageSize"
+            />
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="秒杀活动设置" name="setup" lazy>
+          <setupSeckill />
+        </el-tab-pane>
+      </el-tabs>
+    </el-card>
   </div>
 </template>
 
 <script>
 import { getSeckillList, delSeckill, updateSeckillStatus } from "@/api/promotion";
 import setupSeckill from "@/views/promotions/seckill/seckill-setup";
-import { promotionsStatusRender } from "@/utils/promotions";
 
 export default {
   name: "seckill",
@@ -131,103 +142,62 @@ export default {
   },
   data() {
     return {
+      activeTab: "list",
       selectDate: [],
-      loading: true, // 表单加载状态
-        searchForm: {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-          pageSize: 20, // 页面大小
-          sort: "createTime",
-          order: "desc", // 默认排序方式
-        },
-      setupFlag: false, //默认不请求设置
-      columns: [
-        // 表单
-        {
-          title: "活动名称",
-          key: "promotionName",
-          minWidth: 130,
-          tooltip: true,
-        },
-
-        {
-          title: "开始时间",
-          key: "startTime",
-          width: 180,
-        },
-        {
-          title: "申请截止时间",
-          key: "applyEndTime",
-          width: 180,
-        },
-
-        {
-          title: "活动状态",
-          key: "promotionStatus",
-          width: 100,
-          render: (h, params) => {
-            return promotionsStatusRender(h, params);
-          },
-        },
-
-        {
-          title: "申请规则",
-          key: "seckillRule",
-          minWidth: 120,
-          tooltip: true,
-        },
-        {
-          title: "操作",
-          slot: "action",
-          align: "center",
-          width: 250,
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      loading: true,
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+      },
+      data: [],
+      total: 0,
     };
   },
   methods: {
-    // tab栏点击切换列表和设置
-    clickTabPane(name) {
-      if (name == "setup") {
-        this.setupFlag = true;
-      } else {
-        this.setupFlag = false;
-      }
+    promotionStatusText(status) {
+      const map = {
+        NEW: "未开始",
+        START: "已开始",
+        END: "已结束",
+        CLOSE: "已关闭",
+      };
+      return map[status] || "未知";
     },
-    // 初始化信息
+    promotionStatusTagType(status) {
+      const map = {
+        NEW: "info",
+        START: "success",
+        END: "danger",
+        CLOSE: "danger",
+      };
+      return map[status] || "danger";
+    },
     init() {
       this.getDataList();
     },
-    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
-    // 分页 改变页数
     changePageSize(v) {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    // 搜索
-      handleSearch() {
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 20;
-        this.getDataList();
-      },
+    handleSearch() {
+      this.searchForm.pageNumber = 1;
+      this.searchForm.pageSize = 20;
+      this.getDataList();
+    },
     edit(v) {
-      // 编辑
       this.$router.push({ name: "manager-seckill-add", query: { id: v.id } });
     },
     manage(v) {
-      // 管理
       this.$router.push({ name: "seckill-goods", query: { id: v.id } });
     },
-
     off(v) {
-      // 下架
       this.$Modal.confirm({
         title: "提示",
         content: "您确定要下架该活动吗？",
@@ -242,7 +212,6 @@ export default {
       });
     },
     expire(v) {
-      // 作废
       this.$Modal.confirm({
         title: "提示",
         content: "您确定要作废该活动吗？",
@@ -256,24 +225,25 @@ export default {
         },
       });
     },
-    // 获取数据集合
     getDataList() {
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
-        this.searchForm.startTime = this.selectDate[0].getTime();
-        this.searchForm.endTime = this.selectDate[1].getTime();
+        this.searchForm.startTime = new Date(this.selectDate[0]).getTime();
+        this.searchForm.endTime = new Date(this.selectDate[1]).getTime();
       } else {
         this.searchForm.startTime = null;
         this.searchForm.endTime = null;
       }
-      // 带多条件搜索参数获取表单数据
-      getSeckillList(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
+      getSeckillList(this.searchForm)
+        .then((res) => {
+          if (res.success) {
+            this.data = res.result.records;
+            this.total = res.result.total;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
   },
   mounted() {
@@ -281,8 +251,19 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-.mr_5 {
-  margin: 0 5px;
+
+<style lang="scss" scoped>
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+  margin-right: 5px;
+}
+.op-split {
+  margin: 0 8px;
+  color: #dcdee2;
+}
+.mt_10 {
+  margin-top: 10px;
 }
 </style>

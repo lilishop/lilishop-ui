@@ -13,15 +13,15 @@
             ghostClass: 'ghost',
           }"
         >
+          <template v-for="(model, index) in modelData" :key="index">
           <li
-            v-for="(model, index) in modelData"
             v-if="!model.drawer && !model.drawerPromotions"
-            :key="index"
             class="model-item"
           >
             <img src alt />
             <span>{{ model.name }}</span>
           </li>
+          </template>
         </draggable>
       </div>
 
@@ -48,14 +48,15 @@
                 :is="templates[element.type]"
                 :res="element.options"
               ></component>
-              <Icon
+              <el-icon
                 v-if="selected == index"
                 @click="closeComponent(index)"
-                color="#e1251b"
-                size="25"
                 class="close"
-                type="ios-close-circle"
-              />
+                :size="25"
+                color="#e1251b"
+              >
+                <CircleClose />
+              </el-icon>
             </div>
           </draggable>
         </div>
@@ -73,6 +74,7 @@
   </div>
 </template>
 <script>
+import { CircleClose } from "@element-plus/icons-vue";
 import templates from "./template/index";
 import Draggable from "vuedraggable";
 import { modelData } from "./config";
@@ -83,6 +85,7 @@ export default {
   components: {
     Draggable,
     decorate,
+    CircleClose,
   },
   data() {
     return {
@@ -169,7 +172,7 @@ export default {
     // 点击楼层装修
     handleComponent(val, index) {
       this.selected = index;
-      this.$set(this, "decorateData", val);
+      this["decorateData"] = val;
     },
     // 右侧栏回调
     handleDrawer(val) {
@@ -223,30 +226,27 @@ export default {
             }
           });
         }
-        this.$set(this.contentData.list, newIndex, {
+        this.contentData.list[newIndex] = {
           ...val,
           options: {
             ...this.contentData.list[newIndex].options,
           },
-          // 绑定键值
           model: val.type,
-        });
+        };
       } else {
         this.decorateData = "";
 
-        this.$set(this.contentData.list, newIndex, {
+        this.contentData.list[newIndex] = {
           ...val,
           options: {
             ...val.options,
           },
-
-          // 绑定键值
           model: val.type,
-        });
+        };
         this.contentData.list = JSON.parse(
           JSON.stringify(this.contentData.list)
         );
-        this.$set(this, "decorateData", this.contentData.list[newIndex]);
+        this["decorateData"] = this.contentData.list[newIndex];
       }
     },
 
@@ -254,15 +254,13 @@ export default {
     package(val, newIndex) {
       this.contentData.list[newIndex] = "";
       val = JSON.parse(JSON.stringify(val));
-      this.$set(this.contentData.list, newIndex, {
+      this.contentData.list[newIndex] = {
         ...val,
         options: {
           ...val.options,
         },
-
-        // 绑定键值
         model: val.type,
-      });
+      };
     },
     // 拖动
     handleContentlAdd(evt) {

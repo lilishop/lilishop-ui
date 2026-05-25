@@ -1,27 +1,18 @@
-
 <template>
   <div class="error404">
     <div class="error404-body-con">
-      <Card>
+      <el-card>
         <div class="error404-body-con-title">
-          4<span><Icon type="ios-navigate-outline"></Icon></span>4
+          4<span>🧭</span>4
         </div>
-        <p class="error404-body-con-message">
-          YOU&nbsp;&nbsp;LOOK&nbsp;&nbsp;LOST
-        </p>
+        <p class="error404-body-con-message">YOU&nbsp;&nbsp;LOOK&nbsp;&nbsp;LOST</p>
         <div class="error404-btn-con">
-          <Button @click="goHome" size="large" style="width: 200px" type="text"
-            >返回首页</Button
-          >
-          <Button
-            @click="backPage"
-            size="large"
-            style="width: 200px; margin-left: 40px"
-            type="primary"
-            >返回上一页</Button
-          >
+          <el-button size="large" style="width: 200px" @click="goHome">返回首页</el-button>
+          <el-button size="large" type="primary" style="width: 200px; margin-left: 40px" @click="backPage">
+            返回上一页
+          </el-button>
         </div>
-      </Card>
+      </el-card>
     </div>
   </div>
 </template>
@@ -30,11 +21,9 @@
 export default {
   name: "Error404",
   methods: {
-    // 返回上一页
     backPage() {
       this.$router.go(-1);
     },
-    // 返回首页
     goHome() {
       this.$router.push({
         name: "home_index",
@@ -43,6 +32,7 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
 @keyframes error404animation {
   0% {
@@ -83,7 +73,7 @@ export default {
       span {
         display: inline-block;
         color: #19be6b;
-        font-size: 230px;
+        font-size: 120px;
         animation: error404animation 3s ease 0s infinite alternate;
       }
     }

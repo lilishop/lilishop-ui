@@ -1,24 +1,29 @@
 <template>
   <div class="lang-icon">
-    <Dropdown @on-click="langChange">
-      <Icon type="md-globe" size="26"/>
-      <DropdownMenu slot="list">
-        <DropdownItem name="zh-CN">简体中文</DropdownItem>
-        <DropdownItem name="en-US">English</DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
+    <el-dropdown @command="langChange">
+      <el-icon :size="26"><Platform /></el-icon>
+      <template #dropdown>
+        <el-dropdown-menu>
+          <el-dropdown-item command="zh-CN">简体中文</el-dropdown-item>
+          <el-dropdown-item command="en-US">English</el-dropdown-item>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
   </div>
 </template>
 
 <script>
+import { Platform } from "@element-plus/icons-vue";
+
 export default {
   name: "langSwitch",
+  components: { Platform },
   methods: {
     langChange(v) {
       this.$i18n.locale = v;
       this.$store.commit("switchLang", v);
-    }
-  }
+    },
+  },
 };
 </script>
 

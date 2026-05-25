@@ -1,79 +1,93 @@
 <template>
   <div class="search">
-    <Card>
-      <Form
+    <el-card>
+      <el-form
         ref="searchForm"
-        @keydown.enter.native="handleSearch"
         :model="searchForm"
         inline
-        :label-width="70"
+        label-width="70px"
         class="search-form"
+        @keyup.enter="handleSearch"
       >
-        <Form-item label="商品名称" prop="goodsName">
-          <Input
-            type="text"
+        <el-form-item label="商品名称" prop="goodsName">
+          <el-input
             v-model="searchForm.goodsName"
             placeholder="请输入商品名称"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Form-item label="商品编号" prop="id">
-          <Input
-            type="text"
+        </el-form-item>
+        <el-form-item label="商品编号" prop="id">
+          <el-input
             v-model="searchForm.id"
             placeholder="请输入商品编号"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search"
-          >搜索</Button
-        >
-      </Form>
-    </Card>
-    <Card>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        class="mt_10"
-      >
-        <!-- 商品栏目格式化 -->
-        <template slot="goodsSlot" slot-scope="scope">
-          <div style="margin-top: 5px; height: 80px; display: flex">
-            <div style="">
-              <img
-                :src="scope.row.original"
-                style="height: 60px; margin-top: 3px; width: 60px"
-              />
-            </div>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
-            <div style="margin-left: 13px">
-              <div class="div-zoom">
-                <a>{{ scope.row.goodsName }}</a>
+    <el-card>
+      <el-table v-loading="loading" :data="data" ref="table" class="mt_10" style="width: 100%">
+        <el-table-column label="商品名称" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">
+            <div v-if="row" style="margin-top: 5px; height: 80px; display: flex; align-items: flex-start">
+              <img
+                v-if="row.original"
+                :src="row.original"
+                style="height: 60px; width: 60px; object-fit: cover; margin-top: 3px"
+                alt=""
+              />
+              <div style="margin-left: 13px">
+                <div class="div-zoom">
+                  <a class="link-text">{{ row.goodsName }}</a>
+                </div>
               </div>
             </div>
-          </div>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+          </template>
+        </el-table-column>
+        <el-table-column prop="id" label="商品编号" min-width="120" show-overflow-tooltip />
+        <el-table-column label="价格" min-width="120">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">{{ $filters.unitPrice(row.price, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="审核状态" min-width="120">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="authFlagTagType(row.authFlag)">{{ authFlagText(row.authFlag) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="storeName" label="店铺名称" min-width="120" show-overflow-tooltip />
+        <el-table-column label="操作" width="200" align="center" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a class="link-text" @click="examine(row, 1)">通过</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="examine(row, 2)">拒绝</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="showDetail(row)">查看</a>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
@@ -81,214 +95,82 @@
 import { authGoods, getAuthGoodsListData } from "@/api/goods";
 
 export default {
-  name: "goods",
-  components: {},
+  name: "goodsApply",
   data() {
     return {
-      id: "", //要操作的id
-      loading: true, // 表单加载状态
+      loading: true,
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 20, // 页面大小
-        sort: "create_time", // 默认排序字段
-        order: "desc", // 默认排序方式
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "create_time",
+        order: "desc",
       },
       goodsAuditForm: {
-        // 商品编辑表单
         auth_flag: 1,
       },
-      columns: [
-        {
-          title: "商品名称",
-          key: "goodsName",
-          minWidth: 180,
-          slot: "goodsSlot",
-          tooltip: true,
-        },
-        {
-          title: "商品编号",
-          key: "id",
-          minWidth: 100,
-          tooltip: true,
-        },
-        {
-          title: "价格",
-          key: "price",
-          minWidth: 130,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
-          },
-        },
-        {
-          title: "审核状态",
-          key: "authFlag",
-          minWidth: 130,
-          render: (h, params) => {
-            if (params.row.authFlag == "TOBEAUDITED") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "待审核",
-                  },
-                }),
-              ]);
-            } else if (params.row.authFlag == "PASS") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "success",
-                    text: "审核通过",
-                  },
-                }),
-              ]);
-            } else if (params.row.authFlag == "REFUSE") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "审核拒绝",
-                  },
-                }),
-              ]);
-            }
-          },
-        },
-
-        {
-          title: "店铺名称",
-          key: "storeName",
-          minWidth: 100,
-          tooltip: true,
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          fixed: "right",
-          width: 200,
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.examine(params.row, 1);
-                    },
-                  },
-                },
-                "通过"
-              ),
-              h(
-                "span",
-                { style: { margin: "0 8px", color: "#dcdee2" } },
-                "|"
-              ),
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.examine(params.row, 2);
-                    },
-                  },
-                },
-                "拒绝"
-              ),
-              h(
-                "span",
-                { style: { margin: "0 8px", color: "#dcdee2" } },
-                "|"
-              ),
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none"
-                  },
-                  on: {
-                    click: () => {
-                      this.showDetail(params.row);
-                    },
-                  },
-                },
-                "查看"
-              ),
-            ]);
-          },
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      data: [],
+      total: 0,
     };
   },
   methods: {
+    authFlagText(v) {
+      const map = {
+        TOBEAUDITED: "待审核",
+        PASS: "审核通过",
+        REFUSE: "审核拒绝",
+      };
+      return map[v] || v || "-";
+    },
+    authFlagTagType(v) {
+      const map = {
+        TOBEAUDITED: "warning",
+        PASS: "success",
+        REFUSE: "danger",
+      };
+      return map[v] || "info";
+    },
     init() {
-      // 初始化数据
       this.getDataList();
     },
     changePage(v) {
-      // 改变页码
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
     changePageSize(v) {
-      // 改变每页数量
       this.searchForm.pageSize = v;
       this.getDataList();
     },
     handleSearch() {
-      // 搜索
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getDataList();
     },
     getDataList() {
-      // 获取列表数据
       this.loading = true;
-      // 带多条件搜索参数获取表单数据
       this.searchForm.authFlag = 0;
-      getAuthGoodsListData(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
+      getAuthGoodsListData(this.searchForm)
+        .then((res) => {
+          this.loading = false;
+          if (res.success) {
+            this.data = res.result.records;
+            this.total = res.result.total;
+          }
+        })
+        .catch(() => {
+          this.loading = false;
+        });
     },
     examine(v, authFlag) {
-      // 审核商品
-      let examine = "通过";
-      this.goodsAuditForm.authFlag = "PASS";
-      if (authFlag != 1) {
-        examine = "拒绝";
-        this.goodsAuditForm.authFlag = "REFUSE";
-      }
+      const examine = authFlag === 1 ? "通过" : "拒绝";
+      this.goodsAuditForm.authFlag = authFlag === 1 ? "PASS" : "REFUSE";
       this.$Modal.confirm({
         title: "确认审核",
-        content: "您确认要审核" + examine + " " + v.goodsName + " ?",
+        content: `您确认要审核${examine} ${v.goodsName} ?`,
         loading: true,
         onOk: () => {
-          let formData = new FormData();
-          formData.append('goodsIds', v.id);
-          formData.append('authFlag', this.goodsAuditForm.authFlag);
-
+          const formData = new FormData();
+          formData.append("goodsIds", v.id);
+          formData.append("authFlag", this.goodsAuditForm.authFlag);
           authGoods(formData).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -299,13 +181,11 @@ export default {
         },
       });
     },
-    //查看商品详情
     showDetail(v) {
-      let id = v.id;
-      this.$options.filters.customRouterPush({
+      this.$filters.customRouterPush({
         name: "goods-detail",
-        query: { id: id },
-      })
+        query: { id: v.id },
+      });
     },
   },
   mounted() {
@@ -313,3 +193,20 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+.op-split {
+  margin: 0 8px;
+  color: #dcdee2;
+}
+.div-zoom {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+</style>

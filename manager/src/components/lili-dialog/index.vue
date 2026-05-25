@@ -1,5 +1,14 @@
 <template>
-  <Modal :styles="{ top: '120px' }" width="1160" :z-index="10000" @on-cancel="clickClose" @on-ok="clickOK" v-model="flag" :mask-closable="false" scrollable>
+  <el-dialog
+    v-model="flag"
+    width="1160px"
+    top="120px"
+    :z-index="10000"
+    :close-on-click-modal="false"
+    append-to-body
+    destroy-on-close
+    @close="clickClose"
+  >
     <template v-if="flag">
       <goodsDialog
         @selected="
@@ -21,7 +30,11 @@
         class="linkDialog"
       />
     </template>
-  </Modal>
+    <template #footer>
+      <el-button @click="clickClose">取消</el-button>
+      <el-button type="primary" @click="clickOK">确定</el-button>
+    </template>
+  </el-dialog>
 </template>
 <script>
 import goodsDialog from "./goods-dialog";
@@ -86,11 +99,7 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-::v-deep .ivu-modal {
-  overflow: hidden;
-  height: 650px !important;
-}
-::v-deep .ivu-modal-body {
+:deep(.el-dialog__body) {
   width: 100%;
   height: 500px;
   overflow: hidden;

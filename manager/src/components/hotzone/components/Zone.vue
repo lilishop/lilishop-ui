@@ -51,49 +51,45 @@
       <li class="hz-u-square hz-u-square-br" data-pointer="dealBR"></li>
     </ul>
    
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="编辑热区"
-      draggable
-      scrollable
-      :mask="false"
-      ok-text="保存"
-      @on-ok="saveZone"
-      @on-cancel="cancelZone"
+      :modal="false"
+      append-to-body
+      width="520px"
+      @close="cancelZone"
     >
       <div>
         <div class="hz-edit-img">
           <img class="show-image" :src="zoneForm.img" alt />
         </div>
 
-        <Form :model="zoneForm" :label-width="80">
-          <!-- <FormItem label="图片链接：">
-            <Input v-model="zoneForm.img"></Input>
-            <Button size="small" type="primary" @click="handleSelectImg"
-              >选择图片</Button
+        <el-form :model="zoneForm" label-width="80px">
+          <el-form-item label="跳转链接：">
+            <el-input type="textarea" v-if="zoneForm.type === 'other' && zoneForm.title === '外部链接'" v-model="zoneForm.link" />
+            <el-button size="small" type="primary" @click="handleSelectLink"
+              >选择链接</el-button
             >
-            :v-model="zoneForm.type === 'goods' ? zoneForm.goodsName : zoneForm.link"
-          </FormItem> -->
-          <FormItem label="跳转链接：">
-            <Input type="textarea" v-if="zoneForm.type === 'other' && zoneForm.title === '外部链接'" v-model="zoneForm.link" ></Input>
-            <Button size="small" type="primary" @click="handleSelectLink"
-              >选择链接</Button
-            >
-          </FormItem>
-        </Form>
+          </el-form-item>
+        </el-form>
       </div>
-    </Modal>
+      <template #footer>
+        <el-button @click="cancelZone">取消</el-button>
+        <el-button type="primary" @click="saveZone">保存</el-button>
+      </template>
+    </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
-    <Modal width="1200px" v-model="picModelFlag" footer-hide>
+    <el-dialog width="1200px" v-model="picModelFlag" append-to-body destroy-on-close>
       <ossManage
         @callback="callbackSelected"
         :isComponent="true"
         :initialize="picModelFlag"
         ref="ossManage"
       />
-    </Modal>
+      <template #footer />
+    </el-dialog>
   </li>
 </template>
 
@@ -179,7 +175,7 @@ export default {
     },
     // 已选链接
     selectedLink(val) {
-      this.zoneForm.link = this.$options.filters.formatLinkType(val);
+      this.zoneForm.link = this.$filters.formatLinkType(val);
       this.settingZone(val);
       this.changeInfo(this.zoneForm);
     },
@@ -220,7 +216,10 @@ export default {
           break;
       }
     },
-    saveZone() {},
+    saveZone() {
+      this.showModal = false;
+      this.changeInfo(this.zoneForm);
+    },
     cancelZone() {
       this.showModal = false;
     },

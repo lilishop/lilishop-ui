@@ -1,61 +1,72 @@
 <template>
   <div class="wx-channel-order">
-    <Row>
-      <Form :model="searchForm" inline :label-width="70" class="search-form">
-        <FormItem label="订单编号" prop="channelOrderSn">
-          <Input
-            v-model="searchForm.channelOrderSn"
-            placeholder="视频号订单编号"
-            clearable
-            style="width: 220px"
-          />
-        </FormItem>
-        <FormItem label="会员昵称" prop="memberNickName">
-          <Input v-model="searchForm.memberNickName" placeholder="请输入会员昵称" clearable style="width: 180px" />
-        </FormItem>
-        <FormItem label="商品名称" prop="goodsName">
-          <Input v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px" />
-        </FormItem>
-        <FormItem label="状态" prop="status">
-          <Input v-model="searchForm.status" placeholder="订单状态" clearable style="width: 140px" />
-        </FormItem>
-        <FormItem label="场景" prop="scene">
-          <Select v-model="searchForm.scene" clearable style="width: 140px" placeholder="全部">
-            <Option v-for="item in sceneList" :key="item.value" :value="item.value">{{ item.label }}</Option>
-          </Select>
-        </FormItem>
-        <FormItem label="下单时间">
-          <DatePicker
-            type="daterange"
-            v-model="selectDate"
-            format="yyyy-MM-dd"
-            clearable
-            @on-change="selectDateRange"
-            placeholder="选择起始时间"
-            style="width: 240px"
-          ></DatePicker>
-        </FormItem>
-        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn" :loading="loading"
-          >搜索</Button
-        >
-      </Form>
-    </Row>
+    <el-form :model="searchForm" inline label-width="70px" class="search-form">
+      <el-form-item label="订单编号" prop="channelOrderSn">
+        <el-input v-model="searchForm.channelOrderSn" placeholder="视频号订单编号" clearable style="width: 220px" />
+      </el-form-item>
+      <el-form-item label="会员昵称" prop="memberNickName">
+        <el-input v-model="searchForm.memberNickName" placeholder="请输入会员昵称" clearable style="width: 180px" />
+      </el-form-item>
+      <el-form-item label="商品名称" prop="goodsName">
+        <el-input v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px" />
+      </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-input v-model="searchForm.status" placeholder="订单状态" clearable style="width: 140px" />
+      </el-form-item>
+      <el-form-item label="场景" prop="scene">
+        <el-select v-model="searchForm.scene" clearable style="width: 140px" placeholder="全部">
+          <el-option v-for="item in sceneList" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="下单时间">
+        <el-date-picker
+          v-model="selectDate"
+          type="daterange"
+          value-format="YYYY-MM-DD"
+          clearable
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          style="width: 240px"
+          @change="selectDateRange"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" class="search-btn" :loading="loading" @click="handleSearch">搜索</el-button>
+      </el-form-item>
+    </el-form>
 
-    <Table :loading="loading" border :columns="columns" :data="data" class="mt_10"></Table>
-    <Row type="flex" justify="end" class="mt_10" style="margin-top: 10px">
-      <Page
-        :current="searchForm.pageNumber"
+    <el-table v-loading="loading" border :data="data" class="mt_10" style="width: 100%">
+      <el-table-column prop="channelOrderSn" label="视频号订单编号" min-width="200" show-overflow-tooltip />
+      <el-table-column prop="orderSn" label="平台订单编号" min-width="200" show-overflow-tooltip />
+      <el-table-column prop="memberNickName" label="会员昵称" min-width="140" show-overflow-tooltip />
+      <el-table-column prop="amount" label="订单金额" width="110" />
+      <el-table-column label="订单状态" width="130">
+        <template #default="{ row }">
+          <el-tag v-if="row && row.status" type="primary">{{ row.status }}</el-tag>
+          <span v-else-if="row">-</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="channelName" label="带货视频号" min-width="160" show-overflow-tooltip />
+      <el-table-column label="下单场景" width="110">
+        <template #default="{ row }">
+          <el-tag v-if="row" :type="sceneTagType(row.scene)">{{ sceneLabel(row.scene) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="createTime" label="创建时间" min-width="160" show-overflow-tooltip />
+    </el-table>
+
+    <div class="mt_10" style="display: flex; justify-content: flex-end">
+      <el-pagination
+        v-model:current-page="searchForm.pageNumber"
+        v-model:page-size="searchForm.pageSize"
+        :page-sizes="[20, 50, 100]"
         :total="total"
-        :page-size="searchForm.pageSize"
-        @on-change="changePage"
-        @on-page-size-change="changePageSize"
-        :page-size-opts="[20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
         size="small"
-        show-total
-        show-elevator
-        show-sizer
-      ></Page>
-    </Row>
+        @current-change="changePage"
+        @size-change="changePageSize"
+      />
+    </div>
   </div>
 </template>
 
@@ -85,54 +96,28 @@ export default {
         pageNumber: 1,
         pageSize: 20,
       },
-      columns: [
-        { title: "视频号订单编号", key: "channelOrderSn", minWidth: 200, tooltip: true },
-        { title: "平台订单编号", key: "orderSn", minWidth: 200, tooltip: true },
-        { title: "会员昵称", key: "memberNickName", minWidth: 140, tooltip: true },
-        { title: "订单金额", key: "amount", width: 110 },
-        {
-          title: "订单状态",
-          key: "status",
-          width: 130,
-          render: (h, params) => {
-            const val = params.row.status;
-            if (!val) return h("span", "-");
-            return h("Tag", { props: { color: "blue" } }, val);
-          },
-        },
-        { title: "带货视频号", key: "channelName", minWidth: 160, tooltip: true },
-        {
-          title: "下单场景",
-          key: "scene",
-          width: 110,
-          render: (h, params) => {
-            const val = params.row.scene;
-            const map = {
-              LIVE: { label: "直播", color: "orange" },
-              WINDOW: { label: "橱窗", color: "purple" },
-            };
-            const item = map[val] || { label: val || "-", color: "default" };
-            return h("Tag", { props: { color: item.color } }, item.label);
-          },
-        },
-        { title: "创建时间", key: "createTime", minWidth: 160, tooltip: true },
-      ],
     };
   },
   mounted() {
     this.loadPage();
   },
   methods: {
+    sceneLabel(val) {
+      const map = { LIVE: "直播", WINDOW: "橱窗" };
+      return map[val] || val || "-";
+    },
+    sceneTagType(val) {
+      const map = { LIVE: "warning", WINDOW: "" };
+      return map[val] || "info";
+    },
     selectDateRange(v) {
       if (!v || v.length !== 2) {
         this.searchForm.startTime = null;
         this.searchForm.endTime = null;
         return;
       }
-      const startStr = v[0];
-      const endStr = v[1];
-      const start = startStr ? new Date(`${startStr}T00:00:00`).getTime() : null;
-      const end = endStr ? new Date(`${endStr}T23:59:59`).getTime() : null;
+      const start = v[0] ? new Date(`${v[0]}T00:00:00`).getTime() : null;
+      const end = v[1] ? new Date(`${v[1]}T23:59:59`).getTime() : null;
       this.searchForm.startTime = Number.isFinite(start) ? start : null;
       this.searchForm.endTime = Number.isFinite(end) ? end : null;
     },

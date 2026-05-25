@@ -24,10 +24,10 @@
         />
         <div class="setup-box">
           <div>
-            <Button
+            <el-button
               size="small"
               @click.stop="handleSelectModel(element.options.list[0])"
-              >编辑</Button
+              >编辑</el-button
             >
           </div>
         </div>
@@ -43,8 +43,8 @@
             <img :src="item.img" width="230" height="190" alt="" />
             <div class="setup-box">
               <div>
-                <Button size="small" @click.stop="handleSelectModel(item)"
-                  >编辑</Button
+                <el-button size="small" @click.stop="handleSelectModel(item)"
+                  >编辑</el-button
                 >
               </div>
             </div>
@@ -78,8 +78,8 @@
             <img :src="item.img" width="190" height="210" alt="" />
             <div class="setup-box">
               <div>
-                <Button size="small" @click.stop="handleSelectModel(item)"
-                  >编辑</Button
+                <el-button size="small" @click.stop="handleSelectModel(item)"
+                  >编辑</el-button
                 >
               </div>
             </div>
@@ -94,8 +94,8 @@
             <img :src="item.img" width="240" height="105" alt="" />
             <div class="setup-box">
               <div>
-                <Button size="small" @click.stop="handleSelectModel(item)"
-                  >编辑</Button
+                <el-button size="small" @click.stop="handleSelectModel(item)"
+                  >编辑</el-button
                 >
               </div>
             </div>
@@ -150,10 +150,10 @@
         </div>
         <div class="setup-box">
           <div>
-            <Button
+            <el-button
               size="small"
               @click.stop="handleSelectModel(element.options)"
-              >编辑</Button
+              >编辑</el-button
             >
           </div>
         </div>
@@ -163,15 +163,15 @@
       <not-enough :data="element"></not-enough>
     </template>
     <div class="del-btn">
-      <Button size="small" type="error" @click="handleModelDelete">删除</Button>
+      <el-button size="small" type="danger" @click="handleModelDelete">删除</el-button>
     </div>
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="装修"
-      draggable
-      width="800"
-      :z-index="100"
-      :mask-closable="false"
+      width="800px"
+      :close-on-click-modal="false"
+      append-to-body
+      destroy-on-close
     >
       <div class="modal-top-advert">
         <div>
@@ -222,34 +222,34 @@
           建议尺寸：<span>{{ selected.size }}</span>
         </div>
         <div>
-          图片链接：<Input
+          图片链接：<el-input
             class="outsideUrl"
             v-model="selected.url"
             :disabled="!!selected.type && selected.type !== 'link'"
             placeholder="https://"
           />
-          <Button size="small" type="primary" @click="handleSelectLink"
-            >选择链接</Button
+          <el-button size="small" type="primary" @click="handleSelectLink"
+            >选择链接</el-button
           >
         </div>
         <div>
-          选择图片：<Button size="small" type="primary" @click="handleSelectImg"
-            >选择图片</Button
-          >&nbsp;
+          选择图片：<el-button size="small" type="primary" @click="handleSelectImg"
+            >选择图片</el-button
+          >
         </div>
       </div>
-    </Modal>
+    </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
-    <Modal width="1200px" v-model="picModelFlag" footer-hide>
+    <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
       <ossManage
         @callback="callbackSelected"
-        :isComponent="true"
+        :is-component="true"
         :initialize="picModelFlag"
         ref="ossManage"
       />
-    </Modal>
+    </el-dialog>
   </div>
 </template>
 
@@ -322,7 +322,7 @@ export default {
     },
     // 确定选择链接
     selectedLink(val) {
-      this.selected.url = this.$options.filters.formatLinkType(val);
+      this.selected.url = this.$filters.formatLinkType(val);
       this.selected.type =
         val.___type === "other" && val.url === "" ? "link" : "other";
     },
@@ -479,7 +479,7 @@ export default {
         height: inherit;
         font-size: 12px;
         font-weight: bold;
-        .ivu-icon {
+        .el-icon {
           position: absolute;
           right: 10px;
           top: 10px;
@@ -503,14 +503,14 @@ export default {
       align-items: center;
       flex-direction: column;
       justify-content: center;
-      .ivu-icon {
+      .el-icon {
         font-size: 18px;
         transition: all 0.3s ease-out;
       }
       &:hover {
         background-color: $theme_color;
         color: #fff;
-        .ivu-icon {
+        .el-icon {
           transform: rotateZ(360deg);
         }
       }

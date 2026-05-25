@@ -1,71 +1,69 @@
 <template>
   <div class="search">
-    <Card>
-      <Row class="operation">
-        <Button @click="add()" type="primary">设置今日热词</Button>
-      </Row>
-      <Row>
-        <p>
-          <Alert type="success">
-            这里展示今日系统中搜索前一百的搜索热词，分数为热词在排序系统中的分数，分数越高，可以在用户获取热词时进行优先展示（首页商品搜索栏下方推荐位）（分数可以填写负数，会降低推荐度）
-          </Alert>
-        </p>
-      </Row>
+    <el-card>
+      <div class="operation mb_10">
+        <el-button type="primary" @click="add()">设置今日热词</el-button>
+      </div>
+      <el-alert
+        type="success"
+        :closable="false"
+        show-icon
+        title="这里展示今日系统中搜索前一百的搜索热词，分数为热词在排序系统中的分数，分数越高，可以在用户获取热词时进行优先展示（首页商品搜索栏下方推荐位）（分数可以填写负数，会降低推荐度）"
+      />
 
       <div class="card-list">
-        <Card v-for="words in data" class="card-item" :key="words" onclick="">
-          <p>
-            <a href="#" slot="extra" @click.prevent="add(words)">{{ words }}</a>
-          </p>
-          <p slot="extra">
-            <a @click="deleteWords(words)">
-              <Icon type="md-close"/>
-            </a>
-          </p>
-        </Card>
+        <el-card v-for="words in data" :key="words" class="card-item" shadow="hover">
+          <div class="card-item-inner">
+            <a href="#" class="word-link" @click.prevent="add(words)">{{ words }}</a>
+            <el-icon class="close-icon" @click="deleteWords(words)"><Close /></el-icon>
+          </div>
+        </el-card>
       </div>
-    </Card>
-    <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="500">
-      <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
-        <FormItem label="热词" prop="keywords">
-          <Input v-model="form.keywords" clearable style="width: 100%"/>
-        </FormItem>
-        <FormItem label="分数" prop="point">
-          <Input v-model="form.point" clearable style="width: 100%"/>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="handleSubmit"
-        >提交
-        </Button
-        >
-      </div>
-    </Modal>
+    </el-card>
+
+    <el-dialog
+      v-model="modalVisible"
+      :title="modalTitle"
+      width="500px"
+      :close-on-click-modal="false"
+      append-to-body
+      destroy-on-close
+    >
+      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+        <el-form-item label="热词" prop="keywords">
+          <el-input v-model="form.keywords" clearable style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="分数" prop="point">
+          <el-input v-model="form.point" clearable style="width: 100%" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="modalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">提交</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import {getHotWords, setHotWords, deleteHotWords} from "@/api/index";
-
-import {regular} from "@/utils";
+import { Close } from "@element-plus/icons-vue";
+import { getHotWords, setHotWords, deleteHotWords } from "@/api/index";
+import { regular } from "@/utils";
 
 export default {
-  name: "hotWords",
-  components: {},
+  name: "HOTWORDS_TODAY",
+  components: { Close },
   data() {
     return {
       submitLoading: false,
       modalTitle: "",
-      loading: true, // 表单加载状态
-      modalVisible: false, //弹出框
+      loading: true,
+      modalVisible: false,
       form: {
         keywords: "",
         point: 0,
       },
-      data: [], // 表单数据
-
-      // 表单验证规则
+      data: [],
       formValidate: {
         keywords: [regular.REQUIRED, regular.VARCHAR20],
         point: [regular.REQUIRED, regular.NUMBER],
@@ -84,7 +82,6 @@ export default {
           this.data = res.result;
         }
       });
-      this.loading = false;
     },
     handleSubmit() {
       this.$refs.form.validate((valid) => {
@@ -101,27 +98,20 @@ export default {
         }
       });
     },
-    //设置热词优先
     add(words) {
-      this.modalType = 0;
       this.modalTitle = "设置热词";
-      if (words) {
-        this.form.keywords = words;
-      } else {
-        this.form.keywords = "";
-      }
+      this.form.keywords = words || "";
       this.form.point = 1;
       this.modalVisible = true;
     },
     deleteWords(words) {
       this.$Modal.confirm({
         title: "是否确定删除热词",
-        content: "<p>您确定要删除此热词吗？</p>",
-        okText: "确实",
+        content: "您确定要删除此热词吗？",
+        okText: "确定",
         cancelText: "取消",
         onOk: () => {
-          let params = {words: words}
-          deleteHotWords(params).then((res) => {
+          deleteHotWords({ words }).then((res) => {
             if (res.success) {
               this.$Message.success("删除成功");
               this.getDataList();
@@ -136,22 +126,38 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
 .card-list {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  margin-top: 16px;
 }
 
 .card-item {
   min-width: 100px;
-  margin: 20px;
+  margin: 10px;
 }
-</style>
-<style>
-.ivu-card-extra {
-  right: 3px;
-  top: 15px;
-  z-index: 99;
+
+.card-item-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.word-link {
+  color: var(--el-color-primary);
+  text-decoration: none;
+}
+
+.close-icon {
+  cursor: pointer;
+  color: var(--el-text-color-secondary);
+
+  &:hover {
+    color: var(--el-color-danger);
+  }
 }
 </style>

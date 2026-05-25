@@ -6,7 +6,7 @@
       <div class="count-list flex">
         <div class="count-item" @click="navigateTo('managerGoods')">
           <div>
-            <Icon class="icon" size="31" type="md-photos" />
+            <el-icon class="icon" :size="31"><Picture /></el-icon>
           </div>
           <div>
             <div class="counts">{{ homeData.goodsNum || 0 }}</div>
@@ -15,7 +15,7 @@
         </div>
         <div class="count-item" @click="navigateTo('memberList')">
           <div>
-            <Icon class="icon" size="31" type="md-person" />
+            <el-icon class="icon" :size="31"><User /></el-icon>
           </div>
           <div>
             <div class="counts">{{ homeData.memberNum || 0 }}</div>
@@ -24,7 +24,7 @@
         </div>
         <div class="count-item" @click="navigateTo('orderList')">
           <div>
-            <Icon class="icon" size="31" type="md-list" />
+            <el-icon class="icon" :size="31"><List /></el-icon>
           </div>
           <div>
             <div class="counts">{{ homeData.orderNum || 0 }}</div>
@@ -33,7 +33,7 @@
         </div>
         <div class="count-item" @click="navigateTo('shopList')">
           <div>
-            <Icon class="icon" size="31" type="ios-stats" />
+            <el-icon class="icon" :size="31"><DataLine /></el-icon>
           </div>
           <div>
             <div class="counts">{{ homeData.storeNum || 0 }}</div>
@@ -83,8 +83,7 @@
           <div class="flow-member">
             <div>当前在线人数</div>
             <span>
-              {{ homeData.currentNumberPeopleOnline || 0 }}
-            </span>
+              {{ homeData.currentNumberPeopleOnline || 0 }}</span>
           </div>
           <div class="flow-wrapper">
             <h4>流量概括</h4>
@@ -129,7 +128,7 @@
             <div class="today-item">
               <div>今日交易额</div>
               <span v-if="homeData.todayOrderPrice"
-                >￥{{ homeData.todayOrderPrice | unitPrice }}</span
+                >{{ $filters.unitPrice(homeData.todayOrderPrice, '￥') }}</span
               >
               <span v-else>￥0.00</span>
             </div>
@@ -176,97 +175,47 @@
     <!-- top10商品 -->
     <div class="card transform">
       <h4>热卖商品TOP10</h4>
-      <Table
-        stripe
-        :columns="tophotGoodsColumns"
-        :data="topHotGoodsData"
-      ></Table>
+      <el-table stripe :data="topHotGoodsData" style="width: 100%">
+        <el-table-column type="index" label="排名" width="100" align="center" />
+        <el-table-column prop="goodsName" label="商品名称" />
+        <el-table-column prop="price" label="价格">
+          <template #default="{ row }">
+            <span :style="{ color: $mainColor }">{{ $filters.unitPrice(row.price, '￥') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="num" label="销量" width="100" sortable />
+      </el-table>
     </div>
 
     <!-- top10店铺 -->
     <div class="card transform">
       <h4>热卖店铺TOP10</h4>
-      <Table
-        stripe
-        :columns="tophotShopsColumns"
-        :data="topHotShopsData"
-      ></Table>
+      <el-table stripe :data="topHotShopsData" style="width: 100%">
+        <el-table-column type="index" label="排名" width="100" align="center" />
+        <el-table-column prop="storeName" label="店铺名称" />
+        <el-table-column prop="price" label="价格">
+          <template #default="{ row }">
+            <span :style="{ color: $mainColor }">{{ $filters.unitPrice(row.price, '￥') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="num" label="销量" width="100" sortable />
+      </el-table>
     </div>
   </div>
 </template>
 
 <script>
+import { Picture, User, List, DataLine } from "@element-plus/icons-vue";
 import { homeStatistics, hotGoods, hotShops, getNoticePage } from "@/api/index";
 import * as API_Goods from "@/api/goods";
 import { Chart } from "@antv/g2";
 import * as API_Member from "@/api/member";
-
 export default {
   name: "home",
+  components: { Picture, User, List, DataLine },
 
   data() {
     return {
-      // 测试数据
-      test: {
-        a: "test",
-        languages: [],
-      },
-      // 测试数据结束
-      tophotShopsColumns: [
-        // 表格表头
-        {
-          type: "index",
-          width: 100,
-          title: "排名",
-          align: "center",
-        },
-        {
-          title: "店铺名称",
-          key: "storeName",
-        },
-
-        {
-          title: "价格",
-          key: "price",
-
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
-          },
-        },
-        {
-          title: "销量",
-          key: "num",
-          width: 100,
-          sortable: true,
-        },
-      ],
-
-      tophotGoodsColumns: [
-        {
-          type: "index",
-          width: 100,
-          title: "排名",
-          align: "center",
-        },
-        {
-          title: "商品名称",
-          key: "goodsName",
-        },
-
-        {
-          title: "价格",
-          key: "price",
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
-          },
-        },
-        {
-          title: "销量",
-          key: "num",
-          width: 100,
-          sortable: true,
-        },
-      ],
       topHotGoodsData: [], //热卖商品集合
       topHotShopsData: [], //热卖店铺集合
       awaitTodoData: "", //今日待办集合

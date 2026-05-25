@@ -1,30 +1,18 @@
-
-
 <template>
   <div class="error500">
     <div class="error500-body-con">
-      <Card>
+      <el-card>
         <div class="error500-body-con-title">
-          5<span class="error500-0-span"
-            ><Icon type="social-freebsd-devil"></Icon></span
-          ><span class="error500-0-span"
-            ><Icon type="social-freebsd-devil"></Icon
-          ></span>
+          5<span class="error500-0-span">😈</span><span class="error500-0-span">😈</span>
         </div>
         <p class="error500-body-con-message">Oops! the server is wrong</p>
         <div class="error500-btn-con">
-          <Button @click="goHome" size="large" style="width: 200px" type="text"
-            >返回首页</Button
-          >
-          <Button
-            @click="backPage"
-            size="large"
-            style="width: 200px; margin-left: 40px"
-            type="primary"
-            >返回上一页</Button
-          >
+          <el-button size="large" style="width: 200px" @click="goHome">返回首页</el-button>
+          <el-button size="large" type="primary" style="width: 200px; margin-left: 40px" @click="backPage">
+            返回上一页
+          </el-button>
         </div>
-      </Card>
+      </el-card>
     </div>
   </div>
 </template>
@@ -33,11 +21,9 @@
 export default {
   name: "Error500",
   methods: {
-    // 返回上一页
     backPage() {
       this.$router.go(-1);
     },
-    // 返回首页
     goHome() {
       this.$router.push({
         name: "home_index",
@@ -46,6 +32,7 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
 @keyframes error500animation {
   0% {
@@ -86,21 +73,15 @@ export default {
       .error500-0-span {
         display: inline-block;
         position: relative;
-        width: 170px;
-        height: 170px;
+        width: 120px;
+        height: 120px;
         border-radius: 50%;
         border: 20px solid #ed3f14;
         color: #ed3f14;
         margin-right: 10px;
-        i {
-          display: inline-block;
-          font-size: 120px;
-          position: absolute;
-          bottom: -10px;
-          left: 10px;
-          transform-origin: center bottom;
-          animation: error500animation 3s ease 0s infinite alternate;
-        }
+        font-size: 60px;
+        line-height: 80px;
+        animation: error500animation 3s ease 0s infinite alternate;
       }
     }
     &-message {

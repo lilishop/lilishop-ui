@@ -6,43 +6,43 @@
     </div>
     <div class="setup-box">
       <div>
-        <Button
+        <el-button
           size="small"
           @click.stop="handleSelectModel(data.options.list)"
-        >编辑</Button
+        >编辑</el-button
         >
       </div>
     </div>
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="装修"
-      draggable
+      
       width="800"
-      :z-index="100"
-      :mask-closable="false"
-    >
+      
+      :close-on-click-modal="false"
+     append-to-body destroy-on-close>
       <div class="modal-tab-bar">
         <div v-for="(item,index) in data.options.list" :key="index">
           <img :src="item.img" class="three-column-img">
           <div>推荐尺寸：{{item.size}}</div>
-          <Button
+          <el-button
             size="small"
             class="ml_10"
             type="primary"
             @click="handleSelectImg(index)"
-          >选择图片</Button
+          >选择图片</el-button
           >
-          <Button
+          <el-button
             size="small"
             class="ml_10"
             type="primary"
             @click="handleSelectLink(index)"
-          >选择链接</Button
+          >选择链接</el-button
           >
         </div>
 
       </div>
-    </Modal>
+    </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog
       ref="liliDialog"
@@ -50,14 +50,14 @@
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
     <!-- 选择图片 -->
-    <Modal width="1200px" v-model="picModelFlag" footer-hide>
+    <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
       <ossManage
         @callback="callbackSelected"
-        :isComponent="true"
+        :is-component="true"
         :initialize="picModelFlag"
         ref="ossManage"
       />
-    </Modal>
+    </el-dialog>
   </div>
 </template>
 
@@ -104,7 +104,7 @@ export default {
     },
     // 选择链接回调
     selectedLink(val) {
-      this.selected.url = this.$options.filters.formatLinkType(val);
+      this.selected.url = this.$filters.formatLinkType(val);
       this.selected.type =
         val.___type === "other" && val.url === "" ? "link" : "other";
     },

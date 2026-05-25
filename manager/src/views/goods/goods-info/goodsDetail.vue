@@ -1,247 +1,159 @@
 <template>
   <div>
-    <Form :label-width="120">
-      <Card>
+    <el-form label-width="120px">
+      <el-card>
         <div class="base-info-item">
           <h4>基本信息</h4>
           <div class="form-item-view">
-            <FormItem label="商品分类">
+            <el-form-item label="商品分类">
               <span v-for="(item, index) in goods.categoryName" :key="index">
                 {{ item }}
                 <i v-if="index !== goods.categoryName.length - 1">&gt;</i>
               </span>
-            </FormItem>
-            <FormItem label="商品名称">
-              {{ goods.goodsName }}
-            </FormItem>
-
-            <FormItem label="商品卖点">
-              {{ goods.sellingPoint }}
-            </FormItem>
-            <FormItem label="商品参数">
-             <div v-if="goods.goodsParamsDTOList && goods.goodsParamsDTOList.length" v-for="(item,index) in goods.goodsParamsDTOList" :key="index">
-               <div style="margin-bottom: 10px; display: flex; align-items: center;" >
-                  {{ item.groupName }} : <tag v-for="(child,i) in item.goodsParamsItemDTOList" :key="i">
+            </el-form-item>
+            <el-form-item label="商品名称">{{ goods.goodsName }}</el-form-item>
+            <el-form-item label="商品卖点">{{ goods.sellingPoint }}</el-form-item>
+            <el-form-item label="商品参数">
+              <div
+                v-if="goods.goodsParamsDTOList && goods.goodsParamsDTOList.length"
+                v-for="(item, index) in goods.goodsParamsDTOList"
+                :key="index"
+                style="margin-bottom: 10px; display: flex; align-items: center"
+              >
+                {{ item.groupName }} :
+                <el-tag v-for="(child, i) in item.goodsParamsItemDTOList" :key="i" style="margin-left: 4px">
                   {{ child.paramName }} - {{ child.paramValue }}
-                  </tag>
-               </div>
-             </div>
-            </FormItem>
+                </el-tag>
+              </div>
+            </el-form-item>
           </div>
           <h4>商品交易信息</h4>
           <div class="form-item-view">
-            <FormItem label="计量单位"> {{ goods.goodsUnit }}</FormItem>
-            <FormItem label="销售模式">
+            <el-form-item label="计量单位">{{ goods.goodsUnit }}</el-form-item>
+            <el-form-item label="销售模式">
               {{ goods.salesModel === "RETAIL" ? "零售型" : "批发型" }}
-            </FormItem>
-            <FormItem label="销售规则" v-if="goods.salesModel !== 'RETAIL'">
-              <Table
-                border
-                :columns="wholesalePreviewColumns"
-                :data="wholesaleData"
-              >
-              </Table>
-            </FormItem>
+            </el-form-item>
+            <el-form-item v-if="goods.salesModel !== 'RETAIL'" label="销售规则">
+              <el-table border :data="wholesaleData" style="width: 100%">
+                <el-table-column label="销售规则" width="300">
+                  <template #default="{ row }">
+                    <span v-if="row">
+                      当商品购买数量 ≥{{ row.num }} 时，售价为 ￥{{ row.price }} /{{ goods.goodsUnit }}</span>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-form-item>
           </div>
           <h4>商品规格及图片</h4>
           <div class="form-item-view">
-            <FormItem label="商品编号"> {{ goods.id }}</FormItem>
-            <FormItem label="商品价格">
-              <priceColorScheme :value="goods.price" :color="$mainColor"></priceColorScheme>
-
-            </FormItem>
-            <FormItem label="商品图片">
+            <el-form-item label="商品编号">{{ goods.id }}</el-form-item>
+            <el-form-item label="商品价格">
+              <priceColorScheme :value="goods.price" :color="$mainColor" />
+            </el-form-item>
+            <el-form-item label="商品图片">
               <div
-                class="demo-upload-list"
                 v-for="(item, __index) in goods.goodsGalleryList"
                 :key="__index"
+                class="demo-upload-list"
               >
                 <img :src="item" />
                 <div class="demo-upload-list-cover">
-                  <Icon
-                    type="ios-eye-outline"
-                    @click.native="handleViewGoodsPicture(item)"
-                  ></Icon>
+                  <el-icon class="preview-icon" @click="handleViewGoodsPicture(item)"><View /></el-icon>
                 </div>
-                <Modal title="View Image" v-model="goodsPictureVisible">
-                  <img
-                    :src="previewGoodsPicture"
-                    v-if="goodsPictureVisible"
-                    style="width: 100%"
-                  />
-                </Modal>
               </div>
-            </FormItem>
-            <FormItem label="商品视频">
-              <video
-                v-if="goods.goodsVideo"
-                controls
-                class="player"
-                :src="goods.goodsVideo"
-              />
-            </FormItem>
-            <FormItem label="商品规格">
-              <Table :columns="skuColumn" :data="skuData">
-                <template slot="showImage" slot-scope="scope">
-                  <div style="margin-top: 5px; display: flex">
-                    <div>
+              <el-dialog v-model="goodsPictureVisible" title="View Image" width="600px">
+                <img v-if="goodsPictureVisible" :src="previewGoodsPicture" style="width: 100%" />
+              </el-dialog>
+            </el-form-item>
+            <el-form-item label="商品视频">
+              <video v-if="goods.goodsVideo" controls class="player" :src="goods.goodsVideo" />
+            </el-form-item>
+            <el-form-item label="商品规格">
+              <el-table :data="skuData" style="width: 100%">
+                <el-table-column prop="specs" label="规格" />
+                <el-table-column prop="sn" label="编号" />
+                <el-table-column prop="weight" label="重量(kg)" />
+                <el-table-column
+                  v-for="(item, index) in wholesaleData"
+                  :key="'wp' + index"
+                  :label="'购买量 ≥ ' + item.num"
+                >
+                  <template #default>
+                    <el-input v-if="wholesaleData[index]" v-model="wholesaleData[index].price" disabled>
+                      <template #append>元</template>
+                    </el-input>
+                  </template>
+                </el-table-column>
+                <el-table-column v-if="goods.salesModel !== 'WHOLESALE'" label="价格">
+                  <template #default="{ row }">
+                    <priceColorScheme v-if="row" :value="row.price" :color="$mainColor" />
+                  </template>
+                </el-table-column>
+                <el-table-column v-if="goods.salesModel !== 'WHOLESALE'" prop="quantity" label="库存" />
+                <el-table-column label="图片">
+                  <template #default="{ row }">
+                    <div v-if="row" style="margin-top: 5px; display: flex">
                       <img
-                        v-for="(item,index) in scope.row.image"
+                        v-for="(item, index) in row.image"
                         :key="index"
                         :src="item"
-                        style="height: 60px; margin:10px; width: 60px"
+                        style="height: 60px; margin: 10px; width: 60px"
                       />
                     </div>
-                  </div>
-                </template>
-                <template slot-scope="{ row }" slot="wholePrice0">
-                  <Input
-                    v-if="wholesaleData[0]"
-                    clearable
-                    disabled
-                    v-model="wholesaleData[0].price"
-                  >
-                    <span slot="append">元</span>
-                  </Input>
-                </template>
-                <template slot-scope="{ row }" slot="wholePrice1">
-                  <Input
-                    v-if="wholesaleData[1]"
-                    clearable
-                    disabled
-                    v-model="wholesaleData[1].price"
-                  >
-                    <span slot="append">元</span>
-                  </Input>
-                </template>
-                <template slot-scope="{ row }" slot="wholePrice2">
-                  <Input
-                    v-if="wholesaleData[2]"
-                    clearable
-                    disabled
-                    v-model="wholesaleData[2].price"
-                  >
-                    <span slot="append">元</span>
-                  </Input>
-                </template>
-              </Table>
-            </FormItem>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-form-item>
           </div>
           <h4>商品详情描述</h4>
           <div class="form-item-view">
-            <FormItem label="商品描述">
+            <el-form-item label="商品描述">
               <div v-html="goods.intro"></div>
-            </FormItem>
-            <FormItem label="移动端描述">
+            </el-form-item>
+            <el-form-item label="移动端描述">
               <div v-html="goods.mobileIntro"></div>
-            </FormItem>
+            </el-form-item>
           </div>
         </div>
-      </Card>
-    </Form>
+      </el-card>
+    </el-form>
   </div>
 </template>
 <script>
+import { View } from "@element-plus/icons-vue";
 import { getGoodsDetail } from "@/api/goods";
+
 export default {
   name: "goodsDetail",
+  components: { View },
   data() {
     return {
-      goods: {}, // 商品信息
-      previewGoodsPicture: "", // 预览图片
-      goodsPictureVisible: false, // 预览图片模态框
-      wholesalePreviewColumns: [
-        {
-          title: "销售规则",
-          width: 300,
-          render: (h, params) => {
-            let guide =
-              "当商品购买数量 ≥" +
-              params.row.num +
-              " 时，售价为 ￥" +
-              params.row.price +
-              " /" +
-              this.goods.goodsUnit;
-            return h("div", guide);
-          },
-        },
-      ],
+      goods: {},
+      previewGoodsPicture: "",
+      goodsPictureVisible: false,
       wholesaleData: [],
-      skuColumn: [
-        // 规格表头
-        {
-          title: "规格",
-          key: "specs",
-        },
-        {
-          title: "编号",
-          key: "sn",
-        },
-        {
-          title: "重量(kg)",
-          key: "weight",
-        },
-      ],
-      skuData: [], // sku数据
+      skuData: [],
     };
   },
   mounted() {
     this.initGoods(this.$route.query.id);
   },
   methods: {
-    // 初始化数据，获取商品详情
     initGoods(id) {
       getGoodsDetail(id).then((res) => {
         this.goods = res.result;
-        let that = this;
-        res.result.skuList.forEach(function (sku, index, array) {
-          that.skuData.push({
-            specs: sku.goodsName,
-            sn: sku.sn,
-            weight: sku.weight,
-            cost: sku.cost,
-            price:sku.price,
-            image: sku.goodsGalleryList,
-            quantity:sku.quantity
-          });
-        });
-        if (res.result.salesModel === "WHOLESALE" && res.result.wholesaleList) {
-          res.result.wholesaleList.forEach((item, index) => {
-            this.skuColumn.push({
-              title: "购买量 ≥ " + item.num,
-              slot: "wholePrice" + index,
-            });
-          });
-        } else {
-          this.skuColumn.push(
-            // {
-            //   title: "成本",
-            //   key: "cost",
-            //   render: (h, params) => {
-            //     console.log(params)
-            //     return h("priceColorScheme", {props:{value:params.row.cost,color:this.$mainColor}} );
-            //   },
-            // },
-            {
-              title: "价格",
-              key: "price",
-              render: (h, params) => {
-                return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
-              },
-            },{
-              title: "库存",
-              key: "quantity",
-            }
-          );
-        }
-        this.skuColumn.push({
-          title: "图片",
-          slot: "showImage",
-        });
-        this.wholesaleData = res.result.wholesaleList;
+        this.skuData = res.result.skuList.map((sku) => ({
+          specs: sku.goodsName,
+          sn: sku.sn,
+          weight: sku.weight,
+          cost: sku.cost,
+          price: sku.price,
+          image: sku.goodsGalleryList,
+          quantity: sku.quantity,
+        }));
+        this.wholesaleData = res.result.wholesaleList || [];
       });
     },
-    // 预览商品图片
     handleViewGoodsPicture(url) {
       this.previewGoodsPicture = url;
       this.goodsPictureVisible = true;
@@ -251,7 +163,6 @@ export default {
 </script>
 
 <style lang="scss" soped>
-/*平铺*/
 div.base-info-item {
   h4 {
     margin-bottom: 10px;
@@ -300,13 +211,10 @@ div.base-info-item {
 .demo-upload-list:hover .demo-upload-list-cover {
   display: block;
 }
-.demo-upload-list-cover i {
+.preview-icon {
   color: #fff;
   font-size: 20px;
   cursor: pointer;
-  margin: 0 2px;
-}
-.ivu-table table {
-  width: 100% !important;
+  margin-top: 20px;
 }
 </style>

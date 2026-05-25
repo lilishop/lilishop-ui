@@ -1,31 +1,30 @@
 <template>
-  <div class="wx-channel-setting">
-    <Form :label-width="160" label-position="right" :model="configObject">
-      <FormItem label="AppId">
-        <Input v-model="configObject.appId" style="width: 360px" />
-      </FormItem>
-      <FormItem label="AppSecret">
-        <Input v-model="configObject.appSecret" style="width: 360px" />
-      </FormItem>
-      <FormItem label="接口基础地址">
-        <Input
+  <div v-loading="loading" class="wx-channel-setting">
+    <el-form label-width="160px" label-position="right" :model="configObject">
+      <el-form-item label="AppId">
+        <el-input v-model="configObject.appId" style="width: 360px" />
+      </el-form-item>
+      <el-form-item label="AppSecret">
+        <el-input v-model="configObject.appSecret" style="width: 360px" />
+      </el-form-item>
+      <el-form-item label="接口基础地址">
+        <el-input
           v-model="configObject.apiBase"
           style="width: 360px"
           placeholder="https://api.weixin.qq.com/minishop"
         />
-      </FormItem>
-      <FormItem label="Token地址">
-        <Input
+      </el-form-item>
+      <el-form-item label="Token地址">
+        <el-input
           v-model="configObject.tokenUrl"
           style="width: 360px"
           placeholder="https://api.weixin.qq.com/cgi-bin/token"
         />
-      </FormItem>
+      </el-form-item>
       <div class="actions">
-        <Button type="primary" @click="submit" :loading="submitLoading">保存</Button>
+        <el-button type="primary" :loading="submitLoading" @click="submit">保存</el-button>
       </div>
-    </Form>
-    <Spin size="large" fix v-if="loading"></Spin>
+    </el-form>
   </div>
 </template>
 
@@ -79,8 +78,8 @@ export default {
       getSetting("WX_CHANNELS")
         .then((res) => {
           if (res && res.success) {
-            const base = this.normalizeConfig(res.result);
-            this.configObject = this.pickConfigFields(base);
+            const raw = this.normalizeConfig(res.result);
+            this.configObject = this.pickConfigFields(raw);
           }
         })
         .finally(() => {
@@ -88,12 +87,14 @@ export default {
         });
     },
     submit() {
-      const payload = { ...this.configObject };
       this.submitLoading = true;
-      setSetting("WX_CHANNELS", payload)
+      setSetting("WX_CHANNELS", this.configObject)
         .then((res) => {
           if (res && res.success) {
             this.$Message.success("保存成功");
+            this.reloadConfig();
+          } else {
+            this.$Message.error("保存失败");
           }
         })
         .finally(() => {
@@ -107,8 +108,5 @@ export default {
 <style scoped lang="scss">
 .actions {
   margin-left: 160px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
 }
 </style>

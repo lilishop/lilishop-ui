@@ -32,59 +32,57 @@
           <div class="goods-desc">{{ item.desc }}</div>
         </div>
         <div class="goods-price">
-          {{ item.price | unitPrice("￥") }}
+          {{ $filters.unitPrice(item.price, "￥") }}
         </div>
       </div>
       <div class="setup-box">
         <div>
-          <Button
+          <el-button
             size="small"
             @click.stop="handleSelectModel(data.options.list)"
-            >编辑</Button
+            >编辑</el-button
           >
         </div>
       </div>
     </div>
 
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="装修"
-      draggable
+      
       width="800"
-      :z-index="100"
-      :mask-closable="false"
-    >
+      
+      :close-on-click-modal="false"
+     append-to-body destroy-on-close>
       <div class="modal-tab-bar">
         <div class="tab-bar">
           标题
-          <Input style="width: 300px" v-model="data.options.title"></Input>
+          <el-input style="width: 300px" v-model="data.options.title" />
         </div>
         <div class="tab-bar" v-if="data.options.labels[tabCurrentlyIndex]">
           标签
-          <Input
+          <el-input
             style="width: 300px"
             v-model="data.options.labels[tabCurrentlyIndex].label"
-          ></Input>
+           />
         </div>
-        <Tabs
+        <el-button @click="handleTabsAdd" size="small" class="mb_10">增加</el-button>
+        <el-tabs
           type="card"
-          @on-click="handleClickTab"
-          :value="tabIndex"
-          :draggable="true"
-
+          v-model="tabIndex"
+          @tab-click="handleClickTab"
         >
-          <Button @click="handleTabsAdd" size="small" slot="extra">增加</Button>
-          <TabPane
+          <el-tab-pane
             v-for="(tab,tabIndex) in data.options.labels"
             :key="tabIndex"
             :label="tab.label"
             :name="tab.___index + ''"
           >
             <div class="flex flex-a-c">
-              <Button class="del-btn" type="primary" @click="handleContextMenuDelete(tab,tabIndex)">删除当前标签</Button>
-              <Button class="add-goods" @click="addCurrentGoods">
+              <el-button class="del-btn" type="primary" @click="handleContextMenuDelete(tab,tabIndex)">删除当前标签</el-button>
+              <el-button class="add-goods" @click="addCurrentGoods">
                 添加商品
-              </Button>
+              </el-button>
             </div>
 
             <div
@@ -100,21 +98,21 @@
                   <div class="column-config">
                     <div>
                       标题：
-                      <Input v-model="item.title"></Input>
+                      <el-input v-model="item.title" />
                     </div>
                     <div>
                       描述：
-                      <Input v-model="item.desc"></Input>
+                      <el-input v-model="item.desc" />
                     </div>
                   </div>
-                  <Button @click="delGoods(item)">删除</Button>
+                  <el-button @click="delGoods(item)">删除</el-button>
                 </div>
               </div>
             </div>
-          </TabPane>
-        </Tabs>
+          </el-tab-pane>
+        </el-tabs>
       </div>
-    </Modal>
+    </el-dialog>
 
     <!-- 选择商品。链接 -->
     <liliDialog
@@ -222,7 +220,7 @@ export default {
     // 选择链接回调
     selectedLink(val) {
       this.selected[this.current].url =
-        this.$options.filters.formatLinkType(val);
+        this.$filters.formatLinkType(val);
       this.selected[this.current].type =
         val.___type === "other" && val.url === "" ? "link" : "other";
 

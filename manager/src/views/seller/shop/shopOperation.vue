@@ -1,89 +1,79 @@
 <template>
   <div>
-    <Card>
-      <Button class="mb_10" v-if="shopForm.storeDisable === 'APPLYING'" type="primary" @click="auditHandler">审核</Button>
-      <Tabs v-model="tabName" :animated="false" style="overflow: visible">
-        <Form
-          ref="shopForm"
-          :model="shopForm"
-          :label-width="130"
-          label-position="right"
-          :rules="shopValidate"
-          @on-validate="formValidate"
-        >
-          <TabPane label="基本信息" class="tab" name="base">
-            <Divider orientation="left">基本信息</Divider>
+    <el-card>
+      <el-button
+        class="mb_10"
+        v-if="shopForm.storeDisable === 'APPLYING'"
+        type="primary"
+        @click="auditHandler"
+        >审核</el-button
+      >
+      <el-form
+        ref="shopForm"
+        :model="shopForm"
+        label-width="130px"
+        label-position="right"
+        :rules="shopValidate"
+      >
+        <el-tabs v-model="tabName" style="overflow: visible">
+          <el-tab-pane label="基本信息" class="tab" name="base">
+            <el-divider content-position="left">基本信息</el-divider>
             <!-- 遮罩层  -->
             <div v-if="isRead" class="mask">只读不可修改</div>
             <div>
-              <FormItem label="会员名称" prop="memberName">
+              <el-form-item label="会员名称" prop="memberName">
                 <div class="item">
-                  <Input disabled v-model="shopForm.memberName" />
-                  <Button type="default" @click="selectMember()" v-if="!$route.query.shopId"
-                    >选择会员</Button
+                  <el-input disabled v-model="shopForm.memberName" />
+                  <el-button type="default" @click="selectMember()" v-if="!$route.query.shopId"
+                    >选择会员</el-button
                   >
                 </div>
-              </FormItem>
-              <FormItem label="店铺名称" prop="storeName">
-                <Input v-model="shopForm.storeName" clearable style="width: 350px" />
-              </FormItem>
+              </el-form-item>
+              <el-form-item label="店铺名称" prop="storeName">
+                <el-input v-model="shopForm.storeName" clearable style="width: 350px" />
+              </el-form-item>
 
-              <FormItem label="是否自营" prop="selfOperated">
-                <RadioGroup
-                  type="button"
-                  button-style="solid"
-                  v-model="shopForm.selfOperated"
+              <el-form-item label="是否自营" prop="selfOperated">
+                <el-radio-group v-model="shopForm.selfOperated">
+                  <el-radio-button value="true">自营</el-radio-button>
+                  <el-radio-button value="false">非自营</el-radio-button>
+                </el-radio-group>
+              </el-form-item>
+
+              <el-form-item label="店铺所在地" prop="storeAddressPath">
+                <span>{{ shopForm.storeAddressPath || "暂无地址" }}</span>
+                <el-button
+                  style="margin-left: 10px"
+                  type="default"
+                  @click="handleClickAddress('storeAddressPath')"
+                  >选择</el-button
                 >
-                  <Radio label="true">自营</Radio>
-                  <Radio label="false">非自营</Radio>
-                </RadioGroup>
-              </FormItem>
+              </el-form-item>
 
-              <FormItem label="店铺所在地" prop="storeAddressPath">
-                <span>{{shopForm.storeAddressPath || '暂无地址'}}</span>
-                <Button style="margin-left: 10px;" type="default" @click="handleClickAddress('storeAddressPath')">选择</Button>
-              </FormItem>
-
-              <FormItem label="店铺详细地址" prop="storeAddressDetail">
-                <Input
+              <el-form-item label="店铺详细地址" prop="storeAddressDetail">
+                <el-input
                   v-model="shopForm.storeAddressDetail"
                   clearable
                   style="width: 350px"
                 />
-              </FormItem>
+              </el-form-item>
 
-              <!-- <FormItem label="店铺定位" prop="shopCenter">
-                 <Button
-                  type="info"
-                  v-if="!shopForm.storeCenter"
-                  @click="$refs.liliMap.showMap = true"
-                  >点击获取店铺定位</Button
-                >
-                <Button type="success" v-else @click="$refs.liliMap.showMap = true"
-                  >已定位</Button
-                >
-              </FormItem> -->
-
-
-
-              <FormItem label="店铺logo" class="storeLogo">
-                <Avatar
-                  style="height: 100px; width: 100px"
+              <el-form-item label="店铺logo" class="storeLogo">
+                <el-avatar
                   v-if="shopForm.storeLogo"
                   shape="square"
-                  icon="ios-person"
-                  size="default"
+                  :size="100"
                   :src="shopForm.storeLogo"
                 />
                 <div>
-                  <Button @click="handleCLickImg('storeLogo')" type="primary"
-                    >选择图片</Button
+                  <el-button @click="handleCLickImg('storeLogo')" type="primary"
+                    >选择图片</el-button
                   >
                 </div>
-              </FormItem>
+              </el-form-item>
 
-              <FormItem label="店铺简介" prop="storeDesc" style="width: 350px">
-                <Input
+              <el-form-item label="店铺简介" prop="storeDesc" style="width: 350px">
+                <el-input
                   v-model="shopForm.storeDesc"
                   type="textarea"
                   :rows="4"
@@ -92,317 +82,314 @@
                   clearable
                   style="width: 400px"
                 />
-              </FormItem>
+              </el-form-item>
               <br />
-              <Divider orientation="left">退货收件地址</Divider>
-              <FormItem label="收件人姓名">
-                <Input
+              <el-divider content-position="left">退货收件地址</el-divider>
+              <el-form-item label="收件人姓名">
+                <el-input
                   v-model="shopForm.salesConsigneeName"
                   clearable
                   style="width: 350px"
                 />
-              </FormItem>
-              <FormItem label="收件人手机">
-                <Input
+              </el-form-item>
+              <el-form-item label="收件人手机">
+                <el-input
                   v-model="shopForm.salesConsigneeMobile"
                   clearable
                   maxlength="11"
                   style="width: 350px"
                 />
-              </FormItem>
-              <FormItem label="地址信息">
-                {{ shopForm.salesConsigneeAddressPath || '暂无地址' }}
-                <Button style="margin-left: 10px;" type="default" @click="handleClickAddress('salesConsigneeAddressPath')">选择</Button>
-              </FormItem>
-              <FormItem label="详细地址">
-                <Input
+              </el-form-item>
+              <el-form-item label="地址信息">
+                {{ shopForm.salesConsigneeAddressPath || "暂无地址" }}
+                <el-button
+                  style="margin-left: 10px"
+                  type="default"
+                  @click="handleClickAddress('salesConsigneeAddressPath')"
+                  >选择</el-button
+                >
+              </el-form-item>
+              <el-form-item label="详细地址">
+                <el-input
                   v-model="shopForm.salesConsigneeDetail"
                   clearable
                   style="width: 350px"
                 />
-              </FormItem>
-              <!-- <Divider orientation="left">腾讯云智服</Divider>
-              <FormItem label="唯一标识">
-                <Input v-model="shopForm.yzfSign" clearable style="width: 350px" />
-              </FormItem>
-              <FormItem label="小程序唯一标识">
-                <Input v-model="shopForm.yzfMpSign" clearable style="width: 350px" />
-              </FormItem>
-              <Spin fix v-if="loading"></Spin> -->
+              </el-form-item>
             </div>
-          </TabPane>
+          </el-tab-pane>
 
           <!-- 入驻信息 -->
-          <TabPane label="入驻信息" class="tab" name="entry">
+          <el-tab-pane label="入驻信息" class="tab" name="entry">
             <!-- 遮罩层  -->
             <div v-if="isRead" class="mask">只读不可修改</div>
-            <Divider orientation="left">公司信息</Divider>
-            <div>
-              <FormItem label="公司名称" prop="companyName">
-                <Input v-model="shopForm.companyName" clearable style="width: 350px" />
-              </FormItem>
+            <el-divider content-position="left">公司信息</el-divider>
+            <div v-loading="loading">
+              <el-form-item label="公司名称" prop="companyName">
+                <el-input v-model="shopForm.companyName" clearable style="width: 350px" />
+              </el-form-item>
 
-              <FormItem label="公司电话" prop="companyPhone">
-                <Input v-model="shopForm.companyPhone" clearable style="width: 350px" />
-              </FormItem>
-              <FormItem label="公司所在地" prop="companyAddressIdPath">
+              <el-form-item label="公司电话" prop="companyPhone">
+                <el-input v-model="shopForm.companyPhone" clearable style="width: 350px" />
+              </el-form-item>
+              <el-form-item label="公司所在地" prop="companyAddressIdPath">
                 <span>{{ shopForm.companyAddressPath }}</span>
-                <Button style="margin-left: 10px;" @click="handleClickAddress('companyAddressPath')">选择</Button>
-                <!-- <region
-                  style="width: 350px"
-                  @selected="selectedRegion"
-                  :addressId="address"
-                /> -->
-              </FormItem>
-              <FormItem label="公司详细地址" prop="companyAddress">
-                <Input v-model="shopForm.companyAddress" clearable style="width: 350px" />
-              </FormItem>
-              <FormItem label="员工总数" prop="employeeNum">
-                <InputNumber
+                <el-button
+                  style="margin-left: 10px"
+                  type="default"
+                  @click="handleClickAddress('companyAddressPath')"
+                  >选择</el-button
+                >
+              </el-form-item>
+              <el-form-item label="公司详细地址" prop="companyAddress">
+                <el-input v-model="shopForm.companyAddress" clearable style="width: 350px" />
+              </el-form-item>
+              <el-form-item label="员工总数" prop="employeeNum">
+                <el-input-number
                   style="width: 150px"
                   :min="1"
                   :max="9999999"
                   v-model="shopForm.employeeNum"
-                >
-                </InputNumber>
-              </FormItem>
-              <FormItem label="注册资金" prop="registeredCapital">
-                <InputNumber
+                />
+              </el-form-item>
+              <el-form-item label="注册资金" prop="registeredCapital">
+                <el-input-number
                   style="width: 150px"
                   :min="1"
                   :max="9999999"
                   v-model="shopForm.registeredCapital"
-                >
-                </InputNumber>
+                />
                 <span style="margin-left: 10px">万</span>
-              </FormItem>
-              <FormItem label="联系人姓名" prop="linkName">
-                <Input v-model="shopForm.linkName" clearable style="width: 200px" />
-              </FormItem>
-              <FormItem label="联系人手机" prop="linkPhone">
-                <Input
+              </el-form-item>
+              <el-form-item label="联系人姓名" prop="linkName">
+                <el-input v-model="shopForm.linkName" clearable style="width: 200px" />
+              </el-form-item>
+              <el-form-item label="联系人手机" prop="linkPhone">
+                <el-input
                   v-model="shopForm.linkPhone"
                   maxlength="11"
                   clearable
                   style="width: 200px"
                 />
-              </FormItem>
-              <FormItem label="电子邮箱" prop="companyEmail">
-                <Input v-model="shopForm.companyEmail" clearable style="width: 200px" />
-              </FormItem>
+              </el-form-item>
+              <el-form-item label="电子邮箱" prop="companyEmail">
+                <el-input v-model="shopForm.companyEmail" clearable style="width: 200px" />
+              </el-form-item>
 
-              <Divider orientation="left">营业执照信息</Divider>
+              <el-divider content-position="left">营业执照信息</el-divider>
 
-              <FormItem label="营业执照号" prop="licenseNum">
-                <Input v-model="shopForm.licenseNum" clearable style="width: 200px" />
-              </FormItem>
+              <el-form-item label="营业执照号" prop="licenseNum">
+                <el-input v-model="shopForm.licenseNum" clearable style="width: 200px" />
+              </el-form-item>
 
-              <FormItem label="法定经营范围" prop="scope">
-                <Input v-model="shopForm.scope" clearable style="width: 200px" />
-              </FormItem>
+              <el-form-item label="法定经营范围" prop="scope">
+                <el-input v-model="shopForm.scope" clearable style="width: 200px" />
+              </el-form-item>
 
-              <FormItem label="营业执照电子版" prop="licencePhoto">
-                <Avatar
-                  style="height: 100px; width: 100px"
+              <el-form-item label="营业执照电子版" prop="licencePhoto">
+                <el-avatar
                   v-if="shopForm.licencePhoto"
                   shape="square"
-                  icon="ios-person"
-                  size="default"
+                  :size="100"
                   :src="shopForm.licencePhoto"
                 />
                 <div>
-                  <Button @click="handleCLickImg('licencePhoto')" type="primary"
-                  >选择图片</Button
+                  <el-button @click="handleCLickImg('licencePhoto')" type="primary"
+                    >选择图片</el-button
                   >
                 </div>
-              </FormItem>
-              <Divider orientation="left">法人信息</Divider>
+              </el-form-item>
+              <el-divider content-position="left">法人信息</el-divider>
 
-              <FormItem label="法人姓名" prop="legalName">
-                <Input v-model="shopForm.legalName" clearable style="width: 200px" />
-              </FormItem>
-              <FormItem label="法人证件号" prop="legalId">
-                <Input v-model="shopForm.legalId" clearable style="width: 200px" />
-              </FormItem>
-              <FormItem label="法人身份证照片" prop="legalPhoto">
-                <Avatar
+              <el-form-item label="法人姓名" prop="legalName">
+                <el-input v-model="shopForm.legalName" clearable style="width: 200px" />
+              </el-form-item>
+              <el-form-item label="法人证件号" prop="legalId">
+                <el-input v-model="shopForm.legalId" clearable style="width: 200px" />
+              </el-form-item>
+              <el-form-item label="法人身份证照片" prop="legalPhoto">
+                <el-avatar
                   class="legal-photo"
                   shape="square"
-                  size="100"
-                  icon="md-add"
-                  @click.native="handleCLickImg('legalPhoto', 0)"
+                  :size="100"
+                  @click="handleCLickImg('legalPhoto', 0)"
                   :src="shopForm.legalPhoto[0]"
                 />
-                <Avatar
+                <el-avatar
                   class="ml_10 legal-photo"
                   shape="square"
-                  size="100"
-                  icon="md-add"
-                  @click.native="handleCLickImg('legalPhoto', 1)"
+                  :size="100"
+                  @click="handleCLickImg('legalPhoto', 1)"
                   :src="shopForm.legalPhoto[1]"
                 />
                 <span>点击图片上传身份证正反面，要求身份证清晰，四角无缺漏</span>
-              </FormItem>
+              </el-form-item>
 
-              <Divider orientation="left">结算银行信息</Divider>
-              <FormItem label="银行开户名" prop="settlementBankAccountName">
-                <Input
+              <el-divider content-position="left">结算银行信息</el-divider>
+              <el-form-item label="银行开户名" prop="settlementBankAccountName">
+                <el-input
                   v-model="shopForm.settlementBankAccountName"
                   clearable
                   style="width: 200px"
                 />
-              </FormItem>
-              <FormItem label="银行账号" prop="settlementBankAccountNum">
-                <Input
+              </el-form-item>
+              <el-form-item label="银行账号" prop="settlementBankAccountNum">
+                <el-input
                   v-model="shopForm.settlementBankAccountNum"
                   clearable
                   style="width: 200px"
                 />
-              </FormItem>
-              <FormItem label="银行支行名称" prop="settlementBankBranchName">
-                <Input
+              </el-form-item>
+              <el-form-item label="银行支行名称" prop="settlementBankBranchName">
+                <el-input
                   v-model="shopForm.settlementBankBranchName"
                   clearable
                   style="width: 200px"
                 />
-              </FormItem>
-              <FormItem label="支行联行号" prop="settlementBankJointName">
-                <Input
+              </el-form-item>
+              <el-form-item label="支行联行号" prop="settlementBankJointName">
+                <el-input
                   v-model="shopForm.settlementBankJointName"
                   clearable
                   style="width: 200px"
                 />
-              </FormItem>
-
-              <Spin fix v-if="loading"></Spin>
+              </el-form-item>
             </div>
-          </TabPane>
-          <TabPane label="经营范围" class="tab" name="category">
+          </el-tab-pane>
+          <el-tab-pane label="经营范围" class="tab" name="category">
             <!-- 遮罩层  -->
             <div v-if="isRead" class="mask">只读不可修改</div>
-            <FormItem label="经营类目" prop="goodsManagementCategory">
+            <el-form-item label="经营类目" prop="goodsManagementCategory">
               <div>
-                <Checkbox
+                <el-checkbox
+                  v-model="checkAll"
                   :indeterminate="indeterminate"
-                  :value="checkAll"
-                  @click.prevent.native="handleCheckAll"
+                  @change="handleCheckAll"
                   >全选
-                </Checkbox>
+                </el-checkbox>
               </div>
-              <CheckboxGroup v-model="checkAllGroup" @on-change="checkAllGroupChange">
-                <Checkbox v-for="(item, i) in categories" :key="i + 1" :label="item.id"
+              <el-checkbox-group v-model="checkAllGroup" @change="checkAllGroupChange">
+                <el-checkbox
+                  v-for="(item, i) in categories"
+                  :key="i + 1"
+                  :value="String(item.id)"
                   >{{ item.name }}
-                </Checkbox>
-              </CheckboxGroup>
-            </FormItem>
-          </TabPane>
+                </el-checkbox>
+              </el-checkbox-group>
+            </el-form-item>
+          </el-tab-pane>
 
-          <!-- <TabPane label="配送信息" class="tab" name="send"> -->
-            <!-- 遮罩层  -->
-            <!-- <FormItem label="达达编码" prop="ddCode">
-              <Input
-                v-model="shopForm.ddCode"
-                maxlength="20"
-                clearable
-                style="width: 200px"
-              />
-            </FormItem> -->
-          <!-- </TabPane> -->
-
-          <TabPane label="结算信息" class="tab" name="settlement">
-            <Alert type="error"
-              >已添加<span class="theme_color">{{ settlementCycle.length }}</span
-              >个结算日，最多可添加5个结算日，当月不包含所设日期时，将会顺延到下一个结算日</Alert
-            >
-            <FormItem label="结算日期">
-              <Tag
+          <el-tab-pane label="结算信息" class="tab" name="settlement">
+            <el-alert type="error" :closable="false" show-icon>
+              已添加<span class="theme_color">{{ settlementCycle.length }}</span
+              >个结算日，最多可添加5个结算日，当月不包含所设日期时，将会顺延到下一个结算日
+            </el-alert>
+            <el-form-item label="结算日期">
+              <el-tag
                 v-for="item in settlementCycle"
                 :key="item"
-                :name="item"
                 closable
-                style="marrgin-left: 10px"
-                @on-close="removesettlementCycle"
+                style="margin-left: 10px"
+                @close="removesettlementCycle(item)"
                 >{{ item }}
-              </Tag>
-              <InputNumber
+              </el-tag>
+              <el-input-number
                 size="small"
                 :max="31"
                 :min="1"
                 v-model="day"
                 v-show="settlementShow"
-              ></InputNumber>
-              <Button
+              />
+              <el-button
                 type="default"
                 @click="addsettlementCycle"
                 size="small"
                 v-if="addSettlementBtn && settlementCycle.length < 5"
                 style="margin-left: 8px"
                 >添加结算日期
-              </Button>
-              <Button
+              </el-button>
+              <el-button
                 v-if="addSettlementConfirmBtn"
                 type="default"
                 @click="addsettlementCycleConfirm"
                 size="small"
                 style="margin-left: 8px"
                 >确认
-              </Button>
-            </FormItem>
-          </TabPane>
-        </Form>
-      </Tabs>
-      <div align="center">
-        <Button
-          type="info"
+              </el-button>
+            </el-form-item>
+          </el-tab-pane>
+        </el-tabs>
+      </el-form>
+      <div style="text-align: center">
+        <el-button
+          type="default"
           v-show="tabNameList.indexOf(tabName) > 0"
           class="mr_10"
           @click="prev"
-          >上一步</Button
+          >上一步</el-button
         >
-        <Button type="primary" v-show="tabNameList.indexOf(tabName) < tabNameList.length - 1" @click="next"
-          >下一步</Button
+        <el-button
+          type="primary"
+          v-show="tabNameList.indexOf(tabName) < tabNameList.length - 1"
+          @click="next"
+          >下一步</el-button
         >
-        <Button
+        <el-button
           type="primary"
           v-show="tabNameList.indexOf(tabName) === tabNameList.length - 1"
           @click="save"
           v-if="!isRead"
         >
           {{ shopId ? "修改" : "保存" }}
-        </Button>
+        </el-button>
       </div>
-    </Card>
+    </el-card>
 
+    <el-dialog
+      v-model="picModelFlag"
+      width="1200px"
+      append-to-body
+      destroy-on-close
+      :show-close="true"
+    >
+      <ossManage
+        @callback="callbackSelected"
+        :isComponent="true"
+        :initialize="picModelFlag"
+        ref="ossManage"
+      />
+    </el-dialog>
 
-    <Modal width="1200px" v-model="picModelFlag">
-      <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage" />
-    </Modal>
-
-    <Modal width="1200px" v-model="memberModalFlag">
+    <el-dialog
+      v-model="memberModalFlag"
+      width="1200px"
+      append-to-body
+      destroy-on-close
+      :show-close="true"
+    >
       <memberLayout
         @callback="callbackMember"
         class="selectedMember"
         ref="memberLayout"
       />
-    </Modal>
+    </el-dialog>
 
-    <Modal v-model="auditModel" width="360">
-      <p slot="header" style="color: #f60; text-align: center">
-        <Icon type="ios-information-circle"></Icon>
-        <span>审核店铺</span>
-      </p>
+    <el-dialog v-model="auditModel" width="360px" append-to-body :show-close="true">
+      <template #header>
+        <span style="color: #f60; text-align: center; display: block">审核店铺</span>
+      </template>
       <div style="text-align: center">
         <p>您确认要审核通过该店铺</p>
       </div>
-      <div slot="footer">
-        <Button type="error" :loading="auditModalLoading" @click="audit('REFUSED')"
-          >驳回</Button
+      <template #footer>
+        <el-button type="danger" :loading="auditModalLoading" @click="audit('REFUSED')"
+          >驳回</el-button
         >
-        <Button type="info" :loading="auditModalLoading" @click="audit('PASS')"
-          >通过</Button
+        <el-button type="primary" :loading="auditModalLoading" @click="audit('PASS')"
+          >通过</el-button
         >
-      </div>
-    </Modal>
+      </template>
+    </el-dialog>
 
     <multipleMap ref="map" @callback="getAddress" />
   </div>
@@ -511,7 +498,7 @@ export default {
       settlementCycle: [], // 结算周期
       shopForm: {
         // 店铺数据
-        storeAddressPath:"",
+        storeAddressPath: "",
 
         settlementCycle: "",
         selfOperated: "false",
@@ -548,15 +535,14 @@ export default {
 
       infoResult: {}, // 店铺详情
       picIndex: "", // 存储身份证图片下标，方便赋值
-      currentAddress:"", //当前选中的地址
+      currentAddress: "", //当前选中的地址
     };
   },
   methods: {
     // 选择地址
-    handleClickAddress(val){
+    handleClickAddress(val) {
       this.currentAddress = val;
       this.$refs.map.open();
-
     },
     // 选择会员的回调
     callbackMember(val) {
@@ -588,7 +574,7 @@ export default {
       this.regionId = "";
     },
     //删除所选择的结算日
-    removesettlementCycle(event, name) {
+    removesettlementCycle(name) {
       this.settlementCycle = this.settlementCycle.filter((i) => i !== name);
     },
     //确认添加方法
@@ -615,21 +601,13 @@ export default {
     },
     // 选择公司地址
     selectedRegion(val) {
-      this.$set(this.shopForm, "companyAddressIdPath", val[0].toString());
-      this.$set(
-        this.shopForm,
-        "companyAddressPath",
-        val[1].toString().replace(/\s/g, "")
-      );
+      this.shopForm.companyAddressIdPath = val[0].toString();
+      this.shopForm.companyAddressPath = val[1].toString().replace(/\s/g, "");
     },
     // 选择退货收件地址
     selectedConsigneeRegion(val) {
-      this.$set(this.shopForm, "salesConsigneeAddressId", val[0].toString());
-      this.$set(
-        this.shopForm,
-        "salesConsigneeAddressPath",
-        val[1].toString().replace(/\s/g, "")
-      );
+      this.shopForm.salesConsigneeAddressId = val[0].toString();
+      this.shopForm.salesConsigneeAddressPath = val[1].toString().replace(/\s/g, "");
     },
     // 选择图片modal
     handleCLickImg(val, index) {
@@ -665,7 +643,6 @@ export default {
       let index = this.tabNameList.indexOf(this.tabName) - 1;
       this.tabName = this.tabNameList[index];
     },
-    formValidate(prop, status, error) {},
     // 获取店铺详情
     getShopDetail() {
       shopDetail(this.shopId).then((res) => {
@@ -698,7 +675,7 @@ export default {
         //校验经营类目
         if (this.checkAllGroup == "") {
           this.$Message.error("请选择店铺经营类目");
-          this.tabName = "cagetory";
+          this.tabName = "category";
           return;
         }
         if (valid) {
@@ -732,9 +709,9 @@ export default {
       });
     },
     // 筛选值为空的参数
-    filterFun (params) {
-      Object.entries(params).map(value => {
-        if (!value[1] || value[1] === '' || value[1] === 'null') {
+    filterFun(params) {
+      Object.entries(params).map((value) => {
+        if (!value[1] || value[1] === "" || value[1] === "null") {
           delete params[value[0]];
         }
       });
@@ -742,52 +719,43 @@ export default {
     },
     // 点击定位获取店铺地址
     getAddress(val) {
-      if (val.type === 'select') {
-        const paths = val.data.map(item => item.name).join(',')
+      if (val.type === "select") {
+        const paths = val.data.map((item) => item.name).join(",");
 
-        const ids = val.data.map(item => item.id).join(',')
+        const ids = val.data.map((item) => item.id).join(",");
 
-        if(this.currentAddress === 'storeAddressPath'){
-          this.$set(this.shopForm, "storeAddressPath", paths);
-          this.$set(this.shopForm, "storeAddressIdPath", ids);
+        if (this.currentAddress === "storeAddressPath") {
+          this.shopForm.storeAddressPath = paths;
+          this.shopForm.storeAddressIdPath = ids;
 
-          this.shopForm.center = val.data[val.data.length - 1].center
-        }else if(this.currentAddress === 'salesConsigneeAddressPath'){
-          this.$set(this.shopForm, "salesConsigneeAddressPath", paths);
-          this.$set(this.shopForm, "salesConsigneeAddressId", ids);
-        }else if(this.currentAddress === 'companyAddressPath'){
-          this.$set(this.shopForm, "companyAddressPath", paths);
-          this.$set(this.shopForm, "companyAddressIdPath", ids);
+          this.shopForm.center = val.data[val.data.length - 1].center;
+        } else if (this.currentAddress === "salesConsigneeAddressPath") {
+          this.shopForm.salesConsigneeAddressPath = paths;
+          this.shopForm.salesConsigneeAddressId = ids;
+        } else if (this.currentAddress === "companyAddressPath") {
+          this.shopForm.companyAddressPath = paths;
+          this.shopForm.companyAddressIdPath = ids;
         }
-
-
-      }
-      else{
-        if(this.currentAddress === 'storeAddressPath'){
+      } else {
+        if (this.currentAddress === "storeAddressPath") {
           this.shopForm.storeCenter = val.data.position.lng + "," + val.data.position.lat;
-          this.$set(this.shopForm, "storeAddressPath", val.data.addr);
-          this.$set(this.shopForm, "storeAddressIdPath", val.data.addrId);
-        }else if(this.currentAddress === 'salesConsigneeAddressPath'){
-          this.$set(this.shopForm, "salesConsigneeAddressPath", val.data.addr);
-          this.$set(this.shopForm, "salesConsigneeAddressId", val.data.addrId);
-        }else if(this.currentAddress === 'companyAddressPath'){
-          this.$set(this.shopForm, "companyAddressPath", val.data.addr);
-          this.$set(this.shopForm, "companyAddressIdPath", val.data.addrId);
+          this.shopForm.storeAddressPath = val.data.addr;
+          this.shopForm.storeAddressIdPath = val.data.addrId;
+        } else if (this.currentAddress === "salesConsigneeAddressPath") {
+          this.shopForm.salesConsigneeAddressPath = val.data.addr;
+          this.shopForm.salesConsigneeAddressId = val.data.addrId;
+        } else if (this.currentAddress === "companyAddressPath") {
+          this.shopForm.companyAddressPath = val.data.addr;
+          this.shopForm.companyAddressIdPath = val.data.addrId;
         }
       }
     },
     // 全部选中
-    handleCheckAll() {
-      if (this.indeterminate) {
-        this.checkAll = false;
-      } else {
-        this.checkAll = !this.checkAll;
-      }
+    handleCheckAll(checked) {
       this.indeterminate = false;
-
-      if (this.checkAll) {
-        let checkAllDate = [];
-        this.categories.forEach((i) => checkAllDate.push(i.id));
+      if (checked) {
+        const checkAllDate = [];
+        this.categories.forEach((i) => checkAllDate.push(String(i.id)));
         this.checkAllGroup = checkAllDate;
       } else {
         this.checkAllGroup = [];
@@ -862,7 +830,7 @@ export default {
   z-index: 9;
 }
 
-::v-deep .ivu-tabs-bar {
+:deep(.el-tabs__header) {
   margin: 0;
 }
 

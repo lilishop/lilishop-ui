@@ -5,9 +5,9 @@
       <left :data="data" />
       <div class="setup-box">
         <div>
-          <Button size="small" @click.stop="handleSelectModel('left')"
+          <el-button size="small" @click.stop="handleSelectModel('left')"
             >编辑
-          </Button>
+          </el-button>
         </div>
       </div>
     </div>
@@ -16,32 +16,32 @@
       <right :data="data" />
       <div class="setup-box">
         <div>
-          <Button size="small" @click.stop="handleSelectModel('right')"
+          <el-button size="small" @click.stop="handleSelectModel('right')"
             >编辑
-          </Button>
+          </el-button>
         </div>
       </div>
     </div>
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="装修"
-      draggable
+      
       width="800"
-      :z-index="100"
-      :mask-closable="false"
-    >
+      
+      :close-on-click-modal="false"
+     append-to-body destroy-on-close>
       <div v-if="current">
         <div class="modal-tab-bar">
           <div>
             当前模块 :
-            <ButtonGroup>
-              <Button :type="current.model == 'goods' ? 'primary' : 'default'"
-                >商品</Button
+            <el-button-group>
+              <el-button :type="current.model == 'goods' ? 'primary' : 'default'"
+                >商品</el-button
               >
-              <Button :type="current.model == 'brand' ? 'primary' : 'default'"
-                >品牌</Button
+              <el-button :type="current.model == 'brand' ? 'primary' : 'default'"
+                >品牌</el-button
               >
-            </ButtonGroup>
+            </el-button-group>
           </div>
 
           <div class="flex">
@@ -52,48 +52,48 @@
                 <div>推荐尺寸：{{ current.data.image.size }}</div>
                 <div class="link-src">
                   链接地址：
-                  <Input
+                  <el-input
                     style="width: 200px"
                     v-model="current.data.image.url"
                     disabled
                   />
                 </div>
-                <Button
+                <el-button
                   size="small"
                   type="primary"
                   @click="handleSelectImg('default')"
                   >选择图片
-                </Button>
-                <Button
+                </el-button>
+                <el-button
                   size="small"
                   class="ml_10"
                   type="primary"
                   @click="handleSelectLink('image')"
                   >选择链接
-                </Button>
+                </el-button>
               </div>
             </div>
           </div>
           <div class="flex" v-if="current.model == 'goods'">
             <div>标签 :</div>
-            <Input
+            <el-input
               style="width: 200px"
               type="text"
               v-model="current.data.badge.label"
             />
-            <Input
+            <el-input
               style="width: 100px; margin-left: 10px"
               disabled
               type="text"
               v-model="current.data.badge.url"
             />
-            <Button
+            <el-button
               size="small"
               class="ml_10"
               type="primary"
               @click="handleSelectLink('badge')"
               >选择链接
-            </Button>
+            </el-button>
           </div>
           <div class="flex column-list">
             <div
@@ -103,19 +103,19 @@
             >
               <div class="flex">
                 <img :src="item.img" class="column-img" />
-                <Button
+                <el-button
                   size="small"
                   class="ml_10"
                   type="primary"
                   v-if="current.model == 'goods'"
                   @click="handleSelectGoods('list', index)"
                   >选择商品
-                </Button>
+                </el-button>
                 <div>
                   <div  v-if="current.model == 'brand'" style="margin-bottom: 10px">
-                    <Input disabled v-model="item.url" />
+                    <el-input disabled v-model="item.url" />
                   </div>
-                  <Button
+                  <el-button
                     size="small"
                     class="ml_10"
                     type="primary"
@@ -123,22 +123,22 @@
                     @click="handleSelectLink('list', index)"
                   >
                     选择链接
-                  </Button>
-                  <Button
+                  </el-button>
+                  <el-button
                     size="small"
                     class="ml_10"
                     type="primary"
                     v-if="current.model == 'brand'"
                     @click="handleSelectImg('list', index)"
                     >选择图片
-                  </Button>
+                  </el-button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </Modal>
+    </el-dialog>
 
     <!-- 选择商品。链接 -->
     <liliDialog
@@ -148,14 +148,14 @@
     ></liliDialog>
 
     <!-- 选择图片 -->
-    <Modal width="1200px" v-model="picModelFlag" footer-hide>
+    <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
       <ossManage
         @callback="callbackSelected"
-        :isComponent="true"
+        :is-component="true"
         :initialize="picModelFlag"
         ref="ossManage"
       />
-    </Modal>
+    </el-dialog>
   </div>
 </template>
 
@@ -242,12 +242,12 @@ export default {
     // 选择链接回调
     selectedLink(val) {
       if (this.selectedData != "list") {
-        this.data.options[this.align].data[this.selectedData].url = this.$options.filters.formatLinkType(val);
+        this.data.options[this.align].data[this.selectedData].url = this.$filters.formatLinkType(val);
         console.log(this.data.options[this.align].data[this.selectedData])
       }
       if (this.selectedData == "list") {
          this.data.options[this.align].data[this.selectedData][this.goodsIndex]
-        .url = this.$options.filters.formatLinkType(val);
+        .url = this.$filters.formatLinkType(val);
       }
     },
     /*

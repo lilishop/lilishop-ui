@@ -6,7 +6,7 @@
     <div>
       <div class="badge-box flex">
         <div class="round">
-          <Icon type="ios-arrow-forward" />
+          <el-icon><ArrowRight /></el-icon>
         </div>
 
 
@@ -23,8 +23,10 @@
 </template>
 
 <script>
+import { ArrowRight } from "@element-plus/icons-vue";
 export default {
   name: "mix-goods",
+  components: { ArrowRight },
   data() {
     return {}
   },

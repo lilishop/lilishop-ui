@@ -4,46 +4,26 @@
       <div class="query-wrapper">
         <div class="query-item">
           <div>搜索范围</div>
-          <Input
+          <el-input
+            v-model="goodsParams.goodsName"
             placeholder="商品名称"
-            @on-clear="
-              goodsData = [];
-              goodsParams.goodsName = '';
-              goodsParams.pageNumber = 1;
-              getQueryGoodsList();
-            "
-            @on-enter="
-              () => {
-                goodsData = [];
-                goodsParams.pageNumber = 1;
-                getQueryGoodsList();
-              }
-            "
-            icon="ios-search"
             clearable
             style="width: 150px"
-            v-model="goodsParams.goodsName"
+            @clear="onSearchGoods"
+            @keyup.enter="onSearchGoods"
           />
         </div>
         <div class="query-item">
-          <Cascader
+          <el-cascader
             v-model="category"
+            :options="skuList"
             placeholder="请选择商品分类"
             style="width: 250px"
-            :data="skuList"
-          ></Cascader>
+            clearable
+          />
         </div>
         <div class="query-item">
-          <Button
-            type="primary"
-            @click="
-              goodsData = [];
-              goodsParams.pageNumber = 1;
-              getQueryGoodsList();
-            "
-            icon="ios-search"
-            >搜索</Button
-          >
+          <el-button type="primary" @click="onSearchGoods">搜索</el-button>
         </div>
       </div>
       <div>
@@ -63,27 +43,33 @@
             <div class="wap-content-desc">
               <div class="wap-content-desc-title">{{ item.goodsName }}</div>
 
-              <div class="wap-sku">{{ item.goodsUnit }}<Tag style="margin-left: 10px;" :color="item.salesModel === 'RETAIL' ? 'default' : 'geekblue'">{{item.salesModel === "RETAIL" ? "零售型" : "批发型"}}</Tag></div>
+              <div class="wap-sku">
+                {{ item.goodsUnit }}
+                <el-tag
+                  style="margin-left: 10px"
+                  :type="item.salesModel === 'RETAIL' ? 'info' : 'primary'"
+                >
+                  {{ item.salesModel === "RETAIL" ? "零售型" : "批发型" }}
+                </el-tag>
+              </div>
               <div class="wap-content-desc-bottom">
-                <div>￥{{ item.price | unitPrice }}</div>
+                <div>￥{{ $filters.unitPrice(item.price) }}</div>
               </div>
             </div>
           </div>
-          <Spin size="large" fix v-if="loading"></Spin>
+          <div v-if="loading" v-loading="loading" class="loading-mask" />
 
           <div v-if="empty" class="empty">暂无商品信息</div>
         </div>
-        <Page
-          :total="total"
+        <el-pagination
+          v-model:current-page="goodsParams.pageNumber"
           class="pageration"
-          @on-change="changePageSize"
+          :total="total"
           :page-size="goodsParams.pageSize"
+          layout="total, prev, pager, next"
           size="small"
-          show-total
-          show-elevator
-
-        >
-        </Page>
+          @current-change="changePageSize"
+        />
       </div>
     </div>
   </div>
@@ -145,6 +131,11 @@ export default {
     this.init();
   },
   methods: {
+    onSearchGoods() {
+      this.goodsData = [];
+      this.goodsParams.pageNumber = 1;
+      this.getQueryGoodsList();
+    },
     changePageSize(v){
       this.goodsParams.pageNumber = v;
       this.getQueryGoodsList();
@@ -201,7 +192,6 @@ export default {
                 arr[index] = {
                   value: grandson.id,
                   label: grandson.name,
-                  children: "",
                 };
               });
             }

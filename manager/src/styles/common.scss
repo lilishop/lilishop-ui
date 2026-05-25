@@ -124,5 +124,50 @@ $bg_color: #f1f6fa;
 }
 
 
+// table-common（原 @import 合并，避免 Sass @import 弃用警告）
+.search {
+  .operation {
+    margin-bottom: 2vh;
+  }
+  .select-clear {
+    margin-left: 10px;
+  }
+}
+.search-input {
+  width: 270px;
+  margin-right: 20px;
+}
+.search-form {
+  width: 100% !important;
+  display: flex;
+  align-items: center;
+  border-radius: 0.4em;
+  flex-wrap: wrap;
 
-@import "./table-common.scss";
+  > .ivu-form-item,
+  > .el-form-item {
+    margin: 8px 10px !important;
+  }
+}
+.padding-row {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+.search-btn {
+  margin-left: 20px;
+}
+.div-zoom {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+// 列表页「筛选 Card + 列表 Card」间距（Vue3 使用 el-card）
+.search > .el-card + .el-card {
+  margin-top: 10px;
+}
+
+// 兼容遗留 iView 结构
+.ivu-card + .ivu-card {
+  margin-top: 10px;
+}

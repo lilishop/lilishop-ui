@@ -1,60 +1,60 @@
 <template>
   <div class="layout">
-    <Form
+    <el-form
       ref="formValidate"
-      :label-width="150"
+      label-width="150px"
       label-position="right"
       :model="formValidate"
       :rules="ruleValidate"
     >
-      <FormItem label="JSAPI支付应用ID" prop="jsapiAppId">
-        <Input maxlength="300" class="w200" v-model="formValidate.jsapiAppId" />
-      </FormItem>
-      <FormItem label="Native支付应用ID" prop="nativeAppId">
-        <Input maxlength="300" class="w200" v-model="formValidate.nativeAppId" />
-      </FormItem>
-      <FormItem label="小程序支付应用id" prop="mpAppId">
-        <Input maxlength="300" class="w200" v-model="formValidate.mpAppId" />
-      </FormItem>
-      <FormItem label="H5支付应用ID" prop="h5AppId">
-        <Input maxlength="300" class="w200" v-model="formValidate.h5AppId" />
-      </FormItem>
-      <FormItem label="APP支付应用ID" prop="appAppId">
-        <Input maxlength="300" class="w200" v-model="formValidate.appAppId" />
-      </FormItem>
-      <FormItem label="商户号" prop="mchId">
-        <Input maxlength="300" class="w200" v-model="formValidate.mchId" />
-      </FormItem>
-      <FormItem label="APIv3密钥" prop="apiKey3">
-        <Input maxlength="300" v-model="formValidate.apiKey3" />
-      </FormItem>
-      <FormItem label="API证书-证书序列号" prop="serialNumber">
-        <Input maxlength="300" v-model="formValidate.serialNumber" />
-      </FormItem>
-      <FormItem class="form-item-view-el" label="apiclient_key" prop="apiclient_key">
-        <Input v-model="formValidate.apiclientKey" :rows="6" maxlength="2500" show-word-limit type="textarea" placeholder="Enter something..." />
-      </FormItem>
-      <FormItem label="加签方式" prop="publicType">
-        <RadioGroup type="button" button-style="solid" v-model="formValidate.publicType" @change="handlePublicTypeChange">
-          <Radio label="CERT">平台证书</Radio>
-          <Radio label="KEY">微信支付公钥</Radio>
-        </RadioGroup>
+      <el-form-item label="JSAPI支付应用ID" prop="jsapiAppId">
+        <el-input maxlength="300" class="w200" v-model="formValidate.jsapiAppId" />
+      </el-form-item>
+      <el-form-item label="Native支付应用ID" prop="nativeAppId">
+        <el-input maxlength="300" class="w200" v-model="formValidate.nativeAppId" />
+      </el-form-item>
+      <el-form-item label="小程序支付应用id" prop="mpAppId">
+        <el-input maxlength="300" class="w200" v-model="formValidate.mpAppId" />
+      </el-form-item>
+      <el-form-item label="H5支付应用ID" prop="h5AppId">
+        <el-input maxlength="300" class="w200" v-model="formValidate.h5AppId" />
+      </el-form-item>
+      <el-form-item label="APP支付应用ID" prop="appAppId">
+        <el-input maxlength="300" class="w200" v-model="formValidate.appAppId" />
+      </el-form-item>
+      <el-form-item label="商户号" prop="mchId">
+        <el-input maxlength="300" class="w200" v-model="formValidate.mchId" />
+      </el-form-item>
+      <el-form-item label="APIv3密钥" prop="apiKey3">
+        <el-input maxlength="300" v-model="formValidate.apiKey3" />
+      </el-form-item>
+      <el-form-item label="API证书-证书序列号" prop="serialNumber">
+        <el-input maxlength="300" v-model="formValidate.serialNumber" />
+      </el-form-item>
+      <el-form-item class="form-item-view-el" label="apiclient_key" prop="apiclient_key">
+        <el-input v-model="formValidate.apiclientKey" :rows="6" maxlength="2500" show-word-limit type="textarea" placeholder="Enter something..." />
+      </el-form-item>
+      <el-form-item label="加签方式" prop="publicType">
+        <el-radio-group v-model="formValidate.publicType" @change="handlePublicTypeChange">
+          <el-radio-button value="CERT">平台证书</el-radio-button>
+          <el-radio-button value="KEY">微信支付公钥</el-radio-button>
+        </el-radio-group>
         <span class="desc">商户接收APIv3的请求应答、回调时验签使用，以下两种方式只能使用一种</span>
-      </FormItem>
+      </el-form-item>
       <!-- 当加签方式选择“KEY”时展示 -->
-      <FormItem v-if="formValidate.publicType === 'KEY'" label="公钥证书ID" prop="publicId">
-        <Input maxlength="300" v-model="formValidate.publicId" />
-      </FormItem>
-      <FormItem v-if="formValidate.publicType === 'KEY'" class="form-item-view-el" label="公钥证书" prop="publicKey">
-        <Input v-model="formValidate.publicKey" :rows="6" maxlength="2500" show-word-limit type="textarea" placeholder="Enter something..." />
-      </FormItem>
-      <FormItem label="支付回调域名" prop="callbackUrl">
-        <Input maxlength="300" v-model="formValidate.callbackUrl" />
-      </FormItem>
+      <el-form-item v-if="formValidate.publicType === 'KEY'" label="公钥证书ID" prop="publicId">
+        <el-input maxlength="300" v-model="formValidate.publicId" />
+      </el-form-item>
+      <el-form-item v-if="formValidate.publicType === 'KEY'" class="form-item-view-el" label="公钥证书" prop="publicKey">
+        <el-input v-model="formValidate.publicKey" :rows="6" maxlength="2500" show-word-limit type="textarea" placeholder="Enter something..." />
+      </el-form-item>
+      <el-form-item label="支付回调域名" prop="callbackUrl">
+        <el-input maxlength="300" v-model="formValidate.callbackUrl" />
+      </el-form-item>
       <div class="label-btns">
-        <Button type="primary" @click="submit('formValidate')">保存</Button>
+        <el-button type="primary" @click="submit('formValidate')">保存</el-button>
       </div>
-    </Form>
+    </el-form>
   </div>
 </template>
 <script>
@@ -93,7 +93,7 @@ export default {
     init() {
       this.res = JSON.parse(this.res);
 
-      this.$set(this, "formValidate", { ...this.res });
+      this.formValidate = { ...this.res };
       Object.keys(this.formValidate).forEach((item) => {
         if (item.indexOf("pId") < 0) {
           this.ruleValidate[item] = [
@@ -118,18 +118,18 @@ export default {
 }
 
 .w200 {
-  ::v-deep .ivu-input {
+  :deep(.el-input){
     width: 250px !important;
     margin: 0 10px;
   }
 }
 
-::v-deep .ivu-input {
+:deep(.el-input){
   width: 450px !important;
   margin: 0 10px;
 }
 
-.ivu-input-wrapper {
+.el-input {
   width: 450px;
   margin-right: 10px;
 }

@@ -1,163 +1,133 @@
 <template>
   <div class="pintuan-goods">
-    <Card>
+    <el-card>
       <h4>活动详情</h4>
-      <Table style="margin: 10px 0" border :columns="columns" :data="data"></Table>
+      <el-table border :data="data" style="width: 100%; margin: 10px 0">
+        <el-table-column prop="promotionName" label="活动名称" min-width="120" />
+        <el-table-column prop="startTime" label="活动开始时间" min-width="120" />
+        <el-table-column prop="endTime" label="活动结束时间" min-width="120" />
+        <el-table-column prop="requiredNum" label="成团人数" min-width="90" />
+        <el-table-column prop="limitNum" label="限购数量" min-width="90" />
+        <el-table-column label="状态" min-width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="promotionStatusTagType(row.promotionStatus)">
+              {{ promotionStatusText(row.promotionStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
 
       <h4>商品信息</h4>
-      <Table
-        :loading="loading"
+      <el-table
+        ref="table"
+        v-loading="loading"
         border
         class="operation"
-        :columns="goodsColumns"
         :data="goodsData"
-        ref="table"
-        sortable="custom"
+        style="width: 100%"
       >
-        <template slot-scope="{ row }" slot="goodsName">
-          <div>
-            <a class="mr_10" @click="linkTo(row.goodsId, row.skuId)">{{
-              row.goodsName
-            }}</a>
-            <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-              <div slot="content">
+        <el-table-column label="商品名称" min-width="120">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a class="link-text mr_10" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
+              <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
+                <template #reference>
+                  <img
+                    src="../../../assets/qrcode.svg"
+                    style="vertical-align: middle"
+                    class="hover-pointer"
+                    width="20"
+                    height="20"
+                    alt="qrcode"
+                  />
+                </template>
                 <vue-qr
                   :text="wapLinkTo(row.goodsId, row.skuId)"
                   :margin="0"
-                  colorDark="#000"
-                  colorLight="#fff"
+                  color-dark="#000"
+                  color-light="#fff"
                   :size="150"
-                ></vue-qr>
-              </div>
-              <img
-                src="../../../assets/qrcode.svg"
-                style="vertical-align: middle"
-                class="hover-pointer"
-                width="20"
-                height="20"
-                alt=""
-              />
-            </Poptip>
-          </div>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="page operation">
-        <Page
-          :current="searchForm.pageNumber"
+                />
+              </el-popover>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column prop="quantity" label="库存" min-width="80" />
+        <el-table-column label="拼团价格" min-width="100">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">
+              {{ $filters.unitPrice(row.price, "￥") }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="page operation mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
+
 <script>
 import { getPintuanGoodsList, getPintuanDetail } from "@/api/promotion.js";
 import vueQr from "vue-qr";
-import { promotionsStatusRender } from "@/utils/promotions";
 
 export default {
-  components: {
-    "vue-qr": vueQr,
-  },
+  components: { vueQr },
   data() {
     return {
-      loading: false, // 表单加载状态
-        searchForm: {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-          pageSize: 20, // 页面大小
-        },
-
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
-      columns: [
-        {
-          title: "活动名称",
-          key: "promotionName",
-          minWidth: 120,
-        },
-        {
-          title: "活动开始时间",
-          key: "startTime",
-          minWidth: 120,
-        },
-        {
-          title: "活动结束时间",
-          key: "endTime",
-          minWidth: 120,
-        },
-        {
-          title: "成团人数",
-          key: "requiredNum",
-        },
-        {
-          title: "限购数量",
-          key: "limitNum",
-        },
-        {
-          title: "状态",
-          key: "promotionStatus",
-          minWidth: 100,
-          render: (h, params) => {
-            return promotionsStatusRender(h, params);
-          },
-        },
-      ],
-      goodsColumns: [
-        {
-          title: "商品名称",
-          slot: "goodsName",
-          minWidth: 120,
-        },
-
-        {
-          title: "库存",
-          key: "quantity",
-          minWidth: 40,
-        },
-
-        {
-          title: "拼团价格",
-          key: "price",
-          minWidth: 50,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
-          },
-        },
-      ],
-      goodsData: [], // 商品数据
+      loading: false,
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+      },
+      data: [],
+      total: 0,
+      goodsData: [],
     };
   },
   methods: {
-    // 初始化数据
+    promotionStatusText(status) {
+      const map = {
+        NEW: "未开始",
+        START: "已开始",
+        END: "已结束",
+        CLOSE: "已关闭",
+      };
+      return map[status] || "未知";
+    },
+    promotionStatusTagType(status) {
+      const map = {
+        NEW: "info",
+        START: "success",
+        END: "danger",
+        CLOSE: "danger",
+      };
+      return map[status] || "danger";
+    },
     init() {
       this.getDataList();
       this.getPintuanMsg();
     },
-    // 分页 改变页码
-    changePage(v) {
-      this.searchForm.pageNumber = v;
+    changePage() {
       this.getDataList();
     },
-    // 分页 改变页数
-    changePageSize(v) {
+    changePageSize() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
       this.getDataList();
     },
-    // 获取拼团商品列表
     getDataList() {
       this.loading = true;
       this.searchForm.pintuanId = this.$route.query.id;
-
       getPintuanGoodsList(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
@@ -166,7 +136,6 @@ export default {
         }
       });
     },
-    // 获取拼团详情
     getPintuanMsg() {
       getPintuanDetail(this.$route.query.id).then((res) => {
         if (res.success) this.data.push(res.result);
@@ -178,6 +147,7 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
 h4 {
   margin: 20px 0;
@@ -187,5 +157,23 @@ h4 {
   font-size: 14px;
   text-align: left;
   border-left: 3px solid red;
+}
+
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.mr_10 {
+  margin-right: 10px;
+}
+
+.hover-pointer {
+  cursor: pointer;
+}
+
+.mt_10 {
+  margin-top: 10px;
 }
 </style>

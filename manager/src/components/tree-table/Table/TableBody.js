@@ -1,13 +1,13 @@
 import Checkbox from '../Checkbox/Checkbox'; // eslint-disable-line
 // import Radio from '../Radio/Radio'; // eslint-disable-line
 import { mixins } from './utils';
-import { Radio } from 'view-design'; // eslint-disable-line
-
 /* eslint-disable no-underscore-dangle */
 export default {
   name: 'TreeTable__body',
   mixins: [mixins],
-  components: { Radio },
+  inject: {
+    treeTableRoot: { default: null },
+  },
   data() {
     return {
       radioSelectedIndex: -1,
@@ -15,6 +15,12 @@ export default {
   },
   computed: {
     table() {
+      if (this.treeTableRoot) return this.treeTableRoot;
+      let parent = this.$parent;
+      while (parent) {
+        if (parent.$options && parent.$options.name === 'TreeTable') return parent;
+        parent = parent.$parent;
+      }
       return this.$parent;
     },
   },
@@ -186,8 +192,21 @@ export default {
       return classList.join(' ');
     }
 
+    // Vue 3：scoped slot 合并到 $slots
+    function renderTemplateSlot(table, slotName, scope) {
+      if (!table || !slotName) return '';
+      const slots = table.$slots || {};
+      let slot = slots[slotName];
+      if (!slot && table.$scopedSlots && table.$scopedSlots[slotName]) {
+        slot = table.$scopedSlots[slotName];
+      }
+      if (!slot) return '';
+      return slot(scope);
+    }
+
     // 根据type渲染单元格Cell
     function renderCell(row, rowIndex, column, columnIndex) {
+      if (!row || !column) return '';
       // ExpandType
       if (this.isExpandCell(this.table, columnIndex)) {
         return <i class='zk-icon zk-icon-angle-right'></i>;
@@ -226,7 +245,15 @@ export default {
           //   onOn-change={isChecked => this.handleEvent(null, 'checkbox', { row, rowIndex, column, columnIndex }, { isChecked })}>
           // </Checkbox>;
         } else {
-          res = <Radio value={this.radioSelectedIndex === rowIndex} on-on-change={() => this.handleEvent(null, 'radio', { row, rowIndex, column, columnIndex })}></Radio>;
+          res = (
+            <input
+              type="radio"
+              checked={this.radioSelectedIndex === rowIndex}
+              onChange={() =>
+                this.handleEvent(null, 'radio', { row, rowIndex, column, columnIndex })
+              }
+            />
+          );
         }
         return res;
       }
@@ -254,9 +281,12 @@ export default {
       if (column.type === undefined || column.type === 'custom') {
         return row[column.key];
       } else if (column.type === 'template') {
-        return this.table.$scopedSlots[column.template]
-          ? this.table.$scopedSlots[column.template]({ row, rowIndex, column, columnIndex })
-          : '';
+        return renderTemplateSlot.call(this, this.table, column.template, {
+          row,
+          rowIndex,
+          column,
+          columnIndex,
+        });
       }
       return '';
     }
@@ -305,10 +335,7 @@ export default {
                   <td
                     class={`${this.prefixCls}--expand-content`}
                     colspan={this.table.tableColumns.length}>
-                    {this.table.$scopedSlots.expand
-                      ? this.table.$scopedSlots.expand({ row, rowIndex })
-                      : ''
-                    }
+                    {renderTemplateSlot.call(this, this.table, 'expand', { row, rowIndex })}
                   </td>
                 </tr>,
               ])

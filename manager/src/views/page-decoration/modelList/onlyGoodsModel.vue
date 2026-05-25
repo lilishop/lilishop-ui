@@ -17,28 +17,28 @@
       </div>
       <div class="setup-box">
         <div>
-          <Button
+          <el-button
             size="small"
             @click.stop="handleSelectModel(data.options.list)"
-          >编辑</Button
+          >编辑</el-button
           >
         </div>
       </div>
     </div>
 
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="装修"
-      draggable
+      
       width="800"
-      :z-index="100"
-      :mask-closable="false"
-    >
+      
+      :close-on-click-modal="false"
+     append-to-body destroy-on-close>
       <div class="modal-tab-bar">
             <div class="flex flex-a-c">
-              <Button class="add-goods" @click="addCurrentGoods">
+              <el-button class="add-goods" @click="addCurrentGoods">
                 添加商品
-              </Button>
+              </el-button>
             </div>
 
             <div
@@ -52,20 +52,20 @@
                   <div class="column-config">
                     <div>
                       标题：
-                      <Input v-model="item.title"></Input>
+                      <el-input v-model="item.title" />
                     </div>
                     <div>
                       描述：
-                      <Input v-model="item.desc"></Input>
+                      <el-input v-model="item.desc" />
                     </div>
                   </div>
-                  <Button @click="delGoods(item,index)">删除</Button>
+                  <el-button @click="delGoods(item,index)">删除</el-button>
                 </div>
               </div>
             </div>
 
       </div>
-    </Modal>
+    </el-dialog>
 
     <!-- 选择商品。链接 -->
     <liliDialog
@@ -132,7 +132,7 @@ export default {
     // 选择链接回调
     selectedLink(val) {
       this.selected[this.current].url =
-        this.$options.filters.formatLinkType(val);
+        this.$filters.formatLinkType(val);
       this.selected[this.current].type =
         val.___type === "other" && val.url === "" ? "link" : "other";
 

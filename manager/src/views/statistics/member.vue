@@ -1,26 +1,34 @@
 <template>
   <div class="wrapper">
-    <Affix :offset-top="100">
-      <Card class="card fixed-bottom">
+    <el-affix :offset="100">
+      <el-card class="card fixed-bottom">
         <affixTime :closeShop="true" @selected="clickBreadcrumb" />
-      </Card>
-    </Affix>
+      </el-card>
+    </el-affix>
 
-    <Card class="card">
+    <el-card class="card">
       <div>
-        <h4>客户增长趋势 <Button style="margin-left:10px" @click="()=>{enableShowMemberCount = !enableShowMemberCount; initMemberChart()}" size="small">{{enableShowMemberCount ? '关闭' : '显示'}}用户总人数</Button></h4>
+        <h4>
+          客户增长趋势
+          <el-button style="margin-left: 10px" size="small" @click="toggleMemberCount">
+            {{ enableShowMemberCount ? "关闭" : "显示" }}用户总人数
+          </el-button>
+        </h4>
         <div id="orderChart"></div>
       </div>
-    </Card>
+    </el-card>
 
-    <Card class="card">
+    <el-card class="card">
       <div>
         <h4>客户增长报表</h4>
-        <Table class="mt_10" stripe :columns="columns" :data="data"></Table>
-
+        <el-table class="mt_10" stripe :data="data" style="width: 100%">
+          <el-table-column prop="createDate" label="日期" min-width="120" sortable />
+          <el-table-column prop="memberCount" label="当前会员" min-width="120" />
+          <el-table-column prop="newlyAdded" label="新增会员" min-width="120" />
+          <el-table-column prop="activeQuantity" label="活跃会员" min-width="120" />
+        </el-table>
       </div>
-    </Card>
-
+    </el-card>
   </div>
 </template>
 <script>
@@ -32,101 +40,56 @@ export default {
   components: { affixTime },
   data() {
     return {
-      columns: [ // 表头
-        {
-          key: "createDate",
-          title: "日期",
-          sortable: true,
-        },
-        {
-          key: "memberCount",
-          title: "当前会员",
-        },
-        {
-          key: "newlyAdded",
-          title: "新增会员",
-        },
-        {
-          key: "activeQuantity",
-          title: "活跃会员",
-        },
-      ],
-      // 时间
-      dateList: [
-        {
-          title: "今天",
-          selected: false,
-          value: "TODAY",
-        },
-        {
-          title: "昨天",
-          selected: false,
-          value: "YESTERDAY",
-        },
-        {
-          title: "过去7天",
-          selected: true,
-          value: "LAST_SEVEN",
-        },
-        {
-          title: "过去30天",
-          selected: false,
-          value: "LAST_THIRTY",
-        },
-      ],
-      year: "", // 当前年限
-      orderChart: "", // 订单表格
-      params: { // 请求参数
+      orderChart: "",
+      params: {
         searchType: "LAST_SEVEN",
         year: "",
         month: "",
         shopId: "",
       },
-
-      data: [], // 数据
-      enableShowMemberCount:false
+      data: [],
+      enableShowMemberCount: false,
+      year: "",
     };
   },
   watch: {
     params: {
-      handler(val) {
+      handler() {
         this.init();
       },
       deep: true,
-      immediate:true,
+      immediate: true,
     },
     year(val) {
       this.params.year = new Date(val).getFullYear();
     },
   },
   methods: {
-    // 订单图
+    toggleMemberCount() {
+      this.enableShowMemberCount = !this.enableShowMemberCount;
+      this.initMemberChart();
+    },
     initMemberChart() {
-      // 默认已经加载 legend-filter 交互
-      /**
-       * 将数据分成三组来进行展示
-       */
-
-      let count = [];
-      let newly = [];
-      let actives = [];
+      const count = [];
+      const newly = [];
+      const actives = [];
 
       this.data.forEach((item) => {
-        if (this.enableShowMemberCount && (item.memberCount!="" || item.memberCount!=null)) {
+        if (this.enableShowMemberCount && (item.memberCount != "" || item.memberCount != null)) {
           count.push({
             createDate: item.createDate,
-            memberCount:item.memberCount,
+            memberCount: item.memberCount,
             title: "当前会员数量",
           });
         }
-        if (!this.enableShowMemberCount && (item.newlyAdded!="" || item.newlyAdded!=null)) {
+        if (!this.enableShowMemberCount && (item.newlyAdded != "" || item.newlyAdded != null)) {
           newly.push({
             createDate: item.createDate,
             memberCount: item.newlyAdded,
             title: "新增会员数量",
           });
         }
-        if (!this.enableShowMemberCount && (item.activeQuantity!="" || item.activeQuantity!=null)) {
+        if (!this.enableShowMemberCount && (item.activeQuantity != "" || item.activeQuantity != null)) {
           actives.push({
             createDate: item.createDate,
             memberCount: item.activeQuantity,
@@ -135,9 +98,9 @@ export default {
         }
       });
 
-      let data = [...count, ...newly, ...actives];
+      const chartData = [...count, ...newly, ...actives];
 
-      this.orderChart.data(data);
+      this.orderChart.data(chartData);
       this.orderChart.scale({
         activeQuantity: {
           range: [0, 1],
@@ -166,21 +129,15 @@ export default {
           stroke: "#fff",
           lineWidth: 1,
         });
-         this.orderChart.area().position("createDate*memberCount").color("title").shape("smooth");
-
+      this.orderChart.area().position("createDate*memberCount").color("title").shape("smooth");
 
       this.orderChart.render();
     },
-    // 条件查询
-    clickBreadcrumb(item, index) {
-      let callback = item;
-
-      console.warn(callback);
-      this.params = {...callback};
+    clickBreadcrumb(item) {
+      this.params = { ...item };
     },
-    // 初始化数据
     init() {
-      this.orderChart ? this.orderChart.clear() : ''
+      this.orderChart ? this.orderChart.clear() : "";
       API_Member.getMemberStatistics(this.params).then((res) => {
         if (res.result) {
           res.result.forEach((item) => {
@@ -202,8 +159,7 @@ export default {
     },
   },
   mounted() {
-    let data = new Date();
-    this.year = data;
+    this.year = new Date();
   },
 };
 </script>
@@ -213,5 +169,8 @@ export default {
 }
 .card {
   margin-bottom: 10px;
+}
+.mt_10 {
+  margin-top: 10px;
 }
 </style>

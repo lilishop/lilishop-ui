@@ -1,50 +1,45 @@
 <template>
-
   <div class="layout">
-
-    <div class="row" v-if="client ==item.client" v-for="(item,index) in  formValidate" :key="index">
+    <div class="row" v-for="(item, index) in formValidate" :key="index">
       <div class="col">
-        <Card :padding="0">
-          <!-- app -->
-          <div class="icon-item" v-if="item.clientType== 'APP'">
-            <img class="icon" src="../../../../assets/setting/app.svg" alt="" srcset="">
+        <el-card shadow="never" :body-style="{ padding: '0 16px' }">
+          <div class="icon-item" v-if="item.clientType == 'APP'">
+            <img class="icon" src="../../../../assets/setting/app.svg" alt="" />
           </div>
-          <div class="icon-item" v-if="item.clientType== 'PC'">
-            <!-- pc -->
-            <img class="icon" src="../../../../assets/setting/pc.svg" alt="" srcset="">
+          <div class="icon-item" v-if="item.clientType == 'PC'">
+            <img class="icon" src="../../../../assets/setting/pc.svg" alt="" />
           </div>
-          <div class="icon-item" v-if="item.clientType== 'WECHAT_MP'">
-            <!-- 小程序 -->
-            <img class="icon" src="../../../../assets/setting/wechat_mp.svg" alt="" srcset="">
+          <div class="icon-item" v-if="item.clientType == 'WECHAT_MP'">
+            <img class="icon" src="../../../../assets/setting/wechat_mp.svg" alt="" />
           </div>
-          <div class="icon-item" v-if=" item.clientType== 'H5'">
-            <!-- h5 -->
-            <img class="icon" src="../../../../assets/setting/h5.svg" alt="" srcset="">
+          <div class="icon-item" v-if="item.clientType == 'H5'">
+            <img class="icon" src="../../../../assets/setting/h5.svg" alt="" />
           </div>
-          <div class='pay-title'> {{way[item.clientType]}}</div>
+          <div class="pay-title">{{ way[item.clientType] }}</div>
           <div>
-
-            <Divider orientation="left">登录设置</Divider>
+            <el-divider content-position="left">登录设置</el-divider>
             <div class="pay-list">
-              <Form style="width:100%;" ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="100">
-                <FormItem label="appId" prop="appId">
-                  <Input @on-enter="setupSetting" class="label-appkey" v-model="item.appId" />
-                </FormItem>
-                <FormItem label="appSecret" prop="appSecret">
-                  <Input @on-enter="setupSetting" v-model="item.appSecret" />
-                </FormItem>
-              </Form>
-                 <Button @click="setupSetting">保存设置</Button>
+              <el-form
+                style="width: 100%"
+                ref="formValidate"
+                :model="formValidate"
+                :rules="ruleValidate"
+                label-width="100px"
+              >
+                <el-form-item label="appId" prop="appId">
+                  <el-input @keyup.enter="setupSetting" class="label-appkey" v-model="item.appId" />
+                </el-form-item>
+                <el-form-item label="appSecret" prop="appSecret">
+                  <el-input @keyup.enter="setupSetting" v-model="item.appSecret" />
+                </el-form-item>
+              </el-form>
+              <el-button @click="setupSetting">保存设置</el-button>
             </div>
           </div>
-
-        </Card>
+        </el-card>
       </div>
-
     </div>
-
   </div>
-
 </template>
 <script>
 import { setSetting } from "@/api/index";
@@ -53,14 +48,14 @@ import { handleSubmit } from "../setting/validate";
 export default {
   data() {
     return {
-      ruleValidate: {}, // 验证规则
-      way: { // 类型
+      ruleValidate: {},
+      way: {
         APP: "APP",
         H5: "手机网页（微商城）",
         WECHAT_MP: "微信小程序",
         PC: "WEB网页",
       },
-      formValidate: {} // 表单数据
+      formValidate: {},
     };
   },
   props: ["res", "type"],
@@ -69,30 +64,24 @@ export default {
   },
   methods: {
     submit(name) {
-      let that = this;
+      const that = this;
       if (handleSubmit(that, name)) {
         this.setupSetting();
       }
     },
-    // 保存设置
     setupSetting() {
-      this.$Spin.show();
-      setTimeout(() => {
-             this.$Spin.hide();
-        setSetting(this.type, {
-          wechatConnectSettingItems: this.formValidate,
-        }).then((res) => {
-          if (res.success) {
-            this.$Message.success("保存成功!");
-            this.$Modal.remove();
-          } else {
-            this.$Message.error("保存失败!");
-            this.$Modal.remove();
-          }
-        });
-      }, 3000);
+      setSetting(this.type, {
+        wechatConnectSettingItems: this.formValidate,
+      }).then((res) => {
+        if (res.success) {
+          this.$Message.success("保存成功!");
+          this.$Modal.remove();
+        } else {
+          this.$Message.error("保存失败!");
+          this.$Modal.remove();
+        }
+      });
     },
-    // 实例化数据
     async init() {
       this.formValidate = JSON.parse(this.res).wechatConnectSettingItems;
       Object.keys(this.formValidate).forEach((item) => {
@@ -132,14 +121,8 @@ export default {
   margin-right: 20px;
   display: flex;
   margin-bottom: 20px;
-  ::v-deep .ivu-card-body {
-    padding: 0 16px !important;
-  }
 }
 
-.label-item {
-  display: flex;
-}
 .label-item {
   display: flex;
   align-items: center;
@@ -150,7 +133,7 @@ export default {
   padding-bottom: 10px;
   flex-direction: column;
   align-items: center;
-  ::v-deep .ivu-btn {
+  :deep(.el-button){
     width: 100px;
   }
 }
@@ -162,13 +145,9 @@ export default {
   align-items: center;
   flex-direction: column;
 }
-.ivu-form-item {
+.el-form-item {
   display: flex;
-
   align-items: center;
-}
-.ivu-row {
-  width: 100%;
 }
 .icon {
   width: 100px;

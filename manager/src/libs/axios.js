@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getStore, setStore } from "./storage.js";
 import { router } from "../router/index";
-import { Message } from "view-design";
+import { Message } from "@/utils/message";
 import Cookies from "js-cookie";
 import { handleRefreshToken } from "../api/index";
 import {v4 as uuidv4} from 'uuid';

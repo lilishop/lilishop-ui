@@ -1,23 +1,23 @@
 <template>
-  <div>
-    <div class="affix-time">
-      <Affix :offset-top="100">
-        <div class="flex affix-box">
-          <affixTime :closeShop="true" @selected="clickBreadcrumb" />
-
-          <InputNumber
-            placeholder="展示前N"
-            :max="200"
-            :min="10"
-            v-model="params.top"
-          ></InputNumber>
-          <Button style="margin-left: 10px" @click="search">搜索</Button>
-        </div>
-      </Affix>
-    </div>
+  <div class="affix-time">
+    <el-affix :offset="100">
+      <div class="flex affix-box">
+        <affixTime :closeShop="true" @selected="clickBreadcrumb" />
+        <el-input-number
+          v-model="params.top"
+          placeholder="展示前N"
+          :max="200"
+          :min="10"
+        />
+        <el-button style="margin-left: 10px" @click="search">搜索</el-button>
+      </div>
+    </el-affix>
 
     <div id="container"></div>
-    <Table border :columns="columns" :data="hotWordsData"></Table>
+    <el-table border :data="hotWordsData" style="width: 100%">
+      <el-table-column prop="keywords" label="热词名称" min-width="160" />
+      <el-table-column prop="score" label="搜索次数" min-width="120" />
+    </el-table>
   </div>
 </template>
 
@@ -33,31 +33,18 @@ export default {
   data() {
     return {
       params: {
-        // 请求参数
         searchType: "LAST_SEVEN",
         year: "",
         month: "",
         top: 50,
       },
-      columns: [
-        {
-          title: "热词名称",
-          key: "keywords",
-        },
-        {
-          title: "搜索次数",
-          key: "score",
-        },
-      ],
-      hotWordsChart: "", //图表
-      hotWordsData: [], //数据
-      orderChart: "",
+      hotWordsChart: "",
+      hotWordsData: [],
     };
   },
-  computed: {},
   watch: {
     params: {
-      handler(val) {
+      handler() {
         this.search();
       },
       deep: true,
@@ -71,7 +58,6 @@ export default {
     clickBreadcrumb(val) {
       this.params = { ...this.params, ...val };
     },
-    // 初始化图表
     async search() {
       const res = await getHotWordsStatistics(this.params);
       if (res.success) {
@@ -84,11 +70,9 @@ export default {
             padding: [50, 20, 50, 20],
           });
         }
-
         this.init();
       }
     },
-    handleClickSearch() {},
     init() {
       if (this.hotWordsChart) {
         this.hotWordsChart.data(this.hotWordsData);
@@ -106,25 +90,8 @@ export default {
         this.hotWordsChart.tooltip({
           showMarkers: false,
         });
-        this.hotWordsChart
-          .interval()
-          .position("keywords*score")
-          .color("#f59b99");
+        this.hotWordsChart.interval().position("keywords*score").color("#f59b99");
         this.hotWordsChart.interaction("element-active");
-
-        // 添加文本标注
-        // this.hotWordsData.forEach((item) => {
-        //   this.hotWordsChart
-        //     .annotation()
-        //     .text({
-        //       position: [item.keywords, item.score],
-        //       content: item.score,
-        //       style: {
-        //         textAlign: "center",
-        //       },
-        //       offsetY: -30,
-        //     })
-        // });
 
         this.hotWordsChart.render();
       }

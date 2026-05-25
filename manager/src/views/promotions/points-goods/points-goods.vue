@@ -1,146 +1,167 @@
 <template>
   <div class="search">
-    <Card>
-      <Row>
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
-          <Form-item label="商品名称">
-            <Input
-              type="text"
-              v-model="searchForm.goodsName"
-              placeholder="请输入商品名称"
-              clearable
-              style="width: 240px"
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="商品名称">
+          <el-input
+            v-model="searchForm.goodsName"
+            placeholder="请输入商品名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="积分区间">
+          <el-input
+            v-model="searchForm.pointsS"
+            placeholder="请输入开始区间"
+            clearable
+            style="width: 110px"
+          />
+          <span style="margin: 0 6px">-</span>
+          <el-input
+            v-model="searchForm.pointsE"
+            placeholder="请输入结束区间"
+            clearable
+            style="width: 110px"
+          />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="searchForm.promotionStatus" clearable style="width: 240px">
+            <el-option
+              v-for="item in statusList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
             />
-          </Form-item>
-          <Form-item label="积分区间">
-            <Input
-              type="text"
-              v-model="searchForm.pointsS"
-              placeholder="请输入开始区间"
-              clearable
-              style="width: 240px"
-            />
-            -
-            <Input
-              type="text"
-              v-model="searchForm.pointsE"
-              placeholder="请输入结束区间"
-              clearable
-              style="width: 240px"
-            />
-          </Form-item>
-          <Form-item label="状态">
-            <Select v-model="searchForm.promotionStatus" style="width: 240px">
-              <Option v-for="item in statusList" :value="item.value" :key="item.value">{{
-                item.label
-              }}</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="SKU编码">
-            <Input
-              type="text"
-              v-model="searchForm.skuId"
-              placeholder="请输入SKU编码"
-              clearable
-              style="width: 240px"
-            />
-          </Form-item>
-          <Button
-            @click="handleSearch"
-            type="primary"
-            icon="ios-search"
-            class="search-btn"
-            >搜索</Button
-          >
-        </Form>
-      </Row>
-      </Card>
-    <Card>
-      <Row class="operation padding-row">
-        <Button @click="addPointsGoods" type="primary">添加积分商品</Button>
-      </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table">
-        <template slot-scope="{ row }" slot="goodsName">
-          <div>
-            <a class="mr_10" @click="linkTo(row.goodsId, row.skuId)">{{
-              row.goodsName
-            }}</a>
-            <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-              <div slot="content">
+          </el-select>
+        </el-form-item>
+        <el-form-item label="SKU编码">
+          <el-input
+            v-model="searchForm.skuId"
+            placeholder="请输入SKU编码"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <div class="operation padding-row">
+        <el-button type="primary" @click="addPointsGoods">添加积分商品</el-button>
+      </div>
+
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+      >
+        <el-table-column label="商品名称" min-width="200" fixed="left" show-overflow-tooltip>
+          <template #default="{ row }">
+            <template v-if="row">
+              <a class="link-text mr_10" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
+              <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
+                <template #reference>
+                  <img
+                    src="../../../assets/qrcode.svg"
+                    class="hover-pointer"
+                    width="20"
+                    height="20"
+                    alt="qrcode"
+                  />
+                </template>
                 <vue-qr
                   :text="wapLinkTo(row.goodsId, row.skuId)"
                   :margin="0"
-                  colorDark="#000"
-                  colorLight="#fff"
+                  color-dark="#000"
+                  color-light="#fff"
                   :size="150"
-                ></vue-qr>
-              </div>
-              <img
-                src="../../../assets/qrcode.svg"
-                style="vertical-align: middle"
-                class="hover-pointer"
-                width="20"
-                height="20"
-                alt=""
-              />
-            </Poptip>
-          </div>
-        </template>
-        <template slot-scope="{ row }" slot="price">
-          <div>
-            <priceColorScheme :value="row.originalPrice" :color="$mainColor"></priceColorScheme>
-          </div>
-        </template>
-        <template slot-scope="{ row }" slot="settlementPrice">
-          <div>
-            <priceColorScheme :value="row.settlementPrice" :color="$mainColor"></priceColorScheme>
-          </div>
-        </template>
-        <template slot-scope="{ row }" slot="quantity">
-          <div>{{ row.activeStock }}</div>
-        </template>
-        <template slot-scope="{ row }" slot="startTime">
-          <div>{{ row.startTime }}</div>
-          <div>{{ row.endTime }}</div>
-        </template>
-        <template slot-scope="{ row }" slot="action">
-          <a
-            v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
-            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
-            @click="edit(row.id)"
-            >编辑</a>
-          <span
-            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
-            style="margin:0 8px;color:#dcdee2"
-            >|</span>
-          <a
-            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
-            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
-            @click="statusChanged(row.id, 'CLOSE')"
-            >关闭</a>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+                />
+              </el-popover>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column label="市场价" width="110">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">
+              {{ $filters.unitPrice(row.originalPrice, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="结算价" width="110">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">
+              {{ $filters.unitPrice(row.settlementPrice, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="库存数量" width="100">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.activeStock }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="activeStock" label="活动剩余库存" width="130" />
+        <el-table-column prop="points" label="兑换积分" width="100" />
+        <el-table-column prop="storeName" label="所属店铺" width="120" show-overflow-tooltip />
+        <el-table-column label="活动开始时间" min-width="160">
+          <template #default="{ row }">
+            <template v-if="row">
+              <div>{{ row.startTime }}</div>
+              <div>{{ row.endTime }}</div>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="promotionStatusTagType(row.promotionStatus)">
+              {{ promotionStatusText(row.promotionStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="pointsGoodsCategoryName" label="分类" width="100" show-overflow-tooltip />
+        <el-table-column label="操作" width="150" align="center" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a
+                v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
+                class="link-text"
+                @click="edit(row.id)"
+              >
+                编辑
+              </a>
+              <template v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'">
+                <span class="op-split">|</span>
+                <a class="link-text" @click="statusChanged(row.id, 'CLOSE')">关闭</a>
+              </template>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
@@ -151,156 +172,94 @@ import {
   deletePointsGoodsStatus,
 } from "@/api/promotion";
 import vueQr from "vue-qr";
-import { promotionsStatusRender } from "@/utils/promotions";
 
 export default {
   name: "pointsGoods",
-  components: {
-    "vue-qr": vueQr,
-  },
+  components: { vueQr },
   data() {
     return {
-      loading: true, // 表单加载状态
-        searchForm: {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-          pageSize: 20, // 页面大小
-          sort: "createTime",
-          order: "desc", // 默认排序方式
-        },
+      loading: true,
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+      },
       statusList: [
-        // 活动状态
         { label: "未开始", value: "NEW" },
         { label: "已开始", value: "START" },
         { label: "已结束", value: "END" },
         { label: "已关闭", value: "CLOSE" },
       ],
-      columns: [
-        // 表头
-        {
-          title: "商品名称",
-          slot: "goodsName",
-          minWidth: 150,
-          fixed: "left",
-          tooltip: true,
-        },
-        {
-          title: "市场价",
-          slot: "price",
-          width: 100,
-        },
-        {
-          title: "结算价",
-          slot: "settlementPrice",
-          width: 100,
-        },
-        {
-          title: "库存数量",
-          slot: "quantity",
-          width: 100,
-        },
-        {
-          title: "活动剩余库存",
-          key: "activeStock",
-          width: 150,
-        },
-        {
-          title: "兑换积分",
-          key: "points",
-          width: 100,
-        },
-        {
-          title: "所属店铺",
-          key: "storeName",
-          width: 100,
-        },
-        {
-          title: "活动开始时间",
-          slot: "startTime",
-          minWidth: 150,
-        },
-        {
-          title: "状态",
-          key: "promotionStatus",
-          width: 100,
-          render: (h, params) => {
-            return promotionsStatusRender(h, params);
-          },
-        },
-        {
-          title: "分类",
-          key: "pointsGoodsCategoryName",
-          width: 100,
-        },
-        {
-          title: "操作",
-          slot: "action",
-          align: "center",
-          fixed: "right",
-          width: 150,
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      data: [],
+      total: 0,
     };
   },
   methods: {
-    // 初始化数据
+    promotionStatusText(status) {
+      const map = {
+        NEW: "未开始",
+        START: "已开始",
+        END: "已结束",
+        CLOSE: "已关闭",
+      };
+      return map[status] || "未知";
+    },
+    promotionStatusTagType(status) {
+      const map = {
+        NEW: "info",
+        START: "success",
+        END: "danger",
+        CLOSE: "danger",
+      };
+      return map[status] || "danger";
+    },
     init() {
       this.getDataList();
     },
-    // 跳转添加商品页面
     addPointsGoods() {
       this.$router.push({ name: "add-points-goods" });
     },
-    // 分页 修改页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
-    // 分页 修改页数
     changePageSize(v) {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    // 搜索
-      handleSearch() {
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 20;
-        if (this.searchForm.pointsS) {
-          this.searchForm.points =
-            this.searchForm.pointsS +
-            "_" +
-            (this.searchForm.pointsE ? this.searchForm.pointsE : "");
-        }
-        this.getDataList();
-      },
-    // 获取列表数据
+    handleSearch() {
+      this.searchForm.pageNumber = 1;
+      this.searchForm.pageSize = 20;
+      if (this.searchForm.pointsS) {
+        this.searchForm.points =
+          this.searchForm.pointsS + "_" + (this.searchForm.pointsE ? this.searchForm.pointsE : "");
+      }
+      this.getDataList();
+    },
     getDataList() {
       this.loading = true;
-      getPointsGoodsList(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
+      getPointsGoodsList(this.searchForm)
+        .then((res) => {
+          if (res.success) {
+            this.data = res.result.records;
+            this.total = res.result.total;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
-    // 编辑
     edit(id) {
-      this.$router.push({ name: "edit-points-goods", query: { id: id } });
+      this.$router.push({ name: "edit-points-goods", query: { id } });
     },
-    // 启用 停用积分商品
     statusChanged(id, status, startTime, endTime) {
       let text = "";
       let params = {};
       if (status == "START") {
         text = "开启";
-        params = {
-          startTime: startTime,
-          endTime: endTime,
-        };
+        params = { startTime, endTime };
       } else if (status == "CLOSE") {
         text = "关闭";
       }
@@ -319,14 +278,12 @@ export default {
         },
       });
     },
-    // 删除积分商品
     close(id) {
       this.$Modal.confirm({
         title: "确认删除",
         content: "您确认要删除此积分商品?",
         loading: true,
         onOk: () => {
-          // 删除
           deletePointsGoodsStatus(id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -343,3 +300,28 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+.mr_10 {
+  margin-right: 10px;
+}
+.hover-pointer {
+  cursor: pointer;
+  vertical-align: middle;
+}
+.op-split {
+  margin: 0 8px;
+  color: #dcdee2;
+}
+.padding-row {
+  margin-bottom: 10px;
+}
+.mt_10 {
+  margin-top: 10px;
+}
+</style>

@@ -1,56 +1,68 @@
 <template>
-  <div>
-    <Card>
-      <Row @keydown.enter.native.prevent="handleSearch">
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
-          <Form-item label="会员名称" prop="memberName">
-            <Input
-              type="text"
-              v-model="searchForm.memberName"
-              placeholder="请输入会员名称"
-              clearable
-              style="width: 240px"
-            />
-          </Form-item>
-          <Button
-            @click="handleSearch"
-            type="primary"
-            class="search-btn"
-            >搜索</Button
-          >
-        </Form>
-      </Row>
-      </Card>
-    <Card>
-      <Table
-        class="mt_10"
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
+  <div class="search">
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="会员名称" prop="memberName">
+          <el-input
+            v-model="searchForm.memberName"
+            placeholder="请输入会员名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <el-table
         ref="table"
-      ></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+      >
+        <el-table-column prop="memberName" label="会员名称" min-width="100" show-overflow-tooltip />
+        <el-table-column prop="name" label="姓名" min-width="100" />
+        <el-table-column prop="idNumber" label="身份证号" min-width="120" />
+        <el-table-column prop="settlementBankAccountName" label="结算银行开户行名称" min-width="120" />
+        <el-table-column prop="settlementBankAccountNum" label="结算银行开户账号" min-width="120" />
+        <el-table-column prop="settlementBankBranchName" label="结算银行开户支行名称" min-width="120" />
+        <el-table-column prop="createTime" label="提交时间" min-width="100" />
+        <el-table-column label="操作" width="200" align="center" fixed="right">
+          <template #default="{ row }">
+            <div v-if="row" class="ops">
+              <a class="link-text" @click="audit(row, 'PASS')">通过</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="audit(row, 'REFUSE')">拒绝</a>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
@@ -61,115 +73,35 @@ export default {
   name: "distributionApply",
   data() {
     return {
-      loading: true, // 表单加载状态
+      loading: true,
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 20, // 页面大小
-        sort: "createTime", // 默认排序字段
-        order: "desc", // 默认排序方式
-        startDate: "", // 起始时间
-        endDate: "", // 终止时间
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+        startDate: "",
+        endDate: "",
       },
-      columns: [
-        {
-          title: "会员名称",
-          key: "memberName",
-          minWidth: 100,
-          tooltip: true,
-        },
-        {
-          title: "姓名",
-          key: "name",
-          minWidth: 100,
-        },
-        {
-          title: "身份证号",
-          key: "idNumber",
-          minWidth: 120,
-        },
-        {
-          title: "结算银行开户行名称",
-          key: "settlementBankAccountName",
-          minWidth: 120,
-        },
-        {
-          title: "结算银行开户账号",
-          key: "settlementBankAccountNum",
-          minWidth: 120,
-        },
-        {
-          title: "结算银行开户支行名称",
-          key: "settlementBankBranchName",
-          minWidth: 120,
-        },
-        {
-          title: "提交时间",
-          key: "createTime",
-          minWidth: 100,
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          fixed: "right",
-          width: 200,
-          render: (h, params) => {
-            return h("div", { class: "ops" }, [
-              h(
-                "a",
-                {
-                  on: {
-                    click: () => {
-                      this.audit(params.row, "PASS");
-                    },
-                  },
-                },
-                "通过"
-              ),
-              h("span", {}, "|"),
-              h(
-                "a",
-                {
-                  on: {
-                    click: () => {
-                      this.audit(params.row, "REFUSE");
-                    },
-                  },
-                },
-                "拒绝"
-              ),
-            ]);
-          },
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      data: [],
+      total: 0,
     };
   },
   methods: {
-    // 初始化数据
     init() {
       this.getDataList();
     },
-    // 分页 改变页码
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-      this.clearSelectAll();
-    },
-    // 分页 改变页数
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
+    changePage() {
       this.getDataList();
     },
-    // 搜索
+    changePageSize() {
+      this.searchForm.pageNumber = 1;
+      this.getDataList();
+    },
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getDataList();
     },
-    // 获取列表数据
     getDataList() {
       this.loading = true;
       this.searchForm.distributionStatus = "APPLY";
@@ -180,10 +112,7 @@ export default {
           this.total = res.result.total;
         }
       });
-      this.total = this.data.length;
-      this.loading = false;
     },
-    //审核
     audit(v, status) {
       let test = "拒绝";
       if (status == "PASS") {
@@ -194,7 +123,6 @@ export default {
       };
       this.$Modal.confirm({
         title: "确认" + test,
-        // 记得确认修改此处
         content: "您确认要" + test + " " + v.memberName + " ?",
         loading: true,
         onOk: () => {

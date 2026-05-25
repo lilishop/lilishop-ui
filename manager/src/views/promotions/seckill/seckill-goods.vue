@@ -1,246 +1,136 @@
 <template>
   <div class="seckill-goods">
-    <Card>
-      <Table border :columns="columns" :data="data">
-        <template slot-scope="{ row }" slot="applyEndTime">
-          {{ unixDate(row.applyEndTime) }}
-        </template>
-        <template slot-scope="{ row }" slot="hours">
-          <Tag v-for="item in unixHours(row.hours)" :key="item">{{ item }}</Tag>
-        </template>
-      </Table>
-      <Table
-        :loading="loading"
+    <el-card>
+      <el-table border :data="data" style="width: 100%">
+        <el-table-column prop="promotionName" label="活动名称" min-width="120" />
+        <el-table-column prop="startTime" label="活动开始时间" min-width="160" />
+        <el-table-column label="报名截止时间" min-width="160">
+          <template #default="{ row }">
+            <span v-if="row">{{ unixDate(row.applyEndTime) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="时间场次" min-width="160">
+          <template #default="{ row }">
+            <template v-if="row">
+              <el-tag v-for="item in unixHours(row.hours)" :key="item" class="hour-tag">{{ item }}</el-tag>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column label="活动状态" min-width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="seckillStatusTagType(row.promotionStatus)">
+              {{ seckillStatusText(row.promotionStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <el-table
+        ref="table"
+        v-loading="loading"
         border
         class="operation"
-        :columns="goodsColumns"
         :data="goodsList"
-        ref="table"
+        style="width: 100%"
       >
-        <template slot-scope="{ row }" slot="originalPrice">
-          <div>
-            <priceColorScheme :value="row.originalPrice" :color="$mainColor"></priceColorScheme>
-          </div>
-        </template>
+        <el-table-column prop="goodsName" label="商品名称" min-width="120" show-overflow-tooltip />
+        <el-table-column label="商品价格" width="110">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">
+              {{ $filters.unitPrice(row.originalPrice, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="库存" width="90">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.quantity }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="活动价格" width="100">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">
+              {{ $filters.unitPrice(row.price, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="storeName" label="商家名称" min-width="100" show-overflow-tooltip />
+        <el-table-column label="活动场次" width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row">{{ row.timeLine + ":00" }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="150" align="center">
+          <template #default="{ row, $index }">
+            <a v-if="row" class="link-text" @click="delGoods($index, row)">删除</a>
+          </template>
+        </el-table-column>
+      </el-table>
 
-        <template slot-scope="{ row }" slot="quantity">
-          <div>{{ row.quantity }}</div>
-        </template>
-
-        <template slot-scope="{ row }" slot="price">
-          <div>
-            <priceColorScheme :value="row.price" :color="$mainColor"></priceColorScheme>
-          </div>
-        </template>
-
-        <template slot-scope="{ row }" slot="time">
-          <Tag>{{ row.timeLine + ":00" }}</Tag>
-        </template>
-        <template slot-scope="{ row }" slot="QRCode">
-          <img
-            v-if="row.QRCode"
-            :src="row.QRCode || '../../../assets/lili.png'"
-            width="50px"
-            height="50px"
-            alt=""
-          />
-        </template>
-        <template slot-scope="{ row, index }" slot="action">
-          <a style="color:#2d8cf0;cursor:pointer;text-decoration:none" @click="delGoods(index, row)">删除</a>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
+
 <script>
 import {
   seckillGoodsList,
   seckillDetail,
-  auditApplySeckill,
   delSeckillGoods,
 } from "@/api/promotion.js";
 
 export default {
   data() {
     return {
-      promotionStatus: "", // 活动状态
-      showModal: false, // modal显隐
-      openTip: true, // 显示提示
-      loading: false, // 表单加载状态
-      submitLoading: false, // 加载状态
-        searchForm: {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-          pageSize: 20, // 页面大小
-        },
-      total: 0, // 总数
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
-      data: [], // 表单数据
-      columns: [
-        // 表头
-        {
-          title: "活动名称",
-          key: "promotionName",
-          minWidth: 120,
-        },
-        {
-          title: "活动开始时间",
-          key: "startTime",
-        },
-        {
-          title: "报名截止时间",
-          slot: "applyEndTime",
-        },
-        {
-          title: "时间场次",
-          slot: "hours",
-        },
-        {
-          title: "活动状态",
-          key: "promotionStatus",
-          minWidth: 80,
-          sortable: false,
-          render: (h, params) => {
-            if (params.row.promotionStatus == "NEW") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "新建",
-                  },
-                }),
-              ]);
-            } else if (params.row.promotionStatus == "START") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "success",
-                    text: "开始",
-                  },
-                }),
-              ]);
-            } else if (params.row.promotionStatus == "END") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "结束",
-                  },
-                }),
-              ]);
-            } else if (params.row.promotionStatus == "CLOSE") {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "废弃",
-                  },
-                }),
-              ]);
-            }
-          },
-        },
-      ],
-      goodsColumns: [
-        // 商品表单
-        {
-          title: "商品名称",
-          key: "goodsName",
-          minWidth: 120,
-          tooltip: true,
-        },
-        {
-          title: "商品价格",
-          slot: "originalPrice",
-          width: 110,
-        },
-        {
-          title: "库存",
-          slot: "quantity",
-          minWidth: 30,
-          width: 90,
-        },
-        {
-          title: "活动价格",
-          slot: "price",
-          width: 100,
-        },
-        {
-          title: "商家名称",
-          key: "storeName",
-          minWidth: 100,
-          tooltip: true,
-        },
-        {
-          title: "活动场次",
-          width: 100,
-          slot: "time",
-        },
-        // {
-        //   title: "状态",
-        //   slot: "promotionApplyStatus",
-        //   width: 90,
-        // },
-        {
-          title: "操作",
-          slot: "action",
-          width: 150,
-          align: "center",
-        },
-      ],
-      goodsList: [], // 商品列表
-      params: {
-        // 请求参数
-        seckillId: this.$route.query.id,
-        applyStatus: "PASS",
-        failReason: "",
-        ids: "",
+      promotionStatus: "",
+      loading: false,
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
       },
-      rules: {
-        // 验证规则
-        failReason: [{ required: true, message: "请输入拒绝原因" }],
-      },
+      total: 0,
+      data: [],
+      goodsList: [],
     };
   },
   methods: {
-    // 初始化数据
+    seckillStatusText(status) {
+      const map = {
+        NEW: "新建",
+        START: "开始",
+        END: "结束",
+        CLOSE: "废弃",
+      };
+      return map[status] || status || "-";
+    },
+    seckillStatusTagType(status) {
+      const map = {
+        NEW: "danger",
+        START: "success",
+        END: "danger",
+        CLOSE: "danger",
+      };
+      return map[status] || "danger";
+    },
     init() {
       this.getSeckillMsg();
     },
-    // 分页 改变页码
-    changePage(v) {
-      this.searchForm.pageNumber = v;
+    changePage() {
       this.getDataList();
-      this.clearSelectAll();
     },
-    // 分页 改变页数
-    changePageSize(v) {
+    changePageSize() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
       this.getDataList();
     },
-    // 清除选中状态
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-
     getDataList() {
-      // 获取商品详情
       this.loading = true;
       this.searchForm.seckillId = this.$route.query.id;
       seckillGoodsList(this.searchForm).then((res) => {
@@ -251,9 +141,7 @@ export default {
         }
       });
     },
-
     getSeckillMsg() {
-      // 获取活动详情
       seckillDetail(this.$route.query.id).then((res) => {
         if (res.success && res.result) {
           this.data = [];
@@ -264,7 +152,6 @@ export default {
       });
     },
     delGoods(index, row) {
-      // 删除商品
       this.$Modal.confirm({
         title: "确认删除",
         content: "您确认要删除该商品吗?删除后不可恢复",
@@ -283,12 +170,10 @@ export default {
       });
     },
     unixDate(time) {
-      // 处理报名截止时间
-      return this.$options.filters.unixToDate(new Date(time) / 1000);
+      return this.$filters.unixToDate(new Date(time) / 1000);
     },
     unixHours(item) {
-      // 处理小时场次
-      let hourArr = item.split(",");
+      const hourArr = item.split(",");
       for (let i = 0; i < hourArr.length; i++) {
         hourArr[i] += ":00";
       }
@@ -300,14 +185,24 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
 .operation {
   margin: 10px 0;
 }
 
-.reason {
+.hour-tag {
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+
+.link-text {
+  color: #409eff;
   cursor: pointer;
-  color: #2d8cf0;
-  font-size: 12px;
+  text-decoration: none;
+}
+
+.mt_10 {
+  margin-top: 10px;
 }
 </style>

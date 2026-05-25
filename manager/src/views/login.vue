@@ -1,135 +1,126 @@
 <template>
   <div class="login" @click="$refs.verify.show = false">
-    <Row @keydown.enter.native="submitLogin" class="flex">
-      <Col style="width: 368px">
+    <el-row class="flex" @keyup.enter="submitLogin">
+      <el-col style="width: 368px">
         <Header />
-        <Row style="flex-direction: column">
-          <Form
+        <el-row style="flex-direction: column">
+          <el-form
             ref="usernameLoginForm"
             :model="form"
             :rules="rules"
             class="form"
           >
-            <FormItem prop="username">
-              <Input
+            <el-form-item prop="username">
+              <el-input
                 v-model="form.username"
-                prefix="ios-contact"
                 size="large"
                 clearable
                 placeholder="请输入用户名"
                 autocomplete="off"
-              />
-            </FormItem>
-            <FormItem prop="password">
-              <Input
-                type="password"
+              >
+                <template #prefix>
+                  <el-icon><User /></el-icon>
+                </template>
+              </el-input>
+            </el-form-item>
+            <el-form-item prop="password">
+              <el-input
                 v-model="form.password"
-                prefix="ios-lock"
+                type="password"
                 size="large"
-                password
+                show-password
                 placeholder="请输入密码"
                 autocomplete="off"
-              />
-            </FormItem>
-          </Form>
+              >
+                <template #prefix>
+                  <el-icon><Lock /></el-icon>
+                </template>
+              </el-input>
+            </el-form-item>
+          </el-form>
 
-          <Row>
-            <Button
+          <el-row>
+            <el-button
               class="login-btn"
               type="primary"
               size="large"
               :loading="loading"
+              style="width: 100%"
               @click="submitLogin"
-              long
             >
               <span v-if="!loading">{{ $t("login") }}</span>
               <span v-else>{{ $t("logining") }}</span>
-            </Button>
-          </Row>
-        </Row>
-        <!-- 拼图验证码 -->
+            </el-button>
+          </el-row>
+        </el-row>
         <verify
           ref="verify"
           class="verify-con"
           verifyType="LOGIN"
           @change="verifyChange"
-        ></verify>
+        />
         <Footer />
-      </Col>
-      <!-- <LangSwitch /> -->
-    </Row>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
 <script>
+import { User, Lock } from "@element-plus/icons-vue";
 import { login, userInfo } from "@/api/index";
 import Cookies from "js-cookie";
 import Header from "@/views/main-parts/header";
 import Footer from "@/views/main-parts/footer";
-import LangSwitch from "@/views/main-parts/lang-switch";
 import util from "@/libs/util.js";
 import verify from "@/components/verify";
 
 export default {
   components: {
-    LangSwitch,
     Header,
     Footer,
     verify,
+    User,
+    Lock,
   },
   data() {
     return {
-      loading: false, // 加载状态
+      loading: false,
       form: {
-        // 表单数据
         username: "",
         password: "",
         mobile: "",
         code: "",
       },
       rules: {
-        // 验证规则
         username: [
-          {
-            required: true,
-            message: "账号不能为空",
-            trigger: "blur",
-          },
+          { required: true, message: "账号不能为空", trigger: "blur" },
         ],
         password: [
-          {
-            required: true,
-            message: "密码不能为空",
-            trigger: "blur",
-          },
+          { required: true, message: "密码不能为空", trigger: "blur" },
         ],
       },
     };
   },
   methods: {
     afterLogin(res) {
-      // 登录成功后处理
-      let accessToken = res.result.accessToken;
-      let refreshToken = res.result.refreshToken;
+      const accessToken = res.result.accessToken;
+      const refreshToken = res.result.refreshToken;
       this.setStore("accessToken", accessToken);
       this.setStore("refreshToken", refreshToken);
-      // 获取用户信息
       userInfo().then((res) => {
         if (res.success) {
-          // 加载菜单
           Cookies.set("userInfoManager", JSON.stringify(res.result));
           this.$store.commit("setAvatarPath", res.result.avatar);
           util.initRouter(this);
-          this.$router.push({
-            name: "home_index",
-          });
+          this.$store.commit("setOpenedList");
+          this.$store.commit("initCachePage");
+          this.$router.push({ name: "home_index" });
         } else {
           this.loading = false;
         }
       });
     },
     submitLogin() {
-      // 登录操作
       this.$refs.usernameLoginForm.validate((valid) => {
         if (valid) {
           this.$refs.verify.init();
@@ -137,12 +128,9 @@ export default {
       });
     },
     verifyChange(con) {
-      // 拼图验证码回显
       if (!con.status) return;
-
       this.loading = true;
-
-      let fd = new FormData();
+      const fd = new FormData();
       fd.append("username", this.form.username);
       fd.append("password", this.md5(this.form.password));
       login(fd)
@@ -185,20 +173,10 @@ export default {
   .login-btn {
     background: linear-gradient(135deg, $theme_color 0%, $warning_color 100%);
     height: 40px;
-    cursor: pointer;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    color: #fff;
-    width: 100%;
-    text-align: center;
-    transition: 0.35s;
+    border: none;
   }
   .login-btn:hover {
     opacity: 0.9;
-    border-radius: 10px;
   }
 }
 .flex {

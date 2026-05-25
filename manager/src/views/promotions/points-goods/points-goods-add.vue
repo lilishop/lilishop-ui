@@ -1,100 +1,122 @@
 <template>
   <div class="wrapper">
-    <Card>
-      <Form ref="form" :model="form" :rules="formRule">
+    <el-card>
+      <el-form ref="form" :model="form" :rules="formRule" label-width="120px">
         <div class="base-info-item">
           <div class="form-item-view">
-            <FormItem astyle="width: 100%">
+            <el-form-item style="width: 100%">
               <div style="display: flex; margin-bottom: 10px">
-                <Button type="primary" @click="openSkuList">选择商品</Button>
-                <Button
-                  type="error"
-                  ghost
+                <el-button type="primary" @click="openSkuList">选择商品</el-button>
+                <el-button
+                  type="danger"
+                  plain
                   style="margin-left: 10px"
                   @click="delSelectGoods"
-                >批量删除
-                </Button
-                >
+                >批量删除</el-button>
               </div>
-              <Table
+              <el-table
                 border
                 v-if="showTable"
-                :columns="columns"
                 :data="promotionGoodsList"
-                @on-selection-change="changeSelect"
+                style="width: 100%"
+                @selection-change="changeSelect"
               >
-                <template slot-scope="{ row }" slot="skuId">
-                  <div>{{ row.skuId }}</div>
-                </template>
-
-                <template slot-scope="{ index }" slot="settlementPrice">
-                  <InputNumber
-                    :min="0"
-                    type="number"
-                    v-model="promotionGoodsList[index].settlementPrice"
-                  />
-                </template>
-
-                <template slot-scope="{ row, index }" slot="pointsGoodsCategory">
-                  <Select
-                    v-model="promotionGoodsList[index].pointsGoodsCategoryId"
-                    :transfer="true"
-                    :label-in-value="true"
-                    @on-change="
-                      (val) => {
-                        changeCategory(val, index);
-                      }
-                    "
-                  >
-                    <Option
-                      v-for="item in categoryList"
-                      :value="item.id"
-                      :key="item.id"
-                    >{{ item.name }}
-                    </Option
+                <el-table-column type="selection" width="60" align="center" />
+                <el-table-column prop="goodsName" label="商品名称" min-width="120" show-overflow-tooltip />
+                <el-table-column label="SKU编码" min-width="120">
+                  <template #default="{ row }">
+                    <span v-if="row">{{ row.skuId }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="storeName" label="店铺名称" min-width="100" show-overflow-tooltip />
+                <el-table-column label="商品价格" width="110">
+                  <template #default="{ row }">
+                    <span v-if="row" :style="{ color: $mainColor }">
+                      {{ $filters.unitPrice(row.price, "￥") }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="库存" width="90">
+                  <template #default="{ row }">
+                    <span v-if="row">{{ row.quantity }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="结算价格" min-width="130">
+                  <template #default="{ $index }">
+                    <el-input-number
+                      :min="0"
+                      v-model="promotionGoodsList[$index].settlementPrice"
+                      style="width: 110px"
+                    />
+                  </template>
+                </el-table-column>
+                <el-table-column label="分类" min-width="160">
+                  <template #default="{ $index }">
+                    <el-select
+                      v-model="promotionGoodsList[$index].pointsGoodsCategoryId"
+                      @change="(val) => changeCategory(val, $index)"
+                      style="width: 140px"
                     >
-                  </Select>
-                </template>
-                <template slot-scope="{ index }" slot="activeStock">
-                  <InputNumber
-                    :min="0"
-                    type="number"
-                    v-model="promotionGoodsList[index].activeStock"
-                  />
-                </template>
-                <template slot-scope="{ index }" slot="points">
-                  <InputNumber
-                    :min="0"
-                    type="number"
-                    v-model="promotionGoodsList[index].points"
-                  />
-                </template>
-              </Table>
-            </FormItem>
+                      <el-option
+                        v-for="item in categoryList"
+                        :value="item.id"
+                        :key="item.id"
+                        :label="item.name"
+                      />
+                    </el-select>
+                  </template>
+                </el-table-column>
+                <el-table-column label="活动库存" min-width="130">
+                  <template #default="{ $index }">
+                    <el-input-number
+                      :min="0"
+                      v-model="promotionGoodsList[$index].activeStock"
+                      style="width: 110px"
+                    />
+                  </template>
+                </el-table-column>
+                <el-table-column label="兑换积分" min-width="130">
+                  <template #default="{ $index }">
+                    <el-input-number
+                      :min="0"
+                      v-model="promotionGoodsList[$index].points"
+                      style="width: 110px"
+                    />
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="100" align="center">
+                  <template #default="{ $index }">
+                    <el-button type="danger" size="small" plain @click="delGoods($index)">删除</el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-form-item>
 
-            <FormItem label="活动时间" prop="rangeTime">
-              <DatePicker type="datetimerange" v-model="form.rangeTime" format="yyyy-MM-dd HH:mm:ss"
-                          placeholder="请选择" :options="options" style="width: 260px">
-              </DatePicker>
-            </FormItem>
+            <el-form-item label="活动时间" prop="rangeTime">
+              <el-date-picker
+                type="datetimerange"
+                v-model="form.rangeTime"
+                format="YYYY-MM-DD HH:mm:ss"
+                start-placeholder="开始时间"
+                end-placeholder="结束时间"
+                placeholder="请选择"
+                :disabled-date="options.disabledDate"
+                style="width: 260px"
+              />
+            </el-form-item>
             <div>
-              <Button type="text" @click="closeCurrentPage">返回</Button>
-              <Button type="primary" :loading="submitLoading" @click="handleSubmit"
-              >提交
-              </Button
-              >
+              <el-button link @click="closeCurrentPage">返回</el-button>
+              <el-button type="primary" :loading="submitLoading" @click="handleSubmit">提交</el-button>
             </div>
           </div>
         </div>
-      </Form>
-    </Card>
+      </el-form>
+    </el-card>
     <sku-select ref="skuSelect" @selectedGoodsData="selectedGoodsData"></sku-select>
   </div>
 </template>
 
 <script>
-import {addPointsGoods, getPointsGoodsCategoryList} from "@/api/promotion";
-import {regular} from "@/utils";
+import { addPointsGoods, getPointsGoodsCategoryList } from "@/api/promotion";
 import skuSelect from "@/components/lili-dialog";
 
 export default {
@@ -105,105 +127,17 @@ export default {
   data() {
     return {
       form: {
-        rangeTime: ["",""],
-        promotionGoodsList: [], // 活动商品列表
+        rangeTime: ["", ""],
+        promotionGoodsList: [],
       },
       showTable: true,
-      promotionGoodsList: [], // 活动商品列表
-      categoryList: [], // 分类列表
-      submitLoading: false, // 添加或编辑提交状态
-      selectedGoods: [], // 已选商品列表，便于删除
+      promotionGoodsList: [],
+      categoryList: [],
+      submitLoading: false,
+      selectedGoods: [],
       formRule: {
-        rangeTime: [{required: true, message: "请选择活动时间"}],
+        rangeTime: [{ required: true, message: "请选择活动时间" }],
       },
-      columns: [
-        {
-          type: "selection",
-          width: 60,
-          align: "center",
-        },
-        {
-          title: "商品名称",
-          key: "goodsName",
-          minWidth: 120,
-          render: (h, params) => {
-            return h("div", params.row.goodsName);
-          },
-        },
-        {
-          title: "SKU编码",
-          slot: "skuId",
-          minWidth: 120,
-        },
-        {
-          title: "店铺名称",
-          key: "storeName",
-          minWidth: 60,
-          render: (h, params) => {
-            return h("div", params.row.storeName);
-          },
-        },
-        {
-          title: "商品价格",
-          key: "price",
-          minWidth: 40,
-          render: (h, params) => {
-            return h("priceColorScheme", {props: {value: params.row.price, color: this.$mainColor}});
-          },
-        },
-        {
-          title: "库存",
-          key: "quantity",
-          minWidth: 20,
-          render: (h, params) => {
-            return h("div", params.row.quantity);
-          },
-        },
-        {
-          title: "结算价格",
-          slot: "settlementPrice",
-          minWidth: 40,
-        },
-        {
-          title: "分类",
-          slot: "pointsGoodsCategory",
-          minWidth: 60,
-        },
-        {
-          title: "活动库存",
-          slot: "activeStock",
-          minWidth: 40,
-        },
-        {
-          title: "兑换积分",
-          slot: "points",
-          minWidth: 40,
-        },
-        {
-          title: "操作",
-          key: "action",
-          minWidth: 50,
-          align: "center",
-          render: (h, params) => {
-            return h(
-              "Button",
-              {
-                props: {
-                  size: "small",
-                  type: "error",
-                  ghost: true,
-                },
-                on: {
-                  click: () => {
-                    this.delGoods(params.index);
-                  },
-                },
-              },
-              "删除"
-            );
-          },
-        },
-      ],
       options: {
         disabledDate(date) {
           return date && date.valueOf() < Date.now() - 86400000;
@@ -215,23 +149,21 @@ export default {
     await this.getCategory();
   },
   methods: {
-    // 获取商品分类
     async getCategory() {
       let res = await getPointsGoodsCategoryList();
       this.categoryList = res.result.records;
     },
-    /** 保存积分商品 */
     handleSubmit() {
-      this.form.startTime=this.form.rangeTime[0]
-      this.form.endTime=this.form.rangeTime[1]
+      this.form.startTime = this.form.rangeTime[0];
+      this.form.endTime = this.form.rangeTime[1];
       this.$refs.form.validate((valid) => {
         if (valid) {
           let params = this.promotionGoodsList;
-          const start = this.$options.filters.unixToDate(this.form.startTime / 1000);
-          const end = this.$options.filters.unixToDate(this.form.endTime / 1000);
+          const start = this.$filters.unixToDate(this.form.startTime / 1000);
+          const end = this.$filters.unixToDate(this.form.endTime / 1000);
 
           if (!params || params.length === 0) {
-            this.$Modal.warning({title: "提示", content: "请选择指定商品"});
+            this.$Modal.warning({ title: "提示", content: "请选择指定商品" });
             return;
           }
 
@@ -251,23 +183,19 @@ export default {
         }
       });
     },
-    // 关闭当前页面
     closeCurrentPage() {
       this.$store.commit("removeTag", "add-points-goods");
       localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList);
       this.$router.go(-1);
     },
-    // 选择分类
-    changeCategory(val, index) {
-      this.promotionGoodsList[index].pointsGoodsCategoryName = val.label;
+    changeCategory(categoryId, index) {
+      const item = this.categoryList.find((c) => c.id === categoryId);
+      this.promotionGoodsList[index].pointsGoodsCategoryName = item ? item.name : "";
     },
-    // 变更选中状态
     changeSelect(e) {
-      // 已选商品批量选择
       this.selectedGoods = e;
     },
     delSelectGoods() {
-      // 多选删除商品
       if (this.selectedGoods.length <= 0) {
         this.$Message.warning("您还未选择要删除的数据");
         return;
@@ -287,11 +215,9 @@ export default {
       });
     },
     delGoods(index) {
-      // 删除商品
       this.promotionGoodsList.splice(index, 1);
     },
     openSkuList() {
-      // 显示商品选择器
       this.$refs.skuSelect.open("goods");
       let data = JSON.parse(JSON.stringify(this.promotionGoodsList));
       data.forEach((e) => {
@@ -300,7 +226,6 @@ export default {
       this.$refs.skuSelect.goodsData = data;
     },
     selectedGoodsData(item) {
-      // 回显已选商品
       let list = [];
       item.forEach((e) => {
         const obj = {
@@ -316,7 +241,7 @@ export default {
           goodsName: e.goodsName || "",
           quantity: e.quantity || "",
           storeName: e.storeName || "",
-          price: e.price || ""
+          price: e.price || "",
         };
         list.push(obj);
       });

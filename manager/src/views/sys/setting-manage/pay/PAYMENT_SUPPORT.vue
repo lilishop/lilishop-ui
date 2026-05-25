@@ -1,53 +1,39 @@
 <template>
   <div class="layout">
-    <div class="row" v-for="(client,clientIndex) in supportForm.clients" :key="clientIndex">
-
-      <div class="col" v-if="client ==item.client" v-for="(item,index) in  formValidate" :key="index">
-        <Card :padding="0">
-          <div>
-
-            <!-- app -->
-            <div class="icon-item" v-if="client ==item.client &&item.client== 'APP'">
-              <img class="icon" src="../../../../assets/setting/app.svg" alt="" srcset="">
-            </div>
-            <div class="icon-item" v-if="  client ==item.client &&  item.client== 'PC'">
-              <!-- pc -->
-              <img class="icon" src="../../../../assets/setting/pc.svg" alt="" srcset="">
-
-            </div>
-            <div class="icon-item" v-if="  client ==item.client &&  item.client== 'WECHAT_MP'">
-              <!-- 小程序 -->
-
-              <img class="icon" src="../../../../assets/setting/wechat_mp.svg" alt="" srcset="">
-            </div>
-
-            <div class="icon-item" v-if=" client ==item.client &&  item.client== 'H5'">
-              <!-- h5 -->
-
-              <img class="icon" src="../../../../assets/setting/h5.svg" alt="" srcset="">
-            </div>
-            <div class='pay-title' v-if=" client ==item.client "> {{way[item.client]}}</div>
-
-            <div v-if=" client ==item.client ">
-              <Divider orientation="left">支付设置</Divider>
-
-              <div class="pay-list">
-                <CheckboxGroup @on-change="handleChangePayType" v-model="item.supports">
-
-                  <Checkbox v-for="(support,i)  in supportForm.payments" :key="i" :label="support">
-
-                    {{payWay[support] || support}}
-
-                  </Checkbox>
-                </CheckboxGroup>
-              </div>
-            </div>
-
+    <div class="row" v-for="(item, index) in formValidate" :key="index">
+      <div class="col">
+        <el-card shadow="never" :body-style="{ padding: '0 16px' }">
+          <div class="icon-item" v-if="item.client == 'APP'">
+            <img class="icon" src="../../../../assets/setting/app.svg" alt="" />
           </div>
-        </Card>
+          <div class="icon-item" v-if="item.client == 'PC'">
+            <img class="icon" src="../../../../assets/setting/pc.svg" alt="" />
+          </div>
+          <div class="icon-item" v-if="item.client == 'WECHAT_MP'">
+            <img class="icon" src="../../../../assets/setting/wechat_mp.svg" alt="" />
+          </div>
+          <div class="icon-item" v-if="item.client == 'H5'">
+            <img class="icon" src="../../../../assets/setting/h5.svg" alt="" />
+          </div>
+          <div class="pay-title">{{ way[item.client] }}</div>
 
+          <div>
+            <el-divider content-position="left">支付设置</el-divider>
+
+            <div class="pay-list">
+              <el-checkbox-group v-model="item.supports" @change="handleChangePayType">
+                <el-checkbox
+                  v-for="(support, i) in supportForm.payments"
+                  :key="i"
+                  :value="support"
+                >
+                  {{ payWay[support] || support }}
+                </el-checkbox>
+              </el-checkbox-group>
+            </div>
+          </div>
+        </el-card>
       </div>
-
     </div>
   </div>
 </template>
@@ -58,21 +44,20 @@ import { getPaymentSupportForm } from "@/api/setting";
 export default {
   data() {
     return {
-      ruleValidate: {}, // 验证规则
-      way: { // 类型
+      ruleValidate: {},
+      way: {
         APP: "移动应用端",
         H5: "移动端",
         WECHAT_MP: "小程序端",
         PC: "PC端",
       },
-      formValidate: {}, // 表单数据
-      // key obj
-      payWay: { // 支付方式
+      formValidate: {},
+      payWay: {
         ALIPAY: "支付宝支付",
         WECHAT: "微信支付",
         WALLET: "余额支付",
       },
-      supportForm: "", // 支持的支付方式
+      supportForm: "",
       checkSupport: {},
     };
   },
@@ -82,12 +67,11 @@ export default {
   },
   methods: {
     submit(name) {
-      let that = this;
+      const that = this;
       if (handleSubmit(that, name)) {
         this.setupSetting();
       }
     },
-    // 修改支付设置
     handleChangePayType(val) {
       this.$Modal.confirm({
         title: "修改支付设置",
@@ -101,31 +85,25 @@ export default {
         },
       });
     },
-    // 保存设置
     setupSetting() {
-      setSetting(this.type, { paymentSupportItems: this.formValidate }).then(
-        (res) => {
-          if (res.success) {
-            this.checkSupport =  JSON.parse(JSON.stringify(this.formValidate));
-            this.$Message.success("保存成功!");
-            this.$Modal.remove();
-          } else {
-            this.$Message.error("保存失败!");
-            this.$Modal.remove();
-          }
+      setSetting(this.type, { paymentSupportItems: this.formValidate }).then((res) => {
+        if (res.success) {
+          this.checkSupport = JSON.parse(JSON.stringify(this.formValidate));
+          this.$Message.success("保存成功!");
+          this.$Modal.remove();
+        } else {
+          this.$Message.error("保存失败!");
+          this.$Modal.remove();
         }
-      );
+      });
     },
-    // 实例化数据
     async init() {
       this.formValidate = JSON.parse(this.res).paymentSupportItems;
-      this.checkSupport =  JSON.parse(JSON.stringify(this.formValidate));
+      this.checkSupport = JSON.parse(JSON.stringify(this.formValidate));
       console.log(this.formValidate);
 
       await getPaymentSupportForm().then((res) => {
-        // res.result.payments = ["H5", "PC"];
         this.supportForm = res.result;
-
       });
     },
   },
@@ -151,14 +129,8 @@ export default {
   margin-right: 20px;
   display: flex;
   margin-bottom: 20px;
-  ::v-deep .ivu-card-body {
-    padding: 0 16px !important;
-  }
 }
 
-.label-item {
-  display: flex;
-}
 .label-item {
   display: flex;
   align-items: center;
@@ -176,13 +148,9 @@ export default {
   align-items: center;
   flex-direction: column;
 }
-.ivu-form-item {
+.el-form-item {
   display: flex;
-
   align-items: center;
-}
-.ivu-row {
-  width: 100%;
 }
 .icon {
   width: 100px;

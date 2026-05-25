@@ -25,8 +25,8 @@
             <img :src="item.img" width="140" height="140" :alt="item.name" />
             <div class="ellipsis">{{ item.name }}</div>
             <div>
-              <span>{{ item.price | unitPrice("￥") }}</span>
-              <span>{{ item.originalPrice | unitPrice("￥") }}</span>
+              <span>{{ $filters.unitPrice(item.price, "￥") }}</span>
+              <span>{{ $filters.unitPrice(item.originalPrice, "￥") }}</span>
             </div>
           </div>
         </swiper-slide>
@@ -95,7 +95,7 @@ export default {
   mounted() {
     this.countDown(this.options.list);
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearInterval(this.interval);
   },
   methods: {

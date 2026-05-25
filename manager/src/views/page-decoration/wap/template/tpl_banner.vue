@@ -1,12 +1,12 @@
 <template>
   <div class="layout">
-    <Carousel class="carousel" v-if="res"  autoplay :autoplay-speed="5000">
-      <CarouselItem v-for="(item, index) in res.list" :key="index">
+    <el-carousel class="carousel" v-if="res" autoplay :interval="5000" height="150px">
+      <el-carousel-item v-for="(item, index) in res.list" :key="index">
         <div>
           <img class="image-mode" :src="item.img" />
         </div>
-      </CarouselItem>
-    </Carousel>
+      </el-carousel-item>
+    </el-carousel>
   </div>
 </template>
 <script>
@@ -16,7 +16,7 @@ export default {
   watch: {
     res: {
       handler(newValue, oldValue) {
-          this.$set(this,'res',newValue);
+          this['res'] = newValue;
       },
       deep: true
     }

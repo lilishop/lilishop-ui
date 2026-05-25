@@ -1,13 +1,12 @@
 <template>
-  <Modal
-    :styles="{ top: '120px' }"
-    width="800"
-    @on-cancel="clickClose"
-    @on-ok="clickOK"
+  <el-dialog
     v-model="flag"
-    :mask-closable="false"
+    width="800px"
+    :close-on-click-modal="false"
     title="绘制热区"
-    scrollable
+    top="120px"
+    destroy-on-close
+    @close="clickClose"
   >
     <template v-if="flag">
       <hotzone
@@ -17,7 +16,11 @@
         :image="res.img"
       ></hotzone>
     </template>
-  </Modal>
+    <template #footer>
+      <el-button @click="clickClose">取消</el-button>
+      <el-button type="primary" @click="clickOK">确定</el-button>
+    </template>
+  </el-dialog>
 </template>
 <script>
 import hotzone from "./components/Hotzone.vue";
@@ -57,11 +60,11 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-::v-deep .ivu-modal {
+:deep(.el-dialog) {
   overflow: hidden;
   height: 650px !important;
 }
-::v-deep .ivu-modal-body {
+:deep(.el-dialog__body) {
   width: 100%;
   height: 500px;
   overflow: hidden;

@@ -23,7 +23,7 @@
   flex: 11;
 }
 
-.ivu-card {
+.el-card {
   width: 100%;
 }
 
@@ -45,134 +45,174 @@
   margin-bottom: 16px;
 }
 
+.oss-tree-node {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-right: 8px;
+}
+
+.oss-tree-more {
+  cursor: pointer;
+  color: #909399;
+  padding: 0 4px;
+}
+
 </style>
 <template>
   <div class="search">
-    <Card class="tabs-card">
-      <Tabs v-model="activeRoleTab" @on-click="handleRoleTabChange">
-        <TabPane label="管理员" name="MANAGER"></TabPane>
-        <TabPane label="商家" name="STORE"></TabPane>
-        <TabPane label="用户" name="MEMBER"></TabPane>
-        <TabPane label="客服" name="CUSTOMER"></TabPane>
-      </Tabs>
-    </Card>
-    <Row>
-      <Card>
+    <el-card class="tabs-card">
+      <el-tabs v-model="activeRoleTab" @tab-change="handleRoleTabChange">
+        <el-tab-pane label="管理员" name="MANAGER" />
+        <el-tab-pane label="商家" name="STORE" />
+        <el-tab-pane label="用户" name="MEMBER" />
+        <el-tab-pane label="客服" name="CUSTOMER" />
+      </el-tabs>
+    </el-card>
+    <el-row>
+      <el-card>
         <div>
           <div class="operation">
-            <Row @keydown.enter.native="handleSearch">
-              <Form
+            <el-row @keyup.enter="handleSearch">
+              <el-form
                 ref="searchForm"
-                :label-width="85"
+                label-width="85px"
                 :model="searchForm"
                 class="search-form"
                 inline
               >
-                <Form-item label="上传时间">
-                  <DatePicker
+                <el-form-item label="上传时间">
+                  <el-date-picker
                     v-model="selectDate"
                     clearable
-                    format="yyyy-MM-dd"
-                    placeholder="选择起始时间"
+                    value-format="YYYY-MM-DD"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
                     style="width: 240px"
                     type="daterange"
-                    @on-change="selectDateRange"
-                  ></DatePicker>
-                </Form-item>
-                <Button
-                  class="search-btn"
-                  icon="ios-search"
-                  type="primary"
-                  @click="handleSearch"
-                >搜索
-                </Button>
-              </Form>
-            </Row>
+                    @change="selectDateRange"
+                  />
+                </el-form-item>
+                <el-form-item>
+                  <el-button class="search-btn" type="primary" @click="handleSearch">搜索</el-button>
+                </el-form-item>
+              </el-form>
+            </el-row>
           </div>
-          <Row class="oss-manage-box">
-            <Col v-if="canShowGroups" :span="isComponent?5:4">
+          <el-row class="oss-manage-box">
+            <el-col v-if="canShowGroups" :span="isComponent ? 5 : 4">
               <div class="file-list">
                 <div class="article-category mr_10">
-                  <Tree :data="treeData" :render="renderContent" @on-select-change.self="handleCateChange"
-                        class="demo-tree-render"></Tree>
-                  <div class="group-row flex" v-if="!isComponent">
-                    <Button @click="handleClickAddGroup">添加分组</Button>
+                  <el-tree
+                    :data="treeData"
+                    node-key="value"
+                    :props="{ label: 'title', children: 'children' }"
+                    highlight-current
+                    class="demo-tree-render"
+                    @node-click="handleTreeNodeClick"
+                  >
+                    <template #default="{ data }">
+                      <span v-if="data" class="oss-tree-node">
+                        <span>{{ data.title }}</span>
+                        <el-dropdown
+                          v-if="data.value !== '0' && !isComponent"
+                          trigger="click"
+                          @command="(cmd) => onTreeDropdownCommand(cmd, data)"
+                        >
+                          <span class="oss-tree-more" @click.stop>···</span>
+                          <template #dropdown>
+                            <el-dropdown-menu>
+                              <el-dropdown-item command="edit">编辑</el-dropdown-item>
+                              <el-dropdown-item command="delete">删除</el-dropdown-item>
+                            </el-dropdown-menu>
+                          </template>
+                        </el-dropdown>
+                      </span>
+                    </template>
+                  </el-tree>
+                  <div v-if="!isComponent" class="group-row flex">
+                    <el-button @click="handleClickAddGroup">添加分组</el-button>
                   </div>
                 </div>
               </div>
-            </Col>
-            <Col :span="canShowGroups ? (isComponent ? 19 : 20) : 24">
+            </el-col>
+            <el-col :span="canShowGroups ? (isComponent ? 19 : 20) : 24">
               <div class="pic-list">
                 <div>
-                  <div class="oss-operation padding-row" style="display: flex;flex-direction: row-reverse;">
+                  <div class="oss-operation padding-row" style="display: flex; flex-direction: row-reverse">
                     <div>
-                      <Upload
+                      <el-upload
                         v-if="canUploadImages"
                         ref="up"
                         :action="commonUrl + '/common/common/upload/file'"
                         :data="uploadData"
                         :headers="accessToken"
                         :before-upload="beforeUpload"
-                        :max-size="20480"
                         :on-error="handleError"
-                        :on-exceeded-size="handleMaxSize"
                         :on-success="handleSuccess"
-                        :show-upload-list="false"
+                        :show-file-list="false"
                         multiple
                         style="display: inline-block"
                       >
-                        <Button>上传图片</Button>
-                      </Upload>
-                      <Button v-if="!isComponent && showType == 'list'" @click="removeAll">批量删除</Button>
+                        <el-button>上传图片</el-button>
+                      </el-upload>
+                      <el-button v-if="!isComponent && showType == 'list'" @click="removeAll">批量删除</el-button>
                     </div>
                   </div>
                 </div>
                 <div>
-                  <CheckboxGroup v-model="selectedOss" @on-change="selectOssChange">
+                  <el-checkbox-group v-model="selectedOss" @change="selectOssChange">
                     <div class="img-box">
                       <div v-for="(item, index) in data" :key="index" class="img-item">
-                        <Checkbox :label="item.id+','+item.url" class="check-box">
-                          <template>
-                            <div class="card" @mouseenter.active="onMouseOver(item, index)"
-                                 @mouseleave.active="onMouseOut(item, index)">
-                              <!--<div class="custom-checkbox-card-mask"><div class="custom-checkbox-card-mask-dot"/></div>-->
-                              <img :src="item.url" alt=""/>
-                              <div v-if="item.isShowPreview" class="preview">
-                                <div @click.prevent="download(item)">
-                                  <Tooltip content="下载">
-                                    <Icon type="md-cloud-download" size="18"/>
-                                  </Tooltip>
-                                </div>
-                                <div @click.prevent="remove(item)">
-                                  <Tooltip content="删除">
-                                    <Icon type="md-trash" size="18"/>
-                                  </Tooltip>
-                                </div>
-                                <div @click.prevent="showPic(item)">
-                                  <Tooltip content="预览">
-                                    <Icon type="ios-eye" size="22"/>
-                                  </Tooltip>
-                                </div>
+                        <el-checkbox :value="item.id + ',' + item.url" class="check-box">
+                          <div
+                            class="card"
+                            @mouseenter="onMouseOver(item, index)"
+                            @mouseleave="onMouseOut(item, index)"
+                          >
+                            <img :src="item.url" alt="" />
+                            <div v-if="item.isShowPreview" class="preview">
+                              <div @click.prevent="download(item)">
+                                <el-tooltip content="下载" placement="top">
+                                  <el-icon :size="18"><Download /></el-icon>
+                                </el-tooltip>
+                              </div>
+                              <div @click.prevent="remove(item)">
+                                <el-tooltip content="删除" placement="top">
+                                  <el-icon :size="18"><Delete /></el-icon>
+                                </el-tooltip>
+                              </div>
+                              <div @click.prevent="showPic(item)">
+                                <el-tooltip content="预览" placement="top">
+                                  <el-icon :size="22"><View /></el-icon>
+                                </el-tooltip>
                               </div>
                             </div>
-                          </template>
-                        </Checkbox>
+                          </div>
+                        </el-checkbox>
                         <div>
-                          <Tooltip :content="item.name" placement="bottom">
+                          <el-tooltip :content="item.name" placement="bottom">
                             <div class="text">{{ item.name }}</div>
-                          </Tooltip>
+                          </el-tooltip>
                         </div>
                       </div>
                     </div>
-                  </CheckboxGroup>
+                  </el-checkbox-group>
                 </div>
                 <div class="page-box">
-                  <Page :total="total" :page-size="searchForm.pageSize" show-elevator @on-change="pageChange"
-                        size="small"/>
+                  <el-pagination
+                    v-model:current-page="searchForm.pageNumber"
+                    v-model:page-size="searchForm.pageSize"
+                    :total="total"
+                    layout="prev, pager, next, jumper"
+                    size="small"
+                    @current-change="pageChange"
+                  />
                 </div>
               </div>
-            </Col>
-          </Row>
+            </el-col>
+          </el-row>
 
 
           <!--<div class="oss-operation padding-row">-->
@@ -334,97 +374,89 @@
         <!--@on-page-size-change="changePageSize"-->
         <!--&gt;</Page>-->
         <!--</Row>-->
-      </Card>
-    </Row>
-    <Modal
+      </el-card>
+    </el-row>
+    <el-dialog
       v-model="modalVisible"
-      :mask-closable="false"
+      :close-on-click-modal="false"
       :title="modalTitle"
-      :width="500"
+      width="500px"
+      destroy-on-close
     >
-      <Form ref="form" :label-width="95" :model="form" :rules="formValidate">
-        <FormItem label="原文件名" prop="name">
-          <Input v-model="form.name"/>
-        </FormItem>
-        <FormItem label="存储文件名" prop="fileKey">
-          <Input v-model="form.fileKey" disabled/>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="handleCancel">取消</Button>
-        <Button :loading="submitLoading" type="primary" @click="handleSubmit"
-        >提交
-        </Button>
-      </div>
-    </Modal>
+      <el-form ref="form" label-width="95px" :model="form" :rules="formValidate">
+        <el-form-item label="原文件名" prop="name">
+          <el-input v-model="form.name" />
+        </el-form-item>
+        <el-form-item label="存储文件名" prop="fileKey">
+          <el-input v-model="form.fileKey" disabled />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="handleCancel">取消</el-button>
+        <el-button :loading="submitLoading" type="primary" @click="handleSubmit">提交</el-button>
+      </template>
+    </el-dialog>
 
-    <Modal v-model="picVisible" :title="picTitle" draggable>
+    <el-dialog v-model="picVisible" :title="picTitle" width="600px">
       <img
         :src="file.url"
         alt="无效的图片链接"
         style="width: 100%; margin: 0 auto; display: block"
       />
-      <div slot="footer">
-        <span
-        >文件类型：{{ file.fileType }} 文件大小：{{ file.msize }} 创建时间：{{
-            file.createTime
-          }}</span
-        >
-      </div>
-    </Modal>
+      <template #footer>
+        <span>文件类型：{{ file.fileType }} 文件大小：{{ file.msize }} 创建时间：{{ file.createTime }}</span>
+      </template>
+    </el-dialog>
 
-    <Modal
+    <el-dialog
       v-model="videoVisible"
       :title="videoTitle"
-      :width="800"
-      draggable
-      @on-cancel="closeVideo"
+      width="800px"
+      destroy-on-close
+      @close="closeVideo"
     >
       <div id="dplayer"></div>
-      <div slot="footer">
-        <span
-        >文件类型：{{ file.fileType }} 文件大小：{{ file.msize }} 创建时间：{{
-            file.createTime
-          }}</span
-        >
-      </div>
-    </Modal>
+      <template #footer>
+        <span>文件类型：{{ file.fileType }} 文件大小：{{ file.msize }} 创建时间：{{ file.createTime }}</span>
+      </template>
+    </el-dialog>
 
-    <!-- 添加分组修改分组编辑框 -->
-    <Modal
+    <el-dialog
       v-model="enableGroup"
       :title="insertOrUpdate === 'insert' ? '添加分组' : '修改分组'"
-      :loading="groupLoading"
-      @on-ok="submitAddGroup"
-      footer-hide
+      width="500px"
+      :close-on-click-modal="false"
+      destroy-on-close
     >
-      <Form
+      <el-form
         ref="formValidate"
-        :label-width="80"
+        label-width="80px"
         :model="groupFormValidate"
         :rules="groupRuleValidate"
       >
-        <FormItem label="所在分组" prop="id">
-          <Cascader
+        <el-form-item label="所在分组" prop="id">
+          <el-cascader
             v-model="defaultValue"
-            :data="treeData"
-            change-on-select
-            @on-change="treeDataChange"
-          ></Cascader>
-        </FormItem>
-        <FormItem label="分组名称" prop="directoryName">
-          <Input v-model="groupFormValidate.directoryName"/>
-        </FormItem>
-      </Form>
+            :options="treeData"
+            :props="{ value: 'value', label: 'label', children: 'children', checkStrictly: true }"
+            style="width: 100%"
+            @change="treeDataChange"
+          />
+        </el-form-item>
+        <el-form-item label="分组名称" prop="directoryName">
+          <el-input v-model="groupFormValidate.directoryName" />
+        </el-form-item>
+      </el-form>
       <div class="modal-footer">
-        <Button @click="enableGroup = false">取消</Button>
-        <Button type="primary" @click="submitAddGroup">确定</Button>
+        <el-button @click="enableGroup = false">取消</el-button>
+        <el-button type="primary" :loading="groupLoading" @click="submitAddGroup">确定</el-button>
       </div>
-    </Modal>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import { Delete, Download, View } from "@element-plus/icons-vue";
 import {
   addFileDirectory,
   deleteFile,
@@ -442,6 +474,7 @@ const config = require("@/config/index");
 let dp;
 export default {
   name: "oss-manage",
+  components: { Delete, Download, View },
   props: {
     isComponent: {
       default: false,
@@ -954,19 +987,37 @@ export default {
   },
 
   methods: {
-    beforeUpload() {
+    beforeUpload(file) {
       if (!this.canUploadImages) {
         this.$Message.warning("仅管理员模块支持上传图片");
         return false;
       }
+      const maxSize = 20480 * 1024;
+      if (file && file.size > maxSize) {
+        this.handleMaxSize(file);
+        return false;
+      }
       return true;
     },
+    handleTreeNodeClick(data) {
+      if (data) {
+        this.handleCateChange([data]);
+      }
+    },
+    onTreeDropdownCommand(cmd, data) {
+      this.selectedGroupData = data;
+      if (cmd === "edit") {
+        this.handleContextMenuEdit(null, null, data);
+      } else if (cmd === "delete") {
+        this.handleContextMenuDelete();
+      }
+    },
     onMouseOver(item, index) {
-      this.$set(this.data[index], 'isShowPreview', true);
+      this.data[index].isShowPreview = true;
       this.$forceUpdate();
     },
     onMouseOut(item, index) {
-      this.$set(this.data[index], 'isShowPreview', false);
+      this.data[index].isShowPreview = false;
     },
     handleRoleTabChange(name) {
       this.activeRoleTab = name;
@@ -977,7 +1028,7 @@ export default {
       this.defaultValue = [];
       this.groupFormValidate.id = [];
       this.groupFormValidate.level = 0;
-      this.$set(this, "selectedOss", []);
+      this.selectedOss = [];
       this.updateTreeDataByRole();
       this.getDataList();
     },
@@ -1024,7 +1075,7 @@ export default {
     },
     // 页码改变时回调
     pageChange(value) {
-      this.$set(this, 'selectedOss', []);
+      this.selectedOss = [];
       this.searchForm.pageNumber = value;
       this.getDataList();
     },
@@ -1109,14 +1160,25 @@ export default {
         },
       });
     },
-    treeDataChange(value, selectedData) {
+    treeDataChange(value) {
       if (value && value.length) {
-        if (value[value.length - 1] == '0') {
+        this.groupFormValidate.id = value;
+        if (value[value.length - 1] == "0") {
           this.groupFormValidate.level = 0;
         } else {
-          this.groupFormValidate.level = Number(selectedData[selectedData.length - 1].level) + 1;
+          const node = this.findTreeNodeByValue(this.treeData, value[value.length - 1]);
+          this.groupFormValidate.level = node ? Number(node.level) + 1 : 0;
         }
       }
+    },
+    findTreeNodeByValue(nodes, value) {
+      if (!nodes || !nodes.length) return null;
+      for (const node of nodes) {
+        if (String(node.value) === String(value)) return node;
+        const found = this.findTreeNodeByValue(node.children, value);
+        if (found) return found;
+      }
+      return null;
     },
     // 保存/修改分组
     async submitAddGroup() {
@@ -1220,7 +1282,7 @@ export default {
         }
         this.searchForm.userEnums = type || this.activeRoleTab;
         this.getDataList();
-        this.$set(this, 'selectedOss', []);
+        this.selectedOss = [];
       }
     },
     /**
@@ -1287,9 +1349,12 @@ export default {
     },
     // 起止时间从新赋值
     selectDateRange(v) {
-      if (v) {
+      if (v && v.length === 2) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
+      } else {
+        this.searchForm.startDate = "";
+        this.searchForm.endDate = "";
       }
     },
     // 改变查看方式
@@ -1341,11 +1406,8 @@ export default {
       this.handleSearch();
     },
     // 上传文件超过大小限制
-    handleMaxSize(file) {
-      this.$Notice.warning({
-        title: "文件大小过大",
-        desc: "所选文件大小过大, 不得超过 1M.",
-      });
+    handleMaxSize() {
+      this.$Message.warning("所选文件大小过大，不得超过 20MB");
     },
     // 上传成功回调
     handleSuccess(res, file) {
@@ -1397,7 +1459,7 @@ export default {
           deleteFile(ids).then((res) => {
             this.$Modal.remove();
             if (res.success) {
-              this.$set(this, 'selectedOss', []);
+              this.selectedOss = [];
               // this.clearSelectAll();
               this.init();
               this.$Message.success("批量删除文件成功");

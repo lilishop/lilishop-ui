@@ -1,17 +1,22 @@
 <template>
   <div class="search">
-    <Card>
-      <Tabs @on-click="handleClickTab">
-        <TabPane
+    <el-card>
+      <el-tabs v-model="currentTemplate">
+        <el-tab-pane
           v-for="(item, index) in templatesWay"
           :key="index"
-          :name="item.template"
           :label="item.label"
+          :name="item.template"
         >
-          <components v-if="item.template == currentTemplate" :is="currentTemplate"></components>
-        </TabPane>
-      </Tabs>
-    </Card>
+          <todayHotWords v-if="item.template === 'todayHotWords' && currentTemplate === 'todayHotWords'" />
+          <historyHotWords v-if="item.template === 'historyHotWords' && currentTemplate === 'historyHotWords'" />
+          <statisticsHotWords
+            v-if="item.template === 'statisticsHotWords' && currentTemplate === 'statisticsHotWords'"
+          />
+          <setupHotWords v-if="item.template === 'setupHotWords' && currentTemplate === 'setupHotWords'" />
+        </el-tab-pane>
+      </el-tabs>
+    </el-card>
   </div>
 </template>
 
@@ -20,52 +25,27 @@ import todayHotWords from "./template/todayHotWords";
 import historyHotWords from "./template/historyHotWords";
 import setupHotWords from "./template/setupHotWords";
 import statisticsHotWords from "./template/statisticsHotWords";
+
 export default {
   name: "hotWords",
   components: {
     todayHotWords,
     historyHotWords,
     setupHotWords,
-    statisticsHotWords
+    statisticsHotWords,
   },
   data() {
     return {
-      // 模版集合key value
       templatesWay: [
-        {
-          template: "todayHotWords",
-          label: "今日热词",
-        },
-        {
-          template: "historyHotWords",
-          label: "历史热词",
-        },
-        {
-          template: "statisticsHotWords",
-          label: "热词统计",
-        },
-        {
-          template: "setupHotWords",
-          label: "设置热词",
-        },
+        { template: "todayHotWords", label: "今日热词" },
+        { template: "historyHotWords", label: "历史热词" },
+        { template: "statisticsHotWords", label: "热词统计" },
+        { template: "setupHotWords", label: "设置热词" },
       ],
-      // 引入模板
-      templates: {
-        todayHotWords,
-        historyHotWords,
-        setupHotWords,
-        statisticsHotWords
-      },
-      // 当前模版
       currentTemplate: "todayHotWords",
     };
   },
-  methods: {
-    handleClickTab(val) {
-      this.currentTemplate = val;
-    },
-  },
-
 };
 </script>
+
 <style lang="scss" scoped></style>

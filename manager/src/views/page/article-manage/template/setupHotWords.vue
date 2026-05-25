@@ -1,13 +1,13 @@
 <template>
   <div class="layout">
-    <Form
+    <el-form
       ref="formValidate"
-      :label-width="150"
+      label-width="150px"
       label-position="right"
       :model="formValidate"
       :rules="ruleValidate"
     >
-      <FormItem label="热词默认配置" prop="hotWordsSettingItems">
+      <el-form-item label="热词默认配置" prop="hotWordsSettingItems">
         <div
           class="item-label"
           v-for="(item, index) in formValidate.hotWordsSettingItems"
@@ -16,55 +16,55 @@
           <div>
             <div class="item-keyword">
               <div>热词：</div>
-              <Input type="text" v-model="item.keywords"> </Input>
+              <el-input v-model="item.keywords" />
             </div>
             <div class="item-score">
               <div>分数：</div>
-              <InputNumber :max="5" :min="0" v-model="item.score"></InputNumber>
+              <el-input-number :max="5" :min="0" v-model="item.score" />
             </div>
           </div>
           <div>
-            <Button type="primary" @click="formValidate.hotWordsSettingItems.splice(index,1)">删除</Button>
+            <el-button type="primary" @click="formValidate.hotWordsSettingItems.splice(index, 1)">
+              删除
+            </el-button>
           </div>
         </div>
-        <Button @click="addSetItem">添加配置</Button>
-      </FormItem>
-      <FormItem label="每日持久化热词数量" prop="saveNum">
-        <InputNumber :min="0" v-model="formValidate.saveNum" />
-      </FormItem>
+        <el-button @click="addSetItem">添加配置</el-button>
+      </el-form-item>
+      <el-form-item label="每日持久化热词数量" prop="saveNum">
+        <el-input-number :min="0" v-model="formValidate.saveNum" />
+      </el-form-item>
 
       <div class="label-btns">
-        <Button type="primary" @click="submit('formValidate')">保存</Button>
+        <el-button type="primary" @click="submit('formValidate')">保存</el-button>
       </div>
-    </Form>
+    </el-form>
   </div>
 </template>
+
 <script>
 import { setSetting, getSetting } from "@/api/index";
 
 export default {
   data() {
     return {
-      ruleValidate: {}, // 验证规则
+      ruleValidate: {},
       formValidate: {
-        // 表单数据
-        saveNum: 1, // 每日保存数量
+        saveNum: 1,
         hotWordsSettingItems: [
           {
             keywords: "",
             score: 1,
           },
-        ], // 热词默认配置
+        ],
       },
     };
   },
-
   created() {
     this.init();
   },
   methods: {
-    // 添加热词默认配置
-    addSetItem(val) {
+    addSetItem() {
       if (this.formValidate.hotWordsSettingItems.length >= 5) {
         this.$Message.error("最多5个热词项");
       } else {
@@ -74,18 +74,15 @@ export default {
         });
       }
     },
-
     submit(name) {
-      this.$refs["formValidate"].validate(async (valid) => {
+      this.$refs[name].validate((valid) => {
         if (valid) {
           this.setupSetting();
         } else {
-          that.$Message.error("请正确填写内容!");
-          return flag;
+          this.$Message.error("请正确填写内容!");
         }
       });
     },
-    // 保存设置
     setupSetting() {
       setSetting("HOT_WORDS", this.formValidate).then((res) => {
         if (res.success) {
@@ -96,10 +93,9 @@ export default {
         this.init();
       });
     },
-    // 实例化数据
     async init() {
       const res = await getSetting("HOT_WORDS");
-      if (res.success) {
+      if (res.success && res.result) {
         this.formValidate = res.result;
       }
     },
@@ -113,23 +109,22 @@ export default {
   margin-bottom: 10px;
   display: flex;
   align-items: center;
-  width:500px;
-  justify-content:space-between;
+  width: 500px;
+  justify-content: space-between;
 }
-::v-deep .ivu-input {
-  width: 100px !important;
-}
-.ivu-input-wrapper {
-  width: 300px;
-  margin-right: 10px;
-}
+
 .item-keyword,
 .item-score {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
+
   > div {
     margin-right: 20px;
   }
+}
+
+.item-keyword .el-input {
+  width: 200px;
 }
 </style>

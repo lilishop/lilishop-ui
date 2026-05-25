@@ -33,7 +33,7 @@
             <div class="hot-goods">
               <div class="hot-goods-title">{{ item.title }}</div>
               <div>
-                <div class="hot-price">￥{{ item.price | unitPrice }}</div>
+                <div class="hot-price">￥{{ $filters.unitPrice(item.price) }}</div>
               </div>
             </div>
           </div>
@@ -41,24 +41,24 @@
       </div>
       <div class="setup-box">
         <div>
-          <Button size="small" @click.stop="handleSelectModel()">编辑 </Button>
+          <el-button size="small" @click.stop="handleSelectModel()">编辑 </el-button>
         </div>
       </div>
     </div>
 
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="装修"
-      draggable
+      
       width="800"
-      :z-index="100"
-      :mask-closable="false"
-    >
+      
+      :close-on-click-modal="false"
+     append-to-body destroy-on-close>
       <div>
         <div class="modal-tab-bar">
           <div>
             主标题:
-            <Input style="width: 200px" v-model="data.options.title"></Input>
+            <el-input style="width: 200px" v-model="data.options.title" />
           </div>
           <Divider>左侧商品部分</Divider>
           <div class="flex">
@@ -69,25 +69,25 @@
                 <div>推荐尺寸：{{ data.options.data.image.size }}</div>
                 <div class="link-src">
                   链接地址：
-                  <Input
+                  <el-input
                     style="width: 200px"
                     v-model="data.options.data.image.url"
                     disabled
                   />
                 </div>
-                <Button
+                <el-button
                   size="small"
                   type="primary"
                   @click="handleSelectImg('image')"
                   >选择图片
-                </Button>
-                <Button
+                </el-button>
+                <el-button
                   size="small"
                   class="ml_10"
                   type="primary"
                   @click="handleSelectLink('image')"
                   >选择链接
-                </Button>
+                </el-button>
               </div>
             </div>
           </div>
@@ -102,24 +102,24 @@
               <div class="flex">
                 <img :src="item.img" class="column-img" />
                 <div class="column-goods-list">
-                  <div><Input v-model="item.title"></Input></div>
-                  <div><Input v-model="item.desc"></Input></div>
-                  <div><Input disabled v-model="item.url"></Input></div>
+                  <div><el-input v-model="item.title" /></div>
+                  <div><el-input v-model="item.desc" /></div>
+                  <div><el-input disabled v-model="item.url" /></div>
                   <div>{{ item.size }}</div>
-                  <Button
+                  <el-button
                     size="small"
                     class="ml_10"
                     type="primary"
                     @click="handleSelectLink('list', index)"
                     >选择链接
-                  </Button>
-                  <Button
+                  </el-button>
+                  <el-button
                     size="small"
                     class="ml_10"
                     type="primary"
                     @click="handleSelectImg('list', index)"
                     >选择图片
-                  </Button>
+                  </el-button>
                 </div>
               </div>
             </div>
@@ -127,10 +127,10 @@
           <Divider>右侧商品部分</Divider>
           <div class="flex">
             <div>右侧标题 :</div>
-            <Input
+            <el-input
               style="width: 200px"
               v-model="data.options.data.hot.title"
-            ></Input>
+             />
           </div>
           <div class="flex column-list">
             <div
@@ -141,20 +141,20 @@
               <div class="flex">
                 <img :src="item.img" class="column-img" />
                 <div class="column-goods-list">
-                  <Button
+                  <el-button
                     size="small"
                     class="ml_10"
                     type="primary"
                     @click="handleSelectGoods('hot', index)"
                     >选择商品
-                  </Button>
+                  </el-button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </Modal>
+    </el-dialog>
 
     <!-- 选择商品。链接 -->
     <liliDialog
@@ -164,14 +164,14 @@
     ></liliDialog>
 
     <!-- 选择图片 -->
-    <Modal width="1200px" v-model="picModelFlag" footer-hide>
+    <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
       <ossManage
         @callback="callbackSelected"
-        :isComponent="true"
+        :is-component="true"
         :initialize="picModelFlag"
         ref="ossManage"
       />
-    </Modal>
+    </el-dialog>
   </div>
 </template>
 
@@ -242,7 +242,7 @@ export default {
       this.data.options.data.hot.list[this.goodsIndex].title = val[0].goodsName;
       this.data.options.data.hot.list[this.goodsIndex].price = val[0].price;
       this.data.options.data.hot.list[this.goodsIndex].url =
-        this.$options.filters.formatLinkType(val[0]);
+        this.$filters.formatLinkType(val[0]);
 
       console.log(val, this.selectedData, this.goodsIndex);
     },
@@ -251,12 +251,12 @@ export default {
       console.log(val,this.selectedData)
       if (this.selectedData == "image") {
         this.data.options.data.image.url =
-          this.$options.filters.formatLinkType(val);
+          this.$filters.formatLinkType(val);
       } else {
         console.log(this.data.options.data.list,this.goodsIndex)
         this.data.options.data.list[
           this.goodsIndex
-        ].url =  this.$options.filters.formatLinkType(val);
+        ].url =  this.$filters.formatLinkType(val);
       }
     },
     /*

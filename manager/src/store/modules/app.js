@@ -5,7 +5,7 @@ import {
   router
 } from '@/router/index';
 import Util from '@/libs/util';
-import Vue from 'vue';
+import i18n from '@/locale';
 
 const app = {
   state: {
@@ -34,11 +34,10 @@ const app = {
     // 动态添加主界面路由，需要缓存
     updateAppRouter(state, routes) {
       state.routers.push(...routes);
-      router.addRoutes(routes);
+      // 实际 addRoute 在 util.registerDynamicRoutes 中完成
     },
-    // 动态添加全局路由404、500等页面，不需要缓存
     updateDefaultRouter(state, routes) {
-      router.addRoutes(routes);
+      // 兼容旧调用，404 由 registerDynamicRoutes 注册
     },
     setAdded(state, v) {
       state.added = v;
@@ -122,7 +121,7 @@ const app = {
     switchLang(state, lang) {
       state.lang = lang;
       localStorage.lang = lang;
-      Vue.config.lang = lang;
+      i18n.global.locale = lang;
     },
     setMessageCount(state, count) {
       state.messageCount = count;

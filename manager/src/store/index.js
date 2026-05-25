@@ -1,30 +1,23 @@
-import Vue from "vue";
-import Vuex from "vuex";
-
+import { createStore } from "vuex";
 import app from "./modules/app";
-import setting from './modules/setting';
+import setting from "./modules/setting";
 import user from "./modules/user";
 import dict from "./modules/dict";
 
-Vue.use(Vuex);
-
-const store = new Vuex.Store({
+const store = createStore({
   state: {
-    // 状态
-    openStyleStore: "", // 移动端楼层装修中选择风格存储
-    openStoreId:"",
-    notices: "" //通知提示信息
+    openStyleStore: "",
+    openStoreId: "",
+    notices: "",
   },
-  mutations: {
-    // 改变方法
-  },
+  mutations: {},
   actions: {},
   modules: {
     app,
     user,
     setting,
-    dict
-  }
+    dict,
+  },
 });
 
 export default store;

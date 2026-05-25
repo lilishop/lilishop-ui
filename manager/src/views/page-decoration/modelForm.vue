@@ -1,16 +1,13 @@
 <template>
   <div class="model-form">
     <div class="model-content">
-      <!-- 头部广告，登录信息，不需要拖拽 -->
       <div
         class="top-fixed-advert"
         :style="{ backgroundColor: topAdvert.bgColor }"
       >
         <img :src="topAdvert.img" width="1200" height="80" alt="" />
         <div class="setup-box">
-          <Button size="small" @click.stop="handleModel('topAdvert')"
-            >编辑</Button
-          >
+          <el-button size="small" @click.stop="handleModel('topAdvert')">编辑</el-button>
         </div>
       </div>
       <div class="header-con">
@@ -20,16 +17,21 @@
           <li>请登录</li>
           <li>我的订单</li>
           <li>我的足迹</li>
-          <li><Icon size="18" type="ios-cart-outline"></Icon>购物车</li>
+          <li>
+            <el-icon :size="18"><ShoppingCart /></el-icon>
+            购物车
+          </li>
           <li>店铺入驻</li>
         </ul>
       </div>
       <div class="search-con">
         <img :src="require('@/assets/logo.png')" class="logo" alt="" />
         <div class="search">
-          <i-input size="large" placeholder="输入你想查找的商品">
-            <Button slot="append">搜索</Button>
-          </i-input>
+          <el-input size="large" placeholder="输入你想查找的商品">
+            <template #append>
+              <el-button>搜索</el-button>
+            </template>
+          </el-input>
         </div>
       </div>
       <div class="nav-con" v-if="$route.query.pageType !== 'SPECIAL'">
@@ -40,12 +42,9 @@
           </li>
         </ul>
         <div class="setup-box">
-          <Button size="small" @click.stop="handleModel('quickNav')"
-            >编辑</Button
-          >
+          <el-button size="small" @click.stop="handleModel('quickNav')">编辑</el-button>
         </div>
       </div>
-      <!-- 装修主体 -->
       <div>
         <draggable
           class="model-form-list"
@@ -54,120 +53,94 @@
           @end="handleMoveEnd"
           @add="handleModelAdd"
         >
-          <template v-for="(element, index) in data.list">
+          <template v-for="(element, index) in data.list" :key="element.key || index">
             <model-form-item
               v-if="element && element.key"
-              :key="element.key"
               :element="element"
               :index="index"
               :data="data"
-            ></model-form-item>
+            />
           </template>
         </draggable>
       </div>
     </div>
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="顶部广告"
-      draggable
-      width="800"
-      :z-index="100"
-      :mask-closable="false"
+      width="800px"
+      :close-on-click-modal="false"
+      append-to-body
+      destroy-on-close
     >
-      <!-- 顶部广告 -->
       <div class="modal-top-advert">
         <div>
-          <img
-            class="show-image"
-            width="600"
-            height="40"
-            :src="topAdvert.img"
-            alt
-          />
+          <img class="show-image" width="600" height="40" :src="topAdvert.img" alt />
         </div>
-        <div class="tips">
-          建议尺寸：<span>{{ topAdvert.size }}</span>
-        </div>
+        <div class="tips">建议尺寸：<span>{{ topAdvert.size }}</span></div>
         <div>
-          图片链接：<Input
+          图片链接：<el-input
             class="outsideUrl"
             v-model="topAdvert.url"
             :disabled="!!topAdvert.type && topAdvert.type !== 'link'"
             placeholder="https://"
-          /><Button size="small" type="primary" @click="handleSelectLink"
-            >选择链接</Button
-          >
+          />
+          <el-button size="small" type="primary" @click="handleSelectLink">选择链接</el-button>
         </div>
         <div>
-          选择图片：<Button size="small" type="primary" @click="handleSelectImg"
-            >选择图片</Button
-          >&nbsp;
+          选择图片：<el-button size="small" type="primary" @click="handleSelectImg">选择图片</el-button>
         </div>
-        <div>选择背景色：<ColorPicker v-model="topAdvert.bgColor" /></div>
+        <div>选择背景色：<el-color-picker v-model="topAdvert.bgColor" /></div>
       </div>
-    </Modal>
-    <Modal
+    </el-dialog>
+    <el-dialog
       v-model="showModalNav"
       title="快捷导航"
-      draggable
-      width="800"
-      :z-index="100"
-      :mask-closable="false"
+      width="800px"
+      :close-on-click-modal="false"
+      append-to-body
+      destroy-on-close
     >
-      <!-- 分类tab栏 -->
       <div class="modal-tab-bar">
-        <Button type="primary" size="small" @click="handleAddNav"
-          >添加分类</Button
-        >
+        <el-button type="primary" size="small" @click="handleAddNav">添加分类</el-button>
         <table cellspacing="0">
           <thead>
             <tr>
               <th width="250">分类名称</th>
               <th width="250">链接地址</th>
-              <!-- <th width="150">排序</th> -->
               <th width="250">操作</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(item, index) in navList.list" :key="index">
-              <td><Input v-model="item.name" /></td>
+              <td><el-input v-model="item.name" /></td>
               <td>
-                <Input
+                <el-input
                   v-model="item.url"
                   :disabled="!item.title || item.title !== '外部链接'"
                 />
               </td>
-              <!-- <td><Input v-model="item.sort"/></td> -->
               <td>
-                <Button
-                  type="primary"
-                  size="small"
-                  @click="handleSelectLink(item, index)"
-                  >选择链接</Button
-                >&nbsp;
-                <Button type="error" size="small" @click="handleDelNav(index)"
-                  >删除</Button
-                >
+                <el-button type="primary" size="small" @click="handleSelectLink(item, index)">选择链接</el-button>
+                <el-button type="danger" size="small" @click="handleDelNav(index)">删除</el-button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-    </Modal>
-    <!-- 选择商品。链接 -->
+    </el-dialog>
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
-    <!-- 选择图片 -->
-    <Modal width="1200px" v-model="picModelFlag" footer-hide>
+    <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
       <ossManage
         @callback="callbackSelected"
-        :isComponent="true"
+        :is-component="true"
         :initialize="picModelFlag"
         ref="ossManage"
       />
-    </Modal>
+    </el-dialog>
   </div>
 </template>
 <script>
+import { ShoppingCart } from "@element-plus/icons-vue";
 import Draggable from "vuedraggable";
 import ModelFormItem from "./modelFormItem.vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
@@ -177,24 +150,17 @@ export default {
     Draggable,
     ModelFormItem,
     ossManage,
+    ShoppingCart,
   },
   props: ["data"],
   data() {
     return {
-      picModelFlag: false, // 选择图片模态框
-      showModal: false, // 顶部广告模态框
-      showModalNav: false, // 分类nav模态框
-      selectedNav: null, //当前已选nav
-      // 模拟搜索框下方数据
-      promotionTags: [
-        "买2免1",
-        "领200神券",
-        "199减100",
-        "母婴5折抢",
-        "充100送20",
-      ], // 热词数据
+      picModelFlag: false,
+      showModal: false,
+      showModalNav: false,
+      selectedNav: null,
+      promotionTags: ["买2免1", "领200神券", "199减100", "母婴5折抢", "充100送20"],
       topAdvert: {
-        // 头部广告图数据
         type: "topAdvert",
         img: "",
         url: "",
@@ -203,7 +169,6 @@ export default {
       },
       currentIndex: 0,
       navList: {
-        // 分类nav数据
         type: "navBar",
         list: [
           { name: "秒杀", url: "", title: "" },
@@ -226,38 +191,32 @@ export default {
   },
   methods: {
     handleSelectLink(item, index) {
-      // 调起选择链接弹窗
       if (item) this.selectedNav = item;
       this.$refs.liliDialog.open("link");
       this.currentIndex = index;
     },
-    // 已选链接
     selectedLink(val) {
-
       if (this.showModalNav) {
-        this.selectedNav.url = this.$options.filters.formatLinkType(val);
+        this.selectedNav.url = this.$filters.formatLinkType(val);
         this.selectedNav.type = val.___type === "other" && val.url === "" ? "link" : "other";
       } else {
-        this.topAdvert.url = this.$options.filters.formatLinkType(val);
+        this.topAdvert.url = this.$filters.formatLinkType(val);
         this.topAdvert.type = val.___type === "other" && val.url === "" ? "link" : "other";
       }
       this.navList.list[this.currentIndex].title = val.title;
     },
     handleDelNav(index) {
-      // 删除导航
       this.navList.list.splice(index, 1);
     },
     handleAddNav() {
-      // 添加导航
-      this.navList.list.push({ name: "", url: "", title: "" });this.$nextTick(() => {
+      this.navList.list.push({ name: "", url: "", title: "" });
+      this.$nextTick(() => {
         this.selectedNav.title = val.title;
       });
     },
-    // 拖动结束回调
     handleMoveEnd({ newIndex, oldIndex }) {
       console.log("index", newIndex, oldIndex);
     },
-    // 修改顶部广告
     handleModel(type) {
       if (type == "topAdvert") {
         this.showModal = true;
@@ -265,35 +224,27 @@ export default {
         this.showModalNav = true;
       }
     },
-    // 选择图片
     handleSelectImg() {
       this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
     },
     callbackSelected(item) {
-      // 选择图片回调
       this.picModelFlag = false;
       this.topAdvert.img = item.url;
     },
     handleModelAdd(evt) {
-      // 拖拽，添加模块
       const newIndex = evt.newIndex;
 
-      // 为拖拽到容器的元素添加唯一 key
-      this.data.list[newIndex] = JSON.parse(
-        JSON.stringify(this.data.list[newIndex])
-      );
-      const key =
-        Date.parse(new Date()) + "_" + Math.ceil(Math.random() * 99999);
-      this.$set(this.data.list, newIndex, {
+      this.data.list[newIndex] = JSON.parse(JSON.stringify(this.data.list[newIndex]));
+      const key = Date.parse(new Date()) + "_" + Math.ceil(Math.random() * 99999);
+      this.data.list[newIndex] = {
         ...this.data.list[newIndex],
         options: {
           ...this.data.list[newIndex].options,
         },
         key,
-        // 绑定键值
         model: this.data.list[newIndex].type + "_" + key,
-      });
+      };
     },
   },
 };
@@ -312,7 +263,6 @@ export default {
 .model-form-list {
   min-height: 500px;
 }
-/**  顶部广告，头部，搜索框 start */
 .top-fixed-advert {
   display: flex;
   width: 1500px;
@@ -354,7 +304,6 @@ export default {
     }
   }
 }
-/** 搜索框 */
 .search-con {
   padding-top: 15px;
   margin: 0px auto;
@@ -371,29 +320,27 @@ export default {
   .search {
     width: 460px;
     margin: 0 auto;
-    ::v-deep .ivu-input.ivu-input-large {
+    :deep(.el-input--large .el-input__wrapper) {
       border: 2px solid $theme_color;
       font-size: 12px;
       height: 34px;
-      &:focus {
-        box-shadow: none;
-      }
+      box-shadow: none;
     }
-    ::v-deep .ivu-input-group-append {
+    :deep(.el-input-group__append) {
       border: 1px solid $theme_color;
       border-left: none;
       height: 30px;
       background-color: $theme_color;
       color: #ffffff;
-      button {
+      .el-button {
         font-size: 14px;
         font-weight: 600;
         line-height: 1;
+        color: #fff;
       }
     }
   }
 }
-/** 商品分类 */
 .nav-con {
   width: 1200px;
   height: 40px;
@@ -429,7 +376,6 @@ export default {
     }
   }
 }
-/**  顶部广告，头部，搜索框 end */
 
 .top-fixed-advert,
 .nav-con {
@@ -440,14 +386,8 @@ export default {
     }
   }
 }
-/** 装修模态框 内部样式start */
 .modal-top-advert {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  > * {
-    margin-bottom: 10px;
-  }
+  align-items: start;
+  padding: 0 30px;
 }
 </style>

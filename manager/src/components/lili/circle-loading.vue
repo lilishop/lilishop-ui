@@ -1,12 +1,17 @@
 <template>
-  <div style="display: inline-block;">
-    <Icon type="ios-loading" size="18" color="#2d8cf0" class="spin-icon-load"></Icon>
+  <div style="display: inline-block">
+    <el-icon class="spin-icon-load" :size="18" color="#ff5c58">
+      <Loading />
+    </el-icon>
   </div>
 </template>
 
 <script>
+import { Loading } from "@element-plus/icons-vue";
+
 export default {
-  name: "circleLoading"
+  name: "circleLoading",
+  components: { Loading },
 };
 </script>
 
@@ -14,5 +19,12 @@ export default {
 .spin-icon-load {
   animation: ani-demo-spin 1s linear infinite;
 }
+@keyframes ani-demo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 </style>
-
