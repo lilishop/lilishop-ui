@@ -2,7 +2,7 @@
   <div class="wrapper">
     <!-- 卡片组件 -->
     <card _Title="我的足迹" :_Size="16"></card>
-    <Button class="del-btn" @click="clearAll" type="primary">删除全部</Button>
+    <el-button class="del-btn" @click="clearAll" type="primary">删除全部</el-button>
     <!-- 订单列表 -->
     <empty v-if="list.length === 0" />
     <ul class="track-list" v-else>
@@ -13,29 +13,28 @@
       >
         <img :src="item.thumbnail" :alt="item.thumbnail" width="200" height="200" />
         <p class="ellipsis">{{ item.goodsName }}</p>
-        <p>{{ item.price | unitPrice("￥") }}</p>
+        <p>{{ $filters.unitPrice(item.price, "￥") }}</p>
         <span class="del-icon" @click.stop="clearById(item.goodsId)">
-          <Icon type="md-trash" />
+          <el-icon><Delete /></el-icon>
         </span>
       </li>
     </ul>
     <!-- 分页 -->
     <div class="page-size">
-      <Page
-        :total="total"
-        @on-change="changePageNum"
-        @on-page-size-change="changePageSize"
+      <el-pagination         :total="total"
+        @current-change="changePageNum"
+        @size-change="changePageSize"
         :page-size="params.pageSize"
-        show-sizer
-      >
-      </Page>
+       layout="sizes, prev, pager, next"></el-pagination>
     </div>
   </div>
 </template>
 
 <script>
+import { Delete } from '@element-plus/icons-vue';
 import { tracksList, clearTracks, clearTracksById } from "@/api/member";
 export default {
+  components: { Delete },
   name: "MyTrack",
   data() {
     return {

@@ -1,245 +1,191 @@
 <template>
   <div class="search">
-    <Card>
-      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-        <Form-item label="订单编号" prop="orderSn">
-          <Input type="text" v-model="searchForm.orderSn" clearable placeholder="请输入订单编号" style="width: 240px" />
-        </Form-item>
-        <Form-item label="会员名称" prop="buyerName">
-          <Input type="text" v-model="searchForm.buyerName" clearable placeholder="请输入会员名称" style="width: 240px" />
-        </Form-item>
-        <Form-item label="订单状态" prop="orderStatus">
-          <Select v-model="searchForm.orderStatus" placeholder="请选择" clearable style="width: 240px">
-            <Option value="UNPAID">未付款</Option>
-            <Option value="PAID">已付款</Option>
-            <Option value="COMPLETED">已完成</Option>
-            <Option value="TAKE">待核验</Option>
-            <Option value="CANCELLED">已取消</Option>
-          </Select>
-        </Form-item>
-        <Form-item label="下单时间">
-          <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 240px"></DatePicker>
-        </Form-item>
-        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
-        <Button @click="handleReset" class="search-btn">重置</Button>
-      </Form>
-      </Card>
-    <Card>
-      <div>
-        <Poptip @keydown.enter.native="orderVerification" placement="bottom-start" width="400">
-          <Button class="export">
-            核验订单
-          </Button>
-          <div class="api" slot="content">
-            <h2>核验码</h2>
-            <div style="margin:10px 0;">
-              <Input v-model="orderCode" style="width:300px; margin-right:10px;" />
-              <Button style="primary" @click="orderVerification">核验</Button>
-            </div>
-          </div>
-        </Poptip>
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="订单号" prop="orderSn">
+          <el-input
+            v-model="searchForm.orderSn"
+            placeholder="请输入订单号"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="会员名称" prop="buyerName">
+          <el-input
+            v-model="searchForm.buyerName"
+            placeholder="请输入会员名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="下单时间">
+          <el-date-picker
+            v-model="selectDate"
+            type="datetimerange"
+            value-format="YYYY-MM-DD"
+            clearable
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            placeholder="选择起始时间"
+            style="width: 240px"
+            @change="selectDateRange"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
+    <el-card>
+      <div class="order-tab">
+        <el-tabs v-model="currentStatus" @tab-click="onStatusTabClick">
+          <el-tab-pane
+            v-for="(item, index) in orderStatus"
+            :key="index"
+            :label="item.title"
+            :name="item.value"
+          />
+        </el-tabs>
       </div>
-      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort"></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]" size="small"
-          show-total show-elevator show-sizer></Page>
-      </Row>
-    </Card>
+
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+        @sort-change="changeSort"
+      >
+        <el-table-column prop="sn" label="订单号" min-width="230" show-overflow-tooltip />
+        <el-table-column prop="createTime" label="下单时间" width="200" />
+        <el-table-column label="订单来源" width="95">
+          <template #default="{ row }">
+            <span v-if="row">
+              <span v-if="row.clientType == 'H5'">移动端</span>
+              <span v-else-if="row.clientType == 'PC'">PC端</span>
+              <span v-else-if="row.clientType == 'WECHAT_MP'">小程序端</span>
+              <span v-else-if="row.clientType == 'APP'">移动应用端</span>
+              <span v-else>{{ row.clientType }}</span>
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="memberName" label="买家名称" width="130" />
+        <el-table-column label="订单金额" prop="flowPrice" min-width="120" sortable="custom">
+          <template #default="{ row }">
+            <priceColorScheme v-if="row" :value="row.flowPrice" :color="$mainColor" />
+          </template>
+        </el-table-column>
+        <el-table-column label="订单状态" width="95">
+          <template #default="{ row }">
+            <template v-if="row">
+              <el-tag v-if="row.orderStatus == 'UNPAID'" type="danger">未付款</el-tag>
+              <el-tag v-else-if="row.orderStatus == 'PAID'" type="primary">已付款</el-tag>
+              <el-tag v-else-if="row.orderStatus == 'COMPLETED'" type="success">已完成</el-tag>
+              <el-tag v-else-if="row.orderStatus == 'TAKE'" type="warning">待核验</el-tag>
+              <el-tag v-else-if="row.orderStatus == 'CANCELLED'" type="info">已关闭</el-tag>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="200" align="center">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a
+                class="link-text"
+                :class="{ disabled: row.orderStatus != 'UNPAID' }"
+                @click="row.orderStatus == 'UNPAID' && confirmPrice(row)"
+              >收款</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="detail(row)">查看</a>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
 import * as API_Order from "@/api/order";
-import { verificationCode } from "@/api/order";
 export default {
-  name: "virtualOrderList",
+  name: "fictitiousOrderList",
   data() {
     return {
-      orderCode: "", // 核验码
-      loading: true, // 表单加载状态
+      loading: true,
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 20, // 页面大小
-        sort: "createTime", // 默认排序字段
-        order: "desc", // 默认排序方式
-        startDate: "", // 起始时间
-        endDate: "", // 终止时间
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "",
+        order: "",
+        startDate: "",
+        endDate: "",
+        orderType: "VIRTUAL",
         orderSn: "",
         buyerName: "",
         orderStatus: "",
-        orderType: "VIRTUAL",
       },
       selectDate: null,
-      columns: [
-        {
-          title: "订单号",
-          key: "sn",
-          minWidth: 240,
-          tooltip: true,
-        },
-        {
-          title: "订单来源",
-          key: "clientType",
-          width: 120,
-          render: (h, params) => {
-            if (params.row.clientType == "H5") {
-              return h("div", {}, "移动端");
-            } else if (params.row.clientType == "PC") {
-              return h("div", {}, "PC端");
-            } else if (params.row.clientType == "WECHAT_MP") {
-              return h("div", {}, "小程序端");
-            } else if (params.row.clientType == "APP") {
-              return h("div", {}, "移动应用端");
-            } else {
-              return h("div", {}, params.row.clientType);
-            }
-          },
-        },
-        {
-          title: "买家名称",
-          key: "memberName",
-          minWidth: 130,
-          tooltip: true,
-        },
-        {
-          title: "订单金额",
-          key: "flowPrice",
-          minWidth: 100,
-          tooltip: true,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.flowPrice,color:this.$mainColor}} );
-          },
-
-
-        },
-
-        {
-          title: "订单状态",
-          key: "orderStatus",
-          minWidth: 100,
-          render: (h, params) => {
-            if (params.row.orderStatus == "UNPAID") {
-              return h("div", [h("tag", {props: {color: "magenta"}}, "未付款")]);
-            } else if (params.row.orderStatus == "PAID") {
-              return h("div", [h("tag", {props: {color: "blue"}}, "已付款")]);
-            } else if (params.row.orderStatus == "UNDELIVERED") {
-              return h("div", [h("tag", {props: {color: "geekblue"}}, "待发货")]);
-            } else if (params.row.orderStatus == "DELIVERED") {
-              return h("div", [h("tag", {props: {color: "cyan"}}, "已发货")]);
-            } else if (params.row.orderStatus == "COMPLETED") {
-              return h("div", [h("tag", {props: {color: "green"}}, "已完成")]);
-            } else if (params.row.orderStatus == "TAKE") {
-              return h("div", [h("tag", {props: {color: "volcano"}}, "待核验")]);
-            } else if (params.row.orderStatus == "CANCELLED") {
-              return h("div", [h("tag", {props: {color: "red"}}, "已取消")]);
-            }
-          },
-        },
-        {
-          title: "下单时间",
-          key: "createTime",
-          width: 170,
-          sortable: true,
-          sortType: "desc",
-        },
-
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          width: 100,
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.detail(params.row);
-                    },
-                  },
-                },
-                "查看"
-              ),
-            ]);
-          },
-        },
+      data: [],
+      total: 0,
+      orderStatus: [
+        { title: "全部", value: "" },
+        { title: "未付款", value: "UNPAID" },
+        { title: "已付款", value: "PAID" },
+        { title: "待核验", value: "TAKE" },
+        { title: "已完成", value: "COMPLETED" },
+        { title: "已关闭", value: "CANCELLED" },
       ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      currentStatus: "",
     };
   },
   methods: {
-    /**
-     * 核验订单
-     */
-    async orderVerification() {
-      let result = await verificationCode(this.orderCode);
-
-      if (result.success) {
-        this.$router.push({
-          name: "order-detail",
-          query: { sn: result.result.sn || this.orderCode },
-        });
-      }
-    },
-    // 初始化数据
     init() {
       this.getDataList();
     },
-    // 改变页码
-    changePage(v) {
-      this.searchForm.pageNumber = v;
+    changePage() {
       this.getDataList();
     },
-    // 改变页数
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
+    changePageSize() {
+      this.searchForm.pageNumber = 1;
       this.getDataList();
     },
-    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
-    // 重置
-    handleReset() {
-      this.searchForm = {};
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      this.searchForm.orderType = "VIRTUAL";
-      this.selectDate = null;
-      this.searchForm.startDate = "";
-      this.searchForm.endDate = "";
-      // 重新加载数据
-      this.getDataList();
-    },
-    // 表格排序
     changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
-      }
+      this.searchForm.sort = e.prop;
+      this.searchForm.order = e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
       this.getDataList();
     },
-    // 时间段重新赋值
     selectDateRange(v) {
       if (v) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
       }
     },
-    // 获取商品列表
     getDataList() {
       this.loading = true;
       API_Order.getOrderList(this.searchForm).then((res) => {
@@ -250,29 +196,44 @@ export default {
         }
       });
     },
-    // 跳转详情
+    confirmPrice(v) {
+      this.$Modal.confirm({
+        title: "确认收款",
+        content: "您确定要收款吗？",
+        loading: true,
+        onOk: () => {
+          API_Order.orderPay(v.sn).then((res) => {
+            if (res.success) {
+              this.$Message.success("收款成功");
+              this.getDataList();
+            }
+            this.$Modal.remove();
+          });
+        },
+      });
+    },
     detail(v) {
       let sn = v.sn;
-      this.$options.filters.customRouterPush({
+      this.$filters.customRouterPush({
         name: "order-detail",
-        query: { sn: sn },
-      })
+        query: { sn: sn, orderType: v.orderType },
+      });
+    },
+    onStatusTabClick(tab) {
+      const item = tab.paneName;
+      this.currentStatus = item;
+      this.searchForm.orderStatus = item;
+      this.getDataList();
     },
   },
   mounted() {
     this.init();
   },
-  // 页面缓存处理，从该页面离开时，修改KeepAlive为false，保证进入该页面是刷新
-  beforeRouteLeave(to, from, next) {
-    from.meta.keepAlive = false
-    next()
-  }
 };
 </script>
-<style lang="scss">
-// 建议引入通用样式 可删除下面样式代码
-@import "@/styles/table-common.scss";
-.export {
-  margin: 10px 20px 10px 0;
+
+<style lang="scss" scoped>
+.order-tab {
+  margin-top: 20px;
 }
 </style>

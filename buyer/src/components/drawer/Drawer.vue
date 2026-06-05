@@ -8,12 +8,12 @@
           </div>
           <div>
             <p class="hover-color" @click="linkTo(`/goodsDetail?skuId=${goods.goodsSku.id}&goodsId=${goods.goodsSku.goodsId}`)">{{goods.goodsSku.goodsName}}</p>
-            <p class="price">{{goods.goodsSku.price | unitPrice('￥')}}<span>&nbsp; x{{goods.num}}</span></p>
+            <p class="price">{{ $filters.unitPrice(goods.goodsSku.price, '￥') }}<span>&nbsp; x{{goods.num}}</span></p>
           </div>
           <span class="del hover-color" @click="delGoods(goods.goodsSku.id)">删除</span>
         </li>
       </ul>
-      <Button size="large" class="mt_10" type="primary" @click="linkTo('/cart')" long>去购物车结算</Button>
+      <el-button size="large" class="mt_10" type="primary" @click="linkTo('/cart')" style="width:100%">去购物车结算</el-button>
     </div>
 
     <div v-else-if="title === '我的订单'" class="order-con">
@@ -26,10 +26,10 @@
               v-for="(img,imgIndex) in order.orderItems"
               :key="imgIndex" width="40" height="40" alt="">
           </div>
-          <div class="order-handle"><span>{{ order.flowPrice | unitPrice("￥") }}</span><span class="hover-color" @click="linkTo(`home/OrderDetail?sn=${order.sn}`)">查看订单</span></div>
+          <div class="order-handle"><span>{{ $filters.unitPrice(order.flowPrice, "￥") }}</span><span class="hover-color" @click="linkTo(`home/OrderDetail?sn=${order.sn}`)">查看订单</span></div>
         </li>
       </ul>
-      <Button type="primary" @click="linkTo('/home/MyOrder')" long>查看全部订单</Button>
+      <el-button type="primary" @click="linkTo('/home/MyOrder')" style="width:100%">查看全部订单</el-button>
     </div>
 
     <div v-else-if="title === '优惠券'" class="coupon-con">
@@ -37,7 +37,7 @@
           <li v-for="(coupon, index) in couponList" class="coupon-item" :key="index">
             <div class="c-left">
               <div>
-                <span v-if="coupon.couponType === 'PRICE'" class="fontsize_12 global_color">￥<span class="price">{{coupon.price | unitPrice}}</span></span>
+                <span v-if="coupon.couponType === 'PRICE'" class="fontsize_12 global_color">￥<span class="price">{{ $filters.unitPrice(coupon.price) }}</span></span>
                 <span v-if="coupon.couponType === 'DISCOUNT'" class="fontsize_12 global_color"><span class="price">{{coupon.couponDiscount}}</span>折</span>
                 <span class="describe">满{{coupon.consumeThreshold}}元可用</span>
               </div>
@@ -56,7 +56,7 @@
         <li v-for="(track,trackIndex) in tracksList" :key="trackIndex">
           <img :src="track.thumbnail" :alt="track.thumbnail" @click="linkTo(`/goodsDetail?skuId=${track.id}&goodsId=${track.goodsId}`)" width="100" height="100">
           <div @click="addToCart(track.id)">加入购物车</div>
-          <p class="global_color">{{track.price | unitPrice('￥')}}</p>
+          <p class="global_color">{{ $filters.unitPrice(track.price, '￥') }}</p>
         </li>
       </ul>
       <div class="hover-color" style="text-align:center;" @click="linkTo('/home/MyTracks')">查看更多>></div>
@@ -67,22 +67,24 @@
           <img :src="collect.image" :alt="collect.image" @click="linkTo(`/goodsDetail?skuId=${collect.skuId}&goodsId=${collect.goodsId}`)" width="100" height="100">
           <div @click="addToCart(collect.skuId)">加入购物车</div>
           <span class="del-icon" @click.stop="cancelCollect(collect.skuId)">
-            <Icon type="md-trash" />
+            <el-icon><Delete /></el-icon>
           </span>
-          <p class="global_color">{{collect.price | unitPrice('￥')}}</p>
+          <p class="global_color">{{ $filters.unitPrice(collect.price, '￥') }}</p>
         </li>
       </ul>
       <div class="hover-color" style="text-align:center;" @click="linkTo('/home/Favorites')">查看更多>></div>
     </div>
-    <Spin v-if="loading" fix></Spin>
+    <el-skeleton v-if="loading" fix></el-skeleton>
   </div>
 </template>
 
 <script>
+import { Delete } from '@element-plus/icons-vue';
 import {cartGoodsAll, delCartGoods, addCartGoods, cartCount} from '@/api/cart.js'
 import { getOrderList } from '@/api/order';
 import {couponList, receiveCoupon, tracksList, collectList, cancelCollect} from '@/api/member.js'
 export default {
+  components: { Delete },
   name: 'Drawer',
   props: {
     title: {

@@ -1,8 +1,6 @@
 import { getSort, getMutipSort } from "@/utils/functions";
 import { formatTalkItem } from "@/utils/talk";
 import { ServeGetTalkList } from "@/api/chat";
-import store from '@/store/index.js'
-import Vue from 'vue'
 const Talk = {
   state: {
     // 用户对话列表
@@ -40,7 +38,7 @@ const Talk = {
    
     // 设置对话列表
     SET_TALK_ITEMS (state, resource) {
-      Vue.set(state, 'items', resource.items)
+      state.items = resource.items;
     },
 
     // 更新对话节点

@@ -9,8 +9,8 @@
         <span>{{ msgLeft.secondTitle }}&gt;</span>
         <div class="setup-box">
           <div>
-            <Button size="small" @click.stop="handleSelectModel(msgLeft, true)"
-              >编辑</Button
+            <el-button size="small" @click.stop="handleSelectModel(msgLeft, true)"
+              >编辑</el-button
             >
           </div>
         </div>
@@ -20,18 +20,18 @@
           <img :src="msgLeft.list[0].img" width="160" height="160" alt="" />
           <div class="margin-left">{{ msgLeft.list[0].name }}</div>
           <div class="margin-left">{{ msgLeft.list[0].describe }}</div>
-          <Button
+          <el-button
             size="small"
             :style="{ background: msgLeft.bgColor }"
             class="fz_12 view-btn"
-            >点击查看</Button
+            >点击查看</el-button
           >
           <div class="setup-box">
             <div>
-              <Button
+              <el-button
                 size="small"
                 @click.stop="handleSelectModel(msgLeft.list[0])"
-                >编辑</Button
+                >编辑</el-button
               >
             </div>
           </div>
@@ -46,8 +46,8 @@
               </div>
               <div class="setup-box">
                 <div>
-                  <Button size="small" @click.stop="handleSelectModel(item)"
-                    >编辑</Button
+                  <el-button size="small" @click.stop="handleSelectModel(item)"
+                    >编辑</el-button
                   >
                 </div>
               </div>
@@ -65,8 +65,8 @@
         <span>{{ msgRight.secondTitle }}&gt;</span>
         <div class="setup-box">
           <div>
-            <Button size="small" @click.stop="handleSelectModel(msgRight, true)"
-              >编辑</Button
+            <el-button size="small" @click.stop="handleSelectModel(msgRight, true)"
+              >编辑</el-button
             >
           </div>
         </div>
@@ -93,24 +93,22 @@
           </div>
           <div class="setup-box">
             <div>
-              <Button size="small" @click.stop="handleSelectModel(item)"
-                >编辑</Button
+              <el-button size="small" @click.stop="handleSelectModel(item)"
+                >编辑</el-button
               >
             </div>
           </div>
         </div>
       </div>
     </div>
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="装修"
-      draggable
+      
       width="800"
-      :z-index="100"
-      :mask-closable="false"
       
-      
-    >
+      :close-on-click-modal="false"
+     append-to-body destroy-on-close>
       <div class="modal-top-advert">
         <div>
           <img
@@ -138,60 +136,68 @@
             alt
           />
         </div>
-        <div><span>图片主标题：</span><Input v-model="selected.name" /></div>
-        <div><span>图片描述：</span><Input v-model="selected.describe" /></div>
+        <div><span>图片主标题：</span><el-input v-model="selected.name" /></div>
+        <div><span>图片描述：</span><el-input v-model="selected.describe" /></div>
         <div class="tips">
           建议尺寸：<span>{{ selected.size }}</span>
         </div>
         <div>
-          图片链接：<span>{{ selected.url }}</span>
-          <Button
+          图片链接：<el-input
+            class="outsideUrl"
+            v-model="selected.url"
+            :disabled="!!selected.type && selected.type !== 'link'"
+            placeholder="https://"
+          />
+          <el-button
             size="small"
             class="ml_10"
             type="primary"
             @click="handleSelectLink"
-            >选择链接</Button
+            >选择链接</el-button
           >
         </div>
         <div>
-          <Button size="small" type="primary" @click="handleSelectImg"
-            >选择图片</Button
+          <el-button size="small" type="primary" @click="handleSelectImg"
+            >选择图片</el-button
           >&nbsp;
-          <Button size="small" type="primary" @click="handleSelectGoods"
-            >选择商品</Button
+          <el-button size="small" type="primary" @click="handleSelectGoods"
+            >选择商品</el-button
           >
         </div>
       </div>
-    </Modal>
-    <Modal
+    </el-dialog>
+    <el-dialog
       v-model="showModal1"
       title="装修"
-      draggable
+      
       width="800"
-      :z-index="100"
-      :mask-closable="false"
       
-      
-    >
+      :close-on-click-modal="false"
+     append-to-body destroy-on-close>
       <div class="modal-top-advert">
-        <div><span>主标题：</span><Input v-model="selected.title" /></div>
-        <div><span>副标题：</span><Input v-model="selected.secondTitle" /></div>
+        <div><span>主标题：</span><el-input v-model="selected.title" /></div>
+        <div><span>副标题：</span><el-input v-model="selected.secondTitle" /></div>
         <div>
-          <span>副标题链接：{{ selected.url }}</span
-          ><Button
+          <span
+            >副标题链接：<el-input
+              class="outsideUrl"
+              v-model="selected.url"
+              :disabled="!!selected.type && selected.type !== 'link'"
+              placeholder="https://" /></span
+          ><el-button
             size="small"
             class="ml_10"
             type="primary"
             @click="handleSelectLink"
-            >选择链接</Button
+            >选择链接</el-button
           >
         </div>
         <div>
-          <span>背景色：</span><Input v-model="selected.bgColor" />
-          <ColorPicker v-if="selected.bgColor" v-model="selected.bgColor" />
+          <span>背景色：</span><el-input v-model="selected.bgColor" />
+          <el-color-picker v-if="selected.bgColor" v-model="selected.bgColor" />
         </div>
       </div>
-    </Modal>
+    </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog
       ref="liliDialog"
@@ -199,14 +205,18 @@
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
     <!-- 选择图片 -->
-    <Modal width="1200px" v-model="picModelFlag" footer-hide>
-      <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage" />
-    </Modal>
+    <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
+      <ossManage
+        @callback="callbackSelected"
+        :is-component="true"
+        :initialize="picModelFlag"
+        ref="ossManage"
+      />
+    </el-dialog>
   </div>
 </template>
 <script>
-// import ossManage from "@/views/sys/oss-manage/ossManage";
-import ossManage from "@/views/shop/ossManages";
+import ossManage from "@/views/sys/oss-manage/ossManage";
 export default {
   props: {
     data: {
@@ -243,11 +253,13 @@ export default {
     },
     handleSelectGoods(item) {
       // 调起选择商品
-      this.$refs.liliDialog.open('goods', 'single')
+      this.$refs.liliDialog.open("goods", "single");
     },
     // 选择链接回调
     selectedLink(val) {
-      this.selected.url = this.$options.filters.formatLinkType(val);
+      this.selected.url = this.$filters.formatLinkType(val);
+      this.selected.type =
+        val.___type === "other" && val.url === "" ? "link" : "other";
     },
     // 选择商品回调
     selectedGoodsData(val) {

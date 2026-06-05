@@ -9,13 +9,13 @@
       </div>
       <div class="cart-steps">
         <span :class="stepIndex == 1 ? 'active' : ''">1.我的购物车</span>
-        <Icon :class="stepIndex == 1 ? 'active-arrow' : ''" custom="icomoon icon-next"></Icon>
+        <i class="icomoon icon-next" :class="stepIndex == 1 ? 'active-arrow' : ''"></i>
         <span :class="stepIndex == 1 ? 'active' : ''">2.填写订单信息</span>
-        <Icon :class="stepIndex == 1 ? 'active-arrow' : ''" custom="icomoon icon-next"></Icon>
+        <i class="icomoon icon-next" :class="stepIndex == 1 ? 'active-arrow' : ''"></i>
         <span :class="stepIndex == 2 ? 'active' : ''">3.成功提交订单</span>
       </div>
     </div>
-    <Divider />
+    <el-divider />
     <div class="content width_1200">
       <!-- 收货地址 -->
       <div class="address" v-if="selectedDeliverMethod === 'LOGISTICS' && goodsType !== 'VIRTUAL_GOODS'">
@@ -30,13 +30,13 @@
             :key="index">
             <div>
               <span>{{ item.name }}</span>
-              <Tag class="ml_10" v-if="item.isDefault" color="red">默认</Tag>
-              <Tag class="ml_10" v-if="item.alias" color="warning">{{ item.alias }}
-              </Tag>
+              <el-tag class="ml_10" v-if="item.isDefault" color="red">默认</el-tag>
+              <el-tag class="ml_10" v-if="item.alias" color="warning">{{ item.alias }}
+              </el-tag>
             </div>
             <div>{{ item.mobile }}</div>
             <div>
-              {{ item.consigneeAddressPath | unitAddress }} {{ item.detail }}
+              {{ $filters.unitAddress(item.consigneeAddressPath) }} {{ item.detail }}
             </div>
             <div class="edit-btn" v-show="showEditBtn === index">
               <span @click.stop="editAddress(item.id)">修改</span>
@@ -44,18 +44,18 @@
             </div>
             <div class="corner-icon" v-show="selectedAddress.id === item.id">
               <div></div>
-              <Icon type="md-checkmark" />
+              <el-icon><Check /></el-icon>
             </div>
           </div>
           <div class="add-address" @click="editAddress('')">
-            <Icon type="ios-add-circle-outline" />
+            <el-icon><Plus /></el-icon>
             <div>添加新地址</div>
           </div>
         </div>
         <div class="more-addr" @click="moreAddr = !moreAddr" v-if="addressList.length > 3">
           {{ moreAddr ? "收起地址" : "更多地址" }}
-          <Icon v-show="!moreAddr" type="md-arrow-dropdown" />
-          <Icon v-show="moreAddr" type="md-arrow-dropup" />
+          <el-icon :v-show="!moreAddr"><ArrowDown /></el-icon>
+          <el-icon :v-show="moreAddr"><ArrowUp /></el-icon>
         </div>
       </div>
 
@@ -73,18 +73,18 @@
             </div>
             <div>{{ item.mobile }}</div>
             <div>
-              {{ item.address | unitAddress }} {{ item.detail }}
+              {{ $filters.unitAddress(item.address) }} {{ item.detail }}
             </div>
             <div class="corner-icon" v-show="selectedStoreAddress.id === item.id">
               <div></div>
-              <Icon type="md-checkmark" />
+              <el-icon><Check /></el-icon>
             </div>
           </div>
         </div>
         <div class="more-addr" @click="storeMoreAddr = !storeMoreAddr" v-if="addressList.length > 3">
           {{ storeMoreAddr ? "收起地址" : "更多地址" }}
-          <Icon v-show="!storeMoreAddr" type="md-arrow-dropdown" />
-          <Icon v-show="storeMoreAddr" type="md-arrow-dropup" />
+          <el-icon :v-show="!storeMoreAddr"><ArrowDown /></el-icon>
+          <el-icon :v-show="storeMoreAddr"><ArrowUp /></el-icon>
         </div>
       </div>
       <div>
@@ -102,7 +102,7 @@
             <div>{{ item.label }}</div>
             <div class="corner-icon" v-show="selectedDeliverMethod === item.value">
               <div></div>
-              <Icon type="md-checkmark" />
+              <el-icon><Check /></el-icon>
             </div>
           </div>
         </div>
@@ -132,18 +132,14 @@
                       goods.goodsSku.goodsName
                   }}</span>
                 </span>
-                <span class="goods-price">{{
-                    goods.purchasePrice | unitPrice("￥")
-                }}</span>
+                <span class="goods-price">{{ $filters.unitPrice(goods.purchasePrice, "￥") }}</span>
                 <span>x{{ goods.num }}</span>
                 <span>{{ goods.goodsSku.quantity > 0 ? "有货" : "无货" }}</span>
-                <span class="goods-price">{{
-                    goods.subTotal | unitPrice("￥")
-                }}</span>
+                <span class="goods-price">{{ $filters.unitPrice(goods.subTotal, "￥") }}</span>
               </div>
             </div>
             <div class="order-mark">
-              <Input type="textarea" maxlength="60" v-model="shop.remark" show-word-limit placeholder="订单备注" />
+              <el-input type="textarea" maxlength="60" v-model="shop.remark" show-word-limit placeholder="订单备注" />
               <span style="font-size: 12px; color: #999">提示：请勿填写有关支付、收货、发票方面的信息</span>
             </div>
           </div>
@@ -153,7 +149,7 @@
       <div class="invoice">
         <div class="card-head mt_20 mb_20">
           <span class="relative">发票信息<span class="inv-tips">
-              <Icon type="ios-alert-outline" />开企业抬头发票须填写纳税人识别号，以免影响报销
+              <el-icon><Warning /></el-icon>开企业抬头发票须填写纳税人识别号，以免影响报销
             </span></span>
         </div>
         <div class="inovice-content">
@@ -175,9 +171,7 @@
           <li v-for="(item, index) in couponList" class="coupon-item" :key="index">
             <div class="c-left">
               <div>
-                <span v-if="item.couponType === 'PRICE'" class="fontsize_12 global_color">￥<span class="price">{{
-                    item.price | unitPrice
-                }}</span></span>
+                <span v-if="item.couponType === 'PRICE'" class="fontsize_12 global_color">￥<span class="price">{{ $filters.unitPrice(item.price) }}</span></span>
                 <span v-if="item.couponType === 'DISCOUNT'" class="fontsize_12 global_color"><span class="price">{{
                     item.discount
                 }}</span>折</span>
@@ -201,12 +195,11 @@
           <div class="pay-gcc-title">
             使用礼品卡
             <span class="pay-gcc-deduct">
-              (已抵扣 <span class="pay-gcc-deduct-num">{{ giftCardDeductAmount | unitPrice("¥") }}</span
-              >)
+              (已抵扣 <span class="pay-gcc-deduct-num">{{ $filters.unitPrice(giftCardDeductAmount, "¥") }}</span>)
             </span>
           </div>
           <a href="javascript:void(0)" class="pay-gcc-help" @click.prevent="giftCardNoticeModal = true">
-            使用说明 <Icon type="ios-help-circle-outline" />
+            使用说明 <el-icon><Help /></el-icon>
           </a>
         </div>
         <div class="pay-gcc-body">
@@ -234,14 +227,14 @@
                         </div>
                       </div>
                       <div class="pay-gcc-balance-row">
-                        <span class="pay-gcc-amt">¥{{ item.balance != null ? (item.balance | unitPrice) : "0.00" }}</span>
+                        <span class="pay-gcc-amt">¥{{ item.balance != null ? $filters.unitPrice(item.balance) : "0.00" }}</span>
                         <span class="pay-gcc-bal-label">余额</span>
                       </div>
                       <div class="pay-gcc-no">{{ item.cardNo }}</div>
                     </div>
                   </div>
                   <div v-if="isGiftCardSelected(item)" class="pay-gcc-corner">
-                    <Icon type="md-checkmark" />
+                    <el-icon><Check /></el-icon>
                   </div>
                 </div>
               </div>
@@ -252,28 +245,26 @@
       <!-- 订单价格 -->
       <div class="order-price">
         <div>
-          <span>{{ totalNum }}件商品，总商品金额：</span><span>{{ priceDetailDTO.goodsPrice | unitPrice("￥") }}</span>
+          <span>{{ totalNum }}件商品，总商品金额：</span><span>{{ $filters.unitPrice(priceDetailDTO.goodsPrice, "￥") }}</span>
         </div>
         <div v-if="priceDetailDTO.freightPrice > 0">
-          <span>运费：</span><span>{{ priceDetailDTO.freightPrice | unitPrice("￥") }}</span>
+          <span>运费：</span><span>{{ $filters.unitPrice(priceDetailDTO.freightPrice, "￥") }}</span>
         </div>
         <div v-if="priceDetailDTO.discountPrice > 0">
-          <span>优惠金额：</span><span>-{{ priceDetailDTO.discountPrice | unitPrice("￥") }}</span>
+          <span>优惠金额：</span><span>-{{ $filters.unitPrice(priceDetailDTO.discountPrice, "￥") }}</span>
         </div>
         <div v-if="priceDetailDTO.couponPrice > 0">
-          <span>优惠券金额：</span><span>-{{ priceDetailDTO.couponPrice | unitPrice("￥") }}</span>
+          <span>优惠券金额：</span><span>-{{ $filters.unitPrice(priceDetailDTO.couponPrice, "￥") }}</span>
         </div>
         <div v-if="giftCardDeductAmount > 0">
-          <span>礼品卡抵扣：</span><span>-{{ giftCardDeductAmount | unitPrice("￥") }}</span>
+          <span>礼品卡抵扣：</span><span>-{{ $filters.unitPrice(giftCardDeductAmount, "￥") }}</span>
         </div>
 
         <div v-if="$route.query.way === 'POINTS'">
           <span>应付积分：</span><span class="actrual-price">{{ priceDetailDTO.payPoint }}</span>
         </div>
         <div v-else>
-          <span>应付金额：</span><span class="actrual-price">{{
-              priceDetailDTO.flowPrice | unitPrice("￥")
-          }}</span>
+          <span>应付金额：</span><span class="actrual-price">{{ $filters.unitPrice(priceDetailDTO.flowPrice, "￥") }}</span>
         </div>
       </div>
     </div>
@@ -281,7 +272,7 @@
     <div class="order-footer width_1200">
       <div class="pay ml_20" @click="pay">提交订单</div>
       <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'LOGISTICS'">
-        配送至：{{ selectedAddress.consigneeAddressPath | unitAddress }}
+        配送至：{{ $filters.unitAddress(selectedAddress.consigneeAddressPath) }}
         {{ selectedAddress.detail }}&nbsp;&nbsp;收货人：{{
             selectedAddress.name
         }}&nbsp;&nbsp;{{ selectedAddress.mobile }}
@@ -295,18 +286,18 @@
     <invoice-modal ref="invModal" :invoiceData="invoiceData" @change="getInvMsg" />
     <!-- 选择地址模态框 -->
     <address-manage ref="address" :id="addrId" @change="addrChange"></address-manage>
-    <Modal v-model="giftCardNoticeModal" title="礼品卡使用说明" footer-hide width="520">
+    <el-dialog v-model="giftCardNoticeModal" title="礼品卡使用说明" footer-hide width="520">
       <p class="pay-gcc-notice-p">
         请在礼品卡有效期内使用；结算时勾选礼品卡即可按规则抵扣订单金额，可与优惠券等活动叠加规则以平台说明为准。放弃勾选或取消抵扣将恢复对应余额。
       </p>
       <div class="pay-gcc-notice-foot">
-        <Button type="primary" @click="giftCardNoticeModal = false">我知道了</Button>
-      </div>
-    </Modal>
+        <el-button type="primary" @click="giftCardNoticeModal = false">我知道了</el-button>
+      </div></el-dialog>
   </div>
 </template>
 
 <script>
+import { ArrowDown, ArrowUp, Check, Help, Plus, Warning } from '@element-plus/icons-vue';
 import invoiceModal from "@/components/invoiceModal";
 import addressManage from "@/components/addressManage";
 import { memberAddress, delMemberAddress } from "@/api/address";
@@ -928,7 +919,7 @@ export default {
     padding: 0 15px;
   }
 
-  .ivu-icon {
+  .el-icon {
     @include content_color($light_content_color);
     font-size: 20px;
     margin: 0 15px;
@@ -1008,7 +999,7 @@ export default {
         border-right: 20px solid $theme_color;
       }
 
-      .ivu-icon {
+      .el-icon {
         font-size: 12px;
         position: absolute;
         bottom: 0;
@@ -1045,7 +1036,7 @@ export default {
     justify-content: center;
     flex-direction: column;
 
-    .ivu-icon {
+    .el-icon {
       font-size: 24px;
     }
 
@@ -1091,7 +1082,7 @@ export default {
         border-right: 20px solid $theme_color;
       }
 
-      .ivu-icon {
+      .el-icon {
         font-size: 12px;
         position: absolute;
         bottom: 0;
@@ -1115,7 +1106,7 @@ export default {
   >span:nth-child(1) {
     font-weight: bold;
 
-    .ivu-icon {
+    .el-icon {
       color: #ff8f23;
 
       &:hover {
@@ -1232,7 +1223,7 @@ export default {
       left: -9px;
     }
 
-    .ivu-icon {
+    .el-icon {
       color: #ff8f23;
       margin-right: 3px;
       font-size: 16px;
@@ -1333,7 +1324,7 @@ export default {
   }
 }
 
-.ivu-divider {
+.el-divider {
   background: $theme_color;
   height: 2px;
 }
@@ -1551,7 +1542,7 @@ export default {
   background: #e54d42;
   transform: rotate(45deg);
 }
-.pay-gcc-corner .ivu-icon {
+.pay-gcc-corner .el-icon {
   position: absolute;
   right: 3px;
   bottom: 3px;

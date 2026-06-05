@@ -1,11 +1,10 @@
 <template>
   <div class="map">
-
     <div class="address">{{ addrContent.address }}</div>
     <div id="map-container"></div>
 
     <div class="search-con">
-      <Input placeholder="输入关键字搜索" id="input-map" v-model="mapSearch" />
+      <el-input id="input-map" v-model="mapSearch" placeholder="输入关键字搜索" clearable />
       <ul>
         <li v-for="(tip, index) in tips" :key="index" @click="selectAddr(tip.location)">
           <p>{{ tip.name }}</p>
@@ -13,42 +12,39 @@
         </li>
       </ul>
     </div>
-    <div slot="footer" class="footer">
-
-      <Button type="primary" :loading="loading" @click="ok">确定</Button>
+    <div class="footer">
+      <el-button type="primary" :loading="loading" @click="ok">确定</el-button>
     </div>
-
   </div>
 </template>
 <script>
 import AMapLoader from "@amap/amap-jsapi-loader";
 import { getRegion } from "@/api/common.js";
 
-const config = require('@/config/index')
+const config = require("@/config/index");
 export default {
   name: "map",
   data() {
     return {
       config,
-      showMap: false, // 地图显隐
-      mapSearch: "", // 地图搜索
-      map: null, // 初始化地图
-      autoComplete: null, // 初始化搜索方法
-      geocoder: null, // 初始化地理、坐标转化
-      positionPicker: null, // 地图拖拽选点
-      tips: [], //搜索关键字列表
-      addrContent: {}, // 回显地址信息
-      loading: false, // 加载状态
+      showMap: false,
+      mapSearch: "",
+      map: null,
+      autoComplete: null,
+      geocoder: null,
+      positionPicker: null,
+      tips: [],
+      addrContent: {},
+      loading: false,
     };
   },
   watch: {
-    mapSearch: function (val) {
+    mapSearch(val) {
       this.searchOfMap(val);
     },
   },
   methods: {
     ok() {
-
       if (this.addrContent && this.addrContent.regeocode) {
         const params = {
           cityCode: this.addrContent.regeocode.addressComponent.citycode,
@@ -59,30 +55,27 @@ export default {
             this.addrContent.addr = res.result.name.replace(/,/g, " ");
             this.addrContent.addrId = res.result.id;
             this.loading = false;
-
             this.$emit("getAddress", this.addrContent);
           }
         });
       } else {
-        this.$Message.error('未获取到坐标信息！请查看高德API配置是否正确')
+        this.$Message.error("未获取到坐标信息！请查看高德API配置是否正确");
       }
-
     },
     init() {
       AMapLoader.load({
-        key: this.config.aMapKey, // 申请好的Web端开发者Key，首次调用 load 时必填
-        version: "", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
+        key: this.config.aMapKey,
+        version: "",
         plugins: [
           "AMap.ToolBar",
           "AMap.Autocomplete",
           "AMap.PlaceSearch",
           "AMap.Geolocation",
           "AMap.Geocoder",
-        ], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
+        ],
         AMapUI: {
-          // 是否加载 AMapUI，缺省不加载
-          version: "1.1", // AMapUI 缺省 1.1
-          plugins: ["misc/PositionPicker"], // 需要加载的 AMapUI ui插件
+          version: "1.1",
+          plugins: ["misc/PositionPicker"],
         },
       })
         .then((AMap) => {
@@ -95,36 +88,26 @@ export default {
           that.map.addControl(new AMap.PlaceSearch());
           that.map.addControl(new AMap.Geocoder());
 
-          // 实例化Autocomplete
           let autoOptions = {
             city: "全国",
           };
-          that.autoComplete = new AMap.Autocomplete(autoOptions); // 搜索
+          that.autoComplete = new AMap.Autocomplete(autoOptions);
           that.geocoder = new AMap.Geocoder(autoOptions);
 
           that.positionPicker = new AMapUI.PositionPicker({
-            // 拖拽选点
             mode: "dragMap",
             map: that.map,
           });
           that.positionPicker.start();
-          /**
-           *
-           * 所有回显数据，都在positionResult里面
-           * 需要字段可以查找
-           *
-           */
           that.positionPicker.on("success", function (positionResult) {
             that.addrContent = positionResult;
           });
         })
-        .catch((e) => { });
+        .catch(() => {});
     },
     searchOfMap(val) {
-      // 地图搜索
       let that = this;
       this.autoComplete.search(val, function (status, result) {
-        // 搜索成功时，result即是对应的匹配数据
         if (status == "complete" && result.info == "OK") {
           that.tips = result.tips;
         } else {
@@ -133,7 +116,6 @@ export default {
       });
     },
     selectAddr(location) {
-      // 选择坐标
       if (!location) {
         this.$Message.warning("请选择正确点位");
         return false;
@@ -182,7 +164,6 @@ export default {
 
 .address {
   margin-bottom: 10px;
-  // color: $theme_color;
   font-weight: bold;
 }
 

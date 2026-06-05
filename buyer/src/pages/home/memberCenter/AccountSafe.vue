@@ -3,87 +3,89 @@
     <card _Title="账户安全"/>
     <div class="safeList">
       <!-- 密码 -->
-      <Row class="safeItem">
-        <Col :span="2">
-          <Icon size="40" type="md-key"/>
-        </Col>
-        <Col :span="16">
+      <div class="safeItem">
+        <div :span="2">
+          <el-icon :size="40"><Key /></el-icon>
+        </div>
+        <div :span="16">
           <div class="setDivItem">登录密码</div>
           <div class="setDivItem theme">互联网账号存在被盗风险，建议您定期更改密码以保护账户安全。</div>
-        </Col>
-        <Col :span="4">
-          <Button @click="modifyPwd">修改密码</Button>
-        </Col>
-      </Row>
+        </div>
+        <div :span="4">
+          <el-button @click="modifyPwd">修改密码</el-button>
+        </div>
+      </div>
 
-      <Row class="safeItem">
-        <Col :span="2">
-          <Icon size="40" type="md-link" />
-        </Col>
-        <Col :span="16">
+      <div class="safeItem">
+        <div :span="2">
+          <el-icon :size="40"><Link /></el-icon>
+        </div>
+        <div :span="16">
           <div class="setDivItem">第三方账户绑定</div>
           <div class="setDivItem theme">绑定后可使用第三方账号快捷登录。</div>
           <div class="connectList">
             <div class="connectRow">
               <div class="connectRowLeft">
                 <span class="connectName">{{ wechatConnect.label }}</span>
-                <Tag v-if="isBound(wechatConnect.type)" color="success">已绑定</Tag>
-                <Tag v-else>未绑定</Tag>
+                <el-tag v-if="isBound(wechatConnect.type)" color="success">已绑定</el-tag>
+                <el-tag v-else>未绑定</el-tag>
               </div>
             </div>
-            <Spin size="large" fix v-if="connectLoading"></Spin>
+            <el-skeleton size="large" fix v-if="connectLoading"></el-skeleton>
           </div>
-        </Col>
-        <Col :span="4">
-          <Button v-if="!isBound(wechatConnect.type)" type="primary" @click="openBindModal(wechatConnect)">绑定</Button>
-          <Button v-else @click="confirmUnbind(wechatConnect)">解绑</Button>
-        </Col>
-      </Row>
+        </div>
+        <div :span="4">
+          <el-button v-if="!isBound(wechatConnect.type)" type="primary" @click="openBindModal(wechatConnect)">绑定</el-button>
+          <el-button v-else @click="confirmUnbind(wechatConnect)">解绑</el-button>
+        </div>
+      </div>
     </div>
 
-    <Modal
+    <el-dialog
       v-model="bindModalVisible"
       title="绑定第三方账户"
-      :mask-closable="false"
+      :close-on-click-modal="false"
       :footer-hide="bindForm.type === 'WECHAT'"
       :ok-text="bindModalOkText"
       :loading="bindSubmitLoading"
-      @on-ok="submitBind"
-      @on-cancel="resetBindForm"
+      @ok="submitBind"
+      @cancel="resetBindForm"
     >
-      <Form :label-width="110">
-        <FormItem label="类型">
-          <Input v-model="bindForm.typeLabel" disabled />
-        </FormItem>
+      <el-form label-width="110px">
+        <el-form-item label="类型">
+          <el-input v-model="bindForm.typeLabel" disabled />
+        </el-form-item>
 
-        <FormItem v-if="bindForm.type === 'WECHAT'" label="公众号二维码">
+        <el-form-item v-if="bindForm.type === 'WECHAT'" label="公众号二维码">
           <div class="wechatQrBox">
             <div class="wechatQrImgBox">
-              <Spin fix v-if="qrCodeLoading"></Spin>
+              <el-skeleton fix v-if="qrCodeLoading"></el-skeleton>
               <img v-if="qrCodeSrc" class="wechatQrImg" :src="qrCodeSrc" alt="微信公众号二维码" />
               <div v-else class="wechatQrEmpty">二维码获取失败，请刷新重试</div>
             </div>
             <div class="wechatQrActions">
-              <Button @click="fetchWechatQrCode">刷新二维码</Button>
-              <Button type="primary" @click="submitBind">我已完成绑定</Button>
+              <el-button @click="fetchWechatQrCode">刷新二维码</el-button>
+              <el-button type="primary" @click="submitBind">我已完成绑定</el-button>
             </div>
             <div class="wechatQrTip">请使用微信扫码关注/授权，完成后点击“我已完成绑定”检测绑定状态</div>
           </div>
-        </FormItem>
+        </el-form-item>
 
-        <FormItem v-if="bindForm.type !== 'WECHAT'" label="OpenID/UnionID">
-          <Input v-model="bindForm.unionID" placeholder="请输入 OpenID/UnionID" />
-        </FormItem>
-      </Form>
-    </Modal>
+        <el-form-item v-if="bindForm.type !== 'WECHAT'" label="OpenID/UnionID">
+          <el-input v-model="bindForm.unionID" placeholder="请输入 OpenID/UnionID" />
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import { Key, Link } from '@element-plus/icons-vue';
 // import { getPwdStatus } from '@/api/account';
 import storage from '@/plugins/storage'
 import { bindThirdAccount, getThirdAccountBindList, getWechatH5QrCode, unbindThirdAccount } from '@/api/login.js'
 export default {
+  components: { Key, Link },
   name: 'AccountSafe',
   data () {
     return {
@@ -264,7 +266,8 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  ::v-deep .ivu-col-span-2, .ivu-col-span-4 {
+  .safeItem > div:first-child,
+  .safeItem > div:last-child {
     text-align: center;
     color: $theme_color;
   }
@@ -281,9 +284,8 @@ export default {
     border-bottom: 1px solid $border_color;
     padding: 16px 0;
 
-    ::v-deep .ivu-col {
+    > div {
       padding: 8px 0;
-
     }
   }
 

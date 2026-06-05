@@ -1,158 +1,177 @@
 <template>
   <div class="search">
-    <Card>
-      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-        <Form-item label="店员名称">
-          <Input
+    <el-card>
+      <el-form ref="searchForm" :model="searchForm" inline label-width="70px" class="search-form">
+        <el-form-item label="店员名称">
+          <el-input
             type="text"
             v-model="searchForm.clerkName"
             placeholder="请输入店员名称"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Form-item label="联系方式">
-          <Input
+        </el-form-item>
+        <el-form-item label="联系方式">
+          <el-input
             type="text"
             v-model="searchForm.mobile"
             placeholder="请输入联系方式"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Form-item label="部门">
-          <department-choose @on-change="handleSelectDep" style="width: 150px;" ref="dep"></department-choose>
-        </Form-item>
-        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-      </Form>
-      </Card>
-        <Card>
-      <Row class="operation padding-row">
-        <Button @click="add" type="primary">添加</Button>
-        <Button @click="delAll">批量删除</Button>
-        <Button @click="resetPass">重置密码</Button>
-      </Row>
+        </el-form-item>
+        <el-form-item label="部门">
+          <department-choose @change="handleSelectDep" style="width: 150px;" ref="dep"></department-choose>
+        </el-form-item>
+        <el-button type="primary" class="search-btn" @click="handleSearch">
+          <el-icon><Search /></el-icon>
+          搜索
+        </el-button>
+      </el-form>
+      </el-card>
+        <el-card>
+      <div class="operation padding-row">
+        <el-button @click="add" type="primary">添加</el-button>
+        <el-button @click="delAll">批量删除</el-button>
+        <el-button @click="resetPass">重置密码</el-button>
+      </div>
       <br>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="showSelect"
+      <el-table
         ref="table"
-      ></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+        v-loading="loading"
+        border
+        :data="data"
+        style="width: 100%"
+        @selection-change="showSelect"
+        @sort-change="changeSort"
+      >
+        <el-table-column type="selection" width="60" align="center" fixed="left" />
+        <el-table-column prop="clerkName" label="店员名称" min-width="100" sortable="custom" fixed="left" />
+        <el-table-column prop="mobile" label="手机号码" min-width="100" fixed="left" />
+        <el-table-column label="店主" width="130" align="center">
+          <template #default="{ row }">
+            <el-tag :type="row.shopkeeper ? 'success' : 'danger'">{{ row.shopkeeper ? "是" : "否" }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="超级管理员" width="130" align="center">
+          <template #default="{ row }">
+            <el-tag :type="row.isSuper ? 'success' : 'danger'">{{ row.isSuper ? "是" : "否" }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="130" align="center">
+          <template #default="{ row }">
+            <el-tag :type="row.status ? 'success' : 'danger'">{{ row.status ? "启用" : "禁用" }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" width="180" sortable="custom" />
+        <el-table-column label="操作" width="200" align="center" fixed="right">
+          <template #default="{ row }">
+            <a class="link-text" @click="edit(row)">编辑</a>
+            <span class="op-split">|</span>
+            <a class="link-text" @click="row.status ? disable(row) : enable(row)">
+              {{ row.status ? "禁用" : "启用" }}
+            </a>
+            <span class="op-split">|</span>
+            <a class="link-text" @click="remove(row)">删除</a>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[10, 20, 50]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[10,20,50]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
 
-    <Modal
+    <el-dialog
       :title="modalTitle"
       v-model="userEditModalVisible"
-      :mask-closable="false"
-      :width="500"
-      :styles="{top: '30px'}"
+      :close-on-click-modal="false"
+      width="500px"
+      top="30px"
     >
-      <Form ref="form" :model="editForm" :label-width="80" :rules="formValidate">
-        <FormItem label="手机号">
-          <Input v-model="mobile" disabled/>
-        </FormItem>
-        <FormItem label="店员名称">
-          <Input v-model="clerkName" disabled/>
-        </FormItem>
-        <FormItem label="超级管理员" prop="isSuper">
-          <RadioGroup type="button" button-style="solid" v-model="editForm.isSuper">
-            <Radio :label="1">
-              <span>是</span>
-            </Radio>
-            <Radio :label="0">
-              <span>否</span>
-            </Radio>
-          </RadioGroup>
-        </FormItem>
+      <el-form ref="form" :model="editForm" label-width="80px" :rules="formValidate">
+        <el-form-item label="手机号">
+          <el-input v-model="mobile" disabled/>
+        </el-form-item>
+        <el-form-item label="店员名称">
+          <el-input v-model="clerkName" disabled/>
+        </el-form-item>
+        <el-form-item label="超级管理员" prop="isSuper">
+          <el-radio-group v-model="editForm.isSuper">
+            <el-radio-button value="1">是</el-radio-button>
+            <el-radio-button value="0">否</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
 
-        <FormItem label="角色" prop="roles" v-if="editForm.isSuper == 0">
-          <Select v-model="editForm.roles" multiple>
-            <Option v-for="item in roleList" :value="item.id" :key="item.id" :label="item.name">
+        <el-form-item label="角色" prop="roles" v-if="editForm.isSuper == 0">
+          <el-select v-model="editForm.roles" multiple>
+            <el-option v-for="item in roleList" :key="item.id" :label="item.name" :value="item.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="所属部门">
+          <department-tree-choose @change="handleEditSelectDepTree" ref="depTree"></department-tree-choose>
+        </el-form-item>
 
-            </Option>
-          </Select>
-        </FormItem>
-        <Form-item label="所属部门">
-          <department-tree-choose @on-change="handleEditSelectDepTree" ref="depTree"></department-tree-choose>
-        </Form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="userEditModalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="updateSubmit">提交</el-button>
+      </template>
+    </el-dialog>
 
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="userEditModalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="updateSubmit">提交</Button>
-      </div>
-    </Modal>
-
-    <Modal
+    <el-dialog
       :title="modalTitle"
       v-model="userModalVisible"
-      :mask-closable="false"
-      :width="500"
-      :styles="{top: '30px'}"
+      :close-on-click-modal="false"
+      width="500px"
+      top="30px"
     >
-      <Form ref="form" :model="form" :label-width="80" :rules="formValidate">
-        <FormItem label="手机号" prop="mobile">
-          <Input placeholder="请输入要添加的会员手机号码" maxlength="11" style="width: 75%" v-model="form.mobile"
-                 autocomplete="off" @on-change="checkClerks"/>
-          &nbsp;<Button v-if="!memberCheck" @click="checkClerk">校验</Button>
-          <Button v-if="memberCheck" @click="checkAgainClerk">重新校验</Button>
-        </FormItem>
-        <FormItem v-if="newMember" label="用户名" prop="username">
-          <Input v-model="form.username" autocomplete="off"/>
-        </FormItem>
-        <FormItem v-if="oldMember" label="用户名" prop="username">
-          <Input v-model="form.username" autocomplete="off" disabled/>
-        </FormItem>
+      <el-form ref="form" :model="form" label-width="80px" :rules="formValidate">
+        <el-form-item label="手机号" prop="mobile">
+          <el-input placeholder="请输入要添加的会员手机号码" maxlength="11" style="width: 75%" v-model="form.mobile"
+                 autocomplete="off" @change="checkClerks"/>
+          &nbsp;<el-button v-if="!memberCheck" @click="checkClerk">校验</el-button>
+          <el-button v-if="memberCheck" @click="checkAgainClerk">重新校验</el-button>
+        </el-form-item>
+        <el-form-item v-if="newMember" label="用户名" prop="username">
+          <el-input v-model="form.username" autocomplete="off"/>
+        </el-form-item>
+        <el-form-item v-if="oldMember" label="用户名" prop="username">
+          <el-input v-model="form.username" autocomplete="off" disabled/>
+        </el-form-item>
 
-        <FormItem label="密码" prop="password" v-if="newMember" :error="errorPass">
-          <Input type="password" password v-model="form.password" autocomplete="off"/>
-        </FormItem>
-        <FormItem label="超级管理员" prop="isSuper" v-if="newMember || oldMember">
-          <RadioGroup type="button" button-style="solid" v-model="form.isSuper">
-            <Radio :label="1">
-              <span>是</span>
-            </Radio>
-            <Radio :label="0">
-              <span>否</span>
-            </Radio>
-          </RadioGroup>
-        </FormItem>
-        <FormItem label="角色" prop="roles" v-if="(oldMember || newMember) && form.isSuper == 0">
-          <Select v-model="form.roles" multiple>
-            <Option v-for="item in roleList" :value="item.id" :key="item.id" :label="item.name">
+        <el-form-item label="密码" prop="password" v-if="newMember" :error="errorPass">
+          <el-input v-model="form.password" type="password" show-password autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="超级管理员" prop="isSuper" v-if="newMember || oldMember">
+          <el-radio-group v-model="form.isSuper">
+            <el-radio-button value="1">是</el-radio-button>
+            <el-radio-button value="0">否</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="角色" prop="roles" v-if="(oldMember || newMember) && form.isSuper == 0">
+          <el-select v-model="form.roles" multiple>
+            <el-option v-for="item in roleList" :key="item.id" :label="item.name" :value="item.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="所属部门" v-if="oldMember || newMember">
+          <department-tree-choose @change="handleSelectDepTree" ref="depTree"></department-tree-choose>
+        </el-form-item>
+      </el-form>
 
-            </Option>
-          </Select>
-        </FormItem>
-        <Form-item label="所属部门" v-if="oldMember || newMember">
-          <department-tree-choose @on-change="handleSelectDepTree" ref="depTree"></department-tree-choose>
-        </Form-item>
-      </Form>
-
-      <div slot="footer">
-        <Button type="text" @click="userModalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="submitUser">提交</Button>
-      </div>
-    </Modal>
+      <template #footer>
+        <el-button @click="userModalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitUser">提交</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -169,6 +188,7 @@ import {
   getClerk
 } from "@/api/index";
 import {validateMobile} from "@/libs/validate";
+import { Search } from "@element-plus/icons-vue";
 import departmentChoose from "@/views/my-components/lili/department-choose";
 import departmentTreeChoose from "@/views/my-components/lili/department-tree-choose";
 import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
@@ -176,6 +196,7 @@ import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
 export default {
   name: "clerk-manage",
   components: {
+    Search,
     departmentChoose,
     departmentTreeChoose,
     uploadPicInput,
@@ -235,211 +256,6 @@ export default {
         ]
       },
       submitLoading: false, // 提交状态
-      columns: [ // 表头
-        {
-          type: "selection",
-          width: 60,
-          align: "center",
-          fixed: "left"
-        },
-        {
-          title: "店员名称",
-          key: "clerkName",
-          minWidth: 100,
-          sortable: true,
-          fixed: "left"
-        },
-        {
-          title: "手机号码",
-          key: "mobile",
-          minWidth: 100,
-          fixed: "left"
-        },
-        {
-          title: "店主",
-          key: "status",
-          align: "center",
-          width: 130,
-          render: (h, params) => {
-            if (params.row.shopkeeper == true) {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "success",
-                    text: "是"
-                  }
-                })
-              ]);
-            } else if (params.row.shopkeeper == false) {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "否"
-                  }
-                })
-              ]);
-            }
-          },
-        },
-        {
-          title: "超级管理员",
-          key: "status",
-          align: "center",
-          width: 130,
-          render: (h, params) => {
-            if (params.row.isSuper == true) {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "success",
-                    text: "是"
-                  }
-                })
-              ]);
-            } else if (params.row.isSuper == false) {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "否"
-                  }
-                })
-              ]);
-            }
-          },
-        },
-        {
-          title: "状态",
-          key: "status",
-          align: "center",
-          width: 130,
-          render: (h, params) => {
-            if (params.row.status == true) {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "success",
-                    text: "启用"
-                  }
-                })
-              ]);
-            } else if (params.row.status == false) {
-              return h("div", [
-                h("Badge", {
-                  props: {
-                    status: "error",
-                    text: "禁用"
-                  }
-                })
-              ]);
-            }
-          },
-          filters: [
-            {
-              label: "启用",
-              value: true
-            },
-            {
-              label: "禁用",
-              value: false
-            }
-          ],
-          filterMultiple: false,
-          filterMethod(value, row) {
-            return row.status == value;
-          }
-        },
-        {
-          title: "创建时间",
-          key: "createTime",
-          sortable: true,
-          sortType: "desc",
-          width: 180
-        },
-        {
-          title: "操作",
-          key: "action",
-          width: 200,
-          align: "center",
-          fixed: "right",
-          render: (h, params) => {
-            let enableOrDisable = "";
-            if (params.row.status == true) {
-              enableOrDisable = h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.disable(params.row);
-                    },
-                  },
-                },
-                "禁用"
-              );
-            } else {
-              enableOrDisable = h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.enable(params.row);
-                    },
-                  },
-                },
-                "启用"
-              );
-            }
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.edit(params.row);
-                    },
-                  },
-                },
-                "编辑"
-              ),
-              h("span", { style: { margin: "0 8px", color: "#dcdee2" } }, "|"),
-              enableOrDisable,
-              h("span", { style: { margin: "0 8px", color: "#dcdee2" } }, "|"),
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.remove(params.row);
-                    },
-                  },
-                },
-                "删除"
-              ),
-            ]);
-          }
-        }
-      ],
       data: [], // 用户数据
       total: 0, // 总数
     };
@@ -539,11 +355,9 @@ export default {
     },
     // 排序
     changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order == "normal") {
-        this.searchForm.order = "";
-      }
+      this.searchForm.sort = e.prop;
+      this.searchForm.order =
+        e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
       this.getUserList();
     },
     // 获取角色列表
@@ -743,7 +557,7 @@ export default {
     },
     // 清除选中状态
     clearSelectAll() {
-      this.$refs.table.selectAll(false);
+      this.$refs.table?.clearSelection();
     },
     // 批量删除
     delAll() {

@@ -2,11 +2,13 @@
   <!-- 头部广告 -->
   <div class="advertising" v-if="show" :style="{'background-color': data.bgColor}">
     <img :src="data.img" class="hover-pointer" @click="linkTo(data.url)"/>
-    <Icon type="md-close-circle" size="20" @click="show = false" />
+    <el-icon :size="20" @click="show = false"><CircleClose /></el-icon>
   </div>
 </template>
 <script>
+import { CircleClose } from '@element-plus/icons-vue';
 export default {
+  components: { CircleClose },
   props: {
     data: { // 传入的广告信息
       type: Object,

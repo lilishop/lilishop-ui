@@ -1,4 +1,4 @@
-import { Notification, MessageBox  } from "element-ui";
+import { ElNotification, ElMessageBox } from "element-plus";
 let wsSignIn; // ws 是否是掉线状态
 import store from "@/store";
 class WsSocket {
@@ -84,7 +84,7 @@ class WsSocket {
       store.commit('SET_WS_STATUS',true);
       wsSignIn.close();
 
-      Notification({
+      ElNotification({
         title: "成功",
         message: "重连成功",
         type: "success",
@@ -125,7 +125,7 @@ class WsSocket {
      * 长时间挂载页面中并且重连次数为空的时候进行提示
      */
     if (this.config.reconnect.number == 0) {
-      MessageBox("当前对话链接已失效，请从关闭重新进入。", "提示", {
+      ElMessageBox("当前对话链接已失效，请从关闭重新进入。", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         closeOnPressEscape: false,
@@ -134,7 +134,7 @@ class WsSocket {
       })
         .then(() => {
           window.close();
-          Notification({
+          ElNotification({
             title: "对话链接已失效提示",
             message: "请手动关闭当前页面",
             type: "error",
@@ -142,7 +142,7 @@ class WsSocket {
           });
         })
         .catch(() => {
-          Notification({
+          ElNotification({
             title: "对话链接已失效提示",
             message: "请手动关闭当前页面",
             type: "error",
@@ -152,7 +152,7 @@ class WsSocket {
       return false;
     }
     // 掉线重连提示
-    wsSignIn = Notification({
+    wsSignIn = ElNotification({
       title: "掉线重连接提示",
       message: `网络连接已断开，正在尝试重新连接......`,
       type: "error",

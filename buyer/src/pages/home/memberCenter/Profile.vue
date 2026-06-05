@@ -1,38 +1,38 @@
 <template>
   <div class="wrapper">
     <card _Title="用户信息" />
-    <Form :model="formItem" :rules="rules" ref="form" :label-width="80">
-      <FormItem label="头像">
-        <Avatar v-if="formItem.face" :src="formItem.face" size="80"/>
-        <Avatar v-else icon="ios-person" size="80"/>
-        <Upload
+    <el-form :model="formItem" :rules="rules" ref="form" label-width="80px">
+      <el-form-item label="头像">
+        <el-avatar v-if="formItem.face" :src="formItem.face" :size="80" />
+        <el-avatar v-else :size="80"><el-icon><User /></el-icon></el-avatar>
+        <el-upload
           :show-upload-list="false"
           :on-success="handleSuccess"
           :format="['jpg','jpeg','png']"
           :action="action"
           :headers="accessToken"
           >
-          <Button class="mt_10">上传头像</Button>
-        </Upload>
-      </FormItem>
-      <FormItem label="昵称" prop="nickName">
-        <Input class="wrapper-user-name" style="width:187px" v-model="formItem.nickName" placeholder="" />
-      </FormItem>
+          <el-button class="mt_10">上传头像</el-button>
+        </el-upload>
+      </el-form-item>
+      <el-form-item label="昵称" prop="nickName">
+        <el-input class="wrapper-user-name" style="width:187px" v-model="formItem.nickName" placeholder="" />
+      </el-form-item>
 
-      <FormItem label="生日">
-        <DatePicker type="date" placeholder="选择您的生日" v-model="formItem.birthday"></DatePicker>
-      </FormItem>
-      <FormItem label="性别">
-        <RadioGroup v-model="formItem.sex" type="button" button-style="solid">
-          <Radio :label="1">男</Radio>
-          <Radio :label="0">女</Radio>
-        </RadioGroup>
-      </FormItem>
-      <FormItem>
-        <Button type="primary" @click="save">确认修改</Button>
+      <el-form-item label="生日">
+        <el-date-picker type="date" placeholder="选择您的生日" v-model="formItem.birthday"></el-date-picker>
+      </el-form-item>
+      <el-form-item label="性别">
+        <el-radio-group v-model="formItem.sex" type="button" button-style="solid">
+          <el-radio :label="1">男</el-radio>
+          <el-radio :label="0">女</el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="save">确认修改</el-button>
 
-      </FormItem>
-    </Form>
+      </el-form-item>
+    </el-form>
   </div>
 </template>
 
@@ -40,7 +40,9 @@
 import { editMemberInfo } from '@/api/account.js';
 import { commonUrl } from '@/plugins/request.js';
 import storage from '@/plugins/storage.js';
+import { User } from '@element-plus/icons-vue';
 export default {
+  components: { User },
   name: 'Profile',
   data () {
     return {
@@ -103,7 +105,7 @@ export default {
       })
     },
     handleSuccess (res, file) { // 上传成功
-      this.$set(this.formItem, 'face', res.result)
+      this.formItem['face'] = res.result
     },
   }
 

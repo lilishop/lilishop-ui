@@ -1,44 +1,44 @@
 <template>
   <div>
-    <Modal v-model="showAddr" width="800" title="收件人地址">
-      <Form
+    <el-dialog v-model="showAddr" width="800" title="收件人地址">
+      <el-form
         :model="formData"
         ref="form"
         label-position="left"
-        :label-width="100"
+        label-width="100px"
         :rules="ruleInline"
       >
-        <FormItem label="收件人" prop="name">
-          <i-input v-model="formData.name" style="width: 600px"></i-input>
-        </FormItem>
-        <FormItem label="收件地区" prop="address">
+        <el-form-item label="收件人" prop="name">
+          <el-input v-model="formData.name" style="width: 600px"></el-input>
+        </el-form-item>
+        <el-form-item label="收件地区" prop="address">
           {{ formData.address || '暂无地址' }}
-          <Button type="primary" style="margin-left: 10px;" size="small" @click="$refs.map.open()">选择</Button>
-        </FormItem>
-        <FormItem label="详细地址" prop="detail">
-          <i-input v-model="formData.detail" style="width: 600px"></i-input>
-        </FormItem>
-        <FormItem label="手机号码" prop="mobile">
-          <i-input v-model="formData.mobile" style="width: 600px"></i-input>
-        </FormItem>
-        <FormItem label="地址别名">
-          <i-input
+          <el-button type="primary" style="margin-left: 10px;" size="small" @click="$refs.map.open()">选择</el-button>
+        </el-form-item>
+        <el-form-item label="详细地址" prop="detail">
+          <el-input v-model="formData.detail" style="width: 600px"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号码" prop="mobile">
+          <el-input v-model="formData.mobile" style="width: 600px"></el-input>
+        </el-form-item>
+        <el-form-item label="地址别名">
+          <el-input
             v-model="formData.alias"
             length
             :maxlength="4"
             placeholder="请输入地址别名，例如公司"
             style="width: 600px"
-          ></i-input>
-        </FormItem>
-        <FormItem label="默认地址">
-          <i-switch v-model="formData.isDefault" />
-        </FormItem>
-      </Form>
-      <div class="mt_20" slot="footer">
-        <Button @click="hide">取消</Button>
-        <Button type="primary" class="mr_10" :loading="loading" @click="save">保存收货地址</Button>
-      </div>
-    </Modal>
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="默认地址">
+          <el-switch v-model="formData.isDefault" />
+        </el-form-item>
+      </el-form>
+      <template #footer><div class="mt_20">
+        <el-button @click="hide">取消</el-button>
+        <el-button type="primary" class="mr_10" :loading="loading" @click="save">保存收货地址</el-button>
+      </div></template>
+    </el-dialog>
     <multipleMap ref="map" @callback="getAddress"></multipleMap>
   </div>
 </template>
@@ -130,15 +130,15 @@ export default {
        if(val.type === 'select'){
         const paths = val.data.map(item => item.name).join(',')
         const ids = val.data.map(item => item.id).join(',')
-        this.$set(this.formData,'address',paths)
-        this.$set(this.formData,'consigneeAddressIdPath',ids)
+        this.formData['address'] = paths
+        this.formData['consigneeAddressIdPath'] = ids
         const coord = val.data[val.data.length - 1].center.split(',')
         this.formData.lat = coord[1]
         this.formData.lon = coord[0]
       }else{
-        this.$set(this.formData, "address", val.data.addr);
-        this.$set(this.formData, "consigneeAddressIdPath", val.data.addrId);
-        this.$set(this.formData, "detail", val.data.address);
+        this.formData["address"] = val.data.addr;
+        this.formData["consigneeAddressIdPath"] = val.data.addrId;
+        this.formData["detail"] = val.data.address;
         this.formData.lat = val.data.position.lat;
         this.formData.lon = val.data.position.lng;
       }

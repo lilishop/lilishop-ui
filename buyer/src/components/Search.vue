@@ -9,18 +9,20 @@
         @click="$router.push('/')"
       />
       <div :class="{'small-search-box':useClass == 'fixed-show'}" class="search-box">
-        <i-input
+        <el-input
           v-model="searchData"
           size="large"
           class="search "
           placeholder="输入你想查找的商品"
-          @keyup.enter.native="search"
+          @keyup.enter="search"
         >
 
-          <div class="search-icon" slot="append" @click="search">
-            <Icon type="ios-search" size="21"/>
-          </div>
-        </i-input>
+          <template #append>
+            <div class="search-icon" @click="search">
+              <el-icon :size="21"><SearchIcon /></el-icon>
+            </div>
+          </template>
+        </el-input>
         <template v-if="showTag">
           <div class="only-store" v-if="storeId" @click="research()">
             切换为{{!onlyStore ? '店铺内' : '平台'}}搜索
@@ -46,9 +48,11 @@
 <script>
 import storage from '@/plugins/storage.js'
 import {hotWords} from '@/api/goods.js'
+import { Search as SearchIcon } from '@element-plus/icons-vue'
 
 export default {
   name: 'search',
+  components: { SearchIcon },
   props: {
     showTag: { // 是否展示搜索栏下方热门搜索
       type: Boolean,
@@ -173,7 +177,7 @@ export default {
   border-radius: 18.9px;
 
 
-  ::v-deep .ivu-input.ivu-input-large {
+  :deep(.el-input--large .el-input__wrapper) {
     border: 1.4px solid $theme_color;
     box-sizing: border-box;
     border-radius: 19.6px;
@@ -183,12 +187,10 @@ export default {
     font-weight: normal;
     height: 37.8px;
     color: #999;
-    &:focus {
-      box-shadow: none;
-    }
+    box-shadow: none;
   }
 
-  ::v-deep .ivu-input-group-append {
+  :deep(.el-input-group__append) {
     border-radius: 19.6px !important;
     cursor: pointer;
     box-sizing: border-box;

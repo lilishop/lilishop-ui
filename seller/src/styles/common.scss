@@ -133,3 +133,9 @@ $theme_color: #F31947;
   color: $theme_color !important;
 }
 $bg_color: #f1f6fa;
+
+@import "./table-common.scss";
+
+.el-table table {
+  width: 100% !important;
+}

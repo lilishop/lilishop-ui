@@ -6,26 +6,27 @@
       <span>累计获得：<span>{{ pointObj.totalPoint || 0 }}</span></span>
     </div>
     <h3>积分日志</h3>
-    <Table :columns="logColumns" :data="logData.records">
-      <template slot-scope="{ row }" slot="point">
-        <div :style="{color:row.pointType === 'INCREASE' ? 'green' : 'red'}">
-          <span v-if="row.pointType === 'INCREASE'">+</span>{{ row.variablePoint }}
-        </div>
-      </template>
-    </Table>
+    <el-table :data="logData.records || []">
+      <el-table-column prop="content" label="日志内容" align="center" />
+      <el-table-column prop="createTime" label="时间" align="center" />
+      <el-table-column label="积分明细" align="center">
+        <template #default="{ row }">
+          <div :style="{ color: row.pointType === 'INCREASE' ? 'green' : 'red' }">
+            <span v-if="row.pointType === 'INCREASE'">+</span>{{ row.variablePoint }}
+          </div>
+        </template>
+      </el-table-column>
+    </el-table>
     <!-- 分页 -->
-    <Page
-      style="float:right;margin-top:10px"
-      :current="params.pageNumber"
+    <el-pagination       style="float:right;margin-top:10px"
+      :current-page="params.pageNumber"
       :total="logData.total"
       :page-size="params.pageSize"
-      @on-change="changePage"
-      @on-page-size-change="changePageSize"
-      :page-size-opts="[10, 20, 50]"
-      size="small"
-      show-total
-      show-elevator
-    ></Page>
+      @current-change="changePage"
+      @size-change="changePageSize"
+      :page-sizes="[10, 20, 50]"
+      small
+     layout="total, prev, pager, next, jumper"></el-pagination>
   </div>
 </template>
 <script>
@@ -42,23 +43,6 @@ export default {
         pageNumber: 1,
         pageSize: 10
       },
-      logColumns: [ // table展示数据
-        {
-          title: '日志内容',
-          key: 'content',
-          align: 'center'
-        },
-        {
-          title: '时间',
-          key: 'createTime',
-          align: 'center'
-        },
-        {
-          title: '积分明细',
-          slot: 'point',
-          align: 'center'
-        }
-      ]
     }
   },
   mounted () {

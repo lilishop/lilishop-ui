@@ -8,11 +8,9 @@
             <img src="../assets/images/logo.png" width="120" alt="" />
           </router-link>
           <p>领券中心</p>
-          <Input
-            search
+          <el-input
             style="width: 400px"
-            @on-search="search"
-            enter-button="搜索"
+            @keyup.enter="search"
             placeholder="搜索优惠券"
           />
         </div>
@@ -27,19 +25,13 @@
                 <span
                   v-if="item.couponType === 'PRICE'"
                   class="fontsize_12 global_color"
-                  >￥<span class="price">{{
-                    item.price | unitPrice
-                  }}</span></span
-                >
+                  >￥<span class="price">{{ $filters.unitPrice(item.price) }}</span></span>
                 <span
                   v-if="item.couponType === 'DISCOUNT'"
                   class="fontsize_12 global_color"
-                  ><span class="price">{{ item.couponDiscount }}</span
-                  >折</span
-                >
+                  ><span class="price">{{ item.couponDiscount }}</span>折</span>
                 <span class="describe"
-                  >满{{ item.consumeThreshold }}元可用</span
-                >
+                  >满{{ item.consumeThreshold }}元可用</span>
               </div>
               <p>使用范围：{{ useScope(item.scopeType, item.storeName) }}</p>
               <p>有效期：{{ item.endTime }}</p>
@@ -50,16 +42,12 @@
             <i class="circle-bottom"></i>
           </li>
         </ul>
-        <Page
-          :total="total"
-          @on-change="changePageNum"
+        <el-pagination           :total="total"
+          @current-change="changePageNum"
           class="pageration"
-          @on-page-size-change="changePageSize"
+          @size-change="changePageSize"
           :page-size="params.pageSize"
-          show-total
-          show-sizer
-        >
-        </Page>
+         layout="total, sizes, prev, pager, next"></el-pagination>
       </div>
     </div>
     <BaseFooter></BaseFooter>

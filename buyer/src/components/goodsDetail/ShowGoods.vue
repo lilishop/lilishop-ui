@@ -6,7 +6,12 @@
         <!-- 大图、放大镜 -->
         <!-- <div  id="dplayer"></div> -->
         <div class="item-detail-big-img" v-if="imgList[imgIndex]">
-          <pic-zoom :url="imgList[imgIndex].url || imgList[imgIndex]" :scale="2"></pic-zoom>
+          <el-image
+            :src="currentImg"
+            :preview-src-list="previewList"
+            fit="contain"
+            style="width: 100%; height: 400px"
+          />
         </div>
 
         <!-- <div  id="dplayer"></div> -->
@@ -24,11 +29,7 @@
 
         <div class="goodsConfig mt_10">
           <span @click="collect"
-            ><Icon
-              type="ios-heart"
-              :color="isCollected ? '#ed3f14' : '#666'"
-            />{{ isCollected ? "已收藏" : "收藏" }}</span
-          >
+            ><el-icon :color="isCollected ? '#ed3f14' : '#666'"><StarFilled /></el-icon>{{ isCollected ? "已收藏" : "收藏" }}</span>
         </div>
       </div>
       <!-- 右侧商品信息、活动信息、操作展示 -->
@@ -36,18 +37,18 @@
         <div class="item-detail-title">
           <p>
             {{ skuDetail.goodsName }}
-            <Tag
+            <el-tag
               v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
               style="margin-top:10px;rgb(153, 149, 149);"
             >
               实物商品
-            </Tag>
-            <Tag
+            </el-tag>
+            <el-tag
               v-else-if="skuDetail.goodsType == 'VIRTUAL_GOODS'"
               style="margin-top:10px;rgb(153, 149, 149);"
             >
               虚拟商品
-            </Tag>
+            </el-tag>
           </p>
         </div>
         <div class="sell-point">
@@ -68,14 +69,9 @@
             >
               <p>
                 <span class="item-price-title" v-if="promotionMap['SECKILL']"
-                  >秒 &nbsp;杀&nbsp;价</span
-                >
-                <span class="item-price">{{
-                  skuDetail.promotionPrice | unitPrice("￥")
-                }}</span>
-                <span class="item-price-old">{{
-                  skuDetail.price | unitPrice("￥")
-                }}</span>
+                  >秒 &nbsp;杀&nbsp;价</span>
+                <span class="item-price">{{ $filters.unitPrice(skuDetail.promotionPrice, "￥") }}</span>
+                <span class="item-price-old">{{ $filters.unitPrice(skuDetail.price, "￥") }}</span>
               </p>
             </div>
             <!-- 商品原价 -->
@@ -92,7 +88,7 @@
                     :key="index"
                     class="item-price item-num"
                   >
-                    {{ item | unitPrice("￥") }}
+                    {{ $filters.unitPrice(item, "￥") }}
                   </div>
                 </div>
                 <div class="flex">
@@ -110,11 +106,8 @@
               <!-- 普通价格 -->
               <div v-else>
                 <span class="item-price-title"
-                  >价 &nbsp;&nbsp;&nbsp;&nbsp;格</span
-                >
-                <span class="item-price">{{
-                  skuDetail.price | unitPrice("￥")
-                }}</span>
+                  >价 &nbsp;&nbsp;&nbsp;&nbsp;格</span>
+                <span class="item-price">{{ $filters.unitPrice(skuDetail.price, "￥") }}</span>
               </div>
             </div>
             <!-- 优惠券展示 -->
@@ -129,13 +122,11 @@
                     @click="receiveCoupon(item.id)"
                   >
                     <span v-if="item.couponType == 'PRICE'"
-                      >满{{ item.consumeThreshold }}减{{ item.price }}</span
-                    >
+                      >满{{ item.consumeThreshold }}减{{ item.price }}</span>
                     <span v-if="item.couponType == 'DISCOUNT'"
                       >满{{ item.consumeThreshold }}打{{
                         item.couponDiscount
-                      }}折</span
-                    >
+                      }}折</span>
                   </span>
                 </span>
 
@@ -149,13 +140,11 @@
                         @click="receiveCoupon(item.id)"
                       >
                         <span v-if="item.couponType == 'PRICE'"
-                          >满{{ item.consumeThreshold }}减{{ item.price }}</span
-                        >
+                          >满{{ item.consumeThreshold }}减{{ item.price }}</span>
                         <span v-if="item.couponType == 'DISCOUNT'"
                           >满{{ item.consumeThreshold }}打{{
                             item.couponDiscount
-                          }}折</span
-                        >
+                          }}折</span>
                       </span>
                     </div>
                   </div>
@@ -165,16 +154,14 @@
             <div class="item-price-row" v-if="promotionMap['FULL_DISCOUNT']">
               <p>
                 <span class="item-price-title"
-                  >促&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;销</span
-                >
+                  >促&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;销</span>
                 <span class="item-promotion">满减</span>
                 <span
                   class="item-desc-pintuan"
                   v-if="promotionMap['FULL_DISCOUNT'].fullMinus"
                   >满{{ promotionMap["FULL_DISCOUNT"].fullMoney }}元，立减现金{{
                     promotionMap["FULL_DISCOUNT"].fullMinus
-                  }}元</span
-                >
+                  }}元</span>
                 <span
                   class="item-desc-pintuan"
                   v-if="
@@ -183,8 +170,7 @@
                   "
                   >满{{ promotionMap["FULL_DISCOUNT"].fullMoney }}元，立享{{
                     promotionMap["FULL_DISCOUNT"].fullRate
-                  }}折</span
-                >
+                  }}折</span>
               </p>
             </div>
           </div>
@@ -193,8 +179,7 @@
               <p>累计评价</p>
               <p>
                 <span class="item-remarks-num"
-                  >{{ skuDetail.commentNum || 0 }} 条</span
-                >
+                  >{{ skuDetail.commentNum || 0 }} 条</span>
               </p>
             </div>
           </div>
@@ -236,14 +221,14 @@
               <p>数量</p>
             </div>
             <div class="item-select-row">
-              <InputNumber
+              <el-input-number
                 :min="1"
                 :max="skuDetail.quantity"
                 :disabled="skuDetail.quantity === 0"
                 v-model="count"
                 :precision="0.1"
-                @on-blur="changeCount"
-              ></InputNumber>
+                @blur="changeCount"
+              ></el-input-number>
               <span class="inventory"> 库存{{ skuDetail.quantity }}</span>
             </div>
           </div>
@@ -264,12 +249,12 @@
             class="add-buy-car"
             v-if="$route.query.way === 'POINT' && skuDetail.authFlag === 'PASS'"
           >
-            <Button
-              type="error"
+            <el-button
+              type="danger"
               :loading="loading"
               :disabled="skuDetail.quantity === 0"
               @click="pointPay"
-              >积分购买</Button
+              >积分购买</el-button
             >
           </div>
           <div
@@ -277,37 +262,37 @@
             v-if="$route.query.way !== 'POINT' && skuDetail.authFlag === 'PASS'"
           >
 
-           <Button
-              type="error"
+           <el-button
+              type="danger"
               v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
               :loading="loading"
               :disabled="skuDetail.quantity === 0"
               @click="addShoppingCartBtn"
-              >加入购物车</Button
+              >加入购物车</el-button
             >
-            <Button
+            <el-button
               type="warning"
               :loading="loading1"
               :disabled="skuDetail.quantity === 0"
               @click="buyNow"
-              >立即购买</Button
+              >立即购买</el-button
             >
-            <Tooltip content="观看视频" v-if="skuDetail.goodsVideo">
+            <el-tooltip content="观看视频" v-if="skuDetail.goodsVideo">
               <img class="view-video" @click="showGoodsVideo = true" :src="require('@/assets/iconfont/play.svg')" alt="">
-            </Tooltip>
+            </el-tooltip>
           </div>
         </div>
       </div>
-      <Modal title="浏览视频" v-model="showGoodsVideo">
-        <div id="dplayer"></div>
-      </Modal>
+      <el-dialog title="浏览视频" v-model="showGoodsVideo">
+          <div id="dplayer"></div>
+        </el-dialog>
     </div>
   </div>
 </template>
 
 <script>
+import { StarFilled } from '@element-plus/icons-vue';
 import Promotion from "./Promotion.vue";
-import PicZoom from "vue-piczoom"; // 图片放大
 import DPlayer from "dplayer";
 import {
   collectGoods,
@@ -371,8 +356,15 @@ export default {
       isCollected: false, // 是否收藏
     };
   },
-  components: { PicZoom, Promotion },
+  components: { Promotion, StarFilled },
   computed: {
+    currentImg() {
+      const item = this.imgList[this.imgIndex];
+      return item ? item.url || item : "";
+    },
+    previewList() {
+      return this.imgList.map((item) => item.url || item);
+    },
     wholesalePrice(key) {
       return this.wholesaleList.length
         ? this.wholesaleList.map((item) => {
@@ -417,7 +409,7 @@ export default {
     },
     select(index, value) {
       // 选择规格
-      this.$set(this.currentSelceted, index, value);
+      this.currentSelceted[index] = value;
       let selectedSkuId = this.goodsSpecList.find((i) => {
         let matched = true;
         let specValues = i.specValues.filter((j) => j.specName !== "images");

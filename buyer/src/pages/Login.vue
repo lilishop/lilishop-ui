@@ -10,13 +10,13 @@
     <!-- 登录主体 包含轮播图 登录模块 -->
     <div class="login-container">
       <!-- 轮播 -->
-      <Carousel loop :autoplay-speed="5000" class="login-carousel" arrow="never">
-        <CarouselItem>
+      <el-carousel :interval="5000" arrow="never" class="login-carousel" height="550px">
+        <el-carousel-item>
           <div class="demo-carousel" @click='$refs.verify.show = false'>
             <img src="https://lili-system.oss-cn-beijing.aliyuncs.com/background.jpg" />
           </div>
-        </CarouselItem>
-      </Carousel>
+        </el-carousel-item>
+      </el-carousel>
       <!-- 登录模块 -->
       <div class="form-box" @click='$refs.verify.show = false'>
         <div class="account-number">
@@ -34,7 +34,7 @@
               <span>
                 二维码已失效
               </span>
-              <Button size='small' @click="createPCLoginSession">刷新二维码</Button>
+              <el-button size='small' @click="createPCLoginSession">刷新二维码</el-button>
             </div>
             <vue-qr
               :text="qrCode"
@@ -69,45 +69,45 @@
         <div>
           <div v-show="!scannerCodeLoginFLag">
           <!-- 账号密码登录 -->
-          <Form ref="formInline" :model="formData" :rules="ruleInline" v-show="type === true"
+          <el-form ref="formInline" :model="formData" :rules="ruleInline" v-show="type === true"
                 @click.self='$refs.verify.show = false'>
-            <FormItem prop="username">
-              <i-input type="text" v-model="formData.username" clearable placeholder="用户名">
-                <Icon type="md-person" slot="prepend"></Icon>
-              </i-input>
-            </FormItem>
-            <FormItem prop="password">
-              <i-input type="password" v-model="formData.password" clearable placeholder="密码">
-                <Icon type="md-lock" slot="prepend"></Icon>
-              </i-input>
-            </FormItem>
-            <FormItem>
-              <Button type="error" @click.stop="handleSubmit('formInline')" long>登录</Button>
-            </FormItem>
-          </Form>
+            <el-form-item prop="username">
+              <el-input type="text" v-model="formData.username" clearable placeholder="用户名">
+                <template #prepend><el-icon><User /></el-icon></template>
+              </el-input>
+            </el-form-item>
+            <el-form-item prop="password">
+              <el-input type="password" v-model="formData.password" clearable placeholder="密码">
+                <template #prepend><el-icon><Lock /></el-icon></template>
+              </el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="danger" @click.stop="handleSubmit('formInline')" style="width:100%">登录</el-button>
+            </el-form-item>
+          </el-form>
           <!-- 验证码登录 -->
-          <Form ref="formSms" :model="formSms" :rules="ruleInline" v-show="type === false"
+          <el-form ref="formSms" :model="formSms" :rules="ruleInline" v-show="type === false"
                 @click.self='$refs.verify.show = false'>
-            <FormItem prop="mobile">
-              <i-input type="text" v-model="formSms.mobile" clearable placeholder="手机号">
-                <Icon type="md-lock" slot="prepend"></Icon>
-              </i-input>
-            </FormItem>
-            <FormItem prop="code">
-              <i-input type="text" v-model="formSms.code" placeholder="手机验证码">
-                <Icon type="ios-text-outline" style="font-weight: bold" slot="prepend"/>
-                <Button slot="append" @click="sendCode">{{ codeMsg }}</Button>
-              </i-input>
-            </FormItem>
-            <FormItem>
-              <Button @click.stop="verifyBtnClick" long
+            <el-form-item prop="mobile">
+              <el-input type="text" v-model="formSms.mobile" clearable placeholder="手机号">
+                <template #prepend><el-icon><Lock /></el-icon></template>
+              </el-input>
+            </el-form-item>
+            <el-form-item prop="code">
+              <el-input type="text" v-model="formSms.code" placeholder="手机验证码">
+                <template #prepend><el-icon style="font-weight: bold"><Document /></el-icon></template>
+                <template #append><el-button @click="sendCode">{{ codeMsg }}</el-button></template>
+              </el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button @click.stop="verifyBtnClick" style="width:100%"
                       :type="verifyStatus?'success':'default'">{{ verifyStatus ? '验证通过' : '点击完成安全验证' }}
-              </Button>
-            </FormItem>
-            <FormItem>
-              <Button type="error" @click="handleSubmit('formSms')" long>登录</Button>
-            </FormItem>
-          </Form>
+              </el-button>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="danger" @click="handleSubmit('formSms')" style="width:100%">登录</el-button>
+            </el-form-item>
+          </el-form>
         </div>
           <div class="other">
             <div class="other-login">
@@ -138,16 +138,16 @@
       <verify ref="verify" class="verify-con" verifyType="LOGIN" @change="verifyChange"></verify>
     </div>
     <div class="foot">
-      <Row type="flex" justify="space-around" class="help">
+      <div type="flex" justify="space-around" class="help">
         <router-link to="/article" class="item" target="_blank">帮助</router-link>
         <router-link to="/article?id=1371779927900160000" class="item" target="_blank">隐私</router-link>
         <router-link to="/article?id=1371992704333905920" class="item" target="_blank">条款</router-link>
-      </Row>
-      <Row type="flex" justify="center" class="copyright">
+      </div>
+      <div type="flex" justify="center" class="copyright">
         Copyright © {{year}} - Present
         <a href="https://pickmall.cn" target="_blank" style="margin: 0 5px">{{config.title}}</a>
         版权所有
-      </Row>
+      </div>
     </div>
   </div>
 </template>
@@ -162,12 +162,16 @@ import { webLogin, loginCallback,sCLogin,getSCLoginCode} from "@/api/login.js";
 import storage from "@/plugins/storage.js";
 import verify from "@/components/verify";
 import vueQr from "vue-qr";
+import { User, Lock, Document } from "@element-plus/icons-vue";
 
 export default {
   name: "Login",
   components: {
     verify,
-    vueQr
+    vueQr,
+    User,
+    Lock,
+    Document,
   },
   data() {
     return {
@@ -413,7 +417,7 @@ export default {
       });
     },
   },
-  destroyed() {
+  beforeUnmount() {
     this.clearQRLoginInfo();
   },
   mounted() {

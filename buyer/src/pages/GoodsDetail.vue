@@ -4,12 +4,12 @@
     <Search></Search>
     <div class="shop-item-path">
       <div class="shop-nav-container">
-        <Breadcrumb>
-          <BreadcrumbItem to="/">首页</BreadcrumbItem>
-          <BreadcrumbItem v-for="(item, index) in categoryBar" :to="goGoodsList(index)" target="_blank" :key="index">
+        <el-breadcrumb>
+          <el-breadcrumb-item to="/">首页</el-breadcrumb-item>
+          <el-breadcrumb-item v-for="(item, index) in categoryBar" :to="goGoodsList(index)" target="_blank" :key="index">
             {{ item.name }}
-          </BreadcrumbItem>
-        </Breadcrumb>
+          </el-breadcrumb-item>
+        </el-breadcrumb>
         <div class="store-collect" v-if="!takeDownSale">
           <span class="mr_10" v-if="goodsMsg.data">
             <router-link :to="'Merchant?id=' + goodsMsg.data.storeId">{{
@@ -17,7 +17,7 @@
             }}</router-link>
           </span>
           <span @click="collect">
-            <Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#666'" />
+            <el-icon :color="storeCollected ? '#ed3f14' : '#666'"><StarFilled /></el-icon>
             {{ storeCollected? "已收藏店铺": "收藏店铺" }}
           </span>
           <span class="ml_10" @click="IMService(goodsMsg.data.storeId,goodsMsg.data.goodsId,goodsMsg.data.id)">联系客服</span>
@@ -32,16 +32,17 @@
 
     <empty _Title='当前商品已下架' v-if="takeDownSale">
       <div class="sale-btn">
-        <Button size="small" class="mr_10" @click="target('/')">返回首页</Button>
-        <Button size="small" @click="target('goodsList')">返回商品列表</Button>
+        <el-button size="small" class="mr_10" @click="target('/')">返回首页</el-button>
+        <el-button size="small" @click="target('goodsList')">返回商品列表</el-button>
       </div>
     </empty>
-    <Spin size="large" fix v-if="isLoading"></Spin>
+    <el-skeleton size="large" fix v-if="isLoading"></el-skeleton>
     <BaseFooter></BaseFooter>
   </div>
 </template>
 
 <script>
+import { StarFilled } from '@element-plus/icons-vue';
 import Search from "@/components/Search";
 
 import ShowGoods from "@/components/goodsDetail/ShowGoods";
@@ -129,7 +130,7 @@ export default {
               });
             });
             this.categoryBar = cateArr;
-            this.$set(this, "goodsMsg", res.result);
+            this["goodsMsg"] = res.result;
             if (!this.goodsMsg.data.intro) {
               this.goodsMsg.data.intro = ''
             }
@@ -191,12 +192,10 @@ export default {
     },
   },
   watch: {},
-  components: {
-    Search,
+  components: { Search,
     ShowGoods,
     ShowGoodsDetail,
-    empty
-  },
+    empty, StarFilled },
 };
 </script>
 <style scoped lang="scss">

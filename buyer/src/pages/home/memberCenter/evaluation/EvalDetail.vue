@@ -3,8 +3,7 @@
     <div class="title">
       <card _Title="评价详情" :_Size="16"></card>
       <p>
-        <span class="color999">创建人：</span
-        ><span>{{ orderGoods.createBy | secrecyMobile }}</span>
+        <span class="color999">创建人：</span><span>{{ $filters.secrecyMobile( orderGoods.createBy ) }}</span>
         <span class="color999 ml_20">{{ orderGoods.createTime }}</span>
       </p>
     </div>
@@ -12,10 +11,10 @@
     <div class="delivery-rate">
       <div class="fontsize_16">物流服务评价：</div>
       <div class="color999">
-        <span>物流评价：<Rate disabled :value="Number(orderGoods.deliveryScore)" /></span>
-        <span>服务评价：<Rate disabled :value="Number(orderGoods.serviceScore)" /></span>
+        <span>物流评价：<el-rate disabled :value="Number(orderGoods.deliveryScore)" /></span>
+        <span>服务评价：<el-rate disabled :value="Number(orderGoods.serviceScore)" /></span>
         <span
-          >服务评价：<Rate disabled :value="Number(orderGoods.descriptionScore)"
+          >服务评价：<el-rate disabled :value="Number(orderGoods.descriptionScore)"
         /></span>
       </div>
     </div>
@@ -41,17 +40,17 @@
         <div class="eval-con">
           <div>
             <span class="color999">商品评价：</span>
-            <RadioGroup
+            <el-radio-group
               style="margin-bottom: 5px; color: #999"
               v-model="orderGoods.grade"
               type="button"
               button-style="solid"
             >
-              <Radio label="GOOD" disabled>好评</Radio>
-              <Radio label="MODERATE" disabled>中评</Radio>
-              <Radio label="WORSE" disabled>差评</Radio>
-            </RadioGroup>
-            <Input
+              <el-radio label="GOOD" disabled>好评</el-radio>
+              <el-radio label="MODERATE" disabled>中评</el-radio>
+              <el-radio label="WORSE" disabled>差评</el-radio>
+            </el-radio-group>
+            <el-input
               type="textarea"
               maxlength="500"
               readonly
@@ -64,7 +63,7 @@
             <template v-if="orderGoods.images">
               <div class="demo-upload-list" v-for="(img, index) in orderGoods.images.split(',')" :key="index">
                 <img :src="img" />
-                <div class="demo-upload-list-cover"><Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon></div>
+                <div class="demo-upload-list-cover"><el-icon @click="handleView(img)"><View /></el-icon></div>
               </div>
             </template>
           </div>
@@ -75,7 +74,7 @@
               <template v-if="orderGoods.replyImage">
                 <div class="demo-upload-list" v-for="(img, index) in orderGoods.replyImage.split(',')" :key="index">
                   <img :src="img" />
-                  <div class="demo-upload-list-cover"><Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon></div>
+                  <div class="demo-upload-list-cover"><el-icon @click="handleView(img)"><View /></el-icon></div>
                 </div>
               </template>
             </div>
@@ -84,14 +83,16 @@
         </div>
       </li>
     </ul>
-    <Modal title="View Image" v-model="visible">
+    <el-dialog title="View Image" v-model="visible">
       <img :src="previewImage" v-if="visible" style="width: 100%" />
-    </Modal>
+    </el-dialog>
   </div>
 </template>
 <script>
+import { View } from '@element-plus/icons-vue';
 import { evaluationDetail } from "@/api/member.js";
 export default {
+  components: { View },
   data() {
     return {
       order: {}, // 订单详情

@@ -9,7 +9,7 @@
       </p>
     </div>
 
-    <Alert class="l_title" show-icon type="warning">我的申诉信息</Alert>
+    <el-alert class="l_title" show-icon type="warning">我的申诉信息</el-alert>
     <table cellspacing="0" cellpadding='0' border="1">
       <tr>
         <td>投诉商品</td>
@@ -31,7 +31,7 @@
               <div class="demo-upload-list" v-for="(img, index) in detail.images.split(',')" :key="index">
                 <img :src="img">
                 <div class="demo-upload-list-cover">
-                  <Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon>
+                  <el-icon @click="handleView(img)"><View /></el-icon>
                 </div>
               </div>
             </template>
@@ -41,7 +41,7 @@
       </tr>
     </table>
 
-    <Alert class="l_title" show-icon type="warning">商家申诉信息</Alert>
+    <el-alert class="l_title" show-icon type="warning">商家申诉信息</el-alert>
     <table cellspacing="0" cellpadding='0' border="1">
       <tr>
         <td>申诉时间</td>
@@ -60,7 +60,7 @@
               <div class="demo-upload-list" v-for="(img, index) in detail.appealImages.split(',')" :key="index">
                 <img :src="img">
                 <div class="demo-upload-list-cover">
-                  <Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon>
+                  <el-icon @click="handleView(img)"><View /></el-icon>
                 </div>
               </div>
             </template>
@@ -70,7 +70,7 @@
       </tr>
     </table>
 
-    <Alert class="l_title" show-icon type="warning">平台仲裁</Alert>
+    <el-alert class="l_title" show-icon type="warning">平台仲裁</el-alert>
     <table cellspacing="0" cellpadding='0' border="1">
       <tr>
         <td>仲裁意见</td>
@@ -78,7 +78,7 @@
       </tr>
     </table>
 
-    <Alert class="l_title" show-icon type="warning">对话详情</Alert>
+    <el-alert class="l_title" show-icon type="warning">对话详情</el-alert>
     <div class="speak-way" v-if="detail.orderComplaintCommunications && detail.orderComplaintCommunications.length">
       <div
         class="speak-msg seller"
@@ -108,22 +108,24 @@
       <tr>
         <td></td>
         <td>
-          <Button type="primary"  :loading="submitLoading" @click="handleSubmit" style="margin-left: 5px">
+          <el-button type="primary"  :loading="submitLoading" @click="handleSubmit" style="margin-left: 5px">
             回复
-          </Button>
+          </el-button>
         </td>
       </tr>
     </table>
 
-    <Modal title="View Image" v-model="visible">
+    <el-dialog title="View Image" v-model="visible">
       <img :src="previewImage" v-if="visible" style="width: 100%">
-    </Modal>
+    </el-dialog>
   </div>
 </template>
 <script>
+import { View } from '@element-plus/icons-vue';
 import {getComplainDetail} from '@/api/member.js';
 import {communication} from '@/api/order';
 export default {
+  components: { View },
   data () {
     return {
       detail: {}, // 评价详情

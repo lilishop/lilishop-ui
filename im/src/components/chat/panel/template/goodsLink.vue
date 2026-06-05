@@ -8,7 +8,7 @@
       <div style="margin-left: 13px">
         <a @click="linkToGoods(goodsDetail.goodsId, goodsDetail.id)"> {{ goodsDetail.goodsName }} </a>
         <div>
-          <span style="color: red;">{{ goodsDetail.price | unitPrice('￥') }}</span>
+          <span style="color: red;">{{ $filters.unitPrice(goodsDetail.price, '￥') }}</span>
         </div>
         <div v-if="hide">
           <el-button class="store-button" type="danger" v-if="btnHide == 1 && toUser.storeFlag" size="mini"
@@ -20,7 +20,6 @@
 </template>
 
 <script>
-import { Tag, button } from 'element-ui'
 import { mapState, mapGetters } from "vuex";
 import SocketInstance from "@/im-server/socket-instance";
 export default {
@@ -41,11 +40,6 @@ export default {
   mounted () {
     console.log(this.goodsDetail)
     this.btnHide = localStorage.getItem('btnHide')
-  },
-  components: {
-    "el-tag": Tag,
-    "el-button": button,
-    Storage
   },
   methods: {
     toGoods () {

@@ -4,12 +4,12 @@
 
     <div class="order">
       <div class="order-title">
-        <Row class="order-row title">
-          <i-col span="12">订单详情</i-col>
-          <i-col span="4">收货人</i-col>
-          <i-col span="4">评价</i-col>
-          <i-col span="6"></i-col>
-        </Row>
+        <div class="order-row title">
+          <div span="12">订单详情</div>
+          <div span="4">收货人</div>
+          <div span="4">评价</div>
+          <div span="6"></div>
+        </div>
       </div>
       <empty v-if="list.length === 0" />
 
@@ -20,40 +20,39 @@
             <span class="color999 ml_10">{{item.createTime}}</span>
             <span class="hover-pointer fontsize_12 eval-detail" @click="evaluateDetail(item.id)">评价详情</span>
           </div>
-          <Row class="order-item-view">
-            <i-col span="12" class="item-view-name">
+          <div class="order-item-view">
+            <div span="12" class="item-view-name">
               <div class="order-img hover-color" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
                 <img :src="item.goodsImage" alt="" />
               </div>
               <div class="order-name hover-color" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
                 {{item.goodsName}}
               </div>
-            </i-col>
-            <i-col span="4">{{item.createBy | secrecyMobile}}</i-col>
-            <i-col span="4">
+            </div>
+            <div span="4">{{ $filters.secrecyMobile(item.createBy ) }}</div>
+            <div span="4">
               {{item.grade==='GOOD'?'好评' : item.grade === 'WORSE'?'差评' : '中评'}}
-            </i-col>
-            <i-col span="4">
-              <Tooltip transfer>
+            </div>
+            <div span="4">
+              <el-tooltip>
                   <div class="content">{{item.content}}</div>
-                  <div style="white-space: normal;word-break:break-all" slot="content">
-                    {{item.content}}
-                  </div>
-              </Tooltip>
-            </i-col>
-          </Row>
+                  <template #content>
+                    <div style="white-space: normal;word-break:break-all">
+                      {{item.content}}
+                    </div>
+                  </template>
+              </el-tooltip>
+            </div>
+          </div>
         </div>
       </div>
-      <Spin v-if="loading"></Spin>
+      <el-skeleton v-if="loading"></el-skeleton>
     </div>
     <!-- 分页 -->
     <div class="page-size">
-      <Page :total="total" @on-change="changePageNum"
-        @on-page-size-change="changePageSize"
-        :page-size="params.pageSize"
-        show-total
-        show-sizer>
-      </Page>
+      <el-pagination :total="total" @current-change="changePageNum"
+        @size-change="changePageSize"
+        :page-size="params.pageSize" layout="total, sizes, prev, pager, next"></el-pagination>
     </div>
   </div>
 </template>

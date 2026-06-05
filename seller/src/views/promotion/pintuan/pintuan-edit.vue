@@ -1,187 +1,179 @@
 <template>
-  <div class="new-pintuan">
-    <Card>
-      <Form ref="form" :model="form" :label-width="130" :rules="formValidate">
-        <FormItem label="活动名称" prop="promotionName" :label-width="130">
-          <Input v-model="form.promotionName" clearable style="width: 260px" maxlength="25" />
-          <div style="color: #cccccc">
-            活动名称将显示在对人拼团活动列表中，方便商家管理使用，最多输入25个字符
-          </div>
-        </FormItem>
-        <FormItem label="活动时间" prop="rangeTime">
-          <DatePicker type="datetimerange" v-model="form.rangeTime" format="yyyy-MM-dd HH:mm:ss" placeholder="请选择" :options="options" style="width: 260px">
-          </DatePicker>
-        </FormItem>
+  <div class="pintuan-goods">
+    <el-card>
+      <h4>活动详情</h4>
+      <el-table border :data="data" style="width: 100%; margin: 10px 0">
+        <el-table-column prop="promotionName" label="活动名称" min-width="120" />
+        <el-table-column prop="startTime" label="活动开始时间" min-width="120" />
+        <el-table-column prop="endTime" label="活动结束时间" min-width="120" />
+        <el-table-column prop="requiredNum" label="成团人数" min-width="90" />
+        <el-table-column prop="limitNum" label="限购数量" min-width="90" />
+        <el-table-column label="状态" min-width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="promotionStatusTagType(row.promotionStatus)">
+              {{ promotionStatusText(row.promotionStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
 
-        <FormItem label="参团人数" prop="requiredNum" :label-width="130">
-          <Input v-model="form.requiredNum" style="width: 260px" max="8">
-          <span slot="append">人</span>
-          </Input>
-          <span style="color: #cccccc">参团人数不少于2人，不得超过10人。</span>
-        </FormItem>
-        <FormItem label="限购数量" prop="limitNum" :label-width="130">
-          <Input v-model="form.limitNum" type="number" style="width: 260px">
-          <span slot="append">件/人</span>
-          </Input>
-          <span style="color: #cccccc">如果设置为0则视为不限制购买数量</span>
-        </FormItem>
-        <FormItem label="虚拟成团" prop="fictitious">
-          <RadioGroup type="button" button-style="solid" v-model="form.fictitious">
-            <Radio title="开启" :label="1">
-              <span>开启</span>
-            </Radio>
-            <Radio title="关闭" :label="0">
-              <span>关闭</span>
-            </Radio>
-          </RadioGroup>
-          <br />
-          <span style="color: #cccccc">开启虚拟成团后，24小时人数未满的团，系统将会模拟匿名买家凑满人数，使该团成团；您只需要对已付款参团的真实买家发货；建议合理开启以提高成团率</span>
-        </FormItem>
-        <FormItem label="拼团规则" prop="pintuanRule">
-          <Input v-model="form.pintuanRule" type="textarea" :rows="4" clearable maxlength="255" style="width: 260px" />
-          <br />
-          <span style="color: #cccccc">拼团规则描述不能为空且不能大于255个字，会在WAP拼团详情页面显示</span>
-        </FormItem>
-      </Form>
-      <div>
-        <Button type="text" @click="closeCurrentPage">返回</Button>
-        <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
+      <h4>商品信息</h4>
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        class="operation"
+        :data="goodsData"
+        style="width: 100%"
+      >
+        <el-table-column label="商品名称" min-width="120">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a class="link-text mr_10" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
+              <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
+                <template #reference>
+                  <img
+                    src="../../../assets/qrcode.svg"
+                    style="vertical-align: middle"
+                    class="hover-pointer"
+                    width="20"
+                    height="20"
+                    alt="qrcode"
+                  />
+                </template>
+                <vue-qr
+                  :text="wapLinkTo(row.goodsId, row.skuId)"
+                  :margin="0"
+                  color-dark="#000"
+                  color-light="#fff"
+                  :size="150"
+                />
+              </el-popover>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column prop="quantity" label="库存" min-width="80" />
+        <el-table-column label="拼团价格" min-width="100">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">
+              {{ $filters.unitPrice(row.price, "￥") }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="page operation mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
       </div>
-    </Card>
+    </el-card>
   </div>
 </template>
+
 <script>
-import { savePintuan, editPintuan, getPintuanDetail } from "@/api/promotion";
+import { getPintuanGoodsList, getPintuanDetail } from "@/api/promotion.js";
+import vueQr from "vue-qr";
+
 export default {
+  components: { vueQr },
   data() {
     return {
-      id: this.$route.query.id, // 拼团id
-      form: {
-        // 添加或编辑表单对象初始化数据
-        promotionName: "",
-        promotionTitle: "",
-        pintuanRule: "",
-        requiredNum: "",
-        fictitious: 0,
-        limitNum: "",
-        startTime: "",
-        endTime: "",
+      loading: false,
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
       },
-      // 表单验证规则
-      formValidate: {
-        promotionName: [{ required: true, message: "活动名称不能为空" }],
-        requiredNum: [
-          { required: true, message: "参团人数不能为空" },
-          {
-            pattern: /^([2-9]|10)?$/,
-            message: "参团人数不合法",
-          },
-        ],
-        limitNum: [
-          { required: true, message: "限购数不能为空" },
-          {
-            pattern: /^(0|[1-9]\d?|100)$/,
-            message: "限购数不合法",
-          },
-        ],
-        rangeTime: [{ required: true, message: "请选择活动时间" }],
-      },
-      submitLoading: false, // 添加或编辑提交状态
-      options: {
-        // 不可选取时间
-        disabledDate(date) {
-          return date && date.valueOf() < Date.now() - 86400000;
-        },
-      },
+      data: [],
+      total: 0,
+      goodsData: [],
     };
   },
-  mounted() {
-    if (this.id) {
-      this.getDetail();
-    }
-  },
-
   methods: {
-    // 关闭当前页面
-    closeCurrentPage() {
-      this.$store.commit("removeTag", "new-pintuan");
-      localStorage.storeOpenedList = JSON.stringify(
-        this.$store.state.app.storeOpenedList
-      );
-      this.$router.go(-1);
+    promotionStatusText(status) {
+      const map = {
+        NEW: "未开始",
+        START: "已开始",
+        END: "已结束",
+        CLOSE: "已关闭",
+      };
+      return map[status] || "未知";
     },
-    // 提交活动
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          let params = JSON.parse(JSON.stringify(this.form));
-          params.fictitious
-            ? (params.fictitious = true)
-            : (params.fictitious = false);
-          params.startTime = this.$options.filters.unixToDate(
-            this.form.rangeTime[0] / 1000
-          );
-
-          params.endTime = this.$options.filters.unixToDate(
-            this.form.rangeTime[1] / 1000
-          );
-          if (params.startTime === "" || params.endTime === "") {
-            this.$Message.error("活动时间不能为空");
-            this.submitLoading = false;
-            return;
-          }
-          if (params.startTime < new Date()) {
-            this.$Message.error("拼团活动开始时间不能小于当前时间");
-            this.submitLoading = false;
-            return;
-          }
-
-          delete params.rangeTime;
-          if (!this.id) {
-            // 添加 避免编辑后传入id等数据 记得删除
-            delete params.id;
-            savePintuan(params).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("拼团活动发布成功");
-                this.closeCurrentPage();
-              }
-            });
-          } else {
-            // 编辑
-            if (params.promotionGoodsList == "")
-              delete params.promotionGoodsList;
-            editPintuan(params).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("操作成功");
-                this.closeCurrentPage();
-              }
-            });
-          }
+    promotionStatusTagType(status) {
+      const map = {
+        NEW: "info",
+        START: "success",
+        END: "danger",
+        CLOSE: "danger",
+      };
+      return map[status] || "danger";
+    },
+    init() {
+      this.getDataList();
+      this.getPintuanMsg();
+    },
+    changePage() {
+      this.getDataList();
+    },
+    changePageSize() {
+      this.searchForm.pageNumber = 1;
+      this.getDataList();
+    },
+    getDataList() {
+      this.loading = true;
+      this.searchForm.pintuanId = this.$route.query.id;
+      getPintuanGoodsList(this.searchForm).then((res) => {
+        this.loading = false;
+        if (res.success) {
+          this.goodsData = res.result.records;
+          this.total = res.result.total;
         }
       });
     },
-    // 获取详情
-    getDetail() {
-      getPintuanDetail(this.id).then((res) => {
-        if (res.success) {
-          const data = res.result;
-          data.rangeTime = [];
-          data.rangeTime.push(new Date(data.startTime), new Date(data.endTime));
-          this.form = data;
-          // 此处将值转换为 1 true ，0 false 不然ivew radio组件会报错
-          this.form.fictitious ? this.$set(this.form, "fictitious", 1)  : this.$set(this.form, "fictitious", 0);
-
-       }
+    getPintuanMsg() {
+      getPintuanDetail(this.$route.query.id).then((res) => {
+        if (res.success) this.data.push(res.result);
       });
     },
   },
+  mounted() {
+    this.init();
+  },
 };
 </script>
+
 <style lang="scss" scoped>
-::v-deep .ivu-form-item {
-  padding: 18px 10px !important;
+h4 {
+  margin: 20px 0;
+  padding: 0 10px;
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+  text-align: left;
+  border-left: 3px solid red;
+}
+
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.mr_10 {
+  margin-right: 10px;
+}
+
+.hover-pointer {
+  cursor: pointer;
+}
+
+.mt_10 {
+  margin-top: 10px;
 }
 </style>

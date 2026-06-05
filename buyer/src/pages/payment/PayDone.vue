@@ -5,9 +5,9 @@
       <img src="../../assets/images/pay-success.png">
     </div>
     <div class="pay-btn">
-      <Button type="primary" @click="$router.push('/')">继续逛逛</Button>
-      <Button type="info" v-if="$route.query.orderType ==='RECHARGE'" @click="$router.push('/home/MoneyManagement')">查看余额</Button>
-      <Button type="info" v-else @click="$router.push('/home/myOrder')">查看订单</Button>
+      <el-button type="primary" @click="$router.push('/')">继续逛逛</el-button>
+      <el-button type="info" v-if="$route.query.orderType ==='RECHARGE'" @click="$router.push('/home/MoneyManagement')">查看余额</el-button>
+      <el-button type="info" v-else @click="$router.push('/home/myOrder')">查看订单</el-button>
     </div>
   </div>
 </template>

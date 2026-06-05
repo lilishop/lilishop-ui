@@ -49,8 +49,7 @@
                 @click="goGoodsList(second.id, second.parentId)"
                 class="nav-side-item"
                 v-if="secIndex < 2"
-                >{{ second.name }}</span
-              >
+                >{{ second.name }}</span>
             </span>
           </li>
         </ul>
@@ -69,8 +68,7 @@
               @click="goGoodsList(item.id,item.parentId)"
               v-if="index < 8"
               :key="index"
-              >{{ item.name }}<Icon type="ios-arrow-forward"
-            /></span>
+              >{{ item.name }}<el-icon><ArrowRight /></el-icon></span>
           </template>
         </div>
         <ul>
@@ -83,7 +81,7 @@
               class="detail-item-title"
               @click="goGoodsList(items.id, items.parentId)"
             >
-              {{ items.name }} <Icon type="ios-arrow-forward" />
+              {{ items.name }} <el-icon><ArrowRight /></el-icon>
               <span class="glyphicon glyphicon-menu-right"></span>
             </span>
             <div>
@@ -92,8 +90,7 @@
                 @click="goGoodsList(item.id, items.id, items.parentId)"
                 :key="subIndex"
                 class="detail-item"
-                >{{ item.name }}</span
-              >
+                >{{ item.name }}</span>
             </div>
           </li>
         </ul>
@@ -105,7 +102,9 @@
 <script>
 import { getCategory } from "@/api/goods";
 import storage from "@/plugins/storage.js";
+import { ArrowRight } from "@element-plus/icons-vue";
 export default {
+  components: { ArrowRight },
   name: "GoodsListNav",
   props: {
     showAlways: {

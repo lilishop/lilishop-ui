@@ -29,12 +29,11 @@
         />
       </div>
       <ul class="advert-list width_1200_auto">
-        <template v-for="(item, index) in element.options.list">
+        <template v-for="(item, index) in element.options.list" :key="index">
           <li
             v-if="index !== 0"
             @click="linkTo(item.url)"
             class="hover-pointer"
-            :key="index"
           >
             <img :src="item.img" width="230" height="190" alt="" />
           </li>

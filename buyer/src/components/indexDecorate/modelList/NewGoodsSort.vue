@@ -4,8 +4,7 @@
       <div class="top-header" :style="{ background: options.left.bgColor }">
         <span>{{ options.left.title }}</span>
         <span @click="linkTo(options.left.url)" class="hover-pointer"
-          >{{ options.left.secondTitle }} &gt;</span
-        >
+          >{{ options.left.secondTitle }} &gt;</span>
       </div>
       <div class="content">
         <div
@@ -27,8 +26,7 @@
       <div class="top-header" :style="{ background: options.middle.bgColor }">
         <span>{{ options.middle.title }}</span>
         <span class="hover-pointer" @click="linkTo(options.middle.url)"
-          >{{ options.middle.secondTitle }} &gt;</span
-        >
+          >{{ options.middle.secondTitle }} &gt;</span>
       </div>
       <div class="content">
         <div
@@ -50,8 +48,7 @@
       <div class="top-header" :style="{ background: options.right.bgColor }">
         <span>{{ options.right.title }}</span>
         <span @click="linkTo(options.right.url)" class="hover-pointer"
-          >{{ options.right.secondTitle }} &gt;</span
-        >
+          >{{ options.right.secondTitle }} &gt;</span>
       </div>
       <div class="content">
         <div
@@ -62,7 +59,7 @@
         >
           <img :src="item.img" alt="" />
           <p>{{ item.name }}</p>
-          <p>{{ item.price | unitPrice("￥") }}</p>
+          <p>{{ $filters.unitPrice(item.price, "￥") }}</p>
           <div class="jiaobiao" :class="'jiaobiao' + (index + 1)">
             {{ index + 1 }}
           </div>

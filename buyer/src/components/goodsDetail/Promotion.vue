@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="wrapper" v-if="type === 'goodsDetail'">
-      <div class="wr-l"><Icon size="23" type="ios-alarm-outline" /> 秒杀活动</div>
+      <div class="wr-l"><el-icon :size="23"><AlarmClock /></el-icon> 秒杀活动</div>
       <div class="count-down" v-if="end === ''">
       <p>倒计时：</p><span>{{ hours }}</span><span>{{ minutes }}</span><span>{{ seconds }}</span>
       </div>
@@ -14,7 +14,9 @@
   </div>
 </template>
 <script>
+import { AlarmClock } from '@element-plus/icons-vue';
 export default {
+  components: { AlarmClock },
   props: {
     time: { // 传入的初始时间
       default: 1718977559428

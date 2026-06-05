@@ -6,19 +6,11 @@
         <div class="left-tips">订单提交成功，请尽快付款！</div>
         <div class="left-tips-time">请您尽快完成支付，否则订单会被自动取消</div>
         <div class="left-tips-count-down">
-          <mv-count-down :startTime="startTime" class="count-down"
-            :endTime="endTime"
-            :endText="endText"
-            :dayTxt="'天'"
-            :hourTxt="'小时'"
-            :minutesTxt="'分钟'"
-            :secondsTxt="'秒'"
-            :isStart="isStart"></mv-count-down>
-
+          <span class="count-down">{{ countdownText }}</span>
         </div>
       </div>
       <div class="head-right">
-        <div>应付金额 <span class="price">{{ payDetail.price | unitPrice }}</span>元</div>
+        <div>应付金额 <span class="price">{{ $filters.unitPrice(payDetail.price) }}</span>元</div>
       </div>
     </div>
     <div class="wrapper-box">
@@ -35,9 +27,9 @@
         <span>微信</span>
       </div>
       <div v-if="support.includes('WALLET') && $route.query.orderType !== 'RECHARGE'" class="-box-item" @click="handlePay('WALLET')">
-        <Icon custom="icomoon icon-wallet" size="60"/>
+        <i class="icomoon icon-wallet" style="font-size: 60px"></i>
         <span>余额支付</span>
-        <span>当前剩余({{ walletValue | unitPrice('￥') }})</span>
+        <span>当前剩余({{ $filters.unitPrice(walletValue, '￥') }})</span>
       </div>
     </div>
     <BaseFooter></BaseFooter>
@@ -46,24 +38,33 @@
 <script>
 
 import {tradeDetail, pay} from '@/api/pay.js';
-import MvCountDown from 'mv-count-down'
-import {Message} from 'view-design';
+import { Message } from '@/utils/message';
 
 export default {
-  components: {
-    MvCountDown
-  },
   data () {
     return {
-      payDetail: {}, // 支付详情
-      support: [], // 支持配送方式
-      walletValue: 0, // 当前余额
-      qrcode: '', // 支付二维码
-      startTime: new Date().getTime(), // 开始时间（时间戳）
-      endTime: 0, // 完成的时间（时间戳）
-      endText: '订单已超时取消', // 倒计时完成的提示文本
-      isStart: false // 控制倒计时开始的时机（异步请求完成开启）
+      payDetail: {},
+      support: [],
+      walletValue: 0,
+      qrcode: '',
+      endTime: 0,
+      endText: '订单已超时取消',
+      isStart: false,
+      now: Date.now(),
+      countdownTimer: null,
     };
+  },
+  computed: {
+    countdownText () {
+      if (!this.isStart || !this.endTime) return '';
+      const diff = this.endTime - this.now;
+      if (diff <= 0) return this.endText;
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      return `${days}天${hours}小时${minutes}分钟${seconds}秒`;
+    },
   },
   methods: {
     // 获取订单详情
@@ -118,7 +119,13 @@ export default {
   },
   mounted () {
     this.getTradeDetail();
-  }
+    this.countdownTimer = setInterval(() => {
+      this.now = Date.now();
+    }, 1000);
+  },
+  beforeUnmount () {
+    if (this.countdownTimer) clearInterval(this.countdownTimer);
+  },
 };
 </script>
 <style scoped lang="scss">

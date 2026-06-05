@@ -1,86 +1,112 @@
 <template>
   <div class="wrapper">
-    <Button @click="handleClickUploadImage">上传图片</Button>
-    <Modal v-model="show" width="850" @on-ok="callback" title="上传图片">
-      <div class="import-oss" @click="importOSS">
-        从资源库中导入
-      </div>
+    <el-button @click="handleClickUploadImage">上传图片</el-button>
+    <el-dialog v-model="show" width="850px" title="上传图片" append-to-body :z-index="3500">
+      <div class="import-oss" @click="importOSS">从资源库中导入</div>
       <div style="display: flex; flex-wrap: wrap">
-        <vuedraggable
-          :animation="200"
-          :list="images"
-        >
+        <vuedraggable :animation="200" :list="images">
           <div
             v-for="(item, __index) in images"
             :key="__index"
             class="upload-list"
           >
-            <template>
-              <img alt="image" :src="item.url"/>
-              <div class="upload-list-cover">
-                <div>
-                  <Icon
-                    size="30"
-                    type="md-search"
-                    @click.native="$previewImage(item.url)"
-                  ></Icon>
-                  <Icon
-                    size="30"
-                    type="md-trash"
-                    @click.native="handleRemoveGoodsPicture(__index)"
-                  ></Icon>
-                </div>
+            <img alt="image" :src="item.url" />
+            <div class="upload-list-cover">
+              <div>
+                <el-icon class="action-icon" :size="30" @click="handleView(item.url)">
+                  <ZoomIn />
+                </el-icon>
+                <el-icon
+                  class="action-icon"
+                  :size="30"
+                  @click="handleRemoveGoodsPicture(__index)"
+                >
+                  <Delete />
+                </el-icon>
               </div>
-            </template>
+            </div>
           </div>
         </vuedraggable>
         <div class="upload-box">
-          <Upload
+          <el-upload
             ref="upload"
             :action="uploadFileUrl"
-            :format="['jpg', 'jpeg', 'png']"
-            :headers="{ ...accessToken }"
-            :max-size="10240"
-            :on-exceeded-size="handleMaxSize"
-            :on-format-error="handleFormatError"
-            :on-success="handleSuccessGoodsPicture"
-            :show-upload-list="false"
+            :headers="accessToken"
+            :show-file-list="false"
+            accept=".jpg,.jpeg,.png"
+            drag
             multiple
-            type="drag"
+            :before-upload="handleBeforeUpload"
+            :on-success="handleSuccessGoodsPicture"
+            :on-error="handleUploadError"
           >
-            <div style="width: 148px; height: 148px; line-height: 148px">
-              <Icon size="20" type="md-add"></Icon>
+            <div class="upload-trigger">
+              <el-icon :size="20"><Plus /></el-icon>
             </div>
-          </Upload>
+          </el-upload>
         </div>
       </div>
-    </Modal>
+      <template #footer>
+        <el-button @click="show = false">取消</el-button>
+        <el-button type="primary" @click="callback">确定</el-button>
+      </template>
+    </el-dialog>
 
-    <Modal width="1000" v-model="showOssManager" @on-ok="confirmUrls">
-    <OssManage ref="ossManage" :isComponent="true" :initialize="showOssManager"  @selected="(list)=>{ selectedImage = list}" @callback="handleCallback" />
-    </Modal>
+    <el-dialog
+      v-model="showOssManager"
+      width="1000px"
+      append-to-body
+      :z-index="3600"
+      destroy-on-close
+      @closed="confirmUrls"
+    >
+      <OssManage
+        ref="ossManage"
+        :is-component="true"
+        :initialize="showOssManager"
+        @selected="(list) => { selectedImage = list }"
+        @callback="handleCallback"
+      />
+      <template #footer>
+        <el-button @click="showOssManager = false">取消</el-button>
+        <el-button type="primary" @click="confirmUrls">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="viewImage" title="图片预览" width="520px" append-to-body :z-index="3700">
+      <img :src="previewUrl" alt="预览" style="width: 100%; display: block; margin: 0 auto" />
+      <template #footer>
+        <el-button @click="viewImage = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 <script>
+import { Delete, Plus, ZoomIn } from "@element-plus/icons-vue";
 import vuedraggable from "vuedraggable";
-import {uploadFile} from "@/libs/axios";
-// import OssManage from "@/views/sys/oss-manage/ossManage";
+import { uploadFile } from "@/libs/axios";
 import OssManage from "@/views/shop/ossManage";
+
 export default {
   name: "upload-image",
   components: {
     OssManage,
     vuedraggable,
+    Delete,
+    Plus,
+    ZoomIn,
   },
   data() {
     return {
-      show: false, // 是否显示弹窗
-      uploadFileUrl: uploadFile, // 上传地址
-      accessToken:"",
-      showOssManager:false, // 是否显示oss管理弹窗
-      images:[],
-      selectedImage:[]
-    }
+      show: false,
+      uploadFileUrl: uploadFile,
+      accessToken: {},
+      showOssManager: false,
+      images: [],
+      selectedImage: [],
+      viewImage: false,
+      previewUrl: "",
+    };
   },
   mounted() {
     this.accessToken = {
@@ -88,71 +114,78 @@ export default {
     };
   },
   methods: {
-    handleClickUploadImage(){
+    handleClickUploadImage() {
       this.show = true;
     },
-    // 回调给父级
-    callback() {
-      // 先给数据做一下处理 然后将数据传给父级
-      const formatImages = this.images.map((item) => item.url);
-      this.$emit('callback',formatImages)
+    handleView(url) {
+      this.previewUrl = url;
+      this.viewImage = true;
     },
-    // 移除商品图片
+    callback() {
+      const formatImages = this.images.map((item) => item.url);
+      this.$emit("callback", formatImages);
+      this.show = false;
+    },
     handleRemoveGoodsPicture(__index) {
       this.images.splice(__index, 1);
     },
-    // 图片大小不正确
-    handleMaxSize(file) {
-      this.$Notice.warning({
-        title: "超过文件大小限制",
-        desc: "图片大小不能超过10MB",
-      });
+    handleBeforeUpload(file) {
+      const okType = ["image/jpeg", "image/png", "image/jpg"].includes(file.type);
+      if (!okType) {
+        this.$Message.warning("文件 " + file.name + " 的格式不正确，请选择 jpg/jpeg/png");
+        return false;
+      }
+      if (file.size / 1024 / 1024 > 10) {
+        this.$Message.warning("图片大小不能超过10MB");
+        return false;
+      }
+      return true;
     },
-    // 图片格式不正确
-    handleFormatError(file) {
-      this.$Notice.warning({
-        title: "文件格式不正确",
-        desc: "文件 " + file.name + " 的格式不正确",
-      });
-    },
-    // sku图片上传成功
-    handleSuccessGoodsPicture(res, file) {
-      if (file.response) {
-        file.url = file.response.result;
-        this.images.push(file);
+    handleSuccessGoodsPicture(res) {
+      const url = res?.result ?? res?.data?.result;
+      if (url) {
+        this.images.push({ url });
+      } else {
+        this.$Message.error(res?.message || "上传失败");
       }
     },
-    confirmUrls(){
-      this.selectedImage.length ? this.selectedImage.forEach(element => {
-        this.images.push({ url: element.url })
-      }):''
-      this.showOssManager = false
+    handleUploadError(err) {
+      this.$Message.error(err?.message || String(err));
     },
-    handleCallback(val){
-      this.$Message.success("导入成功")
-      this.images.push({url:val.url})
+    confirmUrls() {
+      if (this.selectedImage.length) {
+        this.selectedImage.forEach((element) => {
+          this.images.push({ url: element.url });
+        });
+      }
+      this.showOssManager = false;
     },
-    // 从资源库中导入图片
-    importOSS(){
+    handleCallback(val) {
+      this.$Message.success("导入成功");
+      this.images.push({ url: val.url });
+    },
+    importOSS() {
       this.showOssManager = true;
-      this.$refs.ossManage.selectImage = true;
-    }
-  }
-}
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
+    },
+  },
+};
 </script>
 
 <style scoped lang="scss">
-.import-oss{
+.import-oss {
   margin-bottom: 10px;
   text-align: right;
   color: $theme_color;
   cursor: pointer;
-
 }
-.wrapper{
+.wrapper {
   margin: 10px 0;
 }
-
 .upload-list {
   width: 150px;
   height: 150px;
@@ -165,47 +198,48 @@ export default {
   margin-right: 4px;
   vertical-align: bottom;
 }
-
-.upload-box{
+.upload-box {
   margin: 10px 0;
-
+  display: inline-block;
+  vertical-align: bottom;
 }
-
+.upload-trigger {
+  width: 148px;
+  height: 148px;
+  line-height: 148px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .upload-list img {
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
-
 .upload-list-cover {
   display: none;
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
-
   right: 0;
   background: rgba(0, 0, 0, 0.6);
-
   justify-content: space-between;
   align-items: center;
   flex-direction: column;
 }
-
 .upload-list:hover .upload-list-cover {
   display: flex;
 }
-
 .upload-list-cover div {
   margin-top: 50px;
   width: 100%;
-
-  >i {
-    width: 50%;
-    margin-top: 8px;
-    color: #fff;
-    font-size: 20px;
-    cursor: pointer;
-  }
+  display: flex;
+  justify-content: center;
+  gap: 8px;
 }
-
+.action-icon {
+  color: #fff;
+  cursor: pointer;
+}
 </style>

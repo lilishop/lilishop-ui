@@ -17,22 +17,22 @@
           </div>
           <div v-else class="goodsTitle  hover-pointer" @click="buynow(item.skuId, item.goodsId,item.id)" >
             {{ item.storeName }}
-            <Tag color="error" class="operated" v-if="item.selfOperated">商家自营</Tag>
+            <el-tag color="error" class="operated" v-if="item.selfOperated">商家自营</el-tag>
           </div>
           <div class="goodsPrice">
-            <span v-if="params.type === 'GOODS'">{{ item.price | unitPrice('￥') }}</span>
+            <span v-if="params.type === 'GOODS'">{{ $filters.unitPrice(item.price, '￥') }}</span>
 
           </div>
           <div class="goodsBuy">
-            <Button size="small" type="primary" @click="buynow(item.skuId, item.goodsId)"
-              v-if="params.type === 'GOODS'">立即购买</Button>
-            <Button size="small" type="primary" @click="goShop(item.id)" v-else>店铺购买</Button>
-            <Button size="small" v-if="params.type === 'GOODS'" @click="cancel(item.skuId)">取消收藏</Button>
-            <Button size="small" v-if="params.type === 'STORE'" @click="cancelStore(item.id)">取消收藏</Button>
+            <el-button size="small" type="primary" @click="buynow(item.skuId, item.goodsId)"
+              v-if="params.type === 'GOODS'">立即购买</el-button>
+            <el-button size="small" type="primary" @click="goShop(item.id)" v-else>店铺购买</el-button>
+            <el-button size="small" v-if="params.type === 'GOODS'" @click="cancel(item.skuId)">取消收藏</el-button>
+            <el-button size="small" v-if="params.type === 'STORE'" @click="cancelStore(item.id)">取消收藏</el-button>
           </div>
         </div>
       </div>
-      <Spin size="large" fix v-if="spinShow"></Spin>
+      <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
     </div>
     <empty v-else />
   </div>

@@ -11,9 +11,9 @@
     <div class="delivery-rate">
       <div class="fontsize_16">物流服务评价：</div>
       <div class="color999">
-        <span>物流评价：<Rate v-model="form.deliveryScore" /></span>
-        <span>服务评价：<Rate v-model="form.serviceScore" /></span>
-        <span>描述评价：<Rate v-model="form.descriptionScore" /></span>
+        <span>物流评价：<el-rate v-model="form.deliveryScore" /></span>
+        <span>服务评价：<el-rate v-model="form.serviceScore" /></span>
+        <span>描述评价：<el-rate v-model="form.descriptionScore" /></span>
       </div>
     </div>
     <!-- 添加订单评价  左侧商品详情  右侧评价框 -->
@@ -22,28 +22,28 @@
         <div class="goods-con">
           <img :src="orderGoods.image" class="hover-pointer" alt="" width="100" @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)">
           <p class="hover-pointer color999" @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)">{{orderGoods.goodsName}}</p>
-          <p>{{orderGoods.goodsPrice | unitPrice('￥')}}</p>
+          <p>{{ $filters.unitPrice(orderGoods.goodsPrice, '￥') }}</p>
         </div>
 
         <div class="eval-con">
           <div>
             <span class="color999">商品评价：</span>
-            <RadioGroup style="margin-bottom:5px;color:#999" v-model="orderGoods.grade" type="button" button-style="solid">
-              <Radio label="GOOD">好评</Radio>
-              <Radio label="MODERATE">中评</Radio>
-              <Radio label="WORSE">差评</Radio>
-            </RadioGroup>
-            <Input type="textarea" maxlength="500" show-word-limit :rows="4" v-model="orderGoods.content" />
+            <el-radio-group style="margin-bottom:5px;color:#999" v-model="orderGoods.grade" type="button" button-style="solid">
+              <el-radio label="GOOD">好评</el-radio>
+              <el-radio label="MODERATE">中评</el-radio>
+              <el-radio label="WORSE">差评</el-radio>
+            </el-radio-group>
+            <el-input type="textarea" maxlength="500" show-word-limit :rows="4" v-model="orderGoods.content" />
           </div>
           <div style="display:flex;align-items:center;">
             <div class="demo-upload-list" v-for="(img, index) in orderGoods.uploadList" :key="index">
               <img :src="img">
               <div class="demo-upload-list-cover">
-                  <Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon>
-                  <Icon type="ios-trash-outline" @click.native="handleRemove(index)"></Icon>
+                  <el-icon @click="handleView(img)"><View /></el-icon>
+                  <el-icon @click="handleRemove(index)"><Delete /></el-icon>
               </div>
             </div>
-            <Upload
+            <el-upload
                 :show-upload-list="false"
                 :on-success="handleSuccess"
                 :before-upload="handleBeforeUpload"
@@ -52,25 +52,27 @@
                 :headers="accessToken"
                 style="display: inline-block;width:58px;">
                 <div class="hover-pointer icon-upload" style="">
-                  <Icon type="ios-camera" size="20"></Icon>
+                  <el-icon :size="20"><Camera /></el-icon>
                 </div>
-            </Upload>
+            </el-upload>
           </div>
         </div>
       </li>
     </ul>
-    <Button type="primary" class="mt_10" :loading="loading" @click="save">发表</Button>
-    <Modal title="View Image" v-model="visible">
+    <el-button type="primary" class="mt_10" :loading="loading" @click="save">发表</el-button>
+    <el-dialog title="View Image" v-model="visible">
         <img :src="previewImage" v-if="visible" style="width: 100%">
-    </Modal>
+    </el-dialog>
   </div>
 </template>
 <script>
+import { Camera, Delete, View } from '@element-plus/icons-vue';
 import { orderDetail } from '@/api/order.js';
 import { addEvaluation } from '@/api/member.js';
 import { commonUrl } from '@/plugins/request.js';
 import storage from '@/plugins/storage';
 export default {
+  components: { Camera, Delete, View },
   data () {
     return {
       order: {}, // 订单详情
@@ -92,7 +94,7 @@ export default {
       orderDetail(this.$route.query.sn).then(res => {
         this.order = res.result
         this.orderGoods = res.result.orderItems[this.$route.query.index]
-        this.$set(this.orderGoods, 'grade', 'GOOD')
+        this.orderGoods['grade'] = 'GOOD'
         this.orderGoods.uploadList = []
       })
     },

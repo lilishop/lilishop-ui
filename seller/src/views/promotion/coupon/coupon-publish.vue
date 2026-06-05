@@ -1,166 +1,103 @@
 <template>
-  <div class="wrapper">
-    <Card>
-      <Form ref="form" :model="form" :label-width="120" :rules="formRule">
+  <div>
+    <el-card>
+      <el-form ref="form" :model="form" label-width="120px" :rules="formRule">
         <div class="base-info-item">
           <h4>基本信息</h4>
           <div class="form-item-view">
-            <FormItem label="活动名称" prop="promotionName">
-              <Input
+            <el-form-item label="活动名称" prop="promotionName">
+              <el-input
                 :disabled="disabled"
-                type="text"
                 v-model="form.promotionName"
                 placeholder="活动名称"
                 clearable
                 style="width: 260px"
               />
-            </FormItem>
-            <FormItem label="优惠券名称" prop="couponName">
-              <Input
+            </el-form-item>
+            <el-form-item label="优惠券名称" prop="couponName">
+              <el-input
                 :disabled="disabled"
-                type="text"
                 v-model="form.couponName"
                 placeholder="优惠券名称"
                 clearable
                 style="width: 260px"
               />
-            </FormItem>
-            <FormItem label="优惠券类型" prop="couponType">
-              <Select :disabled="disabled" v-model="form.couponType" style="width: 260px">
-                <Option value="DISCOUNT">打折</Option>
-                <Option value="PRICE">减免现金</Option>
-              </Select>
-            </FormItem>
-            <FormItem label="折扣" prop="discount" v-if="form.couponType == 'DISCOUNT'">
-              <InputNumber
+            </el-form-item>
+            <el-form-item label="优惠券类型" prop="couponType">
+              <el-select :disabled="disabled" v-model="form.couponType" style="width: 260px">
+                <el-option label="打折" value="DISCOUNT" />
+                <el-option label="减免现金" value="PRICE" />
+              </el-select>
+            </el-form-item>
+            <el-form-item
+              label="折扣"
+              prop="couponDiscount"
+              v-if="form.couponType == 'DISCOUNT'"
+            >
+              <el-input-number
                 :disabled="disabled"
                 placeholder="折扣"
                 :max="9.9"
                 :min="0.1"
                 :step="0.1"
-                precision="1"
+                :precision="1"
                 v-model="form.couponDiscount"
-                style="width: 260px"/>
+                style="width: 260px"
+              />
               <span class="describe">请输入0-10的数字,可有一位小数</span>
-            </FormItem>
-            <FormItem label="面额" prop="price" v-if="form.couponType == 'PRICE'">
-              <Input
+            </el-form-item>
+            <el-form-item label="面额" prop="price" v-if="form.couponType == 'PRICE'">
+              <el-input
                 :disabled="disabled"
-                type="text"
                 v-model="form.price"
                 placeholder="面额"
                 clearable
                 style="width: 260px"
               />
-            </FormItem>
-            <FormItem label="活动类型" prop="getType">
-              <Select :disabled="disabled" v-model="form.getType" style="width: 260px">
-                <Option value="FREE">免费领取</Option>
-                <Option value="ACTIVITY">活动赠送</Option>
-              </Select>
-            </FormItem>
+            </el-form-item>
+            <el-form-item label="活动类型" prop="getType">
+              <el-select :disabled="disabled" v-model="form.getType" style="width: 260px">
+                <el-option label="免费领取" value="FREE" />
+                <el-option label="活动赠送" value="ACTIVITY" />
+              </el-select>
+            </el-form-item>
 
-            <FormItem label="发放数量" v-if="form.getType == 'FREE'" prop="publishNum">
-              <Input
+            <el-form-item label="店铺承担比例" prop="storeCommission">
+              <el-input
+                :disabled="disabled"
+                v-model="form.storeCommission"
+                placeholder="店铺承担比例"
+                style="width: 260px"
+              >
+                <template #append>%</template>
+              </el-input>
+              <span class="describe">店铺承担比例，输入0-100之间数值</span>
+            </el-form-item>
+            <el-form-item label="发放数量" prop="publishNum" v-if="form.getType === 'FREE'">
+              <el-input
                 :disabled="disabled"
                 v-model="form.publishNum"
                 placeholder="发放数量"
                 style="width: 260px"
               />
-              <span class="tips ml_10">如果发放数量为0时,则代表不限制发放数量</span>
-            </FormItem>
-          </div>
-          <h4>使用限制</h4>
-          <div class="form-item-view">
-            <FormItem label="消费门槛" prop="consumeThreshold">
-              <Input
-                :disabled="disabled"
-                type="text"
-                v-model="form.consumeThreshold"
-                placeholder="消费门槛"
-                clearable
-                style="width: 260px"
-              />
-            </FormItem>
-            <FormItem
-              label="领取限制"
-              v-if="form.getType == 'FREE'"
+              <div class="tips">如果发放数量为0时,则代表不限制发放数量</div>
+            </el-form-item>
+            <el-form-item
+              label="领取数量限制"
               prop="couponLimitNum"
+              v-if="form.getType === 'FREE'"
             >
-              <Input
+              <el-input
                 :disabled="disabled"
                 v-model="form.couponLimitNum"
                 placeholder="领取限制"
                 clearable
                 style="width: 260px"
               />
-              <span class="tips ml_10">如果领取限制为0时,则代表不限制领取数量</span>
-            </FormItem>
-            <FormItem label="有效期" prop="rangeTime">
-              <DatePicker
-                :disabled="disabled"
-                type="datetimerange"
-                v-model="form.rangeTime"
-                format="yyyy-MM-dd HH:mm:ss"
-                placeholder="请选择"
-                :options="options"
-                style="width: 260px"
-              >
-              </DatePicker>
-            </FormItem>
-            <FormItem label="使用范围" prop="scopeType">
-              <RadioGroup type="button" button-style="solid" v-model="form.scopeType">
-                <Radio :disabled="disabled" label="ALL">全品类</Radio>
-                <Radio :disabled="disabled" label="PORTION_GOODS">指定商品</Radio>
-                <Radio :disabled="disabled" label="PORTION_GOODS_CATEGORY">部分商品分类</Radio>
-              </RadioGroup>
-            </FormItem>
-
-            <FormItem style="width: 100%" v-if="form.scopeType == 'PORTION_GOODS'">
-              <div style="display: flex; margin-bottom: 10px">
-                <Button :disabled="disabled" type="primary" @click="openSkuList"
-                  >选择商品</Button
-                >
-                <Button
-                  :disabled="disabled"
-                  type="error"
-                  ghost
-                  style="margin-left: 10px"
-                  @click="delSelectGoods"
-                  >批量删除</Button
-                >
-              </div>
-              <Table
-                class="mt_10"
-                :disabled="disabled"
-                border
-                :columns="columns"
-                :data="form.promotionGoodsList"
-                @on-selection-change="changeSelect"
-              >
-                <template slot-scope="{ row }" slot="QRCode">
-                  <img
-                    :src="row.QRCode || '../../../assets/lili.png'"
-                    width="50px"
-                    height="50px"
-                    alt=""
-                  />
-                </template>
-              </Table>
-            </FormItem>
-
-            <FormItem v-if="form.scopeType == 'PORTION_GOODS_CATEGORY'">
-              <Cascader
-                :disabled="disabled"
-                @on-change="getGoodsCategory"
-                :data="goodsCategoryList"
-                style="width: 300px"
-                v-model="form.scopeIdGoods"
-              ></Cascader>
-            </FormItem>
-
-            <FormItem label="范围描述" prop="description">
-              <Input
+              <div class="tips">如果领取数量为0时,则代表不限制领取数量</div>
+            </el-form-item>
+            <el-form-item label="范围描述" prop="description">
+              <el-input
                 :disabled="disabled"
                 v-model="form.description"
                 type="textarea"
@@ -170,39 +107,167 @@
                 clearable
                 style="width: 260px"
               />
-            </FormItem>
-            <div>
-              <Button
+            </el-form-item>
+          </div>
+          <h4>使用限制</h4>
+          <div class="form-item-view">
+            <el-form-item label="消费门槛" prop="consumeThreshold">
+              <el-input
                 :disabled="disabled"
-                type="text"
-                @click="$router.push({ name: 'coupon' })"
-                >返回</Button
+                v-model="form.consumeThreshold"
+                placeholder="消费门槛"
+                clearable
+                style="width: 260px"
+              />
+            </el-form-item>
+            <el-form-item label="有效期" prop="rangeTime">
+              <div v-if="form.getType == 'ACTIVITY'">
+                <el-radio-group v-model="rangeTimeType">
+                  <el-radio :disabled="disabled" :value="1" v-if="form.getType !== 'ACTIVITY'">起止时间</el-radio>
+                  <el-radio :disabled="disabled" :value="0">固定时间</el-radio>
+                </el-radio-group>
+              </div>
+              <div v-if="rangeTimeType == 1">
+                <el-date-picker
+                  :disabled="disabled"
+                  type="datetimerange"
+                  v-model="form.rangeTime"
+                  format="YYYY-MM-DD HH:mm:ss"
+                  value-format="YYYY-MM-DD HH:mm:ss"
+                  start-placeholder="开始时间"
+                  end-placeholder="结束时间"
+                  :disabled-date="options.disabledDate"
+                  style="width: 260px"
+                />
+              </div>
+              <div class="effectiveDays" v-if="rangeTimeType == 0">
+                领取当天开始
+                <el-input-number
+                  :disabled="disabled"
+                  v-model="form.effectiveDays"
+                  :min="1"
+                  style="width: 100px"
+                  :max="365"
+                />
+                天内有效(1-365间的整数)
+              </div>
+            </el-form-item>
+
+            <el-form-item label="使用范围" prop="scopeType">
+              <el-radio-group v-model="form.scopeType">
+                <el-radio-button :disabled="disabled" value="ALL">全品类</el-radio-button>
+                <el-radio-button :disabled="disabled" value="PORTION_GOODS">指定商品</el-radio-button>
+                <el-radio-button :disabled="disabled" value="PORTION_GOODS_CATEGORY">部分商品分类</el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+
+            <el-form-item style="width: 100%" v-if="form.scopeType == 'PORTION_GOODS'">
+              <div style="display: flex; margin-bottom: 10px">
+                <el-button :disabled="disabled" type="primary" @click="openSkuList">选择商品</el-button>
+                <el-button
+                  :disabled="disabled"
+                  type="danger"
+                  plain
+                  style="margin-left: 10px"
+                  @click="delSelectGoods"
+                >批量删除</el-button>
+              </div>
+              <el-table
+                border
+                :data="form.promotionGoodsList"
+                style="width: 100%"
+                @selection-change="changeSelect"
               >
-              <Button
+                <el-table-column type="selection" width="60" align="center" />
+                <el-table-column prop="goodsName" label="商品名称" min-width="120" show-overflow-tooltip />
+                <el-table-column label="商品价格" width="110">
+                  <template #default="{ row }">
+                    <span v-if="row" :style="{ color: $mainColor }">
+                      {{ $filters.unitPrice(row.price, "￥") }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="库存" width="90">
+                  <template #default="{ row }">
+                    <span v-if="row">{{ row.quantity }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="100" align="center">
+                  <template #default="{ $index }">
+                    <el-button
+                      :disabled="disabled"
+                      type="danger"
+                      size="small"
+                      plain
+                      @click="delGoods($index)"
+                    >删除</el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-form-item>
+
+            <el-form-item v-if="form.scopeType == 'PORTION_GOODS_CATEGORY'">
+              <el-cascader
+                :disabled="disabled"
+                :options="goodsCategoryList"
+                style="width: 260px"
+                v-model="form.scopeIdGoods"
+              />
+            </el-form-item>
+            <div>
+              <el-button :disabled="disabled" link @click="closeCurrentPage">返回</el-button>
+              <el-button
                 :disabled="disabled"
                 type="primary"
                 :loading="submitLoading"
                 @click="handleSubmit"
-                >提交</Button
-              >
+              >提交</el-button>
             </div>
           </div>
         </div>
-      </Form>
-    </Card>
+      </el-form>
+    </el-card>
     <sku-select ref="skuSelect" @selectedGoodsData="selectedGoodsData"></sku-select>
   </div>
 </template>
 
 <script>
 import { saveShopCoupon, getShopCoupon, editShopCoupon } from "@/api/promotion";
+import {
+  savePlatformCoupon,
+  getPlatformCoupon,
+  editPlatformCoupon,
+} from "@/api/promotion";
 import { getGoodsCategoryAll } from "@/api/goods";
 import { regular } from "@/utils";
 import skuSelect from "@/views/lili-dialog";
+
 export default {
-  name: "addCoupon",
+  name: "edit-platform-coupon",
   components: {
     skuSelect,
+  },
+  watch: {
+    "form.getType": {
+      handler(val) {
+        if (val == "FREE") {
+          this.rangeTimeType = 1;
+        } else {
+          this.rangeTimeType = 0;
+        }
+        if (this.rangeTimeType == 0) {
+          delete this.formRule.rangeTime;
+        }
+      },
+      deep: true,
+    },
+    $route(e) {
+      this.id = e.query.id;
+      if (this.id) {
+        this.getCoupon();
+      } else {
+        this.$refs.form.resetFields();
+      }
+    },
   },
   data() {
     const checkPrice = (rule, value, callback) => {
@@ -227,41 +292,37 @@ export default {
         callback();
       }
     };
-
     return {
-      modalType: 0, // 判断是新增还是编辑优惠券 0 新增  1 编辑
       disabled: this.$route.query.onlyView,
+      rangeTimeType: 1,
+      modalType: 0,
       form: {
-        /** 店铺承担比例 */
-        sellerCommission: 0,
-        /** 发行数量 */
-        publishNum: 1,
-        /** 运费承担者 */
+        storeCommission: 0,
+        publishNum: 0,
         scopeType: "ALL",
-        /** 限领数量 */
         couponLimitNum: 1,
-        /** 活动类型 */
         couponType: "PRICE",
-        /** 优惠券名称 */
         couponName: "",
+        promotionName: "",
         getType: "FREE",
         promotionGoodsList: [],
         scopeIdGoods: [],
-        rangeDayType: "FIXEDTIME",
+        rangeDayType: "",
+        effectiveDays: 1,
       },
       id: this.$route.query.id,
-      submitLoading: false, // 添加或编辑提交状态
-      selectedGoods: [], // 已选商品列表，便于删除
-      goodsCategoryList: [], // 商品分类列表
+      submitLoading: false,
+      selectedGoods: [],
+      goodsCategoryList: [],
       formRule: {
         promotionName: [{ required: true, message: "活动名称不能为空" }],
         couponName: [{ required: true, message: "优惠券名称不能为空" }],
         price: [{ required: true, message: "请输入面额" }, { validator: checkPrice }],
+        rangeTime: [{ required: true, message: "请选择优惠券有效期" }],
         consumeThreshold: [
           { required: true, message: "请输入消费门槛" },
           { validator: checkWeight },
         ],
-        rangeTime: [{ required: true, message: "请选择优惠券有效期" }],
         couponDiscount: [
           { required: true, message: "请输入折扣" },
           {
@@ -269,7 +330,7 @@ export default {
             message: "请输入0-10的数字,可有一位小数",
           },
         ],
-        sellerCommission: [
+        storeCommission: [
           { required: true, message: "请输入店铺承担比例" },
           { pattern: regular.rate, message: "请输入0-100的正整数" },
         ],
@@ -278,65 +339,11 @@ export default {
           { pattern: regular.Integer, message: "请输入正整数" },
         ],
         couponLimitNum: [
-          { required: true, message: "请输入领取限制" },
+          { required: true, message: "领取限制不能为空" },
           { pattern: regular.Integer, message: "请输入正整数" },
         ],
         description: [{ required: true, message: "请输入范围描述" }],
       },
-      columns: [
-        {
-          type: "selection",
-          width: 60,
-          align: "center",
-        },
-        {
-          title: "商品名称",
-          key: "goodsName",
-          minWidth: 120,
-        },
-        {
-          title: "商品价格",
-          key: "price",
-          minWidth: 40,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
-          },
-        },
-        {
-          title: "库存",
-          key: "quantity",
-          minWidth: 40,
-        },
-
-        {
-          title: "操作",
-          key: "action",
-          minWidth: 50,
-          align: "center",
-          render: (h, params) => {
-            if (this.disabled) {
-              return h("div");
-            }
-            return h(
-              "a",
-              {
-                style: {
-                  color: "#2d8cf0",
-                  cursor: "pointer",
-                  textDecoration: "none",
-                },
-                on: {
-                  click: () => {
-                    this.delGoods(params.index);
-                  },
-                },
-              },
-              "删除"
-            );
-          },
-        },
-      ],
-      // 时间选择器可选范围
       options: {
         disabledDate(date) {
           return date && date.valueOf() < Date.now() - 86400000;
@@ -346,18 +353,17 @@ export default {
   },
   async mounted() {
     await this.getCagetoryList();
-    // 如果id不为空则查询信息
     if (this.id) {
       this.getCoupon();
       this.modalType = 1;
     }
   },
   methods: {
-    // 获取回显数据
     getCoupon() {
-      getShopCoupon(this.id).then((res) => {
+      getPlatformCoupon(this.id).then((res) => {
         let data = res.result;
         if (!data.promotionGoodsList) data.promotionGoodsList = [];
+        this.rangeTimeType = data.rangeDayType === "DYNAMICTIME" ? 0 : 1;
         if (data.scopeType == "PORTION_GOODS_CATEGORY") {
           let prevCascader = data.scopeId.split(",");
           function next(params, prev) {
@@ -381,6 +387,7 @@ export default {
               }
             }
           }
+
           next(this.goodsCategoryList, []);
           data.scopeIdGoods = prevCascader;
         }
@@ -391,23 +398,27 @@ export default {
         this.form = data;
       });
     },
-    /** 保存优惠券 */
     handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
           const params = JSON.parse(JSON.stringify(this.form));
-          params.startTime = this.$options.filters.unixToDate(
-            this.form.rangeTime[0] / 1000
-          );
-          params.endTime = this.$options.filters.unixToDate(
-            this.form.rangeTime[1] / 1000
-          );
-          if (params.getType == "ACTIVITY") {
-            params.couponLimitNum = 0;
-            params.publishNum = 0;
+          params.getType != "ACTIVITY" ? delete params.effectiveDays : "";
+
+          if (this.rangeTimeType == 1) {
+            params.rangeDayType = "FIXEDTIME";
+            const rangeTime = this.form.rangeTime;
+            const start = rangeTime[0] instanceof Date ? rangeTime[0] : new Date(rangeTime[0]);
+            const end = rangeTime[1] instanceof Date ? rangeTime[1] : new Date(rangeTime[1]);
+            params.startTime = this.$filters.unixToDate(start.getTime() / 1000);
+            params.endTime = this.$filters.unixToDate(end.getTime() / 1000);
+            delete params.effectiveDays;
+          } else {
+            params.rangeDayType = "DYNAMICTIME";
+            delete params.rangeTime;
           }
-          delete params.rangeTime;
+
           let scopeId = [];
+
           if (
             params.scopeType == "PORTION_GOODS" &&
             (!params.promotionGoodsList || params.promotionGoodsList.length == 0)
@@ -425,7 +436,6 @@ export default {
           }
 
           if (params.scopeType == "PORTION_GOODS") {
-            //指定商品
             params.promotionGoodsList.forEach((item) => {
               scopeId.push(item.skuId);
             });
@@ -433,7 +443,6 @@ export default {
           } else if (params.scopeType == "ALL") {
             delete params.promotionGoodsList;
           } else if (params.scopeType == "PORTION_GOODS_CATEGORY") {
-            //部分商品分类
             scopeId = this.filterCategoryId(params.scopeIdGoods, []);
             params.scopeId = scopeId.toString();
             delete params.promotionGoodsList;
@@ -442,9 +451,9 @@ export default {
 
           this.submitLoading = true;
           if (this.modalType === 0) {
-            // 添加 避免编辑后传入id等数据 记得删除
             delete params.id;
-            saveShopCoupon(params).then((res) => {
+
+            savePlatformCoupon(params).then((res) => {
               this.submitLoading = false;
               if (res.success) {
                 this.$Message.success("优惠券发送成功");
@@ -452,11 +461,10 @@ export default {
               }
             });
           } else {
-            // 编辑
             delete params.consumeLimit;
             delete params.updateTime;
 
-            editShopCoupon(params).then((res) => {
+            editPlatformCoupon(params).then((res) => {
               this.submitLoading = false;
               if (res.success) {
                 this.$Message.success("优惠券修改成功");
@@ -467,18 +475,12 @@ export default {
         }
       });
     },
-    // 关闭当前页面
     closeCurrentPage() {
-      this.$store.commit("removeTag", "add-coupon");
-      localStorage.storeOpenedList = JSON.stringify(
-        this.$store.state.app.storeOpenedList
-      );
-      this.$router.push({
-        name: "coupon",
-      });
+      this.$store.commit("removeTag", "add-platform-coupon");
+      localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList);
+      this.$router.go(-1);
     },
     openSkuList() {
-      // 显示商品选择器
       this.$refs.skuSelect.open("goods");
       let data = JSON.parse(JSON.stringify(this.form.promotionGoodsList));
       data.forEach((e) => {
@@ -487,11 +489,9 @@ export default {
       this.$refs.skuSelect.goodsData = data;
     },
     changeSelect(e) {
-      // 已选商品批量选择
       this.selectedGoods = e;
     },
     delSelectGoods() {
-      // 多选删除商品
       if (this.selectedGoods.length <= 0) {
         this.$Message.warning("您还未选择要删除的数据");
         return;
@@ -502,20 +502,19 @@ export default {
         onOk: () => {
           let ids = [];
           this.selectedGoods.forEach(function (e) {
-            ids.push(e.id);
+            ids.push(e.skuId);
           });
+
           this.form.promotionGoodsList = this.form.promotionGoodsList.filter((item) => {
-            return !ids.includes(item.id);
+            return !ids.includes(item.skuId);
           });
         },
       });
     },
     delGoods(index) {
-      // 删除商品
       this.form.promotionGoodsList.splice(index, 1);
     },
     selectedGoodsData(item) {
-      // 回显已选商品
       let list = [];
       item.forEach((e) => {
         list.push({
@@ -524,22 +523,20 @@ export default {
           originalPrice: e.price,
           quantity: e.quantity,
           storeId: e.storeId,
-          sellerName: e.sellerName,
+          storeName: e.storeName,
           skuId: e.id,
+          categoryPath: e.categoryPath,
+          thumbnail: e.small,
+          goodsType: e.goodsType,
+          goodsId: e.goodsId,
+          originPrice: e.price,
         });
       });
       this.form.promotionGoodsList = list;
     },
-    getGoodsCategory(e) {
-      // 获取级联选择器商品分类id
-    },
-
     async getCagetoryList() {
-      // 获取全部商品分类
-      let data = await getGoodsCategoryAll();
-      this.goodsCategoryList = this.filterCategory(data.result);
-      // 过滤出可显示的值
-
+      let data = await getCategoryTree();
+      this.goodsCategoryList = data.result;
       this.goodsCategoryList = this.goodsCategoryList.map((item) => {
         if (item.children) {
           item.children = item.children.map((child) => {
@@ -566,19 +563,7 @@ export default {
         return { value: item.id, label: item.name, children: item.children };
       });
     },
-    filterCategory(list) {
-      // 递归删除空children
-      list.forEach((item) => {
-        if (item.children.length == 0) {
-          delete item.children;
-        } else {
-          this.filterCategory(item.children);
-        }
-      });
-      return list;
-    },
     filterCategoryId(list, idArr) {
-      // 递归获取分类id
       list.forEach((e) => {
         if (e instanceof Array) {
           this.filterCategoryId(e, idArr);
@@ -604,16 +589,20 @@ h4 {
   line-height: 40px;
   text-align: left;
 }
+
 .describe {
   font-size: 12px;
   margin-left: 10px;
   color: #999;
 }
-.ivu-form-item {
-  margin-bottom: 24px !important;
-}
-.wrapper {
-  min-height: 1000px;
+
+.effectiveDays {
+  font-size: 12px;
+  color: #999;
+
+  > * {
+    margin: 0 4px;
+  }
 }
 .tips {
   font-size: 12px;

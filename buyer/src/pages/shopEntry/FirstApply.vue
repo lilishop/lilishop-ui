@@ -1,79 +1,78 @@
 <template>
   <div class="company-msg">
-    <Form ref="firstForm" :model="form" :rules="rules" :label-width="140">
+    <el-form ref="firstForm" :model="form" :rules="rules" label-width="140px">
       <h4>基础信息</h4>
-      <FormItem prop="companyName" label="公司名称">
-        <Input
+      <el-form-item prop="companyName" label="公司名称">
+        <el-input
           type="text"
           v-model="form.companyName"
           placeholder="请填写公司信息"
         />
-      </FormItem>
-      <FormItem prop="companyAddressIdPath" label="公司所在地">
+      </el-form-item>
+      <el-form-item prop="companyAddressIdPath" label="公司所在地">
         <span>{{ form.companyAddressPath || '暂无地址' }}</span>
-        <Button type="default" style="margin-left: 10px;" @click="$refs.map.open()">选择</Button>
-      </FormItem>
-      <FormItem prop="companyAddress" label="公司详细地址">
-        <Input
+        <el-button type="default" style="margin-left: 10px;" @click="$refs.map.open()">选择</el-button>
+      </el-form-item>
+      <el-form-item prop="companyAddress" label="公司详细地址">
+        <el-input
           type="text"
           v-model="form.companyAddress"
           placeholder="请填写公司详细信息"
         />
-      </FormItem>
-      <FormItem prop="employeeNum" label="员工总数">
-        <Input
+      </el-form-item>
+      <el-form-item prop="employeeNum" label="员工总数">
+        <el-input
           type="text"
           v-model="form.employeeNum"
           placeholder="请填写公司员工总数"
-          ><span slot="append">人</span>
-          </Input>
-      </FormItem>
-      <FormItem prop="companyPhone" label="公司电话">
-        <Input
+          ><template #append><span>人</span></template></el-input>
+      </el-form-item>
+      <el-form-item prop="companyPhone" label="公司电话">
+        <el-input
           type="text"
           v-model="form.companyPhone"
           placeholder="请填写公司电话"
-          ></Input>
-      </FormItem>
-      <FormItem prop="registeredCapital" label="注册资金">
-        <Input
+          ></el-input>
+      </el-form-item>
+      <el-form-item prop="registeredCapital" label="注册资金">
+        <el-input
           type="text"
           v-model="form.registeredCapital"
           placeholder="请填写注册资金"
-          ><span slot="append">万元</span></Input>
-      </FormItem>
-      <FormItem prop="linkName" label="联系人姓名">
-        <Input
+          ><template #append><span>万元</span></template></el-input>
+      </el-form-item>
+      <el-form-item prop="linkName" label="联系人姓名">
+        <el-input
           type="text"
           v-model="form.linkName"
           placeholder="请填写联系人姓名"
         />
-      </FormItem>
-      <FormItem prop="linkPhone" label="联系人电话">
-        <Input
+      </el-form-item>
+      <el-form-item prop="linkPhone" label="联系人电话">
+        <el-input
           type="text"
           v-model="form.linkPhone"
           placeholder="请填写联系人电话"
         />
-      </FormItem>
-      <FormItem prop="companyEmail" label="电子邮箱">
-        <Input
+      </el-form-item>
+      <el-form-item prop="companyEmail" label="电子邮箱">
+        <el-input
           type="text"
           v-model="form.companyEmail"
           placeholder="请填写电子邮箱"
         />
-      </FormItem>
+      </el-form-item>
 
       <h4>营业执照信息</h4>
-      <FormItem prop="licenseNum" label="营业执照号">
-        <Input
+      <el-form-item prop="licenseNum" label="营业执照号">
+        <el-input
           type="text"
           v-model="form.licenseNum"
           placeholder="请填写营业执照号"
         />
-      </FormItem>
-      <FormItem prop="scope" label="法定经营范围">
-        <Input
+      </el-form-item>
+      <el-form-item prop="scope" label="法定经营范围">
+        <el-input
           type="textarea"
           v-model="form.scope"
           maxlength="200"
@@ -81,9 +80,9 @@
           :rows="4"
           placeholder="请输入营业执照所示经营范围"
         />
-      </FormItem>
-      <FormItem prop="licencePhoto" label="营业执照电子版">
-        <Upload
+      </el-form-item>
+      <el-form-item prop="licencePhoto" label="营业执照电子版">
+        <el-upload
           ref="uploadLicence"
           :show-upload-list="false"
           :on-success="handleSuccess"
@@ -97,8 +96,8 @@
           :action="action"
           :headers="accessToken"
         >
-          <Button type="info" :loading="uploadLoading">证照上传</Button>
-        </Upload>
+          <el-button type="info" :loading="uploadLoading">证照上传</el-button>
+        </el-upload>
         <div class="describe">
           请压缩图片在2M以内，格式为gif，jpg，png，并确保文字清晰，以免上传或审核失败
         </div>
@@ -109,36 +108,30 @@
         >
           <img :src="item" width="100" alt="" />
           <div class="cover">
-            <Icon
-              type="ios-eye-outline"
-              @click.native="handleView(item)"
-            ></Icon>
-            <Icon
-              type="ios-trash-outline"
-              @click.native="handleRemove(index, 'licencePhoto')"
-            ></Icon>
+            <el-icon @click="handleView(item)"><View /></el-icon>
+            <el-icon @click="handleRemove(index, 'licencePhoto')"><Delete /></el-icon>
           </div>
         </div>
-      </FormItem>
+      </el-form-item>
 
       <h4>法人信息</h4>
-      <FormItem prop="legalName" label="法人姓名">
-        <Input
+      <el-form-item prop="legalName" label="法人姓名">
+        <el-input
           type="text"
           v-model="form.legalName"
           maxlength="20"
           placeholder="请输入法人姓名"
         />
-      </FormItem>
-      <FormItem prop="legalId" label="法人证件号">
-        <Input
+      </el-form-item>
+      <el-form-item prop="legalId" label="法人证件号">
+        <el-input
           type="text"
           v-model="form.legalId"
           placeholder="请输入法人证件号"
         />
-      </FormItem>
-      <FormItem prop="legalPhoto" label="法人证件电子版">
-        <Upload
+      </el-form-item>
+      <el-form-item prop="legalPhoto" label="法人证件电子版">
+        <el-upload
           ref="uploadLegal"
           :show-upload-list="false"
           :on-success="handleSuccess1"
@@ -152,8 +145,8 @@
           :action="action"
           :headers="accessToken"
         >
-          <Button type="info" :loading="uploadLoading1">证照上传</Button>
-        </Upload>
+          <el-button type="info" :loading="uploadLoading1">证照上传</el-button>
+        </el-upload>
         <div class="describe">
           请压缩图片在2M以内，身份证正反面两张照片，确保图片清晰无缺角
         </div>
@@ -164,38 +157,33 @@
         >
           <img :src="item" width="100" alt="" />
           <div class="cover">
-            <Icon
-              type="ios-eye-outline"
-              @click.native="handleView(item)"
-            ></Icon>
-            <Icon
-              type="ios-trash-outline"
-              @click.native="handleRemove(index, 'legalPhoto')"
-            ></Icon>
+            <el-icon @click="handleView(item)"><View /></el-icon>
+            <el-icon @click="handleRemove(index, 'legalPhoto')"><Delete /></el-icon>
           </div>
         </div>
-      </FormItem>
-      <FormItem>
-        <Button type="primary" :loading="loading" @click="next"
-          >填写财务资质信息</Button
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" :loading="loading" @click="next"
+          >填写财务资质信息</el-button
         >
-      </FormItem>
-    </Form>
-    <Modal title="View Image" v-model="visible">
+      </el-form-item>
+    </el-form>
+    <el-dialog title="View Image" v-model="visible">
       <img :src="previewPicture" v-if="visible" style="width: 100%" />
-    </Modal>
+    </el-dialog>
 
     <multipleMap ref="map" @callback="getAddress" />
   </div>
 </template>
 <script>
+import { Delete, View } from '@element-plus/icons-vue';
 import { applyFirst } from '@/api/shopentry';
 import * as RegExp from '@/plugins/RegExp.js';
 import multipleMap from "@/components/map/multiple-map";
 import storage from '@/plugins/storage';
 import { commonUrl } from '@/plugins/request.js';
 export default {
-  components: { multipleMap },
+  components: { multipleMap, View, Delete },
   props: {
     content: {
       default: {},
@@ -262,11 +250,11 @@ export default {
       if(val.type === 'select'){
         const paths = val.data.map(item => item.name).join(',')
         const ids = val.data.map(item => item.id).join(',')
-        this.$set(this.form, 'companyAddressIdPath', ids)
-        this.$set(this.form, 'companyAddressPath', paths)
+        this.form['companyAddressIdPath'] = ids
+        this.form['companyAddressPath'] = paths
       }else{
-        this.$set(this.form, 'companyAddressIdPath', val.data.addrId)
-        this.$set(this.form, 'companyAddressPath', val.data.addr)
+        this.form['companyAddressIdPath'] = val.data.addrId
+        this.form['companyAddressPath'] = val.data.addr
       }
     },
 
@@ -376,7 +364,7 @@ h4 {
   line-height: 40px;
   text-align: left;
 }
-.ivu-input-wrapper {
+.el-input {
   width: 300px;
 }
 .img-list {

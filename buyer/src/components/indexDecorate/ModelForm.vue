@@ -1,10 +1,9 @@
 <template>
   <div class="model-form">
     <div class="model-content">
-      <template v-for="(element, index) in data.list">
+      <template v-for="(element, index) in data.list" :key="element.key || index">
         <model-form-item
           v-if="element && element.key"
-          :key="element.key"
           :element="element"
           :index="index"
           :data="data"

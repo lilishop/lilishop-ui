@@ -2,12 +2,12 @@
   <div class="order-detail">
     <card _Title="售后详情" :_Size="16"></card>
     <!-- 操作按钮 -->
-    <Card class="mb_10" v-if="(afterSale.serviceStatus == 'PASS' &&
+    <el-card class="mb_10" shadow="never" v-if="(afterSale.serviceStatus == 'PASS' &&
           afterSale.serviceType != 'RETURN_MONEY') || (afterSale.afterSaleAllowOperationVO && afterSale.afterSaleAllowOperationVO.cancel)">
-      <Button type="success" @click="openModal" v-if="afterSale.serviceStatus == 'PASS' &&
-          afterSale.serviceType != 'RETURN_MONEY'" size="small">提交物流</Button>&nbsp;
-      <Button type="error" @click="cancel(afterSale.sn)" v-if="afterSale.afterSaleAllowOperationVO && afterSale.afterSaleAllowOperationVO.cancel" size="small">取消售后</Button>
-    </Card>
+      <el-button type="success" @click="openModal" v-if="afterSale.serviceStatus == 'PASS' &&
+          afterSale.serviceType != 'RETURN_MONEY'" size="small">提交物流</el-button>&nbsp;
+      <el-button type="danger" @click="cancel(afterSale.sn)" v-if="afterSale.afterSaleAllowOperationVO && afterSale.afterSaleAllowOperationVO.cancel" size="small">取消售后</el-button>
+    </el-card>
     <div class="order-card">
       <h3>{{afterSale.serviceName}}</h3>
       <p class="global_color fontsize_18">{{ afterSale.orderStatusValue }}</p>
@@ -25,14 +25,13 @@
     </div>
     <div class="order-card">
       <h3>售后进程</h3>
-      <Steps class="progress" :current="logList.length" direction="vertical">
-        <Step
-          :content="'操作人：'+ log.operatorName + '   ' + log.createTime"
+      <el-steps class="progress" :current="logList.length" direction="vertical">
+        <el-step           :content="'操作人：'+ log.operatorName + '   ' + log.createTime"
           :title="log.message"
           v-for="(log, index) in logList"
           :key="index"
-        ></Step>
-      </Steps>
+        ></el-step>
+      </el-steps>
     </div>
     <div class="order-card">
       <h3 class="mb_10">服务单信息</h3>
@@ -41,10 +40,10 @@
           <td>退款方式</td><td>{{afterSale.refundWay == 'ORIGINAL' ? '原路退回' : '账号退款'}}</td>
         </tr>
         <tr>
-          <td>申请退款金额</td><td>{{afterSale.applyRefundPrice | unitPrice('￥')}}</td>
+          <td>申请退款金额</td><td>{{ $filters.unitPrice(afterSale.applyRefundPrice, '￥') }}</td>
         </tr>
         <tr v-if="afterSale.actualRefundPrice">
-          <td>实际退款金额</td><td>{{afterSale.actualRefundPrice | unitPrice('￥')}}</td>
+          <td>实际退款金额</td><td>{{ $filters.unitPrice(afterSale.actualRefundPrice, '￥') }}</td>
         </tr>
         <template v-if="afterSale.refundWay === 'OFFLINE'">
           <tr>
@@ -74,30 +73,30 @@
         <img :src="img" width="200" height="200" @click="perviewImg(img)" class="hover-pointer" alt="">
       </div>
     </div>
-    <Modal v-model="logisticsShow" width="530">
-      <p slot="header">
+    <el-dialog v-model="logisticsShow" width="530">
+      <template #header><p>
         <span>提交物流信息</span>
-      </p>
+      </p></template>
       <div>
-        <Form ref="form" :model="form" label-position="left" :label-width="100" :rules="rules">
-          <FormItem label="物流公司" prop="logisticsId">
-            <Select v-model="form.logisticsId" placeholder="请选择物流公司">
-              <Option v-for="item in companyList" :value="item.id" :key="item.id">{{ item.name }}</Option>
-            </Select>
-          </FormItem>
-          <FormItem label="物流单号" prop="logisticsNo">
-            <Input v-model="form.logisticsNo" placeholder="请填写物流单号"></Input>
-          </FormItem>
-          <FormItem label="发货时间" prop="mDeliverTime">
-            <DatePicker type="date" style="width:100%" v-model="form.mDeliverTime" @on-change="changeTime" format="yyyy-MM-dd" placeholder="选择发货时间"></DatePicker>
-          </FormItem>
-        </Form>
+        <el-form ref="form" :model="form" label-position="left" label-width="100px" :rules="rules">
+          <el-form-item label="物流公司" prop="logisticsId">
+            <el-select v-model="form.logisticsId" placeholder="请选择物流公司">
+              <el-option v-for="item in companyList" :value="item.id" :key="item.id">{{ item.name }}</el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="物流单号" prop="logisticsNo">
+            <el-input v-model="form.logisticsNo" placeholder="请填写物流单号"></el-input>
+          </el-form-item>
+          <el-form-item label="发货时间" prop="mDeliverTime">
+            <el-date-picker type="date" style="width:100%" v-model="form.mDeliverTime" @change="changeTime" format="yyyy-MM-dd" placeholder="选择发货时间"></el-date-picker>
+          </el-form-item>
+        </el-form>
       </div>
-      <div slot="footer" style="text-align: right">
-        <Button @click="logisticsShow = false">关闭</Button>
-        <Button type="primary" :loading="submitLoading" @click="submitDelivery">提交</Button>
-      </div>
-    </Modal>
+      <template #footer><div style="text-align: right">
+        <el-button @click="logisticsShow = false">关闭</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitDelivery">提交</el-button>
+      </div></template>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -139,7 +138,7 @@ export default {
           if (pattern3.test(this.afterSale.reason)) {
             this.getReason(this.afterSale.serviceType)
           } else {
-            this.$set(this.afterSale, 'reasonName', this.afterSale.reason)
+            this.afterSale['reasonName'] = this.afterSale.reason
           }
         }
       })
@@ -150,7 +149,7 @@ export default {
           this.reasonList = res.result
           this.reasonList.forEach(e => {
             if (e.id === this.afterSale.reason) {
-              this.$set(this.afterSale, 'reasonName', e.reason)
+              this.afterSale['reasonName'] = e.reason
             }
           })
         }

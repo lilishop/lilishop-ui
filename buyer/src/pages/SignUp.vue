@@ -11,67 +11,63 @@
     </div>
     <div class="login-container">
         <!-- 注册 -->
-        <Form
+        <el-form
           ref="formRegist"
           :model="formRegist"
           :rules="ruleInline"
           style="width:300px;"
         >
-          <FormItem prop="username">
-            <i-input
+          <el-form-item prop="username">
+            <el-input
               type="text"
               v-model="formRegist.username"
               clearable
               placeholder="用户名"
             >
-              <Icon type="md-person" slot="prepend"></Icon>
-            </i-input>
-          </FormItem>
-          <FormItem prop="password">
-            <i-input
+              <template #prepend><el-icon><User /></el-icon></template>
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="password">
+            <el-input
               type="password"
               v-model="formRegist.password"
               clearable
               placeholder="请输入大于6位密码"
             >
-              <Icon type="md-lock" slot="prepend"> </Icon>
-            </i-input>
-          </FormItem>
-          <FormItem prop="mobilePhone">
-            <i-input
+              <template #prepend><el-icon><Lock /></el-icon></template>
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="mobilePhone">
+            <el-input
               type="text"
               v-model="formRegist.mobilePhone"
               clearable
               placeholder="手机号"
             >
-              <Icon type="md-phone-portrait" slot="prepend"></Icon>
-            </i-input>
-          </FormItem>
-          <FormItem prop="code">
-            <i-input
+              <template #prepend><el-icon><Iphone /></el-icon></template>
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="code">
+            <el-input
               type="text"
               v-model="formRegist.code"
               clearable
               placeholder="手机验证码"
             >
-              <Icon
-                type="ios-text-outline"
-                style="font-weight: bold"
-                slot="prepend"
-              />
-              <Button slot="append" @click="sendCode">{{ codeMsg }}</Button>
-            </i-input>
-          </FormItem>
-          <FormItem>
-            <Button @click="verifyBtnClick" long :type="verifyStatus?'success':'default'">{{verifyStatus?'验证通过':'点击完成安全验证'}}</Button>
-          </FormItem>
-          <FormItem>
-            <Button type="error" size="large" @click="handleRegist" long
-              >注册</Button
+              <template #prepend><el-icon style="font-weight: bold"><Document /></el-icon></template>
+              <template #append><el-button @click="sendCode">{{ codeMsg }}</el-button></template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button @click="verifyBtnClick" style="width:100%" :type="verifyStatus?'success':'default'">{{verifyStatus?'验证通过':'点击完成安全验证'}}</el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="danger" size="large" @click="handleRegist" style="width:100%"
+              >注册</el-button
             >
-          </FormItem>
-          <FormItem><span class="color999 ml_20">点击注册，表示您同意《<router-link to="/article?id=1371992704333905920" target="_blank">商城用户协议</router-link>》</span></FormItem>
-        </Form>
+          </el-form-item>
+          <el-form-item><span class="color999 ml_20">点击注册，表示您同意《<router-link to="/article?id=1371992704333905920" target="_blank">商城用户协议</router-link>》</span></el-form-item>
+        </el-form>
         <!-- 拼图验证码 -->
         <Verify
           ref="verify"
@@ -82,16 +78,16 @@
         <div class="login-btn">已有账号？<a @click="$router.push('login')">立即登录</a></div>
     </div>
     <div class="foot">
-      <Row type="flex" justify="space-around" class="help">
+      <div type="flex" justify="space-around" class="help">
         <router-link to="/article" class="item" target="_blank">帮助</router-link>
         <router-link to="/article?id=1371779927900160000" class="item" target="_blank">隐私</router-link>
         <router-link to="/article?id=1371992704333905920" class="item" target="_blank">条款</router-link>
-      </Row>
-      <Row type="flex" justify="center" class="copyright">
+      </div>
+      <div type="flex" justify="center" class="copyright">
         Copyright © {{year}} - Present
         <a href="https://pickmall.cn" target="_blank" style="margin: 0 5px">{{config.title}}</a>
         版权所有
-      </Row>
+      </div>
     </div>
   </div>
 </template>
@@ -103,9 +99,10 @@ import { md5 } from '@/plugins/md5.js';
 import * as apiLogin from '@/api/login.js';
 import { sendSms } from '@/api/common.js';
 import Verify from '@/components/verify';
+import { User, Lock, Iphone, Document } from '@element-plus/icons-vue';
 export default {
   name: 'SignUp',
-  components: { Verify },
+  components: { Verify, User, Lock, Iphone, Document },
   data () {
     return {
       config:require('@/config'),
@@ -254,7 +251,7 @@ export default {
 
 .other-login {
   margin: 0 auto;
-  .ivu-icon {
+  .el-icon {
     font-size: 24px;
   }
 }

@@ -1,37 +1,35 @@
 <template>
   <div class="order-detail" v-if="order.order">
     <card _Title="订单详情" :_Size="16"></card>
-    <Card
+    <el-card
       class="mb_10"
+      shadow="never"
       v-if="
         order.allowOperationVO.pay ||
         order.allowOperationVO.rog ||
         order.allowOperationVO.cancel
       "
     >
-      <Button
+      <el-button
         type="success"
         @click="goPay(order.order.sn)"
         size="small"
         v-if="order.allowOperationVO.pay"
-        >去支付</Button
-      >
-      <Button
+        >去支付</el-button>
+      <el-button
         type="info"
         @click="received(order.order.sn)"
         size="small"
         v-if="order.allowOperationVO.rog"
-        >确认收货</Button
-      >
-      <Button
-        type="error"
+        >确认收货</el-button>
+      <el-button
+        type="danger"
         @click="handleCancelOrder(order.order.sn)"
         v-if="order.allowOperationVO.cancel"
         size="small"
-        >取消订单</Button
-      >
-      <Button v-if="order.allowOperationVO.showLogistics || orderPackage.length > 0 || logistics" type="info" @click="logisticsList()" size="small">查看物流</Button>
-    </Card>
+        >取消订单</el-button>
+      <el-button v-if="order.allowOperationVO.showLogistics || orderPackage.length > 0 || logistics" type="info" @click="logisticsList()" size="small">查看物流</el-button>
+    </el-card>
     <p class="verificationCode" v-if="order.order.verificationCode">
       核验码：<span>{{ order.order.verificationCode }}</span>
     </p>
@@ -41,25 +39,24 @@
       <div style="color: #999" class="operation-time">
         操作时间：{{ order.order.updateTime || order.order.createTime }}
       </div>
-      <Steps
+      <el-steps
         class="progress"
         :current="progressList.length"
         direction="vertical"
       >
-        <Step
-          :title="progress.message"
+        <el-step           :title="progress.message"
           :content="progress.createTime"
           v-for="(progress, index) in progressList"
           :key="index"
-        ></Step>
-      </Steps>
+        ></el-step>
+      </el-steps>
     </div>
     <div class="order-card" v-if="order.order.deliveryMethod === 'LOGISTICS' && order.order.orderType !== 'VIRTUAL'">
       <h3>收货人信息</h3>
       <p>收货人：{{ order.order.consigneeName }}</p>
-      <p>手机号码：{{ order.order.consigneeMobile | secrecyMobile }}</p>
+      <p>手机号码：{{ $filters.secrecyMobile( order.order.consigneeMobile ) }}</p>
       <p>
-        收货地址：{{ order.order.consigneeAddressPath | unitAddress }}
+        收货地址：{{ $filters.unitAddress(order.order.consigneeAddressPath) }}
         {{ order.order.consigneeDetail }}
       </p>
     </div>
@@ -128,9 +125,9 @@
           收票人邮箱：{{ order.receipt.receiptEmail }}
         </p>
         <div v-if="Number(order.receipt.receiptStatus) === 1" class="receipt-action">
-          <Button size="small" type="primary" ghost @click="viewReceiptInvoice(order.receipt)">
+          <el-button size="small" type="primary" ghost @click="viewReceiptInvoice(order.receipt)">
             查看发票
-          </Button>
+          </el-button>
         </div>
       </template>
       <div v-else style="color: #999; margin-left: 5px">未开发票</div>
@@ -171,13 +168,13 @@
               </div>
             </td>
             <td>{{ goods.id }}</td>
-            <td>{{ goods.goodsPrice | unitPrice("￥") }}</td>
+            <td>{{ $filters.unitPrice(goods.goodsPrice, "￥") }}</td>
             <td>{{ goods.num }}</td>
             <td>{{refundPriceList(goods.isRefund)}}</td>
-            <td>{{ goods.refundPrice | unitPrice("￥") }}</td>
-            <td>{{ (goods.goodsPrice * goods.num) | unitPrice("￥") }}</td>
+            <td>{{ $filters.unitPrice(goods.refundPrice, "￥") }}</td>
+            <td>{{ $filters.unitPrice((goods.goodsPrice * goods.num), "￥") }}</td>
             <td>
-              <Button
+              <el-button
                 v-if="
                   goods.afterSaleStatus.includes('NOT_APPLIED') ||
                   goods.afterSaleStatus.includes('PART_AFTER_SALE')
@@ -186,23 +183,23 @@
                 type="info"
                 size="small"
                 class="mb_5"
-                >申请售后</Button
+                >申请售后</el-button
               >
-              <Button
+              <el-button
                 v-if="goods.commentStatus == 'UNFINISHED'"
                 @click="comment(order.order.sn, goodsIndex)"
                 size="small"
                 type="success"
                 class="fontsize_12 mb_5"
-                >评价</Button
+                >评价</el-button
               >
-              <Button
+              <el-button
                 v-if="goods.complainStatus == 'NO_APPLY'"
                 @click="complain(order.order.sn, goodsIndex)"
                 type="warning"
                 class="fontsize_12"
                 size="small"
-                >投诉</Button
+                >投诉</el-button
               >
             </td>
           </tr>
@@ -214,68 +211,52 @@
           <span>商品件数：</span><span>{{ order.order.goodsNum }}件</span>
         </div>
         <div>
-          <span>商品总价：</span
-          ><span>{{ order.order.goodsPrice | unitPrice("￥") }}</span
-          ><br />
+          <span>商品总价：</span><span>{{ $filters.unitPrice(order.order.goodsPrice, "￥") }}</span><br />
         </div>
         <div v-if="order.order.orderType !== 'VIRTUAL'">
-          <span>运费：</span
-          ><span>+{{ order.order.freightPrice | unitPrice("￥") }}</span
-          ><br />
+          <span>运费：</span><span>+{{ $filters.unitPrice(order.order.freightPrice, "￥") }}</span><br />
         </div>
         <div v-if="order.order.priceDetailDTO.couponPrice">
-          <span>优惠券：</span
-          ><span
-            >-{{
-              order.order.priceDetailDTO.couponPrice || 0 | unitPrice("￥")
-            }}</span
-          >
+          <span>优惠券：</span><span
+            >-{{ $filters.unitPrice(order.order.priceDetailDTO.couponPrice || 0, "￥") }}</span>
         </div>
         <div v-if="order.order.priceDetailDTO.giftCardPrice">
-          <span>礼品卡抵扣：</span
-          ><span
-            >-{{
-              order.order.priceDetailDTO.giftCardPrice || 0 | unitPrice("￥")
-            }}</span
-          >
+          <span>礼品卡抵扣：</span><span
+            >-{{ $filters.unitPrice(order.order.priceDetailDTO.giftCardPrice || 0, "￥") }}</span>
         </div>
         <div v-if="order.order.discountPrice">
-          <span>活动优惠：</span
-          ><span>-{{ order.order.discountPrice | unitPrice("￥") }}</span>
+          <span>活动优惠：</span><span>-{{ $filters.unitPrice(order.order.discountPrice, "￥") }}</span>
         </div>
         <div v-if="order.order.priceDetailDTO.updatePrice">
-          <span>修改价格：</span
-          ><span>{{ order.order.priceDetailDTO.updatePrice | unitPrice("￥") }}</span>
+          <span>修改价格：</span><span>{{ $filters.unitPrice(order.order.priceDetailDTO.updatePrice, "￥") }}</span>
         </div>
         <div>
           <span>应付金额：</span>
-          <span class="actrual-price">{{
-            order.order.flowPrice | unitPrice("￥")
-          }}</span>
+          <span class="actrual-price">{{ $filters.unitPrice(order.order.flowPrice, "￥") }}</span>
         </div>
       </div>
     </div>
-    <Modal
+    <el-dialog
       v-model="cancelAvail"
       title="请选择取消订单原因"
-      @on-ok="sureCancel"
-      @on-cancel="cancelAvail = false"
+      @ok="sureCancel"
+      @cancel="cancelAvail = false"
     >
-      <RadioGroup
+      <el-radio-group
         v-model="cancelParams.reason"
         vertical
         type="button"
         button-style="solid"
       >
-        <Radio :label="item.reason" v-for="item in cancelReason" :key="item.id">
+        <el-radio :label="item.reason" v-for="item in cancelReason" :key="item.id">
           {{ item.reason }}
-        </Radio>
-      </RadioGroup>
-    </Modal>
+        </el-radio>
+      </el-radio-group>
+    </el-dialog>
 
     <!--查询物流-->
-    <Modal v-model="logisticsModal" width="40">
-      <p slot="header"><span>查询物流</span></p>
+    <el-dialog v-model="logisticsModal" width="40">
+      <template #header><p><span>查询物流</span></p></template>
       <div class="layui-layer-wrap">
         <dl>
           <dt>订单号：</dt>
@@ -331,10 +312,10 @@
           </div>
         </div>
       </div>
-      <div slot="footer" style="text-align: right">
-        <Button @click="logisticsModal = false">取消</Button>
-      </div>
-    </Modal>
+      <template #footer><div style="text-align: right">
+        <el-button @click="logisticsModal = false">取消</el-button>
+      </div></template>
+    </el-dialog>
 
   </div>
 </template>
@@ -455,7 +436,7 @@ export default {
           if (receiptId) {
             const receiptRes = await receiptDetail(receiptId);
             if (receiptRes && receiptRes.success && receiptRes.result) {
-              this.$set(this.order, "receipt", receiptRes.result);
+              this.order["receipt"] = receiptRes.result;
             }
           }
           this.progressList = res.result.orderLogs;
@@ -592,7 +573,7 @@ export default {
       color: $theme_color;
     }
   }
-  .ivu-icon {
+  .el-icon {
     color: #ff8f23;
     cursor: pointer;
     &:hover {
@@ -698,15 +679,15 @@ table {
 .layui-layer-wrap > .div-express-log {
   max-height: 300px;
 }
-::v-deep .layui-layer-wrap > .div-express-log::-webkit-scrollbar{
+:deep .layui-layer-wrap > .div-express-log::-webkit-scrollbar{
   width: 1px;
   height: 5px;
 }
-::v-deep .layui-layer-wrap > .div-express-log::-webkit-scrollbar-thumb{
+:deep .layui-layer-wrap > .div-express-log::-webkit-scrollbar-thumb{
   border-radius: 1em;
   background-color: rgba(50,50,50,.3);
 }
-::v-deep .layui-layer-wrap > .div-express-log::-webkit-scrollbar-track{
+:deep .layui-layer-wrap > .div-express-log::-webkit-scrollbar-track{
   border-radius: 1em;
   background-color: rgba(50,50,50,.1);
 }

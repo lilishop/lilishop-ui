@@ -397,7 +397,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-/deep/.el-scrollbar__wrap {
+:deep(.el-scrollbar__wrap ) {
   overflow-x: hidden;
 }
 

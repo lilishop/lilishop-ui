@@ -1,57 +1,66 @@
 <template>
-  <Modal :mask-closable="false" :value="switched" v-model="switched" title="选择地址" @on-ok="submit" @on-cancel="cancel">
-    <div class="flex">
-      <Spin size="large" fix v-if="spinShow"></Spin>
-      <Tree ref="tree" class="tree" :data="data" expand-node show-checkbox multiple></Tree>
+  <el-dialog
+    v-model="switched"
+    title="选择地址"
+    width="600px"
+    :close-on-click-modal="false"
+    destroy-on-close
+    @close="cancel"
+  >
+    <div v-loading="spinShow" class="flex">
+      <el-tree
+        ref="tree"
+        class="tree"
+        :data="data"
+        :props="treeProps"
+        node-key="id"
+        show-checkbox
+        default-expand-all
+      />
     </div>
-  </Modal>
+    <template #footer>
+      <el-button @click="cancel">取消</el-button>
+      <el-button type="primary" @click="submit">确定</el-button>
+    </template>
+  </el-dialog>
 </template>
 <script>
 import { getAllCity } from "@/api/index";
 export default {
   data() {
     return {
-      switched: false, // 控制模态框显隐
-      spinShow: false, // 加载loading
-      data: [], // 地区数据
-      selectedWay: [], // 选择的地区
-      callBackData: "", // 打开组件的回显数据
+      switched: false,
+      spinShow: false,
+      data: [],
+      selectedWay: [],
+      callBackData: "",
+      treeProps: {
+        label: "title",
+        children: "children",
+      },
     };
   },
   mounted() {
     this.init();
   },
   methods: {
-    clear() {  // 引用该组件的父组件会调用
+    clear() {
       this.data = [];
       this.selectedWay = [];
       this.init();
     },
-    /**
-     * 关闭
-     */
     cancel() {
       this.switched = false;
-
-      // 关闭的时候所有数据设置成disabled为true
       this.data.forEach((item) => {
-        this.$set(item, "disabled", false);
+        item.disabled = false;
         item.children.forEach((child) => {
-          this.$set(child, "disabled", false);
+          child.disabled = false;
         });
       });
     },
-
-    /**
-     * 打开地图选择器
-     * @param {val} 回调的数据
-     * @param {index} 当前操作的运费模板的索引
-     */
     open(val, index) {
       if (val) {
-        //已选中的地址
         let checkedData = this.$store.state.shipTemplate;
-
         let checkData = [];
         let disabledData = checkedData.filter((item, i) => {
           if (i != index) {
@@ -60,140 +69,127 @@ export default {
             checkData.push(item);
           }
         });
-        // 选中
         checkData.forEach((check) => {
-          // 循环出已经选中的地址id
           check.areaId.split(",").forEach((ids) => {
             this.data.forEach((item) => {
-              // 如果当前省份下市区全部选中则选中该省份
               if (check.selectedAll) {
                 check.area.split(",").forEach((area) => {
                   if (area == item.name) {
-                    this.$set(item, "checked", true);
+                    item.checked = true;
                   }
                 });
               }
-
-              // 将市区继续循环
-              item.children.forEach((child, childIndex) => {
-                // 判断当前市区是否是已选中状态
+              item.children.forEach((child) => {
                 if (item.checked) {
-                  this.$set(child, "checked", true);
+                  child.checked = true;
                 }
                 if (child.id == ids) {
-                  this.$set(child, "checked", true);
+                  child.checked = true;
                 }
               });
             });
           });
         });
-
-        // 禁用
         disabledData.forEach((dis) => {
-          // 循环出已经选中的地址id
           dis.areaId.split(",").forEach((ids) => {
-            // 循环出省份
             this.data.forEach((item) => {
-              // 如果当前省份下市区全部选中则禁用该省份
               if (dis.selectedAll) {
                 dis.area.split(",").forEach((area) => {
                   if (area == item.name) {
-                    this.$set(item, "disabled", true);
+                    item.disabled = true;
                   }
                 });
               }
-              // 将市区继续循环
-              item.children.forEach((child, childIndex) => {
-                // 判断当前市区是否是已禁用状态
+              item.children.forEach((child) => {
                 if (item.disabled) {
-                  this.$set(child, "disabled", true);
-                } else {
-                  if (child.id == ids) {
-                    this.$set(child, "disabled", true);
-                  }
+                  child.disabled = true;
+                } else if (child.id == ids) {
+                  child.disabled = true;
                 }
               });
             });
           });
         });
+        this.syncTreeCheckedKeys();
       }
-      this.switched ? (this.switched = true) : (this.switched = true);
+      this.switched = true;
     },
-
-    /**
-     * 提交并筛选出省市
-     */
+    syncTreeCheckedKeys() {
+      this.$nextTick(() => {
+        const keys = [];
+        this.data.forEach((item) => {
+          if (item.checked) {
+            keys.push(item.id);
+          }
+          item.children.forEach((child) => {
+            if (child.checked) {
+              keys.push(child.id);
+            }
+          });
+        });
+        if (this.$refs.tree) {
+          this.$refs.tree.setCheckedKeys(keys);
+        }
+      });
+    },
     submit() {
-      // 筛选出省市
-      let list = this.$refs.tree.getCheckedAndIndeterminateNodes();
+      const checkedNodes = this.$refs.tree.getCheckedNodes(false, true);
+      const halfCheckedNodes = this.$refs.tree.getHalfCheckedNodes();
+      let list = [...checkedNodes, ...halfCheckedNodes];
 
       let sort = [];
-      list.forEach((item, i) => {
+      list.forEach((item) => {
         item.selectedList = [];
         item.selectedAll = false;
-        // 筛选出当前的省份
         if (item.level == "province" && !item.disabled) {
-          sort.push({
-            ...item,
-          });
+          sort.push({ ...item });
         }
-
-        // 筛选出当前选中的市
-        sort.forEach((sortItem, sortIndex) => {
-          if (
-            item.level != "province" &&
-            sortItem.id == item.parentId &&
-            !item.disabled
-          ) {
-            sortItem.selectedList.push({
-              ...item,
-            });
+        sort.forEach((sortItem) => {
+          if (item.level != "province" && sortItem.id == item.parentId && !item.disabled) {
+            sortItem.selectedList.push({ ...item });
           }
         });
       });
 
-      // 判断如果当前省是否全选
       this.data.forEach((whether) => {
         sort.forEach((item) => {
-          // 如果当前省匹配
           if (
             item.id == whether.id &&
             item.selectedList.length == whether.children.length
           ) {
-            // 给一个全选子级的标识符
             item.selectedList.forEach((child) => {
-              this.$set(child, "selectedAll", true);
+              child.selectedAll = true;
             });
-            this.$set(item, "selectedAll", true);
+            item.selectedAll = true;
           }
         });
       });
 
       this.$emit("selected", sort);
-
       this.cancel();
     },
-    // 初始化地区数据
     init() {
-      getAllCity().then((res) => {
-        if (res.result) {
-          res.result.forEach((item) => {
-            item.children.forEach((child) => {
-              child.title = child.name;
+      this.spinShow = true;
+      getAllCity()
+        .then((res) => {
+          if (res.result) {
+            this.data = [];
+            res.result.forEach((item) => {
+              item.children.forEach((child) => {
+                child.title = child.name;
+              });
+              this.data.push({
+                title: item.name,
+                ...item,
+              });
+              this.selectedWay.push({ name: item.name, id: item.id });
             });
-
-            let data = {
-              title: item.name,
-
-              ...item,
-            };
-            this.data.push(data);
-
-            this.selectedWay.push({ name: data.title, id: data.id });
-          });
-          this.$store.state.regions = this.data;
-        }
-      });
+            this.$store.state.regions = this.data;
+          }
+        })
+        .finally(() => {
+          this.spinShow = false;
+        });
     },
   },
 };
@@ -202,21 +198,14 @@ export default {
 .flex {
   display: flex;
   position: relative;
+  min-height: 400px;
 }
 .tree {
-  flex: 2;
+  flex: 1;
+  width: 100%;
 }
-.form {
-  flex: 8;
-}
-.button-list {
-  margin-left: 80px;
-  > * {
-    margin: 0 4px;
-  }
-}
-::v-deep .ivu-modal-body {
-  height: 400px !important;
+:deep(.el-dialog__body) {
+  max-height: 450px;
   overflow: auto;
 }
 </style>

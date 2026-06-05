@@ -1,122 +1,84 @@
-import Vue from "vue";
-import ViewUI from "view-design";
-import "./styles/theme.less";
-
+import { createApp } from "vue";
 import "core-js/stable";
-import vueQr from "vue-qr";
-
-import liliDialog from '@/views/lili-dialog'
-import App from "./App";
-import {router} from "./router/index";
+import "./styles/theme.less";
+import App from "./App.vue";
+import { router } from "./router/index";
 import store from "./store";
+import { setupElementPlus } from "@/plugins/element";
+import { setupLegacyMessage } from "@/utils/message";
+import liliDialog from "@/views/lili-dialog";
+import PriceColorScheme from "@/components/price-color-scheme.vue";
+import { install as installVueQr } from "vue-qr";
+import VueLazyload from "vue-lazyload";
 import {
   getRequest,
   postRequest,
   putRequest,
   deleteRequest,
   importRequest,
-  uploadFileRequest
+  uploadFileRequest,
 } from "@/libs/axios";
-import {setStore, getStore, removeStore} from "@/libs/storage";
-
-
+import { setStore, getStore, removeStore } from "@/libs/storage";
 import util from "@/libs/util";
+import { md5 } from "@/utils/md5.js";
+import * as filters from "@/utils/filters";
 
-import VueLazyload from "vue-lazyload";
+const { aMapSecurityJsCode, mainColor } = require("@/config");
 
-import * as filters from "@/utils/filters"; // global filter
-
-import {md5} from "@/utils/md5.js";
-
-const {aMapSecurityJsCode, inputMaxLength,mainColor} = require("@/config");
-// 打印
-import Print from 'vue-print-nb';
-
-Vue.use(Print);
-// 高德安全密钥
 if (aMapSecurityJsCode) {
   window._AMapSecurityConfig = {
     securityJsCode: aMapSecurityJsCode,
   };
 }
-Vue.config.devtools = true;
-Vue.config.productionTip = false;
-Vue.use(VueLazyload, {
+
+const PC_URL = BASE.PC_URL;
+const WAP_URL = BASE.WAP_URL;
+
+util.bootstrapDynamicRoutesFromCache();
+
+const app = createApp(App);
+
+setupElementPlus(app);
+setupLegacyMessage(app);
+installVueQr(app);
+
+app.use(VueLazyload, {
   error: require("./assets/img-error.png"),
-  loading: require("./assets/loading2.gif")
+  loading: require("./assets/loading2.gif"),
 });
 
-// 引入价格格式化组件
-import priceColorScheme from 'price-color'
-Vue.use(priceColorScheme);
+app.use(router);
+app.use(store);
 
-const copyViewUi = {...ViewUI}
-copyViewUi.Input.props.maxlength.default = inputMaxLength // 挂载最大输入值
-Vue.use(copyViewUi);
+app.component("liliDialog", liliDialog);
+app.component("priceColorScheme", PriceColorScheme);
 
-Vue.component('liliDialog', liliDialog)
+app.config.globalProperties.getRequest = getRequest;
+app.config.globalProperties.postRequest = postRequest;
+app.config.globalProperties.putRequest = putRequest;
+app.config.globalProperties.deleteRequest = deleteRequest;
+app.config.globalProperties.importRequest = importRequest;
+app.config.globalProperties.uploadFileRequest = uploadFileRequest;
+app.config.globalProperties.setStore = setStore;
+app.config.globalProperties.getStore = getStore;
+app.config.globalProperties.removeStore = removeStore;
+app.config.globalProperties.$mainColor = mainColor;
+app.config.globalProperties.md5 = md5;
+app.config.globalProperties.$filters = filters;
 
-Vue.component('liliDialog', liliDialog)
-Vue.component("vue-qr", vueQr); //此处将vue-qr添加为全局组件
-
-// 挂载全局使用的方法
-Vue.prototype.getRequest = getRequest;
-Vue.prototype.postRequest = postRequest;
-Vue.prototype.putRequest = putRequest;
-Vue.prototype.deleteRequest = deleteRequest;
-Vue.prototype.importRequest = importRequest;
-Vue.prototype.uploadFileRequest = uploadFileRequest;
-Vue.prototype.setStore = setStore;
-Vue.prototype.getStore = getStore;
-Vue.prototype.removeStore = removeStore;
-Vue.prototype.$mainColor = mainColor;
-Vue.prototype.md5 = md5;
-const PC_URL = BASE.PC_URL; // 跳转买家端地址 pc端
-const WAP_URL = BASE.WAP_URL; // 跳转买家端地址 wap端
-Vue.prototype.linkTo = function (goodsId, skuId) {
-  // 跳转买家端商品
+app.config.globalProperties.linkTo = function (goodsId, skuId) {
   window.open(
     `${PC_URL}/goodsDetail?skuId=${skuId}&goodsId=${goodsId}`,
     "_blank"
   );
 };
-Vue.prototype.wapLinkTo = function (goodsId, skuId) {
-  // app端二维码
+
+app.config.globalProperties.wapLinkTo = function (goodsId, skuId) {
   return `${WAP_URL}/pages/product/goods?id=${skuId}&goodsId=${goodsId}`;
 };
 
-Array.prototype.remove = function (from, to) {
-  var rest = this.slice((to || from) + 1 || this.length);
-  this.length = from < 0 ? this.length + from : from;
-  return this.push.apply(this, rest);
-};
-
-Object.keys(filters).forEach(key => {
-  Vue.filter(key, filters[key]);
+router.isReady().then(() => {
+  app.mount("#app");
 });
 
-
-
-
-
-
-
-/* eslint-disable no-new */
-new Vue({
-  el: "#app",
-  router,
-  store,
-  render: h => h(App),
-  data: {
-    currentPageName: ""
-  },
-  mounted() {
-    // 初始化菜单
-    util.initRouter(this);
-
-    this.currentPageName = this.$route.name;
-    // 显示打开的页面的列表
-    this.$store.commit("setOpenedList");
-    this.$store.commit("initCachepage");
-  }
-});
+export { app, util };

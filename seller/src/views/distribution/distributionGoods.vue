@@ -1,291 +1,238 @@
 <template>
-  <div class="search">
-    <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="商品名称" prop="goodsName">
-            <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 240px"/>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
-        </Form>
-      </Row>
-      </Card>
-    <Card>
-      <Row class="operation padding-row">
-        <Button @click="add" type="primary">添加</Button>
-      </Row>
-      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table" >
-        <!-- 商品栏目格式化 -->
-        <template slot="goodsSlot" slot-scope="{row}">
-          <div style="margin-top: 5px;height: 70px; display: flex;">
-            <div style="">
-              <img :src="row.thumbnail" style="height: 60px;margin-top: 3px;width: 60px">
-            </div>
+  <div>
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter.prevent="handleSearch"
+      >
+        <el-form-item label="商品名称" prop="goodsName">
+          <el-input
+            v-model="searchForm.goodsName"
+            placeholder="请输入商品名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
-            <div style="margin-left: 13px;">
-              <div class="div-zoom">
-                <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
-              </div>
-              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-                <div slot="content">
-                  <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
-                </div>
-                <img src="../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
-              </Poptip>
-            </div>
-          </div>
-
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small" show-total show-elevator show-sizer></Page>
-      </Row>
-    </Card>
-    <liliDialog
-      ref="liliDialog"
-      @selectedGoodsData="selectedGoodsData"
-    ></liliDialog>
-    <Modal
-      :title="modalTitle"
-      v-model="modalVisible"
-      :mask-closable="false"
-      :width="500"
-    >
-      <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
-        <FormItem label="分销佣金" prop="commission">
-          <Input v-model="form.commission" clearable style="width: 100%"/>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="handleSubmit"
-        >提交
-        </Button
-        >
+    <el-card>
+      <div class="operation" style="margin: 10px 0">
+        <el-button type="primary" @click="delAll">批量下架</el-button>
       </div>
-    </Modal>
+
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+        @selection-change="changeSelect"
+      >
+        <el-table-column type="selection" width="55" align="center" fixed="left" />
+        <el-table-column label="商品图片" width="120" align="center" fixed="left">
+          <template #default="{ row }">
+            <img
+              v-if="row"
+              :src="row.thumbnail || ''"
+              alt="商品图"
+              style="cursor: pointer; width: 80px; height: 60px; margin: 10px 0; object-fit: contain"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="商品名称" min-width="220" show-overflow-tooltip>
+          <template #default="{ row }">
+            <template v-if="row">
+              <div class="div-zoom">
+                <a class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
+              </div>
+              <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
+                <template #reference>
+                  <img
+                    src="../../assets/qrcode.svg"
+                    class="hover-pointer"
+                    width="20"
+                    height="20"
+                    alt="qrcode"
+                  />
+                </template>
+                <vue-qr
+                  :text="wapLinkTo(row.goodsId, row.skuId)"
+                  :margin="0"
+                  color-dark="#000"
+                  color-light="#fff"
+                  :size="150"
+                />
+              </el-popover>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column label="商品价格" min-width="110">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">{{ $filters.unitPrice(row.price, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="quantity" label="库存" min-width="80" />
+        <el-table-column prop="createTime" label="添加时间" min-width="160" />
+        <el-table-column prop="storeName" label="店铺名称" min-width="120" show-overflow-tooltip />
+        <el-table-column label="佣金金额" min-width="110">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">{{ $filters.unitPrice(row.commission, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" min-width="100" align="center" fixed="right">
+          <template #default="{ row }">
+            <a v-if="row" class="link-text" @click="remove(row)">下架</a>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
-import {
-        getDistributionGoods,
-        distributionGoodsCancel,
-        distributionGoodsCheck
-    } from "@/api/distribution";
-import liliDialog from "../lili-dialog/index";
+import { delDistributionGoods, getDistributionGoods } from "@/api/distribution";
+import vueQr from "vue-qr";
 
-import {getShopListData} from '@/api/shops'
 export default {
   name: "distributionGoods",
-  components: {
-    liliDialog
-  },
+  components: { vueQr },
   data() {
     return {
-      modalVisible: false, // 添加或编辑显示
-      modalTitle: "", // 添加或编辑标题
-      submitLoading: false, // 添加或编辑提交状态
-      shopList:[], // 店铺列表
-      loading: true, // 表单加载状态
-      searchForm: { // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-        sort: "createTime", // 默认排序字段
-        order: "desc", // 默认排序方式
+      loading: true,
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
       },
-      selectList: [], // 多选数据
-      form:{
-        commission : 1 // 分销金额
-      },
-      skuId:0, // 当前分销商品的skuId
-      formValidate: {
-        commission: [
-          { required: true, message: '请输入大于1小于9999的合法分销金额'},
-          {
-            pattern:  /^[1-9]\d{0,3}(\.\d{1,2})?$/,
-            message: "请输入大于1小于9999的合法分销金额",
-            trigger: "change"
-          }],
-      },
-      columns: [ // 表格表头
-        {
-          title: "商品名称",
-          key: "goodsName",
-          minWidth: 250,
-          slot: "goodsSlot",
-        },
-        {
-          title: "商品价格",
-          key: "price",
-          width: 130,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
-          }
-        },
-        {
-          title: "库存",
-          key: "quantity",
-          width: 100
-        },
-        {
-          title: "店铺名称",
-          key: "storeName",
-          minWidth: 120,
-        },
-        {
-            title: "佣金金额",
-            key: "commission",
-            width: 120,
-            render: (h, params) => {
-                if(params.row.commission !=null){
-                  return h("div", this.$options.filters.unitPrice(params.row.commission,'￥'));
-                }else{
-                  return h("div", this.$options.filters.unitPrice(0,'￥'));
-                }
-            }
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          width: 150,
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.remove(params.row);
-                    },
-                  },
-                },
-                "删除"
-              ),
-            ]);
-          }
-        }
-      ],
-      data: [], // 表单数据
-      total: 0 // 表单数据总数
+      selectList: [],
+      selectCount: 0,
+      data: [],
+      total: 0,
     };
   },
   methods: {
-    init() { // 初始化数据
+    init() {
       this.getDataList();
     },
-    // 选择商品回调
-    selectedGoodsData(v){
-      this.modalVisible = true
-      this.form.commission = 1
-      this.modalTitle = "保存分销商品"
-      this.skuId = v[0].id
-    },
-    // 添加商品modal
-    add(){
-      this.$refs.liliDialog.flag = true;
-      this.$refs.liliDialog.goodsFlag = true;
-      this.$refs.liliDialog.singleGoods();
-    },
-    // 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
-      this.$refs.table.selectAll(false);
+      this.clearSelectAll();
     },
-    // 添加商品
-    handleSubmit(){
-      this.$refs['form'].validate((valid) => {
-        if (valid) {
-          distributionGoodsCheck(this.skuId,this.form).then(res => {
-            if(res.message === 'success') {
-              this.$Message.success("添加成功");
-            }
-            this.modalVisible = false
-            this.getDataList()
-          });
-        }
-      })
-    },
-    // 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
-    // 获取商品列表
+    clearSelectAll() {
+      this.$refs.table?.clearSelection();
+    },
+    changeSelect(e) {
+      this.selectList = e;
+      this.selectCount = e.length;
+    },
     getDataList() {
       this.loading = true;
-      // 带多条件搜索参数获取表单数据 请自行修改接口
-      getDistributionGoods(this.searchForm).then(res => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-      this.total = this.data.length;
-      this.loading = false;
+      getDistributionGoods(this.searchForm)
+        .then((res) => {
+          if (res.success) {
+            this.data = res.result.records;
+            this.total = res.result.total;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
-    // 删除商品
     remove(v) {
       this.$Modal.confirm({
-        title: "确认删除",
-        // 记得确认修改此处
-        content: "您确认要删除此分销商品么?",
+        title: "确认下架",
+        content: "您确认要下架么?",
         loading: true,
         onOk: () => {
-          // 删除
-          distributionGoodsCancel(v.id).then(res => {
+          delDistributionGoods(v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("删除成功");
+              this.$Message.success("下架成功");
               this.getDataList();
             }
           });
-        }
+        },
       });
     },
-    // 获取店铺列表 搜索项用
-    getShopList (val) {
-      const params = {
-        pageNumber:1,
-        pageSize:10,
-        storeName:''
+    delAll() {
+      if (this.selectCount <= 0) {
+        this.$Message.warning("您还未选择要下架的数据");
+        return;
       }
-      if (val) {
-        params.storeName = val;
-      } else {
-        params.storeName = ''
-      }
-
-      getShopListData(params).then(res => {
-        this.shopList = res.result.records
-      })
+      this.$Modal.confirm({
+        title: "确认下架",
+        content: "您确认要下架所选的 " + this.selectCount + " 条数据?",
+        loading: true,
+        onOk: () => {
+          const ids = this.selectList.map((item) => item.id);
+          delDistributionGoods(ids.toString()).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success("下架成功");
+              this.clearSelectAll();
+              this.getDataList();
+            }
+          });
+        },
+      });
     },
-    searchChange(val){
-      this.getShopList(val)
-    }
   },
   mounted() {
     this.init();
-  }
+  },
 };
 </script>
+
 <style lang="scss" scoped>
-  @import "@/styles/table-common.scss";
-  .search-form{
-    width: 100%;
-  }
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+.div-zoom {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+.hover-pointer {
+  cursor: pointer;
+  vertical-align: middle;
+}
+.mt_10 {
+  margin-top: 10px;
+}
 </style>

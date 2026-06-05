@@ -3,20 +3,22 @@
     <div class="imgBox" :style="{width:data.originalWidth+'px',height:data.originalHeight + 'px'}">
       <img :src="data.backImage" style="width:100%;height:100%" alt="">
       <img class="slider" :src="data.slidingImage" :style="{left:distance+'px',top:data.randomY+'px'}" :width="data.sliderWidth" :height="data.sliderHeight" alt="">
-      <Icon type="md-refresh" class="refresh" @click="init" />
+      <el-icon class="refresh" @click="init"><Refresh /></el-icon>
     </div>
     <div class="handle" :style="{width:data.originalWidth+'px'}">
       <span class="bgcolor" :style="{width:distance + 'px',background:bgColor}"></span>
       <span class="swiper" :style="{left:distance + 'px'}" @mousedown="mouseDown">
-        <Icon type="md-arrow-round-forward" />
+        <el-icon><ArrowRight /></el-icon>
       </span>
       <span class="text">{{verifyText}}</span>
     </div>
   </div>
 </template>
 <script>
+import { Refresh, ArrowRight } from '@element-plus/icons-vue';
 import { getVerifyImg, postVerifyImg } from './verify.js';
 export default {
+  components: { Refresh, ArrowRight },
   props: {
     // 传入数据，判断是登录、注册、修改密码
     verifyType: {
@@ -174,7 +176,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    .ivu-icon {
+    .el-icon {
       font-size: 20px;
     }
   }

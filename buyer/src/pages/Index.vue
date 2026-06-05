@@ -1,27 +1,25 @@
 <template>
   <div class="container">
-    <Modal v-model="showCpmodel" width="350">
+    <el-dialog v-model="showCpmodel" width="350">
             <template #header>
                 <p style="color:black;text-align:left">
-                    <!-- <Icon type="ios-information-circle"></Icon> -->
+                    <!-- <el-icon><InfoFilled /></el-icon> -->
                     <span>活动优惠券</span>
                 </p>
             </template>
-              <template>
-                  <Scroll :on-reach-bottom="handleReachBottom">
-                      <Card dis-hover v-for="(item, index) in autoCoupList" :key="index" style="margin: 10px 15px">
-                            <span v-if="item.couponType === 'PRICE'" class="fontsize_12 global_color" style="font-size: 15px;">￥<span class="price">{{item.price | unitPrice}}</span></span>
+              <div class="coupon-scroll" @scroll="handleReachBottom">
+                      <el-card shadow="never" v-for="(item, index) in autoCoupList" :key="index" style="margin: 10px 15px">
+                            <span v-if="item.couponType === 'PRICE'" class="fontsize_12 global_color" style="font-size: 15px;">￥<span class="price">{{ $filters.unitPrice(item.price) }}</span></span>
                             <span v-if="item.couponType === 'DISCOUNT'" class="fontsize_12 global_color" style="font-size: 15px;"><span class="price">{{item.discount}}</span>折</span>
                             <span class="describe" style="font-size: 15px;margin-left: 5px;">满{{item.consumeThreshold}}元可用</span>
                             <p style="font-size: 10px;">使用范围：{{useScope(item.scopeType, item.storeName)}}</p>
                             <p style="font-size: 10px;">有效期：{{item.endTime}}</p>
-                      </Card>
-                  </Scroll>
-              </template>
+                      </el-card>
+              </div>
             <template #footer>
-                <Button type="error" @click="showCpmodel=false">确定</Button>
+                <el-button type="danger" @click="showCpmodel=false">确定</el-button>
             </template>
-        </Modal>
+        </el-dialog>
 
     <!-- 固定头部 -->
     <hover-search class="hover-search" :class="{show: topSearchShow}"></hover-search>
@@ -43,6 +41,7 @@
 </template>
 
 <script>
+import { InfoFilled } from '@element-plus/icons-vue';
 import Search from '@/components/Search';
 import ModelForm from '@/components/indexDecorate/ModelForm';
 import HoverSearch from '@/components/header/hoverSearch';
@@ -196,12 +195,10 @@ export default {
       }
     }
   },
-  components: {
-    Search,
+  components: { Search,
     ModelForm,
     HoverSearch,
-    fixedBar
-  }
+    fixedBar, InfoFilled }
 };
 </script>
 

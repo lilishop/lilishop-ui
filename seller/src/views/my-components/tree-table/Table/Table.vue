@@ -2,8 +2,8 @@
   <div
     v-if="columns.length > 0"
     ref="table"
+    v-loading="loading"
     :class="[prefixCls, `${prefixCls}-${size}`, tableClass]">
-    <Spin fix v-if="loading"></Spin>
     <div
       v-show="showHeader"
       ref="header-wrapper"
@@ -297,6 +297,11 @@ export default {
     cellStyle: [Object, Function],
     expandKey: String
   },
+  provide() {
+    return {
+      treeTableRoot: this,
+    };
+  },
   data() {
     return {
       computedWidth: "",
@@ -387,7 +392,7 @@ export default {
     this.measure();
     window.addEventListener("resize", this.measure);
   },
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener("resize", this.measure);
   }
 };

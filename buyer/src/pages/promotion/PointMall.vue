@@ -4,9 +4,9 @@
     <Search></Search>
     <cateNav></cateNav>
     <h3 class="promotion-decorate">积分商品</h3>
-    <Select @on-select="selectCate" size="small" class="cate-select-con" v-model="cateId">
-      <Option v-for="(cate, index) in cateList" :value="cate.id" :key="index">{{cate.name}}</Option>
-    </Select>
+    <el-select @select="selectCate" size="small" class="cate-select-con" v-model="cateId">
+      <el-option v-for="(cate, index) in cateList" :value="cate.id" :key="index">{{cate.name}}</el-option>
+    </el-select>
     <!-- 列表 -->
     <div class="goods-list">
       <empty v-if="goodsList.length === 0" />
@@ -29,8 +29,7 @@
           <span>{{ item.goodsSku.goodsName }}</span>
         </div>
         <div class="goods-show-num">
-          已有<span>{{ item.commentNum || 0 }}</span
-          >人评价
+          已有<span>{{ item.commentNum || 0 }}</span>人评价
         </div>
         <div class="goods-show-seller">
           <span>{{ item.storeName }}</span>
@@ -38,12 +37,9 @@
       </div>
     </div>
     <div class="page-size">
-      <Page :total="total" @on-change="changePageNum"
-        @on-page-size-change="changePageSize"
-        :page-size="params.pageSize"
-        show-total
-        show-sizer>
-      </Page>
+      <el-pagination :total="total" @current-change="changePageNum"
+        @size-change="changePageSize"
+        :page-size="params.pageSize" layout="total, sizes, prev, pager, next"></el-pagination>
     </div>
     <BaseFooter></BaseFooter>
   </div>

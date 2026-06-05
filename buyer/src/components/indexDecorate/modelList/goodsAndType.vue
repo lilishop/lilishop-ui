@@ -33,7 +33,7 @@
           <div class="goods-desc">{{ item.desc }}</div>
         </div>
         <div class="goods-price">
-          {{ item.price | unitPrice("￥") }}
+          {{ $filters.unitPrice(item.price, "￥") }}
         </div>
         <!-- 查看 -->
         <div class="white-shadow">

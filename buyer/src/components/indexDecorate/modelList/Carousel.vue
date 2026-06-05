@@ -6,17 +6,17 @@
       <div class="nav-content">
         <!-- 轮播图 -->
 <!--        autoplay autoplay-speed="10000"-->
-        <Carousel :height="333.9" autoplay :autoplay-speed="5000">
-          <CarouselItem  v-for="(item, index) in data.options.list" :key="index">
-            <div class="swiper-img" >
+        <el-carousel height="334px" :interval="5000">
+          <el-carousel-item v-for="(item, index) in data.options.list" :key="index">
+            <div class="swiper-img">
               <img
                 :src="item.img"
                 @click="linkTo(item.url)"
                 class="hover-pointer"
               />
             </div>
-          </CarouselItem>
-        </Carousel>
+          </el-carousel-item>
+        </el-carousel>
       </div>
       <div class="nav-right">
         <div class="person-msg">
@@ -24,7 +24,7 @@
             <img class="user-face" :src="userInfo.face || defaultAvatar"  alt />
             <div class="welcome">
               Hi, {{
-                userInfo.nickName || `欢迎来到${config.title}` | secrecyMobile
+                $filters.secrecyMobile(userInfo.nickName || `欢迎来到${config.title}`)
               }}
             </div>
           </div>

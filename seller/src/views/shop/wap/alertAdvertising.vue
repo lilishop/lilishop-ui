@@ -43,12 +43,12 @@
                   </div>
                 </div>
                 <div class="selectBtn">
-                  <Button
+                  <el-button
                     size="small"
                     @click="handleClickFile(item, index)"
-                    ghost
+                    plain
                     type="primary"
-                    >选择照片</Button
+                    >选择链接</el-button
                   >
                 </div>
               </div>
@@ -57,27 +57,50 @@
               <div class="decorate-view">
                 <div class="decorate-view-title">选择图片</div>
                 <div>
-                  <Button
-                    ghost
+                  <el-button
+                    plain
                     type="primary"
                     size="small"
                     @click="clickLink(item)"
-                    >选择链接</Button
+                    >选择链接</el-button
                   >
+                </div>
+              </div>
+
+              <div class="decorate-view">
+                <div class="decorate-view-title">当前页面状态</div>
+                <div>
+                  <el-tag :type="result.pageShow === 'OPEN' ? 'success' : 'danger'">
+                    {{ result.pageShow === "OPEN" ? "开启" : "关闭" }}
+                  </el-tag>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <liliDialog ref="liliDialog" :types="linkType"></liliDialog>
+        <liliDialog
+          ref="liliDialog"
+          @selectedLink="selectedLink"
+          :types="linkType"
+        ></liliDialog>
       </div>
+      <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
+      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" ref="ossManage" />
+    </el-dialog>
     </div>
   </div>
 </template>
 <script>
+import ossManage from "@/views/sys/oss-manage/ossManage";
+import * as API_Other from "@/api/other.js";
 export default {
+   components: {
+    ossManage,
+  },
   data() {
     return {
+      result:"",
+      picModelFlag: false, //图片选择器
       type: "full", // 展示方式
       //全屏广告
       advertising: [
@@ -88,9 +111,58 @@ export default {
         },
       ],
       linkType: "", // 选择类型
+      selectedLinks: {},
     };
   },
+
+  watch: {
+    advertising: {
+      handler(val) {
+        this.$store.state.openStyleStore = val;
+        console.log(
+          "this.$store.state.openStyleStore",
+          this.$store.state.openStyleStore
+        );
+      },
+      deep: true,
+    },
+  },
+  mounted() {
+    this.openPage();
+  },
   methods: {
+    // 回调选择的链接
+    selectedLink(val) {
+      this.selectedLinks.url = val;
+
+      this.advertising[0].config = val;
+    },
+    openPage() {
+      const alertType = this.$route.query.pagetype;
+      const pageType = {
+        INDEX: "INDEX",
+        ALERT: "OPEN_SCREEN_PAGE",
+        OPEN_SCREEN_ANIMATION: "OPEN_SCREEN_ANIMATION",
+      }[alertType ? alertType : "INDEX"];
+
+      API_Other.getOpenHomeData(pageType).then((res) => {
+        this.$store.state.openStoreId = res.result.id;
+        if (res.result.pageData) {
+          this.advertising = [JSON.parse(res.result.pageData)];
+        }
+        this.result = res.result
+      });
+    },
+    // 图片选择器回显
+    callbackSelected(val) {
+      this.picModelFlag = false;
+      this.advertising[0].img = val.url;
+    },
+    // 点击选择图片
+    handleClickFile(item, index) {
+      this.$refs.ossManage.selectImage = true;
+      this.picModelFlag = true;
+    },
     // 点击链接
     clickLink(item) {
       this.$refs.liliDialog.open('link')
@@ -107,10 +179,7 @@ export default {
         };
       });
     },
-    // 点击选择照片
-    handleClickFile(item, index) {
-      document.getElementById("files" + index).click();
-    },
+
   },
 };
 </script>

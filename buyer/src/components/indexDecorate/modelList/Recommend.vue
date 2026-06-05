@@ -10,12 +10,12 @@
           <img class="hover-pointer"  @click="linkTo(msgLeft.list[0].url)" :src="msgLeft.list[0].img" width="160" height="160" alt="" />
           <div class="margin-left">{{ msgLeft.list[0].name }}</div>
           <div class="margin-left">{{ msgLeft.list[0].describe }}</div>
-          <Button
+          <el-button
             size="small"
             :style="{ background: msgLeft.bgColor }"
             @click="linkTo(msgLeft.list[0].url)"
             class="fz_12 view-btn"
-            >点击查看</Button
+            >点击查看</el-button
           >
         </div>
         <div>
@@ -36,8 +36,7 @@
       <div class="head-recommend" :style="{ background: msgRight.bgColor }">
         <span>{{ msgRight.title }}</span>
         <span @click="linkTo(msgRight.url)" class="hover-pointer"
-          >{{ msgRight.secondTitle }}&gt;</span
-        >
+          >{{ msgRight.secondTitle }}&gt;</span>
       </div>
       <div class="content-right">
         <div

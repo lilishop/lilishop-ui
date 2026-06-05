@@ -24,10 +24,10 @@
         />
         <div class="setup-box">
           <div>
-            <Button
+            <el-button
               size="small"
               @click.stop="handleSelectModel(element.options.list[0])"
-              >编辑</Button
+              >编辑</el-button
             >
           </div>
         </div>
@@ -43,8 +43,8 @@
             <img :src="item.img" width="230" height="190" alt="" />
             <div class="setup-box">
               <div>
-                <Button size="small" @click.stop="handleSelectModel(item)"
-                  >编辑</Button
+                <el-button size="small" @click.stop="handleSelectModel(item)"
+                  >编辑</el-button
                 >
               </div>
             </div>
@@ -55,6 +55,10 @@
     <!-- 限时秒杀 待完善 -->
     <template v-if="element.type == 'seckill'">
       <seckill :data="element"></seckill>
+    </template>
+    <!-- 限时秒杀 待完善 -->
+    <template v-if="element.type == 'seckill-only-album'">
+      <seckill-only-album :data="element"></seckill-only-album>
     </template>
     <!-- 折扣广告 -->
     <template v-if="element.type == 'discountAdvert'">
@@ -74,8 +78,8 @@
             <img :src="item.img" width="190" height="210" alt="" />
             <div class="setup-box">
               <div>
-                <Button size="small" @click.stop="handleSelectModel(item)"
-                  >编辑</Button
+                <el-button size="small" @click.stop="handleSelectModel(item)"
+                  >编辑</el-button
                 >
               </div>
             </div>
@@ -90,8 +94,8 @@
             <img :src="item.img" width="240" height="105" alt="" />
             <div class="setup-box">
               <div>
-                <Button size="small" @click.stop="handleSelectModel(item)"
-                  >编辑</Button
+                <el-button size="small" @click.stop="handleSelectModel(item)"
+                  >编辑</el-button
                 >
               </div>
             </div>
@@ -111,6 +115,26 @@
     <template v-if="element.type == 'firstAdvert'">
       <first-page-advert :data="element"></first-page-advert>
     </template>
+    <!-- 商品模块 -->
+    <template v-if="element.type == 'goodsType'">
+      <goodsType :data="element" class="mb_20 width_1200_auto"></goodsType>
+    </template>
+    <!-- 商品模块2 -->
+    <template v-if="element.type == 'onlyGoodsModel'">
+      <onlyGoodsModel :data="element" class="mb_20 width_1200_auto"></onlyGoodsModel>
+    </template>
+    <!-- 混合模块 -->
+    <template v-if="element.type == 'mixModel'">
+      <mixModel :data="element" class="mb_20 width_1200_auto"></mixModel>
+    </template>
+    <!-- 为你推荐 -->
+    <template v-if="element.type == 'forYour'">
+      <forYour :data="element" class="mb_20 width_1200_auto"></forYour>
+    </template>
+    <!-- 一行三列 -->
+    <template v-if="element.type == 'oneRowThreeColumns'">
+      <oneRowThreeColumns :data="element" class="mb_20 width_1200_auto"></oneRowThreeColumns>
+    </template>
     <!-- 横幅广告 -->
     <template v-if="element.type == 'bannerAdvert'">
       <div class="horizontal-advert setup-content">
@@ -126,10 +150,10 @@
         </div>
         <div class="setup-box">
           <div>
-            <Button
+            <el-button
               size="small"
               @click.stop="handleSelectModel(element.options)"
-              >编辑</Button
+              >编辑</el-button
             >
           </div>
         </div>
@@ -139,15 +163,15 @@
       <not-enough :data="element"></not-enough>
     </template>
     <div class="del-btn">
-      <Button size="small" type="error" @click="handleModelDelete">删除</Button>
+      <el-button size="small" type="danger" @click="handleModelDelete">删除</el-button>
     </div>
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="装修"
-      draggable
-      width="800"
-      :z-index="100"
-      :mask-closable="false"
+      width="800px"
+      :close-on-click-modal="false"
+      append-to-body
+      destroy-on-close
     >
       <div class="modal-top-advert">
         <div>
@@ -198,41 +222,55 @@
           建议尺寸：<span>{{ selected.size }}</span>
         </div>
         <div>
-          图片链接：<span>{{ selected.url }}</span>
-          <Button size="small" type="primary" @click="handleSelectLink"
-            >选择链接</Button
+          图片链接：<el-input
+            class="outsideUrl"
+            v-model="selected.url"
+            :disabled="!!selected.type && selected.type !== 'link'"
+            placeholder="https://"
+          />
+          <el-button size="small" type="primary" @click="handleSelectLink"
+            >选择链接</el-button
           >
         </div>
         <div>
-          选择图片：<Button size="small" type="primary" @click="handleSelectImg">选择图片</Button>&nbsp;
+          选择图片：<el-button size="small" type="primary" @click="handleSelectImg"
+            >选择图片</el-button
+          >
         </div>
       </div>
-    </Modal>
+    </el-dialog>
     <!-- 选择商品。链接 -->
-    <liliDialog
-      ref="liliDialog"
-      @selectedLink="selectedLink"
-  
-    ></liliDialog>
+    <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
-    <Modal width="1200px" v-model="picModelFlag" footer-hide>
-      <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage"/>
-    </Modal>
+    <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
+      <ossManage
+        @callback="callbackSelected"
+        :is-component="true"
+        :initialize="picModelFlag"
+        ref="ossManage"
+      />
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import ModelCarousel from "./modelList/carousel.vue";
-import ModelCarousel1 from './modelList/carousel1.vue';
-import ModelCarousel2 from './modelList/carousel2.vue';
+import ModelCarousel1 from "./modelList/carousel1.vue";
+import ModelCarousel2 from "./modelList/carousel2.vue";
 import FirstPageAdvert from "./modelList/firstPageAdvert.vue";
 import NewGoodsSort from "./modelList/newGoodsSort.vue";
 import Recommend from "./modelList/recommend.vue";
 import NotEnough from "./modelList/notEnough.vue";
 import Seckill from "./modelList/seckill.vue";
-// import ossManage from "@/views/sys/oss-manage/ossManage";
-import ossManage from "@/views/shop/ossManages";
+import goodsType from "./modelList/goodsAndType.vue";
+import ossManage from "@/views/sys/oss-manage/ossManage";
 
+import mixModel from "./modelList/mixModel.vue";
+import forYour from "./modelList/forYour.vue";
+import onlyGoodsModel from "./modelList/onlyGoodsModel.vue";
+
+import oneRowThreeColumns from "./modelList/oneRowThreeColumns.vue";
+import seckillOnlyAlbum from "./modelList/seckill-only-album.vue";
 export default {
   name: "modelFormItem",
   props: ["element", "select", "index", "data"],
@@ -245,7 +283,13 @@ export default {
     FirstPageAdvert,
     NotEnough,
     Seckill,
+    goodsType,
     ossManage,
+    oneRowThreeColumns,
+    "seckill-only-album":seckillOnlyAlbum,
+    onlyGoodsModel,
+    mixModel,
+    forYour
   },
   data() {
     return {
@@ -278,9 +322,11 @@ export default {
     },
     // 确定选择链接
     selectedLink(val) {
-      this.selected.url = this.$options.filters.formatLinkType(val);
+      this.selected.url = this.$filters.formatLinkType(val);
+      this.selected.type =
+        val.___type === "other" && val.url === "" ? "link" : "other";
     },
-    
+
     handleSelectImg() {
       // 选择图片
       this.$refs.ossManage.selectImage = true;
@@ -433,7 +479,7 @@ export default {
         height: inherit;
         font-size: 12px;
         font-weight: bold;
-        .ivu-icon {
+        .el-icon {
           position: absolute;
           right: 10px;
           top: 10px;
@@ -457,14 +503,14 @@ export default {
       align-items: center;
       flex-direction: column;
       justify-content: center;
-      .ivu-icon {
+      .el-icon {
         font-size: 18px;
         transition: all 0.3s ease-out;
       }
       &:hover {
         background-color: $theme_color;
         color: #fff;
-        .ivu-icon {
+        .el-icon {
           transform: rotateZ(360deg);
         }
       }

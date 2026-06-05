@@ -1,6 +1,6 @@
 <template>
   <div class="not-enough" ref="obtain" id="demo">
-    <Affix :offset-top="62" @on-change="change">
+    <el-affix :offset-top="62" @change="change">
       <ul class="nav-bar" v-show="topSearchShow">
         <li
           v-for="(item, index) in conData.options.navList"
@@ -12,7 +12,7 @@
           <p @click="gotoDemo">{{ item.desc }}</p>
         </li>
       </ul>
-    </Affix>
+    </el-affix>
     <div class="content" v-if="showContent">
       <div
         v-for="(item, index) in conData.options.list[currentIndex]"
@@ -23,7 +23,7 @@
         <img :src="item.img" width="210" height="210" :alt="item.name" />
         <p>{{ item.name }}</p>
         <p>
-          <span>{{ Number(item.price) | unitPrice("￥") }}</span>
+          <span>{{ $filters.unitPrice(Number(item.price), "￥") }}</span>
         </p>
       </div>
     </div>

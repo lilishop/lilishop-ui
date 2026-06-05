@@ -1,90 +1,89 @@
 <template>
   <div class="invoice-modal">
-    <Modal v-model="invoiceAvailable" width="640" footer-hide>
-      <p slot="header">
+    <el-dialog v-model="invoiceAvailable" width="640" footer-hide>
+      <template #header><p>
         <span>发票信息</span>
-      </p>
+      </p></template>
       <div class="nav-content">
-        <Form :model="invoiceForm" ref="form" label-position="left" :rules="formRules" :label-width="118">
-          <FormItem label="发票类型">
-            <RadioGroup v-model="invoice" type="button" button-style="solid" @on-change="onInvoiceKindChange">
-              <Radio :label="1">电子普通发票</Radio>
-              <Radio :label="2">增值税专用发票</Radio>
-            </RadioGroup>
-          </FormItem>
+        <el-form :model="invoiceForm" ref="form" label-position="left" :rules="formRules" label-width="118px">
+          <el-form-item label="发票类型">
+            <el-radio-group v-model="invoice" type="button" button-style="solid" @change="onInvoiceKindChange">
+              <el-radio :label="1">电子普通发票</el-radio>
+              <el-radio :label="2">增值税专用发票</el-radio>
+            </el-radio-group>
+          </el-form-item>
 
           <!-- 电子普通发票 -->
           <div v-if="invoice === 1" key="invoice-normal">
-            <FormItem label="发票抬头">
-              <RadioGroup v-model="type" type="button" button-style="solid" @on-change="onHeaderTypeChange">
-                <Radio :label="1">个人</Radio>
-                <Radio :label="2">单位</Radio>
-              </RadioGroup>
-            </FormItem>
-            <FormItem :label="type === 1 ? '个人名称' : '单位名称'" :prop="type === 1 ? 'personalName' : 'companyName'">
-              <i-input v-if="type === 1" v-model="invoiceForm.personalName"></i-input>
-              <i-input v-else v-model="invoiceForm.companyName"></i-input>
-            </FormItem>
+            <el-form-item label="发票抬头">
+              <el-radio-group v-model="type" type="button" button-style="solid" @change="onHeaderTypeChange">
+                <el-radio :label="1">个人</el-radio>
+                <el-radio :label="2">单位</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item :label="type === 1 ? '个人名称' : '单位名称'" :prop="type === 1 ? 'personalName' : 'companyName'">
+              <el-input v-if="type === 1" v-model="invoiceForm.personalName"></el-input>
+              <el-input v-else v-model="invoiceForm.companyName"></el-input>
+            </el-form-item>
 
-            <FormItem label="纳税人识别号" v-if="type === 2" prop="taxpayerId">
-              <i-input v-model="invoiceForm.taxpayerId"></i-input>
-            </FormItem>
-            <FormItem label="发票内容">
-              <RadioGroup v-model="invoiceForm.receiptContent" type="button" button-style="solid">
-                <Radio label="商品明细">商品明细</Radio>
-                <Radio label="商品类别">商品类别</Radio>
-              </RadioGroup>
-            </FormItem>
-            <FormItem label="收票人手机" prop="receiptPhone">
-              <i-input v-model="invoiceForm.receiptPhone"></i-input>
-            </FormItem>
-            <FormItem label="收票人邮箱" prop="receiptEmail">
-              <i-input v-model="invoiceForm.receiptEmail" placeholder="可选"></i-input>
-            </FormItem>
+            <el-form-item label="纳税人识别号" v-if="type === 2" prop="taxpayerId">
+              <el-input v-model="invoiceForm.taxpayerId"></el-input>
+            </el-form-item>
+            <el-form-item label="发票内容">
+              <el-radio-group v-model="invoiceForm.receiptContent" type="button" button-style="solid">
+                <el-radio label="商品明细">商品明细</el-radio>
+                <el-radio label="商品类别">商品类别</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="收票人手机" prop="receiptPhone">
+              <el-input v-model="invoiceForm.receiptPhone"></el-input>
+            </el-form-item>
+            <el-form-item label="收票人邮箱" prop="receiptEmail">
+              <el-input v-model="invoiceForm.receiptEmail" placeholder="可选"></el-input>
+            </el-form-item>
           </div>
 
           <!-- 增值税专用发票（固定为单位） -->
           <div v-else key="invoice-vat">
-            <FormItem label="发票抬头">
+            <el-form-item label="发票抬头">
               <span class="inv-title-fixed">单位</span>
-            </FormItem>
-            <FormItem label="单位名称" prop="companyName">
-              <i-input v-model="invoiceForm.companyName" placeholder="与营业执照一致"></i-input>
-            </FormItem>
-            <FormItem label="纳税人识别号" prop="taxpayerId">
-              <i-input v-model="invoiceForm.taxpayerId"></i-input>
-            </FormItem>
-            <FormItem label="单位地址" prop="companyAddress">
-              <i-input v-model="invoiceForm.companyAddress" placeholder="注册地址"></i-input>
-            </FormItem>
-            <FormItem label="单位电话" prop="companyPhone">
-              <i-input v-model="invoiceForm.companyPhone" placeholder="固话或手机"></i-input>
-            </FormItem>
-            <FormItem label="开户银行" prop="bankName">
-              <i-input v-model="invoiceForm.bankName"></i-input>
-            </FormItem>
-            <FormItem label="银行账号" prop="bankAccount">
-              <i-input v-model="invoiceForm.bankAccount"></i-input>
-            </FormItem>
-            <FormItem label="发票内容">
-              <RadioGroup v-model="invoiceForm.receiptContent" type="button" button-style="solid">
-                <Radio label="商品明细">商品明细</Radio>
-              </RadioGroup>
-            </FormItem>
-            <FormItem label="收票人手机" prop="receiptPhone">
-              <i-input v-model="invoiceForm.receiptPhone"></i-input>
-            </FormItem>
-            <FormItem label="收票人邮箱" prop="receiptEmail">
-              <i-input v-model="invoiceForm.receiptEmail" placeholder="可选"></i-input>
-            </FormItem>
+            </el-form-item>
+            <el-form-item label="单位名称" prop="companyName">
+              <el-input v-model="invoiceForm.companyName" placeholder="与营业执照一致"></el-input>
+            </el-form-item>
+            <el-form-item label="纳税人识别号" prop="taxpayerId">
+              <el-input v-model="invoiceForm.taxpayerId"></el-input>
+            </el-form-item>
+            <el-form-item label="单位地址" prop="companyAddress">
+              <el-input v-model="invoiceForm.companyAddress" placeholder="注册地址"></el-input>
+            </el-form-item>
+            <el-form-item label="单位电话" prop="companyPhone">
+              <el-input v-model="invoiceForm.companyPhone" placeholder="固话或手机"></el-input>
+            </el-form-item>
+            <el-form-item label="开户银行" prop="bankName">
+              <el-input v-model="invoiceForm.bankName"></el-input>
+            </el-form-item>
+            <el-form-item label="银行账号" prop="bankAccount">
+              <el-input v-model="invoiceForm.bankAccount"></el-input>
+            </el-form-item>
+            <el-form-item label="发票内容">
+              <el-radio-group v-model="invoiceForm.receiptContent" type="button" button-style="solid">
+                <el-radio label="商品明细">商品明细</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="收票人手机" prop="receiptPhone">
+              <el-input v-model="invoiceForm.receiptPhone"></el-input>
+            </el-form-item>
+            <el-form-item label="收票人邮箱" prop="receiptEmail">
+              <el-input v-model="invoiceForm.receiptEmail" placeholder="可选"></el-input>
+            </el-form-item>
           </div>
-        </Form>
+        </el-form>
         <div style="text-align: center">
-          <Button type="primary" :loading="loading" @click="submit">保存发票信息</Button>
-          <Button type="default" @click="invoiceAvailable = false">取消</Button>
+          <el-button type="primary" :loading="loading" @click="submit">保存发票信息</el-button>
+          <el-button type="default" @click="invoiceAvailable = false">取消</el-button>
         </div>
-      </div>
-    </Modal>
+      </div></el-dialog>
   </div>
 </template>
 <script>

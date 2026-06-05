@@ -17,7 +17,6 @@
 </template>
 
 <script>
-import { Tabs, TabPane } from 'element-ui'
 import { ServeGetStoreDetail, ServeGetUserDetail, ServeGetFootPrint, ServeGetOrderPrint, ServeGetGoodsDetail, ServeStoreGetFootPrint,ServeStoreGetOrderPrint } from '@/api/user'
 import StoreDetail from "@/components/chat/panel/template/storeDetail.vue";
 import FootPrint from "@/components/chat/panel/template/footPrint.vue";
@@ -26,8 +25,6 @@ import SocketInstance from "@/im-server/socket-instance";
 import { mapState, mapGetters } from "vuex";
 export default {
   components: {
-    "el-tabs": Tabs,
-    "el-tab-pane": TabPane,
     StoreDetail,
     FootPrint,
     GoodsLink
@@ -271,27 +268,27 @@ export default {
 </script>
 
 <style scoped lang="less">
-// /deep/ .el-tabs__nav.is-top {
+// :deep(.el-tabs__nav.is-top ) {
 // }
 
-/deep/ .el-tabs__nav {
+:deep(.el-tabs__nav ) {
   height: 60px;
   line-height: 60px;
 }
 
-/deep/ .el-tab-pane {
+:deep(.el-tab-pane ) {
   // margin-left: 12px;
 }
-/deep/.el-tabs__nav-scroll{
+:deep(.el-tabs__nav-scroll) {
   min-width: 362px;
 }
-/deep/ .el-tabs__item{
+:deep(.el-tabs__item) {
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-/deep/ .el-tabs__header{
+:deep(.el-tabs__header) {
   margin-bottom: 0;
 }
 </style>

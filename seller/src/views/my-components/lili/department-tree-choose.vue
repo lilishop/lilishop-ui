@@ -1,112 +1,123 @@
 <template>
   <div>
-    <div style="display:flex;">
-      <Input
+    <div style="display: flex">
+      <el-input
         v-model="departmentTitle"
         readonly
-        style="margin-right:10px;"
+        style="margin-right: 10px; flex: 1"
         :placeholder="placeholder"
         :clearable="clearable"
-        @on-clear="clearSelect"
+        @clear="clearSelect"
       />
-      <Poptip transfer trigger="click" placement="right" title="选择部门" width="250">
-        <Button icon="md-list">选择部门</Button>
-        <div slot="content">
-          <Input
-            v-model="searchKey"
-            suffix="ios-search"
-            @on-change="searchDep"
-            placeholder="输入部门名搜索"
-            clearable
+      <el-popover trigger="click" placement="right" title="选择部门" :width="280">
+        <template #reference>
+          <el-button>选择部门</el-button>
+        </template>
+        <el-input
+          v-model="searchKey"
+          placeholder="输入部门名搜索"
+          clearable
+          style="margin-bottom: 8px"
+          @input="searchDep"
+        />
+        <div v-loading="depLoading" class="dep-tree-bar">
+          <el-tree
+            :data="dataDep"
+            :props="treeProps"
+            node-key="id"
+            highlight-current
+            default-expand-all
+            @node-click="selectTree"
           />
-          <div class="dep-tree-bar">
-            <Tree
-              :data="dataDep"
-              @on-select-change="selectTree"
-            ></Tree>
-            <Spin size="large" fix v-if="depLoading"></Spin>
-          </div>
         </div>
-      </Poptip>
+      </el-popover>
     </div>
   </div>
 </template>
 
 <script>
-import {initDepartment, searchDepartment} from "@/api/index";
+import { initDepartment, searchDepartment } from "@/api/index";
 
 export default {
   name: "departmentTreeChoose",
   props: {
     multiple: {
       type: Boolean,
-      default: false
+      default: false,
     },
     clearable: {
       type: Boolean,
-      default: true
+      default: true,
     },
     placeholder: {
       type: String,
-      default: "点击选择部门"
-    }
+      default: "点击选择部门",
+    },
   },
   data() {
     return {
-      depLoading: false, // 加载状态
-      departmentTitle: "", // modal标题
-      searchKey: "", // 搜索关键词
-      dataDep: [], // 部门列表
-      selectDep: [], // 已选部门
-      departmentId: [] // 部门id
+      depLoading: false,
+      departmentTitle: "",
+      searchKey: "",
+      dataDep: [],
+      cloneDep: [],
+      departmentId: [],
+      treeProps: {
+        label: "title",
+        children: "children",
+      },
     };
   },
   methods: {
-    // 获取部门数据
     initDepartmentData() {
-      initDepartment().then(res => {
-        if (res.success) {
-          this.dataDep = res.result;
-        }
-      });
+      this.depLoading = true;
+      initDepartment()
+        .then((res) => {
+          if (res.success) {
+            this.dataDep = res.result;
+            this.cloneDep = JSON.parse(JSON.stringify(this.dataDep));
+          }
+        })
+        .finally(() => {
+          this.depLoading = false;
+        });
     },
     searchDep() {
-      // 搜索部门
       if (this.searchKey) {
         this.depLoading = true;
-        searchDepartment({title: this.searchKey}).then(res => {
-          this.depLoading = false;
-          if (res.success) {
-            res.result.forEach(function (e) {
-              if (e.status == -1) {
-                e.title = "[已禁用] " + e.title;
-                e.disabled = true;
-              }
-            });
-            this.dataDep = res.result;
-          }
-        });
+        searchDepartment({ title: this.searchKey })
+          .then((res) => {
+            if (res.success) {
+              res.result.forEach((e) => {
+                if (e.status == -1) {
+                  e.title = "[已禁用] " + e.title;
+                  e.disabled = true;
+                }
+              });
+              this.dataDep = res.result;
+            }
+          })
+          .finally(() => {
+            this.depLoading = false;
+          });
       } else {
-        this.initDepartmentData();
+        this.dataDep = JSON.parse(JSON.stringify(this.cloneDep));
       }
     },
-    // 选择回调
-    selectTree(v) {
-      if (v.length === 0) {
+    selectTree(node) {
+      if (!node) {
         this.$emit("on-change", null);
         this.departmentId = "";
         this.departmentTitle = "";
-        return
+        return;
       }
-      this.departmentId = v[0].id;
-      this.departmentTitle = v[0].title;
-      let department = {
+      this.departmentId = node.id;
+      this.departmentTitle = node.title;
+      this.$emit("on-change", {
         departmentId: this.departmentId,
-        departmentTitle: this.departmentTitle
-      }
-      this.$emit("on-change", department);
+        departmentTitle: this.departmentTitle,
+      });
     },
-    // 清除选中方法
     clearSelect() {
       this.departmentId = [];
       this.departmentTitle = "";
@@ -118,7 +129,6 @@ export default {
       }
       this.$emit("on-clear");
     },
-    // 设置数据 回显用
     setData(ids, title) {
       this.departmentTitle = title;
       if (this.multiple) {
@@ -127,11 +137,11 @@ export default {
         this.departmentId = [];
         this.departmentId.push(ids);
       }
-    }
+    },
   },
   created() {
     this.initDepartmentData();
-  }
+  },
 };
 </script>
 
@@ -151,9 +161,6 @@ export default {
 
 .dep-tree-bar::-webkit-scrollbar-thumb {
   border-radius: 4px;
-  -webkit-box-shadow: inset 0 0 2px #d1d1d1;
   background: #e4e4e4;
 }
-
 </style>
-

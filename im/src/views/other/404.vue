@@ -39,7 +39,7 @@ export default {
       }
     }, 1000)
   },
-  destroyed() {
+  beforeUnmount() {
     clearInterval(this.setInterval)
   },
   methods: {

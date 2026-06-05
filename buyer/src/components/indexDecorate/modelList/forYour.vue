@@ -34,7 +34,7 @@
             <div class="hot-goods">
               <div class="hot-goods-title">{{ item.title }}</div>
               <div>
-                <div class="hot-price">￥{{ item.price | unitPrice }}</div>
+                <div class="hot-price">￥{{ $filters.unitPrice(item.price) }}</div>
               </div>
             </div>
           </div>
@@ -84,10 +84,10 @@ export default {
     border-top: 1.4px solid #e2e2e2;
   }
   &:hover {
-    ::v-deep .goods-name {
+    :deep .goods-name {
       color: $theme_color;
     }
-    ::v-deep .goods-desc {
+    :deep .goods-desc {
       color: $theme_color;
     }
   }

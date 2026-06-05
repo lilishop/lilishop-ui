@@ -9,17 +9,6 @@ function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
-const assetsCDN = {
-  externals: {
-    vue: 'Vue',
-
-  },
-  css: [],
-  js: [
-    'https://cdn.pickmall.cn/cdn/vue.min.js',
-  ],
-}
-
 // vue.config.js
 const vueConfig = {
   // 公共路径(必须有的)
@@ -57,37 +46,24 @@ const vueConfig = {
       }),
     ],
 
-    // if prod, add externals
-    externals: isProd ? assetsCDN.externals : {},
   },
 
   chainWebpack: config => {
     config.resolve.alias.set('@', resolve('src'))
 
-    const svgRule = config.module.rule('svg')
-    svgRule.uses.clear()
-    svgRule
-      .oneOf('inline')
-      .resourceQuery(/inline/)
-      .use('vue-svg-icon-loader')
-      .loader('vue-svg-icon-loader')
+    config.module.rule('svg').exclude.add(resolve('src/icons/svg')).end()
+
+    config.module
+      .rule('icons')
+      .test(/\.svg$/)
+      .include.add(resolve('src/icons/svg'))
       .end()
-      .end()
-      .oneOf('external')
-      .use('file-loader')
-      .loader('file-loader')
+      .use('svg-sprite-loader')
+      .loader('svg-sprite-loader')
       .options({
-        name: 'assets/[name].[hash:8].[ext]',
+        symbolId: 'icon-[name]',
       })
 
-    // if prod is on
-    // assets require on cdn
-    if (isProd) {
-      config.plugin('html').tap(args => {
-        args[0].cdn = assetsCDN
-        return args
-      })
-    }
   },
   pluginOptions: {
     'style-resources-loader': {

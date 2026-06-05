@@ -5,13 +5,13 @@
       <div class="nav-side"></div>
       <div class="nav-content">
         <!-- 轮播图 -->
-        <Carousel autoplay @on-change="autoChange">
-          <CarouselItem v-for="(item, index) in data.options.list" :key="index" >
+        <el-carousel height="470px" :interval="5000" @change="autoChange">
+          <el-carousel-item v-for="(item, index) in data.options.list" :key="index">
             <div style="overflow: hidden">
               <img :src="item.img" width="1200" height="470" />
             </div>
-          </CarouselItem>
-        </Carousel>
+          </el-carousel-item>
+        </el-carousel>
       </div>
     </div>
   </div>
@@ -34,8 +34,8 @@ export default {
   },
   methods: {
     // 自动切换时改变背景色
-    autoChange (oVal, val) {
-      this.bgColor = this.data.options.list[val].bgColor
+    autoChange (index) {
+      this.bgColor = this.data.options.list[index].bgColor
     }
   }
 };

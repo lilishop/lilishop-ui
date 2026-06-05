@@ -5,164 +5,202 @@
     <div class="box">
       <div class="mb_20 account-price">
         <span class="subTips">账户余额：</span>
-        <span class="global_color mr_10" style="font-size:26px">￥{{ memberDeposit | unitPrice }}</span>
+        <span class="global_color mr_10" style="font-size:26px">￥{{ $filters.unitPrice(memberDeposit) }}</span>
         <span class="subTips">冻结金额：</span>
-        <span class="">￥{{ frozenDeposit | unitPrice }}</span>
+        <span class="">￥{{ $filters.unitPrice(frozenDeposit) }}</span>
       </div>
       <div class="account-btns">
-        <Button type="primary" @click="recharge">在线充值</Button>
-        <Button @click="withdrawalApply">申请提现</Button>
+        <el-button type="primary" @click="recharge">在线充值</el-button>
+        <el-button @click="withdrawalApply">申请提现</el-button>
       </div>
     </div>
-    <Modal v-model="modal" width="530">
-      <p slot="header">
-        <Icon type="edit"></Icon>
+    <el-dialog v-model="modal" width="530">
+      <template #header><p>
+        <el-icon><Edit /></el-icon>
         <span>充值金额</span>
-      </p>
+      </p></template>
       <div>
-        <Form
+        <el-form
           ref="formData"
-          :label-width="100"
+          label-width="100px"
           :model="formData"
           :rules="formValidate"
           label-position="left"
         >
-          <FormItem label="充值金额" prop="price">
-            <Input v-model="formData.price" maxlength="9" number size="large"
-            ><span slot="append">元</span></Input>
-          </FormItem>
-        </Form>
+          <el-form-item label="充值金额" prop="price">
+            <el-input v-model="formData.price" maxlength="9" number size="large"
+            ><template #append><span>元</span></template></el-input>
+          </el-form-item>
+        </el-form>
       </div>
-      <div slot="footer" style="text-align: center">
-        <Button size="large" type="success" @click="rechargePrice">充值</Button>
-      </div>
-    </Modal>
+      <template #footer><div style="text-align: center">
+        <el-button size="large" type="success" @click="rechargePrice">充值</el-button>
+      </div></template>
+    </el-dialog>
     <!-- 提现申请 -->
-    <Modal v-model="withdrawApplyModal" width="530">
-      <p slot="header">
-        <Icon type="edit"></Icon>
+    <el-dialog v-model="withdrawApplyModal" width="530">
+      <template #header><p>
+        <el-icon><Edit /></el-icon>
         <span>提现金额</span>
-      </p>
+      </p></template>
       <div>
-        <Form
+        <el-form
           ref="withdrawApplyFormData"
-          :label-width="120"
+          label-width="120px"
           :model="withdrawApplyFormData"
           :rules="withdrawApplyFormValidate"
         >
-          <FormItem label="提现类型" prop="type">
-            <Select v-model="withdrawApplyFormData.type" disabled>
-              <Option value="ALI">支付宝</Option>
-              <Option value="WECHAT">微信</Option>
-            </Select>
-          </FormItem>
-          <FormItem label="提现金额" prop="price">
-            <Input
+          <el-form-item label="提现类型" prop="type">
+            <el-select v-model="withdrawApplyFormData.type" disabled>
+              <el-option value="ALI">支付宝</el-option>
+              <el-option value="WECHAT">微信</el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="提现金额" prop="price">
+            <el-input
               v-model="withdrawApplyFormData.price"
               maxlength="9"
               number
               size="large"
-            ><span slot="append">元</span></Input>
+            ><template #append><span>元</span></template></el-input>
             <span style="color: red">最低提现金额 {{ withdrawApplyFormData.minPrice }}元</span>
-          </FormItem>
-          <FormItem v-if="withdrawApplyFormData.type === 'ALI'" label="真实姓名" prop="realName">
-            <Input
+          </el-form-item>
+          <el-form-item v-if="withdrawApplyFormData.type === 'ALI'" label="真实姓名" prop="realName">
+            <el-input
               v-model="withdrawApplyFormData.realName"
               maxlength="9"
               number
               size="large"
-            ></Input>
-          </FormItem>
-          <FormItem v-if="withdrawApplyFormData.type === 'ALI'" label="第三方登录账号" prop="connectNumber">
-            <Input
+            ></el-input>
+          </el-form-item>
+          <el-form-item v-if="withdrawApplyFormData.type === 'ALI'" label="第三方登录账号" prop="connectNumber">
+            <el-input
               v-model="withdrawApplyFormData.connectNumber"
               maxlength="9"
               number
               size="large"
-            ></Input>
-          </FormItem>
-        </Form>
+            ></el-input>
+          </el-form-item>
+        </el-form>
       </div>
-      <div slot="footer" style="text-align: center">
-        <Button size="large" type="success" @click="withdrawal">提现</Button>
-      </div>
-    </Modal>
+      <template #footer><div style="text-align: center">
+        <el-button size="large" type="success" @click="withdrawal">提现</el-button>
+      </div></template>
+    </el-dialog>
     <!-- 余额日志 -->
-    <Tabs value="log" @on-click="tabPaneChange">
-      <TabPane label="余额日志" name="log">
-        <Table :columns="logColumns" :data="logColumnsData.records"></Table>
+    <el-tabs v-model="activeWalletTab" @tab-click="(tab) => tabPaneChange(tab.paneName)">
+      <el-tab-pane label="余额日志" name="log">
+        <el-table :data="logColumnsData.records || []">
+          <el-table-column prop="createTime" label="时间" width="190" />
+          <el-table-column label="金额" width="180">
+            <template #default="{ row }">
+              <span v-if="row.money > 0" style="color: green">{{ $filters.unitPrice(row.money, '+ ¥') }}</span>
+              <span v-else-if="row.money < 0" style="color: red">{{ $filters.unitPrice(0 - row.money, '- ¥') }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="detail" label="变动日志" />
+        </el-table>
         <!-- 分页 -->
         <div class="page-size">
-          <Page
-            :current="walletForm.pageNumber"
+          <el-pagination             :current-page="walletForm.pageNumber"
             :page-size="walletForm.pageSize"
-            :page-size-opts="[10, 20, 50]"
+            :page-sizes="[10, 20, 50]"
             :total="logColumnsData.total"
-            show-sizer
-            show-total
-            size="small"
-            transfer
-            @on-change="changePage"
-            @on-page-size-change="changePageSize"
-          ></Page>
+            small
+            @current-change="changePage"
+            @size-change="changePageSize"
+           layout="total, sizes, prev, pager, next"></el-pagination>
         </div>
-      </TabPane>
+      </el-tab-pane>
       <!-- 充值记录 -->
-      <TabPane label="充值记录" name="recharge">
-        <Table
-          :columns="rechargeListColumns"
-          :data="rechargeListData.records"
-        ></Table>
+      <el-tab-pane label="充值记录" name="recharge">
+        <el-table :data="rechargeListData.records || []">
+          <el-table-column prop="createTime" label="充值时间" width="168" />
+          <el-table-column prop="rechargeSn" label="支付单号" width="200" />
+          <el-table-column label="充值金额">
+            <template #default="{ row }">
+              <span v-if="row.payStatus === 'PAID'" style="color: green">{{ $filters.unitPrice(row.rechargeMoney, '+ ¥') }}</span>
+              <span v-else>{{ $filters.unitPrice(row.rechargeMoney, '¥') }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="支付状态">
+            <template #default="{ row }">
+              <span v-if="row.payStatus === 'PAID'">已付款</span>
+              <span v-else-if="row.payStatus === 'UNPAID'">未付款</span>
+              <span v-else-if="row.payStatus === 'CANCEL'">已取消</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="支付方式">
+            <template #default="{ row }">
+              <span v-if="row.rechargeWay === 'ALIPAY'">支付宝</span>
+              <span v-else-if="row.rechargeWay === 'WECHAT'">微信</span>
+              <span v-else-if="row.rechargeWay === 'BANK_TRANSFER'">线下转账</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="payTime" label="支付时间" width="180" />
+        </el-table>
         <!-- 分页 -->
         <div class="page-size">
-          <Page
-            :current="rechargeForm.pageNumber"
+          <el-pagination             :current-page="rechargeForm.pageNumber"
             :page-size="rechargeForm.pageSize"
-            :page-size-opts="[10, 20, 50]"
+            :page-sizes="[10, 20, 50]"
             :total="rechargeListData.total"
-            show-sizer
-            show-total
-            size="small"
-            transfer
-            @on-change="rechargeChangePage"
-            @on-page-size-change="rechargeChangePageSize"
-          ></Page>
+            small
+            @current-change="rechargeChangePage"
+            @size-change="rechargeChangePageSize"
+           layout="total, sizes, prev, pager, next"></el-pagination>
         </div>
-      </TabPane>
+      </el-tab-pane>
 
-      <TabPane label="提现记录" name="withdrawApply">
-        <Table
-          :columns="withdrawApplyColumns"
-          :data="withdrawApplyColumnsListData.records"
-        ></Table>
+      <el-tab-pane label="提现记录" name="withdrawApply">
+        <el-table :data="withdrawApplyColumnsListData.records || []">
+          <el-table-column prop="createTime" label="申请时间" width="168" />
+          <el-table-column prop="sn" label="提现单号" width="200" />
+          <el-table-column label="提现金额" width="110">
+            <template #default="{ row }">
+              <span v-if="row.applyStatus === 'VIA_AUDITING'" style="color: green">{{ $filters.unitPrice(row.applyMoney, '+ ¥') }}</span>
+              <span v-else>{{ $filters.unitPrice(row.applyMoney, '¥') }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="提现状态" width="95">
+            <template #default="{ row }">
+              <span v-if="row.applyStatus === 'APPLY'">申请中</span>
+              <span v-else-if="row.applyStatus === 'VIA_AUDITING'">审核通过</span>
+              <span v-else-if="row.applyStatus === 'SUCCESS'">提现成功</span>
+              <span v-else-if="row.applyStatus === 'ERROR'">提现失败</span>
+              <span v-else>审核拒绝</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="inspectTime" label="审核时间" width="168" />
+          <el-table-column prop="inspectRemark" label="审核备注" show-overflow-tooltip />
+        </el-table>
         <!-- 分页 -->
         <div class="page-size">
-          <Page
-            :current="withdrawApplyForm.pageNumber"
+          <el-pagination             :current-page="withdrawApplyForm.pageNumber"
             :page-size="withdrawApplyForm.pageSize"
-            :page-size-opts="[10, 20, 50]"
+            :page-sizes="[10, 20, 50]"
             :total="withdrawApplyColumnsListData.total"
-            show-sizer
-            show-total
-            size="small"
-            transfer
-            @on-change="withdrawChangePage"
-            @on-page-size-change="withdrawChangePageSize"
-          ></Page>
+            small
+            @current-change="withdrawChangePage"
+            @size-change="withdrawChangePageSize"
+           layout="total, sizes, prev, pager, next"></el-pagination>
         </div>
-      </TabPane>
-    </Tabs>
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 
 <script>
 import {getDepositLog, getMembersWallet, getRecharge, getWithdrawApply, recharge, withdrawalApply} from '@/api/member';
 import {withdrawalSettingVO} from "@/api/pay";
+import { Edit } from '@element-plus/icons-vue';
 
 export default {
   name: 'MoneyManagement',
+  components: { Edit },
   data() {
     return {
+      activeWalletTab: "log",
       frozenDeposit: 0, // 冻结余额
       memberDeposit: 0, // 余额
 
@@ -225,172 +263,9 @@ export default {
           }
         ]
       },
-      // 余额日志
-      logColumns: [
-        {
-          title: '时间',
-          width: 190,
-          key: 'createTime'
-        },
-        {
-          title: '金额',
-          key: 'money',
-          width: 180,
-          render: (h, params) => {
-            if (params.row.money > 0) {
-              return h('div', [
-                h(
-                  'span',
-                  {
-                    style: {
-                      color: 'green'
-                    }
-                  },
-                  this.$options.filters.unitPrice(params.row.money, '+ ¥')
-                )
-              ]);
-            } else if (params.row.money < 0) {
-              return h('div', [
-                h(
-                  'span',
-                  {
-                    style: {
-                      color: 'red'
-                    }
-                  },
-                  this.$options.filters.unitPrice(0 - params.row.money, '- ¥')
-                )
-              ]);
-            }
-          }
-        },
-        {
-          title: '变动日志',
-          key: 'detail'
-        }
-      ],
-      logColumnsData: {}, // 余额日志
-      // 充值记录
-      rechargeListColumns: [
-        {
-          title: '充值时间',
-          key: 'createTime',
-          width: 168
-        },
-        {
-          title: '支付单号',
-          key: 'rechargeSn',
-          width: 200
-        },
-        {
-          title: '充值金额',
-          key: 'rechargeMoney',
-          render: (h, params) => {
-            if (params.row.payStatus === 'PAID') {
-              return h('div', [h('span', {
-                style: {
-                  color: 'green'
-                }
-              }, this.$options.filters.unitPrice(params.row.rechargeMoney, '+ ¥'))]);
-            } else {
-              return h('div', [h('span', this.$options.filters.unitPrice(params.row.rechargeMoney, '¥'))]);
-            }
-          }
-        },
-        {
-          title: '支付状态',
-          key: 'payStatus',
-          render: (h, params) => {
-            if (params.row.payStatus === 'PAID') {
-              return h('div', [h('span', {}, '已付款')]);
-            } else if (params.row.payStatus === 'UNPAID') {
-              return h('div', [h('span', {}, '未付款')]);
-            } else if (params.row.payStatus === 'CANCEL') {
-              return h('div', [h('span', {}, '已取消')]);
-            }
-          }
-        },
-        {
-          title: '支付方式',
-          key: 'rechargeWay',
-          render: (h, params) => {
-            if (params.row.rechargeWay === 'ALIPAY') {
-              return h('div', [h('span', {}, '支付宝')]);
-            } else if (params.row.rechargeWay === 'WECHAT') {
-              return h('div', [h('span', {}, '微信')]);
-            } else if (params.row.rechargeWay === 'BANK_TRANSFER') {
-              return h('div', [h('span', {}, '线下转账')]);
-            } else {
-              return h('div', [h('span', {}, '')]);
-            }
-          }
-        },
-        {
-          title: '支付时间',
-          key: 'payTime',
-          width: 180
-        }
-      ],
-      rechargeListData: {}, // 充值记录数据
-      // 提现记录
-      withdrawApplyColumns: [
-        {
-          title: '申请时间',
-          key: 'createTime',
-          width: 168
-        },
-        {
-          title: '提现单号',
-          key: 'sn',
-          width: 200
-        },
-        {
-          title: '提现金额',
-          key: 'applyMoney',
-          width: 110,
-          render: (h, params) => {
-            if (params.row.applyStatus === 'VIA_AUDITING') {
-              return h('div', [h('span', {
-                style: {
-                  color: 'green'
-                }
-              }, this.$options.filters.unitPrice(params.row.applyMoney, '+ ¥'))]);
-            } else {
-              return h('div', [h('span', this.$options.filters.unitPrice(params.row.applyMoney, '¥'))]);
-            }
-          }
-        },
-        {
-          title: '提现状态',
-          key: 'applyStatus',
-          width: 95,
-          render: (h, params) => {
-            if (params.row.applyStatus === 'APPLY') {
-              return h('div', [h('span', {}, '申请中')]);
-            } else if (params.row.applyStatus === 'VIA_AUDITING') {
-              return h('div', [h('span', {}, '审核通过')]);
-            } else if (params.row.applyStatus === 'SUCCESS') {
-              return h('div', [h('span', {}, '提现成功')]);
-            } else if (params.row.applyStatus === 'ERROR') {
-              return h('div', [h('span', {}, '提现失败')]);
-            } else {
-              return h('div', [h('span', {}, '审核拒绝')]);
-            }
-          }
-        },
-        {
-          title: '审核时间',
-          key: 'inspectTime',
-          width: 168
-        },
-        {
-          title: '审核备注',
-          key: 'inspectRemark',
-          tooltip: true
-
-        }
-      ],
-      withdrawApplyColumnsListData: {} // 提现记录
+      logColumnsData: {},
+      rechargeListData: {},
+      withdrawApplyColumnsListData: {}
     };
   },
   mounted() {
@@ -548,7 +423,7 @@ export default {
   margin: 10px 0;
 }
 
-.ivu-btn {
+.el-button {
   margin: 0 4px;
 }
 

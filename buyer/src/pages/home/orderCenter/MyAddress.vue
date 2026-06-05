@@ -5,12 +5,12 @@
       <div class="address-header">
         <span>
           {{ item.name }}
-          <Tag class="ml_10" v-if="item.isDefault" color="red">默认地址</Tag>
-          <Tag class="ml_10" v-if="item.alias" color="warning">{{item.alias}}</Tag>
+          <el-tag class="ml_10" v-if="item.isDefault" color="red">默认地址</el-tag>
+          <el-tag class="ml_10" v-if="item.alias" color="warning">{{item.alias}}</el-tag>
         </span>
         <div class="address-action">
-          <span @click="edit(item.id)"><Icon type="edit"></Icon>修改</span>
-          <span @click="del(item.id)"><Icon type="trash-a"></Icon>删除</span>
+          <span @click="edit(item.id)"><el-icon><Edit /></el-icon>修改</span>
+          <span @click="del(item.id)"><el-icon><Delete /></el-icon>删除</span>
         </div>
       </div>
       <div class="address-content">
@@ -18,8 +18,7 @@
           <span class="address-content-title"> 收 货 人 :</span> {{ item.name }}
         </p>
         <p>
-          <span class="address-content-title">收货地区:</span
-          >{{ item.consigneeAddressPath | unitAddress }}
+          <span class="address-content-title">收货地区:</span>{{ $filters.unitAddress(item.consigneeAddressPath) }}
         </p>
         <p>
           <span class="address-content-title">详细地址:</span> {{ item.detail }}
@@ -33,10 +32,12 @@
 </template>
 
 <script>
+import { Delete, Edit } from '@element-plus/icons-vue';
 import card from '@/components/card';
 import { memberAddress, delMemberAddress } from '@/api/address.js';
 
 export default {
+  components: { Delete, Edit },
   name: 'MyAddress',
 
   data () {

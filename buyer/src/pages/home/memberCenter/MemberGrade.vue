@@ -9,7 +9,7 @@
             <div class="gradeNameRow">
               <span class="gradeNameText">{{ currentGrade.gradeName || '暂无等级' }}</span>
               <span v-if="currentGradeBenefits.length" class="benefitTagsInline">
-                <Tag v-for="b in currentGradeBenefits" :key="b.id" class="benefitTag" color="blue">{{ b.benefitName || '-' }}</Tag>
+                <el-tag v-for="b in currentGradeBenefits" :key="b.id" class="benefitTag" color="blue">{{ b.benefitName || '-' }}</el-tag>
               </span>
             </div>
             <div class="gradeExp">
@@ -24,54 +24,58 @@
       </div>
     </div>
 
-    <Tabs value="rules">
-      <TabPane label="获取经验值方式" name="rules">
-        <Table :columns="ruleColumns" :data="ruleList" :loading="rulesLoading">
-          <template slot-scope="{ row }" slot="ruleItem">
-            <div class="ruleItem">
-              <div class="ruleTop">
-                <div class="ruleName">
-                  <span>{{ row.ruleName || row.ruleKey || '-' }}</span>
+    <el-tabs value="rules">
+      <el-tab-pane label="获取经验值方式" name="rules">
+        <el-table v-loading="rulesLoading" :data="ruleList">
+          <el-table-column label="获取方式" min-width="720">
+            <template #default="{ row }">
+              <div class="ruleItem">
+                <div class="ruleTop">
+                  <div class="ruleName">
+                    <span>{{ row.ruleName || row.ruleKey || '-' }}</span>
+                  </div>
+                  <el-tag v-if="row.completed === true" color="success">已完成</el-tag>
+                  <el-tag v-else color="default">未完成</el-tag>
                 </div>
-                <Tag v-if="row.completed === true" color="success">已完成</Tag>
-                <Tag v-else color="default">未完成</Tag>
+                <div class="ruleDesc">{{ getRuleDesc(row.ruleKey) }}</div>
+                <div class="ruleMeta">
+                  <span class="metaItem">单次获得：<b>+{{ row.value == null ? 0 : row.value }}</b></span>
+                  <span v-if="row.maxValue != null && Number(row.maxValue) > 0" class="metaItem">限额：<b>{{ row.maxValue }}</b></span>
+                  <span class="metaItem">已获得：<b>{{ row.gainedExperience == null ? 0 : row.gainedExperience }}</b></span>
+                </div>
               </div>
-              <div class="ruleDesc">{{ getRuleDesc(row.ruleKey) }}</div>
-              <div class="ruleMeta">
-                <span class="metaItem">单次获得：<b>+{{ row.value == null ? 0 : row.value }}</b></span>
-                <span v-if="row.maxValue != null && Number(row.maxValue) > 0" class="metaItem">限额：<b>{{ row.maxValue }}</b></span>
-                <span class="metaItem">已获得：<b>{{ row.gainedExperience == null ? 0 : row.gainedExperience }}</b></span>
-              </div>
-            </div>
-          </template>
-        </Table>
+            </template>
+          </el-table-column>
+        </el-table>
         <div class="rulesDesc" v-if="rulesDescription">{{ rulesDescription }}</div>
-      </TabPane>
-      <TabPane label="经验值记录" name="logs">
-        <Table :columns="logColumns" :data="experienceLogs.records || []" :loading="logLoading">
-          <template slot-scope="{ row }" slot="rule">
-            <span>{{ getRuleName(row.ruleKey) }}</span>
-          </template>
-          <template slot-scope="{ row }" slot="delta">
-            <div :style="{color: getLogDeltaColor(row)}">
-              <span v-if="getLogDeltaSign(row) === '+'">+</span>{{ getLogDeltaAbsValue(row) }}
-            </div>
-          </template>
-        </Table>
-        <Page
-          style="float:right;margin-top:10px"
-          :current="params.pageNumber"
+      </el-tab-pane>
+      <el-tab-pane label="经验值记录" name="logs">
+        <el-table v-loading="logLoading" :data="experienceLogs.records || []">
+          <el-table-column prop="createTime" label="时间" align="center" min-width="160" />
+          <el-table-column label="规则" align="center" min-width="160">
+            <template #default="{ row }">
+              <span>{{ getRuleName(row.ruleKey) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="变动值" align="center" min-width="120">
+            <template #default="{ row }">
+              <div :style="{ color: getLogDeltaColor(row) }">
+                <span v-if="getLogDeltaSign(row) === '+'">+</span>{{ getLogDeltaAbsValue(row) }}
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-pagination           style="float:right;margin-top:10px"
+          :current-page="params.pageNumber"
           :total="experienceLogs.total || 0"
           :page-size="params.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
-          size="small"
-          show-total
-          show-elevator
-        ></Page>
-      </TabPane>
-    </Tabs>
+          @current-change="changePage"
+          @size-change="changePageSize"
+          :page-sizes="[10, 20, 50]"
+          small
+         layout="total, prev, pager, next, jumper"></el-pagination>
+      </el-tab-pane>
+    </el-tabs>
 
   </div>
 
@@ -100,34 +104,7 @@ export default {
         pageNumber: 1,
         pageSize: 10
       },
-      experienceLogs: {},
-      ruleColumns: [
-        {
-          title: '获取方式',
-          slot: 'ruleItem',
-          minWidth: 720
-        }
-      ],
-      logColumns: [
-        {
-          title: '时间',
-          key: 'createTime',
-          align: 'center',
-          minWidth: 160
-        },
-        {
-          title: '规则',
-          slot: 'rule',
-          align: 'center',
-          minWidth: 160
-        },
-        {
-          title: '变动值',
-          slot: 'delta',
-          align: 'center',
-          minWidth: 120
-        }
-      ]
+      experienceLogs: {}
     }
   },
   computed: {

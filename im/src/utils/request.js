@@ -2,7 +2,7 @@ import axios from "axios";
 import config from "@/config/config";
 import { getToken, removeAll } from "@/utils/auth";
 
-import { Notification, MessageBox } from "element-ui";
+import { ElNotification, ElMessageBox } from "element-plus";
 import qs from "qs";
 
 // 创建 axios 实例
@@ -33,7 +33,7 @@ const errorHandler = (error) => {
       /**
        * 403提示将重新从商家移动端进入当前页面
        */
-      MessageBox("当前登录已失效，请从关闭重新进入。", "提示", {
+      ElMessageBox("当前登录已失效，请从关闭重新进入。", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         closeOnPressEscape: false,
@@ -43,7 +43,7 @@ const errorHandler = (error) => {
         .then(() => {
           isRefreshing = true
           window.close();
-          Notification({
+          ElNotification({
             title:"登录失效提示",
             message: "请手动关闭当前页面",
             type:"error",
@@ -53,7 +53,7 @@ const errorHandler = (error) => {
         })
         .catch(() => {
           isRefreshing = true
-          Notification({
+          ElNotification({
             title:"登录失效提示",
             message: "请手动关闭当前页面",
             type:"error",
@@ -63,7 +63,7 @@ const errorHandler = (error) => {
         isRefreshing = false
       }
     } else if(error.response.status == 400){
-      Notification({
+      ElNotification({
         message: error.response.data.message,
         position: "top-right",
         type:"error",

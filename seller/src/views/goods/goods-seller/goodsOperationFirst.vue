@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- 选择商品类型 -->
-    <Modal v-model="selectGoodsType" width="550" :closable="false">
+    <el-dialog v-model="selectGoodsType" width="550px" :show-close="false">
       <div class="goods-type-list">
         <div
           class="goods-type-item"
@@ -17,7 +17,7 @@
           </div>
         </div>
       </div>
-    </Modal>
+    </el-dialog>
     <!-- 商品分类 -->
     <div class="content-goods-publish">
       <div class="goods-category">
@@ -63,10 +63,10 @@
     </div>
     <!-- 底部按钮 -->
     <div class="footer">
-      <ButtonGroup>
-        <Button type="primary" @click="selectGoodsType = true">商品类型</Button>
-        <Button type="primary" @click="next">下一步</Button>
-      </ButtonGroup>
+      <div class="footer-btns">
+        <el-button type="primary" @click="selectGoodsType = true">商品类型</el-button>
+        <el-button type="primary" @click="next">下一步</el-button>
+      </div>
     </div>
   </div>
 </template>

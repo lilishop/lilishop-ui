@@ -1,12 +1,14 @@
 <template>
     <div class="layout">
         <div class="search">
-            <Icon type="ios-search" />{{res.list[0].title}}
+            <el-icon><Search /></el-icon>{{res.list[0].title}}
         </div>
     </div>
 </template>
 <script>
+import { Search } from "@element-plus/icons-vue";
 export default {
+    components: { Search },
     props: ['res']
 }
 </script>

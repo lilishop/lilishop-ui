@@ -23,10 +23,9 @@
         <li v-show="!!userInfo.username">
           <div class="username-p">
             <div>
-              <Avatar class="person-icon" :src="userInfo.face" icon="person" size="small"/>
-              <span class="username">{{
-                  userInfo.nickName ? userInfo.nickName : userInfo.username | secrecyMobile
-                }}</span>
+              <el-avatar class="person-icon" :src="userInfo.face" :size="24" />
+              <span class="username">{{ $filters.secrecyMobile(
+                  userInfo.nickName ? userInfo.nickName : userInfo.username ) }}</span>
             </div>
             <transition name='fade'>
               <ul class="drop-items">
@@ -42,16 +41,16 @@
         <li @click="goUserCenter('/home/MyTracks')"><span class="nav-item">我的足迹</span></li>
         <li @click="goUserCenter('/home/MsgList')"><span class="nav-item">我的消息</span></li>
         <li v-if="$route.name !== 'Cart'" style="position:relative;">
-          <Dropdown placement="bottom-start">
+          <el-dropdown placement="bottom-start" trigger="hover">
             <router-link to="/cart" target="_blank">
               <span class="nav-item" @mouseenter="getCartList">
-                <Icon size="18" type="ios-cart-outline"></Icon>
+                <el-icon :size="18"><ShoppingCart /></el-icon>
                 购物车（{{ cartNum < 100 ? cartNum : '99' }}）
               </span>
             </router-link>
-            <DropdownMenu slot="list">
+            <template #dropdown>
               <div class="shopping-cart-null" style="width:200px" v-show="shoppingCart.length <= 0">
-                <Icon type="ios-cart-outline" class="cart-null-icon"></Icon>
+                <el-icon class="cart-null-icon"><ShoppingCart /></el-icon>
                 <span>你的购物车没有宝贝哦</span>
                 <span>赶快去添加商品吧~</span>
               </div>
@@ -68,18 +67,16 @@
                       <div>
                         数量:
                         <span class="shopping-cart-text">{{ item.num }}</span>
-
                       </div>
                       <div class="shopping-price">
-                        {{ item.purchasePrice | unitPrice('￥') }}
+                        {{ $filters.unitPrice(item.purchasePrice, '￥') }}
                       </div>
                     </div>
                   </div>
                 </div>
-
               </div>
-            </DropdownMenu>
-          </Dropdown>
+            </template>
+          </el-dropdown>
         </li>
         <li>
           <span class="nav-item" @click="shopEntry">店铺入驻</span>
@@ -91,12 +88,14 @@
 </template>
 
 <script>
+import { ShoppingCart } from '@element-plus/icons-vue';
 import storage from '@/plugins/storage.js';
 import {cartGoodsAll} from '@/api/cart.js';
 import {logout} from '@/api/account.js';
 
 
 export default {
+  components: { ShoppingCart },
   name: 'M-Header',
   created() {
     if (storage.getItem('userInfo')) {

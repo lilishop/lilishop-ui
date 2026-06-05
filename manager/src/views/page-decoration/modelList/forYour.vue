@@ -60,7 +60,7 @@
             主标题:
             <el-input style="width: 200px" v-model="data.options.title" />
           </div>
-          <Divider>左侧商品部分</Divider>
+          <el-divider content-position="left">左侧商品部分</el-divider>
           <div class="flex">
             <div>图片 :</div>
             <div>
@@ -92,7 +92,7 @@
             </div>
           </div>
 
-          <Divider>中间商品部分</Divider>
+          <el-divider content-position="left">中间商品部分</el-divider>
           <div class="flex column-list">
             <div
               v-for="(item, index) in data.options.data.list"
@@ -124,7 +124,7 @@
               </div>
             </div>
           </div>
-          <Divider>右侧商品部分</Divider>
+          <el-divider content-position="left">右侧商品部分</el-divider>
           <div class="flex">
             <div>右侧标题 :</div>
             <el-input

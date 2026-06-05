@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="wrapper">
     <div class="shop">
       <h3>售后详情</h3>
       <div class="shop-item">
@@ -14,13 +14,16 @@
 
         <div class="label-item">
           <span>退款时间</span>
-          <span>{{res.refundTime || '暂无'}}</span>
+          <span>{{
+            res.refundTime
+              ? $filters.unixToDate(new Date(res.refundTime).getTime() / 1000)
+              : "暂无"
+          }}</span>
         </div>
         <div class="label-item">
           <span>申请退款金额</span>
-          <span>
-            <priceColorScheme :value="afterSaleInfo.applyRefundPrice" :color="$mainColor" />
-          </span>
+          <span :style="{ color: $mainColor }">
+            {{ $filters.unitPrice(res.applyRefundPrice, "￥") }}</span>
         </div>
         <div class="label-item">
           <span>商家备注</span>
@@ -39,25 +42,24 @@
         </div>
         <div class="label-item">
           <span>店铺名称</span>
-          <span>{{res.sellerName}}</span>
+          <span>{{res.storeName}}</span>
         </div>
         <div class="label-item">
           <span>创建时间</span>
           <span>{{res.createTime}}</span>
         </div>
-
       </div>
       <h3>商品详情</h3>
       <div class="shop-item">
 
-        <div class="goods-item">
+        <div  @click="handleClickGoods(res.goodsId)" class="goods-item">
           <div class="goods-img">
             <img class="img" :src="res.goodsImage" alt="">
           </div>
           <div class="goods-title">
             <div>{{res.goodsName}}</div>
             <div>{{'x'+res.num}}</div>
-            <div class="goods-price">{{res.flowPrice |  unitPrice('￥')}}</div>
+            <div class="goods-price">{{ $filters.unitPrice(res.flowPrice, "￥") }}</div>
 
           </div>
 
@@ -66,7 +68,7 @@
       <div class="count-price">
         <div class="label-item">
           <span>实际退款金额</span>
-          <span class="flowPrice">{{res.flowPrice | unitPrice('￥')}}</span>
+          <span class="flowPrice">{{ $filters.unitPrice(res.flowPrice, "￥") }}</span>
         </div>
       </div>
     </div>
@@ -77,12 +79,12 @@
 export default {
   data() {
     return {
-      orderStatusList: {
+      orderStatusList: { // 订单状态
         UNDELIVERED: "待发货",
         UNPAID: "未付款",
         PAID: "已付款",
         DELIVERED: "已发货",
-        CANCELLED: "已取消",
+        CANCELLED: "已关闭",
         COMPLETED: "已完成",
         TAKE: "已完成",
       },
@@ -109,16 +111,23 @@ export default {
     };
   },
   props: ["res"],
+  methods: {
+    handleClickGoods(id) {
+      this.$router.push({
+        query: { id },
+        path: "/goods/goods-info/goodsDetail",
+      });
+    },
+  }
 };
 </script>
 <style lang="scss" scoped>
 .shop {
-  padding: 10px 0;
+  padding: 5px 0;
   background: #fff;
 }
 .shop-item {
   display: flex;
-
   flex-wrap: wrap;
 }
 h3 {
@@ -133,6 +142,7 @@ h3 {
   display: flex;
   width: 100%;
   margin: 16px;
+  cursor: pointer;
 }
 .count-price {
   display: flex;
@@ -157,13 +167,18 @@ h3 {
 }
 .label-item {
   margin: 10px 0;
-  width: 20%;
+  width: 33%;
   padding: 8px;
   align-items: center;
   font-weight: bold;
   display: flex;
-  > span {
-    padding: 8px;
+  > span:nth-child(1) {
+    width: 90px;
+    color: #999;
+  }
+  > span:nth-child(2){
+    text-align: left;
+    white-space: wrap;
   }
 }
 </style>

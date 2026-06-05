@@ -20,21 +20,14 @@
                 @click="orderBy(item.en, index)"
               >
                 <span :class="{ 'goods-list-tool-active': index === sortIndex }"
-                  >{{ item.title }}<Icon type="ios-arrow-round-down"
-                /></span>
+                  >{{ item.title }}<el-icon><ArrowDown /></el-icon></span>
               </li>
               <li @click="orderBy('price', 5, 'up')" class="price-sort">
                 <span :class="{ 'goods-list-tool-active': 5 === sortIndex }">
                   价格
                   <div>
-                    <Icon
-                      type="md-arrow-dropup"
-                      :class="{ 'price-color': sortPriceIndex == 'desc' }"
-                    />
-                    <Icon
-                      type="md-arrow-dropdown"
-                      :class="{ 'price-color': sortPriceIndex == 'asc' }"
-                    />
+                    <el-icon :class="{ 'price-color': sortPriceIndex == 'desc' }"><ArrowUp /></el-icon>
+                    <el-icon :class="{ 'price-color': sortPriceIndex == 'asc' }"><ArrowDown /></el-icon>
                   </div>
                 </span>
               </li>
@@ -55,24 +48,21 @@
               </div>
               <div class="goods-show-price">
                 <span>
-                  <span class="seckill-price text-danger">{{
-                    item.price | unitPrice("￥")
-                  }}</span>
+                  <span class="seckill-price text-danger">{{ $filters.unitPrice(item.price, "￥") }}</span>
                 </span>
               </div>
               <div class="goods-show-detail">
-                <Tag
+                <el-tag
                   v-if="item.salesModel === 'WHOLESALE'"
                   class="goods-show-tag"
                   color="purple"
                 >
                   批发
-                </Tag>
+                </el-tag>
                 <span>{{ item.goodsName }}</span>
               </div>
               <div class="goods-show-num">
-                已有<span>{{ item.commentNum || 0 }}</span
-                >人评价
+                已有<span>{{ item.commentNum || 0 }}</span>人评价
               </div>
               <div class="goods-show-seller">
                 <span class="text-bottom" style="color: #e4393c">{{
@@ -81,49 +71,48 @@
               </div>
 
               <div class="goods-show-right">
-                <Tag
+                <el-tag
                   class="goods-show-tag"
                   color="red"
                   v-if="item.selfOperated"
                 >
                   自营
-                </Tag>
-                <Tag
+                </el-tag>
+                <el-tag
                   class="goods-show-tag"
                   color="blue"
                   v-if="item.goodsType === 'VIRTUAL_GOODS'"
                 >
                   虚拟
-                </Tag>
-                <Tag
+                </el-tag>
+                <el-tag
                   class="goods-show-tag"
                   color="blue"
                   v-else-if="item.goodsType === 'PHYSICAL_GOODS'"
                 >
                   实物
-                </Tag>
+                </el-tag>
               </div>
             </div>
           </div>
         </div>
       </div>
       <div class="goods-page">
-        <Page
-          show-total
-          show-sizer
-          @on-change="changePageNum"
-          @on-page-size-change="changePageSize"
+        <el-pagination
+          @current-change="changePageNum"
+          @size-change="changePageSize"
           :total="total"
           :page-size="params.pageSize"
-        ></Page>
+         layout="total, sizes, prev, pager, next"></el-pagination>
       </div>
     </div>
-    <Spin size="large" fix v-if="loading"></Spin>
+    <el-skeleton size="large" fix v-if="loading"></el-skeleton>
     <BaseFooter></BaseFooter>
   </div>
 </template>
 
 <script>
+import { ArrowDown, ArrowUp } from '@element-plus/icons-vue';
 import GoodsClassNav from "@/components/nav/GoodsClassNav";
 import * as apiGoods from "@/api/goods";
 export default {
@@ -347,7 +336,7 @@ export default {
     }
     span > div {
       display: inline-block;
-      .ivu-icon {
+      .el-icon {
         font-size: 12px;
         position: absolute;
         &:nth-child(1) {
@@ -379,7 +368,7 @@ export default {
   text-decoration: none;
   z-index: 1;
 }
-.goods-list-tool .ivu-icon {
+.goods-list-tool .el-icon {
   font-weight: bold;
   font-size: 16px;
 }

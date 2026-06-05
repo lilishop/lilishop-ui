@@ -1,174 +1,104 @@
 <template>
   <div class="search">
-    <Card>
-      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form mb_10"
-        @keydown.enter.native="handleSearch">
-        <Form-item label="商品名称" prop="goodsName">
-          <Input type="text" v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 240px" />
-        </Form-item>
-        <Form-item label="商品编号" prop="id">
-          <Input
-            type="text"
-            v-model="searchForm.id"
-            placeholder="商品编号"
-            clearable
-            style="width: 200px"
-          />
-        </Form-item>
-        <Form-item style="margin-left: -35px" class="br">
-          <Button @click="handleSearch" type="primary" icon="ios-search"
-            >搜索</Button
-          >
-          <Button @click="handleReset">重置</Button>
-        </Form-item>
-      </Form>
-      </Card>
-    <Card>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
-          @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator
-          show-sizer></Page>
-      </Row>
-    </Card>
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form mb_10"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="商品名称" prop="goodsName">
+          <el-input v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="商品编号" prop="id">
+          <el-input v-model="searchForm.id" placeholder="商品编号" clearable style="width: 200px" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <el-table v-loading="loading" border :data="data" ref="table" class="mt_10" style="width: 100%">
+        <el-table-column prop="id" label="编号" min-width="120" />
+        <el-table-column label="商品原图" width="120" align="center">
+          <template #default="{ row }">
+            <img
+              :src="row.original"
+              alt="加载图片失败"
+              style="cursor: pointer; width: 80px; height: 60px; margin: 10px 0; object-fit: contain"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="goodsName" label="商品名称" min-width="120" show-overflow-tooltip />
+        <el-table-column label="商品价格" width="120">
+          <template #default="{ row }">
+            <priceColorScheme :value="row.price || 0" :color="$mainColor" />
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" min-width="120" />
+        <el-table-column label="操作" align="center" width="150">
+          <template #default="{ row }">
+            <a class="link-text" @click="editGoods(row)">编辑</a>
+            <span class="op-split">|</span>
+            <a class="link-text" @click="removeDraft(row.id)">删除</a>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[10, 20, 50]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
 import { getDraftGoodsListData, deleteDraftGoods } from "@/api/goods";
+
 export default {
   name: "goods",
-  components: {},
   data() {
     return {
-      loading: true, // 表单加载状态
+      loading: true,
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-        sort: "create_time", // 默认排序字段
-        order: "desc", // 默认排序方式
+        pageNumber: 1,
+        pageSize: 10,
+        sort: "create_time",
+        order: "desc",
         saveType: "TEMPLATE",
       },
-      columns: [
-        // 表头
-        {
-          title: "编号",
-          key: "id",
-          minWidth: 120,
-        },
-        {
-          title: "商品原图",
-          key: "original",
-          width: 120,
-          align: "center",
-          render: (h, params) => {
-            return h("img", {
-              attrs: {
-                src: params.row.original,
-                alt: "加载图片失败",
-              },
-              style: {
-                cursor: "pointer",
-                width: "80px",
-                height: "60px",
-                margin: "10px 0",
-                "object-fit": "contain",
-              },
-            });
-          },
-        },
-        {
-          title: "商品名称",
-          key: "goodsName",
-          minWidth: 120,
-        },
-        {
-          title: "商品价格",
-          key: "price",
-          width: 120,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.price || 0,color:this.$mainColor}} );
-          },
-        },
-        {
-          title: "创建时间",
-          key: "createTime",
-          minWidth: 120,
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          width: 150,
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.editGoods(params.row);
-                    },
-                  },
-                },
-                "编辑"
-              ),
-              h(
-                "span",
-                {
-                  style: { margin: "0 8px", color: "#dcdee2" },
-                },
-                "|"
-              ),
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.removeDraft(params.row.id);
-                    },
-                  },
-                },
-                "删除"
-              ),
-            ]);
-          },
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      data: [],
+      total: 0,
     };
   },
   methods: {
     init() {
-      // 初始化数据
       this.getDataList();
     },
-    // 编辑模板
     editGoods(v) {
       this.$router.push({
         name: "goods-template-operation-edit",
         query: { draftId: v.id },
       });
     },
-    // 删除模板
     removeDraft(id) {
-      let showType = "模版";
       this.$Modal.confirm({
         title: "确认审核",
-        content: "您确认要删除id为 " + id + " 的" + showType + "吗?",
+        content: "您确认要删除id为 " + id + " 的模版吗?",
         loading: true,
         onOk: () => {
           deleteDraftGoods(id).then((res) => {
@@ -181,34 +111,25 @@ export default {
         },
       });
     },
-    // 改变页数
-    changePage(v) {
-      this.searchForm.pageNumber = v;
+    changePage() {
       this.getDataList();
     },
-    // 改变页码
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
+    changePageSize() {
       this.getDataList();
     },
-    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    // 重置
     handleReset() {
       this.$refs.searchForm.resetFields();
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
-      // 重新加载数据
       this.getDataList();
     },
-    // 获取列表数据
     getDataList() {
       this.loading = true;
-      // 带多条件搜索参数获取表单数据
       getDraftGoodsListData(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
@@ -222,11 +143,21 @@ export default {
     this.init();
   },
   watch: {
-    $route(to, from) {
+    $route() {
       this.init();
     },
   },
 };
 </script>
+
 <style lang="scss" scoped>
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+.op-split {
+  margin: 0 8px;
+  color: #dcdee2;
+}
 </style>

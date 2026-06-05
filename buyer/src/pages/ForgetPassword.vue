@@ -11,76 +11,72 @@
     </div>
     <div class="login-container">
         <!-- 验证手机号 -->
-        <Form
+        <el-form
           ref="formFirst"
           :model="formFirst"
           :rules="ruleInline"
           style="width:300px;"
           v-show="step === 0"
         >
-          <FormItem prop="mobile">
-            <i-input
+          <el-form-item prop="mobile">
+            <el-input
               type="text"
               v-model="formFirst.mobile"
               clearable
               placeholder="手机号"
             >
-              <Icon type="md-phone-portrait" slot="prepend"></Icon>
-            </i-input>
-          </FormItem>
-          <FormItem prop="code">
-            <i-input
+              <template #prepend><el-icon><Iphone /></el-icon></template>
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="code">
+            <el-input
               type="text"
               v-model="formFirst.code"
               clearable
               placeholder="手机验证码"
             >
-              <Icon
-                type="ios-text-outline"
-                style="font-weight: bold"
-                slot="prepend"
-              />
-              <Button slot="append" @click="sendCode">{{ codeMsg }}</Button>
-            </i-input>
-          </FormItem>
-          <FormItem>
-            <Button @click="verifyBtnClick" long :type="verifyStatus?'success':'default'">{{verifyStatus?'验证通过':'点击完成安全验证'}}</Button>
-          </FormItem>
-          <FormItem>
-            <Button type="error" @click="next" :loading="loading" long>下一步</Button>
-          </FormItem>
-        </Form>
-        <Form
+              <template #prepend><el-icon style="font-weight: bold"><Document /></el-icon></template>
+              <template #append><el-button @click="sendCode">{{ codeMsg }}</el-button></template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button @click="verifyBtnClick" style="width:100%" :type="verifyStatus?'success':'default'">{{verifyStatus?'验证通过':'点击完成安全验证'}}</el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="danger" @click="next" :loading="loading" style="width:100%">下一步</el-button>
+          </el-form-item>
+        </el-form>
+        <el-form
           ref="form"
           :model="form"
           :rules="ruleInline"
           style="width:300px;"
           v-show="step === 1"
         >
-          <FormItem prop="password">
-            <i-input
+          <el-form-item prop="password">
+            <el-input
               type="password"
               v-model="form.password"
               clearable
               placeholder="请输入至少六位密码"
             >
-              <Icon type="md-lock" slot="prepend"></Icon>
-            </i-input>
-          </FormItem>
-          <FormItem prop="password">
-            <i-input
+              <template #prepend><el-icon><Lock /></el-icon></template>
+            </el-input>
+          </el-form-item>
+          <el-form-item prop="password">
+            <el-input
               type="password"
               v-model="form.oncePasd"
               clearable
               placeholder="请再次输入密码"
             >
-              <Icon type="md-lock" slot="prepend"></Icon>
-            </i-input>
-          </FormItem>
-          <FormItem>
-            <Button type="error" size="large" @click="handleSubmit" :loading="loading1" long>提交</Button>
-          </FormItem>
-        </Form>
+              <template #prepend><el-icon><Lock /></el-icon></template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="danger" size="large" @click="handleSubmit" :loading="loading1" style="width:100%">提交</el-button>
+          </el-form-item>
+        </el-form>
         <!-- 拼图验证码 -->
         <Verify
           ref="verify"
@@ -91,18 +87,18 @@
         <div class="login-btn"><a @click="$router.push('login')">前往登录</a></div>
     </div>
     <div class="foot">
-      <Row type="flex" justify="space-around" class="help">
+      <div type="flex" justify="space-around" class="help">
         <a class="item" href="https://pickmall.cn/" target="_blank">帮助</a>
         <a class="item" href="https://pickmall.cn/" target="_blank">隐私</a>
         <a class="item" href="https://pickmall.cn/" target="_blank">条款</a>
-      </Row>
-      <Row type="flex" justify="center" class="copyright">
+      </div>
+      <div type="flex" justify="center" class="copyright">
         Copyright © {{year}} - Present
         <a href="https://pickmall.cn/" target="_blank" style="margin: 0 5px"
           >{{config.title}}</a
         >
         版权所有
-      </Row>
+      </div>
     </div>
   </div>
 </template>
@@ -114,9 +110,10 @@ import { md5 } from '@/plugins/md5.js';
 import * as apiLogin from '@/api/login.js';
 import { sendSms } from '@/api/common.js';
 import Verify from '@/components/verify';
+import { Lock, Iphone, Document } from '@element-plus/icons-vue';
 export default {
   name: 'ForgetPassword',
-  components: { Verify },
+  components: { Verify, Lock, Iphone, Document },
   data () {
     return {
       config:require('@/config'),
@@ -294,7 +291,7 @@ export default {
 
 .other-login {
   margin: 0 auto;
-  .ivu-icon {
+  .el-icon {
     font-size: 24px;
   }
 }

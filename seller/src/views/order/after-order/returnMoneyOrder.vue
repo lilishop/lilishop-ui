@@ -1,298 +1,197 @@
 <template>
   <div class="search">
-    <Card>
-      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-        <Form-item label="商品" prop="goodsName">
-          <Input
-            type="text"
-            v-model="searchForm.goodsName"
-            clearable
-            placeholder="请输入商品名称"
-            style="width: 240px"
-          />
-        </Form-item>
-        <Form-item label="会员名称" prop="memberName">
-          <Input
-            type="text"
-            v-model="searchForm.memberName"
-            clearable
-            placeholder="请输入会员名称"
-            style="width: 240px"
-          />
-        </Form-item>
-        <Form-item label="订单编号" prop="orderSn">
-          <Input
-            type="text"
-            v-model="searchForm.orderSn"
-            clearable
-            placeholder="请输入订单编号"
-            style="width: 240px"
-          />
-        </Form-item>
-
-        <Form-item label="申请时间">
-          <DatePicker
-            v-model="selectDate"
-            type="datetimerange"
-            format="yyyy-MM-dd HH:mm:ss"
-            clearable
-            @on-change="selectDateRange"
-            placeholder="选择起始时间"
-            style="width: 240px"
-          ></DatePicker>
-        </Form-item>
-        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
-        <Button @click="handleReset" class="search-btn">重置</Button>
-      </Form>
-    </Card>
-        <Card>
-      <Table
-        :loading="loading"
-        border
-        class="mt_10"
-        :columns="columns"
-        :data="data"
-
-        ref="table"
-      >
-
-        <!-- 商品栏目格式化 -->
-        <template slot="goodsSlot" slot-scope="{row}">
-          <div style="margin-top: 5px;height: 90px; display: flex;">
-            <div style="">
-              <img :src="row.goodsImage" style="height: 80px;margin-top: 3px">
-            </div>
-
-            <div style="margin-left: 13px;">
-              <div class="div-zoom">
-                <a @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
-              </div>
-              <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-                <div slot="content">
-                  <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
-                </div>
-                <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="">
-              </Poptip>
-            </div>
+    <el-card>
+      <el-tabs v-model="activeTab" @tab-click="onTabClick">
+        <el-tab-pane label="退款" name="RETURN_MONEY">
+          <div class="operation" style="margin-bottom: 10px">
+            <el-button type="primary" @click="add">添加</el-button>
           </div>
+        </el-tab-pane>
+        <el-tab-pane label="取消" name="CANCEL">
+          <div class="operation" style="margin-bottom: 10px">
+            <el-button type="primary" @click="add">添加</el-button>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="退货" name="RETURN_GOODS">
+          <div class="operation" style="margin-bottom: 10px">
+            <el-button type="primary" @click="add">添加</el-button>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="投诉" name="COMPLAIN">
+          <div class="operation" style="margin-bottom: 10px">
+            <el-button type="primary" @click="add">添加</el-button>
+            <el-button @click="getDataList">刷新</el-button>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
 
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+      <el-table v-loading="loading" border :data="data" ref="table" style="width: 100%">
+        <el-table-column prop="createBy" label="创建人" min-width="120" />
+        <el-table-column prop="reason" label="原因" min-width="400" />
+        <el-table-column prop="createTime" label="时间" min-width="100" />
+        <el-table-column label="操作" width="200" align="center">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a class="link-text" @click="edit(row)">编辑</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="remove(row)">删除</a>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
+
+    <el-dialog v-model="modalVisible" :title="modalTitle" width="500px" :close-on-click-modal="false">
+      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+        <el-form-item label="售后原因" prop="reason">
+          <el-input v-model="form.reason" maxlength="20" clearable style="width: 100%" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="modalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">提交</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
-
 <script>
-  import * as API_Order from "@/api/order";
+import * as API_Order from "@/api/order";
 
-  export default {
-    name: "returnMoneyOrder",
-    data() {
-      return {
-        loading: true, // 表单加载状态
-        searchForm: {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-          pageSize: 20, // 页面大小
-          sort: "createTime", // 默认排序字段
-          order: "desc", // 默认排序方式
-          startDate: "", // 起始时间
-          endDate: "", // 终止时间
-          serviceType:"RETURN_MONEY",
-          orderSn:"",
-          memberName:"",
-          goodsName:""
-        },
-        selectDate: null,
-        submitLoading: false, // 添加或编辑提交状态
-        columns: [
-          // 表头
-          {
-            title: "退款编号",
-            key: "sn",
-            minWidth: 150,
-          },
-          {
-            title: "订单号",
-            key: "orderSn",
-            minWidth: 150,
-          },
-
-          {
-            title: "商品",
-            key: "sn",
-            minWidth: 250,
-            sortable: false,
-            slot: "goodsSlot",
-          },
-          {
-            title: "申请退款金额",
-            key: "applyRefundPrice",
-            width: 130,
-            render: (h, params) => {
-              return h("priceColorScheme", {props:{value:params.row.applyRefundPrice,color:this.$mainColor}} );
-            },
-
-          },
-          {
-            title: "会员",
-            key: "memberName",
-            minWidth: 130,
-            tooltip: true
-          },
-          {
-            title: "申请时间",
-            key: "createTime",
-            width: 170
-          },
-          {
-            title: "售后状态",
-            key: "serviceStatus",
-            minWidth: 120,
-            render: (h, params) => {
-              if (params.row.serviceStatus == "APPLY") {
-                return h('div', [h('tag', {props: {color: "blue"}}, '申请中'),]);
-              } else if (params.row.serviceStatus == "PASS") {
-                return h('div', [h('tag', {props: {color: "cyan"}}, '通过售后'),]);
-              } else if (params.row.serviceStatus == "REFUSE") {
-                return h('div', [h('tag', {props: {color: "volcano"}}, '拒绝售后'),]);
-              } else if (params.row.serviceStatus == "BUYER_CANCEL") {
-                return h('div', [h('tag', {props: {color: "purple"}}, '买家取消售后'),]);
-              } else if (params.row.serviceStatus == "COMPLETE") {
-                return h('div', [h('tag', {props: {color: "green"}}, '完成售后'),]);
-              }else if (params.row.serviceStatus == "WAIT_REFUND") {
-                return h('div', [h('tag', {props: {color: "geekblue"}}, '待平台退款'),]);
-              }
-            }
-          },
-
-          {
-            title: "操作",
-            key: "action",
-            align: "center",
-            fixed: 'right',
-            width: 200,
-            render: (h, params) => {
-              return h("div", [
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.detail(params.row);
-                      },
-                    },
-                  },
-                  "查看"
-                ),
-              ]);
-            },
-          },
-        ],
-        data: [], // 表单数据
-        total: 0, // 表单数据总数
-      };
+export default {
+  data() {
+    return {
+      activeTab: "RETURN_MONEY",
+      modalVisible: false,
+      modalTitle: "",
+      loading: true,
+      submitLoading: false,
+      form: { reason: "" },
+      formValidate: {
+        reason: [{ required: true, message: "请输入售后原因", trigger: "blur" }],
+      },
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+        serviceType: "RETURN_MONEY",
+      },
+      data: [],
+      total: 0,
+    };
+  },
+  methods: {
+    onTabClick(tab) {
+      this.handleClickType(tab.paneName);
     },
-    methods: {
-      // 初始化数据
-      init() {
-        this.getDataList();
-      },
-      // 改变页码
-      changePage(v) {
-        this.searchForm.pageNumber = v;
-        this.getDataList();
-      },
-      // 改变页数
-      changePageSize(v) {
-        this.searchForm.pageSize = v;
-        this.getDataList();
-      },
-      // 搜索
-      handleSearch() {
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 20;
-        this.getDataList();
-      },
-      // 重置
-      handleReset() {
-        this.searchForm = {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-          pageSize: 20, // 页面大小
-          sort: "createTime", // 默认排序字段
-          order: "desc", // 默认排序方式
-          startDate: "", // 起始时间
-          endDate: "", // 终止时间
-          serviceType:"RETURN_MONEY",
-          orderSn:"",
-          memberName:"",
-          goodsName:""
-        }
-        this.selectDate = ''
-
-        this.getDataList();
-      },
-      // 范围时间重新赋值
-      selectDateRange(v) {
-        if (v) {
-          this.searchForm.startDate = v[0];
-          this.searchForm.endDate = v[1];
-        }
-      },
-      // 获取列表数据
-      getDataList() {
-        this.loading = true;
-        API_Order.afterSaleOrderPage(this.searchForm).then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        });
-        this.total = this.data.length;
+    changePage(v) {
+      this.searchForm.pageNumber = v;
+      this.getDataList();
+    },
+    changePageSize(v) {
+      this.searchForm.pageNumber = 1;
+      this.searchForm.pageSize = v;
+      this.getDataList();
+    },
+    handleClickType(v) {
+      this.searchForm.pageNumber = 1;
+      this.searchForm.pageSize = 20;
+      this.searchForm.serviceType = v;
+      this.getDataList();
+    },
+    getDataList() {
+      this.loading = true;
+      API_Order.getAfterSaleReasonPage(this.searchForm).then((res) => {
         this.loading = false;
-      },
-      // 退款订单详情
-      detail(v) {
-        let sn = v.sn;
-        this.$options.filters.customRouterPush({
-          name: "return-goods-order-detail",
-          query: { sn: sn },
-        })
-
-      },
+        if (res.success) {
+          this.data = res.result.records;
+          this.total = res.result.total;
+        }
+      });
     },
-    mounted() {
-      this.init();
+    add() {
+      this.form.reason = "";
+      this.modalVisible = true;
+      this.modalTitle = "添加售后原因";
     },
-    // 页面缓存处理，从该页面离开时，修改KeepAlive为false，保证进入该页面是刷新
-    beforeRouteLeave(to, from, next) {
-      from.meta.keepAlive = false
-      next()
-    }
-  };
+    edit(v) {
+      this.form.reason = v.reason;
+      this.form.id = v.id;
+      this.modalVisible = true;
+      this.modalTitle = "修改售后原因";
+    },
+    handleSubmit() {
+      this.form.serviceType = this.searchForm.serviceType;
+      this.$refs.form.validate((valid) => {
+        if (valid) {
+          this.submitLoading = true;
+          if (this.modalTitle == "添加售后原因") {
+            delete this.form.id;
+            API_Order.addAfterSaleReason(this.form).then((res) => {
+              this.submitLoading = false;
+              if (res.success) {
+                this.$Message.success("添加成功");
+                this.getDataList();
+                this.modalVisible = false;
+              }
+            });
+          } else {
+            API_Order.editAfterSaleReason(this.form.id, this.form).then((res) => {
+              this.submitLoading = false;
+              if (res.success) {
+                this.$Message.success("修改成功");
+                this.getDataList();
+                this.modalVisible = false;
+              }
+            });
+          }
+        }
+      });
+    },
+    remove(v) {
+      this.$Modal.confirm({
+        title: "确认删除",
+        content: "确认要删除此售后原因?",
+        loading: true,
+        onOk: () => {
+          API_Order.delAfterSaleReason(v.id).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success("售后原因已删除");
+              this.getDataList();
+            }
+          });
+        },
+      });
+    },
+  },
+  mounted() {
+    this.getDataList();
+  },
+};
 </script>
-<style lang="scss">
-  // 建议引入通用样式 可删除下面样式代码
-   @import "@/styles/table-common.scss";
+<style scoped>
+.link-text {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.op-split {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
+}
 </style>

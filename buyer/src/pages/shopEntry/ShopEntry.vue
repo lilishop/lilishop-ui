@@ -3,12 +3,12 @@
     <div style="height: 20px"></div>
     <div class="content">
       <h1>店铺入驻</h1>
-      <Steps :current="currentIndex" class="margin">
-        <Step title="企业资质信息"></Step>
-        <Step title="财务资质信息"></Step>
-        <Step title="其他信息"></Step>
-        <Step title="提交审核"></Step>
-      </Steps>
+      <el-steps :current="currentIndex" class="margin">
+        <el-step title="企业资质信息"></el-step>
+        <el-step title="财务资质信息"></el-step>
+        <el-step title="其他信息"></el-step>
+        <el-step title="提交审核"></el-step>
+      </el-steps>
       <first-apply v-if="currentIndex == 0 && dataReview" :content="firstData" @change="nextPage"></first-apply>
 
       <second-apply v-if="currentIndex == 1 && dataReview" :content="secondData" @change="nextPage"></second-apply>
@@ -21,24 +21,24 @@
         <span v-if="storeDisable == 'CLOSED'">店铺已关闭，重申请联系管理员</span>
         <span v-if="storeDisable == 'REFUSED'">审核未通过,请修改资质信息，如有疑问请联系管理员</span>
       </div>
-      <Button v-if="currentIndex === 3" @click="$router.push('/')">返回</Button>
+      <el-button v-if="currentIndex === 3" @click="$router.push('/')">返回</el-button>
       &nbsp;
-      <Button type="primary" @click='currentIndex = 0'
-        v-if="storeDisable === 'REFUSED' && currentIndex === 3">重新申请</Button>
+      <el-button type="primary" @click='currentIndex = 0'
+        v-if="storeDisable === 'REFUSED' && currentIndex === 3">重新申请</el-button>
     </div>
 
-    <Modal title="店铺入驻协议" v-model="showAgreement" width="1200" :closable="false" :mask-closable="false">
+    <el-dialog title="店铺入驻协议" v-model="showAgreement" width="1200" :closable="false" :close-on-click-modal="false">
       <Scroll :on-reach-bottom="handleReachBottom">
         <div class="agreeent-con" v-html="agreementCon"></div>
       </Scroll>
 
-      <div slot="footer" style="text-align: center">
+      <template #footer><div style="text-align: center">
         <p>
-          <Checkbox v-model="checked">我已同意以上协议</Checkbox>
+          <el-checkbox v-model="checked">我已同意以上协议</el-checkbox>
         </p>
-        <Button type="primary" :disabled="!checked" class="margin" @click="showAgreement = false">同意协议填写资质信息</Button>
-      </div>
-    </Modal>
+        <el-button type="primary" :disabled="!checked" class="margin" @click="showAgreement = false">同意协议填写资质信息</el-button>
+      </div></template>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -182,7 +182,7 @@ export default {
 }
 .agreeent-con {
   max-height: 500px;
-  ::v-deep img{
+  :deep img{
     max-width: 100%;
 
   }

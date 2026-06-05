@@ -7,8 +7,12 @@
       :style="getImgStyle(src)"
       :preview-src-list="[src]"
     >
-      <div slot="error" class="image-slot">图片加载失败...</div>
-      <div slot="placeholder" class="image-slot">图片加载中...</div>
+      <template #error>
+        <div class="image-slot">图片加载失败...</div>
+      </template>
+      <template #placeholder>
+        <div class="image-slot">图片加载中...</div>
+      </template>
     </el-image>
   </div>
 </template>
@@ -31,7 +35,7 @@ export default {
 </script>
 <style lang="less" scoped>
 .image-message {
-  /deep/.el-image {
+  :deep(.el-image) {
     border-radius: 5px;
     cursor: pointer;
     background: #f1efef;

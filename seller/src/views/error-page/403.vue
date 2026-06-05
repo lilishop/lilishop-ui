@@ -1,19 +1,18 @@
-
 <template>
   <div class="error403">
     <div class="error403-body-con">
-      <Card>
-        <div class="error403-body-con-title">4<span class="error403-0-span">
-            <Icon type="android-lock"></Icon>
-          </span><span class="error403-key-span">
-            <Icon size="220" type="ios-bolt"></Icon>
-          </span></div>
+      <el-card>
+        <div class="error403-body-con-title">
+          4<span class="error403-0-span">🔒</span><span class="error403-key-span">⚡</span>
+        </div>
         <p class="error403-body-con-message">You don't have permission</p>
         <div class="error403-btn-con">
-          <Button @click="goHome" size="large" style="width: 200px;" type="text">返回首页</Button>
-          <Button @click="backPage" size="large" style="width: 200px;margin-left: 40px;" type="primary">返回上一页</Button>
+          <el-button size="large" style="width: 200px" @click="goHome">返回首页</el-button>
+          <el-button size="large" type="primary" style="width: 200px; margin-left: 40px" @click="backPage">
+            返回上一页
+          </el-button>
         </div>
-      </Card>
+      </el-card>
     </div>
   </div>
 </template>
@@ -33,6 +32,7 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
 @keyframes error403animation {
   0% {
@@ -82,14 +82,8 @@ export default {
         border: 20px solid #ed3f14;
         color: #ed3f14;
         margin-right: 10px;
-        i {
-          display: inline-block;
-          font-size: 120px;
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          transform: translate(-50%, -50%);
-        }
+        font-size: 80px;
+        line-height: 130px;
       }
       .error403-key-span {
         display: inline-block;
@@ -98,15 +92,8 @@ export default {
         height: 190px;
         border-radius: 50%;
         margin-right: 10px;
-        i {
-          display: inline-block;
-          font-size: 190px;
-          position: absolute;
-          left: 20px;
-          transform: translate(-50%, -60%);
-          transform-origin: center bottom;
-          animation: error403animation 2.8s ease 0s infinite;
-        }
+        font-size: 80px;
+        animation: error403animation 2.8s ease 0s infinite;
       }
     }
     &-message {
@@ -125,4 +112,3 @@ export default {
   }
 }
 </style>
-

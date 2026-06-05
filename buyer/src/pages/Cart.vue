@@ -6,27 +6,20 @@
       <div>
         <router-link to="/"><img :src="$store.state.logoImg" /></router-link>
         <div>
-          购物车(<span>{{ goodsTotal }}</span
-          >)
+          购物车(<span>{{ goodsTotal }}</span>)
         </div>
       </div>
 
     </div>
-    <Divider />
+    <el-divider />
     <!-- 购物车主体 -->
     <div class="cart-content width_1200 center">
       <div class="available-area">
         <div class="cart-steps">
           <span :class="stepIndex == 0 ? 'active' : ''">1.我的购物车</span>
-          <Icon
-            :class="stepIndex == 0 ? 'active-arrow' : ''"
-            custom="icomoon icon-next"
-          ></Icon>
+          <i class="icomoon icon-next" :class="stepIndex == 0 ? 'active-arrow' : ''"></i>
           <span :class="stepIndex == 1 ? 'active' : ''">2.填写订单信息</span>
-          <Icon
-            :class="stepIndex == 1 ? 'active-arrow' : ''"
-            custom="icomoon icon-next"
-          ></Icon>
+          <i class="icomoon icon-next" :class="stepIndex == 1 ? 'active-arrow' : ''"></i>
           <span :class="stepIndex == 2 ? 'active' : ''">3.成功提交订单</span>
         </div>
       </div>
@@ -34,10 +27,10 @@
       <div class="cart-goods">
         <div class="cart-goods-title">
           <div class="width_60">
-            <Checkbox
+            <el-checkbox
               v-model="allChecked"
-              @on-change="changeChecked(allChecked, 'all')"
-              >全选</Checkbox
+              @change="changeChecked(allChecked, 'all')"
+              >全选</el-checkbox
             >
           </div>
           <div class="goods-title">商品</div>
@@ -58,10 +51,10 @@
         >
           <div class="shop-name">
             <div>
-              <Checkbox
+              <el-checkbox
                 v-model="shop.checked"
-                @on-change="changeChecked(shop.checked, 'shop', shop.storeId)"
-              ></Checkbox>
+                @change="changeChecked(shop.checked, 'shop', shop.storeId)"
+              ></el-checkbox>
               <span class="go-shop-page" @click="goShopPage(shop.storeId)">{{
                 shop.storeName
               }}</span>
@@ -80,34 +73,32 @@
                   :key="index"
                 >
                   <span v-if="item.couponType === 'PRICE'"
-                    >￥{{ item.price }}</span
-                  >
+                    >￥{{ item.price }}</span>
                   <span v-if="item.couponType === 'DISCOUNT'"
-                    >{{ item.couponDiscount }}折</span
-                  >
+                    >{{ item.couponDiscount }}折</span>
                   <span>满{{ item.consumeThreshold }}元可用</span>
-                  <Button
+                  <el-button
                     class="coupon-btn"
                     size="small"
                     type="primary"
                     @click="receiveShopCoupon(item)"
                     :disabled="item.disabled"
-                    >{{ item.disabled ? "已领取" : "领取" }}</Button
+                    >{{ item.disabled ? "已领取" : "领取" }}</el-button
                   >
                 </div>
               </div>
             </span>
             <div class="promotion-notice">{{ shop.promotionNotice }}</div>
           </div>
-          <template v-for="(goods, goodsIndex) in shop.skuList">
-            <div class="goods-item" :key="goodsIndex">
+          <template v-for="(goods, goodsIndex) in shop.skuList" :key="goods.goodsSku?.id || goodsIndex">
+            <div class="goods-item">
               <div class="width_60">
-                <Checkbox
+                <el-checkbox
                   v-model="goods.checked"
-                  @on-change="
+                  @change="
                     changeChecked(goods.checked, 'goods', goods.goodsSku.id)
                   "
-                ></Checkbox>
+                ></el-checkbox>
               </div>
               <div
                 class="goods-title"
@@ -125,13 +116,13 @@
                   <p>
                     {{ goods.goodsSku.goodsName }}
                   </p>
-                  <p><Tag
+                  <p><el-tag
                     v-if="goods.goodsSku.salesModel === 'WHOLESALE'"
                     class="goods-show-tag"
                     color="purple"
                   >
                     批发商品
-                  </Tag></p>
+                  </el-tag></p>
                   <template
                     v-for="(promotion, promotionIndex) in goods.promotions"
                   >
@@ -165,43 +156,43 @@
                 </div>
               </div>
               <div class="width_150">
-                {{ goods.purchasePrice | unitPrice("￥") }}
+                {{ $filters.unitPrice(goods.purchasePrice, "￥") }}
               </div>
               <div class="width_100">
-                <InputNumber
+                <el-input-number
                   :min="1"
                   size="small"
                   v-model="goods.num"
-                  @on-change="changeNum(goods.num, goods.goodsSku.id)"
-                ></InputNumber>
+                  @change="changeNum(goods.num, goods.goodsSku.id)"
+                ></el-input-number>
                 <div class="fontsize_12">
                   {{ goods.goodsSku.quantity > 0 ? "有货" : "无货" }}
                 </div>
               </div>
               <div class="width_150">
-                {{ goods.subTotal | unitPrice("￥") }}
+                {{ $filters.unitPrice(goods.subTotal, "￥") }}
               </div>
               <div class="width_100">
-                <Button
+                <el-button
                   v-if="!goods.errorMessage"
                   size="small"
                   type="primary"
                   @click="delGoods(goods.goodsSku.id)"
-                  >删除</Button
+                  >删除</el-button
                 >
-                <Button
+                <el-button
                   v-if="!goods.errorMessage"
                   size="small"
                   type="info"
                   @click="collectGoods(goods.goodsSku.id)"
                   style="margin-left: 10px"
-                  >收藏</Button
+                  >收藏</el-button
                 >
               </div>
               <div class="error-goods" v-if="goods.errorMessage">
                 <div style="margin-top: 20px">{{ goods.errorMessage }}</div>
-                <Button type="primary" @click="delGoods(goods.goodsSku.id)"
-                  >删除</Button
+                <el-button type="primary" @click="delGoods(goods.goodsSku.id)"
+                  >删除</el-button
                 >
               </div>
             </div>
@@ -211,10 +202,10 @@
         <div class="cart-goods-footer">
           <div>
             <div class="width_60">
-              <Checkbox
+              <el-checkbox
                 v-model="allChecked"
-                @on-change="changeChecked(allChecked, 'all')"
-                >全选</Checkbox
+                @change="changeChecked(allChecked, 'all')"
+                >全选</el-checkbox
               >
             </div>
             <div class="width_100 handle-btn" @click="delGoods()">
@@ -227,23 +218,20 @@
           </div>
           <div>
             <div class="selected-count">
-              已选择<span>{{ checkedNum }}</span
-              >件商品
+              已选择<span>{{ checkedNum }}</span>件商品
             </div>
             <div class="ml_20 save-price">
-              已节省<span>{{
-                priceDetailDTO.discountPrice | unitPrice("￥")
-              }}</span>
+              已节省<span>{{ $filters.unitPrice(priceDetailDTO.discountPrice, "￥") }}</span>
             </div>
             <div class="ml_20 total-price">
               总价（不含运费）:
-              <div>{{ priceDetailDTO.flowPrice | unitPrice("￥") }}</div>
+              <div>{{ $filters.unitPrice(priceDetailDTO.flowPrice, "￥") }}</div>
             </div>
             <div class="pay ml_20" @click="pay">去结算</div>
           </div>
         </div>
       </div>
-      <Spin size="large" fix v-if="loading"></Spin>
+      <el-skeleton size="large" fix v-if="loading"></el-skeleton>
     </div>
     <BaseFooter class="footer"></BaseFooter>
   </div>
@@ -400,7 +388,7 @@ export default {
     async receiveShopCoupon(item) {
       let res = await APIMember.receiveCoupon(item.id);
       if (res.success) {
-        this.$set(item, "disabled", true);
+        item["disabled"] = true;
         this.$Message.success("领取成功");
       } else {
         this.$Message.error(res.message);
@@ -500,7 +488,7 @@ export default {
     padding: 0 15px;
   }
 
-  .ivu-icon {
+  .el-icon {
     @include content_color($light_content_color);
     font-size: 20px;
     margin: 0 15px;
@@ -743,7 +731,7 @@ export default {
   width: 1200px;
   margin: 0 auto;
 }
-.ivu-divider {
+.el-divider {
   background: $theme_color;
   height: 2px;
 }
@@ -781,7 +769,7 @@ export default {
 }
 </style>
 <style>
-.ivu-input-number-input {
+.el-input-number .el-input__inner {
   text-align: center;
 }
 

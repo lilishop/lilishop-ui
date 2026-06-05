@@ -6,12 +6,12 @@
     <!-- 搜索 筛选 -->
     <div class="mb_24 box" v-if="!homePage">
       <div class="global_float_right" >
-        <Input
+        <el-input
           class="width_300"
-          search
-          enter-button
+          
+          
           v-model="params.keywords"
-          @on-search="getList"
+          @keyup.enter="getList"
           placeholder="请输入订单号搜索"
         />
       </div>
@@ -32,8 +32,8 @@
             </div>
           </div>
           <div>
-            <Button v-if="order.orderStatus === 'COMPLETED'" @click="delOrder(order.sn)" class="del-btn mr_10 fontsize_16" style="margin-top:-5px;" type="text" icon="ios-trash-outline" size="small"></Button>
-            <span>{{ order.flowPrice | unitPrice("￥") }}</span>
+            <el-button v-if="order.orderStatus === 'COMPLETED'" @click="delOrder(order.sn)" class="del-btn mr_10 fontsize_16" style="margin-top:-5px;" type="text" icon="ios-trash-outline" size="small"></el-button>
+            <span>{{ $filters.unitPrice(order.flowPrice, "￥") }}</span>
           </div>
         </div>
         <div class="order-body">
@@ -51,11 +51,11 @@
               <div>
                 <div class="hover-color" @click="goodsDetail(goods.skuId, goods.goodsId)">{{ goods.name }}</div>
                 <div class="mt_10">
-                  <span class="global_color">{{ goods.goodsPrice | unitPrice("￥") }} </span>x {{ goods.num }}
+                  <span class="global_color">{{ $filters.unitPrice(goods.goodsPrice, "￥") }} </span>x {{ goods.num }}
                   <span style="margin-left: 10px;color: #ff9900;">{{refundPriceList(goods.isRefund)}}</span>
                 </div>
-                <Button v-if="goods.commentStatus == 'UNFINISHED'" @click="comment(order.sn, goodsIndex)" size="small" type="success" class="fontsize_12" style="position:relative;top:-22px;left:190px;margin-right:10px">评价</Button>
-                <Button v-if="goods.complainStatus == 'NO_APPLY'" @click="complain(order.sn, goodsIndex)" type="warning" class="fontsize_12" size="small" style="position:relative;top:-22px;left:190px">投诉</Button>
+                <el-button v-if="goods.commentStatus == 'UNFINISHED'" @click="comment(order.sn, goodsIndex)" size="small" type="success" class="fontsize_12" style="position:relative;top:-22px;left:190px;margin-right:10px">评价</el-button>
+                <el-button v-if="goods.complainStatus == 'NO_APPLY'" @click="complain(order.sn, goodsIndex)" type="warning" class="fontsize_12" size="small" style="position:relative;top:-22px;left:190px">投诉</el-button>
               </div>
             </div>
           </div>
@@ -64,47 +64,41 @@
           </div>
           <div>
             <!-- 订单基础操作 -->
-            <Button @click="orderDetail(order.sn)" type="info" size="small">订单详情</Button>
-            <Button @click="handleCancelOrder(order.sn)" type="error" v-if="order.allowOperationVO.cancel" size="small">取消订单</Button>
-            <Button @click="goPay(order.sn)" size="small" type="success" v-if="order.allowOperationVO.pay">去支付</Button>
-            <Button @click="received(order.sn)" size="small" type="warning" v-if="order.allowOperationVO.rog">确认收货</Button>
+            <el-button @click="orderDetail(order.sn)" type="info" size="small">订单详情</el-button>
+            <el-button @click="handleCancelOrder(order.sn)" type="danger" v-if="order.allowOperationVO.cancel" size="small">取消订单</el-button>
+            <el-button @click="goPay(order.sn)" size="small" type="success" v-if="order.allowOperationVO.pay">去支付</el-button>
+            <el-button @click="received(order.sn)" size="small" type="warning" v-if="order.allowOperationVO.rog">确认收货</el-button>
             <!-- 售后 -->
-            <Button v-if="order.groupAfterSaleStatus && (order.groupAfterSaleStatus.includes('NOT_APPLIED')|| order.groupAfterSaleStatus.includes('PART_AFTER_SALE'))"
-                    @click="applyAfterSale(order.orderItems)" size="small">申请售后</Button>
+            <el-button v-if="order.groupAfterSaleStatus && (order.groupAfterSaleStatus.includes('NOT_APPLIED')|| order.groupAfterSaleStatus.includes('PART_AFTER_SALE'))"
+                    @click="applyAfterSale(order.orderItems)" size="small">申请售后</el-button>
           </div>
         </div>
       </div>
-      <Spin size="large" fix v-if="spinShow"></Spin>
+      <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
     </div>
     <!-- 分页 -->
     <div class="page-size" v-if="!homePage">
-      <Page :total="total" @on-change="changePageNum"
-        @on-page-size-change="changePageSize"
-        :page-size="params.pageSize"
-        show-total
-        show-sizer>
-      </Page>
+      <el-pagination :total="total" @current-change="changePageNum"
+        @size-change="changePageSize"
+        :page-size="params.pageSize" layout="total, sizes, prev, pager, next"></el-pagination>
     </div>
     <!-- 选择售后商品 -->
-    <Modal v-model="afterSaleModal" title="请选择申请售后的商品">
+    <el-dialog v-model="afterSaleModal" title="请选择申请售后的商品">
       <div>
-        <Table
-          border
-          :columns="afterSaleColumns"
-          :data="afterSaleArr"
-          @on-row-click="afterSaleSelect"
-        >
-        </Table>
+        <el-table :data="afterSaleArr" border @row-click="afterSaleSelect">
+          <el-table-column prop="name" label="商品名称" />
+          <el-table-column prop="goodsPrice" label="价格" />
+        </el-table>
       </div>
-      <div slot="footer"></div>
-    </Modal>
-    <Modal v-model="cancelAvail" title="请选择取消订单原因" @on-ok="sureCancel" @on-cancel="cancelAvail = false">
-      <RadioGroup v-model="cancelParams.reason" vertical type="button" button-style="solid">
-        <Radio :label="item.reason" v-for="item in cancelReason" :key="item.id">
+      <template #footer><div></div></template>
+    </el-dialog>
+    <el-dialog v-model="cancelAvail" title="请选择取消订单原因" @ok="sureCancel" @cancel="cancelAvail = false">
+      <el-radio-group v-model="cancelParams.reason" vertical type="button" button-style="solid">
+        <el-radio :label="item.reason" v-for="item in cancelReason" :key="item.id">
            {{item.reason}}
-        </Radio>
-      </RadioGroup>
-    </Modal>
+        </el-radio>
+      </el-radio-group>
+    </el-dialog>
   </div>
 </template>
 
@@ -140,10 +134,6 @@ export default {
       total: 0, // 数据总数
       spinShow: false, // 加载状态
       afterSaleModal: false, // 选择售后商品模态框
-      afterSaleColumns: [ // 售后商品表头
-        {title: '商品名称', key: 'name'},
-        {title: '价格', key: 'goodsPrice'}
-      ],
       afterSaleArr: [], // 售后商品列表
       cancelAvail: false, // 取消订单modal控制
       cancelReason: [] // 取消订单原因
@@ -374,7 +364,7 @@ export default {
           color: $theme_color;
         }
       }
-      .ivu-icon {
+      .el-icon {
         color: #ff8f23;
         cursor: pointer;
         &:hover {
@@ -385,7 +375,7 @@ export default {
 
     > div:nth-child(3) {
       width: 100px;
-      .ivu-btn {
+      .el-button {
         margin-bottom: 10px;
       }
     }

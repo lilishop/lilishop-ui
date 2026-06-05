@@ -1,781 +1,403 @@
 <template>
   <div class="search">
-    <Card>
-
-      <Row @keydown.enter.native="handleSearch">
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
-          <Form-item label="商品名称" prop="goodsName">
-            <Input
-              type="text"
-              v-model="searchForm.goodsName"
-              placeholder="请输入商品名称"
-              clearable
-              style="width: 240px"
-            />
-          </Form-item>
-          <Form-item label="状态" prop="status">
-            <Select
-              v-model="searchForm.marketEnable"
-              placeholder="请选择"
-              clearable
-              style="width: 240px"
-            >
-              <Option value="DOWN">下架</Option>
-              <Option value="UPPER">上架</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="销售模式" prop="status">
-            <Select
-              v-model="searchForm.salesModel"
-              placeholder="请选择"
-              clearable
-              style="width: 240px"
-            >
-              <Option value="RETAIL">零售</Option>
-              <Option value="WHOLESALE">批发</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="商品类型" prop="status">
-            <Select
-              v-model="searchForm.goodsType"
-              placeholder="请选择"
-              clearable
-              style="width: 240px"
-            >
-              <Option value="PHYSICAL_GOODS">实物商品</Option>
-              <Option value="VIRTUAL_GOODS">虚拟商品</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="商品编号" prop="sn">
-            <Input
-              type="text"
-              v-model="searchForm.id"
-              placeholder="商品编号"
-              clearable
-              style="width: 240px"
-            />
-          </Form-item>
-          <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
-          <Button @click="handleReset" class="search-btn">重置</Button>
-        </Form>
-      </Row>
-    </Card>
-    <Card>
-
-      <div class="goods-tab">
-        <Tabs v-model="currentStatus" @on-click="goodsStatusClick">
-          <TabPane v-for="(item,index) in goodsStatusWithCount" :key="index" :label="item.title" :name="item.value">
-          </TabPane>
-        </Tabs>
-      </div>
-
-      <Row class="operation padding-row">
-        <Button @click="addGoods" type="info">添加商品</Button>
-        <Button @click="openImportGoods" >导入商品</Button>
-        <Dropdown @on-click="handleDropdown">
-          <Button>
-            批量修改
-            <Icon type="ios-arrow-down"></Icon>
-          </Button>
-          <DropdownMenu slot="list">
-            <DropdownItem name="uppers">批量上架</DropdownItem>
-            <DropdownItem name="lowers">批量下架</DropdownItem>
-            <DropdownItem name="scheduleMarket">批量定时上下架</DropdownItem>
-            <DropdownItem name="batchShipTemplate">批量设置物流模板</DropdownItem>
-            <DropdownItem name="deleteAll">批量删除</DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
-      </Row>
-
-      <Table
-        class="mt_10"
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        @on-selection-change="changeSelect"
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
       >
-        <!-- 商品栏目格式化 -->
-        <template slot="goodsSlot" slot-scope="{ row }">
-          <div style=" height: 60px; display: flex">
-            <div style="">
-              <img
-                :src="row.original"
-                style="height: 50px; margin-top: 3px; width: 50px"
-              />
-            </div>
-
-            <div style="margin-left: 13px">
-              <div class="div-zoom">
-                <a @click="linkTo(row.id, row.skuId)">{{ row.goodsName }}</a>
-              </div>
-              
-            </div>
-          </div>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
-          :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
-          size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
-
-    <Modal
-      title="更新库存"
-      v-model="updateStockModalVisible"
-      :mask-closable="false"
-      :width="610"
-    >
-      <Tabs value="updateStock" v-model="updateStockType">
-        <TabPane label="手动规格更新" name="updateStock">
-          <Table
-            class="mt_10"
-            :columns="updateStockColumns"
-            :data="stockList"
-            border
-          ></Table>
-        </TabPane>
-        
-      </Tabs>
-
-      <div slot="footer">
-        <Button type="text" @click="updateStockModalVisible = false">取消</Button>
-        <Button type="primary" @click="updateStock">更新</Button>
-      </div>
-    </Modal>
-
-    <!-- 批量设置物流模板 -->
-    <Modal
-      title="批量设置物流模板"
-      v-model="shipTemplateModal"
-      :mask-closable="false"
-      :width="500"
-    >
-      <Form ref="shipTemplateForm" :model="shipTemplateForm" :label-width="120">
-        <FormItem class="form-item-view-el" label="物流模板" prop="templateId">
-          <Select v-model="shipTemplateForm.templateId" style="width: 200px">
-            <Option v-for="item in logisticsTemplate" :value="item.id" :key="item.id"
-              >{{ item.name }}
-            </Option>
-          </Select>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="shipTemplateModal = false">取消</Button>
-        <Button type="primary" @click="saveShipTemplate">更新</Button>
-      </div>
-    </Modal>
-
-    <Modal
-      title="批量定时上下架"
-      v-model="scheduleMarketModal"
-      :mask-closable="false"
-      :width="520"
-    >
-      <Form
-        ref="scheduleMarketFormRef"
-        :model="scheduleMarketForm"
-        :label-width="120"
-      >
-        <FormItem label="状态" prop="status">
-          <Select v-model="scheduleMarketForm.status" style="width: 200px">
-            <Option value="UPPER">上架</Option>
-            <Option value="DOWN">下架</Option>
-          </Select>
-        </FormItem>
-        <FormItem label="触发时间" prop="triggerTime">
-          <DatePicker
-            v-model="scheduleMarketForm.triggerTime"
-            type="datetime"
-            format="yyyy-MM-dd HH:mm:ss"
-            :options="scheduleMarketDatePickerOptions"
-            :time-picker-options="scheduleMarketTimePickerOptions"
-            @on-change="handleScheduleMarketTimeChange"
+        <el-form-item label="商品名称" prop="goodsName">
+          <el-input
+            v-model="searchForm.goodsName"
+            placeholder="请输入商品名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="商品编号" prop="id">
+          <el-input
+            v-model="searchForm.id"
+            placeholder="请输入商品编号"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="店铺名称" prop="storeName">
+          <el-input
+            v-model="searchForm.storeName"
+            placeholder="请输入店铺名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="销售模式" prop="salesModel">
+          <el-select
+            v-model="searchForm.salesModel"
             placeholder="请选择"
             clearable
             style="width: 240px"
-          ></DatePicker>
-        </FormItem>
-        <FormItem label="原因" prop="reason">
-          <Input
-            v-model="scheduleMarketForm.reason"
-            type="textarea"
-            :rows="3"
-            placeholder="可选"
+          >
+            <el-option label="零售" value="RETAIL" />
+            <el-option label="批发" value="WHOLESALE" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="商品类型" prop="goodsType">
+          <el-select
+            v-model="searchForm.goodsType"
+            placeholder="请选择"
+            clearable
+            style="width: 240px"
+          >
+            <el-option label="实物商品" value="PHYSICAL_GOODS" />
+            <el-option label="虚拟商品" value="VIRTUAL_GOODS" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="商品分组" prop="groupId">
+          <el-select
+            v-model="searchForm.groupId"
+            placeholder="请选择商品分组"
+            clearable
+            filterable
+            style="width: 240px"
+          >
+            <el-option
+              v-for="item in goodsGroupList"
+              :key="item.id"
+              :label="item.groupName"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <div class="goods-tab">
+        <el-tabs v-model="currentStatus" @tab-click="onStatusTabClick">
+          <el-tab-pane
+            v-for="(item, index) in goodsStatusWithCount"
+            :key="index"
+            :label="item.title"
+            :name="item.value"
           />
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="scheduleMarketModal = false">取消</Button>
-        <Button
+        </el-tabs>
+      </div>
+
+      <div class="batch-operations" style="margin: 10px 0">
+        <el-button
           type="primary"
-          :loading="scheduleMarketLoading"
-          @click="submitScheduleMarket"
-        >确定</Button>
+          :disabled="selectedRows.length === 0"
+          style="margin-right: 10px"
+          @click="openSetGoodsGroup"
+        >
+          批量设置分组
+        </el-button>
+        <el-button
+          type="success"
+          :disabled="selectedRows.length === 0"
+          style="margin-right: 10px"
+          @click="batchUpper"
+        >
+          批量上架
+        </el-button>
+        <el-button
+          type="warning"
+          :disabled="selectedRows.length === 0"
+          style="margin-right: 10px"
+          @click="batchLower"
+        >
+          批量下架
+        </el-button>
+        <el-button
+          v-if="currentStatus === 'TOBEAUDITED'"
+          type="primary"
+          :disabled="selectedRows.length === 0"
+          @click="batchAudit"
+        >
+          批量审核
+        </el-button>
       </div>
-    </Modal>
-    <Modal title="导入商品信息" v-model="importModal" :mask-closable="false">
-      <div style="text-align: center">
-        <Upload :before-upload="handleUpload" name="files" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                multiple type="drag" :action="action" :headers="accessToken">
-          <div style="padding: 50px 0">
-            <Icon type="ios-cloud-upload" size="102" style="color: #3399ff"></Icon>
-            <h2>选择或拖拽文件上传</h2>
+
+      <el-table
+        ref="table"
+        v-loading="loading"
+        :data="data"
+        class="mt_10"
+        row-key="id"
+        @selection-change="onSelectionChange"
+      >
+        <el-table-column type="selection" width="100" align="center" />
+        <el-table-column prop="id" label="商品ID" width="200" show-overflow-tooltip />
+        <el-table-column label="商品图片" width="100" align="center">
+          <template #default="{ row }">
+            <img
+              v-if="row && row.original"
+              :src="row.original"
+              style="height: 50px; width: 50px; object-fit: cover"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="商品名称" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">
+            <a class="link-text" @click="linkTo(row.id, row.skuId)">{{ row.goodsName }}</a>
+          </template>
+        </el-table-column>
+        <el-table-column label="价格" width="200">
+          <template #default="{ row }">
+            <span :style="{ color: $mainColor }">{{ $filters.unitPrice(row.price, '￥') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="buyCount" label="销量" width="150" />
+        <el-table-column prop="quantity" label="库存" width="150" />
+        <el-table-column label="销售模式" width="150">
+          <template #default="{ row }">
+            <span v-if="row">{{ salesModelText(row.salesModel) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="商品类型" width="150">
+          <template #default="{ row }">
+            <span v-if="row">{{ goodsTypeText(row.goodsType) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="150">
+          <template #default="{ row }">
+            <span v-if="row">{{ marketEnableText(row.marketEnable) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="审核状态" width="150">
+          <template #default="{ row }">
+            <span v-if="row">{{ authFlagText(row.authFlag) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="storeName" label="店铺名称" width="200" show-overflow-tooltip />
+        <el-table-column label="操作" width="200" align="center" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row.authFlag === 'TOBEAUDITED'">
+              <a class="link-text" @click="openAuditModal(row)">审核</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="showDetail(row)">查看</a>
+            </template>
+            <template v-else-if="row.marketEnable === 'DOWN'">
+              <a class="link-text" @click="upper(row)">上架</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="showDetail(row)">查看</a>
+            </template>
+            <template v-else>
+              <a class="link-text" @click="edit(row)">下架</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="showDetail(row)">查看</a>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
+
+    <el-dialog v-model="modalVisible" title="下架操作" width="500px" :close-on-click-modal="false">
+      <el-form ref="underForm" :model="underForm" label-width="100px">
+        <el-form-item label="下架原因" prop="reason">
+          <el-input v-model="underForm.reason" clearable />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="modalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="lower">提交</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="auditModalVisible" title="商品审核" width="500px" :close-on-click-modal="false">
+      <el-form ref="auditForm" :model="goodsAuditForm" label-width="100px">
+        <el-form-item label="审核结果" prop="auth_flag">
+          <el-radio-group v-model="goodsAuditForm.auth_flag">
+            <el-radio :value="1">审核通过</el-radio>
+            <el-radio :value="2">审核拒绝</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="auditModalVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmAudit">提交审核</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
+      v-model="batchAuditModalVisible"
+      title="批量商品审核"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <el-form ref="batchAuditForm" :model="batchAuditForm" label-width="100px">
+        <el-form-item label="审核结果" prop="auth_flag">
+          <el-radio-group v-model="batchAuditForm.auth_flag">
+            <el-radio :value="1">审核通过</el-radio>
+            <el-radio :value="2">审核拒绝</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item v-if="batchAuditForm.auth_flag === 2" label="审核备注" prop="reason">
+          <el-input v-model="batchAuditForm.reason" type="textarea" :rows="3" placeholder="请输入拒绝原因" />
+        </el-form-item>
+        <el-form-item label="选中商品">
+          <div style="max-height: 200px; overflow-y: auto">
+            <el-tag v-for="item in selectedRows" :key="item.id" style="margin: 2px">{{ item.goodsName }}</el-tag>
           </div>
-          <Spin fix v-if="spinShow"></Spin>
-        </Upload>
-        <Button @click="exportGoods" type="text" style="color: red">下载导入模板</Button>
-      </div>
-      <div slot="footer">
-        <Button type="text" @click="importModal = false">确定</Button>
-      </div>
-    </Modal>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="batchAuditModalVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitBatchAudit">提交审核</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="goodsGroupFlag" title="批量设置商品分组" width="420px">
+      <el-form ref="goodsGroupForm" :model="goodsGroupForm" :rules="goodsGroupRule" label-width="90px">
+        <el-form-item label="商品分组" prop="groupId">
+          <el-select v-model="goodsGroupForm.groupId" clearable filterable style="width: 240px">
+            <el-option
+              v-for="item in goodsGroupList"
+              :key="item.id"
+              :label="item.groupName"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="goodsGroupFlag = false">取消</el-button>
+        <el-button type="primary" :loading="goodsGroupLoading" @click="submitSetGoodsGroup">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import {
-  getGoodsListDataSeller,
-  getGoodsSkuListDataSeller,
-  updateGoodsSkuStocks,
-  upGoods,
-  lowGoods,
-  deleteGoods,
-  batchShipTemplate,
-  downLoadGoods,
-  getGoodsNumerData,
-  scheduleGoodsMarket
-} from "@/api/goods";
-import { baseUrl } from "@/libs/axios.js";
 import * as API_Shop from "@/api/shops";
 
-import {uploadGoodsExcel} from "../../../api/goods";
-
+import {
+  getGoodsListData,
+  getGoodsNumerData,
+  upGoods,
+  lowGoods,
+  authGoods,
+  getGoodsGroupByPage,
+  addGoodsGroupItems
+} from "@/api/goods";
 export default {
   name: "goods",
   data() {
     return {
-      spinShow:false,
-      accessToken: {}, // 验证token
-      importModal: false,
-      action: baseUrl + "/goods/import/import", // 上传接口
       id: "", //要操作的id
       loading: true, // 表单加载状态
-      shipTemplateForm: {}, // 物流模板
-      shipTemplateModal: false, // 物流模板是否显示
-      logisticsTemplate: [], // 物流列表
-      updateStockModalVisible: false, // 更新库存模态框显隐
-      stockAllUpdate: undefined, // 更新库存数量
-      scheduleMarketModal: false,
-      scheduleMarketLoading: false,
-      scheduleMarketForm: {
-        status: "UPPER",
-        triggerTime: null,
-        reason: ""
-      },
-      selectList: [], // 选中的商品列表
-      selectCount: 0, // 选中的商品数量
+      modalVisible: false, // 添加或编辑显示
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
         pageSize: 20, // 页面大小
         sort: "create_time", // 默认排序字段
         order: "desc", // 默认排序方式
+        groupId: "",
       },
-      stockList: [], // 库存列表
-      form: {
-        // 添加或编辑表单对象初始化数据
-        goodsName: "",
-        sn: "",
-        marketEnable: "",
-        price: "",
-        sellerName: "",
+      underForm: {
+        // 下架原因
+        reason: "",
       },
-      columns: [
-        {
-          type: "selection",
-          width: 60,
-          align: "center",
-        },
-         {
-          title: "商品ID",
-          key: "id",
-          width: 180,
-          tooltip: true,
-        },
-        {
-          title: "商品",
-          key: "goodsName",
-          minWidth: 200,
-          slot: "goodsSlot",
-        },
-        {
-          title: "销售模式",
-          key: "salesModel",
-          width: 150,
-          render: (h, params) => {
-            if (params.row.salesModel === "RETAIL") {
-              return h("div", [h("Tag", { props: { color: "blue" } }, "零售")]);
-            } else if (params.row.salesModel === "WHOLESALE") {
-              return h("div", [h("Tag", { props: { color: "green" } }, "批发")]);
-            }
-          },
-        },
-        {
-          title: "商品类型",
-          key: "goodsType",
-          width: 150,
-          render: (h, params) => {
-            if (params.row.goodsType === "PHYSICAL_GOODS") {
-              return h("div", [h("Tag", { props: { color: "blue" } }, "实物")]);
-            } else if (params.row.goodsType === "VIRTUAL_GOODS") {
-              return h("div", [h("Tag", { props: { color: "green" } }, "虚拟")]);
-            }
-          },
-        },
-        {
-          title: "价格",
-          key: "price",
-          width: 150,
-          render: (h, params) => {
-            return h("div", "￥" + params.row.price);
-          },
-        },
-        {
-          title: "销量",
-          key: "buyCount",
-          width: 150,
-          render: (h, params) => {
-            return h("span", params.row.buyCount || 0);
-          },
-        },
-        {
-          title: "库存",
-          key: "quantity",
-          width: 150,
-          render: (h, params) => {
-            return h("span", params.row.quantity || 0);
-          },
-        },
-        {
-          title: "审核状态",
-          key: "authFlag",
-          width: 150,
-          render: (h, params) => {
-            if (params.row.authFlag === "TOBEAUDITED") {
-              return h("Tag", { props: { color: "gold" } }, "待审核");
-            } else if (params.row.authFlag === "PASS") {
-              return h("Tag", { props: { color: "green" } }, "审核通过");
-            } else if (params.row.authFlag === "REFUSE") {
-              return h("Tag", { props: { color: "red" } }, "审核拒绝");
-            }
-          },
-        },
-        {
-          title: "状态",
-          key: "marketEnable",
-          width: 150,
-          render: (h, params) => {
-            if (params.row.marketEnable === "UPPER") {
-              return h("Tag", { props: { color: "green" } }, "上架");
-            } else if (params.row.marketEnable === "DOWN") {
-              return h("Tag", { props: { color: "red" } }, "下架");
-            }
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          fixed: "right",
-          width: 200,
-          render: (h, params) => {
-            if (params.row.marketEnable == "DOWN") {
-              return h("div", [
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.editGoods(params.row);
-                      },
-                    },
-                  },
-                  "编辑"
-                ),
-                h("span", {
-                  style: {
-                    margin: "0 8px",
-                    color: "#dcdee2"
-                  }
-                }, "|"),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.upper(params.row);
-                      },
-                    },
-                  },
-                  "上架"
-                ),
-                h("span", {
-                  style: {
-                    margin: "0 8px",
-                    color: "#dcdee2"
-                  }
-                }, "|"),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.copyGoods(params.row);
-                      },
-                    },
-                  },
-                  "复制"
-                ),
-              ]);
-            } else {
-              return h("div", [
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.editGoods(params.row);
-                      },
-                    },
-                  },
-                  "编辑"
-                ),
-                h("span", {
-                  style: {
-                    margin: "0 8px",
-                    color: "#dcdee2"
-                  }
-                }, "|"),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.getStockDetail(params.row.id);
-                      },
-                    },
-                  },
-                  "库存"
-                ),
-                h("span", {
-                  style: {
-                    margin: "0 8px",
-                    color: "#dcdee2"
-                  }
-                }, "|"),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.lower(params.row);
-                      },
-                    },
-                  },
-                  "下架"
-                ),
-                h("span", {
-                  style: {
-                    margin: "0 8px",
-                    color: "#dcdee2"
-                  }
-                }, "|"),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.copyGoods(params.row);
-                      },
-                    },
-                  },
-                  "复制"
-                ),
-              ]);
-            }
-          },
-        },
-      ],
-      updateStockColumns: [
-        {
-          title: "sku规格",
-          key: "sn",
-          minWidth: 120,
-          render: (h, params) => {
-            return h("div", {}, params.row.simpleSpecs);
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          width: 200,
-          render: (h, params) => {
-            let vm = this;
-            return h("InputNumber", {
-              props: {
-                value: params.row.quantity,
-              },
-              on: {
-                "on-change": (event) => {
-                  vm.stockList[params.index].quantity = event;
-                },
-              },
-            });
-          },
-        },
-      ],
+      goodsAuditForm: {
+        // 商品审核表单
+        auth_flag: 1,
+      },
+      auditModalVisible: false, // 审核弹框显示状态
+      currentAuditGoods: null, // 当前审核的商品
+      submitLoading: false, // 添加或编辑提交状态
       data: [], // 表单数据
       total: 0, // 表单数据总数
-      updateStockType: 'updateStock',  // 更新库存状态
+      currentStatus: "ALL",
       goodsNumerData: {},
-      currentStatus: '',
+      selectedRows: [], // 选中的行数据
+      selectAll: false, // 全选状态
+      batchAuditModalVisible: false, // 批量审核弹框显示状态
+      batchAuditForm: {
+        auth_flag: 1,
+        reason: ''
+      },
+      goodsGroupFlag: false,
+      goodsGroupLoading: false,
+      goodsGroupList: [],
+      goodsGroupForm: {
+        groupId: ""
+      },
+      goodsGroupRule: {
+        groupId: [{ required: true, message: "请选择商品分组", trigger: "change" }]
+      }
     };
   },
   computed: {
     goodsStatusWithCount() {
       return [
-        {title: '全部', value: ''},
+        {title: '全部', value: 'ALL'},
         {title: `出售中${this.goodsNumerData.upperGoodsNum ? '(' + this.goodsNumerData.upperGoodsNum + ')' : ''}`, value: 'UPPER'},
         {title: `仓库中${this.goodsNumerData.downGoodsNum ? '(' + this.goodsNumerData.downGoodsNum + ')' : ''}`, value: 'DOWN'},
         {title: `待审核${this.goodsNumerData.auditGoodsNum ? '(' + this.goodsNumerData.auditGoodsNum + ')' : ''}`, value: 'TOBEAUDITED'},
         {title: `审核未通过${this.goodsNumerData.refuseGoodsNum ? '(' + this.goodsNumerData.refuseGoodsNum + ')' : ''}`, value: 'REFUSE'}
       ];
-    },
-    scheduleMarketDatePickerOptions() {
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      const todayStartMs = todayStart.getTime();
-      return {
-        disabledDate(date) {
-          if (!date) return false;
-          return date.getTime() < todayStartMs;
-        }
-      };
-    },
-    scheduleMarketTimePickerOptions() {
-      const now = new Date();
-      const selected = this.scheduleMarketForm && this.scheduleMarketForm.triggerTime
-        ? (this.scheduleMarketForm.triggerTime instanceof Date
-          ? this.scheduleMarketForm.triggerTime
-          : new Date(this.scheduleMarketForm.triggerTime))
-        : null;
-
-      const isToday = selected
-        ? selected.getFullYear() === now.getFullYear() &&
-          selected.getMonth() === now.getMonth() &&
-          selected.getDate() === now.getDate()
-        : true;
-
-      if (!isToday) {
-        return {};
-      }
-
-      const nowH = now.getHours();
-      const nowM = now.getMinutes();
-      const nowS = now.getSeconds();
-
-      return {
-        disabledHours: () => Array.from({ length: nowH }, (_, i) => i),
-        disabledMinutes: (hour) => (hour === nowH ? Array.from({ length: nowM }, (_, i) => i) : []),
-        disabledSeconds: (hour, minute) =>
-          hour === nowH && minute === nowM ? Array.from({ length: nowS + 1 }, (_, i) => i) : []
-      };
     }
   },
   methods: {
+    clearTableSelection() {
+      this.$refs.table?.clearSelection?.();
+    },
+    onStatusTabClick(tab) {
+      this.goodsStatusClick(tab.paneName);
+    },
+    salesModelText(v) {
+      if (v === "RETAIL") return "零售";
+      if (v === "WHOLESALE") return "批发";
+      return "其他类型";
+    },
+    goodsTypeText(v) {
+      if (v === "PHYSICAL_GOODS") return "实物商品";
+      if (v === "VIRTUAL_GOODS") return "虚拟商品";
+      return "电子卡券";
+    },
+    marketEnableText(v) {
+      if (v === "DOWN") return "下架";
+      if (v === "UPPER") return "上架";
+      return "";
+    },
+    authFlagText(v) {
+      if (v === "TOBEAUDITED") return "待审核";
+      if (v === "PASS") return "通过";
+      if (v === "REFUSE") return "拒绝";
+      return "";
+    },
+    // 初始化数据
     init() {
-      // 初始化数据
       this.getDataList();
       this.getNumberData();
+      this.loadGoodsGroupList();
     },
-    // 添加商品
-    addGoods() {
-      this.$router.push({ name: "goods-operation" });
-    },
-    // 编辑商品
-    editGoods(v) {
-      this.$router.push({ name: "goods-operation-edit", query: { id: v.id } });
-    },
-    // 复制商品
-    copyGoods(v) {
-      this.$router.push({ name: "goods-operation", query: { copyId: v.id } });
-    },
-
-    //批量操作
-    handleDropdown(v) {
-      //批量上架
-      if (v == "uppers") {
-        this.uppers();
-      }
-      //批量下架
-      if (v == "lowers") {
-        this.lowers();
-      }
-      //批量定时上下架
-      if (v == "scheduleMarket") {
-        this.openScheduleMarketModal();
-      }
-      //批量删除商品
-      if (v == "deleteAll") {
-        this.deleteAll();
-      }
-      //批量设置物流模板
-      if (v == "batchShipTemplate") {
-        this.batchShipTemplate();
-      }
-    },
-    // 获取库存详情
-    getStockDetail(id) {
-      getGoodsSkuListDataSeller({ goodsId: id, pageSize: 1000 }).then((res) => {
-        if (res.success) {
-          this.updateStockModalVisible = true;
-          this.updateStockType = 'updateStock';
-          this.stockAllUpdate = undefined;
-          this.stockList = res.result.records;
-        }
-      });
-    },
-    // 上传数据
-    handleUpload(file) {
-      this.file = file;
-      this.upload();
-      return false;
-    },
-    /**
-     * 上传文件
-     */
-    async upload() {
-      let fd = new FormData();
-      fd.append("files", this.file);
-      this.spinShow = true
-      let res = await uploadGoodsExcel(fd);
-      this.spinShow = false
-      if (res.success) {
-        this.$Message.success("导入成功")
-        this.init();
-      }
-    },
-    openImportGoods(){
-      this.importModal = true
-    },
-    async exportGoods(){
-      downLoadGoods()
-        .then((res) => {
-          const blob = new Blob([res], {
-            type: "application/vnd.ms-excel;charset=utf-8",
-          });
-          //对于<a>标签，只有 Firefox 和 Chrome（内核） 支持 download 属性
-          //IE10以上支持blob但是依然不支持download
-          if ("download" in document.createElement("a")) {
-            //支持a标签download的浏览器
-            const link = document.createElement("a"); //创建a标签
-            link.download = "商品批量导入模板.xls"; //a标签添加属性
-            link.style.display = "none";
-            link.href = URL.createObjectURL(blob);
-            document.body.appendChild(link);
-            link.click(); //执行下载
-            URL.revokeObjectURL(link.href); //释放url
-            document.body.removeChild(link); //释放标签
-          } else {
-            navigator.msSaveBlob(blob, fileName);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-    // 更新库存
-    updateStock () {
-      if (this.updateStockType === 'updateStock' || this.updateStockType === 'stockAll') {
-        // updateStock 手动规格更新，stockAll 批量规格更新
-        let updateStockList = this.stockList.map((i) => {
-          let j = { skuId: i.id, quantity: i.quantity };
-          if (this.stockAllUpdate) {
-            j.quantity = this.stockAllUpdate;
-          }
-          return j;
-        });
-        updateGoodsSkuStocks(updateStockList).then((res) => {
-          if (res.success) {
-            this.updateStockModalVisible = false;
-            this.$Message.success("更新库存成功");
-            this.getDataList();
-          }
-        });
-      }
-
-    },
-    // 改变页码
+    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
-      this.clearSelectAll();
     },
-    // 改变页数
+    // 分页 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
@@ -787,287 +409,15 @@ export default {
       this.getDataList();
       this.getNumberData();
     },
-    // 重置搜索条件
-    handleReset() {
-      this.searchForm = {};
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      // 重新加载数据
-      this.getDataList();
-      this.getNumberData();
-    },
-    // 清除多选
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-    // 添加选中项
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
-    //保存物流模板信息
-    saveShipTemplate() {
-      this.$Modal.confirm({
-        title: "确认设置物流模板",
-        content: "您确认要设置所选的 " + this.selectCount + " 个商品的物流模板?",
-        loading: true,
-        onOk: () => {
-          let ids = [];
-          this.selectList.forEach(function (e) {
-            ids.push(e.id);
-          });
-          // 批量设置物流模板
-          batchShipTemplate(this.shipTemplateForm).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("物流模板设置成功");
-              this.clearSelectAll();
-              this.getDataList();
-            }
-            this.shipTemplateModal = false;
-          });
-        },
-      });
-    },
-    //批量设置物流模板
-    batchShipTemplate() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要设置物流模板的商品");
-        return;
-      }
-      this.getShipTempList();
-      let data = [];
-      this.selectList.forEach(function (e) {
-        data.push(e.id);
-      });
-      this.shipTemplateForm.goodsId = data;
-      this.shipTemplateModal = true;
-    },
-    openScheduleMarketModal() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要定时上下架的商品");
-        return;
-      }
-      this.scheduleMarketForm = {
-        status: "UPPER",
-        triggerTime: null,
-        reason: ""
-      };
-      this.scheduleMarketModal = true;
-    },
-    handleScheduleMarketTimeChange() {
-      if (!this.scheduleMarketForm || !this.scheduleMarketForm.triggerTime) return;
-      const selected =
-        this.scheduleMarketForm.triggerTime instanceof Date
-          ? this.scheduleMarketForm.triggerTime
-          : new Date(this.scheduleMarketForm.triggerTime);
-
-      const selectedMs = selected.getTime();
-      if (!Number.isFinite(selectedMs)) return;
-      if (selectedMs <= Date.now()) {
-        this.$Message.warning("触发时间只能选择当前时间之后");
-        this.scheduleMarketForm.triggerTime = new Date(Date.now() + 60 * 1000);
-      }
-    },
-    submitScheduleMarket() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要定时上下架的商品");
-        return;
-      }
-      if (!this.scheduleMarketForm.status) {
-        this.$Message.warning("请选择状态");
-        return;
-      }
-      if (!this.scheduleMarketForm.triggerTime) {
-        this.$Message.warning("请选择触发时间");
-        return;
-      }
-
-      const triggerTime =
-        this.scheduleMarketForm.triggerTime instanceof Date
-          ? this.scheduleMarketForm.triggerTime.getTime()
-          : new Date(this.scheduleMarketForm.triggerTime).getTime();
-
-      if (!Number.isFinite(triggerTime)) {
-        this.$Message.error("触发时间格式不正确");
-        return;
-      }
-      if (triggerTime <= Date.now()) {
-        this.$Message.warning("触发时间需大于当前时间");
-        return;
-      }
-
-      const goodsIds = this.selectList.map((i) => i.id);
-
-      const payload = {
-        goodsIds,
-        status: this.scheduleMarketForm.status,
-        triggerTime,
-        reason: this.scheduleMarketForm.reason || undefined
-      };
-
-      this.scheduleMarketLoading = true;
-      scheduleGoodsMarket(payload)
-        .then((res) => {
-          if (res && res.success) {
-            this.$Message.success("设置成功");
-            this.scheduleMarketModal = false;
-            this.clearSelectAll();
-            this.getDataList();
-            this.getNumberData();
-          }
-        })
-        .finally(() => {
-          this.scheduleMarketLoading = false;
-        });
-    },
-    // 获取商品列表数据
+    // 获取数据
     getDataList() {
       this.loading = true;
-      // 带多条件搜索参数获取表单数据
-      getGoodsListDataSeller(this.searchForm).then((res) => {
+      getGoodsListData(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
           this.data = res.result.records;
           this.total = res.result.total;
         }
-      });
-    },
-    // 获取物流模板
-    getShipTempList() {
-      API_Shop.getShipTemplate().then((res) => {
-        if (res.success) {
-          this.logisticsTemplate = res.result;
-        }
-      });
-    },
-    //下架商品
-    lower(v) {
-      this.$Modal.confirm({
-        title: "确认下架",
-        content: "您确认要下架 " + v.goodsName + " ?",
-        loading: true,
-        onOk: () => {
-          let params = {
-            goodsId: v.id,
-          };
-          lowGoods(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("下架成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-    //批量下架
-    lowers() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要下架的商品");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认下架",
-        content: "您确认要下架所选的 " + this.selectCount + " 个商品?",
-        loading: true,
-        onOk: () => {
-          let ids = [];
-          this.selectList.forEach(function (e) {
-            ids.push(e.id);
-          });
-          let params = {
-            goodsId: ids.toString(),
-          };
-          // 批量下架
-          lowGoods(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("下架成功");
-              this.clearSelectAll();
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-    //批量删除商品
-    deleteAll() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要删除的商品");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选的 " + this.selectCount + " 个商品?",
-        loading: true,
-        onOk: () => {
-          let ids = [];
-          this.selectList.forEach(function (e) {
-            ids.push(e.id);
-          });
-          let params = {
-            goodsId: ids.toString(),
-          };
-          // 批量删除
-          deleteGoods(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("删除成功");
-              this.clearSelectAll();
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-    //批量上架
-    uppers(v) {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要上架的商品");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认上架",
-        content: "您确认要上架所选的 " + this.selectCount + " 个商品?",
-        loading: true,
-        onOk: () => {
-          let ids = [];
-          this.selectList.forEach(function (e) {
-            ids.push(e.id);
-          });
-          let params = {
-            goodsId: ids.toString(),
-          };
-          // 批量上架
-          upGoods(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("上架成功");
-              this.clearSelectAll();
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-    upper(v) {
-      this.$Modal.confirm({
-        title: "确认上架",
-        content: "您确认要上架 " + v.goodsName + " ?",
-        loading: true,
-        onOk: () => {
-          let params = {
-            goodsId: v.id,
-          };
-          upGoods(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("上架成功");
-              this.getDataList();
-            }
-          });
-        },
       });
     },
     getNumberData() {
@@ -1079,38 +429,332 @@ export default {
         }
       })
     },
-    // 商品状态筛选
-    goodsStatusClick(item) {
-      // 根据选择的状态设置搜索条件
-      if (item === 0) {
-        // 全部：清除状态筛选
-        delete this.searchForm.goodsStatus;
+    // 编辑
+    edit(v) {
+      this.id = v.id;
+      if (v.underMessage) {
+        this.underForm.reason = v.underMessage;
       } else {
-        // 其他状态正常赋值
-        this.searchForm.goodsStatus = item;
+        this.underForm.reason = "";
       }
-      this.currentStatus = item;
-      
-      // tab切换时清除选中内容
+      this.modalVisible = true;
+    },
+    // 下架
+    lower() {
+      let params = {
+        goodsId: this.id,
+        reason:this.underForm.reason
+      };
+      lowGoods(params).then((res) => {
+        this.$Modal.remove();
+        if (res.success) {
+          this.$Message.success("操作成功");
+          this.modalVisible = false;
+          this.getDataList();
+          this.getNumberData(); // 添加这行
+        }
+      });
+    },
+    // 上架
+    upper(v) {
+      this.$Modal.confirm({
+        title: "确认上架",
+        content: "您确认要上架 " + v.goodsName + " ?",
+        loading: true,
+        onOk: () => {
+           let params = {
+            goodsId: v.id
+          };
+          upGoods(params).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success("上架成功");
+              this.getDataList();
+              this.getNumberData(); // 添加这行
+            }
+          });
+        },
+      });
+    },
+
+    //查看商品详情
+    showDetail(v) {
+      this.$filters.customRouterPush({
+        name: "goods-detail",
+        query: { id: v.id },
+      });
+    },
+
+    // 商品状态筛选
+    goodsStatusClick(name) {
+      if (name === "ALL" || name === "" || name === undefined || name === null) {
+        delete this.searchForm.goodsStatus;
+        this.currentStatus = "ALL";
+      } else {
+        this.searchForm.goodsStatus = name;
+        this.currentStatus = name;
+      }
       this.selectedRows = [];
-      if (this.$refs.table) {
-        this.$refs.table.selectAll(false);
-      }
-      
+      this.clearTableSelection();
       this.getDataList();
     },
+    examine(v, authFlag) {
+      // 审核商品
+      let examine = "通过";
+      this.goodsAuditForm.authFlag = "PASS";
+      if (authFlag != 1) {
+        examine = "拒绝";
+        this.goodsAuditForm.authFlag = "REFUSE";
+      }
+
+      this.$Modal.confirm({
+        title: "确认审核",
+        content: "您确认要审核" + examine + " " + v.goodsName + " ?",
+        loading: true,
+        onOk: () => {
+          this.goodsAuditForm.goodsIds=v.id;
+          let formData = new FormData();
+          formData.append('goodsIds', v.id);
+          formData.append('authFlag', this.goodsAuditForm.authFlag);
+
+          authGoods(formData).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success("审核成功");
+              this.getDataList();
+              this.getNumberData();
+            }
+          });
+        },
+      });
+    },
+
+    // 打开审核弹框
+    openAuditModal(goods) {
+      this.currentAuditGoods = goods;
+      this.goodsAuditForm.auth_flag = 1;
+      this.goodsAuditForm.reason = '';
+      this.auditModalVisible = true;
+    },
+
+    // 确认审核（二次确认）
+    confirmAudit() {
+      const auditText = this.goodsAuditForm.auth_flag === 1 ? '通过' : '拒绝';
+      this.$Modal.confirm({
+        title: '确认审核',
+        content: `您确认要审核${auditText} "${this.currentAuditGoods.goodsName}" 吗？`,
+        loading: true,
+        onOk: () => {
+          this.submitAudit();
+        },
+      });
+    },
+
+    // 提交审核
+    submitAudit() {
+      let formData = new FormData();
+      formData.append('goodsIds', this.currentAuditGoods.id);
+      formData.append('authFlag', this.goodsAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE');
+      authGoods(formData).then((res) => {
+        this.$Modal.remove();
+        if (res.success) {
+          this.$Message.success('审核成功');
+          this.auditModalVisible = false;
+          this.getDataList();
+          this.getNumberData();
+        }
+      });
+    },
+
+    onSelectionChange(selection) {
+      this.selectedRows = selection;
+    },
+
+    // 批量上架
+    batchUpper() {
+      if (this.selectedRows.length === 0) {
+        this.$Message.warning('请先选择要上架的商品');
+        return;
+      }
+
+      const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
+      this.$Modal.confirm({
+        title: '确认批量上架',
+        content: `您确认要上架以下商品吗？\n${goodsNames}`,
+        loading: true,
+        onOk: () => {
+          // 提取所有选中商品的ID
+          const goodsIds = this.selectedRows.map(item => item.id);
+          const params = {
+            goodsId: goodsIds // 传递ID数组
+          };
+
+          upGoods(params).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success('批量上架成功');
+              this.selectedRows = [];
+              this.selectAll = false;
+              this.getDataList();
+              this.getNumberData();
+            }
+          }).catch(() => {
+            this.$Modal.remove();
+          });
+        }
+      });
+    },
+
+    // 批量下架
+    batchLower() {
+      if (this.selectedRows.length === 0) {
+        this.$Message.warning('请先选择要下架的商品');
+        return;
+      }
+
+      const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
+      this.$Modal.confirm({
+        title: '确认批量下架',
+        content: `您确认要下架以下商品吗？\n${goodsNames}`,
+        loading: true,
+        onOk: () => {
+          // 提取所有选中商品的ID
+          const goodsIds = this.selectedRows.map(item => item.id);
+          const params = {
+            goodsId: goodsIds, // 传递ID数组
+            reason: '批量下架操作' // 可以设置默认下架原因
+          };
+
+          lowGoods(params).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success('批量下架成功');
+              this.selectedRows = [];
+              this.selectAll = false;
+              this.getDataList();
+              this.getNumberData();
+            }
+          }).catch(() => {
+            this.$Modal.remove();
+          });
+        }
+      });
+    },
+
+    // 批量审核
+    batchAudit() {
+      if (this.selectedRows.length === 0) {
+        this.$Message.warning('请先选择要审核的商品');
+        return;
+      }
+
+      // 重置批量审核表单
+      this.batchAuditForm = {
+        auth_flag: 1,
+        reason: ''
+      };
+      this.batchAuditModalVisible = true;
+    },
+
+    // 提交批量审核
+    submitBatchAudit() {
+      if (this.selectedRows.length === 0) {
+        this.$Message.warning('请先选择要审核的商品');
+        return;
+      }
+
+      // 如果是拒绝审核，必须填写原因
+      if (this.batchAuditForm.auth_flag === 2 && !this.batchAuditForm.reason.trim()) {
+        this.$Message.warning('审核拒绝时必须填写拒绝原因');
+        return;
+      }
+
+      const actionText = this.batchAuditForm.auth_flag === 1 ? '通过' : '拒绝';
+      const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
+
+      this.$Modal.confirm({
+        title: `确认批量审核${actionText}`,
+        content: `您确认要${actionText}以下商品的审核吗？\n${goodsNames}`,
+        loading: true,
+        onOk: () => {
+          // 提取所有选中商品的ID
+          const goodsIds = this.selectedRows.map(item => item.id);
+
+          let formData = new FormData();
+          formData.append('goodsId', goodsIds);
+          formData.append('authFlag', this.batchAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE');
+          formData.append('reason', this.batchAuditForm.reason || '');
+
+          // 修正：直接调用authGoods，不传递'batch'参数
+          authGoods(formData).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success(`批量审核${actionText}成功`);
+              this.selectedRows = [];
+              this.selectAll = false;
+              this.batchAuditModalVisible = false;
+              this.getDataList();
+              this.getNumberData();
+            }
+          }).catch(() => {
+            this.$Modal.remove();
+          });
+        }
+      });
+    },
+    loadGoodsGroupList() {
+      getGoodsGroupByPage({ pageNumber: 1, pageSize: 1000 }).then((res) => {
+        if (res && res.success && res.result) {
+          this.goodsGroupList = res.result.records || [];
+        }
+      });
+    },
+    openSetGoodsGroup() {
+      if (this.selectedRows.length === 0) {
+        this.$Message.warning("请先选择商品");
+        return;
+      }
+      this.goodsGroupFlag = true;
+      this.goodsGroupLoading = false;
+      this.goodsGroupForm = { groupId: "" };
+      this.$nextTick(() => {
+        if (this.$refs.goodsGroupForm) this.$refs.goodsGroupForm.resetFields();
+      });
+      this.loadGoodsGroupList();
+    },
+    submitSetGoodsGroup() {
+      this.$refs.goodsGroupForm.validate((valid) => {
+        if (!valid) return;
+        const goodsIds = this.selectedRows.map((item) => item.id);
+        this.goodsGroupLoading = true;
+        addGoodsGroupItems(this.goodsGroupForm.groupId, goodsIds).then((res) => {
+          this.goodsGroupLoading = false;
+          if (res && res.success) {
+            this.$Message.success("设置成功");
+            this.goodsGroupFlag = false;
+            this.selectedRows = [];
+            this.selectAll = false;
+            this.clearTableSelection();
+            this.getDataList();
+          } else if (res && res.message) {
+            this.$Message.error(res.message);
+          }
+        }).catch(() => {
+          this.goodsGroupLoading = false;
+          this.$Message.error("设置失败，请检查权限或后端接口");
+        });
+      });
+    }
   },
   mounted() {
     this.init();
-    this.accessToken.accessToken = this.getStore("accessToken");
   },
 };
 </script>
 <style lang="scss" scoped>
-@import "@/styles/table-common.scss";
 // Tab组件样式
 .goods-tab {
-  ::v-deep .ivu-tabs-tab {
+  :deep(.el-tabs__item) {
     font-size: 14px;
   }
 }

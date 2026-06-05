@@ -1,231 +1,170 @@
 <template>
   <div class="store-bill">
-    <Card>
-      <Form ref="searchForm"
+    <el-card>
+      <el-form
+        ref="searchForm"
         :model="searchForm"
         inline
-        :label-width="70" class="search-form" @keydown.enter.native="handleSearch"
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
       >
-        <Form-item label="开始时间" prop="startDay">
-          <DatePicker
-            type="date"
+        <el-form-item label="开始时间" prop="startDate">
+          <el-date-picker
             v-model="searchForm.startDate"
-            format="yyyy-MM-dd HH:mm:ss"
-            placeholder="请选择"
-            clearable
-            style="width: 240px"
-          ></DatePicker>
-        </Form-item>
-        <Form-item label="结束时间" prop="endDate">
-          <DatePicker
             type="date"
-            v-model="searchForm.endDate"
-            format="yyyy-MM-dd HH:mm:ss"
-            di
+            value-format="YYYY-MM-DD HH:mm:ss"
             placeholder="请选择"
             clearable
             style="width: 240px"
-          ></DatePicker>
-        </Form-item>
-        <Form-item label="状态" prop="orderStatus">
-          <Select v-model="searchForm.billStatus" placeholder="请选择" clearable style="width: 240px">
-            <Option value="OUT">已出账</Option>
-            <Option value="CHECK">已对账</Option>
-            <Option value="COMPLETE">已完成</Option>
-          </Select>
-        </Form-item>
-        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
-        <Button @click="handleReset" class="search-btn">重置</Button>
-      </Form>
-      </Card>
-    <Card>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        class="mt_10"
-      ></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+          />
+        </el-form-item>
+        <el-form-item label="结束时间" prop="endDate">
+          <el-date-picker
+            v-model="searchForm.endDate"
+            type="date"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            placeholder="请选择"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="状态" prop="billStatus">
+          <el-select v-model="searchForm.billStatus" placeholder="请选择" clearable style="width: 240px">
+            <el-option label="已出账" value="OUT" />
+            <el-option label="已对账" value="CHECK" />
+            <el-option label="已完成" value="COMPLETE" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+          <el-button class="search-btn" @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <el-table v-loading="loading" border :data="data" ref="table" class="mt_10" style="width: 100%">
+        <el-table-column prop="sn" label="账单号" min-width="250" show-overflow-tooltip />
+        <el-table-column prop="createTime" label="生成时间" min-width="120" />
+        <el-table-column label="结算时间段" width="200" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.startTime }}~{{ row.endTime }}</template>
+        </el-table-column>
+        <el-table-column label="结算金额" min-width="100">
+          <template #default="{ row }">
+            <priceColorScheme :value="row.billPrice" :color="$mainColor" />
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row.billStatus === 'OUT'" type="primary">已出账</el-tag>
+            <el-tag v-else-if="row.billStatus === 'CHECK'" type="info">已对账</el-tag>
+            <el-tag v-else-if="row.billStatus === 'EXAMINE'" type="warning">已审核</el-tag>
+            <el-tag v-else type="success">已付款</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" fixed="right" width="100">
+          <template #default="{ row }">
+            <a class="link-text" @click="detail(row)">查看</a>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[10, 20, 50]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
-  import * as API_Shop from "@/api/shops";
+import * as API_Shop from "@/api/shops";
 
-  export default {
-    name: "storeBill",
-    data() {
-      return {
-        loading: true, // 表单加载状态
-        searchForm: {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
-          sort: "createTime", // 默认排序字段
-          order: "desc", // 默认排序方式
-          startDate: "", // 起始时间
-          endDate: "", // 终止时间
-        },
-        columns: [
-          {
-            title: "账单号",
-            key: "sn",
-            minWidth: 250,
-            tooltip: true
-          },
-          {
-            title: "生成时间",
-            key: "createTime",
-            minWidth: 120,
-          },
-          {
-            title: "结算时间段",
-            key: "startTime",
-            width: 200,
-            tooltip: true,
-            render: (h, params) => {
-              return h('div', params.row.startTime +"~"+params.row.endTime)
-            }
-          },
-          {
-            title: "结算金额",
-            key: "billPrice",
-            minWidth: 100,
-            render: (h, params) => {
-              return h("priceColorScheme", {props:{value:params.row.billPrice,color:this.$mainColor}} );
-            },
-
-          },
-
-
-          {
-            title: "状态",
-            key: "billStatus",
-            width: 100,
-            render: (h, params) => {
-              if (params.row.billStatus == "OUT") {
-                return h("Tag", {props: {color: "blue",},},"已出账");
-              } else if (params.row.billStatus == "CHECK") {
-                return h("Tag", {props: {color: "geekblue",},},"已对账");
-              } else if (params.row.billStatus == "EXAMINE") {
-                return h("Tag", {props: {color: "purple",},},"已审核");
-              } else {
-                return h("Tag", {props: {color: "green",},},"已付款");
-              }
-            }
-          },
-
-          {
-            title: "操作",
-            key: "action",
-            align: "center",
-            fixed: 'right',
-            width: 200,
-            render: (h, params) => {
-              return h("div", [
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.detail(params.row);
-                      },
-                    },
-                  },
-                  "查看"
-                ),
-              ]);
-            },
-          },
-        ],
-        data: [], // 表单数据
-        total: 0, // 表单数据总数
+export default {
+  name: "storeBill",
+  data() {
+    return {
+      loading: true,
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 10,
+        sort: "createTime",
+        order: "desc",
+        startDate: "",
+        endDate: "",
+      },
+      data: [],
+      total: 0,
+    };
+  },
+  methods: {
+    init() {
+      this.getDataList();
+    },
+    changePage() {
+      this.getDataList();
+    },
+    changePageSize() {
+      this.searchForm.pageNumber = 1;
+      this.getDataList();
+    },
+    handleSearch() {
+      this.searchForm.pageNumber = 1;
+      this.searchForm.pageSize = 10;
+      this.getDataList();
+    },
+    handleReset() {
+      this.searchForm = {
+        pageNumber: 1,
+        pageSize: 10,
+        sort: "createTime",
+        order: "desc",
+        startDate: "",
+        endDate: "",
       };
+      this.getDataList();
     },
-    methods: {
-      // 初始化数据
-      init() {
-        this.getDataList();
-      },
-      // 分页 改变页码
-      changePage(v) {
-        this.searchForm.pageNumber = v;
-        this.getDataList();
-      },
-      // 分页 改变页数
-      changePageSize(v) {
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = v;
-        this.getDataList();
-      },
-      // 搜索
-      handleSearch() {
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 10;
-        this.getDataList();
-      },
-      // 重置
-      handleReset() {
-        this.searchForm = {}
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 10;
-        this.getDataList();
-      },
-      // 获取列表数据
-      getDataList() {
-        this.loading = true;
-        API_Shop.getBillPage(this.searchForm).then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        });
-        this.total = this.data.length;
+    getDataList() {
+      this.loading = true;
+      API_Shop.getBillPage(this.searchForm).then((res) => {
         this.loading = false;
-      },
-      // 跳转结算详情
-      detail(v) {
-        let id = v.id;
-        this.$options.filters.customRouterPush({
-          name: "bill-detail",
-          query: { id: id },
-        })
-      },
+        if (res.success) {
+          this.data = res.result.records;
+          this.total = res.result.total;
+        }
+      });
     },
-    mounted () {
-      this.init();
+    detail(v) {
+      this.$filters.customRouterPush({
+        name: "bill-detail",
+        query: { id: v.id },
+      });
     },
-    // 页面缓存处理，从该页面离开时，修改KeepAlive为false，保证进入该页面是刷新
-    beforeRouteLeave(to, from, next) {
-      from.meta.keepAlive = false
-      next()
-    }
-  };
+  },
+  mounted() {
+    this.init();
+  },
+  beforeRouteLeave(to, from, next) {
+    from.meta.keepAlive = false;
+    next();
+  },
+};
 </script>
-<style lang="scss" scoped>
-  // 建议引入通用样式 可删除下面样式代码
-   @import "@/styles/table-common.scss";
 
+<style lang="scss" scoped>
+@import "@/styles/table-common.scss";
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
 </style>

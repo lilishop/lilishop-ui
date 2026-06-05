@@ -1,4 +1,4 @@
-<style lang="scss" scoped>
+<style lang="scss">
 @import "./main.scss";
 </style>
 
@@ -8,177 +8,155 @@
       <div class="logo-con">
         <img :src="storeSideLogo" key="max-logo" />
       </div>
-      <shrinkable-menu></shrinkable-menu>
+      <shrinkable-menu />
     </div>
-    <!-- 顶部标题栏主体 -->
     <div class="main-header-con" :style="{ height: setting.isUseTabsRouter ? '100px' : '60px' }">
       <div class="main-header">
-        <div
-          class="header-avator-con"
-        >
-          <!-- 左侧栏 -->
-          <div>
-
-          </div>
-          <!-- 用户头像 -->
+        <div class="header-avator-con">
+          <div></div>
           <div class="user-dropdown-menu-con">
-            <Row
+            <el-row
               type="flex"
               justify="end"
               align="middle"
               class="user-dropdown-innercon"
             >
               <ul class="nav-list">
-                <li class="nav-item " @click="im">
-                  <Tooltip content="联系客服">
-                    <Button type="info" size="small" :loading='load' icon="md-chatbubbles">客服</Button>
-                  </Tooltip>
+                <li class="nav-item" @click="im">
+                  <el-tooltip content="联系客服" placement="bottom">
+                    <el-button type="info" size="small" :loading="load">
+                      <el-icon><ChatDotRound /></el-icon>
+                      客服
+                    </el-button>
+                  </el-tooltip>
                 </li>
-                <li class="nav-item " @click="handleClickSetting">
-                  <Tooltip content="设置">
-                    <Icon size="16" type="md-settings" />
-                  </Tooltip>
+                <li class="nav-item" @click="handleClickSetting">
+                  <el-tooltip content="设置" placement="bottom">
+                    <el-icon :size="16"><Setting /></el-icon>
+                  </el-tooltip>
                 </li>
               </ul>
-              <Dropdown
-                transfer
-                trigger="hover"
-                @on-click="handleClickUserDropdown"
-              >
+              <el-dropdown trigger="hover" @command="handleClickUserDropdown">
                 <div class="dropList">
-
-                  <Avatar
-                    icon="ios-person"
+                  <el-avatar
+                    :size="32"
                     :src="userInfo.storeLogo"
                     style="background: #fff; margin-left: 10px"
-                  ></Avatar>
+                  >
+                    <el-icon><UserFilled /></el-icon>
+                  </el-avatar>
                 </div>
-                <DropdownMenu slot="list">
-                  <DropdownItem name="changePass">修改密码</DropdownItem>
-                  <DropdownItem name="loginOut" divided>退出</DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-            </Row>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="changePass">修改密码</el-dropdown-item>
+                    <el-dropdown-item divided command="loginOut">退出</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </el-row>
           </div>
         </div>
       </div>
-      <!-- 已打开的页面标签 -->
       <div class="tags-con" v-if="setting.isUseTabsRouter">
-        <tags-page-opened :pageTagsList="pageTagsList"></tags-page-opened>
+        <tags-page-opened :pageTagsList="pageTagsList" />
       </div>
     </div>
-    <div class="single-page-con" :style="{ 'top': setting.isUseTabsRouter ? '100px' : '60px', height: setting.isUseTabsRouter ? 'calc(100% - 110px)' : 'calc(100% - 70px)' }">
+    <div
+      class="single-page-con"
+      :style="{
+        top: setting.isUseTabsRouter ? '100px' : '60px',
+        height: setting.isUseTabsRouter ? 'calc(100% - 110px)' : 'calc(100% - 70px)',
+      }"
+    >
       <div class="single-page">
-        <!-- <keep-alive :include="cachePage"> -->
-        <!-- </keep-alive> -->
-        <keep-alive>
-          <router-view v-if="$route.meta.keepAlive"></router-view>
-        </keep-alive>
-        <router-view v-if="!$route.meta.keepAlive"></router-view>
+        <router-view v-slot="{ Component }">
+          <component :is="Component" v-if="Component" :key="$route.fullPath" />
+        </router-view>
       </div>
     </div>
-    <!-- 全局加载动画 -->
     <circleLoading class="loading-position" v-show="loading" />
-    <!-- 右侧抽屉配置 -->
-    <configDrawer ref="config"/>
+    <configDrawer ref="config" />
   </div>
 </template>
 
 <script>
+import { ChatDotRound, Setting, UserFilled } from "@element-plus/icons-vue";
 import shrinkableMenu from "./main-components/shrinkable-menu/shrinkable-menu.vue";
 import tagsPageOpened from "./main-components/tags-page-opened.vue";
 import circleLoading from "@/views/my-components/lili/circle-loading.vue";
 import configDrawer from "@/views/main-components/config-drawer.vue";
-
 import Cookies from "js-cookie";
 import util from "@/libs/util.js";
 import { logout } from "@/api/index";
 import { getIMDetail } from "@/api/common";
 import { userMsg } from "@/api/index";
+
 const config = require("@/config/index.js");
+
 export default {
   components: {
+    ChatDotRound,
+    Setting,
+    UserFilled,
     shrinkableMenu,
     tagsPageOpened,
     circleLoading,
-    configDrawer
+    configDrawer,
   },
   data() {
     return {
       config,
-      sliceNum: 5, // 展示nav数量
-      userInfo: {}, // 用户信息
-
-      storeSideLogo: "", //logo图片
-      IMLink: "", // IM链接
-      load: false, // 加载IM状态
+      sliceNum: 5,
+      userInfo: {},
+      storeSideLogo: "",
+      IMLink: "",
+      load: false,
     };
   },
   computed: {
-    setting(){
-      let data = this.$store.state.setting
-
-      return data.setting
+    setting() {
+      return this.$store.state.setting.setting;
     },
     loading() {
       return this.$store.state.app.loading;
     },
     pageTagsList() {
-      return this.$store.state.app.storeOpenedList; // 打开的页面的页面对象
-    },
-    cachePage() {
-      return this.$store.state.app.cachePage;
+      return this.$store.state.app.storeOpenedList;
     },
     lang() {
       return this.$store.state.app.lang;
-    },
-    mesCount() {
-      return 0;
     },
   },
   methods: {
     handleClickSetting() {
       this.$refs.config.open();
     },
-    
-    /**
-     * 点击登录im的时候需要去判断一下当前店铺信息是否失效
-     * 失效的话重新请求刷新token保证最新的token去访问im
-     */
-    async im () {
-       // 获取访问Token
-       let accessToken = this.getStore("accessToken");
-       this.load = true
-       await this.getIMDetailMethods();
-       const userInfo = await userMsg();
-       this.load = false
-       if (userInfo.success && this.IMLink) {
-         window.open(`${this.IMLink}?token=` + accessToken);
-       }
-       else{
-         this.$Message.error("请登录后再联系客服");
-       }
-     },
-
-    // 获取im信息
-     async getIMDetailMethods () {
-       let res = await getIMDetail();
-       if (res.success) {
-         this.IMLink = res.result;
-       }
-     },
-    
-    // 初始化方法
+    async im() {
+      const accessToken = this.getStore("accessToken");
+      this.load = true;
+      await this.getIMDetailMethods();
+      const userInfo = await userMsg();
+      this.load = false;
+      if (userInfo.success && this.IMLink) {
+        window.open(`${this.IMLink}?token=` + accessToken);
+      } else {
+        this.$Message.error("请登录后再联系客服");
+      }
+    },
+    async getIMDetailMethods() {
+      const res = await getIMDetail();
+      if (res.success) {
+        this.IMLink = res.result;
+      }
+    },
     init() {
-      // 菜单
-      let pathArr = util.setCurrentPath(this, this.$route.name);
+      const pathArr = util.setCurrentPath(this, this.$route.name);
       if (pathArr.length >= 2) {
         this.$store.commit("addOpenSubmenu", pathArr[1].name);
       }
       this.storeSideLogo = localStorage.getItem("sellerlogoImg");
       window.document.title = localStorage.getItem("sellersiteName");
-      //动态获取icon
-      let link =
+      const link =
         document.querySelector("link[rel*='icon']") ||
         document.createElement("link");
       link.type = "image/x-icon";
@@ -186,47 +164,33 @@ export default {
       link.rel = "shortcut icon";
       document.getElementsByTagName("head")[0].appendChild(link);
 
-      let userInfo = JSON.parse(Cookies.get("userInfoSeller"));
+      const userInfo = JSON.parse(Cookies.get("userInfoSeller"));
       this.userInfo = userInfo;
       this.checkTag(this.$route.name);
 
-      let currWidth = document.body.clientWidth;
+      const currWidth = document.body.clientWidth;
       if (currWidth <= 1200) {
         this.sliceNum = 2;
       }
     },
-    // 用户头像下拉
     handleClickUserDropdown(name) {
-      if (name == "ownSpace") {
-        util.openNewPage(this, "personal-enter");
-        this.$router.push({
-          name: "personal-enter",
-        });
-      } else if (name == "changePass") {
+      if (name === "changePass") {
         util.openNewPage(this, "change_pass");
-        this.$router.push({
-          name: "change_pass",
-        });
-      } else if (name == "loginOut") {
-        logout().then(res => {
+        this.$router.push({ name: "change_pass" });
+      } else if (name === "loginOut") {
+        logout().then(() => {
           Cookies.set("accessToken", "");
           this.$store.commit("logout", this);
           this.$store.commit("clearOpenedSubmenu");
           this.setStore("accessToken", "");
           this.setStore("refreshToken", "");
           this.$router.push({ path: "/login" });
-        })
+        });
       }
     },
-    // 快捷页签选中状态
     checkTag(name) {
-      let openpageHasTag = this.pageTagsList.some((item) => {
-        if (item.name == name) {
-          return true;
-        }
-      });
+      const openpageHasTag = this.pageTagsList.some((item) => item.name === name);
       if (!openpageHasTag) {
-        //  解决关闭当前标签后再点击回退按钮会退到当前页时没有标签的问题
         util.openNewPage(
           this,
           name,
@@ -235,21 +199,16 @@ export default {
         );
       }
     },
-    // 宽度变化
     resize() {
-      let currWidth = document.body.clientWidth;
-      let count = currWidth / 300;
-      if (count > 6) {
-        this.sliceNum = 6;
-      } else {
-        this.sliceNum = count;
-      }
+      const currWidth = document.body.clientWidth;
+      const count = currWidth / 300;
+      this.sliceNum = count > 6 ? 6 : count;
     },
   },
   watch: {
     $route(to) {
       this.$store.commit("setCurrentPageName", to.name);
-      let pathArr = util.setCurrentPath(this, to.name);
+      const pathArr = util.setCurrentPath(this, to.name);
       if (pathArr.length > 2) {
         this.$store.commit("addOpenSubmenu", pathArr[1].name);
       }
@@ -257,20 +216,19 @@ export default {
       localStorage.currentPageName = to.name;
     },
     lang() {
-      util.setCurrentPath(this, this.$route.name); // 在切换语言时用于刷新面包屑
+      util.setCurrentPath(this, this.$route.name);
     },
+  },
+  created() {
+    this.$store.commit("setOpenedList");
   },
   mounted() {
     this.init();
-    let that = this;
     this.resize();
-    window.addEventListener("resize", function () {
-      that.resize();
-    });
+    window.addEventListener("resize", this.resize);
   },
-  created() {
-    // 显示打开的页面的列表
-    this.$store.commit("setOpenedList");
+  beforeUnmount() {
+    window.removeEventListener("resize", this.resize);
   },
 };
 </script>

@@ -12,26 +12,26 @@
       <div class="goods-con">
         <img :src="orderGoods.image" class="hover-pointer" alt="" width="100" @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)">
         <p class="hover-pointer color999" @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)">{{orderGoods.goodsName}}</p>
-        <p>{{orderGoods.goodsPrice | unitPrice('￥')}}</p>
+        <p>{{ $filters.unitPrice(orderGoods.goodsPrice, '￥') }}</p>
       </div>
 
       <div class="eval-con">
         <div>
           <span class="color999">投诉主题：</span>
-          <Select v-model="form.complainTopic" style="width:260px;margin-bottom:10px">
-            <Option v-for="item in reasonList" :value="item.reason" :key="item.id">{{ item.reason }}</Option>
-          </Select>
-          <Input type="textarea" maxlength="500" show-word-limit :rows="4" placeholder="请输入投诉内容" v-model="form.content" />
+          <el-select v-model="form.complainTopic" style="width:260px;margin-bottom:10px">
+            <el-option v-for="item in reasonList" :value="item.reason" :key="item.id">{{ item.reason }}</el-option>
+          </el-select>
+          <el-input type="textarea" maxlength="500" show-word-limit :rows="4" placeholder="请输入投诉内容" v-model="form.content" />
         </div>
         <div style="display:flex;align-items:center;">
           <div class="demo-upload-list" v-for="(img, index) in orderGoods.uploadList" :key="index">
             <img :src="img">
             <div class="demo-upload-list-cover">
-                <Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon>
-                <Icon type="ios-trash-outline" @click.native="handleRemove(index)"></Icon>
+                <el-icon @click="handleView(img)"><View /></el-icon>
+                <el-icon @click="handleRemove(index)"><Delete /></el-icon>
             </div>
           </div>
-          <Upload
+          <el-upload
               :show-upload-list="false"
               :on-success="handleSuccess"
               :before-upload="handleBeforeUpload"
@@ -40,25 +40,27 @@
               :headers="accessToken"
               style="display: inline-block;width:58px;">
               <div class="hover-pointer icon-upload" style="">
-                <Icon type="ios-camera" size="20"></Icon>
+                <el-icon :size="20"><Camera /></el-icon>
               </div>
-          </Upload>
+          </el-upload>
           <div class="describe">上传投诉凭证，最多5张</div>
         </div>
       </div>
     </div>
-    <Button type="primary" class="mt_10" :loading="loading" @click="save">提交</Button>
-    <Modal title="View Image" v-model="visible">
+    <el-button type="primary" class="mt_10" :loading="loading" @click="save">提交</el-button>
+    <el-dialog title="View Image" v-model="visible">
         <img :src="previewImage" v-if="visible" style="width: 100%">
-    </Modal>
+    </el-dialog>
   </div>
 </template>
 <script>
+import { Camera, Delete, View } from '@element-plus/icons-vue';
 import { orderDetail } from '@/api/order.js';
 import { afterSaleReason, handleComplain } from '@/api/member.js';
 import { commonUrl } from '@/plugins/request.js';
 import storage from '@/plugins/storage';
 export default {
+  components: { Camera, Delete, View },
   data () {
     return {
       order: {}, // 订单详情
@@ -85,7 +87,7 @@ export default {
       afterSaleReason('COMPLAIN').then(res => {
         if (res.success) {
           this.reasonList = res.result
-          this.$set(this.form, 'complainTopic', res.result[0].reason)
+          this.form['complainTopic'] = res.result[0].reason
           this.$forceUpdate()
         }
       })

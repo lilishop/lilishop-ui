@@ -1,180 +1,126 @@
-import Vue from "vue";
-import Router from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
+import NProgress from "nprogress";
+import "nprogress/nprogress.css";
 import Index from "@/pages/Index";
-const Login = (resolve) => require(["@/pages/Login"], resolve);
-const SignUp = (resolve) => require(["@/pages/SignUp"], resolve);
-const ForgetPassword = (resolve) =>
-  require(["@/pages/ForgetPassword"], resolve);
-const GoodsList = (resolve) => require(["@/pages/GoodsList"], resolve);
-const GoodsDetail = (resolve) => require(["@/pages/GoodsDetail"], resolve);
-const PointGoodsDetail = (resolve) =>
-  require(["@/pages/promotion/PointGoodsDetail"], resolve);
-const ShoppingCart = (resolve) => require(["@/pages/ShoppingCart"], resolve);
-const Cart = (resolve) => require(["@/pages/Cart"], resolve);
-const Pay = (resolve) => require(["@/pages/payment/Pay"], resolve);
-const PayDone = (resolve) => require(["@/pages/payment/PayDone"], resolve);
-const PayMent = (resolve) => require(["@/pages/payment/PayMent"], resolve);
-const ThirdPay = (resolve) => require(["@/pages/payment/ThirdPay"], resolve);
-const Coupon = (resolve) => require(["@/pages/CouponCenter"], resolve);
-const seckill = (resolve) => require(["@/pages/promotion/seckill"], resolve);
-const article = (resolve) => require(["@/pages/article/index"], resolve);
-const articleDetail = (resolve) => require(["@/pages/article/detail"], resolve);
-const PointMall = (resolve) =>
-  require(["@/pages/promotion/PointMall"], resolve);
 
-/*
- * 会员中心
- * 订单列表
- */
-const MyOrder = (resolve) =>
-  require([`@/pages/home/orderCenter/MyOrder`], resolve);
-const OrderDetail = (resolve) =>
-  require([`@/pages/home/orderCenter/OrderDetail`], resolve);
-const MyAddress = (resolve) =>
-  require(["@/pages/home/orderCenter/MyAddress"], resolve);
-const AddAddress = (resolve) =>
-  require(["@/pages/home/orderCenter/AddAddress"], resolve);
-const Complain = (resolve) =>
-  require(["@/pages/home/orderCenter/Complain"], resolve);
-const AfterSale = (resolve) =>
-  require(["@/pages/home/orderCenter/AfterSale"], resolve);
-const AfterSaleDetail = (resolve) =>
-  require(["@/pages/home/orderCenter/AfterSaleDetail"], resolve);
-const ApplyAfterSale = (resolve) =>
-  require(["@/pages/home/orderCenter/ApplyAfterSale"], resolve);
+const Login = () => import("@/pages/Login");
+const SignUp = () => import("@/pages/SignUp");
+const ForgetPassword = () => import("@/pages/ForgetPassword");
+const GoodsList = () => import("@/pages/GoodsList");
+const GoodsDetail = () => import("@/pages/GoodsDetail");
+const PointGoodsDetail = () => import("@/pages/promotion/PointGoodsDetail");
+const ShoppingCart = () => import("@/pages/ShoppingCart");
+const Cart = () => import("@/pages/Cart");
+const Pay = () => import("@/pages/payment/Pay");
+const PayDone = () => import("@/pages/payment/PayDone");
+const PayMent = () => import("@/pages/payment/PayMent");
+const ThirdPay = () => import("@/pages/payment/ThirdPay");
+const Coupon = () => import("@/pages/CouponCenter");
+const seckill = () => import("@/pages/promotion/seckill");
+const article = () => import("@/pages/article/index");
+const articleDetail = () => import("@/pages/article/detail");
+const PointMall = () => import("@/pages/promotion/PointMall");
 
-/*
- * 会员中心
- */
-const Profile = (resolve) =>
-  require(["@/pages/home/memberCenter/Profile"], resolve);
-const AccountSafe = (resolve) =>
-  require(["@/pages/home/memberCenter/AccountSafe"], resolve);
-const ModifyPwd = (resolve) =>
-  require(["@/pages/home/memberCenter/ModifyPwd"], resolve);
-const Favorites = (resolve) =>
-  require(["@/pages/home/memberCenter/Favorites"], resolve);
-const Distribution = (resolve) =>
-  require(["@/pages/home/memberCenter/Distribution"], resolve);
-const CommentList = (resolve) =>
-  require(["@/pages/home/memberCenter/CommentList"], resolve); // 评价列表
-const AddEval = (resolve) =>
-  require(["@/pages/home/memberCenter/evaluation/AddEval"], resolve); // 添加评价
-const EvalDetail = (resolve) =>
-  require(["@/pages/home/memberCenter/evaluation/EvalDetail"], resolve);
-const ComplainList = (resolve) =>
-  require(["@/pages/home/memberCenter/ComplainList"], resolve);
-const ComplainDetail = (resolve) =>
-  require(["@/pages/home/memberCenter/ComplainDetail"], resolve);
-const Point = (resolve) =>
-  require(["@/pages/home/memberCenter/Point"], resolve);
-const MemberGrade = (resolve) =>
-  require(["@/pages/home/memberCenter/MemberGrade"], resolve);
-const MsgList = (resolve) =>
-  require(["@/pages/home/memberCenter/memberMsg/MsgList"], resolve);
-const MsgDetail = (resolve) =>
-  require(["@/pages/home/memberCenter/memberMsg/MsgDetail"], resolve);
+const MyOrder = () => import("@/pages/home/orderCenter/MyOrder");
+const OrderDetail = () => import("@/pages/home/orderCenter/OrderDetail");
+const MyAddress = () => import("@/pages/home/orderCenter/MyAddress");
+const AddAddress = () => import("@/pages/home/orderCenter/AddAddress");
+const Complain = () => import("@/pages/home/orderCenter/Complain");
+const AfterSale = () => import("@/pages/home/orderCenter/AfterSale");
+const AfterSaleDetail = () => import("@/pages/home/orderCenter/AfterSaleDetail");
+const ApplyAfterSale = () => import("@/pages/home/orderCenter/ApplyAfterSale");
 
-/*
- * 会员中心（我的优惠券、我的余额等）
- */
-const Coupons = (resolve) =>
-  require(["@/pages/home/userCenter/Coupons"], resolve);
-const MyTracks = (resolve) =>
-  require(["@/pages/home/userCenter/MyTracks"], resolve);
-const MoneyManagement = (resolve) =>
-  require(["@/pages/home/userCenter/MoneyManagement"], resolve);
-const MyGiftCards = (resolve) =>
-  require(["@/pages/home/userCenter/MyGiftCards"], resolve);
+const Profile = () => import("@/pages/home/memberCenter/Profile");
+const AccountSafe = () => import("@/pages/home/memberCenter/AccountSafe");
+const ModifyPwd = () => import("@/pages/home/memberCenter/ModifyPwd");
+const Favorites = () => import("@/pages/home/memberCenter/Favorites");
+const Distribution = () => import("@/pages/home/memberCenter/Distribution");
+const CommentList = () => import("@/pages/home/memberCenter/CommentList");
+const AddEval = () => import("@/pages/home/memberCenter/evaluation/AddEval");
+const EvalDetail = () => import("@/pages/home/memberCenter/evaluation/EvalDetail");
+const ComplainList = () => import("@/pages/home/memberCenter/ComplainList");
+const ComplainDetail = () => import("@/pages/home/memberCenter/ComplainDetail");
+const Point = () => import("@/pages/home/memberCenter/Point");
+const MemberGrade = () => import("@/pages/home/memberCenter/MemberGrade");
+const MsgList = () => import("@/pages/home/memberCenter/memberMsg/MsgList");
+const MsgDetail = () => import("@/pages/home/memberCenter/memberMsg/MsgDetail");
 
-const Home = (resolve) => require(["@/pages/user/Home"], resolve);
+const Coupons = () => import("@/pages/home/userCenter/Coupons");
+const MyTracks = () => import("@/pages/home/userCenter/MyTracks");
+const MoneyManagement = () => import("@/pages/home/userCenter/MoneyManagement");
+const MyGiftCards = () => import("@/pages/home/userCenter/MyGiftCards");
 
-const Merchant = (resolve) => require(["@/pages/Merchant"], resolve);
-const UserMain = (resolve) => require(["@/pages/home/Main"], resolve);
-const topic = (resolve) => require(["@/pages/Topic"], resolve);
-/**
- * 店铺入驻
- */
-const ShopEntry = (resolve) =>
-  require(["@/pages/shopEntry/ShopEntry"], resolve);
+const Home = () => import("@/pages/user/Home");
+const Merchant = () => import("@/pages/Merchant");
+const UserMain = () => import("@/pages/home/Main");
+const topic = () => import("@/pages/Topic");
+const ShopEntry = () => import("@/pages/shopEntry/ShopEntry");
 
-Vue.use(Router);
+const { title } = require("@/config");
 
-/**
- * 解决重复点击菜单会控制台报错bug
- */
- const routerPush = Router.prototype.push
- Router.prototype.push = function push(location) {
-   return routerPush.call(this, location).catch(error=> error)
- }
+NProgress.configure({ showSpinner: false });
 
-export default new Router({
-  mode: "history",
+export const router = createRouter({
+  history: createWebHistory(),
   routes: [
     {
-      path: "/", // 首页
+      path: "/",
       name: "Index",
       component: Index,
     },
     {
-      path: "/topic", // 首页
+      path: "/topic",
       name: "topic",
       component: topic,
     },
     {
-      path: "/login", // 登陆
+      path: "/login",
       name: "login",
       component: Login,
-      meta: {
-        title: "登录",
-      },
+      meta: { title: "登录" },
     },
     {
-      path: "/SignUp", // 注册
+      path: "/SignUp",
       name: "SignUp",
       component: SignUp,
-      meta: {
-        title: "注册",
-      },
+      meta: { title: "注册" },
     },
     {
-      path: "/forgetPassword", // 忘记密码
+      path: "/forgetPassword",
       name: "forgetPassword",
       component: ForgetPassword,
-      meta: {
-        title: "忘记密码",
-      },
+      meta: { title: "忘记密码" },
     },
     {
-      path: "/goodsList", // 商品列表
+      path: "/goodsList",
       name: "GoodsList",
       component: GoodsList,
     },
     {
-      path: "/goodsDetail", // 商品详情
+      path: "/goodsDetail",
       name: "GoodsDetail",
       component: GoodsDetail,
       meta: { title: "商品详情" },
     },
     {
-      path: "/pointGoodsDetail", // 商品详情
+      path: "/pointGoodsDetail",
       name: "PointGoodsDetail",
       component: PointGoodsDetail,
       meta: { title: "积分商品" },
     },
     {
-      path: "/shoppingCart", // 头部购物车
+      path: "/shoppingCart",
       name: "ShoppingCart",
       component: ShoppingCart,
     },
     {
-      path: "/cart", // 购物车
+      path: "/cart",
       name: "Cart",
       component: Cart,
       meta: { title: "购物车" },
     },
     {
-      path: "/pay", // 支付页面
+      path: "/pay",
       name: "Pay",
       component: Pay,
       meta: { title: "订单结算" },
@@ -191,66 +137,54 @@ export default new Router({
       meta: { title: "积分商城" },
     },
     {
-      path: "/qrpay", // 三方支付
+      path: "/qrpay",
       name: "qrpay",
       component: ThirdPay,
     },
     {
-      path: "/payDone", // 支付成功页面
+      path: "/payDone",
       name: "PayDone",
       component: PayDone,
     },
     {
-      path: "/article", // 文章页面
+      path: "/article",
       name: "article",
       component: article,
-      meta: {
-        title: "帮助中心",
-      },
+      meta: { title: "帮助中心" },
     },
     {
-      path: "/article/detail", // 文章页面
+      path: "/article/detail",
       name: "articleDetail",
       component: articleDetail,
-      meta: {
-        title: "帮助中心",
-      },
+      meta: { title: "帮助中心" },
     },
     {
       path: "/shopEntry",
       name: "shopEntry",
       component: ShopEntry,
-      meta: {
-        title: "店铺入驻",
-      },
+      meta: { title: "店铺入驻" },
     },
     {
       path: "/coupon",
       name: "coupon",
       component: Coupon,
-      meta: {
-        title: "领券中心",
-      },
+      meta: { title: "领券中心" },
     },
     {
       path: "/seckill",
       name: "seckill",
       component: seckill,
-      meta: {
-        title: "限时秒杀",
-      },
+      meta: { title: "限时秒杀" },
     },
     {
-      path: "/home", // 主页
+      path: "/home",
       component: Home,
       children: [
         {
           path: "/",
           name: "Home",
           component: UserMain,
-          meta: {
-            title: "会员中心",
-          },
+          meta: { title: "会员中心" },
         },
         {
           path: "MyTracks",
@@ -411,3 +345,15 @@ export default new Router({
     },
   ],
 });
+
+router.beforeEach((to, from, next) => {
+  NProgress.start();
+  window.document.title = to.meta.title === undefined ? title : to.meta.title;
+  next();
+});
+
+router.afterEach(() => {
+  NProgress.done();
+});
+
+export default router;

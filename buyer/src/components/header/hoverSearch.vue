@@ -12,12 +12,9 @@
         useClass="fixed-show"
       ></Search>
       <div class="flex flex-a-c cart">
-        <Icon
-          type="ios-cart-outline"
-          @click="goCartList"
-          class="cart-icon"
-          @mouseenter.native="getCartList"
-        />
+        <span @mouseenter="getCartList">
+          <el-icon class="cart-icon" :size="20" @click="goCartList"><ShoppingCart /></el-icon>
+        </span>
         <i class="cart-badge">{{ cartNum < 100 ? cartNum : "99" }}</i>
       </div>
     </div>
@@ -27,7 +24,9 @@
 <script>
 import { cartCount } from "@/api/cart.js";
 import storage from "@/plugins/storage.js";
+import { ShoppingCart } from "@element-plus/icons-vue";
 export default {
+  components: { ShoppingCart },
   data() {
     return {
       userInfo: {}, // 用户信息

@@ -4,10 +4,10 @@
     <Search style="border-bottom:2px solid red;"></Search>
     <!-- <drawer></drawer> -->
     <div class="base-width cate-container">
-      <Breadcrumb>
-        <BreadcrumbItem to="/">首页</BreadcrumbItem>
-        <BreadcrumbItem>{{goodsMsg.pointsGoodsCategoryName}}</BreadcrumbItem>
-      </Breadcrumb>
+      <el-breadcrumb>
+        <el-breadcrumb-item to="/">首页</el-breadcrumb-item>
+        <el-breadcrumb-item>{{goodsMsg.pointsGoodsCategoryName}}</el-breadcrumb-item>
+      </el-breadcrumb>
     </div>
     <!-- 商品信息展示 -->
     <div class="item-detail-show">
@@ -15,7 +15,13 @@
       <div class="item-detail-left">
         <!-- 大图、放大镜 -->
         <div class="item-detail-big-img">
-          <pic-zoom v-if="goodsSku.thumbnail" :url="goodsSku.thumbnail" :scale="2"></pic-zoom>
+          <el-image
+            v-if="goodsSku.thumbnail"
+            :src="goodsSku.thumbnail"
+            :preview-src-list="[goodsSku.thumbnail]"
+            fit="contain"
+            style="width: 100%; height: 400px"
+          />
         </div>
         <div class="item-detail-img-row">
           <div class="item-detail-img-small">
@@ -49,7 +55,7 @@
               <p>数量</p>
             </div>
             <div class="item-select-row">
-              <InputNumber :min="1" :disabled="goodsSku.quantity === 0" v-model="count"></InputNumber>
+              <el-input-number :min="1" :disabled="goodsSku.quantity === 0" v-model="count"></el-input-number>
               <span class="inventory"> 库存{{goodsSku.quantity}}</span>
             </div>
           </div>
@@ -62,7 +68,7 @@
             </div>
           </div>
           <div class="add-buy-car">
-            <Button type="error" :loading="loading" :disabled="goodsSku.quantity === 0" @click="pointBuy">积分购买</Button>
+            <el-button type="danger" :loading="loading" :disabled="goodsSku.quantity === 0" @click="pointBuy">积分购买</el-button>
           </div>
         </div>
       </div>
@@ -73,14 +79,13 @@
       <div v-html="goodsSku.intro" class="mt_10 ml_10" v-if="goodsSku.intro"></div>
       <div v-else style="margin:20px;">暂无商品介绍</div>
     </div>
-    <Spin size="large" fix v-if="isLoading"></Spin>
+    <el-skeleton size="large" fix v-if="isLoading"></el-skeleton>
     <BaseFooter></BaseFooter>
   </div>
 </template>
 
 <script>
 import Search from '@/components/Search';
-import PicZoom from 'vue-piczoom';
 import { addCartGoods } from '@/api/cart.js';
 import { pointGoodsDetail } from '@/api/promotion';
 export default {
@@ -157,7 +162,7 @@ export default {
     }
   },
   components: {
-    Search, PicZoom
+    Search,
   }
 };
 </script>

@@ -1,12 +1,12 @@
 <template>
   <div class="search">
-    <Card>
-      <Row>
-        <Button @click="refresh">刷新</Button>
-        <Button @click="add" type="primary">添加</Button>
-      </Row>
-      <Tabs @on-click="handleClickType" v-model="currentTab" style="margin-top: 10px">
-        <TabPane label="运费模板" name="INFO">
+    <el-card>
+      <el-row>
+        <el-button @click="refresh">刷新</el-button>
+        <el-button @click="add" type="primary">添加</el-button>
+      </el-row>
+      <el-tabs @click="handleClickType" v-model="currentTab" style="margin-top: 10px">
+        <el-tab-pane label="运费模板" name="INFO">
           <table class="ncsc-default-table order m-b-30" :key="index" v-for="(item,index) in shipInfo">
             <tbody>
               <tr>
@@ -15,7 +15,7 @@
               <tr>
                 <th colspan="20">
                   <span class="temp-name">{{item.name}}</span>
-                  <Tag v-if="item.pricingMethod==='FREE'" class="baoyou" color="warning">包邮</Tag>
+                  <el-tag v-if="item.pricingMethod==='FREE'" class="baoyou" color="warning">包邮</el-tag>
                   <span class="fr m-r-5">
                     <time style="margin-right: 20px" title="最后编辑时间">
                       <i class="icon-time"></i>{{item.updateTime}}
@@ -48,34 +48,34 @@
                     {{children.firstCompany}}
                   </td>
                   <td>
-                    <span class="yuan">￥</span><span class="integer">{{children.firstPrice | unitPrice}}</span>
+                    <span class="yuan">￥</span><span class="integer">{{ $filters.unitPrice(children.firstPrice) }}</span>
                   </td>
                   <td>
                     {{children.continuedCompany}}
                   </td>
                   <td class="bdr">
-                    <span class="yuan">￥</span><span class="integer">{{children.continuedPrice | unitPrice}}</span>
+                    <span class="yuan">￥</span><span class="integer">{{ $filters.unitPrice(children.continuedPrice) }}</span>
                   </td>
                 </tr>
               </template>
             </tbody>
           </table>
-        </TabPane>
-        <TabPane v-if="csTab" :label="title" :name="operation">
-          <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
-            <FormItem label="模板名称" prop="name">
-              <Input v-model="form.name" maxlength="10" clearable style="width: 20%" />
-            </FormItem>
-            <FormItem label="计价方式" prop="pricingMethod">
-              <RadioGroup type="button" button-style="solid" v-model="form.pricingMethod">
-                <Radio label="WEIGHT">按重量</Radio>
-                <Radio label="NUM">按件数</Radio>
-                <Radio label="FREE">包邮</Radio>
-              </RadioGroup>
-            </FormItem>
+        </el-tab-pane>
+        <el-tab-pane v-if="csTab" :label="title" :name="operation">
+          <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+            <el-form-item label="模板名称" prop="name">
+              <el-input v-model="form.name" maxlength="10" clearable style="width: 20%" />
+            </el-form-item>
+            <el-form-item label="计价方式" prop="pricingMethod">
+              <el-radio-group v-model="form.pricingMethod">
+                <el-radio-button value="WEIGHT">按重量</el-radio-button>
+                <el-radio-button value="NUM">按件数</el-radio-button>
+                <el-radio-button value="FREE">包邮</el-radio-button>
+              </el-radio-group>
+            </el-form-item>
 
-            <FormItem label="详细设置" v-if="form.pricingMethod !== 'FREE'">
-              <Alert type="warning" >点击右侧修改按钮编辑数据</Alert>
+            <el-form-item label="详细设置" v-if="form.pricingMethod !== 'FREE'">
+              <el-alert type="warning" title="点击右侧修改按钮编辑数据" :closable="false" />
               <div class="ncsu-trans-type" data-delivery="TRANSTYPE">
                 <div class="entity">
                   <div class="tbl-except">
@@ -103,21 +103,16 @@
                           </td>
                           <td></td>
                           <td>
-                            <InputNumber class="text w40" type="text" v-model="item.firstCompany" :max="999" :min="0" :step="0.1" clearable/>
+                            <el-input-number class="text w40" v-model="item.firstCompany" :max="999" :min="0" :step="0.1" />
                           </td>
                           <td>
-                            <InputNumber class="text w60" type="text" v-model="item.firstPrice" :max="999999" :min="0" clearable  :formatter="value => `¥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-            :parser="value => value.replace(/\¥\s?|(,*)/g, '')">
-                            </InputNumber>
+                            <el-input-number class="text w60" v-model="item.firstPrice" :max="999999" :min="0" />
                           </td>
                           <td>
-                            <InputNumber class="text w40" type="text" v-model="item.continuedCompany" :max="999" :min="0" :step="0.1"
-                              />
+                            <el-input-number class="text w40" v-model="item.continuedCompany" :max="999" :min="0" :step="0.1" />
                           </td>
                           <td>
-                            <InputNumber class="text w60" type="text" v-model="item.continuedPrice" :max="999999" :min="0" clearable  :formatter="value => `¥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-            :parser="value => value.replace(/\¥\s?|(,*)/g, '')">
-                            </InputNumber>
+                            <el-input-number class="text w60" v-model="item.continuedPrice" :max="999999" :min="0" />
                           </td>
                           <td class="nscs-table-handle">
                             <a
@@ -136,31 +131,25 @@
                   <div class="tbl-attach p-5">
                     <div class="div-error" v-if="saveError">
                       <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-                      <Icon type="ios-information-circle-outline" />
                       指定地区城市为空或指定错误
-                      <!-- <Icon type="ios-information-circle-outline" />
-                      首费应输入正确的金额
-                      <Icon type="ios-information-circle-outline" />
-                      续费应输入正确的金额 -->
-                      <Icon type="ios-information-circle-outline" />
                       首(续)件(重)费应输入大于0的整数
                     </div>
 
                   </div>
                 </div>
               </div>
-            </FormItem>
-            <Form-item>
-              <Button @click="addShipTemplateChildren(index)" v-if="form.pricingMethod !== 'FREE'"
-                icon="ios-create-outline">为指定城市设置运费模板
-              </Button>
-              <Button @click="handleSubmit" type="primary" style="margin-right:5px">保存
-              </Button>
-            </Form-item>
-          </Form>
-        </TabPane>
-      </Tabs>
-    </Card>
+            </el-form-item>
+            <el-form-item>
+              <el-button v-if="form.pricingMethod !== 'FREE'" @click="addShipTemplateChildren(index)">
+                为指定城市设置运费模板
+              </el-button>
+              <el-button @click="handleSubmit" type="primary" style="margin-right:5px">保存
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+      </el-tabs>
+    </el-card>
     <multiple-region ref="region" @selected="handleSelect">
 
     </multiple-region>
@@ -288,7 +277,7 @@ export default {
           child.area.split(",").forEach((area) => {
             if (addr.name == area) {
               addr.selectedAll = true;
-              this.$set(child, "selectedAll", true);
+              child.selectedAll = true;
             }
           });
         });

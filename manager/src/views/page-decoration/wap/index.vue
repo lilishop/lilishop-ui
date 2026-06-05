@@ -44,7 +44,7 @@
               <component
                 class="component"
                 :class="{ active: selected == index }"
-                @click.native="handleComponent(element, index)"
+                @click="handleComponent(element, index)"
                 :is="templates[element.type]"
                 :res="element.options"
               ></component>

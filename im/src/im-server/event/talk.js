@@ -1,7 +1,6 @@
 import Base from "./base";
-import Vue from "vue";
-import router from "@/router";
-import vm from "@/main";
+import { nextTick } from "vue";
+import { getAppBridge } from "@/utils/app-bridge";
 import NewMessageNotify from "@/components/notify/NewMessageNotify";
 import { ServeClearTalkUnreadNum, ServeCreateTalkList } from "@/api/chat";
 import { formatTalkItem, findTalkIndex, toTalk } from "@/utils/talk";
@@ -46,11 +45,11 @@ class Talk extends Base {
     this.resource = resource;
 
     // 判断发送者消息是否在当前用户列表中 
-    if (this.sender_id && !vm.$store.state.talks.items.find(item => {
+    const bridge = getAppBridge();
+    if (this.sender_id && !bridge.$store.state.talks.items.find(item => {
       return item.userId == this.sender_id
     })) {
-      // 没有当前用户，未在当前列表 进行重新加载
-      vm.loadUserSetting('update')
+      bridge.loadUserSetting('update')
     }
   }
 
@@ -147,15 +146,14 @@ class Talk extends Base {
       receiver_id = this.sender_id;
     }
 
+    const bridge = getAppBridge();
     this.$notify({
-      message: vm.$createElement(NewMessageNotify, {
-        props: {
-          avatar,
-          talk_type,
-          nickname,
-          content: this.getTalkText(),
-          datetime: this.resource.created_at,
-        },
+      message: bridge.$createElement(NewMessageNotify, {
+        avatar,
+        talk_type,
+        nickname,
+        content: this.getTalkText(),
+        datetime: this.resource.created_at,
       }),
       customClass: "im-notify",
       duration: 3000,
@@ -211,7 +209,7 @@ class Talk extends Base {
       record.userId == this.getAccountId() ||
       record.fromUser == this.getAccountId()
     ) {
-      Vue.nextTick(() => {
+      nextTick(() => {
         el.scrollTop = el.scrollHeight;
       });
     } else {

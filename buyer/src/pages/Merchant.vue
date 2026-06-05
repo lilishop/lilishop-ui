@@ -10,12 +10,10 @@
         <p :alt="storeMsg.storeDesc" class="ellipsis" v-html="storeMsg.storeDesc"></p>
       </div>
       <div>
-        <span class="hover-pointer" @click="collect"><Icon :color="storeCollected ? '#ed3f14' : '#fff'"
-                                                           type="ios-heart"/>{{
+        <span class="hover-pointer" @click="collect"><el-icon :color="storeCollected ? '#ed3f14' : '#fff'"><StarFilled /></el-icon>{{
             storeCollected ? '已收藏店铺' : '收藏店铺'
           }}</span>
-        <span class="hover-pointer ml_10" style="width:80px" @click="IMService(storeMsg.storeId,null,null)"><Icon
-          custom="icomoon icon-customer-service"/>联系客服</span>
+        <span class="hover-pointer ml_10" style="width:80px" @click="IMService(storeMsg.storeId,null,null)"><i class="icomoon icon-customer-service"></i>联系客服</span>
       </div>
     </div>
     <div class="store-category">
@@ -27,22 +25,21 @@
           首页
         </li>
         <li v-for="(cate, index) in cateList" :key="index" class="cate-item">
-          <Dropdown v-if="cate.children.length">
+          <el-dropdown v-if="cate.children.length" trigger="hover">
             <div @click.self="searchByCate(cate)">
               {{ cate.labelName }}
-              <Icon type="ios-arrow-down"></Icon>
+              <el-icon><ArrowDown /></el-icon>
             </div>
-            <DropdownMenu slot="list">
-              <DropdownItem
-                v-for="sec in cate.children"
-                :key="sec.id"
-                :name="sec.id"
-                @click.native="searchByCate(sec)"
-              >{{ sec.labelName }}
-              </DropdownItem
-              >
-            </DropdownMenu>
-          </Dropdown>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item
+                  v-for="sec in cate.children"
+                  :key="sec.id"
+                  @click="searchByCate(sec)"
+                >{{ sec.labelName }}</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
           <span v-else @click.self="searchByCate(cate)">{{
               cate.labelName
             }}</span>
@@ -74,28 +71,23 @@
           </div>
           <div class="goods-show-price">
             <span>
-              <span class="seckill-price text-danger">{{
-                  item.price | unitPrice("￥")
-                }}</span>
+              <span class="seckill-price text-danger">{{ $filters.unitPrice(item.price, "￥") }}</span>
             </span>
           </div>
           <div class="goods-show-detail">
             <span>{{ item.goodsName }}</span>
           </div>
           <div class="goods-show-num">
-            已有<span>{{ item.commentNum || 0 }}</span
-          >人评价
+            已有<span>{{ item.commentNum || 0 }}</span>人评价
           </div>
         </div>
       </div>
       <div class="goods-page">
-        <Page
-          :page-size="params.pageSize"
+        <el-pagination           :page-size="params.pageSize"
           :total="total"
-          show-sizer
-          @on-change="changePageNum"
-          @on-page-size-change="changePageSize"
-        ></Page>
+          @current-change="changePageNum"
+          @size-change="changePageSize"
+         layout="sizes, prev, pager, next"></el-pagination>
       </div>
 
     </div>
@@ -107,6 +99,7 @@
 
 <script>
 
+import { ArrowDown, StarFilled } from '@element-plus/icons-vue';
 import {getCateById, getDetailById} from "@/api/shopentry";
 import {cancelStoreCollect, collectStore} from "@/api/member";
 import {goodsList} from "@/api/goods";
@@ -119,11 +112,7 @@ import imTalk from '@/components/mixes/talkIm'
 
 export default {
   name: "Merchant",
-  components: {
-    Search,
-    ModelForm,
-    HoverSearch,
-  },
+  components: { Search, ModelForm, HoverSearch, StarFilled, ArrowDown },
   mixins: [imTalk],
   data() {
     return {

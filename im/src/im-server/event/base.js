@@ -1,13 +1,13 @@
 import store from "@/store";
 import router from "@/router";
-import { Notification } from "element-ui";
+import { ElNotification } from "element-plus";
 
 class Base {
   /**
    * 初始化
    */
   constructor() {
-    this.$notify = Notification;
+    this.$notify = ElNotification;
   }
 
   getStoreInstance() {
@@ -54,7 +54,7 @@ class Base {
    * 判断用户是否打开对话页
    */
   isTalkPage() {
-    let path = router.currentRoute.path;
+    let path = router.currentRoute.value.path;
     return !(path != "/message" && path != "/");
   }
 }

@@ -1,17 +1,17 @@
 <template>
   <div class="person-msg">
-    <Form ref="thirdForm" :model="form" :rules="rules" :label-width="140">
+    <el-form ref="thirdForm" :model="form" :rules="rules" label-width="140px">
       <h4>基础信息</h4>
-      <FormItem prop="storeName" label="店铺名称">
-        <Input
+      <el-form-item prop="storeName" label="店铺名称">
+        <el-input
           type="text"
           v-model="form.storeName"
           placeholder="请填写店铺名称"
         />
-      </FormItem>
+      </el-form-item>
 
-      <FormItem prop="storeLogo" label="店铺logo">
-        <Upload
+      <el-form-item prop="storeLogo" label="店铺logo">
+        <el-upload
           ref="uploadLogo"
           :show-upload-list="false"
           :on-success="handleSuccess"
@@ -25,8 +25,8 @@
           :action="action"
           :headers="accessToken"
         >
-          <Button type="info" :loading="uploadLoading">上传logo</Button>
-        </Upload>
+          <el-button type="info" :loading="uploadLoading">上传logo</el-button>
+        </el-upload>
         <div class="describe">请压缩图片在2M以内，格式为gif，jpg，png</div>
         <div
           class="img-list"
@@ -35,45 +35,38 @@
         >
           <img :src="item" width="100" height="" alt="" />
           <div class="cover">
-            <Icon
-              type="ios-eye-outline"
-              @click.native="handleView(item)"
-            ></Icon>
-            <Icon
-              type="ios-trash-outline"
-              @click.native="handleRemove(index, 'storeLogo')"
-            ></Icon>
+            <el-icon @click="handleView(item)"><View /></el-icon>
+            <el-icon @click="handleRemove(index, 'storeLogo')"><Delete /></el-icon>
           </div>
         </div>
-      </FormItem>
-      <FormItem prop="goodsManagementCategory" label="店铺经营类目">
-        <Select
+      </el-form-item>
+      <el-form-item prop="goodsManagementCategory" label="店铺经营类目">
+        <el-select
           v-model="form.goodsManagementCategory"
           multiple
           style="width: 300px"
         >
-          <Option
-            v-for="item in categoryList"
+          <el-option             v-for="item in categoryList"
             :value="item.id"
             :key="item.id"
-            >{{ item.name }}</Option
+            >{{ item.name }}</el-option
           >
-        </Select>
-      </FormItem>
+        </el-select>
+      </el-form-item>
 
-      <FormItem prop="storeAddressIdPath" label="店铺所在地">
+      <el-form-item prop="storeAddressIdPath" label="店铺所在地">
         <span>{{ form.storeAddressPath || '暂无地址' }}</span>
-        <Button type="default" style="margin-left: 10px;" @click="$refs.map.open()">选择</Button>
-      </FormItem>
-      <FormItem prop="storeAddressDetail" label="店铺详细地址">
-        <Input
+        <el-button type="default" style="margin-left: 10px;" @click="$refs.map.open()">选择</el-button>
+      </el-form-item>
+      <el-form-item prop="storeAddressDetail" label="店铺详细地址">
+        <el-input
           type="text"
           v-model="form.storeAddressDetail"
           placeholder="请填写店铺详细地址"
         />
-      </FormItem>
-      <FormItem prop="storeDesc" label="店铺简介">
-        <Input
+      </el-form-item>
+      <el-form-item prop="storeDesc" label="店铺简介">
+        <el-input
           type="textarea"
           v-model="form.storeDesc"
           maxlength="200"
@@ -81,22 +74,23 @@
           :rows="4"
           placeholder="请输入店铺简介"
         />
-      </FormItem>
+      </el-form-item>
 
-      <FormItem>
-        <Button @click="$emit('change', 1)">返回</Button>
-        <Button type="primary" :loading="loading" @click="next"
-          >提交平台审核</Button
+      <el-form-item>
+        <el-button @click="$emit('change', 1)">返回</el-button>
+        <el-button type="primary" :loading="loading" @click="next"
+          >提交平台审核</el-button
         >
-      </FormItem>
-    </Form>
-    <Modal title="View Image" v-model="visible">
+      </el-form-item>
+    </el-form>
+    <el-dialog title="View Image" v-model="visible">
       <img :src="previewPicture" v-if="visible" style="width: 100%" />
-    </Modal>
+    </el-dialog>
     <multipleMap ref="map" @callback="getAddress" />
   </div>
 </template>
 <script>
+import { Delete, View } from '@element-plus/icons-vue';
 import { applyThird } from '@/api/shopentry';
 import { getCategory } from '@/api/goods';
 
@@ -114,7 +108,7 @@ export default {
       type: Object
     }
   },
-  components: { multipleMap },
+  components: { multipleMap, View, Delete },
   data () {
     return {
       loading: false, // 加载状态
@@ -211,17 +205,15 @@ export default {
       if(val.type === 'select'){
         const paths = val.data.map(item => item.name).join(',')
         const ids = val.data.map(item => item.id).join(',')
-        this.$set(this.form, "storeAddressPath", paths);
-        this.$set(this.form, "storeAddressIdPath", ids);
+        this.form["storeAddressPath"] = paths;
+        this.form["storeAddressIdPath"] = ids;
         this.form.storeCenter = val.data[val.data.length - 1].center
       }else{
-        this.$set(this.form, "storeAddressPath", val.data.addr);
-        this.$set(this.form, "storeAddressIdPath", val.data.addrId);
-        this.$set(
-          this.form,
-          'storeCenter',
-          val.data.position.lng + ',' + val.data.position.lat
-        );
+        this.form["storeAddressPath"] = val.data.addr;
+        this.form["storeAddressIdPath"] = val.data.addrId;
+        
+          this.form['storeCenter'] = val.data.position.lng + ',' + val.data.position.lat
+        ;
       }
     },
     // 获取商品分类
@@ -264,7 +256,7 @@ h4 {
   line-height: 40px;
   text-align: left;
 }
-.ivu-input-wrapper {
+.el-input {
   width: 300px;
 }
 .img-list {

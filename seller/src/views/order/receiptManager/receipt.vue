@@ -1,52 +1,95 @@
 <template>
   <div class="search">
-    <Card>
-      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-        <Form-item label="订单编号" prop="orderSn">
-          <Input type="text" v-model="searchForm.orderSn" clearable placeholder="请输入订单编号" style="width: 240px" />
-        </Form-item>
-        <Form-item label="会员名称" prop="memberName">
-          <Input type="text" v-model="searchForm.memberName" clearable placeholder="请输入会员名称" style="width: 240px" />
-        </Form-item>
-        <Form-item label="发票抬头" prop="receiptTitle">
-          <Input type="text" v-model="searchForm.receiptTitle" clearable placeholder="请输入发票抬头" style="width: 240px" />
-        </Form-item>
-        <Form-item label="状态" prop="receiptStatus">
-          <Select v-model="searchForm.receiptStatus" placeholder="请选择" clearable style="width: 240px">
-            <Option :value="0">未开票</Option>
-            <Option :value="1">已开票</Option>
-          </Select>
-        </Form-item>
-        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
-        <Button @click="handleReset" class="search-btn">重置</Button>
-      </Form>
-      </Card>
+    <el-card>
+      <el-form ref="searchForm" :model="searchForm" inline label-width="70px" class="search-form">
+        <el-form-item label="订单编号" prop="orderSn">
+          <el-input v-model="searchForm.orderSn" clearable placeholder="请输入订单编号" style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="会员名称" prop="memberName">
+          <el-input v-model="searchForm.memberName" clearable placeholder="请输入会员名称" style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="发票抬头" prop="receiptTitle">
+          <el-input v-model="searchForm.receiptTitle" clearable placeholder="请输入发票抬头" style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="状态" prop="receiptStatus">
+          <el-select v-model="searchForm.receiptStatus" placeholder="请选择" clearable style="width: 240px">
+            <el-option label="未开票" :value="0" />
+            <el-option label="已开票" :value="1" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+          <el-button class="search-btn" @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
-    <Card>
-      <div class="receipt-tip">
-          订单状态为已发货/已完成可开票
+    <el-card>
+      <div class="receipt-tip">订单状态为已发货/已完成可开票</div>
+      <el-table ref="table" v-loading="loading" border :data="data" class="mt_10" style="width: 100%">
+        <el-table-column label="订单号" min-width="120">
+          <template #default="{ row }">
+            <a class="link-text" @click="$router.push({ name: 'order-detail', query: { sn: row.orderSn } })">
+              {{ row.orderSn }}
+            </a>
+          </template>
+        </el-table-column>
+        <el-table-column prop="memberName" label="会员名称" min-width="90" show-overflow-tooltip />
+        <el-table-column label="发票抬头" min-width="90" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.receiptTitle || "暂未填写" }}</template>
+        </el-table-column>
+        <el-table-column label="纳税人识别号" min-width="100" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.taxpayerId || "暂未填写" }}</template>
+        </el-table-column>
+        <el-table-column label="发票内容" min-width="90" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.receiptContent || "暂未填写" }}</template>
+        </el-table-column>
+        <el-table-column label="发票金额" width="150">
+          <template #default="{ row }">
+            <priceColorScheme :value="row.receiptPrice" :color="$mainColor" />
+          </template>
+        </el-table-column>
+        <el-table-column label="发票状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="Number(row.receiptStatus) === 0 ? 'warning' : 'success'">
+              {{ Number(row.receiptStatus) === 0 ? "未开票" : "已开票" }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="订单状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="orderStatusTagType(row.orderStatus)">{{ orderStatusText(row.orderStatus) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="200" align="center" fixed="right">
+          <template #default="{ row }">
+            <a class="link-text" style="margin-right: 12px" @click="openReceiptModal(row, 'detail')">详情</a>
+            <a
+              class="link-text"
+              :class="{ disabled: !canInvoicing(row) }"
+              @click="canInvoicing(row) && openReceiptModal(row, 'invoicing')"
+            >
+              开票
+            </a>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[10, 20, 50]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
       </div>
-      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table">
-        <!-- 订单详情格式化 -->
-        <template slot="orderSlot" slot-scope="scope">
-          <a @click="$router.push({name: 'order-detail',query: {sn: scope.row.orderSn}})">{{scope.row.orderSn}}</a>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
-          show-total show-elevator show-sizer></Page>
-      </Row>
-    </Card>
-    <Modal
-      v-model="receiptModalVisible"
-      title="发票信息"
-      :mask-closable="false"
-      width="680"
-    >
-      <div v-if="receiptDetailLoading" class="receipt-modal-loading">
-        <Spin size="large" />
-      </div>
-      <div v-else class="receipt-modal-content">
+    </el-card>
+
+    <el-dialog v-model="receiptModalVisible" title="发票信息" :close-on-click-modal="false" width="680px">
+      <div v-loading="receiptDetailLoading" class="receipt-modal-content">
         <div v-if="hasValue(currentReceipt.orderSn)" class="receipt-item">
           <span class="receipt-label">订单号：</span>
           <span class="receipt-value">{{ currentReceipt.orderSn }}</span>
@@ -110,39 +153,31 @@
         <div v-if="hasValue(getInvoiceAddress(currentReceipt))" class="receipt-item">
           <span class="receipt-label">发票附件：</span>
           <span class="receipt-value">
-            <a @click="viewInvoiceFile(getInvoiceAddress(currentReceipt))">查看附件</a>
+            <a class="link-text" @click="viewInvoiceFile(getInvoiceAddress(currentReceipt))">查看附件</a>
           </span>
         </div>
       </div>
-      <div slot="footer">
+      <template #footer>
         <template v-if="receiptModalMode === 'invoicing'">
-          <Upload
+          <el-upload
             :action="uploadFileUrl"
             :data="receiptUploadData"
             :headers="{ ...accessToken }"
-            :format="['jpg', 'jpeg', 'png', 'pdf']"
-            :max-size="10240"
+            :accept="'.jpg,.jpeg,.png,.pdf'"
+            :show-file-list="false"
             :on-success="handleInvoiceUploadSuccess"
             :on-error="handleInvoiceUploadError"
-            :on-format-error="handleInvoiceFormatError"
-            :on-exceeded-size="handleInvoiceMaxSize"
-            :show-upload-list="false"
+            :before-upload="beforeInvoiceUpload"
             style="display: inline-block; margin-right: 8px"
           >
-            <Button :disabled="receiptDetailLoading">上传发票</Button>
-          </Upload>
-          <Button @click="receiptModalVisible = false">取消</Button>
-          <Button
-            type="primary"
-            :loading="invoiceSubmitting"
-            @click="submitInvoicing"
-          >
-            确认开票
-          </Button>
+            <el-button :disabled="receiptDetailLoading">上传发票</el-button>
+          </el-upload>
+          <el-button @click="receiptModalVisible = false">取消</el-button>
+          <el-button type="primary" :loading="invoiceSubmitting" @click="submitInvoicing">确认开票</el-button>
         </template>
-        <Button v-else @click="receiptModalVisible = false">关闭</Button>
-      </div>
-    </Modal>
+        <el-button v-else @click="receiptModalVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -154,178 +189,61 @@ export default {
   name: "receipt",
   data() {
     return {
-      loading: true, // 表单加载状态
+      loading: true,
       receiptModalVisible: false,
       receiptDetailLoading: false,
       invoiceSubmitting: false,
       receiptModalMode: "detail",
       uploadFileUrl: uploadFile,
       accessToken: {},
-      receiptUploadData: {
-        directoryPath: "receipt"
-      },
+      receiptUploadData: { directoryPath: "receipt" },
       currentReceipt: {},
       selectedReceiptRow: null,
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-        sort: "createTime", // 默认排序字段
-        order: "desc", // 默认排序方式
-        receiptStatus: "", // 发票状态
+        pageNumber: 1,
+        pageSize: 10,
+        sort: "createTime",
+        order: "desc",
+        receiptStatus: "",
       },
-      columns: [
-        {
-          title: "订单号",
-          key: "orderSn",
-          minWidth: 120,
-          slot: "orderSlot",
-        },
-        {
-          title: "会员名称",
-          key: "memberName",
-          minWidth: 90,
-          tooltip: true,
-        },
-
-        {
-          title: "发票抬头",
-          key: "receiptTitle",
-          minWidth: 90,
-          tooltip: true,
-          render: (h, params) => {
-            return h("div", params.row.receiptTitle || "暂未填写");
-          },
-        },
-        {
-          title: "纳税人识别号",
-          key: "taxpayerId",
-          minWidth: 100,
-          tooltip: true,
-          render: (h, params) => {
-            return h("div", params.row.taxpayerId || "暂未填写");
-          },
-        },
-        {
-          title: "发票内容",
-          key: "receiptContent",
-          minWidth: 90,
-          tooltip: true,
-          render: (h, params) => {
-            return h("div", params.row.receiptContent || "暂未填写");
-          },
-        },
-        {
-          title: "发票金额",
-          key: "billPrice",
-          width: 150,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.receiptPrice,color:this.$mainColor}} );
-          },
-        },
-        {
-          title: "发票状态",
-          key: "receiptStatus",
-          width: 100,
-          tooltip: true,
-          render: (h, params) => {
-            if (Number(params.row.receiptStatus) === 0) {
-              return h("div", [
-                h("tag", { props: { color: "volcano" } }, "未开票"),
-              ]);
-            } else {
-              return h("div", [
-                h("tag", { props: { color: "green" } }, "已开票"),
-              ]);
-            }
-          },
-        },
-        {
-          title: "订单状态",
-          key: "orderStatus",
-          width: 100,
-          render: (h, params) => {
-            if (params.row.orderStatus == "UNPAID") {
-              return h("div", [
-                h("tag", { props: { color: "magenta" } }, "未付款"),
-              ]);
-            } else if (params.row.orderStatus == "PAID") {
-              return h("div", [
-                h("tag", { props: { color: "blue" } }, "已付款"),
-              ]);
-            } else if (params.row.orderStatus == "UNDELIVERED") {
-              return h("div", [
-                h("tag", { props: { color: "geekblue" } }, "待发货"),
-              ]);
-            } else if (params.row.orderStatus == "DELIVERED") {
-              return h("div", [
-                h("tag", { props: { color: "cyan" } }, "已发货"),
-              ]);
-            } else if (params.row.orderStatus == "COMPLETED") {
-              return h("div", [
-                h("tag", { props: { color: "green" } }, "已完成"),
-              ]);
-            } else if (params.row.orderStatus == "TAKE") {
-              return h("div", [
-                h("tag", { props: { color: "volcano" } }, "待核验"),
-              ]);
-            } else if (params.row.orderStatus == "CANCELLED") {
-              return h("div", [
-                h("tag", { props: { color: "red" } }, "已取消"),
-              ]);
-            }
-          },
-        },
-
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          fixed: 'right',
-          width: 200,
-          render: (h, params) => {
-            const disabled = !this.canInvoicing(params.row);
-            const detailStyle = { color: "#2d8cf0", cursor: "pointer", textDecoration: "none", marginRight: "12px" };
-            const style = disabled
-              ? { color: "#c5c8ce", cursor: "not-allowed", textDecoration: "none" }
-              : { color: "#2d8cf0", cursor: "pointer", textDecoration: "none" };
-            const on = disabled ? {} : { click: () => { this.openReceiptModal(params.row, "invoicing"); } };
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: detailStyle,
-                  on: { click: () => { this.openReceiptModal(params.row, "detail"); } },
-                },
-                "详情"
-              ),
-              h(
-                "a",
-                {
-                  style,
-                  on,
-                },
-                "开票"
-              ),
-            ]);
-          },
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      data: [],
+      total: 0,
     };
   },
   methods: {
+    orderStatusText(status) {
+      const map = {
+        UNPAID: "未付款",
+        PAID: "已付款",
+        UNDELIVERED: "待发货",
+        DELIVERED: "已发货",
+        COMPLETED: "已完成",
+        TAKE: "待核验",
+        CANCELLED: "已取消",
+      };
+      return map[status] || status;
+    },
+    orderStatusTagType(status) {
+      const map = {
+        UNPAID: "danger",
+        PAID: "primary",
+        UNDELIVERED: "",
+        DELIVERED: "info",
+        COMPLETED: "success",
+        TAKE: "warning",
+        CANCELLED: "danger",
+      };
+      return map[status] || "";
+    },
     canInvoicing(row) {
       if (!row) return false;
-      const orderStatus = row.orderStatus;
-      const receiptStatus = Number(row.receiptStatus);
-      return (orderStatus === "COMPLETED" || orderStatus === "DELIVERED") && receiptStatus === 0;
+      return (
+        (row.orderStatus === "COMPLETED" || row.orderStatus === "DELIVERED") &&
+        Number(row.receiptStatus) === 0
+      );
     },
     initUploadAccessToken() {
-      this.accessToken = {
-        accessToken: this.getStore("accessToken")
-      };
+      this.accessToken = { accessToken: this.getStore("accessToken") };
     },
     hasValue(value) {
       if (value === null || value === undefined) return false;
@@ -333,11 +251,6 @@ export default {
     },
     hasPrice(value) {
       return value !== null && value !== undefined && value !== "";
-    },
-    formatValue(value) {
-      if (value === null || value === undefined) return "暂无";
-      const text = String(value).trim();
-      return text ? text : "暂无";
     },
     formatPrice(value) {
       if (value === null || value === undefined || value === "") return "暂无";
@@ -354,26 +267,6 @@ export default {
       if (receiptType === "电子普通发票" || receiptType === "增值税专用发票") return receiptType;
       return this.isVatSpecialReceipt(receipt) ? "增值税专用发票" : "电子普通发票";
     },
-    formatReceiptHeaderType(receipt) {
-      if (!receipt) return "暂无";
-      if (this.isVatSpecialReceipt(receipt)) return "单位";
-      if (receipt.companyName) return "单位";
-      if (receipt.personalName) return "个人";
-      const receiptTitle = receipt.receiptTitle != null ? String(receipt.receiptTitle).trim() : "";
-      if (receiptTitle === "单位" || receiptTitle === "个人") return receiptTitle;
-      return receipt.taxpayerId ? "单位" : "个人";
-    },
-    getReceiptTitleLabel(receipt) {
-      return this.formatReceiptHeaderType(receipt) === "单位" ? "单位名称" : "个人名称";
-    },
-    getReceiptTitleName(receipt) {
-      if (!receipt) return "";
-      if (receipt.companyName) return receipt.companyName;
-      if (receipt.personalName) return receipt.personalName;
-      const receiptTitle = receipt.receiptTitle != null ? String(receipt.receiptTitle).trim() : "";
-      if (receiptTitle === "单位" || receiptTitle === "个人") return "";
-      return receiptTitle;
-    },
     getInvoiceAddress(receipt) {
       if (!receipt) return "";
       return receipt.invoiceAddress || receipt.invoiceFileUrl || "";
@@ -382,11 +275,24 @@ export default {
       const invoiceAddress = this.getInvoiceAddress(this.currentReceipt);
       return invoiceAddress ? { invoiceAddress } : {};
     },
+    beforeInvoiceUpload(file) {
+      const allowed = ["image/jpeg", "image/jpg", "image/png", "application/pdf"];
+      const okType = allowed.includes(file.type) || /\.(jpg|jpeg|png|pdf)$/i.test(file.name);
+      if (!okType) {
+        this.$Message.warning("请上传 jpg、jpeg、png 或 pdf 格式文件");
+        return false;
+      }
+      if (file.size / 1024 / 1024 > 10) {
+        this.$Message.warning("发票附件不能超过 10MB");
+        return false;
+      }
+      return true;
+    },
     handleInvoiceUploadSuccess(res) {
       if (res && res.success && res.result) {
-        this.$set(this.currentReceipt, "invoiceAddress", res.result);
+        this.currentReceipt.invoiceAddress = res.result;
         if (this.selectedReceiptRow) {
-          this.$set(this.selectedReceiptRow, "invoiceAddress", res.result);
+          this.selectedReceiptRow.invoiceAddress = res.result;
         }
         this.$Message.success("发票上传成功");
       } else {
@@ -396,57 +302,35 @@ export default {
     handleInvoiceUploadError() {
       this.$Message.error("发票上传失败");
     },
-    handleInvoiceFormatError() {
-      this.$Notice.warning({
-        title: "文件格式不正确",
-        desc: "请上传 jpg、jpeg、png 或 pdf 格式文件"
-      });
-    },
-    handleInvoiceMaxSize() {
-      this.$Notice.warning({
-        title: "超过文件大小限制",
-        desc: "发票附件不能超过 10MB"
-      });
-    },
     viewInvoiceFile(url) {
       if (!url) return;
       window.open(url, "_blank");
     },
-    // 初始化数据
     init() {
       this.getData();
     },
-    // 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getData();
     },
-    // 改变页数
     changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getData();
     },
-    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
       this.getData();
     },
-    // 重置搜索条件
     handleReset() {
-      this.searchForm = {};
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm = {
+        pageNumber: 1,
+        pageSize: 10,
+        sort: "createTime",
+        order: "desc",
+        receiptStatus: "",
+      };
       this.getData();
     },
-    // 时间段从新赋值
-    selectDateRange(v) {
-      if (v) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      }
-    },
-    // 获取数据
     getData() {
       this.loading = true;
       API_Order.getReceiptPage(this.searchForm).then((res) => {
@@ -456,8 +340,6 @@ export default {
           this.total = res.result.total;
         }
       });
-      this.total = this.data.length;
-      this.loading = false;
     },
     async openReceiptModal(row, mode = "detail") {
       if (!row) return;
@@ -512,15 +394,7 @@ export default {
 };
 </script>
 <style lang="scss">
-// 建议引入通用样式 可删除下面样式代码
 @import "@/styles/table-common.scss";
-
-.receipt-modal-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 240px;
-}
 
 .receipt-modal-content {
   max-height: 460px;
@@ -553,5 +427,15 @@ export default {
   flex: 1;
   color: #17233d;
   word-break: break-all;
+}
+
+.link-text {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.link-text.disabled {
+  color: #c5c8ce;
+  cursor: not-allowed;
 }
 </style>

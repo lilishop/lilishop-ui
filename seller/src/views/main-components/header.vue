@@ -1,15 +1,15 @@
 <template>
   <div>
-    <Row class="header">
+    <el-row class="header">
       <img class="logo" :src="storeSideLogo" />
-    </Row>
+    </el-row>
   </div>
 </template>
 
 <script>
 import { getBaseSite } from "@/api/common.js";
+
 export default {
-  // name: "header",
   data() {
     return {
       storeSideLogo: require("@/assets/logo.png"),
@@ -24,53 +24,39 @@ export default {
         !localStorage.getItem("seller_expiration_time")
       ) {
         this.getSite();
+      } else if (new Date() > localStorage.getItem("seller_expiration_time")) {
+        this.getSite();
       } else {
-        // 如果缓存过期，则获取最新的信息
-        if (new Date() > localStorage.getItem("seller_expiration_time")) {
-          this.getSite();
-          return;
-        } else {
-          this.storeSideLogo = localStorage.getItem("sellerlogoImg");
-          window.document.title = localStorage.getItem("sellersiteName");
-          //动态获取icon
-          let link =
-            document.querySelector("link[rel*='icon']") ||
-            document.createElement("link");
-          link.type = "image/x-icon";
-          link.href = localStorage.getItem("sellerIconImg");
-          link.rel = "shortcut icon";
-          document.getElementsByTagName("head")[0].appendChild(link);
-        }
+        this.storeSideLogo = localStorage.getItem("sellerlogoImg");
+        window.document.title = localStorage.getItem("sellersiteName");
+        this.applyFavicon(localStorage.getItem("sellerIconImg"));
       }
     },
+    applyFavicon(href) {
+      const link =
+        document.querySelector("link[rel*='icon']") ||
+        document.createElement("link");
+      link.type = "image/x-icon";
+      link.href = href;
+      link.rel = "shortcut icon";
+      document.getElementsByTagName("head")[0].appendChild(link);
+    },
     getSite() {
-      //获取基本站点信息
       getBaseSite().then((res) => {
         if (res.success && res.result.settingValue) {
-          let data = JSON.parse(res.result.settingValue);
-          // 过期时间
-          var expirationTime = new Date().setHours(new Date().getHours() + 1);
-          // 存放过期时间
+          const data = JSON.parse(res.result.settingValue);
+          const expirationTime = new Date().setHours(new Date().getHours() + 1);
           localStorage.setItem("seller_expiration_time", expirationTime);
-          // 存放信息
           localStorage.setItem("sellersiteName", data.siteName);
           localStorage.setItem("sellerlogoImg", data.storeSideLogo);
           localStorage.setItem("sellerIconImg", data.storeSideIcon);
-          console.log(data, "datadadada");
+          this.storeSideLogo = data.storeSideLogo;
           window.document.title = data.siteName;
-          //动态获取icon
-          let link =
-            document.querySelector("link[rel*='icon']") ||
-            document.createElement("link");
-          link.type = "image/x-icon";
-          link.href = data.storeSideIcon;
-          link.rel = "shortcut icon";
-          document.getElementsByTagName("head")[0].appendChild(link);
+          this.applyFavicon(data.storeSideIcon);
         }
       });
     },
   },
-
   mounted() {
     this.init();
   },

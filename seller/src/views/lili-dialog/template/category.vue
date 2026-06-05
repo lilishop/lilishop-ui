@@ -117,5 +117,6 @@ export default {
 }
 .wrapper {
   overflow: hidden;
+  display: flex;
 }
 </style>

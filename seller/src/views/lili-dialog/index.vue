@@ -1,26 +1,40 @@
 <template>
-  <Modal
-    :title="title"
-    :styles="{ top: '120px' }"
-    width="750"
-    @on-cancel="clickClose"
-    @on-ok="clickOK"
+  <el-dialog
     v-model="flag"
-    :mask-closable="false"
-    scrollable
+    width="1160px"
+    top="120px"
+    :z-index="10000"
+    :close-on-click-modal="false"
+    append-to-body
+    destroy-on-close
+    @close="clickClose"
   >
-    <goodsDialog
-      @selected="(val) => {goodsData = val;}"
-      :selectedWay='goodsData'
-      ref="goodsDialog"
-      v-if="goodsFlag"
-    />
-    <linkDialog
-      @selectedLink="(val) => {linkData = val;}"
-      v-else
-      class="linkDialog"
-    />
-  </Modal>
+    <template v-if="flag">
+      <goodsDialog
+        @selected="
+          (val) => {
+            goodsData = val;
+          }
+        "
+        v-if="goodsFlag"
+        ref="goodsDialog"
+        :selectedWay="goodsData"
+      />
+      <linkDialog
+        @selectedLink="
+          (val) => {
+            linkData = val;
+          }
+        "
+        v-else
+        class="linkDialog"
+      />
+    </template>
+    <template #footer>
+      <el-button @click="clickClose">取消</el-button>
+      <el-button type="primary" @click="clickOK">确定</el-button>
+    </template>
+  </el-dialog>
 </template>
 <script>
 import goodsDialog from "./goods-dialog";
@@ -32,31 +46,29 @@ export default {
   },
   data() {
     return {
-      title: "选择", // 模态框标题
-      goodsFlag: false, // 是否商品选择器
-      goodsData: [], //选择的商品
-      linkData: "", //选择的链接
-      flag: false, // 控制模态框显隐
+      goodsFlag: false,
+      goodsData: [],
+      linkData: "",
+      flag: false,
     };
   },
   methods: {
-    // 关闭弹窗
+    clearGoodsSelected() {
+      this.goodsData = [];
+    },
     clickClose() {
       this.$emit("closeFlag", false);
       this.goodsFlag = false;
     },
-
-    // 单选商品
-    singleGoods(){
+    singleGoods() {
       var timer = setInterval(() => {
         if (this.$refs.goodsDialog) {
-
           this.$refs.goodsDialog.type = "single";
-         clearInterval(timer);
+          clearInterval(timer);
         }
       }, 100);
     },
-    clickOK() { // 确定按钮回调，
+    clickOK() {
       if (this.goodsFlag) {
         this.$emit("selectedGoodsData", this.goodsData);
       } else {
@@ -64,27 +76,25 @@ export default {
       }
       this.clickClose();
     },
-    open (type) { // 父组件通过ref调用，打开商品选择器
+    open(type, mutiple) {
       this.flag = true;
-      if(type == 'goods'){
+      if (type == "goods") {
         this.goodsFlag = true;
+        if (mutiple) {
+          this.singleGoods();
+        }
       } else {
-        this.goodsFlag = false
+        this.goodsFlag = false;
       }
-
     },
-    close(){ // 关闭组件
+    close() {
       this.flag = false;
-    }
+    },
   },
 };
 </script>
 <style scoped lang="scss">
-::v-deep .ivu-modal {
-  overflow: hidden;
-  height: 650px !important;
-}
-::v-deep .ivu-modal-body {
+:deep(.el-dialog__body) {
   width: 100%;
   height: 500px;
   overflow: hidden;

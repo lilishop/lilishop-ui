@@ -4,37 +4,68 @@
       <div class="query-wrapper">
         <div class="query-item">
           <div>搜索范围</div>
-          <Input placeholder="商品名称" @on-clear="goodsData=[]; goodsParams.goodsName=''; goodsParams.pageNumber = 1;  getQueryGoodsList()" @on-enter="()=>{goodsData=[]; goodsParams.pageNumber = 1; getQueryGoodsList();}" clearable style="width: 150px"
-            v-model="goodsParams.goodsName" />
+          <el-input
+            v-model="goodsParams.goodsName"
+            placeholder="商品名称"
+            clearable
+            style="width: 150px"
+            @clear="onSearchGoods"
+            @keyup.enter="onSearchGoods"
+          />
         </div>
         <div class="query-item">
-          <Cascader v-model="category" placeholder="请选择商品分类" style="width: 150px" :data="cateList"></Cascader>
+          <el-cascader
+            v-model="category"
+            :options="skuList"
+            placeholder="请选择商品分类"
+            style="width: 250px"
+            clearable
+          />
         </div>
         <div class="query-item">
-          <Button type="primary" @click="goodsData=[]; goodsParams.pageNumber = 1; getQueryGoodsList();" icon="ios-search">搜索</Button>
+          <el-button type="primary" @click="onSearchGoods">搜索</el-button>
         </div>
       </div>
-      <div >
-        <Scroll class="wap-content-list" :on-reach-bottom="handleReachBottom" :distance-to-edge="[3,3]">
-
-          <div class="wap-content-item" :class="{ active: item.selected }" @click="checkedGoods(item, index)" v-for="(item, index) in goodsData" :key="index">
+      <div>
+        <div class="wap-content-list">
+          <div
+            class="wap-content-item"
+            :class="{ active: item.selected }"
+            @click="checkedGoods(item, index)"
+            v-for="(item, index) in goodsData"
+            :key="index"
+          >
             <div>
               <img :src="item.thumbnail" alt="" />
             </div>
             <div class="wap-content-desc">
               <div class="wap-content-desc-title">{{ item.goodsName }}</div>
-              <div class="wap-sku">{{ item.goodsUnit }}</div>
-              <div class="wap-sku"><Tag :color="item.salesModel === 'RETAIL' ? 'default' : 'geekblue'">{{item.salesModel === "RETAIL" ? "零售型" : "批发型"}}</Tag></div>
+              <div class="wap-sku">
+                {{ item.goodsUnit }}
+                <el-tag
+                  style="margin-left: 10px"
+                  :type="item.salesModel === 'RETAIL' ? 'info' : 'primary'"
+                >
+                  {{ item.salesModel === "RETAIL" ? "零售型" : "批发型" }}
+                </el-tag>
+              </div>
               <div class="wap-content-desc-bottom">
-                <div>￥{{ item.price | unitPrice }}</div>
+                <div>￥{{ $filters.unitPrice(item.price) }}</div>
               </div>
             </div>
           </div>
-          <Spin size="large" fix v-if="loading"></Spin>
-
+          <div v-if="loading" v-loading="loading" class="loading-mask" />
           <div v-if="empty" class="empty">暂无商品信息</div>
-        </Scroll>
-
+        </div>
+        <el-pagination
+          v-model:current-page="goodsParams.pageNumber"
+          class="pageration"
+          :total="total"
+          :page-size="goodsParams.pageSize"
+          layout="total, prev, pager, next"
+          size="small"
+          @current-change="changePageSize"
+        />
       </div>
     </div>
   </div>
@@ -45,33 +76,29 @@ export default {
   props: {
     selectedWay: {
       type: Array,
-      default: () => {
-        return [];
-      },
+      default: () => [],
     },
   },
   data() {
     return {
-      type: "multiple", //单选或者多选 single  multiple
-
-      cateList: [], // 商品分类列表
-      total: "", // 商品总数
+      type: "multiple",
+      skuList: [],
+      total: 0,
       goodsParams: {
-        // 请求商品列表参数
         pageNumber: 1,
-        pageSize: 18,
+        pageSize: 15,
         order: "desc",
         goodsName: "",
         sn: "",
         categoryPath: "",
         marketEnable: "UPPER",
         authFlag: "PASS",
-        sort:"createTime"
+        sort: "createTime",
       },
-      category: [], // 选中的商品分类
-      goodsData: [], // 商品列表
-      empty: false, // 是否空数据
-      loading: false, // 商品加载loading
+      category: [],
+      goodsData: [],
+      empty: false,
+      loading: false,
     };
   },
   watch: {
@@ -79,16 +106,17 @@ export default {
       this.goodsParams.categoryPath = val[2];
     },
     selectedWay: {
-      handler(val) {
+      handler() {
         this.$emit("selected", this.selectedWay);
       },
       deep: true,
       immediate: true,
     },
     "goodsParams.categoryPath": {
-      handler: function () {
+      handler() {
         this.goodsData = [];
-        (this.goodsParams.pageNumber = 0), this.getQueryGoodsList();
+        this.goodsParams.pageNumber = 1;
+        this.getQueryGoodsList();
       },
       deep: true,
     },
@@ -97,106 +125,82 @@ export default {
     this.init();
   },
   methods: {
-    handleReachBottom() {
-      // 页面触底触发加载
-      setTimeout(() => {
-        if (
-          this.goodsParams.pageNumber * this.goodsParams.pageSize <=
-          this.total
-        ) {
-          this.goodsParams.pageNumber++;
-          this.getQueryGoodsList();
-        }
-      }, 1500);
+    onSearchGoods() {
+      this.goodsData = [];
+      this.goodsParams.pageNumber = 1;
+      this.getQueryGoodsList();
+    },
+    changePageSize(v) {
+      this.goodsParams.pageNumber = v;
+      this.getQueryGoodsList();
     },
     getQueryGoodsList() {
-      // 根据商品分类筛选商品
-      API_Goods.getGoodsSkuData(this.goodsParams).then((res) => {
-        this.initGoods(res);
-      });
+      this.loading = true;
+      API_Goods.getGoodsSkuData(this.goodsParams)
+        .then((res) => {
+          this.initGoods(res);
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
-
     initGoods(res) {
-      // 获取商品列表
       if (res.result.records.length != 0) {
-        let data = res.result.records;
-        data.forEach((item) => {
+        res.result.records.forEach((item) => {
           item.selected = false;
-          item.___type = "goods"; //设置为goods让pc wap知道标识
-
+          item.___type = "goods";
           this.selectedWay.forEach((e) => {
-            if (e.id === item.id) {
+            if (e.id && e.id === item.id) {
               item.selected = true;
             }
           });
         });
-        /**
-         * 解决数据请求中，滚动栏会一直上下跳动
-         */
         this.total = res.result.total;
-        this.goodsData.push(...res.result.records);
+        this.goodsData = res.result.records;
+        this.empty = false;
       } else {
+        this.goodsData = [];
         this.empty = true;
       }
     },
-
-    // 查询商品
     init() {
-      Promise.all([
-        API_Goods.getGoodsSkuData(this.goodsParams),
-        API_Goods.getGoodsCategoryAll(0),
-      ]).then((res) => {
-        // 商品
-        this.initGoods(res[0]);
-
-        // 分类
-        if (res[1].result) {
-          this.deepGroup(res[1].result);
+      API_Goods.getGoodsSkuData(this.goodsParams).then((res) => {
+        this.initGoods(res);
+      });
+      API_Goods.getGoodsCategoryAll(0).then((res) => {
+        if (res.result) {
+          this.deepGroup(res.result);
         }
       });
     },
-
     deepGroup(val) {
       val.forEach((item) => {
-        let childWay = []; //第二级
-        // 第二层
+        let childWay = [];
         if (item.children) {
           item.children.forEach((child) => {
-            // // 第三层
             if (child.children) {
               child.children.forEach((grandson, index, arr) => {
                 arr[index] = {
                   value: grandson.id,
                   label: grandson.name,
-                  children: "",
                 };
               });
             }
-            let children = {
+            childWay.push({
               value: child.id,
               label: child.name,
               children: child.children,
-            };
-            childWay.push(children);
+            });
           });
         }
-
-        // 第一层
-        let way = {
+        this.skuList.push({
           value: item.id,
           label: item.name,
           children: childWay,
-        };
-
-        this.cateList.push(way);
+        });
       });
     },
-
-    /**
-     * 点击商品
-     */
-    checkedGoods(val, index) {
-      // 如果单选的话
+    checkedGoods(val) {
       if (this.type != "multiple") {
         this.goodsData.forEach((item) => {
           item.selected = false;
@@ -204,10 +208,8 @@ export default {
         this.selectedWay = [];
         val.selected = true;
         this.selectedWay.push(val);
-
         return false;
       }
-
       if (val.selected == false) {
         val.selected = true;
         this.selectedWay.push(val);
@@ -239,17 +241,27 @@ export default {
   padding: 0;
 }
 .wap-content-list {
+  display: flex;
   position: relative;
+  flex-wrap: wrap;
+  height: 340px;
 }
 .wap-content-item {
   width: 210px;
   margin: 10px 7px;
   padding: 6px 0;
 }
-
 .active {
   background: url("../../assets/selected.png") no-repeat;
   background-position: right;
   background-size: 10%;
+}
+.loading-mask {
+  position: absolute;
+  inset: 0;
+}
+.pageration {
+  margin-top: 12px;
+  justify-content: flex-end;
 }
 </style>

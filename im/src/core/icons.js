@@ -1,22 +1,21 @@
-/**
- * Custom icon list
- * All icons are loaded here for easy management
- *
- * 自定义图标加载表
- * 所有图标均从这里加载，方便管理
- */
-import SvgMentionDown from '@/icons/svg/mention-down.svg?inline' // path to your '*.svg?inline' file.
-import SvgNotFount from '@/icons/svg/not-fount.svg?inline' // path to your '*.svg?inline' file.
-import SvgNote from '@/icons/svg/note.svg?inline' // path to your '*.svg?inline' file.
-import SvgNoteBook from '@/icons/svg/note-book.svg?inline' // path to your '*.svg?inline' file.
-import SvgNotData from '@/icons/svg/not-data.svg?inline' // path to your '*.svg?inline' file.
-import SvgZhuangFa from '@/icons/svg/zhuangfa.svg?inline' // path to your '*.svg?inline' file.
+import { h } from "vue";
 
-export {
-  SvgMentionDown,
-  SvgNotFount,
-  SvgNote,
-  SvgNoteBook,
-  SvgNotData,
-  SvgZhuangFa,
+function createSvgIcon(name) {
+  return {
+    name: `SvgIcon_${name}`,
+    inheritAttrs: false,
+    render() {
+      return h("svg-icon", {
+        iconClass: name,
+        ...this.$attrs,
+      });
+    },
+  };
 }
+
+export const SvgMentionDown = createSvgIcon("mention-down");
+export const SvgNotFount = createSvgIcon("not-fount");
+export const SvgNote = createSvgIcon("note");
+export const SvgNoteBook = createSvgIcon("note-book");
+export const SvgNotData = createSvgIcon("not-data");
+export const SvgZhuangFa = createSvgIcon("zhuangfa");

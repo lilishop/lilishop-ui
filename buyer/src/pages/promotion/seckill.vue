@@ -32,12 +32,8 @@
         </div>
         <div class="goods-show-price">
           <span>
-            <span class="seckill-price text-danger">{{
-              item.price | unitPrice("￥")
-            }}</span>
-            <span style="color: #999; text-decoration: line-through">{{
-              item.originalPrice | unitPrice("￥")
-            }}</span>
+            <span class="seckill-price text-danger">{{ $filters.unitPrice(item.price, "￥") }}</span>
+            <span style="color: #999; text-decoration: line-through">{{ $filters.unitPrice(item.originalPrice, "￥") }}</span>
           </span>
         </div>
         <div class="goods-show-detail" style="margin-bottom: 20px">
@@ -59,12 +55,15 @@
                 (item.salesNum / (item.quantity)) * 100
               )
               : 100) + "%"
-          }}</span><Progress hide-info stroke-color="#df0021" style="width: 110px" class="ml_10" :percent="item.quantity && item.quantity > 0
-      ? Math.ceil(
-        (item.salesNum / (item.quantity)) * 100
-      )
-      : 100
-    " />
+          }}</span><el-progress
+            :show-text="false"
+            color="#df0021"
+            style="width: 110px"
+            class="ml_10"
+            :percentage="item.quantity && item.quantity > 0
+              ? Math.ceil((item.salesNum / item.quantity) * 100)
+              : 100"
+          />
         </div>
         <div class="goods-show-seller">
           <span>{{ item.storeName }}</span>
@@ -88,8 +87,7 @@ export default {
       nowHour: new Date().getHours(), // 当前小时数
     };
   },
-  beforeDestroy () {
-    // 销毁前清除定时器
+  beforeUnmount () {
     clearInterval(this.interval);
   },
   watch: {
@@ -265,7 +263,7 @@ export default {
   justify-content: center;
 }
 
-.ivu-progress-success .ivu-progress-bg {
-  background-color: #111fff;
+.el-progress-bar__inner {
+  background-color: #df0021;
 }
 </style>

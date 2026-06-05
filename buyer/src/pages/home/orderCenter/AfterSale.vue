@@ -5,12 +5,12 @@
     <!-- 搜索 筛选 -->
     <div class="mb_20 box">
       <div class="global_float_right">
-        <Input
+        <el-input
           class="width_300"
-          search
-          enter-button
+          
+          
           v-model="params.keywords"
-          @on-search="getList"
+          @keyup.enter="getList"
           placeholder="请输入订单号搜索"
         />
       </div>
@@ -18,18 +18,18 @@
     <!-- 列表 -->
     <empty v-if="orderList.length === 0"/>
     <div class="order-content" v-else>
-      <template v-for="(order, onderIndex) in orderList">
-        <div class="order-list" :key="onderIndex">
+      <template v-for="(order, onderIndex) in orderList" :key="order.sn || onderIndex">
+        <div class="order-list">
           <div class="order-header">
             <div>
               <div v-if="order.serviceStatus">{{ filterOrderStatus(order.serviceStatus) }}</div>
               <div>
                 售后单号：{{ order.sn }} &nbsp; &nbsp; &nbsp;{{ order.createTime }}
-                &nbsp; &nbsp;{{ order.memberName | secrecyMobile }}
+                &nbsp; &nbsp;{{ $filters.secrecyMobile( order.memberName ) }}
               </div>
             </div>
             <div>
-              <span>申请退款金额：<span class="global_color">{{ order.applyRefundPrice | unitPrice("￥") }}</span></span>
+              <span>申请退款金额：<span class="global_color">{{ $filters.unitPrice(order.applyRefundPrice, "￥") }}</span></span>
             </div>
           </div>
           <div class="order-body">
@@ -47,33 +47,31 @@
             </div>
             <div>
               <!-- 订单基础操作 -->
-              <Button @click="goDetail(order.sn)" type="info" size="small">售后详情</Button>
-              <Button @click="openModal(order)"
+              <el-button @click="goDetail(order.sn)" type="info" size="small">售后详情</el-button>
+              <el-button @click="openModal(order)"
                       v-if="order.serviceStatus == 'PASS' &&
                 order.serviceType != 'RETURN_MONEY'"
                       type="warning" size="small">提交物流
-              </Button>
-              <Button @click="cancel(order.sn)" type="error" v-if="order.afterSaleAllowOperationVO.cancel" size="small">
+              </el-button>
+              <el-button @click="cancel(order.sn)" type="danger" v-if="order.afterSaleAllowOperationVO.cancel" size="small">
                 取消售后
-              </Button>
+              </el-button>
             </div>
           </div>
         </div>
       </template>
-      <Spin size="large" fix v-if="spinShow"></Spin>
+      <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
     </div>
     <!-- 分页 -->
     <div class="page-size">
-      <Page :total="total" @on-change="changePageNum"
-            @on-page-size-change="changePageSize"
-            :page-size="params.pageSize"
-            show-sizer>
-      </Page>
+      <el-pagination :total="total" @current-change="changePageNum"
+            @size-change="changePageSize"
+            :page-size="params.pageSize" layout="sizes, prev, pager, next"></el-pagination>
     </div>
-    <Modal v-model="logisticsShow" width="530">
-      <p slot="header">
+    <el-dialog v-model="logisticsShow" width="530">
+      <template #header><p>
         <span>提交物流信息</span>
-      </p>
+      </p></template>
       <div>
         <div class="goods-list modal-goods">
           <img @click="goodsDetail(singleOrder.skuId, singleOrder.goodsId)" class="hover-color"
@@ -84,31 +82,30 @@
             </div>
             <div class="mt_10">
               <span class="global_color"
-              >{{ singleOrder.flowPrice | unitPrice("￥") }} </span
-              >x {{ singleOrder.num }}
+              >{{ $filters.unitPrice(singleOrder.flowPrice, "￥") }} </span>x {{ singleOrder.num }}
             </div>
           </div>
         </div>
-        <Form ref="form" :model="form" label-position="left" :label-width="100" :rules="rules">
-          <FormItem label="物流公司" prop="logisticsId">
-            <Select v-model="form.logisticsId" placeholder="请选择物流公司">
-              <Option v-for="item in companyList" :value="item.id" :key="item.id">{{ item.name }}</Option>
-            </Select>
-          </FormItem>
-          <FormItem label="物流单号" prop="logisticsNo">
-            <Input v-model="form.logisticsNo" placeholder="请填写物流单号"></Input>
-          </FormItem>
-          <FormItem label="发货时间" prop="mDeliverTime">
-            <DatePicker type="date" style="width:100%" v-model="form.mDeliverTime" @on-change="changeTime"
-                        format="yyyy-MM-dd" placeholder="选择发货时间"></DatePicker>
-          </FormItem>
-        </Form>
+        <el-form ref="form" :model="form" label-position="left" label-width="100px" :rules="rules">
+          <el-form-item label="物流公司" prop="logisticsId">
+            <el-select v-model="form.logisticsId" placeholder="请选择物流公司">
+              <el-option v-for="item in companyList" :value="item.id" :key="item.id">{{ item.name }}</el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="物流单号" prop="logisticsNo">
+            <el-input v-model="form.logisticsNo" placeholder="请填写物流单号"></el-input>
+          </el-form-item>
+          <el-form-item label="发货时间" prop="mDeliverTime">
+            <el-date-picker type="date" style="width:100%" v-model="form.mDeliverTime" @change="changeTime"
+                        format="yyyy-MM-dd" placeholder="选择发货时间"></el-date-picker>
+          </el-form-item>
+        </el-form>
       </div>
-      <div slot="footer" style="text-align: right">
-        <Button @click="logisticsShow = false">关闭</Button>
-        <Button type="primary" :loading="submitLoading" @click="submitDelivery">提交</Button>
-      </div>
-    </Modal>
+      <template #footer><div style="text-align: right">
+        <el-button @click="logisticsShow = false">关闭</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitDelivery">提交</el-button>
+      </div></template>
+    </el-dialog>
   </div>
 </template>
 
@@ -324,7 +321,7 @@ export default {
         }
       }
 
-      .ivu-icon {
+      .el-icon {
         color: #ff8f23;
         cursor: pointer;
 
@@ -337,7 +334,7 @@ export default {
     > div:nth-child(3) {
       width: 100px;
 
-      .ivu-btn {
+      .el-button {
         margin-bottom: 10px;
       }
     }

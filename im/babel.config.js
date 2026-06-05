@@ -1,19 +1,10 @@
 module.exports = {
-  presets: [
-    '@vue/cli-plugin-babel/preset'
-  ],
+  presets: ["@vue/cli-plugin-babel/preset"],
   plugins: [
-    [
-      "import",
-      {
-        "libraryName": "element-ui",
-        "styleLibraryName": "theme-chalk"
-      }
-    ],
     [
       "prismjs",
       {
-        "languages": [
+        languages: [
           "html",
           "css",
           "less",
@@ -42,10 +33,10 @@ module.exports = {
           "yml",
           "md",
           "erlang",
-          "ini"
+          "ini",
         ],
-        "theme": "okaidia"
-      }
-    ]
-  ]
-}
+        theme: "okaidia",
+      },
+    ],
+  ],
+};

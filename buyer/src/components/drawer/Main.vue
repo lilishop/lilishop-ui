@@ -3,20 +3,20 @@
     <div class="wrapper" :style="{right:handleDrawer ? '300px' : '0px'}">
 
       <div class="barItem" @mouseenter="showCartNum(item)" @click="clickBar(item)" v-for="(item,index) in resetConfig.menuList" :key="index">
-        <Tooltip placement="left" :content="item.title">
-          <Icon size="20" :type="item.icon"/>
+        <el-tooltip placement="left" :content="item.title">
+          <el-icon :size="20"><component :is="resolveIcon(item.icon)" /></el-icon>
           <p class="barTitle" v-if="item.titleShow"> {{item.title}}</p>
           <div class="circle" v-if="item.title === '购物车'">
             {{cartNum < 100 ? cartNum : 99}}
           </div>
-        </Tooltip>
+        </el-tooltip>
       </div>
 
     </div>
-    <Drawer width="300" class="popup" :title="drawerData.title" :mask="resetConfig.mask" :closable="resetConfig.closable"
+    <el-drawer width="300" class="popup" :title="drawerData.title" :mask="resetConfig.mask" :closable="resetConfig.closable"
       v-model="handleDrawer">
       <drawerPage :title="drawerData.title" />
-    </Drawer>
+    </el-drawer>
   </div>
 </template>
 
@@ -25,6 +25,7 @@ import Storage from '@/plugins/storage.js';
 import Configuration from './config';
 import drawerPage from './Drawer'
 import {cartCount} from '@/api/cart.js'
+import { resolveIcon } from '@/utils/iconMap'
 export default {
   name: 'Main',
   data () {
@@ -46,6 +47,7 @@ export default {
     }
   },
   methods: {
+    resolveIcon,
     showCartNum (item) { // 获取购物车数量
       if (this.userInfo && item.title === '购物车') {
         this.getCartList()
@@ -147,11 +149,11 @@ export default {
     justify-content: center;
     flex-direction: column;
   }
-  ::v-deep.popup .ivu-drawer-body{
-    padding: 0!important;
+  :deep(.popup .el-drawer__body) {
+    padding: 0 !important;
     background-color: #eee;
   }
-  ::v-deep.popup .ivu-drawer-wrap{
+  :deep(.popup) {
     z-index: 3001;
   }
 </style>

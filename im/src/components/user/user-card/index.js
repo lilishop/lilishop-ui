@@ -1,33 +1,40 @@
-import UserCardDetail from './UserCardDetail'
+import { createApp, h } from "vue";
+import UserCardDetail from "./UserCardDetail";
+import router from "@/router";
+import store from "@/store";
+import { setupElementPlus } from "@/plugins/element";
+import { setupLegacyMessage } from "@/utils/message";
+import { registerDirectives } from "@/core/directives";
 
 export default {
-  install(Vue) {
+  install(app) {
     function user(user_id, options) {
-      let _vm = this
-      const el = new Vue({
-        router: _vm.$router,
-        store: _vm.$store,
-        render(h) {
-          return h(UserCardDetail, {
-            on: {
-              close: () => {
-                el.$destroy()
-                document.body.removeChild(el.$el)
-              },
-              changeRemark: data => {
-                options.editRemarkCallbak && options.editRemarkCallbak(data)
-              },
-            },
-            props: {
-              user_id,
-            },
-          })
-        },
-      }).$mount()
+      const container = document.createElement("div");
+      document.body.appendChild(container);
 
-      document.body.appendChild(el.$el)
+      const cardApp = createApp({
+        render() {
+          return h(UserCardDetail, {
+            user_id,
+            onClose: () => {
+              cardApp.unmount();
+              document.body.removeChild(container);
+            },
+            onChangeRemark: (data) => {
+              options.editRemarkCallbak && options.editRemarkCallbak(data);
+            },
+          });
+        },
+      });
+
+      setupElementPlus(cardApp);
+      setupLegacyMessage(cardApp);
+      registerDirectives(cardApp);
+      cardApp.use(router);
+      cardApp.use(store);
+      cardApp.mount(container);
     }
 
-    Vue.prototype.$user = user
+    app.config.globalProperties.$user = user;
   },
-}
+};

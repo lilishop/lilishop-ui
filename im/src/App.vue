@@ -4,6 +4,8 @@
   </div>
 </template>
 <script>
+import { setRefreshView } from "@/utils/app-bridge";
+
 export default {
   name: 'App',
   data () {
@@ -35,10 +37,11 @@ export default {
   },
 
   mounted () {
+    setRefreshView(this.refreshView.bind(this));
     window.addEventListener('beforeunload', e => this.beforeunloadHandler(e))
     window.addEventListener('unload', e => this.unloadHandler(e))
   },
-  destroyed () {
+  beforeUnmount () {
     window.removeEventListener('beforeunload', e => this.beforeunloadHandler(e))
     window.removeEventListener('unload', e => this.unloadHandler(e))
   },
