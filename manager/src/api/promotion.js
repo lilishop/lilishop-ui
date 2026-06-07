@@ -283,6 +283,12 @@ export const getCouponReceiveList = (params) => {
   return getRequest("/promotion/coupon/received", params);
 };
 
+export const getFlashDiscountList = (params) => getRequest("/promotion/flashDiscount", params);
+export const getFlashDiscountDetail = (id) => getRequest(`/promotion/flashDiscount/${id}`);
+export const updateFlashDiscountStatus = (id, params) => putRequest(`/promotion/flashDiscount/status/${id}`, params);
+export const deleteFlashDiscount = (id) => deleteRequest(`/promotion/flashDiscount/${id}`);
+export const getNthItemDiscountList = (params) => getRequest("/promotion/nthItemDiscount", params);
+
 // 现金礼品卡活动分页
 export const getGiftCardCashActivityPage = (params) => {
   return getRequest("/promotion/giftCardCash/activity", params);

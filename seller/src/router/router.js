@@ -140,6 +140,18 @@ export const otherRouter = {
       component: () => import("@/views/promotion/full-discount/full-discount-add.vue")
     },
     {
+      path: "flash-discount-add",
+      title: "限时直降",
+      name: "flash-discount-add",
+      component: () => import("@/views/promotion/flash-discount/flash-discount-add.vue")
+    },
+    {
+      path: "nth-item-discount-add",
+      title: "第N件优惠",
+      name: "nth-item-discount-add",
+      component: () => import("@/views/promotion/nth-item-discount/nth-item-discount-add.vue")
+    },
+    {
       path: "export-order-deliver",
       title: "发货",
       name: "export-order-deliver",

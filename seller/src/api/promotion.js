@@ -182,3 +182,18 @@ export const updateFullDiscount = (id, params) => {
 export const getCouponReceiveList = (params) => {
     return getRequest("/promotion/coupon/received", params);
 };
+
+// ========== 限时直降 ==========
+export const getFlashDiscountList = (params) => getRequest('/promotion/flashDiscount', params)
+export const getFlashDiscountDetail = (id) => getRequest(`/promotion/flashDiscount/${id}`)
+export const saveFlashDiscount = (params) => postRequest('/promotion/flashDiscount', params, { 'Content-type': 'application/json' })
+export const editFlashDiscount = (params) => putRequest('/promotion/flashDiscount', params, { 'Content-type': 'application/json' })
+export const deleteFlashDiscount = (id) => deleteRequest(`/promotion/flashDiscount/${id}`)
+export const updateFlashDiscountStatus = (id, params) => putRequest(`/promotion/flashDiscount/status/${id}`, params)
+
+// ========== 第N件优惠 ==========
+export const getNthItemDiscountList = (params) => getRequest('/promotion/nthItemDiscount', params)
+export const getNthItemDiscountDetail = (id) => getRequest(`/promotion/nthItemDiscount/${id}`)
+export const saveNthItemDiscount = (params) => postRequest('/promotion/nthItemDiscount', params, { 'Content-type': 'application/json' })
+export const editNthItemDiscount = (params) => putRequest('/promotion/nthItemDiscount', params, { 'Content-type': 'application/json' })
+export const updateNthItemDiscountStatus = (id, params) => putRequest(`/promotion/nthItemDiscount/status/${id}`, params)

@@ -314,6 +314,18 @@ export const otherRouter = {
       component: () => import("@/views/promotions/full-discount/full-discount-detail.vue")
     },
     {
+      path: "promotions/flash-discount",
+      title: "限时直降",
+      name: "flash-discount",
+      component: () => import("@/views/promotions/flash-discount/flash-discount.vue")
+    },
+    {
+      path: "promotions/nth-item-discount",
+      title: "第N件优惠",
+      name: "nth-item-discount",
+      component: () => import("@/views/promotions/nth-item-discount/nth-item-discount.vue")
+    },
+    {
       path: "promotions/seckill/manager-seckill-add",
       title: "编辑秒杀活动",
       name: "manager-seckill-add",
