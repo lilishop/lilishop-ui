@@ -37,3 +37,7 @@ yarn build
 - `scripts/replace-icon.js` — 静态 `<Icon type>` → `el-icon`
 - `scripts/fix-el-icon-click.js` — 修复 `@click` 绑定
 - `scripts/fix-broken-tags.js` — 闭合标签修复
+
+## 上线前检查
+
+四端统一清单（认证、axios、Element Plus、分端专项）：[../MIGRATION-VUE3.md](../MIGRATION-VUE3.md)

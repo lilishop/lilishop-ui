@@ -169,14 +169,12 @@ export const otherRouter = {
       name: "coupon-receive",
       component: () => import("@/views/promotion/coupon/coupon-receive.vue"),
     },
-    // {
-    //   path: "/*",
-    //   name: "error-404",
-    //   meta: {
-    //     title: "404-页面不存在"
-    //   },
-    //   component: () => import("@/views/error-page/404.vue")
-    // }
+    {
+      path: "shop-finance-summary",
+      title: "财务汇总",
+      name: "shop-finance-summary",
+      component: () => import("@/views/shop/finance/summary.vue")
+    }
   ]
 };
 

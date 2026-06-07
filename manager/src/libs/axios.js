@@ -189,6 +189,20 @@ export const getRequest = (url, params, resBlob) => {
 };
 
 
+export const postBlobRequest = (url, data) => {
+  let accessToken = getStore("accessToken");
+  return service({
+    method: "post",
+    url: `${url}`,
+    data: data,
+    responseType: "blob",
+    headers: {
+      "Content-Type": "application/json",
+      accessToken: accessToken
+    }
+  });
+};
+
 export const postRequest = (url, params, headers) => {
   let accessToken = getStore("accessToken");
   return service({

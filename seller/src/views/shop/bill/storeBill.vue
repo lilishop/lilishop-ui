@@ -39,6 +39,7 @@
         <el-form-item>
           <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
           <el-button class="search-btn" @click="handleReset">重置</el-button>
+          <el-button class="search-btn" @click="handleExport">导出列表</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -59,7 +60,6 @@
           <template #default="{ row }">
             <el-tag v-if="row.billStatus === 'OUT'" type="primary">已出账</el-tag>
             <el-tag v-else-if="row.billStatus === 'CHECK'" type="info">已对账</el-tag>
-            <el-tag v-else-if="row.billStatus === 'EXAMINE'" type="warning">已审核</el-tag>
             <el-tag v-else type="success">已付款</el-tag>
           </template>
         </el-table-column>
@@ -88,6 +88,8 @@
 
 <script>
 import * as API_Shop from "@/api/shops";
+import * as API_Finance from "@/api/finance";
+import { downloadBlob } from "@/utils/downloadBlob";
 
 export default {
   name: "storeBill",
@@ -147,6 +149,12 @@ export default {
       this.$filters.customRouterPush({
         name: "bill-detail",
         query: { id: v.id },
+      });
+    },
+    handleExport() {
+      const params = { ...this.searchForm };
+      API_Finance.exportBillList(params).then((blob) => {
+        downloadBlob(blob, "结算单列表.xlsx");
       });
     },
   },

@@ -56,4 +56,8 @@ yarn install
 yarn run dev
 ```
 
-Node **18+**，包管理统一 **yarn**。
+Node **16+**，包管理统一 **yarn**。
+
+## 上线前检查
+
+四端统一清单（认证、axios、Element Plus、分端专项）：[../MIGRATION-VUE3.md](../MIGRATION-VUE3.md)

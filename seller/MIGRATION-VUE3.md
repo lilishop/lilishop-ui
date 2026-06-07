@@ -38,3 +38,7 @@ Node **16+**，包管理统一 **yarn**。商家后台默认端口见 `src/confi
 
 - `scripts/migrate-iview-to-element.js` — 从 manager 复制装修模板 + 批量替换
 - `scripts/copy-manager-migrations.js` — 从 manager 复制已迁移业务页
+
+## 上线前检查
+
+四端统一清单（认证、axios、Element Plus、分端专项）：[../MIGRATION-VUE3.md](../MIGRATION-VUE3.md)

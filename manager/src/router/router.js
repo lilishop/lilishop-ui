@@ -348,6 +348,42 @@ export const otherRouter = {
       title: "查看直播",
       name: "live-detail",
       component: () => import("@/views/promotions/live/live-detail.vue")
+    },
+    {
+      path: "finance-platform-report",
+      title: "平台经营报表",
+      name: "finance-platform-report",
+      component: () => import("@/views/finance/platform-report.vue")
+    },
+    {
+      path: "finance-store-settlement",
+      title: "店铺结算汇总",
+      name: "finance-store-settlement",
+      component: () => import("@/views/finance/store-settlement.vue")
+    },
+    {
+      path: "finance-payment-method",
+      title: "支付方式汇总",
+      name: "finance-payment-method",
+      component: () => import("@/views/finance/payment-method.vue")
+    },
+    {
+      path: "finance-settlement-ledger",
+      title: "结算台账",
+      name: "finance-settlement-ledger",
+      component: () => import("@/views/finance/settlement-ledger.vue")
+    },
+    {
+      path: "finance-refund-log",
+      title: "退款流水",
+      name: "finance-refund-log",
+      component: () => import("@/views/finance/refundLog.vue")
+    },
+    {
+      path: "finance-wallet-log",
+      title: "钱包流水",
+      name: "finance-wallet-log",
+      component: () => import("@/views/finance/walletLog.vue")
     }
   ]
 };

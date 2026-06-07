@@ -436,11 +436,11 @@ export default {
       API_Shop.downloadBill(this.id)
         .then((res) => {
           const blob = new Blob([res], {
-            type: "application/vnd.ms-excel;charset=utf-8",
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
           });
           if ("download" in document.createElement("a")) {
             const link = document.createElement("a");
-            link.download = "结算单-" + this.id + ".xls";
+            link.download = "结算单-" + this.id + ".xlsx";
             link.style.display = "none";
             link.href = URL.createObjectURL(blob);
             document.body.appendChild(link);
@@ -448,7 +448,7 @@ export default {
             URL.revokeObjectURL(link.href);
             document.body.removeChild(link);
           } else {
-            navigator.msSaveBlob(blob, "结算单-" + this.id + ".xls");
+            navigator.msSaveBlob(blob, "结算单-" + this.id + ".xlsx");
           }
         })
         .catch((err) => {

@@ -184,8 +184,6 @@ export function unixSellerBillStatus(status_code) {
       return '已出账'
     case 'CHECK':
       return '已对账'
-    case 'EXAMINE':
-      return '已审核'
     case 'PAY':
       return '已结算'
     case 'COMPLETE':

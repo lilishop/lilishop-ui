@@ -19,6 +19,8 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+          <el-button class="search-btn" @click="handleExportList">导出列表</el-button>
+          <el-button class="search-btn" :disabled="selectCount === 0" @click="handleBatchDownload">批量下载</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -77,6 +79,8 @@
 
 <script>
 import * as API_Shop from "@/api/shops";
+import * as API_Finance from "@/api/finance";
+import { downloadBlob } from "@/utils/downloadBlob";
 
 export default {
   name: "bill",
@@ -100,11 +104,11 @@ export default {
   },
   methods: {
     billStatusText(v) {
-      const map = { OUT: "已出账", CHECK: "已对账", EXAMINE: "已审核", COMPLETE: "已付款" };
+      const map = { OUT: "已出账", CHECK: "已对账", COMPLETE: "已付款" };
       return map[v] || "已付款";
     },
     billStatusTagType(v) {
-      const map = { OUT: "primary", CHECK: "", EXAMINE: "warning", COMPLETE: "success" };
+      const map = { OUT: "primary", CHECK: "warning", COMPLETE: "success" };
       return map[v] || "success";
     },
     init() {
@@ -161,6 +165,23 @@ export default {
       this.$router.push({
         name: "bill-detail",
         query: { id: v.id },
+      });
+    },
+    handleExportList() {
+      const params = { ...this.searchForm };
+      delete params.billStatus;
+      API_Finance.exportBillList(params).then((blob) => {
+        downloadBlob(blob, "结算单列表.xlsx");
+      });
+    },
+    handleBatchDownload() {
+      if (this.selectCount <= 0) {
+        this.$Message.warning("请先选择结算单");
+        return;
+      }
+      const billIds = this.selectList.map((item) => item.id);
+      API_Finance.batchDownloadBills(billIds).then((blob) => {
+        downloadBlob(blob, "结算单批量下载.zip");
       });
     },
   },
