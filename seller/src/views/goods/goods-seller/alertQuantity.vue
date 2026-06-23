@@ -24,8 +24,8 @@
               style="width: 200px"
             />
           </el-form-item>
-          <el-form-item label="货号" prop="id">
-            <el-input v-model="searchForm.skuSn" placeholder="请输入货号" clearable style="width: 200px" />
+          <el-form-item label="货号" prop="sn">
+            <el-input v-model="searchForm.sn" placeholder="请输入货号" clearable style="width: 200px" />
           </el-form-item>
           <el-form-item>
             <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>

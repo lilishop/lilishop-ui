@@ -11,7 +11,7 @@
         :key="index"
         @click="goodsDetail(item.id, item.goodsId)"
       >
-        <img :src="item.thumbnail" :alt="item.thumbnail" width="200" height="200" />
+        <img :src="item.thumbnail" :alt="item.goodsName" />
         <p class="ellipsis">{{ item.goodsName }}</p>
         <p>{{ $filters.unitPrice(item.price, "￥") }}</p>
         <span class="del-icon" @click.stop="clearById(item.goodsId)">
@@ -132,15 +132,27 @@ export default {
 }
 
 .track-list {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 0 15px;
+  box-sizing: border-box;
+
   li {
-    width: 200px;
+    width: 100%;
+    min-width: 0;
     overflow: hidden;
-    margin-left: 15px;
-    margin-bottom: 10px;
     border: 1px solid #eee;
     position: relative;
+    box-sizing: border-box;
+
+    img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      display: block;
+    }
+
     &:hover {
       cursor: pointer;
       box-shadow: 1px 1px 3px #999;

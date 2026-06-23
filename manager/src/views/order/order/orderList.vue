@@ -380,7 +380,8 @@ export default {
       this.getDataList();
     },
     getOrderNumData() {
-      const { orderStatus, ...searchParams } = this.searchForm;
+      // orderNum 接口仅查 li_order，不含 order_item 关联；keywords/goodsName 会引用 oi 字段导致 SQL 报错
+      const { orderStatus, keywords, goodsName, ...searchParams } = this.searchForm;
       API_Order.getOrderNum(searchParams)
         .then((res) => {
           if (res.success) {

@@ -120,7 +120,11 @@
         </el-table-column>
         <el-table-column label="售后状态" width="180">
           <template #default="{ row }">
-            <el-tag v-if="row" :type="serviceStatusTagType(row.serviceStatus)">
+            <el-tag
+              v-if="row"
+              :type="serviceStatusTagType(row.serviceStatus)"
+              effect="plain"
+            >
               {{ serviceStatusText(row.serviceStatus) }}
             </el-tag>
           </template>

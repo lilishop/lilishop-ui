@@ -3,7 +3,12 @@
     <div class="wrapper" v-if="type === 'goodsDetail'">
       <div class="wr-l"><el-icon :size="23"><AlarmClock /></el-icon> 秒杀活动</div>
       <div class="count-down" v-if="end === ''">
-      <p>倒计时：</p><span>{{ hours }}</span><span>{{ minutes }}</span><span>{{ seconds }}</span>
+        <span class="count-down-label">倒计时：</span>
+        <span class="count-down-num">{{ hours }}</span>
+        <span class="count-down-colon">:</span>
+        <span class="count-down-num">{{ minutes }}</span>
+        <span class="count-down-colon">:</span>
+        <span class="count-down-num">{{ seconds }}</span>
       </div>
       <div v-else>{{end}}</div>
     </div>
@@ -89,36 +94,35 @@ export default {
   font-size: 13px;
 }
 .count-down {
-  margin-right: -20px;
-  p{
-    float: left;
-    line-height: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  line-height: 1;
+
+  .count-down-label {
+    flex-shrink: 0;
+    white-space: nowrap;
   }
-  > span {
-    position: relative;
-    float: left;
-    width: 20px;
+
+  .count-down-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
     height: 20px;
-    text-align: center;
+    padding: 0 2px;
     background-color: #2f3430;
-    margin-right: 20px;
-    color: white;
+    color: #fff;
     font-size: 14px;
-    line-height: 20px;
-    &::after {
-      content: ":";
-      display: block;
-      position: absolute;
-      right: -20px;
-      font-weight: bolder;
-      font-size: 14px;
-      width: 20px;
-      height: 100%;
-      top: 0;
-    }
+    line-height: 1;
+    border-radius: 2px;
   }
-  > span:last-child::after {
-    content: "";
+
+  .count-down-colon {
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 1;
   }
 }
 

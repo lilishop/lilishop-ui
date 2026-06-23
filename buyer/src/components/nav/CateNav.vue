@@ -260,7 +260,7 @@ export default {
 }
 .cate-nav {
   position: relative;
-  z-index: 3;
+  z-index: 5;
   width: 100%;
   margin: 14px 0 0;
   box-sizing: border-box;
@@ -286,6 +286,7 @@ export default {
     font-weight: normal;
     color: #333333;
     letter-spacing: 0px;
+    box-sizing: border-box;
   }
   .nav-item {
     flex: 1;
@@ -317,7 +318,7 @@ export default {
   position: absolute;
   left: 0;
   top: 46px;
-  z-index: 10;
+  z-index: 1000;
 }
 
 .nav-side {
@@ -356,11 +357,14 @@ export default {
 .nav-side ul {
   width: 100%;
   list-style: none;
+  margin: 0;
+  padding: 0;
 }
 .nav-side li {
   padding: 0 0 16.2px 37.4px;
   font-size: 13px;
   line-height: 18px;
+  box-sizing: border-box;
 }
 .nav-side-item:hover {
   cursor: pointer;

@@ -55,22 +55,6 @@
             <el-option label="虚拟商品" value="VIRTUAL_GOODS" />
           </el-select>
         </el-form-item>
-        <el-form-item label="商品分组" prop="groupId">
-          <el-select
-            v-model="searchForm.groupId"
-            placeholder="请选择商品分组"
-            clearable
-            filterable
-            style="width: 240px"
-          >
-            <el-option
-              v-for="item in goodsGroupList"
-              :key="item.id"
-              :label="item.groupName"
-              :value="item.id"
-            />
-          </el-select>
-        </el-form-item>
         <el-form-item>
           <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
         </el-form-item>
@@ -90,14 +74,6 @@
       </div>
 
       <div class="batch-operations" style="margin: 10px 0">
-        <el-button
-          type="primary"
-          :disabled="selectedRows.length === 0"
-          style="margin-right: 10px"
-          @click="openSetGoodsGroup"
-        >
-          批量设置分组
-        </el-button>
         <el-button
           type="success"
           :disabled="selectedRows.length === 0"
@@ -209,38 +185,15 @@
         <el-button type="primary" :loading="submitLoading" @click="lower">提交</el-button>
       </template>
     </el-dialog>
-
-    <el-dialog v-model="goodsGroupFlag" title="批量设置商品分组" width="420px">
-      <el-form ref="goodsGroupForm" :model="goodsGroupForm" :rules="goodsGroupRule" label-width="90px">
-        <el-form-item label="商品分组" prop="groupId">
-          <el-select v-model="goodsGroupForm.groupId" clearable filterable style="width: 240px">
-            <el-option
-              v-for="item in goodsGroupList"
-              :key="item.id"
-              :label="item.groupName"
-              :value="item.id"
-            />
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="goodsGroupFlag = false">取消</el-button>
-        <el-button type="primary" :loading="goodsGroupLoading" @click="submitSetGoodsGroup">确定</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import * as API_Shop from "@/api/shops";
-
 import {
   getGoodsListData,
   getGoodsNumerData,
   upGoods,
   lowGoods,
-  getGoodsGroupByPage,
-  addGoodsGroupItems
 } from "@/api/goods";
 export default {
   name: "goods",
@@ -255,7 +208,6 @@ export default {
         pageSize: 20, // 页面大小
         sort: "create_time", // 默认排序字段
         order: "desc", // 默认排序方式
-        groupId: "",
       },
       underForm: {
         // 下架原因
@@ -268,15 +220,6 @@ export default {
       goodsNumerData: {},
       selectedRows: [], // 选中的行数据
       selectAll: false, // 全选状态
-      goodsGroupFlag: false,
-      goodsGroupLoading: false,
-      goodsGroupList: [],
-      goodsGroupForm: {
-        groupId: ""
-      },
-      goodsGroupRule: {
-        groupId: [{ required: true, message: "请选择商品分组", trigger: "change" }]
-      }
     };
   },
   computed: {
@@ -322,7 +265,6 @@ export default {
     init() {
       this.getDataList();
       this.getNumberData();
-      this.loadGoodsGroupList();
     },
     // 分页 改变页码
     changePage(v) {
@@ -505,49 +447,6 @@ export default {
         }
       });
     },
-    loadGoodsGroupList() {
-      getGoodsGroupByPage({ pageNumber: 1, pageSize: 1000 }).then((res) => {
-        if (res && res.success && res.result) {
-          this.goodsGroupList = res.result.records || [];
-        }
-      });
-    },
-    openSetGoodsGroup() {
-      if (this.selectedRows.length === 0) {
-        this.$Message.warning("请先选择商品");
-        return;
-      }
-      this.goodsGroupFlag = true;
-      this.goodsGroupLoading = false;
-      this.goodsGroupForm = { groupId: "" };
-      this.$nextTick(() => {
-        if (this.$refs.goodsGroupForm) this.$refs.goodsGroupForm.resetFields();
-      });
-      this.loadGoodsGroupList();
-    },
-    submitSetGoodsGroup() {
-      this.$refs.goodsGroupForm.validate((valid) => {
-        if (!valid) return;
-        const goodsIds = this.selectedRows.map((item) => item.id);
-        this.goodsGroupLoading = true;
-        addGoodsGroupItems(this.goodsGroupForm.groupId, goodsIds).then((res) => {
-          this.goodsGroupLoading = false;
-          if (res && res.success) {
-            this.$Message.success("设置成功");
-            this.goodsGroupFlag = false;
-            this.selectedRows = [];
-            this.selectAll = false;
-            this.clearTableSelection();
-            this.getDataList();
-          } else if (res && res.message) {
-            this.$Message.error(res.message);
-          }
-        }).catch(() => {
-          this.goodsGroupLoading = false;
-          this.$Message.error("设置失败，请检查权限或后端接口");
-        });
-      });
-    }
   },
   mounted() {
     this.init();

@@ -82,6 +82,7 @@ export default {
   data() {
     return {
       type: "multiple",
+      selectedList: [],
       skuList: [],
       total: 0,
       goodsParams: {
@@ -106,8 +107,8 @@ export default {
       this.goodsParams.categoryPath = val && val.length ? val.join(",") : "";
     },
     selectedWay: {
-      handler() {
-        this.$emit("selected", this.selectedWay);
+      handler(val) {
+        this.selectedList = Array.isArray(val) ? val.slice() : [];
       },
       deep: true,
       immediate: true,
@@ -145,23 +146,28 @@ export default {
         });
     },
     initGoods(res) {
-      if (res.result.records.length != 0) {
-        res.result.records.forEach((item) => {
+      const records = res?.result?.records || [];
+      if (records.length) {
+        records.forEach((item) => {
           item.selected = false;
           item.___type = "goods";
-          this.selectedWay.forEach((e) => {
+          this.selectedList.forEach((e) => {
             if (e.id && e.id === item.id) {
               item.selected = true;
             }
           });
         });
-        this.total = res.result.total;
-        this.goodsData = res.result.records;
+        this.total = res.result.total || 0;
+        this.goodsData = records;
         this.empty = false;
       } else {
         this.goodsData = [];
         this.empty = true;
       }
+    },
+    emitSelected(list) {
+      this.selectedList = list;
+      this.$emit("selected", this.selectedList);
     },
     init() {
       API_Goods.getGoodsSkuData(this.goodsParams).then((res) => {
@@ -201,26 +207,20 @@ export default {
       });
     },
     checkedGoods(val) {
-      if (this.type != "multiple") {
+      if (this.type !== "multiple") {
         this.goodsData.forEach((item) => {
           item.selected = false;
         });
-        this.selectedWay = [];
         val.selected = true;
-        this.selectedWay.push(val);
-        return false;
+        this.emitSelected([val]);
+        return;
       }
-      if (val.selected == false) {
+      if (!val.selected) {
         val.selected = true;
-        this.selectedWay.push(val);
+        this.emitSelected([...this.selectedList, val]);
       } else {
         val.selected = false;
-        for (let i = 0; i < this.selectedWay.length; i++) {
-          if (this.selectedWay[i].id === val.id) {
-            this.selectedWay.splice(i, 1);
-            break;
-          }
-        }
+        this.emitSelected(this.selectedList.filter((item) => item.id !== val.id));
       }
     },
   },

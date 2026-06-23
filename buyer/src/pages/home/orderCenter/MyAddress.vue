@@ -5,7 +5,7 @@
       <div class="address-header">
         <span>
           {{ item.name }}
-          <el-tag class="ml_10" v-if="item.isDefault" color="red">默认地址</el-tag>
+          <el-tag class="ml_10 default-address-tag" v-if="item.isDefault">默认地址</el-tag>
           <el-tag class="ml_10" v-if="item.alias" color="warning">{{item.alias}}</el-tag>
         </span>
         <div class="address-action">
@@ -119,6 +119,12 @@ export default {
   font-size: 14px;
   color: $theme_color;
   cursor: pointer;
+}
+
+.default-address-tag {
+  background-color: #fff3f2 !important;
+  border: 1px solid $theme_color !important;
+  color: $theme_color !important;
 }
 
 #map-container {

@@ -38,6 +38,7 @@ export default {
 <style lang="scss" scoped>
 .model-form {
   position: relative;
+  z-index: 0;
   width: 100%;
 }
 .model-content {

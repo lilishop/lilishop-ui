@@ -27,9 +27,7 @@
         </div>
       </div>
       <div>
-        <div
-          class="wap-content-list"
-        >
+        <div class="wap-content-list">
           <div
             class="wap-content-item"
             :class="{ active: item.selected }"
@@ -77,13 +75,19 @@
 <script>
 import * as API_Goods from "@/api/goods";
 export default {
+  props: {
+    selectedWay: {
+      type: Array,
+      default: () => [],
+    },
+  },
   data() {
     return {
-      type: "multiple", //单选或者多选 single  multiple
-      skuList: [], // 商品sku列表
-      total: 0, // 商品总数
+      type: "multiple",
+      selectedList: [],
+      skuList: [],
+      total: 0,
       goodsParams: {
-        // 商品请求参数
         pageNumber: 1,
         pageSize: 15,
         order: "desc",
@@ -92,37 +96,30 @@ export default {
         categoryPath: "",
         marketEnable: "UPPER",
         authFlag: "PASS",
-        sort:"createTime"
+        sort: "createTime",
       },
-      category: [], // 分类
-      goodsData: [], // 商品数据
-      empty: false, // 空数据
-      loading: false, // 加载状态
+      category: [],
+      goodsData: [],
+      empty: false,
+      loading: false,
     };
-  },
-  props: {
-    selectedWay: {
-      type: Array,
-      default: function () {
-        return new Array();
-      },
-    },
   },
   watch: {
     category(val) {
-      this.goodsParams.categoryPath = val[2];
+      this.goodsParams.categoryPath = val && val.length ? val[2] : "";
     },
     selectedWay: {
-      handler() {
-        this.$emit("selected", this.selectedWay);
+      handler(val) {
+        this.selectedList = Array.isArray(val) ? val.slice() : [];
       },
       deep: true,
       immediate: true,
     },
     "goodsParams.categoryPath": {
-      handler: function () {
+      handler() {
         this.goodsData = [];
-        (this.goodsParams.pageNumber = 0), this.getQueryGoodsList();
+        this.goodsParams.pageNumber = 1;
+        this.getQueryGoodsList();
       },
       deep: true,
     },
@@ -136,57 +133,59 @@ export default {
       this.goodsParams.pageNumber = 1;
       this.getQueryGoodsList();
     },
-    changePageSize(v){
+    changePageSize(v) {
       this.goodsParams.pageNumber = v;
       this.getQueryGoodsList();
     },
-    // 获取商品列表
     getQueryGoodsList() {
-      API_Goods.getGoodsSkuData(this.goodsParams).then((res) => {
-        this.initGoods(res);
-      });
+      this.loading = true;
+      API_Goods.getGoodsSkuData(this.goodsParams)
+        .then((res) => {
+          this.initGoods(res);
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
-    // 获取列表方法
     initGoods(res) {
-      if (res.result.records.length != 0) {
-        res.result.records.forEach((item) => {
+      const records = res?.result?.records || [];
+      if (records.length) {
+        records.forEach((item) => {
           item.selected = false;
-          item.___type = "goods"; //设置为goods让pc wap知道标识
-          this.selectedWay.forEach((e) => {
+          item.___type = "goods";
+          this.selectedList.forEach((e) => {
             if (e.id && e.id === item.id) {
               item.selected = true;
             }
           });
         });
-        /**
-         * 解决数据请求中，滚动栏会一直上下跳动
-         */
-        this.total = res.result.total;
-        this.goodsData = res.result.records;
+        this.total = res.result.total || 0;
+        this.goodsData = records;
+        this.empty = false;
       } else {
+        this.goodsData = [];
         this.empty = true;
       }
     },
-    // 查询商品
+    emitSelected(list) {
+      this.selectedList = list;
+      this.$emit("selected", this.selectedList);
+    },
     init() {
       API_Goods.getGoodsSkuData(this.goodsParams).then((res) => {
-        // 商品
         this.initGoods(res);
       });
-      API_Goods.getCategoryTree({deleteFlag: false}).then((res) => {
+      API_Goods.getCategoryTree({ deleteFlag: false }).then((res) => {
         if (res.success) {
           this.deepGroup(res.result);
         }
       });
     },
-
     deepGroup(val) {
       val.forEach((item) => {
-        let childWay = []; //第二级
-        // 第二层
+        let childWay = [];
         if (item.children) {
           item.children.forEach((child) => {
-            // // 第三层
             if (child.children) {
               child.children.forEach((grandson, index, arr) => {
                 arr[index] = {
@@ -195,52 +194,36 @@ export default {
                 };
               });
             }
-            let children = {
+            childWay.push({
               value: child.id,
               label: child.name,
               children: child.children,
-            };
-            childWay.push(children);
+            });
           });
         }
-        // 第一层
-        let way = {
+        this.skuList.push({
           value: item.id,
           label: item.name,
           children: childWay,
-        };
-
-        this.skuList.push(way);
+        });
       });
     },
-
-    /**
-     * 点击商品
-     */
-    checkedGoods(val, index) {
-      // 如果单选的话
-      if (this.type != "multiple") {
+    checkedGoods(val) {
+      if (this.type !== "multiple") {
         this.goodsData.forEach((item) => {
           item.selected = false;
         });
-        this.selectedWay = [];
         val.selected = true;
-        this.selectedWay.push(val);
-
-        return false;
+        this.emitSelected([val]);
+        return;
       }
 
-      if (val.selected == false) {
+      if (!val.selected) {
         val.selected = true;
-        this.selectedWay.push(val);
+        this.emitSelected([...this.selectedList, val]);
       } else {
         val.selected = false;
-        for (let i = 0; i < this.selectedWay.length; i++) {
-          if (this.selectedWay[i].id === val.id) {
-            this.selectedWay.splice(i, 1);
-            break;
-          }
-        }
+        this.emitSelected(this.selectedList.filter((item) => item.id !== val.id));
       }
     },
   },
@@ -271,9 +254,6 @@ export default {
   margin: 10px 7px;
   padding: 6px 0;
 }
-// .wap-content-item{
-
-// }
 .active {
   background: url("../../assets/selected.png") no-repeat;
   background-position: right;

@@ -18,5 +18,8 @@
 }
 
 // 与 CateNav 商品分类栏、Carousel 左占位一致的列宽
+$index-main-width: 1200px;
 $index-side-col-width: 263.2px;
 $index-col-gap: 10px;
+// 1200 - 263.2*2 - 10*2 = 653.6px
+$index-center-col-width: $index-main-width - ($index-side-col-width * 2) - ($index-col-gap * 2);

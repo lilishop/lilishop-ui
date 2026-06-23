@@ -193,8 +193,10 @@ export default {
 }
 .carousel-wrap {
   width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   box-sizing: border-box;
-  overflow: visible;
+  overflow: hidden;
 }
 .bannerAd{
   width: 100%;

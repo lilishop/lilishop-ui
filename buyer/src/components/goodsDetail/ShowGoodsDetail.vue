@@ -69,7 +69,12 @@
                         <p class="remarks-content">{{ item.reply }}</p>
                         <div>
                           <div class="comment-img" v-if="item.replyImage">
-                            <div v-for="(img, imgIndex) in item.replyImage.split(',')"  @click="$previewImage(img)" :key="imgIndex">
+                            <div
+                              v-for="(img, imgIndex) in item.replyImage.split(',')"
+                              :key="imgIndex"
+                              :class="{ borderColor: img === item.previewImg }"
+                              @click="previewImg(img, item)"
+                            >
                               <img :src="img" alt="">
                             </div>
                           </div>

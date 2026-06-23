@@ -4,15 +4,15 @@
       <!-- 侧边导航占位（与 CateNav 分类栏同宽，勿与 CateNav .nav-side 混用类名） -->
       <div class="carousel-side-spacer"></div>
       <div class="nav-content">
-        <!-- 轮播图：无数据时不挂载 el-carousel，避免 Element Plus 卸载子项时报错 -->
+        <!-- 轮播图：无有效图片时不挂载 el-carousel；勿对 el-carousel 使用随图片变化的 key，否则 Vue3 patch 会报 emitsOptions 错误 -->
         <el-carousel
-          v-if="carouselList.length"
-          :key="carouselRenderKey"
+          v-if="displaySlides.length"
           height="334px"
           :interval="5000"
+          :loop="displaySlides.length > 1"
         >
           <el-carousel-item
-            v-for="(item, index) in carouselList"
+            v-for="(item, index) in displaySlides"
             :key="carouselItemKey(item, index)"
           >
             <div class="swiper-img">
@@ -96,10 +96,8 @@ export default {
     carouselList() {
       return this.data?.options?.list || [];
     },
-    carouselRenderKey() {
-      const moduleKey = this.data?.key || "carousel";
-      const imgs = this.carouselList.map((item) => item?.img || "").join("|");
-      return `${moduleKey}-${this.carouselList.length}-${imgs}`;
+    displaySlides() {
+      return this.carouselList.filter((item) => item && item.img);
     },
   },
   data() {
@@ -291,12 +289,14 @@ export default {
 }
 
 .model-carousel {
-  width: 1200px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 1200px;
   height: 340px;
   margin: 0 auto;
-  overflow: visible;
+  overflow: hidden;
   box-sizing: border-box;
+  position: relative;
+  z-index: 0;
 }
 
 .hover-pointer {
@@ -358,14 +358,14 @@ export default {
 
 }
 
-/* 导航主体：固定列宽与 CateNav 完全一致（263.2 + 10 + 637 + 10 + 263.2 = 1183.4px） */
+/* 导航主体：263.2 + 10 + 1fr + 10 + 263.2 = 1200px，与下方楼层右缘对齐 */
 .nav-body {
-  width: 1200px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 1200px;
   height: 340px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 263.2px 637px 263.2px;
+  grid-template-columns: 263.2px minmax(0, 1fr) 263.2px;
   column-gap: 10px;
   align-items: start;
   box-sizing: border-box;
@@ -385,9 +385,8 @@ export default {
 /*导航内容*/
 .nav-content {
   grid-column: 2;
-  width: 637px;
-  min-width: 637px;
-  max-width: 637px;
+  width: 100%;
+  min-width: 0;
   margin-top: 10px;
   height: 333.9px;
   position: relative;

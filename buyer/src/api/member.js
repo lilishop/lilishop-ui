@@ -158,7 +158,7 @@ export function addEvaluation (params) {
     url: `/buyer/member/evaluation`,
     method: Method.POST,
     needToken: true,
-    params
+    data: params
   });
 }
 

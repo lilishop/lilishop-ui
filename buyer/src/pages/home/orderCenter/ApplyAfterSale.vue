@@ -29,8 +29,13 @@
           <el-input type="number" v-model="form.num" style="width:260px" />
         </el-form-item>
         <el-form-item label="提交原因" prop="reason">
-          <el-select v-model="form.reason" style="width:260px">
-            <el-option v-for="item in reasonList" :value="item.id" :key="item.id">{{ item.reason }}</el-option>
+          <el-select v-model="form.reason" style="width:260px" placeholder="请选择提交原因">
+            <el-option
+              v-for="item in reasonList"
+              :key="item.id"
+              :label="item.reason"
+              :value="item.id"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="问题描述" prop="problemDesc">

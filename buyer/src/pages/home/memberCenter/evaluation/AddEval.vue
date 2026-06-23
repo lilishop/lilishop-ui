@@ -28,10 +28,10 @@
         <div class="eval-con">
           <div>
             <span class="color999">商品评价：</span>
-            <el-radio-group style="margin-bottom:5px;color:#999" v-model="orderGoods.grade" type="button" button-style="solid">
-              <el-radio label="GOOD">好评</el-radio>
-              <el-radio label="MODERATE">中评</el-radio>
-              <el-radio label="WORSE">差评</el-radio>
+            <el-radio-group v-model="orderGoods.grade">
+              <el-radio-button value="GOOD">好评</el-radio-button>
+              <el-radio-button value="MODERATE">中评</el-radio-button>
+              <el-radio-button value="WORSE">差评</el-radio-button>
             </el-radio-group>
             <el-input type="textarea" maxlength="500" show-word-limit :rows="4" v-model="orderGoods.content" />
           </div>
@@ -106,6 +106,12 @@ export default {
 
       if (!this.form.descriptionScore) {
         this.$Message.warning('描述评价不能为空')
+        return false;
+      }
+
+      if (!this.orderGoods.content || !String(this.orderGoods.content).trim()) {
+        this.$Message.warning('评论内容不能为空')
+        return false;
       }
 
       this.loading = true;
@@ -118,17 +124,20 @@ export default {
         serviceScore: this.form.serviceScore,
         deliveryScore: this.form.deliveryScore,
         grade: goods.grade,
-        content: goods.content || '',
-        images: goods.uploadList.toString()
+        content: goods.content.trim(),
+        images: goods.uploadList.length ? goods.uploadList.join(',') : ''
       }
       addEvaluation(params).then(res => {
         this.loading = false
         if (res.success) {
           this.$Message.success('评价成功')
           this.$router.push('/home/CommentList')
+        } else {
+          this.$Message.error(res.message || '评价失败，请稍后重试')
         }
-      }).catch(() => {
+      }).catch((err) => {
         this.loading = false;
+        this.$Message.error(err?.message || '评价失败，请稍后重试')
       })
     },
     goGoodsDetail (skuId, goodsId) { // 跳转商品详情

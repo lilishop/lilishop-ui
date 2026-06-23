@@ -9,7 +9,7 @@
         class="search-form"
         @keyup.enter="handleSearch"
       >
-        <el-form-item label="关键字" prop="keywords" style="display: block; width: 100%">
+        <el-form-item label="关键字" prop="keywords">
           <el-input
             v-model="searchForm.keywords"
             placeholder="请输入商品名称、订单编号搜索"
@@ -112,7 +112,11 @@
         </el-table-column>
         <el-table-column label="售后状态" width="180">
           <template #default="{ row }">
-            <el-tag v-if="row" :type="serviceStatusTagType(row.serviceStatus)">
+            <el-tag
+              v-if="row"
+              :type="serviceStatusTagType(row.serviceStatus)"
+              effect="plain"
+            >
               {{ serviceStatusText(row.serviceStatus) }}
             </el-tag>
           </template>

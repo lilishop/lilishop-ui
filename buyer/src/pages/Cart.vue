@@ -37,7 +37,7 @@
           <div class="width_150">单价（元）</div>
           <div class="width_100">数量</div>
           <div class="width_150">小计</div>
-          <div class="width_100">操作</div>
+          <div class="cart-ops-col">操作</div>
         </div>
         <div v-if="cartList.length === 0" class="cart-empty">
           <p>购物车空空如也</p>
@@ -172,22 +172,21 @@
               <div class="width_150">
                 {{ $filters.unitPrice(goods.subTotal, "￥") }}
               </div>
-              <div class="width_100">
-                <el-button
-                  v-if="!goods.errorMessage"
-                  size="small"
-                  type="primary"
-                  @click="delGoods(goods.goodsSku.id)"
-                  >删除</el-button
-                >
-                <el-button
-                  v-if="!goods.errorMessage"
-                  size="small"
-                  type="info"
-                  @click="collectGoods(goods.goodsSku.id)"
-                  style="margin-left: 10px"
-                  >收藏</el-button
-                >
+              <div class="cart-ops-col">
+                <div v-if="!goods.errorMessage" class="cart-ops">
+                  <el-button
+                    size="small"
+                    class="cart-del-btn"
+                    @click="delGoods(goods.goodsSku.id)"
+                    >删除</el-button
+                  >
+                  <el-button
+                    size="small"
+                    class="cart-collect-btn"
+                    @click="collectGoods(goods.goodsSku.id)"
+                    >收藏</el-button
+                  >
+                </div>
               </div>
               <div class="error-goods" v-if="goods.errorMessage">
                 <div style="margin-top: 20px">{{ goods.errorMessage }}</div>
@@ -766,6 +765,48 @@ export default {
 .total-price {
   display: flex;
   align-items: center;
+}
+
+.cart-ops-col {
+  width: 130px;
+  min-width: 130px;
+  flex-shrink: 0;
+}
+
+.cart-ops {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.cart-del-btn {
+  background-color: #ff7d79 !important;
+  border-color: #ff7d79 !important;
+  color: #fff !important;
+  margin: 0 !important;
+
+  &:hover,
+  &:focus {
+    background-color: #ff6b66 !important;
+    border-color: #ff6b66 !important;
+    color: #fff !important;
+  }
+}
+
+.cart-collect-btn {
+  background-color: #fa6419 !important;
+  border-color: #fa6419 !important;
+  color: #fff !important;
+  margin: 0 !important;
+
+  &:hover,
+  &:focus {
+    background-color: #e55a15 !important;
+    border-color: #e55a15 !important;
+    color: #fff !important;
+  }
 }
 </style>
 <style>

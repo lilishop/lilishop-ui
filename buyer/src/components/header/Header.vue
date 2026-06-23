@@ -226,7 +226,7 @@ export default {
   height: 100%;
 }
 
-.nav ul {
+.nav > ul {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -234,10 +234,11 @@ export default {
   align-items: center;
 }
 
-.nav li {
+.nav > ul > li,
+.location > ul.flex > li {
   cursor: pointer;
   float: none;
-  line-height: 1;
+  line-height: 36px;
   margin-right: 15px;
   display: flex;
   align-items: center;
@@ -331,6 +332,7 @@ export default {
 
 .username-p {
   position: relative;
+  z-index: 100;
 
   div {
     cursor: pointer;
@@ -345,59 +347,71 @@ export default {
   .drop-items {
     position: absolute;
     display: none;
-    top: 45px;
-    left: 0;
-    right: 0;
-    margin: 0 auto;
-    padding: 5px 10px;
-    z-index: 20;
-    height: 150px;
+    flex-direction: column;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    padding: 4px 0;
+    z-index: 1000;
+    min-width: 100px;
+    width: max-content;
     background-color: #fff;
-    width: 80px;
     border: 1px solid #eee;
-    box-shadow: 2px 2px 7px #999;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    list-style: none;
 
     li {
-      color: rgb(107, 106, 106);
+      display: block;
+      float: none;
       width: 100%;
-      border-bottom: 1px solid rgb(207, 206, 206);
+      margin: 0;
+      padding: 8px 16px;
+      line-height: 1.4;
+      color: #666;
+      font-size: 13px;
       font-weight: normal;
       text-align: center;
+      white-space: nowrap;
+      border-bottom: 1px solid #f0f0f0;
+      box-sizing: border-box;
 
       &:last-child {
-        border: none;
+        border-bottom: none;
       }
 
       &:hover {
         cursor: pointer;
         color: $theme_color;
+        background-color: #fff7f7;
       }
     }
 
     &::before {
       position: absolute;
-      top: -20px;
-      left: 30px;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
       content: '';
       width: 0;
       height: 0;
-      border: 10px solid #999;
-      border-color: transparent transparent #fff transparent;
+      border: 6px solid transparent;
+      border-bottom-color: #fff;
     }
 
     &::after {
       content: '';
       position: absolute;
-      width: 80px;
-      height: 20px;
-      top: -20px;
+      width: 100%;
+      height: 10px;
+      top: -10px;
       left: 0;
     }
   }
 
   &:hover {
     .drop-items {
-      display: block;
+      display: flex;
     }
   }
 }

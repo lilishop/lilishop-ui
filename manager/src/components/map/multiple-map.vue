@@ -15,7 +15,7 @@
             <div
               v-for="(item, index) in data[plant]"
               :key="index"
-              :class="{ active: chiosend[plantIndex]?.id == item.id }"
+              :class="{ active: chiosend[plantIndex] && chiosend[plantIndex].id == item.id }"
               class="map-item"
               @click="
                 init(
