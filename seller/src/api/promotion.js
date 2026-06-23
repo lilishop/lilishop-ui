@@ -145,6 +145,17 @@ export const removeSeckillGoods = (seckillId, ids) => {
 export const seckillDetail = (seckillId) => {
     return getRequest(`/promotion/seckill/${seckillId}`)
 }
+
+// 删除秒杀活动
+export const delSeckill = (id) => {
+    return deleteRequest(`/promotion/seckill/${id}`)
+}
+
+// 关闭秒杀活动
+export const updateSeckillStatus = (id, params) => {
+    return putRequest(`/promotion/seckill/status/${id}`, params)
+}
+
 // 删除秒杀商品
 export const delSeckillGoods = params => {
     return deleteRequest(`/promotion/seckill/apply/${params.seckillId}/${params.id}`);
@@ -197,3 +208,11 @@ export const getNthItemDiscountDetail = (id) => getRequest(`/promotion/nthItemDi
 export const saveNthItemDiscount = (params) => postRequest('/promotion/nthItemDiscount', params, { 'Content-type': 'application/json' })
 export const editNthItemDiscount = (params) => putRequest('/promotion/nthItemDiscount', params, { 'Content-type': 'application/json' })
 export const updateNthItemDiscountStatus = (id, params) => putRequest(`/promotion/nthItemDiscount/status/${id}`, params)
+
+// 兼容平台优惠券命名（商家端实际调用店铺优惠券接口）
+export const getPlatformCouponList = getShopCouponList
+export const savePlatformCoupon = saveShopCoupon
+export const editPlatformCoupon = editShopCoupon
+export const getPlatformCoupon = getShopCoupon
+export const deletePlatformCoupon = deleteShopCoupon
+export const updatePlatformCouponStatus = updateCouponStatus

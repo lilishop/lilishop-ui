@@ -67,7 +67,6 @@
 </template>
 <script>
 import { setSetting, createIndex, getProgress, deleteGoodsDown, generateGoodsCache, delSkuIndex } from "@/api/index";
-import { handleSubmit } from "./validate";
 export default {
   props: ["res", "type"],
   data() {
@@ -93,10 +92,13 @@ export default {
   },
   methods: {
     submit(name) {
-      const that = this;
-      if (handleSubmit(that, name)) {
-        this.setupSetting();
-      }
+      this.$refs[name].validate((valid) => {
+        if (valid) {
+          this.setupSetting();
+        } else {
+          this.$Message.error("请正确填写内容!");
+        }
+      });
     },
     createIndex() {
       createIndex().then((res) => {

@@ -112,10 +112,14 @@ export default {
   },
   methods: {
     handleCLickImg(val, index) {
-      this.$refs.ossManage.selectImage = true;
       this.picModalFlag = true;
       this.selectedFormBtnName = val;
       this.picIndex = index;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
     callbackSelected(val) {
       this.picModalFlag = false;

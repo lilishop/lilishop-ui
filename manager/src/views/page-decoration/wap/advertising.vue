@@ -156,8 +156,12 @@ export default {
     },
     // 点击选择照片
     handleClickFile() {
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     }, // 图片选择器回显
     callbackSelected(val) {
       this.picModelFlag = false;

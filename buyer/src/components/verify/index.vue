@@ -96,6 +96,9 @@ export default {
         this.init()
       });
     },
+    close () {
+      this.show = false;
+    },
     init () { // 初始化数据
       this.flag = false;
       this.downX = 0;

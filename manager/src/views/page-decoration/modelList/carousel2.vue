@@ -277,8 +277,12 @@ export default {
     // 打开选择图片modal
     handleSelectImg(item) {
       this.selected = item;
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
   },
 };

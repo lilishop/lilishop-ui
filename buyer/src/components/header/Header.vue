@@ -41,9 +41,9 @@
         <li @click="goUserCenter('/home/MyTracks')"><span class="nav-item">我的足迹</span></li>
         <li @click="goUserCenter('/home/MsgList')"><span class="nav-item">我的消息</span></li>
         <li v-if="$route.name !== 'Cart'" style="position:relative;">
-          <el-dropdown placement="bottom-start" trigger="hover">
+          <el-dropdown placement="bottom-start" trigger="hover" @visible-change="handleCartDropdownVisible">
             <router-link to="/cart" target="_blank">
-              <span class="nav-item" @mouseenter="getCartList">
+              <span class="nav-item">
                 <el-icon :size="18"><ShoppingCart /></el-icon>
                 购物车（{{ cartNum < 100 ? cartNum : '99' }}）
               </span>
@@ -107,7 +107,10 @@ export default {
     return {
       config: require('@/config'),
       userInfo: {}, // 用户信息
-      shoppingCart: [] // 购物车
+      shoppingCart: [], // 购物车
+      cartLoading: false,
+      cartLoadedAt: 0,
+      cartCacheTime: 5000
     };
   },
   computed: {
@@ -146,7 +149,7 @@ export default {
       } else {
         this.$Modal.confirm({
           title: '请登录',
-          content: '<p>请登录后执行此操作</p>',
+          content: '请登录后执行此操作',
           okText: '立即登录',
           cancelText: '继续浏览',
           onOk: () => {
@@ -173,15 +176,31 @@ export default {
         this.$router.push('login');
       }
     },
+    handleCartDropdownVisible(visible) {
+      if (visible) {
+        this.getCartList();
+      }
+    },
     getCartList() {
       // 获取购物车列表
-      if (this.userInfo.username) {
-        cartGoodsAll().then((res) => {
-          this.shoppingCart = res.result.skuList;
+      if (!this.userInfo.username || this.cartLoading) {
+        return;
+      }
+      const now = Date.now();
+      if (this.cartLoadedAt && now - this.cartLoadedAt < this.cartCacheTime) {
+        return;
+      }
+      this.cartLoadedAt = now;
+      this.cartLoading = true;
+      cartGoodsAll().then((res) => {
+        if (res.success) {
+          this.shoppingCart = (res.result && res.result.skuList) || [];
           this.$store.commit('SET_CARTNUM', this.shoppingCart.length);
           this.Cookies.setItem('cartNum', this.shoppingCart.length);
-        });
-      }
+        }
+      }).finally(() => {
+        this.cartLoading = false;
+      });
     }
   }
 };
@@ -192,28 +211,36 @@ export default {
 .box {
   width: 100%;
   font-size: 12px !important;
-   height: 36px;
+  height: 36px;
   background: #333;
   color: #fff;
+  display: flex;
+  align-items: center;
 }
 
 .nav {
   display: flex;
   flex-direction: row;
+  align-items: center;
   justify-content: space-between;
-
+  height: 100%;
 }
 
 .nav ul {
   list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
 }
 
 .nav li {
   cursor: pointer;
-  float: left;
-  line-height: 36px;
+  float: none;
+  line-height: 1;
   margin-right: 15px;
-
+  display: flex;
+  align-items: center;
 }
 
 .nav a,
@@ -221,9 +248,11 @@ export default {
   font-size: 13px;
   font-weight: normal;
   text-decoration: none;
-
   cursor: pointer;
   color: #fff;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
 }
 
 .nav-item {
@@ -305,6 +334,8 @@ export default {
 
   div {
     cursor: pointer;
+    display: flex;
+    align-items: center;
 
     > span {
       margin-left: 5px;

@@ -95,9 +95,22 @@ export default {
     height: auto;
     min-height: 56px;
     white-space: normal;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  :deep(.el-menu-item:not(.is-active):hover),
+  :deep(.el-menu-item:not(.is-active):focus) {
+    background-color: #43444d !important;
+    color: #fff !important;
   }
 
   :deep(.el-menu-item.is-active) {
+    background-color: #fff !important;
+    color: $theme_color !important;
+  }
+
+  :deep(.el-menu-item.is-active:hover),
+  :deep(.el-menu-item.is-active:focus) {
     background-color: #fff !important;
     color: $theme_color !important;
   }

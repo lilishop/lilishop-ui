@@ -1,5 +1,5 @@
 <template>
-  <div class="sign-up" @click='$refs.verify.show = false'>
+  <div class="sign-up" @click="hideVerify">
     <div style="height:50px;"></div>
     <div class="logo-box">
       <img
@@ -75,7 +75,7 @@
           :verifyType="verifyType"
           @change="verifyChange"
         ></Verify>
-        <div class="login-btn">已有账号？<a @click="$router.push('login')">立即登录</a></div>
+        <div class="login-btn">已有账号？<a @click.stop="$router.push('login')">立即登录</a></div>
     </div>
     <div class="foot">
       <div type="flex" justify="space-around" class="help">
@@ -139,22 +139,26 @@ export default {
     };
   },
   methods: {
+    hideVerify() {
+      this.$refs.verify?.close?.();
+    },
     // 注册
     handleRegist () {
       this.$refs.formRegist.validate((valid) => {
-        if (valid) {
-          let data = JSON.parse(JSON.stringify(this.formRegist));
-          data.password = md5(data.password);
-          apiLogin.regist(data).then((res) => {
-            if (res.success) {
-              this.$Message.success('注册成功!');
-              this.$router.push('login');
-            } else {
-              this.$Message.warning(res.message);
-            }
-          });
-        } else {}
-      });
+        if (!valid) {
+          return;
+        }
+        const data = JSON.parse(JSON.stringify(this.formRegist));
+        data.password = md5(data.password);
+        apiLogin.regist(data).then((res) => {
+          if (res.success) {
+            this.$Message.success('注册成功!');
+            this.$router.push('login');
+          } else {
+            this.$Message.warning(res.message || '注册失败');
+          }
+        }).catch(() => {});
+      }).catch(() => {});
     },
     // 发送短信验证码
     sendCode () {
@@ -187,21 +191,21 @@ export default {
               }
             }, 1000);
           } else {
-            this.$Message.warning(res.message);
+            this.$Message.warning(res.message || '验证码发送失败');
           }
-        });
+        }).catch(() => {});
       }
     },
     // 图片验证码成功回调
     verifyChange (con) {
       if (!con.status) return;
-      this.$refs.verify.show = false;
+      this.hideVerify();
       this.verifyStatus = true;
     },
     // 打开图片验证码
     verifyBtnClick () {
       if (!this.verifyStatus) {
-        this.$refs.verify.init();
+        this.$refs.verify?.init();
       }
     }
   },

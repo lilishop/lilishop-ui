@@ -611,10 +611,14 @@ export default {
     },
     // 选择图片modal
     handleCLickImg(val, index) {
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
       this.selectedFormBtnName = val;
       this.picIndex = index;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
     // 图片回显
     callbackSelected(val) {

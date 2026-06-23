@@ -202,19 +202,26 @@ export default {
 .shop-item-path {
   height: 38px;
   @include background_color($light_background_color);
-  line-height: 38px;
   color: #2c2c2c;
 }
 
 .shop-nav-container {
   width: 1200px;
+  height: 100%;
   margin: 0 auto;
   position: relative;
+  display: flex;
+  align-items: center;
+
+  :deep(.el-breadcrumb) {
+    line-height: 1;
+  }
 
   .store-collect {
     position: absolute;
     right: 20px;
-    top: 0;
+    top: 50%;
+    transform: translateY(-50%);
     color: #999;
 
     span {

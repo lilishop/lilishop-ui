@@ -164,9 +164,13 @@ export default {
   },
   methods: {
     changeHeight (name) { // 设置商品详情高度
-      let heightCss = window.getComputedStyle(this.$refs[name]).height;
-      heightCss = parseInt(heightCss.substr(0, heightCss.length - 2)) + 89;
-      this.$refs.itemIntroDetail.style.height = heightCss + 'px';
+      const el = this.$refs[name];
+      const container = this.$refs.itemIntroDetail;
+      if (!el || !container) return;
+      let heightCss = window.getComputedStyle(el).height;
+      heightCss = parseInt(heightCss, 10) + 89;
+      if (Number.isNaN(heightCss)) return;
+      container.style.height = heightCss + 'px';
     },
     changePageNum (val) { // 修改评论页码
       this.commentParams.pageNumber = val;
@@ -245,13 +249,18 @@ export default {
   },
   mounted () {
     this.$nextTick(() => { // 手动设置详情高度，解决无法撑开问题
-      setTimeout(this.changeHeight('itemIntroGoods'), 2000);
+      setTimeout(() => {
+        this.changeHeight('itemIntroGoods');
+      }, 2000);
     });
     window.addEventListener('scroll', this.handleScroll)
     this.getList();
     if (this.skuDetail.grade === null || this.skuDetail.grade === undefined) {
       this.skuDetail.grade = 100
     }
+  },
+  beforeUnmount () {
+    window.removeEventListener('scroll', this.handleScroll);
   }
 };
 </script>

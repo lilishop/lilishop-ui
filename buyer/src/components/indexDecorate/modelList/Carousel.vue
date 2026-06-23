@@ -1,13 +1,20 @@
 <template>
   <div class="model-carousel">
-    <div class="nav-body clearfix">
-      <!-- 侧边导航占位 -->
-      <div class="nav-side"></div>
+    <div class="nav-body">
+      <!-- 侧边导航占位（与 CateNav 分类栏同宽，勿与 CateNav .nav-side 混用类名） -->
+      <div class="carousel-side-spacer"></div>
       <div class="nav-content">
-        <!-- 轮播图 -->
-<!--        autoplay autoplay-speed="10000"-->
-        <el-carousel height="334px" :interval="5000">
-          <el-carousel-item v-for="(item, index) in data.options.list" :key="index">
+        <!-- 轮播图：无数据时不挂载 el-carousel，避免 Element Plus 卸载子项时报错 -->
+        <el-carousel
+          v-if="carouselList.length"
+          :key="carouselRenderKey"
+          height="334px"
+          :interval="5000"
+        >
+          <el-carousel-item
+            v-for="(item, index) in carouselList"
+            :key="carouselItemKey(item, index)"
+          >
             <div class="swiper-img">
               <img
                 :src="item.img"
@@ -17,6 +24,7 @@
             </div>
           </el-carousel-item>
         </el-carousel>
+        <div v-else class="swiper-img carousel-placeholder"></div>
       </div>
       <div class="nav-right">
         <div class="person-msg">
@@ -84,6 +92,16 @@ import storage from "@/plugins/storage";
 export default {
   name: "modelCarousel",
   props: ["data"],
+  computed: {
+    carouselList() {
+      return this.data?.options?.list || [];
+    },
+    carouselRenderKey() {
+      const moduleKey = this.data?.key || "carousel";
+      const imgs = this.carouselList.map((item) => item?.img || "").join("|");
+      return `${moduleKey}-${this.carouselList.length}-${imgs}`;
+    },
+  },
   data() {
     return {
       config: require("@/config"),
@@ -154,6 +172,9 @@ export default {
     };
   },
   methods: {
+    carouselItemKey(item, index) {
+      return item?.img || item?.url || `slide-${index}`;
+    },
     // 快捷跳转中心
     entryControl(val) {
       console.log("val",val)
@@ -182,8 +203,13 @@ export default {
 
 .swiper-img {
   overflow: hidden;
-  width: 637px;
+  width: 100%;
   height: 329.9px;
+}
+
+.carousel-placeholder {
+  border-radius: 10px;
+  background: #ececec;
 }
 
 .icon-list {
@@ -266,20 +292,18 @@ export default {
 
 .model-carousel {
   width: 1200px;
+  max-width: 100%;
   height: 340px;
-  overflow: hidden;
+  margin: 0 auto;
+  overflow: visible;
+  box-sizing: border-box;
 }
 
 .hover-pointer {
-  //display: block;
-  //width: 100%;
-  //height: 100%;
-  width: 637px;
+  width: 100%;
   height: 329.9px;
   object-fit: cover;
   border-radius: 10px;
-
-
 }
 
 .welcome {
@@ -334,44 +358,63 @@ export default {
 
 }
 
-/* 导航主体 */
+/* 导航主体：固定列宽与 CateNav 完全一致（263.2 + 10 + 637 + 10 + 263.2 = 1183.4px） */
 .nav-body {
   width: 1200px;
+  max-width: 100%;
   height: 340px;
-  margin: 0px auto;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 263.2px 637px 263.2px;
+  column-gap: 10px;
+  align-items: start;
+  box-sizing: border-box;
 }
 
-.nav-side {
-  height: 334px;
+.carousel-side-spacer {
+  grid-column: 1;
   width: 263.2px;
+  height: 334px;
+  flex-shrink: 0;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
-  float: left;
-  padding: 0px;
-  color: #fff;
-  // background-color: #6e6568;
-
-
+  pointer-events: none;
 }
 
 
 /*导航内容*/
 .nav-content {
+  grid-column: 2;
   width: 637px;
-  margin-left: 10.8px;
-
+  min-width: 637px;
+  max-width: 637px;
   margin-top: 10px;
   height: 333.9px;
-
-  float: left;
   position: relative;
+  overflow: hidden;
+
+  :deep(.el-carousel) {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  :deep(.el-carousel__container) {
+    height: 334px;
+  }
+
+  :deep(.el-carousel__item) {
+    width: 100%;
+  }
 }
 
 .nav-right {
-  float: left;
-  margin-top: 10px;
+  grid-column: 3;
   width: 263.2px;
-  margin-left: 10px;
+  min-width: 263.2px;
+  max-width: 263.2px;
+  margin-top: 10px;
 
   border-radius: 10px;
   background: #FFFFFF;

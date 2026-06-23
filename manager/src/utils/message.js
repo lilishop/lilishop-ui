@@ -40,24 +40,48 @@ export const Notice = {
 export const Modal = {
   confirm(options = {}) {
     const content = options.content || options.title || "确认操作？";
-    return ElMessageBox.confirm(content, options.title || "提示", {
+    const title = options.title || "提示";
+    return ElMessageBox.confirm(content, title, {
       confirmButtonText: options.okText || "确定",
       cancelButtonText: options.cancelText || "取消",
       type: options.type || "warning",
-    })
-      .then(() => {
-        if (typeof options.onOk === "function") {
-          return options.onOk();
+      beforeClose: (action, instance, done) => {
+        if (action !== "confirm") {
+          done();
+          if (typeof options.onCancel === "function") {
+            options.onCancel();
+          }
+          return;
         }
-      })
-      .catch(() => {
-        if (typeof options.onCancel === "function") {
-          options.onCancel();
+        if (typeof options.onOk !== "function") {
+          done();
+          return;
         }
-      });
+        const result = options.onOk();
+        if (result && typeof result.then === "function") {
+          instance.confirmButtonLoading = true;
+          result
+            .then(() => done())
+            .catch(() => {})
+            .finally(() => {
+              instance.confirmButtonLoading = false;
+            });
+          return;
+        }
+        done();
+      },
+    }).catch(() => {
+      if (typeof options.onCancel === "function") {
+        options.onCancel();
+      }
+    });
   },
   remove() {
-    ElMessageBox.close();
+    try {
+      ElMessageBox.close();
+    } catch (_) {
+      // MessageBox 已关闭时忽略，避免操作已销毁 DOM 触发 parentNode 报错
+    }
   },
 };
 

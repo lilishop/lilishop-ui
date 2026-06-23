@@ -16,8 +16,9 @@
       </div>
     </div>
     <div class="section">
-      <swiper ref="mySwiper" :options="swiperOptions">
-        <swiper-slide
+      <div class="seckill-list">
+        <div
+          class="seckill-item"
           v-for="(item, index) in options.list[0].goodsList"
           :key="index"
         >
@@ -29,22 +30,13 @@
               <span>{{ $filters.unitPrice(item.originalPrice, "￥") }}</span>
             </div>
           </div>
-        </swiper-slide>
-      </swiper>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script>
-import { Swiper, SwiperSlide, directive } from "vue-awesome-swiper";
-import "swiper/swiper-bundle.css";
 export default {
-  components: {
-    Swiper,
-    SwiperSlide,
-  },
-  directives: {
-    swiper: directive,
-  },
   props: {
     data: {
       type: Object,
@@ -62,12 +54,6 @@ export default {
       minutes: "00", // 分钟
       seconds: "00", // 秒
       interval: undefined, // 定时器
-      swiperOptions: {
-        // 轮播图参数
-        slidesPerView: 5,
-        autoplay: true,
-        loop: true,
-      },
     };
   },
   watch: {
@@ -139,7 +125,6 @@ export default {
             new Date().getTime()) /
             1000
         );
-        const that = this;
         this.interval = setInterval(() => {
           this.diffSeconds--;
         }, 1000);
@@ -220,7 +205,14 @@ export default {
   .section {
     width: 1000px;
     // background: #efefef;
-    .swiper-slide {
+    overflow-x: auto;
+    overflow-y: hidden;
+    .seckill-list {
+      display: flex;
+      min-width: 100%;
+    }
+    .seckill-item {
+      flex: 0 0 200px;
       height: 260px;
       .content {
         width: 200px;

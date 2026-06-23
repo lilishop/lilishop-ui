@@ -107,11 +107,11 @@
           </div>
           <h4>商品详情描述</h4>
           <div class="form-item-view">
-            <el-form-item label="商品描述">
-              <div v-html="goods.intro"></div>
+            <el-form-item class="goods-desc-item" label="商品描述">
+              <div class="goods-desc-content" v-html="goods.intro"></div>
             </el-form-item>
-            <el-form-item label="移动端描述">
-              <div v-html="goods.mobileIntro"></div>
+            <el-form-item class="goods-desc-item" label="移动端描述">
+              <div class="goods-desc-content" v-html="goods.mobileIntro"></div>
             </el-form-item>
           </div>
         </div>
@@ -178,6 +178,30 @@ div.base-info-item {
 
   .form-item-view {
     padding-left: 80px;
+  }
+
+  .goods-desc-item {
+    align-items: flex-start;
+  }
+
+  .goods-desc-item .el-form-item__label {
+    line-height: 24px;
+    padding-top: 0;
+  }
+
+  .goods-desc-item .el-form-item__content {
+    align-items: flex-start;
+    line-height: 24px;
+  }
+
+  .goods-desc-content {
+    line-height: 24px;
+    text-align: left;
+    word-break: break-word;
+  }
+
+  .goods-desc-content > :first-child {
+    margin-top: 0;
   }
 }
 

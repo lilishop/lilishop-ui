@@ -7,7 +7,9 @@
           <el-button v-if="allowOperation.editConsignee" plain type="primary" @click="editAddress">修改收货地址</el-button>
           <el-button v-if="allowOperation.cancel" plain type="warning" @click="orderCancel">订单取消</el-button>
           <el-button v-if="orderInfo.order.orderStatus === 'UNPAID'" type="primary" @click="confirmPrice">收款</el-button>
+          <el-button v-if="canOrderTake" type="primary" @click="orderTake">订单核验</el-button>
           <el-button plain @click="orderLog">订单日志</el-button>
+          <el-button v-if="canPartDelivery" type="primary" @click="openPartDelivery">分包裹发货</el-button>
           <el-button v-if="$route.query.orderType != 'VIRTUAL'" plain type="primary" style="float:right;" @click="printOrder">打印发货单</el-button>
         </div>
       </el-card>
@@ -36,6 +38,10 @@
             <div class="div-item-right">
               {{ orderInfo.order.createTime }}
             </div>
+          </div>
+          <div class="div-item" v-if="orderInfo.order.verificationCode">
+            <div class="div-item-left">核验码：</div>
+            <div class="div-item-right">{{ orderInfo.order.verificationCode }}</div>
           </div>
         </div>
         <div style="width: 30%; float: left; margin-left: 20px">
@@ -366,6 +372,59 @@
       </template>
     </el-dialog>
 
+    <el-dialog v-model="partDeliveryModal" title="分包裹发货" width="760px">
+      <el-form ref="partDeliveryForm" :model="partDeliveryForm" label-width="100px" :rules="partDeliveryRules">
+        <el-form-item label="物流公司" prop="logisticsId">
+          <el-select v-model="partDeliveryForm.logisticsId" placeholder="请选择物流公司" filterable style="width: 260px">
+            <el-option
+              v-for="item in checkedLogistics"
+              :key="getLogisticsId(item)"
+              :label="getLogisticsName(item)"
+              :value="getLogisticsId(item)"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="物流单号" prop="logisticsNo">
+          <el-input v-model="partDeliveryForm.logisticsNo" placeholder="请输入物流单号" style="width: 260px" />
+        </el-form-item>
+        <el-form-item label="发货商品" prop="partDeliveryDTOList">
+          <div class="delivery-item-group">
+            <div v-for="item in deliverableOrderItems" :key="getOrderItemId(item)" class="delivery-item">
+              <el-checkbox
+                :model-value="isPartDeliveryItemSelected(item)"
+                @change="(checked) => togglePartDeliveryItem(item, checked)"
+              >
+                <span class="delivery-item-name">{{ item.goodsName }}</span>
+                <span class="delivery-item-num">订单数量 x{{ item.num }}</span>
+              </el-checkbox>
+              <el-input-number
+                v-model="partDeliveryForm.deliveryNumMap[getOrderItemId(item)]"
+                :disabled="!isPartDeliveryItemSelected(item)"
+                :min="1"
+                :max="getMaxDeliveryNum(item)"
+                :precision="0"
+                controls-position="right"
+                size="small"
+                class="delivery-num-input"
+              />
+            </div>
+          </div>
+          <div v-if="!deliverableOrderItems.length" class="delivery-empty">暂无可发货商品</div>
+        </el-form-item>
+      </el-form>
+      <div v-if="orderPackages.length" class="package-list">
+        <div class="package-title">已有包裹</div>
+        <el-table :data="orderPackages" border size="small">
+          <el-table-column prop="logisticsName" label="物流公司" min-width="120" />
+          <el-table-column prop="logisticsNo" label="物流单号" min-width="160" />
+        </el-table>
+      </div>
+      <template #footer>
+        <el-button @click="partDeliveryModal = false">关闭</el-button>
+        <el-button type="primary" :loading="partDeliverySubmitting" @click="submitPartDelivery">确认发货</el-button>
+      </template>
+    </el-dialog>
+
     <el-dialog v-model="printModal" width="530px" @close="printCancel">
       <template #header>
         <div style="line-height:26px;height:26px;">
@@ -427,12 +486,23 @@
     </el-dialog>
 
 
+    <el-dialog v-model="orderTakeModal" title="订单核验" width="530px">
+      <el-form ref="orderTakeForm" :model="orderTakeForm" label-width="100px" :rules="orderTakeValidate">
+        <el-form-item label="核验码" prop="qrCode">
+          <el-input v-model="orderTakeForm.qrCode" placeholder="请输入核验码" clearable />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="orderTakeModal = false">取消</el-button>
+        <el-button type="primary" @click="orderTakeSubmit">核验</el-button>
+      </template>
+    </el-dialog>
+
     <multipleMap ref="map" @callback="selectedRegion" />
   </div>
 </template>
 
 <script>
-import * as API_Logistics from "@/api/logistics";
 import * as API_Order from "@/api/order";
 import * as RegExp from "@/libs/RegExp.js";
 
@@ -487,6 +557,15 @@ export default {
         logisticsNo: "", //发货单号
         logisticsId: "", //物流公司
       },
+      partDeliveryModal: false,
+      partDeliverySubmitting: false,
+      partDeliveryForm: {
+        logisticsNo: "",
+        logisticsId: "",
+        selectedOrderItemIds: [],
+        deliveryNumMap: {},
+      },
+      orderPackages: [],
       //验证要调整的订单金额
       modifyPriceValidate: {
         reason: [
@@ -505,6 +584,13 @@ export default {
       },
       addressModal: false, //弹出修改收件信息框
       printModal: false,
+      orderTakeModal: false,
+      orderTakeForm: {
+        qrCode: "",
+      },
+      orderTakeValidate: {
+        qrCode: [{ required: true, message: "核验码不能为空", trigger: "blur" }],
+      },
       //收件地址表单
       addressForm: {
         consigneeName: "",
@@ -516,6 +602,10 @@ export default {
       orderDeliverFormValidate: {
         logisticsNo: [{ required: true, message: "发货单号不能为空", trigger: "change" }],
         logisticsId: [{ required: true, message: "请选择物流公司", trigger: "blur" }],
+      },
+      partDeliveryRules: {
+        logisticsNo: [{ required: true, message: "发货单号不能为空", trigger: "change" }],
+        logisticsId: [{ required: true, message: "请选择物流公司", trigger: "change" }],
       },
       addressRule: {
         consigneeName: [
@@ -537,6 +627,28 @@ export default {
       data: [], // 表单数据
     };
   },
+  computed: {
+    canPartDelivery() {
+      const status = this.orderInfo.order && this.orderInfo.order.orderStatus;
+      return (
+        this.$route.query.orderType !== "VIRTUAL" &&
+        ["UNDELIVERED", "PARTS_DELIVERED"].includes(status) &&
+        this.deliverableOrderItems.length > 0
+      );
+    },
+    deliverableOrderItems() {
+      return (this.data || []).filter((item) => this.getOrderItemId(item));
+    },
+    canOrderTake() {
+      if (this.allowOperation.take) return true;
+      const order = this.orderInfo?.order;
+      if (!order) return false;
+      const isVirtual =
+        this.$route.query.orderType === "VIRTUAL" ||
+        order.orderType === "VIRTUAL";
+      return isVirtual && order.orderStatus === "TAKE";
+    },
+  },
   watch: {
     $route (to, from) {
       this.$router.go(0);
@@ -557,6 +669,106 @@ export default {
     },
     gotoHomes () {
       return false
+    },
+    getOrderItemId(item) {
+      return item && (item.id || item.orderItemId || item.sn);
+    },
+    getLogisticsId(item) {
+      return item && (item.logisticsId || item.id);
+    },
+    getLogisticsName(item) {
+      return item && (item.logisticsName || item.name || item.logisticsCompany || item.logisticsId || item.id);
+    },
+    getMaxDeliveryNum(item) {
+      const num = Number(item && item.num);
+      return Number.isFinite(num) && num > 0 ? num : 999999;
+    },
+    isPartDeliveryItemSelected(item) {
+      const id = this.getOrderItemId(item);
+      return !!id && this.partDeliveryForm.selectedOrderItemIds.includes(id);
+    },
+    togglePartDeliveryItem(item, checked) {
+      const id = this.getOrderItemId(item);
+      if (!id) return;
+      if (checked) {
+        if (!this.partDeliveryForm.selectedOrderItemIds.includes(id)) {
+          this.partDeliveryForm.selectedOrderItemIds.push(id);
+        }
+        if (!this.partDeliveryForm.deliveryNumMap[id]) {
+          this.partDeliveryForm.deliveryNumMap[id] = this.getMaxDeliveryNum(item);
+        }
+        return;
+      }
+      this.partDeliveryForm.selectedOrderItemIds = this.partDeliveryForm.selectedOrderItemIds.filter((itemId) => itemId !== id);
+      delete this.partDeliveryForm.deliveryNumMap[id];
+    },
+    buildPartDeliveryDTOList() {
+      return this.partDeliveryForm.selectedOrderItemIds
+        .map((orderItemId) => ({
+          orderItemId,
+          deliveryNum: Number(this.partDeliveryForm.deliveryNumMap[orderItemId]),
+        }))
+        .filter((item) => item.orderItemId && item.deliveryNum > 0);
+    },
+    resetPartDeliveryForm() {
+      this.partDeliveryForm = {
+        logisticsNo: "",
+        logisticsId: "",
+        selectedOrderItemIds: [],
+        deliveryNumMap: {},
+      };
+      this.$nextTick(() => {
+        if (this.$refs.partDeliveryForm) {
+          this.$refs.partDeliveryForm.clearValidate();
+        }
+      });
+    },
+    openPartDelivery() {
+      this.resetPartDeliveryForm();
+      this.partDeliveryModal = true;
+      this.getCheckedLogistics();
+      this.getOrderPackages();
+    },
+    getCheckedLogistics() {
+      API_Order.getLogisticsChecked().then((res) => {
+        if (res.success) {
+          this.checkedLogistics = Array.isArray(res.result) ? res.result : [];
+        }
+      });
+    },
+    getOrderPackages() {
+      API_Order.getPackage(this.sn).then((res) => {
+        if (res.success) {
+          this.orderPackages = Array.isArray(res.result) ? res.result : [];
+        }
+      });
+    },
+    submitPartDelivery() {
+      this.$refs.partDeliveryForm.validate((valid) => {
+        if (!valid) return;
+        const partDeliveryDTOList = this.buildPartDeliveryDTOList();
+        if (!partDeliveryDTOList.length) {
+          this.$Message.error("请选择本次发货商品并填写发货数量");
+          return;
+        }
+        this.partDeliverySubmitting = true;
+        API_Order.partDelivery(this.sn, {
+          orderSn: this.sn,
+          logisticsNo: this.partDeliveryForm.logisticsNo,
+          logisticsId: this.partDeliveryForm.logisticsId,
+          partDeliveryDTOList,
+        })
+          .then((res) => {
+            if (res.success) {
+              this.$Message.success("发货成功");
+              this.partDeliveryModal = false;
+              this.getDataList();
+            }
+          })
+          .finally(() => {
+            this.partDeliverySubmitting = false;
+          });
+      });
     },
 
     //确认收款
@@ -602,7 +814,7 @@ export default {
     // 获取订单详情
     getDataList () {
       this.loading = true;
-      API_Order.orderDetail(this.sn).then((res) => {
+      API_Order.getOrderDetail(this.sn).then((res) => {
         this.loading = false;
         if (res.success) {
           this.orderInfo = res.result;
@@ -623,7 +835,7 @@ export default {
     modifyPriceSubmit () {
       this.$refs.modifyPriceForm.validate((valid) => {
         if (valid) {
-          API_Order.updateOrderPrice(this.sn, this.modifyPriceForm).then((res) => {
+          API_Order.modifyOrderPrice(this.sn, this.modifyPriceForm).then((res) => {
             if (res.success) {
               this.$Message.success("修改订单金额成功");
               this.modal = false;
@@ -655,7 +867,7 @@ export default {
     orderCancelSubmit () {
       this.$refs.orderCancelForm.validate((valid) => {
         if (valid) {
-          API_Order.orderCancel(this.sn, this.orderCancelForm).then((res) => {
+          API_Order.cancelOrder(this.sn, this.orderCancelForm).then((res) => {
             if (res.success) {
               this.$Message.success("取消成功");
               this.getDataList();
@@ -672,6 +884,25 @@ export default {
     //订单日志取消
     handelCancel () {
       this.orderLogModal = false;
+    },
+    orderTake() {
+      this.orderTakeForm.qrCode = this.orderInfo.order.verificationCode || "";
+      this.orderTakeModal = true;
+      this.$nextTick(() => {
+        this.$refs.orderTakeForm?.clearValidate();
+      });
+    },
+    orderTakeSubmit() {
+      this.$refs.orderTakeForm.validate((valid) => {
+        if (!valid) return;
+        API_Order.orderTake(this.sn, this.orderTakeForm.qrCode).then((res) => {
+          if (res.success) {
+            this.$Message.success("订单核验成功");
+            this.orderTakeModal = false;
+            this.getDataList();
+          }
+        });
+      });
     },
     //打印发货单
     printOrder () {
@@ -732,6 +963,54 @@ export default {
 .order-log-div {
   line-height: 30px;
   overflow-y: scroll;
+}
+
+.delivery-item-group {
+  width: 100%;
+}
+
+.delivery-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: auto;
+  margin: 0 0 8px 0;
+  padding: 8px 12px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+}
+
+.delivery-item-name {
+  display: inline-block;
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.delivery-item-num {
+  margin-left: 12px;
+  color: #999;
+}
+
+.delivery-num-input {
+  width: 120px;
+  margin-left: 12px;
+}
+
+.delivery-empty {
+  color: #999;
+}
+
+.package-list {
+  margin-top: 12px;
+}
+
+.package-title {
+  margin-bottom: 8px;
+  font-weight: bold;
 }
 
 .flex-card {

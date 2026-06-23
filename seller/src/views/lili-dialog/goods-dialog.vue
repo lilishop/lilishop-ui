@@ -103,7 +103,7 @@ export default {
   },
   watch: {
     category(val) {
-      this.goodsParams.categoryPath = val[2];
+      this.goodsParams.categoryPath = val && val.length ? val.join(",") : "";
     },
     selectedWay: {
       handler() {

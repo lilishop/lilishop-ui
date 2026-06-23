@@ -143,8 +143,35 @@ export default {
   font-size: 13px;
   position: relative;
 }
+.order-row,
+.order-item-view {
+  display: flex;
+  align-items: center;
+
+  > [span] {
+    box-sizing: border-box;
+    padding: 0 8px;
+  }
+
+  > [span='12'] {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  > [span='4'] {
+    flex: 0 0 16.666667%;
+    max-width: 16.666667%;
+  }
+
+  > [span='6'] {
+    flex: 0 0 25%;
+    max-width: 25%;
+  }
+}
+
 .order-item-view {
   padding: 10px 20px;
+  align-items: flex-start;
 }
 .order-item {
   text-align: center;

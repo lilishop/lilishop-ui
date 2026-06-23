@@ -184,8 +184,12 @@ export default {
     // 选择图片
     handleSelectImg(item) {
       this.selected = item;
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
   },
 };

@@ -166,13 +166,11 @@ export default {
       this.$Modal.confirm({
         title: "确认审核",
         content: `您确认要审核${examine} ${v.goodsName} ?`,
-        loading: true,
         onOk: () => {
           const formData = new FormData();
           formData.append("goodsIds", v.id);
           formData.append("authFlag", this.goodsAuditForm.authFlag);
-          authGoods(formData).then((res) => {
-            this.$Modal.remove();
+          return authGoods(formData).then((res) => {
             if (res.success) {
               this.$Message.success("审核成功");
               this.getDataList();

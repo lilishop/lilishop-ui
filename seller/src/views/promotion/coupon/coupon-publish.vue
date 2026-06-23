@@ -232,17 +232,12 @@
 
 <script>
 import { saveShopCoupon, getShopCoupon, editShopCoupon } from "@/api/promotion";
-import {
-  savePlatformCoupon,
-  getPlatformCoupon,
-  editPlatformCoupon,
-} from "@/api/promotion";
 import { getGoodsCategoryAll } from "@/api/goods";
 import { regular } from "@/utils";
 import skuSelect from "@/views/lili-dialog";
 
 export default {
-  name: "edit-platform-coupon",
+  name: "add-coupon",
   components: {
     skuSelect,
   },
@@ -360,7 +355,7 @@ export default {
   },
   methods: {
     getCoupon() {
-      getPlatformCoupon(this.id).then((res) => {
+      getShopCoupon(this.id).then((res) => {
         let data = res.result;
         if (!data.promotionGoodsList) data.promotionGoodsList = [];
         this.rangeTimeType = data.rangeDayType === "DYNAMICTIME" ? 0 : 1;
@@ -453,7 +448,7 @@ export default {
           if (this.modalType === 0) {
             delete params.id;
 
-            savePlatformCoupon(params).then((res) => {
+            saveShopCoupon(params).then((res) => {
               this.submitLoading = false;
               if (res.success) {
                 this.$Message.success("优惠券发送成功");
@@ -464,7 +459,7 @@ export default {
             delete params.consumeLimit;
             delete params.updateTime;
 
-            editPlatformCoupon(params).then((res) => {
+            editShopCoupon(params).then((res) => {
               this.submitLoading = false;
               if (res.success) {
                 this.$Message.success("优惠券修改成功");
@@ -476,7 +471,7 @@ export default {
       });
     },
     closeCurrentPage() {
-      this.$store.commit("removeTag", "add-platform-coupon");
+      this.$store.commit("removeTag", "add-coupon");
       localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList);
       this.$router.go(-1);
     },
@@ -535,7 +530,7 @@ export default {
       this.form.promotionGoodsList = list;
     },
     async getCagetoryList() {
-      let data = await getCategoryTree();
+      let data = await getGoodsCategoryAll();
       this.goodsCategoryList = data.result;
       this.goodsCategoryList = this.goodsCategoryList.map((item) => {
         if (item.children) {

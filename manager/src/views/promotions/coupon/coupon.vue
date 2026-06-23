@@ -204,6 +204,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    manualConfirm: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -222,6 +226,7 @@ export default {
       selectDate: [],
       showActionColumn: true,
       showStatusColumn: true,
+      isSyncingSelection: false,
     };
   },
   watch: {
@@ -232,6 +237,8 @@ export default {
     },
     selectedList: {
       handler(val) {
+        if (this.isSyncingSelection) return;
+        if (this.isSameSelection(val, this.selectList)) return;
         this.$nextTick(() => {
           this.syncTableSelection(val);
         });
@@ -311,19 +318,38 @@ export default {
       };
       return map[type] || "";
     },
+    isSameSelection(next, current) {
+      const a = next || [];
+      const b = current || [];
+      if (a.length !== b.length) return false;
+      const nextIds = a.map((item) => item.id).sort().join(",");
+      const currentIds = b.map((item) => item.id).sort().join(",");
+      return nextIds === currentIds;
+    },
     syncTableSelection(selected) {
       const table = this.$refs.table;
       if (!table) return;
+      const nextList = selected ? [...selected] : [];
+      this.isSyncingSelection = true;
       table.clearSelection();
-      if (!selected || !selected.length) return;
-      this.data.forEach((row) => {
-        if (selected.some((item) => item.id === row.id)) {
-          table.toggleRowSelection(row, true);
-        }
+      if (nextList.length) {
+        this.data.forEach((row) => {
+          if (nextList.some((item) => item.id === row.id)) {
+            table.toggleRowSelection(row, true);
+          }
+        });
+      }
+      this.selectList = nextList;
+      this.selectCount = nextList.length;
+      this.$nextTick(() => {
+        this.isSyncingSelection = false;
       });
     },
     check() {
       this.$emit("selected", this.selectList);
+    },
+    getSelection() {
+      return [...this.selectList];
     },
     receivePage(id) {
       if (id) {
@@ -356,9 +382,10 @@ export default {
       this.$refs.table?.clearSelection();
     },
     changeSelect(e) {
+      if (this.isSyncingSelection) return;
       this.selectList = e;
       this.selectCount = e.length;
-      if (this.getType === "ACTIVITY") this.check();
+      if (this.getType === "ACTIVITY" && !this.manualConfirm) this.check();
     },
     getDataList() {
       this.loading = true;

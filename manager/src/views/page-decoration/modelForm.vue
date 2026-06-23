@@ -49,11 +49,13 @@
         <draggable
           class="model-form-list"
           v-model="data.list"
-          v-bind="{ group: 'model', ghostClass: 'ghost' }"
+          :item-key="getModelItemKey"
+          group="model"
+          ghost-class="ghost"
           @end="handleMoveEnd"
           @add="handleModelAdd"
         >
-          <template v-for="(element, index) in data.list" :key="element.key || index">
+          <template #item="{ element, index }">
             <model-form-item
               v-if="element && element.key"
               :element="element"
@@ -190,6 +192,9 @@ export default {
     };
   },
   methods: {
+    getModelItemKey(element) {
+      return element.model || element.key || element.type;
+    },
     handleSelectLink(item, index) {
       if (item) this.selectedNav = item;
       this.$refs.liliDialog.open("link");
@@ -225,8 +230,12 @@ export default {
       }
     },
     handleSelectImg() {
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
     callbackSelected(item) {
       this.picModelFlag = false;
@@ -234,16 +243,18 @@ export default {
     },
     handleModelAdd(evt) {
       const newIndex = evt.newIndex;
-
-      this.data.list[newIndex] = JSON.parse(JSON.stringify(this.data.list[newIndex]));
-      const key = Date.parse(new Date()) + "_" + Math.ceil(Math.random() * 99999);
+      const current = this.data.list[newIndex];
+      if (!current || current.key) {
+        return;
+      }
+      const key = Date.now() + "_" + Math.ceil(Math.random() * 99999);
       this.data.list[newIndex] = {
-        ...this.data.list[newIndex],
+        ...JSON.parse(JSON.stringify(current)),
         options: {
-          ...this.data.list[newIndex].options,
+          ...current.options,
         },
         key,
-        model: this.data.list[newIndex].type + "_" + key,
+        model: current.type + "_" + key,
       };
     },
   },

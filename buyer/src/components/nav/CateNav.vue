@@ -1,5 +1,5 @@
 <template>
-  <div class="cate-nav width_1200_auto" :class="{'fixed-show':useClass == 'fixed-show'}">
+  <div class="cate-nav" :class="{'fixed-show':useClass == 'fixed-show'}">
     <div class="nav-con" :class="{'background-white':useClass == 'background-white'}">
       <div
         class="all-categories hover-pointer"
@@ -149,9 +149,8 @@ export default {
       // 导航列表
       if (storage.getItem("navList")) {
         return JSON.parse(storage.getItem("navList"));
-      } else {
-        return [];
       }
+      return { list: [] };
     },
   },
   methods: {
@@ -261,21 +260,27 @@ export default {
 }
 .cate-nav {
   position: relative;
-  margin: 14px auto 0 auto;
+  z-index: 3;
+  width: 100%;
+  margin: 14px 0 0;
+  box-sizing: border-box;
 }
 /** 商品分类 */
 .nav-con {
   height: 46px;
   margin: 0 auto;
   display: flex;
+  align-items: stretch;
   .all-categories {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    height: 46px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     padding-left: 37.4px;
     background: #FFFFFF;
     width: 263.2px;
-    padding-top: 15.4px;
-    line-height: 20px;
     border-bottom: none;
     font-size: 16.8px;
     font-weight: normal;
@@ -283,15 +288,16 @@ export default {
     letter-spacing: 0px;
   }
   .nav-item {
-    width: 914px;
+    flex: 1;
+    min-width: 0;
     height: 46px;
     border-radius: 10px;
     background: #FFFFFF;
-    margin-left: 10px;
+    margin: 0 0 0 10px;
+    padding: 0;
     line-height: 46px;
     overflow: hidden;
     list-style: none;
-    // background-color: #eee;
     display: flex;
     li {
       float: left;
@@ -306,12 +312,12 @@ export default {
     }
   }
 }
-// 分类列表
+// 分类列表（浮层叠在轮播左列之上）
 .cate-list {
-  margin: 0 auto;
   position: absolute;
-
-  z-index: 1000;
+  left: 0;
+  top: 46px;
+  z-index: 10;
 }
 
 .nav-side {

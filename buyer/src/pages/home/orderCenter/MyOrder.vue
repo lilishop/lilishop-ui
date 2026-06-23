@@ -4,12 +4,10 @@
     <card _Title="我的订单" :_Size="16" :_Tabs="changeWay" @_Change="change" v-if="!homePage"></card>
     <card _Title="我的订单" :_Size="16" :_Tabs="changeWay" @_Change="change" _More="全部订单" _Src="/home/MyOrder" v-else></card>
     <!-- 搜索 筛选 -->
-    <div class="mb_24 box" v-if="!homePage">
-      <div class="global_float_right" >
+    <div class="order-search-bar" v-if="!homePage">
+      <div class="global_float_right">
         <el-input
           class="width_300"
-          
-          
           v-model="params.keywords"
           @keyup.enter="getList"
           placeholder="请输入订单号搜索"
@@ -62,12 +60,12 @@
           <div>
             <span @click="shopPage(order.storeId)">{{ order.storeName }}</span>
           </div>
-          <div>
+          <div class="order-actions">
             <!-- 订单基础操作 -->
-            <el-button @click="orderDetail(order.sn)" type="info" size="small">订单详情</el-button>
+            <el-button @click="orderDetail(order.sn)" type="warning" size="small">订单详情</el-button>
             <el-button @click="handleCancelOrder(order.sn)" type="danger" v-if="order.allowOperationVO.cancel" size="small">取消订单</el-button>
             <el-button @click="goPay(order.sn)" size="small" type="success" v-if="order.allowOperationVO.pay">去支付</el-button>
-            <el-button @click="received(order.sn)" size="small" type="warning" v-if="order.allowOperationVO.rog">确认收货</el-button>
+            <el-button @click="received(order.sn)" size="small" class="confirm-receipt-btn" v-if="order.allowOperationVO.rog">确认收货</el-button>
             <!-- 售后 -->
             <el-button v-if="order.groupAfterSaleStatus && (order.groupAfterSaleStatus.includes('NOT_APPLIED')|| order.groupAfterSaleStatus.includes('PART_AFTER_SALE'))"
                     @click="applyAfterSale(order.orderItems)" size="small">申请售后</el-button>
@@ -92,12 +90,18 @@
       </div>
       <template #footer><div></div></template>
     </el-dialog>
-    <el-dialog v-model="cancelAvail" title="请选择取消订单原因" @ok="sureCancel" @cancel="cancelAvail = false">
-      <el-radio-group v-model="cancelParams.reason" vertical type="button" button-style="solid">
+    <el-dialog v-model="cancelAvail" title="请选择取消订单原因">
+      <el-radio-group v-model="cancelParams.reason">
         <el-radio :label="item.reason" v-for="item in cancelReason" :key="item.id">
-           {{item.reason}}
+          {{ item.reason }}
         </el-radio>
       </el-radio-group>
+      <template #footer>
+        <div style="text-align: right">
+          <el-button @click="cancelAvail = false">取消</el-button>
+          <el-button type="primary" @click="sureCancel">确定</el-button>
+        </div>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -302,7 +306,9 @@ export default {
 .wrapper {
   margin-bottom: 40px;
 }
-.box {
+.order-search-bar {
+  margin-top: 16px;
+  margin-bottom: 16px;
   overflow: hidden;
 }
 .page-size {
@@ -373,10 +379,30 @@ export default {
       }
     }
 
-    > div:nth-child(3) {
-      width: 100px;
+    .order-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 100px;
+
       .el-button {
-        margin-bottom: 10px;
+        margin: 0;
+        min-width: 88px;
+      }
+
+      :deep(.confirm-receipt-btn) {
+        background-color: #ff9900 !important;
+        border-color: #ff9900 !important;
+        color: #fff !important;
+
+        &:hover,
+        &:focus {
+          background-color: #e68a00 !important;
+          border-color: #e68a00 !important;
+          color: #fff !important;
+        }
       }
     }
   }

@@ -10,12 +10,10 @@
     <!-- 物流评分、服务评分 -->
     <div class="delivery-rate">
       <div class="fontsize_16">物流服务评价：</div>
-      <div class="color999">
-        <span>物流评价：<el-rate disabled :value="Number(orderGoods.deliveryScore)" /></span>
-        <span>服务评价：<el-rate disabled :value="Number(orderGoods.serviceScore)" /></span>
-        <span
-          >服务评价：<el-rate disabled :value="Number(orderGoods.descriptionScore)"
-        /></span>
+      <div class="color999 delivery-rate-items">
+        <span>物流评价：<el-rate disabled :model-value="Number(orderGoods.deliveryScore) || 0" /></span>
+        <span>服务评价：<el-rate disabled :model-value="Number(orderGoods.serviceScore) || 0" /></span>
+        <span>描述评价：<el-rate disabled :model-value="Number(orderGoods.descriptionScore) || 0" /></span>
       </div>
     </div>
     <!-- 添加订单评价  左侧商品详情  右侧评价框 -->
@@ -133,12 +131,28 @@ export default {
   display: flex;
   align-items: center;
   margin-top: 20px;
-  height: 50px;
+  min-height: 50px;
   border-bottom: 1px solid #eee;
   > div:nth-child(1) {
     width: 120px;
     font-weight: bold;
   }
+}
+
+.delivery-rate-items {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.delivery-rate-items :deep(.el-rate) {
+  --el-rate-fill-color: #ffb400;
+  --el-rate-disabled-fill-color: #ffb400;
+}
+
+:deep(.el-rate__icon.is-active) {
+  color: #ffb400;
 }
 .goods-eval li {
   display: flex;

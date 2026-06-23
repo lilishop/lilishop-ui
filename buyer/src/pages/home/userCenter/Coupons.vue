@@ -133,21 +133,73 @@ export default {
 <style scoped lang="scss">
 @import "../../../assets/styles/coupon.scss";
 .coupon-item {
-  height: 125px;
+  overflow: hidden;
+  height: 145px;
+  margin-left: 0;
+  $claim-width: 55px;
+
   .c-left {
-    padding: 16px;
+    width: calc(100% - #{$claim-width});
+    box-sizing: border-box;
+    padding: 20px;
+
+    p {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
+
+  b {
+    right: $claim-width;
+    width: 0;
+    background: none;
+    border-right: 1px dashed #e0e0e0;
+  }
+
   .c-right {
-    padding: 20px 16px;
-    width: 43px;
-    font-size: 14px;
+    width: $claim-width;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 4px;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+
+    &:hover {
+      opacity: 0.9;
+    }
   }
+
   .canot-use {
     color: #999;
     background-color: #eee;
+    cursor: not-allowed;
+
+    &:hover {
+      opacity: 1;
+    }
   }
-  i {
-    right: 34px;
+
+  i.circle-top,
+  i.circle-bottom {
+    right: calc(#{$claim-width} - 9px);
+    width: 18px;
+    height: 18px;
+  }
+
+  i.circle-top {
+    top: -9px;
+  }
+
+  i.circle-bottom {
+    bottom: -9px;
   }
 }
 

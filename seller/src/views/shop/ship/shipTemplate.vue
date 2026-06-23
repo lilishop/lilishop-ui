@@ -5,7 +5,7 @@
         <el-button @click="refresh">刷新</el-button>
         <el-button @click="add" type="primary">添加</el-button>
       </el-row>
-      <el-tabs @click="handleClickType" v-model="currentTab" style="margin-top: 10px">
+      <el-tabs @tab-click="handleClickType" v-model="currentTab" style="margin-top: 10px">
         <el-tab-pane label="运费模板" name="INFO">
           <table class="ncsc-default-table order m-b-30" :key="index" v-for="(item,index) in shipInfo">
             <tbody>
@@ -79,50 +79,68 @@
               <div class="ncsu-trans-type" data-delivery="TRANSTYPE">
                 <div class="entity">
                   <div class="tbl-except">
-                    <table cellspacing="0" class="ncsc-default-table">
+                    <table cellspacing="0" class="ncsc-default-table ship-template-edit-table">
                       <thead>
-                        <tr style="border-bottom: 1px solid #ddd;">
-                          <th class="w10"></th>
-                          <th class="tl">运送到</th>
-                          <th class="w10"></th>
-                          <th class="w50">首件(重)</th>
-                          <th class="w110">首费</th>
-                          <th class="w50">续件(重)</th>
-                          <th class="w110">续费</th>
-                          <th class="w150">操作</th>
+                        <tr>
+                          <th class="col-area">运送到</th>
+                          <th class="col-num">首件(重)</th>
+                          <th class="col-num">首费</th>
+                          <th class="col-num">续件(重)</th>
+                          <th class="col-num">续费</th>
+                          <th class="col-action">操作</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr class="bd-line" data-group="n1" v-for="(item,index) in form.freightTemplateChildList"
-                          :key="index">
-                          <td></td>
-                          <td class="tl cell-area">
-                            <span class="area-group">
-                              <p style="display:inline-block">{{item.area}}</p>
-                            </span>
+                        <tr
+                          class="bd-line"
+                          v-for="(item,index) in form.freightTemplateChildList"
+                          :key="index"
+                        >
+                          <td class="col-area">
+                            <span class="area-group">{{ item.area || '未设置地区' }}</span>
                           </td>
-                          <td></td>
-                          <td>
-                            <el-input-number class="text w40" v-model="item.firstCompany" :max="999" :min="0" :step="0.1" />
+                          <td class="col-num">
+                            <el-input-number
+                              v-model="item.firstCompany"
+                              :max="999"
+                              :min="0"
+                              :step="0.1"
+                              controls-position="right"
+                              size="small"
+                            />
                           </td>
-                          <td>
-                            <el-input-number class="text w60" v-model="item.firstPrice" :max="999999" :min="0" />
+                          <td class="col-num">
+                            <el-input-number
+                              v-model="item.firstPrice"
+                              :max="999999"
+                              :min="0"
+                              controls-position="right"
+                              size="small"
+                            />
                           </td>
-                          <td>
-                            <el-input-number class="text w40" v-model="item.continuedCompany" :max="999" :min="0" :step="0.1" />
+                          <td class="col-num">
+                            <el-input-number
+                              v-model="item.continuedCompany"
+                              :max="999"
+                              :min="0"
+                              :step="0.1"
+                              controls-position="right"
+                              size="small"
+                            />
                           </td>
-                          <td>
-                            <el-input-number class="text w60" v-model="item.continuedPrice" :max="999999" :min="0" />
+                          <td class="col-num">
+                            <el-input-number
+                              v-model="item.continuedPrice"
+                              :max="999999"
+                              :min="0"
+                              controls-position="right"
+                              size="small"
+                            />
                           </td>
-                          <td class="nscs-table-handle">
-                            <a
-                              @click="editRegion(item,index)"
-                              style="display:inline-block;margin-bottom:5px;color:#2d8cf0;cursor:pointer;text-decoration:none"
-                            >修改</a>
-                            <a
-                              @click="removeTemplateChildren(index)"
-                              style="display:inline-block;margin-bottom:5px;color:#2d8cf0;cursor:pointer;text-decoration:none"
-                            >删除</a>
+                          <td class="col-action">
+                            <a class="action-link" @click="editRegion(item,index)">修改</a>
+                            <span class="action-split">|</span>
+                            <a class="action-link" @click="removeTemplateChildren(index)">删除</a>
                           </td>
                         </tr>
                       </tbody>
@@ -172,10 +190,10 @@ export default {
       index:'0',
       selectedIndex: 0, //选中的地址模板下标
       item: "", //运费模板子模板
-      shipInfo: {}, // 运费模板数据
+      shipInfo: [], // 运费模板数据
       title: "添加运费模板", // 模态框标题
-      operation: "add", // 操作状态
-      currentTab: "", // 当前模板tab
+      operation: "INFO", // 操作状态
+      currentTab: "INFO", // 当前模板tab
       // submitLoading:false,
       saveError: false, // 是否显示错误提示
       csTab: false, // 添加运费模板显示
@@ -211,11 +229,15 @@ export default {
   methods: {
     // 初始化数据
     init() {
+      this.currentTab = "INFO";
+      this.csTab = false;
+      this.operation = "INFO";
       this.getData();
     },
     //切换tabPane
-    handleClickType(v) {
-      if (v == "INFO") {
+    handleClickType(tab) {
+      const tabName = tab.paneName ?? tab.props?.name;
+      if (tabName === "INFO") {
         this.getData();
         this.csTab = false;
       }
@@ -297,7 +319,7 @@ export default {
     //运费模板数据
     getData() {
       API_Shop.getShipTemplate().then((res) => {
-        this.shipInfo = res.result;
+        this.shipInfo = Array.isArray(res.result) ? res.result : [];
       });
     },
     /**
@@ -617,6 +639,64 @@ em {
 
 .cell-area {
   width: 50%;
+}
+
+.ship-template-edit-table {
+  table-layout: fixed;
+
+  th,
+  td {
+    padding: 10px 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #eee;
+  }
+
+  thead th {
+    text-align: center;
+    font-weight: 500;
+    color: #555;
+    background-color: #fafafa;
+  }
+
+  .col-area {
+    width: 32%;
+    text-align: left;
+    word-break: break-all;
+    white-space: normal;
+    color: #333;
+  }
+
+  .col-num {
+    width: 14%;
+    text-align: center;
+  }
+
+  .col-action {
+    width: 12%;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  :deep(.el-input-number) {
+    width: 100%;
+    max-width: 130px;
+  }
+
+  :deep(.el-input-number .el-input__wrapper) {
+    padding-left: 8px;
+    padding-right: 32px;
+  }
+}
+
+.action-link {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.action-split {
+  margin: 0 6px;
+  color: #dcdee2;
 }
 
 .div-error {

@@ -81,8 +81,8 @@
       <div class="goods-tab">
         <el-tabs v-model="currentStatus" @tab-click="onStatusTabClick">
           <el-tab-pane
-            v-for="(item, index) in goodsStatusWithCount"
-            :key="index"
+            v-for="item in goodsStatusWithCount"
+            :key="item.value"
             :label="item.title"
             :name="item.value"
           />
@@ -126,6 +126,7 @@
 
       <el-table
         ref="table"
+        :key="currentStatus"
         v-loading="loading"
         :data="data"
         class="mt_10"
@@ -223,7 +224,13 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="auditModalVisible" title="商品审核" width="500px" :close-on-click-modal="false">
+    <el-dialog
+      v-model="auditModalVisible"
+      title="商品审核"
+      width="500px"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
       <el-form ref="auditForm" :model="goodsAuditForm" label-width="100px">
         <el-form-item label="审核结果" prop="auth_flag">
           <el-radio-group v-model="goodsAuditForm.auth_flag">
@@ -234,7 +241,7 @@
       </el-form>
       <template #footer>
         <el-button @click="auditModalVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmAudit">提交审核</el-button>
+        <el-button type="primary" :loading="auditSubmitLoading" @click="submitAudit">提交审核</el-button>
       </template>
     </el-dialog>
 
@@ -243,6 +250,7 @@
       title="批量商品审核"
       width="500px"
       :close-on-click-modal="false"
+      destroy-on-close
     >
       <el-form ref="batchAuditForm" :model="batchAuditForm" label-width="100px">
         <el-form-item label="审核结果" prop="auth_flag">
@@ -251,7 +259,7 @@
             <el-radio :value="2">审核拒绝</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item v-if="batchAuditForm.auth_flag === 2" label="审核备注" prop="reason">
+        <el-form-item v-show="batchAuditForm.auth_flag === 2" label="审核备注" prop="reason">
           <el-input v-model="batchAuditForm.reason" type="textarea" :rows="3" placeholder="请输入拒绝原因" />
         </el-form-item>
         <el-form-item label="选中商品">
@@ -262,7 +270,7 @@
       </el-form>
       <template #footer>
         <el-button @click="batchAuditModalVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitBatchAudit">提交审核</el-button>
+        <el-button type="primary" :loading="batchAuditSubmitLoading" @click="submitBatchAudit">提交审核</el-button>
       </template>
     </el-dialog>
 
@@ -321,6 +329,7 @@ export default {
         auth_flag: 1,
       },
       auditModalVisible: false, // 审核弹框显示状态
+      auditSubmitLoading: false,
       currentAuditGoods: null, // 当前审核的商品
       submitLoading: false, // 添加或编辑提交状态
       data: [], // 表单数据
@@ -330,6 +339,7 @@ export default {
       selectedRows: [], // 选中的行数据
       selectAll: false, // 全选状态
       batchAuditModalVisible: false, // 批量审核弹框显示状态
+      batchAuditSubmitLoading: false,
       batchAuditForm: {
         auth_flag: 1,
         reason: ''
@@ -361,7 +371,8 @@ export default {
       this.$refs.table?.clearSelection?.();
     },
     onStatusTabClick(tab) {
-      this.goodsStatusClick(tab.paneName);
+      const status = tab.paneName ?? tab.props?.name;
+      this.goodsStatusClick(status);
     },
     salesModelText(v) {
       if (v === "RETAIL") return "零售";
@@ -532,35 +543,28 @@ export default {
       this.currentAuditGoods = goods;
       this.goodsAuditForm.auth_flag = 1;
       this.goodsAuditForm.reason = '';
+      this.auditSubmitLoading = false;
       this.auditModalVisible = true;
-    },
-
-    // 确认审核（二次确认）
-    confirmAudit() {
-      const auditText = this.goodsAuditForm.auth_flag === 1 ? '通过' : '拒绝';
-      this.$Modal.confirm({
-        title: '确认审核',
-        content: `您确认要审核${auditText} "${this.currentAuditGoods.goodsName}" 吗？`,
-        loading: true,
-        onOk: () => {
-          this.submitAudit();
-        },
-      });
     },
 
     // 提交审核
     submitAudit() {
-      let formData = new FormData();
+      if (!this.currentAuditGoods) {
+        return;
+      }
+      this.auditSubmitLoading = true;
+      const formData = new FormData();
       formData.append('goodsIds', this.currentAuditGoods.id);
       formData.append('authFlag', this.goodsAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE');
       authGoods(formData).then((res) => {
-        this.$Modal.remove();
         if (res.success) {
           this.$Message.success('审核成功');
           this.auditModalVisible = false;
           this.getDataList();
           this.getNumberData();
         }
+      }).finally(() => {
+        this.auditSubmitLoading = false;
       });
     },
 
@@ -668,36 +672,27 @@ export default {
       }
 
       const actionText = this.batchAuditForm.auth_flag === 1 ? '通过' : '拒绝';
-      const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
+      const goodsIds = this.selectedRows.map(item => item.id);
+      const formData = new FormData();
+      formData.append('goodsIds', goodsIds.join(','));
+      formData.append('authFlag', this.batchAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE');
+      if (this.batchAuditForm.reason) {
+        formData.append('reason', this.batchAuditForm.reason);
+      }
 
-      this.$Modal.confirm({
-        title: `确认批量审核${actionText}`,
-        content: `您确认要${actionText}以下商品的审核吗？\n${goodsNames}`,
-        loading: true,
-        onOk: () => {
-          // 提取所有选中商品的ID
-          const goodsIds = this.selectedRows.map(item => item.id);
-
-          let formData = new FormData();
-          formData.append('goodsId', goodsIds);
-          formData.append('authFlag', this.batchAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE');
-          formData.append('reason', this.batchAuditForm.reason || '');
-
-          // 修正：直接调用authGoods，不传递'batch'参数
-          authGoods(formData).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success(`批量审核${actionText}成功`);
-              this.selectedRows = [];
-              this.selectAll = false;
-              this.batchAuditModalVisible = false;
-              this.getDataList();
-              this.getNumberData();
-            }
-          }).catch(() => {
-            this.$Modal.remove();
-          });
+      this.batchAuditSubmitLoading = true;
+      authGoods(formData).then((res) => {
+        if (res.success) {
+          this.$Message.success(`批量审核${actionText}成功`);
+          this.selectedRows = [];
+          this.selectAll = false;
+          this.batchAuditModalVisible = false;
+          this.clearTableSelection();
+          this.getDataList();
+          this.getNumberData();
         }
+      }).finally(() => {
+        this.batchAuditSubmitLoading = false;
       });
     },
     loadGoodsGroupList() {

@@ -1,4 +1,30 @@
-import { ElMessage, ElMessageBox } from "element-plus";
+import { ElLoading, ElMessage, ElMessageBox } from "element-plus";
+
+let loadingInstance = null;
+
+export const Spin = {
+  show(options = {}) {
+    Spin.hide();
+    const config =
+      typeof options === "string"
+        ? { text: options }
+        : options && typeof options === "object"
+          ? options
+          : {};
+    loadingInstance = ElLoading.service({
+      lock: true,
+      text: config.text || "加载中...",
+      background: config.background || "rgba(255, 255, 255, 0.7)",
+      ...config,
+    });
+  },
+  hide() {
+    if (loadingInstance) {
+      loadingInstance.close();
+      loadingInstance = null;
+    }
+  },
+};
 
 export const Message = {
   success(content) {
@@ -53,6 +79,17 @@ export const Modal = {
         }
       });
   },
+  warning(options = {}) {
+    const content = options.content || options.title || "";
+    return ElMessageBox.alert(content, options.title || "提示", {
+      confirmButtonText: options.okText || "确定",
+      type: "warning",
+    }).then(() => {
+      if (typeof options.onOk === "function") {
+        return options.onOk();
+      }
+    });
+  },
   remove() {
     ElMessageBox.close();
   },
@@ -68,4 +105,5 @@ export function setupLegacyMessage(app) {
   app.config.globalProperties.$Message = Message;
   app.config.globalProperties.$Modal = Modal;
   app.config.globalProperties.$Notice = Notice;
+  app.config.globalProperties.$Spin = Spin;
 }

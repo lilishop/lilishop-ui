@@ -606,5 +606,6 @@ h4 {
 .tips {
   font-size: 12px;
   color: #999;
+  margin-left: 10px;
 }
 </style>

@@ -45,17 +45,27 @@
             <div>
               <span @click="shopPage(order.shopId)">{{ order.storeName }}</span>
             </div>
-            <div>
+            <div class="order-actions">
               <!-- 订单基础操作 -->
-              <el-button @click="goDetail(order.sn)" type="info" size="small">售后详情</el-button>
-              <el-button @click="openModal(order)"
-                      v-if="order.serviceStatus == 'PASS' &&
-                order.serviceType != 'RETURN_MONEY'"
-                      type="warning" size="small">提交物流
-              </el-button>
-              <el-button @click="cancel(order.sn)" type="danger" v-if="order.afterSaleAllowOperationVO.cancel" size="small">
-                取消售后
-              </el-button>
+              <el-button
+                @click="goDetail(order.sn)"
+                type="warning"
+                size="small"
+                class="after-sale-action-btn"
+              >售后详情</el-button>
+              <el-button
+                @click="openModal(order)"
+                v-if="order.serviceStatus == 'PASS' && order.serviceType != 'RETURN_MONEY'"
+                size="small"
+                class="after-sale-action-btn submit-logistics-btn"
+              >提交物流</el-button>
+              <el-button
+                @click="cancel(order.sn)"
+                type="danger"
+                v-if="order.afterSaleAllowOperationVO.cancel"
+                size="small"
+                class="after-sale-action-btn"
+              >取消售后</el-button>
             </div>
           </div>
         </div>
@@ -96,8 +106,14 @@
             <el-input v-model="form.logisticsNo" placeholder="请填写物流单号"></el-input>
           </el-form-item>
           <el-form-item label="发货时间" prop="mDeliverTime">
-            <el-date-picker type="date" style="width:100%" v-model="form.mDeliverTime" @change="changeTime"
-                        format="yyyy-MM-dd" placeholder="选择发货时间"></el-date-picker>
+            <el-date-picker
+              type="date"
+              style="width:100%"
+              v-model="form.mDeliverTime"
+              format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD"
+              placeholder="选择发货时间"
+            />
           </el-form-item>
         </el-form>
       </div>
@@ -225,32 +241,32 @@ export default {
     },
     // 提交物流信息
     submitDelivery() {
-      this.submitLoading = true
-      afterSaleDelivery(this.form).then(res => {
-        if (res.success) {
-          this.logisticsShow = false;
-          this.$Message.success('提交成功')
-          this.getList()
-        }
-        this.submitLoading = false
-      }).catch(() => {
-        this.submitLoading = false
-      })
+      this.$refs.form?.validate((valid) => {
+        if (!valid) return;
+        this.submitLoading = true;
+        afterSaleDelivery(this.form).then(res => {
+          if (res.success) {
+            this.logisticsShow = false;
+            this.$Message.success('提交成功');
+            this.getList();
+          }
+          this.submitLoading = false;
+        }).catch(() => {
+          this.submitLoading = false;
+        });
+      });
     },
     // 提交物流modal
     openModal(row) {
-      console.log(row);
       this.singleOrder = row;
-      this.form.afterSaleSn = row.sn
       this.logisticsShow = true;
-      this.$refs.form.resetFields()
       if (!this.companyList.length) {
-        this.getCompany()
+        this.getCompany();
       }
-    },
-    // 格式化时间
-    changeTime(time) {
-      this.form.mDeliverTime = time;
+      this.$nextTick(() => {
+        this.$refs.form?.resetFields();
+        this.form.afterSaleSn = row.sn;
+      });
     }
   }
 };
@@ -331,11 +347,31 @@ export default {
       }
     }
 
-    > div:nth-child(3) {
-      width: 100px;
+    .order-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 100px;
 
-      .el-button {
-        margin-bottom: 10px;
+      .after-sale-action-btn {
+        display: block;
+        margin: 0;
+        min-width: 88px;
+      }
+
+      :deep(.submit-logistics-btn) {
+        background-color: #ff9900 !important;
+        border-color: #ff9900 !important;
+        color: #fff !important;
+
+        &:hover,
+        &:focus {
+          background-color: #e68a00 !important;
+          border-color: #e68a00 !important;
+          color: #fff !important;
+        }
       }
     }
   }

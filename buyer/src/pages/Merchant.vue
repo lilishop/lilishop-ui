@@ -67,7 +67,7 @@
         >
 
           <div class="goods-show-img">
-            <img :src="item.small" height="220" width="220" alt=""/>
+            <img :src="item.small" alt=""/>
           </div>
           <div class="goods-show-price">
             <span>

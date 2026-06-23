@@ -30,8 +30,13 @@
             :key="index">
             <div>
               <span>{{ item.name }}</span>
-              <el-tag class="ml_10" v-if="item.isDefault" color="red">默认</el-tag>
-              <el-tag class="ml_10" v-if="item.alias" color="warning">{{ item.alias }}
+              <el-tag class="ml_10 address-default-tag" v-if="item.isDefault" color="red" effect="dark">默认</el-tag>
+              <el-tag
+                class="ml_10 address-alias-tag"
+                v-if="item.alias"
+                color="rgb(255, 153, 0)"
+                effect="dark"
+              >{{ item.alias }}
               </el-tag>
             </div>
             <div>{{ item.mobile }}</div>
@@ -182,8 +187,16 @@
             </div>
             <img class="used" v-if="usedCouponId.includes(item.id)" src="../../assets/images/geted.png" alt="" />
             <b></b>
-            <a class="c-right" @click="useCoupon(item.id, true)">立即使用</a>
-            <a class="c-right" v-if="usedCouponId.includes(item.id)" @click="useCoupon(item.id, false)">放弃优惠</a>
+            <a
+              class="c-right"
+              v-if="!usedCouponId.includes(item.id)"
+              @click="useCoupon(item.id, true)"
+            >立即使用</a>
+            <a
+              class="c-right c-right-cancel"
+              v-else
+              @click="useCoupon(item.id, false)"
+            >放弃优惠</a>
             <i class="circle-top"></i>
             <i class="circle-bottom"></i>
           </li>
@@ -1020,6 +1033,18 @@ export default {
   display: flex;
   flex-wrap: wrap;
 
+  :deep(.address-default-tag) {
+    --el-tag-text-color: #fff;
+    color: #fff;
+  }
+
+  :deep(.address-alias-tag) {
+    --el-tag-bg-color: rgb(255, 153, 0);
+    --el-tag-border-color: rgb(255, 153, 0);
+    --el-tag-text-color: #fff;
+    color: #fff;
+  }
+
   >div {
     border: 1px dotted #949494;
     width: 265px;
@@ -1340,32 +1365,92 @@ export default {
 }
 
 .coupon-item {
-  width: 260px;
+  width: 280px;
   height: 125px;
   margin-right: 10px;
   margin-bottom: 10px;
+  overflow: hidden;
+  $claim-width: 55px;
 
-  .c-right {
-    width: 30px;
-    padding: 10px 7px;
+  .c-left {
+    width: calc(100% - #{$claim-width});
+    padding: 14px 12px;
+    box-sizing: border-box;
+
+    > div,
+    > p {
+      margin-bottom: 8px;
+    }
+
+    > div .price {
+      font-size: 18px;
+    }
+
+    p {
+      margin-bottom: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+    }
   }
 
   b {
-    background: url("../../assets/images/small-circle.png") top left repeat-y;
-    right: 28px;
+    right: $claim-width;
+    width: 0;
+    background: none;
+    border-right: 1px dashed #e0e0e0;
+  }
+
+  .c-right {
+    width: $claim-width;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 3px;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+    box-sizing: border-box;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  .c-right-cancel {
+    letter-spacing: 2px;
+    font-size: 13px;
   }
 
   .circle-top,
   .circle-bottom {
-    right: 22px;
+    right: calc(#{$claim-width} - 9px);
+    width: 18px;
+    height: 18px;
+  }
+
+  .circle-top {
+    top: -9px;
+  }
+
+  .circle-bottom {
+    bottom: -9px;
   }
 
   .used {
     position: absolute;
-    top: 60px;
-    right: 40px;
-    width: 50px;
-    height: 50px;
+    top: 50%;
+    right: calc(#{$claim-width} + 8px);
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    z-index: 3;
   }
 }
 

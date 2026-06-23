@@ -1,14 +1,13 @@
 <template>
   <div class="model-form">
     <div class="model-content">
-      <template v-for="(element, index) in data.list" :key="element.key || index">
-        <model-form-item
-          v-if="element && element.key"
-          :element="element"
-          :index="index"
-          :data="data"
-        ></model-form-item>
-      </template>
+      <model-form-item
+        v-for="(element, index) in renderList"
+        :key="element.key"
+        :element="element"
+        :index="index"
+        :data="data"
+      ></model-form-item>
     </div>
   </div>
 </template>
@@ -19,12 +18,32 @@ export default {
   components: {
     ModelFormItem
   },
-  props: ['data']
+  props: ['data'],
+  computed: {
+    renderList() {
+      const list = this.data?.list || [];
+      return list.filter(
+        (el) => el && el.key && !this.isBuiltinModule(el.type)
+      );
+    }
+  },
+  methods: {
+    isBuiltinModule(type) {
+      // 顶部广告、快捷导航由 Index 页单独渲染
+      return type === 'topAdvert' || type === 'navBar';
+    }
+  }
 };
 </script>
 <style lang="scss" scoped>
+.model-form {
+  position: relative;
+  width: 100%;
+}
 .model-content {
   width: 100%;
   min-height: 1200px;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 </style>

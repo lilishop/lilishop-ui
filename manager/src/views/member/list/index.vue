@@ -187,12 +187,7 @@
             type="primary"
             link
             class="upload"
-            @click="
-              () => {
-                picModelFlag = true;
-                $refs.ossManage.selectImage = true;
-              }
-            "
+            @click="openPicSelector"
           >修改</el-button>
         </el-form-item>
         <el-form-item label="用户名" prop="name">
@@ -535,6 +530,14 @@ export default {
           this.loading = false;
           this.init(res.result.records);
           this.total = res.result.total;
+        }
+      });
+    },
+    openPicSelector() {
+      this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
         }
       });
     },

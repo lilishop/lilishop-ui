@@ -88,7 +88,14 @@
             <el-input v-model="form.logisticsNo" placeholder="请填写物流单号"></el-input>
           </el-form-item>
           <el-form-item label="发货时间" prop="mDeliverTime">
-            <el-date-picker type="date" style="width:100%" v-model="form.mDeliverTime" @change="changeTime" format="yyyy-MM-dd" placeholder="选择发货时间"></el-date-picker>
+            <el-date-picker
+              type="date"
+              style="width:100%"
+              v-model="form.mDeliverTime"
+              format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD"
+              placeholder="选择发货时间"
+            />
           </el-form-item>
         </el-form>
       </div>
@@ -206,16 +213,14 @@ export default {
     },
     // 提交物流modal
     openModal () {
-      this.form.afterSaleSn = this.afterSale.sn
       this.logisticsShow = true;
-      this.$refs.form.resetFields()
       if (!this.companyList.length) {
-        this.getCompany()
+        this.getCompany();
       }
-    },
-    // 格式化时间
-    changeTime (time) {
-      this.form.mDeliverTime = time;
+      this.$nextTick(() => {
+        this.$refs.form?.resetFields();
+        this.form.afterSaleSn = this.afterSale.sn;
+      });
     }
   },
   mounted () {

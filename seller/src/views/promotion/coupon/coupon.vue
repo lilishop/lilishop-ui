@@ -56,7 +56,7 @@
       <div class="operation padding-row" v-if="getType !== 'ACTIVITY'">
         <el-button type="primary" @click="add">添加优惠券</el-button>
         <el-button @click="delAll">批量关闭</el-button>
-        <el-button type="info" @click="receivePage()">优惠券领取记录</el-button>
+        <el-button type="warning" @click="receivePage()">优惠券领取记录</el-button>
       </div>
 
       <el-table
@@ -182,11 +182,10 @@
 </template>
 
 <script>
-import { getShopCouponList, updateCouponStatus } from "@/api/promotion";
 import {
-  getPlatformCouponList,
-  updatePlatformCouponStatus,
-  deletePlatformCoupon,
+  getShopCouponList,
+  updateCouponStatus,
+  deleteShopCoupon,
 } from "@/api/promotion";
 import { formatPromotionCouponValidityHtml } from "@/utils/promotions";
 
@@ -223,6 +222,7 @@ export default {
       selectDate: [],
       showActionColumn: true,
       showStatusColumn: true,
+      isSyncingSelection: false,
     };
   },
   watch: {
@@ -233,6 +233,8 @@ export default {
     },
     selectedList: {
       handler(val) {
+        if (this.isSyncingSelection) return;
+        if (this.isSameSelection(val, this.selectList)) return;
         this.$nextTick(() => {
           this.syncTableSelection(val);
         });
@@ -312,15 +314,31 @@ export default {
       };
       return map[type] || "";
     },
+    isSameSelection(next, current) {
+      const a = next || [];
+      const b = current || [];
+      if (a.length !== b.length) return false;
+      const nextIds = a.map((item) => item.id).sort().join(",");
+      const currentIds = b.map((item) => item.id).sort().join(",");
+      return nextIds === currentIds;
+    },
     syncTableSelection(selected) {
       const table = this.$refs.table;
       if (!table) return;
+      const nextList = selected ? [...selected] : [];
+      this.isSyncingSelection = true;
       table.clearSelection();
-      if (!selected || !selected.length) return;
-      this.data.forEach((row) => {
-        if (selected.some((item) => item.id === row.id)) {
-          table.toggleRowSelection(row, true);
-        }
+      if (nextList.length) {
+        this.data.forEach((row) => {
+          if (nextList.some((item) => item.id === row.id)) {
+            table.toggleRowSelection(row, true);
+          }
+        });
+      }
+      this.selectList = nextList;
+      this.selectCount = nextList.length;
+      this.$nextTick(() => {
+        this.isSyncingSelection = false;
       });
     },
     check() {
@@ -337,7 +355,7 @@ export default {
       this.getDataList();
     },
     add() {
-      this.$router.push({ name: "add-platform-coupon" });
+      this.$router.push({ name: "add-coupon" });
     },
     changePage(v) {
       this.searchForm.pageNumber = v;
@@ -357,6 +375,7 @@ export default {
       this.$refs.table?.clearSelection();
     },
     changeSelect(e) {
+      if (this.isSyncingSelection) return;
       this.selectList = e;
       this.selectCount = e.length;
       if (this.getType === "ACTIVITY") this.check();
@@ -370,7 +389,7 @@ export default {
         this.searchForm.startTime = null;
         this.searchForm.endTime = null;
       }
-      getPlatformCouponList(this.searchForm)
+      getShopCouponList(this.searchForm)
         .then((res) => {
           if (res.success) {
             this.data = res.result.records;
@@ -388,7 +407,7 @@ export default {
     },
     see(v, only) {
       const data = only ? { onlyView: true, id: v.id } : { id: v.id };
-      this.$router.push({ name: "edit-platform-coupon", query: data });
+      this.$router.push({ name: "add-coupon", query: data });
     },
     close(v) {
       this.$Modal.confirm({
@@ -396,7 +415,7 @@ export default {
         content: "确认要关闭此优惠券么?",
         loading: true,
         onOk: () => {
-          updatePlatformCouponStatus({
+          updateCouponStatus({
             couponIds: v.id,
             effectiveDays: 0,
           })
@@ -419,7 +438,7 @@ export default {
         content: "确认要删除此优惠券么?",
         loading: true,
         onOk: () => {
-          deletePlatformCoupon(v.id)
+          deleteShopCoupon(v.id)
             .then((res) => {
               this.$Modal.remove();
               if (res.success) {
@@ -444,7 +463,7 @@ export default {
         loading: true,
         onOk: () => {
           const ids = this.selectList.map((e) => e.id);
-          updatePlatformCouponStatus({
+          updateCouponStatus({
             couponIds: ids.toString(),
             promotionStatus: "CLOSE",
           }).then((res) => {

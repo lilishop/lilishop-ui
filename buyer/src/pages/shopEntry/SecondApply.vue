@@ -90,11 +90,9 @@ export default {
     }
   },
   mounted () {
-    if (this.content != {}) {
+    if (this.content && Object.keys(this.content).length) {
       this.form = JSON.parse(JSON.stringify(this.content));
-      this.$forceUpdate();
     }
-    this.$refs.secondForm.resetFields()
   }
 };
 </script>

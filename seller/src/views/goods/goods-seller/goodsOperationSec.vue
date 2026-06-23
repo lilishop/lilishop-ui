@@ -120,19 +120,23 @@
           <div class="form-item-view">
             <el-form-item class="form-item-view-el required" label="主图" prop="goodsGalleryFiles">
               <div style="display: flex; flex-wrap: wrap;">
-                <vuedraggable :animation="200" :list="baseInfoForm.goodsGalleryFiles">
-                  <div v-for="(item, __index) in baseInfoForm.goodsGalleryFiles" :key="__index"
-                    class="demo-upload-list">
-                    <template>
-                      <img :src="item" />
+                <vuedraggable
+                  v-model="baseInfoForm.goodsGalleryFiles"
+                  :animation="200"
+                  :item-key="draggableItemKey"
+                  style="display: flex; flex-wrap: wrap"
+                >
+                  <template #item="{ element }">
+                    <div class="demo-upload-list">
+                      <img :src="element" />
                       <div class="demo-upload-list-cover">
                         <div>
-                          <el-button link type="primary" @click="handleViewGoodsPicture(item)">预览</el-button>
-                          <el-button link type="danger" @click="handleRemoveGoodsPicture(item)">删除</el-button>
+                          <el-button link type="primary" @click="handleViewGoodsPicture(element)">预览</el-button>
+                          <el-button link type="danger" @click="handleRemoveGoodsPicture(element)">删除</el-button>
                         </div>
                       </div>
-                    </template>
-                  </div>
+                    </div>
+                  </template>
                 </vuedraggable>
                 <!--<Upload ref="upload"-->
                 <!--:action="uploadFileUrl" :before-upload="handleBeforeUploadGoodsPicture"-->
@@ -190,39 +194,34 @@
                           <template #header>
                             <el-button link type="danger" @click="handleCloseSkuItem($index, item)">删除规格项</el-button>
                           </template>
-                          <div>
-                            <div style="display: flex;margin-bottom: 10px;font-weight: bold">规格项</div>
-                            <el-form-item class="sku-item-content-val flex" label="">
-
-                              <div>
-                                <el-autocomplete
-                                  v-model="item.name"
-                                  :fetch-suggestions="(q, cb) => cb([])"
-                                  maxlength="30"
-                                  placeholder="请输入规格项名称"
-                                  style="width: 150px"
-                                  @focus="changeSkuItem(item.name)"
-                                  @change="editSkuItem(item.name, $index, item)"
-                                />
-
-                                <el-switch
-                                  v-if="$index === 0"
-                                  v-model="openImage"
-                                  style="margin-left: 10px"
-                                  @change="changeSkuOpenImage"
-                                />
-                                <span v-if="$index === 0" style="margin-left: 5px">添加规格图片</span>
-                              </div>
-                            </el-form-item>
-
+                          <div class="sku-item-content-name">
+                            <div class="sku-item-label">规格项</div>
+                            <div class="sku-item-input-row">
+                              <el-autocomplete
+                                v-model="item.name"
+                                :fetch-suggestions="(q, cb) => cb([])"
+                                maxlength="30"
+                                placeholder="请输入规格项名称"
+                                style="width: 150px"
+                                @focus="changeSkuItem(item.name)"
+                                @change="editSkuItem(item.name, $index, item)"
+                              />
+                              <el-switch
+                                v-if="$index === 0"
+                                v-model="openImage"
+                                style="margin-left: 10px"
+                                @change="changeSkuOpenImage"
+                              />
+                              <span v-if="$index === 0" style="margin-left: 5px">添加规格图片</span>
+                            </div>
                           </div>
                           <div class="sku-val">
-                            <div style="margin-bottom: 10px;font-weight: bold;display: flex">规格值 (输入完成后，鼠标点击其他地方后生效)</div>
-                            <el-form :model="item" class="flex">
+                            <div class="sku-val-label">规格值 (输入完成后，鼠标点击其他地方后生效)</div>
+                            <el-form :model="item" class="sku-val-form flex">
                               <!--规格值文本列表-->
                               <el-form-item v-for="(val, index) in item.spec_values" :key="index"
                                 class="sku-item-content-val flex" label="" style="line-height: 32px;">
-                                <div style="display: flex; justify-content: center; align-items: center;">
+                                <div style="display: flex; justify-content: flex-start; align-items: center;">
 
 
                                   <el-autocomplete
@@ -244,19 +243,26 @@
                                   <!-- 内联错误提示 -->
                                   <div v-if="val._error" class="sku-inline-error">{{ val._error }}</div>
                                 <div v-if="$index === 0 && openImage" style="margin-top: 10px">
-                                  <vuedraggable :animation="200" :list="val.images">
-                                    <div v-for="(img, __index) in val.images" :key="__index" class="sku-upload-list"
-                                      style="width: 180px;height: 140px">
-                                      <template>
-                                        <img :src="img" style="width: 180px;height: 140px" />
+                                  <vuedraggable
+                                    v-model="val.images"
+                                    :animation="200"
+                                    :item-key="draggableItemKey"
+                                    style="display: flex; flex-wrap: wrap"
+                                  >
+                                    <template #item="{ element, index: imgIndex }">
+                                      <div
+                                        class="sku-upload-list"
+                                        style="width: 180px;height: 140px"
+                                      >
+                                        <img :src="element" style="width: 180px;height: 140px" />
                                         <div class="sku-upload-list-cover">
                                           <div style="margin-top: 50px">
-                                            <el-icon :size="25" style="cursor:pointer;margin-right:8px" @click="handleView(img)"><ZoomIn /></el-icon>
-                                            <el-icon :size="25" style="cursor:pointer" @click="handleRemove(val.images, __index)"><Delete /></el-icon>
+                                            <el-icon :size="25" style="cursor:pointer;margin-right:8px" @click="handleView(element)"><ZoomIn /></el-icon>
+                                            <el-icon :size="25" style="cursor:pointer" @click="handleRemove(val.images, imgIndex)"><Delete /></el-icon>
                                           </div>
                                         </div>
-                                      </template>
-                                    </div>
+                                      </div>
+                                    </template>
                                   </vuedraggable>
                                   <el-upload
                                     v-if="val.images.length < 1"
@@ -311,21 +317,21 @@
                           :prop="col.key"
                           min-width="120"
                         >
-                          <template #default="{ row }">
+                          <template #default="{ row, $index }">
                             <span v-if="col.key && !col.slot">{{ row[col.key] }}</span>
                             <el-input
                               v-else-if="col.slot === 'sn'"
                               v-model="row.sn"
                               clearable
                               placeholder="请输入货号"
-                              @change="updateSkuTable(row, 'sn')"
+                              @change="updateSkuTable(row, 'sn', $index)"
                             />
                             <el-input
                               v-else-if="col.slot === 'weight' && baseInfoForm.goodsType !== 'VIRTUAL_GOODS'"
                               v-model="row.weight"
                               clearable
                               placeholder="请输入重量"
-                              @change="updateSkuTable(row, 'weight')"
+                              @change="updateSkuTable(row, 'weight', $index)"
                             >
                               <template #append>kg</template>
                             </el-input>
@@ -334,7 +340,7 @@
                               v-model="row.quantity"
                               clearable
                               placeholder="请输入库存"
-                              @change="updateSkuTable(row, 'quantity')"
+                              @change="updateSkuTable(row, 'quantity', $index)"
                             >
                               <template #append>{{ baseInfoForm.goodsUnit || "" }}</template>
                             </el-input>
@@ -343,7 +349,7 @@
                               v-model="row.cost"
                               clearable
                               placeholder="请输入成本价"
-                              @change="updateSkuTable(row, 'cost')"
+                              @change="updateSkuTable(row, 'cost', $index)"
                             >
                               <template #append>元</template>
                             </el-input>
@@ -352,7 +358,7 @@
                               v-model="row.price"
                               clearable
                               placeholder="请输入价格"
-                              @change="updateSkuTable(row, 'price')"
+                              @change="updateSkuTable(row, 'price', $index)"
                             >
                               <template #append>元</template>
                             </el-input>
@@ -414,15 +420,19 @@
               </el-form-item>
             </div>
             <el-form-item class="form-item-view-el" label="PC商品描述" prop="intro" style="width: 100%">
-              <editor ref="editor" v-model="baseInfoForm.intro" height="800px" openXss></editor>
-              <div class="promise-intro-btn">
-                <el-button type="primary" @click="promiseIntroEditor">将PC商品描述同步到移动端描述
-                </el-button>
+              <div class="intro-editor-field">
+                <editor ref="editor" v-model="baseInfoForm.intro" height="800px" openXss></editor>
+                <div class="promise-intro-btn">
+                  <el-button type="primary" @click="promiseIntroEditor">将PC商品描述同步到移动端描述
+                  </el-button>
+                </div>
               </div>
             </el-form-item>
 
             <el-form-item class="form-item-view-el" label="移动端描述" prop="skuList" style="width: 100%">
-              <editor ref="introEditor" v-model="baseInfoForm.mobileIntro" height="800px" openXss></editor>
+              <div class="intro-editor-field">
+                <editor ref="introEditor" v-model="baseInfoForm.mobileIntro" height="800px" openXss></editor>
+              </div>
             </el-form-item>
           </div>
           <div v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'">
@@ -669,7 +679,7 @@ export default {
       // 某一规格名下的规格值
       skuVal: [],
       // 规格展开的项
-      open_panel: [1, 2],
+      open_panel: ["1", "2"],
       /** 要提交的规格数据*/
       skuInfo: [],
       /** 物流模板 **/
@@ -736,12 +746,18 @@ export default {
     }
   },
   methods: {
+    draggableItemKey(item) {
+      return item;
+    },
     // 选择图片modal
     handleCLickImg(val, index) {
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
       this.selectedFormBtnName = val;
-      // this.picIndex = index;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
     handleLoadingSkuData() {
       this.needToloadSku = false
@@ -908,11 +924,21 @@ export default {
       this.baseInfoForm.goodsGalleryFiles =
         this.baseInfoForm.goodsGalleryFiles.filter((i) => i !== file);
     },
+    assignSkuTableIndex() {
+      this.skuTableData.forEach((row, index) => {
+        row._index = index;
+      });
+    },
     // 更新sku图片
     updateSkuPicture() {
       this.baseInfoForm.regeneratorSkuFlag = true;
       let _index = this.selectedSku._index;
-      this.skuTableData[_index] = this.selectedSku;
+      if (_index === undefined || _index === null) {
+        _index = this.skuTableData.indexOf(this.selectedSku);
+      }
+      if (_index >= 0) {
+        this.skuTableData[_index] = this.selectedSku;
+      }
     },
     // sku图片上传成功
     handleSuccess(res, file, images) {
@@ -1251,13 +1277,12 @@ export default {
     },
     // 将pc商品描述同步给移动端
     promiseIntroEditor() {
+      const pcContent = this.$refs.editor?.getContent?.() ?? this.baseInfoForm.intro ?? "";
+      this.baseInfoForm.intro = pcContent;
+      this.baseInfoForm.mobileIntro = pcContent;
       this.$nextTick(() => {
-        this.$refs.introEditor.setContent(this.baseInfoForm.intro);
-      })
-
-      this.baseInfoForm.mobileIntro = this.baseInfoForm.intro;
-
-      this.$forceUpdate();
+        this.$refs.introEditor?.setContent?.(pcContent);
+      });
     },
 
     /** 根据当前分类id查询商品应包含的参数 */
@@ -1830,6 +1855,7 @@ export default {
             };
           }
         });
+        this.assignSkuTableIndex();
       }
     },
 
@@ -1967,8 +1993,18 @@ export default {
       return option.toUpperCase().indexOf(value.toUpperCase()) !== -1;
     },
     /** 数据改变之后 抛出数据 */
-    updateSkuTable(row, item, type = "default") {
-      let index = row._index;
+    updateSkuTable(row, item, rowIndex) {
+      let index = rowIndex;
+      if (index === undefined || index === null) {
+        index = row._index;
+      }
+      if (index === undefined || index === null) {
+        index = this.skuTableData.indexOf(row);
+      }
+      if (index < 0 || !this.skuTableData[index]) {
+        return;
+      }
+      row._index = index;
       this.baseInfoForm.regeneratorSkuFlag = true;
       /** 进行自定义校验 判断是否是数字（小数也能通过）重量 */
       if (item === "weight") {
@@ -1994,35 +2030,11 @@ export default {
           return;
         }
       }
-      // else if (item === "alertQuantity") {
-      //   if (
-      //     !/^[0-9]\d*$/.test(row[item]) ||
-      //     parseInt(row[item]) < 0 ||
-      //     parseInt(row[item]) > 99999999
-      //   ) {
-      //     // 库存预警
-      //     this.validateError.push([index, item]);
-      //     this.validatatxt = "请输入0~99999999之间的整数";
-      //     return;
-      //   }
-      // }
-      // else if (item === "cost" || item === "price") {
-      //   if (
-      //     !regular.money.test(row[item]) ||
-      //     parseInt(row[item]) < 0 ||
-      //     parseInt(row[item]) > 99999999
-      //   ) {
-      //     // 成本价 价格
-      //     this.validateError.push([index, item]);
-      //     this.validatatxt = "请输入0~99999999之间的价格";
-      //     return;
-      //   }
-      // }
       this.$nextTick(() => {
-        this.skuTableData[index][item] = row[item];
+        if (this.skuTableData[index]) {
+          this.skuTableData[index][item] = row[item];
+        }
       });
-      // // migrated
-(this.skuTableData,[index][item],row[item])
     },
     // 店内分类选择
     selectTree(v) {
@@ -2283,6 +2295,26 @@ export default {
 
 .editor-alert {
   text-align: left;
+}
+
+.intro-editor-field {
+  width: calc(100% - 400px);
+}
+
+.promise-intro-btn {
+  margin-top: 12px;
+  text-align: left;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+}
+
+.footer-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
 }
 
 

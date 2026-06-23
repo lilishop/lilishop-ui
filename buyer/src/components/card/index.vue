@@ -136,5 +136,10 @@ export default {
 
 :deep(._Card .el-card__body) {
   padding: 0 !important;
+  min-height: 0;
+}
+
+:deep(._Card .el-card__body:empty) {
+  display: none;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="forget-password" @click='$refs.verify.show = false'>
+  <div class="forget-password" @click="hideVerify">
     <div style="height:50px;"></div>
     <!-- 顶部logo -->
     <div class="logo-box">
@@ -151,6 +151,9 @@ export default {
     };
   },
   methods: {
+    hideVerify() {
+      this.$refs.verify?.close?.();
+    },
     // 提交短信验证码，修改密码
     next () {
       this.$refs.formFirst.validate((valid) => {
@@ -230,12 +233,12 @@ export default {
     },
     verifyChange (con) { // 验证通过
       if (!con.status) return;
-      this.$refs.verify.show = false;
+      this.hideVerify();
       this.verifyStatus = true;
     },
     verifyBtnClick () {
       if (!this.verifyStatus) {
-        this.$refs.verify.init();
+        this.$refs.verify?.init();
       }
     }
   },

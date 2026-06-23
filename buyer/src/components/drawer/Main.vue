@@ -57,7 +57,7 @@ export default {
       if (!this.userInfo) {
         this.$Modal.confirm({
           title: '请登录',
-          content: '<p>请登录后执行此操作</p>',
+          content: '请登录后执行此操作',
           okText: '立即登录',
           cancelText: '继续浏览',
           onOk: () => {

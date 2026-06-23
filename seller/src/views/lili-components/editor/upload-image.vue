@@ -4,28 +4,31 @@
     <el-dialog v-model="show" width="850px" title="上传图片" append-to-body :z-index="3500">
       <div class="import-oss" @click="importOSS">从资源库中导入</div>
       <div style="display: flex; flex-wrap: wrap">
-        <vuedraggable :animation="200" :list="images">
-          <div
-            v-for="(item, __index) in images"
-            :key="__index"
-            class="upload-list"
-          >
-            <img alt="image" :src="item.url" />
-            <div class="upload-list-cover">
-              <div>
-                <el-icon class="action-icon" :size="30" @click="handleView(item.url)">
-                  <ZoomIn />
-                </el-icon>
-                <el-icon
-                  class="action-icon"
-                  :size="30"
-                  @click="handleRemoveGoodsPicture(__index)"
-                >
-                  <Delete />
-                </el-icon>
+        <vuedraggable
+          v-model="images"
+          :animation="200"
+          :item-key="draggableItemKey"
+          style="display: flex; flex-wrap: wrap"
+        >
+          <template #item="{ element, index }">
+            <div class="upload-list">
+              <img alt="image" :src="element.url" />
+              <div class="upload-list-cover">
+                <div>
+                  <el-icon class="action-icon" :size="30" @click="handleView(element.url)">
+                    <ZoomIn />
+                  </el-icon>
+                  <el-icon
+                    class="action-icon"
+                    :size="30"
+                    @click="handleRemoveGoodsPicture(index)"
+                  >
+                    <Delete />
+                  </el-icon>
+                </div>
               </div>
             </div>
-          </div>
+          </template>
         </vuedraggable>
         <div class="upload-box">
           <el-upload
@@ -58,17 +61,16 @@
       append-to-body
       :z-index="3600"
       destroy-on-close
-      @closed="confirmUrls"
+      @closed="resetOssSelection"
     >
       <OssManage
         ref="ossManage"
         :is-component="true"
         :initialize="showOssManager"
-        @selected="(list) => { selectedImage = list }"
-        @callback="handleCallback"
+        @selected="handleOssSelected"
       />
       <template #footer>
-        <el-button @click="showOssManager = false">取消</el-button>
+        <el-button @click="cancelOssImport">取消</el-button>
         <el-button type="primary" @click="confirmUrls">确定</el-button>
       </template>
     </el-dialog>
@@ -114,6 +116,9 @@ export default {
     };
   },
   methods: {
+    draggableItemKey(item) {
+      return item?.url || item;
+    },
     handleClickUploadImage() {
       this.show = true;
     },
@@ -153,18 +158,39 @@ export default {
       this.$Message.error(err?.message || String(err));
     },
     confirmUrls() {
-      if (this.selectedImage.length) {
-        this.selectedImage.forEach((element) => {
-          this.images.push({ url: element.url });
-        });
-      }
+      this.applySelectedImages();
       this.showOssManager = false;
     },
-    handleCallback(val) {
-      this.$Message.success("导入成功");
-      this.images.push({ url: val.url });
+    cancelOssImport() {
+      this.selectedImage = [];
+      this.showOssManager = false;
+    },
+    resetOssSelection() {
+      this.selectedImage = [];
+    },
+    handleOssSelected(list) {
+      this.selectedImage = Array.isArray(list) ? list : [];
+    },
+    parseOssSelectionUrl(item) {
+      if (!item) {
+        return "";
+      }
+      if (typeof item === "string") {
+        const index = item.indexOf(",");
+        return index >= 0 ? item.slice(index + 1) : item;
+      }
+      return item.url || "";
+    },
+    applySelectedImages() {
+      (this.selectedImage || []).forEach((item) => {
+        const url = this.parseOssSelectionUrl(item);
+        if (url) {
+          this.images.push({ url });
+        }
+      });
     },
     importOSS() {
+      this.selectedImage = [];
       this.showOssManager = true;
       this.$nextTick(() => {
         if (this.$refs.ossManage) {

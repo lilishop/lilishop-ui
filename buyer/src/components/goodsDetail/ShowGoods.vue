@@ -10,7 +10,7 @@
             :src="currentImg"
             :preview-src-list="previewList"
             fit="contain"
-            style="width: 100%; height: 400px"
+            style="width: 100%; height: 350px"
           />
         </div>
 
@@ -220,16 +220,18 @@
             <div class="item-select-title">
               <p>数量</p>
             </div>
-            <div class="item-select-row">
-              <el-input-number
-                :min="1"
-                :max="skuDetail.quantity"
-                :disabled="skuDetail.quantity === 0"
-                v-model="count"
-                :precision="0.1"
-                @blur="changeCount"
-              ></el-input-number>
-              <span class="inventory"> 库存{{ skuDetail.quantity }}</span>
+            <div class="item-select-column">
+              <div class="item-select-row">
+                <el-input-number
+                  :min="1"
+                  :max="skuDetail.quantity"
+                  :disabled="skuDetail.quantity === 0"
+                  v-model="count"
+                  :precision="0.1"
+                  @blur="changeCount"
+                ></el-input-number>
+                <span class="inventory"> 库存{{ skuDetail.quantity }}</span>
+              </div>
             </div>
           </div>
           <div
@@ -241,45 +243,52 @@
             <div class="item-select-title">
               <p>重量</p>
             </div>
-            <div class="item-select-row">
-              <span class="inventory"> {{ skuDetail.weight }}kg</span>
+            <div class="item-select-column">
+              <span class="inventory">{{ skuDetail.weight }}kg</span>
             </div>
           </div>
           <div
-            class="add-buy-car"
+            class="item-select add-buy-car-row"
             v-if="$route.query.way === 'POINT' && skuDetail.authFlag === 'PASS'"
           >
-            <el-button
-              type="danger"
-              :loading="loading"
-              :disabled="skuDetail.quantity === 0"
-              @click="pointPay"
-              >积分购买</el-button
-            >
+            <div class="item-select-column">
+              <div class="add-buy-car">
+                <el-button
+                  type="danger"
+                  :loading="loading"
+                  :disabled="skuDetail.quantity === 0"
+                  @click="pointPay"
+                  >积分购买</el-button
+                >
+              </div>
+            </div>
           </div>
           <div
-            class="add-buy-car"
+            class="item-select add-buy-car-row"
             v-if="$route.query.way !== 'POINT' && skuDetail.authFlag === 'PASS'"
           >
-
-           <el-button
-              type="danger"
-              v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
-              :loading="loading"
-              :disabled="skuDetail.quantity === 0"
-              @click="addShoppingCartBtn"
-              >加入购物车</el-button
-            >
-            <el-button
-              type="warning"
-              :loading="loading1"
-              :disabled="skuDetail.quantity === 0"
-              @click="buyNow"
-              >立即购买</el-button
-            >
-            <el-tooltip content="观看视频" v-if="skuDetail.goodsVideo">
-              <img class="view-video" @click="showGoodsVideo = true" :src="require('@/assets/iconfont/play.svg')" alt="">
-            </el-tooltip>
+            <div class="item-select-column">
+              <div class="add-buy-car">
+                <el-button
+                  type="danger"
+                  v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
+                  :loading="loading"
+                  :disabled="skuDetail.quantity === 0"
+                  @click="addShoppingCartBtn"
+                  >加入购物车</el-button
+                >
+                <el-button
+                  type="warning"
+                  :loading="loading1"
+                  :disabled="skuDetail.quantity === 0"
+                  @click="buyNow"
+                  >立即购买</el-button
+                >
+                <el-tooltip content="观看视频" v-if="skuDetail.goodsVideo">
+                  <img class="view-video" @click="showGoodsVideo = true" :src="require('@/assets/iconfont/play.svg')" alt="">
+                </el-tooltip>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -644,9 +653,7 @@ export default {
   height: 350px;
   box-shadow: 0px 0px 8px $border_color;
   cursor: pointer;
-
-
-
+  margin-bottom: 24px;
 }
 #dplayer{
     width: 100%;
@@ -657,7 +664,7 @@ export default {
 }
 
 .item-detail-img-row {
-  margin-top: 15px;
+  margin-top: 0;
   display: flex;
 }
 
@@ -835,6 +842,7 @@ export default {
 .item-select {
   display: flex;
   flex-direction: row;
+  align-items: center;
   margin-top: 15px;
 }
 
@@ -843,15 +851,25 @@ export default {
   font-size: 14px;
   margin-right: 15px;
   width: 60px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+
+  p {
+    margin: 0;
+  }
 }
 
 .item-select-column {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   flex: 1;
 }
 
 .item-select-row {
+  display: flex;
+  align-items: center;
   margin-bottom: 8px;
 }
 
@@ -890,12 +908,33 @@ export default {
   border-top: 1px dotted $border_color;
 }
 
+.add-buy-car-row {
+  margin-top: 25px;
+
+  &.item-select {
+    margin-top: 25px;
+  }
+
+  .item-select-column {
+    flex: none;
+    width: 100%;
+  }
+}
+
 .add-buy-car {
   display: flex;
   align-items: center;
-  margin-top: 15px;
+  flex-wrap: wrap;
+  margin-top: 0;
+  padding-left: 0;
+  margin-left: 0;
+
   > * {
-    margin: 0 4px;
+    margin: 0 8px 0 0;
+  }
+
+  > *:last-child {
+    margin-right: 0;
   }
 }
 

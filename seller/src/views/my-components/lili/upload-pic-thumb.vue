@@ -1,15 +1,8 @@
 <template>
   <div>
     <div class="upload-pic-thumb">
-      <vuedraggable
-        :list="uploadList"
-        :disabled="!draggable || !multiple"
-        :animation="200"
-        class="list-group"
-        ghost-class="thumb-ghost"
-        @end="onEnd"
-      >
-        <div v-for="(item, index) in uploadList" :key="index" class="upload-list">
+      <div v-if="disable || isView" class="list-group">
+        <div v-for="item in uploadList" :key="item.url" class="upload-list">
           <div v-if="item.status == 'finished'" style="height: 60px">
             <img :src="item.url" alt="" />
             <div class="upload-list-cover">
@@ -25,6 +18,35 @@
             />
           </div>
         </div>
+      </div>
+      <vuedraggable
+        v-else
+        v-model="uploadList"
+        :disabled="disable || !draggable || !multiple"
+        :animation="200"
+        class="list-group"
+        ghost-class="thumb-ghost"
+        item-key="url"
+        @end="onEnd"
+      >
+        <template #item="{ element: item }">
+          <div class="upload-list">
+            <div v-if="item.status == 'finished'" style="height: 60px">
+              <img :src="item.url" alt="" />
+              <div class="upload-list-cover">
+                <el-icon class="action-icon" @click="handleView(item.url)"><View /></el-icon>
+                <el-icon v-if="remove" class="action-icon" @click="handleRemove(item)"><Delete /></el-icon>
+              </div>
+            </div>
+            <div v-else>
+              <el-progress
+                v-if="item.showProgress"
+                :percentage="item.percentage"
+                :show-text="false"
+              />
+            </div>
+          </div>
+        </template>
       </vuedraggable>
       <div
         v-if="!isView"
@@ -121,9 +143,13 @@ export default {
   },
   methods: {
     handleCLickImg(val) {
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
       this.selectedFormBtnName = val;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
     callbackSelected(val) {
       this.picModelFlag = false;

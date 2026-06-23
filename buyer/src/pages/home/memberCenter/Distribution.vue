@@ -470,29 +470,36 @@ export default {
     },
     distribution() {
       // 获取分销商信息
-      distribution().then((res) => {
-        if (res.result) {
-          this.result = res.result;
-          let type = res.result.distributionStatus;
-          if (type === "PASS") {
-            this.status = 2;
-            this.getGoodsData();
-          } else if ( type === "REFUSE") {
+      distribution()
+        .then((res) => {
+          if (res?.result) {
+            this.result = res.result;
+            const type = res.result.distributionStatus;
+            if (type === "PASS") {
+              this.status = 2;
+              this.getGoodsData();
+            } else if (type === "REFUSE") {
+              this.status = 0;
+            } else if (type === "RETREAT") {
+              this.status = 4;
+            } else if (type === "APPEAL") {
+              this.status = 5;
+            } else {
+              this.status = 1;
+            }
+          } else if (res?.code === 22000) {
+            // 分销功能未开启
+            this.status = 3;
+          } else {
+            // 没有资格申请，显示申请表单
             this.status = 0;
-          } else if (type === "RETREAT") {
-            this.status = 4;
-          }else if (type === "APPEAL") {
-            this.status = 5;
-          }else {
-            this.status = 1;
           }
-        } else if (!res.data.success && res.data.code === 22000) {
-          this.status = 3;
-        } else {
-          // 没有资格申请 先去实名认证
-          this.status = 0;
-        }
-      });
+        })
+        .catch((err) => {
+          if (err?.code === 22000) {
+            this.status = 3;
+          }
+        });
     },
   },
 };

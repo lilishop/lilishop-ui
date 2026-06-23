@@ -173,16 +173,16 @@
             <td>{{refundPriceList(goods.isRefund)}}</td>
             <td>{{ $filters.unitPrice(goods.refundPrice, "￥") }}</td>
             <td>{{ $filters.unitPrice((goods.goodsPrice * goods.num), "￥") }}</td>
-            <td>
+            <td class="order-item-actions">
               <el-button
                 v-if="
                   goods.afterSaleStatus.includes('NOT_APPLIED') ||
                   goods.afterSaleStatus.includes('PART_AFTER_SALE')
                 "
                 @click="applyAfterSale(goods.sn)"
-                type="info"
+                type="warning"
                 size="small"
-                class="mb_5"
+                class="order-item-action-btn mb_5"
                 >申请售后</el-button
               >
               <el-button
@@ -190,14 +190,14 @@
                 @click="comment(order.order.sn, goodsIndex)"
                 size="small"
                 type="success"
-                class="fontsize_12 mb_5"
+                class="order-item-action-btn fontsize_12 mb_5"
                 >评价</el-button
               >
               <el-button
                 v-if="goods.complainStatus == 'NO_APPLY'"
                 @click="complain(order.order.sn, goodsIndex)"
                 type="warning"
-                class="fontsize_12"
+                class="order-item-action-btn fontsize_12 mb_5"
                 size="small"
                 >投诉</el-button
               >
@@ -239,19 +239,20 @@
     <el-dialog
       v-model="cancelAvail"
       title="请选择取消订单原因"
-      @ok="sureCancel"
-      @cancel="cancelAvail = false"
     >
       <el-radio-group
         v-model="cancelParams.reason"
-        vertical
-        type="button"
-        button-style="solid"
       >
         <el-radio :label="item.reason" v-for="item in cancelReason" :key="item.id">
           {{ item.reason }}
         </el-radio>
       </el-radio-group>
+      <template #footer>
+        <div style="text-align: right">
+          <el-button @click="cancelAvail = false">取消</el-button>
+          <el-button type="primary" @click="sureCancel">确定</el-button>
+        </div>
+      </template>
     </el-dialog>
 
     <!--查询物流-->
@@ -594,6 +595,10 @@ table {
     height: 40px;
     background: #eee;
   }
+  th {
+    font-size: 12px;
+    font-weight: normal;
+  }
   td {
     padding: 5px;
     text-align: center;
@@ -611,6 +616,16 @@ table {
     &:last-child {
       color: $theme_color;
     }
+  }
+}
+
+.order-item-actions {
+  vertical-align: middle;
+
+  .order-item-action-btn {
+    display: block;
+    margin: 0 auto 5px;
+    min-width: 88px;
   }
 }
 /** 订单价格 */

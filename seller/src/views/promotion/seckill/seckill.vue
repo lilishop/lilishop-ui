@@ -47,102 +47,74 @@
     </el-card>
 
     <el-card>
-      <el-tabs v-model="activeTab" class="mt_10">
-        <el-tab-pane label="秒杀活动列表" name="list">
-          <el-table
-            ref="table"
-            v-loading="loading"
-            border
-            :data="data"
-            class="mt_10"
-            style="width: 100%"
-          >
-            <el-table-column
-              prop="promotionName"
-              label="活动名称"
-              min-width="140"
-              show-overflow-tooltip
-            />
-            <el-table-column prop="startTime" label="开始时间" width="180" />
-            <el-table-column prop="applyEndTime" label="申请截止时间" width="180" />
-            <el-table-column label="活动状态" width="110">
-              <template #default="{ row }">
-                <el-tag v-if="row" :type="promotionStatusTagType(row.promotionStatus)">
-                  {{ promotionStatusText(row.promotionStatus) }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column
-              prop="seckillRule"
-              label="申请规则"
-              min-width="120"
-              show-overflow-tooltip
-            />
-            <el-table-column label="操作" width="250" align="center" fixed="right">
-              <template #default="{ row }">
-                <template v-if="row">
-                  <a
-                    v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
-                    class="link-text"
-                    @click="edit(row)"
-                  >
-                    编辑
-                  </a>
-                  <a v-else class="link-text" @click="manage(row)">查看</a>
-                  <span v-if="row.promotionStatus" class="op-split">|</span>
-                  <a
-                    v-if="row.promotionStatus == 'NEW'"
-                    class="link-text"
-                    @click="manage(row)"
-                  >
-                    管理
-                  </a>
-                  <span v-if="row.promotionStatus == 'NEW'" class="op-split">|</span>
-                  <a
-                    v-if="row.promotionStatus == 'START' || row.promotionStatus == 'NEW'"
-                    class="link-text"
-                    @click="off(row)"
-                  >
-                    关闭
-                  </a>
-                </template>
-              </template>
-            </el-table-column>
-          </el-table>
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+      >
+        <el-table-column
+          prop="promotionName"
+          label="活动名称"
+          min-width="140"
+          show-overflow-tooltip
+        />
+        <el-table-column prop="startTime" label="开始时间" width="180" />
+        <el-table-column prop="applyEndTime" label="申请截止时间" width="180" />
+        <el-table-column label="活动状态" width="110">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="promotionStatusTagType(row.promotionStatus)">
+              {{ promotionStatusText(row.promotionStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="seckillRule"
+          label="申请规则"
+          min-width="120"
+          show-overflow-tooltip
+        />
+        <el-table-column label="操作" width="120" align="center" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a
+                v-if="row.promotionStatus === 'NEW'"
+                class="link-text"
+                @click="manage(row)"
+              >
+                管理
+              </a>
+              <a v-else class="link-text" @click="view(row)">查看</a>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
 
-          <div class="mt_10" style="display: flex; justify-content: flex-end">
-            <el-pagination
-              v-model:current-page="searchForm.pageNumber"
-              v-model:page-size="searchForm.pageSize"
-              :page-sizes="[20, 50, 100]"
-              :total="total"
-              layout="total, sizes, prev, pager, next, jumper"
-              size="small"
-              @current-change="changePage"
-              @size-change="changePageSize"
-            />
-          </div>
-        </el-tab-pane>
-        <el-tab-pane label="秒杀活动设置" name="setup" lazy>
-          <setupSeckill />
-        </el-tab-pane>
-      </el-tabs>
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
     </el-card>
   </div>
 </template>
 
 <script>
 import { seckillList } from "@/api/promotion";
-import setupSeckill from "@/views/promotion/seckill/seckill-setup";
 
 export default {
   name: "seckill",
-  components: {
-    setupSeckill,
-  },
   data() {
     return {
-      activeTab: "list",
       selectDate: [],
       loading: true,
       searchForm: {
@@ -191,39 +163,11 @@ export default {
       this.searchForm.pageSize = 20;
       this.getDataList();
     },
-    edit(v) {
-      this.$router.push({ name: "manager-seckill-add", query: { id: v.id } });
+    view(v) {
+      this.$router.push({ name: "seckill-goods", query: { id: v.id, mode: "view" } });
     },
     manage(v) {
       this.$router.push({ name: "seckill-goods", query: { id: v.id } });
-    },
-    off(v) {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "您确定要下架该活动吗？",
-        onOk: () => {
-          updateSeckillStatus(v.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("下架成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-    expire(v) {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "您确定要作废该活动吗？",
-        onOk: () => {
-          delSeckill(v.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("作废成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
     },
     getDataList() {
       this.loading = true;
@@ -234,7 +178,7 @@ export default {
         this.searchForm.startTime = null;
         this.searchForm.endTime = null;
       }
-      getSeckillList(this.searchForm)
+      seckillList(this.searchForm)
         .then((res) => {
           if (res.success) {
             this.data = res.result.records;

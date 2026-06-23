@@ -100,7 +100,7 @@ export default {
       if (way === 'WALLET') {
         this.$Modal.confirm({
           title: '支付确认',
-          content: '<p>确认使用余额支付吗？</p>',
+          content: '确认使用余额支付吗？',
           onOk: () => {
             pay(params).then(res => {
               if (res.success) {

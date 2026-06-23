@@ -9,7 +9,7 @@
         class="search-form"
         @keyup.enter="handleSearch"
       >
-        <el-form-item label="关键字" prop="keywords" style="display: block; width: 100%">
+        <el-form-item label="关键字" prop="keywords">
           <el-input
             v-model="searchForm.keywords"
             placeholder="请输入商品名称、订单编号搜索"
@@ -60,17 +60,6 @@
             clearable
             style="width: 240px"
           />
-        </el-form-item>
-        <el-form-item label="售后类型">
-          <el-select
-            v-model="searchForm.serviceType"
-            placeholder="全部"
-            clearable
-            style="width: 240px"
-          >
-            <el-option label="退款" value="RETURN_MONEY" />
-            <el-option label="退货" value="RETURN_GOODS" />
-          </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
@@ -129,13 +118,6 @@
               {{ $filters.unitPrice(row.applyRefundPrice, "￥") }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="售后类型" width="100">
-          <template #default="{ row }">
-            <el-tag v-if="row" :type="serviceTypeTagType(row.serviceType)">
-              {{ serviceTypeText(row.serviceType) }}
-            </el-tag>
-          </template>
-        </el-table-column>
         <el-table-column label="售后状态" width="180">
           <template #default="{ row }">
             <el-tag v-if="row" :type="serviceStatusTagType(row.serviceStatus)">
@@ -182,6 +164,7 @@ export default {
         order: "desc",
         startDate: "",
         endDate: "",
+        serviceType: "RETURN_GOODS",
         orderSn: "",
         memberName: "",
         serviceStatus: "",
@@ -240,22 +223,6 @@ export default {
     },
   },
   methods: {
-    serviceTypeText(type) {
-      const map = {
-        RETURN_MONEY: "退款",
-        RETURN_GOODS: "退货",
-        EXCHANGE_GOODS: "换货",
-      };
-      return map[type] || type || "-";
-    },
-    serviceTypeTagType(type) {
-      const map = {
-        RETURN_MONEY: "primary",
-        RETURN_GOODS: "warning",
-        EXCHANGE_GOODS: "success",
-      };
-      return map[type] || "info";
-    },
     serviceStatusText(status) {
       const map = {
         APPLY: "申请中",
@@ -331,7 +298,7 @@ export default {
     detail(v) {
       const sn = v.sn;
       this.$filters.customRouterPush({
-        name: "after-order-detail",
+        name: "return-goods-order-detail",
         query: { sn: sn },
       });
     },

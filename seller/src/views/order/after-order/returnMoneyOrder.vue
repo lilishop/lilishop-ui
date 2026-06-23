@@ -1,41 +1,126 @@
 <template>
   <div class="search">
     <el-card>
-      <el-tabs v-model="activeTab" @tab-click="onTabClick">
-        <el-tab-pane label="退款" name="RETURN_MONEY">
-          <div class="operation" style="margin-bottom: 10px">
-            <el-button type="primary" @click="add">添加</el-button>
-          </div>
-        </el-tab-pane>
-        <el-tab-pane label="取消" name="CANCEL">
-          <div class="operation" style="margin-bottom: 10px">
-            <el-button type="primary" @click="add">添加</el-button>
-          </div>
-        </el-tab-pane>
-        <el-tab-pane label="退货" name="RETURN_GOODS">
-          <div class="operation" style="margin-bottom: 10px">
-            <el-button type="primary" @click="add">添加</el-button>
-          </div>
-        </el-tab-pane>
-        <el-tab-pane label="投诉" name="COMPLAIN">
-          <div class="operation" style="margin-bottom: 10px">
-            <el-button type="primary" @click="add">添加</el-button>
-            <el-button @click="getDataList">刷新</el-button>
-          </div>
-        </el-tab-pane>
-      </el-tabs>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="关键字" prop="keywords" style="display: block; width: 100%">
+          <el-input
+            v-model="searchForm.keywords"
+            placeholder="请输入商品名称、订单编号搜索"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="订单编号" prop="orderSn">
+          <el-input
+            v-model="searchForm.orderSn"
+            placeholder="请输入订单编号"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="售后单号" prop="sn">
+          <el-input
+            v-model="searchForm.sn"
+            placeholder="请输入售后单号"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="申请时间">
+          <el-date-picker
+            v-model="selectDate"
+            type="datetimerange"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            clearable
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            style="width: 360px"
+            @change="selectDateRange"
+          />
+        </el-form-item>
+        <el-form-item label="会员名称" prop="memberName">
+          <el-input
+            v-model="searchForm.memberName"
+            placeholder="请输入会员名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+          <el-button class="search-btn" @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
-      <el-table v-loading="loading" border :data="data" ref="table" style="width: 100%">
-        <el-table-column prop="createBy" label="创建人" min-width="120" />
-        <el-table-column prop="reason" label="原因" min-width="400" />
-        <el-table-column prop="createTime" label="时间" min-width="100" />
-        <el-table-column label="操作" width="200" align="center">
+    <el-card>
+      <div class="order-tab">
+        <el-tabs v-model="currentStatus" @tab-click="onStatusTabClick">
+          <el-tab-pane
+            v-for="item in serviceStatusWithCount"
+            :key="item.value"
+            :label="item.title"
+            :name="item.value"
+          />
+        </el-tabs>
+      </div>
+
+      <el-table
+        ref="table"
+        v-loading="loading"
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+      >
+        <el-table-column prop="sn" label="售后服务单号" min-width="140" show-overflow-tooltip />
+        <el-table-column prop="orderSn" label="订单编号" min-width="120" show-overflow-tooltip />
+        <el-table-column label="商品" min-width="300">
           <template #default="{ row }">
-            <template v-if="row">
-              <a class="link-text" @click="edit(row)">编辑</a>
-              <span class="op-split">|</span>
-              <a class="link-text" @click="remove(row)">删除</a>
-            </template>
+            <div v-if="row" style="margin-top: 5px; height: 80px; display: flex">
+              <div>
+                <img
+                  :src="row.goodsImage"
+                  style="width: 60px; height: 60px; margin-top: 3px; object-fit: cover; border-radius: 4px"
+                  alt=""
+                />
+              </div>
+              <div style="margin-left: 13px">
+                <div class="div-zoom">
+                  <a class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
+                </div>
+                <div style="color: #999; font-size: 12px; margin-top: 5px">
+                  商品ID: {{ row.goodsId }}
+                </div>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="memberId" label="会员ID" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="memberName" label="会员名称" width="140" />
+        <el-table-column label="售后金额" width="110">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">
+              {{ $filters.unitPrice(row.applyRefundPrice, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="售后状态" width="180">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="serviceStatusTagType(row.serviceStatus)">
+              {{ serviceStatusText(row.serviceStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="申请时间" width="180" />
+        <el-table-column label="操作" fixed="right" align="center" width="100">
+          <template #default="{ row }">
+            <a v-if="row" class="link-text" @click="detail(row)">查看</a>
           </template>
         </el-table-column>
       </el-table>
@@ -53,145 +138,198 @@
         />
       </div>
     </el-card>
-
-    <el-dialog v-model="modalVisible" :title="modalTitle" width="500px" :close-on-click-modal="false">
-      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
-        <el-form-item label="售后原因" prop="reason">
-          <el-input v-model="form.reason" maxlength="20" clearable style="width: 100%" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="modalVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">提交</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
+
 <script>
 import * as API_Order from "@/api/order";
 
+const createDefaultSearchForm = () => ({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  startDate: "",
+  endDate: "",
+  serviceType: "RETURN_MONEY",
+  orderSn: "",
+  memberName: "",
+  serviceStatus: "",
+  sn: "",
+  keywords: "",
+});
+
 export default {
+  name: "returnMoneyOrder",
   data() {
     return {
-      activeTab: "RETURN_MONEY",
-      modalVisible: false,
-      modalTitle: "",
       loading: true,
-      submitLoading: false,
-      form: { reason: "" },
-      formValidate: {
-        reason: [{ required: true, message: "请输入售后原因", trigger: "blur" }],
-      },
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        serviceType: "RETURN_MONEY",
-      },
+      searchForm: createDefaultSearchForm(),
+      selectDate: null,
       data: [],
       total: 0,
+      currentStatus: "",
+      afterSaleNumData: {},
     };
   },
+  computed: {
+    serviceStatusWithCount() {
+      return [
+        { title: "全部", value: "" },
+        {
+          title: `申请售后${this.afterSaleNumData.applyNum ? "(" + this.afterSaleNumData.applyNum + ")" : ""}`,
+          value: "APPLY",
+        },
+        {
+          title: `通过售后${this.afterSaleNumData.passNum ? "(" + this.afterSaleNumData.passNum + ")" : ""}`,
+          value: "PASS",
+        },
+        {
+          title: `拒绝售后${this.afterSaleNumData.refuseNum ? "(" + this.afterSaleNumData.refuseNum + ")" : ""}`,
+          value: "REFUSE",
+        },
+        {
+          title: `完成售后${this.afterSaleNumData.completeNum ? "(" + this.afterSaleNumData.completeNum + ")" : ""}`,
+          value: "COMPLETE",
+        },
+        {
+          title: `卖家终止售后${this.afterSaleNumData.sellerTerminationNum ? "(" + this.afterSaleNumData.sellerTerminationNum + ")" : ""}`,
+          value: "SELLER_TERMINATION",
+        },
+        {
+          title: `买家取消售后${this.afterSaleNumData.buyerCancelNum ? "(" + this.afterSaleNumData.buyerCancelNum + ")" : ""}`,
+          value: "BUYER_CANCEL",
+        },
+        {
+          title: `等待平台退款${this.afterSaleNumData.waitRefundNum ? "(" + this.afterSaleNumData.waitRefundNum + ")" : ""}`,
+          value: "WAIT_REFUND",
+        },
+      ];
+    },
+  },
   methods: {
-    onTabClick(tab) {
-      this.handleClickType(tab.paneName);
+    serviceStatusText(status) {
+      const map = {
+        APPLY: "申请中",
+        PASS: "通过售后",
+        REFUSE: "拒绝售后",
+        BUYER_RETURN: "买家退货，待卖家收货",
+        SELLER_CONFIRM: "卖家确认收货",
+        SELLER_TERMINATION: "卖家终止售后",
+        BUYER_CANCEL: "买家取消售后",
+        COMPLETE: "完成售后",
+        WAIT_REFUND: "待平台退款",
+      };
+      return map[status] || status || "-";
     },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
+    serviceStatusTagType(status) {
+      const map = {
+        APPLY: "primary",
+        PASS: "info",
+        REFUSE: "warning",
+        BUYER_RETURN: "warning",
+        SELLER_CONFIRM: "",
+        SELLER_TERMINATION: "success",
+        BUYER_CANCEL: "danger",
+        COMPLETE: "success",
+        WAIT_REFUND: "primary",
+      };
+      return map[status] || "info";
+    },
+    init() {
+      this.getDataList();
+      this.getAfterSaleNumData();
+    },
+    changePage() {
       this.getDataList();
     },
-    changePageSize(v) {
+    changePageSize() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
       this.getDataList();
     },
-    handleClickType(v) {
+    handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
-      this.searchForm.serviceType = v;
       this.getDataList();
+      this.getAfterSaleNumData();
+    },
+    handleReset() {
+      this.searchForm = createDefaultSearchForm();
+      this.selectDate = null;
+      this.currentStatus = "";
+      this.getDataList();
+      this.getAfterSaleNumData();
+    },
+    selectDateRange(v) {
+      if (v) {
+        this.searchForm.startDate = v[0];
+        this.searchForm.endDate = v[1];
+      } else {
+        this.searchForm.startDate = "";
+        this.searchForm.endDate = "";
+      }
     },
     getDataList() {
       this.loading = true;
-      API_Order.getAfterSaleReasonPage(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    add() {
-      this.form.reason = "";
-      this.modalVisible = true;
-      this.modalTitle = "添加售后原因";
-    },
-    edit(v) {
-      this.form.reason = v.reason;
-      this.form.id = v.id;
-      this.modalVisible = true;
-      this.modalTitle = "修改售后原因";
-    },
-    handleSubmit() {
-      this.form.serviceType = this.searchForm.serviceType;
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          if (this.modalTitle == "添加售后原因") {
-            delete this.form.id;
-            API_Order.addAfterSaleReason(this.form).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("添加成功");
-                this.getDataList();
-                this.modalVisible = false;
-              }
-            });
-          } else {
-            API_Order.editAfterSaleReason(this.form.id, this.form).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("修改成功");
-                this.getDataList();
-                this.modalVisible = false;
-              }
-            });
+      API_Order.getAfterSaleOrderPage(this.searchForm)
+        .then((res) => {
+          if (res.success) {
+            this.data = res.result.records;
+            this.total = res.result.total;
           }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+    getAfterSaleNumData() {
+      const { serviceStatus, ...searchParams } = this.searchForm;
+      API_Order.getAfterSaleNumVO(searchParams).then((res) => {
+        if (res.success) {
+          this.afterSaleNumData = res.result;
         }
       });
     },
-    remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "确认要删除此售后原因?",
-        loading: true,
-        onOk: () => {
-          API_Order.delAfterSaleReason(v.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("售后原因已删除");
-              this.getDataList();
-            }
-          });
-        },
+    detail(v) {
+      this.$filters.customRouterPush({
+        name: "return-goods-order-detail",
+        query: { sn: v.sn },
       });
+    },
+    onStatusTabClick(tab) {
+      this.serviceStatusClick(tab.paneName);
+    },
+    serviceStatusClick(item) {
+      this.currentStatus = item;
+      if (item === "" || item === undefined) {
+        delete this.searchForm.serviceStatus;
+      } else {
+        this.searchForm.serviceStatus = item;
+      }
+      this.getDataList();
+      this.getAfterSaleNumData();
     },
   },
   mounted() {
-    this.getDataList();
+    this.init();
   },
 };
 </script>
-<style scoped>
+
+<style lang="scss" scoped>
+.order-tab {
+  :deep(.el-tabs__item) {
+    font-size: 14px;
+  }
+}
+
 .link-text {
-  color: #2d8cf0;
+  color: #409eff;
   cursor: pointer;
   text-decoration: none;
 }
-.op-split {
-  display: inline-block;
-  margin: 0 8px;
-  color: #dcdee2;
+
+.mt_10 {
+  margin-top: 10px;
 }
 </style>

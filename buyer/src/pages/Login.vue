@@ -1,7 +1,7 @@
 <template>
   <div class="login" @keyup.enter="handleSubmit('formInline')">
     <!-- 顶部logo -->
-    <div class="top-content" @click='$refs.verify.show = false'>
+    <div class="top-content" @click="hideVerify">
       <div class="logo-box">
         <img :src="$store.state.logoImg" @click="$router.push('/')" />
         <div>欢迎登录</div>
@@ -12,13 +12,13 @@
       <!-- 轮播 -->
       <el-carousel :interval="5000" arrow="never" class="login-carousel" height="550px">
         <el-carousel-item>
-          <div class="demo-carousel" @click='$refs.verify.show = false'>
+          <div class="demo-carousel" @click="hideVerify">
             <img src="https://lili-system.oss-cn-beijing.aliyuncs.com/background.jpg" />
           </div>
         </el-carousel-item>
       </el-carousel>
       <!-- 登录模块 -->
-      <div class="form-box" @click='$refs.verify.show = false'>
+      <div class="form-box" @click="hideVerify">
         <div class="account-number">
           <div class="tab-switch">
             <span>{{ type ? '账号登录' : '验证码登录' }}</span>
@@ -70,7 +70,7 @@
           <div v-show="!scannerCodeLoginFLag">
           <!-- 账号密码登录 -->
           <el-form ref="formInline" :model="formData" :rules="ruleInline" v-show="type === true"
-                @click.self='$refs.verify.show = false'>
+                @click.self="hideVerify">
             <el-form-item prop="username">
               <el-input type="text" v-model="formData.username" clearable placeholder="用户名">
                 <template #prepend><el-icon><User /></el-icon></template>
@@ -87,7 +87,7 @@
           </el-form>
           <!-- 验证码登录 -->
           <el-form ref="formSms" :model="formSms" :rules="ruleInline" v-show="type === false"
-                @click.self='$refs.verify.show = false'>
+                @click.self="hideVerify">
             <el-form-item prop="mobile">
               <el-input type="text" v-model="formSms.mobile" clearable placeholder="手机号">
                 <template #prepend><el-icon><Lock /></el-icon></template>
@@ -126,8 +126,8 @@
               </svg>
             </div>
             <div class="register">
-              <span style="color:red" @click="$router.push('signUp')">还没有账号？点击立即注册</span>
-              <span @click="$router.push('forgetPassword')">忘记密码</span>
+              <span style="color:red" @click.stop="$router.push('signUp')">还没有账号？点击立即注册</span>
+              <span @click.stop="$router.push('forgetPassword')">忘记密码</span>
             </div>
           </div>
         </div>
@@ -224,17 +224,20 @@ export default {
     }
   },
   methods: {
+    hideVerify() {
+      this.$refs.verify?.close?.();
+    },
 
     // 登录
     handleSubmit(name) {
       this.$refs[name].validate((valid) => {
         if (valid) {
           if (this.type) {
-            this.$refs.verify.init();
+            this.$refs.verify?.init();
           } else {
             let data = JSON.parse(JSON.stringify(this.formSms));
             apiLogin.smsLogin(data).then((res) => {
-              this.$refs.verify.show = false;
+              this.hideVerify();
               if (res.success) {
                 this.$Message.success("登录成功");
                 storage.setItem("accessToken", res.result.accessToken);
@@ -306,7 +309,7 @@ export default {
         // 账号密码登录
         let data = JSON.parse(JSON.stringify(this.formData));
         data.password = md5(data.password);
-        this.$refs.verify.show = false;
+        this.hideVerify();
         this.$Spin.show();
         apiLogin
           .login(data)
@@ -323,13 +326,13 @@ export default {
           });
       } else {
         this.verifyStatus = true;
-        this.$refs.verify.show = false;
+        this.hideVerify();
       }
     },
     // 开启滑块验证
     verifyBtnClick() {
       if (!this.verifyStatus) {
-        this.$refs.verify.init();
+        this.$refs.verify?.init();
       }
     },
     handleWebLogin(type) {
@@ -448,7 +451,7 @@ export default {
         this.$refs.formSms.resetFields();
       }
       this.verifyStatus = false;
-      this.$refs.verify.show = false;
+      this.hideVerify();
       clearInterval(this.interval);
       this.codeMsg = "发送验证码";
       this.time = 60;
@@ -614,11 +617,12 @@ export default {
 
 .register {
   display: flex;
-
   margin-top: -10px;
+  font-size: 12px;
 
   span {
     margin-left: 10px;
+    font-size: 12px;
 
     &:hover {
       cursor: pointer;

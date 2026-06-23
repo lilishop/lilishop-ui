@@ -16,6 +16,10 @@ export default {
   components:{uploadImage},
   name: "Tinymce",
   props: {
+    modelValue: {
+      type: String,
+      default: "",
+    },
     value: {
       type: String,
       default: "",
@@ -25,6 +29,7 @@ export default {
       default:'500px'
     }
   },
+  emits: ["update:modelValue", "input"],
   data() {
     return {
       // 引入编辑器的配置
@@ -41,14 +46,19 @@ export default {
   created() {
     this.init();
   },
+  computed: {
+    bindValue() {
+      return this.modelValue ?? this.value ?? "";
+    },
+  },
   watch: {
-    value: {
+    bindValue: {
       handler(val) {
         if (!this.hasChange && this.hasInit) {
-          // 当内容有更改且编辑器已初始化时，更新编辑器的内容
-          this.$nextTick(() =>
-            window.tinymce.get(this.tinymceId).setContent(val || "")
-          );
+          const editor = window.tinymce.get(this.tinymceId);
+          if (editor) {
+            this.$nextTick(() => editor.setContent(val || ""));
+          }
         }
       },
       deep: true,
@@ -69,19 +79,15 @@ export default {
         selector: `#${this.tinymceId}`,
         convert_urls: false,
         init_instance_callback: (editor) => {
-          if (_this.value) {
-            // 如果有初始值，则设置编辑器的内容为初始值
-            this.$nextTick(() => editor.setContent(_this.value));
+          if (_this.bindValue) {
+            _this.$nextTick(() => editor.setContent(_this.bindValue));
           }
           _this.hasInit = true;
-          // 监听编辑器内容的变化
-          editor.on("NodeChange Change KeyUp  SetContent", (event) => {
-            if (_this.value) {
-              // 内容发生更改
-              this.hasChange = true;
-            }
-            // 通过 input 事件将编辑器的内容传递给父组件
-            this.$emit("input", editor.getContent());
+          editor.on("NodeChange Change KeyUp SetContent", () => {
+            _this.hasChange = true;
+            const content = editor.getContent();
+            _this.$emit("update:modelValue", content);
+            _this.$emit("input", content);
           });
         },
         setup(editor) {
@@ -96,8 +102,15 @@ export default {
       });
     },
     setContent(value) {
-      // 设置编辑器的内容
-      window.tinymce.get(this.tinymceId).setContent(value);
+      const editor = window.tinymce.get(this.tinymceId);
+      if (!editor) {
+        return;
+      }
+      const content = value || "";
+      this.hasChange = false;
+      editor.setContent(content);
+      this.$emit("update:modelValue", content);
+      this.$emit("input", content);
     },
     getContent() {
       // 获取编辑器的内容

@@ -19,16 +19,18 @@
                 :key="index"
                 @click="orderBy(item.en, index)"
               >
-                <span :class="{ 'goods-list-tool-active': index === sortIndex }"
-                  >{{ item.title }}<el-icon><ArrowDown /></el-icon></span>
+                <span :class="{ 'goods-list-tool-active': index === sortIndex }">
+                  {{ item.title }}
+                  <el-icon><ArrowDown /></el-icon>
+                </span>
               </li>
               <li @click="orderBy('price', 5, 'up')" class="price-sort">
                 <span :class="{ 'goods-list-tool-active': 5 === sortIndex }">
                   价格
-                  <div>
+                  <span class="price-arrows">
                     <el-icon :class="{ 'price-color': sortPriceIndex == 'desc' }"><ArrowUp /></el-icon>
                     <el-icon :class="{ 'price-color': sortPriceIndex == 'asc' }"><ArrowDown /></el-icon>
-                  </div>
+                  </span>
                 </span>
               </li>
             </ul>
@@ -44,7 +46,7 @@
               @click="goGoodsDetail(item.id, item.goodsId)"
             >
               <div class="goods-show-img">
-                <img width="220" height="220" :src="item.thumbnail" />
+                <img :src="item.thumbnail" />
               </div>
               <div class="goods-show-price">
                 <span>
@@ -72,22 +74,21 @@
 
               <div class="goods-show-right">
                 <el-tag
-                  class="goods-show-tag"
+                  class="goods-show-tag goods-show-tag-self"
                   color="red"
+                  effect="dark"
                   v-if="item.selfOperated"
                 >
                   自营
                 </el-tag>
                 <el-tag
-                  class="goods-show-tag"
-                  color="blue"
+                  class="goods-show-tag goods-show-tag-physical"
                   v-if="item.goodsType === 'VIRTUAL_GOODS'"
                 >
                   虚拟
                 </el-tag>
                 <el-tag
-                  class="goods-show-tag"
-                  color="blue"
+                  class="goods-show-tag goods-show-tag-physical"
                   v-else-if="item.goodsType === 'PHYSICAL_GOODS'"
                 >
                   实物
@@ -103,7 +104,8 @@
           @size-change="changePageSize"
           :total="total"
           :page-size="params.pageSize"
-         layout="total, sizes, prev, pager, next"></el-pagination>
+          layout="total, prev, pager, next, sizes"
+        ></el-pagination>
       </div>
     </div>
     <el-skeleton size="large" fix v-if="loading"></el-skeleton>
@@ -244,6 +246,8 @@ export default {
   },
   components: {
     GoodsClassNav,
+    ArrowDown,
+    ArrowUp,
   },
 };
 </script>
@@ -274,6 +278,24 @@ export default {
   padding: 0 3px;
 }
 
+.goods-show-tag-self {
+  color: #fff;
+
+  :deep(.el-tag__content) {
+    color: #fff;
+  }
+}
+
+.goods-show-tag-physical {
+  background-color: #e6f4ff;
+  border-color: #b3d8ff;
+  color: #409eff;
+
+  :deep(.el-tag__content) {
+    color: #409eff;
+  }
+}
+
 .goods-show-seller {
   // padding:3px 0;
   vertical-align: middle;
@@ -295,6 +317,8 @@ export default {
 .goods-show-right {
   display: flex;
   flex-direction: row;
+  align-items: center;
+  gap: 6px;
   margin-top: 5px;
 }
 
@@ -314,38 +338,40 @@ export default {
   background-color: #f1f1f1;
 }
 .goods-list-tool ul {
+  display: flex;
+  align-items: center;
+  height: 100%;
   padding-left: 15px;
   font-size: 12px;
-  margin-top: 10px;
-  &::after {
-    content: "";
-    display: block;
-    clear: left;
-  }
+  margin: 0;
+  list-style: none;
 
   .price-sort {
-    span {
-      display: inline-block;
-      vertical-align: middle;
-      width: 50px;
-      height: 22px;
-      position: relative;
-      line-height: 15px;
-      top: -2px;
-      left: 0;
-    }
-    span > div {
-      display: inline-block;
+    .price-arrows {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+      padding: 0;
+      border: none;
+      margin: 0;
+      background: transparent;
+      line-height: 0;
+
       .el-icon {
-        font-size: 12px;
-        position: absolute;
-        &:nth-child(1) {
-          top: 1px;
-        }
-        &:nth-child(2) {
-          top: 7px;
+        font-size: 8px;
+        line-height: 1;
+        height: 6px;
+
+        :deep(svg) {
+          width: 8px;
+          height: 8px;
         }
       }
+
       .price-color {
         color: #b3b3b3;
       }
@@ -354,28 +380,37 @@ export default {
 }
 .goods-list-tool li {
   cursor: pointer;
-  float: left;
 }
-.goods-list-tool span {
+.goods-list-tool li > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   padding: 3px 5px;
   border: 1px solid #ccc;
   margin-left: -1px;
   background-color: #fff;
+  line-height: 1;
+  white-space: nowrap;
+  box-sizing: border-box;
 }
-.goods-list-tool span:hover {
+.goods-list-tool li > span:hover {
   border-color: $theme_color;
   position: relative;
   text-decoration: none;
   z-index: 1;
 }
-.goods-list-tool .el-icon {
-  font-weight: bold;
-  font-size: 16px;
+.goods-list-tool li > span .el-icon {
+  font-size: 12px;
+  line-height: 1;
 }
 .goods-list-tool-active {
   color: #fff;
   border-left: 1px solid #ccc;
   background-color: $theme_color !important;
+
+  .price-color {
+    color: rgba(255, 255, 255, 0.65) !important;
+  }
 }
 
 /* ---------------商品栏结束------------------- */

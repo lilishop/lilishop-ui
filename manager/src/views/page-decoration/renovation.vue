@@ -2,11 +2,22 @@
   <div class="renovation">
     <div class="model-list">
       <div class="classification-title">基础模块</div>
-      <draggable tag="ul" :list="modelData" v-bind="{group:{ name:'model', pull:'clone',put:false},sort:false, ghostClass: 'ghost'}"   >
-        <li v-for="(model, index) in modelData" :key="index" class="model-item">
-          <el-icon><Picture /></el-icon>
-          <span>{{model.name}}</span>
-        </li>
+      <draggable
+        tag="ul"
+        :list="modelData"
+        :item-key="getModelKey"
+        :clone="cloneModel"
+        :group="{ name: 'model', pull: 'clone', put: false }"
+        :sort="false"
+        ghost-class="ghost"
+        handle=".model-item"
+      >
+        <template #item="{ element: model }">
+          <li class="model-item">
+            <el-icon><Picture /></el-icon>
+            <span>{{ model.name }}</span>
+          </li>
+        </template>
       </draggable>
     </div>
     <div class="show-content">
@@ -73,6 +84,18 @@ export default {
     };
   },
   methods: {
+    getModelKey(model) {
+      return model.type || model.name;
+    },
+    cloneModel(model) {
+      const key = Date.now() + "_" + Math.ceil(Math.random() * 99999);
+      const cloned = JSON.parse(JSON.stringify(model));
+      return {
+        ...cloned,
+        key,
+        model: cloned.type + "_" + key,
+      };
+    },
     clearCache(){
       this.setStore('managerPCPageCache', '')
       this.$Message.success('清除成功')
@@ -158,6 +181,15 @@ export default {
     width: 100%;
     height: 30px;
     line-height: 30px;
+    text-align: center;
+  }
+  :deep(ul) {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   .model-item {
     width: 110px;
@@ -165,7 +197,10 @@ export default {
     background: #eee;
     margin-top: 10px;
     line-height: 30px;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     color: #999;
     transition:0.15s;
     border-radius: 4px;

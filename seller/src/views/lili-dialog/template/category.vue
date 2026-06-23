@@ -73,26 +73,21 @@ export default {
       this.thirdIndex = index;
     },
     init() {
-
-
-      let category = JSON.parse(localStorage.getItem('category'))
-      if (category) {
+      const loadCategory = () => {
+        const category = JSON.parse(localStorage.getItem("category"));
+        if (!Array.isArray(category)) {
+          return;
+        }
         category.forEach((item) => {
           item.___type = "category";
         });
         this.categoryList = category;
-        // this.handleClickChild(category[0], 0);
-      } else {
-        setTimeout(() => {
-          category = JSON.parse(localStorage.getItem('category'))
-          category.forEach((item) => {
-            item.___type = "category";
-          });
-          this.categoryList = category;
-          // this.handleClickChild(category[0], 0);
-        },3000)
-      }
+      };
 
+      loadCategory();
+      if (!this.categoryList.length) {
+        setTimeout(loadCategory, 3000);
+      }
     },
   },
 };

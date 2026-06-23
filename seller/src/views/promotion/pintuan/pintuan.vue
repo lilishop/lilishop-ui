@@ -47,6 +47,9 @@
     </el-card>
 
     <el-card>
+      <div class="operation padding-row mb_10">
+        <el-button type="primary" @click="newAct">添加</el-button>
+      </div>
       <el-table
         ref="table"
         v-loading="loading"
@@ -71,13 +74,23 @@
         <el-table-column prop="storeName" label="所属店铺" min-width="120" show-overflow-tooltip />
         <el-table-column prop="startTime" label="活动开始时间" width="180" />
         <el-table-column prop="endTime" label="活动结束时间" width="180" />
-        <el-table-column label="操作" width="200" align="center" fixed="right">
+        <el-table-column label="操作" width="220" align="center" fixed="right">
           <template #default="{ row }">
             <template v-if="row">
-              <a class="link-text" @click="view(row)">查看</a>
-              <template v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'">
+              <template v-if="row.promotionStatus === 'NEW'">
+                <a class="link-text" @click="edit(row)">编辑</a>
                 <span class="op-split">|</span>
-                <a class="link-text" @click="close(row)">关闭</a>
+                <a class="link-text" @click="manage(row, 'manager')">管理</a>
+              </template>
+              <template v-else-if="row.promotionStatus !== 'CLOSE'">
+                <a class="link-text" @click="manage(row, 'view')">查看</a>
+                <template v-if="row.promotionStatus === 'START'">
+                  <span class="op-split">|</span>
+                  <a class="link-text" @click="close(row)">关闭</a>
+                </template>
+              </template>
+              <template v-else>
+                <a class="link-text" @click="open(row)">开启</a>
               </template>
             </template>
           </template>
@@ -101,7 +114,7 @@
 </template>
 
 <script>
-import { getPintuanList, deletePintuan, editPintuanStatus } from "@/api/promotion";
+import { getPintuanList, editPintuanStatus } from "@/api/promotion";
 export default {
   name: "pintuan",
   data() {
@@ -176,8 +189,37 @@ export default {
           this.loading = false;
         });
     },
-    view(v) {
-      this.$router.push({ name: "pintuan-goods", query: { id: v.id } });
+    newAct() {
+      this.$router.push({ name: "pintuan-edit" });
+    },
+    edit(v) {
+      this.$router.push({ name: "pintuan-edit", query: { id: v.id } });
+    },
+    manage(v, status) {
+      this.$router.push({ name: "pintuan-goods", query: { id: v.id, status } });
+    },
+    open(v) {
+      const sTime = new Date();
+      sTime.setMinutes(sTime.getMinutes() + 10);
+      const eTime = new Date(new Date().setHours(0, 0, 0, 0) + 24 * 60 * 60 * 1000 - 1);
+      const params = {
+        startTime: sTime.getTime(),
+        endTime: eTime.getTime(),
+      };
+      this.$Modal.confirm({
+        title: "确认开启",
+        content: "您确认要开启此拼团活动？（默认为当前时间后十分钟至当天结束）",
+        loading: true,
+        onOk: () => {
+          editPintuanStatus(v.id, params).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success("开启活动成功");
+              this.getDataList();
+            }
+          });
+        },
+      });
     },
     close(v) {
       this.$Modal.confirm({
@@ -185,10 +227,10 @@ export default {
         content: "您确认要关闭此拼团活动?",
         loading: true,
         onOk: () => {
-          updatePintuanStatus(v.id).then((res) => {
+          editPintuanStatus(v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("操作成功");
+              this.$Message.success("关闭活动成功");
               this.getDataList();
             }
           });
@@ -205,5 +247,20 @@ export default {
 <style lang="scss" scoped>
 .mt_10 {
   margin-top: 10px;
+}
+
+.mb_10 {
+  margin-bottom: 10px;
+}
+
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.op-split {
+  margin: 0 8px;
+  color: #dcdee2;
 }
 </style>

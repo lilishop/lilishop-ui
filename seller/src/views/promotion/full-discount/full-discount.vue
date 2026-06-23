@@ -47,6 +47,9 @@
     </el-card>
 
     <el-card>
+      <div class="operation padding-row">
+        <el-button type="primary" @click="add">新增</el-button>
+      </div>
       <el-table
         ref="table"
         v-loading="loading"
@@ -71,10 +74,12 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" width="140" fixed="right">
+        <el-table-column label="操作" align="center" width="160" fixed="right">
           <template #default="{ row }">
             <template v-if="row">
-              <a class="link-text" @click="view(row)">查看</a>
+              <a class="link-text" @click="goDetail(row)">
+                {{ row.promotionStatus === "NEW" ? "编辑" : "查看" }}
+              </a>
               <template v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'START'">
                 <span class="op-split">|</span>
                 <a class="link-text" @click="openOrClose(row)">关闭</a>
@@ -189,7 +194,10 @@ export default {
         }
       });
     },
-    view(row) {
+    add() {
+      this.$router.push({ name: "full-discount-detail" });
+    },
+    goDetail(row) {
       this.$router.push({ name: "full-discount-detail", query: { id: row.id } });
     },
   },
@@ -213,5 +221,13 @@ export default {
 
 .mt_10 {
   margin-top: 10px;
+}
+
+.operation {
+  margin-bottom: 10px;
+}
+
+.padding-row {
+  padding: 0 0 10px;
 }
 </style>

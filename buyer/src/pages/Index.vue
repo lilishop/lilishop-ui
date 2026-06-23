@@ -29,10 +29,11 @@
     <BaseHeader></BaseHeader>
     <!-- 搜索框、logo -->
     <Search></Search>
-    <!-- 商品分类 -->
-    <cateNav :showAlways="true" v-if="showNav" :large="carouselLarge" :opacity="carouselOpacity"></cateNav>
-    <!-- 楼层装修部分 -->
-    <model-form ref="modelForm" :data="modelForm"></model-form>
+    <div class="index-main">
+      <!-- 商品分类 + 楼层装修（同一宽度容器，保证与分类栏左缘对齐） -->
+      <cateNav :showAlways="true" v-if="showNav" :large="carouselLarge" :opacity="carouselOpacity"></cateNav>
+      <model-form ref="modelForm" :data="modelForm"></model-form>
+    </div>
     <!-- 底部栏 -->
     <BaseFooter></BaseFooter>
     <!-- 侧边栏 -->

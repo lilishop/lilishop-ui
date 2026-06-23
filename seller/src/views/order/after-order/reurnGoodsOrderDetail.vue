@@ -4,9 +4,9 @@
       <div class="main-content">
         <div class="div-flow-left">
           <div class="div-form-default">
-            <h3>退货申请</h3>
+            <h3>{{ sectionTitle }}</h3>
             <dl>
-              <dt>退货商品</dt>
+              <dt>{{ isRefundOnly ? '退款商品' : '退货商品' }}</dt>
               <dd>
                 <div>
                   <img :src="afterSaleInfo.goodsImage" style="height: 60px">
@@ -23,11 +23,11 @@
               <dd>{{ afterSaleInfo.serviceName }}</dd>
             </dl>
             <dl>
-              <dt>退货退款编号</dt>
+              <dt>{{ isRefundOnly ? '退款编号' : '退货退款编号' }}</dt>
               <dd>{{ afterSaleInfo.sn }}</dd>
             </dl>
             <dl>
-              <dt>退货退款原因</dt>
+              <dt>{{ isRefundOnly ? '退款原因' : '退货退款原因' }}</dt>
               <dd>{{ afterSaleInfo.reason }}</dd>
             </dl>
             <dl>
@@ -47,7 +47,7 @@
               <dd>{{ afterSaleInfo.refundPoint }}</dd>
             </dl>
             <dl>
-              <dt>退货数量</dt>
+              <dt>{{ isRefundOnly ? '退款数量' : '退货数量' }}</dt>
               <dd>{{ afterSaleInfo.num }}</dd>
             </dl>
             <dl>
@@ -92,7 +92,7 @@
                 <priceColorScheme :value="afterSaleInfo.applyRefundPrice" :color="$mainColor"></priceColorScheme>
               </dd>
             </dl>
-            <dl>
+            <dl v-if="params.serviceStatus === 'PASS'">
               <dt>实际退款金额</dt>
               <dd>
                 <el-input-number :min="0" v-model="params.actualRefundPrice" style="width: 260px" />
@@ -264,20 +264,36 @@
             </dl>
             <dl>
               <dt>物流公司</dt>
-              <dd>{{ afterSaleInfo.mlogisticsName }}</dd>
+              <dd>{{ buyerLogisticsName }}</dd>
             </dl>
             <dl>
               <dt>物流单号</dt>
               <dd>
-                {{ afterSaleInfo.mlogisticsNo }}
+                {{ buyerLogisticsNo }}
               </dd>
             </dl>
             <dl>
               <dt>操作</dt>
               <dd>
                 <el-button
+                  v-if="canConfirmReceipt"
+                  type="danger"
+                  :loading="confirmLoading"
+                  @click="sellerConfirmSubmit('PASS')"
+                  style="margin-left: 5px"
+                >
+                  确认收货
+                </el-button>
+                <el-button
+                  v-if="canConfirmReceipt"
                   type="primary"
-                  plain
+                  :loading="confirmLoading"
+                  @click="sellerConfirmSubmit('REFUSE')"
+                  style="margin-left: 5px"
+                >
+                  拒收
+                </el-button>
+                <el-button
                   :loading="submitLoading"
                   @click="logisticsSeller()"
                   style="margin-left: 5px"
@@ -302,13 +318,13 @@
         <dl>
           <dt>物流公司：</dt>
           <dd>
-            <div class="text-box">{{ afterSaleInfo.mlogisticsName }}</div>
+            <div class="text-box">{{ buyerLogisticsName }}</div>
           </dd>
         </dl>
         <dl>
           <dt>物流单号：</dt>
           <dd>
-            <div class="text-box">{{ afterSaleInfo.mlogisticsNo }}</div>
+            <div class="text-box">{{ buyerLogisticsNo }}</div>
           </dd>
         </dl>
         <div class="div-express-log">
@@ -349,6 +365,7 @@ export default {
       afterSaleInfo: {}, // 售后信息
       afterSaleImage: [], //会员申诉图片
       submitLoading: false, // 添加或编辑提交状态
+      confirmLoading: false, // 确认收货提交状态
       storeMsg: {}, // 商家地址信息
       //商家处理意见
       params: {
@@ -359,6 +376,36 @@ export default {
       refundPriceForm: {
         remark: "",
       },
+      afterSaleRefundStatusList: [
+        {
+          name: "退款申请",
+          status: "APPLY",
+        },
+        {
+          name: "通过售后",
+          status: "PASS",
+        },
+        {
+          name: "拒绝售后",
+          status: "REFUSE",
+        },
+        {
+          name: "卖家终止售后",
+          status: "SELLER_TERMINATION",
+        },
+        {
+          name: "买家取消售后",
+          status: "BUYER_CANCEL",
+        },
+        {
+          name: "完成售后",
+          status: "COMPLETE",
+        },
+        {
+          name: "待平台退款",
+          status: "WAIT_REFUND",
+        },
+      ],
       afterSaleStatusList: [
         // 售后状态列表
         {
@@ -399,6 +446,37 @@ export default {
         },
       ],
     };
+  },
+  computed: {
+    isRefundOnly() {
+      return this.afterSaleInfo.serviceType === "RETURN_MONEY";
+    },
+    sectionTitle() {
+      return this.isRefundOnly ? "退款申请" : "退货申请";
+    },
+    buyerLogisticsName() {
+      const info = this.afterSaleInfo;
+      return (
+        info.mLogisticsName ||
+        info.mlogisticsName ||
+        this.logisticsInfo.shipper ||
+        "-"
+      );
+    },
+    buyerLogisticsNo() {
+      const info = this.afterSaleInfo;
+      return (
+        info.mLogisticsNo ||
+        info.mlogisticsNo ||
+        this.logisticsInfo.logisticCode ||
+        "-"
+      );
+    },
+    canConfirmReceipt() {
+      const vo = this.afterSaleInfo.afterSaleAllowOperationVO;
+      if (vo && vo.rog) return true;
+      return this.afterSaleInfo.serviceStatus === "BUYER_RETURN";
+    },
   },
   methods: {
     // 获取售后详情
@@ -463,10 +541,37 @@ export default {
     //查询物流
     logisticsSeller() {
       this.logisticsModal = true;
+      this.logisticsInfo = {};
       API_Order.getAfterSaleTraces(this.sn).then((res) => {
         if (res.success && res.result != null) {
           this.logisticsInfo = res.result;
         }
+      });
+    },
+    // 商家确认收货 / 拒收
+    sellerConfirmSubmit(type) {
+      const isPass = type === "PASS";
+      this.$Modal.confirm({
+        title: isPass ? "确认收货" : "确认拒收",
+        content: isPass ? "请确认已经收到退货货物？" : "确认拒收此货物？",
+        loading: true,
+        onOk: () => {
+          this.confirmLoading = true;
+          API_Order.afterSaleSellerConfirm(this.sn, {
+            serviceStatus: type,
+            remark: this.params.remark || "",
+          }).then((res) => {
+            this.$Modal.remove();
+            this.confirmLoading = false;
+            if (res.success) {
+              this.$Message.success(isPass ? "收货成功" : "拒收成功");
+              this.getDetail();
+            }
+          }).catch(() => {
+            this.$Modal.remove();
+            this.confirmLoading = false;
+          });
+        },
       });
     },
     //关闭物流弹出框
@@ -479,7 +584,7 @@ export default {
         this.$Message.error("请输入备注信息");
         return;
       }
-      if (this.params.actualRefundPrice == "") {
+      if (this.params.serviceStatus === "PASS" && this.params.actualRefundPrice === "") {
         this.$Message.error("请输入退款金额");
         return;
       }
@@ -493,10 +598,11 @@ export default {
       });
     },
     filterOrderStatus(status) {
-      // 获取订单状态中文
-      const ob = this.afterSaleStatusList.filter((e) => {
-        return e.status === status;
-      });
+      const list =
+        this.afterSaleInfo.serviceType === "RETURN_MONEY"
+          ? this.afterSaleRefundStatusList
+          : this.afterSaleStatusList;
+      const ob = list.filter((e) => e.status === status);
       return ob.length > 0 ? ob[0].name : status;
     },
     // 根据订单状态判断是否显示物流信息

@@ -62,7 +62,7 @@
         :close-on-click-modal="false"
         destroy-on-close
       >
-        <el-form ref="form" :model="formAdd" label-width="100px" :rules="formValidate">
+        <el-form ref="form" :model="formAdd" label-width="110px" :rules="formValidate">
           <el-form-item v-if="showParent" label="上级分类" prop="parentId">
             {{ parentTitle }}
             <el-input v-model="formAdd.parentId" style="display: none" />
@@ -79,7 +79,8 @@
           <el-form-item label="排序值" prop="sortOrder">
             <el-input-number v-model="formAdd.sortOrder" style="width: 200px" />
           </el-form-item>
-          <el-form-item label="佣金比例(%)" prop="commissionRate">
+          <el-form-item prop="commissionRate" class="commission-rate-item">
+            <template #label>佣金比例(%)</template>
             <el-input-number v-model="formAdd.commissionRate" :min="0" :max="100" style="width: 200px" />
           </el-form-item>
           <el-form-item label="是否启用" prop="deleteFlag">
@@ -450,5 +451,8 @@ export default {
 }
 .mb_10 {
   margin-bottom: 10px;
+}
+.commission-rate-item :deep(.el-form-item__label) {
+  white-space: nowrap;
 }
 </style>

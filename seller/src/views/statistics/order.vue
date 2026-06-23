@@ -415,7 +415,7 @@ export default {
   methods: {
     goDetail(row) {
       const sn = row.sn;
-      const path = this.orderOrRefund === "order" ? "order-detail" : "after-order-detail";
+      const path = this.orderOrRefund === "order" ? "order-detail" : "return-goods-order-detail";
       this.$router.push({ path, query: { sn } });
     },
     // 订单图

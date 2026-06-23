@@ -1,5 +1,6 @@
 import { createApp } from "vue";
 import "core-js/stable";
+import "./assets/styles/global-layout.scss";
 import "./assets/styles/theme.less";
 import App from "./App.vue";
 import { router } from "./router/index";

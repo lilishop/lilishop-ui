@@ -205,6 +205,7 @@ export function couponList (params) {
     url: `/buyer/promotion/coupon`,
     method: Method.GET,
     needToken: true,
+    loading: false,
     params
   });
 }

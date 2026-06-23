@@ -57,8 +57,9 @@ export default {
       this.goodsData = [];
     },
     clickClose() {
-      this.$emit("closeFlag", false);
+      this.flag = false;
       this.goodsFlag = false;
+      this.$emit("closeFlag", false);
     },
     singleGoods() {
       var timer = setInterval(() => {

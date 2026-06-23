@@ -13,7 +13,7 @@
                 style="width: 260px"
               />
             </el-form-item>
-            <el-form-item label="活动时间">
+            <el-form-item label="活动时间" class="activity-time-form-item">
               <el-date-picker
                 type="datetimerange"
                 :disabled-date="options.disabledDate"
@@ -22,7 +22,6 @@
                 start-placeholder="开始时间"
                 end-placeholder="结束时间"
                 placeholder="请选择活动时间"
-                style="width: 260px"
               />
             </el-form-item>
 
@@ -133,14 +132,25 @@
       </el-form>
     </el-card>
 
-    <el-dialog v-model="showCouponSelect" width="80%" title="选择优惠券" destroy-on-close>
+    <el-dialog
+      v-model="showCouponSelect"
+      width="80%"
+      title="选择优惠券"
+      destroy-on-close
+      :close-on-click-modal="false"
+    >
       <couponTemplate
-        :checked="true"
-        :selectedList="selectCouponList"
+        v-if="showCouponSelect"
+        ref="couponPicker"
+        manualConfirm
+        :selectedList="tempCouponList"
         getType="ACTIVITY"
         promotionStatus="START"
-        @selected="selectedCoupon"
       />
+      <template #footer>
+        <el-button @click="cancelCouponSelect">取消</el-button>
+        <el-button type="primary" @click="confirmCouponSelect">确定</el-button>
+      </template>
     </el-dialog>
 
     <el-dialog v-model="checkUserList" width="1200px" title="选择会员" destroy-on-close>
@@ -173,6 +183,7 @@ export default {
         },
       },
       showCouponSelect: false,
+      tempCouponList: [],
       rangeTime: "",
       checkUserList: false,
       selectedMember: [],
@@ -241,9 +252,18 @@ export default {
         };
       });
     },
-    selectedCoupon(val) {
-      this.selectCouponList = val;
+    cancelCouponSelect() {
+      this.showCouponSelect = false;
+    },
+    confirmCouponSelect() {
+      const list = this.$refs.couponPicker?.getSelection?.() || [];
+      if (!list.length) {
+        this.$Message.warning("请至少选择一张优惠券");
+        return;
+      }
+      this.selectCouponList = list;
       this.reSelectCoupon();
+      this.showCouponSelect = false;
     },
     delCoupon(index) {
       this.selectCouponList.splice(index, 1);
@@ -251,8 +271,11 @@ export default {
     },
     reSelectCoupon() {
       this.form.couponActivityItems = this.selectCouponList.map((item) => {
+        const existing = this.form.couponActivityItems.find(
+          (entry) => entry.couponId === item.id
+        );
         return {
-          num: 1,
+          num: existing ? existing.num : 1,
           couponId: item.id,
         };
       });
@@ -264,6 +287,7 @@ export default {
       });
     },
     showSelector() {
+      this.tempCouponList = [...this.selectCouponList];
       this.showCouponSelect = true;
     },
     handleSubmit() {
@@ -320,7 +344,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scpoed>
+<style lang="scss" scoped>
 h4 {
   margin-bottom: 10px;
   padding: 0 10px;
@@ -331,6 +355,14 @@ h4 {
   font-size: 14px;
   line-height: 40px;
   text-align: left;
+}
+
+.activity-time-form-item {
+  :deep(.el-date-editor) {
+    width: 380px !important;
+    max-width: 380px;
+    flex-grow: 0;
+  }
 }
 
 .describe {

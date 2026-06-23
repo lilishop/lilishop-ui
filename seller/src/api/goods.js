@@ -147,6 +147,16 @@ export const getGoodsSkuData = params => {
 export const getGoodsListData = params => {
   return getRequest("/goods/goods/list", params);
 };
+// 商品分组分页
+export const getGoodsGroupByPage = params => {
+  return getRequest("/goods/goodsGroup/getByPage", params);
+};
+// 设定商品分组（批量）
+export const addGoodsGroupItems = (groupId, goodsIds) => {
+  return postRequest(`/goods/goodsGroup/${groupId}/goods`, {
+    goodsIds: Array.isArray(goodsIds) ? goodsIds.join(",") : goodsIds,
+  });
+};
 // 获取商品数量
 export const getGoodsNumerData = (params) => {
     return getRequest('/goods/goods/goodsNumber', params)
@@ -175,6 +185,9 @@ export const getGoodsCategoryLevelList = (ids, params) => {
 export const getGoodsCategoryAll = () => {
   return getRequest(`/goods/category/all`);
 };
+
+// 兼容旧页面的分类树命名
+export const getCategoryTree = getGoodsCategoryAll;
 
 // 获取当前店铺分类
 export const getShopGoodsLabelListSeller = () => {

@@ -25,24 +25,6 @@
             style="width: 240px"
           />
         </el-form-item>
-        <el-form-item label="店铺名称">
-          <el-select
-            v-model="searchForm.storeId"
-            placeholder="请选择"
-            filterable
-            remote
-            :remote-method="searchChange"
-            clearable
-            style="width: 240px"
-          >
-            <el-option
-              v-for="item in shopList"
-              :key="item.id"
-              :label="item.storeName"
-              :value="item.id"
-            />
-          </el-select>
-        </el-form-item>
         <el-form-item label="订单时间">
           <el-date-picker
             v-model="timeRange"
@@ -108,7 +90,6 @@
           </template>
         </el-table-column>
         <el-table-column prop="distributionName" label="分销商" min-width="100" show-overflow-tooltip />
-        <el-table-column prop="storeName" label="店铺名称" min-width="100" show-overflow-tooltip />
         <el-table-column label="状态" min-width="90">
           <template #default="{ row }">
             <el-tag v-if="row" :type="filterStatusTagType(row.distributionOrderStatus)">
@@ -144,7 +125,6 @@
 <script>
 import { getDistributionOrder } from "@/api/distribution";
 import { orderStatusList } from "./dataJson";
-import { getShopListData } from "@/api/shops";
 import vueQr from "vue-qr";
 
 export default {
@@ -154,7 +134,6 @@ export default {
     return {
       timeRange: [],
       orderStatusList,
-      shopList: [],
       distributionId: this.$route.query.id,
       loading: true,
       searchForm: {
@@ -176,7 +155,6 @@ export default {
   methods: {
     init() {
       this.getDataList();
-      this.getShopList();
     },
     changePage() {
       this.getDataList();
@@ -202,26 +180,20 @@ export default {
         this.searchForm.startTime = null;
         this.searchForm.endTime = null;
       }
-      getDistributionOrder(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    getShopList(val) {
-      const params = {
-        pageNumber: 1,
-        pageSize: 20,
-        storeName: val || "",
-      };
-      getShopListData(params).then((res) => {
-        this.shopList = res.result.records;
-      });
-    },
-    searchChange(val) {
-      this.getShopList(val);
+      getDistributionOrder(this.searchForm)
+        .then((res) => {
+          if (res?.success) {
+            const page = res.result || {};
+            this.data = page.records || [];
+            this.total = page.total || 0;
+          } else {
+            this.data = [];
+            this.total = 0;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
     filterStatus(status) {
       const arr = [

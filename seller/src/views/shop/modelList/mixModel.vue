@@ -194,8 +194,12 @@ export default {
       this.defaultCallbackImageType = type;
       this.goodsIndex = index;
       // 选择图片
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
 
     handleSelectGoods(val, index) {

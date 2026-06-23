@@ -284,8 +284,12 @@ export default {
     },
     handleSelectImg() {
       // 选择图片
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
     // 选择图片回显
     callbackSelected(val) {
@@ -300,82 +304,171 @@ export default {
 .new-goods {
   display: flex;
   justify-content: space-between;
+  align-items: stretch;
   > div {
     width: 393px;
     height: 440px;
+    overflow: hidden;
   }
 
   .left > .content {
-    > div:nth-child(1) {
-      height: 240px;
-      flex-direction: column;
-      border: 1px solid #eee;
-      border-top: none;
-      border-left: none;
-      justify-content: space-between;
-      img {
-        width: 160px;
-        height: 160px;
-      }
-      .describe {
-        margin-top: 10px;
-      }
-    }
-    > div:nth-child(2) {
-      border-right: 1px solid #eee;
-    }
-    > div:nth-child(3),
-    > div:nth-child(4) {
-      border-bottom: 1px solid #eee;
-    }
-  }
-
-  .middle > .content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    flex-direction: unset;
+    overflow: hidden;
     > div {
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+      display: flex;
+      padding: 6px 4px 4px 6px;
       border-style: solid;
       border-color: #eee;
       border-width: 0;
       border-bottom-width: 1px;
+      border-right-width: 1px;
+      img {
+        width: 64px;
+        height: 64px;
+        margin-top: 2px;
+        flex-shrink: 0;
+        object-fit: cover;
+      }
+      > div {
+        flex: 1;
+        min-width: 0;
+        p {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-size: 12px;
+          line-height: 1.3;
+        }
+        .describe {
+          margin-top: 4px;
+          font-size: 11px;
+        }
+      }
     }
-    > div:nth-child(1),
+    > div:nth-child(1) {
+      grid-row: span 2;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      padding: 8px 6px;
+      img {
+        width: 120px;
+        height: 120px;
+        margin-top: 6px;
+      }
+      > div {
+        flex: unset;
+        width: 100%;
+        p {
+          white-space: normal;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+        }
+        .describe {
+          margin-top: 6px;
+          white-space: normal;
+        }
+      }
+    }
     > div:nth-child(2),
-    > div:nth-child(3) {
+    > div:nth-child(3),
+    > div:nth-child(5) {
+      border-right-width: 0;
+    }
+    > div:nth-child(4),
+    > div:nth-child(5) {
+      border-bottom-width: 0;
+    }
+  }
+
+  .middle > .content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    flex-direction: unset;
+    > div {
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+      border-style: solid;
+      border-color: #eee;
+      border-width: 0;
+      border-bottom-width: 1px;
       border-right-width: 1px;
     }
-    > div:nth-child(6),
-    > div:nth-child(3) {
+    > div:nth-child(2n) {
+      border-right-width: 0;
+    }
+    > div:nth-child(n + 5) {
       border-bottom-width: 0;
     }
   }
 
   .right > .content {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    flex-direction: unset;
+    flex-wrap: unset;
     font-size: 12px;
+    overflow: hidden;
     > div {
       position: relative;
-      width: 120px;
-      padding: 5px 10px 0 10px;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      box-sizing: border-box;
+      padding: 4px 4px 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
       img {
-        width: 100px;
-        height: 100px;
+        width: 80px;
+        height: 80px;
+        flex-shrink: 0;
+        display: block;
+        object-fit: cover;
       }
       border-bottom: 1px solid #eee;
+      border-right: 1px solid #eee;
       :nth-child(2) {
-        height: 38px;
+        width: 100%;
+        height: auto;
+        max-height: 32px;
+        line-height: 16px;
+        margin-top: 4px;
         overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        text-align: center;
       }
       :nth-child(3) {
         color: $theme_color;
-        margin-top: 5px;
+        margin-top: 2px;
+        line-height: 1.2;
+        flex-shrink: 0;
       }
       .jiaobiao {
         position: absolute;
         width: 23px;
         height: 23px;
-        top: 10px;
-        right: 16px;
+        top: 6px;
+        right: 6px;
         background: url("../../../assets/festival_icon.png");
         color: #fff;
         text-align: center;
@@ -393,10 +486,11 @@ export default {
         background-position: -60px -30px;
       }
     }
-    > div:nth-child(4),
-    > div:nth-child(5),
-    > div:nth-child(6) {
-      border: none;
+    > div:nth-child(3n) {
+      border-right: none;
+    }
+    > div:nth-child(n + 4) {
+      border-bottom: none;
     }
   }
 
@@ -421,6 +515,8 @@ export default {
     flex-wrap: wrap;
     flex-direction: column;
     height: 370px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
   .con-item {
     width: 185px;
@@ -433,6 +529,42 @@ export default {
       height: 90px;
       margin-top: 10px;
     }
+  }
+  .middle > .content .con-item {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 6px 4px 4px 6px;
+    img {
+      width: 64px;
+      height: 64px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    > div {
+      flex: 1;
+      min-width: 0;
+      p {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 12px;
+        line-height: 1.3;
+      }
+      .describe {
+        margin-top: 4px;
+        font-size: 11px;
+      }
+    }
+  }
+  .left > .content .con-item {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
   }
   .describe {
     color: #999;

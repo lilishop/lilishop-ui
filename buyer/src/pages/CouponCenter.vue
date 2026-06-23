@@ -9,6 +9,7 @@
           </router-link>
           <p>领券中心</p>
           <el-input
+            v-model="keyword"
             style="width: 400px"
             @keyup.enter="search"
             placeholder="搜索优惠券"
@@ -17,8 +18,8 @@
 
         <div class="fontsize_18 recommend">推荐好券</div>
 
-        <empty v-if="list.length === 0" />
-        <ul class="coupon-list" v-else>
+        <empty v-if="!loading && list.length === 0" />
+        <ul class="coupon-list" v-else-if="list.length > 0">
           <li v-for="(item, index) in list" class="coupon-item" :key="index">
             <div class="c-left">
               <div>
@@ -29,7 +30,7 @@
                 <span
                   v-if="item.couponType === 'DISCOUNT'"
                   class="fontsize_12 global_color"
-                  ><span class="price">{{ item.couponDiscount }}</span>折</span>
+                  ><span class="price">{{ item.couponDiscount || item.discount }}</span>折</span>
                 <span class="describe"
                   >满{{ item.consumeThreshold }}元可用</span>
               </div>
@@ -60,6 +61,8 @@ export default {
     return {
       list: [], // 优惠券列表
       total: 0, // 优惠券总数
+      loading: false,
+      keyword: "",
       params: {
         // 请求参数
         getType: "FREE",
@@ -70,25 +73,31 @@ export default {
   },
   methods: {
     // 搜索优惠券
-    search(item) {
-      this.params.couponName = item;
+    search() {
+      this.params.couponName = this.keyword.trim();
       this.params.pageNumber = 1;
       this.getList();
     },
     // 获取优惠券列表
     getList() {
-      this.$Spin.show();
+      if (this.loading) return;
+      this.loading = true;
       couponList(this.params)
         .then((res) => {
-          this.$Spin.hide();
-          this.loading = false;
-          if (res.success) {
-            this.list = res.result.records;
-            this.total = res.result.total;
+          if (res && res.success && res.result) {
+            this.list = res.result.records || [];
+            this.total = res.result.total || 0;
+          } else {
+            this.list = [];
+            this.total = 0;
           }
         })
         .catch(() => {
-          this.$Spin.hide();
+          this.list = [];
+          this.total = 0;
+        })
+        .finally(() => {
+          this.loading = false;
         });
     },
     // 分页 改变页码
@@ -104,12 +113,12 @@ export default {
     },
     // 领取优惠券
     receive(item) {
-      receiveCoupon(item.id).then((res) => {
-        if (res.success) {
-          console.log(item);
+      receiveCoupon(item.id)
+        .then((res) => {
+          if (!res || !res.success) return;
           this.$Modal.confirm({
             title: "领取优惠券",
-            content: "<p>优惠券领取成功，可到我的优惠券页面查看</p>",
+            content: "优惠券领取成功，可到我的优惠券页面查看",
             okText: "我的优惠券",
             cancelText: "立即使用",
             closable: true,
@@ -123,8 +132,8 @@ export default {
               });
             },
           });
-        }
-      });
+        })
+        .catch(() => {});
     },
     // 优惠券可用范围
     useScope(type, storeName) {
@@ -178,8 +187,54 @@ export default {
   text-align: center;
 }
 .coupon-item {
+  overflow: hidden;
+  $claim-width: 55px;
+
+  .c-left {
+    width: calc(100% - #{$claim-width});
+    box-sizing: border-box;
+  }
+
   b {
-    background: url("../assets/images/small-circle.png") top left repeat-y;
+    right: $claim-width;
+    width: 0;
+    background: none;
+    border-right: 1px dashed #e0e0e0;
+  }
+
+  .c-right {
+    width: $claim-width;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 4px;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  i.circle-top,
+  i.circle-bottom {
+    right: calc(#{$claim-width} - 9px);
+    width: 18px;
+    height: 18px;
+  }
+
+  i.circle-top {
+    top: -9px;
+  }
+
+  i.circle-bottom {
+    bottom: -9px;
   }
 }
 .pageration {

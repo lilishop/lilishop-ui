@@ -2,10 +2,9 @@
   <div class="model-item" v-if="element && element.key">
     <!-- 轮播图模块，包括个人信息，快捷导航模块 -->
     <template v-if="element.type == 'carousel'">
-      <model-carousel
-        :data="element"
-        class="mb_20 width_1200_auto"
-      ></model-carousel>
+      <div class="carousel-wrap mb_20">
+        <model-carousel :key="element.key" :data="element"></model-carousel>
+      </div>
     </template>
     <template v-if="element.type == 'carousel1'">
       <model-carousel1 :data="element" class="mb_20"></model-carousel1>
@@ -20,7 +19,7 @@
     <template v-if="element.type == 'hotAdvert'">
       <div class="mb_20 width_1200_auto">
         <img
-          style="display: block"
+          style="display: block; width: 100%; max-width: 1200px; height: auto"
           class="hover-pointer"
           :src="element.options.list[0].img"
           @click="linkTo(element.options.list[0].url)"
@@ -46,33 +45,39 @@
     </template>
     <!-- 折扣广告 -->
     <template v-if="element.type == 'discountAdvert'">
-      <div
-        class="discountAdvert"
-        :style="{
-          backgroundImage:
-            'url(' + require('@/assets/images/decorate.png') + ')',
-        }"
-      >
-        <img
-          @click="linkTo(item.url)"
-          class="hover-pointer"
-          v-for="(item, index) in element.options.classification"
-          :key="index"
-          :src="item.img"
-          width="190"
-          height="210"
-          alt=""
-        />
-        <img
-          @click="linkTo(item.url)"
-          class="hover-pointer"
-          v-for="(item, index) in element.options.brandList"
-          :key="'discount' + index"
-          :src="item.img"
-          width="240"
-          height="105"
-          alt=""
-        />
+      <div class="discountAdvert-wrap width_1200_auto mb_20">
+        <div
+          class="discountAdvert"
+          :style="{
+            backgroundImage:
+              'url(' + require('@/assets/images/decorate.png') + ')',
+          }"
+        >
+          <div>
+            <img
+              @click="linkTo(item.url)"
+              class="hover-pointer"
+              v-for="(item, index) in element.options.classification"
+              :key="index"
+              :src="item.img"
+              width="190"
+              height="210"
+              alt=""
+            />
+          </div>
+          <div>
+            <img
+              @click="linkTo(item.url)"
+              class="hover-pointer"
+              v-for="(item, index) in element.options.brandList"
+              :key="'discount' + index"
+              :src="item.img"
+              width="240"
+              height="105"
+              alt=""
+            />
+          </div>
+        </div>
       </div>
     </template>
 
@@ -183,11 +188,19 @@ export default {
 .model-item {
   position: relative;
   margin-bottom: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.carousel-wrap {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
 }
 .bannerAd{
-  width: 1183px;
+  width: 100%;
   height: 166.6px;
   border-radius: 10px;
+  box-sizing: border-box;
 }
 /** 热门广告 */
 .advert-list {
@@ -196,6 +209,7 @@ export default {
   display: flex;
   justify-content: space-around;
   padding: 3px 10px;
+  box-sizing: border-box;
   > li {
     img {
       cursor: pointer;
@@ -210,25 +224,40 @@ export default {
 }
 
 /** 折扣广告 */
-.discountAdvert {
-  width: 1300px;
-  height: 566px;
-  margin: 0 auto;
-  margin-bottom: 20px;
-  background-repeat: no-repeat;
+.discountAdvert-wrap {
   position: relative;
-  left: -47px;
-  padding-left: 295px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  img {
-    margin-top: 10px;
-    margin-right: 10px;
-    transition: all 150ms ease-in-out;
-    &:hover {
-      box-shadow: 0 5px 12px 0 rgba(0, 0, 0, 0.4);
-      transform: translateY(-2px);
+  overflow: hidden;
+}
+.discountAdvert {
+  width: 100%;
+  max-width: 1200px;
+  height: 520px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  background-repeat: no-repeat;
+  background-size: 1200px 520px;
+  background-position: center top;
+  position: relative;
+  padding: 10px 0 0 330px;
+  overflow: hidden;
+  > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    align-content: flex-start;
+    box-sizing: border-box;
+    width: 100%;
+    img {
+      display: block;
+      flex-shrink: 0;
+      margin-top: 10px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      transition: all 150ms ease-in-out;
+      &:hover {
+        box-shadow: 0 5px 12px 0 rgba(0, 0, 0, 0.4);
+        transform: translateY(-2px);
+      }
     }
   }
 }

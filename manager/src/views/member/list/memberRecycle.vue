@@ -94,12 +94,7 @@
             type="primary"
             link
             class="upload"
-            @click="
-              () => {
-                picModelFlag = true;
-                $refs.ossManage.selectImage = true;
-              }
-            "
+            @click="openPicSelector"
           >修改</el-button>
           <input type="file" style="display: none" id="file" />
         </el-form-item>
@@ -220,6 +215,14 @@ export default {
         if (res.success) {
           this.data = res.result.records;
           this.total = res.result.total;
+        }
+      });
+    },
+    openPicSelector() {
+      this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
         }
       });
     },

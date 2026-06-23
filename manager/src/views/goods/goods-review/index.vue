@@ -90,7 +90,7 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="infoFlag" :title="infoTitle" width="800px">
+    <el-dialog v-model="infoFlag" :title="infoTitle" width="800px" @closed="onInfoDialogClosed">
       <div class="info-list" style="overflow: hidden">
         <div class="left-container">
           <div class="product">
@@ -99,6 +99,7 @@
           <div class="show">
             <label>页面展示：</label>
             <el-switch
+              v-if="detailStatusReady"
               v-model="infoData.status"
               active-value="OPEN"
               inactive-value="CLOSE"
@@ -179,6 +180,8 @@ export default {
       infoData: {},
       infoFlag: false,
       infoTitle: "",
+      currentReviewId: "",
+      detailStatusReady: false,
       loading: true,
       searchForm: {
         pageNumber: 1,
@@ -204,11 +207,15 @@ export default {
       if (grade === "MODERATE") return "中评";
       return "差评";
     },
-    changeSwitchView(val) {
-      const status = val;
-      API_Member.updateMemberReview(this.infoData.id, { status }).then(() => {
-        this.$Message.success("修改成功!");
-        this.init();
+    changeSwitchView(status) {
+      if (!this.detailStatusReady || !this.currentReviewId) {
+        return;
+      }
+      API_Member.updateMemberReview(this.currentReviewId, { status }).then((res) => {
+        if (res.success) {
+          this.$Message.success("修改成功!");
+          this.getDataList();
+        }
       });
     },
     init() {
@@ -227,10 +234,14 @@ export default {
       this.searchForm.pageSize = 20;
       this.getDataList();
     },
-    changeSwitch(v) {
-      const status = v.status;
-      API_Member.updateMemberReview(v.id, { status }).then(() => {
-        this.init();
+    changeSwitch(row) {
+      if (!row || !row.id) {
+        return;
+      }
+      API_Member.updateMemberReview(row.id, { status: row.status }).then((res) => {
+        if (res.success) {
+          this.getDataList();
+        }
       });
     },
     updateTop(v) {
@@ -264,13 +275,24 @@ export default {
       this.loading = false;
     },
     info(v) {
+      this.currentReviewId = v.id;
+      this.detailStatusReady = false;
+      this.infoData = {};
       this.infoFlag = true;
       this.infoTitle = `用户${v.memberName}的评价详情`;
       API_Member.getMemberInfoReview(v.id).then((res) => {
         if (res.result) {
           this.infoData = res.result;
+          this.$nextTick(() => {
+            this.detailStatusReady = true;
+          });
         }
       });
+    },
+    onInfoDialogClosed() {
+      this.detailStatusReady = false;
+      this.currentReviewId = "";
+      this.infoData = {};
     },
     remove(v) {
       this.$Modal.confirm({

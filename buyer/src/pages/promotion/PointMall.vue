@@ -18,7 +18,7 @@
         @click="goGoodsDetail(item.id)"
       >
         <div class="goods-show-img">
-          <img width="220" height="220" :src="item.goodsSku.thumbnail" />
+          <img :src="item.goodsSku.thumbnail" />
         </div>
         <div class="goods-show-price">
           <span>

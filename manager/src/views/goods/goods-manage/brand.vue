@@ -203,8 +203,12 @@ export default {
   },
   methods: {
     openLogoPicker() {
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
     callbackSelected(val) {
       this.picModelFlag = false;

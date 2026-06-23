@@ -767,9 +767,13 @@ export default {
     },
     // 点击选择图片
     handleClickFile(item, index) {
-      this.$refs.ossManage.selectImage = true;
       this.selectedGoods = item;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
     removeNotice(index) {
       this.$nextTick(() => {

@@ -1,6 +1,14 @@
 <template>
   <div class="company-msg">
-    <el-form ref="firstForm" :model="form" :rules="rules" label-width="140px">
+    <el-form
+      ref="firstForm"
+      :model="form"
+      :rules="rules"
+      label-width="140px"
+      @submit.prevent
+      @keydown.enter.prevent
+      @focusout="saveDraft"
+    >
       <h4>基础信息</h4>
       <el-form-item prop="companyName" label="公司名称">
         <el-input
@@ -182,6 +190,8 @@ import * as RegExp from '@/plugins/RegExp.js';
 import multipleMap from "@/components/map/multiple-map";
 import storage from '@/plugins/storage';
 import { commonUrl } from '@/plugins/request.js';
+const FIRST_APPLY_DRAFT_KEY = 'shopEntryFirstDraft';
+
 export default {
   components: { multipleMap, View, Delete },
   props: {
@@ -199,6 +209,20 @@ export default {
 
       previewPicture: '', // 预览图片url
       form: { // 表单数据
+        companyName: '',
+        companyAddressIdPath: '',
+        companyAddressPath: '',
+        companyAddress: '',
+        employeeNum: '',
+        companyPhone: '',
+        registeredCapital: '',
+        linkName: '',
+        linkPhone: '',
+        companyEmail: '',
+        licenseNum: '',
+        scope: '',
+        legalName: '',
+        legalId: '',
         legalPhoto: [],
         licencePhoto: []
       },
@@ -241,7 +265,8 @@ export default {
         ]
       },
       uploadLoading1: false, // 上传loading
-      uploadLoading: false // 上传loading
+      uploadLoading: false, // 上传loading
+      contentInitialized: false
     };
   },
   methods: {
@@ -269,7 +294,10 @@ export default {
           applyFirst(params)
             .then((res) => {
               this.loading = false;
-              if (res.success) this.$emit('change', 1);
+              if (res.success) {
+                sessionStorage.removeItem(FIRST_APPLY_DRAFT_KEY);
+                this.$emit('change', 1);
+              }
             })
             .catch(() => {
               this.loading = false;
@@ -337,18 +365,57 @@ export default {
     // 删除图片
     handleRemove (index, listName) {
       this.form[listName].splice(index, 1);
+    },
+    initFormFromContent(content) {
+      if (!content || !Object.keys(content).length) return;
+      this.form = JSON.parse(JSON.stringify(content));
+      this.form.legalPhoto = content.legalPhoto
+        ? String(content.legalPhoto).split(',').filter(Boolean)
+        : [];
+      this.form.licencePhoto = content.licencePhoto
+        ? String(content.licencePhoto).split(',').filter(Boolean)
+        : [];
+      this.contentInitialized = true;
+    },
+    restoreDraft() {
+      const draft = sessionStorage.getItem(FIRST_APPLY_DRAFT_KEY);
+      if (!draft) return;
+      try {
+        const parsed = JSON.parse(draft);
+        this.form = {
+          legalPhoto: [],
+          licencePhoto: [],
+          ...parsed,
+        };
+        this.form.legalPhoto = Array.isArray(parsed.legalPhoto) ? parsed.legalPhoto : [];
+        this.form.licencePhoto = Array.isArray(parsed.licencePhoto) ? parsed.licencePhoto : [];
+      } catch (e) {
+        sessionStorage.removeItem(FIRST_APPLY_DRAFT_KEY);
+      }
+    },
+    saveDraft() {
+      sessionStorage.setItem(FIRST_APPLY_DRAFT_KEY, JSON.stringify(this.form));
+    }
+  },
+  watch: {
+    content: {
+      immediate: true,
+      handler(val) {
+        if (this.contentInitialized || !val || !Object.keys(val).length) return;
+        this.initFormFromContent(val);
+      }
     }
   },
   mounted () {
     this.accessToken.accessToken = storage.getItem('accessToken');
-    if (Object.keys(this.content).length) { // 处理回显数据
-      this.form = JSON.parse(JSON.stringify(this.content));
-      if (this.form.licencePhoto) {
-        this.form.legalPhoto = this.content.legalPhoto.split(',');
-        this.form.licencePhoto = this.content.licencePhoto.split(',');
-
-      }
+    if (Object.keys(this.content).length) {
+      this.initFormFromContent(this.content);
+    } else {
+      this.restoreDraft();
     }
+  },
+  beforeUnmount() {
+    this.saveDraft();
   }
 };
 </script>

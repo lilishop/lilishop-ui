@@ -160,8 +160,12 @@ export default {
     },
     // 点击选择图片
     handleClickFile(item, index) {
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
     // 点击链接
     clickLink(item) {

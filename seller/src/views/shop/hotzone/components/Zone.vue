@@ -156,8 +156,12 @@ export default {
     },
     // 选择图片
     handleSelectImg() {
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
     // 选择图片回调
     callbackSelected(item) {

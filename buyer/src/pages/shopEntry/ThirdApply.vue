@@ -148,7 +148,7 @@ export default {
             .then((res) => {
               this.loading = false;
               if (res.success) this.$emit('change', 3);
-              this.$parent.getData()
+              this.$parent.getData('next');
             })
             .catch(() => {
               this.loading = false;
@@ -228,19 +228,17 @@ export default {
   mounted () {
     this.accessToken.accessToken = storage.getItem('accessToken');
     this.getCategoryList();
-    if (this.content != {}) {
+    if (this.content && Object.keys(this.content).length) {
       this.form = JSON.parse(JSON.stringify(this.content));
       if (this.form.storeLogo) {
-        this.form.storeLogo = this.content.storeLogo.split(',');
-        this.form.goodsManagementCategory = this.content.goodsManagementCategory.split(
-          ','
-        );
+        this.form.storeLogo = String(this.content.storeLogo).split(',').filter(Boolean);
+        this.form.goodsManagementCategory = String(this.content.goodsManagementCategory || '')
+          .split(',')
+          .filter(Boolean);
       } else {
         this.form.storeLogo = [];
       }
-      this.$forceUpdate();
     }
-    this.$refs.thirdForm.resetFields()
   }
 };
 </script>

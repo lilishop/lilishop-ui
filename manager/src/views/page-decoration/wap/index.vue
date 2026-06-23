@@ -6,21 +6,21 @@
         <draggable
           class="model-view-menu-item"
           :list="modelData"
+          :item-key="getModelKey"
+          :clone="cloneModel"
           :move="handleMove"
-          v-bind="{
-            group: { name: 'model', pull: 'clone', put: false, animation: 150 },
-            sort: false,
-            ghostClass: 'ghost',
-          }"
+          :group="{ name: 'model', pull: 'clone', put: false, animation: 150 }"
+          :sort="false"
+          ghost-class="ghost"
         >
-          <template v-for="(model, index) in modelData" :key="index">
-          <li
-            v-if="!model.drawer && !model.drawerPromotions"
-            class="model-item"
-          >
-            <img src alt />
-            <span>{{ model.name }}</span>
-          </li>
+          <template #item="{ element: model }">
+            <li
+              v-if="!model.drawer && !model.drawerPromotions"
+              class="model-item"
+            >
+              <img src alt />
+              <span>{{ model.name }}</span>
+            </li>
           </template>
         </draggable>
       </div>
@@ -31,33 +31,32 @@
           <draggable
             class="draggable"
             group="model"
-            ghostClass="ghost"
+            ghost-class="ghost"
             @add="handleContentlAdd"
             @end="handleContentlEnd"
             v-model="contentData.list"
+            :item-key="getContentItemKey"
           >
-            <div
-              class="list"
-              v-for="(element, index) in contentData.list"
-              :key="element.key"
-            >
-              <component
-                class="component"
-                :class="{ active: selected == index }"
-                @click="handleComponent(element, index)"
-                :is="templates[element.type]"
-                :res="element.options"
-              ></component>
-              <el-icon
-                v-if="selected == index"
-                @click="closeComponent(index)"
-                class="close"
-                :size="25"
-                color="#e1251b"
-              >
-                <CircleClose />
-              </el-icon>
-            </div>
+            <template #item="{ element, index }">
+              <div class="list">
+                <component
+                  class="component"
+                  :class="{ active: selected == index }"
+                  @click="handleComponent(element, index)"
+                  :is="templates[element.type]"
+                  :res="element.options"
+                ></component>
+                <el-icon
+                  v-if="selected == index"
+                  @click="closeComponent(index)"
+                  class="close"
+                  :size="25"
+                  color="#e1251b"
+                >
+                  <CircleClose />
+                </el-icon>
+              </div>
+            </template>
           </draggable>
         </div>
       </div>
@@ -114,6 +113,21 @@ export default {
   },
 
   methods: {
+    getModelKey(model) {
+      return model.type || model.name;
+    },
+    getContentItemKey(element) {
+      return element.key || element.model || element.type;
+    },
+    cloneModel(model) {
+      const key = Date.now() + "_" + Math.ceil(Math.random() * 99999);
+      const cloned = JSON.parse(JSON.stringify(model));
+      return {
+        ...cloned,
+        key,
+        model: cloned.type + "_" + key,
+      };
+    },
     // 初始化数据
     init() {
       // 先读缓存，如果缓存有值则读缓存。
@@ -254,12 +268,14 @@ export default {
     package(val, newIndex) {
       this.contentData.list[newIndex] = "";
       val = JSON.parse(JSON.stringify(val));
+      const key = val.key || Date.now() + "_" + Math.ceil(Math.random() * 99999);
       this.contentData.list[newIndex] = {
         ...val,
         options: {
           ...val.options,
         },
-        model: val.type,
+        key,
+        model: val.model || val.type + "_" + key,
       };
     },
     // 拖动

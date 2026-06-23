@@ -62,41 +62,43 @@
     </template>
     <!-- 折扣广告 -->
     <template v-if="element.type == 'discountAdvert'">
-      <div
-        class="discountAdvert"
-        :style="{
-          'background-image':
-            'url(' + require('@/assets/nav/decorate.png') + ')',
-        }"
-      >
-        <div>
-          <div
-            v-for="(item, index) in element.options.classification"
-            :key="index"
-            class="setup-content"
-          >
-            <img :src="item.img" width="190" height="210" alt="" />
-            <div class="setup-box">
-              <div>
-                <el-button size="small" @click.stop="handleSelectModel(item)"
-                  >编辑</el-button
-                >
+      <div class="discountAdvert-wrap">
+        <div
+          class="discountAdvert"
+          :style="{
+            'background-image':
+              'url(' + require('@/assets/nav/decorate.png') + ')',
+          }"
+        >
+          <div>
+            <div
+              v-for="(item, index) in element.options.classification"
+              :key="index"
+              class="setup-content"
+            >
+              <img :src="item.img" width="190" height="210" alt="" />
+              <div class="setup-box">
+                <div>
+                  <el-button size="small" @click.stop="handleSelectModel(item)"
+                    >编辑</el-button
+                  >
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div>
-          <div
-            v-for="(item, index) in element.options.brandList"
-            :key="index"
-            class="setup-content"
-          >
-            <img :src="item.img" width="240" height="105" alt="" />
-            <div class="setup-box">
-              <div>
-                <el-button size="small" @click.stop="handleSelectModel(item)"
-                  >编辑</el-button
-                >
+          <div>
+            <div
+              v-for="(item, index) in element.options.brandList"
+              :key="index"
+              class="setup-content"
+            >
+              <img :src="item.img" width="240" height="105" alt="" />
+              <div class="setup-box">
+                <div>
+                  <el-button size="small" @click.stop="handleSelectModel(item)"
+                    >编辑</el-button
+                  >
+                </div>
               </div>
             </div>
           </div>
@@ -329,8 +331,12 @@ export default {
 
     handleSelectImg() {
       // 选择图片
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
     // 回显图片
     callbackSelected(val) {
@@ -402,15 +408,23 @@ export default {
   }
 }
 /** 折扣广告 */
+.discountAdvert-wrap {
+  width: 1200px;
+  position: relative;
+}
 .discountAdvert {
+  width: 1300px;
   height: 566px;
+  margin-left: -100px;
+  box-sizing: border-box;
   background-repeat: no-repeat;
-  margin-left: -97px;
+  background-size: 1300px 566px;
   position: relative;
   > div {
     padding-left: 295px;
     display: flex;
     flex-wrap: wrap;
+    box-sizing: border-box;
     &:nth-child(1) img {
       margin: 10px 10px 0 0;
     }
