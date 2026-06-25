@@ -34,7 +34,6 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
-          <el-button class="search-btn" @click="handleExport">导出</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -114,8 +113,6 @@
 
 <script>
 import * as API_Order from "@/api/order";
-import * as API_Finance from "@/api/finance";
-import { downloadBlob } from "@/utils/downloadBlob";
 
 export default {
   name: "paymentLog",
@@ -165,11 +162,6 @@ export default {
           this.data = res.result.records;
           this.total = res.result.total;
         }
-      });
-    },
-    handleExport() {
-      API_Finance.exportPaymentFlow(this.searchForm).then((blob) => {
-        downloadBlob(blob, "支付流水.xlsx");
       });
     },
   },

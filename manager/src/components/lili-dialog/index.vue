@@ -58,8 +58,9 @@ export default {
     },
     // 关闭弹窗
     clickClose() {
-      this.$emit("closeFlag", false);
+      this.flag = false;
       this.goodsFlag = false;
+      this.$emit("closeFlag", false);
     },
     // 单选商品
     singleGoods() {

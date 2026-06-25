@@ -2,7 +2,7 @@
   <div class="wrapper">
     <el-affix :offset="100">
       <el-card class="card fixed-bottom">
-        <affixTime @selected="clickBreadcrumb" />
+        <affixTime :closeShop="true" @selected="clickBreadcrumb" />
       </el-card>
     </el-affix>
 
@@ -183,11 +183,6 @@
                   {{ $filters.unitPrice(row.flowPrice, "￥") }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="80" align="center">
-              <template #default="{ row }">
-                <a v-if="row" class="link-text" @click="goDetail(row)">查看</a>
-              </template>
-            </el-table-column>
           </el-table>
         </el-tab-pane>
         <el-tab-pane label="退单" name="refund">
@@ -234,11 +229,6 @@
             <el-table-column label="实际金额" min-width="110">
               <template #default="{ row }">
                 <span v-if="row">{{ $filters.unitPrice(row.flowPrice || 0, "￥") }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" width="90" align="center">
-              <template #default="{ row }">
-                <a v-if="row" class="link-text" @click="goDetail(row)">查看</a>
               </template>
             </el-table-column>
           </el-table>
@@ -413,11 +403,6 @@ export default {
     },
   },
   methods: {
-    goDetail(row) {
-      const sn = row.sn;
-      const path = this.orderOrRefund === "order" ? "order-detail" : "return-goods-order-detail";
-      this.$router.push({ path, query: { sn } });
-    },
     // 订单图
     initOrderChart() {
       // 默认已经加载 legend-filter 交互

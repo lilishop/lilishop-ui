@@ -6,7 +6,11 @@
     <div class="sidebar-menu-con menu-bar">
       <shrinkable-menu />
     </div>
-    <div class="main-header-con" :style="{ height: '60px' }">
+    <div
+      class="main-header-con"
+      :class="{ 'has-tabs': setting.isUseTabsRouter }"
+      :style="{ height: setting.isUseTabsRouter ? '106px' : '60px' }"
+    >
       <div class="main-header">
         <div class="header-logo-con">
           <img :src="domainLogo" key="max-logo" />
@@ -51,15 +55,15 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="breadcrumb-bar" v-if="setting.isUseTabsRouter">
-      <page-breadcrumb />
+      <div class="tags-con" v-if="setting.isUseTabsRouter">
+        <tags-page-opened :pageTagsList="pageTagsList" />
+      </div>
     </div>
     <div
       class="single-page-con"
       :style="{
-        top: setting.isUseTabsRouter ? '104px' : '60px',
-        height: setting.isUseTabsRouter ? 'calc(100% - 114px)' : 'calc(100% - 70px)',
+        top: setting.isUseTabsRouter ? '106px' : '60px',
+        height: setting.isUseTabsRouter ? 'calc(100% - 116px)' : 'calc(100% - 70px)',
       }"
     >
       <div class="single-page">
@@ -75,7 +79,7 @@
 <script>
 import { UserFilled } from "@element-plus/icons-vue";
 import shrinkableMenu from "./main-parts/shrinkable-menu/shrinkable-menu.vue";
-import pageBreadcrumb from "./main-parts/page-breadcrumb.vue";
+import tagsPageOpened from "./main-parts/tags-page-opened.vue";
 import messageTip from "./main-parts/message-tip.vue";
 import circleLoading from "@/components/lili/circle-loading.vue";
 import Cookies from "js-cookie";
@@ -88,7 +92,7 @@ export default {
   components: {
     UserFilled,
     shrinkableMenu,
-    pageBreadcrumb,
+    tagsPageOpened,
     messageTip,
     circleLoading,
   },

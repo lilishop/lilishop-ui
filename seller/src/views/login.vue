@@ -289,14 +289,41 @@ export default {
 
 <style lang="scss" scoped>
 .login {
-  height: 100%;
-  background: url("../assets/background.png") no-repeat;
-  background-size: 100%;
-  background-position-y: bottom;
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
   background-color: #fff;
+  background-image: url("../assets/background.png");
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: 100% auto;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  :deep(.el-input__wrapper) {
+    background-color: #fff !important;
+    box-shadow: 0 0 0 1px var(--el-border-color) inset !important;
+
+    &.is-focus {
+      box-shadow: 0 0 0 1px var(--el-border-color) inset !important;
+    }
+  }
+
+  :deep(.el-input__inner) {
+    background-color: transparent !important;
+
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus,
+    &:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+      box-shadow: 0 0 0 1000px #fff inset !important;
+      -webkit-text-fill-color: #606266 !important;
+      caret-color: #606266;
+      transition: background-color 99999s ease-out;
+    }
+  }
 
   .verify-con {
     position: absolute;

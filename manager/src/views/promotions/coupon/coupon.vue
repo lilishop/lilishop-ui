@@ -56,7 +56,7 @@
       <div class="operation padding-row" v-if="getType !== 'ACTIVITY'">
         <el-button type="primary" @click="add">添加优惠券</el-button>
         <el-button @click="delAll">批量关闭</el-button>
-        <el-button type="info" @click="receivePage()">优惠券领取记录</el-button>
+        <el-button type="warning" @click="receivePage()">优惠券领取记录</el-button>
       </div>
 
       <el-table

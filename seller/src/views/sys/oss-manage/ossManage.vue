@@ -165,37 +165,39 @@
                   <el-checkbox-group v-model="selectedOss" @change="selectOssChange">
                     <div class="img-box">
                       <div v-for="(item, index) in data" :key="index" class="img-item">
-                        <el-checkbox :value="item.id + ',' + item.url" class="check-box">
-                          <div
-                            class="card"
-                            @mouseenter="onMouseOver(item, index)"
-                            @mouseleave="onMouseOut(item, index)"
-                          >
-                            <img :src="item.url" alt="" />
-                            <div v-if="item.isShowPreview" class="preview">
-                              <div @click.prevent="download(item)">
-                                <el-tooltip content="下载" placement="top">
-                                  <el-icon :size="18"><Download /></el-icon>
-                                </el-tooltip>
-                              </div>
-                              <div @click.prevent="remove(item)">
-                                <el-tooltip content="删除" placement="top">
-                                  <el-icon :size="18"><Delete /></el-icon>
-                                </el-tooltip>
-                              </div>
-                              <div @click.prevent="showPic(item)">
-                                <el-tooltip content="预览" placement="top">
-                                  <el-icon :size="22"><View /></el-icon>
-                                </el-tooltip>
-                              </div>
+                        <div
+                          class="card"
+                          :class="{ 'custom-checkbox-card-checked': selectedOss.includes(item.id + ',' + item.url) }"
+                          @mouseenter="onMouseOver(item, index)"
+                          @mouseleave="onMouseOut(item, index)"
+                        >
+                          <el-checkbox
+                            :value="item.id + ',' + item.url"
+                            class="card-checkbox"
+                            @click.stop
+                          />
+                          <img :src="item.url" alt="" />
+                          <div v-if="item.isShowPreview" class="preview">
+                            <div @click.prevent="download(item)">
+                              <el-tooltip content="下载" placement="top">
+                                <el-icon :size="18"><Download /></el-icon>
+                              </el-tooltip>
+                            </div>
+                            <div @click.prevent="remove(item)">
+                              <el-tooltip content="删除" placement="top">
+                                <el-icon :size="18"><Delete /></el-icon>
+                              </el-tooltip>
+                            </div>
+                            <div @click.prevent="showPic(item)">
+                              <el-tooltip content="预览" placement="top">
+                                <el-icon :size="22"><View /></el-icon>
+                              </el-tooltip>
                             </div>
                           </div>
-                        </el-checkbox>
-                        <div>
-                          <el-tooltip :content="item.name" placement="bottom">
-                            <div class="text">{{ item.name }}</div>
-                          </el-tooltip>
                         </div>
+                        <el-tooltip :content="item.name" placement="bottom">
+                          <div class="text">{{ item.name }}</div>
+                        </el-tooltip>
                       </div>
                     </div>
                   </el-checkbox-group>

@@ -3,7 +3,7 @@
     <el-button style="margin-bottom: 10px" @click="back()">返回</el-button>
 
     <el-card>
-      <el-form ref="searchForm" :model="searchForm" inline label-width="75px" class="search-form mb_10">
+      <el-form ref="searchForm" :model="searchForm" inline label-width="90px" class="search-form mb_10">
         <el-form-item label="优惠券名称" prop="couponName">
           <el-input
             v-model="searchForm.couponName"
@@ -121,7 +121,7 @@
             </template>
           </template>
         </el-table-column>
-        <el-table-column label="有效时间" width="150">
+        <el-table-column label="有效时间" width="200">
           <template #default="{ row }">
             <template v-if="row">
               <span v-if="row.getType === 'ACTIVITY' && row.rangeDayType === 'DYNAMICTIME'">长期有效</span>

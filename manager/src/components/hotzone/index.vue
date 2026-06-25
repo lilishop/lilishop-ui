@@ -8,12 +8,12 @@
     destroy-on-close
     @close="clickClose"
   >
-    <template v-if="flag">
+    <template v-if="flag && hotzoneRes">
       <hotzone
         ref="hotzone"
         @change="changeHotzone"
-        :zonesInit="res.zoneInfo"
-        :image="res.img"
+        :zonesInit="hotzoneRes.zoneInfo"
+        :image="hotzoneRes.img"
       ></hotzone>
     </template>
     <template #footer>
@@ -31,30 +31,35 @@ export default {
   },
   data() {
     return {
-      flag: false, // modal显隐
+      flag: false,
+      hotzoneRes: null,
     };
   },
-  props: ["res"],
-  mounted() {},
   methods: {
     changeHotzone(info) {
+      if (this.hotzoneRes) {
+        this.hotzoneRes.zoneInfo = info;
+      }
       this.$emit("changeZone", info);
     },
-    // 关闭弹窗
     clickClose() {
+      this.flag = false;
+      this.hotzoneRes = null;
       this.$emit("closeFlag", false);
     },
-    // 点击确认
     clickOK() {
       this.clickClose();
     },
-    // 打开组件方法
-    open(type, mutiple) {
+    open(val) {
+      this.hotzoneRes = val || null;
+      if (this.hotzoneRes && !this.hotzoneRes.zoneInfo) {
+        this.hotzoneRes.zoneInfo = [];
+      }
       this.flag = true;
     },
-    // 关闭组件
     close() {
       this.flag = false;
+      this.hotzoneRes = null;
     },
   },
 };

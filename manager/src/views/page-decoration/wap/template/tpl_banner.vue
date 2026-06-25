@@ -13,14 +13,6 @@
 export default {
   title: "导航栏",
   props: ["res"],
-  watch: {
-    res: {
-      handler(newValue, oldValue) {
-          this['res'] = newValue;
-      },
-      deep: true
-    }
-  }
 };
 </script>
 <style lang="scss" scoped>

@@ -5,7 +5,7 @@
         ref="searchForm"
         :model="searchForm"
         inline
-        label-width="80px"
+        label-width="100px"
         class="search-form mb_10"
         @keyup.enter="handleSearch"
       >

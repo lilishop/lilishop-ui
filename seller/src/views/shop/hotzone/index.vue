@@ -9,11 +9,11 @@
     destroy-on-close
     @close="clickClose"
   >
-    <template v-if="flag">
+    <template v-if="flag && hotzoneRes">
       <hotzone
         ref="hotzone"
-        :zonesInit="res.zoneInfo"
-        :image="res.img"
+        :zonesInit="hotzoneRes.zoneInfo"
+        :image="hotzoneRes.img"
         @change="changeHotzone"
       />
     </template>
@@ -33,25 +33,34 @@ export default {
   data() {
     return {
       flag: false,
+      hotzoneRes: null,
     };
   },
-  props: ["res"],
   methods: {
     changeHotzone(info) {
+      if (this.hotzoneRes) {
+        this.hotzoneRes.zoneInfo = info;
+      }
       this.$emit("changeZone", info);
     },
     clickClose() {
       this.flag = false;
+      this.hotzoneRes = null;
       this.$emit("closeFlag", false);
     },
     clickOK() {
       this.clickClose();
     },
-    open() {
+    open(val) {
+      this.hotzoneRes = val || null;
+      if (this.hotzoneRes && !this.hotzoneRes.zoneInfo) {
+        this.hotzoneRes.zoneInfo = [];
+      }
       this.flag = true;
     },
     close() {
       this.flag = false;
+      this.hotzoneRes = null;
     },
   },
 };

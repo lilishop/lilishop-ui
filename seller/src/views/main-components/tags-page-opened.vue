@@ -214,6 +214,21 @@ export default {
   font-size: 13px;
   transition: all 0.2s ease;
 
+  &.el-tag--info.el-tag--plain {
+    color: #606266;
+    border-color: #dcdfe6;
+    background-color: #fff;
+  }
+
+  &.el-tag--info.el-tag--plain .el-tag__close {
+    color: #909399;
+
+    &:hover {
+      color: #606266;
+      background-color: transparent;
+    }
+  }
+
   & + .page-tag {
     margin-left: 0;
   }

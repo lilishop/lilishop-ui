@@ -108,14 +108,15 @@
     <el-dialog
       v-model="modalVisible"
       title="修改分销员"
-      width="600px"
+      width="640px"
       :close-on-click-modal="false"
       destroy-on-close
     >
       <el-form
         ref="distributionForm"
         :model="distributionForm"
-        label-width="150px"
+        label-width="180px"
+        class="distribution-form"
         :rules="distributionFormValidate"
       >
         <el-form-item label="姓名" prop="name">
@@ -268,3 +269,9 @@ export default {
   },
 };
 </script>
+
+<style scoped lang="scss">
+.distribution-form :deep(.el-form-item__label) {
+  white-space: nowrap;
+}
+</style>

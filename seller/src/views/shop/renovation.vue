@@ -1,22 +1,35 @@
 <template>
   <div class="renovation">
-    <div class="model-list">
-      <div class="classification-title">基础模块</div>
-      <draggable tag="ul" :list="modelData" v-bind="{group:{ name:'model', pull:'clone',put:false},sort:false, ghostClass: 'ghost'}"   >
-        <li v-for="(model, index) in modelData" :key="index" class="model-item">
-          <el-icon><Picture /></el-icon>
-          <span>{{model.name}}</span>
-        </li>
-      </draggable>
-    </div>
-    <div class="show-content">
-      <model-form ref="modelForm" :data="modelForm"></model-form>
-    </div>
-    <div class="btn-bar" :class="{'top':isHiddenBar}">
+    <div class="btn-bar">
       <el-button type="primary" :loading="submitLoading" @click="saveTemplate">保存模板</el-button>
       <el-button class="ml_10" @click="resetTemplate">还原模板</el-button>
       <el-button class="ml_10" @click="witeLocalStore">将装修内容写入到本地</el-button>
       <el-button class="ml_10" v-if="hasCache" @click="clearCache">清空本地装修缓存</el-button>
+    </div>
+    <div class="renovation-main">
+      <div class="model-list">
+        <div class="classification-title">基础模块</div>
+        <draggable
+          tag="ul"
+          :list="modelData"
+          :item-key="getModelKey"
+          :clone="cloneModel"
+          :group="{ name: 'model', pull: 'clone', put: false }"
+          :sort="false"
+          ghost-class="ghost"
+          handle=".model-item"
+        >
+          <template #item="{ element: model }">
+            <li class="model-item">
+              <el-icon><Picture /></el-icon>
+              <span>{{ model.name }}</span>
+            </li>
+          </template>
+        </draggable>
+      </div>
+      <div class="show-content">
+        <model-form ref="modelForm" :data="modelForm"></model-form>
+      </div>
     </div>
   </div>
 </template>
@@ -33,9 +46,7 @@ export default {
     Picture,
   },
   mounted() {
-    const setting = window.localStorage.getItem('seller-setting') ? JSON.parse(window.localStorage.getItem('seller-setting')) : {};
-    this.isHiddenBar = setting.isUseTabsRouter
-     const cache = this.getStore('managerPCPageCache')
+    const cache = this.getStore('managerPCPageCache')
     this.hasCache = !!cache;
       if(cache){
         this.$Modal.confirm({
@@ -69,10 +80,21 @@ export default {
       modelData,
       modelForm: { list: [] },
       submitLoading: false,
-      isHiddenBar:true,
     };
   },
   methods: {
+    getModelKey(model) {
+      return model.type || model.name;
+    },
+    cloneModel(model) {
+      const key = Date.now() + "_" + Math.ceil(Math.random() * 99999);
+      const cloned = JSON.parse(JSON.stringify(model));
+      return {
+        ...cloned,
+        key,
+        model: cloned.type + "_" + key,
+      };
+    },
     clearCache(){
       this.setStore('managerPCPageCache', '')
       this.$Message.success('清除成功')
@@ -143,21 +165,49 @@ export default {
 .renovation {
   position: relative;
   display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+.btn-bar {
+  position: sticky;
+  top: 0;
+  z-index: 99;
+  background: #fff;
+  height: 50px;
+  padding: 10px;
+  box-shadow: 1px 1px 10px #999;
+}
+.renovation-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  flex: 1;
+  padding-top: 10px;
 }
 .model-list {
+  flex-shrink: 0;
   width: 130px;
-  height: 620px;
+  max-height: calc(100vh - 180px);
   overflow-y: auto;
   padding: 10px;
   background: #fff;
-  margin-top: 60px;
-  position: fixed;
-  z-index: 100;
+  position: sticky;
+  top: 60px;
+  z-index: 10;
   box-shadow: 1px 1px 10px #999;
   .classification-title {
     width: 100%;
     height: 30px;
     line-height: 30px;
+    text-align: center;
+  }
+  :deep(ul) {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   .model-item {
     width: 110px;
@@ -165,9 +215,12 @@ export default {
     background: #eee;
     margin-top: 10px;
     line-height: 30px;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     color: #999;
-    transition:0.15s;
+    transition: 0.15s;
     border-radius: 4px;
     &:hover {
       background: $theme_color;
@@ -182,8 +235,8 @@ export default {
   }
 }
 .show-content {
-  margin-left: 150px;
-  margin-top: 60px;
+  flex: 1;
+  min-width: 0;
 }
 .ghost {
   background: #fff;
@@ -202,17 +255,5 @@ export default {
     text-align: center;
     line-height: 50px;
   }
-}
-.btn-bar {
-  position: fixed;
-  width: 100%;
-  background: #fff;
-  height: 50px;
-  padding: 10px;
-  box-shadow: 1px 1px 10px #999;
-  z-index: 99;
-}
-.top{
-  top: 100px;
 }
 </style>

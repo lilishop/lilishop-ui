@@ -95,9 +95,10 @@
       v-model="userEditModalVisible"
       :close-on-click-modal="false"
       width="500px"
-      top="30px"
+      align-center
+      append-to-body
     >
-      <el-form ref="form" :model="editForm" label-width="80px" :rules="formValidate">
+      <el-form ref="editFormRef" :model="editForm" label-width="100px" :rules="formValidate" class="clerk-form">
         <el-form-item label="手机号">
           <el-input v-model="mobile" disabled/>
         </el-form-item>
@@ -106,12 +107,12 @@
         </el-form-item>
         <el-form-item label="超级管理员" prop="isSuper">
           <el-radio-group v-model="editForm.isSuper">
-            <el-radio-button value="1">是</el-radio-button>
-            <el-radio-button value="0">否</el-radio-button>
+            <el-radio-button :value="1">是</el-radio-button>
+            <el-radio-button :value="0">否</el-radio-button>
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item label="角色" prop="roles" v-if="editForm.isSuper == 0">
+        <el-form-item label="角色" prop="roles" v-if="editForm.isSuper === 0">
           <el-select v-model="editForm.roles" multiple>
             <el-option v-for="item in roleList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
@@ -132,9 +133,10 @@
       v-model="userModalVisible"
       :close-on-click-modal="false"
       width="500px"
-      top="30px"
+      align-center
+      append-to-body
     >
-      <el-form ref="form" :model="form" label-width="80px" :rules="formValidate">
+      <el-form ref="addForm" :model="form" label-width="100px" :rules="addFormRules" class="clerk-form">
         <el-form-item label="手机号" prop="mobile">
           <el-input placeholder="请输入要添加的会员手机号码" maxlength="11" style="width: 75%" v-model="form.mobile"
                  autocomplete="off" @change="checkClerks"/>
@@ -146,6 +148,7 @@
         </el-form-item>
         <el-form-item v-if="oldMember" label="用户名" prop="username">
           <el-input v-model="form.username" autocomplete="off" disabled/>
+          <div class="form-tip">该手机号已注册为平台会员，提交后将直接添加为店员</div>
         </el-form-item>
 
         <el-form-item label="密码" prop="password" v-if="newMember" :error="errorPass">
@@ -153,11 +156,11 @@
         </el-form-item>
         <el-form-item label="超级管理员" prop="isSuper" v-if="newMember || oldMember">
           <el-radio-group v-model="form.isSuper">
-            <el-radio-button value="1">是</el-radio-button>
-            <el-radio-button value="0">否</el-radio-button>
+            <el-radio-button :value="1">是</el-radio-button>
+            <el-radio-button :value="0">否</el-radio-button>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="角色" prop="roles" v-if="(oldMember || newMember) && form.isSuper == 0">
+        <el-form-item label="角色" prop="roles" v-if="(oldMember || newMember) && form.isSuper === 0">
           <el-select v-model="form.roles" multiple>
             <el-option v-for="item in roleList" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
@@ -260,6 +263,18 @@ export default {
       total: 0, // 总数
     };
   },
+  computed: {
+    addFormRules() {
+      const rules = {
+        username: this.formValidate.username,
+        mobile: this.formValidate.mobile,
+      };
+      if (this.newMember) {
+        rules.password = this.formValidate.password;
+      }
+      return rules;
+    },
+  },
   methods: {
     // 初始化数据
     init() {
@@ -297,28 +312,43 @@ export default {
     },
     //重新校验会员
     checkAgainClerk() {
-      this.memberCheck = false
-      this.newMember = false
-      this.oldMember = false
+      this.memberCheck = false;
+      this.newMember = false;
+      this.oldMember = false;
+      this.form.username = "";
+      this.form.password = "";
+      this.form.isSuper = 0;
+      this.form.roles = [];
+      this.errorPass = "";
     },
-    //检测当前店员
+    // 检测当前手机号对应会员：无 id 为新建会员，有 id 为已有会员
     checkClerk() {
-      if (this.form.mobile) {
-        this.newMember = false
-        this.oldMember = false
-        checkClerk(this.form.mobile).then(res => {
-          if (!res.result.id) {
-            this.newMember = true
-          } else {
-            this.oldMember = true
-            this.form.username = res.result.username
-            this.form.password = res.result.password
-          }
-          this.form.isSuper = 1
-          this.memberCheck = true;
-        });
+      if (!this.form.mobile) {
+        return;
       }
-
+      this.newMember = false;
+      this.oldMember = false;
+      this.form.username = "";
+      this.form.password = "";
+      this.errorPass = "";
+      checkClerk(this.form.mobile).then((res) => {
+        if (!res.success) {
+          return;
+        }
+        if (!res.result || !res.result.id) {
+          // 平台无此会员，需新建账号并设置密码
+          this.newMember = true;
+          this.oldMember = false;
+        } else {
+          // 已有会员，仅绑定为店员，不需要也不应展示/回填密码
+          this.newMember = false;
+          this.oldMember = true;
+          this.form.username = res.result.username || "";
+          this.form.password = "";
+        }
+        this.form.isSuper = 0;
+        this.memberCheck = true;
+      });
     },
     // 搜索项部门选择
     handleSelectDep(v) {
@@ -416,10 +446,9 @@ export default {
     },
     // 确认提交
     submitUser() {
-      this.$refs.form.validate(valid => {
+      this.$refs.addForm?.validate(valid => {
         if (valid) {
-          // 添加用户 避免编辑后传入id
-          const params = JSON.parse(JSON.stringify(this.form))
+          const params = JSON.parse(JSON.stringify(this.form));
           delete params.id;
           delete params.status;
           if (this.newMember) {
@@ -431,10 +460,12 @@ export default {
               this.errorPass = "密码长度不得少于6位";
               return;
             }
-            //todo
-            params.password = this.md5(params.password)
-          } else {
-            params.password = this.form.password
+            params.password = this.md5(params.password);
+          } else if (this.oldMember) {
+            // 后端 ClerkAddDTO 对 username/password 有 @NotEmpty 校验；
+            // 已有会员走 findByMobile 分支，不会使用该 password，仅用于通过参数校验
+            params.username = this.form.username;
+            params.password = params.password || "000000";
           }
           this.submitLoading = true;
           addUser(params).then(res => {
@@ -450,21 +481,25 @@ export default {
     },
     // 添加用户
     add() {
-      // this.checkClerks();
       this.modalType = 0;
       this.modalTitle = "添加店员";
-      this.$refs.form.resetFields();
-      this.form = { // 表单
+      this.form = {
         username: "",
         mobile: "",
+        password: "",
         isSuper: 0,
         roles: [],
         departmentId: "",
-        departmentTitle: ""
-      },
-      this.oldMember = false
-      this.newMember = false
+        departmentTitle: "",
+      };
+      this.oldMember = false;
+      this.newMember = false;
+      this.memberCheck = false;
       this.userModalVisible = true;
+      this.$nextTick(() => {
+        this.$refs.addForm?.resetFields();
+        this.$refs.depTree?.clearSelect?.();
+      });
     },
     // 编辑用户
     edit(v) {
@@ -593,3 +628,17 @@ export default {
   }
 };
 </script>
+
+<style scoped lang="scss">
+.clerk-form {
+  :deep(.el-form-item__label) {
+    white-space: nowrap;
+  }
+}
+.form-tip {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #909399;
+  line-height: 1.4;
+}
+</style>

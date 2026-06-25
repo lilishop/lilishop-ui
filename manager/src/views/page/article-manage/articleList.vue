@@ -311,18 +311,16 @@ export default {
     getDataList(val) {
       if (val) this.form = {};
       this.loading = true;
-      getArticle(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.total = res.result.total;
-          this.data = [];
-          if (res.result.records.length > 0) {
-            this.data = res.result.records;
+      getArticle(this.searchForm)
+        .then((res) => {
+          if (res.success) {
+            this.total = res.result.total;
+            this.data = res.result.records?.length ? res.result.records : [];
           }
-        }
-      });
-      this.total = this.data?.length;
-      this.loading = false;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
     handleSubmit() {
       this.$refs.form.validate((valid) => {

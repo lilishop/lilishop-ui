@@ -73,6 +73,14 @@ import {
   deletePointsGoodsCategoryById,
 } from "@/api/promotion";
 
+const buildDefaultFormAdd = () => ({
+  parentId: 0,
+  name: "",
+  deleteFlag: 0,
+  level: 0,
+  sortOrder: 1,
+});
+
 export default {
   name: "pointsGoodsCategory",
   data() {
@@ -88,13 +96,7 @@ export default {
         sort: "sortOrder",
         order: "asc",
       },
-      formAdd: {
-        parentId: 0,
-        name: "",
-        deleteFlag: 0,
-        level: 0,
-        sortOrder: 1,
-      },
+      formAdd: buildDefaultFormAdd(),
       formValidate: {
         name: [{ required: true, message: "商品分类名称不能为空", trigger: "blur" }],
       },
@@ -109,18 +111,22 @@ export default {
     edit(v) {
       this.modalType = 1;
       this.modalTitle = "编辑";
-      this.formAdd.id = v.id;
-      this.formAdd.name = v.name;
-      this.formAdd.sortOrder = v.sortOrder;
+      this.formAdd = {
+        ...buildDefaultFormAdd(),
+        id: v.id,
+        name: v.name,
+        sortOrder: v.sortOrder,
+      };
       this.modalVisible = true;
     },
     addParent() {
       this.modalType = 0;
       this.modalTitle = "添加积分商品分类";
-      this.$refs.form?.resetFields();
-      delete this.formAdd.id;
-      this.formAdd.parentId = 0;
+      this.formAdd = buildDefaultFormAdd();
       this.modalVisible = true;
+      this.$nextTick(() => {
+        this.$refs.form?.clearValidate();
+      });
     },
     Submit() {
       this.$refs.form.validate((valid) => {
@@ -134,7 +140,7 @@ export default {
               this.$Message.success("添加成功");
               this.getAllList();
               this.modalVisible = false;
-              this.$refs.form.resetFields();
+              this.formAdd = buildDefaultFormAdd();
             }
           });
         } else {
@@ -144,7 +150,7 @@ export default {
               this.$Message.success("修改成功");
               this.getAllList();
               this.modalVisible = false;
-              this.$refs.form.resetFields();
+              this.formAdd = buildDefaultFormAdd();
             }
           });
         }

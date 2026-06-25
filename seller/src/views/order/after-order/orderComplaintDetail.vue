@@ -42,7 +42,36 @@
             </dl>
           </div>
 
-          <div class="div-form-default" v-if="complaintInfo.appealContent">
+          <div class="div-form-default" v-if="complaintInfo.complainStatus === 'WAIT_APPEAL'">
+            <h3>商家申诉</h3>
+            <dl>
+              <dt>申诉内容</dt>
+              <dd>
+                <el-input
+                  v-model="appeal.appealContent"
+                  type="textarea"
+                  maxlength="200"
+                  :rows="4"
+                  clearable
+                  style="width: 260px"
+                />
+              </dd>
+            </dl>
+            <dl>
+              <dt>申诉凭证</dt>
+              <dd>
+                <upload-pic-thumb v-model="appeal.appealImages" :limit="5" />
+              </dd>
+            </dl>
+            <dl>
+              <dt></dt>
+              <dd>
+                <el-button type="primary" :loading="submitLoading" @click="appealSubmit">提交申诉</el-button>
+              </dd>
+            </dl>
+          </div>
+
+          <div class="div-form-default" v-else-if="complaintInfo.appealContent">
             <h3>商家申诉信息</h3>
             <dl>
               <dt>申诉时间</dt>
@@ -116,50 +145,6 @@
               <dd>{{ complaintInfo.arbitrationResult }}</dd>
             </dl>
           </div>
-
-          <div class="div-form-default" v-if="complaintInfo.complainStatus != 'COMPLETE'">
-            <h3>平台仲裁</h3>
-            <dl v-if="arbitrationResultShow">
-              <dt>仲裁</dt>
-              <dd>
-                <el-input
-                  v-model="arbitrationParams.arbitrationResult"
-                  type="textarea"
-                  maxlength="200"
-                  :rows="4"
-                  clearable
-                  style="width: 260px"
-                />
-              </dd>
-            </dl>
-            <dl>
-              <dt></dt>
-              <dd style="text-align: right; display: flex; justify-content: space-between">
-                <el-button
-                  v-if="!arbitrationResultShow"
-                  :loading="submitLoading"
-                  @click="arbitrationHandle"
-                >
-                  直接仲裁结束投诉流程
-                </el-button>
-                <el-button
-                  v-if="complaintInfo.complainStatus == 'NEW'"
-                  :loading="submitLoading"
-                  @click="handleStoreComplaint"
-                >
-                  交由商家申诉
-                </el-button>
-                <el-button
-                  v-if="arbitrationResultShow"
-                  type="primary"
-                  :loading="submitLoading"
-                  @click="arbitrationHandleSubmit"
-                >
-                  提交仲裁
-                </el-button>
-              </dd>
-            </dl>
-          </div>
         </div>
 
         <div class="div-flow-center"></div>
@@ -173,7 +158,7 @@
             </dl>
             <dl>
               <dt>下单时间</dt>
-              <dd>{{ complaintInfo.createTime }}</dd>
+              <dd>{{ complaintInfo.orderTime || complaintInfo.createTime }}</dd>
             </dl>
             <dl>
               <dt>订单金额</dt>
@@ -205,6 +190,7 @@
 
 <script>
 import * as API_Order from "@/api/order";
+import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
 const emptyComplaint = () => ({
   id: "",
   orderComplaintCommunications: [],
@@ -212,6 +198,9 @@ const emptyComplaint = () => ({
 
 export default {
   name: "orderComplaintDetail",
+  components: {
+    uploadPicThumb,
+  },
   data() {
     return {
       loading: false,
@@ -224,10 +213,11 @@ export default {
         content: "",
         complainId: "",
       },
-      arbitrationParams: {
-        arbitrationResult: "",
+      appeal: {
+        orderComplaintId: "",
+        appealContent: "",
+        appealImages: [],
       },
-      arbitrationResultShow: false,
     };
   },
   methods: {
@@ -241,17 +231,6 @@ export default {
         COMPLETE: "已完成",
       };
       return map[v] || v || "-";
-    },
-    handleStoreComplaint() {
-      API_Order.storeComplain({
-        complainStatus: "WAIT_APPEAL",
-        complainId: this.complaintInfo.id,
-      }).then((res) => {
-        if (res.success) {
-          this.$Message.success("操作成功");
-          this.getDetail();
-        }
-      });
     },
     getDetail() {
       if (!this.id) return;
@@ -278,22 +257,26 @@ export default {
     returnDataList() {
       this.$router.push({ name: "orderComplaint" });
     },
-    arbitrationHandle() {
-      this.arbitrationResultShow = true;
-    },
-    arbitrationHandleSubmit() {
-      if (!this.arbitrationParams.arbitrationResult) {
-        this.$Message.error("请填写仲裁内容");
+    appealSubmit() {
+      if (!this.appeal.appealContent) {
+        this.$Message.error("请填写申诉内容");
         return;
       }
       this.submitLoading = true;
-      API_Order.orderComplete(this.id, this.arbitrationParams)
+      const appealImages = Array.isArray(this.appeal.appealImages)
+        ? this.appeal.appealImages
+        : [];
+      API_Order.appeal({
+        orderComplaintId: this.id,
+        appealContent: this.appeal.appealContent,
+        appealImages,
+      })
         .then((res) => {
           this.submitLoading = false;
           if (res.success) {
-            this.$Message.success("仲裁成功");
-            this.arbitrationParams.arbitrationResult = "";
-            this.arbitrationResultShow = false;
+            this.$Message.success("申诉成功");
+            this.appeal.appealContent = "";
+            this.appeal.appealImages = [];
             this.getDetail();
           }
         })

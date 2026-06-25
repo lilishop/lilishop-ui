@@ -56,6 +56,17 @@ export const Modal = {
         }
       });
   },
+  warning(options = {}) {
+    const content = options.content || options.title || "";
+    return ElMessageBox.alert(content, options.title || "提示", {
+      confirmButtonText: options.okText || "确定",
+      type: "warning",
+    }).then(() => {
+      if (typeof options.onOk === "function") {
+        return options.onOk();
+      }
+    });
+  },
   remove() {
     ElMessageBox.close();
   },

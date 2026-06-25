@@ -237,8 +237,9 @@
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="TA收货地址" name="address">
-          <el-table v-loading="loading" border :data="addressData" class="mt_10" style="width: 100%">
+        <el-tab-pane label="TA收货地址" name="address" lazy>
+          <div v-loading="addressLoading" class="member-tab-panel">
+            <el-table border :data="addressData" class="mt_10 address-table" style="width: 100%">
             <el-table-column prop="alias" label="地址别名" min-width="80" show-overflow-tooltip />
             <el-table-column prop="name" label="收货人姓名" min-width="90" show-overflow-tooltip />
             <el-table-column prop="mobile" label="收货人电话" width="125" />
@@ -262,6 +263,7 @@
               @current-change="addressChangePage"
               @size-change="addressChangePageSize"
             />
+          </div>
           </div>
         </el-tab-pane>
 
@@ -428,6 +430,7 @@ export default {
       id: "",
       activeTab: "point",
       loading: true,
+      addressLoading: false,
       memberInfo: {},
       memberWalletInfo: {},
       addressModalTitle: "",
@@ -565,7 +568,9 @@ export default {
         this.getPointData();
       }
       if (v == "address") {
-        this.getAddressData();
+        this.$nextTick(() => {
+          this.getAddressData();
+        });
       }
       if (v == "order") {
         this.getOrderData();
@@ -723,15 +728,17 @@ export default {
       });
     },
     getAddressData() {
-      this.loading = true;
-      API_Member.getMemberAddressData(this.id, this.addressSearchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.addressData = res.result.records;
-          this.addressTotal = res.result.total;
-        }
-      });
-      this.loading = false;
+      this.addressLoading = true;
+      API_Member.getMemberAddressData(this.id, this.addressSearchForm)
+        .then((res) => {
+          if (res.success) {
+            this.addressData = res.result.records;
+            this.addressTotal = res.result.total;
+          }
+        })
+        .finally(() => {
+          this.addressLoading = false;
+        });
     },
     pointChangePage(v) {
       this.pointSearchForm.pageNumber = v;
@@ -749,7 +756,7 @@ export default {
     addressChangePageSize(v) {
       this.addressSearchForm.pageNumber = 1;
       this.addressSearchForm.pageSize = v;
-      this.getPointData();
+      this.getAddressData();
     },
     walletChangePage(v) {
       this.walletSearchForm.pageNumber = v;
@@ -770,9 +777,12 @@ export default {
       this.getOrderData();
     },
     selectDateRange(v) {
-      if (v) {
+      if (v && v.length === 2) {
         this.orderSearchForm.startDate = v[0];
         this.orderSearchForm.endDate = v[1];
+      } else {
+        delete this.orderSearchForm.startDate;
+        delete this.orderSearchForm.endDate;
       }
     },
   },

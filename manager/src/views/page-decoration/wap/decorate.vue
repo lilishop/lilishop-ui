@@ -46,7 +46,14 @@
     </el-alert>
 
     <!-- 右侧显示抽屉 -->
-    <el-drawer title="选择风格" :show-close="false" size="400px" v-model="styleFlag">
+    <el-drawer
+      title="选择风格"
+      :show-close="false"
+      size="400px"
+      v-model="styleFlag"
+      append-to-body
+      destroy-on-close
+    >
       <div class="drawer">
         <template v-for="(item, index) in modelData" :key="index">
           <div
@@ -67,6 +74,8 @@
       :show-close="false"
       size="400px"
       v-model="promotionsFlag"
+      append-to-body
+      destroy-on-close
     >
       <div class="drawer">
         <template v-for="(item, index) in modelData" :key="index">
@@ -185,7 +194,6 @@
                 <el-button
                   @click="bindGoodsCategory(title_index)"
                   size="small"
-                  style="margin-top: 20px"
                   >选择分类</el-button
                 >
               </div>
@@ -686,6 +694,7 @@ export default {
     clickDrawer(item, index) {
       this.$emit("handleDrawer", item);
       this.styleFlag = false;
+      this.promotionsFlag = false;
     },
     // 打开图片选择器
     liliDialogFlag(flag) {
@@ -705,8 +714,7 @@ export default {
         if (!val.zoneInfo) {
           val.zoneInfo = [];
         }
-        this.$refs.hotzone.flag = true;
-        this.$refs.hotzone.res = val;
+        this.$refs.hotzone.open(val);
       } else {
         this.liliDialogFlag(false);
       }

@@ -64,7 +64,7 @@
           <img class="show-image" :src="zoneForm.img" alt />
         </div>
 
-        <el-form :model="zoneForm" label-width="80px">
+        <el-form :model="zoneForm" label-width="90px" class="hz-edit-form">
           <el-form-item label="跳转链接：">
             <el-input type="textarea" v-if="zoneForm.type === 'other' && zoneForm.title === '外部链接'" v-model="zoneForm.link" />
             <el-button size="small" type="primary" @click="handleSelectLink"
@@ -252,3 +252,9 @@ export default {
   },
 };
 </script>
+
+<style scoped lang="scss">
+.hz-edit-form :deep(.el-form-item__label) {
+  white-space: nowrap;
+}
+</style>

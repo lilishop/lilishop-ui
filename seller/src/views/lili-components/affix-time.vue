@@ -125,13 +125,15 @@ export default {
         this.selectedWay.searchType = "";
         this.$emit("selected", this.selectedWay);
       } else {
-        const current = this.dateList.find((item) => item.selected);
-        this.selectedWay = current;
+        const current =
+          this.dateList.find((item) => item.selected) ||
+          this.dateList.find((item) => item.title === this.selectedWay.title) ||
+          this.dateList.find((item) => item.searchType === "LAST_SEVEN");
         this.clickBreadcrumb(current);
-        this.$emit("selected", this.selectedWay);
       }
     },
     clickBreadcrumb(item) {
+      if (!item) return;
       let currentIndex;
       this.dateList.forEach((res, index) => {
         res.selected = false;

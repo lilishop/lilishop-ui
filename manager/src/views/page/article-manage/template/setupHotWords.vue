@@ -8,28 +8,35 @@
       :rules="ruleValidate"
     >
       <el-form-item label="热词默认配置" prop="hotWordsSettingItems">
-        <div
-          class="item-label"
-          v-for="(item, index) in formValidate.hotWordsSettingItems"
-          :key="index"
-        >
-          <div>
-            <div class="item-keyword">
-              <div>热词：</div>
-              <el-input v-model="item.keywords" />
+        <div class="hotwords-config">
+          <div
+            class="item-label"
+            v-for="(item, index) in formValidate.hotWordsSettingItems"
+            :key="index"
+          >
+            <div class="item-fields">
+              <div class="item-keyword">
+                <div>热词：</div>
+                <el-input v-model="item.keywords" />
+              </div>
+              <div class="item-score">
+                <div>分数：</div>
+                <el-input-number :max="5" :min="0" v-model="item.score" />
+              </div>
             </div>
-            <div class="item-score">
-              <div>分数：</div>
-              <el-input-number :max="5" :min="0" v-model="item.score" />
+            <div class="item-actions">
+              <el-button
+                type="primary"
+                @click="formValidate.hotWordsSettingItems.splice(index, 1)"
+              >
+                删除
+              </el-button>
+              <el-button v-if="index === formValidate.hotWordsSettingItems.length - 1" @click="addSetItem">
+                添加配置
+              </el-button>
             </div>
-          </div>
-          <div>
-            <el-button type="primary" @click="formValidate.hotWordsSettingItems.splice(index, 1)">
-              删除
-            </el-button>
           </div>
         </div>
-        <el-button @click="addSetItem">添加配置</el-button>
       </el-form-item>
       <el-form-item label="每日持久化热词数量" prop="saveNum">
         <el-input-number :min="0" v-model="formValidate.saveNum" />
@@ -109,8 +116,21 @@ export default {
   margin-bottom: 10px;
   display: flex;
   align-items: center;
-  width: 500px;
+  width: 560px;
   justify-content: space-between;
+  gap: 12px;
+}
+
+.item-fields {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .item-keyword,

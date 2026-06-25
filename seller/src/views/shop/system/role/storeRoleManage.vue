@@ -75,8 +75,9 @@
       :title="modalTitle"
       width="500px"
       :close-on-click-modal="false"
+      align-center
+      append-to-body
       class="permModal"
-      top="30px"
     >
       <div v-loading="treeLoading" style="position: relative; max-height: 560px; overflow: auto">
         <el-tree
@@ -115,7 +116,15 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="selectIsSuperModel" title="选择菜单权限" width="800px">
+    <el-dialog
+      v-model="selectIsSuperModel"
+      title="选择菜单权限"
+      width="800px"
+      append-to-body
+      align-center
+      :close-on-click-modal="false"
+      :z-index="3500"
+    >
       <div class="btns">
         <el-button type="primary" class="btn-item" @click="setRole()">一键选中·数据权限</el-button>
         <el-button class="btn-item" @click="setRole('onlyView')">一键选中·查看权限</el-button>
@@ -295,9 +304,14 @@ export default {
     addRole() {
       this.modalType = 0;
       this.modalTitle = "添加角色";
-      this.$refs.roleForm?.resetFields();
-      delete this.roleForm.id;
+      this.roleForm = {
+        name: "",
+        description: "",
+      };
       this.roleModalVisible = true;
+      this.$nextTick(() => {
+        this.$refs.roleForm?.clearValidate();
+      });
     },
     edit(v) {
       this.modalType = 1;

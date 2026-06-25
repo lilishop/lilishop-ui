@@ -81,33 +81,34 @@
             </template>
             <el-table
               v-loading="memberLoading"
+              border
               :data="memberData"
               class="member-table"
               style="width: 100%"
             >
-              <el-table-column label="客户名称" width="180" show-overflow-tooltip>
+              <el-table-column label="客户名称" min-width="160" show-overflow-tooltip>
                 <template #default="{ row }">
                   <span v-if="row">{{ row.nickName || "-" }}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="客户账号" width="180" show-overflow-tooltip>
+              <el-table-column label="客户账号" min-width="260" show-overflow-tooltip>
                 <template #default="{ row }">
                   <span v-if="row">{{ row.username || "-" }}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="账号状态" width="180">
+              <el-table-column label="账号状态" min-width="120" align="center">
                 <template #default="{ row }">
                   <el-tag v-if="row" :type="row.disabled === true ? 'success' : 'info'">
                     {{ row.disabled === true ? "启用" : "禁用" }}
                   </el-tag>
                 </template>
               </el-table-column>
-              <el-table-column label="积分余额" width="180">
+              <el-table-column label="积分余额" min-width="120" align="center">
                 <template #default="{ row }">
                   <span v-if="row">{{ row.point == null ? 0 : row.point }}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" width="100" align="center">
+              <el-table-column label="操作" width="120" align="center" fixed="right">
                 <template #default="{ row }">
                   <a v-if="row" class="link-text" @click="detail(row)">详情</a>
                 </template>
@@ -409,8 +410,27 @@ export default {
 }
 
 .member-table {
-  :deep(.el-table__header th) {
+  width: 100%;
+
+  :deep(.el-table__header th.el-table__cell) {
     background: #fafafa;
+    padding: 14px 0;
+    font-size: 14px;
+    color: #17233d;
+  }
+
+  :deep(.el-table__header .cell) {
+    padding: 0 16px;
+    line-height: 22px;
+  }
+
+  :deep(.el-table__body td.el-table__cell) {
+    padding: 12px 0;
+  }
+
+  :deep(.el-table__body .cell) {
+    padding: 0 16px;
+    line-height: 22px;
   }
 }
 

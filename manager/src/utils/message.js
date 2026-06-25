@@ -39,7 +39,7 @@ export const Notice = {
 
 export const Modal = {
   confirm(options = {}) {
-    const content = options.content || options.title || "确认操作？";
+    const content = normalizeModalContent(options.content || options.title || "确认操作？");
     const title = options.title || "提示";
     return ElMessageBox.confirm(content, title, {
       confirmButtonText: options.okText || "确定",
@@ -76,6 +76,18 @@ export const Modal = {
       }
     });
   },
+  warning(options = {}) {
+    const content = normalizeModalContent(options.content || options.title || "");
+    const title = options.title || "提示";
+    return ElMessageBox.alert(content, title, {
+      confirmButtonText: options.okText || "确定",
+      type: "warning",
+    }).then(() => {
+      if (typeof options.onOk === "function") {
+        return options.onOk();
+      }
+    });
+  },
   remove() {
     try {
       ElMessageBox.close();
@@ -89,6 +101,11 @@ function normalize(content) {
   if (typeof content === "string") return content;
   if (content && content.content) return content.content;
   return String(content ?? "");
+}
+
+function normalizeModalContent(content) {
+  const text = normalize(content);
+  return text.replace(/<\/?p>/gi, "").trim();
 }
 
 export function setupLegacyMessage(app) {

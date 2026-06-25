@@ -63,7 +63,7 @@
           <img class="show-image" :src="zoneForm.img" alt />
         </div>
 
-        <el-form :model="zoneForm" label-width="80px">
+        <el-form :model="zoneForm" label-width="90px" class="hz-edit-form">
           <!-- <el-form-item label="图片链接：">
             <el-input v-model="zoneForm.img"></el-input>
             <el-button size="small" type="primary" @click="handleSelectImg"
@@ -240,3 +240,9 @@ export default {
   },
 };
 </script>
+
+<style scoped lang="scss">
+.hz-edit-form :deep(.el-form-item__label) {
+  white-space: nowrap;
+}
+</style>

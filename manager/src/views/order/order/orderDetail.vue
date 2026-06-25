@@ -422,7 +422,7 @@
 
       <template #footer>
         <el-button @click="printModal = false">关闭</el-button>
-        <el-button type="primary" v-print="printInfoObj">打印发货单</el-button>
+        <el-button type="primary" @click="handlePrintInvoice">打印发货单</el-button>
       </template>
     </el-dialog>
 
@@ -437,6 +437,7 @@ import * as RegExp from "@/libs/RegExp.js";
 
 import multipleMap from "@/components/map/multiple-map";
 import vueQr from "vue-qr";
+import { printElement } from "@/utils/print";
 export default {
   name: "orderList",
   components: {
@@ -449,11 +450,6 @@ export default {
       typeList: [],
       showPrices: false,
       printHiddenFlag: false,//隐藏信息
-      printInfoObj: {
-        id: "printInfo",//要打印的id名 无#号
-        popTitle: '&nbsp;',//页眉标题 默认浏览器标题 空字符串时显示undefined 使用html语言
-        extraHead: '',//头部文字 默认空
-      },
       loading: false, //加载表格
 
       addr: "", //地区
@@ -685,6 +681,9 @@ export default {
     },
     printCancel () {
       // this.printHiddenFlag = false;
+    },
+    handlePrintInvoice () {
+      printElement("printInfo", "发货单");
     },
     //弹出修改收货地址框
     editAddress () {

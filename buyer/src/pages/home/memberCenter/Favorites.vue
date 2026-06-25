@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
-    <card _Title="近期收藏" :_Tabs="favoriteWay" @_Change="change" :_Size="16" v-if="!homePage" />
-    <card _Title="近期收藏" :_Size="16" :_Tabs="favoriteWay" @_Change="change" _More="全部收藏" _Src="/home/Favorites" v-else>
+    <card _Title="近期收藏" :_Tabs="favoriteWay" :_ActiveTab="activeTabIndex" @_Change="change" :_Size="16" v-if="!homePage" />
+    <card _Title="近期收藏" :_Size="16" :_Tabs="favoriteWay" :_ActiveTab="activeTabIndex" @_Change="change" _More="全部收藏" _Src="/home/Favorites" v-else>
     </card>
     <div v-if="list.length">
       <div v-for="(item, index) in list" :key="index">
@@ -61,20 +61,42 @@ export default {
       spinShow: false // 加载状态
     };
   },
+  computed: {
+    activeTabIndex() {
+      return this.params.type === 'STORE' ? 1 : 0;
+    },
+  },
 
   methods: {
-    getList() { // 获取收藏列表
+    loadFavorites() {
+      if (this.params.type === 'STORE') {
+        this.getStoreList();
+      } else {
+        this.getList();
+      }
+    },
+    getList() { // 获取商品收藏列表
       this.spinShow = true
       collectList(this.params).then(res => {
+        if (res.success && res.result) {
+          this.list = res.result.records || [];
+        }
+      }).catch(() => {
+        this.list = [];
+      }).finally(() => {
         this.spinShow = false
-        if (res.success) this.list = res.result.records;
       })
     },
-    getStoreList() { // 获取收藏列表
+    getStoreList() { // 获取店铺收藏列表
       this.spinShow = true
       storeCollectList(this.params).then(res => {
+        if (res.success && res.result) {
+          this.list = res.result.records || [];
+        }
+      }).catch(() => {
+        this.list = [];
+      }).finally(() => {
         this.spinShow = false
-        if (res.success) this.list = res.result.records;
       })
     },
     change(index) { // tab栏切换
@@ -137,8 +159,7 @@ export default {
   },
   mounted() {
     if (this.homePage) this.params.pageSize = 5;
-    this.getList()
-
+    this.loadFavorites();
   }
 };
 </script>

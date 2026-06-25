@@ -10,7 +10,7 @@
             {{ item.name }}
           </el-breadcrumb-item>
         </el-breadcrumb>
-        <div class="store-collect" v-if="!takeDownSale">
+        <div class="store-collect" v-if="!takeDownSale && goodsMsg.data">
           <span class="mr_10" v-if="goodsMsg.data">
             <router-link :to="'Merchant?id=' + goodsMsg.data.storeId">{{
               goodsMsg.data.storeName
@@ -176,14 +176,23 @@ export default {
     },
     async collect () {
       // 收藏店铺
+      const storeId = this.goodsMsg.data && this.goodsMsg.data.storeId;
+      if (!storeId) {
+        return;
+      }
+      if (!this.Cookies.getItem("userInfo")) {
+        this.$Message.warning("请先登录");
+        this.$router.push("/login");
+        return;
+      }
       if (this.storeCollected) {
-        let cancel = await cancelStoreCollect("STORE", this.goodsMsg.data.storeId);
+        let cancel = await cancelStoreCollect("STORE", storeId);
         if (cancel.success) {
           this.$Message.success("已取消收藏");
           this.storeCollected = false;
         }
       } else {
-        let collect = await collectStore("STORE", this.goodsMsg.data.storeId);
+        let collect = await collectStore("STORE", storeId);
         if (collect.code === 200) {
           this.storeCollected = true;
           this.$Message.success("收藏店铺成功,可以前往个人中心我的收藏查看");

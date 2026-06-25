@@ -42,17 +42,19 @@ export default {
     },
     getSite() {
       getBaseSite().then((res) => {
-        const { domainLogo, domainIcon, siteName } = JSON.parse(
-          res.result.settingValue
-        );
-        this.domainLogo = domainLogo;
-        const expirationTime = new Date().setHours(new Date().getHours() + 1);
-        localStorage.setItem("icontitle_expiration_time", expirationTime);
-        localStorage.setItem("icon", domainLogo);
-        localStorage.setItem("domainIcon", domainIcon);
-        localStorage.setItem("title", siteName);
-        this.applyFavicon(domainIcon || domainLogo);
-        window.document.title = siteName + " - 运营后台";
+        if (res.success && res.result && res.result.settingValue) {
+          const { domainLogo, domainIcon, siteName } = JSON.parse(
+            res.result.settingValue
+          );
+          this.domainLogo = domainLogo;
+          const expirationTime = new Date().setHours(new Date().getHours() + 1);
+          localStorage.setItem("icontitle_expiration_time", expirationTime);
+          localStorage.setItem("icon", domainLogo);
+          localStorage.setItem("domainIcon", domainIcon);
+          localStorage.setItem("title", siteName);
+          this.applyFavicon(domainIcon || domainLogo);
+          window.document.title = siteName + " - 运营后台";
+        }
       });
     },
   },

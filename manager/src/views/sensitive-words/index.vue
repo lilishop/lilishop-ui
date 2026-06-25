@@ -134,15 +134,16 @@ export default {
     },
     getDataList() {
       this.loading = true;
-      getSensitiveWordsPage(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-      this.total = this.data.length;
-      this.loading = false;
+      getSensitiveWordsPage(this.searchForm)
+        .then((res) => {
+          if (res.success) {
+            this.data = res.result.records;
+            this.total = res.result.total;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
     handleSubmit() {
       this.$refs.form.validate((valid) => {

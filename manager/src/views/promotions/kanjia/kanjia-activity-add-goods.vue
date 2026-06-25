@@ -13,67 +13,72 @@
             <el-form-item style="width: 100%">
               <el-table
                 border
+                class="kanjia-goods-table"
                 :data="form.promotionGoodsList"
                 style="width: 100%"
                 @selection-change="changeSelect"
               >
                 <el-table-column type="selection" width="60" align="center" />
                 <el-table-column prop="goodsName" label="商品名称" min-width="100" show-overflow-tooltip />
-                <el-table-column label="商品价格" width="120">
+                <el-table-column label="商品价格" width="150">
                   <template #default="{ row }">
                     <span v-if="row" :style="{ color: $mainColor }">
                       {{ $filters.unitPrice(row.price, "￥") }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="库存" width="100">
+                <el-table-column label="库存" width="120">
                   <template #default="{ row }">
                     <span v-if="row">{{ row.quantity }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="结算价格" width="130">
+                <el-table-column label="结算价格" width="160">
                   <template #default="{ $index }">
                     <el-input-number
                       :min="0"
                       v-model="form.promotionGoodsList[$index].settlementPrice"
-                      style="width: 110px"
+                      controls-position="right"
+                      class="kanjia-goods-input"
                     />
                   </template>
                 </el-table-column>
-                <el-table-column label="最低砍" width="130">
+                <el-table-column label="最低砍" width="160">
                   <template #default="{ $index }">
                     <el-input-number
                       :min="0"
                       v-model="form.promotionGoodsList[$index].lowestPrice"
-                      style="width: 110px"
+                      controls-position="right"
+                      class="kanjia-goods-input"
                     />
                   </template>
                 </el-table-column>
-                <el-table-column label="最高砍" width="130">
+                <el-table-column label="最高砍" width="160">
                   <template #default="{ $index }">
                     <el-input-number
                       :min="0"
                       v-model="form.promotionGoodsList[$index].highestPrice"
-                      style="width: 110px"
+                      controls-position="right"
+                      class="kanjia-goods-input"
                     />
                   </template>
                 </el-table-column>
-                <el-table-column label="活动库存" width="130">
+                <el-table-column label="活动库存" width="160">
                   <template #default="{ $index }">
                     <el-input-number
                       :min="0"
                       v-model="form.promotionGoodsList[$index].stock"
-                      style="width: 110px"
+                      controls-position="right"
+                      class="kanjia-goods-input"
                     />
                   </template>
                 </el-table-column>
-                <el-table-column label="操作" width="100" align="center">
+                <el-table-column label="操作" width="120" align="center">
                   <template #default="{ $index }">
                     <el-button type="danger" size="small" plain @click="delGoods($index)">删除</el-button>
                   </template>
                 </el-table-column>
               </el-table>
             </el-form-item>
-            <el-form-item label="活动时间" prop="rangeTime">
+            <el-form-item label="活动时间" prop="rangeTime" class="kanjia-activity-time-form-item">
               <el-date-picker
                 type="datetimerange"
                 v-model="form.rangeTime"
@@ -82,7 +87,6 @@
                 end-placeholder="结束时间"
                 placeholder="请选择"
                 :disabled-date="options.disabledDate"
-                style="width: 260px"
               />
             </el-form-item>
             <div>
@@ -253,7 +257,27 @@ export default {
 };
 </script>
 
-<style lang="scss" scpoed>
+<style lang="scss" scoped>
+.kanjia-goods-table {
+  :deep(.el-table__body .el-table__cell .cell) {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+}
+
+.kanjia-goods-input {
+  width: 100%;
+}
+
+.kanjia-activity-time-form-item {
+  :deep(.el-date-editor) {
+    width: 360px !important;
+    max-width: 360px;
+    flex-grow: 0;
+  }
+}
+
 h4 {
   margin-bottom: 10px;
   padding: 0 10px;

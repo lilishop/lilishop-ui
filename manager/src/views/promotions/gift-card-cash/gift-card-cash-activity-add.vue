@@ -225,7 +225,10 @@ export default {
           this.form.stockTotal =
             d.stockTotal !== null && d.stockTotal !== undefined ? d.stockTotal : null;
           this.form.validityType = d.validityType || "LONG_TERM";
-          this.form.validEndTime = this.parseDetailDate(d.validEndTime);
+          const endDate = this.parseDetailDate(d.validEndTime);
+          this.form.validEndTime = endDate
+            ? this.$filters.unixToDate(endDate.getTime() / 1000)
+            : null;
           this.form.validMonthsAfterActivate =
             d.validMonthsAfterActivate !== null &&
             d.validMonthsAfterActivate !== undefined &&
@@ -271,7 +274,10 @@ export default {
         stockTotal: this.form.stockTotal,
       };
       if (payload.validityType === "FIXED_UNTIL") {
-        payload.validEndTime = this.form.validEndTime;
+        const endDate = new Date(this.form.validEndTime);
+        payload.validEndTime = Number.isNaN(endDate.getTime())
+          ? this.form.validEndTime
+          : endDate.getTime();
       }
       if (payload.validityType === "AFTER_ACTIVATE_MONTHS") {
         payload.validMonthsAfterActivate = this.form.validMonthsAfterActivate;

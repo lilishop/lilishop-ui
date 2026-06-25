@@ -22,7 +22,7 @@
               <div>店铺状态：{{ userData.storeDisable == "OPEN" ? "开启中" : "关闭" }}</div>
             </div>
             <div class="box-item" @click="im()">
-              <el-button type="info" :loading="load">点击登录客服</el-button>
+              <el-button type="warning" :loading="load">点击登录客服</el-button>
             </div>
           </div>
 

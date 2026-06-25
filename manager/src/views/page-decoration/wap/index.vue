@@ -200,25 +200,27 @@ export default {
           API_Promotions.getLiveList({
             status: "START",
             pageSize: 1,
-          }).then((res) => {
-            if (res.success && res.result.size > 0) {
-              API_Promotions.getLiveInfo(res.result.records[0].id).then(
-                (res) => {
-                  if (res.success) {
-                    this.contentData.list[newIndex].options.list.push({
-                      type: val.promotionsType,
-                      title: val.name,
-                      title1: val.subName,
-                      color1: val.subColor,
-                      bk_color: val.subBkColor,
-                      data: res.result.commodityList
-                        ? res.result.commodityList.splice(0, 2)
-                        : [],
-                    });
-                  }
-                }
-              );
+            pageNumber: 1,
+          }).then((listRes) => {
+            const records = listRes.result?.records || [];
+            if (!listRes.success || records.length === 0) {
+              this.$Message.warning("暂无进行中的直播活动");
+              return;
             }
+            API_Promotions.getLiveInfo(records[0].id).then((infoRes) => {
+              if (infoRes.success) {
+                this.contentData.list[newIndex].options.list.push({
+                  type: val.promotionsType,
+                  title: val.name,
+                  title1: val.subName,
+                  color1: val.subColor,
+                  bk_color: val.subBkColor,
+                  data: infoRes.result.commodityList
+                    ? infoRes.result.commodityList.splice(0, 2)
+                    : [],
+                });
+              }
+            });
           });
         } else {
           API_Promotions.getAllPromotion().then((res) => {

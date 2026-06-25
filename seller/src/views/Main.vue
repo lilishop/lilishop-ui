@@ -10,7 +10,7 @@
       </div>
       <shrinkable-menu />
     </div>
-    <div class="main-header-con" :style="{ height: setting.isUseTabsRouter ? '100px' : '60px' }">
+    <div class="main-header-con" :style="{ height: setting.isUseTabsRouter ? '106px' : '60px' }">
       <div class="main-header">
         <div class="header-avator-con">
           <div></div>
@@ -24,7 +24,7 @@
               <ul class="nav-list">
                 <li class="nav-item" @click="im">
                   <el-tooltip content="联系客服" placement="bottom">
-                    <el-button type="info" size="small" :loading="load">
+                    <el-button type="warning" size="small" :loading="load">
                       <el-icon><ChatDotRound /></el-icon>
                       客服
                     </el-button>
@@ -64,8 +64,8 @@
     <div
       class="single-page-con"
       :style="{
-        top: setting.isUseTabsRouter ? '100px' : '60px',
-        height: setting.isUseTabsRouter ? 'calc(100% - 110px)' : 'calc(100% - 70px)',
+        top: setting.isUseTabsRouter ? '106px' : '60px',
+        height: setting.isUseTabsRouter ? 'calc(100% - 116px)' : 'calc(100% - 70px)',
       }"
     >
       <div class="single-page">

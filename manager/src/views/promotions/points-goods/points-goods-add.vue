@@ -91,7 +91,7 @@
               </el-table>
             </el-form-item>
 
-            <el-form-item label="活动时间" prop="rangeTime">
+            <el-form-item label="活动时间" prop="rangeTime" class="points-goods-time-form-item">
               <el-date-picker
                 type="datetimerange"
                 v-model="form.rangeTime"
@@ -100,7 +100,6 @@
                 end-placeholder="结束时间"
                 placeholder="请选择"
                 :disabled-date="options.disabledDate"
-                style="width: 260px"
               />
             </el-form-item>
             <div>
@@ -127,7 +126,7 @@ export default {
   data() {
     return {
       form: {
-        rangeTime: ["", ""],
+        rangeTime: null,
         promotionGoodsList: [],
       },
       showTable: true,
@@ -136,7 +135,19 @@ export default {
       submitLoading: false,
       selectedGoods: [],
       formRule: {
-        rangeTime: [{ required: true, message: "请选择活动时间" }],
+        rangeTime: [
+          {
+            required: true,
+            validator: (rule, value, callback) => {
+              if (!value || !Array.isArray(value) || value.length < 2 || !value[0] || !value[1]) {
+                callback(new Error("请选择活动时间"));
+              } else {
+                callback();
+              }
+            },
+            trigger: "change",
+          },
+        ],
       },
       options: {
         disabledDate(date) {
@@ -154,33 +165,31 @@ export default {
       this.categoryList = res.result.records;
     },
     handleSubmit() {
-      this.form.startTime = this.form.rangeTime[0];
-      this.form.endTime = this.form.rangeTime[1];
       this.$refs.form.validate((valid) => {
-        if (valid) {
-          let params = this.promotionGoodsList;
-          const start = this.$filters.unixToDate(this.form.startTime / 1000);
-          const end = this.$filters.unixToDate(this.form.endTime / 1000);
-
-          if (!params || params.length === 0) {
-            this.$Modal.warning({ title: "提示", content: "请选择指定商品" });
-            return;
-          }
-
-          this.submitLoading = true;
-          params = params.map((j) => {
-            j.startTime = start;
-            j.endTime = end;
-            return j;
-          });
-          addPointsGoods(params).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("积分商品创建成功");
-              this.closeCurrentPage();
-            }
-          });
+        if (!valid) return;
+        let params = this.promotionGoodsList;
+        if (!params || params.length === 0) {
+          this.$Modal.warning({ title: "提示", content: "请选择指定商品" });
+          return;
         }
+        this.form.startTime = this.form.rangeTime[0];
+        this.form.endTime = this.form.rangeTime[1];
+        const start = this.$filters.unixToDate(this.form.startTime / 1000);
+        const end = this.$filters.unixToDate(this.form.endTime / 1000);
+
+        this.submitLoading = true;
+        params = params.map((j) => {
+          j.startTime = start;
+          j.endTime = end;
+          return j;
+        });
+        addPointsGoods(params).then((res) => {
+          this.submitLoading = false;
+          if (res.success) {
+            this.$Message.success("积分商品创建成功");
+            this.closeCurrentPage();
+          }
+        });
       });
     },
     closeCurrentPage() {
@@ -251,7 +260,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scpoed>
+<style lang="scss" scoped>
 h4 {
   margin-bottom: 10px;
   padding: 0 10px;
@@ -272,5 +281,14 @@ h4 {
 
 .wrapper {
   min-height: 800px;
+}
+
+.points-goods-time-form-item {
+  :deep(.el-date-editor.el-date-editor--datetimerange) {
+    width: 420px !important;
+    min-width: 420px;
+    max-width: 420px;
+    flex-shrink: 0;
+  }
 }
 </style>

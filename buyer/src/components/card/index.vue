@@ -50,11 +50,20 @@ export default {
       type: null,
       default: null,
     },
+    _ActiveTab: {
+      type: Number,
+      default: 0,
+    },
   },
   data() {
     return {
-      isActive: 0,
+      isActive: this._ActiveTab,
     };
+  },
+  watch: {
+    _ActiveTab(val) {
+      this.isActive = val;
+    },
   },
   methods: {
     callBack() {

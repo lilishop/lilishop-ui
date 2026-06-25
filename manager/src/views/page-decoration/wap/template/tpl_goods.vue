@@ -1,11 +1,11 @@
 <template>
-  <div class="layout">
+  <div v-if="goodsBlock" class="layout">
     <div class="goods-cell-title">
       <div
         class="goods-item-title"
         :class="{ selected: selected.index == index }"
         @click="handleClickTitle(title, index)"
-        v-for="(title, index) in res.list[0].titleWay"
+        v-for="(title, index) in goodsBlock.titleWay"
         :key="index"
       >
         <h4>{{ title.title }}</h4>
@@ -13,36 +13,29 @@
       </div>
     </div>
     <div class="goods-list">
-      <div
-        v-if="
-          item.___index != undefined
-            ? selected.index == item.___index
-            : selected.val == item.type
-        "
-        class="goods-item"
-        v-for="(item, item_index) in res.list[0].listWay"
-        :key="item_index"
-      >
-        <div class="goods-img">
-          <el-icon
-            :size="20"
-            color="#e1251b"
-            @click="closeGoods(item, item_index)"
-            class="goods-icon"
-          >
-            <CircleClose />
-          </el-icon>
-          <img :src="item.img" alt />
-        </div>
-        <div class="goods-desc">
-          <div class="goods-title">
-            {{ item.title }}
+      <template v-for="(item, item_index) in goodsBlock.listWay" :key="item_index">
+        <div v-if="isGoodsVisible(item)" class="goods-item">
+          <div class="goods-img">
+            <el-icon
+              :size="20"
+              color="#e1251b"
+              @click="closeGoods(item, item_index)"
+              class="goods-icon"
+            >
+              <CircleClose />
+            </el-icon>
+            <img :src="item.img" alt />
           </div>
-          <div class="goods-bottom">
-            <div class="goods-price">￥{{ $filters.unitPrice(item.price) }}</div>
+          <div class="goods-desc">
+            <div class="goods-title">
+              {{ item.title }}
+            </div>
+            <div class="goods-bottom">
+              <div class="goods-price">￥{{ $filters.unitPrice(item.price) }}</div>
+            </div>
           </div>
         </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
@@ -53,29 +46,46 @@ export default {
   data() {
     return {
       selected: {
-        // 已选数据
         index: 0,
+        val: "",
       },
     };
   },
   props: ["res"],
+  computed: {
+    goodsBlock() {
+      return this.res?.list?.[0] || null;
+    },
+  },
   watch: {
-    res: {
+    goodsBlock: {
       handler(val) {
-        // 监听父级的值 如果有值将值赋给selected
-        if (val) {
-          this.selected.val = this.res.list[0].listWay[0].type;
+        if (!val) {
+          return;
+        }
+        const firstGoods = (val.listWay || []).find(Boolean);
+        if (firstGoods) {
+          this.selected.val = firstGoods.type;
+        } else if (val.titleWay?.[0]?.title) {
+          this.selected.val = val.titleWay[0].title;
         }
       },
       immediate: true,
     },
   },
   methods: {
-    // 删除商品
-    closeGoods(val, index) {
-      this.res.list[0].listWay.splice(index, 1);
+    isGoodsVisible(item) {
+      if (!item) {
+        return false;
+      }
+      if (item.___index != undefined) {
+        return this.selected.index == item.___index;
+      }
+      return this.selected.val == item.type;
     },
-    // 切换商品列表
+    closeGoods(val, index) {
+      this.goodsBlock.listWay.splice(index, 1);
+    },
     handleClickTitle(val, index) {
       this.selected.index = index;
       this.selected.val = val.title;

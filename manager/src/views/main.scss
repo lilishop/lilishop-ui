@@ -55,9 +55,13 @@
     padding-left: 0;
     width: 100%;
     height: 60px;
-    z-index: 22;
+    z-index: 20;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
     transition: padding 0.3s;
+
+    &.has-tabs {
+      box-shadow: 0 2px 1px 1px rgba(100, 100, 100, 0.1);
+    }
   }
 
   &-breadcrumb {
@@ -81,29 +85,30 @@
   }
 
   .tags-con {
-    height: 44px;
+    height: 46px;
     z-index: -1;
-    background: #fff;
-    border-top: 1px solid #f0f0f0;
-    border-bottom: 1px solid #f0f0f0;
+    margin-left: 200px;
+    width: calc(100% - 200px);
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
 
     .tags-outer-scroll-con {
       position: relative;
       box-sizing: border-box;
-      padding-right: 12px;
+      padding-right: 120px;
       width: 100%;
       height: 100%;
-      display: flex;
-      align-items: center;
 
       .tags-inner-scroll-body {
         position: absolute;
-        padding: 0 6px;
-        overflow: visible;
-        white-space: nowrap;
+        top: 0;
+        bottom: 0;
         display: flex;
         align-items: center;
-        height: 100%;
+        padding: 0 10px;
+        overflow: visible;
+        white-space: nowrap;
         transition: left 0.3s ease;
       }
 
@@ -126,6 +131,7 @@
     min-width: 740px;
     height: 60px;
     background: #fff;
+    box-shadow: 0 2px 1px 1px rgba(100, 100, 100, 0.1);
     position: relative;
     z-index: 11;
     display: flex;
@@ -242,28 +248,14 @@
     }
   }
 
-  .breadcrumb-bar {
-    position: fixed;
-    top: 60px;
-    left: 212px;
-    right: 0;
-    height: 44px;
-    background: #fff;
-    border-bottom: 1px solid #f0f0f0;
-    z-index: 19;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-  }
-
   .single-page-con {
     min-width: 740px;
     position: relative;
     left: 200px;
-    top: 100px;
+    top: 106px;
     right: 0;
     bottom: 0;
-    height: calc(100% - 110px);
+    height: calc(100% - 116px);
     width: calc(100% - 200px);
     overflow: auto;
     background-color: #f0f0f0;
@@ -272,7 +264,7 @@
 
     .single-page {
       position: relative;
-      margin: 10px 12px;
+      margin: 10px;
     }
   }
 

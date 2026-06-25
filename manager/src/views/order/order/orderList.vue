@@ -9,12 +9,12 @@
         class="search-form"
         @keyup.enter="handleSearch"
       >
-        <el-form-item label="关键字" prop="keywords" style="display: block; width: 100%">
+        <el-form-item label="关键字" prop="keywords">
           <el-input
             v-model="searchForm.keywords"
             placeholder="请输入商品名称/收货人/收货人手机号/店铺名称"
             clearable
-            style="width: 500px"
+            style="width: 380px"
           />
         </el-form-item>
         <el-form-item label="订单号" prop="orderSn">
@@ -76,7 +76,7 @@
         </el-tabs>
       </div>
       <div>
-        <el-button type="info" class="export" @click="exportOrder">导出订单</el-button>
+        <el-button type="warning" class="export" @click="exportOrder">导出订单</el-button>
       </div>
 
       <el-table v-loading="loading" :data="data" ref="table" class="mt_10" style="width: 100%">

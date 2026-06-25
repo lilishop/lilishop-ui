@@ -16,35 +16,31 @@
       </div>
     </div>
     <div class="section">
-      <swiper ref="mySwiper" :options="swiperOptions">
-        <swiper-slide
-          v-for="(item, index) in options.list[0].goodsList"
-          :key="index"
-        >
-          <div class="content">
-            <img :src="item.img" width="140" height="140" :alt="item.name" />
-            <div class="ellipsis">{{ item.name }}</div>
-            <div>
-              <span>{{ $filters.unitPrice(item.price, "￥") }}</span>
-              <span>{{ $filters.unitPrice(item.originalPrice, "￥") }}</span>
+      <div ref="swiperEl" class="swiper">
+        <div class="swiper-wrapper">
+          <div
+            class="swiper-slide"
+            v-for="(item, index) in options.list[0].goodsList"
+            :key="index"
+          >
+            <div class="content">
+              <img :src="item.img" width="140" height="140" :alt="item.name" />
+              <div class="ellipsis">{{ item.name }}</div>
+              <div>
+                <span>{{ $filters.unitPrice(item.price, "￥") }}</span>
+                <span>{{ $filters.unitPrice(item.originalPrice, "￥") }}</span>
+              </div>
             </div>
           </div>
-        </swiper-slide>
-      </swiper>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script>
-import { Swiper, SwiperSlide, directive } from "vue-awesome-swiper";
+import Swiper from "swiper";
 import "swiper/swiper-bundle.css";
 export default {
-  components: {
-    Swiper,
-    SwiperSlide,
-  },
-  directives: {
-    swiper: directive,
-  },
   props: {
     data: {
       type: Object,
@@ -62,12 +58,7 @@ export default {
       minutes: "00", // 分钟
       seconds: "00", // 秒
       interval: undefined, // 定时器
-      swiperOptions: {
-        // 轮播图参数
-        slidesPerView: 5,
-        autoplay: true,
-        loop: true,
-      },
+      swiperInstance: null,
     };
   },
   watch: {
@@ -94,11 +85,26 @@ export default {
   },
   mounted() {
     this.countDown(this.options.list);
+    this.initSwiper();
   },
   beforeUnmount() {
     clearInterval(this.interval);
+    if (this.swiperInstance) {
+      this.swiperInstance.destroy(true, true);
+      this.swiperInstance = null;
+    }
   },
   methods: {
+    initSwiper() {
+      if (!this.$refs.swiperEl) {
+        return;
+      }
+      this.swiperInstance = new Swiper(this.$refs.swiperEl, {
+        slidesPerView: 5,
+        autoplay: true,
+        loop: true,
+      });
+    },
     // 倒计时
     countDown(list) {
       /**

@@ -1,11 +1,26 @@
 
 :deep(.el-overlay) {
-  z-index: 800;
+  z-index: 2000;
 }
 .decorate-view-link{
     font-size: 12px;
     margin: 0 4px;
+    flex: 1;
+    min-width: 0;
     color: #999;
+}
+.decorate-view-btn {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  margin-left: 10px;
+
+  :deep(.el-button) {
+    width: 76px;
+    margin: 0;
+  }
 }
 .decorate-view-style {
     border: 1px solid #ededed;

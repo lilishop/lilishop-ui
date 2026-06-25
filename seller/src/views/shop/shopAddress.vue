@@ -133,11 +133,22 @@ export default {
         }
       });
     },
+    resetForm() {
+      this.form = {
+        addressName: "",
+        center: "",
+        address: "",
+        mobile: "",
+      };
+    },
     add() {
       this.modalType = 0;
-      this.$refs.form.resetFields();
-      this.modalVisible = true;
       this.modalTitle = "添加自提地址";
+      this.resetForm();
+      this.modalVisible = true;
+      this.$nextTick(() => {
+        this.$refs.form?.resetFields();
+      });
     },
     edit(v) {
       this.modalType = 1;

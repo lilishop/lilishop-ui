@@ -173,11 +173,30 @@ export default {
     carouselItemKey(item, index) {
       return item?.img || item?.url || `slide-${index}`;
     },
+    resolveRoute(pathStr) {
+      if (!pathStr) return { path: "/" };
+      const [path, search] = pathStr.split("?");
+      if (!search) return { path };
+      return {
+        path,
+        query: Object.fromEntries(new URLSearchParams(search)),
+      };
+    },
     // 快捷跳转中心
     entryControl(val) {
-      console.log("val",val)
-      let url = this.$router.resolve(val.path);
-      window.open(url.href, '_blank');
+      const location = this.resolveRoute(val.path);
+      if (location.path.startsWith("/home/") && !storage.getItem("userInfo")) {
+        this.$router.push({
+          path: "/login",
+          query: {
+            rePath: location.path,
+            query: JSON.stringify(location.query || {}),
+          },
+        });
+        return;
+      }
+      const url = this.$router.resolve(location);
+      window.open(url.href, "_blank");
     },
   },
   mounted() {

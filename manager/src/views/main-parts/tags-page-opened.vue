@@ -165,7 +165,6 @@ export default {
   watch: {
     $route(to) {
       this.currentPageName = to.name;
-      this.tagsCount = this.pageTagsList?.length;
     },
     visible(value) {
       if (value) {
@@ -174,6 +173,9 @@ export default {
         document.body.removeEventListener("click", this.closeMenu);
       }
     },
+  },
+  beforeUnmount() {
+    document.body.removeEventListener("click", this.closeMenu);
   },
 };
 </script>
@@ -188,13 +190,13 @@ export default {
   z-index: 11000;
   list-style-type: none;
   border-radius: 4px;
-  box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
   li {
     margin: 0;
     padding: 5px 15px;
     cursor: pointer;
     &:hover {
-      background: #eee;
+      background: rgba($color: $theme_color, $alpha: 0.1);
     }
   }
 }
@@ -206,6 +208,21 @@ export default {
   border-radius: 4px;
   font-size: 13px;
   transition: all 0.2s ease;
+
+  &.el-tag--info.el-tag--plain {
+    color: #606266;
+    border-color: #dcdfe6;
+    background-color: #fff;
+  }
+
+  &.el-tag--info.el-tag--plain .el-tag__close {
+    color: #909399;
+
+    &:hover {
+      color: #606266;
+      background-color: transparent;
+    }
+  }
 
   & + .page-tag {
     margin-left: 0;

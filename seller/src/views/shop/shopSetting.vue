@@ -35,7 +35,7 @@
           </el-form>
         </el-tab-pane>
         <el-tab-pane label="发货地址">
-          <el-form ref="addressGoods" :model="addressGoods" label-width="100px" :rules="addressGoodsValidate">
+          <el-form ref="addressGoods" :model="addressGoods" label-width="120px" :rules="addressGoodsValidate" class="shop-setting-form">
             <el-form-item label="发货人姓名" prop="salesConsignorName">
               <el-input v-model="addressGoods.salesConsignorName" maxlength="11" clearable style="width: 20%">
               </el-input>
@@ -481,5 +481,16 @@ export default {
 .desc {
   margin-left: 10px;
   color: #999;
+}
+
+.shop-setting-form {
+  :deep(.el-form-item) {
+    align-items: center;
+  }
+
+  :deep(.el-form-item__label) {
+    white-space: nowrap;
+    line-height: 32px;
+  }
 }
 </style>

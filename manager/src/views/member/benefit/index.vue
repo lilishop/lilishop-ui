@@ -102,6 +102,8 @@
       direction="rtl"
       :z-index="950"
       :close-on-click-modal="false"
+      append-to-body
+      destroy-on-close
       class="benefit-form-drawer"
     >
       <el-form ref="addForm" :model="formAdd" :rules="rulesAdd" label-width="110px">
@@ -218,6 +220,8 @@
       direction="rtl"
       :z-index="950"
       :close-on-click-modal="false"
+      append-to-body
+      destroy-on-close
       class="benefit-form-drawer"
     >
       <el-form ref="editForm" :model="formEdit" :rules="rulesEdit" label-width="110px">
@@ -807,7 +811,7 @@ export default {
       const text = checked ? "开启" : "关闭";
       this.$Modal.confirm({
         title: "提示",
-        content: `<p>确定${text}该客户权益？</p>`,
+        content: `确定${text}该客户权益？`,
         onOk: () => {
           row._benefitStateLoading = true;
           return API_Member.updateMemberBenefitState(row.id, nextState)
@@ -829,7 +833,7 @@ export default {
     remove(row) {
       this.$Modal.confirm({
         title: "提示",
-        content: "<p>确定删除该客户权益？</p>",
+        content: "确定删除该客户权益？",
         onOk: () => {
           API_Member.deleteMemberBenefit(row.id).then((res) => {
             if (res && res.success) {

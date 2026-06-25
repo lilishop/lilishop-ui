@@ -7,15 +7,42 @@ const config = require("@/config/index");
 
 let util = {};
 
+/** 静态路由名，禁止被动态路由清理误删 */
+const STATIC_ROUTE_NAMES = new Set([
+  "home_index",
+  "change_pass",
+  "message_index",
+  "main",
+  "renovation",
+  "login",
+  "forgetPassword",
+]);
+
 util.dynamicRouteNames = [];
 
 util.clearDynamicRoutes = function () {
   util.dynamicRouteNames.forEach((name) => {
+    if (STATIC_ROUTE_NAMES.has(name)) {
+      return;
+    }
     if (router.hasRoute(name)) {
       router.removeRoute(name);
     }
   });
-  util.dynamicRouteNames = [];
+  util.dynamicRouteNames = util.dynamicRouteNames.filter(
+    (name) => !STATIC_ROUTE_NAMES.has(name)
+  );
+};
+
+util.resolveRouteComponent = function (menu) {
+  const routeKey =
+    menu.frontRoute ||
+    (typeof menu.component === "string" &&
+    menu.component &&
+    menu.component !== "Main"
+      ? menu.component
+      : "");
+  return routeKey ? lazyLoading(routeKey) : null;
 };
 
 util.collectLeafRoutes = function (routes, result = [], parentPath = "") {
@@ -29,7 +56,7 @@ util.collectLeafRoutes = function (routes, result = [], parentPath = "") {
       util.collectLeafRoutes(route.children, result, fullPath);
     } else if (
       route.name &&
-      route.component &&
+      typeof route.component === "function" &&
       !String(route.name).endsWith("__layout")
     ) {
       result.push({
@@ -59,7 +86,7 @@ util.registerDynamicRoutes = function (menuData, options = {}) {
       util.collectLeafRoutes(top.children, leaves, base);
     } else if (
       top.name &&
-      top.component &&
+      typeof top.component === "function" &&
       !String(top.name).endsWith("__layout")
     ) {
       leaves.push({
@@ -73,15 +100,24 @@ util.registerDynamicRoutes = function (menuData, options = {}) {
 
   leaves.forEach((leaf) => {
     const path = (leaf.path || leaf.name || "").replace(/^\//, "");
-    if (!router.hasRoute(leaf.name)) {
-      router.addRoute("otherRouter", {
-        path,
-        name: leaf.name,
-        component: leaf.component,
-        meta: leaf.meta,
-      });
-      util.dynamicRouteNames.push(leaf.name);
+    let component = leaf.component;
+    if (typeof component === "string") {
+      component = util.resolveRouteComponent({ component });
     }
+    if (
+      typeof component !== "function" ||
+      STATIC_ROUTE_NAMES.has(leaf.name) ||
+      router.hasRoute(leaf.name)
+    ) {
+      return;
+    }
+    router.addRoute("otherRouter", {
+      path,
+      name: leaf.name,
+      component,
+      meta: leaf.meta,
+    });
+    util.dynamicRouteNames.push(leaf.name);
   });
 
   if (!router.hasRoute("error-404")) {
@@ -378,6 +414,7 @@ util.initRouter = function (vm) {
     let data = window.localStorage.getItem("menuData");
     if (!data) {
       vm.$store.commit("setAdded", false);
+      util.initRouter(vm);
       return;
     }
     let menuData = JSON.parse(data);
@@ -456,13 +493,19 @@ util.initRouterNode = function (routers, data) {
         menu.name = `${menu.name}__layout`;
       }
       util.initRouterNode(menu.children, item.children);
-      if (menu.frontRoute) {
-        menu.component = lazyLoading(menu.frontRoute);
+      const layoutComponent = util.resolveRouteComponent(menu);
+      if (layoutComponent) {
+        menu.component = layoutComponent;
       } else {
         delete menu.component;
       }
-    } else if (menu.frontRoute) {
-      menu.component = lazyLoading(menu.frontRoute);
+    } else {
+      const component = util.resolveRouteComponent(menu);
+      if (component) {
+        menu.component = component;
+      } else {
+        delete menu.component;
+      }
     }
 
     const meta = {};

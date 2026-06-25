@@ -2,7 +2,7 @@
   <div class="wrapper">
     <el-affix :offset="100">
       <el-card class="card fixed-bottom">
-        <affixTime @selected="clickBreadcrumb" />
+        <affixTime :closeShop="true" @selected="clickBreadcrumb" />
       </el-card>
     </el-affix>
     <el-card class="card">

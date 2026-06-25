@@ -264,15 +264,16 @@ export default {
     },
     getDataList() {
       this.loading = true;
-      API_Member.getMemberReview(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-      this.total = this.data.length;
-      this.loading = false;
+      API_Member.getMemberReview(this.searchForm)
+        .then((res) => {
+          if (res.success) {
+            this.data = res.result.records;
+            this.total = res.result.total;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
     info(v) {
       this.currentReviewId = v.id;

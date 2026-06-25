@@ -154,13 +154,30 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="addFlag" title="添加会员" width="500px" destroy-on-close>
-      <el-form ref="addMemberForm" :model="addMemberForm" :rules="addRule" label-width="100px">
+    <el-dialog v-model="addFlag" title="添加会员" width="500px" destroy-on-close class="add-member-dialog">
+      <el-form
+        ref="addMemberForm"
+        :model="addMemberForm"
+        :rules="addRule"
+        label-width="100px"
+        autocomplete="off"
+      >
         <el-form-item label="手机号码" prop="mobile" style="width: 90%">
-          <el-input v-model="addMemberForm.mobile" maxlength="11" placeholder="请输入手机号码" />
+          <el-input
+            v-model="addMemberForm.mobile"
+            maxlength="11"
+            placeholder="请输入手机号码"
+            autocomplete="off"
+          />
         </el-form-item>
         <el-form-item label="会员名称" prop="username" style="width: 90%">
-          <el-input v-model="addMemberForm.username" maxlength="15" placeholder="请输入会员名称" />
+          <el-input
+            v-model="addMemberForm.username"
+            maxlength="15"
+            placeholder="请输入会员名称"
+            autocomplete="off"
+            name="member-username"
+          />
         </el-form-item>
         <el-form-item label="会员密码" prop="password" style="width: 90%">
           <el-input
@@ -169,6 +186,8 @@
             show-password
             maxlength="20"
             placeholder="请输入会员密码"
+            autocomplete="new-password"
+            name="member-password"
           />
         </el-form-item>
       </el-form>
@@ -509,8 +528,15 @@ export default {
       this.getMemberInfo(val.id);
     },
     addMember() {
+      this.addMemberForm = {
+        mobile: "",
+        username: "",
+        password: "",
+      };
       this.addFlag = true;
-      this.$refs.addMemberForm?.resetFields();
+      this.$nextTick(() => {
+        this.$refs.addMemberForm?.clearValidate();
+      });
     },
     getMemberInfo(id) {
       API_Member.getMemberInfoData(id).then((res) => {
@@ -704,5 +730,31 @@ export default {
 .op-split {
   margin: 0 8px;
   color: #dcdee2;
+}
+
+.add-member-dialog {
+  :deep(.el-input__wrapper) {
+    background-color: #fff !important;
+    box-shadow: 0 0 0 1px var(--el-border-color) inset !important;
+
+    &.is-focus {
+      box-shadow: 0 0 0 1px var(--el-border-color) inset !important;
+    }
+  }
+
+  :deep(.el-input__inner) {
+    background-color: transparent !important;
+
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus,
+    &:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+      box-shadow: 0 0 0 1000px #fff inset !important;
+      -webkit-text-fill-color: #606266 !important;
+      caret-color: #606266;
+      transition: background-color 99999s ease-out;
+    }
+  }
 }
 </style>
