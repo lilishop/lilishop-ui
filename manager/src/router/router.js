@@ -356,6 +356,36 @@ export const otherRouter = {
       component: () => import("@/views/sys/message/smsSign.vue")
     },
     {
+      path: "live-list",
+      title: "直播管理",
+      name: "live-list",
+      component: () => import("@/views/live/list.vue")
+    },
+    {
+      path: "live-add",
+      title: "创建直播",
+      name: "live-add",
+      component: () => import("@/views/live/add.vue")
+    },
+    {
+      path: "live-edit",
+      title: "编辑直播",
+      name: "live-edit",
+      component: () => import("@/views/live/edit.vue")
+    },
+    {
+      path: "live-manage-detail",
+      title: "直播详情",
+      name: "live-manage-detail",
+      component: () => import("@/views/live/detail.vue")
+    },
+    {
+      path: "live-control-panel",
+      title: "直播中控台",
+      name: "live-control-panel",
+      component: () => import("@/views/live/control-panel.vue")
+    },
+    {
       path: "live-detail",
       title: "查看直播",
       name: "live-detail",

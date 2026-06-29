@@ -7,6 +7,7 @@ import LOGISTICS_SETTING from "./setting/LOGISTICS_SETTING";
 import OSS_SETTING from "./setting/OSS_SETTING";
 import SMS_SETTING from "./setting/SMS_SETTING";
 import IM_SETTING from "./setting/IM_SETTING";
+import LIVE_SETTING from "./setting/LIVE_SETTING";
 import WITHDRAWAL_SETTING from "./setting/WITHDRAWAL_SETTING";
 import ALIPAY_PAYMENT from "./pay/ALIPAY_PAYMENT";
 import WECHAT_PAYMENT from "./pay/WECHAT_PAYMENT";
@@ -24,6 +25,7 @@ export default {
   OSS_SETTING: markRaw(OSS_SETTING),
   SMS_SETTING: markRaw(SMS_SETTING),
   IM_SETTING: markRaw(IM_SETTING),
+  LIVE_SETTING: markRaw(LIVE_SETTING),
   WITHDRAWAL_SETTING: markRaw(WITHDRAWAL_SETTING),
   PAYMENT_SUPPORT: markRaw(PAYMENT_SUPPORT),
   WECHAT_PAYMENT: markRaw(WECHAT_PAYMENT),
