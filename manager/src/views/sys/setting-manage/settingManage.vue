@@ -71,6 +71,10 @@ export default {
           type: "IM_SETTING",
           name: "客服设置",
         },
+        {
+          type: "LIVE_SETTING",
+          name: "直播设置",
+        },
       ],
       authLogin: [
         // 登录设置
