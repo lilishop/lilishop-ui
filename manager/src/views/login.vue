@@ -159,7 +159,7 @@ export default {
   background-image: url("../assets/background.png");
   background-repeat: no-repeat;
   background-position: center bottom;
-  background-size: 100% auto;
+  background-size: cover;
   display: flex;
   align-items: center;
   justify-content: center;

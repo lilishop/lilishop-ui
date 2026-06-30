@@ -104,7 +104,7 @@ export default {
           onOk: () => {
             pay(params).then(res => {
               if (res.success) {
-                this.$Message.warning(res.message)
+                this.$Message.success(res.message)
                 this.$router.push('/payDone');
               } else {
                 this.$Message.warning(res.message)

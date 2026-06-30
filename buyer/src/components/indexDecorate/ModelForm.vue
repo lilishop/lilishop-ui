@@ -45,6 +45,7 @@ export default {
   width: 100%;
   min-height: 1200px;
   box-sizing: border-box;
-  overflow-x: hidden;
+  /* 勿设 overflow-x: hidden，会裁切 discountAdvert 的 margin-left: -100px 左溢背景 */
+  overflow-x: visible;
 }
 </style>

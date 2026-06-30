@@ -9,7 +9,7 @@
             <div class="gradeNameRow">
               <span class="gradeNameText">{{ currentGrade.gradeName || '暂无等级' }}</span>
               <span v-if="currentGradeBenefits.length" class="benefitTagsInline">
-                <el-tag v-for="b in currentGradeBenefits" :key="b.id" class="benefitTag" color="blue">{{ b.benefitName || '-' }}</el-tag>
+                <el-tag v-for="b in currentGradeBenefits" :key="b.id" class="benefitTag" type="primary">{{ b.benefitName || '-' }}</el-tag>
               </span>
             </div>
             <div class="gradeExp">

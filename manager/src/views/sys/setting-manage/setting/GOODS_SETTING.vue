@@ -50,16 +50,18 @@
           </el-input>
         </el-form-item>
       </div>
-      <div class="label-btns">
-        <el-button type="primary" @click="submit('formValidate')">保存</el-button>
-        <div class="es-buttons">
+      <div class="label-btns goods-setting-btns">
+        <div class="goods-setting-action-row">
           <el-button type="success" @click="createIndex()">重新生成所有商品索引</el-button>
           <el-button type="info" @click="deleteDownGoods()">删除ES中下架的商品</el-button>
           <el-button type="warning" @click="generateCache()">生成所有商品的缓存</el-button>
           <el-button type="danger" @click="deleteNotExistIndex()">删除不存在的索引</el-button>
+          <div class="progress-item" v-if="showProgress">
+            <el-progress :percentage="progressVal" />
+          </div>
         </div>
-        <div class="progress-item" v-if="showProgress">
-          <el-progress :percentage="progressVal" />
+        <div class="goods-setting-save-row">
+          <el-button type="primary" @click="submit('formValidate')">保存</el-button>
         </div>
       </div>
     </el-form>
@@ -207,7 +209,27 @@ export default {
 .label-item {
   display: flex;
 }
+.goods-setting-btns {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-left: 150px;
+}
+.goods-setting-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.goods-setting-action-row .progress-item {
+  flex: 0 0 240px;
+  min-width: 200px;
+}
+.goods-setting-action-row .progress-item :deep(.el-progress) {
+  width: 100%;
+}
 :deep(.el-input){
-  width: 100px !important;
+  width: 180px !important;
 }
 </style>

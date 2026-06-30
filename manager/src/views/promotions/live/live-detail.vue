@@ -3,67 +3,82 @@
     <el-card>
       <el-form :model="liveForm" ref="liveForm" :rules="liveRulesForm" label-width="120px">
         <el-form-item label="直播标题" prop="name">
-          <el-input disabled v-model="liveForm.name" style="width:460px"></el-input>
-          <div class="tips">直播间名字，最短3个汉字，最长17个汉字，1个汉字相当于2个字符</div>
+          <div class="form-field-block">
+            <el-input disabled v-model="liveForm.name" style="width:460px"></el-input>
+            <div class="form-tip">直播间名字，最短3个汉字，最长17个汉字，1个汉字相当于2个字符</div>
+          </div>
         </el-form-item>
         <el-form-item label="主播昵称" prop="anchorName">
-          <el-input disabled v-model="liveForm.anchorName" style="width:360px"></el-input>
-          <div class="tips">主播昵称，最短2个汉字，最长15个汉字，1个汉字相当于2个字符</div>
+          <div class="form-field-block">
+            <el-input disabled v-model="liveForm.anchorName" style="width:360px"></el-input>
+            <div class="form-tip">主播昵称，最短2个汉字，最长15个汉字，1个汉字相当于2个字符</div>
+          </div>
         </el-form-item>
         <el-form-item label="直播时间" prop="startTime">
-          <el-date-picker
-            disabled
-            format="YYYY-MM-DD HH:mm"
-            type="datetimerange"
-            v-model="times"
-            @change="handleChangeTime"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
-            placeholder="直播计划开始时间-直播计划结束时间"
-            style="width: 300px"
-          />
-          <div class="tips">直播开播时间需要在当前时间的10分钟后 并且 开始时间不能在 6 个月后</div>
+          <div class="form-field-block">
+            <el-date-picker
+              disabled
+              format="YYYY-MM-DD HH:mm"
+              type="datetimerange"
+              v-model="times"
+              @change="handleChangeTime"
+              start-placeholder="开始时间"
+              end-placeholder="结束时间"
+              placeholder="直播计划开始时间-直播计划结束时间"
+              style="width: 300px"
+            />
+            <div class="form-tip">直播开播时间需要在当前时间的10分钟后 并且 开始时间不能在 6 个月后</div>
+          </div>
         </el-form-item>
 
         <el-form-item label="主播微信号" prop="anchorWechat">
-          <el-input disabled v-model="liveForm.anchorWechat" style="width:360px" placeholder="主播微信号"></el-input>
-          <div class="tips">主播微信号，如果未实名认证，需要先前往“小程序直播”小程序进行<a target="_black" href="https://res.wx.qq.com/op_res/9rSix1dhHfK4rR049JL0PHJ7TpOvkuZ3mE0z7Ou_Etvjf-w1J_jVX0rZqeStLfwh">实名验证</a></div>
+          <div class="form-field-block">
+            <el-input disabled v-model="liveForm.anchorWechat" style="width:360px" placeholder="主播微信号"></el-input>
+            <div class="form-tip">主播微信号，如果未实名认证，需要先前往“小程序直播”小程序进行<a target="_black" href="https://res.wx.qq.com/op_res/9rSix1dhHfK4rR049JL0PHJ7TpOvkuZ3mE0z7Ou_Etvjf-w1J_jVX0rZqeStLfwh">实名验证</a></div>
+          </div>
         </el-form-item>
 
         <el-form-item label="分享卡片封面" prop="feedsImg">
-          <div class="upload-list" v-if="liveForm.feedsImg">
-            <img :src="liveForm.feedsImg">
-            <div class="upload-list-cover" @click="handleView(liveForm.feedsImg)">
-              <span class="view-icon">查看</span>
+          <div class="form-field-block">
+            <div class="upload-list" v-if="liveForm.feedsImg">
+              <img :src="liveForm.feedsImg">
+              <div class="upload-list-cover" @click="handleView(liveForm.feedsImg)">
+                <span class="view-icon">查看</span>
+              </div>
             </div>
-          </div>
-          <div class="tips">
-            直播间分享图，图片规则：建议像素800*640，大小不超过1M；
+            <div class="form-tip">
+              直播间分享图，图片规则：建议像素800*640，大小不超过1M；
+            </div>
           </div>
         </el-form-item>
 
         <el-form-item label="直播间背景墙" prop="coverImg">
-          <div class="upload-list" v-if="liveForm.coverImg">
-            <img :src="liveForm.coverImg">
-            <div class="upload-list-cover" @click="handleView(liveForm.coverImg)">
-              <span class="view-icon">查看</span>
+          <div class="form-field-block">
+            <div class="upload-list" v-if="liveForm.coverImg">
+              <img :src="liveForm.coverImg">
+              <div class="upload-list-cover" @click="handleView(liveForm.coverImg)">
+                <span class="view-icon">查看</span>
+              </div>
             </div>
+            <div class="form-tip"> 直播间背景图，图片规则：建议像素1080*1920，大小不超过1M</div>
           </div>
-          <div class="tips"> 直播间背景图，图片规则：建议像素1080*1920，大小不超过1M</div>
         </el-form-item>
 
         <el-form-item label="直播间分享图" prop="shareImg">
-          <div class="upload-list" v-if="liveForm.shareImg">
-            <img :src="liveForm.shareImg">
-            <div class="upload-list-cover" @click="handleView(liveForm.shareImg)">
-              <span class="view-icon">查看</span>
+          <div class="form-field-block">
+            <div class="upload-list" v-if="liveForm.shareImg">
+              <img :src="liveForm.shareImg">
+              <div class="upload-list-cover" @click="handleView(liveForm.shareImg)">
+                <span class="view-icon">查看</span>
+              </div>
             </div>
+            <div class="form-tip"> 直播间分享图，图片规则：建议像素800*640，大小不超过1M</div>
           </div>
-          <div class="tips"> 直播间分享图，图片规则：建议像素800*640，大小不超过1M</div>
         </el-form-item>
 
         <el-form-item label="商品" v-if="$route.query.id">
-          <el-table class="goods-table" border :data="liveData" style="width: 100%">
+          <div class="form-field-block">
+            <el-table class="goods-table" border :data="liveData" style="width: 100%">
             <el-table-column label="商品" min-width="200">
               <template #default="{ row, $index }">
                 <div v-if="row" class="flex-goods">
@@ -91,8 +106,9 @@
               </template>
             </el-table-column>
           </el-table>
-          <div class="tips">
-            直播间商品中前两个商品将自动被选为封面，伴随直播间在直播列表中显示
+            <div class="form-tip">
+              直播间商品中前两个商品将自动被选为封面，伴随直播间在直播列表中显示
+            </div>
           </div>
         </el-form-item>
 
@@ -198,13 +214,21 @@ export default {
     margin-right: 10px;
   }
 }
-.tips {
+.form-field-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+.form-tip {
   color: #999;
   font-size: 12px;
+  line-height: 1.5;
+  margin-top: 4px;
 }
 .goods-table {
   width: 1000px;
-  margin: 10px 0;
+  margin: 10px 0 0;
 }
 .upload-list {
   display: inline-block;

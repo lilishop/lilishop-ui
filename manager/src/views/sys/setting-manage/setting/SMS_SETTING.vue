@@ -115,10 +115,11 @@ export default {
   methods: {
     // 保存
     submit(name) {
-      let that = this;
-      if (handleSubmit(that, name)) {
-        this.setupSetting()
-      }
+      handleSubmit(this, name)
+        .then(() => {
+          this.setupSetting();
+        })
+        .catch(() => {});
     },
     // 保存设置
     setupSetting() {

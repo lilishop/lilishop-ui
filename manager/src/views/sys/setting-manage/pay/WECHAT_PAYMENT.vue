@@ -74,10 +74,11 @@ export default {
   },
   methods: {
     submit(name) {
-      let that = this;
-      if (handleSubmit(that, name)) {
-        this.setupSetting();
-      }
+      handleSubmit(this, name)
+        .then(() => {
+          this.setupSetting();
+        })
+        .catch(() => {});
     },
     // 保存设置
     setupSetting() {
@@ -91,9 +92,8 @@ export default {
     },
     // 实例化数据
     init() {
-      this.res = JSON.parse(this.res);
-
-      this.formValidate = { ...this.res };
+      const setting = JSON.parse(this.res || "{}");
+      this.formValidate = { ...setting };
       Object.keys(this.formValidate).forEach((item) => {
         if (item.indexOf("pId") < 0) {
           this.ruleValidate[item] = [

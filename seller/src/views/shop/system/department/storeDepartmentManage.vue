@@ -24,12 +24,11 @@
             <el-tree
               ref="treeRef"
               :data="data"
-              lazy
-              :load="loadNode"
               :props="treeProps"
               node-key="id"
               show-checkbox
               highlight-current
+              default-expand-all
               :check-strictly="!strict"
               :current-node-key="currentNodeKey"
               @node-click="onNodeClick"
@@ -109,7 +108,6 @@
 <script>
 import {
   initDepartment,
-  loadDepartment,
   addDepartment,
   editDepartment,
   deleteDepartment,
@@ -176,23 +174,20 @@ export default {
       initDepartment().then((res) => {
         this.loading = false;
         if (res.success) {
-          this.data = this.bubbleSort(res.result);
+          const list = Array.isArray(res.result) ? res.result : [];
+          this.data = this.bubbleSort(this.normalizeDepartmentTree(list));
         }
       });
     },
-    loadNode(node, resolve) {
-      const id = node.data?.id;
-      if (id === undefined || id === null) {
-        resolve([]);
-        return;
-      }
-      loadDepartment(id).then((res) => {
-        this.loadingEdit = false;
-        if (res.success) {
-          resolve(res.result || []);
+    normalizeDepartmentTree(list) {
+      return list.map((item) => {
+        const node = { ...item };
+        if (Array.isArray(node.children) && node.children.length > 0) {
+          node.children = this.normalizeDepartmentTree(node.children);
         } else {
-          resolve([]);
+          delete node.children;
         }
+        return node;
       });
     },
     onNodeClick(data) {
@@ -235,6 +230,7 @@ export default {
       this.selectCount = checkedNodes.length;
     },
     bubbleSort(array) {
+      if (!Array.isArray(array)) return [];
       const len = array.length;
       if (len < 2) return array;
       for (let i = 0; i < len; i++) {

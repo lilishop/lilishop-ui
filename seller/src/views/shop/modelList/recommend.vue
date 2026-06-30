@@ -77,10 +77,7 @@
           :key="index"
           class="setup-content"
         >
-          <div
-            class="right-item"
-            :style="{ border: index === 2 || index === 3 ? 'none' : '' }"
-          >
+          <div class="right-item">
             <div>
               <span :style="{ background: msgRight.bgColor }">{{
                 item.name
@@ -104,13 +101,13 @@
     <el-dialog
       v-model="showModal"
       title="装修"
-      
-      width="800"
-      
+      width="800px"
       :close-on-click-modal="false"
-     append-to-body destroy-on-close>
+      append-to-body
+      destroy-on-close
+    >
       <div class="modal-top-advert">
-        <div>
+        <div class="modal-form-item modal-form-preview">
           <img
             class="show-image"
             width="160"
@@ -136,67 +133,86 @@
             alt
           />
         </div>
-        <div><span>图片主标题：</span><el-input v-model="selected.name" /></div>
-        <div><span>图片描述：</span><el-input v-model="selected.describe" /></div>
-        <div class="tips">
-          建议尺寸：<span>{{ selected.size }}</span>
+        <div class="modal-form-item">
+          <span class="modal-label">图片主标题：</span>
+          <el-input v-model="selected.name" />
         </div>
-        <div>
-          图片链接：<el-input
-            class="outsideUrl"
-            v-model="selected.url"
-            :disabled="!!selected.type && selected.type !== 'link'"
-            placeholder="https://"
-          />
-          <el-button
-            size="small"
-            class="ml_10"
-            type="primary"
-            @click="handleSelectLink"
-            >选择链接</el-button
-          >
+        <div class="modal-form-item">
+          <span class="modal-label">图片描述：</span>
+          <el-input v-model="selected.describe" />
         </div>
-        <div>
+        <div class="tips">建议尺寸：{{ selected.size }}</div>
+        <div class="modal-form-item modal-form-link">
+          <span class="modal-label">图片链接：</span>
+          <div class="modal-link-field">
+            <el-input
+              class="outsideUrl"
+              v-model="selected.url"
+              :disabled="!!selected.type && selected.type !== 'link'"
+              placeholder="https://"
+            />
+            <el-button size="small" type="primary" @click="handleSelectLink"
+              >选择链接</el-button
+            >
+          </div>
+        </div>
+        <div class="modal-form-item modal-form-actions">
           <el-button size="small" type="primary" @click="handleSelectImg"
             >选择图片</el-button
-          >&nbsp;
+          >
           <el-button size="small" type="primary" @click="handleSelectGoods"
             >选择商品</el-button
           >
         </div>
       </div>
+      <template #footer>
+        <el-button @click="handleCancelModal">取消</el-button>
+        <el-button type="primary" @click="handleConfirmModal">确定</el-button>
+      </template>
     </el-dialog>
     <el-dialog
       v-model="showModal1"
       title="装修"
-      
-      width="800"
-      
+      width="800px"
       :close-on-click-modal="false"
-     append-to-body destroy-on-close>
+      append-to-body
+      destroy-on-close
+    >
       <div class="modal-top-advert">
-        <div><span>主标题：</span><el-input v-model="selected.title" /></div>
-        <div><span>副标题：</span><el-input v-model="selected.secondTitle" /></div>
-        <div>
-          <span
-            >副标题链接：<el-input
+        <div class="modal-form-item">
+          <span class="modal-label">主标题：</span>
+          <el-input v-model="selected.title" />
+        </div>
+        <div class="modal-form-item">
+          <span class="modal-label">副标题：</span>
+          <el-input v-model="selected.secondTitle" />
+        </div>
+        <div class="modal-form-item modal-form-link">
+          <span class="modal-label">副标题链接：</span>
+          <div class="modal-link-field">
+            <el-input
               class="outsideUrl"
               v-model="selected.url"
               :disabled="!!selected.type && selected.type !== 'link'"
-              placeholder="https://" /></span
-          ><el-button
-            size="small"
-            class="ml_10"
-            type="primary"
-            @click="handleSelectLink"
-            >选择链接</el-button
-          >
+              placeholder="https://"
+            />
+            <el-button size="small" type="primary" @click="handleSelectLink"
+              >选择链接</el-button
+            >
+          </div>
         </div>
-        <div>
-          <span>背景色：</span><el-input v-model="selected.bgColor" />
-          <el-color-picker v-if="selected.bgColor" v-model="selected.bgColor" />
+        <div class="modal-form-item">
+          <span class="modal-label">背景色：</span>
+          <div class="modal-color-field">
+            <el-input v-model="selected.bgColor" />
+            <el-color-picker v-if="selected.bgColor" v-model="selected.bgColor" />
+          </div>
         </div>
       </div>
+      <template #footer>
+        <el-button @click="handleCancelModal1">取消</el-button>
+        <el-button type="primary" @click="handleConfirmModal1">确定</el-button>
+      </template>
     </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog
@@ -210,6 +226,7 @@
         @callback="callbackSelected"
         :is-component="true"
         :initialize="picModelFlag"
+        :max-select="1"
         ref="ossManage"
       />
     </el-dialog>
@@ -233,14 +250,19 @@ export default {
       msgRight: this.data.options.contentRight, // 右侧数据
       showModal: false, // modal显隐
       showModal1: false, // modal显隐
-      selected: {}, // 已选数据
+      selected: {}, // 弹窗编辑草稿
+      editTarget: null, // 确定后写回的原数据
       picModelFlag: false, // 图片选择
     };
   },
   methods: {
+    cloneItem(item) {
+      return JSON.parse(JSON.stringify(item || {}));
+    },
     // 编辑
     handleSelectModel(item, type) {
-      this.selected = item;
+      this.editTarget = item;
+      this.selected = this.cloneItem(item);
       if (type) {
         this.showModal1 = true;
       } else {
@@ -282,7 +304,34 @@ export default {
     // 选择图片回调
     callbackSelected(val) {
       this.picModelFlag = false;
+      if (!val?.url) return;
       this.selected.img = val.url;
+    },
+    handleCancelModal() {
+      this.editTarget = null;
+      this.selected = {};
+      this.showModal = false;
+    },
+    handleConfirmModal() {
+      if (this.editTarget) {
+        Object.assign(this.editTarget, this.cloneItem(this.selected));
+      }
+      this.editTarget = null;
+      this.selected = {};
+      this.showModal = false;
+    },
+    handleCancelModal1() {
+      this.editTarget = null;
+      this.selected = {};
+      this.showModal1 = false;
+    },
+    handleConfirmModal1() {
+      if (this.editTarget) {
+        Object.assign(this.editTarget, this.cloneItem(this.selected));
+      }
+      this.editTarget = null;
+      this.selected = {};
+      this.showModal1 = false;
     },
   },
 };
@@ -292,6 +341,8 @@ export default {
 .recommend {
   display: flex;
   justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
   .recommend-left {
     width: 595px;
     .content-left {
@@ -349,64 +400,84 @@ export default {
 
   .recommend-right {
     width: 595px;
-    height: 360px;
+
     .head-recommend {
       background: #a25684;
     }
     .content-right {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      height: 360px;
       padding-top: 10px;
+      box-sizing: border-box;
+
       > div {
-        width: 50%;
+        width: 100%;
+        height: 100%;
         text-align: center;
-        height: 180px;
-        padding-top: 10px;
+        padding: 0;
+        border-right: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+        box-sizing: border-box;
+
+        &:nth-child(2n) {
+          border-right: none;
+        }
+
+        &:nth-child(n + 3) {
+          border-bottom: none;
+        }
+
         .right-item {
-          border-bottom: 1px solid #eee;
+          border-bottom: none;
           display: flex;
-          margin-top: 30px;
-          margin-left: 5px;
-          margin-right: 5px;
-          height: 150px;
-          padding: 0 10px;
+          align-items: center;
+          justify-content: space-between;
+          height: 100%;
+          margin: 0;
+          padding: 10px 15px;
           font-size: 12px;
+          box-sizing: border-box;
+
           > div:nth-child(1) {
-            width: 130px;
-            margin-top: 30px;
+            flex: 1;
+            min-width: 0;
+            margin-top: 0;
+            text-align: left;
+
             span:nth-child(1) {
               color: #fff;
               border-radius: 10px;
               padding: 0 5px;
               background-color: #a25684;
               display: block;
-              width: 120px;
+              max-width: 120px;
               overflow: hidden;
               white-space: nowrap;
-              margin: 0 10px 10px 0;
+              margin: 0 0 10px;
             }
+
             span:nth-child(2) {
               font-size: 12px;
               color: #666;
               display: block;
             }
           }
+
           .right-img {
-            width: 100;
+            width: 100px;
             height: 100px;
+            flex-shrink: 0;
             text-align: center;
-            margin: 0 auto;
+            margin: 0;
+
             img {
               max-height: 100px;
               max-width: 100px;
             }
           }
         }
-      }
-      > div:nth-child(n + 1) {
-        border-right: 1px solid #eee;
       }
     }
   }
@@ -429,7 +500,78 @@ export default {
 }
 
 .modal-top-advert {
-  align-items: start;
-  padding: 0 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
+
+  .modal-form-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 16px;
+
+    .modal-label {
+      flex-shrink: 0;
+      width: 100px;
+      text-align: right;
+      padding-right: 12px;
+    }
+
+    .el-input {
+      flex: 1;
+    }
+  }
+
+  .modal-form-preview {
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .modal-form-link {
+    align-items: flex-start;
+
+    .modal-label {
+      padding-top: 8px;
+    }
+
+    .modal-link-field {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+
+      .outsideUrl {
+        flex: 1;
+        min-width: 0;
+      }
+    }
+  }
+
+  .modal-form-actions {
+    padding-left: 112px;
+    gap: 10px;
+  }
+
+  .modal-color-field {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .el-input {
+      flex: 1;
+    }
+  }
+
+  .tips {
+    padding-left: 112px;
+    margin-bottom: 16px;
+    color: #999;
+    font-size: 12px;
+  }
 }
 </style>

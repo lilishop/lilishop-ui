@@ -77,7 +77,7 @@ export default {
       selectDate: null,
       searchForm: {
         type: 1,
-        key: "",
+        searchKey: "",
         operatorName: "",
         pageNumber: 1,
         pageSize: 20,
@@ -114,15 +114,23 @@ export default {
     },
     handleSearch() {
       this.searchForm.pageNumber = 1;
+      if (this.selectDate && this.selectDate.length === 2) {
+        this.searchForm.startDate = this.selectDate[0];
+        this.searchForm.endDate = this.selectDate[1];
+      }
       this.getLogList();
     },
     getLogList() {
       this.loading = true;
       getLogListData(this.searchForm).then((res) => {
         this.loading = false;
-        if (res.success) {
+        if (res && res.success) {
           this.data = res.result.records;
           this.total = res.result.total;
+        } else {
+          this.data = [];
+          this.total = 0;
+          this.$Message.error((res && res.message) || "日志查询失败");
         }
       });
     },

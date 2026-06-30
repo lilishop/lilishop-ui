@@ -215,7 +215,7 @@ export const modelData = [
       bgImg: {
         img: require('@/assets/nav/decorate.png'),
         url: '',
-        size: "1300*586"
+        size: "1300*585"
       },
       classification: [{
         img: require('@/assets/nav/decorate2.jpeg'),

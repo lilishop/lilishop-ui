@@ -14,43 +14,43 @@
     </template>
     <!-- 热门广告 -->
     <template v-if="element.type == 'hotAdvert'">
-      <div class="setup-content">
-        <img
-          style="display: block"
-          :src="element.options.list[0].img"
-          @click="$router.push(element.options.list[0].url)"
-          width="1200"
-          alt=""
-        />
-        <div class="setup-box">
-          <div>
-            <el-button
-              size="small"
-              @click.stop="handleSelectModel(element.options.list[0])"
-              >编辑</el-button
-            >
+      <div class="hot-advert">
+        <div class="hot-advert-banner setup-content">
+          <img
+            :src="element.options.list[0].img"
+            @click="$router.push(element.options.list[0].url)"
+            alt=""
+          />
+          <div class="setup-box">
+            <div>
+              <el-button
+                size="small"
+                @click.stop="handleSelectModel(element.options.list[0])"
+                >编辑</el-button
+              >
+            </div>
           </div>
         </div>
-      </div>
-      <ul class="advert-list">
-        <template v-for="(item, index) in element.options.list">
-          <li
-            v-if="index !== 0"
-            @click="$router.push(item.url)"
-            class="setup-content"
-            :key="index"
-          >
-            <img :src="item.img" width="230" height="190" alt="" />
-            <div class="setup-box">
-              <div>
-                <el-button size="small" @click.stop="handleSelectModel(item)"
-                  >编辑</el-button
-                >
+        <ul class="advert-list">
+          <template v-for="(item, index) in element.options.list">
+            <li
+              v-if="index !== 0"
+              @click="$router.push(item.url)"
+              class="setup-content"
+              :key="index"
+            >
+              <img :src="item.img" alt="" />
+              <div class="setup-box">
+                <div>
+                  <el-button size="small" @click.stop="handleSelectModel(item)"
+                    >编辑</el-button
+                  >
+                </div>
               </div>
-            </div>
-          </li>
-        </template>
-      </ul>
+            </li>
+          </template>
+        </ul>
+      </div>
     </template>
     <!-- 限时秒杀 待完善 -->
     <template v-if="element.type == 'seckill'">
@@ -107,15 +107,15 @@
     </template>
     <!-- 好货推荐 -->
     <template v-if="element.type == 'recommend'">
-      <recommend :data="element"></recommend>
+      <recommend :data="element" class="mb_20 width_1200_auto"></recommend>
     </template>
     <!-- 新品排行 -->
     <template v-if="element.type == 'newGoodsSort'">
-      <new-goods-sort :data="element"></new-goods-sort>
+      <new-goods-sort :data="element" class="mb_20 width_1200_auto"></new-goods-sort>
     </template>
     <!-- 首页广告 -->
     <template v-if="element.type == 'firstAdvert'">
-      <first-page-advert :data="element"></first-page-advert>
+      <first-page-advert :data="element" class="mb_20 width_1200_auto"></first-page-advert>
     </template>
     <!-- 商品模块 -->
     <template v-if="element.type == 'goodsType'">
@@ -142,7 +142,7 @@
       <div class="horizontal-advert setup-content">
         <img
           v-if="element.options.img"
-          width="1200"
+          class="banner-ad-img"
           :src="element.options.img"
           alt=""
         />
@@ -162,7 +162,7 @@
       </div>
     </template>
     <template v-if="element.type == 'notEnough'">
-      <not-enough :data="element"></not-enough>
+      <not-enough :data="element" class="mb_20 width_1200_auto"></not-enough>
     </template>
     <div class="del-btn">
       <el-button size="small" type="danger" @click="handleModelDelete">删除</el-button>
@@ -176,13 +176,13 @@
       destroy-on-close
     >
       <div class="modal-top-advert">
-        <div>
+        <div class="modal-form-item modal-form-preview">
           <!-- 热门广告两种图片尺寸 -->
           <img
             class="show-image"
             width="600"
             height="40"
-            v-if="selected.size && selected.size.indexOf('1200') >= 0"
+            v-if="selected.size && selected.size.indexOf('1200') >= 0 && selected.img"
             :src="selected.img"
             alt
           />
@@ -198,7 +198,7 @@
           <img
             class="show-image"
             width="600"
-            height="300"
+            height="270"
             v-if="selected.size && selected.size.indexOf('1300') >= 0"
             :src="selected.img"
             alt
@@ -220,26 +220,32 @@
             alt
           />
         </div>
-        <div class="tips">
-          建议尺寸：<span>{{ selected.size }}</span>
+        <div class="tips">建议尺寸：{{ selected.size }}</div>
+        <div class="modal-form-item modal-form-link">
+          <span class="modal-label">图片链接：</span>
+          <div class="modal-link-field">
+            <el-input
+              class="outsideUrl"
+              v-model="selected.url"
+              :disabled="!!selected.type && selected.type !== 'link'"
+              placeholder="https://"
+            />
+            <el-button size="small" type="primary" @click="handleSelectLink"
+              >选择链接</el-button
+            >
+          </div>
         </div>
-        <div>
-          图片链接：<el-input
-            class="outsideUrl"
-            v-model="selected.url"
-            :disabled="!!selected.type && selected.type !== 'link'"
-            placeholder="https://"
-          />
-          <el-button size="small" type="primary" @click="handleSelectLink"
-            >选择链接</el-button
-          >
-        </div>
-        <div>
-          选择图片：<el-button size="small" type="primary" @click="handleSelectImg"
+        <div class="modal-form-item">
+          <span class="modal-label">选择图片：</span>
+          <el-button size="small" type="primary" @click="handleSelectImg"
             >选择图片</el-button
           >
         </div>
       </div>
+      <template #footer>
+        <el-button @click="handleCancelModal">取消</el-button>
+        <el-button type="primary" @click="handleConfirmModal">确定</el-button>
+      </template>
     </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
@@ -249,6 +255,7 @@
         @callback="callbackSelected"
         :is-component="true"
         :initialize="picModelFlag"
+        :max-select="1"
         ref="ossManage"
       />
     </el-dialog>
@@ -296,14 +303,19 @@ export default {
   data() {
     return {
       showModal: false, // modal显隐
-      selected: {}, // 已选数据
+      selected: {}, // 弹窗编辑草稿
+      editTarget: null, // 确定后写回的原数据
       picModelFlag: false, // 图片选择器
     };
   },
   methods: {
+    cloneItem(item) {
+      return JSON.parse(JSON.stringify(item || {}));
+    },
     // 编辑模块
     handleSelectModel(item) {
-      this.selected = item;
+      this.editTarget = item;
+      this.selected = this.cloneItem(item);
       this.showModal = true;
     },
     // 删除模块
@@ -341,7 +353,21 @@ export default {
     // 回显图片
     callbackSelected(val) {
       this.picModelFlag = false;
+      if (!val?.url) return;
       this.selected.img = val.url;
+    },
+    handleCancelModal() {
+      this.editTarget = null;
+      this.selected = {};
+      this.showModal = false;
+    },
+    handleConfirmModal() {
+      if (this.editTarget) {
+        Object.assign(this.editTarget, this.cloneItem(this.selected));
+      }
+      this.editTarget = null;
+      this.selected = {};
+      this.showModal = false;
     },
   },
 };
@@ -364,30 +390,68 @@ export default {
   position: absolute;
   right: -100px;
   top: 0;
+  z-index: 10;
   &:hover {
     display: block;
   }
 }
 /** 横幅广告 */
 .horizontal-advert {
-  width: 1200px;
-  height: auto;
+  width: 100%;
+  max-width: 1200px;
+  overflow: hidden;
+  line-height: 0;
+
+  .banner-ad-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 166px;
+    object-fit: cover;
+  }
+
   .default-con {
     height: 100px;
     padding-top: 30px;
     text-align: center;
     background: #ddd;
+    line-height: normal;
   }
 }
 /** 热门广告 */
+.hot-advert {
+  width: 1200px;
+  margin-right: -110px;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  .hot-advert-banner {
+    line-height: 0;
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  }
+}
 .advert-list {
+  width: 100%;
+  margin: 0;
+  padding: 5px 0;
+  list-style: none;
+  box-sizing: border-box;
   background: $theme_color;
   height: 200px;
   display: flex;
-  justify-content: space-around;
-  padding: 3px 10px;
+  gap: 10px;
+  align-items: center;
   > li {
+    flex: 0 0 calc((100% - 40px) / 5);
     img {
+      display: block;
+      width: 100%;
+      height: 190px;
       cursor: pointer;
       border-radius: 10px;
       transition: all 150ms ease-in-out;
@@ -414,11 +478,11 @@ export default {
 }
 .discountAdvert {
   width: 1300px;
-  height: 566px;
+  height: 585px;
   margin-left: -100px;
   box-sizing: border-box;
   background-repeat: no-repeat;
-  background-size: 1300px 566px;
+  background-size: 1300px 585px;
   position: relative;
   > div {
     padding-left: 295px;
@@ -428,8 +492,11 @@ export default {
     &:nth-child(1) img {
       margin: 10px 10px 0 0;
     }
-    &:nth-child(2) img {
-      margin: 0 10px 0 0;
+    &:nth-child(2) {
+      margin-top: 10px;
+      img {
+        margin: 0 10px 0 0;
+      }
     }
   }
 }
@@ -535,11 +602,61 @@ export default {
 /** 装修模态框 内部样式start */
 .modal-top-advert {
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
-  > * {
-    margin-bottom: 10px;
+  align-items: stretch;
+  padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
+
+  .modal-form-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 16px;
+
+    .modal-label {
+      flex-shrink: 0;
+      width: 100px;
+      text-align: right;
+      padding-right: 12px;
+    }
+
+    .el-input {
+      flex: 1;
+    }
+  }
+
+  .modal-form-preview {
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .modal-form-link {
+    align-items: flex-start;
+
+    .modal-label {
+      padding-top: 8px;
+    }
+
+    .modal-link-field {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+
+      .outsideUrl {
+        flex: 1;
+        min-width: 0;
+      }
+    }
+  }
+
+  .tips {
+    padding-left: 112px;
+    margin-bottom: 16px;
+    color: #999;
+    font-size: 12px;
   }
 }
 </style>

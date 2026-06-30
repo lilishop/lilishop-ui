@@ -1,23 +1,24 @@
 <template>
     <div class="not-enough">
-        <ul class="nav-bar setup-content">
-            <li v-for="(item, index) in conData.options.navList" :class="currentIndex===index?'curr':''" @click="changeCurr(index)" :key="index">
-                <p>{{item.title}}</p>
-                <p>{{item.desc}}</p>
-            </li>
-            <div class="setup-box" style="width:100px;left:1100px;">
+        <div class="nav-bar setup-content">
+            <ul class="nav-list">
+                <li v-for="(item, index) in conData.options.navList" :class="currentIndex===index?'curr':''" @click="changeCurr(index)" :key="index">
+                    <p>{{item.title}}</p>
+                    <p>{{item.desc}}</p>
+                </li>
+            </ul>
+            <div class="setup-box nav-setup-box">
                 <div>
                     <el-button size="small" @click.stop="handleSelectModel">编辑</el-button>
                 </div>
             </div>
-        </ul>
+        </div>
         <div class="content" v-if="showContent">
             <div v-for="(item, index) in conData.options.list[currentIndex]" :key="index" class="setup-content">
                 <img :src="item.img" width="210" height="210" :alt="item.name">
                 <p>{{item.name}}</p>
                 <p>
                     <span>{{ $filters.unitPrice(item.price, '￥') }}</span>
-                    <!-- <span>{{ $filters.unitPrice(item.price, '￥') }}</span> -->
                 </p>
                 <div class="setup-box">
                     <div>
@@ -29,12 +30,12 @@
         <el-dialog
             v-model="showModal"
             title="装修"
-            
             width="800"
-            
             :close-on-click-modal="false"
-             append-to-body destroy-on-close>
-            <div class="modal-tab-bar">
+            append-to-body
+            destroy-on-close
+            @close="handleCancelModal">
+            <div class="modal-tab-bar" v-if="draftNavList.length">
                 <el-button type="primary" size='small' @click="handleAddNav">添加分类</el-button>
                 <table cellspacing="0">
                     <thead>
@@ -45,7 +46,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(item, index) in conData.options.navList" :key="index">
+                        <tr v-for="(item, index) in draftNavList" :key="index">
                             <td><el-input v-model="item.title" /></td>
                             <td><el-input v-model="item.desc" /></td>
                             <td v-if="index!=0">
@@ -55,8 +56,40 @@
                     </tbody>
                 </table>
             </div>
+            <template #footer>
+                <el-button @click="handleCancelModal">取消</el-button>
+                <el-button type="primary" @click="handleConfirmModal">确定</el-button>
+            </template>
         </el-dialog>
-        <!-- 选择商品。链接 -->
+        <el-dialog
+            v-model="showGoodsModal"
+            title="装修"
+            width="600"
+            :close-on-click-modal="false"
+            append-to-body
+            destroy-on-close
+            @close="handleCancelGoodsModal">
+            <div class="modal-top-advert">
+                <div class="modal-form-item modal-form-preview" v-if="selected.img">
+                    <img class="show-image" width="210" height="210" :src="selected.img" alt />
+                </div>
+                <div class="modal-form-item" v-if="selected.name">
+                    <span class="modal-label">商品名称：</span>
+                    <span>{{ selected.name }}</span>
+                </div>
+                <div class="modal-form-item" v-if="selected.price">
+                    <span class="modal-label">商品价格：</span>
+                    <span>{{ $filters.unitPrice(selected.price, '￥') }}</span>
+                </div>
+                <div class="modal-form-item modal-form-actions">
+                    <el-button size="small" type="primary" @click="handleOpenGoodsPicker">选择商品</el-button>
+                </div>
+            </div>
+            <template #footer>
+                <el-button @click="handleCancelGoodsModal">取消</el-button>
+                <el-button type="primary" @click="handleConfirmGoodsModal">确定</el-button>
+            </template>
+        </el-dialog>
         <liliDialog
             ref="liliDialog"
             @selectedGoodsData="selectedGoodsData"
@@ -73,11 +106,15 @@ export default {
     },
     data() {
         return {
-            currentIndex:0, // 当前商品index
-            conData:this.data, // 当前数据
-            selected:{}, // 已选数据
-            showModal:false, // modal显隐
-            showContent:true, // 选择后刷新数据用
+            currentIndex:0,
+            conData:this.data,
+            selected:{},
+            editTarget: null,
+            showModal:false,
+            showGoodsModal: false,
+            showContent:true,
+            draftNavList: [],
+            draftGoodsList: [],
         }
     },
     watch:{
@@ -89,41 +126,46 @@ export default {
         }
     },
     methods:{
-        // tab点击切换
+        cloneList(list) {
+            return JSON.parse(JSON.stringify(list || []));
+        },
+        cloneItem(item) {
+            return JSON.parse(JSON.stringify(item || {}));
+        },
         changeCurr(index){
             this.currentIndex = index;
         },
-        // 编辑
-        handleSelectModel (item,type) {
-            this.selected = item;
-            this.showModal = true
+        handleSelectModel () {
+            this.draftNavList = this.cloneList(this.conData.options.navList);
+            this.draftGoodsList = this.cloneList(this.conData.options.list);
+            this.showModal = true;
         },
-        handleSelectGoods(item) { // 调起选择商品弹窗
-            if(item) this.selected = item;
-            this.$refs.liliDialog.open('goods', 'single')
+        handleSelectGoods(item) {
+            this.editTarget = item;
+            this.selected = this.cloneItem(item);
+            this.showGoodsModal = true;
+        },
+        handleOpenGoodsPicker() {
+            this.$refs.liliDialog.open('goods', 'single');
             setTimeout(() => {
-                this.$refs.liliDialog.goodsData = [this.selected]
+                this.$refs.liliDialog.goodsData = [this.selected];
             }, 500);
         },
-        // 选择商品回调
         selectedGoodsData(val){
-            console.log(val)
-            let goods = val[0]
-            this.selected.img = goods.thumbnail
-            this.selected.price = goods.price
-            this.selected.name = goods.goodsName
-            this.selected.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`
+            if (!val?.length) return;
+            const goods = val[0];
+            this.selected.img = goods.thumbnail;
+            this.selected.price = goods.price;
+            this.selected.name = goods.goodsName;
+            this.selected.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
         },
-        handleDelNav(index){ // 删除导航
-            this.conData.options.navList.splice(index,1)
-            this.conData.options.list.splice(index,1)
+        handleDelNav(index){
+            this.draftNavList.splice(index,1);
+            this.draftGoodsList.splice(index,1);
         },
-        handleAddNav(){ // 添加导航
-            this.conData.options.navList.push(
-                {title:'',desc:''}
-            )
-            this.conData.options.list.push(
-                [{ img:'', name:'', price:0, url:'' },
+        handleAddNav(){
+            this.draftNavList.push({ title:'', desc:'' });
+            this.draftGoodsList.push([
                 { img:'', name:'', price:0, url:'' },
                 { img:'', name:'', price:0, url:'' },
                 { img:'', name:'', price:0, url:'' },
@@ -133,27 +175,66 @@ export default {
                 { img:'', name:'', price:0, url:'' },
                 { img:'', name:'', price:0, url:'' },
                 { img:'', name:'', price:0, url:'' },
-                ],
-            )
-            this.showContent = false
-            this.$nextTick(()=>{
+                { img:'', name:'', price:0, url:'' },
+            ]);
+        },
+        handleCancelModal() {
+            this.draftNavList = [];
+            this.draftGoodsList = [];
+            this.showModal = false;
+        },
+        handleConfirmModal() {
+            this.conData.options.navList = this.cloneList(this.draftNavList);
+            this.conData.options.list = this.cloneList(this.draftGoodsList);
+            this.draftNavList = [];
+            this.draftGoodsList = [];
+            this.showContent = false;
+            this.$nextTick(() => {
                 this.showContent = true;
-            })
+            });
+            this.showModal = false;
+        },
+        handleCancelGoodsModal() {
+            this.editTarget = null;
+            this.selected = {};
+            this.showGoodsModal = false;
+        },
+        handleConfirmGoodsModal() {
+            if (this.editTarget) {
+                Object.assign(this.editTarget, this.cloneItem(this.selected));
+            }
+            this.editTarget = null;
+            this.selected = {};
+            this.showGoodsModal = false;
         },
     }
 }
 </script>
 <style lang="scss" scoped>
 @import './setup-box.scss';
+.not-enough {
+    width: 100%;
+}
 .nav-bar{
-    display: flex;
-    justify-content: center;
     width: 100%;
     margin-bottom: 10px;
     background-color: rgb(218, 217, 217);
     height: 60px;
-    align-items: center;
     position: relative;
+}
+.nav-setup-box {
+    left: auto;
+    right: 0;
+    width: 100px;
+}
+.nav-list {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
     li{
         padding: 0 30px;
         text-align: center;
@@ -161,11 +242,15 @@ export default {
             font-size: 16px;
             border-radius: 50px;
             padding: 0 7px;
+            margin: 0;
+            line-height: 1.2;
         }
 
         p:nth-child(2){
             font-size: 14px;
             color: #999;
+            margin: 2px 0 0;
+            line-height: 1.2;
         }
 
         &:hover{
@@ -180,11 +265,9 @@ export default {
     li:last-of-type{
         border: none;
     }
-   
     .curr{
         p:nth-child(1){
             background-color: $theme_color;
-            
             color: #fff;
         }
         p:nth-child(2){

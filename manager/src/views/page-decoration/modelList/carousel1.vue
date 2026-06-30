@@ -84,7 +84,7 @@
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
     <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
-      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" ref="ossManage" />
+      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" :max-select="1" ref="ossManage" />
     </el-dialog>
   </div>
 </template>
@@ -130,6 +130,7 @@ export default {
     callbackSelected(item) {
       // 选择图片回调
       this.picModelFlag = false;
+      if (!item?.url) return;
       this.selected.img = item.url;
     },
     // 删除图片

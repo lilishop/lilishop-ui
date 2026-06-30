@@ -17,7 +17,7 @@
         v-if="order.allowOperationVO.pay"
         >去支付</el-button>
       <el-button
-        type="info"
+        type="primary"
         @click="received(order.order.sn)"
         size="small"
         v-if="order.allowOperationVO.rog"
@@ -180,7 +180,7 @@
                   goods.afterSaleStatus.includes('PART_AFTER_SALE')
                 "
                 @click="applyAfterSale(goods.sn)"
-                type="warning"
+                type="default"
                 size="small"
                 class="order-item-action-btn mb_5"
                 >申请售后</el-button
@@ -196,7 +196,7 @@
               <el-button
                 v-if="goods.complainStatus == 'NO_APPLY'"
                 @click="complain(order.order.sn, goodsIndex)"
-                type="warning"
+                type="danger"
                 class="order-item-action-btn fontsize_12 mb_5"
                 size="small"
                 >投诉</el-button

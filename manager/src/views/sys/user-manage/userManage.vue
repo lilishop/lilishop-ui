@@ -94,9 +94,11 @@
       v-model="userModalVisible"
       :title="modalTitle"
       width="500px"
+      align-center
+      append-to-body
       :close-on-click-modal="false"
-      top="30px"
       destroy-on-close
+      class="user-manage-dialog"
     >
       <el-form ref="form" :model="form" label-width="70px" :rules="formValidate">
         <el-form-item label="用户名" prop="username">
@@ -106,7 +108,7 @@
           <el-input v-model="form.nickName" autocomplete="off" />
         </el-form-item>
         <el-form-item v-if="modalType == 0" label="密码" prop="password" :error="errorPass">
-          <el-input v-model="form.password" type="password" show-password autocomplete="off" />
+          <el-input v-model="form.password" type="password" show-password autocomplete="new-password" />
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="form.email" />
@@ -326,7 +328,6 @@ export default {
     add() {
       this.modalType = 0;
       this.modalTitle = "添加用户";
-      this.$refs.form?.resetFields();
       this.form = {
         username: "",
         mobile: "",
@@ -336,20 +337,23 @@ export default {
         departmentId: 0,
         departmentTitle: "",
       };
-      this.$refs.depTree.setData("", "");
       this.userModalVisible = true;
+      this.$nextTick(() => {
+        this.$refs.form?.resetFields();
+        this.$refs.depTree?.setData("", "");
+      });
     },
     edit(v) {
       this.form = JSON.parse(JSON.stringify(v));
       this.modalType = 1;
       this.modalTitle = "编辑用户";
-      this.$refs.form?.resetFields();
       for (let attr in this.form) {
         if (this.form[attr] == null) {
           this.form[attr] = "";
         }
       }
-      this.$refs.depTree.setData(this.form.departmentId, this.form.departmentTitle);
+      const departmentId = this.form.departmentId;
+      const departmentTitle = this.form.departmentTitle;
       let selectRolesId = [];
       if (this.form.roles) {
         this.form.roles.forEach(function (e) {
@@ -358,6 +362,10 @@ export default {
       }
       this.form.roles = selectRolesId;
       this.userModalVisible = true;
+      this.$nextTick(() => {
+        this.$refs.form?.resetFields();
+        this.$refs.depTree?.setData(departmentId, departmentTitle);
+      });
     },
     enable(v) {
       let params = { status: true };
@@ -460,5 +468,38 @@ export default {
   display: inline-block;
   margin: 0 8px;
   color: #dcdee2;
+}
+</style>
+
+<style lang="scss">
+.user-manage-dialog {
+  .el-dialog__body {
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+  }
+
+  .el-input__wrapper {
+    background-color: #fff !important;
+    box-shadow: 0 0 0 1px var(--el-border-color) inset !important;
+
+    &.is-focus {
+      box-shadow: 0 0 0 1px var(--el-border-color) inset !important;
+    }
+  }
+
+  .el-input__inner {
+    background-color: transparent !important;
+
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus,
+    &:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+      box-shadow: 0 0 0 1000px #fff inset !important;
+      -webkit-text-fill-color: #606266 !important;
+      caret-color: #606266;
+      transition: background-color 99999s ease-out;
+    }
+  }
 }
 </style>

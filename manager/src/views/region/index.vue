@@ -99,10 +99,10 @@ export default {
         content: "更新后店铺以及用户地区绑定数据将全部错乱",
         onOk: () => {
           this.asyncLoading = true;
-          let closeCountdown = null;
+          let messageInstance = null;
           const showCountdown = () => {
-            if (closeCountdown) closeCountdown();
-            closeCountdown = ElMessage.info({
+            if (messageInstance) messageInstance.close();
+            messageInstance = ElMessage.info({
               message: `地区数据将在 ${this.num} 秒后更新`,
               duration: 0,
               showClose: true,
@@ -115,7 +115,7 @@ export default {
           }, 1000);
           setTimeout(() => {
             clearInterval(number);
-            if (closeCountdown) closeCountdown();
+            if (messageInstance) messageInstance.close();
             ElMessage.closeAll();
             asyncRegion().then(() => {
               this.asyncLoading = false;

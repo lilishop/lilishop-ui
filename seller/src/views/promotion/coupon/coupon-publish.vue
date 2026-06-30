@@ -63,38 +63,44 @@
             </el-form-item>
 
             <el-form-item label="店铺承担比例" prop="storeCommission">
-              <el-input
-                :disabled="disabled"
-                v-model="form.storeCommission"
-                placeholder="店铺承担比例"
-                style="width: 260px"
-              >
-                <template #append>%</template>
-              </el-input>
-              <span class="describe">店铺承担比例，输入0-100之间数值</span>
+              <div class="form-field-block">
+                <el-input
+                  :disabled="disabled"
+                  v-model="form.storeCommission"
+                  placeholder="店铺承担比例"
+                  style="width: 260px"
+                >
+                  <template #append>%</template>
+                </el-input>
+                <div class="form-tip">店铺承担比例，输入0-100之间数值</div>
+              </div>
             </el-form-item>
             <el-form-item label="发放数量" prop="publishNum" v-if="form.getType === 'FREE'">
-              <el-input
-                :disabled="disabled"
-                v-model="form.publishNum"
-                placeholder="发放数量"
-                style="width: 260px"
-              />
-              <div class="tips">如果发放数量为0时,则代表不限制发放数量</div>
+              <div class="form-field-block">
+                <el-input
+                  :disabled="disabled"
+                  v-model="form.publishNum"
+                  placeholder="发放数量"
+                  style="width: 260px"
+                />
+                <div class="form-tip">如果发放数量为0时,则代表不限制发放数量</div>
+              </div>
             </el-form-item>
             <el-form-item
               label="领取数量限制"
               prop="couponLimitNum"
               v-if="form.getType === 'FREE'"
             >
-              <el-input
-                :disabled="disabled"
-                v-model="form.couponLimitNum"
-                placeholder="领取限制"
-                clearable
-                style="width: 260px"
-              />
-              <div class="tips">如果领取数量为0时,则代表不限制领取数量</div>
+              <div class="form-field-block">
+                <el-input
+                  :disabled="disabled"
+                  v-model="form.couponLimitNum"
+                  placeholder="领取限制"
+                  clearable
+                  style="width: 260px"
+                />
+                <div class="form-tip">如果领取数量为0时,则代表不限制领取数量</div>
+              </div>
             </el-form-item>
             <el-form-item label="范围描述" prop="description">
               <el-input
@@ -591,6 +597,20 @@ h4 {
   color: #999;
 }
 
+.form-field-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.form-tip {
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 4px;
+  color: #999;
+}
+
 .effectiveDays {
   font-size: 12px;
   color: #999;
@@ -598,9 +618,5 @@ h4 {
   > * {
     margin: 0 4px;
   }
-}
-.tips {
-  font-size: 12px;
-  color: #999;
 }
 </style>

@@ -138,6 +138,10 @@
           </div>
         </div>
       </div>
+      <template #footer>
+        <el-button @click="handleCancelModal">取消</el-button>
+        <el-button type="primary" @click="handleConfirmModal">确定</el-button>
+      </template>
     </el-dialog>
 
     <!-- 选择商品。链接 -->
@@ -153,6 +157,7 @@
         @callback="callbackSelected"
         :is-component="true"
         :initialize="picModelFlag"
+        :max-select="1"
         ref="ossManage"
       />
     </el-dialog>
@@ -169,7 +174,7 @@ export default {
   data() {
     return {
       showModal: false,
-      current: "", //当前选择的模块
+      current: null, // 当前编辑的模块草稿
       picModelFlag: false,
       selectedData: "", //选中的数据
       goodsIndex: 0, // 商品索引
@@ -190,6 +195,9 @@ export default {
   },
   mounted() {},
   methods: {
+    cloneModule(module) {
+      return JSON.parse(JSON.stringify(module || {}));
+    },
     handleSelectImg(type, index) {
       this.defaultCallbackImageType = type;
       this.goodsIndex = index;
@@ -217,53 +225,48 @@ export default {
     // 回显图片
     callbackSelected(val) {
       this.picModelFlag = false;
+      if (!val?.url || !this.current) return;
       if (this.defaultCallbackImageType == "default") {
-        console.log(this.current.data.image);
         this.current.data.image.src = val.url;
       } else {
-        console.log(this.goodsIndex, this.data.options[this.align].data.list);
-        this.data.options[this.align].data.list[this.goodsIndex].img = val.url;
-
-        // this.data.options[this.align].data[this.selectedData][this.goodsIndex].url = val.img
+        this.current.data.list[this.goodsIndex].img = val.url;
       }
     },
     // 选择商品回调
     selectedGoodsData(val) {
-      console.log(val);
-      this.$nextTick(() => {
-        this.data.options[this.align].data.list[this.goodsIndex].img =
-          val[0].thumbnail;
-        this.data.options[this.align].data.list[this.goodsIndex].title =
-          val[0].goodsName;
-        this.data.options[this.align].data.list[this.goodsIndex].price =
-          val[0].price;
-        this.data.options[this.align].data.list[this.goodsIndex].url =
-          val[0].url;
-      });
-      console.log(this.data.options[this.align].data.list[this.goodsIndex]);
-      this.$forceUpdate();
+      if (!val?.length || !this.current) return;
+      const item = this.current.data.list[this.goodsIndex];
+      item.img = val[0].thumbnail;
+      item.title = val[0].goodsName;
+      item.price = val[0].price;
+      item.url = val[0].url;
     },
     // 选择链接回调
     selectedLink(val) {
+      if (!this.current) return;
+      const formattedUrl = this.$filters.formatLinkType(val);
       if (this.selectedData != "list") {
-        this.data.options[this.align].data[this.selectedData].url = this.$filters.formatLinkType(val);
-        console.log(this.data.options[this.align].data[this.selectedData])
+        this.current.data[this.selectedData].url = formattedUrl;
       }
       if (this.selectedData == "list") {
-         this.data.options[this.align].data[this.selectedData][this.goodsIndex]
-        .url = this.$filters.formatLinkType(val);
+        this.current.data.list[this.goodsIndex].url = formattedUrl;
       }
     },
-    /*
-     * 点击不同模块进行编辑
-     * 判断也很简单，就是第一个第二个模块进行判断
-     *
-     * */
     handleSelectModel(align) {
       this.align = align;
-      this.current = this.data.options[align];
-      console.log(this.data.options[align]);
+      this.current = this.cloneModule(this.data.options[align]);
       this.showModal = true;
+    },
+    handleCancelModal() {
+      this.current = null;
+      this.showModal = false;
+    },
+    handleConfirmModal() {
+      if (this.current && this.align) {
+        this.data.options[this.align] = this.cloneModule(this.current);
+      }
+      this.current = null;
+      this.showModal = false;
     },
   },
 };

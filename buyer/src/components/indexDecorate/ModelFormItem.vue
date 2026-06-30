@@ -17,30 +17,30 @@
     </template>
     <!-- 热门广告 -->
     <template v-if="element.type == 'hotAdvert'">
-      <div class="mb_20 width_1200_auto">
-        <img
-          style="display: block; width: 100%; max-width: 1200px; height: auto"
-          class="hover-pointer"
-          :src="element.options.list[0].img"
-          @click="linkTo(element.options.list[0].url)"
-          width="1200"
-          alt=""
-        />
-      </div>
-      <ul class="advert-list width_1200_auto">
-        <template v-for="(item, index) in element.options.list" :key="index">
-          <li
-            v-if="index !== 0"
-            @click="linkTo(item.url)"
+      <div class="hot-advert mb_20 width_1200_auto">
+        <div class="hot-advert-banner">
+          <img
             class="hover-pointer"
-          >
-            <img :src="item.img" width="230" height="190" alt="" />
-          </li>
-        </template>
-      </ul>
+            :src="element.options.list[0].img"
+            @click="linkTo(element.options.list[0].url)"
+            alt=""
+          />
+        </div>
+        <ul class="advert-list">
+          <template v-for="(item, index) in element.options.list" :key="index">
+            <li
+              v-if="index !== 0"
+              @click="linkTo(item.url)"
+              class="hover-pointer"
+            >
+              <img :src="item.img" alt="" />
+            </li>
+          </template>
+        </ul>
+      </div>
     </template>
     <!-- 限时秒杀 待完善 -->
-    <template v-if="element.type == 'seckill' && element.options.list.length">
+    <template v-if="element.type == 'seckill' && element.options?.list?.length">
       <seckill :data="element" class="mb_20 width_1200_auto"></seckill>
     </template>
     <!-- 折扣广告 -->
@@ -121,15 +121,12 @@
       ></first-page-advert>
     </template>
     <!-- 横幅广告 -->
-    <template v-if="element.type == 'bannerAdvert'">
-      <div style="width: 100%; text-align: center">
-        <img
-          width="1200"
-          class="hover-pointer mb_20 bannerAd"
-          @click="linkTo(element.options.url)"
-          :src="element.options.img"
-          alt=""
-        />
+    <template v-if="element.type == 'bannerAdvert' && element.options.img">
+      <div
+        class="horizontal-advert width_1200_auto mb_20 hover-pointer"
+        @click="linkTo(element.options.url)"
+      >
+        <img class="bannerAd" :src="element.options.img" alt="" />
       </div>
     </template>
     <template v-if="element.type == 'notEnough'"
@@ -198,22 +195,55 @@ export default {
   box-sizing: border-box;
   overflow: hidden;
 }
-.bannerAd{
+/** 横幅广告 */
+.horizontal-advert {
   width: 100%;
-  height: 166.6px;
+  max-width: 1200px;
+  overflow: hidden;
   border-radius: 10px;
-  box-sizing: border-box;
+  line-height: 0;
+}
+.bannerAd {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 166px;
+  object-fit: cover;
 }
 /** 热门广告 */
+.hot-advert {
+  width: 1200px;
+  max-width: 100%;
+  overflow: hidden;
+
+  .hot-advert-banner {
+    line-height: 0;
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  }
+}
 .advert-list {
+  width: 100%;
+  margin: 0;
+  padding: 5px 0;
+  list-style: none;
+  box-sizing: border-box;
   background: $theme_color;
   height: 200px;
   display: flex;
-  justify-content: space-around;
-  padding: 3px 10px;
-  box-sizing: border-box;
+  gap: 10px;
+  align-items: center;
   > li {
+    flex: 1 1 0;
+    min-width: 0;
     img {
+      display: block;
+      width: 100%;
+      height: 190px;
       cursor: pointer;
       border-radius: 10px;
       transition: all 150ms ease-in-out;
@@ -227,38 +257,41 @@ export default {
 
 /** 折扣广告 */
 .discountAdvert-wrap {
+  width: 1200px;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 .discountAdvert {
-  width: 100%;
-  max-width: 1200px;
-  height: 520px;
-  margin: 0 auto;
+  width: 1300px;
+  height: 585px;
+  margin-left: -100px;
   box-sizing: border-box;
   background-repeat: no-repeat;
-  background-size: 1200px 520px;
-  background-position: center top;
+  background-size: 1300px 585px;
+  background-position: left top;
   position: relative;
-  padding: 10px 0 0 330px;
-  overflow: hidden;
   > div {
+    padding-left: 295px;
     display: flex;
     flex-wrap: wrap;
-    align-items: flex-start;
-    align-content: flex-start;
     box-sizing: border-box;
-    width: 100%;
-    img {
-      display: block;
-      flex-shrink: 0;
-      margin-top: 10px;
-      margin-right: 10px;
-      margin-bottom: 10px;
+    &:nth-child(1) img {
+      margin: 10px 10px 0 0;
       transition: all 150ms ease-in-out;
       &:hover {
         box-shadow: 0 5px 12px 0 rgba(0, 0, 0, 0.4);
         transform: translateY(-2px);
+      }
+    }
+    &:nth-child(2) {
+      margin-top: 10px;
+      img {
+        margin: 0 10px 0 0;
+        transition: all 150ms ease-in-out;
+        &:hover {
+          box-shadow: 0 5px 12px 0 rgba(0, 0, 0, 0.4);
+          transform: translateY(-2px);
+        }
       }
     }
   }

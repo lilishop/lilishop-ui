@@ -9,10 +9,10 @@
         :name="tabItem.type"
       >
         <component
-          v-if="settingData"
+          v-if="settingData && selected === tabItem.type"
           :is="templateSetting[tabItem.type]"
           :res="settingData"
-          :type="selected"
+          :type="tabItem.type"
         />
       </el-tab-pane>
     </el-tabs>
@@ -130,6 +130,8 @@ export default {
       getSetting(name).then((res) => {
         if (res.result) {
           this.settingData = JSON.stringify(res.result);
+        } else {
+          this.settingData = "{}";
         }
       });
     },

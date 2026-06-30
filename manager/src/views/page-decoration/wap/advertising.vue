@@ -165,6 +165,7 @@ export default {
     }, // 图片选择器回显
     callbackSelected(val) {
       this.picModelFlag = false;
+      if (!val?.url) return;
       this.advertising[0].img = val.url;
     }
   },

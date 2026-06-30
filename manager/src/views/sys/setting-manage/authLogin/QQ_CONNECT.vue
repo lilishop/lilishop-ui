@@ -44,6 +44,12 @@
 <script>
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
+
+const DEFAULT_QQ_CONNECT_ITEMS = [
+  { clientType: "PC", appId: "", appKey: "" },
+  { clientType: "H5", appId: "", appKey: "" },
+];
+
 export default {
   data() {
     return {
@@ -63,10 +69,11 @@ export default {
   },
   methods: {
     submit(name) {
-      const that = this;
-      if (handleSubmit(that, name)) {
-        this.setupSetting();
-      }
+      handleSubmit(this, name)
+        .then(() => {
+          this.setupSetting();
+        })
+        .catch(() => {});
     },
     setupSetting() {
       setSetting(this.type, {
@@ -81,17 +88,15 @@ export default {
         }
       });
     },
-    async init() {
-      this.formValidate = JSON.parse(this.res).qqConnectSettingItemList;
-      Object.keys(this.formValidate).forEach((item) => {
-        this.ruleValidate[item] = [
-          {
-            required: true,
-            message: "请填写必填项",
-            trigger: "blur",
-          },
-        ];
-      });
+    init() {
+      const setting = JSON.parse(this.res || "{}");
+      const items = setting.qqConnectSettingItemList;
+      this.formValidate =
+        Array.isArray(items) && items.length ? items : DEFAULT_QQ_CONNECT_ITEMS;
+      this.ruleValidate = {
+        appId: [{ required: true, message: "请填写必填项", trigger: "blur" }],
+        appKey: [{ required: true, message: "请填写必填项", trigger: "blur" }],
+      };
     },
   },
 };

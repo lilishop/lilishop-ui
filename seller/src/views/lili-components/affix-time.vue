@@ -120,9 +120,14 @@ export default {
         this.dateList.forEach((res) => {
           res.selected = false;
         });
-        this.selectedWay.year = this.month.split("-")[0];
-        this.selectedWay.month = this.month.split("-")[1];
-        this.selectedWay.searchType = "";
+        const parts = String(this.month).split("-");
+        this.selectedWay = {
+          ...this.selectedWay,
+          year: parts[0],
+          month: parts[1],
+          searchType: "",
+          storeId: this.storeId,
+        };
         this.$emit("selected", this.selectedWay);
       } else {
         const current =
@@ -145,8 +150,8 @@ export default {
       item.storeId = this.storeId;
       this.month = "";
       if (item.searchType === "") {
-        const currentDate = this.originDateList[currentIndex].searchType;
-        item.searchType = currentDate || "LAST_SEVEN";
+        const origin = this.originDateList[currentIndex];
+        item.searchType = (origin && origin.searchType) || "LAST_SEVEN";
       }
       this.selectedWay = item;
       this.selectedWay.year = new Date().getFullYear();

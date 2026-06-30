@@ -27,11 +27,12 @@
       <div class="search-con">
         <img :src="require('@/assets/logo.png')" class="logo" alt="" />
         <div class="search">
-          <el-input size="large" placeholder="输入你想查找的商品">
-            <template #append>
-              <el-button>搜索</el-button>
-            </template>
-          </el-input>
+          <el-input
+            size="large"
+            class="search-input"
+            placeholder="输入你想查找的商品"
+          />
+          <div class="search-btn">搜索</div>
         </div>
       </div>
       <div class="nav-con" v-if="$route.query.pageType !== 'SPECIAL'">
@@ -73,17 +74,18 @@
       :close-on-click-modal="false"
       append-to-body
       destroy-on-close
+      @close="handleCancelTopAdvertModal"
     >
-      <div class="modal-top-advert">
+      <div class="modal-top-advert" v-if="draftTopAdvert">
         <div>
-          <img class="show-image" width="600" height="40" :src="topAdvert.img" alt />
+          <img class="show-image" width="600" height="40" :src="draftTopAdvert.img" alt />
         </div>
-        <div class="tips">建议尺寸：<span>{{ topAdvert.size }}</span></div>
+        <div class="tips">建议尺寸：<span>{{ draftTopAdvert.size }}</span></div>
         <div>
           图片链接：<el-input
             class="outsideUrl"
-            v-model="topAdvert.url"
-            :disabled="!!topAdvert.type && topAdvert.type !== 'link'"
+            v-model="draftTopAdvert.url"
+            :disabled="!!draftTopAdvert.type && draftTopAdvert.type !== 'link'"
             placeholder="https://"
           />
           <el-button size="small" type="primary" @click="handleSelectLink">选择链接</el-button>
@@ -91,8 +93,12 @@
         <div>
           选择图片：<el-button size="small" type="primary" @click="handleSelectImg">选择图片</el-button>
         </div>
-        <div>选择背景色：<el-color-picker v-model="topAdvert.bgColor" /></div>
+        <div>选择背景色：<el-color-picker v-model="draftTopAdvert.bgColor" /></div>
       </div>
+      <template #footer>
+        <el-button @click="handleCancelTopAdvertModal">取消</el-button>
+        <el-button type="primary" @click="handleConfirmTopAdvertModal">确定</el-button>
+      </template>
     </el-dialog>
     <el-dialog
       v-model="showModalNav"
@@ -101,6 +107,7 @@
       :close-on-click-modal="false"
       append-to-body
       destroy-on-close
+      @close="handleNavDialogClose"
     >
       <div class="modal-tab-bar">
         <el-button type="primary" size="small" @click="handleAddNav">添加分类</el-button>
@@ -129,6 +136,10 @@
           </tbody>
         </table>
       </div>
+      <template #footer>
+        <el-button @click="handleCancelNavModal">取消</el-button>
+        <el-button type="primary" @click="handleConfirmNavModal">确定</el-button>
+      </template>
     </el-dialog>
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
     <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
@@ -136,6 +147,7 @@
         @callback="callbackSelected"
         :is-component="true"
         :initialize="picModelFlag"
+        :max-select="1"
         ref="ossManage"
       />
     </el-dialog>
@@ -160,6 +172,8 @@ export default {
       picModelFlag: false,
       showModal: false,
       showModalNav: false,
+      navListBackup: null,
+      draftTopAdvert: null,
       selectedNav: null,
       promotionTags: ["买2免1", "领200神券", "199减100", "母婴5折抢", "充100送20"],
       topAdvert: {
@@ -204,29 +218,52 @@ export default {
       if (this.showModalNav) {
         this.selectedNav.url = this.$filters.formatLinkType(val);
         this.selectedNav.type = val.___type === "other" && val.url === "" ? "link" : "other";
-      } else {
-        this.topAdvert.url = this.$filters.formatLinkType(val);
-        this.topAdvert.type = val.___type === "other" && val.url === "" ? "link" : "other";
+        this.navList.list[this.currentIndex].title = val.title;
+      } else if (this.showModal && this.draftTopAdvert) {
+        this.draftTopAdvert.url = this.$filters.formatLinkType(val);
+        this.draftTopAdvert.type = val.___type === "other" && val.url === "" ? "link" : "other";
       }
-      this.navList.list[this.currentIndex].title = val.title;
     },
     handleDelNav(index) {
       this.navList.list.splice(index, 1);
     },
     handleAddNav() {
       this.navList.list.push({ name: "", url: "", title: "" });
-      this.$nextTick(() => {
-        this.selectedNav.title = val.title;
-      });
     },
     handleMoveEnd({ newIndex, oldIndex }) {
       console.log("index", newIndex, oldIndex);
     },
     handleModel(type) {
       if (type == "topAdvert") {
+        this.draftTopAdvert = JSON.parse(JSON.stringify(this.topAdvert));
         this.showModal = true;
       } else {
+        this.navListBackup = JSON.parse(JSON.stringify(this.navList));
         this.showModalNav = true;
+      }
+    },
+    handleCancelTopAdvertModal() {
+      this.draftTopAdvert = null;
+      this.showModal = false;
+    },
+    handleConfirmTopAdvertModal() {
+      if (this.draftTopAdvert) {
+        Object.assign(this.topAdvert, JSON.parse(JSON.stringify(this.draftTopAdvert)));
+      }
+      this.draftTopAdvert = null;
+      this.showModal = false;
+    },
+    handleCancelNavModal() {
+      this.showModalNav = false;
+    },
+    handleConfirmNavModal() {
+      this.navListBackup = null;
+      this.showModalNav = false;
+    },
+    handleNavDialogClose() {
+      if (this.navListBackup) {
+        this.navList = JSON.parse(JSON.stringify(this.navListBackup));
+        this.navListBackup = null;
       }
     },
     handleSelectImg() {
@@ -239,7 +276,8 @@ export default {
     },
     callbackSelected(item) {
       this.picModelFlag = false;
-      this.topAdvert.img = item.url;
+      if (!item?.url || !this.draftTopAdvert) return;
+      this.draftTopAdvert.img = item.url;
     },
     handleModelAdd(evt) {
       const newIndex = evt.newIndex;
@@ -264,15 +302,18 @@ export default {
 @import "./modelList/setup-box.scss";
 .model-form {
   width: 1500px;
+  max-width: 100%;
 }
 .model-content {
   width: 1200px;
   margin: 0 auto;
   background: #fff;
   min-height: 1200px;
+  overflow-x: visible;
 }
 .model-form-list {
   min-height: 500px;
+  box-sizing: border-box;
 }
 .top-fixed-advert {
   display: flex;
@@ -329,26 +370,47 @@ export default {
     height: 50px;
   }
   .search {
+    $search-height: 34px;
+    $search-btn-width: 60px;
+    $btn-gap: 3px;
+
+    position: relative;
     width: 460px;
+    height: $search-height;
     margin: 0 auto;
-    :deep(.el-input--large .el-input__wrapper) {
-      border: 2px solid $theme_color;
-      font-size: 12px;
-      height: 34px;
-      box-shadow: none;
-    }
-    :deep(.el-input-group__append) {
-      border: 1px solid $theme_color;
-      border-left: none;
-      height: 30px;
-      background-color: $theme_color;
-      color: #ffffff;
-      .el-button {
-        font-size: 14px;
-        font-weight: 600;
-        line-height: 1;
-        color: #fff;
+
+    .search-input {
+      width: 100%;
+
+      :deep(.el-input__wrapper) {
+        border: 2px solid $theme_color;
+        border-radius: calc($search-height / 2);
+        box-sizing: border-box;
+        padding-right: calc($search-btn-width + $btn-gap * 2);
+        font-size: 12px;
+        height: $search-height;
+        box-shadow: none;
       }
+    }
+
+    .search-btn {
+      position: absolute;
+      top: $btn-gap;
+      right: $btn-gap;
+      bottom: $btn-gap;
+      width: $search-btn-width;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      border-radius: calc(($search-height - $btn-gap * 2) / 2);
+      background-color: $theme_color;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1;
+      cursor: default;
+      user-select: none;
     }
   }
 }

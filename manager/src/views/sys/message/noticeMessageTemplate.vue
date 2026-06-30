@@ -57,7 +57,7 @@
                     <div v-if="row" class="ops">
                       <a class="link-text" @click="detail(row)">详细</a>
                       <span class="op-split">|</span>
-                      <a class="link-text" @click="delete(row.id)">删除</a>
+                      <a class="link-text" @click="removeMessage(row.id)">删除</a>
                     </div>
                   </template>
                 </el-table-column>
@@ -207,16 +207,21 @@
           </el-select>
         </el-form-item>
         <el-form-item v-if="memberShow" label="选择会员" prop="scopeType">
-          <el-button type="primary" plain @click="addVip">选择会员</el-button>
-          <div v-if="messageSendForm.messageClient == 'member'" style="margin-top: 24px">
-            <el-table border :data="selectedMember" style="width: 100%">
-              <el-table-column prop="nickName" label="用户名称" min-width="120" />
-              <el-table-column label="手机号" min-width="120">
+          <div class="member-select-wrap">
+            <el-button type="primary" plain @click="addVip">选择会员</el-button>
+            <el-table
+              v-if="messageSendForm.messageClient == 'member'"
+              border
+              :data="selectedMember"
+              class="member-select-table"
+            >
+              <el-table-column prop="nickName" label="用户名称" min-width="140" show-overflow-tooltip />
+              <el-table-column label="手机号" min-width="140">
                 <template #default="{ row }">
                   <span v-if="row">{{ row.mobile || "暂未填写" }}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" min-width="50" align="center">
+              <el-table-column label="操作" width="80" align="center">
                 <template #default="{ row, $index }">
                   <a v-if="row" class="link-text" @click="delUser($index)">删除</a>
                 </template>
@@ -235,9 +240,14 @@
       <userList
         v-if="checkUserList"
         ref="memberLayout"
+        :selectedMember="true"
         :selectedList="selectedMember"
         @callback="callbackSelectUser"
       />
+      <template #footer>
+        <el-button @click="cancelMemberSelect">取消</el-button>
+        <el-button type="primary" @click="confirmMemberSelect">确定</el-button>
+      </template>
     </el-dialog>
 
     <el-dialog
@@ -359,6 +369,7 @@ export default {
     return {
       activeTab: "MESSAGE",
       checkUserList: false,
+      memberSelectSnapshot: [],
       selectedMember: [],
       loading: true,
       modalVisible: false,
@@ -455,10 +466,17 @@ export default {
       this.loading = false;
     },
     addVip() {
+      this.memberSelectSnapshot = JSON.parse(JSON.stringify(this.selectedMember));
       this.checkUserList = true;
-      this.$nextTick(() => {
-        this.$refs.memberLayout.selectedMember = true;
-      });
+    },
+    cancelMemberSelect() {
+      this.selectedMember = JSON.parse(JSON.stringify(this.memberSelectSnapshot));
+      this.reSelectMember();
+      this.checkUserList = false;
+    },
+    confirmMemberSelect() {
+      this.reSelectMember();
+      this.checkUserList = false;
     },
     paneChange(v) {
       if (v == "SETTING") {
@@ -526,7 +544,7 @@ export default {
         return shop ? shop.storeName : "";
       });
     },
-    delete(id) {
+    removeMessage(id) {
       this.$Modal.confirm({
         title: "确认删除",
         content: "您确认删除此站内信 ?",
@@ -545,6 +563,7 @@ export default {
       this.messageModalTitle = "发送站内信";
       this.shopShow = false;
       this.memberShow = false;
+      this.selectedMember = [];
       this.messageSendForm = {
         messageRange: "ALL",
         messageClient: "member",
@@ -718,5 +737,12 @@ export default {
   display: inline-block;
   margin: 0 8px;
   color: #dcdfe6;
+}
+.member-select-wrap {
+  width: 100%;
+}
+.member-select-table {
+  width: 100%;
+  margin-top: 12px;
 }
 </style>

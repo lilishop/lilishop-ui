@@ -136,6 +136,7 @@
         @callback="callbackSelected"
         :is-component="true"
         :initialize="picModelFlag"
+        :max-select="1"
         ref="ossManage"
       />
     </el-dialog>
@@ -264,6 +265,7 @@ export default {
 @import "./modelList/setup-box.scss";
 .model-form {
   width: 1500px;
+  max-width: 100%;
 }
 .model-content {
   width: 1200px;
@@ -273,6 +275,8 @@ export default {
 }
 .model-form-list {
   min-height: 500px;
+  padding-right: 110px;
+  box-sizing: border-box;
 }
 .top-fixed-advert {
   display: flex;

@@ -1,15 +1,8 @@
 <template>
   <div>
     <div class="upload-pic-thumb">
-      <vuedraggable
-        :list="uploadList"
-        :disabled="!draggable || !multiple"
-        :animation="200"
-        class="list-group"
-        ghost-class="thumb-ghost"
-        @end="onEnd"
-      >
-        <div v-for="(item, index) in uploadList" :key="index" class="upload-list">
+      <div v-if="!multiple" class="list-group">
+        <div v-for="item in uploadList" :key="draggableItemKey(item)" class="upload-list">
           <div v-if="item.status == 'finished'" style="height: 60px">
             <img :src="item.url" alt="" />
             <div class="upload-list-cover">
@@ -25,19 +18,47 @@
             />
           </div>
         </div>
+      </div>
+      <vuedraggable
+        v-else
+        v-model="uploadList"
+        :disabled="!draggable"
+        :animation="200"
+        class="list-group"
+        ghost-class="thumb-ghost"
+        :item-key="draggableItemKey"
+        @end="onEnd"
+      >
+        <template #item="{ element: item }">
+          <div class="upload-list">
+            <div v-if="item.status == 'finished'" style="height: 60px">
+              <img :src="item.url" alt="" />
+              <div class="upload-list-cover">
+                <el-icon class="action-icon" @click="handleView(item.url)"><View /></el-icon>
+                <el-icon class="action-icon" @click="handleRemove(item)"><Delete /></el-icon>
+              </div>
+            </div>
+            <div v-else>
+              <el-progress
+                v-if="item.showProgress"
+                :percentage="item.percentage"
+                :show-text="false"
+              />
+            </div>
+          </div>
+        </template>
       </vuedraggable>
       <el-upload
         ref="upload"
+        class="upload-box"
         :action="uploadFileUrl"
         :headers="accessToken"
         :multiple="multiple"
         :show-file-list="false"
         accept=".jpg,.jpeg,.png,.gif"
-        drag
         :before-upload="handleBeforeUpload"
         :on-success="handleSuccess"
         :on-error="handleError"
-        style="display: inline-block; width: 58px"
       >
         <div class="upload-trigger">
           <el-icon :size="20"><Camera /></el-icon>
@@ -99,6 +120,9 @@ export default {
     },
   },
   methods: {
+    draggableItemKey(item) {
+      return item.url || item.uid || item.name;
+    },
     onEnd() {
       this.returnValue();
     },
@@ -265,12 +289,29 @@ export default {
   opacity: 0.5;
   background: #c8ebfb;
 }
+.upload-box {
+  display: inline-block;
+  vertical-align: middle;
+
+  :deep(.el-upload) {
+    display: inline-block;
+    vertical-align: top;
+  }
+}
 .upload-trigger {
-  width: 58px;
-  height: 58px;
-  line-height: 58px;
+  width: 60px;
+  height: 60px;
+  border: 1px dashed #dcdfe6;
+  border-radius: 4px;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--el-color-primary);
+    color: var(--el-color-primary);
+  }
 }
 </style>

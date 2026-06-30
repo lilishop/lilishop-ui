@@ -1,5 +1,41 @@
 import { ElMessage, ElMessageBox } from "element-plus";
 
+const MESSAGE_BOX_Z_STYLE_ID = "lili-message-box-z-style";
+
+/** EP 2.14 打开 MessageBox 时会用 nextZIndex() 覆盖 options.zIndex，需动态压过当前最高遮罩 */
+function getMaxOverlayZIndex() {
+  if (typeof document === "undefined") {
+    return 2000;
+  }
+  let max = 2000;
+  document.querySelectorAll(".el-overlay").forEach((el) => {
+    const z = Number.parseInt(window.getComputedStyle(el).zIndex, 10);
+    if (Number.isFinite(z) && z > max) {
+      max = z;
+    }
+  });
+  return max + 100;
+}
+
+function applyMessageBoxLayerZIndex(zIndex) {
+  if (typeof document === "undefined") {
+    return;
+  }
+  let styleEl = document.getElementById(MESSAGE_BOX_Z_STYLE_ID);
+  if (!styleEl) {
+    styleEl = document.createElement("style");
+    styleEl.id = MESSAGE_BOX_Z_STYLE_ID;
+    document.head.appendChild(styleEl);
+  }
+  styleEl.textContent = `.el-overlay.is-message-box { z-index: ${zIndex} !important; }`;
+}
+
+function prepareMessageBoxLayer(options = {}) {
+  const zIndex = options.zIndex ?? getMaxOverlayZIndex();
+  applyMessageBoxLayerZIndex(zIndex);
+  return zIndex;
+}
+
 /**
  * 兼容原 view-design Message API，便于业务页渐进迁移
  */
@@ -39,6 +75,7 @@ export const Notice = {
 
 export const Modal = {
   confirm(options = {}) {
+    prepareMessageBoxLayer(options);
     const content = normalizeModalContent(options.content || options.title || "确认操作？");
     const title = options.title || "提示";
     return ElMessageBox.confirm(content, title, {
@@ -77,6 +114,7 @@ export const Modal = {
     });
   },
   warning(options = {}) {
+    prepareMessageBoxLayer(options);
     const content = normalizeModalContent(options.content || options.title || "");
     const title = options.title || "提示";
     return ElMessageBox.alert(content, title, {

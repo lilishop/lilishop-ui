@@ -278,7 +278,7 @@
                   >加入购物车</el-button
                 >
                 <el-button
-                  type="warning"
+                  class="confirm-receipt-btn"
                   :loading="loading1"
                   :disabled="skuDetail.quantity === 0"
                   @click="buyNow"

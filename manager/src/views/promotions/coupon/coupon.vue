@@ -18,22 +18,39 @@
           />
         </el-form-item>
         <el-form-item label="获取方式" prop="getType">
-          <el-select v-model="searchForm.getType" placeholder="请选择" clearable style="width: 240px">
-            <el-option label="免费获取" value="FREE" />
-            <el-option label="活动获取" value="ACTIVITY" />
+          <el-select
+            v-model="searchForm.getType"
+            placeholder="请选择"
+            :clearable="!isGetTypeFilterLocked"
+            :disabled="isGetTypeFilterLocked"
+            teleported
+            popper-class="coupon-filter-popper"
+            style="width: 240px"
+          >
+            <el-option
+              v-for="item in getTypeFilterOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="活动状态" prop="promotionStatus">
           <el-select
             v-model="searchForm.promotionStatus"
             placeholder="请选择"
-            clearable
+            :clearable="!isPromotionStatusFilterLocked"
+            :disabled="isPromotionStatusFilterLocked"
+            teleported
+            popper-class="coupon-filter-popper"
             style="width: 240px"
           >
-            <el-option label="未开始" value="NEW" />
-            <el-option label="已开始/上架" value="START" />
-            <el-option label="已结束/下架" value="END" />
-            <el-option label="紧急关闭/作废" value="CLOSE" />
+            <el-option
+              v-for="item in promotionStatusFilterOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="活动时间">
@@ -41,6 +58,8 @@
             v-model="selectDate"
             type="daterange"
             clearable
+            teleported
+            popper-class="coupon-filter-popper"
             start-placeholder="开始日期"
             end-placeholder="结束日期"
             style="width: 240px"
@@ -218,6 +237,8 @@ export default {
         sort: "create_time",
         order: "desc",
         getType: "",
+        promotionStatus: "",
+        couponName: "",
       },
       selectList: [],
       selectCount: 0,
@@ -228,6 +249,36 @@ export default {
       showStatusColumn: true,
       isSyncingSelection: false,
     };
+  },
+  computed: {
+    getTypeFilterOptions() {
+      const all = [
+        { label: "免费获取", value: "FREE" },
+        { label: "活动获取", value: "ACTIVITY" },
+      ];
+      if (this.getType) {
+        return all.filter((item) => item.value === this.getType);
+      }
+      return all;
+    },
+    promotionStatusFilterOptions() {
+      const all = [
+        { label: "未开始", value: "NEW" },
+        { label: "已开始/上架", value: "START" },
+        { label: "已结束/下架", value: "END" },
+        { label: "紧急关闭/作废", value: "CLOSE" },
+      ];
+      if (this.promotionStatus) {
+        return all.filter((item) => item.value === this.promotionStatus);
+      }
+      return all;
+    },
+    isGetTypeFilterLocked() {
+      return !!this.getType;
+    },
+    isPromotionStatusFilterLocked() {
+      return !!this.promotionStatus;
+    },
   },
   watch: {
     $route(to) {
@@ -342,7 +393,9 @@ export default {
       this.selectList = nextList;
       this.selectCount = nextList.length;
       this.$nextTick(() => {
-        this.isSyncingSelection = false;
+        this.$nextTick(() => {
+          this.isSyncingSelection = false;
+        });
       });
     },
     check() {
@@ -398,9 +451,9 @@ export default {
       }
       getPlatformCouponList(this.searchForm)
         .then((res) => {
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
+          if (res && res.success && res.result) {
+            this.data = res.result.records || [];
+            this.total = res.result.total || 0;
             this.$nextTick(() => {
               if (this.selectedList.length) {
                 this.syncTableSelection(this.selectedList);
@@ -408,6 +461,7 @@ export default {
             });
           }
         })
+        .catch(() => {})
         .finally(() => {
           this.loading = false;
         });
@@ -521,5 +575,11 @@ export default {
 }
 .padding-row {
   margin-bottom: 10px;
+}
+</style>
+
+<style lang="scss">
+.coupon-filter-popper {
+  z-index: 4000 !important;
 }
 </style>

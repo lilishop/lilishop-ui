@@ -16,6 +16,7 @@
             </el-form-item>
             <el-form-item label="活动时间" prop="rangeTime">
               <el-date-picker
+                class="full-discount-range-picker"
                 type="datetimerange"
                 v-model="form.rangeTime"
                 :disabled="fieldDisabled"
@@ -24,7 +25,6 @@
                 end-placeholder="结束时间"
                 placeholder="请选择"
                 :disabled-date="options.disabledDate"
-                style="width: 320px"
               />
             </el-form-item>
             <el-form-item label="活动描述" prop="description">
@@ -504,5 +504,12 @@ h4 {
   color: #409eff;
   cursor: pointer;
   text-decoration: none;
+}
+
+:deep(.full-discount-range-picker.el-date-editor--datetimerange) {
+  width: 380px;
+  max-width: 380px;
+  flex-grow: 0;
+  --el-date-editor-width: 380px;
 }
 </style>

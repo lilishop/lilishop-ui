@@ -366,27 +366,30 @@ export default {
   padding-top: 1px;
 }
 .gift-card-validity-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
   padding-top: 0;
   padding-bottom: 0;
 }
 .gift-card-validity-group :deep(.el-radio) {
   display: inline-flex;
   align-items: center;
-  line-height: 1;
-}
-.gift-card-validity-group :deep(.el-radio:first-child) {
-  margin-top: 0;
-}
-.gift-card-validity-group :deep(.el-radio) {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  margin-right: 0;
   margin-bottom: 10px;
   line-height: 32px;
   min-height: 32px;
+  height: auto;
 }
 .gift-card-validity-group :deep(.el-radio:last-child) {
   margin-bottom: 0;
+}
+.gift-card-validity-group :deep(.el-radio__label) {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  line-height: 32px;
 }
 .gift-card-validity-input-gap {
   width: 168px;

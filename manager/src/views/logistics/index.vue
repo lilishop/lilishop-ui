@@ -69,6 +69,8 @@
         <el-form-item label="支持电子面单">
           <el-switch
             v-model="form.standBy"
+            active-value="true"
+            inactive-value="false"
             inline-prompt
             active-text="开"
             inactive-text="关"
@@ -106,9 +108,11 @@ import {
 const defaultForm = () => ({
   name: "",
   code: "",
-  standBy: false,
+  standBy: "false",
   disabled: "CLOSE",
 });
+
+const normalizeStandBy = (value) => (value === true || value === "true" ? "true" : "false");
 
 export default {
   name: "logistics",
@@ -159,7 +163,7 @@ export default {
           const data = res.result.records;
           data.forEach((e) => {
             e.switch = e.disabled === "OPEN";
-            e.standBy = e.standBy == "null" || !e.standBy ? false : !!e.standBy;
+            e.standBy = normalizeStandBy(e.standBy);
           });
           this.data = data;
           this.total = res.result.total;
@@ -167,11 +171,12 @@ export default {
       });
     },
     changeSwitch(row) {
-      this.form.name = row.name;
-      this.form.code = row.code;
-      this.form.standBy = row.standBy;
-      this.form.disabled = row.disabled === "CLOSE" ? "OPEN" : "CLOSE";
-      updateLogistics(row.id, this.form).then((res) => {
+      updateLogistics(row.id, {
+        name: row.name,
+        code: row.code,
+        standBy: normalizeStandBy(row.standBy),
+        disabled: row.disabled === "CLOSE" ? "OPEN" : "CLOSE",
+      }).then((res) => {
         if (res.success) {
           this.$Message.success("操作成功");
           this.getDataList();
@@ -186,7 +191,10 @@ export default {
         this.submitLoading = true;
 
         if (this.modalTitle === "添加") {
-          const payload = { ...this.form };
+          const payload = {
+            ...this.form,
+            standBy: normalizeStandBy(this.form.standBy),
+          };
           delete payload.id;
           addLogistics(payload).then((res) => {
             this.submitLoading = false;
@@ -197,7 +205,10 @@ export default {
             }
           });
         } else {
-          updateLogistics(this.id, this.form).then((res) => {
+          updateLogistics(this.id, {
+            ...this.form,
+            standBy: normalizeStandBy(this.form.standBy),
+          }).then((res) => {
             this.submitLoading = false;
             if (res.success) {
               this.$Message.success("操作成功");
@@ -222,7 +233,7 @@ export default {
       this.form = {
         name: v.name,
         code: v.code,
-        standBy: v.standBy == "null" || !v.standBy ? false : !!v.standBy,
+        standBy: normalizeStandBy(v.standBy),
         disabled: v.disabled,
       };
       this.modalVisible = true;

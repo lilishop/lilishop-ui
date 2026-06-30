@@ -173,7 +173,7 @@ export default {
   overflow-y: auto;
   padding: 10px;
   background: #fff;
-  margin-top: 60px;
+  margin-top: 80px;
   position: fixed;
   z-index: 100;
   box-shadow: 1px 1px 10px #999;

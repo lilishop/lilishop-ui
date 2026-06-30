@@ -135,8 +135,10 @@
       v-model="menuModalVisible"
       :title="modalTitle"
       width="500px"
+      align-center
+      append-to-body
       :close-on-click-modal="false"
-      top="30px"
+      class="menu-manage-dialog"
     >
       <el-form ref="formAdd" :model="formAdd" label-width="100px" :rules="formValidate">
         <div v-if="showParent">
@@ -555,5 +557,12 @@ export default {
 .tree-node-label {
   display: inline-flex;
   align-items: center;
+}
+</style>
+
+<style lang="scss">
+.menu-manage-dialog .el-dialog__body {
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
 }
 </style>

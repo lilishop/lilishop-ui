@@ -46,6 +46,13 @@
     clear: both;
 }
 .width_1200{width: 1200px;}
+.width_1200_auto {
+  width: 1200px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
 .width_800{width: 800px;}
 .width_400{width: 400px;}
 .width_300{width: 300px;}

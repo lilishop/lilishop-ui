@@ -59,13 +59,12 @@
               </el-form-item>
 
               <el-form-item label="店铺logo" class="storeLogo">
-                <el-avatar
-                  v-if="shopForm.storeLogo"
-                  shape="square"
-                  :size="100"
-                  :src="shopForm.storeLogo"
-                />
-                <div>
+                <div class="store-logo-block">
+                  <el-avatar
+                    shape="square"
+                    :size="100"
+                    :src="shopForm.storeLogo"
+                  />
                   <el-button @click="handleCLickImg('storeLogo')" type="primary"
                     >选择图片</el-button
                   >
@@ -187,13 +186,12 @@
               </el-form-item>
 
               <el-form-item label="营业执照电子版" prop="licencePhoto">
-                <el-avatar
-                  v-if="shopForm.licencePhoto"
-                  shape="square"
-                  :size="100"
-                  :src="shopForm.licencePhoto"
-                />
-                <div>
+                <div class="store-logo-block">
+                  <el-avatar
+                    shape="square"
+                    :size="100"
+                    :src="shopForm.licencePhoto"
+                  />
                   <el-button @click="handleCLickImg('licencePhoto')" type="primary"
                     >选择图片</el-button
                   >
@@ -208,21 +206,25 @@
                 <el-input v-model="shopForm.legalId" clearable style="width: 200px" />
               </el-form-item>
               <el-form-item label="法人身份证照片" prop="legalPhoto">
-                <el-avatar
-                  class="legal-photo"
-                  shape="square"
-                  :size="100"
-                  @click="handleCLickImg('legalPhoto', 0)"
-                  :src="shopForm.legalPhoto[0]"
-                />
-                <el-avatar
-                  class="ml_10 legal-photo"
-                  shape="square"
-                  :size="100"
-                  @click="handleCLickImg('legalPhoto', 1)"
-                  :src="shopForm.legalPhoto[1]"
-                />
-                <span>点击图片上传身份证正反面，要求身份证清晰，四角无缺漏</span>
+                <div class="legal-photo-block">
+                  <div class="legal-photo-list">
+                    <el-avatar
+                      class="legal-photo"
+                      shape="square"
+                      :size="100"
+                      @click="handleCLickImg('legalPhoto', 0)"
+                      :src="shopForm.legalPhoto[0]"
+                    />
+                    <el-avatar
+                      class="legal-photo"
+                      shape="square"
+                      :size="100"
+                      @click="handleCLickImg('legalPhoto', 1)"
+                      :src="shopForm.legalPhoto[1]"
+                    />
+                  </div>
+                  <div class="form-tip">点击图片上传身份证正反面，要求身份证清晰，四角无缺漏</div>
+                </div>
               </el-form-item>
 
               <el-divider content-position="left">结算银行信息</el-divider>
@@ -866,5 +868,27 @@ export default {
   width: 100px;
   height: 100px;
   cursor: pointer;
+}
+.store-logo-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.legal-photo-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.legal-photo-list {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.form-tip {
+  color: #999;
+  font-size: 12px;
+  line-height: 1.5;
 }
 </style>

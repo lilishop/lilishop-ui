@@ -44,10 +44,11 @@ export default {
   props: ["res", "type"],
   methods: {
     submit(name) {
-      const that = this;
-      if (handleSubmit(that, name)) {
-        this.setupSetting();
-      }
+      handleSubmit(this, name)
+        .then(() => {
+          this.setupSetting();
+        })
+        .catch(() => {});
     },
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {

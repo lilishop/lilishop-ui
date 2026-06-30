@@ -1,5 +1,5 @@
 <template>
-  <div class="seckill" v-if="goodsList.length">
+  <div class="seckill" v-if="goodsList && goodsList.length">
     <div class="aside hover-pointer" @click="goToSeckill">
       <div class="title">{{ actName }}</div>
       <div class="hour">
@@ -54,7 +54,7 @@ export default {
       clearInterval(this.interval);
       this.interval = null;
       this.countDown(val);
-      this.goodsList = this.list[val].seckillGoodsList;
+      this.goodsList = this.list[val]?.seckillGoodsList || [];
     },
     diffSeconds(val) {
       const hours = Math.floor(val / 3600);
@@ -106,9 +106,15 @@ export default {
       }, 1000);
     },
     getListByDay() {
-      this.list = this.data.options.list;
-      this.goodsList = this.list[0].seckillGoodsList;
-      this.countDown(this.currIndex);
+      this.list = this.data?.options?.list || [];
+      if (!this.list.length) {
+        this.goodsList = [];
+        return;
+      }
+      this.goodsList = this.list[0]?.seckillGoodsList || [];
+      if (this.goodsList.length) {
+        this.countDown(this.currIndex);
+      }
     },
   },
 };

@@ -83,15 +83,27 @@ methodItem h4 {
     border-radius: 6px;
   }
 }
+.choose-member-item {
+  width: 100%;
+
+  .el-form-item__content {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+}
+
 .choose-member {
   display: flex;
+  width: 100%;
+  min-width: 580px;
   height: 400px;
   border: 1px solid #eee;
   margin-bottom: 20px;
 }
 
 .source-member {
-  width: 50%;
+  flex: 3;
+  min-width: 0;
   border-right: 1px solid #eee;
   padding: 10px;
 }
@@ -116,7 +128,8 @@ methodItem h4 {
   white-space: nowrap;
 }
 .traget-member {
-  width: 50%;
+  flex: 2;
+  min-width: 0;
   padding: 10px;
 }
 .scroll-card {

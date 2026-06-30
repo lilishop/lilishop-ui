@@ -48,13 +48,13 @@
     </div>
 
 
-    <div v-if="storeMsg.pageShow&&storeMsg.pageShow==='1'">
+    <div v-if="showFloorView">
       <!-- 楼层装修部分 -->
       <model-form ref="modelForm" :data="modelForm"></model-form>
     </div>
 
 
-    <div v-else>
+    <div v-else class="store-goods-section">
       <div class="promotion-decorate">{{ cateName }}</div>
       <div class="goods-list">
         <empty v-if="goodsList.length === 0"/>
@@ -108,6 +108,7 @@ import ModelForm from "@/components/indexDecorate/ModelForm";
 import HoverSearch from "@/components/header/hoverSearch";
 import storage from "@/plugins/storage";
 import {getFloorStoreData} from "@/api/index.js";
+import { seckillByDay } from "@/api/promotion";
 import imTalk from '@/components/mixes/talkIm'
 
 export default {
@@ -125,6 +126,7 @@ export default {
       carouselOpacity: false, // 不同轮播分类样式,
       enablePageData: false, //是否显示楼层装修内容
       basePageData: false, //基础店铺信息
+      showFloorView: false, // 是否展示楼层装修（有有效装修数据时为 true）
       storeMsg: {}, // 店铺信息
       cateList: [], // 店铺分裂
       goodsList: [], // 商品列表
@@ -145,35 +147,61 @@ export default {
     this.getStoreMsg();
   },
   methods: {
+    isFloorEnabled() {
+      const pageShow = this.storeMsg.pageShow;
+      return pageShow === "1" || pageShow === 1 || pageShow === "OPEN" || pageShow === true;
+    },
+    loadStoreGoodsView() {
+      this.showFloorView = false;
+      this.getGoodsList();
+      this.getCateList();
+    },
     getIndexData() {
-      // 获取首页装修数据
-      getFloorStoreData({clientType: "PC", num: this.$route.query.id, pageType: 'STORE'}).then(
-        (res) => {
-          if (res.success) {
-            let dataJson = JSON.parse(res.result.pageData);
-            // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
-            // 轮播图根据不同轮播，样式不同
-            for (const element of dataJson.list) {
-              let type = element.type;
-              if (type === "carousel2") {
-                this.carouselLarge = true;
-              } else if (type === "carousel1") {
-                this.carouselLarge = true;
-                this.carouselOpacity = true;
-              }
-
-              // else if (type === "seckill") {
-              //   let seckill = this.getListByDay();
-              //   dataJson.list[i].options.list = seckill;
-              // }
+      getFloorStoreData({
+        clientType: "PC",
+        num: this.$route.query.id,
+        pageType: "STORE",
+      })
+        .then(async (res) => {
+          if (res.success && res.result?.pageData) {
+            try {
+              await this.parsePageData(res.result.pageData);
+              this.showFloorView = true;
+            } catch {
+              this.loadStoreGoodsView();
             }
-            this.modelForm = dataJson;
-            storage.setItem("navList", dataJson.list[1]);
-            this.showNav = true;
-            this.topAdvert = dataJson.list[0];
+          } else {
+            this.loadStoreGoodsView();
           }
+        })
+        .catch(() => {
+          this.loadStoreGoodsView();
+        });
+    },
+    async parsePageData(pageData) {
+      const dataJson = JSON.parse(pageData);
+      for (let i = 0; i < dataJson.list.length; i++) {
+        const type = dataJson.list[i].type;
+        if (type === "carousel2") {
+          this.carouselLarge = true;
+        } else if (type === "carousel1") {
+          this.carouselLarge = true;
+          this.carouselOpacity = true;
+        } else if (type === "seckill") {
+          dataJson.list[i].options.list = await this.getListByDay();
         }
-      );
+      }
+      this.modelForm = dataJson;
+      storage.setItem("navList", dataJson.list[1]);
+      this.showNav = true;
+      this.topAdvert = dataJson.list[0];
+    },
+    async getListByDay() {
+      const res = await seckillByDay();
+      if (res.success && res.result?.length) {
+        return res.result;
+      }
+      return [];
     },
 
 
@@ -208,15 +236,11 @@ export default {
         if (res.success) {
 
           this.storeMsg = res.result;
-          console.log(this.storeMsg)
 
-          //判定如果开启楼层展示，则获取页面信息 否则读取商品信息
-          if (this.storeMsg.pageShow && this.storeMsg.pageShow === '1') {
-
+          if (this.isFloorEnabled()) {
             this.getIndexData();
           } else {
-            this.getGoodsList();
-            this.getCateList();
+            this.loadStoreGoodsView();
           }
           let that = this;
           window.onscroll = function () {
@@ -378,5 +402,33 @@ export default {
 .promotion-decorate::before,
 .promotion-decorate::after {
   background-image: url("/src/assets/images/sprite@2x.png");
+}
+
+.store-goods-section {
+  width: 1200px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 10px;
+  box-sizing: border-box;
+
+  .goods-list {
+    width: 100%;
+    margin: 0;
+    column-gap: 10px;
+  }
+
+  .goods-show-info {
+    width: calc(20% - 8px);
+    min-width: 0;
+  }
+
+  .seckill-price {
+    font-size: 16px;
+  }
+
+  .goods-show-detail {
+    height: 32px;
+    line-height: 16px;
+  }
 }
 </style>

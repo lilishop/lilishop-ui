@@ -204,7 +204,7 @@
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
     <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
-      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" ref="ossManage" />
+      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" :max-select="1" ref="ossManage" />
     </el-dialog>
   </div>
 </template>

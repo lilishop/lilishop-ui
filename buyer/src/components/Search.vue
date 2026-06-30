@@ -1,47 +1,60 @@
 <template>
-  <div class="navbar" :class="{'small-search-box':useClass == 'fixed-show'}">
-    <div class="container width_1200_auto flex flex-a-c">
-      <img
-        :src="$store.state.logoImg"
-        v-if="showLogo"
-        class="logo-img"
-        alt=""
-        @click="$router.push('/')"
-      />
-      <div :class="{'small-search-box':useClass == 'fixed-show'}" class="search-box">
+  <div class="navbar" :class="{'small-search-box': useClass == 'fixed-show'}">
+    <template v-if="useClass == 'fixed-show'">
+      <div class="search search-embedded">
         <el-input
           v-model="searchData"
           size="large"
-          class="search "
+          class="search-input"
           placeholder="输入你想查找的商品"
           @keyup.enter="search"
-        >
-
-          <template #append>
-            <div class="search-icon" @click="search">
+        />
+        <div class="search-btn" @click="search">
+          <el-icon :size="21"><SearchIcon /></el-icon>
+        </div>
+      </div>
+    </template>
+    <template v-else>
+      <div class="container width_1200_auto flex flex-a-c">
+        <img
+          :src="$store.state.logoImg"
+          v-if="showLogo"
+          class="logo-img"
+          alt=""
+          @click="$router.push('/')"
+        />
+        <div class="search-box">
+          <div class="search">
+            <el-input
+              v-model="searchData"
+              size="large"
+              class="search-input"
+              placeholder="输入你想查找的商品"
+              @keyup.enter="search"
+            />
+            <div class="search-btn" @click="search">
               <el-icon :size="21"><SearchIcon /></el-icon>
             </div>
-          </template>
-        </el-input>
-        <template v-if="showTag">
-          <div class="only-store" v-if="storeId" @click="research()">
-            切换为{{!onlyStore ? '店铺内' : '平台'}}搜索
-
           </div>
-          <div v-if="promotionTags.length === 0"></div>
-          <div v-else class="history-list flex">
-            <div
-              v-for="(item, index) in promotionTags"
-              :key="index"
-              class="mr_10"
-            >
-              <span class="history-item" @click="selectTags(item)">{{ item }}</span>
+          <template v-if="showTag">
+            <div class="only-store" v-if="storeId" @click="research()">
+              切换为{{!onlyStore ? '店铺内' : '平台'}}搜索
+
             </div>
-          </div>
-        </template>
+            <div v-if="promotionTags.length === 0"></div>
+            <div v-else class="history-list flex">
+              <div
+                v-for="(item, index) in promotionTags"
+                :key="index"
+                class="mr_10"
+              >
+                <span class="history-item" @click="selectTags(item)">{{ item }}</span>
+              </div>
+            </div>
+          </template>
+        </div>
       </div>
-    </div>
-
+    </template>
   </div>
 </template>
 
@@ -154,14 +167,19 @@ export default {
   height: 113px;
   background: #fff;
 }
-.search-icon{
-  width: 100%;
-  height: 100%;
-}
-.small-search-box{
-  height: 60px;
 
-  margin: 0 !important;
+.navbar.small-search-box {
+  height: 60px;
+  width: 100%;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  background: transparent;
+}
+
+.search-embedded {
+  width: 100%;
+  margin: 0;
 }
 
 .container {
@@ -171,47 +189,47 @@ export default {
 }
 
 .search {
+  $btn-gap: 4px;
+  $btn-width: 60px;
+  $input-height: 37.8px;
+
+  position: relative;
   width: 778.4px;
+  height: $input-height;
   margin: 10px 0px 5px 0;
 
-  border-radius: 18.9px;
+  .search-input {
+    width: 100%;
 
-
-  :deep(.el-input--large .el-input__wrapper) {
-    border: 1.4px solid $theme_color;
-    box-sizing: border-box;
-    border-radius: 19.6px;
-    position: relative;
-    padding-left: 26px;
-    font-size: 14px;
-    font-weight: normal;
-    height: 37.8px;
-    color: #999;
-    box-shadow: none;
+    :deep(.el-input__wrapper) {
+      border: 1.4px solid $theme_color;
+      box-sizing: border-box;
+      border-radius: 19.6px;
+      padding-left: 26px;
+      padding-right: calc(#{$btn-gap * 2} + #{$btn-width});
+      font-size: 14px;
+      font-weight: normal;
+      height: $input-height;
+      color: #999;
+      box-shadow: none;
+    }
   }
 
-  :deep(.el-input-group__append) {
-    border-radius: 19.6px !important;
+  .search-btn {
+    position: absolute;
+    right: $btn-gap;
+    top: $btn-gap;
+    bottom: $btn-gap;
+    width: $btn-width;
+    border-radius: calc((#{$input-height} - #{$btn-gap * 2}) / 2);
     cursor: pointer;
     box-sizing: border-box;
-    border: 1.4px solid $theme_color;
-    width: 67.2px;
-    height: 37.8px;
-    position: absolute;
-    right: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    top: 0;
-    z-index: 99;
+    z-index: 1;
     background-color: $theme_color;
     color: #ffffff;
-
-    button {
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 1;
-    }
   }
 }
 .search-box{

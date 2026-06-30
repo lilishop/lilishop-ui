@@ -208,10 +208,27 @@ export default {
       getPintuanGoodsList(params).then((res) => {
         this.loading = false;
         if (res.success && res.result) {
-          this.goodsData = res.result.records || [];
+          const serverRecords = res.result.records || [];
+          this.goodsData = this.readonly
+            ? serverRecords
+            : this.mergeGoodsData(serverRecords);
           this.total = res.result.total || 0;
         }
       });
+    },
+    mergeGoodsData(serverRecords) {
+      const localMap = new Map(this.goodsData.map((item) => [item.skuId, item]));
+      const serverSkuIds = new Set(serverRecords.map((item) => item.skuId));
+
+      const merged = serverRecords.map((serverItem) => {
+        const local = localMap.get(serverItem.skuId);
+        return local ? { ...serverItem, price: local.price } : serverItem;
+      });
+
+      const unsavedItems = this.goodsData.filter(
+        (item) => item.skuId && !serverSkuIds.has(item.skuId)
+      );
+      return [...merged, ...unsavedItems];
     },
     openSkuList() {
       const data = JSON.parse(JSON.stringify(this.goodsData));

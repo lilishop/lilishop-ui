@@ -204,7 +204,7 @@
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
     <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
-      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" ref="ossManage" />
+      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" :max-select="1" ref="ossManage" />
     </el-dialog>
   </div>
 </template>
@@ -262,6 +262,7 @@ export default {
     callbackSelected(item) {
       // 选择图片回调
       this.picModelFlag = false;
+      if (!item?.url) return;
       this.selected.img = item.url;
     },
     // 删除图片
@@ -367,18 +368,24 @@ export default {
     }
   }
   .shop-msg {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+
     div {
       width: 100%;
-      margin: 10px 27px;
+      margin: 10px 0;
+      text-align: center;
+
       span {
+        display: block;
         cursor: pointer;
         text-align: center;
         font-weight: bold;
-        margin-left: 5px;
+        margin-left: 0;
       }
       span:nth-child(1) {
         color: $theme_color;
-        margin-left: 0;
       }
       span:nth-child(2) {
         font-weight: normal;
@@ -387,13 +394,19 @@ export default {
         color: $theme_color;
       }
     }
+
     ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+
       li {
         cursor: pointer;
         margin: 5px 0;
         color: #999395;
-        width: 150px;
+        width: auto;
         font-size: 12px;
+        text-align: center;
         &:hover {
           color: $theme_color;
         }

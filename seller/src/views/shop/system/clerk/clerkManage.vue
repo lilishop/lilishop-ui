@@ -118,7 +118,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="所属部门">
-          <department-tree-choose @change="handleEditSelectDepTree" ref="depTree"></department-tree-choose>
+          <department-tree-choose @on-change="handleEditSelectDepTree" ref="editDepTree"></department-tree-choose>
         </el-form-item>
 
       </el-form>
@@ -166,7 +166,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="所属部门" v-if="oldMember || newMember">
-          <department-tree-choose @change="handleSelectDepTree" ref="depTree"></department-tree-choose>
+          <department-tree-choose @on-change="handleSelectDepTree" ref="addDepTree"></department-tree-choose>
         </el-form-item>
       </el-form>
 
@@ -498,35 +498,36 @@ export default {
       this.userModalVisible = true;
       this.$nextTick(() => {
         this.$refs.addForm?.resetFields();
-        this.$refs.depTree?.clearSelect?.();
+        this.$refs.addDepTree?.clearSelect?.();
       });
     },
     // 编辑用户
     edit(v) {
-
       getClerk(v.id).then(res => {
-
-        this.mobile = res.result.mobile
-        this.clerkName = res.result.clerkName
-        this.editForm.isSuper = 0
-        this.editForm.id = res.result.id
-        if(res.result.isSuper){
-          this.editForm.isSuper = 1
+        if (!res.success || !res.result) {
+          return;
         }
-        this.editForm.departmentId = res.result.departmentId
-        this.$refs.depTree.setData(res.result.departmentId, res.result.departmentTitle);
-        let selectRolesId = [];
+        this.mobile = res.result.mobile;
+        this.clerkName = res.result.clerkName;
+        this.editForm.isSuper = res.result.isSuper ? 1 : 0;
+        this.editForm.id = res.result.id;
+        this.editForm.departmentId = res.result.departmentId;
+        const selectRolesId = [];
         if (res.result.roles) {
           res.result.roles.forEach(function (e) {
             selectRolesId.push(e.id);
           });
         }
         this.editForm.roles = selectRolesId;
-
         this.modalTitle = "修改店员";
         this.userEditModalVisible = true;
-      })
-
+        this.$nextTick(() => {
+          this.$refs.editDepTree?.setData(
+            res.result.departmentId,
+            res.result.departmentTitle
+          );
+        });
+      });
     },
     // 启用
     enable(v) {

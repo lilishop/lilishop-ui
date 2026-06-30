@@ -52,11 +52,9 @@
     <el-dialog
       v-model="showModal"
       title="快捷导航"
-      
       width="800"
-      
       :close-on-click-modal="false"
-     append-to-body destroy-on-close>
+     append-to-body destroy-on-close @close="handleCancelModal">
       <div class="modal-tab-bar">
         <el-button type="primary" size="small" @click="handleAdd">添加轮播</el-button>
         &nbsp;
@@ -72,7 +70,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item, index) in data.options.list" :key="index">
+            <tr v-for="(item, index) in draftList" :key="index">
               <td>
                 <img
                   style="cursor: pointer"
@@ -113,6 +111,10 @@
           </tbody>
         </table>
       </div>
+      <template #footer>
+        <el-button @click="handleCancelModal">取消</el-button>
+        <el-button type="primary" @click="handleConfirmModal">确定</el-button>
+      </template>
     </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
@@ -122,6 +124,7 @@
         @callback="callbackSelected"
         :is-component="true"
         :initialize="picModelFlag"
+        :max-select="1"
         ref="ossManage"
       />
     </el-dialog>
@@ -140,6 +143,7 @@ export default {
     return {
       showModal: false, // modal显隐
       selected: null, // 已选数据
+      draftList: [], // 弹窗编辑草稿
       picModelFlag: false, // 选择图片modal
       userInfo: {},
       articleList: [
@@ -152,14 +156,29 @@ export default {
   },
 
   methods: {
+    cloneList(list) {
+      return JSON.parse(JSON.stringify(list || []));
+    },
     handleSelectModel() {
-      // 编辑模块
+      this.draftList = this.cloneList(this.data.options.list);
       this.showModal = true;
+    },
+    handleCancelModal() {
+      this.draftList = [];
+      this.showModal = false;
+    },
+    handleConfirmModal() {
+      this.data.options.list.splice(
+        0,
+        this.data.options.list.length,
+        ...this.cloneList(this.draftList)
+      );
+      this.draftList = [];
+      this.showModal = false;
     },
     // 添加轮播图
     handleAdd() {
-      this.data.options.list.push({ img: "", url: "", type: "" });
-      this.$forceUpdate();
+      this.draftList.push({ img: "", url: "", type: "" });
     },
     handleSelectLink(item) {
       // 选择链接
@@ -169,11 +188,11 @@ export default {
     callbackSelected(item) {
       // 选择图片回调
       this.picModelFlag = false;
+      if (!item?.url) return;
       this.selected.img = item.url;
     },
     handleDel(index) {
-      // 删除图片
-      this.data.options.list.splice(index, 1);
+      this.draftList.splice(index, 1);
     },
     selectedLink(val) {
       // 选择链接回调
@@ -268,18 +287,24 @@ export default {
     }
   }
   .shop-msg {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+
     div {
       width: 100%;
-      margin: 10px 27px;
+      margin: 10px 0;
+      text-align: center;
+
       span {
+        display: block;
         cursor: pointer;
         text-align: center;
         font-weight: bold;
-        margin-left: 5px;
+        margin-left: 0;
       }
       span:nth-child(1) {
         color: $theme_color;
-        margin-left: 0;
       }
       span:nth-child(2) {
         font-weight: normal;
@@ -290,11 +315,15 @@ export default {
     }
 
     ul {
-      margin: 0 30px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+
       li {
         cursor: pointer;
         margin: 5px 0;
         color: #999395;
+        text-align: center;
         &:hover {
           color: $theme_color;
         }

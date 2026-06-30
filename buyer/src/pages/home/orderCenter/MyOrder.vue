@@ -53,7 +53,7 @@
                   <span style="margin-left: 10px;color: #ff9900;">{{refundPriceList(goods.isRefund)}}</span>
                 </div>
                 <el-button v-if="goods.commentStatus == 'UNFINISHED'" @click="comment(order.sn, goodsIndex)" size="small" type="success" class="fontsize_12" style="position:relative;top:-22px;left:190px;margin-right:10px">评价</el-button>
-                <el-button v-if="goods.complainStatus == 'NO_APPLY'" @click="complain(order.sn, goodsIndex)" type="warning" class="fontsize_12" size="small" style="position:relative;top:-22px;left:190px">投诉</el-button>
+                <el-button v-if="goods.complainStatus == 'NO_APPLY'" @click="complain(order.sn, goodsIndex)" type="danger" class="fontsize_12" size="small" style="position:relative;top:-22px;left:190px">投诉</el-button>
               </div>
             </div>
           </div>
@@ -65,7 +65,7 @@
             <el-button @click="orderDetail(order.sn)" type="warning" size="small">订单详情</el-button>
             <el-button @click="handleCancelOrder(order.sn)" type="danger" v-if="order.allowOperationVO.cancel" size="small">取消订单</el-button>
             <el-button @click="goPay(order.sn)" size="small" type="success" v-if="order.allowOperationVO.pay">去支付</el-button>
-            <el-button @click="received(order.sn)" size="small" class="confirm-receipt-btn" v-if="order.allowOperationVO.rog">确认收货</el-button>
+            <el-button @click="received(order.sn)" size="small" type="primary" v-if="order.allowOperationVO.rog">确认收货</el-button>
             <!-- 售后 -->
             <el-button v-if="order.groupAfterSaleStatus && (order.groupAfterSaleStatus.includes('NOT_APPLIED')|| order.groupAfterSaleStatus.includes('PART_AFTER_SALE'))"
                     @click="applyAfterSale(order.orderItems)" size="small">申请售后</el-button>
@@ -390,19 +390,6 @@ export default {
       .el-button {
         margin: 0;
         min-width: 88px;
-      }
-
-      :deep(.confirm-receipt-btn) {
-        background-color: #ff9900 !important;
-        border-color: #ff9900 !important;
-        color: #fff !important;
-
-        &:hover,
-        &:focus {
-          background-color: #e68a00 !important;
-          border-color: #e68a00 !important;
-          color: #fff !important;
-        }
       }
     }
   }

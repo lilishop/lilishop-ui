@@ -35,6 +35,15 @@
   }
 }
 
+.oss-select-footer {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #ededed;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .tab-empty {
   padding: 48px 0;
   color: #999;
@@ -211,6 +220,10 @@
                     size="small"
                     @current-change="pageChange"
                   />
+                </div>
+                <div v-if="isComponent && selectImage" class="oss-select-footer">
+                  <el-button @click="handleSelectCancel">取消</el-button>
+                  <el-button type="primary" @click="handleSelectConfirm">确定</el-button>
                 </div>
               </div>
             </el-col>
@@ -489,6 +502,10 @@ export default {
     initialize: {
       type: Boolean,
       default: false,
+    },
+    maxSelect: {
+      type: Number,
+      default: 0,
     },
   },
   data() {
@@ -956,8 +973,8 @@ export default {
       if (val) this.selectImage = val
     },
     selectedOss(val) {
-      if (val && val.length) {
-        this.$emit("callback", {url: val[val.length - 1].split(',')[1]});
+      if (val && val.length && !(this.isComponent && this.selectImage)) {
+        this.$emit("callback", { url: val[val.length - 1].split(",")[1] });
       }
     },
     // 初始化监听 是否清空所选图片
@@ -1064,6 +1081,11 @@ export default {
     },
     // 复选框值改变时触发
     selectOssChange(e) {
+      if (this.maxSelect === 1 && e.length > 1) {
+        const last = e[e.length - 1];
+        this.selectedOss = [last];
+        e = [last];
+      }
       if (e) {
         this.selectList = e.map(item => {
           return {id: item.split(',')[0]}
@@ -1292,6 +1314,18 @@ export default {
      */
     selectedParams(val) {
       this.$emit("callback", val);
+    },
+    handleSelectConfirm() {
+      if (!this.selectedOss.length) {
+        this.$Message.warning("请选择图片");
+        return;
+      }
+      const last = this.selectedOss[this.selectedOss.length - 1];
+      this.$emit("callback", { url: last.split(",")[1] });
+    },
+    handleSelectCancel() {
+      this.selectedOss = [];
+      this.$emit("callback", { url: "" });
     },
     // 初始化数据
     init() {

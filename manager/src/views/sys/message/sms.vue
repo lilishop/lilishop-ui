@@ -184,7 +184,7 @@
     <el-dialog
       v-model="sendSmsModal"
       :title="sendSmsModalTitle"
-      width="900px"
+      width="1100px"
       :close-on-click-modal="false"
       destroy-on-close
     >
@@ -234,7 +234,7 @@
                 <el-radio value="2">自定义选择</el-radio>
               </el-radio-group>
             </el-form-item>
-            <el-form-item v-if="customSms">
+            <el-form-item v-if="customSms" label-width="0" class="choose-member-item">
               <div class="choose-member">
                 <div class="source-member">
                   <el-input

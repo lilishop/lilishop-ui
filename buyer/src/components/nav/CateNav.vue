@@ -241,8 +241,10 @@ export default {
 }
 .fixed-show{
   margin-top: 0 !important;
+  width: 100%;
   >.nav-con{
   >.all-categories{
+    width: 100%;
     align-items: center !important;
     height: 60px;
     display: inherit;

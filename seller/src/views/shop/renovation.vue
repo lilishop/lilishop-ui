@@ -237,6 +237,7 @@ export default {
 .show-content {
   flex: 1;
   min-width: 0;
+  overflow-x: auto;
 }
 .ghost {
   background: #fff;

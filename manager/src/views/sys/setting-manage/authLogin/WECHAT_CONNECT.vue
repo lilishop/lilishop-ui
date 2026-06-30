@@ -45,6 +45,13 @@
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
 
+const DEFAULT_WECHAT_CONNECT_ITEMS = [
+  { clientType: "PC", appId: "", appSecret: "" },
+  { clientType: "H5", appId: "", appSecret: "" },
+  { clientType: "APP", appId: "", appSecret: "" },
+  { clientType: "WECHAT_MP", appId: "", appSecret: "" },
+];
+
 export default {
   data() {
     return {
@@ -64,10 +71,11 @@ export default {
   },
   methods: {
     submit(name) {
-      const that = this;
-      if (handleSubmit(that, name)) {
-        this.setupSetting();
-      }
+      handleSubmit(this, name)
+        .then(() => {
+          this.setupSetting();
+        })
+        .catch(() => {});
     },
     setupSetting() {
       setSetting(this.type, {
@@ -82,17 +90,15 @@ export default {
         }
       });
     },
-    async init() {
-      this.formValidate = JSON.parse(this.res).wechatConnectSettingItems;
-      Object.keys(this.formValidate).forEach((item) => {
-        this.ruleValidate[item] = [
-          {
-            required: true,
-            message: "请填写必填项",
-            trigger: "blur",
-          },
-        ];
-      });
+    init() {
+      const setting = JSON.parse(this.res || "{}");
+      const items = setting.wechatConnectSettingItems;
+      this.formValidate =
+        Array.isArray(items) && items.length ? items : DEFAULT_WECHAT_CONNECT_ITEMS;
+      this.ruleValidate = {
+        appId: [{ required: true, message: "请填写必填项", trigger: "blur" }],
+        appSecret: [{ required: true, message: "请填写必填项", trigger: "blur" }],
+      };
     },
   },
 };

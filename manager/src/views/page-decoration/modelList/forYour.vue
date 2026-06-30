@@ -55,23 +55,23 @@
       :close-on-click-modal="false"
      append-to-body destroy-on-close>
       <div>
-        <div class="modal-tab-bar">
+        <div class="modal-tab-bar" v-if="draftOptions">
           <div>
             主标题:
-            <el-input style="width: 200px" v-model="data.options.title" />
+            <el-input style="width: 200px" v-model="draftOptions.title" />
           </div>
           <el-divider content-position="left">左侧商品部分</el-divider>
           <div class="flex">
             <div>图片 :</div>
             <div>
-              <img class="image" :src="data.options.data.image.src" alt="" />
+              <img class="image" :src="draftOptions.data.image.src" alt="" />
               <div>
-                <div>推荐尺寸：{{ data.options.data.image.size }}</div>
+                <div>推荐尺寸：{{ draftOptions.data.image.size }}</div>
                 <div class="link-src">
                   链接地址：
                   <el-input
                     style="width: 200px"
-                    v-model="data.options.data.image.url"
+                    v-model="draftOptions.data.image.url"
                     disabled
                   />
                 </div>
@@ -95,7 +95,7 @@
           <el-divider content-position="left">中间商品部分</el-divider>
           <div class="flex column-list">
             <div
-              v-for="(item, index) in data.options.data.list"
+              v-for="(item, index) in draftOptions.data.list"
               :key="index"
               class="draggable"
             >
@@ -129,12 +129,12 @@
             <div>右侧标题 :</div>
             <el-input
               style="width: 200px"
-              v-model="data.options.data.hot.title"
+              v-model="draftOptions.data.hot.title"
              />
           </div>
           <div class="flex column-list">
             <div
-              v-for="(item, index) in data.options.data.hot.list"
+              v-for="(item, index) in draftOptions.data.hot.list"
               :key="index"
               class="draggable"
             >
@@ -154,6 +154,10 @@
           </div>
         </div>
       </div>
+      <template #footer>
+        <el-button @click="handleCancelModal">取消</el-button>
+        <el-button type="primary" @click="handleConfirmModal">确定</el-button>
+      </template>
     </el-dialog>
 
     <!-- 选择商品。链接 -->
@@ -169,6 +173,7 @@
         @callback="callbackSelected"
         :is-component="true"
         :initialize="picModelFlag"
+        :max-select="1"
         ref="ossManage"
       />
     </el-dialog>
@@ -183,13 +188,11 @@ export default {
   data() {
     return {
       showModal: false,
-
+      draftOptions: null,
       picModelFlag: false,
       selectedData: "", //选中的数据
       goodsIndex: 0, // 商品索引
-      align: "",
       defaultCallbackImageType: "",
-      current: "",
     };
   },
   props: {
@@ -204,6 +207,9 @@ export default {
   mounted() {
    },
   methods: {
+    cloneOptions(options) {
+      return JSON.parse(JSON.stringify(options || {}));
+    },
     handleSelectImg(type, index) {
       this.defaultCallbackImageType = type;
       this.goodsIndex = index;
@@ -232,44 +238,50 @@ export default {
     // 回显图片
     callbackSelected(val) {
       this.picModelFlag = false;
+      if (!val?.url || !this.draftOptions) return;
       if (this.defaultCallbackImageType == "image") {
-        this.data.options.data.image.src = val.url;
+        this.draftOptions.data.image.src = val.url;
       } else {
-        this.data.options.data[this.defaultCallbackImageType][
+        this.draftOptions.data[this.defaultCallbackImageType][
           this.goodsIndex
         ].img = val.url;
       }
     },
     // 选择商品回调
     selectedGoodsData(val) {
-      this.data.options.data.hot.list[this.goodsIndex].img = val[0].thumbnail;
-      this.data.options.data.hot.list[this.goodsIndex].title = val[0].goodsName;
-      this.data.options.data.hot.list[this.goodsIndex].price = val[0].price;
-      this.data.options.data.hot.list[this.goodsIndex].url =
-        this.$filters.formatLinkType(val[0]);
-
-      console.log(val, this.selectedData, this.goodsIndex);
+      if (!val?.length || !this.draftOptions) return;
+      const item = this.draftOptions.data.hot.list[this.goodsIndex];
+      item.img = val[0].thumbnail;
+      item.title = val[0].goodsName;
+      item.price = val[0].price;
+      item.url = this.$filters.formatLinkType(val[0]);
     },
     // 选择链接回调
     selectedLink(val) {
-      console.log(val,this.selectedData)
+      if (!this.draftOptions) return;
       if (this.selectedData == "image") {
-        this.data.options.data.image.url =
-          this.$filters.formatLinkType(val);
+        this.draftOptions.data.image.url = this.$filters.formatLinkType(val);
       } else {
-        console.log(this.data.options.data.list,this.goodsIndex)
-        this.data.options.data.list[
-          this.goodsIndex
-        ].url =  this.$filters.formatLinkType(val);
+        this.draftOptions.data.list[this.goodsIndex].url =
+          this.$filters.formatLinkType(val);
       }
     },
-    /*
-     * 点击不同模块进行编辑
-     * 判断也很简单，就是第一个第二个模块进行判断
-     *
-     * */
     handleSelectModel() {
+      this.draftOptions = this.cloneOptions(this.data.options);
       this.showModal = true;
+    },
+    handleCancelModal() {
+      this.draftOptions = null;
+      this.showModal = false;
+    },
+    handleConfirmModal() {
+      if (this.draftOptions) {
+        const saved = this.cloneOptions(this.draftOptions);
+        this.data.options.title = saved.title;
+        this.data.options.data = saved.data;
+      }
+      this.draftOptions = null;
+      this.showModal = false;
     },
   },
 };

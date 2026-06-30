@@ -1,17 +1,17 @@
 :root {
-  --el-color-primary: #ff5c58;
-  --el-color-success: #68cabe;
-  --el-color-warning: #fa6419;
-  --el-color-danger: #ff3c2a;
+  // --el-color-primary: #ff5c58;
+  // --el-color-success: #68cabe;
+  // --el-color-warning: #fa6419;
+  // --el-color-danger: #ff3c2a;
   --el-font-size-base: 14px;
 }
 
-.el-button--primary {
-  --el-button-bg-color: #ff5c58;
-  --el-button-border-color: #ff5c58;
-  --el-button-hover-bg-color: #ff7875;
-  --el-button-hover-border-color: #ff7875;
-}
+// .el-button--primary {
+//   --el-button-bg-color: #ff5c58;
+//   --el-button-border-color: #ff5c58;
+//   --el-button-hover-bg-color: #ff7875;
+//   --el-button-hover-border-color: #ff7875;
+// }
 
 .el-table--border {
   .el-table__cell {
@@ -32,4 +32,18 @@
 .op-split {
   margin: 0 8px;
   color: #dcdfe6;
+}
+
+/* 与「我的订单」确认收货按钮一致的橙色操作按钮 */
+.confirm-receipt-btn {
+  background-color: #ff9900 !important;
+  border-color: #ff9900 !important;
+  color: #fff !important;
+
+  &:hover,
+  &:focus {
+    background-color: #e68a00 !important;
+    border-color: #e68a00 !important;
+    color: #fff !important;
+  }
 }

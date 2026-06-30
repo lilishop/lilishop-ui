@@ -63,10 +63,11 @@ export default {
   },
   methods: {
     submit(name) {
-      const that = this;
-      if (handleSubmit(that, name)) {
-        this.setupSetting();
-      }
+      handleSubmit(this, name)
+        .then(() => {
+          this.setupSetting();
+        })
+        .catch(() => {});
     },
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
@@ -115,12 +116,12 @@ export default {
 }
 
 .el-input {
-  width: 100px;
+  width: 180px;
   margin-right: 10px;
 }
 
 :deep(.el-input){
-  width: 100px !important;
+  width: 180px !important;
 }
 
 .desc {

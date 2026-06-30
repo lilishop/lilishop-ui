@@ -372,7 +372,7 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="partDeliveryModal" title="分包裹发货" width="760px">
+    <el-dialog v-model="partDeliveryModal" title="分包裹发货" width="1200px">
       <el-form ref="partDeliveryForm" :model="partDeliveryForm" label-width="100px" :rules="partDeliveryRules">
         <el-form-item label="物流公司" prop="logisticsId">
           <el-select v-model="partDeliveryForm.logisticsId" placeholder="请选择物流公司" filterable style="width: 260px">
@@ -387,29 +387,65 @@
         <el-form-item label="物流单号" prop="logisticsNo">
           <el-input v-model="partDeliveryForm.logisticsNo" placeholder="请输入物流单号" style="width: 260px" />
         </el-form-item>
-        <el-form-item label="发货商品" prop="partDeliveryDTOList">
-          <div class="delivery-item-group">
-            <div v-for="item in deliverableOrderItems" :key="getOrderItemId(item)" class="delivery-item">
-              <el-checkbox
-                :model-value="isPartDeliveryItemSelected(item)"
-                @change="(checked) => togglePartDeliveryItem(item, checked)"
-              >
-                <span class="delivery-item-name">{{ item.goodsName }}</span>
-                <span class="delivery-item-num">订单数量 x{{ item.num }}</span>
-              </el-checkbox>
-              <el-input-number
-                v-model="partDeliveryForm.deliveryNumMap[getOrderItemId(item)]"
-                :disabled="!isPartDeliveryItemSelected(item)"
-                :min="1"
-                :max="getMaxDeliveryNum(item)"
-                :precision="0"
-                controls-position="right"
-                size="small"
-                class="delivery-num-input"
-              />
-            </div>
+        <el-form-item label-width="0" prop="partDeliveryDTOList" class="part-delivery-goods-item">
+          <div v-if="deliverableOrderItems.length" class="part-delivery-table-wrap">
+            <el-table
+              ref="partDeliveryTable"
+              border
+              :data="deliverableOrderItems"
+              style="width: 100%"
+              @selection-change="handlePartDeliverySelectionChange"
+            >
+            <el-table-column type="selection" width="55" :selectable="isPartDeliveryRowSelectable" />
+            <el-table-column label="商品" min-width="420">
+              <template #default="{ row }">
+                <div class="part-delivery-goods">
+                  <img :src="row.image" class="part-delivery-goods-img" alt="" />
+                  <div class="part-delivery-goods-info">
+                    <div class="part-delivery-goods-name">{{ row.goodsName }}</div>
+                    <div
+                      v-for="(specValue, specKey) in parseOrderItemSpecs(row.specs)"
+                      :key="specKey"
+                      class="part-delivery-goods-spec"
+                    >
+                      <span v-if="specKey !== 'images'">{{ specKey }}：{{ specValue }}</span>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="单价" min-width="110" align="center">
+              <template #default="{ row }">
+                {{ $filters.unitPrice(row.unitPrice || 0, "￥") }}
+              </template>
+            </el-table-column>
+            <el-table-column label="数量" min-width="140" align="center">
+              <template #default="{ row }">
+                <el-input-number
+                  v-model="partDeliveryForm.deliveryNumMap[getOrderItemId(row)]"
+                  :min="1"
+                  :max="getRemainingDeliveryNum(row)"
+                  :precision="0"
+                  controls-position="right"
+                  size="default"
+                  class="part-delivery-num-input"
+                  @change="(val) => handlePartDeliveryNumChange(row, val)"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="已发包裹" min-width="110" align="center">
+              <template #default="{ row }">
+                {{ getShippedPackageNum(row) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="小计" min-width="110" align="center">
+              <template #default="{ row }">
+                {{ $filters.unitPrice(getPartDeliverySubtotal(row), "￥") }}
+              </template>
+            </el-table-column>
+          </el-table>
           </div>
-          <div v-if="!deliverableOrderItems.length" class="delivery-empty">暂无可发货商品</div>
+          <div v-else class="delivery-empty">暂无可发货商品</div>
         </el-form-item>
       </el-form>
       <div v-if="orderPackages.length" class="package-list">
@@ -637,7 +673,10 @@ export default {
       );
     },
     deliverableOrderItems() {
-      return (this.data || []).filter((item) => this.getOrderItemId(item));
+      return (this.data || []).filter((item) => {
+        if (!this.getOrderItemId(item)) return false;
+        return this.getRemainingDeliveryNum(item) > 0;
+      });
     },
     canOrderTake() {
       if (this.allowOperation.take) return true;
@@ -679,28 +718,132 @@ export default {
     getLogisticsName(item) {
       return item && (item.logisticsName || item.name || item.logisticsCompany || item.logisticsId || item.id);
     },
-    getMaxDeliveryNum(item) {
-      const num = Number(item && item.num);
-      return Number.isFinite(num) && num > 0 ? num : 999999;
+    parseOrderItemSpecs(specs) {
+      if (!specs) return {};
+      try {
+        return JSON.parse(specs);
+      } catch (e) {
+        return {};
+      }
+    },
+    getShippedPackageNum(item) {
+      if (item != null && item.deliverNumber != null && item.deliverNumber !== "") {
+        const direct = Number(item.deliverNumber);
+        if (Number.isFinite(direct)) return direct;
+      }
+      const orderItemId = this.getOrderItemId(item);
+      if (!orderItemId || !this.orderPackages.length) return 0;
+      let total = 0;
+      this.orderPackages.forEach((pkg) => {
+        (pkg.orderPackageItemList || []).forEach((pkgItem) => {
+          if (this.isPackageItemMatch(item, pkgItem)) {
+            total += Number(pkgItem.deliverNumber ?? pkgItem.num ?? 0);
+          }
+        });
+      });
+      return total;
+    },
+    isPackageItemMatch(orderItem, pkgItem) {
+      const orderKeys = [
+        this.getOrderItemId(orderItem),
+        orderItem?.sn,
+        orderItem?.id,
+        orderItem?.orderItemId,
+      ]
+        .filter(Boolean)
+        .map(String);
+      const pkgKeys = [
+        pkgItem.orderItemSn,
+        pkgItem.orderItemId,
+        pkgItem.orderItemsId,
+        pkgItem.id,
+        pkgItem.sn,
+      ]
+        .filter(Boolean)
+        .map(String);
+      return pkgKeys.some((key) => orderKeys.includes(key));
+    },
+    getRemainingDeliveryNum(item) {
+      const total = Number(item && item.num) || 0;
+      return Math.max(total - this.getShippedPackageNum(item), 0);
+    },
+    getPartDeliverySubtotal(row) {
+      const id = this.getOrderItemId(row);
+      const qty = Number(this.partDeliveryForm.deliveryNumMap[id]) || 0;
+      const unitPrice = Number(row.unitPrice) || 0;
+      return unitPrice * qty;
+    },
+    initPartDeliveryNumMap() {
+      const map = {};
+      this.deliverableOrderItems.forEach((item) => {
+        const id = this.getOrderItemId(item);
+        if (id) {
+          map[id] = this.getRemainingDeliveryNum(item);
+        }
+      });
+      this.partDeliveryForm.deliveryNumMap = map;
+    },
+    refreshPartDeliveryAfterSubmit() {
+      this.loading = true;
+      return Promise.all([
+        API_Order.getOrderDetail(this.sn).then((res) => {
+          if (res.success) {
+            this.orderInfo = res.result;
+            this.allowOperation = res.result.allowOperationVO;
+            this.data = res.result.orderItems;
+            this.typeList = JSON.parse(
+              JSON.stringify(res.result.order.priceDetailDTO.discountPriceDetail)
+            );
+            this.getContentPrice();
+            this.getOrderPrice();
+          }
+        }),
+        this.getOrderPackages(),
+      ]).finally(() => {
+        this.loading = false;
+        this.partDeliveryForm.logisticsNo = "";
+        this.partDeliveryForm.logisticsId = "";
+        this.partDeliveryForm.selectedOrderItemIds = [];
+        this.initPartDeliveryNumMap();
+        this.$nextTick(() => {
+          this.$refs.partDeliveryTable?.clearSelection();
+          this.$refs.partDeliveryForm?.clearValidate();
+        });
+      });
+    },
+    handlePartDeliveryNumChange(row, value) {
+      const id = this.getOrderItemId(row);
+      if (!id) return;
+      const num = Number(value);
+      if (!Number.isFinite(num) || num < 1) return;
+      if (!this.partDeliveryForm.selectedOrderItemIds.includes(id)) {
+        this.partDeliveryForm.selectedOrderItemIds = [
+          ...this.partDeliveryForm.selectedOrderItemIds,
+          id,
+        ];
+        this.$nextTick(() => {
+          this.$refs.partDeliveryTable?.toggleRowSelection(row, true);
+        });
+      }
+    },
+    isPartDeliveryRowSelectable(row) {
+      return this.getRemainingDeliveryNum(row) > 0;
+    },
+    handlePartDeliverySelectionChange(selection) {
+      const selectedIds = [];
+      selection.forEach((item) => {
+        const id = this.getOrderItemId(item);
+        if (!id) return;
+        selectedIds.push(id);
+        if (this.partDeliveryForm.deliveryNumMap[id] == null) {
+          this.partDeliveryForm.deliveryNumMap[id] = this.getRemainingDeliveryNum(item);
+        }
+      });
+      this.partDeliveryForm.selectedOrderItemIds = selectedIds;
     },
     isPartDeliveryItemSelected(item) {
       const id = this.getOrderItemId(item);
       return !!id && this.partDeliveryForm.selectedOrderItemIds.includes(id);
-    },
-    togglePartDeliveryItem(item, checked) {
-      const id = this.getOrderItemId(item);
-      if (!id) return;
-      if (checked) {
-        if (!this.partDeliveryForm.selectedOrderItemIds.includes(id)) {
-          this.partDeliveryForm.selectedOrderItemIds.push(id);
-        }
-        if (!this.partDeliveryForm.deliveryNumMap[id]) {
-          this.partDeliveryForm.deliveryNumMap[id] = this.getMaxDeliveryNum(item);
-        }
-        return;
-      }
-      this.partDeliveryForm.selectedOrderItemIds = this.partDeliveryForm.selectedOrderItemIds.filter((itemId) => itemId !== id);
-      delete this.partDeliveryForm.deliveryNumMap[id];
     },
     buildPartDeliveryDTOList() {
       return this.partDeliveryForm.selectedOrderItemIds
@@ -721,6 +864,9 @@ export default {
         if (this.$refs.partDeliveryForm) {
           this.$refs.partDeliveryForm.clearValidate();
         }
+        if (this.$refs.partDeliveryTable) {
+          this.$refs.partDeliveryTable.clearSelection();
+        }
       });
     },
     openPartDelivery() {
@@ -737,10 +883,11 @@ export default {
       });
     },
     getOrderPackages() {
-      API_Order.getPackage(this.sn).then((res) => {
+      return API_Order.getPackage(this.sn).then((res) => {
         if (res.success) {
           this.orderPackages = Array.isArray(res.result) ? res.result : [];
         }
+        this.initPartDeliveryNumMap();
       });
     },
     submitPartDelivery() {
@@ -761,8 +908,7 @@ export default {
           .then((res) => {
             if (res.success) {
               this.$Message.success("发货成功");
-              this.partDeliveryModal = false;
-              this.getDataList();
+              this.refreshPartDeliveryAfterSubmit();
             }
           })
           .finally(() => {
@@ -965,43 +1111,70 @@ export default {
   overflow-y: scroll;
 }
 
-.delivery-item-group {
-  width: 100%;
+.delivery-empty {
+  color: #999;
 }
 
-.delivery-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.part-delivery-goods-item :deep(.el-form-item__content) {
+  line-height: normal;
+}
+
+.part-delivery-table-wrap {
   width: 100%;
-  height: auto;
-  margin: 0 0 8px 0;
-  padding: 8px 12px;
-  border: 1px solid #dcdfe6;
+  min-height: 360px;
+  max-height: 520px;
+  overflow: auto;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+
+  :deep(.el-table__cell) {
+    padding: 18px 0;
+  }
+
+  :deep(.el-table__header .el-table__cell) {
+    padding: 14px 0;
+    font-size: 14px;
+  }
+
+  :deep(.el-table__body .el-table__cell) {
+    font-size: 14px;
+  }
+}
+
+.part-delivery-goods {
+  display: flex;
+  align-items: flex-start;
+  padding: 8px 0;
+  min-height: 88px;
+}
+
+.part-delivery-goods-img {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  object-fit: cover;
   border-radius: 4px;
 }
 
-.delivery-item-name {
-  display: inline-block;
-  max-width: 420px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: middle;
-  white-space: nowrap;
+.part-delivery-goods-info {
+  margin-left: 16px;
+  min-width: 0;
 }
 
-.delivery-item-num {
-  margin-left: 12px;
+.part-delivery-goods-name {
+  line-height: 1.5;
+  font-size: 14px;
+  word-break: break-all;
+}
+
+.part-delivery-goods-spec {
+  font-size: 13px;
   color: #999;
+  line-height: 1.6;
 }
 
-.delivery-num-input {
-  width: 120px;
-  margin-left: 12px;
-}
-
-.delivery-empty {
-  color: #999;
+.part-delivery-num-input {
+  width: 130px;
 }
 
 .package-list {

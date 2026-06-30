@@ -41,6 +41,14 @@
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
 import { getPaymentSupportForm } from "@/api/setting";
+
+const DEFAULT_PAYMENT_SUPPORT_ITEMS = [
+  { client: "PC", supports: [] },
+  { client: "H5", supports: [] },
+  { client: "APP", supports: [] },
+  { client: "WECHAT_MP", supports: [] },
+];
+
 export default {
   data() {
     return {
@@ -51,7 +59,7 @@ export default {
         WECHAT_MP: "小程序端",
         PC: "PC端",
       },
-      formValidate: {},
+      formValidate: [],
       payWay: {
         ALIPAY: "支付宝支付",
         WECHAT: "微信支付",
@@ -67,10 +75,11 @@ export default {
   },
   methods: {
     submit(name) {
-      const that = this;
-      if (handleSubmit(that, name)) {
-        this.setupSetting();
-      }
+      handleSubmit(this, name)
+        .then(() => {
+          this.setupSetting();
+        })
+        .catch(() => {});
     },
     handleChangePayType(val) {
       this.$Modal.confirm({
@@ -97,13 +106,17 @@ export default {
         }
       });
     },
-    async init() {
-      this.formValidate = JSON.parse(this.res).paymentSupportItems;
+    init() {
+      const setting = JSON.parse(this.res || "{}");
+      const items = setting.paymentSupportItems;
+      this.formValidate =
+        Array.isArray(items) && items.length ? items : DEFAULT_PAYMENT_SUPPORT_ITEMS;
       this.checkSupport = JSON.parse(JSON.stringify(this.formValidate));
-      console.log(this.formValidate);
 
-      await getPaymentSupportForm().then((res) => {
-        this.supportForm = res.result;
+      getPaymentSupportForm().then((res) => {
+        if (res.success && res.result) {
+          this.supportForm = res.result;
+        }
       });
     },
   },

@@ -2,9 +2,9 @@
   <div class="model-view">
     <div class="model-view-content">
       <div class="content">
-        <div class="wap-title">首页</div>
+        <div class="wap-title">??</div>
         <div class="draggable">
-          <!-- 全屏 -->
+          <!-- ?? -->
           <div class="full-shadow" v-if="type == 'full'">
             <img :src="advertising[0].img" alt="" />
           </div>
@@ -14,7 +14,7 @@
     </div>
     <div class="model-config">
       <div class="decorate">
-        <div class="decorate-title">全屏广告</div>
+        <div class="decorate-title">????</div>
         <div class="decorate-list">
           <div
             class="decorate-item"
@@ -22,12 +22,12 @@
             :key="index"
           >
             <div class="decorate-item-title">
-              <div>设置</div>
+              <div>??</div>
             </div>
             <div class="decorate-item-box">
-              <!-- 选择照片 -->
+              <!-- ???? -->
               <div class="decorate-view">
-                <div class="decorate-view-title">选择图片</div>
+                <div class="decorate-view-title">????</div>
                 <div>
                   <img class="show-image" :src="item.img" alt />
                   <input
@@ -38,7 +38,7 @@
                     :id="'files' + index"
                   />
                   <div class="tips">
-                    建议尺寸
+                    ????
                     <span>{{ item.size }}</span>
                   </div>
                 </div>
@@ -48,41 +48,41 @@
                     @click="handleClickFile(item, index)"
                     plain
                     type="primary"
-                    >选择照片</el-button
+                    >????</el-button
                   >
                 </div>
               </div>
 
-              <!-- 选择连接 -->
+              <!-- ???? -->
               <div class="decorate-view">
-                <div class="decorate-view-title">选择图片</div>
+                <div class="decorate-view-title">????</div>
                 <div>
                   <el-button
                     plain
                     type="primary"
                     size="small"
                     @click="clickLink(item)"
-                    >选择链接</el-button
+                    >????</el-button
                   >
                 </div>
               </div>
 
               <div class="decorate-view">
-                <div class="decorate-view-title">当前页面状态</div>
+                <div class="decorate-view-title">??????</div>
                 <div>
                   <el-tag :type="result.pageShow === 'OPEN' ? 'success' : 'danger'">
-                    {{ result.pageShow === "OPEN" ? "开启" : "关闭" }}
+                    {{ result.pageShow === "OPEN" ? "??" : "??" }}
                   </el-tag>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <!-- <el-button type="primary" @click="addDecorate()" ghost>添加</el-button> -->
+        <!-- <el-button type="primary" @click="addDecorate()" ghost>??</el-button> -->
         <liliDialog ref="liliDialog"    @selectedLink="selectedLink" :types="linkType"></liliDialog>
       </div>
       <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
-         <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" ref="ossManage" />
+         <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" :max-select="1" ref="ossManage" />
       </el-dialog>
     </div>
   </div>
@@ -97,10 +97,10 @@ export default {
   data() {
     return {
       result:"",
-      picModelFlag: false, //图片选择器
-      type: "full", // 是否全屏
+      picModelFlag: false, //?????
+      type: "full", // ????
 
-      //全屏广告
+      //????
       advertising: [
          {
           img:
@@ -109,7 +109,7 @@ export default {
         },
       ],
       selectedLinks: {},
-      linkType: "", // 选择类型
+      linkType: "", // ????
     };
   },
    watch: {
@@ -144,17 +144,17 @@ export default {
         this.result = res.result
       });
     },
-    // 点击链接
+    // ????
     clickLink(item) {
       this.$refs.liliDialog.open('link')
     },
-    // 回调选择的链接
+    // ???????
     selectedLink(val) {
       this.selectedLinks.url = val;
 
       this.advertising[0].config = val;
     },
-    // 点击选择照片
+    // ??????
     handleClickFile() {
       this.picModelFlag = true;
       this.$nextTick(() => {
@@ -162,9 +162,10 @@ export default {
           this.$refs.ossManage.selectImage = true;
         }
       });
-    }, // 图片选择器回显
+    }, // ???????
     callbackSelected(val) {
       this.picModelFlag = false;
+      if (!val?.url) return;
       this.advertising[0].img = val.url;
     }
   },

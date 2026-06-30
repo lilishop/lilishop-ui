@@ -7,19 +7,19 @@
           <div class="form-list">
             <el-form
               ref="formValidate"
-              label-width="120px"
+              label-width="140px"
               label-position="right"
               :model="formValidate"
               :rules="ruleValidate"
             >
               <el-form-item label="买家PC端域名" prop="pc">
-                <el-input v-model="formValidate.pc" class="w200" />
+                <el-input v-model="formValidate.pc" />
               </el-form-item>
               <el-form-item label="买家WAP端域名" prop="wap">
-                <el-input v-model="formValidate.wap" class="w200" />
+                <el-input v-model="formValidate.wap" />
               </el-form-item>
               <el-form-item label="登录回调域名" prop="callbackUrl">
-                <el-input maxlength="300" v-model="formValidate.callbackUrl" class="w200" />
+                <el-input maxlength="300" v-model="formValidate.callbackUrl" />
               </el-form-item>
               <el-form-item label="操作">
                 <el-button @click="setupSetting">保存设置</el-button>
@@ -52,10 +52,11 @@ export default {
   },
   methods: {
     submit(name) {
-      const that = this;
-      if (handleSubmit(that, name)) {
-        this.setupSetting();
-      }
+      handleSubmit(this, name)
+        .then(() => {
+          this.setupSetting();
+        })
+        .catch(() => {});
     },
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
@@ -67,8 +68,8 @@ export default {
       });
     },
     init() {
-      this.res = JSON.parse(this.res);
-      this.formValidate = { ...this.res };
+      const setting = JSON.parse(this.res || "{}");
+      this.formValidate = { ...setting };
       Object.keys(this.formValidate).forEach((item) => {
         if (item.indexOf("pId") < 0) {
           this.ruleValidate[item] = [
@@ -112,10 +113,19 @@ export default {
   justify-content: flex-start;
 }
 .row {
-  width: 600px;
+  width: 100%;
+  max-width: 720px;
   margin-right: 10px;
   display: flex;
   margin-bottom: 20px;
+}
+
+:deep(.el-input) {
+  width: 480px !important;
+}
+
+.el-input {
+  width: 480px;
 }
 
 .label-item {
@@ -134,5 +144,9 @@ export default {
 .el-form-item {
   display: flex;
   align-items: center;
+}
+
+:deep(.el-form-item__label) {
+  white-space: nowrap;
 }
 </style>

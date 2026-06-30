@@ -18,6 +18,7 @@
             v-model="category"
             :options="skuList"
             placeholder="请选择商品分类"
+            popper-class="goods-dialog-cascader-popper"
             style="width: 250px"
             clearable
           />
@@ -258,5 +259,10 @@ export default {
   background: url("../../assets/selected.png") no-repeat;
   background-position: right;
   background-size: 10%;
+}
+</style>
+<style lang="scss">
+.goods-dialog-cascader-popper {
+  z-index: 10001 !important;
 }
 </style>

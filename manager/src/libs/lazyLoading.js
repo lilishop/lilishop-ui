@@ -1,2 +1,12 @@
-export default (url) =>()=>import(`@/views/${url}.vue`)
+const viewContext = require.context("@/views", true, /\.vue$/);
 
+/** 后端菜单 frontRoute 与前端实际路径不一致时的映射 */
+const VIEW_ALIASES = {
+  "live/list": "promotions/live/live",
+};
+
+function resolveViewPath(url) {
+  return VIEW_ALIASES[url] || url;
+}
+
+export default (url) => () => Promise.resolve(viewContext(`./${resolveViewPath(url)}.vue`));

@@ -96,7 +96,6 @@ export default {
   },
   data() {
     return {
-      handleSubmit,
       picModelFlag: false,
       formValidate: {
         buyerSideLogo: "",
@@ -126,10 +125,11 @@ export default {
       });
     },
     submit(name) {
-      const that = this;
-      if (handleSubmit(that, name)) {
-        this.setupSetting();
-      }
+      handleSubmit(this, name)
+        .then(() => {
+          this.setupSetting();
+        })
+        .catch(() => {});
     },
     callbackSelected(val) {
       this.picModelFlag = false;

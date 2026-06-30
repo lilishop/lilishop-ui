@@ -16,7 +16,7 @@
       </div>
     </div>
     <el-divider />
-    <div class="content width_1200">
+    <div class="content width_1200_auto">
       <!-- 收货地址 -->
       <div class="address" v-if="selectedDeliverMethod === 'LOGISTICS' && goodsType !== 'VIRTUAL_GOODS'">
         <div class="card-head">
@@ -30,11 +30,11 @@
             :key="index">
             <div>
               <span>{{ item.name }}</span>
-              <el-tag class="ml_10 address-default-tag" v-if="item.isDefault" color="red" effect="dark">默认</el-tag>
+              <el-tag class="ml_10 address-default-tag" v-if="item.isDefault" type="danger" effect="dark">默认</el-tag>
               <el-tag
                 class="ml_10 address-alias-tag"
                 v-if="item.alias"
-                color="rgb(255, 153, 0)"
+                type="warning"
                 effect="dark"
               >{{ item.alias }}
               </el-tag>
@@ -280,18 +280,18 @@
           <span>应付金额：</span><span class="actrual-price">{{ $filters.unitPrice(priceDetailDTO.flowPrice, "￥") }}</span>
         </div>
       </div>
-    </div>
-    <!-- 底部支付栏 -->
-    <div class="order-footer width_1200">
-      <div class="pay ml_20" @click="pay">提交订单</div>
-      <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'LOGISTICS'">
-        配送至：{{ $filters.unitAddress(selectedAddress.consigneeAddressPath) }}
-        {{ selectedAddress.detail }}&nbsp;&nbsp;收货人：{{
-            selectedAddress.name
-        }}&nbsp;&nbsp;{{ selectedAddress.mobile }}
-      </div>
-      <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'SELF_PICK_UP'">
-        自提地点：{{selectedStoreAddress.address}} &nbsp;&nbsp;联系方式：{{ selectedStoreAddress.mobile }}
+      <!-- 底部支付栏 -->
+      <div class="order-footer">
+        <div class="pay ml_20" @click="pay">提交订单</div>
+        <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'LOGISTICS'">
+          配送至：{{ $filters.unitAddress(selectedAddress.consigneeAddressPath) }}
+          {{ selectedAddress.detail }}&nbsp;&nbsp;收货人：{{
+              selectedAddress.name
+          }}&nbsp;&nbsp;{{ selectedAddress.mobile }}
+        </div>
+        <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'SELF_PICK_UP'">
+          自提地点：{{selectedStoreAddress.address}} &nbsp;&nbsp;联系方式：{{ selectedStoreAddress.mobile }}
+        </div>
       </div>
     </div>
     <BaseFooter></BaseFooter>
@@ -922,6 +922,7 @@ export default {
   height: 30px;
   display: flex;
   align-items: center;
+  gap: 12px;
 
   span {
     @include content_color($light_content_color);
@@ -930,6 +931,12 @@ export default {
     line-height: 30px;
     display: inline-block;
     padding: 0 15px;
+    flex-shrink: 0;
+  }
+
+  .icon-next {
+    flex-shrink: 0;
+    font-size: 14px;
   }
 
   .el-icon {
@@ -956,6 +963,7 @@ export default {
   background-color: #fff;
   min-height: 200px;
   padding: 15px 25px;
+  box-sizing: border-box;
 }
 
 .delivery-method {
@@ -1034,13 +1042,15 @@ export default {
   flex-wrap: wrap;
 
   :deep(.address-default-tag) {
+    --el-tag-bg-color: var(--el-color-danger);
+    --el-tag-border-color: var(--el-color-danger);
     --el-tag-text-color: #fff;
     color: #fff;
   }
 
   :deep(.address-alias-tag) {
-    --el-tag-bg-color: rgb(255, 153, 0);
-    --el-tag-border-color: rgb(255, 153, 0);
+    --el-tag-bg-color: var(--el-color-warning);
+    --el-tag-border-color: var(--el-color-warning);
     --el-tag-text-color: #fff;
     color: #fff;
   }
@@ -1306,7 +1316,9 @@ export default {
   align-items: center;
   flex-direction: row-reverse;
   border-top: 1px solid #ddd;
-  margin: 10px auto;
+  margin: 10px -25px 0;
+  width: calc(100% + 50px);
+  box-sizing: border-box;
 
   div {
     text-align: center;

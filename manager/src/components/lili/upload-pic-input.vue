@@ -40,7 +40,7 @@
       <el-button @click="handleCLickImg('storeLogo')">选择图片</el-button>
     </div>
 
-    <el-dialog v-model="viewImage" title="图片预览" width="480px" append-to-body :z-index="3500">
+    <el-dialog v-model="viewImage" title="图片预览" width="480px" append-to-body>
       <img
         :src="currentValue"
         alt="该资源不存在"
@@ -51,13 +51,24 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="picModalFlag" width="1200px" append-to-body :z-index="3500" destroy-on-close>
+    <el-dialog
+      v-model="picModalFlag"
+      title="选择图片"
+      width="1200px"
+      append-to-body
+      destroy-on-close
+      @closed="resetPicModal"
+    >
       <ossManage
         ref="ossManage"
         :is-component="true"
         :initialize="picModalFlag"
-        @callback="callbackSelected"
+        @selected="handleOssSelected"
       />
+      <template #footer>
+        <el-button @click="cancelPicModal">取消</el-button>
+        <el-button type="primary" @click="confirmPicModal">确认</el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -106,12 +117,14 @@ export default {
       viewImage: false,
       uploadFileUrl: uploadFile,
       picModalFlag: false,
+      pendingSelection: [],
       selectedFormBtnName: "",
       picIndex: "",
     };
   },
   methods: {
     handleCLickImg(val, index) {
+      this.pendingSelection = [];
       this.picModalFlag = true;
       this.selectedFormBtnName = val;
       this.picIndex = index;
@@ -121,11 +134,41 @@ export default {
         }
       });
     },
-    callbackSelected(val) {
+    handleOssSelected(list) {
+      this.pendingSelection = Array.isArray(list) ? list : [];
+    },
+    parseOssSelectionUrl(item) {
+      if (!item) {
+        return "";
+      }
+      if (typeof item === "string") {
+        const index = item.indexOf(",");
+        return index >= 0 ? item.slice(index + 1) : item;
+      }
+      return item.url || "";
+    },
+    confirmPicModal() {
+      const list = this.pendingSelection || [];
+      if (!list.length) {
+        this.$Message.warning("请先选择图片");
+        return;
+      }
+      const url = this.parseOssSelectionUrl(list[list.length - 1]);
+      if (!url) {
+        this.$Message.warning("请选择有效图片");
+        return;
+      }
       this.picModalFlag = false;
-      this.currentValue = val.url;
+      this.currentValue = url;
       this.picIndex = "";
       this.emitValue(this.currentValue);
+      this.pendingSelection = [];
+    },
+    cancelPicModal() {
+      this.picModalFlag = false;
+    },
+    resetPicModal() {
+      this.pendingSelection = [];
     },
     init() {
       this.accessToken = {

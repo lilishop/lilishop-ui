@@ -1,17 +1,19 @@
 <template>
   <div class="not-enough" ref="obtain" id="demo">
-    <el-affix :offset-top="62" @change="change">
-      <ul class="nav-bar" v-show="topSearchShow">
-        <li
-          v-for="(item, index) in conData.options.navList"
-          :class="currentIndex === index ? 'curr' : ''"
-          @click="changeCurr(index)"
-          :key="index"
-        >
-          <p @click="gotoDemo">{{ item.title }}</p>
-          <p @click="gotoDemo">{{ item.desc }}</p>
-        </li>
-      </ul>
+    <el-affix :offset-top="62" @change="change" class="nav-affix">
+      <div class="nav-bar" v-show="topSearchShow">
+        <ul class="nav-list">
+          <li
+            v-for="(item, index) in conData.options.navList"
+            :class="currentIndex === index ? 'curr' : ''"
+            @click="changeCurr(index)"
+            :key="index"
+          >
+            <p @click="gotoDemo">{{ item.title }}</p>
+            <p @click="gotoDemo">{{ item.desc }}</p>
+          </li>
+        </ul>
+      </div>
     </el-affix>
     <div class="content" v-if="showContent">
       <div
@@ -95,18 +97,34 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.not-enough {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+:deep(.nav-affix.el-affix) {
+  width: 100%;
+}
+
 .nav-bar {
-  display: flex;
-  justify-content: center;
   width: 100%;
   margin-bottom: 10px;
   background-color: #f8f8f8;
   height: 60px;
+  box-sizing: border-box;
+}
+
+.nav-list {
+  display: flex;
+  justify-content: center;
   align-items: center;
-  position: relative;
-  position: sticky;
-  position: -webkit-sticky;
-  top: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  box-sizing: border-box;
+
   li {
     padding: 0 30px;
     text-align: center;
@@ -114,11 +132,15 @@ export default {
       font-size: 16px;
       border-radius: 50px;
       padding: 0 7px;
+      margin: 0;
+      line-height: 1.2;
     }
 
     p:nth-child(2) {
       font-size: 14px;
       color: #999;
+      margin: 2px 0 0;
+      line-height: 1.2;
     }
 
     &:hover {
@@ -129,6 +151,7 @@ export default {
     }
     border-right: 1px solid #eee;
   }
+
   li:last-of-type {
     border: none;
   }
@@ -136,7 +159,6 @@ export default {
   .curr {
     p:nth-child(1) {
       background-color: $theme_color;
-
       color: #fff;
     }
     p:nth-child(2) {
@@ -146,6 +168,8 @@ export default {
 }
 
 .content {
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;

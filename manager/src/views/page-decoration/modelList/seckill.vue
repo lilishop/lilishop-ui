@@ -203,8 +203,8 @@ export default {
   }
 
   .section {
-    width: 1000px;
-    // background: #efefef;
+    flex: 1;
+    min-width: 0;
     overflow-x: auto;
     overflow-y: hidden;
     .seckill-list {

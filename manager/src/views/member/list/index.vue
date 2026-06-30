@@ -709,10 +709,8 @@ export default {
   },
   mounted() {
     this.getData();
-    if (!this.selectedMember) {
-      this.loadMemberGroupList();
-      this.loadMemberGradeList();
-    }
+    this.loadMemberGroupList();
+    this.loadMemberGradeList();
   },
 };
 </script>

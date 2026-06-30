@@ -69,10 +69,11 @@ export default {
   },
   methods: {
     submit(name) {
-      const that = this;
-      if (handleSubmit(that, name)) {
-        this.setupSetting();
-      }
+      handleSubmit(this, name)
+        .then(() => {
+          this.setupSetting();
+        })
+        .catch(() => {});
     },
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
@@ -140,27 +141,27 @@ export default {
   display: flex;
 
   > .el-input-number {
-    width: 100px;
+    width: 120px;
     margin-right: 5px;
   }
 
   > .el-input-number:nth-last-of-type(1) {
-    width: 150px;
+    width: 180px;
     margin-right: 5px;
   }
 
   > .el-input {
-    width: 100px;
+    width: 180px;
     margin: 0 10px;
   }
 }
 
 :deep(.el-input){
-  width: 70px !important;
+  width: 180px !important;
 }
 
 .el-input {
-  width: 70px;
+  width: 180px;
   margin-right: 10px;
 }
 

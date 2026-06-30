@@ -222,12 +222,7 @@ export default {
   transition: 0.35s;
 }
 .show {
-  transform: translateY(0);
-  -webkit-transform: translateZ(0);
-  -moz-transform: translateZ(0);
-  -ms-transform: translateZ(0);
-  -o-transform: translateZ(0);
-  transform: translateZ(0);
+  transform: translateY(0) translateZ(0);
   top: 0;
 }
 .fixed-bar{
@@ -241,12 +236,7 @@ export default {
 .show-fixed{
   height: 354px !important;
   opacity: 1 !important;
-  transform: translateY(0);
-  -webkit-transform: translateZ(0);
-  -moz-transform: translateZ(0);
-  -ms-transform: translateZ(0);
-  -o-transform: translateZ(0);
-  transform: translateZ(0);
+  transform: translateY(0) translateZ(0);
 }
 
 

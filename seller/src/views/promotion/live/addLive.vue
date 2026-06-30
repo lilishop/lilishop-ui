@@ -15,19 +15,21 @@
           <div class="tips">主播昵称，最短2个汉字，最长15个汉字，1个汉字相当于2个字符</div>
         </el-form-item>
         <el-form-item label="直播时间" prop="startTime">
-          <el-date-picker
-            :disabled="liveStatus != 'NEW'"
-            v-model="times"
-            type="datetimerange"
-            value-format="YYYY-MM-DD HH:mm"
-            :disabled-date="disabledDate"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
-            style="width: 360px"
-            @change="handleChangeTime"
-          />
-          <div class="tips">
-            直播开播时间需要在当前时间的10分钟后并且,开始时间不能在6个月后,直播计划结束时间（开播时间和结束时间间隔不得短于30分钟，不得超过24小时）
+          <div class="form-field-block">
+            <el-date-picker
+              class="live-time-picker"
+              :disabled="liveStatus != 'NEW'"
+              v-model="times"
+              type="datetimerange"
+              value-format="YYYY-MM-DD HH:mm"
+              :disabled-date="disabledDate"
+              start-placeholder="开始时间"
+              end-placeholder="结束时间"
+              @change="handleChangeTime"
+            />
+            <div class="tips">
+              直播开播时间需要在当前时间的10分钟后并且,开始时间不能在6个月后,直播计划结束时间（开播时间和结束时间间隔不得短于30分钟，不得超过24小时）
+            </div>
           </div>
         </el-form-item>
         <el-form-item label="主播微信号" prop="anchorWechat">
@@ -285,6 +287,25 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+:deep(.el-form-item__content) {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.form-field-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+:deep(.live-time-picker.el-date-editor--datetimerange) {
+  width: 360px;
+  max-width: 360px;
+  flex-grow: 0;
+  --el-date-editor-width: 360px;
+}
+
 .action {
   display: flex;
 }
@@ -306,7 +327,15 @@ export default {
     margin-right: 10px;
   }
 }
+:deep(.el-form-item__content > .tips) {
+  flex: 0 0 100%;
+}
+
 .tips {
+  width: 100%;
+  max-width: 460px;
+  margin-top: 6px;
+  line-height: 1.6;
   color: #999;
   font-size: 12px;
 }

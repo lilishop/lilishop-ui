@@ -19,7 +19,7 @@
         <div>
           <el-button
             size="small"
-            @click.stop="handleSelectModel(data.options.list)"
+            @click.stop="handleSelectModel"
           >编辑</el-button
           >
         </div>
@@ -34,7 +34,7 @@
       
       :close-on-click-modal="false"
      append-to-body destroy-on-close>
-      <div class="modal-tab-bar">
+      <div class="modal-tab-bar" v-if="draftList">
             <div class="flex flex-a-c">
               <el-button class="add-goods" @click="addCurrentGoods">
                 添加商品
@@ -42,7 +42,7 @@
             </div>
 
             <div
-              v-for="(item, index) in data.options.list"
+              v-for="(item, index) in draftList"
               :key="index"
               class="draggable"
             >
@@ -65,6 +65,10 @@
             </div>
 
       </div>
+      <template #footer>
+        <el-button @click="handleCancelModal">取消</el-button>
+        <el-button type="primary" @click="handleConfirmModal">确定</el-button>
+      </template>
     </el-dialog>
 
     <!-- 选择商品。链接 -->
@@ -88,60 +92,66 @@ export default {
   },
   data() {
     return {
-      flag:false,
-      tabIndex:0,
       current: 0,
       showModal: false,
-      selected: {}, // 已选数据
-      picModelFlag: false,
+      draftList: [],
     };
   },
   mounted(){
 
   },
   methods: {
+    cloneList(list) {
+      return JSON.parse(JSON.stringify(list || []));
+    },
     // 删除商品
-    delGoods(val,i) {
-      this.data.options.list.splice(i, 1);
+    delGoods(val, i) {
+      this.draftList.splice(i, 1);
     },
     // 添加当前选项卡中的商品
     addCurrentGoods() {
       this.$refs.liliDialog.open("goods");
     },
     // 编辑模块
-    handleSelectModel(item) {
-      console.log(item);
-      this.selected = item;
+    handleSelectModel() {
+      this.draftList = this.cloneList(this.data.options.list);
       this.showModal = true;
     },
     // 选择商品回调
     selectedGoodsData(val) {
-      if (val.length) {
-        val.forEach((item) => {
-          const pushGoodsDetail = {
-            img: item.thumbnail,
-            price: item.price,
-            title: item.goodsName,
-            desc: "",
-            url: `/goodsDetail?skuId=${item.id}&goodsId=${item.goodsId}`,
-          };
-          this.data.options.list.push(pushGoodsDetail);
+      if (!val?.length || !this.draftList) return;
+      val.forEach((item) => {
+        this.draftList.push({
+          img: item.thumbnail,
+          price: item.price,
+          title: item.goodsName,
+          desc: "",
+          url: `/goodsDetail?skuId=${item.id}&goodsId=${item.goodsId}`,
         });
-      }
+      });
     },
     // 选择链接回调
     selectedLink(val) {
-      this.selected[this.current].url =
-        this.$filters.formatLinkType(val);
-      this.selected[this.current].type =
+      if (!this.draftList?.length) return;
+      const item = this.draftList[this.current];
+      item.url = this.$filters.formatLinkType(val);
+      item.type =
         val.___type === "other" && val.url === "" ? "link" : "other";
-
-      console.log(this.selected[this.current]);
     },
     handleSelectLink(index) {
       // 调起选择链接弹窗
       this.$refs.liliDialog.open("link");
       this.current = index;
+    },
+    handleCancelModal() {
+      this.draftList = [];
+      this.showModal = false;
+    },
+    handleConfirmModal() {
+      const saved = this.cloneList(this.draftList);
+      this.data.options.list.splice(0, this.data.options.list.length, ...saved);
+      this.draftList = [];
+      this.showModal = false;
     },
   },
 };

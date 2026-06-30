@@ -35,6 +35,15 @@
   }
 }
 
+.oss-select-footer {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #ededed;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .tab-empty {
   padding: 48px 0;
   color: #999;
@@ -57,6 +66,10 @@
   cursor: pointer;
   color: #909399;
   padding: 0 4px;
+}
+
+.oss-manage-date-popper {
+  z-index: 4000 !important;
 }
 
 </style>
@@ -86,6 +99,8 @@
                   <el-date-picker
                     v-model="selectDate"
                     clearable
+                    teleported
+                    popper-class="oss-manage-date-popper"
                     value-format="YYYY-MM-DD"
                     start-placeholder="开始日期"
                     end-placeholder="结束日期"
@@ -165,37 +180,39 @@
                   <el-checkbox-group v-model="selectedOss" @change="selectOssChange">
                     <div class="img-box">
                       <div v-for="(item, index) in data" :key="index" class="img-item">
-                        <el-checkbox :value="item.id + ',' + item.url" class="check-box">
-                          <div
-                            class="card"
-                            @mouseenter="onMouseOver(item, index)"
-                            @mouseleave="onMouseOut(item, index)"
-                          >
-                            <img :src="item.url" alt="" />
-                            <div v-if="item.isShowPreview" class="preview">
-                              <div @click.prevent="download(item)">
-                                <el-tooltip content="下载" placement="top">
-                                  <el-icon :size="18"><Download /></el-icon>
-                                </el-tooltip>
-                              </div>
-                              <div @click.prevent="remove(item)">
-                                <el-tooltip content="删除" placement="top">
-                                  <el-icon :size="18"><Delete /></el-icon>
-                                </el-tooltip>
-                              </div>
-                              <div @click.prevent="showPic(item)">
-                                <el-tooltip content="预览" placement="top">
-                                  <el-icon :size="22"><View /></el-icon>
-                                </el-tooltip>
-                              </div>
+                        <div
+                          class="card"
+                          :class="{ 'custom-checkbox-card-checked': selectedOss.includes(item.id + ',' + item.url) }"
+                          @mouseenter="onMouseOver(item, index)"
+                          @mouseleave="onMouseOut(item, index)"
+                        >
+                          <el-checkbox
+                            :value="item.id + ',' + item.url"
+                            class="card-checkbox"
+                            @click.stop
+                          />
+                          <img :src="item.url" alt="" />
+                          <div v-if="item.isShowPreview" class="preview">
+                            <div @click.prevent="download(item)">
+                              <el-tooltip content="下载" placement="top">
+                                <el-icon :size="18"><Download /></el-icon>
+                              </el-tooltip>
+                            </div>
+                            <div @click.prevent="remove(item)">
+                              <el-tooltip content="删除" placement="top">
+                                <el-icon :size="18"><Delete /></el-icon>
+                              </el-tooltip>
+                            </div>
+                            <div @click.prevent="showPic(item)">
+                              <el-tooltip content="预览" placement="top">
+                                <el-icon :size="22"><View /></el-icon>
+                              </el-tooltip>
                             </div>
                           </div>
-                        </el-checkbox>
-                        <div>
-                          <el-tooltip :content="item.name" placement="bottom">
-                            <div class="text">{{ item.name }}</div>
-                          </el-tooltip>
                         </div>
+                        <el-tooltip :content="item.name" placement="bottom">
+                          <div class="text">{{ item.name }}</div>
+                        </el-tooltip>
                       </div>
                     </div>
                   </el-checkbox-group>
@@ -209,6 +226,10 @@
                     size="small"
                     @current-change="pageChange"
                   />
+                </div>
+                <div v-if="isComponent && selectImage" class="oss-select-footer">
+                  <el-button @click="handleSelectCancel">取消</el-button>
+                  <el-button type="primary" @click="handleSelectConfirm">确定</el-button>
                 </div>
               </div>
             </el-col>
@@ -487,6 +508,10 @@ export default {
     initialize: {
       type: Boolean,
       default: false,
+    },
+    maxSelect: {
+      type: Number,
+      default: 0,
     },
   },
   data() {
@@ -954,8 +979,8 @@ export default {
       if (val) this.selectImage = val
     },
     selectedOss(val) {
-      if (val && val.length) {
-        this.$emit("callback", {url: val[val.length - 1].split(',')[1]});
+      if (val && val.length && !(this.isComponent && this.selectImage)) {
+        this.$emit("callback", { url: val[val.length - 1].split(",")[1] });
       }
     },
     // 初始化监听 是否清空所选图片
@@ -1062,6 +1087,11 @@ export default {
     },
     // 复选框值改变时触发
     selectOssChange(e) {
+      if (this.maxSelect === 1 && e.length > 1) {
+        const last = e[e.length - 1];
+        this.selectedOss = [last];
+        e = [last];
+      }
       if (e) {
         this.selectList = e.map(item => {
           return {id: item.split(',')[0]}
@@ -1290,6 +1320,18 @@ export default {
      */
     selectedParams(val) {
       this.$emit("callback", val);
+    },
+    handleSelectConfirm() {
+      if (!this.selectedOss.length) {
+        this.$Message.warning("请选择图片");
+        return;
+      }
+      const last = this.selectedOss[this.selectedOss.length - 1];
+      this.$emit("callback", { url: last.split(",")[1] });
+    },
+    handleSelectCancel() {
+      this.selectedOss = [];
+      this.$emit("callback", { url: "" });
     },
     // 初始化数据
     init() {

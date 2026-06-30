@@ -4,15 +4,15 @@
       <div class="operation padding-row">
         <el-button type="primary" @click="openAdd">添加权益设置</el-button>
       </div>
-      <el-table
-        v-loading="loading"
-        stripe
-        :data="data"
-        empty-text="暂无数据"
-        class="mt_10 benefit-list-table benefit-list-table--no-vertical-borders"
-        style="width: 100%"
-      >
-        <el-table-column label="权益类型" width="132">
+      <div class="benefit-list-panel">
+        <el-table
+          v-loading="loading"
+          stripe
+          :data="data"
+          empty-text="暂无数据"
+          class="mt_10 benefit-list-table benefit-list-table--no-vertical-borders"
+        >
+          <el-table-column label="权益类型" min-width="132">
           <template #default="{ row }">
             <span
               v-if="row"
@@ -22,7 +22,7 @@
               {{ benefitTypeLabel(row.benefitType) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="权益名称" width="188">
+        <el-table-column label="权益名称" min-width="188">
           <template #default="{ row }">
             <span
               v-if="row"
@@ -32,7 +32,7 @@
               {{ row.benefitName || "-" }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="权益LOGO" width="116" align="center">
+        <el-table-column label="权益LOGO" min-width="116" align="center">
           <template #default="{ row }">
             <span v-if="row && !row.benefitLogo">-</span>
             <div v-else-if="row" class="benefit-logo-thumb benefit-logo-thumb--table">
@@ -40,7 +40,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="118" align="center">
+        <el-table-column label="状态" min-width="118" align="center">
           <template #default="{ row }">
             <el-switch
               v-if="row"
@@ -53,7 +53,7 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" width="140">
+        <el-table-column label="操作" align="center" min-width="140">
           <template #default="{ row }">
             <div v-if="row" class="ops" style="display: flex; justify-content: center">
               <a class="link-text" @click="openEdit(row)">编辑</a>
@@ -63,6 +63,7 @@
           </template>
         </el-table-column>
       </el-table>
+      </div>
       <div class="mt_10" style="display: flex; justify-content: flex-end">
         <el-pagination
           v-model:current-page="searchForm.pageNumber"
@@ -81,18 +82,24 @@
       v-model="couponPickerVisible"
       title="选择优惠券"
       width="80%"
-      :z-index="3000"
+      append-to-body
+      modal-class="member-benefit-coupon-picker-modal"
       :close-on-click-modal="false"
       destroy-on-close
       @close="handleCouponPickerClose"
     >
       <couponTemplate
         v-if="couponPickerVisible"
+        ref="couponPicker"
+        manualConfirm
         :selectedList="couponPickerSelectedList"
         getType="ACTIVITY"
         promotionStatus="START"
-        @selected="onCouponTemplateSelected"
       />
+      <template #footer>
+        <el-button @click="couponPickerVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmCouponPicker">确定</el-button>
+      </template>
     </el-dialog>
 
     <el-drawer
@@ -140,21 +147,22 @@
         </el-form-item>
         <el-form-item
           v-show="formAdd.benefitType === 'COUPON_PACKAGE'"
+          class="benefit-coupon-form-item"
           label="赠送优惠券"
           prop="couponPackageRows"
           :required="formAdd.benefitType === 'COUPON_PACKAGE'"
         >
-          <div>
+          <div class="benefit-coupon-field">
             <el-button plain class="mb_10" @click="openCouponPicker('add')">添加优惠券</el-button>
             <el-table
               border
               size="small"
+              class="benefit-coupon-table"
               :data="formAdd.couponPackageRows"
               empty-text="请添加优惠券"
-              style="width: 100%"
             >
-              <el-table-column prop="couponName" label="优惠券名称" min-width="100" show-overflow-tooltip />
-              <el-table-column label="有效期" min-width="100">
+              <el-table-column prop="couponName" label="优惠券名称" min-width="180" show-overflow-tooltip />
+              <el-table-column label="有效期" min-width="280">
                 <template #default="{ row }">
                   <span v-if="row" v-html="row.validRange || '-'" />
                 </template>
@@ -259,21 +267,22 @@
         </el-form-item>
         <el-form-item
           v-show="formEdit.benefitType === 'COUPON_PACKAGE'"
+          class="benefit-coupon-form-item"
           label="赠送优惠券"
           prop="couponPackageRows"
           :required="formEdit.benefitType === 'COUPON_PACKAGE'"
         >
-          <div>
+          <div class="benefit-coupon-field">
             <el-button plain class="mb_10" @click="openCouponPicker('edit')">添加优惠券</el-button>
             <el-table
               border
               size="small"
+              class="benefit-coupon-table"
               :data="formEdit.couponPackageRows"
               empty-text="请添加优惠券"
-              style="width: 100%"
             >
-              <el-table-column prop="couponName" label="优惠券名称" min-width="100" show-overflow-tooltip />
-              <el-table-column label="有效期" min-width="100">
+              <el-table-column prop="couponName" label="优惠券名称" min-width="180" show-overflow-tooltip />
+              <el-table-column label="有效期" min-width="280">
                 <template #default="{ row }">
                   <span v-if="row" v-html="row.validRange || '-'" />
                 </template>
@@ -405,14 +414,20 @@ export default {
       const opt = this.benefitTypeOptions.find((o) => o.value === v);
       return opt ? opt.description : v;
     },
+    touchFormField(refName, field) {
+      this.$nextTick(() => {
+        const ref = this.$refs[refName];
+        if (ref && typeof ref.validateField === "function") {
+          // validateField rejects on failure; catch to avoid dev-server [object Object] overlay
+          ref.validateField(field, () => {});
+        }
+      });
+    },
     onCouponQuantityChange(which, index, val) {
       const formKey = which === "add" ? "formAdd" : "formEdit";
       const refName = which === "add" ? "addForm" : "editForm";
       this[formKey].couponPackageRows[index].quantity = val;
-      this.$nextTick(() => {
-        const ref = this.$refs[refName];
-        if (ref) ref.validateField("couponPackageRows");
-      });
+      this.touchFormField(refName, "couponPackageRows");
     },
     buildFormRules(which) {
       const formKey = which === "add" ? "formAdd" : "formEdit";
@@ -524,14 +539,12 @@ export default {
       if (val !== COUPON_PACKAGE) {
         this.formAdd.couponPackageRows = [];
       }
-      this.$nextTick(() => {
-        if (this.$refs.addForm && val !== GIFT_POINT) {
-          this.$refs.addForm.validateField("giftPoint");
-        }
-        if (this.$refs.addForm && val !== COUPON_PACKAGE) {
-          this.$refs.addForm.validateField("couponPackageRows");
-        }
-      });
+      if (this.$refs.addForm && val !== GIFT_POINT) {
+        this.touchFormField("addForm", "giftPoint");
+      }
+      if (this.$refs.addForm && val !== COUPON_PACKAGE) {
+        this.touchFormField("addForm", "couponPackageRows");
+      }
     },
     onEditBenefitTypeChange(val) {
       if (val !== GIFT_POINT) {
@@ -540,14 +553,12 @@ export default {
       if (val !== COUPON_PACKAGE) {
         this.formEdit.couponPackageRows = [];
       }
-      this.$nextTick(() => {
-        if (this.$refs.editForm && val !== GIFT_POINT) {
-          this.$refs.editForm.validateField("giftPoint");
-        }
-        if (this.$refs.editForm && val !== COUPON_PACKAGE) {
-          this.$refs.editForm.validateField("couponPackageRows");
-        }
-      });
+      if (this.$refs.editForm && val !== GIFT_POINT) {
+        this.touchFormField("editForm", "giftPoint");
+      }
+      if (this.$refs.editForm && val !== COUPON_PACKAGE) {
+        this.touchFormField("editForm", "couponPackageRows");
+      }
     },
     parseCouponsFromConfig(str) {
       if (!str) return [];
@@ -627,6 +638,15 @@ export default {
       this.couponPickerWhich = which;
       this.couponPickerVisible = true;
     },
+    confirmCouponPicker() {
+      const list = this.$refs.couponPicker?.getSelection?.() || [];
+      if (!list.length) {
+        this.$Message.warning("请至少选择一张优惠券");
+        return;
+      }
+      this.onCouponTemplateSelected(list);
+      this.couponPickerVisible = false;
+    },
     onCouponTemplateSelected(selectedRows) {
       const which = this.couponPickerWhich;
       const form = which === "add" ? this.formAdd : this.formEdit;
@@ -638,19 +658,13 @@ export default {
         return this.buildCouponDisplayRow(row, qty);
       });
       form.couponPackageRows = rows;
-      this.$nextTick(() => {
-        const ref = this.$refs[refName];
-        if (ref) ref.validateField("couponPackageRows");
-      });
+      this.touchFormField(refName, "couponPackageRows");
     },
     removeCouponRow(which, index) {
       const form = which === "add" ? this.formAdd : this.formEdit;
       const refName = which === "add" ? "addForm" : "editForm";
       form.couponPackageRows.splice(index, 1);
-      this.$nextTick(() => {
-        const ref = this.$refs[refName];
-        if (ref) ref.validateField("couponPackageRows");
-      });
+      this.touchFormField(refName, "couponPackageRows");
     },
     init() {
       this.loadBenefitTypes();
@@ -902,6 +916,13 @@ export default {
   margin: 0 auto;
 }
 
+.member-benefit .benefit-list-panel {
+  width: 50%;
+  max-width: 100%;
+}
+.member-benefit .benefit-list-panel .benefit-list-table {
+  width: 100%;
+}
 .member-benefit .benefit-list-table table {
   table-layout: fixed;
 }
@@ -923,6 +944,25 @@ export default {
 .member-benefit .benefit-list-table--no-vertical-borders .el-table th,
 .member-benefit .benefit-list-table--no-vertical-borders .el-table td {
   border-right: none !important;
+}
+
+.member-benefit-coupon-picker-modal {
+  z-index: 2700 !important;
+}
+
+.benefit-form-drawer .benefit-coupon-form-item.el-form-item .el-form-item__content {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+}
+.benefit-form-drawer .benefit-coupon-field {
+  width: 100%;
+}
+.benefit-form-drawer .benefit-coupon-table {
+  width: 100%;
+}
+.benefit-form-drawer .benefit-coupon-table table {
+  width: 100% !important;
 }
 </style>
 

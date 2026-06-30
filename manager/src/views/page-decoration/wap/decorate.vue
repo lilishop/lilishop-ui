@@ -498,11 +498,23 @@
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
 
-    <el-dialog width="800px" title="选择分类" v-model="enableSelectCategory" append-to-body destroy-on-close>
+    <el-dialog
+      width="800px"
+      title="选择分类"
+      v-model="enableSelectCategory"
+      append-to-body
+      destroy-on-close
+      :close-on-click-modal="false"
+      @close="handleCancelCategoryModal"
+    >
       <categoryTemplate
         v-if="enableSelectCategory"
-        @selected="confirmCategory"
+        @selected="onCategorySelected"
       />
+      <template #footer>
+        <el-button @click="handleCancelCategoryModal">取消</el-button>
+        <el-button type="primary" @click="handleConfirmCategoryModal">确定</el-button>
+      </template>
     </el-dialog>
 
     <hotzone ref="hotzone" @changeZone="changeZone"></hotzone>
@@ -542,6 +554,7 @@ export default {
       selectedLinks: "", // 已选链接
       modelList: "", // 装修列表
       enableSelectCategory: false, //商品是否绑定分类
+      pendingCategory: null, // 选择分类弹窗草稿
       goodsSelectedIndex: 0, //绑定商品分类的索引
     };
   },
@@ -553,7 +566,21 @@ export default {
   },
   props: ["res"],
   methods: {
-    // 选择分类
+    // 选择分类（弹窗内暂存，确定后写回）
+    onCategorySelected(val) {
+      this.pendingCategory = val;
+    },
+    handleCancelCategoryModal() {
+      this.pendingCategory = null;
+      this.enableSelectCategory = false;
+    },
+    handleConfirmCategoryModal() {
+      if (this.pendingCategory?.length) {
+        this.confirmCategory(this.pendingCategory);
+      }
+      this.pendingCategory = null;
+      this.enableSelectCategory = false;
+    },
     confirmCategory(val) {
       let data = {
         ...this.res.options.list[0].titleWay[this.goodsSelectedIndex],
@@ -687,6 +714,7 @@ export default {
     },
     // 绑定分类
     bindGoodsCategory(index, key) {
+      this.pendingCategory = null;
       this.enableSelectCategory = true;
       this.goodsSelectedIndex = index;
     },
@@ -771,6 +799,7 @@ export default {
     // 图片选择器回显
     callbackSelected(val) {
       this.picModelFlag = false;
+      if (!val?.url) return;
       this.selectedGoods.img = val.url;
     },
     // 点击选择图片
