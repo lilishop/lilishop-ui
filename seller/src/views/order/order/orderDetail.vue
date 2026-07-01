@@ -784,6 +784,7 @@ export default {
       this.partDeliveryForm.deliveryNumMap = map;
     },
     refreshPartDeliveryAfterSubmit() {
+      this.partDeliveryModal = false;
       this.loading = true;
       return Promise.all([
         API_Order.getOrderDetail(this.sn).then((res) => {
