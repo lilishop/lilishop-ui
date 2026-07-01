@@ -1,6 +1,5 @@
-import { getCurrentPermissionList } from "@/api/index";
 import lazyLoading from "./lazyLoading.js";
-import { router } from "@/router/index";
+import { getRouter } from "./router-holder";
 import Cookies from "js-cookie";
 
 let util = {};
@@ -9,6 +8,8 @@ let util = {};
 util.dynamicRouteNames = [];
 
 util.clearDynamicRoutes = function () {
+  const router = getRouter();
+  if (!router) return;
   util.dynamicRouteNames.forEach((name) => {
     if (router.hasRoute(name)) {
       router.removeRoute(name);
@@ -44,6 +45,8 @@ util.collectLeafRoutes = function (routes, result = [], parentPath = "") {
 
 /** Vue Router 4：动态路由必须挂到 otherRouter 下，且刷新/热更新后需重新注册 */
 util.registerDynamicRoutes = function (menuData, options = {}) {
+  const router = getRouter();
+  if (!router) return;
   const { rematch = true } = options;
   const pendingPath = router.currentRoute.value.fullPath;
   const pendingUnmatched = router.currentRoute.value.matched.length === 0;
@@ -231,7 +234,8 @@ util.initRouter = function(vm) {
   if (!vm.$store.state.app.added) {
     // 第一次加载 读取数据
     // 加载菜单
-    getCurrentPermissionList().then(res => {
+    import("@/api/index").then(({ getCurrentPermissionList }) => {
+      getCurrentPermissionList().then(res => {
       if (!res.success) return false;
       let menuData = res.result;
 
@@ -261,6 +265,7 @@ util.initRouter = function(vm) {
       // 缓存数据 修改加载标识
       window.localStorage.setItem("menuData", JSON.stringify(menuData));
       vm.$store.commit("setAdded", true);
+      });
     });
   } else {
     // 读取缓存数据

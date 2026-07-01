@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
 import Util from "../libs/util";
+import { setRouter } from "../libs/router-holder";
 import Cookies from "js-cookie";
 import store from "@/store";
 import { routers } from "./router";
@@ -12,6 +13,8 @@ export const router = createRouter({
   history: createWebHistory(),
   routes: routers,
 });
+
+setRouter(router);
 
 router.beforeEach((to, from, next) => {
   NProgress.start();
