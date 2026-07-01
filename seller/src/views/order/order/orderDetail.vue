@@ -1155,24 +1155,41 @@ export default {
         }
       })
     },
-    toPrints () {
-      if (this.faceSheetForm.logisticsId != null && this.faceSheetForm.logisticsId != '') {
-        this.orderDeliverModal = false;
+    toPrints (printWindow) {
+      this.orderDeliverModal = false;
+      if (!this.someJSONdata) {
+        printWindow && printWindow.close();
+        return;
       }
+      const win = printWindow || window.open('', '_blank');
+      if (!win) {
+        this.$Message.error('无法打开打印窗口，请允许浏览器弹窗');
+        return;
+      }
+      win.document.write(this.someJSONdata);
+      win.document.close();
+      win.focus();
+      this.$Message.success('电子面单发货成功');
+      this.getDataDetail();
     },
     //订单发货提交
     orderDeliverySubmit () {
       if (this.facesheetFlag) {
         this.$refs['faceSheetForm'].validate((valid) => {
           if (valid) {
+            const printWindow = window.open('', '_blank');
             API_Order.getOrderFaceSheet(this.sn, this.faceSheetForm).then(res => {
               if (res.success && res.result.printTemplate) {
                 this.someJSONdata = res.result.printTemplate;
-                this.toPrints();
-              }else{
-                this.$Message.success("电子面单发货失败！");
+                this.toPrints(printWindow);
+              } else {
+                printWindow && printWindow.close();
+                this.$Message.error('电子面单发货失败！');
               }
-            })
+            }).catch(() => {
+              printWindow && printWindow.close();
+              this.$Message.error('电子面单发货失败！');
+            });
           }
         })
       } else {
