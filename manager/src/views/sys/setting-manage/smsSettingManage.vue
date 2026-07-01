@@ -1,6 +1,6 @@
 
 <template>
-  <el-card class="card">
+  <el-card class="sms-setting-card">
     <div class="cardBox">
       <div class="methodItem">
         <img src="../../../assets/aliyun.png" height="172" width="440" />
@@ -82,7 +82,7 @@ export default {
 };
 </script>
 <style lang="scss">
-.card {
+.sms-setting-card {
   width: 100%;
   height: 100%;
   position: fixed;
