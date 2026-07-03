@@ -1,14 +1,15 @@
 <template>
   <div class="wrapper">
-    <card _Title="评论/晒单" />
+    <UserCenterLayout title="评论/晒单" :tabs="['评论/晒单']">
 
     <div class="order">
       <div class="order-title">
         <div class="order-row title">
-          <div span="12">订单详情</div>
+          <div span="10" class="order-detail-title">订单详情</div>
           <div span="4">收货人</div>
-          <div span="4">评价</div>
-          <div span="6"></div>
+          <div span="4">评价等级</div>
+          <div span="4">评价内容</div>
+          <div span="2"></div>
         </div>
       </div>
       <empty v-if="list.length === 0" />
@@ -21,7 +22,7 @@
             <span class="hover-pointer fontsize_12 eval-detail" @click="evaluateDetail(item.id)">评价详情</span>
           </div>
           <div class="order-item-view">
-            <div span="12" class="item-view-name">
+            <div span="10" class="item-view-name">
               <div class="order-img hover-color" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
                 <img :src="item.goodsImage" alt="" />
               </div>
@@ -43,6 +44,7 @@
                   </template>
               </el-tooltip>
             </div>
+            <div span="2"></div>
           </div>
         </div>
       </div>
@@ -52,8 +54,9 @@
     <div class="page-size">
       <el-pagination :total="total" @current-change="changePageNum"
         @size-change="changePageSize"
-        :page-size="params.pageSize" layout="total, sizes, prev, pager, next"></el-pagination>
+        :page-size="params.pageSize" layout="total, sizes, prev, pager, next, jumper"></el-pagination>
     </div>
+    </UserCenterLayout>
   </div>
 </template>
 
@@ -158,9 +161,19 @@ export default {
     max-width: 50%;
   }
 
+  > [span='10'] {
+    flex: 0 0 41.666667%;
+    max-width: 41.666667%;
+  }
+
   > [span='4'] {
     flex: 0 0 16.666667%;
     max-width: 16.666667%;
+  }
+
+  > [span='2'] {
+    flex: 0 0 8.333333%;
+    max-width: 8.333333%;
   }
 
   > [span='6'] {
@@ -181,6 +194,10 @@ export default {
 .order-row {
   padding: 10px 0;
   text-align: center;
+}
+.order-detail-title {
+  text-align: left;
+  padding-left: 20px !important;
 }
 .content {
   color: #999;

@@ -176,9 +176,13 @@
                       <div v-for="(item, index) in data" :key="index" class="img-item">
                         <div
                           class="card"
-                          :class="{ 'custom-checkbox-card-checked': selectedOss.includes(item.id + ',' + item.url) }"
+                          :class="{
+                            'custom-checkbox-card-checked': selectedOss.includes(item.id + ',' + item.url),
+                            'oss-card-selectable': isComponent && selectImage,
+                          }"
                           @mouseenter="onMouseOver(item, index)"
                           @mouseleave="onMouseOut(item, index)"
+                          @click="handleCardClick(item, $event)"
                         >
                           <el-checkbox
                             :value="item.id + ',' + item.url"
@@ -1096,6 +1100,23 @@ export default {
         // this.totalSize = ((size * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
         this.$emit("selected", e);
       }
+    },
+    handleCardClick(item, event) {
+      if (!(this.isComponent && this.selectImage)) return;
+      if (event?.target?.closest?.(".preview") || event?.target?.closest?.(".card-checkbox")) {
+        return;
+      }
+      const key = `${item.id},${item.url}`;
+      let next;
+      if (this.maxSelect === 1) {
+        next = this.selectedOss.includes(key) ? [] : [key];
+      } else if (this.selectedOss.includes(key)) {
+        next = this.selectedOss.filter((k) => k !== key);
+      } else {
+        next = [...this.selectedOss, key];
+      }
+      this.selectedOss = next;
+      this.selectOssChange(next);
     },
     // 页码改变时回调
     pageChange(value) {

@@ -17,7 +17,8 @@ export function newMemberAddress (params) {
     url: '/buyer/member/address',
     needToken: true,
     method: Method.POST,
-    data: params
+    data: params,
+    loading: false
   });
 }
 
@@ -27,7 +28,8 @@ export function editMemberAddress (params) {
     url: '/buyer/member/address',
     needToken: true,
     method: Method.PUT,
-    params
+    params,
+    loading: false
   });
 }
 
@@ -36,7 +38,8 @@ export function delMemberAddress (id) {
   return request({
     url: `/buyer/member/address/delById/${id}`,
     needToken: true,
-    method: Method.DELETE
+    method: Method.DELETE,
+    loading: false
   });
 }
 

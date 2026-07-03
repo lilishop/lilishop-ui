@@ -46,10 +46,14 @@ export default {
     getSite() {
       getBaseSite().then((res) => {
         if (res.success && res.result.settingValue) {
-          const data = JSON.parse(res.result.settingValue);
-          this.applySiteInfo(data);
+          try {
+            const data = JSON.parse(res.result.settingValue);
+            this.applySiteInfo(data);
+          } catch {
+            // 站点配置解析失败时使用缓存
+          }
         }
-      });
+      }).catch(() => {});
     },
   },
 };

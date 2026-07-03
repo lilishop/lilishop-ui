@@ -29,7 +29,7 @@
             </div>
             <transition name='fade'>
               <ul class="drop-items">
-                <li @click="goUserCenter('/home')">我的主页</li>
+                <li @click="goUserCenter('/home/MyOrder')">我的主页</li>
                 <li @click="goUserCenter('/home/Coupons')">优惠券</li>
                 <li @click="goUserCenter('/home/Favorites')">我的收藏</li>
                 <li @click="signOutFun">退出登录</li>
@@ -40,14 +40,17 @@
         <li @click="goUserCenter('/home/MyOrder')"><span class="nav-item">我的订单</span></li>
         <li @click="goUserCenter('/home/MyTracks')"><span class="nav-item">我的足迹</span></li>
         <li @click="goUserCenter('/home/MsgList')"><span class="nav-item">我的消息</span></li>
-        <li v-if="$route.name !== 'Cart'" style="position:relative;">
-          <el-dropdown placement="bottom-start" trigger="hover" @visible-change="handleCartDropdownVisible">
-            <router-link to="/cart" target="_blank">
-              <span class="nav-item">
-                <el-icon :size="18"><ShoppingCart /></el-icon>
-                购物车（{{ cartNum < 100 ? cartNum : '99' }}）
-              </span>
-            </router-link>
+        <li v-if="$route.name !== 'Cart'" class="cart-nav-item">
+          <el-dropdown
+            class="cart-nav-dropdown"
+            placement="bottom-start"
+            trigger="hover"
+            @visible-change="handleCartDropdownVisible"
+          >
+            <span class="nav-item" @click="goToPay">
+              <el-icon :size="18"><ShoppingCart /></el-icon>
+              购物车（{{ cartNum < 100 ? cartNum : '99' }}）
+            </span>
             <template #dropdown>
               <div class="shopping-cart-null" style="width:200px" v-show="shoppingCart.length <= 0">
                 <el-icon class="cart-null-icon"><ShoppingCart /></el-icon>
@@ -128,7 +131,7 @@ export default {
     },
     myInfo() { // 跳转会员中心
       let url = this.$router.resolve({
-        path: '/home'
+        path: '/home/MyOrder'
       });
       window.open(url.href, '_blank');
     },
@@ -258,6 +261,27 @@ export default {
 
 .nav-item {
   padding-left: 20px;
+  gap: 4px;
+}
+
+.cart-nav-item {
+  :deep(.cart-nav-dropdown),
+  :deep(.el-dropdown) {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
+    line-height: 36px;
+  }
+
+  :deep(.el-tooltip__trigger),
+  :deep(.el-dropdown-selfdefine),
+  :deep([aria-expanded="true"]) {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
 }
 
 .location a {

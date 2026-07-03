@@ -1,8 +1,9 @@
 <template>
   <div class="wrapper">
-    <!-- 卡片组件 -->
-    <card _Title="我的足迹" :_Size="16"></card>
-    <el-button class="del-btn" @click="clearAll" type="primary">删除全部</el-button>
+    <UserCenterLayout title="我的足迹" :tabs="['我的足迹']">
+      <template #extra>
+        <el-button class="del-btn" @click="clearAll" type="primary">删除全部</el-button>
+      </template>
     <!-- 订单列表 -->
     <empty v-if="list.length === 0" />
     <ul class="track-list" v-else>
@@ -25,8 +26,9 @@
         @current-change="changePageNum"
         @size-change="changePageSize"
         :page-size="params.pageSize"
-       layout="sizes, prev, pager, next"></el-pagination>
+       layout="sizes, prev, pager, next, jumper"></el-pagination>
     </div>
+    </UserCenterLayout>
   </div>
 </template>
 

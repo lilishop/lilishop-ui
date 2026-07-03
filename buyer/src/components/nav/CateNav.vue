@@ -184,7 +184,7 @@ export default {
           // 存放分类信息
           localStorage.setItem("category", JSON.stringify(res.result));
         }
-      });
+      }).catch(() => {});
     },
     showDetail(index) {
       // 展示全部分类

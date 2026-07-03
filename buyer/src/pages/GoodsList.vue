@@ -67,16 +67,16 @@
                 已有<span>{{ item.commentNum || 0 }}</span>人评价
               </div>
               <div class="goods-show-seller">
-                <span class="text-bottom" style="color: #e4393c">{{
-                  item.storeName
-                }}</span>
+                <span
+                  class="text-bottom hover-pointer"
+                  style="color: #e4393c"
+                  @click.stop="goShopPage(item.storeId)"
+                >{{ item.storeName }}</span>
               </div>
 
               <div class="goods-show-right">
                 <el-tag
                   class="goods-show-tag goods-show-tag-self"
-                  color="red"
-                  effect="dark"
                   v-if="item.selfOperated"
                 >
                   自营
@@ -200,6 +200,17 @@ export default {
       });
       window.open(routeUrl.href, "_blank");
     },
+    goShopPage(id) {
+      if (!id) {
+        this.$Message.warning("店铺信息不存在");
+        return;
+      }
+      const routeUrl = this.$router.resolve({
+        path: "/merchant",
+        query: { id },
+      });
+      window.open(routeUrl.href, "_blank");
+    },
     // 分页 修改页码
     changePageNum(val) {
       this.params.pageNumber = val;
@@ -279,6 +290,11 @@ export default {
 }
 
 .goods-show-tag-self {
+  --el-tag-bg-color: #fa2c19;
+  --el-tag-border-color: #fa2c19;
+  --el-tag-text-color: #fff;
+  background-color: #fa2c19;
+  border-color: #fa2c19;
   color: #fff;
 
   :deep(.el-tag__content) {

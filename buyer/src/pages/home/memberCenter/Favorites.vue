@@ -1,40 +1,80 @@
 <template>
   <div class="wrapper">
-    <card _Title="近期收藏" :_Tabs="favoriteWay" :_ActiveTab="activeTabIndex" @_Change="change" :_Size="16" v-if="!homePage" />
-    <card _Title="近期收藏" :_Size="16" :_Tabs="favoriteWay" :_ActiveTab="activeTabIndex" @_Change="change" _More="全部收藏" _Src="/home/Favorites" v-else>
-    </card>
-    <div v-if="list.length">
-      <div v-for="(item, index) in list" :key="index">
-        <div class="goodsItem" :key="item.skuId">
-          <div class="goodsImg hover-pointer" v-if="params.type === 'GOODS'">
-            <img :src="item.image" />
-          </div>
-          <div class="goodsImg hover-pointer" v-else>
-            <img :src="item.storeLogo" />
-          </div>
-          <div class="goodsTitle hover-color" v-if="params.type === 'GOODS'" @click="buynow(item.skuId, item.goodsId,item.id)">
-            {{ item.goodsName }}
-          </div>
-          <div v-else class="goodsTitle  hover-pointer" @click="buynow(item.skuId, item.goodsId,item.id)" >
-            {{ item.storeName }}
-            <el-tag color="error" class="operated" v-if="item.selfOperated">商家自营</el-tag>
-          </div>
-          <div class="goodsPrice">
-            <span v-if="params.type === 'GOODS'">{{ $filters.unitPrice(item.price, '￥') }}</span>
+    <UserCenterLayout
+      v-if="!homePage"
+      title="近期收藏"
+      :tabs="favoriteWay"
+      :active-tab="activeTabIndex"
+      @tab-change="change"
+    >
+      <div v-if="list.length">
+        <div v-for="(item, index) in list" :key="index">
+          <div class="goodsItem" :key="item.skuId">
+            <div class="goodsImg hover-pointer" v-if="params.type === 'GOODS'">
+              <img :src="item.image" />
+            </div>
+            <div class="goodsImg hover-pointer" v-else>
+              <img :src="item.storeLogo" />
+            </div>
+            <div class="goodsTitle hover-color" v-if="params.type === 'GOODS'" @click="buynow(item.skuId, item.goodsId,item.id)">
+              {{ item.goodsName }}
+            </div>
+            <div v-else class="goodsTitle  hover-pointer" @click="buynow(item.skuId, item.goodsId,item.id)" >
+              {{ item.storeName }}
+              <el-tag color="error" class="operated" v-if="item.selfOperated">商家自营</el-tag>
+            </div>
+            <div class="goodsPrice">
+              <span v-if="params.type === 'GOODS'">{{ $filters.unitPrice(item.price, '￥') }}</span>
 
-          </div>
-          <div class="goodsBuy">
-            <el-button size="small" type="primary" @click="buynow(item.skuId, item.goodsId)"
-              v-if="params.type === 'GOODS'">立即购买</el-button>
-            <el-button size="small" type="primary" @click="goShop(item.id)" v-else>店铺购买</el-button>
-            <el-button size="small" v-if="params.type === 'GOODS'" @click="cancel(item.skuId)">取消收藏</el-button>
-            <el-button size="small" v-if="params.type === 'STORE'" @click="cancelStore(item.id)">取消收藏</el-button>
+            </div>
+            <div class="goodsBuy">
+              <el-button size="small" type="primary" @click="buynow(item.skuId, item.goodsId)"
+                v-if="params.type === 'GOODS'">立即购买</el-button>
+              <el-button size="small" type="primary" @click="goShop(item.id)" v-else>店铺购买</el-button>
+              <el-button size="small" v-if="params.type === 'GOODS'" @click="cancel(item.skuId)">取消收藏</el-button>
+              <el-button size="small" v-if="params.type === 'STORE'" @click="cancelStore(item.id)">取消收藏</el-button>
+            </div>
           </div>
         </div>
+        <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
       </div>
-      <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
-    </div>
-    <empty v-else />
+      <empty v-else />
+    </UserCenterLayout>
+
+    <template v-else>
+      <card _Title="近期收藏" :_Size="16" :_Tabs="favoriteWay" :_ActiveTab="activeTabIndex" @_Change="change" _More="全部收藏" _Src="/home/Favorites"></card>
+      <div v-if="list.length">
+        <div v-for="(item, index) in list" :key="index">
+          <div class="goodsItem" :key="item.skuId">
+            <div class="goodsImg hover-pointer" v-if="params.type === 'GOODS'">
+              <img :src="item.image" />
+            </div>
+            <div class="goodsImg hover-pointer" v-else>
+              <img :src="item.storeLogo" />
+            </div>
+            <div class="goodsTitle hover-color" v-if="params.type === 'GOODS'" @click="buynow(item.skuId, item.goodsId,item.id)">
+              {{ item.goodsName }}
+            </div>
+            <div v-else class="goodsTitle  hover-pointer" @click="buynow(item.skuId, item.goodsId,item.id)" >
+              {{ item.storeName }}
+              <el-tag color="error" class="operated" v-if="item.selfOperated">商家自营</el-tag>
+            </div>
+            <div class="goodsPrice">
+              <span v-if="params.type === 'GOODS'">{{ $filters.unitPrice(item.price, '￥') }}</span>
+            </div>
+            <div class="goodsBuy">
+              <el-button size="small" type="primary" @click="buynow(item.skuId, item.goodsId)"
+                v-if="params.type === 'GOODS'">立即购买</el-button>
+              <el-button size="small" type="primary" @click="goShop(item.id)" v-else>店铺购买</el-button>
+              <el-button size="small" v-if="params.type === 'GOODS'" @click="cancel(item.skuId)">取消收藏</el-button>
+              <el-button size="small" v-if="params.type === 'STORE'" @click="cancelStore(item.id)">取消收藏</el-button>
+            </div>
+          </div>
+        </div>
+        <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
+      </div>
+      <empty v-else />
+    </template>
   </div>
 </template>
 
@@ -183,14 +223,15 @@ export default {
 
 .goodsItem {
   display: flex;
+  align-items: center;
   height: 60px;
-  line-height: 60px;
   margin-bottom: 10px;
 
   >.goodsImg {
     width: 60px;
     height: 60px;
     overflow: hidden;
+    flex-shrink: 0;
 
     >img {
       width: 100%;
@@ -200,12 +241,15 @@ export default {
 
   >.goodsPrice,
   .goodsShop {
-    width: 150px;
+    width: 120px;
+    flex-shrink: 0;
     text-align: center;
   }
 
   >.goodsTitle {
-    width: 400px;
+    flex: 1;
+    min-width: 0;
+    line-height: 60px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -213,10 +257,17 @@ export default {
 }
 
 .goodsBuy {
-  margin-left: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  gap: 8px;
+  width: 170px;
+  margin-left: 16px;
+  line-height: normal;
 
-  >* {
-    margin: 0 4px;
+  :deep(.el-button) {
+    margin: 0;
   }
 }
 

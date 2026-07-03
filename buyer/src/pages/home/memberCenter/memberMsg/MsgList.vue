@@ -1,8 +1,13 @@
 <template>
   <div class="msg-list">
-    <card _Title="我的消息" :_Tabs="status" :_Size="16"  @_Change="statusChange"/>
+    <UserCenterLayout
+      title="我的消息"
+      :tabs="status"
+      :active-tab="activeStatusIndex"
+      @tab-change="statusChange"
+    >
 
-    <el-table v-if="params.status != 'ALREADY_REMOVE'" :data="messageData.records || []">
+      <el-table v-if="params.status != 'ALREADY_REMOVE'" :data="messageData.records || []">
       <el-table-column prop="title" label="消息标题" align="left" show-overflow-tooltip />
       <el-table-column prop="content" label="消息内容" align="left" show-overflow-tooltip />
       <el-table-column prop="createTime" label="发送时间" align="left" width="240" />
@@ -18,23 +23,24 @@
           <el-button type="danger" size="small" @click="removeMessage(row.id)">删除</el-button>
         </template>
       </el-table-column>
-    </el-table>
-    <el-table v-else :data="messageData.records || []">
+      </el-table>
+      <el-table v-else :data="messageData.records || []">
       <el-table-column prop="title" label="消息标题" align="left" show-overflow-tooltip />
       <el-table-column prop="content" label="消息内容" align="left" show-overflow-tooltip />
       <el-table-column prop="createTime" label="发送时间" align="left" width="240" />
-    </el-table>
-    <el-pagination
-      style="float:right;margin-top:10px"
-      :current-page="params.pageNumber"
-      :total="messageData.total"
-      :page-size="params.pageSize"
-      @current-change="changePage"
-      @size-change="changePageSize"
-      :page-sizes="[10, 20, 50]"
-      small
-      layout="total, prev, pager, next, jumper"
-    />
+      </el-table>
+      <div class="msg-pagination">
+        <el-pagination
+          :current-page="params.pageNumber"
+          :total="messageData.total"
+          :page-size="params.pageSize"
+          @current-change="changePage"
+          @size-change="changePageSize"
+          :page-sizes="[10, 20, 50]"
+          layout="total, prev, pager, next, jumper"
+        />
+      </div>
+    </UserCenterLayout>
   </div>
 </template>
 <script>
@@ -49,6 +55,13 @@ export default {
         pageSize: 10,
         status: 'UN_READY'
       },
+    }
+  },
+  computed: {
+    activeStatusIndex () {
+      const map = ['UN_READY', 'ALREADY_READY', 'ALREADY_REMOVE'];
+      const index = map.indexOf(this.params.status);
+      return index > -1 ? index : 0;
     }
   },
   methods: {
@@ -103,5 +116,9 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-
+.msg-pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
 </style>

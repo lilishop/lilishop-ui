@@ -1,6 +1,6 @@
 <template>
   <div class="order-detail">
-    <card _Title="售后详情" :_Size="16"></card>
+    <UserCenterLayout title="售后详情" :tabs="['售后详情']">
     <!-- 操作按钮 -->
     <el-card class="mb_10" shadow="never" v-if="(afterSale.serviceStatus == 'PASS' &&
           afterSale.serviceType != 'RETURN_MONEY') || (afterSale.afterSaleAllowOperationVO && afterSale.afterSaleAllowOperationVO.cancel)">
@@ -11,8 +11,10 @@
     <div class="order-card">
       <h3>{{afterSale.serviceName}}</h3>
       <p class="global_color fontsize_18">{{ afterSale.orderStatusValue }}</p>
-      <p>售后单号：{{ afterSale.sn }} &nbsp;&nbsp;&nbsp;订单号：{{afterSale.orderSn}}</p>
-      <div style="color:#999;" class="operation-time">创建时间：{{afterSale.createTime}}</div>
+      <p class="order-meta">
+        <span>售后单号：{{ afterSale.sn }} &nbsp;&nbsp;&nbsp;订单号：{{ afterSale.orderSn }}</span>
+        <span class="order-meta-time">创建时间：{{ afterSale.createTime }}</span>
+      </p>
       <div class="service-after">
         <div>
           本次售后服务由<span>{{afterSale.storeName}}</span>为您提供
@@ -104,6 +106,7 @@
         <el-button type="primary" :loading="submitLoading" @click="submitDelivery">提交</el-button>
       </div></template>
     </el-dialog>
+    </UserCenterLayout>
   </div>
 </template>
 <script>
@@ -243,14 +246,20 @@ export default {
     color: #999;
     margin: 3px;
   }
+  .order-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    .order-meta-time {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+  }
   h3 {
     font-weight: normal;
     font-size: 16px;
-  }
-  .operation-time {
-    position: absolute;
-    right: 20px;
-    top: 10px;
   }
   &:last-child{
     border: none;

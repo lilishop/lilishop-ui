@@ -40,9 +40,7 @@
           </el-menu>
         </el-aside>
         <el-main class="content ml_10">
-          <transition mode="out-in">
-            <router-view></router-view>
-          </transition>
+          <router-view></router-view>
         </el-main>
       </div>
     </div>

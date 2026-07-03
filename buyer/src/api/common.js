@@ -38,7 +38,8 @@ export function getRegion (id) {
   return request({
     url: `${commonUrl}/common/common/region/item/${id}`,
     needToken: true,
-    method: Method.GET
+    method: Method.GET,
+    loading: false
   });
 }
 

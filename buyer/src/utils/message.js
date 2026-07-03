@@ -1,7 +1,8 @@
 import { ElLoading, ElMessage, ElMessageBox } from "element-plus";
 
-let loadingInstance = null;
+const MESSAGE_OFFSET = 36;
 
+let loadingInstance = null;
 export const Spin = {
   show(options = {}) {
     Spin.hide();
@@ -28,19 +29,18 @@ export const Spin = {
 
 export const Message = {
   success(content) {
-    return ElMessage.success(normalize(content));
+    return showMessage("success", content);
   },
   error(content) {
-    return ElMessage.error(normalize(content));
+    return showMessage("error", content);
   },
   warning(content) {
-    return ElMessage.warning(normalize(content));
+    return showMessage("warning", content);
   },
   info(content) {
-    return ElMessage.info(normalize(content));
+    return showMessage("info", content);
   },
 };
-
 export const Notice = {
   open(options = {}) {
     const fn = Message[options.type] || Message.info;
@@ -95,8 +95,14 @@ export const Modal = {
   },
 };
 
-function normalize(content) {
-  if (typeof content === "string") return content;
+function showMessage(type, content) {
+  return ElMessage[type]({
+    message: normalize(content),
+    offset: MESSAGE_OFFSET,
+  });
+}
+
+function normalize(content) {  if (typeof content === "string") return content;
   if (content && content.content) return content.content;
   return String(content ?? "");
 }

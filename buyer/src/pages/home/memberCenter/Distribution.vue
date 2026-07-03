@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <card _Title="我的分销" />
+    <UserCenterLayout title="我的分销" :tabs="['我的分销']">
     <!-- 分销申请 -->
 
     <div v-if="status === 0">
@@ -103,7 +103,6 @@
               :total="goodsData.total"
               :page-size="params.pageSize"
               @current-change="changePage"
-              small
              layout="total, prev, pager, next, jumper"></el-pagination>
           </div>
         </el-tab-pane>
@@ -141,7 +140,6 @@
               :total="goodsData.total"
               :page-size="params.pageSize"
               @current-change="changePage"
-              small
              layout="total, prev, pager, next, jumper"></el-pagination>
           </div>
         </el-tab-pane>
@@ -178,7 +176,6 @@
               :total="logData.total"
               :page-size="logParams.pageSize"
               @current-change="changePageLog"
-              small
              layout="total, prev, pager, next, jumper"></el-pagination>
           </div>
         </el-tab-pane>
@@ -254,6 +251,7 @@
       <div class="mt_10" style="margin-top: 100px;">
         商品链接：<el-input style="width: 600px" v-model="qrcode"></el-input>
       </div></el-dialog>
+    </UserCenterLayout>
   </div>
 </template>
 
@@ -510,8 +508,9 @@ export default {
   margin: 20px 0;
 }
 .page-size {
+  display: flex;
+  justify-content: flex-end;
   margin: 15px 0px;
-  text-align: right;
 }
 .account-price {
   font-weight: bold;

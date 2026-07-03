@@ -90,34 +90,40 @@
         />
       </el-form-item>
       <el-form-item prop="licencePhoto" label="营业执照电子版">
-        <el-upload
-          ref="uploadLicence"
-          :show-upload-list="false"
-          :on-success="handleSuccess"
-          :format="['jpg', 'jpeg', 'png', 'gif']"
-          :max-size="2048"
-          :before-upload="beforeUpload"
-          :on-format-error="handleFormatError"
-          :on-exceeded-size="handleMaxSize"
-          :on-error="uploadErr"
-          multiple
-          :action="action"
-          :headers="accessToken"
-        >
-          <el-button type="info" :loading="uploadLoading">证照上传</el-button>
-        </el-upload>
-        <div class="describe">
-          请压缩图片在2M以内，格式为gif，jpg，png，并确保文字清晰，以免上传或审核失败
-        </div>
-        <div
-          class="img-list"
-          v-for="(item, index) in form.licencePhoto"
-          :key="index"
-        >
-          <img :src="item" width="100" alt="" />
-          <div class="cover">
-            <el-icon @click="handleView(item)"><View /></el-icon>
-            <el-icon @click="handleRemove(index, 'licencePhoto')"><Delete /></el-icon>
+        <div class="upload-wrap">
+          <el-upload
+            ref="uploadLicence"
+            :show-file-list="false"
+            :on-success="handleSuccess"
+            accept=".jpg,.jpeg,.png,.gif"
+            :before-upload="beforeUpload"
+            :on-error="uploadErr"
+            :disabled="form.licencePhoto.length >= 1"
+            :action="action"
+            :headers="accessToken"
+          >
+            <el-button
+              type="info"
+              :loading="uploadLoading"
+              :disabled="form.licencePhoto.length >= 1"
+              >证照上传</el-button
+            >
+          </el-upload>
+          <div class="describe">
+            请压缩图片在2M以内，格式为gif，jpg，png，并确保文字清晰，以免上传或审核失败，仅可上传1张
+          </div>
+          <div class="img-list-wrap">
+            <div
+              class="img-list"
+              v-for="(item, index) in form.licencePhoto"
+              :key="index"
+            >
+              <img :src="item" alt="" />
+              <div class="cover">
+                <el-icon @click="handleView(item)"><View /></el-icon>
+                <el-icon @click="handleRemove(index, 'licencePhoto')"><Delete /></el-icon>
+              </div>
+            </div>
           </div>
         </div>
       </el-form-item>
@@ -139,34 +145,35 @@
         />
       </el-form-item>
       <el-form-item prop="legalPhoto" label="法人证件电子版">
-        <el-upload
-          ref="uploadLegal"
-          :show-upload-list="false"
-          :on-success="handleSuccess1"
-          :before-upload="beforeUpload1"
-          :max-size="2048"
-          :format="['jpg', 'jpeg', 'png', 'gif']"
-          :on-format-error="handleFormatError"
-          :on-exceeded-size="handleMaxSize"
-          :on-error="uploadErr"
-          multiple
-          :action="action"
-          :headers="accessToken"
-        >
-          <el-button type="info" :loading="uploadLoading1">证照上传</el-button>
-        </el-upload>
-        <div class="describe">
-          请压缩图片在2M以内，身份证正反面两张照片，确保图片清晰无缺角
-        </div>
-        <div
-          class="img-list"
-          v-for="(item, index) in form.legalPhoto"
-          :key="index"
-        >
-          <img :src="item" width="100" alt="" />
-          <div class="cover">
-            <el-icon @click="handleView(item)"><View /></el-icon>
-            <el-icon @click="handleRemove(index, 'legalPhoto')"><Delete /></el-icon>
+        <div class="upload-wrap">
+          <el-upload
+            ref="uploadLegal"
+            :show-file-list="false"
+            :on-success="handleSuccess1"
+            :before-upload="beforeUpload1"
+            accept=".jpg,.jpeg,.png,.gif"
+            :on-error="uploadErr"
+            multiple
+            :action="action"
+            :headers="accessToken"
+          >
+            <el-button type="info" :loading="uploadLoading1">证照上传</el-button>
+          </el-upload>
+          <div class="describe">
+            请压缩图片在2M以内，身份证正反面两张照片，确保图片清晰无缺角
+          </div>
+          <div class="img-list-wrap">
+            <div
+              class="img-list"
+              v-for="(item, index) in form.legalPhoto"
+              :key="index"
+            >
+              <img :src="item" alt="" />
+              <div class="cover">
+                <el-icon @click="handleView(item)"><View /></el-icon>
+                <el-icon @click="handleRemove(index, 'legalPhoto')"><Delete /></el-icon>
+              </div>
+            </div>
           </div>
         </div>
       </el-form-item>
@@ -194,6 +201,7 @@ const FIRST_APPLY_DRAFT_KEY = 'shopEntryFirstDraft';
 
 export default {
   components: { multipleMap, View, Delete },
+  emits: ['change'],
   props: {
     content: {
       default: {},
@@ -290,7 +298,7 @@ export default {
           this.loading = true;
           let params = JSON.parse(JSON.stringify(this.form));
           params.legalPhoto = this.form.legalPhoto.toString();
-          params.licencePhoto = this.form.licencePhoto.toString();
+          params.licencePhoto = this.normalizeLicencePhoto(this.form.licencePhoto);
           applyFirst(params)
             .then((res) => {
               this.loading = false;
@@ -309,25 +317,47 @@ export default {
     },
 
     // 上传之前
-    beforeUpload () {
+    beforeUpload (file) {
       this.uploadLoading = true;
-      if (this.form.licencePhoto.length >= 3) {
-        this.$Message.warning('最多上传三张图片')
+      if (this.form.licencePhoto.length >= 1) {
+        this.$Message.warning('最多上传一张图片')
+        this.uploadLoading = false;
         return false;
       }
+      return this.validateUploadFile(file);
     },
     // 上传之前
-    beforeUpload1 () {
+    beforeUpload1 (file) {
       this.uploadLoading1 = true;
       if (this.form.legalPhoto.length >= 2) {
         this.$Message.warning('最多上传两张图片')
+        this.uploadLoading1 = false;
         return false;
       }
+      return this.validateUploadFile(file);
+    },
+    validateUploadFile (file) {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      const isAllowedType = allowedTypes.includes(file.type);
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isAllowedType) {
+        this.uploadLoading = false;
+        this.uploadLoading1 = false;
+        this.$Message.warning('上传文件格式不正确');
+        return false;
+      }
+      if (!isLt2M) {
+        this.uploadLoading = false;
+        this.uploadLoading1 = false;
+        this.$Message.warning('文件大小不能超过2M');
+        return false;
+      }
+      return true;
     },
     // 上传成功回调
     handleSuccess (res, file) {
       this.uploadLoading = false;
-      this.form.licencePhoto.push(res.result);
+      this.form.licencePhoto = [res.result];
     },
     // 上传成功回调
     handleSuccess1 (res, file) {
@@ -366,6 +396,12 @@ export default {
     handleRemove (index, listName) {
       this.form[listName].splice(index, 1);
     },
+    normalizeLicencePhoto (value) {
+      if (Array.isArray(value)) {
+        return value.length ? value[0] : '';
+      }
+      return value ? String(value).split(',').filter(Boolean)[0] || '' : '';
+    },
     initFormFromContent(content) {
       if (!content || !Object.keys(content).length) return;
       this.form = JSON.parse(JSON.stringify(content));
@@ -373,7 +409,7 @@ export default {
         ? String(content.legalPhoto).split(',').filter(Boolean)
         : [];
       this.form.licencePhoto = content.licencePhoto
-        ? String(content.licencePhoto).split(',').filter(Boolean)
+        ? String(content.licencePhoto).split(',').filter(Boolean).slice(0, 1)
         : [];
       this.contentInitialized = true;
     },
@@ -388,7 +424,9 @@ export default {
           ...parsed,
         };
         this.form.legalPhoto = Array.isArray(parsed.legalPhoto) ? parsed.legalPhoto : [];
-        this.form.licencePhoto = Array.isArray(parsed.licencePhoto) ? parsed.licencePhoto : [];
+        this.form.licencePhoto = Array.isArray(parsed.licencePhoto)
+          ? parsed.licencePhoto.slice(0, 1)
+          : [];
       } catch (e) {
         sessionStorage.removeItem(FIRST_APPLY_DRAFT_KEY);
       }
@@ -434,26 +472,45 @@ h4 {
 .el-input {
   width: 300px;
 }
+.img-list-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+}
+
 .img-list {
-  display: inline-block;
-  margin: 10px;
+  display: block;
+  flex-shrink: 0;
   width: 100px;
+  height: 100px;
   position: relative;
+  overflow: hidden;
+  border: 1px solid #eee;
+  box-sizing: border-box;
+  background-color: #f5f5f5;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
   .cover {
     display: none;
     position: absolute;
     top: 0;
-    bottom: 0;
     left: 0;
-    right: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.6);
-    width: inherit;
-    height: inherit;
     align-items: center;
     justify-content: space-around;
-    i {
+    :deep(.el-icon) {
       color: #fff;
-      font-size: 30px;
+      font-size: 24px;
       cursor: pointer;
     }
   }
@@ -461,7 +518,27 @@ h4 {
     display: flex;
   }
 }
+.upload-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+
+  :deep(.el-upload) {
+    display: block;
+  }
+
+  :deep(.el-upload-list) {
+    display: none;
+  }
+}
+
 .describe {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  margin-bottom: 0;
+  line-height: 1.5;
   font-size: 12px;
   color: #999;
 }

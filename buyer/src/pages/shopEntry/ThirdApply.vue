@@ -11,32 +11,33 @@
       </el-form-item>
 
       <el-form-item prop="storeLogo" label="店铺logo">
-        <el-upload
-          ref="uploadLogo"
-          :show-upload-list="false"
-          :on-success="handleSuccess"
-          :format="['jpg', 'jpeg', 'png', 'gif']"
-          :max-size="2048"
-          :before-upload="beforeUpload"
-          :on-format-error="handleFormatError"
-          :on-exceeded-size="handleMaxSize"
-          :on-error="uploadErr"
-          multiple
-          :action="action"
-          :headers="accessToken"
-        >
-          <el-button type="info" :loading="uploadLoading">上传logo</el-button>
-        </el-upload>
-        <div class="describe">请压缩图片在2M以内，格式为gif，jpg，png</div>
-        <div
-          class="img-list"
-          v-for="(item, index) in form.storeLogo"
-          :key="index"
-        >
-          <img :src="item" width="100" height="" alt="" />
-          <div class="cover">
-            <el-icon @click="handleView(item)"><View /></el-icon>
-            <el-icon @click="handleRemove(index, 'storeLogo')"><Delete /></el-icon>
+        <div class="upload-wrap">
+          <el-upload
+            ref="uploadLogo"
+            :show-file-list="false"
+            :on-success="handleSuccess"
+            accept=".jpg,.jpeg,.png,.gif"
+            :before-upload="beforeUpload"
+            :on-error="uploadErr"
+            :disabled="form.storeLogo.length >= 1"
+            :action="action"
+            :headers="accessToken"
+          >
+            <el-button type="info" :loading="uploadLoading" :disabled="form.storeLogo.length >= 1">上传logo</el-button>
+          </el-upload>
+          <div class="describe">请压缩图片在2M以内，格式为gif，jpg，png，仅可上传1张</div>
+          <div class="img-list-wrap">
+            <div
+              class="img-list"
+              v-for="(item, index) in form.storeLogo"
+              :key="index"
+            >
+              <img :src="item" alt="" />
+              <div class="cover">
+                <el-icon @click="handleView(item)"><View /></el-icon>
+                <el-icon @click="handleRemove(index, 'storeLogo')"><Delete /></el-icon>
+              </div>
+            </div>
           </div>
         </div>
       </el-form-item>
@@ -44,13 +45,15 @@
         <el-select
           v-model="form.goodsManagementCategory"
           multiple
+          placeholder="请选择"
           style="width: 300px"
         >
-          <el-option             v-for="item in categoryList"
-            :value="item.id"
+          <el-option
+            v-for="item in categoryList"
             :key="item.id"
-            >{{ item.name }}</el-option
-          >
+            :label="item.name"
+            :value="normalizeCategoryId(item.id)"
+          />
         </el-select>
       </el-form-item>
 
@@ -102,6 +105,7 @@ import multipleMap from "@/components/map/multiple-map";
 
 
 export default {
+  emits: ['change'],
   props: {
     content: {
       default: {},
@@ -119,7 +123,8 @@ export default {
 
       visible: false, // 图片预览
       form: { // 表单数据
-        storeLogo: []
+        storeLogo: [],
+        goodsManagementCategory: [],
       },
       rules: { // 验证规则
         goodsManagementCategory: [
@@ -159,33 +164,35 @@ export default {
       });
     },
     // 上传之前
-    beforeUpload () {
+    beforeUpload (file) {
       this.uploadLoading = true;
-      if (this.form.storeLogo.length >= 3) {
-        this.$Message.warning('最多上传三张图片')
+      if (this.form.storeLogo.length >= 1) {
+        this.$Message.warning('最多上传一张图片')
+        this.uploadLoading = false;
         return false;
       }
+      return this.validateUploadFile(file);
+    },
+    validateUploadFile (file) {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      const isAllowedType = allowedTypes.includes(file.type);
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isAllowedType) {
+        this.uploadLoading = false;
+        this.$Message.warning('上传文件格式不正确');
+        return false;
+      }
+      if (!isLt2M) {
+        this.uploadLoading = false;
+        this.$Message.warning('文件大小不能超过2M');
+        return false;
+      }
+      return true;
     },
     // 上传成功回调
     handleSuccess (res, file) {
       this.uploadLoading = false;
-      this.form.storeLogo.push(res.result);
-    },
-    // 上传格式错误
-    handleFormatError (file) {
-      this.uploadLoading = false;
-      this.$Notice.warning({
-        title: 'The file format is incorrect',
-        desc: '上传文件格式不正确'
-      });
-    },
-    // 上传大小限制
-    handleMaxSize (file) {
-      this.uploadLoading = false;
-      this.$Notice.warning({
-        title: 'Exceeding file size limit',
-        desc: '文件大小不能超过2M'
-      })
+      this.form.storeLogo = [res.result];
     },
     // 上传失败
     uploadErr () {
@@ -219,26 +226,37 @@ export default {
     // 获取商品分类
     getCategoryList () {
       getCategory(0).then((res) => {
-        if (res.success) this.categoryList = res.result;
+        if (res.success) {
+          this.categoryList = res.result || [];
+          this.syncCategorySelection();
+        }
       });
     },
-
-
+    normalizeCategoryId (id) {
+      return id == null ? '' : String(id);
+    },
+    syncCategorySelection () {
+      if (!Array.isArray(this.form.goodsManagementCategory)) {
+        this.form.goodsManagementCategory = [];
+        return;
+      }
+      this.form.goodsManagementCategory = this.form.goodsManagementCategory.map(
+        (id) => this.normalizeCategoryId(id)
+      );
+    },
   },
   mounted () {
     this.accessToken.accessToken = storage.getItem('accessToken');
-    this.getCategoryList();
     if (this.content && Object.keys(this.content).length) {
       this.form = JSON.parse(JSON.stringify(this.content));
-      if (this.form.storeLogo) {
-        this.form.storeLogo = String(this.content.storeLogo).split(',').filter(Boolean);
-        this.form.goodsManagementCategory = String(this.content.goodsManagementCategory || '')
-          .split(',')
-          .filter(Boolean);
-      } else {
-        this.form.storeLogo = [];
-      }
+      this.form.storeLogo = this.content.storeLogo
+        ? String(this.content.storeLogo).split(',').filter(Boolean)
+        : [];
+      this.form.goodsManagementCategory = this.content.goodsManagementCategory
+        ? String(this.content.goodsManagementCategory).split(',').filter(Boolean)
+        : [];
     }
+    this.getCategoryList();
   }
 };
 </script>
@@ -257,27 +275,45 @@ h4 {
 .el-input {
   width: 300px;
 }
+.img-list-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+}
+
 .img-list {
-  display: inline-block;
-  margin: 10px;
+  display: block;
+  flex-shrink: 0;
   width: 100px;
-  height: auto;
+  height: 100px;
   position: relative;
+  overflow: hidden;
+  border: 1px solid #eee;
+  box-sizing: border-box;
+  background-color: #f5f5f5;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
   .cover {
     display: none;
     position: absolute;
     top: 0;
-    bottom: 0;
     left: 0;
-    right: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.6);
-    width: inherit;
-    height: inherit;
     align-items: center;
     justify-content: space-around;
-    i {
+    :deep(.el-icon) {
       color: #fff;
-      font-size: 30px;
+      font-size: 24px;
       cursor: pointer;
     }
   }
@@ -285,7 +321,28 @@ h4 {
     display: flex;
   }
 }
+
+.upload-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+
+  :deep(.el-upload) {
+    display: block;
+  }
+
+  :deep(.el-upload-list) {
+    display: none;
+  }
+}
+
 .describe {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  margin-bottom: 0;
+  line-height: 1.5;
   font-size: 12px;
   color: #999;
 }

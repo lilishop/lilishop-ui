@@ -1,8 +1,13 @@
 <template>
   <div class="wrapper">
-    <card _Title="优惠券列表" :_Tabs="statusNameList" @_Change="change" />
-    <empty v-if="list.length == 0" />
-    <ul class="coupon-list" v-else>
+    <UserCenterLayout
+      title="优惠券列表"
+      :tabs="statusNameList"
+      :active-tab="activeStatusIndex"
+      @tab-change="change"
+    >
+      <empty v-if="list.length == 0" />
+      <ul class="coupon-list" v-else>
       <li v-for="(item, index) in list" class="coupon-item" :key="index">
         <div class="c-left">
           <div>
@@ -29,14 +34,18 @@
         <i class="circle-top"></i>
         <i class="circle-bottom"></i>
       </li>
-    </ul>
-    <el-pagination       :total="total"
-      @current-change="changePageNum"
-      class="pageration"
-      @size-change="changePageSize"
-      :page-size="params.pageSize"
-     layout="total, sizes, prev, pager, next"></el-pagination>
-    <el-skeleton v-if="loading" fix></el-skeleton>
+      </ul>
+      <div class="pageration">
+        <el-pagination
+          :total="total"
+          @current-change="changePageNum"
+          @size-change="changePageSize"
+          :page-size="params.pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+        />
+      </div>
+      <el-skeleton v-if="loading" fix></el-skeleton>
+    </UserCenterLayout>
   </div>
 </template>
 
@@ -63,6 +72,12 @@ export default {
       total: 0, // 优惠券总数
       list: [], // 优惠券列表
     };
+  },
+  computed: {
+    activeStatusIndex() {
+      const index = this.statusList.indexOf(this.params.memberCouponStatus);
+      return index > -1 ? index : 0;
+    },
   },
   methods: {
     getList() {
@@ -204,6 +219,7 @@ export default {
 }
 
 .pageration {
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

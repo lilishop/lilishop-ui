@@ -12,9 +12,9 @@
         </el-breadcrumb>
         <div class="store-collect" v-if="!takeDownSale && goodsMsg.data">
           <span class="mr_10" v-if="goodsMsg.data">
-            <router-link :to="'Merchant?id=' + goodsMsg.data.storeId">{{
-              goodsMsg.data.storeName
-            }}</router-link>
+            <router-link
+              :to="{ path: '/merchant', query: { id: goodsMsg.data.storeId } }"
+            >{{ goodsMsg.data.storeName }}</router-link>
           </span>
           <span @click="collect">
             <el-icon :color="storeCollected ? '#ed3f14' : '#666'"><StarFilled /></el-icon>

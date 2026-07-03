@@ -33,6 +33,7 @@ app.config.globalProperties.Cookies = storage;
 app.config.globalProperties.$inputMaxLength = inputMaxLength;
 
 app.config.globalProperties.linkTo = function (url) {
+  if (!url) return;
   if (url.substr(0, 1) === "/") {
     window.open(location.origin + url, "_blank");
   } else {

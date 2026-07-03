@@ -12,7 +12,14 @@ export default createStore({
       storage.getItem("logoImg") || require("@/assets/images/logo2.png"),
     siteName: storage.getItem("siteName") || "lilishop",
     hotWordsList: storage.getItem("hotWordsList"),
-    category: JSON.parse(localStorage.getItem("category")),
+    category: (() => {
+      try {
+        const raw = localStorage.getItem("category");
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
+    })(),
   },
   getters,
   actions,

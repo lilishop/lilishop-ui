@@ -1,6 +1,6 @@
 <template>
   <div class="memberGrade">
-    <card _Title="我的等级"/>
+    <UserCenterLayout title="我的等级" :tabs="['我的等级']">
     <div class="summary">
       <div class="gradeCard">
         <div class="gradeLeft">
@@ -24,7 +24,7 @@
       </div>
     </div>
 
-    <el-tabs value="rules">
+    <el-tabs v-model="activeGradeTab">
       <el-tab-pane label="获取经验值方式" name="rules">
         <el-table v-loading="rulesLoading" :data="ruleList">
           <el-table-column label="获取方式" min-width="720">
@@ -65,17 +65,20 @@
             </template>
           </el-table-column>
         </el-table>
-        <el-pagination           style="float:right;margin-top:10px"
-          :current-page="params.pageNumber"
-          :total="experienceLogs.total || 0"
-          :page-size="params.pageSize"
-          @current-change="changePage"
-          @size-change="changePageSize"
-          :page-sizes="[10, 20, 50]"
-          small
-         layout="total, prev, pager, next, jumper"></el-pagination>
+        <div class="grade-pagination">
+          <el-pagination
+            :current-page="params.pageNumber"
+            :total="experienceLogs.total || 0"
+            :page-size="params.pageSize"
+            @current-change="changePage"
+            @size-change="changePageSize"
+            :page-sizes="[10, 20, 50]"
+            layout="total, prev, pager, next, jumper"
+          />
+        </div>
       </el-tab-pane>
     </el-tabs>
+    </UserCenterLayout>
 
   </div>
 
@@ -98,6 +101,7 @@ export default {
       currentExperience: 0,
       currentGradeId: '',
       selectedRuleKey: '',
+      activeGradeTab: 'rules',
       logLoading: false,
       gradeLoading: false,
       params: {
@@ -403,6 +407,12 @@ h3 {
 .metaItem b {
   color: $theme_color;
   font-weight: 600;
+}
+
+.grade-pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 
 </style>

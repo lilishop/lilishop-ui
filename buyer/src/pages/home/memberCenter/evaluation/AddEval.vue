@@ -1,19 +1,19 @@
 <template>
   <div class="add-eval">
-    <div class="title">
-      <card _Title="订单评价" :_Size="16"></card>
+    <UserCenterLayout title="订单评价" :tabs="['订单评价']">
+      <div class="title">
       <p>
         <span class="color999">订单号：</span><span>{{$route.query.sn}}</span>
         <span class="color999 ml_20" v-if="order.order">{{order.order.paymentTime}}</span>
       </p>
-    </div>
+      </div>
     <!-- 物流评分、服务评分 -->
     <div class="delivery-rate">
       <div class="fontsize_16">物流服务评价：</div>
-      <div class="color999">
-        <span>物流评价：<el-rate v-model="form.deliveryScore" /></span>
-        <span>服务评价：<el-rate v-model="form.serviceScore" /></span>
-        <span>描述评价：<el-rate v-model="form.descriptionScore" /></span>
+      <div class="color999 rate-list">
+        <span class="rate-item">物流评价：<el-rate v-model="form.deliveryScore" /></span>
+        <span class="rate-item">服务评价：<el-rate v-model="form.serviceScore" /></span>
+        <span class="rate-item">描述评价：<el-rate v-model="form.descriptionScore" /></span>
       </div>
     </div>
     <!-- 添加订单评价  左侧商品详情  右侧评价框 -->
@@ -26,13 +26,15 @@
         </div>
 
         <div class="eval-con">
-          <div>
-            <span class="color999">商品评价：</span>
+          <div class="goods-grade-row">
+            <span class="color999 goods-grade-label">商品评价：</span>
             <el-radio-group v-model="orderGoods.grade">
               <el-radio-button value="GOOD">好评</el-radio-button>
               <el-radio-button value="MODERATE">中评</el-radio-button>
               <el-radio-button value="WORSE">差评</el-radio-button>
             </el-radio-group>
+          </div>
+          <div>
             <el-input type="textarea" maxlength="500" show-word-limit :rows="4" v-model="orderGoods.content" />
           </div>
           <div style="display:flex;align-items:center;">
@@ -59,10 +61,13 @@
         </div>
       </li>
     </ul>
-    <el-button type="primary" class="mt_10" :loading="loading" @click="save">发表</el-button>
+    <div class="submit-row">
+      <el-button type="primary" :loading="loading" @click="save">发表</el-button>
+    </div>
     <el-dialog title="View Image" v-model="visible">
         <img :src="previewImage" v-if="visible" style="width: 100%">
     </el-dialog>
+    </UserCenterLayout>
   </div>
 </template>
 <script>
@@ -188,6 +193,16 @@ export default {
     font-weight: bold;
   }
 }
+.rate-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+.rate-item {
+  display: inline-flex;
+  align-items: center;
+}
 .goods-eval li{
   display: flex;
   border-bottom: 1px solid #eee;
@@ -205,6 +220,20 @@ export default {
     width: 70%;
     padding: 20px;
   }
+}
+.goods-grade-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.goods-grade-label {
+  flex-shrink: 0;
+}
+
+.submit-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 
 .demo-upload-list{

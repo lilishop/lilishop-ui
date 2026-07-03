@@ -1,6 +1,6 @@
 <template>
   <div>
-    <card _Title="收货地址" />
+    <UserCenterLayout title="收货地址" :tabs="['收货地址']">
     <div class="add-box">
       <el-form :model="formData" ref="form" label-position="left" label-width="100px" :rules="ruleInline">
         <el-form-item label="收件人" prop="name">
@@ -30,14 +30,13 @@
       <el-button type="primary" class="mr_10" :loading="loading" @click="save">保存收货地址</el-button>
       <el-button @click="$router.back()">返回</el-button>
     </div>
+    </UserCenterLayout>
 
     <multipleMap  ref="map" @callback="getAddress" />
   </div>
 </template>
 
 <script>
-import card from "@/components/card";
-
 import multipleMap from "@/components/map/multiple-map";
 import * as RegExp from "@/plugins/RegExp.js";
 import {
@@ -85,8 +84,8 @@ export default {
           if (this.$route.query.id) {
             editMemberAddress(params)
               .then((res) => {
+                this.loading = false;
                 if (res.success) {
-                  this.loading = false;
                   this.$router.push("/home/MyAddress");
                 }
               })
@@ -96,8 +95,8 @@ export default {
           } else {
             newMemberAddress(params)
               .then((res) => {
+                this.loading = false;
                 if (res.success) {
-                  this.loading = false;
                   this.$router.push("/home/MyAddress");
                 }
               })
@@ -145,7 +144,6 @@ export default {
     if (id) this.getAddrById(id);
   },
   components: {
-    card,
     multipleMap
   },
 };

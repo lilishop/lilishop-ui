@@ -229,11 +229,11 @@ export default {
 .advert-list {
   width: 100%;
   margin: 0;
-  padding: 5px 0;
+  padding: 10px;
   list-style: none;
   box-sizing: border-box;
   background: $theme_color;
-  height: 200px;
+  height: 210px;
   display: flex;
   gap: 10px;
   align-items: center;

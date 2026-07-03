@@ -121,14 +121,25 @@ export default {
     selectedGoodsData(val) {
       if (!val?.length || !this.draftList) return;
       val.forEach((item) => {
+        if (this.isGoodsInDraftList(item)) return;
         this.draftList.push({
           img: item.thumbnail,
           price: item.price,
           title: item.goodsName,
           desc: "",
+          skuId: item.id,
+          goodsId: item.goodsId,
           url: `/goodsDetail?skuId=${item.id}&goodsId=${item.goodsId}`,
         });
       });
+    },
+    isGoodsInDraftList(goods) {
+      const targetUrl = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
+      return this.draftList.some(
+        (draft) =>
+          (draft.skuId && String(draft.skuId) === String(goods.id)) ||
+          (draft.url && draft.url === targetUrl)
+      );
     },
     // 选择链接回调
     selectedLink(val) {

@@ -2,18 +2,35 @@
   <div class="merchant">
     <BaseHeader/>
     <!-- 搜索栏 -->
-    <Search  :storeId="storeMsg.storeId" @search="search"></Search>
+    <Search :storeId="storeMsg.storeId || $route.query.id" @search="search"></Search>
     <!-- 店铺logo -->
     <div class="shop-logo">
-      <div>
-        <p>{{ storeMsg.storeName || '店铺' }}</p>
-        <p :alt="storeMsg.storeDesc" class="ellipsis" v-html="storeMsg.storeDesc"></p>
-      </div>
-      <div>
-        <span class="hover-pointer" @click="collect"><el-icon :color="storeCollected ? '#ed3f14' : '#fff'"><StarFilled /></el-icon>{{
-            storeCollected ? '已收藏店铺' : '收藏店铺'
-          }}</span>
-        <span class="hover-pointer ml_10" style="width:80px" @click="IMService(storeMsg.storeId,null,null)"><i class="icomoon icon-customer-service"></i>联系客服</span>
+      <div class="shop-logo-inner">
+        <div class="shop-info">
+          <p class="shop-name">{{ storeMsg.storeName || '店铺' }}</p>
+          <p
+            v-if="storeMsg.storeDesc"
+            :alt="storeMsg.storeDesc"
+            class="shop-desc ellipsis"
+            v-html="storeMsg.storeDesc"
+          ></p>
+        </div>
+        <div class="shop-actions">
+          <span class="hover-pointer store-collect-btn" @click="collect">
+            <el-icon :color="storeCollected ? '#ffc107' : '#fff'">
+              <StarFilled />
+            </el-icon>
+            <span>{{
+              storeCollected ? '已收藏店铺' : '收藏店铺'
+            }}</span>
+          </span>
+          <span
+            class="hover-pointer store-service-btn"
+            @click="IMService(storeMsg.storeId, null, null)"
+          >
+            <i class="icomoon icon-customer-service"></i>联系客服
+          </span>
+        </div>
       </div>
     </div>
     <div class="store-category">
@@ -101,7 +118,11 @@
 
 import { ArrowDown, StarFilled } from '@element-plus/icons-vue';
 import {getCateById, getDetailById} from "@/api/shopentry";
-import {cancelStoreCollect, collectStore} from "@/api/member";
+import {
+  cancelStoreCollect,
+  collectStore,
+  isStoreCollection,
+} from "@/api/member";
 import {goodsList} from "@/api/goods";
 import Search from "@/components/Search";
 import ModelForm from "@/components/indexDecorate/ModelForm";
@@ -145,10 +166,15 @@ export default {
   },
   created() {
     this.getStoreMsg();
+    window.onscroll = () => {
+      const top =
+        document.documentElement.scrollTop || document.body.scrollTop;
+      this.topSearchShow = top > 300;
+    };
   },
   methods: {
     isFloorEnabled() {
-      const pageShow = this.storeMsg.pageShow;
+      const pageShow = this.storeMsg && this.storeMsg.pageShow;
       return pageShow === "1" || pageShow === 1 || pageShow === "OPEN" || pageShow === true;
     },
     loadStoreGoodsView() {
@@ -205,55 +231,45 @@ export default {
     },
 
 
-    // getStoreMsg () { // 店铺信息
-    //   getDetailById(this.$route.query.id).then(res => {
-    //     if (res.success) {
-    //       this.storeMsg = res.result
-    //       document.title = this.storeMsg.storeName
-    //       if (this.Cookies.getItem('userInfo')) {
-    //         isCollection('STORE', this.storeMsg.storeId).then(res => {
-    //           if (res.success && res.result) {
-    //             this.storeCollected = true;
-    //           }
-    //         })
-    //       }
-    //     }
-    //   })
-    // },
-    // async getListByDay() {
-    //   // 当天秒杀活动
-    //   const res = await seckillByDay();
-    //   if (res.success && res.result.length) {
-    //     return res.result;
-    //   } else {
-    //     return [];
-    //   }
-    // },
-
+    checkStoreCollectionStatus() {
+      const storeId = this.storeMsg && this.storeMsg.storeId;
+      if (!storeId || !this.Cookies.getItem("userInfo")) {
+        return;
+      }
+      isStoreCollection("STORE", storeId)
+        .then((res) => {
+          if (res.success && res.result) {
+            this.storeCollected = true;
+          }
+        })
+        .catch(() => {});
+    },
     getStoreMsg() {
-      // 店铺信息
-      getDetailById(this.$route.query.id).then((res) => {
-        if (res.success) {
-
-          this.storeMsg = res.result;
-
-          if (this.isFloorEnabled()) {
-            this.getIndexData();
+      const storeId = this.$route.query.id;
+      if (!storeId) {
+        this.$Message.warning("店铺不存在");
+        return;
+      }
+      getDetailById(storeId)
+        .then((res) => {
+          if (res.success && res.result) {
+            this.storeMsg = res.result;
+            document.title = this.storeMsg.storeName || "店铺";
+            this.checkStoreCollectionStatus();
+            if (this.isFloorEnabled()) {
+              this.getIndexData();
+            } else {
+              this.loadStoreGoodsView();
+            }
           } else {
+            this.storeMsg = { storeId };
             this.loadStoreGoodsView();
           }
-          let that = this;
-          window.onscroll = function () {
-            let top =
-              document.documentElement.scrollTop || document.body.scrollTop;
-            if (top > 300) {
-              that.topSearchShow = true;
-            } else {
-              that.topSearchShow = false;
-            }
-          };
-        }
-      });
+        })
+        .catch(() => {
+          this.storeMsg = { storeId };
+          this.loadStoreGoodsView();
+        });
     },
     getCateList() {
       // 店铺分类
@@ -318,17 +334,26 @@ export default {
         this.$router.push("/login");
         return;
       }
-      if (this.storeCollected) {
-        let cancel = await cancelStoreCollect("STORE", storeId);
-        if (cancel.success) {
-          this.$Message.success("已取消收藏");
-          this.storeCollected = false;
+      try {
+        if (this.storeCollected) {
+          const cancel = await cancelStoreCollect("STORE", storeId);
+          if (cancel.success) {
+            this.$Message.success("已取消收藏");
+            this.storeCollected = false;
+          }
+        } else {
+          const collect = await collectStore("STORE", storeId);
+          if (collect.success || collect.code === 200) {
+            this.storeCollected = true;
+            this.$Message.success(
+              "收藏店铺成功,可以前往个人中心我的收藏查看"
+            );
+          }
         }
-      } else {
-        let collect = await collectStore("STORE", storeId);
-        if (collect.code === 200) {
+      } catch (err) {
+        const msg = err?.message || err?.data?.message || "";
+        if (msg.includes("重复收藏")) {
           this.storeCollected = true;
-          this.$Message.success("收藏店铺成功,可以前往个人中心我的收藏查看");
         }
       }
     },
@@ -350,30 +375,55 @@ export default {
   padding: 4px;
   color: #fff;
 
-  > div {
+  .shop-logo-inner {
     display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
     width: 1200px;
     margin: 0 auto;
+  }
+
+  .shop-info {
+    display: flex;
+    flex-direction: row;
     align-items: center;
-
-    > div:nth-child(2) {
-      margin-left: 10px;
-      flex: 1;
-    }
-
-    > div:nth-child(3) {
-      width: 200px;
-    }
+    gap: 12px;
+    min-width: 0;
   }
 
-  p:nth-child(1) {
+  .shop-name {
+    margin: 0;
     font-size: 20px;
+    flex-shrink: 0;
   }
 
-  p:nth-child(2) {
+  .shop-desc {
+    margin: 0;
     font-size: 14px;
     max-height: 40px;
     max-width: 400px;
+  }
+
+  .shop-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .store-collect-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .store-service-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 80px;
   }
 }
 

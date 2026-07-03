@@ -1,6 +1,6 @@
 <template>
   <!-- 头部广告 -->
-  <div class="advertising" v-if="show" :style="{'background-color': data.bgColor}">
+  <div class="advertising" v-if="show && data" :style="{'background-color': data.bgColor}">
     <img :src="data.img" class="hover-pointer" @click="linkTo(data.url)"/>
     <el-icon :size="20" @click="show = false"><CircleClose /></el-icon>
   </div>

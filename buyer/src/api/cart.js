@@ -20,7 +20,8 @@ export function cartGoodsAll () {
   return request({
     url: '/buyer/trade/carts/all',
     method: Method.GET,
-    needToken: true
+    needToken: true,
+    loading: false
   });
 }
 

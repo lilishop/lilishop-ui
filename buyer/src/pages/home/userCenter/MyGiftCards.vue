@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper my-gift-cards">
-    <card _Title="我的礼品卡" />
+    <UserCenterLayout title="我的礼品卡" :tabs="['我的礼品卡']">
 
     <div class="bind-section mb_20">
       <div class="section-title">兑换礼品卡</div>
@@ -77,10 +77,9 @@
         :page-size="params.pageSize"
         :page-sizes="[10, 20, 50]"
         :total="total"
-        small
         @current-change="changePage"
         @size-change="changePageSize"
-       layout="total, sizes, prev, pager, next" />
+       layout="total, sizes, prev, pager, next, jumper" />
     </div>
 
     <el-dialog v-model="noticeModal" title="使用须知" footer-hide width="520">
@@ -90,6 +89,7 @@
       <div class="gcc-notice-footer">
         <el-button type="primary" @click="noticeModal = false">我知道了</el-button>
       </div></el-dialog>
+    </UserCenterLayout>
   </div>
 </template>
 
@@ -441,8 +441,9 @@ export default {
     background: #f7f7f7;
   }
   .page-size {
+    display: flex;
+    justify-content: flex-end;
     margin-top: 20px;
-    text-align: right;
   }
 }
 .gcc-notice-text {

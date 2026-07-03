@@ -1,45 +1,48 @@
 <template>
   <div class="wrapper">
-    <card _Title="账户安全"/>
-    <div class="safeList">
+    <UserCenterLayout title="账户安全" :tabs="['账户安全']">
+      <div class="safeList">
       <!-- 密码 -->
       <div class="safeItem">
-        <div :span="2">
+        <div class="safeItem-icon">
           <el-icon :size="40"><Key /></el-icon>
         </div>
-        <div :span="16">
+        <div class="safeItem-content">
           <div class="setDivItem">登录密码</div>
           <div class="setDivItem theme">互联网账号存在被盗风险，建议您定期更改密码以保护账户安全。</div>
         </div>
-        <div :span="4">
+        <div class="safeItem-action">
           <el-button @click="modifyPwd">修改密码</el-button>
         </div>
       </div>
 
-      <div class="safeItem">
-        <div :span="2">
-          <el-icon :size="40"><Link /></el-icon>
-        </div>
-        <div :span="16">
-          <div class="setDivItem">第三方账户绑定</div>
-          <div class="setDivItem theme">绑定后可使用第三方账号快捷登录。</div>
-          <div class="connectList">
-            <div class="connectRow">
-              <div class="connectRowLeft">
-                <span class="connectName">{{ wechatConnect.label }}</span>
-                <el-tag v-if="isBound(wechatConnect.type)" color="success">已绑定</el-tag>
-                <el-tag v-else>未绑定</el-tag>
-              </div>
-            </div>
-            <el-skeleton size="large" fix v-if="connectLoading"></el-skeleton>
+      <div class="safeItem safeItem-connect">
+        <div class="safeItem-main">
+          <div class="safeItem-icon">
+            <el-icon :size="40"><Link /></el-icon>
+          </div>
+          <div class="safeItem-content">
+            <div class="setDivItem">第三方账户绑定</div>
+            <div class="setDivItem theme">绑定后可使用第三方账号快捷登录。</div>
+          </div>
+          <div class="safeItem-action">
+            <el-button v-if="!isBound(wechatConnect.type)" type="primary" @click="openBindModal(wechatConnect)">绑定</el-button>
+            <el-button v-else @click="confirmUnbind(wechatConnect)">解绑</el-button>
           </div>
         </div>
-        <div :span="4">
-          <el-button v-if="!isBound(wechatConnect.type)" type="primary" @click="openBindModal(wechatConnect)">绑定</el-button>
-          <el-button v-else @click="confirmUnbind(wechatConnect)">解绑</el-button>
+        <div class="connectList">
+          <div class="connectRow">
+            <div class="connectRowLeft">
+              <span class="connectName">{{ wechatConnect.label }}</span>
+              <el-tag v-if="isBound(wechatConnect.type)" color="success">已绑定</el-tag>
+              <el-tag v-else>未绑定</el-tag>
+            </div>
+          </div>
+          <el-skeleton size="large" fix v-if="connectLoading"></el-skeleton>
         </div>
       </div>
-    </div>
+      </div>
+    </UserCenterLayout>
 
     <el-dialog
       v-model="bindModalVisible"
@@ -266,12 +269,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  .safeItem > div:first-child,
-  .safeItem > div:last-child {
-    text-align: center;
-    color: $theme_color;
-  }
-
   .theme {
     color: $theme_color;
   }
@@ -281,17 +278,47 @@ export default {
   }
 
   .safeItem {
+    display: flex;
+    align-items: center;
+    gap: 16px;
     border-bottom: 1px solid $border_color;
     padding: 16px 0;
+  }
 
-    > div {
-      padding: 8px 0;
-    }
+  .safeItem-connect {
+    display: block;
+  }
+
+  .safeItem-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .safeItem-icon {
+    flex-shrink: 0;
+    width: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $theme_color;
+  }
+
+  .safeItem-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .safeItem-action {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
   }
 
   .connectList {
     position: relative;
     margin-top: 8px;
+    margin-left: 72px;
   }
 
   .connectRow {

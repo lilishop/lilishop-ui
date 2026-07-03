@@ -128,10 +128,14 @@ export default {
   },
   computed: {
     promotionTags() {
-      if (this.$store.state.hotWordsList) {
-        return JSON.parse(this.$store.state.hotWordsList)
-      } else {
-        return []
+      const raw = this.$store.state.hotWordsList;
+      if (!raw) {
+        return [];
+      }
+      try {
+        return typeof raw === "string" ? JSON.parse(raw) : raw;
+      } catch {
+        return [];
       }
     }
   },
@@ -145,12 +149,12 @@ export default {
       if (!reloadTime) {
         hotWords({count: 5}).then(res => {
           if (res.success && res.result) storage.setItem('hotWordsList', res.result)
-        })
+        }).catch(() => {})
         storage.setItem('hotWordsReloadTime', new Date().getTime())
       } else if (reloadTime && time > reloadTime) {
         hotWords({count: 5}).then(res => {
           if (res.success && res.result) storage.setItem('hotWordsList', res.result)
-        })
+        }).catch(() => {})
         storage.setItem('hotWordsReloadTime', new Date().getTime())
       }
     }

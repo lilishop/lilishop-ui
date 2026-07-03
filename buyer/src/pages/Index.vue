@@ -125,7 +125,6 @@ export default {
       }
     },
     getcps(){
-      console.log(123123)
       let data = new Date()
       let datas = data.getDate()
       getAutoCoup().then(res=>{ //调用自动发券
@@ -146,27 +145,34 @@ export default {
               }
               storage.setItem('getTimes',datas)//存储缓存
             }
-      })
+      }).catch(() => {});
     },
     handleReachBottom(){
 
     } ,
     getIndexData () {
       if(this.pageData){
-        this.parsePageData(JSON.stringify(this.pageData))
+        this.parsePageData(JSON.stringify(this.pageData)).catch(() => {});
       }
       else{
         // 获取首页装修数据
         indexData({ clientType: 'PC' }).then(async (res) => {
-          if (res.success && res.result) {
-            this.parsePageData(res.result.pageData)
+          if (res.success && res.result?.pageData) {
+            try {
+              await this.parsePageData(res.result.pageData);
+            } catch {
+              // 装修数据解析失败时保持默认空楼层
+            }
           }
-        });
+        }).catch(() => {});
       }
     },
 
     async parsePageData(pageData){
-      let dataJson = JSON.parse(pageData);
+      const dataJson = typeof pageData === "string" ? JSON.parse(pageData) : pageData;
+      if (!dataJson?.list?.length) {
+        return;
+      }
       // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
       // 轮播图根据不同轮播，样式不同
       for (let i = 0; i < dataJson.list.length; i++) {
@@ -182,18 +188,25 @@ export default {
         }
       }
       this.modelForm = dataJson;
-      storage.setItem('navList', dataJson.list[1])
+      if (dataJson.list[1]) {
+        storage.setItem('navList', dataJson.list[1])
+      }
       this.showNav = true
-      this.topAdvert = dataJson.list[0];
+      if (dataJson.list[0]) {
+        this.topAdvert = dataJson.list[0];
+      }
     },
 
     async getListByDay () { // 当天秒杀活动
-      const res = await seckillByDay()
-      if (res.success && res.result.length) {
-        return res.result
-      } else {
-        return []
+      try {
+        const res = await seckillByDay()
+        if (res.success && res.result?.length) {
+          return res.result
+        }
+      } catch {
+        // 秒杀接口失败时不影响首页其他模块
       }
+      return []
     }
   },
   components: { Search,

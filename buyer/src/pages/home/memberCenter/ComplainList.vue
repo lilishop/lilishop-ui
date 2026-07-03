@@ -1,14 +1,15 @@
 <template>
   <div class="wrapper">
-    <card _Title="我的投诉"  />
+    <UserCenterLayout title="我的投诉" :tabs="['我的投诉']">
 
     <div class="order">
       <div class="order-title">
         <div class="order-row title">
-          <div class="col-12">商品信息</div>
-          <div class="col-4">投诉状态</div>
-          <div class="col-4">投诉主题</div>
-          <div class="col-4">投诉内容</div>
+          <div span="10" class="order-detail-title">商品信息</div>
+          <div span="4">投诉状态</div>
+          <div span="4">投诉主题</div>
+          <div span="4">投诉内容</div>
+          <div span="2"></div>
         </div>
       </div>
       <empty v-if="list.length === 0" />
@@ -22,7 +23,7 @@
             <span class="hover-pointer fontsize_12 eval-detail" style="right: 90px" v-if="item.complainStatus === 'APPLYING' || item.complainStatus === 'NEW'" @click="cancel(item.id)">取消投诉</span>
           </div>
           <div class="order-item-view">
-            <div class="col-12 item-view-name">
+            <div span="10" class="item-view-name">
               <div class="order-img hover-color" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
                 <img :src="item.goodsImage" alt="" />
               </div>
@@ -30,11 +31,11 @@
                 {{item.goodsName}}
               </div>
             </div>
-            <div class="col-4">{{statusLabel[item.complainStatus]}}</div>
-            <div class="col-4">
+            <div span="4">{{statusLabel[item.complainStatus]}}</div>
+            <div span="4">
               <div class="content">{{item.complainTopic}}</div>
             </div>
-            <div class="col-4">
+            <div span="4">
               <el-tooltip>
                 <div class="content">{{item.content}}</div>
                 <template #content>
@@ -44,6 +45,7 @@
                 </template>
               </el-tooltip>
             </div>
+            <div span="2"></div>
           </div>
         </div>
       </div>
@@ -53,8 +55,9 @@
     <div class="page-size">
       <el-pagination :total="total" @current-change="changePageNum"
         @size-change="changePageSize"
-        :page-size="params.pageSize" layout="total, sizes, prev, pager, next"></el-pagination>
+        :page-size="params.pageSize" layout="total, sizes, prev, pager, next, jumper"></el-pagination>
     </div>
+    </UserCenterLayout>
   </div>
 </template>
 
@@ -163,29 +166,30 @@ export default {
 .order-item-view {
   display: flex;
   align-items: center;
-  flex-wrap: nowrap;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 10px 20px;
 
-  .col-12,
-  .col-4 {
+  > [span] {
     box-sizing: border-box;
     padding: 0 8px;
   }
 
-  .col-12 {
-    flex: 0 0 50%;
-    max-width: 50%;
+  > [span='10'] {
+    flex: 0 0 41.666667%;
+    max-width: 41.666667%;
   }
 
-  .col-4 {
+  > [span='4'] {
     flex: 0 0 16.666667%;
     max-width: 16.666667%;
+  }
+
+  > [span='2'] {
+    flex: 0 0 8.333333%;
+    max-width: 8.333333%;
   }
 }
 
 .order-item-view {
+  padding: 10px 20px;
   align-items: flex-start;
 }
 .order-item {
@@ -194,7 +198,12 @@ export default {
   margin: 10px 0;
 }
 .order-row {
+  padding: 10px 0;
   text-align: center;
+}
+.order-detail-title {
+  text-align: left;
+  padding-left: 20px !important;
 }
 .content {
   color: #999;
@@ -214,6 +223,7 @@ export default {
   }
 }
 .page-size{
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

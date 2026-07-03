@@ -23,6 +23,8 @@
 
 </template>
 <script>
+import { getCategoryTree } from "@/api/goods.js";
+
 export default {
   data() {
     return {
@@ -39,10 +41,32 @@ export default {
     this.init();
   },
   methods: {
+    loadCategoryFromCache() {
+      try {
+        const raw = localStorage.getItem("category");
+        if (!raw) {
+          return null;
+        }
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : null;
+      } catch {
+        return null;
+      }
+    },
+    applyCategoryList(category) {
+      if (!Array.isArray(category)) {
+        this.categoryList = [];
+        return;
+      }
+      category.forEach((item) => {
+        item.___type = "category";
+      });
+      this.categoryList = category;
+    },
     // 点击一级
     handleClickChild(item, index) {
       this.parentIndex = index;
-      this.secondLevel = item.children;
+      this.secondLevel = item.children || [];
       item.___type = "category";
       item.allId = item.id;
 
@@ -59,7 +83,7 @@ export default {
       second.allId = `${second.parentId},${second.id}`
 
       this.secondIndex = index;
-      this.thirdLevel = second.children;
+      this.thirdLevel = second.children || [];
       this.thirdIndex = '';
       this.$emit("selected", [second]);
       // this.handleClickthirdChild(second.children[0], 0);
@@ -72,24 +96,17 @@ export default {
       this.thirdIndex = index;
     },
     init() {
-      let category = JSON.parse(localStorage.getItem('category'))
-      if (category) {
-        category.forEach((item) => {
-          item.___type = "category";
-        });
-        this.categoryList = category;
-        // this.handleClickChild(category[0], 0);
-      } else {
-        setTimeout(() => {
-          category = JSON.parse(localStorage.getItem('category'))
-          category.forEach((item) => {
-            item.___type = "category";
-          });
-          this.categoryList = category;
-          // this.handleClickChild(category[0], 0);
-        },3000)
+      const cached = this.loadCategoryFromCache();
+      if (cached) {
+        this.applyCategoryList(cached);
+        return;
       }
-
+      getCategoryTree().then((res) => {
+        if (res.success && Array.isArray(res.result)) {
+          localStorage.setItem("category", JSON.stringify(res.result));
+          this.applyCategoryList(res.result);
+        }
+      });
     },
   },
 };
