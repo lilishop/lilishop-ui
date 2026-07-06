@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-row class="header">
-      <img :src="domainLogo" class="logo" width="220px" />
+      <img v-if="domainLogo" :src="domainLogo" class="logo" width="220px" />
     </el-row>
   </div>
 </template>
@@ -12,26 +12,12 @@ import { getBaseSite } from "@/api/common.js";
 export default {
   data() {
     return {
-      domainLogo: require("@/assets/logo.png"),
+      domainLogo: "",
     };
   },
   methods: {
-    init() {
-      if (
-        !localStorage.getItem("icon") ||
-        !localStorage.getItem("title") ||
-        !localStorage.getItem("icontitle_expiration_time")
-      ) {
-        this.getSite();
-      } else if (new Date() > localStorage.getItem("icontitle_expiration_time")) {
-        this.getSite();
-      } else {
-        this.domainLogo = localStorage.getItem("icon");
-        this.applyFavicon(localStorage.getItem("icon"));
-        window.document.title = localStorage.getItem("title") + " - 运营后台";
-      }
-    },
     applyFavicon(href) {
+      if (!href) return;
       let link =
         document.querySelector("link[rel*='icon']") ||
         document.createElement("link");
@@ -46,20 +32,22 @@ export default {
           const { domainLogo, domainIcon, siteName } = JSON.parse(
             res.result.settingValue
           );
-          this.domainLogo = domainLogo;
+          this.domainLogo = domainLogo || "";
           const expirationTime = new Date().setHours(new Date().getHours() + 1);
           localStorage.setItem("icontitle_expiration_time", expirationTime);
-          localStorage.setItem("icon", domainLogo);
-          localStorage.setItem("domainIcon", domainIcon);
-          localStorage.setItem("title", siteName);
+          localStorage.setItem("icon", domainLogo || "");
+          localStorage.setItem("domainIcon", domainIcon || "");
+          localStorage.setItem("title", siteName || "");
           this.applyFavicon(domainIcon || domainLogo);
-          window.document.title = siteName + " - 运营后台";
+          if (siteName) {
+            window.document.title = siteName + " - 运营后台";
+          }
         }
       });
     },
   },
   mounted() {
-    this.init();
+    this.getSite();
   },
 };
 </script>
