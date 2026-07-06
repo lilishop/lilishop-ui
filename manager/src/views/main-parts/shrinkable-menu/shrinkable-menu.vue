@@ -10,9 +10,9 @@
       </el-menu-item>
     </el-menu>
     <el-menu
-      :key="currNav"
+      :key="`${currNav}-${activeMenuName}`"
       class="sub-menu"
-      :default-active="$route.name"
+      :default-active="activeMenuName"
       @select="changeMenu"
     >
       <template v-for="item in menuList" :key="item.id">
@@ -45,6 +45,19 @@ export default {
     currNav() {
       return this.$store.state.app.currNav;
     },
+    activeMenuName() {
+      const route = this.$route;
+      const routePath = util.normalizeRoutePath(route.path);
+      for (const item of this.menuList) {
+        for (const menu of item.children || []) {
+          const menuPath = util.normalizeRoutePath(menu.path);
+          if (menu.name === route.name || (menuPath && menuPath === routePath)) {
+            return menu.name;
+          }
+        }
+      }
+      return route.name;
+    },
   },
   watch: {
     $route(val) {
@@ -63,6 +76,12 @@ export default {
         this.$router.push({ name });
         return;
       }
+      const menu = this.findMenuByName(name);
+      if (menu?.path) {
+        const path = menu.path.startsWith("/") ? menu.path : `/${menu.path}`;
+        this.$router.push({ path });
+        return;
+      }
       util.initRouter(this);
       this.$nextTick(() => {
         if (this.$router.hasRoute(name)) {
@@ -71,6 +90,16 @@ export default {
           this.$Message.warning("菜单路由未就绪，请刷新页面后重试");
         }
       });
+    },
+    findMenuByName(name) {
+      for (const item of this.menuList) {
+        for (const menu of item.children || []) {
+          if (menu.name === name) {
+            return menu;
+          }
+        }
+      }
+      return null;
     },
     selectNav(name) {
       this.$store.commit("setCurrNav", name);

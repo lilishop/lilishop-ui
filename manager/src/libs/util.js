@@ -7,6 +7,30 @@ let util = {};
 /** 动态菜单路由 name，用于登出或重新注册时清理 */
 util.dynamicRouteNames = [];
 
+util.normalizeRoutePath = function (path) {
+  return String(path || "")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "");
+};
+
+util.isSameRoutePage = function (a, b) {
+  if (!a || !b) return false;
+  if (a.name && b.name && a.name === b.name) return true;
+  const pathA = util.normalizeRoutePath(a.path);
+  const pathB = util.normalizeRoutePath(b.path);
+  return !!(pathA && pathB && pathA === pathB);
+};
+
+util.findOpenedPageIndex = function (pageOpenedList, name, path) {
+  const normalizedPath = util.normalizeRoutePath(path);
+  return pageOpenedList.findIndex(
+    (item) =>
+      item.name === name ||
+      (normalizedPath &&
+        util.normalizeRoutePath(item.path) === normalizedPath)
+  );
+};
+
 util.clearDynamicRoutes = function () {
   const router = getRouter();
   if (!router) return;
@@ -75,16 +99,17 @@ util.registerDynamicRoutes = function (menuData, options = {}) {
   });
 
   leaves.forEach((leaf) => {
-    const path = (leaf.path || leaf.name || "").replace(/^\//, "");
-    if (!router.hasRoute(leaf.name)) {
-      router.addRoute("otherRouter", {
-        path,
-        name: leaf.name,
-        component: leaf.component,
-        meta: leaf.meta,
-      });
-      util.dynamicRouteNames.push(leaf.name);
+    const path = util.normalizeRoutePath(leaf.path || leaf.name);
+    if (router.hasRoute(leaf.name)) {
+      return;
     }
+    router.addRoute("otherRouter", {
+      path,
+      name: leaf.name,
+      component: leaf.component,
+      meta: leaf.meta,
+    });
+    util.dynamicRouteNames.push(leaf.name);
   });
 
   if (!router.hasRoute("error-404")) {
@@ -147,41 +172,43 @@ util.openNewPage = function(vm, name, argu, query) {
     return;
   }
   let pageOpenedList = vm.$store.state.app.pageOpenedList;
-  let openedPageLen = pageOpenedList.length;
-  let i = 0;
-  let tagHasOpened = false;
-  while (i < openedPageLen) {
-    if (name == pageOpenedList[i].name) {
-      // 页面已经打开
-      vm.$store.commit("pageOpenedList", {
-        index: i,
-        argu: argu,
-        query: query
-      });
-      tagHasOpened = true;
-      break;
-    }
-    i++;
-  }
-  if (!tagHasOpened) {
-    let tag = vm.$store.state.app.tagsList.filter(item => {
-      if (item.children) {
-        return name == item.children[0].name;
-      } else {
-        return name == item.name;
-      }
+  const currentPath = vm.$route ? vm.$route.path : "";
+  const openedIndex = util.findOpenedPageIndex(pageOpenedList, name, currentPath);
+  if (openedIndex >= 0) {
+    vm.$store.commit("pageOpenedList", {
+      index: openedIndex,
+      argu: argu,
+      query: query
     });
-    tag = tag[0];
-    if (tag) {
-      tag = tag.children ? tag.children[0] : tag;
-      if (argu) {
-        tag.argu = argu;
-      }
-      if (query) {
-        tag.query = query;
-      }
-      vm.$store.commit("increateTag", tag);
+    return;
+  }
+  let tag = vm.$store.state.app.tagsList.filter(item => {
+    if (item.children) {
+      return name == item.children[0].name;
+    } else {
+      return name == item.name;
     }
+  });
+  tag = tag[0];
+  if (!tag) {
+    tag = vm.$store.state.app.tagsList.find((item) => {
+      const candidate = item.children ? item.children[0] : item;
+      return util.isSameRoutePage(candidate, { name, path: currentPath });
+    });
+    if (tag && tag.children) {
+      tag = tag.children[0];
+    }
+  }
+  if (tag) {
+    tag = tag.children ? tag.children[0] : tag;
+    const tagObj = { ...tag, name: name || tag.name };
+    if (argu) {
+      tagObj.argu = argu;
+    }
+    if (query) {
+      tagObj.query = query;
+    }
+    vm.$store.commit("increateTag", tagObj);
   }
 };
 

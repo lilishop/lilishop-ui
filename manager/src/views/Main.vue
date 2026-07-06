@@ -159,7 +159,11 @@ export default {
       }
     },
     checkTag(name) {
-      const openpageHasTag = this.pageTagsList.some((item) => item.name == name);
+      const openpageHasTag = util.findOpenedPageIndex(
+        this.pageTagsList,
+        name,
+        this.$route.path
+      ) >= 0;
       if (!openpageHasTag) {
         util.openNewPage(
           this,

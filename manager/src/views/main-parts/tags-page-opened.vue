@@ -42,6 +42,8 @@
 </template>
 
 <script>
+import util from "@/libs/util.js";
+
 export default {
   name: "tagsPageOpened",
   props: {
@@ -66,9 +68,11 @@ export default {
   },
   methods: {
     isActive(item) {
-      return item.children
-        ? item.children[0].name === this.currentPageName
-        : item.name === this.currentPageName;
+      const target = item.children ? item.children[0] : item;
+      return util.isSameRoutePage(target, {
+        name: this.currentPageName,
+        path: this.$route.path,
+      });
     },
     tagType(item) {
       return this.isActive(item) ? "primary" : "info";
@@ -104,12 +108,25 @@ export default {
       }
     },
     linkTo(item) {
-      if (this.$route.name === item.name) return;
+      const target = item.children ? item.children[0] : item;
+      if (util.isSameRoutePage(target, this.$route)) return;
+      if (!this.beforePush(item)) return;
+
       const routerObj = { name: item.name };
       if (item.argu) routerObj.params = item.argu;
       if (item.query) routerObj.query = item.query;
-      if (this.beforePush(item)) {
+
+      if (item.name && this.$router.hasRoute(item.name)) {
         this.$router.push(routerObj);
+        return;
+      }
+
+      const path = target.path || item.path;
+      if (path) {
+        this.$router.push({
+          path: path.startsWith("/") ? path : `/${path}`,
+          query: item.query,
+        });
       }
     },
     handlescroll(e) {

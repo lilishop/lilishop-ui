@@ -356,12 +356,6 @@ export const otherRouter = {
       component: () => import("@/views/sys/message/smsSign.vue")
     },
     {
-      path: "live-list",
-      title: "直播管理",
-      name: "live-list",
-      component: () => import("@/views/live/list.vue")
-    },
-    {
       path: "live-add",
       title: "创建直播",
       name: "live-add",
