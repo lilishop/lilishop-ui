@@ -338,7 +338,7 @@ export default {
   font-weight: bolder;
 }
 .item-intro-detail{
-  margin: 0  30px;
+  margin: 0;
   width: 100%;
 }
 .item-intro-nav{
@@ -365,6 +365,8 @@ export default {
 }
 .item-intro-img {
   width: 100%;
+  box-sizing: border-box;
+  padding: 0 30px;
   min-height: 300px;
   :deep img{
     margin:0 auto;
@@ -377,6 +379,8 @@ export default {
 .item-param-container {
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+  padding: 0 30px;
 }
 .item-param-box {
   padding: 5px;
@@ -399,6 +403,10 @@ export default {
   line-height: 36px;
   color: #666666;
   background-color: #F7F7F7;
+}
+.remarks-container {
+  box-sizing: border-box;
+  padding: 0 30px;
 }
 .remarks-analyse-box {
   padding: 15px;
@@ -507,31 +515,36 @@ export default {
 }
 /***************商品详情介绍和推荐侧边栏结束***************/
 /* 改变标签页样式 */
-:deep(.el-tabs__active-bar) {
-  background-color: $theme_color !important;
-}
-:deep(.el-tabs__header) {
-  border: none;
-}
-.item-tabs > .el-tabs > .el-tabs__header .el-tabs__item {
-  border-radius: 0px;
-  color: #999;
-  height: 38px;
-}
-.item-tabs > .el-tabs > .el-tabs__header .el-tabs__item.is-active {
-  color: #fff;
-  background-color: $theme_color;
-}
-.item-tabs > .el-tabs > .el-tabs__header .el-tabs__item.is-active:before {
-  content: '';
-  display: block;
-  width: 100%;
-  height: 1px;
-  color: #fff;
-  background: #F7F7F7;
-  position: absolute;
-  top: 0;
-  left: 0;
+.item-tabs {
+  :deep(.el-tabs__header) {
+    border: none;
+    margin: 0;
+    background-color: #f7f7f7;
+  }
+
+  :deep(.el-tabs__active-bar) {
+    background-color: $theme_color !important;
+  }
+
+  :deep(.el-tabs__item) {
+    border-radius: 0;
+    color: #999;
+    height: 38px;
+    padding: 0 20px;
+
+    &:hover {
+      color: #999;
+    }
+  }
+
+  :deep(.el-tabs__nav) {
+    padding-left: 10px;
+  }
+
+  :deep(.el-tabs__item.is-active) {
+    color: $theme_color !important;
+    background-color: transparent;
+  }
 }
 :deep(.el-rate__icon) {
   color: $theme_color;

@@ -277,7 +277,7 @@
               <dd>
                 <el-button
                   v-if="canConfirmReceipt"
-                  type="danger"
+                  type="primary"
                   :loading="confirmLoading"
                   @click="sellerConfirmSubmit('PASS')"
                   style="margin-left: 5px"
@@ -286,7 +286,7 @@
                 </el-button>
                 <el-button
                   v-if="canConfirmReceipt"
-                  type="primary"
+                  type="danger"
                   :loading="confirmLoading"
                   @click="sellerConfirmSubmit('REFUSE')"
                   style="margin-left: 5px"

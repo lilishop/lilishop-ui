@@ -109,7 +109,7 @@ export default {
     cancel (id) { // 取消投诉
       this.$Modal.confirm({
         title: '取消投诉',
-        content: '<p>确定取消投诉吗？</p>',
+        content: '确定取消投诉吗？',
         onOk: () => {
           clearComplain(id).then((res) => {
             if (res.success) {

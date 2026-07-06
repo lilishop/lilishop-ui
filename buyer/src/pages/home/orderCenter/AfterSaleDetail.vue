@@ -4,8 +4,12 @@
     <!-- 操作按钮 -->
     <el-card class="mb_10" shadow="never" v-if="(afterSale.serviceStatus == 'PASS' &&
           afterSale.serviceType != 'RETURN_MONEY') || (afterSale.afterSaleAllowOperationVO && afterSale.afterSaleAllowOperationVO.cancel)">
-      <el-button type="success" @click="openModal" v-if="afterSale.serviceStatus == 'PASS' &&
-          afterSale.serviceType != 'RETURN_MONEY'" size="small">提交物流</el-button>&nbsp;
+      <el-button
+        @click="openModal"
+        v-if="afterSale.serviceStatus == 'PASS' && afterSale.serviceType != 'RETURN_MONEY'"
+        size="small"
+        class="submit-logistics-btn"
+      >提交物流</el-button>&nbsp;
       <el-button type="danger" @click="cancel(afterSale.sn)" v-if="afterSale.afterSaleAllowOperationVO && afterSale.afterSaleAllowOperationVO.cancel" size="small">取消售后</el-button>
     </el-card>
     <div class="order-card">
@@ -300,6 +304,19 @@ table{
   }
   td{
     padding: 5px;
+  }
+}
+
+:deep(.submit-logistics-btn) {
+  background-color: #ff9900 !important;
+  border-color: #ff9900 !important;
+  color: #fff !important;
+
+  &:hover,
+  &:focus {
+    background-color: #e68a00 !important;
+    border-color: #e68a00 !important;
+    color: #fff !important;
   }
 }
 </style>

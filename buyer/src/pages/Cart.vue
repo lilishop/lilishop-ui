@@ -25,8 +25,9 @@
       </div>
       <!-- 购物车商品列表 -->
       <div class="cart-goods">
+        <div class="cart-goods-table">
         <div class="cart-goods-title">
-          <div class="width_60">
+          <div class="width_60 cart-col-check">
             <el-checkbox
               v-model="allChecked"
               @change="changeChecked(allChecked, 'all')"
@@ -43,56 +44,58 @@
           <p>购物车空空如也</p>
           <router-link to="/">去选购&gt;</router-link>
         </div>
-        <div
-          v-else
-          class="cart-goods-items"
-          v-for="(shop, index) in cartList"
-          :key="index"
-        >
-          <div class="shop-name">
-            <div>
-              <el-checkbox
-                v-model="shop.checked"
-                @change="changeChecked(shop.checked, 'shop', shop.storeId)"
-              ></el-checkbox>
-              <span class="go-shop-page" @click="goShopPage(shop.storeId)">{{
-                shop.storeName
-              }}</span>
-            </div>
-            <span
-              class="shop-coupon"
-              v-if="shop.couponList.length"
-              :class="couponAvailable === index ? 'shop-coupon-show' : ''"
-              @click.stop="showCoupon(shop.id, index)"
-            >
-              <!-- 优惠券模态框 -->
-              <div v-if="couponAvailable === index">
-                <div
-                  class="coupon-item"
-                  v-for="(item, index) in shop.couponList"
-                  :key="index"
-                >
-                  <span v-if="item.couponType === 'PRICE'"
-                    >￥{{ item.price }}</span>
-                  <span v-if="item.couponType === 'DISCOUNT'"
-                    >{{ item.couponDiscount }}折</span>
-                  <span>满{{ item.consumeThreshold }}元可用</span>
-                  <el-button
-                    class="coupon-btn"
-                    size="small"
-                    type="primary"
-                    @click="receiveShopCoupon(item)"
-                    :disabled="item.disabled"
-                    >{{ item.disabled ? "已领取" : "领取" }}</el-button
-                  >
-                </div>
+        <div v-else class="cart-goods-list-box">
+          <div
+            class="cart-shop-group"
+            v-for="(shop, index) in cartList"
+            :key="index"
+          >
+            <div class="shop-name">
+              <div class="width_60 cart-col-check">
+                <el-checkbox
+                  v-model="shop.checked"
+                  @change="changeChecked(shop.checked, 'shop', shop.storeId)"
+                ></el-checkbox>
               </div>
-            </span>
-            <div class="promotion-notice">{{ shop.promotionNotice }}</div>
-          </div>
-          <template v-for="(goods, goodsIndex) in shop.skuList" :key="goods.goodsSku?.id || goodsIndex">
-            <div class="goods-item">
-              <div class="width_60">
+              <div class="shop-info">
+                <span class="go-shop-page" @click="goShopPage(shop.storeId)">{{
+                  shop.storeName
+                }}</span>
+              <span
+                class="shop-coupon"
+                v-if="shop.couponList.length"
+                :class="couponAvailable === index ? 'shop-coupon-show' : ''"
+                @click.stop="showCoupon(shop.id, index)"
+              >
+                <!-- 优惠券模态框 -->
+                <div v-if="couponAvailable === index">
+                  <div
+                    class="coupon-item"
+                    v-for="(item, couponIndex) in shop.couponList"
+                    :key="couponIndex"
+                  >
+                    <span v-if="item.couponType === 'PRICE'"
+                      >￥{{ item.price }}</span>
+                    <span v-if="item.couponType === 'DISCOUNT'"
+                      >{{ item.couponDiscount }}折</span>
+                    <span>满{{ item.consumeThreshold }}元可用</span>
+                    <el-button
+                      class="coupon-btn"
+                      size="small"
+                      type="primary"
+                      @click="receiveShopCoupon(item)"
+                      :disabled="item.disabled"
+                      >{{ item.disabled ? "已领取" : "领取" }}</el-button
+                    >
+                  </div>
+                </div>
+              </span>
+              <div class="promotion-notice">{{ shop.promotionNotice }}</div>
+              </div>
+            </div>
+            <template v-for="(goods, goodsIndex) in shop.skuList" :key="goods.goodsSku?.id || goodsIndex">
+              <div class="goods-item">
+              <div class="width_60 cart-col-check">
                 <el-checkbox
                   v-model="goods.checked"
                   @change="
@@ -155,21 +158,21 @@
                   </template>
                 </div>
               </div>
-              <div class="width_150">
+              <div class="width_150 cart-col-price">
                 {{ $filters.unitPrice(goods.purchasePrice, "￥") }}
               </div>
-              <div class="width_100">
+              <div class="width_100 cart-col-qty">
                 <el-input-number
                   :min="1"
                   size="small"
                   v-model="goods.num"
                   @change="changeNum(goods.num, goods.goodsSku.id)"
                 ></el-input-number>
-                <div class="fontsize_12">
+                <div class="fontsize_12 cart-qty-stock">
                   {{ goods.goodsSku.quantity > 0 ? "有货" : "无货" }}
                 </div>
               </div>
-              <div class="width_150">
+              <div class="width_150 cart-col-subtotal">
                 {{ $filters.unitPrice(goods.subTotal, "￥") }}
               </div>
               <div class="cart-ops-col">
@@ -195,12 +198,14 @@
                 >
               </div>
             </div>
-          </template>
+            </template>
+          </div>
+        </div>
         </div>
         <!-- 底部支付栏 -->
         <div class="cart-goods-footer">
           <div>
-            <div class="width_60">
+            <div class="width_60 cart-col-check">
               <el-checkbox
                 v-model="allChecked"
                 @change="changeChecked(allChecked, 'all')"
@@ -286,7 +291,7 @@ export default {
     collectGoods(id) {
       this.$Modal.confirm({
         title: "收藏",
-        content: "<p>商品收藏后可在个人中心我的收藏查看</p>",
+        content: "商品收藏后可在个人中心我的收藏查看",
         onOk: () => {
           APIMember.collectGoods("GOODS", id).then((res) => {
             if (res.success) {
@@ -315,7 +320,7 @@ export default {
       }
       this.$Modal.confirm({
         title: "删除",
-        content: "<p>确定要删除该商品吗？</p>",
+        content: "确定要删除该商品吗？",
         onOk: () => {
           APICart.delCartGoods({ skuIds: idArr.toString() }).then((res) => {
             if (res.success) {
@@ -332,7 +337,7 @@ export default {
     clearCart() {
       this.$Modal.confirm({
         title: "提示",
-        content: "<p>确定要清空购物车吗？清空后不可恢复</p>",
+        content: "确定要清空购物车吗？清空后不可恢复",
         onOk: () => {
           APICart.clearCart().then((res) => {
             if (res.success) {
@@ -512,6 +517,10 @@ export default {
 }
 /** 商品列表 */
 .cart-goods {
+  .cart-goods-table {
+    border: 1px solid #e0e0e0;
+    @include background_color($light_white_background_color);
+  }
   &-title {
     height: 50px;
     @include background_color($light_white_background_color);
@@ -519,7 +528,8 @@ export default {
     display: flex;
     align-items: center;
     padding: 0 20px;
-    div {
+    border-bottom: 1px solid #e0e0e0;
+    div:not(.cart-col-check) {
       text-align: center;
     }
     .goods-title {
@@ -532,7 +542,26 @@ export default {
     height: 300px;
     padding-top: 100px;
   }
-  &-items {
+  .cart-goods-list-box {
+    @include background_color($light_white_background_color);
+  }
+  .cart-col-check {
+    width: 60px;
+    min-width: 60px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+
+    :deep(.el-checkbox) {
+      margin-right: 0;
+    }
+  }
+  .cart-shop-group {
+    &:not(:last-child) {
+      border-bottom: 1px solid #e0e0e0;
+    }
     .shop-name {
       height: 50px;
       display: flex;
@@ -540,8 +569,14 @@ export default {
       padding: 0 20px;
       position: relative;
       @include title_color($light_title_color);
-      > * {
-        width: 50%;
+      .shop-info {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        .promotion-notice {
+          margin-left: auto;
+        }
       }
       .go-shop-page:hover {
         color: $theme_color;
@@ -559,6 +594,7 @@ export default {
       .shop-coupon {
         width: 80px;
         height: 24px;
+        flex-shrink: 0;
         position: relative;
         background: url(../assets/images/cart-coupon-icons02.png) 0 0 no-repeat;
         > div {
@@ -569,7 +605,6 @@ export default {
           height: 300px;
           background-color: #fff;
           border: 1px solid $theme_color;
-          // border-radius: 3px;
           z-index: 1;
           padding: 10px 20px;
           &::before {
@@ -612,6 +647,8 @@ export default {
       .promotion-notice {
         text-align: right;
         font-size: 12px;
+        flex-shrink: 0;
+        margin-left: 10px;
       }
       .shop-coupon-show {
         background-position-y: -34px;
@@ -620,12 +657,16 @@ export default {
     .goods-item {
       position: relative;
       @extend .cart-goods-title;
-      @include background_color($light_white_background_color);
+      background: transparent;
+      border-top: 1px solid #f0f0f0;
       padding: 10px 20px;
       height: auto;
+      .cart-col-check {
+        padding-left: 20px;
+        box-sizing: border-box;
+      }
       > div:nth-child(1) {
-        padding-left: 15px;
-        width: 30px;
+        width: 60px;
       }
       > div:nth-child(2) {
         cursor: pointer;
@@ -647,8 +688,37 @@ export default {
           }
         }
       }
-      > div:nth-child(5) {
+      .cart-col-price,
+      .cart-col-subtotal {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        text-align: center;
+      }
+      .cart-col-subtotal {
         font-weight: bold;
+      }
+      .cart-col-qty {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        :deep(.el-input-number) {
+          width: 100%;
+        }
+
+        .cart-qty-stock {
+          position: absolute;
+          top: calc(100% + 4px);
+          left: 50%;
+          transform: translateX(-50%);
+          white-space: nowrap;
+          line-height: 1.2;
+          color: #999;
+        }
       }
       .num-input {
         width: 60px;

@@ -3,12 +3,12 @@
     <el-button @click="handleClickUploadImage">上传图片</el-button>
     <el-dialog v-model="show" width="850px" title="上传图片" append-to-body :z-index="3500">
       <div class="import-oss" @click="importOSS">从资源库中导入</div>
-      <div style="display: flex; flex-wrap: wrap">
+      <div class="upload-images-wrap">
         <vuedraggable
           v-model="images"
           :animation="200"
           :item-key="draggableItemKey"
-          style="display: flex; flex-wrap: wrap"
+          class="upload-images-draggable"
         >
           <template #item="{ element, index }">
             <div class="upload-list">
@@ -212,27 +212,57 @@ export default {
 .wrapper {
   margin: 10px 0;
 }
+$upload-item-size: 150px;
+.upload-images-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.upload-images-draggable {
+  display: flex;
+  flex-wrap: wrap;
+}
 .upload-list {
-  width: 150px;
-  height: 150px;
+  width: $upload-item-size;
+  height: $upload-item-size;
   text-align: center;
-  border: 1px solid transparent;
+  border: 1px solid #dcdfe6;
   border-radius: 4px;
   display: inline-block;
   background: #fff;
   position: relative;
-  margin-right: 4px;
-  vertical-align: bottom;
+  margin: 0 4px 4px 0;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 .upload-box {
-  margin: 10px 0;
+  width: $upload-item-size;
+  height: $upload-item-size;
+  margin: 0 4px 4px 0;
   display: inline-block;
-  vertical-align: bottom;
+  flex-shrink: 0;
+
+  :deep(.el-upload) {
+    width: $upload-item-size;
+    height: $upload-item-size;
+    display: block;
+  }
+
+  :deep(.el-upload-dragger) {
+    width: $upload-item-size;
+    height: $upload-item-size;
+    min-height: $upload-item-size;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
 }
 .upload-trigger {
-  width: 148px;
-  height: 148px;
-  line-height: 148px;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;

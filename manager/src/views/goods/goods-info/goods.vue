@@ -450,9 +450,14 @@ export default {
     },
     // 下架
     lower() {
+      const reason = this.underForm.reason ? this.underForm.reason.trim() : "";
+      if (!reason) {
+        this.$Message.error("下架原因不能为空");
+        return;
+      }
       let params = {
         goodsId: this.id,
-        reason:this.underForm.reason
+        reason
       };
       lowGoods(params).then((res) => {
         this.$Modal.remove();

@@ -128,7 +128,7 @@
                 >
                   <template #item="{ element }">
                     <div class="demo-upload-list">
-                      <img :src="element" />
+                      <img :src="element" @error="handleGoodsPictureError($event, element)" />
                       <div class="demo-upload-list-cover">
                         <div>
                           <el-button link type="primary" @click="handleViewGoodsPicture(element)">预览</el-button>
@@ -220,29 +220,27 @@
                             <el-form :model="item" class="sku-val-form flex">
                               <!--规格值文本列表-->
                               <el-form-item v-for="(val, index) in item.spec_values" :key="index"
-                                class="sku-item-content-val flex" label="" style="line-height: 32px;">
-                                <div style="display: flex; justify-content: flex-start; align-items: center;">
-
-
-                                  <el-autocomplete
-                                    v-model="val.value"
-                                    :disabled="containsSameSkuItem"
-                                    :fetch-suggestions="(q, cb) => cb([])"
-                                    maxlength="30"
-                                    placeholder="请输入规格值"
-                                    style="width: 180px"
-                                    @focus="changeSkuVals(val, item.name)"
-                                    @blur="checkSkuVal(val, $index, item)"
-                                    @change="skuValueChange(val, index, item)"
-                                  />
-                                  <el-button link type="danger" style="margin-left: 6px" @click="handleCloseSkuValue(val, index, item)">
-                                    <el-icon><Delete /></el-icon>
-                                  </el-button>
-                                </div>
-
+                                class="sku-item-content-val" label="">
+                                <div class="sku-val-item">
+                                  <div class="sku-val-input-row">
+                                    <el-autocomplete
+                                      v-model="val.value"
+                                      :disabled="containsSameSkuItem"
+                                      :fetch-suggestions="(q, cb) => cb([])"
+                                      maxlength="30"
+                                      placeholder="请输入规格值"
+                                      style="width: 180px"
+                                      @focus="changeSkuVals(val, item.name)"
+                                      @blur="checkSkuVal(val, $index, item)"
+                                      @change="skuValueChange(val, index, item)"
+                                    />
+                                    <el-button link type="danger" style="margin-left: 6px" @click="handleCloseSkuValue(val, index, item)">
+                                      <el-icon><Delete /></el-icon>
+                                    </el-button>
+                                  </div>
                                   <!-- 内联错误提示 -->
                                   <div v-if="val._error" class="sku-inline-error">{{ val._error }}</div>
-                                <div v-if="$index === 0 && openImage" style="margin-top: 10px">
+                                  <div v-if="$index === 0 && openImage" class="sku-val-image">
                                   <vuedraggable
                                     v-model="val.images"
                                     :animation="200"
@@ -279,12 +277,13 @@
                                   >
                                     <el-icon :size="40"><Camera /></el-icon>
                                   </el-upload>
+                                  </div>
                                 </div>
                               </el-form-item>
 
                               <el-form-item
                                 v-if="item.spec_values.length < 10 && item.spec_values.length >= 1 && item.spec_values[0].value !== ''"
-                                class="sku-item-content-val flex" label="" style="line-height: 32px;">
+                                class="sku-item-content-val" label="">
                                 <el-autocomplete
                                   v-model="newSkuValues[$index]"
                                   :disabled="containsSameSkuItem"
@@ -498,6 +497,7 @@
         ref="ossManage"
         :isComponent="true"
         :initialize="picModelFlag"
+        :max-select="selectedFormBtnName === 'goodsGalleryFiles' ? 1 : 0"
         @callback="callbackSelected"
         @selected="(list) => { selectedImage = list }"
       />
@@ -664,6 +664,9 @@ export default {
         /** 商品参数用于验证 */
         goodsParams: [],
       },
+      invalidGoodsGalleryFiles: [],
+      goodsPictureFallback:
+        "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22148%22%20height%3D%22148%22%20viewBox%3D%220%200%20148%20148%22%3E%3Crect%20width%3D%22148%22%20height%3D%22148%22%20fill%3D%22%23f5f7fa%22/%3E%3Ctext%20x%3D%2274%22%20y%3D%2274%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22middle%22%20font-size%3D%2212%22%20fill%3D%22%23999%22%3EImage%20unavailable%3C/text%3E%3C/svg%3E",
       /** 表格头 */
       skuTableColumn: [],
       /** 表格数据 */
@@ -916,13 +919,28 @@ export default {
     },
     // 查看商品大图
     handleViewGoodsPicture(url) {
+      if (this.invalidGoodsGalleryFiles.includes(url)) {
+        this.$Message.warning("图片链接已失效，请重新上传主图");
+        return;
+      }
       this.previewGoodsPicture = url;
       this.goodsPictureVisible = true;
+    },
+    handleGoodsPictureError(event, url) {
+      if (!this.invalidGoodsGalleryFiles.includes(url)) {
+        this.invalidGoodsGalleryFiles.push(url);
+      }
+      const img = event && event.target;
+      if (!img || img.dataset.fallbackApplied) return;
+      img.dataset.fallbackApplied = "true";
+      img.src = this.goodsPictureFallback;
     },
     // 移除商品图片
     handleRemoveGoodsPicture(file) {
       this.baseInfoForm.goodsGalleryFiles =
         this.baseInfoForm.goodsGalleryFiles.filter((i) => i !== file);
+      this.invalidGoodsGalleryFiles =
+        this.invalidGoodsGalleryFiles.filter((i) => i !== file);
     },
     assignSkuTableIndex() {
       this.skuTableData.forEach((row, index) => {
@@ -1151,6 +1169,7 @@ export default {
       response.result.recommend
         ? (response.result.recommend = 1)
         : (response.result.recommend = 0);
+      this.invalidGoodsGalleryFiles = [];
       this.baseInfoForm = { ...this.baseInfoForm, ...response.result };
       this.baseInfoForm.release = 1; //即使是被放入仓库，修改的时候也会显示会立即发布
       this.categoryId = response.result.categoryPath.split(",")[2];
@@ -2115,6 +2134,14 @@ export default {
           ) {
             this.submitLoading = false;
             this.$Message.error("请上传商品图片");
+            return;
+          }
+          const invalidGalleryFiles = submit.goodsGalleryFiles.filter((url) =>
+            this.invalidGoodsGalleryFiles.includes(url)
+          );
+          if (invalidGalleryFiles.length > 0) {
+            this.submitLoading = false;
+            this.$Message.error("存在已失效的商品主图，请删除后重新上传");
             return;
           }
           if (submit.templateId === "") submit.templateId = 0;

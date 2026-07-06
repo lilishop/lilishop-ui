@@ -39,7 +39,7 @@
               </div>
             </div>
             <div>
-              <span @click="shopPage(order.shopId)">{{ order.storeName }}</span>
+              <span @click="shopPage(order.storeId)">{{ order.storeName }}</span>
             </div>
             <div class="order-actions">
               <!-- 订单基础操作 -->
@@ -89,7 +89,7 @@
             </div>
             <div class="mt_10">
               <span class="global_color"
-              >{{ $filters.unitPrice(singleOrder.flowPrice, "￥") }} </span>x {{ singleOrder.num }}
+              >{{ $filters.unitPrice(singleOrder.flowPrice, "￥") }} </span> x {{ singleOrder.num }}
             </div>
           </div>
         </div>
@@ -173,7 +173,7 @@ export default {
     cancel(sn) { // 取消售后申请
       this.$Modal.confirm({
         title: '取消',
-        content: '<p>确定取消此次售后申请吗？</p>',
+        content: '确定取消此次售后申请吗？',
         onOk: () => {
           cancelAfterSale(sn).then(res => {
             if (res.success) {

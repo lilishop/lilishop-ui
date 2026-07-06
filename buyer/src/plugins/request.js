@@ -29,6 +29,16 @@ export const sellerUrl =
 let isRefreshToken = 0;
 const refreshToken = getTokenDebounce();
 
+/** 会员中心（/home/*）页面使用局部 loading，不启用全屏遮罩 */
+function isMemberCenterRoute() {
+  try {
+    const path = router.currentRoute?.value?.path || "";
+    return path === "/home" || path.startsWith("/home/");
+  } catch {
+    return false;
+  }
+}
+
 const service = axios.create({
   timeout: 10000,
   baseURL: buyerUrl,
@@ -56,7 +66,8 @@ service.interceptors.request.use(
     const method = (config.method || "get").toLowerCase();
     const isReadRequest = method === "get" || method === "head";
     const shouldShowLoading =
-      loading === true || (!isReadRequest && loading !== false);
+      loading === true ||
+      (!isReadRequest && loading !== false && !isMemberCenterRoute());
 
     if (typeof window !== "undefined" && shouldShowLoading) {
       config.loading = ElLoading.service({ fullscreen: true });
@@ -166,7 +177,7 @@ service.interceptors.response.use(
     if (errorResponse.status === 404) {
       return Promise.reject(buildRejectError(error, { message: "请求的资源不存在" }));
     }
-    if (error.message) {
+    if (error.message && !error.config?.skipMessage) {
       const _message =
         error.code === "ECONNABORTED"
           ? "连接超时，请稍候再试！"

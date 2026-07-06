@@ -26,9 +26,9 @@
         </el-form-item>
       </el-form>
     </div>
-    <div class="mt_20">
-      <el-button type="primary" class="mr_10" :loading="loading" @click="save">保存收货地址</el-button>
+    <div class="action-bar mt_20">
       <el-button @click="$router.back()">返回</el-button>
+      <el-button type="primary" class="ml_10" :loading="loading" @click="save">保存收货地址</el-button>
     </div>
     </UserCenterLayout>
 
@@ -152,5 +152,10 @@ export default {
 <style scoped lang="scss">
 .add-box {
   margin: 40px 0;
+}
+
+.action-bar {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

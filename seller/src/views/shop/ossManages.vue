@@ -165,9 +165,13 @@
                       <div v-for="(item, index) in data" :key="index" class="img-item">
                         <div
                           class="card"
-                          :class="{ 'custom-checkbox-card-checked': selectedOss.includes(item.id + ',' + item.url) }"
+                          :class="{
+                            'custom-checkbox-card-checked': selectedOss.includes(item.id + ',' + item.url),
+                            'oss-card-selectable': isComponent && selectImage
+                          }"
                           @mouseenter="onMouseOver(item, index)"
                           @mouseleave="onMouseOut(item, index)"
+                          @click="toggleSelectedOss(item)"
                         >
                           <el-checkbox
                             :value="item.id + ',' + item.url"
@@ -176,17 +180,17 @@
                           />
                           <img :src="item.url" alt="" />
                           <div v-if="item.isShowPreview" class="preview">
-                            <div @click.prevent="download(item)">
+                            <div @click.stop.prevent="download(item)">
                               <el-tooltip content="下载" placement="top">
                                 <el-icon :size="18"><Download /></el-icon>
                               </el-tooltip>
                             </div>
-                            <div @click.prevent="remove(item)">
+                            <div @click.stop.prevent="remove(item)">
                               <el-tooltip content="删除" placement="top">
                                 <el-icon :size="18"><Delete /></el-icon>
                               </el-tooltip>
                             </div>
-                            <div @click.prevent="showPic(item)">
+                            <div @click.stop.prevent="showPic(item)">
                               <el-tooltip content="预览" placement="top">
                                 <el-icon :size="22"><View /></el-icon>
                               </el-tooltip>
@@ -487,6 +491,10 @@ export default {
     initialize: {
       type: Boolean,
       default: false,
+    },
+    maxSelect: {
+      type: Number,
+      default: 0,
     },
   },
   data() {
@@ -1059,6 +1067,10 @@ export default {
     // 复选框值改变时触发
     selectOssChange(e) {
       if (e) {
+        if (this.maxSelect > 0 && e.length > this.maxSelect) {
+          e = e.slice(-this.maxSelect);
+          this.selectedOss = e;
+        }
         this.selectList = e.map(item => {
           return {id: item.split(',')[0]}
         });
@@ -1068,6 +1080,22 @@ export default {
         // this.totalSize = ((size * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
         this.$emit("selected", e);
       }
+    },
+    toggleSelectedOss(item) {
+      if (!item) return;
+      const value = `${item.id},${item.url}`;
+      const index = this.selectedOss.indexOf(value);
+      if (index > -1) {
+        this.selectedOss.splice(index, 1);
+      } else if (this.maxSelect === 1) {
+        this.selectedOss = [value];
+      } else {
+        if (this.maxSelect > 0 && this.selectedOss.length >= this.maxSelect) {
+          this.selectedOss = this.selectedOss.slice(1);
+        }
+        this.selectedOss.push(value);
+      }
+      this.selectOssChange(this.selectedOss);
     },
     // 页码改变时回调
     pageChange(value) {

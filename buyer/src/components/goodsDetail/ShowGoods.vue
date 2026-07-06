@@ -28,28 +28,36 @@
         </div>
 
         <div class="goodsConfig mt_10">
-          <span @click="collect"
-            ><el-icon :color="isCollected ? '#ed3f14' : '#666'"><StarFilled /></el-icon>{{ isCollected ? "已收藏" : "收藏" }}</span>
+          <span
+            class="collect-btn"
+            :class="{ 'is-collected': isCollected }"
+            @click="collect"
+          >
+            <el-icon class="collect-icon"><StarFilled /></el-icon>
+            <span class="collect-text">{{ isCollected ? '已收藏' : '收藏' }}</span>
+          </span>
         </div>
       </div>
       <!-- 右侧商品信息、活动信息、操作展示 -->
       <div class="item-detail-right">
         <div class="item-detail-title">
-          <p>
-            {{ skuDetail.goodsName }}
+          <div class="item-detail-title-row">
+            <span class="item-detail-name">{{ skuDetail.goodsName }}</span>
             <el-tag
               v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
-              style="margin-top:10px;rgb(153, 149, 149);"
+              class="goods-type-tag"
+              size="small"
             >
               实物商品
             </el-tag>
             <el-tag
               v-else-if="skuDetail.goodsType == 'VIRTUAL_GOODS'"
-              style="margin-top:10px;rgb(153, 149, 149);"
+              class="goods-type-tag"
+              size="small"
             >
               虚拟商品
             </el-tag>
-          </p>
+          </div>
         </div>
         <div class="sell-point">
           {{ skuDetail.sellingPoint }}
@@ -224,13 +232,13 @@
               <div class="item-select-row">
                 <el-input-number
                   :min="1"
-                  :max="skuDetail.quantity"
-                  :disabled="skuDetail.quantity === 0"
+                  :max="quantityMax"
+                  :disabled="isOutOfStock"
                   v-model="count"
-                  :precision="0.1"
+                  :precision="0"
                   @blur="changeCount"
                 ></el-input-number>
-                <span class="inventory"> 库存{{ skuDetail.quantity }}</span>
+                <span class="inventory">&nbsp&nbsp库存{{ skuDetail.quantity }}</span>
               </div>
             </div>
           </div>
@@ -325,9 +333,7 @@ export default {
       handler(val) {
         this.skuDetail = val.data;
         this.wholesaleList = val.wholesaleList;
-        if (this.wholesaleList && this.wholesaleList.length > 0) {
-          this.count = this.wholesaleList[0].num;
-        }
+        this.syncCountWithQuantity();
         this.promotion();
         this.swiperGoodsImg();
       },
@@ -388,6 +394,13 @@ export default {
           })
         : [];
     },
+    quantityMax() {
+      const qty = Number(this.skuDetail.quantity) || 0;
+      return qty > 0 ? qty : 1;
+    },
+    isOutOfStock() {
+      return (Number(this.skuDetail.quantity) || 0) <= 0;
+    },
   },
   methods: {
     // 初始化video
@@ -408,6 +421,22 @@ export default {
     },
 
 
+    syncCountWithQuantity() {
+      const qty = Number(this.skuDetail.quantity) || 0;
+      if (qty <= 0) {
+        this.count = 1;
+        return;
+      }
+      if (this.wholesaleList && this.wholesaleList.length > 0) {
+        this.count = Math.min(Math.max(this.wholesaleList[0].num, 1), qty);
+        return;
+      }
+      if (this.count > qty) {
+        this.count = qty;
+      } else if (this.count < 1) {
+        this.count = 1;
+      }
+    },
     changeCount(val) {
       if (this.wholesaleList && this.wholesaleList.length > 0) {
         if (this.count <= this.wholesaleList[0].num) {
@@ -688,11 +717,23 @@ export default {
   flex-direction: column;
 }
 
-.item-detail-title p {
+.item-detail-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.item-detail-name {
   @include content_color($light_content_color);
   font-weight: bold;
   font-size: 20px;
-  padding: 8px 0;
+  line-height: 1.4;
+}
+
+.goods-type-tag {
+  flex-shrink: 0;
 }
 
 .item-detail-express {
@@ -941,12 +982,31 @@ export default {
 .goodsConfig {
   display: flex;
   justify-content: space-between;
-  > span {
+
+  .collect-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     padding-right: 10px;
-    &:hover {
-      cursor: pointer;
-      color: $theme_color;
+    color: #666;
+    cursor: pointer;
+    line-height: 1;
+
+    &.is-collected {
+      .collect-icon {
+        color: #ffc107;
+      }
     }
+  }
+
+  .collect-icon {
+    display: inline-flex;
+    align-items: center;
+    font-size: 16px;
+  }
+
+  .collect-text {
+    line-height: 1;
   }
 }
 .sell-point {

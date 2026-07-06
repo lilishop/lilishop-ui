@@ -139,6 +139,13 @@ export default {
     this.status = this.$route.query.status
   },
   methods: {
+    normalizePwdError (message) {
+      if (!message) return '修改失败，请稍后重试';
+      if (String(message).includes('旧密码') || String(message).includes('密码不正确')) {
+        return '旧密码不正确';
+      }
+      return message;
+    },
     // 修改
     handleRegist () {
       this.$refs['formRegister'].validate((valid) => {
@@ -146,7 +153,7 @@ export default {
           const {newPassword, againPassword, password} = this.formRegister
           if (newPassword !== againPassword) {
             this.$Message.error({
-              content: '新旧密码不一致'
+              content: '新密码和确认密码不一致'
             });
             return
           }
@@ -154,10 +161,14 @@ export default {
           params.newPassword = md5(newPassword)
           params.password = md5(password)
           editPwd(params).then(res => {
-            if (res.message === 'success' && res.result) {
+            if (res.success && res.result) {
               this.$Message.success('修改密码成功');
               this.$router.push('/home')
+            } else {
+              this.$Message.error(this.normalizePwdError(res.message));
             }
+          }).catch((err) => {
+            this.$Message.error(this.normalizePwdError(err?.message || err?.data?.message));
           });
         }
       })
@@ -183,7 +194,7 @@ export default {
           }
           if (newPassword !== againPassword) {
             this.$Message.error({
-              content: '新旧密码不一致'
+              content: '新密码和确认密码不一致'
             });
             return
           }

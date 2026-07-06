@@ -427,7 +427,9 @@ export function distCash (params) {
     url: `/buyer/distribution/cash`,
     method: Method.POST,
     needToken: true,
-    params
+    params,
+    loading: false,
+    skipMessage: true
   });
 }
 
