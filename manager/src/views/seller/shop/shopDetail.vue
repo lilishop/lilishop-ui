@@ -26,9 +26,10 @@
               </p>
               <p>
                 <el-switch
-                  v-model="storeInfo.storeDisable"
+                  v-model="storeEnabled"
                   :active-value="true"
                   :inactive-value="false"
+                  :loading="storeStatusChanging"
                   active-text="启用"
                   inactive-text="禁用"
                   @change="shopStatusChange"
@@ -301,7 +302,7 @@
             </el-form-item>
             <el-form-item label="下单时间">
               <el-date-picker
-                v-model="selectDate"
+                v-model="orderSelectDate"
                 type="datetimerange"
                 value-format="YYYY-MM-DD HH:mm:ss"
                 clearable
@@ -427,7 +428,7 @@
             </el-form-item>
             <el-form-item label="申请时间">
               <el-date-picker
-                v-model="selectDate"
+                v-model="refundGoodsSelectDate"
                 type="datetimerange"
                 value-format="YYYY-MM-DD HH:mm:ss"
                 clearable
@@ -573,7 +574,7 @@
             </el-form-item>
             <el-form-item label="申请时间">
               <el-date-picker
-                v-model="selectDate"
+                v-model="refundSelectDate"
                 type="datetimerange"
                 value-format="YYYY-MM-DD HH:mm:ss"
                 clearable
@@ -696,8 +697,12 @@ export default {
       categories: [],
       loading: true,
       storeInfo: {},
+      storeEnabled: false,
+      storeStatusChanging: false,
       checkAllGroup: [],
-      selectDate: null,
+      orderSelectDate: null,
+      refundGoodsSelectDate: null,
+      refundSelectDate: null,
       orderData: [],
       orderTotal: 0,
       orderSearchForm: {
@@ -833,7 +838,7 @@ export default {
     getStoreInfo() {
       API_Store.getShopDetailData(this.id).then((res) => {
         this.storeInfo = res.result;
-        this.storeInfo.storeDisable = this.storeInfo.storeDisable === "OPEN" ? true : false;
+        this.storeEnabled = this.storeInfo.storeDisable === "OPEN";
         if (this.storeInfo.goodsManagementCategory != null) {
           this.checkAllGroup = this.storeInfo.goodsManagementCategory
             .split(",")
@@ -843,11 +848,23 @@ export default {
       });
     },
     shopStatusChange(v) {
-      if (v) {
-        API_Store.enableBrand(this.id).then((res) => {});
-      } else {
-        API_Store.disableShop(this.id).then((res) => {});
-      }
+      this.storeStatusChanging = true;
+      const request = v ? API_Store.enableBrand(this.id) : API_Store.disableShop(this.id);
+      request
+        .then((res) => {
+          if (res.success) {
+            this.$Message.success("操作成功");
+            this.getStoreInfo();
+          } else {
+            this.storeEnabled = !v;
+          }
+        })
+        .catch(() => {
+          this.storeEnabled = !v;
+        })
+        .finally(() => {
+          this.storeStatusChanging = false;
+        });
     },
     getOrderData() {
       this.loading = true;
@@ -922,21 +939,30 @@ export default {
       this.getOrderData();
     },
     selectDateRange(v) {
-      if (v) {
+      if (v && v.length === 2) {
         this.orderSearchForm.startDate = v[0];
         this.orderSearchForm.endDate = v[1];
+      } else {
+        this.orderSearchForm.startDate = "";
+        this.orderSearchForm.endDate = "";
       }
     },
     selectRefundGoodsDateRange(v) {
-      if (v) {
+      if (v && v.length === 2) {
         this.refundGoodsOrderSearchForm.startDate = v[0];
         this.refundGoodsOrderSearchForm.endDate = v[1];
+      } else {
+        this.refundGoodsOrderSearchForm.startDate = "";
+        this.refundGoodsOrderSearchForm.endDate = "";
       }
     },
     selectRefundDateRange(v) {
-      if (v) {
+      if (v && v.length === 2) {
         this.refundOrderSearchForm.startDate = v[0];
         this.refundOrderSearchForm.endDate = v[1];
+      } else {
+        this.refundOrderSearchForm.startDate = "";
+        this.refundOrderSearchForm.endDate = "";
       }
     },
   },

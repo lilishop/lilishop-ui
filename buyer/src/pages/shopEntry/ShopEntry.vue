@@ -172,6 +172,7 @@ export default {
     },
     // 下一步
     nextPage(step) {
+      if (typeof step !== "number") return;
       this.currentIndex = step;
       if (step > 0 && step < 3) {
         this.refreshApplyData();

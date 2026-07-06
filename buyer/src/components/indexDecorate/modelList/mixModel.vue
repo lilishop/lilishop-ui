@@ -49,5 +49,6 @@ export default {
   background: #FFFFFF;
   box-shadow: 0px 1px 13px 0px #E5E5E5;
   position: relative;
+  overflow: hidden;
 }
 </style>

@@ -193,23 +193,30 @@
           width: 100%;
           height: 26px;
           background-color: #ffffff;
-          text-align: center;
-          line-height: 30px;
           color: #666666;
           position: absolute;
           left: 0;
           bottom: 0;
           display: flex;
           flex-wrap: nowrap;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
           > div {
-            width: 100%;
             flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
           }
         }
       }
       .card:hover,
       .custom-checkbox-card-checked {
         border: 2px solid #ff5c58;
+      }
+      .oss-card-selectable {
+        cursor: pointer;
       }
       .text {
         width: 120px;

@@ -57,12 +57,14 @@
           class="hover-pointer"
           @click="linkTo(item.url)"
         >
-          <img :src="item.img" alt="" />
+          <div class="img-wrap">
+            <img :src="item.img" alt="" />
+            <div class="jiaobiao" :class="'jiaobiao' + (index + 1)">
+              {{ index + 1 }}
+            </div>
+          </div>
           <p>{{ item.name }}</p>
           <p>{{ $filters.unitPrice(item.price, "￥") }}</p>
-          <div class="jiaobiao" :class="'jiaobiao' + (index + 1)">
-            {{ index + 1 }}
-          </div>
         </div>
       </div>
     </div>
@@ -220,16 +222,52 @@ export default {
       flex-direction: column;
       align-items: center;
       overflow: hidden;
-      img {
+      border-bottom: 1px solid #eee;
+      border-right: 1px solid #eee;
+      .img-wrap {
+        position: relative;
         width: 80px;
         height: 80px;
         flex-shrink: 0;
-        display: block;
-        object-fit: cover;
+        img {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: cover;
+        }
+        .jiaobiao {
+          position: absolute;
+          width: 23px;
+          height: 23px;
+          top: 0;
+          right: 0;
+          margin: 0;
+          padding: 0;
+          max-height: none;
+          overflow: visible;
+          display: block;
+          background: url(../../../assets/images/festival_icon.png) no-repeat;
+          color: #fff;
+          text-align: center;
+          line-height: 23px;
+          font-size: 12px;
+          -webkit-line-clamp: unset;
+          -webkit-box-orient: unset;
+        }
+        .jiaobiao1,
+        .jiaobiao4 {
+          background-position: -2px -30px;
+        }
+        .jiaobiao2,
+        .jiaobiao5 {
+          background-position: -31px -30px;
+        }
+        .jiaobiao3,
+        .jiaobiao6 {
+          background-position: -60px -30px;
+        }
       }
-      border-bottom: 1px solid #eee;
-      border-right: 1px solid #eee;
-      :nth-child(2) {
+      > p:nth-child(2) {
         width: 100%;
         height: auto;
         max-height: 32px;
@@ -241,33 +279,11 @@ export default {
         -webkit-box-orient: vertical;
         text-align: center;
       }
-      :nth-child(3) {
+      > p:nth-child(3) {
         color: $theme_color;
         margin-top: 2px;
         line-height: 1.2;
         flex-shrink: 0;
-      }
-      .jiaobiao {
-        position: absolute;
-        width: 23px;
-        height: 23px;
-        top: 6px;
-        right: 6px;
-        background: url(../../../assets/images/festival_icon.png);
-        color: #fff;
-        text-align: center;
-      }
-      .jiaobiao1,
-      .jiaobiao4 {
-        background-position: -2px -30px;
-      }
-      .jiaobiao2,
-      .jiaobiao5 {
-        background-position: -31px -30px;
-      }
-      .jiaobiao3,
-      .jiaobiao6 {
-        background-position: -60px -30px;
       }
     }
     > div:nth-child(3n) {

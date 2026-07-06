@@ -1,39 +1,42 @@
 <template>
-  <div>
-    <card _Title="收货地址" _More="添加新地址" _Src="/home/addAddress"></card>
-    <div class="address-box" v-for="(item, index) in list" :key="index">
-      <div class="address-header">
-        <span>
-          {{ item.name }}
-          <el-tag class="ml_10 default-address-tag" v-if="item.isDefault">默认地址</el-tag>
-          <el-tag class="ml_10" v-if="item.alias" color="warning">{{item.alias}}</el-tag>
-        </span>
-        <div class="address-action">
-          <span @click="edit(item.id)"><el-icon><Edit /></el-icon>修改</span>
-          <span @click="del(item.id)"><el-icon><Delete /></el-icon>删除</span>
+  <div class="wrapper">
+    <UserCenterLayout title="收货地址" :tabs="['收货地址']" more-text="添加新地址" more-to="/home/addAddress">
+      <template #extra>
+        <el-button type="primary" @click="add">添加新地址</el-button>
+      </template>
+      <div class="address-box" v-for="(item, index) in list" :key="index">
+        <div class="address-header">
+          <span>
+            {{ item.name }}
+            <el-tag class="ml_10 default-address-tag" v-if="item.isDefault">默认地址</el-tag>
+            <el-tag class="ml_10" v-if="item.alias" color="warning">{{item.alias}}</el-tag>
+          </span>
+          <div class="address-action">
+            <span @click="edit(item.id)"><el-icon><Edit /></el-icon>修改</span>
+            <span @click="del(item.id)"><el-icon><Delete /></el-icon>删除</span>
+          </div>
+        </div>
+        <div class="address-content">
+          <p>
+            <span class="address-content-title"> 收 货 人 :</span> {{ item.name }}
+          </p>
+          <p>
+            <span class="address-content-title">收货地区:</span>{{ $filters.unitAddress(item.consigneeAddressPath) }}
+          </p>
+          <p>
+            <span class="address-content-title">详细地址:</span> {{ item.detail }}
+          </p>
+          <p>
+            <span class="address-content-title">手机号码:</span> {{ item.mobile }}
+          </p>
         </div>
       </div>
-      <div class="address-content">
-        <p>
-          <span class="address-content-title"> 收 货 人 :</span> {{ item.name }}
-        </p>
-        <p>
-          <span class="address-content-title">收货地区:</span>{{ $filters.unitAddress(item.consigneeAddressPath) }}
-        </p>
-        <p>
-          <span class="address-content-title">详细地址:</span> {{ item.detail }}
-        </p>
-        <p>
-          <span class="address-content-title">手机号码:</span> {{ item.mobile }}
-        </p>
-      </div>
-    </div>
+    </UserCenterLayout>
   </div>
 </template>
 
 <script>
 import { Delete, Edit } from '@element-plus/icons-vue';
-import card from '@/components/card';
 import { memberAddress, delMemberAddress } from '@/api/address.js';
 
 export default {
@@ -46,6 +49,9 @@ export default {
     };
   },
   methods: {
+    add () {
+      this.$router.push('/home/addAddress');
+    },
     edit (id) {
       // 编辑地址
       this.$router.push({ path: '/home/addAddress', query: { id: id } });
@@ -85,11 +91,17 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.wrapper {
+  margin-bottom: 40px;
+}
 .address-box {
   padding: 15px;
-  margin: 15px;
-
+  margin: 0;
   border-bottom: 1px solid $border_color;
+
+  &:last-child {
+    border-bottom: 0;
+  }
 }
 
 .address-header {
@@ -114,11 +126,23 @@ export default {
  
 }
 
-.address-action span {
-  margin-left: 15px;
-  font-size: 14px;
-  color: $theme_color;
-  cursor: pointer;
+.address-action {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    color: $theme_color;
+    cursor: pointer;
+
+    .el-icon {
+      font-size: 14px;
+    }
+  }
 }
 
 .default-address-tag {

@@ -44,7 +44,8 @@ export function editMemberInfo (params) {
     url: '/buyer/passport/member/editOwn',
     method: Method.PUT,
     needToken: true,
-    data: params
+    data: params,
+    loading: false
   })
 }
 

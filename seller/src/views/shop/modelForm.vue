@@ -272,11 +272,12 @@ export default {
   margin: 0 auto;
   background: #fff;
   min-height: 1200px;
+  overflow-x: visible;
 }
 .model-form-list {
   min-height: 500px;
-  padding-right: 110px;
   box-sizing: border-box;
+  overflow: visible;
 }
 .top-fixed-advert {
   display: flex;

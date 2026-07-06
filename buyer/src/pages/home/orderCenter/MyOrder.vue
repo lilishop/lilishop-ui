@@ -1,22 +1,97 @@
 <template>
   <div class="wrapper">
-    <!-- 卡片组件 -->
-    <card _Title="我的订单" :_Size="16" :_Tabs="changeWay" @_Change="change" v-if="!homePage"></card>
-    <card _Title="我的订单" :_Size="16" :_Tabs="changeWay" @_Change="change" _More="全部订单" _Src="/home/MyOrder" v-else></card>
-    <!-- 搜索 筛选 -->
-    <div class="order-search-bar" v-if="!homePage">
-      <div class="global_float_right">
-        <el-input
-          class="width_300"
-          v-model="params.keywords"
-          @keyup.enter="getList"
-          placeholder="请输入订单号搜索"
-        />
+    <card _Title="我的订单" :_Size="16" :_Tabs="changeWay" @_Change="change" _More="全部订单" _Src="/home/MyOrder" v-if="homePage"></card>
+
+    <UserCenterLayout
+      v-if="!homePage"
+      title="我的订单"
+      :tabs="changeWay"
+      :active-tab="activeOrderTab"
+      @tab-change="change"
+    >
+      <template #extra>
+        <div class="order-search">
+          <el-input
+            v-model="params.keywords"
+            @keyup.enter="getList"
+            placeholder="输入订单号搜索"
+          />
+          <el-button type="primary" @click="getList">搜索</el-button>
+        </div>
+      </template>
+
+      <!-- 订单列表 -->
+      <empty v-if="orderList.length === 0" />
+      <div class="order-content" v-else>
+        <div
+          class="order-list"
+          v-for="(order, onderIndex) in orderList"
+          :key="onderIndex"
+        >
+          <div class="order-header">
+            <div>
+              <div>{{ filterOrderStatus(order.orderStatus) }}</div>
+              <div>
+                订单号：{{ order.sn }} &nbsp; &nbsp; &nbsp;{{order.createTime}}
+              </div>
+            </div>
+            <div>
+              <el-button v-if="order.orderStatus === 'COMPLETED'" @click="delOrder(order.sn)" class="del-btn mr_10 fontsize_16" style="margin-top:-5px;" type="text" icon="ios-trash-outline" size="small"></el-button>
+              <span>{{ $filters.unitPrice(order.flowPrice, "￥") }}</span>
+            </div>
+          </div>
+          <div class="order-body">
+            <div class="goods-list">
+              <div
+                v-for="(goods, goodsIndex) in order.orderItems"
+                :key="goodsIndex"
+              >
+                <img
+                  @click="goodsDetail(goods.skuId, goods.goodsId)"
+                  class="hover-color"
+                  :src="goods.image"
+                  alt=""
+                />
+                <div>
+                  <div class="hover-color" @click="goodsDetail(goods.skuId, goods.goodsId)">{{ goods.name }}</div>
+                  <div class="mt_10">
+                    <span class="global_color">{{ $filters.unitPrice(goods.goodsPrice, "￥") }} </span>x {{ goods.num }}
+                    <span style="margin-left: 10px;color: #ff9900;">{{refundPriceList(goods.isRefund)}}</span>
+                  </div>
+                  <el-button v-if="goods.commentStatus == 'UNFINISHED'" @click="comment(order.sn, goodsIndex)" size="small" type="success" class="fontsize_12" style="position:relative;top:-22px;left:190px;margin-right:10px">评价</el-button>
+                  <el-button v-if="goods.complainStatus == 'NO_APPLY'" @click="complain(order.sn, goodsIndex)" type="danger" class="fontsize_12" size="small" style="position:relative;top:-22px;left:190px">投诉</el-button>
+                </div>
+              </div>
+            </div>
+            <div>
+              <span @click="shopPage(order.storeId)">{{ order.storeName }}</span>
+            </div>
+            <div class="order-actions">
+              <!-- 订单基础操作 -->
+              <el-button @click="orderDetail(order.sn)" type="warning" size="small">订单详情</el-button>
+              <el-button @click="handleCancelOrder(order.sn)" type="danger" v-if="order.allowOperationVO.cancel" size="small">取消订单</el-button>
+              <el-button @click="goPay(order.sn)" size="small" type="success" v-if="order.allowOperationVO.pay">去支付</el-button>
+              <el-button @click="received(order.sn)" size="small" type="primary" v-if="order.allowOperationVO.rog">确认收货</el-button>
+              <!-- 售后 -->
+              <el-button v-if="order.groupAfterSaleStatus && (order.groupAfterSaleStatus.includes('NOT_APPLIED')|| order.groupAfterSaleStatus.includes('PART_AFTER_SALE'))"
+                      @click="applyAfterSale(order.orderItems)" size="small">申请售后</el-button>
+            </div>
+          </div>
+        </div>
+        <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
       </div>
-    </div>
-    <!-- 订单列表 -->
-    <empty v-if="orderList.length === 0" />
-    <div class="order-content" v-else>
+
+      <!-- 分页 -->
+      <div class="page-size">
+        <el-pagination :total="total" @current-change="changePageNum"
+          @size-change="changePageSize"
+          :page-size="params.pageSize" layout="total, sizes, prev, pager, next, jumper"></el-pagination>
+      </div>
+    </UserCenterLayout>
+
+    <!-- 个人中心首页订单列表 -->
+    <empty v-if="homePage && orderList.length === 0" />
+    <div class="order-content" v-else-if="homePage">
       <div
         class="order-list"
         v-for="(order, onderIndex) in orderList"
@@ -74,12 +149,6 @@
       </div>
       <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
     </div>
-    <!-- 分页 -->
-    <div class="page-size" v-if="!homePage">
-      <el-pagination :total="total" @current-change="changePageNum"
-        @size-change="changePageSize"
-        :page-size="params.pageSize" layout="total, sizes, prev, pager, next"></el-pagination>
-    </div>
     <!-- 选择售后商品 -->
     <el-dialog v-model="afterSaleModal" title="请选择申请售后的商品">
       <div>
@@ -135,6 +204,7 @@ export default {
       // 状态数组
       orderStatusList,
       changeWay: ['全部订单', '待付款', '待收货', '已完成'], // 订单状态
+      activeOrderTab: 0,
       total: 0, // 数据总数
       spinShow: false, // 加载状态
       afterSaleModal: false, // 选择售后商品模态框
@@ -173,6 +243,8 @@ export default {
     },
     // 切换订单状态
     change (index) {
+      this.activeOrderTab = index;
+      this.params.pageNumber = 1;
       switch (index) {
         case 0:
           this.params.tag = 'ALL'
@@ -306,14 +378,30 @@ export default {
 .wrapper {
   margin-bottom: 40px;
 }
-.order-search-bar {
-  margin-top: 16px;
-  margin-bottom: 16px;
-  overflow: hidden;
+.order-search {
+  display: flex;
+  align-items: center;
+  width: 330px;
+
+  :deep(.el-input) {
+    flex: 1;
+  }
+
+  :deep(.el-button) {
+    margin-left: 8px;
+  }
+}
+.order-content {
+  padding-top: 14px;
 }
 .page-size {
-  margin: 15px 0px;
-  text-align: right;
+  margin: 15px 0;
+  display: flex;
+  justify-content: flex-end;
+
+  :deep(.el-pagination) {
+    justify-content: flex-end;
+  }
 }
 /** 订单列表 */
 .order-list {

@@ -260,6 +260,14 @@ export default {
   background-position: right;
   background-size: 10%;
 }
+.pageration {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 16px;
+  padding-right: 8px;
+  box-sizing: border-box;
+}
 </style>
 <style lang="scss">
 .goods-dialog-cascader-popper {

@@ -1,6 +1,6 @@
 <template>
   <div class="point">
-    <card _Title="我的积分"/>
+    <UserCenterLayout title="我的积分" :tabs="['我的积分']">
     <div class="point-content">
       <span>剩余积分：<span>{{ pointObj.point || 0 }}</span></span>
       <span>累计获得：<span>{{ pointObj.totalPoint || 0 }}</span></span>
@@ -18,15 +18,18 @@
       </el-table-column>
     </el-table>
     <!-- 分页 -->
-    <el-pagination       style="float:right;margin-top:10px"
-      :current-page="params.pageNumber"
-      :total="logData.total"
-      :page-size="params.pageSize"
-      @current-change="changePage"
-      @size-change="changePageSize"
-      :page-sizes="[10, 20, 50]"
-      small
-     layout="total, prev, pager, next, jumper"></el-pagination>
+    <div class="point-pagination">
+      <el-pagination
+        :current-page="params.pageNumber"
+        :total="logData.total"
+        :page-size="params.pageSize"
+        @current-change="changePage"
+        @size-change="changePageSize"
+        :page-sizes="[10, 20, 50]"
+        layout="total, prev, pager, next, jumper"
+      />
+    </div>
+    </UserCenterLayout>
   </div>
 </template>
 <script>
@@ -91,5 +94,11 @@ h3 {
       font-size: 24px;
     }
   }
+}
+
+.point-pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 </style>

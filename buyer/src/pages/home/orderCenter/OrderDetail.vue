@@ -1,6 +1,6 @@
 <template>
   <div class="order-detail" v-if="order.order">
-    <card _Title="订单详情" :_Size="16"></card>
+    <UserCenterLayout title="订单详情" :tabs="['订单详情']">
     <el-card
       class="mb_10"
       shadow="never"
@@ -317,6 +317,7 @@
         <el-button @click="logisticsModal = false">取消</el-button>
       </div></template>
     </el-dialog>
+    </UserCenterLayout>
 
   </div>
 </template>

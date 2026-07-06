@@ -1,13 +1,13 @@
 <template>
   <div class="add-eval">
-    <div class="title">
-      <card _Title="订单投诉" :_Size="16"></card>
+    <UserCenterLayout title="订单投诉" :tabs="['订单投诉']">
+      <div class="title">
       <p>
         <span class="fontsize_16 global_color">{{ statusLabel[detail.complainStatus] }}</span>
         <span class="color999 ml_20">创建时间：</span><span>{{ detail.createTime }}</span>
         <span class="color999 ml_20">{{ detail.createTime }}</span>
       </p>
-    </div>
+      </div>
 
     <el-alert class="l_title" show-icon type="warning">我的申诉信息</el-alert>
     <table cellspacing="0" cellpadding='0' border="1">
@@ -118,6 +118,7 @@
     <el-dialog title="View Image" v-model="visible">
       <img :src="previewImage" v-if="visible" style="width: 100%">
     </el-dialog>
+    </UserCenterLayout>
   </div>
 </template>
 <script>

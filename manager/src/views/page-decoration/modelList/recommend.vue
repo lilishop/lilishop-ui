@@ -345,12 +345,17 @@ export default {
     width: 595px;
     .content-left {
       display: flex;
+      align-items: stretch;
       padding-top: 10px;
       font-size: 12px;
+      box-sizing: content-box;
       > div:nth-child(1) {
         width: 189px;
         border-right: 1px solid #eee;
         height: 360px;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
         img {
           margin: 40px 0 0 15px;
         }
@@ -368,15 +373,20 @@ export default {
           color: #999;
         }
         .view-btn {
-          margin-left: 15px;
-          margin-top: 10px;
+          align-self: center;
+          width: 145px;
+          margin-top: auto;
+          margin-bottom: 15px;
           color: #fff;
         }
       }
       > div:nth-child(2) {
         width: 405px;
+        height: 360px;
         display: flex;
         flex-wrap: wrap;
+        align-content: flex-start;
+        box-sizing: border-box;
         > div {
           display: flex;
           align-items: center;
@@ -408,7 +418,7 @@ export default {
       grid-template-rows: repeat(2, 1fr);
       height: 360px;
       padding-top: 10px;
-      box-sizing: border-box;
+      box-sizing: content-box;
 
       > div {
         width: 100%;

@@ -1,10 +1,7 @@
 <template>
   <div class="wrapper">
-    <!-- 卡片组件 -->
-    <card _Title="我的售后" :_Size="16"></card>
-    <!-- 搜索 筛选 -->
-    <div class="mb_20 box">
-      <div class="global_float_right">
+    <UserCenterLayout title="我的售后" :tabs="['我的售后']">
+      <template #extra>
         <el-input
           class="width_300"
           
@@ -13,8 +10,7 @@
           @keyup.enter="getList"
           placeholder="请输入订单号搜索"
         />
-      </div>
-    </div>
+      </template>
     <!-- 列表 -->
     <empty v-if="orderList.length === 0"/>
     <div class="order-content" v-else>
@@ -76,8 +72,9 @@
     <div class="page-size">
       <el-pagination :total="total" @current-change="changePageNum"
             @size-change="changePageSize"
-            :page-size="params.pageSize" layout="sizes, prev, pager, next"></el-pagination>
+            :page-size="params.pageSize" layout="sizes, prev, pager, next, jumper"></el-pagination>
     </div>
+    </UserCenterLayout>
     <el-dialog v-model="logisticsShow" width="530">
       <template #header><p>
         <span>提交物流信息</span>

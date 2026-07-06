@@ -53,7 +53,12 @@ service.interceptors.request.use(
       });
     }
 
-    if (typeof window !== "undefined" && loading !== false) {
+    const method = (config.method || "get").toLowerCase();
+    const isReadRequest = method === "get" || method === "head";
+    const shouldShowLoading =
+      loading === true || (!isReadRequest && loading !== false);
+
+    if (typeof window !== "undefined" && shouldShowLoading) {
       config.loading = ElLoading.service({ fullscreen: true });
     }
 
@@ -65,18 +70,23 @@ service.interceptors.request.use(
     config.headers["uuid"] = uuid;
 
     const accessToken = Storage.getItem("accessToken");
-    if (accessToken && config.needToken) {
+    if (accessToken && (config.needToken || config.optionalToken)) {
       config.headers["accessToken"] = accessToken;
-      const jwtData = JSON.parse(
-        decodeURIComponent(
-          escape(
-            window
-              .atob(accessToken.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
+      try {
+        const jwtData = JSON.parse(
+          decodeURIComponent(
+            escape(
+              window
+                .atob(accessToken.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
+            )
           )
-        )
-      );
-      if (jwtData.exp < Math.round(new Date() / 1000)) {
-        refresh(config);
+        );
+        if (jwtData.exp < Math.round(new Date() / 1000)) {
+          refresh({ response: { config } });
+        }
+      } catch {
+        Storage.removeItem("accessToken");
+        Storage.removeItem("refreshToken");
       }
     }
 
@@ -85,41 +95,49 @@ service.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+function buildRejectError(error, errorData = {}) {
+  const message =
+    errorData.message ||
+    (error?.code === "ECONNABORTED" ? "连接超时，请稍候再试！" : "网络错误，请稍后再试！");
+  return Object.assign(new Error(message), { data: errorData });
+}
+
 async function refresh(error) {
   const getTokenRes = await refreshToken();
   if (getTokenRes === "success") {
-    if (isRefreshToken === 1) {
+    if (error?.response?.config) {
       error.response.config.headers.accessToken = Storage.getItem("accessToken");
       return service(error.response.config);
     }
     router.go(0);
-  } else {
-    Storage.removeItem("accessToken");
-    Storage.removeItem("refreshToken");
-    Storage.removeItem("userInfo");
-    Storage.setItem("cartNum", 0);
-    store.commit("SET_CARTNUM", 0);
-    const currentRoute = router.currentRoute.value;
-    Modal.confirm({
-      title: "请登录",
-      content: "请登录后执行此操作",
-      okText: "立即登录",
-      cancelText: "继续浏览",
-      onOk: () => {
-        router.push({
-          path: "/login",
-          query: {
-            rePath: currentRoute.path,
-            query: JSON.stringify(currentRoute.query),
-          },
-        });
-      },
-      onCancel: () => {
-        router.push("/");
-        Modal.remove();
-      },
-    });
+    return new Promise(() => {});
   }
+  Storage.removeItem("accessToken");
+  Storage.removeItem("refreshToken");
+  Storage.removeItem("userInfo");
+  Storage.setItem("cartNum", 0);
+  store.commit("SET_CARTNUM", 0);
+  const currentRoute = router.currentRoute.value;
+  Modal.confirm({
+    title: "请登录",
+    content: "请登录后执行此操作",
+    okText: "立即登录",
+    cancelText: "继续浏览",
+    onOk: () => {
+      router.push({
+        path: "/login",
+        query: {
+          rePath: currentRoute.path,
+          query: JSON.stringify(currentRoute.query),
+        },
+      });
+    },
+    onCancel: () => {
+      router.push("/");
+      Modal.remove();
+    },
+  });
+  return Promise.reject(new Error("登录已过期"));
 }
 
 service.interceptors.response.use(
@@ -140,19 +158,22 @@ service.interceptors.response.use(
     ) {
       isRefreshToken++;
       if (isRefreshToken === 1) {
-        refresh(error);
         isRefreshToken = 0;
+        return refresh(error);
       }
-    } else if (errorResponse.status === 404) {
-      // skip
-    } else if (error.message) {
+      return Promise.reject(buildRejectError(error, errorData));
+    }
+    if (errorResponse.status === 404) {
+      return Promise.reject(buildRejectError(error, { message: "请求的资源不存在" }));
+    }
+    if (error.message) {
       const _message =
         error.code === "ECONNABORTED"
           ? "连接超时，请稍候再试！"
           : "网络错误，请稍后再试！";
       Message.error(errorData.message || _message);
     }
-    return Promise.reject(errorData);
+    return Promise.reject(buildRejectError(error, errorData));
   }
 );
 

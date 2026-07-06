@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <card _Title="账户安全"/>
+    <UserCenterLayout title="账户安全" :tabs="['账户安全']">
     <!--  手机号验证  -->
     <el-form ref="formData" :model="formData" label-position="left" label-width="100px" :rules="ruleInLines"
           v-if="(status == 2 || status == 3) && !showPwd">
@@ -69,6 +69,7 @@
     <div v-if="showPwd" style="text-align: center;width: 50%">
       <el-button type="primary" class="ml_10" @click="setPassword">设置</el-button>
     </div>
+    </UserCenterLayout>
   </div>
 </template>
 

@@ -1,26 +1,33 @@
 <template>
   <div class="wrapper">
-    <card _Title="用户信息" />
-    <el-form :model="formItem" :rules="rules" ref="form" label-width="80px">
-      <el-form-item label="头像">
-        <el-avatar v-if="formItem.face" :src="formItem.face" :size="80" />
-        <el-avatar v-else :size="80"><el-icon><User /></el-icon></el-avatar>
-        <el-upload
-          :show-upload-list="false"
-          :on-success="handleSuccess"
-          :format="['jpg','jpeg','png']"
-          :action="action"
-          :headers="accessToken"
+    <UserCenterLayout title="用户信息" :tabs="['用户信息']">
+      <el-form :model="formItem" :rules="rules" ref="form" label-width="80px">
+      <el-form-item label="头像" class="avatar-form-item">
+        <div class="avatar-upload">
+          <el-avatar v-if="formItem.face" :src="formItem.face" :size="80" />
+          <el-avatar v-else :size="80"><el-icon><User /></el-icon></el-avatar>
+          <el-upload
+            :show-file-list="false"
+            :on-success="handleSuccess"
+            :format="['jpg','jpeg','png']"
+            :action="action"
+            :headers="accessToken"
           >
-          <el-button class="mt_10">上传头像</el-button>
-        </el-upload>
+            <el-button>上传头像</el-button>
+          </el-upload>
+        </div>
       </el-form-item>
       <el-form-item label="昵称" prop="nickName">
-        <el-input class="wrapper-user-name" style="width:187px" v-model="formItem.nickName" placeholder="" />
+        <el-input class="profile-field" v-model="formItem.nickName" placeholder="" />
       </el-form-item>
 
       <el-form-item label="生日">
-        <el-date-picker type="date" placeholder="选择您的生日" v-model="formItem.birthday"></el-date-picker>
+        <el-date-picker
+          class="profile-field"
+          type="date"
+          placeholder="选择您的生日"
+          v-model="formItem.birthday"
+        />
       </el-form-item>
       <el-form-item label="性别">
         <el-radio-group v-model="formItem.sex" type="button" button-style="solid">
@@ -32,7 +39,8 @@
         <el-button type="primary" @click="save">确认修改</el-button>
 
       </el-form-item>
-    </el-form>
+      </el-form>
+    </UserCenterLayout>
   </div>
 </template>
 
@@ -113,5 +121,35 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.avatar-form-item {
+  :deep(.el-form-item__label) {
+    height: 90px;
+    line-height: 90px;
+    display: flex;
+    align-items: center;
+  }
+}
 
+.avatar-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+
+  :deep(.el-avatar) {
+    margin-top: 10px;
+  }
+
+  :deep(.el-upload) {
+    display: block;
+  }
+}
+
+.profile-field {
+  width: 187px;
+}
+
+:deep(.profile-field.el-date-editor) {
+  width: 187px;
+}
 </style>

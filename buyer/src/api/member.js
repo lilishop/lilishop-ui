@@ -298,7 +298,8 @@ export function cancelAfterSale (afterSaleSn) {
   return request({
     url: `/buyer/order/afterSale/cancel/${afterSaleSn}`,
     method: Method.POST,
-    needToken: true
+    needToken: true,
+    loading: false
   });
 }
 

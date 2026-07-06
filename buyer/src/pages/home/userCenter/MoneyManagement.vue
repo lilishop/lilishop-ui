@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <card _Title="资金管理"/>
+    <UserCenterLayout title="资金管理" :tabs="['资金管理']">
 
     <div class="box">
       <div class="mb_20 account-price">
@@ -90,7 +90,7 @@
     <!-- 余额日志 -->
     <el-tabs v-model="activeWalletTab" @tab-click="(tab) => tabPaneChange(tab.paneName)">
       <el-tab-pane label="余额日志" name="log">
-        <el-table :data="logColumnsData.records || []">
+        <el-table ref="logTable" :data="logColumnsData.records || []">
           <el-table-column prop="createTime" label="时间" width="190" />
           <el-table-column label="金额" width="180">
             <template #default="{ row }">
@@ -106,15 +106,14 @@
             :page-size="walletForm.pageSize"
             :page-sizes="[10, 20, 50]"
             :total="logColumnsData.total"
-            small
             @current-change="changePage"
             @size-change="changePageSize"
-           layout="total, sizes, prev, pager, next"></el-pagination>
+           layout="total, sizes, prev, pager, next, jumper"></el-pagination>
         </div>
       </el-tab-pane>
       <!-- 充值记录 -->
       <el-tab-pane label="充值记录" name="recharge">
-        <el-table :data="rechargeListData.records || []">
+        <el-table ref="rechargeTable" :data="rechargeListData.records || []">
           <el-table-column prop="createTime" label="充值时间" width="168" />
           <el-table-column prop="rechargeSn" label="支付单号" width="200" />
           <el-table-column label="充值金额">
@@ -145,15 +144,14 @@
             :page-size="rechargeForm.pageSize"
             :page-sizes="[10, 20, 50]"
             :total="rechargeListData.total"
-            small
             @current-change="rechargeChangePage"
             @size-change="rechargeChangePageSize"
-           layout="total, sizes, prev, pager, next"></el-pagination>
+           layout="total, sizes, prev, pager, next, jumper"></el-pagination>
         </div>
       </el-tab-pane>
 
       <el-tab-pane label="提现记录" name="withdrawApply">
-        <el-table :data="withdrawApplyColumnsListData.records || []">
+        <el-table ref="withdrawTable" :data="withdrawApplyColumnsListData.records || []">
           <el-table-column prop="createTime" label="申请时间" width="168" />
           <el-table-column prop="sn" label="提现单号" width="200" />
           <el-table-column label="提现金额" width="110">
@@ -180,13 +178,13 @@
             :page-size="withdrawApplyForm.pageSize"
             :page-sizes="[10, 20, 50]"
             :total="withdrawApplyColumnsListData.total"
-            small
             @current-change="withdrawChangePage"
             @size-change="withdrawChangePageSize"
-           layout="total, sizes, prev, pager, next"></el-pagination>
+           layout="total, sizes, prev, pager, next, jumper"></el-pagination>
         </div>
       </el-tab-pane>
     </el-tabs>
+    </UserCenterLayout>
   </div>
 </template>
 
@@ -281,6 +279,7 @@ export default {
       getDepositLog(this.walletForm).then((res) => {
         if (res.message === 'success') {
           this.logColumnsData = res.result;
+          this.refreshActiveTableLayout();
         }
       });
     },
@@ -297,12 +296,14 @@ export default {
       if (v === 'withdrawApply') {
         this.getWithdrawApplyData();
       }
+      this.refreshActiveTableLayout();
     },
     // 充值记录
     getRechargeData() {
       getRecharge(this.rechargeForm).then((res) => {
         if (res.message === 'success') {
           this.rechargeListData = res.result;
+          this.refreshActiveTableLayout();
         }
       });
     },
@@ -311,7 +312,18 @@ export default {
       getWithdrawApply(this.withdrawApplyForm).then((res) => {
         if (res.message === 'success') {
           this.withdrawApplyColumnsListData = res.result;
+          this.refreshActiveTableLayout();
         }
+      });
+    },
+    refreshActiveTableLayout() {
+      this.$nextTick(() => {
+        const tableMap = {
+          log: this.$refs.logTable,
+          recharge: this.$refs.rechargeTable,
+          withdrawApply: this.$refs.withdrawTable
+        };
+        tableMap[this.activeWalletTab]?.doLayout?.();
       });
     },
     // 余额日志

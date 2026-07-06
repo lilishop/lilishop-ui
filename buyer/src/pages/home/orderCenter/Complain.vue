@@ -1,13 +1,13 @@
 
 <template>
   <div class="add-eval">
-    <div class="title">
-      <card _Title="商品投诉" :_Size="16"></card>
+    <UserCenterLayout title="商品投诉" :tabs="['商品投诉']">
+      <div class="title">
       <p>
         <span class="color999">订单号：</span><span>{{$route.query.sn}}</span>
         <span class="color999 ml_20" v-if="order.order">{{order.order.paymentTime}}</span>
       </p>
-    </div>
+      </div>
     <div class="goods-eval">
       <div class="goods-con">
         <img :src="orderGoods.image" class="hover-pointer" alt="" width="100" @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)">
@@ -16,41 +16,47 @@
       </div>
 
       <div class="eval-con">
-        <div>
+        <div class="eval-form">
           <span class="color999">投诉主题：</span>
           <el-select v-model="form.complainTopic" style="width:260px;margin-bottom:10px">
             <el-option v-for="item in reasonList" :value="item.reason" :key="item.id">{{ item.reason }}</el-option>
           </el-select>
           <el-input type="textarea" maxlength="500" show-word-limit :rows="4" placeholder="请输入投诉内容" v-model="form.content" />
         </div>
-        <div style="display:flex;align-items:center;">
-          <div class="demo-upload-list" v-for="(img, index) in orderGoods.uploadList" :key="index">
-            <img :src="img">
-            <div class="demo-upload-list-cover">
-                <el-icon @click="handleView(img)"><View /></el-icon>
-                <el-icon @click="handleRemove(index)"><Delete /></el-icon>
+        <div class="upload-section">
+          <div class="upload-row">
+            <div class="demo-upload-list" v-for="(img, index) in orderGoods.uploadList" :key="index">
+              <img :src="img">
+              <div class="demo-upload-list-cover">
+                  <el-icon @click="handleView(img)"><View /></el-icon>
+                  <el-icon @click="handleRemove(index)"><Delete /></el-icon>
+              </div>
             </div>
-          </div>
-          <el-upload
-              :show-upload-list="false"
-              :on-success="handleSuccess"
-              :before-upload="handleBeforeUpload"
-              :format="['jpg','jpeg','png']"
-              :action="action"
-              :headers="accessToken"
-              style="display: inline-block;width:58px;">
-              <div class="hover-pointer icon-upload" style="">
+            <el-upload
+                class="upload-trigger"
+                :show-file-list="false"
+                :on-success="handleSuccess"
+                :before-upload="handleBeforeUpload"
+                :format="['jpg','jpeg','png']"
+                :action="action"
+                :headers="accessToken"
+            >
+              <div class="hover-pointer icon-upload">
                 <el-icon :size="20"><Camera /></el-icon>
               </div>
-          </el-upload>
+            </el-upload>
+          </div>
           <div class="describe">上传投诉凭证，最多5张</div>
+        </div>
+        <div class="submit-bar">
+          <el-button type="primary" :loading="loading" @click="save">提交</el-button>
         </div>
       </div>
     </div>
-    <el-button type="primary" class="mt_10" :loading="loading" @click="save">提交</el-button>
     <el-dialog title="View Image" v-model="visible">
         <img :src="previewImage" v-if="visible" style="width: 100%">
     </el-dialog>
+    </UserCenterLayout>
   </div>
 </template>
 <script>
@@ -170,11 +176,18 @@ export default {
   .eval-con {
     width: 70%;
     padding: 20px;
+    box-sizing: border-box;
+  }
+
+  .eval-form {
+    :deep(.el-textarea) {
+      width: 100%;
+    }
   }
 }
 
 .demo-upload-list{
-  display: inline-block;
+  display: block;
   width: 60px;
   height: 60px;
   text-align: center;
@@ -185,8 +198,7 @@ export default {
   background: #fff;
   position: relative;
   box-shadow: 0 1px 1px rgba(0,0,0,.2);
-  margin-right: 4px;
-  margin-top: 10px;
+  flex-shrink: 0;
 }
 .demo-upload-list img{
   width: 100%;
@@ -211,24 +223,53 @@ export default {
   margin: 0 2px;
 }
 .icon-upload {
-  width: 58px;
-  height:58px;
-  line-height: 58px;
-  text-align:center;
-  display: inline-block;
-  border:1px dashed #999;
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #999;
   border-radius: 4px;
-  margin-top: 10px;
+  box-sizing: border-box;
   &:hover{
     cursor: pointer;
     border-color: $theme_color;
   }
 }
+
+.upload-section {
+  margin-top: 10px;
+}
+
+.upload-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.upload-trigger {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  :deep(.el-upload) {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
 .describe{
   font-size: 12px;
   color: #999;
-  position:relative;
-  top: 46px;
-  left: -60px;
+  margin-top: 8px;
+}
+
+.submit-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 </style>

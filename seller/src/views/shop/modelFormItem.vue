@@ -377,20 +377,34 @@ export default {
 .model-item {
   position: relative;
   margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
+
   &:hover {
     .del-btn {
       display: block;
     }
   }
 }
+
+.model-item :deep(.width_1200_auto) {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
 .del-btn {
-  width: 100px;
-  height: 100px;
-  display: none;
   position: absolute;
-  right: -100px;
+  left: 100%;
+  right: auto;
   top: 0;
-  z-index: 10;
+  width: auto;
+  white-space: nowrap;
+  display: none;
+  z-index: 100;
+
   &:hover {
     display: block;
   }
@@ -420,38 +434,41 @@ export default {
 }
 /** 热门广告 */
 .hot-advert {
-  width: 1200px;
-  margin-right: -110px;
+  width: 100%;
   box-sizing: border-box;
   overflow: hidden;
 
   .hot-advert-banner {
     line-height: 0;
+    width: 100%;
 
     img {
       display: block;
       width: 100%;
       height: auto;
+      object-fit: cover;
     }
   }
 }
 .advert-list {
   width: 100%;
   margin: 0;
-  padding: 5px 0;
+  padding: 10px;
   list-style: none;
   box-sizing: border-box;
   background: $theme_color;
-  height: 200px;
+  height: 210px;
   display: flex;
   gap: 10px;
   align-items: center;
   > li {
-    flex: 0 0 calc((100% - 40px) / 5);
+    flex: 1 1 0;
+    min-width: 0;
     img {
       display: block;
       width: 100%;
       height: 190px;
+      object-fit: cover;
       cursor: pointer;
       border-radius: 10px;
       transition: all 150ms ease-in-out;
@@ -473,16 +490,17 @@ export default {
 }
 /** 折扣广告 */
 .discountAdvert-wrap {
-  width: 1200px;
+  width: 100%;
   position: relative;
+  overflow: hidden;
 }
 .discountAdvert {
   width: 1300px;
-  height: 585px;
+  height: 596px;
   margin-left: -100px;
   box-sizing: border-box;
   background-repeat: no-repeat;
-  background-size: 1300px 585px;
+  background-size: 1300px 596px;
   position: relative;
   > div {
     padding-left: 295px;

@@ -43,6 +43,7 @@
 <script>
 import { applySecond } from '@/api/shopentry';
 export default {
+  emits: ['change'],
   props: {
     content: {
       default: {},

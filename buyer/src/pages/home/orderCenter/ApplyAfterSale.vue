@@ -1,6 +1,6 @@
 <template>
   <div class="apply-after-sale">
-    <card _Title="申请售后"></card>
+    <UserCenterLayout title="申请售后" :tabs="['申请售后']">
     <el-table :data="goodsData" border>
       <el-table-column label="商品名称">
         <template #default="{ row }">
@@ -42,26 +42,30 @@
           <el-input type="textarea" :rows="4" maxlength="500" style="width:260px" show-word-limit v-model="form.problemDesc" />
         </el-form-item>
         <el-form-item label="图片信息">
-          <div style="display:flex;align-items:center;">
-            <div class="demo-upload-list" v-for="(img, index) in uploadList" :key="index">
-              <img :src="img">
-              <div class="demo-upload-list-cover">
-                  <el-icon @click="handleView(img)"><View /></el-icon>
-                  <el-icon @click="handleRemove(index)"><Delete /></el-icon>
-              </div>
-            </div>
-            <el-upload
-                :show-upload-list="false"
-                :on-success="handleSuccess"
-                :before-upload="handleBeforeUpload"
-                :format="['jpg','jpeg','png']"
-                :action="action"
-                :headers="accessToken"
-                style="display: inline-block;width:58px;">
-                <div class="hover-pointer icon-upload" style="">
-                  <el-icon :size="20"><Plus /></el-icon>
+          <div class="upload-section">
+            <div class="upload-row">
+              <div class="demo-upload-list" v-for="(img, index) in uploadList" :key="index">
+                <img :src="img">
+                <div class="demo-upload-list-cover">
+                    <el-icon @click="handleView(img)"><View /></el-icon>
+                    <el-icon @click="handleRemove(index)"><Delete /></el-icon>
                 </div>
-            </el-upload>
+              </div>
+              <el-upload
+                  class="upload-trigger"
+                  :show-file-list="false"
+                  :on-success="handleSuccess"
+                  :before-upload="handleBeforeUpload"
+                  :format="['jpg','jpeg','png']"
+                  :action="action"
+                  :headers="accessToken"
+              >
+                <div class="hover-pointer icon-upload">
+                  <el-icon :size="20"><Camera /></el-icon>
+                </div>
+              </el-upload>
+            </div>
+            <div class="describe">上传售后凭证，最多5张</div>
           </div>
         </el-form-item>
         <el-form-item label="退款方式">
@@ -89,16 +93,17 @@
         <img :src="previewImage" v-if="visible" style="width: 100%">
       </el-dialog>
     </div>
+    </UserCenterLayout>
   </div>
 </template>
 <script>
-import { Delete, Plus, View } from '@element-plus/icons-vue';
+import { Camera, Delete, View } from '@element-plus/icons-vue';
 import { afterSaleReason, afterSaleInfo, applyAfterSale } from '@/api/member.js'
 import { commonUrl } from '@/plugins/request.js';
 import storage from '@/plugins/storage';
 import * as RegExp from '@/plugins/RegExp'
 export default {
-  components: { Delete, Plus, View },
+  components: { Camera, Delete, View },
   data () {
     const checkNum = (rule, value, callback) => {
       if (value === '') {
@@ -228,7 +233,7 @@ export default {
   }
 }
 .demo-upload-list{
-  display: inline-block;
+  display: block;
   width: 60px;
   height: 60px;
   text-align: center;
@@ -239,8 +244,7 @@ export default {
   background: #fff;
   position: relative;
   box-shadow: 0 1px 1px rgba(0,0,0,.2);
-  margin-right: 4px;
-  margin-top: 10px;
+  flex-shrink: 0;
 }
 .demo-upload-list img{
   width: 100%;
@@ -265,17 +269,43 @@ export default {
   margin: 0 2px;
 }
 .icon-upload {
-  width: 58px;
-  height:58px;
-  line-height: 58px;
-  text-align:center;
-  display: inline-block;
-  border:1px dashed #999;
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #999;
   border-radius: 4px;
-  margin-top: 10px;
+  box-sizing: border-box;
   &:hover{
     cursor: pointer;
     border-color: $theme_color;
   }
+}
+
+.upload-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.upload-trigger {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  :deep(.el-upload) {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+.describe {
+  font-size: 12px;
+  color: #999;
+  margin-top: 8px;
 }
 </style>

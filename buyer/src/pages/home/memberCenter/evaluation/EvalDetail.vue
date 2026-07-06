@@ -1,12 +1,12 @@
 <template>
   <div class="add-eval">
-    <div class="title">
-      <card _Title="评价详情" :_Size="16"></card>
+    <UserCenterLayout title="评价详情" :tabs="['评价详情']">
+      <div class="title">
       <p>
         <span class="color999">创建人：</span><span>{{ $filters.secrecyMobile( orderGoods.createBy ) }}</span>
         <span class="color999 ml_20">{{ orderGoods.createTime }}</span>
       </p>
-    </div>
+      </div>
     <!-- 物流评分、服务评分 -->
     <div class="delivery-rate">
       <div class="fontsize_16">物流服务评价：</div>
@@ -84,6 +84,7 @@
     <el-dialog title="View Image" v-model="visible">
       <img :src="previewImage" v-if="visible" style="width: 100%" />
     </el-dialog>
+    </UserCenterLayout>
   </div>
 </template>
 <script>

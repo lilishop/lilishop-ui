@@ -32,23 +32,16 @@
      append-to-body destroy-on-close>
       <div v-if="current">
         <div class="modal-tab-bar">
-          <div>
+          <div class="current-module-row">
             当前模块 :
-            <el-button-group>
-              <el-button :type="current.model == 'goods' ? 'primary' : 'default'"
-                >商品</el-button
-              >
-              <el-button :type="current.model == 'brand' ? 'primary' : 'default'"
-                >品牌</el-button
-              >
-            </el-button-group>
+            <el-tag>{{ current.model === "goods" ? "商品" : "品牌" }}</el-tag>
           </div>
 
-          <div class="flex">
+          <div class="flex image-row">
             <div>图片 :</div>
-            <div>
+            <div class="image-config">
               <img class="image" :src="current.data.image.src" alt="" />
-              <div>
+              <div class="image-config-detail">
                 <div>推荐尺寸：{{ current.data.image.size }}</div>
                 <div class="link-src">
                   链接地址：
@@ -74,7 +67,7 @@
               </div>
             </div>
           </div>
-          <div class="flex" v-if="current.model == 'goods'">
+          <div class="flex badge-row" v-if="current.model == 'goods'">
             <div>标签 :</div>
             <el-input
               style="width: 200px"
@@ -82,14 +75,13 @@
               v-model="current.data.badge.label"
             />
             <el-input
-              style="width: 100px; margin-left: 10px"
+              style="width: 100px"
               disabled
               type="text"
               v-model="current.data.badge.url"
             />
             <el-button
               size="small"
-              class="ml_10"
               type="primary"
               @click="handleSelectLink('badge')"
               >选择链接
@@ -101,7 +93,7 @@
               :key="index"
               class="draggable"
             >
-              <div class="flex">
+              <div class="flex column-item">
                 <img :src="item.img" class="column-img" />
                 <el-button
                   size="small"
@@ -111,7 +103,7 @@
                   @click="handleSelectGoods('list', index)"
                   >选择商品
                 </el-button>
-                <div>
+                <div class="column-item-config">
                   <div  v-if="current.model == 'brand'" style="margin-bottom: 10px">
                     <el-input disabled v-model="item.url" />
                   </div>
@@ -235,11 +227,12 @@ export default {
     // 选择商品回调
     selectedGoodsData(val) {
       if (!val?.length || !this.current) return;
+      const goods = val[0];
       const item = this.current.data.list[this.goodsIndex];
-      item.img = val[0].thumbnail;
-      item.title = val[0].goodsName;
-      item.price = val[0].price;
-      item.url = val[0].url;
+      item.img = goods.thumbnail;
+      item.title = goods.goodsName;
+      item.price = goods.price;
+      item.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
     },
     // 选择链接回调
     selectedLink(val) {
@@ -279,6 +272,45 @@ export default {
   margin: 10px 0;
 }
 
+.current-module-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.image-row {
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.badge-row {
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.image-config {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.image-config-detail {
+  flex: 1;
+  min-width: 0;
+}
+
+.column-item {
+  align-items: center;
+  gap: 12px;
+}
+
+.column-item-config {
+  flex: 1;
+  min-width: 0;
+}
+
 .mix-model {
   display: flex;
   justify-content: space-between;
@@ -293,6 +325,7 @@ export default {
   background: #ffffff;
   box-shadow: 0px 1px 13px 0px #e5e5e5;
   position: relative;
+  overflow: hidden;
 
   &:hover {
     .setup-box {
@@ -326,8 +359,6 @@ export default {
 }
 
 .draggable {
-  > .flex {
-    align-items: center;
-  }
+  margin-bottom: 10px;
 }
 </style>

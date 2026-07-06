@@ -448,16 +448,16 @@ export default {
 .advert-list {
   width: 100%;
   margin: 0;
-  padding: 5px 6px;
+  padding: 10px;
   list-style: none;
   box-sizing: border-box;
   background: $theme_color;
-  height: 200px;
+  height: 210px;
   display: flex;
-  gap: 6px;
+  gap: 10px;
   align-items: center;
   > li {
-    flex: 0 0 calc((100% - 24px) / 5);
+    flex: 0 0 calc((100% - 40px) / 5);
     img {
       display: block;
       width: 100%;

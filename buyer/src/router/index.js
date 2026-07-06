@@ -52,7 +52,6 @@ const MyGiftCards = () => import("@/pages/home/userCenter/MyGiftCards");
 
 const Home = () => import("@/pages/user/Home");
 const Merchant = () => import("@/pages/Merchant");
-const UserMain = () => import("@/pages/home/Main");
 const topic = () => import("@/pages/Topic");
 const ShopEntry = () => import("@/pages/shopEntry/ShopEntry");
 
@@ -179,13 +178,8 @@ export const router = createRouter({
     {
       path: "/home",
       component: Home,
+      redirect: { name: "MyOrder" },
       children: [
-        {
-          path: "/",
-          name: "Home",
-          component: UserMain,
-          meta: { title: "会员中心" },
-        },
         {
           path: "MyTracks",
           name: "MyTracks",

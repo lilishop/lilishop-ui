@@ -67,8 +67,12 @@
 }
 
 .pageration {
-  text-align: right;
-  padding-right: 20px;
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 16px;
+  padding-right: 8px;
+  box-sizing: border-box;
 }
 .wap-content-item {
 
