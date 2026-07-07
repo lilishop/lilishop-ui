@@ -29,7 +29,12 @@
           <el-input type="number" v-model="form.num" style="width:260px" />
         </el-form-item>
         <el-form-item label="提交原因" prop="reason">
-          <el-select v-model="form.reason" style="width:260px" placeholder="请选择提交原因">
+          <el-select
+            v-model="form.reason"
+            :key="form.serviceType"
+            style="width:260px"
+            placeholder="请选择提交原因"
+          >
             <el-option
               v-for="item in reasonList"
               :key="item.id"
@@ -166,7 +171,11 @@ export default {
       })
     },
     changeReason (type) { // 改变售后原因列表
+      this.form.reason = undefined
       this.getReason(type)
+      this.$nextTick(() => {
+        this.$refs.form?.clearValidate('reason')
+      })
     },
     apply () { // 售后申请提交
       this.$refs.form.validate(valid => {

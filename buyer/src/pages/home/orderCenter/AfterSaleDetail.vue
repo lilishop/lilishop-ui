@@ -23,7 +23,7 @@
         <div>
           本次售后服务由<span>{{afterSale.storeName}}</span>为您提供
         </div>
-        <div>
+        <div class="service-after-goods">
           <img :src="afterSale.goodsImage" alt="" width="60" height="60">
           <span>{{afterSale.goodsName}}</span>
         </div>
@@ -285,8 +285,19 @@ export default {
   }
   >div:nth-child(2){
     padding-left: 15px;
-    img{vertical-align: top;}
-    span{color: #999;}
+  }
+  .service-after-goods {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    img {
+      flex-shrink: 0;
+    }
+
+    span {
+      color: #999;
+    }
   }
 }
 /** 售后进度条 */

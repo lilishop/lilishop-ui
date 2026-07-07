@@ -126,7 +126,7 @@
             <dl v-if="complaintInfo.complainStatus != 'COMPLETE'">
               <dt></dt>
               <dd>
-                <div style="text-align: right; width: 45%; margin-top: 10px">
+                <div style="text-align: left; margin-top: 10px">
                   <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
                     回复
                   </el-button>
@@ -442,6 +442,22 @@ export default {
   overflow-y: auto;
   overflow-x: auto;
   height: 150px;
+  scrollbar-width: auto;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(50, 50, 50, 0.45);
+  }
+
+  &::-webkit-scrollbar-track {
+    border-radius: 4px;
+    background-color: rgba(50, 50, 50, 0.12);
+  }
 }
 
 .link-text {

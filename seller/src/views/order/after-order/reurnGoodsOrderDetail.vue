@@ -112,13 +112,13 @@
               </dd>
             </dl>
             <dl>
+              <dt></dt>
               <dd>
-                <div style="text-align: right; width: 45%; margin-top: 10px">
+                <div style="text-align: left; margin-top: 10px">
                   <el-button
                     type="primary"
                     :loading="submitLoading"
                     @click="handleSubmit"
-                    style="margin-left: 5px"
                   >
                     确定
                   </el-button>
