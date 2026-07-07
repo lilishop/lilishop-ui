@@ -130,7 +130,7 @@ export default {
     width: 190px;
     height: 100%;
     color: #fff;
-    background: linear-gradient(180deg, #ff5c58 0%, #e84a46 100%);
+    background: linear-gradient(180deg, var(--theme-color, #F31947) 0%, var(--theme-light, #ff6b35) 100%);
     .title {
       width: 100%;
       text-align: center;

@@ -94,3 +94,12 @@ export function getBaseSite(){
     needToken: false
   })
 }
+
+// 获取主题色配置
+export function getThemeSetting() {
+  return request({
+    url: `${commonUrl}/common/common/site/theme`,
+    method: Method.GET,
+    needToken: false,
+  });
+}

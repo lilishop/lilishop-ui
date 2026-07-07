@@ -85,7 +85,7 @@ export default {
   font-size: 14px;
   font-weight: normal;
   line-height: 17px;
-  color: #f31947;
+  color: $theme_color;
   margin-top: 8px;
 }
 
@@ -139,7 +139,7 @@ export default {
   height: 27px;
   line-height: 27px;
   border-radius: 13.3px 0 0 13.3px;
-  background: #f31947;
+  background: $theme_color;
   font-size: 12.6px;
   text-align: center;
   color: #ffffff;

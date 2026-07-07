@@ -814,7 +814,7 @@ export default {
   color: $theme_color;
   margin: 5px 0;
   font-size: 12px;
-  background-color: #ffdedf;
+  background-color: var(--theme-tint-12, #ffdedf);
   border: 1px dotted $theme_color;
   cursor: pointer;
 
@@ -839,7 +839,7 @@ export default {
   padding: 0 5px;
   color: $theme_color;
   font-size: 12px;
-  background-color: #ffdedf;
+  background-color: var(--theme-tint-12, #ffdedf);
   border: 1px dotted $theme_color;
   cursor: pointer;
 

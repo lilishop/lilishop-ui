@@ -6,7 +6,9 @@
 
 <script>
 import storage from "@/plugins/storage";
-import { getBaseSite } from "@/api/common.js";
+import { getBaseSite, getThemeSetting } from "@/api/common.js";
+import { fetchAndApplyTheme } from "@/utils/theme";
+
 export default {
   name: "App",
   mounted() {
@@ -42,6 +44,7 @@ export default {
         });
       }
       this.getSite();
+      this.getTheme();
     },
     getSite() {
       getBaseSite().then((res) => {
@@ -54,6 +57,9 @@ export default {
           }
         }
       }).catch(() => {});
+    },
+    getTheme() {
+      fetchAndApplyTheme(getThemeSetting).catch(() => {});
     },
   },
 };
