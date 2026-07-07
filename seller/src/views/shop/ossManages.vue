@@ -536,6 +536,7 @@ export default {
         name: "",
         fileKey: "",
         fileType: "",
+        fileCategory: "",
         userEnums: "STORE",
         pageNumber: 1, // 当前页数
         pageSize: 20, // 页面大小
@@ -574,7 +575,7 @@ export default {
           width: 300,
           align: "center",
           render: (h, params) => {
-            if (params.row.fileType.includes("image") > 0) {
+            if (this.isImageFile(params.row)) {
               return h("img", {
                 attrs: {
                   src: params.row.url || "",
@@ -593,7 +594,7 @@ export default {
                   },
                 },
               });
-            } else if (params.row.fileType.includes("video") > 0) {
+            } else if (this.isVideoFile(params.row)) {
               // 如果视频文件大小超过5MB不予加载video
               if (params.row.fileSize < 1024 * 1024 * 5) {
                 return h(
@@ -775,7 +776,7 @@ export default {
           // width: 150,
           align: "center",
           render: (h, params) => {
-            if (params.row.fileType.includes("image") > 0) {
+            if (this.isImageFile(params.row)) {
               return h("img", {
                 attrs: {
                   src: params.row.url || "",
@@ -794,7 +795,7 @@ export default {
                   },
                 },
               });
-            } else if (params.row.fileType.includes("video") > 0) {
+            } else if (this.isVideoFile(params.row)) {
               // 如果视频文件大小超过5MB不予加载video
               if (params.row.fileSize < 1024 * 1024 * 5) {
                 return h(
@@ -1391,15 +1392,21 @@ export default {
     },
     // 文件类型筛选
     changeFileType() {
-      let name = this.fileType;
-      if (name == "all") {
-        this.searchForm.fileType = "";
-      } else if (name == "pic") {
-        this.searchForm.fileType = "image";
-      } else if (name == "video") {
-        this.searchForm.fileType = "video";
+      const name = this.fileType;
+      this.searchForm.fileType = "";
+      this.searchForm.fileCategory = "";
+      if (name === "pic") {
+        this.searchForm.fileCategory = "IMAGE";
+      } else if (name === "video") {
+        this.searchForm.fileCategory = "VIDEO";
       }
       this.handleSearch();
+    },
+    isImageFile(row) {
+      return row?.fileCategory === "IMAGE" || (row?.fileType && row.fileType.includes("image"));
+    },
+    isVideoFile(row) {
+      return row?.fileCategory === "VIDEO" || (row?.fileType && row.fileType.includes("video"));
     },
     // 上传文件超过大小限制
     handleMaxSize() {

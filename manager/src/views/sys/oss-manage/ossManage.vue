@@ -2,9 +2,9 @@
 @import "./ossManage.scss";
 
 .group-row {
-  padding-top: 10px;
+  padding-top: 16px;
+  margin-top: 8px;
   border-top: 1px solid #ededed;
-  margin-top: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,28 +54,60 @@
   margin-bottom: 16px;
 }
 
+.oss-group-tree {
+  padding: 4px 8px 0;
+
+  :deep(.el-tree-node__expand-icon) {
+    display: none;
+  }
+
+  :deep(.el-tree-node) {
+    margin-bottom: 6px;
+  }
+
+  :deep(.el-tree-node__content) {
+    padding: 0 10px !important;
+    height: 42px;
+    border-radius: 6px;
+    font-size: 15px;
+    line-height: 42px;
+  }
+
+  :deep(.el-tree-node__content:hover) {
+    background: #f5f7fa;
+  }
+
+  :deep(.el-tree-node.is-current > .el-tree-node__content) {
+    background: #ecf5ff;
+    color: #409eff;
+    font-weight: 500;
+  }
+}
+
 .oss-tree-node {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding-right: 8px;
+  padding-right: 4px;
+  font-size: 15px;
 }
 
 .oss-tree-more {
   cursor: pointer;
   color: #909399;
   padding: 0 4px;
+  font-size: 16px;
 }
 
-.oss-manage-date-popper {
-  z-index: 4000 !important;
+.category-tabs-card {
+  margin-bottom: 0;
 }
 
 </style>
 <template>
   <div class="search">
-    <el-card class="tabs-card">
+    <el-card v-if="!isComponent" class="tabs-card">
       <el-tabs v-model="activeRoleTab" @tab-change="handleRoleTabChange">
         <el-tab-pane label="管理员" name="MANAGER" />
         <el-tab-pane label="商家" name="STORE" />
@@ -83,48 +115,28 @@
         <el-tab-pane label="客服" name="CUSTOMER" />
       </el-tabs>
     </el-card>
+    <el-card class="tabs-card category-tabs-card">
+      <el-tabs v-model="activeCategoryTab" @tab-change="handleCategoryTabChange">
+        <el-tab-pane label="图片" name="IMAGE" />
+        <el-tab-pane label="视频" name="VIDEO" />
+        <el-tab-pane label="文件" name="FILE" />
+      </el-tabs>
+    </el-card>
     <el-row>
       <el-card>
         <div>
-          <div class="operation">
-            <el-row @keyup.enter="handleSearch">
-              <el-form
-                ref="searchForm"
-                label-width="85px"
-                :model="searchForm"
-                class="search-form"
-                inline
-              >
-                <el-form-item label="上传时间">
-                  <el-date-picker
-                    v-model="selectDate"
-                    clearable
-                    teleported
-                    popper-class="oss-manage-date-popper"
-                    value-format="YYYY-MM-DD"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期"
-                    style="width: 240px"
-                    type="daterange"
-                    @change="selectDateRange"
-                  />
-                </el-form-item>
-                <el-form-item>
-                  <el-button class="search-btn" type="primary" @click="handleSearch">搜索</el-button>
-                </el-form-item>
-              </el-form>
-            </el-row>
-          </div>
           <el-row class="oss-manage-box">
             <el-col v-if="canShowGroups" :span="isComponent ? 5 : 4">
               <div class="file-list">
                 <div class="article-category mr_10">
                   <el-tree
+                    :key="treeRenderKey"
                     :data="treeData"
                     node-key="value"
                     :props="{ label: 'title', children: 'children' }"
+                    :indent="0"
                     highlight-current
-                    class="demo-tree-render"
+                    class="demo-tree-render oss-group-tree"
                     @node-click="handleTreeNodeClick"
                   >
                     <template #default="{ data }">
@@ -195,7 +207,16 @@
                             class="card-checkbox"
                             @click.stop
                           />
-                          <img :src="item.url" alt="" />
+                          <img v-if="isImageFile(item)" :src="item.url" alt="" />
+                          <video
+                            v-else-if="isVideoFile(item)"
+                            class="card-media"
+                            :src="item.url"
+                            muted
+                          />
+                          <div v-else class="card-file">
+                            <el-icon :size="28"><Document /></el-icon>
+                          </div>
                           <div v-if="item.isShowPreview" class="preview">
                             <div @click.prevent="download(item)">
                               <el-tooltip content="下载" placement="top">
@@ -207,7 +228,11 @@
                                 <el-icon :size="18"><Delete /></el-icon>
                               </el-tooltip>
                             </div>
-                            <div @click.prevent="showPic(item)">
+                            <div
+                              @click.prevent="
+                                isVideoFile(item) ? showVideo(item) : showPic(item)
+                              "
+                            >
                               <el-tooltip content="预览" placement="top">
                                 <el-icon :size="22"><View /></el-icon>
                               </el-tooltip>
@@ -459,15 +484,6 @@
         :model="groupFormValidate"
         :rules="groupRuleValidate"
       >
-        <el-form-item label="所在分组" prop="id">
-          <el-cascader
-            v-model="defaultValue"
-            :options="treeData"
-            :props="{ value: 'value', label: 'label', children: 'children', checkStrictly: true }"
-            style="width: 100%"
-            @change="treeDataChange"
-          />
-        </el-form-item>
         <el-form-item label="分组名称" prop="directoryName">
           <el-input v-model="groupFormValidate.directoryName" />
         </el-form-item>
@@ -481,7 +497,7 @@
 </template>
 
 <script>
-import { Delete, Download, View } from "@element-plus/icons-vue";
+import { Delete, Download, View, Document } from "@element-plus/icons-vue";
 import {
   addFileDirectory,
   deleteFile,
@@ -499,7 +515,7 @@ const config = require("@/config/index");
 let dp;
 export default {
   name: "oss-manage",
-  components: { Delete, Download, View },
+  components: { Delete, Download, View, Document },
   props: {
     isComponent: {
       default: false,
@@ -524,11 +540,11 @@ export default {
       config, // api地址
       fileDirectoryId: "",
       groupFormValidate: {
-        id: [],
+        id: "",
         level: 0,
+        parentId: "0",
         directoryName: "",
       },
-      defaultValue: [], // 默认分组id
       groupRuleValidate: {
         directoryName: [
           {
@@ -537,20 +553,12 @@ export default {
             trigger: "blur",
           },
         ],
-        id: [
-          {
-            required: true,
-            message: "请选择分组",
-            trigger: "blur",
-            type: "array",
-          },
-        ],
       },
       enableGroup: false, // 是否展示分组
       selectImage: false, //是否是选择
       accessToken: {}, // 上传token鉴权
       loading: false, // 表单加载状态
-      fileType: "all", // 文件类型
+      fileType: "pic", // 兼容外部调用：pic / video
       showType: "list", // 展示类型
       modalVisible: false, // 添加或编辑显示
       uploadVisible: false, // 上传展示
@@ -560,20 +568,19 @@ export default {
       videoTitle: "", // 视频title
       modalTitle: "", // 添加或编辑标题
       activeRoleTab: "MANAGER",
+      activeCategoryTab: "IMAGE",
       searchForm: {
         // 搜索框对应data对象
         name: "",
         fileKey: "",
         fileType: "",
+        fileCategory: "IMAGE",
         userEnums: "MANAGER",
         pageNumber: 1, // 当前页数
         pageSize: 20, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
-        startDate: "", // 起始时间
-        endDate: "", // 终止时间
       },
-      selectDate: null, // 选择日期绑定modal
       oldKey: "", // 请求参数
       form: {
         // 表单
@@ -603,7 +610,7 @@ export default {
           width: 300,
           align: "center",
           render: (h, params) => {
-            if (params.row.fileType.includes("image") > 0) {
+            if (this.isImageFile(params.row)) {
               return h("img", {
                 attrs: {
                   src: params.row.url || "",
@@ -622,7 +629,7 @@ export default {
                   },
                 },
               });
-            } else if (params.row.fileType.includes("video") > 0) {
+            } else if (this.isVideoFile(params.row)) {
               // 如果视频文件大小超过5MB不予加载video
               if (params.row.fileSize < 1024 * 1024 * 5) {
                 return h(
@@ -804,7 +811,7 @@ export default {
           // width: 150,
           align: "center",
           render: (h, params) => {
-            if (params.row.fileType.includes("image") > 0) {
+            if (this.isImageFile(params.row)) {
               return h("img", {
                 attrs: {
                   src: params.row.url || "",
@@ -823,7 +830,7 @@ export default {
                   },
                 },
               });
-            } else if (params.row.fileType.includes("video") > 0) {
+            } else if (this.isVideoFile(params.row)) {
               // 如果视频文件大小超过5MB不予加载video
               if (params.row.fileSize < 1024 * 1024 * 5) {
                 return h(
@@ -933,6 +940,7 @@ export default {
       //树结构
       treeData: [],
       treeDataDefault: [],
+      treeRenderKey: 0,
       selectedGroupData: "",
       insertOrUpdate: "insert",
       groupLoading: false,
@@ -977,7 +985,15 @@ export default {
   },
   watch: {
     selectImage(val) {
-      if (val && !this.data.length) this.init();
+      if (val) {
+        if (this.isComponent) {
+          this.activeRoleTab = "MANAGER";
+          this.searchForm.userEnums = "MANAGER";
+          this.init();
+        } else if (!this.data.length) {
+          this.init();
+        }
+      }
     },
     choose(val) {
       if (val) this.selectImage = val
@@ -991,11 +1007,10 @@ export default {
     initialize(val) {
       if (val && this.isComponent) {
         this.selectedOss = [];
-      }
-    },
-    defaultValue(val) {
-      if (val) {
-        this.groupFormValidate.parentId = val;
+        this.activeRoleTab = "MANAGER";
+        this.searchForm.userEnums = "MANAGER";
+        delete this.searchForm.fileDirectoryId;
+        this.selectedGroupData = "";
       }
     },
   },
@@ -1054,11 +1069,22 @@ export default {
       this.searchForm.userEnums = name;
       delete this.searchForm.fileDirectoryId;
       this.selectedGroupData = "";
-      this.defaultValue = [];
-      this.groupFormValidate.id = [];
+      this.groupFormValidate.id = "";
       this.groupFormValidate.level = 0;
       this.selectedOss = [];
       this.updateTreeDataByRole();
+      this.getDataList();
+    },
+    handleCategoryTabChange(name) {
+      this.activeCategoryTab = name;
+      this.searchForm.fileCategory = name;
+      this.searchForm.fileType = "";
+      this.searchForm.pageNumber = 1;
+      if (this.showType === "list") {
+        this.searchForm.pageSize = 20;
+      } else {
+        this.searchForm.pageSize = 12;
+      }
       this.getDataList();
     },
     updateTreeDataByRole() {
@@ -1070,24 +1096,22 @@ export default {
           value: "0",
           type: this.activeRoleTab,
           level: 0,
-          children: currentTree,
+          children: [],
           id: "0",
           categoryId: 0,
         },
+        ...currentTree,
       ];
+      this.treeRenderKey += 1;
     },
     filterTreeByRole(tree = [], role) {
       if (!tree || !tree.length) return [];
-      return tree.reduce((arr, item) => {
-        const children = this.filterTreeByRole(item.children || [], role);
-        if (item.type === role || children.length) {
-          arr.push({
-            ...item,
-            children,
-          });
-        }
-        return arr;
-      }, []);
+      return tree
+        .filter((item) => item.type === role)
+        .map((item) => ({
+          ...item,
+          children: [],
+        }));
     },
     // 复选框值改变时触发
     selectOssChange(e) {
@@ -1190,11 +1214,10 @@ export default {
     handleContextMenuEdit(root, node, data) {
       this.insertOrUpdate = "update";
       this.enableGroup = true;
-      this.groupFormValidate.directoryName = data.label;
-      this.groupFormValidate.id = [data.value];
-      this.groupFormValidate.level = data.level;
-      this.groupFormValidate.parentId = data.parentId;
-      this.defaultValue = [data.parentId];
+      this.groupFormValidate.id = data.value;
+      this.groupFormValidate.directoryName = data.title || data.label;
+      this.groupFormValidate.level = 0;
+      this.groupFormValidate.parentId = "0";
     },
     // 删除分组
     async handleContextMenuDelete(val) {
@@ -1211,40 +1234,20 @@ export default {
         },
       });
     },
-    treeDataChange(value) {
-      if (value && value.length) {
-        this.groupFormValidate.id = value;
-        if (value[value.length - 1] == "0") {
-          this.groupFormValidate.level = 0;
-        } else {
-          const node = this.findTreeNodeByValue(this.treeData, value[value.length - 1]);
-          this.groupFormValidate.level = node ? Number(node.level) + 1 : 0;
-        }
-      }
-    },
-    findTreeNodeByValue(nodes, value) {
-      if (!nodes || !nodes.length) return null;
-      for (const node of nodes) {
-        if (String(node.value) === String(value)) return node;
-        const found = this.findTreeNodeByValue(node.children, value);
-        if (found) return found;
-      }
-      return null;
-    },
-    // 保存/修改分组
     async submitAddGroup() {
       this.$refs["formValidate"].validate(async (valid) => {
         if (valid) {
-          let res
-          const params = {...this.groupFormValidate};
-          params.directoryType = (this.selectedGroupData && this.selectedGroupData.type) || this.activeRoleTab;
+          let res;
+          const params = {
+            directoryName: this.groupFormValidate.directoryName,
+            level: 0,
+            parentId: "0",
+            directoryType: this.activeRoleTab,
+          };
           if (this.insertOrUpdate === "insert") {
-            params.parentId = params.id[params.id.length - 1];
-            delete params.id;
             res = await addFileDirectory(params);
           } else {
-            params.id = params.id[params.id.length - 1];
-            params.parentId = params.parentId[params.parentId.length - 1];
+            params.id = this.groupFormValidate.id;
             res = await updateFileDirectory(params);
           }
 
@@ -1259,16 +1262,15 @@ export default {
         }
       });
     },
-    // 添加/修改分组
     handleClickAddGroup() {
       this.insertOrUpdate = "insert";
-      if (this.selectedGroupData) {
-        this.groupFormValidate.id = [this.selectedGroupData.value];
-      } else {
-        this.groupFormValidate.id = ["0"];
-      }
+      this.groupFormValidate = {
+        id: "",
+        level: 0,
+        parentId: "0",
+        directoryName: "",
+      };
       this.enableGroup = true;
-      this.groupFormValidate.directoryName = "";
     },
     copyFileUrl(row) {
       const textArea = document.createElement("textarea");
@@ -1296,26 +1298,31 @@ export default {
         }
       });
     },
-    // 文件目录分类格式化方法
+    // 文件目录分类格式化：仅展示一级分组
     getTree(tree = []) {
-      let arr = [];
-      if (!!tree && tree.length !== 0) {
-        tree.forEach((item) => {
-          let obj = {};
-          obj.title = item.directoryName;
-          obj.value = item.id; // 拥有者id
-          obj.type = item.directoryType; // 用户类型
-          obj.label = item.directoryName;
-          obj.level = item.level;
-          obj.expand = false;
-          obj.selected = false;
-          obj.contextmenu = false;
-          obj.parentId = item.parentId;
-          obj.children = this.getTree(item.children); // 递归调用
-          arr.push(obj);
+      const flat = [];
+      const walk = (nodes) => {
+        if (!nodes || !nodes.length) return;
+        nodes.forEach((item) => {
+          flat.push({
+            title: item.directoryName,
+            value: item.id,
+            type: item.directoryType,
+            label: item.directoryName,
+            level: 0,
+            expand: false,
+            selected: false,
+            contextmenu: false,
+            parentId: "0",
+            children: [],
+          });
+          if (item.children && item.children.length) {
+            walk(item.children);
+          }
         });
-      }
-      return arr;
+      };
+      walk(tree);
+      return flat;
     },
 
     // 选择分类回调
@@ -1327,9 +1334,6 @@ export default {
         this.searchForm.fileDirectoryId = value;
         if (value === "0" || value === 0) {
           delete this.searchForm.fileDirectoryId;
-          this.groupFormValidate.level = 0;
-        } else {
-          this.groupFormValidate.level = Number(level) + 1;
         }
         this.searchForm.userEnums = type || this.activeRoleTab;
         this.getDataList();
@@ -1360,6 +1364,7 @@ export default {
         accessToken: this.getStore("accessToken"),
       };
       this.searchForm.userEnums = this.activeRoleTab;
+      this.searchForm.fileCategory = this.activeCategoryTab;
       this.getDataList();
       this.getAllList();
     },
@@ -1410,16 +1415,7 @@ export default {
       }
       this.getDataList();
     },
-    // 起止时间从新赋值
-    selectDateRange(v) {
-      if (v && v.length === 2) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      } else {
-        this.searchForm.startDate = "";
-        this.searchForm.endDate = "";
-      }
-    },
+    // 起止时间筛选已移除
     // 改变查看方式
     changeShowType() {
       this.searchForm.pageNumber = 1;
@@ -1438,35 +1434,41 @@ export default {
         this.pageSizeOpts = [12, 24, 48];
       }
       this.loading = true;
-      getFileListData(this.searchForm).then((res) => {
-        this.loading = false;
-
-        this.data = res.result.records;
-        this.total = res.result.total;
-      });
+      getFileListData(this.searchForm)
+        .then((res) => {
+          if (res && res.success && res.result) {
+            this.data = res.result.records || [];
+            this.total = res.result.total || 0;
+          } else {
+            this.data = [];
+            this.total = 0;
+          }
+        })
+        .catch(() => {
+          this.data = [];
+          this.total = 0;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
-    // 搜索
-    handleSearch() {
-      this.searchForm.title = this.searchForm.name;
-      this.searchForm.pageNumber = 1;
-      if (this.showType == "list") {
-        this.searchForm.pageSize = 20;
-      } else {
-        this.searchForm.pageSize = 12;
-      }
-      this.getDataList();
-    },
-    // 文件类型筛选
+    // 兼容外部按场景切换分类（如装修选图/选视频）
     changeFileType() {
-      let name = this.fileType;
-      if (name == "all") {
-        this.searchForm.fileType = "";
-      } else if (name == "pic") {
-        this.searchForm.fileType = "image";
-      } else if (name == "video") {
-        this.searchForm.fileType = "video";
-      }
-      this.handleSearch();
+      const categoryMap = {
+        pic: "IMAGE",
+        video: "VIDEO",
+        file: "FILE",
+        all: "IMAGE",
+      };
+      const category = categoryMap[this.fileType] || "IMAGE";
+      this.activeCategoryTab = category;
+      this.handleCategoryTabChange(category);
+    },
+    isImageFile(row) {
+      return row?.fileCategory === "IMAGE" || (row?.fileType && row.fileType.includes("image"));
+    },
+    isVideoFile(row) {
+      return row?.fileCategory === "VIDEO" || (row?.fileType && row.fileType.includes("video"));
     },
     // 上传文件超过大小限制
     handleMaxSize() {

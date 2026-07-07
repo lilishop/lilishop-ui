@@ -51,15 +51,15 @@
   width: 100%;
   display: flex;
   flex-wrap: wrap;
+  gap: 14px;
 
   >.drawer-item {
     cursor: pointer;
     border: 1px solid #ededed;
     background: #f9f0ff;
-    width: 170px;
-    margin-right: 14px;
+    width: calc(50% - 7px);
+    box-sizing: border-box;
     color: #9254de;
-    margin-bottom: 14px;
     border-radius: 0.8em;
     height: 60px;
     display: flex;
