@@ -10,10 +10,10 @@
           <div class="form-item-view">
             <el-form-item label="商品分类">
               <span class="goods-category-name">{{
-                this.baseInfoForm.categoryName[0]
+                baseInfoForm.categoryName[0]
                 }}</span>
-              <span> &gt; {{ this.baseInfoForm.categoryName[1] }}</span>
-              <span> &gt; {{ this.baseInfoForm.categoryName[2] }}</span>
+              <span> &gt; {{ baseInfoForm.categoryName[1] }}</span>
+              <span> &gt; {{ baseInfoForm.categoryName[2] }}</span>
             </el-form-item>
             <el-form-item label="商品名称" prop="goodsName">
               <el-input v-model="baseInfoForm.goodsName" clearable placeholder="商品名称" style="width: 260px" type="text" />
@@ -190,7 +190,7 @@
                 <el-collapse-item title="自定义规格项" name="1">
                     <div>
                       <div v-for="(item, $index) in skuInfo" :key="$index" class="sku-item-content">
-                        <el-card class="ivu-card-body">
+                        <el-card>
                           <template #header>
                             <el-button link type="danger" @click="handleCloseSkuItem($index, item)">删除规格项</el-button>
                           </template>
@@ -478,7 +478,7 @@
       <div class="footer-btns">
         <el-button type="primary" @click="pre">上一步</el-button>
         <el-button :loading="submitLoading" type="primary" @click="save">
-          {{ this.$route.query.id ? "保存" : "保存商品" }}
+          {{ $route.query.id ? "保存" : "保存商品" }}
         </el-button>
       </div>
     </div>
@@ -1310,7 +1310,12 @@ export default {
       this.params_panel = [];
       API_GOODS.getCategoryParamsListDataSeller(this.categoryId).then(
         (response) => {
-          if (!response || response.length <= 0) {
+          const list = Array.isArray(response)
+            ? response
+            : Array.isArray(response?.result)
+              ? response.result
+              : [];
+          if (!list.length) {
             return;
           }
 
@@ -1355,15 +1360,15 @@ export default {
             return undefined;
           };
 
-          const isGrouped = response[0] && Array.isArray(response[0].params);
+          const isGrouped = list[0] && Array.isArray(list[0].params);
           const flatParams = isGrouped
-            ? response.reduce((acc, g) => {
+            ? list.reduce((acc, g) => {
               if (g && Array.isArray(g.params)) {
                 acc.push(...g.params);
               }
               return acc;
             }, [])
-            : response;
+            : list;
 
           this.goodsParams = flatParams
             .map((p) => {
@@ -1547,7 +1552,7 @@ export default {
         }
       } else if (val._error) {
         // 清除错误
-        this.$delete(val, '_error');
+        delete val._error;
         if (this.skuInfo[groupIndex]) {
           this.skuInfo[groupIndex].spec_values = this.skuInfo[groupIndex].spec_values.filter((i) => i.value !== "");
         }
@@ -2316,7 +2321,7 @@ export default {
 </style>
 
 <style scoped>
-.ivu-select .ivu-select-dropdown {
+.el-select .el-select-dropdown {
   overflow: hidden !important;
 }
 

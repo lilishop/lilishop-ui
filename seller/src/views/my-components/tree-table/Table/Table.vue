@@ -214,11 +214,8 @@ export default {
       default: () => []
     },
     size: {
-      default() {
-        return !this.$IVIEW || this.$IVIEW.size === ""
-          ? "default"
-          : this.$IVIEW.size;
-      }
+      type: String,
+      default: "default",
     },
     loading: {
       type: Boolean,

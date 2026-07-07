@@ -10,7 +10,7 @@
             <h4>Hi,<span style="margin-left: 5px">{{ userData.nickName }}</span></h4>
             <img
               class="shop-logo"
-              :src="userData.storeLogo || require('@/assets/logo1.png')"
+              :src="userData.storeLogo || defaultLogo"
               alt=""
             />
           </div>
@@ -199,6 +199,7 @@
 </template>
 
 <script>
+import defaultLogo from "@/assets/logo1.png";
 import { Picture, CreditCard, List, User } from "@element-plus/icons-vue";
 import { getSellerHomeData, getHomeNotice } from "@/api/index";
 import { getIMDetail } from "@/api/common";
@@ -216,6 +217,7 @@ export default {
   },
   data() {
     return {
+      defaultLogo,
       noticeFlage: false,
       homeData: {},
       userData: "",

@@ -7,12 +7,13 @@
 </template>
 
 <script>
+import defaultLogo from "@/assets/logo.png";
 import { getBaseSite } from "@/api/common.js";
 
 export default {
   data() {
     return {
-      storeSideLogo: require("@/assets/logo.png"),
+      storeSideLogo: defaultLogo,
     };
   },
   methods: {

@@ -23,6 +23,7 @@
 
 </template>
 <script>
+import { getCategoryTree } from "@/api/goods.js";
 
 export default {
   data() {
@@ -40,10 +41,32 @@ export default {
     this.init();
   },
   methods: {
+    loadCategoryFromCache() {
+      try {
+        const raw = localStorage.getItem("category");
+        if (!raw) {
+          return null;
+        }
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : null;
+      } catch {
+        return null;
+      }
+    },
+    applyCategoryList(category) {
+      if (!Array.isArray(category)) {
+        this.categoryList = [];
+        return;
+      }
+      category.forEach((item) => {
+        item.___type = "category";
+      });
+      this.categoryList = category;
+    },
     // 点击一级
     handleClickChild(item, index) {
       this.parentIndex = index;
-      this.secondLevel = item.children;
+      this.secondLevel = item.children || [];
       item.___type = "category";
       item.allId = item.id;
 
@@ -51,8 +74,6 @@ export default {
       this.thirdIndex = '';
       this.thirdLevel = []
       this.$emit("selected", [item]);
-      // 点击第一级的时候默认显示第二级第一个
-      // this.handleClickSecondChild(item.children, 0);
     },
     // 点击二级
     handleClickSecondChild(second, index) {
@@ -60,10 +81,9 @@ export default {
       second.allId = `${second.parentId},${second.id}`
 
       this.secondIndex = index;
-      this.thirdLevel = second.children;
+      this.thirdLevel = second.children || [];
       this.thirdIndex = '';
       this.$emit("selected", [second]);
-      // this.handleClickthirdChild(second.children[0], 0);
     },
     // 点击三级
     handleClickthirdChild(item, index) {
@@ -73,21 +93,17 @@ export default {
       this.thirdIndex = index;
     },
     init() {
-      const loadCategory = () => {
-        const category = JSON.parse(localStorage.getItem("category"));
-        if (!Array.isArray(category)) {
-          return;
-        }
-        category.forEach((item) => {
-          item.___type = "category";
-        });
-        this.categoryList = category;
-      };
-
-      loadCategory();
-      if (!this.categoryList.length) {
-        setTimeout(loadCategory, 3000);
+      const cached = this.loadCategoryFromCache();
+      if (cached) {
+        this.applyCategoryList(cached);
+        return;
       }
+      getCategoryTree().then((res) => {
+        if (res.success && Array.isArray(res.result)) {
+          localStorage.setItem("category", JSON.stringify(res.result));
+          this.applyCategoryList(res.result);
+        }
+      });
     },
   },
 };

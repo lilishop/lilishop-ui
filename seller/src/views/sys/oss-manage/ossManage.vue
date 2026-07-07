@@ -73,10 +73,7 @@
   <div class="search">
     <el-card class="tabs-card">
       <el-tabs v-model="activeRoleTab" @tab-change="handleRoleTabChange">
-        <el-tab-pane label="管理员" name="MANAGER" />
         <el-tab-pane label="商家" name="STORE" />
-        <el-tab-pane label="用户" name="MEMBER" />
-        <el-tab-pane label="客服" name="CUSTOMER" />
       </el-tabs>
     </el-card>
     <el-row>
@@ -232,167 +229,7 @@
               </div>
             </el-col>
           </el-row>
-
-
-          <!--<div class="oss-operation padding-row">-->
-          <!--<div>-->
-          <!--<Upload-->
-          <!--ref="up"-->
-          <!--:action="commonUrl + '/common/common/upload/file'"-->
-          <!--:data="{-->
-          <!--directoryPath: searchForm.fileDirectoryId,-->
-          <!--}"-->
-          <!--:headers="accessToken"-->
-          <!--:max-size="20480"-->
-          <!--:on-error="handleError"-->
-          <!--:on-exceeded-size="handleMaxSize"-->
-          <!--:on-success="handleSuccess"-->
-          <!--:show-upload-list="false"-->
-          <!--multiple-->
-          <!--style="display: inline-block"-->
-          <!--&gt;-->
-          <!--<Button>上传图片</Button>-->
-          <!--</Upload>-->
-          <!--<Dropdown @on-click="handleDropdown" v-if="!isComponent">-->
-          <!--<Button>-->
-          <!--更多操作-->
-          <!--<Icon type="md-arrow-dropdown"/>-->
-          <!--</Button>-->
-          <!--<DropdownMenu slot="list">-->
-          <!--<DropdownItem name="refresh">刷新</DropdownItem>-->
-          <!--<DropdownItem v-show="showType == 'list'" name="removeAll"-->
-          <!--&gt;批量删除-->
-          <!--</DropdownItem>-->
-          <!--</DropdownMenu>-->
-          <!--</Dropdown>-->
-          <!--</div>-->
-          <!--</div>-->
         </div>
-
-        <!--<Alert show-icon v-if="!isComponent">-->
-        <!--已选择-->
-        <!--<span>{{ selectCount }}</span> 项-->
-        <!--<a class="select-clear" @click="clearSelectAll">清空</a>-->
-        <!--<span v-if="selectCount > 0" style="margin-left: 15px"-->
-        <!--&gt;共计 {{ totalSize }} 存储量</span-->
-        <!--&gt;-->
-        <!--</Alert>-->
-
-        <!--<div v-show="showType === 'list'" >-->
-        <!--<div class="flex">-->
-        <!--<div class="article-category mr_10">-->
-        <!--<Tree-->
-        <!--:data="treeData"-->
-        <!--@on-contextmenu="handleContextMenu"-->
-        <!--@on-select-change="handleCateChange"-->
-        <!--&gt;-->
-        <!--<template slot="contextMenu" v-if="!isComponent">-->
-        <!--<DropdownItem @click.native="handleContextMenuEdit"-->
-        <!--&gt;编辑-->
-        <!--</DropdownItem-->
-        <!--&gt;-->
-        <!--<DropdownItem-->
-        <!--style="color: #ed4014"-->
-        <!--@click.native="handleContextMenuDelete"-->
-        <!--&gt;删除-->
-        <!--</DropdownItem-->
-        <!--&gt;-->
-        <!--</template>-->
-        <!--</Tree>-->
-        <!--<Alert v-if="!isComponent">鼠标右键编辑/删除分组</Alert>-->
-        <!--<div class="group-row flex" v-if="!isComponent">-->
-        <!--<Button @click="handleClickAddGroup">添加分组</Button>-->
-        <!--</div>-->
-        <!--</div>-->
-
-        <!--<Table-->
-        <!--ref="table"-->
-        <!--:columns="isComponent ? viewColumns : columns"-->
-        <!--:data="data"-->
-        <!--:loading="loading"-->
-        <!--border-->
-        <!--class="table"-->
-        <!--sortable="custom"-->
-        <!--@on-sort-change="changeSort"-->
-        <!--@on-selection-change="changeSelect"-->
-        <!--&gt;-->
-        <!--<template slot="fileKey" slot-scope="{ row }">-->
-        <!--<a @click="copyFileUrl(row)">{{ row.fileKey }}</a>-->
-        <!--</template>-->
-        <!--</Table>-->
-        <!--</div>-->
-        <!--</div>-->
-
-        <!--<div v-show="showType === 'thumb'">-->
-        <!--<div class="oss-wrapper">-->
-        <!--<Card v-for="(item, i) in data" :key="i" class="oss-card">-->
-        <!--<div class="content">-->
-        <!--<img-->
-        <!--v-if="item.fileType.indexOf('image') >= 0"-->
-        <!--:src="item.url"-->
-        <!--class="img"-->
-        <!--@click="showPic(item)"-->
-        <!--/>-->
-        <!--<div-->
-        <!--v-else-if="item.fileType.indexOf('video') >= 0"-->
-        <!--class="video"-->
-        <!--@click="showVideo(item)"-->
-        <!--&gt;-->
-        <!--&lt;!&ndash; 文件小于5MB显示video &ndash;&gt;-->
-        <!--<video v-if="item.fileSize < 1024 * 1024 * 5" class="cover">-->
-        <!--<source :src="item.url"/>-->
-        <!--</video>-->
-        <!--<img class="play" src="@/assets/play.png"/>-->
-        <!--</div>-->
-        <!--<div v-else class="other">-->
-        <!--<div class="name">{{ item.name }}</div>-->
-        <!--<div class="key">{{ item.fileKey }}</div>-->
-        <!--<div class="info">-->
-        <!--文件类型：{{ item.fileType }} 文件大小：{{-->
-        <!--((item.fileSize * 1.0) / (1024 * 1024)).toFixed(2)-->
-        <!--}}-->
-        <!--MB 创建时间：{{ item.createTime }}-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--<div class="actions">-->
-        <!--<div class="btn">-->
-        <!--<Tooltip content="下载" placement="top">-->
-        <!--<Icon-->
-        <!--size="16"-->
-        <!--type="md-download"-->
-        <!--@click="download(item)"-->
-        <!--/>-->
-        <!--</Tooltip>-->
-        <!--</div>-->
-        <!--<div class="btn">-->
-        <!--<Tooltip content="重命名" placement="top">-->
-        <!--<Icon size="16" type="md-create" @click="rename(item)"/>-->
-        <!--</Tooltip>-->
-        <!--</div>-->
-        <!--<div class="btn-no">-->
-        <!--<Tooltip content="删除" placement="top">-->
-        <!--<Icon size="16" type="md-trash" @click="remove(item)"/>-->
-        <!--</Tooltip>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--</Card>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--<Row class="mt_10" justify="end" type="flex">-->
-        <!--<Page-->
-        <!--:current="searchForm.pageNumber"-->
-        <!--:page-size="searchForm.pageSize"-->
-        <!--:page-size-opts="pageSizeOpts"-->
-        <!--:total="total"-->
-        <!--show-elevator-->
-        <!--show-sizer-->
-        <!--show-total-->
-        <!--size="small"-->
-        <!--@on-change="changePage"-->
-        <!--@on-page-size-change="changePageSize"-->
-        <!--&gt;</Page>-->
-        <!--</Row>-->
       </el-card>
     </el-row>
     <el-dialog
@@ -488,7 +325,7 @@ import {
 import DPlayer from "dplayer";
 import {commonUrl} from "@/libs/axios";
 
-const config = require("@/config/index");
+import config from "@/config/index";
 
 let dp;
 export default {
@@ -553,14 +390,14 @@ export default {
       picTitle: "", // 图片title
       videoTitle: "", // 视频title
       modalTitle: "", // 添加或编辑标题
-      activeRoleTab: "MANAGER",
+      activeRoleTab: "STORE",
       searchForm: {
         // 搜索框对应data对象
         name: "",
         fileKey: "",
         fileType: "",
         fileCategory: "",
-        userEnums: "MANAGER",
+        userEnums: "STORE",
         pageNumber: 1, // 当前页数
         pageSize: 20, // 页面大小
         sort: "createTime", // 默认排序字段
@@ -585,342 +422,6 @@ export default {
       selectList: [], // 多选数据
       selectCount: 0, // 多选计数
       totalSize: "", // 文件大小统计
-      columns: [
-        // 表头
-        {
-          type: "selection",
-          width: 60,
-          align: "center",
-        },
-        {
-          title: "缩略图(点击预览)",
-          key: "url",
-          width: 300,
-          align: "center",
-          render: (h, params) => {
-            if (this.isImageFile(params.row)) {
-              return h("img", {
-                attrs: {
-                  src: params.row.url || "",
-                  alt: "加载图片失败",
-                },
-                style: {
-                  cursor: "pointer",
-                  width: "80px",
-                  height: "60px",
-                  margin: "10px 0",
-                  "object-fit": "contain",
-                },
-                on: {
-                  click: () => {
-                    this.showPic(params.row);
-                  },
-                },
-              });
-            } else if (this.isVideoFile(params.row)) {
-              // 如果视频文件大小超过5MB不予加载video
-              if (params.row.fileSize < 1024 * 1024 * 5) {
-                return h(
-                  "video",
-                  {
-                    style: {
-                      cursor: "pointer",
-                      width: "80px",
-                      height: "60px",
-                      margin: "10px 0",
-                      "object-fit": "contain",
-                    },
-                    on: {
-                      click: () => {
-                        this.showVideo(params.row);
-                      },
-                    },
-                  },
-                  [
-                    h("source", {
-                      attrs: {
-                        src: params.row.url,
-                      },
-                    }),
-                  ]
-                );
-              } else {
-                return h("img", {
-                  attrs: {
-                    src: require("@/assets/play.png"),
-                  },
-                  style: {
-                    cursor: "pointer",
-                    width: "80px",
-                    height: "60px",
-                    margin: "10px 0",
-                    "object-fit": "contain",
-                  },
-                  on: {
-                    click: () => {
-                      this.showVideo(params.row);
-                    },
-                  },
-                });
-              }
-            } else {
-              return h("span", "非多媒体类型");
-            }
-          },
-        },
-        {
-          title: "文件类型",
-          key: "fileType",
-          width: 115,
-          className: this.selectImage == true ? "none" : "",
-        },
-        {
-          title: "文件大小",
-          key: "fileSize",
-          width: 115,
-          sortable: true,
-          className: this.selectImage == true ? "none" : "",
-          render: (h, params) => {
-            let m =
-              ((params.row.fileSize * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
-            return h("span", m);
-          },
-        },
-        {
-          title: "上传者",
-          key: "createBy",
-          width: 200,
-          render: (h, params) => {
-            let m = "";
-            if (params.row.userEnums == "MANAGER") {
-              m = "[管理员]";
-            } else if (params.row.userEnums == "STORE") {
-              m = "[商家]";
-            } else if (params.row.userEnums == "CUSTOMER") {
-              m = "[客服]";
-            } else {
-              m = "[用户]";
-            }
-            m += params.row.createBy;
-            return h("span", m);
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          fixed: "right",
-          // width: 300,
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                    marginRight: "5px",
-                    display: this.selectImage === true ? "inline-block" : "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.selectedParams(params.row);
-                    },
-                  },
-                },
-                "选择"
-              ),
-              h(
-                "span",
-                {
-                  style: {
-                    margin: "0 8px",
-                    color: "#dcdee2",
-                    display: this.selectImage === true ? "inline-block" : "none",
-                  },
-                },
-                "|"
-              ),
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                    marginRight: "5px",
-                    display: this.selectImage == true ? "none" : "inline-block",
-                  },
-                  on: {
-                    click: () => {
-                      this.download(params.row);
-                    },
-                  },
-                },
-                "下载"
-              ),
-              h(
-                "span",
-                {
-                  style: {
-                    margin: "0 8px",
-                    color: "#dcdee2",
-                    display: this.selectImage == true ? "none" : "inline-block",
-                  },
-                },
-                "|"
-              ),
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                    display: this.selectImage == true ? "none" : "inline-block",
-                  },
-                  on: {
-                    click: () => {
-                      this.remove(params.row);
-                    },
-                  },
-                },
-                "删除"
-              ),
-            ]);
-          },
-        },
-      ],
-      viewColumns: [
-        {
-          title: "缩略图(点击预览)",
-          key: "url",
-          // width: 150,
-          align: "center",
-          render: (h, params) => {
-            if (this.isImageFile(params.row)) {
-              return h("img", {
-                attrs: {
-                  src: params.row.url || "",
-                  alt: "加载图片失败",
-                },
-                style: {
-                  cursor: "pointer",
-                  width: "80px",
-                  height: "60px",
-                  margin: "10px 0",
-                  "object-fit": "contain",
-                },
-                on: {
-                  click: () => {
-                    this.showPic(params.row);
-                  },
-                },
-              });
-            } else if (this.isVideoFile(params.row)) {
-              // 如果视频文件大小超过5MB不予加载video
-              if (params.row.fileSize < 1024 * 1024 * 5) {
-                return h(
-                  "video",
-                  {
-                    style: {
-                      cursor: "pointer",
-                      width: "80px",
-                      height: "60px",
-                      margin: "10px 0",
-                      "object-fit": "contain",
-                    },
-                    on: {
-                      click: () => {
-                        this.showVideo(params.row);
-                      },
-                    },
-                  },
-                  [
-                    h("source", {
-                      attrs: {
-                        src: params.row.url,
-                      },
-                    }),
-                  ]
-                );
-              } else {
-                return h("img", {
-                  attrs: {
-                    src: require("@/assets/play.png"),
-                  },
-                  style: {
-                    cursor: "pointer",
-                    width: "80px",
-                    height: "60px",
-                    margin: "10px 0",
-                    "object-fit": "contain",
-                  },
-                  on: {
-                    click: () => {
-                      this.showVideo(params.row);
-                    },
-                  },
-                });
-              }
-            } else {
-              return h("span", "非多媒体类型");
-            }
-          },
-        },
-        {
-          title: "上传者",
-          key: "createBy",
-          width: 120,
-          sortable: true,
-          render: (h, params) => {
-            let m = "";
-            if (params.row.userEnums == "MANAGER") {
-              m = "[管理员]";
-            } else if (params.row.userEnums == "STORE") {
-              m = "[商家]";
-            } else if (params.row.userEnums == "CUSTOMER") {
-              m = "[客服]";
-            } else {
-              m = "[用户]";
-            }
-            m += params.row.createBy;
-            return h("span", m);
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          fixed: "right",
-          width: 300,
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "Button",
-                {
-                  props: {
-                    type: "default",
-                    size: "small",
-                  },
-                  style: {
-                    marginRight: "5px",
-                    display:
-                      this.selectImage === true ? "inline-block" : "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.selectedParams(params.row);
-                    },
-                  },
-                },
-                "选择"
-              )
-            ]);
-          },
-        },
-      ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
       pageSizeOpts: [5, 10, 20], // 页码展示项
@@ -933,41 +434,6 @@ export default {
       groupLoading: false,
       // 图片列表
       selectedOss: [],
-      myData: [
-        {
-          title: 'parent 1',
-          expand: true,
-          render: (h, {root, node, data}) => {
-            return h('span', {style: {display: 'inline-block', width: '100%'}}, [
-              h('span', [h("Icon", {type: 'ios-folder-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
-              h('span', {style: {display: 'inline-block', float: 'right', marginRight: '32px'}},
-                [h("Button", {
-                  ...this.buttonProps,
-                  icon: 'ios-add',
-                  type: 'primary',
-                  style: {width: '64px'},
-                  onClick: () => {
-                    this.append(data)
-                  }
-                })
-                ])
-            ]);
-          },
-          children: [
-            {
-              title: 'child 1-1',
-              expand: true,
-              children: [{title: 'leaf 1-1-1', expand: true}, {title: 'leaf 1-1-2', expand: true}]
-            },
-            {
-              title: 'child 1-2',
-              expand: true,
-              children: [{title: 'leaf 1-2-1', expand: true}, {title: 'leaf 1-2-1', expand: true}]
-            }
-          ]
-        }
-      ],
-      buttonProps: {type: 'default', size: 'small',},
     };
   },
   watch: {
@@ -999,7 +465,7 @@ export default {
       return this.activeRoleTab === "MANAGER";
     },
     canUploadImages() {
-      return this.activeRoleTab === "MANAGER";
+      return this.activeRoleTab === "MANAGER" || this.activeRoleTab === "STORE";
     },
     uploadData() {
       return {
@@ -1125,61 +591,8 @@ export default {
       this.searchForm.pageNumber = value;
       this.getDataList();
     },
-    // 自定义tree节点显示内容和交互
-    renderContent(h, {root, node, data}) {
-      if (data.value === '0') {
-        return h('span', {style: {display: 'inline-block', width: '100%'}},
-          [
-            h('span', [h("Icon", {type: 'ios-paper-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
-            h('span', {style: {display: 'inline-block', float: 'right', marginRight: '10px'}}, [])
-          ]
-        );
-      } else {
-        return h('span', {style: {display: 'inline-block', width: '100%'}},
-          [
-            h('span', [h("Icon", {type: 'ios-paper-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
-            h('span', {style: {display: 'inline-block', float: 'right', marginRight: '10px'}},
-              [
-                h("Dropdown", {style: {marginLeft: "4px"}},
-                  [
-                    h("Icon", {
-                      props: {type: 'ios-more', size: "20",},
-                      style: {display: 'inline-block'},
-                      on: {
-                        click: () => {
-                        }
-                      }
-                    }),
-                    h("DropdownMenu", {
-                      slot: "list"
-                    }, [
-                      h("DropdownItem", {
-                        nativeOn: {
-                          click: () => {
-                            this.handleContextMenuEdit(root, node, data)
-                          }
-                        }
-                      }, "编辑"),
-                      h("DropdownItem", {
-                        nativeOn: {
-                          click: () => {
-                            this.handleContextMenuDelete()
-                          }
-                        }
-                      }, "删除"),
-                    ])
-                  ]),
-              ])
-          ]
-        );
-      }
-
-    },
-
-
     handleContextMenu(val) {
-      console.log('handleContextMenu', val);
-      this.selectedGroupData = val;
+this.selectedGroupData = val;
     },
     // 编辑分组
     handleContextMenuEdit(root, node, data) {

@@ -2,8 +2,7 @@ import { getCurrentPermissionList } from "@/api/index";
 import lazyLoading from "./lazyLoading.js";
 import { router } from "@/router/index";
 import Cookies from "js-cookie";
-
-const config = require("@/config/index");
+import config from "@/config/index";
 
 let util = {};
 

@@ -19,7 +19,7 @@
 </template>
 
 <script>
-const config = require("@/config/index");
+import config from "@/config/index";
 export default {
   data() {
     return {

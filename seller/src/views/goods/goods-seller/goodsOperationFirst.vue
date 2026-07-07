@@ -78,6 +78,8 @@
 </template>
 <script>
 import * as API_GOODS from "@/api/goods";
+import goodsType1Img from "@/assets/goodsType1.png";
+import goodsType2Img from "@/assets/goodsType2.png";
 export default {
   data() {
     return {
@@ -85,14 +87,14 @@ export default {
       goodsTypeWay: [
         {
           title: "实物商品",
-          img: require("@/assets/goodsType1.png"),
+          img: goodsType1Img,
           desc: "零售批发，物流配送",
           type: "PHYSICAL_GOODS",
           check: false,
         },
         {
           title: "虚拟商品",
-          img: require("@/assets/goodsType2.png"),
+          img: goodsType2Img,
           desc: "虚拟核验，无需物流",
           type: "VIRTUAL_GOODS",
           check: false,

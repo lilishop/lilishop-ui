@@ -578,7 +578,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scpoed>
+<style lang="scss" scoped>
 h4 {
   margin-bottom: 10px;
   padding: 0 10px;

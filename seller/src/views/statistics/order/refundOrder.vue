@@ -112,10 +112,14 @@ export default {
   },
   props: ["res"],
   methods: {
-    handleClickGoods(id) {
-      this.$router.push({
-        query: { id },
-        path: "/goods/goods-info/goodsDetail",
+    handleClickGoods(goodsId) {
+      if (!goodsId) {
+        this.$Message.warning("商品信息不存在");
+        return;
+      }
+      this.$filters.customRouterPush({
+        name: "goods-operation-edit",
+        query: { id: goodsId },
       });
     },
   }

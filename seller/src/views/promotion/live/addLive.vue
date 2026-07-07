@@ -116,7 +116,7 @@
       <img v-if="imageVisible" :src="imageSrc" style="width: 100%" alt="" />
     </el-dialog>
 
-    <el-dialog v-model="liveGoodsVisible" width="800px" :show-footer="false">
+    <el-dialog v-model="liveGoodsVisible" width="800px">
       <liveGoods reviewed @selectedGoods="callBackData" />
     </el-dialog>
   </div>

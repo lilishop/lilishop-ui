@@ -44,12 +44,12 @@
           </div>
         </div>
         <el-pagination
+          v-model:current-page="params.pageNumber"
           class="pageration"
           size="small"
           layout="total, prev, pager, next, jumper"
           :total="total"
           :page-size="params.pageSize"
-          :current-page="params.pageNumber"
           @current-change="changePageSize"
         />
       </div>

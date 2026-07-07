@@ -49,6 +49,9 @@
 import { UploadFilled } from "@element-plus/icons-vue";
 import { downLoadDeliverExcel, uploadDeliverExcel } from "@/api/order.js";
 import { baseUrl } from "@/libs/axios.js";
+import downloadImg from "@/assets/download.png";
+import uploadImg from "@/assets/upload.png";
+import successImg from "@/assets/success.png";
 
 export default {
   components: { UploadFilled },
@@ -59,17 +62,17 @@ export default {
       accessToken: {},
       stepList: [
         {
-          img: require("@/assets/download.png"),
+          img: downloadImg,
           title: "1.下载批量发货导入模板",
           checked: true,
         },
         {
-          img: require("@/assets/upload.png"),
+          img: uploadImg,
           title: "2.上传数据",
           checked: false,
         },
         {
-          img: require("@/assets/success.png"),
+          img: successImg,
           title: "3.完成",
           checked: false,
         },

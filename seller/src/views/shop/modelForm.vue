@@ -25,7 +25,7 @@
         </ul>
       </div>
       <div class="search-con">
-        <img :src="require('@/assets/logo.png')" class="logo" alt="" />
+        <img :src="logoImg" class="logo" alt="" />
         <div class="search">
           <el-input size="large" placeholder="输入你想查找的商品">
             <template #append>
@@ -144,6 +144,7 @@
 </template>
 <script>
 import { ShoppingCart } from "@element-plus/icons-vue";
+import logoImg from "@/assets/logo.png";
 import Draggable from "vuedraggable";
 import ModelFormItem from "./modelFormItem.vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
@@ -158,6 +159,7 @@ export default {
   props: ["data"],
   data() {
     return {
+      logoImg,
       picModelFlag: false,
       showModal: false,
       showModalNav: false,

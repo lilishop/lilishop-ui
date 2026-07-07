@@ -247,7 +247,7 @@
                 @click="changeTextAlign('left')"
               >
                 <img
-                  :src="require('@/assets/align-text-left.png')"
+                  :src="alignTextLeftImg"
                   class="align-text"
                   alt=""
                 />
@@ -258,7 +258,7 @@
                 @click="changeTextAlign('center')"
               >
                 <img
-                  :src="require('@/assets/align-text-center.png')"
+                  :src="alignTextCenterImg"
                   class="align-text"
                   alt=""
                 />
@@ -269,7 +269,7 @@
                 @click="changeTextAlign('right')"
               >
                 <img
-                  :src="require('@/assets/align-text-right.png')"
+                  :src="alignTextRightImg"
                   class="align-text"
                   alt=""
                 />
@@ -526,6 +526,9 @@
 </template>
 <script>
 import { CircleClose } from "@element-plus/icons-vue";
+import alignTextLeftImg from "@/assets/align-text-left.png";
+import alignTextCenterImg from "@/assets/align-text-center.png";
+import alignTextRightImg from "@/assets/align-text-right.png";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import { modelData } from "./config";
 import hotzone from "@/views/shop/hotzone";
@@ -540,6 +543,9 @@ export default {
   },
   data() {
     return {
+      alignTextLeftImg,
+      alignTextCenterImg,
+      alignTextRightImg,
       ways, // 选择链接的类型
       picModelFlag: false, //图片选择器
       linkType: "goods", // dialog弹窗口类型

@@ -16,7 +16,6 @@
           <div></div>
           <div class="user-dropdown-menu-con">
             <el-row
-              type="flex"
               justify="end"
               align="middle"
               class="user-dropdown-innercon"
@@ -90,8 +89,7 @@ import util from "@/libs/util.js";
 import { logout } from "@/api/index";
 import { getIMDetail } from "@/api/common";
 import { userMsg } from "@/api/index";
-
-const config = require("@/config/index.js");
+import config from "@/config/index.js";
 
 export default {
   components: {
