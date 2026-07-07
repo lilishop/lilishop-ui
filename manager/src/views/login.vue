@@ -377,7 +377,7 @@ export default {
   transition: background-color 0.2s ease, opacity 0.2s ease;
 
   &:hover {
-    background: darken($theme_color, 4%);
+    background: color-mix(in srgb, #{$theme_color} 96%, black);
     opacity: 1;
   }
 }

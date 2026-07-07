@@ -19,6 +19,7 @@ import tpl_group from "./tpl_group";
 import tpl_ad_list from "./tpl_view_list";
 import tpl_activity_list from './tpl_view_list';
 // import tpl_hot_area from './tpl_hot_area';
+import tpl_video from "./tpl_video";
 import tpl_goods from "./tpl_goods";
 import tpl_notice from "./tpl_notice";
 import tpl_promotions from "./tpl_promotions";
@@ -45,6 +46,7 @@ export default {
   spike: tpl_spike,
   group: tpl_group,
   // hotArea: tpl_hot_area,
+  video: tpl_video,
   tpl_ad_list,
   promotions: tpl_promotions,
   tpl_activity_list,

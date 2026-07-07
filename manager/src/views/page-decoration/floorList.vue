@@ -11,6 +11,7 @@
       </el-tabs>
       <div class="operation mb_10">
         <el-button type="primary" @click="createTemp">添加页面</el-button>
+        <el-button @click="goThemeSetting">主题色设置</el-button>
       </div>
       <el-table v-loading="loading" :data="list" style="width: 100%">
         <el-table-column prop="name" label="页面名称" min-width="200" show-overflow-tooltip>
@@ -166,6 +167,10 @@ export default {
         name: "renovation",
         query: data,
       });
+    },
+
+    goThemeSetting() {
+      this.$router.push({ name: "theme-setting" });
     },
 
     changePageNum(val) {

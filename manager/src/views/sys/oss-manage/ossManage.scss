@@ -140,7 +140,7 @@
     height: 100%;
     box-sizing: border-box;
     border-right: 1px solid #e5e6eb;
-    padding: 16px 0 24px;
+    padding: 20px 12px 28px;
   }
   .pic-list {
     height: 100%;
@@ -172,10 +172,20 @@
         overflow: hidden;
         box-sizing: border-box;
         position: relative;
-        img {
+        img,
+        .card-media {
           width: 100%;
           height: 100%;
           object-fit: cover;
+        }
+        .card-file {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #f5f7fa;
+          color: #909399;
         }
         .card-checkbox {
           position: absolute;

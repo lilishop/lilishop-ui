@@ -10,7 +10,7 @@ $warning_color: #ff9900;
 $error_color: #ed3f14;
 $handle-btn-color: #438cde;
 
-$theme_color: #F31947;
+$theme_color: var(--theme-color, #ff3c2a);
 
 $border_color: #dddee1;
 $title_color: #8c8c8c;

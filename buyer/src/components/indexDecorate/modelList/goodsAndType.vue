@@ -173,7 +173,7 @@ export default {
   text-align: center;
   letter-spacing: 0px;
 
-  color: #f31947;
+  color: $theme_color;
   -webkit-text-stroke: #979797 0.7px; /* 浏览器可能不支持 */
 }
 .goods-type-line {
@@ -190,7 +190,7 @@ export default {
   color: #333333;
 }
 .active {
-  color: #f31947;
+  color: $theme_color;
 }
 .goods-type-labels {
   cursor: pointer;

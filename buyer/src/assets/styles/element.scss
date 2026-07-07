@@ -1,17 +1,8 @@
 :root {
-  // --el-color-primary: #ff5c58;
-  // --el-color-success: #68cabe;
-  // --el-color-warning: #fa6419;
-  // --el-color-danger: #ff3c2a;
+  --el-color-primary: var(--theme-color, #ff3c2a);
+  --el-color-danger: var(--theme-color, #ff3c2a);
   --el-font-size-base: 14px;
 }
-
-// .el-button--primary {
-//   --el-button-bg-color: #ff5c58;
-//   --el-button-border-color: #ff5c58;
-//   --el-button-hover-bg-color: #ff7875;
-//   --el-button-hover-border-color: #ff7875;
-// }
 
 .el-table--border {
   .el-table__cell {
@@ -20,12 +11,12 @@
 }
 
 .link-text {
-  color: #409eff;
+  color: var(--theme-color, #ff3c2a);
   cursor: pointer;
   text-decoration: none;
 
   &:hover {
-    color: #66b1ff;
+    opacity: 0.85;
   }
 }
 
@@ -34,16 +25,16 @@
   color: #dcdfe6;
 }
 
-/* 与「我的订单」确认收货按钮一致的橙色操作按钮 */
+/* 次要强调按钮，使用高亮主题色（如「立即购买」） */
 .confirm-receipt-btn {
-  background-color: #ff9900 !important;
-  border-color: #ff9900 !important;
+  background-color: var(--theme-light, #ff6b35) !important;
+  border-color: var(--theme-light, #ff6b35) !important;
   color: #fff !important;
 
   &:hover,
   &:focus {
-    background-color: #e68a00 !important;
-    border-color: #e68a00 !important;
+    background-color: color-mix(in srgb, var(--theme-light, #ff6b35) 88%, black) !important;
+    border-color: color-mix(in srgb, var(--theme-light, #ff6b35) 88%, black) !important;
     color: #fff !important;
   }
 }

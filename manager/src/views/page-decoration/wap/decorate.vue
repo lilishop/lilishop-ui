@@ -107,7 +107,7 @@
         v-for="(item, index) in res.options.list"
         :key="index"
       >
-        <div class="decorate-item-title">
+        <div class="decorate-item-title" v-if="res.type != 'video'">
           <div>卡片</div>
           <el-icon
             v-if="res.close || res.type == 'promotionDetail'"
@@ -373,6 +373,13 @@
             </div>
           </div>
 
+          <!-- 视频楼层配置 -->
+          <video-config
+            v-if="res.type == 'video'"
+            :item="item"
+            @select-file="(field) => handleClickFile(item, index, field)"
+          />
+
           <!-- 填写链接 -->
 
           <div class="decorate-view" v-if="res.onlyImg">
@@ -531,12 +538,14 @@ import { modelData } from "./config";
 import hotzone from "@/components/hotzone";
 import ways from "@/components/lili-dialog/wap.js";
 import categoryTemplate from "@/components/lili-dialog/template/category";
+import VideoConfig from "./video-config";
 export default {
   components: {
     ossManage,
     hotzone,
     categoryTemplate,
     CircleClose,
+    VideoConfig,
   },
   data() {
     return {
@@ -556,6 +565,7 @@ export default {
       enableSelectCategory: false, //商品是否绑定分类
       pendingCategory: null, // 选择分类弹窗草稿
       goodsSelectedIndex: 0, //绑定商品分类的索引
+      pictureField: "img", //图片选择器回写的字段
     };
   },
   watch: {
@@ -800,16 +810,30 @@ export default {
     callbackSelected(val) {
       this.picModelFlag = false;
       if (!val?.url) return;
-      this.selectedGoods.img = val.url;
+      if (this.pictureField === "bgImage") {
+        if (!this.selectedGoods.style) {
+          this.selectedGoods.style = {};
+        }
+        this.selectedGoods.style.bgImage = val.url;
+        return;
+      }
+      this.selectedGoods[this.pictureField] = val.url;
     },
     // 点击选择图片
-    handleClickFile(item, index) {
+    handleClickFile(item, index, field = "img") {
+      this.pictureField = field;
       this.selectedGoods = item;
       this.picModelFlag = true;
       this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
+        const oss = this.$refs.ossManage;
+        if (!oss) return;
+        oss.selectImage = true;
+        if (field === "videoUrl") {
+          oss.fileType = "video";
+        } else {
+          oss.fileType = "pic";
         }
+        oss.changeFileType();
       });
     },
     removeNotice(index) {

@@ -10,6 +10,8 @@ import { setupLegacyMessage } from "@/utils/message";
 import { registerGlobalComponents } from "@/components/global.js";
 import * as filters from "./plugins/filters";
 import storage from "@/plugins/storage";
+import { fetchAndApplyTheme } from "@/utils/theme";
+import { getThemeSetting } from "@/api/common.js";
 
 const { aMapSecurityJsCode, inputMaxLength } = require("@/config");
 
@@ -49,6 +51,7 @@ app.config.globalProperties.connectCs = function (
   window.open(url, "_blank");
 };
 
-router.isReady().then(() => {
+router.isReady().then(async () => {
+  await fetchAndApplyTheme(getThemeSetting);
   app.mount("#app");
 });
