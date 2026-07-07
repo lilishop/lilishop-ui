@@ -78,6 +78,9 @@ export const queryLiveMessagePage = params => getRequest('/live/message/page', p
 export const authLiveMessage = params =>
   putRequest('/live/message/auth', params, { 'Content-type': 'application/json' })
 
+export const postSendMessage = params =>
+  postRequest('/live/message/send', params, { 'Content-type': 'application/json' })
+
 // ========== 直播用户 / 拉黑 ==========
 export const liveUserList = params => getRequest('/live/user/page', params)
 
