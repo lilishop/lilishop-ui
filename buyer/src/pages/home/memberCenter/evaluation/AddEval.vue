@@ -37,26 +37,30 @@
           <div>
             <el-input type="textarea" maxlength="500" show-word-limit :rows="4" v-model="orderGoods.content" />
           </div>
-          <div style="display:flex;align-items:center;">
-            <div class="demo-upload-list" v-for="(img, index) in orderGoods.uploadList" :key="index">
-              <img :src="img">
-              <div class="demo-upload-list-cover">
+          <div class="upload-section">
+            <div class="upload-row">
+              <div class="demo-upload-list" v-for="(img, index) in orderGoods.uploadList" :key="index">
+                <img :src="img">
+                <div class="demo-upload-list-cover">
                   <el-icon @click="handleView(img)"><View /></el-icon>
                   <el-icon @click="handleRemove(index)"><Delete /></el-icon>
+                </div>
               </div>
-            </div>
-            <el-upload
-                :show-upload-list="false"
+              <el-upload
+                class="upload-trigger"
+                :show-file-list="false"
                 :on-success="handleSuccess"
                 :before-upload="handleBeforeUpload"
                 :format="['jpg','jpeg','png']"
                 :action="action"
                 :headers="accessToken"
-                style="display: inline-block;width:58px;">
-                <div class="hover-pointer icon-upload" style="">
+              >
+                <div class="hover-pointer icon-upload">
                   <el-icon :size="20"><Camera /></el-icon>
                 </div>
-            </el-upload>
+              </el-upload>
+            </div>
+            <div class="describe">上传评价图片，最多9张</div>
           </div>
         </div>
       </li>
@@ -165,7 +169,7 @@ export default {
       this.$forceUpdate()
     },
     handleBeforeUpload () { // 上传之前钩子
-      const check = this.orderGoods.uploadList.length < 10;
+      const check = this.orderGoods.uploadList.length < 9;
       if (!check) {
         this.$Notice.warning({
           title: '最多可以上传九张图片'
@@ -237,7 +241,7 @@ export default {
 }
 
 .demo-upload-list{
-  display: inline-block;
+  display: block;
   width: 60px;
   height: 60px;
   text-align: center;
@@ -248,8 +252,7 @@ export default {
   background: #fff;
   position: relative;
   box-shadow: 0 1px 1px rgba(0,0,0,.2);
-  margin-right: 4px;
-  margin-top: 10px;
+  flex-shrink: 0;
 }
 .demo-upload-list img{
   width: 100%;
@@ -274,17 +277,47 @@ export default {
   margin: 0 2px;
 }
 .icon-upload {
-  width: 58px;
-  height:58px;
-  line-height: 58px;
-  text-align:center;
-  display: inline-block;
-  border:1px dashed #999;
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #999;
   border-radius: 4px;
-  margin-top: 10px;
+  box-sizing: border-box;
   &:hover{
     cursor: pointer;
     border-color: $theme_color;
   }
+}
+
+.upload-section {
+  margin-top: 10px;
+}
+
+.upload-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.upload-trigger {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  :deep(.el-upload) {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+.describe {
+  font-size: 12px;
+  color: #999;
+  margin-top: 8px;
 }
 </style>

@@ -17,10 +17,12 @@
 
       <div class="eval-con">
         <div class="eval-form">
-          <span class="color999">投诉主题：</span>
-          <el-select v-model="form.complainTopic" style="width:260px;margin-bottom:10px">
-            <el-option v-for="item in reasonList" :value="item.reason" :key="item.id">{{ item.reason }}</el-option>
-          </el-select>
+          <div class="topic-row">
+            <span class="color999 topic-label">投诉主题：</span>
+            <el-select v-model="form.complainTopic" class="topic-select">
+              <el-option v-for="item in reasonList" :value="item.reason" :key="item.id">{{ item.reason }}</el-option>
+            </el-select>
+          </div>
           <el-input type="textarea" maxlength="500" show-word-limit :rows="4" placeholder="请输入投诉内容" v-model="form.content" />
         </div>
         <div class="upload-section">
@@ -184,6 +186,22 @@ export default {
       width: 100%;
     }
   }
+}
+
+.topic-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.topic-label {
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.topic-select {
+  width: 200px;
+  flex-shrink: 0;
 }
 
 .demo-upload-list{

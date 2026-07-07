@@ -59,6 +59,10 @@
   padding: 0 4px;
 }
 
+.oss-manage-date-popper {
+  z-index: 5000 !important;
+}
+
 </style>
 <template>
   <div class="search">
@@ -88,6 +92,7 @@
                     end-placeholder="结束日期"
                     style="width: 240px"
                     type="daterange"
+                    popper-class="oss-manage-date-popper"
                     @change="selectDateRange"
                   />
                 </el-form-item>
@@ -162,37 +167,43 @@
                   <el-checkbox-group v-model="selectedOss" @change="selectOssChange">
                     <div class="img-box">
                       <div v-for="(item, index) in data" :key="index" class="img-item">
-                        <el-checkbox :value="item.id + ',' + item.url" class="check-box">
-                          <div
-                            class="card"
-                            @mouseenter="onMouseOver(item, index)"
-                            @mouseleave="onMouseOut(item, index)"
-                          >
-                            <img :src="item.url" alt="" />
-                            <div v-if="item.isShowPreview" class="preview">
-                              <div @click.prevent="download(item)">
-                                <el-tooltip content="下载" placement="top">
-                                  <el-icon :size="18"><Download /></el-icon>
-                                </el-tooltip>
-                              </div>
-                              <div @click.prevent="remove(item)">
-                                <el-tooltip content="删除" placement="top">
-                                  <el-icon :size="18"><Delete /></el-icon>
-                                </el-tooltip>
-                              </div>
-                              <div @click.prevent="showPic(item)">
-                                <el-tooltip content="预览" placement="top">
-                                  <el-icon :size="22"><View /></el-icon>
-                                </el-tooltip>
-                              </div>
+                        <div
+                          class="card"
+                          :class="{
+                            'custom-checkbox-card-checked': selectedOss.includes(item.id + ',' + item.url),
+                            'oss-card-selectable': isComponent && selectImage,
+                          }"
+                          @mouseenter="onMouseOver(item, index)"
+                          @mouseleave="onMouseOut(item, index)"
+                          @click="handleCardClick(item, $event)"
+                        >
+                          <el-checkbox
+                            :value="item.id + ',' + item.url"
+                            class="card-checkbox"
+                            @click.stop
+                          />
+                          <img :src="item.url" alt="" />
+                          <div v-if="item.isShowPreview" class="preview">
+                            <div @click.prevent="download(item)">
+                              <el-tooltip content="下载" placement="top">
+                                <el-icon :size="18"><Download /></el-icon>
+                              </el-tooltip>
+                            </div>
+                            <div @click.prevent="remove(item)">
+                              <el-tooltip content="删除" placement="top">
+                                <el-icon :size="18"><Delete /></el-icon>
+                              </el-tooltip>
+                            </div>
+                            <div @click.prevent="showPic(item)">
+                              <el-tooltip content="预览" placement="top">
+                                <el-icon :size="22"><View /></el-icon>
+                              </el-tooltip>
                             </div>
                           </div>
-                        </el-checkbox>
-                        <div>
-                          <el-tooltip :content="item.name" placement="bottom">
-                            <div class="text">{{ item.name }}</div>
-                          </el-tooltip>
                         </div>
+                        <el-tooltip :content="item.name" placement="bottom">
+                          <div class="text">{{ item.name }}</div>
+                        </el-tooltip>
                       </div>
                     </div>
                   </el-checkbox-group>
@@ -1069,6 +1080,18 @@ export default {
         // this.totalSize = ((size * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
         this.$emit("selected", e);
       }
+    },
+    handleCardClick(item, event) {
+      if (!(this.isComponent && this.selectImage)) return;
+      if (event?.target?.closest?.(".preview") || event?.target?.closest?.(".card-checkbox")) {
+        return;
+      }
+      const key = `${item.id},${item.url}`;
+      const next = this.selectedOss.includes(key)
+        ? this.selectedOss.filter((k) => k !== key)
+        : [...this.selectedOss, key];
+      this.selectedOss = next;
+      this.selectOssChange(next);
     },
     // 页码改变时回调
     pageChange(value) {

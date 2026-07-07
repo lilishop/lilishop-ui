@@ -93,3 +93,8 @@
   color: #c0c4cc;
   cursor: not-allowed;
 }
+
+/* MessageBox 需高于嵌套 Dialog（如上传图片/资源库 z-index: 3500~3700） */
+.el-overlay.is-message-box {
+  z-index: 4000 !important;
+}

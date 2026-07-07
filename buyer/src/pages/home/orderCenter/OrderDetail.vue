@@ -175,17 +175,6 @@
             <td>{{ $filters.unitPrice((goods.goodsPrice * goods.num), "￥") }}</td>
             <td class="order-item-actions">
               <el-button
-                v-if="
-                  goods.afterSaleStatus.includes('NOT_APPLIED') ||
-                  goods.afterSaleStatus.includes('PART_AFTER_SALE')
-                "
-                @click="applyAfterSale(goods.sn)"
-                type="default"
-                size="small"
-                class="order-item-action-btn mb_5"
-                >申请售后</el-button
-              >
-              <el-button
                 v-if="goods.commentStatus == 'UNFINISHED'"
                 @click="comment(order.order.sn, goodsIndex)"
                 size="small"
@@ -200,6 +189,17 @@
                 class="order-item-action-btn fontsize_12 mb_5"
                 size="small"
                 >投诉</el-button
+              >
+              <el-button
+                v-if="
+                  goods.afterSaleStatus.includes('NOT_APPLIED') ||
+                  goods.afterSaleStatus.includes('PART_AFTER_SALE')
+                "
+                @click="applyAfterSale(goods.sn)"
+                type="default"
+                size="small"
+                class="order-item-action-btn mb_5"
+                >申请售后</el-button
               >
             </td>
           </tr>
@@ -256,7 +256,7 @@
     </el-dialog>
 
     <!--查询物流-->
-    <el-dialog v-model="logisticsModal" width="40">
+    <el-dialog v-model="logisticsModal" width="40%">
       <template #header><p><span>查询物流</span></p></template>
       <div class="layui-layer-wrap">
         <dl>

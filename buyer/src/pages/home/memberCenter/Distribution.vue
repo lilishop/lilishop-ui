@@ -362,18 +362,36 @@ export default {
         }
       });
     },
+    normalizeWithdrawError (message) {
+      if (!message) return '提现失败，请稍后重试';
+      const text = String(message);
+      if (text.includes('最少提现金额为1元')) {
+        return '提现金额单次最少提现金额为1元';
+      }
+      const colonIndex = text.indexOf(':');
+      if (colonIndex > -1 && colonIndex < text.length - 1) {
+        return text.slice(colonIndex + 1).trim();
+      }
+      return text;
+    },
     withdraw() {
-      // 申请提现
+      const price = Number(this.withdrawPrice);
+      if (!price || price < 1) {
+        this.$Message.error('提现金额单次最少提现金额为1元');
+        return;
+      }
       distCash({ price: this.withdrawPrice }).then((res) => {
-        this.withdrawApplyModal = false;
-        this.price = 0;
         if (res.success) {
-          this.$Message.success("申请已提交，请等待审核");
+          this.withdrawApplyModal = false;
+          this.withdrawPrice = 0;
+          this.$Message.success('申请已提交，请等待审核');
           this.distribution();
           this.getLog();
         } else {
-          this.$Message.error(res.message);
+          this.$Message.error(this.normalizeWithdrawError(res.message));
         }
+      }).catch((err) => {
+        this.$Message.error(this.normalizeWithdrawError(err?.message || err?.data?.message));
       });
     },
     qrcodeData(data64) {

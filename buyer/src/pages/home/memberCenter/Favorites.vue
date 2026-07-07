@@ -146,8 +146,8 @@ export default {
     cancel(id) { // 取消收藏
       let typeName = this.params.type === 'GOODS' ? '商品' : '店铺'
       this.$Modal.confirm({
-        title: 'Title',
-        content: `<p>确定取消收藏该${typeName}吗？</p>`,
+        title: '取消收藏',
+        content: `确定取消收藏该${typeName}吗？`,
         onOk: () => {
           cancelCollect(this.params.type, id).then(res => {
             if (res.success) {
@@ -160,8 +160,8 @@ export default {
     cancelStore(id) { // 取消收藏
       let typeName = this.params.type === 'GOODS' ? '商品' : '店铺'
       this.$Modal.confirm({
-        title: 'Title',
-        content: `<p>确定取消收藏该${typeName}吗？</p>`,
+        title: '取消收藏',
+        content: `确定取消收藏该${typeName}吗？`,
         onOk: () => {
           cancelStoreCollect(this.params.type, id).then(res => {
             if (res.success) {

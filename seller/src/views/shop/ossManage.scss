@@ -185,25 +185,31 @@
           height: auto;
           margin: 0;
 
-          :deep(.el-checkbox__label) {
+          .el-checkbox__label {
             display: none;
           }
+        }
+        &.oss-card-selectable {
+          cursor: pointer;
         }
         .preview {
           width: 100%;
           height: 26px;
           background-color: #ffffff;
-          text-align: center;
-          line-height: 30px;
           color: #666666;
           position: absolute;
           left: 0;
           bottom: 0;
           display: flex;
           flex-wrap: nowrap;
+          align-items: center;
+          justify-content: center;
           > div {
-            width: 100%;
             flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
           }
         }
       }

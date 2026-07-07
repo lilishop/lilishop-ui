@@ -22,11 +22,15 @@
     </ul>
     <!-- 分页 -->
     <div class="page-size">
-      <el-pagination         :total="total"
+      <el-pagination
+        :total="total"
+        :current-page="params.pageNumber"
+        :page-size="params.pageSize"
+        :page-sizes="[10, 20, 30, 40, 50, 100]"
+        layout="sizes, prev, pager, next, jumper"
         @current-change="changePageNum"
         @size-change="changePageSize"
-        :page-size="params.pageSize"
-       layout="sizes, prev, pager, next, jumper"></el-pagination>
+      />
     </div>
     </UserCenterLayout>
   </div>
@@ -44,7 +48,7 @@ export default {
       spinShow: false, // 控制loading是否加载
       params: {
         pageNumber: 1,
-        pageSize: 30,
+        pageSize: 10,
         order: "desc",
         sort: "updateTime",
       },

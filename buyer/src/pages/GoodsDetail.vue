@@ -13,14 +13,15 @@
         <div class="store-collect" v-if="!takeDownSale && goodsMsg.data">
           <span class="mr_10" v-if="goodsMsg.data">
             <router-link
+              class="store-name-link"
               :to="{ path: '/merchant', query: { id: goodsMsg.data.storeId } }"
             >{{ goodsMsg.data.storeName }}</router-link>
           </span>
-          <span @click="collect">
-            <el-icon :color="storeCollected ? '#ed3f14' : '#666'"><StarFilled /></el-icon>
+          <span class="store-collect-btn" @click="collect">
+            <el-icon :color="storeCollected ? '#ffc107' : '#666'"><StarFilled /></el-icon>
             {{ storeCollected? "已收藏店铺": "收藏店铺" }}
           </span>
-          <span class="ml_10" @click="IMService(goodsMsg.data.storeId,goodsMsg.data.goodsId,goodsMsg.data.id)">联系客服</span>
+          <span class="ml_10 contact-service-btn" @click="IMService(goodsMsg.data.storeId,goodsMsg.data.goodsId,goodsMsg.data.id)">联系客服</span>
         </div>
       </div>
     </div>
@@ -233,10 +234,25 @@ export default {
     transform: translateY(-50%);
     color: #999;
 
-    span {
+    span:not(.store-collect-btn):not(.contact-service-btn) {
       &:hover {
         cursor: pointer;
         color: $theme_color;
+      }
+    }
+
+    .store-collect-btn,
+    .contact-service-btn {
+      cursor: pointer;
+    }
+
+    .store-name-link {
+      color: $theme_color;
+      text-decoration: none;
+
+      &:hover {
+        color: $theme_color;
+        text-decoration: none;
       }
     }
   }
