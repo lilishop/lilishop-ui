@@ -145,15 +145,32 @@ export default {
     handleCLickImg(val) {
       this.picModelFlag = true;
       this.selectedFormBtnName = val;
+      this.selectedImage = [];
       this.$nextTick(() => {
         if (this.$refs.ossManage) {
           this.$refs.ossManage.selectImage = true;
         }
       });
     },
+    parseOssSelectionUrl(item) {
+      if (!item) {
+        return "";
+      }
+      if (typeof item === "string") {
+        const index = item.indexOf(",");
+        return index >= 0 ? item.slice(index + 1) : item;
+      }
+      return item.url || "";
+    },
     callbackSelected(val) {
+      if (this.multiple) {
+        return;
+      }
+      if (!val?.url) {
+        return;
+      }
       this.picModelFlag = false;
-      if (!this.multiple && this.uploadList.length > 0) {
+      if (this.uploadList.length > 0) {
         this.uploadList.splice(0, 1);
       }
       this.uploadList.push({ ...val, status: "finished" });
@@ -162,9 +179,13 @@ export default {
     confirmUrls() {
       if (this.selectedImage.length) {
         this.selectedImage.forEach((element) => {
-          this.uploadList.push({ url: element.url, status: "finished" });
+          const url = this.parseOssSelectionUrl(element);
+          if (url) {
+            this.uploadList.push({ url, status: "finished" });
+          }
         });
       }
+      this.selectedImage = [];
       this.picModelFlag = false;
       this.returnValue();
     },
@@ -268,7 +289,6 @@ export default {
   background: #fff;
   position: relative;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-  margin-right: 5px;
   vertical-align: middle;
 }
 .upload-list img {
@@ -297,7 +317,9 @@ export default {
   cursor: pointer;
 }
 .list-group {
-  display: inline-block;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 .thumb-ghost {
   opacity: 0.5;

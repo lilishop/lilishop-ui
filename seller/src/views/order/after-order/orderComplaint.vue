@@ -45,7 +45,7 @@
       <el-table v-loading="loading" border :data="data" ref="table" class="mt_10" style="width: 100%">
         <el-table-column prop="memberName" label="会员名称" width="200" />
         <el-table-column prop="orderSn" label="订单编号" min-width="120" show-overflow-tooltip />
-        <el-table-column label="商品名称" min-width="200" show-overflow-tooltip>
+        <el-table-column label="商品名称" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">
             <template v-if="row">
               <a class="link-text mr_10" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
@@ -70,7 +70,7 @@
             </template>
           </template>
         </el-table-column>
-        <el-table-column prop="complainTopic" label="投诉主题" width="120" show-overflow-tooltip />
+        <el-table-column prop="complainTopic" label="投诉主题" min-width="160" show-overflow-tooltip />
         <el-table-column prop="createTime" label="投诉时间" width="180" />
         <el-table-column label="投诉状态" width="110">
           <template #default="{ row }">

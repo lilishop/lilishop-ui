@@ -33,6 +33,14 @@
             style="width: 240px"
           />
         </el-form-item>
+        <el-form-item label="会员名称" prop="memberName">
+          <el-input
+            v-model="searchForm.memberName"
+            placeholder="请输入会员名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
         <el-form-item label="申请时间">
           <el-date-picker
             v-model="selectDate"
@@ -43,14 +51,6 @@
             end-placeholder="结束时间"
             style="width: 360px"
             @change="selectDateRange"
-          />
-        </el-form-item>
-        <el-form-item label="会员名称" prop="memberName">
-          <el-input
-            v-model="searchForm.memberName"
-            placeholder="请输入会员名称"
-            clearable
-            style="width: 240px"
           />
         </el-form-item>
         <el-form-item>

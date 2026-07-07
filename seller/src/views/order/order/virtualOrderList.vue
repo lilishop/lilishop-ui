@@ -78,7 +78,7 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="memberName" label="买家名称" width="130" />
+        <el-table-column prop="memberName" label="会员名称" width="130" />
         <el-table-column label="订单金额" prop="flowPrice" min-width="120" sortable="custom">
           <template #default="{ row }">
             <priceColorScheme v-if="row" :value="row.flowPrice" :color="$mainColor" />

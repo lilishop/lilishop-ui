@@ -15,38 +15,13 @@
         style="width: 100%"
       >
         <el-table-column prop="name" label="分类名称" min-width="200" />
-        <el-table-column label="状态" width="120">
-          <template #default="{ row }">
-            <el-switch
-              v-if="row"
-              v-model="row.deleteFlag"
-              :active-value="false"
-              :inactive-value="true"
-              inline-prompt
-              active-text="开启"
-              inactive-text="关闭"
-              :loading="!!row._statusLoading"
-              @change="(val) => onStatusSwitchChange(row, val)"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column label="佣金" width="120">
-          <template #default="{ row }">
-            <span
-              v-if="row"
-              :style="row.commissionRate > 0 ? { color: $mainColor } : {}"
-            >
-              {{ row.commissionRate }}%
-            </span>
-          </template>
-        </el-table-column>
         <el-table-column label="操作" min-width="220" fixed="right">
           <template #default="{ row }">
             <div v-if="row" class="ops">
               <a class="link-text" @click="edit(row)">编辑</a>
               <span class="op-split">|</span>
               <a class="link-text" @click="remove(row)">删除</a>
-              <template v-if="row.level != 2">
+              <template v-if="row.level === 0">
                 <span class="op-split">|</span>
                 <a class="link-text" @click="addChildren(row)">添加子分类</a>
               </template>
@@ -62,7 +37,7 @@
         :close-on-click-modal="false"
         destroy-on-close
       >
-        <el-form ref="form" :model="formAdd" label-width="100px" :rules="formValidate">
+        <el-form ref="form" :model="formAdd" label-width="120px" :rules="formValidate">
           <el-form-item v-if="showParent" label="上级分类" prop="parentId">
             {{ parentTitle }}
             <el-input v-model="formAdd.parentId" style="display: none" />
@@ -79,19 +54,6 @@
           <el-form-item label="排序值" prop="sortOrder">
             <el-input-number v-model="formAdd.sortOrder" style="width: 200px" />
           </el-form-item>
-          <el-form-item label="佣金比例(%)" prop="commissionRate">
-            <el-input-number v-model="formAdd.commissionRate" :min="0" :max="100" style="width: 200px" />
-          </el-form-item>
-          <el-form-item label="是否启用" prop="deleteFlag">
-            <el-switch
-              v-model="formAdd.deleteFlag"
-              :active-value="false"
-              :inactive-value="true"
-              inline-prompt
-              active-text="启用"
-              inactive-text="禁用"
-            />
-          </el-form-item>
         </el-form>
         <template #footer>
           <el-button @click="modalVisible = false">取消</el-button>
@@ -99,63 +61,16 @@
         </template>
       </el-dialog>
 
-      <el-dialog
-        v-model="modalBrandVisible"
-        :title="modalBrandTitle"
-        width="500px"
-        :close-on-click-modal="false"
-      >
-        <el-form ref="brandForm" :model="brandForm" label-width="100px">
-          <el-select v-model="brandForm.categoryBrands" filterable multiple style="width: 100%">
-            <el-option v-for="item in brandWay" :key="item.id" :label="item.name" :value="item.id" />
-          </el-select>
-        </el-form>
-        <template #footer>
-          <el-button @click="modalBrandVisible = false">取消</el-button>
-          <el-button type="primary" :loading="submitLoading" @click="saveCategoryBrand">提交</el-button>
-        </template>
-      </el-dialog>
-
-      <el-dialog
-        v-model="modalSpecVisible"
-        :title="modalSpecTitle"
-        width="500px"
-        :close-on-click-modal="false"
-      >
-        <el-form ref="specForm" :model="specForm" label-width="100px">
-          <el-select v-model="specForm.categorySpecs" multiple style="width: 100%">
-            <el-option
-              v-for="item in specifications"
-              :key="item.id"
-              :label="item.specName"
-              :value="item.id"
-            />
-          </el-select>
-        </el-form>
-        <template #footer>
-          <el-button @click="modalSpecVisible = false">取消</el-button>
-          <el-button type="primary" :loading="submitLoading" @click="saveCategorySpec">提交</el-button>
-        </template>
-      </el-dialog>
     </el-card>
   </div>
 </template>
 
 <script>
-import * as API_Goods from "@/api/goods";
-
 import {
-  delCategory,
-  disableCategory,
-  getBrandListData,
-  getCategoryBrandListData,
-  getCategorySpecListData,
-  getCategoryTree,
-  getSpecificationList,
-  insertCategory,
-  saveCategoryBrand,
-  saveCategorySpec,
-  updateCategory,
+  addShopGoodsLabel,
+  delCategdelShopGoodsLabel,
+  editShopGoodsLabel,
+  getShopGoodsLabelList,
 } from "@/api/goods";
 import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
 import { regular } from "@/utils";
@@ -170,37 +85,13 @@ export default {
       submitLoading: false,
       categoryList: [],
       loading: false,
-      brands: [],
-      specifications: [],
-      categoryId: "",
-      categorySpecs: [],
       modalType: 0,
       modalVisible: false,
-      modalBrandVisible: false,
-      modalSpecVisible: false,
       modalTitle: "",
       showParent: false,
       parentTitle: "",
-      modalBrandTitle: "",
-      modalSpecTitle: "",
-      formAdd: {
-        parentId: "",
-        name: "",
-        image: "",
-        sortOrder: 0,
-        deleteFlag: false,
-        commissionRate: 0,
-        level: 0,
-      },
-      brandForm: {
-        categoryBrands: [],
-      },
-      brandWay: [],
-      specForm: {
-        categorySpecs: [],
-      },
+      formAdd: this.createDefaultForm(),
       formValidate: {
-        commissionRate: [regular.REQUIRED, regular.INTEGER],
         name: [regular.REQUIRED, regular.VARCHAR20],
         sortOrder: [regular.REQUIRED, regular.INTEGER],
       },
@@ -208,102 +99,36 @@ export default {
     };
   },
   methods: {
-    normalizeCategoryTree(list) {
+    createDefaultForm() {
+      return {
+        parentId: "",
+        name: "",
+        image: "",
+        sortOrder: 0,
+        level: 0,
+      };
+    },
+    normalizeCategoryTree(list, parentId = 0, level = 0) {
       if (!Array.isArray(list) || list.length === 0) return;
       list.forEach((item) => {
         if (!item || typeof item !== "object") return;
-        if (item.deleteFlag === 0) item.deleteFlag = false;
-        else if (item.deleteFlag === 1) item.deleteFlag = true;
-        else item.deleteFlag = !!item.deleteFlag;
+        item.name = item.name || item.labelName;
+        item.parentId = item.parentId ?? parentId;
+        item.level = item.level ?? level;
         if (Array.isArray(item.children) && item.children.length) {
-          this.normalizeCategoryTree(item.children);
+          this.normalizeCategoryTree(item.children, item.id, Number(item.level) + 1);
         }
-      });
-    },
-    onStatusSwitchChange(row, nextDeleteFlag) {
-      const previousDeleteFlag = !nextDeleteFlag;
-      const isClosing = nextDeleteFlag === true;
-      this.$Modal.confirm({
-        title: isClosing ? "确认关闭" : "确认开启",
-        content: `您是否要${isClosing ? "关闭" : "开启"}当前分类 ${row.name} 及其子分类?`,
-        loading: true,
-        okText: "是",
-        cancelText: "否",
-        onOk: () => {
-          row._statusLoading = true;
-          disableCategory(row.id, { enableOperations: isClosing ? true : 0 }).then((res) => {
-            this.$Modal.remove();
-            row._statusLoading = false;
-            if (res && res.success) {
-              this.$Message.success("操作成功");
-              this.getAllList();
-              return;
-            }
-            row.deleteFlag = previousDeleteFlag;
-          });
-        },
-        onCancel: () => {
-          row.deleteFlag = previousDeleteFlag;
-        },
       });
     },
     init() {
       this.getAllList();
-      this.getBrandList();
-      this.getSpecList();
-    },
-    getBrandList() {
-      getBrandListData().then((res) => {
-        this.brandWay = res;
-      });
-    },
-    getSpecList() {
-      getSpecificationList().then((res) => {
-        if (res.length != 0) {
-          this.specifications = res.result;
-        }
-      });
-    },
-    brandOperation(v) {
-      getCategoryBrandListData(v.id).then((res) => {
-        this.categoryId = v.id;
-        this.modalBrandTitle = "品牌关联";
-        this.brandForm.categoryBrands = res.result.map((item) => item.id);
-        this.modalBrandVisible = true;
-      });
-    },
-    specOperation(v) {
-      getCategorySpecListData(v.id).then((res) => {
-        this.categoryId = v.id;
-        this.modalSpecTitle = "规格关联";
-        this.specForm.categorySpecs = res.map((item) => item.id);
-        this.modalSpecVisible = true;
-      });
-    },
-    saveCategorySpec() {
-      saveCategorySpec(this.categoryId, this.specForm).then((res) => {
-        this.submitLoading = false;
-        if (res.success) {
-          this.$Message.success("操作成功");
-          this.modalSpecVisible = false;
-        }
-      });
-    },
-    saveCategoryBrand() {
-      saveCategoryBrand(this.categoryId, this.brandForm).then((res) => {
-        this.submitLoading = false;
-        if (res.success) {
-          this.$Message.success("操作成功");
-          this.modalBrandVisible = false;
-        }
-      });
     },
     addChildren(v) {
       this.modalType = 0;
       this.modalTitle = "添加子分类";
       this.parentTitle = v.name;
+      this.formAdd = this.createDefaultForm();
       this.formAdd.level = Number(v.level) + 1;
-      this.formAdd.commissionRate = v.commissionRate;
       this.showParent = true;
       delete this.formAdd.id;
       this.formAdd.parentId = v.id;
@@ -315,10 +140,8 @@ export default {
       this.formAdd.id = v.id;
       this.formAdd.name = v.name;
       this.formAdd.level = v.level;
-      this.formAdd.parentId = v.parentId;
+      this.formAdd.parentId = v.parentId ?? 0;
       this.formAdd.sortOrder = v.sortOrder;
-      this.formAdd.commissionRate = v.commissionRate;
-      this.formAdd.deleteFlag = v.deleteFlag;
       this.formAdd.image = v.image;
       this.showParent = false;
       this.modalVisible = true;
@@ -328,7 +151,7 @@ export default {
       this.modalTitle = "添加一级分类";
       this.parentTitle = "顶级分类";
       this.showParent = true;
-      this.$refs.form?.resetFields();
+      this.formAdd = this.createDefaultForm();
       delete this.formAdd.id;
       this.formAdd.parentId = 0;
       this.formAdd.level = 0;
@@ -338,9 +161,10 @@ export default {
       this.$refs.form.validate((valid) => {
         if (!valid) return;
         this.submitLoading = true;
+        const params = this.buildLabelParams(this.formAdd);
         if (this.modalType === 0) {
-          delete this.formAdd.id;
-          insertCategory(this.formAdd).then((res) => {
+          delete params.id;
+          addShopGoodsLabel(params).then((res) => {
             this.submitLoading = false;
             if (res.success) {
               this.$Message.success("添加成功");
@@ -350,7 +174,7 @@ export default {
             }
           });
         } else {
-          updateCategory(this.formAdd).then((res) => {
+          editShopGoodsLabel(params).then((res) => {
             this.submitLoading = false;
             if (res.success) {
               this.$Message.success("修改成功");
@@ -368,7 +192,7 @@ export default {
         content: "您确认要删除 " + v.name + " ?",
         loading: true,
         onOk: () => {
-          delCategory(v.id).then((res) => {
+          delCategdelShopGoodsLabel(v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("操作成功");
@@ -380,11 +204,10 @@ export default {
     },
     getAllList() {
       this.loading = true;
-      getCategoryTree()
+      getShopGoodsLabelList()
         .then((res) => {
           this.loading = false;
           if (res.success) {
-            localStorage.setItem("category", JSON.stringify(res.result));
             this.normalizeCategoryTree(res.result);
             this.categoryList = JSON.parse(JSON.stringify(res.result));
             this.tableData = JSON.parse(JSON.stringify(res.result));
@@ -394,47 +217,21 @@ export default {
           this.loading = false;
         });
     },
-    enable(v) {
-      this.$Modal.confirm({
-        title: "确认启用",
-        content: "您是否要启用当前分类 " + v.name + " 及其子分类?",
-        loading: true,
-        okText: "是",
-        cancelText: "否",
-        onOk: () => {
-          disableCategory(v.id, { enableOperations: 0 }).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getAllList();
-            }
-          });
-        },
-        onCancel: () => {
-          this.getAllList();
-        },
+    buildLabelParams(form) {
+      const params = {
+        id: form.id,
+        parentId: form.parentId,
+        labelName: form.name,
+        image: form.image,
+        sortOrder: form.sortOrder,
+        level: form.level,
+      };
+      Object.keys(params).forEach((key) => {
+        if (params[key] === undefined || params[key] === "") {
+          delete params[key];
+        }
       });
-    },
-    disable(v) {
-      this.$Modal.confirm({
-        title: "确认禁用",
-        content: "您是否要禁用当前分类 " + v.name + " 及其子分类?",
-        loading: true,
-        okText: "是",
-        cancelText: "否",
-        onOk: () => {
-          disableCategory(v.id, { enableOperations: true }).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getAllList();
-            }
-          });
-        },
-        onCancel: () => {
-          this.getAllList();
-        },
-      });
+      return params;
     },
   },
   mounted() {

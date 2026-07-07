@@ -56,8 +56,14 @@
         ref="ossManage"
         :is-component="true"
         :initialize="picModalFlag"
+        :max-select="1"
         @callback="callbackSelected"
+        @selected="handleOssSelected"
       />
+      <template #footer>
+        <el-button @click="picModalFlag = false">取消</el-button>
+        <el-button type="primary" @click="confirmSelectedImage">确认</el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -108,6 +114,7 @@ export default {
       picModalFlag: false,
       selectedFormBtnName: "",
       picIndex: "",
+      selectedImage: [],
     };
   },
   methods: {
@@ -115,6 +122,7 @@ export default {
       this.picModalFlag = true;
       this.selectedFormBtnName = val;
       this.picIndex = index;
+      this.selectedImage = [];
       this.$nextTick(() => {
         if (this.$refs.ossManage) {
           this.$refs.ossManage.selectImage = true;
@@ -122,8 +130,20 @@ export default {
       });
     },
     callbackSelected(val) {
+      if (val?.url) {
+        this.selectedImage = [val.url];
+      }
+    },
+    handleOssSelected(list) {
+      this.selectedImage = (list || []).map((item) => item.split(",")[1]).filter(Boolean);
+    },
+    confirmSelectedImage() {
+      if (!this.selectedImage.length) {
+        this.$Message.warning("请选择图片");
+        return;
+      }
+      this.currentValue = this.selectedImage[this.selectedImage.length - 1];
       this.picModalFlag = false;
-      this.currentValue = val.url;
       this.picIndex = "";
       this.emitValue(this.currentValue);
     },
