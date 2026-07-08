@@ -13,8 +13,8 @@
   border-radius: 1em;
   background-color: rgba(50,50,50,.1);
 }
-.ivu-table table{
-  width: 100%!important;
+.el-table table {
+  width: 100% !important;
 }
 
 .flex{
@@ -151,7 +151,6 @@ $bg_color: #f1f6fa;
   border-radius: 0.4em;
   flex-wrap: wrap;
 
-  > .ivu-form-item,
   > .el-form-item {
     margin: 8px 10px !important;
   }
@@ -174,7 +173,3 @@ $bg_color: #f1f6fa;
   margin-top: 10px;
 }
 
-// 兼容遗留 iView 结构
-.ivu-card + .ivu-card {
-  margin-top: 10px;
-}

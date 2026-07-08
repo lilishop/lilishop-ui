@@ -42,17 +42,6 @@
   }
 }
 
-:deep(.ivu-scroll-container){
-  width: 100% !important;
-  height: 400px !important;
-}
-
-:deep(.ivu-scroll-content){
-  /* */
-  display: flex;
-  flex-wrap: wrap;
-}
-
 .wap-content-list {
   overflow-y: auto;
 }

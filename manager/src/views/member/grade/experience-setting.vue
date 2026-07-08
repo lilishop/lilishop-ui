@@ -239,6 +239,7 @@
 
 <script>
 import { getSetting, setSetting } from "@/api/index";
+import { ElMessage } from "element-plus";
 
 const RULE_OPTIONS = [
   { ruleKey: "CONSUME", ruleName: "消费" },
@@ -407,7 +408,7 @@ export default {
         return false;
       });
       if (invalid) {
-        this.$Message.error("请检查经验值配置，经验值范围为1-100，限额需为正整数");
+        ElMessage.error("请检查经验值配置，经验值范围为1-100，限额需为正整数");
         return false;
       }
       return true;
@@ -428,7 +429,7 @@ export default {
       setSetting("EXPERIENCE_SETTING", payload)
         .then((res) => {
           if (res && res.success) {
-            this.$Message.success("保存成功");
+            ElMessage.success("保存成功");
           }
         })
         .finally(() => {

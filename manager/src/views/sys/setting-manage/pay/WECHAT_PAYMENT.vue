@@ -58,6 +58,7 @@
   </div>
 </template>
 <script>
+import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
 
@@ -84,9 +85,9 @@ export default {
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {
-          this.$Message.success("保存成功!");
+          ElMessage.success("保存成功!");
         } else {
-          this.$Message.error("保存失败!");
+          ElMessage.error("保存失败!");
         }
       });
     },

@@ -79,6 +79,7 @@
   </div>
 </template>
 <script>
+import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "./validate";
 import ossManage from "@/views/sys/oss-manage/ossManage";
@@ -138,12 +139,12 @@ export default {
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {
-          this.$Message.success("保存成功!");
+          ElMessage.success("保存成功!");
           localStorage.setItem("icon", this.formValidate.domainLogo);
           window.document.title = this.formValidate.siteName + " - 运营后台";
           this.setStore("title", this.formValidate.siteName);
         } else {
-          this.$Message.error("保存失败!");
+          ElMessage.error("保存失败!");
         }
       });
     },

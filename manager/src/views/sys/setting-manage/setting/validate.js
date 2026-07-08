@@ -1,3 +1,4 @@
+import { ElMessage } from "element-plus";
 //表单中必填
 export function validateRequired(rule, value, callback) {
   if (value !== undefined && value !== null && value !== "") {
@@ -12,7 +13,7 @@ export function handleSubmit(that, name) {
   return new Promise((resolve, reject) => {
     const form = that.$refs[name];
     if (!form) {
-      that.$Message.error("表单未就绪，请稍后重试");
+      ElMessage.error("表单未就绪，请稍后重试");
       reject(new Error("form ref missing"));
       return;
     }
@@ -20,7 +21,7 @@ export function handleSubmit(that, name) {
       if (valid) {
         resolve(true);
       } else {
-        that.$Message.error("请正确填写内容!");
+        ElMessage.error("请正确填写内容!");
         reject(new Error("validation failed"));
       }
     });

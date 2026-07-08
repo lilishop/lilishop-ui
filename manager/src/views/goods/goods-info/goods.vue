@@ -151,7 +151,7 @@
         </el-table-column>
         <el-table-column label="价格" width="200">
           <template #default="{ row }">
-            <span :style="{ color: $mainColor }">{{ $filters.unitPrice(row.price, '￥') }}</span>
+            <span :style="{ color: $mainColor }">{{ unitPrice(row.price, '￥') }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="buyCount" label="销量" width="150" />
@@ -305,6 +305,8 @@ import {
   getGoodsGroupByPage,
   addGoodsGroupItems
 } from "@/api/goods";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { unitPrice, customRouterPush } from "@/utils/filters";
 export default {
   name: "goods",
   data() {
@@ -367,6 +369,7 @@ export default {
     }
   },
   methods: {
+    unitPrice,
     clearTableSelection() {
       this.$refs.table?.clearSelection?.();
     },
@@ -452,7 +455,7 @@ export default {
     lower() {
       const reason = this.underForm.reason ? this.underForm.reason.trim() : "";
       if (!reason) {
-        this.$Message.error("下架原因不能为空");
+        ElMessage.error("下架原因不能为空");
         return;
       }
       let params = {
@@ -460,9 +463,8 @@ export default {
         reason
       };
       lowGoods(params).then((res) => {
-        this.$Modal.remove();
         if (res.success) {
-          this.$Message.success("操作成功");
+          ElMessage.success("操作成功");
           this.modalVisible = false;
           this.getDataList();
           this.getNumberData(); // 添加这行
@@ -471,29 +473,23 @@ export default {
     },
     // 上架
     upper(v) {
-      this.$Modal.confirm({
-        title: "确认上架",
-        content: "您确认要上架 " + v.goodsName + " ?",
-        loading: true,
-        onOk: () => {
-           let params = {
-            goodsId: v.id
-          };
-          upGoods(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("上架成功");
-              this.getDataList();
-              this.getNumberData(); // 添加这行
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("您确认要上架 " + v.goodsName + " ?", "确认上架", { type: "warning" }).then(() => {
+        let params = {
+          goodsId: v.id
+        };
+        return upGoods(params).then((res) => {
+          if (res.success) {
+            ElMessage.success("上架成功");
+            this.getDataList();
+            this.getNumberData(); // 添加这行
+          }
+        });
+      }).catch(() => {});
     },
 
     //查看商品详情
     showDetail(v) {
-      this.$filters.customRouterPush({
+      customRouterPush({
         name: "goods-detail",
         query: { id: v.id },
       });
@@ -521,26 +517,20 @@ export default {
         this.goodsAuditForm.authFlag = "REFUSE";
       }
 
-      this.$Modal.confirm({
-        title: "确认审核",
-        content: "您确认要审核" + examine + " " + v.goodsName + " ?",
-        loading: true,
-        onOk: () => {
-          this.goodsAuditForm.goodsIds=v.id;
-          let formData = new FormData();
-          formData.append('goodsIds', v.id);
-          formData.append('authFlag', this.goodsAuditForm.authFlag);
+      ElMessageBox.confirm("您确认要审核" + examine + " " + v.goodsName + " ?", "确认审核", { type: "warning" }).then(() => {
+        this.goodsAuditForm.goodsIds=v.id;
+        let formData = new FormData();
+        formData.append('goodsIds', v.id);
+        formData.append('authFlag', this.goodsAuditForm.authFlag);
 
-          authGoods(formData).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("审核成功");
-              this.getDataList();
-              this.getNumberData();
-            }
-          });
-        },
-      });
+        return authGoods(formData).then((res) => {
+          if (res.success) {
+            ElMessage.success("审核成功");
+            this.getDataList();
+            this.getNumberData();
+          }
+        });
+      }).catch(() => {});
     },
 
     // 打开审核弹框
@@ -563,7 +553,7 @@ export default {
       formData.append('authFlag', this.goodsAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE');
       authGoods(formData).then((res) => {
         if (res.success) {
-          this.$Message.success('审核成功');
+          ElMessage.success('审核成功');
           this.auditModalVisible = false;
           this.getDataList();
           this.getNumberData();
@@ -580,78 +570,60 @@ export default {
     // 批量上架
     batchUpper() {
       if (this.selectedRows.length === 0) {
-        this.$Message.warning('请先选择要上架的商品');
+        ElMessage.warning('请先选择要上架的商品');
         return;
       }
 
       const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
-      this.$Modal.confirm({
-        title: '确认批量上架',
-        content: `您确认要上架以下商品吗？\n${goodsNames}`,
-        loading: true,
-        onOk: () => {
-          // 提取所有选中商品的ID
-          const goodsIds = this.selectedRows.map(item => item.id);
-          const params = {
-            goodsId: goodsIds // 传递ID数组
-          };
+      ElMessageBox.confirm(`您确认要上架以下商品吗？\n${goodsNames}`, "确认批量上架", { type: "warning" }).then(() => {
+        const goodsIds = this.selectedRows.map(item => item.id);
+        const params = {
+          goodsId: goodsIds
+        };
 
-          upGoods(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success('批量上架成功');
-              this.selectedRows = [];
-              this.selectAll = false;
-              this.getDataList();
-              this.getNumberData();
-            }
-          }).catch(() => {
-            this.$Modal.remove();
-          });
-        }
-      });
+        return upGoods(params).then((res) => {
+          if (res.success) {
+            ElMessage.success('批量上架成功');
+            this.selectedRows = [];
+            this.selectAll = false;
+            this.getDataList();
+            this.getNumberData();
+          }
+        });
+      }).catch(() => {});
     },
 
     // 批量下架
     batchLower() {
       if (this.selectedRows.length === 0) {
-        this.$Message.warning('请先选择要下架的商品');
+        ElMessage.warning('请先选择要下架的商品');
         return;
       }
 
       const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
-      this.$Modal.confirm({
-        title: '确认批量下架',
-        content: `您确认要下架以下商品吗？\n${goodsNames}`,
-        loading: true,
-        onOk: () => {
-          // 提取所有选中商品的ID
-          const goodsIds = this.selectedRows.map(item => item.id);
-          const params = {
-            goodsId: goodsIds, // 传递ID数组
-            reason: '批量下架操作' // 可以设置默认下架原因
-          };
+      ElMessageBox.confirm(`您确认要下架以下商品吗？\n${goodsNames}`, "确认批量下架", { type: "warning" }).then(() => {
+        const goodsIds = this.selectedRows.map(item => item.id);
+        const params = {
+          goodsId: goodsIds,
+          reason: '批量下架操作'
+        };
 
-          lowGoods(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success('批量下架成功');
-              this.selectedRows = [];
-              this.selectAll = false;
-              this.getDataList();
-              this.getNumberData();
-            }
-          }).catch(() => {
-            this.$Modal.remove();
-          });
-        }
-      });
+        return lowGoods(params).then((res) => {
+          if (res.success) {
+            ElMessage.success('批量下架成功');
+            this.selectedRows = [];
+            this.selectAll = false;
+            this.getDataList();
+            this.getNumberData();
+          }
+        });
+      }).catch(() => {});
     },
 
     // 批量审核
     batchAudit() {
       if (this.selectedRows.length === 0) {
-        this.$Message.warning('请先选择要审核的商品');
+        ElMessage.warning('请先选择要审核的商品');
         return;
       }
 
@@ -666,13 +638,13 @@ export default {
     // 提交批量审核
     submitBatchAudit() {
       if (this.selectedRows.length === 0) {
-        this.$Message.warning('请先选择要审核的商品');
+        ElMessage.warning('请先选择要审核的商品');
         return;
       }
 
       // 如果是拒绝审核，必须填写原因
       if (this.batchAuditForm.auth_flag === 2 && !this.batchAuditForm.reason.trim()) {
-        this.$Message.warning('审核拒绝时必须填写拒绝原因');
+        ElMessage.warning('审核拒绝时必须填写拒绝原因');
         return;
       }
 
@@ -688,7 +660,7 @@ export default {
       this.batchAuditSubmitLoading = true;
       authGoods(formData).then((res) => {
         if (res.success) {
-          this.$Message.success(`批量审核${actionText}成功`);
+          ElMessage.success(`批量审核${actionText}成功`);
           this.selectedRows = [];
           this.selectAll = false;
           this.batchAuditModalVisible = false;
@@ -709,7 +681,7 @@ export default {
     },
     openSetGoodsGroup() {
       if (this.selectedRows.length === 0) {
-        this.$Message.warning("请先选择商品");
+        ElMessage.warning("请先选择商品");
         return;
       }
       this.goodsGroupFlag = true;
@@ -728,18 +700,18 @@ export default {
         addGoodsGroupItems(this.goodsGroupForm.groupId, goodsIds).then((res) => {
           this.goodsGroupLoading = false;
           if (res && res.success) {
-            this.$Message.success("设置成功");
+            ElMessage.success("设置成功");
             this.goodsGroupFlag = false;
             this.selectedRows = [];
             this.selectAll = false;
             this.clearTableSelection();
             this.getDataList();
           } else if (res && res.message) {
-            this.$Message.error(res.message);
+            ElMessage.error(res.message);
           }
         }).catch(() => {
           this.goodsGroupLoading = false;
-          this.$Message.error("设置失败，请检查权限或后端接口");
+          ElMessage.error("设置失败，请检查权限或后端接口");
         });
       });
     }

@@ -130,6 +130,7 @@
 </template>
 
 <script>
+import { ElMessage } from "element-plus";
 import { getParams, editParams } from "@/api/platform.js";
 import uploadPicInput from "@/components/lili/upload-pic-input";
 import { regular } from "@/utils";
@@ -446,7 +447,7 @@ export default {
           editParams(this.base, "base").then((res) => {
             this.saveLoading = false;
             if (res.success) {
-              this.$Message.success("保存成功");
+              ElMessage.success("保存成功");
             }
           });
         }
@@ -460,7 +461,7 @@ export default {
           editParams(this.point, "point").then((res) => {
             this.saveLoading = false;
             if (res.success) {
-              this.$Message.success("保存成功");
+              ElMessage.success("保存成功");
             }
           });
         }
@@ -474,7 +475,7 @@ export default {
           editParams(this.order, "order").then((res) => {
             this.saveLoading = false;
             if (res.success) {
-              this.$Message.success("保存成功");
+              ElMessage.success("保存成功");
             }
           });
         }
@@ -488,7 +489,7 @@ export default {
           editParams(this.goods, "goods").then((res) => {
             this.saveLoading = false;
             if (res.success) {
-              this.$Message.success("保存成功");
+              ElMessage.success("保存成功");
             }
           });
         }
@@ -502,7 +503,7 @@ export default {
           editParams(this.wechat, "wechat").then((res) => {
             this.saveLoading = false;
             if (res.success) {
-              this.$Message.success("保存成功");
+              ElMessage.success("保存成功");
             }
           });
         }
@@ -516,7 +517,7 @@ export default {
           editParams(this.qq, "qq").then((res) => {
             this.saveLoading = false;
             if (res.success) {
-              this.$Message.success("保存成功");
+              ElMessage.success("保存成功");
             }
           });
         }
@@ -530,7 +531,7 @@ export default {
           editParams(this.weibo, "weibo").then((res) => {
             this.saveLoading = false;
             if (res.success) {
-              this.$Message.success("保存成功");
+              ElMessage.success("保存成功");
             }
           });
         }
@@ -544,7 +545,7 @@ export default {
           editParams(this.alipay, "alipay").then((res) => {
             this.saveLoading = false;
             if (res.success) {
-              this.$Message.success("保存成功");
+              ElMessage.success("保存成功");
             }
           });
         }

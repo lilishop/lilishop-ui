@@ -102,6 +102,7 @@
 </template>
 
 <script>
+import { ElMessage, ElMessageBox } from "element-plus";
 import * as API_Setting from "@/api/setting";
 import uploadPicInput from "@/components/lili/upload-pic-input";
 
@@ -206,7 +207,7 @@ export default {
           API_Setting.addVerification(payload).then((res) => {
             this.submitLoading = false;
             if (res.success) {
-              this.$Message.success("添加成功");
+              ElMessage.success("添加成功");
               this.getDataList();
               this.modalVisible = false;
             }
@@ -215,7 +216,7 @@ export default {
           API_Setting.editVerification(this.form.id, this.form).then((res) => {
             this.submitLoading = false;
             if (res.success) {
-              this.$Message.success("修改成功");
+              ElMessage.success("修改成功");
               this.getDataList();
               this.modalVisible = false;
             }
@@ -224,18 +225,14 @@ export default {
       });
     },
     remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "确认要删除此验证码源?",
-        onOk: () => {
+      ElMessageBox.confirm("确认要删除此验证码源?", "确认删除", { type: "warning" }).then(() => {
           return API_Setting.delVerification(v.id).then((res) => {
             if (res.success) {
-              this.$Message.success("验证码源已删除");
+              ElMessage.success("验证码源已删除");
               this.getDataList();
             }
           });
-        },
-      });
+      }).catch(() => {});
     },
   },
   mounted() {

@@ -148,6 +148,8 @@
 import * as API_Member from "@/api/member.js";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import multipleMap from "@/components/map/multiple-map";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { customRouterPush } from "@/utils/filters";
 
 export default {
   name: "memberRecycle",
@@ -242,25 +244,21 @@ export default {
       }
     },
     detail(row) {
-      this.$filters.customRouterPush({ name: "member-detail", query: { id: row.id } });
+      customRouterPush({ name: "member-detail", query: { id: row.id } });
     },
     enable(v) {
       let params = {
         memberIds: [v.id],
         disabled: true,
       };
-      this.$Modal.confirm({
-        title: "提示",
-        content: "<p>确定启用此会员？</p>",
-        onOk: () => {
-          API_Member.updateMemberStatus(params).then((res) => {
-            if (res.success) {
-              this.$Message.success("启用成功");
-              this.getData();
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("确定启用此会员？", "提示", { type: "warning" }).then(() => {
+        API_Member.updateMemberStatus(params).then((res) => {
+          if (res.success) {
+            ElMessage.success("启用成功");
+            this.getData();
+          }
+        });
+      }).catch(() => {});
     },
     handleSubmitModal() {
       const { nickName, sex, username, face, newPassword, id, regionId, region } = this.formValidate;
@@ -280,7 +278,7 @@ export default {
       }
       API_Member.updateMember(submit).then((res) => {
         if (res.result) {
-          this.$Message.success("修改成功！");
+          ElMessage.success("修改成功！");
           this.descFlag = false;
           this.init();
         }

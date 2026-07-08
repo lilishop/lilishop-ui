@@ -171,6 +171,7 @@
 
 <script>
 import { getUserWithdrawApply, withdrawApply } from "@/api/member";
+import { ElMessage } from "element-plus";
 
 export default {
   name: "withdrawApply",
@@ -242,7 +243,7 @@ export default {
       params.result = res;
       params.remark = this.audit;
       if (res === false && params.remark === "") {
-        this.$Message.error("审核备注不能为空");
+        ElMessage.error("审核备注不能为空");
         return;
       }
       this.submitLoading = true;
@@ -250,7 +251,7 @@ export default {
         .then((result) => {
           const success = result === true || (result && result.success === true);
           if (success) {
-            this.$Message.success("操作成功");
+            ElMessage.success("操作成功");
             this.roleModalVisible = false;
             this.queryModalVisible = false;
             this.audit = "";

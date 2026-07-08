@@ -418,6 +418,7 @@ import ossManage from "@/views/sys/oss-manage/ossManage";
 import multipleMap from "@/components/map/multiple-map";
 import * as RegExp from "@/libs/RegExp.js";
 import * as API_Order from "@/api/order.js";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   name: "memberDetail",
@@ -677,7 +678,7 @@ export default {
             API_Member.editMemberAddress(submit).then((res) => {
               this.submitLoading = false;
               if (res && res.success) {
-                this.$Message.success("修改成功");
+                ElMessage.success("修改成功");
                 this.addressModalVisible = false;
                 this.getAddressData();
               }
@@ -686,7 +687,7 @@ export default {
             API_Member.addMemberAddress(submit).then((res) => {
               this.submitLoading = false;
               if (res && res.success) {
-                this.$Message.success("添加成功");
+                ElMessage.success("添加成功");
                 this.addressModalVisible = false;
                 this.getAddressData();
               }
@@ -714,18 +715,14 @@ export default {
       }
     },
     memberAddressRemove(v) {
-      this.$Modal.confirm({
-        title: "删除",
-        content: "<p>确定要删除此收货地址？</p>",
-        onOk: () => {
-          API_Member.removeMemberAddress(v.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("删除成功");
-              this.getAddressData();
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("确定要删除此收货地址？", "删除", { type: "warning" }).then(() => {
+        API_Member.removeMemberAddress(v.id).then((res) => {
+          if (res.success) {
+            ElMessage.success("删除成功");
+            this.getAddressData();
+          }
+        });
+      }).catch(() => {});
     },
     getAddressData() {
       this.addressLoading = true;

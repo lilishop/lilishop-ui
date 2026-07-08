@@ -25,7 +25,7 @@
         </ul>
       </div>
       <div class="search-con">
-        <img :src="require('@/assets/logo.png')" class="logo" alt="" />
+        <img :src="logoImg" class="logo" alt="" />
         <div class="search">
           <el-input
             size="large"
@@ -158,6 +158,7 @@ import { ShoppingCart } from "@element-plus/icons-vue";
 import Draggable from "vuedraggable";
 import ModelFormItem from "./modelFormItem.vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
+import logoImg from "@/assets/logo.png";
 export default {
   name: "modelForm",
   components: {
@@ -169,6 +170,7 @@ export default {
   props: ["data"],
   data() {
     return {
+      logoImg,
       picModelFlag: false,
       showModal: false,
       showModalNav: false,

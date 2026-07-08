@@ -45,7 +45,7 @@
         <el-table-column prop="costTime" label="耗时-毫秒" width="140" align="center" />
         <el-table-column label="操作时间" width="170" align="center">
           <template #default="{ row }">
-            <span v-if="row">{{ $filters.unixToDate(row.createTime / 1000) }}</span>
+            <span v-if="row">{{ unixToDate(row.createTime / 1000) }}</span>
           </template>
         </el-table-column>
       </el-table>
@@ -67,6 +67,8 @@
 </template>
 
 <script>
+import { ElMessage } from "element-plus";
+import { unixToDate } from "@/utils/filters";
 import { getLogListData } from "@/api/index";
 
 export default {
@@ -91,6 +93,7 @@ export default {
     };
   },
   methods: {
+    unixToDate,
     init() {
       this.getLogList();
     },
@@ -130,7 +133,7 @@ export default {
         } else {
           this.data = [];
           this.total = 0;
-          this.$Message.error((res && res.message) || "日志查询失败");
+          ElMessage.error((res && res.message) || "日志查询失败");
         }
       });
     },

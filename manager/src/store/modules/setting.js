@@ -1,4 +1,6 @@
-const { setting } = require("@/config");
+import config from "@/config";
+
+const { setting } = config;
 
 const localSetting = window.localStorage.getItem('admin-setting')
 const settingData = {

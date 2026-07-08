@@ -349,6 +349,7 @@ import { getPlatformCoupon } from "@/api/promotion";
 import { formatPromotionCouponValidityHtml } from "@/utils/promotions";
 import couponTemplate from "@/views/promotions/coupon/coupon.vue";
 import uploadPicInput from "@/components/lili/upload-pic-input.vue";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 const GIFT_POINT = "GIFT_POINT";
 const COUPON_PACKAGE = "COUPON_PACKAGE";
@@ -641,7 +642,7 @@ export default {
     confirmCouponPicker() {
       const list = this.$refs.couponPicker?.getSelection?.() || [];
       if (!list.length) {
-        this.$Message.warning("请至少选择一张优惠券");
+        ElMessage.warning("请至少选择一张优惠券");
         return;
       }
       this.onCouponTemplateSelected(list);
@@ -712,7 +713,7 @@ export default {
     },
     submitAdd() {
       if (!this.$refs.addForm) {
-        this.$Message.warning("表单未就绪，请稍后重试");
+        ElMessage.warning("表单未就绪，请稍后重试");
         return;
       }
       this.$refs.addForm.validate((valid) => {
@@ -730,17 +731,17 @@ export default {
         API_Member.addMemberBenefit(payload).then((res) => {
           this.submitAddLoading = false;
           if (res && res.success) {
-            this.$Message.success("添加成功");
+            ElMessage.success("添加成功");
             this.addFlag = false;
             this.getData();
           } else if (res && res.message) {
-            this.$Message.error(res.message);
+            ElMessage.error(res.message);
           } else {
-            this.$Message.error("添加失败");
+            ElMessage.error("添加失败");
           }
         }).catch(() => {
           this.submitAddLoading = false;
-          this.$Message.error("网络异常，请稍后重试");
+          ElMessage.error("网络异常，请稍后重试");
         });
       });
     },
@@ -786,7 +787,7 @@ export default {
     },
     submitEdit() {
       if (!this.$refs.editForm) {
-        this.$Message.warning("表单未就绪，请稍后重试");
+        ElMessage.warning("表单未就绪，请稍后重试");
         return;
       }
       this.$refs.editForm.validate((valid) => {
@@ -804,17 +805,17 @@ export default {
         API_Member.updateMemberBenefit(id, payload).then((res) => {
           this.submitEditLoading = false;
           if (res && res.success) {
-            this.$Message.success("修改成功");
+            ElMessage.success("修改成功");
             this.editFlag = false;
             this.getData();
           } else if (res && res.message) {
-            this.$Message.error(res.message);
+            ElMessage.error(res.message);
           } else {
-            this.$Message.error("修改失败");
+            ElMessage.error("修改失败");
           }
         }).catch(() => {
           this.submitEditLoading = false;
-          this.$Message.error("网络异常，请稍后重试");
+          ElMessage.error("网络异常，请稍后重试");
         });
       });
     },
@@ -823,42 +824,34 @@ export default {
       const prevState = row.benefitState;
       if (nextState === prevState) return;
       const text = checked ? "开启" : "关闭";
-      this.$Modal.confirm({
-        title: "提示",
-        content: `确定${text}该客户权益？`,
-        onOk: () => {
-          row._benefitStateLoading = true;
-          return API_Member.updateMemberBenefitState(row.id, nextState)
-            .then((res) => {
-              row._benefitStateLoading = false;
-              if (res && res.success) {
-                this.$Message.success(`${text}成功`);
-                row.benefitState = nextState;
-              } else {
-                this.getData();
-              }
-            })
-            .catch(() => {
-              row._benefitStateLoading = false;
-            });
-        },
-      });
+      ElMessageBox.confirm(`确定${text}该客户权益？`, "提示", { type: "warning" }).then(() => {
+        row._benefitStateLoading = true;
+        return API_Member.updateMemberBenefitState(row.id, nextState)
+          .then((res) => {
+            row._benefitStateLoading = false;
+            if (res && res.success) {
+              ElMessage.success(`${text}成功`);
+              row.benefitState = nextState;
+            } else {
+              this.getData();
+            }
+          })
+          .catch(() => {
+            row._benefitStateLoading = false;
+          });
+      }).catch(() => {});
     },
     remove(row) {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "确定删除该客户权益？",
-        onOk: () => {
-          API_Member.deleteMemberBenefit(row.id).then((res) => {
-            if (res && res.success) {
-              this.$Message.success("删除成功");
-              this.getData();
-            } else if (res && res.message) {
-              this.$Message.error(res.message);
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("确定删除该客户权益？", "提示", { type: "warning" }).then(() => {
+        API_Member.deleteMemberBenefit(row.id).then((res) => {
+          if (res && res.success) {
+            ElMessage.success("删除成功");
+            this.getData();
+          } else if (res && res.message) {
+            ElMessage.error(res.message);
+          }
+        });
+      }).catch(() => {});
     },
   },
   mounted() {

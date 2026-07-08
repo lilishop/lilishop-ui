@@ -137,6 +137,7 @@
 </template>
 
 <script>
+import { ElMessage, ElMessageBox } from "element-plus";
 import {
   getUserListData,
   getAllRoleList,
@@ -262,29 +263,23 @@ export default {
     },
     resetPass() {
       if (this.selectCount == 0) {
-        this.$Message.warning("请选中数据后重试!");
+        ElMessage.warning("请选中数据后重试!");
         return;
       }
-      this.$Modal.confirm({
-        title: "确认重置",
-        content: "您确认要重置所选的 " + this.selectCount + " 条用户数据密码为【123456】?",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要重置所选的 " + this.selectCount + " 条用户数据密码为【123456】?", "确认重置", { type: "warning" }).then(() => {
           let ids = "";
           this.selectList.forEach(function (e) {
             ids += e.id + ",";
           });
           ids = ids.substring(0, ids.length - 1);
           resetPassword(ids).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("操作成功");
+              ElMessage.success("操作成功");
               this.clearSelectAll();
               this.getUserList();
             }
           });
-        },
-      });
+      }).catch(() => {});
     },
     submitUser() {
       this.$refs.form.validate((valid) => {
@@ -306,7 +301,7 @@ export default {
             addUser(params).then((res) => {
               this.submitLoading = false;
               if (res.success) {
-                this.$Message.success("操作成功");
+                ElMessage.success("操作成功");
                 this.getUserList();
                 this.userModalVisible = false;
               }
@@ -316,7 +311,7 @@ export default {
             editOtherUser(this.form).then((res) => {
               this.submitLoading = false;
               if (res.success) {
-                this.$Message.success("操作成功");
+                ElMessage.success("操作成功");
                 this.getUserList();
                 this.userModalVisible = false;
               }
@@ -369,53 +364,35 @@ export default {
     },
     enable(v) {
       let params = { status: true };
-      this.$Modal.confirm({
-        title: "确认启用",
-        content: "您确认要启用用户 " + v.username + " ?",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要启用用户 " + v.username + " ?", "确认启用", { type: "warning" }).then(() => {
           enableUser(v.id, params).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("操作成功");
+              ElMessage.success("操作成功");
               this.getUserList();
             }
           });
-        },
-      });
+      }).catch(() => {});
     },
     disable(v) {
       let params = { status: false };
-      this.$Modal.confirm({
-        title: "确认禁用",
-        content: "您确认要禁用用户 " + v.username + " ?",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要禁用用户 " + v.username + " ?", "确认禁用", { type: "warning" }).then(() => {
           enableUser(v.id, params).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("操作成功");
+              ElMessage.success("操作成功");
               this.getUserList();
             }
           });
-        },
-      });
+      }).catch(() => {});
     },
     remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除用户 " + v.username + " ?",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要删除用户 " + v.username + " ?", "确认删除", { type: "warning" }).then(() => {
           deleteUser(v.id).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("删除成功");
+              ElMessage.success("删除成功");
               this.getUserList();
             }
           });
-        },
-      });
+      }).catch(() => {});
     },
     showSelect(e) {
       this.exportData = e;
@@ -427,29 +404,23 @@ export default {
     },
     delAll() {
       if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要删除的数据");
+        ElMessage.warning("您还未选择要删除的数据");
         return;
       }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选的 " + this.selectCount + " 条数据?",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要删除所选的 " + this.selectCount + " 条数据?", "确认删除", { type: "warning" }).then(() => {
           let ids = "";
           this.selectList.forEach(function (e) {
             ids += e.id + ",";
           });
           ids = ids.substring(0, ids.length - 1);
           deleteUser(ids).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("删除成功");
+              ElMessage.success("删除成功");
               this.clearSelectAll();
               this.getUserList();
             }
           });
-        },
-      });
+      }).catch(() => {});
     },
   },
   mounted() {

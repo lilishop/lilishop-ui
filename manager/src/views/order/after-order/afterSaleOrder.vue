@@ -126,7 +126,7 @@
         <el-table-column label="售后金额" width="110">
           <template #default="{ row }">
             <span v-if="row" :style="{ color: $mainColor }">
-              {{ $filters.unitPrice(row.applyRefundPrice, "￥") }}</span>
+              {{ unitPrice(row.applyRefundPrice, "￥") }}</span>
           </template>
         </el-table-column>
         <el-table-column label="售后类型" width="100">
@@ -169,6 +169,7 @@
 
 <script>
 import * as API_Order from "@/api/order";
+import { unitPrice, customRouterPush } from "@/utils/filters";
 
 export default {
   name: "after-sale-order",
@@ -240,6 +241,7 @@ export default {
     },
   },
   methods: {
+    unitPrice,
     serviceTypeText(type) {
       const map = {
         RETURN_MONEY: "退款",
@@ -330,7 +332,7 @@ export default {
     },
     detail(v) {
       const sn = v.sn;
-      this.$filters.customRouterPush({
+      customRouterPush({
         name: "after-order-detail",
         query: { sn: sn },
       });

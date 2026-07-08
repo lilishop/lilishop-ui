@@ -67,6 +67,7 @@
 </template>
 <script>
 import { deleteParams, getGoodsParamsPage } from "@/api/goods";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   name: "categoryParams",
@@ -127,20 +128,14 @@ export default {
       this.$router.push({ name: "goods-parameter-edit", query: { id: row.id } });
     },
     remove(row) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除 " + (row.paramName || "") + " ?",
-        loading: true,
-        onOk: () => {
-          deleteParams(row.id).then((res) => {
-            this.$Modal.remove();
-            if (res && res.success) {
-              this.$Message.success("删除成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("您确认要删除 " + (row.paramName || "") + " ?", "确认删除", { type: "warning" }).then(() => {
+        return deleteParams(row.id).then((res) => {
+          if (res && res.success) {
+            ElMessage.success("删除成功");
+            this.getDataList();
+          }
+        });
+      }).catch(() => {});
     },
   },
   mounted() {

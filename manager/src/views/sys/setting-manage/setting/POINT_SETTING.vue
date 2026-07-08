@@ -52,6 +52,7 @@
 </template>
 
 <script>
+import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "./validate";
 
@@ -78,9 +79,9 @@ export default {
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {
-          this.$Message.success("保存成功!");
+          ElMessage.success("保存成功!");
         } else {
-          this.$Message.error("保存失败!");
+          ElMessage.error("保存失败!");
         }
       });
     },
@@ -89,9 +90,8 @@ export default {
     },
     addSign() {
       if (this.formValidate.pointSettingItems.length >= 4) {
-        this.$Message.error({
-          content: "最多设置4项签到设置",
-        });
+        ElMessage.error("最多设置4项签到设置",
+        );
         return false;
       }
       this.formValidate.pointSettingItems.push({

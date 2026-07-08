@@ -61,6 +61,7 @@
 </template>
 
 <script>
+import { ElMessage } from "element-plus";
 import * as API_Setting from "@/api/setting.js";
 import uploadPicThumb from "@/components/lili/upload-pic-thumb";
 
@@ -97,11 +98,11 @@ export default {
     },
     addSignSubmit() {
       if (this.form.businessLicense == "" || this.form.license == "") {
-        this.$Message.error("请完善证件信息");
+        ElMessage.error("请完善证件信息");
         return;
       }
       if (this.form.signSource === "" || this.form.signSource === null || this.form.signSource === undefined) {
-        this.$Message.error("请选择签名来源");
+        ElMessage.error("请选择签名来源");
         return;
       }
       this.$refs.form.validate((valid) => {
@@ -112,7 +113,7 @@ export default {
               .then((res) => {
                 this.loading = false;
                 if (res.success) {
-                  this.$Message.success("添加成功");
+                  ElMessage.success("添加成功");
                   this.$router.back();
                 }
               })
@@ -124,7 +125,7 @@ export default {
               .then((res) => {
                 this.loading = false;
                 if (res.success) {
-                  this.$Message.success("修改成功");
+                  ElMessage.success("修改成功");
                   this.$router.back();
                 }
               })

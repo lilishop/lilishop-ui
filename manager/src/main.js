@@ -22,8 +22,9 @@ import { setStore, getStore, removeStore } from "@/libs/storage";
 import util from "@/libs/util";
 import { md5 } from "@/utils/md5.js";
 import * as filters from "@/utils/filters";
+import config from "@/config";
 
-const { aMapSecurityJsCode, mainColor } = require("@/config");
+const { aMapSecurityJsCode, mainColor } = config;
 
 if (aMapSecurityJsCode) {
   window._AMapSecurityConfig = {

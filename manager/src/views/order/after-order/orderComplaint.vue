@@ -107,6 +107,7 @@
 <script>
 import * as API_Order from "@/api/order";
 import vueQr from "vue-qr";
+import { customRouterPush } from "@/utils/filters";
 
 export default {
   name: "orderComplaint",
@@ -184,7 +185,7 @@ export default {
         });
     },
     detail(v) {
-      this.$filters.customRouterPush({
+      customRouterPush({
         name: "order-complaint-detail",
         query: { id: v.id },
       });

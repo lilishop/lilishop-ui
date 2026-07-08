@@ -219,6 +219,7 @@
 </template>
 
 <script>
+import { ElMessage } from "element-plus";
 import * as API_Setting from "@/api/setting.js";
 
 export default {
@@ -290,7 +291,7 @@ export default {
         if (!(res && res.success && res.result)) {
           this.memberRows = [];
           this.total = 0;
-          this.$Message.error((res && res.message) || "加载消息模板失败");
+          ElMessage.error((res && res.message) || "加载消息模板失败");
           return;
         }
         const records = res.result.records || [];
@@ -332,9 +333,9 @@ export default {
         const res = await API_Setting.wechatMessageSync();
         if (res && res.success) {
           await this.loadMemberPage();
-          this.$Message.success("服务号模板同步成功");
+          ElMessage.success("服务号模板同步成功");
         } else {
-          this.$Message.error((res && res.message) || "服务号模板同步失败");
+          ElMessage.error((res && res.message) || "服务号模板同步失败");
         }
       } finally {
         this.syncOaLoading = false;
@@ -346,9 +347,9 @@ export default {
         const res = await API_Setting.wechatMPMessageSync();
         if (res && res.success) {
           await this.loadMemberPage();
-          this.$Message.success("小程序模板同步成功");
+          ElMessage.success("小程序模板同步成功");
         } else {
-          this.$Message.error((res && res.message) || "小程序模板同步失败");
+          ElMessage.error((res && res.message) || "小程序模板同步失败");
         }
       } finally {
         this.syncMpLoading = false;
@@ -402,9 +403,9 @@ export default {
       const res = await API_Setting.updateMessageStatus(row.id, this.toOpenClose(v));
       if (!(res && res.success)) {
         this.updateRowStatus(row, "noticeStatus", old);
-        this.$Message.error((res && res.message) || "站内信开关更新失败");
+        ElMessage.error((res && res.message) || "站内信开关更新失败");
       } else {
-        this.$Message.success("站内信开关更新成功");
+        ElMessage.success("站内信开关更新成功");
       }
     },
     async toggleOaChannel(v, row) {
@@ -416,13 +417,13 @@ export default {
         const res = await API_Setting.editWechatMessageTemplate(row.oaId, params);
         if (!(res && res.success)) {
           this.updateRowStatus(row, "oaStatus", old);
-          this.$Message.error((res && res.message) || "服务号开关更新失败");
+          ElMessage.error((res && res.message) || "服务号开关更新失败");
         } else {
-          this.$Message.success("服务号开关更新成功");
+          ElMessage.success("服务号开关更新成功");
         }
       } catch (e) {
         this.updateRowStatus(row, "oaStatus", old);
-        this.$Message.error((e && e.message) || "服务号开关更新失败");
+        ElMessage.error((e && e.message) || "服务号开关更新失败");
       }
     },
     async toggleMpChannel(v, row) {
@@ -433,9 +434,9 @@ export default {
       const res = await API_Setting.editWechatMPMessageTemplate(row.mpId, params);
       if (!(res && res.success)) {
         this.updateRowStatus(row, "mpStatus", old);
-        this.$Message.error((res && res.message) || "小程序开关更新失败");
+        ElMessage.error((res && res.message) || "小程序开关更新失败");
       } else {
-        this.$Message.success("小程序开关更新成功");
+        ElMessage.success("小程序开关更新成功");
       }
     },
     async toggleEmailChannel(v, row) {
@@ -444,9 +445,9 @@ export default {
       const res = await API_Setting.updateNoticeMessageEmailStatus(row.id, this.toOpenClose(v));
       if (!(res && res.success)) {
         this.updateRowStatus(row, "emailStatus", old);
-        this.$Message.error((res && res.message) || "邮箱开关更新失败");
+        ElMessage.error((res && res.message) || "邮箱开关更新失败");
       } else {
-        this.$Message.success("邮箱开关更新成功");
+        ElMessage.success("邮箱开关更新成功");
       }
     },
   },

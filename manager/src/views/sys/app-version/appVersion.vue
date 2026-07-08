@@ -164,6 +164,8 @@
 </template>
 
 <script>
+import { ElMessage, ElMessageBox } from "element-plus";
+import { unixToDate } from "@/utils/filters";
 import * as API_Setting from "@/api/setting";
 
 export default {
@@ -233,7 +235,7 @@ export default {
       this.modalVisible = true;
       this.modalTitle = "添加APP版本信息";
       this.modalType = 0;
-      const versionUpdateDate = this.$filters.unixToDate(new Date() / 1000);
+      const versionUpdateDate = unixToDate(new Date() / 1000);
       this.form = {
         forceUpdate: 0,
         type: "IOS",
@@ -253,7 +255,7 @@ export default {
         if (valid) {
           this.submitLoading = true;
           if (JSON.stringify(this.form.versionUpdateDate).includes("T")) {
-            const versionUpdateDate = this.$filters.unixToDate(
+            const versionUpdateDate = unixToDate(
               this.form.versionUpdateDate / 1000
             );
             this.form.versionUpdateDate = versionUpdateDate;
@@ -264,7 +266,7 @@ export default {
             API_Setting.addVersion(this.form).then((res) => {
               this.submitLoading = false;
               if (res && res.success) {
-                this.$Message.success("添加成功");
+                ElMessage.success("添加成功");
                 this.modalVisible = false;
                 this.getData();
               }
@@ -273,7 +275,7 @@ export default {
             API_Setting.editVersion(this.form, this.form.id).then((res) => {
               this.submitLoading = false;
               if (res && res.success) {
-                this.$Message.success("修改成功");
+                ElMessage.success("修改成功");
                 this.modalVisible = false;
                 this.getData();
               }
@@ -283,20 +285,14 @@ export default {
       });
     },
     remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除么?",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要删除么?", "确认删除", { type: "warning" }).then(() => {
           API_Setting.deleteVersion(v.id).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("删除成功");
+              ElMessage.success("删除成功");
               this.getData();
             }
           });
-        },
-      });
+      }).catch(() => {});
     },
     detail(v) {
       this.queryModalVisible = true;

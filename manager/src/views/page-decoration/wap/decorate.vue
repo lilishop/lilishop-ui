@@ -247,7 +247,7 @@
                 @click="changeTextAlign('left')"
               >
                 <img
-                  :src="require('@/assets/align-text-left.png')"
+                  :src="alignTextLeft"
                   class="align-text"
                   alt=""
                 />
@@ -258,7 +258,7 @@
                 @click="changeTextAlign('center')"
               >
                 <img
-                  :src="require('@/assets/align-text-center.png')"
+                  :src="alignTextCenter"
                   class="align-text"
                   alt=""
                 />
@@ -269,7 +269,7 @@
                 @click="changeTextAlign('right')"
               >
                 <img
-                  :src="require('@/assets/align-text-right.png')"
+                  :src="alignTextRight"
                   class="align-text"
                   alt=""
                 />
@@ -527,7 +527,13 @@
     <hotzone ref="hotzone" @changeZone="changeZone"></hotzone>
 
     <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
-      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" ref="ossManage" />
+      <ossManage
+        @callback="callbackSelected"
+        :is-component="true"
+        :initialize="picModelFlag"
+        :max-select="1"
+        ref="ossManage"
+      />
     </el-dialog>
   </div>
 </template>
@@ -539,6 +545,9 @@ import hotzone from "@/components/hotzone";
 import ways from "@/components/lili-dialog/wap.js";
 import categoryTemplate from "@/components/lili-dialog/template/category";
 import VideoConfig from "./video-config";
+import alignTextLeft from "@/assets/align-text-left.png";
+import alignTextCenter from "@/assets/align-text-center.png";
+import alignTextRight from "@/assets/align-text-right.png";
 export default {
   components: {
     ossManage,
@@ -549,6 +558,9 @@ export default {
   },
   data() {
     return {
+      alignTextLeft,
+      alignTextCenter,
+      alignTextRight,
       ways, // 选择链接的类型
       picModelFlag: false, //图片选择器
       linkType: "goods", // dialog弹窗口类型

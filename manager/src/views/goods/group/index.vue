@@ -70,6 +70,7 @@
 
 <script>
 import * as API_Goods from "@/api/goods.js";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   name: "goodsGroup",
@@ -125,12 +126,12 @@ export default {
             this.data = res.result.records || [];
             this.total = res.result.total || 0;
           } else if (res && res.message) {
-            this.$Message.error(res.message);
+            ElMessage.error(res.message);
           }
         })
         .catch(() => {
           this.loading = false;
-          this.$Message.error("加载商品分组失败");
+          ElMessage.error("加载商品分组失败");
         });
     },
     openAdd() {
@@ -148,16 +149,16 @@ export default {
           .then((res) => {
             this.submitAddLoading = false;
             if (res && res.success) {
-              this.$Message.success("添加成功");
+              ElMessage.success("添加成功");
               this.addFlag = false;
               this.getData();
             } else if (res && res.message) {
-              this.$Message.error(res.message);
+              ElMessage.error(res.message);
             }
           })
           .catch(() => {
             this.submitAddLoading = false;
-            this.$Message.error("添加失败，请检查权限或后端接口");
+            ElMessage.error("添加失败，请检查权限或后端接口");
           });
       });
     },
@@ -181,7 +182,7 @@ export default {
           }
         })
         .catch(() => {
-          this.$Message.error("获取分组详情失败");
+          ElMessage.error("获取分组详情失败");
         });
     },
     submitEdit() {
@@ -193,38 +194,34 @@ export default {
           .then((res) => {
             this.submitEditLoading = false;
             if (res && res.success) {
-              this.$Message.success("修改成功");
+              ElMessage.success("修改成功");
               this.editFlag = false;
               this.getData();
             } else if (res && res.message) {
-              this.$Message.error(res.message);
+              ElMessage.error(res.message);
             }
           })
           .catch(() => {
             this.submitEditLoading = false;
-            this.$Message.error("修改失败，请检查权限或后端接口");
+            ElMessage.error("修改失败，请检查权限或后端接口");
           });
       });
     },
     remove(row) {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "确定删除该分组？",
-        onOk: () => {
-          API_Goods.deleteGoodsGroup(row.id)
-            .then((res) => {
-              if (res && res.success) {
-                this.$Message.success("删除成功");
-                this.getData();
-              } else if (res && res.message) {
-                this.$Message.error(res.message);
-              }
-            })
-            .catch(() => {
-              this.$Message.error("删除失败，请检查权限或后端接口");
-            });
-        },
-      });
+      ElMessageBox.confirm("确定删除该分组？", "提示", { type: "warning" }).then(() => {
+        return API_Goods.deleteGoodsGroup(row.id)
+          .then((res) => {
+            if (res && res.success) {
+              ElMessage.success("删除成功");
+              this.getData();
+            } else if (res && res.message) {
+              ElMessage.error(res.message);
+            }
+          })
+          .catch(() => {
+            ElMessage.error("删除失败，请检查权限或后端接口");
+          });
+      }).catch(() => {});
     },
   },
   mounted() {

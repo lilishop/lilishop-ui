@@ -287,6 +287,7 @@
 </template>
 
 <script>
+import { ElMessage, ElMessageBox } from "element-plus";
 import * as API_Setting from "@/api/setting.js";
 import * as API_Member from "@/api/member.js";
 
@@ -405,7 +406,7 @@ export default {
     },
     moveMember(index, item) {
       if (!item.mobile) {
-        this.$Message.error("当前用户暂无手机号绑定");
+        ElMessage.error("当前用户暂无手机号绑定");
         return false;
       }
       item.____selected = true;
@@ -505,20 +506,14 @@ export default {
       this.smsForm.context = this.smsTemplateContent;
     },
     deleteSmsTemplate(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除此短信模板？",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要删除此短信模板？", "确认删除", { type: "warning" }).then(() => {
           API_Setting.deleteSmsTemplatePage({ templateCode: v.templateCode }).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("删除成功");
+              ElMessage.success("删除成功");
               this.getSmsTemplate();
             }
           });
-        },
-      });
+      }).catch(() => {});
     },
     sendSms() {
       this.$refs.smsForm.validate((valid) => {
@@ -526,7 +521,7 @@ export default {
         this.smsForm.mobile = this.alreadyCheck;
         API_Setting.sendSms(this.smsForm).then((res) => {
           if (res.success) {
-            this.$Message.success("发送成功");
+            ElMessage.success("发送成功");
             this.getSms();
             this.sendSmsModal = false;
           }
@@ -553,7 +548,7 @@ export default {
       API_Setting.syncSign().then((res) => {
         this.loading = false;
         if (res.success) {
-          this.$Message.success("同步成功");
+          ElMessage.success("同步成功");
           this.getSmsSign();
         }
       });
@@ -570,7 +565,7 @@ export default {
           .then((res) => {
             this.submitLoading = false;
             if (res.success) {
-              this.$Message.success(this.modalType == 0 ? "添加成功" : "修改成功");
+              ElMessage.success(this.modalType == 0 ? "添加成功" : "修改成功");
               this.templateModalVisible = false;
               this.getSmsTemplate();
             }
@@ -581,27 +576,21 @@ export default {
       });
     },
     deleteSmsSign(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除此短信签名？",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要删除此短信签名？", "确认删除", { type: "warning" }).then(() => {
           API_Setting.deleteSign(v.id).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("删除成功");
+              ElMessage.success("删除成功");
               this.getSmsSign();
             }
           });
-        },
-      });
+      }).catch(() => {});
     },
     syncTemplate() {
       this.loading = true;
       API_Setting.syncTemplate().then((res) => {
         this.loading = false;
         if (res.success) {
-          this.$Message.success("同步成功");
+          ElMessage.success("同步成功");
           this.getSmsTemplate();
         }
       });

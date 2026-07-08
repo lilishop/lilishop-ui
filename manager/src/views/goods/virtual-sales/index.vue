@@ -214,6 +214,7 @@ import {
   getGoodsSkuData,
   updateGoodsSkuVirtualSales,
 } from "@/api/goods";
+import { ElMessage } from "element-plus";
 
 const VIRTUAL_SALES_FIELDS = [
   "virtualSales",
@@ -311,14 +312,14 @@ export default {
             this.data = [];
             this.total = 0;
             this.selectedRows = [];
-            this.$Message.error((res && res.message) || "加载规格列表失败");
+            ElMessage.error((res && res.message) || "加载规格列表失败");
           }
         })
         .catch(() => {
           this.data = [];
           this.total = 0;
           this.selectedRows = [];
-          this.$Message.error("加载规格列表失败");
+          ElMessage.error("加载规格列表失败");
         })
         .finally(() => {
           this.loading = false;
@@ -339,7 +340,7 @@ export default {
     },
     openBatchVirtualSalesModal() {
       if (!this.selectedRows.length) {
-        this.$Message.warning("请先选择要设置的商品规格");
+        ElMessage.warning("请先选择要设置的商品规格");
         return;
       }
       this.modalMode = "batch";
@@ -362,7 +363,7 @@ export default {
     handleSubmitVirtualSales() {
       const virtualSales = Number(this.editForm.virtualSales);
       if (!Number.isInteger(virtualSales) || virtualSales < 0) {
-        this.$Message.warning("请输入大于等于 0 的整数虚拟销量");
+        ElMessage.warning("请输入大于等于 0 的整数虚拟销量");
         return;
       }
       if (this.modalMode === "batch") {
@@ -384,14 +385,14 @@ export default {
               this.data[currentIndex].virtualSales = virtualSales;
               this.data[currentIndex].virtualSalesInput = virtualSales;
             }
-            this.$Message.success("虚拟销量设置成功");
+            ElMessage.success("虚拟销量设置成功");
             this.resetVirtualSalesModal();
           } else {
-            this.$Message.error((res && res.message) || "规格虚拟销量设置失败");
+            ElMessage.error((res && res.message) || "规格虚拟销量设置失败");
           }
         })
         .catch(() => {
-          this.$Message.error("规格虚拟销量设置失败");
+          ElMessage.error("规格虚拟销量设置失败");
         })
         .finally(() => {
           if (this.data[currentIndex]) {
@@ -403,7 +404,7 @@ export default {
     handleBatchSubmitVirtualSales(virtualSales) {
       const skuIds = this.selectedRows.map((item) => item.id).filter(Boolean);
       if (!skuIds.length) {
-        this.$Message.warning("请先选择要设置的商品规格");
+        ElMessage.warning("请先选择要设置的商品规格");
         return;
       }
       this.modalSubmitting = true;
@@ -420,14 +421,14 @@ export default {
             });
             this.selectedRows = [];
             this.$refs.table?.clearSelection();
-            this.$Message.success("虚拟销量设置成功");
+            ElMessage.success("虚拟销量设置成功");
             this.resetVirtualSalesModal();
           } else {
-            this.$Message.error((res && res.message) || "虚拟销量设置失败");
+            ElMessage.error((res && res.message) || "虚拟销量设置失败");
           }
         })
         .catch(() => {
-          this.$Message.error("虚拟销量设置失败");
+          ElMessage.error("虚拟销量设置失败");
         })
         .finally(() => {
           this.modalSubmitting = false;
