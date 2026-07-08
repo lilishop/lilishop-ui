@@ -12,7 +12,7 @@ import { getBaseSite } from "@/api/common.js";
 export default {
   data() {
     return {
-      storeSideLogo: require("@/assets/logo.png"),
+      storeSideLogo: require("@/assets/logo-lilishop.png"),
     };
   },
   methods: {
@@ -65,13 +65,13 @@ export default {
 
 <style lang="scss" scoped>
 .header {
-  margin-bottom: 6vh;
+  margin-bottom: 0;
   align-items: center;
   display: flex;
   justify-content: center !important;
 }
 .logo {
-  width: 440px;
-  height: 158px;
+  width: 168px;
+  height: auto;
 }
 </style>
