@@ -83,9 +83,9 @@
 
       <!-- 分页 -->
       <div class="page-size">
-        <el-pagination :total="total" @current-change="changePageNum"
-          @size-change="changePageSize"
-          :page-size="params.pageSize" layout="total, sizes, prev, pager, next, jumper"></el-pagination>
+        <el-pagination v-model:current-page="params.pageNumber" v-model:page-size="params.pageSize"
+          :total="total" @current-change="changePageNum"
+          @size-change="changePageSize" layout="total, sizes, prev, pager, next, jumper"></el-pagination>
       </div>
     </UserCenterLayout>
 
@@ -176,6 +176,7 @@
 </template>
 
 <script>
+import { Message, Modal } from "@/utils/message";
 import { getOrderList, sureReceived, cancelOrder, delOrder } from '@/api/order';
 import { afterSaleReason } from '@/api/member';
 import { orderStatusList } from '../enumeration.js'
@@ -276,7 +277,7 @@ export default {
     received (sn) { // 确认收货
       sureReceived(sn).then(res => {
         if (res.success) {
-          this.$Message.success('确认收货成功')
+          Message.success('确认收货成功')
           this.getList()
         }
       })
@@ -309,13 +310,13 @@ export default {
       this.$router.push({name: 'Complain', query: {sn, index: goodsIndex}})
     },
     delOrder (sn) { // 删除订单
-      this.$Modal.confirm({
+      Modal.confirm({
         title: '删除订单',
         content: '<p>确认删除当前订单吗？</p>',
         onOk: () => {
           delOrder(sn).then(res => {
             if (res.success) {
-              this.$Message.success('删除成功');
+              Message.success('删除成功');
               this.getList()
             }
           })
@@ -360,7 +361,7 @@ export default {
     sureCancel () { // 确定取消
       cancelOrder(this.cancelParams).then(res => {
         if (res.success) {
-          this.$Message.success('取消订单成功')
+          Message.success('取消订单成功')
           this.getList()
           this.cancelAvail = false
         }

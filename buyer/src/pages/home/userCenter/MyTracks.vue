@@ -23,9 +23,9 @@
     <!-- 分页 -->
     <div class="page-size">
       <el-pagination
+        v-model:current-page="params.pageNumber"
+        v-model:page-size="params.pageSize"
         :total="total"
-        :current-page="params.pageNumber"
-        :page-size="params.pageSize"
         :page-sizes="[10, 20, 30, 40, 50, 100]"
         layout="sizes, prev, pager, next, jumper"
         @current-change="changePageNum"
@@ -37,6 +37,7 @@
 </template>
 
 <script>
+import { Message, Modal } from "@/utils/message";
 import { Delete } from '@element-plus/icons-vue';
 import { tracksList, clearTracks, clearTracksById } from "@/api/member";
 export default {
@@ -77,13 +78,13 @@ export default {
     },
     clearAll() {
       // 清除全部足迹
-      this.$Modal.confirm({
+      Modal.confirm({
         title: "删除",
         content: "<p>确定要删除全部足迹吗？</p>",
         onOk: () => {
           clearTracks().then((res) => {
             if (res.success) {
-              this.$Message.success("删除成功");
+              Message.success("删除成功");
               this.getList();
             }
           });
@@ -95,7 +96,7 @@ export default {
       // 清除全部足迹
       clearTracksById(id).then((res) => {
         if (res.success) {
-          this.$Message.success("删除成功");
+          Message.success("删除成功");
           this.getList();
         }
       });

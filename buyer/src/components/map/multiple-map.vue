@@ -1,5 +1,5 @@
 <template>
-  <el-dialog width="800" footer-hide v-model="enableMap">
+  <el-dialog width="800" v-model="enableMap">
     <el-radio-group @change="changeMap" v-model="mapDefault" type="button">
       <el-radio label="select">级联选择</el-radio>
       <el-radio label="map" v-if="aMapSwitch">高德地图</el-radio>
@@ -27,6 +27,7 @@
 </template>
 
 <script>
+import { Message } from "@/utils/message";
 import { aMapSwitch } from '@/config/index'
 import mapping from "@/components/map/index.vue";
 import * as API_Setup from "@/api/common.js";
@@ -101,7 +102,7 @@ export default {
     // 选择完成
     finished() {
       if(!this.chiosend[0]){
-        this.$Message.error("请选择地址")
+        Message.error("请选择地址")
         return
       }
       const params = this.chiosend.filter((item) => item!=="" && item.value !== "");

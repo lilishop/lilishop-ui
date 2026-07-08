@@ -12,7 +12,7 @@
 
 <script>
 import { articleDetail } from "@/api/common.js";
-const config = require("@/config/index");
+import config from "@/config/index";
 export default {
   data() {
     return {

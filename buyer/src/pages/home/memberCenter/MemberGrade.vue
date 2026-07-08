@@ -67,9 +67,9 @@
         </el-table>
         <div class="grade-pagination">
           <el-pagination
-            :current-page="params.pageNumber"
+            v-model:current-page="params.pageNumber"
+            v-model:page-size="params.pageSize"
             :total="experienceLogs.total || 0"
-            :page-size="params.pageSize"
             @current-change="changePage"
             @size-change="changePageSize"
             :page-sizes="[10, 20, 50]"

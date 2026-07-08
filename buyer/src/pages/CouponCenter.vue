@@ -43,11 +43,12 @@
             <i class="circle-bottom"></i>
           </li>
         </ul>
-        <el-pagination           :total="total"
+        <el-pagination           v-model:current-page="params.pageNumber"
+          v-model:page-size="params.pageSize"
+          :total="total"
           @current-change="changePageNum"
           class="pageration"
           @size-change="changePageSize"
-          :page-size="params.pageSize"
          layout="total, sizes, prev, pager, next"></el-pagination>
       </div>
     </div>
@@ -55,6 +56,7 @@
   </div>
 </template>
 <script>
+import { Modal } from "@/utils/message";
 import { couponList, receiveCoupon } from "@/api/member.js";
 export default {
   data() {
@@ -116,7 +118,7 @@ export default {
       receiveCoupon(item.id)
         .then((res) => {
           if (!res || !res.success) return;
-          this.$Modal.confirm({
+          Modal.confirm({
             title: "领取优惠券",
             content: "优惠券领取成功，可到我的优惠券页面查看",
             okText: "我的优惠券",

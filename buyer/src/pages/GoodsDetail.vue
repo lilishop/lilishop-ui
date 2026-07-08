@@ -43,6 +43,7 @@
 </template>
 
 <script>
+import { Message } from "@/utils/message";
 import { StarFilled } from '@element-plus/icons-vue';
 import Search from "@/components/Search";
 
@@ -154,7 +155,7 @@ export default {
               });
             }
           } else {
-            this.$Message.error(res.message);
+            Message.error(res.message);
             this.isLoading = false
           }
         })
@@ -182,21 +183,21 @@ export default {
         return;
       }
       if (!this.Cookies.getItem("userInfo")) {
-        this.$Message.warning("请先登录");
+        Message.warning("请先登录");
         this.$router.push("/login");
         return;
       }
       if (this.storeCollected) {
         let cancel = await cancelStoreCollect("STORE", storeId);
         if (cancel.success) {
-          this.$Message.success("已取消收藏");
+          Message.success("已取消收藏");
           this.storeCollected = false;
         }
       } else {
         let collect = await collectStore("STORE", storeId);
         if (collect.code === 200) {
           this.storeCollected = true;
-          this.$Message.success("收藏店铺成功,可以前往个人中心我的收藏查看");
+          Message.success("收藏店铺成功,可以前往个人中心我的收藏查看");
         }
       }
     },

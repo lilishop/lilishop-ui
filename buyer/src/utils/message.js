@@ -63,11 +63,42 @@ export const Notice = {
 export const Modal = {
   confirm(options = {}) {
     const content = options.content || options.title || "确认操作？";
-    return ElMessageBox.confirm(content, options.title || "提示", {
+    const title = options.title || "提示";
+    const boxOptions = {
       confirmButtonText: options.okText || "确定",
       cancelButtonText: options.cancelText || "取消",
       type: options.type || "warning",
-    })
+    };
+
+    if (options.loading) {
+      return ElMessageBox.confirm(content, title, {
+        ...boxOptions,
+        beforeClose: (action, instance, done) => {
+          if (action !== "confirm") {
+            if (typeof options.onCancel === "function") {
+              options.onCancel();
+            }
+            done();
+            return;
+          }
+          if (typeof options.onOk !== "function") {
+            done();
+            return;
+          }
+          instance.confirmButtonLoading = true;
+          Promise.resolve(options.onOk())
+            .then(() => {
+              instance.confirmButtonLoading = false;
+              done();
+            })
+            .catch(() => {
+              instance.confirmButtonLoading = false;
+            });
+        },
+      });
+    }
+
+    return ElMessageBox.confirm(content, title, boxOptions)
       .then(() => {
         if (typeof options.onOk === "function") {
           return options.onOk();

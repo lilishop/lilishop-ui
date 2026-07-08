@@ -242,6 +242,7 @@
 </template>
 
 <script>
+import { Message, Modal } from "@/utils/message";
 import Promotion from "@/components/goodsDetail/Promotion";
 import Search from "@/components/Search";
 import * as APICart from "@/api/cart";
@@ -289,13 +290,13 @@ export default {
     },
     // 收藏商品
     collectGoods(id) {
-      this.$Modal.confirm({
+      Modal.confirm({
         title: "收藏",
         content: "商品收藏后可在个人中心我的收藏查看",
         onOk: () => {
           APIMember.collectGoods("GOODS", id).then((res) => {
             if (res.success) {
-              this.$Message.success("收藏商品成功");
+              Message.success("收藏商品成功");
               this.getCartList();
             }
           });
@@ -318,16 +319,16 @@ export default {
       } else {
         idArr.push(id);
       }
-      this.$Modal.confirm({
+      Modal.confirm({
         title: "删除",
         content: "确定要删除该商品吗？",
         onOk: () => {
           APICart.delCartGoods({ skuIds: idArr.toString() }).then((res) => {
             if (res.success) {
-              this.$Message.success("删除成功");
+              Message.success("删除成功");
               this.getCartList();
             } else {
-              this.$Message.error(res.message);
+              Message.error(res.message);
             }
           });
         },
@@ -335,16 +336,16 @@ export default {
     },
     // 清空购物车
     clearCart() {
-      this.$Modal.confirm({
+      Modal.confirm({
         title: "提示",
         content: "确定要清空购物车吗？清空后不可恢复",
         onOk: () => {
           APICart.clearCart().then((res) => {
             if (res.success) {
-              this.$Message.success("清空购物车成功");
+              Message.success("清空购物车成功");
               this.getCartList();
             } else {
-              this.$Message.error(res.message);
+              Message.error(res.message);
             }
           });
         },
@@ -355,7 +356,7 @@ export default {
       if (this.checkedNum) {
         this.$router.push({ path: "/pay", query: { way: "CART" } });
       } else {
-        this.$Message.warning("请至少选择一件商品");
+        Message.warning("请至少选择一件商品");
       }
     },
     // 展示优惠券
@@ -393,9 +394,9 @@ export default {
       let res = await APIMember.receiveCoupon(item.id);
       if (res.success) {
         item["disabled"] = true;
-        this.$Message.success("领取成功");
+        Message.success("领取成功");
       } else {
-        this.$Message.error(res.message);
+        Message.error(res.message);
       }
     },
     // 购物车列表

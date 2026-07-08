@@ -93,6 +93,7 @@
   </div>
 </template>
 <script>
+import { Message } from "@/utils/message";
 import { Delete, View } from '@element-plus/icons-vue';
 import { applyThird } from '@/api/shopentry';
 import { getCategory } from '@/api/goods';
@@ -153,7 +154,6 @@ export default {
             .then((res) => {
               this.loading = false;
               if (res.success) this.$emit('change', 3);
-              this.$parent.getData('next');
             })
             .catch(() => {
               this.loading = false;
@@ -167,7 +167,7 @@ export default {
     beforeUpload (file) {
       this.uploadLoading = true;
       if (this.form.storeLogo.length >= 1) {
-        this.$Message.warning('最多上传一张图片')
+        Message.warning('最多上传一张图片')
         this.uploadLoading = false;
         return false;
       }
@@ -179,12 +179,12 @@ export default {
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isAllowedType) {
         this.uploadLoading = false;
-        this.$Message.warning('上传文件格式不正确');
+        Message.warning('上传文件格式不正确');
         return false;
       }
       if (!isLt2M) {
         this.uploadLoading = false;
-        this.$Message.warning('文件大小不能超过2M');
+        Message.warning('文件大小不能超过2M');
         return false;
       }
       return true;

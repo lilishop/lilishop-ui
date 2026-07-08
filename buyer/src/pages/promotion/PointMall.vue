@@ -37,9 +37,9 @@
       </div>
     </div>
     <div class="page-size">
-      <el-pagination :total="total" @current-change="changePageNum"
-        @size-change="changePageSize"
-        :page-size="params.pageSize" layout="total, sizes, prev, pager, next"></el-pagination>
+      <el-pagination v-model:current-page="params.pageNumber" v-model:page-size="params.pageSize"
+        :total="total" @current-change="changePageNum"
+        @size-change="changePageSize" layout="total, sizes, prev, pager, next"></el-pagination>
     </div>
     <BaseFooter></BaseFooter>
   </div>

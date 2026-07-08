@@ -42,7 +42,7 @@
         v-if="storeDisable === 'REFUSED' && currentIndex === 3">重新申请</el-button>
     </div>
 
-    <el-dialog title="店铺入驻协议" v-model="showAgreement" width="1200" :closable="false" :close-on-click-modal="false">
+    <el-dialog title="店铺入驻协议" v-model="showAgreement" width="1200" :show-close="false" :close-on-click-modal="false">
       <div class="agreement-scroll">
         <div class="agreeent-con" v-html="agreementCon"></div>
       </div>
@@ -211,7 +211,7 @@ export default {
 }
 .agreeent-con {
   max-height: 500px;
-  :deep img{
+  :deep(img){
     max-width: 100%;
 
   }

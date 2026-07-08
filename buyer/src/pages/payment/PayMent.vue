@@ -38,7 +38,7 @@
 <script>
 
 import {tradeDetail, pay} from '@/api/pay.js';
-import { Message } from '@/utils/message';
+import { Message, Modal } from "@/utils/message";
 
 export default {
   data () {
@@ -98,16 +98,16 @@ export default {
       params.paymentClient = 'NATIVE';
       params.price = this.payDetail.price;
       if (way === 'WALLET') {
-        this.$Modal.confirm({
+        Modal.confirm({
           title: '支付确认',
           content: '确认使用余额支付吗？',
           onOk: () => {
             pay(params).then(res => {
               if (res.success) {
-                this.$Message.success(res.message)
+                Message.success(res.message)
                 this.$router.push('/payDone');
               } else {
-                this.$Message.warning(res.message)
+                Message.warning(res.message)
               }
             })
           }

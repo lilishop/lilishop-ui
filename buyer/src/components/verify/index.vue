@@ -15,6 +15,7 @@
   </div>
 </template>
 <script>
+import { Message } from "@/utils/message";
 import { Refresh, ArrowRight } from '@element-plus/icons-vue';
 import { getVerifyImg, postVerifyImg } from './verify.js';
 export default {
@@ -110,7 +111,7 @@ export default {
           this.data = res.result;
           this.show = true;
         } else {
-          this.$Message.warning('请求失败请重试！')
+          Message.warning('请求失败请重试！')
         }
       });
     }

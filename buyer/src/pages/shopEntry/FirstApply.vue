@@ -191,6 +191,7 @@
   </div>
 </template>
 <script>
+import { Message, Notice } from "@/utils/message";
 import { Delete, View } from '@element-plus/icons-vue';
 import { applyFirst } from '@/api/shopentry';
 import * as RegExp from '@/plugins/RegExp.js';
@@ -320,7 +321,7 @@ export default {
     beforeUpload (file) {
       this.uploadLoading = true;
       if (this.form.licencePhoto.length >= 1) {
-        this.$Message.warning('最多上传一张图片')
+        Message.warning('最多上传一张图片')
         this.uploadLoading = false;
         return false;
       }
@@ -330,7 +331,7 @@ export default {
     beforeUpload1 (file) {
       this.uploadLoading1 = true;
       if (this.form.legalPhoto.length >= 2) {
-        this.$Message.warning('最多上传两张图片')
+        Message.warning('最多上传两张图片')
         this.uploadLoading1 = false;
         return false;
       }
@@ -343,13 +344,13 @@ export default {
       if (!isAllowedType) {
         this.uploadLoading = false;
         this.uploadLoading1 = false;
-        this.$Message.warning('上传文件格式不正确');
+        Message.warning('上传文件格式不正确');
         return false;
       }
       if (!isLt2M) {
         this.uploadLoading = false;
         this.uploadLoading1 = false;
-        this.$Message.warning('文件大小不能超过2M');
+        Message.warning('文件大小不能超过2M');
         return false;
       }
       return true;
@@ -373,7 +374,7 @@ export default {
     handleFormatError (file) {
       this.uploadLoading = false;
       this.uploadLoading1 = false;
-      this.$Notice.warning({
+      Notice.warning({
         title: 'The file format is incorrect',
         desc: '上传文件格式不正确'
       });
@@ -382,7 +383,7 @@ export default {
     handleMaxSize (file) {
       this.uploadLoading = false;
       this.uploadLoading1 = false;
-      this.$Notice.warning({
+      Notice.warning({
         title: 'Exceeding file size limit',
         desc: '文件大小不能超过2M'
       });

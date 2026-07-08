@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
 import Index from "@/pages/Index";
+import config from "@/config";
 
 const Login = () => import("@/pages/Login");
 const SignUp = () => import("@/pages/SignUp");
@@ -55,7 +56,7 @@ const Merchant = () => import("@/pages/Merchant");
 const topic = () => import("@/pages/Topic");
 const ShopEntry = () => import("@/pages/shopEntry/ShopEntry");
 
-const { title } = require("@/config");
+const { title } = config;
 
 NProgress.configure({ showSpinner: false });
 

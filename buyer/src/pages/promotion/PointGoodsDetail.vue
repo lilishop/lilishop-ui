@@ -85,6 +85,7 @@
 </template>
 
 <script>
+import { Message } from "@/utils/message";
 import Search from '@/components/Search';
 import { addCartGoods } from '@/api/cart.js';
 import { pointGoodsDetail } from '@/api/promotion';
@@ -121,7 +122,7 @@ export default {
           this.goodsMsg = res.result;
           this.goodsSku = res.result.goodsSku
         } else {
-          this.$Message.error(res.message)
+          Message.error(res.message)
           this.$router.push('/')
         }
       }).catch(() => {
@@ -140,7 +141,7 @@ export default {
         if (res.success) {
           this.$router.push({path: '/pay', query: {way: params.cartType}});
         } else {
-          this.$Message.warning(res.message);
+          Message.warning(res.message);
         }
       }).catch(() => {
         this.loading = false;

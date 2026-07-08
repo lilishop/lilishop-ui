@@ -49,8 +49,7 @@
         <div
           class="discountAdvert"
           :style="{
-            backgroundImage:
-              'url(' + require('@/assets/images/decorate.png') + ')',
+            backgroundImage: 'url(' + decorateImg + ')',
           }"
         >
           <div>
@@ -153,7 +152,7 @@ import goodsAndType from "./modelList/goodsAndType.vue";
 import onlyGoodsModel from "./modelList/onlyGoodsModel.vue";
 import mixModel from "./modelList/mixModel.vue";
 import forYour from "./modelList/forYour.vue";
-
+import decorateImg from "@/assets/images/decorate.png";
 
 export default {
   name: "modelFormItem",
@@ -175,6 +174,7 @@ export default {
   },
   data() {
     return {
+      decorateImg,
       showModal: false, // 控制模态框显隐
       selected: {}, // 已选数据
     };

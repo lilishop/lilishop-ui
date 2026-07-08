@@ -34,10 +34,10 @@
           <el-avatar v-else :size="80" class="mb_10"><el-icon><User /></el-icon></el-avatar>
           <div>Hi，{{ $filters.secrecyMobile(userInfo.nickName || `欢迎来到${config.title}`) }}</div>
           <div v-if="userInfo.id">
-            <el-button type="danger" shape="circle">会员中心</el-button>
+            <el-button type="danger">会员中心</el-button>
           </div>
           <div v-else>
-            <el-button type="danger" shape="circle">请登录</el-button>
+            <el-button type="danger">请登录</el-button>
           </div>
         </div>
         <div class="shop-msg">
@@ -60,13 +60,14 @@
 import {articleList} from '@/api/common.js'
 import storage from '@/plugins/storage';
 import { User } from '@element-plus/icons-vue';
+import config from '@/config';
 export default {
   components: { User },
   name: 'modelCarousel2',
   props: ['data'],
   data () {
     return {
-      config:require('@/config'),
+      config,
       userInfo: {}, // 用户信息
       articleList: [], // 常见问题
       params: { // 请求常见问题参数

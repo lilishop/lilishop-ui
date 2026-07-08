@@ -20,9 +20,9 @@
     <!-- 分页 -->
     <div class="point-pagination">
       <el-pagination
-        :current-page="params.pageNumber"
+        v-model:current-page="params.pageNumber"
+        v-model:page-size="params.pageSize"
         :total="logData.total"
-        :page-size="params.pageSize"
         @current-change="changePage"
         @size-change="changePageSize"
         :page-sizes="[10, 20, 50]"

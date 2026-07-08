@@ -48,11 +48,7 @@
       v-model="bindModalVisible"
       title="绑定第三方账户"
       :close-on-click-modal="false"
-      :footer-hide="bindForm.type === 'WECHAT'"
-      :ok-text="bindModalOkText"
-      :loading="bindSubmitLoading"
-      @ok="submitBind"
-      @cancel="resetBindForm"
+      @closed="resetBindForm"
     >
       <el-form label-width="110px">
         <el-form-item label="类型">
@@ -67,8 +63,8 @@
               <div v-else class="wechatQrEmpty">二维码获取失败，请刷新重试</div>
             </div>
             <div class="wechatQrActions">
-              <el-button @click="fetchWechatQrCode">刷新二维码</el-button>
-              <el-button type="primary" @click="submitBind">我已完成绑定</el-button>
+              <el-button :loading="qrCodeLoading" @click="fetchWechatQrCode">刷新二维码</el-button>
+              <el-button type="primary" :loading="bindSubmitLoading" @click="submitBind">我已完成绑定</el-button>
             </div>
             <div class="wechatQrTip">请使用微信扫码关注/授权，完成后点击“我已完成绑定”检测绑定状态</div>
           </div>
@@ -78,11 +74,19 @@
           <el-input v-model="bindForm.unionID" placeholder="请输入 OpenID/UnionID" />
         </el-form-item>
       </el-form>
+
+      <template v-if="bindForm.type !== 'WECHAT'" #footer>
+        <el-button @click="bindModalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="bindSubmitLoading" @click="submitBind">
+          {{ bindModalOkText }}
+        </el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
 
 <script>
+import { Message, Modal } from "@/utils/message";
 import { Key, Link } from '@element-plus/icons-vue';
 // import { getPwdStatus } from '@/api/account';
 import storage from '@/plugins/storage'
@@ -186,7 +190,7 @@ export default {
       const userId = userInfo && userInfo.id ? String(userInfo.id) : ''
       if (!userId) {
         this.qrCodeBase64 = ''
-        this.$Message.error('未获取到当前用户ID，请重新登录后重试')
+        Message.error('未获取到当前用户ID，请重新登录后重试')
         return
       }
       this.qrCodeLoading = true
@@ -197,7 +201,7 @@ export default {
             return
           }
           this.qrCodeBase64 = ''
-          this.$Message.error((res && res.message) || '二维码获取失败')
+          Message.error((res && res.message) || '二维码获取失败')
         })
         .catch(() => {
           this.qrCodeBase64 = ''
@@ -213,12 +217,12 @@ export default {
         this.refreshConnectBinds()
           .then(() => {
             if (this.isBound(this.bindForm.type)) {
-              this.$Message.success('绑定成功')
+              Message.success('绑定成功')
               this.bindModalVisible = false
               this.resetBindForm()
               return
             }
-            this.$Message.warning('暂未检测到绑定，请扫码后重试')
+            Message.warning('暂未检测到绑定，请扫码后重试')
             this.$nextTick(() => {
               this.bindModalVisible = true
             })
@@ -229,11 +233,11 @@ export default {
         return
       }
       if (!this.bindForm.type) {
-        this.$Message.error('绑定类型不能为空')
+        Message.error('绑定类型不能为空')
         return
       }
       if (!this.bindForm.unionID) {
-        this.$Message.error('OpenID/UnionID 不能为空')
+        Message.error('OpenID/UnionID 不能为空')
         this.$nextTick(() => {
           this.bindModalVisible = true
         })
@@ -243,7 +247,7 @@ export default {
       this.bindSubmitLoading = true
       bindThirdAccount({ unionID: this.bindForm.unionID, type: this.bindForm.type })
         .then(() => {
-          this.$Message.success('绑定成功')
+          Message.success('绑定成功')
           this.bindModalVisible = false
           this.resetBindForm()
           this.refreshConnectBinds()
@@ -253,12 +257,12 @@ export default {
         })
     },
     confirmUnbind (item) {
-      this.$Modal.confirm({
+      Modal.confirm({
         title: '解绑确认',
         content: `<p>确定解绑 ${item.label} 吗？</p>`,
         onOk: () => {
           unbindThirdAccount({ type: item.type }).then(() => {
-            this.$Message.success('解绑成功')
+            Message.success('解绑成功')
             this.refreshConnectBinds()
           })
         }

@@ -51,18 +51,14 @@
             </div> -->
           </div>
           <div v-else class="flex flex-a-c ">
-            <div class="btns" @click="$router.push('login')" shape="circle"
-            >登录</div
-            >
-            <div class="btns sign-up" @click="$router.push('signUp')" shape="circle"
-            >注册</div
-            >
+            <div class="btns" @click="$router.push('login')">登录</div>
+            <div class="btns sign-up" @click="$router.push('signUp')">注册</div>
           </div>
 
           <div class="gray-line"></div>
           <div class="icon-list flex flex-j-sb" >
             <div class="icon-item" @click="entryControl(item)" :key="index" v-for="(item, index) in entranceList">
-              <img class="icon" :src="require(`@/assets/iconfont/${item.icon}.png`)">
+              <img class="icon" :src="getIconUrl(item.icon)">
               <div>
                 {{ item.label }}
               </div>
@@ -70,7 +66,7 @@
           </div>
           <div class="icon-list flex flex-j-sb" >
             <div class="icon-item" :key="index"  @click="entryControl(item)" v-for="(item, index) in appendList">
-              <img class="icon" :src="require(`@/assets/iconfont/${item.icon}.png`)">
+              <img class="icon" :src="getIconUrl(item.icon)">
               <div>
                 {{ item.label }}
               </div>
@@ -89,6 +85,9 @@
 <script>
 
 import storage from "@/plugins/storage";
+import config from "@/config";
+import defaultAvatar from "@/assets/images/default.png";
+import { getIconUrl } from "@/assets/iconfont/iconMap";
 export default {
   name: "modelCarousel",
   props: ["data"],
@@ -102,8 +101,8 @@ export default {
   },
   data() {
     return {
-      config: require("@/config"),
-      defaultAvatar: require("@/assets/images/default.png"),
+      config,
+      defaultAvatar,
       userInfo: {}, // 用户信息
       entranceList: [
         {
@@ -170,6 +169,7 @@ export default {
     };
   },
   methods: {
+    getIconUrl,
     carouselItemKey(item, index) {
       return item?.img || item?.url || `slide-${index}`;
     },

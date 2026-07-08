@@ -19,10 +19,11 @@
   </div>
 </template>
 <script>
+import { Message } from "@/utils/message";
 import AMapLoader from "@amap/amap-jsapi-loader";
 import { handleRegion } from "@/api/address.js";
+import config from "@/config/index";
 
-const config = require('@/config/index')
 export default {
   name: "map",
   data() {
@@ -62,7 +63,7 @@ export default {
           }
         });
       } else {
-        this.$Message.error('未获取到坐标信息！请查看高德API配置是否正确')
+        Message.error('未获取到坐标信息！请查看高德API配置是否正确')
       }
 
     },
@@ -133,7 +134,7 @@ export default {
     selectAddr(location) {
       // 选择坐标
       if (!location) {
-        this.$Message.warning("请选择正确点位");
+        Message.warning("请选择正确点位");
         return false;
       }
       const lnglat = [location.lng, location.lat];
