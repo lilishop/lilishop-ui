@@ -22,8 +22,11 @@ import { setStore, getStore, removeStore } from "@/libs/storage";
 import util from "@/libs/util";
 import { md5 } from "@/utils/md5.js";
 import * as filters from "@/utils/filters";
+import config from "@/config/index";
+import imgError from "./assets/img-error.png";
+import loadingGif from "./assets/loading2.gif";
 
-const { aMapSecurityJsCode, mainColor } = require("@/config");
+const { aMapSecurityJsCode, mainColor } = config;
 
 if (aMapSecurityJsCode) {
   window._AMapSecurityConfig = {
@@ -43,8 +46,8 @@ setupLegacyMessage(app);
 installVueQr(app);
 
 app.use(VueLazyload, {
-  error: require("./assets/img-error.png"),
-  loading: require("./assets/loading2.gif"),
+  error: imgError,
+  loading: loadingGif,
 });
 
 app.use(router);

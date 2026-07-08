@@ -120,6 +120,7 @@ import { Iphone, Message, Lock } from "@element-plus/icons-vue";
 import * as RegExp from "@/utils/regular.js";
 import * as apiLogin from "@/api/index.js";
 import { sendSms } from "@/api/common.js";
+import config from "@/config/index";
 import verify from "@/views/my-components/verify";
 
 export default {
@@ -127,7 +128,7 @@ export default {
   components: { verify, Iphone, Message, Lock },
   data() {
     return {
-      config: require("@/config"),
+      config,
       loading: false,
       loading1: false,
       formFirst: {
@@ -207,7 +208,7 @@ export default {
               }
             })
             .catch(() => {
-              this.loading = false;
+              this.loading1 = false;
             });
         }
       });

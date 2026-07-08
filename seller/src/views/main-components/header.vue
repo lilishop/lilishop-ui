@@ -7,6 +7,7 @@
 </template>
 
 <script>
+import defaultLogo from "@/assets/logo.png";
 import { getBaseSite } from "@/api/common.js";
 
 export default {

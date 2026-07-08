@@ -27,30 +27,28 @@
           <div class="panel-head">
             <span class="panel-title">直播预览</span>
             <div class="ratio-switch">
-              <button
-                type="button"
-                class="ratio-btn"
-                :class="{ active: aspectRatio === '16:9' }"
-                @click="aspectRatio = '16:9'"
-              >
-                16:9
-              </button>
-              <button
-                type="button"
-                class="ratio-btn"
-                :class="{ active: aspectRatio === '4:3' }"
-                @click="aspectRatio = '4:3'"
-              >
-                4:3
-              </button>
+             
             </div>
           </div>
           <div class="player-box" :class="aspectRatio === '16:9' ? 'ratio-169' : 'ratio-43'">
-            <div v-if="videoUrl" id="live-dplayer" class="player-inner" />
-            <div v-else class="player-empty">
-              <el-icon class="is-loading" :size="32"><Loading /></el-icon>
-              <span>暂无拉流地址</span>
+            <div v-if="showPlayerCover" class="player-cover">
+              <img
+                v-if="liveDetail.coverImg"
+                class="cover-img"
+                :src="liveDetail.coverImg"
+                alt="直播封面"
+              />
+              <div class="cover-mask">
+                <el-tag :type="liveStatusTagType(liveStatus)" size="small">{{ liveStatusText(liveStatus) }}</el-tag>
+                <span v-if="liveStatus === 'NEW' && liveDetail.startTime" class="cover-tip">
+                  开播：{{ formatTime(liveDetail.startTime) }}
+                </span>
+                <span v-else-if="liveStatus === 'PAUSED'" class="cover-tip">主播暂时离开，请稍候</span>
+                <span v-else-if="liveStatus === 'ENDED'" class="cover-tip">直播已结束</span>
+                <span v-else-if="liveStatus === 'LIVING' && !videoUrl" class="cover-tip">等待拉流地址...</span>
+              </div>
             </div>
+            <div v-if="shouldPlayStream" ref="hlsContainer" class="player-inner" />
           </div>
         </div>
 
@@ -112,8 +110,12 @@
           <div class="area-chat panel-box">
             <el-tabs v-model="chatTab" class="panel-tabs fill-tabs">
               <el-tab-pane label="互动聊天" name="chat">
-                <div class="tab-body chat-placeholder">
-                  <el-empty :image-size="64" description="暂无聊天消息" />
+                <div class="tab-body chat-tab-body">
+                  <LiveChatPanel
+                    :live-id="liveId"
+                    :live-detail="liveDetail"
+                    :active="chatTab === 'chat'"
+                  />
                 </div>
               </el-tab-pane>
               <el-tab-pane label="在线用户" name="online">
@@ -237,8 +239,7 @@
 </template>
 
 <script>
-import DPlayer from "dplayer";
-import { DocumentCopy, Loading, Refresh } from "@element-plus/icons-vue";
+import { getSetting } from "@/api/index";
 import {
   endLive,
   getLiveInfo,
@@ -246,16 +247,17 @@ import {
   liveUserList,
   startLive,
 } from "@/api/live";
-import { getSetting } from "@/api/index";
 import config from "@/config";
+import { DocumentCopy, Refresh } from "@element-plus/icons-vue";
 import CommentReview from "./components/CommentReview.vue";
 import Coupon from "./components/Coupon.vue";
+import LiveChatPanel from "./components/LiveChatPanel.vue";
 import LiveGoods from "./components/LiveGoods.vue";
 import LivePurchaseRecords from "./components/LivePurchaseRecords.vue";
 
 export default {
   name: "live-control-panel",
-  components: { CommentReview, Coupon, LiveGoods, LivePurchaseRecords, DocumentCopy, Loading, Refresh },
+  components: { CommentReview, Coupon, LiveChatPanel, LiveGoods, LivePurchaseRecords, DocumentCopy, Refresh },
   data() {
     return {
       loading: false,
@@ -275,14 +277,30 @@ export default {
         pageSize: 10,
         total: 0,
       },
-      player: null,
       nowTick: Date.now(),
       durationTimer: null,
+      pollTimer: null,
+      hlsHttpFallbackUsed: false,
+      lastHlsPullUrl: "",
     };
+  },
+  created() {
+    this.hlsInstance = null;
+    this.hlsVideoElement = null;
+    this._hlsVideoClickHandler = null;
   },
   computed: {
     liveStatus() {
       return this.liveDetail.liveStatus || this.liveDetail.status || "";
+    },
+    isLiving() {
+      return this.liveStatus === "LIVING";
+    },
+    shouldPlayStream() {
+      return this.isLiving && !!this.videoUrl;
+    },
+    showPlayerCover() {
+      return !this.shouldPlayStream;
     },
     cumulativeViewers() {
       return Number(this.liveDetail.actualViewNumber ?? 0);
@@ -318,10 +336,19 @@ export default {
   },
   watch: {
     videoUrl() {
-      this.initPlayer();
+      this.syncH5Player();
+    },
+    isLiving() {
+      this.syncH5Player();
+      if (this.isLiving) {
+        this.startPolling();
+      } else {
+        this.stopPolling();
+      }
     },
     aspectRatio() {
-      this.$nextTick(() => this.initPlayer());
+      this.lastHlsPullUrl = "";
+      this.$nextTick(() => this.syncH5Player());
     },
     chatTab(tab) {
       if (tab === "online") this.loadOnlineUsers();
@@ -341,7 +368,8 @@ export default {
     this.startDurationTimer();
   },
   beforeUnmount() {
-    this.destroyPlayer();
+    this.destroyH5HlsPlayer();
+    this.stopPolling();
     this.stopDurationTimer();
   },
   methods: {
@@ -385,12 +413,25 @@ export default {
       return Number(val || 0).toFixed(2);
     },
     liveStatusText(status) {
-      const map = { NEW: "未开始", LIVING: "直播中", ENDED: "已结束" };
+      const map = { NEW: "未开始", LIVING: "直播中", PAUSED: "已暂停", ENDED: "已结束" };
       return map[status] || "未知";
     },
     liveStatusTagType(status) {
-      const map = { NEW: "info", LIVING: "success", ENDED: "warning" };
+      const map = { NEW: "info", LIVING: "success", PAUSED: "warning", ENDED: "warning" };
       return map[status] || "info";
+    },
+    startPolling() {
+      this.stopPolling();
+      if (!this.isLiving) return;
+      this.pollTimer = setInterval(() => {
+        this.loadDetail(false);
+      }, 5000);
+    },
+    stopPolling() {
+      if (this.pollTimer) {
+        clearInterval(this.pollTimer);
+        this.pollTimer = null;
+      }
     },
     refreshAll() {
       this.loadDetail();
@@ -398,42 +439,182 @@ export default {
       this.$refs.purchaseRecords?.refresh();
       if (this.chatTab === "online") this.loadOnlineUsers();
     },
-    destroyPlayer() {
-      if (this.player) {
-        this.player.destroy();
-        this.player = null;
-      }
+    buildHlsPlayUrl(url, useHttpFallback = false) {
+      if (!url) return "";
+      const httpUrl =
+        useHttpFallback && url.startsWith("https://")
+          ? url.replace("https://", "http://")
+          : url;
+      return httpUrl.replace(".flv", ".m3u8");
     },
-    initPlayer() {
-      this.destroyPlayer();
-      if (!this.videoUrl) return;
+    syncH5Player(retry = 0) {
+      const shouldPlay = this.shouldPlayStream;
+      if (!shouldPlay) {
+        this.destroyH5HlsPlayer();
+        this.lastHlsPullUrl = "";
+        return;
+      }
+      if (
+        this.videoUrl === this.lastHlsPullUrl &&
+        this.hlsInstance &&
+        this.hlsVideoElement &&
+        !this.hlsVideoElement.paused
+      ) {
+        return;
+      }
+      if (this.videoUrl === this.lastHlsPullUrl && this.hlsInstance) {
+        this.ensureH5VideoPlaying(this.hlsVideoElement);
+        return;
+      }
+      this.lastHlsPullUrl = this.videoUrl;
+      this.hlsHttpFallbackUsed = false;
       this.$nextTick(() => {
-        const container = document.getElementById("live-dplayer");
-        if (!container) return;
-        this.player = new DPlayer({
-          container,
-          live: this.liveStatus === "LIVING",
-          autoplay: true,
-          video: {
-            url: this.videoUrl,
-            type: "auto",
-          },
-        });
+        const container = this.$refs.hlsContainer;
+        if (!container) {
+          if (retry < 8) {
+            setTimeout(() => this.syncH5Player(retry + 1), 80);
+          }
+          return;
+        }
+        this.initH5HlsPlayer();
       });
     },
-    loadDetail() {
-      this.loading = true;
+    ensureH5VideoPlaying(video) {
+      if (!video) return Promise.resolve();
+      const tryPlay = (muted) => {
+        video.muted = muted;
+        return video.play().catch(() => Promise.reject());
+      };
+      return tryPlay(false)
+        .catch(() => tryPlay(true))
+        .catch(() => {
+          console.warn("[HLS] 自动播放被阻止，请点击画面播放");
+        });
+    },
+    async initH5HlsPlayer(useHttpFallback = false) {
+      const originalUrl = this.videoUrl;
+      const container = this.$refs.hlsContainer;
+      if (!originalUrl || !container) return;
+
+      const url = this.buildHlsPlayUrl(originalUrl, useHttpFallback);
+      this.destroyH5HlsPlayer();
+
+      const video = document.createElement("video");
+      video.style.cssText = "width:100%;height:100%;object-fit:cover;background:#000;";
+      video.autoplay = true;
+      video.muted = true;
+      video.defaultMuted = true;
+      video.playsInline = true;
+      video.setAttribute("autoplay", "");
+      video.setAttribute("muted", "");
+      video.setAttribute("playsinline", "");
+      video.setAttribute("webkit-playsinline", "");
+      video.controls = false;
+
+      const onVideoClick = () => {
+        if (video.muted) {
+          video.muted = false;
+        }
+        video.play().catch(() => {});
+      };
+      video.addEventListener("click", onVideoClick);
+      container.appendChild(video);
+      this.hlsVideoElement = video;
+      this._hlsVideoClickHandler = onVideoClick;
+
+      const onReadyPlay = () => {
+        this.ensureH5VideoPlaying(video);
+      };
+
+      let Hls = null;
+      try {
+        const hlsModule = await import("hls.js");
+        Hls = hlsModule.default;
+      } catch (error) {
+        console.error("[HLS] 加载播放器失败:", error);
+        this.$Message.error("直播播放器加载失败，请刷新页面重试");
+        return;
+      }
+
+      if (Hls.isSupported()) {
+        const hls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: true,
+          liveSyncDurationCount: 3,
+          liveMaxLatencyDurationCount: 6,
+          maxBufferLength: 10,
+          maxMaxBufferLength: 30,
+        });
+        this.hlsInstance = hls;
+        hls.on(Hls.Events.MEDIA_ATTACHED, onReadyPlay);
+        hls.on(Hls.Events.MANIFEST_PARSED, onReadyPlay);
+        hls.attachMedia(video);
+        hls.loadSource(url);
+        hls.on(Hls.Events.ERROR, (_event, data) => {
+          if (!data.fatal) return;
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              if (!this.hlsHttpFallbackUsed && originalUrl.startsWith("https://")) {
+                console.warn("[HLS] HTTPS 加载失败，尝试 HTTP 降级...");
+                this.hlsHttpFallbackUsed = true;
+                this.destroyH5HlsPlayer();
+                this.$nextTick(() => this.initH5HlsPlayer(true));
+              } else {
+                console.error("[HLS] 网络错误，尝试重连...");
+                hls.startLoad();
+              }
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              console.error("[HLS] 媒体错误，尝试恢复...");
+              hls.recoverMediaError();
+              break;
+            default:
+              console.error("[HLS] 致命错误:", data);
+              this.destroyH5HlsPlayer();
+              this.$Message.error("直播加载失败");
+              break;
+          }
+        });
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = url;
+        video.addEventListener("loadedmetadata", onReadyPlay);
+        video.addEventListener("canplay", onReadyPlay);
+      } else {
+        this.$Message.error("当前浏览器不支持 HLS 播放");
+      }
+    },
+    destroyH5HlsPlayer() {
+      if (this.hlsInstance) {
+        this.hlsInstance.destroy();
+        this.hlsInstance = null;
+      }
+      if (this.hlsVideoElement) {
+        if (this._hlsVideoClickHandler) {
+          this.hlsVideoElement.removeEventListener("click", this._hlsVideoClickHandler);
+          this._hlsVideoClickHandler = null;
+        }
+        this.hlsVideoElement.remove();
+        this.hlsVideoElement = null;
+      }
+      const container = this.$refs.hlsContainer;
+      if (container) {
+        container.innerHTML = "";
+      }
+    },
+    loadDetail(showLoading = true) {
+      if (showLoading) this.loading = true;
       getLiveInfo(this.liveId)
         .then((res) => {
-          this.loading = false;
+          if (showLoading) this.loading = false;
           if (res.success) {
             const data = res.result || {};
             this.liveDetail = data;
             this.videoUrl = data.pullStreamUrl || data.streamUrl || "";
+            this.syncH5Player();
           }
         })
         .catch(() => {
-          this.loading = false;
+          if (showLoading) this.loading = false;
         });
     },
     loadOrderStats() {
@@ -503,7 +684,8 @@ export default {
           return endLive(this.liveId).then((res) => {
             if (res.success) {
               this.$Message.success("直播已结束");
-              this.destroyPlayer();
+              this.destroyH5HlsPlayer();
+              this.stopPolling();
               this.refreshAll();
             }
           });
@@ -611,6 +793,13 @@ export default {
 .area-chat,
 .area-stats {
   min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.area-chat {
+  display: flex;
+  flex-direction: column;
 }
 
 .area-manage {
@@ -687,17 +876,37 @@ export default {
 .player-inner {
   width: 100%;
   height: 100%;
+  position: relative;
+  z-index: 1;
 }
 
-.player-empty {
+.player-cover {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: #000;
+
+  .cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.cover-mask {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  color: #909399;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.cover-tip {
+  color: #fff;
   font-size: 13px;
 }
 
@@ -874,12 +1083,14 @@ export default {
   min-height: 100%;
 }
 
-.chat-placeholder {
+.chat-tab-body {
+  display: flex;
+  flex-direction: column;
   min-height: 0;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
+  padding: 12px 16px 12px;
+  box-sizing: border-box;
 }
 
 @media (max-width: 1200px) {

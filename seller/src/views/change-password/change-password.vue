@@ -93,19 +93,21 @@ export default {
       this.$refs.editPasswordForm.validate((valid) => {
         if (!valid) return;
         this.savePassLoading = true;
-        changePass(params).then((res) => {
-          this.savePassLoading = false;
-          if (res.success) {
-            ElMessageBox.alert("修改密码成功，需重新登录", "修改密码成功", {
-              confirmButtonText: "确定",
-              callback: () => {
+        changePass(params)
+          .then((res) => {
+            if (res?.success) {
+              ElMessageBox.alert("修改密码成功，需重新登录", "修改密码成功", {
+                confirmButtonText: "确定",
+              }).then(() => {
                 this.$store.commit("logout", this);
                 this.$store.commit("clearOpenedSubmenu");
                 this.$router.push({ name: "login" });
-              },
-            });
-          }
-        });
+              });
+            }
+          })
+          .finally(() => {
+            this.savePassLoading = false;
+          });
       });
     },
     cancelEditPass() {
@@ -120,25 +122,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-.change-pass {
-  &-btn-box {
-    margin-bottom: 10px;
-
-    button {
-      padding-left: 0;
-
-      span {
-        color: #2d8cf0;
-        transition: all 0.2s;
-      }
-
-      span:hover {
-        color: #0c25f1;
-        transition: all 0.2s;
-      }
-    }
-  }
-}
-</style>

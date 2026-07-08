@@ -94,7 +94,7 @@
     width: 100%;
   }
 
-  >.ivu-form {
+  >.el-form {
     flex-wrap: wrap !important;
   }
 
@@ -175,11 +175,11 @@ div.base-info-item {
         justify-content: flex-start;
         width: 100%;
 
-        >.ivu-card-body {
+        >.el-card__body {
           width: 100%;
         }
 
-        .ivu-card-body {
+        .el-card__body {
           width: 100%;
           justify-content: center;
           align-items: flex-start;
@@ -344,7 +344,7 @@ div.base-info-item {
   text-align: center;
   z-index: 999;
 
-  >.ivu-btn {
+  >.el-button {
     margin: 0 10px;
   }
 }

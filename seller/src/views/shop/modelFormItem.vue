@@ -67,7 +67,7 @@
           class="discountAdvert"
           :style="{
             'background-image':
-              'url(' + require('@/assets/nav/decorate.png') + ')',
+              'url(' + decorateImg + ')',
           }"
         >
           <div>
@@ -280,6 +280,7 @@ import onlyGoodsModel from "./modelList/onlyGoodsModel.vue";
 
 import oneRowThreeColumns from "./modelList/oneRowThreeColumns.vue";
 import seckillOnlyAlbum from "./modelList/seckill-only-album.vue";
+import decorateImg from "@/assets/nav/decorate.png";
 export default {
   name: "modelFormItem",
   props: ["element", "select", "index", "data"],
@@ -302,6 +303,7 @@ export default {
   },
   data() {
     return {
+      decorateImg,
       showModal: false, // modal显隐
       selected: {}, // 弹窗编辑草稿
       editTarget: null, // 确定后写回的原数据

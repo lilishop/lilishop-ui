@@ -350,12 +350,8 @@
 
 <script>
 import * as API_Order from "@/api/order";
-import vueQr from "vue-qr";
 export default {
-  components: {
-    "vue-qr": vueQr,
-  },
-  name: "orderDetail",
+  name: "returnGoodsOrderDetail",
   data() {
     return {
       sn: "", // 订单号
@@ -624,9 +620,6 @@ export default {
 };
 </script>
 <style lang="scss">
-.ivu-col {
-  width: 100% !important;
-}
 .main-content {
   min-height: 600px;
   padding: 10px;

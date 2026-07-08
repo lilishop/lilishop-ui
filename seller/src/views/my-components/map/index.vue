@@ -20,8 +20,7 @@
 <script>
 import AMapLoader from "@amap/amap-jsapi-loader";
 import { getRegion } from "@/api/common.js";
-
-const config = require("@/config/index");
+import config from "@/config/index";
 export default {
   name: "map",
   data() {

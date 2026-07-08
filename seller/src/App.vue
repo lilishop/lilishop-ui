@@ -7,6 +7,7 @@
 <script>
 import Cookies from "js-cookie";
 import util from "@/libs/util";
+import { getCategoryTree } from "@/api/goods.js";
 
 export default {
   name: "App",
@@ -18,6 +19,13 @@ export default {
       util.initRouter(this);
       this.$store.commit("setOpenedList");
       this.$store.commit("initCachepage");
+      if (!localStorage.getItem("category")) {
+        getCategoryTree().then((res) => {
+          if (res.success && Array.isArray(res.result)) {
+            localStorage.setItem("category", JSON.stringify(res.result));
+          }
+        });
+      }
     }
   },
 };

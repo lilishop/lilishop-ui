@@ -83,7 +83,7 @@
     <!-- 选择商品。链接 -->
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
-    <el-dialog width="1200px" v-model="picModelFlag" :show-footer="false">
+    <el-dialog width="1200px" v-model="picModelFlag">
       <ossManage @callback="callbackSelected" :isComponent="true"  :initialize="picModelFlag" ref="ossManage"/>
     </el-dialog>
   </li>

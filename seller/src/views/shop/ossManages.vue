@@ -218,166 +218,8 @@
             </el-col>
           </el-row>
 
-
-          <!--<div class="oss-operation padding-row">-->
-          <!--<div>-->
-          <!--<Upload-->
-          <!--ref="up"-->
-          <!--:action="commonUrl + '/common/common/upload/file'"-->
-          <!--:data="{-->
-          <!--directoryPath: searchForm.fileDirectoryId,-->
-          <!--}"-->
-          <!--:headers="accessToken"-->
-          <!--:max-size="20480"-->
-          <!--:on-error="handleError"-->
-          <!--:on-exceeded-size="handleMaxSize"-->
-          <!--:on-success="handleSuccess"-->
-          <!--:show-upload-list="false"-->
-          <!--multiple-->
-          <!--style="display: inline-block"-->
-          <!--&gt;-->
-          <!--<el-button>上传图片</el-button>-->
-          <!--</Upload>-->
-          <!--<Dropdown @click="handleDropdown" v-if="!isComponent">-->
-          <!--<el-button>-->
-          <!--更多操作-->
-          <!--<Icon type="md-arrow-dropdown"/>-->
-          <!--</el-button>-->
-          <!--<DropdownMenu #list>-->
-          <!--<DropdownItem name="refresh">刷新</DropdownItem>-->
-          <!--<DropdownItem v-show="showType == 'list'" name="removeAll"-->
-          <!--&gt;批量删除-->
-          <!--</DropdownItem>-->
-          <!--</DropdownMenu>-->
-          <!--</Dropdown>-->
-          <!--</div>-->
-          <!--</div>-->
         </div>
 
-        <!--<Alert show-icon v-if="!isComponent">-->
-        <!--已选择-->
-        <!--<span>{{ selectCount }}</span> 项-->
-        <!--<a class="select-clear" @click="clearSelectAll">清空</a>-->
-        <!--<span v-if="selectCount > 0" style="margin-left: 15px"-->
-        <!--&gt;共计 {{ totalSize }} 存储量</span-->
-        <!--&gt;-->
-        <!--</Alert>-->
-
-        <!--<div v-show="showType === 'list'" >-->
-        <!--<div class="flex">-->
-        <!--<div class="article-category mr_10">-->
-        <!--<Tree-->
-        <!--:data="treeData"-->
-        <!--@on-contextmenu="handleContextMenu"-->
-        <!--@on-select-change="handleCateChange"-->
-        <!--&gt;-->
-        <!--<template #contextMenu v-if="!isComponent">-->
-        <!--<DropdownItem @click.native="handleContextMenuEdit"-->
-        <!--&gt;编辑-->
-        <!--</DropdownItem-->
-        <!--&gt;-->
-        <!--<DropdownItem-->
-        <!--style="color: #ed4014"-->
-        <!--@click.native="handleContextMenuDelete"-->
-        <!--&gt;删除-->
-        <!--</DropdownItem-->
-        <!--&gt;-->
-        <!--</template>-->
-        <!--</Tree>-->
-        <!--<Alert v-if="!isComponent">鼠标右键编辑/删除分组</Alert>-->
-        <!--<div class="group-row flex" v-if="!isComponent">-->
-        <!--<el-button @click="handleClickAddGroup">添加分组</el-button>-->
-        <!--</div>-->
-        <!--</div>-->
-
-        <!--<Table-->
-        <!--ref="table"-->
-        <!--:columns="isComponent ? viewColumns : columns"-->
-        <!--:data="data"-->
-        <!--:loading="loading"-->
-        <!--border-->
-        <!--class="table"-->
-        <!--sortable="custom"-->
-        <!--@on-sort-change="changeSort"-->
-        <!--@on-selection-change="changeSelect"-->
-        <!--&gt;-->
-        <!--<template #fileKey #default="{ row }">-->
-        <!--<a @click="copyFileUrl(row)">{{ row.fileKey }}</a>-->
-        <!--</template>-->
-        <!--</Table>-->
-        <!--</div>-->
-        <!--</div>-->
-
-        <!--<div v-show="showType === 'thumb'">-->
-        <!--<div class="oss-wrapper">-->
-        <!--<Card v-for="(item, i) in data" :key="i" class="oss-card">-->
-        <!--<div class="content">-->
-        <!--<img-->
-        <!--v-if="item.fileType.indexOf('image') >= 0"-->
-        <!--:src="item.url"-->
-        <!--class="img"-->
-        <!--@click="showPic(item)"-->
-        <!--/>-->
-        <!--<div-->
-        <!--v-else-if="item.fileType.indexOf('video') >= 0"-->
-        <!--class="video"-->
-        <!--@click="showVideo(item)"-->
-        <!--&gt;-->
-        <!--&lt;!&ndash; 文件小于5MB显示video &ndash;&gt;-->
-        <!--<video v-if="item.fileSize < 1024 * 1024 * 5" class="cover">-->
-        <!--<source :src="item.url"/>-->
-        <!--</video>-->
-        <!--<img class="play" src="@/assets/play.png"/>-->
-        <!--</div>-->
-        <!--<div v-else class="other">-->
-        <!--<div class="name">{{ item.name }}</div>-->
-        <!--<div class="key">{{ item.fileKey }}</div>-->
-        <!--<div class="info">-->
-        <!--文件类型：{{ item.fileType }} 文件大小：{{-->
-        <!--((item.fileSize * 1.0) / (1024 * 1024)).toFixed(2)-->
-        <!--}}-->
-        <!--MB 创建时间：{{ item.createTime }}-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--<div class="actions">-->
-        <!--<div class="btn">-->
-        <!--<el-tooltip content="下载" placement="top">-->
-        <!--<Icon-->
-        <!--size="16"-->
-        <!--type="md-download"-->
-        <!--@click="download(item)"-->
-        <!--/>-->
-        <!--</el-tooltip>-->
-        <!--</div>-->
-        <!--<div class="btn">-->
-        <!--<el-tooltip content="重命名" placement="top">-->
-        <!--<Icon size="16" type="md-create" @click="rename(item)"/>-->
-        <!--</el-tooltip>-->
-        <!--</div>-->
-        <!--<div class="btn-no">-->
-        <!--<el-tooltip content="删除" placement="top">-->
-        <!--<Icon size="16" type="md-trash" @click="remove(item)"/>-->
-        <!--</el-tooltip>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--</el-card>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--<div class="mt_10" justify="end" type="flex">-->
-        <!--<Page-->
-        <!--:current="searchForm.pageNumber"-->
-        <!--:page-size="searchForm.pageSize"-->
-        <!--:page-size-opts="pageSizeOpts"-->
-        <!--:total="total"-->
-        <!--show-elevator-->
-        <!--show-sizer-->
-        <!--show-total-->
-        <!--size="small"-->
-        <!--@change="changePage"-->
-        <!--@size-change="changePageSize"-->
-        <!--&gt;</el-pagination>-->
-        <!--</div>-->
       </el-card>
     </el-row>
     <el-dialog
@@ -473,7 +315,8 @@ import {
 import DPlayer from "dplayer";
 import {commonUrl} from "@/libs/axios";
 
-const config = require("@/config/index");
+import config from "@/config/index";
+import playImg from "@/assets/play.png";
 
 let dp;
 export default {
@@ -632,7 +475,7 @@ export default {
               } else {
                 return h("img", {
                   attrs: {
-                    src: require("@/assets/play.png"),
+                    src: playImg,
                   },
                   style: {
                     cursor: "pointer",
@@ -833,7 +676,7 @@ export default {
               } else {
                 return h("img", {
                   attrs: {
-                    src: require("@/assets/play.png"),
+                    src: playImg,
                   },
                   style: {
                     cursor: "pointer",
@@ -918,41 +761,6 @@ export default {
       groupLoading: false,
       // 图片列表
       selectedOss: [],
-      myData: [
-        {
-          title: 'parent 1',
-          expand: true,
-          render: (h, {root, node, data}) => {
-            return h('span', {style: {display: 'inline-block', width: '100%'}}, [
-              h('span', [h("Icon", {type: 'ios-folder-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
-              h('span', {style: {display: 'inline-block', float: 'right', marginRight: '32px'}},
-                [h("Button", {
-                  ...this.buttonProps,
-                  icon: 'ios-add',
-                  type: 'primary',
-                  style: {width: '64px'},
-                  onClick: () => {
-                    this.append(data)
-                  }
-                })
-                ])
-            ]);
-          },
-          children: [
-            {
-              title: 'child 1-1',
-              expand: true,
-              children: [{title: 'leaf 1-1-1', expand: true}, {title: 'leaf 1-1-2', expand: true}]
-            },
-            {
-              title: 'child 1-2',
-              expand: true,
-              children: [{title: 'leaf 1-2-1', expand: true}, {title: 'leaf 1-2-1', expand: true}]
-            }
-          ]
-        }
-      ],
-      buttonProps: {type: 'default', size: 'small',},
     };
   },
   watch: {
@@ -1104,57 +912,6 @@ export default {
       this.searchForm.pageNumber = value;
       this.getDataList();
     },
-    // 自定义tree节点显示内容和交互
-    renderContent(h, {root, node, data}) {
-      if (data.value === '0') {
-        return h('span', {style: {display: 'inline-block', width: '100%'}},
-          [
-            h('span', [h("Icon", {type: 'ios-paper-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
-            h('span', {style: {display: 'inline-block', float: 'right', marginRight: '10px'}}, [])
-          ]
-        );
-      } else {
-        return h('span', {style: {display: 'inline-block', width: '100%'}},
-          [
-            h('span', [h("Icon", {type: 'ios-paper-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
-            h('span', {style: {display: 'inline-block', float: 'right', marginRight: '10px'}},
-              [
-                h("Dropdown", {style: {marginLeft: "4px"}},
-                  [
-                    h("Icon", {
-                      props: {type: 'ios-more', size: "20",},
-                      style: {display: 'inline-block'},
-                      on: {
-                        click: () => {
-                        }
-                      }
-                    }),
-                    h("DropdownMenu", {
-                      slot: "list"
-                    }, [
-                      h("DropdownItem", {
-                        nativeOn: {
-                          click: () => {
-                            this.handleContextMenuEdit(root, node, data)
-                          }
-                        }
-                      }, "编辑"),
-                      h("DropdownItem", {
-                        nativeOn: {
-                          click: () => {
-                            this.handleContextMenuDelete()
-                          }
-                        }
-                      }, "删除"),
-                    ])
-                  ]),
-              ])
-          ]
-        );
-      }
-
-    },
-
 
     handleContextMenu(val) {
       console.log('handleContextMenu', val);
