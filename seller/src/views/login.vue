@@ -1,106 +1,119 @@
 <template>
   <div class="login" @click="$refs.verify.show = false">
-    <el-row class="flex" @keyup.enter="submitLogin">
-      <el-col style="width: 368px">
-        <Header />
-        <el-row style="flex-direction: column">
-          <el-tabs v-model="loginType">
-            <el-tab-pane label="账号密码登录" name="passwordLogin">
-              <el-form
-                ref="usernameLoginForm"
-                :model="form"
-                :rules="rules"
-                class="form"
-              >
-                <el-form-item prop="username">
+    <div class="login-hero">
+      <img class="login-bg" :src="loginBg" alt="" />
+      <div class="login-panel" @keyup.enter="submitLogin">
+        <div class="login-wrap">
+        <img class="login-logo" :src="loginLogo" alt="LILISHOP" />
+        <Header class="login-header-init" />
+
+        <el-tabs v-model="loginType" class="login-tabs">
+          <el-tab-pane label="账号登录" name="passwordLogin">
+            <el-form
+              ref="usernameLoginForm"
+              :model="form"
+              :rules="rules"
+              class="form"
+            >
+              <el-form-item prop="username">
+                <el-input
+                  v-model="form.username"
+                  size="large"
+                  clearable
+                  placeholder="请输入用户名"
+                  autocomplete="off"
+                >
+                  <template #prefix>
+                    <el-icon><User /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+              <el-form-item prop="password">
+                <el-input
+                  v-model="form.password"
+                  type="password"
+                  size="large"
+                  show-password
+                  placeholder="请输入密码"
+                  autocomplete="off"
+                >
+                  <template #prefix>
+                    <el-icon><Lock /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+          <el-tab-pane label="手机登录" name="mobileLogin">
+            <el-form
+              ref="formSms"
+              :model="formSms"
+              :rules="ruleInline"
+              class="form"
+              @click.self="$refs.verify.show = false"
+            >
+              <el-form-item prop="mobile">
+                <el-input
+                  v-model="formSms.mobile"
+                  size="large"
+                  maxlength="11"
+                  clearable
+                  placeholder="请输入手机号"
+                >
+                  <template #prefix>
+                    <el-icon><Iphone /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+              <el-form-item prop="code">
+                <div class="code-field">
                   <el-input
-                    v-model="form.username"
+                    v-model="formSms.code"
                     size="large"
-                    clearable
-                    placeholder="请输入用户名"
-                    autocomplete="off"
+                    placeholder="请输入验证码"
+                    class="code-input"
                   >
                     <template #prefix>
-                      <el-icon><User /></el-icon>
-                    </template>
-                  </el-input>
-                </el-form-item>
-                <el-form-item prop="password">
-                  <el-input
-                    v-model="form.password"
-                    type="password"
-                    size="large"
-                    show-password
-                    placeholder="请输入密码"
-                    autocomplete="off"
-                  >
-                    <template #prefix>
-                      <el-icon><Lock /></el-icon>
-                    </template>
-                  </el-input>
-                </el-form-item>
-              </el-form>
-              <div class="register">
-                <a @click="$router.push('forgetPassword')">忘记密码</a>
-              </div>
-            </el-tab-pane>
-            <el-tab-pane label="验证码登录" name="mobileLogin">
-              <el-form
-                ref="formSms"
-                :model="formSms"
-                :rules="ruleInline"
-                @click.self="$refs.verify.show = false"
-              >
-                <el-form-item prop="mobile">
-                  <el-input
-                    v-model="formSms.mobile"
-                    maxlength="11"
-                    clearable
-                    placeholder="手机号"
-                  >
-                    <template #prepend>
-                      <el-icon><Iphone /></el-icon>
-                    </template>
-                  </el-input>
-                </el-form-item>
-                <el-form-item prop="code">
-                  <el-input v-model="formSms.code" placeholder="手机验证码">
-                    <template #prepend>
                       <el-icon><Message /></el-icon>
                     </template>
-                    <template #append>
-                      <el-button @click="sendCode" :loading="sendCodeLoading">
-                        {{ codeMsg }}
-                      </el-button>
-                    </template>
                   </el-input>
-                </el-form-item>
-              </el-form>
-            </el-tab-pane>
-          </el-tabs>
-          <el-row>
-            <el-button
-              class="login-btn"
-              type="primary"
-              size="large"
-              :loading="loading"
-              style="width: 100%"
-              @click="submitLogin"
-            >
-              <span v-if="!loading">登录</span>
-              <span v-else>登录中</span>
-            </el-button>
-          </el-row>
-        </el-row>
+                  <el-button
+                    class="send-code-btn"
+                    link
+                    :disabled="!isMobileValid || time !== 60"
+                    :loading="sendCodeLoading"
+                    @click="sendCode"
+                  >
+                    {{ codeMsg }}
+                  </el-button>
+                </div>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+        </el-tabs>
+
+        <el-button
+          class="login-btn"
+          type="primary"
+          size="large"
+          :loading="loading"
+          :disabled="!canSubmitLogin"
+          @click="submitLogin"
+        >
+          <span v-if="!loading">登录</span>
+          <span v-else>登录中</span>
+        </el-button>
+
         <verify
           ref="verify"
           class="verify-con"
           verifyType="LOGIN"
           @change="verifyChange"
         />
-        <Footer />
-      </el-col>
-    </el-row>
+      </div>
+    </div>
+    </div>
+    <Footer class="login-footer" />
   </div>
 </template>
 
@@ -127,10 +140,13 @@ export default {
   },
   data() {
     return {
+      loginBg: require("@/assets/login-bg.png"),
+      loginLogo: require("@/assets/logo-lilishop.png"),
       saveLogin: true,
       sendCodeLoading: false,
       loading: false,
       verifyStatus: false,
+      smsCodeSent: false,
       time: 60,
       loginType: "passwordLogin",
       form: {
@@ -159,6 +175,24 @@ export default {
       },
       codeMsg: "发送验证码",
     };
+  },
+  computed: {
+    isMobileValid() {
+      return RegExp.mobile.test(this.formSms.mobile);
+    },
+    canSubmitLogin() {
+      if (this.loginType === "passwordLogin") {
+        return !!(this.form.username.trim() && this.form.password.trim());
+      }
+      return this.smsCodeSent;
+    },
+  },
+  watch: {
+    "formSms.mobile"() {
+      this.smsCodeSent = false;
+      this.verifyStatus = false;
+      this.formSms.code = "";
+    },
   },
   created() {
     window.localStorage.setItem("menuData", "");
@@ -193,8 +227,8 @@ export default {
       });
     },
     sendCode() {
-      if (this.formSms.mobile === "") {
-        this.$Message.warning("请先填写手机号");
+      if (!this.isMobileValid) {
+        this.$Message.warning("请输入正确的手机号");
         return;
       }
       if (!this.verifyStatus) {
@@ -210,6 +244,7 @@ export default {
         sendSms(params)
           .then((res) => {
             if (res.success) {
+              this.smsCodeSent = true;
               this.$Message.success("验证码发送成功");
               const that = this;
               this.interval = setInterval(() => {
@@ -234,6 +269,8 @@ export default {
       }
     },
     submitLogin() {
+      if (!this.canSubmitLogin) return;
+
       if (this.loginType === "passwordLogin") {
         this.$refs.usernameLoginForm.validate((valid) => {
           if (valid) {
@@ -289,74 +326,277 @@ export default {
 
 <style lang="scss" scoped>
 .login {
+  position: relative;
   min-height: 100vh;
   width: 100%;
-  box-sizing: border-box;
   background-color: #fff;
-  background-image: url("../assets/background.png");
-  background-repeat: no-repeat;
-  background-position: center bottom;
-  background-size: 100% auto;
+  overflow: hidden;
+}
+
+.login-hero {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1024 / 426;
+}
+
+.login-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+.login-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
+  padding: 0 12vw 0 0;
+  background: transparent;
+}
 
-  :deep(.el-input__wrapper) {
-    background-color: #fff !important;
-    box-shadow: 0 0 0 1px var(--el-border-color) inset !important;
+.login-wrap {
+  position: relative;
+  width: 320px;
+  padding: 40px 42px 32px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
 
-    &.is-focus {
-      box-shadow: 0 0 0 1px var(--el-border-color) inset !important;
+.login-logo {
+  display: block;
+  width: 168px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.login-header-init {
+  display: none;
+}
+
+.login-tabs {
+  margin-top: 28px;
+
+  :deep(.el-tabs__header) {
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: center;
+  }
+
+  :deep(.el-tabs__nav-wrap) {
+    flex: none;
+  }
+
+  :deep(.el-tabs__nav-wrap::after) {
+    display: none;
+  }
+
+  :deep(.el-tabs__nav) {
+    float: none;
+    display: flex;
+    justify-content: center;
+  }
+
+  :deep(.el-tabs__item) {
+    padding: 0 0 12px;
+    margin-right: 32px;
+    height: auto;
+    font-size: 15px;
+    color: #8a9199;
+    transition: color 0.2s ease, font-size 0.2s ease;
+
+    &:last-child {
+      margin-right: 0;
     }
-  }
 
-  :deep(.el-input__inner) {
-    background-color: transparent !important;
-
-    &:-webkit-autofill,
-    &:-webkit-autofill:hover,
-    &:-webkit-autofill:focus,
-    &:-webkit-autofill:active {
-      -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
-      box-shadow: 0 0 0 1000px #fff inset !important;
-      -webkit-text-fill-color: #606266 !important;
-      caret-color: #606266;
-      transition: background-color 99999s ease-out;
+    &.is-active {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2329;
     }
-  }
 
-  .verify-con {
-    position: absolute;
-    top: 126px;
-    z-index: 10;
-    left: 20px;
-  }
-
-  .form {
-    padding-top: 1vh;
-  }
-
-  .login-btn {
-    background: linear-gradient(135deg, $theme_color 0%, $warning_color 100%);
-    height: 40px;
-    border: none;
-  }
-
-  .login-btn:hover {
-    opacity: 0.9;
-  }
-
-  .register {
-    text-align: right;
-    margin-bottom: 12px;
-    a {
+    &:hover {
       color: $theme_color;
-      cursor: pointer;
     }
+  }
+
+  :deep(.el-tabs__active-bar) {
+    height: 2px;
+    background-color: $theme_color;
+    border-radius: 1px;
   }
 }
 
-.flex {
+:deep(.el-input__wrapper) {
+  background-color: #fff !important;
+  box-shadow: 0 0 0 1px #e5e7eb inset !important;
+  border-radius: 8px;
+  padding: 4px 14px;
+  transition: box-shadow 0.2s ease;
+
+  &.is-focus {
+    box-shadow: 0 0 0 1px $theme_color inset,
+      0 0 0 3px rgba($theme_color, 0.12) !important;
+  }
+}
+
+:deep(.el-input-group__prepend),
+:deep(.el-input-group__append) {
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+}
+
+:deep(.el-input-group__prepend) {
+  padding-right: 8px;
+}
+
+:deep(.el-input-group__append) {
+  padding-left: 8px;
+}
+
+:deep(.el-input__prefix) {
+  color: #a0a7b0;
+}
+
+:deep(.el-input__inner) {
+  background-color: transparent !important;
+
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+    box-shadow: 0 0 0 1000px #fff inset !important;
+    -webkit-text-fill-color: #606266 !important;
+    caret-color: #606266;
+    transition: background-color 99999s ease-out;
+  }
+}
+
+:deep(.el-form-item) {
+  margin-bottom: 22px;
+}
+
+.send-code-btn {
+  flex-shrink: 0;
+  min-width: 90px;
+  padding: 0 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  color: $theme_color !important;
+
+  &:not(.is-disabled):hover {
+    opacity: 0.85;
+  }
+
+  &.is-disabled {
+    color: #c0c4cc !important;
+  }
+}
+
+.code-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+
+  .code-input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.verify-con {
+  position: absolute;
+  top: 150px;
+  z-index: 10;
+  left: 20px;
+}
+
+.form {
+  padding-top: 2px;
+}
+
+.login-btn {
+  width: 100%;
+  height: 44px;
+  margin-top: 4px;
+  border: none !important;
+  border-radius: 8px;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: #fff !important;
+  background: linear-gradient(135deg, $theme_color 0%, $warning_color 100%) !important;
+  box-shadow: none;
+  transition: opacity 0.2s ease;
+
+  &:not(.is-disabled):hover {
+    opacity: 0.9;
+  }
+
+  &.is-disabled,
+  &.is-disabled:hover,
+  &.is-disabled:focus {
+    color: #fff !important;
+    border-color: transparent !important;
+    background: linear-gradient(
+      135deg,
+      rgba($theme_color, 0.45) 0%,
+      rgba($warning_color, 0.45) 100%
+    ) !important;
+    opacity: 1;
+    cursor: not-allowed;
+  }
+}
+
+:deep(.login-footer.foot) {
+  position: absolute;
+  bottom: 24px;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  width: 100%;
+  margin-top: 0;
+  text-align: center;
+  color: #000;
+}
+
+:deep(.login-footer .information) {
   justify-content: center;
+}
+
+:deep(.login-footer .copyright p) {
+  color: #000;
+}
+
+:deep(.login-footer a) {
+  color: #000 !important;
+
+  &:hover {
+    color: #333 !important;
+  }
+}
+
+@media (max-width: 992px) {
+  .login-panel {
+    justify-content: center;
+    padding: 0 20px;
+  }
+
+  .login-wrap {
+    width: 100%;
+    max-width: 340px;
+    padding: 32px 24px 24px;
+  }
 }
 </style>
