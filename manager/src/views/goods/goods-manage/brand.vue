@@ -60,7 +60,7 @@
               <span class="op-split">|</span>
               <a class="link-text" @click="openCategoryModal(row)">关联分类</a>
               <span class="op-split">|</span>
-              <a class="link-text" @click="delBrand(row.id)">删除</a>
+              <a class="link-text" @click="delBrand(row)">删除</a>
             </template>
           </template>
         </el-table-column>
@@ -289,12 +289,15 @@ export default {
         this.$nextTick(() => this.$forceUpdate());
       });
     },
-    async delBrand(id) {
-      const res = await delBrand(id);
-      if (res.success) {
-        ElMessage.success("品牌删除成功!");
-        this.getDataList();
-      }
+    delBrand(row) {
+      ElMessageBox.confirm("您确认要删除 " + row.name + " ?", "确认删除", { type: "warning" }).then(() => {
+        return delBrand(row.id).then((res) => {
+          if (res.success) {
+            ElMessage.success("品牌删除成功!");
+            this.getDataList();
+          }
+        });
+      }).catch(() => {});
     },
     init() {
       this.getDataList();

@@ -17,8 +17,12 @@
               :to="{ path: '/merchant', query: { id: goodsMsg.data.storeId } }"
             >{{ goodsMsg.data.storeName }}</router-link>
           </span>
-          <span class="store-collect-btn" @click="collect">
-            <el-icon :color="storeCollected ? '#ffc107' : '#666'"><StarFilled /></el-icon>
+          <span
+            class="store-collect-btn"
+            :class="{ 'is-collected': storeCollected }"
+            @click="collect"
+          >
+            <el-icon class="store-collect-icon"><StarFilled /></el-icon>
             {{ storeCollected? "已收藏店铺": "收藏店铺" }}
           </span>
           <span class="ml_10 contact-service-btn" @click="IMService(goodsMsg.data.storeId,goodsMsg.data.goodsId,goodsMsg.data.id)">联系客服</span>
@@ -245,6 +249,17 @@ export default {
     .store-collect-btn,
     .contact-service-btn {
       cursor: pointer;
+    }
+
+    .store-collect-btn {
+      .store-collect-icon {
+        color: #666;
+        vertical-align: middle;
+      }
+
+      &.is-collected .store-collect-icon {
+        color: $theme_color;
+      }
     }
 
     .store-name-link {

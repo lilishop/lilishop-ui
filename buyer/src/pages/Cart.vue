@@ -186,8 +186,9 @@
                   <el-button
                     size="small"
                     class="cart-collect-btn"
-                    @click="collectGoods(goods.goodsSku.id)"
-                    >收藏</el-button
+                    :class="{ 'is-collected': goods.isCollected }"
+                    @click="handleCollect(goods)"
+                    >{{ goods.isCollected ? "已收藏" : "收藏" }}</el-button
                   >
                 </div>
               </div>
@@ -288,16 +289,69 @@ export default {
       });
       window.open(routeUrl.href, "_blank");
     },
-    // 收藏商品
-    collectGoods(id) {
+    // 同步购物车商品收藏状态
+    async syncCartCollectionStatus() {
+      if (!this.Cookies.getItem("userInfo") || !this.cartList.length) return;
+      const skuIds = [];
+      this.cartList.forEach((shop) => {
+        (shop.skuList || []).forEach((goods) => {
+          goods.isCollected = false;
+          if (goods.goodsSku && goods.goodsSku.id) {
+            skuIds.push(goods.goodsSku.id);
+          }
+        });
+      });
+      const uniqueSkuIds = [...new Set(skuIds)];
+      await Promise.all(
+        uniqueSkuIds.map(async (skuId) => {
+          try {
+            const res = await APIMember.isCollection("GOODS", skuId);
+            if (res.success && res.result) {
+              this.cartList.forEach((shop) => {
+                (shop.skuList || []).forEach((goods) => {
+                  if (goods.goodsSku && goods.goodsSku.id === skuId) {
+                    goods.isCollected = true;
+                  }
+                });
+              });
+            }
+          } catch (e) {
+            // 单个查询失败不影响其他商品
+          }
+        })
+      );
+      this.$forceUpdate();
+    },
+    // 收藏 / 取消收藏商品
+    handleCollect(goods) {
+      const skuId = goods.goodsSku && goods.goodsSku.id;
+      if (!skuId) return;
+      if (goods.isCollected) {
+        Modal.confirm({
+          title: "取消收藏",
+          content: "确定取消收藏该商品吗？",
+          onOk: () => {
+            return APIMember.cancelCollect("GOODS", skuId).then((res) => {
+              if (res.success) {
+                goods.isCollected = false;
+                Message.success("取消收藏成功");
+                this.$forceUpdate();
+              }
+            });
+          },
+          onCancel: () => {},
+        });
+        return;
+      }
       Modal.confirm({
         title: "收藏",
         content: "商品收藏后可在个人中心我的收藏查看",
         onOk: () => {
-          APIMember.collectGoods("GOODS", id).then((res) => {
+          return APIMember.collectGoods("GOODS", skuId).then((res) => {
             if (res.success) {
+              goods.isCollected = true;
               Message.success("收藏商品成功");
-              this.getCartList();
+              this.$forceUpdate();
             }
           });
         },
@@ -425,6 +479,7 @@ export default {
           }
           this.$forceUpdate();
           this.allChecked = allChecked;
+          this.syncCartCollectionStatus();
         }
       } catch (error) {
         this.loading = false;
@@ -877,6 +932,18 @@ export default {
     background-color: #e55a15 !important;
     border-color: #e55a15 !important;
     color: #fff !important;
+  }
+
+  &.is-collected {
+    background-color: $theme_color !important;
+    border-color: $theme_color !important;
+
+    &:hover,
+    &:focus {
+      background-color: $theme_color !important;
+      border-color: $theme_color !important;
+      opacity: 0.9;
+    }
   }
 }
 </style>

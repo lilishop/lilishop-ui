@@ -272,7 +272,7 @@
                     @current-change="pageChange"
                   />
                 </div>
-                <div v-if="isComponent && selectImage" class="oss-select-footer">
+                <div v-if="isComponent && selectImage && !hideSelectFooter" class="oss-select-footer">
                   <el-button @click="handleSelectCancel">取消</el-button>
                   <el-button type="primary" @click="handleSelectConfirm">确定</el-button>
                 </div>
@@ -409,6 +409,10 @@ export default {
     maxSelect: {
       type: Number,
       default: 0,
+    },
+    hideSelectFooter: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {

@@ -11,9 +11,9 @@
     <div class="delivery-rate">
       <div class="fontsize_16">物流服务评价：</div>
       <div class="color999 delivery-rate-items">
-        <span>物流评价：<el-rate disabled :model-value="Number(orderGoods.deliveryScore) || 0" /></span>
-        <span>服务评价：<el-rate disabled :model-value="Number(orderGoods.serviceScore) || 0" /></span>
-        <span>描述评价：<el-rate disabled :model-value="Number(orderGoods.descriptionScore) || 0" /></span>
+        <span>物流评价：<el-rate disabled :model-value="Number(orderGoods.deliveryScore) || 0" :colors="rateThemeColors" class="theme-rate" /></span>
+        <span>服务评价：<el-rate disabled :model-value="Number(orderGoods.serviceScore) || 0" :colors="rateThemeColors" class="theme-rate" /></span>
+        <span>描述评价：<el-rate disabled :model-value="Number(orderGoods.descriptionScore) || 0" :colors="rateThemeColors" class="theme-rate" /></span>
       </div>
     </div>
     <!-- 添加订单评价  左侧商品详情  右侧评价框 -->
@@ -99,6 +99,8 @@ export default {
       visible: false, // 图片预览
       previewImage: "", // 预览图片链接
       loading: false, // 加载状态
+      // el-rate SVG 通过 colors 写入 fill-color，跟随平台主题色
+      rateThemeColors: ["var(--theme-color)", "var(--theme-color)", "var(--theme-color)"],
     };
   },
   methods: {
@@ -147,13 +149,13 @@ export default {
   gap: 16px;
 }
 
-.delivery-rate-items :deep(.el-rate) {
-  --el-rate-fill-color: #ffb400;
-  --el-rate-disabled-fill-color: #ffb400;
+.delivery-rate-items :deep(.theme-rate.el-rate) {
+  --el-rate-fill-color: #{$theme_color};
+  --el-rate-disabled-fill-color: #{$theme_color};
 }
 
-:deep(.el-rate__icon.is-active) {
-  color: #ffb400;
+:deep(.theme-rate .el-rate__icon.is-active) {
+  color: $theme_color !important;
 }
 .goods-eval li {
   display: flex;
