@@ -164,25 +164,27 @@
             </el-form-item>
             <el-form-item class="form-item-view-el" label="主图视频" prop="goodsVideo">
               <div class="goods-video">
-                <div v-if="baseInfoForm.goodsVideo">
-                  <div>
-                    <video :src="baseInfoForm.goodsVideo" class="video" controls style="max-width: 300px;" />
-                  </div>
+                <div v-if="baseInfoForm.goodsVideo" class="goods-video-preview">
+                  <video :src="baseInfoForm.goodsVideo" class="video" controls style="max-width: 300px;" />
                 </div>
-                <el-upload
-                  :action="uploadFileUrl"
-                  :headers="{ ...accessToken }"
-                  accept=".avi,.wmv,.mpeg,.mp4,.mov"
-                  :show-file-list="false"
-                  :before-upload="beforeVideoUpload"
-                  :on-success="handleSuccessGoodsVideo"
-                  :on-error="() => { loadingVideo = false }"
-                  style="margin-left: 10px; display: inline-block"
-                >
-                  <el-button :loading="loadingVideo" type="primary" link>
-                    {{ loadingVideo ? "正在上传..." : `${baseInfoForm.goodsVideo ? "已" : ""}上传视频` }}
+                <div class="goods-video-actions">
+                  <el-upload
+                    :action="uploadFileUrl"
+                    :headers="{ ...accessToken }"
+                    accept=".avi,.wmv,.mpeg,.mp4,.mov"
+                    :show-file-list="false"
+                    :before-upload="beforeVideoUpload"
+                    :on-success="handleSuccessGoodsVideo"
+                    :on-error="() => { loadingVideo = false }"
+                  >
+                    <el-button :loading="loadingVideo" type="primary" link>
+                      {{ loadingVideo ? "正在上传..." : `${baseInfoForm.goodsVideo ? "已" : ""}上传视频` }}
+                    </el-button>
+                  </el-upload>
+                  <el-button v-if="baseInfoForm.goodsVideo" link type="danger" @click="handleRemoveGoodsVideo">
+                    删除
                   </el-button>
-                </el-upload>
+                </div>
               </div>
             </el-form-item>
             <div class="layout" style="width: 100%">
@@ -1074,6 +1076,15 @@ export default {
         file.url = file.response.result;
         this.baseInfoForm.goodsVideo = file.url;
       }
+      this.loadingVideo = false;
+    },
+    handleRemoveGoodsVideo() {
+      this.baseInfoForm.goodsVideo = "";
+      this.showGoodsVideo = false;
+      if (this.goodsVideo && typeof this.goodsVideo.destroy === "function") {
+        this.goodsVideo.destroy();
+      }
+      this.goodsVideo = "";
     },
     // 图片大小不正确
     handleMaxSize(size = 2) {
@@ -2361,7 +2372,21 @@ export default {
 }
 
 .goods-video {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+}
+
+.goods-video-preview {
+  display: flex;
   align-items: center;
+}
+
+.goods-video-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
 }
 
 .mb-10 {
