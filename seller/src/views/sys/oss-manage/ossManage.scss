@@ -35,7 +35,7 @@
 
   cursor: pointer;
 
-  .ivu-card-body {
+  .el-card__body {
     padding: 0;
   }
 
@@ -161,6 +161,9 @@
       box-sizing: border-box;
       margin: 0 13px 8px;
       position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       .card {
         width: 120px;
         height: 120px;
@@ -172,12 +175,19 @@
         img {
           width: 100%;
           height: 100%;
+          object-fit: cover;
         }
-        .checkbox {
+        .card-checkbox {
           position: absolute;
-          top: 10px;
-          right: 10px;
+          top: 8px;
+          right: 8px;
           z-index: 1000;
+          height: auto;
+          margin: 0;
+
+          :deep(.el-checkbox__label) {
+            display: none;
+          }
         }
         .preview {
           width: 100%;
@@ -200,6 +210,9 @@
       .card:hover,
       .custom-checkbox-card-checked {
         border: 2px solid #ff5c58;
+      }
+      .oss-card-selectable {
+        cursor: pointer;
       }
       .text {
         width: 120px;
@@ -226,37 +239,8 @@
     display: flex;
     flex-direction: row-reverse;
   }
-  /* Checkbox默认的样式 */
-  .check-box {
-    .ivu-checkbox {
-      position: absolute;
-      right: 10px;
-      top: 10px;
-      z-index: 100;
-    }
-  }
-  /* 覆盖iView默认的Checkbox样式 */
-  .ivu-checkbox-wrapper {
-    /*font-size: 16px; !* 修改字体大小 *!*/
-    /*color: #495060; !* 修改文本颜色 *!*/
-    /* 添加其他需要的样式 */
-  }
-  .ivu-checkbox-inner {
-    /*width: 20px; !* 修改选框大小 *!*/
-    /*height: 20px;*/
-    /*border-color: #dcdee2; !* 修改边框颜色 *!*/
-    /* 添加其他需要的样式 */
-  }
-  /* 当Checkbox被选中时的样式 */
-  .ivu-checkbox-checked .ivu-checkbox-inner {
-    /*background-color: #2db7f5; !* 修改选中时的背景颜色 *!*/
-  }
-  /* 当Checkbox不可用时的样式 */
-  .ivu-checkbox-disabled .ivu-checkbox-inner {
-    /*background-color: #e9e9e9; !* 修改禁用状态下的背景颜色 *!*/
-  }
 
-  .demo-tree-render .ivu-tree-title{
+  .demo-tree-render .el-tree-node__content {
     width: 94%;
   }
 }

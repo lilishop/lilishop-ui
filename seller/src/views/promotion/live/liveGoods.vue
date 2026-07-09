@@ -1,393 +1,287 @@
 <template>
-  <div class="wrapper">
-    <Card>
-      <Form ref="searchForm" :model="params" inline :label-width="100" class="search-form">
-        <Form-item label="商品名称">
-          <Input type="text" v-model="params.name" placeholder="请输入商品名称" clearable style="width: 240px" />
-        </Form-item>
+  <div>
+    <el-card>
+      <el-form :model="liveForm" ref="liveForm" :rules="liveRulesForm" label-width="120px">
+        <el-form-item label="直播标题" prop="name">
+          <div class="form-field-block">
+            <el-input disabled v-model="liveForm.name" style="width:460px"></el-input>
+            <div class="tips">直播间名字，最短3个汉字，最长17个汉字，1个汉字相当于2个字符</div>
+          </div>
+        </el-form-item>
+        <el-form-item label="主播昵称" prop="anchorName">
+          <div class="form-field-block">
+            <el-input disabled v-model="liveForm.anchorName" style="width:360px"></el-input>
+            <div class="tips">主播昵称，最短2个汉字，最长15个汉字，1个汉字相当于2个字符</div>
+          </div>
+        </el-form-item>
+        <el-form-item label="直播时间" prop="startTime">
+          <div class="form-field-block">
+            <el-date-picker
+              class="live-time-picker"
+              disabled
+              format="YYYY-MM-DD HH:mm"
+              type="datetimerange"
+              v-model="times"
+              @change="handleChangeTime"
+              start-placeholder="开始时间"
+              end-placeholder="结束时间"
+              placeholder="直播计划开始时间-直播计划结束时间"
+            />
+            <div class="tips">直播开播时间需要在当前时间的10分钟后 并且 开始时间不能在 6 个月后</div>
+          </div>
+        </el-form-item>
 
-        <Button @click="getLiveGoodsMethods('clear')" type="primary" class="search-btn" icon="ios-search">搜索</Button>
-      </Form>
-      </Card>
-    <Card>
-      <h4 v-if="!reviewed">
-        由于直播商品需经过小程序直播平台的审核，你需要在此先提审商品，为了不影响直播间选取商品，请提前1天提审商品；
-      </h4>
+        <el-form-item label="主播微信号" prop="anchorWechat">
+          <div class="form-field-block">
+            <el-input disabled v-model="liveForm.anchorWechat" style="width:360px" placeholder="主播微信号"></el-input>
+            <div class="tips">主播微信号，如果未实名认证，需要先前往“小程序直播”小程序进行<a target="_black" href="https://res.wx.qq.com/op_res/9rSix1dhHfK4rR049JL0PHJ7TpOvkuZ3mE0z7Ou_Etvjf-w1J_jVX0rZqeStLfwh">实名验证</a></div>
+          </div>
+        </el-form-item>
 
-      <div>
-        <Tabs v-model="params.auditStatus">
-          <TabPane v-for="(item,index) in liveTabWay" :key="index" :label="item.label" :name="item.type+''">
-          </TabPane>
-        </Tabs>
-      </div>
-
-      <Button v-if="!reviewed" type="primary" style="margin-bottom:10px;" @click="addNewLiveGoods" icon="md-add">选择商品</Button>
-      <Button type="primary" v-if="params.auditStatus == 0" ghost style="margin:0 0 10px 10px" @click="getLiveGoodsMethods('clear')">更新状态</Button>
-      <div style="position:relative">
-        <Spin size="large" fix v-if="tableLoading">
-        </Spin>
-        <Table class="mt_10" disabled-hover :columns="liveGoodsColumns" :data="liveGoodsData">
-
-          <template slot-scope="{ row }" slot="goodsName">
-            <div class="flex-goods">
-              <img class="thumbnail" :src="row.thumbnail || row.goodsImage">
-              {{ row.goodsName || row.name }}
+        <el-form-item label="分享卡片封面" prop="feedsImg">
+          <div class="form-field-block">
+            <div class="upload-list" v-if="liveForm.feedsImg">
+              <img :src="liveForm.feedsImg">
+              <div class="upload-list-cover" @click="handleView(liveForm.feedsImg)">
+                <span class="view-icon">查看</span>
+              </div>
             </div>
-          </template>
-          <template slot-scope="{ row ,index }" class="price" slot="price">
-            <!-- 如果为新增商品显示 -->
-
-            <RadioGroup v-if="params.auditStatus == 99" @on-change="changeRadio(row,'priceType')" v-model="row.priceType">
-              <div class="price-item">
-                <Radio :label="1">一口价:</Radio>
-                <InputNumber :min="0.1" v-if="liveGoodsData[index].priceType == 1" style="width:100px" v-model="liveGoodsData[index].price"></InputNumber>
-              </div>
-              <div class="price-item">
-                <Radio :label="2">区间价:</Radio> <span v-if="liveGoodsData[index].priceType == 2">
-                  <InputNumber :min="0.1" style="width:100px" v-model="liveGoodsData[index].price" />至
-                  <InputNumber :min="0.1" style="width:100px" v-model="liveGoodsData[index].price2" />
-                </span>
-              </div>
-              <div class="price-item">
-                <Radio :label="3">折扣价:</Radio> <span v-if="liveGoodsData[index].priceType == 3">原价<InputNumber :min="0.1" style="width:100px" v-model="liveGoodsData[index].price"></InputNumber>现价
-                  <InputNumber :min="0.1" style="width:100px" v-model="liveGoodsData[index].price2" />
-                </span>
-              </div>
-            </RadioGroup>
-            <div v-else>
-              <div v-if="row.priceType == 1"><priceColorScheme :value="row.price" :color="$mainColor" /></div>
-              <div class="flex" v-if="row.priceType == 2"><priceColorScheme :value="row.price" :color="$mainColor" />至<priceColorScheme :value="row.price2" :color="$mainColor" /></div>
-              <div class="flex" v-if="row.priceType == 3"><priceColorScheme :value="row.price2" :color="$mainColor" /><span class="original-price">{{row.price | unitPrice('￥')}}</span></div>
+            <div class="tips">
+              直播间分享图，图片规则：建议像素800*640，大小不超过1M；
             </div>
+          </div>
+        </el-form-item>
 
-          </template>
+        <el-form-item label="直播间背景墙" prop="coverImg">
+          <div class="form-field-block">
+            <div class="upload-list" v-if="liveForm.coverImg">
+              <img :src="liveForm.coverImg">
+              <div class="upload-list-cover" @click="handleView(liveForm.coverImg)">
+                <span class="view-icon">查看</span>
+              </div>
+            </div>
+            <div class="tips"> 直播间背景图，图片规则：建议像素1080*1920，大小不超过1M</div>
+          </div>
+        </el-form-item>
 
-          <template slot-scope="{ row ,index }" slot="action">
-            <a v-if="params.auditStatus == 99" @click="liveGoodsData.splice(index,1)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">删除</a>
-            <span v-if="params.auditStatus == 99 || (params.auditStatus != 99 && !reviewed) || reviewed" style="margin:0 8px;color:#dcdee2">|</span>
-            <a v-if="params.auditStatus != 99 && !reviewed" @click="$router.push({path:'/goods-operation-edit',query:{id:row.goodsId}})" style="color:#2d8cf0;cursor:pointer;text-decoration:none">查看</a>
-            <span v-if="reviewed" style="margin:0 8px;color:#dcdee2">|</span>
-            <a v-if="reviewed" @click="selectedLiveGoods(row,index)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">{{row.___selected ? '已':''}}选择</a>
-          </template>
-        </Table>
-        <div class="flex">
-          <Page size="small" :total="goodsTotal" @on-change="changePageNumber" class="pageration" @on-page-size-change="changePageSize" :page-size="params.pageSize" show-total show-elevator
-            show-sizer>
-          </Page>
+        <el-form-item label="直播间分享图" prop="shareImg">
+          <div class="form-field-block">
+            <div class="upload-list" v-if="liveForm.shareImg">
+              <img :src="liveForm.shareImg">
+              <div class="upload-list-cover" @click="handleView(liveForm.shareImg)">
+                <span class="view-icon">查看</span>
+              </div>
+            </div>
+            <div class="tips"> 直播间分享图，图片规则：建议像素800*640，大小不超过1M</div>
+          </div>
+        </el-form-item>
 
-        </div>
-      </div>
-    </Card>
-    <sku-select ref="skuSelect" @selectedGoodsData="selectedGoodsData"></sku-select>
-    <div v-if="params.auditStatus == 99" class="submit">
-      <Button type="primary" :loading="saveGoodsLoading" @click="saveLiveGoods">保存商品</Button>
-    </div>
+        <el-form-item label="商品" v-if="$route.query.id">
+          <div class="form-field-block">
+            <el-table class="goods-table" border :data="liveData" style="width: 100%">
+            <el-table-column label="商品" min-width="200">
+              <template #default="{ row, $index }">
+                <div v-if="row" class="flex-goods">
+                  <el-badge v-if="$index == 0 || $index == 1" is-dot type="danger" />
+                  <img class="thumbnail" :src="row.thumbnail || row.goodsImage">
+                  {{ row.goodsName || row.name }}
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="价格" min-width="160">
+              <template #default="{ row }">
+                <div v-if="row">
+                  <div v-if="row.priceType == 1">{{ $filters.unitPrice(row.price, '￥') }}</div>
+                  <div v-if="row.priceType == 2">{{ $filters.unitPrice(row.price, '￥') }}至{{ $filters.unitPrice(row.price2, '￥') }}</div>
+                  <div v-if="row.priceType == 3">
+                    {{ $filters.unitPrice(row.price, '￥') }}
+                    <span class="original-price">{{ $filters.unitPrice(row.price2, '￥') }}</span>
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="库存" width="100">
+              <template #default="{ row }">
+                <span v-if="row">{{ row.quantity }}</span>
+              </template>
+            </el-table-column>
+          </el-table>
+            <div class="tips">
+              直播间商品中前两个商品将自动被选为封面，伴随直播间在直播列表中显示
+            </div>
+          </div>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button type="primary" @click="createLives()">保存</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-dialog v-model="imageVisible" title="查看图片" width="600px">
+      <img :src="imageSrc" v-if="imageVisible" style="width: 100%">
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import skuSelect from "@/views/lili-dialog"; //选择商品组件
 import { addLiveStoreGoods, getLiveGoods } from "@/api/promotion.js";
 export default {
-  components: {
-    skuSelect,
-  },
   data() {
     return {
-      goodsTotal: 0, //商品总数
-      saveGoodsLoading: false, //保存商品加载
-      tableLoading: false, //表格是否加载
-      params: {
-        pageNumber: 1,
-        pageSize: 10,
-        auditStatus: 2, //商品状态
+      imageVisible: false,
+      imageSrc: "",
+      liveForm: {
+        name: "",
+        anchorName: "",
+        anchorWechat: "",
+        feedsImg: "",
+        coverImg: "",
+        shareImg: "",
+        startTime: "",
       },
-      // 商品审核状态
-      liveTabWay: [
-        {
-          label: "待提审",
-          type: 0,
-        },
-        {
-          label: "已审核",
-          type: 2,
-        },
-
-        {
-          label: "审核中",
-          type: 1,
-        },
-
-        {
-          label: "审核未通过",
-          type: 3,
-        },
-      ],
-
-      // 商品表格columns
-      liveGoodsColumns: [
-        {
-          title: "商品",
-          slot: "goodsName",
-        },
-        {
-          title: "价格",
-          slot: "price",
-        },
-        {
-          title: "库存",
-          key: "quantity",
-          width: 100,
-        },
-
-        {
-          title: "操作",
-          slot: "action",
-          width: 100,
-        },
-      ],
-      // 表格商品详情
-      liveGoodsData: [],
-      // 已选商品
-      selectedGoods: [],
+      times: [],
+      liveData: [],
+      commodityList: "",
     };
   },
-  props: {
-    // 是否是已审核，此处为组件模式时使用。去除添加等功能 只保留查询以及新增选择回调数据
-    reviewed: {
-      type: Boolean,
-      default: false,
-    },
-    // 初始化信息，此处为组件模式时使用。父级将数据传输到此方法上
-    init: {
-      type: null,
-      default: "",
-    },
+  mounted() {
+    if (this.$route.query.id) {
+      this.getLiveDetail();
+    }
+    this.accessToken = {
+      accessToken: this.getStore("accessToken"),
+    };
   },
-  watch: {
-    //此处为组件模式时使用 监听此处为开启则需要删除tab上面的数据只显示已审核
-    reviewed: {
-      handler(val) {
-        if (val) {
-          this.liveTabWay = this.liveTabWay.filter((item) => {
-            return item.label == "已审核";
-          });
-        }
-      },
-      immediate: true,
-    },
-    //此处为组件模式时使用 监听父级给传值
-    init: {
-      handler(val) {
-        if (val) {
-          this.$nextTick(() => {
-            // 将当前父级返回的数据和当前数据进行匹配
-            this.selectedGoods = val;
-            this.liveGoodsData.forEach((item, index) => {
-              val.forEach((callback) => {
-                if (item.id == callback.id) {
-                  this.$set(this.liveGoodsData[index], "___selected", true);
-                  // this.selectedGoods.push(item);
-                }
-              });
-            });
-          });
-        }
-      },
-      immediate: true,
-    },
-    // 监听如果次数变化说明用户再点击tab
-    "params.auditStatus": {
-      handler(val) {
-        this.liveGoodsData = [];
-        if (val != 99) {
-          this.params.pageNumber = 1;
-          this.getLiveGoodsMethods();
-        }
-      },
-      immediate: true,
-    },
-  },
+
   methods: {
-    /**
-     * 回调参数补充
-     */
-    selectedLiveGoods(val, index) {
-      this.$emit("selectedGoods", val);
+    handleView(src) {
+      this.imageVisible = true;
+      this.imageSrc = src;
     },
-    /**
-     * 解决radio数据不回显问题
-     */
-    changeRadio(val) {
-      this.$set(this.liveGoodsData[val._index], "priceType", val.priceType);
-    },
-    /**
-     * 页面数据大小分页回调
-     */
-    changePageSize(val) {
-      this.params.pageSize = val;
-      this.getLiveGoodsMethods("clear");
-    },
-    /**
-     * 分页回调
-     */
-    changePageNumber(val) {
-      this.params.pageNumber = val;
-      this.getLiveGoodsMethods("clear");
-    },
-    /**
-     * 清除新增的tab
-     */
-    clearNewLiveTab() {
-      this.liveTabWay.map((item, index) => {
-        return item.type == 99 && this.liveTabWay.splice(index, 1);
+    handleMaxSize(file) {
+      this.$Notice.warning({
+        title: "文件大小过大",
+        desc: "所选文件大小过大, 不得超过 1M.",
       });
     },
+    async getLiveDetail() {
+      let result = await getLiveInfo(this.$route.query.id);
 
-    /**
-     * 查询商品
-     */
-    async getLiveGoodsMethods(type) {
-      this.tableLoading = true;
-
-      let result = await getLiveGoods(this.params);
       if (result.success) {
-        // 将表格数据清除
-        if (type == "clear") {
-          this.liveGoodsData = [];
+        let data = result.result;
+        for (let key in data) {
+          this.liveForm[key] = data[key];
         }
-        this.liveGoodsData.push(...result.result.records);
-        this.goodsTotal = result.result.total;
+
+        this.liveData = data.commodityList;
+        this.commodityList = data.commodityList;
+
+        this.times = [
+          this.$filters.unixToDate(data.startTime, "yyyy-MM-dd hh:mm"),
+          this.$filters.unixToDate(data.endTime, "yyyy-MM-dd hh:mm"),
+        ];
+        this.liveStatus = data.status;
       }
-      this.tableLoading = false;
-    },
-
-    /**
-     * 保存直播商品
-     */
-    async saveLiveGoods() {
-      this.saveGoodsLoading = true;
-      let submit = this.liveGoodsData.map((element) => {
-
-        return {
-          goodsId: element.goodsId, //商品id
-          goodsImage: element.small, //商品图片  最大为 300 * 300
-          name: element.goodsName, //商品昵称
-          price: parseInt(element.price), //商品价格
-          quantity: element.quantity, //库存
-          price2: element.price2 ? parseInt(element.price2) : "", //商品价格
-          priceType: element.priceType, // priceType  Number  是  价格类型，1：一口价（只需要传入price，price2不传） 2：价格区间（price字段为左边界，price2字段为右边界，price和price2必传） 3：显示折扣价（price字段为原价，price2字段为现价， price和price2必传）
-          skuId: element.id,
-          url: `pages/product/goods?id=${element.id}&goodsId=${element.goodsId}`, //小程序地址
-        };
-      });
-
-      let result = await addLiveStoreGoods(submit);
-      if (result.success) {
-        this.$Message.success({
-          content: `添加成功！`,
-        });
-
-        this.params.auditStatus = 0;
-      }
-      this.saveGoodsLoading = false;
-    },
-
-    /**
-     * 商品选择器回调的商品信息
-     */
-    selectedGoodsData(goods) {
-      goods.map((item) => {
-        return (item.priceType = 1);
-      });
-
-      this.liveGoodsData.push(...goods);
-    },
-
-    /**
-     * 新增商品
-     */
-    addNewLiveGoods() {
-      this.clearNewLiveTab();
-      this.liveTabWay.push({
-        type: 99,
-        label: "新增商品",
-      });
-      this.$set(this, "liveGoodsData", []);
-      this.params.auditStatus = 99;
-      this.$refs.skuSelect.open("goods");
-      this.$refs.skuSelect.goodsData = JSON.parse(
-        JSON.stringify(this.liveGoodsData)
-      );
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@import "@/styles/table-common.scss";
-.search-form {
-  margin-bottom: 10px;
+:deep(.el-form-item__content) {
+  flex-wrap: wrap;
+  align-items: flex-start;
 }
-.flex {
-  display: flex;
-  justify-content: flex-end;
-  margin: 20px 0;
-}
-.wrapper {
-  position: relative;
-}
-.thumbnail {
-  width: 100px;
-  height: 100px;
-  border-radius: 0.4em;
-}
-.flex-goods {
-  margin: 10px;
-  display: flex;
 
-  align-items: center;
-  > img {
-    margin-right: 10px;
-  }
-}
-.price-item {
-  margin: 15px 5px;
-  > * {
-    margin: 5px;
-  }
-}
-.submit {
-  box-shadow: 3px 5px 12px rgba(0, 0, 0, 0.1);
-  height: 60px;
-  background: #fff;
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 100%;
+.form-field-block {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+:deep(.live-time-picker.el-date-editor--datetimerange) {
+  width: 360px;
+  max-width: 360px;
+  flex-grow: 0;
+  --el-date-editor-width: 360px;
+}
+
+.action {
+  display: flex;
+  :deep(.el-button) {
+    margin: 0 5px !important;
+  }
 }
 .original-price {
   margin-left: 10px;
   color: #999;
   text-decoration: line-through;
 }
-
-h4 {
-  margin-bottom: 10px;
-  padding: 0 10px;
-  border: 1px solid #ddd;
-  background-color: #f8f8f8;
-  color: #333;
-  font-size: 12px;
-  line-height: 40px;
-  text-align: left;
+.thumbnail {
+  width: 50px;
+  height: 50px;
+  border-radius: 0.4em;
 }
-.flex{
+.flex-goods {
+  margin: 10px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  > img {
+    margin-right: 10px;
+  }
+}
+:deep(.el-form-item__content > .tips) {
+  flex: 0 0 100%;
+}
+
+.tips {
+  width: 100%;
+  max-width: 460px;
+  margin-top: 6px;
+  line-height: 1.6;
+  color: #999;
+  font-size: 12px;
+}
+.goods-table {
+  width: 1000px;
+  margin: 10px 0;
+}
+.upload-list {
+  display: inline-block;
+  width: 60px;
+  height: 60px;
+  text-align: center;
+  line-height: 60px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+  position: relative;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  margin-right: 4px;
+}
+.upload-list img {
+  width: 100%;
+  height: 100%;
+}
+.upload-list-cover {
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.6);
+}
+.upload-list:hover .upload-list-cover {
+  display: block;
+}
+.view-icon {
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  margin: 0 2px;
 }
 </style>

@@ -2,101 +2,105 @@
   <div class="model-item" v-if="element && element.key">
     <!-- 轮播图模块，包括个人信息，快捷导航模块 -->
     <template v-if="element.type == 'carousel'">
-      <model-carousel :data="element"></model-carousel>
+      <div class="carousel-wrap mb_20 width_1200_auto">
+        <model-carousel :data="element"></model-carousel>
+      </div>
     </template>
     <!-- 轮播图模块，100%宽度，无个人信息栏 -->
     <template v-if="element.type == 'carousel1'">
-      <model-carousel1 class="mb_20" :data="element"></model-carousel1>
+      <model-carousel1 class="mb_20 width_1200_auto" :data="element"></model-carousel1>
     </template>
     <!-- 轮播图模块，包括个人信息，两个轮播模块 -->
     <template v-if="element.type == 'carousel2'">
-      <model-carousel2 class="mb_20" :data="element"></model-carousel2>
+      <model-carousel2 class="mb_20 width_1200_auto" :data="element"></model-carousel2>
     </template>
     <!-- 热门广告 -->
     <template v-if="element.type == 'hotAdvert'">
-      <div class="setup-content">
-        <img
-          style="display: block"
-          :src="element.options.list[0].img"
-          @click="$router.push(element.options.list[0].url)"
-          width="1200"
-          alt=""
-        />
-        <div class="setup-box">
-          <div>
-            <Button
-              size="small"
-              @click.stop="handleSelectModel(element.options.list[0])"
-              >编辑</Button
-            >
+      <div class="hot-advert mb_20 width_1200_auto">
+        <div class="hot-advert-banner setup-content">
+          <img
+            :src="element.options.list[0].img"
+            @click="$router.push(element.options.list[0].url)"
+            alt=""
+          />
+          <div class="setup-box">
+            <div>
+              <el-button
+                size="small"
+                @click.stop="handleSelectModel(element.options.list[0])"
+                >编辑</el-button
+              >
+            </div>
           </div>
         </div>
-      </div>
-      <ul class="advert-list">
-        <template v-for="(item, index) in element.options.list">
-          <li
-            v-if="index !== 0"
-            @click="$router.push(item.url)"
-            class="setup-content"
-            :key="index"
-          >
-            <img :src="item.img" width="230" height="190" alt="" />
-            <div class="setup-box">
-              <div>
-                <Button size="small" @click.stop="handleSelectModel(item)"
-                  >编辑</Button
-                >
+        <ul class="advert-list">
+          <template v-for="(item, index) in element.options.list">
+            <li
+              v-if="index !== 0"
+              @click="$router.push(item.url)"
+              class="setup-content"
+              :key="index"
+            >
+              <img :src="item.img" alt="" />
+              <div class="setup-box">
+                <div>
+                  <el-button size="small" @click.stop="handleSelectModel(item)"
+                    >编辑</el-button
+                  >
+                </div>
               </div>
-            </div>
-          </li>
-        </template>
-      </ul>
+            </li>
+          </template>
+        </ul>
+      </div>
     </template>
     <!-- 限时秒杀 待完善 -->
     <template v-if="element.type == 'seckill'">
-      <seckill :data="element"></seckill>
+      <seckill :data="element" class="mb_20 width_1200_auto"></seckill>
     </template>
     <!-- 限时秒杀 待完善 -->
     <template v-if="element.type == 'seckill-only-album'">
-      <seckill-only-album :data="element"></seckill-only-album>
+      <seckill-only-album :data="element" class="mb_20 width_1200_auto"></seckill-only-album>
     </template>
     <!-- 折扣广告 -->
     <template v-if="element.type == 'discountAdvert'">
-      <div
-        class="discountAdvert"
-        :style="{
-          'background-image':
-            'url(' + require('@/assets/nav/decorate.png') + ')',
-        }"
-      >
-        <div>
-          <div
-            v-for="(item, index) in element.options.classification"
-            :key="index"
-            class="setup-content"
-          >
-            <img :src="item.img" width="190" height="210" alt="" />
-            <div class="setup-box">
-              <div>
-                <Button size="small" @click.stop="handleSelectModel(item)"
-                  >编辑</Button
-                >
+      <div class="discountAdvert-wrap width_1200_auto mb_20">
+        <div
+          class="discountAdvert"
+          :style="{
+            'background-image':
+              'url(' + discountAdvertBg + ')',
+          }"
+        >
+          <div>
+            <div
+              v-for="(item, index) in element.options.classification"
+              :key="index"
+              class="setup-content"
+            >
+              <img :src="item.img" width="190" height="210" alt="" />
+              <div class="setup-box">
+                <div>
+                  <el-button size="small" @click.stop="handleSelectModel(item)"
+                    >编辑</el-button
+                  >
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div>
-          <div
-            v-for="(item, index) in element.options.brandList"
-            :key="index"
-            class="setup-content"
-          >
-            <img :src="item.img" width="240" height="105" alt="" />
-            <div class="setup-box">
-              <div>
-                <Button size="small" @click.stop="handleSelectModel(item)"
-                  >编辑</Button
-                >
+          <div>
+            <div
+              v-for="(item, index) in element.options.brandList"
+              :key="index"
+              class="setup-content"
+            >
+              <img :src="item.img" width="240" height="105" alt="" />
+              <div class="setup-box">
+                <div>
+                  <el-button size="small" @click.stop="handleSelectModel(item)"
+                    >编辑</el-button
+                  >
+                </div>
               </div>
             </div>
           </div>
@@ -105,15 +109,15 @@
     </template>
     <!-- 好货推荐 -->
     <template v-if="element.type == 'recommend'">
-      <recommend :data="element"></recommend>
+      <recommend :data="element" class="mb_20 width_1200_auto"></recommend>
     </template>
     <!-- 新品排行 -->
     <template v-if="element.type == 'newGoodsSort'">
-      <new-goods-sort :data="element"></new-goods-sort>
+      <new-goods-sort :data="element" class="mb_20 width_1200_auto"></new-goods-sort>
     </template>
     <!-- 首页广告 -->
     <template v-if="element.type == 'firstAdvert'">
-      <first-page-advert :data="element"></first-page-advert>
+      <first-page-advert :data="element" class="mb_20 width_1200_auto"></first-page-advert>
     </template>
     <!-- 商品模块 -->
     <template v-if="element.type == 'goodsType'">
@@ -137,10 +141,10 @@
     </template>
     <!-- 横幅广告 -->
     <template v-if="element.type == 'bannerAdvert'">
-      <div class="horizontal-advert setup-content">
+      <div class="horizontal-advert setup-content width_1200_auto mb_20">
         <img
           v-if="element.options.img"
-          width="1200"
+          class="banner-ad-img"
           :src="element.options.img"
           alt=""
         />
@@ -150,37 +154,37 @@
         </div>
         <div class="setup-box">
           <div>
-            <Button
+            <el-button
               size="small"
               @click.stop="handleSelectModel(element.options)"
-              >编辑</Button
+              >编辑</el-button
             >
           </div>
         </div>
       </div>
     </template>
     <template v-if="element.type == 'notEnough'">
-      <not-enough :data="element"></not-enough>
+      <not-enough :data="element" class="mb_20 width_1200_auto"></not-enough>
     </template>
     <div class="del-btn">
-      <Button size="small" type="error" @click="handleModelDelete">删除</Button>
+      <el-button size="small" type="danger" @click="handleModelDelete">删除</el-button>
     </div>
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="装修"
-      draggable
-      width="800"
-      :z-index="100"
-      :mask-closable="false"
+      width="800px"
+      :close-on-click-modal="false"
+      append-to-body
+      destroy-on-close
     >
       <div class="modal-top-advert">
-        <div>
+        <div class="modal-form-item modal-form-preview">
           <!-- 热门广告两种图片尺寸 -->
           <img
             class="show-image"
             width="600"
             height="40"
-            v-if="selected.size && selected.size.indexOf('1200') >= 0"
+            v-if="selected.size && selected.size.indexOf('1200') >= 0 && selected.img"
             :src="selected.img"
             alt
           />
@@ -196,7 +200,7 @@
           <img
             class="show-image"
             width="600"
-            height="300"
+            height="275"
             v-if="selected.size && selected.size.indexOf('1300') >= 0"
             :src="selected.img"
             alt
@@ -218,38 +222,45 @@
             alt
           />
         </div>
-        <div class="tips">
-          建议尺寸：<span>{{ selected.size }}</span>
+        <div class="tips">建议尺寸：{{ selected.size }}</div>
+        <div class="modal-form-item modal-form-link">
+          <span class="modal-label">图片链接：</span>
+          <div class="modal-link-field">
+            <el-input
+              class="outsideUrl"
+              v-model="selected.url"
+              :disabled="!!selected.type && selected.type !== 'link'"
+              placeholder="https://"
+            />
+            <el-button size="small" type="primary" @click="handleSelectLink"
+              >选择链接</el-button
+            >
+          </div>
         </div>
-        <div>
-          图片链接：<Input
-            class="outsideUrl"
-            v-model="selected.url"
-            :disabled="!!selected.type && selected.type !== 'link'"
-            placeholder="https://"
-          />
-          <Button size="small" type="primary" @click="handleSelectLink"
-            >选择链接</Button
+        <div class="modal-form-item">
+          <span class="modal-label">选择图片：</span>
+          <el-button size="small" type="primary" @click="handleSelectImg"
+            >选择图片</el-button
           >
         </div>
-        <div>
-          选择图片：<Button size="small" type="primary" @click="handleSelectImg"
-            >选择图片</Button
-          >&nbsp;
-        </div>
       </div>
-    </Modal>
+      <template #footer>
+        <el-button @click="handleCancelModal">取消</el-button>
+        <el-button type="primary" @click="handleConfirmModal">确定</el-button>
+      </template>
+    </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
-    <Modal width="1200px" v-model="picModelFlag" footer-hide>
+    <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
       <ossManage
         @callback="callbackSelected"
-        :isComponent="true"
+        :is-component="true"
         :initialize="picModelFlag"
+        :max-select="1"
         ref="ossManage"
       />
-    </Modal>
+    </el-dialog>
   </div>
 </template>
 
@@ -271,6 +282,7 @@ import onlyGoodsModel from "./modelList/onlyGoodsModel.vue";
 
 import oneRowThreeColumns from "./modelList/oneRowThreeColumns.vue";
 import seckillOnlyAlbum from "./modelList/seckill-only-album.vue";
+import discountAdvertBg from "@/assets/nav/decorate.png";
 export default {
   name: "modelFormItem",
   props: ["element", "select", "index", "data"],
@@ -293,15 +305,21 @@ export default {
   },
   data() {
     return {
+      discountAdvertBg,
       showModal: false, // modal显隐
-      selected: {}, // 已选数据
+      selected: {}, // 弹窗编辑草稿
+      editTarget: null, // 确认后写回的原数据
       picModelFlag: false, // 图片选择器
     };
   },
   methods: {
+    cloneItem(item) {
+      return JSON.parse(JSON.stringify(item || {}));
+    },
     // 编辑模块
     handleSelectModel(item) {
-      this.selected = item;
+      this.editTarget = item;
+      this.selected = this.cloneItem(item);
       this.showModal = true;
     },
     // 删除模块
@@ -322,20 +340,38 @@ export default {
     },
     // 确定选择链接
     selectedLink(val) {
-      this.selected.url = this.$options.filters.formatLinkType(val);
+      this.selected.url = this.$filters.formatLinkType(val);
       this.selected.type =
         val.___type === "other" && val.url === "" ? "link" : "other";
     },
 
     handleSelectImg() {
       // 选择图片
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
     // 回显图片
     callbackSelected(val) {
       this.picModelFlag = false;
+      if (!val?.url) return;
       this.selected.img = val.url;
+    },
+    handleCancelModal() {
+      this.editTarget = null;
+      this.selected = {};
+      this.showModal = false;
+    },
+    handleConfirmModal() {
+      if (this.editTarget) {
+        Object.assign(this.editTarget, this.cloneItem(this.selected));
+      }
+      this.editTarget = null;
+      this.selected = {};
+      this.showModal = false;
     },
   },
 };
@@ -345,11 +381,20 @@ export default {
 .model-item {
   position: relative;
   margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
   &:hover {
     .del-btn {
       display: block;
     }
   }
+}
+.carousel-wrap {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 .del-btn {
   width: 100px;
@@ -358,6 +403,7 @@ export default {
   position: absolute;
   right: -100px;
   top: 0;
+  z-index: 10;
   &:hover {
     display: block;
   }
@@ -365,23 +411,59 @@ export default {
 /** 横幅广告 */
 .horizontal-advert {
   width: 1200px;
-  height: auto;
+  max-width: 1200px;
+  overflow: hidden;
+  line-height: 0;
+
+  .banner-ad-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 166px;
+    object-fit: cover;
+  }
+
   .default-con {
     height: 100px;
     padding-top: 30px;
     text-align: center;
     background: #ddd;
+    line-height: normal;
   }
 }
 /** 热门广告 */
-.advert-list {
-  background: $theme_color;
-  height: 200px;
-  display: flex;
-  justify-content: space-around;
-  padding: 3px 10px;
-  > li {
+.hot-advert {
+  width: 1200px;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  .hot-advert-banner {
+    line-height: 0;
+
     img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  }
+}
+.advert-list {
+  width: 100%;
+  margin: 0;
+  padding: 10px;
+  list-style: none;
+  box-sizing: border-box;
+  background: $theme_color;
+  height: 210px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  > li {
+    flex: 0 0 calc((100% - 40px) / 5);
+    img {
+      display: block;
+      width: 100%;
+      height: 190px;
       cursor: pointer;
       border-radius: 10px;
       transition: all 150ms ease-in-out;
@@ -402,20 +484,31 @@ export default {
   }
 }
 /** 折扣广告 */
+.discountAdvert-wrap {
+  width: 1200px;
+  position: relative;
+}
 .discountAdvert {
-  height: 566px;
+  width: 1300px;
+  height: 596px;
+  margin-left: -100px;
+  box-sizing: border-box;
   background-repeat: no-repeat;
-  margin-left: -97px;
+  background-size: 1300px 596px;
   position: relative;
   > div {
     padding-left: 295px;
     display: flex;
     flex-wrap: wrap;
+    box-sizing: border-box;
     &:nth-child(1) img {
       margin: 10px 10px 0 0;
     }
-    &:nth-child(2) img {
-      margin: 0 10px 0 0;
+    &:nth-child(2) {
+      margin-top: 10px;
+      img {
+        margin: 0 10px 0 0;
+      }
     }
   }
 }
@@ -479,7 +572,7 @@ export default {
         height: inherit;
         font-size: 12px;
         font-weight: bold;
-        .ivu-icon {
+        .el-icon {
           position: absolute;
           right: 10px;
           top: 10px;
@@ -503,14 +596,14 @@ export default {
       align-items: center;
       flex-direction: column;
       justify-content: center;
-      .ivu-icon {
+      .el-icon {
         font-size: 18px;
         transition: all 0.3s ease-out;
       }
       &:hover {
         background-color: $theme_color;
         color: #fff;
-        .ivu-icon {
+        .el-icon {
           transform: rotateZ(360deg);
         }
       }
@@ -521,11 +614,61 @@ export default {
 /** 装修模态框 内部样式start */
 .modal-top-advert {
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
-  > * {
-    margin-bottom: 10px;
+  align-items: stretch;
+  padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
+
+  .modal-form-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 16px;
+
+    .modal-label {
+      flex-shrink: 0;
+      width: 100px;
+      text-align: right;
+      padding-right: 12px;
+    }
+
+    .el-input {
+      flex: 1;
+    }
+  }
+
+  .modal-form-preview {
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .modal-form-link {
+    align-items: flex-start;
+
+    .modal-label {
+      padding-top: 8px;
+    }
+
+    .modal-link-field {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+
+      .outsideUrl {
+        flex: 1;
+        min-width: 0;
+      }
+    }
+  }
+
+  .tips {
+    padding-left: 112px;
+    margin-bottom: 16px;
+    color: #999;
+    font-size: 12px;
   }
 }
 </style>

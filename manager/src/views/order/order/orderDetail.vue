@@ -1,18 +1,17 @@
 <template>
   <div class="search">
     <div>
-      <Card style="height: 60px">
+      <el-card style="height: 60px">
         <div style="">
-          <Button v-if="allowOperation.editPrice" @click="modifyPrice">调整价格</Button>
-          <Button v-if="allowOperation.editConsignee" @click="editAddress" type="primary" ghost>修改收货地址</Button>
-          <Button v-if="allowOperation.cancel" @click="orderCancel" type="warning" ghost>订单取消</Button>
-          <Button v-if="orderInfo.order.orderStatus === 'UNPAID'" @click="confirmPrice" type="primary">收款</Button>
-          <Button @click="orderLog" type="info" ghost>订单日志</Button>
-          <Button @click="printOrder" type="primary" ghost style="float:right;"
-            v-if="$route.query.orderType != 'VIRTUAL'">打印发货单</Button>
+          <el-button v-if="allowOperation.editPrice" @click="modifyPrice">调整价格</el-button>
+          <el-button v-if="allowOperation.editConsignee" plain type="primary" @click="editAddress">修改收货地址</el-button>
+          <el-button v-if="allowOperation.cancel" plain type="warning" @click="orderCancel">订单取消</el-button>
+          <el-button v-if="orderInfo.order.orderStatus === 'UNPAID'" type="primary" @click="confirmPrice">收款</el-button>
+          <el-button plain @click="orderLog">订单日志</el-button>
+          <el-button v-if="$route.query.orderType != 'VIRTUAL'" plain type="primary" style="float:right;" @click="printOrder">打印发货单</el-button>
         </div>
-      </Card>
-      <Card class="mt_10 clearfix">
+      </el-card>
+      <el-card class="mt_10 clearfix">
         <div style="width: 30%; float: left; margin-left: 20px">
           <div class="div-item">
             <div class="div-item-left">订单号：</div>
@@ -21,7 +20,7 @@
           <div class="div-item">
             <div class="div-item-left">订单来源：</div>
             <div class="div-item-right">
-              {{ orderInfo.order.clientType | clientTypeWay }}
+              {{ clientTypeWay(orderInfo.order.clientType) }}
             </div>
           </div>
 
@@ -149,9 +148,12 @@
             <div class="div-item-left">发票金额：</div>
             <div class="div-item-right">
               {{
-                orderInfo.receipt && orderInfo.receipt.receiptPrice
-                ? orderInfo.receipt.receiptPrice
-                : "暂无" | unitPrice("￥")
+                unitPrice(
+                  orderInfo.receipt && orderInfo.receipt.receiptPrice
+                    ? orderInfo.receipt.receiptPrice
+                    : "暂无",
+                  "￥"
+                )
               }}
             </div>
           </div>
@@ -170,42 +172,57 @@
             </div>
           </div>
         </div>
-      </Card>
-      <Card class="mt_10">
-        <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom">
-          <!-- 商品栏目格式化 -->
-          <template slot="goodsSlot" slot-scope="{ row }">
-            <div style="margin-top: 5px; height: 80px; display: flex">
-              <div style="">
-                <img :src="row.image" style="height: 60px; margin-top: 1px; width: 60px" />
-              </div>
-
-              <div style="margin-left: 13px">
-                <div class="div-zoom">
-                  <a @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
+      </el-card>
+      <el-card class="mt_10">
+        <el-table v-loading="loading" border :data="data" ref="table" style="width: 100%">
+          <el-table-column label="商品" min-width="200">
+            <template #default="{ row }">
+              <div v-if="row" style="margin-top: 5px; height: 80px; display: flex">
+                <div>
+                  <img :src="row.image" style="height: 60px; margin-top: 1px; width: 60px" />
                 </div>
-                <span v-for="(item, key) in JSON.parse(row.specs)" :key="key">
-                  <span v-show="key != 'images'" style="font-size: 12px; color: #999999">
-                    {{ key }} : {{ item }}
-                  </span>
-                </span>
-                <Poptip trigger="hover" style="display: block" title="扫码在手机中查看" transfer>
-                  <div slot="content">
-                    <vue-qr :text="wapLinkTo(row.goodsId, row.skuId)" :margin="0" colorDark="#000" colorLight="#fff"
-                      :size="150"></vue-qr>
+                <div style="margin-left: 13px">
+                  <div class="div-zoom">
+                    <a class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
                   </div>
-                  <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="" />
-                </Poptip>
+                  <span v-for="(item, key) in JSON.parse(row.specs)" :key="key">
+                    <span v-show="key != 'images'" style="font-size: 12px; color: #999999">
+                      {{ key }} : {{ item }}</span>
+                  </span>
+                  <el-popover trigger="hover" title="扫码在手机中查看" width="180">
+                    <template #reference>
+                      <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="" style="display: block" />
+                    </template>
+                    <vue-qr :text="wapLinkTo(row.goodsId, row.skuId)" :margin="0" colorDark="#000" colorLight="#fff" :size="150" />
+                  </el-popover>
+                </div>
               </div>
-            </div>
-          </template>
-        </Table>
+            </template>
+          </el-table-column>
+          <el-table-column label="优惠" min-width="100">
+            <template #default="{ row }">
+              <span v-if="row">{{ getPromotionText(row) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="单价" min-width="100">
+            <template #default="{ row }">
+              <span v-if="row">{{ unitPrice(row.unitPrice || 0, "￥") }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="num" label="数量" min-width="80" />
+          <el-table-column prop="returnGoodsNumber" label="退款数量" min-width="80" />
+          <el-table-column label="小计" min-width="100">
+            <template #default="{ row }">
+              <span v-if="row">{{ unitPrice(row.flowPrice, "￥") }}</span>
+            </template>
+          </el-table-column>
+        </el-table>
         <div class="goods-total">
           <ul>
             <li>
               <span class="label">商品总额：</span>
               <span class="txt">{{
-                orderInfo.order.priceDetailDTO.goodsPrice | unitPrice("￥")
+                unitPrice(orderInfo.order.priceDetailDTO.goodsPrice, "￥")
               }}</span>
             </li>
             <li v-if="
@@ -214,8 +231,7 @@
             ">
               <span class="label">优惠金额：</span>
               <span class="txt">
-                {{ orderInfo.order.priceDetailDTO.discountPrice | unitPrice("￥") }}
-              </span>
+                {{ unitPrice(orderInfo.order.priceDetailDTO.discountPrice, "￥") }}</span>
             </li>
 
             <li v-if="
@@ -225,33 +241,31 @@
               <span class="label">优惠券金额：</span>
               <span class="txt">
                 <priceColorScheme :value="orderInfo.order.priceDetailDTO.couponPrice" :color="$mainColor"></priceColorScheme>
-
               </span>
             </li>
             <li
               v-if="orderInfo.order.priceDetailDTO.discountPriceDetail != undefined && orderInfo.order.priceDetailDTO.discountPriceDetail && orderInfo.order.priceDetailDTO.discountPriceDetail != null && orderInfo.order.priceDetailDTO.discountPriceDetail != ''">
               <div class="label">
-                <Poptip trigger="hover" placement="left" width="200">
-                  <Icon v-if="typeList.length > 0" type="ios-alert-outline" size="17" @click="getOrderPrice"
-                    color="#cc0000" />
-                  <template #content>
-                    <div class="api" style="text-align:left;">
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>优惠详情：</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr v-for="(item, index) in typeList" :key="index">
-                            <td>{{ item.promotionName }}：</td>
-                            <td>¥{{ item.discountPrice | unitPrice }}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
+                <el-popover v-if="typeList.length > 0" trigger="hover" placement="left" width="220">
+                  <template #reference>
+                    <span class="hover-pointer" style="color: #cc0000" @click="getOrderPrice">ⓘ</span>
                   </template>
-                </Poptip>
+                  <div class="api" style="text-align:left;">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>优惠详情：</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(item, index) in typeList" :key="index">
+                          <td>{{ item.promotionName }}：</td>
+                          <td>¥{{ unitPrice(item.discountPrice) }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </el-popover>
                 <span>优惠详情：</span>
               </div>
             </li>
@@ -259,22 +273,22 @@
                 <span class="label" style="color: #cc0000;font-size: 14px;" v-if="typeList.length > 0" >优惠详情：</span>
               </li> -->
             <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index">
-                <span class="label" v-if="index == 1 && typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
-                <span class="txt" style="border-bottom: 1px dashed;font-size:10px !important;" v-if="index == 1 &&  typeList.length > 1">¥{{ item.discountPrice | unitPrice }}</span>
-                <span class="label" v-if="index == 0 &&  typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
-                <span class="txt" style="border-top: 1px dashed;font-size:10px !important;" v-if="index == 0 && typeList.length > 1">¥{{ item.discountPrice | unitPrice }}</span>
-                <span class="label" v-if="typeList.length == 1 && index == 0" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
-                <span class="txt"  v-if="typeList.length == 1 && index == 0" style="border-top: 1px dashed;border-bottom: 1px dashed;font-size:10px !important;">¥{{ item.discountPrice | unitPrice }}</span>
+                <span class="label" v-if="index == 1 && typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a><span class="op-split">|</span>
+                <span class="txt" style="border-bottom: 1px dashed;font-size:10px !important;" v-if="index == 1 &&  typeList.length > 1">¥{{ unitPrice(item.discountPrice) }}</span>
+                <span class="label" v-if="index == 0 &&  typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a><span class="op-split">|</span>
+                <span class="txt" style="border-top: 1px dashed;font-size:10px !important;" v-if="index == 0 && typeList.length > 1">¥{{ unitPrice(item.discountPrice) }}</span>
+                <span class="label" v-if="typeList.length == 1 && index == 0" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a><span class="op-split">|</span>
+                <span class="txt"  v-if="typeList.length == 1 && index == 0" style="border-top: 1px dashed;border-bottom: 1px dashed;font-size:10px !important;">¥{{ unitPrice(item.discountPrice) }}</span>
               </li> -->
             <li>
               <span class="label">运费：</span>
               <span class="txt">{{
-                orderInfo.order.freightPrice | unitPrice("￥")
+                unitPrice(orderInfo.order.freightPrice, "￥")
               }}</span>
             </li>
             <li v-if="orderInfo.order.priceDetailDTO.updatePrice">
               <span class="label">修改金额：</span>
-              <span class="txt theme_color">¥{{ orderInfo.order.priceDetailDTO.updatePrice | unitPrice }}</span>
+              <span class="txt theme_color">¥{{ unitPrice(orderInfo.order.priceDetailDTO.updatePrice) }}</span>
             </li>
             <li v-if="orderInfo.order.priceDetailDTO.payPoint != 0">
               <span class="label">使用积分：</span>
@@ -284,126 +298,108 @@
             </li>
             <li>
               <span class="label">应付金额：</span>
-              <span class="txt flowPrice">¥{{ orderInfo.order.priceDetailDTO.flowPrice | unitPrice }}</span>
+              <span class="txt flowPrice">¥{{ unitPrice(orderInfo.order.priceDetailDTO.flowPrice) }}</span>
             </li>
           </ul>
         </div>
-      </Card>
+      </el-card>
     </div>
 
-    <Modal v-model="modal" width="530">
-      <p slot="header">
-        <Icon type="edit"></Icon>
-        <span>修改金额</span>
-      </p>
-      <div>
-        <Form ref="modifyPriceForm" :model="modifyPriceForm" label-position="left" :label-width="70"
-          :rules="modifyPriceValidate" @submit.native.prevent>
-          <FormItem label="订单金额" prop="price">
-            <InputNumber style="width: 100px" v-model="modifyPriceForm.price" :min="0" :max="999999"></InputNumber>
-            <span class="ml_10">元</span>
-          </FormItem>
-        </Form>
-      </div>
-      <div slot="footer" style="text-align: right">
-        <Button @click="modal = false">关闭</Button>
-        <Button type="primary" @click="modifyPriceSubmit">调整</Button>
-      </div>
-    </Modal>
-    <!-- 订单取消模态框 -->
-    <Modal v-model="orderCancelModal" width="530">
-      <p slot="header">
-        <Icon type="edit"></Icon>
-        <span>订单取消</span>
-      </p>
-      <div>
-        <Form ref="orderCancelForm" :model="orderCancelForm" label-position="left" :label-width="100"
-          :rules="orderCancelValidate">
-          <FormItem label="取消原因" prop="reason">
-            <Input v-model="orderCancelForm.reason" type="textarea" :autosize="{ minRows: 2, maxRows: 5 }"
-              placeholder="请输入取消原因"></Input>
-          </FormItem>
-        </Form>
-      </div>
-      <div slot="footer" style="text-align: right">
-        <Button @click="orderCancelModal = false">关闭</Button>
-        <Button type="primary" @click="orderCancelSubmit">确认</Button>
-      </div>
-    </Modal>
-    <!--收件地址弹出框-->
-    <Modal v-model="addressModal" width="530">
-      <p slot="header">
-        <Icon type="edit"></Icon>
-        <span>修改收件信息</span>
-      </p>
-      <div>
-        <Form ref="addressForm" :model="addressForm" label-position="left" :label-width="100" :rules="addressRule">
-          <FormItem label="收件人" prop="consigneeName">
-            <Input v-model="addressForm.consigneeName" size="large" maxlength="20"></Input>
-          </FormItem>
-          <FormItem label="联系方式" prop="consigneeMobile">
-            <Input v-model="addressForm.consigneeMobile" size="large" maxlength="11"></Input>
-          </FormItem>
-          <FormItem label="地址信息" prop="consigneeAddressPath">
-            {{ addr }}
-            <Button type="default" @click="$refs.map.open()">选择</Button>
-          </FormItem>
-          <FormItem label="详细地址" prop="consigneeDetail">
-            <Input v-model="addressForm.consigneeDetail" size="large" ></Input>
-          </FormItem>
-        </Form>
-      </div>
-      <div slot="footer" style="text-align: right">
-        <Button @click="addressModal = false">关闭</Button>
-        <Button type="primary" @click="editAddressSubmit">修改</Button>
-      </div>
-    </Modal>
-    <!-- 订单日志 -->
-    <Modal v-model="orderLogModal" width="60">
-      <p slot="header">
-        <span>订单日志</span>
-      </p>
-      <div class="order-log-div">
-        <Table :loading="loading" border :columns="orderLogColumns" :data="orderInfo.orderLogs" ref="table"
-          sortable="custom"></Table>
-      </div>
+    <el-dialog v-model="modal" title="修改金额" width="530px">
+      <el-form ref="modifyPriceForm" :model="modifyPriceForm" label-width="70px" :rules="modifyPriceValidate" @submit.prevent>
+        <el-form-item label="订单金额" prop="price">
+          <el-input-number v-model="modifyPriceForm.price" :min="0" :max="999999" style="width: 120px" />
+          <span class="ml_10">元</span>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="modal = false">关闭</el-button>
+        <el-button type="primary" @click="modifyPriceSubmit">调整</el-button>
+      </template>
+    </el-dialog>
 
-      <div slot="footer" style="text-align: right">
-        <Button @click="handelCancel">取消</Button>
+    <el-dialog v-model="orderCancelModal" title="订单取消" width="530px">
+      <el-form ref="orderCancelForm" :model="orderCancelForm" label-width="100px" :rules="orderCancelValidate">
+        <el-form-item label="取消原因" prop="reason">
+          <el-input v-model="orderCancelForm.reason" type="textarea" :rows="3" placeholder="请输入取消原因" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="orderCancelModal = false">关闭</el-button>
+        <el-button type="primary" @click="orderCancelSubmit">确认</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="addressModal" title="修改收件信息" width="530px">
+      <el-form ref="addressForm" :model="addressForm" label-width="100px" :rules="addressRule">
+        <el-form-item label="收件人" prop="consigneeName">
+          <el-input v-model="addressForm.consigneeName" maxlength="20" />
+        </el-form-item>
+        <el-form-item label="联系方式" prop="consigneeMobile">
+          <el-input v-model="addressForm.consigneeMobile" maxlength="11" />
+        </el-form-item>
+        <el-form-item label="地址信息" prop="consigneeAddressPath">
+          {{ addr }}
+          <el-button @click="$refs.map.open()">选择</el-button>
+        </el-form-item>
+        <el-form-item label="详细地址" prop="consigneeDetail">
+          <el-input v-model="addressForm.consigneeDetail" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addressModal = false">关闭</el-button>
+        <el-button type="primary" @click="editAddressSubmit">修改</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="orderLogModal" title="订单日志" width="60%">
+      <div class="order-log-div">
+        <el-table v-loading="loading" border :data="orderInfo.orderLogs || []" style="width: 100%">
+          <el-table-column prop="operatorName" label="操作者" min-width="120" />
+          <el-table-column prop="operatorType" label="操作类型" min-width="100" />
+          <el-table-column prop="createTime" label="时间" width="180" />
+          <el-table-column prop="message" label="日志" min-width="200" show-overflow-tooltip />
+        </el-table>
       </div>
-    </Modal>
-    <Modal v-model="printModal" width="530" @on-cancel="printCancel">
-      <p slot="header" style="line-height:26px;height:26px;">
-        <span style="float: left;">打印发货单</span>
-        <Button size="small" style="margin-right:35px;float: right;padding-bottom: 2px;"
-          @click="printHiddenInfo"><template v-if="printHiddenFlag">显示</template><template
-            v-else>隐藏</template>敏感信息</Button>
-      </p>
+      <template #footer>
+        <el-button @click="handelCancel">取消</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="printModal" width="530px" @close="printCancel">
+      <template #header>
+        <div style="line-height:26px;height:26px;">
+          <span style="float: left;">打印发货单</span>
+          <el-button size="small" style="margin-right:35px;float: right;padding-bottom: 2px;" @click="printHiddenInfo">
+            {{ printHiddenFlag ? "显示" : "隐藏" }}敏感信息
+          </el-button>
+        </div>
+      </template>
       <div style="max-height:500px;overflow-y:auto;overflow-x:hidden;">
         <div id="printInfo">
-          <Row v-if="orderInfo.order.remark !== ''">
-            <Col span="24">
+          <el-row v-if="orderInfo.order.remark !== ''">
+            <el-col :span="24">
             <p class="lineH30 f14">备注：{{ orderInfo.order.remark }}</p>
-            </Col>
-          </Row>
-          <Row>
-            <Col span="12">
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12">
             <p class="lineH30 f14">收件人：{{ orderInfo.order.consigneeName }}</p>
-            </Col>
-            <Col span="12" v-if="orderInfo.order.consigneeMobile">
-            <p class="lineH30 f14" v-if="printHiddenFlag">手机号：{{
+            </el-col>
+            <el-col v-if="orderInfo.order.consigneeMobile" :span="12">
+            <p v-if="printHiddenFlag" class="lineH30 f14">手机号：{{
               orderInfo.order.consigneeMobile.replace(/^(.{3})(?:\d+)(.{4})$/, "$1****$2") }}</p>
-            <p class="lineH30 f14" v-else>手机号：{{ orderInfo.order.consigneeMobile }}</p>
-            </Col>
-          </Row>
-          <Row>
-            <Col span="24">
+            <p v-else class="lineH30 f14">手机号：{{ orderInfo.order.consigneeMobile }}</p>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24">
             <p class="lineH30 f14">收货地址：{{ orderInfo.order.consigneeAddressPath }}{{ orderInfo.order.consigneeDetail }}
             </p>
-            </Col>
-          </Row>
-          <Row>
-            <Col span="24">
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24">
             <p class="printgoodtitle">商品信息</p>
             <div class="printgoodinfo">
               <div v-for="(item, index) in orderInfo.orderItems" :key="index" class="printgooditem">
@@ -412,24 +408,23 @@
                   <div class="printgoodguid">
                     <span v-for="(itemchild, keychild) in JSON.parse(item.specs)" :key="keychild">
                       <span class="printgoodguiditem" v-if="keychild != 'images'">
-                        {{ keychild }} : {{ itemchild }}
-                      </span>
+                        {{ keychild }} : {{ itemchild }}</span>
                     </span>
                   </div>
                 </div>
                 <span class="printgoodnumber">数量：{{ item.num }}</span>
               </div>
             </div>
-            </Col>
-          </Row>
+            </el-col>
+          </el-row>
         </div>
       </div>
 
-      <div slot="footer" style="text-align: right">
-        <Button @click="printModal = false">关闭</Button>
-        <Button type="primary" v-print="printInfoObj">打印发货单</Button>
-      </div>
-    </Modal>
+      <template #footer>
+        <el-button @click="printModal = false">关闭</el-button>
+        <el-button type="primary" @click="handlePrintInvoice">打印发货单</el-button>
+      </template>
+    </el-dialog>
 
 
     <multipleMap ref="map" @callback="selectedRegion" />
@@ -442,6 +437,9 @@ import * as RegExp from "@/libs/RegExp.js";
 
 import multipleMap from "@/components/map/multiple-map";
 import vueQr from "vue-qr";
+import { printElement } from "@/utils/print";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { unitPrice, clientTypeWay } from "@/utils/filters";
 export default {
   name: "orderList",
   components: {
@@ -454,11 +452,6 @@ export default {
       typeList: [],
       showPrices: false,
       printHiddenFlag: false,//隐藏信息
-      printInfoObj: {
-        id: "printInfo",//要打印的id名 无#号
-        popTitle: '&nbsp;',//页眉标题 默认浏览器标题 空字符串时显示undefined 使用html语言
-        extraHead: '',//头部文字 默认空
-      },
       loading: false, //加载表格
 
       addr: "", //地区
@@ -542,98 +535,7 @@ export default {
         ],
       },
 
-      columns: [
-        {
-          title: "商品",
-          key: "goodsName",
-          minWidth: 200,
-          slot: "goodsSlot",
-        },
-        {
-          title: "优惠",
-          key: "num",
-          minWidth: 100,
-          render: (h, params) => {
-            let resultText = "";
-            if (params.row.promotionType) {
-              let type = params.row.promotionType.split(",");
-              if (type.indexOf("PINTUAN") != -1) {
-                resultText += "拼团 ";
-              }
-              if (type.indexOf("SECKILL") != -1) {
-                resultText += "秒杀 ";
-              }
-              if (type.indexOf("COUPON") != -1) {
-                resultText += "优惠券 ";
-              }
-              if (type.indexOf("FULL_DISCOUNT") != -1) {
-                resultText += "满减 ";
-              }
-              if (type.indexOf("POINTS_GOODS") != -1) {
-                resultText += "积分商品 ";
-              }
-            }
-            if (resultText === "") {
-              resultText = "暂无未参与任何促销";
-            }
-            return h("div", resultText);
-          },
-        },
-        {
-          title: "单价",
-          key: "goodsPrice",
-          minWidth: 100,
-          render: (h, params) => {
-            if (!params.row.goodsPrice) {
-              return h("div", this.$options.filters.unitPrice(0, "￥"));
-            }
-            return h("div", this.$options.filters.unitPrice(params.row.unitPrice, "￥"));
-          },
-        },
-
-        {
-          title: "数量",
-          key: "num",
-          minWidth: 80,
-        },
-        {
-          title: "退款数量",
-          key: "returnGoodsNumber",
-          minWidth: 80,
-        },
-        {
-          title: "小计",
-          key: "subTotal",
-          minWidth: 100,
-          render: (h, params) => {
-            return h("div", this.$options.filters.unitPrice(params.row.flowPrice, "￥"));
-          },
-        },
-      ],
       data: [], // 表单数据
-      orderLogColumns: [
-        {
-          title: "操作者",
-          key: "operatorName",
-          minWidth: 120,
-        },
-        {
-          title: "操作类型",
-          key: "operatorType",
-          minWidth: 100,
-        },
-        {
-          title: "时间",
-          key: "createTime",
-          width: 180,
-        },
-        {
-          title: "日志",
-          key: "message",
-          tooltip: true,
-          minWidth: 200,
-        },
-      ],
     };
   },
   watch: {
@@ -642,27 +544,38 @@ export default {
     },
   },
   methods: {
+    unitPrice,
+    clientTypeWay,
+    getPromotionText(row) {
+      let resultText = "";
+      if (row && row.promotionType) {
+        const type = row.promotionType.split(",");
+        if (type.indexOf("PINTUAN") != -1) resultText += "拼团 ";
+        if (type.indexOf("SECKILL") != -1) resultText += "秒杀 ";
+        if (type.indexOf("COUPON") != -1) resultText += "优惠券 ";
+        if (type.indexOf("FULL_DISCOUNT") != -1) resultText += "满减 ";
+        if (type.indexOf("POINTS_GOODS") != -1) resultText += "积分商品 ";
+      }
+      return resultText === "" ? "暂无未参与任何促销" : resultText;
+    },
     gotoHomes () {
       return false
     },
 
     //确认收款
     confirmPrice () {
-      this.$Modal.confirm({
-        title: "提示",
-        content:
-          "<p>您确定要收款吗？线下收款涉及库存变更，需异步进行，等待约一分钟刷新列表查看</p>",
-        onOk: () => {
-          API_Order.orderPay(this.sn).then((res) => {
-            if (res.success) {
-              this.$Message.success("收款成功");
-              this.getDataList();
-            } else {
-              // this.$Message.error(res.message);
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm(
+        "您确定要收款吗？线下收款涉及库存变更，需异步进行，等待约一分钟刷新列表查看",
+        "提示",
+        { type: "warning" }
+      ).then(() => {
+        API_Order.orderPay(this.sn).then((res) => {
+          if (res.success) {
+            ElMessage.success("收款成功");
+            this.getDataList();
+          }
+        });
+      }).catch(() => {});
     },
     getOrderPrice () {
       if (this.showPrices) {
@@ -712,7 +625,7 @@ export default {
         if (valid) {
           API_Order.updateOrderPrice(this.sn, this.modifyPriceForm).then((res) => {
             if (res.success) {
-              this.$Message.success("修改订单金额成功");
+              ElMessage.success("修改订单金额成功");
               this.modal = false;
               this.getDataList();
             }
@@ -725,12 +638,12 @@ export default {
       if(val.type === 'select'){
         const paths = val.data.map(item => item.name).join(',')
         const ids = val.data.map(item => item.id).join(',')
-        this.$set(this,'addr',paths)
-        this.$set(this,'regionId',ids)
+        this.addr = paths;
+        this.regionId = ids;
       }
       else{
-        this.$set(this,'addr',val.data.addr)
-        this.$set(this,'regionId',val.data.addrId)
+        this.addr = val.data.addr;
+        this.regionId = val.data.addrId;
       }
 
     },
@@ -744,7 +657,7 @@ export default {
         if (valid) {
           API_Order.orderCancel(this.sn, this.orderCancelForm).then((res) => {
             if (res.success) {
-              this.$Message.success("取消成功");
+              ElMessage.success("取消成功");
               this.getDataList();
             }
             this.orderCancelModal = false;
@@ -770,6 +683,9 @@ export default {
     printCancel () {
       // this.printHiddenFlag = false;
     },
+    handlePrintInvoice () {
+      printElement("printInfo", "发货单");
+    },
     //弹出修改收货地址框
     editAddress () {
       this.addressModal = true;
@@ -784,7 +700,7 @@ export default {
     //修改收货地址
     editAddressSubmit () {
       if (this.regionId == "") {
-        this.$Message.error("请选择地址");
+        ElMessage.error("请选择地址");
         return;
       }
       this.addressForm.consigneeAddressPath = this.addr;
@@ -793,7 +709,7 @@ export default {
         if (valid) {
           API_Order.editOrderConsignee(this.sn, this.addressForm).then((res) => {
             if (res.success) {
-              this.$Message.success("收货地址修改成功");
+              ElMessage.success("收货地址修改成功");
               this.addressModal = false;
               this.getDataList();
             }

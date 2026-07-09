@@ -1,165 +1,165 @@
 <template>
   <div>
-    <Card>
+    <el-card>
       <div class="mb_10">
-        <Button @click="addParent" icon="md-add">添加一级分类</Button>
+        <el-button type="primary" @click="addParent">添加一级分类</el-button>
       </div>
-      <Table
-      update-show-children
+
+      <el-table
+        v-loading="loading"
         class="table"
-        :load-data="handleLoadData"
-        row-key="id"
-        :loading="loading"
         :data="tableData"
-        :columns="columns"
+        row-key="id"
+        border
+        :tree-props="{ children: 'children' }"
+        style="width: 100%"
       >
-        <template slot="action" slot-scope="scope">
-          <div class="ops">
-            <a class="ops-link" @click="edit(scope.row)">编辑</a>
-            <a class="ops-link" @click="remove(scope.row)">删除</a>
-            <a v-show="scope.row.level != 2" class="ops-link" @click="addChildren(scope.row)">添加子分类</a>
-          </div>
-        </template>
-
-        <template slot="commissionRate" slot-scope="scope">
-          <priceColorScheme v-if="scope.row.commissionRate > 0" unit=""  :color="$mainColor" :value="scope.row.commissionRate">%</priceColorScheme>
-          <priceColorScheme v-else :value="scope.row.commissionRate" unit=""  >%</priceColorScheme>
-           <!-- {{ scope.row.commissionRate }}% -->
-        </template>
-
-        <template slot="deleteFlag" slot-scope="{ row }">
-          <i-switch
-            size="large"
-            v-model="row.deleteFlag"
-            :true-value="false"
-            :false-value="true"
-            :loading="row._statusLoading"
-            @on-change="onStatusSwitchChange(row, $event)"
-          >
-            <span slot="open">开启</span>
-            <span slot="close">关闭</span>
-          </i-switch>
-        </template>
-      </Table>
-
-      <Modal
-        :title="modalTitle"
-        v-model="modalVisible"
-        :mask-closable="false"
-        :width="500"
-      >
-        <Form ref="form" :model="formAdd" :label-width="100" :rules="formValidate">
-          <div v-if="showParent">
-            <FormItem label="上级分类" prop="parentId">
-              {{ parentTitle }}
-              <Input
-                v-model="formAdd.parentId"
-                clearable
-                style="width: 100%; display: none"
-              />
-            </FormItem>
-          </div>
-          <FormItem label="层级" prop="level" style="display: none">
-            <Input v-model="formAdd.level" clearable style="width: 100%" />
-          </FormItem>
-          <FormItem label="分类名称" prop="name">
-            <Input v-model="formAdd.name" clearable style="width: 100%" />
-          </FormItem>
-          <FormItem label="分类图标" prop="image" v-if="formAdd.level !== 1">
-            <upload-pic-input
-              v-model="formAdd.image"
-              style="width: 100%"
-            ></upload-pic-input>
-          </FormItem>
-          <FormItem label="排序值" prop="sortOrder" style="width: 345px">
-            <InputNumber v-model="formAdd.sortOrder"></InputNumber>
-          </FormItem>
-          <FormItem label="佣金比例(%)" prop="commissionRate" style="width: 345px">
-            <InputNumber :max="100" :min="0" v-model="formAdd.commissionRate"></InputNumber>
-          </FormItem>
-          <FormItem label="是否启用" prop="deleteFlag">
-            <i-switch
-              size="large"
-              v-model="formAdd.deleteFlag"
-              :true-value="false"
-              :false-value="true"
+        <el-table-column prop="name" label="分类名称" min-width="200" />
+        <el-table-column label="状态" width="120">
+          <template #default="{ row }">
+            <el-switch
+              v-if="row"
+              v-model="row.deleteFlag"
+              :active-value="false"
+              :inactive-value="true"
+              inline-prompt
+              active-text="开启"
+              inactive-text="关闭"
+              :loading="!!row._statusLoading"
+              @change="(val) => onStatusSwitchChange(row, val)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="佣金" width="120">
+          <template #default="{ row }">
+            <span
+              v-if="row"
+              :style="row.commissionRate > 0 ? { color: $mainColor } : {}"
             >
-              <span slot="open">启用</span>
-              <span slot="close">禁用</span>
-            </i-switch>
-          </FormItem>
-        </Form>
-        <div slot="footer">
-          <Button type="text" @click="modalVisible = false">取消</Button>
-          <Button type="primary" :loading="submitLoading" @click="Submit">提交</Button>
-        </div>
-      </Modal>
+              {{ row.commissionRate }}%
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" min-width="220" fixed="right">
+          <template #default="{ row }">
+            <div v-if="row" class="ops">
+              <a class="link-text" @click="edit(row)">编辑</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="remove(row)">删除</a>
+              <template v-if="row.level != 2">
+                <span class="op-split">|</span>
+                <a class="link-text" @click="addChildren(row)">添加子分类</a>
+              </template>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
 
-      <Modal
-        :title="modalBrandTitle"
+      <el-dialog
+        v-model="modalVisible"
+        :title="modalTitle"
+        width="500px"
+        :close-on-click-modal="false"
+        destroy-on-close
+      >
+        <el-form ref="form" :model="formAdd" label-width="110px" :rules="formValidate">
+          <el-form-item v-if="showParent" label="上级分类" prop="parentId">
+            {{ parentTitle }}
+            <el-input v-model="formAdd.parentId" style="display: none" />
+          </el-form-item>
+          <el-form-item label="层级" prop="level" style="display: none">
+            <el-input v-model="formAdd.level" />
+          </el-form-item>
+          <el-form-item label="分类名称" prop="name">
+            <el-input v-model="formAdd.name" clearable />
+          </el-form-item>
+          <el-form-item v-if="formAdd.level !== 1" label="分类图标" prop="image">
+            <upload-pic-input v-model="formAdd.image" style="width: 100%" />
+          </el-form-item>
+          <el-form-item label="排序值" prop="sortOrder">
+            <el-input-number v-model="formAdd.sortOrder" style="width: 200px" />
+          </el-form-item>
+          <el-form-item prop="commissionRate" class="commission-rate-item">
+            <template #label>佣金比例(%)</template>
+            <el-input-number v-model="formAdd.commissionRate" :min="0" :max="100" style="width: 200px" />
+          </el-form-item>
+          <el-form-item label="是否启用" prop="deleteFlag">
+            <el-switch
+              v-model="formAdd.deleteFlag"
+              :active-value="false"
+              :inactive-value="true"
+              inline-prompt
+              active-text="启用"
+              inactive-text="禁用"
+            />
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <el-button @click="modalVisible = false">取消</el-button>
+          <el-button type="primary" :loading="submitLoading" @click="Submit">提交</el-button>
+        </template>
+      </el-dialog>
+
+      <el-dialog
         v-model="modalBrandVisible"
-        :mask-closable="false"
-        :width="500"
+        :title="modalBrandTitle"
+        width="500px"
+        :close-on-click-modal="false"
       >
-        <Form ref="brandForm" :model="brandForm" :label-width="100">
-          <Select v-model="brandForm.categoryBrands" filterable multiple>
-            <Option v-for="item in brandWay" :value="item.id" :key="item.id">{{
-              item.name
-            }}</Option>
-          </Select>
-        </Form>
-        <div slot="footer">
-          <Button type="text" @click="modalBrandVisible = false">取消</Button>
-          <Button type="primary" :loading="submitLoading" @click="saveCategoryBrand"
-            >提交</Button
-          >
-        </div>
-      </Modal>
+        <el-form ref="brandForm" :model="brandForm" label-width="100px">
+          <el-select v-model="brandForm.categoryBrands" filterable multiple style="width: 100%">
+            <el-option v-for="item in brandWay" :key="item.id" :label="item.name" :value="item.id" />
+          </el-select>
+        </el-form>
+        <template #footer>
+          <el-button @click="modalBrandVisible = false">取消</el-button>
+          <el-button type="primary" :loading="submitLoading" @click="saveCategoryBrand">提交</el-button>
+        </template>
+      </el-dialog>
 
-      <Modal
-        :title="modalSpecTitle"
+      <el-dialog
         v-model="modalSpecVisible"
-        :mask-closable="false"
-        :width="500"
+        :title="modalSpecTitle"
+        width="500px"
+        :close-on-click-modal="false"
       >
-        <Form ref="specForm" :model="specForm" :label-width="100">
-          <Select v-model="specForm.categorySpecs" multiple>
-            <Option
+        <el-form ref="specForm" :model="specForm" label-width="100px">
+          <el-select v-model="specForm.categorySpecs" multiple style="width: 100%">
+            <el-option
               v-for="item in specifications"
-              :value="item.id"
               :key="item.id"
               :label="item.specName"
-            >
-            </Option>
-          </Select>
-        </Form>
-        <div slot="footer">
-          <Button type="text" @click="modalSpecVisible = false">取消</Button>
-          <Button type="primary" :loading="submitLoading" @click="saveCategorySpec"
-            >提交</Button
-          >
-        </div>
-      </Modal>
-    </Card>
+              :value="item.id"
+            />
+          </el-select>
+        </el-form>
+        <template #footer>
+          <el-button @click="modalSpecVisible = false">取消</el-button>
+          <el-button type="primary" :loading="submitLoading" @click="saveCategorySpec">提交</el-button>
+        </template>
+      </el-dialog>
+    </el-card>
   </div>
 </template>
+
 <script>
 import {
-delCategory,
-disableCategory,
-getBrandListData,
-getCategoryBrandListData,
-getCategorySpecListData,
-getCategoryTree,
-getSpecificationList,
-insertCategory,
-saveCategoryBrand,
-saveCategorySpec,
-updateCategory,
+  delCategory,
+  disableCategory,
+  getBrandListData,
+  getCategoryBrandListData,
+  getCategorySpecListData,
+  getCategoryTree,
+  getSpecificationList,
+  insertCategory,
+  saveCategoryBrand,
+  saveCategorySpec,
+  updateCategory,
 } from "@/api/goods";
-
 import uploadPicInput from "@/components/lili/upload-pic-input";
 import { regular } from "@/utils";
+import { ElMessage, ElMessageBox } from "element-plus";
+
 export default {
   name: "goods-category",
   components: {
@@ -167,69 +167,44 @@ export default {
   },
   data() {
     return {
-      recordLevel:[], // 记录当前层级
-      submitLoading: false, //加载状态
-      categoryList: [], // 分类列表
-      loading: false, // 加载状态
-      brands: [], //品牌集合
-      specifications: [], //规格集合
-      categoryId: "", // 分类id
-      categorySpecs: [], //已经选择的规格
-      modalType: 0, // 添加或编辑标识
-      modalVisible: false, // 添加或编辑显示
-      modalBrandVisible: false, //品牌关联编辑显示
-      modalSpecVisible: false, //品牌关联编辑显示
-      modalTitle: "", // 添加或编辑标题
-      showParent: false, // 是否展示上级菜单
-      parentTitle: "", // 父级菜单名称
-      modalBrandTitle: "", // 品牌弹窗标题
-      modalSpecTitle: "", // 规格弹窗标题
+      submitLoading: false,
+      categoryList: [],
+      loading: false,
+      brands: [],
+      specifications: [],
+      categoryId: "",
+      categorySpecs: [],
+      modalType: 0,
+      modalVisible: false,
+      modalBrandVisible: false,
+      modalSpecVisible: false,
+      modalTitle: "",
+      showParent: false,
+      parentTitle: "",
+      modalBrandTitle: "",
+      modalSpecTitle: "",
       formAdd: {
-        // 添加或编辑表单对象初始化数据
         parentId: "",
         name: "",
         image: "",
         sortOrder: 0,
-        deleteFlag: 0,
+        deleteFlag: false,
         commissionRate: 0,
         level: 0,
       },
       brandForm: {
         categoryBrands: [],
       },
-      brandWay: "", //请求绑定品牌的信息
-      specForm: {}, // 规格数据
-      // 表单验证规则
+      brandWay: [],
+      specForm: {
+        categorySpecs: [],
+      },
       formValidate: {
         commissionRate: [regular.REQUIRED, regular.INTEGER],
         name: [regular.REQUIRED, regular.VARCHAR20],
         sortOrder: [regular.REQUIRED, regular.INTEGER],
       },
-      columns: [
-        {
-          title: "分类名称",
-          key: "name",
-          tree: true,
-        },
-        {
-          title: "状态",
-          slot: "deleteFlag",
-        },
-        {
-          title: "佣金",
-          key: "commissionRate",
-
-          slot: "commissionRate",
-        },
-        {
-          title: "操作",
-          key: "action",
-
-          slot: "action",
-        },
-      ],
-      tableData: [], // 表格数据
-      checkedCategoryChildren: "", //选中的分类子级
+      tableData: [],
     };
   },
   methods: {
@@ -248,50 +223,35 @@ export default {
     onStatusSwitchChange(row, nextDeleteFlag) {
       const previousDeleteFlag = !nextDeleteFlag;
       const isClosing = nextDeleteFlag === true;
-      this.$Modal.confirm({
-        title: isClosing ? "确认关闭" : "确认开启",
-        content:
-          "您是否要" +
-          (isClosing ? "关闭" : "开启") +
-          "当前分类 " +
-          row.name +
-          " 及其子分类?",
-        loading: true,
-        okText: "是",
-        cancelText: "否",
-        onOk: () => {
-          this.$set(row, "_statusLoading", true);
-          disableCategory(row.id, { enableOperations: isClosing ? true : 0 }).then(
-            (res) => {
-              this.$Modal.remove();
-              this.$set(row, "_statusLoading", false);
-              if (res && res.success) {
-                this.$Message.success("操作成功");
-                this.getAllList(0);
-                return;
-              }
-              row.deleteFlag = previousDeleteFlag;
-            }
-          );
-        },
-        onCancel: () => {
+      ElMessageBox.confirm(
+        `您是否要${isClosing ? "关闭" : "开启"}当前分类 ${row.name} 及其子分类?`,
+        isClosing ? "确认关闭" : "确认开启",
+        { type: "warning", confirmButtonText: "是", cancelButtonText: "否" }
+      ).then(() => {
+        row._statusLoading = true;
+        return disableCategory(row.id, { enableOperations: isClosing ? true : 0 }).then((res) => {
+          row._statusLoading = false;
+          if (res && res.success) {
+            ElMessage.success("操作成功");
+            this.getAllList();
+            return;
+          }
           row.deleteFlag = previousDeleteFlag;
-        },
+        });
+      }).catch(() => {
+        row.deleteFlag = previousDeleteFlag;
       });
     },
-    // 初始化数据
     init() {
-      this.getAllList(0);
+      this.getAllList();
       this.getBrandList();
       this.getSpecList();
     },
-    //获取所有品牌
     getBrandList() {
       getBrandListData().then((res) => {
         this.brandWay = res;
       });
     },
-    //获取所有规格
     getSpecList() {
       getSpecificationList().then((res) => {
         if (res.length != 0) {
@@ -299,7 +259,6 @@ export default {
         }
       });
     },
-    //弹出品牌关联框
     brandOperation(v) {
       getCategoryBrandListData(v.id).then((res) => {
         this.categoryId = v.id;
@@ -308,7 +267,6 @@ export default {
         this.modalBrandVisible = true;
       });
     },
-    //弹出规格关联框
     specOperation(v) {
       getCategorySpecListData(v.id).then((res) => {
         this.categoryId = v.id;
@@ -317,39 +275,35 @@ export default {
         this.modalSpecVisible = true;
       });
     },
-    //保存分类规格绑定
     saveCategorySpec() {
       saveCategorySpec(this.categoryId, this.specForm).then((res) => {
         this.submitLoading = false;
         if (res.success) {
-          this.$Message.success("操作成功");
+          ElMessage.success("操作成功");
           this.modalSpecVisible = false;
         }
       });
     },
-    //保存分类品牌绑定
     saveCategoryBrand() {
       saveCategoryBrand(this.categoryId, this.brandForm).then((res) => {
         this.submitLoading = false;
         if (res.success) {
-          this.$Message.success("操作成功");
+          ElMessage.success("操作成功");
           this.modalBrandVisible = false;
         }
       });
     },
-    // 添加子分类
     addChildren(v) {
       this.modalType = 0;
       this.modalTitle = "添加子分类";
       this.parentTitle = v.name;
-      this.formAdd.level = eval(v.level + "+1");
+      this.formAdd.level = Number(v.level) + 1;
       this.formAdd.commissionRate = v.commissionRate;
       this.showParent = true;
       delete this.formAdd.id;
       this.formAdd.parentId = v.id;
       this.modalVisible = true;
     },
-    // 编辑分类
     edit(v) {
       this.modalType = 1;
       this.modalTitle = "编辑";
@@ -364,182 +318,101 @@ export default {
       this.showParent = false;
       this.modalVisible = true;
     },
-    // 添加一级分类
     addParent() {
       this.modalType = 0;
       this.modalTitle = "添加一级分类";
       this.parentTitle = "顶级分类";
       this.showParent = true;
-      this.$refs.form.resetFields();
+      this.$refs.form?.resetFields();
       delete this.formAdd.id;
       this.formAdd.parentId = 0;
+      this.formAdd.level = 0;
       this.modalVisible = true;
     },
-    // 提交
     Submit() {
       this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          if (this.modalType === 0) {
-            // 添加 避免编辑后传入id等数据 记得删除
-            delete this.formAdd.id;
-            insertCategory(this.formAdd).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("添加成功");
-                this.getAllList();
-                this.modalVisible = false;
-                this.$refs.form.resetFields();
-              }
-            });
-          } else {
-            // 编辑
-            updateCategory(this.formAdd).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("修改成功");
-                this.getAllList();
-                this.modalVisible = false;
-                this.$refs.form.resetFields();
-              }
-            });
-          }
+        if (!valid) return;
+        this.submitLoading = true;
+        if (this.modalType === 0) {
+          delete this.formAdd.id;
+          insertCategory(this.formAdd).then((res) => {
+            this.submitLoading = false;
+            if (res.success) {
+              ElMessage.success("添加成功");
+              this.getAllList();
+              this.modalVisible = false;
+              this.$refs.form.resetFields();
+            }
+          });
+        } else {
+          updateCategory(this.formAdd).then((res) => {
+            this.submitLoading = false;
+            if (res.success) {
+              ElMessage.success("修改成功");
+              this.getAllList();
+              this.modalVisible = false;
+              this.$refs.form.resetFields();
+            }
+          });
         }
       });
     },
-    // 删除分类
     remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除 " + v.name + " ?",
-        loading: true,
-        onOk: () => {
-          // 删除
-          delCategory(v.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getAllList();
-            }
-          });
-        },
-      });
-    },
-
-    // 异步手动加载分类名称
-    handleLoadData(item, callback) {
-      this.recordLevel[item.level] = item.id;
-      if (item.level == 0) {
-        let categoryList = JSON.parse(JSON.stringify(this.categoryList));
-        categoryList.forEach((val) => {
-          if (val.id == item.id) {
-            val.children.map((child) => {
-              child._loading = false;
-              child.children = [];
-            });
-            this.normalizeCategoryTree(val.children);
-            // 模拟加载
-            setTimeout(() => {
-              callback(val.children);
-            }, 100);
+      ElMessageBox.confirm("您确认要删除 " + v.name + " ?", "确认删除", { type: "warning" }).then(() => {
+        return delCategory(v.id).then((res) => {
+          if (res.success) {
+            ElMessage.success("操作成功");
+            this.getAllList();
           }
         });
-      } else {
-        this.deepCategoryChildren(item.id, this.categoryList);
-        this.normalizeCategoryTree(this.checkedCategoryChildren);
-        setTimeout(() => {
-          callback(this.checkedCategoryChildren);
-        }, 100);
-      }
+      }).catch(() => {});
     },
-
-    // 通过递归children来实现手动加载数据
-    deepCategoryChildren(id, list) {
-      if (id != "0" && list.length != 0) {
-        for (let i = 0; i < list.length; i++) {
-          let item = list[i];
-          if (item.id == id) {
-            this.checkedCategoryChildren = item.children;
-            return;
-          } else {
-            this.deepCategoryChildren(id, item.children);
-          }
-        }
-      }
-    },
-    // 获取分类数据
     getAllList() {
       this.loading = true;
-      getCategoryTree().then((res) => {
-        this.loading = false;
-        if (res.success) {
-          localStorage.setItem("category", JSON.stringify(res.result));
-          this.normalizeCategoryTree(res.result);
-          this.categoryList = JSON.parse(JSON.stringify(res.result));
-          this.tableData = res.result.map((item) => {
-            if(this.recordLevel[0] && item.id === this.recordLevel[0]) {
-              item._showChildren = true
-              // 继续判断第二层
-              if(this.recordLevel[1] && item.children){
-                item.children.map((child)=>{
-                  if(this.recordLevel[1] && child.id === this.recordLevel[1]){
-                    child._showChildren = true
-                  }
-                })
-              }
-            }else{
-              if (item.children.length !== 0) {
-                item.children = [];
-                item._loading = false;
-              }
-           }
-            return item;
-          });
-        }
-      });
+      getCategoryTree()
+        .then((res) => {
+          this.loading = false;
+          if (res.success) {
+            localStorage.setItem("category", JSON.stringify(res.result));
+            this.normalizeCategoryTree(res.result);
+            this.categoryList = JSON.parse(JSON.stringify(res.result));
+            this.tableData = JSON.parse(JSON.stringify(res.result));
+          }
+        })
+        .catch(() => {
+          this.loading = false;
+        });
     },
-    // 启用分类
     enable(v) {
-      this.$Modal.confirm({
-        title: "确认启用",
-        content: "您是否要启用当前分类 " + v.name + " 及其子分类?",
-        loading: true,
-        okText: "是",
-        cancelText: "否",
-        onOk: () => {
-          disableCategory(v.id, { enableOperations: 0 }).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getAllList(0);
-            }
-          });
-        },
-        onCancel: () => {
-          this.getAllList(0);
-        },
+      ElMessageBox.confirm(
+        "您是否要启用当前分类 " + v.name + " 及其子分类?",
+        "确认启用",
+        { type: "warning", confirmButtonText: "是", cancelButtonText: "否" }
+      ).then(() => {
+        return disableCategory(v.id, { enableOperations: 0 }).then((res) => {
+          if (res.success) {
+            ElMessage.success("操作成功");
+            this.getAllList();
+          }
+        });
+      }).catch(() => {
+        this.getAllList();
       });
     },
-    // 禁用分类
     disable(v) {
-      this.$Modal.confirm({
-        title: "确认禁用",
-        content: "您是否要禁用当前分类 " + v.name + " 及其子分类?",
-        loading: true,
-        okText: "是",
-        cancelText: "否",
-        onOk: () => {
-          disableCategory(v.id, { enableOperations: true }).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getAllList(0);
-            }
-          });
-        },
-        onCancel: () => {
-          this.getAllList(0);
-        },
+      ElMessageBox.confirm(
+        "您是否要禁用当前分类 " + v.name + " 及其子分类?",
+        "确认禁用",
+        { type: "warning", confirmButtonText: "是", cancelButtonText: "否" }
+      ).then(() => {
+        return disableCategory(v.id, { enableOperations: true }).then((res) => {
+          if (res.success) {
+            ElMessage.success("操作成功");
+            this.getAllList();
+          }
+        });
+      }).catch(() => {
+        this.getAllList();
       });
     },
   },
@@ -548,31 +421,18 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
-::v-deep .ivu-table-wrapper {
+:deep(.el-table__body-wrapper) {
   overflow: auto;
 }
 .table {
-  min-height: 100vh;
-  height: auto;
+  min-height: 60vh;
 }
-.ops-link {
-  color: #2d8cf0;
-  cursor: pointer;
-  text-decoration: none;
+.mb_10 {
+  margin-bottom: 10px;
 }
-.ops {
-  display: flex;
-  flex-wrap: wrap;
-}
-.ops-link + .ops-link {
-  margin-left: 16px;
-  position: relative;
-}
-.ops-link + .ops-link::before {
-  content: "|";
-  position: absolute;
-  left: -10px;
-  color: #dcdee2;
+.commission-rate-item :deep(.el-form-item__label) {
+  white-space: nowrap;
 }
 </style>

@@ -43,12 +43,12 @@
                   </div>
                 </div>
                 <div class="selectBtn">
-                  <Button
+                  <el-button
                     size="small"
                     @click="handleClickFile(item, index)"
-                    ghost
+                    plain
                     type="primary"
-                    >选择链接</Button
+                    >选择链接</el-button
                   >
                 </div>
               </div>
@@ -57,12 +57,12 @@
               <div class="decorate-view">
                 <div class="decorate-view-title">选择图片</div>
                 <div>
-                  <Button
-                    ghost
+                  <el-button
+                    plain
                     type="primary"
                     size="small"
                     @click="clickLink(item)"
-                    >选择链接</Button
+                    >选择链接</el-button
                   >
                 </div>
               </div>
@@ -70,7 +70,9 @@
               <div class="decorate-view">
                 <div class="decorate-view-title">当前页面状态</div>
                 <div>
-                  <Tag :type="result.pageShow === 'OPEN'  ? 'green' : 'red'">{{result.pageShow === 'OPEN' ? '开启' : '关闭'}}</Tag>
+                  <el-tag :type="result.pageShow === 'OPEN' ? 'success' : 'danger'">
+                    {{ result.pageShow === "OPEN" ? "开启" : "关闭" }}
+                  </el-tag>
                 </div>
               </div>
             </div>
@@ -82,9 +84,9 @@
           :types="linkType"
         ></liliDialog>
       </div>
-      <Modal width="1200px" v-model="picModelFlag">
-      <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage" />
-    </Modal>
+      <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
+      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" ref="ossManage" />
+    </el-dialog>
     </div>
   </div>
 </template>
@@ -145,21 +147,26 @@ export default {
 
       API_Other.getOpenHomeData(pageType).then((res) => {
         this.$store.state.openStoreId = res.result.id;
-        res.result.pageData
-          ? this.$set(this, "advertising", [JSON.parse(res.result.pageData)])
-          : "";
+        if (res.result.pageData) {
+          this.advertising = [JSON.parse(res.result.pageData)];
+        }
         this.result = res.result
       });
     },
     // 图片选择器回显
     callbackSelected(val) {
       this.picModelFlag = false;
+      if (!val?.url) return;
       this.advertising[0].img = val.url;
     },
     // 点击选择图片
     handleClickFile(item, index) {
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
     // 点击链接
     clickLink(item) {

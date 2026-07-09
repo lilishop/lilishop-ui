@@ -3,10 +3,16 @@
     <el-container class="editor-container">
       <el-header class="no-padding toolbar" height="35px">
         <ul>
-          <li v-popover:popoverEmoticon>
-            <i class="iconfont icon-icon_im_face" style="font-size: 15px" />
-            <p class="tip-title">表情符号</p>
-          </li>
+          <el-popover ref="popoverEmoticon" placement="top-start" trigger="click" width="300"
+            popper-class="no-padding el-popover-em">
+            <template #reference>
+              <li>
+                <i class="iconfont icon-icon_im_face" style="font-size: 15px" />
+                <p class="tip-title">表情符号</p>
+              </li>
+            </template>
+            <MeEditorEmoticon ref="editorEmoticon" @selected="selecteEmoticon" />
+          </el-popover>
           <!-- <li @click="codeBlock.isShow = true">
             <i class="iconfont icon-daima" />
             <p class="tip-title">代码片段</p>
@@ -59,11 +65,6 @@
           <!--          </p>-->
         </ul>
 
-        <el-popover ref="popoverEmoticon" placement="top-start" trigger="click" width="300"
-          popper-class="no-padding el-popover-em">
-          <MeEditorEmoticon ref="editorEmoticon" @selected="selecteEmoticon" />
-        </el-popover>
-
         <form enctype="multipart/form-data" style="display: none" ref="fileFrom">
           <input type="file" ref="restFile" accept="image/*" @change="uploadImageChange" />
           <input type="file" ref="restFile2" @change="uploadFileChange" />
@@ -76,7 +77,7 @@
     </el-container>
 
     <!-- 图片查看器 -->
-    <MeEditorImageView ref="imageViewer" v-model="imageViewer.isShow" :file="imageViewer.file"
+    <MeEditorImageView ref="imageViewer" v-model:show="imageViewer.isShow" :file="imageViewer.file"
       @confirm="confirmUploadImage" />
 
     <MeEditorRecorder v-if="recorder" @close="recorder = false" />
@@ -86,7 +87,7 @@
       @confirm="confirmCodeBlock" />
 
     <!-- 文件上传管理器 -->
-    <MeEditorFileManage ref="filesManager" v-model="filesManager.isShow" />
+    <MeEditorFileManage ref="filesManager" v-model:show="filesManager.isShow" />
 
     <MeEditorVote v-if="vote.isShow" @close="
       () => {
@@ -335,7 +336,7 @@ export default {
         });
       }
 
-      this.$refs.popoverEmoticon.doClose();
+      this.$refs.popoverEmoticon.hide();
     },
   },
 };

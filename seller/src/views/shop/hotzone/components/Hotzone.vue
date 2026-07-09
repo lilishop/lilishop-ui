@@ -31,9 +31,8 @@
                 {{ showZoneText(zone) }}
               </div>
             </div>
-            <div class="flex">
+            <div class="hotzone-box-item-actions">
               <div class="hotzone-btn" @click="editZone(index)">修改</div>
-              &nbsp;&nbsp;&nbsp;&nbsp;
               <div class="hotzone-btn" @click="delZone(index)">删除</div>
             </div>
           </div>
@@ -239,13 +238,16 @@ export default {
   }
   > div:nth-of-type(2) {
     width: 50%;
+    min-width: 0;
     background: #f7f7f7;
+    overflow: hidden;
   }
 }
 
 .hotzone-add-box-body {
   height: 90%;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .hotzone-box-item-main {
@@ -256,11 +258,18 @@ export default {
 .hotzone-box-item {
   align-items: center;
   display: flex;
+  gap: 8px;
   border-bottom: 1px solid #ededed;
   font-size: 12px;
-  justify-content: space-between;
   padding: 5px 10px 0;
   width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+
+  > div:nth-child(2) {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 .hotzone-add-box-footer {
@@ -280,8 +289,18 @@ export default {
   cursor: pointer;
 }
 
+.hotzone-box-item-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
 .hotzone-box-item-text {
-  width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   cursor: pointer;
 }
 

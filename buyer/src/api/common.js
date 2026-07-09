@@ -38,7 +38,8 @@ export function getRegion (id) {
   return request({
     url: `${commonUrl}/common/common/region/item/${id}`,
     needToken: true,
-    method: Method.GET
+    method: Method.GET,
+    loading: false
   });
 }
 
@@ -92,4 +93,13 @@ export function getBaseSite(){
     method: Method.GET,
     needToken: false
   })
+}
+
+// 获取主题色配置
+export function getThemeSetting() {
+  return request({
+    url: `${commonUrl}/common/common/site/theme`,
+    method: Method.GET,
+    needToken: false,
+  });
 }

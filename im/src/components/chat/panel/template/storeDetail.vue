@@ -35,18 +35,12 @@
 </template>
 
 <script>
-import { Tag, button, rate } from 'element-ui'
 export default {
   data () {
     return {
       value: null,
       colors: ['#99A9BF', '#F7BA2A', '#FF9900']
     }
-  },
-  components: {
-    "el-tag": Tag,
-    "el-button": button,
-    "el-rate": rate
   },
   methods: {
   },

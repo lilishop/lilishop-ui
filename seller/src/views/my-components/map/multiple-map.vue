@@ -1,38 +1,50 @@
 <template>
-  <Modal width="800" footer-hide v-model="enableMap">
-    <RadioGroup @on-change="changeMap" v-model="mapDefault" type="button">
-      <Radio label="select">级联选择</Radio>
-      <Radio label="map" v-if="aMapSwitch">高德地图</Radio>
-    </RadioGroup>
+  <el-dialog v-model="enableMap" width="800px" :show-close="true" destroy-on-close>
+    <el-radio-group v-model="mapDefault" @change="changeMap">
+      <el-radio-button value="select">级联选择</el-radio-button>
+      <el-radio-button v-if="aMapSwitch" value="map">高德地图</el-radio-button>
+    </el-radio-group>
     <div>
       <div v-if="mapDefault === 'select'">
         <div class="selector">
-          <div class="selector-item" v-for="(plant, plantIndex) in Object.keys(data)" :key="plantIndex">
-            <div :class="{ 'active': chiosend[plantIndex].id == item.id }" v-for="(item, index) in data[plant]"
+          <div
+            v-for="(plant, plantIndex) in Object.keys(data)"
+            :key="plantIndex"
+            class="selector-item"
+          >
+            <div
+              v-for="(item, index) in data[plant]"
               :key="index"
-              @click="init(item, plantIndex != Object.keys(data).length - 1 ? Object.keys(data)[plantIndex + 1] : 0, plantIndex)"
-              class="map-item">
+              :class="{ active: chiosend[plantIndex] && chiosend[plantIndex].id == item.id }"
+              class="map-item"
+              @click="
+                init(
+                  item,
+                  plantIndex != Object.keys(data).length - 1
+                    ? Object.keys(data)[plantIndex + 1]
+                    : 0,
+                  plantIndex
+                )
+              "
+            >
               {{ item.name }}
             </div>
           </div>
-
         </div>
         <div class="footer">
-          <Button type="primary" @click="finished">确定</Button>
+          <el-button type="primary" @click="finished">确定</el-button>
         </div>
       </div>
       <mapping v-if="mapDefault === 'map'" ref="map" @getAddress="getAddress" />
-
     </div>
-
-
-  </Modal>
+  </el-dialog>
 </template>
 
 <script>
-import { aMapSwitch } from '@/config/index'
+import { aMapSwitch } from "@/config/index";
 import mapping from "@/views/my-components/map/index.vue";
 import * as API_Setup from "@/api/common.js";
+
 export default {
   components: { mapping },
   data() {
@@ -41,87 +53,76 @@ export default {
       enableMap: false,
       mapDefault: "select",
       data: {
-        province: [], //省
-        city: [], //市
-        area: [], //区
-        street: [], //街道
+        province: [],
+        city: [],
+        area: [],
+        street: [],
       },
       chiosend: [],
-
     };
   },
   mounted() {
-
     this.chiosend = new Array(4).fill("");
-
   },
   methods: {
     open() {
-      this.enableMap = true
-      this.init({ id: 0 }, 'province');
+      this.enableMap = true;
+      this.init({ id: 0 }, "province");
     },
     changeMap(val) {
-      this.mapDefault = val
-
-
+      this.mapDefault = val;
     },
-    init(val, level = 'province', index) {
+    init(val, level = "province", index) {
       if (level == 0) {
-        // 说明选择到了街道，将街道id存入数组
         this.chiosend.splice(3, 1, val);
-      }
-      else {
+      } else {
         API_Setup.getChildRegion(val.id).then((res) => {
           if (res.result.length && val.id !== 0) {
-            this.chiosend[index] = val
-          }
-          else if(!res.result.length){
-            this.chiosend[index] = val
+            this.chiosend[index] = val;
+          } else if (!res.result.length) {
+            this.chiosend[index] = val;
           }
           this.data[level] = res.result;
-          if (level == 'city') {
-            this.data.area = []
-            this.data.street = []
-            this.chiosend.splice(1, 3, "","","");
+          if (level == "city") {
+            this.data.area = [];
+            this.data.street = [];
+            this.chiosend.splice(1, 3, "", "", "");
           }
-          if (level == 'area') {
-            this.data.street = []
-            this.chiosend.splice(2, 2, "","");
+          if (level == "area") {
+            this.data.street = [];
+            this.chiosend.splice(2, 2, "", "");
           }
-          if (level == 'street') {
+          if (level == "street") {
             this.chiosend.splice(3, 1, "");
           }
         });
       }
     },
     getAddress(center) {
-      this.$emit('callback', {
+      this.$emit("callback", {
         type: this.mapDefault,
-        data: center
-      })
+        data: center,
+      });
       this.enableMap = false;
     },
-    // 选择完成
     finished() {
-      if(!this.chiosend[0]){
-        this.$Message.error("请选择地址")
-        return
+      if (!this.chiosend[0]) {
+        this.$Message.error("请选择地址");
+        return;
       }
-      const params = this.chiosend.filter((item) => item!=="" && item.value !== "");
+      const params = this.chiosend.filter((item) => item !== "" && item.value !== "");
       this.enableMap = false;
-      this.$emit('callback', {
+      this.$emit("callback", {
         type: this.mapDefault,
-        data: params
-      })
+        data: params,
+      });
     },
   },
-}
+};
 </script>
 
 <style lang="scss" scoped>
 .selector {
-
-
   height: 400px;
   padding: 10px 0;
   display: flex;

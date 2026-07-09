@@ -1,30 +1,38 @@
 <template>
   <div class="renovation">
-    <!-- 左侧模块列表 -->
     <div class="model-list">
       <div class="classification-title">基础模块</div>
-      <draggable tag="ul" :list="modelData" v-bind="{group:{ name:'model', pull:'clone',put:false},sort:false, ghostClass: 'ghost'}"   >
-        <li v-for="(model, index) in modelData" :key="index" class="model-item">
-          <Icon :type="model.icon" />
-          <span>{{model.name}}</span>
-        </li>
+      <draggable
+        tag="ul"
+        :list="modelData"
+        :item-key="getModelKey"
+        :clone="cloneModel"
+        :group="{ name: 'model', pull: 'clone', put: false }"
+        :sort="false"
+        ghost-class="ghost"
+        handle=".model-item"
+      >
+        <template #item="{ element: model }">
+          <li class="model-item">
+            <el-icon><Picture /></el-icon>
+            <span>{{ model.name }}</span>
+          </li>
+        </template>
       </draggable>
     </div>
-    <!-- 中间展示模块 -->
     <div class="show-content">
       <model-form ref="modelForm" :data="modelForm"></model-form>
     </div>
-    <!-- 操作按钮 -->
     <div class="btn-bar" :class="{'top':isHiddenBar}">
-      <Button type="primary" :loading="submitLoading" @click="saveTemplate">保存模板</Button>
-      <Button class="ml_10" @click="resetTemplate">还原模板</Button>
-      <Button class="ml_10" @click="witeLocalStore">将装修内容写入到本地</Button>
-
-      <Button class="ml_10" v-if="hasCache" @click="clearCache">清空本地装修缓存</Button>
+      <el-button type="primary" :loading="submitLoading" @click="saveTemplate">保存模板</el-button>
+      <el-button class="ml_10" @click="resetTemplate">还原模板</el-button>
+      <el-button class="ml_10" @click="witeLocalStore">将装修内容写入到本地</el-button>
+      <el-button class="ml_10" v-if="hasCache" @click="clearCache">清空本地装修缓存</el-button>
     </div>
   </div>
 </template>
 <script>
+import { Picture } from "@element-plus/icons-vue";
 import { modelData } from "./modelConfig";
 import Draggable from "vuedraggable";
 import ModelForm from "./modelForm.vue";
@@ -33,12 +41,12 @@ export default {
   components: {
     Draggable,
     ModelForm,
+    Picture,
   },
   mounted() {
     const setting = window.localStorage.getItem('admin-setting') ? JSON.parse(window.localStorage.getItem('admin-setting')) : {};
     this.isHiddenBar = setting.isUseTabsRouter
-     // 先读缓存，如果缓存有值则读缓存。
-    const cache = this.getStore('managerPCPageCache')
+     const cache = this.getStore('managerPCPageCache')
     this.hasCache = !!cache;
       if(cache){
         this.$Modal.confirm({
@@ -51,7 +59,6 @@ export default {
           if (pageData) {
             pageData = JSON.parse(pageData);
             if (pageData.list[0].type === "topAdvert") {
-              // topAdvert 为顶部广告 navList为导航栏
               this.$refs.modelForm.topAdvert = pageData.list[0];
               this.$refs.modelForm.navList = pageData.list[1];
               pageData.list.splice(0, 2);
@@ -70,18 +77,29 @@ export default {
   data() {
     return {
       hasCache:false,
-      modelData, // 可选模块数据
-      modelForm: { list: [] }, // 模板数据
-      submitLoading: false, // 提交加载状态
+      modelData,
+      modelForm: { list: [] },
+      submitLoading: false,
       isHiddenBar:true,
     };
   },
   methods: {
+    getModelKey(model) {
+      return model.type || model.name;
+    },
+    cloneModel(model) {
+      const key = Date.now() + "_" + Math.ceil(Math.random() * 99999);
+      const cloned = JSON.parse(JSON.stringify(model));
+      return {
+        ...cloned,
+        key,
+        model: cloned.type + "_" + key,
+      };
+    },
     clearCache(){
       this.setStore('managerPCPageCache', '')
       this.$Message.success('清除成功')
     },
-      // 将楼层装修的内容写入到本地缓存中
     witeLocalStore(){
       const data ={...this.modelForm}
       data.list.unshift(this.$refs.modelForm.navList);
@@ -90,10 +108,8 @@ export default {
       this.$Message.success('写入成功')
     },
     saveTemplate() {
-      // 保存模板
       this.submitTemplate(this.$route.query.pageShow ? 'OPEN' : 'CLOSE')
     },
-    // 提交模板
     submitTemplate(pageShow) {
       this.submitLoading = true
       const modelForm = JSON.parse(JSON.stringify(this.modelForm))
@@ -102,7 +118,6 @@ export default {
       const data = {
         id: this.$route.query.id,
         pageData: JSON.stringify(modelForm),
-        // 如果是专题页面永远关闭
         pageShow: this.$route.query.pageType === 'SPECIAL' ? 'CLOSE' : pageShow,
         pageClientType: 'PC',
       };
@@ -114,18 +129,15 @@ export default {
       });
     },
     resetTemplate() {
-      // 还原模板
       this.getTemplateItem(this.$route.query.id);
     },
     getTemplateItem(id) {
-      // 获取模板数据
       API_floor.getHomeData(id).then((res) => {
         if (res.success) {
           let pageData = res.result.pageData;
           if (pageData) {
             pageData = JSON.parse(pageData);
             if (pageData.list[0].type === "topAdvert") {
-              // topAdvert 为顶部广告 navList为导航栏
               this.$refs.modelForm.topAdvert = pageData.list[0];
               this.$refs.modelForm.navList = pageData.list[1];
               pageData.list.splice(0, 2);
@@ -161,7 +173,7 @@ export default {
   overflow-y: auto;
   padding: 10px;
   background: #fff;
-  margin-top: 60px;
+  margin-top: 80px;
   position: fixed;
   z-index: 100;
   box-shadow: 1px 1px 10px #999;
@@ -169,6 +181,15 @@ export default {
     width: 100%;
     height: 30px;
     line-height: 30px;
+    text-align: center;
+  }
+  :deep(ul) {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   .model-item {
     width: 110px;
@@ -176,16 +197,17 @@ export default {
     background: #eee;
     margin-top: 10px;
     line-height: 30px;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     color: #999;
     transition:0.15s;
     border-radius: 4px;
     &:hover {
-
       background: $theme_color;
       cursor: move;
       color: #fff;
-
     }
   }
   .ghost::after {
@@ -224,7 +246,6 @@ export default {
   padding: 10px;
   box-shadow: 1px 1px 10px #999;
   z-index: 99;
-
 }
 .top{
   top: 100px;

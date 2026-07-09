@@ -1,22 +1,19 @@
 <template>
   <div class="add-eval">
-    <div class="title">
-      <card _Title="评价详情" :_Size="16"></card>
+    <UserCenterLayout title="评价详情" :tabs="['评价详情']">
+      <div class="title">
       <p>
-        <span class="color999">创建人：</span
-        ><span>{{ orderGoods.createBy | secrecyMobile }}</span>
+        <span class="color999">创建人：</span><span>{{ $filters.secrecyMobile( orderGoods.createBy ) }}</span>
         <span class="color999 ml_20">{{ orderGoods.createTime }}</span>
       </p>
-    </div>
+      </div>
     <!-- 物流评分、服务评分 -->
     <div class="delivery-rate">
       <div class="fontsize_16">物流服务评价：</div>
-      <div class="color999">
-        <span>物流评价：<Rate disabled :value="Number(orderGoods.deliveryScore)" /></span>
-        <span>服务评价：<Rate disabled :value="Number(orderGoods.serviceScore)" /></span>
-        <span
-          >服务评价：<Rate disabled :value="Number(orderGoods.descriptionScore)"
-        /></span>
+      <div class="color999 delivery-rate-items">
+        <span>物流评价：<el-rate disabled :model-value="Number(orderGoods.deliveryScore) || 0" /></span>
+        <span>服务评价：<el-rate disabled :model-value="Number(orderGoods.serviceScore) || 0" /></span>
+        <span>描述评价：<el-rate disabled :model-value="Number(orderGoods.descriptionScore) || 0" /></span>
       </div>
     </div>
     <!-- 添加订单评价  左侧商品详情  右侧评价框 -->
@@ -41,17 +38,17 @@
         <div class="eval-con">
           <div>
             <span class="color999">商品评价：</span>
-            <RadioGroup
+            <el-radio-group
               style="margin-bottom: 5px; color: #999"
               v-model="orderGoods.grade"
               type="button"
               button-style="solid"
             >
-              <Radio label="GOOD" disabled>好评</Radio>
-              <Radio label="MODERATE" disabled>中评</Radio>
-              <Radio label="WORSE" disabled>差评</Radio>
-            </RadioGroup>
-            <Input
+              <el-radio label="GOOD" disabled>好评</el-radio>
+              <el-radio label="MODERATE" disabled>中评</el-radio>
+              <el-radio label="WORSE" disabled>差评</el-radio>
+            </el-radio-group>
+            <el-input
               type="textarea"
               maxlength="500"
               readonly
@@ -64,7 +61,7 @@
             <template v-if="orderGoods.images">
               <div class="demo-upload-list" v-for="(img, index) in orderGoods.images.split(',')" :key="index">
                 <img :src="img" />
-                <div class="demo-upload-list-cover"><Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon></div>
+                <div class="demo-upload-list-cover"><el-icon @click="handleView(img)"><View /></el-icon></div>
               </div>
             </template>
           </div>
@@ -75,7 +72,7 @@
               <template v-if="orderGoods.replyImage">
                 <div class="demo-upload-list" v-for="(img, index) in orderGoods.replyImage.split(',')" :key="index">
                   <img :src="img" />
-                  <div class="demo-upload-list-cover"><Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon></div>
+                  <div class="demo-upload-list-cover"><el-icon @click="handleView(img)"><View /></el-icon></div>
                 </div>
               </template>
             </div>
@@ -84,14 +81,17 @@
         </div>
       </li>
     </ul>
-    <Modal title="View Image" v-model="visible">
+    <el-dialog title="View Image" v-model="visible">
       <img :src="previewImage" v-if="visible" style="width: 100%" />
-    </Modal>
+    </el-dialog>
+    </UserCenterLayout>
   </div>
 </template>
 <script>
+import { View } from '@element-plus/icons-vue';
 import { evaluationDetail } from "@/api/member.js";
 export default {
+  components: { View },
   data() {
     return {
       order: {}, // 订单详情
@@ -132,12 +132,28 @@ export default {
   display: flex;
   align-items: center;
   margin-top: 20px;
-  height: 50px;
+  min-height: 50px;
   border-bottom: 1px solid #eee;
   > div:nth-child(1) {
     width: 120px;
     font-weight: bold;
   }
+}
+
+.delivery-rate-items {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.delivery-rate-items :deep(.el-rate) {
+  --el-rate-fill-color: #ffb400;
+  --el-rate-disabled-fill-color: #ffb400;
+}
+
+:deep(.el-rate__icon.is-active) {
+  color: #ffb400;
 }
 .goods-eval li {
   display: flex;

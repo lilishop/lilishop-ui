@@ -1,189 +1,154 @@
 <template>
-  <div class="full-cut">
-    <Card>
-      <Row>
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
-          <Form-item label="活动名称" prop="promotionName">
-            <Input
-              type="text"
-              v-model="searchForm.promotionName"
-              placeholder="请输入活动名称"
-              clearable
-              style="width: 240px"
-            />
-          </Form-item>
-          <Form-item label="活动状态" prop="promotionStatus">
-            <Select
-              v-model="searchForm.promotionStatus"
-              placeholder="请选择"
-              clearable
-              style="width: 240px"
-            >
-              <Option value="NEW">未开始</Option>
-              <Option value="START">已开始/上架</Option>
-              <Option value="END">已结束/下架</Option>
-              <Option value="CLOSE">紧急关闭/作废</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="活动时间">
-            <DatePicker
-              v-model="selectDate"
-              type="daterange"
-              clearable
-              placeholder="选择起始时间"
-              style="width: 240px"
-            >
-            </DatePicker>
-          </Form-item>
-          <Button
-            @click="handleSearch"
-            type="primary"
-            class="search-btn"
-            icon="ios-search"
-            >搜索</Button
-          >
-        </Form>
-      </Row>
-      </Card>
-    <Card>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        class="mt_10"
-        sortable="custom"
+  <div class="search full-cut">
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
       >
-        <template slot-scope="{ row }" slot="applyEndTime">
-          {{ unixDate(row.applyEndTime) }}
-        </template>
-        <template slot-scope="{ row }" slot="promotionType">
-          {{ row.fullMinusFlag ? "满减" : "满折" }}
-        </template>
-        <template slot-scope="{ row }" slot="hours">
-          <Tag v-for="item in unixHours(row.hours)" :key="item">{{ item }}</Tag>
-        </template>
-        <template slot-scope="{ row }" slot="action">
-          <div>
-            <a
-              :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
-              @click="view(row)"
-            >查看</a>
-            <span
-              v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'START'"
-              style="margin: 0 8px; color: #dcdee2"
-            >|</span>
-            <a
-              v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'START'"
-              :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
-              @click="openOrClose(row)"
-            >关闭</a>
-          </div>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+        <el-form-item label="活动名称" prop="promotionName">
+          <el-input
+            v-model="searchForm.promotionName"
+            placeholder="请输入活动名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="活动状态" prop="promotionStatus">
+          <el-select
+            v-model="searchForm.promotionStatus"
+            placeholder="请选择"
+            clearable
+            style="width: 240px"
+          >
+            <el-option label="未开始" value="NEW" />
+            <el-option label="已开始/上架" value="START" />
+            <el-option label="已结束/下架" value="END" />
+            <el-option label="紧急关闭/作废" value="CLOSE" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="活动时间">
+          <el-date-picker
+            v-model="selectDate"
+            type="daterange"
+            clearable
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+      >
+        <el-table-column prop="promotionName" label="活动名称" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="startTime" label="开始时间" width="170" />
+        <el-table-column prop="endTime" label="结束时间" width="170" />
+        <el-table-column prop="storeName" label="店铺名称" min-width="100" show-overflow-tooltip />
+        <el-table-column label="活动类型" min-width="80">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.fullMinusFlag ? "满减" : "满折" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="活动状态" min-width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="promotionStatusTagType(row.promotionStatus)">
+              {{ promotionStatusText(row.promotionStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" width="140" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a class="link-text" @click="view(row)">查看</a>
+              <template v-if="row.promotionStatus === 'NEW' || row.promotionStatus === 'START'">
+                <span class="op-split">|</span>
+                <a class="link-text" @click="openOrClose(row)">关闭</a>
+              </template>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
+
 <script>
 import { getFullDiscountList, updateFullDiscount } from "@/api/promotion.js";
-import { promotionsStatusRender } from "@/utils/promotions";
 
 export default {
   data() {
     return {
       selectDate: [],
       total: 0,
-      loading: false, // 表单加载状态
-        searchForm: {
-          // 请求参数
-          pageNumber: 1,
-          pageSize: 20,
-          sort: "createTime",
-          order: "desc",
-        },
-      columns: [
-        // 表头
-        {
-          title: "活动名称",
-          key: "promotionName",
-          minWidth: 120,
-        },
-        {
-          title: "开始时间",
-          key: "startTime",
-          width: 170,
-        },
-        {
-          title: "结束时间",
-          key: "endTime",
-          width: 170,
-        },
-        {
-          title: "店铺名称",
-          key: "storeName",
-          minWidth: 60,
-        },
-        {
-          title: "活动类型",
-          slot: "promotionType",
-          minWidth: 60,
-        },
-        {
-          title: "活动状态",
-          key: "promotionStatus",
-          minWidth: 60,
-          render: (h, params) => {
-            return promotionsStatusRender(h, params);
-          },
-        },
-        {
-          title: "操作",
-          slot: "action",
-          align: "center",
-          width: 140,
-        },
-      ],
-      data: [], // 列表数据
+      loading: false,
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+      },
+      data: [],
     };
   },
   methods: {
-    // 初始化数据
+    promotionStatusText(status) {
+      const map = {
+        NEW: "未开始",
+        START: "已开始",
+        END: "已结束",
+        CLOSE: "已关闭",
+      };
+      return map[status] || "未知";
+    },
+    promotionStatusTagType(status) {
+      const map = {
+        NEW: "info",
+        START: "success",
+        END: "danger",
+        CLOSE: "danger",
+      };
+      return map[status] || "danger";
+    },
     init() {
       this.getDataList();
     },
-    // 开启或关闭活动
     openOrClose(row) {
       let name = "开启";
-      if (row.promotionStatus === 'NEW' ||row.promotionStatus === "START") {
+      if (row.promotionStatus === "NEW" || row.promotionStatus === "START") {
         name = "关闭";
         this.$Modal.confirm({
           title: "提示",
-          // 记得确认修改此处
           content: `确认${name}此活动吗?需要一定时间才能生效，请耐心等待`,
           loading: true,
           onOk: () => {
-            // 删除
             updateFullDiscount(row.id).then((res) => {
               this.$Modal.remove();
               if (res.success) {
@@ -195,24 +160,18 @@ export default {
         });
       }
     },
-    changePage(v) {
-      // 改变页数
-      this.searchForm.pageNumber = v;
+    changePage() {
       this.getDataList();
     },
-    changePageSize(v) {
-      // 改变页码
+    changePageSize() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
       this.getDataList();
     },
     handleSearch() {
-      // 搜索
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getDataList();
     },
-    // 获取列表数据
     getDataList() {
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
@@ -225,14 +184,12 @@ export default {
       getFullDiscountList(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
-          console.log(res)
           this.data = res.result.records;
           this.total = res.result.total;
         }
       });
     },
     view(row) {
-      // 查看
       this.$router.push({ name: "full-discount-detail", query: { id: row.id } });
     },
   },
@@ -241,3 +198,20 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.op-split {
+  margin: 0 8px;
+  color: #dcdfe6;
+}
+
+.mt_10 {
+  margin-top: 10px;
+}
+</style>

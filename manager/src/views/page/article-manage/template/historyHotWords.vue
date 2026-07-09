@@ -1,25 +1,21 @@
 <template>
   <div class="box">
-    <Row class="operation">
-      <Col span="12">
-        <DatePicker
-          :options="options"
-          @on-change="search"
-          type="date"
-          placement="bottom-end"
-          placeholder="选择查看日期"
-          style="width: 200px"
-          v-model="yestDate"
-        ></DatePicker>
-      </Col>
-    </Row>
-    <Row>
-      <p>
-        <Alert type="success">
-          这里展示历史某一天的热词数据统计，可根据需求配置每日持久化多少条数据。
-        </Alert>
-      </p>
-    </Row>
+    <el-date-picker
+      v-model="params.date"
+      type="date"
+      placeholder="选择查看日期"
+      value-format="YYYY-MM-DD"
+      :disabled-date="disabledDate"
+      style="width: 200px"
+      @change="search"
+    />
+    <el-alert
+      class="mt_10"
+      type="success"
+      :closable="false"
+      show-icon
+      title="这里展示历史某一天的热词数据统计，可根据需求配置每日持久化多少条数据。"
+    />
 
     <div id="container"></div>
   </div>
@@ -28,64 +24,53 @@
 <script>
 import { Chart } from "@antv/g2";
 import { getHotWordsHistory } from "@/api/index";
-import affixTime from "@/components/affix-time";
-import { Message } from "view-design";
+import { Message } from "@/utils/message";
 
 export default {
-  components: {
-    affixTime,
-  },
   data() {
     return {
-      yestDate:new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toString(),
-      yestDate:this.$options.filters.unixToDate(
-          (new Date().getTime() / 1000) - (24 * 60 * 60),
-          "yyyy年MM月dd日"
-        ),
       params: {
-        date: this.$options.filters.unixToDate(
-          (new Date().getTime() / 1000) - (24 * 60 * 60),
-          "yyyy-MM-dd"
-        ),
+        date: "",
       },
-      hotWordsChart: "", //图表
-      hotWordsData: [], //数据
-      options: {
-        disabledDate: (date) => {
-          if (this.endMonth) {
-            let endDate = this.getDate(this.endMonth);
-            return (date && date > endDate) || date > new Date();
-          } else {
-            return date && date > new Date();
-          }
-        },
-      },
+      hotWordsChart: null,
+      hotWordsData: [],
+      endMonth: null,
     };
   },
-  computed: {},
-
+  created() {
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    this.params.date = this.$filters.unixToDate(Math.floor(yesterday.getTime() / 1000), "yyyy-MM-dd");
+  },
   methods: {
-    clickBreadcrumb(val) {
-      this.params = { ...this.params, ...val };
+    disabledDate(date) {
+      if (this.endMonth) {
+        const endDate = this.getDate(this.endMonth);
+        return (date && date > endDate) || date > new Date();
+      }
+      return date && date > new Date();
     },
-    // 初始化图表
+    getDate(monthStr) {
+      const [year, month] = monthStr.split("-");
+      return new Date(year, month, 0);
+    },
     async search(val) {
-      console.log(val)
-      val ? (this.params.date = val) : "";
+      if (val) {
+        this.params.date = val;
+      }
       const res = await getHotWordsHistory(this.params);
       if (res.success) {
-        this.hotWordsData = res.result;
-        this.hotWordsChart.data(this.hotWordsData);
-        this.hotWordsChart.render();
-        if (!this.hotWordsData) {
+        this.hotWordsData = res.result || [];
+        if (this.hotWordsChart) {
+          this.hotWordsChart.changeData(this.hotWordsData);
+          this.hotWordsChart.render();
+        }
+        if (!this.hotWordsData.length) {
           Message.error("暂无数据");
         }
       }
     },
-    handleClickSearch() {},
     init() {
-      let chart = this.hotWordsChart;
-      chart = new Chart({
+      const chart = new Chart({
         container: "container",
         autoFit: true,
         height: 500,
@@ -94,14 +79,12 @@ export default {
       chart.scale("score", {
         alias: "搜索次数",
       });
-
       chart.axis("keywords", {
         tickLine: {
           alignTick: false,
         },
       });
       chart.axis("score", false);
-
       chart.tooltip({
         showMarkers: false,
       });
@@ -118,12 +101,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.affix-time {
-  padding-left: 15px;
-
-}
-
-
 .box {
   min-height: 400px;
   margin-left: 50px;

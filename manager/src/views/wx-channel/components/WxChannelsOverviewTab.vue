@@ -1,76 +1,76 @@
 <template>
-  <div class="wx-channel-overview">
-    <Row>
-      <Form :model="searchForm" inline :label-width="70" class="search-form">
-        <FormItem label="统计时间">
-          <DatePicker
-            type="daterange"
-            v-model="selectDate"
-            format="yyyy-MM-dd"
-            clearable
-            @on-change="selectDateRange"
-            placeholder="选择起始时间"
-            style="width: 240px"
-          ></DatePicker>
-        </FormItem>
-        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn" :loading="loading"
-          >查询</Button
-        >
-      </Form>
-    </Row>
+  <div v-loading="loading" class="wx-channel-overview">
+    <el-form :model="searchForm" inline label-width="70px" class="search-form">
+      <el-form-item label="统计时间">
+        <el-date-picker
+          v-model="selectDate"
+          type="daterange"
+          format="YYYY-MM-DD"
+          value-format="YYYY-MM-DD"
+          clearable
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          style="width: 240px"
+          @change="selectDateRange"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" class="search-btn" :loading="loading" @click="handleSearch">查询</el-button>
+      </el-form-item>
+    </el-form>
 
-    <Row :gutter="16" style="margin-top: 12px">
-      <Col :xs="24" :sm="12" :md="8">
-        <Card dis-hover>
+    <el-row :gutter="16" style="margin-top: 12px">
+      <el-col :xs="24" :sm="12" :md="8">
+        <el-card shadow="never">
           <div class="overview-card">
             <div class="label">视频号总销售额</div>
             <div class="value">{{ summary.totalSales || 0 }}</div>
           </div>
-        </Card>
-      </Col>
-      <Col :xs="24" :sm="12" :md="8">
-        <Card dis-hover>
+        </el-card>
+      </el-col>
+      <el-col :xs="24" :sm="12" :md="8">
+        <el-card shadow="never">
           <div class="overview-card">
             <div class="label">直播间销售额</div>
             <div class="value">{{ summary.liveSales || 0 }}</div>
           </div>
-        </Card>
-      </Col>
-      <Col :xs="24" :sm="12" :md="8">
-        <Card dis-hover>
+        </el-card>
+      </el-col>
+      <el-col :xs="24" :sm="12" :md="8">
+        <el-card shadow="never">
           <div class="overview-card">
             <div class="label">橱窗销售额</div>
             <div class="value">{{ summary.windowSales || 0 }}</div>
           </div>
-        </Card>
-      </Col>
-    </Row>
-    <Row :gutter="16" style="margin-top: 16px">
-      <Col :xs="24" :sm="12" :md="8">
-        <Card dis-hover>
+        </el-card>
+      </el-col>
+    </el-row>
+    <el-row :gutter="16" style="margin-top: 16px">
+      <el-col :xs="24" :sm="12" :md="8">
+        <el-card shadow="never">
           <div class="overview-card">
             <div class="label">视频号退款总金额</div>
             <div class="value">{{ summary.totalRefund || 0 }}</div>
           </div>
-        </Card>
-      </Col>
-      <Col :xs="24" :sm="12" :md="8">
-        <Card dis-hover>
+        </el-card>
+      </el-col>
+      <el-col :xs="24" :sm="12" :md="8">
+        <el-card shadow="never">
           <div class="overview-card">
             <div class="label">直播间退款金额</div>
             <div class="value">{{ summary.liveRefund || 0 }}</div>
           </div>
-        </Card>
-      </Col>
-      <Col :xs="24" :sm="12" :md="8">
-        <Card dis-hover>
+        </el-card>
+      </el-col>
+      <el-col :xs="24" :sm="12" :md="8">
+        <el-card shadow="never">
           <div class="overview-card">
             <div class="label">橱窗退款金额</div>
             <div class="value">{{ summary.windowRefund || 0 }}</div>
           </div>
-        </Card>
-      </Col>
-    </Row>
+        </el-card>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -107,8 +107,7 @@ export default {
         this.searchForm.endTime = null;
         return;
       }
-      const startStr = v[0];
-      const endStr = v[1];
+      const [startStr, endStr] = v;
       const start = startStr ? new Date(`${startStr}T00:00:00`).getTime() : null;
       const end = endStr ? new Date(`${endStr}T23:59:59`).getTime() : null;
       this.searchForm.startTime = Number.isFinite(start) ? start : null;

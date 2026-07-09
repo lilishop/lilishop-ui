@@ -6,43 +6,47 @@
     </div>
     <div class="setup-box">
       <div>
-        <Button
+        <el-button
           size="small"
-          @click.stop="handleSelectModel(data.options.list)"
-        >编辑</Button
+          @click.stop="handleSelectModel"
+        >编辑</el-button
         >
       </div>
     </div>
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="装修"
-      draggable
+      
       width="800"
-      :z-index="100"
-      :mask-closable="false"
-    >
+      
+      :close-on-click-modal="false"
+     append-to-body destroy-on-close>
       <div class="modal-tab-bar">
-        <div v-for="(item,index) in data.options.list" :key="index">
+        <div v-for="(item,index) in draftList" :key="index">
           <img :src="item.img" class="three-column-img">
           <div>推荐尺寸：{{item.size}}</div>
-          <Button
+          <el-button
             size="small"
             class="ml_10"
             type="primary"
             @click="handleSelectImg(index)"
-          >选择图片</Button
+          >选择图片</el-button
           >
-          <Button
+          <el-button
             size="small"
             class="ml_10"
             type="primary"
             @click="handleSelectLink(index)"
-          >选择链接</Button
+          >选择链接</el-button
           >
         </div>
 
       </div>
-    </Modal>
+      <template #footer>
+        <el-button @click="handleCancelModal">取消</el-button>
+        <el-button type="primary" @click="handleConfirmModal">确定</el-button>
+      </template>
+    </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog
       ref="liliDialog"
@@ -50,14 +54,15 @@
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
     <!-- 选择图片 -->
-    <Modal width="1200px" v-model="picModelFlag" footer-hide>
+    <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
       <ossManage
         @callback="callbackSelected"
-        :isComponent="true"
+        :is-component="true"
         :initialize="picModelFlag"
+        :max-select="1"
         ref="ossManage"
       />
-    </Modal>
+    </el-dialog>
   </div>
 </template>
 
@@ -75,37 +80,41 @@ export default {
   data () {
     return {
       showModal:false,
-      selected: {}, // 已选数据
+      draftList: [],
       picModelFlag:false,
       current:0,
     };
   },
   methods: {
+    cloneList(list) {
+      return JSON.parse(JSON.stringify(list || []));
+    },
     // 回显图片
     callbackSelected(val) {
       this.picModelFlag = false;
-      this.selected[this.current].img = val.url;
-      console.log(this.selected)
+      if (!val?.url) return;
+      this.draftList[this.current].img = val.url;
     },
     // 编辑模块
-    handleSelectModel(item) {
-      this.selected = item;
+    handleSelectModel() {
+      this.draftList = this.cloneList(this.data.options.list);
       this.showModal = true;
-
     },
     // 选择商品回调
     selectedGoodsData(val) {
-      console.log(val);
-      let goods = val[0];
-      this.selected.img = goods.thumbnail;
-      this.selected.price = goods.price;
-      this.selected.name = goods.goodsName;
-      this.selected.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
+      const goods = val[0];
+      if (!goods) return;
+      const item = this.draftList[this.current];
+      item.img = goods.thumbnail;
+      item.price = goods.price;
+      item.name = goods.goodsName;
+      item.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
     },
     // 选择链接回调
     selectedLink(val) {
-      this.selected.url = this.$options.filters.formatLinkType(val);
-      this.selected.type =
+      const item = this.draftList[this.current];
+      item.url = this.$filters.formatLinkType(val);
+      item.type =
         val.___type === "other" && val.url === "" ? "link" : "other";
     },
     handleSelectLink(index) {
@@ -115,10 +124,24 @@ export default {
     },
     handleSelectImg(index){
       // 选择图片
-      this.$refs.ossManage.selectImage = true;
-      this.picModelFlag = true;
       this.current = index;
-    }
+      this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
+    },
+    handleCancelModal() {
+      this.draftList = [];
+      this.showModal = false;
+    },
+    handleConfirmModal() {
+      const saved = this.cloneList(this.draftList);
+      this.data.options.list.splice(0, this.data.options.list.length, ...saved);
+      this.draftList = [];
+      this.showModal = false;
+    },
   }
 }
 </script>

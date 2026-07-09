@@ -9,14 +9,14 @@
       </div>
       <div class="cart-steps">
         <span :class="stepIndex == 1 ? 'active' : ''">1.我的购物车</span>
-        <Icon :class="stepIndex == 1 ? 'active-arrow' : ''" custom="icomoon icon-next"></Icon>
+        <i class="icomoon icon-next" :class="stepIndex == 1 ? 'active-arrow' : ''"></i>
         <span :class="stepIndex == 1 ? 'active' : ''">2.填写订单信息</span>
-        <Icon :class="stepIndex == 1 ? 'active-arrow' : ''" custom="icomoon icon-next"></Icon>
+        <i class="icomoon icon-next" :class="stepIndex == 1 ? 'active-arrow' : ''"></i>
         <span :class="stepIndex == 2 ? 'active' : ''">3.成功提交订单</span>
       </div>
     </div>
-    <Divider />
-    <div class="content width_1200">
+    <el-divider />
+    <div class="content width_1200_auto">
       <!-- 收货地址 -->
       <div class="address" v-if="selectedDeliverMethod === 'LOGISTICS' && goodsType !== 'VIRTUAL_GOODS'">
         <div class="card-head">
@@ -30,13 +30,18 @@
             :key="index">
             <div>
               <span>{{ item.name }}</span>
-              <Tag class="ml_10" v-if="item.isDefault" color="red">默认</Tag>
-              <Tag class="ml_10" v-if="item.alias" color="warning">{{ item.alias }}
-              </Tag>
+              <el-tag class="ml_10 address-default-tag" v-if="item.isDefault" type="danger" effect="dark">默认</el-tag>
+              <el-tag
+                class="ml_10 address-alias-tag"
+                v-if="item.alias"
+                type="warning"
+                effect="dark"
+              >{{ item.alias }}
+              </el-tag>
             </div>
             <div>{{ item.mobile }}</div>
             <div>
-              {{ item.consigneeAddressPath | unitAddress }} {{ item.detail }}
+              {{ $filters.unitAddress(item.consigneeAddressPath) }} {{ item.detail }}
             </div>
             <div class="edit-btn" v-show="showEditBtn === index">
               <span @click.stop="editAddress(item.id)">修改</span>
@@ -44,18 +49,18 @@
             </div>
             <div class="corner-icon" v-show="selectedAddress.id === item.id">
               <div></div>
-              <Icon type="md-checkmark" />
+              <el-icon><Check /></el-icon>
             </div>
           </div>
           <div class="add-address" @click="editAddress('')">
-            <Icon type="ios-add-circle-outline" />
+            <el-icon><Plus /></el-icon>
             <div>添加新地址</div>
           </div>
         </div>
         <div class="more-addr" @click="moreAddr = !moreAddr" v-if="addressList.length > 3">
           {{ moreAddr ? "收起地址" : "更多地址" }}
-          <Icon v-show="!moreAddr" type="md-arrow-dropdown" />
-          <Icon v-show="moreAddr" type="md-arrow-dropup" />
+          <el-icon :v-show="!moreAddr"><ArrowDown /></el-icon>
+          <el-icon :v-show="moreAddr"><ArrowUp /></el-icon>
         </div>
       </div>
 
@@ -73,18 +78,18 @@
             </div>
             <div>{{ item.mobile }}</div>
             <div>
-              {{ item.address | unitAddress }} {{ item.detail }}
+              {{ $filters.unitAddress(item.address) }} {{ item.detail }}
             </div>
             <div class="corner-icon" v-show="selectedStoreAddress.id === item.id">
               <div></div>
-              <Icon type="md-checkmark" />
+              <el-icon><Check /></el-icon>
             </div>
           </div>
         </div>
         <div class="more-addr" @click="storeMoreAddr = !storeMoreAddr" v-if="addressList.length > 3">
           {{ storeMoreAddr ? "收起地址" : "更多地址" }}
-          <Icon v-show="!storeMoreAddr" type="md-arrow-dropdown" />
-          <Icon v-show="storeMoreAddr" type="md-arrow-dropup" />
+          <el-icon :v-show="!storeMoreAddr"><ArrowDown /></el-icon>
+          <el-icon :v-show="storeMoreAddr"><ArrowUp /></el-icon>
         </div>
       </div>
       <div>
@@ -102,7 +107,7 @@
             <div>{{ item.label }}</div>
             <div class="corner-icon" v-show="selectedDeliverMethod === item.value">
               <div></div>
-              <Icon type="md-checkmark" />
+              <el-icon><Check /></el-icon>
             </div>
           </div>
         </div>
@@ -132,18 +137,14 @@
                       goods.goodsSku.goodsName
                   }}</span>
                 </span>
-                <span class="goods-price">{{
-                    goods.purchasePrice | unitPrice("￥")
-                }}</span>
+                <span class="goods-price">{{ $filters.unitPrice(goods.purchasePrice, "￥") }}</span>
                 <span>x{{ goods.num }}</span>
                 <span>{{ goods.goodsSku.quantity > 0 ? "有货" : "无货" }}</span>
-                <span class="goods-price">{{
-                    goods.subTotal | unitPrice("￥")
-                }}</span>
+                <span class="goods-price">{{ $filters.unitPrice(goods.subTotal, "￥") }}</span>
               </div>
             </div>
             <div class="order-mark">
-              <Input type="textarea" maxlength="60" v-model="shop.remark" show-word-limit placeholder="订单备注" />
+              <el-input type="textarea" maxlength="60" v-model="shop.remark" show-word-limit placeholder="订单备注" />
               <span style="font-size: 12px; color: #999">提示：请勿填写有关支付、收货、发票方面的信息</span>
             </div>
           </div>
@@ -153,7 +154,7 @@
       <div class="invoice">
         <div class="card-head mt_20 mb_20">
           <span class="relative">发票信息<span class="inv-tips">
-              <Icon type="ios-alert-outline" />开企业抬头发票须填写纳税人识别号，以免影响报销
+              <el-icon><Warning /></el-icon>开企业抬头发票须填写纳税人识别号，以免影响报销
             </span></span>
         </div>
         <div class="inovice-content">
@@ -175,9 +176,7 @@
           <li v-for="(item, index) in couponList" class="coupon-item" :key="index">
             <div class="c-left">
               <div>
-                <span v-if="item.couponType === 'PRICE'" class="fontsize_12 global_color">￥<span class="price">{{
-                    item.price | unitPrice
-                }}</span></span>
+                <span v-if="item.couponType === 'PRICE'" class="fontsize_12 global_color">￥<span class="price">{{ $filters.unitPrice(item.price) }}</span></span>
                 <span v-if="item.couponType === 'DISCOUNT'" class="fontsize_12 global_color"><span class="price">{{
                     item.discount
                 }}</span>折</span>
@@ -188,8 +187,16 @@
             </div>
             <img class="used" v-if="usedCouponId.includes(item.id)" src="../../assets/images/geted.png" alt="" />
             <b></b>
-            <a class="c-right" @click="useCoupon(item.id, true)">立即使用</a>
-            <a class="c-right" v-if="usedCouponId.includes(item.id)" @click="useCoupon(item.id, false)">放弃优惠</a>
+            <a
+              class="c-right"
+              v-if="!usedCouponId.includes(item.id)"
+              @click="useCoupon(item.id, true)"
+            >立即使用</a>
+            <a
+              class="c-right c-right-cancel"
+              v-else
+              @click="useCoupon(item.id, false)"
+            >放弃优惠</a>
             <i class="circle-top"></i>
             <i class="circle-bottom"></i>
           </li>
@@ -201,12 +208,11 @@
           <div class="pay-gcc-title">
             使用礼品卡
             <span class="pay-gcc-deduct">
-              (已抵扣 <span class="pay-gcc-deduct-num">{{ giftCardDeductAmount | unitPrice("¥") }}</span
-              >)
+              (已抵扣 <span class="pay-gcc-deduct-num">{{ $filters.unitPrice(giftCardDeductAmount, "¥") }}</span>)
             </span>
           </div>
           <a href="javascript:void(0)" class="pay-gcc-help" @click.prevent="giftCardNoticeModal = true">
-            使用说明 <Icon type="ios-help-circle-outline" />
+            使用说明 <el-icon><Help /></el-icon>
           </a>
         </div>
         <div class="pay-gcc-body">
@@ -234,14 +240,14 @@
                         </div>
                       </div>
                       <div class="pay-gcc-balance-row">
-                        <span class="pay-gcc-amt">¥{{ item.balance != null ? (item.balance | unitPrice) : "0.00" }}</span>
+                        <span class="pay-gcc-amt">¥{{ item.balance != null ? $filters.unitPrice(item.balance) : "0.00" }}</span>
                         <span class="pay-gcc-bal-label">余额</span>
                       </div>
                       <div class="pay-gcc-no">{{ item.cardNo }}</div>
                     </div>
                   </div>
                   <div v-if="isGiftCardSelected(item)" class="pay-gcc-corner">
-                    <Icon type="md-checkmark" />
+                    <el-icon><Check /></el-icon>
                   </div>
                 </div>
               </div>
@@ -252,42 +258,40 @@
       <!-- 订单价格 -->
       <div class="order-price">
         <div>
-          <span>{{ totalNum }}件商品，总商品金额：</span><span>{{ priceDetailDTO.goodsPrice | unitPrice("￥") }}</span>
+          <span>{{ totalNum }}件商品，总商品金额：</span><span>{{ $filters.unitPrice(priceDetailDTO.goodsPrice, "￥") }}</span>
         </div>
         <div v-if="priceDetailDTO.freightPrice > 0">
-          <span>运费：</span><span>{{ priceDetailDTO.freightPrice | unitPrice("￥") }}</span>
+          <span>运费：</span><span>{{ $filters.unitPrice(priceDetailDTO.freightPrice, "￥") }}</span>
         </div>
         <div v-if="priceDetailDTO.discountPrice > 0">
-          <span>优惠金额：</span><span>-{{ priceDetailDTO.discountPrice | unitPrice("￥") }}</span>
+          <span>优惠金额：</span><span>-{{ $filters.unitPrice(priceDetailDTO.discountPrice, "￥") }}</span>
         </div>
         <div v-if="priceDetailDTO.couponPrice > 0">
-          <span>优惠券金额：</span><span>-{{ priceDetailDTO.couponPrice | unitPrice("￥") }}</span>
+          <span>优惠券金额：</span><span>-{{ $filters.unitPrice(priceDetailDTO.couponPrice, "￥") }}</span>
         </div>
         <div v-if="giftCardDeductAmount > 0">
-          <span>礼品卡抵扣：</span><span>-{{ giftCardDeductAmount | unitPrice("￥") }}</span>
+          <span>礼品卡抵扣：</span><span>-{{ $filters.unitPrice(giftCardDeductAmount, "￥") }}</span>
         </div>
 
         <div v-if="$route.query.way === 'POINTS'">
           <span>应付积分：</span><span class="actrual-price">{{ priceDetailDTO.payPoint }}</span>
         </div>
         <div v-else>
-          <span>应付金额：</span><span class="actrual-price">{{
-              priceDetailDTO.flowPrice | unitPrice("￥")
-          }}</span>
+          <span>应付金额：</span><span class="actrual-price">{{ $filters.unitPrice(priceDetailDTO.flowPrice, "￥") }}</span>
         </div>
       </div>
-    </div>
-    <!-- 底部支付栏 -->
-    <div class="order-footer width_1200">
-      <div class="pay ml_20" @click="pay">提交订单</div>
-      <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'LOGISTICS'">
-        配送至：{{ selectedAddress.consigneeAddressPath | unitAddress }}
-        {{ selectedAddress.detail }}&nbsp;&nbsp;收货人：{{
-            selectedAddress.name
-        }}&nbsp;&nbsp;{{ selectedAddress.mobile }}
-      </div>
-      <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'SELF_PICK_UP'">
-        自提地点：{{selectedStoreAddress.address}} &nbsp;&nbsp;联系方式：{{ selectedStoreAddress.mobile }}
+      <!-- 底部支付栏 -->
+      <div class="order-footer">
+        <div class="pay ml_20" @click="pay">提交订单</div>
+        <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'LOGISTICS'">
+          配送至：{{ $filters.unitAddress(selectedAddress.consigneeAddressPath) }}
+          {{ selectedAddress.detail }}&nbsp;&nbsp;收货人：{{
+              selectedAddress.name
+          }}&nbsp;&nbsp;{{ selectedAddress.mobile }}
+        </div>
+        <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'SELF_PICK_UP'">
+          自提地点：{{selectedStoreAddress.address}} &nbsp;&nbsp;联系方式：{{ selectedStoreAddress.mobile }}
+        </div>
       </div>
     </div>
     <BaseFooter></BaseFooter>
@@ -295,18 +299,19 @@
     <invoice-modal ref="invModal" :invoiceData="invoiceData" @change="getInvMsg" />
     <!-- 选择地址模态框 -->
     <address-manage ref="address" :id="addrId" @change="addrChange"></address-manage>
-    <Modal v-model="giftCardNoticeModal" title="礼品卡使用说明" footer-hide width="520">
+    <el-dialog v-model="giftCardNoticeModal" title="礼品卡使用说明" width="520">
       <p class="pay-gcc-notice-p">
         请在礼品卡有效期内使用；结算时勾选礼品卡即可按规则抵扣订单金额，可与优惠券等活动叠加规则以平台说明为准。放弃勾选或取消抵扣将恢复对应余额。
       </p>
       <div class="pay-gcc-notice-foot">
-        <Button type="primary" @click="giftCardNoticeModal = false">我知道了</Button>
-      </div>
-    </Modal>
+        <el-button type="primary" @click="giftCardNoticeModal = false">我知道了</el-button>
+      </div></el-dialog>
   </div>
 </template>
 
 <script>
+import { Message, Modal, Spin } from "@/utils/message";
+import { ArrowDown, ArrowUp, Check, Help, Plus, Warning } from '@element-plus/icons-vue';
 import invoiceModal from "@/components/invoiceModal";
 import addressManage from "@/components/addressManage";
 import { memberAddress, delMemberAddress } from "@/api/address";
@@ -483,17 +488,17 @@ export default {
     },
     getGoodsDetail() {
       // 订单商品详情
-      this.$Spin.show();
+      Spin.show();
       cartGoodsPay({ way: this.$route.query.way })
         .then((res) => {
-          this.$Spin.hide();
+          Spin.hide();
           if (res.success) {
             if (
               !res.result.checkedSkuList ||
               res.result.checkedSkuList.length === 0
             ) {
               if (res.result.skuList && res.result.skuList[0]) {
-                this.$Modal.warning({
+                Modal.warning({
                   title: "购物车存在无效商品！",
                   content:
                     "[" +
@@ -541,7 +546,7 @@ export default {
                 title = e.errorMessage;
                 content.push(e.goodsSku.goodsName);
               });
-              this.$Modal.warning({
+              Modal.warning({
                 title: "以下商品超出配送区域" || title,
                 content: content.toString(),
               });
@@ -583,7 +588,7 @@ export default {
           }
         })
         .catch(() => {
-          this.$Spin.hide();
+          Spin.hide();
         });
     },
     syncGiftCardSelectionFromCart(result) {
@@ -723,7 +728,7 @@ export default {
       };
       selectAddr(params).then((res) => {
         if (res.success) {
-          this.$Message.success("选择配送方式成功");
+          Message.success("选择配送方式成功");
           this.selectMethod = item;
           this.getGoodsDetail();
         }
@@ -735,7 +740,7 @@ export default {
       // 选择自提地址
       setStoreAddressId(item.id,this.$route.query.way).then((res) => {
         if (res.success) {
-          this.$Message.success("选择自提地址成功");
+          Message.success("选择自提地址成功");
           this.selectedStoreAddress = item;
           this.getGoodsDetail();
         }
@@ -764,13 +769,13 @@ export default {
     },
     delAddress(item) {
       // 删除地址
-      this.$Modal.confirm({
+      Modal.confirm({
         title: "提示",
         content: "你确定删除这个收货地址",
         onOk: () => {
           delMemberAddress(item.id).then((res) => {
             if (res.success) {
-              this.$Message.success("删除成功");
+              Message.success("删除成功");
               this.getAddress();
             }
           });
@@ -835,10 +840,10 @@ export default {
 
       if (!params.remark.length) delete params.remark;
 
-      this.$Spin.show();
+      Spin.show();
       createTrade(params)
         .then((res) => {
-          this.$Spin.hide();
+          Spin.hide();
           if (res.success) {
             if (params.way === "POINTS") {
               // 积分支付不需要跳转支付页面
@@ -852,7 +857,7 @@ export default {
           }
         })
         .catch(() => {
-          this.$Spin.hide();
+          Spin.hide();
         });
     },
     // 优惠券可用范围
@@ -918,6 +923,7 @@ export default {
   height: 30px;
   display: flex;
   align-items: center;
+  gap: 12px;
 
   span {
     @include content_color($light_content_color);
@@ -926,9 +932,15 @@ export default {
     line-height: 30px;
     display: inline-block;
     padding: 0 15px;
+    flex-shrink: 0;
   }
 
-  .ivu-icon {
+  .icon-next {
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+
+  .el-icon {
     @include content_color($light_content_color);
     font-size: 20px;
     margin: 0 15px;
@@ -952,6 +964,7 @@ export default {
   background-color: #fff;
   min-height: 200px;
   padding: 15px 25px;
+  box-sizing: border-box;
 }
 
 .delivery-method {
@@ -1008,7 +1021,7 @@ export default {
         border-right: 20px solid $theme_color;
       }
 
-      .ivu-icon {
+      .el-icon {
         font-size: 12px;
         position: absolute;
         bottom: 0;
@@ -1029,6 +1042,20 @@ export default {
   display: flex;
   flex-wrap: wrap;
 
+  :deep(.address-default-tag) {
+    --el-tag-bg-color: var(--el-color-danger);
+    --el-tag-border-color: var(--el-color-danger);
+    --el-tag-text-color: #fff;
+    color: #fff;
+  }
+
+  :deep(.address-alias-tag) {
+    --el-tag-bg-color: var(--el-color-warning);
+    --el-tag-border-color: var(--el-color-warning);
+    --el-tag-text-color: #fff;
+    color: #fff;
+  }
+
   >div {
     border: 1px dotted #949494;
     width: 265px;
@@ -1045,7 +1072,7 @@ export default {
     justify-content: center;
     flex-direction: column;
 
-    .ivu-icon {
+    .el-icon {
       font-size: 24px;
     }
 
@@ -1091,7 +1118,7 @@ export default {
         border-right: 20px solid $theme_color;
       }
 
-      .ivu-icon {
+      .el-icon {
         font-size: 12px;
         position: absolute;
         bottom: 0;
@@ -1115,7 +1142,7 @@ export default {
   >span:nth-child(1) {
     font-weight: bold;
 
-    .ivu-icon {
+    .el-icon {
       color: #ff8f23;
 
       &:hover {
@@ -1232,7 +1259,7 @@ export default {
       left: -9px;
     }
 
-    .ivu-icon {
+    .el-icon {
       color: #ff8f23;
       margin-right: 3px;
       font-size: 16px;
@@ -1290,7 +1317,9 @@ export default {
   align-items: center;
   flex-direction: row-reverse;
   border-top: 1px solid #ddd;
-  margin: 10px auto;
+  margin: 10px -25px 0;
+  width: calc(100% + 50px);
+  box-sizing: border-box;
 
   div {
     text-align: center;
@@ -1333,7 +1362,7 @@ export default {
   }
 }
 
-.ivu-divider {
+.el-divider {
   background: $theme_color;
   height: 2px;
 }
@@ -1349,32 +1378,92 @@ export default {
 }
 
 .coupon-item {
-  width: 260px;
+  width: 280px;
   height: 125px;
   margin-right: 10px;
   margin-bottom: 10px;
+  overflow: hidden;
+  $claim-width: 55px;
 
-  .c-right {
-    width: 30px;
-    padding: 10px 7px;
+  .c-left {
+    width: calc(100% - #{$claim-width});
+    padding: 14px 12px;
+    box-sizing: border-box;
+
+    > div,
+    > p {
+      margin-bottom: 8px;
+    }
+
+    > div .price {
+      font-size: 18px;
+    }
+
+    p {
+      margin-bottom: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+    }
   }
 
   b {
-    background: url("../../assets/images/small-circle.png") top left repeat-y;
-    right: 28px;
+    right: $claim-width;
+    width: 0;
+    background: none;
+    border-right: 1px dashed #e0e0e0;
+  }
+
+  .c-right {
+    width: $claim-width;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 3px;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+    box-sizing: border-box;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  .c-right-cancel {
+    letter-spacing: 2px;
+    font-size: 13px;
   }
 
   .circle-top,
   .circle-bottom {
-    right: 22px;
+    right: calc(#{$claim-width} - 9px);
+    width: 18px;
+    height: 18px;
+  }
+
+  .circle-top {
+    top: -9px;
+  }
+
+  .circle-bottom {
+    bottom: -9px;
   }
 
   .used {
     position: absolute;
-    top: 60px;
-    right: 40px;
-    width: 50px;
-    height: 50px;
+    top: 50%;
+    right: calc(#{$claim-width} + 8px);
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    z-index: 3;
   }
 }
 
@@ -1551,7 +1640,7 @@ export default {
   background: #e54d42;
   transform: rotate(45deg);
 }
-.pay-gcc-corner .ivu-icon {
+.pay-gcc-corner .el-icon {
   position: absolute;
   right: 3px;
   bottom: 3px;

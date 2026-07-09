@@ -10,12 +10,12 @@
           <img class="hover-pointer"  @click="linkTo(msgLeft.list[0].url)" :src="msgLeft.list[0].img" width="160" height="160" alt="" />
           <div class="margin-left">{{ msgLeft.list[0].name }}</div>
           <div class="margin-left">{{ msgLeft.list[0].describe }}</div>
-          <Button
+          <el-button
             size="small"
             :style="{ background: msgLeft.bgColor }"
             @click="linkTo(msgLeft.list[0].url)"
             class="fz_12 view-btn"
-            >点击查看</Button
+            >点击查看</el-button
           >
         </div>
         <div>
@@ -36,8 +36,7 @@
       <div class="head-recommend" :style="{ background: msgRight.bgColor }">
         <span>{{ msgRight.title }}</span>
         <span @click="linkTo(msgRight.url)" class="hover-pointer"
-          >{{ msgRight.secondTitle }}&gt;</span
-        >
+          >{{ msgRight.secondTitle }}&gt;</span>
       </div>
       <div class="content-right">
         <div
@@ -45,7 +44,7 @@
           :key="index"
           @click="linkTo(item.url)" class="hover-pointer"
         >
-          <div class="right-item" :style="{'border': index===2 || index===3 ?'none': ''}">
+          <div class="right-item">
             <div>
               <span :style="{ background: msgRight.bgColor }">{{item.name}}</span>
               <span>{{ item.describe }}</span>
@@ -84,12 +83,17 @@ export default {
     width: 595px;
     .content-left {
       display: flex;
+      align-items: stretch;
       padding-top: 10px;
       font-size: 12px;
+      box-sizing: content-box;
       > div:nth-child(1) {
         width: 189px;
         border-right: 1px solid #eee;
         height: 360px;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
         img {
           margin: 40px 0 0 15px;
         }
@@ -107,15 +111,20 @@ export default {
           color: #999;
         }
         .view-btn {
-          margin-left: 15px;
-          margin-top: 10px;
+          align-self: center;
+          width: 145px;
+          margin-top: auto;
+          margin-bottom: 15px;
           color: #fff;
         }
       }
       > div:nth-child(2) {
         width: 405px;
+        height: 360px;
         display: flex;
         flex-wrap: wrap;
+        align-content: flex-start;
+        box-sizing: border-box;
         > div {
           display: flex;
           align-items: center;
@@ -136,64 +145,84 @@ export default {
 
   .recommend-right {
     width: 595px;
-    height: 360px;
+
     .head-recommend {
       background: #a25684;
     }
     .content-right {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      height: 360px;
       padding-top: 10px;
+      box-sizing: content-box;
+
       > div {
-        width: 50%;
+        width: 100%;
+        height: 100%;
         text-align: center;
-        height: 180px;
-        padding-top: 10px;
+        padding: 0;
+        border-right: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+        box-sizing: border-box;
+
+        &:nth-child(2n) {
+          border-right: none;
+        }
+
+        &:nth-child(n + 3) {
+          border-bottom: none;
+        }
+
         .right-item {
-          border-bottom: 1px solid #eee;
+          border-bottom: none;
           display: flex;
-          margin-top: 30px;
-          margin-left: 5px;
-          margin-right: 5px;
-          height: 150px;
-          padding: 0 10px;
+          align-items: center;
+          justify-content: space-between;
+          height: 100%;
+          margin: 0;
+          padding: 10px 15px;
           font-size: 12px;
-          >div:nth-child(1) {
+          box-sizing: border-box;
 
-            margin-top: 30px;
-            span:nth-child(1){
-                color: #fff;
-                border-radius: 10px;
-                padding: 0 5px;
-                background-color: #a25684;
-                display: block;
+          > div:nth-child(1) {
+            flex: 1;
+            min-width: 0;
+            margin-top: 0;
+            text-align: left;
 
-                overflow: hidden;
-                white-space: nowrap;
-                margin: 0 10px 10px 0;
+            span:nth-child(1) {
+              color: #fff;
+              border-radius: 10px;
+              padding: 0 5px;
+              background-color: #a25684;
+              display: block;
+              max-width: 120px;
+              overflow: hidden;
+              white-space: nowrap;
+              margin: 0 0 10px;
             }
+
             span:nth-child(2) {
-                font-size: 12px;
-                color: #666;
-                display: block;
+              font-size: 12px;
+              color: #666;
+              display: block;
             }
           }
+
           .right-img {
-            width: 100;
+            width: 100px;
             height: 100px;
+            flex-shrink: 0;
             text-align: center;
-            margin: 0 auto;
-            img{
-                max-height: 100px;
-                max-width: 100px;
+            margin: 0;
+
+            img {
+              max-height: 100px;
+              max-width: 100px;
             }
           }
         }
-      }
-      > div:nth-child(n + 1) {
-        border-right: 1px solid #eee;
       }
     }
   }

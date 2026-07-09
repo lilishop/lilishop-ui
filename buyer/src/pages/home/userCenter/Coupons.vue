@@ -1,22 +1,24 @@
 <template>
   <div class="wrapper">
-    <card _Title="优惠券列表" :_Tabs="statusNameList" @_Change="change" />
-    <empty v-if="list.length == 0" />
-    <ul class="coupon-list" v-else>
+    <UserCenterLayout
+      title="优惠券列表"
+      :tabs="statusNameList"
+      :active-tab="activeStatusIndex"
+      @tab-change="change"
+    >
+      <empty v-if="list.length == 0" />
+      <ul class="coupon-list" v-else>
       <li v-for="(item, index) in list" class="coupon-item" :key="index">
         <div class="c-left">
           <div>
             <span
               v-if="item.couponType === 'PRICE'"
               class="fontsize_12 global_color"
-              >￥<span class="price">{{ item.price | unitPrice }}</span></span
-            >
+              >￥<span class="price">{{ $filters.unitPrice(item.price) }}</span></span>
             <span
               v-if="item.couponType === 'DISCOUNT'"
               class="fontsize_12 global_color"
-              ><span class="price">{{ item.discount }}</span
-              >折</span
-            >
+              ><span class="price">{{ item.discount }}</span>折</span>
             <span class="describe">满{{ item.consumeThreshold }}元可用</span>
           </div>
           <p>使用范围：{{ useScope(item.scopeType, item.storeName) }}</p>
@@ -32,18 +34,19 @@
         <i class="circle-top"></i>
         <i class="circle-bottom"></i>
       </li>
-    </ul>
-    <Page
-      :total="total"
-      @on-change="changePageNum"
-      class="pageration"
-      @on-page-size-change="changePageSize"
-      :page-size="params.pageSize"
-      show-total
-      show-sizer
-    >
-    </Page>
-    <Spin v-if="loading" fix></Spin>
+      </ul>
+      <div class="pageration">
+        <el-pagination
+          v-model:current-page="params.pageNumber"
+          v-model:page-size="params.pageSize"
+          :total="total"
+          @current-change="changePageNum"
+          @size-change="changePageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+        />
+      </div>
+      <el-skeleton v-if="loading" fix></el-skeleton>
+    </UserCenterLayout>
   </div>
 </template>
 
@@ -70,6 +73,12 @@ export default {
       total: 0, // 优惠券总数
       list: [], // 优惠券列表
     };
+  },
+  computed: {
+    activeStatusIndex() {
+      const index = this.statusList.indexOf(this.params.memberCouponStatus);
+      return index > -1 ? index : 0;
+    },
   },
   methods: {
     getList() {
@@ -140,25 +149,78 @@ export default {
 <style scoped lang="scss">
 @import "../../../assets/styles/coupon.scss";
 .coupon-item {
-  height: 125px;
+  overflow: hidden;
+  height: 145px;
+  margin-left: 0;
+  $claim-width: 55px;
+
   .c-left {
-    padding: 16px;
+    width: calc(100% - #{$claim-width});
+    box-sizing: border-box;
+    padding: 20px;
+
+    p {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
+
+  b {
+    right: $claim-width;
+    width: 0;
+    background: none;
+    border-right: 1px dashed #e0e0e0;
+  }
+
   .c-right {
-    padding: 20px 16px;
-    width: 43px;
-    font-size: 14px;
+    width: $claim-width;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 4px;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+
+    &:hover {
+      opacity: 0.9;
+    }
   }
+
   .canot-use {
     color: #999;
     background-color: #eee;
+    cursor: not-allowed;
+
+    &:hover {
+      opacity: 1;
+    }
   }
-  i {
-    right: 34px;
+
+  i.circle-top,
+  i.circle-bottom {
+    right: calc(#{$claim-width} - 9px);
+    width: 18px;
+    height: 18px;
+  }
+
+  i.circle-top {
+    top: -9px;
+  }
+
+  i.circle-bottom {
+    bottom: -9px;
   }
 }
 
 .pageration {
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

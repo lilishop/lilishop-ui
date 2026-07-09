@@ -2,7 +2,7 @@ import { ServeFindUserEmoticon, ServeUploadEmoticon } from "@/api/emoticon";
 
 import { ServeCollectEmoticon } from "@/api/chat";
 
-import { Notification } from "element-ui";
+import { ElNotification } from "element-plus";
 
 export default {
   state: {
@@ -36,7 +36,7 @@ export default {
       })
         .then((res) => {
           if (res.code == 200) {
-            Notification({
+            ElNotification({
               title: "收藏提示",
               message: "表情包收藏成功...",
               type: "success",
@@ -46,7 +46,7 @@ export default {
           }
         })
         .catch(() => {
-          Notification({
+          ElNotification({
             title: "收藏提示",
             message: "表情包收藏失败...",
             type: "warning",
@@ -65,7 +65,7 @@ export default {
           }
         })
         .catch(() => {
-          Notification({
+          ElNotification({
             message: "网络异常请稍后再试...",
             type: "error",
             duration: 3000,

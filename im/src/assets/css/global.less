@@ -173,7 +173,7 @@
     }
 
     .main {
-      /deep/.el-input__inner {
+      :deep(.el-input__inner ) {
         border-radius: 1px !important;
       }
 
@@ -238,4 +238,44 @@
 
 .flex-10 {
   flex: 10;
+}
+
+.im-contextmenu {
+  padding: 4px 0;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.im-contextmenu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: #606266;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background: #f5f7fa;
+    color: #409eff;
+  }
+
+  &.is-disabled {
+    color: #c0c4cc;
+    cursor: not-allowed;
+
+    &:hover {
+      background: transparent;
+      color: #c0c4cc;
+    }
+  }
+}
+
+.im-contextmenu-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: #ebeef5;
 }

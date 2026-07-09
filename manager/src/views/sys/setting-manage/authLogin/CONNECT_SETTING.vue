@@ -1,51 +1,50 @@
 <template>
-
   <div class="layout">
     <div class="row">
       <div class="col">
-        <Card :padding="0">
-            <Divider orientation="left">登录设置</Divider>
-            <div class="form-list">
-              <Form
-                ref="formValidate"
-                label-width="120"
-                label-position="right"
-                :model="formValidate"
-                :rules="ruleValidate"
-              >
-                <FormItem  label="买家PC端域名" prop="pc">
-                  <Input  v-model="formValidate.pc" class="w200" />
-                </FormItem>
-                <FormItem label="买家WAP端域名" prop="wap">
-                  <Input  v-model="formValidate.wap" class="w200" />
-                </FormItem>
-                <FormItem label="登录回调域名" prop="callbackUrl">
-                  <Input maxlength="300" v-model="formValidate.callbackUrl"  class="w200" />
-                </FormItem>
-                <FormItem label="操作" >
-                  <Button @click="setupSetting">保存设置</Button>
-                </FormItem>
-              </Form>
-            </div>
-        </Card>
+        <el-card shadow="never" :body-style="{ padding: '0 16px' }">
+          <el-divider content-position="left">登录设置</el-divider>
+          <div class="form-list">
+            <el-form
+              ref="formValidate"
+              label-width="140px"
+              label-position="right"
+              :model="formValidate"
+              :rules="ruleValidate"
+            >
+              <el-form-item label="买家PC端域名" prop="pc">
+                <el-input v-model="formValidate.pc" />
+              </el-form-item>
+              <el-form-item label="买家WAP端域名" prop="wap">
+                <el-input v-model="formValidate.wap" />
+              </el-form-item>
+              <el-form-item label="登录回调域名" prop="callbackUrl">
+                <el-input maxlength="300" v-model="formValidate.callbackUrl" />
+              </el-form-item>
+              <el-form-item label="操作">
+                <el-button @click="setupSetting">保存设置</el-button>
+              </el-form-item>
+            </el-form>
+          </div>
+        </el-card>
       </div>
     </div>
   </div>
-
 </template>
 <script>
+import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
 
 export default {
   data() {
     return {
-      ruleValidate: {}, // 验证规则
+      ruleValidate: {},
       formValidate: {
-        pc:"",
-        wap:"",
-        callbackUrl:""
-      } // 表单数据
+        pc: "",
+        wap: "",
+        callbackUrl: "",
+      },
     };
   },
   props: ["res", "type"],
@@ -54,26 +53,24 @@ export default {
   },
   methods: {
     submit(name) {
-      let that = this;
-      if (handleSubmit(that, name)) {
-        this.setupSetting();
-      }
+      handleSubmit(this, name)
+        .then(() => {
+          this.setupSetting();
+        })
+        .catch(() => {});
     },
-    // 保存设置
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {
-          this.$Message.success("保存成功!");
+          ElMessage.success("保存成功!");
         } else {
-          this.$Message.error("保存失败!");
+          ElMessage.error("保存失败!");
         }
       });
     },
-    // 实例化数据
     init() {
-      this.res = JSON.parse(this.res);
-
-      this.$set(this, "formValidate", { ...this.res });
+      const setting = JSON.parse(this.res || "{}");
+      this.formValidate = { ...setting };
       Object.keys(this.formValidate).forEach((item) => {
         if (item.indexOf("pId") < 0) {
           this.ruleValidate[item] = [
@@ -97,10 +94,8 @@ export default {
   display: flex;
 }
 
-
-.form-list{
-  padding:  16px;
-
+.form-list {
+  padding: 16px;
 }
 .pay-title {
   text-align: center;
@@ -119,18 +114,21 @@ export default {
   justify-content: flex-start;
 }
 .row {
-  width: 600px;
+  width: 100%;
+  max-width: 720px;
   margin-right: 10px;
   display: flex;
   margin-bottom: 20px;
-  ::v-deep .ivu-card-body {
-    padding: 0 16px !important;
-  }
 }
 
-.label-item {
-  display: flex;
+:deep(.el-input) {
+  width: 480px !important;
 }
+
+.el-input {
+  width: 480px;
+}
+
 .label-item {
   display: flex;
   align-items: center;
@@ -144,12 +142,12 @@ export default {
   align-items: center;
   flex-direction: column;
 }
-.ivu-form-item {
+.el-form-item {
   display: flex;
-
   align-items: center;
 }
-.ivu-row {
-  width: 100%;
+
+:deep(.el-form-item__label) {
+  white-space: nowrap;
 }
 </style>

@@ -1,23 +1,27 @@
 <template>
-  <Modal
-    :styles="{ top: '120px' }"
-    width="800"
-    @on-cancel="clickClose"
-    @on-ok="clickOK"
+  <el-dialog
     v-model="flag"
-    :mask-closable="false"
     title="绘制热区"
-    scrollable
+    width="800px"
+    top="8vh"
+    :close-on-click-modal="false"
+    append-to-body
+    destroy-on-close
+    @close="clickClose"
   >
-    <template v-if="flag">
+    <template v-if="flag && hotzoneRes">
       <hotzone
         ref="hotzone"
+        :zonesInit="hotzoneRes.zoneInfo"
+        :image="hotzoneRes.img"
         @change="changeHotzone"
-        :zonesInit="res.zoneInfo"
-        :image="res.img"
-      ></hotzone>
+      />
     </template>
-  </Modal>
+    <template #footer>
+      <el-button @click="clickClose">取消</el-button>
+      <el-button type="primary" @click="clickOK">确定</el-button>
+    </template>
+  </el-dialog>
 </template>
 <script>
 import hotzone from "./components/Hotzone.vue";
@@ -28,42 +32,42 @@ export default {
   },
   data() {
     return {
-      flag: false, // modal显隐
+      flag: false,
+      hotzoneRes: null,
     };
   },
-  props: ["res"],
-  mounted() {},
   methods: {
     changeHotzone(info) {
+      if (this.hotzoneRes) {
+        this.hotzoneRes.zoneInfo = info;
+      }
       this.$emit("changeZone", info);
     },
-    // 关闭弹窗
     clickClose() {
+      this.flag = false;
+      this.hotzoneRes = null;
       this.$emit("closeFlag", false);
     },
-    // 点击确认
     clickOK() {
       this.clickClose();
     },
-    // 打开组件方法
-    open(type, mutiple) {
+    open(val) {
+      this.hotzoneRes = val || null;
+      if (this.hotzoneRes && !this.hotzoneRes.zoneInfo) {
+        this.hotzoneRes.zoneInfo = [];
+      }
       this.flag = true;
     },
-    // 关闭组件
     close() {
       this.flag = false;
+      this.hotzoneRes = null;
     },
   },
 };
 </script>
 <style scoped lang="scss">
-::v-deep .ivu-modal {
+:deep(.el-dialog__body) {
   overflow: hidden;
-  height: 650px !important;
-}
-::v-deep .ivu-modal-body {
-  width: 100%;
   height: 500px;
-  overflow: hidden;
 }
 </style>

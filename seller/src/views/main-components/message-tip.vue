@@ -1,34 +1,41 @@
 <template>
   <div @click="showMessage" class="message-con">
-    <Tooltip :always="value>0" :content="value > 0 ? '有' + value + message : '无未读消息'" placement="bottom">
-      <Badge :count="value" dot>
-        <Icon type="md-notifications" :size="22" />
-      </Badge>
-    </Tooltip>
+    <el-tooltip
+      :visible="value > 0 ? undefined : false"
+      :content="value > 0 ? '有' + value + message : '无未读消息'"
+      placement="bottom"
+    >
+      <el-badge :value="value" :hidden="value <= 0" is-dot>
+        <el-icon :size="22"><Bell /></el-icon>
+      </el-badge>
+    </el-tooltip>
   </div>
 </template>
 
 <script>
+import { Bell } from "@element-plus/icons-vue";
 import util from "@/libs/util.js";
+
 export default {
   name: "messageTip",
+  components: { Bell },
   props: {
-    value: { // 未读消息数量
+    value: {
       type: Number,
-      default: 0
+      default: 0,
     },
-    message:{ // 消息展示内容
+    message: {
       type: String,
-      default: ""
-    }
+      default: "",
+    },
   },
   methods: {
     showMessage() {
       util.openNewPage(this, "message_index");
       this.$router.push({
-        name: "message_index"
+        name: "message_index",
       });
-    }
-  }
+    },
+  },
 };
 </script>

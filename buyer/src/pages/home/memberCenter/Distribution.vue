@@ -1,42 +1,41 @@
 <template>
   <div class="wrapper">
-    <card _Title="我的分销" />
+    <UserCenterLayout title="我的分销" :tabs="['我的分销']">
     <!-- 分销申请 -->
 
     <div v-if="status === 0">
-      <Alert type="warning">分销商申请</Alert>
-      <Form ref="form" :model="applyForm" :rules="rules">
-        <FormItem label="姓名" prop="name">
-          <Input v-model="applyForm.name"></Input>
-        </FormItem>
-        <FormItem label="身份证号" prop="idNumber">
-          <Input v-model="applyForm.idNumber"></Input>
-        </FormItem>
-        <FormItem label="银行开户行" prop="settlementBankBranchName">
-          <Input v-model="applyForm.settlementBankBranchName"></Input>
-        </FormItem>
-        <FormItem label="银行开户名" prop="settlementBankAccountName">
-          <Input v-model="applyForm.settlementBankAccountName"></Input>
-        </FormItem>
-        <FormItem label="银行账号" prop="settlementBankAccountNum">
-          <Input v-model="applyForm.settlementBankAccountNum"></Input>
-        </FormItem>
+      <el-alert type="warning">分销商申请</el-alert>
+      <el-form ref="form" :model="applyForm" :rules="rules">
+        <el-form-item label="姓名" prop="name">
+          <el-input v-model="applyForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="身份证号" prop="idNumber">
+          <el-input v-model="applyForm.idNumber"></el-input>
+        </el-form-item>
+        <el-form-item label="银行开户行" prop="settlementBankBranchName">
+          <el-input v-model="applyForm.settlementBankBranchName"></el-input>
+        </el-form-item>
+        <el-form-item label="银行开户名" prop="settlementBankAccountName">
+          <el-input v-model="applyForm.settlementBankAccountName"></el-input>
+        </el-form-item>
+        <el-form-item label="银行账号" prop="settlementBankAccountNum">
+          <el-input v-model="applyForm.settlementBankAccountNum"></el-input>
+        </el-form-item>
 
-        <FormItem>
-          <Button type="primary" :loading="applyLoading" @click="apply"
-          >提交申请</Button
+        <el-form-item>
+          <el-button type="primary" :loading="applyLoading" @click="apply"
+          >提交申请</el-button
           >
-        </FormItem>
-      </Form>
+        </el-form-item>
+      </el-form>
     </div>
     <!-- 分销审核 -->
     <div v-if="status === 1">
-      <Alert type="success">
-        您提交的信息正在审核
-        <template slot="desc"
-        >提交认证申请后，工作人员将在三个工作日进行核对完成审核</template
-        >
-      </Alert>
+      <el-alert
+        type="success"
+        title="您提交的信息正在审核"
+        description="提交认证申请后，工作人员将在三个工作日进行核对完成审核"
+      />
     </div>
     <!-- 分销提现、商品、订单 -->
     <div v-if="status === 2">
@@ -54,211 +53,176 @@
         <div class="mb_20 account-price">
           <span class="subTips">可提现金额：</span>
           <span class="fontsize_48 global_color"
-          >￥{{ result.canRebate | unitPrice }}</span
-          >
+          >￥{{ $filters.unitPrice(result.canRebate) }}</span>
           <span class="subTips">冻结金额：</span>
-          <span class="">￥{{ result.commissionFrozen | unitPrice }}</span>
+          <span class="">￥{{ $filters.unitPrice(result.commissionFrozen) }}</span>
           <span class="subTips">返利总金额：</span>
-          <span class="">￥{{ result.rebateTotal | unitPrice }}</span>
-          <Button
+          <span class="">￥{{ $filters.unitPrice(result.rebateTotal) }}</span>
+          <el-button
             type="primary"
             size="small"
             class="ml_20"
             @click="withdrawApplyModal = true"
-          >申请提现</Button
+          >申请提现</el-button
           >
         </div>
       </div>
-      <Tabs :value="tabName" @on-click="tabPaneChange">
-        <TabPane label="已选商品" name="goodsChecked">
-          <Table stripe :columns="goodsColumns" :data="goodsData.records">
-            <template slot-scope="{ row }" slot="name">
-              <div
-                class="goods-msg"
-                @click="
-                  linkTo(
-                    `/goodsDetail?skuId=${row.skuId}&goodsId=${row.goodsId}`
-                  )
-                "
-              >
-                <img
-                  style="vertical-align: top"
-                  :src="row.thumbnail"
-                  width="60"
-                  height="60"
-                  alt=""
-                />&nbsp; {{ row.goodsName }}
-              </div>
-            </template>
-            <template slot-scope="{ row }" slot="price">
-              <span> ￥{{ row.price | unitPrice }}</span>
-            </template>
-            <template slot-scope="{ row }" slot="commission">
-              <span> ￥{{ row.commission | unitPrice }}</span>
-            </template>
-            <template slot-scope="{ row }" slot="action">
-              <Button
-                type="success"
-                size="small"
-                style="margin-right: 5px"
-                @click="fenxiao(row)"
-              >分销商品</Button
-              >
-              <Button
-                type="error"
-                size="small"
-                @click="selectGoods(row.id, false)"
-              >取消选择</Button
-              >
-            </template>
-          </Table>
+      <el-tabs v-model="tabName" @tab-click="(tab) => tabPaneChange(tab.paneName)">
+        <el-tab-pane label="已选商品" name="goodsChecked">
+          <el-table stripe :data="goodsData.records || []">
+            <el-table-column label="商品名称" width="400">
+              <template #default="{ row }">
+                <div
+                  class="goods-msg"
+                  @click="linkTo(`/goodsDetail?skuId=${row.skuId}&goodsId=${row.goodsId}`)"
+                >
+                  <img style="vertical-align: top" :src="row.thumbnail" width="60" height="60" alt="" />
+                  &nbsp; {{ row.goodsName }}
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="商品价格">
+              <template #default="{ row }">
+                <span> ￥{{ $filters.unitPrice(row.price) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="佣金">
+              <template #default="{ row }">
+                <span> ￥{{ $filters.unitPrice(row.commission) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" min-width="120">
+              <template #default="{ row }">
+                <el-button type="success" size="small" style="margin-right: 5px" @click="fenxiao(row)">分销商品</el-button>
+                <el-button type="danger" size="small" @click="selectGoods(row.id, false)">取消选择</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
           <div class="page-size">
-            <Page
-              :current="params.pageNumber"
+            <el-pagination               v-model:current-page="params.pageNumber"
               :total="goodsData.total"
-              :page-size="params.pageSize"
-              @on-change="changePage"
-              size="small"
-              show-total
-              show-elevator
-            ></Page>
+              v-model:page-size="params.pageSize"
+              :page-sizes="[10, 20, 50]"
+              @current-change="changePage"
+              @size-change="changePageSize"
+             layout="total, sizes, prev, pager, next, jumper"></el-pagination>
           </div>
-        </TabPane>
-        <TabPane label="未选商品" name="goodsUncheck">
-          <Table stripe :columns="goodsColumns" :data="goodsData.records">
-            <template slot-scope="{ row }" slot="name">
-              <div
-                class="goods-msg"
-                @click="
-                  linkTo(
-                    `/goodsDetail?skuId=${row.skuId}&goodsId=${row.goodsId}`
-                  )
-                "
-              >
-                <img
-                  style="vertical-align: top"
-                  :src="row.thumbnail"
-                  width="60"
-                  height="60"
-                  alt=""
-                />&nbsp; {{ row.goodsName }}
-              </div>
-            </template>
-            <template slot-scope="{ row }" slot="price">
-              <span> ￥{{ row.price | unitPrice }}</span>
-            </template>
-            <template slot-scope="{ row }" slot="commission">
-              <span> ￥{{ row.commission | unitPrice }}</span>
-            </template>
-            <template slot-scope="{ row }" slot="action">
-              <Button
-                type="primary"
-                size="small"
-                style="margin-right: 5px"
-                @click="selectGoods(row.id, true)"
-              >选择商品</Button
-              >
-            </template>
-          </Table>
+        </el-tab-pane>
+        <el-tab-pane label="未选商品" name="goodsUncheck">
+          <el-table stripe :data="goodsData.records || []">
+            <el-table-column label="商品名称" width="400">
+              <template #default="{ row }">
+                <div
+                  class="goods-msg"
+                  @click="linkTo(`/goodsDetail?skuId=${row.skuId}&goodsId=${row.goodsId}`)"
+                >
+                  <img style="vertical-align: top" :src="row.thumbnail" width="60" height="60" alt="" />
+                  &nbsp; {{ row.goodsName }}
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="商品价格">
+              <template #default="{ row }">
+                <span> ￥{{ $filters.unitPrice(row.price) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="佣金">
+              <template #default="{ row }">
+                <span> ￥{{ $filters.unitPrice(row.commission) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" min-width="120">
+              <template #default="{ row }">
+                <el-button type="primary" size="small" style="margin-right: 5px" @click="selectGoods(row.id, true)">选择商品</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
           <div class="page-size">
-            <Page
-              :current="params.pageNumber"
+            <el-pagination               v-model:current-page="params.pageNumber"
               :total="goodsData.total"
-              :page-size="params.pageSize"
-              @on-change="changePage"
-              size="small"
-              show-total
-              show-elevator
-            ></Page>
+              v-model:page-size="params.pageSize"
+              :page-sizes="[10, 20, 50]"
+              @current-change="changePage"
+              @size-change="changePageSize"
+             layout="total, sizes, prev, pager, next, jumper"></el-pagination>
           </div>
-        </TabPane>
-        <TabPane label="提现记录" name="log">
-          <Table stripe :columns="logColumns" :data="logData.records">
-            <template slot-scope="{ row }" slot="sn">
-              <span>{{ row.sn }}</span>
-            </template>
-            <template slot-scope="{ row }" slot="time">
-              <span>{{ row.createTime }}</span>
-            </template>
-            <template slot-scope="{ row }" slot="price">
-              <span
-                v-if="row.distributionCashStatus == 'VIA_AUDITING'"
-                style="color: green"
-              >
-                +￥{{ row.price | unitPrice }}</span
-              >
-              <span v-else style="color: red">
-                -￥{{ row.price | unitPrice }}</span
-              >
-            </template>
-            <template slot-scope="{ row }" slot="status">
-              <span>
-                {{
-                  row.distributionCashStatus == "APPLY"
-                    ? "待处理"
-                    : row.distributionCashStatus == "VIA_AUDITING"
-                      ? "通过"
-                      : "拒绝"
-                }}</span
-              >
-            </template>
-          </Table>
+        </el-tab-pane>
+        <el-tab-pane label="提现记录" name="log">
+          <el-table stripe :data="logData.records || []">
+            <el-table-column prop="sn" label="编号" />
+            <el-table-column prop="createTime" label="申请时间" />
+            <el-table-column label="提现金额">
+              <template #default="{ row }">
+                <span v-if="row.distributionCashStatus == 'VIA_AUDITING'" style="color: green">
+                  +￥{{ $filters.unitPrice(row.price) }}
+                </span>
+                <span v-else style="color: red">
+                  -￥{{ $filters.unitPrice(row.price) }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column label="提现状态">
+              <template #default="{ row }">
+                <span>
+                  {{
+                    row.distributionCashStatus == "APPLY"
+                      ? "待处理"
+                      : row.distributionCashStatus == "VIA_AUDITING"
+                        ? "通过"
+                        : "拒绝"
+                  }}
+                </span>
+              </template>
+            </el-table-column>
+          </el-table>
           <div class="page-size">
-            <Page
-              :current="logParams.pageNumber"
+            <el-pagination               v-model:current-page="logParams.pageNumber"
               :total="logData.total"
-              :page-size="logParams.pageSize"
-              @on-change="changePageLog"
-              size="small"
-              show-total
-              show-elevator
-            ></Page>
+              v-model:page-size="logParams.pageSize"
+              :page-sizes="[10, 20, 50]"
+              @current-change="changePageLog"
+              @size-change="changePageSizeLog"
+             layout="total, sizes, prev, pager, next, jumper"></el-pagination>
           </div>
-        </TabPane>
-      </Tabs>
+        </el-tab-pane>
+      </el-tabs>
     </div>
     <!-- 未开放 -->
     <div v-if="status === 3">
-      <Alert type="error">
-        分销功能暂未开启
-        <template slot="desc"
-        >提交认证申请后，工作人员将在三个工作日进行核对完成审核</template
-        >
-      </Alert>
+      <el-alert type="danger" title="分销功能暂未开启" />
     </div>
     <!-- 分销资格被清退 -->
     <div v-if="status === 4">
-      <Alert type="error">
+      <el-alert type="danger">
         您的分销资格已被清退。请联系管理员或进行申诉
 
-        <Button style="margin-left: 50px;" type="warning" @click="repaying">申诉</Button>
-      </Alert>
+        <el-button style="margin-left: 50px;" type="warning" @click="repaying">申诉</el-button>
+      </el-alert>
     </div>
     <!-- 分销申诉审核 -->
     <div v-if="status === 5">
-      <Alert type="success">
-        您提交的申诉正在审核
-        <template slot="desc"
-        >提交认证申请后，工作人员将在三个工作日进行核对完成审核</template
-        >
-      </Alert>
+      <el-alert
+        type="success"
+        title="您提交的申诉正在审核"
+        description="提交认证申请后，工作人员将在三个工作日进行核对完成审核"
+      />
     </div>
-    <Modal v-model="withdrawApplyModal" width="530">
-      <p slot="header">
-        <Icon type="edit"></Icon>
+    <el-dialog v-model="withdrawApplyModal" width="530">
+      <template #header><p>
+        <el-icon><Edit /></el-icon>
         <span>提现金额</span>
-      </p>
+      </p></template>
       <div>
-        <Input v-model="withdrawPrice" size="large" number maxlength="9"
-        ><span slot="append">元</span></Input
+        <el-input v-model="withdrawPrice" size="large" number maxlength="9"
+        ><template #append><span>元</span></template></el-input
         >
       </div>
-      <div slot="footer" style="text-align: center">
-        <Button type="primary" size="large" @click="withdraw">提现</Button>
-      </div>
-    </Modal>
-    <Modal v-model="qrcodeShow" title="分销商品" width="800">
-      <Alert type="warning"> 下载二维码或者复制链接分享商品 </Alert>
+      <template #footer><div style="text-align: center">
+        <el-button type="primary" size="large" @click="withdraw">提现</el-button>
+      </div></template>
+    </el-dialog>
+    <el-dialog v-model="qrcodeShow" title="分销商品" width="800">
+      <el-alert type="warning"> 下载二维码或者复制链接分享商品 </el-alert>
       <div class="qrcode">
         <div style="width: 150px; height: 150px; border: 1px solid #eee">
           <vue-qr
@@ -270,8 +234,8 @@
             :size="150"
           ></vue-qr>
           <div class="qrcode-platform">PC端</div>
-          <Button class="download-btn" type="success" @click="downloadQrcode"
-          >下载二维码</Button
+          <el-button class="download-btn" type="success" @click="downloadQrcode"
+          >下载二维码</el-button
           >
         </div>
         <div style="width: 150px; height: 150px; border: 1px solid #eee">
@@ -284,20 +248,22 @@
             :size="150"
           ></vue-qr>
           <div class="qrcode-platform">移动应用端</div>
-          <Button class="download-btn" type="success" @click="downloadQrcodeH5"
-          >下载二维码</Button
+          <el-button class="download-btn" type="success" @click="downloadQrcodeH5"
+          >下载二维码</el-button
           >
         </div>
       </div>
 
       <div class="mt_10" style="margin-top: 100px;">
-        商品链接：<Input style="width: 600px" v-model="qrcode"></Input>
-      </div>
-    </Modal>
+        商品链接：<el-input style="width: 600px" v-model="qrcode"></el-input>
+      </div></el-dialog>
+    </UserCenterLayout>
   </div>
 </template>
 
 <script>
+import { Message } from "@/utils/message";
+import { Edit } from '@element-plus/icons-vue';
 import {
   distribution,
   applyDistribution,
@@ -309,12 +275,13 @@ import {
 import { IDCard } from "@/plugins/RegExp.js";
 import { checkBankno } from "@/plugins/Foundation";
 import vueQr from "vue-qr";
+import config from "@/config";
 export default {
   name: "Distribution",
-  components: { vueQr },
+  components: { vueQr, Edit },
   data() {
     return {
-      config:require('@/config'),
+      config,
       status: 0, // 申请状态，0为未申请 1 申请中 2 申请完成 3 功能暂未开启
       applyForm: {}, // 申请表单
       rules: {
@@ -358,35 +325,21 @@ export default {
       withdrawPrice: 0, // 提现金额
       goodsData: {}, // 商品数据
       logData: {}, // 日志数据
-      goodsColumns: [
-        // 商品表头
-        { title: "商品名称", slot: "name", width: 400 },
-        { title: "商品价格", slot: "price" },
-        { title: "佣金", slot: "commission" },
-        { title: "操作", slot: "action", minWidth: 120 },
-      ],
-      logColumns: [
-        // 日志表头
-        { title: "编号", slot: "sn" },
-        { title: "申请时间", slot: "time" },
-        { title: "提现金额", slot: "price" },
-        { title: "提现状态", slot: "status" },
-      ],
       params: {
         // 商品请求参数
         pageNumber: 1,
-        pageSize: 20,
+        pageSize: 10,
         checked: true,
       },
       orderParams: {
         // 订单商品请求参数
         pageNumber: 1,
-        pageSize: 20,
+        pageSize: 10,
       },
       logParams: {
         // 日志参数
         pageNumber: 1,
-        pageSize: 20,
+        pageSize: 10,
         sort: "createTime",
         order: "desc",
       },
@@ -410,25 +363,43 @@ export default {
           applyDistribution(this.applyForm).then((res) => {
             this.applyLoading = false;
             if (res.success) {
-              this.$Message.success("申请已提交，请等待管理员审核");
+              Message.success("申请已提交，请等待管理员审核");
               this.status = 1;
             }
           });
         }
       });
     },
+    normalizeWithdrawError (message) {
+      if (!message) return '提现失败，请稍后重试';
+      const text = String(message);
+      if (text.includes('最少提现金额为1元')) {
+        return '提现金额单次最少提现金额为1元';
+      }
+      const colonIndex = text.indexOf(':');
+      if (colonIndex > -1 && colonIndex < text.length - 1) {
+        return text.slice(colonIndex + 1).trim();
+      }
+      return text;
+    },
     withdraw() {
-      // 申请提现
+      const price = Number(this.withdrawPrice);
+      if (!price || price < 1) {
+        Message.error('提现金额单次最少提现金额为1元');
+        return;
+      }
       distCash({ price: this.withdrawPrice }).then((res) => {
-        this.withdrawApplyModal = false;
-        this.price = 0;
         if (res.success) {
-          this.$Message.success("申请已提交，请等待审核");
+          this.withdrawApplyModal = false;
+          this.withdrawPrice = 0;
+          Message.success('申请已提交，请等待审核');
           this.distribution();
           this.getLog();
         } else {
-          this.$Message.error(res.message);
+          Message.error(this.normalizeWithdrawError(res.message));
         }
+      }).catch((err) => {
+        Message.error(this.normalizeWithdrawError(err?.message || err?.data?.message));
       });
     },
     qrcodeData(data64) {
@@ -474,9 +445,21 @@ export default {
       this.params.pageNumber = val;
       this.getGoodsData();
     },
+    changePageSize(val) {
+      // 修改每页条数
+      this.params.pageNumber = 1;
+      this.params.pageSize = val;
+      this.getGoodsData();
+    },
     changePageLog(val) {
       // 修改页码 日志
       this.logParams.pageNumber = val;
+      this.getLog();
+    },
+    changePageSizeLog(val) {
+      // 修改每页条数 日志
+      this.logParams.pageNumber = 1;
+      this.logParams.pageSize = val;
       this.getLog();
     },
     selectGoods(id, checked) {
@@ -487,7 +470,7 @@ export default {
       };
       selectDistGoods(params).then((res) => {
         if (res.success) {
-          this.$Message.success("操作成功！");
+          Message.success("操作成功！");
           this.getGoodsData();
         }
       });
@@ -516,36 +499,43 @@ export default {
       applyDistribution().then((res) => {
         this.applyLoading = false;
         if (res.success) {
-          this.$Message.success("申诉已提交，请等待管理员审核");
+          Message.success("申诉已提交，请等待管理员审核");
           // this.status = 1;
         }
       });
     },
     distribution() {
       // 获取分销商信息
-      distribution().then((res) => {
-        if (res.result) {
-          this.result = res.result;
-          let type = res.result.distributionStatus;
-          if (type === "PASS") {
-            this.status = 2;
-            this.getGoodsData();
-          } else if ( type === "REFUSE") {
+      distribution()
+        .then((res) => {
+          if (res?.result) {
+            this.result = res.result;
+            const type = res.result.distributionStatus;
+            if (type === "PASS") {
+              this.status = 2;
+              this.getGoodsData();
+            } else if (type === "REFUSE") {
+              this.status = 0;
+            } else if (type === "RETREAT") {
+              this.status = 4;
+            } else if (type === "APPEAL") {
+              this.status = 5;
+            } else {
+              this.status = 1;
+            }
+          } else if (res?.code === 22000) {
+            // 分销功能未开启
+            this.status = 3;
+          } else {
+            // 没有资格申请，显示申请表单
             this.status = 0;
-          } else if (type === "RETREAT") {
-            this.status = 4;
-          }else if (type === "APPEAL") {
-            this.status = 5;
-          }else {
-            this.status = 1;
           }
-        } else if (!res.data.success && res.data.code === 22000) {
-          this.status = 3;
-        } else {
-          // 没有资格申请 先去实名认证
-          this.status = 0;
-        }
-      });
+        })
+        .catch((err) => {
+          if (err?.code === 22000) {
+            this.status = 3;
+          }
+        });
     },
   },
 };
@@ -556,8 +546,9 @@ export default {
   margin: 20px 0;
 }
 .page-size {
+  display: flex;
+  justify-content: flex-end;
   margin: 15px 0px;
-  text-align: right;
 }
 .account-price {
   font-weight: bold;
@@ -584,7 +575,7 @@ export default {
   margin-left: 25px;
   margin-top: 5px
 }
-::v-deep .ivu-alert-message {
+:deep(.el-alert__content) {
   p {
     margin: 4px 0;
   }

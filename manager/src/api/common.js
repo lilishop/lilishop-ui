@@ -21,9 +21,9 @@ export const postVerifyImg = (params) => {
 };
 
 
-// 获取系统基础信息
+// 获取系统基础信息（登录页等场景无需 token）
 export const getBaseSite = () => {
-  return getRequest(`${commonUrl}/common/common/site`);
+  return getRequestWithNoToken(`${commonUrl}/common/common/site`);
 };
 
 // 上传文件

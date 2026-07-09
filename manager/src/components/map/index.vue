@@ -5,7 +5,7 @@
     <div id="map-container"></div>
 
     <div class="search-con">
-      <Input placeholder="输入关键字搜索" id="input-map" v-model="mapSearch" />
+      <el-input id="input-map" v-model="mapSearch" placeholder="输入关键字搜索" clearable />
       <ul>
         <li v-for="(tip, index) in tips" :key="index" @click="selectAddr(tip.location)">
           <p>{{ tip.name }}</p>
@@ -13,9 +13,8 @@
         </li>
       </ul>
     </div>
-    <div slot="footer" class="footer">
-
-      <Button type="primary" :loading="loading" @click="ok">确定</Button>
+    <div class="footer">
+      <el-button type="primary" :loading="loading" @click="ok">确定</el-button>
     </div>
 
   </div>
@@ -23,8 +22,8 @@
 <script>
 import AMapLoader from "@amap/amap-jsapi-loader";
 import { getRegion } from "@/api/common.js";
+import config from "@/config/index";
 
-const config = require('@/config/index')
 export default {
   name: "map",
   data() {

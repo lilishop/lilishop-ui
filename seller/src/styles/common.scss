@@ -25,6 +25,13 @@
 .width_1200 {
   width: 1200px;
 }
+.width_1200_auto {
+  width: 1200px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
 .width_800 {
   width: 800px;
 }
@@ -133,3 +140,9 @@ $theme_color: #F31947;
   color: $theme_color !important;
 }
 $bg_color: #f1f6fa;
+
+@import "./table-common.scss";
+
+.el-table table {
+  width: 100% !important;
+}

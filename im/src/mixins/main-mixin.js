@@ -119,7 +119,7 @@ export default {
 
 
     reload() {
-      this.$root.$children[0].refreshView();
+      import("@/utils/app-bridge").then(({ refreshView }) => refreshView());
     },
   },
 };

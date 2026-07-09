@@ -6,108 +6,102 @@
       <div>
         <router-link to="/"><img :src="$store.state.logoImg" /></router-link>
         <div>
-          购物车(<span>{{ goodsTotal }}</span
-          >)
+          购物车(<span>{{ goodsTotal }}</span>)
         </div>
       </div>
 
     </div>
-    <Divider />
+    <el-divider />
     <!-- 购物车主体 -->
     <div class="cart-content width_1200 center">
       <div class="available-area">
         <div class="cart-steps">
           <span :class="stepIndex == 0 ? 'active' : ''">1.我的购物车</span>
-          <Icon
-            :class="stepIndex == 0 ? 'active-arrow' : ''"
-            custom="icomoon icon-next"
-          ></Icon>
+          <i class="icomoon icon-next" :class="stepIndex == 0 ? 'active-arrow' : ''"></i>
           <span :class="stepIndex == 1 ? 'active' : ''">2.填写订单信息</span>
-          <Icon
-            :class="stepIndex == 1 ? 'active-arrow' : ''"
-            custom="icomoon icon-next"
-          ></Icon>
+          <i class="icomoon icon-next" :class="stepIndex == 1 ? 'active-arrow' : ''"></i>
           <span :class="stepIndex == 2 ? 'active' : ''">3.成功提交订单</span>
         </div>
       </div>
       <!-- 购物车商品列表 -->
       <div class="cart-goods">
+        <div class="cart-goods-table">
         <div class="cart-goods-title">
-          <div class="width_60">
-            <Checkbox
+          <div class="width_60 cart-col-check">
+            <el-checkbox
               v-model="allChecked"
-              @on-change="changeChecked(allChecked, 'all')"
-              >全选</Checkbox
+              @change="changeChecked(allChecked, 'all')"
+              >全选</el-checkbox
             >
           </div>
           <div class="goods-title">商品</div>
           <div class="width_150">单价（元）</div>
           <div class="width_100">数量</div>
           <div class="width_150">小计</div>
-          <div class="width_100">操作</div>
+          <div class="cart-ops-col">操作</div>
         </div>
         <div v-if="cartList.length === 0" class="cart-empty">
           <p>购物车空空如也</p>
           <router-link to="/">去选购&gt;</router-link>
         </div>
-        <div
-          v-else
-          class="cart-goods-items"
-          v-for="(shop, index) in cartList"
-          :key="index"
-        >
-          <div class="shop-name">
-            <div>
-              <Checkbox
-                v-model="shop.checked"
-                @on-change="changeChecked(shop.checked, 'shop', shop.storeId)"
-              ></Checkbox>
-              <span class="go-shop-page" @click="goShopPage(shop.storeId)">{{
-                shop.storeName
-              }}</span>
-            </div>
-            <span
-              class="shop-coupon"
-              v-if="shop.couponList.length"
-              :class="couponAvailable === index ? 'shop-coupon-show' : ''"
-              @click.stop="showCoupon(shop.id, index)"
-            >
-              <!-- 优惠券模态框 -->
-              <div v-if="couponAvailable === index">
-                <div
-                  class="coupon-item"
-                  v-for="(item, index) in shop.couponList"
-                  :key="index"
-                >
-                  <span v-if="item.couponType === 'PRICE'"
-                    >￥{{ item.price }}</span
-                  >
-                  <span v-if="item.couponType === 'DISCOUNT'"
-                    >{{ item.couponDiscount }}折</span
-                  >
-                  <span>满{{ item.consumeThreshold }}元可用</span>
-                  <Button
-                    class="coupon-btn"
-                    size="small"
-                    type="primary"
-                    @click="receiveShopCoupon(item)"
-                    :disabled="item.disabled"
-                    >{{ item.disabled ? "已领取" : "领取" }}</Button
-                  >
-                </div>
+        <div v-else class="cart-goods-list-box">
+          <div
+            class="cart-shop-group"
+            v-for="(shop, index) in cartList"
+            :key="index"
+          >
+            <div class="shop-name">
+              <div class="width_60 cart-col-check">
+                <el-checkbox
+                  v-model="shop.checked"
+                  @change="changeChecked(shop.checked, 'shop', shop.storeId)"
+                ></el-checkbox>
               </div>
-            </span>
-            <div class="promotion-notice">{{ shop.promotionNotice }}</div>
-          </div>
-          <template v-for="(goods, goodsIndex) in shop.skuList">
-            <div class="goods-item" :key="goodsIndex">
-              <div class="width_60">
-                <Checkbox
+              <div class="shop-info">
+                <span class="go-shop-page" @click="goShopPage(shop.storeId)">{{
+                  shop.storeName
+                }}</span>
+              <span
+                class="shop-coupon"
+                v-if="shop.couponList.length"
+                :class="couponAvailable === index ? 'shop-coupon-show' : ''"
+                @click.stop="showCoupon(shop.id, index)"
+              >
+                <!-- 优惠券模态框 -->
+                <div v-if="couponAvailable === index">
+                  <div
+                    class="coupon-item"
+                    v-for="(item, couponIndex) in shop.couponList"
+                    :key="couponIndex"
+                  >
+                    <span v-if="item.couponType === 'PRICE'"
+                      >￥{{ item.price }}</span>
+                    <span v-if="item.couponType === 'DISCOUNT'"
+                      >{{ item.couponDiscount }}折</span>
+                    <span>满{{ item.consumeThreshold }}元可用</span>
+                    <el-button
+                      class="coupon-btn"
+                      size="small"
+                      type="primary"
+                      @click="receiveShopCoupon(item)"
+                      :disabled="item.disabled"
+                      >{{ item.disabled ? "已领取" : "领取" }}</el-button
+                    >
+                  </div>
+                </div>
+              </span>
+              <div class="promotion-notice">{{ shop.promotionNotice }}</div>
+              </div>
+            </div>
+            <template v-for="(goods, goodsIndex) in shop.skuList" :key="goods.goodsSku?.id || goodsIndex">
+              <div class="goods-item">
+              <div class="width_60 cart-col-check">
+                <el-checkbox
                   v-model="goods.checked"
-                  @on-change="
+                  @change="
                     changeChecked(goods.checked, 'goods', goods.goodsSku.id)
                   "
-                ></Checkbox>
+                ></el-checkbox>
               </div>
               <div
                 class="goods-title"
@@ -125,13 +119,13 @@
                   <p>
                     {{ goods.goodsSku.goodsName }}
                   </p>
-                  <p><Tag
+                  <p><el-tag
                     v-if="goods.goodsSku.salesModel === 'WHOLESALE'"
                     class="goods-show-tag"
                     color="purple"
                   >
                     批发商品
-                  </Tag></p>
+                  </el-tag></p>
                   <template
                     v-for="(promotion, promotionIndex) in goods.promotions"
                   >
@@ -164,57 +158,58 @@
                   </template>
                 </div>
               </div>
-              <div class="width_150">
-                {{ goods.purchasePrice | unitPrice("￥") }}
+              <div class="width_150 cart-col-price">
+                {{ $filters.unitPrice(goods.purchasePrice, "￥") }}
               </div>
-              <div class="width_100">
-                <InputNumber
+              <div class="width_100 cart-col-qty">
+                <el-input-number
                   :min="1"
                   size="small"
                   v-model="goods.num"
-                  @on-change="changeNum(goods.num, goods.goodsSku.id)"
-                ></InputNumber>
-                <div class="fontsize_12">
+                  @change="changeNum(goods.num, goods.goodsSku.id)"
+                ></el-input-number>
+                <div class="fontsize_12 cart-qty-stock">
                   {{ goods.goodsSku.quantity > 0 ? "有货" : "无货" }}
                 </div>
               </div>
-              <div class="width_150">
-                {{ goods.subTotal | unitPrice("￥") }}
+              <div class="width_150 cart-col-subtotal">
+                {{ $filters.unitPrice(goods.subTotal, "￥") }}
               </div>
-              <div class="width_100">
-                <Button
-                  v-if="!goods.errorMessage"
-                  size="small"
-                  type="primary"
-                  @click="delGoods(goods.goodsSku.id)"
-                  >删除</Button
-                >
-                <Button
-                  v-if="!goods.errorMessage"
-                  size="small"
-                  type="info"
-                  @click="collectGoods(goods.goodsSku.id)"
-                  style="margin-left: 10px"
-                  >收藏</Button
-                >
+              <div class="cart-ops-col">
+                <div v-if="!goods.errorMessage" class="cart-ops">
+                  <el-button
+                    size="small"
+                    class="cart-del-btn"
+                    @click="delGoods(goods.goodsSku.id)"
+                    >删除</el-button
+                  >
+                  <el-button
+                    size="small"
+                    class="cart-collect-btn"
+                    @click="collectGoods(goods.goodsSku.id)"
+                    >收藏</el-button
+                  >
+                </div>
               </div>
               <div class="error-goods" v-if="goods.errorMessage">
                 <div style="margin-top: 20px">{{ goods.errorMessage }}</div>
-                <Button type="primary" @click="delGoods(goods.goodsSku.id)"
-                  >删除</Button
+                <el-button type="primary" @click="delGoods(goods.goodsSku.id)"
+                  >删除</el-button
                 >
               </div>
             </div>
-          </template>
+            </template>
+          </div>
+        </div>
         </div>
         <!-- 底部支付栏 -->
         <div class="cart-goods-footer">
           <div>
-            <div class="width_60">
-              <Checkbox
+            <div class="width_60 cart-col-check">
+              <el-checkbox
                 v-model="allChecked"
-                @on-change="changeChecked(allChecked, 'all')"
-                >全选</Checkbox
+                @change="changeChecked(allChecked, 'all')"
+                >全选</el-checkbox
               >
             </div>
             <div class="width_100 handle-btn" @click="delGoods()">
@@ -227,29 +222,27 @@
           </div>
           <div>
             <div class="selected-count">
-              已选择<span>{{ checkedNum }}</span
-              >件商品
+              已选择<span>{{ checkedNum }}</span>件商品
             </div>
             <div class="ml_20 save-price">
-              已节省<span>{{
-                priceDetailDTO.discountPrice | unitPrice("￥")
-              }}</span>
+              已节省<span>{{ $filters.unitPrice(priceDetailDTO.discountPrice, "￥") }}</span>
             </div>
             <div class="ml_20 total-price">
               总价（不含运费）:
-              <div>{{ priceDetailDTO.flowPrice | unitPrice("￥") }}</div>
+              <div>{{ $filters.unitPrice(priceDetailDTO.flowPrice, "￥") }}</div>
             </div>
             <div class="pay ml_20" @click="pay">去结算</div>
           </div>
         </div>
       </div>
-      <Spin size="large" fix v-if="loading"></Spin>
+      <el-skeleton size="large" fix v-if="loading"></el-skeleton>
     </div>
     <BaseFooter class="footer"></BaseFooter>
   </div>
 </template>
 
 <script>
+import { Message, Modal } from "@/utils/message";
 import Promotion from "@/components/goodsDetail/Promotion";
 import Search from "@/components/Search";
 import * as APICart from "@/api/cart";
@@ -297,13 +290,13 @@ export default {
     },
     // 收藏商品
     collectGoods(id) {
-      this.$Modal.confirm({
+      Modal.confirm({
         title: "收藏",
-        content: "<p>商品收藏后可在个人中心我的收藏查看</p>",
+        content: "商品收藏后可在个人中心我的收藏查看",
         onOk: () => {
           APIMember.collectGoods("GOODS", id).then((res) => {
             if (res.success) {
-              this.$Message.success("收藏商品成功");
+              Message.success("收藏商品成功");
               this.getCartList();
             }
           });
@@ -326,16 +319,16 @@ export default {
       } else {
         idArr.push(id);
       }
-      this.$Modal.confirm({
+      Modal.confirm({
         title: "删除",
-        content: "<p>确定要删除该商品吗？</p>",
+        content: "确定要删除该商品吗？",
         onOk: () => {
           APICart.delCartGoods({ skuIds: idArr.toString() }).then((res) => {
             if (res.success) {
-              this.$Message.success("删除成功");
+              Message.success("删除成功");
               this.getCartList();
             } else {
-              this.$Message.error(res.message);
+              Message.error(res.message);
             }
           });
         },
@@ -343,16 +336,16 @@ export default {
     },
     // 清空购物车
     clearCart() {
-      this.$Modal.confirm({
+      Modal.confirm({
         title: "提示",
-        content: "<p>确定要清空购物车吗？清空后不可恢复</p>",
+        content: "确定要清空购物车吗？清空后不可恢复",
         onOk: () => {
           APICart.clearCart().then((res) => {
             if (res.success) {
-              this.$Message.success("清空购物车成功");
+              Message.success("清空购物车成功");
               this.getCartList();
             } else {
-              this.$Message.error(res.message);
+              Message.error(res.message);
             }
           });
         },
@@ -363,7 +356,7 @@ export default {
       if (this.checkedNum) {
         this.$router.push({ path: "/pay", query: { way: "CART" } });
       } else {
-        this.$Message.warning("请至少选择一件商品");
+        Message.warning("请至少选择一件商品");
       }
     },
     // 展示优惠券
@@ -400,10 +393,10 @@ export default {
     async receiveShopCoupon(item) {
       let res = await APIMember.receiveCoupon(item.id);
       if (res.success) {
-        this.$set(item, "disabled", true);
-        this.$Message.success("领取成功");
+        item["disabled"] = true;
+        Message.success("领取成功");
       } else {
-        this.$Message.error(res.message);
+        Message.error(res.message);
       }
     },
     // 购物车列表
@@ -500,7 +493,7 @@ export default {
     padding: 0 15px;
   }
 
-  .ivu-icon {
+  .el-icon {
     @include content_color($light_content_color);
     font-size: 20px;
     margin: 0 15px;
@@ -525,6 +518,10 @@ export default {
 }
 /** 商品列表 */
 .cart-goods {
+  .cart-goods-table {
+    border: 1px solid #e0e0e0;
+    @include background_color($light_white_background_color);
+  }
   &-title {
     height: 50px;
     @include background_color($light_white_background_color);
@@ -532,7 +529,8 @@ export default {
     display: flex;
     align-items: center;
     padding: 0 20px;
-    div {
+    border-bottom: 1px solid #e0e0e0;
+    div:not(.cart-col-check) {
       text-align: center;
     }
     .goods-title {
@@ -545,7 +543,26 @@ export default {
     height: 300px;
     padding-top: 100px;
   }
-  &-items {
+  .cart-goods-list-box {
+    @include background_color($light_white_background_color);
+  }
+  .cart-col-check {
+    width: 60px;
+    min-width: 60px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+
+    :deep(.el-checkbox) {
+      margin-right: 0;
+    }
+  }
+  .cart-shop-group {
+    &:not(:last-child) {
+      border-bottom: 1px solid #e0e0e0;
+    }
     .shop-name {
       height: 50px;
       display: flex;
@@ -553,8 +570,14 @@ export default {
       padding: 0 20px;
       position: relative;
       @include title_color($light_title_color);
-      > * {
-        width: 50%;
+      .shop-info {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        .promotion-notice {
+          margin-left: auto;
+        }
       }
       .go-shop-page:hover {
         color: $theme_color;
@@ -572,6 +595,7 @@ export default {
       .shop-coupon {
         width: 80px;
         height: 24px;
+        flex-shrink: 0;
         position: relative;
         background: url(../assets/images/cart-coupon-icons02.png) 0 0 no-repeat;
         > div {
@@ -582,7 +606,6 @@ export default {
           height: 300px;
           background-color: #fff;
           border: 1px solid $theme_color;
-          // border-radius: 3px;
           z-index: 1;
           padding: 10px 20px;
           &::before {
@@ -625,6 +648,8 @@ export default {
       .promotion-notice {
         text-align: right;
         font-size: 12px;
+        flex-shrink: 0;
+        margin-left: 10px;
       }
       .shop-coupon-show {
         background-position-y: -34px;
@@ -633,12 +658,16 @@ export default {
     .goods-item {
       position: relative;
       @extend .cart-goods-title;
-      @include background_color($light_white_background_color);
+      background: transparent;
+      border-top: 1px solid #f0f0f0;
       padding: 10px 20px;
       height: auto;
+      .cart-col-check {
+        padding-left: 20px;
+        box-sizing: border-box;
+      }
       > div:nth-child(1) {
-        padding-left: 15px;
-        width: 30px;
+        width: 60px;
       }
       > div:nth-child(2) {
         cursor: pointer;
@@ -660,8 +689,37 @@ export default {
           }
         }
       }
-      > div:nth-child(5) {
+      .cart-col-price,
+      .cart-col-subtotal {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        text-align: center;
+      }
+      .cart-col-subtotal {
         font-weight: bold;
+      }
+      .cart-col-qty {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        :deep(.el-input-number) {
+          width: 100%;
+        }
+
+        .cart-qty-stock {
+          position: absolute;
+          top: calc(100% + 4px);
+          left: 50%;
+          transform: translateX(-50%);
+          white-space: nowrap;
+          line-height: 1.2;
+          color: #999;
+        }
       }
       .num-input {
         width: 60px;
@@ -743,7 +801,7 @@ export default {
   width: 1200px;
   margin: 0 auto;
 }
-.ivu-divider {
+.el-divider {
   background: $theme_color;
   height: 2px;
 }
@@ -779,9 +837,51 @@ export default {
   display: flex;
   align-items: center;
 }
+
+.cart-ops-col {
+  width: 130px;
+  min-width: 130px;
+  flex-shrink: 0;
+}
+
+.cart-ops {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.cart-del-btn {
+  background-color: #ff7d79 !important;
+  border-color: #ff7d79 !important;
+  color: #fff !important;
+  margin: 0 !important;
+
+  &:hover,
+  &:focus {
+    background-color: #ff6b66 !important;
+    border-color: #ff6b66 !important;
+    color: #fff !important;
+  }
+}
+
+.cart-collect-btn {
+  background-color: #fa6419 !important;
+  border-color: #fa6419 !important;
+  color: #fff !important;
+  margin: 0 !important;
+
+  &:hover,
+  &:focus {
+    background-color: #e55a15 !important;
+    border-color: #e55a15 !important;
+    color: #fff !important;
+  }
+}
 </style>
 <style>
-.ivu-input-number-input {
+.el-input-number .el-input__inner {
   text-align: center;
 }
 

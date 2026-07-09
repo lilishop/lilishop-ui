@@ -6,22 +6,22 @@
         <draggable
           class="model-view-menu-item"
           :list="modelData"
+          :item-key="getModelKey"
+          :clone="cloneModel"
           :move="handleMove"
-          v-bind="{
-            group: { name: 'model', pull: 'clone', put: false, animation: 150 },
-            sort: false,
-            ghostClass: 'ghost',
-          }"
+          :group="{ name: 'model', pull: 'clone', put: false, animation: 150 }"
+          :sort="false"
+          ghost-class="ghost"
         >
-          <li
-            v-for="(model, index) in modelData"
-            v-if="!model.drawer && !model.drawerPromotions"
-            :key="index"
-            class="model-item"
-          >
-            <img src alt />
-            <span>{{ model.name }}</span>
-          </li>
+          <template #item="{ element: model }">
+            <li
+              v-if="!model.drawer && !model.drawerPromotions"
+              class="model-item"
+            >
+              <img src alt />
+              <span>{{ model.name }}</span>
+            </li>
+          </template>
         </draggable>
       </div>
 
@@ -31,32 +31,32 @@
           <draggable
             class="draggable"
             group="model"
-            ghostClass="ghost"
+            ghost-class="ghost"
             @add="handleContentlAdd"
             @end="handleContentlEnd"
             v-model="contentData.list"
+            :item-key="getContentItemKey"
           >
-            <div
-              class="list"
-              v-for="(element, index) in contentData.list"
-              :key="element.key"
-            >
-              <component
-                class="component"
-                :class="{ active: selected == index }"
-                @click.native="handleComponent(element, index)"
-                :is="templates[element.type]"
-                :res="element.options"
-              ></component>
-              <Icon
-                v-if="selected == index"
-                @click="closeComponent(index)"
-                color="#e1251b"
-                size="25"
-                class="close"
-                type="ios-close-circle"
-              />
-            </div>
+            <template #item="{ element, index }">
+              <div class="list">
+                <component
+                  class="component"
+                  :class="{ active: selected == index }"
+                  @click="handleComponent(element, index)"
+                  :is="templates[element.type]"
+                  :res="element.options"
+                ></component>
+                <el-icon
+                  v-if="selected == index"
+                  @click="closeComponent(index)"
+                  class="close"
+                  :size="25"
+                  color="#e1251b"
+                >
+                  <CircleClose />
+                </el-icon>
+              </div>
+            </template>
           </draggable>
         </div>
       </div>
@@ -73,6 +73,7 @@
   </div>
 </template>
 <script>
+import { CircleClose } from "@element-plus/icons-vue";
 import templates from "./template/index";
 import Draggable from "vuedraggable";
 import { modelData } from "./config";
@@ -83,6 +84,7 @@ export default {
   components: {
     Draggable,
     decorate,
+    CircleClose,
   },
   data() {
     return {
@@ -111,6 +113,21 @@ export default {
   },
 
   methods: {
+    getModelKey(model) {
+      return model.type || model.name;
+    },
+    getContentItemKey(element) {
+      return element.key || element.model || element.type;
+    },
+    cloneModel(model) {
+      const key = Date.now() + "_" + Math.ceil(Math.random() * 99999);
+      const cloned = JSON.parse(JSON.stringify(model));
+      return {
+        ...cloned,
+        key,
+        model: cloned.type + "_" + key,
+      };
+    },
     // 初始化数据
     init() {
       // 先读缓存，如果缓存有值则读缓存。
@@ -169,7 +186,7 @@ export default {
     // 点击楼层装修
     handleComponent(val, index) {
       this.selected = index;
-      this.$set(this, "decorateData", val);
+      this["decorateData"] = val;
     },
     // 右侧栏回调
     handleDrawer(val) {
@@ -183,25 +200,27 @@ export default {
           API_Promotions.getLiveList({
             status: "START",
             pageSize: 1,
-          }).then((res) => {
-            if (res.success && res.result.size > 0) {
-              API_Promotions.getLiveInfo(res.result.records[0].id).then(
-                (res) => {
-                  if (res.success) {
-                    this.contentData.list[newIndex].options.list.push({
-                      type: val.promotionsType,
-                      title: val.name,
-                      title1: val.subName,
-                      color1: val.subColor,
-                      bk_color: val.subBkColor,
-                      data: res.result.commodityList
-                        ? res.result.commodityList.splice(0, 2)
-                        : [],
-                    });
-                  }
-                }
-              );
+            pageNumber: 1,
+          }).then((listRes) => {
+            const records = listRes.result?.records || [];
+            if (!listRes.success || records.length === 0) {
+              this.$Message.warning("暂无进行中的直播活动");
+              return;
             }
+            API_Promotions.getLiveInfo(records[0].id).then((infoRes) => {
+              if (infoRes.success) {
+                this.contentData.list[newIndex].options.list.push({
+                  type: val.promotionsType,
+                  title: val.name,
+                  title1: val.subName,
+                  color1: val.subColor,
+                  bk_color: val.subBkColor,
+                  data: infoRes.result.commodityList
+                    ? infoRes.result.commodityList.splice(0, 2)
+                    : [],
+                });
+              }
+            });
           });
         } else {
           API_Promotions.getAllPromotion().then((res) => {
@@ -223,30 +242,27 @@ export default {
             }
           });
         }
-        this.$set(this.contentData.list, newIndex, {
+        this.contentData.list[newIndex] = {
           ...val,
           options: {
             ...this.contentData.list[newIndex].options,
           },
-          // 绑定键值
           model: val.type,
-        });
+        };
       } else {
         this.decorateData = "";
 
-        this.$set(this.contentData.list, newIndex, {
+        this.contentData.list[newIndex] = {
           ...val,
           options: {
             ...val.options,
           },
-
-          // 绑定键值
           model: val.type,
-        });
+        };
         this.contentData.list = JSON.parse(
           JSON.stringify(this.contentData.list)
         );
-        this.$set(this, "decorateData", this.contentData.list[newIndex]);
+        this["decorateData"] = this.contentData.list[newIndex];
       }
     },
 
@@ -254,15 +270,15 @@ export default {
     package(val, newIndex) {
       this.contentData.list[newIndex] = "";
       val = JSON.parse(JSON.stringify(val));
-      this.$set(this.contentData.list, newIndex, {
+      const key = val.key || Date.now() + "_" + Math.ceil(Math.random() * 99999);
+      this.contentData.list[newIndex] = {
         ...val,
         options: {
           ...val.options,
         },
-
-        // 绑定键值
-        model: val.type,
-      });
+        key,
+        model: val.model || val.type + "_" + key,
+      };
     },
     // 拖动
     handleContentlAdd(evt) {

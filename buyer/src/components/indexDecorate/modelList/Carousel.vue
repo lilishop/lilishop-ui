@@ -1,22 +1,30 @@
 <template>
   <div class="model-carousel">
-    <div class="nav-body clearfix">
-      <!-- 侧边导航占位 -->
-      <div class="nav-side"></div>
+    <div class="nav-body">
+      <!-- 侧边导航占位（与 CateNav 分类栏同宽，勿与 CateNav .nav-side 混用类名） -->
+      <div class="carousel-side-spacer"></div>
       <div class="nav-content">
-        <!-- 轮播图 -->
-<!--        autoplay autoplay-speed="10000"-->
-        <Carousel :height="333.9" autoplay :autoplay-speed="5000">
-          <CarouselItem  v-for="(item, index) in data.options.list" :key="index">
-            <div class="swiper-img" >
+        <!-- 轮播图：无有效图片时不挂载 el-carousel；勿对 el-carousel 使用随图片变化的 key，否则 Vue3 patch 会报 emitsOptions 错误 -->
+        <el-carousel
+          v-if="displaySlides.length"
+          height="334px"
+          :interval="5000"
+          :loop="displaySlides.length > 1"
+        >
+          <el-carousel-item
+            v-for="(item, index) in displaySlides"
+            :key="carouselItemKey(item, index)"
+          >
+            <div class="swiper-img">
               <img
                 :src="item.img"
                 @click="linkTo(item.url)"
                 class="hover-pointer"
               />
             </div>
-          </CarouselItem>
-        </Carousel>
+          </el-carousel-item>
+        </el-carousel>
+        <div v-else class="swiper-img carousel-placeholder"></div>
       </div>
       <div class="nav-right">
         <div class="person-msg">
@@ -24,7 +32,7 @@
             <img class="user-face" :src="userInfo.face || defaultAvatar"  alt />
             <div class="welcome">
               Hi, {{
-                userInfo.nickName || `欢迎来到${config.title}` | secrecyMobile
+                $filters.secrecyMobile(userInfo.nickName || `欢迎来到${config.title}`)
               }}
             </div>
           </div>
@@ -43,18 +51,14 @@
             </div> -->
           </div>
           <div v-else class="flex flex-a-c ">
-            <div class="btns" @click="$router.push('login')" shape="circle"
-            >登录</div
-            >
-            <div class="btns sign-up" @click="$router.push('signUp')" shape="circle"
-            >注册</div
-            >
+            <div class="btns" @click="$router.push('login')">登录</div>
+            <div class="btns sign-up" @click="$router.push('signUp')">注册</div>
           </div>
 
           <div class="gray-line"></div>
           <div class="icon-list flex flex-j-sb" >
             <div class="icon-item" @click="entryControl(item)" :key="index" v-for="(item, index) in entranceList">
-              <img class="icon" :src="require(`@/assets/iconfont/${item.icon}.png`)">
+              <img class="icon" :src="getIconUrl(item.icon)">
               <div>
                 {{ item.label }}
               </div>
@@ -62,7 +66,7 @@
           </div>
           <div class="icon-list flex flex-j-sb" >
             <div class="icon-item" :key="index"  @click="entryControl(item)" v-for="(item, index) in appendList">
-              <img class="icon" :src="require(`@/assets/iconfont/${item.icon}.png`)">
+              <img class="icon" :src="getIconUrl(item.icon)">
               <div>
                 {{ item.label }}
               </div>
@@ -81,13 +85,24 @@
 <script>
 
 import storage from "@/plugins/storage";
+import config from "@/config";
+import defaultAvatar from "@/assets/images/default.png";
+import { getIconUrl } from "@/assets/iconfont/iconMap";
 export default {
   name: "modelCarousel",
   props: ["data"],
+  computed: {
+    carouselList() {
+      return this.data?.options?.list || [];
+    },
+    displaySlides() {
+      return this.carouselList.filter((item) => item && item.img);
+    },
+  },
   data() {
     return {
-      config: require("@/config"),
-      defaultAvatar: require("@/assets/images/default.png"),
+      config,
+      defaultAvatar,
       userInfo: {}, // 用户信息
       entranceList: [
         {
@@ -154,11 +169,34 @@ export default {
     };
   },
   methods: {
+    getIconUrl,
+    carouselItemKey(item, index) {
+      return item?.img || item?.url || `slide-${index}`;
+    },
+    resolveRoute(pathStr) {
+      if (!pathStr) return { path: "/" };
+      const [path, search] = pathStr.split("?");
+      if (!search) return { path };
+      return {
+        path,
+        query: Object.fromEntries(new URLSearchParams(search)),
+      };
+    },
     // 快捷跳转中心
     entryControl(val) {
-      console.log("val",val)
-      let url = this.$router.resolve(val.path);
-      window.open(url.href, '_blank');
+      const location = this.resolveRoute(val.path);
+      if (location.path.startsWith("/home/") && !storage.getItem("userInfo")) {
+        this.$router.push({
+          path: "/login",
+          query: {
+            rePath: location.path,
+            query: JSON.stringify(location.query || {}),
+          },
+        });
+        return;
+      }
+      const url = this.$router.resolve(location);
+      window.open(url.href, "_blank");
     },
   },
   mounted() {
@@ -182,8 +220,13 @@ export default {
 
 .swiper-img {
   overflow: hidden;
-  width: 637px;
+  width: 100%;
   height: 329.9px;
+}
+
+.carousel-placeholder {
+  border-radius: 10px;
+  background: #ececec;
 }
 
 .icon-list {
@@ -265,21 +308,21 @@ export default {
 }
 
 .model-carousel {
-  width: 1200px;
+  width: 100%;
+  max-width: 1200px;
   height: 340px;
+  margin: 0 auto;
   overflow: hidden;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 0;
 }
 
 .hover-pointer {
-  //display: block;
-  //width: 100%;
-  //height: 100%;
-  width: 637px;
+  width: 100%;
   height: 329.9px;
   object-fit: cover;
   border-radius: 10px;
-
-
 }
 
 .welcome {
@@ -334,44 +377,62 @@ export default {
 
 }
 
-/* 导航主体 */
+/* 导航主体：263.2 + 10 + 1fr + 10 + 263.2 = 1200px，与下方楼层右缘对齐 */
 .nav-body {
-  width: 1200px;
+  width: 100%;
+  max-width: 1200px;
   height: 340px;
-  margin: 0px auto;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 263.2px minmax(0, 1fr) 263.2px;
+  column-gap: 10px;
+  align-items: start;
+  box-sizing: border-box;
 }
 
-.nav-side {
-  height: 334px;
+.carousel-side-spacer {
+  grid-column: 1;
   width: 263.2px;
+  height: 334px;
+  flex-shrink: 0;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
-  float: left;
-  padding: 0px;
-  color: #fff;
-  // background-color: #6e6568;
-
-
+  pointer-events: none;
 }
 
 
 /*导航内容*/
 .nav-content {
-  width: 637px;
-  margin-left: 10.8px;
-
+  grid-column: 2;
+  width: 100%;
+  min-width: 0;
   margin-top: 10px;
   height: 333.9px;
-
-  float: left;
   position: relative;
+  overflow: hidden;
+
+  :deep(.el-carousel) {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  :deep(.el-carousel__container) {
+    height: 334px;
+  }
+
+  :deep(.el-carousel__item) {
+    width: 100%;
+  }
 }
 
 .nav-right {
-  float: left;
-  margin-top: 10px;
+  grid-column: 3;
   width: 263.2px;
-  margin-left: 10px;
+  min-width: 263.2px;
+  max-width: 263.2px;
+  margin-top: 10px;
 
   border-radius: 10px;
   background: #FFFFFF;

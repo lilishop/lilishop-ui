@@ -1,64 +1,128 @@
 <template>
   <div class="search">
-    <Card>
-      <Form ref="searchForm" :model="searchForm" @keydown.enter.native="handleSearch" inline :label-width="70" class="search-form">
-        <Form-item label="会员名称" prop="memberName">
-          <Input type="text" v-model="searchForm.memberName" clearable placeholder="请输入会员名称" style="width: 240px" />
-        </Form-item>
-        <Form-item label="商品名称" prop="goodsName">
-          <Input type="text" v-model="searchForm.goodsName" clearable placeholder="请输入商品名" style="width: 240px" />
-        </Form-item>
-        <Form-item label="评价" prop="orderStatus">
-          <Select v-model="searchForm.grade" placeholder="请选择" clearable style="width: 240px">
-            <Option value="GOOD">好评</Option>
-            <Option value="MODERATE">中评</Option>
-            <Option value="WORSE">差评</Option>
-          </Select>
-        </Form-item>
-        <Form-item label="评论日期">
-          <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 240px"></DatePicker>
-        </Form-item>
-        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
-        <Button @click="handleReset" class="search-btn">重置</Button>
-      </Form>
-      </Card>
-    <Card>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10"></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small"
-          show-total show-elevator show-sizer></Page>
-      </Row>
-    </Card>
-    <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="500">
-      <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
-        <FormItem label="评价内容">
-          <span v-if="!content">暂无评价</span>
-          <span v-else>
-            <div>
-              <Input v-model="content" type="textarea" maxlength="200" disabled :rows="4" clearable style="width:90%" />
-            </div>
-          </span>
-        </FormItem>
-        <FormItem label="评价图片" style="padding-top: 10px" v-if="detailInfo.haveImage == 1">
-          <upload-pic-thumb v-model="image" :disable="true" :remove="false" :isView="true"></upload-pic-thumb>
-        </FormItem>
-        <FormItem label="回复内容" prop="reply">
-          <Input v-if="replyStatus == false" v-model="form.reply" type="textarea" maxlength="200" :rows="4" clearable style="width:90%" />
-          <span v-else>
-            <Input v-model="form.reply" type="textarea" maxlength="200" disabled :rows="4" clearable style="width:90%" />
-          </span>
-        </FormItem>
-        <FormItem label="回复图片" prop="replyImage" style="padding-top: 18px" v-if="detailInfo.haveReplyImage == 1 || replyStatus == false">
-          <upload-pic-thumb v-if="replyStatus == false" v-model="form.replyImage" :limit="5"></upload-pic-thumb>
-          <upload-pic-thumb v-else v-model="form.replyImage" :disable="true" :remove="false"></upload-pic-thumb>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button v-if="replyStatus == false" type="primary" :loading="submitLoading" @click="handleSubmit">回复
-        </Button>
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="会员名称" prop="memberName">
+          <el-input v-model="searchForm.memberName" clearable placeholder="请输入会员名称" style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="商品名称" prop="goodsName">
+          <el-input v-model="searchForm.goodsName" clearable placeholder="请输入商品名" style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="评价" prop="grade">
+          <el-select v-model="searchForm.grade" placeholder="请选择" clearable style="width: 240px">
+            <el-option label="好评" value="GOOD" />
+            <el-option label="中评" value="MODERATE" />
+            <el-option label="差评" value="WORSE" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="评论日期">
+          <el-date-picker
+            v-model="selectDate"
+            type="datetimerange"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            clearable
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            style="width: 360px"
+            @change="selectDateRange"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+          <el-button class="search-btn" @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <el-table v-loading="loading" border :data="data" ref="table" class="mt_10" style="width: 100%">
+        <el-table-column prop="memberName" label="会员名称" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="goodsName" label="商品名称" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="content" label="评价内容" min-width="300" show-overflow-tooltip />
+        <el-table-column label="评价" width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row.grade === 'GOOD'" type="success">好评</el-tag>
+            <el-tag v-else-if="row.grade === 'MODERATE'" type="warning">中评</el-tag>
+            <el-tag v-else type="danger">差评</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row.status === 'OPEN'" type="success">展示</el-tag>
+            <el-tag v-else type="danger">隐藏</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="回复状态" width="110">
+          <template #default="{ row }">
+            <el-tag v-if="row.replyStatus" type="success">已回复</el-tag>
+            <el-tag v-else type="primary">未回复</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="创建日期" width="170" />
+        <el-table-column label="操作" align="center" fixed="right" width="100">
+          <template #default="{ row }">
+            <a class="link-text" @click="detail(row)">详细</a>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[10, 20, 50]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
       </div>
-    </Modal>
+    </el-card>
+
+    <el-dialog v-model="modalVisible" :title="modalTitle" width="500px" :close-on-click-modal="false">
+      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+        <el-form-item label="评价内容">
+          <span v-if="!content">暂无评价</span>
+          <el-input v-else v-model="content" type="textarea" maxlength="200" disabled :rows="4" style="width: 90%" />
+        </el-form-item>
+        <el-form-item v-if="detailInfo.haveImage == 1" label="评价图片" style="padding-top: 10px">
+          <upload-pic-thumb v-model="image" :disable="true" :remove="false" :isView="true" />
+        </el-form-item>
+        <el-form-item label="回复内容" prop="reply">
+          <el-input
+            v-if="!replyStatus"
+            v-model="form.reply"
+            type="textarea"
+            maxlength="200"
+            :rows="4"
+            clearable
+            style="width: 90%"
+          />
+          <el-input v-else v-model="form.reply" type="textarea" maxlength="200" disabled :rows="4" style="width: 90%" />
+        </el-form-item>
+        <el-form-item
+          v-if="detailInfo.haveReplyImage == 1 || !replyStatus"
+          label="回复图片"
+          prop="replyImage"
+          style="padding-top: 18px"
+        >
+          <upload-pic-thumb v-if="!replyStatus" v-model="form.replyImage" :limit="5" />
+          <upload-pic-thumb v-else v-model="form.replyImage" :disable="true" :remove="false" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="modalVisible = false">取消</el-button>
+        <el-button v-if="!replyStatus" type="primary" :loading="submitLoading" @click="handleSubmit">回复</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -68,175 +132,74 @@ import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
 
 export default {
   name: "memberComment",
-  components: {
-    uploadPicThumb,
-  },
+  components: { uploadPicThumb },
   data() {
     return {
-      detailInfo: {}, // 详情信息
-      image: [], //评价图片
-      replyStatus: false, //回复状态
-      modalVisible: false, // 添加或编辑显示
-      modalTitle: "", // 添加或编辑标题
-      loading: true, // 表单加载状态
-      content: "", //评价内容
+      detailInfo: {},
+      image: [],
+      replyStatus: false,
+      modalVisible: false,
+      modalTitle: "",
+      loading: true,
+      content: "",
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-        sort: "createTime", // 默认排序字段
-        order: "desc", // 默认排序方式
-        startTime: "", // 起始时间
-        endTime: "", // 终止时间
+        pageNumber: 1,
+        pageSize: 10,
+        sort: "createTime",
+        order: "desc",
+        startTime: "",
+        endTime: "",
       },
       selectDate: null,
       form: {
         replyImage: [],
         reply: "",
       },
-      // 表单验证规则
       formValidate: {
         reply: [{ required: true, message: "请输入回复内容", trigger: "blur" }],
       },
-      submitLoading: false, // 添加或编辑提交状态
-      columns: [
-        // 表头
-        {
-          title: "会员名称",
-          key: "memberName",
-          minWidth: 150,
-          tooltip: true,
-        },
-        {
-          title: "商品名称",
-          key: "goodsName",
-          minWidth: 150,
-          tooltip: true,
-        },
-        {
-          title: "评价内容",
-          key: "content",
-          minWidth: 300,
-          tooltip: true,
-        },
-        {
-          title: "评价",
-          key: "grade",
-          width: 100,
-          render: (h, params) => {
-            if (params.row.grade == "GOOD") {
-              return h("Tag", { props: { color: "green" } }, "好评");
-            } else if (params.row.grade == "MODERATE") {
-              return h("Tag", { props: { color: "orange" } }, "中评");
-            } else {
-              return h("Tag", { props: { color: "red" } }, "差评");
-            }
-          },
-        },
-        {
-          title: "状态",
-          key: "status",
-          width: 100,
-          render: (h, params) => {
-            if (params.row.status === "OPEN") {
-              return h("Tag", { props: { color: "green" } }, "展示");
-            } else {
-              return h("Tag", { props: { color: "red" } }, "隐藏");
-            }
-          },
-        },
-        {
-          title: "回复状态",
-          key: "replyStatus",
-          width: 110,
-          render: (h, params) => {
-            if (params.row.replyStatus) {
-              return h("Tag", { props: { color: "green" } }, "已回复");
-            } else {
-              return h("Tag", { props: { color: "blue" } }, "未回复");
-            }
-          },
-        },
-
-        {
-          title: "创建日期",
-          key: "createTime",
-          width: 170,
-        },
-
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          fixed: 'right',
-          width: 200,
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.detail(params.row);
-                    },
-                  },
-                },
-                "详细"
-              ),
-            ]);
-          },
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      submitLoading: false,
+      data: [],
+      total: 0,
     };
   },
   methods: {
     init() {
-      // 初始化数据
       this.getDataList();
     },
-    // 改变页数
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-      this.clearSelectAll();
-    },
-    // 改变页码
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
+    changePage() {
       this.getDataList();
     },
-    // 搜索
+    changePageSize() {
+      this.searchForm.pageNumber = 1;
+      this.getDataList();
+    },
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 10;
       this.getDataList();
     },
-    // 重置
     handleReset() {
-      this.searchForm = {};
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm = {
+        pageNumber: 1,
+        pageSize: 10,
+        sort: "createTime",
+        order: "desc",
+        startTime: "",
+        endTime: "",
+      };
+      this.selectDate = null;
       this.getDataList();
     },
-    // 清除选中状态
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-    // 选择日期回调
     selectDateRange(v) {
-      if (v) {
+      if (v && v.length === 2) {
         this.searchForm.startTime = v[0];
         this.searchForm.endTime = v[1];
+      } else {
+        this.searchForm.startTime = "";
+        this.searchForm.endTime = "";
       }
     },
-    // 获取列表数据
     getDataList() {
       this.loading = true;
       API_Member.getMemberReview(this.searchForm).then((res) => {
@@ -247,7 +210,6 @@ export default {
         }
       });
     },
-    //回复
     handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
@@ -262,26 +224,19 @@ export default {
         }
       });
     },
-    // 获取详情
     detail(v) {
       this.form.replyImage = [];
       this.loading = true;
       API_Member.getMemberInfoReview(v.id).then((res) => {
         this.loading = false;
         if (res.success) {
-          //赋值
           this.form.id = res.result.id;
           this.content = res.result.content;
           this.form.reply = res.result.reply;
           this.replyStatus = res.result.replyStatus;
-          if (res.result.images) {
-            this.image = (res.result.images || "").split(",");
-          }
-          if (res.result.replyImage) {
-            this.form.replyImage = (res.result.replyImage || "").split(",");
-          }
+          this.image = res.result.images ? (res.result.images || "").split(",") : [];
+          this.form.replyImage = res.result.replyImage ? (res.result.replyImage || "").split(",") : [];
           this.detailInfo = res.result;
-          //弹出框
           this.modalVisible = true;
           this.modalTitle = "详细";
         }
@@ -293,7 +248,12 @@ export default {
   },
 };
 </script>
+
 <style lang="scss">
-// 建议引入通用样式 可删除下面样式代码
 @import "@/styles/table-common.scss";
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
 </style>

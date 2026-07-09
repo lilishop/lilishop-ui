@@ -1,273 +1,216 @@
 <template>
   <div class="search">
-    <Card>
-      <Form
+    <el-card>
+      <el-form
         ref="searchForm"
         :model="searchForm"
         inline
-        :label-width="75"
+        label-width="90px"
         class="search-form mb_10"
+        @keyup.enter="handleSearch"
       >
-        <Form-item label="优惠券名称" prop="couponName">
-          <Input
-            type="text"
+        <el-form-item label="优惠券名称" prop="couponName">
+          <el-input
             v-model="searchForm.couponName"
             placeholder="请输入优惠券名称"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Form-item label="获取方式" prop="getType">
-          <Select
+        </el-form-item>
+        <el-form-item label="获取方式" prop="getType">
+          <el-select
             v-model="searchForm.getType"
             placeholder="请选择"
-            clearable
+            :clearable="!isGetTypeFilterLocked"
+            :disabled="isGetTypeFilterLocked"
+            teleported
+            popper-class="coupon-filter-popper"
             style="width: 240px"
           >
-            <Option value="FREE">免费获取</Option>
-            <Option value="ACTIVITY">活动获取</Option>
-          </Select>
-        </Form-item>
-        <Form-item label="活动状态" prop="promotionStatus">
-          <Select
+            <el-option
+              v-for="item in getTypeFilterOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="活动状态" prop="promotionStatus">
+          <el-select
             v-model="searchForm.promotionStatus"
             placeholder="请选择"
-            clearable
+            :clearable="!isPromotionStatusFilterLocked"
+            :disabled="isPromotionStatusFilterLocked"
+            teleported
+            popper-class="coupon-filter-popper"
             style="width: 240px"
           >
-            <Option value="NEW">未开始</Option>
-            <Option value="START">已开始/上架</Option>
-            <Option value="END">已结束/下架</Option>
-            <Option value="CLOSE">紧急关闭/作废</Option>
-          </Select>
-        </Form-item>
-        <Form-item label="活动时间">
-          <DatePicker
+            <el-option
+              v-for="item in promotionStatusFilterOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="活动时间">
+          <el-date-picker
             v-model="selectDate"
             type="daterange"
             clearable
-            placeholder="选择起始时间"
+            teleported
+            popper-class="coupon-filter-popper"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
             style="width: 240px"
-          ></DatePicker>
-        </Form-item>
-        <Button
-          @click="handleSearch"
-          type="primary"
-          icon="ios-search"
-          class="search-btn"
-          >搜索</Button
-        >
-      </Form>
-    </Card>
-    <Card>
-      <Row class="operation padding-row" v-if="getType !== 'ACTIVITY'">
-        <Button @click="add" type="primary">添加优惠券</Button>
-        <Button @click="delAll">批量关闭</Button>
-        <Button @click="receivePage()" type="info">优惠券领取记录</Button>
-      </Row>
-      <Table
-        v-if="refreshTable"
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <div class="operation padding-row" v-if="getType !== 'ACTIVITY'">
+        <el-button type="primary" @click="add">添加优惠券</el-button>
+        <el-button @click="delAll">批量关闭</el-button>
+        <el-button type="warning" @click="receivePage()">优惠券领取记录</el-button>
+      </div>
+
+      <el-table
         ref="table"
-        @on-selection-change="changeSelect"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+        row-key="id"
+        @selection-change="changeSelect"
       >
-        <template slot-scope="{ row }" slot="action">
-          <a
-            v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
-            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
-            @click="see(row)"
-            >编辑</a>
-          <a
-            v-else
-            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
-            @click="see(row, 'onlyView')"
-            >查看</a>
-          <span
-            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
-            style="margin: 0 8px; color: #dcdee2"
-            >|</span>
-          <a
-            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
-            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
-            @click="close(row)"
-            >关闭</a>
-          <span style="margin: 0 8px; color: #dcdee2">|</span>
-          <a
-            :style="{ color: '#2d8cf0', cursor: 'pointer', textDecoration: 'none' }"
-            @click="receivePage(row.id)"
-            >领取记录</a>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+        <el-table-column type="selection" width="52" align="center" />
+        <el-table-column prop="couponName" label="优惠券名称" min-width="180" show-overflow-tooltip />
+        <el-table-column label="面额/折扣" width="150">
+          <template #default="{ row }">
+            <span v-if="row">
+              <span v-if="row.price" :style="{ color: $mainColor }">
+                {{ $filters.unitPrice(row.price, "￥") }}</span>
+              <span v-else>{{ row.couponDiscount }}折</span>
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="已领取数量/总数量" width="180">
+          <template #default="{ row }">
+            <span v-if="row">
+              {{ row.receivedNum }}/{{ row.publishNum === 0 ? "不限制" : row.publishNum }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="已被使用的数量/已领取数量" width="200">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.usedNum }}/{{ row.receivedNum }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="获取方式" width="120">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="getTypeTagType(row.getType)">{{ getTypeText(row.getType) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="优惠券类型" width="120">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="couponTypeTagType(row.couponType)">
+              {{ couponTypeText(row.couponType) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="品类描述" width="120">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="scopeTypeTagType(row.scopeType)">
+              {{ scopeTypeText(row.scopeType) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="活动时间" width="200">
+          <template #default="{ row }">
+            <div v-if="row" class="activity-time" v-html="formatActivityTime(row)"></div>
+          </template>
+        </el-table-column>
+        <el-table-column
+          v-if="showStatusColumn"
+          label="状态"
+          width="100"
+          align="center"
+          fixed="right"
+        >
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="promotionStatusTagType(row.promotionStatus)">
+              {{ promotionStatusText(row.promotionStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+          v-if="showActionColumn"
+          label="操作"
+          width="250"
+          align="center"
+          fixed="right"
+        >
+          <template #default="{ row }">
+            <template v-if="row">
+              <a
+                v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
+                class="link-text"
+                @click="see(row)"
+              >
+                编辑
+              </a>
+              <a v-else class="link-text" @click="see(row, 'onlyView')">查看</a>
+              <span
+                v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+                class="op-split"
+              >
+                |
+              </span>
+              <a
+                v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
+                class="link-text"
+                @click="close(row)"
+              >
+                关闭
+              </a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="receivePage(row.id)">领取记录</a>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
+
 <script>
 import {
   getPlatformCouponList,
   updatePlatformCouponStatus,
   deletePlatformCoupon,
 } from "@/api/promotion";
-import {
-  promotionsStatusRender,
-  promotionsScopeTypeRender,
-  promotionsCouponActivityTimeRender,
-} from "@/utils/promotions";
+import { formatPromotionCouponValidityHtml } from "@/utils/promotions";
 
 export default {
   name: "coupon",
-  data() {
-    return {
-      loading: true, // 表单加载状态
-        searchForm: {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-          pageSize: 20, // 页面大小
-          sort: "create_time", // 默认排序字段
-          order: "desc", // 默认排序方式
-          getType: "", // 默认排序方式
-        },
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
-      columns: [
-        // 表头
-        {
-          type: "selection",
-          width: 52,
-          align: "center",
-          /* 不使用 fixed：左侧固定列与主体表格分开渲染，叠加全局 .ivu-table table{width:100%} 易在接缝处留白；勾选列无需横向钉住 */
-        },
-        {
-          title: "优惠券名称",
-          key: "couponName",
-          minWidth: 140,
-          width: 180,
-          tooltip: true,
-        },
-        {
-          title: "面额/折扣",
-          key: "price",
-          width: 150,
-          render: (h, params) => {
-            if (params.row.price) {
-              return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
-
-            } else {
-              return h("div", params.row.couponDiscount + "折");
-            }
-          },
-        },
-
-        {
-          title: "已领取数量/总数量",
-          key: "publishNum",
-          width: 180,
-          render: (h, params) => {
-            return h(
-              "div",
-              params.row.receivedNum +
-                "/" +
-                (params.row.publishNum === 0 ? "不限制" : params.row.publishNum)
-            );
-          },
-        },
-
-        {
-          title: "已被使用的数量/已领取数量",
-          key: "publishNum",
-          width: 100,
-          render: (h, params) => {
-            return h("div", params.row.usedNum + "/" + params.row.receivedNum);
-          },
-        },
-        {
-          title: "获取方式",
-          width: 120,
-          key: "getType",
-          render: (h, params) => {
-            if (params.row.getType === "FREE") {
-              return h("Tag", { props: { color: "red" } }, "免费获取");
-            } else if (params.row.getType === "ACTIVITY") {
-              return h("Tag", { props: { color: "volcano" } }, "活动获取");
-            } else if (params.row.getType === "INSIDE") {
-              return h("Tag", { props: { color: "lime" } }, "内购");
-            } else if (params.row.getType === "IGAME") {
-              return h("Tag", { props: { color: "lime" } }, "游戏人生");
-            } else {
-              return h("Tag", { props: { color: "purple" } }, "未知");
-            }
-          },
-        },
-        {
-          title: "优惠券类型",
-          key: "couponType",
-          width: 150,
-          render: (h, params) => {
-            let text = "";
-            if (params.row.couponType === "DISCOUNT") {
-              return h("Tag", { props: { color: "blue" } }, "打折");
-            } else if (params.row.couponType === "PRICE") {
-              return h("Tag", { props: { color: "geekblue" } }, "减免现金");
-            } else {
-              return h("Tag", { props: { color: "purple" } }, "未知");
-            }
-          },
-        },
-        {
-          title: "品类描述",
-          key: "scopeType",
-          width: 120,
-          render: (h, params) => {
-            return promotionsScopeTypeRender(h, params);
-          },
-        },
-        {
-          title: "活动时间",
-          width: 200,
-          render: promotionsCouponActivityTimeRender,
-        },
-        {
-          title: "状态",
-          width: 100,
-          key: "promotionStatus",
-          align: "center",
-          fixed: "right",
-          render: (h, params) => {
-            return promotionsStatusRender(h, params);
-          },
-        },
-        {
-          title: "操作",
-          slot: "action",
-          align: "center",
-          fixed: "right",
-          width: 250,
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
-      refreshTable: true, // 修改选中状态后刷新表格
-      selectDate: [], //选中的信息
-    };
-  },
   props: {
-    //优惠券类型 查询参数
     getType: {
       type: String,
       default: "",
@@ -276,53 +219,190 @@ export default {
       type: String,
       default: "",
     },
-    //已选择优惠券
     selectedList: {
       type: Array,
-      default: () => {
-        return [];
+      default: () => [],
+    },
+    manualConfirm: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data() {
+    return {
+      loading: true,
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "create_time",
+        order: "desc",
+        getType: "",
+        promotionStatus: "",
+        couponName: "",
       },
+      selectList: [],
+      selectCount: 0,
+      data: [],
+      total: 0,
+      selectDate: [],
+      showActionColumn: true,
+      showStatusColumn: true,
+      isSyncingSelection: false,
+    };
+  },
+  computed: {
+    getTypeFilterOptions() {
+      const all = [
+        { label: "免费获取", value: "FREE" },
+        { label: "活动获取", value: "ACTIVITY" },
+      ];
+      if (this.getType) {
+        return all.filter((item) => item.value === this.getType);
+      }
+      return all;
+    },
+    promotionStatusFilterOptions() {
+      const all = [
+        { label: "未开始", value: "NEW" },
+        { label: "已开始/上架", value: "START" },
+        { label: "已结束/下架", value: "END" },
+        { label: "紧急关闭/作废", value: "CLOSE" },
+      ];
+      if (this.promotionStatus) {
+        return all.filter((item) => item.value === this.promotionStatus);
+      }
+      return all;
+    },
+    isGetTypeFilterLocked() {
+      return !!this.getType;
+    },
+    isPromotionStatusFilterLocked() {
+      return !!this.promotionStatus;
     },
   },
   watch: {
-    $route(to, from) {
+    $route(to) {
       if (to.fullPath == "/promotions/manager-coupon") {
         this.init();
       }
     },
-    // 选中优惠券 父级传值
     selectedList: {
       handler(val) {
-        // 判断是否是父级回调给自己已选择优惠券
-        if (val.length) {
-          this.selectList = val;
-          this.data.forEach((item) => {
-            item._checked = false;
-            if (this.selectList.length) {
-              this.selectList.forEach((child) => {
-                if (item.id == child.id) {
-                  item._checked = true;
-                }
-              });
-            }
-          });
-        } else {
-          this.data.forEach((item) => {
-            item._checked = false;
-          });
-        }
-        this.refreshTable = false;
+        if (this.isSyncingSelection) return;
+        if (this.isSameSelection(val, this.selectList)) return;
         this.$nextTick(() => {
-          this.refreshTable = true;
+          this.syncTableSelection(val);
         });
       },
       deep: true,
     },
   },
   methods: {
+    formatActivityTime(row) {
+      return formatPromotionCouponValidityHtml(row);
+    },
+    promotionStatusText(status) {
+      const map = {
+        NEW: "未开始",
+        START: "已开始",
+        END: "已结束",
+        CLOSE: "已关闭",
+      };
+      return map[status] || "未知";
+    },
+    promotionStatusTagType(status) {
+      const map = {
+        NEW: "info",
+        START: "success",
+        END: "danger",
+        CLOSE: "danger",
+      };
+      return map[status] || "danger";
+    },
+    scopeTypeText(type) {
+      const map = {
+        ALL: "全品类",
+        PORTION_GOODS_CATEGORY: "商品分类",
+        PORTION_SHOP_CATEGORY: "店铺分类",
+        PORTION_GOODS: "指定商品",
+      };
+      return map[type] || "未知";
+    },
+    scopeTypeTagType(type) {
+      const map = {
+        ALL: "info",
+        PORTION_GOODS_CATEGORY: "warning",
+        PORTION_SHOP_CATEGORY: "warning",
+        PORTION_GOODS: "primary",
+      };
+      return map[type] || "danger";
+    },
+    getTypeText(type) {
+      const map = {
+        FREE: "免费获取",
+        ACTIVITY: "活动获取",
+        INSIDE: "内购",
+        IGAME: "游戏人生",
+      };
+      return map[type] || "未知";
+    },
+    getTypeTagType(type) {
+      const map = {
+        FREE: "danger",
+        ACTIVITY: "warning",
+        INSIDE: "success",
+        IGAME: "success",
+      };
+      return map[type] || "";
+    },
+    couponTypeText(type) {
+      const map = {
+        DISCOUNT: "打折",
+        PRICE: "减免现金",
+      };
+      return map[type] || "未知";
+    },
+    couponTypeTagType(type) {
+      const map = {
+        DISCOUNT: "primary",
+        PRICE: "info",
+      };
+      return map[type] || "";
+    },
+    isSameSelection(next, current) {
+      const a = next || [];
+      const b = current || [];
+      if (a.length !== b.length) return false;
+      const nextIds = a.map((item) => item.id).sort().join(",");
+      const currentIds = b.map((item) => item.id).sort().join(",");
+      return nextIds === currentIds;
+    },
+    syncTableSelection(selected) {
+      const table = this.$refs.table;
+      if (!table) return;
+      const nextList = selected ? [...selected] : [];
+      this.isSyncingSelection = true;
+      table.clearSelection();
+      if (nextList.length) {
+        this.data.forEach((row) => {
+          if (nextList.some((item) => item.id === row.id)) {
+            table.toggleRowSelection(row, true);
+          }
+        });
+      }
+      this.selectList = nextList;
+      this.selectCount = nextList.length;
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.isSyncingSelection = false;
+        });
+      });
+    },
     check() {
-      // 选中的优惠券
       this.$emit("selected", this.selectList);
+    },
+    getSelection() {
+      return [...this.selectList];
     },
     receivePage(id) {
       if (id) {
@@ -331,84 +411,71 @@ export default {
         this.$router.push({ name: "coupon-receive" });
       }
     },
-    // 初始化数据
     init() {
       this.getDataList();
     },
     add() {
-      // 跳转添加页面
       this.$router.push({ name: "add-platform-coupon" });
     },
-    info(v) {
-      // 查看优惠券
-      this.$router.push({ name: "platform-coupon-info", query: { id: v.id } });
-    },
     changePage(v) {
-      // 改变页码
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
     changePageSize(v) {
-      // 改变页数
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
     handleSearch() {
-      // 搜索
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getDataList();
     },
     clearSelectAll() {
-      // 清除选中状态
-      this.$refs.table.selectAll(false);
+      this.$refs.table?.clearSelection();
     },
-    /**
-     * 选择优惠券
-     */
     changeSelect(e) {
+      if (this.isSyncingSelection) return;
       this.selectList = e;
       this.selectCount = e.length;
-      if (this.getType === "ACTIVITY") this.check();
+      if (this.getType === "ACTIVITY" && !this.manualConfirm) this.check();
     },
     getDataList() {
-      // 获取数据
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
-        this.searchForm.startTime = this.selectDate[0].getTime();
-        this.searchForm.endTime = this.selectDate[1].getTime();
+        this.searchForm.startTime = new Date(this.selectDate[0]).getTime();
+        this.searchForm.endTime = new Date(this.selectDate[1]).getTime();
       } else {
         this.searchForm.startTime = null;
         this.searchForm.endTime = null;
       }
-      getPlatformCouponList(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          console.log(res);
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-      this.total = this.data.length;
-      this.loading = false;
+      getPlatformCouponList(this.searchForm)
+        .then((res) => {
+          if (res && res.success && res.result) {
+            this.data = res.result.records || [];
+            this.total = res.result.total || 0;
+            this.$nextTick(() => {
+              if (this.selectedList.length) {
+                this.syncTableSelection(this.selectedList);
+              }
+            });
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          this.loading = false;
+        });
     },
-
     see(v, only) {
-      // 跳转编辑页面
-      let data;
-      only ? (data = { onlyView: true, id: v.id }) : (data = { id: v.id });
+      const data = only ? { onlyView: true, id: v.id } : { id: v.id };
       this.$router.push({ name: "edit-platform-coupon", query: data });
     },
     close(v) {
-      // 下架优惠券
       this.$Modal.confirm({
         title: "确认关闭",
-        // 记得确认修改此处
         content: "确认要关闭此优惠券么?",
         loading: true,
         onOk: () => {
-          // 删除
           updatePlatformCouponStatus({
             couponIds: v.id,
             effectiveDays: 0,
@@ -421,20 +488,17 @@ export default {
               }
             })
             .catch(() => {
-              this.$Modal;
+              this.$Modal.remove();
             });
         },
       });
     },
     remove(v) {
-      // 下架优惠券
       this.$Modal.confirm({
         title: "确认删除",
-        // 记得确认修改此处
         content: "确认要删除此优惠券么?",
         loading: true,
         onOk: () => {
-          // 删除
           deletePlatformCoupon(v.id)
             .then((res) => {
               this.$Modal.remove();
@@ -444,13 +508,12 @@ export default {
               }
             })
             .catch(() => {
-              this.$Modal;
+              this.$Modal.remove();
             });
         },
       });
     },
     delAll() {
-      // 批量下架
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未选择要下架的优惠券");
         return;
@@ -460,16 +523,11 @@ export default {
         content: "您确认要下架所选的 " + this.selectCount + " 条数据?",
         loading: true,
         onOk: () => {
-          let ids = [];
-          this.selectList.forEach(function (e) {
-            ids.push(e.id);
-          });
-          let params = {
+          const ids = this.selectList.map((e) => e.id);
+          updatePlatformCouponStatus({
             couponIds: ids.toString(),
             promotionStatus: "CLOSE",
-          };
-          // 批量删除
-          updatePlatformCouponStatus(params).then((res) => {
+          }).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("下架成功");
@@ -482,16 +540,46 @@ export default {
     },
   },
   mounted() {
-    //如果作为组件方式，传入了类型值，则搜索参数附加类型
     if (this.getType) {
       this.searchForm.getType = this.getType;
-      this.columns.pop();
+      this.showActionColumn = false;
     }
     if (this.promotionStatus) {
       this.searchForm.promotionStatus = this.promotionStatus;
-      this.columns.pop();
+      this.showStatusColumn = false;
     }
     this.init();
   },
 };
 </script>
+
+<style scoped>
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+.op-split {
+  margin: 0 8px;
+  color: #dcdee2;
+}
+.activity-time {
+  line-height: 1.5;
+  word-break: break-all;
+}
+.mb_10 {
+  margin-bottom: 10px;
+}
+.mt_10 {
+  margin-top: 10px;
+}
+.padding-row {
+  margin-bottom: 10px;
+}
+</style>
+
+<style lang="scss">
+.coupon-filter-popper {
+  z-index: 4000 !important;
+}
+</style>

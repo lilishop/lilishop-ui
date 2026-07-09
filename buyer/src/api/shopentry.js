@@ -72,7 +72,8 @@ export function applyStatus () {
   return request({
     url: `/buyer/store/store/apply`,
     needToken: true,
-    method: Method.GET
+    method: Method.GET,
+    loading: false
   })
 }
 

@@ -1,19 +1,19 @@
 <template>
   <div class="add-eval">
-    <div class="title">
-      <card _Title="订单评价" :_Size="16"></card>
+    <UserCenterLayout title="订单评价" :tabs="['订单评价']">
+      <div class="title">
       <p>
         <span class="color999">订单号：</span><span>{{$route.query.sn}}</span>
         <span class="color999 ml_20" v-if="order.order">{{order.order.paymentTime}}</span>
       </p>
-    </div>
+      </div>
     <!-- 物流评分、服务评分 -->
     <div class="delivery-rate">
       <div class="fontsize_16">物流服务评价：</div>
-      <div class="color999">
-        <span>物流评价：<Rate v-model="form.deliveryScore" /></span>
-        <span>服务评价：<Rate v-model="form.serviceScore" /></span>
-        <span>描述评价：<Rate v-model="form.descriptionScore" /></span>
+      <div class="color999 rate-list">
+        <span class="rate-item">物流评价：<el-rate v-model="form.deliveryScore" /></span>
+        <span class="rate-item">服务评价：<el-rate v-model="form.serviceScore" /></span>
+        <span class="rate-item">描述评价：<el-rate v-model="form.descriptionScore" /></span>
       </div>
     </div>
     <!-- 添加订单评价  左侧商品详情  右侧评价框 -->
@@ -22,55 +22,67 @@
         <div class="goods-con">
           <img :src="orderGoods.image" class="hover-pointer" alt="" width="100" @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)">
           <p class="hover-pointer color999" @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)">{{orderGoods.goodsName}}</p>
-          <p>{{orderGoods.goodsPrice | unitPrice('￥')}}</p>
+          <p>{{ $filters.unitPrice(orderGoods.goodsPrice, '￥') }}</p>
         </div>
 
         <div class="eval-con">
-          <div>
-            <span class="color999">商品评价：</span>
-            <RadioGroup style="margin-bottom:5px;color:#999" v-model="orderGoods.grade" type="button" button-style="solid">
-              <Radio label="GOOD">好评</Radio>
-              <Radio label="MODERATE">中评</Radio>
-              <Radio label="WORSE">差评</Radio>
-            </RadioGroup>
-            <Input type="textarea" maxlength="500" show-word-limit :rows="4" v-model="orderGoods.content" />
+          <div class="goods-grade-row">
+            <span class="color999 goods-grade-label">商品评价：</span>
+            <el-radio-group v-model="orderGoods.grade">
+              <el-radio-button value="GOOD">好评</el-radio-button>
+              <el-radio-button value="MODERATE">中评</el-radio-button>
+              <el-radio-button value="WORSE">差评</el-radio-button>
+            </el-radio-group>
           </div>
-          <div style="display:flex;align-items:center;">
-            <div class="demo-upload-list" v-for="(img, index) in orderGoods.uploadList" :key="index">
-              <img :src="img">
-              <div class="demo-upload-list-cover">
-                  <Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon>
-                  <Icon type="ios-trash-outline" @click.native="handleRemove(index)"></Icon>
+          <div>
+            <el-input type="textarea" maxlength="500" show-word-limit :rows="4" v-model="orderGoods.content" />
+          </div>
+          <div class="upload-section">
+            <div class="upload-row">
+              <div class="demo-upload-list" v-for="(img, index) in orderGoods.uploadList" :key="index">
+                <img :src="img">
+                <div class="demo-upload-list-cover">
+                  <el-icon @click="handleView(img)"><View /></el-icon>
+                  <el-icon @click="handleRemove(index)"><Delete /></el-icon>
+                </div>
               </div>
-            </div>
-            <Upload
-                :show-upload-list="false"
+              <el-upload
+                class="upload-trigger"
+                :show-file-list="false"
                 :on-success="handleSuccess"
                 :before-upload="handleBeforeUpload"
                 :format="['jpg','jpeg','png']"
                 :action="action"
                 :headers="accessToken"
-                style="display: inline-block;width:58px;">
-                <div class="hover-pointer icon-upload" style="">
-                  <Icon type="ios-camera" size="20"></Icon>
+              >
+                <div class="hover-pointer icon-upload">
+                  <el-icon :size="20"><Camera /></el-icon>
                 </div>
-            </Upload>
+              </el-upload>
+            </div>
+            <div class="describe">上传评价图片，最多9张</div>
           </div>
         </div>
       </li>
     </ul>
-    <Button type="primary" class="mt_10" :loading="loading" @click="save">发表</Button>
-    <Modal title="View Image" v-model="visible">
+    <div class="submit-row">
+      <el-button type="primary" :loading="loading" @click="save">发表</el-button>
+    </div>
+    <el-dialog title="View Image" v-model="visible">
         <img :src="previewImage" v-if="visible" style="width: 100%">
-    </Modal>
+    </el-dialog>
+    </UserCenterLayout>
   </div>
 </template>
 <script>
+import { Message, Notice } from "@/utils/message";
+import { Camera, Delete, View } from '@element-plus/icons-vue';
 import { orderDetail } from '@/api/order.js';
 import { addEvaluation } from '@/api/member.js';
 import { commonUrl } from '@/plugins/request.js';
 import storage from '@/plugins/storage';
 export default {
+  components: { Camera, Delete, View },
   data () {
     return {
       order: {}, // 订单详情
@@ -92,18 +104,24 @@ export default {
       orderDetail(this.$route.query.sn).then(res => {
         this.order = res.result
         this.orderGoods = res.result.orderItems[this.$route.query.index]
-        this.$set(this.orderGoods, 'grade', 'GOOD')
+        this.orderGoods['grade'] = 'GOOD'
         this.orderGoods.uploadList = []
       })
     },
     save () { // 保存评价
       if (!this.form.serviceScore || !this.form.deliveryScore) {
-        this.$Message.warning('物流服务评价不能为空')
+        Message.warning('物流服务评价不能为空')
         return false;
       }
 
       if (!this.form.descriptionScore) {
-        this.$Message.warning('描述评价不能为空')
+        Message.warning('描述评价不能为空')
+        return false;
+      }
+
+      if (!this.orderGoods.content || !String(this.orderGoods.content).trim()) {
+        Message.warning('评论内容不能为空')
+        return false;
       }
 
       this.loading = true;
@@ -116,17 +134,20 @@ export default {
         serviceScore: this.form.serviceScore,
         deliveryScore: this.form.deliveryScore,
         grade: goods.grade,
-        content: goods.content || '',
-        images: goods.uploadList.toString()
+        content: goods.content.trim(),
+        images: goods.uploadList.length ? goods.uploadList.join(',') : ''
       }
       addEvaluation(params).then(res => {
         this.loading = false
         if (res.success) {
-          this.$Message.success('评价成功')
+          Message.success('评价成功')
           this.$router.push('/home/CommentList')
+        } else {
+          Message.error(res.message || '评价失败，请稍后重试')
         }
-      }).catch(() => {
+      }).catch((err) => {
         this.loading = false;
+        Message.error(err?.message || '评价失败，请稍后重试')
       })
     },
     goGoodsDetail (skuId, goodsId) { // 跳转商品详情
@@ -149,9 +170,9 @@ export default {
       this.$forceUpdate()
     },
     handleBeforeUpload () { // 上传之前钩子
-      const check = this.orderGoods.uploadList.length < 10;
+      const check = this.orderGoods.uploadList.length < 9;
       if (!check) {
-        this.$Notice.warning({
+        Notice.warning({
           title: '最多可以上传九张图片'
         });
         return check;
@@ -177,6 +198,16 @@ export default {
     font-weight: bold;
   }
 }
+.rate-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+.rate-item {
+  display: inline-flex;
+  align-items: center;
+}
 .goods-eval li{
   display: flex;
   border-bottom: 1px solid #eee;
@@ -195,9 +226,23 @@ export default {
     padding: 20px;
   }
 }
+.goods-grade-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.goods-grade-label {
+  flex-shrink: 0;
+}
+
+.submit-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
 
 .demo-upload-list{
-  display: inline-block;
+  display: block;
   width: 60px;
   height: 60px;
   text-align: center;
@@ -208,8 +253,7 @@ export default {
   background: #fff;
   position: relative;
   box-shadow: 0 1px 1px rgba(0,0,0,.2);
-  margin-right: 4px;
-  margin-top: 10px;
+  flex-shrink: 0;
 }
 .demo-upload-list img{
   width: 100%;
@@ -234,17 +278,47 @@ export default {
   margin: 0 2px;
 }
 .icon-upload {
-  width: 58px;
-  height:58px;
-  line-height: 58px;
-  text-align:center;
-  display: inline-block;
-  border:1px dashed #999;
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #999;
   border-radius: 4px;
-  margin-top: 10px;
+  box-sizing: border-box;
   &:hover{
     cursor: pointer;
     border-color: $theme_color;
   }
+}
+
+.upload-section {
+  margin-top: 10px;
+}
+
+.upload-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.upload-trigger {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  :deep(.el-upload) {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+.describe {
+  font-size: 12px;
+  color: #999;
+  margin-top: 8px;
 }
 </style>

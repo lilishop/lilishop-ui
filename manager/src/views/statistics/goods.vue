@@ -1,78 +1,69 @@
 <template>
   <div>
-    <Affix :offset-top="100">
-      <Card class="card fixed-bottom">
-        <affixTime :closeShop="true" @selected="clickBreadcrumb"/>
-      </Card>
-    </Affix>
-    <Card class="card">
-      <Tabs @on-click="handleClickType">
-        <TabPane label="热门商品订单数量" name="NUM">
-          <Table :columns="columns" :data="data"></Table>
-        </TabPane>
-        <TabPane label="热门商品订单金额" name="PRICE">
-          <Table :columns="columns" :data="data"></Table>
-        </TabPane>
-      </Tabs>
-
-    </Card>
+    <el-affix :offset="100">
+      <el-card class="card fixed-bottom">
+        <affixTime :closeShop="true" @selected="clickBreadcrumb" />
+      </el-card>
+    </el-affix>
+    <el-card class="card">
+      <el-tabs v-model="params.type" @tab-click="handleClickType">
+        <el-tab-pane label="热门商品订单数量" name="NUM">
+          <el-table :data="data" stripe style="width: 100%">
+            <el-table-column prop="goodsName" label="商品名称" min-width="160" />
+            <el-table-column prop="num" label="销售数量" min-width="120" />
+            <el-table-column label="销售金额" min-width="120">
+              <template #default="{ row }">
+                <priceColorScheme v-if="row" :value="row.price" :color="$mainColor" />
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="热门商品订单金额" name="PRICE">
+          <el-table :data="data" stripe style="width: 100%">
+            <el-table-column prop="goodsName" label="商品名称" min-width="160" />
+            <el-table-column prop="num" label="销售数量" min-width="120" />
+            <el-table-column label="销售金额" min-width="120">
+              <template #default="{ row }">
+                <priceColorScheme v-if="row" :value="row.price" :color="$mainColor" />
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
+    </el-card>
   </div>
 </template>
 <script>
-import memberLayout from "@/views/member/list";
 import * as API_Goods from "@/api/goods";
 import affixTime from "@/components/affix-time";
 
 export default {
   components: {
     affixTime,
-    memberLayout
   },
   data() {
     return {
-      params: { // 请求参数
+      params: {
         searchType: "LAST_SEVEN",
         year: "",
         month: "",
         shopId: "",
-        type: "NUM"
+        type: "NUM",
       },
-      columns: [ // 表头
-        {
-          title: "商品名称",
-          key: "goodsName",
-        },
-        {
-          title: "销售数量",
-          key: "num",
-        },
-        {
-          title: "销售金额",
-          key: "price",
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
-          },
-
-        },
-      ],
-      data: [], // 数据
+      data: [],
     };
   },
   methods: {
-    // tab切换
-    handleClickType(name) {
-      this.params.type = name;
+    handleClickType(tab) {
+      this.params.type = tab.paneName;
       this.getData();
     },
-    // 条件删选
-    clickBreadcrumb(item, index) {
-      let callback = item;
-      let type = this.params.type;
-      this.params = {...callback};
+    clickBreadcrumb(item) {
+      const type = this.params.type;
+      this.params = { ...item };
       this.params.type = type;
       this.getData();
     },
-    // 获取数据
     getData() {
       Promise.all([API_Goods.goodsStatistics(this.params)]).then((res) => {
         if (res[0].result) {

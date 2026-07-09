@@ -1,258 +1,212 @@
 <template>
   <div class="search">
-    <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="会员名称" prop="memberName">
-            <Input
-              type="text"
-              v-model="searchForm.memberName"
-              clearable
-              placeholder="请输入会员名称"
-              style="width: 240px"
-            />
-          </Form-item>
-          <Form-item label="订单号" prop="orderSn">
-            <Input
-              type="text"
-              v-model="searchForm.orderSn"
-              clearable
-              placeholder="请输入订单号"
-              style="width: 240px"
-            />
-          </Form-item>
-          <Form-item label="状态" prop="status">
-            <Select v-model="searchForm.status" placeholder="请选择订单状态" clearable style="width: 240px">
-              <Option value="NEW">新投诉</Option>
-              <Option value="CANCEL">已撤销</Option>
-              <Option value="WAIT_APPEAL">待申诉</Option>
-              <Option value="COMMUNICATION">对话中</Option>
-              <Option value="WAIT_ARBITRATION">等待仲裁</Option>
-              <Option value="COMPLETE">已完成</Option>
-
-            </Select>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
-          <Button @click="handleReset" class="search-btn">重置</Button>
-        </Form>
-      </Row>
-      </Card>
-    <Card>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        class="mt_10"
-        ref="table"
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
       >
-        <template slot-scope="{row}" slot="goodsName">
-          <a class="mr_10" @click="linkTo(row.goodsId,row.skuId)">{{row.goodsName}}</a>
-          <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-            <div slot="content">
-              <vue-qr :text="wapLinkTo(row.goodsId,row.skuId)"  :margin="0" colorDark="#000" colorLight="#fff" :size="150"></vue-qr>
-            </div>
-            <img src="../../../assets/qrcode.svg" style="vertical-align:bottom;" class="hover-pointer" width="20" height="20" alt="">
-          </Poptip>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+        <el-form-item label="订单编号" prop="orderSn">
+          <el-input
+            v-model="searchForm.orderSn"
+            placeholder="请输入订单编号"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="会员名称" prop="memberName">
+          <el-input
+            v-model="searchForm.memberName"
+            placeholder="请输入会员名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="状态" prop="status">
+          <el-select v-model="searchForm.status" placeholder="请选择" clearable style="width: 240px">
+            <el-option label="新投诉" value="NEW" />
+            <el-option label="已撤销" value="CANCEL" />
+            <el-option label="待申诉" value="WAIT_APPEAL" />
+            <el-option label="对话中" value="COMMUNICATION" />
+            <el-option label="等待仲裁" value="WAIT_ARBITRATION" />
+            <el-option label="已完成" value="COMPLETE" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <el-table v-loading="loading" border :data="data" ref="table" class="mt_10" style="width: 100%">
+        <el-table-column prop="memberName" label="会员名称" width="200" />
+        <el-table-column prop="orderSn" label="订单编号" min-width="120" show-overflow-tooltip />
+        <el-table-column label="商品名称" min-width="180" show-overflow-tooltip>
+          <template #default="{ row }">
+            <template v-if="row">
+              <a class="link-text mr_10" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
+              <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
+                <template #reference>
+                  <img
+                    src="../../../assets/qrcode.svg"
+                    class="hover-pointer"
+                    width="20"
+                    height="20"
+                    alt="qrcode"
+                  />
+                </template>
+                <vue-qr
+                  :text="wapLinkTo(row.goodsId, row.skuId)"
+                  :margin="0"
+                  color-dark="#000"
+                  color-light="#fff"
+                  :size="150"
+                />
+              </el-popover>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column prop="complainTopic" label="投诉主题" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="createTime" label="投诉时间" width="180" />
+        <el-table-column label="投诉状态" width="110">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="complainStatusTagType(row.complainStatus)">
+              {{ complainStatusText(row.complainStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="120" align="center" fixed="right">
+          <template #default="{ row }">
+            <a v-if="row" class="link-text" @click="detail(row)">
+              {{ row.complainStatus === "COMPLETE" ? "详情" : "处理" }}
+            </a>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
-  import * as API_Member from "@/api/member";
-  import * as API_Order from "@/api/order";
-  import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
+import * as API_Order from "@/api/order";
+import vueQr from "vue-qr";
 
-  export default {
-    name: "orderComplaint",
-    components: {
-      uploadPicThumb
+export default {
+  name: "orderComplaint",
+  components: { vueQr },
+  data() {
+    return {
+      loading: true,
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+      },
+      data: [],
+      total: 0,
+    };
+  },
+  watch: {
+    $route() {
+      this.getDataList();
     },
-    data() {
-      return {
-        loading: true, // 表单加载状态
-        searchForm: {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-          pageSize: 20, // 页面大小
-          sort: "createTime", // 默认排序字段
-          order: "desc", // 默认排序方式
-        },
-        columns: [
-          // 表头
-          {
-            title: "会员名称",
-            key: "memberName",
-            sortable: false,
-          },
-          {
-            title: "订单编号",
-            key: "orderSn",
-          },
-          {
-            title: "商品名称",
-            slot: "goodsName",
-          },
-          {
-            title: "投诉主题",
-            key: "complainTopic",
-          },
-          {
-            title: "投诉时间",
-            key: "createTime",
-          },
-          {
-            title: "投诉状态",
-            key: "complainStatus",
-            render: (h, params) => {
-              if (params.row.complainStatus == "NEW") {
-                return h('div', [h('tag',{props: {color: "purple"}}, '新投诉'),]);
-              } else if (params.row.complainStatus == "CANCEL") {
-                return h('div', [h('tag', {props: {color: "cyan"}}, '已撤销'),]);
-              } else if (params.row.complainStatus == "WAIT_APPEAL") {
-                return h('div', [h('tag', {props: {color: "volcano"}}, '待申诉'),]);
-              } else if (params.row.complainStatus == "COMMUNICATION") {
-                return h('div', [h('tag', {props: {color: "orange"}}, '对话中'),]);
-              }else if (params.row.complainStatus == "WAIT_ARBITRATION") {
-                return h('div', [h('tag', {props: {color: "blue"}}, '等待仲裁'),]);
-              }else if (params.row.complainStatus == "COMPLETE") {
-                return h('div', [h('tag', {props: {color: "green"}}, '已完成'),]);
-              }
-            }
-          },
-
-          {
-            title: "操作",
-            key: "action",
-            align: "center",
-            fixed: 'right',
-            width: 200,
-            render: (h, params) => {
-              if (params.row.complainStatus === "COMPLETE") {
-                return h("div", [
-                  h(
-                    "a",
-                    {
-                      style: {
-                        color: "#2d8cf0",
-                        cursor: "pointer",
-                        textDecoration: "none",
-                      },
-                      on: {
-                        click: () => {
-                          this.detail(params.row);
-                        },
-                      },
-                    },
-                    "详情"
-                  ),
-                ]);
-              } else {
-                return h("div", [
-                  h(
-                    "a",
-                    {
-                      style: {
-                        color: "#2d8cf0",
-                        cursor: "pointer",
-                        textDecoration: "none",
-                      },
-                      on: {
-                        click: () => {
-                          this.detail(params.row);
-                        },
-                      },
-                    },
-                    "处理"
-                  ),
-                ]);
-              }
-
-            },
-          },
-
-        ],
-        data: [], // 表格数据
-        total: 0, // 表单数据总数
+  },
+  methods: {
+    complainStatusText(v) {
+      const map = {
+        NEW: "新投诉",
+        CANCEL: "已撤销",
+        WAIT_APPEAL: "待申诉",
+        COMMUNICATION: "对话中",
+        WAIT_ARBITRATION: "等待仲裁",
+        COMPLETE: "已完成",
       };
+      return map[v] || v || "-";
     },
-    methods: {
-      // 初始化数据
-      init() {
-        this.getDataList();
-      },
-      // 改变页码
-      changePage(v) {
-        this.searchForm.pageNumber = v;
-        this.getDataList();
-      },
-      // 改变页数
-      changePageSize(v) {
-        this.searchForm.pageSize = v;
-        this.getDataList();
-      },
-      // 搜索
-      handleSearch() {
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 20;
-        this.getDataList();
-      },
-      // 重置
-      handleReset() {
-        this.searchForm = {}
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 20;
-        this.getDataList();
-      },
-      // 获取数据
-      getDataList() {
-        this.loading = true;
-        API_Order.getComplainPage(this.searchForm).then((res) => {
+    complainStatusTagType(v) {
+      const map = {
+        NEW: "primary",
+        CANCEL: "info",
+        WAIT_APPEAL: "warning",
+        COMMUNICATION: "warning",
+        WAIT_ARBITRATION: "",
+        COMPLETE: "success",
+      };
+      return map[v] || "info";
+    },
+    init() {
+      this.getDataList();
+    },
+    changePage(v) {
+      this.searchForm.pageNumber = v;
+      this.getDataList();
+    },
+    changePageSize(v) {
+      this.searchForm.pageNumber = 1;
+      this.searchForm.pageSize = v;
+      this.getDataList();
+    },
+    handleSearch() {
+      this.searchForm.pageNumber = 1;
+      this.searchForm.pageSize = 20;
+      this.getDataList();
+    },
+    getDataList() {
+      this.loading = true;
+      API_Order.getOrderComplain(this.searchForm)
+        .then((res) => {
           this.loading = false;
           if (res.success) {
             this.data = res.result.records;
             this.total = res.result.total;
           }
-        });
-        this.total = this.data.length;
-        this.loading = false;
-      },
-      //投诉详情
-      detail(v) {
-        let id = v.id;
-        this.$options.filters.customRouterPush({
-          name: "order-complaint-detail",
-          query: { id: id },
         })
-      },
+        .catch(() => {
+          this.loading = false;
+        });
     },
-    mounted() {
-      this.init();
+    detail(v) {
+      this.$filters.customRouterPush({
+        name: "order-complaint-detail",
+        query: { id: v.id },
+      });
     },
-    // 页面缓存处理，从该页面离开时，修改KeepAlive为false，保证进入该页面是刷新
-    beforeRouteLeave(to, from, next) {
-      from.meta.keepAlive = false
-      next()
-    }
-  };
+  },
+  mounted() {
+    this.init();
+  },
+};
 </script>
-<style lang="scss">
-  // 建议引入通用样式 可删除下面样式代码
-  @import "@/styles/table-common.scss";
+
+<style scoped>
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+.mr_10 {
+  margin-right: 10px;
+}
+.hover-pointer {
+  cursor: pointer;
+  vertical-align: bottom;
+}
 </style>

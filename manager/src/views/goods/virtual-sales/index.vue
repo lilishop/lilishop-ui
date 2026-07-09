@@ -1,120 +1,160 @@
 <template>
   <div class="search">
-    <Card>
-      <Form
+    <el-card>
+      <el-form
         ref="searchForm"
         :model="searchForm"
         inline
-        :label-width="70"
+        label-width="70px"
         class="search-form"
-        @keydown.enter.native="handleSearch"
+        @keyup.enter="handleSearch"
       >
-        <Form-item label="商品名称" prop="goodsName">
-          <Input
+        <el-form-item label="商品名称" prop="goodsName">
+          <el-input
             v-model="searchForm.goodsName"
             placeholder="请输入商品名称"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Form-item label="商品ID" prop="goodsId">
-          <Input
+        </el-form-item>
+        <el-form-item label="商品ID" prop="goodsId">
+          <el-input
             v-model="searchForm.goodsId"
             placeholder="请输入商品ID"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Form-item label="SKU货号" prop="sn">
-          <Input
+        </el-form-item>
+        <el-form-item label="SKU货号" prop="sn">
+          <el-input
             v-model="searchForm.sn"
             placeholder="请输入SKU货号"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Form-item label="店铺名称" prop="storeName">
-          <Input
+        </el-form-item>
+        <el-form-item label="店铺名称" prop="storeName">
+          <el-input
             v-model="searchForm.storeName"
             placeholder="请输入店铺名称"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Button
-          @click="handleSearch"
-          class="search-btn"
-          type="primary"
-          icon="ios-search"
-        >
-          搜索
-        </Button>
-        <Button @click="handleReset" style="margin-left: 8px">重置</Button>
-      </Form>
-    </Card>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+          <el-button style="margin-left: 8px" @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
-    <Card class="mt_10">
-      <Alert show-icon>
-        支持按规格逐条设置虚拟销量，列表总销量 = 真实销量 + 虚拟销量。
-      </Alert>
+    <el-card class="mt_10">
+      <el-alert
+        type="info"
+        show-icon
+        :closable="false"
+        title="支持按规格逐条设置虚拟销量，列表总销量 = 真实销量 + 虚拟销量。"
+        style="margin-bottom: 10px"
+      />
 
       <div class="batch-operations">
-        <Button
+        <el-button
           type="primary"
           :disabled="selectedRows.length === 0"
           @click="openBatchVirtualSalesModal"
         >
           批量设置虚拟销量
-        </Button>
+        </el-button>
       </div>
 
-      <Table
-        :loading="loading"
-        :columns="columns"
-        :data="data"
+      <el-table
         ref="table"
+        v-loading="loading"
+        :data="data"
         class="mt_10"
-        sortable="custom"
-        @on-sort-change="changeSort"
-        @on-selection-change="handleSelectionChange"
+        style="width: 100%"
+        @sort-change="changeSort"
+        @selection-change="handleSelectionChange"
       >
-        <template slot="goodsSlot" slot-scope="{ row }">
-          <div class="goods-info">
-            <img
-              :src="row.thumbnail"
-              class="goods-thumbnail"
-            />
-            <div class="goods-text">
-              <div class="div-zoom">{{ row.goodsName }}</div>
-              <div class="sub-title" v-if="row.simpleSpecs">
-                规格：{{ row.simpleSpecs.trim() || "-" }}
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column prop="id" label="SKU ID" width="180" show-overflow-tooltip />
+        <el-table-column prop="goodsId" label="商品ID" width="180" show-overflow-tooltip />
+        <el-table-column label="商品信息" min-width="360">
+          <template #default="{ row }">
+            <div v-if="row" class="goods-info">
+              <img
+                v-if="row.thumbnail"
+                :src="row.thumbnail"
+                class="goods-thumbnail"
+                alt=""
+              />
+              <div class="goods-text">
+                <div class="div-zoom">{{ row.goodsName }}</div>
+                <div v-if="row.simpleSpecs" class="sub-title">
+                  规格：{{ row.simpleSpecs.trim() || "-" }}
+                </div>
               </div>
             </div>
-          </div>
-        </template>
-      </Table>
+          </template>
+        </el-table-column>
+        <el-table-column label="真实销量" width="110">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.buyCount || 0 }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="虚拟销量" width="110">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.virtualSalesInput || 0 }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="总销量" width="110">
+          <template #default="{ row }">
+            <span v-if="row">{{ getTotalSales(row) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="row.marketEnable === 'UPPER' ? 'success' : 'warning'">
+              {{ row.marketEnable === "UPPER" ? "上架" : "下架" }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="100" align="center" fixed="right">
+          <template #default="{ row, $index }">
+            <a
+              v-if="row"
+              class="link-text"
+              :class="{ disabled: row.saving }"
+              @click="!row.saving && openVirtualSalesModal(row, $index)"
+            >
+              设置
+            </a>
+          </template>
+        </el-table-column>
+      </el-table>
 
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
 
-    <Modal
+    <el-dialog
       v-model="editModalVisible"
       :title="modalMode === 'batch' ? '批量设置虚拟销量' : '设置虚拟销量'"
-      :mask-closable="false"
-      :closable="!modalSubmitting"
+      width="480px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="!modalSubmitting"
+      :show-close="!modalSubmitting"
+      destroy-on-close
     >
       <div v-if="modalMode === 'single' && currentSku" class="virtual-sales-modal">
         <div class="sku-info-item">
@@ -129,50 +169,42 @@
           <span class="sku-info-label">SKU ID：</span>
           <span>{{ currentSku.id || "-" }}</span>
         </div>
-
-        <Form :label-width="90" class="mt_10">
-          <Form-item label="虚拟销量">
-            <InputNumber
+        <el-form label-width="90px" class="mt_10">
+          <el-form-item label="虚拟销量">
+            <el-input-number
               v-model="editForm.virtualSales"
               :min="0"
               :max="99999999"
               :precision="0"
               style="width: 200px"
             />
-          </Form-item>
-        </Form>
+          </el-form-item>
+        </el-form>
       </div>
       <div v-else-if="modalMode === 'batch'" class="virtual-sales-modal">
         <div class="sku-info-item">
           <span class="sku-info-label">已选规格：</span>
           <span>{{ selectedRows.length }} 个</span>
         </div>
-
-        <Form :label-width="90" class="mt_10">
-          <Form-item label="虚拟销量">
-            <InputNumber
+        <el-form label-width="90px" class="mt_10">
+          <el-form-item label="虚拟销量">
+            <el-input-number
               v-model="editForm.virtualSales"
               :min="0"
               :max="99999999"
               :precision="0"
               style="width: 200px"
             />
-          </Form-item>
-        </Form>
+          </el-form-item>
+        </el-form>
       </div>
-      <div slot="footer">
-        <Button @click="handleCancelVirtualSales" :disabled="modalSubmitting">
-          取消
-        </Button>
-        <Button
-          type="primary"
-          :loading="modalSubmitting"
-          @click="handleSubmitVirtualSales"
-        >
+      <template #footer>
+        <el-button :disabled="modalSubmitting" @click="handleCancelVirtualSales">取消</el-button>
+        <el-button type="primary" :loading="modalSubmitting" @click="handleSubmitVirtualSales">
           提交
-        </Button>
-      </div>
-    </Modal>
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -182,6 +214,7 @@ import {
   getGoodsSkuData,
   updateGoodsSkuVirtualSales,
 } from "@/api/goods";
+import { ElMessage } from "element-plus";
 
 const VIRTUAL_SALES_FIELDS = [
   "virtualSales",
@@ -216,84 +249,6 @@ export default {
         sn: "",
         storeName: "",
       },
-      columns: [
-        {
-          type: "selection",
-          width: 60,
-          align: "center",
-        },
-        {
-          title: "SKU ID",
-          key: "id",
-          width: 180,
-          tooltip: true,
-        },
-        {
-          title: "商品ID",
-          key: "goodsId",
-          width: 180,
-          tooltip: true,
-        },
-        {
-          title: "商品信息",
-          key: "goodsName",
-          minWidth: 360,
-          slot: "goodsSlot",
-        },
-        {
-          title: "真实销量",
-          key: "buyCount",
-          width: 110,
-          render: (h, params) => h("span", params.row.buyCount || 0),
-        },
-        {
-          title: "虚拟销量",
-          key: "virtualSalesInput",
-          width: 110,
-          render: (h, params) => h("span", params.row.virtualSalesInput || 0),
-        },
-        {
-          title: "总销量",
-          key: "totalSalesDisplay",
-          width: 110,
-          render: (h, params) => h("span", this.getTotalSales(params.row)),
-        },
-        {
-          title: "状态",
-          key: "marketEnable",
-          width: 100,
-          render: (h, params) => {
-            const isUpper = params.row.marketEnable === "UPPER";
-            return h(
-              "Tag",
-              { props: { color: isUpper ? "green" : "volcano" } },
-              isUpper ? "上架" : "下架"
-            );
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          width: 100,
-          align: "center",
-          render: (h, params) => {
-            return h(
-              "Button",
-              {
-                props: {
-                  type: "primary",
-                  size: "small",
-                  loading: !!params.row.saving,
-                },
-                on: {
-                  click: () => this.openVirtualSalesModal(params.row, params.index),
-                },
-              },
-              "设置"
-            );
-          },
-        },
-      ],
       data: [],
       total: 0,
     };
@@ -328,12 +283,13 @@ export default {
       };
       this.getDataList();
     },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
+    changeSort({ prop, order }) {
+      if (!order) {
         this.searchForm.sort = "create_time";
         this.searchForm.order = "desc";
+      } else {
+        this.searchForm.sort = prop;
+        this.searchForm.order = order === "ascending" ? "asc" : "desc";
       }
       this.getDataList();
     },
@@ -356,14 +312,14 @@ export default {
             this.data = [];
             this.total = 0;
             this.selectedRows = [];
-            this.$Message.error((res && res.message) || "加载规格列表失败");
+            ElMessage.error((res && res.message) || "加载规格列表失败");
           }
         })
         .catch(() => {
           this.data = [];
           this.total = 0;
           this.selectedRows = [];
-          this.$Message.error("加载规格列表失败");
+          ElMessage.error("加载规格列表失败");
         })
         .finally(() => {
           this.loading = false;
@@ -384,7 +340,7 @@ export default {
     },
     openBatchVirtualSalesModal() {
       if (!this.selectedRows.length) {
-        this.$Message.warning("请先选择要设置的商品规格");
+        ElMessage.warning("请先选择要设置的商品规格");
         return;
       }
       this.modalMode = "batch";
@@ -394,9 +350,7 @@ export default {
       this.editModalVisible = true;
     },
     handleCancelVirtualSales() {
-      if (this.modalSubmitting) {
-        return;
-      }
+      if (this.modalSubmitting) return;
       this.resetVirtualSalesModal();
     },
     resetVirtualSalesModal() {
@@ -409,37 +363,40 @@ export default {
     handleSubmitVirtualSales() {
       const virtualSales = Number(this.editForm.virtualSales);
       if (!Number.isInteger(virtualSales) || virtualSales < 0) {
-        this.$Message.warning("请输入大于等于 0 的整数虚拟销量");
+        ElMessage.warning("请输入大于等于 0 的整数虚拟销量");
         return;
       }
       if (this.modalMode === "batch") {
         this.handleBatchSubmitVirtualSales(virtualSales);
         return;
       }
-      if (!this.currentSku || this.currentIndex < 0) {
-        return;
-      }
+      if (!this.currentSku || this.currentIndex < 0) return;
+
       const currentIndex = this.currentIndex;
       const currentSkuId = this.currentSku.id;
       this.modalSubmitting = true;
-      this.$set(this.data[currentIndex], "saving", true);
+      if (this.data[currentIndex]) {
+        this.data[currentIndex].saving = true;
+      }
       updateGoodsSkuVirtualSales(currentSkuId, { virtualSales })
         .then((res) => {
           if (res && res.success) {
-            this.$set(this.data[currentIndex], "virtualSales", virtualSales);
-            this.$set(this.data[currentIndex], "virtualSalesInput", virtualSales);
-            this.$Message.success("虚拟销量设置成功");
+            if (this.data[currentIndex]) {
+              this.data[currentIndex].virtualSales = virtualSales;
+              this.data[currentIndex].virtualSalesInput = virtualSales;
+            }
+            ElMessage.success("虚拟销量设置成功");
             this.resetVirtualSalesModal();
           } else {
-            this.$Message.error((res && res.message) || "规格虚拟销量设置失败");
+            ElMessage.error((res && res.message) || "规格虚拟销量设置失败");
           }
         })
         .catch(() => {
-          this.$Message.error("规格虚拟销量设置失败");
+          ElMessage.error("规格虚拟销量设置失败");
         })
         .finally(() => {
           if (this.data[currentIndex]) {
-            this.$set(this.data[currentIndex], "saving", false);
+            this.data[currentIndex].saving = false;
           }
           this.modalSubmitting = false;
         });
@@ -447,7 +404,7 @@ export default {
     handleBatchSubmitVirtualSales(virtualSales) {
       const skuIds = this.selectedRows.map((item) => item.id).filter(Boolean);
       if (!skuIds.length) {
-        this.$Message.warning("请先选择要设置的商品规格");
+        ElMessage.warning("请先选择要设置的商品规格");
         return;
       }
       this.modalSubmitting = true;
@@ -455,9 +412,7 @@ export default {
         .then((res) => {
           if (res && res.success) {
             this.data = this.data.map((item) => {
-              if (!skuIds.includes(item.id)) {
-                return item;
-              }
+              if (!skuIds.includes(item.id)) return item;
               return {
                 ...item,
                 virtualSales,
@@ -465,17 +420,15 @@ export default {
               };
             });
             this.selectedRows = [];
-            if (this.$refs.table) {
-              this.$refs.table.selectAll(false);
-            }
-            this.$Message.success("虚拟销量设置成功");
+            this.$refs.table?.clearSelection();
+            ElMessage.success("虚拟销量设置成功");
             this.resetVirtualSalesModal();
           } else {
-            this.$Message.error((res && res.message) || "虚拟销量设置失败");
+            ElMessage.error((res && res.message) || "虚拟销量设置失败");
           }
         })
         .catch(() => {
-          this.$Message.error("虚拟销量设置失败");
+          ElMessage.error("虚拟销量设置失败");
         })
         .finally(() => {
           this.modalSubmitting = false;
@@ -517,6 +470,12 @@ export default {
   min-width: 0;
 }
 
+.div-zoom {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .batch-operations {
   margin-top: 10px;
 }
@@ -536,5 +495,9 @@ export default {
   width: 90px;
   color: #808695;
   flex-shrink: 0;
+}
+
+.mt_10 {
+  margin-top: 10px;
 }
 </style>

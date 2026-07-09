@@ -1,10 +1,8 @@
 <template>
   <div class="search">
-    <Card>
+    <el-card>
       <div class="gcc-records-toolbar">
-        <Button type="primary" class="gcc-records-back" @click="closePage">
-          返回
-        </Button>
+        <el-button type="primary" class="gcc-records-back" @click="closePage">返回</el-button>
       </div>
       <div v-if="giftCardName" class="gcc-records-meta mb_10">
         <strong>礼品卡：</strong>{{ giftCardName }}
@@ -12,242 +10,343 @@
       <div v-else-if="activityId" class="gcc-records-meta mb_10">
         <strong>活动ID：</strong>{{ activityId }}
       </div>
-      <Alert v-if="!activityId" type="warning">缺少活动参数，请从礼品卡列表进入。</Alert>
-      <Tabs v-else v-model="activeTab" @on-click="onTabClick">
-        <TabPane label="制卡记录" name="createBatch">
-          <Card :bordered="false" dis-hover>
-            <Form
+      <el-alert v-if="!activityId" type="warning" show-icon :closable="false">
+        缺少活动参数，请从礼品卡列表进入。
+      </el-alert>
+      <el-tabs v-else v-model="activeTab" @tab-click="onTabClick">
+        <el-tab-pane label="制卡记录" name="createBatch">
+          <el-card shadow="never">
+            <el-form
               ref="createFilterForm"
               :model="createSearchForm"
               inline
               label-position="left"
               class="search-form mb_10 gcc-create-batch-search"
-              :label-width="100"
+              label-width="100px"
             >
-              <FormItem label="卡号" prop="cardNo">
-                <Input
-                  v-model="createSearchForm.cardNo"
-                  clearable
-                  style="width: 150px"
-                />
-              </FormItem>
-              <FormItem label="制卡批次ID" prop="createBatchId">
-                <Input
-                  v-model="createSearchForm.createBatchId"
-                  clearable
-                  style="width: 170px"
-                />
-              </FormItem>
-              <FormItem label="卡名称" prop="giftCardName">
-                <Input
-                  v-model="createSearchForm.giftCardName"
-                  clearable
-                  style="width: 160px"
-                />
-              </FormItem>
-              <FormItem label="制卡人名称" prop="createUserName">
-                <Input
-                  v-model="createSearchForm.createUserName"
-                  clearable
-                  style="width: 140px"
-                />
-              </FormItem>
-              <FormItem label="制卡时间" prop="createTimeRange">
-                <DatePicker
+              <el-form-item label="卡号" prop="cardNo">
+                <el-input v-model="createSearchForm.cardNo" clearable style="width: 150px" />
+              </el-form-item>
+              <el-form-item label="制卡批次ID" prop="createBatchId">
+                <el-input v-model="createSearchForm.createBatchId" clearable style="width: 170px" />
+              </el-form-item>
+              <el-form-item label="卡名称" prop="giftCardName">
+                <el-input v-model="createSearchForm.giftCardName" clearable style="width: 160px" />
+              </el-form-item>
+              <el-form-item label="制卡人名称" prop="createUserName">
+                <el-input v-model="createSearchForm.createUserName" clearable style="width: 140px" />
+              </el-form-item>
+              <el-form-item label="制卡时间" prop="createTimeRange">
+                <el-date-picker
                   v-model="createSearchForm.createTimeRange"
                   type="daterange"
                   clearable
-                  format="yyyy-MM-dd"
+                  value-format="YYYY-MM-DD"
                   style="width: 220px"
                 />
-              </FormItem>
-              <FormItem label="过期时间" prop="expireTimeRange">
-                <DatePicker
+              </el-form-item>
+              <el-form-item label="过期时间" prop="expireTimeRange">
+                <el-date-picker
                   v-model="createSearchForm.expireTimeRange"
                   type="daterange"
                   clearable
-                  format="yyyy-MM-dd"
+                  value-format="YYYY-MM-DD"
                   style="width: 220px"
                 />
-              </FormItem>
-              <FormItem :label-width="0">
-                <Button type="primary" icon="ios-search" class="search-btn" @click="handleCreateSearch">
-                  搜索
-                </Button>
-              </FormItem>
-            </Form>
-            <Table :loading="createLoading" :columns="createColumns" :data="createData" />
-            <Row type="flex" justify="end" class="mt_10">
-              <Page
-                :current="createSearchForm.pageNumber"
+              </el-form-item>
+              <el-form-item label-width="0">
+                <el-button type="primary" class="search-btn" @click="handleCreateSearch">搜索</el-button>
+              </el-form-item>
+            </el-form>
+            <el-table v-loading="createLoading" :data="createData" style="width: 100%">
+              <el-table-column label="制卡批次ID" min-width="100" show-overflow-tooltip align="left">
+                <template #default="{ row }">
+                  <span v-if="row">{{ formatCreateBatchId(row) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="卡号范围" min-width="160" show-overflow-tooltip align="left">
+                <template #default="{ row }">
+                  <span v-if="row">{{ formatText(row.cardNoRange) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="面值" width="150" align="left">
+                <template #default="{ row }">
+                  <template v-if="row">
+                    <priceColorScheme
+                      v-if="hasValue(row.faceValue)"
+                      :value="row.faceValue"
+                      :color="$mainColor"
+                    />
+                    <span v-else>-</span>
+                  </template>
+                </template>
+              </el-table-column>
+              <el-table-column label="礼品卡名称" width="150" show-overflow-tooltip align="left">
+                <template #default="{ row }">
+                  <span v-if="row">{{ formatGiftCardName(row.giftCardName) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="createUserName" label="制卡人" width="150" show-overflow-tooltip align="left" />
+              <el-table-column prop="createTime" label="制卡时间" width="200" align="left" />
+              <el-table-column label="制卡数量" width="200" align="left">
+                <template #default="{ row }">
+                  <span v-if="row">{{ formatQuantity(row.quantity) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="过期时间" width="200" align="left">
+                <template #default="{ row }">
+                  <span v-if="row">{{ formatExpireTime(row.expireTime) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="150" align="center" fixed="right">
+                <template #default="{ row }">
+                  <a v-if="row" class="link-text" @click="goBatchCredentials(row)">查看
+                  </a>
+                </template>
+              </el-table-column>
+            </el-table>
+            <div class="mt_10" style="display: flex; justify-content: flex-end">
+              <el-pagination
+                v-model:current-page="createSearchForm.pageNumber"
+                v-model:page-size="createSearchForm.pageSize"
+                :page-sizes="[20, 50, 100]"
                 :total="createTotal"
-                :page-size="createSearchForm.pageSize"
-                :page-size-opts="[20, 50, 100]"
+                layout="total, sizes, prev, pager, next, jumper"
                 size="small"
-                show-total
-                show-elevator
-                show-sizer
-                @on-change="createChangePage"
-                @on-page-size-change="createChangePageSize"
+                @current-change="createChangePage"
+                @size-change="createChangePageSize"
               />
-            </Row>
-          </Card>
-        </TabPane>
-        <TabPane label="发卡记录" name="issue">
-          <Card :bordered="false" dis-hover>
-            <Form
+            </div>
+          </el-card>
+        </el-tab-pane>
+
+        <el-tab-pane label="发卡记录" name="issue">
+          <el-card shadow="never">
+            <el-form
               ref="issueFilterForm"
               :model="issueSearchForm"
               inline
               label-position="left"
               class="search-form mb_10 gcc-create-batch-search"
-              :label-width="100"
+              label-width="100px"
             >
-              <FormItem label="卡号" prop="cardNo">
-                <Input
-                  v-model="issueSearchForm.cardNo"
-                  clearable
-                  style="width: 150px"
-                />
-              </FormItem>
-              <FormItem label="发卡批次ID" prop="issueBatchId">
-                <Input
-                  v-model="issueSearchForm.issueBatchId"
-                  clearable
-                  style="width: 170px"
-                />
-              </FormItem>
-              <FormItem label="现金卡名称" prop="giftCardName">
-                <Input
-                  v-model="issueSearchForm.giftCardName"
-                  clearable
-                  style="width: 160px"
-                />
-              </FormItem>
-              <FormItem label="发卡人名称" prop="issueUserName">
-                <Input
-                  v-model="issueSearchForm.issueUserName"
-                  clearable
-                  style="width: 140px"
-                />
-              </FormItem>
-              <FormItem label="发卡时间" prop="createTimeRange">
-                <DatePicker
+              <el-form-item label="卡号" prop="cardNo">
+                <el-input v-model="issueSearchForm.cardNo" clearable style="width: 150px" />
+              </el-form-item>
+              <el-form-item label="发卡批次ID" prop="issueBatchId">
+                <el-input v-model="issueSearchForm.issueBatchId" clearable style="width: 170px" />
+              </el-form-item>
+              <el-form-item label="现金卡名称" prop="giftCardName">
+                <el-input v-model="issueSearchForm.giftCardName" clearable style="width: 160px" />
+              </el-form-item>
+              <el-form-item label="发卡人名称" prop="issueUserName">
+                <el-input v-model="issueSearchForm.issueUserName" clearable style="width: 140px" />
+              </el-form-item>
+              <el-form-item label="发卡时间" prop="createTimeRange">
+                <el-date-picker
                   v-model="issueSearchForm.createTimeRange"
                   type="daterange"
                   clearable
-                  format="yyyy-MM-dd"
+                  value-format="YYYY-MM-DD"
                   style="width: 220px"
                 />
-              </FormItem>
-              <FormItem label="过期时间" prop="expireTimeRange">
-                <DatePicker
+              </el-form-item>
+              <el-form-item label="过期时间" prop="expireTimeRange">
+                <el-date-picker
                   v-model="issueSearchForm.expireTimeRange"
                   type="daterange"
                   clearable
-                  format="yyyy-MM-dd"
+                  value-format="YYYY-MM-DD"
                   style="width: 220px"
                 />
-              </FormItem>
-              <FormItem :label-width="0">
-                <Button type="primary" icon="ios-search" class="search-btn" @click="handleIssueSearch">
-                  搜索
-                </Button>
-              </FormItem>
-            </Form>
-            <Table :loading="issueLoading" :columns="issueColumns" :data="issueData" />
-            <Row type="flex" justify="end" class="mt_10">
-              <Page
-                :current="issueSearchForm.pageNumber"
+              </el-form-item>
+              <el-form-item label-width="0">
+                <el-button type="primary" class="search-btn" @click="handleIssueSearch">搜索</el-button>
+              </el-form-item>
+            </el-form>
+            <el-table v-loading="issueLoading" :data="issueData" style="width: 100%">
+              <el-table-column label="发卡批次ID" min-width="160" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <span v-if="row">{{ formatIssueBatchId(row) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="卡号范围" min-width="160" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <span v-if="row">{{ formatText(row.cardNoRange) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="面值" width="120" align="right">
+                <template #default="{ row }">
+                  <template v-if="row">
+                    <priceColorScheme
+                      v-if="hasValue(row.faceValue)"
+                      :value="row.faceValue"
+                      :color="$mainColor"
+                    />
+                    <span v-else>-</span>
+                  </template>
+                </template>
+              </el-table-column>
+              <el-table-column label="卡名称" min-width="120" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <span v-if="row">{{ formatGiftCardName(row.giftCardName) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="发卡人" min-width="100" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <span v-if="row">{{ formatText(row.issueUserName) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="createTime" label="发卡时间" width="170" />
+              <el-table-column label="发卡数量" width="100" align="center">
+                <template #default="{ row }">
+                  <span v-if="row">{{ formatQuantity(row.totalCards) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="过期时间" width="170">
+                <template #default="{ row }">
+                  <span v-if="row">{{ formatExpireTime(row.expireTime) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="150" align="center" fixed="right">
+                <template #default="{ row }">
+                  <a v-if="row" class="link-text" @click="goIssueBatchCredentials(row)">查看
+                  </a>
+                </template>
+              </el-table-column>
+            </el-table>
+            <div class="mt_10" style="display: flex; justify-content: flex-end">
+              <el-pagination
+                v-model:current-page="issueSearchForm.pageNumber"
+                v-model:page-size="issueSearchForm.pageSize"
+                :page-sizes="[20, 50, 100]"
                 :total="issueTotal"
-                :page-size="issueSearchForm.pageSize"
-                :page-size-opts="[20, 50, 100]"
+                layout="total, sizes, prev, pager, next, jumper"
                 size="small"
-                show-total
-                show-elevator
-                show-sizer
-                @on-change="issueChangePage"
-                @on-page-size-change="issueChangePageSize"
+                @current-change="issueChangePage"
+                @size-change="issueChangePageSize"
               />
-            </Row>
-          </Card>
-        </TabPane>
-        <TabPane label="使用记录" name="usage">
-          <Card :bordered="false" dis-hover>
-            <Form
+            </div>
+          </el-card>
+        </el-tab-pane>
+
+        <el-tab-pane label="使用记录" name="usage">
+          <el-card shadow="never">
+            <el-form
               ref="usageFilterForm"
               :model="usageSearchForm"
               inline
               label-position="left"
               class="search-form mb_10 gcc-create-batch-search"
-              :label-width="90"
+              label-width="90px"
             >
-              <FormItem label="订单号" prop="orderSn">
-                <Input
-                  v-model="usageSearchForm.orderSn"
-                  clearable
-                  style="width: 160px"
-                />
-              </FormItem>
-              <FormItem label="客户名称" prop="memberName">
-                <Input
-                  v-model="usageSearchForm.memberName"
-                  clearable
-                  style="width: 150px"
-                />
-              </FormItem>
-              <FormItem label="卡号" prop="cardNo">
-                <Input
-                  v-model="usageSearchForm.cardNo"
-                  clearable
-                  style="width: 150px"
-                />
-              </FormItem>
-              <FormItem label="交易时间" prop="transactionTimeRange">
-                <DatePicker
+              <el-form-item label="订单号" prop="orderSn">
+                <el-input v-model="usageSearchForm.orderSn" clearable style="width: 160px" />
+              </el-form-item>
+              <el-form-item label="客户名称" prop="memberName">
+                <el-input v-model="usageSearchForm.memberName" clearable style="width: 150px" />
+              </el-form-item>
+              <el-form-item label="卡号" prop="cardNo">
+                <el-input v-model="usageSearchForm.cardNo" clearable style="width: 150px" />
+              </el-form-item>
+              <el-form-item label="交易时间" prop="transactionTimeRange">
+                <el-date-picker
                   v-model="usageSearchForm.transactionTimeRange"
                   type="daterange"
                   clearable
-                  format="yyyy-MM-dd"
+                  value-format="YYYY-MM-DD"
                   style="width: 220px"
                 />
-              </FormItem>
-              <FormItem label="交易类型" prop="transactionType">
-                <Select
-                  v-model="usageSearchForm.transactionType"
-                  clearable
-                  style="width: 150px"
-                >
-                  <Option value="ORDER_DEDUCT">订单抵扣</Option>
-                  <Option value="ORDER_REFUND">订单退款</Option>
-                  <Option value="ORDER_CANCEL">订单取消</Option>
-                </Select>
-              </FormItem>
-              <FormItem :label-width="0">
-                <Button type="primary" icon="ios-search" class="search-btn" @click="handleUsageSearch">
-                  搜索
-                </Button>
-              </FormItem>
-            </Form>
-            <Table :loading="usageLoading" :columns="usageColumns" :data="usageData" />
-            <Row type="flex" justify="end" class="mt_10">
-              <Page
-                :current="usageSearchForm.pageNumber"
+              </el-form-item>
+              <el-form-item label="交易类型" prop="transactionType">
+                <el-select v-model="usageSearchForm.transactionType" clearable style="width: 150px">
+                  <el-option label="订单抵扣" value="ORDER_DEDUCT" />
+                  <el-option label="订单退款" value="ORDER_REFUND" />
+                  <el-option label="订单取消" value="ORDER_CANCEL" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label-width="0">
+                <el-button type="primary" class="search-btn" @click="handleUsageSearch">搜索</el-button>
+              </el-form-item>
+            </el-form>
+            <el-table v-loading="usageLoading" :data="usageData" style="width: 100%">
+              <el-table-column prop="orderSn" label="订单号" min-width="160" show-overflow-tooltip />
+              <el-table-column label="交易类型" min-width="120">
+                <template #default="{ row }">
+                  <span v-if="row">{{ formatUsageBizType(row.transactionType || row.bizType) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="cardNo" label="卡号" min-width="150" show-overflow-tooltip />
+              <el-table-column label="现金卡信息" min-width="180">
+                <template #default="{ row }">
+                  <template v-if="row">
+                    <div>{{ formatUsageGiftCardName(row) }}</div>
+                    <div class="gcc-sub-text">面额：{{ formatUsageFaceValue(row) }}</div>
+                  </template>
+                </template>
+              </el-table-column>
+              <el-table-column label="金额" width="130" align="right">
+                <template #default="{ row }">
+                  <template v-if="row">
+                    <priceColorScheme
+                      v-if="getUsageAmountDisplay(row)"
+                      :value="getUsageAmountDisplay(row).amount"
+                      :color="getUsageAmountDisplay(row).color"
+                    />
+                    <span v-else>-</span>
+                  </template>
+                </template>
+              </el-table-column>
+              <el-table-column label="余额" width="130" align="right">
+                <template #default="{ row }">
+                  <template v-if="row">
+                    <priceColorScheme
+                      v-if="hasValue(row.balanceAfter)"
+                      :value="row.balanceAfter"
+                      :color="$mainColor"
+                    />
+                    <span v-else>-</span>
+                  </template>
+                </template>
+              </el-table-column>
+              <el-table-column label="交易时间" width="170">
+                <template #default="{ row }">
+                  <span v-if="row">{{ formatTransactionTime(row) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="客户信息" min-width="150">
+                <template #default="{ row }">
+                  <template v-if="row">
+                    <div>{{ row.memberName || "-" }}</div>
+                    <div class="gcc-sub-text">{{ row.memberMobile || "-" }}</div>
+                  </template>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="100" align="center" fixed="right">
+                <template #default="{ row }">
+                  <template v-if="row">
+                    <span v-if="!row.orderSn" class="gcc-disabled-action">详情</span>
+                    <a v-else class="link-text" @click="goOrderDetail(row.orderSn)">详情</a>
+                  </template>
+                </template>
+              </el-table-column>
+            </el-table>
+            <div class="mt_10" style="display: flex; justify-content: flex-end">
+              <el-pagination
+                v-model:current-page="usageSearchForm.pageNumber"
+                v-model:page-size="usageSearchForm.pageSize"
+                :page-sizes="[20, 50, 100]"
                 :total="usageTotal"
-                :page-size="usageSearchForm.pageSize"
-                :page-size-opts="[20, 50, 100]"
+                layout="total, sizes, prev, pager, next, jumper"
                 size="small"
-                show-total
-                show-elevator
-                show-sizer
-                @on-change="usageChangePage"
-                @on-page-size-change="usageChangePageSize"
+                @current-change="usageChangePage"
+                @size-change="usageChangePageSize"
               />
-            </Row>
-          </Card>
-        </TabPane>
-      </Tabs>
-    </Card>
+            </div>
+          </el-card>
+        </el-tab-pane>
+      </el-tabs>
+    </el-card>
   </div>
 </template>
 
@@ -311,303 +410,6 @@ export default {
       },
     };
   },
-  computed: {
-    createColumns() {
-      return [
-        {
-          title: "制卡批次ID",
-          key: "createBatchId",
-          minWidth: 100,
-          tooltip: true,
-          align: "left",
-          render: (h, p) => {
-            const id = p.row.createBatchId ?? p.row.id;
-            return h("span", id != null && id !== "" ? String(id) : "-");
-          },
-        },
-        {
-          title: "卡号范围",
-          key: "cardNoRange",
-          minWidth: 160,
-          tooltip: true,
-          align: "left",
-          render: (h, p) => {
-            const t = p.row.cardNoRange;
-            return h("span", t != null && t !== "" ? String(t) : "-");
-          },
-        },
-        {
-          title: "面值",
-          key: "faceValue",
-          width: 150,
-          align: "left",
-          render: (h, p) => {
-            const v = p.row.faceValue;
-            if (v === null || v === undefined || v === "") {
-              return h("span", "-");
-            }
-            return h("priceColorScheme", {
-              props: { value: v, color: this.$mainColor },
-            });
-          },
-        },
-        {
-          title: "礼品卡名称",
-          key: "giftCardName",
-          width: 150,
-          tooltip: true,
-          align: "left",
-          render: (h, p) => {
-            const t = p.row.giftCardName ?? this.giftCardName;
-            return h("span", t != null && t !== "" ? String(t) : "-");
-          },
-        },
-        { title: "制卡人", key: "createUserName", width: 150, tooltip: true ,align: "left"},
-        { title: "制卡时间", key: "createTime", width: 200,align: "left" },
-        {
-          title: "制卡数量",
-          key: "quantity",
-          width: 200,
-          align: "left",
-          render: (h, p) => {
-            const v = p.row.quantity;
-            if (v === null || v === undefined || v === "") {
-              return h("span", "-");
-            }
-            return h("span", String(v));
-          },
-        },
-        {
-          title: "过期时间",
-          key: "expireTime",
-          width: 200,
-          align: "left",
-          render: (h, p) => {
-            const t = p.row.expireTime;
-            return h("span", t != null && t !== "" ? String(t) : "长期有效");
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          width: 150,
-          align: "center",
-          fixed: "right",
-          render: (h, params) => {
-            return h(
-              "Button",
-              {
-                props: { type: "primary", size: "small" },
-                on: { click: () => this.goBatchCredentials(params.row) },
-              },
-              "查看"
-            );
-          },
-        },
-      ];
-    },
-    issueColumns() {
-      return [
-        {
-          title: "发卡批次ID",
-          key: "issueBatchId",
-          minWidth: 160,
-          tooltip: true,
-          render: (h, p) => {
-            const id = p.row.issueBatchId ?? p.row.id;
-            return h("span", id != null && id !== "" ? String(id) : "-");
-          },
-        },
-        {
-          title: "卡号范围",
-          key: "cardNoRange",
-          minWidth: 160,
-          tooltip: true,
-          render: (h, p) => {
-            const t = p.row.cardNoRange;
-            return h("span", t != null && t !== "" ? String(t) : "-");
-          },
-        },
-        {
-          title: "面值",
-          key: "faceValue",
-          width: 120,
-          align: "right",
-          render: (h, p) => {
-            const v = p.row.faceValue;
-            if (v === null || v === undefined || v === "") {
-              return h("span", "-");
-            }
-            return h("priceColorScheme", {
-              props: { value: v, color: this.$mainColor },
-            });
-          },
-        },
-        {
-          title: "卡名称",
-          key: "giftCardName",
-          minWidth: 120,
-          tooltip: true,
-          render: (h, p) => {
-            const t = p.row.giftCardName ?? this.giftCardName;
-            return h("span", t != null && t !== "" ? String(t) : "-");
-          },
-        },
-        {
-          title: "发卡人",
-          key: "issueUserName",
-          minWidth: 100,
-          tooltip: true,
-          render: (h, p) => {
-            const t = p.row.issueUserName;
-            return h("span", t != null && t !== "" ? String(t) : "-");
-          },
-        },
-        { title: "发卡时间", key: "createTime", width: 170 },
-        {
-          title: "发卡数量",
-          key: "totalCards",
-          width: 100,
-          align: "center",
-          render: (h, p) => {
-            const v = p.row.totalCards;
-            if (v === null || v === undefined || v === "") {
-              return h("span", "-");
-            }
-            return h("span", String(v));
-          },
-        },
-        {
-          title: "过期时间",
-          key: "expireTime",
-          width: 170,
-          render: (h, p) => {
-            const t = p.row.expireTime;
-            return h("span", t != null && t !== "" ? String(t) : "长期有效");
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          width: 150,
-          align: "center",
-          fixed: "right",
-          render: (h, params) => {
-            return h(
-              "Button",
-              {
-                props: { type: "primary", size: "small" },
-                on: { click: () => this.goIssueBatchCredentials(params.row) },
-              },
-              "查看"
-            );
-          },
-        },
-      ];
-    },
-    usageColumns() {
-      return [
-        { title: "订单号", key: "orderSn", minWidth: 160, tooltip: true },
-        {
-          title: "交易类型",
-          key: "transactionType",
-          minWidth: 120,
-          render: (h, p) => h("span", this.formatUsageBizType(p.row.transactionType || p.row.bizType)),
-        },
-        { title: "卡号", key: "cardNo", minWidth: 150, tooltip: true },
-        {
-          title: "现金卡信息",
-          key: "giftCardName",
-          minWidth: 180,
-          render: (h, p) => {
-            const name = p.row.giftCardName || this.giftCardName || "-";
-            const faceValue = p.row.faceValue;
-            return h("div", [
-              h("div", String(name)),
-              h(
-                "div",
-                { style: { color: "#808695", marginTop: "4px" } },
-                `面额：${faceValue != null && faceValue !== "" ? faceValue : "-"}`
-              ),
-            ]);
-          },
-        },
-        {
-          title: "金额",
-          key: "changeAmount",
-          width: 130,
-          align: "right",
-          render: (h, p) => {
-            const display = this.getUsageAmountDisplay(p.row);
-            if (!display) {
-              return h("span", "-");
-            }
-            return h("priceColorScheme", {
-              props: { value: display.amount, color: display.color },
-            });
-          },
-        },
-        {
-          title: "余额",
-          key: "balanceAfter",
-          width: 130,
-          align: "right",
-          render: (h, p) => {
-            const v = p.row.balanceAfter;
-            if (v === null || v === undefined || v === "") {
-              return h("span", "-");
-            }
-            return h("priceColorScheme", {
-              props: { value: v, color: this.$mainColor },
-            });
-          },
-        },
-        {
-          title: "交易时间",
-          key: "transactionTime",
-          width: 170,
-          render: (h, p) => {
-            const t = p.row.transactionTime || p.row.createTime;
-            return h("span", t != null && t !== "" ? String(t) : "-");
-          },
-        },
-        {
-          title: "客户信息",
-          key: "memberName",
-          minWidth: 150,
-          render: (h, p) => {
-            const name = p.row.memberName || "-";
-            const mobile = p.row.memberMobile || "-";
-            return h("div", [
-              h("div", String(name)),
-              h("div", { style: { color: "#808695", marginTop: "4px" } }, String(mobile)),
-            ]);
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          width: 100,
-          align: "center",
-          fixed: "right",
-          render: (h, p) => {
-            const orderSn = p.row.orderSn;
-            if (!orderSn) {
-              return h("span", { style: { color: "#c5c8ce" } }, "详情");
-            }
-            return h(
-              "Button",
-              {
-                props: { type: "primary", size: "small" },
-                on: { click: () => this.goOrderDetail(orderSn) },
-              },
-              "详情"
-            );
-          },
-        },
-      ];
-    },
-  },
   mounted() {
     this.initFromRoute();
     if (this.activityId) {
@@ -631,6 +433,40 @@ export default {
     },
   },
   methods: {
+    hasValue(v) {
+      return v !== null && v !== undefined && v !== "";
+    },
+    formatText(v) {
+      return this.hasValue(v) ? String(v) : "-";
+    },
+    formatCreateBatchId(row) {
+      const id = row.createBatchId ?? row.id;
+      return this.formatText(id);
+    },
+    formatIssueBatchId(row) {
+      const id = row.issueBatchId ?? row.id;
+      return this.formatText(id);
+    },
+    formatGiftCardName(name) {
+      return this.formatText(name ?? this.giftCardName);
+    },
+    formatQuantity(v) {
+      return this.hasValue(v) ? String(v) : "-";
+    },
+    formatExpireTime(v) {
+      return this.hasValue(v) ? String(v) : "长期有效";
+    },
+    formatUsageGiftCardName(row) {
+      return row.giftCardName || this.giftCardName || "-";
+    },
+    formatUsageFaceValue(row) {
+      const faceValue = row.faceValue;
+      return this.hasValue(faceValue) ? String(faceValue) : "-";
+    },
+    formatTransactionTime(row) {
+      const t = row.transactionTime || row.createTime;
+      return this.formatText(t);
+    },
     initFromRoute() {
       this.activityId = (this.$route.query.activityId && String(this.$route.query.activityId)) || "";
       this.giftCardName = (this.$route.query.giftCardName && String(this.$route.query.giftCardName)) || "";
@@ -669,7 +505,8 @@ export default {
         query: { sn: orderSn },
       });
     },
-    onTabClick(name) {
+    onTabClick(tab) {
+      const name = tab.paneName;
       if (name === "createBatch" && this.activityId) {
         this.loadCreateBatchList();
       }
@@ -684,7 +521,6 @@ export default {
       this.createSearchForm.pageNumber = 1;
       this.loadCreateBatchList();
     },
-    /** 日期区间 → yyyy-MM-dd HH:mm:ss，供 Spring 绑定 Date */
     toApiDateTimeBoundary(val, endOfDay) {
       const dt = val instanceof Date ? val : new Date(val);
       if (Number.isNaN(dt.getTime())) {
@@ -800,12 +636,7 @@ export default {
         sort: this.issueSearchForm.sort,
         order: this.issueSearchForm.order,
       };
-      [
-        "cardNo",
-        "issueBatchId",
-        "giftCardName",
-        "issueUserName",
-      ].forEach((key) => {
+      ["cardNo", "issueBatchId", "giftCardName", "issueUserName"].forEach((key) => {
         this.appendTrimmedParam(params, key, this.issueSearchForm[key]);
       });
       this.appendDateRangeToParams(
@@ -892,12 +723,7 @@ export default {
         sort: this.usageSearchForm.sort,
         order: this.usageSearchForm.order,
       };
-      [
-        "orderSn",
-        "memberName",
-        "cardNo",
-        "transactionType",
-      ].forEach((key) => {
+      ["orderSn", "memberName", "cardNo", "transactionType"].forEach((key) => {
         this.appendTrimmedParam(params, key, this.usageSearchForm[key]);
       });
       this.appendDateRangeToParams(
@@ -942,11 +768,17 @@ export default {
   flex-wrap: wrap;
   text-align: left;
 }
-/* 与全局 .search-form > .ivu-form-item 的 margin-left:10px 对齐到表格左缘 */
-.gcc-create-batch-search.search-form > .ivu-form-item:first-of-type {
+.gcc-create-batch-search.search-form > .el-form-item:first-of-type {
   margin-left: 0 !important;
 }
-.gcc-create-batch-search.search-form ::v-deep .ivu-form-item-label {
+.gcc-create-batch-search.search-form :deep(.el-form-item__label) {
   text-align: left;
+}
+.gcc-sub-text {
+  color: #808695;
+  margin-top: 4px;
+}
+.gcc-disabled-action {
+  color: #c5c8ce;
 }
 </style>

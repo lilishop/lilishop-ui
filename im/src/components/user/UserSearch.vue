@@ -16,7 +16,7 @@
             prefix-icon="el-icon-search"
             placeholder="请输入对方手机号(精确查找)"
             clearable
-            @keyup.enter.native="onSubmit"
+            @keyup.enter="onSubmit"
             @input="error = false"
           />
           <p v-show="error" class="error">

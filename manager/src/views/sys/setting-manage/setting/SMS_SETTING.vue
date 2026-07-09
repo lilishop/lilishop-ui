@@ -1,83 +1,84 @@
 <template>
   <div class="layout">
-    <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
-      <FormItem label="是否测试模式" prop="isTestModel">
-        <RadioGroup type="button" button-style="solid" v-model="formValidate.isTestModel">
-          <Radio label="true">开启</Radio>
-          <Radio label="false">关闭</Radio>
-        </RadioGroup>
+    <el-form ref="formValidate" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
+      <el-form-item label="是否测试模式" prop="isTestModel">
+        <el-radio-group v-model="formValidate.isTestModel">
+          <el-radio-button value="true">开启</el-radio-button>
+          <el-radio-button value="false">关闭</el-radio-button>
+        </el-radio-group>
         <span class="desc">测试模式则不实际发送短信，短信验证码为：111111</span>
-      </FormItem>
-      <FormItem label="登录短信模板CODE" prop="loginTemplateCode">
-        <Input v-model="formValidate.loginTemplateCode"/>
-      </FormItem>
-      <FormItem label="注册短信模板CODE" prop="registerTemplateCode">
-        <Input v-model="formValidate.registerTemplateCode"/>
-      </FormItem>
-      <FormItem label="找回密码短信模板CODE" prop="findPasswordTemplateCode">
-        <Input v-model="formValidate.findPasswordTemplateCode"/>
-      </FormItem>
-      <FormItem label="设置密码短信模板CODE" prop="walletPasswordTemplateCode">
-        <Input v-model="formValidate.walletPasswordTemplateCode"/>
-      </FormItem>
-      <FormItem label="支付密码短信模板CODE" prop="payPasswordTemplateCode">
-        <Input v-model="formValidate.payPasswordTemplateCode"/>
-      </FormItem>
+      </el-form-item>
+      <el-form-item label="登录短信模板CODE" prop="loginTemplateCode">
+        <el-input v-model="formValidate.loginTemplateCode"/>
+      </el-form-item>
+      <el-form-item label="注册短信模板CODE" prop="registerTemplateCode">
+        <el-input v-model="formValidate.registerTemplateCode"/>
+      </el-form-item>
+      <el-form-item label="找回密码短信模板CODE" prop="findPasswordTemplateCode">
+        <el-input v-model="formValidate.findPasswordTemplateCode"/>
+      </el-form-item>
+      <el-form-item label="设置密码短信模板CODE" prop="walletPasswordTemplateCode">
+        <el-input v-model="formValidate.walletPasswordTemplateCode"/>
+      </el-form-item>
+      <el-form-item label="支付密码短信模板CODE" prop="payPasswordTemplateCode">
+        <el-input v-model="formValidate.payPasswordTemplateCode"/>
+      </el-form-item>
 
-      <FormItem label="平台" prop="endPoint">
-        <RadioGroup v-model="formValidate.type" type="button">
-          <Radio label="ALI">阿里云</Radio>
-          <Radio label="HUAWEI">华为云</Radio>
-          <Radio label="TENCENT">腾讯云</Radio>
-        </RadioGroup>
-      </FormItem>
+      <el-form-item label="平台" prop="endPoint">
+        <el-radio-group v-model="formValidate.type">
+          <el-radio-button value="ALI">阿里云</el-radio-button>
+          <el-radio-button value="HUAWEI">华为云</el-radio-button>
+          <el-radio-button value="TENCENT">腾讯云</el-radio-button>
+        </el-radio-group>
+      </el-form-item>
       <!--      阿里云-->
-      <FormItem v-if="formValidate.type==='ALI'" label="accessKeyId" prop="accessKeyId">
-        <Input v-model="formValidate.accessKeyId"/>
-      </FormItem>
-      <FormItem v-if="formValidate.type==='ALI'" label="accessSecret" prop="accessSecret">
-        <Input v-model="formValidate.accessSecret"/>
-      </FormItem>
-      <FormItem v-if="formValidate.type==='ALI'" label="短信签名" prop="signName">
-        <Input v-model="formValidate.signName"/>
-      </FormItem>
+      <el-form-item v-if="formValidate.type==='ALI'" label="accessKeyId" prop="accessKeyId">
+        <el-input v-model="formValidate.accessKeyId"/>
+      </el-form-item>
+      <el-form-item v-if="formValidate.type==='ALI'" label="accessSecret" prop="accessSecret">
+        <el-input v-model="formValidate.accessSecret"/>
+      </el-form-item>
+      <el-form-item v-if="formValidate.type==='ALI'" label="短信签名" prop="signName">
+        <el-input v-model="formValidate.signName"/>
+      </el-form-item>
 
       <!--      华为云-->
-      <FormItem v-if="formValidate.type==='HUAWEI'" label="APP_Key" prop="huaweiAppKey">
-        <Input v-model="formValidate.huaweiAppKey"/>
-      </FormItem>
-      <FormItem v-if="formValidate.type==='HUAWEI'" label="APP_Secret" prop="huaweiAppSecret">
-        <Input v-model="formValidate.huaweiAppSecret"/>
-      </FormItem>
-      <FormItem v-if="formValidate.type==='HUAWEI'" label="短信签名通道号" prop="huaweiSender">
-        <Input v-model="formValidate.huaweiSender"/>
-      </FormItem>
-      <FormItem v-if="formValidate.type==='HUAWEI'" label="短信签名" prop="huaweiSignature">
-        <Input v-model="formValidate.huaweiSignature"/>
-      </FormItem>
+      <el-form-item v-if="formValidate.type==='HUAWEI'" label="APP_Key" prop="huaweiAppKey">
+        <el-input v-model="formValidate.huaweiAppKey"/>
+      </el-form-item>
+      <el-form-item v-if="formValidate.type==='HUAWEI'" label="APP_Secret" prop="huaweiAppSecret">
+        <el-input v-model="formValidate.huaweiAppSecret"/>
+      </el-form-item>
+      <el-form-item v-if="formValidate.type==='HUAWEI'" label="短信签名通道号" prop="huaweiSender">
+        <el-input v-model="formValidate.huaweiSender"/>
+      </el-form-item>
+      <el-form-item v-if="formValidate.type==='HUAWEI'" label="短信签名" prop="huaweiSignature">
+        <el-input v-model="formValidate.huaweiSignature"/>
+      </el-form-item>
 
       <!--      腾讯云-->
-      <FormItem v-if="formValidate.type==='TENCENT'" label="用户的 SecretId" prop="tencentSecretId">
-        <Input v-model="formValidate.tencentSecretId"/>
-      </FormItem>
-      <FormItem v-if="formValidate.type==='TENCENT'" label="用户的 SecretKey" prop="tencentSecretKey">
-        <Input v-model="formValidate.tencentSecretKey"/>
-      </FormItem>
-      <FormItem v-if="formValidate.type==='TENCENT'" label="短信应用ID" prop="tencentSdkAppId">
-        <Input v-model="formValidate.tencentSdkAppId"/>
-      </FormItem>
-      <FormItem v-if="formValidate.type==='TENCENT'" label="短信签名" prop="tencentSignName">
-        <Input v-model="formValidate.tencentSignName"/>
-      </FormItem>
+      <el-form-item v-if="formValidate.type==='TENCENT'" label="用户的 SecretId" prop="tencentSecretId">
+        <el-input v-model="formValidate.tencentSecretId"/>
+      </el-form-item>
+      <el-form-item v-if="formValidate.type==='TENCENT'" label="用户的 SecretKey" prop="tencentSecretKey">
+        <el-input v-model="formValidate.tencentSecretKey"/>
+      </el-form-item>
+      <el-form-item v-if="formValidate.type==='TENCENT'" label="短信应用ID" prop="tencentSdkAppId">
+        <el-input v-model="formValidate.tencentSdkAppId"/>
+      </el-form-item>
+      <el-form-item v-if="formValidate.type==='TENCENT'" label="短信签名" prop="tencentSignName">
+        <el-input v-model="formValidate.tencentSignName"/>
+      </el-form-item>
 
       <div class="label-btns">
-        <Button type="primary" @click="submit('formValidate')">保存</Button>
+        <el-button type="primary" @click="submit('formValidate')">保存</el-button>
 
       </div>
-    </Form>
+    </el-form>
   </div>
 </template>
 <script>
+import { ElMessage } from "element-plus";
 import {setSetting} from "@/api/index";
 import {handleSubmit} from "./validate";
 
@@ -115,18 +116,19 @@ export default {
   methods: {
     // 保存
     submit(name) {
-      let that = this;
-      if (handleSubmit(that, name)) {
-        this.setupSetting()
-      }
+      handleSubmit(this, name)
+        .then(() => {
+          this.setupSetting();
+        })
+        .catch(() => {});
     },
     // 保存设置
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {
-          this.$Message.success("保存成功!");
+          ElMessage.success("保存成功!");
         } else {
-          this.$Message.error("保存失败!");
+          ElMessage.error("保存失败!");
         }
       });
     },
@@ -138,7 +140,7 @@ export default {
         this.result[item] += "";
       });
 
-      this.$set(this, "formValidate", {...this.result});
+      this.formValidate = { ...this.result };
       Object.keys(this.formValidate).forEach((item) => {
         this.ruleValidate[item] = [
           {
@@ -160,12 +162,12 @@ export default {
   display: flex;
 }
 
-::v-deep .ivu-input {
+:deep(.el-input){
   width: 300px !important;
   margin: 0 10px;
 }
 
-.ivu-input-wrapper {
+.el-input {
   width: 300px;
   margin-right: 10px;
 }

@@ -78,21 +78,14 @@
 </template>
 
 <script>
-import Vue from 'vue'
 import { SvgNotData } from '@/core/icons'
-import { Progress } from 'element-ui'
-Vue.use(Progress)
-
 import { ServeFindFileSplitInfo, ServeFileSubareaUpload } from '@/api/upload'
 import { formatSize, getFileExt, parseTime } from '@/utils/functions'
 import { ServeSendTalkFile } from '@/api/chat'
 
 export default {
   name: 'MeEditorFileManage',
-  model: {
-    prop: 'show',
-    event: 'close',
-  },
+  emits: ['close', 'update:show'],
   props: {
     show: Boolean,
   },
@@ -141,6 +134,7 @@ export default {
   },
   methods: {
     closeBox() {
+      this.$emit('update:show', false)
       this.$emit('close', false)
     },
 

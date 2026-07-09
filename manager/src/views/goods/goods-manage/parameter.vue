@@ -1,55 +1,73 @@
 <template>
   <div class="search">
-    <Card>
-      <Form
+    <el-card>
+      <el-form
         ref="searchForm"
-        @submit.native.prevent
-        @keydown.enter.native="handleSearch"
         :model="searchForm"
         inline
-        :label-width="70"
+        label-width="70px"
         class="search-form"
+        @keyup.enter="handleSearch"
       >
-        <Form-item label="参数名称">
-          <Input
-            type="text"
+        <el-form-item label="参数名称">
+          <el-input
             v-model="searchForm.paramName"
             placeholder="请输入参数名称"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Button @click="handleSearch" type="primary">搜索</Button>
-      </Form>
-    </Card>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
-    <Card>
-      <Row class="operation padding-row">
-        <Button @click="goAdd" type="primary">添加</Button>
-      </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table"></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+    <el-card>
+      <div class="operation padding-row">
+        <el-button type="primary" @click="goAdd">添加</el-button>
+      </div>
+      <el-table v-loading="loading" border :data="data" ref="table" style="width: 100%">
+        <el-table-column prop="paramName" label="参数名称" width="300" />
+        <el-table-column prop="options" label="参数值" min-width="260" show-overflow-tooltip />
+        <el-table-column label="必填" width="300" align="center">
+          <template #default="{ row }">
+            <span v-if="row">{{ isTruthyFlag(row.required) ? "是" : "否" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="可索引" width="300" align="center">
+          <template #default="{ row }">
+            <span v-if="row">{{ isTruthyFlag(row.isIndex) ? "是" : "否" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="300" align="center" fixed="right">
+          <template #default="{ row }">
+            <div v-if="row">
+              <a class="link-text" @click="goEdit(row)">编辑</a>
+              <span class="op-split">|</span>|<span class="op-split">|</span>
+              <a class="link-text" @click="remove(row)">删除</a>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 <script>
-import {
-  deleteParams,
-  getGoodsParamsPage,
-} from "@/api/goods";
+import { deleteParams, getGoodsParamsPage } from "@/api/goods";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   name: "categoryParams",
@@ -66,90 +84,12 @@ export default {
         paramName: "",
       },
       data: [],
-      columns: [
-        {
-          title: "参数名称",
-          key: "paramName",
-          width: 300,
-          resizable: true,
-          sortable: false,
-        },
-        {
-          title: "参数值",
-          key: "options",
-          minWidth: 260,
-          tooltip: true,
-        },
-        {
-          title: "必填",
-          key: "required",
-          width: 300,
-          align: "center",
-          render: (h, params) => {
-            const val = params.row.required;
-            const on = val === 1 || val === "1" || val === true;
-            return h("span", on ? "是" : "否");
-          },
-        },
-        {
-          title: "可索引",
-          key: "isIndex",
-          width: 300,
-          align: "center",
-          render: (h, params) => {
-            const val = params.row.isIndex;
-            const on = val === 1 || val === "1" || val === true;
-            return h("span", on ? "是" : "否");
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          width: 300,
-          align: "center",
-          fixed: "right",
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.goEdit(params.row);
-                    },
-                  },
-                },
-                "编辑"
-              ),
-              h("span", { style: { margin: "0 8px", color: "#dcdee2" } }, "|"),
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.remove(params.row);
-                    },
-                  },
-                },
-                "删除"
-              ),
-            ]);
-          },
-        },
-      ],
     };
   },
   methods: {
+    isTruthyFlag(val) {
+      return val === 1 || val === "1" || val === true;
+    },
     init() {
       this.getDataList();
     },
@@ -188,20 +128,14 @@ export default {
       this.$router.push({ name: "goods-parameter-edit", query: { id: row.id } });
     },
     remove(row) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除 " + (row.paramName || "") + " ?",
-        loading: true,
-        onOk: () => {
-          deleteParams(row.id).then((res) => {
-            this.$Modal.remove();
-            if (res && res.success) {
-              this.$Message.success("删除成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("您确认要删除 " + (row.paramName || "") + " ?", "确认删除", { type: "warning" }).then(() => {
+        return deleteParams(row.id).then((res) => {
+          if (res && res.success) {
+            ElMessage.success("删除成功");
+            this.getDataList();
+          }
+        });
+      }).catch(() => {});
     },
   },
   mounted() {
@@ -209,4 +143,10 @@ export default {
   },
 };
 </script>
-<style lang="scss"></style>
+<style lang="scss">
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+</style>

@@ -1,6 +1,5 @@
 import Main from "@/views/Main.vue";
-
-const config = require('@/config/index')
+import config from "@/config/index";
 // 不作为Main组件的子页面展示的页面单独写，如下
 export const loginRouter = {
   path: "/login",
@@ -109,15 +108,17 @@ export const otherRouter = {
     },
     {
       path: "/floorList/main",
-      title: "编辑模板",
+      title: "移动装修",
       name: "main",
-      component: () => import("@/views/shop/wap/main.vue")
+      meta: { title: "移动装修" },
+      component: () => import("@/views/shop/wap/main.vue"),
     },
     {
       path: "/pcFloorList/main",
-      title: "编辑模板",
+      title: "PC装修",
       name: "renovation",
-      component: () => import("@/views/shop/renovation.vue")
+      meta: { title: "PC装修" },
+      component: () => import("@/views/shop/renovation.vue"),
     },
     {
       path: "order-complaint-detail",
@@ -140,28 +141,22 @@ export const otherRouter = {
       component: () => import("@/views/promotion/full-discount/full-discount-add.vue")
     },
     {
+      path: "flash-discount-add",
+      title: "限时直降",
+      name: "flash-discount-add",
+      component: () => import("@/views/promotion/flash-discount/flash-discount-add.vue")
+    },
+    {
+      path: "nth-item-discount-add",
+      title: "第N件优惠",
+      name: "nth-item-discount-add",
+      component: () => import("@/views/promotion/nth-item-discount/nth-item-discount-add.vue")
+    },
+    {
       path: "export-order-deliver",
       title: "发货",
       name: "export-order-deliver",
       component: () => import("@/views/order/order/exportOrderDeliver.vue")
-    },
-    {
-      path: "order-detail",
-      title: "订单详情",
-      name: "order-detail",
-      component: () => import("@/views/order/order/orderDetail.vue")
-    },
-    {
-      path: "/floorList/main",
-      title: "编辑模板",
-      name: "main",
-      component: () => import("@/views/shop/wap/main.vue")
-    },
-    {
-      path: "/pcFloorList/main",
-      title: "编辑模板",
-      name: "renovation",
-      component: () => import("@/views/shop/renovation.vue")
     },
     {
       path: "promotions/coupon-receive",
@@ -169,14 +164,12 @@ export const otherRouter = {
       name: "coupon-receive",
       component: () => import("@/views/promotion/coupon/coupon-receive.vue"),
     },
-    // {
-    //   path: "/*",
-    //   name: "error-404",
-    //   meta: {
-    //     title: "404-页面不存在"
-    //   },
-    //   component: () => import("@/views/error-page/404.vue")
-    // }
+    {
+      path: "shop-finance-summary",
+      title: "财务汇总",
+      name: "shop-finance-summary",
+      component: () => import("@/views/shop/finance/summary.vue")
+    }
   ]
 };
 

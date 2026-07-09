@@ -158,7 +158,7 @@ export function addEvaluation (params) {
     url: `/buyer/member/evaluation`,
     method: Method.POST,
     needToken: true,
-    params
+    data: params
   });
 }
 
@@ -205,6 +205,7 @@ export function couponList (params) {
     url: `/buyer/promotion/coupon`,
     method: Method.GET,
     needToken: true,
+    loading: false,
     params
   });
 }
@@ -297,7 +298,8 @@ export function cancelAfterSale (afterSaleSn) {
   return request({
     url: `/buyer/order/afterSale/cancel/${afterSaleSn}`,
     method: Method.POST,
-    needToken: true
+    needToken: true,
+    loading: false
   });
 }
 
@@ -425,7 +427,9 @@ export function distCash (params) {
     url: `/buyer/distribution/cash`,
     method: Method.POST,
     needToken: true,
-    params
+    params,
+    loading: false,
+    skipMessage: true
   });
 }
 

@@ -1,59 +1,81 @@
 <template>
-  <div class="verify-content" v-if="show" @mousemove="mouseMove" @mouseup="mouseUp" @click.stop>
-    <div class="imgBox" :style="{width:data.originalWidth+'px',height:data.originalHeight + 'px'}">
-      <img :src="data.backImage" style="width:100%;height:100%" alt="">
-      <img class="slider" :src="data.slidingImage" :style="{left:distance+'px',top:data.randomY+'px'}" :width="data.sliderWidth" :height="data.sliderHeight" alt="">
-      <Icon type="md-refresh" class="refresh" @click="init" />
+  <div
+    class="verify-content"
+    v-if="show"
+    @mousemove="mouseMove"
+    @mouseup="mouseUp"
+    @click.stop
+  >
+    <div
+      class="imgBox"
+      :style="{
+        width: data.originalWidth + 'px',
+        height: data.originalHeight + 'px',
+      }"
+    >
+      <img :src="data.backImage" style="width: 100%; height: 100%" alt="" />
+      <img
+        class="slider"
+        :src="data.slidingImage"
+        :style="{ left: distance + 'px', top: data.randomY + 'px' }"
+        :width="data.sliderWidth"
+        :height="data.sliderHeight"
+        alt=""
+      />
+      <el-icon class="refresh" @click="init"><Refresh /></el-icon>
     </div>
-    <div class="handle" :style="{width:data.originalWidth+'px'}">
-      <span class="bgcolor" :style="{width:distance + 'px',background:bgColor}"></span>
-      <span class="swiper" :style="{left:distance + 'px'}" @mousedown="mouseDown">
-        <Icon type="md-arrow-round-forward" />
+    <div class="handle" :style="{ width: data.originalWidth + 'px' }">
+      <span
+        class="bgcolor"
+        :style="{ width: distance + 'px', background: bgColor }"
+      ></span>
+      <span class="swiper" :style="{ left: distance + 'px' }" @mousedown="mouseDown">
+        <el-icon><DArrowRight /></el-icon>
       </span>
-      <span class="text">{{verifyText}}</span>
+      <span class="text">{{ verifyText }}</span>
     </div>
   </div>
 </template>
+
 <script>
-import { getVerifyImg, postVerifyImg } from './verify.js';
+import { Refresh, DArrowRight } from "@element-plus/icons-vue";
+import { getVerifyImg, postVerifyImg } from "./verify.js";
+
 export default {
+  components: { Refresh, DArrowRight },
   props: {
-    // 传入数据，判断是登录、注册、修改密码
     verifyType: {
-      defalut: 'LOGIN',
-      type: String
-    }
+      default: "LOGIN",
+      type: String,
+    },
   },
-  data () {
+  data() {
     return {
-      show: false, // 验证码显隐
-      type: 'LOGIN', // 请求类型
-      data: { // 验证码数据
-        backImage: '',
-        slidingImage: '',
+      show: false,
+      type: "LOGIN",
+      data: {
+        backImage: "",
+        slidingImage: "",
         originalHeight: 150,
         originalWidth: 300,
         sliderWidth: 60,
-        sliderHeight: 60
+        sliderHeight: 60,
       },
-      distance: 0, // 拼图移动距离
-      flag: false, // 判断滑块是否按下
-      downX: 0, // 鼠标按下位置
-      bgColor: '#04ad11', // 滑动背景颜色
-      verifyText: '拖动滑块解锁' // 文字提示
+      distance: 0,
+      flag: false,
+      downX: 0,
+      bgColor: "#04ad11",
+      verifyText: "拖动滑块解锁",
     };
   },
   methods: {
-    // 鼠标按下事件，开始拖动滑块
-    mouseDown (e) {
+    mouseDown(e) {
       this.downX = e.clientX;
       this.flag = true;
     },
-    // 鼠标移动事件，计算距离
-    mouseMove (e) {
+    mouseMove(e) {
       if (this.flag) {
-        let offset = e.clientX - this.downX;
-
+        const offset = e.clientX - this.downX;
         if (offset > this.data.originalWidth - 43) {
           this.distance = this.data.originalWidth - 43;
         } else if (offset < 0) {
@@ -63,65 +85,63 @@ export default {
         }
       }
     },
-    // 鼠标抬起事件，验证是否正确
-    mouseUp () {
+    mouseUp() {
       if (!this.flag) return false;
       this.flag = false;
-      let params = {
+      const params = {
         verificationEnums: this.type,
-        xPos: this.distance
+        xPos: this.distance,
       };
-      postVerifyImg(params).then(res => {
-        if (res.success) {
-          if (res.result) {
-            this.bgColor = 'green';
-            this.verifyText = '解锁成功';
-            this.$emit('change', { status: true, distance: this.distance });
+      postVerifyImg(params)
+        .then((res) => {
+          if (res.success) {
+            if (res.result) {
+              this.bgColor = "green";
+              this.verifyText = "解锁成功";
+              this.$emit("change", { status: true, distance: this.distance });
+            } else {
+              this.bgColor = "red";
+              this.verifyText = "解锁失败";
+              setTimeout(() => this.init(), 1000);
+              this.$emit("change", { status: false, distance: this.distance });
+            }
           } else {
-            this.bgColor = 'red';
-            this.verifyText = '解锁失败';
-            let that = this;
-            setTimeout(() => {
-              that.init();
-            }, 1000);
-            this.$emit('change', { status: false, distance: this.distance });
+            this.init();
           }
-        } else {
-          this.init()
-        }
-        
-      }).catch(()=>{
-        this.init()
-      });
+        })
+        .catch(() => {
+          this.init();
+        });
     },
-    init () { // 初始化数据
+    init() {
       this.flag = false;
       this.downX = 0;
       this.distance = 0;
-      this.bgColor = '#04ad11';
-      this.verifyText = '拖动滑块解锁';
-      getVerifyImg(this.type).then(res => {
+      this.bgColor = "#04ad11";
+      this.verifyText = "拖动滑块解锁";
+      getVerifyImg(this.type).then((res) => {
         if (res.result) {
           this.data = res.result;
           this.show = true;
         } else {
-          this.$Message.warning('请求失败请重试！')
+          this.$Message.warning("请求失败请重试！");
         }
       });
-    }
+    },
   },
   watch: {
     verifyType: {
       immediate: true,
-      handler: function (v) {
+      handler(v) {
         this.type = v;
-      }
-    }
-  }
+      },
+    },
+  },
 };
 </script>
+
 <style lang="scss" scoped>
-.verify-content{
+.verify-content {
   padding: 10px;
   background: #fff;
   border: 1px solid #eee;
@@ -174,9 +194,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    .ivu-icon {
-      font-size: 20px;
-    }
+    font-size: 20px;
   }
 
   .text {

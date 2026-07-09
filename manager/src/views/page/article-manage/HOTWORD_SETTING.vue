@@ -1,53 +1,91 @@
 <template>
   <div class="layout">
-    <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
-
-      <FormItem class="label-item" v-for="(point,index) in  formValidate.pointSettingItems" :key="index"
-                :label="'签到设置'+(index+1)">
-        <div class="label-item">
-
-          <InputNumber :min="1" v-model="point.day"></InputNumber>
-
-          <InputNumber :min="0" v-model="point.point"></InputNumber>
-
-          <Button ghost type="error" @click="delSign(point,index)">删除</Button>
-          <span class="ml_10">签到<span class="theme_color">{{ point.day }}</span>天，赠送<span
-            class="theme_color">{{ point.point }}</span>积分</span>
+    <el-form
+      ref="formValidate"
+      label-width="150px"
+      label-position="right"
+      :model="formValidate"
+      :rules="ruleValidate"
+    >
+      <el-form-item label="热词默认配置" prop="hotWordsSettingItems">
+        <div
+          class="item-label"
+          v-for="(item, index) in formValidate.hotWordsSettingItems"
+          :key="index"
+        >
+          <div>
+            <div class="item-keyword">
+              <div>热词：</div>
+              <el-input v-model="item.keywords" />
+            </div>
+            <div class="item-score">
+              <div>分数：</div>
+              <el-input-number :max="5" :min="0" v-model="item.score" />
+            </div>
+          </div>
+          <div>
+            <el-button type="primary" @click="formValidate.hotWordsSettingItems.splice(index, 1)">
+              删除
+            </el-button>
+          </div>
         </div>
+        <el-button @click="addSetItem">添加配置</el-button>
+      </el-form-item>
+      <el-form-item label="每日持久化热词数量" prop="saveNum">
+        <el-input-number :min="0" v-model="formValidate.saveNum" />
+      </el-form-item>
 
-      </FormItem>
-      <FormItem label="操作：">
-        <Button @click="addSign">新增签到</Button>
-      </FormItem>
       <div class="label-btns">
-        <Button type="primary" @click="submit('formValidate')">保存</Button>
+        <el-button type="primary" @click="submit('formValidate')">保存</el-button>
       </div>
-    </Form>
+    </el-form>
   </div>
 </template>
 
 <script>
-import {setSetting} from "@/api/index";
+import { setSetting } from "@/api/index";
 
 export default {
+  props: ["res", "type"],
   data() {
     return {
-      formValidate: {}, // 表单数据
+      ruleValidate: {},
+      formValidate: {
+        saveNum: 1,
+        hotWordsSettingItems: [
+          {
+            keywords: "",
+            score: 1,
+          },
+        ],
+      },
     };
   },
-  props: ["res", "type"],
   created() {
     this.init();
   },
   methods: {
-    // 保存
-    submit(name) {
-      let that = this;
-      this.setupSetting();
+    addSetItem() {
+      if (this.formValidate.hotWordsSettingItems.length >= 5) {
+        this.$Message.error("最多5个热词项");
+      } else {
+        this.formValidate.hotWordsSettingItems.push({
+          keywords: "",
+          score: 1,
+        });
+      }
     },
-    // 保存设置
+    submit(name) {
+      this.$refs[name].validate((valid) => {
+        if (valid) {
+          this.setupSetting();
+        } else {
+          this.$Message.error("请正确填写内容!");
+        }
+      });
+    },
     setupSetting() {
-      setSetting(this.type, this.formValidate).then((res) => {
+      setSetting(this.type || "HOT_WORDS", this.formValidate).then((res) => {
         if (res.success) {
           this.$Message.success("保存成功!");
         } else {
@@ -55,52 +93,14 @@ export default {
         }
       });
     },
-    delSign(item, index) {
-      this.formValidate.pointSettingItems.splice(index, 1);
-    },
-    addSign() {
-      if (this.formValidate.pointSettingItems.length >= 5) {
-        this.$Message.error({
-          content: "最多设置5项签到设置",
-        });
-        return false;
-      }
-      this.formValidate.pointSettingItems.push({
-        point: "0",
-        day: this.formValidate.pointSettingItems.length,
-      });
-    },
-    // 实例化数据
     init() {
-      this.res = JSON.parse(this.res);
-      Object.keys(this.res).map((item) => {
-        if (item == "pointSettingItems") {
-          return false;
-        }
-        this.res[item] += "";
-      });
-
-      this.$set(this, "formValidate", {...this.res});
-
-      Object.keys(this.formValidate).forEach((item) => {
-        this.ruleValidate[item] = [
-          {
-            required: true,
-            message: "请填写必填项",
-            trigger: "blur",
-          },
-          {
-            validator: (rule, value, callback) => {
-              if (value < 0) {
-                callback(new Error("不能输入负数！"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "change",
-          },
-        ];
-      });
+      if (!this.res) {
+        return;
+      }
+      const parsed = typeof this.res === "string" ? JSON.parse(this.res) : this.res;
+      if (parsed.hotWordsSettingItems) {
+        this.formValidate = { ...parsed };
+      }
     },
   },
 };
@@ -109,37 +109,27 @@ export default {
 <style lang="scss" scoped>
 @import "./style.scss";
 
-.label-item {
+.item-label {
+  border-bottom: 1px solid #ededed;
+  margin-bottom: 10px;
   display: flex;
+  align-items: center;
+  width: 500px;
+  justify-content: space-between;
+}
 
-  > .ivu-input-number {
-    width: 100px;
-    margin-right: 5px;
-  }
+.item-keyword,
+.item-score {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
 
-  > .ivu-input-number:nth-last-of-type(1) {
-    width: 150px;
-    margin-right: 5px;
-  }
-
-  > .ivu-input {
-    width: 100px;
-    margin: 0 10px;
+  > div {
+    margin-right: 20px;
   }
 }
 
-::v-deep .ivu-input {
-  width: 70px !important;
-}
-
-.ivu-input-wrapper {
-  width: 70px;
-  margin-right: 10px;
-}
-
-.label-btns {
-  ::v-deep .ivu-btn {
-    margin-right: 10px;
-  }
+.item-keyword .el-input {
+  width: 200px;
 }
 </style>

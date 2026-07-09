@@ -1,134 +1,133 @@
 <template>
   <div class="search">
-    <Card style="margin-left: 10px">
-      <Tabs v-model="type" @on-click="handleClickType">
-        <TabPane label="基本信息" name="INFO">
-          <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
-            <FormItem label="店铺名称">
-              <Input v-model="storeName" disabled clearable style="width: 20%" />
-            </FormItem>
-            <FormItem label="店铺地址" prop="storeAddressPath">
+    <el-card style="margin-left: 10px">
+      <el-tabs v-model="type" @click="handleClickType">
+        <el-tab-pane label="基本信息" name="INFO">
+          <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+            <el-form-item label="店铺名称">
+              <el-input v-model="storeName" disabled clearable style="width: 20%" />
+            </el-form-item>
+            <el-form-item label="店铺地址" prop="storeAddressPath">
               <span>{{ form.storeAddressPath }}</span>
-              <Button style="margin-left: 10px;" @click="handleChangeAddress('storeAddress')">选择</Button>
-            </FormItem>
-            <FormItem label="详细地址" prop="shopAddressDetail">
-              <Input v-model="form.storeAddressDetail" clearable style="width: 20%" maxlength="50" />
-            </FormItem>
-            <FormItem label="店铺LOGO">
+              <el-button style="margin-left: 10px;" @click="handleChangeAddress('storeAddress')">选择</el-button>
+            </el-form-item>
+            <el-form-item label="详细地址" prop="shopAddressDetail">
+              <el-input v-model="form.storeAddressDetail" clearable style="width: 20%" maxlength="50" />
+            </el-form-item>
+            <el-form-item label="店铺LOGO">
               <upload-pic-thumb v-model="form.storeLogo" :multiple="false"></upload-pic-thumb>
-            </FormItem>
-            <FormItem label="店铺简介" prop="content" class="wangEditor">
-              <Input type="textarea" :rows="8" v-model="form.storeDesc" style="width: 30%"></Input>
-            </FormItem>
-            <FormItem label="店铺楼层" prop="content" class="wangEditor">
-              <i-switch v-model="form.pageShow" @on-change="pageShow"></i-switch>
+            </el-form-item>
+            <el-form-item label="店铺简介" prop="content" class="wangEditor">
+              <el-input type="textarea" :rows="8" v-model="form.storeDesc" style="width: 30%"></el-input>
+            </el-form-item>
+            <el-form-item label="店铺楼层" prop="content" class="wangEditor">
+              <el-switch v-model="form.pageShow" @change="pageShow" />
               <span class="desc">店铺楼层装修是否开启，开启后移动端PC端将会自动展示装修的内容</span>
-            </FormItem>
-            <FormItem label="开启自提" prop="content" class="wangEditor">
-              <i-switch v-model="form.selfPickFlag" @on-change="changeSelfPickFlag"></i-switch>
+            </el-form-item>
+            <el-form-item label="开启自提" prop="content" class="wangEditor">
+              <el-switch v-model="form.selfPickFlag" @change="changeSelfPickFlag" />
               <span class="desc">店铺是否开启自提功能</span>
-            </FormItem>
-            <Form-item>
-              <Button @click="handleSubmit" :loading="submitLoading" type="primary" style="margin-right: 5px">修改
-              </Button>
-            </Form-item>
-          </Form>
-        </TabPane>
-        <TabPane label="发货地址">
-          <Form ref="addressGoods" :model="addressGoods" :label-width="100" :rules="addressGoodsValidate">
-            <FormItem label="发货人姓名" prop="salesConsignorName">
-              <Input v-model="addressGoods.salesConsignorName" maxlength="11" clearable style="width: 20%">
-              </Input>
-            </FormItem>
-            <FormItem label="发货人手机号" prop="salesConsignorMobile">
-              <Input v-model="addressGoods.salesConsignorMobile" maxlength="11" clearable style="width: 20%">
-              </Input>
-            </FormItem>
-            <FormItem label="地址" prop="salesConsignorAddressId">
+            </el-form-item>
+            <el-form-item>
+              <el-button @click="handleSubmit" :loading="submitLoading" type="primary" style="margin-right: 5px">修改
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+        <el-tab-pane label="发货地址">
+          <el-form ref="addressGoods" :model="addressGoods" label-width="120px" :rules="addressGoodsValidate" class="shop-setting-form">
+            <el-form-item label="发货人姓名" prop="salesConsignorName">
+              <el-input v-model="addressGoods.salesConsignorName" maxlength="11" clearable style="width: 20%">
+              </el-input>
+            </el-form-item>
+            <el-form-item label="发货人手机号" prop="salesConsignorMobile">
+              <el-input v-model="addressGoods.salesConsignorMobile" maxlength="11" clearable style="width: 20%">
+              </el-input>
+            </el-form-item>
+            <el-form-item label="地址" prop="salesConsignorAddressId">
               <span>{{ addressGoods.salesConsignorAddressPath }}</span>
-              <Button style="margin-left: 10px;" @click="handleChangeAddress('addressGoods')">选择</Button>
-            </FormItem>
-            <!-- <FormItem label="地址名称" prop="salesConsignorAddressPath">
-              <Input
+              <el-button style="margin-left: 10px;" @click="handleChangeAddress('addressGoods')">选择</el-button>
+            </el-form-item>
+            <!-- <el-form-item label="地址名称" prop="salesConsignorAddressPath">
+              <el-input
                 v-model="addressGoods.salesConsignorAddressPath"
                 clearable
                 style="width: 20%"
               >
-              </Input>
-            </FormItem> -->
-            <FormItem label="详细地址" prop="salesConsignorDetail">
-              <Input v-model="addressGoods.salesConsignorDetail" clearable style="width: 20%">
-              </Input>
-            </FormItem>
-            <Button @click="setAddressGoods" type="primary" style="margin-left: 8px">确认
-            </Button>
-          </Form>
-        </TabPane>
-        <TabPane label="退货地址" name="REFUND_GOODS_ADDRESS">
-          <Form ref="addressForm" :model="addressForm" :label-width="100" :rules="afterFormValidate">
-            <FormItem label="收货人" prop="salesConsigneeName">
-              <Input v-model="addressForm.salesConsigneeName" maxlength="11" clearable style="width: 20%" />
-            </FormItem>
-            <FormItem label="收货人电话" prop="salesConsigneeMobile">
-              <Input v-model="addressForm.salesConsigneeMobile" maxlength="11" style="width: 20%" />
-            </FormItem>
-            <FormItem label="售后地址">
+              </el-input>
+            </el-form-item> -->
+            <el-form-item label="详细地址" prop="salesConsignorDetail">
+              <el-input v-model="addressGoods.salesConsignorDetail" clearable style="width: 20%">
+              </el-input>
+            </el-form-item>
+            <el-button @click="setAddressGoods" type="primary" style="margin-left: 8px">确认
+            </el-button>
+          </el-form>
+        </el-tab-pane>
+        <el-tab-pane label="退货地址" name="REFUND_GOODS_ADDRESS">
+          <el-form ref="addressForm" :model="addressForm" label-width="100px" :rules="afterFormValidate">
+            <el-form-item label="收货人" prop="salesConsigneeName">
+              <el-input v-model="addressForm.salesConsigneeName" maxlength="11" clearable style="width: 20%" />
+            </el-form-item>
+            <el-form-item label="收货人电话" prop="salesConsigneeMobile">
+              <el-input v-model="addressForm.salesConsigneeMobile" maxlength="11" style="width: 20%" />
+            </el-form-item>
+            <el-form-item label="售后地址">
               <span>{{ addressForm.salesConsigneeAddressPath }}</span>
-              <Button style="margin-left: 10px;" @click="handleChangeAddress('salesConsigneeAddressPath')">选择</Button>
-            </FormItem>
-            <FormItem label="详细地址" prop="salesConsigneeDetail">
-              <Input v-model="addressForm.salesConsigneeDetail" clearable style="width: 20%" maxlength="50" />
-            </FormItem>
+              <el-button style="margin-left: 10px;" @click="handleChangeAddress('salesConsigneeAddressPath')">选择</el-button>
+            </el-form-item>
+            <el-form-item label="详细地址" prop="salesConsigneeDetail">
+              <el-input v-model="addressForm.salesConsigneeDetail" clearable style="width: 20%" maxlength="50" />
+            </el-form-item>
 
-            <Form-item>
-              <Button @click="afterHandleSubmit" :loading="submitLoading" type="primary" style="margin-right: 5px">修改
-              </Button>
-            </Form-item>
-          </Form>
-        </TabPane>
-        <TabPane label="库存预警" name="STOCK_WARNING">
-          <Form ref="stockWarningForm" :model="stockWarningForm" :label-width="100" :rules="stockWarningFormValidate">
-            <FormItem label="预警数" prop="stockWarning">
-              <InputNumber :min="0" :max="99999" v-model="stockWarningForm.stockWarning" type="number" maxlength="6"
-                clearable style="width: 20%" />
-            </FormItem>
+            <el-form-item>
+              <el-button @click="afterHandleSubmit" :loading="submitLoading" type="primary" style="margin-right: 5px">修改
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+        <el-tab-pane label="库存预警" name="STOCK_WARNING">
+          <el-form ref="stockWarningForm" :model="stockWarningForm" label-width="100px" :rules="stockWarningFormValidate">
+            <el-form-item label="预警数" prop="stockWarning">
+              <el-input-number :min="0" :max="99999" v-model="stockWarningForm.stockWarning" style="width: 20%" />
+            </el-form-item>
 
-            <Form-item>
-              <Button @click="stockWarningHandleSubmit" :loading="submitLoading" type="primary"
+            <el-form-item>
+              <el-button @click="stockWarningHandleSubmit" :loading="submitLoading" type="primary"
                 style="margin-right: 5px">修改
-              </Button>
-            </Form-item>
-          </Form>
-        </TabPane>
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
         <!-- Udesk 坐席功能 后续维护 -->
-        <!-- <TabPane label="客服设置" name="UDESK">
-          <Form
+        <!-- <el-tab-pane label="客服设置" name="UDESK">
+          <el-form
             ref="udeskForm"
             :model="udeskForm"
-            :label-width="100"
+            label-width="100px"
             :rules="udeskFormValidate"
           >
-            <FormItem label="坐席id" prop="merchantEuid">
-              <Input
+            <el-form-item label="坐席id" prop="merchantEuid">
+              <el-input
                 v-model="udeskForm.merchantEuid"
                 maxlength="30"
                 clearable
                 style="width: 20%"
               />
-            </FormItem>
-            <Form-item>
-              <Button
+            </el-form-item>
+            <el-form-item>
+              <el-button
                 @click="merchantSubmit"
                 :loading="submitLoading"
                 type="primary"
                 style="margin-right: 5px"
                 >修改
-              </Button>
-            </Form-item>
-          </Form>
-        </TabPane> -->
-      </Tabs>
-    </Card>
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane> -->
+      </el-tabs>
+    </el-card>
 
     <multipleMap ref="map" @callback="callbackAddress" />
   </div>
@@ -482,5 +481,16 @@ export default {
 .desc {
   margin-left: 10px;
   color: #999;
+}
+
+.shop-setting-form {
+  :deep(.el-form-item) {
+    align-items: center;
+  }
+
+  :deep(.el-form-item__label) {
+    white-space: nowrap;
+    line-height: 32px;
+  }
 }
 </style>

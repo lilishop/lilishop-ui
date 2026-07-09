@@ -1,12 +1,12 @@
 <template>
   <div>
-    <Card :loading="detailLoading">
-      <Form ref="form" :model="form" :label-width="130" :rules="onlyView ? {} : formRule">
+    <el-card v-loading="detailLoading">
+      <el-form ref="form" :model="form" label-width="130px" :rules="onlyView ? {} : formRule">
         <div class="base-info-item">
           <h4>{{ pageTitle }}</h4>
           <div class="form-item-view gift-card-activity-form">
-            <FormItem label="礼品卡名称" prop="giftCardName">
-              <Input
+            <el-form-item label="礼品卡名称" prop="giftCardName">
+              <el-input
                 v-model="form.giftCardName"
                 type="text"
                 placeholder="请输入礼品卡名称"
@@ -16,15 +16,15 @@
                 style="width: 360px"
                 :disabled="onlyView"
               />
-            </FormItem>
-            <FormItem label="礼品卡类型" prop="cardType" class="gift-card-type-form-item">
-              <RadioGroup v-model="form.cardType" class="gift-card-type-group">
-                <Radio label="CASH" :disabled="onlyView">现金卡</Radio>
-                <Radio label="PICKUP" disabled>提货卡</Radio>
-              </RadioGroup>
-            </FormItem>
-            <FormItem label="面值" prop="faceValue">
-              <Input
+            </el-form-item>
+            <el-form-item label="礼品卡类型" prop="cardType" class="gift-card-type-form-item">
+              <el-radio-group v-model="form.cardType" class="gift-card-type-group">
+                <el-radio value="CASH" :disabled="onlyView">现金卡</el-radio>
+                <el-radio value="PICKUP" disabled>提货卡</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="面值" prop="faceValue">
+              <el-input
                 v-model="form.faceValue"
                 type="text"
                 placeholder="面值"
@@ -32,9 +32,9 @@
                 style="width: 200px"
                 :disabled="onlyView"
               />
-            </FormItem>
-            <FormItem label="总库存" prop="stockTotal">
-              <InputNumber
+            </el-form-item>
+            <el-form-item label="总库存" prop="stockTotal">
+              <el-input-number
                 v-model="form.stockTotal"
                 :min="1"
                 :precision="0"
@@ -42,21 +42,21 @@
                 style="width: 200px"
                 :disabled="onlyView"
               />
-            </FormItem>
-            <FormItem prop="validityType" :label-width="0" class="gift-card-validity-form-item">
+            </el-form-item>
+            <el-form-item prop="validityType" :label-width="0" class="gift-card-validity-form-item">
               <div class="gift-card-validity-outer">
                 <div class="gift-card-validity-label-col">
                   <span v-if="!onlyView" class="gift-card-validity-required">*</span>
                   <span>有效期</span>
                 </div>
                 <div class="gift-card-validity-radios">
-                  <RadioGroup v-model="form.validityType" vertical class="gift-card-validity-group">
-                    <Radio label="LONG_TERM" class="gift-card-validity-row" :disabled="onlyView"
-                      >长期有效</Radio
+                  <el-radio-group v-model="form.validityType" class="gift-card-validity-group">
+                    <el-radio value="LONG_TERM" class="gift-card-validity-row" :disabled="onlyView"
+                      >长期有效</el-radio
                     >
-                    <Radio label="AFTER_ACTIVATE_MONTHS" class="gift-card-validity-row" :disabled="onlyView">
+                    <el-radio value="AFTER_ACTIVATE_MONTHS" class="gift-card-validity-row" :disabled="onlyView">
                       <span>自激活后</span>
-                      <InputNumber
+                      <el-input-number
                         v-model="form.validMonthsAfterActivate"
                         :min="1"
                         :max="99"
@@ -66,39 +66,39 @@
                         class="gift-card-validity-input-gap"
                       />
                       <span>月内有效</span>
-                    </Radio>
-                    <Radio label="FIXED_UNTIL" class="gift-card-validity-row" :disabled="onlyView">
+                    </el-radio>
+                    <el-radio value="FIXED_UNTIL" class="gift-card-validity-row" :disabled="onlyView">
                       <span>指定有效期至</span>
-                      <DatePicker
+                      <el-date-picker
                         v-model="form.validEndTime"
                         type="datetime"
-                        format="yyyy-MM-dd HH:mm:ss"
+                        format="YYYY-MM-DD HH:mm:ss"
+                        value-format="YYYY-MM-DD HH:mm:ss"
                         placeholder="选择结束时间"
                         clearable
-                        transfer
                         :disabled="onlyView || form.validityType !== 'FIXED_UNTIL'"
                         class="gift-card-validity-date-gap"
                         style="width: 220px"
                       />
-                    </Radio>
-                  </RadioGroup>
+                    </el-radio>
+                  </el-radio-group>
                 </div>
               </div>
-            </FormItem>
+            </el-form-item>
           </div>
           <div class="foot-btn">
-            <Button style="margin-right: 8px" @click="closeCurrentPage">返回</Button>
-            <Button
+            <el-button style="margin-right: 8px" @click="closeCurrentPage">返回</el-button>
+            <el-button
               v-if="!onlyView"
               type="primary"
               :loading="submitLoading"
               @click="handleSubmit"
-              >提交</Button
+              >提交</el-button
             >
           </div>
         </div>
-      </Form>
-    </Card>
+      </el-form>
+    </el-card>
   </div>
 </template>
 
@@ -225,7 +225,10 @@ export default {
           this.form.stockTotal =
             d.stockTotal !== null && d.stockTotal !== undefined ? d.stockTotal : null;
           this.form.validityType = d.validityType || "LONG_TERM";
-          this.form.validEndTime = this.parseDetailDate(d.validEndTime);
+          const endDate = this.parseDetailDate(d.validEndTime);
+          this.form.validEndTime = endDate
+            ? this.$filters.unixToDate(endDate.getTime() / 1000)
+            : null;
           this.form.validMonthsAfterActivate =
             d.validMonthsAfterActivate !== null &&
             d.validMonthsAfterActivate !== undefined &&
@@ -271,7 +274,10 @@ export default {
         stockTotal: this.form.stockTotal,
       };
       if (payload.validityType === "FIXED_UNTIL") {
-        payload.validEndTime = this.form.validEndTime;
+        const endDate = new Date(this.form.validEndTime);
+        payload.validEndTime = Number.isNaN(endDate.getTime())
+          ? this.form.validEndTime
+          : endDate.getTime();
       }
       if (payload.validityType === "AFTER_ACTIVATE_MONTHS") {
         payload.validMonthsAfterActivate = this.form.validMonthsAfterActivate;
@@ -313,26 +319,22 @@ export default {
 </script>
 
 <style scoped>
-.gift-card-activity-form >>> .ivu-form-item {
+.gift-card-activity-form :deep(.el-form-item) {
   margin-bottom: 26px;
 }
-.gift-card-type-form-item >>> .ivu-form-item-label {
+.gift-card-type-form-item :deep(.el-form-item__label) {
   line-height: 32px;
   padding-top: 1px;
 }
-.gift-card-type-form-item >>> .ivu-form-item-content {
+.gift-card-type-form-item :deep(.el-form-item__content) {
   display: flex;
   align-items: center;
   min-height: 32px;
 }
-.gift-card-type-group >>> .ivu-radio-wrapper {
-  margin-right: 32px;
-  line-height: 32px;
-  display: inline-flex !important;
-  align-items: center;
-  vertical-align: middle;
+.gift-card-type-group {
+  gap: 20px;
 }
-.gift-card-validity-form-item >>> .ivu-form-item-content {
+.gift-card-validity-form-item :deep(.el-form-item__content) {
   margin-left: 0 !important;
 }
 .gift-card-validity-outer {
@@ -364,32 +366,30 @@ export default {
   padding-top: 1px;
 }
 .gift-card-validity-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
   padding-top: 0;
   padding-bottom: 0;
 }
-.gift-card-type-group >>> .ivu-radio {
+.gift-card-validity-group :deep(.el-radio) {
   display: inline-flex;
   align-items: center;
-  line-height: 1;
-}
-.gift-card-validity-group >>> .ivu-radio {
-  display: inline-flex;
-  align-items: center;
-  line-height: 1;
-}
-.gift-card-validity-group >>> .ivu-radio-wrapper:first-child {
-  margin-top: 0;
-}
-.gift-card-validity-group >>> .ivu-radio-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  margin-right: 0;
   margin-bottom: 10px;
   line-height: 32px;
   min-height: 32px;
+  height: auto;
 }
-.gift-card-validity-group >>> .ivu-radio-wrapper:last-child {
+.gift-card-validity-group :deep(.el-radio:last-child) {
   margin-bottom: 0;
+}
+.gift-card-validity-group :deep(.el-radio__label) {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  line-height: 32px;
 }
 .gift-card-validity-input-gap {
   width: 168px;

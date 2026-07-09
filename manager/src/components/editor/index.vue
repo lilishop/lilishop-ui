@@ -122,7 +122,7 @@ export default {
   deactivated() {
     this.destroyTinymce();
   },
-  destroyed() {
+  unmounted() {
     this.destroyTinymce();
   },
 };

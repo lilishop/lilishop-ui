@@ -1,205 +1,148 @@
-
 <template>
   <div class="search">
-    <Card>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
+    <el-card>
+      <el-table
         ref="table"
-      ></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
-          :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
-          size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
-    <!-- 修改模态框 -->
-    <Modal v-model="formValidate" title="详细信息" width="500">
-      <Form
-        ref="formValidate"
-        :model="form"
-        :label-width="80"
+        v-loading="loading"
+        border
+        :data="data"
+        style="width: 100%"
       >
-        <FormItem label="用户名" prop="userName">
-          <span> {{form.userName}}</span>
-        </FormItem>
-        <FormItem label="手机号码" prop="mobile">
-          <span> {{form.mobile}}</span>
-        </FormItem>
-        <FormItem label="类型" prop="type">
+        <el-table-column prop="userName" label="会员名称" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="mobile" label="手机号码" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="context" label="反馈内容" min-width="380" show-overflow-tooltip />
+        <el-table-column label="类型" min-width="120">
+          <template #default="{ row }">
+            <span v-if="row">
+              <span v-if="row.type == 'FUNCTION'">功能建议</span>
+              <span v-else-if="row.type == 'OPTIMIZE'">优化反馈</span>
+              <span v-else-if="row.type == 'OTHER'">其他意见</span>
+              <span v-else>未知意见</span>
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" width="170" sortable />
+        <el-table-column label="操作" width="130" align="center">
+          <template #default="{ row }">
+            <div v-if="row" class="ops">
+              <a class="link-text" @click="detail(row)">查看</a>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
+
+    <el-dialog v-model="detailVisible" title="详细信息" width="500px" destroy-on-close>
+      <el-form ref="formValidate" :model="form" label-width="80px">
+        <el-form-item label="用户名" prop="userName">
+          <span>{{ form.userName }}</span>
+        </el-form-item>
+        <el-form-item label="手机号码" prop="mobile">
+          <span>{{ form.mobile }}</span>
+        </el-form-item>
+        <el-form-item label="类型" prop="type">
           <span v-if="form.type == 'FUNCTION'">功能建议</span>
           <span v-if="form.type == 'OPTIMIZE'">优化反馈</span>
           <span v-if="form.type == 'OTHER'">其他意见</span>
-        </FormItem>
-        <FormItem label="反馈内容" prop="context">
-          <Input style="width: 85%" v-model="form.context" type="textarea" disabled :autosize="{minRows: 3,maxRows: 5}"
-          ></Input>
-        </FormItem>
-        <FormItem label="相关材料" prop="images">
-          <div v-if="form.images == null">
-            暂无
-          </div>
+        </el-form-item>
+        <el-form-item label="反馈内容" prop="context">
+          <el-input
+            v-model="form.context"
+            type="textarea"
+            disabled
+            :autosize="{ minRows: 3, maxRows: 5 }"
+            style="width: 85%"
+          />
+        </el-form-item>
+        <el-form-item label="相关材料" prop="images">
+          <div v-if="form.images == null">暂无</div>
           <div v-else>
-            <span v-for="(item, index) in this.form.images.split(',')" :key="index">
-              <Avatar shape="square" icon="ios-person" size="large" style="width: 80px;height: 90px;margin-right: 5px" :src="item"
-              />
-            </span>
+            <el-avatar
+              v-for="(item, index) in form.images.split(',')"
+              :key="index"
+              shape="square"
+              :size="80"
+              :src="item"
+              style="margin-right: 5px"
+            />
           </div>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="formValidate = false">取消</Button>
-      </div>
-    </Modal>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="detailVisible = false">取消</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-  import {
-    getMemberFeedback,
-    getMemberFeedbackDetail
-  } from "@/api/other";
+import { getMemberFeedback, getMemberFeedbackDetail } from "@/api/other";
 
-  export default {
-    name: "feedback",
-    data() {
-      return {
-        loading: true, // 加载状态
-        form: {}, // 表单数据
-        searchForm: { // 请求参数
-          pageNumber: 1,
-          pageSize: 20,
-          sort: "createTime",
-          order: "desc",
-        },
-        formValidate: false, // modal显隐
-        columns: [ // 表头
-          {
-            title: "会员名称",
-            key: "userName",
-            minWidth: 120,
-            tooltip: true
-
-          },
-          {
-            title: "手机号码",
-            key: "mobile",
-            minWidth: 120,
-            tooltip: true
-
-          },
-          {
-            title: "反馈内容",
-            key: "context",
-            minWidth: 380,
-            tooltip: true
-          },
-          {
-            title: "类型",
-            key: "type",
-            minWidth: 120,
-            render: (h, params) => {
-              if (params.row.type == "FUNCTION") {
-                return h('div', [h('span', {}, "功能建议")]);
-              } else if (params.row.type == "OPTIMIZE") {
-                return h('div', [h('span', {}, "优化反馈")]);
-              } else if (params.row.type == "OTHER") {
-                return h('div', [h('span', {}, "其他意见")]);
-              } else {
-                return h('div', [h('span', {}, "未知意见")]);
-              }
-            }
-          },
-          {
-            title: "创建时间",
-            key: "createTime",
-            width: 170,
-            sortable: true,
-          },
-          {
-            title: "操作",
-            key: "action",
-            align: "center",
-            width: 130,
-            render: (h, params) => {
-              return h("div", { class: "ops" }, [
-                h(
-                  "a",
-                  {
-                    on: {
-                      click: () => {
-                        this.detail(params.row);
-                      },
-                    },
-                  },
-                  "查看"
-                )
-              ]);
-            },
-          },
-        ],
-        data: [], // 表格数据
-        total: 0 // 数据总数
-
-      };
+export default {
+  name: "feedback",
+  data() {
+    return {
+      loading: true,
+      form: {},
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+      },
+      detailVisible: false,
+      data: [],
+      total: 0,
+    };
+  },
+  methods: {
+    init() {
+      this.getFeedback();
     },
-    methods: {
-      // 初始化数据
-      init() {
-        this.getFeedback();
-      },
-      // 分页 修改页码
-      changePage(v) {
-        this.searchForm.pageNumber = v;
-        this.getFeedback();
-      },
-      // 分页 修改页数
-      changePageSize(v) {
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = v;
-        this.getFeedback();
-      },
-      /**
-       * 查询意见反馈
-       */
-      getFeedback() {
-        this.loading = true;
-        getMemberFeedback(this.searchForm).then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        });
-      },
-      /**
-       * 投诉建议详细
-       */
-      detail(v) {
-        getMemberFeedbackDetail(v.id).then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.$set(this, "form", res.result);
-            this.formValidate = true
-          }
-        });
-      }
+    changePage() {
+      this.getFeedback();
     },
-    mounted() {
-      this.init();
+    changePageSize() {
+      this.searchForm.pageNumber = 1;
+      this.getFeedback();
     },
-  };
+    getFeedback() {
+      this.loading = true;
+      getMemberFeedback(this.searchForm).then((res) => {
+        this.loading = false;
+        if (res.success) {
+          this.data = res.result.records;
+          this.total = res.result.total;
+        }
+      });
+    },
+    detail(v) {
+      getMemberFeedbackDetail(v.id).then((res) => {
+        this.loading = false;
+        if (res.success) {
+          this.form = res.result;
+          this.detailVisible = true;
+        }
+      });
+    },
+  },
+  mounted() {
+    this.init();
+  },
+};
 </script>
 <style lang="scss" scoped>
 .ops a {

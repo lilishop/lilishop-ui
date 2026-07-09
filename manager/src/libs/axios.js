@@ -1,9 +1,8 @@
 import axios from "axios";
 import { getStore, setStore } from "./storage.js";
-import { router } from "../router/index";
-import { Message } from "view-design";
+import { getRouter } from "./router-holder";
+import { Message } from "@/utils/message";
 import Cookies from "js-cookie";
-import { handleRefreshToken } from "../api/index";
 import {v4 as uuidv4} from 'uuid';
 
 // 统一请求路径前缀
@@ -23,6 +22,27 @@ const service = axios.create({
   timeout: 8000,
   baseURL: managerUrl
 });
+
+function refreshAccessToken(token) {
+  return service({
+    method: "get",
+    url: `/passport/user/refresh/${token}`,
+  });
+}
+
+function redirectToLogin(message) {
+  const router = getRouter();
+  Cookies.set("userInfoManager", "");
+  setStore("accessToken", "");
+  if (router && router.currentRoute.value.name !== "login") {
+    if (message) {
+      Message.error(message);
+    } else {
+      Message.error("未知错误，请重新登录");
+    }
+    router.push("/login");
+  }
+}
 var isRefreshToken = 0;
 const refreshToken = getTokenDebounce();
 service.interceptors.request.use(
@@ -65,17 +85,7 @@ service.interceptors.response.use(
         break;
       case 20004:
       case 401:
-        // 未登录 清除已登录状态
-        Cookies.set("userInfoManager", "");
-        setStore("accessToken", "");
-        if (router.history.current.name != "login") {
-          if (data.message !== null) {
-            Message.error(data.message);
-          } else {
-            Message.error("未知错误，请重新登录");
-          }
-          router.push("/login");
-        }
+        redirectToLogin(data.message !== null ? data.message : null);
         return data;
         break;
       case 500:
@@ -109,11 +119,11 @@ service.interceptors.response.use(
               );
               return service(error.response.config);
             } else {
-              router.go(0);
+              const router = getRouter();
+              if (router) router.go(0);
             }
           } else {
-            Cookies.set("userInfoManager", "");
-            router.push("/login");
+            redirectToLogin(null);
           }
           isRefreshToken = 0;
         }
@@ -135,7 +145,7 @@ function getTokenDebounce() {
     if (!lock) {
       lock = true;
       let oldRefreshToken = getStore("refreshToken");
-      handleRefreshToken(oldRefreshToken)
+      refreshAccessToken(oldRefreshToken)
         .then(res => {
           if (res.success) {
             let { accessToken, refreshToken } = res.result;
@@ -147,7 +157,7 @@ function getTokenDebounce() {
           } else {
             success = false;
             lock = false;
-            router.push("/login");
+            redirectToLogin(null);
           }
         })
         .catch(err => {
@@ -188,6 +198,20 @@ export const getRequest = (url, params, resBlob) => {
   return service(data);
 };
 
+
+export const postBlobRequest = (url, data) => {
+  let accessToken = getStore("accessToken");
+  return service({
+    method: "post",
+    url: `${url}`,
+    data: data,
+    responseType: "blob",
+    headers: {
+      "Content-Type": "application/json",
+      accessToken: accessToken
+    }
+  });
+};
 
 export const postRequest = (url, params, headers) => {
   let accessToken = getStore("accessToken");

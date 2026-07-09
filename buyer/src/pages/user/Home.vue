@@ -3,15 +3,13 @@
     <BaseHeader></BaseHeader>
 
     <div class="container width_1200">
-      <Layout class="layoutAll">
-        <Sider class="side-bar" ref="side" :collapsed-width="78">
-          <Menu
+      <div class="layoutAll">
+        <el-aside class="side-bar" width="200px">
+          <el-menu
             class="side-menu"
-            theme="light"
-            width="auto"
-            :active-name="$route.name"
-            :open-names="['订单中心', '会员中心']"
-            @on-select="onSelect"
+            :default-active="$route.name"
+            :default-openeds="['订单中心', '会员中心']"
+            @select="onSelect"
           >
             <div class="user-icon">
               <div class="user-img">
@@ -21,68 +19,58 @@
                   v-if="userInfo.face"
                   alt
                 />
-                <Avatar icon="ios-person" class="mb_10" v-else size="96" />
+                <el-avatar v-else :size="96" class="mb_10"><el-icon><User /></el-icon></el-avatar>
               </div>
               <p>{{ userInfo.nickName }}</p>
             </div>
 
-            <!--   循环导航栏       -->
-            <Submenu
-              v-for="(menu, index) in menuList"
-              :key="index"
-              :name="menu.title"
-            >
-              <template slot="title" v-if="menu.display">
-                <Icon type="location"></Icon>
-                <span>{{ menu.title }}</span>
-              </template>
-              <MenuItem
-                v-for="(chlidren, i) in menu.menus"
-                :key="i"
-                :name="chlidren.path"
-                >{{ chlidren.title }}</MenuItem
-              >
-            </Submenu>
-          </Menu>
-        </Sider>
-        <Layout class="layout ml_10">
-          <Content class="content">
-            <transition mode="out-in">
-              <router-view></router-view>
-            </transition>
-          </Content>
-        </Layout>
-      </Layout>
+            <template v-for="(menu, index) in menuList" :key="index">
+              <el-sub-menu v-if="menu.display" :index="menu.title">
+                <template #title>
+                  <el-icon><Location /></el-icon>
+                  <span>{{ menu.title }}</span>
+                </template>
+                <el-menu-item
+                  v-for="(chlidren, i) in menu.menus"
+                  :key="i"
+                  :index="chlidren.path"
+                >{{ chlidren.title }}</el-menu-item>
+              </el-sub-menu>
+            </template>
+          </el-menu>
+        </el-aside>
+        <el-main class="content ml_10">
+          <router-view></router-view>
+        </el-main>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import { Location, User } from '@element-plus/icons-vue';
 import menuList from "./menu";
 import Storage from "@/plugins/storage.js";
 
 export default {
+  components: { Location, User },
   name: "Home",
   data() {
     return {
-      menuList, // 会员中心左侧列表
+      menuList,
     };
   },
   computed: {
     userInfo() {
-      // 用户信息
       if (Storage.getItem("userInfo")) {
         return JSON.parse(Storage.getItem("userInfo"));
-      } else {
-        return {};
       }
+      return {};
     },
   },
-
   methods: {
-    // 每次点击左侧bar的callback
     onSelect(name) {
-      this.$router.push({ name: name });
+      this.$router.push({ name });
     },
   },
 };
@@ -110,6 +98,7 @@ export default {
 }
 
 .layoutAll {
+  display: flex;
   min-height: 1200px;
   @include background_color($light_background_color);
 }
@@ -141,7 +130,6 @@ export default {
 
 .layout-footer-center {
   padding: 0px 15px;
-
   padding-bottom: 15px;
   text-align: center;
 }

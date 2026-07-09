@@ -23,14 +23,13 @@
         <li v-show="!!userInfo.username">
           <div class="username-p">
             <div>
-              <Avatar class="person-icon" :src="userInfo.face" icon="person" size="small"/>
-              <span class="username">{{
-                  userInfo.nickName ? userInfo.nickName : userInfo.username | secrecyMobile
-                }}</span>
+              <el-avatar class="person-icon" :src="userInfo.face" :size="24" />
+              <span class="username">{{ $filters.secrecyMobile(
+                  userInfo.nickName ? userInfo.nickName : userInfo.username ) }}</span>
             </div>
             <transition name='fade'>
               <ul class="drop-items">
-                <li @click="goUserCenter('/home')">我的主页</li>
+                <li @click="goUserCenter('/home/MyOrder')">我的主页</li>
                 <li @click="goUserCenter('/home/Coupons')">优惠券</li>
                 <li @click="goUserCenter('/home/Favorites')">我的收藏</li>
                 <li @click="signOutFun">退出登录</li>
@@ -41,17 +40,20 @@
         <li @click="goUserCenter('/home/MyOrder')"><span class="nav-item">我的订单</span></li>
         <li @click="goUserCenter('/home/MyTracks')"><span class="nav-item">我的足迹</span></li>
         <li @click="goUserCenter('/home/MsgList')"><span class="nav-item">我的消息</span></li>
-        <li v-if="$route.name !== 'Cart'" style="position:relative;">
-          <Dropdown placement="bottom-start">
-            <router-link to="/cart" target="_blank">
-              <span class="nav-item" @mouseenter="getCartList">
-                <Icon size="18" type="ios-cart-outline"></Icon>
-                购物车（{{ cartNum < 100 ? cartNum : '99' }}）
-              </span>
-            </router-link>
-            <DropdownMenu slot="list">
+        <li v-if="$route.name !== 'Cart'" class="cart-nav-item">
+          <el-dropdown
+            class="cart-nav-dropdown"
+            placement="bottom-start"
+            trigger="hover"
+            @visible-change="handleCartDropdownVisible"
+          >
+            <span class="nav-item" @click="goToPay">
+              <el-icon :size="18"><ShoppingCart /></el-icon>
+              购物车（{{ cartNum < 100 ? cartNum : '99' }}）
+            </span>
+            <template #dropdown>
               <div class="shopping-cart-null" style="width:200px" v-show="shoppingCart.length <= 0">
-                <Icon type="ios-cart-outline" class="cart-null-icon"></Icon>
+                <el-icon class="cart-null-icon"><ShoppingCart /></el-icon>
                 <span>你的购物车没有宝贝哦</span>
                 <span>赶快去添加商品吧~</span>
               </div>
@@ -68,18 +70,16 @@
                       <div>
                         数量:
                         <span class="shopping-cart-text">{{ item.num }}</span>
-
                       </div>
                       <div class="shopping-price">
-                        {{ item.purchasePrice | unitPrice('￥') }}
+                        {{ $filters.unitPrice(item.purchasePrice, '￥') }}
                       </div>
                     </div>
                   </div>
                 </div>
-
               </div>
-            </DropdownMenu>
-          </Dropdown>
+            </template>
+          </el-dropdown>
         </li>
         <li>
           <span class="nav-item" @click="shopEntry">店铺入驻</span>
@@ -91,12 +91,15 @@
 </template>
 
 <script>
+import { Modal } from "@/utils/message";
+import { ShoppingCart } from '@element-plus/icons-vue';
 import storage from '@/plugins/storage.js';
 import {cartGoodsAll} from '@/api/cart.js';
 import {logout} from '@/api/account.js';
-
+import config from '@/config';
 
 export default {
+  components: { ShoppingCart },
   name: 'M-Header',
   created() {
     if (storage.getItem('userInfo')) {
@@ -106,9 +109,12 @@ export default {
 
   data() {
     return {
-      config: require('@/config'),
+      config,
       userInfo: {}, // 用户信息
-      shoppingCart: [] // 购物车
+      shoppingCart: [], // 购物车
+      cartLoading: false,
+      cartLoadedAt: 0,
+      cartCacheTime: 5000
     };
   },
   computed: {
@@ -126,7 +132,7 @@ export default {
     },
     myInfo() { // 跳转会员中心
       let url = this.$router.resolve({
-        path: '/home'
+        path: '/home/MyOrder'
       });
       window.open(url.href, '_blank');
     },
@@ -145,9 +151,9 @@ export default {
       if (this.userInfo.username) {
         this.$router.push({path: path});
       } else {
-        this.$Modal.confirm({
+        Modal.confirm({
           title: '请登录',
-          content: '<p>请登录后执行此操作</p>',
+          content: '请登录后执行此操作',
           okText: '立即登录',
           cancelText: '继续浏览',
           onOk: () => {
@@ -174,15 +180,31 @@ export default {
         this.$router.push('login');
       }
     },
+    handleCartDropdownVisible(visible) {
+      if (visible) {
+        this.getCartList();
+      }
+    },
     getCartList() {
       // 获取购物车列表
-      if (this.userInfo.username) {
-        cartGoodsAll().then((res) => {
-          this.shoppingCart = res.result.skuList;
+      if (!this.userInfo.username || this.cartLoading) {
+        return;
+      }
+      const now = Date.now();
+      if (this.cartLoadedAt && now - this.cartLoadedAt < this.cartCacheTime) {
+        return;
+      }
+      this.cartLoadedAt = now;
+      this.cartLoading = true;
+      cartGoodsAll().then((res) => {
+        if (res.success) {
+          this.shoppingCart = (res.result && res.result.skuList) || [];
           this.$store.commit('SET_CARTNUM', this.shoppingCart.length);
           this.Cookies.setItem('cartNum', this.shoppingCart.length);
-        });
-      }
+        }
+      }).finally(() => {
+        this.cartLoading = false;
+      });
     }
   }
 };
@@ -193,28 +215,37 @@ export default {
 .box {
   width: 100%;
   font-size: 12px !important;
-   height: 36px;
+  height: 36px;
   background: #333;
   color: #fff;
+  display: flex;
+  align-items: center;
 }
 
 .nav {
   display: flex;
   flex-direction: row;
+  align-items: center;
   justify-content: space-between;
-
+  height: 100%;
 }
 
-.nav ul {
+.nav > ul {
   list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
 }
 
-.nav li {
+.nav > ul > li,
+.location > ul.flex > li {
   cursor: pointer;
-  float: left;
+  float: none;
   line-height: 36px;
   margin-right: 15px;
-
+  display: flex;
+  align-items: center;
 }
 
 .nav a,
@@ -222,13 +253,36 @@ export default {
   font-size: 13px;
   font-weight: normal;
   text-decoration: none;
-
   cursor: pointer;
   color: #fff;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
 }
 
 .nav-item {
   padding-left: 20px;
+  gap: 4px;
+}
+
+.cart-nav-item {
+  :deep(.cart-nav-dropdown),
+  :deep(.el-dropdown) {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
+    line-height: 36px;
+  }
+
+  :deep(.el-tooltip__trigger),
+  :deep(.el-dropdown-selfdefine),
+  :deep([aria-expanded="true"]) {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
 }
 
 .location a {
@@ -303,9 +357,12 @@ export default {
 
 .username-p {
   position: relative;
+  z-index: 100;
 
   div {
     cursor: pointer;
+    display: flex;
+    align-items: center;
 
     > span {
       margin-left: 5px;
@@ -315,59 +372,71 @@ export default {
   .drop-items {
     position: absolute;
     display: none;
-    top: 45px;
-    left: 0;
-    right: 0;
-    margin: 0 auto;
-    padding: 5px 10px;
-    z-index: 20;
-    height: 150px;
+    flex-direction: column;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    padding: 4px 0;
+    z-index: 1000;
+    min-width: 100px;
+    width: max-content;
     background-color: #fff;
-    width: 80px;
     border: 1px solid #eee;
-    box-shadow: 2px 2px 7px #999;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    list-style: none;
 
     li {
-      color: rgb(107, 106, 106);
+      display: block;
+      float: none;
       width: 100%;
-      border-bottom: 1px solid rgb(207, 206, 206);
+      margin: 0;
+      padding: 8px 16px;
+      line-height: 1.4;
+      color: #666;
+      font-size: 13px;
       font-weight: normal;
       text-align: center;
+      white-space: nowrap;
+      border-bottom: 1px solid #f0f0f0;
+      box-sizing: border-box;
 
       &:last-child {
-        border: none;
+        border-bottom: none;
       }
 
       &:hover {
         cursor: pointer;
         color: $theme_color;
+        background-color: #fff7f7;
       }
     }
 
     &::before {
       position: absolute;
-      top: -20px;
-      left: 30px;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
       content: '';
       width: 0;
       height: 0;
-      border: 10px solid #999;
-      border-color: transparent transparent #fff transparent;
+      border: 6px solid transparent;
+      border-bottom-color: #fff;
     }
 
     &::after {
       content: '';
       position: absolute;
-      width: 80px;
-      height: 20px;
-      top: -20px;
+      width: 100%;
+      height: 10px;
+      top: -10px;
       left: 0;
     }
   }
 
   &:hover {
     .drop-items {
-      display: block;
+      display: flex;
     }
   }
 }

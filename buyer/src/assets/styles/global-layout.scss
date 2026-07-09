@@ -1,0 +1,25 @@
+// 全局布局工具类（非 scoped，避免子组件继承 class 时宽度失效）
+.width_1200_auto {
+  width: 1200px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+// 首页主体：分类导航 + 楼层装修共用同一 1200px 容器，保证列对齐
+.index-main {
+  width: 1200px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+  position: relative;
+}
+
+// 与 CateNav 商品分类栏、Carousel 左占位一致的列宽
+$index-main-width: 1200px;
+$index-side-col-width: 263.2px;
+$index-col-gap: 10px;
+// 1200 - 263.2*2 - 10*2 = 653.6px
+$index-center-col-width: $index-main-width - ($index-side-col-width * 2) - ($index-col-gap * 2);

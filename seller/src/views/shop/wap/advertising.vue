@@ -2,9 +2,9 @@
   <div class="model-view">
     <div class="model-view-content">
       <div class="content">
-        <div class="wap-title">首页</div>
+        <div class="wap-title">??</div>
         <div class="draggable">
-          <!-- 全屏 -->
+          <!-- ?? -->
           <div class="full-shadow" v-if="type == 'full'">
             <img :src="advertising[0].img" alt="" />
           </div>
@@ -14,7 +14,7 @@
     </div>
     <div class="model-config">
       <div class="decorate">
-        <div class="decorate-title">全屏广告</div>
+        <div class="decorate-title">????</div>
         <div class="decorate-list">
           <div
             class="decorate-item"
@@ -22,12 +22,12 @@
             :key="index"
           >
             <div class="decorate-item-title">
-              <div>设置</div>
+              <div>??</div>
             </div>
             <div class="decorate-item-box">
-              <!-- 选择照片 -->
+              <!-- ???? -->
               <div class="decorate-view">
-                <div class="decorate-view-title">选择图片</div>
+                <div class="decorate-view-title">????</div>
                 <div>
                   <img class="show-image" :src="item.img" alt />
                   <input
@@ -38,52 +38,69 @@
                     :id="'files' + index"
                   />
                   <div class="tips">
-                    建议尺寸
+                    ????
                     <span>{{ item.size }}</span>
                   </div>
                 </div>
                 <div class="selectBtn">
-                  <Button
+                  <el-button
                     size="small"
                     @click="handleClickFile(item, index)"
-                    ghost
+                    plain
                     type="primary"
-                    >选择照片</Button
+                    >????</el-button
                   >
                 </div>
               </div>
 
-              <!-- 选择连接 -->
+              <!-- ???? -->
               <div class="decorate-view">
-                <div class="decorate-view-title">选择图片</div>
+                <div class="decorate-view-title">????</div>
                 <div>
-                  <Button
-                    ghost
+                  <el-button
+                    plain
                     type="primary"
                     size="small"
                     @click="clickLink(item)"
-                    >选择链接</Button
+                    >????</el-button
                   >
+                </div>
+              </div>
+
+              <div class="decorate-view">
+                <div class="decorate-view-title">??????</div>
+                <div>
+                  <el-tag :type="result.pageShow === 'OPEN' ? 'success' : 'danger'">
+                    {{ result.pageShow === "OPEN" ? "??" : "??" }}
+                  </el-tag>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <!-- <Button type="primary" @click="addDecorate()" ghost>添加</Button> -->
-        <liliDialog ref="liliDialog" :types="linkType"></liliDialog>
+        <!-- <el-button type="primary" @click="addDecorate()" ghost>??</el-button> -->
+        <liliDialog ref="liliDialog"    @selectedLink="selectedLink" :types="linkType"></liliDialog>
       </div>
+      <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
+         <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" :max-select="1" ref="ossManage" />
+      </el-dialog>
     </div>
   </div>
 </template>
 <script>
-
+import ossManage from "@/views/sys/oss-manage/ossManage";
+import * as API_Other from "@/api/other.js";
 export default {
+   components: {
+    ossManage,
+  },
   data() {
     return {
+      result:"",
+      picModelFlag: false, //?????
+      type: "full", // ????
 
-      type: "full", // 是否全屏
-
-      //全屏广告
+      //????
       advertising: [
          {
           img:
@@ -91,31 +108,66 @@ export default {
           size: "750*1624",
         },
       ],
-
-      linkType: "", // 选择类型
+      selectedLinks: {},
+      linkType: "", // ????
     };
   },
+   watch: {
+    advertising: {
+      handler(val) {
+        this.$store.state.openStyleStore = val;
+        console.log(
+          "this.$store.state.openStyleStore",
+          this.$store.state.openStyleStore
+        );
+      },
+      deep: true,
+    },
+  },
+  mounted() {
+    this.openPage();
+  },
   methods: {
-    // 点击链接
+    openPage() {
+      const alertType = this.$route.query.pagetype;
+      const pageType = {
+        INDEX: "INDEX",
+        ALERT: "OPEN_SCREEN_PAGE",
+        OPEN_SCREEN_ANIMATION: "OPEN_SCREEN_ANIMATION",
+      }[alertType ? alertType : "INDEX"];
+
+      API_Other.getOpenHomeData(pageType).then((res) => {
+        this.$store.state.openStoreId = res.result.id;
+        if (res.result.pageData) {
+          this.advertising = [JSON.parse(res.result.pageData)];
+        }
+        this.result = res.result
+      });
+    },
+    // ????
     clickLink(item) {
       this.$refs.liliDialog.open('link')
     },
-    //点击图片解析成base64
-    changeFile(item, index) {
-      const file = document.getElementById("files" + index).files[0];
-      if (file == void 0) return false;
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      this.$nextTick((res) => {
-        reader.onload = (e) => {
-          item.img = e.target.result;
-        };
+    // ???????
+    selectedLink(val) {
+      this.selectedLinks.url = val;
+
+      this.advertising[0].config = val;
+    },
+    // ??????
+    handleClickFile() {
+      this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
       });
-    },
-    // 点击选择照片
-    handleClickFile(item, index) {
-      document.getElementById("files" + index).click();
-    },
+    }, // ???????
+    callbackSelected(val) {
+      this.picModelFlag = false;
+      if (!val?.url) return;
+      this.advertising[0].img = val.url;
+    }
   },
 };
 </script>

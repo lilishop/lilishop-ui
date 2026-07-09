@@ -188,7 +188,7 @@ export default {
       return `${hour}:${minute}:${seconds}`
     },
   },
-  destroyed() {
+  beforeUnmount() {
     if (this.recorder) {
       this.destroyRecorder()
     }

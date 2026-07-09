@@ -1,12 +1,12 @@
 <template>
   <div>
-    <Cascader
+    <el-cascader
       :data="data"
       :load-data="loadData"
       v-model="addr"
-      @on-change="change"
+      @change="change"
       style="width: 300px"
-    ></Cascader>
+    ></el-cascader>
   </div>
 </template>
 <script>

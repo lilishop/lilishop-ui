@@ -1,207 +1,191 @@
 <template>
   <div class="search">
-    <Card>
-      <Form
+    <el-card>
+      <el-form
         ref="searchForm"
         :model="searchForm"
         inline
-        :label-width="70"
+        label-width="70px"
         class="search-form"
+        @keyup.enter="handleSearch"
       >
-        <Form-item label="活动名称" prop="promotionName">
-          <Input
-            type="text"
+        <el-form-item label="活动名称" prop="promotionName">
+          <el-input
             v-model="searchForm.promotionName"
             placeholder="请输入活动名称"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Form-item label="活动状态" prop="promotionStatus">
-          <Select
+        </el-form-item>
+        <el-form-item label="活动状态" prop="promotionStatus">
+          <el-select
             v-model="searchForm.promotionStatus"
             placeholder="请选择"
             clearable
             style="width: 240px"
           >
-            <Option value="NEW">未开始</Option>
-            <Option value="START">已开始/上架</Option>
-            <Option value="END">已结束/下架</Option>
-            <Option value="CLOSE">紧急关闭/作废</Option>
-          </Select>
-        </Form-item>
-        <Form-item label="活动时间">
-          <DatePicker
+            <el-option label="未开始" value="NEW" />
+            <el-option label="已开始/上架" value="START" />
+            <el-option label="已结束/下架" value="END" />
+            <el-option label="紧急关闭/作废" value="CLOSE" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="活动时间">
+          <el-date-picker
             v-model="selectDate"
             type="daterange"
             clearable
-            placeholder="选择起始时间"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
             style="width: 240px"
-          ></DatePicker>
-        </Form-item>
-        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
-      </Form>
-    </Card>
-    <Card>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <el-table
         ref="table"
+        v-loading="loading"
+        border
+        :data="data"
         class="mt_10"
+        style="width: 100%"
       >
-        <template slot-scope="{ row }" slot="action">
-          <a
-            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:5px"
-            @click="view(row)"
-          >查看</a>
-          <span
-            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
-            style="margin:0 8px;color:#dcdee2"
-          >|</span>
-          <a
-            v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'"
-            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
-            @click="close(row)"
-          >关闭</a>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+        <el-table-column
+          prop="promotionName"
+          label="活动名称"
+          min-width="150"
+          show-overflow-tooltip
+        />
+        <el-table-column label="状态" width="110">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="promotionStatusTagType(row.promotionStatus)">
+              {{ promotionStatusText(row.promotionStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="storeName" label="所属店铺" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="startTime" label="活动开始时间" width="180" />
+        <el-table-column prop="endTime" label="活动结束时间" width="180" />
+        <el-table-column label="操作" width="200" align="center" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a class="link-text" @click="view(row)">查看</a>
+              <template v-if="row.promotionStatus === 'START' || row.promotionStatus === 'NEW'">
+                <span class="op-split">|</span>
+                <a class="link-text" @click="close(row)">关闭</a>
+              </template>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
 import { getPintuanList, updatePintuanStatus } from "@/api/promotion";
-import { promotionsStatusRender } from "@/utils/promotions";
 
 export default {
   name: "pintuan",
   data() {
     return {
-      selectDate: [], //选中的数据
-      loading: true, // 表单加载状态
-        searchForm: {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-          pageSize: 20, // 页面大小
-          sort: "createTime",
-          order: "desc", // 默认排序方式
-        },
-      columns: [
-        // 表头
-        {
-          title: "活动名称",
-          key: "promotionName",
-          minWidth: 150,
-          tooltip: true,
-        },
-        {
-          title: "状态",
-          key: "promotionStatus",
-          width: 110,
-          render: (h, params) => {
-            return promotionsStatusRender(h, params);
-          },
-        },
-        {
-          title: "所属店铺",
-          key: "storeName",
-          minWidth: 120,
-          tooltip: true,
-        },
-
-        {
-          title: "活动开始时间",
-          key: "startTime",
-          width: 180,
-        },
-        {
-          title: "活动结束时间",
-          key: "endTime",
-          width: 180,
-        },
-
-        {
-          fixed: "right",
-          title: "操作",
-          slot: "action",
-          align: "center",
-          width: 200,
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      selectDate: [],
+      loading: true,
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+        promotionName: "",
+        promotionStatus: "",
+      },
+      data: [],
+      total: 0,
     };
   },
   methods: {
-    // 初始化数据
+    promotionStatusText(status) {
+      const map = {
+        NEW: "未开始",
+        START: "已开始",
+        END: "已结束",
+        CLOSE: "已关闭",
+      };
+      return map[status] || "未知";
+    },
+    promotionStatusTagType(status) {
+      const map = {
+        NEW: "info",
+        START: "success",
+        END: "danger",
+        CLOSE: "danger",
+      };
+      return map[status] || "danger";
+    },
     init() {
       this.getDataList();
     },
-    // 分页 修改页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
-      this.clearSelectAll();
     },
-    // 分页 修改页数
     changePageSize(v) {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    // 搜索
-      handleSearch() {
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 20;
-        this.getDataList();
-      },
-    // 获取拼团列表
+    handleSearch() {
+      this.searchForm.pageNumber = 1;
+      this.searchForm.pageSize = 20;
+      this.getDataList();
+    },
     getDataList() {
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
-        this.searchForm.startTime = this.selectDate[0].getTime();
-        this.searchForm.endTime = this.selectDate[1].getTime();
+        this.searchForm.startTime = new Date(this.selectDate[0]).getTime();
+        this.searchForm.endTime = new Date(this.selectDate[1]).getTime();
       } else {
         this.searchForm.startTime = null;
         this.searchForm.endTime = null;
       }
-      getPintuanList(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
+      getPintuanList(this.searchForm)
+        .then((res) => {
+          if (res.success) {
+            this.data = res.result.records;
+            this.total = res.result.total;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
-    // 查看拼团商品
     view(v) {
       this.$router.push({ name: "pintuan-goods", query: { id: v.id } });
     },
-    // 关闭当前活动
     close(v) {
       this.$Modal.confirm({
         title: "确认关闭",
-        // 记得确认修改此处
         content: "您确认要关闭此拼团活动?",
         loading: true,
         onOk: () => {
-          // 删除
           updatePintuanStatus(v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -218,8 +202,9 @@ export default {
   },
 };
 </script>
+
 <style lang="scss" scoped>
-.ivu-form-item {
-  margin-bottom: 0 !important;
+.mt_10 {
+  margin-top: 10px;
 }
 </style>

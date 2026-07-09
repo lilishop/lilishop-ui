@@ -1,20 +1,23 @@
 <template>
-  <div class="flex" v-if="data.options.right.model == 'brand'">
-    <div class="left-side" @click="linkTo(data.options.right.data.image.url)">
-      <img :src="data.options.right.data.image.src" alt="">
+  <div class="mix-panel flex" v-if="data.options.right.model == 'brand'">
+    <div class="left-side hover-pointer" @click="linkTo(data.options.right.data.image.url)">
+      <img :src="data.options.right.data.image.src" alt="" />
     </div>
     <div class="right-side">
       <div class="badge-box flex">
         <div class="round">
-          <Icon type="ios-arrow-forward" />
+          <el-icon><ArrowRight /></el-icon>
         </div>
-
-
       </div>
       <div class="flex goods-list">
-        <div class="goods-item flex" @click="linkTo(item.url)" :key="index" v-for="(item,index) in data.options.right.data.list">
+        <div
+          class="goods-item flex hover-pointer"
+          @click="linkTo(item.url)"
+          :key="index"
+          v-for="(item, index) in data.options.right.data.list"
+        >
           <div class="goods-thumbnail">
-            <img :src="item.img" alt="">
+            <img :src="item.img" alt="" />
           </div>
         </div>
       </div>
@@ -23,62 +26,60 @@
 </template>
 
 <script>
+import { ArrowRight } from "@element-plus/icons-vue";
+
 export default {
-  name: "mix-goods",
-  data() {
-    return {}
-  },
+  name: "mix-brand",
+  components: { ArrowRight },
   props: {
     data: {
       type: Object,
-      default: {}
-    }
+      default: () => ({}),
+    },
   },
-  components: {},
-  mounted() {
-
-  },
-  methods: {}
-}
+};
 </script>
 
 <style scoped lang="scss">
-.right-side{
-  width: 330px;
+.mix-panel {
+  height: 100%;
+  align-items: stretch;
+  overflow: hidden;
 }
-.goods-detail-title{
-  font-size: 13px;
-  font-weight: normal;
-  line-height: 16px;
-  text-align: center;
-  letter-spacing: 0px;
-  color: #333333;
-}
-.goods-detail-price{
-  font-size: 14px;
-  font-weight: normal;
-  line-height: 17px;
-  letter-spacing: 0px;
-  color: $theme_color;
-  margin-top: 8px;
-  margin-bottom:10px;
-}
-.goods-thumbnail{
-  margin-left: 7px;
-  display: flex;
-  align-items: center;
-  >img{
-    width:90px;
-    height: 90px;
+
+.left-side {
+  flex-shrink: 0;
+  width: 254px;
+  height: 344px;
+
+  > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 9.8px 0 0 9.8px;
   }
 }
-.badge-box{
-  margin-top: 33px;
-  justify-content:right;
-  >.round{
+
+.right-side {
+  flex: 1;
+  min-width: 0;
+  height: 344px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.badge-box {
+  margin-top: 24px;
+  margin-bottom: 8px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+
+  > .round {
     width: 17.5px;
     height: 17.5px;
-    opacity: 1;
     border-radius: 50%;
     text-align: center;
     line-height: 17.5px;
@@ -86,47 +87,48 @@ export default {
     margin-right: 17.5px;
   }
 }
-.goods-list{
-   width: 330px;
+
+.goods-list {
+  width: 100%;
+  box-sizing: border-box;
   flex-wrap: wrap;
-  justify-content:space-between;
-  padding: 0 16px;
+  justify-content: space-between;
+  align-content: flex-start;
+  padding: 0 16px 12px;
+  gap: 8px 0;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
-.goods-item{
+
+.goods-item {
   display: flex;
   align-items: center;
   justify-content: center;
-  width:50%;
-  height: 85px;
+  flex: 0 0 calc(50% - 4px);
+  width: calc(50% - 4px);
+  height: 82px;
   border-radius: 9.8px;
-  opacity: 1;
-  transition: .35s;
-  background: #FFFFFF;
-  margin-bottom:9px;
-
-
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #ffffff;
+  transition: 0.35s;
+  cursor: pointer;
 }
-.left-side {
-  >img{
-    width: 254px;
-    height: 344px;
-    border-radius: 9.8px 0px 0px 9.8px;
-    opacity: 1;
+
+.goods-thumbnail {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  > img {
+    max-width: 80px;
+    max-height: 76px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
   }
-}
-.badge {
-  width: 50px;
-  height: 27px;
-  line-height:27px;
-  border-radius: 13.3px 0px 0px 13.3px;
-  opacity: 1;
-  background: #F31947;
-  font-size: 12.6px;
-  font-weight: normal;
-  text-align: center;
-  letter-spacing: 0px;
-  color: #FFFFFF;
-  margin-top: 26px;
-  margin-bottom:17px;
 }
 </style>

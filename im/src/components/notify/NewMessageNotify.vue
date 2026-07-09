@@ -9,7 +9,7 @@
         <p class="title">
           {{ talk_type == 1 ? '私信消息通知' : '群聊消息通知' }}
         </p>
-        <p class="time"><i class="el-icon-time" /> {{ datetime | format }}</p>
+        <p class="time"><i class="el-icon-time" /> {{ formatTime(datetime) }}</p>
       </div>
       <div class="xbody">
         <p>@{{ nickname }}</p>
@@ -50,8 +50,8 @@ export default {
   data() {
     return {}
   },
-  filters: {
-    format(datetime) {
+  methods: {
+    formatTime(datetime) {
       datetime = datetime || new Date()
       return parseTime(datetime, '{m}/{d} {h}:{i} 分')
     },

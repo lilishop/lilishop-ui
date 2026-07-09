@@ -1,7 +1,7 @@
 <template>
     <div class="shadow-box">
         <div class="shadow-item flex flex-a-c flex-j-c" v-for="(item,index) in iconList" @click="handleClickIcon(item)" :key="index">
-          <img class="icon" :src="require(`@/assets/iconfont/${item.icon}.png`)">
+          <img class="icon" :src="getIconUrl(item.icon)">
           <div class="shadow-label">{{item.label}}</div>
           <div class="line" v-if="iconList.length-1 !=index"></div>
         </div>
@@ -9,6 +9,8 @@
 </template>
 
 <script>
+import { getIconUrl } from "@/assets/iconfont/iconMap";
+
 export default {
   name: "fixed-index",
   data(){
@@ -58,6 +60,7 @@ export default {
 
   },
   methods:{
+    getIconUrl,
     scrollToTop() {
       const c = document.documentElement.scrollTop || document.body.scrollTop;
       if (c > 0) {

@@ -1,0 +1,100 @@
+/* Element Plus 主题覆盖（对齐原 iView 主色） */
+:root {
+  // --el-color-primary: #f31947;
+  // --el-color-success: #67c23a;
+  // --el-color-warning: #fa6419;
+  // --el-color-danger: #ff3c2a;
+  --el-font-size-extra-small: 12px;
+  --el-font-size-small: 13px;
+  --el-font-size-base: 14px;
+  --el-font-size-large: 16px;
+}
+
+// .el-button--primary {
+//   --el-button-bg-color: #f31947;
+//   --el-button-border-color: #f31947;
+//   --el-button-hover-bg-color: #ff4d6d;
+//   --el-button-hover-border-color: #ff4d6d;
+// }
+
+.el-table--border {
+  .el-table__cell {
+    border-right: none !important;
+  }
+
+  .el-table__border-left-patch {
+    display: none;
+  }
+
+  &::before,
+  &::after,
+  .el-table__inner-wrapper::before,
+  .el-table__inner-wrapper::after {
+    width: 0 !important;
+  }
+
+  &.el-table--group::before,
+  &.el-table--group::after,
+  &.el-table--group .el-table__inner-wrapper::before,
+  &.el-table--group .el-table__inner-wrapper::after {
+    width: 0 !important;
+  }
+}
+
+.el-table__fixed-right::before,
+.el-table__fixed::before {
+  background-color: transparent;
+}
+
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    color: #66b1ff;
+  }
+
+  &.disabled {
+    color: #c0c4cc;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+.op-split {
+  margin: 0 8px;
+  color: #dcdfe6;
+}
+
+.el-table .ops {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+
+  a:not(.link-text) {
+    color: #409eff;
+    cursor: pointer;
+    text-decoration: none;
+
+    &:hover {
+      color: #66b1ff;
+    }
+  }
+
+  > span:not(.op-split) {
+    margin: 0 8px;
+    color: #dcdfe6;
+  }
+}
+
+.gcc-disabled-action {
+  color: #c0c4cc;
+  cursor: not-allowed;
+}
+
+/* MessageBox 需高于嵌套 Dialog（如上传图片/资源库 z-index: 3500~3700） */
+.el-overlay.is-message-box {
+  z-index: 4000 !important;
+}

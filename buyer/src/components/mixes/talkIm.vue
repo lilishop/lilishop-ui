@@ -3,6 +3,7 @@
 </template>
 
 <script>
+import { Message } from "@/utils/message";
 import { getIMDetail } from "@/api/common";
 import Storage from "@/plugins/storage";
 import { getMemberMsg } from "@/api/login";
@@ -34,7 +35,7 @@ export default {
         }
 
       } else {
-        this.$Message.error("请登录后再联系客服");
+        Message.error("请登录后再联系客服");
         return;
       }
     },

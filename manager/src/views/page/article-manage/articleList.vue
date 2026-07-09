@@ -1,138 +1,146 @@
 <template>
   <div class="wrapper">
-    <Row>
-      <Col style="height: 100%" span="4">
-        <Card class="article-category mr_10">
-          <Tree :data="treeData" @on-select-change="handleCateChange"></Tree>
-        </Card>
-      </Col>
-      <Col span="20">
-        <Card class="article-detail">
-          <Row @keydown.enter.native="handleSearch">
-            <Form
-              ref="searchForm"
-              :model="searchForm"
-              inline
-              :label-width="70"
-              style="width: 100%"
-              class="search-form"
-            >
-              <Form-item label="文章标题" prop="title">
-                <Input
-                  type="text"
-                  v-model="searchForm.title"
-                  placeholder="请输入文章标题"
-                  clearable
-                  style="width: 200px"
+    <el-row :gutter="10">
+      <el-col :span="4" style="height: 100%">
+        <el-card class="article-category mr_10">
+          <el-tree
+            :data="treeData"
+            :props="{ label: 'title', children: 'children' }"
+            node-key="value"
+            highlight-current
+            default-expand-all
+            @node-click="handleCateChange"
+          />
+        </el-card>
+      </el-col>
+      <el-col :span="20">
+        <el-card class="article-detail">
+          <el-form
+            ref="searchForm"
+            :model="searchForm"
+            inline
+            label-width="70px"
+            style="width: 100%"
+            class="search-form"
+            @keyup.enter="handleSearch"
+          >
+            <el-form-item label="文章标题" prop="title">
+              <el-input
+                v-model="searchForm.title"
+                placeholder="请输入文章标题"
+                clearable
+                style="width: 200px"
+              />
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+            </el-form-item>
+          </el-form>
+
+          <div class="operation padding-row">
+            <el-button v-if="!selected" type="primary" @click="add">添加</el-button>
+          </div>
+
+          <el-table ref="table" v-loading="loading" border :data="data" style="width: 100%">
+            <el-table-column prop="articleCategoryName" label="分类名称" width="150" />
+            <el-table-column prop="title" label="文章标题" min-width="200" show-overflow-tooltip />
+            <el-table-column label="是否显示" width="100">
+              <template #default="{ row }">
+                <el-switch
+                  v-if="row"
+                  v-model="row.openStatus"
+                  inline-prompt
+                  active-text="展示"
+                  inactive-text="隐藏"
+                  @change="changeSwitch(row)"
                 />
-              </Form-item>
-              <Button
-                @click="handleSearch"
-                type="primary"
-                icon="ios-search"
-                class="search-btn"
-                >搜索</Button
-              >
-            </Form>
-          </Row>
-          <Row class="operation padding-row">
-            <Button @click="add" v-if="!selected" type="primary">添加</Button>
-          </Row>
-          <Table
-            :loading="loading"
-            border
-            :columns="columns"
-            :data="data"
-            ref="table"
-          >
-            <!-- 页面展示 -->
-            <template slot="openStatusSlot" slot-scope="scope">
-              <div></div>
-              <i-switch
-                size="large"
-                v-model="scope.row.openStatus"
-                @on-change="changeSwitch(scope.row)"
-              >
-                <span slot="open">展示</span>
-                <span slot="close">隐藏</span>
-              </i-switch>
-            </template>
-          </Table>
-          <Row type="flex" justify="end" class="mt_10">
-            <Page
-              :current="searchForm.pageNumber"
+              </template>
+            </el-table-column>
+            <el-table-column prop="sort" label="排序" width="100" />
+            <el-table-column label="操作" width="230" align="center">
+              <template #default="{ row, $index }">
+                <template v-if="row">
+                  <a
+                    v-if="selected"
+                    class="link-text"
+                    @click="selectRow(row, $index)"
+                  >
+                    {{ selectedIndex == $index ? "已选" : "选择" }}
+                  </a>
+                  <span v-if="selected" class="op-split">|</span>
+                  <a class="link-text" @click="edit(row)">编辑</a>
+                  <span class="op-split">|</span>
+                  <a class="link-text" @click="remove(row)">删除</a>
+                </template>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <div class="mt_10" style="display: flex; justify-content: flex-end">
+            <el-pagination
+              v-model:current-page="searchForm.pageNumber"
+              v-model:page-size="searchForm.pageSize"
+              :page-sizes="[20, 50, 100]"
               :total="total"
-              :page-size="searchForm.pageSize"
-              @on-change="changePage"
-              @on-page-size-change="changePageSize"
-              :page-size-opts="[20, 50, 100]"
+              layout="total, sizes, prev, pager, next, jumper"
               size="small"
-              show-total
-              show-elevator
-            >
-            </Page>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
-    <template v-if="!selected">
-      <Modal
-        :title="modalTitle"
-        v-model="modalVisible"
-        :mask-closable="false"
-        :width="1100"
-      >
-        <Form ref="form" :model="form" :label-width="100">
-          <FormItem label="文章标题" prop="title">
-            <Input v-model="form.title" clearable style="width: 40%" />
-          </FormItem>
-          <FormItem label="文章分类" prop="categoryId">
-            <Select
-              v-model="treeValue"
-              placeholder="请选择"
-              clearable
-              style="width: 180px"
-            >
-              <Option v-if="treeValue" :value="treeValue" style="display: none"
-                >{{ treeValue }}
-              </Option>
-              <Tree
-                :data="treeDataDefault"
-                @on-select-change="handleCheckChange"
-              ></Tree>
-            </Select>
-          </FormItem>
-          <FormItem label="文章排序" prop="sort">
-            <Input
-              type="number"
-              v-model="form.sort"
-              clearable
-              style="width: 10%"
+              @current-change="changePage"
+              @size-change="changePageSize"
             />
-          </FormItem>
-          <FormItem class="form-item-view-el" label="文章内容" prop="content">
-              <tinymec
-                ref="editor"
-                openXss
-                v-model="form.content"
-                v-if="modalVisible"
-              ></tinymec>
-          </FormItem>
-          <FormItem label="是否展示" prop="openStatus">
-            <i-switch size="large" v-model="form.openStatus">
-              <span slot="open">展示</span>
-              <span slot="close">隐藏</span>
-            </i-switch>
-          </FormItem>
-        </Form>
-        <div slot="footer">
-          <Button type="text" @click="modalVisible = false">取消</Button>
-          <Button type="primary" :loading="submitLoading" @click="handleSubmit"
-            >提交</Button
-          >
-        </div>
-      </Modal>
-    </template>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <el-dialog
+      v-if="!selected"
+      v-model="modalVisible"
+      :title="modalTitle"
+      width="1100px"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
+      <el-form ref="form" :model="form" label-width="100px">
+        <el-form-item label="文章标题" prop="title">
+          <el-input v-model="form.title" clearable style="width: 40%" />
+        </el-form-item>
+        <el-form-item label="文章分类" prop="categoryId">
+          <el-tree-select
+            v-model="form.categoryId"
+            :data="treeDataDefault"
+            :props="{ label: 'title', value: 'value', children: 'children' }"
+            placeholder="请选择"
+            clearable
+            check-strictly
+            style="width: 180px"
+            @change="handleCategoryChange"
+          />
+        </el-form-item>
+        <el-form-item label="文章排序" prop="sort">
+          <el-input v-model="form.sort" type="number" clearable style="width: 10%" />
+        </el-form-item>
+        <el-form-item class="form-item-view-el" label="文章内容" prop="content">
+          <tinymec
+            v-if="modalVisible"
+            ref="editor"
+            open-xss
+            v-model="form.content"
+          />
+        </el-form-item>
+        <el-form-item label="是否展示" prop="openStatus">
+          <el-switch
+            v-model="form.openStatus"
+            inline-prompt
+            active-text="展示"
+            inactive-text="隐藏"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="modalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">提交</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -147,9 +155,10 @@ import {
   updateArticleStatus,
 } from "@/api/pages";
 import tinymec from "@/components/editor/index.vue";
+
 export default {
   components: {
-     tinymec: tinymec,
+    tinymec,
   },
   props: {
     selected: {
@@ -159,23 +168,21 @@ export default {
   },
   data() {
     return {
-      selectedIndex: 99999, // 已选下标
-      loading: true, // 表单加载状态
-      modalType: 0, // 添加或编辑标识
-      modalVisible: false, // 添加或编辑显示
-      modalTitle: "", // 添加或编辑标题
+      selectedIndex: 99999,
+      loading: true,
+      modalType: 0,
+      modalVisible: false,
+      modalTitle: "",
       treeDataDefault: [],
-        searchForm: {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-          pageSize: 20, // 页面大小
-          sort: "createTime", // 默认排序字段
-          order: "desc", // 默认排序方式
-          categoryId: "",
-        },
-      searchTreeValue: "", // 切换
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+        categoryId: "",
+      },
+      searchTreeValue: "",
       form: {
-        // 添加或编辑表单对象初始化数据
         openStatus: false,
         title: "",
         categoryId: "",
@@ -183,111 +190,12 @@ export default {
         content: "",
         id: "",
       },
-      list: [], // 列表
-      treeValue: "", // 选择的分类
-      //树结构
+      list: [],
+      treeValue: "",
       treeData: [],
-      submitLoading: false, // 添加或编辑提交状态
-      columns: [
-        // 表头
-        {
-          title: "分类名称",
-          key: "articleCategoryName",
-          width: 150,
-        },
-        {
-          title: "文章标题",
-          key: "title",
-          minWidth: 200,
-          tooltip: true,
-        },
-        {
-          title: "是否显示",
-          key: "openStatus",
-          width: 100,
-          slot: "openStatusSlot",
-        },
-        {
-          title: "排序",
-          key: "sort",
-          width: 100,
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-
-          width: 230,
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                    marginRight: "5px",
-                    display: this.selected ? "" : "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.selectedIndex = params.index;
-                      this.$emit("callbacked", params.row);
-                    },
-                  },
-                },
-                this.selectedIndex == params.index ? "已选" : "选择"
-              ),
-              h(
-                "span",
-                { style: { margin: "0 8px", color: "#dcdee2" } },
-                "|"
-              ),
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                    marginRight: "5px",
-                  },
-                  on: {
-                    click: () => {
-                      this.edit(params.row);
-                    },
-                  },
-                },
-                "编辑"
-              ),
-              h(
-                "span",
-                { style: { margin: "0 8px", color: "#dcdee2" } },
-                "|"
-              ),
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.remove(params.row);
-                    },
-                  },
-                },
-                "删除"
-              ),
-            ]);
-          },
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      submitLoading: false,
+      data: [],
+      total: 0,
     };
   },
   watch: {
@@ -305,68 +213,69 @@ export default {
     },
   },
   methods: {
-    // 初始化数据
     init() {
       this.getDataList();
       this.getAllList(0);
     },
-    // 选择分类回调
+    selectRow(row, index) {
+      this.selectedIndex = index;
+      this.$emit("callbacked", row);
+    },
     handleCateChange(data) {
-      let { value, title } = data[0];
-      this.list.push({
-        value,
-        title,
-      });
+      if (!data) return;
+      const { value, title } = data;
+      this.list.push({ value, title });
       this.searchForm.categoryId = value;
       this.searchTreeValue = title;
     },
-    //是否展示文章
     changeSwitch(v) {
-      let params = {
-        status: v.openStatus,
-      };
+      const params = { status: v.openStatus };
       updateArticleStatus(v.id, params).then((res) => {
         this.submitLoading = false;
         if (res.success) {
         }
       });
     },
-    // 文章分类的选择事件
+    handleCategoryChange(value) {
+      this.form.categoryId = value;
+      const findTitle = (nodes, id) => {
+        for (const node of nodes || []) {
+          if (node.value === id) return node.title;
+          const childTitle = findTitle(node.children, id);
+          if (childTitle) return childTitle;
+        }
+        return "";
+      };
+      this.treeValue = findTitle(this.treeDataDefault, value);
+    },
     handleCheckChange(data) {
       let value = "";
       let title = "";
       this.list = [];
-      data.forEach((item, index) => {
+      data.forEach((item) => {
         value += `${item.value},`;
         title += `${item.title},`;
       });
       value = value.substring(0, value.length - 1);
       title = title.substring(0, title.length - 1);
-      this.list.push({
-        value,
-        title,
-      });
+      this.list.push({ value, title });
       this.form.categoryId = value;
       this.treeValue = title;
     },
-    // 改变页数
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
-    // 改变页码
     changePageSize(v) {
-      this.selected.pageNumber = 1;
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    // 搜索列表
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getDataList();
     },
-    // 获取全部文章分类
     getAllList(parent_id) {
       this.loading = true;
       getArticleCategory(parent_id).then((res) => {
@@ -380,52 +289,44 @@ export default {
             children: [],
             id: "0",
             categoryId: 0,
+            value: "0",
           });
         }
       });
     },
-    // 文章分类格式化方法
     getTree(tree = []) {
-      let arr = [];
+      const arr = [];
       if (!!tree && tree.length !== 0) {
         tree.forEach((item) => {
-          let obj = {};
+          const obj = {};
           obj.title = item.articleCategoryName;
           obj.value = item.id;
-          obj.attr = item.articleCategoryName; // 其他你想要添加的属性
-          obj.expand = false;
-          obj.selected = false;
-          obj.children = this.getTree(item.children); // 递归调用
+          obj.attr = item.articleCategoryName;
+          obj.children = this.getTree(item.children);
           arr.push(obj);
         });
       }
       return arr;
     },
-    // 获取文章列表
     getDataList(val) {
       if (val) this.form = {};
       this.loading = true;
-      getArticle(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.total = res.result.total;
-          //为了在是否展示一列展示开关 需要改一下数据类型，最终提交再次更改
-          this.data = [];
-          if (res.result.records.length > 0) {
-            this.data = res.result.records;
+      getArticle(this.searchForm)
+        .then((res) => {
+          if (res.success) {
+            this.total = res.result.total;
+            this.data = res.result.records?.length ? res.result.records : [];
           }
-        }
-      });
-      this.total = this.data?.length;
-      this.loading = false;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
-    // 添加文章
     handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
           this.submitLoading = true;
           if (this.modalType === 0) {
-            // 添加 避免编辑后传入id等数据 记得删除
             delete this.form.id;
             saveArticle(this.form).then((res) => {
               this.submitLoading = false;
@@ -436,7 +337,6 @@ export default {
               }
             });
           } else {
-            // 编辑
             updateArticle(this.form).then((res) => {
               this.submitLoading = false;
               if (res.success) {
@@ -449,30 +349,24 @@ export default {
         }
       });
     },
-    // 添加文章modal
     add() {
       this.modalType = 0;
       this.modalTitle = "添加文章";
       this.treeValue = "";
-
       this.form = {
         sort: 1,
         content: "",
       };
-      this.$refs.form.resetFields();
+      this.$refs.form?.resetFields();
       delete this.form.id;
       this.modalVisible = true;
     },
-    // 编辑文章modal
     edit(data) {
       this.modalType = 1;
       this.modalTitle = "编辑文章";
       this.treeValue = "";
-      this.form = {
-        content: "",
-      };
-      this.$refs.form.resetFields();
-
+      this.form = { content: "" };
+      this.$refs.form?.resetFields();
       seeArticle(data.id).then((res) => {
         if (res.result) {
           this.modalVisible = true;
@@ -486,14 +380,12 @@ export default {
         }
       });
     },
-    // 删除文章
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
         content: "您确认要删除么?",
         loading: true,
         onOk: () => {
-          // 删除
           delArticle(v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {

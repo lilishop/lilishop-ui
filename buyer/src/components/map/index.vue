@@ -5,7 +5,7 @@
     <div id="map-container"></div>
 
     <div class="search-con">
-      <Input placeholder="输入关键字搜索" id="input-map" v-model="mapSearch" />
+      <el-input placeholder="输入关键字搜索" id="input-map" v-model="mapSearch" />
       <ul>
         <li v-for="(tip, index) in tips" :key="index" @click="selectAddr(tip.location)">
           <p>{{ tip.name }}</p>
@@ -13,18 +13,17 @@
         </li>
       </ul>
     </div>
-    <div slot="footer" class="footer">
-
-      <Button type="primary" :loading="loading" @click="ok">确定</Button>
+    <div class="footer">
+      <el-button type="primary" :loading="loading" @click="ok">确定</el-button>
     </div>
-
   </div>
 </template>
 <script>
+import { Message } from "@/utils/message";
 import AMapLoader from "@amap/amap-jsapi-loader";
 import { handleRegion } from "@/api/address.js";
+import config from "@/config/index";
 
-const config = require('@/config/index')
 export default {
   name: "map",
   data() {
@@ -64,7 +63,7 @@ export default {
           }
         });
       } else {
-        this.$Message.error('未获取到坐标信息！请查看高德API配置是否正确')
+        Message.error('未获取到坐标信息！请查看高德API配置是否正确')
       }
 
     },
@@ -135,7 +134,7 @@ export default {
     selectAddr(location) {
       // 选择坐标
       if (!location) {
-        this.$Message.warning("请选择正确点位");
+        Message.warning("请选择正确点位");
         return false;
       }
       const lnglat = [location.lng, location.lat];

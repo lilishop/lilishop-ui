@@ -10,12 +10,13 @@ h4 {
   margin: 20px 0;
   font-size: 18px;
 }
-::v-deep .ivu-icon {
+.icon {
   margin-left: 40px;
   margin-right: 40px;
 }
 .count-item,
-.todo-item {
+.todo-item,
+.today-item {
   height: 84px;
   display: flex;
 
@@ -60,6 +61,12 @@ h4 {
   cursor: pointer;
   color: #fff;
   justify-content: flex-start;
+
+  > div:first-child {
+    margin-left: 40px;
+    margin-right: 20px;
+    flex-shrink: 0;
+  }
 }
 .count-item:nth-of-type(1) {
   background-image: linear-gradient(109.6deg, rgba($color: #ff7171, $alpha: 0.6) 11.2%, #ff7171 100.2%);
@@ -93,7 +100,10 @@ h4 {
 
 
 .flow-list {
-  height: 330px;
+  min-height: 330px;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 .svg {
   width: 20px;
@@ -101,7 +111,8 @@ h4 {
 }
 .flow-item {
   display: flex;
-  flex: 1;
+  flex: 1 1 620px;
+  min-width: 0;
 }
 .flow {
   background: #ebebeb88 !important;
@@ -131,28 +142,36 @@ h4 {
   }
 }
 .flow-box {
-  padding-top: 20px;
-  width: 400px;
+  padding: 37px;
+  width: 100%;
+  box-sizing: border-box;
   justify-content: space-between;
   margin: 10px 0 20px;
+  gap: 20px;
   > .flow-box-item {
+    flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     font-size: 15px;
-    margin: 0 20px;
     > div {
       margin: 4px 0;
     }
   }
 }
+.flow-splice {
+  width: 100%;
+  gap: 20px;
+}
 .flow-box-splice {
   background: #fff;
-  width: 190px;
+  flex: 1;
+  min-width: 0;
   margin-right: 20px;
-  padding: 20px;
+  padding: 36px;
   font-weight: bold;
   display: flex;
   align-items: center;
@@ -182,24 +201,44 @@ h4 {
 .flow-wrapper {
   background: #fff;
   padding: 0 30px;
+  flex: 1;
+  min-width: 0;
 }
 .today-box {
-  flex: 3;
+  flex: 1 1 380px;
+  min-width: 380px;
+  align-self: flex-start;
   background: #fff;
-  margin-left: 20px;
-  padding: 0 30px;
+  padding: 0 30px 20px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+
+  > h4 {
+    margin: 20px 0;
+  }
 }
 
 .today-item {
-  width: 30%;
-  margin-bottom: 20px;
-  border-radius: 0.4em;
-  font-weight: bold;
+  box-sizing: border-box;
+  flex: 1 1 calc(50% - 8px);
+  min-width: calc(50% - 8px);
+  margin-right: 0;
+  flex-direction: column;
+  justify-content: space-between;
   background: #ebebeb88;
-  padding: 20px;
+  padding: 16px 20px;
+  > div {
+    word-break: break-word;
+    font-size: 14px;
+    line-height: 1.3;
+  }
   > span {
     color: $theme_color;
     font-size: 21px;
+    margin-top: 8px;
+    word-break: break-all;
+    line-height: 1.2;
   }
 }
 
@@ -214,6 +253,7 @@ h4 {
 }
 
 .today-list {
-  justify-content: space-between;
+  display: flex;
   flex-wrap: wrap;
+  gap: 16px;
 }

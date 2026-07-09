@@ -23,7 +23,8 @@
       </template>
     </ul>
     <!-- 秒杀商品列表 -->
-    <div class="goods-list">
+    <div class="seckill-goods-wrap">
+      <div class="goods-list">
       <empty v-if="goodsList.length === 0" />
       <div v-else class="goods-show-info1" v-for="(item, index) in goodsList" :key="index"
         @click="goGoodsDetail(item.skuId, item.goodsId)">
@@ -32,12 +33,8 @@
         </div>
         <div class="goods-show-price">
           <span>
-            <span class="seckill-price text-danger">{{
-              item.price | unitPrice("￥")
-            }}</span>
-            <span style="color: #999; text-decoration: line-through">{{
-              item.originalPrice | unitPrice("￥")
-            }}</span>
+            <span class="seckill-price text-danger">{{ $filters.unitPrice(item.price, "￥") }}</span>
+            <span style="color: #999; text-decoration: line-through">{{ $filters.unitPrice(item.originalPrice, "￥") }}</span>
           </span>
         </div>
         <div class="goods-show-detail" style="margin-bottom: 20px">
@@ -59,16 +56,20 @@
                 (item.salesNum / (item.quantity)) * 100
               )
               : 100) + "%"
-          }}</span><Progress hide-info stroke-color="#df0021" style="width: 110px" class="ml_10" :percent="item.quantity && item.quantity > 0
-      ? Math.ceil(
-        (item.salesNum / (item.quantity)) * 100
-      )
-      : 100
-    " />
+          }}</span><el-progress
+            :show-text="false"
+            color="#df0021"
+            style="width: 110px"
+            class="ml_10"
+            :percentage="item.quantity && item.quantity > 0
+              ? Math.ceil((item.salesNum / item.quantity) * 100)
+              : 100"
+          />
         </div>
         <div class="goods-show-seller">
           <span>{{ item.storeName }}</span>
         </div>
+      </div>
       </div>
     </div>
     <BaseFooter />
@@ -88,8 +89,7 @@ export default {
       nowHour: new Date().getHours(), // 当前小时数
     };
   },
-  beforeDestroy () {
-    // 销毁前清除定时器
+  beforeUnmount () {
     clearInterval(this.interval);
   },
   watch: {
@@ -201,10 +201,12 @@ export default {
 
 .time-line {
   width: 1200px;
+  max-width: 1200px;
   height: 60px;
   margin: 0 auto;
   background-color: #fff;
   display: flex;
+  box-sizing: border-box;
 
   li {
     padding: 0 30px;
@@ -244,15 +246,29 @@ export default {
   }
 }
 
+.seckill-goods-wrap {
+  width: 1200px;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+
+  .goods-list {
+    width: 100%;
+    margin: 0;
+    column-gap: 10px;
+  }
+}
+
 .goods-show-info1 {
-  width: 290px;
+  width: calc(25% - 8px);
+  min-width: 0;
   padding: 6px;
-  margin: 10px 0px;
-  margin-left: 8px;
+  margin: 10px 0;
   position: relative;
   border: 1px solid #fff;
   cursor: pointer;
   background-color: #fff;
+  box-sizing: border-box;
 }
 
 .goods-show-info1:hover {
@@ -263,9 +279,25 @@ export default {
 .goods-show-img {
   display: flex;
   justify-content: center;
+
+  img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
 }
 
-.ivu-progress-success .ivu-progress-bg {
-  background-color: #111fff;
+.goods-show-num1 {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  margin-bottom: 6px;
+  color: #666;
+}
+
+.el-progress-bar__inner {
+  background-color: #df0021;
 }
 </style>

@@ -1,46 +1,57 @@
 <template>
   <div class="wrapper">
-    <card _Title="用户信息" />
-    <Form :model="formItem" :rules="rules" ref="form" :label-width="80">
-      <FormItem label="头像">
-        <Avatar v-if="formItem.face" :src="formItem.face" size="80"/>
-        <Avatar v-else icon="ios-person" size="80"/>
-        <Upload
-          :show-upload-list="false"
-          :on-success="handleSuccess"
-          :format="['jpg','jpeg','png']"
-          :action="action"
-          :headers="accessToken"
+    <UserCenterLayout title="用户信息" :tabs="['用户信息']">
+      <el-form :model="formItem" :rules="rules" ref="form" label-width="80px">
+      <el-form-item label="头像" class="avatar-form-item">
+        <div class="avatar-upload">
+          <el-avatar v-if="formItem.face" :src="formItem.face" :size="80" />
+          <el-avatar v-else :size="80"><el-icon><User /></el-icon></el-avatar>
+          <el-upload
+            :show-file-list="false"
+            :on-success="handleSuccess"
+            :format="['jpg','jpeg','png']"
+            :action="action"
+            :headers="accessToken"
           >
-          <Button class="mt_10">上传头像</Button>
-        </Upload>
-      </FormItem>
-      <FormItem label="昵称" prop="nickName">
-        <Input class="wrapper-user-name" style="width:187px" v-model="formItem.nickName" placeholder="" />
-      </FormItem>
+            <el-button>上传头像</el-button>
+          </el-upload>
+        </div>
+      </el-form-item>
+      <el-form-item label="昵称" prop="nickName">
+        <el-input class="profile-field" v-model="formItem.nickName" placeholder="" />
+      </el-form-item>
 
-      <FormItem label="生日">
-        <DatePicker type="date" placeholder="选择您的生日" v-model="formItem.birthday"></DatePicker>
-      </FormItem>
-      <FormItem label="性别">
-        <RadioGroup v-model="formItem.sex" type="button" button-style="solid">
-          <Radio :label="1">男</Radio>
-          <Radio :label="0">女</Radio>
-        </RadioGroup>
-      </FormItem>
-      <FormItem>
-        <Button type="primary" @click="save">确认修改</Button>
+      <el-form-item label="生日">
+        <el-date-picker
+          class="profile-field"
+          type="date"
+          placeholder="选择您的生日"
+          v-model="formItem.birthday"
+        />
+      </el-form-item>
+      <el-form-item label="性别">
+        <el-radio-group v-model="formItem.sex" type="button" button-style="solid">
+          <el-radio :label="1">男</el-radio>
+          <el-radio :label="0">女</el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="save">确认修改</el-button>
 
-      </FormItem>
-    </Form>
+      </el-form-item>
+      </el-form>
+    </UserCenterLayout>
   </div>
 </template>
 
 <script>
+import { Message } from "@/utils/message";
 import { editMemberInfo } from '@/api/account.js';
 import { commonUrl } from '@/plugins/request.js';
 import storage from '@/plugins/storage.js';
+import { User } from '@element-plus/icons-vue';
 export default {
+  components: { User },
   name: 'Profile',
   data () {
     return {
@@ -94,7 +105,7 @@ export default {
           }
           editMemberInfo(params).then(res => {
             if (res.success) {
-              this.$Message.success('修改个人资料成功')
+              Message.success('修改个人资料成功')
               storage.setItem('userInfo', res.result)
               this.$router.go(0)
             }
@@ -103,7 +114,7 @@ export default {
       })
     },
     handleSuccess (res, file) { // 上传成功
-      this.$set(this.formItem, 'face', res.result)
+      this.formItem['face'] = res.result
     },
   }
 
@@ -111,5 +122,35 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.avatar-form-item {
+  :deep(.el-form-item__label) {
+    height: 90px;
+    line-height: 90px;
+    display: flex;
+    align-items: center;
+  }
+}
 
+.avatar-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+
+  :deep(.el-avatar) {
+    margin-top: 10px;
+  }
+
+  :deep(.el-upload) {
+    display: block;
+  }
+}
+
+.profile-field {
+  width: 187px;
+}
+
+:deep(.profile-field.el-date-editor) {
+  width: 187px;
+}
 </style>

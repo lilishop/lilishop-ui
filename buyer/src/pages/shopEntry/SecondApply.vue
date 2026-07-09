@@ -1,48 +1,49 @@
 <template>
   <div class="photo-msg">
-    <Form ref="secondForm" :model="form" :rules="rules" :label-width="140">
+    <el-form ref="secondForm" :model="form" :rules="rules" label-width="140px">
       <h4>基础信息</h4>
-      <FormItem prop="settlementBankAccountName" label="银行开户名">
-        <Input
+      <el-form-item prop="settlementBankAccountName" label="银行开户名">
+        <el-input
           type="text"
           v-model="form.settlementBankAccountName"
           placeholder="请填写银行开户名称"
         />
-      </FormItem>
-      <FormItem prop="settlementBankAccountNum" label="银行账号">
-        <Input
+      </el-form-item>
+      <el-form-item prop="settlementBankAccountNum" label="银行账号">
+        <el-input
           type="text"
           v-model="form.settlementBankAccountNum"
           placeholder="请填写银行账号"
         />
-      </FormItem>
-      <FormItem prop="settlementBankBranchName" label="开户银行支行名称">
-        <Input
+      </el-form-item>
+      <el-form-item prop="settlementBankBranchName" label="开户银行支行名称">
+        <el-input
           type="text"
           v-model="form.settlementBankBranchName"
           placeholder="请填写开户银行支行名称"
         />
-      </FormItem>
-      <FormItem prop="settlementBankJointName" label="支行联行号">
-        <Input
+      </el-form-item>
+      <el-form-item prop="settlementBankJointName" label="支行联行号">
+        <el-input
           type="text"
           v-model="form.settlementBankJointName"
           placeholder="请填写支行联行号"
         />
-      </FormItem>
+      </el-form-item>
 
-      <FormItem>
-        <Button @click="$emit('change', 0)">返回</Button>
-        <Button type="primary" :loading="loading" @click="next"
-          >填写其他信息</Button
+      <el-form-item>
+        <el-button @click="$emit('change', 0)">返回</el-button>
+        <el-button type="primary" :loading="loading" @click="next"
+          >填写其他信息</el-button
         >
-      </FormItem>
-    </Form>
+      </el-form-item>
+    </el-form>
   </div>
 </template>
 <script>
 import { applySecond } from '@/api/shopentry';
 export default {
+  emits: ['change'],
   props: {
     content: {
       default: {},
@@ -90,11 +91,9 @@ export default {
     }
   },
   mounted () {
-    if (this.content != {}) {
+    if (this.content && Object.keys(this.content).length) {
       this.form = JSON.parse(JSON.stringify(this.content));
-      this.$forceUpdate();
     }
-    this.$refs.secondForm.resetFields()
   }
 };
 </script>
@@ -110,7 +109,7 @@ h4 {
   line-height: 40px;
   text-align: left;
 }
-.ivu-input-wrapper {
+.el-input {
   width: 300px;
 }
 </style>

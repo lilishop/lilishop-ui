@@ -1,148 +1,89 @@
 <template>
   <div>
-    <Card>
-      <Form ref="searchForm" :model="searchForm" inline :label-width="100" class="search-form">
+    <el-card>
+      <el-tabs v-model="searchForm.status">
+        <el-tab-pane
+          v-for="(item, index) in tabs"
+          :key="index"
+          :name="item.status"
+          :label="item.title"
+        />
+      </el-tabs>
 
-        <Form-item label="直播状态" prop="promotionStatus">
-          <Select v-model="searchForm.status" placeholder="请选择" clearable style="width: 240px">
-            <Option value="NEW">未开始</Option>
-            <Option value="START">直播中</Option>
-            <Option value="END">已结束</Option>
+      <el-table :data="liveData" style="width: 100%">
+        <el-table-column prop="name" label="直播标题" />
+        <el-table-column prop="anchorName" label="主播昵称" />
+        <el-table-column label="直播开始时间">
+          <template #default="{ row }">
+            <span v-if="row">{{ $filters.unixToDate(row.startTime) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="直播结束时间">
+          <template #default="{ row }">
+            <span v-if="row">{{ $filters.unixToDate(row.endTime) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="是否推荐" align="center">
+          <template #default="{ row, $index }">
+            <el-switch
+              v-if="row"
+              v-model="row.recommend"
+              inline-prompt
+              active-text="是"
+              inactive-text="否"
+              @change="star(row, $index)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="直播状态">
+          <template #default="{ row }">
+            <template v-if="row">
+              <el-tag v-if="row.status == 'NEW'" type="primary">未开始</el-tag>
+              <el-tag v-else-if="row.status == 'START'" type="success">直播中</el-tag>
+              <el-tag v-else type="warning">已结束</el-tag>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作">
+          <template #default="{ row }">
+            <a v-if="row" class="link-text" @click="getLiveDetail(row)">查看</a>
+          </template>
+        </el-table-column>
+      </el-table>
 
-          </Select>
-        </Form-item>
-
-        <Button @click="handleSearch" type="primary" class="search-btn" icon="ios-search">搜索</Button>
-      </Form>
-      </Card>
-    <Card>
-      <div class="btns">
-        <Button @click="createLive()" type="primary">创建直播</Button>
+      <div class="mt_10 page" style="display: flex; justify-content: flex-end; margin: 20px 0">
+        <el-pagination
+          :current-page="searchForm.pageNumber"
+          :page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePageNumber"
+          @size-change="changePageSize"
+        />
       </div>
-      <Tabs v-model="searchForm.status">
-        <!-- 标签栏 -->
-        <TabPane v-for="(item,index) in tabs" :key="index" :name="item.status" :label="item.title">
-
-        </TabPane>
-
-      </Tabs>
-      <Table :columns="liveColumns" :data="liveData"></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePageNumber" @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]"
-          size="small" show-total show-elevator show-sizer></Page>
-      </Row>
-
-    </Card>
+    </el-card>
   </div>
 </template>
 
 <script>
-import { getLiveList } from "@/api/promotion.js";
+import { getLiveList, whetherStar } from "@/api/promotion.js";
 export default {
   data() {
     return {
-      // 查询数据的总数
       total: 0,
-      // 查询的form
       searchForm: {
         pageSize: 20,
         pageNumber: 1,
         status: "NEW",
       },
-      // 直播tab选项栏
       tabs: [
-        {
-          title: "直播中",
-          status: "START",
-        },
-        {
-          title: "未开始",
-          status: "NEW",
-        },
-        {
-          title: "已结束",
-          status: "END",
-        },
+        { title: "直播中", status: "START" },
+        { title: "未开始", status: "NEW" },
+        { title: "已结束", status: "END" },
       ],
-      liveColumns: [
-        {
-          title: "直播标题",
-          key: "name",
-        },
-        {
-          title: "主播昵称",
-          key: "anchorName",
-        },
-        {
-          title: "直播开始时间",
-          key: "createTime",
-          render: (h, params) => {
-            return h(
-              "span",
-
-              this.$options.filters.unixToDate(params.row.startTime)
-            );
-          },
-        },
-        {
-          title: "直播结束时间",
-          key: "endTime",
-          render: (h, params) => {
-            return h(
-              "span",
-
-              this.$options.filters.unixToDate(params.row.endTime)
-            );
-          },
-        },
-
-        {
-          title: "直播状态",
-          render: (h, params) => {
-            return h(
-              "span",
-              params.row.status == "NEW"
-                ? "未开始"
-                : params.row.status == "START"
-                ? "直播中"
-                : "已结束"
-            );
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          render: (h, params) => {
-            return h(
-              "div",
-              {
-                style: {
-                  display: "flex",
-                },
-              },
-              [
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.getLiveDetail(params.row);
-                      },
-                    },
-                  },
-                  "查看/添加商品"
-                ),
-              ]
-            );
-          },
-        },
-      ], //table中显示的title
-      liveData: [], //table中显示的直播数据
+      liveData: [],
     };
   },
   watch: {
@@ -158,33 +99,27 @@ export default {
     this.getStoreLives();
   },
   methods: {
-    /**
-     * 搜索直播间状态
-     */
-    handleSearch() {
-      this.getStoreLives();
+    async star(val, index) {
+      const switched = this.liveData[index].recommend;
+      try {
+        const res = await whetherStar({ id: val.id, recommend: switched });
+        if (res.success) {
+          this.getStoreLives();
+          return;
+        }
+        this.liveData[index].recommend = !switched;
+      } catch (e) {
+        this.liveData[index].recommend = !switched;
+      }
     },
-
-    /**
-     * 页面数据大小分页回调
-     */
     changePageSize(val) {
-      console.log(val)
       this.searchForm.pageSize = val;
       this.getStoreLives();
     },
-    /**
-     * 分页回调
-     */
     changePageNumber(val) {
-      console.log(val)
       this.searchForm.pageNumber = val;
       this.getStoreLives();
     },
-
-    /**
-     * 获取店铺直播间列表
-     */
     async getStoreLives() {
       let result = await getLiveList(this.searchForm);
       if (result.success) {
@@ -192,29 +127,17 @@ export default {
         this.total = result.result.total;
       }
     },
-
-    /**
-     * 获取直播间详情
-     */
     getLiveDetail(val) {
       this.$router.push({
-        path: "/add-live",
+        path: "/live-detail",
         query: { ...val, liveStatus: this.searchForm.status },
       });
     },
-    /**
-     * 创建直播
-     */
-    createLive() {
-      this.$router.push({ path: "/add-live" });
-    },
-
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@import "@/styles/table-common.scss";
 .btns {
   margin-bottom: 10px;
   margin-top: 10px;

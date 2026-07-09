@@ -1,75 +1,99 @@
 <template>
-
   <div class="wrapper">
-      <Card class="card fixed-bottom">
-        <affixTime @selected="clickBreadcrumb" />
-      </Card>
+    <el-affix :offset="100">
+      <el-card class="card fixed-bottom">
+        <affixTime :closeShop="true" @selected="clickBreadcrumb" />
+      </el-card>
+    </el-affix>
 
-    <Card class="card">
+    <el-card class="card">
       <div>
         <h4>交易概况</h4>
         <div class="flex">
           <div class="transactionList">
-            <div class="transaction-item" v-for="(item,index) in transactionList" :key="index">
-              <h4>{{item.label}}</h4>
-              <div class="transaction-card" v-if="item.label=='转换'">
-
+            <div
+              class="transaction-item"
+              v-for="(item, index) in transactionList"
+              :key="index"
+            >
+              <h4>{{ item.label }}</h4>
+              <div class="transaction-card" v-if="item.label == '转换'">
                 <div class="card-item">
                   <div class="card-item-label">访客数UV</div>
-                  <div class="card-item-value">{{overViewList.uvNum || 0}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.uvNum || 0 }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">下单转化率</div>
-                  <div class="card-item-value">{{overViewList.orderConversionRate || '0%'}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.orderConversionRate || "0%" }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">付款转化率</div>
-                  <div class="card-item-value">{{overViewList.paymentsConversionRate ||'0%'}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.paymentsConversionRate || "0%" }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">全店转化率</div>
-                  <div class="card-item-value">{{overViewList.overallConversionRate || '0%'}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.overallConversionRate || "0%" }}
+                  </div>
                 </div>
-
               </div>
-              <div class="transaction-card" v-if="item.label=='订单'">
+              <div class="transaction-card" v-if="item.label == '订单'">
                 <div class="card-item">
                   <div class="card-item-label">下单笔数</div>
-                  <div class="card-item-value">{{overViewList.orderNum || 0}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.orderNum || 0 }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">下单人数</div>
-                  <div class="card-item-value">{{overViewList.orderMemberNum || 0}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.orderMemberNum || 0 }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">下单金额</div>
-                  <div class="card-item-value">{{overViewList.orderAmount || 0 | unitPrice('￥')}}</div>
+                  <div class="card-item-value">
+                    {{ $filters.unitPrice(overViewList.orderAmount || 0, "￥") }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">付款笔数</div>
-                  <div class="card-item-value">{{overViewList.paymentOrderNum  || 0}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.paymentOrderNum || 0 }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">付款人数</div>
-                  <div class="card-item-value">{{overViewList.paymentsNum || 0}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.paymentsNum || 0 }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">付款金额</div>
-                  <div class="card-item-value">{{ overViewList.paymentAmount || 0 | unitPrice('￥')}}</div>
+                  <div class="card-item-value">
+                    {{ $filters.unitPrice(overViewList.paymentAmount || 0, "￥") }}
+                  </div>
                 </div>
-
               </div>
-              <div class="transaction-card" v-if="item.label=='退单'">
-
+              <div class="transaction-card" v-if="item.label == '退单'">
                 <div class="card-item">
                   <div class="card-item-label">退单笔数</div>
-                  <div class="card-item-value">{{overViewList.refundOrderNum || 0}}</div>
+                  <div class="card-item-value">
+                    {{ overViewList.refundOrderNum || 0 }}
+                  </div>
                 </div>
                 <div class="card-item">
                   <div class="card-item-label">退单金额</div>
-                  <div class="card-item-value">{{overViewList.refundOrderPrice || 0 | unitPrice('￥')}}</div>
+                  <div class="card-item-value">
+                    {{ $filters.unitPrice(overViewList.refundOrderPrice || 0, "￥") }}
+                  </div>
                 </div>
-
               </div>
             </div>
           </div>
@@ -79,107 +103,171 @@
               <div class="block">
                 <div class="box">
                   <span>访客数</span>
-                  <span>{{overViewList.uvNum  || 0}}</span>
+                  <span>{{ overViewList.uvNum || 0 }}</span>
                 </div>
               </div>
               <!-- 中 -->
               <div class="block">
                 <div class="box">
                   <span>下单笔数</span>
-                  <span>{{overViewList.orderNum  || 0}}</span>
+                  <span>{{ overViewList.orderNum || 0 }}</span>
                 </div>
               </div>
               <!-- 下 -->
               <div class="block">
                 <div class="box">
                   <span>付款笔数</span>
-                  <span>{{overViewList.paymentOrderNum  || 0 }}</span>
+                  <span>{{ overViewList.paymentOrderNum || 0 }}</span>
                 </div>
               </div>
 
               <!-- 线 -->
-              <div class="rightBorder">
-
-              </div>
-              <div class="leftTopBorder">
-
-              </div>
-              <div class="leftBottomBorder">
-
-              </div>
+              <div class="rightBorder"></div>
+              <div class="leftTopBorder"></div>
+              <div class="leftBottomBorder"></div>
               <!--数据 -->
               <div class="leftTopTips">
-                <div>下单转化率 </div>
-                <div>{{overViewList.orderConversionRate  || '0%' }}</div>
+                <div>下单转化率</div>
+                <div>{{ overViewList.orderConversionRate || "0%" }}</div>
               </div>
               <div class="leftBottomTips">
                 <div>付款转化率</div>
-                <div>{{overViewList.paymentsConversionRate  || '0%'}}</div>
+                <div>{{ overViewList.paymentsConversionRate || "0%" }}</div>
               </div>
               <div class="rightTips">
                 <div>整体转换率</div>
-                <div>{{overViewList.overallConversionRate  || '0%'}}</div>
+                <div>{{ overViewList.overallConversionRate || "0%" }}</div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </Card>
+    </el-card>
 
-    <Card class="card">
+    <el-card class="card">
       <div>
         <h4>交易趋势</h4>
-        <div>
-
-        </div>
+        <div></div>
       </div>
 
       <div>
-
         <div id="orderChart"></div>
-
       </div>
-    </Card>
-    <Card class="card">
-      <div>
-        <h4>订退单统计</h4>
-        <div class="breadcrumb" style="margin-bottom:20px;">
-          <RadioGroup v-model="orderOrRefund" type="button" size="small" button-style="solid">
-            <Radio :label="1">订单</Radio>
-            <Radio :label="0">退单</Radio>
-          </RadioGroup>
-        </div>
-        <div>
-          <Table stripe :columns="columns" :data="data"></Table>
-        </div>
-        <Page @on-change="pageNumberChange" @on-page-size-change="pageSizeChange" class="mt_10" show-total show-elevator :total="total" />
-      </div>
-    </Card>
+    </el-card>
 
+    <el-card class="card">
+      <el-tabs v-model="orderOrRefund">
+        <el-tab-pane label="订单" name="order">
+          <el-table stripe :data="data" style="width: 100%">
+            <el-table-column type="expand" width="50">
+              <template #default="{ row }">
+                <orderRow v-if="row" :res="row" />
+              </template>
+            </el-table-column>
+            <el-table-column prop="storeName" label="商家名称" min-width="120" />
+            <el-table-column prop="memberName" label="用户名" min-width="100" />
+            <el-table-column label="订单状态" min-width="100">
+              <template #default="{ row }">
+                <span v-if="row">{{ orderStatusList[row.orderStatus] }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="createTime" label="创建时间" min-width="160" />
+            <el-table-column label="支付时间" min-width="160">
+              <template #default="{ row }">
+                <span v-if="row">{{ row.paymentTime || "暂无" }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="价格" min-width="110">
+              <template #default="{ row }">
+                <span v-if="row" :style="{ color: $mainColor }">
+                  {{ $filters.unitPrice(row.flowPrice, "￥") }}</span>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="退单" name="refund">
+          <el-table stripe :data="data" style="width: 100%">
+            <el-table-column type="expand" width="50">
+              <template #default="{ row }">
+                <refundRow v-if="row" :res="row" />
+              </template>
+            </el-table-column>
+            <el-table-column label="商品图片" width="90" align="center">
+              <template #default="{ row }">
+                <img
+                  v-if="row && row.goodsImage"
+                  :src="row.goodsImage"
+                  style="width: 60px; vertical-align: middle"
+                  alt=""
+                />
+              </template>
+            </el-table-column>
+            <el-table-column prop="goodsName" label="商品名称" min-width="140" show-overflow-tooltip />
+            <el-table-column prop="storeName" label="商家名称" min-width="120" />
+            <el-table-column label="售后单类型" min-width="100">
+              <template #default="{ row }">
+                <span v-if="row">{{ serviceTypeList[row.serviceType] }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="售后单状态" min-width="120">
+              <template #default="{ row }">
+                <span v-if="row">{{ serviceStatusList[row.serviceStatus] }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="退款时间" min-width="160">
+              <template #default="{ row }">
+                <span v-if="row">{{ row.refundTime || "暂无" }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="申请退款金额" min-width="120">
+              <template #default="{ row }">
+                <span v-if="row" :style="{ color: $mainColor }">
+                  {{ $filters.unitPrice(row.applyRefundPrice, "￥") }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="reason" label="申请原因" min-width="120" show-overflow-tooltip />
+            <el-table-column label="实际金额" min-width="110">
+              <template #default="{ row }">
+                <span v-if="row">{{ $filters.unitPrice(row.flowPrice || 0, "￥") }}</span>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
+      <el-pagination
+        v-if="showRecords"
+        v-model:current-page="refundParams.pageNumber"
+        v-model:page-size="refundParams.pageSize"
+        class="mt_10"
+        :total="total"
+        :page-sizes="[20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        size="small"
+      />
+    </el-card>
   </div>
 </template>
 <script>
 import * as API_Goods from "@/api/goods";
 import { Chart } from "@antv/g2";
-
 import orderRow from "./order/orderDetail";
 import refundRow from "./order/refundOrder";
 import affixTime from "@/views/lili-components/affix-time";
-import Cookies from "js-cookie";
+
 export default {
   components: { orderRow, refundRow, affixTime },
 
   data() {
     return {
-      orderOrRefund: 1, // 订单还是退单
-      total:0, // 订单总数
+      orderOrRefund: "order", // order | refund
+      total: 0, // 总数
       // 订单状态
       orderStatusList: {
         UNDELIVERED: "待发货",
         UNPAID: "未付款",
         PAID: "已付款",
         DELIVERED: "已发货",
-        CANCELLED: "已取消",
+        CANCELLED: "已关闭",
         COMPLETED: "已完成",
         TAKE: "已完成",
       },
@@ -192,7 +280,7 @@ export default {
         RETURN_MONEY: "退款",
       },
       serviceStatusList: {
-        // 服务类型
+        // 服务状态
         APPLY: "申请售后",
         PASS: "通过售后",
         REFUSE: "拒绝售后",
@@ -207,140 +295,7 @@ export default {
       },
       //
 
-      data: [], //定退单存储值
-
-      columns: [], // 定退单title
-
-      orderColumns: [
-        // 订单表头
-        {
-          type: "expand",
-          width: 50,
-          render: (h, params) => {
-            return h(orderRow, {
-              props: {
-                res: params.row,
-              },
-            });
-          },
-        },
-        {
-          title: "商家名称",
-          key: "storeName",
-        },
-        {
-          title: "用户名",
-          key: "memberName",
-        },
-
-        {
-          title: "订单状态",
-          key: "orderStatus",
-          render: (h, params) => {
-            return h("div", this.orderStatusList[params.row.orderStatus]);
-          },
-        },
-        {
-          title: "创建时间",
-          key: "createTime",
-        },
-
-        {
-          title: "支付时间",
-          key: "paymentTime",
-          render: (h, params) => {
-            return h("div", params.row.paymentTime || "暂无");
-          },
-        },
-        {
-          title: "价格",
-          key: "flowPrice",
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.flowPrice,color:this.$mainColor}} );
-          },
-        },
-      ],
-      refundColumns: [
-        // 退货单表头
-        {
-          type: "expand",
-          width: 50,
-          render: (h, params) => {
-            return h(refundRow, {
-              props: {
-                res: params.row,
-              },
-            });
-          },
-        },
-        {
-          title: "商品图片",
-          key: "goodsImage",
-          render: (h, params) => {
-            return h("img", {
-              attrs: {
-                src: params.row.goodsImage,
-              },
-              style: {
-                width: "60px",
-                verticalAlign: "middle",
-              },
-            });
-          },
-        },
-
-        {
-          title: "商品名称",
-          key: "goodsName",
-        },
-        {
-          title: "商家名称",
-          key: "sellerName",
-        },
-        {
-          title: "售后单类型",
-          key: "serviceType",
-          render: (h, params) => {
-            return h("div", this.serviceTypeList[params.row.serviceType]);
-          },
-        },
-        {
-          title: "售后单状态",
-          key: "serviceStatus",
-          render: (h, params) => {
-            return h("div", this.serviceStatusList[params.row.serviceStatus]);
-          },
-        },
-        {
-          title: "退款时间",
-          key: "refundTime",
-          render: (h, params) => {
-            return h("div", params.row.refundTime || "暂无");
-          },
-        },
-        {
-          title: "申请退款金额",
-          key: "applyRefundPrice",
-          render: (h, params) => {
-              return h("priceColorScheme", {props:{value:params.row.applyRefundPrice,color:this.$mainColor}} );
-          },
-
-        },
-        {
-          title: "申请原因",
-          key: "reason",
-        },
-        {
-          title: "实际金额",
-          key: "flowPrice",
-          render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.flowPrice, "￥")
-            );
-          },
-        },
-      ],
+      data: [],
 
       // 交易概况
       transactionList: [
@@ -387,37 +342,35 @@ export default {
           value: "LAST_THIRTY",
         },
       ],
-
       // 订单传参
       orderParams: {
         searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
         year: "",
-        storeId: JSON.parse(Cookies.get("userInfoSeller")).id || "",
+        shopId: "",
         memberId: "",
       },
       // 订单概念
       overViewParams: {
         month: "",
         searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
-        storeId: JSON.parse(Cookies.get("userInfoSeller")).id || "",
+        storeId: "",
         year: "",
       },
       defaultParams: {
         month: "",
         searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
-        storeId: JSON.parse(Cookies.get("userInfoSeller")).id || "",
+        storeId: "",
         year: "",
       },
-
-      refundIndex: 0, // 当前退单下标详情
       // 退单订单
       refundParams: {
         pageNumber: 1,
         pageSize: 20,
         searchType: "LAST_SEVEN",
-        storeId: JSON.parse(Cookies.get("userInfoSeller")).id || "",
+        storeId: "",
         year: "",
       },
+      showRecords:false,
 
       //
       //
@@ -425,15 +378,16 @@ export default {
   },
   watch: {
     refundParams: {
-      handler() {
-        if (this.refundIndex == 1) {
-          this.getOrderRefundList();
-        } else {
-          this.getOrderList();
-        }
+      handler(val) {
+        this.getOrderList();
       },
       deep: true,
       immediate: true,
+    },
+    orderOrRefund() {
+      this.showRecords = false;
+      this.refundParams.pageNumber = 1;
+      this.getOrderList();
     },
     orderParams: {
       handler() {
@@ -447,26 +401,8 @@ export default {
       },
       deep: true,
     },
-    orderOrRefund: {
-      // 订单还是退单
-      handler(val) {
-        if (val == 1) {
-          this.getOrderList();
-        } else {
-          this.getOrderRefundList();
-        }
-      },
-    },
   },
   methods: {
-    pageNumberChange(val){
-      this.refundParams.pageNumber = val
-      this.getOrderList();
-    },
-    pageSizeChange(val){
-      this.refundParams.pageSize = val
-      this.getOrderList();
-    },
     // 订单图
     initOrderChart() {
       // 默认已经加载 legend-filter 交互
@@ -500,16 +436,20 @@ export default {
           stroke: "#fff",
           lineWidth: 1,
         });
+         this.orderChart.area().position("createTime*price").color("title").shape("smooth");
+
       this.orderChart.render();
     },
-    // 时间筛选
+
     clickBreadcrumb(item, index) {
       let callback = JSON.parse(JSON.stringify(item));
-
+      console.log("callback",callback)
       this.orderParams = callback;
 
       this.overViewParams = callback;
       this.refundParams = callback;
+      this.refundParams.pageNumber = 1
+      this.refundParams.pageSize = 20
     },
 
     // 实例化订单概览
@@ -540,20 +480,17 @@ export default {
     },
     // 统计相关订单统计
     async getOrderList() {
-      const res = await API_Goods.statisticsOrderList(this.refundParams);
-      if (res.success) {
-        this.data = res.result.records;
-        this.columns = this.orderColumns;
-        this.total = res.result.total;
+      let res;
+      if (this.orderOrRefund === "order") {
+        // 订单
+        res = await API_Goods.statisticsOrderList(this.refundParams);
+      } else {
+        // 退单
+        res = await API_Goods.statisticsOrderRefundList(this.refundParams);
       }
-    },
-
-    //  统计相关退单统计
-    async getOrderRefundList() {
-      const res = await API_Goods.statisticsOrderRefundList(this.refundParams);
       if (res.success) {
+        this.showRecords = true;
         this.data = res.result.records;
-        this.columns = this.refundColumns;
         this.total = res.result.total;
       }
     },
@@ -573,11 +510,6 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-.fixed-bottom{
-  position:sticky;
-  z-index: 999;
-  top: 0;
-}
 .active {
   color: $theme_color;
   position: relative;
@@ -718,7 +650,7 @@ export default {
       z-index: 2;
     }
   }
-  ::v-deep .box {
+  :deep(.box){
     color: #fff;
     position: absolute;
 
@@ -794,5 +726,13 @@ h4 {
 }
 .card {
   margin-bottom: 10px;
+}
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+.mt_10 {
+  margin-top: 10px;
 }
 </style>

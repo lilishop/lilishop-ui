@@ -1,17 +1,23 @@
 <template>
   <div class="wrapper">
-
-    <Tabs :value="wap[0].title" class="tabs">
-
-      <TabPane :label="item.title" :name="item.title" @click="clickTag(item, i)" v-for="(item, i) in wap" :key="i">
-        <component ref="lili-component" :is="templateWay[item.name]" @selected="
-          (val) => {
-            changed = val;
-          }
-        " />
-      </TabPane>
-    </Tabs>
-
+    <el-tabs v-model="activeTab" class="tabs">
+      <el-tab-pane
+        :label="item.title"
+        :name="item.title"
+        v-for="(item, i) in wap"
+        :key="i"
+      >
+        <component
+          ref="lili-component"
+          :is="templateWay[item.name]"
+          @selected="
+            (val) => {
+              changed = val;
+            }
+          "
+        />
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 <script>
@@ -22,33 +28,38 @@ export default {
   components: {
     goodsDialog,
   },
+  setup() {
+    return { templateWay };
+  },
   data() {
     return {
-      templateWay, // 模板数据
-      changed: "", // 变更模板
-      selected: 0, // 已选数据
-      selectedLink: "", //选中的链接
-      wap  // tab标签
+      changed: "",
+      selected: 0,
+      selectedLink: "",
+      wap,
+      activeTab: wap[0]?.title || "",
     };
   },
   watch: {
     changed: {
       handler(val) {
-        this.$emit("selectedLink", val[0]); //因为是单选，所以直接返回第一个
+        this.$emit("selectedLink", val[0]);
       },
       deep: true,
     },
   },
   mounted() {
     this.$nextTick(() => {
-      this.$refs["lili-component"][0].type = "single"; //商品页面设置成为单选
+      if (this.$refs["lili-component"]?.[0]) {
+        this.$refs["lili-component"][0].type = "single";
+      }
     });
-
     this.wap.forEach((item) => {
-      item.selected = false;
+      if (item) {
+        item.selected = false;
+      }
     });
   },
-  methods: {},
 };
 </script>
 <style scoped lang="scss">
@@ -63,14 +74,8 @@ export default {
 .tabs {
   width: 100%;
 }
-
-::v-deep .ivu-modal {
-  overflow: hidden;
-  height: 650px !important;
-}
-::v-deep .ivu-modal-body {
-  width: 100%;
+:deep(.el-tabs__content) {
   height: 500px;
-  overflow: hidden;
+  overflow: auto;
 }
 </style>

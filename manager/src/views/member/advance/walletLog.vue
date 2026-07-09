@@ -1,132 +1,148 @@
-
 <template>
   <div class="search">
-    <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="会员名称" prop="memberName">
-            <Input type="text" v-model="searchForm.memberName" placeholder="请输入会员名称" clearable style="width: 240px" />
-          </Form-item>
-          <Form-item label="支付时间">
-            <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 240px"></DatePicker>
-          </Form-item>
-          <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-        </Form>
-      </Row>
-    </Card>
-    <Card>
-      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table"></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]"
-          size="small" show-total show-elevator show-sizer></Page>
-      </Row>
-    </Card>
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="会员名称" prop="memberName">
+          <el-input
+            v-model="searchForm.memberName"
+            placeholder="请输入会员名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="支付时间">
+          <el-date-picker
+            v-model="selectDate"
+            type="datetimerange"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            clearable
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            placeholder="选择起始时间"
+            style="width: 360px"
+            @change="selectDateRange"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+    <el-card>
+      <el-table
+        v-loading="loading"
+        border
+        :data="data"
+        ref="table"
+        class="mt_10"
+        style="width: 100%"
+      >
+        <el-table-column prop="memberName" label="会员名称" min-width="100" />
+        <el-table-column label="变动金额" width="150">
+          <template #default="{ row }">
+            <template v-if="row">
+              <priceColorScheme
+                v-if="row.money > 0"
+                :value="row.money"
+                color="green"
+              />
+              <priceColorScheme
+                v-else-if="row.money < 0"
+                :value="row.money"
+                :color="$mainColor"
+              />
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="变更时间" width="200" />
+        <el-table-column label="业务类型" width="200">
+          <template #default="{ row }">
+            <span v-if="row">{{ serviceTypeText(row.serviceType) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="detail" label="详细" min-width="300" show-overflow-tooltip />
+      </el-table>
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
 import { getUserWallet } from "@/api/member";
+
 export default {
   name: "walletLog",
   data() {
     return {
-      loading: true, // 表单加载状态
-        searchForm: {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-        pageSize: 20, // 页面大小
-          sort: "createTime", // 默认排序字段
-          order: "desc", // 默认排序方式
-          startDate: "", // 起始时间
-          endDate: "", // 终止时间
-          memberName: "",
-        },
-      selectDate: null, // 选择时间段
-      columns: [
-        // 表头
-        {
-          title: "会员名称",
-          key: "memberName",
-          minWidth: 100,
-        },
-        {
-          title: "变动金额",
-          key: "money",
-          width: 150,
-          render: (h, params) => {
-            if (params.row.money >0) {
-              return h("priceColorScheme", {props:{value:params.row.money,color:'green'}} );
-            } else if (params.row.money < 0) {
-              return h("priceColorScheme", {props:{value:params.row.money,color:this.$mainColor}} );
-            }
-          },
-        },
-
-        {
-          title: "变更时间",
-          key: "createTime",
-          width: 200,
-        },
-        {
-          title: "业务类型",
-          key: "serviceType",
-          width: 200,
-          render: (h, params) => {
-            if (params.row.serviceType == "WALLET_WITHDRAWAL") {
-              return h("div", [h("span", {}, "余额提现")]);
-            } else if (params.row.serviceType == "WALLET_PAY") {
-              return h("div", [h("span", {}, "余额支付")]);
-            } else if (params.row.serviceType == "WALLET_REFUND") {
-              return h("div", [h("span", {}, "余额退款")]);
-            } else if (params.row.serviceType == "WALLET_RECHARGE") {
-              return h("div", [h("span", {}, "余额充值")]);
-            } else {
-              return h("div", [h("span", {}, "佣金提成")]);
-            }
-          },
-        },
-        {
-          title: "详细",
-          key: "detail",
-          minWidth: 300,
-          tooltip: true,
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      loading: true,
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+        startDate: "",
+        endDate: "",
+        memberName: "",
+      },
+      selectDate: null,
+      data: [],
+      total: 0,
     };
   },
   methods: {
-    // 初始化数据
+    serviceTypeText(type) {
+      if (type === "WALLET_WITHDRAWAL") return "余额提现";
+      if (type === "WALLET_PAY") return "余额支付";
+      if (type === "WALLET_REFUND") return "余额退款";
+      if (type === "WALLET_RECHARGE") return "余额充值";
+      return "佣金提成";
+    },
     init() {
       this.getDataList();
     },
-    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
-    // 分页 改变页数
     changePageSize(v) {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getDataList();
     },
-    // 时间段赋值
     selectDateRange(v) {
-      if (v) {
+      if (v && v.length === 2) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
+      } else {
+        this.searchForm.startDate = "";
+        this.searchForm.endDate = "";
       }
     },
-    // 获取列表数据
     getDataList() {
+      this.loading = true;
       getUserWallet(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
@@ -134,8 +150,6 @@ export default {
           this.total = res.result.total;
         }
       });
-      this.total = this.data.length;
-      this.loading = false;
     },
   },
   mounted() {

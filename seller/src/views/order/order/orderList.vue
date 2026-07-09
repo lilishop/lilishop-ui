@@ -1,543 +1,415 @@
 <template>
   <div class="search">
-    <Card>
-      <Form
+    <el-card>
+      <el-form
         ref="searchForm"
         :model="searchForm"
         inline
-        :label-width="70"
+        label-width="70px"
         class="search-form"
+        @keyup.enter="handleSearch"
       >
-      <Form-item label="关键字" prop="keywords" style="display: block; width: 100%;">
-          <Input
-            type="text"
+        <el-form-item label="关键字" prop="keywords" style="display: block; width: 100%">
+          <el-input
             v-model="searchForm.keywords"
             placeholder="请输入商品名称/收货人/收货人手机号/店铺名称"
             clearable
             style="width: 500px"
           />
-        </Form-item>
-        <Form-item label="订单编号" prop="orderSn">
-          <Input
-            type="text"
-            v-model="searchForm.orderSn"
-            clearable
-            placeholder="请输入订单编号"
-            style="width: 240px"
-          />
-        </Form-item>
-        <Form-item label="会员名称" prop="buyerName">
-          <Input
-            type="text"
-            v-model="searchForm.buyerName"
-            clearable
-            placeholder="请输入会员名称"
-            style="width: 240px"
-          />
-        </Form-item>
-         <Form-item label="收货人" prop="shipName">
-          <Input
-            type="text"
-            v-model="searchForm.shipName"
-            placeholder="请输入收货人姓名"
-            clearable
-            style="width: 240px"
-          />
-        </Form-item>
-        <Form-item label="订单类型" prop="orderType">
-          <Select
-            v-model="searchForm.orderPromotionType"
-            placeholder="请选择"
-            clearable
-            style="width: 240px"
-          >
-            <Option value="NORMAL">普通订单</Option>
-            <Option value="PINTUAN">拼团订单</Option>
-            <Option value="GIFT">赠品订单</Option>
-            <Option value="POINTS">积分订单</Option>
-            <Option value="KANJIA">砍价订单</Option>
-          </Select>
-        </Form-item>
-        <Form-item label="下单时间">
-          <DatePicker
+        </el-form-item>
+        <el-form-item label="订单号" prop="orderSn">
+          <el-input v-model="searchForm.orderSn" placeholder="请输入订单号" clearable style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="会员名称" prop="buyerName">
+          <el-input v-model="searchForm.buyerName" placeholder="请输入会员名称" clearable style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="商品名称" prop="goodsName">
+          <el-input v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="收货人" prop="shipName">
+          <el-input v-model="searchForm.shipName" placeholder="请输入收货人姓名" clearable style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="订单类型" prop="orderType">
+          <el-select v-model="searchForm.orderPromotionType" placeholder="请选择" clearable style="width: 240px">
+            <el-option label="普通订单" value="NORMAL" />
+            <el-option label="拼团订单" value="PINTUAN" />
+            <el-option label="赠品订单" value="GIFT" />
+            <el-option label="积分订单" value="POINTS" />
+            <el-option label="砍价订单" value="KANJIA" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="支付方式" prop="paymentMethod">
+          <el-select v-model="searchForm.paymentMethod" placeholder="请选择支付方式" clearable style="width: 240px">
+            <el-option label="微信支付" value="WECHAT" />
+            <el-option label="支付宝" value="ALIPAY" />
+            <el-option label="余额支付" value="WALLET" />
+            <el-option label="线下转账" value="BANK_TRANSFER" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="下单时间">
+          <el-date-picker
             v-model="selectDate"
             type="datetimerange"
-            format="yyyy-MM-dd"
+            value-format="YYYY-MM-DD HH:mm:ss"
             clearable
-            @on-change="selectDateRange"
-            placeholder="选择起始时间"
-            style="width: 240px"
-          ></DatePicker>
-        </Form-item>
-        <Button @click="handleSearch" type="primary" class="search-btn"
-          >搜索</Button
-        >
-        <Button @click="handleReset" class="search-btn">重置</Button>
-      </Form>
-      </Card>
-    <Card>
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            style="width: 360px"
+            @change="selectDateRange"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
       <div class="order-tab">
-        <Tabs v-model="currentStatus" @on-click="orderStatusClick">
-          <TabPane v-for="(item,index) in orderStatusWithCount" :key="index" :label="item.title" :name="item.value">
-          </TabPane>
-        </Tabs>
+        <el-tabs v-model="currentStatus" @tab-click="onStatusTabClick">
+          <el-tab-pane
+            v-for="(item, index) in orderStatusWithCount"
+            :key="index"
+            :label="item.title"
+            :name="item.value"
+          />
+        </el-tabs>
       </div>
-      <div class="export">
-        <Button type="primary" class="mr_10" @click="expressOrderDeliver">批量发货</Button>
-        <Button @click="exportOrder" type="info" class="export">导出订单</Button>
-        <Poptip @keydown.enter.native="orderVerification" placement="bottom-start" width="400">
-          <Button class="export">
-            核验订单
-          </Button>
-          <div class="api" slot="content">
-            <h2>核验码</h2>
-            <div style="margin:10px 0;">
-              <Input v-model="orderCode" style="width:300px; margin-right:10px;" />
-              <Button style="primary" @click="orderVerification">核验</Button>
-            </div>
-          </div>
-        </Poptip>
+      <div>
+        <el-button type="info" class="export" @click="exportOrder">导出订单</el-button>
       </div>
-      <Table
-        :loading="loading"
-        :columns="columns"
-        :data="data"
-        ref="table"
-      ></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+
+      <el-table v-loading="loading" :data="data" ref="table" class="mt_10" style="width: 100%">
+        <el-table-column prop="sn" label="订单号" min-width="240" show-overflow-tooltip />
+        <el-table-column label="订单来源" width="120">
+          <template #default="{ row }">{{ clientTypeText(row.clientType) }}</template>
+        </el-table-column>
+        <el-table-column label="订单类型" width="120">
+          <template #default="{ row }">
+            <el-tag :type="orderPromotionTagType(row.orderPromotionType)">
+              {{ orderPromotionText(row.orderPromotionType) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="memberName" label="买家名称" min-width="130" show-overflow-tooltip />
+        <el-table-column prop="memberId" label="会员ID" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="storeName" label="店铺名称" min-width="150" show-overflow-tooltip />
+        <el-table-column label="订单金额" min-width="100">
+          <template #default="{ row }">
+            <span :style="{ color: $mainColor }">{{ $filters.unitPrice(row.flowPrice, '￥') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="支付方式" width="120">
+          <template #default="{ row }">{{ paymentMethodText(row.paymentMethod) }}</template>
+        </el-table-column>
+        <el-table-column label="订单状态" min-width="100">
+          <template #default="{ row }">
+            <el-tag :type="orderStatusTagType(row.orderStatus)">{{ orderStatusText(row.orderStatus) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="下单时间" width="170" />
+        <el-table-column label="操作" width="100" align="center" fixed="right">
+          <template #default="{ row }">
+            <a class="link-text" @click="detail(row)">查看</a>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
 import * as API_Order from "@/api/order";
-import JsonExcel from "vue-json-excel";
-import Cookies from "js-cookie";
-import {verificationCode} from "@/api/order";
 export default {
   name: "orderList",
-  components: {
-    "download-excel": JsonExcel,
-  },
   data() {
     return {
-      loading: true, // 表单加载状态
+      fields: {
+        订单编号: "sn",
+        下单时间: "createTime",
+        客户名称: "memberName",
+        支付方式: {
+          field: "clientType",
+          callback: (value) => {
+            if (value == "H5") return "移动端";
+            if (value == "PC") return "PC端";
+            if (value == "WECHAT_MP") return "小程序端";
+            if (value == "APP") return "移动应用端";
+            return value;
+          },
+        },
+        商品数量: "groupNum",
+        付款状态: {
+          field: "payStatus",
+          callback: (value) =>
+            value == "UNPAID" ? "未付款" : value == "PAID" ? "已付款" : "",
+        },
+        店铺: "storeName",
+      },
+      loading: true,
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 20, // 页面大小
-        sort: "", // 默认排序字段
-        order: "", // 默认排序方式
-        startDate: "", // 起始时间
-        endDate: "", // 终止时间
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+        startDate: "",
+        endDate: "",
+        orderType: "",
         orderSn: "",
+        keywords: "",
         buyerName: "",
+        goodsName: "",
+        shipName: "",
         orderStatus: "",
-        orderType: "NORMAL",
+        paymentMethod: "",
+        orderPromotionType: "",
       },
       selectDate: null,
-      columns: [
-        {
-          title: "订单号",
-          key: "sn",
-          minWidth: 200,
-          tooltip: true,
-          render: (h, params) => {
-            if (params.row.sellerRemark) {
-              return h("div", {}, params.row.sellerRemark + " ("+params.row.sn+")");
-            } else {
-              return h("div", {}, params.row.sn);
-            }
-          },
-        },
-        {
-          title: "订单来源",
-          key: "clientType",
-          width: 120,
-          render: (h, params) => {
-            if (params.row.clientType == "H5") {
-              return h("div", {}, "移动端");
-            } else if (params.row.clientType == "PC") {
-              return h("div", {}, "PC端");
-            } else if (params.row.clientType == "WECHAT_MP") {
-              return h("div", {}, "小程序端");
-            } else if (params.row.clientType == "APP") {
-              return h("div", {}, "APP端");
-            } else {
-              return h("div", {}, params.row.clientType);
-            }
-          },
-        },
-        {
-          title: "订单类型",
-          key: "orderPromotionType",
-          width: 120,
-          render: (h, params) => {
-            if (params.row.orderPromotionType == "NORMAL") {
-              return h("div", [
-                h("tag", { props: { color: "blue" } }, "普通订单"),
-              ]);
-            } else if (params.row.orderPromotionType == "PINTUAN") {
-              return h("div", [
-                h("tag", { props: { color: "volcano" } }, "拼团订单"),
-              ]);
-            } else if (params.row.orderPromotionType == "GIFT") {
-              return h("div", [
-                h("tag", { props: { color: "green" } }, "赠品订单"),
-              ]);
-            } else if (params.row.orderPromotionType == "POINTS") {
-              return h("div", [
-                h("tag", { props: { color: "geekblue" } }, "积分订单"),
-              ]);
-            } else if (params.row.orderPromotionType == "KANJIA") {
-              return h("div", [
-                h("tag", { props: { color: "pink" } }, "砍价订单"),
-              ]);
-            }
-          },
-        },
-        {
-          title: "买家名称",
-          key: "memberName",
-          minWidth: 130,
-          tooltip: true,
-        },
-        {
-          title: "会员ID",
-          key: "memberId",
-          minWidth: 120,
-          tooltip: true,
-        },
-        {
-          title: "订单金额",
-          key: "flowPrice",
-          minWidth: 100,
-          tooltip: true,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.flowPrice,color:this.$mainColor}} );
-          },
-        },
-
-        {
-          title: "订单状态",
-          key: "orderStatus",
-          minWidth: 100,
-          render: (h, params) => {
-            if (params.row.orderStatus == "UNPAID") {
-              return h("div", [
-                h("tag", { props: { color: "magenta" } }, "未付款"),
-              ]);
-            } else if (params.row.orderStatus == "PAID") {
-              return h("div", [
-                h("tag", { props: { color: "blue" } }, "已付款"),
-              ]);
-            } else if (params.row.orderStatus == "UNDELIVERED") {
-              return h("div", [
-                h("tag", { props: { color: "geekblue" } }, "待发货"),
-              ]);
-            } else if (params.row.orderStatus == "STAY_PICKED_UP") {
-              return h("div", [
-                h("tag", { props: { color: "geekblue" } }, "待自提"),
-              ]);
-            } else if (params.row.orderStatus == "PARTS_DELIVERED") {
-              return h("div", [
-                h("tag", { props: { color: "cyan" } }, "部分发货"),
-              ]);
-            } else if (params.row.orderStatus == "DELIVERED") {
-              return h("div", [
-                h("tag", { props: { color: "cyan" } }, "已发货"),
-              ]);
-            } else if (params.row.orderStatus == "COMPLETED") {
-              return h("div", [
-                h("tag", { props: { color: "green" } }, "已完成"),
-              ]);
-            } else if (params.row.orderStatus == "TAKE") {
-              return h("div", [
-                h("tag", { props: { color: "volcano" } }, "待核验"),
-              ]);
-            } else if (params.row.orderStatus == "CANCELLED") {
-              return h("div", [
-                h("tag", { props: { color: "red" } }, "已取消"),
-              ]);
-            }
-          },
-        },
-        {
-          title: "支付方式",
-          key: "paymentMethod",
-          width: 120,
-          render: (h, params) => {
-            if (params.row.paymentMethod == "NOT_ACTUALLY_PAID") {
-              return h("div", {}, "-");
-            } else if (params.row.paymentMethod == "WECHAT") {
-              return h("div", {}, "微信支付");
-            } else if (params.row.paymentMethod == "ALIPAY") {
-              return h("div", {}, "支付宝");
-            } else if (params.row.paymentMethod == "WALLET") {
-              return h("div", {}, "余额支付");
-            } else if (params.row.paymentMethod == "BANK_TRANSFER") {
-              return h("div", {}, "线下转账");
-            } else {
-              return h("div", {}, params.row.paymentMethod || "-");
-            }
-          },
-        },
-        {
-          title: "下单时间",
-          key: "createTime",
-          width: 170,
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          fixed: "right",
-          width: 200,
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.detail(params.row);
-                    },
-                  },
-                },
-                "查看"
-              ),
-            ]);
-          },
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
-      orderNumData: {}, // 新增：订单数量统计数据
-      excelColumns: {
-        // 导出excel的参数
-        编号: "index",
-        订单号: "sn",
-        收货人: "consigneeName",
-        收货人联系电话: "consigneeMobile",
-        收货地址: "consigneeAddress",
-        商品名称: "goodsName",
-        商品价格: "goodsPrice",
-        订单金额: "flowPrice",
-        商品数量: "num",
-        店铺名称: "storeName",
-        创建时间: "createTime",
-      },
-      orderStatus: [
-        {title: '全部', value: ''},
-        {title: '未付款', value: 'UNPAID'},
-        {title: '已付款', value: 'PAID'},
-        {title: '待发货', value: 'UNDELIVERED'},
-        {title: '部分发货', value: 'PARTS_DELIVERED'},
-        {title: '已发货', value: 'DELIVERED'},
-        {title: '待核验', value: 'TAKE'},
-        {title: '待自提', value: 'STAY_PICKED_UP'},
-        {title: '已完成', value: 'COMPLETED'},
-        {title: '已关闭', value: 'CANCELLED'},
-      ],
-      currentStatus: ''
+      data: [],
+      total: 0,
+      orderNumData: {},
+      currentStatus: "ALL",
     };
   },
   computed: {
-    // 新增：带数量的订单状态选项
     orderStatusWithCount() {
       return [
-        {title: '全部', value: ''},
-        {title: `未付款${this.orderNumData.waitPayNum ? '(' + this.orderNumData.waitPayNum + ')' : ''}`, value: 'UNPAID'},
-        {title: `已付款${this.orderNumData.waitDeliveryNum ? '(' + this.orderNumData.waitDeliveryNum + ')' : ''}`, value: 'PAID'},
-        {title: `待发货${this.orderNumData.waitShipNum ? '(' + this.orderNumData.waitShipNum + ')' : ''}`, value: 'UNDELIVERED'},
-        {title: `部分发货${this.orderNumData.partsDeliveredNumNum ? '(' + this.orderNumData.partsDeliveredNumNum + ')' : ''}`, value: 'PARTS_DELIVERED'},
-        {title: `已发货${this.orderNumData.deliveredNum ? '(' + this.orderNumData.deliveredNum + ')' : ''}`, value: 'DELIVERED'},
-        {title: `待核验${this.orderNumData.waitCheckNum ? '(' + this.orderNumData.waitCheckNum + ')' : ''}`, value: 'TAKE'},
-        {title: `待自提${this.orderNumData.waitSelfPickNum ? '(' + this.orderNumData.waitSelfPickNum + ')' : ''}`, value: 'STAY_PICKED_UP'},
-        {title: `已完成${this.orderNumData.finishNum ? '(' + this.orderNumData.finishNum + ')' : ''}`, value: 'COMPLETED'},
-        {title: `已关闭${this.orderNumData.closeNum ? '(' + this.orderNumData.closeNum + ')' : ''}`, value: 'CANCELLED'},
+        { title: "全部", value: "ALL" },
+        {
+          title: `未付款${this.orderNumData.waitPayNum ? "(" + this.orderNumData.waitPayNum + ")" : ""}`,
+          value: "UNPAID",
+        },
+        {
+          title: `已付款${this.orderNumData.waitDeliveryNum ? "(" + this.orderNumData.waitDeliveryNum + ")" : ""}`,
+          value: "PAID",
+        },
+        {
+          title: `待发货${this.orderNumData.waitShipNum ? "(" + this.orderNumData.waitShipNum + ")" : ""}`,
+          value: "UNDELIVERED",
+        },
+        {
+          title: `部分发货${this.orderNumData.partsDeliveredNumNum ? "(" + this.orderNumData.partsDeliveredNumNum + ")" : ""}`,
+          value: "PARTS_DELIVERED",
+        },
+        {
+          title: `待收货${this.orderNumData.deliveredNum ? "(" + this.orderNumData.deliveredNum + ")" : ""}`,
+          value: "DELIVERED",
+        },
+        {
+          title: `待核验${this.orderNumData.waitCheckNum ? "(" + this.orderNumData.waitCheckNum + ")" : ""}`,
+          value: "TAKE",
+        },
+        {
+          title: `待自提${this.orderNumData.waitSelfPickNum ? "(" + this.orderNumData.waitSelfPickNum + ")" : ""}`,
+          value: "STAY_PICKED_UP",
+        },
+        {
+          title: `已完成${this.orderNumData.finishNum ? "(" + this.orderNumData.finishNum + ")" : ""}`,
+          value: "COMPLETED",
+        },
+        {
+          title: `已关闭${this.orderNumData.closeNum ? "(" + this.orderNumData.closeNum + ")" : ""}`,
+          value: "CANCELLED",
+        },
       ];
-    }
+    },
   },
   methods: {
-    /**
-     * 核验订单
-     */
-    async orderVerification() {
-      let result = await verificationCode(this.orderCode);
-
-      if (result.success) {
-        this.$router.push({
-          name: "order-detail",
-          query: { sn: result.result.sn || this.orderCode },
-        });
-      }
+    onStatusTabClick(tab) {
+      this.orderStatusClick(tab.paneName);
     },
-    /**
-     * 批量发货
-     */
-    expressOrderDeliver() {
-      this.$router.push({
-        path: "/export-order-deliver",
-      });
+    clientTypeText(v) {
+      const map = { H5: "移动端", PC: "PC端", WECHAT_MP: "小程序端", APP: "移动应用端" };
+      return map[v] || v || "-";
     },
-    // 初始化数据
+    orderPromotionText(v) {
+      const map = {
+        NORMAL: "普通订单",
+        PINTUAN: "拼团订单",
+        GIFT: "赠品订单",
+        POINTS: "积分订单",
+        KANJIA: "砍价订单",
+      };
+      return map[v] || v || "-";
+    },
+    orderPromotionTagType(v) {
+      const map = {
+        NORMAL: "primary",
+        PINTUAN: "danger",
+        GIFT: "success",
+        POINTS: "info",
+        KANJIA: "warning",
+      };
+      return map[v] || "info";
+    },
+    paymentMethodText(v) {
+      const map = {
+        NOT_ACTUALLY_PAID: "-",
+        WECHAT: "微信支付",
+        ALIPAY: "支付宝",
+        WALLET: "余额支付",
+        BANK_TRANSFER: "线下转账",
+      };
+      return map[v] || v || "-";
+    },
+    orderStatusText(v) {
+      const map = {
+        UNPAID: "未付款",
+        PAID: "已付款",
+        UNDELIVERED: "待发货",
+        STAY_PICKED_UP: "待自提",
+        PARTS_DELIVERED: "部分发货",
+        DELIVERED: "已发货",
+        COMPLETED: "已完成",
+        TAKE: "待核验",
+        CANCELLED: "已关闭",
+      };
+      return map[v] || v || "-";
+    },
+    orderStatusTagType(v) {
+      const map = {
+        UNPAID: "danger",
+        PAID: "primary",
+        UNDELIVERED: "info",
+        STAY_PICKED_UP: "info",
+        PARTS_DELIVERED: "warning",
+        DELIVERED: "warning",
+        COMPLETED: "success",
+        TAKE: "warning",
+        CANCELLED: "danger",
+      };
+      return map[v] || "info";
+    },
     init() {
       this.getDataList();
-      this.getOrderNumData(); // 新增：获取订单数量统计
+      this.getOrderNumData();
     },
-    // 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
-    // 改变页数
     changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    // 搜索订单
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getDataList();
-      this.getOrderNumData(); // 新增：搜索时也更新数量统计
+      this.getOrderNumData();
     },
-    // 重置
-    handleReset() {
-      this.searchForm = {};
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.selectDate = null;
-      this.searchForm.startDate = "";
-      this.searchForm.endDate = "";
-      this.searchForm.orderType = "NORMAL",
-      // 重新加载数据
-      this.getDataList();
-    },
-    // 起始时间处理
     selectDateRange(v) {
-      if (v) {
+      if (v && v.length === 2) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
+      } else {
+        this.searchForm.startDate = "";
+        this.searchForm.endDate = "";
       }
     },
-    // 获取表格数据
     getDataList() {
       this.loading = true;
-      API_Order.getOrderList(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
+      API_Order.getOrderList(this.searchForm)
+        .then((res) => {
+          this.loading = false;
+          if (res.success) {
+            this.data = res.result.records;
+            this.total = res.result.total;
+          }
+        })
+        .catch(() => {
+          this.loading = false;
+        });
+    },
+    detail(v) {
+      this.$filters.customRouterPush({
+        name: "order-detail",
+        query: { sn: v.sn },
       });
     },
-    // 导出订单
     async exportOrder() {
-      if(this.searchForm.startDate==""||this.searchForm.endDate==""){
+      if (!this.searchForm.startDate || !this.searchForm.endDate) {
         this.$Message.error("必须选择时间范围，搜索后进行导出！");
-      }else{
-        API_Order.exportOrder(this.searchForm)
-          .then((res) => {
-            const blob = new Blob([res], {
-              type: "application/vnd.ms-excel;charset=utf-8",
-            });
-            //对于<a>标签，只有 Firefox 和 Chrome（内核） 支持 download 属性
-            //IE10以上支持blob但是依然不支持download
-            if ("download" in document.createElement("a")) {
-              //支持a标签download的浏览器
-              const link = document.createElement("a"); //创建a标签
-              link.download = "订单列表.xlsx"; //a标签添加属性
-              link.style.display = "none";
-              link.href = URL.createObjectURL(blob);
-              document.body.appendChild(link);
-              link.click(); //执行下载
-              URL.revokeObjectURL(link.href); //释放url
-              document.body.removeChild(link); //释放标签
-            } else {
-              navigator.msSaveBlob(blob, fileName);
-            }
-          })
-          .catch((err) => {
-            console.log(err);
+        return;
+      }
+      API_Order.exportOrder(this.searchForm)
+        .then((res) => {
+          const blob = new Blob([res], {
+            type: "application/vnd.ms-excel;charset=utf-8",
           });
-      }
-
+          if ("download" in document.createElement("a")) {
+            const link = document.createElement("a");
+            link.download = "订单列表.xlsx";
+            link.style.display = "none";
+            link.href = URL.createObjectURL(blob);
+            document.body.appendChild(link);
+            link.click();
+            URL.revokeObjectURL(link.href);
+            document.body.removeChild(link);
+          } else {
+            navigator.msSaveBlob(blob, "订单列表.xlsx");
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
-    // 查看订单详情
-    detail(v) {
-      let sn = v.sn;
-      this.$options.filters.customRouterPush({
-        name: "order-detail",
-        query: { sn: sn },
-      })
-
-    },
-    // 订单筛选
     orderStatusClick(name) {
-      if (name === 0) {
-        // 点击"全部"时，设置为空字符串，在getDataList中会被过滤掉
-        this.searchForm.orderStatus = '';
+      if (name === "ALL" || name === "" || name === undefined) {
+        this.searchForm.orderStatus = "";
+        this.currentStatus = "ALL";
       } else {
-        // 其他状态正常赋值
         this.searchForm.orderStatus = name;
+        this.currentStatus = name;
       }
-      this.currentStatus = name;
-     
       this.getDataList();
     },
     getOrderNumData() {
-      // 创建一个不包含orderStatus字段的搜索参数
-      const { orderStatus, ...searchParams } = this.searchForm;
-      API_Order.getOrderNum(searchParams).then((res) => {
-        if (res.success) {
-          this.orderNumData = res.result;
-        }
-      }).catch((err) => {
-        console.error('获取订单数量统计失败:', err);
-      });
+      // orderNum 接口仅查 li_order，不含 order_item 关联；keywords/goodsName 会引用 oi 字段导致 SQL 报错
+      const { orderStatus, keywords, goodsName, ...searchParams } = this.searchForm;
+      API_Order.getOrderNum(searchParams)
+        .then((res) => {
+          if (res.success) {
+            this.orderNumData = res.result;
+          }
+        })
+        .catch((err) => {
+          console.error("获取订单数量统计失败:", err);
+        });
     },
   },
   mounted() {
     this.init();
   },
-  // 页面缓存处理，从该页面离开时，修改KeepAlive为false，保证进入该页面是刷新
-  beforeRouteLeave(to, from, next) {
-    from.meta.keepAlive = false;
-    next();
-  },
-  
 };
 </script>
-<style lang="scss">
-// 建议引入通用样式 可删除下面样式代码
-@import "@/styles/table-common.scss";
+
+<style lang="scss" scoped>
 .export {
   margin: 10px 20px 10px 0;
 }
-// Tab组件样式
 .order-tab {
-  ::v-deep .ivu-tabs-tab {
+  :deep(.el-tabs__item) {
     font-size: 14px;
   }
+}
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
 }
 </style>

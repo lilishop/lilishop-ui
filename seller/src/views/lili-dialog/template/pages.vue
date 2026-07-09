@@ -33,12 +33,9 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-::v-deep .ivu-card-body {
+:deep(.el-card__body) {
   height: 414px;
   overflow: auto;
-}
-.ivu-table-wrapper ivu-table-wrapper-with-border {
-  height: 300px !important;
 }
 .list {
   margin: 0 1.5%;
@@ -69,11 +66,11 @@ export default {
   height: 416px;
   overflow: hidden;
 }
-::v-deep .ivu-table {
+:deep(.el-table) {
   height: 300px !important;
   overflow: auto;
 }
-::v-deep .ivu-card-body {
+:deep(.el-card__body) {
   padding: 0;
   height: auto;
 }

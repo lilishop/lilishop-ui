@@ -1,218 +1,341 @@
 <template>
   <div class="search">
-    <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-          <Form-item label="会员ID" prop="id">
-            <Input type="text" v-model="searchForm.id" placeholder="请输入会员ID" clearable style="width: 240px" />
-          </Form-item>
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="会员ID" prop="id">
+          <el-input v-model="searchForm.id" placeholder="请输入会员ID" clearable style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="会员名称" prop="username">
+          <el-input v-model="searchForm.username" placeholder="请输入会员名称" clearable style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="会员昵称" prop="nickName">
+          <el-input v-model="searchForm.nickName" placeholder="请输入会员昵称" clearable style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="联系方式" prop="mobile">
+          <el-input v-model="searchForm.mobile" placeholder="请输入会员联系方式" clearable style="width: 240px" />
+        </el-form-item>
+        <el-form-item label="会员分组" prop="groupId">
+          <el-select v-model="searchForm.groupId" clearable filterable style="width: 240px">
+            <el-option
+              v-for="item in memberGroupList"
+              :key="item.id"
+              :value="item.id"
+              :label="item.groupName"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="会员等级" prop="gradeId">
+          <el-select v-model="searchForm.gradeId" clearable filterable style="width: 240px">
+            <el-option
+              v-for="item in memberGradeList"
+              :key="item.id"
+              :value="item.id"
+              :label="item.gradeName"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
-          <Form-item label="会员名称" prop="username">
-            <Input type="text" v-model="searchForm.username" placeholder="请输入会员名称" clearable style="width: 240px" />
-          </Form-item>
-
-          <Form-item label="会员昵称" prop="nickName">
-            <Input type="text" v-model="searchForm.nickName" placeholder="请输入会员昵称" clearable style="width: 240px" />
-          </Form-item>
-
-          <Form-item label="联系方式" prop="mobile">
-            <Input type="text" v-model="searchForm.mobile" placeholder="请输入会员联系方式" clearable style="width: 240px" />
-          </Form-item>
-          <Form-item label="会员分组" prop="groupId">
-            <Select v-model="searchForm.groupId" clearable filterable style="width: 240px">
-              <Option v-for="item in memberGroupList" :value="item.id" :key="item.id">{{ item.groupName }}</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="会员等级" prop="gradeId">
-            <Select v-model="searchForm.gradeId" clearable filterable style="width: 240px">
-              <Option v-for="item in memberGradeList" :value="item.id" :key="item.id">{{ item.gradeName }}</Option>
-            </Select>
-          </Form-item>
-          <Button @click="handleSearch" class="search-btn" type="primary" icon="ios-search">搜索</Button>
-        </Form>
-      </Row>
-      </Card>
-      <Card>
-      <Row class="operation padding-row" v-if="!selectedMember">
-        <Button @click="addMember" type="primary">添加会员</Button>
-        <Button
-          style="margin-left: 10px;"
+    <el-card>
+      <div v-if="!selectedMember" class="operation padding-row">
+        <el-button type="primary" @click="addMember">添加会员</el-button>
+        <el-button
+          style="margin-left: 10px"
           type="primary"
           :disabled="selectedRows.length === 0"
           @click="openSetMemberGroup"
-        >设定会员分组</Button>
-      </Row>
+        >设定会员分组</el-button>
+      </div>
 
-      <Table
-        :loading="loading"
-        :columns="tableColumns"
-        class="mt_10"
-        :data="data"
+      <el-table
         ref="table"
-        @on-selection-change="onSelectionChange"
-      ></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
-          @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]" size="small" show-total show-elevator
-          show-sizer></Page>
-      </Row>
-    </Card>
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+        row-key="id"
+        @selection-change="onSelectionChange"
+      >
+        <el-table-column v-if="!selectedMember" type="selection" width="60" align="center" />
+        <el-table-column prop="id" label="会员ID" min-width="120" show-overflow-tooltip />
+        <el-table-column label="头像" min-width="80" align="center">
+          <template #default="{ row }">
+            <img
+              v-if="row"
+              :src="row.face || defaultPic"
+              alt="头像"
+              style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="username" label="会员名称" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="nickName" label="会员昵称" min-width="120" show-overflow-tooltip />
+        <el-table-column label="联系方式" min-width="130">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.mobile || "" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="注册时间" min-width="160" />
+        <el-table-column prop="lastLoginDate" label="最后登录时间" min-width="160" />
+        <el-table-column label="积分数量" min-width="120" align="left">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.point == void 0 ? "0" : row.point }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="经验值" min-width="100">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.experience == null ? "0" : row.experience }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="会员等级" min-width="120" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span v-if="row">{{ row.gradeName || "-" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="余额" width="120">
+          <template #default="{ row }">
+            <priceColorScheme v-if="row" :value="row.memberWallet" :color="$mainColor" />
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="200" align="center" fixed="right">
+          <template #default="{ row }">
+            <div v-if="row" style="display: flex; justify-content: center; align-items: center">
+              <template v-if="selectedMember">
+                <a class="link-text" @click="callback(row)">
+                  {{ row.___selected ? "已选择" : "选择" }}
+                </a>
+              </template>
+              <template v-else>
+                <a class="link-text" @click="detail(row)">查看</a>
+                <span class="op-split">|</span>
+                <el-dropdown trigger="click" @command="(cmd) => handleMoreCommand(cmd, row)">
+                  <a class="link-text">
+                    更多
+                    <el-icon style="margin-left: 4px"><ArrowDown /></el-icon>
+                  </a>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item command="edit">编辑会员</el-dropdown-item>
+                      <el-dropdown-item command="increaseWallet">增加余额</el-dropdown-item>
+                      <el-dropdown-item command="updatePoint">修改积分</el-dropdown-item>
+                      <el-dropdown-item command="disabled">禁用会员</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </template>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
 
-    <!-- 添加用户模态框 -->
-    <Modal v-model="addFlag" title="添加会员">
-      <Form ref="addMemberForm" :model="addMemberForm" :rules="addRule" :label-width="100">
-        <FormItem label="手机号码" prop="mobile" style="width: 90%;">
-          <Input v-model="addMemberForm.mobile" maxlength="11" placeholder="请输入手机号码" />
-        </FormItem>
-        <FormItem label="会员名称" prop="username" style="width: 90%">
-          <Input v-model="addMemberForm.username" maxlength="15" placeholder="请输入会员名称" />
-        </FormItem>
-
-        <FormItem label="会员密码" prop="password" style="width: 90%">
-          <Input type="password" password v-model="addMemberForm.password" maxlength="20" placeholder="请输入会员密码" />
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button @click="addFlag = false">取消</Button>
-        <Button type="primary" @click="addMemberSubmit">确定</Button>
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
       </div>
-    </Modal>
-    <!-- 修改模态框 -->
-    <Modal v-model="descFlag" :title="descTitle" @on-ok="handleSubmitModal" width="500">
-      <Form ref="form" :model="form" :rules="ruleValidate" :label-width="80">
+    </el-card>
 
-        <Input v-model="form.id" v-show="false"/>
+    <el-dialog v-model="addFlag" title="添加会员" width="500px" destroy-on-close class="add-member-dialog">
+      <el-form
+        ref="addMemberForm"
+        :model="addMemberForm"
+        :rules="addRule"
+        label-width="100px"
+        autocomplete="off"
+      >
+        <el-form-item label="手机号码" prop="mobile" style="width: 90%">
+          <el-input
+            v-model="addMemberForm.mobile"
+            maxlength="11"
+            placeholder="请输入手机号码"
+            autocomplete="off"
+          />
+        </el-form-item>
+        <el-form-item label="会员名称" prop="username" style="width: 90%">
+          <el-input
+            v-model="addMemberForm.username"
+            maxlength="15"
+            placeholder="请输入会员名称"
+            autocomplete="off"
+            name="member-username"
+          />
+        </el-form-item>
+        <el-form-item label="会员密码" prop="password" style="width: 90%">
+          <el-input
+            v-model="addMemberForm.password"
+            type="password"
+            show-password
+            maxlength="20"
+            placeholder="请输入会员密码"
+            autocomplete="new-password"
+            name="member-password"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addFlag = false">取消</el-button>
+        <el-button type="primary" @click="addMemberSubmit">确定</el-button>
+      </template>
+    </el-dialog>
 
-        <FormItem label="头像">
+    <el-dialog v-model="descFlag" :title="descTitle" width="500px" destroy-on-close>
+      <el-form ref="form" :model="form" :rules="ruleValidate" label-width="80px">
+        <el-input v-model="form.id" style="display: none" />
+        <el-form-item label="头像">
           <img :src="form.face || defaultPic" class="face" />
-          <Button type="text" class="upload" @click="() => {
-                this.picModelFlag = true;
-                this.$refs.ossManage.selectImage = true;
-              }">修改</Button>
-          <input type="file" style="display: none" id="file" />
-        </FormItem>
-        <FormItem label="用户名" prop="name">
-          <Input v-model="form.username" style="width: 200px" disabled />
-        </FormItem>
-        <FormItem label="用户昵称" prop="name">
-          <Input v-model="form.nickName" style="width: 200px" />
-        </FormItem>
-        <FormItem label="性别" prop="sex">
-          <RadioGroup type="button" button-style="solid" v-model="form.sex">
-            <Radio :label="1">
-              <span>男</span>
-            </Radio>
-            <Radio :label="0">
-              <span>女</span>
-            </Radio>
-          </RadioGroup>
-        </FormItem>
-        <FormItem label="修改密码" prop="password">
-          <Input type="password" style="width: 220px" password v-model="form.newPassword" />
-        </FormItem>
-        <FormItem label="生日" prop="birthday">
-          <DatePicker type="date" format="yyyy-MM-dd" v-model="form.birthday" style="width: 220px"></DatePicker>
-        </FormItem>
-        <FormItem label="所在地" prop="mail">
-          {{ form.region || '暂无地址' }}
+          <el-button
+            type="primary"
+            link
+            class="upload"
+            @click="openPicSelector"
+          >修改</el-button>
+        </el-form-item>
+        <el-form-item label="用户名" prop="name">
+          <el-input v-model="form.username" style="width: 200px" disabled />
+        </el-form-item>
+        <el-form-item label="用户昵称" prop="name">
+          <el-input v-model="form.nickName" style="width: 200px" />
+        </el-form-item>
+        <el-form-item label="性别" prop="sex">
+          <el-radio-group v-model="form.sex">
+            <el-radio-button :value="1">男</el-radio-button>
+            <el-radio-button :value="0">女</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="修改密码" prop="password">
+          <el-input v-model="form.newPassword" type="password" show-password style="width: 220px" />
+        </el-form-item>
+        <el-form-item label="生日" prop="birthday">
+          <el-date-picker v-model="form.birthday" type="date" value-format="YYYY-MM-DD" style="width: 220px" />
+        </el-form-item>
+        <el-form-item label="所在地" prop="mail">
+          {{ form.region || "暂无地址" }}
+          <el-button style="margin-left: 10px" @click="$refs.map.open()">选择</el-button>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="descFlag = false">取消</el-button>
+        <el-button type="primary" @click="handleSubmitModal">确定</el-button>
+      </template>
+    </el-dialog>
 
+    <el-dialog v-model="walletIncreaseFlag" title="增加余额" width="420px" destroy-on-close>
+      <el-form ref="walletIncreaseForm" :model="walletIncreaseForm" :rules="walletIncreaseRule" label-width="90px">
+        <el-form-item label="充值金额" prop="rechargeMoney">
+          <el-input-number v-model="walletIncreaseForm.rechargeMoney" :min="0.01" :precision="2" style="width: 240px" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="walletIncreaseFlag = false">取消</el-button>
+        <el-button type="primary" :loading="walletIncreaseLoading" @click="submitWalletIncrease">确定</el-button>
+      </template>
+    </el-dialog>
 
-          <Button style="margin-left: 10px;" @click="$refs.map.open()">选择</Button>
+    <el-dialog v-model="memberPointFlag" title="修改积分" width="420px" destroy-on-close>
+      <el-form ref="memberPointForm" :model="memberPointForm" :rules="memberPointRule" label-width="90px">
+        <el-form-item label="类型" prop="type">
+          <el-radio-group v-model="memberPointForm.type">
+            <el-radio-button value="INCREASE">增加</el-radio-button>
+            <el-radio-button value="REDUCE">减少</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="积分" prop="point">
+          <el-input-number v-model="memberPointForm.point" :min="1" :precision="0" style="width: 240px" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="memberPointFlag = false">取消</el-button>
+        <el-button type="primary" :loading="memberPointLoading" @click="submitMemberPoint">确定</el-button>
+      </template>
+    </el-dialog>
 
-        </FormItem>
-      </Form>
-    </Modal>
-    <Modal v-model="walletIncreaseFlag" title="增加余额" width="420">
-      <Form ref="walletIncreaseForm" :model="walletIncreaseForm" :rules="walletIncreaseRule" :label-width="90">
-        <FormItem label="充值金额" prop="rechargeMoney">
-          <InputNumber v-model="walletIncreaseForm.rechargeMoney" :min="0.01" :precision="2" style="width: 240px" />
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button @click="walletIncreaseFlag = false">取消</Button>
-        <Button type="primary" :loading="walletIncreaseLoading" @click="submitWalletIncrease">确定</Button>
-      </div>
-    </Modal>
-    <Modal v-model="memberPointFlag" title="修改积分" width="420">
-      <Form ref="memberPointForm" :model="memberPointForm" :rules="memberPointRule" :label-width="90">
-        <FormItem label="类型" prop="type">
-          <RadioGroup type="button" button-style="solid" v-model="memberPointForm.type">
-            <Radio label="INCREASE">增加</Radio>
-            <Radio label="REDUCE">减少</Radio>
-          </RadioGroup>
-        </FormItem>
-        <FormItem label="积分" prop="point">
-          <InputNumber v-model="memberPointForm.point" :min="1" :precision="0" style="width: 240px" />
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button @click="memberPointFlag = false">取消</Button>
-        <Button type="primary" :loading="memberPointLoading" @click="submitMemberPoint">确定</Button>
-      </div>
-    </Modal>
-    <Modal v-model="memberGroupFlag" title="设定会员分组" width="420">
-      <Form ref="memberGroupForm" :model="memberGroupForm" :rules="memberGroupRule" :label-width="90">
-        <FormItem label="会员分组" prop="groupId">
-          <Select v-model="memberGroupForm.groupId" clearable filterable style="width: 240px">
-            <Option v-for="item in memberGroupList" :value="item.id" :key="item.id">{{ item.groupName }}</Option>
-          </Select>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button @click="memberGroupFlag = false">取消</Button>
-        <Button type="primary" :loading="memberGroupLoading" @click="submitSetMemberGroup">确定</Button>
-      </div>
-    </Modal>
-    <Modal width="1200px" v-model="picModelFlag">
-      <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage" />
-    </Modal>
-    <multipleMap ref="map" @callback="selectedRegion"/>
+    <el-dialog v-model="memberGroupFlag" title="设定会员分组" width="420px" destroy-on-close>
+      <el-form ref="memberGroupForm" :model="memberGroupForm" :rules="memberGroupRule" label-width="90px">
+        <el-form-item label="会员分组" prop="groupId">
+          <el-select v-model="memberGroupForm.groupId" clearable filterable style="width: 240px">
+            <el-option
+              v-for="item in memberGroupList"
+              :key="item.id"
+              :value="item.id"
+              :label="item.groupName"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="memberGroupFlag = false">取消</el-button>
+        <el-button type="primary" :loading="memberGroupLoading" @click="submitSetMemberGroup">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="picModelFlag" width="1200px">
+      <ossManage ref="ossManage" @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" />
+    </el-dialog>
+    <multipleMap ref="map" @callback="selectedRegion" />
   </div>
 </template>
 
 <script>
+import { ArrowDown } from "@element-plus/icons-vue";
 import multipleMap from "@/components/map/multiple-map";
 import * as API_Member from "@/api/member.js";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import * as RegExp from "@/libs/RegExp.js";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { customRouterPush } from "@/utils/filters";
+import defaultPic from "@/assets/default.png";
 
 export default {
   name: "member",
   components: {
     multipleMap,
     ossManage,
+    ArrowDown,
   },
-  computed: {
-    tableColumns() {
-      if (this.selectedMember) return this.columns;
-      return [
-        {
-          type: "selection",
-          width: 60,
-          align: "center",
-        },
-        ...this.columns,
-      ];
+  props: {
+    selectedMember: {
+      type: Boolean,
+      default: false,
+    },
+    selectedList: {
+      type: null,
+      default: () => [],
     },
   },
   data() {
     return {
-      defaultPic:require('@/assets/default.png'),
-      descTitle: "", // modal标题
-      descFlag: false, //编辑查看框
-      loading: true, // 表单加载状态
-      addFlag: false, // modal显隐控制
-
+      defaultPic,
+      descTitle: "",
+      descFlag: false,
+      loading: true,
+      addFlag: false,
       addMemberForm: {
-        // 添加用户表单
         mobile: "",
         username: "",
         password: "",
       },
       searchForm: {
-        // 请求参数
         pageNumber: 1,
-        pageSize: 20, // 页面大小
+        pageSize: 20,
         order: "desc",
         id: "",
         username: "",
@@ -220,8 +343,8 @@ export default {
         disabled: "OPEN",
         groupId: "",
       },
-      picModelFlag: false, // 选择图片
-      form: {}, // 表单数据
+      picModelFlag: false,
+      form: {},
       walletIncreaseFlag: false,
       walletIncreaseLoading: false,
       walletIncreaseForm: {
@@ -278,321 +401,36 @@ export default {
         ],
       },
       addRule: {
-        // 验证规则
         mobile: [
           { required: true, message: "请输入手机号码" },
-          {
-            pattern: RegExp.mobile,
-            message: "请输入正确的手机号",
-          },
+          { pattern: RegExp.mobile, message: "请输入正确的手机号" },
         ],
         username: [{ required: true, message: "请输入会员名称" }],
         password: [{ required: true, message: "请输入密码" }],
       },
-      ruleValidate: {}, //修改验证
-      columns: [
-        {
-          title: "会员ID",
-          key: "id",
-          minWidth: 120,  // 减少宽度
-          tooltip: true,
-        },
-        {
-          title: "头像",
-          key: "face",
-          minWidth: 80,
-          align: "center",
-          render: (h, params) => {
-            return h("img", {
-              attrs: {
-                src: params.row.face || require('@/assets/default.png'),
-                alt: "头像"
-              },
-              style: {
-                width: "30px",
-                height: "30px",
-                borderRadius: "50%",
-                objectFit: "cover"
-              }
-            });
-          }
-        },
-        {
-          title: "会员名称",
-          key: "username",
-          tooltip: true,
-          minWidth: 150,  // 减少宽度
-        },
-        {
-          title: "会员昵称",
-          key: "nickName",
-          tooltip: true,
-          minWidth: 120,  // 减少宽度
-        },
-        {
-          title: "联系方式",
-          minWidth: 130,
-          key: "mobile",
-          render: (h, params) => {
-            if (params.row.mobile == null) {
-              return h("div", [h("span", {}, "")]);
-            } else {
-              return h("div", [h("span", {}, params.row.mobile)]);
-            }
-          },
-        },
-        {
-          title: "注册时间",
-          key: "createTime",
-          minWidth: 160,  // 减少宽度
-        },
-        {
-          title: "最后登录时间",
-          key: "lastLoginDate",
-          minWidth: 160,  // 减少宽度
-        },
-
-        {
-          title: "积分数量",
-          align: "left",
-          minWidth: 120,  // 增加宽度
-          render: (h, params) => {
-            return h(
-              "div",
-              {},
-              params.row.point == void 0 ? "0" : params.row.point
-            );
-          },
-        },
-        {
-          title: "经验值",
-          key: "experience",
-          minWidth: 100,
-          render: (h, params) => {
-            return h("div", {}, params.row.experience == null ? "0" : params.row.experience);
-          },
-        },
-        {
-          title: "会员等级",
-          key: "gradeName",
-          minWidth: 120,
-          tooltip: true,
-          render: (h, params) => {
-            return h("div", {}, params.row.gradeName || "-");
-          },
-        },
-        {
-          title: "余额",
-          key: "memberWallet",
-          width: 120,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.memberWallet}} );
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          minWidth: 160,
-          fixed: "right",
-          render: (h, params) => {
-            if (this.selectedMember) {
-              return h(
-                "div",
-                {
-                  style: {
-                    display: "flex",
-                    justifyContent: "center",
-                  },
-                },
-                [
-                  h(
-                    "a",
-                    {
-                      style: {
-                        color: "#2d8cf0",
-                        cursor: "pointer",
-                        textDecoration: "none",
-                      },
-                      on: {
-                        click: () => {
-                          this.callback(params.row, params.index);
-                        },
-                      },
-                    },
-                    params.row.___selected ? "已选择" : "选择"
-                  ),
-                ]
-              );
-            }
-
-            const divider = h(
-              "span",
-              {
-                style: {
-                  margin: "0 8px",
-                  color: "#dcdee2",
-                },
-              },
-              "|"
-            );
-
-            const viewLink = h(
-              "a",
-              {
-                style: {
-                  color: "#2d8cf0",
-                  cursor: "pointer",
-                  textDecoration: "none",
-                },
-                on: {
-                  click: () => {
-                    this.detail(params.row);
-                  },
-                },
-              },
-              "查看"
-            );
-
-            const moreDropdown = h(
-              "Dropdown",
-              {
-                props: {
-                  trigger: "click",
-                  transfer: true,
-                },
-                on: {
-                  "on-click": (name) => {
-                    if (name === "edit") {
-                      this.editPerm(params.row);
-                    }
-                    if (name === "disabled") {
-                      this.disabled(params.row);
-                    }
-                    if (name === "increaseWallet") {
-                      this.openWalletIncrease(params.row);
-                    }
-                    if (name === "updatePoint") {
-                      this.openMemberPoint(params.row);
-                    }
-                  },
-                },
-              },
-              [
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none",
-                      display: "inline-flex",
-                      alignItems: "center",
-                    },
-                  },
-                  [
-                    h("span", "更多"),
-                    h("Icon", {
-                      props: {
-                        type: "md-arrow-dropdown",
-                      },
-                      style: {
-                        marginLeft: "4px",
-                      },
-                    }),
-                  ]
-                ),
-                h(
-                  "DropdownMenu",
-                  {
-                    slot: "list",
-                  },
-                  [
-                    h(
-                      "DropdownItem",
-                      {
-                        props: {
-                          name: "edit",
-                        },
-                      },
-                      "编辑会员"
-                    ),
-                    h(
-                      "DropdownItem",
-                      {
-                        props: {
-                          name: "increaseWallet",
-                        },
-                      },
-                      "增加余额"
-                    ),
-                    h(
-                      "DropdownItem",
-                      {
-                        props: {
-                          name: "updatePoint",
-                        },
-                      },
-                      "修改积分"
-                    ),
-                    h(
-                      "DropdownItem",
-                      {
-                        props: {
-                          name: "disabled",
-                        },
-                      },
-                      "禁用会员"
-                    ),
-                  ]
-                ),
-              ]
-            );
-
-            return h(
-              "div",
-              {
-                style: {
-                  display: "flex",
-                  justifyContent: "center",
-                },
-              },
-              [viewLink, divider, moreDropdown]
-            );
-          },
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
-      selectMember: [], //保存选中的用户
+      ruleValidate: {},
+      data: [],
+      total: 0,
+      selectMember: [],
     };
-  },
-  props: {
-    // 是否为选中模式
-    selectedMember: {
-      type: Boolean,
-      default: false,
-    },
-    // 已选择用户数据
-    selectedList: {
-      type: null,
-      default: () => {
-        return [];
-      },
-    },
   },
   watch: {
     selectedList: {
       handler(val) {
-        this.$set(this, "selectMember", JSON.parse(JSON.stringify(val)));
+        this.selectMember = JSON.parse(JSON.stringify(val));
         this.init(this.data);
-        // 将父级数据与当前组件数据进行匹配
       },
       deep: true,
       immediate: true,
     },
   },
   methods: {
+    handleMoreCommand(name, row) {
+      if (name === "edit") this.editPerm(row);
+      if (name === "disabled") this.disabled(row);
+      if (name === "increaseWallet") this.openWalletIncrease(row);
+      if (name === "updatePoint") this.openMemberPoint(row);
+    },
     onSelectionChange(selection) {
       this.selectedRows = selection || [];
     },
@@ -620,13 +458,11 @@ export default {
       });
     },
     clearSelection() {
-      if (this.$refs.table && this.$refs.table.clearSelection) {
-        this.$refs.table.clearSelection();
-      }
+      this.$refs.table?.clearSelection();
     },
     submitSetMemberGroup() {
       if (this.selectedRows.length === 0) {
-        this.$Message.warning("请先选择会员");
+        ElMessage.warning("请先选择会员");
         return;
       }
       this.$refs.memberGroupForm.validate((valid) => {
@@ -636,94 +472,82 @@ export default {
         API_Member.addMemberGroupUsers(this.memberGroupForm.groupId, memberIds).then((res) => {
           this.memberGroupLoading = false;
           if (res && res.success) {
-            this.$Message.success("设置成功");
+            ElMessage.success("设置成功");
             this.memberGroupFlag = false;
             this.selectedRows = [];
             this.clearSelection();
           } else if (res && res.message) {
-            this.$Message.error(res.message);
+            ElMessage.error(res.message);
           }
         });
       });
     },
-    // 回调给父级
-    callback(val, index) {
-      this.selectMember.forEach(item=>{item.___selected = false})
-      this.$set(val, "___selected", !val.___selected);
-      console.log(val.___selected);
-      console.log(this.selectMember);
-      let findUser = this.selectMember.find((item) => {
-        return item.id == val.id;
+    callback(val) {
+      this.selectMember.forEach((item) => {
+        item.___selected = false;
       });
-      // 如果没有则添加
+      val.___selected = !val.___selected;
+      let findUser = this.selectMember.find((item) => item.id == val.id);
       if (!findUser) {
         this.selectMember.push(val);
       } else {
-        // 有重复数据就删除
         this.selectMember.map((item, index) => {
           if (item.id == findUser.id) {
             this.selectMember.splice(index, 1);
           }
         });
       }
-
       this.$emit("callback", val);
     },
-    // 初始化信息
     init(data) {
       data.forEach((item) => {
         if (this.selectMember.length != 0) {
           this.selectMember.forEach((member) => {
             if (member.id == item.id) {
-              this.$set(item, "___selected", true);
+              item.___selected = true;
             }
           });
         } else {
-          this.$set(item, "___selected", false);
+          item.___selected = false;
         }
       });
       this.data = data;
     },
-    // 分页 改变页码
-    changePage(v) {
-      this.searchForm.pageNumber = v;
+    changePage() {
       this.getData();
     },
-    // 分页 改变页数
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
+    changePageSize() {
       this.searchForm.pageNumber = 1;
       this.getData();
     },
-    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getData();
     },
-    //查看详情修改
     editPerm(val) {
       this.descTitle = `查看用户 ${val.username}`;
       this.descFlag = true;
-
       this.getMemberInfo(val.id);
     },
     addMember() {
+      this.addMemberForm = {
+        mobile: "",
+        username: "",
+        password: "",
+      };
       this.addFlag = true;
-      this.$refs.addMemberForm.resetFields();
+      this.$nextTick(() => {
+        this.$refs.addMemberForm?.clearValidate();
+      });
     },
-    /**
-     * 查询查看会员详情
-     */
     getMemberInfo(id) {
       API_Member.getMemberInfoData(id).then((res) => {
         if (res.result) {
-          this.$set(this, "form", res.result);
+          this.form = res.result;
         }
       });
     },
-
-    //查询会员列表
     getData() {
       this.loading = true;
       if (!this.selectedMember) {
@@ -738,12 +562,18 @@ export default {
         }
       });
     },
-    // 选中的图片
+    openPicSelector() {
+      this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
+    },
     callbackSelected(val) {
       this.picModelFlag = false;
       this.form.face = val.url;
     },
-    //添加会员提交
     addMemberSubmit() {
       this.addMemberForm.password = this.md5(this.addMemberForm.password);
       this.$refs.addMemberForm.validate((valid) => {
@@ -752,59 +582,44 @@ export default {
             if (res.result) {
               this.$refs.addMemberForm.resetFields();
               this.getData();
-              this.$Message.success("添加成功！");
+              ElMessage.success("添加成功！");
               this.addFlag = false;
             }
           });
         }
       });
     },
-
-    // 选中的地址
     selectedRegion(val) {
-      if(val.type === 'select'){
-        const paths = val.data.map(item => item.name).join(',')
-        const ids = val.data.map(item => item.id).join(',')
-
-        this.$set(this.form,'region',paths)
-        this.$set(this.form,'regionId',ids)
-
-      }
-      else{
-        this.$set(this.form,'region',val.data.addr)
-        this.$set(this.form,'regionId',val.data.addrId)
+      if (val.type === "select") {
+        const paths = val.data.map((item) => item.name).join(",");
+        const ids = val.data.map((item) => item.id).join(",");
+        this.form.region = paths;
+        this.form.regionId = ids;
+      } else {
+        this.form.region = val.data.addr;
+        this.form.regionId = val.data.addrId;
       }
     },
-    //查看会员
     detail(row) {
-      this.$options.filters.customRouterPush({ name: "member-detail", query: { id: row.id } })
+      customRouterPush({ name: "member-detail", query: { id: row.id } });
     },
-
-    //禁用会员
     disabled(v) {
       let params = {
         memberIds: [v.id],
         disabled: false,
       };
-      this.$Modal.confirm({
-        title: "提示",
-        content: "<p>确认禁用此会员？</p>",
-        onOk: () => {
-          API_Member.updateMemberStatus(params).then((res) => {
-            if (res.success) {
-              this.$Message.success("禁用成功");
-              this.getData();
-            } else {
-              // this.$Message.error(res.message);
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("确认禁用此会员？", "提示", { type: "warning" }).then(() => {
+        API_Member.updateMemberStatus(params).then((res) => {
+          if (res.success) {
+            ElMessage.success("禁用成功");
+            this.getData();
+          }
+        });
+      }).catch(() => {});
     },
-
     openWalletIncrease(row) {
       this.walletIncreaseLoading = false;
-      this.$set(this, "walletIncreaseForm", { memberId: row.id, rechargeMoney: null });
+      this.walletIncreaseForm = { memberId: row.id, rechargeMoney: null };
       this.walletIncreaseFlag = true;
       this.$nextTick(() => {
         this.$refs.walletIncreaseForm && this.$refs.walletIncreaseForm.resetFields();
@@ -820,11 +635,11 @@ export default {
         })
           .then((res) => {
             if (res && res.success) {
-              this.$Message.success("充值成功");
+              ElMessage.success("充值成功");
               this.walletIncreaseFlag = false;
               this.getData();
             } else {
-              this.$Message.error((res && res.message) || "充值失败");
+              ElMessage.error((res && res.message) || "充值失败");
             }
           })
           .finally(() => {
@@ -832,10 +647,9 @@ export default {
           });
       });
     },
-
     openMemberPoint(row) {
       this.memberPointLoading = false;
-      this.$set(this, "memberPointForm", { memberId: row.id, point: null, type: "INCREASE" });
+      this.memberPointForm = { memberId: row.id, point: null, type: "INCREASE" };
       this.memberPointFlag = true;
       this.$nextTick(() => {
         this.$refs.memberPointForm && this.$refs.memberPointForm.resetFields();
@@ -852,11 +666,11 @@ export default {
         })
           .then((res) => {
             if (res && res.success) {
-              this.$Message.success("修改成功");
+              ElMessage.success("修改成功");
               this.memberPointFlag = false;
               this.getData();
             } else {
-              this.$Message.error((res && res.message) || "修改失败");
+              ElMessage.error((res && res.message) || "修改失败");
             }
           })
           .finally(() => {
@@ -864,30 +678,29 @@ export default {
           });
       });
     },
-
-    // 提交修改数据
     handleSubmitModal() {
-      const { nickName, sex, username, face, newPassword,id,regionId,region } = this.form;
+      const { nickName, sex, username, face, newPassword, id, regionId, region } = this.form;
       let time = new Date(this.form.birthday);
-      let birthday = this.form.birthday=== undefined?'':
-        time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
+      let birthday =
+        this.form.birthday === undefined
+          ? ""
+          : time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
       let submit = {
         regionId,
         region,
         nickName,
-
         sex,
         birthday,
         face,
-        id
+        id,
       };
-
       if (newPassword) {
         submit.password = this.md5(newPassword);
       }
       API_Member.updateMember(submit).then((res) => {
         if (res.result) {
-          this.$Message.success("修改成功！");
+          ElMessage.success("修改成功！");
+          this.descFlag = false;
           this.getData();
         }
       });
@@ -895,24 +708,50 @@ export default {
   },
   mounted() {
     this.getData();
-    if (!this.selectedMember) {
-      this.loadMemberGroupList();
-      this.loadMemberGradeList();
-    }
+    this.loadMemberGroupList();
+    this.loadMemberGradeList();
   },
 };
 </script>
 <style lang="scss" scoped>
-::v-deep .ivu-table-wrapper {
-  width: 100%;
-}
-::v-deep .ivu-card {
-  width: 100%;
-}
 .face {
   width: 60px;
   height: 60px;
   border-radius: 50%;
 }
+.link-text {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.op-split {
+  margin: 0 8px;
+  color: #dcdee2;
+}
 
+.add-member-dialog {
+  :deep(.el-input__wrapper) {
+    background-color: #fff !important;
+    box-shadow: 0 0 0 1px var(--el-border-color) inset !important;
+
+    &.is-focus {
+      box-shadow: 0 0 0 1px var(--el-border-color) inset !important;
+    }
+  }
+
+  :deep(.el-input__inner) {
+    background-color: transparent !important;
+
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus,
+    &:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+      box-shadow: 0 0 0 1000px #fff inset !important;
+      -webkit-text-fill-color: #606266 !important;
+      caret-color: #606266;
+      transition: background-color 99999s ease-out;
+    }
+  }
+}
 </style>

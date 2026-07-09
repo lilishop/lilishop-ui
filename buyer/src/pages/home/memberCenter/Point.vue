@@ -1,31 +1,35 @@
 <template>
   <div class="point">
-    <card _Title="我的积分"/>
+    <UserCenterLayout title="我的积分" :tabs="['我的积分']">
     <div class="point-content">
       <span>剩余积分：<span>{{ pointObj.point || 0 }}</span></span>
       <span>累计获得：<span>{{ pointObj.totalPoint || 0 }}</span></span>
     </div>
     <h3>积分日志</h3>
-    <Table :columns="logColumns" :data="logData.records">
-      <template slot-scope="{ row }" slot="point">
-        <div :style="{color:row.pointType === 'INCREASE' ? 'green' : 'red'}">
-          <span v-if="row.pointType === 'INCREASE'">+</span>{{ row.variablePoint }}
-        </div>
-      </template>
-    </Table>
+    <el-table :data="logData.records || []">
+      <el-table-column prop="content" label="日志内容" align="center" />
+      <el-table-column prop="createTime" label="时间" align="center" />
+      <el-table-column label="积分明细" align="center">
+        <template #default="{ row }">
+          <div :style="{ color: row.pointType === 'INCREASE' ? 'green' : 'red' }">
+            <span v-if="row.pointType === 'INCREASE'">+</span>{{ row.variablePoint }}
+          </div>
+        </template>
+      </el-table-column>
+    </el-table>
     <!-- 分页 -->
-    <Page
-      style="float:right;margin-top:10px"
-      :current="params.pageNumber"
-      :total="logData.total"
-      :page-size="params.pageSize"
-      @on-change="changePage"
-      @on-page-size-change="changePageSize"
-      :page-size-opts="[10, 20, 50]"
-      size="small"
-      show-total
-      show-elevator
-    ></Page>
+    <div class="point-pagination">
+      <el-pagination
+        v-model:current-page="params.pageNumber"
+        v-model:page-size="params.pageSize"
+        :total="logData.total"
+        @current-change="changePage"
+        @size-change="changePageSize"
+        :page-sizes="[10, 20, 50]"
+        layout="total, prev, pager, next, jumper"
+      />
+    </div>
+    </UserCenterLayout>
   </div>
 </template>
 <script>
@@ -42,23 +46,6 @@ export default {
         pageNumber: 1,
         pageSize: 10
       },
-      logColumns: [ // table展示数据
-        {
-          title: '日志内容',
-          key: 'content',
-          align: 'center'
-        },
-        {
-          title: '时间',
-          key: 'createTime',
-          align: 'center'
-        },
-        {
-          title: '积分明细',
-          slot: 'point',
-          align: 'center'
-        }
-      ]
     }
   },
   mounted () {
@@ -107,5 +94,11 @@ h3 {
       font-size: 24px;
     }
   }
+}
+
+.point-pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 </style>

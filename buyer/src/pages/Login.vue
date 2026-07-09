@@ -1,7 +1,7 @@
 <template>
   <div class="login" @keyup.enter="handleSubmit('formInline')">
     <!-- 顶部logo -->
-    <div class="top-content" @click='$refs.verify.show = false'>
+    <div class="top-content" @click="hideVerify">
       <div class="logo-box">
         <img :src="$store.state.logoImg" @click="$router.push('/')" />
         <div>欢迎登录</div>
@@ -10,15 +10,15 @@
     <!-- 登录主体 包含轮播图 登录模块 -->
     <div class="login-container">
       <!-- 轮播 -->
-      <Carousel loop :autoplay-speed="5000" class="login-carousel" arrow="never">
-        <CarouselItem>
-          <div class="demo-carousel" @click='$refs.verify.show = false'>
+      <el-carousel :interval="5000" arrow="never" class="login-carousel" height="550px">
+        <el-carousel-item>
+          <div class="demo-carousel" @click="hideVerify">
             <img src="https://lili-system.oss-cn-beijing.aliyuncs.com/background.jpg" />
           </div>
-        </CarouselItem>
-      </Carousel>
+        </el-carousel-item>
+      </el-carousel>
       <!-- 登录模块 -->
-      <div class="form-box" @click='$refs.verify.show = false'>
+      <div class="form-box" @click="hideVerify">
         <div class="account-number">
           <div class="tab-switch">
             <span>{{ type ? '账号登录' : '验证码登录' }}</span>
@@ -34,7 +34,7 @@
               <span>
                 二维码已失效
               </span>
-              <Button size='small' @click="createPCLoginSession">刷新二维码</Button>
+              <el-button size='small' @click="createPCLoginSession">刷新二维码</el-button>
             </div>
             <vue-qr
               :text="qrCode"
@@ -69,45 +69,45 @@
         <div>
           <div v-show="!scannerCodeLoginFLag">
           <!-- 账号密码登录 -->
-          <Form ref="formInline" :model="formData" :rules="ruleInline" v-show="type === true"
-                @click.self='$refs.verify.show = false'>
-            <FormItem prop="username">
-              <i-input type="text" v-model="formData.username" clearable placeholder="用户名">
-                <Icon type="md-person" slot="prepend"></Icon>
-              </i-input>
-            </FormItem>
-            <FormItem prop="password">
-              <i-input type="password" v-model="formData.password" clearable placeholder="密码">
-                <Icon type="md-lock" slot="prepend"></Icon>
-              </i-input>
-            </FormItem>
-            <FormItem>
-              <Button type="error" @click.stop="handleSubmit('formInline')" long>登录</Button>
-            </FormItem>
-          </Form>
+          <el-form ref="formInline" :model="formData" :rules="ruleInline" v-show="type === true"
+                @click.self="hideVerify">
+            <el-form-item prop="username">
+              <el-input type="text" v-model="formData.username" clearable placeholder="用户名">
+                <template #prepend><el-icon><User /></el-icon></template>
+              </el-input>
+            </el-form-item>
+            <el-form-item prop="password">
+              <el-input type="password" v-model="formData.password" clearable placeholder="密码">
+                <template #prepend><el-icon><Lock /></el-icon></template>
+              </el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="danger" @click.stop="handleSubmit('formInline')" style="width:100%">登录</el-button>
+            </el-form-item>
+          </el-form>
           <!-- 验证码登录 -->
-          <Form ref="formSms" :model="formSms" :rules="ruleInline" v-show="type === false"
-                @click.self='$refs.verify.show = false'>
-            <FormItem prop="mobile">
-              <i-input type="text" v-model="formSms.mobile" clearable placeholder="手机号">
-                <Icon type="md-lock" slot="prepend"></Icon>
-              </i-input>
-            </FormItem>
-            <FormItem prop="code">
-              <i-input type="text" v-model="formSms.code" placeholder="手机验证码">
-                <Icon type="ios-text-outline" style="font-weight: bold" slot="prepend"/>
-                <Button slot="append" @click="sendCode">{{ codeMsg }}</Button>
-              </i-input>
-            </FormItem>
-            <FormItem>
-              <Button @click.stop="verifyBtnClick" long
+          <el-form ref="formSms" :model="formSms" :rules="ruleInline" v-show="type === false"
+                @click.self="hideVerify">
+            <el-form-item prop="mobile">
+              <el-input type="text" v-model="formSms.mobile" clearable placeholder="手机号">
+                <template #prepend><el-icon><Lock /></el-icon></template>
+              </el-input>
+            </el-form-item>
+            <el-form-item prop="code">
+              <el-input type="text" v-model="formSms.code" placeholder="手机验证码">
+                <template #prepend><el-icon style="font-weight: bold"><Document /></el-icon></template>
+                <template #append><el-button @click="sendCode">{{ codeMsg }}</el-button></template>
+              </el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button @click.stop="verifyBtnClick" style="width:100%"
                       :type="verifyStatus?'success':'default'">{{ verifyStatus ? '验证通过' : '点击完成安全验证' }}
-              </Button>
-            </FormItem>
-            <FormItem>
-              <Button type="error" @click="handleSubmit('formSms')" long>登录</Button>
-            </FormItem>
-          </Form>
+              </el-button>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="danger" @click="handleSubmit('formSms')" style="width:100%">登录</el-button>
+            </el-form-item>
+          </el-form>
         </div>
           <div class="other">
             <div class="other-login">
@@ -126,8 +126,8 @@
               </svg>
             </div>
             <div class="register">
-              <span style="color:red" @click="$router.push('signUp')">还没有账号？点击立即注册</span>
-              <span @click="$router.push('forgetPassword')">忘记密码</span>
+              <span style="color:red" @click.stop="$router.push('signUp')">还没有账号？点击立即注册</span>
+              <span @click.stop="$router.push('forgetPassword')">忘记密码</span>
             </div>
           </div>
         </div>
@@ -138,22 +138,23 @@
       <verify ref="verify" class="verify-con" verifyType="LOGIN" @change="verifyChange"></verify>
     </div>
     <div class="foot">
-      <Row type="flex" justify="space-around" class="help">
+      <div type="flex" justify="space-around" class="help">
         <router-link to="/article" class="item" target="_blank">帮助</router-link>
         <router-link to="/article?id=1371779927900160000" class="item" target="_blank">隐私</router-link>
         <router-link to="/article?id=1371992704333905920" class="item" target="_blank">条款</router-link>
-      </Row>
-      <Row type="flex" justify="center" class="copyright">
+      </div>
+      <div type="flex" justify="center" class="copyright">
         Copyright © {{year}} - Present
         <a href="https://pickmall.cn" target="_blank" style="margin: 0 5px">{{config.title}}</a>
         版权所有
-      </Row>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 
+import { Message, Spin } from "@/utils/message";
 import * as RegExp from "@/plugins/RegExp.js";
 import { md5 } from "@/plugins/md5.js";
 import * as apiLogin from "@/api/login.js";
@@ -162,12 +163,17 @@ import { webLogin, loginCallback,sCLogin,getSCLoginCode} from "@/api/login.js";
 import storage from "@/plugins/storage.js";
 import verify from "@/components/verify";
 import vueQr from "vue-qr";
+import { User, Lock, Document } from "@element-plus/icons-vue";
+import config from "@/config";
 
 export default {
   name: "Login",
   components: {
     verify,
-    vueQr
+    vueQr,
+    User,
+    Lock,
+    Document,
   },
   data() {
     return {
@@ -178,7 +184,7 @@ export default {
       scannerCodeLoginFLag: false,
       scannerCodeLoginStatus: 0,
       qrCodeTimer:null,
-      config: require('@/config'),
+      config,
       type: true, // true 账号登录  false 验证码登录
       formData: {
         // 登录表单
@@ -220,19 +226,22 @@ export default {
     }
   },
   methods: {
+    hideVerify() {
+      this.$refs.verify?.close?.();
+    },
 
     // 登录
     handleSubmit(name) {
       this.$refs[name].validate((valid) => {
         if (valid) {
           if (this.type) {
-            this.$refs.verify.init();
+            this.$refs.verify?.init();
           } else {
             let data = JSON.parse(JSON.stringify(this.formSms));
             apiLogin.smsLogin(data).then((res) => {
-              this.$refs.verify.show = false;
+              this.hideVerify();
               if (res.success) {
-                this.$Message.success("登录成功");
+                Message.success("登录成功");
                 storage.setItem("accessToken", res.result.accessToken);
                 storage.setItem("refreshToken", res.result.refreshToken);
                 storage.setItem('getTimes',0)
@@ -251,7 +260,7 @@ export default {
                   }
                 });
               } else {
-                this.$Message.error(res.message);
+                Message.error(res.message);
               }
             });
           }
@@ -262,11 +271,11 @@ export default {
     sendCode() {
       if (this.time === 60) {
         if (this.formSms.mobile === "") {
-          this.$Message.warning("请先填写手机号");
+          Message.warning("请先填写手机号");
           return;
         }
         if (!this.verifyStatus) {
-          this.$Message.warning("请先完成安全验证");
+          Message.warning("请先完成安全验证");
           return;
         }
         let params = {
@@ -275,7 +284,7 @@ export default {
         };
         sendSms(params).then((res) => {
           if (res.success) {
-            this.$Message.success("验证码发送成功");
+            Message.success("验证码发送成功");
             let that = this;
             this.interval = setInterval(() => {
               that.time--;
@@ -289,7 +298,7 @@ export default {
               }
             }, 1000);
           } else {
-            this.$Message.warning(res.message);
+            Message.warning(res.message);
           }
         });
       }
@@ -302,30 +311,30 @@ export default {
         // 账号密码登录
         let data = JSON.parse(JSON.stringify(this.formData));
         data.password = md5(data.password);
-        this.$refs.verify.show = false;
-        this.$Spin.show();
+        this.hideVerify();
+        Spin.show();
         apiLogin
           .login(data)
           .then((res) => {
             if (res.success) {
               this.loginSuccess(res.result.accessToken,res.result.refreshToken);
             } else {
-              this.$Spin.hide();
-              this.$Message.error(res.message);
+              Spin.hide();
+              Message.error(res.message);
             }
           })
           .catch(() => {
-            this.$Spin.hide();
+            Spin.hide();
           });
       } else {
         this.verifyStatus = true;
-        this.$refs.verify.show = false;
+        this.hideVerify();
       }
     },
     // 开启滑块验证
     verifyBtnClick() {
       if (!this.verifyStatus) {
-        this.$refs.verify.init();
+        this.$refs.verify?.init();
       }
     },
     handleWebLogin(type) {
@@ -333,11 +342,11 @@ export default {
       webLogin(type);
     },
     loginSuccess(accessToken,refreshToken){
-      this.$Message.success("登录成功");
+      Message.success("登录成功");
       storage.setItem("accessToken", accessToken);
       storage.setItem("refreshToken", refreshToken);
       apiLogin.getMemberMsg().then((res) => {
-        this.$Spin.hide();
+        Spin.hide();
         if (res.success) {
           storage.setItem("userInfo", res.result);
           let query = this.$route.query;
@@ -413,7 +422,7 @@ export default {
       });
     },
   },
-  destroyed() {
+  beforeUnmount() {
     this.clearQRLoginInfo();
   },
   mounted() {
@@ -444,7 +453,7 @@ export default {
         this.$refs.formSms.resetFields();
       }
       this.verifyStatus = false;
-      this.$refs.verify.show = false;
+      this.hideVerify();
       clearInterval(this.interval);
       this.codeMsg = "发送验证码";
       this.time = 60;
@@ -610,11 +619,12 @@ export default {
 
 .register {
   display: flex;
-
   margin-top: -10px;
+  font-size: 12px;
 
   span {
     margin-left: 10px;
+    font-size: 12px;
 
     &:hover {
       cursor: pointer;

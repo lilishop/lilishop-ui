@@ -1,118 +1,69 @@
 <template>
-  <div>
-      <Card class="card fixed-bottom">
-        <affixTime @selected="clickBreadcrumb" />
-      </Card>
-    <Card class="card">
+  <div class="wrapper">
+    <el-affix :offset="100">
+      <el-card class="card fixed-bottom">
+        <affixTime :closeShop="true" @selected="clickBreadcrumb" />
+      </el-card>
+    </el-affix>
+    <el-card class="card">
       <div>
         <h4>流量概况</h4>
-
       </div>
       <div class="box">
         <div class="box-item">
-          <div>
-            访客数UV
-          </div>
-          <div>
-            {{uvs||0}}
-          </div>
+          <div>访客数UV</div>
+          <div>{{ uvs || 0 }}</div>
         </div>
-
         <div class="box-item">
-          <div>
-            浏览量PV
-          </div>
-          <div>
-            {{pvs||0}}
-          </div>
+          <div>浏览量PV</div>
+          <div>{{ pvs || 0 }}</div>
         </div>
-
       </div>
+    </el-card>
 
-    </Card>
-
-    <Card class="card">
+    <el-card class="card">
       <div>
         <h4>流量趋势</h4>
         <div id="orderChart"></div>
       </div>
-    </Card>
+    </el-card>
 
-    <Card class="card">
+    <el-card class="card">
       <div>
-        <h4>客户增长报表</h4>
-        <Table class="table" stripe :columns="columns" :data="data"></Table>
+        <h4>会员流量报表</h4>
+        <el-table class="table" stripe :data="data" style="width: 100%">
+          <el-table-column prop="date" label="日期" min-width="120" />
+          <el-table-column prop="pvNum" label="浏览量" min-width="120" />
+          <el-table-column prop="uvNum" label="访客数" min-width="120" />
+        </el-table>
       </div>
-    </Card>
+    </el-card>
   </div>
 </template>
 <script>
 import affixTime from "@/views/lili-components/affix-time";
 import * as API_Member from "@/api/member";
 import { Chart } from "@antv/g2";
-import Cookies from "js-cookie";
+
 export default {
   components: { affixTime },
 
   data() {
     return {
-      // 时间
-
-      uvs: 0, // 访客数
-      pvs: 0, // 浏览量
-
-      dateList: [
-        // 日期选择列表
-        {
-          title: "今天",
-          selected: false,
-          value: "TODAY",
-        },
-        {
-          title: "昨天",
-          selected: false,
-          value: "YESTERDAY",
-        },
-        {
-          title: "过去7天",
-          selected: true,
-          value: "LAST_SEVEN",
-        },
-        {
-          title: "过去30天",
-          selected: false,
-          value: "LAST_THIRTY",
-        },
-      ],
-
-      orderChart: "", // 流量趋势数据
+      uvs: 0,
+      pvs: 0,
+      orderChart: "",
       params: {
         searchType: "LAST_SEVEN",
         year: "",
         month: "",
-        storeId: JSON.parse(Cookies.get("userInfoSeller")).id || "",
       },
-      columns: [
-        {
-          key: "date",
-          title: "日期",
-        },
-        {
-          key: "pvNum",
-          title: "浏览量",
-        },
-        {
-          key: "uvNum",
-          title: "访客数",
-        },
-      ],
-
-      data: [], // 客户增长报表数据
+      data: [],
     };
   },
   watch: {
     params: {
-      handler(val) {
+      handler() {
         this.uvs = 0;
         this.pvs = 0;
         this.init();
@@ -121,15 +72,9 @@ export default {
     },
   },
   methods: {
-    // 订单图
     initChart() {
-      // 默认已经加载 legend-filter 交互
-      /**
-       * 将数据分成三组来进行展示
-       */
-
-      let uv = [];
-      let pv = [];
+      const uv = [];
+      const pv = [];
 
       this.data.forEach((item) => {
         uv.push({
@@ -146,9 +91,9 @@ export default {
         });
       });
 
-      let data = [...uv, ...pv];
+      const chartData = [...uv, ...pv];
 
-      this.orderChart.data(data);
+      this.orderChart.data(chartData);
       this.orderChart.scale({
         activeQuantity: {
           range: [0, 1],
@@ -177,24 +122,21 @@ export default {
           stroke: "#fff",
           lineWidth: 1,
         });
+      this.orderChart.area().position("date*pv").color("title").shape("smooth");
 
       this.orderChart.render();
     },
-    // 时间筛选
-    clickBreadcrumb(item, index) {
-      let callback = JSON.parse(JSON.stringify(item));
-
-      this.params = callback;
+    clickBreadcrumb(item) {
+      this.params = JSON.parse(JSON.stringify(item));
     },
-    // 初始化
     init() {
-      this.orderChart ? this.orderChart.clear() : ''
+      this.orderChart ? this.orderChart.clear() : "";
       API_Member.getStatisticsList(this.params).then((res) => {
         if (res.result) {
           this.data = res.result;
           res.result.forEach((item) => {
-            this.uvs += parseInt(item.uvNum);
-            this.pvs += parseInt(item.pvNum);
+            this.uvs += item.uvNum;
+            this.pvs += item.pvNum;
           });
 
           if (!this.orderChart) {
@@ -216,24 +158,14 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-.fixed-bottom{
-  position:sticky;
-  z-index: 999;
-  top: 0;
-}
 .table {
   margin-top: 10px;
 }
-.wrapper {
-  padding-bottom: 200px;
-}
 .box-item {
   display: flex;
-
   flex-direction: column;
   width: 25%;
   font-weight: bold;
-  // align-items: center;
   justify-content: center;
   > div {
     margin: 4px;

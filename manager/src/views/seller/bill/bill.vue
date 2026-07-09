@@ -1,190 +1,115 @@
 <template>
   <div class="search">
-    <Card>
-      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-        <Form-item label="账单编号" prop="sn">
-          <Input type="text" v-model="searchForm.sn" placeholder="请输入账单编号" clearable style="width: 240px" />
-        </Form-item>
-        <Form-item label="出帐时间" prop="createTime">
-          <DatePicker v-model="selectDate" type="daterange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 240px">
-          </DatePicker>
-        </Form-item>
-        <Form-item label="筛选状态">
-          <Select v-model="searchForm.billStatus" clearable style="width:240px">
-            <Option value="OUT">已出账</Option>
-            <Option value="CHECK">已对账</Option>
-            <!-- <Option value="EXAMINE">已审核</Option> -->
-            <Option value="COMPLETE">已付款</Option>
-          </Select>
-        </Form-item>
-        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-      </Form>
-      </Card>
-    <Card>
-      <Row class="operation padding-row">
+    <el-card>
+      <div class="mb_10">
+        <el-button type="primary" @click="handleExportList">导出列表</el-button>
+        <el-button :disabled="selectCount === 0" @click="handleBatchDownload">批量下载</el-button>
+      </div>
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+        @selection-change="changeSelect"
+      >
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column prop="sn" label="账单号" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="createTime" label="生成时间" width="120" />
+        <el-table-column label="结算时间段" width="200">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.startTime }}~{{ row.endTime }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="storeName" label="店铺名称" min-width="120" show-overflow-tooltip />
+        <el-table-column label="结算金额" width="130">
+          <template #default="{ row }">
+            <priceColorScheme v-if="row" :value="row.billPrice" :color="$mainColor" />
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="billStatusTagType(row.billStatus)">{{ billStatusText(row.billStatus) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="120" align="center" fixed="right">
+          <template #default="{ row }">
+            <a v-if="row" class="link-text" @click="detail(row)">详细</a>
+          </template>
+        </el-table-column>
+      </el-table>
 
-      </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-selection-change="changeSelect">
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]"
-          size="small" show-total show-elevator show-sizer></Page>
-      </Row>
-    </Card>
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
 import * as API_Shop from "@/api/shops";
+import * as API_Finance from "@/api/finance";
+import { downloadBlob } from "@/utils/downloadBlob";
 
 export default {
   name: "bill",
-  components: {},
   data() {
     return {
-      loading: true, // 表单加载状态
+      loading: true,
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 20, // 页面大小
-        sort: "createTime", // 默认排序字段
-        order: "desc", // 默认排序方式
-        startDate: "", // 起始时间
-        endDate: "", // 终止时间
-        billStatus:"" //状态
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
       },
-      selectDate: null, // 选择一个时间段
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
-      columns: [
-        // 表头
-        {
-          type: "selection",
-          width: 60,
-          align: "center",
-        },
-        {
-          title: "账单号",
-          key: "sn",
-          minWidth: 200,
-          tooltip: true,
-        },
-        {
-          title: "生成时间",
-          key: "createTime",
-          width: 120,
-        },
-        {
-          title: "结算时间段",
-          key: "startTime",
-          width: 200,
-          render: (h, params) => {
-            return h("div", params.row.startTime + "~" + params.row.endTime);
-          },
-        },
-        {
-          title: "店铺名称",
-          key: "storeName",
-          minWidth: 120,
-          tooltip: true,
-        },
-
-        {
-          title: "结算金额",
-          key: "billPrice",
-          width: 130,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.billPrice,color:this.$mainColor}} );
-          },
-
-        },
-        {
-          title: "状态",
-          key: "billStatus",
-          width: 100,
-          render: (h, params) => {
-            if (params.row.billStatus == "OUT") {
-              return h("Tag", {props: {color: "blue",},},"已出账");
-            } else if (params.row.billStatus == "CHECK") {
-              return h("Tag", {props: {color: "geekblue",},},"已对账");
-            } else if (params.row.billStatus == "EXAMINE") {
-              return h("Tag", {props: {color: "purple",},},"已审核");
-            } else {
-              return h("Tag", {props: {color: "green",},},"已付款");
-            }
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          fixed: "right",
-          width: 120,
-          render: (h, params) => {
-            return h("div", { class: "ops" }, [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.detail(params.row);
-                    },
-                  },
-                },
-                "详细"
-              ),
-            ]);
-          },
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      selectList: [],
+      selectCount: 0,
+      data: [],
+      total: 0,
     };
   },
   methods: {
+    billStatusText(v) {
+      const map = { OUT: "已出账", CHECK: "已对账", COMPLETE: "已付款" };
+      return map[v] || v;
+    },
+    billStatusTagType(v) {
+      const map = { OUT: "primary", CHECK: "warning", COMPLETE: "success" };
+      return map[v] || "success";
+    },
     init() {
       this.getDataList();
     },
-    changePage(v) { // 改变页码
+    changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
-    changePageSize(v) { // 改变页数
+    changePageSize(v) {
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    handleSearch() { // 搜索
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    changeSelect(e) { // 表格选中
+    changeSelect(e) {
       this.selectList = e;
       this.selectCount = e.length;
     },
-    selectDateRange(v) {
-      if (v) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      }
-    },
     getDataList() {
       this.loading = true;
-
-      this.searchForm.startTime &&
-        (this.searchForm.startTime = this.$options.filters.unixToDate(
-          this.searchForm.startTime / 1000
-        ));
-      this.searchForm.endTime &&
-        (this.searchForm.endTime = this.$options.filters.unixToDate(
-          this.searchForm.endTime / 1000
-        ));
-
+      if (this.searchForm.startTime) {
+        this.searchForm.startTime = this.$filters.unixToDate(this.searchForm.startTime / 1000);
+      }
+      if (this.searchForm.endTime) {
+        this.searchForm.endTime = this.$filters.unixToDate(this.searchForm.endTime / 1000);
+      }
       API_Shop.getBuyBillPage(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
@@ -192,24 +117,34 @@ export default {
           this.total = res.result.total;
         }
       });
-      this.total = this.data.length;
-      this.loading = false;
     },
-    detail(v) { // 账单详情
-      let id = v.id;
-      this.$options.filters.customRouterPush({
+    detail(v) {
+      this.$filters.customRouterPush({
         name: "bill-detail",
-        query: { id: id },
-      })
+        query: { id: v.id },
+      });
+    },
+    handleExportList() {
+      API_Finance.exportBillList({ ...this.searchForm }).then((blob) => {
+        downloadBlob(blob, "结算单列表.xlsx");
+      });
+    },
+    handleBatchDownload() {
+      if (this.selectCount <= 0) {
+        this.$Message.warning("请先选择结算单");
+        return;
+      }
+      const billIds = this.selectList.map((item) => item.id);
+      API_Finance.batchDownloadBills(billIds).then((blob) => {
+        downloadBlob(blob, "结算单批量下载.zip");
+      });
     },
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
-        // 记得确认修改此处
         content: "您确认要删除 " + v.name + " ?",
         loading: true,
         onOk: () => {
-          // 删除
           this.deleteRequest("/bill/delByIds/" + v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -220,7 +155,7 @@ export default {
         },
       });
     },
-    delAll() { // 多选删除数据
+    delAll() {
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未选择要删除的数据");
         return;
@@ -235,7 +170,6 @@ export default {
             ids += e.id + ",";
           });
           ids = ids.substring(0, ids.length - 1);
-          // 批量删除
           this.deleteRequest("/bill/delByIds/" + ids).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -252,15 +186,3 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
-.ops a {
-  color: #2d8cf0;
-  cursor: pointer;
-  text-decoration: none;
-}
-.ops span {
-  display: inline-block;
-  margin: 0 8px;
-  color: #dcdee2;
-}
-</style>

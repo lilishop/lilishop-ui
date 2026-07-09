@@ -51,44 +51,41 @@
       <li class="hz-u-square hz-u-square-br" data-pointer="dealBR"></li>
     </ul>
    
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="编辑热区"
-      draggable
-      scrollable
-      :mask="false"
-      ok-text="保存"
-      @on-ok="saveZone"
-      @on-cancel="cancelZone"
+      :close-on-click-modal="false"
+      append-to-body
+      @close="cancelZone"
     >
       <div>
         <div class="hz-edit-img">
           <img class="show-image" :src="zoneForm.img" alt />
         </div>
 
-        <Form :model="zoneForm" :label-width="80">
-          <!-- <FormItem label="图片链接：">
-            <Input v-model="zoneForm.img"></Input>
-            <Button size="small" type="primary" @click="handleSelectImg"
-              >选择图片</Button
+        <el-form :model="zoneForm" label-width="90px" class="hz-edit-form">
+          <!-- <el-form-item label="图片链接：">
+            <el-input v-model="zoneForm.img"></el-input>
+            <el-button size="small" type="primary" @click="handleSelectImg"
+              >选择图片</el-button
             >
             :v-model="zoneForm.type === 'goods' ? zoneForm.goodsName : zoneForm.link"
-          </FormItem> -->
-          <FormItem label="跳转链接：">
-            <Input type="textarea" v-if="zoneForm.type === 'other' && zoneForm.title === '外部链接'" v-model="zoneForm.link" ></Input>
-            <Button size="small" type="primary" @click="handleSelectLink"
-              >选择链接</Button
+          </el-form-item> -->
+          <el-form-item label="跳转链接：">
+            <el-input type="textarea" v-if="zoneForm.type === 'other' && zoneForm.title === '外部链接'" v-model="zoneForm.link" ></el-input>
+            <el-button size="small" type="primary" @click="handleSelectLink"
+              >选择链接</el-button
             >
-          </FormItem>
-        </Form>
+          </el-form-item>
+        </el-form>
       </div>
-    </Modal>
+    </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
-    <Modal width="1200px" v-model="picModelFlag" footer-hide>
+    <el-dialog width="1200px" v-model="picModelFlag">
       <ossManage @callback="callbackSelected" :isComponent="true"  :initialize="picModelFlag" ref="ossManage"/>
-    </Modal>
+    </el-dialog>
   </li>
 </template>
 
@@ -159,8 +156,12 @@ export default {
     },
     // 选择图片
     handleSelectImg() {
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
     // 选择图片回调
     callbackSelected(item) {
@@ -175,7 +176,7 @@ export default {
     },
     // 已选链接
     selectedLink(val) {
-      this.zoneForm.link = this.$options.filters.formatLinkType(val);
+      this.zoneForm.link = this.$filters.formatLinkType(val);
       this.settingZone(val);
       this.changeInfo(this.zoneForm);
     },
@@ -239,3 +240,9 @@ export default {
   },
 };
 </script>
+
+<style scoped lang="scss">
+.hz-edit-form :deep(.el-form-item__label) {
+  white-space: nowrap;
+}
+</style>

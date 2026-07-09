@@ -2,7 +2,7 @@
   <div class="layout">
     <div class="hot-area">
       <!-- <img :src="res.list[0].img" alt="" /> -->
-      <hotzone @change="changeHotzone" :zonesInit="res.zoneInfo" :image="res.list[0].img"></hotzone>
+      <hotzone @change="changeHotzone" :zonesInit="res.list[0].zoneInfo" :image="res.list[0].img"></hotzone>
     </div>
   </div>
 </template>
@@ -16,10 +16,7 @@ export default {
   props: ["res"],
   methods: {
     changeHotzone(info) {
-      console.log(info);
-      console.log(this.res);
-      this.res.zoneInfo = info;
-      // this.$emit("change", res);
+      this.res.list[0].zoneInfo = info;
     },
   },
 };

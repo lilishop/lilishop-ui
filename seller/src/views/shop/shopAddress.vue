@@ -1,327 +1,225 @@
 <template>
   <div class="self-address">
-    <Card>
-      <Button @click="add" type="primary">添加</Button>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
+    <el-card>
+      <el-button type="primary" @click="add">添加</el-button>
+      <el-table
         ref="table"
-        style="margin-top:10px"
-      ></Table>
-      <Row type="flex" justify="end" style="margin-top:10px;">
-        <Page
-          :current="searchForm.pageNumber"
+        v-loading="loading"
+        border
+        :data="data"
+        style="width: 100%; margin-top: 10px"
+      >
+        <el-table-column prop="addressName" label="自提点名称" min-width="120" />
+        <el-table-column prop="address" label="详细地址" min-width="280" />
+        <el-table-column prop="createTime" label="创建时间" min-width="120" sortable />
+        <el-table-column label="操作" width="200" align="center">
+          <template #default="{ row }">
+            <a class="link-text" @click="edit(row)">修改</a>
+            <span class="op-split">|</span>
+            <a class="link-text" @click="deleteSubmit(row)">删除</a>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[10, 20, 50]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[10, 20, 50]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
-    <Modal
-      :title="modalTitle"
-      v-model="modalVisible"
-      :mask-closable="false"
-      :width="500"
-    >
-      <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
-        <FormItem label="名称" prop="addressName">
-          <Input v-model="form.addressName" clearable style="width: 90%"/>
-        </FormItem>
-        <FormItem label="详细地址" prop="address">
-          <span>{{ form.address || '暂无地址' }}</span>
-          <Button type="default" style="margin-left: 10px;" @click="$refs.map.open()">选择地址</Button>
-        </FormItem>
-        <FormItem label="联系电话" prop="mobile">
-          <Input v-model="form.mobile" clearable style="width: 90%" maxlength="11"/>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="handleSubmit"
-        >提交
-        </Button
-        >
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
       </div>
-    </Modal>
-    <multipleMap ref="map" @callback="getAddress"></multipleMap>
+    </el-card>
+
+    <el-dialog
+      v-model="modalVisible"
+      :title="modalTitle"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+        <el-form-item label="名称" prop="addressName">
+          <el-input v-model="form.addressName" clearable style="width: 90%" />
+        </el-form-item>
+        <el-form-item label="详细地址" prop="address">
+          <span>{{ form.address || "暂无地址" }}</span>
+          <el-button style="margin-left: 10px" @click="$refs.map.open()">选择地址</el-button>
+        </el-form-item>
+        <el-form-item label="联系电话" prop="mobile">
+          <el-input v-model="form.mobile" clearable style="width: 90%" maxlength="11" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="modalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">提交</el-button>
+      </template>
+    </el-dialog>
+    <multipleMap ref="map" @callback="getAddress" />
   </div>
 </template>
 
 <script>
-  import * as API_Shop from "@/api/shops";
-  import { validateMobile } from "@/libs/validate";
+import * as API_Shop from "@/api/shops";
+import { validateMobile } from "@/libs/validate";
+import multipleMap from "@/views/my-components/map/multiple-map";
 
-  import multipleMap from "@/views/my-components/map/multiple-map";
-
-
-  export default {
-    name: "shopAddress",
-    components: {
-      multipleMap
-    },
-    data() {
-      return {
-        loading: true, // 表单加载状态
-        modalType: 0, // 添加或编辑标识
-        modalVisible: false, // 添加或编辑显示
-        modalTitle: "", // 添加或编辑标题
-        searchForm: {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-          pageSize: 10, // 页面大小
-        },
-        form: {
-          // 添加或编辑表单对象初始化数据
-          addressName: "",
-          center: "",
-          address:"",//详细地址
-          mobile:"",//手机号码
-        },
-
-        // 表单验证规则
-        formValidate: {
-          addressName: [
-            {
-              required: true,
-              message: "请输入地址名称",
-              trigger: "blur",
-            },
-          ],
-          longitude: [
-            {
-              required: true,
-              message: "请输入地址经度",
-              trigger: "blur",
-            },
-          ],
-          latitude: [
-            {
-              required: true,
-              message: "请输入地址纬度",
-              trigger: "blur",
-            },
-          ],
-          mobile: [
-            {
-              required: true,
-              message: "请输入联系电话号",
-              trigger: "blur",
-            },
-            { validator: validateMobile,
-              trigger: "blur"
-            }
-          ],
-          address: [
-            {
-              required: true,
-              message: " ",
-              trigger: "blur",
-            },
-          ],
-        },
-        submitLoading: false, // 添加或编辑提交状态
-        columns: [
-          // 表头
-          {
-            title: "自提点名称",
-            key: "addressName",
-            minWidth: 120,
-            sortable: false,
-          },
-          {
-            title: "详细地址",
-            key: "address",
-            minWidth: 280
-          },
-          {
-            title: "创建时间",
-            key: "createTime",
-            minWidth: 120,
-            sortable: true,
-          },
-          {
-            title: "操作",
-            key: "action",
-            align: "center",
-            width: 200,
-            render: (h, params) => {
-              return h("div", [
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.edit(params.row);
-                      },
-                    },
-                  },
-                  "修改"
-                ),
-                h("span", { style: { margin: "0 8px", color: "#dcdee2" } }, "|"),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.deleteSubmit(params.row);
-                      },
-                    },
-                  },
-                  "删除"
-                ),
-              ]);
-            },
-          },
+export default {
+  name: "shopAddress",
+  components: { multipleMap },
+  data() {
+    return {
+      loading: true,
+      modalType: 0,
+      modalVisible: false,
+      modalTitle: "",
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 10,
+      },
+      form: {
+        addressName: "",
+        center: "",
+        address: "",
+        mobile: "",
+      },
+      formValidate: {
+        addressName: [{ required: true, message: "请输入地址名称", trigger: "blur" }],
+        longitude: [{ required: true, message: "请输入地址经度", trigger: "blur" }],
+        latitude: [{ required: true, message: "请输入地址纬度", trigger: "blur" }],
+        mobile: [
+          { required: true, message: "请输入联系电话号", trigger: "blur" },
+          { validator: validateMobile, trigger: "blur" },
         ],
-        data: [], // 表单数据
-        total: 0, // 表单数据总数
+        address: [{ required: true, message: " ", trigger: "blur" }],
+      },
+      submitLoading: false,
+      data: [],
+      total: 0,
+    };
+  },
+  methods: {
+    init() {
+      this.getDataList();
+    },
+    changePage(v) {
+      this.searchForm.pageNumber = v;
+      this.getDataList();
+    },
+    changePageSize(v) {
+      this.searchForm.pageSize = v;
+      this.getDataList();
+    },
+    getAddress(val) {
+      if (val.type === "select") {
+        const paths = val.data.map((item) => item.name).join(",");
+        this.form.address = paths;
+        this.form.center = val.data[val.data.length - 1].center;
+      } else {
+        this.form.address = val.data.addr;
+        this.form.address = val.data.address;
+        this.form.center = val.data.position.lng + "," + val.data.position.lat;
+      }
+    },
+    getDataList() {
+      this.loading = true;
+      API_Shop.getShopAddress(this.searchForm).then((res) => {
+        this.loading = false;
+        if (res.success) {
+          this.data = res.result.records;
+          this.total = res.result.total;
+        }
+      });
+    },
+    resetForm() {
+      this.form = {
+        addressName: "",
+        center: "",
+        address: "",
+        mobile: "",
       };
     },
-    methods: {
-      init() { // 初始化数据
-        this.getDataList();
-      },
-      // 分页 改变页码
-      changePage(v) {
-        this.searchForm.pageNumber = v;
-        this.getDataList();
-      },
-      // 分页 改变页数
-      changePageSize(v) {
-        this.searchForm.pageSize = v;
-        this.getDataList();
-      },
-      // 搜索
-      handleSearch() {
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 10;
-        this.getDataList();
-      },
-      // 重置
-      handleReset() {
-        this.$refs.searchForm.resetFields();
-        this.searchForm.pageNumber = 1;
-        this.searchForm.pageSize = 10;
-        this.getDataList();
-      },
-      //获取地址
-      getAddress(val){
-        if(val.type === 'select'){
-          const paths = val.data.map(item => item.name).join(',')
-          this.$set(this.form, 'address', paths)
-
-          this.form.center = val.data[val.data.length - 1].center
-        }
-        else{
-            this.$set(this.form, 'address', val.data.addr)
-            this.form.address = val.data.address
-            this.form.center = val.data.position.lng + "," + val.data.position.lat
-        }
-
-      },
-      // 获取数据
-      getDataList() {
-        this.loading = true;
-        API_Shop.getShopAddress(this.searchForm).then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        });
-        this.total = this.data.length;
-        this.loading = false;
-      },
-      //添加弹出框
-      add() {
-        this.$refs.form.resetFields()
-        this.modalVisible = true
-        this.modalTitle = "添加自提地址"
-      },
-      //修改弹出框
-      edit(v) {
-        this.modalType = 1
-        this.modalVisible = true
-        this.modalTitle = "修改自提地址"
-        this.form.id = v.id
-        this.form.address = v.address
-        this.form.addressName = v.addressName
-        this.form.mobile = v.mobile
-        this.form.center = v.center
-        this.form.longitude = v.center.split(',')[0]
-        this.form.latitude = v.center.split(',')[1]
-      },
-
-      //保存或者编辑
-      handleSubmit() {
-        this.$refs.form.validate((valid) => {
-          if (valid) {
-            this.submitLoading = true;
-            if (this.modalType == 0) {
-              // 添加
-              delete this.form.id;
-              API_Shop.addShopAddress(this.form).then((res) => {
-                this.submitLoading = false;
-                if (res.success) {
-                  this.$Message.success("添加成功");
-                  this.getDataList();
-                  this.modalVisible = false;
-                }
-              });
-            } else {
-              // 编辑
-              API_Shop.editShopAddress(this.form.id, this.form).then((res) => {
-                this.submitLoading = false;
-                if (res.success) {
-                  this.$Message.success("修改成功");
-                  this.getDataList();
-                  this.modalVisible = false;
-                }
-              });
-            }
-          }
-        });
-      },
-      //删除
-      deleteSubmit(v){
-        this.$Modal.confirm({
-          title: "确认删除",
-          // 记得确认修改此处
-          content: "确认删除自提地址么？",
-          loading: true,
-          onOk: () => {
-            API_Shop.deleteShopAddress(v.id).then((res) => {
-              this.$Modal.remove();
+    add() {
+      this.modalType = 0;
+      this.modalTitle = "添加自提地址";
+      this.resetForm();
+      this.modalVisible = true;
+      this.$nextTick(() => {
+        this.$refs.form?.resetFields();
+      });
+    },
+    edit(v) {
+      this.modalType = 1;
+      this.modalVisible = true;
+      this.modalTitle = "修改自提地址";
+      this.form.id = v.id;
+      this.form.address = v.address;
+      this.form.addressName = v.addressName;
+      this.form.mobile = v.mobile;
+      this.form.center = v.center;
+      this.form.longitude = v.center.split(",")[0];
+      this.form.latitude = v.center.split(",")[1];
+    },
+    handleSubmit() {
+      this.$refs.form.validate((valid) => {
+        if (valid) {
+          this.submitLoading = true;
+          if (this.modalType == 0) {
+            const params = { ...this.form };
+            delete params.id;
+            API_Shop.addShopAddress(params).then((res) => {
+              this.submitLoading = false;
               if (res.success) {
-                this.$Message.success("此自自提地址已删除");
-                this.init();
+                this.$Message.success("添加成功");
+                this.getDataList();
+                this.modalVisible = false;
+              }
+            });
+          } else {
+            API_Shop.editShopAddress(this.form.id, this.form).then((res) => {
+              this.submitLoading = false;
+              if (res.success) {
+                this.$Message.success("修改成功");
+                this.getDataList();
+                this.modalVisible = false;
               }
             });
           }
-        });
-      }
+        }
+      });
     },
-    mounted() {
-      this.init();
+    deleteSubmit(v) {
+      this.$Modal.confirm({
+        title: "确认删除",
+        content: "确认删除自提地址么？",
+        loading: true,
+        onOk: () => {
+          API_Shop.deleteShopAddress(v.id).then((res) => {
+            this.$Modal.remove();
+            if (res.success) {
+              this.$Message.success("此自自提地址已删除");
+              this.init();
+            }
+          });
+        },
+      });
     },
-  };
+  },
+  mounted() {
+    this.init();
+  },
+};
 </script>
-
+<style scoped>
+.link-text {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.op-split {
+  margin: 0 8px;
+  color: #dcdee2;
+}
+</style>

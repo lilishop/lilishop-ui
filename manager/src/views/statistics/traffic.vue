@@ -1,54 +1,43 @@
 <template>
   <div class="wrapper">
-    <Affix :offset-top="100">
-      <Card class="card fixed-bottom">
+    <el-affix :offset="100">
+      <el-card class="card fixed-bottom">
         <affixTime @selected="clickBreadcrumb" />
-
-      </Card>
-    </Affix>
-    <Card class="card">
+      </el-card>
+    </el-affix>
+    <el-card class="card">
       <div>
         <h4>流量概况</h4>
-
       </div>
       <div class="box">
         <div class="box-item">
-          <div>
-            访客数UV
-          </div>
-          <div>
-            {{uvs||0}}
-          </div>
+          <div>访客数UV</div>
+          <div>{{ uvs || 0 }}</div>
         </div>
-
         <div class="box-item">
-          <div>
-            浏览量PV
-          </div>
-          <div>
-            {{pvs||0}}
-          </div>
+          <div>浏览量PV</div>
+          <div>{{ pvs || 0 }}</div>
         </div>
-
       </div>
+    </el-card>
 
-    </Card>
-
-    <Card class="card">
+    <el-card class="card">
       <div>
         <h4>流量趋势</h4>
         <div id="orderChart"></div>
       </div>
-    </Card>
+    </el-card>
 
-    <Card class="card">
+    <el-card class="card">
       <div>
         <h4>会员流量报表</h4>
-        <Table class="table" stripe :columns="columns" :data="data"></Table>
-
+        <el-table class="table" stripe :data="data" style="width: 100%">
+          <el-table-column prop="date" label="日期" min-width="120" />
+          <el-table-column prop="pvNum" label="浏览量" min-width="120" />
+          <el-table-column prop="uvNum" label="访客数" min-width="120" />
+        </el-table>
       </div>
-    </Card>
-
+    </el-card>
   </div>
 </template>
 <script>
@@ -61,59 +50,20 @@ export default {
 
   data() {
     return {
-      uvs: 0, // 访客数
-      pvs: 0, // 浏览量
-      dateList: [
-        // 选择项
-        {
-          title: "今天",
-          selected: false,
-          value: "TODAY",
-        },
-        {
-          title: "昨天",
-          selected: false,
-          value: "YESTERDAY",
-        },
-        {
-          title: "过去7天",
-          selected: true,
-          value: "LAST_SEVEN",
-        },
-        {
-          title: "过去30天",
-          selected: false,
-          value: "LAST_THIRTY",
-        },
-      ],
-      orderChart: "", // 初始化图表
+      uvs: 0,
+      pvs: 0,
+      orderChart: "",
       params: {
-        // 请求参数
         searchType: "LAST_SEVEN",
         year: "",
         month: "",
       },
-      columns: [
-        {
-          key: "date",
-          title: "日期",
-        },
-        {
-          key: "pvNum",
-          title: "浏览量",
-        },
-        {
-          key: "uvNum",
-          title: "访客数",
-        },
-      ],
-
-      data: [], // 图表数据
+      data: [],
     };
   },
   watch: {
     params: {
-      handler(val) {
+      handler() {
         this.uvs = 0;
         this.pvs = 0;
         this.init();
@@ -122,10 +72,9 @@ export default {
     },
   },
   methods: {
-    // 订单图
     initChart() {
-      let uv = [];
-      let pv = [];
+      const uv = [];
+      const pv = [];
 
       this.data.forEach((item) => {
         uv.push({
@@ -142,9 +91,9 @@ export default {
         });
       });
 
-      let data = [...uv, ...pv];
+      const chartData = [...uv, ...pv];
 
-      this.orderChart.data(data);
+      this.orderChart.data(chartData);
       this.orderChart.scale({
         activeQuantity: {
           range: [0, 1],
@@ -173,19 +122,15 @@ export default {
           stroke: "#fff",
           lineWidth: 1,
         });
-       this.orderChart.area().position("date*pv").color("title").shape("smooth");
+      this.orderChart.area().position("date*pv").color("title").shape("smooth");
 
       this.orderChart.render();
     },
-    // 通过时间来筛选
-    clickBreadcrumb(item, index) {
-      let callback = JSON.parse(JSON.stringify(item));
-
-      this.params = callback;
+    clickBreadcrumb(item) {
+      this.params = JSON.parse(JSON.stringify(item));
     },
-    // 初始化数据
     init() {
-      this.orderChart ? this.orderChart.clear() : ''
+      this.orderChart ? this.orderChart.clear() : "";
       API_Member.getStatisticsList(this.params).then((res) => {
         if (res.result) {
           this.data = res.result;

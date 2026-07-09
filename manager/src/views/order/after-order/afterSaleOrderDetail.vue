@@ -1,6 +1,6 @@
 <template>
   <div class="search">
-    <Card>
+    <el-card>
       <div class="main-content">
         <div class="div-flow-left">
           <div class="div-form-default">
@@ -79,18 +79,10 @@
               <dt>是否同意</dt>
               <dd>
                 <div class="div-content">
-                  <RadioGroup
-                    type="button"
-                    button-style="solid"
-                    v-model="params.serviceStatus"
-                  >
-                    <Radio label="PASS">
-                      <span>同意</span>
-                    </Radio>
-                    <Radio label="REFUSE">
-                      <span>拒绝</span>
-                    </Radio>
-                  </RadioGroup>
+                  <el-radio-group v-model="params.serviceStatus">
+                    <el-radio-button value="PASS">同意</el-radio-button>
+                    <el-radio-button value="REFUSE">拒绝</el-radio-button>
+                  </el-radio-group>
                 </div>
               </dd>
             </dl>
@@ -103,13 +95,13 @@
             <dl>
               <dt>实际退款金额</dt>
               <dd>
-                <InputNumber :min="0" v-model="params.actualRefundPrice" style="width: 260px" />
+                <el-input-number :min="0" v-model="params.actualRefundPrice" style="width: 260px" />
               </dd>
             </dl>
             <dl>
               <dt>备注信息</dt>
               <dd>
-                <Input
+                <el-input
                   v-model="params.remark"
                   type="textarea"
                   maxlength="200"
@@ -122,14 +114,14 @@
             <dl>
               <dd>
                 <div style="text-align: right; width: 45%; margin-top: 10px">
-                  <Button
+                  <el-button
                     type="primary"
                     :loading="submitLoading"
                     @click="handleSubmit"
                     style="margin-left: 5px"
                   >
                     确定
-                  </Button>
+                  </el-button>
                 </div>
               </dd>
             </dl>
@@ -224,7 +216,7 @@
             <dl>
               <dt>备注信息</dt>
               <dd>
-                <Input
+                <el-input
                   v-model="refundPriceForm.remark"
                   type="textarea"
                   maxlength="200"
@@ -237,14 +229,14 @@
             <dl>
               <dt>操作</dt>
               <dd>
-                <Button
+                <el-button
                   type="primary"
                   :loading="submitLoading"
                   @click="refundPriceSubmit"
                   style="margin-left: 5px"
                 >
                   退款
-                </Button>
+                </el-button>
               </dd>
             </dl>
           </div>
@@ -283,25 +275,23 @@
             <dl>
               <dt>操作</dt>
               <dd>
-                <Button
-                  type="info"
+                <el-button
+                  type="primary"
+                  plain
                   :loading="submitLoading"
                   @click="logisticsSeller()"
                   style="margin-left: 5px"
                 >
                   查询物流
-                </Button>
+                </el-button>
               </dd>
             </dl>
           </div>
         </div>
       </div>
-    </Card>
+    </el-card>
     <!-- 查询物流 -->
-    <Modal v-model="logisticsModal" width="40">
-      <p slot="header">
-        <span>查询物流</span>
-      </p>
+    <el-dialog v-model="logisticsModal" title="查询物流" width="640px" append-to-body>
       <div class="layui-layer-wrap">
         <dl>
           <dt>售后单号：</dt>
@@ -335,16 +325,17 @@
           </ul>
         </div>
       </div>
-      <div slot="footer" style="text-align: right">
-        <Button @click="logisticsClose">取消</Button>
-      </div>
-    </Modal>
+      <template #footer>
+        <el-button @click="logisticsClose">取消</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import * as API_Order from "@/api/order";
 import vueQr from "vue-qr";
+import { ElMessage, ElMessageBox } from "element-plus";
 export default {
   components: {
     "vue-qr": vueQr,
@@ -432,11 +423,7 @@ export default {
               " "
             );
 
-          this.$set(
-            this.params,
-            "actualRefundPrice",
-            this.afterSaleInfo.applyRefundPrice
-          );
+          this.params.actualRefundPrice = this.afterSaleInfo.applyRefundPrice;
           // 如果显示物流信息，展示商家地址
           if (this.afterSaleInfo.showDelivery) {
             API_Order.storeAddress(this.sn).then((resu) => {
@@ -456,23 +443,17 @@ export default {
     //平台退款
     refundPriceSubmit() {
       if (this.refundPriceForm.remark == "") {
-        this.$Message.error("请输入退款备注");
+        ElMessage.error("请输入退款备注");
         return;
       }
-      this.$Modal.confirm({
-        title: "确认退款",
-        content: "请确认退款？",
-        loading: true,
-        onOk: () => {
-          API_Order.refundPrice(this.sn, this.refundPriceForm).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("收款成功");
-              this.getDetail();
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("请确认退款？", "确认退款", { type: "warning" }).then(() => {
+        API_Order.refundPrice(this.sn, this.refundPriceForm).then((res) => {
+          if (res.success) {
+            ElMessage.success("收款成功");
+            this.getDetail();
+          }
+        });
+      }).catch(() => {});
     },
     //查询物流
     logisticsSeller() {
@@ -490,17 +471,17 @@ export default {
     //回复
     handleSubmit() {
       if (this.params.remark == "") {
-        this.$Message.error("请输入备注信息");
+        ElMessage.error("请输入备注信息");
         return;
       }
       if (this.params.actualRefundPrice == "") {
-        this.$Message.error("请输入退款金额");
+        ElMessage.error("请输入退款金额");
         return;
       }
       API_Order.afterSaleSellerReview(this.sn, this.params).then((res) => {
         this.submitLoading = false;
         if (res.success) {
-          this.$Message.success("审核成功");
+          ElMessage.success("审核成功");
           this.params.remark = "";
           this.getDetail();
         }
@@ -532,9 +513,6 @@ export default {
 };
 </script>
 <style lang="scss">
-.ivu-col {
-  width: 100% !important;
-}
 .main-content {
   min-height: 600px;
   padding: 10px;

@@ -5,7 +5,7 @@
       <div class="shop-item">
         <div class="label-item">
           <span>订单来源</span>
-          <span>{{ res.clientType | clientTypeWay }}</span>
+          <span>{{ $filters.clientTypeWay(res.clientType) }}</span>
         </div>
         <div class="label-item">
           <span>订单状态</span>
@@ -67,17 +67,15 @@
           <div class="goods-title">
             <div>{{ item.name }}</div>
             <div>{{ "x" + item.num }}</div>
-            <div class="goods-price">{{ res.flowPrice | unitPrice("￥") }}</div>
+            <div class="goods-price">{{ $filters.unitPrice(res.flowPrice, "￥") }}</div>
           </div>
         </div>
       </div>
       <div class="count-price">
         <div class="label-item">
           <span>总价格</span>
-          <span class="flowPrice">
-            <priceColorScheme :value="row.flowPrice" :color="$mainColor"></priceColorScheme>
-
-          </span>
+          <span class="flowPrice" :style="{ color: $mainColor }">
+            {{ $filters.unitPrice(res.flowPrice, "￥") }}</span>
         </div>
       </div>
     </div>

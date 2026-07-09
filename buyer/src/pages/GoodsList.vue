@@ -19,23 +19,18 @@
                 :key="index"
                 @click="orderBy(item.en, index)"
               >
-                <span :class="{ 'goods-list-tool-active': index === sortIndex }"
-                  >{{ item.title }}<Icon type="ios-arrow-round-down"
-                /></span>
+                <span :class="{ 'goods-list-tool-active': index === sortIndex }">
+                  {{ item.title }}
+                  <el-icon><ArrowDown /></el-icon>
+                </span>
               </li>
               <li @click="orderBy('price', 5, 'up')" class="price-sort">
                 <span :class="{ 'goods-list-tool-active': 5 === sortIndex }">
                   价格
-                  <div>
-                    <Icon
-                      type="md-arrow-dropup"
-                      :class="{ 'price-color': sortPriceIndex == 'desc' }"
-                    />
-                    <Icon
-                      type="md-arrow-dropdown"
-                      :class="{ 'price-color': sortPriceIndex == 'asc' }"
-                    />
-                  </div>
+                  <span class="price-arrows">
+                    <el-icon :class="{ 'price-color': sortPriceIndex == 'desc' }"><ArrowUp /></el-icon>
+                    <el-icon :class="{ 'price-color': sortPriceIndex == 'asc' }"><ArrowDown /></el-icon>
+                  </span>
                 </span>
               </li>
             </ul>
@@ -51,79 +46,76 @@
               @click="goGoodsDetail(item.id, item.goodsId)"
             >
               <div class="goods-show-img">
-                <img width="220" height="220" :src="item.thumbnail" />
+                <img :src="item.thumbnail" />
               </div>
               <div class="goods-show-price">
                 <span>
-                  <span class="seckill-price text-danger">{{
-                    item.price | unitPrice("￥")
-                  }}</span>
+                  <span class="seckill-price text-danger">{{ $filters.unitPrice(item.price, "￥") }}</span>
                 </span>
               </div>
               <div class="goods-show-detail">
-                <Tag
+                <el-tag
                   v-if="item.salesModel === 'WHOLESALE'"
-                  class="goods-show-tag"
-                  color="purple"
+                  class="goods-show-tag goods-show-tag-wholesale"
                 >
                   批发
-                </Tag>
+                </el-tag>
                 <span>{{ item.goodsName }}</span>
               </div>
               <div class="goods-show-num">
-                已有<span>{{ item.commentNum || 0 }}</span
-                >人评价
+                已有<span>{{ item.commentNum || 0 }}</span>人评价
               </div>
               <div class="goods-show-seller">
-                <span class="text-bottom" style="color: #e4393c">{{
-                  item.storeName
-                }}</span>
+                <span
+                  class="text-bottom hover-pointer"
+                  style="color: #e4393c"
+                  @click.stop="goShopPage(item.storeId)"
+                >{{ item.storeName }}</span>
               </div>
 
               <div class="goods-show-right">
-                <Tag
-                  class="goods-show-tag"
-                  color="red"
+                <el-tag
+                  class="goods-show-tag goods-show-tag-self"
                   v-if="item.selfOperated"
                 >
                   自营
-                </Tag>
-                <Tag
-                  class="goods-show-tag"
-                  color="blue"
+                </el-tag>
+                <el-tag
+                  class="goods-show-tag goods-show-tag-physical"
                   v-if="item.goodsType === 'VIRTUAL_GOODS'"
                 >
                   虚拟
-                </Tag>
-                <Tag
-                  class="goods-show-tag"
-                  color="blue"
+                </el-tag>
+                <el-tag
+                  class="goods-show-tag goods-show-tag-physical"
                   v-else-if="item.goodsType === 'PHYSICAL_GOODS'"
                 >
                   实物
-                </Tag>
+                </el-tag>
               </div>
             </div>
           </div>
         </div>
       </div>
       <div class="goods-page">
-        <Page
-          show-total
-          show-sizer
-          @on-change="changePageNum"
-          @on-page-size-change="changePageSize"
+        <el-pagination
+          v-model:current-page="params.pageNumber"
+          v-model:page-size="params.pageSize"
+          @current-change="changePageNum"
+          @size-change="changePageSize"
           :total="total"
-          :page-size="params.pageSize"
-        ></Page>
+          layout="total, prev, pager, next, sizes"
+        ></el-pagination>
       </div>
     </div>
-    <Spin size="large" fix v-if="loading"></Spin>
+    <el-skeleton size="large" fix v-if="loading"></el-skeleton>
     <BaseFooter></BaseFooter>
   </div>
 </template>
 
 <script>
+import { Message } from "@/utils/message";
+import { ArrowDown, ArrowUp } from '@element-plus/icons-vue';
 import GoodsClassNav from "@/components/nav/GoodsClassNav";
 import * as apiGoods from "@/api/goods";
 export default {
@@ -209,6 +201,17 @@ export default {
       });
       window.open(routeUrl.href, "_blank");
     },
+    goShopPage(id) {
+      if (!id) {
+        Message.warning("店铺信息不存在");
+        return;
+      }
+      const routeUrl = this.$router.resolve({
+        path: "/merchant",
+        query: { id },
+      });
+      window.open(routeUrl.href, "_blank");
+    },
     // 分页 修改页码
     changePageNum(val) {
       this.params.pageNumber = val;
@@ -255,6 +258,8 @@ export default {
   },
   components: {
     GoodsClassNav,
+    ArrowDown,
+    ArrowUp,
   },
 };
 </script>
@@ -285,6 +290,40 @@ export default {
   padding: 0 3px;
 }
 
+.goods-show-tag-self {
+  --el-tag-bg-color: #fa2c19;
+  --el-tag-border-color: #fa2c19;
+  --el-tag-text-color: #fff;
+  background-color: #fa2c19;
+  border-color: #fa2c19;
+  color: #fff;
+
+  :deep(.el-tag__content) {
+    color: #fff;
+  }
+}
+
+.goods-show-tag-wholesale {
+  margin-right: 5px;
+  background-color: #f9f0ff;
+  border-color: #d3adf7;
+  color: #9254de;
+
+  :deep(.el-tag__content) {
+    color: #9254de;
+  }
+}
+
+.goods-show-tag-physical {
+  background-color: #e6f4ff;
+  border-color: #b3d8ff;
+  color: #409eff;
+
+  :deep(.el-tag__content) {
+    color: #409eff;
+  }
+}
+
 .goods-show-seller {
   // padding:3px 0;
   vertical-align: middle;
@@ -306,6 +345,8 @@ export default {
 .goods-show-right {
   display: flex;
   flex-direction: row;
+  align-items: center;
+  gap: 6px;
   margin-top: 5px;
 }
 
@@ -325,38 +366,40 @@ export default {
   background-color: #f1f1f1;
 }
 .goods-list-tool ul {
+  display: flex;
+  align-items: center;
+  height: 100%;
   padding-left: 15px;
   font-size: 12px;
-  margin-top: 10px;
-  &::after {
-    content: "";
-    display: block;
-    clear: left;
-  }
+  margin: 0;
+  list-style: none;
 
   .price-sort {
-    span {
-      display: inline-block;
-      vertical-align: middle;
-      width: 50px;
-      height: 22px;
-      position: relative;
-      line-height: 15px;
-      top: -2px;
-      left: 0;
-    }
-    span > div {
-      display: inline-block;
-      .ivu-icon {
-        font-size: 12px;
-        position: absolute;
-        &:nth-child(1) {
-          top: 1px;
-        }
-        &:nth-child(2) {
-          top: 7px;
+    .price-arrows {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+      padding: 0;
+      border: none;
+      margin: 0;
+      background: transparent;
+      line-height: 0;
+
+      .el-icon {
+        font-size: 8px;
+        line-height: 1;
+        height: 6px;
+
+        :deep(svg) {
+          width: 8px;
+          height: 8px;
         }
       }
+
       .price-color {
         color: #b3b3b3;
       }
@@ -365,28 +408,37 @@ export default {
 }
 .goods-list-tool li {
   cursor: pointer;
-  float: left;
 }
-.goods-list-tool span {
+.goods-list-tool li > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   padding: 3px 5px;
   border: 1px solid #ccc;
   margin-left: -1px;
   background-color: #fff;
+  line-height: 1;
+  white-space: nowrap;
+  box-sizing: border-box;
 }
-.goods-list-tool span:hover {
+.goods-list-tool li > span:hover {
   border-color: $theme_color;
   position: relative;
   text-decoration: none;
   z-index: 1;
 }
-.goods-list-tool .ivu-icon {
-  font-weight: bold;
-  font-size: 16px;
+.goods-list-tool li > span .el-icon {
+  font-size: 12px;
+  line-height: 1;
 }
 .goods-list-tool-active {
   color: #fff;
   border-left: 1px solid #ccc;
   background-color: $theme_color !important;
+
+  .price-color {
+    color: rgba(255, 255, 255, 0.65) !important;
+  }
 }
 
 /* ---------------商品栏结束------------------- */

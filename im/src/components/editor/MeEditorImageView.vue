@@ -33,10 +33,7 @@
 <script>
 export default {
   name: 'MeEditorImageView',
-  model: {
-    prop: 'show',
-    event: 'close',
-  },
+  emits: ['close', 'update:show', 'confirm'],
   props: {
     show: Boolean,
     file: File,
@@ -60,6 +57,7 @@ export default {
         return false
       }
 
+      this.$emit('update:show', false)
       this.$emit('close', false)
     },
     loadFile(file) {

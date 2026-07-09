@@ -14,7 +14,7 @@
                   <a class="goods_name">{{ item.goodsName }}</a>
                   <div style="display: flex;">
                     <div style="margin-top: 20px;">
-                      <span class='goods-price'>{{ item.price | unitPrice("￥") }}</span>
+                      <span class='goods-price'>{{ $filters.unitPrice(item.price, "￥") }}</span>
                       <div class="goods_store_button">
                        
                       </div>
@@ -42,7 +42,7 @@
                   <div class="order-items" v-for="(order,orderIndex) in item.orderItems" :key="orderIndex">
                       <img :src="order.image" alt="">
                       <span class="order-goods-name" @click="linkToOrders(item.sn)"> {{ order.name }}</span>
-                      <span class="price">{{order.goodsPrice | unitPrice("￥")}}</span>
+                      <span class="price">{{ $filters.unitPrice(order.goodsPrice, "￥") }}</span>
                   </div>
                   <!-- <img  :src="item.groupImages" alt=""> -->
                  
@@ -77,14 +77,9 @@
 </template>
 
 <script>
-import { Tag, button, Tabs, TabPane, InfiniteScroll } from 'element-ui'
 import { mapState, mapGetters } from "vuex";
-import { unitPrice } from '@/plugins/filters';
 
 export default {
-  directives: {
-    "infinite-scroll": InfiniteScroll,
-  },
   data () {
     return {
       noMoreList:{
@@ -310,7 +305,7 @@ export default {
   font-size:12px;
 }
 
-/deep/ .el-tabs__header {
+:deep(.el-tabs__header ) {
   position: absolute;
   width: 362px;
   height: 50px;
@@ -318,7 +313,7 @@ export default {
   z-index: 2;
   background: #ffffff;
 }
-/deep/ .el-tabs__nav.is-top {
+:deep(.el-tabs__nav.is-top ) {
   height: 50px;
 }
 
@@ -328,10 +323,10 @@ export default {
   align-items: center;
 }
 
-/deep/.el-tabs__content {
+:deep(.el-tabs__content ) {
   margin-top: 50px;
 }
-/deep/ .el-tabs{
+:deep(.el-tabs) {
   width: 100%;
 }
 
@@ -390,7 +385,7 @@ export default {
 //   height: calc(100vh - 110px);
 //   overflow-y: auto; 
 // }
-// /deep/.el-tab-pane {
+// :deep(.el-tab-pane ) {
 //   height: calc(100vh - 110px);
 //   overflow-y: auto;
 // }

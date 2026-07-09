@@ -4,40 +4,54 @@
       <div class="query-wrapper">
         <div class="query-item">
           <div>店铺名称</div>
-          <Input placeholder="请输入店铺名称" @on-clear="shopsData=[]; params.storeName=''; params.pageNumber =1; init()" @on-enter="()=>{shopsData=[]; params.pageNumber =1; init();}" icon="ios-search" clearable style="width: 150px"
-            v-model="params.storeName" />
+          <el-input
+            v-model="params.storeName"
+            placeholder="请输入店铺名称"
+            clearable
+            style="width: 150px"
+            @clear="resetSearch"
+            @keyup.enter="resetSearch"
+          />
         </div>
-
         <div class="query-item">
-          <Button type="primary" @click="shopsData=[];params.pageNumber =1; init();" icon="ios-search">搜索</Button>
+          <el-button type="primary" @click="resetSearch">搜索</el-button>
         </div>
       </div>
       <div>
-        <div class="wap-content-list" >
-          <div class="wap-content-item" @click="clickShop(item,index)" :class="{ active:selected == index }" v-for="(item, index) in shopsData" :key="index">
+        <div v-loading="loading" class="wap-content-list">
+          <div
+            v-for="(item, index) in shopsData"
+            :key="index"
+            class="wap-content-item"
+            :class="{ active: selected == index }"
+            @click="clickShop(item, index)"
+          >
             <div>
               <img class="shop-logo" :src="item.storeLogo" alt="" />
             </div>
             <div class="wap-content-desc">
               <div class="wap-content-desc-title">{{ item.storeName }}</div>
-
-              <div class="self-operated" :class="{'theme_color':item.selfOperated }">{{ item.selfOperated ? '自营' : '非自营' }}</div>
-              <div class="wap-sku" :class="{'theme_color':(item.storeDisable === 'OPEN' ? true : false) }">{{ item.storeDisable === 'OPEN' ? '开启中' : '未开启' }}</div>
+              <div class="self-operated" :class="{ theme_color: item.selfOperated }">
+                {{ item.selfOperated ? "自营" : "非自营" }}
+              </div>
+              <div
+                class="wap-sku"
+                :class="{ theme_color: item.storeDisable === 'OPEN' }"
+              >
+                {{ item.storeDisable === "OPEN" ? "开启中" : "未开启" }}
+              </div>
             </div>
           </div>
-          <Spin size="large" fix v-if="loading"></Spin>
         </div>
-        <Page
-          :total="total"
+        <el-pagination
           class="pageration"
-          @on-change="changePageSize"
-          :page-size="params.pageSize"
           size="small"
-          show-total
-          show-elevator
-
-        >
-        </Page>
+          layout="total, prev, pager, next, jumper"
+          :total="total"
+          :page-size="params.pageSize"
+          :current-page="params.pageNumber"
+          @current-change="changePageSize"
+        />
       </div>
     </div>
   </div>
@@ -47,25 +61,28 @@ import { getShopListData } from "@/api/shops.js";
 export default {
   data() {
     return {
-      loading: false, // 加载状态
-      total: "", // 总数
-      params: { // 请求参数
+      loading: false,
+      total: 0,
+      params: {
         pageNumber: 1,
         pageSize: 12,
         storeDisable: "OPEN",
         storeName: "",
       },
-      shopsData: [], // 店铺数据
-      selected: 9999999999, //设置一个不可能选中的index
+      shopsData: [],
+      selected: 9999999999,
     };
   },
-  watch: {},
-
   created() {
     this.init();
   },
   methods: {
-    changePageSize(v){
+    resetSearch() {
+      this.shopsData = [];
+      this.params.pageNumber = 1;
+      this.init();
+    },
+    changePageSize(v) {
       this.params.pageNumber = v;
       this.init();
     },
@@ -73,15 +90,10 @@ export default {
       this.loading = true;
       getShopListData(this.params).then((res) => {
         if (res.success) {
-          /**
-           * 解决数据请求中，滚动栏会一直上下跳动
-           */
           this.total = res.result.total;
-
           this.shopsData = res.result.records;
-
-          this.loading = false;
         }
+        this.loading = false;
       });
     },
     clickShop(val, i) {
@@ -105,15 +117,18 @@ export default {
   display: flex;
   flex-wrap: wrap;
   height: 340px;
+  min-height: 120px;
 }
-
 .shop-logo {
   object-fit: cover;
 }
-
 .active {
   background: url("../../../assets/selected.png") no-repeat;
   background-position: right;
   background-size: 10%;
+}
+.pageration {
+  margin-top: 12px;
+  justify-content: flex-end;
 }
 </style>

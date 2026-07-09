@@ -5,23 +5,23 @@
       <div class="nav-side">分类占位区</div>
       <div class="nav-content setup-content">
         <!-- 轮播图 -->
-        <Carousel autoplay>
-          <CarouselItem v-for="(item, index) in data.options.list" :key="index">
+        <el-carousel autoplay height="340px">
+          <el-carousel-item v-for="(item, index) in data.options.list" :key="index">
             <div style="overflow: hidden">
               <img :src="item.img" width="590" height="470" />
             </div>
-          </CarouselItem>
-        </Carousel>
+          </el-carousel-item>
+        </el-carousel>
         <div class="setup-box">
           <div>
-            <Button size="small" @click.stop="handleSelectModel">编辑</Button>
+            <el-button size="small" @click.stop="handleSelectModel">编辑</el-button>
           </div>
         </div>
       </div>
       <div class="nav-content1 setup-content">
         <!-- 轮播图 -->
-        <Carousel autoplay :autoplay-speed="5000">
-          <CarouselItem
+        <el-carousel autoplay :autoplay-speed="5000">
+          <el-carousel-item
             v-for="(item, index) in data.options.listRight"
             :key="index"
           >
@@ -34,26 +34,26 @@
             <div>
               <img :src="item[2].img" width="190" height="150" />
             </div>
-          </CarouselItem>
-        </Carousel>
+          </el-carousel-item>
+        </el-carousel>
         <div class="setup-box">
           <div>
-            <Button size="small" @click.stop="handleSelectModel">编辑</Button>
+            <el-button size="small" @click.stop="handleSelectModel">编辑</el-button>
           </div>
         </div>
       </div>
       <div class="nav-right">
         <div class="person-msg">
           <img :src="userInfo.face" v-if="userInfo.face" alt />
-          <Avatar icon="ios-person" class="mb_10" v-else size="80" />
+          <el-avatar class="mb_10" v-else :size="80" />
           <div>
-            Hi，{{ userInfo.nickName || "欢迎来到管理后台" | secrecyMobile }}
+            Hi，{{ userInfo.nickName || "欢迎来到管理后台"  }}
           </div>
           <div v-if="userInfo.id">
-            <Button type="error" shape="circle">会员中心</Button>
+            <el-button type="danger" shape="circle">会员中心</el-button>
           </div>
           <div v-else>
-            <Button type="error" shape="circle">请登录</Button>
+            <el-button type="danger" shape="circle">请登录</el-button>
           </div>
         </div>
         <div class="shop-msg">
@@ -74,16 +74,16 @@
       </div>
     </div>
     <!-- 左侧轮播装修 -->
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="快捷导航"
-      draggable
+      
       width="800"
-      :z-index="100"
-      :mask-closable="false"
-    >
+      
+      :close-on-click-modal="false"
+     append-to-body destroy-on-close>
       <div class="modal-tab-bar">
-        <Button type="primary" size="small" @click="handleAdd">添加轮播</Button>
+        <el-button type="primary" size="small" @click="handleAdd">添加轮播</el-button>
         &nbsp;
         <span class="ml_10">图片尺寸:{{ data.size }}</span>
         <span style="color: red" class="fz_12 ml_10">点击缩略图替换图片</span>
@@ -108,52 +108,52 @@
                 />
               </td>
               <td>
-                <Input
+                <el-input
                   class="outsideUrl"
                   v-model="item.url"
                   :disabled="!!item.type && item.type !== 'link'"
                 />
               </td>
               <td>
-                <Button type="info" size="small" @click="handleSelectLink(item)"
-                  >选择链接</Button
+                <el-button type="info" size="small" @click="handleSelectLink(item)"
+                  >选择链接</el-button
                 >&nbsp;
-                <Button
-                  type="error"
-                  ghost
+                <el-button
+                  type="danger"
+                  plain
                   size="small"
                   @click="handleDel(index)"
-                  >删除</Button
+                  >删除</el-button
                 >
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-    </Modal>
+    </el-dialog>
     <!-- 右侧轮播装修 -->
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="右侧装修"
-      draggable
+      
       width="800"
-      :z-index="100"
-      :mask-closable="false"
-    >
+      
+      :close-on-click-modal="false"
+     append-to-body destroy-on-close>
       <div class="modal-tab-bar">
-        <Button type="primary" size="small" @click="handleAddGroup"
-          >添加组</Button
+        <el-button type="primary" size="small" @click="handleAddGroup"
+          >添加组</el-button
         >
         &nbsp;
         <span class="ml_10">图片尺寸:{{ data.size }}</span>
         <span style="color: red" class="fz_12 ml_10">点击缩略图替换图片</span>
-        <Tabs
+        <el-tabs
           type="card"
           closable
-          @on-tab-remove="handleTabRemove"
+          @tab-remove="handleTabRemove"
           class="mt_10"
         >
-          <TabPane
+          <el-tab-pane
             :label="'图片组' + (gIndex + 1)"
             v-for="(group, gIndex) in data.options.listRight"
             :key="gIndex"
@@ -179,33 +179,33 @@
                     />
                   </td>
                   <td>
-                    <Input
+                    <el-input
                       class="outsideUrl"
                       v-model="item.url"
                       :disabled="!!item.type && item.type !== 'link'"
                     />
                   </td>
                   <td>
-                    <Button
+                    <el-button
                       type="info"
                       size="small"
                       @click="handleSelectLink(item)"
-                      >选择链接</Button
+                      >选择链接</el-button
                     >
                   </td>
                 </tr>
               </tbody>
             </table>
-          </TabPane>
-        </Tabs>
+          </el-tab-pane>
+        </el-tabs>
       </div>
-    </Modal>
+    </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
-    <Modal width="1200px" v-model="picModelFlag" footer-hide>
-      <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage" />
-    </Modal>
+    <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
+      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" :max-select="1" ref="ossManage" />
+    </el-dialog>
   </div>
 </template>
 
@@ -262,6 +262,7 @@ export default {
     callbackSelected(item) {
       // 选择图片回调
       this.picModelFlag = false;
+      if (!item?.url) return;
       this.selected.img = item.url;
     },
     // 删除图片
@@ -270,15 +271,19 @@ export default {
     },
     selectedLink(val) {
       // 选择链接回调
-      this.selected.url = this.$options.filters.formatLinkType(val);
+      this.selected.url = this.$filters.formatLinkType(val);
       this.selected.type =
         val.___type === "other" && val.url === "" ? "link" : "other";
     },
     // 打开选择图片modal
     handleSelectImg(item) {
       this.selected = item;
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
   },
 };
@@ -350,7 +355,7 @@ export default {
       margin-top: 10px;
     }
 
-    .ivu-btn-default {
+    .el-btn-default {
       color: $theme_color;
       border-color: $theme_color;
     }
@@ -363,18 +368,24 @@ export default {
     }
   }
   .shop-msg {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+
     div {
       width: 100%;
-      margin: 10px 27px;
+      margin: 10px 0;
+      text-align: center;
+
       span {
+        display: block;
         cursor: pointer;
         text-align: center;
         font-weight: bold;
-        margin-left: 5px;
+        margin-left: 0;
       }
       span:nth-child(1) {
         color: $theme_color;
-        margin-left: 0;
       }
       span:nth-child(2) {
         font-weight: normal;
@@ -383,13 +394,19 @@ export default {
         color: $theme_color;
       }
     }
+
     ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+
       li {
         cursor: pointer;
         margin: 5px 0;
         color: #999395;
-        width: 150px;
+        width: auto;
         font-size: 12px;
+        text-align: center;
         &:hover {
           color: $theme_color;
         }

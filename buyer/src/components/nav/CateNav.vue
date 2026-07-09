@@ -1,5 +1,5 @@
 <template>
-  <div class="cate-nav width_1200_auto" :class="{'fixed-show':useClass == 'fixed-show'}">
+  <div class="cate-nav" :class="{'fixed-show':useClass == 'fixed-show'}">
     <div class="nav-con" :class="{'background-white':useClass == 'background-white'}">
       <div
         class="all-categories hover-pointer"
@@ -49,8 +49,7 @@
                 @click="goGoodsList(second.id, second.parentId)"
                 class="nav-side-item"
                 v-if="secIndex < 2"
-                >{{ second.name }}</span
-              >
+                >{{ second.name }}</span>
             </span>
           </li>
         </ul>
@@ -69,8 +68,7 @@
               @click="goGoodsList(item.id,item.parentId)"
               v-if="index < 8"
               :key="index"
-              >{{ item.name }}<Icon type="ios-arrow-forward"
-            /></span>
+              >{{ item.name }}<el-icon><ArrowRight /></el-icon></span>
           </template>
         </div>
         <ul>
@@ -83,7 +81,7 @@
               class="detail-item-title"
               @click="goGoodsList(items.id, items.parentId)"
             >
-              {{ items.name }} <Icon type="ios-arrow-forward" />
+              {{ items.name }} <el-icon><ArrowRight /></el-icon>
               <span class="glyphicon glyphicon-menu-right"></span>
             </span>
             <div>
@@ -92,8 +90,7 @@
                 @click="goGoodsList(item.id, items.id, items.parentId)"
                 :key="subIndex"
                 class="detail-item"
-                >{{ item.name }}</span
-              >
+                >{{ item.name }}</span>
             </div>
           </li>
         </ul>
@@ -105,7 +102,9 @@
 <script>
 import { getCategory } from "@/api/goods";
 import storage from "@/plugins/storage.js";
+import { ArrowRight } from "@element-plus/icons-vue";
 export default {
+  components: { ArrowRight },
   name: "GoodsListNav",
   props: {
     showAlways: {
@@ -150,9 +149,8 @@ export default {
       // 导航列表
       if (storage.getItem("navList")) {
         return JSON.parse(storage.getItem("navList"));
-      } else {
-        return [];
       }
+      return { list: [] };
     },
   },
   methods: {
@@ -169,7 +167,7 @@ export default {
         return;
       }
       this.cateList = JSON.parse(localStorage.getItem("category"));
-      // this.$Message.info(cateList)
+      // Message.info(cateList)
       }
     },
     getCate() {
@@ -186,7 +184,7 @@ export default {
           // 存放分类信息
           localStorage.setItem("category", JSON.stringify(res.result));
         }
-      });
+      }).catch(() => {});
     },
     showDetail(index) {
       // 展示全部分类
@@ -243,8 +241,10 @@ export default {
 }
 .fixed-show{
   margin-top: 0 !important;
+  width: 100%;
   >.nav-con{
   >.all-categories{
+    width: 100%;
     align-items: center !important;
     height: 60px;
     display: inherit;
@@ -262,37 +262,45 @@ export default {
 }
 .cate-nav {
   position: relative;
-  margin: 14px auto 0 auto;
+  z-index: 5;
+  width: 100%;
+  margin: 14px 0 0;
+  box-sizing: border-box;
 }
 /** 商品分类 */
 .nav-con {
   height: 46px;
   margin: 0 auto;
   display: flex;
+  align-items: stretch;
   .all-categories {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    height: 46px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     padding-left: 37.4px;
     background: #FFFFFF;
     width: 263.2px;
-    padding-top: 15.4px;
-    line-height: 20px;
     border-bottom: none;
     font-size: 16.8px;
     font-weight: normal;
     color: #333333;
     letter-spacing: 0px;
+    box-sizing: border-box;
   }
   .nav-item {
-    width: 914px;
+    flex: 1;
+    min-width: 0;
     height: 46px;
     border-radius: 10px;
     background: #FFFFFF;
-    margin-left: 10px;
+    margin: 0 0 0 10px;
+    padding: 0;
     line-height: 46px;
     overflow: hidden;
     list-style: none;
-    // background-color: #eee;
     display: flex;
     li {
       float: left;
@@ -307,11 +315,11 @@ export default {
     }
   }
 }
-// 分类列表
+// 分类列表（浮层叠在轮播左列之上）
 .cate-list {
-  margin: 0 auto;
   position: absolute;
-
+  left: 0;
+  top: 46px;
   z-index: 1000;
 }
 
@@ -351,11 +359,14 @@ export default {
 .nav-side ul {
   width: 100%;
   list-style: none;
+  margin: 0;
+  padding: 0;
 }
 .nav-side li {
   padding: 0 0 16.2px 37.4px;
   font-size: 13px;
   line-height: 18px;
+  box-sizing: border-box;
 }
 .nav-side-item:hover {
   cursor: pointer;

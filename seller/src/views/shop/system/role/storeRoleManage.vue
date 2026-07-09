@@ -1,77 +1,150 @@
 <template>
   <div class="search">
-    <Card>
-      <Row class="operation">
-        <Button @click="addRole" type="primary">添加角色</Button>
-        <Button @click="delAll">批量删除</Button>
-      </Row>
-      <br>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" sortable="custom" @on-sort-change="changeSort" @on-selection-change="changeSelect"></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="pageNumber" :total="total" :page-size="pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total
-              show-elevator show-sizer></Page>
-      </Row>
-    </Card>
-
-    <!-- 编辑 -->
-    <Modal :title="modalTitle" v-model="roleModalVisible" :mask-closable="false" :width="500">
-      <Form ref="roleForm" :model="roleForm" :label-width="80" :rules="roleFormValidate">
-        <FormItem label="角色名称" prop="name">
-          <Input v-model="roleForm.name" />
-        </FormItem>
-        <FormItem label="备注" prop="description">
-          <Input v-model="roleForm.description" />
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="roleModalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="submitRole">提交
-        </Button>
+    <el-card>
+      <div class="operation padding-row">
+        <el-button type="primary" @click="addRole">添加角色</el-button>
+        <el-button @click="delAll">批量删除</el-button>
       </div>
-    </Modal>
-    <!-- 菜单权限 -->
-    <Modal :title="modalTitle" v-model="permModalVisible" :mask-closable="false" :width="500" :styles="{ top: '30px' }" class="permModal">
-      <div style="position: relative">
-        <Tree ref="tree" :data="permData" show-checkbox :render="renderContent">
-        </Tree>
-        <Spin size="large" fix v-if="treeLoading"></Spin>
-      </div>
-      <div slot="footer">
-        <Button type="text" @click="permModalVisible = false">取消</Button>
-        <Select v-model="openLevel" @on-change="changeOpen" style="width: 110px; text-align: left; margin-right: 10px">
-          <Option value="0">展开所有</Option>
-          <Option value="1">收合所有</Option>
-          <Option value="2">仅展开一级</Option>
-          <Option value="3">仅展开两级</Option>
-        </Select>
-        <Button type="primary" :loading="submitPermLoading" @click="submitPermEdit()">编辑
-        </Button>
-      </div>
-    </Modal>
 
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        style="width: 100%"
+        row-key="id"
+        @selection-change="changeSelect"
+        @sort-change="changeSort"
+      >
+        <el-table-column type="selection" width="60" align="center" />
+        <el-table-column prop="name" label="角色名称" min-width="150" />
+        <el-table-column prop="description" label="备注" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="createTime" label="创建时间" width="170" sortable="custom" />
+        <el-table-column prop="updateTime" label="更新时间" width="170" sortable="custom" />
+        <el-table-column prop="createBy" label="最后操作人" width="150" />
+        <el-table-column label="操作" width="230" align="center" fixed="right">
+          <template #default="{ row }">
+            <div v-if="row" class="ops">
+              <a class="link-text" @click="editPerm(row)">菜单权限</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="edit(row)">编辑</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="remove(row)">删除</a>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
 
-    <!-- 保存权限弹出选择权限 -->
-    <Modal width="800" v-model="selectIsSuperModel" title="选择菜单权限" :loading="superModelLoading" @on-ok="saveRole">
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="pageNumber"
+          v-model:page-size="pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
+
+    <el-dialog
+      v-model="roleModalVisible"
+      :title="modalTitle"
+      width="500px"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
+      <el-form ref="roleForm" :model="roleForm" label-width="80px" :rules="roleFormValidate">
+        <el-form-item label="角色名称" prop="name">
+          <el-input v-model="roleForm.name" />
+        </el-form-item>
+        <el-form-item label="备注" prop="description">
+          <el-input v-model="roleForm.description" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="roleModalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitRole">提交</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
+      v-model="permModalVisible"
+      :title="modalTitle"
+      width="500px"
+      :close-on-click-modal="false"
+      align-center
+      append-to-body
+      class="permModal"
+    >
+      <div v-loading="treeLoading" style="position: relative; max-height: 560px; overflow: auto">
+        <el-tree
+          ref="permTree"
+          :key="permTreeKey"
+          :data="permData"
+          :props="{ label: 'title', children: 'children', disabled: 'disabled' }"
+          node-key="id"
+          show-checkbox
+          :default-expand-all="openLevel === '0'"
+          :default-expanded-keys="permExpandedKeys"
+          :default-checked-keys="permCheckedKeys"
+        >
+          <template #default="{ data }">
+            <span>{{ data.title }}</span>
+            <el-tag
+              v-if="data.isSuper == 1 || data.isSuper == 0"
+              :type="data.isSuper == 1 ? 'danger' : 'info'"
+              size="small"
+              style="margin-left: 10px"
+            >
+              {{ data.isSuper == 1 ? "操作权限" : "查看权限" }}
+            </el-tag>
+          </template>
+        </el-tree>
+      </div>
+      <template #footer>
+        <el-button @click="permModalVisible = false">取消</el-button>
+        <el-select v-model="openLevel" style="width: 110px; margin-right: 10px" @change="changeOpen">
+          <el-option value="0" label="展开所有" />
+          <el-option value="1" label="收合所有" />
+          <el-option value="2" label="仅展开一级" />
+          <el-option value="3" label="仅展开两级" />
+        </el-select>
+        <el-button type="primary" :loading="submitPermLoading" @click="submitPermEdit()">编辑</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
+      v-model="selectIsSuperModel"
+      title="选择菜单权限"
+      width="800px"
+      append-to-body
+      align-center
+      :close-on-click-modal="false"
+      :z-index="3500"
+    >
       <div class="btns">
-        <Button type="primary" @click="setRole()" class="btn-item">一键选中·数据权限</Button>
-        <Button class="btn-item" @click="setRole('onlyView')">一键选中·查看权限</Button>
+        <el-button type="primary" class="btn-item" @click="setRole()">一键选中·数据权限</el-button>
+        <el-button class="btn-item" @click="setRole('onlyView')">一键选中·查看权限</el-button>
       </div>
       <div class="role-list">
         <div class="role-item" v-for="(item, index) in saveRoleWay" :key="index">
           <div class="title">{{ item.title }}</div>
           <div class="content">
-            <RadioGroup type="button" button-style="solid" v-model="item.isSuper">
-              <Radio :label="1">
-                <span>操作数据权限</span>
-              </Radio>
-              <Radio :label="0">
-                <span>查看权限</span>
-              </Radio>
-            </RadioGroup>
+            <el-radio-group v-model="item.isSuper">
+              <el-radio-button :value="1">操作数据权限</el-radio-button>
+              <el-radio-button :value="0">查看权限</el-radio-button>
+            </el-radio-group>
           </div>
         </div>
       </div>
-    </Modal>
+      <template #footer>
+        <el-button @click="selectIsSuperModel = false">取消</el-button>
+        <el-button type="primary" :loading="superModelLoading" @click="saveRole">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -87,248 +160,74 @@ import {
   saveRoleMenu,
 } from "@/api/index";
 import util from "@/libs/util.js";
+
 export default {
   name: "role-manage",
   data() {
     return {
-      superModelLoading: false, //保存权限弹出选择权限保存
-      selectIsSuperModel: false, //保存权限弹出选择权限
-      rolePermsWay: [], //查询角色权限集合
-      openLevel: "0", // 展开的级别
-      loading: true, // 加载状态
-      treeLoading: true, // 树加载
-      depTreeLoading: true, // 部门树加载
-      submitPermLoading: false, // 权限提交加载
-      submitDepLoading: false, // 部门提交加载
-      sortColumn: "", // 排序
-      sortType: "desc", // 排序类型
-      modalType: 0, // 0 添加 1 编辑
-      roleModalVisible: false, // 角色modal
-      permModalVisible: false, // 菜单权限modal
-      depModalVisible: false, // 部门modal
-      modalTitle: "", // modal标题
+      superModelLoading: false,
+      selectIsSuperModel: false,
+      rolePermsWay: [],
+      openLevel: "0",
+      loading: true,
+      treeLoading: true,
+      depTreeLoading: true,
+      submitPermLoading: false,
+      submitDepLoading: false,
+      sortColumn: "",
+      sortType: "desc",
+      modalType: 0,
+      roleModalVisible: false,
+      permModalVisible: false,
+      depModalVisible: false,
+      modalTitle: "",
       roleForm: {
-        // 角色表单
         name: "",
         description: "",
       },
       roleFormValidate: {
-        // 验证规则
-        name: [
-          { required: true, message: "角色名称不能为空", trigger: "blur" },
-        ],
+        name: [{ required: true, message: "角色名称不能为空", trigger: "blur" }],
       },
-      submitLoading: false, // 提交loading
-      selectList: [], // 已选列表
-      selectCount: 0, // 已选总数
-      columns: [
-        // 表头
-        {
-          type: "selection",
-          width: 60,
-          align: "center",
-        },
-        {
-          title: "角色名称",
-          key: "name",
-          minWidth: 150,
-        },
-        {
-          title: "备注",
-          key: "description",
-          minWidth: 150,
-          tooltip: true,
-        },
-        {
-          title: "创建时间",
-          key: "createTime",
-          width: 170,
-          sortable: true,
-          sortType: "desc",
-        },
-        {
-          title: "更新时间",
-          key: "updateTime",
-          width: 170,
-          sortable: true,
-        },
-        {
-          title: "最后操作人",
-          key: "createBy",
-          width: 150,
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          fixed: "right",
-          width: 230,
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.editPerm(params.row);
-                    },
-                  },
-                },
-                "菜单权限"
-              ),
-              h("span", { style: { margin: "0 8px", color: "#dcdee2" } }, "|"),
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.edit(params.row);
-                    },
-                  },
-                },
-                "编辑"
-              ),
-              h("span", { style: { margin: "0 8px", color: "#dcdee2" } }, "|"),
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.remove(params.row);
-                    },
-                  },
-                },
-                "删除"
-              ),
-            ]);
-          },
-        },
-      ],
-      data: [], // 角色数据
-      pageNumber: 1, // 页数
-      pageSize: 10, // 每页数量
-      total: 0, // 总数
-      permData: [], // 菜单权限数据
-      editRolePermId: "", // 编辑权限id
-      selectAllFlag: false, // 全选标识
-      depData: [], // 部门数据
-      dataType: 0, // 数据类型
-      editDepartments: [], // 编辑部门
-
-      saveRoleWay: [], //用户保存用户点击的菜单
+      submitLoading: false,
+      selectList: [],
+      selectCount: 0,
+      data: [],
+      pageNumber: 1,
+      pageSize: 20,
+      total: 0,
+      permData: [],
+      editRolePermId: "",
+      selectAllFlag: false,
+      depData: [],
+      dataType: 0,
+      editDepartments: [],
+      saveRoleWay: [],
+      permTreeKey: 0,
+      permCheckedKeys: [],
+      permExpandedKeys: [],
     };
   },
   methods: {
-    // 初始化数据
     init() {
       this.getRoleList();
-      // 获取所有菜单权限树
       this.getPermList();
     },
-    // 渲染部门前icon
-    renderContent(h, { root, node, data }) {
-      let icon = "";
-      if (data.level == 0) {
-        icon = "ios-navigate";
-      } else if (data.level == 1) {
-        icon = "md-list-box";
-      } else if (data.level == 2) {
-        icon = "md-list";
-      } else if (data.level == 3) {
-        icon = "md-radio-button-on";
-      } else {
-        icon = "md-radio-button-off";
-      }
-      return h(
-        "span",
-        {
-          style: {
-            display: "inline-block",
-            cursor: "pointer",
-          },
-        },
-        [
-          h("span", [
-            h("Icon", {
-              props: {
-                type: icon,
-                size: "16",
-              },
-              style: {
-                "margin-right": "8px",
-                "margin-bottom": "3px",
-              },
-            }),
-            h("span", data.title),
-            h(
-              "Tag",
-              {
-                props: {
-                  color:
-                    data.isSuper == 1
-                      ? "red"
-                      : data.isSuper == 0
-                      ? "default"
-                      : "default",
-                },
-                style: {
-                  "margin-left": "10px",
-                  display:
-                    data.isSuper == 1 || data.isSuper == 0
-                      ? "inline-block"
-                      : "none",
-                },
-              },
-              data.isSuper == 1
-                ? "操作权限"
-                : data.isSuper == 0
-                ? "查看权限"
-                : ""
-            ),
-          ]),
-        ]
-      );
-    },
-    // 分页 修改页码
-    changePage(v) {
-      this.pageNumber = v;
+    changePage() {
       this.getRoleList();
       this.clearSelectAll();
     },
-    // 分页 修改页数
-    changePageSize(v) {
+    changePageSize() {
       this.pageNumber = 1;
-      this.pageSize = v;
       this.getRoleList();
     },
-    // 变更排序方式
     changeSort(e) {
-      this.sortColumn = e.key;
-      this.sortType = e.order;
-      if (e.order == "normal") {
+      this.sortColumn = e.prop;
+      this.sortType = e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
+      if (!e.order) {
         this.sortType = "";
       }
       this.getRoleList();
     },
-
-    /**
-     * 设置权限
-     */
     setRole(val) {
       let enable;
       val == "onlyView" ? (enable = 0) : (enable = 1);
@@ -336,17 +235,13 @@ export default {
         item.isSuper = enable;
       });
     },
-
-    /**
-     * 查询所有角色
-     */
     getRoleList() {
       this.loading = true;
       let params = {
         pageNumber: this.pageNumber,
         pageSize: this.pageSize,
         sort: this.sortColumn,
-        order: this.sort,
+        order: this.sortType,
       };
       getRoleList(params).then((res) => {
         this.loading = false;
@@ -356,22 +251,16 @@ export default {
         }
       });
     },
-
-    /**
-     * 查询菜单
-     */
     getPermList() {
       this.treeLoading = true;
       getAllPermissionList().then((res) => {
         if (res.success) {
           this.deleteDisableNode(res.result);
           this.permData = res.result;
-          this.treeLoading = false;
         }
         this.treeLoading = false;
       });
     },
-    // 递归标记禁用节点
     deleteDisableNode(permData) {
       let that = this;
       permData.forEach(function (e) {
@@ -384,14 +273,11 @@ export default {
         }
       });
     },
-    // 提交
     submitRole() {
       this.$refs.roleForm.validate((valid) => {
         if (valid) {
           if (this.modalType == 0) {
-            // 添加
             this.submitLoading = true;
-
             addRole(this.roleForm).then((res) => {
               this.submitLoading = false;
               if (res.success) {
@@ -403,7 +289,6 @@ export default {
           } else {
             this.submitLoading = true;
             this.roleForm.roleId = this.roleForm.id;
-
             editRole(this.roleForm).then((res) => {
               this.submitLoading = false;
               if (res.success) {
@@ -416,23 +301,22 @@ export default {
         }
       });
     },
-
-    /**
-     * 点击添加按钮
-     */
     addRole() {
       this.modalType = 0;
       this.modalTitle = "添加角色";
-      this.$refs.roleForm.resetFields();
-      delete this.roleForm.id;
+      this.roleForm = {
+        name: "",
+        description: "",
+      };
       this.roleModalVisible = true;
+      this.$nextTick(() => {
+        this.$refs.roleForm?.clearValidate();
+      });
     },
-    // 编辑
     edit(v) {
       this.modalType = 1;
       this.modalTitle = "编辑角色";
-      this.$refs.roleForm.resetFields();
-      // 转换null为""
+      this.$refs.roleForm?.resetFields();
       for (let attr in v) {
         if (v[attr] == null) {
           v[attr] = "";
@@ -443,7 +327,6 @@ export default {
       this.roleForm = roleInfo;
       this.roleModalVisible = true;
     },
-    // 删除
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
@@ -460,16 +343,13 @@ export default {
         },
       });
     },
-    // 清除选中
     clearSelectAll() {
-      this.$refs.table.selectAll(false);
+      this.$refs.table?.clearSelection();
     },
-    // 选中回调
     changeSelect(e) {
       this.selectList = e;
       this.selectCount = e.length;
     },
-    // 批量删除
     delAll() {
       if (this.selectCount <= 0) {
         this.$Message.warning("您还未选择要删除的数据");
@@ -496,23 +376,17 @@ export default {
         },
       });
     },
-
-    // 菜单权限
     async editPerm(v) {
-
-      /**
-       * 点击菜单权限每次将赋值的isSuper数据给清空掉
-       */
       this.permData.map((item) => {
         item.children.length != 0
           ? item.children.map((child) => {
-            child.children.length != 0
-              ? child.children.map((kid) => {
-                delete kid.isSuper;
-              })
-              : "";
-            delete child.isSuper;
-          })
+              child.children.length != 0
+                ? child.children.map((kid) => {
+                    delete kid.isSuper;
+                  })
+                : "";
+              delete child.isSuper;
+            })
           : "";
         delete item.isSuper;
       });
@@ -523,98 +397,79 @@ export default {
       }
       this.editRolePermId = v.id;
       this.modalTitle = "分配 " + v.name + " 的菜单权限";
-      // 匹配勾选
       let rolePerms;
-      // 当前角色的菜单权限
       let res = await selectRoleMenu(v.id);
       if (res.result) {
         rolePerms = res.result;
         this.rolePermsWay = res.result;
       }
-      // 递归判断子节点是否可以选中
-      this.checkPermTree(this.permData, rolePerms);
+      this.permCheckedKeys = this.collectCheckedKeys(this.permData, rolePerms);
+      this.permExpandedKeys = this.computeExpandedKeys(this.openLevel);
+      this.permTreeKey += 1;
       this.permModalVisible = true;
     },
-    // 递归判断子节点
-    checkPermTree(permData, rolePerms) {
-      let that = this;
-
-      permData.forEach((p) => {
-        if (that.hasPerm(p, rolePerms) && p.status != -1) {
-          if (p.children && p.children.length === 0) {
-            this.$set(p, "checked", true);
+    collectCheckedKeys(permData, rolePerms) {
+      const keys = [];
+      const walk = (nodes) => {
+        nodes.forEach((p) => {
+          if (this.hasPerm(p, rolePerms) && p.status != -1) {
+            if (p.children && p.children.length === 0) {
+              keys.push(p.id);
+            }
           }
-        } else {
-          this.$set(p, "checked", false);
-        }
-        if (p.children && p.children.length > 0) {
-          that.checkPermTree(p.children, rolePerms);
-        }
-      });
+          if (p.children && p.children.length > 0) {
+            walk(p.children);
+          }
+        });
+      };
+      walk(permData);
+      return keys;
     },
-    // 判断角色拥有的权限节点勾选
     hasPerm(p, rolePerms) {
       if (!rolePerms) return false;
       let flag = false;
       for (let i = 0; i < rolePerms.length; i++) {
         if (p.id == rolePerms[i].menuId) {
-          this.$set(p, "isSuper", rolePerms[i].isSuper);
+          p.isSuper = rolePerms[i].isSuper;
           flag = true;
           break;
         }
       }
-      if (flag) {
-        return true;
-      }
-      return false;
+      return flag;
     },
-    // 递归全选节点
-    selectedTreeAll(permData, select) {
-      let that = this;
-      permData.forEach(function (e) {
-        e.checked = select;
-        if (e.children && e.children.length > 0) {
-          that.selectedTreeAll(e.children, select);
-        }
-      });
-    },
-    /**分配菜单权限 */
     submitPermEdit() {
       this.saveRoleWay = [];
-      this.selectIsSuperModel = true; //打开选择权限
-      let selectedNodes = this.$refs.tree.getCheckedAndIndeterminateNodes();
+      this.selectIsSuperModel = true;
+      const tree = this.$refs.permTree;
+      const selectedNodes = [
+        ...tree.getCheckedNodes(false, true),
+      ];
       let way = [];
       selectedNodes.forEach((e) => {
-
         let perm = {
           title: e.title,
-          isSuper: e.isSuper ? e.isSuper = 1 : e.isSuper = 0 || 0,
+          isSuper: e.isSuper ? (e.isSuper = 1) : (e.isSuper = 0) || 0,
           menuId: e.id,
           roleId: this.editRolePermId,
         };
         way.push(perm);
-        this.$set(this,'saveRoleWay',way)
-
+        this.saveRoleWay = way;
       });
-
     },
-
-    /**保存权限 */
     saveRole() {
       this.superModelLoading = true;
       saveRoleMenu(this.editRolePermId, this.saveRoleWay).then((res) => {
         this.superModelLoading = false;
         if (res.success) {
           this.$Message.success("操作成功");
-          // 标记重新获取菜单数据
           this.$store.commit("setAdded", false);
           util.initRouter(this);
           this.getRoleList();
           this.permModalVisible = false;
+          this.selectIsSuperModel = false;
         }
       });
     },
-    // 加载数据
     loadData(item, callback) {
       loadDepartment(item.id, { openDataFilter: false }).then((res) => {
         if (res.success) {
@@ -633,80 +488,30 @@ export default {
         }
       });
     },
-    // 判断展开子节点
-    expandCheckDep(v) {
-      this.checkDepTree(v.children, this.editDepartments);
-    },
-    // 判断子节点
-    checkDepTree(depData, roleDepIds) {
-      let that = this;
-      depData.forEach(function (p) {
-        if (that.hasDepPerm(p, roleDepIds)) {
-          p.checked = true;
-        } else {
-          p.checked = false;
-        }
-      });
-    },
-    // 树结构展开层级
-    changeOpen(v) {
-      if (v == "0") {
-        this.permData.forEach((e) => {
-          e.expand = true;
-          if (e.children && e.children.length > 0) {
-            e.children.forEach((c) => {
-              c.expand = true;
-              if (c.children && c.children.length > 0) {
-                c.children.forEach(function (b) {
-                  b.expand = true;
-                });
-              }
-            });
+    computeExpandedKeys(level) {
+      const keys = [];
+      const walk = (nodes, depth) => {
+        nodes.forEach((n) => {
+          if (level === "0") {
+            keys.push(n.id);
+          } else if (level === "2" && depth < 1) {
+            keys.push(n.id);
+          } else if (level === "3" && depth < 2) {
+            keys.push(n.id);
+          }
+          if (n.children && n.children.length) {
+            walk(n.children, depth + 1);
           }
         });
-      } else if (v == "1") {
-        this.permData.forEach((e) => {
-          e.expand = false;
-          if (e.children && e.children.length > 0) {
-            e.children.forEach((c) => {
-              c.expand = false;
-              if (c.children && c.children.length > 0) {
-                c.children.forEach(function (b) {
-                  b.expand = false;
-                });
-              }
-            });
-          }
-        });
-      } else if (v == "2") {
-        this.permData.forEach((e) => {
-          e.expand = true;
-          if (e.children && e.children.length > 0) {
-            e.children.forEach((c) => {
-              c.expand = false;
-              if (c.children && c.children.length > 0) {
-                c.children.forEach(function (b) {
-                  b.expand = false;
-                });
-              }
-            });
-          }
-        });
-      } else if (v == "3") {
-        this.permData.forEach((e) => {
-          e.expand = true;
-          if (e.children && e.children.length > 0) {
-            e.children.forEach((c) => {
-              c.expand = true;
-              if (c.children && c.children.length > 0) {
-                c.children.forEach(function (b) {
-                  b.expand = false;
-                });
-              }
-            });
-          }
-        });
+      };
+      if (level !== "1") {
+        walk(this.permData, 0);
       }
+      return keys;
+    },
+    changeOpen(v) {
+      this.permExpandedKeys = this.computeExpandedKeys(v);
+      this.permTreeKey += 1;
     },
   },
   mounted() {
@@ -742,18 +547,15 @@ export default {
 .btn-item {
   margin-right: 20px;
 }
-.permModal {
-  .ivu-modal-body {
-    max-height: 560px;
-    overflow: auto;
-  }
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
 }
-
-.depModal {
-  .ivu-modal-body {
-    max-height: 500px;
-    overflow: auto;
-  }
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
 }
 .tips {
   font-size: 12px;

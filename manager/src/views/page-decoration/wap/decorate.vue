@@ -3,10 +3,10 @@
     <div class="decorate-title">
       {{ res.name }}
 
-      <Button
+      <el-button
         style="margin-left: 20px"
         size="small"
-        ghost
+        plain
         v-if="
           res.type == 'tpl_ad_list' ||
           res.type == 'tpl_activity_list' ||
@@ -14,21 +14,25 @@
         "
         type="primary"
         @click="selectStyle()"
-        >选择风格</Button
+        >选择风格</el-button
       >
-      <Button
+      <el-button
         style="margin-left: 20px"
         size="small"
-        ghost
+        plain
         v-if="res.type == 'promotions' || res.drawerPromotions"
         type="primary"
         @click="selectPromotions()"
-        >选择促销活动</Button
+        >选择促销活动</el-button
       >
     </div>
-    <Alert type="warning" v-if="res.name == '商品分类'"
-      >装修提示
-      <template slot="desc">
+    <el-alert
+      v-if="res.name == '商品分类'"
+      type="warning"
+      title="装修提示"
+      :closable="false"
+    >
+      <template #default>
         <div style="color: red">
           如果当前装修模块不是最后一项模块且模块内容绑定为分类，则会默认展示绑定分类的100条商品信息。
         </div>
@@ -39,44 +43,53 @@
           如果当前装修内容不为分类，则会展示当前商品的静态信息。
         </div>
       </template>
-    </Alert>
+    </el-alert>
 
     <!-- 右侧显示抽屉 -->
-    <Drawer title="选择风格" :closable="false" width="400" v-model="styleFlag">
-      <div class="drawer">
-        <div
-          class="drawer-item"
-          @click="clickDrawer(item, index)"
-          v-for="(item, index) in modelData"
-          :key="index"
-          v-if="item.drawer"
-        >
-          <img src alt />
-          <span>{{ item.name }}</span>
-        </div>
-      </div>
-    </Drawer>
-
-    <!-- 右侧显示抽屉 -->
-    <Drawer
-      title="选择促销活动(最多只能展示两个活动)"
-      :closable="false"
-      width="400"
-      v-model="promotionsFlag"
+    <el-drawer
+      title="选择风格"
+      :show-close="false"
+      size="400px"
+      v-model="styleFlag"
+      append-to-body
+      destroy-on-close
     >
       <div class="drawer">
-        <div
-          class="drawer-item"
-          @click="clickDrawer(item, index)"
-          v-for="(item, index) in modelData"
-          :key="index"
-          v-if="item.drawerPromotions"
-        >
-          <img src alt />
-          <span>{{ item.name }}</span>
-        </div>
+        <template v-for="(item, index) in modelData" :key="index">
+          <div
+            v-if="item.drawer"
+            class="drawer-item"
+            @click="clickDrawer(item, index)"
+          >
+            <img src alt />
+            <span>{{ item.name }}</span>
+          </div>
+        </template>
       </div>
-    </Drawer>
+    </el-drawer>
+
+    <!-- 右侧显示抽屉 -->
+    <el-drawer
+      title="选择促销活动(最多只能展示两个活动)"
+      :show-close="false"
+      size="400px"
+      v-model="promotionsFlag"
+      append-to-body
+      destroy-on-close
+    >
+      <div class="drawer">
+        <template v-for="(item, index) in modelData" :key="index">
+          <div
+            v-if="item.drawerPromotions"
+            class="drawer-item"
+            @click="clickDrawer(item, index)"
+          >
+            <img src alt />
+            <span>{{ item.name }}</span>
+          </div>
+        </template>
+      </div>
+    </el-drawer>
 
     <!-- 卡片集合 -->
     <div
@@ -94,34 +107,36 @@
         v-for="(item, index) in res.options.list"
         :key="index"
       >
-        <div class="decorate-item-title">
+        <div class="decorate-item-title" v-if="res.type != 'video'">
           <div>卡片</div>
-          <Icon
-            @click="closeDecorate(index)"
+          <el-icon
             v-if="res.close || res.type == 'promotionDetail'"
-            size="20"
+            @click="closeDecorate(index)"
+            :size="20"
             color="#e1251b"
-            type="md-close-circle"
-          />
+            class="close-icon"
+          >
+            <CircleClose />
+          </el-icon>
         </div>
 
         <div class="decorate-item-box">
+          <template v-if="item.titleWay">
           <div
             class="decorate-border"
-            v-if="item.titleWay"
             v-for="(title_item, title_index) in item.titleWay"
             :key="title_index"
           >
             <div class="decorate-view">
               <div class="decorate-view-title">标题{{ title_index + 1 }}</div>
               <div>
-                <Input v-model="title_item.title" />
+                <el-input v-model="title_item.title" />
               </div>
             </div>
             <div class="decorate-view">
               <div class="decorate-view-title">描述</div>
               <div>
-                <Input v-model="title_item.desc" />
+                <el-input v-model="title_item.desc" />
               </div>
             </div>
             <div class="decorate-view">
@@ -130,26 +145,24 @@
                 <div v-if="res.options.list[0].listWay.length != 0">
                   <!-- 绑定商品选择器回调已选择的商品 -->
 
+                  <template
+                    v-for="(bindGoods, bindGoodsIndex) in res.options.list[0].listWay"
+                    :key="bindGoodsIndex"
+                  >
                   <div
                     v-if="
                       title_item.___index == bindGoods.___index ||
                       title_item.title == bindGoods.type
                     "
-                    v-for="(bindGoods, bindGoodsIndex) in res.options.list[0]
-                      .listWay"
-                    :key="bindGoodsIndex"
                     class="title-item wes-2"
                   >
-                    <Tooltip max-width="200" placement="left">
-                      <div slot="content" class="title-tooltip">
-                        {{ bindGoods.title }}
-                      </div>
+                    <el-tooltip placement="left" :content="bindGoods.title">
                       <div class="title-goodsName">
                         {{ bindGoods.title }}
                       </div>
-                    </Tooltip>
+                    </el-tooltip>
                     <div class="title-btn">
-                      <Button
+                      <el-button
                         @click="
                           slotGoods(
                             res.options.list[0].listWay,
@@ -160,10 +173,11 @@
                         "
                         style="margin-right: 10px"
                         size="small"
-                        >上移</Button
+                        >上移</el-button
                       >
                     </div>
                   </div>
+                  </template>
                 </div>
                 <!-- 显示绑定分类 -->
                 <div v-if="title_item.bindCategory">
@@ -172,31 +186,31 @@
               </div>
 
               <div class="decorate-view-btn">
-                <Button
+                <el-button
                   @click="bindGoodsId(title_item, title_index)"
                   size="small"
-                  >选择商品</Button
+                  >选择商品</el-button
                 >
-                <Button
+                <el-button
                   @click="bindGoodsCategory(title_index)"
                   size="small"
-                  style="margin-top: 20px"
-                  >选择分类</Button
+                  >选择分类</el-button
                 >
               </div>
             </div>
           </div>
+          </template>
           <div class="decorate-view" v-if="res.type == 'carousel'">
             <div class="decorate-view-title">
-              <Button
+              <el-button
                 @click="slotBanner(res, item, index, 'up')"
                 style="margin-right: 10px"
                 size="small"
-                >上移</Button
-              ><Button
+                >上移</el-button
+              ><el-button
                 @click="slotBanner(res, item, index, 'down')"
                 size="small"
-                >下移</Button
+                >下移</el-button
               >
             </div>
           </div>
@@ -212,12 +226,12 @@
               </div>
             </div>
             <div class="selectBtn">
-              <Button
+              <el-button
                 size="small"
                 @click="handleClickFile(item, index)"
-                ghost
+                plain
                 type="primary"
-                >选择照片</Button
+                >选择照片</el-button
               >
             </div>
           </div>
@@ -233,7 +247,7 @@
                 @click="changeTextAlign('left')"
               >
                 <img
-                  :src="require('@/assets/align-text-left.png')"
+                  :src="alignTextLeft"
                   class="align-text"
                   alt=""
                 />
@@ -244,7 +258,7 @@
                 @click="changeTextAlign('center')"
               >
                 <img
-                  :src="require('@/assets/align-text-center.png')"
+                  :src="alignTextCenter"
                   class="align-text"
                   alt=""
                 />
@@ -255,7 +269,7 @@
                 @click="changeTextAlign('right')"
               >
                 <img
-                  :src="require('@/assets/align-text-right.png')"
+                  :src="alignTextRight"
                   class="align-text"
                   alt=""
                 />
@@ -274,8 +288,8 @@
           >
             <div class="decorate-view-title">背景颜色</div>
             <div class="decorate-view">
-              <ColorPicker v-model="item.bk_color" />
-              <Input v-model="item.bk_color" />
+              <el-color-picker v-model="item.bk_color" />
+              <el-input v-model="item.bk_color" />
             </div>
           </div>
           <div
@@ -284,15 +298,15 @@
           >
             <div class="decorate-view-title">方向</div>
             <div class="decorate-view">
-              <Select
+              <el-select
                 style="width: 200px"
-                @on-change="changeDirection($event, item)"
+                @change="changeDirection($event, item)"
                 v-model="item.direction"
               >
                 {{ item.direction }}
-                <Option label="横向" value="horizontal"></Option>
-                <Option label="纵向" value="vertical"></Option>
-              </Select>
+                <el-option label="横向" value="horizontal"></el-option>
+                <el-option label="纵向" value="vertical"></el-option>
+              </el-select>
             </div>
           </div>
 
@@ -303,7 +317,7 @@
           >
             <div class="decorate-view-title">菜单标题</div>
             <div>
-              <Input v-model="item.title" style="width: 200px" />
+              <el-input v-model="item.title" style="width: 200px" />
             </div>
           </div>
           <div
@@ -316,8 +330,8 @@
           >
             <div class="decorate-view-title">标题颜色</div>
             <div class="decorate-view">
-              <ColorPicker v-model="item.color" />
-              <Input v-model="item.color" />
+              <el-color-picker v-model="item.color" />
+              <el-input v-model="item.color" />
             </div>
           </div>
           <!-- 填写小标题 -->
@@ -327,7 +341,7 @@
           >
             <div class="decorate-view-title">小标题</div>
             <div>
-              <Input v-model="item.title1" style="width: 200px" />
+              <el-input v-model="item.title1" style="width: 200px" />
             </div>
           </div>
           <div
@@ -336,8 +350,8 @@
           >
             <div class="decorate-view-title">小标题颜色</div>
             <div class="decorate-view">
-              <ColorPicker v-model="item.color1" />
-              <Input v-model="item.color1" />
+              <el-color-picker v-model="item.color1" />
+              <el-input v-model="item.color1" />
             </div>
           </div>
           <div
@@ -351,15 +365,20 @@
                 :key="tindex"
                 class="decorate-notice"
               >
-                <Input v-model="t.context" style="width: 200px" />
-                <Icon
-                  @click="removeNotice(tindex)"
-                  size="16"
-                  type="md-close-circle"
-                />
+                <el-input v-model="t.context" style="width: 200px" />
+                <el-icon @click="removeNotice(tindex)" :size="16" color="#e1251b">
+                  <CircleClose />
+                </el-icon>
               </div>
             </div>
           </div>
+
+          <!-- 视频楼层配置 -->
+          <video-config
+            v-if="res.type == 'video'"
+            :item="item"
+            @select-file="(field) => handleClickFile(item, index, field)"
+          />
 
           <!-- 填写链接 -->
 
@@ -367,10 +386,10 @@
             <div class="decorate-view-title">选择模式</div>
 
             <div>
-              <RadioGroup v-model="item.model" type="button">
-                <Radio value="link" label="link">链接</Radio>
-                <Radio value="hotzone" label="hotzone">热区</Radio>
-              </RadioGroup>
+              <el-radio-group v-model="item.model">
+                <el-radio value="link">链接</el-radio>
+                <el-radio value="hotzone">热区</el-radio>
+              </el-radio-group>
             </div>
           </div>
 
@@ -421,8 +440,7 @@
                     满减
                   </span>
                   <span v-if="item.url.___promotion == 'PINTUAN'"> 拼团 </span>
-                  {{ item.url.title || item.url.goodsName }}
-                </span>
+                  {{ item.url.title || item.url.goodsName }}</span>
                 <!-- 当选择完活动之后的其他回调 -->
                 <span v-if="item.url.___type == 'pages'">
                   {{ item.url.title }}</span
@@ -430,13 +448,13 @@
               </span>
             </div>
             <div>
-              <Button
-                ghost
+              <el-button
+                plain
                 size="small"
                 type="primary"
                 @click="clickLink(item, index, res)"
               >
-                {{ item.model === "hotzone" ? "绘制热区" : "选择链接" }}</Button
+                {{ item.model === "hotzone" ? "绘制热区" : "选择链接" }}</el-button
               >
             </div>
           </div>
@@ -451,7 +469,7 @@
           >
             <div class="decorate-view-title">外部链接</div>
             <div>
-              <Input v-model="item.url.url" style="width: 200px" />
+              <el-input v-model="item.url.url" style="width: 200px" />
             </div>
           </div>
 
@@ -468,7 +486,7 @@
       </div>
     </div>
 
-    <Button
+    <el-button
       v-if="
         res.type != 'tpl_ad_list' &&
         res.type != 'tpl_activity_list' &&
@@ -477,8 +495,8 @@
       "
       type="primary"
       @click="addDecorate(res.type, res)"
-      ghost
-      >添加</Button
+      plain
+      >添加</el-button
     >
 
     <liliDialog
@@ -487,34 +505,62 @@
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
 
-    <Modal width="800px" title="选择分类" v-model="enableSelectCategory">
+    <el-dialog
+      width="800px"
+      title="选择分类"
+      v-model="enableSelectCategory"
+      append-to-body
+      destroy-on-close
+      :close-on-click-modal="false"
+      @close="handleCancelCategoryModal"
+    >
       <categoryTemplate
         v-if="enableSelectCategory"
-        @selected="confirmCategory"
+        @selected="onCategorySelected"
       />
-    </Modal>
+      <template #footer>
+        <el-button @click="handleCancelCategoryModal">取消</el-button>
+        <el-button type="primary" @click="handleConfirmCategoryModal">确定</el-button>
+      </template>
+    </el-dialog>
 
     <hotzone ref="hotzone" @changeZone="changeZone"></hotzone>
 
-    <Modal width="1200px" v-model="picModelFlag">
-      <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage" />
-    </Modal>
+    <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
+      <ossManage
+        @callback="callbackSelected"
+        :is-component="true"
+        :initialize="picModelFlag"
+        :max-select="1"
+        ref="ossManage"
+      />
+    </el-dialog>
   </div>
 </template>
 <script>
+import { CircleClose } from "@element-plus/icons-vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import { modelData } from "./config";
 import hotzone from "@/components/hotzone";
-import ways from "@/components/lili-dialog/wap.js"; // 选择链接的类型
-import categoryTemplate from "@/components/lili-dialog/template/category"; // 选择链接的类型
+import ways from "@/components/lili-dialog/wap.js";
+import categoryTemplate from "@/components/lili-dialog/template/category";
+import VideoConfig from "./video-config";
+import alignTextLeft from "@/assets/align-text-left.png";
+import alignTextCenter from "@/assets/align-text-center.png";
+import alignTextRight from "@/assets/align-text-right.png";
 export default {
   components: {
     ossManage,
     hotzone,
     categoryTemplate,
+    CircleClose,
+    VideoConfig,
   },
   data() {
     return {
+      alignTextLeft,
+      alignTextCenter,
+      alignTextRight,
       ways, // 选择链接的类型
       picModelFlag: false, //图片选择器
       linkType: "goods", // dialog弹窗口类型
@@ -529,7 +575,9 @@ export default {
       selectedLinks: "", // 已选链接
       modelList: "", // 装修列表
       enableSelectCategory: false, //商品是否绑定分类
+      pendingCategory: null, // 选择分类弹窗草稿
       goodsSelectedIndex: 0, //绑定商品分类的索引
+      pictureField: "img", //图片选择器回写的字段
     };
   },
   watch: {
@@ -540,7 +588,21 @@ export default {
   },
   props: ["res"],
   methods: {
-    // 选择分类
+    // 选择分类（弹窗内暂存，确定后写回）
+    onCategorySelected(val) {
+      this.pendingCategory = val;
+    },
+    handleCancelCategoryModal() {
+      this.pendingCategory = null;
+      this.enableSelectCategory = false;
+    },
+    handleConfirmCategoryModal() {
+      if (this.pendingCategory?.length) {
+        this.confirmCategory(this.pendingCategory);
+      }
+      this.pendingCategory = null;
+      this.enableSelectCategory = false;
+    },
     confirmCategory(val) {
       let data = {
         ...this.res.options.list[0].titleWay[this.goodsSelectedIndex],
@@ -592,7 +654,7 @@ export default {
         list = [...newList, ...newVal];
       }
 
-      this.$set(this.res.options.list[0], "listWay", list);
+      this.res.options.list[0]["listWay"] = list;
     },
 
     // 轮播图排序
@@ -674,6 +736,7 @@ export default {
     },
     // 绑定分类
     bindGoodsCategory(index, key) {
+      this.pendingCategory = null;
       this.enableSelectCategory = true;
       this.goodsSelectedIndex = index;
     },
@@ -681,6 +744,7 @@ export default {
     clickDrawer(item, index) {
       this.$emit("handleDrawer", item);
       this.styleFlag = false;
+      this.promotionsFlag = false;
     },
     // 打开图片选择器
     liliDialogFlag(flag) {
@@ -700,8 +764,7 @@ export default {
         if (!val.zoneInfo) {
           val.zoneInfo = [];
         }
-        this.$refs.hotzone.flag = true;
-        this.$refs.hotzone.res = val;
+        this.$refs.hotzone.open(val);
       } else {
         this.liliDialogFlag(false);
       }
@@ -758,13 +821,32 @@ export default {
     // 图片选择器回显
     callbackSelected(val) {
       this.picModelFlag = false;
-      this.selectedGoods.img = val.url;
+      if (!val?.url) return;
+      if (this.pictureField === "bgImage") {
+        if (!this.selectedGoods.style) {
+          this.selectedGoods.style = {};
+        }
+        this.selectedGoods.style.bgImage = val.url;
+        return;
+      }
+      this.selectedGoods[this.pictureField] = val.url;
     },
     // 点击选择图片
-    handleClickFile(item, index) {
-      this.$refs.ossManage.selectImage = true;
+    handleClickFile(item, index, field = "img") {
+      this.pictureField = field;
       this.selectedGoods = item;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        const oss = this.$refs.ossManage;
+        if (!oss) return;
+        oss.selectImage = true;
+        if (field === "videoUrl") {
+          oss.fileType = "video";
+        } else {
+          oss.fileType = "pic";
+        }
+        oss.changeFileType();
+      });
     },
     removeNotice(index) {
       this.$nextTick(() => {

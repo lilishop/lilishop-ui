@@ -1,6 +1,6 @@
 import Main from "@/views/Main.vue";
+import config from "@/config/index";
 
-const config = require('@/config/index')
 // 不作为Main组件的子页面展示的页面单独写，如下
 export const loginRouter = {
   path: "/login",
@@ -314,6 +314,18 @@ export const otherRouter = {
       component: () => import("@/views/promotions/full-discount/full-discount-detail.vue")
     },
     {
+      path: "promotions/flash-discount",
+      title: "限时直降",
+      name: "flash-discount",
+      component: () => import("@/views/promotions/flash-discount/flash-discount.vue")
+    },
+    {
+      path: "promotions/nth-item-discount",
+      title: "第N件优惠",
+      name: "nth-item-discount",
+      component: () => import("@/views/promotions/nth-item-discount/nth-item-discount.vue")
+    },
+    {
       path: "promotions/seckill/manager-seckill-add",
       title: "编辑秒杀活动",
       name: "manager-seckill-add",
@@ -338,16 +350,82 @@ export const otherRouter = {
       component: () => import("@/views/page-decoration/wap/main.vue")
     },
     {
+      path: "/floorList/theme-setting",
+      title: "主题色设置",
+      name: "theme-setting",
+      component: () => import("@/views/page-decoration/theme-setting.vue")
+    },
+    {
       path: "add-sms-sign",
       title: "短信签名",
       name: "add-sms-sign",
       component: () => import("@/views/sys/message/smsSign.vue")
     },
     {
+      path: "live-add",
+      title: "创建直播",
+      name: "live-add",
+      component: () => import("@/views/live/add.vue")
+    },
+    {
+      path: "live-edit",
+      title: "编辑直播",
+      name: "live-edit",
+      component: () => import("@/views/live/edit.vue")
+    },
+    {
+      path: "live-manage-detail",
+      title: "直播详情",
+      name: "live-manage-detail",
+      component: () => import("@/views/live/detail.vue")
+    },
+    {
+      path: "live-control-panel",
+      title: "直播中控台",
+      name: "live-control-panel",
+      component: () => import("@/views/live/control-panel.vue")
+    },
+    {
       path: "live-detail",
       title: "查看直播",
       name: "live-detail",
       component: () => import("@/views/promotions/live/live-detail.vue")
+    },
+    {
+      path: "finance-platform-report",
+      title: "平台经营报表",
+      name: "finance-platform-report",
+      component: () => import("@/views/finance/platform-report.vue")
+    },
+    {
+      path: "finance-store-settlement",
+      title: "店铺结算汇总",
+      name: "finance-store-settlement",
+      component: () => import("@/views/finance/store-settlement.vue")
+    },
+    {
+      path: "finance-payment-method",
+      title: "支付方式汇总",
+      name: "finance-payment-method",
+      component: () => import("@/views/finance/payment-method.vue")
+    },
+    {
+      path: "finance-settlement-ledger",
+      title: "结算台账",
+      name: "finance-settlement-ledger",
+      component: () => import("@/views/finance/settlement-ledger.vue")
+    },
+    {
+      path: "finance-refund-log",
+      title: "退款流水",
+      name: "finance-refund-log",
+      component: () => import("@/views/finance/refundLog.vue")
+    },
+    {
+      path: "finance-wallet-log",
+      title: "钱包流水",
+      name: "finance-wallet-log",
+      component: () => import("@/views/finance/walletLog.vue")
     }
   ]
 };

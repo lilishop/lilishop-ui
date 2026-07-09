@@ -89,7 +89,7 @@
                           </el-tooltip>
                         </div>
                         <div class="price">
-                          <span>{{ item.text.price | unitPrice('￥') }}</span>
+                          <span>{{ $filters.unitPrice(item.text.price, '￥') }}</span>
                         </div>
                       </div>
                     </div>
@@ -111,14 +111,14 @@
                         <div>
                           <span class="orderGoodsName">{{ order.name }}</span>
                           <div class="goods-item-price">
-                           <span>{{ order.goodsPrice | unitPrice('￥') }}</span>
+                           <span>{{ $filters.unitPrice(order.goodsPrice, '￥') }}</span>
                           </div> 
                         </div>
                       </div>
                       <div class="shared-goods">
                       <div class="orderGoodsTime">{{ item.text.paymentTime }}</div>
                       <span class="orderFlowPrice">
-                        订单金额：<span>{{ item.text.flowPrice | unitPrice('￥') }}</span>
+                        订单金额：<span>{{ $filters.unitPrice(item.text.flowPrice, '￥') }}</span>
                       </span> 
                       <div class="order-status">
                         <el-tag 
@@ -205,7 +205,6 @@ import PanelToolbar from "./PanelToolbar";
 import SocketInstance from "@/im-server/socket-instance";
 import { SvgMentionDown } from "@/core/icons";
 import { formatTime, parseTime, copyTextToClipboard } from "@/utils/functions";
-import { unitPrice } from '@/plugins/filters';
 
 import {
   ServeTalkRecords,

@@ -7,7 +7,7 @@
         <div class="left-tips-time">请您尽快完成支付，否则订单会被自动取消</div>
       </div>
       <div class="head-right">
-        <div>应付金额 <span class="price">{{$route.query.price | unitPrice}}</span>元</div>
+        <div>应付金额 <span class="price">{{ $filters.unitPrice($route.query.price) }}</span>元</div>
       </div>
     </div>
     <div class="content">
@@ -17,14 +17,14 @@
           <vue-qr :text="qrcode" :margin="0" colorDark="#000" colorLight="#fff" :size="200"></vue-qr>
         </div>
         <div class="intro">
-          <Icon type="md-qr-scanner" /> 请使用{{params.paymentMethod === 'ALIPAY' ? '支付宝' : '微信'}}扫码付款
+          <el-icon><Iphone /></el-icon> 请使用{{params.paymentMethod === 'ALIPAY' ? '支付宝' : '微信'}}扫码付款
         </div>
       </div>
       <div class="btn-div">
         <p class="mb_10">支付成功后自动跳转，如未跳转请点击按钮手动跳转。。。</p>
         <div>
-          <Button @click="handlePay">重新支付</Button>
-          <Button type="success" @click="$router.push('/payDone')">支付成功</Button>
+          <el-button @click="handlePay">重新支付</el-button>
+          <el-button type="success" @click="$router.push('/payDone')">支付成功</el-button>
         </div>
       </div>
       <a @click="$router.back()">选择其他支付方式></a>
@@ -33,10 +33,12 @@
   </div>
 </template>
 <script>
+import { Message } from "@/utils/message";
+import { Iphone } from '@element-plus/icons-vue';
 import vueQr from 'vue-qr';
 import { payCallback, pay } from '@/api/pay.js';
 export default {
-  components: { vueQr },
+  components: { vueQr, Iphone },
   data () {
     return {
       qrcode: '', // 二维码
@@ -55,7 +57,7 @@ export default {
           this.num = 0;
           this.interval = setInterval(this.callback, 5000);
         } else {
-          this.$Message.error(res.message)
+          Message.error(res.message)
         }
       });
     },

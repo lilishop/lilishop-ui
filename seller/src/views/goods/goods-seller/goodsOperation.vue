@@ -1,11 +1,11 @@
 <template>
   <div class="goods-operation">
     <div class="step-list">
-      <steps :current="activestep" style="height:60px;margin-top: 10px">
-        <step title="选择商品品类"/>
-        <step title="填写商品详情"/>
-        <step title="商品发布成功"/>
-      </steps>
+      <el-steps :active="activestep" align-center style="height: 60px; margin-top: 10px">
+        <el-step title="选择商品品类" />
+        <el-step title="填写商品详情" />
+        <el-step title="商品发布成功" />
+      </el-steps>
     </div>
     <!-- 第一步 选择分类 -->
     <first-step ref='first' v-show="activestep === 0" @change="getFirstData"></first-step>

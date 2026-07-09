@@ -1,18 +1,19 @@
 <template>
   <div class="layout">
-    <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
-      <FormItem label="云IM地址" prop="httpUrl">
-        <Input v-model="formValidate.httpUrl"/>
+    <el-form ref="formValidate" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
+      <el-form-item label="云IM地址" prop="httpUrl">
+        <el-input v-model="formValidate.httpUrl"/>
         <span class="desc">配置买家端联系客服以及商家端登录客服跳转的路径</span>
-      </FormItem>
+      </el-form-item>
 
       <div class="label-btns">
-        <Button type="primary" @click="submit('formValidate')">保存</Button>
+        <el-button type="primary" @click="submit('formValidate')">保存</el-button>
       </div>
-    </Form>
+    </el-form>
   </div>
 </template>
 <script>
+import { ElMessage } from "element-plus";
 import {setSetting} from "@/api/index";
 import {handleSubmit} from "./validate";
 
@@ -33,18 +34,19 @@ export default {
   methods: {
     // 保存
     submit(name) {
-      let that = this;
-      if (handleSubmit(that, name)) {
-        this.setupSetting()
-      }
+      handleSubmit(this, name)
+        .then(() => {
+          this.setupSetting();
+        })
+        .catch(() => {});
     },
     // 保存设置
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {
-          this.$Message.success("保存成功!");
+          ElMessage.success("保存成功!");
         } else {
-          this.$Message.error("保存失败!");
+          ElMessage.error("保存失败!");
         }
       });
     },
@@ -52,7 +54,7 @@ export default {
     init() {
       this.result = JSON.parse(this.res);
 
-      this.$set(this, "formValidate", {...this.result});
+      this.formValidate = { ...this.result };
       Object.keys(this.formValidate).forEach((item) => {
         this.ruleValidate[item] = [
           {
@@ -74,12 +76,12 @@ export default {
   display: flex;
 }
 
-::v-deep .ivu-input {
+:deep(.el-input){
   width: 300px !important;
   margin: 0 10px;
 }
 
-.ivu-input-wrapper {
+.el-input {
   width: 300px;
   margin-right: 10px;
 }

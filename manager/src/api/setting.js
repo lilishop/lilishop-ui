@@ -196,3 +196,13 @@ export const verificationPage = (params) => {
 export const getNoticeMessageDetail = (id, params) => {
   return getRequest(`/setting/noticeMessage/${id}`, params)
 }
+
+// 消息模板聚合分页（站内信 + 微信服务号 + 小程序）
+export const getMessageTemplateAggregatePage = params => {
+  return getRequest("/setting/noticeMessage/aggregate", params);
+};
+
+// 修改通知类站内信邮箱渠道开关
+export const updateNoticeMessageEmailStatus = (id, status) => {
+  return putRequest(`/setting/noticeMessage/${id}/email/${status}`);
+};

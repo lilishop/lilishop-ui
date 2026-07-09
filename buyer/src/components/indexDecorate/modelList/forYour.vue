@@ -2,14 +2,14 @@
   <div class="model" v-if="data">
     <div class="for-your">{{ data.options.title }}</div>
     <div class="flex card">
-      <div class="left">
+      <div class="left hover-pointer" @click="linkTo(data.options.data.image.url)">
         <img :src="data.options.data.image.src" alt="" />
       </div>
       <div class="right flex">
         <!-- 商品区 -->
-        <div class="goods-list">
+        <div class="for-your-goods-list">
           <div
-            class="goods-item"
+            class="for-your-goods-item"
             :key="index"
             v-for="(item, index) in data.options.data.list"
             @click="linkTo(item.url)"
@@ -34,7 +34,7 @@
             <div class="hot-goods">
               <div class="hot-goods-title">{{ item.title }}</div>
               <div>
-                <div class="hot-price">￥{{ item.price | unitPrice }}</div>
+                <div class="hot-price">￥{{ $filters.unitPrice(item.price) }}</div>
               </div>
             </div>
           </div>
@@ -65,14 +65,18 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.goods-list {
+.for-your-goods-list {
   display: flex;
+  flex: 0 0 558px;
   width: 558px;
   flex-wrap: wrap;
+  column-gap: 0;
 }
-.goods-item {
+.for-your-goods-item {
+  flex: 0 0 278px;
   width: 278px;
   height: 277px;
+  min-width: 0;
   text-align: center;
   box-sizing: border-box;
   cursor: pointer;
@@ -84,10 +88,8 @@ export default {
     border-top: 1.4px solid #e2e2e2;
   }
   &:hover {
-    ::v-deep .goods-name {
-      color: $theme_color;
-    }
-    ::v-deep .goods-desc {
+    .goods-name,
+    .goods-desc {
       color: $theme_color;
     }
   }
@@ -105,10 +107,12 @@ export default {
   color: #333333;
 }
 .goods-img {
+  display: block;
   width: 190px;
   height: 156px;
-  margin-top: 19px;
+  margin: 19px auto 0;
   border-radius: 10px;
+  object-fit: contain;
 }
 .goods-desc {
   font-size: 14px;
@@ -137,6 +141,8 @@ export default {
   background: #ffffff;
   border-radius: 10px;
   position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
   box-shadow: 0px 1px 13px 0px #E5E5E5;
 
   &:hover {
@@ -159,20 +165,27 @@ export default {
   }
 }
 .left {
+  flex: 0 0 346px;
   width: 346px;
   height: 554px;
   border-radius: 9.8px 0px 0px 9.8px;
+  overflow: hidden;
   > img {
-    max-width: 100%;
+    display: block;
+    width: 100%;
     height: 100%;
+    object-fit: cover;
   }
 }
 .right {
+  flex: 0 0 839px;
   width: 839px;
   height: 554px;
   border-radius: 0px 9.8px 9.8px 0px;
+  overflow: hidden;
 }
 .hot-list {
+  flex: 0 0 279px;
   width: 279px;
 }
 .hot-title {
@@ -201,8 +214,11 @@ export default {
   }
 
   > img {
+    flex-shrink: 0;
+    display: block;
     width: 76.3px;
     height: 77.7px;
+    object-fit: contain;
   }
 }
 .hot-goods {

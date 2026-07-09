@@ -1,21 +1,25 @@
-::v-deep .ivu-modal-mask,
-.ivu-modal-wrap {
-  z-index: 800;
+:deep(.el-overlay) {
+  z-index: 2000;
 }
 
 .decorate-view-link {
   font-size: 12px;
   margin: 0 4px;
-  flex:8;
+  flex: 1;
+  min-width: 0;
   color: #999;
 }
-.decorate-view-btn{
-  flex: 2;
+.decorate-view-btn {
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  >button{
+  align-items: stretch;
+  gap: 8px;
+  margin-left: 10px;
 
-    width: 70px;
+  :deep(.el-button) {
+    width: 76px;
+    margin: 0;
   }
 }
 
@@ -45,15 +49,15 @@
   width: 100%;
   display: flex;
   flex-wrap: wrap;
+  gap: 14px;
 
   >.drawer-item {
     cursor: pointer;
     border: 1px solid #ededed;
     background: #f9f0ff;
-    width: 170px;
-    margin-right: 14px;
+    width: calc(50% - 7px);
+    box-sizing: border-box;
     color: #9254de;
-    margin-bottom: 14px;
     border-radius: 0.8em;
     height: 60px;
     display: flex;

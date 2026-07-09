@@ -8,6 +8,7 @@ export function goodsList (params) {
     url: '/buyer/goods/goods/es',
     method: Method.GET,
     needToken: false,
+    optionalToken: true,
     params
   });
 }
@@ -18,6 +19,7 @@ export function filterList (params) {
     url: '/buyer/goods/goods/es/related',
     method: Method.GET,
     needToken: false,
+    optionalToken: true,
     params
   });
 }

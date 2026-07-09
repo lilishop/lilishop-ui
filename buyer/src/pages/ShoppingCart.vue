@@ -13,7 +13,7 @@
           </div>
           <div class="add-info-box-row">
             <div class="add-info-img">
-              <img :src="this.detail.thumbnail" alt="">
+              <img :src="detail.thumbnail" alt="">
             </div>
             <div class="add-info-intro">
               <p>{{detail.goodsName}}</p>
@@ -24,7 +24,7 @@
         <div class="car-btn-group">
           <div></div>
           <div class="car-btn-row">
-            <router-link :to="`/goodsDetail?skuId=${detail.id}&goodsId=${detail.goodsId}`">
+            <router-link :to="{ path: '/goodsDetail', query: { skuId: detail.skuId, goodsId: detail.goodsId } }">
               <button class="btn-car hover-pointer btn-car-to-detail">查看商品详情</button>
             </router-link>
             <router-link to="/cart">
@@ -51,8 +51,13 @@ export default {
     };
   },
   mounted () {
-    let detail = this.$route.query.detail;
-    if (detail) this.detail = detail;
+    const { skuId, goodsId, thumbnail, goodsName } = this.$route.query;
+    this.detail = {
+      skuId,
+      goodsId,
+      thumbnail,
+      goodsName
+    };
   }
 };
 </script>

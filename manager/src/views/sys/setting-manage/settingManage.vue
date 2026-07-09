@@ -1,16 +1,25 @@
 
 <template>
-  <Card v-if="show">
-    <Tabs v-model="selected" @on-click="clickTab">
-      <TabPane :label="tabItem.name" :name="tabItem.type" v-for="(tabItem, tabIndex) in tabWay" :key="tabIndex">
-        <component v-if="settingData" :res="settingData" :type="selected"
-                   :is="templateSetting[tabItem.type]"></component>
-      </TabPane>
-    </Tabs>
-  </Card>
+  <el-card v-if="show">
+    <el-tabs v-model="selected" @tab-change="clickTab">
+      <el-tab-pane
+        v-for="(tabItem, tabIndex) in tabWay"
+        :key="tabIndex"
+        :label="tabItem.name"
+        :name="tabItem.type"
+      >
+        <component
+          v-if="settingData && selected === tabItem.type"
+          :is="templateSetting[tabItem.type]"
+          :res="settingData"
+          :type="tabItem.type"
+        />
+      </el-tab-pane>
+    </el-tabs>
+  </el-card>
 </template>
 <script>
-import {getSetting} from "@/api/index.js";
+import { getSetting } from "@/api/index.js";
 import templateSetting from "./template";
 
 export default {
@@ -37,7 +46,7 @@ export default {
           name: "订单配置",
         },
         //积分设置
-        {type: "POINT_SETTING", name: "积分设置"},
+        { type: "POINT_SETTING", name: "积分设置" },
         {
           type: "WITHDRAWAL_SETTING",
           name: "提现设置",
@@ -62,22 +71,26 @@ export default {
           type: "IM_SETTING",
           name: "客服设置",
         },
+        {
+          type: "LIVE_SETTING",
+          name: "直播设置",
+        },
       ],
       authLogin: [
         // 登录设置
-        {type: "CONNECT_SETTING", name: "登录设置"},
+        { type: "CONNECT_SETTING", name: "登录设置" },
         // 微信设置
-        {type: "WECHAT_CONNECT", name: "微信设置"},
+        { type: "WECHAT_CONNECT", name: "微信设置" },
         // QQ设置
-        {type: "QQ_CONNECT", name: "QQ设置"},
+        { type: "QQ_CONNECT", name: "QQ设置" },
       ],
       pay: [
         //支付宝支付设置
-        {type: "PAYMENT_SUPPORT", name: "支付开启/关闭"},
+        { type: "PAYMENT_SUPPORT", name: "支付开启/关闭" },
         //支付宝支付设置
-        {type: "ALIPAY_PAYMENT", name: "支付宝支付设置"},
+        { type: "ALIPAY_PAYMENT", name: "支付宝支付设置" },
         //微信支付设置
-        {type: "WECHAT_PAYMENT", name: "微信支付设置"},
+        { type: "WECHAT_PAYMENT", name: "微信支付设置" },
       ],
       tabWay: [], // tab数据
     };
@@ -121,6 +134,8 @@ export default {
       getSetting(name).then((res) => {
         if (res.result) {
           this.settingData = JSON.stringify(res.result);
+        } else {
+          this.settingData = "{}";
         }
       });
     },

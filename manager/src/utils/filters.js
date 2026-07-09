@@ -1,3 +1,5 @@
+import { getRouter } from "@/libs/router-holder";
+
 /**
  * 金钱单位置换  2999 --> 2,999.00
  * @param val
@@ -32,11 +34,13 @@ export function enCode(v1) {
   return v1;
 }
 
-import {router} from "@/router/index";
 /**
  * 自定义跳转
  */
 export function customRouterPush(push){
+  const router = getRouter();
+  if (!router) return;
+
   const setting = window.localStorage.getItem('admin-setting') ? JSON.parse(window.localStorage.getItem('admin-setting')) : {};
 
   if(setting.isUseTabsRouter){
@@ -142,8 +146,14 @@ let timeout = null;
  * @returns {string}
  */
 export function formatPrice(price) {
-  if (typeof price !== 'number') return price
-  return String(Number(price).toFixed(2)).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  if (price === null || price === undefined || price === "") {
+    return "0.00";
+  }
+  const num = typeof price === "number" ? price : Number(price);
+  if (Number.isNaN(num)) {
+    return "0.00";
+  }
+  return String(num.toFixed(2)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 /**
@@ -184,8 +194,6 @@ export function unixSellerBillStatus(status_code) {
       return '已出账'
     case 'CHECK':
       return '已对账'
-    case 'EXAMINE':
-      return '已审核'
     case 'PAY':
       return '已结算'
     case 'COMPLETE':

@@ -332,7 +332,7 @@ export default {
   }
 }
 
-/deep/ .el-image {
+:deep(.el-image ) {
   width: 100%;
   height: 100%;
   transition: ease-in 0.3s;

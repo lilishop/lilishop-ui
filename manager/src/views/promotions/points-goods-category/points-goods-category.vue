@@ -1,77 +1,70 @@
 <template>
   <div>
-    <Card>
+    <el-card>
       <div class="operation mb_10">
-        <Button @click="addParent" type="primary" icon="md-add">添加积分商品分类</Button>
-        <Button icon="md-refresh" @click="init">刷新</Button>
+        <el-button type="primary" @click="addParent">添加积分商品分类</el-button>
+        <el-button @click="init">刷新</el-button>
       </div>
-      <tree-table
-        ref="treeTable"
-        size="default"
-        :loading="loading"
+
+      <el-table
+        v-loading="loading"
         :data="tableData"
-        :columns="columns"
-        :border="true"
-        :show-index="false"
-        :is-fold="true"
-        :expand-type="false"
-        primary-key="id"
+        row-key="id"
+        border
+        default-expand-all
+        :tree-props="{ children: 'children' }"
+        style="width: 100%"
       >
-        <template slot="action" slot-scope="scope">
-          <a
-            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:10px"
-            @click.native="edit(scope.row)"
-            >编辑</a>
-          <span style="margin:0 8px;color:#dcdee2">|</span>
-          <a
-            style="color:#2d8cf0;cursor:pointer;text-decoration:none"
-            @click.native="remove(scope.row)"
-            >删除</a>
-        </template>
-      </tree-table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+        <el-table-column prop="name" label="分类名称" min-width="200" />
+        <el-table-column prop="sortOrder" label="排序值" min-width="120" />
+        <el-table-column label="操作" width="200" align="center">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a class="link-text" @click="edit(row)">编辑</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="remove(row)">删除</a>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
-    <Modal
-      :title="modalTitle"
-      v-model="modalVisible"
-      :mask-closable="false"
-      :width="500"
-    >
-      <Form
-        ref="form"
-        :model="formAdd"
-        :label-width="100"
-        :rules="formValidate"
-      >
-        <FormItem label="分类名称" prop="name">
-          <Input v-model="formAdd.name" clearable style="width: 100%" />
-        </FormItem>
-        <FormItem label="排序值" prop="sortOrder">
-          <InputNumber v-model="formAdd.sortOrder" :min="0" clearable style="width: 100%" />
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="Submit"
-          >提交</Button
-        >
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
       </div>
-    </Modal>
+    </el-card>
+
+    <el-dialog
+      v-model="modalVisible"
+      :title="modalTitle"
+      width="500px"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
+      <el-form ref="form" :model="formAdd" label-width="100px" :rules="formValidate">
+        <el-form-item label="分类名称" prop="name">
+          <el-input v-model="formAdd.name" clearable />
+        </el-form-item>
+        <el-form-item label="排序值" prop="sortOrder">
+          <el-input-number v-model="formAdd.sortOrder" :min="0" style="width: 100%" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="modalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="Submit">提交</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
+
 <script>
 import {
   getPointsGoodsCategoryList,
@@ -79,132 +72,96 @@ import {
   updatePointsGoodsCategory,
   deletePointsGoodsCategoryById,
 } from "@/api/promotion";
-import TreeTable from "@/components/tree-table/Table/Table";
+
+const buildDefaultFormAdd = () => ({
+  parentId: 0,
+  name: "",
+  deleteFlag: 0,
+  level: 0,
+  sortOrder: 1,
+});
 
 export default {
   name: "pointsGoodsCategory",
-  components: {
-    TreeTable
-  },
   data() {
     return {
-      submitLoading:false,
-      loading: false, // 加载状态
-      modalType: 0, // 添加或编辑标识
-      modalVisible: false, // 添加或编辑显示
-      modalTitle: "", // 添加或编辑标题
-      showParent: false, // 是否展示上级菜单
-      parentTitle: "", // 父级菜单名称
+      submitLoading: false,
+      loading: false,
+      modalType: 0,
+      modalVisible: false,
+      modalTitle: "",
       searchForm: {
         pageNumber: 1,
         pageSize: 20,
         sort: "sortOrder",
-        order: "asc"
+        order: "asc",
       },
-      formAdd: {
-        // 添加或编辑表单对象初始化数据
-        parentId: 0,
-        name: "",
-        deleteFlag: 0,
-        level: 0,
-        sortOrder:1
-      },
-      // 表单验证规则
+      formAdd: buildDefaultFormAdd(),
       formValidate: {
-        name: [{ required: true, message: "商品分类名称不能为空" }],
+        name: [{ required: true, message: "商品分类名称不能为空", trigger: "blur" }],
       },
-      columns: [
-        {
-          title: "分类名称",
-          key: "name",
-          minWidth: "120px",
-        },
-        {
-          title: "排序值",
-          key: "sortOrder",
-          minWidth: "120px",
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          headerAlign: "center",
-          width: "400px",
-          type: "template",
-          template: "action",
-        },
-      ],
-      tableData: [], // 表格数据
-      total: 0
+      tableData: [],
+      total: 0,
     };
   },
   methods: {
-    // 初始化数据
     init() {
       this.getAllList();
     },
-    // 编辑分类
     edit(v) {
       this.modalType = 1;
       this.modalTitle = "编辑";
-      this.formAdd.id = v.id;
-      this.formAdd.name = v.name;
-      this.formAdd.sortOrder = v.sortOrder;
-      this.showParent = false;
+      this.formAdd = {
+        ...buildDefaultFormAdd(),
+        id: v.id,
+        name: v.name,
+        sortOrder: v.sortOrder,
+      };
       this.modalVisible = true;
     },
-    // 添加顶级分类
     addParent() {
       this.modalType = 0;
       this.modalTitle = "添加积分商品分类";
-      this.parentTitle = "顶级分类";
-      this.showParent = true;
-      this.$refs.form.resetFields();
-      delete this.formAdd.id;
-      this.formAdd.parentId = 0;
+      this.formAdd = buildDefaultFormAdd();
       this.modalVisible = true;
+      this.$nextTick(() => {
+        this.$refs.form?.clearValidate();
+      });
     },
-    // 提交
     Submit() {
       this.$refs.form.validate((valid) => {
-        console.log(valid);
-        if (valid) {
-          this.submitLoading = true;
-          if (this.modalType === 0) {
-            // 添加 避免编辑后传入id等数据 记得删除
-            delete this.formAdd.id;
-            addPointsGoodsCategory(this.formAdd).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("添加成功");
-                this.getAllList();
-                this.modalVisible = false;
-                this.$refs.form.resetFields();
-              }
-            });
-          } else {
-            // 编辑
-            updatePointsGoodsCategory(this.formAdd).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("修改成功");
-                this.getAllList();
-                this.modalVisible = false;
-                this.$refs.form.resetFields();
-              }
-            });
-          }
+        if (!valid) return;
+        this.submitLoading = true;
+        if (this.modalType === 0) {
+          delete this.formAdd.id;
+          addPointsGoodsCategory(this.formAdd).then((res) => {
+            this.submitLoading = false;
+            if (res.success) {
+              this.$Message.success("添加成功");
+              this.getAllList();
+              this.modalVisible = false;
+              this.formAdd = buildDefaultFormAdd();
+            }
+          });
+        } else {
+          updatePointsGoodsCategory(this.formAdd).then((res) => {
+            this.submitLoading = false;
+            if (res.success) {
+              this.$Message.success("修改成功");
+              this.getAllList();
+              this.modalVisible = false;
+              this.formAdd = buildDefaultFormAdd();
+            }
+          });
         }
       });
     },
-    // 删除
     remove(v) {
       this.$Modal.confirm({
         title: "确认删除",
         content: "您确认要删除 " + v.name + " ?",
         loading: true,
         onOk: () => {
-          // 删除
           deletePointsGoodsCategoryById(v.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -215,27 +172,29 @@ export default {
         },
       });
     },
-    // 获取所有分类
     getAllList() {
       this.loading = true;
-      getPointsGoodsCategoryList(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          const records = res.result.records || [];
-          const sortFn = (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0);
-          const sortRecursively = (list = []) => {
-            list.sort(sortFn);
-            list.forEach((item) => {
-              if (Array.isArray(item.children) && item.children.length) {
-                sortRecursively(item.children);
-              }
-            });
-            return list;
-          };
-          this.tableData = sortRecursively(records);
-          this.total = res.result.total || 0;
-        }
-      });
+      getPointsGoodsCategoryList(this.searchForm)
+        .then((res) => {
+          if (res.success) {
+            const records = res.result.records || [];
+            const sortFn = (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0);
+            const sortRecursively = (list = []) => {
+              list.sort(sortFn);
+              list.forEach((item) => {
+                if (Array.isArray(item.children) && item.children.length) {
+                  sortRecursively(item.children);
+                }
+              });
+              return list;
+            };
+            this.tableData = sortRecursively(records);
+            this.total = res.result.total || 0;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
     changePage(v) {
       this.searchForm.pageNumber = v;
@@ -245,14 +204,28 @@ export default {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getAllList();
-    }
+    },
   },
   mounted() {
     this.init();
   },
 };
 </script>
-<style lang="scss" scoped>
 
-
+<style scoped>
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+.op-split {
+  margin: 0 8px;
+  color: #dcdee2;
+}
+.mb_10 {
+  margin-bottom: 10px;
+}
+.mt_10 {
+  margin-top: 10px;
+}
 </style>

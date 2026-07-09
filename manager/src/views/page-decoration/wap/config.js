@@ -660,5 +660,45 @@ export const modelData = [
     options: {
       list: []
     }
+  },
+  {
+    type: "video",
+    name: "视频",
+    img: "md-image",
+    notAdd: true,
+    notImg: true,
+    notLink: true,
+    notTitle: true,
+    options: {
+      list: [
+        {
+          videoUrl: "",
+          poster: "",
+          autoplay: false,
+          aspectRatio: "16:9",
+          style: {
+            bgType: "color",
+            bgColorStart: "#F5F5F5",
+            bgColorEnd: "#F5F5F5",
+            bgGradientDir: "horizontal",
+            bgRadius: 0,
+            bottomBgColor: "#F5F5F5",
+            bgImage: "",
+            margin: 0,
+            padding: 0,
+            borderShow: false,
+            borderStyle: "solid",
+            borderWidth: 1,
+            borderColor: "#e5e5e5",
+            shadowShow: false,
+            shadowColor: "rgba(0,0,0,0.1)",
+            shadowX: 0,
+            shadowY: 0,
+            shadowBlur: 10,
+            shadowSpread: 0,
+          },
+        },
+      ],
+    }
   }
 ];

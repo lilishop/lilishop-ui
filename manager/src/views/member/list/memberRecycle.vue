@@ -1,175 +1,170 @@
 <template>
   <div class="search">
-    <Row>
-      <Card>
-        <Row @keydown.enter.native="handleSearch">
-          <Form
-            ref="searchForm"
-            :model="searchForm"
-            inline
-            :label-width="70"
-            class="search-form"
-          >
-            <Form-item label="会员名称" prop="username">
-              <Input
-                type="text"
-                v-model="searchForm.username"
-                placeholder="请输入会员名称"
-                clearable
-                style="width: 240px"
-              />
-            </Form-item>
-
-            <Form-item label="联系方式" prop="mobile">
-              <Input
-                type="text"
-                v-model="searchForm.mobile"
-                placeholder="请输入会员联系方式"
-                clearable
-                style="width: 240px"
-              />
-            </Form-item>
-            <Button
-              @click="handleSearch"
-              class="search-btn"
-              type="primary"
-              icon="ios-search"
-              >搜索</Button
-            >
-          </Form>
-        </Row>
-      </Card>
-      <Card>
-        <Table
-          :loading="loading"
-          border
-          :columns="columns"
-          :data="data"
-          ref="table"
-          class="mt_10"
-          sortable="custom"
-        >
-        </Table>
-        <Row type="flex" justify="end" class="mt_10">
-          <Page
-            :current="searchForm.pageNumber"
-            :total="total"
-            :page-size="searchForm.pageSize"
-            @on-change="changePage"
-            @on-page-size-change="changePageSize"
-            :page-size-opts="[20, 50, 100]"
-            size="small"
-            show-total
-            show-elevator
-            show-sizer
-          ></Page>
-        </Row>
-      </Card>
-    </Row>
-
-    <!-- 修改模态框 -->
-    <Modal
-      v-model="descFlag"
-      :title="descTitle"
-      @on-ok="handleSubmitModal"
-      width="500"
-    >
-      <Form
-        ref="formValidate"
-        :model="formValidate"
-        :rules="ruleValidate"
-        :label-width="80"
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
       >
-        <FormItem label="头像">
+        <el-form-item label="会员名称" prop="username">
+          <el-input
+            v-model="searchForm.username"
+            placeholder="请输入会员名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="联系方式" prop="mobile">
+          <el-input
+            v-model="searchForm.mobile"
+            placeholder="请输入会员联系方式"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+      >
+        <el-table-column prop="username" label="会员名称" min-width="150" align="left" show-overflow-tooltip />
+        <el-table-column prop="nickName" label="昵称" min-width="120" align="left" show-overflow-tooltip />
+        <el-table-column label="联系方式" min-width="130">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.mobile || "" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="注册时间" min-width="180" />
+        <el-table-column label="积分数量" min-width="120" align="left">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.point == void 0 ? "0" : row.point }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="200" align="center" fixed="right">
+          <template #default="{ row }">
+            <div v-if="row" class="ops" style="display: flex; justify-content: center">
+              <template v-if="selectedMember">
+                <a class="link-text" @click="callback(row)">选择</a>
+                <span class="op-split">|</span>
+              </template>
+              <a class="link-text" @click="detail(row)">查看</a>
+              <template v-if="!selectedMember">
+                <span class="op-split">|</span>
+                <a class="link-text" @click="enable(row)">启用</a>
+                <span class="op-split">|</span>
+                <a class="link-text" @click="editPerm(row)">编辑</a>
+              </template>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
+
+    <el-dialog v-model="descFlag" :title="descTitle" width="500px" destroy-on-close>
+      <el-form ref="formValidate" :model="formValidate" :rules="ruleValidate" label-width="80px">
+        <el-form-item label="头像">
           <img :src="formValidate.face" class="face" />
-          <Button
-            type="text"
+          <el-button
+            type="primary"
+            link
             class="upload"
-            @click="
-              () => {
-                this.picModelFlag = true;
-                this.$refs.ossManage.selectImage = true;
-              }
-            "
-            >修改
-          </Button>
+            @click="openPicSelector"
+          >修改</el-button>
           <input type="file" style="display: none" id="file" />
-        </FormItem>
-        <FormItem label="会员名称" prop="name">
-          <Input
-            v-model="formValidate.username"
-            style="width: 200px"
-            disabled
-          />
-        </FormItem>
-        <FormItem label="用户昵称" prop="name">
-          <Input v-model="formValidate.nickName" style="width: 200px" />
-        </FormItem>
-        <FormItem label="性别" prop="sex">
-          <RadioGroup
-            type="button"
-            button-style="solid"
-            v-model="formValidate.sex"
-          >
-            <Radio :label="1">
-              <span>男</span>
-            </Radio>
-            <Radio :label="0">
-              <span>女</span>
-            </Radio>
-          </RadioGroup>
-        </FormItem>
-        <FormItem label="修改密码" prop="password">
-          <Input
-            type="password"
-            style="width: 220px"
-            password
-            v-model="formValidate.newPassword"
-          />
-        </FormItem>
-        <FormItem label="生日" prop="birthday">
-          <DatePicker
-            type="date"
-            format="yyyy-MM-dd"
+        </el-form-item>
+        <el-form-item label="会员名称" prop="name">
+          <el-input v-model="formValidate.username" style="width: 200px" disabled />
+        </el-form-item>
+        <el-form-item label="用户昵称" prop="name">
+          <el-input v-model="formValidate.nickName" style="width: 200px" />
+        </el-form-item>
+        <el-form-item label="性别" prop="sex">
+          <el-radio-group v-model="formValidate.sex">
+            <el-radio-button :value="1">男</el-radio-button>
+            <el-radio-button :value="0">女</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="修改密码" prop="password">
+          <el-input v-model="formValidate.newPassword" type="password" show-password style="width: 220px" />
+        </el-form-item>
+        <el-form-item label="生日" prop="birthday">
+          <el-date-picker
             v-model="formValidate.birthday"
+            type="date"
+            value-format="YYYY-MM-DD"
             style="width: 220px"
-          ></DatePicker>
-        </FormItem>
-        <FormItem label="所在地" prop="mail">
-          {{ formValidate.region || '暂无地址' }}
-          <Button style="margin-left: 10px;" @click="$refs.map.open()">选择</Button>
-        </FormItem>
-      </Form>
-    </Modal>
-    <Modal width="1200px" v-model="picModelFlag">
-      <ossManage @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" ref="ossManage" />
-    </Modal>
+          />
+        </el-form-item>
+        <el-form-item label="所在地" prop="mail">
+          {{ formValidate.region || "暂无地址" }}
+          <el-button style="margin-left: 10px" @click="$refs.map.open()">选择</el-button>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="descFlag = false">取消</el-button>
+        <el-button type="primary" @click="handleSubmitModal">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="picModelFlag" width="1200px">
+      <ossManage
+        ref="ossManage"
+        @callback="callbackSelected"
+        :isComponent="true"
+        :initialize="picModelFlag"
+      />
+    </el-dialog>
     <multipleMap ref="map" @callback="selectedRegion" />
   </div>
 </template>
 
 <script>
-
 import * as API_Member from "@/api/member.js";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import multipleMap from "@/components/map/multiple-map";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { customRouterPush } from "@/utils/filters";
+
 export default {
   name: "memberRecycle",
   components: {
-
     ossManage,
-    multipleMap
+    multipleMap,
   },
   data() {
     return {
-      selectedMember: false, //是否是其他组件调用
-      descTitle: "", // modal标题
-      descFlag: false, //编辑查看框
-      openSearch: true, // 显示搜索
-      loading: true, // 表单加载状态
-
+      selectedMember: false,
+      descTitle: "",
+      descFlag: false,
+      openSearch: true,
+      loading: true,
       searchForm: {
-        // 请求参数
         pageNumber: 1,
         pageSize: 20,
         order: "desc",
@@ -177,231 +172,102 @@ export default {
         mobile: "",
         disabled: "CLOSE",
       },
-      picModelFlag: false, // 选择图片
-      formValidate: {}, // 表单数据
-      ruleValidate: {}, //修改验证
-      columns: [
-        {
-          title: "会员名称",
-          align: "left",
-          key: "username",
-          tooltip: true,
-        },
-        {
-          title: "昵称",
-          align: "left",
-          key: "nickName",
-          tooltip: true,
-        },
-        {
-          title: "联系方式",
-          width: 130,
-          key: "mobile",
-          render: (h, params) => {
-            if (params.row.mobile == null) {
-              return h("div", [h("span", {}, "")]);
-            } else {
-              return h("div", [h("span", {}, params.row.mobile)]);
-            }
-          },
-        },
-        {
-          title: "注册时间",
-          key: "createTime",
-          width: 180,
-        },
-
-        {
-          title: "积分数量",
-          align: "left",
-          width: 120,
-          render: (h, params) => {
-            return h(
-              "div",
-              {},
-              params.row.point == void 0 ? "0" : params.row.point
-            );
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          width: 200,
-          fixed: "right",
-          render: (h, params) => {
-            const linkStyle = {
-              color: "#2d8cf0",
-              cursor: "pointer",
-              textDecoration: "none",
-            };
-            const sep = h(
-              "span",
-              { style: { margin: "0 8px", color: "#dcdee2" } },
-              "|"
-            );
-            const children = [];
-            if (this.selectedMember) {
-              children.push(
-                h(
-                  "a",
-                  { style: linkStyle, on: { click: () => this.callback(params.row) } },
-                  "选择"
-                )
-              );
-              children.push(sep);
-            }
-            children.push(
-              h(
-                "a",
-                { style: linkStyle, on: { click: () => this.detail(params.row) } },
-                "查看"
-              )
-            );
-            if (!this.selectedMember) {
-              children.push(sep);
-              children.push(
-                h(
-                  "a",
-                  { style: linkStyle, on: { click: () => this.enable(params.row) } },
-                  "启用"
-                )
-              );
-              children.push(sep);
-              children.push(
-                h(
-                  "a",
-                  { style: linkStyle, on: { click: () => this.editPerm(params.row) } },
-                  "编辑"
-                )
-              );
-            }
-            return h(
-              "div",
-              { class: "ops", style: { display: "flex", justifyContent: "center" } },
-              children
-            );
-          },
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      picModelFlag: false,
+      formValidate: {},
+      ruleValidate: {},
+      data: [],
+      total: 0,
     };
   },
   methods: {
-    // 回调给父级
     callback(val) {
       this.$emit("callback", val);
     },
-    // 初始化数据
     init() {
       this.getData();
     },
-    // 分页 修改页码
-    changePage(v) {
-      this.searchForm.pageNumber = v;
+    changePage() {
       this.getData();
     },
-    // 分页 修改页数
-    changePageSize(v) {
+    changePageSize() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
       this.getData();
     },
-    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getData();
     },
-    //查看详情修改
     editPerm(val) {
       this.descTitle = `查看用户 ${val.username}`;
       this.descFlag = true;
-
       this.getMemberInfo(val.id);
     },
-    /**
-     * 查询查看会员详情
-     */
     getMemberInfo(id) {
       API_Member.getMemberInfoData(id).then((res) => {
         if (res.result) {
-          this.$set(this, "formValidate", res.result);
+          this.formValidate = res.result;
         }
       });
     },
-    //查询会员列表
     getData() {
+      this.loading = true;
       API_Member.getMemberListData(this.searchForm).then((res) => {
+        this.loading = false;
         if (res.success) {
-          this.loading = false;
           this.data = res.result.records;
           this.total = res.result.total;
         }
       });
     },
-    // 选中的图片
+    openPicSelector() {
+      this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
+    },
     callbackSelected(val) {
       this.picModelFlag = false;
       this.formValidate.face = val.url;
     },
-
-    // 选中的地址
     selectedRegion(val) {
-      if(val.type === 'select'){
-        const paths = val.data.map(item => item.name).join(',')
-        const ids = val.data.map(item => item.id).join(',')
-
-        this.$set(this.formValidate,'region',paths)
-        this.$set(this.formValidate,'regionId',ids)
-
-      }
-      else{
-        this.$set(this.formValidate,'region',val.data.addr)
-        this.$set(this.formValidate,'regionId',val.data.addrId)
+      if (val.type === "select") {
+        const paths = val.data.map((item) => item.name).join(",");
+        const ids = val.data.map((item) => item.id).join(",");
+        this.formValidate.region = paths;
+        this.formValidate.regionId = ids;
+      } else {
+        this.formValidate.region = val.data.addr;
+        this.formValidate.regionId = val.data.addrId;
       }
     },
-
-    //详细
     detail(row) {
-      this.$options.filters.customRouterPush({ name: "member-detail", query: { id: row.id } })
-
+      customRouterPush({ name: "member-detail", query: { id: row.id } });
     },
-    //启用会员
     enable(v) {
       let params = {
         memberIds: [v.id],
         disabled: true,
       };
-      this.$Modal.confirm({
-        title: "提示",
-        content: "<p>确定启用此会员？</p>",
-        onOk: () => {
-          API_Member.updateMemberStatus(params).then((res) => {
-            if (res.success) {
-              this.$Message.success("启用成功");
-              this.getData();
-            } else {
-              // this.$Message.error(res.message);
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("确定启用此会员？", "提示", { type: "warning" }).then(() => {
+        API_Member.updateMemberStatus(params).then((res) => {
+          if (res.success) {
+            ElMessage.success("启用成功");
+            this.getData();
+          }
+        });
+      }).catch(() => {});
     },
-
-    // 提交修改数据
     handleSubmitModal() {
-      const { nickName, sex, username, face, newPassword, id ,regionId,region} =
-        this.formValidate;
+      const { nickName, sex, username, face, newPassword, id, regionId, region } = this.formValidate;
       let time = new Date(this.formValidate.birthday);
-      let birthday =
-        time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
+      let birthday = time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
       let submit = {
-        regionId:regionId,
+        regionId: regionId,
         region: region,
         nickName,
-
         sex,
         birthday,
         face: face || "",
@@ -412,7 +278,8 @@ export default {
       }
       API_Member.updateMember(submit).then((res) => {
         if (res.result) {
-          this.$Message.success("修改成功！");
+          ElMessage.success("修改成功！");
+          this.descFlag = false;
           this.init();
         }
       });

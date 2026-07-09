@@ -2,7 +2,7 @@ import store from "@/store";
 import config from "@/config/config";
 import WsSocket from "@/plugins/ws-socket";
 import { getToken } from "@/utils/auth";
-import { Notification } from "element-ui";
+import { ElNotification } from "element-plus";
 
 // 引入消息处理类
 import KeyboardEvent from "@/im-server/event/keyboard";
@@ -86,7 +86,7 @@ class SocketInstance {
     });
 
     this.socket.on("event_error", (data) => {
-      Notification({
+      ElNotification({
         title: "友情提示",
         message: data.message,
         type: "warning",

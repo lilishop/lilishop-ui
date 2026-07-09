@@ -2,49 +2,66 @@
   <div class="wrapper">
     <div class="list">
       <div
-        class="list-item"
         v-for="(item, index) in Object.keys(promotionList)"
         :key="index"
-        @click="clickPromotion(item, index)"
+        class="list-item"
         :class="{ active: selectedIndex == index }"
+        @click="clickPromotion(item, index)"
       >
         {{ typeOption(item).title }}
       </div>
-
-      <!-- <div class="list-item" >暂无活动</div> -->
     </div>
     <div class="content">
       <div v-if="showPromotionList">
-        <!-- <div class="search-views">
-          <Input v-model="value11" disabled class="search">
-          <span slot="prepend">店铺名称</span>
-          </Input>
-          <Button type="primary">选择</Button>
-
-        </div> -->
-
         <div class="tables">
-          <Table
-            height="350"
-            border
-            tooltip
-            :loading="loading"
-            :columns="activeColumns"
-            :data="showPromotionList"
-          ></Table>
+          <el-table v-loading="loading" border height="350" :data="showPromotionList" style="width: 100%">
+            <template v-if="isSeckillMode">
+              <el-table-column prop="goodsName" label="商品名称" min-width="200" show-overflow-tooltip />
+              <el-table-column prop="storeName" label="店铺名称" show-overflow-tooltip />
+              <el-table-column label="活动时间" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <span v-if="row">{{ row.timeLine }}点</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="原价" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <span v-if="row">{{ $filters.unitPrice(row.originalPrice) }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="现价" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <span v-if="row">{{ $filters.unitPrice(row.price, "￥") }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="状态" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <span v-if="row">{{ seckillStatusText(row.promotionApplyStatus) }}</span>
+                </template>
+              </el-table-column>
+            </template>
+            <template v-else>
+              <el-table-column prop="goodsName" label="商品名称" show-overflow-tooltip />
+              <el-table-column prop="storeName" label="店铺名称" show-overflow-tooltip />
+              <el-table-column prop="startTime" label="开始时间" show-overflow-tooltip />
+              <el-table-column prop="endTime" label="结束时间" show-overflow-tooltip />
+            </template>
+            <el-table-column label="操作" width="100" fixed="right" align="center">
+              <template #default="{ row, $index }">
+                <a v-if="row" class="link-text" @click="selectedPromotion({ row, index: $index })">
+                  {{ index === $index ? "已选" : "选择" }}
+                </a>
+              </template>
+            </el-table-column>
+          </el-table>
 
-          <Page
-            @on-change="
-              (val) => {
-                params.pageNumber = val;
-              }
-            "
-            :current="params.pageNumber"
-            :page-size="params.pageSize"
+          <el-pagination
+            v-model:current-page="params.pageNumber"
+            v-model:page-size="params.pageSize"
             class="mt_10"
             :total="Number(totals)"
+            layout="prev, pager, next, jumper"
             size="small"
-            show-elevator
+            @current-change="(val) => { params.pageNumber = val; }"
           />
         </div>
       </div>
@@ -52,224 +69,28 @@
   </div>
 </template>
 <script>
-import {
-  getAllPromotion,
-  getPromotionSeckill,
-  getPromotionGoods,
-} from "@/api/promotion";
+import { getAllPromotion } from "@/api/promotion";
 
 export default {
   data() {
     return {
-      totals: "", // 总数
-      loading: true, //表格请求数据为true
-      promotionList: "", // 活动列表
-      selectedIndex: 0, //左侧菜单选择
-      promotions: "", //选中的活动key
-      index: 999, // 已选下标
+      totals: "",
+      loading: true,
+      promotionList: "",
+      selectedIndex: 0,
+      promotions: "",
+      index: 999,
       params: {
-        // 请求参数
         pageNumber: 1,
         pageSize: 20,
       },
-      pintuanColumns: [
-        {
-          title: "商品名称",
-          key: "goodsName",
-          tooltip: true,
-        },
-        {
-          title: "店铺名称",
-          key: "storeName",
-          tooltip: true,
-        },
-        {
-          title: "开始时间",
-          key: "startTime",
-          tooltip: true,
-        },
-        {
-          title: "结束时间",
-          key: "endTime",
-          tooltip: true,
-        },
-        {
-          title: "操作",
-          key: "action",
-          fixed: "right",
-          width: 100,
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.selectedPromotion(params);
-                    },
-                  },
-                },
-                this.index == params.index ? "已选" : "选择"
-              ),
-            ]);
-          },
-        },
-      ],
-      seckillColumns: [
-        {
-          title: "商品名称",
-          key: "goodsName",
-          tooltip: true,
-          width: 200,
-        },
-        {
-          title: "店铺名称",
-          key: "storeName",
-          tooltip: true,
-        },
-        {
-          title: "活动时间",
-          key: "timeLine",
-          tooltip: true,
-          render: (h, params) => {
-            return h("div", {}, `${params.row.timeLine}点`);
-          },
-        },
-
-        {
-          title: "原价",
-          key: "originalPrice",
-          tooltip: true,
-          render: (h, params) => {
-            return h(
-              "div",
-              {},
-              this.$options.filters.unitPrice(params.row.originalPrice)
-            );
-          },
-        },
-        {
-          title: "现价",
-          key: "price",
-          tooltip: true,
-          render: (h, params) => {
-            return h(
-              "div",
-              {
-                style: {},
-              },
-              this.$options.filters.unitPrice(params.row.price, "￥")
-            );
-          },
-        },
-        {
-          title: "状态",
-          key: "promotionApplyStatus",
-          tooltip: true,
-          render: (h, params) => {
-            return h(
-              "div",
-              {
-                style: {},
-              },
-              params.row.promotionApplyStatus == "APPLY"
-                ? "申请"
-                : params.row.promotionApplyStatus == "PASS"
-                ? "通过"
-                : "拒绝"
-            );
-          },
-        },
-
-        {
-          title: "操作",
-          key: "action",
-          width: 100,
-          fixed: "right",
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.selectedPromotion(params);
-                    },
-                  },
-                },
-                this.index == params.index ? "已选" : "选择"
-              ),
-            ]);
-          },
-        },
-      ],
-
-      activeColumns: [], // 活动表头
-
-      columns: [
-        {
-          title: "活动标题",
-          key: "title",
-          tooltip: true,
-          width: 200,
-        },
-        {
-          title: "商品名称",
-          key: "goodsName",
-          tooltip: true,
-        },
-        {
-          title: "活动开始时间",
-          key: "startTime",
-          tooltip: true,
-        },
-        {
-          title: "活动结束时间",
-          key: "endTime",
-          tooltip: true,
-        },
-        {
-          title: "操作",
-          key: "action",
-          fixed: "right",
-          width: 100,
-          render: (h, params) => {
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.selectedPromotion(params);
-                    },
-                  },
-                },
-                this.index == params.index ? "已选" : "选择"
-              ),
-            ]);
-          },
-        },
-      ],
-
-      promotionData: "", //商品集合
-
-      showPromotionList: [], //显示当前促销的商品
+      showPromotionList: [],
     };
+  },
+  computed: {
+    isSeckillMode() {
+      return this.promotions === "SECKILL";
+    },
   },
   mounted() {
     this.init();
@@ -278,97 +99,48 @@ export default {
     params: {
       handler() {
         this.index = 999;
-        this.typeOption(this.promotions) &&
-          this.typeOption(this.promotions).methodsed();
+        this.typeOption(this.promotions) && this.typeOption(this.promotions).methodsed();
       },
       deep: true,
     },
   },
-
   methods: {
+    seckillStatusText(v) {
+      if (v === "APPLY") return "申请";
+      if (v === "PASS") return "通过";
+      return "拒绝";
+    },
     sortGoods(type) {
       this.loading = false;
-      this.params.pageNumber - 1;
       this.showPromotionList = this.promotionList[type];
     },
     typeOption(type) {
-      // 活动选项
       switch (type) {
         case "FULL_DISCOUNT":
-          return {
-            title: "满减",
-            methodsed: () => {
-              this.showPromotionList = [];
-              this.activeColumns = this.pintuanColumns;
-
-              this.sortGoods("FULL_DISCOUNT");
-            },
-          };
+          return { title: "满减", methodsed: () => { this.showPromotionList = []; this.sortGoods("FULL_DISCOUNT"); } };
         case "PINTUAN":
-          return {
-            title: "拼团",
-            methodsed: (id) => {
-              this.showPromotionList = [];
-              this.activeColumns = this.pintuanColumns;
-              this.sortGoods("PINTUAN");
-            },
-          };
-
+          return { title: "拼团", methodsed: () => { this.showPromotionList = []; this.sortGoods("PINTUAN"); } };
         case "KANJIA":
-          return {
-            title: "砍价",
-            methodsed: (id) => {
-              this.showPromotionList = [];
-              this.activeColumns = this.pintuanColumns;
-              this.sortGoods("KANJIA");
-            },
-          };
+          return { title: "砍价", methodsed: () => { this.showPromotionList = []; this.sortGoods("KANJIA"); } };
         case "SECKILL":
-          return {
-            title: "秒杀",
-            methodsed: () => {
-              this.showPromotionList = [];
-              this.activeColumns = this.seckillColumns;
-              this.sortGoods("SECKILL");
-            },
-          };
-        // case "COUPON":
-        //   return {
-        //     title: "优惠券",
-        //     methodsed: () => {
-        //       this.showPromotionList = [];
-        //       this.activeColumns = this.pintuanColumns;
-        //       this.sortGoods("COUPON");
-        //     },
-        //   };
+          return { title: "秒杀", methodsed: () => { this.showPromotionList = []; this.sortGoods("SECKILL"); } };
         case "POINTS_GOODS":
-          return {
-            title: "积分商品",
-            methodsed: () => {
-              this.showPromotionList = [];
-              this.activeColumns = this.pintuanColumns;
-              this.sortGoods("POINTS_GOODS");
-            },
-          };
+          return { title: "积分商品", methodsed: () => { this.showPromotionList = []; this.sortGoods("POINTS_GOODS"); } };
         default:
           return {};
       }
     },
-    // 选择活动
     selectedPromotion(val) {
       val.row.___type = "marketing";
       val.row.___promotion = this.promotions;
       this.$emit("selected", [val.row]);
-
       this.index = val.index;
     },
-    // 获取所有营销的活动
     async init() {
-      let res = await getAllPromotion();
+      const res = await getAllPromotion();
       if (res.success) {
         this.loading = false;
         this.getPromotion(res);
-        // this.clickPromotion(this.typeOption[Object.keys(res.result)[0]], 0);
       } else {
         this.loading = false;
       }
@@ -376,43 +148,25 @@ export default {
     getPromotion(res) {
       if (res.result) {
         this.promotionList = res.result;
-        // 去除优惠券
         delete this.promotionList.COUPON;
         Object.keys(res.result)[0] && this.typeOption(Object.keys(res.result)[0]).methodsed();
         this.promotions = Object.keys(res.result)[0];
       }
-
-      // if (Object.keys(res.result).length) {
-      //   this.typeOption[Object.keys(res.result)[0]].methodsed(
-      //     this.promotionList[Object.keys(res.result)[0]].id
-      //   );
-      // }
     },
-
-    // 点击某个活动查询活动列表
     clickPromotion(val, i) {
       this.promotions = val;
       this.selectedIndex = i;
       this.params.pageNumber = 1;
-      this.typeOption(val) &&
-        this.typeOption(val).methodsed(this.promotionList[val].id);
+      this.typeOption(val) && this.typeOption(val).methodsed(this.promotionList[val].id);
     },
   },
 };
 </script>
 <style lang="scss" scoped>
-img {
-  max-width: 100% !important;
-}
-.search {
-  width: 300px;
-}
-.page {
-  margin-top: 2vh;
-  text-align: right;
-}
-.time {
-  font-size: 12px;
+.link-text {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
 }
 .tables {
   height: 400px;
@@ -420,13 +174,12 @@ img {
   overflow: auto;
   width: 100%;
 }
-::v-deep .ivu-table-wrapper {
-  width: 100%;
-}
 .list {
   margin: 0 1.5%;
   height: 400px;
   overflow: auto;
+  flex: 1;
+  width: auto;
   > .list-item {
     padding: 10px;
     transition: 0.35s;
@@ -435,10 +188,6 @@ img {
   .list-item:hover {
     background: #ededed;
   }
-}
-.list {
-  flex: 1;
-  width: auto;
 }
 .content {
   overflow: hidden;
@@ -449,11 +198,6 @@ img {
 }
 .wrapper {
   overflow: hidden;
-}
-.search-views {
   display: flex;
-  > * {
-    margin: 0 4px;
-  }
 }
 </style>

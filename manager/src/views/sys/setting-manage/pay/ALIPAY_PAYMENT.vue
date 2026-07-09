@@ -1,32 +1,33 @@
 <template>
   <div class="layout">
-    <Form ref="formValidate" :label-width="160" label-position="right" :model="formValidate" :rules="ruleValidate">
-      <FormItem label="appId" prop="appId">
-        <Input maxlength="300" class="w200" v-model="formValidate.appId" />
-      </FormItem>
-      <FormItem label="certPath" prop="certPath">
-        <Input maxlength="300"  v-model="formValidate.certPath" />
-      </FormItem>
-      <FormItem label="alipayPublicCertPath" prop="alipayPublicCertPath">
-        <Input maxlength="300" v-model="formValidate.alipayPublicCertPath" />
-      </FormItem>
-      <FormItem label="privateKey" class="label-item" prop="privateKey">
-        <Input maxlength="3000" v-model="formValidate.privateKey" />
-      </FormItem>
-      <FormItem label="rootCertPath" prop="rootCertPath">
-        <Input maxlength="300" v-model="formValidate.rootCertPath" />
-      </FormItem>
-      <FormItem label="支付回调域名" prop="callbackUrl">
-        <Input maxlength="300" v-model="formValidate.callbackUrl" />
-      </FormItem>
+    <el-form ref="formValidate" label-width="160px" label-position="right" :model="formValidate" :rules="ruleValidate">
+      <el-form-item label="appId" prop="appId">
+        <el-input maxlength="300" class="w200" v-model="formValidate.appId" />
+      </el-form-item>
+      <el-form-item label="certPath" prop="certPath">
+        <el-input maxlength="300"  v-model="formValidate.certPath" />
+      </el-form-item>
+      <el-form-item label="alipayPublicCertPath" prop="alipayPublicCertPath">
+        <el-input maxlength="300" v-model="formValidate.alipayPublicCertPath" />
+      </el-form-item>
+      <el-form-item label="privateKey" class="label-item" prop="privateKey">
+        <el-input maxlength="3000" v-model="formValidate.privateKey" />
+      </el-form-item>
+      <el-form-item label="rootCertPath" prop="rootCertPath">
+        <el-input maxlength="300" v-model="formValidate.rootCertPath" />
+      </el-form-item>
+      <el-form-item label="支付回调域名" prop="callbackUrl">
+        <el-input maxlength="300" v-model="formValidate.callbackUrl" />
+      </el-form-item>
       <div class="label-btns">
-        <Button type="primary" @click="submit('formValidate')">保存</Button>
+        <el-button type="primary" @click="submit('formValidate')">保存</el-button>
 
       </div>
-    </Form>
+    </el-form>
   </div>
 </template>
 <script>
+import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
 export default {
@@ -49,26 +50,26 @@ export default {
   },
   methods: {
     submit(name) {
-      let that = this;
-      if (handleSubmit(that, name)) {
-        this.setupSetting();
-      }
+      handleSubmit(this, name)
+        .then(() => {
+          this.setupSetting();
+        })
+        .catch(() => {});
     },
     // 保存设置
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {
-          this.$Message.success("保存成功!");
+          ElMessage.success("保存成功!");
         } else {
-          this.$Message.error("保存失败!");
+          ElMessage.error("保存失败!");
         }
       });
     },
     // 实例化数据
     init() {
-      this.res = JSON.parse(this.res);
-
-      this.$set(this, "formValidate", { ...this.res });
+      const setting = JSON.parse(this.res || "{}");
+      this.formValidate = { ...setting };
       Object.keys(this.formValidate).forEach((item) => {
         this.ruleValidate[item] = [
           {
@@ -90,16 +91,16 @@ export default {
   display: flex;
 }
 .w200 {
-  ::v-deep .ivu-input {
+  :deep(.el-input){
     width: 250px !important;
     margin: 0 10px;
   }
 }
-::v-deep .ivu-input {
+:deep(.el-input){
   width: 450px !important;
   margin: 0 10px;
 }
-.ivu-input-wrapper {
+.el-input {
   width: 450px;
   margin-right: 10px;
 }

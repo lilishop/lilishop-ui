@@ -1,189 +1,195 @@
 <template>
   <div>
     <div class="upload-pic-thumb">
-      <vuedraggable
-        :list="uploadList"
-        :disabled="!draggable||!multiple"
-        :animation="200"
-        class="list-group"
-        ghost-class="thumb-ghost"
-        @end="onEnd"
-      >
-        <div class="upload-list" v-for="(item, index) in uploadList" :key="index">
-          <div v-if="item.status == 'finished'" style="height:60px;">
-            <img :src="item.url" />
+      <div v-if="!multiple" class="list-group">
+        <div v-for="item in uploadList" :key="draggableItemKey(item)" class="upload-list">
+          <div v-if="item.status == 'finished'" style="height: 60px">
+            <img :src="item.url" alt="" />
             <div class="upload-list-cover">
-              <Icon type="ios-eye-outline" @click="handleView(item.url)"></Icon>
-              <Icon type="ios-trash-outline" @click="handleRemove(item)"></Icon>
+              <el-icon class="action-icon" @click="handleView(item.url)"><View /></el-icon>
+              <el-icon class="action-icon" @click="handleRemove(item)"><Delete /></el-icon>
             </div>
           </div>
           <div v-else>
-            <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
+            <el-progress
+              v-if="item.showProgress"
+              :percentage="item.percentage"
+              :show-text="false"
+            />
           </div>
         </div>
+      </div>
+      <vuedraggable
+        v-else
+        v-model="uploadList"
+        :disabled="!draggable"
+        :animation="200"
+        class="list-group"
+        ghost-class="thumb-ghost"
+        :item-key="draggableItemKey"
+        @end="onEnd"
+      >
+        <template #item="{ element: item }">
+          <div class="upload-list">
+            <div v-if="item.status == 'finished'" style="height: 60px">
+              <img :src="item.url" alt="" />
+              <div class="upload-list-cover">
+                <el-icon class="action-icon" @click="handleView(item.url)"><View /></el-icon>
+                <el-icon class="action-icon" @click="handleRemove(item)"><Delete /></el-icon>
+              </div>
+            </div>
+            <div v-else>
+              <el-progress
+                v-if="item.showProgress"
+                :percentage="item.percentage"
+                :show-text="false"
+              />
+            </div>
+          </div>
+        </template>
       </vuedraggable>
-      <Upload
+      <el-upload
         ref="upload"
-        :multiple="multiple"
-        :show-upload-list="false"
-        :on-success="handleSuccess"
-        :on-error="handleError"
-        :format="['jpg','jpeg','png','gif']"
-        :max-size="1024"
-        :on-format-error="handleFormatError"
-        :on-exceeded-size="handleMaxSize"
-        :before-upload="handleBeforeUpload"
-        type="drag"
+        class="upload-box"
         :action="uploadFileUrl"
         :headers="accessToken"
-        style="display: inline-block;width:58px;"
+        :multiple="multiple"
+        :show-file-list="false"
+        accept=".jpg,.jpeg,.png,.gif"
+        :before-upload="handleBeforeUpload"
+        :on-success="handleSuccess"
+        :on-error="handleError"
       >
-        <div style="width: 58px;height:58px;line-height: 58px;">
-          <Icon type="md-camera" size="20"></Icon>
+        <div class="upload-trigger">
+          <el-icon :size="20"><Camera /></el-icon>
         </div>
-      </Upload>
+      </el-upload>
     </div>
-    <Modal title="图片预览" v-model="viewImage" :styles="{top: '30px'}" draggable>
-      <img :src="imgUrl" alt="无效的图片链接" style="width: 100%;margin: 0 auto;display: block;" />
-      <div slot="footer">
-        <Button @click="viewImage=false">关闭</Button>
-      </div>
-    </Modal>
+
+    <el-dialog v-model="viewImage" title="图片预览" width="520px" append-to-body>
+      <img :src="imgUrl" alt="无效的图片链接" style="width: 100%; display: block; margin: 0 auto" />
+      <template #footer>
+        <el-button @click="viewImage = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import { Camera, Delete, View } from "@element-plus/icons-vue";
 import { uploadFile } from "@/api/index";
 import vuedraggable from "vuedraggable";
+
 export default {
   name: "uploadPicThumb",
   components: {
-    vuedraggable
+    vuedraggable,
+    Camera,
+    Delete,
+    View,
   },
   props: {
-    value: {
-      type: null
-    },
+    modelValue: { type: null },
+    value: { type: null },
     draggable: {
       type: Boolean,
-      default: true
+      default: true,
     },
     multiple: {
       type: Boolean,
-      default: true
+      default: true,
     },
     limit: {
       type: Number,
-      default: 10
-    }
+      default: 10,
+    },
   },
+  emits: ["update:modelValue", "input", "on-change", "uploadchange"],
   data() {
     return {
-      accessToken: {}, // 验证token
-      uploadFileUrl: uploadFile, // 上传地址
-      uploadList: [], // 上传列表
-      viewImage: false, // 预览modal
-      imgUrl: "" // 图片地址
+      accessToken: {},
+      uploadFileUrl: uploadFile,
+      uploadList: [],
+      viewImage: false,
+      imgUrl: "",
     };
   },
+  computed: {
+    bindValue() {
+      return this.modelValue !== undefined ? this.modelValue : this.value;
+    },
+  },
   methods: {
-    // 拖拽结束事件
+    draggableItemKey(item) {
+      return item.url || item.uid || item.name;
+    },
     onEnd() {
       this.returnValue();
     },
-    // 初始化方法
     init() {
-      this.setData(this.value, true);
+      this.setData(this.bindValue, true);
       this.accessToken = {
-        accessToken: this.getStore("accessToken")
+        accessToken: this.getStore("accessToken"),
       };
     },
-    // 预览图片
     handleView(imgUrl) {
       this.imgUrl = imgUrl;
       this.viewImage = true;
     },
-    // 移除图片
     handleRemove(file) {
-      this.uploadList = this.uploadList.filter(i => i.url !== file.url);
+      this.uploadList = this.uploadList.filter((i) => i.url !== file.url);
       this.returnValue();
     },
-    // 上传成功
     handleSuccess(res, file) {
       if (res.success) {
         file.url = res.result;
-        // 单张图片处理
         if (!this.multiple && this.uploadList.length > 0) {
-          // 删除第一张
           this.uploadList.splice(0, 1);
         }
         this.uploadList.push(file);
-        // 返回组件值
         this.returnValue();
       } else {
         this.$Message.error(res.message);
       }
     },
-    // 上传失败
-    handleError(error, file, fileList) {
+    handleError(error) {
       this.$Message.error(error.toString());
     },
-    // 格式校验
-    handleFormatError(file) {
-      this.$Notice.warning({
-        title: "不支持的文件格式",
-        desc:
-          "所选文件‘ " +
-          file.name +
-          " ’格式不正确, 请选择 .jpg .jpeg .png .gif图片格式文件"
-      });
-    },
-    // 上传文件大小校验
-    handleMaxSize(file) {
-      this.$Notice.warning({
-        title: "文件大小过大",
-        desc:
-          "所选文件大小过大，不能超过1M."
-      });
-    },
-    // 上传之前钩子
-    handleBeforeUpload() {
+    handleBeforeUpload(file) {
+      const okType = ["image/jpeg", "image/png", "image/gif", "image/jpg"].includes(file.type);
+      if (!okType) {
+        this.$Message.warning("请选择 .jpg .jpeg .png .gif 格式图片");
+        return false;
+      }
+      if (file.size / 1024 > 1024) {
+        this.$Message.warning("所选文件大小过大，不能超过 1M");
+        return false;
+      }
       if (this.multiple && this.uploadList.length >= this.limit) {
         this.$Message.warning("最多只能上传" + this.limit + "张图片");
         return false;
       }
       return true;
     },
-    // 返回组件值
+    emitValue(val) {
+      this.$emit("update:modelValue", val);
+      this.$emit("input", val);
+      this.$emit("on-change", val);
+    },
     returnValue() {
       if (!this.uploadList || this.uploadList.length < 1) {
-        if (!this.multiple) {
-          this.$emit("input", "");
-          this.$emit("on-change", "");
-        } else {
-          this.$emit("input", []);
-          this.$emit("on-change", []);
-        }
+        const empty = this.multiple ? [] : "";
+        this.emitValue(empty);
         return;
       }
       if (!this.multiple) {
-        // 单张
-        let v = this.uploadList[0].url;
-        this.$emit("input", v);
-        this.$emit("on-change", v);
+        this.emitValue(this.uploadList[0].url);
       } else {
-        let v = [];
-        this.uploadList.forEach(e => {
-          v.push(e.url);
-        });
-        this.$emit("input", v);
-        this.$emit("on-change", v);
+        this.emitValue(this.uploadList.map((e) => e.url));
       }
     },
-    // 传入值变化时改变值
     setData(v, init) {
       if (typeof v == "string") {
-        // 单张
         if (this.multiple) {
           this.$Message.warning("多张上传仅支持数组数据类型");
           return;
@@ -191,60 +197,49 @@ export default {
         if (!v) {
           return;
         }
-        this.uploadList = [];
-        let item = {
-          url: v,
-          status: "finished"
-        };
-        this.uploadList.push(item);
+        this.uploadList = [{ url: v, status: "finished" }];
         this.$emit("uploadchange", v);
-        this.$emit("on-change", v);
-      } else if (typeof v == "object") {
-        // 多张
+        this.emitValue(v);
+      } else if (typeof v == "object" && v) {
         if (!this.multiple) {
           this.$Message.warning("单张上传仅支持字符串数据类型");
           return;
         }
         this.uploadList = [];
+        const list = v.length > this.limit ? v.slice(0, this.limit) : v;
         if (v.length > this.limit) {
-          for (let i = 0; i < this.limit; i++) {
-            let item = {
-              url: v[i],
-              status: "finished"
-            };
-            this.uploadList.push(item);
-          }
-          this.$emit("on-change", v.slice(0, this.limit));
-          if (init) {
-            this.$emit("input", v.slice(0, this.limit));
-          }
           this.$Message.warning("最多只能上传" + this.limit + "张图片");
-        } else {
-          v.forEach(e => {
-            let item = {
-              status: "finished",
-              ...e
-            };
-            this.uploadList.push(item);
+        }
+        list.forEach((e) => {
+          this.uploadList.push({
+            status: "finished",
+            ...(typeof e === "string" ? { url: e } : e),
           });
-          this.$emit("on-change", v);
+        });
+        if (init) {
+          this.emitValue(list);
+        } else {
+          this.$emit("on-change", list);
         }
       }
-    }
+    },
   },
   watch: {
+    modelValue(val) {
+      this.setData(val);
+    },
     value(val) {
       this.setData(val);
-    }
+    },
   },
   mounted() {
     this.init();
-  }
+  },
 };
 </script>
 
 <style lang="scss" scoped>
-.upload-pic-thumb{
+.upload-pic-thumb {
   display: flex;
 }
 .upload-list {
@@ -264,7 +259,8 @@ export default {
 }
 .upload-list img {
   width: 100%;
-  height: -webkit-fill-available;
+  height: 100%;
+  object-fit: cover;
 }
 .upload-list-cover {
   display: none;
@@ -274,15 +270,17 @@ export default {
   left: 0;
   right: 0;
   background: rgba(0, 0, 0, 0.6);
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 .upload-list:hover .upload-list-cover {
-  display: block;
+  display: flex;
 }
-.upload-list-cover i {
+.action-icon {
   color: #fff;
   font-size: 20px;
   cursor: pointer;
-  margin: 0 2px;
 }
 .list-group {
   display: inline-block;
@@ -290,5 +288,30 @@ export default {
 .thumb-ghost {
   opacity: 0.5;
   background: #c8ebfb;
+}
+.upload-box {
+  display: inline-block;
+  vertical-align: middle;
+
+  :deep(.el-upload) {
+    display: inline-block;
+    vertical-align: top;
+  }
+}
+.upload-trigger {
+  width: 60px;
+  height: 60px;
+  border: 1px dashed #dcdfe6;
+  border-radius: 4px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--el-color-primary);
+    color: var(--el-color-primary);
+  }
 }
 </style>

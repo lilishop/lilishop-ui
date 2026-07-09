@@ -5,86 +5,81 @@
 
     <div class="title-bg"><p>文章帮助中心</p></div>
     <div class="container width_1200">
-      <Layout class="layoutAll">
-        <Sider class="side-bar" ref="side" :collapsed-width="78">
+      <div class="layoutAll">
+        <el-aside class="side-bar" width="200px">
           <div class="article-cate">文章分类列表</div>
-          <Menu
+          <el-menu
             class="side-menu"
-            theme="light"
-            width="auto"
-            ref='menu'
-            :active-name="activeName"
-            :open-names="openName"
-            @on-select="onSelect"
+            :key="menuKey"
+            :default-active="String(activeName)"
+            :default-openeds="openName"
+            @select="onSelect"
           >
-            <!-- 循环导航栏  -->
-            <Submenu
-              v-show="menu.children"
+            <el-sub-menu
               v-for="(menu, index) in list"
+              v-show="menu.children"
               :key="index"
-              :name="menu.articleCategoryName"
+              :index="menu.articleCategoryName"
             >
-              <template slot="title">
+              <template #title>
                 <span>{{ menu.articleCategoryName }}</span>
               </template>
-              <MenuItem
+              <el-menu-item
                 v-for="(chlidren, i) in menu.children"
                 :key="i"
-                :name="chlidren.id"
-                >{{ chlidren.articleCategoryName }}</MenuItem
-              >
-            </Submenu>
-          </Menu>
-        </Sider>
-        <Layout class="layout ml_10">
-          <Content class="content">
-            <ul class="article-list" v-show="showList">
-              <li v-for="(article, index) in articleList" :key="index" @click="getDetail(article.id)">
-                {{article.title}}
-              </li>
-            </ul>
-            <transition mode="out-in">
-              <div v-show="!showList">
-                <a class="back-btn" @click="showList = true">&lt;返回上一级</a>
-                <h2 class="mt_10 mb_10">{{detail.title}}</h2>
-                <div class="mt_10 mb_10" v-html="detail.content"></div>
-              </div>
-            </transition>
-          </Content>
-        </Layout>
-      </Layout>
+                :index="String(chlidren.id)"
+              >{{ chlidren.articleCategoryName }}</el-menu-item>
+            </el-sub-menu>
+          </el-menu>
+        </el-aside>
+        <el-main class="content ml_10">
+          <ul class="article-list" v-show="showList">
+            <li v-for="(article, index) in articleList" :key="index" @click="getDetail(article.id)">
+              {{ article.title }}
+            </li>
+          </ul>
+          <transition mode="out-in">
+            <div v-show="!showList">
+              <a class="back-btn" @click="showList = true">&lt;返回上一级</a>
+              <h2 class="mt_10 mb_10">{{ detail.title }}</h2>
+              <div class="mt_10 mb_10" v-html="detail.content"></div>
+            </div>
+          </transition>
+        </el-main>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import {articleCateList, articleDetail, articleList} from '@/api/common.js'
+import { articleCateList, articleDetail, articleList } from '@/api/common.js'
+
 export default {
-  name: 'Home',
+  name: 'ArticleIndex',
   data () {
     return {
-      list: [], // 分类列表
-      detail: '', // 文章详情
-      articleList: [], // 分类下的文章列表
-      activeName: '1347456734864367616', // 左侧激活项
-      openName: [], // 展开的名称
-      params: { // 请求参数
+      list: [],
+      detail: '',
+      articleList: [],
+      activeName: '1347456734864367616',
+      openName: [],
+      menuKey: 0,
+      params: {
         pageNumber: 1,
         pageSize: 100,
         categoryId: '',
         sort: 'sort'
       },
-      showList: true // 展示文章列表
+      showList: true
     };
   },
   methods: {
-    // 每次点击左侧bar的callback
     onSelect (id) {
       this.getList(id)
       this.detail = ''
       this.showList = true
     },
-    getCateList () { // 文章分类列表
+    getCateList () {
       articleCateList().then(res => {
         if (res.success) {
           this.list = res.result
@@ -105,15 +100,12 @@ export default {
             this.activeName = this.list[0].children[0].id
             this.openName.push(this.list[0].articleCategoryName)
           }
-          this.$nextTick(() => {
-            this.$refs.menu.updateOpened()
-            this.$refs.menu.updateActiveName()
-          })
+          this.menuKey++
           this.getList(this.activeName)
         }
       })
     },
-    getList (id) { // 文章列表
+    getList (id) {
       this.params.categoryId = id
       articleList(this.params).then(res => {
         if (res.success) {
@@ -121,7 +113,7 @@ export default {
         }
       })
     },
-    async getDetail (id) { // 文章详情
+    async getDetail (id) {
       await articleDetail(id).then(res => {
         if (res.success) {
           this.detail = res.result
@@ -162,6 +154,7 @@ export default {
 }
 
 .layoutAll {
+  display: flex;
   min-height: 1200px;
   @include background_color($light_background_color);
 }
@@ -177,7 +170,6 @@ export default {
 
 .layout-footer-center {
   padding: 0px 15px;
-
   padding-bottom: 15px;
   text-align: center;
 }
@@ -191,7 +183,6 @@ export default {
     height: 100px;
     line-height: 100px;
     color: #fff;
-    line-height: 100px;
     margin: 0 auto;
     padding-left: 10px;
   }

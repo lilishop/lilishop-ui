@@ -16,7 +16,7 @@
     z-index: 99;
     width: 100%;
     height: 100%;
-    .ivu-btn{
+    .el-button{
         float: right;
         margin-right: 5px;
         margin-top: 5px;
@@ -45,18 +45,5 @@
     }
     tbody>tr:hover{
         background-color: aliceblue;
-    }
-}
-
-.modal-top-advert{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    >*{
-        margin-bottom: 10px;
-    }
-    .ivu-input-wrapper{
-        width: 200px;
     }
 }

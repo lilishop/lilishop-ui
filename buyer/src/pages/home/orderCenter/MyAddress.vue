@@ -1,42 +1,47 @@
 <template>
-  <div>
-    <card _Title="收货地址" _More="添加新地址" _Src="/home/addAddress"></card>
-    <div class="address-box" v-for="(item, index) in list" :key="index">
-      <div class="address-header">
-        <span>
-          {{ item.name }}
-          <Tag class="ml_10" v-if="item.isDefault" color="red">默认地址</Tag>
-          <Tag class="ml_10" v-if="item.alias" color="warning">{{item.alias}}</Tag>
-        </span>
-        <div class="address-action">
-          <span @click="edit(item.id)"><Icon type="edit"></Icon>修改</span>
-          <span @click="del(item.id)"><Icon type="trash-a"></Icon>删除</span>
+  <div class="wrapper">
+    <UserCenterLayout title="收货地址" :tabs="['收货地址']" more-text="添加新地址" more-to="/home/addAddress">
+      <template #extra>
+        <el-button type="primary" @click="add">添加新地址</el-button>
+      </template>
+      <div class="address-box" v-for="(item, index) in list" :key="index">
+        <div class="address-header">
+          <span>
+            {{ item.name }}
+            <el-tag class="ml_10 default-address-tag" v-if="item.isDefault">默认地址</el-tag>
+            <el-tag class="ml_10" v-if="item.alias" color="warning">{{item.alias}}</el-tag>
+          </span>
+          <div class="address-action">
+            <span @click="edit(item.id)"><el-icon><Edit /></el-icon>修改</span>
+            <span @click="del(item.id)"><el-icon><Delete /></el-icon>删除</span>
+          </div>
+        </div>
+        <div class="address-content">
+          <p>
+            <span class="address-content-title"> 收 货 人 :</span> {{ item.name }}
+          </p>
+          <p>
+            <span class="address-content-title">收货地区:</span>{{ $filters.unitAddress(item.consigneeAddressPath) }}
+          </p>
+          <p>
+            <span class="address-content-title">详细地址:</span> {{ item.detail }}
+          </p>
+          <p>
+            <span class="address-content-title">手机号码:</span> {{ item.mobile }}
+          </p>
         </div>
       </div>
-      <div class="address-content">
-        <p>
-          <span class="address-content-title"> 收 货 人 :</span> {{ item.name }}
-        </p>
-        <p>
-          <span class="address-content-title">收货地区:</span
-          >{{ item.consigneeAddressPath | unitAddress }}
-        </p>
-        <p>
-          <span class="address-content-title">详细地址:</span> {{ item.detail }}
-        </p>
-        <p>
-          <span class="address-content-title">手机号码:</span> {{ item.mobile }}
-        </p>
-      </div>
-    </div>
+    </UserCenterLayout>
   </div>
 </template>
 
 <script>
-import card from '@/components/card';
+import { Message, Modal } from "@/utils/message";
+import { Delete, Edit } from '@element-plus/icons-vue';
 import { memberAddress, delMemberAddress } from '@/api/address.js';
 
 export default {
+  components: { Delete, Edit },
   name: 'MyAddress',
 
   data () {
@@ -45,25 +50,28 @@ export default {
     };
   },
   methods: {
+    add () {
+      this.$router.push('/home/addAddress');
+    },
     edit (id) {
       // 编辑地址
       this.$router.push({ path: '/home/addAddress', query: { id: id } });
     },
     del (id) {
       // 删除地址
-      this.$Modal.confirm({
+      Modal.confirm({
         title: '提示',
         content: '你确定删除这个收货地址',
         onOk: () => {
           delMemberAddress(id).then((res) => {
             if (res.success) {
-              this.$Message.success('删除成功');
+              Message.success('删除成功');
               this.getAddrList();
             }
           });
         },
         onCancel: () => {
-          this.$Message.info('取消删除');
+          Message.info('取消删除');
         }
       });
     },
@@ -84,11 +92,17 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.wrapper {
+  margin-bottom: 40px;
+}
 .address-box {
   padding: 15px;
-  margin: 15px;
-
+  margin: 0;
   border-bottom: 1px solid $border_color;
+
+  &:last-child {
+    border-bottom: 0;
+  }
 }
 
 .address-header {
@@ -113,11 +127,29 @@ export default {
  
 }
 
-.address-action span {
-  margin-left: 15px;
-  font-size: 14px;
-  color: $theme_color;
-  cursor: pointer;
+.address-action {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    color: $theme_color;
+    cursor: pointer;
+
+    .el-icon {
+      font-size: 14px;
+    }
+  }
+}
+
+.default-address-tag {
+  background-color: #fff3f2 !important;
+  border: 1px solid $theme_color !important;
+  color: $theme_color !important;
 }
 
 #map-container {

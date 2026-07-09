@@ -44,7 +44,8 @@ export function editMemberInfo (params) {
     url: '/buyer/passport/member/editOwn',
     method: Method.PUT,
     needToken: true,
-    data: params
+    data: params,
+    loading: false
   })
 }
 
@@ -54,7 +55,9 @@ export function editPwd (params) {
     url: `/buyer/passport/member/modifyPass`,
     method: Method.PUT,
     needToken: true,
-    data: params
+    data: params,
+    loading: false,
+    skipMessage: true
   })
 }
 

@@ -1,66 +1,78 @@
 <template>
   <div class="search">
-    <Card>
-      <Row class="operation padding-row">
-        <Button type="primary" @click="openAdd">添加分组</Button>
-      </Row>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        class="mt_10"
-      ></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+    <el-card>
+      <div class="operation padding-row">
+        <el-button type="primary" @click="openAdd">添加分组</el-button>
+      </div>
+    </el-card>
+
+    <el-card>
+      <el-table ref="table" v-loading="loading" :data="data" border class="mt_10" style="width: 100%">
+        <el-table-column prop="groupName" label="分组名称" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="description" label="分组描述" min-width="240" show-overflow-tooltip />
+        <el-table-column prop="createTime" label="创建时间" min-width="180" />
+        <el-table-column prop="updateTime" label="更新时间" min-width="180" />
+        <el-table-column label="操作" width="200" align="center" fixed="right">
+          <template #default="{ row }">
+            <div v-if="row" class="ops" style="display: flex; justify-content: center">
+              <a class="link-text" @click="openEdit(row)">编辑</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="remove(row)">删除</a>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
-    <Modal v-model="addFlag" title="添加分组">
-      <Form ref="addForm" :model="formAdd" :rules="rulesAdd" :label-width="90">
-        <FormItem label="分组名称" prop="groupName" style="width: 90%;">
-          <Input v-model="formAdd.groupName" maxlength="30" placeholder="请输入分组名称" />
-        </FormItem>
-        <FormItem label="分组描述" prop="description" style="width: 90%;">
-          <Input v-model="formAdd.description" maxlength="200" placeholder="请输入分组描述" />
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button @click="addFlag = false">取消</Button>
-        <Button type="primary" :loading="submitAddLoading" @click="submitAdd">确定</Button>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
       </div>
-    </Modal>
-    <Modal v-model="editFlag" title="编辑分组">
-      <Form ref="editForm" :model="formEdit" :rules="rulesEdit" :label-width="90">
-        <Input v-model="formEdit.id" v-show="false" />
-        <FormItem label="分组名称" prop="groupName" style="width: 90%;">
-          <Input v-model="formEdit.groupName" maxlength="30" placeholder="请输入分组名称" />
-        </FormItem>
-        <FormItem label="分组描述" prop="description" style="width: 90%;">
-          <Input v-model="formEdit.description" maxlength="200" placeholder="请输入分组描述" />
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button @click="editFlag = false">取消</Button>
-        <Button type="primary" :loading="submitEditLoading" @click="submitEdit">确定</Button>
-      </div>
-    </Modal>
+    </el-card>
+
+    <el-dialog v-model="addFlag" title="添加分组" width="500px" :close-on-click-modal="false" destroy-on-close>
+      <el-form ref="addForm" :model="formAdd" :rules="rulesAdd" label-width="90px">
+        <el-form-item label="分组名称" prop="groupName" style="width: 90%">
+          <el-input v-model="formAdd.groupName" maxlength="30" placeholder="请输入分组名称" />
+        </el-form-item>
+        <el-form-item label="分组描述" prop="description" style="width: 90%">
+          <el-input v-model="formAdd.description" maxlength="200" placeholder="请输入分组描述" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addFlag = false">取消</el-button>
+        <el-button type="primary" :loading="submitAddLoading" @click="submitAdd">确定</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="editFlag" title="编辑分组" width="500px" :close-on-click-modal="false" destroy-on-close>
+      <el-form ref="editForm" :model="formEdit" :rules="rulesEdit" label-width="90px">
+        <el-input v-model="formEdit.id" style="display: none" />
+        <el-form-item label="分组名称" prop="groupName" style="width: 90%">
+          <el-input v-model="formEdit.groupName" maxlength="30" placeholder="请输入分组名称" />
+        </el-form-item>
+        <el-form-item label="分组描述" prop="description" style="width: 90%">
+          <el-input v-model="formEdit.description" maxlength="200" placeholder="请输入分组描述" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editFlag = false">取消</el-button>
+        <el-button type="primary" :loading="submitEditLoading" @click="submitEdit">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import * as API_Member from "@/api/member.js";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   name: "memberGroup",
@@ -71,67 +83,6 @@ export default {
         pageNumber: 1,
         pageSize: 20,
       },
-      columns: [
-        {
-          title: "分组名称",
-          key: "groupName",
-          minWidth: 160,
-          tooltip: true,
-        },
-        {
-          title: "分组描述",
-          key: "description",
-          minWidth: 240,
-          tooltip: true,
-        },
-        {
-          title: "创建时间",
-          key: "createTime",
-          width: 180,
-        },
-        {
-          title: "更新时间",
-          key: "updateTime",
-          width: 180,
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          width: 200,
-          fixed: "right",
-          render: (h, params) => {
-            const linkStyle = {
-              color: "#2d8cf0",
-              cursor: "pointer",
-              textDecoration: "none",
-            };
-            const sep = h(
-              "span",
-              { style: { margin: "0 8px", color: "#dcdee2" } },
-              "|"
-            );
-            const children = [
-              h(
-                "a",
-                { style: linkStyle, on: { click: () => this.openEdit(params.row) } },
-                "编辑"
-              ),
-              sep,
-              h(
-                "a",
-                { style: linkStyle, on: { click: () => this.remove(params.row) } },
-                "删除"
-              ),
-            ];
-            return h(
-              "div",
-              { class: "ops", style: { display: "flex", justifyContent: "center" } },
-              children
-            );
-          },
-        },
-      ],
       data: [],
       total: 0,
       addFlag: false,
@@ -148,10 +99,10 @@ export default {
         description: "",
       },
       rulesAdd: {
-        groupName: [{ required: true, message: "请输入分组名称" }],
+        groupName: [{ required: true, message: "请输入分组名称", trigger: "blur" }],
       },
       rulesEdit: {
-        groupName: [{ required: true, message: "请输入分组名称" }],
+        groupName: [{ required: true, message: "请输入分组名称", trigger: "blur" }],
       },
     };
   },
@@ -192,7 +143,7 @@ export default {
         API_Member.addMemberGroup(this.formAdd).then((res) => {
           this.submitAddLoading = false;
           if (res && res.success) {
-            this.$Message.success("添加成功");
+            ElMessage.success("添加成功");
             this.addFlag = false;
             this.getData();
           }
@@ -226,7 +177,7 @@ export default {
         API_Member.updateMemberGroup(id, { groupName, description }).then((res) => {
           this.submitEditLoading = false;
           if (res && res.success) {
-            this.$Message.success("修改成功");
+            ElMessage.success("修改成功");
             this.editFlag = false;
             this.getData();
           }
@@ -234,20 +185,16 @@ export default {
       });
     },
     remove(row) {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "<p>确定删除该分组？</p>",
-        onOk: () => {
-          API_Member.deleteMemberGroup(row.id).then((res) => {
-            if (res && res.success) {
-              this.$Message.success("删除成功");
-              this.getData();
-            } else if (res && res.message) {
-              this.$Message.error(res.message);
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("确定删除该分组？", "提示", { type: "warning" }).then(() => {
+        API_Member.deleteMemberGroup(row.id).then((res) => {
+          if (res && res.success) {
+            ElMessage.success("删除成功");
+            this.getData();
+          } else if (res && res.message) {
+            ElMessage.error(res.message);
+          }
+        });
+      }).catch(() => {});
     },
   },
   mounted() {
@@ -255,3 +202,16 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
+}
+</style>

@@ -1,9 +1,157 @@
-import { getCurrentPermissionList } from "@/api/index";
 import lazyLoading from "./lazyLoading.js";
-
+import { getRouter } from "./router-holder";
 import Cookies from "js-cookie";
 
 let util = {};
+
+/** 动态菜单路由 name，用于登出或重新注册时清理 */
+util.dynamicRouteNames = [];
+
+util.normalizeRoutePath = function (path) {
+  return String(path || "")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "");
+};
+
+util.isSameRoutePage = function (a, b) {
+  if (!a || !b) return false;
+  if (a.name && b.name && a.name === b.name) return true;
+  const pathA = util.normalizeRoutePath(a.path);
+  const pathB = util.normalizeRoutePath(b.path);
+  return !!(pathA && pathB && pathA === pathB);
+};
+
+util.findOpenedPageIndex = function (pageOpenedList, name, path) {
+  const normalizedPath = util.normalizeRoutePath(path);
+  return pageOpenedList.findIndex(
+    (item) =>
+      item.name === name ||
+      (normalizedPath &&
+        util.normalizeRoutePath(item.path) === normalizedPath)
+  );
+};
+
+util.clearDynamicRoutes = function () {
+  const router = getRouter();
+  if (!router) return;
+  util.dynamicRouteNames.forEach((name) => {
+    if (router.hasRoute(name)) {
+      router.removeRoute(name);
+    }
+  });
+  util.dynamicRouteNames = [];
+};
+
+util.collectLeafRoutes = function (routes, result = [], parentPath = "") {
+  routes.forEach((route) => {
+    let segment = route.path != null ? String(route.path) : "";
+    segment = segment.replace(/^\//, "");
+    const fullPath = [parentPath, segment].filter(Boolean).join("/");
+    const hasChildren = route.children && route.children.length > 0;
+
+    if (hasChildren) {
+      util.collectLeafRoutes(route.children, result, fullPath);
+    } else if (
+      route.name &&
+      route.component &&
+      !String(route.name).endsWith("__layout")
+    ) {
+      result.push({
+        path: fullPath || segment || route.name,
+        name: route.name,
+        component: route.component,
+        meta: route.meta || {},
+      });
+    }
+  });
+  return result;
+};
+
+/** Vue Router 4：动态路由必须挂到 otherRouter 下，且刷新/热更新后需重新注册 */
+util.registerDynamicRoutes = function (menuData, options = {}) {
+  const router = getRouter();
+  if (!router) return;
+  const { rematch = true } = options;
+  const pendingPath = router.currentRoute.value.fullPath;
+  const pendingUnmatched = router.currentRoute.value.matched.length === 0;
+
+  util.clearDynamicRoutes();
+  const constRoutes = [];
+  util.initAllMenuData(constRoutes, menuData);
+
+  const leaves = [];
+  constRoutes.forEach((top) => {
+    const base = (top.path || "").replace(/^\//, "");
+    if (top.children && top.children.length) {
+      util.collectLeafRoutes(top.children, leaves, base);
+    } else if (
+      top.name &&
+      top.component &&
+      !String(top.name).endsWith("__layout")
+    ) {
+      leaves.push({
+        path: base || top.name,
+        name: top.name,
+        component: top.component,
+        meta: top.meta || {},
+      });
+    }
+  });
+
+  leaves.forEach((leaf) => {
+    const path = util.normalizeRoutePath(leaf.path || leaf.name);
+    if (router.hasRoute(leaf.name)) {
+      return;
+    }
+    router.addRoute("otherRouter", {
+      path,
+      name: leaf.name,
+      component: leaf.component,
+      meta: leaf.meta,
+    });
+    util.dynamicRouteNames.push(leaf.name);
+  });
+
+  if (!router.hasRoute("error-404")) {
+    router.addRoute({
+      path: "/:pathMatch(.*)*",
+      name: "error-404",
+      component: lazyLoading("error-page/404"),
+      meta: { title: "404-页面不存在" },
+    });
+    util.dynamicRouteNames.push("error-404");
+  }
+
+  if (
+    rematch &&
+    pendingUnmatched &&
+    pendingPath &&
+    pendingPath !== "/login"
+  ) {
+    const resolved = router.resolve(pendingPath);
+    if (resolved.matched.length > 0) {
+      router.replace(pendingPath).catch(() => {});
+    }
+  }
+};
+
+/** 从 localStorage 恢复动态路由（刷新深链前必须先注册，避免 /member/xxx 无匹配） */
+util.bootstrapDynamicRoutesFromCache = function () {
+  if (!Cookies.get("userInfoManager")) {
+    return false;
+  }
+  try {
+    const raw = window.localStorage.getItem("menuData");
+    if (!raw) {
+      return false;
+    }
+    util.registerDynamicRoutes(JSON.parse(raw), { rematch: false });
+    return true;
+  } catch (e) {
+    console.warn("[router] menuData parse failed", e);
+    return false;
+  }
+};
 
 util.title = function(title) {
   title = title || "运营后台";
@@ -24,41 +172,43 @@ util.openNewPage = function(vm, name, argu, query) {
     return;
   }
   let pageOpenedList = vm.$store.state.app.pageOpenedList;
-  let openedPageLen = pageOpenedList.length;
-  let i = 0;
-  let tagHasOpened = false;
-  while (i < openedPageLen) {
-    if (name == pageOpenedList[i].name) {
-      // 页面已经打开
-      vm.$store.commit("pageOpenedList", {
-        index: i,
-        argu: argu,
-        query: query
-      });
-      tagHasOpened = true;
-      break;
-    }
-    i++;
-  }
-  if (!tagHasOpened) {
-    let tag = vm.$store.state.app.tagsList.filter(item => {
-      if (item.children) {
-        return name == item.children[0].name;
-      } else {
-        return name == item.name;
-      }
+  const currentPath = vm.$route ? vm.$route.path : "";
+  const openedIndex = util.findOpenedPageIndex(pageOpenedList, name, currentPath);
+  if (openedIndex >= 0) {
+    vm.$store.commit("pageOpenedList", {
+      index: openedIndex,
+      argu: argu,
+      query: query
     });
-    tag = tag[0];
-    if (tag) {
-      tag = tag.children ? tag.children[0] : tag;
-      if (argu) {
-        tag.argu = argu;
-      }
-      if (query) {
-        tag.query = query;
-      }
-      vm.$store.commit("increateTag", tag);
+    return;
+  }
+  let tag = vm.$store.state.app.tagsList.filter(item => {
+    if (item.children) {
+      return name == item.children[0].name;
+    } else {
+      return name == item.name;
     }
+  });
+  tag = tag[0];
+  if (!tag) {
+    tag = vm.$store.state.app.tagsList.find((item) => {
+      const candidate = item.children ? item.children[0] : item;
+      return util.isSameRoutePage(candidate, { name, path: currentPath });
+    });
+    if (tag && tag.children) {
+      tag = tag.children[0];
+    }
+  }
+  if (tag) {
+    tag = tag.children ? tag.children[0] : tag;
+    const tagObj = { ...tag, name: name || tag.name };
+    if (argu) {
+      tagObj.argu = argu;
+    }
+    if (query) {
+      tagObj.query = query;
+    }
+    vm.$store.commit("increateTag", tagObj);
   }
 };
 
@@ -94,7 +244,7 @@ util.initRouter = function(vm) {
   // 404路由需要和动态路由一起加载
   const otherRouter = [
     {
-      path: "/*",
+      path: "/:pathMatch(.*)*",
       name: "error-404",
       meta: {
         title: "404-页面不存在"
@@ -111,7 +261,8 @@ util.initRouter = function(vm) {
   if (!vm.$store.state.app.added) {
     // 第一次加载 读取数据
     // 加载菜单
-    getCurrentPermissionList().then(res => {
+    import("@/api/index").then(({ getCurrentPermissionList }) => {
+      getCurrentPermissionList().then(res => {
       if (!res.success) return false;
       let menuData = res.result;
 
@@ -132,19 +283,16 @@ util.initRouter = function(vm) {
         return;
       }
       util.initAllMenuData(constRoutes, menuData);
-      util.initRouterNode(otherRoutes, otherRouter);
-      // 添加所有主界面路由
+      util.registerDynamicRoutes(menuData);
       vm.$store.commit(
         "updateAppRouter",
-        constRoutes.filter(item => item.children.length > 0)
+        constRoutes.filter((item) => item.children && item.children.length > 0)
       );
-      // 添加全局路由
-      vm.$store.commit("updateDefaultRouter", otherRoutes);
-      // 添加菜单路由
       util.initMenuData(vm, menuData);
       // 缓存数据 修改加载标识
       window.localStorage.setItem("menuData", JSON.stringify(menuData));
       vm.$store.commit("setAdded", true);
+      });
     });
   } else {
     // 读取缓存数据
@@ -154,7 +302,7 @@ util.initRouter = function(vm) {
       return;
     }
     let menuData = JSON.parse(data);
-    // 添加菜单路由
+    util.registerDynamicRoutes(menuData);
     util.initMenuData(vm, menuData);
   }
 };
@@ -235,17 +383,27 @@ util.initRouterNode = function(routers, data) {
   // data为所有子菜单数据
 
   for (let item of data) {
-    let menu = Object.assign({}, item);
+    const menu = Object.assign({}, item);
+    const hasChildren = item.children && item.children.length > 0;
 
-    menu.component = lazyLoading(menu.frontRoute);
-
-    if (item.children && item.children.length > 0) {
+    if (hasChildren) {
       menu.children = [];
+      // Vue Router 4：父子路由 name 必须不同，后端菜单常出现同名父子节点
+      if (menu.name) {
+        menu.name = `${menu.name}__layout`;
+      }
       util.initRouterNode(menu.children, item.children);
+      // 分组节点通常无页面，仅在有 frontRoute 时挂载组件
+      if (menu.frontRoute) {
+        menu.component = lazyLoading(menu.frontRoute);
+      } else {
+        delete menu.component;
+      }
+    } else if (menu.frontRoute) {
+      menu.component = lazyLoading(menu.frontRoute);
     }
 
-    let meta = {};
-    // 给页面添加标题、父级菜单name（方便左侧菜单选中）
+    const meta = {};
     meta.title = menu.title ? menu.title + " - 运营后台" : null;
     meta.firstRouterName = item.firstRouterName;
     menu.meta = meta;

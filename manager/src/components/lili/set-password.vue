@@ -1,30 +1,31 @@
 <template>
   <div class="set-password">
-    <Poptip transfer trigger="focus" placement="right" width="250">
-      <Input
-        type="password"
-        password
-        style="width:350px;"
-        :maxlength="maxlength"
-        v-model="currentValue"
-        @on-change="handleChange"
-        :size="size"
-        :placeholder="placeholder"
-        :disabled="disabled"
-        :readonly="readonly"
-      />
-      <div :class="tipStyle" slot="content">
-        <div class="words">强度 : {{strength}}</div>
-        <Progress
-          :percent="strengthValue"
-          :status="progressStatus"
-          hide-info
-          style="margin: 13px 0;"
+    <el-popover trigger="focus" placement="right" :width="250">
+      <template #reference>
+        <el-input
+          v-model="currentValue"
+          type="password"
+          show-password
+          style="width: 350px"
+          :maxlength="maxlength"
+          :size="size"
+          :placeholder="placeholder"
+          :disabled="disabled"
+          :readonly="readonly"
+          @input="handleChange"
         />
-        <br />请至少输入 6 个字符。请不要使
-        <br />用容易被猜到的密码。
+      </template>
+      <div :class="tipStyle">
+        <div class="words">强度 : {{ strength }}</div>
+        <el-progress
+          :percentage="strengthValue"
+          :status="progressStatus"
+          :show-text="false"
+          style="margin: 13px 0"
+        />
+        <br />请至少输入 6 个字符。请不要使用容易被猜到的密码。
       </div>
-    </Poptip>
+    </el-popover>
   </div>
 </template>
 
@@ -32,54 +33,53 @@
 export default {
   name: "setPassword",
   props: {
+    modelValue: String,
     value: String,
     size: String,
     placeholder: {
       type: String,
-      default: "请输入密码，长度为6-20个字符"
+      default: "请输入密码，长度为6-20个字符",
     },
     disabled: {
       type: Boolean,
-      default: false
+      default: false,
     },
     readonly: {
       type: Boolean,
-      default: false
+      default: false,
     },
     maxlength: {
       type: Number,
-      default: 20
-    }
+      default: 20,
+    },
   },
+  emits: ["update:modelValue", "input", "on-change"],
   data() {
     return {
-      currentValue: this.value, // 当前值
-      tipStyle: "password-tip-none", // 强度样式
-      strengthValue: 0, // 强度等级
-      progressStatus: "normal", // 进度条状态
-      strength: "无", // 密码强度描述
-      grade: 0 // 强度等级
+      currentValue: this.modelValue ?? this.value ?? "",
+      tipStyle: "password-tip-none",
+      strengthValue: 0,
+      progressStatus: "",
+      strength: "无",
+      grade: 0,
     };
+  },
+  watch: {
+    modelValue(val) {
+      this.setCurrentValue(val);
+    },
+    value(val) {
+      this.setCurrentValue(val);
+    },
   },
   methods: {
     checkStrengthValue(v) {
-      // 评级制判断密码强度 最高5
       let grade = 0;
-      if (/\d/.test(v)) {
-        grade++; //数字
-      }
-      if (/[a-z]/.test(v)) {
-        grade++; //小写
-      }
-      if (/[A-Z]/.test(v)) {
-        grade++; //大写
-      }
-      if (/\W/.test(v)) {
-        grade++; //特殊字符
-      }
-      if (v.length >= 10) {
-        grade++;
-      }
+      if (/\d/.test(v)) grade++;
+      if (/[a-z]/.test(v)) grade++;
+      if (/[A-Z]/.test(v)) grade++;
+      if (/\W/.test(v)) grade++;
+      if (v.length >= 10) grade++;
       this.grade = grade;
       return grade;
     },
@@ -90,14 +90,14 @@ export default {
         this.strengthValue = 0;
         return;
       }
-      let grade = this.checkStrengthValue(this.currentValue);
+      const grade = this.checkStrengthValue(this.currentValue);
       if (grade <= 1) {
-        this.progressStatus = "wrong";
+        this.progressStatus = "exception";
         this.tipStyle = "password-tip-weak";
         this.strength = "弱";
         this.strengthValue = 33;
       } else if (grade >= 2 && grade <= 4) {
-        this.progressStatus = "normal";
+        this.progressStatus = "";
         this.tipStyle = "password-tip-middle";
         this.strength = "中";
         this.strengthValue = 66;
@@ -108,61 +108,33 @@ export default {
         this.strengthValue = 100;
       }
     },
-    // 密码变动后回调
-    handleChange(v) {
+    handleChange() {
       this.strengthChange();
+      this.$emit("update:modelValue", this.currentValue);
       this.$emit("input", this.currentValue);
       this.$emit("on-change", this.currentValue, this.grade, this.strength);
     },
-    // 监听密码变动，实时回显密码强度
     setCurrentValue(value) {
-      if (value === this.currentValue) {
-        return;
-      }
-      this.currentValue = value;
+      if (value === this.currentValue) return;
+      this.currentValue = value ?? "";
       this.strengthChange();
       this.$emit("on-change", this.currentValue, this.grade, this.strength);
-    }
+    },
   },
-  watch: {
-    value(val) {
-      this.setCurrentValue(val);
-    }
-  }
 };
 </script>
 
 <style lang="scss" scoped>
-.set-password .ivu-poptip,
-.set-password .ivu-poptip-rel {
-  display: block;
-}
 .password-tip-none {
   padding: 1vh 0;
 }
-
-.password-tip-weak {
-  padding: 1vh 0;
-
-  .words {
-    color: #ed3f14;
-  }
+.password-tip-weak .words {
+  color: #ed3f14;
 }
-
-.password-tip-middle {
-  padding: 1vh 0;
-
-  .words {
-    color: #2d8cf0;
-  }
+.password-tip-middle .words {
+  color: #2d8cf0;
 }
-
-.password-tip-strong {
-  padding: 1vh 0;
-
-  .words {
-    color: #52c41a;
-  }
+.password-tip-strong .words {
+  color: #52c41a;
 }
 </style>
-

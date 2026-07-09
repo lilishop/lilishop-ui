@@ -1,253 +1,297 @@
 <template>
   <div class="search">
-    <Card>
-      <Form
+    <el-card>
+      <el-form
         ref="searchForm"
         :model="searchForm"
         inline
-        :label-width="70"
+        label-width="70px"
         class="search-form"
-        @keydown.enter.native="handleSearch"
+        @keyup.enter="handleSearch"
       >
-        <Form-item label="商品名称" prop="goodsName">
-          <Input
-            type="text"
+        <el-form-item label="商品名称" prop="goodsName">
+          <el-input
             v-model="searchForm.goodsName"
             placeholder="请输入商品名称"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Form-item label="商品编号" prop="id">
-          <Input
-            type="text"
+        </el-form-item>
+        <el-form-item label="商品编号" prop="id">
+          <el-input
             v-model="searchForm.id"
             placeholder="请输入商品编号"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Form-item label="店铺名称" prop="id">
-          <Input
-            type="text"
+        </el-form-item>
+        <el-form-item label="店铺名称" prop="storeName">
+          <el-input
             v-model="searchForm.storeName"
             placeholder="请输入店铺名称"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Form-item label="销售模式" prop="status">
-          <Select
+        </el-form-item>
+        <el-form-item label="销售模式" prop="salesModel">
+          <el-select
             v-model="searchForm.salesModel"
             placeholder="请选择"
             clearable
             style="width: 240px"
           >
-            <Option value="RETAIL">零售</Option>
-            <Option value="WHOLESALE">批发</Option>
-          </Select>
-        </Form-item>
-        <Form-item label="商品类型" prop="status">
-          <Select
+            <el-option label="零售" value="RETAIL" />
+            <el-option label="批发" value="WHOLESALE" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="商品类型" prop="goodsType">
+          <el-select
             v-model="searchForm.goodsType"
             placeholder="请选择"
             clearable
             style="width: 240px"
           >
-            <Option value="PHYSICAL_GOODS">实物商品</Option>
-            <Option value="VIRTUAL_GOODS">虚拟商品</Option>
-          </Select>
-        </Form-item>
-        <Form-item label="商品分组" prop="groupId">
-          <Select
+            <el-option label="实物商品" value="PHYSICAL_GOODS" />
+            <el-option label="虚拟商品" value="VIRTUAL_GOODS" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="商品分组" prop="groupId">
+          <el-select
             v-model="searchForm.groupId"
             placeholder="请选择商品分组"
             clearable
             filterable
             style="width: 240px"
           >
-            <Option v-for="item in goodsGroupList" :value="item.id" :key="item.id">{{ item.groupName }}</Option>
-          </Select>
-        </Form-item>
-        <Button
-          @click="handleSearch"
-          class="search-btn"
-          type="primary"
-          icon="ios-search"
-          >搜索</Button
-        >
-      </Form>
-    </Card>
-    <Card>
+            <el-option
+              v-for="item in goodsGroupList"
+              :key="item.id"
+              :label="item.groupName"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
-       <div class="goods-tab">
-        <Tabs v-model="currentStatus" @on-click="goodsStatusClick">
-          <TabPane v-for="(item,index) in goodsStatusWithCount" :key="index" :label="item.title" :name="item.value">
-          </TabPane>
-        </Tabs>
+    <el-card>
+      <div class="goods-tab">
+        <el-tabs v-model="currentStatus" @tab-click="onStatusTabClick">
+          <el-tab-pane
+            v-for="item in goodsStatusWithCount"
+            :key="item.value"
+            :label="item.title"
+            :name="item.value"
+          />
+        </el-tabs>
       </div>
 
-      <!-- 批量操作按钮 -->
-      <div class="batch-operations" style="margin: 10px 0;">
-        <Button
+      <div class="batch-operations" style="margin: 10px 0">
+        <el-button
           type="primary"
           :disabled="selectedRows.length === 0"
+          style="margin-right: 10px"
           @click="openSetGoodsGroup"
-          style="margin-right: 10px;"
         >
           批量设置分组
-        </Button>
-        <Button
+        </el-button>
+        <el-button
           type="success"
           :disabled="selectedRows.length === 0"
+          style="margin-right: 10px"
           @click="batchUpper"
-          style="margin-right: 10px;"
         >
           批量上架
-        </Button>
-        <Button
+        </el-button>
+        <el-button
           type="warning"
           :disabled="selectedRows.length === 0"
+          style="margin-right: 10px"
           @click="batchLower"
-          style="margin-right: 10px;"
         >
           批量下架
-        </Button>
-        <Button
+        </el-button>
+        <el-button
           v-if="currentStatus === 'TOBEAUDITED'"
           type="primary"
           :disabled="selectedRows.length === 0"
           @click="batchAudit"
         >
           批量审核
-        </Button>
+        </el-button>
       </div>
 
-      <Table
-        :loading="loading"
-        :columns="columns"
-        :data="data"
+      <el-table
         ref="table"
+        :key="currentStatus"
+        v-loading="loading"
+        :data="data"
         class="mt_10"
-        @on-select="onSelect"
-        @on-select-all="onSelectAll"
-        @on-selection-change="onSelectionChange"
+        row-key="id"
+        @selection-change="onSelectionChange"
       >
-        <!-- 商品图片格式化 -->
-        <template slot="imageSlot" slot-scope="{ row }">
-          <div style="margin-top: 5px;">
+        <el-table-column type="selection" width="100" align="center" />
+        <el-table-column prop="id" label="商品ID" width="200" show-overflow-tooltip />
+        <el-table-column label="商品图片" width="100" align="center">
+          <template #default="{ row }">
             <img
+              v-if="row && row.original"
               :src="row.original"
-              style="height: 50px; width: 50px; object-fit: cover;"
+              style="height: 50px; width: 50px; object-fit: cover"
             />
-          </div>
-        </template>
+          </template>
+        </el-table-column>
+        <el-table-column label="商品名称" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">
+            <a class="link-text" @click="linkTo(row.id, row.skuId)">{{ row.goodsName }}</a>
+          </template>
+        </el-table-column>
+        <el-table-column label="价格" width="200">
+          <template #default="{ row }">
+            <span :style="{ color: $mainColor }">{{ unitPrice(row.price, '￥') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="buyCount" label="销量" width="150" />
+        <el-table-column prop="quantity" label="库存" width="150" />
+        <el-table-column label="销售模式" width="150">
+          <template #default="{ row }">
+            <span v-if="row">{{ salesModelText(row.salesModel) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="商品类型" width="150">
+          <template #default="{ row }">
+            <span v-if="row">{{ goodsTypeText(row.goodsType) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="150">
+          <template #default="{ row }">
+            <span v-if="row">{{ marketEnableText(row.marketEnable) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="审核状态" width="150">
+          <template #default="{ row }">
+            <span v-if="row">{{ authFlagText(row.authFlag) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="storeName" label="店铺名称" width="200" show-overflow-tooltip />
+        <el-table-column label="操作" width="200" align="center" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row.authFlag === 'TOBEAUDITED'">
+              <a class="link-text" @click="openAuditModal(row)">审核</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="showDetail(row)">查看</a>
+            </template>
+            <template v-else-if="row.marketEnable === 'DOWN'">
+              <a class="link-text" @click="upper(row)">上架</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="showDetail(row)">查看</a>
+            </template>
+            <template v-else>
+              <a class="link-text" @click="edit(row)">下架</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="showDetail(row)">查看</a>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
 
-        <!-- 商品栏目格式化 -->
-        <template slot="goodsSlot" slot-scope="{ row }">
-          <div style="margin: 5px 0px; padding: 10px 0px;">
-            <div class="div-zoom">
-              <a @click="linkTo(row.id, row.skuId)">{{ row.goodsName }}</a>
-            </div>
-          </div>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
-    <Modal
-      title="下架操作"
-      v-model="modalVisible"
-      :mask-closable="false"
-      :width="500"
-    >
-      <Form ref="underForm" :model="underForm" :label-width="100">
-        <FormItem label="下架原因" prop="reason">
-          <Input v-model="underForm.reason" clearable style="width: 100%" />
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="modalVisible = false">取消</Button>
-        <Button type="primary" :loading="submitLoading" @click="lower"
-          >提交</Button
-        >
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
       </div>
-    </Modal>
-    <Modal
-      title="商品审核"
+    </el-card>
+
+    <el-dialog v-model="modalVisible" title="下架操作" width="500px" :close-on-click-modal="false">
+      <el-form ref="underForm" :model="underForm" label-width="100px">
+        <el-form-item label="下架原因" prop="reason">
+          <el-input v-model="underForm.reason" clearable />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="modalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="lower">提交</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
       v-model="auditModalVisible"
-      :mask-closable="false"
-      :width="500"
+      title="商品审核"
+      width="500px"
+      :close-on-click-modal="false"
+      destroy-on-close
     >
-      <Form ref="auditForm" :model="goodsAuditForm" :label-width="100">
-        <FormItem label="审核结果" prop="auth_flag">
-          <RadioGroup v-model="goodsAuditForm.auth_flag">
-            <Radio :label="1">审核通过</Radio>
-            <Radio :label="2">审核拒绝</Radio>
-          </RadioGroup>
-        </FormItem>
-        <!-- <FormItem label="审核备注" prop="reason" v-if="goodsAuditForm.auth_flag === 2">
-          <Input v-model="goodsAuditForm.reason" type="textarea" :rows="3" placeholder="请输入拒绝原因" />
-        </FormItem> -->
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="auditModalVisible = false">取消</Button>
-        <Button type="primary" @click="confirmAudit">提交审核</Button>
-      </div>
-    </Modal>
-    <!-- 批量审核弹框 -->
-    <Modal
-      title="批量商品审核"
+      <el-form ref="auditForm" :model="goodsAuditForm" label-width="100px">
+        <el-form-item label="审核结果" prop="auth_flag">
+          <el-radio-group v-model="goodsAuditForm.auth_flag">
+            <el-radio :value="1">审核通过</el-radio>
+            <el-radio :value="2">审核拒绝</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="auditModalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="auditSubmitLoading" @click="submitAudit">提交审核</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
       v-model="batchAuditModalVisible"
-      :mask-closable="false"
-      :width="500"
+      title="批量商品审核"
+      width="500px"
+      :close-on-click-modal="false"
+      destroy-on-close
     >
-      <Form ref="batchAuditForm" :model="batchAuditForm" :label-width="100">
-        <FormItem label="审核结果" prop="auth_flag">
-          <RadioGroup v-model="batchAuditForm.auth_flag">
-            <Radio :label="1">审核通过</Radio>
-            <Radio :label="2">审核拒绝</Radio>
-          </RadioGroup>
-        </FormItem>
-        <FormItem label="审核备注" prop="reason" v-if="batchAuditForm.auth_flag === 2">
-          <Input v-model="batchAuditForm.reason" type="textarea" :rows="3" placeholder="请输入拒绝原因" />
-        </FormItem>
-        <FormItem label="选中商品">
-          <div style="max-height: 200px; overflow-y: auto;">
-            <Tag v-for="item in selectedRows" :key="item.id" style="margin: 2px;">{{item.goodsName}}</Tag>
+      <el-form ref="batchAuditForm" :model="batchAuditForm" label-width="100px">
+        <el-form-item label="审核结果" prop="auth_flag">
+          <el-radio-group v-model="batchAuditForm.auth_flag">
+            <el-radio :value="1">审核通过</el-radio>
+            <el-radio :value="2">审核拒绝</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item v-show="batchAuditForm.auth_flag === 2" label="审核备注" prop="reason">
+          <el-input v-model="batchAuditForm.reason" type="textarea" :rows="3" placeholder="请输入拒绝原因" />
+        </el-form-item>
+        <el-form-item label="选中商品">
+          <div style="max-height: 200px; overflow-y: auto">
+            <el-tag v-for="item in selectedRows" :key="item.id" style="margin: 2px">{{ item.goodsName }}</el-tag>
           </div>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button type="text" @click="batchAuditModalVisible = false">取消</Button>
-        <Button type="primary" @click="submitBatchAudit">提交审核</Button>
-      </div>
-    </Modal>
-    <Modal v-model="goodsGroupFlag" title="批量设置商品分组" width="420">
-      <Form ref="goodsGroupForm" :model="goodsGroupForm" :rules="goodsGroupRule" :label-width="90">
-        <FormItem label="商品分组" prop="groupId">
-          <Select v-model="goodsGroupForm.groupId" clearable filterable style="width: 240px">
-            <Option v-for="item in goodsGroupList" :value="item.id" :key="item.id">{{ item.groupName }}</Option>
-          </Select>
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button @click="goodsGroupFlag = false">取消</Button>
-        <Button type="primary" :loading="goodsGroupLoading" @click="submitSetGoodsGroup">确定</Button>
-      </div>
-    </Modal>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="batchAuditModalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="batchAuditSubmitLoading" @click="submitBatchAudit">提交审核</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="goodsGroupFlag" title="批量设置商品分组" width="420px">
+      <el-form ref="goodsGroupForm" :model="goodsGroupForm" :rules="goodsGroupRule" label-width="90px">
+        <el-form-item label="商品分组" prop="groupId">
+          <el-select v-model="goodsGroupForm.groupId" clearable filterable style="width: 240px">
+            <el-option
+              v-for="item in goodsGroupList"
+              :key="item.id"
+              :label="item.groupName"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="goodsGroupFlag = false">取消</el-button>
+        <el-button type="primary" :loading="goodsGroupLoading" @click="submitSetGoodsGroup">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -261,11 +305,9 @@ import {
   getGoodsGroupByPage,
   addGoodsGroupItems
 } from "@/api/goods";
-import vueQr from "vue-qr";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { unitPrice, customRouterPush } from "@/utils/filters";
 export default {
-  components: {
-    "vue-qr": vueQr,
-  },
   name: "goods",
   data() {
     return {
@@ -289,264 +331,17 @@ export default {
         auth_flag: 1,
       },
       auditModalVisible: false, // 审核弹框显示状态
+      auditSubmitLoading: false,
       currentAuditGoods: null, // 当前审核的商品
       submitLoading: false, // 添加或编辑提交状态
-      columns: [
-        {
-          type: 'selection',
-          width: 60,
-          align: 'center'
-        },
-        {
-          title: "商品ID",
-          key: "id",
-          width: 180,
-          tooltip: true,
-        },
-        {
-          title: "商品图片",
-          key: "original",
-          width: 180,
-          slot: "imageSlot",
-        },
-        {
-          title: "商品名称",
-          key: "goodsName",
-          minWidth: 180,
-          slot: "goodsSlot",
-        },
-        {
-          title: "价格",
-          key: "price",
-          width: 100,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
-          },
-        },
-        {
-          title: "销量",
-          key: "buyCount",
-          width: 100,
-          render: (h, params) => {
-            return h("span", params.row.buyCount || 0);
-          },
-        },
-        {
-          title: "库存",
-          key: "quantity",
-          width: 100,
-          render: (h, params) => {
-            return h("span", params.row.quantity || 0);
-          },
-        },
-        {
-          title: "销售模式",
-          key: "salesModel",
-          width: 100,
-          render: (h, params) => {
-            if (params.row.salesModel === "RETAIL") {
-              return h("Tag", { props: { color: "orange" } }, "零售");
-            } else if (params.row.salesModel === "WHOLESALE") {
-              return h("Tag", { props: { color: "magenta" } }, "批发");
-            } else {
-              return h("Tag", { props: { color: "volcano" } }, "其他类型");
-            }
-          },
-        },
-        {
-          title: "商品类型",
-          key: "goodsType",
-          width: 120,
-          render: (h, params) => {
-            if (params.row.goodsType === "PHYSICAL_GOODS") {
-              return h("Tag", { props: { color: "green" } }, "实物商品");
-            } else if (params.row.goodsType === "VIRTUAL_GOODS") {
-              return h("Tag", { props: { color: "volcano" } }, "虚拟商品");
-            } else {
-              return h("Tag", { props: { color: "geekblue" } }, "电子卡券");
-            }
-          },
-        },
-        {
-          title: "状态",
-          key: "marketEnable",
-          width: 120,
-          render: (h, params) => {
-            if (params.row.marketEnable == "DOWN") {
-              return h("Tag", { props: { color: "volcano" } }, "下架");
-            } else if (params.row.marketEnable == "UPPER") {
-              return h("Tag", { props: { color: "green" } }, "上架");
-            }
-          },
-        },
-        {
-          title: "审核状态",
-          key: "authFlag",
-          width: 180,
-          render: (h, params) => {
-            if (params.row.authFlag == "TOBEAUDITED") {
-              return h("Tag", { props: { color: "volcano" } }, "待审核");
-            } else if (params.row.authFlag == "PASS") {
-              return h("Tag", { props: { color: "green" } }, "通过");
-            } else if (params.row.authFlag == "REFUSE") {
-              return h("Tag", { props: { color: "red" } }, "拒绝");
-            }
-          },
-        },
-        {
-          title: "店铺名称",
-          key: "storeName",
-          width: 180,  // 使用minWidth替代width
-          tooltip: true,
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          fixed: "right",
-          width: 200,
-          render: (h, params) => {
-            // 如果是待审核状态，显示审核按钮
-            if (params.row.authFlag === "TOBEAUDITED") {
-              return h("div", [
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.openAuditModal(params.row);
-                      },
-                    },
-                  },
-                  "审核"
-                ),
-                h("span", {
-                  style: {
-                    margin: "0 8px",
-                    color: "#dcdee2"
-                  }
-                }, "|"),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.showDetail(params.row);
-                      },
-                    },
-                  },
-                  "查看"
-                ),
-              ]);
-            }
-            // 原有的上架/下架逻辑
-            else if (params.row.marketEnable == "DOWN") {
-              return h("div", [
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.upper(params.row);
-                      },
-                    },
-                  },
-                  "上架"
-                ),
-                h("span", {
-                  style: {
-                    margin: "0 8px",
-                    color: "#dcdee2"
-                  }
-                }, "|"),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.showDetail(params.row);
-                      },
-                    },
-                  },
-                  "查看"
-                ),
-              ]);
-            } else {
-              return h("div", [
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.edit(params.row);
-                      },
-                    },
-                  },
-                  "下架"
-                ),
-                h("span", {
-                  style: {
-                    margin: "0 8px",
-                    color: "#dcdee2"
-                  }
-                }, "|"),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none"
-                    },
-                    on: {
-                      click: () => {
-                        this.showDetail(params.row);
-                      },
-                    },
-                  },
-                  "查看"
-                ),
-              ]);
-            }
-          },
-        },
-      ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
-      currentStatus: '',
+      currentStatus: "ALL",
       goodsNumerData: {},
-      goodsAuditForm: {
-        // 商品编辑表单
-        auth_flag: 1,
-      },
       selectedRows: [], // 选中的行数据
       selectAll: false, // 全选状态
       batchAuditModalVisible: false, // 批量审核弹框显示状态
+      batchAuditSubmitLoading: false,
       batchAuditForm: {
         auth_flag: 1,
         reason: ''
@@ -565,7 +360,7 @@ export default {
   computed: {
     goodsStatusWithCount() {
       return [
-        {title: '全部', value: ''},
+        {title: '全部', value: 'ALL'},
         {title: `出售中${this.goodsNumerData.upperGoodsNum ? '(' + this.goodsNumerData.upperGoodsNum + ')' : ''}`, value: 'UPPER'},
         {title: `仓库中${this.goodsNumerData.downGoodsNum ? '(' + this.goodsNumerData.downGoodsNum + ')' : ''}`, value: 'DOWN'},
         {title: `待审核${this.goodsNumerData.auditGoodsNum ? '(' + this.goodsNumerData.auditGoodsNum + ')' : ''}`, value: 'TOBEAUDITED'},
@@ -574,6 +369,35 @@ export default {
     }
   },
   methods: {
+    unitPrice,
+    clearTableSelection() {
+      this.$refs.table?.clearSelection?.();
+    },
+    onStatusTabClick(tab) {
+      const status = tab.paneName ?? tab.props?.name;
+      this.goodsStatusClick(status);
+    },
+    salesModelText(v) {
+      if (v === "RETAIL") return "零售";
+      if (v === "WHOLESALE") return "批发";
+      return "其他类型";
+    },
+    goodsTypeText(v) {
+      if (v === "PHYSICAL_GOODS") return "实物商品";
+      if (v === "VIRTUAL_GOODS") return "虚拟商品";
+      return "电子卡券";
+    },
+    marketEnableText(v) {
+      if (v === "DOWN") return "下架";
+      if (v === "UPPER") return "上架";
+      return "";
+    },
+    authFlagText(v) {
+      if (v === "TOBEAUDITED") return "待审核";
+      if (v === "PASS") return "通过";
+      if (v === "REFUSE") return "拒绝";
+      return "";
+    },
     // 初始化数据
     init() {
       this.getDataList();
@@ -629,14 +453,18 @@ export default {
     },
     // 下架
     lower() {
+      const reason = this.underForm.reason ? this.underForm.reason.trim() : "";
+      if (!reason) {
+        ElMessage.error("下架原因不能为空");
+        return;
+      }
       let params = {
         goodsId: this.id,
-        reason:this.underForm.reason
+        reason
       };
       lowGoods(params).then((res) => {
-        this.$Modal.remove();
         if (res.success) {
-          this.$Message.success("操作成功");
+          ElMessage.success("操作成功");
           this.modalVisible = false;
           this.getDataList();
           this.getNumberData(); // 添加这行
@@ -645,53 +473,39 @@ export default {
     },
     // 上架
     upper(v) {
-      this.$Modal.confirm({
-        title: "确认上架",
-        content: "您确认要上架 " + v.goodsName + " ?",
-        loading: true,
-        onOk: () => {
-           let params = {
-            goodsId: v.id
-          };
-          upGoods(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("上架成功");
-              this.getDataList();
-              this.getNumberData(); // 添加这行
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("您确认要上架 " + v.goodsName + " ?", "确认上架", { type: "warning" }).then(() => {
+        let params = {
+          goodsId: v.id
+        };
+        return upGoods(params).then((res) => {
+          if (res.success) {
+            ElMessage.success("上架成功");
+            this.getDataList();
+            this.getNumberData(); // 添加这行
+          }
+        });
+      }).catch(() => {});
     },
 
     //查看商品详情
     showDetail(v) {
-      let id = v.id;
-      this.$options.filters.customRouterPush({
+      customRouterPush({
         name: "goods-detail",
-        query: { id: id },
-      })
+        query: { id: v.id },
+      });
     },
 
     // 商品状态筛选
-    goodsStatusClick(item) {
-      // 根据选择的状态设置搜索条件
-      if (item === 0) {
-        // 全部：清除状态筛选
+    goodsStatusClick(name) {
+      if (name === "ALL" || name === "" || name === undefined || name === null) {
         delete this.searchForm.goodsStatus;
+        this.currentStatus = "ALL";
       } else {
-        // 其他状态正常赋值
-        this.searchForm.goodsStatus = item;
+        this.searchForm.goodsStatus = name;
+        this.currentStatus = name;
       }
-      this.currentStatus = item;
-
-      // tab切换时清除选中内容
       this.selectedRows = [];
-      if (this.$refs.table) {
-        this.$refs.table.selectAll(false);
-      }
-
+      this.clearTableSelection();
       this.getDataList();
     },
     examine(v, authFlag) {
@@ -703,26 +517,20 @@ export default {
         this.goodsAuditForm.authFlag = "REFUSE";
       }
 
-      this.$Modal.confirm({
-        title: "确认审核",
-        content: "您确认要审核" + examine + " " + v.goodsName + " ?",
-        loading: true,
-        onOk: () => {
-          this.goodsAuditForm.goodsIds=v.id;
-          let formData = new FormData();
-          formData.append('goodsIds', v.id);
-          formData.append('authFlag', this.goodsAuditForm.authFlag);
+      ElMessageBox.confirm("您确认要审核" + examine + " " + v.goodsName + " ?", "确认审核", { type: "warning" }).then(() => {
+        this.goodsAuditForm.goodsIds=v.id;
+        let formData = new FormData();
+        formData.append('goodsIds', v.id);
+        formData.append('authFlag', this.goodsAuditForm.authFlag);
 
-          authGoods(formData).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("审核成功");
-              this.getDataList();
-              this.getNumberData();
-            }
-          });
-        },
-      });
+        return authGoods(formData).then((res) => {
+          if (res.success) {
+            ElMessage.success("审核成功");
+            this.getDataList();
+            this.getNumberData();
+          }
+        });
+      }).catch(() => {});
     },
 
     // 打开审核弹框
@@ -730,45 +538,29 @@ export default {
       this.currentAuditGoods = goods;
       this.goodsAuditForm.auth_flag = 1;
       this.goodsAuditForm.reason = '';
+      this.auditSubmitLoading = false;
       this.auditModalVisible = true;
-    },
-
-    // 确认审核（二次确认）
-    confirmAudit() {
-      const auditText = this.goodsAuditForm.auth_flag === 1 ? '通过' : '拒绝';
-      this.$Modal.confirm({
-        title: '确认审核',
-        content: `您确认要审核${auditText} "${this.currentAuditGoods.goodsName}" 吗？`,
-        loading: true,
-        onOk: () => {
-          this.submitAudit();
-        },
-      });
     },
 
     // 提交审核
     submitAudit() {
-      let formData = new FormData();
+      if (!this.currentAuditGoods) {
+        return;
+      }
+      this.auditSubmitLoading = true;
+      const formData = new FormData();
       formData.append('goodsIds', this.currentAuditGoods.id);
       formData.append('authFlag', this.goodsAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE');
       authGoods(formData).then((res) => {
-        this.$Modal.remove();
         if (res.success) {
-          this.$Message.success('审核成功');
+          ElMessage.success('审核成功');
           this.auditModalVisible = false;
           this.getDataList();
           this.getNumberData();
         }
+      }).finally(() => {
+        this.auditSubmitLoading = false;
       });
-    },
-
-    // 选择框事件处理
-    onSelect(selection, row) {
-      // 单行选择时触发
-    },
-
-    onSelectAll(selection) {
-      // 全选时触发
     },
 
     onSelectionChange(selection) {
@@ -778,78 +570,60 @@ export default {
     // 批量上架
     batchUpper() {
       if (this.selectedRows.length === 0) {
-        this.$Message.warning('请先选择要上架的商品');
+        ElMessage.warning('请先选择要上架的商品');
         return;
       }
 
       const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
-      this.$Modal.confirm({
-        title: '确认批量上架',
-        content: `您确认要上架以下商品吗？\n${goodsNames}`,
-        loading: true,
-        onOk: () => {
-          // 提取所有选中商品的ID
-          const goodsIds = this.selectedRows.map(item => item.id);
-          const params = {
-            goodsId: goodsIds // 传递ID数组
-          };
+      ElMessageBox.confirm(`您确认要上架以下商品吗？\n${goodsNames}`, "确认批量上架", { type: "warning" }).then(() => {
+        const goodsIds = this.selectedRows.map(item => item.id);
+        const params = {
+          goodsId: goodsIds
+        };
 
-          upGoods(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success('批量上架成功');
-              this.selectedRows = [];
-              this.selectAll = false;
-              this.getDataList();
-              this.getNumberData();
-            }
-          }).catch(() => {
-            this.$Modal.remove();
-          });
-        }
-      });
+        return upGoods(params).then((res) => {
+          if (res.success) {
+            ElMessage.success('批量上架成功');
+            this.selectedRows = [];
+            this.selectAll = false;
+            this.getDataList();
+            this.getNumberData();
+          }
+        });
+      }).catch(() => {});
     },
 
     // 批量下架
     batchLower() {
       if (this.selectedRows.length === 0) {
-        this.$Message.warning('请先选择要下架的商品');
+        ElMessage.warning('请先选择要下架的商品');
         return;
       }
 
       const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
-      this.$Modal.confirm({
-        title: '确认批量下架',
-        content: `您确认要下架以下商品吗？\n${goodsNames}`,
-        loading: true,
-        onOk: () => {
-          // 提取所有选中商品的ID
-          const goodsIds = this.selectedRows.map(item => item.id);
-          const params = {
-            goodsId: goodsIds, // 传递ID数组
-            reason: '批量下架操作' // 可以设置默认下架原因
-          };
+      ElMessageBox.confirm(`您确认要下架以下商品吗？\n${goodsNames}`, "确认批量下架", { type: "warning" }).then(() => {
+        const goodsIds = this.selectedRows.map(item => item.id);
+        const params = {
+          goodsId: goodsIds,
+          reason: '批量下架操作'
+        };
 
-          lowGoods(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success('批量下架成功');
-              this.selectedRows = [];
-              this.selectAll = false;
-              this.getDataList();
-              this.getNumberData();
-            }
-          }).catch(() => {
-            this.$Modal.remove();
-          });
-        }
-      });
+        return lowGoods(params).then((res) => {
+          if (res.success) {
+            ElMessage.success('批量下架成功');
+            this.selectedRows = [];
+            this.selectAll = false;
+            this.getDataList();
+            this.getNumberData();
+          }
+        });
+      }).catch(() => {});
     },
 
     // 批量审核
     batchAudit() {
       if (this.selectedRows.length === 0) {
-        this.$Message.warning('请先选择要审核的商品');
+        ElMessage.warning('请先选择要审核的商品');
         return;
       }
 
@@ -864,47 +638,38 @@ export default {
     // 提交批量审核
     submitBatchAudit() {
       if (this.selectedRows.length === 0) {
-        this.$Message.warning('请先选择要审核的商品');
+        ElMessage.warning('请先选择要审核的商品');
         return;
       }
 
       // 如果是拒绝审核，必须填写原因
       if (this.batchAuditForm.auth_flag === 2 && !this.batchAuditForm.reason.trim()) {
-        this.$Message.warning('审核拒绝时必须填写拒绝原因');
+        ElMessage.warning('审核拒绝时必须填写拒绝原因');
         return;
       }
 
       const actionText = this.batchAuditForm.auth_flag === 1 ? '通过' : '拒绝';
-      const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
+      const goodsIds = this.selectedRows.map(item => item.id);
+      const formData = new FormData();
+      formData.append('goodsIds', goodsIds.join(','));
+      formData.append('authFlag', this.batchAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE');
+      if (this.batchAuditForm.reason) {
+        formData.append('reason', this.batchAuditForm.reason);
+      }
 
-      this.$Modal.confirm({
-        title: `确认批量审核${actionText}`,
-        content: `您确认要${actionText}以下商品的审核吗？\n${goodsNames}`,
-        loading: true,
-        onOk: () => {
-          // 提取所有选中商品的ID
-          const goodsIds = this.selectedRows.map(item => item.id);
-
-          let formData = new FormData();
-          formData.append('goodsId', goodsIds);
-          formData.append('authFlag', this.batchAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE');
-          formData.append('reason', this.batchAuditForm.reason || '');
-
-          // 修正：直接调用authGoods，不传递'batch'参数
-          authGoods(formData).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success(`批量审核${actionText}成功`);
-              this.selectedRows = [];
-              this.selectAll = false;
-              this.batchAuditModalVisible = false;
-              this.getDataList();
-              this.getNumberData();
-            }
-          }).catch(() => {
-            this.$Modal.remove();
-          });
+      this.batchAuditSubmitLoading = true;
+      authGoods(formData).then((res) => {
+        if (res.success) {
+          ElMessage.success(`批量审核${actionText}成功`);
+          this.selectedRows = [];
+          this.selectAll = false;
+          this.batchAuditModalVisible = false;
+          this.clearTableSelection();
+          this.getDataList();
+          this.getNumberData();
         }
+      }).finally(() => {
+        this.batchAuditSubmitLoading = false;
       });
     },
     loadGoodsGroupList() {
@@ -916,7 +681,7 @@ export default {
     },
     openSetGoodsGroup() {
       if (this.selectedRows.length === 0) {
-        this.$Message.warning("请先选择商品");
+        ElMessage.warning("请先选择商品");
         return;
       }
       this.goodsGroupFlag = true;
@@ -935,20 +700,18 @@ export default {
         addGoodsGroupItems(this.goodsGroupForm.groupId, goodsIds).then((res) => {
           this.goodsGroupLoading = false;
           if (res && res.success) {
-            this.$Message.success("设置成功");
+            ElMessage.success("设置成功");
             this.goodsGroupFlag = false;
             this.selectedRows = [];
             this.selectAll = false;
-            if (this.$refs.table && this.$refs.table.selectAll) {
-              this.$refs.table.selectAll(false);
-            }
+            this.clearTableSelection();
             this.getDataList();
           } else if (res && res.message) {
-            this.$Message.error(res.message);
+            ElMessage.error(res.message);
           }
         }).catch(() => {
           this.goodsGroupLoading = false;
-          this.$Message.error("设置失败，请检查权限或后端接口");
+          ElMessage.error("设置失败，请检查权限或后端接口");
         });
       });
     }
@@ -961,7 +724,7 @@ export default {
 <style lang="scss" scoped>
 // Tab组件样式
 .goods-tab {
-  ::v-deep .ivu-tabs-tab {
+  :deep(.el-tabs__item) {
     font-size: 14px;
   }
 }

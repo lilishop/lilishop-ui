@@ -1,12 +1,12 @@
 <template>
   <div class="wrapper">
-    <Affix :offset-top="100">
-      <Card class="card fixed-bottom">
+    <el-affix :offset="100">
+      <el-card class="card fixed-bottom">
         <affixTime @selected="clickBreadcrumb" />
-      </Card>
-    </Affix>
+      </el-card>
+    </el-affix>
 
-    <Card class="card">
+    <el-card class="card">
       <div>
         <h4>交易概况</h4>
         <div class="flex">
@@ -59,7 +59,7 @@
                 <div class="card-item">
                   <div class="card-item-label">下单金额</div>
                   <div class="card-item-value">
-                    {{ overViewList.orderAmount || 0 | unitPrice("￥") }}
+                    {{ $filters.unitPrice(overViewList.orderAmount || 0, "￥") }}
                   </div>
                 </div>
                 <div class="card-item">
@@ -77,7 +77,7 @@
                 <div class="card-item">
                   <div class="card-item-label">付款金额</div>
                   <div class="card-item-value">
-                    {{ overViewList.paymentAmount || 0 | unitPrice("￥") }}
+                    {{ $filters.unitPrice(overViewList.paymentAmount || 0, "￥") }}
                   </div>
                 </div>
               </div>
@@ -91,7 +91,7 @@
                 <div class="card-item">
                   <div class="card-item-label">退单金额</div>
                   <div class="card-item-value">
-                    {{ overViewList.refundOrderPrice || 0 | unitPrice("￥") }}
+                    {{ $filters.unitPrice(overViewList.refundOrderPrice || 0, "￥") }}
                   </div>
                 </div>
               </div>
@@ -142,9 +142,9 @@
           </div>
         </div>
       </div>
-    </Card>
+    </el-card>
 
-    <Card class="card">
+    <el-card class="card">
       <div>
         <h4>交易趋势</h4>
         <div></div>
@@ -153,49 +153,108 @@
       <div>
         <div id="orderChart"></div>
       </div>
-    </Card>
+    </el-card>
 
-    <Card class="card">
-      <div>
-        <h4>订退单统计</h4>
-        <div class="breadcrumb" style="margin-bottom: 20px">
-          <RadioGroup
-            v-model="orderOrRefund"
-            type="button"
-            size="small"
-            button-style="solid"
-          >
-            <Radio :label="1">订单</Radio>
-            <Radio :label="0">退单</Radio>
-          </RadioGroup>
-        </div>
-        <div>
-          <Table stripe :columns="columns" :data="data"></Table>
-        </div>
-        <!-- (index) => {
-              refundParams.pageNumber = index;
-            } -->
-        <!-- (size) => {
-              (refundParams.pageSize = size), (refundParams.pageNumber = 1);
-            } -->
-        <Page
-          v-if="showRecords"
-          size="small"
-          @on-change="
-            pageNumberChange
-          "
-          @on-page-size-change="
-            pageSizeChange
-          "
-          class="mt_10"
-          show-total
-          show-sizer
-          show-elevator
-          :total="total"
-          :page-size-opts="[20, 50, 100]"
-        />
-      </div>
-    </Card>
+    <el-card class="card">
+      <el-tabs v-model="orderOrRefund">
+        <el-tab-pane label="订单" name="order">
+          <el-table stripe :data="data" style="width: 100%">
+            <el-table-column type="expand" width="50">
+              <template #default="{ row }">
+                <orderRow v-if="row" :res="row" />
+              </template>
+            </el-table-column>
+            <el-table-column prop="storeName" label="商家名称" min-width="120" />
+            <el-table-column prop="memberName" label="用户名" min-width="100" />
+            <el-table-column label="订单状态" min-width="100">
+              <template #default="{ row }">
+                <span v-if="row">{{ orderStatusList[row.orderStatus] }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="createTime" label="创建时间" min-width="160" />
+            <el-table-column label="支付时间" min-width="160">
+              <template #default="{ row }">
+                <span v-if="row">{{ row.paymentTime || "暂无" }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="价格" min-width="110">
+              <template #default="{ row }">
+                <span v-if="row" :style="{ color: $mainColor }">
+                  {{ $filters.unitPrice(row.flowPrice, "￥") }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="80" align="center">
+              <template #default="{ row }">
+                <a v-if="row" class="link-text" @click="goDetail(row)">查看</a>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="退单" name="refund">
+          <el-table stripe :data="data" style="width: 100%">
+            <el-table-column type="expand" width="50">
+              <template #default="{ row }">
+                <refundRow v-if="row" :res="row" />
+              </template>
+            </el-table-column>
+            <el-table-column label="商品图片" width="90" align="center">
+              <template #default="{ row }">
+                <img
+                  v-if="row && row.goodsImage"
+                  :src="row.goodsImage"
+                  style="width: 60px; vertical-align: middle"
+                  alt=""
+                />
+              </template>
+            </el-table-column>
+            <el-table-column prop="goodsName" label="商品名称" min-width="140" show-overflow-tooltip />
+            <el-table-column prop="storeName" label="商家名称" min-width="120" />
+            <el-table-column label="售后单类型" min-width="100">
+              <template #default="{ row }">
+                <span v-if="row">{{ serviceTypeList[row.serviceType] }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="售后单状态" min-width="120">
+              <template #default="{ row }">
+                <span v-if="row">{{ serviceStatusList[row.serviceStatus] }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="退款时间" min-width="160">
+              <template #default="{ row }">
+                <span v-if="row">{{ row.refundTime || "暂无" }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="申请退款金额" min-width="120">
+              <template #default="{ row }">
+                <span v-if="row" :style="{ color: $mainColor }">
+                  {{ $filters.unitPrice(row.applyRefundPrice, "￥") }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="reason" label="申请原因" min-width="120" show-overflow-tooltip />
+            <el-table-column label="实际金额" min-width="110">
+              <template #default="{ row }">
+                <span v-if="row">{{ $filters.unitPrice(row.flowPrice || 0, "￥") }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="90" align="center">
+              <template #default="{ row }">
+                <a v-if="row" class="link-text" @click="goDetail(row)">查看</a>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
+      <el-pagination
+        v-if="showRecords"
+        v-model:current-page="refundParams.pageNumber"
+        v-model:page-size="refundParams.pageSize"
+        class="mt_10"
+        :total="total"
+        :page-sizes="[20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        size="small"
+      />
+    </el-card>
   </div>
 </template>
 <script>
@@ -210,7 +269,7 @@ export default {
 
   data() {
     return {
-      orderOrRefund: 1, // 订单还是退单
+      orderOrRefund: "order", // order | refund
       total: 0, // 总数
       // 订单状态
       orderStatusList: {
@@ -246,185 +305,7 @@ export default {
       },
       //
 
-      data: [], //定退单存储值
-
-      columns: [], // 定退单title
-
-      orderColumns: [
-        // 表头
-        {
-          type: "expand",
-          width: 50,
-          render: (h, params) => {
-            return h(orderRow, {
-              props: {
-                res: params.row,
-              },
-            });
-          },
-        },
-        {
-          title: "商家名称",
-          key: "storeName",
-        },
-        {
-          title: "用户名",
-          key: "memberName",
-        },
-
-        {
-          title: "订单状态",
-          key: "orderStatus",
-          render: (h, params) => {
-            return h("div", this.orderStatusList[params.row.orderStatus]);
-          },
-        },
-        {
-          title: "创建时间",
-          key: "createTime",
-        },
-
-        {
-          title: "支付时间",
-          key: "paymentTime",
-          render: (h, params) => {
-            return h("div", params.row.paymentTime || "暂无");
-          },
-        },
-        {
-          title: "价格",
-          key: "flowPrice",
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.flowPrice,color:this.$mainColor}} );
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          render: (h, params) => {
-            return h(
-              'a',
-              {
-                style: {
-                  color: '#2d8cf0',
-                  cursor: 'pointer',
-                  textDecoration: 'none'
-                },
-                on: {
-                  click: () => {
-                    const { sn } = params.row
-                    this.$router.push({
-                      query: { sn },
-                      path: this.orderOrRefund == 1 ? 'order-detail' : 'after-order-detail' + '?sn=' + sn
-                    })
-                  }
-                }
-              },
-              '查看'
-            )
-          },
-        },
-      ],
-      refundColumns: [
-        // 表头
-        {
-          type: "expand",
-          width: 50,
-          render: (h, params) => {
-            return h(refundRow, {
-              props: {
-                res: params.row,
-              },
-            });
-          },
-        },
-        {
-          title: "商品图片",
-          key: "goodsImage",
-          render: (h, params) => {
-            return h("img", {
-              attrs: {
-                src: params.row.goodsImage,
-              },
-              style: {
-                width: "60px",
-                verticalAlign: "middle",
-              },
-            });
-          },
-        },
-
-        {
-          title: "商品名称",
-          key: "goodsName",
-        },
-        {
-          title: "商家名称",
-          key: "storeName",
-        },
-        {
-          title: "售后单类型",
-          key: "serviceType",
-          render: (h, params) => {
-            return h("div", this.serviceTypeList[params.row.serviceType]);
-          },
-        },
-        {
-          title: "售后单状态",
-          key: "serviceStatus",
-          render: (h, params) => {
-            return h("div", this.serviceStatusList[params.row.serviceStatus]);
-          },
-        },
-        {
-          title: "退款时间",
-          key: "refundTime",
-          render: (h, params) => {
-            return h("div", params.row.refundTime || "暂无");
-          },
-        },
-        {
-          title: "申请退款金额",
-          key: "applyRefundPrice",
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.applyRefundPrice,color:this.$mainColor}} );
-          },
-        },
-        {
-          title: "申请原因",
-          key: "reason",
-        },
-        {
-          title: "实际金额",
-          key: "flowPrice",
-          render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.flowPrice?params.row.flowPrice:0, "￥")
-            );
-          },
-        },
-        {
-          title: "操作",
-          key: "action",
-          render: (h, params) => {
-            return h('Button',{
-              props:{
-                size:'small'
-              },
-              on:{
-                click: () => {
-                 const { sn } = params.row
-                  this.$router.push({
-                    query: {sn},
-                    path: this.orderOrRefund == 1 ? 'order-detail' : 'after-order-detail' + '?sn='+sn
-                  })
-                }
-              }
-            },'查看')
-          },
-        },
-      ],
+      data: [],
 
       // 交易概况
       transactionList: [
@@ -515,7 +396,7 @@ export default {
     },
     orderOrRefund() {
       this.showRecords = false;
-      this.$set(this.refundParams, "pageNumber", 1);
+      this.refundParams.pageNumber = 1;
       this.getOrderList();
     },
     orderParams: {
@@ -532,13 +413,10 @@ export default {
     },
   },
   methods: {
-    pageNumberChange(val){
-      this.refundParams.pageNumber = val
-      this.getOrderList();
-    },
-    pageSizeChange(val){
-      this.refundParams.pageSize = val
-      this.getOrderList();
+    goDetail(row) {
+      const sn = row.sn;
+      const path = this.orderOrRefund === "order" ? "order-detail" : "after-order-detail";
+      this.$router.push({ path, query: { sn } });
     },
     // 订单图
     initOrderChart() {
@@ -618,7 +496,7 @@ export default {
     // 统计相关订单统计
     async getOrderList() {
       let res;
-      if (this.orderOrRefund == 1) {
+      if (this.orderOrRefund === "order") {
         // 订单
         res = await API_Goods.statisticsOrderList(this.refundParams);
       } else {
@@ -628,8 +506,6 @@ export default {
       if (res.success) {
         this.showRecords = true;
         this.data = res.result.records;
-        this.columns =
-          this.orderOrRefund == 1 ? this.orderColumns : this.refundColumns;
         this.total = res.result.total;
       }
     },
@@ -789,7 +665,7 @@ export default {
       z-index: 2;
     }
   }
-  ::v-deep .box {
+  :deep(.box){
     color: #fff;
     position: absolute;
 
@@ -865,5 +741,13 @@ h4 {
 }
 .card {
   margin-bottom: 10px;
+}
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+.mt_10 {
+  margin-top: 10px;
 }
 </style>

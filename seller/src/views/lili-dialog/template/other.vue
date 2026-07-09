@@ -1,116 +1,108 @@
 <template>
   <div>
-    <Row :gutter="30">
-      <Col span="6" v-for="(item,index) in linkList" :key="index" v-if="(item.title !== '拼团频道' && item.title !== '签到') || $route.name !== 'renovation'">
-        <div class="card" :class="{'active':selectedIndex == index}" @click="handleLink(item,index)">
-          <Icon size="24" :type="item.icon" />
-          <p>{{item.title}}</p>
-        </div>
-      </Col>
-      <!-- 外部链接，只有pc端跳转 -->
-      <Col span="6" v-if="$route.name === 'renovation'">
-        <div class="card" :class="{'active':selectedIndex == linkList.length}" @click="handleLink(linkItem,linkList.length)">
-          <Poptip v-model="linkVisible">
-              <Icon size="24" :type="linkItem.icon" />
-              <p>{{linkItem.title}}</p>
-              <div slot="title">链接地址</div>
-              <div slot="content">
-                  <Input type="text" @keyup="handleLink(linkItem,linkList.length)" v-model="linkItem.url" placeholder="https://"></Input>
+    <el-row :gutter="30">
+      <template v-for="(item, index) in linkList" :key="index">
+        <el-col v-if="showLinkItem(item)" :span="6">
+          <div
+            class="card"
+            :class="{ active: selectedIndex == index }"
+            @click="handleLink(item, index)"
+          >
+            <el-icon :size="24">
+              <component :is="item.icon" />
+            </el-icon>
+            <p>{{ item.title }}</p>
+          </div>
+        </el-col>
+      </template>
+      <el-col v-if="linkVisible" :span="6">
+        <div
+          class="card"
+          :class="{ active: selectedIndex == linkList.length }"
+          @click="handleLink(linkItem, linkList.length)"
+        >
+          <el-popover v-model:visible="linkPopoverVisible" trigger="click" placement="top" :width="280">
+            <template #reference>
+              <div class="link-card-inner">
+                <el-icon :size="24">
+                  <component :is="linkItem.icon" />
+                </el-icon>
+                <p>{{ linkItem.title }}</p>
               </div>
-          </Poptip>
-
+            </template>
+            <div>
+              <div style="margin-bottom: 8px">链接地址</div>
+              <el-input
+                v-model="linkItem.url"
+                placeholder="https://"
+                @keyup.enter="handleLink(linkItem, linkList.length)"
+              />
+            </div>
+          </el-popover>
         </div>
-      </Col>
-    </Row>
+      </el-col>
+    </el-row>
   </div>
 </template>
 <script>
+import { markRaw } from "vue";
+import {
+  House,
+  ShoppingCart,
+  Star,
+  Document,
+  User,
+  Promotion,
+  PriceTag,
+  Sunny,
+  Share,
+  ShoppingBag,
+  Link,
+} from "@element-plus/icons-vue";
+
 export default {
   data() {
     return {
-      linkList: [ // 链接列表
-        {
-          title: "首页",
-          icon: "md-home",
-          ___type: "home",
-        },
-        {
-          title: "购物车",
-          icon: "md-cart",
-          ___type: "cart",
-        },
-        {
-          title: "收藏商品",
-          icon: "md-heart",
-          ___type: "collection",
-        },
-        {
-          title: "我的订单",
-          icon: "md-document",
-          ___type: "order",
-        },
-        {
-          title: "个人中心",
-          icon: "md-person",
-          ___type: "user",
-        },
-        {
-          title: "拼团频道",
-          icon: "md-flame",
-          ___type: "group",
-        },
-        {
-          title: "秒杀频道",
-          icon: "md-flame",
-          ___type: "seckill",
-        },
-        {
-          title: "领券中心",
-          icon: "md-pricetag",
-          ___type: "coupon",
-        },
-        {
-          title: "签到",
-          icon: "md-happy",
-          ___type: "sign",
-        },
-        // {
-        //   title: "小程序直播",
-        //   icon: "ios-videocam",
-        //   ___type: "live",
-        // },
-        {
-          title: "砍价",
-          icon: "md-share-alt",
-          ___type: "kanjia",
-        },
-        {
-          title: "积分商城",
-          icon: "ios-basket",
-          ___type: "point",
-        },
-
+      linkList: [
+        { title: "首页", icon: markRaw(House), ___type: "home" },
+        { title: "购物车", icon: markRaw(ShoppingCart), ___type: "cart" },
+        { title: "收藏商品", icon: markRaw(Star), ___type: "collection" },
+        { title: "我的订单", icon: markRaw(Document), ___type: "order" },
+        { title: "个人中心", icon: markRaw(User), ___type: "user" },
+        { title: "拼团频道", icon: markRaw(Promotion), ___type: "group" },
+        { title: "秒杀频道", icon: markRaw(Promotion), ___type: "seckill" },
+        { title: "领券中心", icon: markRaw(PriceTag), ___type: "coupon" },
+        { title: "签到", icon: markRaw(Sunny), ___type: "sign" },
+        { title: "砍价", icon: markRaw(Share), ___type: "kanjia" },
+        { title: "积分商城", icon: markRaw(ShoppingBag), ___type: "point" },
       ],
       linkItem: {
         title: "外部链接",
-        icon: "ios-link",
+        icon: markRaw(Link),
         ___type: "link",
-        url: ''
+        url: "",
       },
-      linkVisible: false, // 是否显示外部链接
-      selectedIndex: 9999999, // 已选index
+      linkVisible: false,
+      linkPopoverVisible: false,
+      selectedIndex: 9999999,
     };
   },
   methods: {
+    showLinkItem(item) {
+      return (
+        (item.title !== "拼团频道" && item.title !== "签到") ||
+        this.$route.name !== "renovation"
+      );
+    },
     handleLink(val, index) {
-      val = {...val,___type:'other'}
+      val = { ...val, ___type: "other" };
       this.selectedIndex = index;
       if (index === this.linkList.length) {
-        this.linkVisible = true
+        this.linkPopoverVisible = true;
       } else {
-        this.linkVisible = false
+        this.linkPopoverVisible = false;
       }
-      this.$emit("selected",[val])
+      this.$emit("selected", [val]);
     },
   },
 };
@@ -127,13 +119,19 @@ export default {
   text-align: center;
   transition: 0.35s;
   cursor: pointer;
-  ::v-deep p {
+  border: 1px solid #ededed;
+  :deep(p) {
     margin: 10px 0;
   }
-  border: 1px solid #ededed;
 }
-.card:hover{
-   background: #ededed;
+.link-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.card:hover {
+  background: #ededed;
 }
 .active {
   background: #ededed;

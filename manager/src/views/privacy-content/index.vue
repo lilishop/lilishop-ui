@@ -1,63 +1,76 @@
 <template>
   <div class="wrapper">
-    <Row>
-      <Col span="24">
-      <Card class="article-detail">
-        <Alert>隐私协议在移动端中 设置->关于我们->对应的文章展示</Alert>
-        <Table :loading="loading" border :columns="columns" :data="data" ref="table">
-        </Table>
-      </Card>
-      </Col>
-    </Row>
-    <template v-if="!selected">
-      <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="1100">
-        <Row>
-          <Col span="16">
-            <Form ref="form" :model="form.article" :label-width="100">
-              <FormItem label="文章标题" prop="title">
-                <Input v-model="form.article.title" clearable style="width: 40%" />
-              </FormItem>
-              <FormItem class="form-item-view-el" label="文章内容" prop="content">
+    <el-row>
+      <el-col :span="24">
+        <el-card class="article-detail">
+          <el-alert
+            title="隐私协议在移动端中 设置->关于我们->对应的文章展示"
+            type="info"
+            :closable="false"
+            show-icon
+            style="margin-bottom: 16px"
+          />
+          <el-table ref="table" v-loading="loading" border :data="data" style="width: 100%">
+            <el-table-column prop="name" label="协议名称" width="150" />
+            <el-table-column prop="type" label="协议类型" width="150" />
+            <el-table-column label="操作" width="230" align="center">
+              <template #default="{ row }">
+                <a v-if="row" class="link-text ops" @click="edit(row)">编辑</a>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-card>
+      </el-col>
+    </el-row>
 
-                <editor
-                  ref="editor"
-                  openXss
-                  v-model="form.article.content"
-                  v-if="modalVisible"
-                ></editor>
-              </FormItem>
-            </Form>
-          </Col>
-          <Col span="8">
-            <div class="mobile-effect">
-              <div class="title">页面预览</div>
-              <div class="content">
-                <div v-html="form.article.content"></div>
-              </div>
+    <el-dialog
+      v-if="!selected"
+      v-model="modalVisible"
+      :title="modalTitle"
+      width="1100px"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
+      <el-row :gutter="16">
+        <el-col :span="16">
+          <el-form ref="form" :model="form.article" label-width="100px">
+            <el-form-item label="文章标题" prop="title">
+              <el-input v-model="form.article.title" clearable style="width: 40%" />
+            </el-form-item>
+            <el-form-item class="form-item-view-el" label="文章内容" prop="content">
+              <editor
+                v-if="modalVisible"
+                ref="editor"
+                open-xss
+                v-model="form.article.content"
+              />
+            </el-form-item>
+          </el-form>
+        </el-col>
+        <el-col :span="8">
+          <div class="mobile-effect">
+            <div class="title">页面预览</div>
+            <div class="content">
+              <div v-html="form.article.content"></div>
             </div>
-          </Col>
-        </Row>
-
-        <div slot="footer">
-          <Button type="text" @click="modalVisible = false">取消</Button>
-          <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
-        </div>
-      </Modal>
-    </template>
+          </div>
+        </el-col>
+      </el-row>
+      <template #footer>
+        <el-button @click="modalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">提交</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import {
-  getArticleCategory,
-  updatePrivacy,
-  getPrivacy,
-} from "@/api/pages";
+import { getArticleCategory, updatePrivacy, getPrivacy } from "@/api/pages";
 import tinymec from "@/components/editor/index.vue";
 
 export default {
   name: "privacy",
- components: {
+  components: {
     editor: tinymec,
   },
   props: {
@@ -68,115 +81,53 @@ export default {
   },
   data() {
     return {
-      loading: false, // 表单加载状态
-      modalVisible: false, // 添加或编辑显示
+      loading: false,
+      modalVisible: false,
       treeDataDefault: [],
-      list: [], // 列表
-      treeValue: "", // 选择的分类
-      //树结构
+      list: [],
+      treeValue: "",
       treeData: [],
-      submitLoading: false, // 添加或编辑提交状态
-      modalTitle:'',
-      currindex:'',
+      submitLoading: false,
+      modalTitle: "",
+      currindex: "",
       form: {
-        type:'',
-        article:{
+        type: "",
+        article: {
           openStatus: false,
-          title: '',
-          categoryId: '',
+          title: "",
+          categoryId: "",
           sort: 1,
-          content: '',
-          type:''
+          content: "",
+          type: "",
         },
-        id:''
+        id: "",
       },
-      columns: [
-        // 表头
-        {
-          title:"协议名称",
-          key: "name",
-          width: 150,
-        },
-        // 表头
-        {
-          title:"协议类型",
-          key: "type",
-          width: 150,
-        },
-        {
-          title: "操作",
-          key: "action",
-          align: "center",
-          width: 230,
-          render: (h, params) => {
-            return h("div", { class: "ops" }, [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.edit(params.row);
-                    },
-                  },
-                },
-                "编辑"
-              )
-            ]);
-          },
-        },
-      ],
       data: [
-        {
-          name:'店铺入驻协议',
-          type:'STORE_REGISTER'
-        },
-        {
-          name:'用户协议',
-          type:'USER_AGREEMENT'
-        },
-        {
-          name:'证照信息',
-          type:'LICENSE_INFORMATION'
-        },
-        {
-          name:'关于我们',
-          type:'ABOUT'
-        },
-        {
-          name:'隐私策略',
-          type:'PRIVACY_POLICY'
-        },
-      ], // 表单数据
+        { name: "店铺入驻协议", type: "STORE_REGISTER" },
+        { name: "用户协议", type: "USER_AGREEMENT" },
+        { name: "证照信息", type: "LICENSE_INFORMATION" },
+        { name: "关于我们", type: "ABOUT" },
+        { name: "隐私策略", type: "PRIVACY_POLICY" },
+      ],
     };
   },
   methods: {
-    // 初始化数据
     init() {
       this.getAllList(0);
     },
-    // 文章分类的选择事件
     handleCheckChange(data) {
       let value = "";
       let title = "";
       this.list = [];
-      data.forEach((item, index) => {
+      data.forEach((item) => {
         value += `${item.value},`;
         title += `${item.title},`;
       });
       value = value.substring(0, value.length - 1);
       title = title.substring(0, title.length - 1);
-      this.list.push({
-        value,
-        title,
-      });
+      this.list.push({ value, title });
       this.form.article.categoryId = value;
     },
-    // 获取全部文章分类
     getAllList(parent_id) {
       this.loading = true;
       getArticleCategory(parent_id).then((res) => {
@@ -194,53 +145,45 @@ export default {
         }
       });
     },
-    // 文章分类格式化方法
     getTree(tree = []) {
-      let arr = [];
+      const arr = [];
       if (!!tree && tree.length !== 0) {
         tree.forEach((item) => {
-          let obj = {};
+          const obj = {};
           obj.title = item.articleCategoryName;
           obj.value = item.id;
-          obj.attr = item.articleCategoryName; // 其他你想要添加的属性
-          obj.expand = false;
-          obj.selected = false;
-          obj.children = this.getTree(item.children); // 递归调用
+          obj.attr = item.articleCategoryName;
+          obj.children = this.getTree(item.children);
           arr.push(obj);
         });
       }
       return arr;
     },
-    // 编辑文章modal
     edit(data) {
       this.modalType = 1;
       this.modalTitle = "编辑协议";
-      this.form.article = {
-        content:''
-      };
-      this.$refs.form.resetFields();
+      this.form.article = { content: "" };
+      this.$refs.form?.resetFields();
       this.loading = true;
       getPrivacy(data.type).then((res) => {
         this.loading = false;
-          this.modalVisible = true;
-          this.form.article.categoryId = res.result.categoryId;
-          this.form.id = res.result.id;
-          this.form.article.content =res.result.content;
-          this.form.article.title = res.result.title;
-          this.form.article.sort = res.result.sort;
-          this.form.article.openStatus = res.result.openStatus;
-          this.form.article.type = res.result.type;
-          this.form.type =  res.result.type;
+        this.modalVisible = true;
+        this.form.article.categoryId = res.result.categoryId;
+        this.form.id = res.result.id;
+        this.form.article.content = res.result.content;
+        this.form.article.title = res.result.title;
+        this.form.article.sort = res.result.sort;
+        this.form.article.openStatus = res.result.openStatus;
+        this.form.article.type = res.result.type;
+        this.form.type = res.result.type;
       });
       this.loading = false;
     },
-    // 添加文章
     handleSubmit() {
       this.$refs.form.validate((valid) => {
         if (valid) {
           this.submitLoading = true;
-          // 编辑
-          updatePrivacy(this.form.id,this.form.type,this.form.article).then((res) => {
+          updatePrivacy(this.form.id, this.form.type, this.form.article).then((res) => {
             this.submitLoading = false;
             if (res.success) {
               this.$Message.success("操作成功");
@@ -258,37 +201,37 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .mobile-effect {
-    box-sizing: border-box;
-    margin: 0 20px;
-    border: 2px solid #f1f2f3;
-    height: 610px;
-    .title {
-      align-items: center;
-      background: #f9f9fa;
-      border-radius: 4px 4px 0 0;
-      color: #85878a;
-      display: flex;
-      font-size: 12px;
-      height: 32px;
-      line-height: 20px;
-      padding: 0 12px;
-    }
-    .content {
-      width: 100%;
-      height: 560px;
-      padding: 0 14px;
-      overflow-y: scroll;
-    }
+.mobile-effect {
+  box-sizing: border-box;
+  margin: 0 20px;
+  border: 2px solid #f1f2f3;
+  height: 610px;
+  .title {
+    align-items: center;
+    background: #f9f9fa;
+    border-radius: 4px 4px 0 0;
+    color: #85878a;
+    display: flex;
+    font-size: 12px;
+    height: 32px;
+    line-height: 20px;
+    padding: 0 12px;
   }
-  .ops a {
-    color: #2d8cf0;
-    cursor: pointer;
-    text-decoration: none;
+  .content {
+    width: 100%;
+    height: 560px;
+    padding: 0 14px;
+    overflow-y: scroll;
   }
-  .ops span {
-    display: inline-block;
-    margin: 0 8px;
-    color: #dcdee2;
-  }
+}
+.ops a {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.ops span {
+  display: inline-block;
+  margin: 0 8px;
+  color: #dcdee2;
+}
 </style>

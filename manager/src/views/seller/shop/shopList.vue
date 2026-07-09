@@ -1,364 +1,209 @@
 <template>
   <div class="search">
-    <Card>
-      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-        <Form-item label="会员名称" prop="memberName">
-          <Input
-            type="text"
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="会员名称" prop="memberName">
+          <el-input
             v-model="searchForm.memberName"
             placeholder="请输入会员名称"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Form-item label="店铺名称" prop="storeName">
-          <Input
-            type="text"
+        </el-form-item>
+        <el-form-item label="店铺名称" prop="storeName">
+          <el-input
             v-model="searchForm.storeName"
             placeholder="请输入店铺名称"
             clearable
             style="width: 240px"
           />
-        </Form-item>
-        <Form-item label="店铺状态">
-          <Select v-model="searchForm.storeDisable" clearable style="width: 240px">
-            <Option value="OPEN">开启中</Option>
-            <Option value="CLOSED">已关闭</Option>
-            <!-- <Option value="APPLY">申请中</Option> -->
-            <Option value="APPLYING">审核中</Option>
-            <Option value="REFUSED">审核拒绝</Option>
-          </Select>
-        </Form-item>
-        <Form-item label="创建时间" prop="createTime">
-          <DatePicker v-model="selectDate" type="datetimerange" format="yyyy-MM-dd HH:mm:ss" clearable @on-change="selectDateRange" placeholder="选择起始时间" style="width: 240px"></DatePicker>
-        </Form-item>
-        <Button @click="handleSearch" type="primary" icon="ios-search" class="search-btn">搜索</Button>
-      </Form>
-      </Card>
-    <Card>
-      <Row class="operation padding-row">
-        <Button @click="add" type="primary">添加</Button>
-      </Row>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table"></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[20, 50, 100]"
-          size="small" show-total show-elevator show-sizer></Page>
-      </Row>
-    </Card>
+        </el-form-item>
+        <el-form-item label="店铺状态">
+          <el-select v-model="searchForm.storeDisable" clearable style="width: 240px">
+            <el-option label="开启中" value="OPEN" />
+            <el-option label="已关闭" value="CLOSED" />
+            <el-option label="审核中" value="APPLYING" />
+            <el-option label="审核拒绝" value="REFUSED" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="创建时间" prop="createTime">
+          <el-date-picker
+            v-model="selectDate"
+            type="datetimerange"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            clearable
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            style="width: 360px"
+            @change="selectDateRange"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <div class="operation padding-row">
+        <el-button type="primary" @click="add">添加</el-button>
+      </div>
+
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+      >
+        <el-table-column prop="storeName" label="店铺名称" min-width="120" align="left" />
+        <el-table-column prop="memberName" label="会员名称" min-width="130" show-overflow-tooltip />
+        <el-table-column label="店铺地址" width="300" show-overflow-tooltip>
+          <template #default="{ row }">
+            <el-tag v-if="row" type="info">{{ row.storeAddressPath || "暂未填写" }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="是否自营" width="120" align="left">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.selfOperated ? "自营" : "非自营" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="店铺状态" width="130" align="left">
+          <template #default="{ row }">
+            <span v-if="row">{{ storeDisableText(row.storeDisable) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" width="170" align="left" />
+        <el-table-column label="操作" width="220" align="center" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row">
+              <template v-if="row.storeDisable === 'APPLYING'">
+                <a class="link-text" @click="audit(row)">审核</a>
+                <span class="op-split">|</span>
+                <a class="link-text" @click="edit(row)">修改</a>
+              </template>
+              <template v-else>
+                <a v-if="selectedShop" class="link-text" @click="callback(row)">选择</a>
+                <span v-if="selectedShop" class="op-split">|</span>
+                <a class="link-text" @click="detail(row)">查看</a>
+                <span class="op-split">|</span>
+                <a class="link-text" @click="edit(row)">修改</a>
+                <template v-if="row.storeDisable === 'OPEN' || row.storeDisable === 'CLOSED'">
+                  <span class="op-split">|</span>
+                  <a v-if="row.storeDisable === 'OPEN'" class="link-text" @click="disable(row)">关闭</a>
+                  <a v-else-if="row.storeDisable === 'CLOSED'" class="link-text" @click="enable(row)">开启</a>
+                </template>
+              </template>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
-import {
-  getShopListData,
-  disableShop,
-  enableBrand,
-  shopAudit,
-} from "@/api/shops";
+import { getShopListData, disableShop, enableBrand, shopAudit } from "@/api/shops";
+
 export default {
   name: "shop",
   data() {
     return {
-      loading: true, // 表单加载状态
+      loading: true,
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 20, // 页面大小
-        sort: "createTime", // 默认排序字段
-        order: "desc", // 默认排序方式
-        startDate: "", // 起始时间
-        endDate: "", // 终止时间
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+        startDate: "",
+        endDate: "",
       },
-      selectDate: null, // 创建时间
-      columns: [
-        // 表头
-        {
-          title: "店铺名称",
-          key: "storeName",
-          minWidth: 120,
-          align: "left",
-        },
-        {
-          title: "会员名称",
-          key: "memberName",
-          minWidth: 130,
-          tooltip: true
-        },
-        {
-          title: "店铺地址",
-          key: "storeAddressPath",
-          width: 300,
-          tooltip: true,
-          render: (h, params) => {
-            return h(
-              "Tag",
-              {
-
-              },
-              params.row.storeAddressPath ||  "暂未填写"
-            );
-          },
-        },
-        {
-          title: "是否自营",
-          key: "selfOperated",
-          align: "left",
-          width: 120,
-          render: (h, params) => {
-            return h(
-              "Tag",
-              {
-                props: {
-                  color: params.row.selfOperated ? "volcano" : "green",
-                },
-              },
-              params.row.selfOperated  ? "自营" : "非自营"
-            );
-          },
-        },
-
-        {
-          title: "店铺状态",
-          key: "storeDisable",
-          align: "left",
-          width: 130,
-          render: (h, params) => {
-            if (params.row.storeDisable == "OPEN") {
-              return h("Tag", {props: {color: "green",},},"开启中");
-            } else if (params.row.storeDisable == "CLOSED") {
-              return h("Tag", {props: {color: "volcano",},},"已关闭");
-            } else if (params.row.storeDisable == "APPLY") {
-              return h("Tag", {props: {color: "geekblue",},},"申请中");
-            } else if (params.row.storeDisable == "APPLYING") {
-              return h("Tag", {props: {color: "purple",},},"审核中");
-            } else if (params.row.storeDisable == "REFUSED") {
-              return h("Tag", {props: {color: "red",},},"审核拒绝");
-            }
-          },
-        },
-        {
-          title: "创建时间",
-          key: "createTime",
-          align: "left",
-          width: 170
-        },
-        {
-          title: "操作",
-          key: "action",
-          width: 200,
-          align: "center",
-          fixed: "right",
-          render: (h, params) => {
-            let enableOrDisable = "";
-            if (params.row.storeDisable == "OPEN") {
-              enableOrDisable = h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.disable(params.row);
-                    },
-                  },
-                },
-                "关闭"
-              );
-            } else if (params.row.storeDisable == "CLOSED") {
-              enableOrDisable = h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.enable(params.row);
-                    },
-                  },
-                },
-                "开启"
-              );
-            } else if (params.row.storeDisable == "APPLYING") {
-              return h("div", [
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.audit(params.row);
-                      },
-                    },
-                  },
-                  "审核"
-                ),
-                h(
-                  "span",
-                  { style: { margin: "0 8px", color: "#dcdee2" } },
-                  "|"
-                ),
-                h(
-                  "a",
-                  {
-                    style: {
-                      color: "#2d8cf0",
-                      cursor: "pointer",
-                      textDecoration: "none",
-                    },
-                    on: {
-                      click: () => {
-                        this.edit(params.row);
-                      },
-                    },
-                  },
-                  "修改"
-                ),
-              ]);
-            }
-
-            return h("div", [
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                    display: this.selectedShop ? "inline-block" : "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.callback(params.row);
-                    },
-                  },
-                },
-                "选择"
-              ),
-              h(
-                "span",
-                { style: { margin: "0 8px", color: "#dcdee2", display: this.selectedShop ? "inline-block" : "none" } },
-                "|"
-              ),
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.detail(params.row);
-                    },
-                  },
-                },
-                "查看"
-              ),
-              h(
-                "span",
-                { style: { margin: "0 8px", color: "#dcdee2" } },
-                "|"
-              ),
-              h(
-                "a",
-                {
-                  style: {
-                    color: "#2d8cf0",
-                    cursor: "pointer",
-                    textDecoration: "none",
-                  },
-                  on: {
-                    click: () => {
-                      this.edit(params.row);
-                    },
-                  },
-                },
-                "修改"
-              ),
-              h(
-                "span",
-                { style: { margin: "0 8px", color: "#dcdee2" } },
-                "|"
-              ),
-              enableOrDisable,
-            ]);
-          },
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
-      selectedShop: false, //用于是否选择店铺
+      selectDate: null,
+      data: [],
+      total: 0,
+      selectedShop: false,
     };
   },
-
   methods: {
-    // 回调给父级
+    storeDisableText(v) {
+      const map = {
+        OPEN: "开启中",
+        CLOSED: "已关闭",
+        APPLY: "申请中",
+        APPLYING: "审核中",
+        REFUSED: "审核拒绝",
+      };
+      return map[v] || v || "-";
+    },
     callback(val) {
       this.$emit("callback", val);
     },
-    // 初始化数据
     init() {
       this.getDataList();
     },
-    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
-    // 分页 改变页数
     changePageSize(v) {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getDataList();
     },
-    // 起止时间分别赋值
     selectDateRange(v) {
-      if (v) {
+      if (v && v.length === 2) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
+      } else {
+        this.searchForm.startDate = "";
+        this.searchForm.endDate = "";
       }
     },
-    // 获取列表数据
     getDataList() {
-      console.log(this.searchForm)
       this.loading = true;
-      // 带多条件搜索参数获取表单数据 请自行修改接口
-      getShopListData(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-      this.total = this.data.length;
-      this.loading = false;
+      getShopListData(this.searchForm)
+        .then((res) => {
+          if (res.success) {
+            this.data = res.result.records;
+            this.total = res.result.total;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
-    // 添加店铺
     add() {
-      this.$router.push({ path: '/shop-operation'});
+      this.$router.push({ path: "/shop-operation" });
     },
-    // 修改店铺
     edit(v) {
-      this.$router.push({ path: '/shop-operation', query: { shopId: v.id } });
+      this.$router.push({ path: "/shop-operation", query: { shopId: v.id } });
     },
-    // 关闭店铺
     disable(v) {
       this.$Modal.confirm({
         title: "确认关闭",
@@ -375,11 +220,9 @@ export default {
         },
       });
     },
-    //查看店铺详细
-    detail(row){
+    detail(row) {
       this.$router.push({ name: "shop-detail", query: { id: row.id } });
     },
-    // 审核店铺
     audit(v) {
       this.$Modal.confirm({
         title: "审核店铺",
@@ -407,7 +250,6 @@ export default {
         },
       });
     },
-    // 启用店铺
     enable(v) {
       this.$Modal.confirm({
         title: "确认开启",
@@ -430,3 +272,21 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+.op-split {
+  margin: 0 8px;
+  color: #dcdee2;
+}
+.padding-row {
+  margin-bottom: 10px;
+}
+.mt_10 {
+  margin-top: 10px;
+}
+</style>

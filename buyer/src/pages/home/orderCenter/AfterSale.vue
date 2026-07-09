@@ -1,35 +1,31 @@
 <template>
   <div class="wrapper">
-    <!-- 卡片组件 -->
-    <card _Title="我的售后" :_Size="16"></card>
-    <!-- 搜索 筛选 -->
-    <div class="mb_20 box">
-      <div class="global_float_right">
-        <Input
+    <UserCenterLayout title="我的售后" :tabs="['我的售后']">
+      <template #extra>
+        <el-input
           class="width_300"
-          search
-          enter-button
+          
+          
           v-model="params.keywords"
-          @on-search="getList"
+          @keyup.enter="getList"
           placeholder="请输入订单号搜索"
         />
-      </div>
-    </div>
+      </template>
     <!-- 列表 -->
     <empty v-if="orderList.length === 0"/>
     <div class="order-content" v-else>
-      <template v-for="(order, onderIndex) in orderList">
-        <div class="order-list" :key="onderIndex">
+      <template v-for="(order, onderIndex) in orderList" :key="order.sn || onderIndex">
+        <div class="order-list">
           <div class="order-header">
             <div>
               <div v-if="order.serviceStatus">{{ filterOrderStatus(order.serviceStatus) }}</div>
               <div>
                 售后单号：{{ order.sn }} &nbsp; &nbsp; &nbsp;{{ order.createTime }}
-                &nbsp; &nbsp;{{ order.memberName | secrecyMobile }}
+                &nbsp; &nbsp;{{ $filters.secrecyMobile( order.memberName ) }}
               </div>
             </div>
             <div>
-              <span>申请退款金额：<span class="global_color">{{ order.applyRefundPrice | unitPrice("￥") }}</span></span>
+              <span>申请退款金额：<span class="global_color">{{ $filters.unitPrice(order.applyRefundPrice, "￥") }}</span></span>
             </div>
           </div>
           <div class="order-body">
@@ -43,37 +39,46 @@
               </div>
             </div>
             <div>
-              <span @click="shopPage(order.shopId)">{{ order.storeName }}</span>
+              <span @click="shopPage(order.storeId)">{{ order.storeName }}</span>
             </div>
-            <div>
+            <div class="order-actions">
               <!-- 订单基础操作 -->
-              <Button @click="goDetail(order.sn)" type="info" size="small">售后详情</Button>
-              <Button @click="openModal(order)"
-                      v-if="order.serviceStatus == 'PASS' &&
-                order.serviceType != 'RETURN_MONEY'"
-                      type="warning" size="small">提交物流
-              </Button>
-              <Button @click="cancel(order.sn)" type="error" v-if="order.afterSaleAllowOperationVO.cancel" size="small">
-                取消售后
-              </Button>
+              <el-button
+                @click="goDetail(order.sn)"
+                type="warning"
+                size="small"
+                class="after-sale-action-btn"
+              >售后详情</el-button>
+              <el-button
+                @click="openModal(order)"
+                v-if="order.serviceStatus == 'PASS' && order.serviceType != 'RETURN_MONEY'"
+                size="small"
+                class="after-sale-action-btn submit-logistics-btn"
+              >提交物流</el-button>
+              <el-button
+                @click="cancel(order.sn)"
+                type="danger"
+                v-if="order.afterSaleAllowOperationVO.cancel"
+                size="small"
+                class="after-sale-action-btn"
+              >取消售后</el-button>
             </div>
           </div>
         </div>
       </template>
-      <Spin size="large" fix v-if="spinShow"></Spin>
+      <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
     </div>
     <!-- 分页 -->
     <div class="page-size">
-      <Page :total="total" @on-change="changePageNum"
-            @on-page-size-change="changePageSize"
-            :page-size="params.pageSize"
-            show-sizer>
-      </Page>
+      <el-pagination v-model:current-page="params.pageNumber" v-model:page-size="params.pageSize"
+        :total="total" @current-change="changePageNum"
+            @size-change="changePageSize" layout="sizes, prev, pager, next, jumper"></el-pagination>
     </div>
-    <Modal v-model="logisticsShow" width="530">
-      <p slot="header">
+    </UserCenterLayout>
+    <el-dialog v-model="logisticsShow" width="530">
+      <template #header><p>
         <span>提交物流信息</span>
-      </p>
+      </p></template>
       <div>
         <div class="goods-list modal-goods">
           <img @click="goodsDetail(singleOrder.skuId, singleOrder.goodsId)" class="hover-color"
@@ -84,35 +89,41 @@
             </div>
             <div class="mt_10">
               <span class="global_color"
-              >{{ singleOrder.flowPrice | unitPrice("￥") }} </span
-              >x {{ singleOrder.num }}
+              >{{ $filters.unitPrice(singleOrder.flowPrice, "￥") }} </span> x {{ singleOrder.num }}
             </div>
           </div>
         </div>
-        <Form ref="form" :model="form" label-position="left" :label-width="100" :rules="rules">
-          <FormItem label="物流公司" prop="logisticsId">
-            <Select v-model="form.logisticsId" placeholder="请选择物流公司">
-              <Option v-for="item in companyList" :value="item.id" :key="item.id">{{ item.name }}</Option>
-            </Select>
-          </FormItem>
-          <FormItem label="物流单号" prop="logisticsNo">
-            <Input v-model="form.logisticsNo" placeholder="请填写物流单号"></Input>
-          </FormItem>
-          <FormItem label="发货时间" prop="mDeliverTime">
-            <DatePicker type="date" style="width:100%" v-model="form.mDeliverTime" @on-change="changeTime"
-                        format="yyyy-MM-dd" placeholder="选择发货时间"></DatePicker>
-          </FormItem>
-        </Form>
+        <el-form ref="form" :model="form" label-position="left" label-width="100px" :rules="rules">
+          <el-form-item label="物流公司" prop="logisticsId">
+            <el-select v-model="form.logisticsId" placeholder="请选择物流公司">
+              <el-option v-for="item in companyList" :value="item.id" :key="item.id">{{ item.name }}</el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="物流单号" prop="logisticsNo">
+            <el-input v-model="form.logisticsNo" placeholder="请填写物流单号"></el-input>
+          </el-form-item>
+          <el-form-item label="发货时间" prop="mDeliverTime">
+            <el-date-picker
+              type="date"
+              style="width:100%"
+              v-model="form.mDeliverTime"
+              format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD"
+              placeholder="选择发货时间"
+            />
+          </el-form-item>
+        </el-form>
       </div>
-      <div slot="footer" style="text-align: right">
-        <Button @click="logisticsShow = false">关闭</Button>
-        <Button type="primary" :loading="submitLoading" @click="submitDelivery">提交</Button>
-      </div>
-    </Modal>
+      <template #footer><div style="text-align: right">
+        <el-button @click="logisticsShow = false">关闭</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitDelivery">提交</el-button>
+      </div></template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import { Message, Modal } from "@/utils/message";
 import {afterSaleList, cancelAfterSale} from '@/api/member.js';
 import {afterSaleDelivery, getLogisticsCompany} from '@/api/order.js';
 import {afterSaleStatusList} from '../enumeration.js'
@@ -161,13 +172,13 @@ export default {
       })
     },
     cancel(sn) { // 取消售后申请
-      this.$Modal.confirm({
+      Modal.confirm({
         title: '取消',
-        content: '<p>确定取消此次售后申请吗？</p>',
+        content: '确定取消此次售后申请吗？',
         onOk: () => {
           cancelAfterSale(sn).then(res => {
             if (res.success) {
-              this.$Message.success('取消售后申请成功')
+              Message.success('取消售后申请成功')
               this.getList()
             }
           })
@@ -228,32 +239,32 @@ export default {
     },
     // 提交物流信息
     submitDelivery() {
-      this.submitLoading = true
-      afterSaleDelivery(this.form).then(res => {
-        if (res.success) {
-          this.logisticsShow = false;
-          this.$Message.success('提交成功')
-          this.getList()
-        }
-        this.submitLoading = false
-      }).catch(() => {
-        this.submitLoading = false
-      })
+      this.$refs.form?.validate((valid) => {
+        if (!valid) return;
+        this.submitLoading = true;
+        afterSaleDelivery(this.form).then(res => {
+          if (res.success) {
+            this.logisticsShow = false;
+            Message.success('提交成功');
+            this.getList();
+          }
+          this.submitLoading = false;
+        }).catch(() => {
+          this.submitLoading = false;
+        });
+      });
     },
     // 提交物流modal
     openModal(row) {
-      console.log(row);
       this.singleOrder = row;
-      this.form.afterSaleSn = row.sn
       this.logisticsShow = true;
-      this.$refs.form.resetFields()
       if (!this.companyList.length) {
-        this.getCompany()
+        this.getCompany();
       }
-    },
-    // 格式化时间
-    changeTime(time) {
-      this.form.mDeliverTime = time;
+      this.$nextTick(() => {
+        this.$refs.form?.resetFields();
+        this.form.afterSaleSn = row.sn;
+      });
     }
   }
 };
@@ -324,7 +335,7 @@ export default {
         }
       }
 
-      .ivu-icon {
+      .el-icon {
         color: #ff8f23;
         cursor: pointer;
 
@@ -334,11 +345,31 @@ export default {
       }
     }
 
-    > div:nth-child(3) {
-      width: 100px;
+    .order-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 100px;
 
-      .ivu-btn {
-        margin-bottom: 10px;
+      .after-sale-action-btn {
+        display: block;
+        margin: 0;
+        min-width: 88px;
+      }
+
+      :deep(.submit-logistics-btn) {
+        background-color: #ff9900 !important;
+        border-color: #ff9900 !important;
+        color: #fff !important;
+
+        &:hover,
+        &:focus {
+          background-color: #e68a00 !important;
+          border-color: #e68a00 !important;
+          color: #fff !important;
+        }
       }
     }
   }

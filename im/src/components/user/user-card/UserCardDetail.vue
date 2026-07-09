@@ -31,7 +31,7 @@
         <div class="card-rows no-select">
           <div class="card-row">
             <label>手机</label>
-            <span>{{ detail.mobile | mobile }}</span>
+            <span>{{ formatMobile(detail.mobile) }}</span>
           </div>
           <div class="card-row">
             <label>昵称</label>
@@ -39,7 +39,7 @@
           </div>
           <div class="card-row">
             <label>性别</label>
-            <span>{{ detail.gender | gender }}</span>
+            <span>{{ formatGender(detail.gender) }}</span>
           </div>
           <div v-show="detail.friend_status == 2" class="card-row">
             <label>备注</label>
@@ -134,18 +134,6 @@ export default {
       default: 0,
     },
   },
-  filters: {
-    gender(value) {
-      let arr = ["未知", "男", "女"];
-      return arr[value] || "未知";
-    },
-    // 手机号格式化
-    mobile(value) {
-      return (
-        value.substr(0, 3) + " " + value.substr(3, 4) + " " + value.substr(7, 4)
-      );
-    },
-  },
   data() {
     return {
       detail: {
@@ -179,6 +167,16 @@ export default {
     // this.loadUserDetail();
   },
   methods: {
+    formatGender(value) {
+      const arr = ["未知", "男", "女"];
+      return arr[value] || "未知";
+    },
+    formatMobile(value) {
+      if (!value) return "";
+      return (
+        value.substr(0, 3) + " " + value.substr(3, 4) + " " + value.substr(7, 4)
+      );
+    },
     close() {
       if (this.contacts) return false;
 

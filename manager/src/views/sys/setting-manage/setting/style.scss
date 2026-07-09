@@ -1,4 +1,4 @@
-::v-deep .ivu-input{
+:deep(.el-input){
   width: 200px !important;
 }
 
@@ -15,16 +15,16 @@
   margin-left: 10px;
 }
 
-::v-deep .label-btns > .ivu-btn{
+:deep(.label-btns > .el-button){
   margin-right: 10px;
 }
 
-::v-deep .es-buttons .ivu-btn{
+:deep(.es-buttons .el-button){
   margin-right: 10px;
   margin-bottom: 10px;
 }
 
-.ivu-form-item{
+.el-form-item{
   padding: 10px 0;
 }
 
@@ -34,12 +34,12 @@
   font-size: 12px;
 }
 
-.ivu-input-wrapper {
+.el-input {
   width: 150px;
   margin-right: 10px;
 }
 
-::v-deep .ivu-form-item-content {
+:deep(.el-form-item__content){
   margin-left: 0 !important;
   display: flex;
 }

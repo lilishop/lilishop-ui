@@ -1,0 +1,40 @@
+:root {
+  --el-color-primary: var(--theme-color, #ff3c2a);
+  --el-color-danger: var(--theme-color, #ff3c2a);
+  --el-font-size-base: 14px;
+}
+
+.el-table--border {
+  .el-table__cell {
+    border-right: none !important;
+  }
+}
+
+.link-text {
+  color: var(--theme-color, #ff3c2a);
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.op-split {
+  margin: 0 8px;
+  color: #dcdfe6;
+}
+
+/* 次要强调按钮，使用高亮主题色（如「立即购买」） */
+.confirm-receipt-btn {
+  background-color: var(--theme-light, #ff6b35) !important;
+  border-color: var(--theme-light, #ff6b35) !important;
+  color: #fff !important;
+
+  &:hover,
+  &:focus {
+    background-color: color-mix(in srgb, var(--theme-light, #ff6b35) 88%, black) !important;
+    border-color: color-mix(in srgb, var(--theme-light, #ff6b35) 88%, black) !important;
+    color: #fff !important;
+  }
+}

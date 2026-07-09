@@ -1,173 +1,190 @@
 <template>
   <div>
-    <div style="display:flex;">
-      <Input
+    <div style="display: flex; gap: 10px; align-items: center; width: 100%">
+      <el-input
+        v-if="showInput"
         v-model="currentValue"
-        @on-change="handleChange"
-        v-show="showInput"
         :placeholder="placeholder"
         :size="size"
         :disabled="disabled"
         :readonly="readonly"
         :maxlength="maxlength"
+        style="flex: 1"
+        @input="handleChange"
       >
-          <Poptip slot="append" transfer trigger="hover" title="图片预览" placement="right">
-            <Icon type="md-eye" class="see-icon" />
-            <div slot="content">
-              <img :src="currentValue" alt="该资源不存在" style="width: 100%;margin: 0 auto;display: block;" />
-              <a @click="viewImage=true" style="margin-top:5px;text-align:right;display:block">查看大图</a>
-            </div>
-          </Poptip>
-      </Input>
-      
-      <Upload
-        :action="uploadFileUrl"
-        :headers="accessToken"
-        :on-success="handleSuccess"
-        :on-error="handleError"
-        :format="['jpg','jpeg','png','gif','bmp']"
-        accept=".jpg, .jpeg, .png, .gif, .bmp"
-        :max-size="1024"
-        :on-format-error="handleFormatError"
-        :on-exceeded-size="handleMaxSize"
-        :before-upload="beforeUpload"
-        :show-upload-list="false"
-        ref="up"
-        class="upload"
-      >
-        <Button :loading="loading" :size="size" :disabled="disabled">上传图片</Button>
-      </Upload>
+        <template #append>
+          <el-popover trigger="hover" placement="right" :width="320" title="图片预览">
+            <template #reference>
+              <el-button class="see-icon">
+                <el-icon><View /></el-icon>
+              </el-button>
+            </template>
+            <img
+              v-if="currentValue"
+              :src="currentValue"
+              alt="该资源不存在"
+              style="max-width: 280px; display: block; margin: 0 auto"
+            />
+            <el-button
+              v-if="currentValue"
+              type="primary"
+              link
+              style="margin-top: 8px; display: block; text-align: right"
+              @click="viewImage = true"
+            >
+              查看大图
+            </el-button>
+          </el-popover>
+        </template>
+      </el-input>
+      <el-button @click="handleCLickImg('storeLogo')">选择图片</el-button>
     </div>
 
-    <Modal title="图片预览" v-model="viewImage" :styles="{top: '30px'}" draggable>
-      <img :src="currentValue" alt="该资源不存在" style="width: 100%;margin: 0 auto;display: block;" />
-      <div slot="footer">
-        <Button @click="viewImage=false">关闭</Button>
-      </div>
-    </Modal>
+    <el-dialog v-model="viewImage" title="图片预览" width="480px" append-to-body :z-index="3500">
+      <img
+        :src="currentValue"
+        alt="该资源不存在"
+        style="max-width: 100%; margin: 0 auto; display: block"
+      />
+      <template #footer>
+        <el-button @click="viewImage = false">关闭</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="picModalFlag" width="1200px" append-to-body :z-index="3500" destroy-on-close>
+      <ossManage
+        ref="ossManage"
+        :is-component="true"
+        :initialize="picModalFlag"
+        :max-select="1"
+        @callback="callbackSelected"
+        @selected="handleOssSelected"
+      />
+      <template #footer>
+        <el-button @click="picModalFlag = false">取消</el-button>
+        <el-button type="primary" @click="confirmSelectedImage">确认</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import { View } from "@element-plus/icons-vue";
 import { uploadFile } from "@/libs/axios";
+import ossManage from "@/views/shop/ossManages";
+
 export default {
   name: "uploadPicInput",
-  props: {
-    value: String,
-    size: String,
-    placeholder: { // input提示信息
-      type: String,
-      default: "图片链接"
-    },
-    showInput: { // 显示图片链接
-      type: Boolean,
-      default: true
-    },
-    disabled: { // 是否不可选中
-      type: Boolean,
-      default: false
-    },
-    readonly: { // 是否只读
-      type: Boolean,
-      default: false
-    },
-    maxlength: Number, // 最大长度
-    icon: { // 上传按钮图标
-      type: String,
-      default: "ios-cloud-upload-outline"
-    }
+  components: {
+    ossManage,
+    View,
   },
+  props: {
+    modelValue: String,
+    value: String,
+    size: {
+      default: "default",
+      type: String,
+    },
+    placeholder: {
+      type: String,
+      default: "图片链接",
+    },
+    showInput: {
+      type: Boolean,
+      default: true,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+    readonly: {
+      type: Boolean,
+      default: false,
+    },
+    maxlength: Number,
+  },
+  emits: ["update:modelValue", "input", "on-change"],
   data() {
     return {
-      accessToken: {}, // 验证token
-      currentValue: this.value, // 当前值
-      loading: false, // 加载状态
-      viewImage: false, // 是否预览图片
-      uploadFileUrl: uploadFile // 上传路径
+      accessToken: {},
+      currentValue: this.modelValue ?? this.value ?? "",
+      viewImage: false,
+      uploadFileUrl: uploadFile,
+      picModalFlag: false,
+      selectedFormBtnName: "",
+      picIndex: "",
+      selectedImage: [],
     };
   },
   methods: {
-    // 初始化
-    init() {
-      this.accessToken = {
-        accessToken: this.getStore("accessToken")
-      };
-    },
-    // 格式校验
-    handleFormatError(file) {
-      this.loading = false;
-      this.$Notice.warning({
-        title: "不支持的文件格式",
-        desc:
-          "所选文件‘ " +
-          file.name +
-          " ’格式不正确, 请选择 .jpg .jpeg .png .gif .bmp格式文件"
+    handleCLickImg(val, index) {
+      this.picModalFlag = true;
+      this.selectedFormBtnName = val;
+      this.picIndex = index;
+      this.selectedImage = [];
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
       });
     },
-    // 大小校验
-    handleMaxSize(file) {
-      this.loading = false;
-      this.$Notice.warning({
-        title: "文件大小过大",
-        desc: "所选文件大小过大, 不得超过1M."
-      });
-    },
-    // 上传前
-    beforeUpload() {
-      this.loading = true;
-      return true;
-    },
-    // 上传成功
-    handleSuccess(res, file) {
-      this.loading = false;
-      if (res.success) {
-        this.currentValue = res.result;
-        this.$emit("input", this.currentValue);
-        this.$emit("on-change", this.currentValue);
-      } else {
-        this.$Message.error(res.message);
+    callbackSelected(val) {
+      if (val?.url) {
+        this.selectedImage = [val.url];
       }
     },
-    // 上传失败
-    handleError(error, file, fileList) {
-      this.loading = false;
-      this.$Message.error(error.toString());
+    handleOssSelected(list) {
+      this.selectedImage = (list || []).map((item) => item.split(",")[1]).filter(Boolean);
     },
-    // 上传成功回显
-    handleChange(v) {
-      this.$emit("input", this.currentValue);
-      this.$emit("on-change", this.currentValue);
-      this.$attrs.rollback && this.$attrs.rollback()
+    confirmSelectedImage() {
+      if (!this.selectedImage.length) {
+        this.$Message.warning("请选择图片");
+        return;
+      }
+      this.currentValue = this.selectedImage[this.selectedImage.length - 1];
+      this.picModalFlag = false;
+      this.picIndex = "";
+      this.emitValue(this.currentValue);
     },
-    // 初始值
+    init() {
+      this.accessToken = {
+        accessToken: this.getStore("accessToken"),
+      };
+    },
+    emitValue(val) {
+      this.$emit("update:modelValue", val);
+      this.$emit("input", val);
+      this.$emit("on-change", val);
+    },
+    handleChange() {
+      this.emitValue(this.currentValue);
+      this.$attrs.rollback && this.$attrs.rollback();
+    },
     setCurrentValue(value) {
       if (value === this.currentValue) {
         return;
       }
-      this.currentValue = value;
-      this.$emit("on-change", this.currentValue);
-    }
+      this.currentValue = value ?? "";
+      this.emitValue(this.currentValue);
+    },
   },
   watch: {
+    modelValue(val) {
+      this.setCurrentValue(val);
+    },
     value(val) {
       this.setCurrentValue(val);
-    }
+    },
   },
   created() {
     this.init();
-  }
+  },
 };
 </script>
 
 <style lang="scss" scoped>
 .see-icon {
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.upload {
-  display: inline-block;
-  margin-left: 10px;
+  padding: 8px;
 }
 </style>
-

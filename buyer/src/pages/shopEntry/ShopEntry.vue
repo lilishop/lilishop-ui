@@ -3,17 +3,32 @@
     <div style="height: 20px"></div>
     <div class="content">
       <h1>店铺入驻</h1>
-      <Steps :current="currentIndex" class="margin">
-        <Step title="企业资质信息"></Step>
-        <Step title="财务资质信息"></Step>
-        <Step title="其他信息"></Step>
-        <Step title="提交审核"></Step>
-      </Steps>
-      <first-apply v-if="currentIndex == 0 && dataReview" :content="firstData" @change="nextPage"></first-apply>
+      <el-steps :active="currentIndex" class="margin" finish-status="success">
+        <el-step title="企业资质信息"></el-step>
+        <el-step title="财务资质信息"></el-step>
+        <el-step title="其他信息"></el-step>
+        <el-step title="提交审核"></el-step>
+      </el-steps>
+      <div v-if="initLoading" class="step-loading" v-loading="true"></div>
+      <template v-else>
+        <first-apply
+          v-if="currentIndex === 0 && agreementAccepted"
+          :content="firstData"
+          @change="nextPage"
+        ></first-apply>
 
-      <second-apply v-if="currentIndex == 1 && dataReview" :content="secondData" @change="nextPage"></second-apply>
+        <second-apply
+          v-if="currentIndex === 1 && agreementAccepted"
+          :content="secondData"
+          @change="nextPage"
+        ></second-apply>
 
-      <third-apply v-if="currentIndex == 2 && dataReview" :content="thirdData" @change="nextPage"></third-apply>
+        <third-apply
+          v-if="currentIndex === 2 && agreementAccepted"
+          :content="thirdData"
+          @change="nextPage"
+        ></third-apply>
+      </template>
 
       <div class="success-page" v-if="currentIndex == 3">
         <span v-if="storeDisable == '' || storeDisable == 'APPLYING'">入驻申请提交成功，等待平台审核</span>
@@ -21,24 +36,24 @@
         <span v-if="storeDisable == 'CLOSED'">店铺已关闭，重申请联系管理员</span>
         <span v-if="storeDisable == 'REFUSED'">审核未通过,请修改资质信息，如有疑问请联系管理员</span>
       </div>
-      <Button v-if="currentIndex === 3" @click="$router.push('/')">返回</Button>
+      <el-button v-if="currentIndex === 3" @click="$router.push('/')">返回</el-button>
       &nbsp;
-      <Button type="primary" @click='currentIndex = 0'
-        v-if="storeDisable === 'REFUSED' && currentIndex === 3">重新申请</Button>
+      <el-button type="primary" @click='currentIndex = 0'
+        v-if="storeDisable === 'REFUSED' && currentIndex === 3">重新申请</el-button>
     </div>
 
-    <Modal title="店铺入驻协议" v-model="showAgreement" width="1200" :closable="false" :mask-closable="false">
-      <Scroll :on-reach-bottom="handleReachBottom">
+    <el-dialog title="店铺入驻协议" v-model="showAgreement" width="1200" :show-close="false" :close-on-click-modal="false">
+      <div class="agreement-scroll">
         <div class="agreeent-con" v-html="agreementCon"></div>
-      </Scroll>
-
-      <div slot="footer" style="text-align: center">
-        <p>
-          <Checkbox v-model="checked">我已同意以上协议</Checkbox>
-        </p>
-        <Button type="primary" :disabled="!checked" class="margin" @click="showAgreement = false">同意协议填写资质信息</Button>
       </div>
-    </Modal>
+
+      <template #footer><div style="text-align: center">
+        <p>
+          <el-checkbox v-model="checked">我已同意以上协议</el-checkbox>
+        </p>
+        <el-button type="primary" :disabled="!checked" class="margin" @click="confirmAgreement">同意协议填写资质信息</el-button>
+      </div></template>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -63,101 +78,115 @@ export default {
       secondData: {}, // 第二步数据
       thirdData: {}, // 第三步数据
       storeDisable: "", // APPLY OPEN 开店中 CLOSED 关闭 REFUSED 拒绝 APPLYING 申请中，审核
-      dataReview: true, // 根据接口返回判断是否可展示数据
+      initLoading: true,
+      agreementAccepted: false, // 是否已同意入驻协议
     };
   },
   methods: {
+    confirmAgreement() {
+      this.agreementAccepted = true;
+      this.showAgreement = false;
+      sessionStorage.setItem("shopEntryAgreementAccepted", "1");
+    },
+    assignApplyData(data) {
+      const first = [
+        "companyAddressPath",
+        "companyAddress",
+        "companyAddressIdPath",
+        "companyEmail",
+        "companyName",
+        "employeeNum",
+        "companyPhone",
+        "legalId",
+        "legalName",
+        "licencePhoto",
+        "legalPhoto",
+        "licenseNum",
+        "linkName",
+        "linkPhone",
+        "registeredCapital",
+        "scope",
+      ];
+      const second = [
+        "settlementBankAccountName",
+        "settlementBankAccountNum",
+        "settlementBankBranchName",
+        "settlementBankJointName",
+      ];
+      const third = [
+        "goodsManagementCategory",
+        "storeCenter",
+        "storeDesc",
+        "storeLogo",
+        "storeName",
+        "storeAddressIdPath",
+        "storeAddressPath",
+        "storeAddressDetail",
+      ];
+
+      this.storeDisable = data.storeDisable || "";
+      Object.assign(this.firstData, Object.fromEntries(first.map((key) => [key, data[key]])));
+      Object.assign(this.secondData, Object.fromEntries(second.map((key) => [key, data[key]])));
+      Object.assign(this.thirdData, Object.fromEntries(third.map((key) => [key, data[key]])));
+    },
     getArticle() {
       // 入驻协议
       agreement().then((res) => {
         this.agreementCon = res.result.content;
       });
     },
-    handleReachBottom(){
-
-    },
     getData(status) {
-      // 获取已填写店铺信息
       applyStatus().then((res) => {
-        if (res.success) {
-          if (!res.result) {
+        if (!res.success) {
+          return;
+        }
+        if (!res.result) {
+          if (status === "init" && !this.agreementAccepted) {
             this.showAgreement = true;
-          } else {
-            this.dataReview = false;
-            let data = res.result;
-            let first = [
-              "companyAddressPath",
-              "companyAddress",
-              "companyAddressIdPath",
-              "companyEmail",
-              "companyName",
-              "employeeNum",
-              "companyPhone",
-              "legalId",
-              "legalName",
-              "licencePhoto",
-              "legalPhoto",
-              "licenseNum",
-              "linkName",
-              "linkPhone",
-              "registeredCapital",
-              "scope",
-            ];
-            let second = [
-              "settlementBankAccountName",
-              "settlementBankAccountNum",
-              "settlementBankBranchName",
-              "settlementBankJointName",
-            ];
-            let third = [
-              "goodsManagementCategory",
-              "storeCenter",
-              "storeDesc",
-              "storeLogo",
-              "storeName",
-              "storeAddressIdPath",
-              "storeAddressPath",
-              "storeAddressDetail",
-            ];
-
-            this.storeDisable = data.storeDisable;
-
-            first.forEach((e) => {
-              this.firstData[e] = data[e];
-            });
-            second.forEach((e) => {
-              this.secondData[e] = data[e];
-            });
-            third.forEach((e) => {
-              this.thirdData[e] = data[e];
-            });
-            if (status === "init") {
-              if (this.storeDisable === "APPLY") {
-                this.currentIndex = 0;
-              } else {
-                this.currentIndex = 3;
-              }
-            }
-            this.$nextTick(() => {
-              this.dataReview = true;
-              this.$forceUpdate();
-            });
           }
+          return;
+        }
+
+        this.assignApplyData(res.result);
+        if (status === "init") {
+          this.agreementAccepted = true;
+          sessionStorage.setItem("shopEntryAgreementAccepted", "1");
+          if (this.storeDisable === "APPLY") {
+            this.currentIndex = 0;
+          } else {
+            this.currentIndex = 3;
+          }
+        }
+      }).finally(() => {
+        if (status === "init") {
+          this.initLoading = false;
+        }
+      });
+    },
+    refreshApplyData() {
+      applyStatus().then((res) => {
+        if (res.success && res.result) {
+          this.assignApplyData(res.result);
         }
       });
     },
     // 下一步
     nextPage(step) {
+      if (typeof step !== "number") return;
       this.currentIndex = step;
-      this.getData("next");
+      if (step > 0 && step < 3) {
+        this.refreshApplyData();
+      } else if (step === 3) {
+        this.refreshApplyData();
+      }
     },
   },
+  created() {
+    this.agreementAccepted = sessionStorage.getItem("shopEntryAgreementAccepted") === "1";
+  },
   mounted() {
-
-      this.getData("init");
-      this.getArticle();
-
-
+    this.getData("init");
+    this.getArticle();
   },
 };
 </script>
@@ -182,10 +211,17 @@ export default {
 }
 .agreeent-con {
   max-height: 500px;
-  ::v-deep img{
+  :deep(img){
     max-width: 100%;
 
   }
+}
+.agreement-scroll {
+  max-height: 500px;
+  overflow-y: auto;
+}
+.step-loading {
+  min-height: 320px;
 }
 .success-page {
   height: 500px;

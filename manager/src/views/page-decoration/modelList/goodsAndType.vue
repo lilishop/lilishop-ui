@@ -32,63 +32,61 @@
           <div class="goods-desc">{{ item.desc }}</div>
         </div>
         <div class="goods-price">
-          {{ item.price | unitPrice("￥") }}
+          {{ $filters.unitPrice(item.price, "￥") }}
         </div>
       </div>
       <div class="setup-box">
         <div>
-          <Button
+          <el-button
             size="small"
-            @click.stop="handleSelectModel(data.options.list)"
-            >编辑</Button
+            @click.stop="handleSelectModel"
+            >编辑</el-button
           >
         </div>
       </div>
     </div>
 
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="装修"
-      draggable
+      
       width="800"
-      :z-index="100"
-      :mask-closable="false"
-    >
-      <div class="modal-tab-bar">
+      
+      :close-on-click-modal="false"
+     append-to-body destroy-on-close>
+      <div class="modal-tab-bar" v-if="draftOptions">
         <div class="tab-bar">
           标题
-          <Input style="width: 300px" v-model="data.options.title"></Input>
+          <el-input style="width: 300px" v-model="draftOptions.title" />
         </div>
-        <div class="tab-bar" v-if="data.options.labels[tabCurrentlyIndex]">
+        <div class="tab-bar" v-if="draftOptions.labels[tabCurrentlyIndex]">
           标签
-          <Input
+          <el-input
             style="width: 300px"
-            v-model="data.options.labels[tabCurrentlyIndex].label"
-          ></Input>
+            v-model="draftOptions.labels[tabCurrentlyIndex].label"
+           />
         </div>
-        <Tabs
+        <el-button @click="handleTabsAdd" size="small" class="mb_10">增加</el-button>
+        <el-tabs
           type="card"
-          @on-click="handleClickTab"
-          :value="tabIndex"
-          :draggable="true"
-
+          v-model="tabIndex"
+          @tab-click="handleClickTab"
         >
-          <Button @click="handleTabsAdd" size="small" slot="extra">增加</Button>
-          <TabPane
-            v-for="(tab,tabIndex) in data.options.labels"
+          <el-tab-pane
+            v-for="(tab,tabIndex) in draftOptions.labels"
             :key="tabIndex"
             :label="tab.label"
             :name="tab.___index + ''"
           >
             <div class="flex flex-a-c">
-              <Button class="del-btn" type="primary" @click="handleContextMenuDelete(tab,tabIndex)">删除当前标签</Button>
-              <Button class="add-goods" @click="addCurrentGoods">
+              <el-button class="del-btn" type="primary" @click="handleContextMenuDelete(tab,tabIndex)">删除当前标签</el-button>
+              <el-button class="add-goods" @click="addCurrentGoods">
                 添加商品
-              </Button>
+              </el-button>
             </div>
 
             <div
-              v-for="(item, index) in data.options.list.filter((subset) => {
+              v-for="(item, index) in draftOptions.list.filter((subset) => {
                 return subset.___index == tabCurrentlyIndex;
               })"
               :key="index"
@@ -100,21 +98,25 @@
                   <div class="column-config">
                     <div>
                       标题：
-                      <Input v-model="item.title"></Input>
+                      <el-input v-model="item.title" />
                     </div>
                     <div>
                       描述：
-                      <Input v-model="item.desc"></Input>
+                      <el-input v-model="item.desc" />
                     </div>
                   </div>
-                  <Button @click="delGoods(item)">删除</Button>
+                  <el-button @click="delGoods(item)">删除</el-button>
                 </div>
               </div>
             </div>
-          </TabPane>
-        </Tabs>
+          </el-tab-pane>
+        </el-tabs>
       </div>
-    </Modal>
+      <template #footer>
+        <el-button @click="handleCancelModal">取消</el-button>
+        <el-button type="primary" @click="handleConfirmModal">确定</el-button>
+      </template>
+    </el-dialog>
 
     <!-- 选择商品。链接 -->
     <liliDialog
@@ -138,11 +140,10 @@ export default {
   },
   data() {
     return {
-      tabIndex:0,
+      tabIndex: 0,
       current: 0,
       showModal: false,
-      selected: {}, // 已选数据
-      picModelFlag: false,
+      draftOptions: null,
       tabCurrentlyIndex: 0, // 选项卡索引
     };
   },
@@ -150,88 +151,110 @@ export default {
     this.tabIndex = this.data.options.labels[0].___index
   },
   methods: {
+    cloneOptions(options) {
+      return JSON.parse(JSON.stringify(options || {}));
+    },
     /**
      * 算出最大的index 然后索引叠加
      */
     handleTabsAdd() {
-      let findAllIndex = this.data.options.labels.map((item) => {
-        return item.___index;
-      });
-      let max = Math.max.apply(null, findAllIndex);
+      if (!this.draftOptions) return;
+      const findAllIndex = this.draftOptions.labels.map((item) => item.___index);
+      const max = Math.max.apply(null, findAllIndex);
 
-      this.data.options.labels.push({
+      this.draftOptions.labels.push({
         label: "标签" + (max + 1),
         ___index: max + 1,
       });
     },
     // 删除标签
-    handleContextMenuDelete(item,index) {
-      // 删除标签下关联的商品
-      this.data.options.list.forEach((lab,currently)=>{
-        if(lab.___index == item.___index){
-           this.data.options.list.splice(currently,1)
-        }
-      })
-      // 删除当前标签
-      this.data.options.labels.splice(index,1)
+    handleContextMenuDelete(item, index) {
+      if (!this.draftOptions) return;
+      this.draftOptions.list = this.draftOptions.list.filter(
+        (lab) => lab.___index != item.___index
+      );
+      this.draftOptions.labels.splice(index, 1);
     },
     // 删除商品
     delGoods(val) {
-      this.data.options.list.forEach((item, i) => {
+      if (!this.draftOptions) return;
+      this.draftOptions.list.forEach((item, i) => {
         if (
           item.title == val.title &&
           item.___index == this.tabCurrentlyIndex
         ) {
-          this.data.options.list.splice(i, 1);
+          this.draftOptions.list.splice(i, 1);
         }
       });
     },
     // 切换选项卡
     handleClickTab(name) {
-      console.log(name)
-      this.tabCurrentlyIndex = name;
+      this.tabCurrentlyIndex = name.paneName ?? name;
     },
     // 添加当前选项卡中的商品
     addCurrentGoods() {
-
       this.$refs.liliDialog.clearGoodsSelected();
       this.$refs.liliDialog.open("goods");
     },
     // 编辑模块
-    handleSelectModel(item) {
-      console.log(item);
-      this.selected = item;
+    handleSelectModel() {
+      this.draftOptions = this.cloneOptions({
+        title: this.data.options.title,
+        labels: this.data.options.labels,
+        list: this.data.options.list,
+      });
+      this.tabCurrentlyIndex = this.draftOptions.labels[0]?.___index ?? 0;
+      this.tabIndex = String(this.tabCurrentlyIndex);
       this.showModal = true;
     },
     // 选择商品回调
     selectedGoodsData(val) {
-      if (val.length) {
-        val.forEach((item) => {
-          const pushGoodsDetail = {
-            img: item.thumbnail,
-            price: item.price,
-            title: item.goodsName,
-            desc: "",
-            url: `/goodsDetail?skuId=${item.id}&goodsId=${item.goodsId}`,
-            ___index: this.tabCurrentlyIndex,
-          };
-          this.data.options.list.push(pushGoodsDetail);
+      if (!val?.length || !this.draftOptions) return;
+      val.forEach((item) => {
+        this.draftOptions.list.push({
+          img: item.thumbnail,
+          price: item.price,
+          title: item.goodsName,
+          desc: "",
+          url: `/goodsDetail?skuId=${item.id}&goodsId=${item.goodsId}`,
+          ___index: this.tabCurrentlyIndex,
         });
-      }
+      });
     },
     // 选择链接回调
     selectedLink(val) {
-      this.selected[this.current].url =
-        this.$options.filters.formatLinkType(val);
-      this.selected[this.current].type =
+      if (!this.draftOptions?.list?.length) return;
+      const item = this.draftOptions.list[this.current];
+      if (!item) return;
+      item.url = this.$filters.formatLinkType(val);
+      item.type =
         val.___type === "other" && val.url === "" ? "link" : "other";
-
-      console.log(this.selected[this.current]);
     },
     handleSelectLink(index) {
-      // 调起选择链接弹窗
       this.$refs.liliDialog.open("link");
       this.current = index;
+    },
+    handleCancelModal() {
+      this.draftOptions = null;
+      this.showModal = false;
+    },
+    handleConfirmModal() {
+      if (this.draftOptions) {
+        const saved = this.cloneOptions(this.draftOptions);
+        this.data.options.title = saved.title;
+        this.data.options.labels.splice(
+          0,
+          this.data.options.labels.length,
+          ...saved.labels
+        );
+        this.data.options.list.splice(
+          0,
+          this.data.options.list.length,
+          ...saved.list
+        );
+      }
+      this.draftOptions = null;
+      this.showModal = false;
     },
   },
 };

@@ -1,27 +1,25 @@
 <template>
   <div class="container">
-    <Modal v-model="showCpmodel" width="350">
+    <el-dialog v-model="showCpmodel" width="350">
             <template #header>
                 <p style="color:black;text-align:left">
-                    <!-- <Icon type="ios-information-circle"></Icon> -->
+                    <!-- <el-icon><InfoFilled /></el-icon> -->
                     <span>活动优惠券</span>
                 </p>
             </template>
-              <template>
-                  <Scroll :on-reach-bottom="handleReachBottom">
-                      <Card dis-hover v-for="(item, index) in autoCoupList" :key="index" style="margin: 10px 15px">
-                            <span v-if="item.couponType === 'PRICE'" class="fontsize_12 global_color" style="font-size: 15px;">￥<span class="price">{{item.price | unitPrice}}</span></span>
+              <div class="coupon-scroll" @scroll="handleReachBottom">
+                      <el-card shadow="never" v-for="(item, index) in autoCoupList" :key="index" style="margin: 10px 15px">
+                            <span v-if="item.couponType === 'PRICE'" class="fontsize_12 global_color" style="font-size: 15px;">￥<span class="price">{{ $filters.unitPrice(item.price) }}</span></span>
                             <span v-if="item.couponType === 'DISCOUNT'" class="fontsize_12 global_color" style="font-size: 15px;"><span class="price">{{item.discount}}</span>折</span>
                             <span class="describe" style="font-size: 15px;margin-left: 5px;">满{{item.consumeThreshold}}元可用</span>
                             <p style="font-size: 10px;">使用范围：{{useScope(item.scopeType, item.storeName)}}</p>
                             <p style="font-size: 10px;">有效期：{{item.endTime}}</p>
-                      </Card>
-                  </Scroll>
-              </template>
+                      </el-card>
+              </div>
             <template #footer>
-                <Button type="error" @click="showCpmodel=false">确定</Button>
+                <el-button type="danger" @click="showCpmodel=false">确定</el-button>
             </template>
-        </Modal>
+        </el-dialog>
 
     <!-- 固定头部 -->
     <hover-search class="hover-search" :class="{show: topSearchShow}"></hover-search>
@@ -31,10 +29,11 @@
     <BaseHeader></BaseHeader>
     <!-- 搜索框、logo -->
     <Search></Search>
-    <!-- 商品分类 -->
-    <cateNav :showAlways="true" v-if="showNav" :large="carouselLarge" :opacity="carouselOpacity"></cateNav>
-    <!-- 楼层装修部分 -->
-    <model-form ref="modelForm" :data="modelForm"></model-form>
+    <div class="index-main">
+      <!-- 商品分类 + 楼层装修（同一宽度容器，保证与分类栏左缘对齐） -->
+      <cateNav :showAlways="true" v-if="showNav" :large="carouselLarge" :opacity="carouselOpacity"></cateNav>
+      <model-form ref="modelForm" :data="modelForm"></model-form>
+    </div>
     <!-- 底部栏 -->
     <BaseFooter></BaseFooter>
     <!-- 侧边栏 -->
@@ -43,6 +42,7 @@
 </template>
 
 <script>
+import { InfoFilled } from '@element-plus/icons-vue';
 import Search from '@/components/Search';
 import ModelForm from '@/components/indexDecorate/ModelForm';
 import HoverSearch from '@/components/header/hoverSearch';
@@ -125,7 +125,6 @@ export default {
       }
     },
     getcps(){
-      console.log(123123)
       let data = new Date()
       let datas = data.getDate()
       getAutoCoup().then(res=>{ //调用自动发券
@@ -146,27 +145,34 @@ export default {
               }
               storage.setItem('getTimes',datas)//存储缓存
             }
-      })
+      }).catch(() => {});
     },
     handleReachBottom(){
 
     } ,
     getIndexData () {
       if(this.pageData){
-        this.parsePageData(JSON.stringify(this.pageData))
+        this.parsePageData(JSON.stringify(this.pageData)).catch(() => {});
       }
       else{
         // 获取首页装修数据
         indexData({ clientType: 'PC' }).then(async (res) => {
-          if (res.success && res.result) {
-            this.parsePageData(res.result.pageData)
+          if (res.success && res.result?.pageData) {
+            try {
+              await this.parsePageData(res.result.pageData);
+            } catch {
+              // 装修数据解析失败时保持默认空楼层
+            }
           }
-        });
+        }).catch(() => {});
       }
     },
 
     async parsePageData(pageData){
-      let dataJson = JSON.parse(pageData);
+      const dataJson = typeof pageData === "string" ? JSON.parse(pageData) : pageData;
+      if (!dataJson?.list?.length) {
+        return;
+      }
       // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
       // 轮播图根据不同轮播，样式不同
       for (let i = 0; i < dataJson.list.length; i++) {
@@ -182,26 +188,31 @@ export default {
         }
       }
       this.modelForm = dataJson;
-      storage.setItem('navList', dataJson.list[1])
+      if (dataJson.list[1]) {
+        storage.setItem('navList', dataJson.list[1])
+      }
       this.showNav = true
-      this.topAdvert = dataJson.list[0];
+      if (dataJson.list[0]) {
+        this.topAdvert = dataJson.list[0];
+      }
     },
 
     async getListByDay () { // 当天秒杀活动
-      const res = await seckillByDay()
-      if (res.success && res.result.length) {
-        return res.result
-      } else {
-        return []
+      try {
+        const res = await seckillByDay()
+        if (res.success && res.result?.length) {
+          return res.result
+        }
+      } catch {
+        // 秒杀接口失败时不影响首页其他模块
       }
+      return []
     }
   },
-  components: {
-    Search,
+  components: { Search,
     ModelForm,
     HoverSearch,
-    fixedBar
-  }
+    fixedBar, InfoFilled }
 };
 </script>
 
@@ -224,12 +235,7 @@ export default {
   transition: 0.35s;
 }
 .show {
-  transform: translateY(0);
-  -webkit-transform: translateZ(0);
-  -moz-transform: translateZ(0);
-  -ms-transform: translateZ(0);
-  -o-transform: translateZ(0);
-  transform: translateZ(0);
+  transform: translateY(0) translateZ(0);
   top: 0;
 }
 .fixed-bar{
@@ -243,12 +249,7 @@ export default {
 .show-fixed{
   height: 354px !important;
   opacity: 1 !important;
-  transform: translateY(0);
-  -webkit-transform: translateZ(0);
-  -moz-transform: translateZ(0);
-  -ms-transform: translateZ(0);
-  -o-transform: translateZ(0);
-  transform: translateZ(0);
+  transform: translateY(0) translateZ(0);
 }
 
 

@@ -1,89 +1,98 @@
 <template>
   <div class="wrapper">
-    <card _Title="账户安全"/>
-    <div class="safeList">
+    <UserCenterLayout title="账户安全" :tabs="['账户安全']">
+      <div class="safeList">
       <!-- 密码 -->
-      <Row class="safeItem">
-        <Col :span="2">
-          <Icon size="40" type="md-key"/>
-        </Col>
-        <Col :span="16">
+      <div class="safeItem">
+        <div class="safeItem-icon">
+          <el-icon :size="40"><Key /></el-icon>
+        </div>
+        <div class="safeItem-content">
           <div class="setDivItem">登录密码</div>
           <div class="setDivItem theme">互联网账号存在被盗风险，建议您定期更改密码以保护账户安全。</div>
-        </Col>
-        <Col :span="4">
-          <Button @click="modifyPwd">修改密码</Button>
-        </Col>
-      </Row>
+        </div>
+        <div class="safeItem-action">
+          <el-button @click="modifyPwd">修改密码</el-button>
+        </div>
+      </div>
 
-      <Row class="safeItem">
-        <Col :span="2">
-          <Icon size="40" type="md-link" />
-        </Col>
-        <Col :span="16">
-          <div class="setDivItem">第三方账户绑定</div>
-          <div class="setDivItem theme">绑定后可使用第三方账号快捷登录。</div>
-          <div class="connectList">
-            <div class="connectRow">
-              <div class="connectRowLeft">
-                <span class="connectName">{{ wechatConnect.label }}</span>
-                <Tag v-if="isBound(wechatConnect.type)" color="success">已绑定</Tag>
-                <Tag v-else>未绑定</Tag>
-              </div>
-            </div>
-            <Spin size="large" fix v-if="connectLoading"></Spin>
+      <div class="safeItem safeItem-connect">
+        <div class="safeItem-main">
+          <div class="safeItem-icon">
+            <el-icon :size="40"><Link /></el-icon>
           </div>
-        </Col>
-        <Col :span="4">
-          <Button v-if="!isBound(wechatConnect.type)" type="primary" @click="openBindModal(wechatConnect)">绑定</Button>
-          <Button v-else @click="confirmUnbind(wechatConnect)">解绑</Button>
-        </Col>
-      </Row>
-    </div>
+          <div class="safeItem-content">
+            <div class="setDivItem">第三方账户绑定</div>
+            <div class="setDivItem theme">绑定后可使用第三方账号快捷登录。</div>
+          </div>
+          <div class="safeItem-action">
+            <el-button v-if="!isBound(wechatConnect.type)" type="primary" @click="openBindModal(wechatConnect)">绑定</el-button>
+            <el-button v-else @click="confirmUnbind(wechatConnect)">解绑</el-button>
+          </div>
+        </div>
+        <div class="connectList">
+          <div class="connectRow">
+            <div class="connectRowLeft">
+              <span class="connectName">{{ wechatConnect.label }}</span>
+              <el-tag v-if="isBound(wechatConnect.type)" color="success">已绑定</el-tag>
+              <el-tag v-else>未绑定</el-tag>
+            </div>
+          </div>
+          <el-skeleton size="large" fix v-if="connectLoading"></el-skeleton>
+        </div>
+      </div>
+      </div>
+    </UserCenterLayout>
 
-    <Modal
+    <el-dialog
       v-model="bindModalVisible"
       title="绑定第三方账户"
-      :mask-closable="false"
-      :footer-hide="bindForm.type === 'WECHAT'"
-      :ok-text="bindModalOkText"
-      :loading="bindSubmitLoading"
-      @on-ok="submitBind"
-      @on-cancel="resetBindForm"
+      :close-on-click-modal="false"
+      @closed="resetBindForm"
     >
-      <Form :label-width="110">
-        <FormItem label="类型">
-          <Input v-model="bindForm.typeLabel" disabled />
-        </FormItem>
+      <el-form label-width="110px">
+        <el-form-item label="类型">
+          <el-input v-model="bindForm.typeLabel" disabled />
+        </el-form-item>
 
-        <FormItem v-if="bindForm.type === 'WECHAT'" label="公众号二维码">
+        <el-form-item v-if="bindForm.type === 'WECHAT'" label="公众号二维码">
           <div class="wechatQrBox">
             <div class="wechatQrImgBox">
-              <Spin fix v-if="qrCodeLoading"></Spin>
+              <el-skeleton fix v-if="qrCodeLoading"></el-skeleton>
               <img v-if="qrCodeSrc" class="wechatQrImg" :src="qrCodeSrc" alt="微信公众号二维码" />
               <div v-else class="wechatQrEmpty">二维码获取失败，请刷新重试</div>
             </div>
             <div class="wechatQrActions">
-              <Button @click="fetchWechatQrCode">刷新二维码</Button>
-              <Button type="primary" @click="submitBind">我已完成绑定</Button>
+              <el-button :loading="qrCodeLoading" @click="fetchWechatQrCode">刷新二维码</el-button>
+              <el-button type="primary" :loading="bindSubmitLoading" @click="submitBind">我已完成绑定</el-button>
             </div>
             <div class="wechatQrTip">请使用微信扫码关注/授权，完成后点击“我已完成绑定”检测绑定状态</div>
           </div>
-        </FormItem>
+        </el-form-item>
 
-        <FormItem v-if="bindForm.type !== 'WECHAT'" label="OpenID/UnionID">
-          <Input v-model="bindForm.unionID" placeholder="请输入 OpenID/UnionID" />
-        </FormItem>
-      </Form>
-    </Modal>
+        <el-form-item v-if="bindForm.type !== 'WECHAT'" label="OpenID/UnionID">
+          <el-input v-model="bindForm.unionID" placeholder="请输入 OpenID/UnionID" />
+        </el-form-item>
+      </el-form>
+
+      <template v-if="bindForm.type !== 'WECHAT'" #footer>
+        <el-button @click="bindModalVisible = false">取消</el-button>
+        <el-button type="primary" :loading="bindSubmitLoading" @click="submitBind">
+          {{ bindModalOkText }}
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import { Message, Modal } from "@/utils/message";
+import { Key, Link } from '@element-plus/icons-vue';
 // import { getPwdStatus } from '@/api/account';
 import storage from '@/plugins/storage'
 import { bindThirdAccount, getThirdAccountBindList, getWechatH5QrCode, unbindThirdAccount } from '@/api/login.js'
 export default {
+  components: { Key, Link },
   name: 'AccountSafe',
   data () {
     return {
@@ -181,7 +190,7 @@ export default {
       const userId = userInfo && userInfo.id ? String(userInfo.id) : ''
       if (!userId) {
         this.qrCodeBase64 = ''
-        this.$Message.error('未获取到当前用户ID，请重新登录后重试')
+        Message.error('未获取到当前用户ID，请重新登录后重试')
         return
       }
       this.qrCodeLoading = true
@@ -192,7 +201,7 @@ export default {
             return
           }
           this.qrCodeBase64 = ''
-          this.$Message.error((res && res.message) || '二维码获取失败')
+          Message.error((res && res.message) || '二维码获取失败')
         })
         .catch(() => {
           this.qrCodeBase64 = ''
@@ -208,12 +217,12 @@ export default {
         this.refreshConnectBinds()
           .then(() => {
             if (this.isBound(this.bindForm.type)) {
-              this.$Message.success('绑定成功')
+              Message.success('绑定成功')
               this.bindModalVisible = false
               this.resetBindForm()
               return
             }
-            this.$Message.warning('暂未检测到绑定，请扫码后重试')
+            Message.warning('暂未检测到绑定，请扫码后重试')
             this.$nextTick(() => {
               this.bindModalVisible = true
             })
@@ -224,11 +233,11 @@ export default {
         return
       }
       if (!this.bindForm.type) {
-        this.$Message.error('绑定类型不能为空')
+        Message.error('绑定类型不能为空')
         return
       }
       if (!this.bindForm.unionID) {
-        this.$Message.error('OpenID/UnionID 不能为空')
+        Message.error('OpenID/UnionID 不能为空')
         this.$nextTick(() => {
           this.bindModalVisible = true
         })
@@ -238,7 +247,7 @@ export default {
       this.bindSubmitLoading = true
       bindThirdAccount({ unionID: this.bindForm.unionID, type: this.bindForm.type })
         .then(() => {
-          this.$Message.success('绑定成功')
+          Message.success('绑定成功')
           this.bindModalVisible = false
           this.resetBindForm()
           this.refreshConnectBinds()
@@ -248,12 +257,12 @@ export default {
         })
     },
     confirmUnbind (item) {
-      this.$Modal.confirm({
+      Modal.confirm({
         title: '解绑确认',
         content: `<p>确定解绑 ${item.label} 吗？</p>`,
         onOk: () => {
           unbindThirdAccount({ type: item.type }).then(() => {
-            this.$Message.success('解绑成功')
+            Message.success('解绑成功')
             this.refreshConnectBinds()
           })
         }
@@ -264,11 +273,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  ::v-deep .ivu-col-span-2, .ivu-col-span-4 {
-    text-align: center;
-    color: $theme_color;
-  }
-
   .theme {
     color: $theme_color;
   }
@@ -278,18 +282,47 @@ export default {
   }
 
   .safeItem {
+    display: flex;
+    align-items: center;
+    gap: 16px;
     border-bottom: 1px solid $border_color;
     padding: 16px 0;
+  }
 
-    ::v-deep .ivu-col {
-      padding: 8px 0;
+  .safeItem-connect {
+    display: block;
+  }
 
-    }
+  .safeItem-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .safeItem-icon {
+    flex-shrink: 0;
+    width: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $theme_color;
+  }
+
+  .safeItem-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .safeItem-action {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
   }
 
   .connectList {
     position: relative;
     margin-top: 8px;
+    margin-left: 72px;
   }
 
   .connectRow {

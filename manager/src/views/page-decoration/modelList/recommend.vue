@@ -9,8 +9,8 @@
         <span>{{ msgLeft.secondTitle }}&gt;</span>
         <div class="setup-box">
           <div>
-            <Button size="small" @click.stop="handleSelectModel(msgLeft, true)"
-              >编辑</Button
+            <el-button size="small" @click.stop="handleSelectModel(msgLeft, true)"
+              >编辑</el-button
             >
           </div>
         </div>
@@ -20,18 +20,18 @@
           <img :src="msgLeft.list[0].img" width="160" height="160" alt="" />
           <div class="margin-left">{{ msgLeft.list[0].name }}</div>
           <div class="margin-left">{{ msgLeft.list[0].describe }}</div>
-          <Button
+          <el-button
             size="small"
             :style="{ background: msgLeft.bgColor }"
             class="fz_12 view-btn"
-            >点击查看</Button
+            >点击查看</el-button
           >
           <div class="setup-box">
             <div>
-              <Button
+              <el-button
                 size="small"
                 @click.stop="handleSelectModel(msgLeft.list[0])"
-                >编辑</Button
+                >编辑</el-button
               >
             </div>
           </div>
@@ -46,8 +46,8 @@
               </div>
               <div class="setup-box">
                 <div>
-                  <Button size="small" @click.stop="handleSelectModel(item)"
-                    >编辑</Button
+                  <el-button size="small" @click.stop="handleSelectModel(item)"
+                    >编辑</el-button
                   >
                 </div>
               </div>
@@ -65,8 +65,8 @@
         <span>{{ msgRight.secondTitle }}&gt;</span>
         <div class="setup-box">
           <div>
-            <Button size="small" @click.stop="handleSelectModel(msgRight, true)"
-              >编辑</Button
+            <el-button size="small" @click.stop="handleSelectModel(msgRight, true)"
+              >编辑</el-button
             >
           </div>
         </div>
@@ -77,10 +77,7 @@
           :key="index"
           class="setup-content"
         >
-          <div
-            class="right-item"
-            :style="{ border: index === 2 || index === 3 ? 'none' : '' }"
-          >
+          <div class="right-item">
             <div>
               <span :style="{ background: msgRight.bgColor }">{{
                 item.name
@@ -93,24 +90,24 @@
           </div>
           <div class="setup-box">
             <div>
-              <Button size="small" @click.stop="handleSelectModel(item)"
-                >编辑</Button
+              <el-button size="small" @click.stop="handleSelectModel(item)"
+                >编辑</el-button
               >
             </div>
           </div>
         </div>
       </div>
     </div>
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="装修"
-      draggable
-      width="800"
-      :z-index="100"
-      :mask-closable="false"
+      width="800px"
+      :close-on-click-modal="false"
+      append-to-body
+      destroy-on-close
     >
       <div class="modal-top-advert">
-        <div>
+        <div class="modal-form-item modal-form-preview">
           <img
             class="show-image"
             width="160"
@@ -136,68 +133,87 @@
             alt
           />
         </div>
-        <div><span>图片主标题：</span><Input v-model="selected.name" /></div>
-        <div><span>图片描述：</span><Input v-model="selected.describe" /></div>
-        <div class="tips">
-          建议尺寸：<span>{{ selected.size }}</span>
+        <div class="modal-form-item">
+          <span class="modal-label">图片主标题：</span>
+          <el-input v-model="selected.name" />
         </div>
-        <div>
-          图片链接：<Input
-            class="outsideUrl"
-            v-model="selected.url"
-            :disabled="!!selected.type && selected.type !== 'link'"
-            placeholder="https://"
-          />
-          <Button
-            size="small"
-            class="ml_10"
-            type="primary"
-            @click="handleSelectLink"
-            >选择链接</Button
-          >
+        <div class="modal-form-item">
+          <span class="modal-label">图片描述：</span>
+          <el-input v-model="selected.describe" />
         </div>
-        <div>
-          <Button size="small" type="primary" @click="handleSelectImg"
-            >选择图片</Button
-          >&nbsp;
-          <Button size="small" type="primary" @click="handleSelectGoods"
-            >选择商品</Button
-          >
-        </div>
-      </div>
-    </Modal>
-    <Modal
-      v-model="showModal1"
-      title="装修"
-      draggable
-      width="800"
-      :z-index="100"
-      :mask-closable="false"
-    >
-      <div class="modal-top-advert">
-        <div><span>主标题：</span><Input v-model="selected.title" /></div>
-        <div><span>副标题：</span><Input v-model="selected.secondTitle" /></div>
-        <div>
-          <span
-            >副标题链接：<Input
+        <div class="tips">建议尺寸：{{ selected.size }}</div>
+        <div class="modal-form-item modal-form-link">
+          <span class="modal-label">图片链接：</span>
+          <div class="modal-link-field">
+            <el-input
               class="outsideUrl"
               v-model="selected.url"
               :disabled="!!selected.type && selected.type !== 'link'"
-              placeholder="https://" /></span
-          ><Button
-            size="small"
-            class="ml_10"
-            type="primary"
-            @click="handleSelectLink"
-            >选择链接</Button
+              placeholder="https://"
+            />
+            <el-button size="small" type="primary" @click="handleSelectLink"
+              >选择链接</el-button
+            >
+          </div>
+        </div>
+        <div class="modal-form-item modal-form-actions">
+          <el-button size="small" type="primary" @click="handleSelectImg"
+            >选择图片</el-button
+          >
+          <el-button size="small" type="primary" @click="handleSelectGoods"
+            >选择商品</el-button
           >
         </div>
-        <div>
-          <span>背景色：</span><Input v-model="selected.bgColor" />
-          <ColorPicker v-if="selected.bgColor" v-model="selected.bgColor" />
+      </div>
+      <template #footer>
+        <el-button @click="handleCancelModal">取消</el-button>
+        <el-button type="primary" @click="handleConfirmModal">确定</el-button>
+      </template>
+    </el-dialog>
+    <el-dialog
+      v-model="showModal1"
+      title="装修"
+      width="800px"
+      :close-on-click-modal="false"
+      append-to-body
+      destroy-on-close
+    >
+      <div class="modal-top-advert">
+        <div class="modal-form-item">
+          <span class="modal-label">主标题：</span>
+          <el-input v-model="selected.title" />
+        </div>
+        <div class="modal-form-item">
+          <span class="modal-label">副标题：</span>
+          <el-input v-model="selected.secondTitle" />
+        </div>
+        <div class="modal-form-item modal-form-link">
+          <span class="modal-label">副标题链接：</span>
+          <div class="modal-link-field">
+            <el-input
+              class="outsideUrl"
+              v-model="selected.url"
+              :disabled="!!selected.type && selected.type !== 'link'"
+              placeholder="https://"
+            />
+            <el-button size="small" type="primary" @click="handleSelectLink"
+              >选择链接</el-button
+            >
+          </div>
+        </div>
+        <div class="modal-form-item">
+          <span class="modal-label">背景色：</span>
+          <div class="modal-color-field">
+            <el-input v-model="selected.bgColor" />
+            <el-color-picker v-if="selected.bgColor" v-model="selected.bgColor" />
+          </div>
         </div>
       </div>
-    </Modal>
+      <template #footer>
+        <el-button @click="handleCancelModal1">取消</el-button>
+        <el-button type="primary" @click="handleConfirmModal1">确定</el-button>
+      </template>
+    </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog
       ref="liliDialog"
@@ -205,14 +221,15 @@
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
     <!-- 选择图片 -->
-    <Modal width="1200px" v-model="picModelFlag" footer-hide>
+    <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
       <ossManage
         @callback="callbackSelected"
-        :isComponent="true"
+        :is-component="true"
         :initialize="picModelFlag"
+        :max-select="1"
         ref="ossManage"
       />
-    </Modal>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -233,14 +250,19 @@ export default {
       msgRight: this.data.options.contentRight, // 右侧数据
       showModal: false, // modal显隐
       showModal1: false, // modal显隐
-      selected: {}, // 已选数据
+      selected: {}, // 弹窗编辑草稿
+      editTarget: null, // 确认后写回的原数据
       picModelFlag: false, // 图片选择
     };
   },
   methods: {
+    cloneItem(item) {
+      return JSON.parse(JSON.stringify(item || {}));
+    },
     // 编辑
     handleSelectModel(item, type) {
-      this.selected = item;
+      this.editTarget = item;
+      this.selected = this.cloneItem(item);
       if (type) {
         this.showModal1 = true;
       } else {
@@ -257,7 +279,7 @@ export default {
     },
     // 选择链接回调
     selectedLink(val) {
-      this.selected.url = this.$options.filters.formatLinkType(val);
+      this.selected.url = this.$filters.formatLinkType(val);
       this.selected.type =
         val.___type === "other" && val.url === "" ? "link" : "other";
     },
@@ -272,13 +294,44 @@ export default {
     },
     handleSelectImg() {
       // 选择图片
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
     // 选择图片回调
     callbackSelected(val) {
       this.picModelFlag = false;
+      if (!val?.url) return;
       this.selected.img = val.url;
+    },
+    handleCancelModal() {
+      this.editTarget = null;
+      this.selected = {};
+      this.showModal = false;
+    },
+    handleConfirmModal() {
+      if (this.editTarget) {
+        Object.assign(this.editTarget, this.cloneItem(this.selected));
+      }
+      this.editTarget = null;
+      this.selected = {};
+      this.showModal = false;
+    },
+    handleCancelModal1() {
+      this.editTarget = null;
+      this.selected = {};
+      this.showModal1 = false;
+    },
+    handleConfirmModal1() {
+      if (this.editTarget) {
+        Object.assign(this.editTarget, this.cloneItem(this.selected));
+      }
+      this.editTarget = null;
+      this.selected = {};
+      this.showModal1 = false;
     },
   },
 };
@@ -292,12 +345,17 @@ export default {
     width: 595px;
     .content-left {
       display: flex;
+      align-items: stretch;
       padding-top: 10px;
       font-size: 12px;
+      box-sizing: content-box;
       > div:nth-child(1) {
         width: 189px;
         border-right: 1px solid #eee;
         height: 360px;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
         img {
           margin: 40px 0 0 15px;
         }
@@ -315,15 +373,20 @@ export default {
           color: #999;
         }
         .view-btn {
-          margin-left: 15px;
-          margin-top: 10px;
+          align-self: center;
+          width: 145px;
+          margin-top: auto;
+          margin-bottom: 15px;
           color: #fff;
         }
       }
       > div:nth-child(2) {
         width: 405px;
+        height: 360px;
         display: flex;
         flex-wrap: wrap;
+        align-content: flex-start;
+        box-sizing: border-box;
         > div {
           display: flex;
           align-items: center;
@@ -345,64 +408,84 @@ export default {
 
   .recommend-right {
     width: 595px;
-    height: 360px;
+
     .head-recommend {
       background: #a25684;
     }
     .content-right {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      height: 360px;
       padding-top: 10px;
+      box-sizing: content-box;
+
       > div {
-        width: 50%;
+        width: 100%;
+        height: 100%;
         text-align: center;
-        height: 180px;
-        padding-top: 10px;
+        padding: 0;
+        border-right: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+        box-sizing: border-box;
+
+        &:nth-child(2n) {
+          border-right: none;
+        }
+
+        &:nth-child(n + 3) {
+          border-bottom: none;
+        }
+
         .right-item {
-          border-bottom: 1px solid #eee;
+          border-bottom: none;
           display: flex;
-          margin-top: 30px;
-          margin-left: 5px;
-          margin-right: 5px;
-          height: 150px;
-          padding: 0 10px;
+          align-items: center;
+          justify-content: space-between;
+          height: 100%;
+          margin: 0;
+          padding: 10px 15px;
           font-size: 12px;
+          box-sizing: border-box;
+
           > div:nth-child(1) {
-            width: 130px;
-            margin-top: 30px;
+            flex: 1;
+            min-width: 0;
+            margin-top: 0;
+            text-align: left;
+
             span:nth-child(1) {
               color: #fff;
               border-radius: 10px;
               padding: 0 5px;
               background-color: #a25684;
               display: block;
-              width: 120px;
+              max-width: 120px;
               overflow: hidden;
               white-space: nowrap;
-              margin: 0 10px 10px 0;
+              margin: 0 0 10px;
             }
+
             span:nth-child(2) {
               font-size: 12px;
               color: #666;
               display: block;
             }
           }
+
           .right-img {
-            width: 100;
+            width: 100px;
             height: 100px;
+            flex-shrink: 0;
             text-align: center;
-            margin: 0 auto;
+            margin: 0;
+
             img {
               max-height: 100px;
               max-width: 100px;
             }
           }
         }
-      }
-      > div:nth-child(n + 1) {
-        border-right: 1px solid #eee;
       }
     }
   }
@@ -425,7 +508,78 @@ export default {
 }
 
 .modal-top-advert {
-  align-items: start;
-  padding: 0 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
+
+  .modal-form-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 16px;
+
+    .modal-label {
+      flex-shrink: 0;
+      width: 100px;
+      text-align: right;
+      padding-right: 12px;
+    }
+
+    .el-input {
+      flex: 1;
+    }
+  }
+
+  .modal-form-preview {
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .modal-form-link {
+    align-items: flex-start;
+
+    .modal-label {
+      padding-top: 8px;
+    }
+
+    .modal-link-field {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+
+      .outsideUrl {
+        flex: 1;
+        min-width: 0;
+      }
+    }
+  }
+
+  .modal-form-actions {
+    padding-left: 112px;
+    gap: 10px;
+  }
+
+  .modal-color-field {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .el-input {
+      flex: 1;
+    }
+  }
+
+  .tips {
+    padding-left: 112px;
+    margin-bottom: 16px;
+    color: #999;
+    font-size: 12px;
+  }
 }
 </style>

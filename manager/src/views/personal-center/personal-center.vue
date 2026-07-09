@@ -1,41 +1,41 @@
 <template>
   <div class="own-space">
-    <Card class="own-space-new">
+    <el-card class="own-space-new">
       <div class="own-wrap">
         <div style="width:240px">
-          <Menu :active-name="activeName" theme="light" @on-select="changeMenu">
-            <MenuItem name="基本信息">基本信息</MenuItem>
-            <MenuItem name="安全设置">安全设置</MenuItem>
-          </Menu>
+          <el-menu :default-active="activeName" @select="changeMenu">
+            <el-menu-item index="基本信息">基本信息</el-menu-item>
+            <el-menu-item index="安全设置">安全设置</el-menu-item>
+          </el-menu>
         </div>
         <div style="padding: 8px 40px;width:100%">
           <div class="title">{{ currMenu }}</div>
           <div>
             <div v-show="currMenu=='基本信息'">
-              <Form ref="userForm" :model="userForm" :label-width="90" label-position="left">
-                <FormItem label="用户头像：">
+              <el-form ref="userForm" :model="userForm" label-width="90px" label-position="left">
+                <el-form-item label="用户头像：">
                   <upload-pic-thumb
                     v-model="userForm.avatar"
                     :multiple="false"
                   ></upload-pic-thumb>
-                </FormItem>
+                </el-form-item>
 
-                <FormItem label="用户名：">
+                <el-form-item label="用户名：">
                   {{ userForm.username }}
-                </FormItem>
-                <FormItem label="昵称：" prop="nickName">
-                  <Input maxlength="20" v-model="userForm.nickName" style="width: 250px"/>
-                </FormItem>
-                <FormItem>
-                  <Button
+                </el-form-item>
+                <el-form-item label="昵称：" prop="nickName">
+                  <el-input maxlength="20" v-model="userForm.nickName" style="width: 250px"/>
+                </el-form-item>
+                <el-form-item>
+                  <el-button
                     type="primary"
                     style="width: 100px;margin-right:5px"
                     :loading="saveLoading"
                     @click="saveEdit"
                   >保存
-                  </Button>
-                </FormItem>
-              </Form>
+                  </el-button>
+                </el-form-item>
+              </el-form>
             </div>
             <div v-show="currMenu=='安全设置'" class="safe">
               <div class="item">
@@ -50,7 +50,7 @@
           </div>
         </div>
       </div>
-    </Card>
+    </el-card>
 
   </div>
 </template>
@@ -112,7 +112,7 @@ export default {
         if (res.success) {
           this.$Message.success("保存成功");
           // 更新用户信息
-          Cookies.set("userInfoManager", this.userForm);
+          Cookies.set("userInfoManager", JSON.stringify(this.userForm));
           // 更新头像
           this.$store.commit("setAvatarPath", this.userForm.avatar);
           setTimeout(()=>{
@@ -131,8 +131,8 @@ export default {
 <style lang="scss" scoped>
   .own-space {
   .own-space-new {
-    .ivu-card-body {
-      padding: 16px 16px 16px 0px;
+    :deep(.el-card__body) {
+      padding: 16px 16px 16px 0;
     }
   }
 
@@ -188,7 +188,7 @@ export default {
   }
 }
 
-::v-deep .upload-list {
+:deep(.upload-list){
   img {
     width: 100%;
     height: 100%;

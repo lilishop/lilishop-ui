@@ -10,7 +10,7 @@ $warning_color: #ff9900;
 $error_color: #ed3f14;
 $handle-btn-color: #438cde;
 
-$theme_color: #F31947;
+$theme_color: var(--theme-color, #ff3c2a);
 
 $border_color: #dddee1;
 $title_color: #8c8c8c;
@@ -30,6 +30,7 @@ $dark_content_color: #d5d5d5;
 	display: -webkit-box;
 	-webkit-box-orient: vertical;
 	-webkit-line-clamp: 2;
+	line-clamp: 2;
 	overflow: hidden;
 }
 /***** 封装一些方法可用于 黑暗主题 ，明亮主题 *****/
@@ -305,9 +306,11 @@ li {
 }
 
 .width_1200_auto {
-  width: 1184px;
+  width: 1200px;
+  max-width: 1200px;
   margin: 0 auto;
 
+  box-sizing: border-box;
 }
 
 
@@ -325,18 +328,24 @@ li {
   .goods-list {
     display: flex;
     flex-wrap: wrap;
-    width: 1200px;
+    width: 100%;
     margin: 0 auto;
+    column-gap: 10px;
   }
   .goods-show-info {
-    width: 235px;
+    width: calc(20% - 8px);
     padding: 6px;
-    margin: 10px 0px;
-    margin-left: 5px;
+    margin: 10px 0;
     position: relative;
     border: 1px solid #fff;
     cursor: pointer;
     background-color: #fff;
+    box-sizing: border-box;
+  }
+  .goods-show-img img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
   }
   .goods-show-info:hover {
     border: 1px solid #ccc;
@@ -368,7 +377,12 @@ li {
     color: $theme_color;
   }
   .goods-page {
-    margin:10px auto ;
-    text-align: right;
-    width: 1200px;
+    margin: 10px 0;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+
+    :deep(.el-pagination) {
+      justify-content: flex-end;
+    }
   }

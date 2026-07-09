@@ -5,9 +5,9 @@
       <img src="../../assets/images/pay-success.png">
     </div>
     <div class="pay-btn">
-      <Button type="primary" @click="$router.push('/')">继续逛逛</Button>
-      <Button type="info" v-if="$route.query.orderType ==='RECHARGE'" @click="$router.push('/home/MoneyManagement')">查看余额</Button>
-      <Button type="info" v-else @click="$router.push('/home/myOrder')">查看订单</Button>
+      <el-button type="primary" @click="$router.push('/')">继续逛逛</el-button>
+      <el-button type="info" v-if="$route.query.orderType ==='RECHARGE'" @click="$router.push('/home/MoneyManagement')">查看余额</el-button>
+      <el-button class="view-order-btn" v-else @click="$router.push('/home/myOrder')">查看订单</el-button>
     </div>
   </div>
 </template>
@@ -34,5 +34,16 @@ export default {
   >*{
     margin:0 4px;
   }
+}
+
+.view-order-btn {
+  --el-button-bg-color: rgb(250, 100, 25);
+  --el-button-border-color: rgb(250, 100, 25);
+  --el-button-hover-bg-color: rgb(250, 100, 25);
+  --el-button-hover-border-color: rgb(250, 100, 25);
+  --el-button-active-bg-color: rgb(250, 100, 25);
+  --el-button-active-border-color: rgb(250, 100, 25);
+  --el-button-text-color: #fff;
+  color: #fff;
 }
 </style>

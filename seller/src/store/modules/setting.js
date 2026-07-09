@@ -1,4 +1,6 @@
-const { setting } = require("@/config");
+import config from "@/config/index";
+
+const { setting } = config;
 
 const localSetting = window.localStorage.getItem('setting')
 const settingData = {

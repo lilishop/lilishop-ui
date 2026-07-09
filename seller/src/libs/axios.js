@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getStore, setStore } from "./storage";
 import { router  } from "../router/index";
-import { Message } from "view-design";
+import { Message } from "@/utils/message";
 import Cookies from "js-cookie";
 import { handleRefreshToken } from "@/api/index";
 import {v4 as uuidv4} from 'uuid';
@@ -25,8 +25,8 @@ const service = axios.create({
 });
 axios.defaults.timeout = 100000
 const recordCurrentPath = () => {
-   return router.history.current.fullPath
-}
+  return router.currentRoute.value.fullPath;
+};
 // 跳转登录页
 const redirectLogin = () => {
   router.push({path:'/login',query:{redirect: recordCurrentPath()}});

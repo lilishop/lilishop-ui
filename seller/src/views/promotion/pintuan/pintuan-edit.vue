@@ -1,63 +1,93 @@
 <template>
   <div class="new-pintuan">
-    <Card>
-      <Form ref="form" :model="form" :label-width="130" :rules="formValidate">
-        <FormItem label="活动名称" prop="promotionName" :label-width="130">
-          <Input v-model="form.promotionName" clearable style="width: 260px" maxlength="25" />
-          <div style="color: #cccccc">
-            活动名称将显示在对人拼团活动列表中，方便商家管理使用，最多输入25个字符
+    <el-card>
+      <el-form ref="form" :model="form" label-width="130px" :rules="formValidate">
+        <el-form-item label="活动名称" prop="promotionName">
+          <div class="form-field-block">
+            <el-input
+              v-model="form.promotionName"
+              clearable
+              style="width: 260px"
+              maxlength="25"
+              placeholder="请输入活动名称"
+            />
+            <div class="form-tip">
+              活动名称将显示在店铺拼团活动列表中，供商家管理使用，最多输入25个字符
+            </div>
           </div>
-        </FormItem>
-        <FormItem label="活动时间" prop="rangeTime">
-          <DatePicker type="datetimerange" v-model="form.rangeTime" format="yyyy-MM-dd HH:mm:ss" placeholder="请选择" :options="options" style="width: 260px">
-          </DatePicker>
-        </FormItem>
-
-        <FormItem label="参团人数" prop="requiredNum" :label-width="130">
-          <Input v-model="form.requiredNum" style="width: 260px" max="8">
-          <span slot="append">人</span>
-          </Input>
-          <span style="color: #cccccc">参团人数不少于2人，不得超过10人。</span>
-        </FormItem>
-        <FormItem label="限购数量" prop="limitNum" :label-width="130">
-          <Input v-model="form.limitNum" type="number" style="width: 260px">
-          <span slot="append">件/人</span>
-          </Input>
-          <span style="color: #cccccc">如果设置为0则视为不限制购买数量</span>
-        </FormItem>
-        <FormItem label="虚拟成团" prop="fictitious">
-          <RadioGroup type="button" button-style="solid" v-model="form.fictitious">
-            <Radio title="开启" :label="1">
-              <span>开启</span>
-            </Radio>
-            <Radio title="关闭" :label="0">
-              <span>关闭</span>
-            </Radio>
-          </RadioGroup>
-          <br />
-          <span style="color: #cccccc">开启虚拟成团后，24小时人数未满的团，系统将会模拟匿名买家凑满人数，使该团成团；您只需要对已付款参团的真实买家发货；建议合理开启以提高成团率</span>
-        </FormItem>
-        <FormItem label="拼团规则" prop="pintuanRule">
-          <Input v-model="form.pintuanRule" type="textarea" :rows="4" clearable maxlength="255" style="width: 260px" />
-          <br />
-          <span style="color: #cccccc">拼团规则描述不能为空且不能大于255个字，会在WAP拼团详情页面显示</span>
-        </FormItem>
-      </Form>
-      <div>
-        <Button type="text" @click="closeCurrentPage">返回</Button>
-        <Button type="primary" :loading="submitLoading" @click="handleSubmit">提交</Button>
-      </div>
-    </Card>
+        </el-form-item>
+        <el-form-item label="活动时间" prop="rangeTime">
+          <div class="form-field-block">
+            <el-date-picker
+              v-model="form.rangeTime"
+              class="pintuan-range-picker"
+              type="datetimerange"
+              format="YYYY-MM-DD HH:mm:ss"
+              start-placeholder="开始时间"
+              end-placeholder="结束时间"
+              placeholder="请选择"
+              :disabled-date="options.disabledDate"
+            />
+          </div>
+        </el-form-item>
+        <el-form-item label="成团人数" prop="requiredNum">
+          <div class="form-field-block">
+            <el-input v-model="form.requiredNum" style="width: 260px" placeholder="请输入成团人数">
+              <template #append>人</template>
+            </el-input>
+            <div class="form-tip">成团人数最少为2人，最多不超过10人。</div>
+          </div>
+        </el-form-item>
+        <el-form-item label="限购数量" prop="limitNum">
+          <div class="form-field-block">
+            <el-input v-model="form.limitNum" type="number" style="width: 260px" placeholder="请输入限购数量">
+              <template #append>件/人</template>
+            </el-input>
+            <div class="form-tip">若设置为0，则为不限制购买数量。</div>
+          </div>
+        </el-form-item>
+        <el-form-item label="虚拟成团" prop="fictitious">
+          <div class="form-field-block">
+            <el-radio-group v-model="form.fictitious">
+              <el-radio-button :value="1">开启</el-radio-button>
+              <el-radio-button :value="0">关闭</el-radio-button>
+            </el-radio-group>
+            <div class="form-tip">
+              开启虚拟成团后，24小时内人数未满的团，系统将会模拟匿名买家凑满人数，使该团成团。您只需要对真实拼团买家发货。建议合理开启，以提高成团率。
+            </div>
+          </div>
+        </el-form-item>
+        <el-form-item label="拼团规则" prop="pintuanRule">
+          <div class="form-field-block">
+            <el-input
+              v-model="form.pintuanRule"
+              type="textarea"
+              :rows="4"
+              clearable
+              maxlength="255"
+              style="width: 260px"
+              placeholder="请输入拼团规则"
+            />
+            <div class="form-tip">拼团规则字数不能超过255字，将在WAP拼团详情页中显示</div>
+          </div>
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="closeCurrentPage">返回</el-button>
+          <el-button type="primary" :loading="submitLoading" @click="handleSubmit">提交</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
   </div>
 </template>
+
 <script>
 import { savePintuan, editPintuan, getPintuanDetail } from "@/api/promotion";
+
 export default {
   data() {
     return {
-      id: this.$route.query.id, // 拼团id
+      id: this.$route.query.id,
       form: {
-        // 添加或编辑表单对象初始化数据
         promotionName: "",
         promotionTitle: "",
         pintuanRule: "",
@@ -66,29 +96,30 @@ export default {
         limitNum: "",
         startTime: "",
         endTime: "",
+        rangeTime: [],
       },
-      // 表单验证规则
       formValidate: {
-        promotionName: [{ required: true, message: "活动名称不能为空" }],
+        promotionName: [{ required: true, message: "活动名称不能为空", trigger: "blur" }],
         requiredNum: [
-          { required: true, message: "参团人数不能为空" },
+          { required: true, message: "成团人数不能为空", trigger: "blur" },
           {
             pattern: /^([2-9]|10)?$/,
-            message: "参团人数不合法",
+            message: "成团人数不合法",
+            trigger: "blur",
           },
         ],
         limitNum: [
-          { required: true, message: "限购数不能为空" },
+          { required: true, message: "限购数量不能为空", trigger: "blur" },
           {
             pattern: /^(0|[1-9]\d?|100)$/,
-            message: "限购数不合法",
+            message: "限购数量不合法",
+            trigger: "blur",
           },
         ],
-        rangeTime: [{ required: true, message: "请选择活动时间" }],
+        rangeTime: [{ required: true, message: "请选择活动时间", trigger: "change" }],
       },
-      submitLoading: false, // 添加或编辑提交状态
+      submitLoading: false,
       options: {
-        // 不可选取时间
         disabledDate(date) {
           return date && date.valueOf() < Date.now() - 86400000;
         },
@@ -100,88 +131,92 @@ export default {
       this.getDetail();
     }
   },
-
   methods: {
-    // 关闭当前页面
     closeCurrentPage() {
-      this.$store.commit("removeTag", "new-pintuan");
-      localStorage.storeOpenedList = JSON.stringify(
-        this.$store.state.app.storeOpenedList
-      );
-      this.$router.go(-1);
+      this.$router.back();
     },
-    // 提交活动
     handleSubmit() {
       this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          let params = JSON.parse(JSON.stringify(this.form));
-          params.fictitious
-            ? (params.fictitious = true)
-            : (params.fictitious = false);
-          params.startTime = this.$options.filters.unixToDate(
-            this.form.rangeTime[0] / 1000
-          );
+        if (!valid) return;
+        this.submitLoading = true;
+        const params = JSON.parse(JSON.stringify(this.form));
+        params.fictitious = !!params.fictitious;
+        params.startTime = this.$filters.unixToDate(this.form.rangeTime[0] / 1000);
+        params.endTime = this.$filters.unixToDate(this.form.rangeTime[1] / 1000);
 
-          params.endTime = this.$options.filters.unixToDate(
-            this.form.rangeTime[1] / 1000
-          );
-          if (params.startTime === "" || params.endTime === "") {
-            this.$Message.error("活动时间不能为空");
-            this.submitLoading = false;
-            return;
-          }
-          if (params.startTime < new Date()) {
-            this.$Message.error("拼团活动开始时间不能小于当前时间");
-            this.submitLoading = false;
-            return;
-          }
+        if (!params.startTime || !params.endTime) {
+          this.$Message.error("活动时间不能为空");
+          this.submitLoading = false;
+          return;
+        }
+        if (new Date(params.startTime).getTime() < Date.now()) {
+          this.$Message.error("拼团活动开始时间不能小于当前时间");
+          this.submitLoading = false;
+          return;
+        }
 
-          delete params.rangeTime;
-          if (!this.id) {
-            // 添加 避免编辑后传入id等数据 记得删除
-            delete params.id;
-            savePintuan(params).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("拼团活动发布成功");
-                this.closeCurrentPage();
-              }
-            });
-          } else {
-            // 编辑
-            if (params.promotionGoodsList == "")
-              delete params.promotionGoodsList;
-            editPintuan(params).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("操作成功");
-                this.closeCurrentPage();
-              }
-            });
-          }
+        delete params.rangeTime;
+        if (!this.id) {
+          delete params.id;
+          savePintuan(params).then((res) => {
+            this.submitLoading = false;
+            if (res.success) {
+              this.$Message.success("拼团活动添加成功");
+              this.closeCurrentPage();
+            }
+          });
+        } else {
+          if (params.promotionGoodsList === "") delete params.promotionGoodsList;
+          editPintuan(params).then((res) => {
+            this.submitLoading = false;
+            if (res.success) {
+              this.$Message.success("编辑成功");
+              this.closeCurrentPage();
+            }
+          });
         }
       });
     },
-    // 获取详情
     getDetail() {
       getPintuanDetail(this.id).then((res) => {
         if (res.success) {
           const data = res.result;
-          data.rangeTime = [];
-          data.rangeTime.push(new Date(data.startTime), new Date(data.endTime));
+          data.rangeTime = [new Date(data.startTime), new Date(data.endTime)];
           this.form = data;
-          // 此处将值转换为 1 true ，0 false 不然ivew radio组件会报错
-          this.form.fictitious ? this.$set(this.form, "fictitious", 1)  : this.$set(this.form, "fictitious", 0);
-
-       }
+          this.form.fictitious = data.fictitious ? 1 : 0;
+        }
       });
     },
   },
 };
 </script>
+
 <style lang="scss" scoped>
-::v-deep .ivu-form-item {
-  padding: 18px 10px !important;
+.new-pintuan {
+  :deep(.el-form-item__label) {
+    color: #000;
+  }
+
+  :deep(.pintuan-range-picker.el-date-editor--datetimerange) {
+    width: 400px;
+    max-width: 100%;
+    flex-grow: 0;
+  }
+}
+
+.form-field-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.form-tip {
+  color: #666666;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 4px;
+  width: 100%;
+  max-width: 720px;
 }
 </style>

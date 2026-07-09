@@ -1,5 +1,5 @@
 // 统一请求路径前缀在libs/axios.js中修改
-import { getRequest, postRequest, putRequest ,postRequestWithNoForm } from "@/libs/axios";
+import { getRequest, postRequest, putRequest, deleteRequest, postRequestWithNoForm } from "@/libs/axios";
 
 import { baseUrl } from "@/libs/axios.js";
 
@@ -42,6 +42,11 @@ export const getOrderDetail = sn => {
   return getRequest(`/order/order/${sn}`);
 };
 
+// 订单付款
+export const orderPay = sn => {
+  return postRequest(`/order/order/${sn}/pay`);
+};
+
 // 调整订单金额
 export const modifyOrderPrice = (sn, params) => {
   return putRequest(`/order/order/update/${sn}/price`, params);
@@ -65,18 +70,31 @@ export const editOrderConsignee = (sn, params) => {
 export const getComplainPage = params => {
   return getRequest(`/order/complain`, params);
 };
+export const getOrderComplain = getComplainPage;
 
 //获取投诉详情
 export const getComplainDetail = id => {
   return getRequest(`/order/complain/${id}`);
 };
+export const getOrderComplainDetail = getComplainDetail;
 
 //添加交易投诉对话
 export const addOrderComplaint = params => {
-  return postRequest(`/order/complain/communication/`, params);
+  return postRequest(`/order/complain/communication`, params);
+};
+export const addOrderCommunication = addOrderComplaint;
+
+// 更新投诉状态
+export const storeComplain = params => {
+  return putRequest(`/order/complain/status`, params);
 };
 
-//添加交易投诉对话
+// 仲裁完成投诉
+export const orderComplete = (id, params) => {
+  return putRequest(`/order/complain/complete/${id}`, params);
+};
+
+//商家申诉
 export const appeal = params => {
   return putRequest(`/order/complain/appeal`, params);
 };
@@ -110,10 +128,42 @@ export const orderTake = (sn, verificationCode) => {
 export const afterSaleOrderPage = params => {
   return getRequest(`/order/afterSale/page`, params);
 };
+export const getAfterSaleOrderPage = afterSaleOrderPage;
 
 // 售后服务单详情
 export const afterSaleOrderDetail = sn => {
   return getRequest(`/order/afterSale/${sn}`);
+};
+export const getAfterSaleOrderDetail = afterSaleOrderDetail;
+
+// 获取售后原因分页列表
+export const getAfterSaleReasonPage = params => {
+  return getRequest(`/order/afterSaleReason/getByPage`, params);
+};
+
+// 删除售后原因
+export const delAfterSaleReason = id => {
+  return deleteRequest(`/order/afterSaleReason/delByIds/${id}`);
+};
+
+// 添加售后原因
+export const addAfterSaleReason = params => {
+  return postRequest(`/order/afterSaleReason`, params);
+};
+
+// 修改售后原因
+export const editAfterSaleReason = (id, params) => {
+  return putRequest(`/order/afterSaleReason/update/${id}`, params);
+};
+
+// 售后单商家收货信息
+export const storeAddress = sn => {
+  return getRequest(`/order/afterSale/getStoreAfterSaleAddress/${sn}`);
+};
+
+// 售后退款
+export const refundPrice = (afterSaleSn, params) => {
+  return putRequest(`/order/afterSale/refund/${afterSaleSn}`, params);
 };
 
 // 商家审核

@@ -1,212 +1,165 @@
 <template>
   <div class="search">
-    <Card>
-      <Row @keydown.enter.native="handleSearch">
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
-          <Form-item label="订单号" prop="orderSn">
-            <Input
-              type="text"
-              v-model="searchForm.orderSn"
-              placeholder="订单/交易号"
-              clearable
-              style="width: 240px"
-            />
-          </Form-item>
-          <Form-item label="退款状态">
-            <Select
-              v-model="searchForm.isRefund"
-              placeholder="请选择"
-              clearable
-              style="width: 240px"
-            >
-              <Option value="false">未退款</Option>
-              <Option value="true">已退款</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="退款时间">
-            <DatePicker
-              v-model="selectDate"
-              type="datetimerange"
-              format="yyyy-MM-dd"
-              clearable
-              @on-change="selectDateRange"
-              placeholder="选择起始时间"
-              style="width: 240px"
-            ></DatePicker>
-          </Form-item>
-          <Button
-            @click="handleSearch"
-            type="primary"
-            icon="ios-search"
-            class="search-btn"
-            >搜索</Button
-          >
-        </Form>
-      </Row>
-      </Card>
-    <Card>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        class="mt_10"
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
       >
-        <template slot-scope="{ row, index }" slot="actions">
-
-          <Tag color="green" v-if="row.isRefund">已退款</Tag>
-          <div v-if="!row.isRefund">
-            <Tag v-if="!row.errorMessage" color="red">未退款</Tag>
-            <Tooltip v-else placement="left">
-              <Tag color="red">未退款<Icon type="md-help" /></Tag>
-              <div
-                slot="content"
-                style="white-space: normal"
-                v-if="row.paymentName == 'WECHAT'"
-              >
-                {{
-                  row.errorMessage ? JSON.parse(row.errorMessage).message : ""
-                }}
+        <el-form-item label="订单号" prop="orderSn">
+          <el-input
+            v-model="searchForm.orderSn"
+            placeholder="订单/交易号"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="退款状态">
+          <el-select
+            v-model="searchForm.isRefund"
+            placeholder="请选择"
+            clearable
+            style="width: 240px"
+          >
+            <el-option label="未退款" value="false" />
+            <el-option label="已退款" value="true" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="退款时间">
+          <el-date-picker
+            v-model="selectDate"
+            type="daterange"
+            clearable
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            style="width: 240px"
+            @change="selectDateRange"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+    <el-card>
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+      >
+        <el-table-column prop="afterSaleNo" label="售后单号" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="orderSn" label="订单号" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="paymentReceivableNo" label="第三方付款流水" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="receivableNo" label="第三方退款流水" min-width="130" show-overflow-tooltip />
+        <el-table-column label="退款金额" min-width="120">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">
+              {{ unitPrice(row.totalAmount, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="申请时间" min-width="120" show-overflow-tooltip />
+        <el-table-column label="退款状态" width="200" align="center">
+          <template #default="{ row }">
+            <template v-if="row">
+              <el-tag v-if="row.isRefund" type="success">已退款</el-tag>
+              <div v-else>
+                <el-tag v-if="!row.errorMessage" type="danger">未退款</el-tag>
+                <el-tooltip v-else placement="left">
+                  <template #content>
+                    <div
+                      v-if="row.paymentName == 'WECHAT'"
+                      style="white-space: normal"
+                    >
+                      {{ row.errorMessage ? JSON.parse(row.errorMessage).message : "" }}
+                    </div>
+                    <div
+                      v-if="row.paymentName == 'ALIPAY'"
+                      style="white-space: normal"
+                    >
+                      {{ row.errorMessage || "" }}
+                    </div>
+                  </template>
+                  <el-tag type="danger">未退款</el-tag>
+                </el-tooltip>
               </div>
-              <div
-                slot="content"
-                style="white-space: normal"
-                v-if="row.paymentName == 'ALIPAY'"
-              >
-                {{ row.errorMessage || "" }}
-              </div>
-            </Tooltip>
-          </div>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
 import * as API_Order from "@/api/order";
+import { unitPrice } from "@/utils/filters";
 
 export default {
   name: "refundLog",
   data() {
     return {
-      loading: true, // 表单加载状态
+      loading: true,
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 20, // 页面大小
-        sort: "createTime", // 默认排序字段
-        order: "desc", // 默认排序方式
-        startDate: "", // 起始时间
-        endDate: "", // 终止时间
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+        startDate: "",
+        endDate: "",
         orderSn: "",
         isRefund: "",
       },
-      // 退款起止时间
       selectDate: null,
-      columns: [
-        {
-          title: "售后单号",
-          key: "afterSaleNo",
-          minWidth: 150,
-          tooltip: true,
-        },
-        {
-          title: "订单号",
-          key: "orderSn",
-          minWidth: 150,
-          tooltip: true,
-        },
-        {
-          title: "第三方付款流水",
-          key: "paymentReceivableNo",
-          minWidth: 150,
-          tooltip: true,
-        },
-        {
-          title: "第三方退款流水",
-          key: "receivableNo",
-          minWidth: 130,
-          tooltip: true,
-        },
-        {
-          title: "退款金额",
-          key: "totalAmount",
-          minWidth: 120,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.totalAmount,color:this.$mainColor}} );
-          },
-
-        },
-        {
-          title: "申请时间",
-          key: "createTime",
-          minWidth: 120,
-          tooltip: true,
-        },
-        {
-          title: "退款状态",
-          key: "isRefund",
-          align:"center",
-          width: 200,
-          slot: "actions",
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      data: [],
+      total: 0,
     };
   },
   methods: {
-    // 初始化数据
+    unitPrice,
     init() {
       this.getDataList();
     },
-    // 分页 改变页码
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
-    // 分页 改变页数
     changePageSize(v) {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    // 搜索
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getDataList();
     },
-    // 起止时间从新赋值
     selectDateRange(v) {
-      if (v) {
+      if (v && v[0] && v[1]) {
         this.searchForm.startDate = v[0];
         this.searchForm.endDate = v[1];
+      } else {
+        this.searchForm.startDate = "";
+        this.searchForm.endDate = "";
       }
     },
-    // 获取列表数据
     getDataList() {
       this.loading = true;
       API_Order.refundLog(this.searchForm).then((res) => {
@@ -216,7 +169,6 @@ export default {
           this.total = res.result.total;
         }
       });
-      this.loading = false;
     },
   },
   mounted() {

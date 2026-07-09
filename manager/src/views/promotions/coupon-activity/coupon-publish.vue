@@ -1,68 +1,58 @@
 <template>
   <div>
-    <Card>
-      <Form ref="form" :model="form" :label-width="120" :rules="formRule">
+    <el-card>
+      <el-form ref="form" :model="form" label-width="120px" :rules="formRule">
         <div class="base-info-item">
           <h4>活动信息</h4>
           <div class="form-item-view">
-            <FormItem label="活动名称" prop="promotionName">
-              <Input
-                type="text"
+            <el-form-item label="活动名称" prop="promotionName">
+              <el-input
                 v-model="form.promotionName"
                 placeholder="请填写活动名称"
                 clearable
                 style="width: 260px"
               />
-            </FormItem>
-            <FormItem label="活动时间">
-              <DatePicker
+            </el-form-item>
+            <el-form-item label="活动时间" class="activity-time-form-item">
+              <el-date-picker
                 type="datetimerange"
-                :options="options"
+                :disabled-date="options.disabledDate"
                 v-model="rangeTime"
-                format="yyyy-MM-dd HH:mm:ss"
+                format="YYYY-MM-DD HH:mm:ss"
+                start-placeholder="开始时间"
+                end-placeholder="结束时间"
                 placeholder="请选择活动时间"
-                style="width: 260px"
-              >
-              </DatePicker>
-            </FormItem>
+              />
+            </el-form-item>
 
-            <FormItem label="优惠券活动类型" prop="couponActivityType">
-              <RadioGroup
-                type="button"
-                button-style="solid"
-                v-model="form.couponActivityType"
-              >
-                <Radio label="REGISTERED">新人发券</Radio>
-                <Radio label="SPECIFY">精确发券</Radio>
-<!--                <Radio label="INVITE_NEW">邀新赠券</Radio>-->
-                <Radio label="AUTO_COUPON">自动赠券</Radio>
-              </RadioGroup>
-            </FormItem>
-            <FormItem
+            <el-form-item label="优惠券活动类型" prop="couponActivityType">
+              <el-radio-group v-model="form.couponActivityType">
+                <el-radio-button value="REGISTERED">新人发券</el-radio-button>
+                <el-radio-button value="SPECIFY">精确发券</el-radio-button>
+                <el-radio-button value="AUTO_COUPON">自动赠券</el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item
               label="领取频率"
               v-if="form.couponActivityType === 'AUTO_COUPON'"
             >
-            <RadioGroup
-                type="button"
-                button-style="solid"
-                v-model="form.couponFrequencyEnum"
-              >
-                <Radio label="DAY">每日一次</Radio>
-                <Radio label="WEEK">每周一次</Radio>
-                <Radio label="MONTH">每月一次</Radio>
-              </RadioGroup>
-            </FormItem>
-            <FormItem
+              <el-radio-group v-model="form.couponFrequencyEnum">
+                <el-radio-button value="DAY">每日一次</el-radio-button>
+                <el-radio-button value="WEEK">每周一次</el-radio-button>
+                <el-radio-button value="MONTH">每月一次</el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item
               label="活动范围"
               prop="activityScope"
               v-if="form.couponActivityType === 'SPECIFY'"
             >
-              <RadioGroup type="button" button-style="solid" v-model="form.activityScope">
-                <Radio label="ALL">全部会员</Radio>
-                <Radio label="DESIGNATED">指定会员</Radio>
-              </RadioGroup>
-            </FormItem>
-            <FormItem
+              <el-radio-group v-model="form.activityScope">
+                <el-radio-button value="ALL">全部会员</el-radio-button>
+                <el-radio-button value="DESIGNATED">指定会员</el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item
               label="选择会员"
               prop="scopeType"
               v-if="
@@ -70,79 +60,107 @@
                 form.activityScope === 'DESIGNATED'
               "
             >
-              <Button type="primary" icon="ios-add" @click="addVip" ghost
-                >选择会员</Button
-              >
+              <el-button type="primary" @click="addVip" plain>选择会员</el-button>
               <div style="margin-top: 24px" v-if="form.activityScope == 'DESIGNATED'">
-                <Table border :columns="userColumns" :data="this.selectedMember"> </Table>
+                <el-table border :data="selectedMember" style="width: 100%">
+                  <el-table-column prop="nickName" label="用户名称" min-width="120" />
+                  <el-table-column label="手机号" min-width="120">
+                    <template #default="{ row }">
+                      <span v-if="row">{{ row.mobile || "暂未填写" }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="lastLoginDate" label="最后登录时间" min-width="160" />
+                  <el-table-column label="操作" width="100" align="center">
+                    <template #default="{ $index }">
+                      <a class="link-text" @click="delUser($index)">删除</a>
+                    </template>
+                  </el-table-column>
+                </el-table>
               </div>
-            </FormItem>
+            </el-form-item>
           </div>
           <h4>配置优惠券</h4>
           <div class="form-item-view">
-            <FormItem label="选择优惠券" prop="scopeType">
-              <Button type="primary" :loading="submitLoading" @click="showSelector"
-                >选择优惠券</Button
-              >
-            </FormItem>
-            <FormItem label="赠送配置" prop="scopeType">
-              <Table border :columns="columns" :data="this.selectCouponList">
-                <template slot="sendNum" slot-scope="scope">
-                  <Input
-                    type="text"
-                    v-model="form.couponActivityItems[scope.index].num"
-                    placeholder="赠送数量"
-                  />
-                  <Input
-                    type="text"
-                    v-model="form.couponActivityItems[scope.index].couponId"
-                    v-show="false"
-                  />
-                </template>
-              </Table>
-            </FormItem>
+            <el-form-item label="选择优惠券" prop="scopeType">
+              <el-button type="primary" :loading="submitLoading" @click="showSelector">选择优惠券</el-button>
+            </el-form-item>
+            <el-form-item label="赠送配置" prop="scopeType">
+              <el-table border :data="selectCouponList" style="width: 100%">
+                <el-table-column prop="couponName" label="优惠券名称" min-width="120" show-overflow-tooltip />
+                <el-table-column label="品类描述" width="120">
+                  <template #default="{ row }">
+                    <el-tag v-if="row" :type="scopeTypeTagType(row.scopeType)">
+                      {{ scopeTypeText(row.scopeType) }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="面额/折扣" min-width="120">
+                  <template #default="{ row }">
+                    <template v-if="row">
+                      <span v-if="row.price" :style="{ color: $mainColor }">
+                        {{ $filters.unitPrice(row.price, "￥") }}</span>
+                      <span v-else>{{ row.couponDiscount }}折</span>
+                    </template>
+                  </template>
+                </el-table-column>
+                <el-table-column label="赠送数量" min-width="120">
+                  <template #default="{ $index }">
+                    <el-input
+                      v-model="form.couponActivityItems[$index].num"
+                      placeholder="赠送数量"
+                    />
+                    <el-input
+                      v-model="form.couponActivityItems[$index].couponId"
+                      v-show="false"
+                    />
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="100" align="center">
+                  <template #default="{ $index }">
+                    <el-button type="danger" size="small" plain @click="delCoupon($index)">删除</el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-form-item>
 
             <div>
-              <Button type="text" @click="closeCurrentPage">返回</Button>
-              <Button type="primary" :loading="submitLoading" @click="handleSubmit"
-                >提交</Button
-              >
+              <el-button link @click="closeCurrentPage">返回</el-button>
+              <el-button type="primary" :loading="submitLoading" @click="handleSubmit">提交</el-button>
             </div>
           </div>
         </div>
-      </Form>
-    </Card>
-    <Modal
-      @on-ok="
-        () => {
-          this.showCouponSelect = false;
-        }
-      "
-      @on-cancel="
-        () => {
-          this.showCouponSelect = false;
-        }
-      "
+      </el-form>
+    </el-card>
+
+    <el-dialog
       v-model="showCouponSelect"
       width="80%"
+      title="选择优惠券"
+      destroy-on-close
+      :close-on-click-modal="false"
     >
       <couponTemplate
-        :checked="true"
-        :selectedList="selectCouponList"
+        v-if="showCouponSelect"
+        ref="couponPicker"
+        manualConfirm
+        :selectedList="tempCouponList"
         getType="ACTIVITY"
         promotionStatus="START"
-        @selected="selectedCoupon"
       />
-    </Modal>
+      <template #footer>
+        <el-button @click="cancelCouponSelect">取消</el-button>
+        <el-button type="primary" @click="confirmCouponSelect">确定</el-button>
+      </template>
+    </el-dialog>
 
-    <Modal width="1200" v-model="checkUserList">
+    <el-dialog v-model="checkUserList" width="1200px" title="选择会员" destroy-on-close>
       <userList
         v-if="checkUserList"
         @callback="callbackSelectUser"
         :selectedList="selectedMember"
         ref="memberLayout"
       />
-    </Modal>
+    </el-dialog>
   </div>
 </template>
 
@@ -150,7 +168,6 @@
 import couponTemplate from "@/views/promotions/coupon/coupon";
 import userList from "@/views/member/list/index";
 import { saveActivityCoupon } from "@/api/promotion";
-import { promotionsScopeTypeRender } from "@/utils/promotions";
 
 export default {
   name: "add-coupon-activity",
@@ -165,144 +182,56 @@ export default {
           return date && date.valueOf() < Date.now() - 86400000;
         },
       },
-      showCouponSelect: false, //显示优惠券选择框
-      rangeTime: "", //时间区间
-      checkUserList: false, //会员选择器
-      selectedMember: [], //选择的会员
+      showCouponSelect: false,
+      tempCouponList: [],
+      rangeTime: "",
+      checkUserList: false,
+      selectedMember: [],
       form: {
-        promotionName: "", //活动名称
-        activityScope: "ALL", //活动范围 ，默认全体发券
-        couponActivityType: "REGISTERED", //触发活动方式 默认新人赠券
-        startTime: "", //开始时间
-        endTime: "", //结束时间
-        memberDTOS: [], //指定会员范围
-        couponActivityItems: [], //优惠券列表
-        couponFrequencyEnum:"", //选择周期
+        promotionName: "",
+        activityScope: "ALL",
+        couponActivityType: "REGISTERED",
+        startTime: "",
+        endTime: "",
+        memberDTOS: [],
+        couponActivityItems: [],
+        couponFrequencyEnum: "",
       },
-      submitLoading: false, // 添加或编辑提交状态
-      selectCouponList: [], //选择的优惠券列表
+      submitLoading: false,
+      selectCouponList: [],
       formRule: {
         promotionName: [{ required: true, message: "活动名称不能为空" }],
         rangeTime: [{ required: true, message: "请选择活动有效期" }],
         description: [{ required: true, message: "请输入范围描述" }],
       },
-      // 用户表格
-      userColumns: [
-        {
-          title: "用户名称",
-          key: "nickName",
-          minWidth: 120,
-        },
-        {
-          title: "手机号",
-          key: "mobile",
-          render: (h, params) => {
-            return h("div", params.row.mobile || "暂未填写");
-          },
-        },
-        {
-          title: "最后登录时间",
-          key: "lastLoginDate",
-        },
-        {
-          title: "操作",
-          key: "action",
-          minWidth: 50,
-          align: "center",
-          render: (h, params) => {
-            return h(
-              "a",
-              {
-                style: {
-                  color: "#2d8cf0",
-                  cursor: "pointer",
-                  textDecoration: "none"
-                },
-                on: {
-                  click: () => {
-                    this.delUser(params.index);
-                  },
-                },
-              },
-              "删除"
-            );
-          },
-        },
-      ],
-      //优惠券表格
-      columns: [
-        {
-          title: "优惠券名称",
-          key: "couponName",
-          minWidth: 120,
-        },
-        {
-          title: "品类描述",
-          key: "scopeType",
-          width: 120,
-          render: (h, params) => {
-            return promotionsScopeTypeRender(h, params);
-          },
-        },
-        {
-          title: "面额/折扣",
-          key: "couponName",
-          minWidth: 120,
-          render: (h, params) => {
-            if (params.row.price) {
-              return h("priceColorScheme", {props:{value:params.row.price,color:this.$mainColor}} );
-
-            } else {
-              return h("div", params.row.couponDiscount + "折");
-            }
-          },
-        },
-
-        {
-          title: "赠送数量",
-          type: "template",
-          slot: "sendNum",
-          minWidth: 120,
-        },
-        {
-          title: "操作",
-          key: "action",
-          minWidth: 50,
-          align: "center",
-          render: (h, params) => {
-            return h(
-              "Button",
-              {
-                props: {
-                  size: "small",
-                  type: "error",
-                  ghost: true,
-                },
-                on: {
-                  click: () => {
-                    this.delCoupon(params.index);
-                  },
-                },
-              },
-              "删除"
-            );
-          },
-        },
-      ],
     };
   },
   methods: {
-    // 返回已选择的用户
+    scopeTypeText(type) {
+      const map = {
+        ALL: "全品类",
+        PORTION_GOODS_CATEGORY: "商品分类",
+        PORTION_SHOP_CATEGORY: "店铺分类",
+        PORTION_GOODS: "指定商品",
+      };
+      return map[type] || "未知";
+    },
+    scopeTypeTagType(type) {
+      const map = {
+        ALL: "info",
+        PORTION_GOODS_CATEGORY: "warning",
+        PORTION_SHOP_CATEGORY: "warning",
+        PORTION_GOODS: "primary",
+      };
+      return map[type] || "danger";
+    },
     callbackSelectUser(val) {
-      // 每次将返回的数据回调判断
       let findUser = this.selectedMember.find((item) => {
         return item.id === val.id;
       });
-      // 如果没有则添加
       if (!findUser) {
         this.selectedMember.push(val);
       } else {
-        // 有重复数据就删除
         this.selectedMember.map((item, index) => {
           if (item.id === findUser.id) {
             this.selectedMember.splice(index, 1);
@@ -311,13 +240,10 @@ export default {
       }
       this.reSelectMember();
     },
-
-    // 删除选择的会员
     delUser(index) {
       this.selectedMember.splice(index, 1);
       this.reSelectMember();
     },
-    //更新选择的会员
     reSelectMember() {
       this.form.memberDTOS = this.selectedMember.map((item) => {
         return {
@@ -326,50 +252,54 @@ export default {
         };
       });
     },
-    /**
-     * 返回优惠券*/
-    selectedCoupon(val) {
-      this.selectCouponList = val;
-      this.reSelectCoupon();
+    cancelCouponSelect() {
+      this.showCouponSelect = false;
     },
-    // 删除选择的优惠券
+    confirmCouponSelect() {
+      const list = this.$refs.couponPicker?.getSelection?.() || [];
+      if (!list.length) {
+        this.$Message.warning("请至少选择一张优惠券");
+        return;
+      }
+      this.selectCouponList = list;
+      this.reSelectCoupon();
+      this.showCouponSelect = false;
+    },
     delCoupon(index) {
       this.selectCouponList.splice(index, 1);
       this.reSelectCoupon();
     },
     reSelectCoupon() {
-      // 清空原有数据
       this.form.couponActivityItems = this.selectCouponList.map((item) => {
+        const existing = this.form.couponActivityItems.find(
+          (entry) => entry.couponId === item.id
+        );
         return {
-          num: 1,
+          num: existing ? existing.num : 1,
           couponId: item.id,
         };
       });
     },
-    // 添加指定用户
     addVip() {
       this.checkUserList = true;
       this.$nextTick(() => {
         this.$refs.memberLayout.selectedMember = true;
       });
     },
-    //显示优惠券选择框
     showSelector() {
+      this.tempCouponList = [...this.selectCouponList];
       this.showCouponSelect = true;
     },
-    /** 保存平台优惠券 */
     handleSubmit() {
-      if(this.form.couponFrequencyEnum !== ''){
-        console.log(this.activityScope)
-        if(this.form.activityScope == 'ALL'){
-          this.form.startTime = this.$options.filters.unixToDate(this.rangeTime[0] / 1000);
-          this.form.endTime = this.$options.filters.unixToDate(this.rangeTime[1] / 1000);
+      if (this.form.couponFrequencyEnum !== "") {
+        if (this.form.activityScope == "ALL") {
+          this.form.startTime = this.$filters.unixToDate(this.rangeTime[0] / 1000);
+          this.form.endTime = this.$filters.unixToDate(this.rangeTime[1] / 1000);
 
           this.$refs.form.validate((valid) => {
             if (valid) {
               const params = JSON.parse(JSON.stringify(this.form));
               this.submitLoading = true;
-              // 添加 避免编辑后传入id等数据 记得删除
               delete params.id;
               saveActivityCoupon(params).then((res) => {
                 this.submitLoading = false;
@@ -380,34 +310,31 @@ export default {
               });
             }
           });
-        }else {
-          this.$Message.info('自动发券只能全用户发送')
-          this.form.couponActivityType = 'SPECIFY'
-          this.form.activityScope = 'ALL'
+        } else {
+          this.$Message.info("自动发券只能全用户发送");
+          this.form.couponActivityType = "SPECIFY";
+          this.form.activityScope = "ALL";
         }
-      }else{
-      this.form.startTime = this.$options.filters.unixToDate(this.rangeTime[0] / 1000);
-      this.form.endTime = this.$options.filters.unixToDate(this.rangeTime[1] / 1000);
+      } else {
+        this.form.startTime = this.$filters.unixToDate(this.rangeTime[0] / 1000);
+        this.form.endTime = this.$filters.unixToDate(this.rangeTime[1] / 1000);
 
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          const params = JSON.parse(JSON.stringify(this.form));
-          this.submitLoading = true;
-          // 添加 避免编辑后传入id等数据 记得删除
-          delete params.id;
-          saveActivityCoupon(params).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("优惠券活动创建成功");
-              this.closeCurrentPage();
-            }
-          });
-        }
-      });
+        this.$refs.form.validate((valid) => {
+          if (valid) {
+            const params = JSON.parse(JSON.stringify(this.form));
+            this.submitLoading = true;
+            delete params.id;
+            saveActivityCoupon(params).then((res) => {
+              this.submitLoading = false;
+              if (res.success) {
+                this.$Message.success("优惠券活动创建成功");
+                this.closeCurrentPage();
+              }
+            });
+          }
+        });
       }
-
     },
-    // 关闭当前页面
     closeCurrentPage() {
       this.$store.commit("removeTag", "add-platform-coupon");
       localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList);
@@ -417,7 +344,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scpoed>
+<style lang="scss" scoped>
 h4 {
   margin-bottom: 10px;
   padding: 0 10px;
@@ -428,6 +355,14 @@ h4 {
   font-size: 14px;
   line-height: 40px;
   text-align: left;
+}
+
+.activity-time-form-item {
+  :deep(.el-date-editor) {
+    width: 380px !important;
+    max-width: 380px;
+    flex-grow: 0;
+  }
 }
 
 .describe {
@@ -443,5 +378,11 @@ h4 {
   > * {
     margin: 0 4px;
   }
+}
+
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
 }
 </style>

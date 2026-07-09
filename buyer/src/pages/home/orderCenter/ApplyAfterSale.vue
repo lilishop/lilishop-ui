@@ -1,95 +1,115 @@
 <template>
   <div class="apply-after-sale">
-    <card _Title="申请售后"></card>
-    <Table
-      border
-      :columns="columns"
-      :data="goodsData"
-    >
-    <template slot-scope="{ row }" slot="goodsName">
-      <div style="padding:5px;display:flex;">
-        <img :src="row.image" style="vertical-align: top;" width="60" height="60" alt=""> <span class="ml_10">{{row.goodsName}}</span>
-      </div>
-    </template>
-    <template slot-scope="{ row }" slot="goodsPrice">
-      <div>{{row.applyRefundPrice | unitPrice('￥')}}</div>
-    </template>
-    </Table>
-    <div>
-      <Form :model="form" ref="form" class="mt_10" :rules="rules" :label-width="80">
-        <FormItem label="售后类别">
-          <RadioGroup v-model="form.serviceType" @on-change="changeReason" type="button" button-style="solid">
-            <Radio v-if="info.returnGoods" label="RETURN_GOODS">退货</Radio>
-            <Radio v-if="info.returnMoney" label="RETURN_MONEY">退款</Radio>
-          </RadioGroup>
-        </FormItem>
-        <FormItem label="提交数量" prop="num">
-          <Input type="number" v-model="form.num" style="width:260px" />
-        </FormItem>
-        <FormItem label="提交原因" prop="reason">
-          <Select v-model="form.reason" style="width:260px">
-            <Option v-for="item in reasonList" :value="item.id" :key="item.id">{{ item.reason }}</Option>
-          </Select>
-        </FormItem>
-        <FormItem label="问题描述" prop="problemDesc">
-          <Input type="textarea" :rows="4" maxlength="500" style="width:260px" show-word-limit v-model="form.problemDesc" />
-        </FormItem>
-        <FormItem label="图片信息">
-          <div style="display:flex;align-items:center;">
-            <div class="demo-upload-list" v-for="(img, index) in uploadList" :key="index">
-              <img :src="img">
-              <div class="demo-upload-list-cover">
-                  <Icon type="ios-eye-outline" @click.native="handleView(img)"></Icon>
-                  <Icon type="ios-trash-outline" @click.native="handleRemove(index)"></Icon>
-              </div>
-            </div>
-            <Upload
-                :show-upload-list="false"
-                :on-success="handleSuccess"
-                :before-upload="handleBeforeUpload"
-                :format="['jpg','jpeg','png']"
-                :action="action"
-                :headers="accessToken"
-                style="display: inline-block;width:58px;">
-                <div class="hover-pointer icon-upload" style="">
-                  <Icon type="md-add" size="20"></Icon>
-                </div>
-            </Upload>
+    <UserCenterLayout title="申请售后" :tabs="['申请售后']">
+    <el-table :data="goodsData" border>
+      <el-table-column label="商品名称">
+        <template #default="{ row }">
+          <div style="padding:5px;display:flex;">
+            <img :src="row.image" style="vertical-align: top;" width="60" height="60" alt="">
+            <span class="ml_10">{{ row.goodsName }}</span>
           </div>
-        </FormItem>
-        <FormItem label="退款方式">
-          <div>{{info.refundWay == 'ORIGINAL' ? '原路退回' : '账号退款'}}</div>
-        </FormItem>
-        <template v-if="info.accountType === 'BANK_TRANSFER' && info.applyRefundPrice != 0">
-          <FormItem label="开户行" prop="bankDepositName">
-            <Input v-model="form.bankDepositName" type="text" placeholder="请输入银行开户行" style="width:260px" />
-          </FormItem>
-          <FormItem label="开户名" prop="bankAccountName">
-            <Input v-model="form.bankAccountName" type="text" placeholder="请输入银行开户名" style="width:260px" />
-          </FormItem>
-          <FormItem label="银行账号" prop="bankAccountNumber">
-            <Input v-model="form.bankAccountNumber" type="text" placeholder="请输入银行账号" style="width:260px" />
-          </FormItem>
         </template>
-        <FormItem label="返回方式" v-if="form.serviceType === 'RETURN_GOODS'">
+      </el-table-column>
+      <el-table-column label="价格">
+        <template #default="{ row }">
+          <div>{{ $filters.unitPrice(row.applyRefundPrice, '￥') }}</div>
+        </template>
+      </el-table-column>
+      <el-table-column prop="num" label="购买数量" />
+    </el-table>
+    <div>
+      <el-form :model="form" ref="form" class="mt_10" :rules="rules" label-width="80px">
+        <el-form-item label="售后类别">
+          <el-radio-group v-model="form.serviceType" @change="changeReason" type="button" button-style="solid">
+            <el-radio v-if="info.returnGoods" label="RETURN_GOODS">退货</el-radio>
+            <el-radio v-if="info.returnMoney" label="RETURN_MONEY">退款</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="提交数量" prop="num">
+          <el-input type="number" v-model="form.num" style="width:260px" />
+        </el-form-item>
+        <el-form-item label="提交原因" prop="reason">
+          <el-select
+            v-model="form.reason"
+            :key="form.serviceType"
+            style="width:260px"
+            placeholder="请选择提交原因"
+          >
+            <el-option
+              v-for="item in reasonList"
+              :key="item.id"
+              :label="item.reason"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="问题描述" prop="problemDesc">
+          <el-input type="textarea" :rows="4" maxlength="500" style="width:260px" show-word-limit v-model="form.problemDesc" />
+        </el-form-item>
+        <el-form-item label="图片信息">
+          <div class="upload-section">
+            <div class="upload-row">
+              <div class="demo-upload-list" v-for="(img, index) in uploadList" :key="index">
+                <img :src="img">
+                <div class="demo-upload-list-cover">
+                    <el-icon @click="handleView(img)"><View /></el-icon>
+                    <el-icon @click="handleRemove(index)"><Delete /></el-icon>
+                </div>
+              </div>
+              <el-upload
+                  class="upload-trigger"
+                  :show-file-list="false"
+                  :on-success="handleSuccess"
+                  :before-upload="handleBeforeUpload"
+                  :format="['jpg','jpeg','png']"
+                  :action="action"
+                  :headers="accessToken"
+              >
+                <div class="hover-pointer icon-upload">
+                  <el-icon :size="20"><Camera /></el-icon>
+                </div>
+              </el-upload>
+            </div>
+            <div class="describe">上传售后凭证，最多5张</div>
+          </div>
+        </el-form-item>
+        <el-form-item label="退款方式">
+          <div>{{info.refundWay == 'ORIGINAL' ? '原路退回' : '账号退款'}}</div>
+        </el-form-item>
+        <template v-if="info.accountType === 'BANK_TRANSFER' && info.applyRefundPrice != 0">
+          <el-form-item label="开户行" prop="bankDepositName">
+            <el-input v-model="form.bankDepositName" type="text" placeholder="请输入银行开户行" style="width:260px" />
+          </el-form-item>
+          <el-form-item label="开户名" prop="bankAccountName">
+            <el-input v-model="form.bankAccountName" type="text" placeholder="请输入银行开户名" style="width:260px" />
+          </el-form-item>
+          <el-form-item label="银行账号" prop="bankAccountNumber">
+            <el-input v-model="form.bankAccountNumber" type="text" placeholder="请输入银行账号" style="width:260px" />
+          </el-form-item>
+        </template>
+        <el-form-item label="返回方式" v-if="form.serviceType === 'RETURN_GOODS'">
           <div>快递至第三方卖家</div>
-        </FormItem>
-        <FormItem>
-          <Button type="primary" @click="apply">提交申请</Button>
-        </FormItem>
-      </Form>
-      <Modal title="View Image" v-model="visible">
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="apply">提交申请</el-button>
+        </el-form-item>
+      </el-form>
+      <el-dialog title="View Image" v-model="visible">
         <img :src="previewImage" v-if="visible" style="width: 100%">
-      </Modal>
+      </el-dialog>
     </div>
+    </UserCenterLayout>
   </div>
 </template>
 <script>
+import { Message, Notice } from "@/utils/message";
+import { Camera, Delete, View } from '@element-plus/icons-vue';
 import { afterSaleReason, afterSaleInfo, applyAfterSale } from '@/api/member.js'
 import { commonUrl } from '@/plugins/request.js';
 import storage from '@/plugins/storage';
 import * as RegExp from '@/plugins/RegExp'
 export default {
+  components: { Camera, Delete, View },
   data () {
     const checkNum = (rule, value, callback) => {
       if (value === '') {
@@ -104,11 +124,6 @@ export default {
       }
     };
     return {
-      columns: [ // 表格表头
-        {title: '商品名称', slot: 'goodsName'},
-        {title: '价格', slot: 'goodsPrice'},
-        {title: '购买数量', key: 'num'}
-      ],
       goodsData: [], // 商品数据
       reasonList: [], // 售后原因列表
       info: {}, // 售后信息
@@ -157,7 +172,11 @@ export default {
       })
     },
     changeReason (type) { // 改变售后原因列表
+      this.form.reason = undefined
       this.getReason(type)
+      this.$nextTick(() => {
+        this.$refs.form?.clearValidate('reason')
+      })
     },
     apply () { // 售后申请提交
       this.$refs.form.validate(valid => {
@@ -168,7 +187,7 @@ export default {
           params.reason = this.reasonList.find(item => item.id == params.reason).reason
           applyAfterSale(params).then(res => {
             if (res.success) {
-              this.$Message.success('售后申请提交成功，请到售后订单查看！')
+              Message.success('售后申请提交成功，请到售后订单查看！')
               this.$router.push({name: 'AfterSale'})
             }
           })
@@ -190,7 +209,7 @@ export default {
     handleBeforeUpload () { // 上传之前钩子函数
       const check = this.uploadList.length < 6;
       if (!check) {
-        this.$Notice.warning({
+        Notice.warning({
           title: '最多可以上传5张图片'
         });
         return check;
@@ -224,7 +243,7 @@ export default {
   }
 }
 .demo-upload-list{
-  display: inline-block;
+  display: block;
   width: 60px;
   height: 60px;
   text-align: center;
@@ -235,8 +254,7 @@ export default {
   background: #fff;
   position: relative;
   box-shadow: 0 1px 1px rgba(0,0,0,.2);
-  margin-right: 4px;
-  margin-top: 10px;
+  flex-shrink: 0;
 }
 .demo-upload-list img{
   width: 100%;
@@ -261,17 +279,43 @@ export default {
   margin: 0 2px;
 }
 .icon-upload {
-  width: 58px;
-  height:58px;
-  line-height: 58px;
-  text-align:center;
-  display: inline-block;
-  border:1px dashed #999;
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #999;
   border-radius: 4px;
-  margin-top: 10px;
+  box-sizing: border-box;
   &:hover{
     cursor: pointer;
     border-color: $theme_color;
   }
+}
+
+.upload-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.upload-trigger {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  :deep(.el-upload) {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+.describe {
+  font-size: 12px;
+  color: #999;
+  margin-top: 8px;
 }
 </style>

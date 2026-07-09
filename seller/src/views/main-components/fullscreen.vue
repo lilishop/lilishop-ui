@@ -1,29 +1,40 @@
 <template>
-    <div @click="handleChange" v-if="showFullScreenBtn" class="full-screen-btn-con">
-        <Tooltip :content="value ? '退出全屏' : '全屏'" placement="bottom">
-            <Icon :type="value ? 'ios-contract' : 'ios-expand'" :size="24"></Icon>
-        </Tooltip>
-    </div>
+  <div v-if="showFullScreenBtn" @click="handleChange" class="full-screen-btn-con">
+    <el-tooltip :content="modelValue ? '退出全屏' : '全屏'" placement="bottom">
+      <el-icon :size="24">
+        <ScaleToOriginal v-if="modelValue" />
+        <FullScreen v-else />
+      </el-icon>
+    </el-tooltip>
+  </div>
 </template>
 
 <script>
+import { FullScreen, ScaleToOriginal } from "@element-plus/icons-vue";
+
 export default {
   name: "fullScreen",
+  components: { FullScreen, ScaleToOriginal },
   props: {
+    modelValue: {
+      type: Boolean,
+      default: false,
+    },
     value: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
+  emits: ["update:modelValue", "input", "on-change"],
   computed: {
     showFullScreenBtn() {
       return window.navigator.userAgent.indexOf("MSIE") < 0;
-    }
+    },
   },
   methods: {
     handleFullscreen() {
-      let main = document.body;
-      if (this.value) {
+      const main = document.body;
+      if (this.modelValue) {
         if (document.exitFullscreen) {
           document.exitFullscreen();
         } else if (document.mozCancelFullScreen) {
@@ -47,34 +58,44 @@ export default {
     },
     handleChange() {
       this.handleFullscreen();
-    }
+    },
+    emitFullscreenState(isFullscreen) {
+      this.$emit("update:modelValue", isFullscreen);
+      this.$emit("input", isFullscreen);
+      this.$emit("on-change", isFullscreen);
+    },
+    onFullscreenChange() {
+      const isFullscreen = !!(
+        document.fullscreenElement ||
+        document.mozFullScreenElement ||
+        document.webkitFullscreenElement ||
+        document.fullScreen ||
+        document.mozFullScreen ||
+        document.webkitIsFullScreen
+      );
+      this.emitFullscreenState(isFullscreen);
+    },
   },
   created() {
-    let isFullscreen =
+    const isFullscreen = !!(
       document.fullscreenElement ||
       document.mozFullScreenElement ||
       document.webkitFullscreenElement ||
       document.fullScreen ||
       document.mozFullScreen ||
-      document.webkitIsFullScreen;
-    isFullscreen = !!isFullscreen;
-    document.addEventListener("fullscreenchange", () => {
-      this.$emit("input", !this.value);
-      this.$emit("on-change", !this.value);
-    });
-    document.addEventListener("mozfullscreenchange", () => {
-      this.$emit("input", !this.value);
-      this.$emit("on-change", !this.value);
-    });
-    document.addEventListener("webkitfullscreenchange", () => {
-      this.$emit("input", !this.value);
-      this.$emit("on-change", !this.value);
-    });
-    document.addEventListener("msfullscreenchange", () => {
-      this.$emit("input", !this.value);
-      this.$emit("on-change", !this.value);
-    });
-    this.$emit("input", isFullscreen);
-  }
+      document.webkitIsFullScreen
+    );
+    this.emitFullscreenState(isFullscreen);
+    document.addEventListener("fullscreenchange", this.onFullscreenChange);
+    document.addEventListener("mozfullscreenchange", this.onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", this.onFullscreenChange);
+    document.addEventListener("msfullscreenchange", this.onFullscreenChange);
+  },
+  beforeUnmount() {
+    document.removeEventListener("fullscreenchange", this.onFullscreenChange);
+    document.removeEventListener("mozfullscreenchange", this.onFullscreenChange);
+    document.removeEventListener("webkitfullscreenchange", this.onFullscreenChange);
+    document.removeEventListener("msfullscreenchange", this.onFullscreenChange);
+  },
 };
 </script>

@@ -1,81 +1,98 @@
 <template>
   <div class="message-con">
-    <Dropdown trigger="click">
-
-      <a href="javascript:void(0)">
+    <el-dropdown trigger="click" popper-class="todo-dropdown" @command="navigateTo">
+      <a href="javascript:void(0)" class="message-link">
         {{ value > 0 ? "有" + value + "条待办事项" : "无待办事项" }}
-        <Icon v-if="value!=0" type="ios-arrow-down"></Icon>
+        <el-icon v-if="value != 0"><ArrowDown /></el-icon>
       </a>
-      <DropdownMenu v-if="value!=0" slot="list">
-        <DropdownItem v-if="res.balanceCash" @click.native="navigateTo('deposit')">
-          <Badge :count="res.balanceCash">待处理预存款提现申请 </Badge>
-        </DropdownItem>
-        <DropdownItem v-if="res.complain" @click.native="navigateTo('orderComplaint')">
-          <Badge :count="res.complain">待处理投诉审核 </Badge>
-        </DropdownItem>
-        <DropdownItem v-if="res.distributionCash" @click.native="navigateTo('distributionCash')">
-          <Badge :count="res.distributionCash">待处理分销商提现申请 </Badge>
-        </DropdownItem>
-        <DropdownItem v-if="res.goods" @click.native="navigateTo('applyGoods')">
-          <Badge :count="res.goods">待处理商品审核 </Badge>
-        </DropdownItem>
-        <DropdownItem v-if="res.refund" @click.native="navigateTo('afterSaleOrder')">
-          <Badge :count="res.refund">待处理售后申请 </Badge>
-        </DropdownItem>
-        <DropdownItem v-if="res.store" @click.native="navigateTo('shopAuth')">
-          <Badge :count="res.store">待处理店铺入驻审核 </Badge>
-        </DropdownItem>
-        <DropdownItem v-if="res.waitPayBill" @click.native="navigateTo('accountStatementBill')">
-          <Badge :count="res.waitPayBill">待与商家对账</Badge>
-        </DropdownItem>
-        <div></div>
-      </DropdownMenu>
-    </Dropdown>
+      <template #dropdown>
+        <el-dropdown-menu v-if="value != 0">
+          <el-dropdown-item v-if="res.balanceCash" command="deposit">
+            <el-badge :value="res.balanceCash">待处理预存款提现申请</el-badge>
+          </el-dropdown-item>
+          <el-dropdown-item v-if="res.complain" command="orderComplaint">
+            <el-badge :value="res.complain">待处理投诉审核</el-badge>
+          </el-dropdown-item>
+          <el-dropdown-item v-if="res.distributionCash" command="distributionCash">
+            <el-badge :value="res.distributionCash">待处理分销商提现申请</el-badge>
+          </el-dropdown-item>
+          <el-dropdown-item v-if="res.goods" command="applyGoods">
+            <el-badge :value="res.goods">待处理商品审核</el-badge>
+          </el-dropdown-item>
+          <el-dropdown-item v-if="res.refund" command="afterSaleOrder">
+            <el-badge :value="res.refund">待处理售后申请</el-badge>
+          </el-dropdown-item>
+          <el-dropdown-item v-if="res.store" command="shopAuth">
+            <el-badge :value="res.store">待处理店铺入驻审核</el-badge>
+          </el-dropdown-item>
+          <el-dropdown-item v-if="res.waitPayBill" command="accountStatementBill">
+            <el-badge :value="res.waitPayBill">待与商家对账</el-badge>
+          </el-dropdown-item>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
   </div>
 </template>
 
 <script>
+import { ArrowDown } from "@element-plus/icons-vue";
+
 export default {
   name: "messageTip",
-  data() {
-    return {
-      value: 0, // 消息数量
-      empty: false, // 是否为空
-    };
-  },
+  components: { ArrowDown },
   props: {
     res: {
-      type: null,
+      type: Object,
+      default: () => ({}),
     },
   },
-  mounted() {
-    this.init();
+  computed: {
+    value() {
+      let count = 0;
+      const r = this.res || {};
+      Object.keys(r).forEach((k) => {
+        if (r[k]) count += r[k];
+      });
+      return count;
+    },
   },
   methods: {
     navigateTo(name) {
-      this.$router.push({
-        name,
-      });
-    },
-    init() {
-      Object.keys(this.res).forEach((item) => {
-        this.value = parseInt(this.value) + parseInt(this.res[item]);
-      });
+      this.$router.push({ name });
     },
   },
 };
 </script>
-<style scoped lang="scss">
-::v-deep .ivu-select-dropdown {
-  text-align: left;
-}
-.message-con {
-  margin-right: 10px;
-}
-::v-deep .ivu-dropdown-item{
-  padding: 7px 20px  !important;
-}
-::v-deep .ivu-badge-count{
-  right: -10px !important;
+
+<style scoped>
+.message-link {
+  color: inherit;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 </style>
+
+<style>
+.todo-dropdown .el-dropdown-menu__item {
+  min-width: 150px;
+  padding: 6px 36px 6px 16px;
+  line-height: 1.6;
+}
+
+.todo-dropdown .el-dropdown-menu__item + .el-dropdown-menu__item {
+  margin-top: 4px;
+}
+
+.todo-dropdown .el-badge {
+  width: 100%;
+}
+
+.todo-dropdown .el-badge__content.is-fixed {
+  right: 4px;
+  top: 8px;
+  transform: translateY(-50%) translateX(50%);
+}
+</style>
+

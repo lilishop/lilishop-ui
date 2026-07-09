@@ -1,11 +1,12 @@
 import Cookies from 'js-cookie';
+import util from '@/libs/util';
 
 const user = {
     state: {},
     mutations: {
         logout () {
+            util.clearDynamicRoutes();
             Cookies.remove('userInfoManager');
-            // 清空打开的页面等数据
             localStorage.clear();
         }
     }

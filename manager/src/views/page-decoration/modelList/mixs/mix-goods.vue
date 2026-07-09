@@ -1,124 +1,147 @@
 <template>
-    <div class="flex" v-if="data.options.left.model == 'goods'">
-      <div class="left-side" >
-        <img :src="data.options.left.data.image.src" alt="">
+  <div class="mix-panel flex" v-if="data.options.left.model == 'goods'">
+    <div class="left-side">
+      <img :src="data.options.left.data.image.src" alt="" />
+    </div>
+    <div class="right-side">
+      <div class="badge-box flex">
+        <div class="badge">
+          {{ data.options.left.data.badge.label }}
+        </div>
       </div>
-      <div>
-          <div class="badge-box flex">
-            <div class="badge">
-              {{data.options.left.data.badge.label}}
-            </div>
+      <div class="flex goods-list">
+        <div
+          class="goods-item flex"
+          :key="index"
+          v-for="(item, index) in data.options.left.data.list"
+        >
+          <div class="goods-thumbnail">
+            <img :src="item.img" alt="" />
           </div>
-          <div class="flex goods-list">
-            <div class="goods-item flex" :key="index" v-for="(item,index) in data.options.left.data.list">
-              <div class="goods-thumbnail">
-                <img :src="item.img" alt="">
-              </div>
-              <div class="goods-detail">
-                <div class="goods-detail-title">{{item.title}}</div>
-                <div class="goods-detail-price">{{item.price | unitPrice('¥')}}</div>
-              </div>
-            </div>
+          <div class="goods-detail">
+            <div class="goods-detail-title">{{ item.title }}</div>
+            <div class="goods-detail-price">{{ $filters.unitPrice(item.price, '¥') }}</div>
           </div>
+        </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script>
 export default {
   name: "mix-goods",
-  data() {
-    return {}
-  },
   props: {
     data: {
       type: Object,
-      default: {}
-    }
+      default: () => ({}),
+    },
   },
-  components: {},
-  mounted() {
-
-  },
-  methods: {}
-}
+};
 </script>
 
 <style scoped lang="scss">
-.goods-detail{
-
+.mix-panel {
+  height: 100%;
+  align-items: stretch;
+  overflow: hidden;
 }
-.goods-detail-title{
+
+.left-side {
+  flex-shrink: 0;
+  width: 196.7px;
+  height: 344px;
+
+  > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px 0 0 10px;
+  }
+}
+
+.right-side {
+  flex: 1;
+  min-width: 0;
+  height: 344px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.goods-detail-title {
   font-size: 13px;
   font-weight: normal;
   line-height: 16px;
   text-align: center;
-  letter-spacing: 0px;
   color: #333333;
 }
-.goods-detail-price{
+
+.goods-detail-price {
   font-size: 14px;
   font-weight: normal;
   line-height: 17px;
-  letter-spacing: 0px;
-  color: #F31947;
+  color: #f31947;
   margin-top: 8px;
-  margin-bottom:10px;
 }
-.goods-thumbnail{
+
+.goods-thumbnail {
   margin-left: 7px;
   display: flex;
   align-items: center;
-  >img{
-    width:90px;
+  flex-shrink: 0;
+
+  > img {
+    width: 90px;
     height: 90px;
+    object-fit: contain;
   }
 }
-.badge-box{
 
-  justify-content:right;
+.badge-box {
+  justify-content: flex-end;
+  flex-shrink: 0;
 }
-.goods-list{
+
+.goods-list {
+  width: 100%;
+  box-sizing: border-box;
   flex-wrap: wrap;
-  justify-content:space-between;
+  justify-content: space-between;
   padding: 0 16px;
+  gap: 9px 0;
 }
-.goods-item{
+
+.goods-item {
   display: flex;
   align-items: center;
-  width: 173.6px;
+  flex: 0 0 calc(50% - 4px);
+  width: calc(50% - 4px);
   height: 119px;
   border-radius: 9.8px;
-  opacity: 1;
-  transition: .35s;
-  background: #FFFFFF;
-  margin-bottom:9px;
-  &:hover{
-    box-shadow: 0px 1px 6px 0px #E5E5E5;
-  }
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #ffffff;
+  transition: 0.35s;
 
-}
-.left-side {
-  >img{
-    border-radius: 10px 0px 0px 10px;
-    display: block;
-    width: 196.7px;
-    height: 343.7px;
+  &:hover {
+    box-shadow: 0 1px 6px 0 #e5e5e5;
   }
 }
+
 .badge {
   width: 50px;
   height: 27px;
-  line-height:27px;
-  border-radius: 13.3px 0px 0px 13.3px;
-  opacity: 1;
-  background: #F31947;
+  line-height: 27px;
+  border-radius: 13.3px 0 0 13.3px;
+  background: #f31947;
   font-size: 12.6px;
-  font-weight: normal;
   text-align: center;
-  letter-spacing: 0px;
-  color: #FFFFFF;
+  color: #ffffff;
   margin-top: 26px;
-  margin-bottom:17px;
+  margin-bottom: 17px;
 }
 </style>

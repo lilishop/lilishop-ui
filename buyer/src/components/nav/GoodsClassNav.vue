@@ -5,32 +5,32 @@
       <template v-if="$route.query.categoryId">
         <!-- 头部展示筛选信息 -->
         <div @click="cateClick(tabBar,1)">{{ tabBar.name }}</div>
-        <Icon type="ios-arrow-forward" />
+        <el-icon><ArrowRight /></el-icon>
 
         <div class="bar" v-if="tabBar.first">
-          {{ tabBar.first.name }} <Icon type="ios-arrow-down" />
+          {{ tabBar.first.name }} <el-icon><ArrowDown /></el-icon>
           <ul>
             <li v-for="item in tabBar.children" :key="item.id"  @click="cateClick(item,2)">
               {{ item.name }}
             </li>
           </ul>
         </div>
-        <Icon type="ios-arrow-forward" v-if="tabBar.first" />
+        <el-icon :v-if="tabBar.first"><ArrowRight /></el-icon>
 
         <div class="bar" v-if="tabBar.second">
-          {{ tabBar.second.name }} <Icon type="ios-arrow-down" />
+          {{ tabBar.second.name }} <el-icon><ArrowDown /></el-icon>
           <ul>
             <li v-for="item in tabBar.first.children" :key="item.id"  @click="cateClick(item,3)">
               {{ item.name }}
             </li>
           </ul>
         </div>
-        <Icon type="ios-arrow-forward" v-if="tabBar.second" />
+        <el-icon :v-if="tabBar.second"><ArrowRight /></el-icon>
       </template>
       <!-- 无商品分类，展示搜索结果 -->
       <template v-else>
         <div style="font-size:14px">全部结果</div>
-        <Icon type="ios-arrow-forward" />
+        <el-icon><ArrowRight /></el-icon>
         <div style="font-weight:bold;" class="mr_10">“{{params.keyword}}”</div>
       </template>
       <!-- 所选分类 -->
@@ -41,7 +41,7 @@
         :key="index"
         :title="item.name"
       >
-        <span>{{ item.type }}：</span><span>{{ item.name }}</span><Icon type="md-close" />
+        <span>{{ item.type }}：</span><span>{{ item.name }}</span><el-icon><Close /></el-icon>
       </a>
     </div>
 
@@ -66,7 +66,7 @@
                 v-show="multSelected.includes(item.name)"
               >
                 <div></div>
-                <Icon type="md-checkmark" />
+                <el-icon><Check /></el-icon>
               </div>
             </li>
           </ul>
@@ -74,21 +74,19 @@
           <div class="btn" v-show="multiple !== 0">
             <span @click="moreBrand(0)"
               >{{ tagsContent[0].more ? "收起" : "更多"
-              }}<Icon
-                :type="tagsContent[0].more ? 'ios-arrow-up' : 'ios-arrow-down'"
-            /></span>
-            <span @click="multSelectBrand(0)"><Icon type="md-add" />多选</span>
+              }}<el-icon><ArrowUp v-if="tagsContent[0].more" /><ArrowDown v-else /></el-icon></span>
+            <span @click="multSelectBrand(0)"><el-icon><Plus /></el-icon>多选</span>
           </div>
 
           <div class="multBtn" v-show="multiple === 0">
-            <Button
+            <el-button
               type="primary"
               size="small"
               :disabled="!multSelected.length"
               @click="sure(0)"
-              >确定</Button
+              >确定</el-button
             >
-            <Button size="small" @click="cancel">取消</Button>
+            <el-button size="small" @click="cancel">取消</el-button>
           </div>
         </div>
       </div>
@@ -115,40 +113,38 @@
               </li>
             </ul>
 
-            <CheckboxGroup
+            <el-checkbox-group
               :class="{ 'show-more': tag.more }"
               class="list"
               v-model="multSelected"
               v-show="multiple === tagIndex"
             >
-              <Checkbox
+              <el-checkbox
                 class="item"
                 :label="item"
                 v-for="(item, index) in tag.values"
                 :key="index"
-                >{{ item }}</Checkbox
+                >{{ item }}</el-checkbox
               >
-            </CheckboxGroup>
+            </el-checkbox-group>
 
             <div class="btn" v-show="multiple !== tagIndex">
               <span @click="moreBrand(tagIndex)" v-show="tag.values.length > 9"
                 >{{ tag.more ? "收起" : "更多"
-                }}<Icon :type="tag.more ? 'ios-arrow-up' : 'ios-arrow-down'"
-              /></span>
+                }}<el-icon><ArrowUp v-if="tag.more" /><ArrowDown v-else /></el-icon></span>
               <span @click="multSelectBrand(tagIndex)"
-                ><Icon type="md-add" />多选</span
-              >
+                ><el-icon><Plus /></el-icon>多选</span>
             </div>
 
             <div class="multBtn" v-show="multiple === tagIndex">
-              <Button
+              <el-button
                 type="primary"
                 size="small"
                 :disabled="!multSelected.length"
                 @click="sure(tagIndex)"
-                >确定</Button
+                >确定</el-button
               >
-              <Button size="small" @click="cancel">取消</Button>
+              <el-button size="small" @click="cancel">取消</el-button>
             </div>
           </div>
         </div>
@@ -161,8 +157,10 @@
 </template>
 
 <script>
+import { ArrowDown, ArrowRight, ArrowUp, Check, Close, Plus } from '@element-plus/icons-vue';
 import * as APIGoods from '@/api/goods';
 export default {
+  components: { ArrowDown, ArrowRight, ArrowUp, Check, Close, Plus },
   name: 'GoodsClassNav',
   data () {
     return {
@@ -250,13 +248,13 @@ export default {
         const first = this.tabBar.children.filter(e => {
           return e.id === arr[1]
         })[0]
-        this.$set(this.tabBar, 'first', first)
+        this.tabBar['first'] = first
       }
       if (arr.length > 2) {
         const second = this.tabBar.first.children.filter(e => {
           return e.id === arr[2]
         })[0]
-        this.$set(this.tabBar, 'second', second)
+        this.tabBar['second'] = second
       }
     },
     cateClick (item, index) { // 点选分类
@@ -329,11 +327,11 @@ export default {
     moreBrand (index) {
       // 更多按钮
       const flag = !this.tagsContent[index].more
-      this.$set(this.tagsContent[index], 'more', flag)
+      this.tagsContent[index]['more'] = flag
     },
     multSelectBrand (index) {
       // 多选按钮
-      this.$set(this.tagsContent[index], 'more', true)
+      this.tagsContent[index]['more'] = true
       this.multiple = index;
     },
     sure (index) {
@@ -376,8 +374,8 @@ export default {
           this.tagsContent[0].values = data.brands;
           this.tagsContent = this.tagsContent.concat(data.paramOptions);
           this.tagsContent.forEach((item) => {
-            this.$set(item, 'show', true)
-            this.$set(item, 'more', false)
+            item['show'] = true
+            item['more'] = false
           });
         }
       });
@@ -437,7 +435,7 @@ export default {
       ul {
         display: block;
       }
-      .ivu-icon {
+      .el-icon {
         transform: rotate(180deg);
       }
     }
@@ -493,7 +491,7 @@ export default {
     &:hover {
       border-color: $theme_color;
       background-color: #fff;
-      .ivu-icon {
+      .el-icon {
         color: #fff;
         background-color: $theme_color;
       }
@@ -503,7 +501,7 @@ export default {
       color: $theme_color;
     }
 
-    .ivu-icon {
+    .el-icon {
       position: absolute;
       right: 0;
       top: 0;
@@ -589,7 +587,7 @@ export default {
             border-top: 20px solid transparent;
             border-right: 20px solid $theme_color;
           }
-          .ivu-icon {
+          .el-icon {
             font-size: 12px;
             position: absolute;
             bottom: 0;
@@ -630,10 +628,10 @@ export default {
     .multBtn {
       text-align: center;
       margin-top: 10px;
-      .ivu-btn {
+      .el-button {
         font-size: 12px !important;
       }
-      .ivu-btn:last-child {
+      .el-button:last-child {
         margin-left: 10px;
       }
     }
@@ -708,10 +706,10 @@ export default {
       text-align: center;
       margin-top: 10px;
       margin-bottom: 10px;
-      .ivu-btn {
+      .el-button {
         font-size: 12px !important;
       }
-      .ivu-btn:last-child {
+      .el-button:last-child {
         margin-left: 10px;
       }
     }

@@ -1,56 +1,297 @@
 <template>
   <div>
-    <Card>
-      <p slot="title">结算单详情</p>
+    <el-card>
+      <template #header>
+        <span>结算单详情</span>
+      </template>
       <div class="flex flex_align_item">
         <div class="procedure">
-          <div class="procedure_item" v-for="(item, index) in billStatusStep">
+          <div class="procedure_item" v-for="(item, index) in billStatusStep" :key="index">
             <div class="icon" :class="item.className">
-              <Icon type="md-checkmark" size="14" v-if="item.className==='' || bill.billStatus === 'COMPLETE'" />
-              <span v-else>{{index + 1}}</span>
+              <span v-if="item.className === '' || bill.billStatus === 'COMPLETE'">✓</span>
+              <span v-else>{{ index + 1 }}</span>
             </div>
-            <div class="text">{{item.title}}</div>
+            <div class="text">{{ item.title }}</div>
           </div>
         </div>
         <div>
-          <Button v-if="bill.billStatus == 'CHECK'" type="success" @click="pass()" style="margin-left: 10px;">付款</Button>
-          <Button type="info" @click="download()" style="margin-left: 10px;">下载账单</Button>
+          <el-button
+            v-if="bill.billStatus == 'CHECK'"
+            type="success"
+            @click="pass()"
+            style="margin-left: 10px"
+          >
+            付款
+          </el-button>
+          <el-button type="primary" @click="download()" style="margin-left: 10px">下载账单</el-button>
         </div>
       </div>
-    </Card>
-    <Card class="mt_10">
-      <p slot="title">账单详细</p>
+    </el-card>
+
+    <el-card class="mt_10">
+      <template #header>
+        <span>账单详细</span>
+      </template>
       <table>
         <tbody>
-        <tr v-for="(item,index) in data" :key="index">
-          <td>{{ item.name }}</td>
-          <td>{{ item.value }}</td>
-        </tr>
+          <tr v-for="(item, index) in data" :key="index">
+            <td>{{ item.name }}</td>
+            <td>{{ item.value }}</td>
+          </tr>
         </tbody>
       </table>
       <div>
         <h3 class="ml_10">结算详细</h3>
-        <Table :columns="billColumns" :data="billData"></Table>
+        <el-table :data="billData" border style="width: 100%">
+          <el-table-column label="结算金额" prop="billPrice" align="center" width="200" fixed="left">
+            <template #default="{ row }">
+              <span v-if="row">{{ formatPrice(row.billPrice) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="收入" align="center">
+            <el-table-column label="用户实付" prop="orderPrice" align="center" width="200">
+              <template #default="{ row }">
+                <span v-if="row">{{ formatPrice(row.orderPrice) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="平台优惠券补贴" prop="siteCouponCommission" align="center" width="200">
+              <template #default="{ row }">
+                <span v-if="row">{{ formatPrice(row.siteCouponCommission) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="积分商品补贴" prop="pointSettlementPrice" align="center" width="200">
+              <template #default="{ row }">
+                <span v-if="row">{{ formatPrice(row.pointSettlementPrice) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="砍价商品补贴" prop="kanjiaSettlementPrice" align="center" width="200">
+              <template #default="{ row }">
+                <span v-if="row">{{ formatPrice(row.kanjiaSettlementPrice) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="礼品卡补贴" prop="giftCardSubsidy" align="center" width="200">
+              <template #default="{ row }">
+                <span v-if="row">{{ formatPrice(row.giftCardSubsidy) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="分销佣金" prop="distributionCommission" align="center" width="200">
+              <template #default="{ row }">
+                <priceColorScheme
+                  v-if="row"
+                  :value="negate(row.distributionCommission)"
+                  :color="$mainColor"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="平台服务费" prop="commissionPrice" align="center" width="200">
+              <template #default="{ row }">
+                <priceColorScheme
+                  v-if="row"
+                  :value="negate(row.commissionPrice)"
+                  :color="$mainColor"
+                />
+              </template>
+            </el-table-column>
+          </el-table-column>
+          <el-table-column label="退款" align="center">
+            <el-table-column label="退款金额" prop="refundPrice" align="center" width="200">
+              <template #default="{ row }">
+                <priceColorScheme v-if="row" :value="negate(row.refundPrice)" :color="$mainColor" />
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="退单返还平台优惠券补贴"
+              prop="siteCouponRefundCommission"
+              align="center"
+              width="200"
+            >
+              <template #default="{ row }">
+                <priceColorScheme
+                  v-if="row"
+                  :value="negate(row.siteCouponRefundCommission)"
+                  :color="$mainColor"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="退单返还积分商品补贴"
+              prop="pointRefundSettlementPrice"
+              align="center"
+              width="200"
+            >
+              <template #default="{ row }">
+                <priceColorScheme
+                  v-if="row"
+                  :value="negate(row.pointRefundSettlementPrice)"
+                  :color="$mainColor"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="退单返还砍价商品补贴"
+              prop="kanjiaRefundSettlementPrice"
+              align="center"
+              width="200"
+            >
+              <template #default="{ row }">
+                <priceColorScheme
+                  v-if="row"
+                  :value="negate(row.kanjiaRefundSettlementPrice)"
+                  :color="$mainColor"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="礼品卡返还" prop="giftCardRefundSubsidy" align="center" width="200">
+              <template #default="{ row }">
+                <priceColorScheme
+                  v-if="row"
+                  :value="negate(row.giftCardRefundSubsidy)"
+                  :color="$mainColor"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="退单返还分销佣金"
+              prop="distributionRefundCommission"
+              align="center"
+              width="200"
+            >
+              <template #default="{ row }">
+                <span v-if="row">{{ formatPrice(row.distributionRefundCommission) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="退单返还平台服务费"
+              prop="refundCommissionPrice"
+              align="center"
+              width="200"
+            >
+              <template #default="{ row }">
+                <span v-if="row">{{ formatPrice(row.refundCommissionPrice) }}</span>
+              </template>
+            </el-table-column>
+          </el-table-column>
+        </el-table>
         <div class="bill-detail-price">
-          <div class="flex bill-item">
-          </div>
+          <div class="flex bill-item"></div>
         </div>
       </div>
-    </Card>
-    <Card class="mt_10">
-      <Tabs active-key="tab" type="card">
-        <Tab-pane label="结算单流水" name="order">
-          <Table :loading="loading" border :columns="orderColumns" :data="orderData" ref="table"></Table>
-          <Row type="flex" justify="end" class="mt_10">
-            <Page :current="orderParam.pageNumber" :total="orderTotal" :page-size="orderParam.pageSize"
-                  @on-change="orderChangePage" @on-page-size-change="orderChangePageSize" size="small" show-total
-                  :page-size-opts="[20, 50, 100]" show-elevator show-sizer></Page>
-          </Row>
-        </Tab-pane>
-      </Tabs>
-    </Card>
+    </el-card>
+
+    <el-card class="mt_10">
+      <el-tabs v-model="activeTab" type="card">
+        <el-tab-pane label="结算单流水" name="order">
+          <el-table
+            ref="table"
+            v-loading="loading"
+            border
+            :data="orderData"
+            style="width: 100%"
+          >
+            <el-table-column label="结算信息" align="center">
+              <el-table-column label="时间" prop="createTime" />
+              <el-table-column label="订单编号" prop="orderSn" width="250" />
+              <el-table-column label="子订单号" prop="orderItemSn" width="250" />
+              <el-table-column label="类型" prop="flowType">
+                <template #default="{ row }">
+                  <template v-if="row">
+                    <el-tag v-if="isPayFlow(row)" type="primary">收款</el-tag>
+                    <el-tag v-else type="danger">退款</el-tag>
+                  </template>
+                </template>
+              </el-table-column>
+              <el-table-column label="结算金额" prop="billPrice">
+                <template #default="{ row }">
+                  <template v-if="row">
+                    <span v-if="isPayFlow(row)">{{ formatPrice(row.billPrice) }}</span>
+                    <priceColorScheme v-else :value="negate(row.billPrice)" :color="$mainColor" />
+                  </template>
+                </template>
+              </el-table-column>
+            </el-table-column>
+            <el-table-column label="收入" align="center">
+              <el-table-column label="补贴" prop="billPrice">
+                <template #default="{ row }">
+                  <template v-if="row">
+                    <span v-if="orderSubsidyDisplay(row) === '-'">-</span>
+                    <span v-else-if="isPayFlow(row)">{{ formatPrice(orderSubsidyDisplay(row)) }}</span>
+                    <priceColorScheme v-else :value="negate(orderSubsidyDisplay(row))" />
+                  </template>
+                </template>
+              </el-table-column>
+              <el-table-column label="用户实付" prop="billPrice">
+                <template #default="{ row }">
+                  <template v-if="row">
+                    <span v-if="isPayFlow(row)">{{ formatPrice(row.finalPrice) }}</span>
+                    <priceColorScheme v-else :value="negate(row.finalPrice)" />
+                  </template>
+                </template>
+              </el-table-column>
+              <el-table-column label="合计" prop="billPrice">
+                <template #default="{ row }">
+                  <template v-if="row">
+                    <span v-if="isPayFlow(row)">{{ formatPrice(row.finalPrice) }}</span>
+                    <priceColorScheme v-else :value="negate(row.finalPrice)" />
+                  </template>
+                </template>
+              </el-table-column>
+            </el-table-column>
+            <el-table-column label="支出" align="center">
+              <el-table-column label="平台服务费" prop="billPrice">
+                <template #default="{ row }">
+                  <template v-if="row">
+                    <span v-if="orderCommissionDisplay(row) === '-'">-</span>
+                    <priceColorScheme
+                      v-else-if="isPayFlow(row)"
+                      :value="negate(row.commissionPrice)"
+                    />
+                    <span v-else>{{ formatPrice(row.commissionPrice) }}</span>
+                  </template>
+                </template>
+              </el-table-column>
+              <el-table-column label="分销佣金" prop="distributionRebate">
+                <template #default="{ row }">
+                  <template v-if="row">
+                    <span v-if="orderDistributionRebateDisplay(row) === '-'">-</span>
+                    <priceColorScheme
+                      v-else-if="isPayFlow(row)"
+                      :value="negate(row.distributionRebate)"
+                    />
+                    <span v-else>{{ formatPrice(row.distributionRebate) }}</span>
+                  </template>
+                </template>
+              </el-table-column>
+              <el-table-column label="合计" prop="billPrice">
+                <template #default="{ row }">
+                  <template v-if="row">
+                    <priceColorScheme
+                      v-if="isPayFlow(row)"
+                      :value="negate(orderExpenseTotal(row))"
+                    />
+                    <span v-else>{{ formatPrice(orderExpenseTotal(row)) }}</span>
+                  </template>
+                </template>
+              </el-table-column>
+            </el-table-column>
+          </el-table>
+          <div class="mt_10" style="display: flex; justify-content: flex-end">
+            <el-pagination
+              v-model:current-page="orderParam.pageNumber"
+              v-model:page-size="orderParam.pageSize"
+              :page-sizes="[20, 50, 100]"
+              :total="orderTotal"
+              layout="total, sizes, prev, pager, next, jumper"
+              size="small"
+              @current-change="orderChangePage"
+              @size-change="orderChangePageSize"
+            />
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+    </el-card>
   </div>
 </template>
+
 <script>
 import * as filters from "@/utils/filters";
 import * as API_Shop from "@/api/shops";
@@ -59,201 +300,8 @@ export default {
   name: "bill-detail",
   data() {
     return {
+      activeTab: "order",
       loading: false,
-      billColumns: [
-        {
-          title: '结算金额',
-          key: 'billPrice',
-          align: 'center',
-          width: 200,
-          fixed: 'left',
-          render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.billPrice, "￥")
-            );
-          },
-        },
-        {
-          title: '收入',
-          key: 'pay',
-          align: 'center',
-          children: [
-            {
-              title: '用户实付',
-              key: 'orderPrice',
-              align: 'center',
-              width: 200,
-              render: (h, params) => {
-                return h(
-                  "div",
-                  this.$options.filters.unitPrice(params.row.orderPrice, "￥")
-                );
-              },
-            }, {
-              title: '平台优惠券补贴',
-              key: 'siteCouponCommission',
-              align: 'center',
-              width: 200,
-              render: (h, params) => {
-                return h(
-                  "div",
-                  this.$options.filters.unitPrice(params.row.siteCouponCommission, "￥")
-                );
-              },
-            }, {
-              title: '积分商品补贴',
-              key: 'pointSettlementPrice',
-              align: 'center',
-              width: 200,
-              render: (h, params) => {
-                return h(
-                  "div",
-                  this.$options.filters.unitPrice(params.row.pointSettlementPrice, "￥")
-                );
-              },
-            }, {
-              title: '砍价商品补贴',
-              key: 'kanjiaSettlementPrice',
-              align: 'center',
-              width: 200,
-              render: (h, params) => {
-                return h(
-                  "div",
-                  this.$options.filters.unitPrice(params.row.kanjiaSettlementPrice, "￥")
-                );
-              },
-            }, {
-              title: '礼品卡补贴',
-              key: 'giftCardSubsidy',
-              align: 'center',
-              width: 200,
-              render: (h, params) => {
-                return h(
-                  "div",
-                  this.$options.filters.unitPrice(params.row.giftCardSubsidy, "￥")
-                );
-              },
-            }, {
-              title: '分销佣金',
-              key: 'distributionCommission',
-              align: 'center',
-              width: 200,
-              render: (h, params) => {
-                return h("priceColorScheme", {
-                  props: {
-                    value: (0 - params.row.distributionCommission),
-                    color: this.$mainColor
-                  }
-                });
-              },
-            }, {
-              title: '平台服务费',
-              key: 'commissionPrice',
-              align: 'center',
-              width: 200,
-              render: (h, params) => {
-                return h("priceColorScheme", {
-                  props: {
-                    value: (0 - params.row.commissionPrice),
-                    color: this.$mainColor
-                  }
-                });
-              },
-            },
-          ]
-        },
-        {
-          title: '退款',
-          key: 'refund',
-          align: 'center',
-          children: [
-            {
-              title: '退款金额',
-              key: 'refundPrice',
-              align: 'center',
-              width: 200,
-              render: (h, params) => {
-                return h("priceColorScheme", {props: {value: (0 - params.row.refundPrice), color: this.$mainColor}});
-              },
-            }, {
-              title: '退单返还平台优惠券补贴',
-              key: 'siteCouponRefundCommission',
-              align: 'center',
-              width: 200,
-              render: (h, params) => {
-                return h("priceColorScheme", {
-                  props: {
-                    value: (0 - params.row.siteCouponRefundCommission),
-                    color: this.$mainColor
-                  }
-                });
-              },
-            }, {
-              title: '退单返还积分商品补贴',
-              key: 'pointRefundSettlementPrice',
-              align: 'center',
-              width: 200,
-              render: (h, params) => {
-                return h("priceColorScheme", {
-                  props: {
-                    value: (0 - params.row.pointRefundSettlementPrice),
-                    color: this.$mainColor
-                  }
-                });
-              },
-            }, {
-              title: '退单返还砍价商品补贴',
-              key: 'kanjiaRefundSettlementPrice',
-              align: 'center',
-              width: 200,
-              render: (h, params) => {
-                return h("priceColorScheme", {
-                  props: {
-                    value: (0 - params.row.kanjiaRefundSettlementPrice),
-                    color: this.$mainColor
-                  }
-                });
-              },
-            }, {
-              title: '礼品卡返还',
-              key: 'giftCardRefundSubsidy',
-              align: 'center',
-              width: 200,
-              render: (h, params) => {
-                return h("priceColorScheme", {
-                  props: {
-                    value: (0 - params.row.giftCardRefundSubsidy),
-                    color: this.$mainColor
-                  }
-                });
-              },
-            }, {
-              title: '退单返还分销佣金',
-              key: 'distributionRefundCommission',
-              align: 'center',
-              width: 200,
-              render: (h, params) => {
-                return h(
-                  "div",
-                  this.$options.filters.unitPrice(params.row.distributionRefundCommission, "￥")
-                );
-              },
-            }, {
-              title: '退单返还平台服务费',
-              key: 'refundCommissionPrice',
-              align: 'center',
-              width: 200,
-              render: (h, params) => {
-                return h(
-                  "div",
-                  this.$options.filters.unitPrice(params.row.refundCommissionPrice, "￥")
-                );
-              },
-            },
-          ]
-        },
-      ],
       billData: [
         {
           billPrice: 0,
@@ -270,266 +318,107 @@ export default {
           kanjiaRefundSettlementPrice: 0,
           giftCardRefundSubsidy: 0,
           distributionRefundCommission: 0,
-          refundCommissionPrice: 0
-        },
-      ],
-      columns: [
-        // 表头
-        {
-          title: "项目",
-          key: "name",
-          width: 250,
-        },
-        {
-          title: "值",
-          key: "value",
+          refundCommissionPrice: 0,
         },
       ],
       data: [
-        // 数据
-        {
-          name: "计算中",
-          value: 0,
-        },
-        {
-          name: "计算中",
-          value: 0,
-        },
-        {
-          name: "计算中",
-          value: 0,
-        },
-        {
-          name: "计算中",
-          value: 0,
-        },
-        {
-          name: "计算中",
-          value: 0,
-        },
-        {
-          name: "计算中",
-          value: 0,
-        },
-        {
-          name: "计算中",
-          value: 0,
-        },
-        {
-          name: "计算中",
-          value: 0,
-        },
-        {
-          name: "计算中",
-          value: 0,
-        },
+        { name: "计算中", value: 0 },
+        { name: "计算中", value: 0 },
+        { name: "计算中", value: 0 },
+        { name: "计算中", value: 0 },
+        { name: "计算中", value: 0 },
+        { name: "计算中", value: 0 },
+        { name: "计算中", value: 0 },
+        { name: "计算中", value: 0 },
+        { name: "计算中", value: 0 },
       ],
-      id: "", // 账单id
-      bill: {}, // 账单详情
-      orderData: [], // 订单列表
+      id: "",
+      bill: {},
+      orderData: [],
       orderParam: {
-        // 请求参数
-        pageNumber: 1, // 当前页数
-        pageSize: 20, // 页面大小
-        sort: "id", // 默认排序字段
-        order: "desc", // 默认排序方式
-        // flowType: "PAY",
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "id",
+        order: "desc",
         startDate: null,
         endDate: null,
       },
-      orderColumns: [
-        {
-          title: '结算信息',
-          key: 'pay',
-          align: 'center',
-          children: [
-            {
-              title: "时间",
-              key: "createTime",
-            },
-            {
-              title: "订单编号",
-              key: "orderSn",
-              width: 250,
-            },
-            {
-              title: "子订单号",
-              key: "orderItemSn",
-              width: 250,
-            },
-            {
-              title: "类型",
-              key: "flowType",
-              render: (h, params) => {
-                if (params.row.flowType == "PAY") {
-                  return h("div", [
-                    h("tag", {props: {color: "blue"}}, "收款"),
-                  ]);
-                } else {
-                  return h("div", [
-                    h("tag", {props: {color: "magenta"}}, "退款"),
-                  ]);
-                }
-              }
-            },
-            {
-              title: "结算金额",
-              key: "billPrice",
-              render: (h, params) => {
-                if (params.row.flowType == "PAY") {
-                  return h("div", this.$options.filters.unitPrice(params.row.billPrice, "￥")
-                  );
-                } else {
-                  return h("priceColorScheme", {props: {value: (0 - params.row.billPrice), color: this.$mainColor}});
-                }
-              },
-            },
-          ]
-        },
-        {
-          title: '收入',
-          key: 'pay',
-          align: 'center',
-          children: [{
-            title: "补贴",
-            key: "billPrice",
-            render: (h, params) => {
-              if (params.row.pointSettlementPrice == 0) {
-                return h("div", "-");
-              } else if (params.row.flowType == "PAY") {
-                return h("div", this.$options.filters.unitPrice((params.row.pointSettlementPrice + params.row.kanjiaSettlementPrice + params.row.siteCouponCommission), "￥")
-                );
-              } else {
-                return h("priceColorScheme", {props: {value: (0 - (params.row.pointSettlementPrice + params.row.kanjiaSettlementPrice + params.row.siteCouponCommission))}});
-              }
-            },
-          },
-            {
-              title: "用户实付",
-              key: "billPrice",
-              render: (h, params) => {
-                if (params.row.flowType == "PAY") {
-                  return h("div", this.$options.filters.unitPrice(params.row.finalPrice, "￥")
-                  );
-                } else {
-                  return h("priceColorScheme", {props: {value: (0 - params.row.finalPrice)}});
-                }
-              },
-            },
-            {
-              title: "合计",
-              key: "billPrice",
-              render: (h, params) => {
-                if (params.row.flowType == "PAY") {
-                  return h("div", this.$options.filters.unitPrice(params.row.finalPrice, "￥")
-                  );
-                } else {
-                  return h("priceColorScheme", {props: {value: (0 - params.row.finalPrice)}});
-                }
-              },
-            },
-          ]
-        },
-        {
-          title: '支出',
-          key: 'pay',
-          align: 'center',
-          children: [{
-            title: "平台服务费",
-            key: "billPrice",
-            render: (h, params) => {
-              if (params.row.commissionPrice == 0) {
-                return h("div", "-");
-              } else if (params.row.flowType == "PAY") {
-                return h("priceColorScheme", {props: {value: (0 - params.row.commissionPrice)}});
-
-              } else {
-                return h("div", this.$options.filters.unitPrice(params.row.commissionPrice, "￥"));
-              }
-            },
-          },
-            {
-              title: "分销佣金",
-              key: "distributionRebate",
-              render: (h, params) => {
-                if (params.row.distributionRebate == 0) {
-                  return h("div", "-");
-                } else if (params.row.flowType == "PAY") {
-                  return h("priceColorScheme", {props: {value: (0 - params.row.distributionRebate)}});
-                } else {
-                  return h("div", this.$options.filters.unitPrice(params.row.distributionRebate, "￥"));
-                }
-              },
-            },
-            {
-              title: "合计",
-              key: "billPrice",
-              render: (h, params) => {
-                if (params.row.flowType == "PAY") {
-                  return h("priceColorScheme", {props: {value: (0 - (params.row.commissionPrice + params.row.distributionRebate))}});
-                } else {
-                  return h("div", this.$options.filters.unitPrice((params.row.commissionPrice + params.row.distributionRebate), "￥"));
-                }
-              },
-            }]
-        }
-
-      ],
-      orderTotal: 0, // 订单总数
-      refundTotal: 0, // 退款单总数
-      // 结算单状态枚举模拟数据
+      orderTotal: 0,
+      refundTotal: 0,
       billStatusList: [
-        { status: 'OUT', value: '已出账', title: '生成账单' },
-        { status: 'CHECK', value: '已对账', title: '商家对账' },
-        { status: 'PAY', value: '已付款', title: '平台付款' },
-        { status: 'COMPLETE', value: '已完成', title: '结算完成' },
+        { status: "OUT", value: "已出账", title: "生成账单" },
+        { status: "CHECK", value: "已对账", title: "商家对账" },
+        { status: "PAY", value: "已付款", title: "平台付款" },
+        { status: "COMPLETE", value: "已完成", title: "结算完成" },
       ],
-      // 结算单状态步骤
-      billStatusStep: []
+      billStatusStep: [],
     };
   },
   methods: {
-    // 结算单状态
+    formatPrice(value) {
+      return this.$filters.unitPrice(value, "￥");
+    },
+    negate(value) {
+      return 0 - value;
+    },
+    isPayFlow(row) {
+      return row.flowType === "PAY";
+    },
+    orderSubsidyTotal(row) {
+      return (
+        row.pointSettlementPrice + row.kanjiaSettlementPrice + row.siteCouponCommission
+      );
+    },
+    orderSubsidyDisplay(row) {
+      if (row.pointSettlementPrice == 0) {
+        return "-";
+      }
+      return this.orderSubsidyTotal(row);
+    },
+    orderCommissionDisplay(row) {
+      return row.commissionPrice == 0 ? "-" : row.commissionPrice;
+    },
+    orderDistributionRebateDisplay(row) {
+      return row.distributionRebate == 0 ? "-" : row.distributionRebate;
+    },
+    orderExpenseTotal(row) {
+      return row.commissionPrice + row.distributionRebate;
+    },
     getBillStatusStep() {
       this.billStatusStep = [];
-      let current = '', myCur = false, myIdx = 0;
+      let current = "";
+      let myCur = false;
+      let myIdx = 0;
       this.billStatusList.map((item, index) => {
         if (item.status === this.bill.billStatus) {
-          myCur = true; myIdx = index; current = '';
+          myCur = true;
+          myIdx = index;
+          current = "";
+        } else if (!myCur) {
+          current = "";
+        } else if (myIdx + 1 === index) {
+          current = "current";
         } else {
-          if (!myCur) {
-            current = '';
-          } else {
-            if (myIdx+1 === index) {
-              current = 'current';
-            } else {
-              current = 'future';
-            }
-          }
+          current = "future";
         }
-        let temp = { ...item, className: current };
-        this.billStatusStep.push (temp);
+        this.billStatusStep.push({ ...item, className: current });
       });
-      if (this.bill.billStatus === 'COMPLETE') {
-        this.billStatusStep[this.billStatusStep.length-1].className = 'current';
+      if (this.bill.billStatus === "COMPLETE") {
+        this.billStatusStep[this.billStatusStep.length - 1].className = "current";
       }
     },
-    //订单页数发生变化
     orderChangePage(v) {
       this.orderParam.pageNumber = v;
       this.getOrder();
     },
-    //订单每页条数变化
     orderChangePageSize(v) {
       this.orderParam.pageNumber = 1;
       this.orderParam.pageSize = v;
       this.getOrder();
     },
-    //平台审核通过（审核通过及付款)
     pass() {
       this.$Modal.confirm({
         title: "结算单付款",
-        // 记得确认修改此处
         content: "确定结算单已付款?",
         loading: true,
         onOk: () => {
@@ -542,36 +431,30 @@ export default {
           });
         },
       });
-
-
     },
-    //下载账单
     download() {
-      API_Shop.downloadBill(this.id).then((res) => {
-        const blob = new Blob([res], {
-          type: "application/vnd.ms-excel;charset=utf-8",
-        });
-        //对于<a>标签，只有 Firefox 和 Chrome（内核） 支持 download 属性
-        //IE10以上支持blob但是依然不支持download
-        if ("download" in document.createElement("a")) {
-          //支持a标签download的浏览器
-          const link = document.createElement("a"); //创建a标签
-          link.download = "结算单-"+this.id+".xls"; //a标签添加属性
-          link.style.display = "none";
-          link.href = URL.createObjectURL(blob);
-          document.body.appendChild(link);
-          link.click(); //执行下载
-          URL.revokeObjectURL(link.href); //释放url
-          document.body.removeChild(link); //释放标签
-        } else {
-          navigator.msSaveBlob(blob, fileName);
-        }
-      })
+      API_Shop.downloadBill(this.id)
+        .then((res) => {
+          const blob = new Blob([res], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          });
+          if ("download" in document.createElement("a")) {
+            const link = document.createElement("a");
+            link.download = "结算单-" + this.id + ".xlsx";
+            link.style.display = "none";
+            link.href = URL.createObjectURL(blob);
+            document.body.appendChild(link);
+            link.click();
+            URL.revokeObjectURL(link.href);
+            document.body.removeChild(link);
+          } else {
+            navigator.msSaveBlob(blob, "结算单-" + this.id + ".xlsx");
+          }
+        })
         .catch((err) => {
           console.log(err);
-      });
+        });
     },
-
     init() {
       this.id = this.$route.query.id;
       this.getDetail();
@@ -580,47 +463,34 @@ export default {
       API_Shop.getBuyBillDetail(this.id).then((res) => {
         if (res.success) {
           this.bill = res.result;
-          //初始化表格
           this.initTable();
-          //初始化订单信息
           this.orderParam.startDate = this.bill.startTime;
           this.orderParam.endDate = this.bill.endTime;
           this.getOrder();
-          // 结算单状态步骤
           this.getBillStatusStep();
         }
       });
     },
-    // 账单详细
     initTable() {
-      let bill = this.bill;
-      const money = (val) =>
-        val === null || val === undefined || val === "" ? 0 : val;
+      const bill = this.bill;
+      const money = (val) => (val === null || val === undefined || val === "" ? 0 : val);
 
       this.data[0].name = "结算单状态";
       this.data[0].value = filters.unixSellerBillStatus(bill.billStatus);
-
       this.data[1].name = "结算单号";
       this.data[1].value = bill.sn;
-
       this.data[2].name = "店铺名称";
       this.data[2].value = bill.storeName;
-
       this.data[3].name = "起止日期";
       this.data[3].value = bill.startTime + "~" + bill.endTime;
-
       this.data[4].name = "银行开户名";
       this.data[4].value = bill.bankAccountName;
-
       this.data[5].name = "银行账号";
       this.data[5].value = bill.bankAccountNumber;
-
       this.data[6].name = "开户行支行名称";
       this.data[6].value = bill.bankName;
-
       this.data[7].name = "支行联行号";
       this.data[7].value = bill.bankCode;
-
       this.data[8].name = "支付时间";
       this.data[8].value = bill.payTime === null ? "未付款" : bill.payTime;
 
@@ -711,11 +581,11 @@ table {
 
   .increase-color {
     color: green;
-    margin-top: 5px
+    margin-top: 5px;
   }
 
   .theme_color {
-    margin-top: 5px
+    margin-top: 5px;
   }
 }
 
@@ -749,9 +619,6 @@ table {
     .future {
       background-color: #f7f7f7;
       color: #515a6e;
-    }
-    .text {
-
     }
   }
 }

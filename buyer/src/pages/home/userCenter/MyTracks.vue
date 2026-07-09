@@ -1,8 +1,9 @@
 <template>
   <div class="wrapper">
-    <!-- 卡片组件 -->
-    <card _Title="我的足迹" :_Size="16"></card>
-    <Button class="del-btn" @click="clearAll" type="primary">删除全部</Button>
+    <UserCenterLayout title="我的足迹" :tabs="['我的足迹']">
+      <template #extra>
+        <el-button class="del-btn" @click="clearAll" type="primary">删除全部</el-button>
+      </template>
     <!-- 订单列表 -->
     <empty v-if="list.length === 0" />
     <ul class="track-list" v-else>
@@ -11,31 +12,36 @@
         :key="index"
         @click="goodsDetail(item.id, item.goodsId)"
       >
-        <img :src="item.thumbnail" :alt="item.thumbnail" width="200" height="200" />
+        <img :src="item.thumbnail" :alt="item.goodsName" />
         <p class="ellipsis">{{ item.goodsName }}</p>
-        <p>{{ item.price | unitPrice("￥") }}</p>
+        <p>{{ $filters.unitPrice(item.price, "￥") }}</p>
         <span class="del-icon" @click.stop="clearById(item.goodsId)">
-          <Icon type="md-trash" />
+          <el-icon><Delete /></el-icon>
         </span>
       </li>
     </ul>
     <!-- 分页 -->
     <div class="page-size">
-      <Page
+      <el-pagination
+        v-model:current-page="params.pageNumber"
+        v-model:page-size="params.pageSize"
         :total="total"
-        @on-change="changePageNum"
-        @on-page-size-change="changePageSize"
-        :page-size="params.pageSize"
-        show-sizer
-      >
-      </Page>
+        :page-sizes="[10, 20, 30, 40, 50, 100]"
+        layout="sizes, prev, pager, next, jumper"
+        @current-change="changePageNum"
+        @size-change="changePageSize"
+      />
     </div>
+    </UserCenterLayout>
   </div>
 </template>
 
 <script>
+import { Message, Modal } from "@/utils/message";
+import { Delete } from '@element-plus/icons-vue';
 import { tracksList, clearTracks, clearTracksById } from "@/api/member";
 export default {
+  components: { Delete },
   name: "MyTrack",
   data() {
     return {
@@ -43,7 +49,7 @@ export default {
       spinShow: false, // 控制loading是否加载
       params: {
         pageNumber: 1,
-        pageSize: 30,
+        pageSize: 10,
         order: "desc",
         sort: "updateTime",
       },
@@ -72,13 +78,13 @@ export default {
     },
     clearAll() {
       // 清除全部足迹
-      this.$Modal.confirm({
+      Modal.confirm({
         title: "删除",
         content: "<p>确定要删除全部足迹吗？</p>",
         onOk: () => {
           clearTracks().then((res) => {
             if (res.success) {
-              this.$Message.success("删除成功");
+              Message.success("删除成功");
               this.getList();
             }
           });
@@ -90,7 +96,7 @@ export default {
       // 清除全部足迹
       clearTracksById(id).then((res) => {
         if (res.success) {
-          this.$Message.success("删除成功");
+          Message.success("删除成功");
           this.getList();
         }
       });
@@ -133,15 +139,27 @@ export default {
 }
 
 .track-list {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 0 15px;
+  box-sizing: border-box;
+
   li {
-    width: 200px;
+    width: 100%;
+    min-width: 0;
     overflow: hidden;
-    margin-left: 15px;
-    margin-bottom: 10px;
     border: 1px solid #eee;
     position: relative;
+    box-sizing: border-box;
+
+    img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      display: block;
+    }
+
     &:hover {
       cursor: pointer;
       box-shadow: 1px 1px 3px #999;

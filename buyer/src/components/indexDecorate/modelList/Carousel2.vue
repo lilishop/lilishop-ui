@@ -5,18 +5,17 @@
       <div class="nav-side"></div>
       <div class="nav-content">
         <!-- 轮播图 -->
-        <Carousel autoplay>
-          <CarouselItem v-for="(item, index) in data.options.list" :key="index">
+        <el-carousel height="470px" :interval="5000">
+          <el-carousel-item v-for="(item, index) in data.options.list" :key="index">
             <div style="overflow: hidden">
               <img :src="item.img" width="590" height="470" />
             </div>
-          </CarouselItem>
-        </Carousel>
+          </el-carousel-item>
+        </el-carousel>
       </div>
       <div class="nav-content1">
-        <!-- 轮播图 -->
-        <Carousel autoplay :autoplay-speed="5000">
-          <CarouselItem v-for="(item, index) in data.options.listRight" :key="index">
+        <el-carousel height="470px" :interval="5000">
+          <el-carousel-item v-for="(item, index) in data.options.listRight" :key="index">
             <div class="mb_10">
               <img :src="item[0].img" width="190" height="150" />
             </div>
@@ -26,19 +25,19 @@
             <div>
               <img :src="item[2].img" width="190" height="150" />
             </div>
-          </CarouselItem>
-        </Carousel>
+          </el-carousel-item>
+        </el-carousel>
       </div>
       <div class="nav-right">
         <div class="person-msg">
           <img :src="userInfo.face" v-if="userInfo.face" alt />
-          <Avatar icon="ios-person" class="mb_10" v-else size="80" />
-          <div>Hi，{{ userInfo.nickName || `欢迎来到${config.title}` | secrecyMobile }}</div>
+          <el-avatar v-else :size="80" class="mb_10"><el-icon><User /></el-icon></el-avatar>
+          <div>Hi，{{ $filters.secrecyMobile(userInfo.nickName || `欢迎来到${config.title}`) }}</div>
           <div v-if="userInfo.id">
-            <Button type="error" shape="circle">会员中心</Button>
+            <el-button type="danger">会员中心</el-button>
           </div>
           <div v-else>
-            <Button type="error" shape="circle">请登录</Button>
+            <el-button type="danger">请登录</el-button>
           </div>
         </div>
         <div class="shop-msg">
@@ -60,12 +59,15 @@
 
 import {articleList} from '@/api/common.js'
 import storage from '@/plugins/storage';
+import { User } from '@element-plus/icons-vue';
+import config from '@/config';
 export default {
+  components: { User },
   name: 'modelCarousel2',
   props: ['data'],
   data () {
     return {
-      config:require('@/config'),
+      config,
       userInfo: {}, // 用户信息
       articleList: [], // 常见问题
       params: { // 请求常见问题参数
@@ -163,7 +165,7 @@ export default {
       margin-top: 10px;
     }
 
-    .ivu-btn-default {
+    .el-button--default {
       color: $theme_color;
       border-color: $theme_color;
     }

@@ -5,9 +5,9 @@
       <left :data="data" />
       <div class="setup-box">
         <div>
-          <Button size="small" @click.stop="handleSelectModel('left')"
+          <el-button size="small" @click.stop="handleSelectModel('left')"
             >编辑
-          </Button>
+          </el-button>
         </div>
       </div>
     </div>
@@ -16,84 +16,76 @@
       <right :data="data" />
       <div class="setup-box">
         <div>
-          <Button size="small" @click.stop="handleSelectModel('right')"
+          <el-button size="small" @click.stop="handleSelectModel('right')"
             >编辑
-          </Button>
+          </el-button>
         </div>
       </div>
     </div>
-    <Modal
+    <el-dialog
       v-model="showModal"
       title="装修"
-      draggable
+      
       width="800"
-      :z-index="100"
-      :mask-closable="false"
-    >
+      
+      :close-on-click-modal="false"
+     append-to-body destroy-on-close>
       <div v-if="current">
         <div class="modal-tab-bar">
-          <div>
+          <div class="current-module-row">
             当前模块 :
-            <ButtonGroup>
-              <Button :type="current.model == 'goods' ? 'primary' : 'default'"
-                >商品</Button
-              >
-              <Button :type="current.model == 'brand' ? 'primary' : 'default'"
-                >品牌</Button
-              >
-            </ButtonGroup>
+            <el-tag>{{ current.model === "goods" ? "商品" : "品牌" }}</el-tag>
           </div>
 
-          <div class="flex">
+          <div class="flex image-row">
             <div>图片 :</div>
-            <div>
+            <div class="image-config">
               <img class="image" :src="current.data.image.src" alt="" />
-              <div>
+              <div class="image-config-detail">
                 <div>推荐尺寸：{{ current.data.image.size }}</div>
                 <div class="link-src">
                   链接地址：
-                  <Input
+                  <el-input
                     style="width: 200px"
                     v-model="current.data.image.url"
                     disabled
                   />
                 </div>
-                <Button
+                <el-button
                   size="small"
                   type="primary"
                   @click="handleSelectImg('default')"
                   >选择图片
-                </Button>
-                <Button
+                </el-button>
+                <el-button
                   size="small"
                   class="ml_10"
                   type="primary"
                   @click="handleSelectLink('image')"
                   >选择链接
-                </Button>
+                </el-button>
               </div>
             </div>
           </div>
-          <div class="flex" v-if="current.model == 'goods'">
+          <div class="flex badge-row" v-if="current.model == 'goods'">
             <div>标签 :</div>
-            <Input
+            <el-input
               style="width: 200px"
               type="text"
               v-model="current.data.badge.label"
             />
-            <Input
-              style="width: 100px; margin-left: 10px"
+            <el-input
+              style="width: 100px"
               disabled
               type="text"
               v-model="current.data.badge.url"
             />
-            <Button
+            <el-button
               size="small"
-              class="ml_10"
               type="primary"
               @click="handleSelectLink('badge')"
               >选择链接
-            </Button>
+            </el-button>
           </div>
           <div class="flex column-list">
             <div
@@ -101,21 +93,21 @@
               :key="index"
               class="draggable"
             >
-              <div class="flex">
+              <div class="flex column-item">
                 <img :src="item.img" class="column-img" />
-                <Button
+                <el-button
                   size="small"
                   class="ml_10"
                   type="primary"
                   v-if="current.model == 'goods'"
                   @click="handleSelectGoods('list', index)"
                   >选择商品
-                </Button>
-                <div>
+                </el-button>
+                <div class="column-item-config">
                   <div  v-if="current.model == 'brand'" style="margin-bottom: 10px">
-                    <Input disabled v-model="item.url" />
+                    <el-input disabled v-model="item.url" />
                   </div>
-                  <Button
+                  <el-button
                     size="small"
                     class="ml_10"
                     type="primary"
@@ -123,22 +115,26 @@
                     @click="handleSelectLink('list', index)"
                   >
                     选择链接
-                  </Button>
-                  <Button
+                  </el-button>
+                  <el-button
                     size="small"
                     class="ml_10"
                     type="primary"
                     v-if="current.model == 'brand'"
                     @click="handleSelectImg('list', index)"
                     >选择图片
-                  </Button>
+                  </el-button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </Modal>
+      <template #footer>
+        <el-button @click="handleCancelModal">取消</el-button>
+        <el-button type="primary" @click="handleConfirmModal">确定</el-button>
+      </template>
+    </el-dialog>
 
     <!-- 选择商品。链接 -->
     <liliDialog
@@ -148,14 +144,15 @@
     ></liliDialog>
 
     <!-- 选择图片 -->
-    <Modal width="1200px" v-model="picModelFlag" footer-hide>
+    <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
       <ossManage
         @callback="callbackSelected"
-        :isComponent="true"
+        :is-component="true"
         :initialize="picModelFlag"
+        :max-select="1"
         ref="ossManage"
       />
-    </Modal>
+    </el-dialog>
   </div>
 </template>
 
@@ -169,7 +166,7 @@ export default {
   data() {
     return {
       showModal: false,
-      current: "", //当前选择的模块
+      current: null, // 当前编辑的模块草稿
       picModelFlag: false,
       selectedData: "", //选中的数据
       goodsIndex: 0, // 商品索引
@@ -190,12 +187,19 @@ export default {
   },
   mounted() {},
   methods: {
+    cloneModule(module) {
+      return JSON.parse(JSON.stringify(module || {}));
+    },
     handleSelectImg(type, index) {
       this.defaultCallbackImageType = type;
       this.goodsIndex = index;
       // 选择图片
-      this.$refs.ossManage.selectImage = true;
       this.picModelFlag = true;
+      this.$nextTick(() => {
+        if (this.$refs.ossManage) {
+          this.$refs.ossManage.selectImage = true;
+        }
+      });
     },
 
     handleSelectGoods(val, index) {
@@ -213,53 +217,49 @@ export default {
     // 回显图片
     callbackSelected(val) {
       this.picModelFlag = false;
+      if (!val?.url || !this.current) return;
       if (this.defaultCallbackImageType == "default") {
-        console.log(this.current.data.image);
         this.current.data.image.src = val.url;
       } else {
-        console.log(this.goodsIndex, this.data.options[this.align].data.list);
-        this.data.options[this.align].data.list[this.goodsIndex].img = val.url;
-
-        // this.data.options[this.align].data[this.selectedData][this.goodsIndex].url = val.img
+        this.current.data.list[this.goodsIndex].img = val.url;
       }
     },
     // 选择商品回调
     selectedGoodsData(val) {
-      console.log(val);
-      this.$nextTick(() => {
-        this.data.options[this.align].data.list[this.goodsIndex].img =
-          val[0].thumbnail;
-        this.data.options[this.align].data.list[this.goodsIndex].title =
-          val[0].goodsName;
-        this.data.options[this.align].data.list[this.goodsIndex].price =
-          val[0].price;
-        this.data.options[this.align].data.list[this.goodsIndex].url =
-          val[0].url;
-      });
-      console.log(this.data.options[this.align].data.list[this.goodsIndex]);
-      this.$forceUpdate();
+      if (!val?.length || !this.current) return;
+      const goods = val[0];
+      const item = this.current.data.list[this.goodsIndex];
+      item.img = goods.thumbnail;
+      item.title = goods.goodsName;
+      item.price = goods.price;
+      item.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
     },
     // 选择链接回调
     selectedLink(val) {
+      if (!this.current) return;
+      const formattedUrl = this.$filters.formatLinkType(val);
       if (this.selectedData != "list") {
-        this.data.options[this.align].data[this.selectedData].url = this.$options.filters.formatLinkType(val);
-        console.log(this.data.options[this.align].data[this.selectedData])
+        this.current.data[this.selectedData].url = formattedUrl;
       }
       if (this.selectedData == "list") {
-         this.data.options[this.align].data[this.selectedData][this.goodsIndex]
-        .url = this.$options.filters.formatLinkType(val);
+        this.current.data.list[this.goodsIndex].url = formattedUrl;
       }
     },
-    /*
-     * 点击不同模块进行编辑
-     * 判断也很简单，就是第一个第二个模块进行判断
-     *
-     * */
     handleSelectModel(align) {
       this.align = align;
-      this.current = this.data.options[align];
-      console.log(this.data.options[align]);
+      this.current = this.cloneModule(this.data.options[align]);
       this.showModal = true;
+    },
+    handleCancelModal() {
+      this.current = null;
+      this.showModal = false;
+    },
+    handleConfirmModal() {
+      if (this.current && this.align) {
+        this.data.options[this.align] = this.cloneModule(this.current);
+      }
+      this.current = null;
+      this.showModal = false;
     },
   },
 };
@@ -270,6 +270,45 @@ export default {
 
 .link-src {
   margin: 10px 0;
+}
+
+.current-module-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.image-row {
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.badge-row {
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.image-config {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.image-config-detail {
+  flex: 1;
+  min-width: 0;
+}
+
+.column-item {
+  align-items: center;
+  gap: 12px;
+}
+
+.column-item-config {
+  flex: 1;
+  min-width: 0;
 }
 
 .mix-model {
@@ -286,6 +325,7 @@ export default {
   background: #ffffff;
   box-shadow: 0px 1px 13px 0px #e5e5e5;
   position: relative;
+  overflow: hidden;
 
   &:hover {
     .setup-box {
@@ -319,8 +359,6 @@ export default {
 }
 
 .draggable {
-  > .flex {
-    align-items: center;
-  }
+  margin-bottom: 10px;
 }
 </style>

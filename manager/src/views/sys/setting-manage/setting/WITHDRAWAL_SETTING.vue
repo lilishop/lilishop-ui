@@ -1,45 +1,42 @@
 <template>
   <div class="layout">
+    <el-form ref="formValidate" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
+      <el-form-item label="提现审核是否开启">
+        <el-switch v-model="formValidate.apply" active-text="开" inactive-text="关" />
+      </el-form-item>
 
-    <Form ref="formValidate" :label-width="150" label-position="right" :model="formValidate" :rules="ruleValidate">
-      <FormItem label="提现审核是否开启">
-        <i-switch v-model="formValidate.apply" style="margin-top:7px;"><span slot="open">开</span>
-          <span slot="close">关</span>
-        </i-switch>
-      </FormItem>
+      <el-form-item label="最低提现金额" prop="minPrice">
+        ￥<el-input class="label-appkey" v-model="formValidate.minPrice" />
+      </el-form-item>
 
-      <FormItem  label="最低提现金额" prop="minPrice">
-        ￥<Input class="label-appkey" v-model="formValidate.minPrice" />
-      </FormItem>
+      <el-form-item label="提现方式" prop="type">
+        <el-radio-group v-model="formValidate.type">
+          <el-radio value="WECHAT">微信</el-radio>
+          <el-radio value="ALI">支付宝</el-radio>
+        </el-radio-group>
+      </el-form-item>
 
-      <FormItem label="提现方式" prop="type">
-        <RadioGroup v-model="formValidate.type">
-          <Radio label="WECHAT">微信</Radio>
-          <Radio label="ALI">支付宝</Radio>
-        </RadioGroup>
-      </FormItem>
-
-      <FormItem label="微信提现应用ID" prop="wechatAppId">
-        <Input class="label-appkey" v-model="formValidate.wechatAppId" />
-      </FormItem>
+      <el-form-item label="微信提现应用ID" prop="wechatAppId">
+        <el-input class="label-appkey" v-model="formValidate.wechatAppId" />
+      </el-form-item>
 
       <div class="label-btns">
-        <Button type="primary" @click="submit('formValidate')">保存</Button>
+        <el-button type="primary" @click="submit('formValidate')">保存</el-button>
       </div>
-    </Form>
+    </el-form>
   </div>
 </template>
 <script>
+import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "./validate";
 export default {
   data() {
     return {
-      result:"",
-      ruleValidate: {}, // 验证规则
-      formValidate: {},// 表单数据
-
-      switchTitle: "提现审核是否开启", // 切换title
+      result: "",
+      ruleValidate: {},
+      formValidate: {},
+      switchTitle: "提现审核是否开启",
     };
   },
   created() {
@@ -47,31 +44,28 @@ export default {
   },
   props: ["res", "type"],
   methods: {
-    // 保存
     submit(name) {
-      let that = this;
-       if( handleSubmit(that, name )){
-        this.setupSetting()
-      }
+      handleSubmit(this, name)
+        .then(() => {
+          this.setupSetting();
+        })
+        .catch(() => {});
     },
-    // 保存设置
     setupSetting() {
-
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {
-          this.$Message.success("保存成功!");
+          ElMessage.success("保存成功!");
         } else {
-          this.$Message.error("保存失败!");
+          ElMessage.error("保存失败!");
         }
       });
     },
-    // 实例化数据
     init() {
       this.result = JSON.parse(this.res);
       Object.keys(this.result).map((item) => {
         this.result[item] += "";
       });
-      this.$set(this, "formValidate", { ...this.result });
+      this.formValidate = { ...this.result };
       Object.keys(this.formValidate).forEach((item) => {
         this.ruleValidate[item] = [
           {
@@ -98,7 +92,7 @@ export default {
 
 <style lang="scss" scoped>
 @import "./style.scss";
-::v-deep .ivu-form-item-content{
+:deep(.el-form-item__content){
   align-items: center;
   padding-bottom: 5px;
 }

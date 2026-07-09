@@ -14,13 +14,16 @@
 
         <div class="label-item">
           <span>退款时间</span>
-          <span>{{res.refundTime ? (new Date(res.refundTime).getTime()/1000 | unixToDate) : '暂无'}}</span>
+          <span>{{
+            res.refundTime
+              ? $filters.unixToDate(new Date(res.refundTime).getTime() / 1000)
+              : "暂无"
+          }}</span>
         </div>
         <div class="label-item">
           <span>申请退款金额</span>
-          <span>
-            <priceColorScheme :value="res.applyRefundPrice" :color="$mainColor"></priceColorScheme>
-          </span>
+          <span :style="{ color: $mainColor }">
+            {{ $filters.unitPrice(res.applyRefundPrice, "￥") }}</span>
         </div>
         <div class="label-item">
           <span>商家备注</span>
@@ -56,7 +59,7 @@
           <div class="goods-title">
             <div>{{res.goodsName}}</div>
             <div>{{'x'+res.num}}</div>
-            <div class="goods-price">{{res.flowPrice |  unitPrice('￥')}}</div>
+            <div class="goods-price">{{ $filters.unitPrice(res.flowPrice, "￥") }}</div>
 
           </div>
 
@@ -65,7 +68,7 @@
       <div class="count-price">
         <div class="label-item">
           <span>实际退款金额</span>
-          <span class="flowPrice">{{res.flowPrice | unitPrice('￥')}}</span>
+          <span class="flowPrice">{{ $filters.unitPrice(res.flowPrice, "￥") }}</span>
         </div>
       </div>
     </div>

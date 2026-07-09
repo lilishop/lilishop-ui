@@ -1,12 +1,12 @@
 <template>
   <div class="search">
-    <Card>
-      <Row>
-        <Button @click="refresh">刷新</Button>
-        <Button @click="add" type="primary">添加</Button>
-      </Row>
-      <Tabs @on-click="handleClickType" v-model="currentTab" style="margin-top: 10px">
-        <TabPane label="运费模板" name="INFO">
+    <el-card>
+      <el-row>
+        <el-button @click="refresh">刷新</el-button>
+        <el-button @click="add" type="primary">添加</el-button>
+      </el-row>
+      <el-tabs @tab-click="handleClickType" v-model="currentTab" style="margin-top: 10px">
+        <el-tab-pane label="运费模板" name="INFO">
           <table class="ncsc-default-table order m-b-30" :key="index" v-for="(item,index) in shipInfo">
             <tbody>
               <tr>
@@ -15,7 +15,7 @@
               <tr>
                 <th colspan="20">
                   <span class="temp-name">{{item.name}}</span>
-                  <Tag v-if="item.pricingMethod==='FREE'" class="baoyou" color="warning">包邮</Tag>
+                  <el-tag v-if="item.pricingMethod==='FREE'" class="baoyou" color="warning">包邮</el-tag>
                   <span class="fr m-r-5">
                     <time style="margin-right: 20px" title="最后编辑时间">
                       <i class="icon-time"></i>{{item.updateTime}}
@@ -48,86 +48,99 @@
                     {{children.firstCompany}}
                   </td>
                   <td>
-                    <span class="yuan">￥</span><span class="integer">{{children.firstPrice | unitPrice}}</span>
+                    <span class="yuan">￥</span><span class="integer">{{ $filters.unitPrice(children.firstPrice) }}</span>
                   </td>
                   <td>
                     {{children.continuedCompany}}
                   </td>
                   <td class="bdr">
-                    <span class="yuan">￥</span><span class="integer">{{children.continuedPrice | unitPrice}}</span>
+                    <span class="yuan">￥</span><span class="integer">{{ $filters.unitPrice(children.continuedPrice) }}</span>
                   </td>
                 </tr>
               </template>
             </tbody>
           </table>
-        </TabPane>
-        <TabPane v-if="csTab" :label="title" :name="operation">
-          <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
-            <FormItem label="模板名称" prop="name">
-              <Input v-model="form.name" maxlength="10" clearable style="width: 20%" />
-            </FormItem>
-            <FormItem label="计价方式" prop="pricingMethod">
-              <RadioGroup type="button" button-style="solid" v-model="form.pricingMethod">
-                <Radio label="WEIGHT">按重量</Radio>
-                <Radio label="NUM">按件数</Radio>
-                <Radio label="FREE">包邮</Radio>
-              </RadioGroup>
-            </FormItem>
+        </el-tab-pane>
+        <el-tab-pane v-if="csTab" :label="title" :name="operation">
+          <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+            <el-form-item label="模板名称" prop="name">
+              <el-input v-model="form.name" maxlength="10" clearable style="width: 20%" />
+            </el-form-item>
+            <el-form-item label="计价方式" prop="pricingMethod">
+              <el-radio-group v-model="form.pricingMethod">
+                <el-radio-button value="WEIGHT">按重量</el-radio-button>
+                <el-radio-button value="NUM">按件数</el-radio-button>
+                <el-radio-button value="FREE">包邮</el-radio-button>
+              </el-radio-group>
+            </el-form-item>
 
-            <FormItem label="详细设置" v-if="form.pricingMethod !== 'FREE'">
-              <Alert type="warning" >点击右侧修改按钮编辑数据</Alert>
+            <el-form-item label="详细设置" v-if="form.pricingMethod !== 'FREE'">
+              <el-alert type="warning" title="点击右侧修改按钮编辑数据" :closable="false" />
               <div class="ncsu-trans-type" data-delivery="TRANSTYPE">
                 <div class="entity">
                   <div class="tbl-except">
-                    <table cellspacing="0" class="ncsc-default-table">
+                    <table cellspacing="0" class="ncsc-default-table ship-template-edit-table">
                       <thead>
-                        <tr style="border-bottom: 1px solid #ddd;">
-                          <th class="w10"></th>
-                          <th class="tl">运送到</th>
-                          <th class="w10"></th>
-                          <th class="w50">首件(重)</th>
-                          <th class="w110">首费</th>
-                          <th class="w50">续件(重)</th>
-                          <th class="w110">续费</th>
-                          <th class="w150">操作</th>
+                        <tr>
+                          <th class="col-area">运送到</th>
+                          <th class="col-num">首件(重)</th>
+                          <th class="col-num">首费</th>
+                          <th class="col-num">续件(重)</th>
+                          <th class="col-num">续费</th>
+                          <th class="col-action">操作</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr class="bd-line" data-group="n1" v-for="(item,index) in form.freightTemplateChildList"
-                          :key="index">
-                          <td></td>
-                          <td class="tl cell-area">
-                            <span class="area-group">
-                              <p style="display:inline-block">{{item.area}}</p>
-                            </span>
+                        <tr
+                          class="bd-line"
+                          v-for="(item,index) in form.freightTemplateChildList"
+                          :key="index"
+                        >
+                          <td class="col-area">
+                            <span class="area-group">{{ item.area || '未设置地区' }}</span>
                           </td>
-                          <td></td>
-                          <td>
-                            <InputNumber class="text w40" type="text" v-model="item.firstCompany" :max="999" :min="0" :step="0.1" clearable/>
+                          <td class="col-num">
+                            <el-input-number
+                              v-model="item.firstCompany"
+                              :max="999"
+                              :min="0"
+                              :step="0.1"
+                              controls-position="right"
+                              size="small"
+                            />
                           </td>
-                          <td>
-                            <InputNumber class="text w60" type="text" v-model="item.firstPrice" :max="999999" :min="0" clearable  :formatter="value => `¥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-            :parser="value => value.replace(/\¥\s?|(,*)/g, '')">
-                            </InputNumber>
+                          <td class="col-num">
+                            <el-input-number
+                              v-model="item.firstPrice"
+                              :max="999999"
+                              :min="0"
+                              controls-position="right"
+                              size="small"
+                            />
                           </td>
-                          <td>
-                            <InputNumber class="text w40" type="text" v-model="item.continuedCompany" :max="999" :min="0" :step="0.1"
-                              />
+                          <td class="col-num">
+                            <el-input-number
+                              v-model="item.continuedCompany"
+                              :max="999"
+                              :min="0"
+                              :step="0.1"
+                              controls-position="right"
+                              size="small"
+                            />
                           </td>
-                          <td>
-                            <InputNumber class="text w60" type="text" v-model="item.continuedPrice" :max="999999" :min="0" clearable  :formatter="value => `¥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
-            :parser="value => value.replace(/\¥\s?|(,*)/g, '')">
-                            </InputNumber>
+                          <td class="col-num">
+                            <el-input-number
+                              v-model="item.continuedPrice"
+                              :max="999999"
+                              :min="0"
+                              controls-position="right"
+                              size="small"
+                            />
                           </td>
-                          <td class="nscs-table-handle">
-                            <a
-                              @click="editRegion(item,index)"
-                              style="display:inline-block;margin-bottom:5px;color:#2d8cf0;cursor:pointer;text-decoration:none"
-                            >修改</a>
-                            <a
-                              @click="removeTemplateChildren(index)"
-                              style="display:inline-block;margin-bottom:5px;color:#2d8cf0;cursor:pointer;text-decoration:none"
-                            >删除</a>
+                          <td class="col-action">
+                            <a class="action-link" @click="editRegion(item,index)">修改</a>
+                            <span class="action-split">|</span>
+                            <a class="action-link" @click="removeTemplateChildren(index)">删除</a>
                           </td>
                         </tr>
                       </tbody>
@@ -136,31 +149,25 @@
                   <div class="tbl-attach p-5">
                     <div class="div-error" v-if="saveError">
                       <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
-                      <Icon type="ios-information-circle-outline" />
                       指定地区城市为空或指定错误
-                      <!-- <Icon type="ios-information-circle-outline" />
-                      首费应输入正确的金额
-                      <Icon type="ios-information-circle-outline" />
-                      续费应输入正确的金额 -->
-                      <Icon type="ios-information-circle-outline" />
                       首(续)件(重)费应输入大于0的整数
                     </div>
 
                   </div>
                 </div>
               </div>
-            </FormItem>
-            <Form-item>
-              <Button @click="addShipTemplateChildren(index)" v-if="form.pricingMethod !== 'FREE'"
-                icon="ios-create-outline">为指定城市设置运费模板
-              </Button>
-              <Button @click="handleSubmit" type="primary" style="margin-right:5px">保存
-              </Button>
-            </Form-item>
-          </Form>
-        </TabPane>
-      </Tabs>
-    </Card>
+            </el-form-item>
+            <el-form-item>
+              <el-button v-if="form.pricingMethod !== 'FREE'" @click="addShipTemplateChildren(index)">
+                为指定城市设置运费模板
+              </el-button>
+              <el-button @click="handleSubmit" type="primary" style="margin-right:5px">保存
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+      </el-tabs>
+    </el-card>
     <multiple-region ref="region" @selected="handleSelect">
 
     </multiple-region>
@@ -183,10 +190,10 @@ export default {
       index:'0',
       selectedIndex: 0, //选中的地址模板下标
       item: "", //运费模板子模板
-      shipInfo: {}, // 运费模板数据
+      shipInfo: [], // 运费模板数据
       title: "添加运费模板", // 模态框标题
-      operation: "add", // 操作状态
-      currentTab: "", // 当前模板tab
+      operation: "INFO", // 操作状态
+      currentTab: "INFO", // 当前模板tab
       // submitLoading:false,
       saveError: false, // 是否显示错误提示
       csTab: false, // 添加运费模板显示
@@ -222,11 +229,15 @@ export default {
   methods: {
     // 初始化数据
     init() {
+      this.currentTab = "INFO";
+      this.csTab = false;
+      this.operation = "INFO";
       this.getData();
     },
     //切换tabPane
-    handleClickType(v) {
-      if (v == "INFO") {
+    handleClickType(tab) {
+      const tabName = tab.paneName ?? tab.props?.name;
+      if (tabName === "INFO") {
         this.getData();
         this.csTab = false;
       }
@@ -288,7 +299,7 @@ export default {
           child.area.split(",").forEach((area) => {
             if (addr.name == area) {
               addr.selectedAll = true;
-              this.$set(child, "selectedAll", true);
+              child.selectedAll = true;
             }
           });
         });
@@ -308,7 +319,7 @@ export default {
     //运费模板数据
     getData() {
       API_Shop.getShipTemplate().then((res) => {
-        this.shipInfo = res.result;
+        this.shipInfo = Array.isArray(res.result) ? res.result : [];
       });
     },
     /**
@@ -628,6 +639,64 @@ em {
 
 .cell-area {
   width: 50%;
+}
+
+.ship-template-edit-table {
+  table-layout: fixed;
+
+  th,
+  td {
+    padding: 10px 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #eee;
+  }
+
+  thead th {
+    text-align: center;
+    font-weight: 500;
+    color: #555;
+    background-color: #fafafa;
+  }
+
+  .col-area {
+    width: 32%;
+    text-align: left;
+    word-break: break-all;
+    white-space: normal;
+    color: #333;
+  }
+
+  .col-num {
+    width: 14%;
+    text-align: center;
+  }
+
+  .col-action {
+    width: 12%;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  :deep(.el-input-number) {
+    width: 100%;
+    max-width: 130px;
+  }
+
+  :deep(.el-input-number .el-input__wrapper) {
+    padding-left: 8px;
+    padding-right: 32px;
+  }
+}
+
+.action-link {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.action-split {
+  margin: 0 6px;
+  color: #dcdee2;
 }
 
 .div-error {

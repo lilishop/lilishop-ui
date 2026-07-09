@@ -1,9 +1,9 @@
 <template>
-  <Modal width="800" footer-hide v-model="enableMap">
-    <RadioGroup @on-change="changeMap" v-model="mapDefault" type="button">
-      <Radio label="select">级联选择</Radio>
-      <Radio label="map" v-if="aMapSwitch">高德地图</Radio>
-    </RadioGroup>
+  <el-dialog width="800" v-model="enableMap">
+    <el-radio-group @change="changeMap" v-model="mapDefault" type="button">
+      <el-radio label="select">级联选择</el-radio>
+      <el-radio label="map" v-if="aMapSwitch">高德地图</el-radio>
+    </el-radio-group>
     <div>
       <div v-if="mapDefault === 'select'">
         <div class="selector">
@@ -18,18 +18,16 @@
 
         </div>
         <div class="footer">
-          <Button type="primary" @click="finished">确定</Button>
+          <el-button type="primary" @click="finished">确定</el-button>
         </div>
       </div>
       <mapping v-if="mapDefault === 'map'" ref="map" @getAddress="getAddress" />
 
-    </div>
-
-
-  </Modal>
+    </div></el-dialog>
 </template>
 
 <script>
+import { Message } from "@/utils/message";
 import { aMapSwitch } from '@/config/index'
 import mapping from "@/components/map/index.vue";
 import * as API_Setup from "@/api/common.js";
@@ -104,7 +102,7 @@ export default {
     // 选择完成
     finished() {
       if(!this.chiosend[0]){
-        this.$Message.error("请选择地址")
+        Message.error("请选择地址")
         return
       }
       const params = this.chiosend.filter((item) => item!=="" && item.value !== "");

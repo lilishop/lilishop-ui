@@ -1,13 +1,14 @@
 <template>
   <div class="wrapper">
     <MainLayout :idx="0" ref="mainLayout">
-      <el-container slot="container" class="full-height">
+      <template #container>
+      <el-container class="full-height">
         <!-- 左侧侧边栏 -->
         <el-aside width="320px" class="aside-box">
           <el-container class="full-height" direction="vertical">
             <!-- 搜索栏 -->
             <el-header height="60px" class="header">
-              <div class="user-login" v-popover:usercard>
+              <div class="user-login">
                 <div class="user-box">
                   <face :text="face" :name="name" class="user-face"></face>
                 </div>
@@ -142,6 +143,7 @@
           <!-- <OtherLink :toUser="toUser" :goodsParams="goodsParams" :id="id" class="flex-4"/> -->
         </el-main>
       </el-container>
+      </template>
     </MainLayout>
 
     <!-- 用户查询组件 -->
@@ -149,8 +151,6 @@
   </div>
 </template>
 <script>
-import { RecycleScroller } from 'vue-virtual-scroller'
-import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import { mapGetters, mapState } from "vuex";
 import MainLayout from "@/views/layout/MainLayout";
 import WelcomeModule from "@/components/layout/WelcomeModule";
@@ -179,7 +179,6 @@ export default {
     UserSearch,
     OtherLink,
     WelcomeModule,
-    RecycleScroller
   },
   data () {
     return {
@@ -247,7 +246,7 @@ export default {
   },
   watch: {
     talkItems (val) {
-      val ? this.$set(this, "userTalkItem", val) : "";
+      if (val) this.userTalkItem = val;
     },
     // 搜索用户的时候 根据当前用户表进行模糊搜索
     input (val, oldVal) {
@@ -312,7 +311,7 @@ export default {
   mounted () {
     this.scrollEvent();
   },
-  destroyed () {
+  beforeUnmount () {
     document.title = title;
     clearInterval(this.interval);
     this.clearTalk();
@@ -665,7 +664,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-/deep/ .el-scrollbar__wrap {
+:deep(.el-scrollbar__wrap ) {
   overflow-x: hidden;
 }
 .user-status{
@@ -689,7 +688,7 @@ export default {
       flex-shrink: 0;
       height: 40px;
 
-      /deep/ .el-input .el-input__inner {
+      :deep(.el-input .el-input__inner ) {
         border-radius: 20px;
       }
     }

@@ -1,15 +1,16 @@
 <template>
   <div class="wrapper">
-    <card _Title="我的投诉"  />
+    <UserCenterLayout title="我的投诉" :tabs="['我的投诉']">
 
     <div class="order">
       <div class="order-title">
-        <Row class="order-row title">
-          <i-col span="12">商品信息</i-col>
-          <i-col span="4">投诉状态</i-col>
-          <i-col span="4">投诉主题</i-col>
-          <i-col span="6"></i-col>
-        </Row>
+        <div class="order-row title">
+          <div class="order-detail-title col-10">商品信息</div>
+          <div class="col-4">投诉状态</div>
+          <div class="col-4">投诉主题</div>
+          <div class="col-4">投诉内容</div>
+          <div class="col-2"></div>
+        </div>
       </div>
       <empty v-if="list.length === 0" />
 
@@ -21,45 +22,47 @@
             <span class="hover-pointer fontsize_12 eval-detail" @click="goDetail(item.id)">投诉详情</span>
             <span class="hover-pointer fontsize_12 eval-detail" style="right: 90px" v-if="item.complainStatus === 'APPLYING' || item.complainStatus === 'NEW'" @click="cancel(item.id)">取消投诉</span>
           </div>
-          <Row class="order-item-view">
-            <i-col span="12" class="item-view-name">
+          <div class="order-item-view">
+            <div class="item-view-name col-10">
               <div class="order-img hover-color" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
                 <img :src="item.goodsImage" alt="" />
               </div>
               <div class="order-name hover-color" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
                 {{item.goodsName}}
               </div>
-            </i-col>
-            <i-col span="4">{{statusLabel[item.complainStatus]}}</i-col>
-            <i-col span="4">
+            </div>
+            <div class="col-4">{{statusLabel[item.complainStatus]}}</div>
+            <div class="col-4">
               <div class="content">{{item.complainTopic}}</div>
-            </i-col>
-            <i-col span="4">
-              <Tooltip >
+            </div>
+            <div class="col-4">
+              <el-tooltip>
                 <div class="content">{{item.content}}</div>
-                <div style="white-space: normal;" slot="content">
-                  {{item.content}}
-                </div>
-              </Tooltip>
-            </i-col>
-          </Row>
+                <template #content>
+                  <div style="white-space: normal;">
+                    {{item.content}}
+                  </div>
+                </template>
+              </el-tooltip>
+            </div>
+            <div class="col-2"></div>
+          </div>
         </div>
       </div>
-      <Spin v-if="loading"></Spin>
+      <el-skeleton v-if="loading"></el-skeleton>
     </div>
     <!-- 分页 -->
     <div class="page-size">
-      <Page :total="total" @on-change="changePageNum"
-        @on-page-size-change="changePageSize"
-        :page-size="params.pageSize"
-        show-total
-        show-sizer>
-      </Page>
+      <el-pagination v-model:current-page="params.pageNumber" v-model:page-size="params.pageSize"
+        :total="total" @current-change="changePageNum"
+        @size-change="changePageSize" layout="total, sizes, prev, pager, next, jumper"></el-pagination>
     </div>
+    </UserCenterLayout>
   </div>
 </template>
 
 <script>
+import { Message, Modal } from "@/utils/message";
 import {complainList, clearComplain} from '@/api/member.js';
 export default {
   name: 'ComplainList',
@@ -105,14 +108,14 @@ export default {
       this.getList()
     },
     cancel (id) { // 取消投诉
-      this.$Modal.confirm({
+      Modal.confirm({
         title: '取消投诉',
-        content: '<p>确定取消投诉吗？</p>',
+        content: '确定取消投诉吗？',
         onOk: () => {
           clearComplain(id).then((res) => {
             if (res.success) {
-              this.$Message.success('取消投诉成功');
-              this.getCartList();
+              Message.success('取消投诉成功');
+              this.getList();
             }
           });
         },
@@ -160,8 +163,35 @@ export default {
   font-size: 13px;
   position: relative;
 }
+.order-row,
+.order-item-view {
+  display: flex;
+  align-items: center;
+
+  > [class*='col-'] {
+    box-sizing: border-box;
+    padding: 0 8px;
+  }
+
+  > .col-10 {
+    flex: 0 0 41.666667%;
+    max-width: 41.666667%;
+  }
+
+  > .col-4 {
+    flex: 0 0 16.666667%;
+    max-width: 16.666667%;
+  }
+
+  > .col-2 {
+    flex: 0 0 8.333333%;
+    max-width: 8.333333%;
+  }
+}
+
 .order-item-view {
   padding: 10px 20px;
+  align-items: flex-start;
 }
 .order-item {
   text-align: center;
@@ -172,11 +202,18 @@ export default {
   padding: 10px 0;
   text-align: center;
 }
+.order-detail-title {
+  text-align: left;
+  padding-left: 20px !important;
+}
 .content {
   color: #999;
   max-height: 60px;
   overflow: hidden;
-  word-wrap: break-word;
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .eval-detail {
@@ -187,6 +224,7 @@ export default {
   }
 }
 .page-size{
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

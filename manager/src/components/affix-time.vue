@@ -1,97 +1,85 @@
 <template>
   <div>
     <div class="breadcrumb">
-      <span @click="clickBreadcrumb(item, index)" :class="{ 'active': item.selected }" v-for="(item, index) in dateList"
-        :key="index"> {{ item.title }}</span>
+      <span
+        v-for="(item, index) in dateList"
+        :key="index"
+        :class="{ active: item.selected }"
+        @click="clickBreadcrumb(item)"
+      >
+        {{ item.title }}
+      </span>
       <div class="date-picker">
-        <Select @on-change="changeSelect($event, selectedWay)" :value="month" placeholder="年月查询" clearable
-          style="width:200px;margin-left:10px;">
-          <Option v-for="(item, i) in dates" :value="item.year + '-' + item.month" :key="i" clearable>
-            {{ item.year + '年' + item.month + '月' }}</Option>
-        </Select>
+        <el-select
+          v-model="month"
+          placeholder="年月查询"
+          clearable
+          style="width: 200px; margin-left: 10px"
+          @change="changeSelect"
+        >
+          <el-option
+            v-for="(item, i) in dates"
+            :key="i"
+            :label="item.year + '年' + item.month + '月'"
+            :value="item.year + '-' + item.month"
+          />
+        </el-select>
       </div>
-      <div class="shop-list" v-if="!closeShop">
-        <Select clearable @on-change="changeshop(selectedWay)" v-model="storeId" placeholder="店铺查询"
-          style="width:200px;margin-left:10px;">
-          <Scroll :on-reach-bottom="handleReachBottom">
-            <Option v-for="(item, index) in shopsData" :value="item.id" :key="index">{{ item.storeName }}</Option>
-          </Scroll>
-        </Select>
+      <div v-if="!closeShop" class="shop-list">
+        <el-select
+          v-model="storeId"
+          placeholder="店铺查询"
+          clearable
+          filterable
+          style="width: 200px; margin-left: 10px"
+          @change="changeshop"
+        >
+          <el-option
+            v-for="(item, index) in shopsData"
+            :key="index"
+            :label="item.storeName"
+            :value="item.id"
+          />
+        </el-select>
       </div>
     </div>
   </div>
 </template>
+
 <script>
 import { getShopListData } from "@/api/shops.js";
+
 export default {
   props: ["closeShop"],
   data() {
     return {
-      month: "", // 月份
-
+      month: "",
       selectedWay: {
-        // 可选时间项
         title: "过去7天",
         selected: true,
         searchType: "LAST_SEVEN",
       },
-      storeId: "", // 店铺id
-      dates: [], // 日期列表
+      storeId: "",
+      dates: [],
       params: {
-        // 请求参数
         pageNumber: 1,
-        pageSize: 20,
+        pageSize: 100,
         storeName: "",
       },
       dateList: [
-        // 筛选条件
-        {
-          title: "今天",
-          selected: false,
-          searchType: "TODAY",
-        },
-        {
-          title: "昨天",
-          selected: false,
-          searchType: "YESTERDAY",
-        },
-        {
-          title: "过去7天",
-          selected: true,
-          searchType: "LAST_SEVEN",
-        },
-        {
-          title: "过去30天",
-          selected: false,
-          searchType: "LAST_THIRTY",
-        },
+        { title: "今天", selected: false, searchType: "TODAY" },
+        { title: "昨天", selected: false, searchType: "YESTERDAY" },
+        { title: "过去7天", selected: true, searchType: "LAST_SEVEN" },
+        { title: "过去30天", selected: false, searchType: "LAST_THIRTY" },
       ],
       originDateList: [
-        // 筛选条件
-        {
-          title: "今天",
-          selected: false,
-          searchType: "TODAY",
-        },
-        {
-          title: "昨天",
-          selected: false,
-          searchType: "YESTERDAY",
-        },
-        {
-          title: "过去7天",
-          selected: true,
-          searchType: "LAST_SEVEN",
-        },
-        {
-          title: "过去30天",
-          selected: false,
-          searchType: "LAST_THIRTY",
-        },
+        { title: "今天", selected: false, searchType: "TODAY" },
+        { title: "昨天", selected: false, searchType: "YESTERDAY" },
+        { title: "过去7天", selected: true, searchType: "LAST_SEVEN" },
+        { title: "过去30天", selected: false, searchType: "LAST_THIRTY" },
       ],
-
-      shopTotal: "", // 店铺总数
-      shopsData: [], // 店铺数据
+      shopTotal: 0,
+      shopsData: [],
     };
   },
   mounted() {
@@ -99,112 +87,87 @@ export default {
     this.getShopList();
   },
   methods: {
-    // 页面触底
-    handleReachBottom() {
-      setTimeout(() => {
-        if (this.params.pageNumber * this.params.pageSize <= this.shopTotal) {
-          this.params.pageNumber++;
-          this.getShopList();
-        }
-      }, 1500);
-    },
-    // 查询店铺列表
     getShopList() {
       getShopListData(this.params).then((res) => {
         if (res.success) {
-          /**
-           * 解决数据请求中，滚动栏会一直上下跳动
-           */
           this.shopTotal = res.result.total;
-
-          this.shopsData.push(...res.result.records);
+          this.shopsData = res.result.records || [];
         }
       });
     },
-    // 变更店铺
-    changeshop(val) {
+    changeshop() {
       this.selectedWay.storeId = this.storeId;
       this.$emit("selected", this.selectedWay);
     },
-
-    // 获取近5年 年月
     getFiveYears() {
-      let getYear = new Date().getFullYear();
-
-      let lastFiveYear = getYear - 5;
-      let maxMonth = new Date().getMonth() + 1;
-      let dates = [];
-      // 循环出过去5年
+      const getYear = new Date().getFullYear();
+      const lastFiveYear = getYear - 5;
+      const maxMonth = new Date().getMonth() + 1;
+      const dates = [];
       for (let year = lastFiveYear; year <= getYear; year++) {
         for (let month = 1; month <= 12; month++) {
-          if (year == getYear && month > maxMonth) {
-          } else {
-            dates.push({
-              year: year,
-              month: month,
-            });
+          if (year === getYear && month > maxMonth) {
+            continue;
           }
+          dates.push({ year, month });
         }
       }
       this.dates = dates.reverse();
     },
-    // 改变已选店铺
     changeSelect(e) {
-      this.month = e
+      this.month = e;
       if (this.month) {
         this.dateList.forEach((res) => {
           res.selected = false;
         });
-        this.selectedWay.year = this.month.split("-")[0];
-        this.selectedWay.month = this.month.split("-")[1];
-        this.selectedWay.searchType = "";
-
+        const parts = String(this.month).split("-");
+        this.selectedWay = {
+          ...this.selectedWay,
+          year: parts[0],
+          month: parts[1],
+          searchType: "",
+          storeId: this.storeId,
+        };
         this.$emit("selected", this.selectedWay);
       } else {
-
-        const current = this.dateList.find(item => { return item.selected })
-        this.selectedWay = current
-        this.clickBreadcrumb(current)
-        this.$emit("selected", this.selectedWay);
-
-
+        const current =
+          this.dateList.find((item) => item.selected) ||
+          this.dateList.find((item) => item.title === this.selectedWay.title) ||
+          this.dateList.find((item) => item.searchType === "LAST_SEVEN");
+        this.clickBreadcrumb(current);
       }
     },
-    // 变更时间
     clickBreadcrumb(item) {
-
+      if (!item) return;
       let currentIndex;
-      this.dateList.forEach((res,index) => {
+      this.dateList.forEach((res, index) => {
         res.selected = false;
-        if(res.title === item.title){
-          currentIndex = index
+        if (res.title === item.title) {
+          currentIndex = index;
         }
       });
       item.selected = true;
       item.storeId = this.storeId;
       this.month = "";
-      if (item.searchType == "") {
-       let currentDate = this.originDateList[currentIndex].searchType
-        if (currentDate) {
-          item.searchType = currentDate
-        } else {
-          item.searchType = "LAST_SEVEN";
-        }
+      if (item.searchType === "") {
+        const origin = this.originDateList[currentIndex];
+        item.searchType = (origin && origin.searchType) || "LAST_SEVEN";
       }
       this.selectedWay = item;
       this.selectedWay.year = new Date().getFullYear();
       this.selectedWay.month = "";
-
       this.$emit("selected", this.selectedWay);
     },
   },
 };
 </script>
+
 <style lang="scss" scoped>
 .breadcrumb {
   display: flex;
   align-items: center;
-  >span {
+
+  > span {
     margin-right: 15px;
     cursor: pointer;
   }
@@ -214,8 +177,6 @@ export default {
   color: $theme_color;
   position: relative;
 }
-
-.date-picker {}
 
 .active:before {
   content: "";

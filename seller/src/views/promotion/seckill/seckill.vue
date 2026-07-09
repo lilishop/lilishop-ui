@@ -1,207 +1,213 @@
 <template>
-  <div class="seckill">
-    <Card>
-      <Form ref="searchForm" :model="searchForm" inline :label-width="70" class="search-form">
-        <Form-item label="活动名称" prop="goodsName">
-          <Input type="text" v-model="searchForm.promotionName" placeholder="请输入活动名称" clearable style="width: 240px" />
-        </Form-item>
-        <Form-item label="活动状态" prop="promotionStatus">
-          <Select v-model="searchForm.promotionStatus" placeholder="请选择" clearable style="width: 240px">
-            <Option value="NEW">未开始</Option>
-            <Option value="START">已开始/上架</Option>
-            <Option value="END">已结束/下架</Option>
-            <Option value="CLOSE">紧急关闭/作废</Option>
-          </Select>
-        </Form-item>
-        <Form-item label="活动时间">
-          <DatePicker v-model="selectDate" type="daterange" clearable placeholder="选择起始时间" style="width: 240px">
-          </DatePicker>
-        </Form-item>
-        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
-        <Button @click="handleReset" class="ml_10">重置</Button>
-      </Form>
-      </Card>
-          <Card>
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table" class="mt_10">
-        <template slot-scope="{ row }" slot="applyEndTime">
-          {{ unixDate(row.applyEndTime) }}
-        </template>
-        <template slot-scope="{ row }" slot="hours">
-          <Tag v-for="item in unixHours(row.hours)" :key="item">{{
-            item
-          }}</Tag>
-        </template>
-        <template slot-scope="{ row }" slot="action">
-          <a v-if="row.promotionStatus === 'NEW'" @click="manage(row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">管理</a>
-          <a v-else @click="manage(row)" style="color:#2d8cf0;cursor:pointer;text-decoration:none">查看</a>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage"
-          @on-page-size-change="changePageSize" :page-size-opts="[10, 20, 50]" size="small" show-total show-elevator
-          show-sizer></Page>
-      </Row>
-    </Card>
+  <div class="search seckill">
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="活动名称" prop="promotionName">
+          <el-input
+            v-model="searchForm.promotionName"
+            placeholder="请输入活动名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="活动状态" prop="promotionStatus">
+          <el-select
+            v-model="searchForm.promotionStatus"
+            placeholder="请选择"
+            clearable
+            style="width: 240px"
+          >
+            <el-option label="未开始" value="NEW" />
+            <el-option label="已开始/上架" value="START" />
+            <el-option label="已结束/下架" value="END" />
+            <el-option label="紧急关闭/作废" value="CLOSE" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="活动时间">
+          <el-date-picker
+            v-model="selectDate"
+            type="daterange"
+            clearable
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+      >
+        <el-table-column
+          prop="promotionName"
+          label="活动名称"
+          min-width="140"
+          show-overflow-tooltip
+        />
+        <el-table-column prop="startTime" label="开始时间" width="180" />
+        <el-table-column prop="applyEndTime" label="申请截止时间" width="180" />
+        <el-table-column label="活动状态" width="110">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="promotionStatusTagType(row.promotionStatus)">
+              {{ promotionStatusText(row.promotionStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="seckillRule"
+          label="申请规则"
+          min-width="120"
+          show-overflow-tooltip
+        />
+        <el-table-column label="操作" width="120" align="center" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a
+                v-if="row.promotionStatus === 'NEW'"
+                class="link-text"
+                @click="manage(row)"
+              >
+                管理
+              </a>
+              <a v-else class="link-text" @click="view(row)">查看</a>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
 import { seckillList } from "@/api/promotion";
+
 export default {
   name: "seckill",
-  components: {},
-  data () {
+  data() {
     return {
       selectDate: [],
-      loading: true, // 表单加载状态
+      loading: true,
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-        sort: "startTime",
-        order: "desc", // 默认排序方式
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
       },
-      columns: [
-        {
-          title: "活动名称",
-          key: "promotionName",
-          minWidth: 120,
-        },
-        {
-          title: "活动开始时间",
-          key: "startTime",
-        },
-        {
-          title: "报名截止时间",
-          slot: "applyEndTime",
-        },
-        {
-          title: "时间场次",
-          slot: "hours",
-        },
-        {
-          title: "状态",
-          key: "promotionStatus",
-          width: 100,
-          render: (h, params) => {
-            let text = "未知",
-              color = "default";
-            if (params.row.promotionStatus == "NEW") {
-              text = "未开始";
-              color = "geekblue";
-            } else if (params.row.promotionStatus == "START") {
-              text = "已开始";
-              color = "green";
-            } else if (params.row.promotionStatus == "END") {
-              text = "已结束";
-              color = "volcano";
-            } else if (params.row.promotionStatus == "CLOSE") {
-              text = "已关闭";
-              color = "red";
-            }
-            return h("div", [
-              h(
-                "Tag",
-                {
-                  props: {
-                    color: color,
-                  },
-                },
-                text
-              ),
-            ]);
-          },
-        },
-        {
-          title: "操作",
-          slot: "action",
-          align: "center",
-          width: 100,
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      data: [],
+      total: 0,
     };
   },
   methods: {
-    // 初始化数据
-    init () {
+    promotionStatusText(status) {
+      const map = {
+        NEW: "未开始",
+        START: "已开始",
+        END: "已结束",
+        CLOSE: "已关闭",
+      };
+      return map[status] || "未知";
+    },
+    promotionStatusTagType(status) {
+      const map = {
+        NEW: "info",
+        START: "success",
+        END: "danger",
+        CLOSE: "danger",
+      };
+      return map[status] || "danger";
+    },
+    init() {
       this.getDataList();
     },
-    // 分页 改变页码
-    changePage (v) {
+    changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
     },
-    // 分页 改变页数
-    changePageSize (v) {
+    changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
-    // 搜索
-    handleSearch () {
+    handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
+      this.searchForm.pageSize = 20;
       this.getDataList();
     },
-    // 重置
-    handleReset () {
-      this.searchForm = {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-        sort: "startTime",
-        order: "desc", // 默认排序方式
-      };
-      this.selectDate = "";
-      this.getDataList();
+    view(v) {
+      this.$router.push({ name: "seckill-goods", query: { id: v.id, mode: "view" } });
     },
-    // 管理
-    manage (row) {
-      this.$router.push({ name: "seckill-goods", query: { id: row.id } });
+    manage(v) {
+      this.$router.push({ name: "seckill-goods", query: { id: v.id } });
     },
-    // 获取列表数据
-    getDataList () {
+    getDataList() {
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
-        this.searchForm.startTime = this.selectDate[0].getTime();
-        this.searchForm.endTime = this.selectDate[1].getTime();
+        this.searchForm.startTime = new Date(this.selectDate[0]).getTime();
+        this.searchForm.endTime = new Date(this.selectDate[1]).getTime();
       } else {
         this.searchForm.startTime = null;
         this.searchForm.endTime = null;
       }
-      // 带多条件搜索参数获取表单数据
-      seckillList(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    unixDate (time) {
-      // 处理报名截止时间
-      return this.$options.filters.unixToDate(new Date(time) / 1000);
-    },
-    unixHours (item) {
-      // 处理小时场次
-      let hourArr = item.split(",");
-      for (let i = 0; i < hourArr.length; i++) {
-        hourArr[i] += ":00";
-      }
-      return hourArr;
+      seckillList(this.searchForm)
+        .then((res) => {
+          if (res.success) {
+            this.data = res.result.records;
+            this.total = res.result.total;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
   },
-  mounted () {
+  mounted() {
     this.init();
   },
-  // 页面缓存处理，从该页面离开时，修改KeepAlive为false，保证进入该页面是刷新
-  beforeRouteLeave (to, from, next) {
-    from.meta.keepAlive = false
-    next()
-  }
 };
 </script>
-<style lang="scss"  scoped>
-@import "@/styles/table-common.scss";
+
+<style lang="scss" scoped>
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+  margin-right: 5px;
+}
+.op-split {
+  margin: 0 8px;
+  color: #dcdee2;
+}
+.mt_10 {
+  margin-top: 10px;
+}
 </style>

@@ -1,23 +1,29 @@
 <template>
   <div class="order-detail">
-    <card _Title="售后详情" :_Size="16"></card>
+    <UserCenterLayout title="售后详情" :tabs="['售后详情']">
     <!-- 操作按钮 -->
-    <Card class="mb_10" v-if="(afterSale.serviceStatus == 'PASS' &&
+    <el-card class="mb_10" shadow="never" v-if="(afterSale.serviceStatus == 'PASS' &&
           afterSale.serviceType != 'RETURN_MONEY') || (afterSale.afterSaleAllowOperationVO && afterSale.afterSaleAllowOperationVO.cancel)">
-      <Button type="success" @click="openModal" v-if="afterSale.serviceStatus == 'PASS' &&
-          afterSale.serviceType != 'RETURN_MONEY'" size="small">提交物流</Button>&nbsp;
-      <Button type="error" @click="cancel(afterSale.sn)" v-if="afterSale.afterSaleAllowOperationVO && afterSale.afterSaleAllowOperationVO.cancel" size="small">取消售后</Button>
-    </Card>
+      <el-button
+        @click="openModal"
+        v-if="afterSale.serviceStatus == 'PASS' && afterSale.serviceType != 'RETURN_MONEY'"
+        size="small"
+        class="submit-logistics-btn"
+      >提交物流</el-button>&nbsp;
+      <el-button type="danger" @click="cancel(afterSale.sn)" v-if="afterSale.afterSaleAllowOperationVO && afterSale.afterSaleAllowOperationVO.cancel" size="small">取消售后</el-button>
+    </el-card>
     <div class="order-card">
       <h3>{{afterSale.serviceName}}</h3>
       <p class="global_color fontsize_18">{{ afterSale.orderStatusValue }}</p>
-      <p>售后单号：{{ afterSale.sn }} &nbsp;&nbsp;&nbsp;订单号：{{afterSale.orderSn}}</p>
-      <div style="color:#999;" class="operation-time">创建时间：{{afterSale.createTime}}</div>
+      <p class="order-meta">
+        <span>售后单号：{{ afterSale.sn }} &nbsp;&nbsp;&nbsp;订单号：{{ afterSale.orderSn }}</span>
+        <span class="order-meta-time">创建时间：{{ afterSale.createTime }}</span>
+      </p>
       <div class="service-after">
         <div>
           本次售后服务由<span>{{afterSale.storeName}}</span>为您提供
         </div>
-        <div>
+        <div class="service-after-goods">
           <img :src="afterSale.goodsImage" alt="" width="60" height="60">
           <span>{{afterSale.goodsName}}</span>
         </div>
@@ -25,14 +31,13 @@
     </div>
     <div class="order-card">
       <h3>售后进程</h3>
-      <Steps class="progress" :current="logList.length" direction="vertical">
-        <Step
-          :content="'操作人：'+ log.operatorName + '   ' + log.createTime"
+      <el-steps class="progress" :current="logList.length" direction="vertical">
+        <el-step           :content="'操作人：'+ log.operatorName + '   ' + log.createTime"
           :title="log.message"
           v-for="(log, index) in logList"
           :key="index"
-        ></Step>
-      </Steps>
+        ></el-step>
+      </el-steps>
     </div>
     <div class="order-card">
       <h3 class="mb_10">服务单信息</h3>
@@ -41,10 +46,10 @@
           <td>退款方式</td><td>{{afterSale.refundWay == 'ORIGINAL' ? '原路退回' : '账号退款'}}</td>
         </tr>
         <tr>
-          <td>申请退款金额</td><td>{{afterSale.applyRefundPrice | unitPrice('￥')}}</td>
+          <td>申请退款金额</td><td>{{ $filters.unitPrice(afterSale.applyRefundPrice, '￥') }}</td>
         </tr>
         <tr v-if="afterSale.actualRefundPrice">
-          <td>实际退款金额</td><td>{{afterSale.actualRefundPrice | unitPrice('￥')}}</td>
+          <td>实际退款金额</td><td>{{ $filters.unitPrice(afterSale.actualRefundPrice, '￥') }}</td>
         </tr>
         <template v-if="afterSale.refundWay === 'OFFLINE'">
           <tr>
@@ -74,33 +79,42 @@
         <img :src="img" width="200" height="200" @click="perviewImg(img)" class="hover-pointer" alt="">
       </div>
     </div>
-    <Modal v-model="logisticsShow" width="530">
-      <p slot="header">
+    <el-dialog v-model="logisticsShow" width="530">
+      <template #header><p>
         <span>提交物流信息</span>
-      </p>
+      </p></template>
       <div>
-        <Form ref="form" :model="form" label-position="left" :label-width="100" :rules="rules">
-          <FormItem label="物流公司" prop="logisticsId">
-            <Select v-model="form.logisticsId" placeholder="请选择物流公司">
-              <Option v-for="item in companyList" :value="item.id" :key="item.id">{{ item.name }}</Option>
-            </Select>
-          </FormItem>
-          <FormItem label="物流单号" prop="logisticsNo">
-            <Input v-model="form.logisticsNo" placeholder="请填写物流单号"></Input>
-          </FormItem>
-          <FormItem label="发货时间" prop="mDeliverTime">
-            <DatePicker type="date" style="width:100%" v-model="form.mDeliverTime" @on-change="changeTime" format="yyyy-MM-dd" placeholder="选择发货时间"></DatePicker>
-          </FormItem>
-        </Form>
+        <el-form ref="form" :model="form" label-position="left" label-width="100px" :rules="rules">
+          <el-form-item label="物流公司" prop="logisticsId">
+            <el-select v-model="form.logisticsId" placeholder="请选择物流公司">
+              <el-option v-for="item in companyList" :value="item.id" :key="item.id">{{ item.name }}</el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="物流单号" prop="logisticsNo">
+            <el-input v-model="form.logisticsNo" placeholder="请填写物流单号"></el-input>
+          </el-form-item>
+          <el-form-item label="发货时间" prop="mDeliverTime">
+            <el-date-picker
+              type="date"
+              style="width:100%"
+              v-model="form.mDeliverTime"
+              format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD"
+              placeholder="选择发货时间"
+            />
+          </el-form-item>
+        </el-form>
       </div>
-      <div slot="footer" style="text-align: right">
-        <Button @click="logisticsShow = false">关闭</Button>
-        <Button type="primary" :loading="submitLoading" @click="submitDelivery">提交</Button>
-      </div>
-    </Modal>
+      <template #footer><div style="text-align: right">
+        <el-button @click="logisticsShow = false">关闭</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitDelivery">提交</el-button>
+      </div></template>
+    </el-dialog>
+    </UserCenterLayout>
   </div>
 </template>
 <script>
+import { Message, Modal } from "@/utils/message";
 import { afterSaleDetail, afterSaleLog, afterSaleReason, cancelAfterSale } from '@/api/member.js';
 import { afterSaleDelivery, getLogisticsCompany } from '@/api/order.js';
 import { afterSaleStatusList } from '../enumeration.js'
@@ -139,7 +153,7 @@ export default {
           if (pattern3.test(this.afterSale.reason)) {
             this.getReason(this.afterSale.serviceType)
           } else {
-            this.$set(this.afterSale, 'reasonName', this.afterSale.reason)
+            this.afterSale['reasonName'] = this.afterSale.reason
           }
         }
       })
@@ -150,7 +164,7 @@ export default {
           this.reasonList = res.result
           this.reasonList.forEach(e => {
             if (e.id === this.afterSale.reason) {
-              this.$set(this.afterSale, 'reasonName', e.reason)
+              this.afterSale['reasonName'] = e.reason
             }
           })
         }
@@ -169,13 +183,13 @@ export default {
       window.open(img, '_blank')
     },
     cancel (sn) { // 取消售后申请
-      this.$Modal.confirm({
+      Modal.confirm({
         title: '取消',
         content: '<p>确定取消此次售后申请吗？</p>',
         onOk: () => {
           cancelAfterSale(sn).then(res => {
             if (res.success) {
-              this.$Message.success('取消售后申请成功')
+              Message.success('取消售后申请成功')
               this.getDetail()
             }
           })
@@ -197,7 +211,7 @@ export default {
       afterSaleDelivery(this.form).then(res => {
         if (res.success) {
           this.logisticsShow = false;
-          this.$Message.success('提交成功')
+          Message.success('提交成功')
           this.getDetail()
         }
         this.submitLoading = false
@@ -207,16 +221,14 @@ export default {
     },
     // 提交物流modal
     openModal () {
-      this.form.afterSaleSn = this.afterSale.sn
       this.logisticsShow = true;
-      this.$refs.form.resetFields()
       if (!this.companyList.length) {
-        this.getCompany()
+        this.getCompany();
       }
-    },
-    // 格式化时间
-    changeTime (time) {
-      this.form.mDeliverTime = time;
+      this.$nextTick(() => {
+        this.$refs.form?.resetFields();
+        this.form.afterSaleSn = this.afterSale.sn;
+      });
     }
   },
   mounted () {
@@ -239,14 +251,20 @@ export default {
     color: #999;
     margin: 3px;
   }
+  .order-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    .order-meta-time {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+  }
   h3 {
     font-weight: normal;
     font-size: 16px;
-  }
-  .operation-time {
-    position: absolute;
-    right: 20px;
-    top: 10px;
   }
   &:last-child{
     border: none;
@@ -268,8 +286,19 @@ export default {
   }
   >div:nth-child(2){
     padding-left: 15px;
-    img{vertical-align: top;}
-    span{color: #999;}
+  }
+  .service-after-goods {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    img {
+      flex-shrink: 0;
+    }
+
+    span {
+      color: #999;
+    }
   }
 }
 /** 售后进度条 */
@@ -287,6 +316,19 @@ table{
   }
   td{
     padding: 5px;
+  }
+}
+
+:deep(.submit-logistics-btn) {
+  background-color: #ff9900 !important;
+  border-color: #ff9900 !important;
+  color: #fff !important;
+
+  &:hover,
+  &:focus {
+    background-color: #e68a00 !important;
+    border-color: #e68a00 !important;
+    color: #fff !important;
   }
 }
 </style>

@@ -1,318 +1,266 @@
 <template>
   <div class="search">
-    <Card>
-      <Row>
-        <Form
-          ref="searchForm"
-          :model="searchForm"
-          inline
-          :label-width="70"
-          class="search-form"
-        >
-          <Form-item label="商品名称" prop="goodsName">
-            <Input
-              type="text"
-              v-model="searchForm.goodsName"
-              placeholder="请输入商品名称"
-              clearable
-              style="width: 240px"
-            />
-          </Form-item>
-          <Form-item label="活动状态" prop="promotionStatus">
-            <Select
-              v-model="searchForm.promotionStatus"
-              placeholder="请选择"
-              clearable
-              style="width: 240px"
-            >
-              <Option value="NEW">未开始</Option>
-              <Option value="START">已开始/上架</Option>
-              <Option value="END">已结束/下架</Option>
-              <Option value="CLOSE">紧急关闭/作废</Option>
-            </Select>
-          </Form-item>
-          <Form-item label="活动时间">
-            <DatePicker
-              v-model="selectDate"
-              type="daterange"
-              clearable
-              placeholder="选择起始时间"
-              style="width: 240px"
-            >
-            </DatePicker>
-          </Form-item>
-          <Button
-            @click="handleSearch"
-            type="primary"
-            icon="ios-search"
-            class="search-btn"
-            >搜索</Button
-          >
-        </Form>
-      </Row>
-      </Card>
-    <Card>
-      <Row class="operation padding-row">
-        <Button @click="add" type="primary">添加砍价</Button>
-      </Row>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        ref="table"
-        sortable="custom"
-        @on-sort-change="changeSort"
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
       >
-        <template slot-scope="{ row }" slot="goodsName">
-          <div>
-            <a class="mr_10" @click="linkTo(row.goodsId, row.skuId)">{{
-              row.goodsName
-            }}</a>
-            <Poptip trigger="hover" title="扫码在手机中查看" transfer>
-              <div slot="content">
+        <el-form-item label="商品名称" prop="goodsName">
+          <el-input
+            v-model="searchForm.goodsName"
+            placeholder="请输入商品名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="活动状态" prop="promotionStatus">
+          <el-select
+            v-model="searchForm.promotionStatus"
+            placeholder="请选择"
+            clearable
+            style="width: 240px"
+          >
+            <el-option label="未开始" value="NEW" />
+            <el-option label="已开始/上架" value="START" />
+            <el-option label="已结束/下架" value="END" />
+            <el-option label="紧急关闭/作废" value="CLOSE" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="活动时间">
+          <el-date-picker
+            v-model="selectDate"
+            type="daterange"
+            clearable
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <div class="operation padding-row">
+        <el-button type="primary" @click="add">添加砍价</el-button>
+      </div>
+
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+        @sort-change="changeSort"
+      >
+        <el-table-column label="商品名称" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">
+            <template v-if="row">
+              <a class="link-text mr_10" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
+              <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
+                <template #reference>
+                  <img
+                    src="../../../assets/qrcode.svg"
+                    class="hover-pointer"
+                    width="20"
+                    height="20"
+                    alt="qrcode"
+                  />
+                </template>
                 <vue-qr
                   :text="wapLinkTo(row.goodsId, row.skuId)"
                   :margin="0"
-                  colorDark="#000"
-                  colorLight="#fff"
+                  color-dark="#000"
+                  color-light="#fff"
                   :size="150"
-                ></vue-qr>
-              </div>
-              <img
-                src="../../../assets/qrcode.svg"
-                style="vertical-align: middle"
-                class="hover-pointer"
-                width="20"
-                height="20"
-                alt=""
-              />
-            </Poptip>
-          </div>
-        </template>
-        <template slot-scope="{ row }" slot="startTime">
-          <div>{{ row.startTime }}</div>
-          <div>{{ row.endTime }}</div>
-        </template>
-        <template slot-scope="{ row }" slot="quantity">
-          <div>{{ row.stock }}</div>
-        </template>
-        <template slot-scope="{ row }" slot="action">
-          <a
-            v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
-            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:10px"
-            @click="edit(row)"
-            >编辑
-          </a>
-          <a
-            v-else
-            style="color:#2d8cf0;cursor:pointer;text-decoration:none;margin-right:10px"
-            @click="edit(row, 'onlyView')"
-            >查看
-          </a>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="page">
-        <Page
-          :current="searchForm.pageNumber"
+                />
+              </el-popover>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column label="库存数量" width="100">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.stock }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="stock" label="剩余活动库存" width="120" />
+        <el-table-column label="每人最低砍" min-width="110">
+          <template #default="{ row }">
+            <span v-if="row">{{ $filters.unitPrice(row.lowestPrice, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="每人最高砍" min-width="110">
+          <template #default="{ row }">
+            <span v-if="row">{{ $filters.unitPrice(row.highestPrice, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="结算价格" min-width="110">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">
+              {{ $filters.unitPrice(row.settlementPrice, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="活动开始时间" min-width="160">
+          <template #default="{ row }">
+            <template v-if="row">
+              <div>{{ row.startTime }}</div>
+              <div>{{ row.endTime }}</div>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="promotionStatusTagType(row.promotionStatus)">
+              {{ promotionStatusText(row.promotionStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="150" align="center" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a
+                v-if="row.promotionStatus === 'CLOSE' || row.promotionStatus === 'NEW'"
+                class="link-text"
+                @click="edit(row)"
+              >
+                编辑
+              </a>
+              <a v-else class="link-text" @click="edit(row, 'onlyView')">查看</a>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="page mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
 import { getKanJiaGoodsList, delKanJiaGoods } from "@/api/promotion";
-import { promotionsStatusRender } from "@/utils/promotions";
 import vueQr from "vue-qr";
 
 export default {
-  name: "coupon",
-  components: {
-    "vue-qr": vueQr,
-  },
-
+  name: "kanjia-activity-goods",
+  components: { vueQr },
   data() {
     return {
-      selectDate: [], //选中的数据
-      loading: true, // 表单加载状态
-      modalType: 0, // 添加或编辑标识
-      modalVisible: false, // 添加或编辑显示
-      modalTitle: "", // 添加或编辑标题
-        searchForm: {
-          // 搜索框初始化对象
-          pageNumber: 1, // 当前页数
-          pageSize: 20, // 页面大小
-          sort: "createTime", // 默认排序字段
-          order: "desc", // 默认排序方式
-          goodsName: "",
-        },
-      form: {
-        // 添加或编辑表单对象初始化数据
+      selectDate: [],
+      loading: true,
+      searchForm: {
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "createTime",
+        order: "desc",
+        goodsName: "",
+        promotionStatus: "",
       },
-      // 表单验证规则
-      formValidate: {},
-      submitLoading: false, // 添加或编辑提交状态
-      selectList: [], // 多选数据
-      selectCount: 0, // 多选计数
-      columns: [
-        {
-          title: "商品名称",
-          slot: "goodsName",
-          minWidth: 150,
-          tooltip: true,
-        },
-        {
-          title: "库存数量",
-          slot: "quantity",
-          width: 100,
-        },
-        {
-          title: "剩余活动库存",
-          key: "stock",
-          width: 110,
-        },
-        {
-          title: "每人最低砍",
-          key: "lowestPrice",
-          minWidth: 100,
-          render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.lowestPrice, "￥")
-            );
-          },
-        },
-        {
-          title: "每人最高砍",
-          key: "highestPrice",
-          minWidth: 100,
-          tooltip: true,
-          render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.highestPrice, "￥")
-            );
-          },
-        },
-        {
-          title: "结算价格",
-          key: "settlementPrice",
-          minWidth: 100,
-          render: (h, params) => {
-            return h("priceColorScheme", {props:{value:params.row.settlementPrice,color:this.$mainColor}} );
-          },
-        },
-        {
-          title: "活动开始时间",
-          slot: "startTime",
-          minWidth: 150,
-        },
-        {
-          title: "状态",
-          key: "promotionStatus",
-          render: (h, params) => {
-            return promotionsStatusRender(h, params);
-          },
-          width: 100,
-        },
-        {
-          title: "操作",
-          slot: "action",
-          align: "center",
-          fixed: "right",
-          width: 150,
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
-      selectCoupon: [], //本级选中的优惠券
+      data: [],
+      total: 0,
+      selectList: [],
+      selectCoupon: [],
     };
   },
-  props: {},
   watch: {
-    $route(to, from) {
+    $route(to) {
       if (to.fullPath == "/promotions/manager-coupon") {
         this.init();
       }
     },
   },
   methods: {
+    promotionStatusText(status) {
+      const map = {
+        NEW: "未开始",
+        START: "已开始",
+        END: "已结束",
+        CLOSE: "已关闭",
+      };
+      return map[status] || "未知";
+    },
+    promotionStatusTagType(status) {
+      const map = {
+        NEW: "info",
+        START: "success",
+        END: "danger",
+        CLOSE: "danger",
+      };
+      return map[status] || "danger";
+    },
     check() {
-      // this.selectCoupon.push(this.selectList)
       this.$emit("selected", this.selectCoupon);
     },
     init() {
       this.getDataList();
     },
-    // 添加砍价活动跳转
     add() {
       this.$router.push({ name: "add-kanJia-activity-goods" });
-    },
-
-    info(v) {
-      this.$router.push({ name: "platform-coupon-info", query: { id: v.id } });
     },
     changePage(v) {
       this.searchForm.pageNumber = v;
       this.getDataList();
-      // this.clearSelectAll();
     },
     changePageSize(v) {
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = v;
       this.getDataList();
     },
     handleSearch() {
-      this.searchForm.pageNumber = 0;
+      this.searchForm.pageNumber = 1;
       this.searchForm.pageSize = 20;
       this.getDataList();
     },
-    changeSort(e) {
-      this.searchForm.sort = e.key;
-      this.searchForm.order = e.order;
-      if (e.order === "normal") {
-        this.searchForm.order = "";
+    changeSort({ prop, order }) {
+      if (!order) {
+        this.searchForm.sort = "createTime";
+        this.searchForm.order = "desc";
+      } else {
+        this.searchForm.sort = prop;
+        this.searchForm.order = order === "ascending" ? "asc" : "desc";
       }
       this.getDataList();
     },
-    clearSelectAll() {
-      this.$refs.table.selectAll(false);
-    },
-
     getDataList() {
       this.loading = true;
       if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
-        this.searchForm.startTime = this.selectDate[0].getTime();
-        this.searchForm.endTime = this.selectDate[1].getTime();
+        this.searchForm.startTime = new Date(this.selectDate[0]).getTime();
+        this.searchForm.endTime = new Date(this.selectDate[1]).getTime();
       } else {
         this.searchForm.startTime = null;
         this.searchForm.endTime = null;
       }
-      // 带多条件搜索参数获取表单数据 请自行修改接口
-      getKanJiaGoodsList(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-      this.total = this.data.length;
-      this.loading = false;
+      getKanJiaGoodsList(this.searchForm)
+        .then((res) => {
+          if (res.success) {
+            this.data = res.result.records;
+            this.total = res.result.total;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
     edit(v, type) {
-      let data = {
-        id: v.id,
-      };
-      type ? (data.onlyView = true) : "";
+      const data = { id: v.id };
+      if (type) data.onlyView = true;
       this.$router.push({
         name: "edit-kanJia-activity-goods",
         query: data,
@@ -324,11 +272,6 @@ export default {
         content: "确认需要删除此砍价商品",
         loading: true,
         onOk: () => {
-          let ids = [];
-          this.selectList.forEach(function (e) {
-            ids.push(e.id);
-          });
-          // 批量删除
           delKanJiaGoods(row.id).then((res) => {
             this.$Modal.remove();
             if (res.success) {
@@ -345,6 +288,19 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-@import "@/styles/table-common.scss";
+
+<style lang="scss" scoped>
+.mr_10 {
+  margin-right: 10px;
+}
+.hover-pointer {
+  cursor: pointer;
+  vertical-align: middle;
+}
+.padding-row {
+  margin-bottom: 10px;
+}
+.mt_10 {
+  margin-top: 10px;
+}
 </style>

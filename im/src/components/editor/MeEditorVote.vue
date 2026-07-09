@@ -37,11 +37,12 @@
                 placeholder="请输入选项内容"
                 :maxlength="120"
               >
-                <span
-                  slot="prefix"
-                  style="margin-left:7px;"
-                  v-text="String.fromCharCode(65 + index)"
-                />
+                <template #prefix>
+                  <span
+                    style="margin-left:7px;"
+                    v-text="String.fromCharCode(65 + index)"
+                  />
+                </template>
               </el-input>
             </div>
             <div class="rbox">
@@ -154,7 +155,7 @@ export default {
         return false
       }
 
-      this.$delete(this.options, index)
+      this.options.splice(index, 1)
     },
   },
 }
@@ -184,7 +185,7 @@ export default {
       .lbox {
         width: 100%;
 
-        /deep/.el-input__prefix {
+        :deep(.el-input__prefix ) {
           height: 36px;
           line-height: 36px;
         }
@@ -220,7 +221,7 @@ export default {
   }
 }
 
-/deep/.el-radio__input.is-checked + .el-radio__label {
+:deep(.el-radio__input.is-checked + .el-radio__label ) {
   color: #606266;
 }
 </style>

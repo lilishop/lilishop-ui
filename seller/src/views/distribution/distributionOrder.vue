@@ -1,163 +1,150 @@
 <template>
-  <div class="search">
-    <Card>
-      <Form ref="searchForm" :model="searchForm" inline :label-width="70"  @keydown.enter.native="handleSearch" class="search-form">
-        <Form-item label="订单编号" prop="orderSn">
-          <Input type="text" v-model="searchForm.orderSn" placeholder="请输入订单编号" clearable style="width: 240px" />
-        </Form-item>
-        <Form-item label="订单时间">
-          <DatePicker type="daterange" v-model="timeRange" format="yyyy-MM-dd" placeholder="选择时间" style="width: 240px"></DatePicker>
-        </Form-item>
-        <Button @click="handleSearch" type="primary" class="search-btn">搜索</Button>
-      </Form>
-    </Card>
-    <Card>
-      <Table class="mt_10" :loading="loading" border :columns="columns" :data="data" ref="table"></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page :current="searchForm.pageNumber" :total="total" :page-size="searchForm.pageSize" @on-change="changePage" @on-page-size-change="changePageSize" :page-size-opts="[10,20,50]" size="small"
-          show-total show-elevator show-sizer></Page>
-      </Row>
-    </Card>
+  <div>
+    <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="订单编号" prop="orderSn">
+          <el-input
+            v-model="searchForm.orderSn"
+            placeholder="请输入订单编号"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="分销商" prop="distributionName">
+          <el-input
+            v-model="searchForm.distributionName"
+            placeholder="请输入分销商名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="订单时间">
+          <el-date-picker
+            v-model="timeRange"
+            type="daterange"
+            value-format="YYYY-MM-DD"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            placeholder="选择时间"
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
+    <el-card>
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        class="mt_10"
+        style="width: 100%"
+      >
+        <el-table-column
+          prop="orderSn"
+          label="订单编号"
+          min-width="180"
+          fixed="left"
+          show-overflow-tooltip
+        />
+        <el-table-column label="商品信息" min-width="200">
+          <template #default="{ row }">
+            <div v-if="row" class="goods-msg">
+              <img :src="row.image" width="60" height="60" alt="" />
+              <div>
+                <div class="div-zoom">
+                  <a class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
+                </div>
+                <div style="color: #999; font-size: 10px">数量：x{{ row.num }}</div>
+                <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
+                  <template #reference>
+                    <img
+                      src="../../assets/qrcode.svg"
+                      class="hover-pointer"
+                      width="20"
+                      height="20"
+                      alt="qrcode"
+                    />
+                  </template>
+                  <vue-qr
+                    :text="wapLinkTo(row.goodsId, row.skuId)"
+                    :margin="0"
+                    color-dark="#000"
+                    color-light="#fff"
+                    :size="150"
+                  />
+                </el-popover>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="distributionName" label="分销商" min-width="100" show-overflow-tooltip />
+        <el-table-column label="状态" min-width="90">
+          <template #default="{ row }">
+            <el-tag v-if="row" :type="filterStatusTagType(row.distributionOrderStatus)">
+              {{ filterStatus(row.distributionOrderStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="佣金金额" min-width="100">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">
+              {{ $filters.unitPrice(row.rebate, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" min-width="160" fixed="right" />
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
+          :total="total"
+          layout="total, sizes, prev, pager, next, jumper"
+          size="small"
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script>
 import { getDistributionOrder } from "@/api/distribution";
 import { orderStatusList } from "./dataJson";
+import vueQr from "vue-qr";
 
 export default {
   name: "distributionOrder",
-  components: {},
+  components: { vueQr },
   data() {
     return {
-      timeRange: [], // 范围时间
-      orderStatusList, // 订单状态列表
-      distributionId: this.$route.query.id, // 分销id
-      loading: true, // 表单加载状态
+      timeRange: [],
+      orderStatusList,
+      distributionId: this.$route.query.id,
+      loading: true,
       searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 10, // 页面大小
-        sort:"create_time",
-        order:"desc"
+        pageNumber: 1,
+        pageSize: 20,
+        sort: "create_time",
+        order: "desc",
       },
-      columns: [
-        {
-          title: "订单编号",
-          key: "orderSn",
-          minWidth: 120,
-          tooltip: true,
-        },
-
-
-        {
-          title: "商品名称",
-          key: "goodsName",
-          minWidth: 120,
-          tooltip: true,
-        },
-        {
-          title: "状态",
-          key: "distributionOrderStatus",
-          width: 100,
-          sortable: false,
-          render: (h, params) => {
-            if (params.row.distributionOrderStatus == "NO_COMPLETED") {
-              return h("Tag", { props: { color: "orange" } }, "未完成");
-            } else if (params.row.distributionOrderStatus == "COMPLETE") {
-              return h("Tag", { props: { color: "green" } }, "完成");
-            } else if (params.row.distributionOrderStatus == "REFUND") {
-              return h("Tag", { props: { color: "red" } }, "退款");
-            } else {
-              return h("Tag", { props: { color: "orange" } }, "未完成");
-            }
-
-          },
-        },
-
-        {
-          title: "佣金金额",
-          key: "rebate",
-          width: 120,
-          sortable: false,
-          render: (h, params) => {
-            if (params.row.rebate == null) {
-              return h("div", this.$options.filters.unitPrice(0, "￥"));
-            } else {
-              return h(
-                "div",
-                this.$options.filters.unitPrice(params.row.rebate, "￥")
-              );
-            }
-          },
-        },
-        {
-          title: "创建时间",
-          key: "createTime",
-          width: 180,
-          sortable: false,
-        },
-        {
-          title: "解冻日期（T+1）",
-          key: "settleCycle",
-          width: 180,
-          sortable: false,
-        },
-      ],
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
+      data: [],
+      total: 0,
     };
-  },
-  methods: {
-    init() { // 初始化数据
-      this.getDataList();
-    },
-    // 改变页码
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    // 改变页数
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    // 搜索
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      this.getDataList();
-    },
-    // 获取订单数据
-    getDataList() {
-      this.searchForm.distributionId = this.distributionId;
-      this.loading = true;
-      if (this.timeRange && this.timeRange[0]) {
-        let startTime = this.timeRange[0];
-        let endTime = this.timeRange[1];
-        this.searchForm.startTime = this.$options.filters.unixToDate(
-          startTime / 1000
-        );
-        this.searchForm.endTime = this.$options.filters.unixToDate(
-          endTime / 1000
-        );
-      }
-      // 带多条件搜索参数获取表单数据 请自行修改接口
-      getDistributionOrder(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-
-          this.total = res.result.total;
-        }
-      });
-      this.total = this.data.length;
-      this.loading = false;
-    },
-  },
-  mounted() {
-    this.init();
   },
   watch: {
     $route(e) {
@@ -165,9 +152,102 @@ export default {
       this.getDataList();
     },
   },
+  methods: {
+    init() {
+      this.getDataList();
+    },
+    changePage() {
+      this.getDataList();
+    },
+    changePageSize() {
+      this.searchForm.pageNumber = 1;
+      this.getDataList();
+    },
+    handleSearch() {
+      this.searchForm.pageNumber = 1;
+      this.searchForm.pageSize = 20;
+      this.getDataList();
+    },
+    getDataList() {
+      this.searchForm.distributionId = this.distributionId;
+      this.loading = true;
+      if (this.timeRange && this.timeRange[0] && this.timeRange[1]) {
+        const startTime = new Date(this.timeRange[0]).getTime();
+        const endTime = new Date(this.timeRange[1]).getTime();
+        this.searchForm.startTime = this.$filters.unixToDate(startTime / 1000);
+        this.searchForm.endTime = this.$filters.unixToDate(endTime / 1000);
+      } else {
+        this.searchForm.startTime = null;
+        this.searchForm.endTime = null;
+      }
+      getDistributionOrder(this.searchForm)
+        .then((res) => {
+          if (res?.success) {
+            const page = res.result || {};
+            this.data = page.records || [];
+            this.total = page.total || 0;
+          } else {
+            this.data = [];
+            this.total = 0;
+          }
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+    filterStatus(status) {
+      const arr = [
+        { status: "NO_COMPLETED", title: "未完成" },
+        { status: "COMPLETE", title: "完成" },
+        { status: "REFUND", title: "退款" },
+      ];
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i].status === status) {
+          return arr[i].title;
+        }
+      }
+      return "未完成";
+    },
+    filterStatusTagType(status) {
+      const arr = [
+        { status: "NO_COMPLETED", type: "warning" },
+        { status: "COMPLETE", type: "success" },
+        { status: "REFUND", type: "danger" },
+      ];
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i].status === status) {
+          return arr[i].type;
+        }
+      }
+      return "warning";
+    },
+  },
+  mounted() {
+    this.init();
+  },
 };
 </script>
-<style lang="scss" >
-@import "@/styles/table-common.scss";
-</style>
 
+<style lang="scss">
+.goods-msg {
+  display: flex;
+  align-items: center;
+  > div {
+    margin-left: 10px;
+  }
+}
+
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.hover-pointer {
+  cursor: pointer;
+}
+
+.mt_10 {
+  margin-top: 10px;
+}
+</style>

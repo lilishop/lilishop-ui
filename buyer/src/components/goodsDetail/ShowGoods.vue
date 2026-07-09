@@ -6,7 +6,12 @@
         <!-- 大图、放大镜 -->
         <!-- <div  id="dplayer"></div> -->
         <div class="item-detail-big-img" v-if="imgList[imgIndex]">
-          <pic-zoom :url="imgList[imgIndex].url || imgList[imgIndex]" :scale="2"></pic-zoom>
+          <el-image
+            :src="currentImg"
+            :preview-src-list="previewList"
+            fit="contain"
+            style="width: 100%; height: 350px"
+          />
         </div>
 
         <!-- <div  id="dplayer"></div> -->
@@ -23,32 +28,36 @@
         </div>
 
         <div class="goodsConfig mt_10">
-          <span @click="collect"
-            ><Icon
-              type="ios-heart"
-              :color="isCollected ? '#ed3f14' : '#666'"
-            />{{ isCollected ? "已收藏" : "收藏" }}</span
+          <span
+            class="collect-btn"
+            :class="{ 'is-collected': isCollected }"
+            @click="collect"
           >
+            <el-icon class="collect-icon"><StarFilled /></el-icon>
+            <span class="collect-text">{{ isCollected ? '已收藏' : '收藏' }}</span>
+          </span>
         </div>
       </div>
       <!-- 右侧商品信息、活动信息、操作展示 -->
       <div class="item-detail-right">
         <div class="item-detail-title">
-          <p>
-            {{ skuDetail.goodsName }}
-            <Tag
+          <div class="item-detail-title-row">
+            <span class="item-detail-name">{{ skuDetail.goodsName }}</span>
+            <el-tag
               v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
-              style="margin-top:10px;rgb(153, 149, 149);"
+              class="goods-type-tag"
+              size="small"
             >
               实物商品
-            </Tag>
-            <Tag
+            </el-tag>
+            <el-tag
               v-else-if="skuDetail.goodsType == 'VIRTUAL_GOODS'"
-              style="margin-top:10px;rgb(153, 149, 149);"
+              class="goods-type-tag"
+              size="small"
             >
               虚拟商品
-            </Tag>
-          </p>
+            </el-tag>
+          </div>
         </div>
         <div class="sell-point">
           {{ skuDetail.sellingPoint }}
@@ -68,14 +77,9 @@
             >
               <p>
                 <span class="item-price-title" v-if="promotionMap['SECKILL']"
-                  >秒 &nbsp;杀&nbsp;价</span
-                >
-                <span class="item-price">{{
-                  skuDetail.promotionPrice | unitPrice("￥")
-                }}</span>
-                <span class="item-price-old">{{
-                  skuDetail.price | unitPrice("￥")
-                }}</span>
+                  >秒 &nbsp;杀&nbsp;价</span>
+                <span class="item-price">{{ $filters.unitPrice(skuDetail.promotionPrice, "￥") }}</span>
+                <span class="item-price-old">{{ $filters.unitPrice(skuDetail.price, "￥") }}</span>
               </p>
             </div>
             <!-- 商品原价 -->
@@ -92,7 +96,7 @@
                     :key="index"
                     class="item-price item-num"
                   >
-                    {{ item | unitPrice("￥") }}
+                    {{ $filters.unitPrice(item, "￥") }}
                   </div>
                 </div>
                 <div class="flex">
@@ -110,16 +114,13 @@
               <!-- 普通价格 -->
               <div v-else>
                 <span class="item-price-title"
-                  >价 &nbsp;&nbsp;&nbsp;&nbsp;格</span
-                >
-                <span class="item-price">{{
-                  skuDetail.price | unitPrice("￥")
-                }}</span>
+                  >价 &nbsp;&nbsp;&nbsp;&nbsp;格</span>
+                <span class="item-price">{{ $filters.unitPrice(skuDetail.price, "￥") }}</span>
               </div>
             </div>
             <!-- 优惠券展示 -->
             <div class="item-price-coupon-row" v-if="promotionMap['COUPON'].length">
-              <p class="Ellipsis">
+              <div class="Ellipsis">
                 <span class="item-price-title">优 惠 券</span>
                 <span>
                   <span
@@ -129,13 +130,11 @@
                     @click="receiveCoupon(item.id)"
                   >
                     <span v-if="item.couponType == 'PRICE'"
-                      >满{{ item.consumeThreshold }}减{{ item.price }}</span
-                    >
+                      >满{{ item.consumeThreshold }}减{{ item.price }}</span>
                     <span v-if="item.couponType == 'DISCOUNT'"
                       >满{{ item.consumeThreshold }}打{{
                         item.couponDiscount
-                      }}折</span
-                    >
+                      }}折</span>
                   </span>
                 </span>
 
@@ -149,32 +148,28 @@
                         @click="receiveCoupon(item.id)"
                       >
                         <span v-if="item.couponType == 'PRICE'"
-                          >满{{ item.consumeThreshold }}减{{ item.price }}</span
-                        >
+                          >满{{ item.consumeThreshold }}减{{ item.price }}</span>
                         <span v-if="item.couponType == 'DISCOUNT'"
                           >满{{ item.consumeThreshold }}打{{
                             item.couponDiscount
-                          }}折</span
-                        >
+                          }}折</span>
                       </span>
                     </div>
                   </div>
-              </p>
+              </div>
             </div>
             <!-- 满减展示 -->
             <div class="item-price-row" v-if="promotionMap['FULL_DISCOUNT']">
               <p>
                 <span class="item-price-title"
-                  >促&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;销</span
-                >
+                  >促&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;销</span>
                 <span class="item-promotion">满减</span>
                 <span
                   class="item-desc-pintuan"
                   v-if="promotionMap['FULL_DISCOUNT'].fullMinus"
                   >满{{ promotionMap["FULL_DISCOUNT"].fullMoney }}元，立减现金{{
                     promotionMap["FULL_DISCOUNT"].fullMinus
-                  }}元</span
-                >
+                  }}元</span>
                 <span
                   class="item-desc-pintuan"
                   v-if="
@@ -183,8 +178,7 @@
                   "
                   >满{{ promotionMap["FULL_DISCOUNT"].fullMoney }}元，立享{{
                     promotionMap["FULL_DISCOUNT"].fullRate
-                  }}折</span
-                >
+                  }}折</span>
               </p>
             </div>
           </div>
@@ -193,8 +187,7 @@
               <p>累计评价</p>
               <p>
                 <span class="item-remarks-num"
-                  >{{ skuDetail.commentNum || 0 }} 条</span
-                >
+                  >{{ skuDetail.commentNum || 0 }} 条</span>
               </p>
             </div>
           </div>
@@ -235,16 +228,18 @@
             <div class="item-select-title">
               <p>数量</p>
             </div>
-            <div class="item-select-row">
-              <InputNumber
-                :min="1"
-                :max="skuDetail.quantity"
-                :disabled="skuDetail.quantity === 0"
-                v-model="count"
-                :precision="0.1"
-                @on-blur="changeCount"
-              ></InputNumber>
-              <span class="inventory"> 库存{{ skuDetail.quantity }}</span>
+            <div class="item-select-column">
+              <div class="item-select-row">
+                <el-input-number
+                  :min="1"
+                  :max="quantityMax"
+                  :disabled="isOutOfStock"
+                  v-model="count"
+                  :precision="0"
+                  @blur="changeCount"
+                ></el-input-number>
+                <span class="inventory">&nbsp;&nbsp;库存{{ skuDetail.quantity }}</span>
+              </div>
             </div>
           </div>
           <div
@@ -256,58 +251,66 @@
             <div class="item-select-title">
               <p>重量</p>
             </div>
-            <div class="item-select-row">
-              <span class="inventory"> {{ skuDetail.weight }}kg</span>
+            <div class="item-select-column">
+              <span class="inventory">{{ skuDetail.weight }}kg</span>
             </div>
           </div>
           <div
-            class="add-buy-car"
+            class="item-select add-buy-car-row"
             v-if="$route.query.way === 'POINT' && skuDetail.authFlag === 'PASS'"
           >
-            <Button
-              type="error"
-              :loading="loading"
-              :disabled="skuDetail.quantity === 0"
-              @click="pointPay"
-              >积分购买</Button
-            >
+            <div class="item-select-column">
+              <div class="add-buy-car">
+                <el-button
+                  type="danger"
+                  :loading="loading"
+                  :disabled="skuDetail.quantity === 0"
+                  @click="pointPay"
+                  >积分购买</el-button
+                >
+              </div>
+            </div>
           </div>
           <div
-            class="add-buy-car"
+            class="item-select add-buy-car-row"
             v-if="$route.query.way !== 'POINT' && skuDetail.authFlag === 'PASS'"
           >
-
-           <Button
-              type="error"
-              v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
-              :loading="loading"
-              :disabled="skuDetail.quantity === 0"
-              @click="addShoppingCartBtn"
-              >加入购物车</Button
-            >
-            <Button
-              type="warning"
-              :loading="loading1"
-              :disabled="skuDetail.quantity === 0"
-              @click="buyNow"
-              >立即购买</Button
-            >
-            <Tooltip content="观看视频" v-if="skuDetail.goodsVideo">
-              <img class="view-video" @click="showGoodsVideo = true" :src="require('@/assets/iconfont/play.svg')" alt="">
-            </Tooltip>
+            <div class="item-select-column">
+              <div class="add-buy-car">
+                <el-button
+                  type="danger"
+                  v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
+                  :loading="loading"
+                  :disabled="skuDetail.quantity === 0"
+                  @click="addShoppingCartBtn"
+                  >加入购物车</el-button
+                >
+                <el-button
+                  class="confirm-receipt-btn"
+                  :loading="loading1"
+                  :disabled="skuDetail.quantity === 0"
+                  @click="buyNow"
+                  >立即购买</el-button
+                >
+                <el-tooltip content="观看视频" v-if="skuDetail.goodsVideo">
+                  <img class="view-video" @click="showGoodsVideo = true" :src="playIcon" alt="">
+                </el-tooltip>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <Modal title="浏览视频" v-model="showGoodsVideo">
-        <div id="dplayer"></div>
-      </Modal>
+      <el-dialog title="浏览视频" v-model="showGoodsVideo">
+          <div id="dplayer"></div>
+        </el-dialog>
     </div>
   </div>
 </template>
 
 <script>
+import { Message } from "@/utils/message";
+import { StarFilled } from '@element-plus/icons-vue';
 import Promotion from "./Promotion.vue";
-import PicZoom from "vue-piczoom"; // 图片放大
 import DPlayer from "dplayer";
 import {
   collectGoods,
@@ -316,6 +319,7 @@ import {
   cancelCollect,
 } from "@/api/member.js";
 import { addCartGoods } from "@/api/cart.js";
+import playIcon from "@/assets/iconfont/play.svg";
 
 export default {
   name: "ShowGoods",
@@ -331,9 +335,7 @@ export default {
       handler(val) {
         this.skuDetail = val.data;
         this.wholesaleList = val.wholesaleList;
-        if (this.wholesaleList && this.wholesaleList.length > 0) {
-          this.count = this.wholesaleList[0].num;
-        }
+        this.syncCountWithQuantity();
         this.promotion();
         this.swiperGoodsImg();
       },
@@ -348,6 +350,7 @@ export default {
   },
   data() {
     return {
+      playIcon,
       showGoodsVideo:false,
       goodsVideo:"",
       wholesaleList: [],
@@ -371,8 +374,15 @@ export default {
       isCollected: false, // 是否收藏
     };
   },
-  components: { PicZoom, Promotion },
+  components: { Promotion, StarFilled },
   computed: {
+    currentImg() {
+      const item = this.imgList[this.imgIndex];
+      return item ? item.url || item : "";
+    },
+    previewList() {
+      return this.imgList.map((item) => item.url || item);
+    },
     wholesalePrice(key) {
       return this.wholesaleList.length
         ? this.wholesaleList.map((item) => {
@@ -386,6 +396,13 @@ export default {
             return item.num;
           })
         : [];
+    },
+    quantityMax() {
+      const qty = Number(this.skuDetail.quantity) || 0;
+      return qty > 0 ? qty : 1;
+    },
+    isOutOfStock() {
+      return (Number(this.skuDetail.quantity) || 0) <= 0;
     },
   },
   methods: {
@@ -407,17 +424,33 @@ export default {
     },
 
 
+    syncCountWithQuantity() {
+      const qty = Number(this.skuDetail.quantity) || 0;
+      if (qty <= 0) {
+        this.count = 1;
+        return;
+      }
+      if (this.wholesaleList && this.wholesaleList.length > 0) {
+        this.count = Math.min(Math.max(this.wholesaleList[0].num, 1), qty);
+        return;
+      }
+      if (this.count > qty) {
+        this.count = qty;
+      } else if (this.count < 1) {
+        this.count = 1;
+      }
+    },
     changeCount(val) {
       if (this.wholesaleList && this.wholesaleList.length > 0) {
         if (this.count <= this.wholesaleList[0].num) {
-          this.$Message.warning("批发商品购买数量不能小于起批数量");
+          Message.warning("批发商品购买数量不能小于起批数量");
           this.count = this.wholesaleList[0].num;
         }
       }
     },
     select(index, value) {
       // 选择规格
-      this.$set(this.currentSelceted, index, value);
+      this.currentSelceted[index] = value;
       let selectedSkuId = this.goodsSpecList.find((i) => {
         let matched = true;
         let specValues = i.specValues.filter((j) => j.specName !== "images");
@@ -450,10 +483,16 @@ export default {
           if (res.success) {
             this.$router.push({
               path: "/shoppingCart",
-              query: { detail: this.skuDetail, count: this.count },
+              query: {
+                skuId: this.skuDetail.id,
+                goodsId: this.skuDetail.goodsId,
+                thumbnail: this.skuDetail.thumbnail,
+                goodsName: this.skuDetail.goodsName,
+                count: this.count,
+              },
             });
           } else {
-            this.$Message.warning(res.message);
+            Message.warning(res.message);
           }
         })
         .catch(() => {
@@ -481,7 +520,7 @@ export default {
               query: { way: params.cartType },
             });
           } else {
-            this.$Message.warning(res.message);
+            Message.warning(res.message);
           }
         })
         .catch(() => {
@@ -493,14 +532,14 @@ export default {
       if (this.isCollected) {
         let cancel = await cancelCollect("GOODS", this.skuDetail.id);
         if (cancel.success) {
-          this.$Message.success("取消收藏成功");
+          Message.success("取消收藏成功");
           this.isCollected = false;
         }
       } else {
         let collect = await collectGoods("GOODS", this.skuDetail.id);
         if (collect.code === 200) {
           this.isCollected = true;
-          this.$Message.success("收藏商品成功,可以前往个人中心我的收藏查看");
+          Message.success("收藏商品成功,可以前往个人中心我的收藏查看");
         }
       }
     },
@@ -556,9 +595,9 @@ export default {
       // 领取优惠券
       receiveCoupon(id).then((res) => {
         if (res.success) {
-          this.$Message.success("优惠券领取成功");
+          Message.success("优惠券领取成功");
         } else {
-          this.$Message.warning(res.message);
+          Message.warning(res.message);
         }
       });
     },
@@ -652,9 +691,7 @@ export default {
   height: 350px;
   box-shadow: 0px 0px 8px $border_color;
   cursor: pointer;
-
-
-
+  margin-bottom: 24px;
 }
 #dplayer{
     width: 100%;
@@ -665,7 +702,7 @@ export default {
 }
 
 .item-detail-img-row {
-  margin-top: 15px;
+  margin-top: 0;
   display: flex;
 }
 
@@ -689,11 +726,23 @@ export default {
   flex-direction: column;
 }
 
-.item-detail-title p {
+.item-detail-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.item-detail-name {
   @include content_color($light_content_color);
   font-weight: bold;
   font-size: 20px;
-  padding: 8px 0;
+  line-height: 1.4;
+}
+
+.goods-type-tag {
+  flex-shrink: 0;
 }
 
 .item-detail-express {
@@ -774,7 +823,7 @@ export default {
   color: $theme_color;
   margin: 5px 0;
   font-size: 12px;
-  background-color: #ffdedf;
+  background-color: var(--theme-tint-12, #ffdedf);
   border: 1px dotted $theme_color;
   cursor: pointer;
 
@@ -799,7 +848,7 @@ export default {
   padding: 0 5px;
   color: $theme_color;
   font-size: 12px;
-  background-color: #ffdedf;
+  background-color: var(--theme-tint-12, #ffdedf);
   border: 1px dotted $theme_color;
   cursor: pointer;
 
@@ -843,6 +892,7 @@ export default {
 .item-select {
   display: flex;
   flex-direction: row;
+  align-items: center;
   margin-top: 15px;
 }
 
@@ -851,15 +901,25 @@ export default {
   font-size: 14px;
   margin-right: 15px;
   width: 60px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+
+  p {
+    margin: 0;
+  }
 }
 
 .item-select-column {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   flex: 1;
 }
 
 .item-select-row {
+  display: flex;
+  align-items: center;
   margin-bottom: 8px;
 }
 
@@ -898,24 +958,64 @@ export default {
   border-top: 1px dotted $border_color;
 }
 
+.add-buy-car-row {
+  margin-top: 25px;
+
+  &.item-select {
+    margin-top: 25px;
+  }
+
+  .item-select-column {
+    flex: none;
+    width: 100%;
+  }
+}
+
 .add-buy-car {
   display: flex;
   align-items: center;
-  margin-top: 15px;
+  flex-wrap: wrap;
+  margin-top: 0;
+  padding-left: 0;
+  margin-left: 0;
+
   > * {
-    margin: 0 4px;
+    margin: 0 8px 0 0;
+  }
+
+  > *:last-child {
+    margin-right: 0;
   }
 }
 
 .goodsConfig {
   display: flex;
   justify-content: space-between;
-  > span {
+
+  .collect-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     padding-right: 10px;
-    &:hover {
-      cursor: pointer;
-      color: $theme_color;
+    color: #666;
+    cursor: pointer;
+    line-height: 1;
+
+    &.is-collected {
+      .collect-icon {
+        color: #ffc107;
+      }
     }
+  }
+
+  .collect-icon {
+    display: inline-flex;
+    align-items: center;
+    font-size: 16px;
+  }
+
+  .collect-text {
+    line-height: 1;
   }
 }
 .sell-point {

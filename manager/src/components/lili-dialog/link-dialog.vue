@@ -1,10 +1,9 @@
 <template>
   <div class="wrapper">
-    <Tabs :value="wap[0].title" class="tabs">
-      <TabPane
+    <el-tabs v-model="activeTab" class="tabs">
+      <el-tab-pane
         :label="item.title"
         :name="item.title"
-        @click="clickTag(item, i)"
         v-for="(item, i) in wap"
         :key="i"
       >
@@ -17,9 +16,8 @@
             }
           "
         />
-      </TabPane>
-      <!-- </template> -->
-    </Tabs>
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 <script>
@@ -30,13 +28,16 @@ export default {
   components: {
     goodsDialog
   },
+  setup() {
+    return { templateWay };
+  },
   data() {
     return {
-      templateWay, // 模板数据
       changed: "", // 变更模板
       selected: 0, // 已选数据
       selectedLink: "", //选中的链接
       wap, // tab标签
+      activeTab: wap[0]?.title || "",
     };
   },
   watch: {
@@ -122,13 +123,8 @@ export default {
   width: 100%;
 }
 
-::v-deep .ivu-modal {
-  overflow: hidden;
-  height: 650px !important;
-}
-::v-deep .ivu-modal-body {
-  width: 100%;
+:deep(.el-tabs__content) {
   height: 500px;
-  overflow: hidden;
+  overflow: auto;
 }
 </style>

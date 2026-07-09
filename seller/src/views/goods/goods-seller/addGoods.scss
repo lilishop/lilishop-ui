@@ -78,15 +78,51 @@
 }
 
 .sku-val {
+  width: 100%;
   justify-content: flex-start;
   flex-wrap: wrap;
 
-  >.ivu-form {
+  .sku-val-label {
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+
+  .sku-val-form {
+    flex-wrap: wrap !important;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  >.el-form {
     flex-wrap: wrap !important;
   }
 
-  ::v-deep .sku-item-content-val {
+  :deep(.sku-item-content-val) {
     margin-right: 20px;
+    margin-left: 0 !important;
+    width: auto !important;
+    min-width: auto !important;
+
+    .el-form-item__content {
+      margin-left: 0 !important;
+      align-items: flex-start;
+    }
+  }
+
+  .sku-val-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sku-val-input-row {
+    display: flex;
+    align-items: center;
+  }
+
+  .sku-val-image {
+    margin-top: 10px;
   }
 }
 
@@ -139,11 +175,11 @@ div.base-info-item {
         justify-content: flex-start;
         width: 100%;
 
-        >.ivu-card-body {
+        >.el-card__body {
           width: 100%;
         }
 
-        .ivu-card-body {
+        .el-card__body {
           width: 100%;
           justify-content: center;
           align-items: flex-start;
@@ -151,9 +187,23 @@ div.base-info-item {
 
         .sku-item-content-name {
           display: flex;
+          flex-direction: column;
           align-items: flex-start;
           justify-content: flex-start;
           width: 100%;
+          margin-bottom: 10px;
+
+          .sku-item-label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            line-height: 1.5;
+          }
+
+          .sku-item-input-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+          }
         }
       }
     }
@@ -215,7 +265,7 @@ div.base-info-item {
   }
 
   /*teatarea*/
-  ::v-deep .el-textarea {
+  :deep(.el-textarea) {
     width: 150%;
   }
 
@@ -226,7 +276,7 @@ div.base-info-item {
 
 /*折叠面板*/
 .el-collapse-item {
-  ::v-deep .el-collapse-item__header {
+  :deep(.el-collapse-item__header) {
     text-align: left;
     background-color: #f8f8f8;
     padding: 0 10px;
@@ -240,7 +290,7 @@ div.base-info-item {
     width: 25%;
   }
 
-  ::v-deep .el-form-item__content {
+  :deep(.el-form-item__content) {
     margin-left: 120px;
     text-align: left;
   }
@@ -251,7 +301,7 @@ div.base-info-item {
     color: #999;
   }
 
-  ::v-deep .el-collapse-item__content {
+  :deep(.el-collapse-item__content) {
     padding: 10px 0;
     text-align: left;
   }
@@ -279,6 +329,11 @@ div.base-info-item {
 }
 
 /** 底部步骤 */
+.footer-btns {
+  display: flex;
+  gap: 10px;
+}
+
 .footer {
   width: 100%;
   margin-top: 20px;
@@ -289,18 +344,18 @@ div.base-info-item {
   text-align: center;
   z-index: 999;
 
-  >.ivu-btn {
+  >.el-button {
     margin: 0 10px;
   }
 }
 
 /*图片上传组件第一张图设置封面*/
 .goods-images {
-  ::v-deep li.el-upload-list__item:first-child {
+  :deep(li.el-upload-list__item:first-child) {
     position: relative;
   }
 
-  ::v-deep li.el-upload-list__item:first-child:after {
+  :deep(li.el-upload-list__item:first-child:after) {
     content: "封";
     color: #fff;
     font-weight: bold;
@@ -394,7 +449,7 @@ div.base-info-item {
 }
 
 .required {
-  ::v-deep .ivu-form-item-label::before {
+  :deep(.el-form-item__label::before) {
     content: "*";
     display: inline-block;
     margin-right: 4px;
@@ -483,7 +538,7 @@ div.base-info-item {
   justify-content: center;
   align-items: center;
 
-  ::v-deep img {
+  :deep(img) {
     margin-right: 20px;
     width: 100px;
     margin-left: 10px;
@@ -491,7 +546,7 @@ div.base-info-item {
 
 
 
-  ::v-deep p {
+  :deep(p) {
     color: #999;
     font-size: 14px;
     margin-top: 10px;

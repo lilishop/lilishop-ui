@@ -55,4 +55,4 @@
   };
 </script>
 
-<style lang="less" src="./Checkbox.less"></style>
+<style lang="less" scoped src="./Checkbox.less"></style>

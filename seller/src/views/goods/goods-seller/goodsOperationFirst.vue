@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- 选择商品类型 -->
-    <Modal v-model="selectGoodsType" width="550" :closable="false">
+    <el-dialog v-model="selectGoodsType" width="550px" :show-close="false">
       <div class="goods-type-list">
         <div
           class="goods-type-item"
@@ -17,7 +17,13 @@
           </div>
         </div>
       </div>
-    </Modal>
+      <template #footer>
+        <div class="goods-type-actions">
+          <el-button @click="cancelGoodsType">取消</el-button>
+          <el-button type="primary" @click="confirmGoodsType">确认</el-button>
+        </div>
+      </template>
+    </el-dialog>
     <!-- 商品分类 -->
     <div class="content-goods-publish">
       <div class="goods-category">
@@ -63,15 +69,17 @@
     </div>
     <!-- 底部按钮 -->
     <div class="footer">
-      <ButtonGroup>
-        <Button type="primary" @click="selectGoodsType = true">商品类型</Button>
-        <Button type="primary" @click="next">下一步</Button>
-      </ButtonGroup>
+      <div class="footer-btns">
+        <el-button type="primary" @click="openGoodsTypeDialog">商品类型</el-button>
+        <el-button type="primary" @click="next">下一步</el-button>
+      </div>
     </div>
   </div>
 </template>
 <script>
 import * as API_GOODS from "@/api/goods";
+import goodsType1Img from "@/assets/goodsType1.png";
+import goodsType2Img from "@/assets/goodsType2.png";
 export default {
   data() {
     return {
@@ -79,14 +87,14 @@ export default {
       goodsTypeWay: [
         {
           title: "实物商品",
-          img: require("@/assets/goodsType1.png"),
+          img: goodsType1Img,
           desc: "零售批发，物流配送",
           type: "PHYSICAL_GOODS",
           check: false,
         },
         {
           title: "虚拟商品",
-          img: require("@/assets/goodsType2.png"),
+          img: goodsType2Img,
           desc: "虚拟核验，无需物流",
           type: "VIRTUAL_GOODS",
           check: false,
@@ -100,6 +108,7 @@ export default {
       ],
       // 商品类型
       goodsType: "",
+      pendingGoodsType: "",
       /** 1级分类列表*/
       categoryListLevel1: [],
       /** 2级分类列表*/
@@ -108,15 +117,41 @@ export default {
       categoryListLevel3: [],
     };
   },
+  watch: {
+    selectGoodsType(val) {
+      if (val) {
+        this.syncGoodsTypeSelection();
+      }
+    },
+  },
   methods: {
-    // 点击商品类型
-    handleClickGoodsType(val) {
-      this.goodsTypeWay.map((item) => {
-        return (item.check = false);
+    syncGoodsTypeSelection() {
+      this.pendingGoodsType = this.goodsType;
+      this.goodsTypeWay.forEach((item) => {
+        item.check = item.type === this.goodsType;
       });
-
-      val.check = !val.check;
-      this.goodsType = val.type;
+    },
+    openGoodsTypeDialog() {
+      this.selectGoodsType = true;
+    },
+    // 点击商品类型（仅临时选中，确认后才生效）
+    handleClickGoodsType(val) {
+      this.goodsTypeWay.forEach((item) => {
+        item.check = item.type === val.type;
+      });
+      this.pendingGoodsType = val.type;
+    },
+    cancelGoodsType() {
+      this.syncGoodsTypeSelection();
+      this.selectGoodsType = false;
+    },
+    confirmGoodsType() {
+      if (!this.pendingGoodsType) {
+        this.$Message.error("请选择商品类型");
+        return;
+      }
+      this.goodsType = this.pendingGoodsType;
+      this.selectGoodsType = false;
     },
     /** 选择商城商品分类 */
     handleSelectCategory(row, index, level) {
@@ -177,4 +212,22 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import "./addGoods.scss";
+
+.footer {
+  display: flex;
+  justify-content: center;
+}
+
+.footer-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.goods-type-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
+}
 </style>

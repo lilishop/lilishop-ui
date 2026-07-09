@@ -1,3 +1,20 @@
+import nav1 from '@/assets/nav/1.jpg';
+import nav2 from '@/assets/nav/2.jpg';
+import nav3 from '@/assets/nav/3.jpg';
+import nav4 from '@/assets/nav/4.jpg';
+import nav5 from '@/assets/nav/5.jpg';
+import navDecorate from '@/assets/nav/decorate.png';
+import navDecorate1 from '@/assets/nav/decorate1.png';
+import navDecorate2 from '@/assets/nav/decorate2.jpeg';
+import navDecorate3 from '@/assets/nav/decorate3.jpeg';
+import navDecorate4 from '@/assets/nav/decorate4.jpeg';
+import navDecorate5 from '@/assets/nav/decorate5.jpeg';
+import navDecorate6 from '@/assets/nav/decorate6.jpeg';
+import navDecorate7 from '@/assets/nav/decorate7.jpeg';
+import navDecorate8 from '@/assets/nav/decorate8.png';
+import navDecorate9 from '@/assets/nav/decorate9.png';
+import navDecorate10 from '@/assets/nav/decorate10.jpeg';
+import navDecorate11 from '@/assets/nav/decorate11.jpeg';
 
 export const modelData = [
   {
@@ -7,32 +24,32 @@ export const modelData = [
     showName: '',
     options: {
       list: [{
-          img: require('@/assets/nav/decorate1.png'),
+          img: navDecorate1,
           url: '',
           size: '1200*自定义'
         },
         {
-          img: require('@/assets/nav/1.jpg'),
+          img: nav1,
           url: '',
           size: '230*190'
         },
         {
-          img: require('@/assets/nav/1.jpg'),
+          img: nav1,
           url: '',
           size: '230*190'
         },
         {
-          img: require('@/assets/nav/1.jpg'),
+          img: nav1,
           url: '',
           size: '230*190'
         },
         {
-          img: require('@/assets/nav/1.jpg'),
+          img: nav1,
           url: '',
           size: '230*190'
         },
         {
-          img: require('@/assets/nav/1.jpg'),
+          img: nav1,
           url: '',
           size: '230*190'
         }
@@ -48,70 +65,70 @@ export const modelData = [
       list: [{
           time: 6,
           goodsList: [{
-              img: require('@/assets/nav/1.jpg'),
+              img: nav1,
               price: 20,
               originalPrice: 30,
               name: '阿迪达斯三叶草asdasdafads123213a',
               url: ''
             },
             {
-              img: require('@/assets/nav/2.jpg'),
+              img: nav2,
               price: 20,
               originalPrice: 30,
               name: '阿迪达斯三叶草asdasdafadsa',
               url: ''
             },
             {
-              img: require('@/assets/nav/3.jpg'),
+              img: nav3,
               price: 20,
               originalPrice: 30,
               name: '阿迪达斯三叶草asdasdafadsa',
               url: ''
             },
             {
-              img: require('@/assets/nav/4.jpg'),
+              img: nav4,
               price: 20,
               originalPrice: 30,
               name: '阿迪达斯三叶草asdasdafadsa',
               url: ''
             },
             {
-              img: require('@/assets/nav/5.jpg'),
+              img: nav5,
               price: 20,
               originalPrice: 30,
               name: '阿迪达斯三叶草asdasdafadsa',
               url: ''
             },
             {
-              img: require('@/assets/nav/1.jpg'),
+              img: nav1,
               price: 20,
               originalPrice: 30,
               name: '阿迪达斯三叶草asdasdafadsa',
               url: ''
             },
             {
-              img: require('@/assets/nav/2.jpg'),
+              img: nav2,
               price: 20,
               originalPrice: 30,
               name: '阿迪达斯三叶草asdasdafadsa',
               url: ''
             },
             {
-              img: require('@/assets/nav/3.jpg'),
+              img: nav3,
               price: 20,
               originalPrice: 30,
               name: '阿迪达斯三叶草asdasdafadsa',
               url: ''
             },
             {
-              img: require('@/assets/nav/4.jpg'),
+              img: nav4,
               price: 20,
               originalPrice: 30,
               name: '阿迪达斯三叶草asdasdafadsa',
               url: ''
             },
             {
-              img: require('@/assets/nav/5.jpg'),
+              img: nav5,
               price: 20,
               originalPrice: 30,
               name: '阿迪达斯三叶草asdasdafadsa',
@@ -122,23 +139,23 @@ export const modelData = [
         {
           time: 8,
           goodsList: [{
-              img: require('@/assets/nav/1.jpg'),
+              img: nav1,
               url: ''
             },
             {
-              img: require('@/assets/nav/2.jpg'),
+              img: nav2,
               url: ''
             },
             {
-              img: require('@/assets/nav/3.jpg'),
+              img: nav3,
               url: ''
             },
             {
-              img: require('@/assets/nav/4.jpg'),
+              img: nav4,
               url: ''
             },
             {
-              img: require('@/assets/nav/5.jpg'),
+              img: nav5,
               url: ''
             },
           ]
@@ -146,23 +163,23 @@ export const modelData = [
         {
           time: 10,
           goodsList: [{
-              img: require('@/assets/nav/1.jpg'),
+              img: nav1,
               url: ''
             },
             {
-              img: require('@/assets/nav/2.jpg'),
+              img: nav2,
               url: ''
             },
             {
-              img: require('@/assets/nav/3.jpg'),
+              img: nav3,
               url: ''
             },
             {
-              img: require('@/assets/nav/4.jpg'),
+              img: nav4,
               url: ''
             },
             {
-              img: require('@/assets/nav/5.jpg'),
+              img: nav5,
               url: ''
             },
           ]
@@ -170,23 +187,23 @@ export const modelData = [
         {
           time: 12,
           goodsList: [{
-              img: require('@/assets/nav/1.jpg'),
+              img: nav1,
               url: ''
             },
             {
-              img: require('@/assets/nav/2.jpg'),
+              img: nav2,
               url: ''
             },
             {
-              img: require('@/assets/nav/3.jpg'),
+              img: nav3,
               url: ''
             },
             {
-              img: require('@/assets/nav/4.jpg'),
+              img: nav4,
               url: ''
             },
             {
-              img: require('@/assets/nav/5.jpg'),
+              img: nav5,
               url: ''
             },
           ]
@@ -213,65 +230,65 @@ export const modelData = [
     icon: 'md-image',
     options: {
       bgImg: {
-        img: require('@/assets/nav/decorate.png'),
+        img: navDecorate,
         url: '',
-        size: "1300*586"
+        size: "1300*585"
       },
       classification: [{
-        img: require('@/assets/nav/decorate2.jpeg'),
+        img: navDecorate2,
         url: '',
         size: '190*210'
       }, {
-        img: require('@/assets/nav/decorate2.jpeg'),
+        img: navDecorate2,
         url: '',
         size: '190*210'
       }, {
-        img: require('@/assets/nav/decorate2.jpeg'),
+        img: navDecorate2,
         url: '',
         size: '190*210'
       }, {
-        img: require('@/assets/nav/decorate2.jpeg'),
+        img: navDecorate2,
         url: '',
         size: '190*210'
       }, {
-        img: require('@/assets/nav/decorate2.jpeg'),
+        img: navDecorate2,
         url: '',
         size: '190*210'
       }, {
-        img: require('@/assets/nav/decorate2.jpeg'),
+        img: navDecorate2,
         url: '',
         size: '190*210'
       }, {
-        img: require('@/assets/nav/decorate2.jpeg'),
+        img: navDecorate2,
         url: '',
         size: '190*210'
       }, {
-        img: require('@/assets/nav/decorate2.jpeg'),
+        img: navDecorate2,
         url: '',
         size: '190*210'
       }, {
-        img: require('@/assets/nav/decorate2.jpeg'),
+        img: navDecorate2,
         url: '',
         size: '190*210'
       }, {
-        img: require('@/assets/nav/decorate2.jpeg'),
+        img: navDecorate2,
         url: '',
         size: '190*210'
       }, ],
       brandList: [{
-        img: require('@/assets/nav/decorate11.jpeg'),
+        img: navDecorate11,
         url: '',
         size: '240*105'
       }, {
-        img: require('@/assets/nav/decorate11.jpeg'),
+        img: navDecorate11,
         url: '',
         size: '240*105'
       }, {
-        img: require('@/assets/nav/decorate11.jpeg'),
+        img: navDecorate11,
         url: '',
         size: '240*105'
       }, {
-        img: require('@/assets/nav/decorate11.jpeg'),
+        img: navDecorate11,
         url: '',
         size: '240*105'
       }, ]
@@ -288,49 +305,49 @@ export const modelData = [
         bgColor: '#449dae',
         url: '',
         list: [{
-            img: require('@/assets/nav/decorate3.jpeg'),
+            img: navDecorate3,
             name: '阿迪达斯三叶草',
             describe: '也许是每一款经典系列都应该有一个独特的故事吧',
             url: '',
             size: '160*160'
           },
           {
-            img: require('@/assets/nav/decorate4.jpeg'),
+            img: navDecorate4,
             name: '360行车记录',
             describe: '夜行 监控 电子狗 蓝牙',
             url: '',
             size: '80*80'
           },
           {
-            img: require('@/assets/nav/decorate4.jpeg'),
+            img: navDecorate4,
             name: '360行车记录',
             describe: '夜行 监控 电子狗 蓝牙',
             url: '',
             size: '80*80'
           },
           {
-            img: require('@/assets/nav/decorate4.jpeg'),
+            img: navDecorate4,
             name: '360行车记录',
             describe: '夜行 监控 电子狗 蓝牙',
             url: '',
             size: '80*80'
           },
           {
-            img: require('@/assets/nav/decorate4.jpeg'),
+            img: navDecorate4,
             name: '360行车记录',
             describe: '夜行 监控 电子狗 蓝牙',
             url: '',
             size: '80*80'
           },
           {
-            img: require('@/assets/nav/decorate4.jpeg'),
+            img: navDecorate4,
             name: '360行车记录',
             describe: '夜行 监控 电子狗 蓝牙',
             url: '',
             size: '80*80'
           },
           {
-            img: require('@/assets/nav/decorate4.jpeg'),
+            img: navDecorate4,
             name: '360行车记录',
             describe: '夜行 监控 电子狗 蓝牙',
             url: '',
@@ -344,28 +361,28 @@ export const modelData = [
         bgColor: '#a25684',
         url: '',
         list: [{
-            img: require('@/assets/nav/decorate5.jpeg'),
+            img: navDecorate5,
             name: '好心情喝出来',
             describe: '遇见懂你的饮品',
             url: '',
             size: '100*100'
           },
           {
-            img: require('@/assets/nav/decorate5.jpeg'),
+            img: navDecorate5,
             name: '好心情喝出来',
             describe: '遇见懂你的饮品',
             url: '',
             size: '100*100'
           },
           {
-            img: require('@/assets/nav/decorate5.jpeg'),
+            img: navDecorate5,
             name: '好心情喝出来',
             describe: '遇见懂你的饮品',
             url: '',
             size: '100*100'
           },
           {
-            img: require('@/assets/nav/decorate5.jpeg'),
+            img: navDecorate5,
             name: '好心情喝出来',
             describe: '遇见懂你的饮品',
             url: '',
@@ -388,35 +405,35 @@ export const modelData = [
         list: [{
             name: '新年心愿单',
             describe: '满269减50,满999减100',
-            img: require('@/assets/nav/decorate6.jpeg'),
+            img: navDecorate6,
             url: '',
             size: "160*160"
           },
           {
             name: 'Ms.Maggie 冬季时尚',
             describe: '满269减50',
-            img: require('@/assets/nav/decorate6.jpeg'),
+            img: navDecorate6,
             url: '',
             size: "90*90"
           },
           {
             name: 'Ms.Maggie 冬季时尚',
             describe: '满269减50',
-            img: require('@/assets/nav/decorate6.jpeg'),
+            img: navDecorate6,
             url: '',
             size: "90*90"
           },
           {
             name: 'Ms.Maggie 冬季时尚',
             describe: '满269减50',
-            img: require('@/assets/nav/decorate6.jpeg'),
+            img: navDecorate6,
             url: '',
             size: "90*90"
           },
           {
             name: '阿迪达斯 领跑时尚',
             describe: '满269减50',
-            img: require('@/assets/nav/decorate6.jpeg'),
+            img: navDecorate6,
             url: '',
             size: "90*90"
           },
@@ -430,42 +447,42 @@ export const modelData = [
         list: [{
             name: '阿迪达斯 领跑时尚',
             describe: '满269减50',
-            img: require('@/assets/nav/decorate6.jpeg'),
+            img: navDecorate6,
             url: '',
             size: "90*90"
           },
           {
             name: '阿迪达斯 领跑时尚',
             describe: '满269减50',
-            img: require('@/assets/nav/decorate6.jpeg'),
+            img: navDecorate6,
             url: '',
             size: "90*90"
           },
           {
             name: '阿迪达斯 领跑时尚',
             describe: '满269减50',
-            img: require('@/assets/nav/decorate6.jpeg'),
+            img: navDecorate6,
             url: '',
             size: "90*90"
           },
           {
             name: '阿迪达斯 领跑时尚',
             describe: '满269减50',
-            img: require('@/assets/nav/decorate6.jpeg'),
+            img: navDecorate6,
             url: '',
             size: "90*90"
           },
           {
             name: '阿迪达斯 领跑时尚',
             describe: '满269减50',
-            img: require('@/assets/nav/decorate6.jpeg'),
+            img: navDecorate6,
             url: '',
             size: "90*90"
           },
           {
             name: '阿迪达斯 领跑时尚',
             describe: '满269减50',
-            img: require('@/assets/nav/decorate6.jpeg'),
+            img: navDecorate6,
             url: '',
             size: "90*90"
           },
@@ -479,37 +496,37 @@ export const modelData = [
         list: [{
             name: '小米红米3s手机壳保护套红米3高配版指纹男女款潮版磨砂硬壳防摔 收藏截图 送大礼包',
             price: 14.9,
-            img: require('@/assets/nav/decorate7.jpeg'),
+            img: navDecorate7,
             url: ''
           },
           {
             name: '小米红米3s手机壳保护套红米3高配版指纹男女款潮版磨砂硬壳防摔 收藏截图 送大礼包',
             price: 14.9,
-            img: require('@/assets/nav/decorate7.jpeg'),
+            img: navDecorate7,
             url: ''
           },
           {
             name: '小米红米3s手机壳保护套红米3高配版指纹男女款潮版磨砂硬壳防摔 收藏截图 送大礼包',
             price: 14.9,
-            img: require('@/assets/nav/decorate7.jpeg'),
+            img: navDecorate7,
             url: ''
           },
           {
             name: '小米红米3s手机壳保护套红米3高配版指纹男女款潮版磨砂硬壳防摔 收藏截图 送大礼包',
             price: 14.9,
-            img: require('@/assets/nav/decorate7.jpeg'),
+            img: navDecorate7,
             url: ''
           },
           {
             name: '小米红米3s手机壳保护套红米3高配版指纹男女款潮版磨砂硬壳防摔 收藏截图 送大礼包',
             price: 14.9,
-            img: require('@/assets/nav/decorate7.jpeg'),
+            img: navDecorate7,
             url: ''
           },
           {
             name: '小米红米3s手机壳保护套红米3高配版指纹男女款潮版磨砂硬壳防摔 收藏截图 送大礼包',
             price: 14.9,
-            img: require('@/assets/nav/decorate7.jpeg'),
+            img: navDecorate7,
             url: ''
           },
         ]
@@ -524,7 +541,7 @@ export const modelData = [
       list: [{
           name: '生鲜',
           describe: "年货带回家 满199减60",
-          img: require('@/assets/nav/decorate8.png'),
+          img: navDecorate8,
           url: '',
           fromColor: '#e89621',
           toColor: "#f5c568",
@@ -533,7 +550,7 @@ export const modelData = [
         {
           name: '众筹',
           describe: "年货带回家",
-          img: require('@/assets/nav/decorate9.png'),
+          img: navDecorate9,
           url: '',
           fromColor: "#325bb4",
           toColor: '#4c9afe',
@@ -542,7 +559,7 @@ export const modelData = [
         {
           name: '生鲜',
           describe: "年货带回家 满199减60",
-          img: require('@/assets/nav/decorate8.png'),
+          img: navDecorate8,
           url: '',
           fromColor: "#1c9daf",
           toColor: '#40cda7',
@@ -551,7 +568,7 @@ export const modelData = [
         {
           name: '众筹',
           describe: "备孕有孕检测仪",
-          img: require('@/assets/nav/decorate9.png'),
+          img: navDecorate9,
           url: '',
           fromColor: "#d13837",
           toColor: '#df6d4f',
@@ -560,7 +577,7 @@ export const modelData = [
         {
           name: '生鲜',
           describe: "年货带回家 满199减60",
-          img: require('@/assets/nav/decorate8.png'),
+          img: navDecorate8,
           url: '',
           fromColor: "#ca4283",
           toColor: '#eb75cf',
@@ -569,7 +586,7 @@ export const modelData = [
         {
           name: '众筹',
           describe: "备孕有孕检测仪",
-          img: require('@/assets/nav/decorate9.png'),
+          img: navDecorate9,
           url: '',
           fromColor: "#5d40c1",
           toColor: '#8c5fdb',
@@ -595,244 +612,244 @@ export const modelData = [
     options: {
       list: [
         [{
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
         ],
         [{
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
         ],
         [{
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
         ],
         [{
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''
           },
           {
-            img: require('@/assets/nav/decorate10.jpeg'),
+            img: navDecorate10,
             name: 'Apple/苹果 13 英寸：MacBook Pro Multi-Touch Bar 和 Touch ID 2.9GHz 处理器 512GB 存储容量',
             price: 6666,
             url: ''

@@ -1,36 +1,36 @@
 <template>
   <div class="wrapper my-gift-cards">
-    <card _Title="我的礼品卡" />
+    <UserCenterLayout title="我的礼品卡" :tabs="['我的礼品卡']">
 
     <div class="bind-section mb_20">
       <div class="section-title">兑换礼品卡</div>
-      <Form ref="bindForm" :model="bindForm" :rules="bindRules" inline class="bind-form">
-        <FormItem label="卡号" prop="cardNo" :label-width="60">
-          <Input v-model="bindForm.cardNo" placeholder="请输入卡号" maxlength="64" style="width: 220px" />
-        </FormItem>
-        <FormItem label="兑换码" prop="cardSecret" :label-width="70">
-          <Input
+      <el-form ref="bindForm" :model="bindForm" :rules="bindRules" inline class="bind-form">
+        <el-form-item label="卡号" prop="cardNo" label-width="60px">
+          <el-input v-model="bindForm.cardNo" placeholder="请输入卡号" maxlength="64" style="width: 220px" />
+        </el-form-item>
+        <el-form-item label="兑换码" prop="cardSecret" label-width="70px">
+          <el-input
             v-model="bindForm.cardSecret"
             type="password"
             placeholder="请输入兑换码（卡密）"
             maxlength="128"
             style="width: 220px"
           />
-        </FormItem>
-        <FormItem :label-width="0">
-          <Button type="primary" :loading="bindSubmitting" @click="submitBind">兑换</Button>
-        </FormItem>
-      </Form>
+        </el-form-item>
+        <el-form-item label-width="0px">
+          <el-button type="primary" :loading="bindSubmitting" @click="submitBind">兑换</el-button>
+        </el-form-item>
+      </el-form>
     </div>
 
-    <Tabs v-model="statusTab" class="status-tabs mb_16" @on-click="onStatusTab">
-      <TabPane label="可用" name="AVAILABLE" />
-      <TabPane label="不可用" name="UNAVAILABLE" />
-      <TabPane label="待激活" name="PENDING_ACTIVATION" />
-    </Tabs>
+    <el-tabs v-model="statusTab" class="status-tabs mb_16" @tab-click="(tab) => onStatusTab(tab.paneName)">
+      <el-tab-pane label="可用" name="AVAILABLE" />
+      <el-tab-pane label="不可用" name="UNAVAILABLE" />
+      <el-tab-pane label="待激活" name="PENDING_ACTIVATION" />
+    </el-tabs>
 
     <div class="card-list-wrap">
-      <Spin v-if="loading" fix />
+      <el-skeleton v-if="loading" fix />
       <template v-if="!loading">
         <empty v-if="list.length === 0" />
         <div v-else class="gift-card-grid">
@@ -51,7 +51,7 @@
             </div>
             <div class="gcc-card-body">
               <div class="gcc-row">
-                当前余额：<span class="gcc-strong" v-if="item.balance != null">￥{{ item.balance | unitPrice }}</span><span class="gcc-strong" v-else>—</span>
+                当前余额：<span class="gcc-strong" v-if="item.balance != null">￥{{ $filters.unitPrice(item.balance) }}</span><span class="gcc-strong" v-else>—</span>
               </div>
               
               <button
@@ -73,32 +73,28 @@
     </div>
 
     <div class="page-size">
-      <Page
-        :current="params.pageNumber"
-        :page-size="params.pageSize"
-        :page-size-opts="[10, 20, 50]"
+      <el-pagination         v-model:current-page="params.pageNumber"
+        v-model:page-size="params.pageSize"
+        :page-sizes="[10, 20, 50]"
         :total="total"
-        show-sizer
-        show-total
-        size="small"
-        transfer
-        @on-change="changePage"
-        @on-page-size-change="changePageSize"
-      />
+        @current-change="changePage"
+        @size-change="changePageSize"
+       layout="total, sizes, prev, pager, next, jumper" />
     </div>
 
-    <Modal v-model="noticeModal" title="使用须知" footer-hide width="520">
+    <el-dialog v-model="noticeModal" title="使用须知" width="520">
       <p class="gcc-notice-text">
         请在有效期内使用本礼品卡；消费时将优先使用卡内余额。具体使用范围以活动规则为准。如有疑问请联系客服。
       </p>
       <div class="gcc-notice-footer">
-        <Button type="primary" @click="noticeModal = false">我知道了</Button>
-      </div>
-    </Modal>
+        <el-button type="primary" @click="noticeModal = false">我知道了</el-button>
+      </div></el-dialog>
+    </UserCenterLayout>
   </div>
 </template>
 
 <script>
+import { Message } from "@/utils/message";
 import {
   getGiftCardCashMemberCardPage,
   bindGiftCardCashMemberCard,
@@ -236,7 +232,7 @@ export default {
           .then((res) => {
             this.bindSubmitting = false;
             if (res.success) {
-              this.$Message.success(res.message || "兑换成功");
+              Message.success(res.message || "兑换成功");
               this.resetBindForm();
               this.params.pageNumber = 1;
               this.getList();
@@ -254,14 +250,14 @@ export default {
       if (this.statusTab === "PENDING_ACTIVATION") {
         const memberCardId = this.resolveMemberCardId(item);
         if (!memberCardId) {
-          this.$Message.error("卡片信息异常，无法激活");
+          Message.error("卡片信息异常，无法激活");
           return;
         }
         this.activatingId = memberCardId;
         activateGiftCardCashMemberCard(memberCardId)
           .then((res) => {
             if (res.success) {
-              this.$Message.success(res.message || "激活成功");
+              Message.success(res.message || "激活成功");
               this.getList();
             }
           })
@@ -314,7 +310,7 @@ export default {
     gap: 4px 8px;
   }
   .status-tabs {
-    ::v-deep .ivu-tabs-bar {
+    :deep(.el-tabs__header) {
       margin-bottom: 0;
     }
   }
@@ -446,8 +442,9 @@ export default {
     background: #f7f7f7;
   }
   .page-size {
+    display: flex;
+    justify-content: flex-end;
     margin-top: 20px;
-    text-align: right;
   }
 }
 .gcc-notice-text {

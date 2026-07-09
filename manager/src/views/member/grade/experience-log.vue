@@ -1,57 +1,80 @@
 <template>
   <div class="search">
-    <Card>
-      <Form
+    <el-card>
+      <el-form
         ref="searchForm"
         :model="searchForm"
         inline
-        :label-width="90"
-        @keydown.enter.native="handleSearch"
-        @submit.native.prevent
+        label-width="90px"
         class="search-form"
+        @keyup.enter="handleSearch"
       >
-        <FormItem label="客户手机号" prop="mobile">
-          <Input
+        <el-form-item label="客户手机号" prop="mobile">
+          <el-input
             v-model="searchForm.memberMobile"
             clearable
             placeholder="请输入客户手机号"
             style="width: 220px"
           />
-        </FormItem>
-        <FormItem label="规则" prop="ruleKey">
-          <Select v-model="searchForm.ruleKey" clearable filterable style="width: 220px">
-            <Option v-for="item in ruleOptions" :key="item.value" :value="item.value">
-              {{ item.label }}
-            </Option>
-          </Select>
-        </FormItem>
-        <Button type="primary" icon="ios-search" @click="handleSearch">搜索</Button>
-      </Form>
-    </Card>
+        </el-form-item>
+        <el-form-item label="规则" prop="ruleKey">
+          <el-select v-model="searchForm.ruleKey" clearable filterable style="width: 220px">
+            <el-option
+              v-for="item in ruleOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
-    <Card>
-      <Table
-        :loading="loading"
-        border
-        :columns="columns"
-        :data="data"
-        class="mt_10"
-      ></Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+    <el-card>
+      <el-table v-loading="loading" border :data="data" class="mt_10" style="width: 100%">
+        <el-table-column label="客户手机号" width="140" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span v-if="row">{{ row.memberMobile || row.mobile || "-" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="规则名称" width="150" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span v-if="row">{{ row.ruleName || findRuleName(row.ruleKey) || "-" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="变化经验值" width="120">
+          <template #default="{ row }">
+            <span v-if="row">{{ formatExperienceValue(row) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="经验值限额" width="120">
+          <template #default="{ row }">
+            <span v-if="row">{{ formatMaxValue(row) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作说明" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span v-if="row">{{ row.content || row.remark || row.description || "-" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" width="170" />
+      </el-table>
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-        ></Page>
-      </Row>
-    </Card>
+          @current-change="changePage"
+          @size-change="changePageSize"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
@@ -86,67 +109,20 @@ export default {
         memberMobile: "",
         ruleKey: "",
       },
-      columns: [
-        {
-          title: "客户手机号",
-          key: "memberMobile",
-          width: 140,
-          tooltip: true,
-          render: (h, params) => {
-            const v = params.row.memberMobile || params.row.mobile || "-";
-            return h("span", v);
-          },
-        },
-        {
-          title: "规则名称",
-          key: "ruleName",
-          width: 150,
-          tooltip: true,
-          render: (h, params) => {
-            const text = params.row.ruleName || this.findRuleName(params.row.ruleKey) || "-";
-            return h("span", text);
-          },
-        },
-        {
-          title: "变化经验值",
-          key: "value",
-          width: 120,
-          render: (h, params) => {
-            const v =
-              params.row.value ??
-              params.row.variableExperience ??
-              params.row.experience ??
-              params.row.variableValue;
-            return h("span", v == null ? "-" : v);
-          },
-        },
-        {
-          title: "经验值限额",
-          key: "maxValue",
-          width: 120,
-          render: (h, params) => {
-            const v = params.row.maxValue ?? params.row.maxExperience ?? params.row.limitValue;
-            return h("span", v == null ? "-" : v);
-          },
-        },
-        {
-          title: "操作说明",
-          key: "content",
-          minWidth: 200,
-          tooltip: true,
-          render: (h, params) => {
-            const text = params.row.content || params.row.remark || params.row.description || "-";
-            return h("span", text);
-          },
-        },
-        { title: "创建时间", key: "createTime", width: 170 },
-      ],
     };
   },
   mounted() {
     this.init();
   },
   methods: {
+    formatExperienceValue(row) {
+      const v = row.value ?? row.variableExperience ?? row.experience ?? row.variableValue;
+      return v == null ? "-" : v;
+    },
+    formatMaxValue(row) {
+      const v = row.maxValue ?? row.maxExperience ?? row.limitValue;
+      return v == null ? "-" : v;
+    },
     findRuleName(ruleKey) {
       const hit = this.ruleOptions.find((item) => item.value === ruleKey);
       return hit ? hit.label : "";

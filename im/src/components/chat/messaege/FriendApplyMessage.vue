@@ -125,7 +125,7 @@ export default {
     justify-content: center;
     box-sizing: border-box;
 
-    /deep/.el-divider {
+    :deep(.el-divider ) {
       background: white;
     }
 

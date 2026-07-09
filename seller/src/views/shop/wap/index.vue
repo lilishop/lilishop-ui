@@ -6,6 +6,8 @@
         <draggable
           class="model-view-menu-item"
           :list="modelData"
+          :item-key="getModelKey"
+          :clone="cloneModel"
           :move="handleMove"
           v-bind="{
             group: { name: 'model', pull: 'clone', put: false, animation: 150 },
@@ -13,15 +15,15 @@
             ghostClass: 'ghost',
           }"
         >
-          <li
-            v-for="(model, index) in modelData"
-            v-if="!model.drawer"
-            :key="index"
-            class="model-item"
-          >
-            <img src alt />
-            <span>{{ model.name }}</span>
-          </li>
+          <template #item="{ element: model }">
+            <li
+              v-if="!model.drawer && !model.drawerPromotions"
+              class="model-item"
+            >
+              <img src alt />
+              <span>{{ model.name }}</span>
+            </li>
+          </template>
         </draggable>
       </div>
 
@@ -35,28 +37,28 @@
             @add="handleContentlAdd"
             @end="handleContentlEnd"
             v-model="contentData.list"
+            :item-key="getContentItemKey"
           >
-            <div
-              class="list"
-              v-for="(element, index) in contentData.list"
-              :key="element.key"
-            >
-              <component
-                class="component"
-                :class="{ active: selected == index }"
-                @click.native="handleComponent(element, index)"
-                :is="templates[element.type]"
-                :res="element.options"
-              ></component>
-              <Icon
-                v-if="selected == index"
-                @click="closeComponent(index)"
-                color="#e1251b"
-                size="25"
-                class="close"
-                type="ios-close-circle"
-              />
-            </div>
+            <template #item="{ element, index }">
+              <div class="list">
+                <component
+                  class="component"
+                  :class="{ active: selected == index }"
+                  @click="handleComponent(element, index)"
+                  :is="templates[element.type]"
+                  :res="element.options"
+                ></component>
+                <el-icon
+                  v-if="selected == index"
+                  @click="closeComponent(index)"
+                  class="close"
+                  :size="25"
+                  color="#e1251b"
+                >
+                  <CircleClose />
+                </el-icon>
+              </div>
+            </template>
           </draggable>
         </div>
       </div>
@@ -73,15 +75,18 @@
   </div>
 </template>
 <script>
+import { CircleClose } from "@element-plus/icons-vue";
 import templates from "./template/index";
 import Draggable from "vuedraggable";
 import { modelData } from "./config";
 import decorate from "./decorate";
-import * as API_Other from '@/api/other'
+import * as API_Other from "@/api/other";
+import * as API_Promotions from "@/api/promotion";
 export default {
   components: {
     Draggable,
     decorate,
+    CircleClose,
   },
   data() {
     return {
@@ -89,10 +94,12 @@ export default {
       modelData, // 装修模型
       qrcode: "", // 二维码
       selected: 0, // 已选下标
-      contentData: { // 总数据
+      contentData: {
+        // 总数据
         list: [],
       },
       decorateData: "", // 装修数据
+      decoratePromotionsData: "", // 装修数据
     };
   },
   watch: {
@@ -108,16 +115,25 @@ export default {
   },
 
   methods: {
-
-    enableBindGoodsShow(){
-
+    getModelKey(model) {
+      return model.type || model.name;
     },
-
-
+    getContentItemKey(element) {
+      return element.key || element.model || element.type;
+    },
+    cloneModel(model) {
+      const key = Date.now() + "_" + Math.ceil(Math.random() * 99999);
+      const cloned = JSON.parse(JSON.stringify(model));
+      return {
+        ...cloned,
+        key,
+        model: cloned.type + "_" + key,
+      };
+    },
     // 初始化数据
     init() {
-       // 先读缓存，如果缓存有值则读缓存。
-       const cache = this.getStore('sellerMobilePageCache')
+      // 先读缓存，如果缓存有值则读缓存。
+      const cache = this.getStore('managerMobilePageCache')
         if(cache){
           this.$Modal.confirm({
           title: '提示',
@@ -132,12 +148,13 @@ export default {
 
         }
       if (!this.$route.query.id) return false;
-      API_Other.getHomeData(this.$route.query.id).then(res=>{
-        this.contentData = JSON.parse(res.result.pageData)
 
+      API_Other.getHomeData(this.$route.query.id).then((res) => {
+        this.contentData = JSON.parse(res.result.pageData);
 
-         this.handleComponent( this.contentData.list[0], 0)
-      })
+        this.handleComponent(this.contentData.list[0], 0);
+      });
+
     },
 
     // 中间组件拖动，右侧数据绑定不变
@@ -150,7 +167,6 @@ export default {
     closeComponent(index) {
       this.$nextTick(() => {
         this.decorateData = "";
-
 
         // 如果当前楼层不为一
         if (this.contentData.list.length > 1) {
@@ -171,44 +187,100 @@ export default {
 
     // 点击楼层装修
     handleComponent(val, index) {
-
       this.selected = index;
-      this.$set(this, "decorateData", val);
+      this["decorateData"] = val;
     },
     // 右侧栏回调
     handleDrawer(val) {
-
       let newIndex = this.selected;
+      if (val.promotionsType) {
+        if (this.contentData.list[newIndex].options.list.length >= 2) {
+          this.$Message.error("最多只能展示两个活动");
+          return;
+        }
+        if (val.promotionsType === "LIVE") {
+          API_Promotions.getLiveList({
+            status: "START",
+            pageSize: 1,
+            pageNumber: 1,
+          }).then((listRes) => {
+            const records = listRes.result?.records || [];
+            if (!listRes.success || records.length === 0) {
+              this.$Message.warning("暂无进行中的直播活动");
+              return;
+            }
+            API_Promotions.getLiveInfo(records[0].id).then((infoRes) => {
+              if (infoRes.success) {
+                this.contentData.list[newIndex].options.list.push({
+                  type: val.promotionsType,
+                  title: val.name,
+                  title1: val.subName,
+                  color1: val.subColor,
+                  bk_color: val.subBkColor,
+                  data: infoRes.result.commodityList
+                    ? infoRes.result.commodityList.splice(0, 2)
+                    : [],
+                });
+              }
+            });
+          });
+        } else {
+          API_Promotions.getAllPromotion().then((res) => {
+            let exist = this.contentData.list[newIndex].options.list.find(
+              (i) => i.type === val.promotionsType
+            );
 
-      this.decorateData = "";
+            if (res.success && !exist) {
+              this.contentData.list[newIndex].options.list.push({
+                data: res.result[val.promotionsType]
+                  ? res.result[val.promotionsType].splice(0, 2)
+                  : [],
+                type: val.promotionsType,
+                title1: val.subName,
+                color1: val.subColor,
+                bk_color: val.subBkColor,
+                title: val.name,
+              });
+            }
+          });
+        }
+        this.contentData.list[newIndex] = {
+          ...val,
+          options: {
+            ...this.contentData.list[newIndex].options,
+          },
+          model: val.type,
+        };
+      } else {
+        this.decorateData = "";
 
-      this.$set(this.contentData.list, newIndex, {
-        ...val,
-        options: {
-          ...val.options,
-        },
-
-        // 绑定键值
-        model: val.type,
-      });
-      this.contentData.list = JSON.parse(JSON.stringify(this.contentData.list));
-
-      this.$set(this, "decorateData", this.contentData.list[newIndex]);
+        this.contentData.list[newIndex] = {
+          ...val,
+          options: {
+            ...val.options,
+          },
+          model: val.type,
+        };
+        this.contentData.list = JSON.parse(
+          JSON.stringify(this.contentData.list)
+        );
+        this["decorateData"] = this.contentData.list[newIndex];
+      }
     },
 
     // 封装拖拽参数
     package(val, newIndex) {
       this.contentData.list[newIndex] = "";
       val = JSON.parse(JSON.stringify(val));
-      this.$set(this.contentData.list, newIndex, {
+      const key = val.key || Date.now() + "_" + Math.ceil(Math.random() * 99999);
+      this.contentData.list[newIndex] = {
         ...val,
         options: {
           ...val.options,
         },
-
-        // 绑定键值
-        model: val.type,
-      });
+        key,
+        model: val.model || val.type + "_" + key,
+      };
     },
     // 拖动
     handleContentlAdd(evt) {

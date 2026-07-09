@@ -4,23 +4,24 @@
     <Search></Search>
     <div class="shop-item-path">
       <div class="shop-nav-container">
-        <Breadcrumb>
-          <BreadcrumbItem to="/">首页</BreadcrumbItem>
-          <BreadcrumbItem v-for="(item, index) in categoryBar" :to="goGoodsList(index)" target="_blank" :key="index">
+        <el-breadcrumb>
+          <el-breadcrumb-item to="/">首页</el-breadcrumb-item>
+          <el-breadcrumb-item v-for="(item, index) in categoryBar" :to="goGoodsList(index)" target="_blank" :key="index">
             {{ item.name }}
-          </BreadcrumbItem>
-        </Breadcrumb>
-        <div class="store-collect" v-if="!takeDownSale">
+          </el-breadcrumb-item>
+        </el-breadcrumb>
+        <div class="store-collect" v-if="!takeDownSale && goodsMsg.data">
           <span class="mr_10" v-if="goodsMsg.data">
-            <router-link :to="'Merchant?id=' + goodsMsg.data.storeId">{{
-              goodsMsg.data.storeName
-            }}</router-link>
+            <router-link
+              class="store-name-link"
+              :to="{ path: '/merchant', query: { id: goodsMsg.data.storeId } }"
+            >{{ goodsMsg.data.storeName }}</router-link>
           </span>
-          <span @click="collect">
-            <Icon type="ios-heart" :color="storeCollected ? '#ed3f14' : '#666'" />
+          <span class="store-collect-btn" @click="collect">
+            <el-icon :color="storeCollected ? '#ffc107' : '#666'"><StarFilled /></el-icon>
             {{ storeCollected? "已收藏店铺": "收藏店铺" }}
           </span>
-          <span class="ml_10" @click="IMService(goodsMsg.data.storeId,goodsMsg.data.goodsId,goodsMsg.data.id)">联系客服</span>
+          <span class="ml_10 contact-service-btn" @click="IMService(goodsMsg.data.storeId,goodsMsg.data.goodsId,goodsMsg.data.id)">联系客服</span>
         </div>
       </div>
     </div>
@@ -32,16 +33,18 @@
 
     <empty _Title='当前商品已下架' v-if="takeDownSale">
       <div class="sale-btn">
-        <Button size="small" class="mr_10" @click="target('/')">返回首页</Button>
-        <Button size="small" @click="target('goodsList')">返回商品列表</Button>
+        <el-button size="small" class="mr_10" @click="target('/')">返回首页</el-button>
+        <el-button size="small" @click="target('goodsList')">返回商品列表</el-button>
       </div>
     </empty>
-    <Spin size="large" fix v-if="isLoading"></Spin>
+    <el-skeleton size="large" fix v-if="isLoading"></el-skeleton>
     <BaseFooter></BaseFooter>
   </div>
 </template>
 
 <script>
+import { Message } from "@/utils/message";
+import { StarFilled } from '@element-plus/icons-vue';
 import Search from "@/components/Search";
 
 import ShowGoods from "@/components/goodsDetail/ShowGoods";
@@ -129,7 +132,7 @@ export default {
               });
             });
             this.categoryBar = cateArr;
-            this.$set(this, "goodsMsg", res.result);
+            this["goodsMsg"] = res.result;
             if (!this.goodsMsg.data.intro) {
               this.goodsMsg.data.intro = ''
             }
@@ -152,7 +155,7 @@ export default {
               });
             }
           } else {
-            this.$Message.error(res.message);
+            Message.error(res.message);
             this.isLoading = false
           }
         })
@@ -175,53 +178,82 @@ export default {
     },
     async collect () {
       // 收藏店铺
+      const storeId = this.goodsMsg.data && this.goodsMsg.data.storeId;
+      if (!storeId) {
+        return;
+      }
+      if (!this.Cookies.getItem("userInfo")) {
+        Message.warning("请先登录");
+        this.$router.push("/login");
+        return;
+      }
       if (this.storeCollected) {
-        let cancel = await cancelStoreCollect("STORE", this.goodsMsg.data.storeId);
+        let cancel = await cancelStoreCollect("STORE", storeId);
         if (cancel.success) {
-          this.$Message.success("已取消收藏");
+          Message.success("已取消收藏");
           this.storeCollected = false;
         }
       } else {
-        let collect = await collectStore("STORE", this.goodsMsg.data.storeId);
+        let collect = await collectStore("STORE", storeId);
         if (collect.code === 200) {
           this.storeCollected = true;
-          this.$Message.success("收藏店铺成功,可以前往个人中心我的收藏查看");
+          Message.success("收藏店铺成功,可以前往个人中心我的收藏查看");
         }
       }
     },
   },
   watch: {},
-  components: {
-    Search,
+  components: { Search,
     ShowGoods,
     ShowGoodsDetail,
-    empty
-  },
+    empty, StarFilled },
 };
 </script>
 <style scoped lang="scss">
 .shop-item-path {
   height: 38px;
   @include background_color($light_background_color);
-  line-height: 38px;
   color: #2c2c2c;
 }
 
 .shop-nav-container {
   width: 1200px;
+  height: 100%;
   margin: 0 auto;
   position: relative;
+  display: flex;
+  align-items: center;
+
+  :deep(.el-breadcrumb) {
+    line-height: 1;
+  }
 
   .store-collect {
     position: absolute;
     right: 20px;
-    top: 0;
+    top: 50%;
+    transform: translateY(-50%);
     color: #999;
 
-    span {
+    span:not(.store-collect-btn):not(.contact-service-btn) {
       &:hover {
         cursor: pointer;
         color: $theme_color;
+      }
+    }
+
+    .store-collect-btn,
+    .contact-service-btn {
+      cursor: pointer;
+    }
+
+    .store-name-link {
+      color: $theme_color;
+      text-decoration: none;
+
+      &:hover {
+        color: $theme_color;
+        text-decoration: none;
       }
     }
   }

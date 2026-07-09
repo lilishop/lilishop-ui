@@ -1,79 +1,86 @@
 <template>
   <div class="company-msg">
-    <Form ref="firstForm" :model="form" :rules="rules" :label-width="140">
+    <el-form
+      ref="firstForm"
+      :model="form"
+      :rules="rules"
+      label-width="140px"
+      @submit.prevent
+      @keydown.enter.prevent
+      @focusout="saveDraft"
+    >
       <h4>基础信息</h4>
-      <FormItem prop="companyName" label="公司名称">
-        <Input
+      <el-form-item prop="companyName" label="公司名称">
+        <el-input
           type="text"
           v-model="form.companyName"
           placeholder="请填写公司信息"
         />
-      </FormItem>
-      <FormItem prop="companyAddressIdPath" label="公司所在地">
+      </el-form-item>
+      <el-form-item prop="companyAddressIdPath" label="公司所在地">
         <span>{{ form.companyAddressPath || '暂无地址' }}</span>
-        <Button type="default" style="margin-left: 10px;" @click="$refs.map.open()">选择</Button>
-      </FormItem>
-      <FormItem prop="companyAddress" label="公司详细地址">
-        <Input
+        <el-button type="default" style="margin-left: 10px;" @click="$refs.map.open()">选择</el-button>
+      </el-form-item>
+      <el-form-item prop="companyAddress" label="公司详细地址">
+        <el-input
           type="text"
           v-model="form.companyAddress"
           placeholder="请填写公司详细信息"
         />
-      </FormItem>
-      <FormItem prop="employeeNum" label="员工总数">
-        <Input
+      </el-form-item>
+      <el-form-item prop="employeeNum" label="员工总数">
+        <el-input
           type="text"
           v-model="form.employeeNum"
           placeholder="请填写公司员工总数"
-          ><span slot="append">人</span>
-          </Input>
-      </FormItem>
-      <FormItem prop="companyPhone" label="公司电话">
-        <Input
+          ><template #append><span>人</span></template></el-input>
+      </el-form-item>
+      <el-form-item prop="companyPhone" label="公司电话">
+        <el-input
           type="text"
           v-model="form.companyPhone"
           placeholder="请填写公司电话"
-          ></Input>
-      </FormItem>
-      <FormItem prop="registeredCapital" label="注册资金">
-        <Input
+          ></el-input>
+      </el-form-item>
+      <el-form-item prop="registeredCapital" label="注册资金">
+        <el-input
           type="text"
           v-model="form.registeredCapital"
           placeholder="请填写注册资金"
-          ><span slot="append">万元</span></Input>
-      </FormItem>
-      <FormItem prop="linkName" label="联系人姓名">
-        <Input
+          ><template #append><span>万元</span></template></el-input>
+      </el-form-item>
+      <el-form-item prop="linkName" label="联系人姓名">
+        <el-input
           type="text"
           v-model="form.linkName"
           placeholder="请填写联系人姓名"
         />
-      </FormItem>
-      <FormItem prop="linkPhone" label="联系人电话">
-        <Input
+      </el-form-item>
+      <el-form-item prop="linkPhone" label="联系人电话">
+        <el-input
           type="text"
           v-model="form.linkPhone"
           placeholder="请填写联系人电话"
         />
-      </FormItem>
-      <FormItem prop="companyEmail" label="电子邮箱">
-        <Input
+      </el-form-item>
+      <el-form-item prop="companyEmail" label="电子邮箱">
+        <el-input
           type="text"
           v-model="form.companyEmail"
           placeholder="请填写电子邮箱"
         />
-      </FormItem>
+      </el-form-item>
 
       <h4>营业执照信息</h4>
-      <FormItem prop="licenseNum" label="营业执照号">
-        <Input
+      <el-form-item prop="licenseNum" label="营业执照号">
+        <el-input
           type="text"
           v-model="form.licenseNum"
           placeholder="请填写营业执照号"
         />
-      </FormItem>
-      <FormItem prop="scope" label="法定经营范围">
-        <Input
+      </el-form-item>
+      <el-form-item prop="scope" label="法定经营范围">
+        <el-input
           type="textarea"
           v-model="form.scope"
           maxlength="200"
@@ -81,121 +88,121 @@
           :rows="4"
           placeholder="请输入营业执照所示经营范围"
         />
-      </FormItem>
-      <FormItem prop="licencePhoto" label="营业执照电子版">
-        <Upload
-          ref="uploadLicence"
-          :show-upload-list="false"
-          :on-success="handleSuccess"
-          :format="['jpg', 'jpeg', 'png', 'gif']"
-          :max-size="2048"
-          :before-upload="beforeUpload"
-          :on-format-error="handleFormatError"
-          :on-exceeded-size="handleMaxSize"
-          :on-error="uploadErr"
-          multiple
-          :action="action"
-          :headers="accessToken"
-        >
-          <Button type="info" :loading="uploadLoading">证照上传</Button>
-        </Upload>
-        <div class="describe">
-          请压缩图片在2M以内，格式为gif，jpg，png，并确保文字清晰，以免上传或审核失败
-        </div>
-        <div
-          class="img-list"
-          v-for="(item, index) in form.licencePhoto"
-          :key="index"
-        >
-          <img :src="item" width="100" alt="" />
-          <div class="cover">
-            <Icon
-              type="ios-eye-outline"
-              @click.native="handleView(item)"
-            ></Icon>
-            <Icon
-              type="ios-trash-outline"
-              @click.native="handleRemove(index, 'licencePhoto')"
-            ></Icon>
+      </el-form-item>
+      <el-form-item prop="licencePhoto" label="营业执照电子版">
+        <div class="upload-wrap">
+          <el-upload
+            ref="uploadLicence"
+            :show-file-list="false"
+            :on-success="handleSuccess"
+            accept=".jpg,.jpeg,.png,.gif"
+            :before-upload="beforeUpload"
+            :on-error="uploadErr"
+            :disabled="form.licencePhoto.length >= 1"
+            :action="action"
+            :headers="accessToken"
+          >
+            <el-button
+              type="info"
+              :loading="uploadLoading"
+              :disabled="form.licencePhoto.length >= 1"
+              >证照上传</el-button
+            >
+          </el-upload>
+          <div class="describe">
+            请压缩图片在2M以内，格式为gif，jpg，png，并确保文字清晰，以免上传或审核失败，仅可上传1张
+          </div>
+          <div class="img-list-wrap">
+            <div
+              class="img-list"
+              v-for="(item, index) in form.licencePhoto"
+              :key="index"
+            >
+              <img :src="item" alt="" />
+              <div class="cover">
+                <el-icon @click="handleView(item)"><View /></el-icon>
+                <el-icon @click="handleRemove(index, 'licencePhoto')"><Delete /></el-icon>
+              </div>
+            </div>
           </div>
         </div>
-      </FormItem>
+      </el-form-item>
 
       <h4>法人信息</h4>
-      <FormItem prop="legalName" label="法人姓名">
-        <Input
+      <el-form-item prop="legalName" label="法人姓名">
+        <el-input
           type="text"
           v-model="form.legalName"
           maxlength="20"
           placeholder="请输入法人姓名"
         />
-      </FormItem>
-      <FormItem prop="legalId" label="法人证件号">
-        <Input
+      </el-form-item>
+      <el-form-item prop="legalId" label="法人证件号">
+        <el-input
           type="text"
           v-model="form.legalId"
           placeholder="请输入法人证件号"
         />
-      </FormItem>
-      <FormItem prop="legalPhoto" label="法人证件电子版">
-        <Upload
-          ref="uploadLegal"
-          :show-upload-list="false"
-          :on-success="handleSuccess1"
-          :before-upload="beforeUpload1"
-          :max-size="2048"
-          :format="['jpg', 'jpeg', 'png', 'gif']"
-          :on-format-error="handleFormatError"
-          :on-exceeded-size="handleMaxSize"
-          :on-error="uploadErr"
-          multiple
-          :action="action"
-          :headers="accessToken"
-        >
-          <Button type="info" :loading="uploadLoading1">证照上传</Button>
-        </Upload>
-        <div class="describe">
-          请压缩图片在2M以内，身份证正反面两张照片，确保图片清晰无缺角
-        </div>
-        <div
-          class="img-list"
-          v-for="(item, index) in form.legalPhoto"
-          :key="index"
-        >
-          <img :src="item" width="100" alt="" />
-          <div class="cover">
-            <Icon
-              type="ios-eye-outline"
-              @click.native="handleView(item)"
-            ></Icon>
-            <Icon
-              type="ios-trash-outline"
-              @click.native="handleRemove(index, 'legalPhoto')"
-            ></Icon>
+      </el-form-item>
+      <el-form-item prop="legalPhoto" label="法人证件电子版">
+        <div class="upload-wrap">
+          <el-upload
+            ref="uploadLegal"
+            :show-file-list="false"
+            :on-success="handleSuccess1"
+            :before-upload="beforeUpload1"
+            accept=".jpg,.jpeg,.png,.gif"
+            :on-error="uploadErr"
+            multiple
+            :action="action"
+            :headers="accessToken"
+          >
+            <el-button type="info" :loading="uploadLoading1">证照上传</el-button>
+          </el-upload>
+          <div class="describe">
+            请压缩图片在2M以内，身份证正反面两张照片，确保图片清晰无缺角
+          </div>
+          <div class="img-list-wrap">
+            <div
+              class="img-list"
+              v-for="(item, index) in form.legalPhoto"
+              :key="index"
+            >
+              <img :src="item" alt="" />
+              <div class="cover">
+                <el-icon @click="handleView(item)"><View /></el-icon>
+                <el-icon @click="handleRemove(index, 'legalPhoto')"><Delete /></el-icon>
+              </div>
+            </div>
           </div>
         </div>
-      </FormItem>
-      <FormItem>
-        <Button type="primary" :loading="loading" @click="next"
-          >填写财务资质信息</Button
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" :loading="loading" @click="next"
+          >填写财务资质信息</el-button
         >
-      </FormItem>
-    </Form>
-    <Modal title="View Image" v-model="visible">
+      </el-form-item>
+    </el-form>
+    <el-dialog title="View Image" v-model="visible">
       <img :src="previewPicture" v-if="visible" style="width: 100%" />
-    </Modal>
+    </el-dialog>
 
     <multipleMap ref="map" @callback="getAddress" />
   </div>
 </template>
 <script>
+import { Message, Notice } from "@/utils/message";
+import { Delete, View } from '@element-plus/icons-vue';
 import { applyFirst } from '@/api/shopentry';
 import * as RegExp from '@/plugins/RegExp.js';
 import multipleMap from "@/components/map/multiple-map";
 import storage from '@/plugins/storage';
 import { commonUrl } from '@/plugins/request.js';
+const FIRST_APPLY_DRAFT_KEY = 'shopEntryFirstDraft';
+
 export default {
-  components: { multipleMap },
+  components: { multipleMap, View, Delete },
+  emits: ['change'],
   props: {
     content: {
       default: {},
@@ -211,6 +218,20 @@ export default {
 
       previewPicture: '', // 预览图片url
       form: { // 表单数据
+        companyName: '',
+        companyAddressIdPath: '',
+        companyAddressPath: '',
+        companyAddress: '',
+        employeeNum: '',
+        companyPhone: '',
+        registeredCapital: '',
+        linkName: '',
+        linkPhone: '',
+        companyEmail: '',
+        licenseNum: '',
+        scope: '',
+        legalName: '',
+        legalId: '',
         legalPhoto: [],
         licencePhoto: []
       },
@@ -253,7 +274,8 @@ export default {
         ]
       },
       uploadLoading1: false, // 上传loading
-      uploadLoading: false // 上传loading
+      uploadLoading: false, // 上传loading
+      contentInitialized: false
     };
   },
   methods: {
@@ -262,11 +284,11 @@ export default {
       if(val.type === 'select'){
         const paths = val.data.map(item => item.name).join(',')
         const ids = val.data.map(item => item.id).join(',')
-        this.$set(this.form, 'companyAddressIdPath', ids)
-        this.$set(this.form, 'companyAddressPath', paths)
+        this.form['companyAddressIdPath'] = ids
+        this.form['companyAddressPath'] = paths
       }else{
-        this.$set(this.form, 'companyAddressIdPath', val.data.addrId)
-        this.$set(this.form, 'companyAddressPath', val.data.addr)
+        this.form['companyAddressIdPath'] = val.data.addrId
+        this.form['companyAddressPath'] = val.data.addr
       }
     },
 
@@ -277,11 +299,14 @@ export default {
           this.loading = true;
           let params = JSON.parse(JSON.stringify(this.form));
           params.legalPhoto = this.form.legalPhoto.toString();
-          params.licencePhoto = this.form.licencePhoto.toString();
+          params.licencePhoto = this.normalizeLicencePhoto(this.form.licencePhoto);
           applyFirst(params)
             .then((res) => {
               this.loading = false;
-              if (res.success) this.$emit('change', 1);
+              if (res.success) {
+                sessionStorage.removeItem(FIRST_APPLY_DRAFT_KEY);
+                this.$emit('change', 1);
+              }
             })
             .catch(() => {
               this.loading = false;
@@ -293,25 +318,47 @@ export default {
     },
 
     // 上传之前
-    beforeUpload () {
+    beforeUpload (file) {
       this.uploadLoading = true;
-      if (this.form.licencePhoto.length >= 3) {
-        this.$Message.warning('最多上传三张图片')
+      if (this.form.licencePhoto.length >= 1) {
+        Message.warning('最多上传一张图片')
+        this.uploadLoading = false;
         return false;
       }
+      return this.validateUploadFile(file);
     },
     // 上传之前
-    beforeUpload1 () {
+    beforeUpload1 (file) {
       this.uploadLoading1 = true;
       if (this.form.legalPhoto.length >= 2) {
-        this.$Message.warning('最多上传两张图片')
+        Message.warning('最多上传两张图片')
+        this.uploadLoading1 = false;
         return false;
       }
+      return this.validateUploadFile(file);
+    },
+    validateUploadFile (file) {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      const isAllowedType = allowedTypes.includes(file.type);
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isAllowedType) {
+        this.uploadLoading = false;
+        this.uploadLoading1 = false;
+        Message.warning('上传文件格式不正确');
+        return false;
+      }
+      if (!isLt2M) {
+        this.uploadLoading = false;
+        this.uploadLoading1 = false;
+        Message.warning('文件大小不能超过2M');
+        return false;
+      }
+      return true;
     },
     // 上传成功回调
     handleSuccess (res, file) {
       this.uploadLoading = false;
-      this.form.licencePhoto.push(res.result);
+      this.form.licencePhoto = [res.result];
     },
     // 上传成功回调
     handleSuccess1 (res, file) {
@@ -327,7 +374,7 @@ export default {
     handleFormatError (file) {
       this.uploadLoading = false;
       this.uploadLoading1 = false;
-      this.$Notice.warning({
+      Notice.warning({
         title: 'The file format is incorrect',
         desc: '上传文件格式不正确'
       });
@@ -336,7 +383,7 @@ export default {
     handleMaxSize (file) {
       this.uploadLoading = false;
       this.uploadLoading1 = false;
-      this.$Notice.warning({
+      Notice.warning({
         title: 'Exceeding file size limit',
         desc: '文件大小不能超过2M'
       });
@@ -349,18 +396,65 @@ export default {
     // 删除图片
     handleRemove (index, listName) {
       this.form[listName].splice(index, 1);
+    },
+    normalizeLicencePhoto (value) {
+      if (Array.isArray(value)) {
+        return value.length ? value[0] : '';
+      }
+      return value ? String(value).split(',').filter(Boolean)[0] || '' : '';
+    },
+    initFormFromContent(content) {
+      if (!content || !Object.keys(content).length) return;
+      this.form = JSON.parse(JSON.stringify(content));
+      this.form.legalPhoto = content.legalPhoto
+        ? String(content.legalPhoto).split(',').filter(Boolean)
+        : [];
+      this.form.licencePhoto = content.licencePhoto
+        ? String(content.licencePhoto).split(',').filter(Boolean).slice(0, 1)
+        : [];
+      this.contentInitialized = true;
+    },
+    restoreDraft() {
+      const draft = sessionStorage.getItem(FIRST_APPLY_DRAFT_KEY);
+      if (!draft) return;
+      try {
+        const parsed = JSON.parse(draft);
+        this.form = {
+          legalPhoto: [],
+          licencePhoto: [],
+          ...parsed,
+        };
+        this.form.legalPhoto = Array.isArray(parsed.legalPhoto) ? parsed.legalPhoto : [];
+        this.form.licencePhoto = Array.isArray(parsed.licencePhoto)
+          ? parsed.licencePhoto.slice(0, 1)
+          : [];
+      } catch (e) {
+        sessionStorage.removeItem(FIRST_APPLY_DRAFT_KEY);
+      }
+    },
+    saveDraft() {
+      sessionStorage.setItem(FIRST_APPLY_DRAFT_KEY, JSON.stringify(this.form));
+    }
+  },
+  watch: {
+    content: {
+      immediate: true,
+      handler(val) {
+        if (this.contentInitialized || !val || !Object.keys(val).length) return;
+        this.initFormFromContent(val);
+      }
     }
   },
   mounted () {
     this.accessToken.accessToken = storage.getItem('accessToken');
-    if (Object.keys(this.content).length) { // 处理回显数据
-      this.form = JSON.parse(JSON.stringify(this.content));
-      if (this.form.licencePhoto) {
-        this.form.legalPhoto = this.content.legalPhoto.split(',');
-        this.form.licencePhoto = this.content.licencePhoto.split(',');
-
-      }
+    if (Object.keys(this.content).length) {
+      this.initFormFromContent(this.content);
+    } else {
+      this.restoreDraft();
     }
+  },
+  beforeUnmount() {
+    this.saveDraft();
   }
 };
 </script>
@@ -376,29 +470,48 @@ h4 {
   line-height: 40px;
   text-align: left;
 }
-.ivu-input-wrapper {
+.el-input {
   width: 300px;
 }
+.img-list-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+}
+
 .img-list {
-  display: inline-block;
-  margin: 10px;
+  display: block;
+  flex-shrink: 0;
   width: 100px;
+  height: 100px;
   position: relative;
+  overflow: hidden;
+  border: 1px solid #eee;
+  box-sizing: border-box;
+  background-color: #f5f5f5;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
   .cover {
     display: none;
     position: absolute;
     top: 0;
-    bottom: 0;
     left: 0;
-    right: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.6);
-    width: inherit;
-    height: inherit;
     align-items: center;
     justify-content: space-around;
-    i {
+    :deep(.el-icon) {
       color: #fff;
-      font-size: 30px;
+      font-size: 24px;
       cursor: pointer;
     }
   }
@@ -406,7 +519,27 @@ h4 {
     display: flex;
   }
 }
+.upload-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+
+  :deep(.el-upload) {
+    display: block;
+  }
+
+  :deep(.el-upload-list) {
+    display: none;
+  }
+}
+
 .describe {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  margin-bottom: 0;
+  line-height: 1.5;
   font-size: 12px;
   color: #999;
 }

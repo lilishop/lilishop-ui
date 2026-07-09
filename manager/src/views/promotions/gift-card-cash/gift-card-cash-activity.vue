@@ -1,90 +1,153 @@
 <template>
   <div class="search">
-    <Card>
-      <Form
+    <el-card>
+      <el-form
         ref="searchForm"
         :model="searchForm"
         inline
-        :label-width="80"
+        label-width="100px"
         class="search-form mb_10"
+        @keyup.enter="handleSearch"
       >
-        <Form-item label="礼品卡名称" prop="giftCardName">
-          <Input
+        <el-form-item label="礼品卡名称" prop="giftCardName">
+          <el-input
             v-model="searchForm.giftCardName"
-            type="text"
             placeholder="模糊搜索礼品卡名称"
             clearable
             style="width: 260px"
           />
-        </Form-item>
-        <Button type="primary" icon="ios-search" class="search-btn" @click="handleSearch"
-          >搜索</Button
-        >
-      </Form>
-    </Card>
-    <Card>
-      <Row class="operation padding-row">
-        <Button type="primary" @click="addActivity">添加礼品卡</Button>
-      </Row>
-      <Table :loading="loading" :columns="columns" :data="data" ref="table">
-        <template slot-scope="{ row }" slot="action">
-          <template v-if="canEdit(row)">
-            <a :style="linkStyle" @click.prevent="goEdit(row)">编辑</a>
-            <span :style="sepStyle">|</span>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <div class="operation padding-row">
+        <el-button type="primary" @click="addActivity">添加礼品卡</el-button>
+      </div>
+
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        style="width: 100%"
+      >
+        <el-table-column prop="giftCardName" label="礼品卡名称" min-width="100" show-overflow-tooltip />
+        <el-table-column label="礼品卡类型" width="120">
+          <template #default="{ row }">
+            <span v-if="row">{{ cardTypeText(row.cardType) }}</span>
           </template>
-          <a :style="linkStyle" @click.prevent="goView(row)">查看</a>
-          <template v-if="canBatchCreate(row)">
-            <span :style="sepStyle">|</span>
-            <a :style="linkStyle" @click.prevent="openBatchCreate(row)">批量制卡</a>
+        </el-table-column>
+        <el-table-column label="面值" width="120" align="right">
+          <template #default="{ row }">
+            <span v-if="row">
+              <span
+                v-if="row.faceValue != null && row.faceValue !== ''"
+                :style="{ color: $mainColor }"
+              >
+                {{ $filters.unitPrice(row.faceValue, "￥") }}</span>
+              <span v-else>-</span>
+            </span>
           </template>
-          <template v-if="canBatchIssue(row)">
-            <span :style="sepStyle">|</span>
-            <a :style="linkStyle" @click.prevent="openBatchIssue(row)">批量发卡</a>
+        </el-table-column>
+        <el-table-column label="有效期" width="180">
+          <template #default="{ row }">
+            <span v-if="row">{{ formatValidity(row) }}</span>
           </template>
-          <span :style="sepStyle">|</span>
-          <a :style="linkStyle" @click.prevent="goRecords(row)">查看记录</a>
-        </template>
-      </Table>
-      <Row type="flex" justify="end" class="mt_10">
-        <Page
-          :current="searchForm.pageNumber"
+        </el-table-column>
+        <el-table-column label="总库存" width="100" align="center">
+          <template #default="{ row }">
+            <span v-if="row">{{ fmtInt(row.stockTotal) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="批量制卡数" width="110" align="center">
+          <template #default="{ row }">
+            <span v-if="row">{{ fmtInt(row.producedQuantity) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="批量发卡数" width="110" align="center">
+          <template #default="{ row }">
+            <span v-if="row">{{ fmtInt(row.issuedCardQuantity) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="剩余库存" width="100" align="center">
+          <template #default="{ row }">
+            <span v-if="row">{{ fmtInt(row.remainingStock) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <template v-if="row">
+              <el-tag v-if="isFixedValidityExpired(row)" type="danger">已过期</el-tag>
+              <el-tag v-else type="success">正常</el-tag>
+            </template>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" width="170" />
+        <el-table-column label="操作" align="right" width="380" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row">
+              <template v-if="canEdit(row)">
+                <a class="link-text" @click.prevent="goEdit(row)">编辑</a>
+                <span class="op-split">|</span>
+              </template>
+              <a class="link-text" @click.prevent="goView(row)">查看</a>
+              <template v-if="canBatchCreate(row)">
+                <span class="op-split">|</span>
+                <a class="link-text" @click.prevent="openBatchCreate(row)">批量制卡</a>
+              </template>
+              <template v-if="canBatchIssue(row)">
+                <span class="op-split">|</span>
+                <a class="link-text" @click.prevent="openBatchIssue(row)">批量发卡</a>
+              </template>
+              <span class="op-split">|</span>
+              <a class="link-text" @click.prevent="goRecords(row)">查看记录</a>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <el-pagination
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
+          :page-sizes="[20, 50, 100]"
           :total="total"
-          :page-size="searchForm.pageSize"
-          :page-size-opts="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          show-total
-          show-elevator
-          show-sizer
-          @on-change="changePage"
-          @on-page-size-change="changePageSize"
+          @current-change="changePage"
+          @size-change="changePageSize"
         />
-      </Row>
-    </Card>
-    <Modal
+      </div>
+    </el-card>
+
+    <el-dialog
       v-model="batchCreateVisible"
       title="批量制卡"
-      :mask-closable="false"
-      width="520"
-      @on-visible-change="onBatchCreateVisible"
+      width="520px"
+      :close-on-click-modal="false"
+      destroy-on-close
+      @closed="onBatchCreateClosed"
     >
-      <Form ref="batchForm" :model="batchForm" :rules="batchFormRule" :label-width="100">
-        <FormItem label="礼品卡名称">
+      <el-form ref="batchForm" :model="batchForm" :rules="batchFormRule" label-width="100px">
+        <el-form-item label="礼品卡名称">
           <span>{{ batchCtx.giftCardName || "-" }}</span>
-        </FormItem>
-        <FormItem label="面值">
+        </el-form-item>
+        <el-form-item label="面值">
           <template v-if="batchCtx.faceValue != null && batchCtx.faceValue !== ''">
-            <priceColorScheme
-              :value="batchCtx.faceValue"
-              :color="$mainColor"
-            ></priceColorScheme>
+            <span :style="{ color: $mainColor }">
+              {{ $filters.unitPrice(batchCtx.faceValue, "￥") }}</span>
           </template>
           <span v-else>-</span>
-        </FormItem>
-        <FormItem label="当前库存">
+        </el-form-item>
+        <el-form-item label="当前库存">
           <span>{{ fmtInt(batchCtx.headroom) }}</span>
-        </FormItem>
-        <FormItem label="制卡张数" prop="quantity">
-          <InputNumber
+        </el-form-item>
+        <el-form-item label="制卡张数" prop="quantity">
+          <el-input-number
             v-model="batchForm.quantity"
             :min="1"
             :max="batchQuantityMax"
@@ -92,9 +155,9 @@
             placeholder="请输入制卡张数"
             style="width: 220px"
           />
-        </FormItem>
-        <FormItem label="本批备注" prop="batchRemark">
-          <Input
+        </el-form-item>
+        <el-form-item label="本批备注" prop="batchRemark">
+          <el-input
             v-model="batchForm.batchRemark"
             type="textarea"
             :rows="2"
@@ -103,61 +166,62 @@
             placeholder="选填，最多64字"
             style="width: 100%"
           />
-        </FormItem>
-      </Form>
-      <div slot="footer">
-        <Button @click="batchCreateVisible = false">取消</Button>
-        <Button type="primary" :loading="batchCreateSubmitting" @click="submitBatchCreate"
-          >确定</Button
-        >
-      </div>
-    </Modal>
-    <Modal
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="batchCreateVisible = false">取消</el-button>
+        <el-button type="primary" :loading="batchCreateSubmitting" @click="submitBatchCreate">
+          确定
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
       v-model="batchIssueVisible"
       title="批量发卡"
-      :mask-closable="false"
-      width="560"
-      @on-visible-change="onBatchIssueVisible"
+      width="560px"
+      :close-on-click-modal="false"
+      destroy-on-close
+      @closed="onBatchIssueClosed"
     >
       <div class="gcc-batch-issue-body">
-        <Form :label-width="100">
-          <FormItem label="礼品卡名称">
+        <el-form label-width="100px">
+          <el-form-item label="礼品卡名称">
             <span>{{ issueCtx.giftCardName || "-" }}</span>
-          </FormItem>
-        </Form>
-        <Alert type="info" show-icon class="mb_10">
+          </el-form-item>
+        </el-form>
+        <el-alert type="info" show-icon class="mb_10" :closable="false">
           请先下载模板，按列填写<strong>手机号</strong>、<strong>发卡数量</strong>后上传；发卡不区分制卡批次。
-        </Alert>
+        </el-alert>
         <div class="gcc-batch-issue-actions">
-          <Button
+          <el-button
             type="primary"
-            ghost
-            icon="md-download"
+            plain
             :loading="issueTemplateDownloading"
             @click="downloadIssueTemplate"
           >
             下载 Excel 模板
-          </Button>
+          </el-button>
         </div>
         <div class="gcc-batch-issue-upload">
           <span class="gcc-batch-issue-upload-label">上传已填写的 Excel</span>
-          <Upload
+          <el-upload
             :before-upload="onIssueImportBeforeUpload"
             accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            :show-upload-list="false"
+            :show-file-list="false"
           >
-            <Button type="dashed" icon="ios-cloud-upload-outline">选择文件</Button>
-          </Upload>
+            <el-button type="default">选择文件</el-button>
+          </el-upload>
           <span v-if="issueFileName" class="gcc-batch-issue-filename">{{ issueFileName }}</span>
         </div>
       </div>
-      <div slot="footer">
-        <Button @click="batchIssueVisible = false">取消</Button>
-        <Button type="primary" :loading="issueImportSubmitting" @click="submitIssueImport"
-          >开始发卡</Button
-        >
-      </div>
-    </Modal>
+      <template #footer>
+        <el-button @click="batchIssueVisible = false">取消</el-button>
+        <el-button type="primary" :loading="issueImportSubmitting" @click="submitIssueImport">
+          开始发卡
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -181,129 +245,8 @@ export default {
         order: "desc",
         giftCardName: "",
       },
-      columns: [
-        {
-          title: "礼品卡名称",
-          key: "giftCardName",
-          minWidth: 100,
-          tooltip: true,
-        },
-        {
-          title: "礼品卡类型",
-          key: "cardType",
-          width: 200,
-          render: (h, params) => {
-            const t = params.row.cardType;
-            const map = { CASH: "现金卡", PICKUP: "提货卡" };
-            return h("span", map[t] || t || "-");
-          },
-        },
-        {
-          title: "面值",
-          key: "faceValue",
-          width: 200,
-          align: "right",
-          render: (h, params) => {
-            const v = params.row.faceValue;
-            if (v === null || v === undefined || v === "") {
-              return h("span", "-");
-            }
-            return h("priceColorScheme", {
-              props: { value: v, color: this.$mainColor },
-            });
-          },
-        },
-        {
-          title: "有效期",
-          key: "validityType",
-          width: 200,
-          render: (h, params) => {
-            return h("span", this.formatValidity(params.row));
-          },
-        },
-        {
-          title: "总库存",
-          key: "stockTotal",
-          width: 200,
-          align: "center",
-          render: (h, params) =>
-            h("span", this.fmtInt(params.row.stockTotal)),
-        },
-        {
-          title: "批量制卡数",
-          key: "producedQuantity",
-          width: 200,
-          align: "center",
-          render: (h, params) =>
-            h("span", this.fmtInt(params.row.producedQuantity)),
-        },
-        {
-          title: "批量发卡数",
-          key: "issuedCardQuantity",
-          width: 200,
-          align: "center",
-          render: (h, params) =>
-            h("span", this.fmtInt(params.row.issuedCardQuantity)),
-        },
-        {
-          title: "剩余库存",
-          key: "remainingStock",
-          width: 200,
-          align: "center",
-          render: (h, params) =>
-            h("span", this.fmtInt(params.row.remainingStock)),
-        },
-        {
-          title: "状态",
-          key: "status",
-          width: 200,
-          render: (h, params) => {
-            if (this.isFixedValidityExpired(params.row)) {
-              return h("div", [
-                h(
-                  "Tag",
-                  {
-                    props: { color: "red" },
-                  },
-                  "已过期"
-                ),
-              ]);
-            }
-            return h("div", [
-              h(
-                "Tag",
-                {
-                  props: { color: "green" },
-                },
-                "正常"
-              ),
-            ]);
-          },
-        },
-        {
-          title: "创建时间",
-          key: "createTime",
-          width: 200,
-        },
-        {
-          title: "操作",
-          slot: "action",
-          align: "right",
-          width: 380,
-        },
-      ],
       data: [],
       total: 0,
-      linkStyle: {
-        color: "#2d8cf0",
-        cursor: "pointer",
-        textDecoration: "none",
-      },
-      disabledLinkStyle: {
-        color: "#c5c8ce",
-        cursor: "not-allowed",
-      },
-      sepStyle: { margin: "0 8px", color: "#dcdee2" },
       batchCreateVisible: false,
       batchCreateSubmitting: false,
       batchCtx: {
@@ -349,6 +292,10 @@ export default {
     this.getDataList();
   },
   methods: {
+    cardTypeText(type) {
+      const map = { CASH: "现金卡", PICKUP: "提货卡" };
+      return map[type] || type || "-";
+    },
     validateBatchQuantity(rule, value, callback) {
       if (value === null || value === undefined || value === "") {
         callback(new Error("请填写制卡张数"));
@@ -376,7 +323,6 @@ export default {
       }
       return n;
     },
-    /** 固定到期类有效期且到期时间早于当前时间，列表状态展示为「已过期」 */
     isFixedValidityExpired(row) {
       if (!row || !row.validityType || row.validEndTime == null || row.validEndTime === "") {
         return false;
@@ -481,14 +427,12 @@ export default {
     canEdit(row) {
       return this.hasRemainingStock(row);
     },
-    /** 本次批量制卡允许的最大张数：以剩余库存为准 */
     getBatchCreateHeadroom(row) {
       return this.getRemainingStock(row);
     },
     canBatchCreate(row) {
       return this.hasRemainingStock(row);
     },
-    /** 可发卡余量：与制卡独立，以剩余库存为准 */
     getBatchIssuePool(row) {
       return this.getRemainingStock(row);
     },
@@ -510,11 +454,9 @@ export default {
       this.issueFileName = "";
       this.batchIssueVisible = true;
     },
-    onBatchIssueVisible(open) {
-      if (!open) {
-        this.issueFile = null;
-        this.issueFileName = "";
-      }
+    onBatchIssueClosed() {
+      this.issueFile = null;
+      this.issueFileName = "";
     },
     downloadIssueTemplate() {
       this.issueTemplateDownloading = true;
@@ -616,10 +558,8 @@ export default {
       this.batchForm.batchRemark = "";
       this.batchCreateVisible = true;
     },
-    onBatchCreateVisible(open) {
-      if (!open && this.$refs.batchForm && typeof this.$refs.batchForm.resetFields === "function") {
-        this.$refs.batchForm.resetFields();
-      }
+    onBatchCreateClosed() {
+      this.$refs.batchForm?.resetFields();
     },
     submitBatchCreate() {
       if (!this.$refs.batchForm) {
@@ -652,13 +592,11 @@ export default {
           });
       });
     },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
+    changePage() {
       this.getDataList();
     },
-    changePageSize(v) {
+    changePageSize() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
       this.getDataList();
     },
     handleSearch() {
@@ -705,8 +643,17 @@ export default {
   font-size: 14px;
 }
 .gcc-batch-issue-filename {
-  color: #2d8cf0;
+  color: #409eff;
   font-size: 13px;
   word-break: break-all;
+}
+.mb_10 {
+  margin-bottom: 10px;
+}
+.mt_10 {
+  margin-top: 10px;
+}
+.padding-row {
+  margin-bottom: 10px;
 }
 </style>

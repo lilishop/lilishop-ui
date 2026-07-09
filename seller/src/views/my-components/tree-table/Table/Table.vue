@@ -2,8 +2,8 @@
   <div
     v-if="columns.length > 0"
     ref="table"
+    v-loading="loading"
     :class="[prefixCls, `${prefixCls}-${size}`, tableClass]">
-    <Spin fix v-if="loading"></Spin>
     <div
       v-show="showHeader"
       ref="header-wrapper"
@@ -214,11 +214,8 @@ export default {
       default: () => []
     },
     size: {
-      default() {
-        return !this.$IVIEW || this.$IVIEW.size === ""
-          ? "default"
-          : this.$IVIEW.size;
-      }
+      type: String,
+      default: "default",
     },
     loading: {
       type: Boolean,
@@ -296,6 +293,11 @@ export default {
     rowStyle: [Object, Function],
     cellStyle: [Object, Function],
     expandKey: String
+  },
+  provide() {
+    return {
+      treeTableRoot: this,
+    };
   },
   data() {
     return {
@@ -387,7 +389,7 @@ export default {
     this.measure();
     window.addEventListener("resize", this.measure);
   },
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener("resize", this.measure);
   }
 };
