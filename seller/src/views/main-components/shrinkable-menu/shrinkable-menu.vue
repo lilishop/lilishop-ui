@@ -106,13 +106,13 @@ export default {
 
   :deep(.el-menu-item.is-active) {
     background-color: #fff !important;
-    color: $theme_color !important;
+    color: var(--el-color-primary) !important;
   }
 
   :deep(.el-menu-item.is-active:hover),
   :deep(.el-menu-item.is-active:focus) {
     background-color: #fff !important;
-    color: $theme_color !important;
+    color: var(--el-color-primary) !important;
   }
 }
 

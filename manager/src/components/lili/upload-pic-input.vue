@@ -63,6 +63,7 @@
         ref="ossManage"
         :is-component="true"
         :initialize="picModalFlag"
+        :max-select="1"
         @callback="handleOssCallback"
       />
     </el-dialog>

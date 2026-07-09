@@ -645,8 +645,8 @@ html.z-modal body {
 }
 
 .hz-edit-img img {
-  max-width: 300px;
-  max-height: 200px;
+  max-width: 240px;
+  max-height: 140px;
   margin-bottom: 10px;
 }
 

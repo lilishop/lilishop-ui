@@ -54,6 +54,7 @@
     <el-dialog
       v-model="showModal"
       title="编辑热区"
+      width="420px"
       :close-on-click-modal="false"
       append-to-body
       @close="cancelZone"
@@ -179,6 +180,7 @@ export default {
       this.zoneForm.link = this.$filters.formatLinkType(val);
       this.settingZone(val);
       this.changeInfo(this.zoneForm);
+      this.showModal = false;
     },
     settingZone(val) {
       this.zoneForm.type = val.___type || val.type;

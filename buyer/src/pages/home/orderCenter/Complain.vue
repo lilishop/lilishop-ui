@@ -102,6 +102,10 @@ export default {
       })
     },
     save () { // 提交投诉信息
+      if (!this.form.content || !String(this.form.content).trim()) {
+        Message.warning('投诉内容不能为空')
+        return
+      }
       let params = {
         goodsId: this.orderGoods.goodsId,
         complainTopic: this.form.complainTopic,

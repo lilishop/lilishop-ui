@@ -38,7 +38,13 @@
                   </div>
                   <div class="remarks-content-box">
                     <p>
-                      <el-rate disabled :value="Number(item.descriptionScore)" allow-half class="remarks-star"></el-rate>
+                      <el-rate
+                        disabled
+                        :model-value="Number(item.descriptionScore) || 0"
+                        allow-half
+                        class="remarks-star"
+                        :colors="['var(--theme-color)', 'var(--theme-color)', 'var(--theme-color)']"
+                      ></el-rate>
                     </p>
                     <p class="remarks-content">{{item.content}}</p>
                     <div class="comment-img" v-if="item.images">
@@ -546,8 +552,12 @@ export default {
     background-color: transparent;
   }
 }
-:deep(.el-rate__icon) {
-  color: $theme_color;
+:deep(.remarks-star.el-rate) {
+  --el-rate-fill-color: #{$theme_color};
+  --el-rate-disabled-fill-color: #{$theme_color};
+}
+:deep(.remarks-star .el-rate__icon.is-active) {
+  color: $theme_color !important;
 }
 table{
   border-color:#efefef;

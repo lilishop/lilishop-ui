@@ -278,7 +278,7 @@
             <div class="item-select-column">
               <div class="add-buy-car">
                 <el-button
-                  type="danger"
+                  class="goods-action-btn"
                   v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
                   :loading="loading"
                   :disabled="skuDetail.quantity === 0"
@@ -286,7 +286,7 @@
                   >加入购物车</el-button
                 >
                 <el-button
-                  class="confirm-receipt-btn"
+                  class="goods-action-btn"
                   :loading="loading1"
                   :disabled="skuDetail.quantity === 0"
                   @click="buyNow"
@@ -986,6 +986,28 @@ export default {
   > *:last-child {
     margin-right: 0;
   }
+
+  .goods-action-btn {
+    background-color: #ff475d !important;
+    border-color: #ff475d !important;
+    color: #fff !important;
+
+    &:hover,
+    &:focus {
+      background-color: #e63e52 !important;
+      border-color: #e63e52 !important;
+      color: #fff !important;
+    }
+
+    &.is-disabled,
+    &.is-disabled:hover,
+    &.is-disabled:focus {
+      background-color: #ff475d !important;
+      border-color: #ff475d !important;
+      color: #fff !important;
+      opacity: 0.5;
+    }
+  }
 }
 
 .goodsConfig {
@@ -1003,7 +1025,7 @@ export default {
 
     &.is-collected {
       .collect-icon {
-        color: #ffc107;
+        color: $theme_color;
       }
     }
   }
