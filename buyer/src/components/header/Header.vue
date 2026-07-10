@@ -124,9 +124,27 @@ export default {
     }
   },
   methods: {
-    goToPay() { // 跳转购物车
-      let url = this.$router.resolve({
-        path: '/cart'
+    goToPay() {
+      if (!this.userInfo.username) {
+        Modal.confirm({
+          title: '温馨提示',
+          content: '请登录后执行此操作',
+          okText: '立即登录',
+          cancelText: '取消',
+          onOk: () => {
+            this.$router.push({
+              path: '/login',
+              query: {
+                rePath: '/cart',
+                query: JSON.stringify(this.$route.query || {}),
+              },
+            });
+          },
+        });
+        return;
+      }
+      const url = this.$router.resolve({
+        path: '/cart',
       });
       window.open(url.href, '_blank');
     },
@@ -169,16 +187,29 @@ export default {
       }
     },
     shopEntry() {
-      // 店铺入驻
       if (storage.getItem('accessToken')) {
-        let routeUrl = this.$router.resolve({
+        const routeUrl = this.$router.resolve({
           path: '/shopEntry',
-          query: {id: 1}
+          query: { id: 1 },
         });
         window.open(routeUrl.href, '_blank');
-      } else {
-        this.$router.push('login');
+        return;
       }
+      Modal.confirm({
+        title: '温馨提示',
+        content: '请登录后执行此操作',
+        okText: '立即登录',
+        cancelText: '取消',
+        onOk: () => {
+          this.$router.push({
+            path: '/login',
+            query: {
+              rePath: '/shopEntry',
+              query: JSON.stringify({ id: 1 }),
+            },
+          });
+        },
+      });
     },
     handleCartDropdownVisible(visible) {
       if (visible) {

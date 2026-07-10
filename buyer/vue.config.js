@@ -51,7 +51,13 @@ module.exports = {
         minSize: 20000,
         cacheGroups: {
           vendor: {
-            test: /[\\/]node_modules[\\/]/,
+            test(module) {
+              if (!module.context) return false;
+              if (/[\\/]node_modules[\\/]vue-qr[\\/]/.test(module.context)) {
+                return false;
+              }
+              return /[\\/]node_modules[\\/]/.test(module.context);
+            },
             name(module) {
               const match =
                 module.context &&

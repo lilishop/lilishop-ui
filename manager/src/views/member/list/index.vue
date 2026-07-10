@@ -468,18 +468,28 @@ export default {
       this.$refs.memberGroupForm.validate((valid) => {
         if (!valid) return;
         const memberIds = this.selectedRows.map((item) => item.id);
+        const groupId = this.memberGroupForm.groupId;
         this.memberGroupLoading = true;
-        API_Member.addMemberGroupUsers(this.memberGroupForm.groupId, memberIds).then((res) => {
-          this.memberGroupLoading = false;
-          if (res && res.success) {
+        Promise.all(
+          memberIds.map((memberId) => API_Member.setMemberUserGroups(memberId, [groupId]))
+        )
+          .then((results) => {
+            this.memberGroupLoading = false;
+            const failed = results.find((res) => !res || !res.success);
+            if (failed) {
+              ElMessage.error(failed.message || "设置失败");
+              return;
+            }
             ElMessage.success("设置成功");
             this.memberGroupFlag = false;
             this.selectedRows = [];
             this.clearSelection();
-          } else if (res && res.message) {
-            ElMessage.error(res.message);
-          }
-        });
+            this.getData();
+          })
+          .catch(() => {
+            this.memberGroupLoading = false;
+            ElMessage.error("设置失败，请稍后重试");
+          });
       });
     },
     callback(val) {

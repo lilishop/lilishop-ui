@@ -15,7 +15,7 @@
           ref="formRegist"
           :model="formRegist"
           :rules="ruleInline"
-          style="width:300px;"
+          class="signup-form"
         >
           <el-form-item prop="username">
             <el-input
@@ -66,7 +66,7 @@
               >注册</el-button
             >
           </el-form-item>
-          <el-form-item><span class="color999 ml_20">点击注册，表示您同意《<router-link to="/article?id=1371992704333905920" target="_blank">商城用户协议</router-link>》</span></el-form-item>
+          <el-form-item><span class="color999">点击注册，表示您同意《<router-link to="/article?id=1371992704333905920" target="_blank">商城用户协议</router-link>》</span></el-form-item>
         </el-form>
         <!-- 拼图验证码 -->
         <Verify
@@ -240,7 +240,15 @@ export default {
   margin: 0 auto;
   width: 600px;
   background-color: #fff;
-  padding: 20px 150px;
+  padding: 20px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .signup-form {
+    width: 300px;
+  }
+
   .login-btn{
     position: absolute;
     right: 20px;
@@ -250,8 +258,9 @@ export default {
 
 .verify-con{
   position: absolute;
-  left: 140px;
+  left: 50%;
   top: 80px;
+  transform: translateX(-50%);
   z-index: 10;
 }
 

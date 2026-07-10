@@ -47,6 +47,7 @@
 <script>
 import { Message } from "@/utils/message";
 import { editMemberInfo } from '@/api/account.js';
+import { getMemberMsg } from '@/api/login.js';
 import { commonUrl } from '@/plugins/request.js';
 import storage from '@/plugins/storage.js';
 import { User } from '@element-plus/icons-vue';
@@ -64,11 +65,44 @@ export default {
     }
   },
   mounted () {
-    this.formItem = JSON.parse(storage.getItem('userInfo'))
-    this.formItem.birthday = this.normalizeBirthday(this.formItem.birthday)
     this.accessToken.accessToken = storage.getItem('accessToken');
+    this.loadUserInfo();
   },
   methods: {
+    loadUserInfo () {
+      const rawUserInfo = storage.getItem('userInfo');
+      if (rawUserInfo) {
+        this.applyUserInfo(JSON.parse(rawUserInfo));
+        return;
+      }
+      if (!storage.getItem('accessToken')) {
+        this.redirectToLogin();
+        return;
+      }
+      getMemberMsg().then(res => {
+        if (res.success && res.result) {
+          storage.setItem('userInfo', res.result);
+          this.applyUserInfo(res.result);
+        } else {
+          this.redirectToLogin();
+        }
+      }).catch(() => {
+        this.redirectToLogin();
+      });
+    },
+    applyUserInfo (userInfo) {
+      this.formItem = { ...userInfo };
+      this.formItem.birthday = this.normalizeBirthday(this.formItem.birthday);
+    },
+    redirectToLogin () {
+      this.$router.push({
+        path: '/login',
+        query: {
+          rePath: this.$route.path,
+          query: JSON.stringify(this.$route.query || {}),
+        },
+      });
+    },
     normalizeBirthday (value) {
       if (!value) return ''
       if (value instanceof Date) return value

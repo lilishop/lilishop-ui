@@ -95,3 +95,13 @@
   color: #c0c4cc;
   cursor: not-allowed;
 }
+
+/* 顶部路由加载条（与商家后台一致） */
+#nprogress .bar {
+  height: 2x;
+  background: var(--el-color-primary, #409eff);
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 4px var(--el-color-primary, #409eff), 0 0 2px var(--el-color-primary, #409eff);
+}

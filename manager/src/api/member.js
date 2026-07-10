@@ -176,6 +176,13 @@ export const addMemberGroupUsers = (groupId, memberIds) => {
   });
 };
 
+export const setMemberUserGroups = (memberId, groupIds) => {
+  const ids = Array.isArray(groupIds) ? groupIds : groupIds ? [groupIds] : [];
+  return postRequest(`/member/memberGroup/user/${memberId}/groups`, {
+    groupIds: ids.join(","),
+  });
+};
+
 // 客户等级
 export const getMemberGradeByPage = (params) => {
   return getRequest("/member/memberGrade/getByPage");

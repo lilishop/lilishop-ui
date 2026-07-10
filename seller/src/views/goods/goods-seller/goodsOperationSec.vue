@@ -162,12 +162,20 @@
             <el-form-item>
               <div style="color: grey">主图仅支持png，jpg，jpeg格式，宽高至少600*600px，大小2M内，可拖拽调整主图顺序</div>
             </el-form-item>
-            <el-form-item class="form-item-view-el" label="主图视频" prop="goodsVideo">
+            <el-form-item
+              class="form-item-view-el goods-video-form-item"
+              :class="{ 'goods-video-form-item--multi': baseInfoForm.goodsVideo }"
+              label="主图视频"
+              prop="goodsVideo"
+            >
               <div class="goods-video">
                 <div v-if="baseInfoForm.goodsVideo" class="goods-video-preview">
                   <video :src="baseInfoForm.goodsVideo" class="video" controls style="max-width: 300px;" />
                 </div>
-                <div class="goods-video-actions">
+                <div
+                  class="goods-video-actions"
+                  :class="{ 'goods-video-actions--with-preview': baseInfoForm.goodsVideo }"
+                >
                   <el-upload
                     :action="uploadFileUrl"
                     :headers="{ ...accessToken }"
@@ -2365,16 +2373,32 @@ export default {
 /* .tox-notifications-container{
   display: none !important;
 } */
-.goods-video-label {
-  width: 120px;
-  text-align: right;
-  padding: 10px 12px 10px 0;
+.goods-video-form-item {
+  align-items: center;
+}
+
+.goods-video-form-item--multi {
+  align-items: flex-start;
+}
+
+.goods-video-form-item--multi :deep(.el-form-item__label) {
+  padding-top: 8px;
+}
+
+.goods-video-form-item :deep(.el-form-item__content) {
+  display: flex;
+  align-items: center;
+}
+
+.goods-video-form-item--multi :deep(.el-form-item__content) {
+  align-items: flex-start;
 }
 
 .goods-video {
   align-items: flex-start;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .goods-video-preview {
@@ -2386,7 +2410,17 @@ export default {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 6px;
+  min-height: 32px;
+}
+
+.goods-video-actions--with-preview {
+  margin-top: 8px;
+}
+
+.goods-video-actions :deep(.el-upload) {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
 }
 
 .mb-10 {
