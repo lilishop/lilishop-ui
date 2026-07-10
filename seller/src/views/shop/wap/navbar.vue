@@ -68,21 +68,10 @@ export default {
       num: 20, // 提交进度
       saveDialog: false, // 加载状态
       way: [
-        // 装修tab栏切换
         {
           title: "首页",
           name: "index",
           selected: true,
-        },
-        {
-          title: "全屏广告",
-          name: "advertising",
-          selected: false,
-        },
-        {
-          title: "弹窗广告",
-          name: "ALERT",
-          selected: false,
         },
       ],
 
@@ -102,10 +91,6 @@ export default {
           this.way.push({ title: "首页", name: "index", selected: true });
         } else if (val == "SPECIAL") {
           this.way.push({ title: "专题", name: "special", selected: true });
-        } else if (val == "ALERT") {
-          this.way.push({ title: "开屏广告", name: "alert", selected: true });
-        }else if (val == "OPEN_SCREEN_ANIMATION") {
-          this.way.push({ title: "app开屏页面", name: "OPEN_SCREEN_ANIMATION", selected: true });
         }
       },
       immediate: true,
@@ -144,7 +129,7 @@ export default {
     save() {
        if (
         this.$store.state.styleStore == void 0 &&
-        (this.$route.query.pagetype && this.$route.query.pagetype != 'ALERT' &&  this.$route.query.pagetype != 'OPEN_SCREEN_ANIMATION')
+        this.$route.query.pagetype != 'SPECIAL'
       ) {
         this.$Message.error("请装修楼层");
         return false;
@@ -155,17 +140,9 @@ export default {
         : (this.submitWay.pageShow = "CLOSE");
 
       this.submitWay.pageData = JSON.stringify(this.$store.state.styleStore);
-      this.submitWay.pageType = "INDEX";
-      this.submitWay.pageType =  this.$route.query.pagetype ||  "INDEX";
-      // this.submitWay.pageType = this.pagetype;
+      this.submitWay.pageType = this.$route.query.pagetype || "INDEX";
 
-      if (this.$route.query.pagetype == 'ALERT' || this.$route.query.pagetype == 'OPEN_SCREEN_ANIMATION') {
-        this.update(this.submitWay);
-      } else {
-        this.$route.query.id ? this.updateHome() : this.submit(this.submitWay);
-      }
-
-      // this.$route.query.id ? this.update() : this.submit(this.submitWay);
+      this.$route.query.id ? this.updateHome() : this.submit(this.submitWay);
     },
 
     // 更新

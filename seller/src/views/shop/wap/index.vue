@@ -81,7 +81,6 @@ import Draggable from "vuedraggable";
 import { modelData } from "./config";
 import decorate from "./decorate";
 import * as API_Other from "@/api/other";
-import * as API_Promotions from "@/api/promotion";
 export default {
   components: {
     Draggable,
@@ -192,80 +191,17 @@ export default {
     },
     // 右侧栏回调
     handleDrawer(val) {
-      let newIndex = this.selected;
-      if (val.promotionsType) {
-        if (this.contentData.list[newIndex].options.list.length >= 2) {
-          this.$Message.error("最多只能展示两个活动");
-          return;
-        }
-        if (val.promotionsType === "LIVE") {
-          API_Promotions.getLiveList({
-            status: "START",
-            pageSize: 1,
-            pageNumber: 1,
-          }).then((listRes) => {
-            const records = listRes.result?.records || [];
-            if (!listRes.success || records.length === 0) {
-              this.$Message.warning("暂无进行中的直播活动");
-              return;
-            }
-            API_Promotions.getLiveInfo(records[0].id).then((infoRes) => {
-              if (infoRes.success) {
-                this.contentData.list[newIndex].options.list.push({
-                  type: val.promotionsType,
-                  title: val.name,
-                  title1: val.subName,
-                  color1: val.subColor,
-                  bk_color: val.subBkColor,
-                  data: infoRes.result.commodityList
-                    ? infoRes.result.commodityList.splice(0, 2)
-                    : [],
-                });
-              }
-            });
-          });
-        } else {
-          API_Promotions.getAllPromotion().then((res) => {
-            let exist = this.contentData.list[newIndex].options.list.find(
-              (i) => i.type === val.promotionsType
-            );
-
-            if (res.success && !exist) {
-              this.contentData.list[newIndex].options.list.push({
-                data: res.result[val.promotionsType]
-                  ? res.result[val.promotionsType].splice(0, 2)
-                  : [],
-                type: val.promotionsType,
-                title1: val.subName,
-                color1: val.subColor,
-                bk_color: val.subBkColor,
-                title: val.name,
-              });
-            }
-          });
-        }
-        this.contentData.list[newIndex] = {
-          ...val,
-          options: {
-            ...this.contentData.list[newIndex].options,
-          },
-          model: val.type,
-        };
-      } else {
-        this.decorateData = "";
-
-        this.contentData.list[newIndex] = {
-          ...val,
-          options: {
-            ...val.options,
-          },
-          model: val.type,
-        };
-        this.contentData.list = JSON.parse(
-          JSON.stringify(this.contentData.list)
-        );
-        this["decorateData"] = this.contentData.list[newIndex];
-      }
+      const newIndex = this.selected;
+      this.decorateData = "";
+      this.contentData.list[newIndex] = {
+        ...val,
+        options: {
+          ...val.options,
+        },
+        model: val.type,
+      };
+      this.contentData.list = JSON.parse(JSON.stringify(this.contentData.list));
+      this.decorateData = this.contentData.list[newIndex];
     },
 
     // 封装拖拽参数

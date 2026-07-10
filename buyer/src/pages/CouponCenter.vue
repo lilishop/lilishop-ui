@@ -57,6 +57,7 @@
 </template>
 <script>
 import { Modal } from "@/utils/message";
+import storage from "@/plugins/storage";
 import { couponList, receiveCoupon } from "@/api/member.js";
 export default {
   data() {
@@ -115,6 +116,26 @@ export default {
     },
     // 领取优惠券
     receive(item) {
+      const userInfo = storage.getItem("userInfo");
+      const isLogin = userInfo && JSON.parse(userInfo).username;
+      if (!isLogin) {
+        Modal.confirm({
+          title: "温馨提示",
+          content: "请登录后执行此操作",
+          okText: "立即登录",
+          cancelText: "取消",
+          onOk: () => {
+            this.$router.push({
+              path: "/login",
+              query: {
+                rePath: this.$route.path,
+                query: JSON.stringify(this.$route.query),
+              },
+            });
+          },
+        });
+        return;
+      }
       receiveCoupon(item.id)
         .then((res) => {
           if (!res || !res.success) return;

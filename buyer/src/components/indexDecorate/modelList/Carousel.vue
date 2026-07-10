@@ -51,7 +51,7 @@
             </div> -->
           </div>
           <div v-else class="flex flex-a-c ">
-            <div class="btns" @click="$router.push('login')">登录</div>
+            <div class="btns" @click="goLogin">登录</div>
             <div class="btns sign-up" @click="$router.push('signUp')">注册</div>
           </div>
 
@@ -84,6 +84,7 @@
 
 <script>
 
+import { Modal } from "@/utils/message";
 import storage from "@/plugins/storage";
 import config from "@/config";
 import defaultAvatar from "@/assets/images/default.png";
@@ -182,17 +183,34 @@ export default {
         query: Object.fromEntries(new URLSearchParams(search)),
       };
     },
+    isMemberRoute(location) {
+      return location.path.startsWith("/home/") || location.path === "/cart";
+    },
+    promptLoginThenNavigate(location) {
+      Modal.confirm({
+        title: "温馨提示",
+        content: "请登录后执行此操作",
+        okText: "立即登录",
+        cancelText: "取消",
+        onOk: () => {
+          this.$router.push({
+            path: "/login",
+            query: {
+              rePath: location.path,
+              query: JSON.stringify(location.query || {}),
+            },
+          });
+        },
+      });
+    },
+    goLogin() {
+      this.$router.push("/login");
+    },
     // 快捷跳转中心
     entryControl(val) {
       const location = this.resolveRoute(val.path);
-      if (location.path.startsWith("/home/") && !storage.getItem("userInfo")) {
-        this.$router.push({
-          path: "/login",
-          query: {
-            rePath: location.path,
-            query: JSON.stringify(location.query || {}),
-          },
-        });
+      if (this.isMemberRoute(location) && !storage.getItem("userInfo")) {
+        this.promptLoginThenNavigate(location);
         return;
       }
       const url = this.$router.resolve(location);

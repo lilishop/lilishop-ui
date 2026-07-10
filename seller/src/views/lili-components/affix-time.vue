@@ -174,7 +174,7 @@ export default {
 }
 
 .active {
-  color: $theme_color;
+  color: var(--el-color-primary);
   position: relative;
 }
 
@@ -185,6 +185,6 @@ export default {
   left: 0;
   width: 100%;
   height: 3px;
-  background: $theme_color;
+  background: var(--el-color-primary);
 }
 </style>

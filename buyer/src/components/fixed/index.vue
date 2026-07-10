@@ -10,6 +10,7 @@
 
 <script>
 import { getIconUrl } from "@/assets/iconfont/iconMap";
+import storage from "@/plugins/storage.js";
 
 export default {
   name: "fixed-index",
@@ -19,22 +20,26 @@ export default {
         {
           icon:"user",
           label:"会员中心",
-          path:"/home"
+          path:"/home",
+          requireLogin: true,
         },
         {
           icon:"carts",
           label:"购物车",
-          path:"/cart"
+          path:"/cart",
+          requireLogin: true,
         },
         {
           icon:"notification",
           label:"消息",
-          path:"/home/MsgList"
+          path:"/home/MsgList",
+          requireLogin: true,
         },
         {
           icon:"collage",
           label:"收藏",
-          path:"/home/Favorites"
+          path:"/home/Favorites",
+          requireLogin: true,
         },
         {
           icon:"back",
@@ -71,13 +76,37 @@ export default {
         this.isScrolling = false;
       }
     },
-    handleClickIcon(val){
-        if(val.path === 'back'){
-          this.scrollToTop()
-        }else{
-          this.$router.push(val.path)
+    isLoggedIn () {
+      const rawUserInfo = storage.getItem('userInfo');
+      if (rawUserInfo) {
+        try {
+          return !!JSON.parse(rawUserInfo).username;
+        } catch {
+          return false;
         }
-    }
+      }
+      return !!storage.getItem('accessToken');
+    },
+    goLogin (rePath) {
+      this.$router.push({
+        path: '/login',
+        query: {
+          rePath,
+          query: JSON.stringify(this.$route.query || {}),
+        },
+      });
+    },
+    handleClickIcon (val) {
+      if (val.path === 'back') {
+        this.scrollToTop();
+        return;
+      }
+      if (val.requireLogin && !this.isLoggedIn()) {
+        this.goLogin(val.path);
+        return;
+      }
+      this.$router.push(val.path);
+    },
   }
 }
 </script>

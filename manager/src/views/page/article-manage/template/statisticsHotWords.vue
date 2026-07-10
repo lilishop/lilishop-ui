@@ -90,7 +90,7 @@ export default {
         this.hotWordsChart.tooltip({
           showMarkers: false,
         });
-        this.hotWordsChart.interval().position("keywords*score").color("#f59b99");
+        this.hotWordsChart.interval().position("keywords*score").color("#409EFF");
         this.hotWordsChart.interaction("element-active");
 
         this.hotWordsChart.render();

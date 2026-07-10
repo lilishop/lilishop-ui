@@ -22,13 +22,7 @@ export default {
     };
   },
   mounted() {
-    if (this.$route.query.pagetype == "ALERT") {
-      this.name = "alertAdvertising";
-    }
-    if (this.$route.query.pagetype == "OPEN_SCREEN_ANIMATION") {
-      this.name = "advertising";
-    }
-    this.pagetype = this.$route.query.pagetype;
+    this.pagetype = this.$route.query.pagetype || "INDEX";
   },
   methods: {
     selected(val) {

@@ -1,17 +1,7 @@
-import index from './index.vue' //首页
-
-import advertising from './advertising.vue' //全屏活动
-import alertAdvertising from './alertAdvertising.vue' //弹窗活动
-
-
+import index from "./index.vue";
 
 const templates = {
-	index,
+  index,
+};
 
-	advertising,
-	alertAdvertising
-}
-
-
-
-export default  templates
+export default templates;

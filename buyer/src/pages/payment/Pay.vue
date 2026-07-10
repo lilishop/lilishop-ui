@@ -182,7 +182,7 @@
                 }}</span>折</span>
                 <span class="describe">满{{ item.consumeThreshold }}元可用</span>
               </div>
-              <p>使用范围：{{ useScope(item.scopeType) }}</p>
+              <p>使用范围：{{ useScope(item.scopeType, item.storeName) }}</p>
               <p>有效期：{{ item.endTime }}</p>
             </div>
             <img class="used" v-if="usedCouponId.includes(item.id)" src="../../assets/images/geted.png" alt="" />
@@ -861,8 +861,10 @@ export default {
         });
     },
     // 优惠券可用范围
-    useScope(type) {
+    useScope(type, storeName) {
+      let shop = "平台";
       let goods = "全部商品";
+      if (storeName !== "platform") shop = storeName;
       switch (type) {
         case "ALL":
           goods = "全部商品";
@@ -874,7 +876,7 @@ export default {
           goods = "部分分类商品";
           break;
       }
-      return `${goods}可用`;
+      return `${shop}${goods}可用`;
     },
   },
 };
@@ -1380,6 +1382,7 @@ export default {
 .coupon-item {
   width: 280px;
   height: 125px;
+  margin-left: 0;
   margin-right: 10px;
   margin-bottom: 10px;
   overflow: hidden;
@@ -1470,6 +1473,10 @@ export default {
 .coupon-list {
   max-height: 260px;
   overflow: scroll;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  justify-content: flex-start;
 }
 
 .pay-gcc-module {
