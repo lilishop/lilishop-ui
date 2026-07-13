@@ -3,13 +3,13 @@ import { nextTick, ref, unref, watch } from "vue";
 import { postSendMessage } from "@/api/live";
 import { Message } from "@/utils/message";
 import TencentCloudChat from "@tencentcloud/chat";
-import { fetchLiveSetting } from "./useLiveSetting";
+import { resolveImConfigFromDetail } from "./useLiveSetting";
 import { genTestUserSig } from "../utils/GenerateTestUserSig";
 
 const MAX_MESSAGE_COUNT = 100;
 const ADMIN_IM_USER_ID = "admin";
 
-export function useChat(liveId, userInfo) {
+export function useChat(liveId, userInfo, liveDetail) {
   const chat = ref(null);
   const groupID = ref("");
   const messageList = ref([]);
@@ -67,22 +67,25 @@ export function useChat(liveId, userInfo) {
       return;
     }
 
-    const setting = await fetchLiveSetting();
-    if (!setting?.imSdkAppid) {
-      initError.value = "请先在系统设置中配置直播 IM SDK APPID";
-      return;
-    }
-    if (!setting?.imSdkSecretKey) {
-      initError.value = "请先在系统设置中配置直播 IM SDK 密钥";
+    const detail = unref(liveDetail) || {};
+    const { sdkAppId, secretKey, userSig: detailUserSig } = resolveImConfigFromDetail(detail);
+    if (!sdkAppId) {
+      initError.value = "直播间详情缺少 IM SDK APPID";
       return;
     }
 
-    const sdkAppId = Number(setting.imSdkAppid);
-    const { userSig } = genTestUserSig({
-      SDKAppID: sdkAppId,
-      secretKey: setting.imSdkSecretKey,
-      userID: ADMIN_IM_USER_ID,
-    });
+    let userSig = detailUserSig;
+    if (!userSig) {
+      if (!secretKey) {
+        initError.value = "直播间详情缺少 IM 登录凭证";
+        return;
+      }
+      userSig = genTestUserSig({
+        SDKAppID: sdkAppId,
+        secretKey,
+        userID: ADMIN_IM_USER_ID,
+      }).userSig;
+    }
 
     if (chat.value) {
       detachChatEvents(chat.value);
