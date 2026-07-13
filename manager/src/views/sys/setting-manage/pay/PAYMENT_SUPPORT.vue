@@ -38,6 +38,7 @@
   </div>
 </template>
 <script>
+import { ElMessage, ElMessageBox } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
 import { getPaymentSupportForm } from "@/api/setting";
@@ -82,27 +83,19 @@ export default {
         .catch(() => {});
     },
     handleChangePayType(val) {
-      this.$Modal.confirm({
-        title: "修改支付设置",
-        content: "您是否修改此项？",
-        loading: true,
-        onOk: () => {
-          this.setupSetting();
-        },
-        onCancel: () => {
-          this.formValidate = JSON.parse(JSON.stringify(this.checkSupport));
-        },
+      ElMessageBox.confirm("您是否修改此项？", "修改支付设置", { type: "warning" }).then(() => {
+        this.setupSetting();
+      }).catch(() => {
+        this.formValidate = JSON.parse(JSON.stringify(this.checkSupport));
       });
     },
     setupSetting() {
       setSetting(this.type, { paymentSupportItems: this.formValidate }).then((res) => {
         if (res.success) {
           this.checkSupport = JSON.parse(JSON.stringify(this.formValidate));
-          this.$Message.success("保存成功!");
-          this.$Modal.remove();
+          ElMessage.success("保存成功!");
         } else {
-          this.$Message.error("保存失败!");
-          this.$Modal.remove();
+          ElMessage.error("保存失败!");
         }
       });
     },

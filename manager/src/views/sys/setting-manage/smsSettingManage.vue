@@ -31,6 +31,7 @@
   </el-card>
 </template>
 <script>
+import { ElMessage } from "element-plus";
 import { getSetting, setSetting } from "@/api/index.js";
 import template from "./template";
 export default {
@@ -57,9 +58,9 @@ export default {
     saveSetting() {
       setSetting("SMS_SETTING", this.form).then((res) => {
         if (res.success) {
-          this.$Message.success("保存成功!");
+          ElMessage.success("保存成功!");
         } else {
-          this.$Message.error("保存失败!");
+          ElMessage.error("保存失败!");
         }
         this.modalVisible = false;
       });

@@ -154,6 +154,7 @@
 
 <script>
 
+import { Message, Spin } from "@/utils/message";
 import * as RegExp from "@/plugins/RegExp.js";
 import { md5 } from "@/plugins/md5.js";
 import * as apiLogin from "@/api/login.js";
@@ -163,6 +164,7 @@ import storage from "@/plugins/storage.js";
 import verify from "@/components/verify";
 import vueQr from "vue-qr";
 import { User, Lock, Document } from "@element-plus/icons-vue";
+import config from "@/config";
 
 export default {
   name: "Login",
@@ -182,7 +184,7 @@ export default {
       scannerCodeLoginFLag: false,
       scannerCodeLoginStatus: 0,
       qrCodeTimer:null,
-      config: require('@/config'),
+      config,
       type: true, // true 账号登录  false 验证码登录
       formData: {
         // 登录表单
@@ -239,7 +241,7 @@ export default {
             apiLogin.smsLogin(data).then((res) => {
               this.hideVerify();
               if (res.success) {
-                this.$Message.success("登录成功");
+                Message.success("登录成功");
                 storage.setItem("accessToken", res.result.accessToken);
                 storage.setItem("refreshToken", res.result.refreshToken);
                 storage.setItem('getTimes',0)
@@ -258,7 +260,7 @@ export default {
                   }
                 });
               } else {
-                this.$Message.error(res.message);
+                Message.error(res.message);
               }
             });
           }
@@ -269,11 +271,11 @@ export default {
     sendCode() {
       if (this.time === 60) {
         if (this.formSms.mobile === "") {
-          this.$Message.warning("请先填写手机号");
+          Message.warning("请先填写手机号");
           return;
         }
         if (!this.verifyStatus) {
-          this.$Message.warning("请先完成安全验证");
+          Message.warning("请先完成安全验证");
           return;
         }
         let params = {
@@ -282,7 +284,7 @@ export default {
         };
         sendSms(params).then((res) => {
           if (res.success) {
-            this.$Message.success("验证码发送成功");
+            Message.success("验证码发送成功");
             let that = this;
             this.interval = setInterval(() => {
               that.time--;
@@ -296,7 +298,7 @@ export default {
               }
             }, 1000);
           } else {
-            this.$Message.warning(res.message);
+            Message.warning(res.message);
           }
         });
       }
@@ -310,19 +312,19 @@ export default {
         let data = JSON.parse(JSON.stringify(this.formData));
         data.password = md5(data.password);
         this.hideVerify();
-        this.$Spin.show();
+        Spin.show();
         apiLogin
           .login(data)
           .then((res) => {
             if (res.success) {
               this.loginSuccess(res.result.accessToken,res.result.refreshToken);
             } else {
-              this.$Spin.hide();
-              this.$Message.error(res.message);
+              Spin.hide();
+              Message.error(res.message);
             }
           })
           .catch(() => {
-            this.$Spin.hide();
+            Spin.hide();
           });
       } else {
         this.verifyStatus = true;
@@ -340,11 +342,11 @@ export default {
       webLogin(type);
     },
     loginSuccess(accessToken,refreshToken){
-      this.$Message.success("登录成功");
+      Message.success("登录成功");
       storage.setItem("accessToken", accessToken);
       storage.setItem("refreshToken", refreshToken);
       apiLogin.getMemberMsg().then((res) => {
-        this.$Spin.hide();
+        Spin.hide();
         if (res.success) {
           storage.setItem("userInfo", res.result);
           let query = this.$route.query;

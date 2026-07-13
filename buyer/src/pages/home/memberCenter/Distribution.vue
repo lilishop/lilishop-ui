@@ -99,11 +99,13 @@
             </el-table-column>
           </el-table>
           <div class="page-size">
-            <el-pagination               :current-page="params.pageNumber"
+            <el-pagination               v-model:current-page="params.pageNumber"
               :total="goodsData.total"
-              :page-size="params.pageSize"
+              v-model:page-size="params.pageSize"
+              :page-sizes="[10, 20, 50]"
               @current-change="changePage"
-             layout="total, prev, pager, next, jumper"></el-pagination>
+              @size-change="changePageSize"
+             layout="total, sizes, prev, pager, next, jumper"></el-pagination>
           </div>
         </el-tab-pane>
         <el-tab-pane label="未选商品" name="goodsUncheck">
@@ -136,11 +138,13 @@
             </el-table-column>
           </el-table>
           <div class="page-size">
-            <el-pagination               :current-page="params.pageNumber"
+            <el-pagination               v-model:current-page="params.pageNumber"
               :total="goodsData.total"
-              :page-size="params.pageSize"
+              v-model:page-size="params.pageSize"
+              :page-sizes="[10, 20, 50]"
               @current-change="changePage"
-             layout="total, prev, pager, next, jumper"></el-pagination>
+              @size-change="changePageSize"
+             layout="total, sizes, prev, pager, next, jumper"></el-pagination>
           </div>
         </el-tab-pane>
         <el-tab-pane label="提现记录" name="log">
@@ -172,11 +176,13 @@
             </el-table-column>
           </el-table>
           <div class="page-size">
-            <el-pagination               :current-page="logParams.pageNumber"
+            <el-pagination               v-model:current-page="logParams.pageNumber"
               :total="logData.total"
-              :page-size="logParams.pageSize"
+              v-model:page-size="logParams.pageSize"
+              :page-sizes="[10, 20, 50]"
               @current-change="changePageLog"
-             layout="total, prev, pager, next, jumper"></el-pagination>
+              @size-change="changePageSizeLog"
+             layout="total, sizes, prev, pager, next, jumper"></el-pagination>
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -256,6 +262,7 @@
 </template>
 
 <script>
+import { Message } from "@/utils/message";
 import { Edit } from '@element-plus/icons-vue';
 import {
   distribution,
@@ -268,12 +275,13 @@ import {
 import { IDCard } from "@/plugins/RegExp.js";
 import { checkBankno } from "@/plugins/Foundation";
 import vueQr from "vue-qr";
+import config from "@/config";
 export default {
   name: "Distribution",
   components: { vueQr, Edit },
   data() {
     return {
-      config:require('@/config'),
+      config,
       status: 0, // 申请状态，0为未申请 1 申请中 2 申请完成 3 功能暂未开启
       applyForm: {}, // 申请表单
       rules: {
@@ -320,18 +328,18 @@ export default {
       params: {
         // 商品请求参数
         pageNumber: 1,
-        pageSize: 20,
+        pageSize: 10,
         checked: true,
       },
       orderParams: {
         // 订单商品请求参数
         pageNumber: 1,
-        pageSize: 20,
+        pageSize: 10,
       },
       logParams: {
         // 日志参数
         pageNumber: 1,
-        pageSize: 20,
+        pageSize: 10,
         sort: "createTime",
         order: "desc",
       },
@@ -355,7 +363,7 @@ export default {
           applyDistribution(this.applyForm).then((res) => {
             this.applyLoading = false;
             if (res.success) {
-              this.$Message.success("申请已提交，请等待管理员审核");
+              Message.success("申请已提交，请等待管理员审核");
               this.status = 1;
             }
           });
@@ -377,21 +385,21 @@ export default {
     withdraw() {
       const price = Number(this.withdrawPrice);
       if (!price || price < 1) {
-        this.$Message.error('提现金额单次最少提现金额为1元');
+        Message.error('提现金额单次最少提现金额为1元');
         return;
       }
       distCash({ price: this.withdrawPrice }).then((res) => {
         if (res.success) {
           this.withdrawApplyModal = false;
           this.withdrawPrice = 0;
-          this.$Message.success('申请已提交，请等待审核');
+          Message.success('申请已提交，请等待审核');
           this.distribution();
           this.getLog();
         } else {
-          this.$Message.error(this.normalizeWithdrawError(res.message));
+          Message.error(this.normalizeWithdrawError(res.message));
         }
       }).catch((err) => {
-        this.$Message.error(this.normalizeWithdrawError(err?.message || err?.data?.message));
+        Message.error(this.normalizeWithdrawError(err?.message || err?.data?.message));
       });
     },
     qrcodeData(data64) {
@@ -437,9 +445,21 @@ export default {
       this.params.pageNumber = val;
       this.getGoodsData();
     },
+    changePageSize(val) {
+      // 修改每页条数
+      this.params.pageNumber = 1;
+      this.params.pageSize = val;
+      this.getGoodsData();
+    },
     changePageLog(val) {
       // 修改页码 日志
       this.logParams.pageNumber = val;
+      this.getLog();
+    },
+    changePageSizeLog(val) {
+      // 修改每页条数 日志
+      this.logParams.pageNumber = 1;
+      this.logParams.pageSize = val;
       this.getLog();
     },
     selectGoods(id, checked) {
@@ -450,7 +470,7 @@ export default {
       };
       selectDistGoods(params).then((res) => {
         if (res.success) {
-          this.$Message.success("操作成功！");
+          Message.success("操作成功！");
           this.getGoodsData();
         }
       });
@@ -479,7 +499,7 @@ export default {
       applyDistribution().then((res) => {
         this.applyLoading = false;
         if (res.success) {
-          this.$Message.success("申诉已提交，请等待管理员审核");
+          Message.success("申诉已提交，请等待管理员审核");
           // this.status = 1;
         }
       });

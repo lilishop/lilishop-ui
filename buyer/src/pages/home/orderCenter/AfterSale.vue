@@ -70,9 +70,9 @@
     </div>
     <!-- 分页 -->
     <div class="page-size">
-      <el-pagination :total="total" @current-change="changePageNum"
-            @size-change="changePageSize"
-            :page-size="params.pageSize" layout="sizes, prev, pager, next, jumper"></el-pagination>
+      <el-pagination v-model:current-page="params.pageNumber" v-model:page-size="params.pageSize"
+        :total="total" @current-change="changePageNum"
+            @size-change="changePageSize" layout="sizes, prev, pager, next, jumper"></el-pagination>
     </div>
     </UserCenterLayout>
     <el-dialog v-model="logisticsShow" width="530">
@@ -123,6 +123,7 @@
 </template>
 
 <script>
+import { Message, Modal } from "@/utils/message";
 import {afterSaleList, cancelAfterSale} from '@/api/member.js';
 import {afterSaleDelivery, getLogisticsCompany} from '@/api/order.js';
 import {afterSaleStatusList} from '../enumeration.js'
@@ -171,13 +172,13 @@ export default {
       })
     },
     cancel(sn) { // 取消售后申请
-      this.$Modal.confirm({
+      Modal.confirm({
         title: '取消',
         content: '确定取消此次售后申请吗？',
         onOk: () => {
           cancelAfterSale(sn).then(res => {
             if (res.success) {
-              this.$Message.success('取消售后申请成功')
+              Message.success('取消售后申请成功')
               this.getList()
             }
           })
@@ -244,7 +245,7 @@ export default {
         afterSaleDelivery(this.form).then(res => {
           if (res.success) {
             this.logisticsShow = false;
-            this.$Message.success('提交成功');
+            Message.success('提交成功');
             this.getList();
           }
           this.submitLoading = false;

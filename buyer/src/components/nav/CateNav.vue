@@ -167,7 +167,7 @@ export default {
         return;
       }
       this.cateList = JSON.parse(localStorage.getItem("category"));
-      // this.$Message.info(cateList)
+      // Message.info(cateList)
       }
     },
     getCate() {

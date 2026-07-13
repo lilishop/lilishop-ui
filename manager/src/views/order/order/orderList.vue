@@ -96,7 +96,7 @@
         <el-table-column prop="storeName" label="店铺名称" min-width="150" show-overflow-tooltip />
         <el-table-column label="订单金额" min-width="100">
           <template #default="{ row }">
-            <span :style="{ color: $mainColor }">{{ $filters.unitPrice(row.flowPrice, '￥') }}</span>
+            <span :style="{ color: $mainColor }">{{ unitPrice(row.flowPrice, '￥') }}</span>
           </template>
         </el-table-column>
         <el-table-column label="支付方式" width="120">
@@ -133,6 +133,8 @@
 
 <script>
 import * as API_Order from "@/api/order";
+import { ElMessage } from "element-plus";
+import { unitPrice, customRouterPush } from "@/utils/filters";
 
 export default {
   name: "orderList",
@@ -229,6 +231,7 @@ export default {
     },
   },
   methods: {
+    unitPrice,
     onStatusTabClick(tab) {
       this.orderStatusClick(tab.paneName);
     },
@@ -337,14 +340,14 @@ export default {
         });
     },
     detail(v) {
-      this.$filters.customRouterPush({
+      customRouterPush({
         name: "order-detail",
         query: { sn: v.sn },
       });
     },
     async exportOrder() {
       if (!this.searchForm.startDate || !this.searchForm.endDate) {
-        this.$Message.error("必须选择时间范围，搜索后进行导出！");
+        ElMessage.error("必须选择时间范围，搜索后进行导出！");
         return;
       }
       API_Order.exportOrder(this.searchForm)

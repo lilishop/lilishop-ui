@@ -187,6 +187,7 @@
 </template>
 
 <script>
+import { ElMessage, ElMessageBox } from "element-plus";
 import { Menu, List, ArrowDown } from "@element-plus/icons-vue";
 import {
   getStoreAllPermissionList,
@@ -420,7 +421,7 @@ export default {
       this.$refs.form.validate((valid) => {
         if (valid) {
           if (!this.form.id) {
-            this.$Message.warning("请先点击选择要修改的菜单节点");
+            ElMessage.warning("请先点击选择要修改的菜单节点");
             return;
           }
           this.submitLoading = true;
@@ -438,7 +439,7 @@ export default {
           editStorePermission(this.form).then((res) => {
             this.submitLoading = false;
             if (res.success) {
-              this.$Message.success("编辑成功");
+              ElMessage.success("编辑成功");
               this.$store.commit("setAdded", false);
               util.initRouter(this);
               this.init();
@@ -456,7 +457,7 @@ export default {
           addStorePermission(this.formAdd).then((res) => {
             this.submitLoading = false;
             if (res.success) {
-              this.$Message.success("添加成功");
+              ElMessage.success("添加成功");
               this.$store.commit("setAdded", false);
               util.initRouter(this);
               this.init();
@@ -468,17 +469,14 @@ export default {
     },
     addMenu() {
       if (!this.form.id) {
-        this.$Message.warning("请先点击选择一个菜单权限节点");
+        ElMessage.warning("请先点击选择一个菜单权限节点");
         return;
       }
       this.parentTitle = this.form.title;
       this.modalTitle = "添加子节点";
       this.showParent = true;
       if (this.form.level == 2) {
-        this.$Modal.warning({
-          title: "抱歉，不能添加啦",
-          content: "仅支持2级菜单目录",
-        });
+        ElMessageBox.alert("仅支持2级菜单目录", "抱歉，不能添加啦", { type: "warning" });
         return;
       }
       this.formAdd = {
@@ -504,23 +502,18 @@ export default {
     },
     delAll() {
       if (this.selectCount <= 0) {
-        this.$Message.warning("您还未勾选要删除的数据");
+        ElMessage.warning("您还未勾选要删除的数据");
         return;
       }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选的 " + this.selectCount + " 条数据?",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要删除所选的 " + this.selectCount + " 条数据?", "确认删除", { type: "warning" }).then(() => {
           let ids = "";
           this.selectList.forEach(function (e) {
             ids += e.id + ",";
           });
           ids = ids.substring(0, ids.length - 1);
           deleteStorePermission(ids).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("删除成功");
+              ElMessage.success("删除成功");
               this.$store.commit("setAdded", false);
               util.initRouter(this);
               this.selectList = [];
@@ -529,8 +522,7 @@ export default {
               this.init();
             }
           });
-        },
-      });
+      }).catch(() => {});
     },
   },
   mounted() {

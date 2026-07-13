@@ -44,6 +44,7 @@
 </template>
 
 <script>
+import { Message } from "@/utils/message";
 import multipleMap from "@/components/map/multiple-map";
 import {
   newMemberAddress,
@@ -96,7 +97,7 @@ export default {
             editMemberAddress(params).then((res) => {
               this.loading = false;
               if (res.success) {
-                this.$Message.success('编辑地址成功');
+                Message.success('编辑地址成功');
                 this.$emit('change', true);
                 this.hide();
               }
@@ -105,7 +106,7 @@ export default {
             newMemberAddress(params).then((res) => {
               this.loading = false;
               if (res.success) {
-                this.$Message.success('新增地址成功');
+                Message.success('新增地址成功');
                 this.$emit('change', true);
                 this.hide();
               }

@@ -183,17 +183,6 @@
       height: 100%;
 
 
-      .options {
-        .ivu-select-dropdown {
-          transform-origin: center top 0px;
-          position: absolute;
-          top: 45px !important;
-          left: -2px;
-          will-change: top, left;
-        }
-      }
-
-
       .message-con {
         display: inline-flex;
         align-items: center;

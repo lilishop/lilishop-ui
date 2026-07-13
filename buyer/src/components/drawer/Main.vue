@@ -13,7 +13,7 @@
       </div>
 
     </div>
-    <el-drawer width="300" class="popup" :title="drawerData.title" :mask="resetConfig.mask" :closable="resetConfig.closable"
+    <el-drawer width="300" class="popup" :title="drawerData.title" :modal="resetConfig.mask" :show-close="resetConfig.closable"
       v-model="handleDrawer">
       <drawerPage :title="drawerData.title" />
     </el-drawer>
@@ -21,6 +21,7 @@
 </template>
 
 <script>
+import { Modal } from "@/utils/message";
 import Storage from '@/plugins/storage.js';
 import Configuration from './config';
 import drawerPage from './Drawer'
@@ -55,7 +56,7 @@ export default {
     },
     clickBar (val) { // tabbar点击操作
       if (!this.userInfo) {
-        this.$Modal.confirm({
+        Modal.confirm({
           title: '请登录',
           content: '请登录后执行此操作',
           okText: '立即登录',

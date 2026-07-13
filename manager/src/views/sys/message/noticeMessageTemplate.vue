@@ -354,6 +354,7 @@
 </template>
 
 <script>
+import { ElMessage, ElMessageBox } from "element-plus";
 import * as API_Setting from "@/api/setting.js";
 import * as API_Other from "@/api/other.js";
 import * as API_Shop from "@/api/shops.js";
@@ -545,18 +546,14 @@ export default {
       });
     },
     removeMessage(id) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认删除此站内信 ?",
-        onOk: () => {
+      ElMessageBox.confirm("您确认删除此站内信 ?", "确认删除", { type: "warning" }).then(() => {
           API_Setting.deleteMessage(id).then((res) => {
             if (res.success) {
-              this.$Message.success("删除成功");
+              ElMessage.success("删除成功");
             }
             this.getMessage();
           });
-        },
-      });
+      }).catch(() => {});
     },
     sendMessage() {
       this.messageModalVisible = true;
@@ -586,7 +583,7 @@ export default {
       }
 
       if (this.messageSendForm.userIds.length <= 0 && this.messageSendForm.messageRange == "APPOINT") {
-        this.$Message.error("请选择发送对象");
+        ElMessage.error("请选择发送对象");
         return;
       }
       this.$refs["messageSendForm"].validate((valid) => {
@@ -594,7 +591,7 @@ export default {
           API_Other.sendMessage(this.messageSendForm).then((res) => {
             this.loading = false;
             if (res.success) {
-              this.$Message.success("发送成功");
+              ElMessage.success("发送成功");
               this.messageModalVisible = false;
               this.getMessage();
             }
@@ -656,7 +653,7 @@ export default {
           API_Setting.editNoticeMessage(this.form.id, params).then((res) => {
             this.submitLoading = false;
             if (res.success) {
-              this.$Message.success("修改成功");
+              ElMessage.success("修改成功");
               this.modalVisible = false;
               this.getNoticeMessage();
             }
@@ -704,7 +701,7 @@ export default {
     disable(v) {
       API_Setting.updateMessageStatus(v.id, "CLOSE").then((res) => {
         if (res.success) {
-          this.$Message.success("禁用成功");
+          ElMessage.success("禁用成功");
           this.getNoticeMessage();
         }
       });
@@ -712,7 +709,7 @@ export default {
     enable(v) {
       API_Setting.updateMessageStatus(v.id, "OPEN").then((res) => {
         if (res.success) {
-          this.$Message.success("启用成功");
+          ElMessage.success("启用成功");
           this.getNoticeMessage();
         }
       });

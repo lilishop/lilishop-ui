@@ -181,6 +181,7 @@
 <script>
 import * as API_Member from "@/api/member.js";
 import uploadPicInput from "@/components/lili/upload-pic-input";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 const buildDefaultForm = () => ({
   id: "",
@@ -358,7 +359,7 @@ export default {
         API_Member.addMemberGrade(payload).then((res) => {
           this.submitAddLoading = false;
           if (res && res.success) {
-            this.$Message.success("添加成功");
+            ElMessage.success("添加成功");
             this.addFlag = false;
             this.getData();
           }
@@ -410,7 +411,7 @@ export default {
         API_Member.updateMemberGrade(id, payload).then((res) => {
           this.submitEditLoading = false;
           if (res && res.success) {
-            this.$Message.success("修改成功");
+            ElMessage.success("修改成功");
             this.editFlag = false;
             this.getData();
           }
@@ -422,42 +423,34 @@ export default {
       const prevState = row.gradeState;
       if (nextState === prevState) return;
       const text = checked ? "开启" : "关闭";
-      this.$Modal.confirm({
-        title: "提示",
-        content: `<p>确定${text}该客户等级？</p>`,
-        onOk: () => {
-          row._gradeStateLoading = true;
-          return API_Member.updateMemberGradeState(row.id, nextState)
-            .then((res) => {
-              row._gradeStateLoading = false;
-              if (res && res.success) {
-                this.$Message.success(`${text}成功`);
-                row.gradeState = nextState;
-              } else {
-                this.getData();
-              }
-            })
-            .catch(() => {
-              row._gradeStateLoading = false;
-            });
-        },
-      });
+      ElMessageBox.confirm(`确定${text}该客户等级？`, "提示", { type: "warning" }).then(() => {
+        row._gradeStateLoading = true;
+        return API_Member.updateMemberGradeState(row.id, nextState)
+          .then((res) => {
+            row._gradeStateLoading = false;
+            if (res && res.success) {
+              ElMessage.success(`${text}成功`);
+              row.gradeState = nextState;
+            } else {
+              this.getData();
+            }
+          })
+          .catch(() => {
+            row._gradeStateLoading = false;
+          });
+      }).catch(() => {});
     },
     remove(row) {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "<p>确定删除该客户等级？</p>",
-        onOk: () => {
-          API_Member.deleteMemberGrade(row.id).then((res) => {
-            if (res && res.success) {
-              this.$Message.success("删除成功");
-              this.getData();
-            } else if (res && res.message) {
-              this.$Message.error(res.message);
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("确定删除该客户等级？", "提示", { type: "warning" }).then(() => {
+        API_Member.deleteMemberGrade(row.id).then((res) => {
+          if (res && res.success) {
+            ElMessage.success("删除成功");
+            this.getData();
+          } else if (res && res.message) {
+            ElMessage.error(res.message);
+          }
+        });
+      }).catch(() => {});
     },
   },
   mounted() {

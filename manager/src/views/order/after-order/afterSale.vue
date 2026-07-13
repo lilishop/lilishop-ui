@@ -69,6 +69,7 @@
 </template>
 <script>
 import * as API_Order from "@/api/order";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   data() {
@@ -143,7 +144,7 @@ export default {
             API_Order.addAfterSaleReason(this.form).then((res) => {
               this.submitLoading = false;
               if (res.success) {
-                this.$Message.success("添加成功");
+                ElMessage.success("添加成功");
                 this.getDataList();
                 this.modalVisible = false;
               }
@@ -152,7 +153,7 @@ export default {
             API_Order.editAfterSaleReason(this.form.id, this.form).then((res) => {
               this.submitLoading = false;
               if (res.success) {
-                this.$Message.success("修改成功");
+                ElMessage.success("修改成功");
                 this.getDataList();
                 this.modalVisible = false;
               }
@@ -162,20 +163,14 @@ export default {
       });
     },
     remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "确认要删除此售后原因?",
-        loading: true,
-        onOk: () => {
-          API_Order.delAfterSaleReason(v.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("售后原因已删除");
-              this.getDataList();
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("确认要删除此售后原因?", "确认删除", { type: "warning" }).then(() => {
+        API_Order.delAfterSaleReason(v.id).then((res) => {
+          if (res.success) {
+            ElMessage.success("售后原因已删除");
+            this.getDataList();
+          }
+        });
+      }).catch(() => {});
     },
   },
   mounted() {

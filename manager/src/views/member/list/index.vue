@@ -300,6 +300,9 @@ import multipleMap from "@/components/map/multiple-map";
 import * as API_Member from "@/api/member.js";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import * as RegExp from "@/libs/RegExp.js";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { customRouterPush } from "@/utils/filters";
+import defaultPic from "@/assets/default.png";
 
 export default {
   name: "member",
@@ -320,7 +323,7 @@ export default {
   },
   data() {
     return {
-      defaultPic: require("@/assets/default.png"),
+      defaultPic,
       descTitle: "",
       descFlag: false,
       loading: true,
@@ -459,7 +462,7 @@ export default {
     },
     submitSetMemberGroup() {
       if (this.selectedRows.length === 0) {
-        this.$Message.warning("请先选择会员");
+        ElMessage.warning("请先选择会员");
         return;
       }
       this.$refs.memberGroupForm.validate((valid) => {
@@ -469,12 +472,12 @@ export default {
         API_Member.addMemberGroupUsers(this.memberGroupForm.groupId, memberIds).then((res) => {
           this.memberGroupLoading = false;
           if (res && res.success) {
-            this.$Message.success("设置成功");
+            ElMessage.success("设置成功");
             this.memberGroupFlag = false;
             this.selectedRows = [];
             this.clearSelection();
           } else if (res && res.message) {
-            this.$Message.error(res.message);
+            ElMessage.error(res.message);
           }
         });
       });
@@ -579,7 +582,7 @@ export default {
             if (res.result) {
               this.$refs.addMemberForm.resetFields();
               this.getData();
-              this.$Message.success("添加成功！");
+              ElMessage.success("添加成功！");
               this.addFlag = false;
             }
           });
@@ -598,25 +601,21 @@ export default {
       }
     },
     detail(row) {
-      this.$filters.customRouterPush({ name: "member-detail", query: { id: row.id } });
+      customRouterPush({ name: "member-detail", query: { id: row.id } });
     },
     disabled(v) {
       let params = {
         memberIds: [v.id],
         disabled: false,
       };
-      this.$Modal.confirm({
-        title: "提示",
-        content: "<p>确认禁用此会员？</p>",
-        onOk: () => {
-          API_Member.updateMemberStatus(params).then((res) => {
-            if (res.success) {
-              this.$Message.success("禁用成功");
-              this.getData();
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("确认禁用此会员？", "提示", { type: "warning" }).then(() => {
+        API_Member.updateMemberStatus(params).then((res) => {
+          if (res.success) {
+            ElMessage.success("禁用成功");
+            this.getData();
+          }
+        });
+      }).catch(() => {});
     },
     openWalletIncrease(row) {
       this.walletIncreaseLoading = false;
@@ -636,11 +635,11 @@ export default {
         })
           .then((res) => {
             if (res && res.success) {
-              this.$Message.success("充值成功");
+              ElMessage.success("充值成功");
               this.walletIncreaseFlag = false;
               this.getData();
             } else {
-              this.$Message.error((res && res.message) || "充值失败");
+              ElMessage.error((res && res.message) || "充值失败");
             }
           })
           .finally(() => {
@@ -667,11 +666,11 @@ export default {
         })
           .then((res) => {
             if (res && res.success) {
-              this.$Message.success("修改成功");
+              ElMessage.success("修改成功");
               this.memberPointFlag = false;
               this.getData();
             } else {
-              this.$Message.error((res && res.message) || "修改失败");
+              ElMessage.error((res && res.message) || "修改失败");
             }
           })
           .finally(() => {
@@ -700,7 +699,7 @@ export default {
       }
       API_Member.updateMember(submit).then((res) => {
         if (res.result) {
-          this.$Message.success("修改成功！");
+          ElMessage.success("修改成功！");
           this.descFlag = false;
           this.getData();
         }

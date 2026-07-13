@@ -45,6 +45,7 @@
 </template>
 
 <script>
+import { Message } from "@/utils/message";
 import { editMemberInfo } from '@/api/account.js';
 import { buyerUrl } from '@/plugins/request.js';
 import storage from '@/plugins/storage.js';
@@ -104,7 +105,7 @@ export default {
           }
           editMemberInfo(params).then(res => {
             if (res.success) {
-              this.$Message.success('修改个人资料成功')
+              Message.success('修改个人资料成功')
               storage.setItem('userInfo', res.result)
               this.$router.go(0)
             }

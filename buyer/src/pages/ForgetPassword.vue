@@ -105,18 +105,20 @@
 
 <script>
 
+import { Message } from "@/utils/message";
 import * as RegExp from '@/plugins/RegExp.js';
 import { md5 } from '@/plugins/md5.js';
 import * as apiLogin from '@/api/login.js';
 import { sendSms } from '@/api/common.js';
 import Verify from '@/components/verify';
 import { Lock, Iphone, Document } from '@element-plus/icons-vue';
+import config from '@/config';
 export default {
   name: 'ForgetPassword',
   components: { Verify, Lock, Iphone, Document },
   data () {
     return {
-      config:require('@/config'),
+      config,
       loading: false, // 加载状态
       loading1: false, // 第二步加载状态
       formFirst: { // 手机验证码表单
@@ -163,10 +165,10 @@ export default {
           apiLogin.validateCode(data).then((res) => {
             this.loading = false;
             if (res.success) {
-            //   this.$Message.success('');
+            //   Message.success('');
               this.step = 1;
             } else {
-              this.$Message.warning(res.message);
+              Message.warning(res.message);
             }
           }).catch(() => { this.loading = false; });
         } else {}
@@ -177,7 +179,7 @@ export default {
         if (valid) {
           let params = JSON.parse(JSON.stringify(this.form));
           if (params.password !== params.oncePasd) {
-            this.$Message.warning('两次输入密码不一致');
+            Message.warning('两次输入密码不一致');
             return;
           };
           params.mobile = this.formFirst.mobile;
@@ -189,7 +191,7 @@ export default {
             this.loading1 = false;
             console.log(res);
             if (res.success) {
-              this.$Message.success('修改密码成功');
+              Message.success('修改密码成功');
               this.$router.push('login');
             }
           }).catch(() => { this.loading = false; });
@@ -199,11 +201,11 @@ export default {
     sendCode () { // 发送验证码
       if (this.time === 60) {
         if (this.formFirst.mobile === '') {
-          this.$Message.warning('请先填写手机号');
+          Message.warning('请先填写手机号');
           return;
         }
         if (!this.verifyStatus) {
-          this.$Message.warning('请先完成安全验证');
+          Message.warning('请先完成安全验证');
           return;
         }
         let params = {
@@ -212,7 +214,7 @@ export default {
         };
         sendSms(params).then(res => {
           if (res.success) {
-            this.$Message.success('验证码发送成功');
+            Message.success('验证码发送成功');
             let that = this;
             this.interval = setInterval(() => {
               that.time--;
@@ -226,7 +228,7 @@ export default {
               }
             }, 1000);
           } else {
-            this.$Message.warning(res.message);
+            Message.warning(res.message);
           }
         });
       }

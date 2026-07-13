@@ -100,8 +100,26 @@
   font-size: 16px;
 }
 
-.category-tabs-card {
-  margin-bottom: 0;
+.file-preview-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  color: #606266;
+
+  .file-preview-name {
+    margin: 16px 0 8px;
+    font-size: 16px;
+    font-weight: 500;
+    word-break: break-all;
+    text-align: center;
+  }
+
+  .file-preview-tip {
+    margin: 0 0 20px;
+    color: #909399;
+  }
 }
 
 </style>
@@ -182,7 +200,7 @@
                         multiple
                         style="display: inline-block"
                       >
-                        <el-button>上传图片</el-button>
+                        <el-button>{{ uploadButtonText }}</el-button>
                       </el-upload>
                       <el-button v-if="!isComponent && showType == 'list'" @click="removeAll">批量删除</el-button>
                     </div>
@@ -229,9 +247,7 @@
                               </el-tooltip>
                             </div>
                             <div
-                              @click.prevent="
-                                isVideoFile(item) ? showVideo(item) : showPic(item)
-                              "
+                              @click.prevent="previewFile(item)"
                             >
                               <el-tooltip content="预览" placement="top">
                                 <el-icon :size="22"><View /></el-icon>
@@ -264,166 +280,7 @@
             </el-col>
           </el-row>
 
-
-          <!--<div class="oss-operation padding-row">-->
-          <!--<div>-->
-          <!--<Upload-->
-          <!--ref="up"-->
-          <!--:action="managerApiUrl + '/manager/common/upload/file'"-->
-          <!--:data="{-->
-          <!--directoryPath: searchForm.fileDirectoryId,-->
-          <!--}"-->
-          <!--:headers="accessToken"-->
-          <!--:max-size="20480"-->
-          <!--:on-error="handleError"-->
-          <!--:on-exceeded-size="handleMaxSize"-->
-          <!--:on-success="handleSuccess"-->
-          <!--:show-upload-list="false"-->
-          <!--multiple-->
-          <!--style="display: inline-block"-->
-          <!--&gt;-->
-          <!--<Button>上传图片</Button>-->
-          <!--</Upload>-->
-          <!--<Dropdown @on-click="handleDropdown" v-if="!isComponent">-->
-          <!--<Button>-->
-          <!--更多操作-->
-          <!--<Icon type="md-arrow-dropdown"/>-->
-          <!--</Button>-->
-          <!--<DropdownMenu slot="list">-->
-          <!--<DropdownItem name="refresh">刷新</DropdownItem>-->
-          <!--<DropdownItem v-show="showType == 'list'" name="removeAll"-->
-          <!--&gt;批量删除-->
-          <!--</DropdownItem>-->
-          <!--</DropdownMenu>-->
-          <!--</Dropdown>-->
-          <!--</div>-->
-          <!--</div>-->
         </div>
-
-        <!--<Alert show-icon v-if="!isComponent">-->
-        <!--已选择-->
-        <!--<span>{{ selectCount }}</span> 项-->
-        <!--<a class="select-clear" @click="clearSelectAll">清空</a>-->
-        <!--<span v-if="selectCount > 0" style="margin-left: 15px"-->
-        <!--&gt;共计 {{ totalSize }} 存储量</span-->
-        <!--&gt;-->
-        <!--</Alert>-->
-
-        <!--<div v-show="showType === 'list'" >-->
-        <!--<div class="flex">-->
-        <!--<div class="article-category mr_10">-->
-        <!--<Tree-->
-        <!--:data="treeData"-->
-        <!--@on-contextmenu="handleContextMenu"-->
-        <!--@on-select-change="handleCateChange"-->
-        <!--&gt;-->
-        <!--<template slot="contextMenu" v-if="!isComponent">-->
-        <!--<DropdownItem @click.native="handleContextMenuEdit"-->
-        <!--&gt;编辑-->
-        <!--</DropdownItem-->
-        <!--&gt;-->
-        <!--<DropdownItem-->
-        <!--style="color: #ed4014"-->
-        <!--@click.native="handleContextMenuDelete"-->
-        <!--&gt;删除-->
-        <!--</DropdownItem-->
-        <!--&gt;-->
-        <!--</template>-->
-        <!--</Tree>-->
-        <!--<Alert v-if="!isComponent">鼠标右键编辑/删除分组</Alert>-->
-        <!--<div class="group-row flex" v-if="!isComponent">-->
-        <!--<Button @click="handleClickAddGroup">添加分组</Button>-->
-        <!--</div>-->
-        <!--</div>-->
-
-        <!--<Table-->
-        <!--ref="table"-->
-        <!--:columns="isComponent ? viewColumns : columns"-->
-        <!--:data="data"-->
-        <!--:loading="loading"-->
-        <!--border-->
-        <!--class="table"-->
-        <!--sortable="custom"-->
-        <!--@on-sort-change="changeSort"-->
-        <!--@on-selection-change="changeSelect"-->
-        <!--&gt;-->
-        <!--<template slot="fileKey" slot-scope="{ row }">-->
-        <!--<a @click="copyFileUrl(row)">{{ row.fileKey }}</a>-->
-        <!--</template>-->
-        <!--</Table>-->
-        <!--</div>-->
-        <!--</div>-->
-
-        <!--<div v-show="showType === 'thumb'">-->
-        <!--<div class="oss-wrapper">-->
-        <!--<Card v-for="(item, i) in data" :key="i" class="oss-card">-->
-        <!--<div class="content">-->
-        <!--<img-->
-        <!--v-if="item.fileType.indexOf('image') >= 0"-->
-        <!--:src="item.url"-->
-        <!--class="img"-->
-        <!--@click="showPic(item)"-->
-        <!--/>-->
-        <!--<div-->
-        <!--v-else-if="item.fileType.indexOf('video') >= 0"-->
-        <!--class="video"-->
-        <!--@click="showVideo(item)"-->
-        <!--&gt;-->
-        <!--&lt;!&ndash; 文件小于5MB显示video &ndash;&gt;-->
-        <!--<video v-if="item.fileSize < 1024 * 1024 * 5" class="cover">-->
-        <!--<source :src="item.url"/>-->
-        <!--</video>-->
-        <!--<img class="play" src="@/assets/play.png"/>-->
-        <!--</div>-->
-        <!--<div v-else class="other">-->
-        <!--<div class="name">{{ item.name }}</div>-->
-        <!--<div class="key">{{ item.fileKey }}</div>-->
-        <!--<div class="info">-->
-        <!--文件类型：{{ item.fileType }} 文件大小：{{-->
-        <!--((item.fileSize * 1.0) / (1024 * 1024)).toFixed(2)-->
-        <!--}}-->
-        <!--MB 创建时间：{{ item.createTime }}-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--<div class="actions">-->
-        <!--<div class="btn">-->
-        <!--<Tooltip content="下载" placement="top">-->
-        <!--<Icon-->
-        <!--size="16"-->
-        <!--type="md-download"-->
-        <!--@click="download(item)"-->
-        <!--/>-->
-        <!--</Tooltip>-->
-        <!--</div>-->
-        <!--<div class="btn">-->
-        <!--<Tooltip content="重命名" placement="top">-->
-        <!--<Icon size="16" type="md-create" @click="rename(item)"/>-->
-        <!--</Tooltip>-->
-        <!--</div>-->
-        <!--<div class="btn-no">-->
-        <!--<Tooltip content="删除" placement="top">-->
-        <!--<Icon size="16" type="md-trash" @click="remove(item)"/>-->
-        <!--</Tooltip>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--</Card>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--<Row class="mt_10" justify="end" type="flex">-->
-        <!--<Page-->
-        <!--:current="searchForm.pageNumber"-->
-        <!--:page-size="searchForm.pageSize"-->
-        <!--:page-size-opts="pageSizeOpts"-->
-        <!--:total="total"-->
-        <!--show-elevator-->
-        <!--show-sizer-->
-        <!--show-total-->
-        <!--size="small"-->
-        <!--@on-change="changePage"-->
-        <!--@on-page-size-change="changePageSize"-->
-        <!--&gt;</Page>-->
-        <!--</Row>-->
       </el-card>
     </el-row>
     <el-dialog
@@ -450,9 +307,27 @@
     <el-dialog v-model="picVisible" :title="picTitle" width="600px">
       <img
         :src="file.url"
-        alt="无效的图片链接"
+        alt="图片加载失败"
         style="width: 100%; margin: 0 auto; display: block"
       />
+      <template #footer>
+        <span>文件类型：{{ file.fileType }} 文件大小：{{ file.msize }} 创建时间：{{ file.createTime }}</span>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="fileVisible" :title="fileTitle" width="800px" destroy-on-close>
+      <iframe
+        v-if="isPdfFile(file)"
+        :src="file.url"
+        style="width: 100%; height: 70vh; border: none"
+        title="文件预览"
+      />
+      <div v-else class="file-preview-fallback">
+        <el-icon :size="64"><Document /></el-icon>
+        <p class="file-preview-name">{{ file.name }}</p>
+        <p class="file-preview-tip">该文件类型暂不支持在线预览</p>
+        <el-button type="primary" @click="download(file)">下载文件</el-button>
+      </div>
       <template #footer>
         <span>文件类型：{{ file.fileType }} 文件大小：{{ file.msize }} 创建时间：{{ file.createTime }}</span>
       </template>
@@ -464,8 +339,9 @@
       width="800px"
       destroy-on-close
       @close="closeVideo"
+      @opened="initDPlayer"
     >
-      <div id="dplayer"></div>
+      <div ref="dplayerRef"></div>
       <template #footer>
         <span>文件类型：{{ file.fileType }} 文件大小：{{ file.msize }} 创建时间：{{ file.createTime }}</span>
       </template>
@@ -497,6 +373,7 @@
 </template>
 
 <script>
+import { ElMessage, ElMessageBox } from "element-plus";
 import { Delete, Download, View, Document } from "@element-plus/icons-vue";
 import {
   addFileDirectory,
@@ -509,8 +386,8 @@ import {
 } from "@/api/index";
 import DPlayer from "dplayer";
 import {managerApiUrl} from "@/libs/axios";
-
-const config = require("@/config/index");
+import config from "@/config/index";
+import playIcon from "@/assets/play.png";
 
 let dp;
 export default {
@@ -562,10 +439,13 @@ export default {
       showType: "list", // 展示类型
       modalVisible: false, // 添加或编辑显示
       uploadVisible: false, // 上传展示
-      videoVisible: false, // 文件modal
-      picVisible: false, // 图片modal
-      picTitle: "", // 图片title
-      videoTitle: "", // 视频title
+      videoVisible: false, // 视频预览
+      picVisible: false, // 图片预览
+      fileVisible: false, // 文件预览
+      picTitle: "", // 图片 title
+      videoTitle: "", // 视频 title
+      fileTitle: "", // 文件 title
+      pendingVideoUrl: "", // 待播放视频地址
       modalTitle: "", // 添加或编辑标题
       activeRoleTab: "MANAGER",
       activeCategoryTab: "IMAGE",
@@ -659,7 +539,7 @@ export default {
               } else {
                 return h("img", {
                   attrs: {
-                    src: require("@/assets/play.png"),
+                    src: playIcon,
                   },
                   style: {
                     cursor: "pointer",
@@ -860,7 +740,7 @@ export default {
               } else {
                 return h("img", {
                   attrs: {
-                    src: require("@/assets/play.png"),
+                    src: playIcon,
                   },
                   style: {
                     cursor: "pointer",
@@ -1021,19 +901,31 @@ export default {
     canUploadImages() {
       return this.activeRoleTab === "MANAGER";
     },
+    uploadButtonText() {
+      const textMap = {
+        IMAGE: "上传图片",
+        VIDEO: "上传视频",
+        FILE: "上传文件",
+      };
+      return textMap[this.activeCategoryTab] || "上传图片";
+    },
     uploadData() {
-      return {
-        directoryPath: this.searchForm.fileDirectoryId,
+      const data = {
         userEnums: this.activeRoleTab,
         directoryType: this.activeRoleTab,
       };
+      const directoryId = this.searchForm.fileDirectoryId;
+      if (directoryId && directoryId !== "0") {
+        data.directoryPath = directoryId;
+      }
+      return data;
     },
   },
 
   methods: {
     beforeUpload(file) {
       if (!this.canUploadImages) {
-        this.$Message.warning("仅管理员模块支持上传图片");
+        ElMessage.warning("仅管理员模块支持上传图片");
         return false;
       }
       const maxSize = 20480 * 1024;
@@ -1221,18 +1113,14 @@ export default {
     },
     // 删除分组
     async handleContextMenuDelete(val) {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "是否删除该分组",
-        onOk: async () => {
+      ElMessageBox.confirm("是否删除该分组", "提示", { type: "warning" }).then(async () => {
           const res = await delFileDirectory(this.selectedGroupData.value);
           if (res.success) {
-            this.$Message.success("删除成功!");
+            ElMessage.success("删除成功!");
             this.getDataList();
             this.getAllList();
           }
-        },
-      });
+      }).catch(() => {});
     },
     async submitAddGroup() {
       this.$refs["formValidate"].validate(async (valid) => {
@@ -1252,13 +1140,12 @@ export default {
           }
 
           if (res.success) {
-            this.$Message.success("操作成功!");
+            ElMessage.success("操作成功!");
             this.enableGroup = false;
             this.getAllList();
           }
-          this.$Modal.remove();
-        } else {
-          this.$Message.error("请填写完整信息!");
+          } else {
+          ElMessage.error("请填写完整信息!");
         }
       });
     },
@@ -1280,7 +1167,7 @@ export default {
       textArea.select();
       try {
         document.execCommand("copy");
-        this.$Message.success("复制成功");
+        ElMessage.success("复制成功");
       } catch (err) {
         console.error("Unable to copy to clipboard", err);
       }
@@ -1348,7 +1235,7 @@ export default {
     },
     handleSelectConfirm() {
       if (!this.selectedOss.length) {
-        this.$Message.warning("请选择图片");
+        ElMessage.warning("请选择图片");
         return;
       }
       const last = this.selectedOss[this.selectedOss.length - 1];
@@ -1370,29 +1257,45 @@ export default {
     },
     // 查看大图
     showPic(v) {
-      this.file = v;
-      this.file.msize = ((v.fileSize * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
-
-      this.picTitle = v.name + "(" + v.fileKey + ")";
+      this.prepareFileMeta(v);
+      this.picTitle = v.name || "图片预览";
       this.picVisible = true;
+    },
+    // 查看文件（PDF 等）
+    showFile(v) {
+      this.prepareFileMeta(v);
+      this.fileTitle = v.name || "文件预览";
+      this.fileVisible = true;
     },
     // 查看视频
     showVideo(v) {
+      this.prepareFileMeta(v);
+      this.videoTitle = v.name || "视频预览";
+      this.pendingVideoUrl = v.url;
+      this.videoVisible = true;
+    },
+    initDPlayer() {
+      const container = this.$refs.dplayerRef;
+      if (!container || !this.pendingVideoUrl) return;
+      if (dp) {
+        dp.destroy();
+        dp = null;
+      }
       dp = new DPlayer({
-        container: document.getElementById("dplayer"),
+        container,
         screenshot: true,
         video: {
-          url: v.url,
+          url: this.pendingVideoUrl,
         },
       });
-      this.file = v;
-      this.file.msize = ((v.fileSize * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
-      this.videoTitle = v.name + "(" + v.fileKey + ")";
-      this.videoVisible = true;
     },
     // 关闭视频
     closeVideo() {
-      dp.destroy();
+      if (dp) {
+        dp.destroy();
+        dp = null;
+      }
+      this.pendingVideoUrl = "";
     },
     // 分页 改变页码
     changePage(v) {
@@ -1470,26 +1373,45 @@ export default {
     isVideoFile(row) {
       return row?.fileCategory === "VIDEO" || (row?.fileType && row.fileType.includes("video"));
     },
+    isPdfFile(row) {
+      return (
+        row?.fileType === "application/pdf" ||
+        (row?.name && row.name.toLowerCase().endsWith(".pdf"))
+      );
+    },
+    previewFile(item) {
+      if (this.isVideoFile(item)) {
+        this.showVideo(item);
+      } else if (this.isImageFile(item)) {
+        this.showPic(item);
+      } else {
+        this.showFile(item);
+      }
+    },
+    prepareFileMeta(v) {
+      this.file = v;
+      this.file.msize = ((v.fileSize * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
+    },
     // 上传文件超过大小限制
     handleMaxSize() {
-      this.$Message.warning("所选文件大小过大，不得超过 20MB");
+      ElMessage.warning("所选文件大小过大，不得超过 20MB");
     },
     // 上传成功回调
     handleSuccess(res, file) {
       if (!this.canUploadImages) {
-        this.$Message.warning("仅管理员模块支持上传图片");
+        ElMessage.warning("仅管理员模块支持上传图片");
         return;
       }
       if (res.success) {
-        this.$Message.success("上传文件 " + file.name + " 成功");
+        ElMessage.success("上传文件 " + file.name + " 成功");
         this.getDataList();
       } else {
-        this.$Message.error(res.message);
+        ElMessage.error(res.message);
       }
     },
     // 上传失败回调
     handleError(error, file, fileList) {
-      this.$Message.error(error.toString());
+      ElMessage.error(error.toString());
     },
     // 清空上传文件
     clearFiles() {
@@ -1508,50 +1430,38 @@ export default {
     // 批量删除文件
     removeAll() {
       if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要删除的数据");
+        ElMessage.warning("您还未选择要删除的数据");
         return;
       }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选的 " + this.selectCount + " 个文件?",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要删除所选的 " + this.selectCount + " 个文件?", "确认删除", { type: "warning" }).then(() => {
           let ids = "";
           this.selectList.forEach(function (e) {
             ids += e.id + ",";
           });
           ids = ids.substring(0, ids.length - 1);
           deleteFile(ids).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
               this.selectedOss = [];
               // this.clearSelectAll();
               this.init();
-              this.$Message.success("批量删除文件成功");
+              ElMessage.success("批量删除文件成功");
             }
           })
             .catch((err) => {
               console.log("失败", err);
             });
-        },
-      });
+      }).catch(() => {});
     },
     // 单个删除文件
     remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除文件 " + v.name + " ?",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要删除文件 " + v.name + " ?", "确认删除", { type: "warning" }).then(() => {
           deleteFile(v.id).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("删除文件 " + v.name + " 成功");
+              ElMessage.success("删除文件 " + v.name + " 成功");
               this.getDataList();
             }
           })
-        },
-      });
+      }).catch(() => {});
     },
     // 提交修改文件名
     handleSubmit() {
@@ -1567,7 +1477,7 @@ export default {
           renameFile(params).then((res) => {
             this.submitLoading = false;
             if (res.success) {
-              this.$Message.success("操作成功");
+              ElMessage.success("操作成功");
               this.getDataList();
               this.modalVisible = false;
             }

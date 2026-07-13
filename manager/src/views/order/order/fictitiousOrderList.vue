@@ -128,6 +128,8 @@
 
 <script>
 import * as API_Order from "@/api/order";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { customRouterPush } from "@/utils/filters";
 
 export default {
   name: "fictitiousOrderList",
@@ -198,24 +200,18 @@ export default {
       });
     },
     confirmPrice(v) {
-      this.$Modal.confirm({
-        title: "确认收款",
-        content: "您确定要收款吗？",
-        loading: true,
-        onOk: () => {
-          API_Order.orderPay(v.sn).then((res) => {
-            if (res.success) {
-              this.$Message.success("收款成功");
-              this.getDataList();
-            }
-            this.$Modal.remove();
-          });
-        },
-      });
+      ElMessageBox.confirm("您确定要收款吗？", "确认收款", { type: "warning" }).then(() => {
+        API_Order.orderPay(v.sn).then((res) => {
+          if (res.success) {
+            ElMessage.success("收款成功");
+            this.getDataList();
+          }
+        });
+      }).catch(() => {});
     },
     detail(v) {
       let sn = v.sn;
-      this.$filters.customRouterPush({
+      customRouterPush({
         name: "order-detail",
         query: { sn: sn, orderType: v.orderType },
       });

@@ -116,6 +116,7 @@ import {
   editWechatMPMessageTemplate,
   delWechatMPMessageTemplate,
 } from "@/api/setting";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   title: "wechat-message-manage",
@@ -166,30 +167,23 @@ export default {
       this.wechatModal = true;
     },
     weChatSync(mp) {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "确认要初始化微信小程序消息订阅?",
-        loading: true,
-        onOk: () => {
-          if (mp === "mp") {
-            wechatMPMessageSync().then((res) => {
-              this.$Modal.remove();
-              if (res.success) {
-                this.$Message.success("微信小程序消息订阅初始化");
-                this.getWechatMPMessagePage();
-              }
-            });
-          } else {
-            wechatMessageSync().then((res) => {
-              this.$Modal.remove();
-              if (res.success) {
-                this.$Message.success("微信消息模板初始化成功");
-                this.getWechatMessagePage();
-              }
-            });
-          }
-        },
-      });
+      ElMessageBox.confirm("确认要初始化微信小程序消息订阅?", "提示", { type: "warning" }).then(() => {
+        if (mp === "mp") {
+          wechatMPMessageSync().then((res) => {
+            if (res.success) {
+              ElMessage.success("微信小程序消息订阅初始化");
+              this.getWechatMPMessagePage();
+            }
+          });
+        } else {
+          wechatMessageSync().then((res) => {
+            if (res.success) {
+              ElMessage.success("微信消息模板初始化成功");
+              this.getWechatMessagePage();
+            }
+          });
+        }
+      }).catch(() => {});
     },
     wechatFormDataEdit() {
       this.$refs.wechatFormData.validate((valid) => {
@@ -199,7 +193,7 @@ export default {
           }
           editWechatMessageTemplate(this.id, this.wechatFormData).then((res) => {
             if (res.message === "success") {
-              this.$Message.success("微信模板修改成功");
+              ElMessage.success("微信模板修改成功");
               this.wechatModal = false;
               this.getWechatMessagePage();
             }
@@ -212,7 +206,7 @@ export default {
         if (valid) {
           editWechatMPMessageTemplate(this.id, this.wechatMPFormData).then((res) => {
             if (res.message === "success") {
-              this.$Message.success("微信消息订阅模板修改成功");
+              ElMessage.success("微信消息订阅模板修改成功");
               this.wechatModal = false;
               this.getWechatMPMessagePage();
             }
@@ -221,30 +215,23 @@ export default {
       });
     },
     delWeChat(v) {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "确定删除此模板?",
-        loading: true,
-        onOk: () => {
-          if (this.tab === "WECHAT") {
-            delWechatMessageTemplate(v.id).then((res) => {
-              if (res.success) {
-                this.$Modal.remove();
-                this.$Message.success("微信模板删除成功");
-                this.getWechatMessagePage();
-              }
-            });
-          } else {
-            delWechatMPMessageTemplate(v.id).then((res) => {
-              if (res.success) {
-                this.$Modal.remove();
-                this.$Message.success("微信消息订阅删除成功");
-                this.getWechatMPMessagePage();
-              }
-            });
-          }
-        },
-      });
+      ElMessageBox.confirm("确定删除此模板?", "提示", { type: "warning" }).then(() => {
+        if (this.tab === "WECHAT") {
+          delWechatMessageTemplate(v.id).then((res) => {
+            if (res.success) {
+              ElMessage.success("微信模板删除成功");
+              this.getWechatMessagePage();
+            }
+          });
+        } else {
+          delWechatMPMessageTemplate(v.id).then((res) => {
+            if (res.success) {
+              ElMessage.success("微信消息订阅删除成功");
+              this.getWechatMPMessagePage();
+            }
+          });
+        }
+      }).catch(() => {});
     },
     getDataList() {
       this.getWechatMessagePage();

@@ -159,6 +159,8 @@ import {
 } from "@/api/goods";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import { regular } from "@/utils";
+import { ElMessage, ElMessageBox } from "element-plus";
+import defaultPic from "@/assets/default.png";
 
 export default {
   name: "brand",
@@ -167,7 +169,7 @@ export default {
   },
   data() {
     return {
-      defaultPic: require("@/assets/default.png"),
+      defaultPic,
       loading: true,
       modalType: 0,
       modalVisible: false,
@@ -262,7 +264,7 @@ export default {
         .then((res) => {
           this.categorySubmitLoading = false;
           if (res && res.success) {
-            this.$Message.success("操作成功");
+            ElMessage.success("操作成功");
             this.categoryModalVisible = false;
           }
         })
@@ -272,28 +274,25 @@ export default {
     },
     handleStatusSwitchChange(row, checked) {
       const disable = !checked;
-      this.$Modal.confirm({
-        title: disable ? "确认禁用" : "确认启用",
-        content: "您确认要" + (disable ? "禁用" : "启用") + "品牌 " + row.name + " ?",
-        loading: true,
-        onOk: () => {
-          disableBrand(row.id, { disable }).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-            }
-            this.getDataList();
-          });
-        },
-        onCancel: () => {
-          this.$nextTick(() => this.$forceUpdate());
-        },
+      ElMessageBox.confirm(
+        "您确认要" + (disable ? "禁用" : "启用") + "品牌 " + row.name + " ?",
+        disable ? "确认禁用" : "确认启用",
+        { type: "warning" }
+      ).then(() => {
+        return disableBrand(row.id, { disable }).then((res) => {
+          if (res.success) {
+            ElMessage.success("操作成功");
+          }
+          this.getDataList();
+        });
+      }).catch(() => {
+        this.$nextTick(() => this.$forceUpdate());
       });
     },
     async delBrand(id) {
       const res = await delBrand(id);
       if (res.success) {
-        this.$Message.success("品牌删除成功!");
+        ElMessage.success("品牌删除成功!");
         this.getDataList();
       }
     },
@@ -332,7 +331,7 @@ export default {
             addBrand(this.form).then((res) => {
               this.submitLoading = false;
               if (res.success) {
-                this.$Message.success("操作成功");
+                ElMessage.success("操作成功");
                 this.getDataList();
                 this.modalVisible = false;
               }
@@ -341,7 +340,7 @@ export default {
             updateBrand(this.form).then((res) => {
               this.submitLoading = false;
               if (res.success) {
-                this.$Message.success("操作成功");
+                ElMessage.success("操作成功");
                 this.getDataList();
                 this.modalVisible = false;
               }

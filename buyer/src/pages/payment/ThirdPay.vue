@@ -33,6 +33,7 @@
   </div>
 </template>
 <script>
+import { Message } from "@/utils/message";
 import { Iphone } from '@element-plus/icons-vue';
 import vueQr from 'vue-qr';
 import { payCallback, pay } from '@/api/pay.js';
@@ -56,7 +57,7 @@ export default {
           this.num = 0;
           this.interval = setInterval(this.callback, 5000);
         } else {
-          this.$Message.error(res.message)
+          Message.error(res.message)
         }
       });
     },

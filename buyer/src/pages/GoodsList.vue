@@ -99,10 +99,11 @@
       </div>
       <div class="goods-page">
         <el-pagination
+          v-model:current-page="params.pageNumber"
+          v-model:page-size="params.pageSize"
           @current-change="changePageNum"
           @size-change="changePageSize"
           :total="total"
-          :page-size="params.pageSize"
           layout="total, prev, pager, next, sizes"
         ></el-pagination>
       </div>
@@ -113,6 +114,7 @@
 </template>
 
 <script>
+import { Message } from "@/utils/message";
 import { ArrowDown, ArrowUp } from '@element-plus/icons-vue';
 import GoodsClassNav from "@/components/nav/GoodsClassNav";
 import * as apiGoods from "@/api/goods";
@@ -201,7 +203,7 @@ export default {
     },
     goShopPage(id) {
       if (!id) {
-        this.$Message.warning("店铺信息不存在");
+        Message.warning("店铺信息不存在");
         return;
       }
       const routeUrl = this.$router.resolve({

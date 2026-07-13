@@ -62,6 +62,7 @@
   </div>
 </template>
 <script>
+import { Message, Notice } from "@/utils/message";
 import { Camera, Delete, View } from '@element-plus/icons-vue';
 import { orderDetail } from '@/api/order.js';
 import { afterSaleReason, handleComplain } from '@/api/member.js';
@@ -111,7 +112,7 @@ export default {
       }
       handleComplain(params).then(res => {
         if (res.success) {
-          this.$Message.success('投诉申请已提交，感谢您的反馈')
+          Message.success('投诉申请已提交，感谢您的反馈')
           this.$router.push({name: 'ComplainList'})
         }
       })
@@ -138,7 +139,7 @@ export default {
     handleBeforeUpload () { // 上传之前钩子函数
       const check = this.orderGoods.uploadList.length < 6;
       if (!check) {
-        this.$Notice.warning({
+        Notice.warning({
           title: '最多可以上传五张图片'
         });
         return check;

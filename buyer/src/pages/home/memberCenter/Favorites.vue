@@ -79,6 +79,7 @@
 </template>
 
 <script>
+import { Modal } from "@/utils/message";
 import { collectList, cancelCollect, storeCollectList, cancelStoreCollect } from '@/api/member.js'
 export default {
   name: 'Favorites',
@@ -145,7 +146,7 @@ export default {
     },
     cancel(id) { // 取消收藏
       let typeName = this.params.type === 'GOODS' ? '商品' : '店铺'
-      this.$Modal.confirm({
+      Modal.confirm({
         title: '取消收藏',
         content: `确定取消收藏该${typeName}吗？`,
         onOk: () => {
@@ -159,7 +160,7 @@ export default {
     },
     cancelStore(id) { // 取消收藏
       let typeName = this.params.type === 'GOODS' ? '商品' : '店铺'
-      this.$Modal.confirm({
+      Modal.confirm({
         title: '取消收藏',
         content: `确定取消收藏该${typeName}吗？`,
         onOk: () => {

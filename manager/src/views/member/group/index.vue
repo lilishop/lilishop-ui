@@ -72,6 +72,7 @@
 
 <script>
 import * as API_Member from "@/api/member.js";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   name: "memberGroup",
@@ -142,7 +143,7 @@ export default {
         API_Member.addMemberGroup(this.formAdd).then((res) => {
           this.submitAddLoading = false;
           if (res && res.success) {
-            this.$Message.success("添加成功");
+            ElMessage.success("添加成功");
             this.addFlag = false;
             this.getData();
           }
@@ -176,7 +177,7 @@ export default {
         API_Member.updateMemberGroup(id, { groupName, description }).then((res) => {
           this.submitEditLoading = false;
           if (res && res.success) {
-            this.$Message.success("修改成功");
+            ElMessage.success("修改成功");
             this.editFlag = false;
             this.getData();
           }
@@ -184,20 +185,16 @@ export default {
       });
     },
     remove(row) {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "确定删除该分组？",
-        onOk: () => {
-          API_Member.deleteMemberGroup(row.id).then((res) => {
-            if (res && res.success) {
-              this.$Message.success("删除成功");
-              this.getData();
-            } else if (res && res.message) {
-              this.$Message.error(res.message);
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("确定删除该分组？", "提示", { type: "warning" }).then(() => {
+        API_Member.deleteMemberGroup(row.id).then((res) => {
+          if (res && res.success) {
+            ElMessage.success("删除成功");
+            this.getData();
+          } else if (res && res.message) {
+            ElMessage.error(res.message);
+          }
+        });
+      }).catch(() => {});
     },
   },
   mounted() {

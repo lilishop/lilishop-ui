@@ -59,7 +59,8 @@
   </div>
 </template>
 <script>
-import { setSetting } from "@/api/index";
+import { ElMessage } from "element-plus";
+import { setSetting, createIndex, getProgress, deleteGoodsDown, generateGoodsCache, delSkuIndex } from "@/api/index";
 export default {
   props: ["res", "type"],
   data() {
@@ -86,16 +87,79 @@ export default {
         if (valid) {
           this.setupSetting();
         } else {
-          this.$Message.error("请正确填写内容!");
+          ElMessage.error("请正确填写内容!");
+        }
+      });
+    },
+    createIndex() {
+      createIndex().then((res) => {
+        if (res.success) {
+          ElMessage.success("开始生成!");
+          this.showProgress = true;
+          setTimeout(() => {
+            this.intervalProgress = setInterval(() => {
+              getProgress().then((resp) => {
+                const progressResult = resp.result;
+                if (progressResult != null && progressResult.flag === 0) {
+                  clearInterval(this.intervalProgress);
+                  this.showProgress = false;
+                  ElMessage.success("生成成功!");
+                } else {
+                  this.progressVal = Math.floor((progressResult.processed / progressResult.total) * 100);
+                }
+              });
+            }, 1000);
+          }, 10000);
+        } else if (res.code === 100000) {
+          this.showProgress = true;
+          this.intervalProgress = setInterval(() => {
+            getProgress().then((resp) => {
+              const progressResult = resp.result;
+              if (progressResult != null && progressResult.flag === 0) {
+                clearInterval(this.intervalProgress);
+                this.showProgress = false;
+                ElMessage.success("生成成功!");
+              } else {
+                this.progressVal = Math.floor((progressResult.processed / progressResult.total) * 100);
+              }
+            });
+          }, 1000);
+        }
+      });
+    },
+    deleteDownGoods() {
+      deleteGoodsDown().then((res) => {
+        if (res.success) {
+          ElMessage.success("删除成功!");
+        } else {
+          ElMessage.error("删除失败!");
+        }
+      });
+    },
+    generateCache() {
+      generateGoodsCache().then((res) => {
+        if (res.success) {
+          ElMessage.success("生成成功!");
+        } else {
+          ElMessage.error("生成失败!");
+        }
+      });
+    },
+    deleteNotExistIndex() {
+      delSkuIndex().then((res) => {
+        if (res.success) {
+          ElMessage.success("删除成功!");
+        } else {
+          ElMessage.error("删除失败!");
         }
       });
     },
     setupSetting() {
       setSetting(this.type, this.formValidate).then((res) => {
         if (res.success) {
-          this.$Message.success("保存成功!");
+          ElMessage.success("保存成功!");
         } else {
-          this.$Message.error("保存失败!");
+          ElMessage.error("保存失败!");
         }
       });
     },

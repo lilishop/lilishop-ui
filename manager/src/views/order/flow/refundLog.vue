@@ -60,7 +60,7 @@
         <el-table-column label="退款金额" min-width="120">
           <template #default="{ row }">
             <span v-if="row" :style="{ color: $mainColor }">
-              {{ $filters.unitPrice(row.totalAmount, "￥") }}</span>
+              {{ unitPrice(row.totalAmount, "￥") }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="申请时间" min-width="120" show-overflow-tooltip />
@@ -110,6 +110,7 @@
 
 <script>
 import * as API_Order from "@/api/order";
+import { unitPrice } from "@/utils/filters";
 
 export default {
   name: "refundLog",
@@ -132,6 +133,7 @@ export default {
     };
   },
   methods: {
+    unitPrice,
     init() {
       this.getDataList();
     },

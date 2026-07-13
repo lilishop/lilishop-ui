@@ -73,8 +73,8 @@
     </div>
 
     <div class="page-size">
-      <el-pagination         :current-page="params.pageNumber"
-        :page-size="params.pageSize"
+      <el-pagination         v-model:current-page="params.pageNumber"
+        v-model:page-size="params.pageSize"
         :page-sizes="[10, 20, 50]"
         :total="total"
         @current-change="changePage"
@@ -82,7 +82,7 @@
        layout="total, sizes, prev, pager, next, jumper" />
     </div>
 
-    <el-dialog v-model="noticeModal" title="使用须知" footer-hide width="520">
+    <el-dialog v-model="noticeModal" title="使用须知" width="520">
       <p class="gcc-notice-text">
         请在有效期内使用本礼品卡；消费时将优先使用卡内余额。具体使用范围以活动规则为准。如有疑问请联系客服。
       </p>
@@ -94,6 +94,7 @@
 </template>
 
 <script>
+import { Message } from "@/utils/message";
 import {
   getGiftCardCashMemberCardPage,
   bindGiftCardCashMemberCard,
@@ -231,7 +232,7 @@ export default {
           .then((res) => {
             this.bindSubmitting = false;
             if (res.success) {
-              this.$Message.success(res.message || "兑换成功");
+              Message.success(res.message || "兑换成功");
               this.resetBindForm();
               this.params.pageNumber = 1;
               this.getList();
@@ -249,14 +250,14 @@ export default {
       if (this.statusTab === "PENDING_ACTIVATION") {
         const memberCardId = this.resolveMemberCardId(item);
         if (!memberCardId) {
-          this.$Message.error("卡片信息异常，无法激活");
+          Message.error("卡片信息异常，无法激活");
           return;
         }
         this.activatingId = memberCardId;
         activateGiftCardCashMemberCard(memberCardId)
           .then((res) => {
             if (res.success) {
-              this.$Message.success(res.message || "激活成功");
+              Message.success(res.message || "激活成功");
               this.getList();
             }
           })

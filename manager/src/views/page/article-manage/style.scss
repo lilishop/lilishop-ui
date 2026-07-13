@@ -1,22 +1,16 @@
-:deep(.ivu-input){
+:deep(.el-input) {
   width: 200px !important;
 }
 
-.label-btns{
+.label-btns {
   margin-left: 150px;
 }
 
-.ivu-form-item{
+.el-form-item {
   padding: 10px 0;
 }
 
-
-.ivu-input-wrapper {
-  width: 150px;
-  margin-right: 10px;
-}
-
-:deep(.ivu-form-item-content){
+:deep(.el-form-item__content) {
   margin-left: 0 !important;
   display: flex;
 }

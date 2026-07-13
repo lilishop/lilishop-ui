@@ -53,8 +53,8 @@
 
       <div class="mt_10 page" style="display: flex; justify-content: flex-end; margin: 20px 0">
         <el-pagination
-          v-model:current-page="searchForm.pageNumber"
-          v-model:page-size="searchForm.pageSize"
+          :current-page="searchForm.pageNumber"
+          :page-size="searchForm.pageSize"
           :page-sizes="[20, 50, 100]"
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
@@ -68,7 +68,7 @@
 </template>
 
 <script>
-import { getLiveList } from "@/api/promotion.js";
+import { getLiveList, whetherStar } from "@/api/promotion.js";
 export default {
   data() {
     return {
@@ -100,14 +100,24 @@ export default {
   },
   methods: {
     async star(val, index) {
-      let switched = this.liveData[index].recommend;
-      await whetherStar({ id: val.id, recommend: switched });
+      const switched = this.liveData[index].recommend;
+      try {
+        const res = await whetherStar({ id: val.id, recommend: switched });
+        if (res.success) {
+          this.getStoreLives();
+          return;
+        }
+        this.liveData[index].recommend = !switched;
+      } catch (e) {
+        this.liveData[index].recommend = !switched;
+      }
+    },
+    changePageSize(val) {
+      this.searchForm.pageSize = val;
       this.getStoreLives();
     },
-    changePageSize() {
-      this.getStoreLives();
-    },
-    changePageNumber() {
+    changePageNumber(val) {
+      this.searchForm.pageNumber = val;
       this.getStoreLives();
     },
     async getStoreLives() {

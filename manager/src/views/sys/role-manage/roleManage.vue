@@ -105,13 +105,13 @@
         </el-tree>
       </div>
       <template #footer>
-        <el-button @click="permModalVisible = false">取消</el-button>
         <el-select v-model="openLevel" style="width: 110px; margin-right: 10px" @change="changeOpen">
           <el-option value="0" label="展开所有" />
           <el-option value="1" label="收合所有" />
           <el-option value="2" label="仅展开一级" />
           <el-option value="3" label="仅展开两级" />
         </el-select>
+        <el-button @click="permModalVisible = false">取消</el-button>
         <el-button type="primary" :loading="submitPermLoading" @click="submitPermEdit()">编辑</el-button>
       </template>
     </el-dialog>
@@ -148,6 +148,7 @@
 </template>
 
 <script>
+import { ElMessage, ElMessageBox } from "element-plus";
 import {
   getRoleList,
   getAllPermissionList,
@@ -280,7 +281,7 @@ export default {
             addRole(this.roleForm).then((res) => {
               this.submitLoading = false;
               if (res.success) {
-                this.$Message.success("操作成功");
+                ElMessage.success("操作成功");
                 this.getRoleList();
                 this.roleModalVisible = false;
               }
@@ -291,7 +292,7 @@ export default {
             editRole(this.roleForm).then((res) => {
               this.submitLoading = false;
               if (res.success) {
-                this.$Message.success("操作成功");
+                ElMessage.success("操作成功");
                 this.getRoleList();
                 this.roleModalVisible = false;
               }
@@ -329,20 +330,14 @@ export default {
       });
     },
     remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除角色 " + v.name + " ?",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要删除角色 " + v.name + " ?", "确认删除", { type: "warning" }).then(() => {
           deleteRole(v.id).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("删除成功");
+              ElMessage.success("删除成功");
               this.getRoleList();
             }
           });
-        },
-      });
+      }).catch(() => {});
     },
     clearSelectAll() {
       this.$refs.table?.clearSelection();
@@ -353,29 +348,23 @@ export default {
     },
     delAll() {
       if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要删除的数据");
+        ElMessage.warning("您还未选择要删除的数据");
         return;
       }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选的 " + this.selectCount + " 条数据?",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要删除所选的 " + this.selectCount + " 条数据?", "确认删除", { type: "warning" }).then(() => {
           let ids = "";
           this.selectList.forEach(function (e) {
             ids += e.id + ",";
           });
           ids = ids.substring(0, ids.length - 1);
           deleteRole(ids).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("删除成功");
+              ElMessage.success("删除成功");
               this.clearSelectAll();
               this.getRoleList();
             }
           });
-        },
-      });
+      }).catch(() => {});
     },
     async editPerm(v) {
       this.permData.map((item) => {
@@ -393,7 +382,7 @@ export default {
       });
 
       if (this.treeLoading) {
-        this.$Message.warning("菜单权限数据加载中，请稍后点击查看");
+        ElMessage.warning("菜单权限数据加载中，请稍后点击查看");
         return;
       }
       this.editRolePermId = v.id;
@@ -462,7 +451,7 @@ export default {
       saveRoleMenu(this.editRolePermId, this.saveRoleWay).then((res) => {
         this.superModelLoading = false;
         if (res.success) {
-          this.$Message.success("操作成功");
+          ElMessage.success("操作成功");
           this.$store.commit("setAdded", false);
           util.initRouter(this);
           this.getRoleList();

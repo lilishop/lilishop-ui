@@ -58,6 +58,7 @@
 </template>
 
 <script>
+import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
 
 const DEFAULT_FORM = {
@@ -113,7 +114,7 @@ export default {
         if (valid) {
           this.setupSetting();
         } else {
-          this.$Message.error("请正确填写内容!");
+          ElMessage.error("请正确填写内容!");
         }
       });
     },
@@ -124,9 +125,9 @@ export default {
       });
       setSetting(this.type, payload).then((res) => {
         if (res.success) {
-          this.$Message.success("保存成功!");
+          ElMessage.success("保存成功!");
         } else {
-          this.$Message.error("保存失败!");
+          ElMessage.error("保存失败!");
         }
       });
     },

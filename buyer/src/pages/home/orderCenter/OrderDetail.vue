@@ -264,7 +264,8 @@
           <dd><div class="text-box">{{ order.order.sn }}</div></dd>
         </dl>
       </div>
-      <div v-if="orderPackage.length > 0" v-for="(packageItem, packageIndex) in orderPackage" :key="packageIndex">
+      <template v-if="orderPackage.length > 0">
+      <div v-for="(packageItem, packageIndex) in orderPackage" :key="packageIndex">
         <div class="layui-layer-wrap">
           <dl><dt>物流公司：</dt>
             <dd><div class="text-box">{{ packageItem.logisticsName }}</div></dd>
@@ -292,6 +293,7 @@
           </div>
         </div>
       </div>
+      </template>
       <div v-if = "orderPackage.length == 0 && logistics">
         <div class="layui-layer-wrap">
           <dl>
@@ -322,6 +324,7 @@
   </div>
 </template>
 <script>
+import { Message } from "@/utils/message";
 import {
   orderDetail,
   getTraces,
@@ -390,7 +393,7 @@ export default {
     viewReceiptInvoice (receipt) {
       const invoiceAddress = this.getInvoiceAddress(receipt);
       if (!invoiceAddress) {
-        this.$Message.warning("暂无发票附件");
+        Message.warning("暂无发票附件");
         return;
       }
       window.open(invoiceAddress, "_blank");
@@ -477,7 +480,7 @@ export default {
       // 确认收货
       sureReceived(sn).then((res) => {
         if (res.success) {
-          this.$Message.success("确认收货成功");
+          Message.success("确认收货成功");
           this.getDetail();
         }
       });
@@ -519,7 +522,7 @@ export default {
       // 确定取消
       cancelOrder(this.cancelParams).then((res) => {
         if (res.success) {
-          this.$Message.success("取消订单成功");
+          Message.success("取消订单成功");
           this.getDetail();
           this.cancelAvail = false;
         }
@@ -695,15 +698,15 @@ table {
 .layui-layer-wrap > .div-express-log {
   max-height: 300px;
 }
-:deep .layui-layer-wrap > .div-express-log::-webkit-scrollbar{
+:deep(.layui-layer-wrap > .div-express-log::-webkit-scrollbar){
   width: 1px;
   height: 5px;
 }
-:deep .layui-layer-wrap > .div-express-log::-webkit-scrollbar-thumb{
+:deep(.layui-layer-wrap > .div-express-log::-webkit-scrollbar-thumb){
   border-radius: 1em;
   background-color: rgba(50,50,50,.3);
 }
-:deep .layui-layer-wrap > .div-express-log::-webkit-scrollbar-track{
+:deep(.layui-layer-wrap > .div-express-log::-webkit-scrollbar-track){
   border-radius: 1em;
   background-color: rgba(50,50,50,.1);
 }
@@ -727,7 +730,6 @@ table {
 
   .time {
     width: 30%;
-    display: inline-block;
     float: left;
   }
 

@@ -172,6 +172,7 @@
 
 <script>
 import * as API_Member from "@/api/member";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   name: "goods-review",
@@ -213,7 +214,7 @@ export default {
       }
       API_Member.updateMemberReview(this.currentReviewId, { status }).then((res) => {
         if (res.success) {
-          this.$Message.success("修改成功!");
+          ElMessage.success("修改成功!");
           this.getDataList();
         }
       });
@@ -257,7 +258,7 @@ export default {
               top: item.id === v.id ? top : false,
             };
           });
-          this.$Message.success(top ? "置顶成功!" : "取消置顶成功!");
+          ElMessage.success(top ? "置顶成功!" : "取消置顶成功!");
           this.init();
         }
       });
@@ -296,18 +297,12 @@ export default {
       this.infoData = {};
     },
     remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除会员" + v.memberName + "的评论?",
-        loading: true,
-        onOk: () => {
-          API_Member.delMemberReview(v.id).then(() => {
-            this.$Modal.remove();
-            this.$Message.success("修改成功");
-            this.init();
-          });
-        },
-      });
+      ElMessageBox.confirm("您确认要删除会员" + v.memberName + "的评论?", "确认删除", { type: "warning" }).then(() => {
+        return API_Member.delMemberReview(v.id).then(() => {
+          ElMessage.success("修改成功");
+          this.init();
+        });
+      }).catch(() => {});
     },
   },
   mounted() {

@@ -122,6 +122,7 @@
   </div>
 </template>
 <script>
+import { Message } from "@/utils/message";
 import { View } from '@element-plus/icons-vue';
 import {getComplainDetail} from '@/api/member.js';
 import {communication} from '@/api/order';
@@ -170,7 +171,7 @@ export default {
     // 回复消息
     handleSubmit () {
       if (this.params.content === '') {
-        this.$Message.error('请填写对话内容');
+        Message.error('请填写对话内容');
         return;
       }
       this.submitLoading = true;
@@ -178,7 +179,7 @@ export default {
       communication(this.params).then((res) => {
         this.submitLoading = false;
         if (res.success) {
-          this.$Message.success('对话成功');
+          Message.success('对话成功');
           this.params.content = '';
           this.getDetail();
         }

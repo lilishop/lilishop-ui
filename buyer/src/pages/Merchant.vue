@@ -100,7 +100,8 @@
         </div>
       </div>
       <div class="goods-page">
-        <el-pagination           :page-size="params.pageSize"
+        <el-pagination           v-model:current-page="params.pageNumber"
+          v-model:page-size="params.pageSize"
           :total="total"
           @current-change="changePageNum"
           @size-change="changePageSize"
@@ -116,6 +117,7 @@
 
 <script>
 
+import { Message } from "@/utils/message";
 import { ArrowDown, StarFilled } from '@element-plus/icons-vue';
 import {getCateById, getDetailById} from "@/api/shopentry";
 import {
@@ -247,7 +249,7 @@ export default {
     getStoreMsg() {
       const storeId = this.$route.query.id;
       if (!storeId) {
-        this.$Message.warning("店铺不存在");
+        Message.warning("店铺不存在");
         return;
       }
       getDetailById(storeId)
@@ -330,7 +332,7 @@ export default {
         return;
       }
       if (!this.Cookies.getItem("userInfo")) {
-        this.$Message.warning("请先登录");
+        Message.warning("请先登录");
         this.$router.push("/login");
         return;
       }
@@ -338,14 +340,14 @@ export default {
         if (this.storeCollected) {
           const cancel = await cancelStoreCollect("STORE", storeId);
           if (cancel.success) {
-            this.$Message.success("已取消收藏");
+            Message.success("已取消收藏");
             this.storeCollected = false;
           }
         } else {
           const collect = await collectStore("STORE", storeId);
           if (collect.success || collect.code === 200) {
             this.storeCollected = true;
-            this.$Message.success(
+            Message.success(
               "收藏店铺成功,可以前往个人中心我的收藏查看"
             );
           }

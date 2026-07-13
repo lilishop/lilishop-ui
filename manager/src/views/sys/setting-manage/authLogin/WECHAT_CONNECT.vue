@@ -42,6 +42,7 @@
   </div>
 </template>
 <script>
+import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
 
@@ -82,12 +83,10 @@ export default {
         wechatConnectSettingItems: this.formValidate,
       }).then((res) => {
         if (res.success) {
-          this.$Message.success("保存成功!");
-          this.$Modal.remove();
-        } else {
-          this.$Message.error("保存失败!");
-          this.$Modal.remove();
-        }
+          ElMessage.success("保存成功!");
+          } else {
+          ElMessage.error("保存失败!");
+          }
       });
     },
     init() {

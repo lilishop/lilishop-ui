@@ -31,9 +31,9 @@
       </el-table>
       <div class="msg-pagination">
         <el-pagination
-          :current-page="params.pageNumber"
+          v-model:current-page="params.pageNumber"
+          v-model:page-size="params.pageSize"
           :total="messageData.total"
-          :page-size="params.pageSize"
           @current-change="changePage"
           @size-change="changePageSize"
           :page-sizes="[10, 20, 50]"
@@ -44,6 +44,7 @@
   </div>
 </template>
 <script>
+import { Message, Modal } from "@/utils/message";
 import {memberMsgList, readMemberMsg, delMemberMsg} from '@/api/member.js'
 export default {
   data() {
@@ -94,19 +95,17 @@ export default {
       })
     },
     removeMessage (id) {
-      this.$Modal.confirm({
+      Modal.confirm({
         title: '确认删除',
         content: '确认要删除此消息?',
         loading: true,
-        onOk: () => {
+        onOk: () =>
           delMemberMsg(id).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
-              this.$Message.success('消息已成功放入回收站');
+              Message.success('消息已成功放入回收站');
               this.getList();
             }
-          });
-        },
+          }),
       });
     }
   },

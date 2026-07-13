@@ -79,6 +79,7 @@
 </template>
 
 <script>
+import { Message, Modal } from "@/utils/message";
 import { Delete } from '@element-plus/icons-vue';
 import {cartGoodsAll, delCartGoods, addCartGoods, cartCount} from '@/api/cart.js'
 import { getOrderList } from '@/api/order';
@@ -165,14 +166,14 @@ export default {
     delGoods (id) {
       delCartGoods({ skuIds: id }).then((res) => {
         if (res.success) {
-          this.$Message.success('删除成功');
+          Message.success('删除成功');
           this.getCartList();
           cartCount().then(res => {
             this.$store.commit('SET_CARTNUM', res.result)
             this.Cookies.setItem('cartNum', res.result)
           })
         } else {
-          this.$Message.error(res.message);
+          Message.error(res.message);
         }
       });
     },
@@ -183,7 +184,7 @@ export default {
     receive (item) { // 领取优惠券
       receiveCoupon(item.id).then(res => {
         if (res.success) {
-          this.$Modal.confirm({
+          Modal.confirm({
             title: '领取优惠券',
             content: '<p>优惠券领取成功，可到我的优惠券页面查看</p>',
             okText: '我的优惠券',
@@ -232,9 +233,9 @@ export default {
       addCartGoods(params).then(res => {
         this.loading = false;
         if (res.success) {
-          this.$Message.success('商品已成功添加到购物车')
+          Message.success('商品已成功添加到购物车')
         } else {
-          this.$Message.warning(res.message);
+          Message.warning(res.message);
         }
       }).catch(() => { this.loading = false });
     },
@@ -280,7 +281,7 @@ export default {
     cancelCollect (id) { // 取消商品收藏
       cancelCollect('GOODS', id).then(res => {
         if (res.success) {
-          this.$Message.success('取消收藏成功')
+          Message.success('取消收藏成功')
           this.getCollectList();
         }
       })

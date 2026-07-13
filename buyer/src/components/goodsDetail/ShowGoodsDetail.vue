@@ -85,10 +85,10 @@
                   </div>
                 </div>
                 <div class="remarks-page">
-                  <el-pagination :total="commentTotal" small
+                  <el-pagination v-model:current-page="commentParams.pageNumber" v-model:page-size="commentParams.pageSize"
+                    :total="commentTotal" small
                     @current-change="changePageNum"
                     @size-change="changePageSize"
-                    :page-size="commentParams.pageSize"
                      layout="prev, pager, next"></el-pagination>
                 </div>
               </div>
@@ -368,7 +368,7 @@ export default {
   box-sizing: border-box;
   padding: 0 30px;
   min-height: 300px;
-  :deep img{
+  :deep(img){
     margin:0 auto;
   }
 }

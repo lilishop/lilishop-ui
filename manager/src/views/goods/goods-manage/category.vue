@@ -158,6 +158,7 @@ import {
 } from "@/api/goods";
 import uploadPicInput from "@/components/lili/upload-pic-input";
 import { regular } from "@/utils";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   name: "goods-category",
@@ -222,28 +223,23 @@ export default {
     onStatusSwitchChange(row, nextDeleteFlag) {
       const previousDeleteFlag = !nextDeleteFlag;
       const isClosing = nextDeleteFlag === true;
-      this.$Modal.confirm({
-        title: isClosing ? "确认关闭" : "确认开启",
-        content: `您是否要${isClosing ? "关闭" : "开启"}当前分类 ${row.name} 及其子分类?`,
-        loading: true,
-        okText: "是",
-        cancelText: "否",
-        onOk: () => {
-          row._statusLoading = true;
-          disableCategory(row.id, { enableOperations: isClosing ? true : 0 }).then((res) => {
-            this.$Modal.remove();
-            row._statusLoading = false;
-            if (res && res.success) {
-              this.$Message.success("操作成功");
-              this.getAllList();
-              return;
-            }
-            row.deleteFlag = previousDeleteFlag;
-          });
-        },
-        onCancel: () => {
+      ElMessageBox.confirm(
+        `您是否要${isClosing ? "关闭" : "开启"}当前分类 ${row.name} 及其子分类?`,
+        isClosing ? "确认关闭" : "确认开启",
+        { type: "warning", confirmButtonText: "是", cancelButtonText: "否" }
+      ).then(() => {
+        row._statusLoading = true;
+        return disableCategory(row.id, { enableOperations: isClosing ? true : 0 }).then((res) => {
+          row._statusLoading = false;
+          if (res && res.success) {
+            ElMessage.success("操作成功");
+            this.getAllList();
+            return;
+          }
           row.deleteFlag = previousDeleteFlag;
-        },
+        });
+      }).catch(() => {
+        row.deleteFlag = previousDeleteFlag;
       });
     },
     init() {
@@ -283,7 +279,7 @@ export default {
       saveCategorySpec(this.categoryId, this.specForm).then((res) => {
         this.submitLoading = false;
         if (res.success) {
-          this.$Message.success("操作成功");
+          ElMessage.success("操作成功");
           this.modalSpecVisible = false;
         }
       });
@@ -292,7 +288,7 @@ export default {
       saveCategoryBrand(this.categoryId, this.brandForm).then((res) => {
         this.submitLoading = false;
         if (res.success) {
-          this.$Message.success("操作成功");
+          ElMessage.success("操作成功");
           this.modalBrandVisible = false;
         }
       });
@@ -342,7 +338,7 @@ export default {
           insertCategory(this.formAdd).then((res) => {
             this.submitLoading = false;
             if (res.success) {
-              this.$Message.success("添加成功");
+              ElMessage.success("添加成功");
               this.getAllList();
               this.modalVisible = false;
               this.$refs.form.resetFields();
@@ -352,7 +348,7 @@ export default {
           updateCategory(this.formAdd).then((res) => {
             this.submitLoading = false;
             if (res.success) {
-              this.$Message.success("修改成功");
+              ElMessage.success("修改成功");
               this.getAllList();
               this.modalVisible = false;
               this.$refs.form.resetFields();
@@ -362,20 +358,14 @@ export default {
       });
     },
     remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除 " + v.name + " ?",
-        loading: true,
-        onOk: () => {
-          delCategory(v.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getAllList();
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("您确认要删除 " + v.name + " ?", "确认删除", { type: "warning" }).then(() => {
+        return delCategory(v.id).then((res) => {
+          if (res.success) {
+            ElMessage.success("操作成功");
+            this.getAllList();
+          }
+        });
+      }).catch(() => {});
     },
     getAllList() {
       this.loading = true;
@@ -394,45 +384,35 @@ export default {
         });
     },
     enable(v) {
-      this.$Modal.confirm({
-        title: "确认启用",
-        content: "您是否要启用当前分类 " + v.name + " 及其子分类?",
-        loading: true,
-        okText: "是",
-        cancelText: "否",
-        onOk: () => {
-          disableCategory(v.id, { enableOperations: 0 }).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getAllList();
-            }
-          });
-        },
-        onCancel: () => {
-          this.getAllList();
-        },
+      ElMessageBox.confirm(
+        "您是否要启用当前分类 " + v.name + " 及其子分类?",
+        "确认启用",
+        { type: "warning", confirmButtonText: "是", cancelButtonText: "否" }
+      ).then(() => {
+        return disableCategory(v.id, { enableOperations: 0 }).then((res) => {
+          if (res.success) {
+            ElMessage.success("操作成功");
+            this.getAllList();
+          }
+        });
+      }).catch(() => {
+        this.getAllList();
       });
     },
     disable(v) {
-      this.$Modal.confirm({
-        title: "确认禁用",
-        content: "您是否要禁用当前分类 " + v.name + " 及其子分类?",
-        loading: true,
-        okText: "是",
-        cancelText: "否",
-        onOk: () => {
-          disableCategory(v.id, { enableOperations: true }).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getAllList();
-            }
-          });
-        },
-        onCancel: () => {
-          this.getAllList();
-        },
+      ElMessageBox.confirm(
+        "您是否要禁用当前分类 " + v.name + " 及其子分类?",
+        "确认禁用",
+        { type: "warning", confirmButtonText: "是", cancelButtonText: "否" }
+      ).then(() => {
+        return disableCategory(v.id, { enableOperations: true }).then((res) => {
+          if (res.success) {
+            ElMessage.success("操作成功");
+            this.getAllList();
+          }
+        });
+      }).catch(() => {
+        this.getAllList();
       });
     },
   },

@@ -106,6 +106,7 @@
 </template>
 
 <script>
+import { ElMessage, ElMessageBox } from "element-plus";
 import {
   initDepartment,
   addDepartment,
@@ -275,7 +276,7 @@ export default {
       this.$refs.form.validate((valid) => {
         if (valid) {
           if (!this.form.id) {
-            this.$Message.warning("请先点击选择要修改的部门");
+            ElMessage.warning("请先点击选择要修改的部门");
             return;
           }
           const roleWay = [];
@@ -292,7 +293,7 @@ export default {
           ]).then((res) => {
             this.submitLoading = false;
             if (res[0].success) {
-              this.$Message.success("编辑成功");
+              ElMessage.success("编辑成功");
               this.init();
               this.modalVisible = false;
             }
@@ -307,7 +308,7 @@ export default {
           addDepartment(this.formAdd).then((res) => {
             this.submitLoading = false;
             if (res.success) {
-              this.$Message.success("添加成功");
+              ElMessage.success("添加成功");
               this.init();
               this.modalVisible = false;
             }
@@ -317,7 +318,7 @@ export default {
     },
     add() {
       if (this.form.id == "" || this.form.id == null) {
-        this.$Message.warning("请先点击选择一个部门");
+        ElMessage.warning("请先点击选择一个部门");
         return;
       }
       this.modalTitle = "添加子部门";
@@ -341,32 +342,25 @@ export default {
     },
     delAll() {
       if (this.selectCount <= 0) {
-        this.$Message.warning("您还未勾选要删除的数据");
+        ElMessage.warning("您还未勾选要删除的数据");
         return;
       }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content:
-          "您确认要删除所选的 " + this.selectCount + " 条数据及其下级所有数据?",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要删除所选的 " + this.selectCount + " 条数据及其下级所有数据?", "确认删除", { type: "warning" }).then(() => {
           let ids = "";
           this.selectList.forEach(function (e) {
             ids += e.id + ",";
           });
           ids = ids.substring(0, ids.length - 1);
           deleteDepartment(ids).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("删除成功");
+              ElMessage.success("删除成功");
               this.selectList = [];
               this.selectCount = 0;
               this.cancelSelect();
               this.init();
             }
           });
-        },
-      });
+      }).catch(() => {});
     },
   },
   mounted() {

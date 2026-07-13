@@ -102,8 +102,8 @@
         </el-table>
         <!-- 分页 -->
         <div class="page-size">
-          <el-pagination             :current-page="walletForm.pageNumber"
-            :page-size="walletForm.pageSize"
+          <el-pagination             v-model:current-page="walletForm.pageNumber"
+            v-model:page-size="walletForm.pageSize"
             :page-sizes="[10, 20, 50]"
             :total="logColumnsData.total"
             @current-change="changePage"
@@ -140,8 +140,8 @@
         </el-table>
         <!-- 分页 -->
         <div class="page-size">
-          <el-pagination             :current-page="rechargeForm.pageNumber"
-            :page-size="rechargeForm.pageSize"
+          <el-pagination             v-model:current-page="rechargeForm.pageNumber"
+            v-model:page-size="rechargeForm.pageSize"
             :page-sizes="[10, 20, 50]"
             :total="rechargeListData.total"
             @current-change="rechargeChangePage"
@@ -174,8 +174,8 @@
         </el-table>
         <!-- 分页 -->
         <div class="page-size">
-          <el-pagination             :current-page="withdrawApplyForm.pageNumber"
-            :page-size="withdrawApplyForm.pageSize"
+          <el-pagination             v-model:current-page="withdrawApplyForm.pageNumber"
+            v-model:page-size="withdrawApplyForm.pageSize"
             :page-sizes="[10, 20, 50]"
             :total="withdrawApplyColumnsListData.total"
             @current-change="withdrawChangePage"
@@ -189,6 +189,7 @@
 </template>
 
 <script>
+import { Message } from "@/utils/message";
 import {getDepositLog, getMembersWallet, getRecharge, getWithdrawApply, recharge, withdrawalApply} from '@/api/member';
 import {withdrawalSettingVO} from "@/api/pay";
 import { Edit } from '@element-plus/icons-vue';
@@ -398,7 +399,7 @@ export default {
         if (valid) {
           withdrawalApply(this.withdrawApplyFormData).then((res) => {
             if (res && res.success) {
-              this.$Message.success('提现申请成功，关注提现状态');
+              Message.success('提现申请成功，关注提现状态');
               this.withdrawApplyModal = false;
               this.init(); // 余额查询
               this.getWithdrawApplyData(); // 提现记录

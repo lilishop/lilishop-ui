@@ -23,7 +23,6 @@
   border-radius: 0.4em;
 
   flex-wrap: wrap;
-  > .ivu-form-item,
   > .el-form-item {
     margin: 8px 10px !important;
   }
@@ -48,7 +47,3 @@
   margin-top: 10px;
 }
 
-// 兼容遗留 iView
-.ivu-card + .ivu-card {
-  margin-top: 10px;
-}

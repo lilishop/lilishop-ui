@@ -1,6 +1,6 @@
 <template>
   <div class="invoice-modal">
-    <el-dialog v-model="invoiceAvailable" width="640" footer-hide>
+    <el-dialog v-model="invoiceAvailable" width="640">
       <template #header><p>
         <span>发票信息</span>
       </p></template>

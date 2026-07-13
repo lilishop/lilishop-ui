@@ -120,7 +120,7 @@
             </div>
             <!-- 优惠券展示 -->
             <div class="item-price-coupon-row" v-if="promotionMap['COUPON'].length">
-              <p class="Ellipsis">
+              <div class="Ellipsis">
                 <span class="item-price-title">优 惠 券</span>
                 <span>
                   <span
@@ -156,7 +156,7 @@
                       </span>
                     </div>
                   </div>
-              </p>
+              </div>
             </div>
             <!-- 满减展示 -->
             <div class="item-price-row" v-if="promotionMap['FULL_DISCOUNT']">
@@ -238,7 +238,7 @@
                   :precision="0"
                   @blur="changeCount"
                 ></el-input-number>
-                <span class="inventory">&nbsp&nbsp库存{{ skuDetail.quantity }}</span>
+                <span class="inventory">&nbsp;&nbsp;库存{{ skuDetail.quantity }}</span>
               </div>
             </div>
           </div>
@@ -293,7 +293,7 @@
                   >立即购买</el-button
                 >
                 <el-tooltip content="观看视频" v-if="skuDetail.goodsVideo">
-                  <img class="view-video" @click="showGoodsVideo = true" :src="require('@/assets/iconfont/play.svg')" alt="">
+                  <img class="view-video" @click="showGoodsVideo = true" :src="playIcon" alt="">
                 </el-tooltip>
               </div>
             </div>
@@ -308,6 +308,7 @@
 </template>
 
 <script>
+import { Message } from "@/utils/message";
 import { StarFilled } from '@element-plus/icons-vue';
 import Promotion from "./Promotion.vue";
 import DPlayer from "dplayer";
@@ -318,6 +319,7 @@ import {
   cancelCollect,
 } from "@/api/member.js";
 import { addCartGoods } from "@/api/cart.js";
+import playIcon from "@/assets/iconfont/play.svg";
 
 export default {
   name: "ShowGoods",
@@ -348,6 +350,7 @@ export default {
   },
   data() {
     return {
+      playIcon,
       showGoodsVideo:false,
       goodsVideo:"",
       wholesaleList: [],
@@ -440,7 +443,7 @@ export default {
     changeCount(val) {
       if (this.wholesaleList && this.wholesaleList.length > 0) {
         if (this.count <= this.wholesaleList[0].num) {
-          this.$Message.warning("批发商品购买数量不能小于起批数量");
+          Message.warning("批发商品购买数量不能小于起批数量");
           this.count = this.wholesaleList[0].num;
         }
       }
@@ -480,10 +483,16 @@ export default {
           if (res.success) {
             this.$router.push({
               path: "/shoppingCart",
-              query: { detail: this.skuDetail, count: this.count },
+              query: {
+                skuId: this.skuDetail.id,
+                goodsId: this.skuDetail.goodsId,
+                thumbnail: this.skuDetail.thumbnail,
+                goodsName: this.skuDetail.goodsName,
+                count: this.count,
+              },
             });
           } else {
-            this.$Message.warning(res.message);
+            Message.warning(res.message);
           }
         })
         .catch(() => {
@@ -511,7 +520,7 @@ export default {
               query: { way: params.cartType },
             });
           } else {
-            this.$Message.warning(res.message);
+            Message.warning(res.message);
           }
         })
         .catch(() => {
@@ -523,14 +532,14 @@ export default {
       if (this.isCollected) {
         let cancel = await cancelCollect("GOODS", this.skuDetail.id);
         if (cancel.success) {
-          this.$Message.success("取消收藏成功");
+          Message.success("取消收藏成功");
           this.isCollected = false;
         }
       } else {
         let collect = await collectGoods("GOODS", this.skuDetail.id);
         if (collect.code === 200) {
           this.isCollected = true;
-          this.$Message.success("收藏商品成功,可以前往个人中心我的收藏查看");
+          Message.success("收藏商品成功,可以前往个人中心我的收藏查看");
         }
       }
     },
@@ -586,9 +595,9 @@ export default {
       // 领取优惠券
       receiveCoupon(id).then((res) => {
         if (res.success) {
-          this.$Message.success("优惠券领取成功");
+          Message.success("优惠券领取成功");
         } else {
-          this.$Message.warning(res.message);
+          Message.warning(res.message);
         }
       });
     },

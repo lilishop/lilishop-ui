@@ -36,6 +36,7 @@
 </template>
 
 <script>
+import { Message, Modal } from "@/utils/message";
 import { Delete, Edit } from '@element-plus/icons-vue';
 import { memberAddress, delMemberAddress } from '@/api/address.js';
 
@@ -58,19 +59,19 @@ export default {
     },
     del (id) {
       // 删除地址
-      this.$Modal.confirm({
+      Modal.confirm({
         title: '提示',
         content: '你确定删除这个收货地址',
         onOk: () => {
           delMemberAddress(id).then((res) => {
             if (res.success) {
-              this.$Message.success('删除成功');
+              Message.success('删除成功');
               this.getAddrList();
             }
           });
         },
         onCancel: () => {
-          this.$Message.info('取消删除');
+          Message.info('取消删除');
         }
       });
     },

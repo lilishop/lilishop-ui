@@ -94,18 +94,20 @@
 
 <script>
 
+import { Message } from "@/utils/message";
 import * as RegExp from '@/plugins/RegExp.js';
 import { md5 } from '@/plugins/md5.js';
 import * as apiLogin from '@/api/login.js';
 import { sendSms } from '@/api/common.js';
 import Verify from '@/components/verify';
 import { User, Lock, Iphone, Document } from '@element-plus/icons-vue';
+import config from '@/config';
 export default {
   name: 'SignUp',
   components: { Verify, User, Lock, Iphone, Document },
   data () {
     return {
-      config:require('@/config'),
+      config,
       year: new Date().getFullYear(),
       formRegist: {
         // 注册表单
@@ -152,10 +154,10 @@ export default {
         data.password = md5(data.password);
         apiLogin.regist(data).then((res) => {
           if (res.success) {
-            this.$Message.success('注册成功!');
+            Message.success('注册成功!');
             this.$router.push('login');
           } else {
-            this.$Message.warning(res.message || '注册失败');
+            Message.warning(res.message || '注册失败');
           }
         }).catch(() => {});
       }).catch(() => {});
@@ -164,11 +166,11 @@ export default {
     sendCode () {
       if (this.time === 60) {
         if (this.formRegist.mobilePhone === '') {
-          this.$Message.warning('请先填写手机号');
+          Message.warning('请先填写手机号');
           return;
         }
         if (!this.verifyStatus) {
-          this.$Message.warning('请先完成安全验证');
+          Message.warning('请先完成安全验证');
           return;
         }
         let params = {
@@ -177,7 +179,7 @@ export default {
         };
         sendSms(params).then(res => {
           if (res.success) {
-            this.$Message.success('验证码发送成功');
+            Message.success('验证码发送成功');
             let that = this;
             this.interval = setInterval(() => {
               that.time--;
@@ -191,7 +193,7 @@ export default {
               }
             }, 1000);
           } else {
-            this.$Message.warning(res.message || '验证码发送失败');
+            Message.warning(res.message || '验证码发送失败');
           }
         }).catch(() => {});
       }

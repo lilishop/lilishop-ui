@@ -335,6 +335,7 @@
 <script>
 import * as API_Order from "@/api/order";
 import vueQr from "vue-qr";
+import { ElMessage, ElMessageBox } from "element-plus";
 export default {
   components: {
     "vue-qr": vueQr,
@@ -442,23 +443,17 @@ export default {
     //平台退款
     refundPriceSubmit() {
       if (this.refundPriceForm.remark == "") {
-        this.$Message.error("请输入退款备注");
+        ElMessage.error("请输入退款备注");
         return;
       }
-      this.$Modal.confirm({
-        title: "确认退款",
-        content: "请确认退款？",
-        loading: true,
-        onOk: () => {
-          API_Order.refundPrice(this.sn, this.refundPriceForm).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("收款成功");
-              this.getDetail();
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm("请确认退款？", "确认退款", { type: "warning" }).then(() => {
+        API_Order.refundPrice(this.sn, this.refundPriceForm).then((res) => {
+          if (res.success) {
+            ElMessage.success("收款成功");
+            this.getDetail();
+          }
+        });
+      }).catch(() => {});
     },
     //查询物流
     logisticsSeller() {
@@ -476,17 +471,17 @@ export default {
     //回复
     handleSubmit() {
       if (this.params.remark == "") {
-        this.$Message.error("请输入备注信息");
+        ElMessage.error("请输入备注信息");
         return;
       }
       if (this.params.actualRefundPrice == "") {
-        this.$Message.error("请输入退款金额");
+        ElMessage.error("请输入退款金额");
         return;
       }
       API_Order.afterSaleSellerReview(this.sn, this.params).then((res) => {
         this.submitLoading = false;
         if (res.success) {
-          this.$Message.success("审核成功");
+          ElMessage.success("审核成功");
           this.params.remark = "";
           this.getDetail();
         }
@@ -518,9 +513,6 @@ export default {
 };
 </script>
 <style lang="scss">
-.ivu-col {
-  width: 100% !important;
-}
 .main-content {
   min-height: 600px;
   padding: 10px;

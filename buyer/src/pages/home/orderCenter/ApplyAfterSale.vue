@@ -102,6 +102,7 @@
   </div>
 </template>
 <script>
+import { Message, Notice } from "@/utils/message";
 import { Camera, Delete, View } from '@element-plus/icons-vue';
 import { afterSaleReason, afterSaleInfo, applyAfterSale } from '@/api/member.js'
 import { buyerUrl } from '@/plugins/request.js';
@@ -186,7 +187,7 @@ export default {
           params.reason = this.reasonList.find(item => item.id == params.reason).reason
           applyAfterSale(params).then(res => {
             if (res.success) {
-              this.$Message.success('售后申请提交成功，请到售后订单查看！')
+              Message.success('售后申请提交成功，请到售后订单查看！')
               this.$router.push({name: 'AfterSale'})
             }
           })
@@ -208,7 +209,7 @@ export default {
     handleBeforeUpload () { // 上传之前钩子函数
       const check = this.uploadList.length < 6;
       if (!check) {
-        this.$Notice.warning({
+        Notice.warning({
           title: '最多可以上传5张图片'
         });
         return check;

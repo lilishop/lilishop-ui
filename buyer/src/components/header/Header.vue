@@ -91,11 +91,12 @@
 </template>
 
 <script>
+import { Modal } from "@/utils/message";
 import { ShoppingCart } from '@element-plus/icons-vue';
 import storage from '@/plugins/storage.js';
 import {cartGoodsAll} from '@/api/cart.js';
 import {logout} from '@/api/account.js';
-
+import config from '@/config';
 
 export default {
   components: { ShoppingCart },
@@ -108,7 +109,7 @@ export default {
 
   data() {
     return {
-      config: require('@/config'),
+      config,
       userInfo: {}, // 用户信息
       shoppingCart: [], // 购物车
       cartLoading: false,
@@ -150,7 +151,7 @@ export default {
       if (this.userInfo.username) {
         this.$router.push({path: path});
       } else {
-        this.$Modal.confirm({
+        Modal.confirm({
           title: '请登录',
           content: '请登录后执行此操作',
           okText: '立即登录',

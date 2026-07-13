@@ -53,7 +53,7 @@
         <el-table-column prop="id" label="商品编号" min-width="120" show-overflow-tooltip />
         <el-table-column label="价格" min-width="120">
           <template #default="{ row }">
-            <span v-if="row" :style="{ color: $mainColor }">{{ $filters.unitPrice(row.price, "￥") }}</span>
+            <span v-if="row" :style="{ color: $mainColor }">{{ unitPrice(row.price, "￥") }}</span>
           </template>
         </el-table-column>
         <el-table-column label="审核状态" min-width="120">
@@ -93,6 +93,8 @@
 
 <script>
 import { authGoods, getAuthGoodsListData } from "@/api/goods";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { unitPrice, customRouterPush } from "@/utils/filters";
 
 export default {
   name: "goodsApply",
@@ -113,6 +115,7 @@ export default {
     };
   },
   methods: {
+    unitPrice,
     authFlagText(v) {
       const map = {
         TOBEAUDITED: "待审核",
@@ -163,24 +166,20 @@ export default {
     examine(v, authFlag) {
       const examine = authFlag === 1 ? "通过" : "拒绝";
       this.goodsAuditForm.authFlag = authFlag === 1 ? "PASS" : "REFUSE";
-      this.$Modal.confirm({
-        title: "确认审核",
-        content: `您确认要审核${examine} ${v.goodsName} ?`,
-        onOk: () => {
-          const formData = new FormData();
-          formData.append("goodsIds", v.id);
-          formData.append("authFlag", this.goodsAuditForm.authFlag);
-          return authGoods(formData).then((res) => {
-            if (res.success) {
-              this.$Message.success("审核成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm(`您确认要审核${examine} ${v.goodsName} ?`, "确认审核", { type: "warning" }).then(() => {
+        const formData = new FormData();
+        formData.append("goodsIds", v.id);
+        formData.append("authFlag", this.goodsAuditForm.authFlag);
+        return authGoods(formData).then((res) => {
+          if (res.success) {
+            ElMessage.success("审核成功");
+            this.getDataList();
+          }
+        });
+      }).catch(() => {});
     },
     showDetail(v) {
-      this.$filters.customRouterPush({
+      customRouterPush({
         name: "goods-detail",
         query: { id: v.id },
       });

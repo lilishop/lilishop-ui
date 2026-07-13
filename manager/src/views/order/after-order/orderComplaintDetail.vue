@@ -178,7 +178,7 @@
             <dl>
               <dt>订单金额</dt>
               <dd>
-                <span class="price-text">{{ $filters.unitPrice(complaintInfo.orderPrice, "￥") }}</span>
+                <span class="price-text">{{ unitPrice(complaintInfo.orderPrice, "￥") }}</span>
               </dd>
             </dl>
           </div>
@@ -205,6 +205,8 @@
 
 <script>
 import * as API_Order from "@/api/order";
+import { ElMessage } from "element-plus";
+import { unitPrice } from "@/utils/filters";
 
 const emptyComplaint = () => ({
   id: "",
@@ -232,6 +234,7 @@ export default {
     };
   },
   methods: {
+    unitPrice,
     complainStatusText(v) {
       const map = {
         NEW: "新投诉",
@@ -249,7 +252,7 @@ export default {
         complainId: this.complaintInfo.id,
       }).then((res) => {
         if (res.success) {
-          this.$Message.success("操作成功");
+          ElMessage.success("操作成功");
           this.getDetail();
         }
       });
@@ -284,7 +287,7 @@ export default {
     },
     arbitrationHandleSubmit() {
       if (!this.arbitrationParams.arbitrationResult) {
-        this.$Message.error("请填写仲裁内容");
+        ElMessage.error("请填写仲裁内容");
         return;
       }
       this.submitLoading = true;
@@ -292,7 +295,7 @@ export default {
         .then((res) => {
           this.submitLoading = false;
           if (res.success) {
-            this.$Message.success("仲裁成功");
+            ElMessage.success("仲裁成功");
             this.arbitrationParams.arbitrationResult = "";
             this.arbitrationResultShow = false;
             this.getDetail();
@@ -304,7 +307,7 @@ export default {
     },
     handleSubmit() {
       if (!this.params.content) {
-        this.$Message.error("请填写对话内容");
+        ElMessage.error("请填写对话内容");
         return;
       }
       this.submitLoading = true;
@@ -313,7 +316,7 @@ export default {
         .then((res) => {
           this.submitLoading = false;
           if (res.success) {
-            this.$Message.success("对话成功");
+            ElMessage.success("对话成功");
             this.params.content = "";
             this.getDetail();
           }

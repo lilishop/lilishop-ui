@@ -75,6 +75,7 @@
   </div>
 </template>
 <script>
+import { Message, Notice } from "@/utils/message";
 import { Camera, Delete, View } from '@element-plus/icons-vue';
 import { orderDetail } from '@/api/order.js';
 import { addEvaluation } from '@/api/member.js';
@@ -109,17 +110,17 @@ export default {
     },
     save () { // 保存评价
       if (!this.form.serviceScore || !this.form.deliveryScore) {
-        this.$Message.warning('物流服务评价不能为空')
+        Message.warning('物流服务评价不能为空')
         return false;
       }
 
       if (!this.form.descriptionScore) {
-        this.$Message.warning('描述评价不能为空')
+        Message.warning('描述评价不能为空')
         return false;
       }
 
       if (!this.orderGoods.content || !String(this.orderGoods.content).trim()) {
-        this.$Message.warning('评论内容不能为空')
+        Message.warning('评论内容不能为空')
         return false;
       }
 
@@ -139,14 +140,14 @@ export default {
       addEvaluation(params).then(res => {
         this.loading = false
         if (res.success) {
-          this.$Message.success('评价成功')
+          Message.success('评价成功')
           this.$router.push('/home/CommentList')
         } else {
-          this.$Message.error(res.message || '评价失败，请稍后重试')
+          Message.error(res.message || '评价失败，请稍后重试')
         }
       }).catch((err) => {
         this.loading = false;
-        this.$Message.error(err?.message || '评价失败，请稍后重试')
+        Message.error(err?.message || '评价失败，请稍后重试')
       })
     },
     goGoodsDetail (skuId, goodsId) { // 跳转商品详情
@@ -171,7 +172,7 @@ export default {
     handleBeforeUpload () { // 上传之前钩子
       const check = this.orderGoods.uploadList.length < 9;
       if (!check) {
-        this.$Notice.warning({
+        Notice.warning({
           title: '最多可以上传九张图片'
         });
         return check;

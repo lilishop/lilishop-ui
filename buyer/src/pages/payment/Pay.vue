@@ -299,7 +299,7 @@
     <invoice-modal ref="invModal" :invoiceData="invoiceData" @change="getInvMsg" />
     <!-- 选择地址模态框 -->
     <address-manage ref="address" :id="addrId" @change="addrChange"></address-manage>
-    <el-dialog v-model="giftCardNoticeModal" title="礼品卡使用说明" footer-hide width="520">
+    <el-dialog v-model="giftCardNoticeModal" title="礼品卡使用说明" width="520">
       <p class="pay-gcc-notice-p">
         请在礼品卡有效期内使用；结算时勾选礼品卡即可按规则抵扣订单金额，可与优惠券等活动叠加规则以平台说明为准。放弃勾选或取消抵扣将恢复对应余额。
       </p>
@@ -310,6 +310,7 @@
 </template>
 
 <script>
+import { Message, Modal, Spin } from "@/utils/message";
 import { ArrowDown, ArrowUp, Check, Help, Plus, Warning } from '@element-plus/icons-vue';
 import invoiceModal from "@/components/invoiceModal";
 import addressManage from "@/components/addressManage";
@@ -487,17 +488,17 @@ export default {
     },
     getGoodsDetail() {
       // 订单商品详情
-      this.$Spin.show();
+      Spin.show();
       cartGoodsPay({ way: this.$route.query.way })
         .then((res) => {
-          this.$Spin.hide();
+          Spin.hide();
           if (res.success) {
             if (
               !res.result.checkedSkuList ||
               res.result.checkedSkuList.length === 0
             ) {
               if (res.result.skuList && res.result.skuList[0]) {
-                this.$Modal.warning({
+                Modal.warning({
                   title: "购物车存在无效商品！",
                   content:
                     "[" +
@@ -545,7 +546,7 @@ export default {
                 title = e.errorMessage;
                 content.push(e.goodsSku.goodsName);
               });
-              this.$Modal.warning({
+              Modal.warning({
                 title: "以下商品超出配送区域" || title,
                 content: content.toString(),
               });
@@ -587,7 +588,7 @@ export default {
           }
         })
         .catch(() => {
-          this.$Spin.hide();
+          Spin.hide();
         });
     },
     syncGiftCardSelectionFromCart(result) {
@@ -727,7 +728,7 @@ export default {
       };
       selectAddr(params).then((res) => {
         if (res.success) {
-          this.$Message.success("选择配送方式成功");
+          Message.success("选择配送方式成功");
           this.selectMethod = item;
           this.getGoodsDetail();
         }
@@ -739,7 +740,7 @@ export default {
       // 选择自提地址
       setStoreAddressId(item.id,this.$route.query.way).then((res) => {
         if (res.success) {
-          this.$Message.success("选择自提地址成功");
+          Message.success("选择自提地址成功");
           this.selectedStoreAddress = item;
           this.getGoodsDetail();
         }
@@ -768,13 +769,13 @@ export default {
     },
     delAddress(item) {
       // 删除地址
-      this.$Modal.confirm({
+      Modal.confirm({
         title: "提示",
         content: "你确定删除这个收货地址",
         onOk: () => {
           delMemberAddress(item.id).then((res) => {
             if (res.success) {
-              this.$Message.success("删除成功");
+              Message.success("删除成功");
               this.getAddress();
             }
           });
@@ -839,10 +840,10 @@ export default {
 
       if (!params.remark.length) delete params.remark;
 
-      this.$Spin.show();
+      Spin.show();
       createTrade(params)
         .then((res) => {
-          this.$Spin.hide();
+          Spin.hide();
           if (res.success) {
             if (params.way === "POINTS") {
               // 积分支付不需要跳转支付页面
@@ -856,7 +857,7 @@ export default {
           }
         })
         .catch(() => {
-          this.$Spin.hide();
+          Spin.hide();
         });
     },
     // 优惠券可用范围

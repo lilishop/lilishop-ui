@@ -114,6 +114,7 @@
   </div>
 </template>
 <script>
+import { Message, Modal } from "@/utils/message";
 import { afterSaleDetail, afterSaleLog, afterSaleReason, cancelAfterSale } from '@/api/member.js';
 import { afterSaleDelivery, getLogisticsCompany } from '@/api/order.js';
 import { afterSaleStatusList } from '../enumeration.js'
@@ -182,13 +183,13 @@ export default {
       window.open(img, '_blank')
     },
     cancel (sn) { // 取消售后申请
-      this.$Modal.confirm({
+      Modal.confirm({
         title: '取消',
         content: '<p>确定取消此次售后申请吗？</p>',
         onOk: () => {
           cancelAfterSale(sn).then(res => {
             if (res.success) {
-              this.$Message.success('取消售后申请成功')
+              Message.success('取消售后申请成功')
               this.getDetail()
             }
           })
@@ -210,7 +211,7 @@ export default {
       afterSaleDelivery(this.form).then(res => {
         if (res.success) {
           this.logisticsShow = false;
-          this.$Message.success('提交成功')
+          Message.success('提交成功')
           this.getDetail()
         }
         this.submitLoading = false

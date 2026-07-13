@@ -6,6 +6,12 @@ import { getRequest, postRequest, postRequestWithNoForm, putRequest, deleteReque
 export const getLiveList = (params) => {
     return getRequest('/broadcast/studio', params)
 }
+
+// 是否推荐直播间
+export const whetherStar = (params) => {
+    return putRequest(`/broadcast/studio/recommend/${params.id}`, params)
+}
+
 // 添加直播间
 export const addLive = (params) => {
     return postRequest('/broadcast/studio', params)

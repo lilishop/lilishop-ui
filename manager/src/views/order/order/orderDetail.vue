@@ -20,7 +20,7 @@
           <div class="div-item">
             <div class="div-item-left">订单来源：</div>
             <div class="div-item-right">
-              {{ $filters.clientTypeWay(orderInfo.order.clientType) }}
+              {{ clientTypeWay(orderInfo.order.clientType) }}
             </div>
           </div>
 
@@ -148,7 +148,7 @@
             <div class="div-item-left">发票金额：</div>
             <div class="div-item-right">
               {{
-                $filters.unitPrice(
+                unitPrice(
                   orderInfo.receipt && orderInfo.receipt.receiptPrice
                     ? orderInfo.receipt.receiptPrice
                     : "暂无",
@@ -206,14 +206,14 @@
           </el-table-column>
           <el-table-column label="单价" min-width="100">
             <template #default="{ row }">
-              <span v-if="row">{{ $filters.unitPrice(row.unitPrice || 0, "￥") }}</span>
+              <span v-if="row">{{ unitPrice(row.unitPrice || 0, "￥") }}</span>
             </template>
           </el-table-column>
           <el-table-column prop="num" label="数量" min-width="80" />
           <el-table-column prop="returnGoodsNumber" label="退款数量" min-width="80" />
           <el-table-column label="小计" min-width="100">
             <template #default="{ row }">
-              <span v-if="row">{{ $filters.unitPrice(row.flowPrice, "￥") }}</span>
+              <span v-if="row">{{ unitPrice(row.flowPrice, "￥") }}</span>
             </template>
           </el-table-column>
         </el-table>
@@ -222,7 +222,7 @@
             <li>
               <span class="label">商品总额：</span>
               <span class="txt">{{
-                $filters.unitPrice(orderInfo.order.priceDetailDTO.goodsPrice, "￥")
+                unitPrice(orderInfo.order.priceDetailDTO.goodsPrice, "￥")
               }}</span>
             </li>
             <li v-if="
@@ -231,7 +231,7 @@
             ">
               <span class="label">优惠金额：</span>
               <span class="txt">
-                {{ $filters.unitPrice(orderInfo.order.priceDetailDTO.discountPrice, "￥") }}</span>
+                {{ unitPrice(orderInfo.order.priceDetailDTO.discountPrice, "￥") }}</span>
             </li>
 
             <li v-if="
@@ -260,7 +260,7 @@
                       <tbody>
                         <tr v-for="(item, index) in typeList" :key="index">
                           <td>{{ item.promotionName }}：</td>
-                          <td>¥{{ $filters.unitPrice(item.discountPrice) }}</td>
+                          <td>¥{{ unitPrice(item.discountPrice) }}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -274,21 +274,21 @@
               </li> -->
             <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index">
                 <span class="label" v-if="index == 1 && typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a><span class="op-split">|</span>
-                <span class="txt" style="border-bottom: 1px dashed;font-size:10px !important;" v-if="index == 1 &&  typeList.length > 1">¥{{ $filters.unitPrice(item.discountPrice) }}</span>
+                <span class="txt" style="border-bottom: 1px dashed;font-size:10px !important;" v-if="index == 1 &&  typeList.length > 1">¥{{ unitPrice(item.discountPrice) }}</span>
                 <span class="label" v-if="index == 0 &&  typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a><span class="op-split">|</span>
-                <span class="txt" style="border-top: 1px dashed;font-size:10px !important;" v-if="index == 0 && typeList.length > 1">¥{{ $filters.unitPrice(item.discountPrice) }}</span>
+                <span class="txt" style="border-top: 1px dashed;font-size:10px !important;" v-if="index == 0 && typeList.length > 1">¥{{ unitPrice(item.discountPrice) }}</span>
                 <span class="label" v-if="typeList.length == 1 && index == 0" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a><span class="op-split">|</span>
-                <span class="txt"  v-if="typeList.length == 1 && index == 0" style="border-top: 1px dashed;border-bottom: 1px dashed;font-size:10px !important;">¥{{ $filters.unitPrice(item.discountPrice) }}</span>
+                <span class="txt"  v-if="typeList.length == 1 && index == 0" style="border-top: 1px dashed;border-bottom: 1px dashed;font-size:10px !important;">¥{{ unitPrice(item.discountPrice) }}</span>
               </li> -->
             <li>
               <span class="label">运费：</span>
               <span class="txt">{{
-                $filters.unitPrice(orderInfo.order.freightPrice, "￥")
+                unitPrice(orderInfo.order.freightPrice, "￥")
               }}</span>
             </li>
             <li v-if="orderInfo.order.priceDetailDTO.updatePrice">
               <span class="label">修改金额：</span>
-              <span class="txt theme_color">¥{{ $filters.unitPrice(orderInfo.order.priceDetailDTO.updatePrice) }}</span>
+              <span class="txt theme_color">¥{{ unitPrice(orderInfo.order.priceDetailDTO.updatePrice) }}</span>
             </li>
             <li v-if="orderInfo.order.priceDetailDTO.payPoint != 0">
               <span class="label">使用积分：</span>
@@ -298,7 +298,7 @@
             </li>
             <li>
               <span class="label">应付金额：</span>
-              <span class="txt flowPrice">¥{{ $filters.unitPrice(orderInfo.order.priceDetailDTO.flowPrice) }}</span>
+              <span class="txt flowPrice">¥{{ unitPrice(orderInfo.order.priceDetailDTO.flowPrice) }}</span>
             </li>
           </ul>
         </div>
@@ -438,6 +438,8 @@ import * as RegExp from "@/libs/RegExp.js";
 import multipleMap from "@/components/map/multiple-map";
 import vueQr from "vue-qr";
 import { printElement } from "@/utils/print";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { unitPrice, clientTypeWay } from "@/utils/filters";
 export default {
   name: "orderList",
   components: {
@@ -542,6 +544,8 @@ export default {
     },
   },
   methods: {
+    unitPrice,
+    clientTypeWay,
     getPromotionText(row) {
       let resultText = "";
       if (row && row.promotionType) {
@@ -560,21 +564,18 @@ export default {
 
     //确认收款
     confirmPrice () {
-      this.$Modal.confirm({
-        title: "提示",
-        content:
-          "<p>您确定要收款吗？线下收款涉及库存变更，需异步进行，等待约一分钟刷新列表查看</p>",
-        onOk: () => {
-          API_Order.orderPay(this.sn).then((res) => {
-            if (res.success) {
-              this.$Message.success("收款成功");
-              this.getDataList();
-            } else {
-              // this.$Message.error(res.message);
-            }
-          });
-        },
-      });
+      ElMessageBox.confirm(
+        "您确定要收款吗？线下收款涉及库存变更，需异步进行，等待约一分钟刷新列表查看",
+        "提示",
+        { type: "warning" }
+      ).then(() => {
+        API_Order.orderPay(this.sn).then((res) => {
+          if (res.success) {
+            ElMessage.success("收款成功");
+            this.getDataList();
+          }
+        });
+      }).catch(() => {});
     },
     getOrderPrice () {
       if (this.showPrices) {
@@ -624,7 +625,7 @@ export default {
         if (valid) {
           API_Order.updateOrderPrice(this.sn, this.modifyPriceForm).then((res) => {
             if (res.success) {
-              this.$Message.success("修改订单金额成功");
+              ElMessage.success("修改订单金额成功");
               this.modal = false;
               this.getDataList();
             }
@@ -656,7 +657,7 @@ export default {
         if (valid) {
           API_Order.orderCancel(this.sn, this.orderCancelForm).then((res) => {
             if (res.success) {
-              this.$Message.success("取消成功");
+              ElMessage.success("取消成功");
               this.getDataList();
             }
             this.orderCancelModal = false;
@@ -699,7 +700,7 @@ export default {
     //修改收货地址
     editAddressSubmit () {
       if (this.regionId == "") {
-        this.$Message.error("请选择地址");
+        ElMessage.error("请选择地址");
         return;
       }
       this.addressForm.consigneeAddressPath = this.addr;
@@ -708,7 +709,7 @@ export default {
         if (valid) {
           API_Order.editOrderConsignee(this.sn, this.addressForm).then((res) => {
             if (res.success) {
-              this.$Message.success("收货地址修改成功");
+              ElMessage.success("收货地址修改成功");
               this.addressModal = false;
               this.getDataList();
             }

@@ -12,8 +12,9 @@ import * as filters from "./plugins/filters";
 import storage from "@/plugins/storage";
 import { fetchAndApplyTheme } from "@/utils/theme";
 import { getThemeSetting } from "@/api/common.js";
+import config from "@/config";
 
-const { aMapSecurityJsCode, inputMaxLength } = require("@/config");
+const { aMapSecurityJsCode, inputMaxLength } = config;
 
 if (aMapSecurityJsCode) {
   window._AMapSecurityConfig = {

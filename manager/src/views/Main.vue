@@ -85,8 +85,8 @@ import circleLoading from "@/components/lili/circle-loading.vue";
 import Cookies from "js-cookie";
 import util from "@/libs/util.js";
 import { getNoticePage, logout } from "@/api/index";
-
-const config = require("@/config/index.js");
+import config from "@/config/index.js";
+import defaultLogo from "@/assets/logo.png";
 
 export default {
   components: {
@@ -102,7 +102,7 @@ export default {
       sliceNum: 5,
       userInfo: "",
       tipsMessage: "",
-      defaultLogo: require("@/assets/logo.png"),
+      defaultLogo,
       domainLogo: "",
     };
   },

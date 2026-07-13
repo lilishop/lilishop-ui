@@ -205,6 +205,7 @@
 
 <script>
 import * as API_Member from "@/api/member.js";
+import { customRouterPush } from "@/utils/filters";
 
 export default {
   name: "point",
@@ -241,7 +242,7 @@ export default {
       this.$emit("callback", val);
     },
     detail(row) {
-      this.$filters.customRouterPush({ name: "member-detail", query: { id: row.id } });
+      customRouterPush({ name: "member-detail", query: { id: row.id } });
     },
     init() {
       this.getStatistics();

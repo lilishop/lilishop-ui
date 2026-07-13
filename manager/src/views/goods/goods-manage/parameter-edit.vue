@@ -98,6 +98,7 @@ import {
   updateGoodsParams,
 } from "@/api/goods";
 import { regular } from "@/utils";
+import { ElMessage } from "element-plus";
 
 const getOptionText = (value) => {
   if (value && typeof value === "object") return value.value;
@@ -369,7 +370,7 @@ export default {
           insertGoodsParams(buildSpringFormPayload(payload))
             .then((res) => {
               if (!(res && res.success)) return;
-              this.$Message.success("操作成功");
+              ElMessage.success("操作成功");
               this.back();
             })
             .finally(() => {
@@ -379,7 +380,7 @@ export default {
           updateGoodsParams(buildSpringFormPayload(payload))
             .then((res) => {
               if (!(res && res.success)) return;
-              this.$Message.success("操作成功");
+              ElMessage.success("操作成功");
               this.back();
             })
             .finally(() => {

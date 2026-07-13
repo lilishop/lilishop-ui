@@ -74,6 +74,7 @@
 </template>
 
 <script>
+import { Message } from "@/utils/message";
 import { Lock } from '@element-plus/icons-vue';
 import {
   setPwd,
@@ -152,7 +153,7 @@ export default {
         if (valid) {
           const {newPassword, againPassword, password} = this.formRegister
           if (newPassword !== againPassword) {
-            this.$Message.error({
+            Message.error({
               content: '新密码和确认密码不一致'
             });
             return
@@ -162,13 +163,13 @@ export default {
           params.password = md5(password)
           editPwd(params).then(res => {
             if (res.success && res.result) {
-              this.$Message.success('修改密码成功');
+              Message.success('修改密码成功');
               this.$router.push('/home')
             } else {
-              this.$Message.error(this.normalizePwdError(res.message));
+              Message.error(this.normalizePwdError(res.message));
             }
           }).catch((err) => {
-            this.$Message.error(this.normalizePwdError(err?.message || err?.data?.message));
+            Message.error(this.normalizePwdError(err?.message || err?.data?.message));
           });
         }
       })
@@ -187,13 +188,13 @@ export default {
         if (valid) {
           const {newPassword, againPassword} = this.formDataUpdate
           if (newPassword === '') {
-            this.$Message.error({
+            Message.error({
               content: '请输入密码'
             });
             return
           }
           if (newPassword !== againPassword) {
-            this.$Message.error({
+            Message.error({
               content: '新密码和确认密码不一致'
             });
             return
@@ -202,7 +203,7 @@ export default {
           params.password = md5(newPassword)
           setPwd(params).then(res => {
             if (res.message === 'success' && res.result) {
-              this.$Message.success('支付密码设置成功');
+              Message.success('支付密码设置成功');
               this.$router.push('/home')
             }
           });

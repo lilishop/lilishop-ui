@@ -37,10 +37,11 @@
       </ul>
       <div class="pageration">
         <el-pagination
+          v-model:current-page="params.pageNumber"
+          v-model:page-size="params.pageSize"
           :total="total"
           @current-change="changePageNum"
           @size-change="changePageSize"
-          :page-size="params.pageSize"
           layout="total, sizes, prev, pager, next, jumper"
         />
       </div>
