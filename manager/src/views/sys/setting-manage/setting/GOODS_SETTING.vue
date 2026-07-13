@@ -60,7 +60,7 @@
 </template>
 <script>
 import { ElMessage } from "element-plus";
-import { setSetting, createIndex, getProgress, deleteGoodsDown, generateGoodsCache, delSkuIndex } from "@/api/index";
+import { setSetting } from "@/api/index";
 export default {
   props: ["res", "type"],
   data() {
@@ -88,69 +88,6 @@ export default {
           this.setupSetting();
         } else {
           ElMessage.error("请正确填写内容!");
-        }
-      });
-    },
-    createIndex() {
-      createIndex().then((res) => {
-        if (res.success) {
-          ElMessage.success("开始生成!");
-          this.showProgress = true;
-          setTimeout(() => {
-            this.intervalProgress = setInterval(() => {
-              getProgress().then((resp) => {
-                const progressResult = resp.result;
-                if (progressResult != null && progressResult.flag === 0) {
-                  clearInterval(this.intervalProgress);
-                  this.showProgress = false;
-                  ElMessage.success("生成成功!");
-                } else {
-                  this.progressVal = Math.floor((progressResult.processed / progressResult.total) * 100);
-                }
-              });
-            }, 1000);
-          }, 10000);
-        } else if (res.code === 100000) {
-          this.showProgress = true;
-          this.intervalProgress = setInterval(() => {
-            getProgress().then((resp) => {
-              const progressResult = resp.result;
-              if (progressResult != null && progressResult.flag === 0) {
-                clearInterval(this.intervalProgress);
-                this.showProgress = false;
-                ElMessage.success("生成成功!");
-              } else {
-                this.progressVal = Math.floor((progressResult.processed / progressResult.total) * 100);
-              }
-            });
-          }, 1000);
-        }
-      });
-    },
-    deleteDownGoods() {
-      deleteGoodsDown().then((res) => {
-        if (res.success) {
-          ElMessage.success("删除成功!");
-        } else {
-          ElMessage.error("删除失败!");
-        }
-      });
-    },
-    generateCache() {
-      generateGoodsCache().then((res) => {
-        if (res.success) {
-          ElMessage.success("生成成功!");
-        } else {
-          ElMessage.error("生成失败!");
-        }
-      });
-    },
-    deleteNotExistIndex() {
-      delSkuIndex().then((res) => {
-        if (res.success) {
-          ElMessage.success("删除成功!");
-        } else {
-          ElMessage.error("删除失败!");
         }
       });
     },
@@ -204,19 +141,6 @@ export default {
   align-items: flex-start;
   gap: 10px;
   margin-left: 150px;
-}
-.goods-setting-action-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-.goods-setting-action-row .progress-item {
-  flex: 0 0 240px;
-  min-width: 200px;
-}
-.goods-setting-action-row .progress-item :deep(.el-progress) {
-  width: 100%;
 }
 :deep(.el-input){
   width: 180px !important;

@@ -79,9 +79,29 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 [**部署文档 -> 环境准备**](https://docs.pickmall.cn/deply/deply.html)
 
 #### 数据库初始化
--   **推荐方式**: 使用项目提供的 `docker-compose` 配置，可自动完成数据库（MySQL, Redis, Elasticsearch等）的部署与初始化。
+-   **推荐方式**: 使用 [`docker`](https://gitee.com/beijing_hongye_huicheng/docker) 仓库中的 `docker-compose`，可自动完成 **MySQL、Redis** 等中间件的部署与初始化。
 -   **手动方式**: 如果您选择手动部署，SQL脚本位于以下地址。请确保获取与您代码版本一致的SQL文件。
     [**数据库脚本 (Gitee)**](https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql)
+
+#### 后端服务与端口（`vue3` 分支）
+
+| 服务 | 端口 | 说明 |
+| :--- | :--- | :--- |
+| buyer-api | 8888 | 买家端 API |
+| manager-api | 8887 | 平台 + 商家 API（`/manager/**`、`/store/**`） |
+| im-api | 8885 | 客服 IM / WebSocket |
+
+运行依赖：**MySQL + Redis**。商品搜索使用 MySQL；异步消息使用 Redis 队列；定时任务使用 Spring `@Scheduled`（内嵌在 manager-api）。
+
+#### 前端 API 路径约定
+
+| 端 | 公共接口前缀 |
+| :--- | :--- |
+| 买家 PC/H5 | `{buyerUrl}/buyer/common/*` |
+| 商家端 | `{sellerUrl}/store/common/*` |
+| 平台端 | `{managerUrl}/manager/common/*` |
+
+`common-api` 已下线，请勿再使用 `/common/common/*` 旧路径。
 
 ---
 
@@ -90,20 +110,18 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 #### 5.1 架构图
 ![系统架构图](https://lili-system.oss-cn-beijing.aliyuncs.com/docs/%E6%9E%B6%E6%9E%84.png)
 
-#### 5.2 后端技术栈
+#### 5.2 后端技术栈（当前分支）
 
-| 技术            | 选型            | 版本   | 备注/用途  |
-| :-------------- | :-------------- | :----- | :--------- |
-| 核心框架        | Spring Boot     | 3.5.6  | 简化应用开发 |
-| ORM框架         | MyBatis-Plus    | 3.5.8 | 数据持久化  |
-| 数据库          | MySQL (LTS)     | 8.3.0  | 关系型数据存储 |
-| 消息队列        | RocketMQ        | 2.3.4  | 异步任务与解耦 |
-| 缓存            | Redis           | -  | 数据缓存    |
-| 搜索引擎        | Elasticsearch   | -  | 商品搜索   |
-| 安全框架        | Spring Security | -  | 认证与授权  |
-| 分库分表        | ShardingSphere  | 4.0.0  | 数据水平扩展 |
-| 定时任务        | XXL-Job         | 2.3.0  | 分布式任务调度 |
-| 认证方案        | JWT             | -      | Token 方案 |
+| 技术 | 选型 | 备注/用途 |
+| :--- | :--- | :--- |
+| 核心框架 | Spring Boot 4 | 简化应用开发 |
+| ORM 框架 | MyBatis-Plus | 数据持久化 |
+| 数据库 | MySQL | 关系型数据存储 |
+| 缓存 | Redis | 数据缓存、消息队列 |
+| 商品搜索 | MySQL | 已移除 Elasticsearch |
+| 异步消息 | Redis List 队列 | 已移除 RocketMQ 中间件 |
+| 定时任务 | Spring `@Scheduled` | 已移除 XXL-Job |
+| 安全框架 | Spring Security + JWT | 认证与授权 |
 
 #### 5.3 前端技术栈
 

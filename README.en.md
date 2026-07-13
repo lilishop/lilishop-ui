@@ -67,14 +67,21 @@ One codebase supports:
 Built with:
 
 - Spring Boot
-- Spring Cloud
+- MySQL
 - Redis
-- RocketMQ
-- Elasticsearch
 - Docker
-- ShardingSphere
 
-Supports distributed deployment and high concurrency ecommerce scenarios.
+Supports standalone deployment: **buyer-api** (8888), **manager-api** (8887, includes store APIs), **im-api** (8885). Product search uses MySQL. Async messaging uses Redis queues. Scheduled tasks use Spring `@Scheduled`.
+
+### Frontend API paths
+
+| App | Public API prefix |
+| :--- | :--- |
+| Buyer | `{buyerUrl}/buyer/common/*` |
+| Seller | `{sellerUrl}/store/common/*` |
+| Manager | `{managerUrl}/manager/common/*` |
+
+The legacy `common-api` and `/common/common/*` paths are removed.
 
 ### Ecommerce Features
 
@@ -96,14 +103,11 @@ Supports distributed deployment and high concurrency ecommerce scenarios.
 
 ### Backend
 
-- Java
-- Spring Boot
-- Spring Cloud
+- Java 21
+- Spring Boot 4
 - MyBatis Plus
 - MySQL
 - Redis
-- RocketMQ
-- Elasticsearch
 - JWT
 - Docker
 
