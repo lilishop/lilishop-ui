@@ -98,7 +98,7 @@ import { applyThird } from '@/api/shopentry';
 import { getCategory } from '@/api/goods';
 
 import storage from '@/plugins/storage';
-import { commonUrl } from '@/plugins/request.js';
+import { buyerUrl } from '@/plugins/request.js';
 
 
 import multipleMap from "@/components/map/multiple-map";
@@ -117,7 +117,7 @@ export default {
     return {
       loading: false, // 加载状态
       uploadLoading: false, // 上传加载状态
-      action: commonUrl + '/common/common/upload/file', // 上传地址
+      action: buyerUrl + '/buyer/common/upload/file', // 上传地址
       accessToken: {}, // 验证token
       previewPicture: '', // 预览图片
 

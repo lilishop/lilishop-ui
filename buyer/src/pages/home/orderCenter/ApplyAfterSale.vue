@@ -104,7 +104,7 @@
 <script>
 import { Camera, Delete, View } from '@element-plus/icons-vue';
 import { afterSaleReason, afterSaleInfo, applyAfterSale } from '@/api/member.js'
-import { commonUrl } from '@/plugins/request.js';
+import { buyerUrl } from '@/plugins/request.js';
 import storage from '@/plugins/storage';
 import * as RegExp from '@/plugins/RegExp'
 export default {
@@ -131,7 +131,7 @@ export default {
         num: 1
       },
       uploadList: [], // 上传列表
-      action: commonUrl + '/common/common/upload/file', // 上传地址
+      action: buyerUrl + '/buyer/common/upload/file', // 上传地址
       accessToken: {}, // 验证token
       visible: false, // 图片预览
       previewImage: '', // 预览图片url

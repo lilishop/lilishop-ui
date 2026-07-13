@@ -9,20 +9,18 @@ import {
   putRequestWithNoForm,
   postRequestWithNoTokenData,
   postRequestWithNoForm,
-  managerUrl
+  managerUrl,
+  managerApiUrl
 } from "@/libs/axios";
 
-
-let commonUrl = (process.env.NODE_ENV === 'development' ? BASE.API_DEV.common : BASE.API_PROD.common)
-
 // 文件上传接口
-export const uploadFile = commonUrl+ "/common/common/upload/file";
+export const uploadFile = managerApiUrl + "/manager/common/upload/file";
 // Websocket
 export const ws = managerUrl + "/ws";
 
 //获取所有city
 export const getAllCity = (params) => {
-  return getRequest(commonUrl + '/common/common/region/allCity', params)
+  return getRequest(managerApiUrl + '/manager/common/region/allCity', params)
 }
 
 
@@ -356,7 +354,7 @@ export const aliDownloadFile = (fKey, params) => {
 
 // base64上传
 export const base64Upload = (params) => {
-  return postRequest("/common/common/upload/file", params);
+  return postRequest("/common/upload/file", params);
 };
 
 // 系统设置
@@ -460,31 +458,6 @@ export const resetPassword = (params) => {
   return postRequest(`/passport/user/resetPassword/${params}`);
 };
 
-// 初始化商品索引
-export const createIndex = () => {
-  return getRequest(`/other/elasticsearch`);
-};
-
-// 初始化商品索引
-export const getProgress = () => {
-  return getRequest(`/other/elasticsearch/progress`);
-};
-
-// 删除ES中下架的商品
-export const deleteGoodsDown = () => {
-  return getRequest(`/other/elasticsearch/deleteGoodsDown`);
-};
-
-// 删除不存在的索引
-export const delSkuIndex = () => {
-  return getRequest(`/other/elasticsearch/delSkuIndex`);
-};
-
-// 生成所有商品的缓存
-export const generateGoodsCache = () => {
-  return getRequest(`/other/elasticsearch/cache`);
-};
-
 // 分页查询自定义分词
 export const getCustomWordsPage = (params) => {
   return getRequest(`/other/customWords/page`, params);
@@ -532,22 +505,22 @@ export const getHotWordsHistory = (params) => {
 
 // 获取文件目录列表
 export const getFileDirectory = () => {
-  return getRequest(commonUrl+`/common/resource/fileDirectory`);
+  return getRequest(managerApiUrl+`/manager/common/fileDirectory`);
 };
 
 // 添加文件目录
 export const addFileDirectory = (params) => {
-  return postRequestWithNoForm(commonUrl+`/common/resource/fileDirectory`,params);
+  return postRequestWithNoForm(managerApiUrl+`/manager/common/fileDirectory`,params);
 };
 
 
 // 修改文件目录
 export const updateFileDirectory = (params) => {
-  return putRequestWithNoForm(commonUrl+`/common/resource/fileDirectory`,params);
+  return putRequestWithNoForm(managerApiUrl+`/manager/common/fileDirectory`,params);
 };
 
 
 // 删除文件目录
 export const delFileDirectory = (id) => {
-  return deleteRequest(commonUrl+`/common/resource/fileDirectory/${id}`);
+  return deleteRequest(managerApiUrl+`/manager/common/fileDirectory/${id}`);
 };

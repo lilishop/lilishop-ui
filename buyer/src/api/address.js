@@ -1,5 +1,5 @@
 import request, {
-  Method, commonUrl
+  Method, buyerUrl
 } from '@/plugins/request.js';
 
 // 会员收货地址列表
@@ -55,7 +55,7 @@ export function getAddrDetail (id) {
 // 传给后台citycode 获取城市街道等id
 export function handleRegion (params) {
   return request({
-    url: `${commonUrl}/common/common/region/region`,
+    url: `${buyerUrl}/buyer/common/region/region`,
     needToken: true,
     method: Method.GET,
     params

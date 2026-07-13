@@ -9,12 +9,12 @@ import {
   putRequestWithNoForm,
   postRequestWithNoToken,
   postRequestWithNoForm,
-  commonUrl,
+  sellerUrl,
 } from "@/libs/axios";
 
 //获取所有city
 export const getAllCity = (params) => {
-  return getRequest(commonUrl+'/common/common/region/allCity', params)
+  return getRequest(sellerUrl+'/store/common/region/allCity', params)
 }
 
 // 获取全部权限数据
@@ -73,7 +73,7 @@ export const sendRegistSms = (mobile, params) => {
 };
 // 发送重置密码短信验证码
 export const sendResetSms = (mobile, params) => {
-  return getRequest(`${commonUrl}/common/captcha/sendResetSms/${mobile}`, params);
+  return getRequest(`${sellerUrl}/common/captcha/sendResetSms/${mobile}`, params);
 };
 // 发送修改绑定手机短信验证码
 export const sendEditMobileSms = (mobile, params) => {
@@ -229,31 +229,31 @@ export const deleteMessageSend = (ids, params) => {
 
 // 分页获取文件数据
 export const getFileListData = params => {
-  return getRequest(`${commonUrl}/common/common/file`, params);
+  return getRequest(`${sellerUrl}/store/common/file`, params);
 };
 
 
 // 复制文件
 export const copyFile = params => {
-  return postRequest(`${commonUrl}/common/common/file/copy`, params);
+  return postRequest(`${sellerUrl}/store/common/file/copy`, params);
 };
 // 重命名文件
 export const renameFile = params => {
-  return postRequest(`${commonUrl}/common/common/file/rename`, params);
+  return postRequest(`${sellerUrl}/store/common/file/rename`, params);
 };
 // 删除文件
 export const deleteFile = (ids, params) => {
-  return deleteRequest(`${commonUrl}/common/common/file/delete/${ids}`, params);
+  return deleteRequest(`${sellerUrl}/store/common/file/delete/${ids}`, params);
 };
 // 下载文件
 export const aliDownloadFile = (fKey, params) => {
-  return getRequest(`${commonUrl}/common/common/file/ali/download/${fKey}`, params);
+  return getRequest(`${sellerUrl}/store/common/file/ali/download/${fKey}`, params);
 };
 
 
 // base64上传
 export const base64Upload = params => {
-  return postRequest("/common/common/upload/file", params);
+  return postRequest("/store/common/upload/file", params);
 };
 
 
@@ -391,20 +391,20 @@ export const editOtherUser = (id, params) => {
 
 // 获取文件目录列表
 export const getFileDirectory = () => {
-  return getRequest(commonUrl+`/common/resource/fileDirectory`);
+  return getRequest(sellerUrl+`/store/common/fileDirectory`);
 };
 
 // 添加文件目录
 export const addFileDirectory = (params) => {
-  return postRequestWithNoForm(commonUrl+`/common/resource/fileDirectory`,params);
+  return postRequestWithNoForm(sellerUrl+`/store/common/fileDirectory`,params);
 };
 
 // 修改文件目录
 export const updateFileDirectory = (params) => {
-  return putRequestWithNoForm(commonUrl+`/common/resource/fileDirectory`,params);
+  return putRequestWithNoForm(sellerUrl+`/store/common/fileDirectory`,params);
 };
 
 // 删除文件目录
 export const delFileDirectory = (id) => {
-  return deleteRequest(commonUrl+`/common/resource/fileDirectory/${id}`);
+  return deleteRequest(sellerUrl+`/store/common/fileDirectory/${id}`);
 };
