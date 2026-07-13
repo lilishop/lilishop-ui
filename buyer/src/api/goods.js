@@ -5,7 +5,7 @@ import request, {
 // 商品列表
 export function goodsList (params) {
   return request({
-    url: '/buyer/goods/goods/es',
+    url: '/buyer/goods/goods/search',
     method: Method.GET,
     needToken: false,
     optionalToken: true,
@@ -16,7 +16,7 @@ export function goodsList (params) {
 // 商品分类 筛选条件  品牌， 尺寸等
 export function filterList (params) {
   return request({
-    url: '/buyer/goods/goods/es/related',
+    url: '/buyer/goods/goods/search/related',
     method: Method.GET,
     needToken: false,
     optionalToken: true,

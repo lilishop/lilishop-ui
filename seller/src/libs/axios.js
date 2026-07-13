@@ -7,16 +7,13 @@ import { handleRefreshToken } from "@/api/index";
 import {v4 as uuidv4} from 'uuid';
 
 // 统一请求路径前缀
-export const baseUrl =
-  (process.env.NODE_ENV === "development"
-    ?  BASE.API_DEV.seller
-    : BASE.API_PROD.seller) + BASE.PREFIX;
-export const commonUrl =
+export const sellerUrl =
   process.env.NODE_ENV === "development"
-    ? BASE.API_DEV.common
-    : BASE.API_PROD.common;
+    ? BASE.API_DEV.seller
+    : BASE.API_PROD.seller;
+export const baseUrl = sellerUrl + BASE.PREFIX;
 // 文件上传接口
-export const uploadFile = commonUrl + "/common/common/upload/file";
+export const uploadFile = sellerUrl + "/store/common/upload/file";
 var isRefreshToken = 0;
 const refreshToken = getTokenDebounce();
 const service = axios.create({

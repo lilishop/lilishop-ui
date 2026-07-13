@@ -86,7 +86,7 @@ export async function fetchAndApplyTheme(requestFn) {
     }
   } catch (error) {
     console.warn(
-      "[theme] 主题色加载失败，请确认 common-api(8890) 已启动且已执行 version4.9to4.10.sql",
+      "[theme] 主题色加载失败，请确认 buyer-api 已启动且站点主题配置可用",
       error
     );
   }
