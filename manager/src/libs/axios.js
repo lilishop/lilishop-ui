@@ -6,16 +6,13 @@ import Cookies from "js-cookie";
 import {v4 as uuidv4} from 'uuid';
 
 // 统一请求路径前缀
-export const commonUrl =
+export const managerApiUrl =
   process.env.NODE_ENV === "development"
-    ? BASE.API_DEV.common
-    : BASE.API_PROD.common;
-export const managerUrl =
-  (process.env.NODE_ENV === "development"
     ? BASE.API_DEV.manager
-    : BASE.API_PROD.manager) + BASE.PREFIX;
+    : BASE.API_PROD.manager;
+export const managerUrl = managerApiUrl + BASE.PREFIX;
 // 文件上传接口
-export const uploadFile = commonUrl + "/common/common/upload/file";
+export const uploadFile = managerApiUrl + "/manager/common/upload/file";
 
 
 const service = axios.create({

@@ -147,7 +147,7 @@
                       <el-upload
                         v-if="canUploadImages"
                         ref="up"
-                        :action="commonUrl + '/common/common/upload/file'"
+                        :action="sellerUrl + '/store/common/upload/file'"
                         :data="uploadData"
                         :headers="accessToken"
                         :before-upload="beforeUpload"
@@ -317,7 +317,7 @@ import {
   updateFileDirectory,
 } from "@/api/index";
 import DPlayer from "dplayer";
-import {commonUrl} from "@/libs/axios";
+import {sellerUrl} from "@/libs/axios";
 
 import config from "@/config/index";
 import playImg from "@/assets/play.png";
@@ -342,7 +342,7 @@ export default {
   },
   data() {
     return {
-      commonUrl, // 上传文件路径
+      sellerUrl, // 上传文件路径
       config, // api地址
       fileDirectoryId: "",
       groupFormValidate: {

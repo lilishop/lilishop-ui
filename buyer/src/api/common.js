@@ -1,11 +1,11 @@
-import request, {Method, commonUrl} from '@/plugins/request.js';
+import request, {Method, buyerUrl} from '@/plugins/request.js';
 
 /**
  * 获取拼图验证
  */
 export function getVerifyImg (verificationEnums) {
   return request({
-    url: `${commonUrl}/common/common/slider/${verificationEnums}`,
+    url: `${buyerUrl}/buyer/common/slider/${verificationEnums}`,
     method: Method.GET,
     needToken: false
   });
@@ -15,7 +15,7 @@ export function getVerifyImg (verificationEnums) {
  */
 export function postVerifyImg (params) {
   return request({
-    url: `${commonUrl}/common/common/slider/${params.verificationEnums}`,
+    url: `${buyerUrl}/buyer/common/slider/${params.verificationEnums}`,
     method: Method.POST,
     needToken: false,
     params
@@ -26,7 +26,7 @@ export function postVerifyImg (params) {
  */
 export function sendSms (params) {
   return request({
-    url: `${commonUrl}/common/common/sms/${params.verificationEnums}/${params.mobile}`,
+    url: `${buyerUrl}/buyer/common/sms/${params.verificationEnums}/${params.mobile}`,
     method: Method.GET,
     needToken: false,
     params
@@ -36,7 +36,7 @@ export function sendSms (params) {
 // 地区数据，用于三级联动
 export function getRegion (id) {
   return request({
-    url: `${commonUrl}/common/common/region/item/${id}`,
+    url: `${buyerUrl}/buyer/common/region/item/${id}`,
     needToken: true,
     method: Method.GET,
     loading: false
@@ -80,7 +80,7 @@ export function articleDetail (id) {
 // 获取IM接口前缀
 export function getIMDetail () {
   return request({
-    url: `${commonUrl}/common/common/IM`,
+    url: `${buyerUrl}/buyer/common/IM`,
     method: Method.GET
   });
 }
@@ -89,7 +89,7 @@ export function getIMDetail () {
 //获取图片logo
 export function getBaseSite(){
   return request ({
-    url:`${commonUrl}/common/common/site`,
+    url:`${buyerUrl}/buyer/common/site`,
     method: Method.GET,
     needToken: false
   })
@@ -98,7 +98,7 @@ export function getBaseSite(){
 // 获取主题色配置
 export function getThemeSetting() {
   return request({
-    url: `${commonUrl}/common/common/site/theme`,
+    url: `${buyerUrl}/buyer/common/site/theme`,
     method: Method.GET,
     needToken: false,
   });

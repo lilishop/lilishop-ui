@@ -13,18 +13,6 @@ export const buyerUrl =
   process.env.NODE_ENV === "development"
     ? BASE.API_DEV.buyer
     : BASE.API_PROD.buyer;
-export const commonUrl =
-  process.env.NODE_ENV === "development"
-    ? BASE.API_DEV.common
-    : BASE.API_PROD.common;
-export const managerUrl =
-  process.env.NODE_ENV === "development"
-    ? BASE.API_DEV.manager
-    : BASE.API_PROD.manager;
-export const sellerUrl =
-  process.env.NODE_ENV === "development"
-    ? BASE.API_DEV.seller
-    : BASE.API_PROD.seller;
 
 let isRefreshToken = 0;
 const refreshToken = getTokenDebounce();

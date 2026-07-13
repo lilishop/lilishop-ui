@@ -71,7 +71,7 @@ export const ServeSendTalkFile = (data) => {
 
 // 发送聊天图片服务接口
 export const ServeSendTalkImage = (data) => {
-  return upload("/common/common/upload/file", data);
+  return upload("/buyer/common/upload/file", data);
 };
 
 // 发送表情包服务接口
