@@ -6,7 +6,7 @@ var BASE = {
     seller: "http://127.0.0.1:8887",
   },
   API_PROD: {
-    seller: "https://store-api.pickmall.cn",
+    seller: "https://admin-api.pickmall.cn",
   },
   /**
    * @description // 跳转买家端地址 pc端
