@@ -237,7 +237,7 @@ export default {
     },
     buildH5ShareUrl(liveId) {
       const base = (this.wapUrl || BASE?.WAP_URL || config.website || "").replace(/\/?$/, "/");
-      return `${base}pages/promotions/live/detail?id=${liveId}`;
+      return `${base}pages/promotion/live/room?id=${liveId}`;
     },
     handleShare(row) {
       this.shareTitle = row.title || "";
@@ -246,8 +246,40 @@ export default {
     },
     copyShareUrl() {
       if (!this.shareH5Url) return;
-      navigator.clipboard.writeText(this.shareH5Url);
-      this.$Message.success("链接已复制");
+      this.copyText(this.shareH5Url);
+    },
+    copyText(text) {
+      const onSuccess = () => this.$Message.success("链接已复制");
+      const onFail = () => this.$Message.error("复制失败，请手动复制");
+
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard
+          .writeText(text)
+          .then(onSuccess)
+          .catch(() => {
+            this.copyTextFallback(text) ? onSuccess() : onFail();
+          });
+        return;
+      }
+
+      this.copyTextFallback(text) ? onSuccess() : onFail();
+    },
+    copyTextFallback(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      let ok = false;
+      try {
+        ok = document.execCommand("copy");
+      } catch (e) {
+        ok = false;
+      }
+      document.body.removeChild(textArea);
+      return ok;
     },
     handleStart(row) {
       if (row.liveStatus === "LIVING") {
