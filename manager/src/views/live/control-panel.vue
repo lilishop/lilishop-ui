@@ -239,7 +239,6 @@
 </template>
 
 <script>
-import { getSetting } from "@/api/index";
 import {
   endLive,
   getLiveInfo,
@@ -363,7 +362,6 @@ export default {
       this.$Message.error("缺少直播ID");
       return;
     }
-    this.loadWapSetting();
     this.refreshAll();
     this.startDurationTimer();
   },
@@ -691,15 +689,6 @@ export default {
           });
         },
       });
-    },
-    loadWapSetting() {
-      getSetting("BASE_SETTING")
-        .then((res) => {
-          if (res.success && res.result?.buyerDomain) {
-            this.wapUrl = res.result.buyerDomain;
-          }
-        })
-        .catch(() => {});
     },
   },
 };

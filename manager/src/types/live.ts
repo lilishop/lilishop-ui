@@ -17,6 +17,17 @@ export interface LiveRoomForm {
   endTime?: string
   pushStreamServer?: string
   pushStreamCode?: string
+  imSdkAppid?: string | number
+  imSdkAppId?: string | number
+  sdkAppId?: string | number
+  imSdkSecretKey?: string
+  sdkSecretKey?: string
+  secretKey?: string
+  userSig?: string
+  imUserSig?: string
+  adminUserSig?: string
+  imGroupId?: string
+  groupId?: string
 }
 
 export interface LiveCoupon {
