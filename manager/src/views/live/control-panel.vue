@@ -27,7 +27,7 @@
           <div class="panel-head">
             <span class="panel-title">直播预览</span>
             <div class="ratio-switch">
-             
+
             </div>
           </div>
           <div class="player-box" :class="aspectRatio === '16:9' ? 'ratio-169' : 'ratio-43'">
@@ -644,7 +644,7 @@ export default {
     },
     buildShareUrl() {
       const base = (this.wapUrl || BASE?.WAP_URL || config.website || "").replace(/\/?$/, "/");
-      return `${base}pages/promotions/live/detail?id=${this.liveId}`;
+      return `${base}pages/promotion/live/room?id=${this.liveId}`;
     },
     handleShare() {
       const url = this.buildShareUrl();
