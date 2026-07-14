@@ -103,9 +103,29 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 [**部署文档 -> 环境准备**](https://docs.pickmall.cn/deply/deply.html)
 
 #### 数据库初始化
--   **推荐方式**: 使用项目提供的 `docker-compose` 配置，可自动完成数据库（MySQL, Redis, Elasticsearch等）的部署与初始化。
+-   **推荐方式**: 使用 [`docker`](https://gitee.com/beijing_hongye_huicheng/docker) 仓库中的 `docker-compose`，可自动完成 **MySQL、Redis** 等中间件的部署与初始化。
 -   **手动方式**: 如果您选择手动部署，SQL脚本位于以下地址。请确保获取与您代码版本一致的SQL文件。
     [**数据库脚本 (Gitee)**](https://gitee.com/beijing_hongye_huicheng/docker/tree/master/init/mysql)
+
+#### 后端服务与端口（`vue3` 分支）
+
+| 服务 | 端口 | 说明 |
+| :--- | :--- | :--- |
+| buyer-api | 8888 | 买家端 API |
+| manager-api | 8887 | 平台 + 商家 API（`/manager/**`、`/store/**`） |
+| im-api | 8885 | 客服 IM / WebSocket |
+
+运行依赖：**MySQL + Redis**。商品搜索使用 MySQL；异步消息使用 Redis 队列；定时任务使用 Spring `@Scheduled`（内嵌在 manager-api）。
+
+#### 前端 API 路径约定
+
+| 端 | 公共接口前缀 |
+| :--- | :--- |
+| 买家 PC/H5 | `{buyerUrl}/buyer/common/*` |
+| 商家端 | `{sellerUrl}/store/common/*` |
+| 平台端 | `{managerUrl}/manager/common/*` |
+
+`common-api` 已下线，请勿再使用 `/common/common/*` 旧路径。
 
 ---
 
@@ -120,14 +140,9 @@ LILISHOP 是基于 Spring Boot / Spring Cloud / Vue / Uniapp 开发的 Java 开�
 - H5 / 小程序 / APP：`lilishop-uniapp`
 - 部署、SQL、镜像与启动脚本：`docker`
 
-All-In-One 仅用于本地体验、演示或验证，不代表生产高可用部署架构。生产部署应按实际访问量、稳定性、监控、备份和扩缩容要求拆分数据库、缓存、搜索、消息、任务调度、前端静态资源和后端服务。
-
 ### 6. 功能列表
 
 [功能清单](https://bdwx2tfwwt.feishu.cn/sheets/FFQKscQKDhUx60to1k9cbMngnYb?from=from_copylink)
-
-
-
 
 
 ### 7. 开源与授权

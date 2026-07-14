@@ -38,9 +38,13 @@
         </el-table-column>
         <el-table-column label="操作" width="160" fixed="right" align="center">
           <template #default="{ row }">
-            <a class="link-text" @click="handleAuth(row, 'PASS')">通过</a>
-            <span class="op-split">|</span>
-            <a class="link-text" @click="handleAuth(row, 'REJECT')">拒绝</a>
+            <template v-if="canPassAuth(row)">
+              <a class="link-text" @click="handleAuth(row, 'PASS')">通过</a>
+            </template>
+            <template v-if="canPassAuth(row) && canRejectAuth(row)">
+              <span class="op-split">|</span>
+            </template>
+            <a v-if="canRejectAuth(row)" class="link-text" @click="handleAuth(row, 'REFUSE')">拒绝</a>
           </template>
         </el-table-column>
       </el-table>
@@ -82,9 +86,13 @@
           </el-table-column>
           <el-table-column label="操作" width="160" fixed="right" align="center">
             <template #default="{ row }">
-              <a class="link-text" @click="handleAuth(row, 'PASS')">通过</a>
-              <span class="op-split">|</span>
-              <a class="link-text" @click="handleAuth(row, 'REJECT')">拒绝</a>
+              <template v-if="canPassAuth(row)">
+                <a class="link-text" @click="handleAuth(row, 'PASS')">通过</a>
+              </template>
+              <template v-if="canPassAuth(row) && canRejectAuth(row)">
+                <span class="op-split">|</span>
+              </template>
+              <a v-if="canRejectAuth(row)" class="link-text" @click="handleAuth(row, 'REFUSE')">拒绝</a>
             </template>
           </el-table-column>
         </el-table>
@@ -262,6 +270,14 @@ export default {
       const map = { PASS: "success", REFUSE: "danger", TOBEAUDITED: "warning" };
       return map[status] || "info";
     },
+    canPassAuth(row) {
+      const status = row?.authStatus;
+      return status === "TOBEAUDITED" || status === "REFUSE" || !status;
+    },
+    canRejectAuth(row) {
+      const status = row?.authStatus;
+      return status === "TOBEAUDITED" || status === "PASS" || !status;
+    },
     parsePageResult(res) {
       if (!res) return { records: [], total: 0 };
       if (res.records) {
@@ -342,7 +358,10 @@ export default {
         });
     },
     handleAuth(record, authStatus) {
-      authLiveMessage({ id: record.id, authStatus }).then((res) => {
+      authLiveMessage({
+        ...record,
+        authStatus,
+      }).then((res) => {
         if (res.success) {
           this.$Message.success("操作成功");
           this.loadMessages();

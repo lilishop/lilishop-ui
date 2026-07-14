@@ -47,8 +47,12 @@
 <script>
 import { Message } from "@/utils/message";
 import { editMemberInfo } from '@/api/account.js';
+<<<<<<< HEAD
 import { getMemberMsg } from '@/api/login.js';
 import { commonUrl } from '@/plugins/request.js';
+=======
+import { buyerUrl } from '@/plugins/request.js';
+>>>>>>> 29d5ba98ff40ecd028bcd8d89bf410f952052931
 import storage from '@/plugins/storage.js';
 import { User } from '@element-plus/icons-vue';
 export default {
@@ -60,7 +64,7 @@ export default {
         nickName: [{required: true, message: '用户昵称不能为空'}, { max: 16, message: '用户昵称不能超过15个字符' }]
       },
       formItem: {}, // 表单数据
-      action: commonUrl + '/common/common/upload/file', // 上传接口
+      action: buyerUrl + '/buyer/common/upload/file', // 上传接口
       accessToken: {} // 验证token
     }
   },

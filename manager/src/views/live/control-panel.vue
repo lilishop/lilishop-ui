@@ -27,7 +27,7 @@
           <div class="panel-head">
             <span class="panel-title">直播预览</span>
             <div class="ratio-switch">
-             
+
             </div>
           </div>
           <div class="player-box" :class="aspectRatio === '16:9' ? 'ratio-169' : 'ratio-43'">
@@ -239,7 +239,6 @@
 </template>
 
 <script>
-import { getSetting } from "@/api/index";
 import {
   endLive,
   getLiveInfo,
@@ -363,7 +362,6 @@ export default {
       this.$Message.error("缺少直播ID");
       return;
     }
-    this.loadWapSetting();
     this.refreshAll();
     this.startDurationTimer();
   },
@@ -644,7 +642,7 @@ export default {
     },
     buildShareUrl() {
       const base = (this.wapUrl || BASE?.WAP_URL || config.website || "").replace(/\/?$/, "/");
-      return `${base}pages/promotions/live/detail?id=${this.liveId}`;
+      return `${base}pages/promotion/live/room?id=${this.liveId}`;
     },
     handleShare() {
       const url = this.buildShareUrl();
@@ -691,15 +689,6 @@ export default {
           });
         },
       });
-    },
-    loadWapSetting() {
-      getSetting("BASE_SETTING")
-        .then((res) => {
-          if (res.success && res.result?.buyerDomain) {
-            this.wapUrl = res.result.buyerDomain;
-          }
-        })
-        .catch(() => {});
     },
   },
 };

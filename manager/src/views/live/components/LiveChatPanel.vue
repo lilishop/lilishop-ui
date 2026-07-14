@@ -46,6 +46,7 @@
 import Cookies from "js-cookie";
 import { toRef } from "vue";
 import { useChat } from "../composables/useChat";
+import { resolveImConfigFromDetail } from "../composables/useLiveSetting";
 
 export default {
   name: "LiveChatPanel",
@@ -71,7 +72,7 @@ export default {
       userInfo = {};
     }
 
-    return useChat(toRef(props, "liveId"), userInfo);
+    return useChat(toRef(props, "liveId"), userInfo, toRef(props, "liveDetail"));
   },
   data() {
     return {
@@ -84,29 +85,59 @@ export default {
     imGroupId() {
       return this.liveDetail?.imGroupId || this.liveDetail?.groupId || this.liveId || "";
     },
+    imSdkAppId() {
+      return resolveImConfigFromDetail(this.liveDetail).sdkAppId;
+    },
+    canInitChat() {
+      const { sdkAppId, secretKey, userSig } = resolveImConfigFromDetail(this.liveDetail);
+      return !!(this.imGroupId && sdkAppId && (userSig || secretKey));
+    },
   },
   watch: {
-    imGroupId: {
+    canInitChat: {
       immediate: true,
-      handler(id) {
-        if (!id) return;
-        this.setGroupID(id);
+      handler(ready) {
+        if (!ready) return;
+        this.setGroupID(this.imGroupId);
         if (this.active) {
           this.bootstrapChat();
         }
       },
     },
+    imGroupId(id) {
+      if (!id) return;
+      this.setGroupID(id);
+    },
     active(val) {
-      if (val && this.imGroupId && !this.chatInited) {
+      if (val && this.canInitChat && !this.chatInited) {
         this.bootstrapChat();
       }
     },
     liveId() {
       this.chatInited = false;
       this.cleanup();
-      if (this.active && this.imGroupId) {
+      if (this.active && this.canInitChat) {
         this.bootstrapChat();
       }
+    },
+    liveDetail: {
+      deep: true,
+      handler(detail, oldDetail) {
+        const nextConfig = resolveImConfigFromDetail(detail);
+        const prevConfig = resolveImConfigFromDetail(oldDetail);
+        if (
+          nextConfig.sdkAppId &&
+          (nextConfig.sdkAppId !== prevConfig.sdkAppId ||
+            nextConfig.secretKey !== prevConfig.secretKey ||
+            nextConfig.userSig !== prevConfig.userSig)
+        ) {
+          this.chatInited = false;
+          this.cleanup();
+          if (this.active && this.canInitChat) {
+            this.bootstrapChat();
+          }
+        }
+      },
     },
   },
   beforeUnmount() {
@@ -117,7 +148,7 @@ export default {
       this.createTextMessageByInput();
     },
     async bootstrapChat() {
-      if (!this.liveId || this.chatInited || this.initializing) {
+      if (!this.liveId || this.chatInited || this.initializing || !this.canInitChat) {
         return;
       }
 
