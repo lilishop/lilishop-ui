@@ -4,9 +4,15 @@ import Cookies from "js-cookie";
 
 let util = {};
 
+<<<<<<< HEAD
 /** 已弃用、前端未实现的菜单 frontRoute，注册路由时跳过 */
 const DEPRECATED_FRONT_ROUTES = new Set([
   "distribution/distrbutionGrade",
+=======
+/** 已弃用、前端已移除的菜单 frontRoute，注册路由时跳过 */
+const DEPRECATED_FRONT_ROUTES = new Set([
+  "goods/goods-manage/spec",
+>>>>>>> vue3
 ]);
 
 function isDeprecatedMenu(menu) {
