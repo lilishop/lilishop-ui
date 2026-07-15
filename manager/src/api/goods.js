@@ -93,26 +93,9 @@ export const disableCategory = (id, type) => {
     return putRequest(`/goods/category/disable/${id}`, type)
 }
 
-
-//  获取商品规格分页列表
-export const getSpecListData = (params) => {
-    return getRequest('/goods/spec', params)
-}
-//  添加或修改规格设置
-export const insertSpec = (params) => {
-    return postRequest('/goods/spec', params)
-}
-//  添加或修改规格设置
-export const updateSpec = (id,params) => {
-    return putRequest(`/goods/spec/${id}`, params)
-}
 //根据分类id获取关联规格
 export const getCategorySpecListData = (category_id, params) => {
     return getRequest(`/goods/categorySpec/${category_id}`, params)
-}
-//删除gUI个
-export const delSpec = (id, params) => {
-    return deleteRequest(`/goods/spec/${id}`, params)
 }
 
 // 查询某分类下的全部子分类列表
