@@ -27,18 +27,6 @@
     <div v-if="unreadCount > 0" class="chat-unread" @click="scrollToBottomAndClearUnread">
       {{ unreadCount }} 条新消息
     </div>
-
-    <div class="chat-input-bar">
-      <el-input
-        v-model="messageContent"
-        placeholder="发送消息到直播间..."
-        maxlength="200"
-        @keyup.enter="createTextMessageByInput"
-      />
-      <el-button type="primary" :disabled="!messageContent.trim()" @click="handleSend">
-        发送
-      </el-button>
-    </div>
   </div>
 </template>
 
@@ -144,9 +132,6 @@ export default {
     this.cleanup();
   },
   methods: {
-    handleSend() {
-      this.createTextMessageByInput();
-    },
     async bootstrapChat() {
       if (!this.liveId || this.chatInited || this.initializing || !this.canInitChat) {
         return;
@@ -259,7 +244,7 @@ export default {
 .chat-unread {
   position: absolute;
   left: 50%;
-  bottom: 56px;
+  bottom: 12px;
   transform: translateX(-50%);
   padding: 4px 12px;
   background: $theme_color;
@@ -269,14 +254,5 @@ export default {
   cursor: pointer;
   z-index: 2;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-}
-
-.chat-input-bar {
-  flex-shrink: 0;
-  display: flex;
-  gap: 8px;
-  padding-top: 12px;
-  border-top: 1px solid #ebeef5;
-  background: #fff;
 }
 </style>
