@@ -1,7 +1,5 @@
 /* eslint-disable no-console */
 import { nextTick, ref, unref, watch } from "vue";
-import { postSendMessage } from "@/api/live";
-import { Message } from "@/utils/message";
 import TencentCloudChat from "@tencentcloud/chat";
 import { resolveImConfigFromDetail } from "./useLiveSetting";
 import { genTestUserSig } from "../utils/GenerateTestUserSig";
@@ -13,7 +11,6 @@ export function useChat(liveId, userInfo, liveDetail) {
   const chat = ref(null);
   const groupID = ref("");
   const messageList = ref([]);
-  const messageContent = ref("");
   const chatListRef = ref(null);
   const bottomAnchorRef = ref(null);
   const isAtBottom = ref(true);
@@ -346,33 +343,6 @@ export function useChat(liveId, userInfo, liveDetail) {
     messageList.value.sort((a, b) => a.time - b.time);
   }
 
-  async function createTextMessageByInput() {
-    const content = messageContent.value.trim();
-    if (!content) {
-      return;
-    }
-    if (!imReady.value) {
-      Message.error("IM 未就绪，请稍后再试");
-      return;
-    }
-
-    try {
-      const res = await postSendMessage({
-        liveRoomId: unref(liveId),
-        message: content,
-      });
-
-      if (res?.success) {
-        messageContent.value = "";
-        isAtBottom.value = true;
-        unreadCount.value = 0;
-        scrollToBottom(true);
-      }
-    } catch {
-      Message.error("发送失败");
-    }
-  }
-
   function scrollToBottom(force = false) {
     if (!force && !isAtBottom.value) {
       return;
@@ -458,7 +428,6 @@ export function useChat(liveId, userInfo, liveDetail) {
     chat,
     groupID,
     messageList,
-    messageContent,
     chatListRef,
     bottomAnchorRef,
     isAtBottom,
@@ -468,7 +437,6 @@ export function useChat(liveId, userInfo, liveDetail) {
     imReady,
     initError,
     initTencentIm,
-    createTextMessageByInput,
     scrollToBottom,
     scrollToBottomAndClearUnread,
     onScroll,
