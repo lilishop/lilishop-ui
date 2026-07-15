@@ -4,6 +4,15 @@ import Cookies from "js-cookie";
 
 let util = {};
 
+/** 已弃用、前端未实现的菜单 frontRoute，注册路由时跳过 */
+const DEPRECATED_FRONT_ROUTES = new Set([
+  "distribution/distrbutionGrade",
+]);
+
+function isDeprecatedMenu(menu) {
+  return menu.frontRoute && DEPRECATED_FRONT_ROUTES.has(menu.frontRoute);
+}
+
 /** 动态菜单路由 name，用于登出或重新注册时清理 */
 util.dynamicRouteNames = [];
 
@@ -383,6 +392,9 @@ util.initRouterNode = function(routers, data) {
   // data为所有子菜单数据
 
   for (let item of data) {
+    if (isDeprecatedMenu(item)) {
+      continue;
+    }
     const menu = Object.assign({}, item);
     const hasChildren = item.children && item.children.length > 0;
 

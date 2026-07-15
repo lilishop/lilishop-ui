@@ -15,6 +15,10 @@ export default {
   components:{uploadImage},
   name: "Tinymce",
   props: {
+    modelValue: {
+      type: String,
+      default: "",
+    },
     value: {
       type: String,
       default: "",
@@ -23,6 +27,11 @@ export default {
       type:String,
       default:'500px'
     }
+  },
+  computed: {
+    editorContent() {
+      return this.modelValue ?? this.value ?? "";
+    },
   },
   data() {
     return {
@@ -41,19 +50,23 @@ export default {
     this.init();
   },
   watch: {
-    value: {
+    editorContent: {
       handler(val) {
         if (!this.hasChange && this.hasInit) {
           // 当内容有更改且编辑器已初始化时，更新编辑器的内容
-          this.$nextTick(() =>
-            window.tinymce.get(this.tinymceId).setContent(val || "")
-          );
+          this.$nextTick(() => {
+            const editor = window.tinymce?.get(this.tinymceId);
+            if (editor) editor.setContent(val || "");
+          });
         }
       },
-      deep: true,
     },
   },
   methods: {
+    emitContent(content) {
+      this.$emit("update:modelValue", content);
+      this.$emit("input", content);
+    },
     // 数据返回并给富文本框插入图片
     insertImage(arr){
       arr.forEach(v => window.tinymce.get(this.tinymceId).insertContent(`<img  src="${v}" >`))
@@ -68,19 +81,16 @@ export default {
         selector: `#${this.tinymceId}`,
         convert_urls: false,
         init_instance_callback: (editor) => {
-          if (_this.value) {
+          if (_this.editorContent) {
             // 如果有初始值，则设置编辑器的内容为初始值
-            this.$nextTick(() => editor.setContent(_this.value));
+            _this.$nextTick(() => editor.setContent(_this.editorContent));
           }
           _this.hasInit = true;
           // 监听编辑器内容的变化
-          editor.on("NodeChange Change KeyUp  SetContent", (event) => {
-            if (_this.value) {
-              // 内容发生更改
-              this.hasChange = true;
-            }
-            // 通过 input 事件将编辑器的内容传递给父组件
-            this.$emit("input", editor.getContent());
+          editor.on("NodeChange Change KeyUp  SetContent", () => {
+            _this.hasChange = true;
+            // Vue3 v-model 使用 update:modelValue，同时保留 input 兼容旧用法
+            _this.emitContent(editor.getContent());
           });
         },
         setup(editor) {

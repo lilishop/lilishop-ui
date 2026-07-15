@@ -370,8 +370,9 @@
       :show-close="true"
     >
       <memberLayout
+        v-if="memberModalFlag"
+        :selectedMember="true"
         @callback="callbackMember"
-        class="selectedMember"
         ref="memberLayout"
       />
     </el-dialog>
@@ -566,7 +567,6 @@ export default {
 
     //选择会员
     selectMember() {
-      this.$refs["memberLayout"].selectedMember = true;
       this.memberModalFlag = true;
     },
 

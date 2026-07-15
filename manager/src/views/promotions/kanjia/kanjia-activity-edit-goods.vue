@@ -62,7 +62,7 @@
                 style="width: 260px"
               />
             </el-form-item>
-            <el-form-item label="活动时间" prop="rangeTime">
+            <el-form-item label="活动时间" prop="rangeTime" class="kanjia-activity-time-form-item">
               <el-date-picker
                 :disabled="onlyView"
                 v-model="form.rangeTime"
@@ -72,7 +72,6 @@
                 start-placeholder="开始时间"
                 end-placeholder="结束时间"
                 :disabled-date="disabledDate"
-                style="width: 360px"
               />
             </el-form-item>
             <div>
@@ -251,5 +250,13 @@ h4 {
   font-size: 14px;
   line-height: 40px;
   text-align: left;
+}
+
+.kanjia-activity-time-form-item {
+  :deep(.el-date-editor) {
+    width: 360px !important;
+    max-width: 360px;
+    flex-grow: 0;
+  }
 }
 </style>
