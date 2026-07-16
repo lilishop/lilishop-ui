@@ -52,18 +52,10 @@ export const saveParameterCategory = (parameter_id, categoryIds) => {
       "Content-Type": "application/json"
     })
 }
-//保存获取关联规格
-export const saveCategorySpec = (category_id, params) => {
-    return postRequest(`/goods/categorySpec/${category_id}`, params)
-}
 
 //获取所有可用品牌
 export const getBrandListData = (params) => {
     return getRequest('/goods/brand/all', params)
-}
-// 获取所有可用规格
-export const getSpecificationList = (params) => {
-    return getRequest('/goods/spec/all', params)
 }
 
 //获取分类列表数据
@@ -91,11 +83,6 @@ export const delCategory = (id) => {
 // 禁用分类
 export const disableCategory = (id, type) => {
     return putRequest(`/goods/category/disable/${id}`, type)
-}
-
-//根据分类id获取关联规格
-export const getCategorySpecListData = (category_id, params) => {
-    return getRequest(`/goods/categorySpec/${category_id}`, params)
 }
 
 // 查询某分类下的全部子分类列表
@@ -220,12 +207,6 @@ export const updateParamsGroup = (params) => {
 export const deleteParamsGroup = (id, params) => {
     return deleteRequest(`/goods/categoryParameters/${id}`, params)
 }
-
-//保存获取关联规格
-export const getGoodsSpecInfo = (category_id, params) => {
-    return getRequest(`/goods/categorySpec/goods/${category_id}`, params)
-}
-
 
 //获取sku列表
 export const getSkuPage = (params) => {

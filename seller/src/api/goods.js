@@ -67,11 +67,6 @@ export const getCategoryBrandListData = (category_id, params) => {
 export const saveCategoryBrand = (category_id, params) => {
   return postRequest(`/category/brand/${category_id}`, params);
 };
-//保存获取关联规格
-export const saveCategorySpec = (category_id, params) => {
-  return postRequest(`/goods/categorySpec/${category_id}`, params);
-};
-
 //获取所有可用品牌
 export const getBrandListData = params => {
   return getRequest("/goods/brand/all", params);
@@ -114,10 +109,6 @@ export const getSpecListData = params => {
 //  添加或修改规格设置
 export const insertOrUpdateSpec = params => {
   return postRequest("/goods/spec/edit", params);
-};
-//根据分类id获取关联规格
-export const getCategorySpecListData = (category_id, params) => {
-  return getRequest(`/goods/categorySpec/${category_id}`, params);
 };
 //删除gUI个
 export const delSpec = (id, params) => {
@@ -333,11 +324,6 @@ export const deleteDraftGoods = id => {
 //查询分类绑定参数信息
 export const getCategoryParamsListDataSeller = (id, params) => {
   return getRequest(`/goods/categoryParameters/${id}`, params);
-};
-
-//保存获取关联规格
-export const getGoodsSpecInfoSeller = (category_id) => {
-  return getRequest(`/goods/spec/${category_id}`);
 };
 
 //批量设置运费模板

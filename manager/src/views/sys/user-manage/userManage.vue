@@ -104,7 +104,7 @@
         <el-form-item label="用户名" prop="username">
           <el-input v-model="form.username" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="昵称" prop="username">
+        <el-form-item label="昵称" prop="nickName">
           <el-input v-model="form.nickName" autocomplete="off" />
         </el-form-item>
         <el-form-item v-if="modalType == 0" label="密码" prop="password" :error="errorPass">
@@ -178,9 +178,12 @@ export default {
       modalTitle: "",
       form: {
         username: "",
+        nickName: "",
+        password: "",
         mobile: "",
         email: "",
-        sex: "",
+        avatar: "",
+        description: "",
         roles: [],
         departmentId: 0,
         departmentTitle: "",
@@ -285,18 +288,30 @@ export default {
       this.$refs.form.validate((valid) => {
         if (valid) {
           if (this.modalType == 0) {
-            const params = JSON.parse(JSON.stringify(this.form));
-            delete params.id;
-            delete params.status;
-            if (params.password == "" || params.password == undefined) {
+            if (this.form.password == "" || this.form.password == undefined) {
               this.errorPass = "密码不能为空";
               return;
             }
-            if (params.password.length < 6) {
+            if (this.form.password.length < 6) {
               this.errorPass = "密码长度不得少于6位";
               return;
             }
-            params.password = this.md5(params.password);
+            if (Array.isArray(this.form.roles) && this.form.roles.length > 9) {
+              ElMessage.warning("角色最多选择9个");
+              return;
+            }
+            const params = {
+              username: this.form.username,
+              password: this.form.password,
+              nickName: this.form.nickName,
+              mobile: this.form.mobile,
+              email: this.form.email,
+              avatar: this.form.avatar,
+              description: this.form.description,
+              departmentId: this.form.departmentId,
+              roles: this.form.roles,
+            };
+            this.errorPass = "";
             this.submitLoading = true;
             addUser(params).then((res) => {
               this.submitLoading = false;
@@ -325,9 +340,12 @@ export default {
       this.modalTitle = "添加用户";
       this.form = {
         username: "",
+        nickName: "",
+        password: "",
         mobile: "",
         email: "",
-        sex: "",
+        avatar: "",
+        description: "",
         roles: [],
         departmentId: 0,
         departmentTitle: "",

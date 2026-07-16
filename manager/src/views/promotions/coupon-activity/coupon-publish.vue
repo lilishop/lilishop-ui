@@ -200,15 +200,21 @@ export default {
       submitLoading: false,
       selectCouponList: [],
       formRule: {
-        promotionName: [{ required: true, message: "活动名称不能为空", trigger: "blur" }],
+        promotionName: [{ required: true, message: "活动名称不能为空" }],
         rangeTime: [
           {
-            type: "array",
             required: true,
-            message: "请选择活动有效期",
+            validator: (rule, value, callback) => {
+              if (!value || !Array.isArray(value) || value.length !== 2 || !value[0] || !value[1]) {
+                callback(new Error("请选择活动有效期"));
+              } else {
+                callback();
+              }
+            },
             trigger: "change",
           },
         ],
+        description: [{ required: true, message: "请输入范围描述" }],
       },
     };
   },
@@ -297,6 +303,7 @@ export default {
       this.showCouponSelect = true;
     },
     handleSubmit() {
+      // 自动发券只能全用户发送：如有自动发券且非全用户，提示并强制切换
       if (
         this.form.couponActivityType === "AUTO_COUPON" &&
         this.form.activityScope !== "ALL"
@@ -326,15 +333,16 @@ export default {
           return;
         }
 
+        // 统一取时间逻辑
         const [start, end] = this.form.rangeTime;
         const startDate = start instanceof Date ? start : new Date(start);
         const endDate = end instanceof Date ? end : new Date(end);
+        this.form.startTime = this.$filters.unixToDate(startDate.getTime() / 1000);
+        this.form.endTime = this.$filters.unixToDate(endDate.getTime() / 1000);
+
         const params = JSON.parse(JSON.stringify(this.form));
-        params.startTime = this.$filters.unixToDate(startDate.getTime() / 1000);
-        params.endTime = this.$filters.unixToDate(endDate.getTime() / 1000);
         delete params.rangeTime;
         delete params.id;
-
         this.submitLoading = true;
         saveActivityCoupon(params).then((res) => {
           this.submitLoading = false;

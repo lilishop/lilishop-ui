@@ -68,10 +68,10 @@
                 v-model="form.rangeTime"
                 type="datetimerange"
                 format="YYYY-MM-DD HH:mm:ss"
-                value-format="YYYY-MM-DD HH:mm:ss"
                 start-placeholder="开始时间"
                 end-placeholder="结束时间"
-                :disabled-date="disabledDate"
+                placeholder="请选择"
+                :disabled-date="options.disabledDate"
               />
             </el-form-item>
             <div>
@@ -153,8 +153,20 @@ export default {
           { required: true, message: "请输入最高可砍金额" },
           { validator: checkHighestPrice },
         ],
-        rangeTime: [{ required: true, message: "请选择活动时间" }],
+        rangeTime: [
+          {
+            type: "array",
+            required: true,
+            message: "请选择活动时间",
+            trigger: "change",
+          },
+        ],
         stock: [{ required: true, message: "请输入活动库存" }],
+      },
+      options: {
+        disabledDate(date) {
+          return date && date.valueOf() < Date.now() - 86400000;
+        },
       },
     };
   },
@@ -165,9 +177,6 @@ export default {
     }
   },
   methods: {
-    disabledDate(date) {
-      return date && date.getTime() < Date.now() - 86400000;
-    },
     getKanJiaActivityGoods() {
       getKanJiaActivityGoodsById(this.id).then((res) => {
         this.form = res.result;
@@ -176,58 +185,62 @@ export default {
     },
     handleSubmit() {
       this.$refs.form.validate((valid) => {
-        if (valid) {
-          const params = JSON.parse(JSON.stringify(this.form));
-          if (!this.form.rangeTime || this.form.rangeTime.length !== 2) {
-            this.$Message.error("请选择活动时间");
-            return;
-          }
-          params.startTime = this.form.rangeTime[0];
-          params.endTime = this.form.rangeTime[1];
-          delete params.rangeTime;
-
-          if (params.stock <= 0 || params.stock > params.goodsSku.quantity) {
-            this.$Message.error("活动库存不能为0且不能超过商品库存");
-            return;
-          }
-          if (!regular.money.test(params.settlementPrice)) {
-            this.$Message.error("结算价格金额格式不正确");
-            return;
-          }
-          if (params.settlementPrice < 0 || params.settlementPrice > params.price) {
-            this.$Message.error("结算价格金额不能为0且不能超过商品价格");
-            return;
-          }
-          if (!regular.money.test(params.highestPrice)) {
-            this.$Message.error("最高可砍金额格式错误");
-            return;
-          }
-          if (params.highestPrice <= 0 || params.highestPrice > params.price) {
-            this.$Message.error("最高可砍金额不能为0且不能超过商品价格");
-            return;
-          }
-          if (!regular.money.test(params.lowestPrice)) {
-            this.$Message.error("最低可砍金额格式错误");
-            return;
-          }
-          if (params.lowestPrice <= 0 || params.lowestPrice > params.price) {
-            this.$Message.error("最低可砍金额不能为0");
-            return;
-          }
-          if (params.lowestPrice > params.highestPrice) {
-            this.$Message.error("最低砍价金额不能大于最高砍价金额");
-            return;
-          }
-
-          this.submitLoading = true;
-          editKanJiaActivityGoods(params).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("砍价活动修改成功");
-              this.closeCurrentPage();
-            }
-          });
+        if (!valid) {
+          return;
         }
+        const params = JSON.parse(JSON.stringify(this.form));
+        const [start, end] = this.form.rangeTime || [];
+        if (!start || !end) {
+          this.$Message.error("请选择活动时间");
+          return;
+        }
+        const startDate = start instanceof Date ? start : new Date(start);
+        const endDate = end instanceof Date ? end : new Date(end);
+        params.startTime = this.$filters.unixToDate(startDate.getTime() / 1000);
+        params.endTime = this.$filters.unixToDate(endDate.getTime() / 1000);
+        delete params.rangeTime;
+
+        if (params.stock <= 0 || params.stock > params.goodsSku.quantity) {
+          this.$Message.error("活动库存不能为0且不能超过商品库存");
+          return;
+        }
+        if (!regular.money.test(params.settlementPrice)) {
+          this.$Message.error("结算价格金额格式不正确");
+          return;
+        }
+        if (params.settlementPrice < 0 || params.settlementPrice > params.price) {
+          this.$Message.error("结算价格金额不能为0且不能超过商品价格");
+          return;
+        }
+        if (!regular.money.test(params.highestPrice)) {
+          this.$Message.error("最高可砍金额格式错误");
+          return;
+        }
+        if (params.highestPrice <= 0 || params.highestPrice > params.price) {
+          this.$Message.error("最高可砍金额不能为0且不能超过商品价格");
+          return;
+        }
+        if (!regular.money.test(params.lowestPrice)) {
+          this.$Message.error("最低可砍金额格式错误");
+          return;
+        }
+        if (params.lowestPrice <= 0 || params.lowestPrice > params.price) {
+          this.$Message.error("最低可砍金额不能为0");
+          return;
+        }
+        if (params.lowestPrice > params.highestPrice) {
+          this.$Message.error("最低砍价金额不能大于最高砍价金额");
+          return;
+        }
+
+        this.submitLoading = true;
+        editKanJiaActivityGoods(params).then((res) => {
+          this.submitLoading = false;
+          if (res.success) {
+            this.$Message.success("砍价活动修改成功");
+            this.closeCurrentPage();
+          }
+        });
       });
     },
     closeCurrentPage() {
